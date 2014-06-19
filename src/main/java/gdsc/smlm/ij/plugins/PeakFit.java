@@ -1,0 +1,1911 @@
+package gdsc.smlm.ij.plugins;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.engine.FitEngine;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitJob;
+import gdsc.smlm.engine.FitParameters;
+import gdsc.smlm.engine.FitParameters.FitTask;
+import gdsc.smlm.engine.FitQueue;
+import gdsc.smlm.engine.FitWorker;
+import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitCriteria;
+import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.fitting.FitSolver;
+import gdsc.smlm.fitting.function.CCDCameraNoiseModel;
+import gdsc.smlm.fitting.logging.Logger;
+import gdsc.smlm.ij.AggregatedImageSource;
+import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.SeriesImageSource;
+import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.ij.results.IJImagePeakResults;
+import gdsc.smlm.ij.results.IJTablePeakResults;
+import gdsc.smlm.ij.results.ImagePeakResultsFactory;
+import gdsc.smlm.ij.results.ResultsImage;
+import gdsc.smlm.ij.results.ResultsMode;
+import gdsc.smlm.ij.results.ResultsTable;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.PSFCalculatorSettings;
+import gdsc.smlm.ij.settings.ResultsSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.IJLogger;
+import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.ImageROIPainter;
+import gdsc.smlm.ij.utils.SeriesOpener;
+import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.BinaryFilePeakResults;
+import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResults;
+import gdsc.smlm.results.PeakResultsList;
+import gdsc.smlm.utils.NoiseEstimator.Method;
+import gdsc.smlm.utils.TextUtils;
+import gdsc.smlm.utils.XmlUtils;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.gui.YesNoCancelDialog;
+import ij.io.OpenDialog;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.ImageProcessor;
+
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.JFileChooser;
+
+//import ij.io.OpenDialog;
+
+/**
+ * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits
+ * fail to meet the fit criteria.
+ */
+public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemListener
+{
+	private static final String TITLE = "PeakFit";
+
+	private static int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+	private int plugin_flags;
+	private int singleFrame = 0;
+	private ImagePlus imp;
+
+	// Used within the run(ImageProcessor) method
+	private Rectangle bounds;
+	private static boolean optionIgnoreBoundsForNoise = true;
+	private boolean ignoreBoundsForNoise = false;
+	private int frameOffset = 0; // Used to set the current slice if not processing the stack
+	private Logger logger = null;
+
+	private ImageSource source = null;
+	private PeakResultsList results;
+	private long time;
+	private Calibration calibration;
+	private FitEngineConfiguration config = null;
+	private FitConfiguration fitConfig;
+	private ResultsSettings resultsSettings;
+	private boolean silentEnd = false;
+
+	// Flag for extra options in the dialog (shift-key down)
+	private boolean extraOptions = false;
+	private boolean maximaIdentification = false;
+	private boolean fitMaxima = false;
+	private boolean simpleFit = false;
+	private static int optionIntegrateFrames = 1;
+	private int integrateFrames = 1;
+
+	private static String inputOption = "";
+	private static boolean showTable = true;
+	private static boolean showImage = true;
+	private static PSFCalculatorSettings calculatorSettings = new PSFCalculatorSettings();
+
+	// Used for the mouse listener
+	private TextField textConfigFile;
+
+	// All the fields that will be updated when reloading the configuration file
+	private TextField textNmPerPixel;
+	private TextField textGain;
+	private TextField textExposure;
+	private TextField textInitialPeakStdDev0;
+	private TextField textInitialPeakStdDev1;
+	private TextField textInitialAngleD;
+	private TextField textSmooth;
+	private TextField textSmooth2;
+	private TextField textSearch;
+	private Choice textFitSolver;
+	private Choice textFitFunction;
+	private Choice textFitCriteria;
+	private TextField textSignificantDigits;
+	private TextField textDelta;
+	private TextField textLambda;
+	private TextField textMinIterations;
+	private TextField textMaxIterations;
+	private TextField textFailuresLimit;
+	private Checkbox textIncludeNeighbours;
+	private TextField textNeighbourHeightThreshold;
+	private TextField textResidualsThreshold;
+	private TextField textDuplicateDistance;
+	private TextField textCoordinateShiftFactor;
+	private TextField textSignalStrength;
+	private TextField textPrecisionThreshold;
+	private TextField textNoise;
+	private Choice textNoiseMethod;
+	private TextField textWidthFactor;
+	private Checkbox textLogProgress;
+	private Checkbox textShowDeviations;
+	private Choice textResultsTable;
+	private Choice textResultsImage;
+	private Checkbox textWeightedImage;
+	private Checkbox textEqualisedImage;
+	private TextField textPrecision;
+	private TextField textImageScale;
+	private TextField textImageRollingWindow;
+	private TextField textResultsDirectory;
+	private Checkbox textBinaryResults;
+	private Checkbox textResultsInMemory;
+
+	public PeakFit()
+	{
+		init(new FitEngineConfiguration(new FitConfiguration()), new ResultsSettings(), new Calibration());
+	}
+
+	public PeakFit(FitEngineConfiguration config)
+	{
+		init(config, new ResultsSettings(), new Calibration());
+	}
+
+	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings)
+	{
+		init(config, resultsSettings, new Calibration());
+	}
+
+	public PeakFit(FitEngineConfiguration config, ResultsSettings resultsSettings, Calibration calibration)
+	{
+		init(config, resultsSettings, calibration);
+	}
+
+	private void init(FitEngineConfiguration config, ResultsSettings resultsSettings, Calibration calibration)
+	{
+		this.config = config;
+		this.resultsSettings = resultsSettings;
+		this.calibration = calibration;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
+	 */
+	public int setup(String arg, ImagePlus imp)
+	{
+		plugin_flags = FLAGS;
+		extraOptions = IJ.altKeyDown();
+
+		maximaIdentification = (arg != null && arg.contains("spot"));
+		fitMaxima = (arg != null && arg.contains("maxima"));
+		simpleFit = (arg != null && arg.contains("simple"));
+		boolean runSeries = (arg != null && arg.contains("series"));
+
+		ImageSource imageSource = null;
+		if (fitMaxima)
+		{
+			imp = null;
+			// The maxima will have been identified already. 
+			// The image source will be found from the peak results.
+			if (!showMaximaDialog())
+				return DONE;
+
+			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+			if (results == null || results.size() == 0)
+			{
+				IJ.error(TITLE, "No results could be loaded");
+				return DONE;
+			}
+
+			imageSource = results.getSource();
+			plugin_flags |= NO_IMAGE_REQUIRED;
+		}
+		else if (runSeries)
+		{
+			imp = null;
+			// Select input folder
+			String inputDirectory;
+			inputDirectory = IJ.getDirectory("Select image series ...");
+			//inputDirectory = getInputDirectory("Select image series ...");
+			if (inputDirectory == null)
+				return DONE;
+
+			// Load input series ...
+			SeriesOpener series = new SeriesOpener(inputDirectory, true);
+			if (series.getNumberOfImages() == 0)
+			{
+				IJ.error(TITLE, "No images in the selected directory:\n" + inputDirectory);
+				return DONE;
+			}
+
+			imageSource = new SeriesImageSource(getName(series.getImageList()), series);
+			((SeriesImageSource)imageSource).setLogProgress(true);
+			plugin_flags |= NO_IMAGE_REQUIRED;
+		}
+		else
+		{
+			if (imp == null)
+			{
+				IJ.noImage();
+				return DONE;
+			}
+
+			// Check it is not a previous result
+			if (imp.getTitle().endsWith(IJImagePeakResults.IMAGE_SUFFIX))
+			{
+				IJImageSource tmpImageSource = null;
+
+				// Check the image to see if it has an image source XML structure in the info property
+				Object o = imp.getProperty("Info");
+				Pattern pattern = Pattern.compile("Source: (<.*IJImageSource>.*<.*IJImageSource>)", Pattern.DOTALL);
+				Matcher match = pattern.matcher((o == null) ? "" : o.toString());
+				if (match.find())
+				{
+					ImageSource source = ImageSource.fromXML(match.group(1));
+					if (source instanceof IJImageSource)
+					{
+						tmpImageSource = (IJImageSource) source;
+						if (!tmpImageSource.open())
+						{
+							tmpImageSource = null;
+						}
+						else
+						{
+							imp = WindowManager.getImage(tmpImageSource.getName());
+						}
+					}
+				}
+
+				if (tmpImageSource == null)
+				{
+					// Look for a parent using the title
+					String parentTitle = imp.getTitle().substring(0,
+							imp.getTitle().length() - IJImagePeakResults.IMAGE_SUFFIX.length() - 1);
+					ImagePlus parentImp = WindowManager.getImage(parentTitle);
+					if (parentImp != null)
+					{
+						tmpImageSource = new IJImageSource(parentImp);
+						imp = parentImp;
+					}
+				}
+				String message = "The selected image may be a previous fit result";
+				if (tmpImageSource != null)
+					message += " of: \n \n" + tmpImageSource.getName() + " \n \nFit the parent?";
+				else
+					message += " \n \nDo you want to continue?";
+
+				YesNoCancelDialog d = new YesNoCancelDialog(null, TITLE, message);
+				if (tmpImageSource == null)
+				{
+					if (!d.yesPressed())
+						return DONE;
+				}
+				else
+				{
+					if (d.yesPressed())
+						imageSource = tmpImageSource;
+					if (d.cancelPressed())
+						return DONE;
+				}
+			}
+
+			if (imageSource == null)
+				imageSource = new IJImageSource(imp);
+		}
+
+		time = -1;
+
+		initialiseImage(imageSource, getBounds(imp), false);
+
+		int flags = showDialog(imp);
+		if ((flags & DONE) == 0)
+		{
+			// Repeat so that we pass in the selected option for ignoring the bounds.
+			// This should not be necessary since it is set within the readDialog method.
+			//if (ignoreBoundsForNoise)
+			//	initialiseImage(imageSource, bounds, ignoreBoundsForNoise);
+			initialiseFitting();
+		}
+		return flags;
+	}
+
+	private String getName(String[] imageList)
+	{
+		String name = imageList[0];
+		// Remove directory
+		int index = name.lastIndexOf(File.separatorChar);
+		if (index > -1)
+		{
+			name = name.substring(index + 1);
+		}
+		//// Remove suffix
+		//index = name.lastIndexOf('.');
+		//if (index > 0)
+		//{
+		//	name = name.substring(0, index);
+		//}
+		return "Series " + name;
+	}
+
+	private Rectangle getBounds(ImagePlus imp)
+	{
+		if (imp == null)
+			return null;
+		Roi roi = imp.getRoi();
+		if (roi != null && roi.isArea())
+		{
+			return roi.getBounds();
+		}
+		return null;
+	}
+
+	/**
+	 * @return An input directory containing a series of images
+	 */
+	@SuppressWarnings("unused")
+	private String getInputDirectory(String title)
+	{
+		final JFileChooser chooser = new JFileChooser()
+		{
+			private static final long serialVersionUID = 275144634537614122L;
+
+			public void approveSelection()
+			{
+				if (getSelectedFile().isFile())
+				{
+					return;
+				}
+				else
+					super.approveSelection();
+			}
+		};
+		if (System.getProperty("os.name").startsWith("Mac OS X"))
+		{
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		}
+		else
+		{
+			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		}
+		chooser.setDialogTitle(title);
+		int returnVal = chooser.showOpenDialog(IJ.getInstance());
+		if (returnVal == JFileChooser.APPROVE_OPTION)
+		{
+			return chooser.getSelectedFile().getPath();
+		}
+		return null;
+	}
+
+	/**
+	 * Initialise a new image for fitting and prepare the output results.
+	 * <p>
+	 * Calls {@link #initialise(ImageSource, Rectangle)} then {@link #initialiseFitting()}.
+	 * 
+	 * @param imageSource
+	 *            The image source
+	 * @param bounds
+	 *            The region to process from the image
+	 * @param ignoreBoundsForNoise
+	 *            Set to true if the bounds should be ignored when computing the noise estimate for each frame
+	 * @return True if the image was valid and the initialisation was successful
+	 */
+	public boolean initialise(ImageSource imageSource, Rectangle bounds, boolean ignoreBoundsForNoise)
+	{
+		if (!initialiseImage(imageSource, bounds, ignoreBoundsForNoise))
+			return false;
+		return initialiseFitting();
+	}
+
+	/**
+	 * Initialise a new image.
+	 * <p>
+	 * Does not set-up for fitting. This can be done using a subsequent call to {@link #initialiseFitting()}.
+	 * <p>
+	 * This mechanism allows additional result outputs to be added after initialisation using
+	 * {@link #addPeakResults(PeakResults)}.
+	 * 
+	 * @param imageSource
+	 *            The image source
+	 * @param bounds
+	 *            The region to process from the image
+	 * @param ignoreBoundsForNoise
+	 *            Set to true if the bounds should be ignored when computing the noise estimate for each frame
+	 * @return
+	 *         True if the image was valid and the initialisation was successful
+	 */
+	public boolean initialiseImage(ImageSource imageSource, Rectangle bounds, boolean ignoreBoundsForNoise)
+	{
+		// Initialise for image processing
+		if (!setSource(imageSource))
+			return false;
+
+		this.ignoreBoundsForNoise = ignoreBoundsForNoise;
+		if (bounds == null)
+		{
+			bounds = new Rectangle(0, 0, source.getWidth(), source.getHeight());
+			// No region so no need to ignore the bounds.
+			this.ignoreBoundsForNoise = false;
+		}
+		this.bounds = bounds;
+		results = new PeakResultsList();
+
+		time = 0;
+		//config = null;
+
+		return true;
+	}
+
+	private boolean setSource(ImageSource imageSource)
+	{
+		// Reset
+		this.source = null;
+		if (imageSource == null)
+			return false;
+
+		// Open the image to ensure it is accessible and the width/height are known
+		if (!imageSource.open())
+			return false;
+
+		this.source = imageSource;
+		return true;
+	}
+
+	/**
+	 * Set-up the fitting using all the configured properties. Prepare the output results.
+	 */
+	public boolean initialiseFitting()
+	{
+		if (source == null)
+			return false;
+
+		// Do this to ensure the serialised configuration is correct
+		updateFitConfiguration(config);
+
+		results.setSource(source);
+		if (maximaIdentification)
+			results.setName(source.getName() + " (Maxima)");
+		else if (fitMaxima)
+			results.setName(source.getName() + " (" + config.getFitConfiguration().getFitSolver() + " Fit Maxima)");
+		else
+			results.setName(source.getName() + " (" + config.getFitConfiguration().getFitSolver() + ")");
+		results.setBounds(bounds);
+		// Account for the frame integration
+		Calibration cal = new Calibration(calibration);
+		cal.exposureTime *= integrateFrames;
+		results.setCalibration(cal);
+		results.setConfiguration(XmlUtils.toXML(config));
+
+		addMemoryResults(results, false);
+		addImageResults(results);
+		addFileResults(results);
+		addTableResults(results);
+		addDefaultResults(results);
+
+		results.begin();
+
+		if (simpleFit && showImage)
+		{
+			for (PeakResults r : results.toArray())
+			{
+				if (r instanceof IJImagePeakResults)
+				{
+					ImagePlus i = ((IJImagePeakResults) r).getImagePlus();
+					Utils.log("Super-resolution image title = " + i.getTitle());
+					WindowManager.toFront(i.getWindow());
+				}
+			}
+		}
+
+		return true;
+	}
+
+	protected void showResults()
+	{
+		IJ.showProgress(1.0);
+		if (time >= 0)
+		{
+			results.end();
+			if (silentEnd)
+				return;
+
+			String textTime = Utils.timeToString(time / 1000000.0);
+
+			int size = getSize();
+			String message = String.format("%d Localisation%s. Fitting Time = %s", size, (size == 1) ? "" : "s",
+					textTime);
+			if (resultsSettings.logProgress)
+				IJ.log("-=-=-=-");
+			IJ.log(message);
+			IJ.showStatus(message);
+		}
+		else
+		{
+			IJ.showStatus("");
+		}
+	}
+
+	private boolean showMaximaDialog()
+	{
+		int size = MemoryPeakResults.countMemorySize();
+		if (size == 0)
+		{
+			IJ.error(TITLE, "There are no fitting results in memory");
+			return false;
+		}
+
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+		gd.addMessage("Select identified maxima for fitting");
+
+		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		inputOption = ResultsManager.getInputSource(gd);
+
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	private int showDialog(ImagePlus imp)
+	{
+		// Executing as an ImageJ plugin.
+		// Override the defaults with those in the configuration file
+		String filename = SettingsManager.getSettingsFilename();
+
+		if (simpleFit)
+		{
+			return showSimpleDialog(filename);
+		}
+
+		GlobalSettings settings = SettingsManager.loadSettings(filename);
+		calibration = settings.getCalibration();
+		config = settings.getFitEngineConfiguration();
+		fitConfig = config.getFitConfiguration();
+		resultsSettings = settings.getResultsSettings();
+
+		boolean isCrop = (bounds != null && imp != null && (bounds.width < imp.getWidth() || bounds.height < imp
+				.getHeight()));
+
+		if (!extraOptions)
+		{
+			integrateFrames = 1;
+			resultsSettings.imageRollingWindow = 0;
+			fitConfig.setMinIterations(0);
+			fitConfig.setNoise(0);
+			config.setNoiseMethod(Method.QuickResidualsLeastMeanOfSquares);
+		}
+
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+		gd.addMessage((maximaIdentification) ? "Identify candidate maxima" : "Fit 2D Gaussian to identified maxima");
+
+		gd.addStringField("Config_file", filename, 40);
+		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
+		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
+
+		if (isCrop)
+			gd.addCheckbox("Ignore_bounds_for_noise", optionIgnoreBoundsForNoise);
+		// This is already set to false before the dialog is displayed
+		//else
+		//	ignoreBoundsForNoise = false;
+
+		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialPeakStdDev0(), 3);
+		if (!maximaIdentification)
+		{
+			gd.addNumericField("Initial_StdDev1", fitConfig.getInitialPeakStdDev1(), 3);
+			gd.addNumericField("Initial_Angle", fitConfig.getInitialAngle(), 3);
+		}
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
+		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
+		gd.addSlider("Search_width", 2, 4.5, config.getSearch());
+		if (extraOptions)
+			gd.addSlider("Integrate_frames", 1, 5, optionIntegrateFrames);
+
+		Component discardLabel = null;
+		if (!maximaIdentification)
+		{
+			gd.addMessage("--- Gaussian fitting ---");
+			String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
+			gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
+			String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
+			gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+
+			String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
+			gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
+			gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
+			gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
+			gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
+			if (extraOptions)
+				gd.addNumericField("Min_iterations", fitConfig.getMinIterations(), 0);
+			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+			gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
+			gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
+			gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
+			gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
+
+			gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
+
+			gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
+			discardLabel = gd.getMessage();
+
+			gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
+			gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
+			if (extraOptions)
+			{
+				gd.addNumericField("Noise", fitConfig.getNoise(), 2);
+				String[] noiseMethodNames = SettingsManager.getNames((Object[]) Method.values());
+				gd.addChoice("Noise_method", noiseMethodNames, noiseMethodNames[config.getNoiseMethod().ordinal()]);
+			}
+			gd.addSlider("Width_factor", 0.01, 5, fitConfig.getWidthFactor());
+			gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
+		}
+
+		gd.addMessage("--- Results ---");
+		gd.addCheckbox("Log_progress", resultsSettings.logProgress);
+		if (!maximaIdentification)
+		{
+			gd.addCheckbox("Show_deviations", resultsSettings.showDeviations);
+		}
+		String[] tableNames = SettingsManager.getNames((Object[]) ResultsTable.values());
+		gd.addChoice("Results_table", tableNames, tableNames[resultsSettings.getResultsTable().ordinal()]);
+		String[] imageNames = SettingsManager.getNames((Object[]) ResultsImage.values());
+		gd.addMessage("--- Image output ---");
+		gd.addChoice("Image", imageNames, imageNames[resultsSettings.getResultsImage().ordinal()]);
+		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
+		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
+		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
+		gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
+		if (extraOptions)
+			gd.addNumericField("Image_window", resultsSettings.imageRollingWindow, 0);
+		gd.addMessage("--- File output ---");
+		gd.addStringField("Results_dir", resultsSettings.resultsDirectory);
+		gd.addCheckbox("Binary_results", resultsSettings.binaryResults);
+		gd.addMessage(" ");
+		gd.addCheckbox("Results_in_memory", resultsSettings.resultsInMemory);
+
+		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
+		// to 4 columns: (label,field) x 2
+
+		if (gd.getLayout() != null)
+		{
+			GridBagLayout grid = (GridBagLayout) gd.getLayout();
+
+			int xOffset = 0, yOffset = 0;
+			int lastY = -1, rowCount = 0;
+			for (Component comp : gd.getComponents())
+			{
+				// Check if this should be the second major column
+				if (comp == discardLabel)
+				{
+					xOffset += 2;
+					yOffset -= rowCount;
+				}
+				// Reposition the field
+				GridBagConstraints c = grid.getConstraints(comp);
+				if (lastY != c.gridy)
+					rowCount++;
+				lastY = c.gridy;
+				c.gridx = c.gridx + xOffset;
+				c.gridy = c.gridy + yOffset;
+				c.insets.left = c.insets.left + 10 * xOffset;
+				c.insets.top = 0;
+				c.insets.bottom = 0;
+				grid.setConstraints(comp, c);
+			}
+
+			if (IJ.isLinux())
+				gd.setBackground(new Color(238, 238, 238));
+		}
+
+		// Add a mouse listener to the config file field
+		if (!java.awt.GraphicsEnvironment.isHeadless())
+		{
+			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
+			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
+			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
+			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+
+			int n = 0;
+			int t = 0;
+			int b = 0;
+			int ch = 0;
+
+			textConfigFile = texts.get(t++);
+			textConfigFile.addMouseListener(this);
+			textConfigFile.addTextListener(this);
+
+			// TODO: add a value changed listener to detect when typing a new file
+
+			textNmPerPixel = numerics.get(n++);
+			textGain = numerics.get(n++);
+			textExposure = numerics.get(n++);
+			textInitialPeakStdDev0 = numerics.get(n++);
+			if (!maximaIdentification)
+			{
+				textInitialPeakStdDev1 = numerics.get(n++);
+				textInitialAngleD = numerics.get(n++);
+			}
+			textSmooth = numerics.get(n++);
+			textSmooth2 = numerics.get(n++);
+			textSearch = numerics.get(n++);
+			if (extraOptions)
+				n++; // Skip over the integrate frames option
+			if (!maximaIdentification)
+			{
+				textFitSolver = choices.get(ch++);
+				textFitFunction = choices.get(ch++);
+				textFitCriteria = choices.get(ch++);
+				textSignificantDigits = numerics.get(n++);
+				textDelta = numerics.get(n++);
+				textLambda = numerics.get(n++);
+				if (extraOptions)
+					textMinIterations = numerics.get(n++);
+				textMaxIterations = numerics.get(n++);
+				textFailuresLimit = numerics.get(n++);
+				textIncludeNeighbours = checkboxes.get(b++);
+				textNeighbourHeightThreshold = numerics.get(n++);
+				textResidualsThreshold = numerics.get(n++);
+				textDuplicateDistance = numerics.get(n++);
+				textCoordinateShiftFactor = numerics.get(n++);
+				textSignalStrength = numerics.get(n++);
+				textPrecisionThreshold = numerics.get(n++);
+				if (extraOptions)
+				{
+					textNoise = numerics.get(n++);
+					textNoiseMethod = choices.get(ch++);
+				}
+				textWidthFactor = numerics.get(n++);
+			}
+			textLogProgress = checkboxes.get(b++);
+			if (!maximaIdentification)
+				textShowDeviations = checkboxes.get(b++);
+			textResultsTable = choices.get(ch++);
+			textResultsImage = choices.get(ch++);
+			textWeightedImage = checkboxes.get(b++);
+			textEqualisedImage = checkboxes.get(b++);
+			textPrecision = numerics.get(n++);
+			textImageScale = numerics.get(n++);
+			if (extraOptions)
+				textImageRollingWindow = numerics.get(n++);
+			textResultsDirectory = texts.get(t++);
+			textBinaryResults = checkboxes.get(b++);
+			textResultsInMemory = checkboxes.get(b++);
+		}
+
+		gd.showDialog();
+
+		if (gd.wasCanceled() || !readDialog(settings, gd, isCrop))
+			return DONE;
+
+		if (imp != null)
+		{
+			// Store whether the user selected to process all the images.
+			int flags = IJ.setupDialog(imp, plugin_flags);
+
+			// Check if cancelled
+			if ((flags & DONE) != 0)
+				return DONE;
+
+			frameOffset = 0;
+			if ((flags & DOES_STACKS) == 0)
+			{
+				// Save the slice number for the overlay
+				singleFrame = imp.getCurrentSlice();
+
+				// Note: When integrating frames it is possible to start from any slice. 
+				// To ensure consistent results when comparing fitting of a single plane to fitting a stack
+				// we ensure the slice corresponds to the start of an integration set
+				if (integrateFrames > 1)
+					singleFrame = 1 + integrateFrames * ((singleFrame - 1) / integrateFrames);
+
+				// No stacks so create a new image source with a single frame (or multiple frames if integrating)
+				setSource(new IJImageSource(imp, singleFrame, integrateFrames - 1));
+
+				// Store the image so the results can be added as an overlay
+				this.imp = imp;
+				this.imp.setOverlay(null);
+				// Save the slice number for the correct frame identification.
+				frameOffset = (singleFrame - 1) / integrateFrames;
+			}
+		}
+
+		// Allow frame aggregation by wrapping the image source
+		if (integrateFrames > 1)
+		{
+			setSource(new AggregatedImageSource(this.source, integrateFrames));
+		}
+		// Return the plugin flags (without the DOES_STACKS flag).
+		// The call to run(ImageProcessor) will process the image in 'this.imp' so we only want a 
+		// single call to be made.
+		return plugin_flags;
+	}
+
+	private int showSimpleDialog(String filename)
+	{
+		GlobalSettings settings = SettingsManager.loadSettings(filename);
+		// Initialise the fit config so that it can be used in the calibration wizard 
+		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
+
+		boolean requireCalibration = requireCalibration(settings, filename);
+		if (requireCalibration)
+		{
+			if (!showCalibrationWizard(settings, true))
+				return DONE;
+		}
+
+		// Present dialog with simple output options: Image, Table
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+		gd.addMessage("Fit single-molecule localisations");
+
+		if (!requireCalibration)
+			gd.addCheckbox("Use_current_calibration", true);
+		gd.addCheckbox("Show_table", showTable);
+		gd.addCheckbox("Show_image", showImage);
+
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return DONE;
+
+		boolean useCurrentCalibration = true;
+		if (!requireCalibration)
+			useCurrentCalibration = gd.getNextBoolean();
+		showTable = gd.getNextBoolean();
+		showImage = gd.getNextBoolean();
+
+		if (!useCurrentCalibration)
+		{
+			if (!showCalibrationWizard(settings, false))
+				return DONE;
+		}
+
+		// Restore fitting to default settings but maintain the calibrated width
+		final float width = fitConfig.getInitialPeakWidth0();
+		config = new FitEngineConfiguration(new FitConfiguration());
+		fitConfig = config.getFitConfiguration();
+		fitConfig.setInitialPeakWidth(width);
+		fitConfig.setCoordinateShiftFactor(1.5f);
+		resultsSettings = new ResultsSettings();
+
+		// Do simple results output
+		resultsSettings.resultsInMemory = true;
+		resultsSettings.setResultsTable((showTable) ? ResultsTable.UNCALIBRATED : ResultsTable.NONE);
+		if (showImage)
+		{
+			resultsSettings.setResultsImage(ResultsImage.SIGNAL_INTENSITY);
+			resultsSettings.imageScale = (float) Math.ceil(1024 / (Math.max(bounds.width, bounds.height)));
+			resultsSettings.weightedImage = true;
+			resultsSettings.equalisedImage = true;
+		}
+		else
+		{
+			resultsSettings.setResultsImage(ResultsImage.NONE);
+		}
+
+		// Log the settings we care about:
+		calibration = settings.getCalibration();
+		IJ.log("-=-=-=-");
+		IJ.log("Peak Fit");
+		IJ.log("-=-=-=-");
+		Utils.log("Pixel pitch = %s", Utils.rounded(calibration.nmPerPixel, 4));
+		Utils.log("Exposure Time = %s", Utils.rounded(calibration.exposureTime, 4));
+		Utils.log("Gain = %s", Utils.rounded(calibration.gain, 4));
+		Utils.log("PSF width = %s", Utils.rounded(fitConfig.getInitialPeakStdDev0(), 4));
+
+		// Save
+		settings.setFitEngineConfiguration(config);
+		settings.setResultsSettings(resultsSettings);
+		SettingsManager.saveSettings(settings, filename);
+
+		return FLAGS;
+	}
+
+	/**
+	 * Check if the configuration file exists. If not then assume this is the first run of the plugin.
+	 * Check the calibration is valid for fitting.
+	 * 
+	 * @param settings
+	 * @param filename
+	 * @return
+	 */
+	private boolean requireCalibration(GlobalSettings settings, String filename)
+	{
+		if (!new File(filename).exists())
+			return true;
+
+		calibration = settings.getCalibration();
+
+		// Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
+		if (calibration.nmPerPixel <= 0)
+			return true;
+		if (calibration.gain <= 0)
+			return true;
+		if (calibration.exposureTime <= 0)
+			return true;
+
+		// Check for a PSF width
+		if (fitConfig.getInitialPeakWidth0() <= 0)
+			return true;
+
+		return false;
+	}
+
+	private boolean showCalibrationWizard(GlobalSettings settings, boolean showIntroduction)
+	{
+		if (showIntroduction)
+		{
+			GenericDialog gd = newWizardDialog("No configuration file could be loaded.",
+					"Please follow the configuration wizard to calibrate.");
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+		}
+
+		//Calibration defaultCalibration = new Calibration();
+		//if (calibration.nmPerPixel <= 0 || calibration.nmPerPixel == defaultCalibration.nmPerPixel)
+		if (!getPixelPitch())
+			return false;
+		//if (calibration.gain <= 0 || calibration.gain == defaultCalibration.gain)
+		if (!getGain())
+			return false;
+		//if (calibration.exposureTime <= 0 || calibration.exposureTime == defaultCalibration.exposureTime)
+		if (!getExposureTime())
+			return false;
+		// Check for a PSF width other than the default
+		//if (fitConfig.getInitialPeakWidth0() == new FitConfiguration().getInitialPeakWidth0())
+		if (!getPeakWidth())
+			return false;
+
+		// Check parameters
+		try
+		{
+			Parameters.isAboveZero("nm per pixel", calibration.nmPerPixel);
+			Parameters.isAboveZero("Gain", calibration.gain);
+			Parameters.isAboveZero("Exposure time", calibration.exposureTime);
+			Parameters.isAboveZero("Initial SD", fitConfig.getInitialPeakStdDev0());
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		return true;
+	}
+
+	private GenericDialog newWizardDialog(String... messages)
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+		final String header = "-=-";
+		gd.addMessage(header + " " + TITLE + " Configuration Wizard " + header);
+		for (String message : messages)
+			gd.addMessage(TextUtils.wrap(message, 80));
+		return gd;
+	}
+
+	private boolean getPixelPitch()
+	{
+		GenericDialog gd = newWizardDialog(
+				"Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
+				"E.g. a camera with a 6.45um pixel size and a 60x objective will have a pitch of 6450/60 = 107.5nm.");
+		// TODO - Add a pop-up calculator...
+		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		calibration.nmPerPixel = gd.getNextNumber();
+		return true;
+	}
+
+	private boolean getGain()
+	{
+		GenericDialog gd = newWizardDialog(
+				"Enter the total gain.",
+				"This is usually supplied with your camera certificate. The gain indicates how many Analogue-to-Digital-Units (ADUs) are recorded at the pixel for each photon registered on the sensor.",
+				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
+				"A value of 1 means no conversion to photons will occur.");
+		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
+		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		calibration.gain = (float) gd.getNextNumber();
+		return true;
+	}
+
+	private boolean getExposureTime()
+	{
+		GenericDialog gd = newWizardDialog(
+				"Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
+				"This is the length of time for each frame in the image.");
+		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		calibration.exposureTime = gd.getNextNumber();
+		return true;
+	}
+
+	private boolean getPeakWidth()
+	{
+		GenericDialog gd = newWizardDialog(
+				"Enter the expected peak width in pixels.",
+				"A point source of light will not be focussed perfectly by the microscope but will appear as a spread out peak. This Point Spread Function (PSF) can be modelled using a 2D Gaussian curve.",
+				"An optimised optical system (lens and camera sensor) should have a peak standard deviation of approximately 1 pixel when in focus. This allows the fitting routine to have enough data to identify the centre of the peak without spreading the light over too many pixels (which increases noise).",
+				"The peak width can be estimated using the wavelength of light emitted by the single molecules and the parameters of the microscope. Use a PSF calculator by clicking the checkbox below:");
+		// Add ability to run the PSF Calculator to get the width
+		gd.addCheckbox("Run_PSF_calculator", false);
+		gd.addNumericField("Gaussian_SD", fitConfig.getInitialPeakStdDev0(), 3);
+		if (!java.awt.GraphicsEnvironment.isHeadless())
+		{
+			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
+			cb.addItemListener(this);
+			textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
+		}
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		fitConfig.setInitialPeakStdDev((float) gd.getNextNumber());
+		return true;
+	}
+
+	public void itemStateChanged(ItemEvent e)
+	{
+		Checkbox cb = (Checkbox) e.getSource();
+		if (cb.getState())
+		{
+			cb.setState(false);
+			PSFCalculator calculator = new PSFCalculator();
+			calculatorSettings.pixelPitch = calibration.nmPerPixel / 1000.0;
+			calculatorSettings.magnification = 1;
+			calculatorSettings.beamExpander = 1;
+			double sd = calculator.calculate(calculatorSettings, true);
+			if (sd > 0)
+				textInitialPeakStdDev0.setText(Double.toString(sd));
+		}
+	}
+
+	private boolean readDialog(GlobalSettings settings, GenericDialog gd, boolean isCrop)
+	{
+		String filename = gd.getNextString();
+
+		calibration.nmPerPixel = gd.getNextNumber();
+		calibration.gain = (float) gd.getNextNumber();
+		calibration.exposureTime = gd.getNextNumber();
+		if (isCrop)
+			ignoreBoundsForNoise = optionIgnoreBoundsForNoise = gd.getNextBoolean();
+
+		fitConfig.setInitialPeakStdDev0((float) gd.getNextNumber());
+		if (!maximaIdentification)
+		{
+			fitConfig.setInitialPeakStdDev1((float) gd.getNextNumber());
+			fitConfig.setInitialAngleD((float) gd.getNextNumber());
+		}
+		config.setSmooth(gd.getNextNumber());
+		config.setSmooth2(gd.getNextNumber());
+		config.setSearch((int) gd.getNextNumber());
+		if (extraOptions)
+		{
+			integrateFrames = optionIntegrateFrames = (int) gd.getNextNumber();
+		}
+
+		if (!maximaIdentification)
+		{
+			fitConfig.setFitSolver(gd.getNextChoiceIndex());
+			fitConfig.setFitFunction(gd.getNextChoiceIndex());
+			fitConfig.setFitCriteria(gd.getNextChoiceIndex());
+
+			fitConfig.setSignificantDigits((int) gd.getNextNumber());
+			fitConfig.setDelta(gd.getNextNumber());
+			fitConfig.setLambda(gd.getNextNumber());
+			if (extraOptions)
+				fitConfig.setMinIterations((int) gd.getNextNumber());
+			fitConfig.setMaxIterations((int) gd.getNextNumber());
+			config.setFailuresLimit((int) gd.getNextNumber());
+			config.setIncludeNeighbours(gd.getNextBoolean());
+			config.setNeighbourHeightThreshold(gd.getNextNumber());
+			config.setResidualsThreshold(gd.getNextNumber());
+
+			fitConfig.setDuplicateDistance((float) gd.getNextNumber());
+
+			fitConfig.setCoordinateShiftFactor((float) gd.getNextNumber());
+			fitConfig.setSignalStrength((float) gd.getNextNumber());
+			if (extraOptions)
+			{
+				fitConfig.setNoise((float) gd.getNextNumber());
+				config.setNoiseMethod(gd.getNextChoiceIndex());
+			}
+			fitConfig.setWidthFactor((float) gd.getNextNumber());
+			fitConfig.setPrecisionThreshold((float) gd.getNextNumber());
+		}
+
+		resultsSettings.logProgress = gd.getNextBoolean();
+		if (!maximaIdentification)
+			resultsSettings.showDeviations = gd.getNextBoolean();
+
+		resultsSettings.setResultsTable(gd.getNextChoiceIndex());
+		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
+		resultsSettings.weightedImage = gd.getNextBoolean();
+		resultsSettings.equalisedImage = gd.getNextBoolean();
+		resultsSettings.precision = (float) gd.getNextNumber();
+		resultsSettings.imageScale = (float) gd.getNextNumber();
+		if (extraOptions)
+			resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
+		resultsSettings.resultsDirectory = gd.getNextString();
+		resultsSettings.binaryResults = gd.getNextBoolean();
+		resultsSettings.resultsInMemory = gd.getNextBoolean();
+
+		// Save to allow dialog state to be maintained even with invalid parameters
+		SettingsManager.saveSettings(settings, filename);
+
+		if (gd.invalidNumber())
+			return false;
+
+		// Check arguments
+		try
+		{
+			Parameters.isAboveZero("nm per pixel", calibration.nmPerPixel);
+			Parameters.isAboveZero("Gain", calibration.gain);
+			Parameters.isAboveZero("Exposure time", calibration.exposureTime);
+			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialPeakStdDev0());
+			if (!maximaIdentification)
+			{
+				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
+				Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
+			}
+			Parameters.isPositive("Smoothing", config.getSmooth());
+			Parameters.isPositive("Smoothing2", config.getSmooth2());
+			Parameters.isAboveZero("Search", config.getSearch());
+			Parameters.isPositive("Integrate frames", integrateFrames);
+			if (!maximaIdentification)
+			{
+				Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
+				Parameters.isAboveZero("Delta", fitConfig.getDelta());
+				Parameters.isAboveZero("Lambda", fitConfig.getLambda());
+				Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+				Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
+				Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
+				Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
+				Parameters.isPositive("Duplicate distance", fitConfig.getDuplicateDistance());
+				Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
+				Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+				if (extraOptions)
+					Parameters.isPositive("Noise", fitConfig.getNoise());
+				Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
+				Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+			}
+			Parameters.isAboveZero("Image precision", resultsSettings.precision);
+			Parameters.isAboveZero("Image scale", resultsSettings.imageScale);
+			if (extraOptions)
+				Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		// Extra parameters are needed for the weighted LVM
+		if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
+			gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
+			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			gd.addCheckbox("EM-CCD", calibration.emCCD);
+			gd.showDialog();
+			if (!gd.wasCanceled())
+			{
+				calibration.readNoise = (float) Math.abs(gd.getNextNumber());
+				calibration.bias = (float) Math.abs(gd.getNextNumber());
+				calibration.emCCD = gd.getNextBoolean();
+				fitConfig.setNoiseModel(new CCDCameraNoiseModel(calibration.readNoise, calibration.bias,
+						calibration.emCCD));
+			}
+			else
+			{
+				fitConfig.setFitSolver(FitSolver.LVM);
+			}
+		}
+
+		return SettingsManager.saveSettings(settings, filename);
+	}
+
+	/**
+	 * Add a result output.
+	 * <p>
+	 * This can be called after {@link #initialiseImage(ImagePlus)} and before {@link #initialiseFitting()} to add to
+	 * the configured result outputs.
+	 * 
+	 * @param peakResults
+	 */
+	public void addPeakResults(PeakResults peakResults)
+	{
+		if (results != null)
+			results.addOutput(peakResults);
+	}
+
+	private void addImageResults(PeakResultsList resultsList)
+	{
+		if (resultsSettings.getResultsImage() != ResultsImage.NONE)
+		{
+			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
+					resultsSettings.getResultsImage(), resultsSettings.weightedImage, resultsSettings.equalisedImage,
+					resultsList.getName(), bounds, calibration.nmPerPixel, calibration.gain,
+					resultsSettings.imageScale, resultsSettings.precision, ResultsMode.ADD);
+			if (extraOptions)
+				image.setRollingWindowSize(resultsSettings.imageRollingWindow);
+			resultsList.addOutput(image);
+		}
+	}
+
+	private void addFileResults(PeakResultsList resultsList)
+	{
+		String filename = null;
+		if (resultsSettings.resultsDirectory != null && new File(resultsSettings.resultsDirectory).exists())
+		{
+			filename = resultsSettings.resultsDirectory + File.separatorChar + source.getName() +
+					((resultsSettings.binaryResults) ? ".results.bin" : ".results.xls");
+		}
+		else if (resultsSettings.resultsFilename != null && resultsSettings.resultsFilename.length() > 0)
+		{
+			filename = resultsSettings.resultsFilename;
+		}
+		if (filename != null)
+		{
+			FilePeakResults r;
+			if (resultsSettings.binaryResults)
+				r = new BinaryFilePeakResults(filename, resultsSettings.showDeviations);
+			else
+				r = new FilePeakResults(filename, resultsSettings.showDeviations);
+			r.setSortAfterEnd(Prefs.getThreads() > 1);
+			r.setPeakIdColumnName("Frame");
+			resultsList.addOutput(r);
+		}
+	}
+
+	private void addMemoryResults(PeakResultsList resultsList, boolean force)
+	{
+		if (resultsSettings.resultsInMemory || force)
+		{
+			MemoryPeakResults results = new MemoryPeakResults();
+			results.setSortAfterEnd(Prefs.getThreads() > 1);
+			resultsList.addOutput(results);
+			MemoryPeakResults.addResults(results);
+		}
+	}
+
+	private void addTableResults(PeakResultsList resultsList)
+	{
+		if (resultsSettings.getResultsTable() != ResultsTable.NONE)
+		{
+			String title = null; // imp.getTitle()
+			IJTablePeakResults r = new IJTablePeakResults(resultsSettings.showDeviations, title);
+			r.setPeakIdColumnName("Frame");
+			r.setShowCalibratedValues(resultsSettings.getResultsTable() == ResultsTable.CALIBRATED);
+			r.setClearAtStart(simpleFit);
+			resultsList.addOutput(r);
+		}
+	}
+
+	private void addDefaultResults(PeakResultsList resultsList)
+	{
+		if (resultsList.numberOfOutputs() == 0)
+		{
+			if (logger != null)
+				logger.info("No results output configured. Defaulting to memory");
+			addMemoryResults(resultsList, true);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
+	 */
+	public void run(ImageProcessor ip)
+	{
+		if (source == null)
+		{
+			IJ.error(TITLE, "No valid image source configured");
+			return;
+		}
+		if (fitMaxima)
+		{
+			runMaximaFitting();
+		}
+		else
+		{
+			// All setup is already done so simply run
+			run();
+
+			addSingleFrameOverlay();
+		}
+	}
+
+	private void addSingleFrameOverlay()
+	{
+		// If a single frame was processed add the peaks as an overlay if they are in memory
+		if (singleFrame > 0 && imp != null)
+		{
+			MemoryPeakResults results = null;
+			for (PeakResults r : this.results.toArray())
+				if (r instanceof MemoryPeakResults)
+				{
+					results = (MemoryPeakResults) r;
+					break;
+				}
+			if (results == null || results.size() == 0)
+				return;
+
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.enableYesNoCancel();
+			gd.hideCancelButton();
+			gd.addMessage("Add the fitted localisations as an overlay?");
+			gd.showDialog();
+			if (!gd.wasOKed())
+				return;
+
+			float[] ox = new float[results.size()];
+			float[] oy = new float[results.size()];
+			int points = 0;
+			for (PeakResult r : results.getResults())
+			{
+				ox[points] = r.getXPosition();
+				oy[points++] = r.getYPosition();
+			}
+
+			ImageROIPainter.addRoi(imp, singleFrame, new PointRoi(ox, oy, points));
+		}
+	}
+
+	/**
+	 * Process the image. The current ROI will be used to define the region processed. The noise can be estimated using
+	 * the entire frame or the ROI region.
+	 * 
+	 * @param imp
+	 * @param ignoreBoundsForNoise
+	 *            If true estimate the noise from the entire frame, otherwise use only the ROI bounds
+	 */
+	public void run(ImagePlus imp, boolean ignoreBoundsForNoise)
+	{
+		run(new IJImageSource(imp), getBounds(imp), ignoreBoundsForNoise);
+	}
+
+	/**
+	 * Process the image
+	 * 
+	 * @param imageSource
+	 * @param bounds
+	 * @param ignoreBoundsForNoise
+	 */
+	public void run(ImageSource imageSource, Rectangle bounds, boolean ignoreBoundsForNoise)
+	{
+		if (initialise(imageSource, bounds, ignoreBoundsForNoise))
+			run();
+	}
+
+	/**
+	 * Locate the peaks in the configured image source. Results are saved to the configured output.
+	 * <p>
+	 * This must be called after initialisation with an image source. Note that each call to this method must be
+	 * preceded with initialisation to prepare the image and output options.
+	 */
+	public void run()
+	{
+		if (source == null)
+			return;
+
+		int totalFrames = source.getFrames();
+
+		// Do not crop the region from the source if the bounds match the source dimensions
+		Rectangle cropBounds = (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth() && bounds.height == source
+				.getHeight()) ? null : bounds;
+
+		// Use the FitEngine to allow multi-threading.
+		FitEngine engine = createFitEngine(Math.min(totalFrames, Prefs.getThreads()));
+
+		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
+
+		boolean shutdown = false;
+		int slice = 0;
+		while (!shutdown)
+		{
+			// Noise can optionally be estimated from the entire frame
+			float[] data = (ignoreBoundsForNoise) ? source.next() : source.next(cropBounds);
+			if (data == null)
+				break;
+
+			if (++slice % step == 0)
+			{
+				IJ.showProgress(slice, totalFrames);
+				IJ.showStatus("Slice: " + slice + " / " + totalFrames);
+			}
+
+			float noise = Float.NaN;
+			if (ignoreBoundsForNoise)
+			{
+				noise = FitWorker.estimateNoise(data, source.getWidth(), source.getHeight(), config.getNoiseMethod());
+
+				// Crop the data to the region
+				data = ImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
+			}
+
+			engine.run(createJob(slice + frameOffset, data, bounds, noise));
+
+			if (escapePressed())
+				shutdown = true;
+		}
+
+		engine.end(shutdown);
+		time = engine.getTime();
+
+		showResults();
+	}
+
+	private FitJob createJob(int slice, float[] data, Rectangle bounds2, float noise)
+	{
+		if (maximaIdentification)
+		{
+			FitParameters fitParams = new FitParameters();
+			fitParams.fitTask = FitTask.MaximaIdentification;
+			fitParams.noise = noise;
+			return new ParameterisedFitJob(fitParams, slice, data, bounds);
+		}
+		else if (!Float.isNaN(noise))
+		{
+			FitParameters fitParams = new FitParameters();
+			fitParams.fitTask = FitTask.PSFFitting;
+			fitParams.noise = noise;
+			return new ParameterisedFitJob(fitParams, slice, data, bounds);
+		}
+		else
+		{
+			return new FitJob(slice, data, bounds);
+		}
+	}
+
+	private boolean escapePressed()
+	{
+		if (IJ.escapePressed())
+		{
+			IJ.log(TITLE + " stopping ...");
+			IJ.beep();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Creates a fitting engine using the current configuration.
+	 * 
+	 * @return The fitting engine
+	 */
+	public FitEngine createFitEngine()
+	{
+		return createFitEngine(Prefs.getThreads());
+	}
+
+	/**
+	 * Creates a fitting engine using the current configuration.
+	 * 
+	 * @param numberOfThreads
+	 * @return The fitting engine
+	 */
+	public FitEngine createFitEngine(int numberOfThreads)
+	{
+		// Use a blocking queue to enable progress tracking on the IJ progress bar.
+		return createFitEngine(numberOfThreads, FitQueue.BLOCKING);
+	}
+
+	/**
+	 * Creates a fitting engine using the current configuration.
+	 * 
+	 * @param numberOfThreads
+	 * @param queue
+	 * @return The fiting engine
+	 */
+	public FitEngine createFitEngine(int numberOfThreads, FitQueue queue)
+	{
+		PeakResults r = results;
+		if (results.numberOfOutputs() == 1)
+			// Reduce to single object for speed
+			r = results.toArray()[0];
+
+		// Update the configuration
+		updateFitConfiguration(config);
+
+		FitEngine engine = new FitEngine(config, r, numberOfThreads, queue);
+
+		// Write settings out to the IJ log
+		if (resultsSettings.logProgress)
+		{
+			IJ.log("-=-=-=-");
+			IJ.log("Peak Fit");
+			IJ.log("-=-=-=-");
+			IJ.log("Initial Peak SD = " + fitConfig.getInitialPeakStdDev0() + "," + fitConfig.getInitialPeakStdDev1());
+			if ((engine.getSmooth() > 0 && engine.getSmooth() < 1))
+				IJ.log("Smoothing = 3 x 3 (Gaussian approximation)");
+			else
+			{
+				int w = 2 * (int) engine.getSmooth() + 1;
+				IJ.log("Smoothing = " + w + " x " + w);
+			}
+			if (engine.getSmooth2() > engine.getSmooth())
+			{
+				int w = 2 * (int) engine.getSmooth2() + 1;
+				IJ.log("Smoothing2 = " + w + " x " + w);
+			}
+			int w = 2 * engine.getSearch() + 1;
+			IJ.log("Fit window = " + w + " x " + w);
+			IJ.log("Coordinate shift = " + IJ.d2s(config.getFitConfiguration().getCoordinateShift(), 3));
+			IJ.log("Signal strength = " + IJ.d2s(fitConfig.getSignalStrength(), 3));
+			if (extraOptions)
+				IJ.log("Noise = " + IJ.d2s(fitConfig.getNoise(), 3));
+			IJ.log("Width factor = " + IJ.d2s(fitConfig.getWidthFactor(), 3));
+			IJ.log("-=-=-=-");
+		}
+
+		return engine;
+	}
+
+	/**
+	 * Updates the configuration for peak fitting. Configures the calculation of residuals, logging and peak validation.
+	 * 
+	 * @return
+	 */
+	private void updateFitConfiguration(FitEngineConfiguration config)
+	{
+		FitConfiguration fitConfig = config.getFitConfiguration();
+
+		// Adjust the settings that are relevant within the fitting configuration. 
+		fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
+		logger = (resultsSettings.logProgress) ? new IJLogger() : null;
+		fitConfig.setLog(logger);
+
+		fitConfig.setComputeDeviations(resultsSettings.showDeviations);
+
+		// Setup peak filtering
+		fitConfig.setFitValidation(true);
+
+		// Add the calibration for precision filtering
+		fitConfig.setNmPerPixel(calibration.nmPerPixel);
+		fitConfig.setGain(calibration.gain);
+	}
+
+	/**
+	 * Load the selected results from memory. All multiple frame results are added directly to the results. All single
+	 * frame
+	 * results are added to a list of candidate maxima per frame and fitted using the configured parameters.
+	 */
+	private void runMaximaFitting()
+	{
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		if (results == null || results.size() == 0)
+			return;
+		if (source == null)
+			return;
+
+		int totalFrames = source.getFrames();
+
+		// Store the indices of each new time-frame
+		results.sort();
+		List<PeakResult> candidateMaxima = results.getResults();
+
+		// Use the FitEngine to allow multi-threading.
+		FitEngine engine = createFitEngine(Math.min(totalFrames, Prefs.getThreads()));
+
+		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
+
+		boolean shutdown = false;
+		int slice = candidateMaxima.get(0).peak;
+		ArrayList<PeakResult> sliceCandidates = new ArrayList<PeakResult>();
+		Iterator<PeakResult> iter = candidateMaxima.iterator();
+		while (iter.hasNext())
+		{
+			PeakResult r = iter.next();
+			if (slice != r.peak)
+			{
+				if (escapePressed())
+				{
+					shutdown = true;
+					break;
+				}
+				if (slice % step == 0)
+				{
+					IJ.showProgress(slice, totalFrames);
+					IJ.showStatus("Slice: " + slice + " / " + totalFrames);
+				}
+
+				// Process results
+				if (!processResults(engine, sliceCandidates, slice))
+					break;
+
+				sliceCandidates.clear();
+			}
+			slice = r.peak;
+			sliceCandidates.add(r);
+		}
+
+		// Process final results
+		if (!shutdown)
+			processResults(engine, sliceCandidates, slice);
+
+		engine.end(shutdown);
+		time = engine.getTime();
+
+		showResults();
+	}
+
+	private boolean processResults(FitEngine engine, ArrayList<PeakResult> sliceCandidates, int slice)
+	{
+		// Process results
+		int[] maxIndices = new int[sliceCandidates.size()];
+		int count = 0;
+		ArrayList<PeakResult> processedResults = new ArrayList<PeakResult>(sliceCandidates.size());
+		for (PeakResult result : sliceCandidates)
+		{
+			// Add ExtendedPeakResults to the results (they are the result of previous fitting).
+			if (result instanceof ExtendedPeakResult)
+			{
+				processedResults.add(result);
+			}
+			else
+			{
+				// Fit single frame results.
+				maxIndices[count++] = result.origX + bounds.width * result.origY;
+			}
+		}
+
+		if (!processedResults.isEmpty())
+			this.results.addAll(processedResults);
+
+		if (count != 0)
+		{
+			float[] data = source.get(slice);
+			if (data == null)
+				return false;
+
+			FitParameters fitParams = new FitParameters();
+			fitParams.maxIndices = Arrays.copyOf(maxIndices, count);
+			FitJob job = new ParameterisedFitJob(fitParams, slice, data, bounds);
+
+			engine.run(job);
+		}
+
+		return true;
+	}
+
+	/**
+	 * @return The total fitting time in nanoseconds
+	 */
+	public long getTime()
+	{
+		return time;
+	}
+
+	/**
+	 * @return The total number of localisations
+	 */
+	public int getSize()
+	{
+		// If only one output in the list it was extracted for the FitEngine to prevent 
+		// passing data through all methods in the PeakResultsList
+		return (results.numberOfOutputs() == 1) ? results.toArray()[0].size() : results.size();
+	}
+
+	/**
+	 * @return If true, do not output message showing the final time and count
+	 */
+	public boolean isSilentEnd()
+	{
+		return silentEnd;
+	}
+
+	/**
+	 * @param silentEnd
+	 *            If true, do not output message showing the final time and count
+	 */
+	public void setSilentEnd(boolean silentEnd)
+	{
+		this.silentEnd = silentEnd;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+	 */
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getClickCount() > 1) // Double-click
+		{
+			if (e.getSource() == textConfigFile)
+			{
+				String[] path = Utils.decodePath(textConfigFile.getText());
+				OpenDialog chooser = new OpenDialog("Configuration_File", path[0], path[1]);
+				if (chooser.getFileName() != null)
+				{
+					String newFilename = chooser.getDirectory() + chooser.getFileName();
+					textConfigFile.setText(newFilename);
+				}
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+	 */
+	public void mousePressed(MouseEvent e)
+	{
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+	 */
+	public void mouseReleased(MouseEvent e)
+	{
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+	 */
+	public void mouseEntered(MouseEvent e)
+	{
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+	 */
+	public void mouseExited(MouseEvent e)
+	{
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.TextListener#textValueChanged(java.awt.event.TextEvent)
+	 */
+	public void textValueChanged(TextEvent e)
+	{
+		if (e.getSource() == textConfigFile)
+		{
+			refreshSettings(textConfigFile.getText());
+		}
+	}
+
+	private void refreshSettings(String newFilename)
+	{
+		if (newFilename != null && new File(newFilename).exists())
+		{
+			YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE, "Reload settings from file");
+			d.setVisible(true);
+			if (d.yesPressed())
+			{
+				// Reload the settings and update the GUI
+				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename);
+				if (settings == null)
+					return;
+				FitEngineConfiguration config = settings.getFitEngineConfiguration();
+				FitConfiguration fitConfig = config.getFitConfiguration();
+				ResultsSettings resultsSettings = settings.getResultsSettings();
+
+				textNmPerPixel.setText("" + calibration.nmPerPixel);
+				textGain.setText("" + calibration.gain);
+				textExposure.setText("" + calibration.exposureTime);
+				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
+				if (!maximaIdentification)
+				{
+					textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
+					textInitialAngleD.setText("" + fitConfig.getInitialAngle());
+				}
+				textSmooth.setText("" + config.getSmooth());
+				textSmooth2.setText("" + config.getSmooth2());
+				textSearch.setText("" + config.getSearch());
+				if (!maximaIdentification)
+				{
+					textFitSolver.select(fitConfig.getFitSolver().ordinal());
+					textFitFunction.select(fitConfig.getFitFunction().ordinal());
+					textFitCriteria.select(fitConfig.getFitCriteria().ordinal());
+					textSignificantDigits.setText("" + fitConfig.getSignificantDigits());
+					textDelta.setText("" + fitConfig.getDelta());
+					textLambda.setText("" + fitConfig.getLambda());
+					if (extraOptions)
+						textMinIterations.setText("" + fitConfig.getMinIterations());
+					textMaxIterations.setText("" + fitConfig.getMaxIterations());
+					textFailuresLimit.setText("" + config.getFailuresLimit());
+					textIncludeNeighbours.setState(config.isIncludeNeighbours());
+					textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
+					textResidualsThreshold.setText("" + config.getResidualsThreshold());
+					textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
+					textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+					textSignalStrength.setText("" + fitConfig.getSignalStrength());
+					textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+					if (extraOptions)
+					{
+						textNoise.setText("" + fitConfig.getNoise());
+						textNoiseMethod.select(config.getNoiseMethod().ordinal());
+					}
+					textWidthFactor.setText("" + fitConfig.getWidthFactor());
+				}
+				textLogProgress.setState(resultsSettings.logProgress);
+				if (!maximaIdentification)
+					textShowDeviations.setState(resultsSettings.showDeviations);
+				textResultsTable.select(resultsSettings.getResultsTable().ordinal());
+				textResultsImage.select(resultsSettings.getResultsImage().ordinal());
+				textWeightedImage.setState(resultsSettings.weightedImage);
+				textEqualisedImage.setState(resultsSettings.equalisedImage);
+				textPrecision.setText("" + resultsSettings.precision);
+				textImageScale.setText("" + resultsSettings.imageScale);
+				if (extraOptions)
+					textImageRollingWindow.setText("" + resultsSettings.imageRollingWindow);
+				textResultsDirectory.setText("" + resultsSettings.resultsDirectory);
+				textBinaryResults.setState(resultsSettings.binaryResults);
+				textResultsInMemory.setState(resultsSettings.resultsInMemory);
+			}
+		}
+	}
+}

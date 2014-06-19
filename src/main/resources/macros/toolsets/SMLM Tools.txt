@@ -1,0 +1,35 @@
+// Add tools used for SMLM
+// (Single Molecule Localisation Microscopy).
+// Place in the ImageJ/macros/toolsets directory.
+
+macro 'PSF Calculator Action Tool - T06091 T0f092 C00f Ta612+ Taf12=' {
+   doCommand('PSF Calculator');
+};
+
+macro 'PSF Estimator Action Tool - P1f2f3e4c5865728192a5b8ccdeefff0C00f Tb913?' {
+   doCommand('PSF Estimator');
+};
+
+macro 'Peak Fit Action Tool - C00f P1f2f3e4c5865728192a5b8ccdeefff0' {
+   doCommand('Peak Fit');
+};
+
+macro 'Peak Fit Series Action Tool - Cccc F6288 C999 F3588 C00f F0888' {
+   doCommand('Peak Fit (Series)');
+};
+
+macro 'Drift Calculator Action Tool - L000f L0fff C00f P1828374656677989a8b8c9e9f8' {
+   doCommand('Drift Calculator');
+};
+
+macro 'Filter Results Action Tool - L0069 L696f Lf099 L999f' {
+   doCommand('Filter Results');
+};
+
+macro 'Results Manager Action Tool - R00ff L03f3 L06f6 L09f9 L0cfc C00f F00f3' {
+   doCommand('Results Manager');
+};
+
+macro 'Find Clusters Action Tool - L3034 L1252 L989c L7aba Ld5d9 Lb7f7 C00f O52cc' {
+   doCommand('Find Clusters');
+};

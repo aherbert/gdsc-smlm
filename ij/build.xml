@@ -1,0 +1,46 @@
+<!-- 
+Ant makefile for running ImageJ with the SMLM plugins
+
+The dependent jar files are copied from the user's local maven repository. This 
+can take a long time if they have a large repository. It may also copy 
+duplicates. This can be solved by substituting the correct patternset for 
+the desired versions.
+-->
+
+<project name="ImageJ" default="run">
+
+    <target name="clean" description="Delete the ImageJ files.">
+        <delete file="ij.jar" />
+        <delete dir="macros" />
+        <delete dir="plugins" />
+    </target>
+
+    <target name="build" description="Copy files to run ImageJ.">
+        <mkdir dir="macros/toolsets" />
+        <copy file="../src/main/resources/macros/toolsets/SMLM Tools.txt" todir="macros/toolsets" />
+        <copy tofile="ij.jar" flatten="true">  
+            <fileset dir="${user.home}/.m2/repository/net/imagej">  
+                <patternset>  
+                    <include name="**/ij-1.48a.jar"/>  
+                </patternset>
+            </fileset>  
+        </copy> 
+        <copy todir="plugins" flatten="true">  
+            <fileset dir="${user.home}/.m2/repository">  
+                <patternset>  
+                    <include name="**/xstream-1.4.4.jar"/>  
+                    <include name="**/commons-math3-3*.jar"/>  
+                    <include name="**/ejml-0.21.jar"/>  
+                    <include name="**/jtransforms-2.4.0.jar"/>  
+                </patternset>
+            </fileset>  
+        </copy> 
+        <jar jarfile="plugins/gdsc_smlm.jar" basedir="../target/classes" />
+    </target>
+
+    <target name="run" depends="build" description="Build and run ImageJ.">
+        <java maxmemory="2048m" jar="ij.jar" fork="yes" spawn="true"/>
+    </target>
+
+</project>
+

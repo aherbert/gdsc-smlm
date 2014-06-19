@@ -1,0 +1,170 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>gdsc</groupId>
+    <artifactId>gdsc_smlm</artifactId>
+	<version>0.2.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>SMLM</name>
+	<url>http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins</url>
+	<developers>
+	  <developer>
+	    <id>aherbert</id>
+	    <name>Alex Herbert</name>
+	    <email>a.herbert@sussex.ac.uk</email>
+	    <roles>
+	      <role>architect</role>
+	      <role>developer</role>
+	    </roles>
+	  </developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
+		<build.date>${maven.build.timestamp}</build.date>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.1</version>
+					<configuration>
+						<source>1.5</source>
+						<target>1.5</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<configuration>
+						<archive>
+							<manifest>
+								<addClasspath>true</addClasspath>
+								<mainClass>gdsc.smlm.ij.plugins.Version</mainClass>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- NOTE: We don't need a groupId specification because the group is 
+						org.apache.maven.plugins ...which is assumed by default. -->
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.4</version>
+					<configuration>
+						<descriptorRefs>
+							<descriptorRef>jar-with-dependencies</descriptorRef>
+						</descriptorRefs>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>dist</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-dependencies</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy-dependencies</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>
+										${project.build.directory}/dist/lib
+									</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.efficient-java-matrix-library</groupId>
+			<artifactId>ejml</artifactId>
+			<version>0.21</version>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+			<version>1.48a</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.rwl</groupId>
+			<artifactId>jtransforms</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>imagej.releases</id>
+			<url>http://maven.imagej.net/content/repositories/releases</url>
+		</repository>
+		<repository>
+			<id>imagej.snapshots</id>
+			<url>http://maven.imagej.net/content/repositories/snapshots</url>
+		</repository>
+		<repository>
+			<id>apache.central</id>
+			<url>http://repo.maven.apache.org/maven2</url>
+		</repository>
+	</repositories>
+
+	<organization>
+		<name>Genome Damage and Stability Centre</name>
+		<url>http://www.sussex.ac.uk/gdsc/</url>
+	</organization>
+	<description>Single Molecule Localisation Microscopy (SMLM) software.
+
+Software for use in single molecule localisation microscopy, e.g. STORM, PALM.
+
+Uses a 2D Gaussian to approximate the Point Spread Function (PSF) of single fluorophores.
+
+Contains routines for:
+
+- PSF calculation using image acquisition details
+- PSF estimation from image data
+- Spot localisation using PSF fitting
+- Drift correction using labelled regions
+- Clustering using distance and time thresholds
+- Super-resolution image reconstruction
+</description>
+</project>

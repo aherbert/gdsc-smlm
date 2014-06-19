@@ -1,0 +1,1011 @@
+package gdsc.smlm.ij.plugins;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.engine.FitEngine;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitParameters;
+import gdsc.smlm.engine.FitQueue;
+import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.PSFSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.match.BasePoint;
+import gdsc.smlm.utils.ImageExtractor;
+import gdsc.smlm.utils.ImageWindow;
+import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.Statistics;
+import gdsc.smlm.utils.StoredDataStatistics;
+import gdsc.smlm.utils.XmlUtils;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.Blitter;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+
+import java.awt.Checkbox;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+
+/**
+ * Produces an average PSF image using selected diffraction limited spots from a sample image.
+ * <p>
+ * The input image must be a z-stack of diffraction limited spots for example quantum dots or fluorescent beads. Spots
+ * will be used only when there are no spots within a specified distance to ensure a clean signal is extracted.
+ */
+public class PSFCreator implements PlugInFilter, ItemListener
+{
+	private final static String TITLE = "PSF Creator";
+
+	private static double nmPerSlice = 20;
+	private static double radius = 10;
+	private static double amplitudeFraction = 0.2;
+	private static int startBackgroundFrames = 5;
+	private static int endBackgroundFrames = 5;
+	private static int magnification = 10;
+	private static double smoothing = 0.5;
+	private static boolean interactiveMode = false;
+	private static int interpolationMethod = ImageProcessor.BICUBIC;
+
+	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+	private ImagePlus imp;
+	private double nmPerPixel;
+	private FitEngineConfiguration config = null;
+	private FitConfiguration fitConfig;
+	private int boxRadius;
+	private static Point yesNoPosition = null;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
+	 */
+	public int setup(String arg, ImagePlus imp)
+	{
+		if (imp == null)
+		{
+			IJ.noImage();
+			return DONE;
+		}
+
+		Roi roi = imp.getRoi();
+		if (roi == null || roi.getType() != Roi.POINT)
+		{
+			IJ.error("Point ROI required");
+			return DONE;
+		}
+
+		this.imp = imp;
+
+		return showDialog();
+	}
+
+	private int showDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		gd.addMessage("Produces an average PSF using selected diffraction limited spots.\nUses the current fit configuration to fit spots.");
+
+		gd.addCheckbox("Update_Fit_Configuration", false);
+		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
+		gd.addSlider("Radius", 3, 20, radius);
+		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
+		gd.addSlider("Start_background_frames", 1, 20, startBackgroundFrames);
+		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
+		gd.addSlider("Magnification", 5, 15, magnification);
+		gd.addSlider("Smoothing", 0.25, 0.5, smoothing);
+		gd.addCheckbox("Interactive_mode", interactiveMode);
+		String[] methods = ImageProcessor.getInterpolationMethods();
+		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
+
+		((Checkbox) gd.getCheckboxes().get(0)).addItemListener(this);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return DONE;
+
+		gd.getNextBoolean();
+		nmPerSlice = gd.getNextNumber();
+		radius = gd.getNextNumber();
+		amplitudeFraction = gd.getNextNumber();
+		startBackgroundFrames = (int) gd.getNextNumber();
+		endBackgroundFrames = (int) gd.getNextNumber();
+		magnification = (int) gd.getNextNumber();
+		smoothing = gd.getNextNumber();
+		interactiveMode = gd.getNextBoolean();
+		interpolationMethod = gd.getNextChoiceIndex();
+
+		// Check arguments
+		try
+		{
+			Parameters.isPositive("nm/slice", nmPerSlice);
+			Parameters.isAbove("Radius", radius, 2);
+			Parameters.isAbove("Amplitude fraction", amplitudeFraction, 0.01);
+			Parameters.isBelow("Amplitude fraction", amplitudeFraction, 0.9);
+			Parameters.isPositive("Start background frames", startBackgroundFrames);
+			Parameters.isPositive("End background frames", endBackgroundFrames);
+			Parameters.isAbove("Total background frames", startBackgroundFrames + endBackgroundFrames, 1);
+			Parameters.isAbove("Magnification", magnification, 1);
+			Parameters.isAbove("Smoothing", smoothing, 0);
+			Parameters.isBelow("Smoothing", smoothing, 1);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return DONE;
+		}
+
+		return flags;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
+	 */
+	public void run(ImageProcessor ip)
+	{
+		loadConfiguration();
+		BasePoint[] spots = getSpots();
+		if (spots.length == 0)
+		{
+			IJ.error(TITLE, "No spots without neighbours within " + (boxRadius * 2) + "px");
+			return;
+		}
+
+		ImageStack stack = getImageStack();
+		final int width = imp.getWidth();
+		final int height = imp.getHeight();
+		final int currentSlice = imp.getSlice();
+
+		// Adjust settings for a single maxima
+		config.setIncludeNeighbours(false);
+		fitConfig.setDuplicateDistance(0);
+
+		ArrayList<double[]> centres = new ArrayList<double[]>(spots.length);
+		int iterations = 1;
+		LoessInterpolator loess = new LoessInterpolator(smoothing, iterations);
+
+		// TODO - The fitting routine may not produce many points. In this instance the LOESS interpolator
+		// fails to smooth the data very well. A higher bandwidth helps this but perhaps 
+		// try a different smoothing method.
+
+		// For each spot
+		Utils.log(TITLE + ": " + imp.getTitle());
+		Utils.log("Finding spot locations...");
+		Utils.log("  %d spot%s without neighbours within %dpx", spots.length, ((spots.length == 1) ? "" : "s"),
+				(boxRadius * 2));
+		Statistics averageSd = new Statistics();
+		Statistics averageRange = new Statistics();
+		for (int n = 1; n <= spots.length; n++)
+		{
+			BasePoint spot = spots[n - 1];
+			final int x = (int) spot.getX();
+			final int y = (int) spot.getY();
+
+			MemoryPeakResults results = fitSpot(stack, width, height, x, y);
+
+			if (results.size() < 5)
+			{
+				Utils.log("  Spot %d: Not enough fit results %d", n, results.size());
+				continue;
+			}
+
+			// Get the results for the spot centre and width
+			double[] z = new double[results.size()];
+			double[] xCoord = new double[z.length];
+			double[] yCoord = new double[z.length];
+			double[] sd = new double[z.length];
+			double[] a = new double[z.length];
+			int i = 0;
+			for (PeakResult peak : results.getResults())
+			{
+				z[i] = peak.peak;
+				xCoord[i] = peak.getXPosition() - x;
+				yCoord[i] = peak.getYPosition() - y;
+				sd[i] = Math.max(peak.getXWidth(), peak.getYWidth());
+				a[i] = peak.getAmplitude();
+				i++;
+			}
+
+			// Smooth the amplitude plot
+			double[] smoothA = loess.smooth(z, a);
+
+			// Find the maximum amplitude
+			int maximumIndex = findMaximumIndex(smoothA);
+
+			// Find the range at a fraction of the max. This is smoothed to find the X/Y centre
+			int start = 0, stop = smoothA.length - 1;
+			double limit = smoothA[maximumIndex] * amplitudeFraction;
+			for (int j = 0; j < smoothA.length; j++)
+			{
+				if (smoothA[j] > limit)
+				{
+					start = j;
+					break;
+				}
+			}
+			for (int j = smoothA.length; j-- > 0;)
+			{
+				if (smoothA[j] > limit)
+				{
+					stop = j;
+					break;
+				}
+			}
+			averageRange.add(stop - start + 1);
+
+			// Extract xy centre coords and smooth
+			double[] smoothX = new double[stop - start + 1];
+			double[] smoothY = new double[smoothX.length];
+			double[] smoothSd = new double[smoothX.length];
+			double[] newZ = new double[smoothX.length];
+			for (int j = start, k = 0; j <= stop; j++, k++)
+			{
+				smoothX[k] = xCoord[j];
+				smoothY[k] = yCoord[j];
+				smoothSd[k] = sd[j];
+				newZ[k] = z[j];
+			}
+			smoothX = loess.smooth(newZ, smoothX);
+			smoothY = loess.smooth(newZ, smoothY);
+			smoothSd = loess.smooth(newZ, smoothSd);
+
+			// Since the amplitude is not very consistent move from this peak to the 
+			// lowest width which is the in-focus spot.
+			maximumIndex = findMinimumIndex(smoothSd, maximumIndex - start);
+			averageSd.add(smoothSd[maximumIndex]);
+
+			// Find the centre at the amplitude peak
+			double cx = smoothX[maximumIndex] + x;
+			double cy = smoothY[maximumIndex] + y;
+			int cz = (int) newZ[maximumIndex];
+			double csd = smoothSd[maximumIndex];
+
+			if (ignoreSpot(n, z, a, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cx, cy, cz, csd))
+			{
+				Utils.log("  Spot %d was ignored", n);
+				continue;
+			}
+
+			// Store result
+			Utils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f\n", n, cx, cy, cz, csd);
+			centres.add(new double[] { cx, cy, cz, csd });
+		}
+
+		if (interactiveMode)
+		{
+			imp.setSlice(currentSlice);
+			imp.setOverlay(null);
+		}
+
+		if (centres.isEmpty())
+		{
+			String msg = "No suitable spots could be identified centres";
+			Utils.log(msg);
+			IJ.error(TITLE, msg);
+			return;
+		}
+
+		// Find the limits of the z-centre
+		int minz = (int) centres.get(0)[2];
+		int maxz = minz;
+		for (double[] centre : centres)
+		{
+			if (minz > centre[2])
+				minz = (int) centre[2];
+			else if (maxz < centre[2])
+				maxz = (int) centre[2];
+		}
+
+		IJ.showStatus("Creating PSF image");
+
+		// Create a stack that can hold all the data.
+		ImageStack psf = createStack(stack, minz, maxz, magnification);
+
+		// For each spot
+		Statistics stats = new Statistics();
+		boolean ok = true;
+		for (int i = 0; ok && i < centres.size(); i++)
+		{
+			double progress = (double) i / centres.size();
+			final double increment = 1.0 / (stack.getSize() * centres.size());
+			IJ.showProgress(progress);
+			double[] centre = centres.get(i);
+
+			// Extract the spot
+			float[][] spot = new float[stack.getSize()][];
+			Rectangle regionBounds = null;
+			for (int slice = 1; slice <= stack.getSize(); slice++)
+			{
+				ImageExtractor ie = new ImageExtractor((float[]) stack.getPixels(slice), width, height);
+				if (regionBounds == null)
+					regionBounds = ie.getBoxRegionBounds((int) centre[0], (int) centre[1], boxRadius);
+				spot[slice - 1] = ie.crop(regionBounds, null);
+			}
+
+			float b = getBackground(spot);
+			stats.add(b);
+			subtractBackgroundAndWindow(spot, b, regionBounds.width, regionBounds.height);
+
+			// This takes a long time so this should track progress
+			ok = addToPSF(maxz, magnification, psf, centre, spot, regionBounds, progress, increment);
+
+		}
+		if (!ok)
+			return;
+
+		Utils.log("  Average background = %.2f", stats.getMean());
+
+		normalise(psf, maxz, averageSd.getMean() * magnification);
+		IJ.showProgress(1);
+
+		ImagePlus imp = Utils.display("PSF", psf);
+		imp.setSlice(maxz);
+		imp.resetDisplayRange();
+		imp.updateAndDraw();
+
+		double fittedSd = fitPSF(psf, loess, maxz, averageRange.getMean());
+
+		// Add Image properties containing the PSF details
+		imp.setProperty("Info",
+				XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, centres.size())));
+
+		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, Av. SD = %s px, PSF SD = %s px\n",
+				imp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
+				centres.size(), Utils.rounded(averageSd.getMean(), 4), Utils.rounded(fittedSd, 4));
+
+		IJ.showStatus("");
+	}
+
+	private MemoryPeakResults fitSpot(ImageStack stack, final int width, final int height, final int x, final int y)
+	{
+		Rectangle regionBounds = null;
+
+		// Create a fit engine
+		MemoryPeakResults results = new MemoryPeakResults();
+		results.setSortAfterEnd(true);
+		results.begin();
+		FitEngine engine = new FitEngine(config, results, Prefs.getThreads(), FitQueue.BLOCKING, 0);
+
+		List<ParameterisedFitJob> jobItems = new ArrayList<ParameterisedFitJob>(stack.getSize());
+
+		for (int slice = 1; slice <= stack.getSize(); slice++)
+		{
+			// Extract the region from each frame
+			ImageExtractor ie = new ImageExtractor((float[]) stack.getPixels(slice), width, height);
+			if (regionBounds == null)
+				regionBounds = ie.getBoxRegionBounds(x, y, boxRadius);
+			float[] region = ie.crop(regionBounds, null);
+
+			// Fit only a spot in the centre
+			FitParameters params = new FitParameters();
+			params.maxIndices = new int[] { boxRadius * regionBounds.width + boxRadius };
+			ParameterisedFitJob job = new ParameterisedFitJob(slice, params, slice, region, regionBounds);
+			jobItems.add(job);
+			engine.run(job);
+		}
+
+		engine.end(false);
+		results.end();
+		return results;
+	}
+
+	private int findMaximumIndex(double[] data)
+	{
+		double max = data[0];
+		int pos = 0;
+		for (int j = 0; j < data.length; j++)
+		{
+			if (max < data[j])
+			{
+				max = data[j];
+				pos = j;
+			}
+		}
+		return pos;
+	}
+
+	private int findMinimumIndex(double[] data, int initialGuess)
+	{
+		double min = data[initialGuess];
+		int pos = initialGuess;
+		// Move only downhill from the initial guess.
+		for (int j = initialGuess + 1; j < data.length; j++)
+		{
+			if (min > data[j])
+			{
+				min = data[j];
+				pos = j;
+			}
+			else
+			{
+				break;
+			}
+		}
+		for (int j = initialGuess; j-- > 0;)
+		{
+			if (min > data[j])
+			{
+				min = data[j];
+				pos = j;
+			}
+			else
+			{
+				break;
+			}
+		}
+		return pos;
+	}
+
+	private boolean ignoreSpot(int n, final double[] z, final double[] a, final double[] smoothA,
+			final double[] xCoord, final double[] yCoord, final double[] sd, final double[] newZ,
+			final double[] smoothX, final double[] smoothY, double[] smoothSd, final double cx, final double cy,
+			final int cz, double csd)
+	{
+		// Allow an interactive mode that shows the plots and allows the user to Yes/No
+		// the addition of the data
+		if (interactiveMode)
+		{
+			showPlots(z, a, z, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cz);
+
+			// Draw the region on the input image as an overlay
+			imp.setSlice(cz);
+			imp.setOverlay(
+					new Roi((int) (cx - boxRadius), (int) (cy - boxRadius), 2 * boxRadius + 1, 2 * boxRadius + 1),
+					Color.GREEN, 1, null);
+
+			// Ask if the spot should be included
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.enableYesNoCancel();
+			gd.hideCancelButton();
+			gd.addMessage(String.format("Add spot %d to the PSF?\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n", n, cx,
+					cy, cz, csd));
+			if (yesNoPosition != null)
+			{
+				gd.centerDialog(false);
+				gd.setLocation(yesNoPosition);
+			}
+
+			gd.showDialog();
+
+			yesNoPosition = gd.getLocation();
+			return !gd.wasOKed();
+		}
+		return false;
+	}
+
+	private void showPlots(final double[] z, final double[] a, final double[] smoothAz, final double[] smoothA,
+			final double[] xCoord, final double[] yCoord, final double[] sd, final double[] newZ,
+			final double[] smoothX, final double[] smoothY, double[] smoothSd, final int cz)
+	{
+		// Draw a plot of the amplitude
+		String title2 = "Spot Amplitude";
+		Plot plot2 = new Plot(title2, "z", "Amplitude", smoothAz, smoothA);
+		double[] limits2 = Maths.limits(Maths.limits(a, smoothA));
+		plot2.setLimits(z[0], z[z.length - 1], limits2[0], limits2[1]);
+		plot2.addPoints(z, a, Plot.CIRCLE);
+
+		// Add a line for the z-centre
+		plot2.setColor(Color.GREEN);
+		plot2.addPoints(new double[] { cz, cz }, limits2, Plot.LINE);
+		plot2.setColor(Color.BLACK);
+
+		PlotWindow amplitudeWindow = Utils.display(title2, plot2);
+
+		// Show plot of width, X centre, Y centre
+		String title = "Spot PSF";
+		Plot plot = new Plot(title, "z", "px", newZ, smoothSd);
+		// Get the limits
+		double[] sd2 = invert(sd);
+		double[] limits = Maths.limits(Maths.limits(Maths.limits(Maths.limits(xCoord), yCoord), sd), sd2);
+		plot.setLimits(z[0], z[z.length - 1], limits[0], limits[1]);
+		plot.addPoints(newZ, invert(smoothSd), Plot.LINE);
+		plot.addPoints(z, sd, Plot.DOT);
+		plot.addPoints(z, sd2, Plot.DOT);
+		plot.setColor(Color.BLUE);
+		plot.addPoints(z, xCoord, Plot.DOT);
+		plot.addPoints(newZ, smoothX, Plot.LINE);
+		plot.setColor(Color.RED);
+		plot.addPoints(z, yCoord, Plot.DOT);
+		plot.addPoints(newZ, smoothY, Plot.LINE);
+
+		// Add a line for the z-centre
+		plot.setColor(Color.GREEN);
+		plot.addPoints(new double[] { cz, cz }, limits, Plot.LINE);
+		plot.setColor(Color.BLACK);
+
+		// Check if the window will need to be aligned
+		boolean alignWindows = (WindowManager.getFrame(title) == null);
+
+		PlotWindow psfWindow = Utils.display(title, plot);
+
+		if (alignWindows && psfWindow != null)
+		{
+			// Put the two plots tiled together so both are visible
+			Point l = psfWindow.getLocation();
+			l.x = amplitudeWindow.getLocation().x;
+			l.y = amplitudeWindow.getLocation().y + amplitudeWindow.getHeight();
+			psfWindow.setLocation(l);
+		}
+	}
+
+	private double[] invert(final double[] data)
+	{
+		double[] data2 = new double[data.length];
+		for (int i = 0; i < data.length; i++)
+			data2[i] = -data[i];
+		return data2;
+	}
+
+	private ImageStack createStack(ImageStack stack, int minz, int maxz, final int magnification)
+	{
+		// Pad box radius with an extra pixel border to allow offset insertion
+		final int w = (2 * (boxRadius + 1) + 1) * magnification;
+		final int d = maxz - minz + stack.getSize();
+		ImageStack psf = new ImageStack(w, w, d);
+		for (int i = 1; i <= d; i++)
+			psf.setPixels(new float[w * w], i);
+		return psf;
+	}
+
+	private float getBackground(float[][] spot)
+	{
+		// Get the average value of the first and last n frames
+		Statistics first = new Statistics();
+		Statistics last = new Statistics();
+		for (int i = 0; i < startBackgroundFrames; i++)
+		{
+			first.add(spot[i]);
+		}
+		for (int i = 0, j = spot.length - 1; i < endBackgroundFrames; i++, j--)
+		{
+			last.add(spot[j]);
+		}
+		float av = (float) ((first.getSum() + last.getSum()) / (first.getN() + last.getN()));
+		//Utils.log("First %d = %.2f, Last %d = %.2f, av = %.2f", backgroundFrames, first.getMean(), backgroundFrames,
+		//		last.getMean(), av);
+		return av;
+	}
+
+	@SuppressWarnings("unused")
+	private float getBackground(final double fraction, StoredDataStatistics all)
+	{
+		double[] allValues = all.getValues();
+		Arrays.sort(allValues);
+		int fractionIndex = (int) (allValues.length * fraction);
+		double sum = 0;
+		for (int i = 0; i <= fractionIndex; i++)
+		{
+			sum += allValues[i];
+		}
+		final float min = (float) (sum / (fractionIndex + 1));
+		return min;
+	}
+
+	private void subtractBackgroundAndWindow(float[][] spot, final float min, final int spotWidth, final int spotHeight)
+	{
+		//ImageWindow imageWindow = new ImageWindow();
+		for (int i = 0; i < spot.length; i++)
+		{
+			for (int j = 0; j < spot[i].length; j++)
+				spot[i][j] = Math.max(spot[i][j] - min, 0);
+
+			// Use a Tukey window to roll-off the image edges
+			//spot[i] = imageWindow.applySeperable(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.Tukey);
+			spot[i] = ImageWindow.applyWindow(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.Tukey);
+		}
+	}
+
+	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, double[] centre, float[][] spot,
+			Rectangle regionBounds, double progress, double increment)
+	{
+		// Calculate insert point in enlargement
+		final int x = (int) centre[0];
+		final int y = (int) centre[1];
+		final int z = (int) centre[2];
+
+		// Note that a perfect alignment to the centre of a pixel would be 0.5,0.5. 
+		// Subtract this from the centre to align to the pixel edge.
+		final int insertX = (int) (magnification + Math.round((centre[0] - 0.5 - x) * magnification) % magnification);
+		final int insertY = (int) (magnification + Math.round((centre[1] - 0.5 - y) * magnification) % magnification);
+
+		int insertZ = maxz - z + 1;
+		//Utils.log("Insert point = %.2f,%.2f => %d,%d\n", centre[0] - x, centre[1] - y, insertX, insertY);
+
+		// Enlargement size
+		final int dstWidth = regionBounds.width * magnification;
+		final int dstHeight = regionBounds.height * magnification;
+
+		for (int i = 0; i < spot.length; i++)
+		{
+			progress += increment;
+			IJ.showProgress(progress);
+			if (Utils.isInterrupted())
+				return false;
+
+			// Enlarge
+			FloatProcessor fp = new FloatProcessor(regionBounds.width, regionBounds.height, spot[i], null);
+			fp.setInterpolationMethod(interpolationMethod);
+			fp = (FloatProcessor) fp.resize(dstWidth, dstHeight);
+
+			// Add to the combined PSF using the correct offset
+			psf.getProcessor(insertZ++).copyBits(fp, insertX, insertY, Blitter.ADD);
+		}
+		return true;
+	}
+
+	/**
+	 * Normalise the PSF using a given denominator
+	 * 
+	 * @param psf
+	 * @param n
+	 *            The denominator
+	 */
+	public static void normaliseUsingSpots(ImageStack psf, int n)
+	{
+		if (psf == null || psf.getSize() == 0)
+			return;
+		if (!(psf.getPixels(1) instanceof float[]))
+			return;
+		for (int i = 0; i < psf.getSize(); i++)
+		{
+			float[] data = (float[]) psf.getPixels(i + 1);
+			for (int j = 0; j < data.length; j++)
+				data[j] /= n;
+		}
+	}
+
+	/**
+	 * Normalise the PSF so the height of the specified frame foreground pixels is 1.
+	 * <p>
+	 * Assumes the PSF can be approximated by a Gaussian in the central frame. All pixels within 3 sigma of the centre
+	 * are foreground pixels.
+	 * 
+	 * @param psf
+	 * @param n
+	 *            The frame number
+	 * @param sigma
+	 *            the Gaussian standard deviation (in pixels)
+	 */
+	public static void normalise(ImageStack psf, int n, double sigma)
+	{
+		if (psf == null || psf.getSize() == 0)
+			return;
+		if (!(psf.getPixels(1) instanceof float[]))
+			return;
+		double cx = psf.getWidth() * 0.5;
+
+		// Get the sum of the foreground pixels
+		float[] data = (float[]) psf.getPixels(n);
+		double foregroundSum = 0;
+		int foregroundN = 0;
+		final int min = Math.max(0, (int) (cx - 3 * sigma));
+		final int max = Math.min(psf.getWidth() - 1, (int) Math.ceil(cx + 3 * sigma));
+
+		// Precompute square distances within 3 sigma of the centre
+		final double r2 = 3 * sigma * 3 * sigma;
+		double[] d2 = new double[max - min + 1];
+		for (int x = min, i = 0; x <= max; x++, i++)
+			d2[i] = (x - cx) * (x - cx);
+
+		for (int y = min, i = 0; y <= max; y++, i++)
+		{
+			int index = y * psf.getWidth() + min;
+			for (int x = min, j = 0; x <= max; x++, index++, j++)
+			{
+				// Check if the pixel is within 3 sigma of the centre
+				if (d2[i] + d2[j] < r2)
+				{
+					foregroundSum += data[index];
+					foregroundN++;
+				}
+			}
+		}
+
+		// Get the average background
+		double backgroundSum = new Statistics(data).getSum() - foregroundSum;
+		double background = backgroundSum / (data.length - foregroundN);
+
+		// Subtract the background from the foreground sum
+		foregroundSum -= background * foregroundN;
+
+		for (int i = 0; i < psf.getSize(); i++)
+		{
+			data = (float[]) psf.getPixels(i + 1);
+			for (int j = 0; j < data.length; j++)
+				data[j] = (float) ((data[j] - background) / foregroundSum);
+		}
+	}
+
+	/**
+	 * Normalise the PSF so the sum of specified frame is 1.
+	 * 
+	 * @param psf
+	 * @param n
+	 *            The frame number
+	 */
+	public static void normalise(ImageStack psf, int n)
+	{
+		if (psf == null || psf.getSize() == 0)
+			return;
+		if (!(psf.getPixels(1) instanceof float[]))
+			return;
+		double sum = new Statistics((float[]) psf.getPixels(n)).getSum();
+		for (int i = 0; i < psf.getSize(); i++)
+		{
+			float[] data = (float[]) psf.getPixels(i + 1);
+			for (int j = 0; j < data.length; j++)
+				data[j] /= sum;
+		}
+	}
+
+	private void loadConfiguration()
+	{
+		String filename = SettingsManager.getSettingsFilename();
+		GlobalSettings settings = SettingsManager.loadSettings(filename);
+		nmPerPixel = settings.getCalibration().nmPerPixel;
+		config = settings.getFitEngineConfiguration();
+		fitConfig = config.getFitConfiguration();
+		boxRadius = (int) Math.ceil(radius *
+				Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()));
+	}
+
+	/**
+	 * @return Extract all the ROI points that are not within twice the box radius of any other spot
+	 */
+	private BasePoint[] getSpots()
+	{
+		Roi roi = imp.getRoi();
+		if (roi != null && roi.getType() == Roi.POINT)
+		{
+			Polygon p = ((PolygonRoi) roi).getNonSplineCoordinates();
+			int n = p.npoints;
+			Rectangle bounds = roi.getBounds();
+
+			BasePoint[] roiPoints = new BasePoint[n];
+			for (int i = 0; i < n; i++)
+			{
+				roiPoints[i] = new BasePoint(bounds.x + p.xpoints[i], bounds.y + p.ypoints[i], 0);
+			}
+
+			// All vs all distance matrix
+			double[][] d = new double[n][n];
+			for (int i = 0; i < n; i++)
+				for (int j = i + 1; j < n; j++)
+					d[i][j] = d[j][i] = roiPoints[i].distanceXY2(roiPoints[j]);
+
+			// Spots must be twice as far apart to have no overlap of the extracted box region
+			double d2 = boxRadius * boxRadius * 4;
+			int ok = 0;
+			for (int i = 0; i < n; i++)
+			{
+				if (noNeighbours(d, n, i, d2))
+					roiPoints[ok++] = roiPoints[i];
+			}
+
+			return Arrays.copyOf(roiPoints, ok);
+		}
+		return new BasePoint[0];
+	}
+
+	/**
+	 * Check the spot is not within the given squared distance from any other spot
+	 * 
+	 * @param d
+	 *            The distance matrix
+	 * @param n
+	 *            The number of spots
+	 * @param i
+	 *            The spot
+	 * @param d2
+	 *            The squared distance
+	 * @return True if there are no neighbours
+	 */
+	private boolean noNeighbours(final double[][] d, final int n, final int i, final double d2)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			if (i != j && d[i][j] < d2)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * @return The input image as a 32-bit (float) image stack
+	 */
+	private ImageStack getImageStack()
+	{
+		final int width = imp.getWidth();
+		final int height = imp.getHeight();
+		ImageStack stack = imp.getImageStack();
+		ImageStack newStack = new ImageStack(width, height, stack.getSize());
+		for (int slice = 1; slice <= stack.getSize(); slice++)
+		{
+			newStack.setPixels(ImageConverter.getData(stack.getPixels(slice), width, height, null, null), slice);
+		}
+		return newStack;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	 */
+	public void itemStateChanged(ItemEvent e)
+	{
+		// Run the fit configuration plugin to update the settings.
+		if (e.getSource() instanceof Checkbox)
+		{
+			((Checkbox) e.getSource()).setState(false);
+			IJ.run("Fit Configuration");
+		}
+	}
+
+	/**
+	 * Fit the new PSF image and show a graph of the amplitude/width
+	 * 
+	 * @param psf
+	 * @param loess
+	 * @param averageRange
+	 * @return The width of the PSF in the z-centre
+	 */
+	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange)
+	{
+		IJ.showStatus("Fitting final PSF");
+		boxRadius = psf.getWidth() / 2;
+		int x = boxRadius, y = boxRadius;
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		float shift = fitConfig.getCoordinateShiftFactor();
+		fitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0() * magnification);
+		fitConfig.setInitialPeakStdDev1(fitConfig.getInitialPeakStdDev1() * magnification);
+		// Need to be updated after the widths have been set
+		fitConfig.setCoordinateShiftFactor(shift);
+		fitConfig.setBackgroundFitting(false);
+		//fitConfig.setLog(new IJLogger());
+
+		MemoryPeakResults results = fitSpot(psf, psf.getWidth(), psf.getHeight(), x, y);
+
+		if (results.size() < 5)
+		{
+			Utils.log("  Final PSF: Not enough fit results %d", results.size());
+			return 0;
+		}
+
+		// Get the results for the spot centre and width
+		double[] z = new double[results.size()];
+		double[] xCoord = new double[z.length];
+		double[] yCoord = new double[z.length];
+		double[] sd = new double[z.length];
+		double[] a = new double[z.length];
+		int i = 0;
+
+		// Set limits for the fit
+		final float maxWidth = Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()) *
+				magnification * 4;
+		final float maxSignal = 2; // PSF is normalised to 1  
+
+		for (PeakResult peak : results.getResults())
+		{
+			// Remove bad fits where the width/signal is above the expected
+			final float w = Math.max(peak.getXWidth(), peak.getYWidth());
+			if (peak.getSignal() > maxSignal || w > maxWidth)
+				continue;
+
+			z[i] = peak.peak;
+			xCoord[i] = peak.getXPosition() - x;
+			yCoord[i] = peak.getYPosition() - y;
+			sd[i] = w;
+			a[i] = peak.getAmplitude();
+			i++;
+		}
+
+		// Truncate
+		z = Arrays.copyOf(z, i);
+		xCoord = Arrays.copyOf(xCoord, i);
+		yCoord = Arrays.copyOf(yCoord, i);
+		sd = Arrays.copyOf(sd, i);
+		a = Arrays.copyOf(a, i);
+
+		// Extract the average smoothed range from the individual fits
+		int r = (int) Math.ceil(averageRange / 2);
+		int start = 0, stop = z.length - 1;
+		for (int j = 0; j < z.length; j++)
+		{
+			if (z[j] > cz - r)
+			{
+				start = j;
+				break;
+			}
+		}
+		for (int j = z.length; j-- > 0;)
+		{
+			if (z[j] < cz + r)
+			{
+				stop = j;
+				break;
+			}
+		}
+
+		// Extract xy centre coords and smooth
+		double[] smoothX = new double[stop - start + 1];
+		double[] smoothY = new double[smoothX.length];
+		double[] smoothSd = new double[smoothX.length];
+		double[] smoothA = new double[smoothX.length];
+		double[] newZ = new double[smoothX.length];
+		int smoothCzIndex = 0;
+		for (int j = start, k = 0; j <= stop; j++, k++)
+		{
+			smoothX[k] = xCoord[j];
+			smoothY[k] = yCoord[j];
+			smoothSd[k] = sd[j];
+			smoothA[k] = a[j];
+			newZ[k] = z[j];
+			if (newZ[k] == cz)
+				smoothCzIndex = k;
+		}
+		smoothX = loess.smooth(newZ, smoothX);
+		smoothY = loess.smooth(newZ, smoothY);
+		smoothSd = loess.smooth(newZ, smoothSd);
+		smoothA = loess.smooth(newZ, smoothA);
+
+		// Update the widths and positions using the magnification
+		final double scale = 1.0 / magnification;
+		for (int j = 0; j < xCoord.length; j++)
+		{
+			xCoord[j] *= scale;
+			yCoord[j] *= scale;
+			sd[j] *= scale;
+		}
+		for (int j = 0; j < smoothX.length; j++)
+		{
+			smoothX[j] *= scale;
+			smoothY[j] *= scale;
+			smoothSd[j] *= scale;
+		}
+
+		showPlots(z, a, newZ, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cz);
+
+		//maximumIndex = findMinimumIndex(smoothSd, maximumIndex - start);
+		return smoothSd[smoothCzIndex];
+	}
+}
