@@ -45,10 +45,11 @@ Installation from source
 
 1. Clone the repository with a unique name (e.g. "smlm")
 
-        git clone https://github.com/aherbert/gdsc-smlm.git smlm
+        git clone https://github.com/aherbert/GDSC-SMLM.git smlm
 
 2. Build the code and package using Maven
 
+        cd smlm
         mvn -P dist package
 
 This will produce a gdsc_smlm-[VERSION].jar file in the target directory. All 
