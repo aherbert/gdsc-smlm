@@ -5,6 +5,7 @@ import gdsc.smlm.utils.XmlUtils;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
+import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -43,7 +44,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	public static final int DISPLAY_MAX = 64;
 
 	public static final int DISPLAY_NEGATIVES = 128;
-	
+
 	protected String title;
 	protected int imageWidth;
 	protected int imageHeight;
@@ -64,7 +65,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private boolean imageLock = false;
 	private double repaintInterval = 0.1;
 	private int currentFrame;
-	
+
 	private String lutName = "fire";
 
 	/**
@@ -138,6 +139,21 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			imp.show();
 		else
 			imp.hide();
+
+		if (calibration != null)
+		{
+			Calibration cal = new Calibration();
+			String unit = "nm";
+			double unitPerPixel = calibration.nmPerPixel * scale;
+			if (unitPerPixel > 100)
+			{
+				unit = "um";
+				unitPerPixel /= 1000.0;
+			}			
+			cal.setUnit(unit);
+			cal.pixelHeight = cal.pixelWidth = unitPerPixel;
+			imp.setCalibration(cal);
+		}
 
 		imageActive = true;
 	}
@@ -286,14 +302,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 					max = data[i];
 				pixels[i] = data[i];
 			}
-			
+
 			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
 			{
 				for (float f : pixels)
 					if (min > f)
 						min = f;
 			}
-			
+
 			imp.setDisplayRange(min, max);
 		}
 	}
@@ -543,7 +559,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		synchronized (data)
 		{
 			size += nPoints / 4;
-			
+
 			if ((displayFlags & DISPLAY_REPLACE) != 0)
 			{
 				// Replace the data
@@ -774,7 +790,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	}
 
 	/**
-	 * @param lutName the lutName to set
+	 * @param lutName
+	 *            the lutName to set
 	 */
 	public void setLutName(String lutName)
 	{
