@@ -179,10 +179,12 @@ public class PCPALMClusters implements PlugInFilter
 			double[] y = new double[n + 2];
 
 			BinomialDistribution dist = new BinomialDistribution(n, p);
+			// We have no data for n=0 so normalise by the sum above zero
+			double sumAboveZero = 1 - dist.probability(0);	
 			for (int i = 0; i <= n; i++)
 			{
 				x[i] = i + 0.5;
-				y[i] = dist.probability(i) * data.getN();
+				y[i] = dist.probability(i) * data.getN() / sumAboveZero;
 			}
 			x[n + 1] = n + 1.5;
 			y[n + 1] = 0;
@@ -358,11 +360,7 @@ public class PCPALMClusters implements PlugInFilter
 		BinomialDistribution dist = new BinomialDistribution(n, p);
 
 		// Normalise to 1 excluding the x=0 point
-		double total = 0;
-		for (int i = 1; i <= n; i++)
-		{
-			total += dist.probability(i);
-		}
+		double total = 1 - dist.probability(0);
 
 		double cumul = 0;
 		for (int i = 1; i <= n; i++)
