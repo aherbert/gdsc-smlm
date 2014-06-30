@@ -291,6 +291,7 @@ public class PCPALMClusters implements PlugInFilter
 
 	private double[] fitBinomial(StoredDataStatistics data)
 	{
+		// TODO - Add unit tests for this
 		double[][] histogram = Maths.cumulativeHistogram(data.getValues(), true);
 
 		int n = 0;
