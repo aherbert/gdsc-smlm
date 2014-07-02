@@ -707,4 +707,42 @@ public class Utils
 		}
 		return false;
 	}
+
+	/**
+	 * Create and fill an array
+	 * 
+	 * @param length
+	 *            The length of the array
+	 * @param start
+	 *            The start
+	 * @param increment
+	 *            The increment
+	 * @return The new array
+	 */
+	public static double[] newArray(int length, double start, double increment)
+	{
+		double[] data = new double[length];
+		for (int i = 0; i < length; i++, start += increment)
+			data[i] = start;
+		return data;
+	}
+
+	/**
+	 * Create and fill an array
+	 * 
+	 * @param length
+	 *            The length of the array
+	 * @param start
+	 *            The start
+	 * @param increment
+	 *            The increment
+	 * @return The new array
+	 */
+	public static int[] newArray(int length, int start, int increment)
+	{
+		int[] data = new int[length];
+		for (int i = 0; i < length; i++, start += increment)
+			data[i] = start;
+		return data;
+	}
 }

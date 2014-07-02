@@ -13,17 +13,18 @@ package gdsc.smlm.ij.plugins.pcpalm;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.fitting.BinomialFitter;
 import gdsc.smlm.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.IJLogger;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.Calibration;
-import gdsc.smlm.results.DensityManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.clustering.ClusterPoint;
 import gdsc.smlm.results.clustering.Cluster;
+import gdsc.smlm.results.clustering.ClusterPoint;
 import gdsc.smlm.results.clustering.ClusteringAlgorithm;
 import gdsc.smlm.results.clustering.ClusteringEngine;
 import gdsc.smlm.utils.Maths;
@@ -36,32 +37,11 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction;
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.SimpleBounds;
-import org.apache.commons.math3.optim.SimpleValueChecker;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 
 /**
  * Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
@@ -84,7 +64,6 @@ public class PCPALMClusters implements PlugInFilter
 	private static boolean showCumulativeHistogram = false;
 
 	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
-	private boolean logging = false;
 
 	/*
 	 * (non-Javadoc)
@@ -120,8 +99,6 @@ public class PCPALMClusters implements PlugInFilter
 		long start = System.currentTimeMillis();
 
 		long s1 = System.nanoTime();
-		this.logging = true;
-
 		ClusteringEngine engine = new ClusteringEngine();
 		engine.setClusteringAlgorithm(clusteringAlgorithm);
 		engine.setTracker(new IJTrackProgress());
@@ -160,7 +137,11 @@ public class PCPALMClusters implements PlugInFilter
 		}
 		Utils.display(title, plot);
 
-		double[] fitParameters = fitBinomial(data);
+		int mode = 3;
+
+		// TODO - Depending on the mode we need to add the fictional n=0 data point (in blue)
+
+		double[] fitParameters = fitBinomial(data, mode);
 		if (fitParameters != null)
 		{
 			// Add the binomial to the histogram
@@ -169,20 +150,28 @@ public class PCPALMClusters implements PlugInFilter
 
 			Utils.log("Optimal fit : N=%d, p=%s", n, Utils.rounded(p));
 
+			BinomialDistribution dist = new BinomialDistribution(n, p);
+
+			// Depending on the mode either a standard or a zero-truncated binomial was fitted.
+			// pi is the adjustment factor for the probability density.
+			double pi = (mode == 3) ? 1 / (1 - dist.probability(0)) : 1;
+
 			// Calculate the estimate number of clusters from the observed molecules:
 			// Actual = (Observed / p-value) / N
 			final double actual = (molecules.size() / p) / n;
 			Utils.log("Estimated number of clusters : (%d / %s) / %d = %s", molecules.size(), Utils.rounded(p), n,
 					Utils.rounded(actual));
+			// This must be adjusted if fitting a zero truncated distribution.
+			Utils.log("Estimated total number of clusters : %s * (%d / %s) / %d = %s", Utils.rounded(pi),
+					molecules.size(), Utils.rounded(p), n, Utils.rounded(pi * actual));
 
 			double[] x = new double[n + 2];
 			double[] y = new double[n + 2];
 
-			BinomialDistribution dist = new BinomialDistribution(n, p);
 			for (int i = 0; i <= n; i++)
 			{
 				x[i] = i + 0.5;
-				y[i] = dist.probability(i) * data.getN();
+				y[i] = dist.probability(i) * data.getN() * pi;
 			}
 			x[n + 1] = n + 1.5;
 			y[n + 1] = 0;
@@ -287,45 +276,59 @@ public class PCPALMClusters implements PlugInFilter
 		IJ.error(TITLE, message);
 	}
 
-	private double[] fitBinomial(StoredDataStatistics data)
+	private double[] fitBinomial(StoredDataStatistics data, int mode)
 	{
-		double[][] histogram = Maths.cumulativeHistogram(data.getValues(), true);
+		double[] cumulativeHistogram = BinomialFitter.getHistogram(data.getValues(), true);
 
-		int n = 0;
 		double bestSS = Double.POSITIVE_INFINITY;
 		double[] parameters = null;
 		int worse = 0;
-		int N = (int) histogram[0][histogram[0].length - 1];
+		int N = (int) cumulativeHistogram.length - 1;
+		double[] values = Utils.newArray(cumulativeHistogram.length, 0.0, 1.0);
+		int minN = 1;
 		if (maxN > 0 && N > maxN)
 			N = maxN;
 		final double mean = data.getMean();
 
+		String name = (mode == 3) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
+
 		Utils.log("Mean cluster size = %s", Utils.rounded(mean));
-		Utils.log("Fitting cumulative Binomial distribution excluding X=0 (zero size clusters cannot be observed)");
+		Utils.log("Fitting cumulative " + name);
 
 		// Plot the cumulative histogram
 		String title = TITLE + " Cumulative Distribution";
 		Plot plot = null;
 		if (showCumulativeHistogram)
 		{
-			plot = new Plot(title, "N", "Cumulative Probability (ex. X=0)", histogram[0], histogram[1]);
+			plot = new Plot(title, "N", "Cumulative Probability", values, cumulativeHistogram);
 			plot.setLimits(0, N, 0, 1.05);
-			plot.addPoints(histogram[0], histogram[1], Plot.CIRCLE);
+			plot.addPoints(values, cumulativeHistogram, Plot.CIRCLE);
 			Utils.display(title, plot);
+		}
+
+		// We need the original histogram, not the cumulative histogram
+		double[] histogram = new double[cumulativeHistogram.length];
+		for (int i = histogram.length; i-- > 1;)
+		{
+			histogram[i] = cumulativeHistogram[i] - cumulativeHistogram[i - 1];
 		}
 
 		// Since varying the N should be done in integer steps do this
 		// for n=1,2,3,... until the SS peaks then falls off (is worse then the best 
 		// score several times in succession)
-		while (n++ < N)
+		BinomialFitter bf = new BinomialFitter(new IJLogger());
+		bf.setMaximumLikelihood(false);
+		for (int n = minN; n <= N; n++)
 		{
-			PointValuePair solution = fitBinomial(histogram, n, mean);
+			// Optionally iterate this if we are estimating the n=0 data using an initial p value.
+			// TODO - Add options for the mode input and the initial p-value
+			PointValuePair solution = bf.fitBinomial(histogram, n, mean, mode, 0);
 			if (solution == null)
 				break;
 
 			double p = solution.getPointRef()[0];
 
-			Utils.log("Fitted Binomial distribution : N=%d, p=%s. SS=%g", n, Utils.rounded(p), solution.getValue());
+			Utils.log("Fitted %s : N=%d, p=%s. SS=%g", name, n, Utils.rounded(p), solution.getValue());
 
 			if (bestSS > solution.getValue())
 			{
@@ -340,32 +343,32 @@ public class PCPALMClusters implements PlugInFilter
 			}
 
 			if (showCumulativeHistogram)
-				addToPlot(n, p, title, plot, new Color((float) n / N, 0, 1f - (float) n / N));
+				addToPlot(n, p, mode, title, plot, new Color((float) n / N, 0, 1f - (float) n / N));
 		}
 
 		// Add best it in magenta
 		if (showCumulativeHistogram && parameters != null)
-			addToPlot((int) parameters[0], parameters[1], title, plot, Color.magenta);
+			addToPlot((int) parameters[0], parameters[1], mode, title, plot, Color.magenta);
 
 		return parameters;
 	}
 
-	private void addToPlot(int n, double p, String title, Plot plot, Color color)
+	private void addToPlot(int n, double p, int mode, String title, Plot plot, Color color)
 	{
 		double[] x = new double[n + 1];
 		double[] y = new double[n + 1];
 
 		BinomialDistribution dist = new BinomialDistribution(n, p);
 
-		// Normalise to 1 excluding the x=0 point
-		double total = 0;
-		for (int i = 1; i <= n; i++)
-		{
-			total += dist.probability(i);
-		}
+		int startIndex = (mode == 3) ? 1 : 0;
+
+		// Normalise optionally excluding the x=0 point
+		double total = 1;
+		if (startIndex > 0)
+			total -= dist.probability(0);
 
 		double cumul = 0;
-		for (int i = 1; i <= n; i++)
+		for (int i = startIndex; i <= n; i++)
 		{
 			cumul += dist.probability(i) / total;
 			x[i] = i;
@@ -376,241 +379,5 @@ public class PCPALMClusters implements PlugInFilter
 		plot.addPoints(x, y, Plot.LINE);
 		//plot.addPoints(x, y, Plot.CIRCLE);
 		Utils.display(title, plot);
-	}
-
-	private PointValuePair fitBinomial(double[][] histogram, int n, double mean)
-	{
-		BinomialModelFunction function = new BinomialModelFunction(histogram, n);
-
-		// The model is only fitting the probability p
-		// For a binomial n*p = mean => p = mean/n
-		double[] initialSolution = new double[] { Math.min(mean / n, 1) };
-
-		double[] lB = new double[1];
-		double[] uB = new double[] { 1 };
-		SimpleBounds bounds = new SimpleBounds(lB, uB);
-
-		// Fit
-		// CMAESOptimizer or BOBYQAOptimizer support bounds
-
-		// CMAESOptimiser based on Matlab code:
-		// https://www.lri.fr/~hansen/cmaes.m
-		// Take the defaults from the Matlab documentation
-		int maxIterations = 2000;
-		double stopFitness = 0; //Double.NEGATIVE_INFINITY;
-		boolean isActiveCMA = true;
-		int diagonalOnly = 0;
-		int checkFeasableCount = 1;
-		RandomGenerator random = new Well19937c();
-		boolean generateStatistics = false;
-		ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
-		// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
-		OptimizationData sigma = new CMAESOptimizer.Sigma(new double[] { (uB[0] - lB[0]) / 3 });
-		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
-				.log(function.p.length))));
-
-		try
-		{
-			CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
-					checkFeasableCount, random, generateStatistics, checker);
-			PointValuePair solution = opt.optimize(new InitialGuess(initialSolution), new ObjectiveFunction(function),
-					GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(maxIterations), new MaxEval(
-							maxIterations * 2));
-			if (solution == null)
-				return null;
-
-			// Improve fit with a gradient based LVM optimizer
-			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-			try
-			{
-				BinomialModelFunctionGradient gradientFunction = new BinomialModelFunctionGradient(histogram, n);
-				PointVectorValuePair lvmSolution = optimizer.optimize(3000, gradientFunction, gradientFunction.p,
-						gradientFunction.getWeights(), solution.getPoint());
-
-				double ss = 0;
-				double[] obs = gradientFunction.p;
-				double[] exp = lvmSolution.getValue();
-				for (int i = 0; i < obs.length; i++)
-					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-				// Check the pValue is valid since the LVM is not bounded.
-				double pValue = lvmSolution.getPointRef()[0];
-				if (ss < solution.getValue() && pValue <= 1 && pValue >= 0)
-				{
-					//Utils.log("Re-fitting improved the SS from %s to %s (-%s%%)",
-					//		Utils.rounded(solution.getValue(), 4), Utils.rounded(ss, 4),
-					//		Utils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
-					return new PointValuePair(lvmSolution.getPoint(), ss);
-				}
-			}
-			catch (TooManyEvaluationsException e)
-			{
-				Utils.log("Failed to re-fit: Too many evaluations (%d)", optimizer.getEvaluations());
-			}
-			catch (ConvergenceException e)
-			{
-				Utils.log("Failed to re-fit: %s", e.getMessage());
-			}
-			catch (Exception e)
-			{
-				// Ignore this ...
-			}
-
-			return solution;
-		}
-		catch (Exception e)
-		{
-			Utils.log("Failed to fit Binomial distribution with N=%d : %s", n, e.getMessage());
-		}
-		return null;
-	}
-
-	/**
-	 * Evaluates the cumulative binomial probability distribution. Assumes the
-	 * input data is a cumulative histogram from 0 to N in integer increments.
-	 */
-	public class BinomialModel
-	{
-		int trials;
-		double[] p;
-
-		public BinomialModel(double[][] histogram, int trials)
-		{
-			this.trials = trials;
-
-			double[] nValues = histogram[0];
-			double[] pValues = histogram[1];
-			int N = (int) nValues[nValues.length - 1];
-			p = new double[N + 1];
-
-			// Pad the histogram out for any missing values between 0 and N
-			for (int i = 1; i < nValues.length; i++)
-			{
-				int j = (int) nValues[i - 1];
-				int k = (int) nValues[i];
-				for (int ii = j; ii < k; ii++)
-					p[ii] = pValues[i - 1];
-			}
-			p[N] = pValues[pValues.length - 1];
-		}
-
-		/**
-		 * Get the cumulative probability function for the input pValue ignoring the X=0 data point
-		 * 
-		 * @param pValue
-		 * @return
-		 */
-		public double[] getP(double pValue)
-		{
-			BinomialDistribution dist = new BinomialDistribution(trials, pValue);
-
-			double cumul = 0;
-
-			// Ignore x=0 since we cannot see a zero size cluster.
-			// This is done by re-normalising the cumulative probability excluding x=0 
-			// to match the input curve.
-			double[] p2 = new double[p.length];
-			for (int i = 1; i < p.length; i++)
-			{
-				cumul += dist.probability(i);
-				p2[i] = cumul;
-			}
-
-			for (int i = 1; i < p.length; i++)
-			{
-				p2[i] /= cumul;
-			}
-
-			return p2;
-		}
-	}
-
-	/**
-	 * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
-	 */
-	public class BinomialModelFunction extends BinomialModel implements MultivariateFunction
-	{
-		public BinomialModelFunction(double[][] histogram, int trials)
-		{
-			super(histogram, trials);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-		 */
-		public double value(double[] parameters)
-		{
-			double[] p2 = getP(parameters[0]);
-			double ss = 0;
-			for (int i = 1; i < p.length; i++)
-			{
-				final double dx = p[i] - p2[i];
-				ss += dx * dx;
-			}
-			return ss;
-		}
-	}
-
-	/**
-	 * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
-	 */
-	public class BinomialModelFunctionGradient extends BinomialModel implements
-			DifferentiableMultivariateVectorFunction
-	{
-		public BinomialModelFunctionGradient(double[][] histogram, int trials)
-		{
-			super(histogram, trials);
-
-			// We could ignore the first p value as it is always zero:
-			//p = Arrays.copyOfRange(p, 1, p.length);
-			// BUT then we would have to override the getP() method since this has 
-			// an offset of 1 and assumes the index of p is X.
-		}
-
-		public double[] getWeights()
-		{
-			double[] w = new double[p.length];
-			Arrays.fill(w, 1);
-			return w;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-		 */
-		public double[] value(double[] point) throws IllegalArgumentException
-		{
-			return getP(point[0]);
-		}
-
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
-		}
-
-		double[][] jacobian(double[] variables)
-		{
-			// Compute the gradients using numerical differentiation
-			final double pValue = variables[0];
-			double[][] jacobian = new double[p.length][1];
-
-			final double delta = 0.001 * pValue;
-			double[] p2 = getP(pValue);
-			double[] p3 = getP(pValue + delta);
-
-			for (int i = 0; i < jacobian.length; ++i)
-			{
-				jacobian[i][0] = (p3[i] - p2[i]) / delta;
-			}
-			return jacobian;
-		}
 	}
 }

@@ -31,6 +31,7 @@ import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
+import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -230,7 +231,7 @@ public class PCPALMMolecules implements PlugIn
 			// Annibale, et al (2011), Quantitative photo activated localization microscopy: unraveling the 
 			// effects of photoblinking. PLoS One, 6(7): e22678 (http://dx.doi.org/10.1371%2Fjournal.pone.0022678)
 			densityProtein = densityPeaks / blinkingRate;
-			log("Peak Density = %s (um^-2). Protein Density = %s (um^-2)", Utils.rounded(densityPeaks * 1e6), 
+			log("Peak Density = %s (um^-2). Protein Density = %s (um^-2)", Utils.rounded(densityPeaks * 1e6),
 					Utils.rounded(densityProtein * 1e6));
 		}
 		else
@@ -280,6 +281,7 @@ public class PCPALMMolecules implements PlugIn
 			gd.addNumericField("Blinking_rate", blinkingRate, 2);
 			gd.addChoice("Blinking_distribution", BLINKING_DISTRIBUTION, BLINKING_DISTRIBUTION[blinkingDistribution]);
 			gd.addNumericField("Average_precision (nm)", sigmaS, 2);
+			gd.addCheckbox("Show_histograms", showHistograms);
 			gd.addChoice("Cluster_simulation", CLUSTER_SIMULATION, CLUSTER_SIMULATION[clusterSimulation]);
 			gd.addNumericField("Cluster_number", clusterNumber, 2);
 			gd.addNumericField("Cluster_variation (SD)", clusterNumberSD, 2);
@@ -318,6 +320,7 @@ public class PCPALMMolecules implements PlugIn
 			blinkingRate = Math.abs(gd.getNextNumber());
 			blinkingDistribution = gd.getNextChoiceIndex();
 			sigmaS = Math.abs(gd.getNextNumber());
+			showHistograms = gd.getNextBoolean();
 			clusterSimulation = gd.getNextChoiceIndex();
 			clusterNumber = Math.abs(gd.getNextNumber());
 			clusterNumberSD = Math.abs(gd.getNextNumber());
@@ -1277,10 +1280,28 @@ public class PCPALMMolecules implements PlugIn
 				xyz.add(dist.next());
 		}
 
+		// The Gaussian sigma should be applied so the overall distance from the centre
+		// ( sqrt(x^2+y^2) ) has a standard deviation of sigmaS?
+		final double sigma1D = sigmaS / Math.sqrt(2);
+
+		// Show optional histograms
+		StoredDataStatistics intraDistances = null;
+		StoredDataStatistics interDistances = null;
+		StoredDataStatistics blinks = null;
+		if (showHistograms)
+		{
+			int capacity = (int) (xyz.size() * blinkingRate);
+			intraDistances = new StoredDataStatistics(capacity);
+			interDistances = new StoredDataStatistics(capacity);
+			blinks = new StoredDataStatistics(capacity);
+		}
+
 		Statistics statsSigma = new Statistics();
 		for (int i = 0; i < xyz.size(); i++)
 		{
 			int nOccurrences = getBlinks(dataGenerator, blinkingRate);
+			if (showHistograms)
+				blinks.add(nOccurrences);
 
 			final int size = molecules.size();
 
@@ -1297,22 +1318,20 @@ public class PCPALMMolecules implements PlugIn
 			{
 				final double[] localisationXy = Arrays.copyOf(moleculeXyz, 2);
 				// Add random precision
-				if (sigmaS > 0)
+				if (sigma1D > 0)
 				{
-					// Q. Should the Gaussian sigma be applied so the overall distance from the centre
-					// ( sqrt(x^2+y^2) ) has a standard deviation of sigmaS?
-					final double dx = dataGenerator.nextGaussian(0, sigmaS);
-					final double dy = dataGenerator.nextGaussian(0, sigmaS);
+					final double dx = dataGenerator.nextGaussian(0, sigma1D);
+					final double dy = dataGenerator.nextGaussian(0, sigma1D);
 					localisationXy[0] += dx;
 					localisationXy[1] += dy;
 					if (!dist.isWithinXY(localisationXy))
 						continue;
-					statsSigma.add(dx);
-					statsSigma.add(dy);
+					// Calculate mean-squared displacement
+					statsSigma.add(dx * dx + dy * dy);
 				}
 				final double x = localisationXy[0];
 				final double y = localisationXy[1];
-				molecules.add(new Molecule(x, y, 0, 0));
+				molecules.add(new Molecule(x, y, i, 0));
 
 				// Store in pixels
 				float[] params = new float[7];
@@ -1322,7 +1341,17 @@ public class PCPALMMolecules implements PlugIn
 			}
 
 			if (molecules.size() > size)
+			{
 				count++;
+				if (showHistograms)
+				{
+					for (int ii = size; ii < molecules.size(); ii++)
+					{
+						for (int jj = ii + 1; jj < molecules.size(); jj++)
+							intraDistances.add(molecules.get(ii).distance(molecules.get(jj)));
+					}
+				}
+			}
 		}
 		results.end();
 
@@ -1339,8 +1368,61 @@ public class PCPALMMolecules implements PlugIn
 		log("Simulation results");
 		log("  * Molecules = %d (%d activated)", xyz.size(), count);
 		log("  * Blinking rate = %s", Utils.rounded((double) molecules.size() / xyz.size(), 4));
-		log("  * Average precision = %s nm",
-				(statsSigma.getN() > 0) ? Utils.rounded(statsSigma.getStandardDeviation(), 4) : "0");
+		log("  * Precision (Mean-displacement) = %s nm",
+				(statsSigma.getN() > 0) ? Utils.rounded(Math.sqrt(statsSigma.getMean()), 4) : "0");
+		if (showHistograms)
+		{
+			plot(blinks, "Blinks/Molecule", true);
+			double[][] intraHist = plot(intraDistances, "Intra-molecule distance", false);
+
+			// Determine 95th and 99th percentile
+			int p99 = intraHist[0].length - 1;
+			double limit1 = 0.99 * intraHist[1][p99];
+			double limit2 = 0.95 * intraHist[1][p99];
+			while (intraHist[1][p99] > limit1 && p99 > 0)
+				p99--;
+			int p95 = p99;
+			while (intraHist[1][p95] > limit2 && p95 > 0)
+				p95--;
+
+			log("  * Mean Intra-Molecule distance = %s nm (95%% = %s, 99%% = %s)",
+					Utils.rounded(intraDistances.getMean(), 4), Utils.rounded(intraHist[0][p95], 4),
+					Utils.rounded(intraHist[0][p99], 4));
+
+			// TODO - Q. Is this the best way to show this? What we actually want to know is how
+			// skewed will the analysis be of blinking fluorophores at different densities.
+			
+			// We want to know the fraction of distances between molecules at the 99th percentile
+			// that are intra- rather than inter-molecule.
+			final double r2 = intraHist[0][p99] * intraHist[0][p99];
+			int all = 0;
+			for (int ii = 0; ii < molecules.size(); ii++)
+			{
+				for (int jj = ii + 1; jj < molecules.size(); jj++)
+				{
+					final double d2 = molecules.get(ii).distance2(molecules.get(jj));
+					if (d2 > r2)
+						continue;
+					all++;
+					// Precision was used to store the molecule ID
+					if (molecules.get(ii).precision != molecules.get(jj).precision)
+						interDistances.add(Math.sqrt(d2));
+				}
+			}
+
+			log("  * Fraction of inter-molecule @ 99%% = %s %%",
+					(interDistances.getN() > 0) ? Utils.rounded(100.0 * interDistances.getN() / all, 4) : "0");
+
+			//// All inter-molecule distances
+			//for (int ii = 0; ii < xyz.size(); ii++)
+			//{
+			//	for (int jj = ii + 1; jj < xyz.size(); jj++)
+			//		interDistances.add(Math.sqrt(distance2(xyz.get(ii), xyz.get(jj))));
+			//}
+			plot(interDistances, "Inter-molecule distance @ 99% Intra-molecule distance", false);
+			
+			// TODO - Need a dual plot showing both inter- and inter- distances
+		}
 		if (clusterSimulation > 0)
 		{
 			log("  * Cluster number = %s +/- %s", Utils.rounded(statsSize.getMean(), 4),
@@ -1348,6 +1430,55 @@ public class PCPALMMolecules implements PlugIn
 			log("  * Cluster radius = %s +/- %s nm (mean distance to centre-of-mass)",
 					Utils.rounded(statsRadius.getMean(), 4), Utils.rounded(statsRadius.getStandardDeviation(), 4));
 		}
+	}
+
+	private double[][] plot(StoredDataStatistics stats, String label, boolean integerBins)
+	{
+		String title = TITLE + " " + label;
+		double yMax = Maths.max(stats.getValues());
+		Plot plot;
+		double[][] hist = null;
+		if (integerBins)
+		{
+			int nBins = (int) (Math.ceil(yMax) + 1);
+			float[][] fHist = Utils.calcHistogram(stats.getFloatValues(), 0, yMax, nBins);
+
+			// Create the axes
+			float[] xValues = Utils.createHistogramAxis(fHist[0]);
+			float[] yValues = Utils.createHistogramValues(fHist[1]);
+
+			//// Copy for return
+			//hist = new double[2][fHist[0].length];
+			//for (int i=0; i<fHist[0].length; i++)
+			//{
+			//	hist[0][i] = fHist[0][i];
+			//	hist[1][i] = fHist[1][i];
+			//}
+
+			// Plot
+			yMax = Maths.max(yValues);
+			plot = new Plot(title, label, "Frequency", xValues, yValues);
+			if (xValues.length > 0)
+			{
+				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
+				plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, yMax * 1.05);
+			}
+		}
+		else
+		{
+			// Show a cumulative histogram so that the bin size is not relevant
+			hist = Maths.cumulativeHistogram(stats.getValues(), false);
+
+			// Create the axes
+			double[] xValues = hist[0];
+			double[] yValues = hist[1];
+
+			// Plot
+			plot = new Plot(title, label, "Frequency", xValues, yValues);
+		}
+
+		Utils.display(title, plot);
+		return hist;
 	}
 
 	private double distance2(double[] centre1, double[] centre2)
@@ -1451,6 +1582,7 @@ public class PCPALMMolecules implements PlugIn
 		gd.addNumericField("Blinking_rate", blinkingRate, 2);
 		gd.addChoice("Blinking_distribution", BLINKING_DISTRIBUTION, BLINKING_DISTRIBUTION[blinkingDistribution]);
 		gd.addNumericField("Average_precision (nm)", sigmaS, 2);
+		gd.addCheckbox("Show_histograms", showHistograms);
 
 		gd.addChoice("Cluster_simulation", CLUSTER_SIMULATION, CLUSTER_SIMULATION[clusterSimulation]);
 		gd.addNumericField("Cluster_number", clusterNumber, 2);
@@ -1468,6 +1600,7 @@ public class PCPALMMolecules implements PlugIn
 		blinkingRate = Math.abs(gd.getNextNumber());
 		blinkingDistribution = gd.getNextChoiceIndex();
 		sigmaS = Math.abs(gd.getNextNumber());
+		showHistograms = gd.getNextBoolean();
 		clusterSimulation = gd.getNextChoiceIndex();
 		clusterNumber = Math.abs(gd.getNextNumber());
 		clusterNumberSD = Math.abs(gd.getNextNumber());
