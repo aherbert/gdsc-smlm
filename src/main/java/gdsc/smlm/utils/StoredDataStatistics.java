@@ -30,6 +30,12 @@ public class StoredDataStatistics extends Statistics
 		super();
 	}
 	
+	public StoredDataStatistics(int capacity)
+	{
+		super();
+		values = new double[capacity];
+	}
+	
 	public StoredDataStatistics(float[] data)
 	{
 		super(data);
