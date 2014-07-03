@@ -29,13 +29,13 @@ public class StoredDataStatistics extends Statistics
 	{
 		super();
 	}
-
+	
 	public StoredDataStatistics(int capacity)
 	{
 		super();
 		values = new double[capacity];
 	}
-
+	
 	public StoredDataStatistics(float[] data)
 	{
 		super(data);
@@ -45,7 +45,7 @@ public class StoredDataStatistics extends Statistics
 	{
 		super(data);
 	}
-
+	
 	public StoredDataStatistics(int[] data)
 	{
 		super(data);
@@ -215,7 +215,7 @@ public class StoredDataStatistics extends Statistics
 
 	/**
 	 * @return object used to compute descriptive statistics. The object is cached
-	 * @see {@link org.apache.commons.math3.stat.descriptive.DescriptiveStatistics }
+	 * @see {@link org.apache.commons.math3.stat.descriptive.DescriptiveStatistics }  
 	 */
 	public DescriptiveStatistics getStatistics()
 	{
