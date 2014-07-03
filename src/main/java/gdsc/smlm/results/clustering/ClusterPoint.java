@@ -20,7 +20,7 @@ public class ClusterPoint
 {
 	public double x, y;
 	public int id, t;
-	
+
 	// Used to construct a single linked list of points
 	public ClusterPoint next = null;
 
@@ -38,5 +38,19 @@ public class ClusterPoint
 		this.x = x;
 		this.y = y;
 		this.t = t;
+	}
+
+	public double distance(ClusterPoint other)
+	{
+		final double dx = x - other.x;
+		final double dy = y - other.y;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	public double distance2(ClusterPoint other)
+	{
+		final double dx = x - other.x;
+		final double dy = y - other.y;
+		return dx * dx + dy * dy;
 	}
 }

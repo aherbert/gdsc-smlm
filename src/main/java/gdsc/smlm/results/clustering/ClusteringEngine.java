@@ -19,6 +19,7 @@ import gdsc.smlm.results.TrackProgress;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,6 +33,7 @@ public class ClusteringEngine
 	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
 	private TrackProgress tracker;
 	private int pulseInterval = 0;
+	private int nextClusterId;
 
 	public ClusteringEngine()
 	{
@@ -60,6 +62,9 @@ public class ClusteringEngine
 	 */
 	public ArrayList<Cluster> findClusters(List<ClusterPoint> points, double radius, int time)
 	{
+		if (clusteringAlgorithm == ClusteringAlgorithm.ParticleLinkage)
+			return runParticleLinkage(points, radius);
+
 		// Get the density around each point. Points with no density cannot be clustered.
 		// Ensure that we only ignore points that could never be within radius of the centroid 
 		// of any other pair:
@@ -187,6 +192,307 @@ public class ClusteringEngine
 		tracker.log("Found %d clusters", (clusters == null) ? 0 : clusters.size());
 
 		return clusters;
+	}
+
+	/**
+	 * Join the closest unlinked particle to its neighbour particle/cluster
+	 * 
+	 * @param points
+	 * @param radius
+	 * @return The clusters
+	 */
+	private ArrayList<Cluster> runParticleLinkage(List<ClusterPoint> points, double radius)
+	{
+		int[] density = calculateDensity(points, radius);
+
+		// Extract initial cluster points using molecules with a density above 1
+		// (All other points cannot be clustered at this radius)
+		ArrayList<ExtendedClusterPoint> candidates = new ArrayList<ExtendedClusterPoint>(density.length);
+		ArrayList<Cluster> singles = new ArrayList<Cluster>(density.length);
+		int i = 0, id = 0;
+		for (ClusterPoint p : points)
+		{
+			if (density[i] > 0)
+				// Store the point using the next pointer of a new point which will be used for clustering
+				candidates.add(new ExtendedClusterPoint(id++, p.x, p.y, 0, p));
+			else
+				singles.add(new Cluster(p));
+			i++;
+		}
+
+		if (candidates.isEmpty())
+			return singles;
+
+		tracker.log("Starting clustering : %d singles, %d cluster candidates", singles.size(), candidates.size());
+		tracker.log("Algorithm = %s", clusteringAlgorithm.toString());
+
+		// Find the bounds of the candidates
+		double minx = candidates.get(0).x;
+		double miny = candidates.get(0).y;
+		double maxx = minx, maxy = miny;
+		for (ExtendedClusterPoint c : candidates)
+		{
+			if (minx > c.x)
+				minx = c.x;
+			else if (maxx < c.x)
+				maxx = c.x;
+			if (miny > c.y)
+				miny = c.y;
+			else if (maxy < c.y)
+				maxy = c.y;
+		}
+
+		// Assign to a grid
+		final int maxBins = 500;
+		final double cellSize = radius * 1.01; // Add an error margin
+		final double xBinWidth = Math.max(cellSize, (maxx - minx) / maxBins);
+		final double yBinWidth = Math.max(cellSize, (maxy - miny) / maxBins);
+		final int nXBins = 1 + (int) ((maxx - minx) / xBinWidth);
+		final int nYBins = 1 + (int) ((maxy - miny) / yBinWidth);
+		ExtendedClusterPoint[][] grid = new ExtendedClusterPoint[nXBins][nYBins];
+		for (ExtendedClusterPoint c : candidates)
+		{
+			final int xBin = (int) ((c.x - minx) / xBinWidth);
+			final int yBin = (int) ((c.y - miny) / yBinWidth);
+			// Build a single linked list
+			c.nextE = grid[xBin][yBin];
+			grid[xBin][yBin] = c;
+		}
+
+		final double r2 = radius * radius;
+
+		tracker.log("Clustering " + clusteringAlgorithm.toString() + " ...");
+
+		ArrayList<Cluster> clusters = runParticleLinkage(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth,
+				candidates, singles);
+
+		tracker.progress(1);
+
+		tracker.log("Found %d clusters", (clusters == null) ? 0 : clusters.size());
+
+		return clusters;
+	}
+
+	private ArrayList<Cluster> runParticleLinkage(ExtendedClusterPoint[][] grid, int nXBins, int nYBins, double r2,
+			double minx, double miny, double xBinWidth, double yBinWidth, ArrayList<ExtendedClusterPoint> candidates,
+			ArrayList<Cluster> singles)
+	{
+		int N = candidates.size();
+		int candidatesProcessed = 0;
+		nextClusterId = 0; // Incremented within joinClosestParticle(...)
+
+		// Used to store the cluster for each candidate
+		int[] clusterId = new int[candidates.size()];
+
+		int nProcessed = 0;
+		while ((nProcessed = joinClosestParticle(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth, clusterId)) > 0)
+		{
+			if (tracker.stop())
+				return null;
+			candidatesProcessed += nProcessed;
+			tracker.progress(candidatesProcessed, N);
+		}
+
+		tracker.log("Processed %d / %d", candidatesProcessed, N);
+		tracker.log("%d candidates linked into %d clusters", candidates.size(), nextClusterId);
+
+		// Create clusters from the original cluster points using the assignments
+		Cluster[] clusters = new Cluster[nextClusterId];
+		int failed = singles.size();
+		for (int i = 0; i < clusterId.length; i++)
+		{
+			ClusterPoint originalPoint = candidates.get(i).next;
+			if (clusterId[i] == 0)
+			{
+				//throw new RuntimeException("Failed to assign a cluster to a candidate particle");
+				//tracker.log("Failed to assign a cluster to a candidate particle: " + i);
+				singles.add(new Cluster(originalPoint));
+
+				// Check is a neighbour
+				boolean neighbour = false;
+				for (int j = 0; j < clusterId.length; j++)
+				{
+					if (i == j)
+						continue;
+					ClusterPoint p = candidates.get(j);
+					if (originalPoint.distance2(p) < r2)
+					{
+						neighbour = true;
+						break;
+					}
+				}
+				if (neighbour)
+					tracker.log("Failed to assign a cluster to a candidate particle: " + i);
+			}
+			else
+			{
+				// The next points were used to store the original cluster points
+				int clusterIndex = clusterId[i] - 1;
+				if (clusters[clusterIndex] == null)
+					clusters[clusterIndex] = new Cluster(originalPoint);
+				else
+					clusters[clusterIndex].add(originalPoint);
+			}
+		}
+		failed = singles.size() - failed;
+		tracker.log("Failed to assign %d candidates", failed);
+
+		for (int i = 0; i < clusters.length; i++)
+		{
+			if (clusters[i] != null)
+				singles.add(clusters[i]);
+			else
+				; //tracker.log("Empty cluster ID %d", i);
+		}
+		return singles;
+	}
+
+	/**
+	 * Search for the closest pair of particles, one of which is not in a cluster, below the squared radius distance and
+	 * join them
+	 * 
+	 * @param grid
+	 * @param nXBins
+	 * @param nYBins
+	 * @param r2
+	 *            The squared radius distance
+	 * @param yBinWidth
+	 * @param xBinWidth
+	 * @param miny
+	 * @param minx
+	 * @param clusterId
+	 * @return The number of points assigned to clusters (either 0, 1, or 2)
+	 */
+	private int joinClosestParticle(ExtendedClusterPoint[][] grid, final int nXBins, final int nYBins, final double r2,
+			double minx, double miny, double xBinWidth, double yBinWidth, int[] clusterId)
+	{
+		double min = r2;
+		ExtendedClusterPoint pair1 = null, pair2 = null;
+		for (int yBin = 0; yBin < nYBins; yBin++)
+		{
+			for (int xBin = 0; xBin < nXBins; xBin++)
+			{
+				for (ExtendedClusterPoint c1 = grid[xBin][yBin]; c1 != null; c1 = c1.nextE)
+				{
+					final boolean cluster1 = c1.inCluster;
+
+					// Build a list of which cells to compare up to a maximum of 4
+					//      | 0,0  |  1,0
+					// ------------+-----
+					// -1,1 | 0,1  |  1,1
+
+					// Compare to neighbours and find the closest.
+					// Use either the radius threshold or the current closest distance
+					// which may have been set by an earlier comparison.
+					ExtendedClusterPoint other = null;
+
+					for (ExtendedClusterPoint c2 = c1.nextE; c2 != null; c2 = c2.nextE)
+					{
+						// Ignore comparing points that are both in a cluster
+						if (cluster1 && c2.inCluster)
+							continue;
+
+						final double d2 = c1.distance2(c2);
+						if (d2 < min)
+						{
+							min = d2;
+							other = c2;
+						}
+					}
+
+					if (yBin < nYBins - 1)
+					{
+						for (ExtendedClusterPoint c2 = grid[xBin][yBin + 1]; c2 != null; c2 = c2.nextE)
+						{
+							// Ignore comparing points that are both in a cluster
+							if (cluster1 && c2.inCluster)
+								continue;
+							final double d2 = c1.distance2(c2);
+							if (d2 < min)
+							{
+								min = d2;
+								other = c2;
+							}
+						}
+						if (xBin > 0)
+						{
+							for (ExtendedClusterPoint c2 = grid[xBin - 1][yBin + 1]; c2 != null; c2 = c2.nextE)
+							{
+								// Ignore comparing points that are both in a cluster
+								if (cluster1 && c2.inCluster)
+									continue;
+								final double d2 = c1.distance2(c2);
+								if (d2 < min)
+								{
+									min = d2;
+									other = c2;
+								}
+							}
+						}
+					}
+					if (xBin < nXBins - 1)
+					{
+						for (ExtendedClusterPoint c2 = grid[xBin + 1][yBin]; c2 != null; c2 = c2.nextE)
+						{
+							// Ignore comparing points that are both in a cluster
+							if (cluster1 && c2.inCluster)
+								continue;
+							final double d2 = c1.distance2(c2);
+							if (d2 < min)
+							{
+								min = d2;
+								other = c2;
+							}
+						}
+						if (yBin < nYBins - 1)
+						{
+							for (ExtendedClusterPoint c2 = grid[xBin + 1][yBin + 1]; c2 != null; c2 = c2.nextE)
+							{
+								// Ignore comparing points that are both in a cluster
+								if (cluster1 && c2.inCluster)
+									continue;
+								final double d2 = c1.distance2(c2);
+								if (d2 < min)
+								{
+									min = d2;
+									other = c2;
+								}
+							}
+						}
+					}
+
+					// Store the details of the closest pair
+					if (other != null)
+					{
+						pair1 = c1;
+						pair2 = other;
+					}
+				}
+			}
+		}
+
+		// Assign the closest pair.
+		if (pair1 != null)
+		{
+			int nProcessed = 1;
+
+			// Create a new cluster if necessary
+			if (clusterId[pair2.id] == 0)
+			{
+				nProcessed = 2;
+				clusterId[pair2.id] = ++nextClusterId;
+				pair2.inCluster = true;
+			}
+
+			clusterId[pair1.id] = clusterId[pair2.id];
+			pair1.inCluster = true;
+
+			return nProcessed;
+		}
+
+		// This should not happen if the density manager counted neighbours correctly
+		// (i.e. all points should have at least one neighbour)		
+		return 0;
 	}
 
 	/**

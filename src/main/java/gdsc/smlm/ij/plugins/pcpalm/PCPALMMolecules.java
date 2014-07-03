@@ -1345,11 +1345,19 @@ public class PCPALMMolecules implements PlugIn
 				count++;
 				if (showHistograms)
 				{
+					// Get the maximum distance for single linkage clustering of this molecule
+					double max = 0;
 					for (int ii = size; ii < molecules.size(); ii++)
 					{
 						for (int jj = ii + 1; jj < molecules.size(); jj++)
-							intraDistances.add(molecules.get(ii).distance(molecules.get(jj)));
+						{
+							//intraDistances.add(molecules.get(ii).distance(molecules.get(jj)));
+							final double d2 = molecules.get(ii).distance2(molecules.get(jj));
+							if (max < d2)
+								max = d2;
+						}
 					}
+					intraDistances.add(Math.sqrt(max));
 				}
 			}
 		}
@@ -1373,7 +1381,7 @@ public class PCPALMMolecules implements PlugIn
 		if (showHistograms)
 		{
 			plot(blinks, "Blinks/Molecule", true);
-			double[][] intraHist = plot(intraDistances, "Intra-molecule distance", false);
+			double[][] intraHist = plot(intraDistances, "Intra-molecule linkage distance", false);
 
 			// Determine 95th and 99th percentile
 			int p99 = intraHist[0].length - 1;
@@ -1385,13 +1393,15 @@ public class PCPALMMolecules implements PlugIn
 			while (intraHist[1][p95] > limit2 && p95 > 0)
 				p95--;
 
-			log("  * Mean Intra-Molecule distance = %s nm (95%% = %s, 99%% = %s)",
+			log("  * Mean Intra-Molecule linkage distance = %s nm (95%% = %s, 99%% = %s)",
 					Utils.rounded(intraDistances.getMean(), 4), Utils.rounded(intraHist[0][p95], 4),
 					Utils.rounded(intraHist[0][p99], 4));
 
 			// TODO - Q. Is this the best way to show this? What we actually want to know is how
 			// skewed will the analysis be of blinking fluorophores at different densities.
-			
+			// Do single linkage clustering of closest pair at this distance and count the number of 
+			// links that are inter and intra.
+
 			// We want to know the fraction of distances between molecules at the 99th percentile
 			// that are intra- rather than inter-molecule.
 			final double r2 = intraHist[0][p99] * intraHist[0][p99];
@@ -1410,7 +1420,7 @@ public class PCPALMMolecules implements PlugIn
 				}
 			}
 
-			log("  * Fraction of inter-molecule @ 99%% = %s %%",
+			log("  * Fraction of inter-molecule single linkage @ %s nm = %s %%", Utils.rounded(intraHist[0][p99], 4),
 					(interDistances.getN() > 0) ? Utils.rounded(100.0 * interDistances.getN() / all, 4) : "0");
 
 			//// All inter-molecule distances
@@ -1420,7 +1430,7 @@ public class PCPALMMolecules implements PlugIn
 			//		interDistances.add(Math.sqrt(distance2(xyz.get(ii), xyz.get(jj))));
 			//}
 			plot(interDistances, "Inter-molecule distance @ 99% Intra-molecule distance", false);
-			
+
 			// TODO - Need a dual plot showing both inter- and inter- distances
 		}
 		if (clusterSimulation > 0)

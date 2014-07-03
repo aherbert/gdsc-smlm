@@ -95,6 +95,19 @@ public class Cluster implements Comparable<Cluster>
 		other.clear();
 	}
 
+	public void add(ClusterPoint point)
+	{
+		point.next = null;
+		head = point;
+
+		// Find the new centroid
+		sumx += point.x;
+		sumy += point.y;
+		n ++;
+		x = sumx / n;
+		y = sumy / n;
+	}
+
 	protected void clear()
 	{
 		head = null;

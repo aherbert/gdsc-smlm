@@ -19,15 +19,20 @@ package gdsc.smlm.results.clustering;
 public enum ClusteringAlgorithm
 {
 	/**
-	 * Hierarchical clustering by joining the closest pair of clusters iteratively
+	 * Joins the closest pair of particles, one of which must not be in a cluster. Clusters are not joined and can
+	 * only grow when particles are added.
+	 */
+	ParticleLinkage,
+	/**
+	 * Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively
 	 */
 	Closest,
 	/**
 	 * Join the current set of closest pairs in a greedy algorithm. This method computes the pairwise distances and
 	 * joins the closest pairs without updating the centroid of each cluster, and the distances, after every join
 	 * (centroids and distances are updated after each pass over the data). This can lead to errors over true
-	 * hierarchical clustering where centroid are computed after each link step. For example if A joins B and C joins D
-	 * in a single step but the new centroid of AB is closer to C than D.
+	 * hierarchical centroid-linkage clustering where centroid are computed after each link step. For example if A joins
+	 * B and C joins D in a single step but the new centroid of AB is closer to C than D.
 	 */
 	PairwiseWithoutNeighbours,
 	/**
@@ -36,13 +41,15 @@ public enum ClusteringAlgorithm
 	 */
 	Pairwise,
 	/**
-	 * Hierarchical clustering by joining the closest pair of clusters iteratively. Clusters are compared using time and
-	 * distance thresholds with priority on the closest time gap (within the distance threshold). 
+	 * Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are
+	 * compared using time and distance thresholds with priority on the closest time gap (within the distance
+	 * threshold).
 	 */
 	ClosestDistancePriority,
 	/**
-	 * Hierarchical clustering by joining the closest pair of clusters iteratively. Clusters are compared using time and
-	 * distance thresholds with priority on the closest distance gap (within the time threshold). 
+	 * Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are
+	 * compared using time and distance thresholds with priority on the closest distance gap (within the time
+	 * threshold).
 	 */
 	ClosestTimePriority
 }

@@ -161,9 +161,6 @@ public class PCPALMClusters implements PlugInFilter
 			final double actual = (molecules.size() / p) / n;
 			Utils.log("Estimated number of clusters : (%d / %s) / %d = %s", molecules.size(), Utils.rounded(p), n,
 					Utils.rounded(actual));
-			// This must be adjusted if fitting a zero truncated distribution.
-			Utils.log("Estimated total number of clusters : %s * (%d / %s) / %d = %s", Utils.rounded(pi),
-					molecules.size(), Utils.rounded(p), n, Utils.rounded(pi * actual));
 
 			double[] x = new double[n + 2];
 			double[] y = new double[n + 2];
