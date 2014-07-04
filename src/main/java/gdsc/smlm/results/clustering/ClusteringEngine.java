@@ -495,16 +495,28 @@ public class ClusteringEngine
 		{
 			int nProcessed = 1;
 
-			// Create a new cluster if necessary
-			if (clusterId[pair2.id] == 0)
+			if (pair1.inCluster && pair2.inCluster)
 			{
-				nProcessed = 2;
-				clusterId[pair2.id] = ++nextClusterId;
+				// Error
+				throw new RuntimeException("Linkage between two particles already in a cluster");
+			}
+			else if (pair1.inCluster)
+			{
+				clusterId[pair2.id] = clusterId[pair1.id];
 				pair2.inCluster = true;
 			}
-
-			clusterId[pair1.id] = clusterId[pair2.id];
-			pair1.inCluster = true;
+			else if (pair2.inCluster)
+			{
+				clusterId[pair1.id] = clusterId[pair2.id];
+				pair1.inCluster = true;
+			}
+			// Create a new cluster if necessary
+			else
+			{
+				nProcessed = 2;
+				clusterId[pair1.id] = clusterId[pair2.id] = ++nextClusterId;
+				pair1.inCluster = pair2.inCluster = true;
+			}
 			
 			if (trackJoins)
 			{
