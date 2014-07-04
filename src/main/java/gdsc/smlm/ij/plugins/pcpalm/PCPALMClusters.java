@@ -60,7 +60,9 @@ public class PCPALMClusters implements PlugInFilter
 
 	private static double distance = 50;
 	private static ClusteringAlgorithm sClusteringAlgorithm = ClusteringAlgorithm.Pairwise;
+	private static int minN = 1;
 	private static int maxN = 0;
+	private static boolean maximumLikelihood = false;
 	private static boolean showCumulativeHistogram = false;
 
 	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
@@ -137,11 +139,7 @@ public class PCPALMClusters implements PlugInFilter
 		}
 		Utils.display(title, plot);
 
-		int mode = 3;
-
-		// TODO - Depending on the mode we need to add the fictional n=0 data point (in blue)
-
-		double[] fitParameters = fitBinomial(data, mode);
+		double[] fitParameters = fitBinomial(data);
 		if (fitParameters != null)
 		{
 			// Add the binomial to the histogram
@@ -152,9 +150,9 @@ public class PCPALMClusters implements PlugInFilter
 
 			BinomialDistribution dist = new BinomialDistribution(n, p);
 
-			// Depending on the mode either a standard or a zero-truncated binomial was fitted.
+			// A zero-truncated binomial was fitted.
 			// pi is the adjustment factor for the probability density.
-			double pi = (mode == 3) ? 1 / (1 - dist.probability(0)) : 1;
+			double pi = 1 / (1 - dist.probability(0));
 
 			// Calculate the estimate number of clusters from the observed molecules:
 			// Actual = (Observed / p-value) / N
@@ -240,8 +238,10 @@ public class PCPALMClusters implements PlugInFilter
 		gd.addNumericField("Distance (nm)", distance, 0);
 		String[] names = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 		gd.addChoice("Algorithm", names, names[sClusteringAlgorithm.ordinal()]);
+		gd.addSlider("Min_N", 1, 10, minN);
 		gd.addSlider("Max_N", 0, 10, maxN);
 		gd.addCheckbox("Show_cumulative_histogram", showCumulativeHistogram);
+		gd.addCheckbox("Maximum_likelihood", maximumLikelihood);
 
 		gd.showDialog();
 
@@ -250,13 +250,16 @@ public class PCPALMClusters implements PlugInFilter
 
 		distance = gd.getNextNumber();
 		clusteringAlgorithm = sClusteringAlgorithm = ClusteringAlgorithm.values()[gd.getNextChoiceIndex()];
+		minN = (int) Math.abs(gd.getNextNumber());
 		maxN = (int) Math.abs(gd.getNextNumber());
 		showCumulativeHistogram = gd.getNextBoolean();
+		maximumLikelihood = gd.getNextBoolean();
 
 		// Check arguments
 		try
 		{
 			Parameters.isAboveZero("Distance", distance);
+			Parameters.isAboveZero("Min N", minN);
 		}
 		catch (IllegalArgumentException ex)
 		{
@@ -273,7 +276,7 @@ public class PCPALMClusters implements PlugInFilter
 		IJ.error(TITLE, message);
 	}
 
-	private double[] fitBinomial(StoredDataStatistics data, int mode)
+	private double[] fitBinomial(StoredDataStatistics data)
 	{
 		double[] cumulativeHistogram = BinomialFitter.getHistogram(data.getValues(), true);
 
@@ -282,12 +285,14 @@ public class PCPALMClusters implements PlugInFilter
 		int worse = 0;
 		int N = (int) cumulativeHistogram.length - 1;
 		double[] values = Utils.newArray(cumulativeHistogram.length, 0.0, 1.0);
-		int minN = 1;
+		int min = minN;
 		if (maxN > 0 && N > maxN)
 			N = maxN;
+		if (min > N)
+			min = N;
 		final double mean = data.getMean();
 
-		String name = (mode == 3) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
+		String name = "Zero-truncated Binomial distribution";
 
 		Utils.log("Mean cluster size = %s", Utils.rounded(mean));
 		Utils.log("Fitting cumulative " + name);
@@ -314,14 +319,12 @@ public class PCPALMClusters implements PlugInFilter
 		// for n=1,2,3,... until the SS peaks then falls off (is worse then the best 
 		// score several times in succession)
 		BinomialFitter bf = new BinomialFitter(new IJLogger());
-		bf.setMaximumLikelihood(false);
-		for (int n = minN; n <= N; n++)
+		bf.setMaximumLikelihood(maximumLikelihood);
+		for (int n = min; n <= N; n++)
 		{
-			// Optionally iterate this if we are estimating the n=0 data using an initial p value.
-			// TODO - Add options for the mode input and the initial p-value
-			PointValuePair solution = bf.fitBinomial(histogram, n, mean, mode, 0);
+			PointValuePair solution = bf.fitBinomial(histogram, mean, n, true);
 			if (solution == null)
-				break;
+				continue;
 
 			double p = solution.getPointRef()[0];
 
@@ -340,24 +343,24 @@ public class PCPALMClusters implements PlugInFilter
 			}
 
 			if (showCumulativeHistogram)
-				addToPlot(n, p, mode, title, plot, new Color((float) n / N, 0, 1f - (float) n / N));
+				addToPlot(n, p, title, plot, new Color((float) n / N, 0, 1f - (float) n / N));
 		}
 
 		// Add best it in magenta
 		if (showCumulativeHistogram && parameters != null)
-			addToPlot((int) parameters[0], parameters[1], mode, title, plot, Color.magenta);
+			addToPlot((int) parameters[0], parameters[1], title, plot, Color.magenta);
 
 		return parameters;
 	}
 
-	private void addToPlot(int n, double p, int mode, String title, Plot plot, Color color)
+	private void addToPlot(int n, double p, String title, Plot plot, Color color)
 	{
 		double[] x = new double[n + 1];
 		double[] y = new double[n + 1];
 
 		BinomialDistribution dist = new BinomialDistribution(n, p);
 
-		int startIndex = (mode == 3) ? 1 : 0;
+		int startIndex = 1;
 
 		// Normalise optionally excluding the x=0 point
 		double total = 1;

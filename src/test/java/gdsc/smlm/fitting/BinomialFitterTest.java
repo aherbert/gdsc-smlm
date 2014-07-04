@@ -13,7 +13,7 @@ public class BinomialFitterTest
 	int[] N = new int[] { 2, 3, 4, 6, 8 };
 	double[] P = new double[] { 0.3, 0.5, 0.7 };
 	int TRIALS = 10;
-	int FAILURES = (int) (0.2 * TRIALS);
+	int FAILURES = (int) (0.3 * TRIALS);
 	RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 	RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
 
@@ -22,14 +22,11 @@ public class BinomialFitterTest
 	{
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = false;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n, mode, initialP);
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n);
 			}
 		}
 	}
@@ -39,42 +36,34 @@ public class BinomialFitterTest
 	{
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = true;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n, mode, initialP);
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n);
 			}
 		}
 	}
-	
+
 	@Test
 	public void canFitBinomialWithUnknownNUsingLeastSquaresEstimator()
 	{
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = false;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, 1, n, mode, initialP);
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, 1, n);
 			}
 		}
 	}
 
-	//@Test
+	@Test
 	public void canFitBinomialWithUnknownNUsingMaximumLikelihood()
 	{
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = true;
-		int mode = 0;
-		double initialP = 0;
 
 		// TODO - Sort out how to fit unknown N using MLE. 
 		// The problem is that the model returns a p of zero when n>N and this results in a negative infinity likelihood
@@ -83,7 +72,7 @@ public class BinomialFitterTest
 		{
 			for (double p : P)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, 1, n, mode, initialP);
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, 1, n);
 			}
 		}
 	}
@@ -93,14 +82,11 @@ public class BinomialFitterTest
 	{
 		boolean zeroTruncated = true;
 		boolean maximumLikelihood = false;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n, mode, initialP);
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n);
 			}
 		}
 	}
@@ -110,14 +96,11 @@ public class BinomialFitterTest
 	{
 		boolean zeroTruncated = true;
 		boolean maximumLikelihood = true;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n, mode, initialP);
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n);
 			}
 		}
 	}
@@ -127,14 +110,25 @@ public class BinomialFitterTest
 	{
 		boolean zeroTruncated = true;
 		boolean maximumLikelihood = false;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, 1, n, mode, initialP);
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, 1, n);
+			}
+		}
+	}
+
+	@Test
+	public void canFitZeroTruncatedBinomialWithUnknownNUsingMaximumLikelihood()
+	{
+		boolean zeroTruncated = true;
+		boolean maximumLikelihood = false;
+		for (int n : N)
+		{
+			for (double p : P)
+			{
+				fitBinomial(n, p, zeroTruncated, maximumLikelihood, 1, n);
 			}
 		}
 	}
@@ -143,36 +137,29 @@ public class BinomialFitterTest
 	public void sameFitBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
 		boolean zeroTruncated = false;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomialUsing_LSE_Or_MLE(n, p, zeroTruncated, n, n, mode, initialP);
+				fitBinomialUsing_LSE_Or_MLE(n, p, zeroTruncated, n, n);
 			}
 		}
 	}
-	
+
 	@Test
 	public void sameFitZeroTruncatedBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
 		boolean zeroTruncated = true;
-		int mode = 0;
-		double initialP = 0;
-
 		for (int n : N)
 		{
 			for (double p : P)
 			{
-				fitBinomialUsing_LSE_Or_MLE(n, p, zeroTruncated, n, n, mode, initialP);
+				fitBinomialUsing_LSE_Or_MLE(n, p, zeroTruncated, n, n);
 			}
 		}
 	}
-	
-	private void fitBinomial(int n, double p, boolean zeroTruncated, boolean maximumLikelihood, int minN, int maxN,
-			int mode, double initialP)
+
+	private void fitBinomial(int n, double p, boolean zeroTruncated, boolean maximumLikelihood, int minN, int maxN)
 	{
 		BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
@@ -183,7 +170,7 @@ public class BinomialFitterTest
 		for (int i = 0; i < TRIALS; i++)
 		{
 			int[] data = createData(n, p, false);
-			double[] fit = bf.fitBinomial(data, minN, maxN, mode, initialP);
+			double[] fit = bf.fitBinomial(data, minN, maxN, zeroTruncated);
 			int fittedN = (int) fit[0];
 			double fittedP = fit[1];
 			log("  Fitted (n=%d, p=%f)\n", fittedN, fittedP);
@@ -205,35 +192,48 @@ public class BinomialFitterTest
 		}
 	}
 
-	private void fitBinomialUsing_LSE_Or_MLE(int n, double p, boolean zeroTruncated, int minN, int maxN,
-			int mode, double initialP)
+	private void fitBinomialUsing_LSE_Or_MLE(int n, double p, boolean zeroTruncated, int minN, int maxN)
 	{
 		BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 
 		log("Fitting (n=%d, p=%f)\n", n, p);
+		int fail = 0;
 		int c1 = 0;
 		for (int i = 0; i < TRIALS; i++)
 		{
 			int[] data = createData(n, p, false);
 			bf.setMaximumLikelihood(false);
-			double[] fitLSE = bf.fitBinomial(data, minN, maxN, mode, initialP);
+			double[] fitLSE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
 			bf.setMaximumLikelihood(true);
-			double[] fitMLE = bf.fitBinomial(data, minN, maxN, mode, initialP);
-			
+			double[] fitMLE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
+
 			int n1 = (int) fitLSE[0];
 			double p1 = fitLSE[1];
 			int n2 = (int) fitMLE[0];
 			double p2 = fitMLE[1];
-			
-			log("  Fitted (n=%d, p=%f) == (n=%d, p=%f)\n", n1, p1, n2, p2);
-			
-			Assert.assertEquals("Failed to match n", n1, n2);
-			Assert.assertEquals("Failed to match p", p1, p2, 0.05);
-			if (Math.abs(p1-p) < Math.abs(p2-p))
+
+			log("  Fitted LSE (n=%d, p=%f) == MLE (n=%d, p=%f)\n", n1, p1, n2, p2);
+
+			try
+			{
+				Assert.assertEquals("Failed to match n", n1, n2);
+				Assert.assertEquals("Failed to match p", p1, p2, 0.05);
+			}
+			catch (AssertionError e)
+			{
+				fail++;
+				log("    " + e.getMessage() + "\n");
+			}
+			if (Math.abs(p1 - p) < Math.abs(p2 - p))
 				c1++;
 		}
-		log("  Closest LSE %d, MLE %d\n", c1, TRIALS-c1);
+		log("  Closest LSE %d, MLE %d\n", c1, TRIALS - c1);
+		if (fail > FAILURES)
+		{
+			String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);
+			Assert.assertTrue(msg, fail <= FAILURES);
+		}
 	}
 
 	private int[] createData(int n, double p, boolean zeroTruncated)

@@ -162,19 +162,17 @@ public class BinomialFitter
 	 *            The minimum n to evaluate
 	 * @param maxN
 	 *            The maximum n to evaluate. Set to zero to evaluate all possible values.
-	 * @param mode
-	 *            The run mode.
-	 * @param estimatedP
-	 *            The estimated p value
+	 * @param zeroTruncated
+	 *            True if the model should ignore n=0 (zero-truncated binomial)
 	 * @return The best fit (n, p)
 	 * @throws IllegalArgumentException
 	 *             If any of the input data values are negative
 	 */
-	public double[] fitBinomial(int[] data, int minN, int maxN, int mode, double estimatedP)
+	public double[] fitBinomial(int[] data, int minN, int maxN, boolean zeroTruncated)
 	{
 		double[] histogram = getHistogram(data, false);
 
-		final double initialSS = (maximumLikelihood) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+		final double initialSS = Double.POSITIVE_INFINITY;
 		double bestSS = initialSS;
 		double[] parameters = null;
 		int worse = 0;
@@ -195,16 +193,12 @@ public class BinomialFitter
 				N = maxN;
 			}
 		}
-		double sum = 0;
-		int count = 0;
-		for (int value : data)
-		{
-			count++;
-			sum += value;
-		}
-		final double mean = sum / count;
+		if (minN > N)
+			minN = N;
 
-		String name = (mode == 3) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
+		final double mean = getMean(histogram);
+
+		String name = (zeroTruncated) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
 
 		log("Mean cluster size = %s", Utils.rounded(mean));
 		log("Fitting cumulative " + name);
@@ -214,43 +208,24 @@ public class BinomialFitter
 		// score several times in succession)
 		for (int n = minN; n <= N; n++)
 		{
-			PointValuePair solution = fitBinomial(histogram, n, mean, mode, estimatedP);
+			PointValuePair solution = fitBinomial(histogram, mean, n, zeroTruncated);
 			if (solution == null)
-				break;
+				continue;
 
 			double p = solution.getPointRef()[0];
 
-			if (maximumLikelihood)
-			{
-				log("Fitted %s : N=%d, p=%s. LL=%g", name, n, Utils.rounded(p), solution.getValue());
+			log("Fitted %s : N=%d, p=%s. SS=%g", name, n, Utils.rounded(p), solution.getValue());
 
-				if (bestSS < solution.getValue())
-				{
-					bestSS = solution.getValue();
-					parameters = new double[] { n, p };
-					worse = 0;
-				}
-				else if (bestSS != initialSS)
-				{
-					if (++worse >= 3)
-						break;
-				}
+			if (bestSS > solution.getValue())
+			{
+				bestSS = solution.getValue();
+				parameters = new double[] { n, p };
+				worse = 0;
 			}
-			else
+			else if (bestSS != initialSS)
 			{
-				log("Fitted %s : N=%d, p=%s. SS=%g", name, n, Utils.rounded(p), solution.getValue());
-
-				if (bestSS > solution.getValue())
-				{
-					bestSS = solution.getValue();
-					parameters = new double[] { n, p };
-					worse = 0;
-				}
-				else if (bestSS != initialSS)
-				{
-					if (++worse >= 3)
-						break;
-				}
+				if (++worse >= 3)
+					break;
 			}
 		}
 
@@ -259,8 +234,7 @@ public class BinomialFitter
 
 	/**
 	 * Fit the binomial distribution (n,p) to the cumulative histogram. Performs fitting assuming a fixed n value and
-	 * attempts to
-	 * optimise p.
+	 * attempts to optimise p.
 	 * 
 	 * @param histogram
 	 *            The input histogram
@@ -268,55 +242,54 @@ public class BinomialFitter
 	 *            The n to evaluate
 	 * @param zeroTruncated
 	 *            True if the model should ignore n=0 (zero-truncated binomial)
-	 * @param mode
-	 *            The run mode.
-	 * @param estimatedP
-	 *            The estimated p value
 	 * @return The best fit (n, p)
 	 * @throws IllegalArgumentException
 	 *             If any of the input data values are negative
 	 */
-	public PointValuePair fitBinomial(double[] histogram, int n, double mean, int mode, double p)
+	public PointValuePair fitBinomial(double[] histogram, int n, boolean zeroTruncated)
 	{
+		return fitBinomial(histogram, Double.NaN, n, zeroTruncated);
+	}
+
+	/**
+	 * Fit the binomial distribution (n,p) to the cumulative histogram. Performs fitting assuming a fixed n value and
+	 * attempts to optimise p.
+	 * 
+	 * @param histogram
+	 *            The input histogram
+	 * @param mean
+	 *            The histogram mean (used to estimate p). Calculated if NaN.
+	 * @param n
+	 *            The n to evaluate
+	 * @param zeroTruncated
+	 *            True if the model should ignore n=0 (zero-truncated binomial)
+	 * @return The best fit (n, p)
+	 * @throws IllegalArgumentException
+	 *             If any of the input data values are negative
+	 * @throws IllegalArgumentException
+	 *             If any fitting a zero truncated binomial and there are no values above zero
+	 */
+	public PointValuePair fitBinomial(double[] histogram, double mean, int n, boolean zeroTruncated)
+	{
+		if (Double.isNaN(mean))
+			mean = getMean(histogram);
+
+		if (zeroTruncated && histogram[0] > 0)
+		{
+			log("Fitting zero-truncated histogram but there are zero values - Renormalising to ignore zero");
+			double cumul = 0;
+			for (int i = 1; i < histogram.length; i++)
+				cumul += histogram[i];
+			if (cumul == 0)
+				throw new IllegalArgumentException("Fitting zero-truncated histogram but there are no non-zero values");
+			histogram[0] = 0;
+			for (int i = 1; i < histogram.length; i++)
+				histogram[i] /= cumul;
+		}
+
 		// The model is only fitting the probability p
 		// For a binomial n*p = mean => p = mean/n
 		double[] initialSolution = new double[] { Math.min(mean / n, 1) };
-
-		boolean zeroTruncated = false;
-		switch (mode)
-		{
-			case 3:
-				// Fit the binomial ignoring n=0
-				zeroTruncated = true;
-				break;
-
-			case 2:
-				// Estimate the n=0 using the estimated p
-				p = initialSolution[0];
-
-			case 1:
-				// Estimate the n=0 using the initial p
-				BinomialDistribution dist = new BinomialDistribution(n, p);
-				double newZeroValue = dist.probability(0);
-
-				// Update the sum to exclude the old zero value
-				double oldZeroValue = histogram[0];
-				double sumAboveZero = 1 - oldZeroValue;
-
-				// Set the calculated zero value
-				histogram[0] = newZeroValue;
-
-				// Adjust the remaining data
-				for (int i = 1; i < histogram.length; i++)
-				{
-					histogram[i] *= ((1 - newZeroValue) / sumAboveZero);
-				}
-				break;
-
-			case 0:
-			default:
-				// Fit the binomial
-		}
 
 		// Create the function
 		BinomialModelFunction function = new BinomialModelFunction(histogram, n, zeroTruncated);
@@ -354,7 +327,19 @@ public class BinomialFitter
 			if (solution == null)
 				return null;
 
-			if (!maximumLikelihood)
+			if (maximumLikelihood)
+			{
+				// Although we fit the log-likelihood, return the sum-of-squares to allow 
+				// comparison across different n
+				double p = solution.getPointRef()[0];
+				double ss = 0;
+				double[] obs = function.p;
+				double[] exp = function.getP(p);
+				for (int i = 0; i < obs.length; i++)
+					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+				return new PointValuePair(solution.getPointRef(), ss);
+			}
+			else
 			{
 				// Improve SS fit with a gradient based LVM optimizer
 				LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
@@ -371,8 +356,8 @@ public class BinomialFitter
 					for (int i = 0; i < obs.length; i++)
 						ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 					// Check the pValue is valid since the LVM is not bounded.
-					double pValue = lvmSolution.getPointRef()[0];
-					if (ss < solution.getValue() && pValue <= 1 && pValue >= 0)
+					double p = lvmSolution.getPointRef()[0];
+					if (ss < solution.getValue() && p <= 1 && p >= 0)
 					{
 						//log("Re-fitting improved the SS from %s to %s (-%s%%)",
 						//		Utils.rounded(solution.getValue(), 4), Utils.rounded(ss, 4),
@@ -401,6 +386,19 @@ public class BinomialFitter
 			log("Failed to fit Binomial distribution with N=%d : %s", n, e.getMessage());
 		}
 		return null;
+	}
+
+	private double getMean(double[] histogram)
+	{
+		double sum = 0;
+		double count = 0;
+		for (int i = 0; i < histogram.length; i++)
+		{
+			sum += histogram[i] * i;
+			count += histogram[i];
+		}
+		double mean = sum / count;
+		return mean;
 	}
 
 	/**
@@ -481,7 +479,9 @@ public class BinomialFitter
 			{
 				// Calculate the log-likelihood
 				double ll = 0;
-				for (int i = startIndex; i < p.length; i++)
+				// We cannot produce a likelihood for any n>N 
+				int limit = trials + 1; // p.length
+				for (int i = startIndex; i < limit; i++)
 				{
 					// Sum for all observations the probability of the observation.
 					// Use p[i] to indicate the frequency of this observation. 
