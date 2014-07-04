@@ -33,6 +33,10 @@ public class ClusteringEngine
 	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
 	private TrackProgress tracker;
 	private int pulseInterval = 0;
+	private boolean trackJoins = false;
+	private double[] intraIdDistances = null;
+	private double[] interIdDistances = null;
+	private int intraIdCount, interIdCount;
 	private int nextClusterId;
 
 	public ClusteringEngine()
@@ -285,7 +289,16 @@ public class ClusteringEngine
 		int[] clusterId = new int[candidates.size()];
 
 		int nProcessed = 0;
-		while ((nProcessed = joinClosestParticle(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth, clusterId)) > 0)
+
+		if (trackJoins)
+		{
+			interIdDistances = new double[candidates.size()];
+			intraIdDistances = new double[candidates.size()];
+			interIdCount = intraIdCount = 0;
+		}
+		
+		while ((nProcessed = joinClosestParticle(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth,
+				clusterId)) > 0)
 		{
 			if (tracker.stop())
 				return null;
@@ -293,6 +306,12 @@ public class ClusteringEngine
 			tracker.progress(candidatesProcessed, N);
 		}
 
+		if (trackJoins)
+		{
+			interIdDistances = Arrays.copyOf(interIdDistances, interIdCount);
+			intraIdDistances = Arrays.copyOf(intraIdDistances, intraIdCount);
+		}
+		
 		tracker.log("Processed %d / %d", candidatesProcessed, N);
 		tracker.log("%d candidates linked into %d clusters", candidates.size(), nextClusterId);
 
@@ -486,6 +505,14 @@ public class ClusteringEngine
 
 			clusterId[pair1.id] = clusterId[pair2.id];
 			pair1.inCluster = true;
+			
+			if (trackJoins)
+			{
+				if (pair1.next.id == pair2.next.id)
+					intraIdDistances[intraIdCount++] = Math.sqrt(min);
+				else
+					interIdDistances[interIdCount++] = Math.sqrt(min);
+			}
 
 			return nProcessed;
 		}
@@ -1675,5 +1702,40 @@ public class ClusteringEngine
 		if (pulseInterval == 0)
 			return 0;
 		return ((time - 1) / pulseInterval);
+	}
+
+	/**
+	 * @return true if recording the distances between particles that were joined.
+	 */
+	public boolean isTrackJoins()
+	{
+		return trackJoins;
+	}
+
+	/**
+	 * Set to true to record the distances between particles that were joined. Only applies to the particle linkage
+	 * algorithm. The distances can be retrieved after the {@link #findClusters(List, double)} method has been called.
+	 * 
+	 * @param trackJoins
+	 */
+	public void setTrackJoins(boolean trackJoins)
+	{
+		this.trackJoins = trackJoins;
+	}
+
+	/**
+	 * @return the intra-Id distances from joins in the particle linkage algorithm
+	 */
+	public double[] getIntraIdDistances()
+	{
+		return intraIdDistances;
+	}
+
+	/**
+	 * @return the inter-Id distances from joins in the particle linkage algorithm
+	 */
+	public double[] getInterIdDistances()
+	{
+		return interIdDistances;
 	}
 }
