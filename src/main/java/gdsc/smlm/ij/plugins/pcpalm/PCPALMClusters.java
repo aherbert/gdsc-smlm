@@ -104,7 +104,9 @@ public class PCPALMClusters implements PlugInFilter
 		ClusteringEngine engine = new ClusteringEngine();
 		engine.setClusteringAlgorithm(clusteringAlgorithm);
 		engine.setTracker(new IJTrackProgress());
+		IJ.showStatus("Clustering ...");
 		ArrayList<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
+		IJ.showStatus("");
 
 		if (clusters == null)
 		{

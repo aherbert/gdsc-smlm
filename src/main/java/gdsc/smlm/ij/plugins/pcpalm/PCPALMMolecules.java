@@ -15,6 +15,7 @@ package gdsc.smlm.ij.plugins.pcpalm;
 
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.fitting.function.SkewNormalFunction;
+import gdsc.smlm.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.plugins.ResultsManager;
@@ -29,6 +30,7 @@ import gdsc.smlm.results.NullSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
+import gdsc.smlm.results.clustering.Cluster;
 import gdsc.smlm.results.clustering.ClusterPoint;
 import gdsc.smlm.results.clustering.ClusteringAlgorithm;
 import gdsc.smlm.results.clustering.ClusteringEngine;
@@ -1441,33 +1443,43 @@ public class PCPALMMolecules implements PlugIn
 					// Precision was used to store the molecule ID
 					points.add(new ClusterPoint((int) m.precision, m.x, m.y));
 				ClusteringEngine engine = new ClusteringEngine();
+				IJ.showStatus("Clustering to check inter-molecule distances");
+				engine.setTracker(new IJTrackProgress());
 				engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleLinkage);
 				engine.setTrackJoins(true);
-				engine.findClusters(points, intraHist[0][p99]);
-				double[] intraIdDistances = engine.getIntraIdDistances();
-				double[] interIdDistances = engine.getInterIdDistances();
+				ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
+				IJ.showStatus("");
+				if (clusters != null)
+				{
+					double[] intraIdDistances = engine.getIntraIdDistances();
+					double[] interIdDistances = engine.getInterIdDistances();
 
-				int all = interIdDistances.length + intraIdDistances.length;
+					int all = interIdDistances.length + intraIdDistances.length;
 
-				log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%",
-						Utils.rounded(intraHist[0][p99], 4),
-						(all > 0) ? Utils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
+					log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%",
+							Utils.rounded(intraHist[0][p99], 4),
+							(all > 0) ? Utils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
 
-				// Show a double cumulative histogram plot
-				double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
-				double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
+					// Show a double cumulative histogram plot
+					double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
+					double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
 
-				// Plot
-				String title = TITLE + " molecule linkage distance";
-				Plot plot = new Plot(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
-				double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
-				if (interIdHist[1].length > 0)
-					max = Math.max(max, interIdHist[1][interIdHist[1].length - 1]);
-				plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
-				plot.setColor(Color.blue);
-				plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
-				plot.setColor(Color.black);
-				Utils.display(title, plot);
+					// Plot
+					String title = TITLE + " molecule linkage distance";
+					Plot plot = new Plot(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
+					double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
+					if (interIdHist[1].length > 0)
+						max = Math.max(max, interIdHist[1][interIdHist[1].length - 1]);
+					plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
+					plot.setColor(Color.blue);
+					plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
+					plot.setColor(Color.black);
+					Utils.display(title, plot);
+				}
+				else
+				{
+					log("Aborted clustering to check inter-molecule distances");
+				}
 			}
 		}
 		if (clusterSimulation > 0)
