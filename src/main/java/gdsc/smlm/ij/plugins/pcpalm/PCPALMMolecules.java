@@ -123,6 +123,7 @@ public class PCPALMMolecules implements PlugIn
 	// Mode 3. Random simulation of molecules
 	private static int nMolecules = 2000;
 	private static double simulationSize = 16;
+	private static boolean distanceAnalysis = false;
 
 	private static String[] CLUSTER_SIMULATION = new String[] { "None", "Circles", "Non-overlapping circles",
 			"Circles Mask" };
@@ -287,6 +288,7 @@ public class PCPALMMolecules implements PlugIn
 			gd.addChoice("Blinking_distribution", BLINKING_DISTRIBUTION, BLINKING_DISTRIBUTION[blinkingDistribution]);
 			gd.addNumericField("Average_precision (nm)", sigmaS, 2);
 			gd.addCheckbox("Show_histograms", showHistograms);
+			gd.addCheckbox("Distance_analysis", distanceAnalysis);
 			gd.addChoice("Cluster_simulation", CLUSTER_SIMULATION, CLUSTER_SIMULATION[clusterSimulation]);
 			gd.addNumericField("Cluster_number", clusterNumber, 2);
 			gd.addNumericField("Cluster_variation (SD)", clusterNumberSD, 2);
@@ -326,6 +328,7 @@ public class PCPALMMolecules implements PlugIn
 			blinkingDistribution = gd.getNextChoiceIndex();
 			sigmaS = Math.abs(gd.getNextNumber());
 			showHistograms = gd.getNextBoolean();
+			distanceAnalysis = gd.getNextBoolean();
 			clusterSimulation = gd.getNextChoiceIndex();
 			clusterNumber = Math.abs(gd.getNextNumber());
 			clusterNumberSD = Math.abs(gd.getNextNumber());
@@ -1432,53 +1435,9 @@ public class PCPALMMolecules implements PlugIn
 						Utils.rounded(intraDistances.getMean(), 4), Utils.rounded(intraHist[0][p95], 4),
 						Utils.rounded(intraHist[0][p99], 4), Utils.rounded(intraHist[0][intraHist[0].length - 1], 4));
 
-				// We want to know the fraction of distances between molecules at the 99th percentile
-				// that are intra- rather than inter-molecule.
-				// Do single linkage clustering of closest pair at this distance and count the number of 
-				// links that are inter and intra.
-
-				// Convert molecules for clustering
-				ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(molecules.size());
-				for (Molecule m : molecules)
-					// Precision was used to store the molecule ID
-					points.add(new ClusterPoint((int) m.precision, m.x, m.y));
-				ClusteringEngine engine = new ClusteringEngine();
-				IJ.showStatus("Clustering to check inter-molecule distances");
-				engine.setTracker(new IJTrackProgress());
-				engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleLinkage);
-				engine.setTrackJoins(true);
-				ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
-				IJ.showStatus("");
-				if (clusters != null)
+				if (distanceAnalysis)
 				{
-					double[] intraIdDistances = engine.getIntraIdDistances();
-					double[] interIdDistances = engine.getInterIdDistances();
-
-					int all = interIdDistances.length + intraIdDistances.length;
-
-					log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%",
-							Utils.rounded(intraHist[0][p99], 4),
-							(all > 0) ? Utils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
-
-					// Show a double cumulative histogram plot
-					double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
-					double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
-
-					// Plot
-					String title = TITLE + " molecule linkage distance";
-					Plot plot = new Plot(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
-					double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
-					if (interIdHist[1].length > 0)
-						max = Math.max(max, interIdHist[1][interIdHist[1].length - 1]);
-					plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
-					plot.setColor(Color.blue);
-					plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
-					plot.setColor(Color.black);
-					Utils.display(title, plot);
-				}
-				else
-				{
-					log("Aborted clustering to check inter-molecule distances");
+					performDistanceAnalysis(intraHist, p99);
 				}
 			}
 		}
@@ -1540,6 +1499,58 @@ public class PCPALMMolecules implements PlugIn
 		return hist;
 	}
 
+	private void performDistanceAnalysis(double[][] intraHist, int p99)
+	{
+		// We want to know the fraction of distances between molecules at the 99th percentile
+		// that are intra- rather than inter-molecule.
+		// Do single linkage clustering of closest pair at this distance and count the number of 
+		// links that are inter and intra.
+
+		// Convert molecules for clustering
+		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(molecules.size());
+		for (Molecule m : molecules)
+			// Precision was used to store the molecule ID
+			points.add(new ClusterPoint((int) m.precision, m.x, m.y));
+		ClusteringEngine engine = new ClusteringEngine();
+		IJ.showStatus("Clustering to check inter-molecule distances");
+		engine.setTracker(new IJTrackProgress());
+		engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleLinkage);
+		engine.setTrackJoins(true);
+		ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
+		IJ.showStatus("");
+		if (clusters != null)
+		{
+			double[] intraIdDistances = engine.getIntraIdDistances();
+			double[] interIdDistances = engine.getInterIdDistances();
+
+			int all = interIdDistances.length + intraIdDistances.length;
+
+			log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%",
+					Utils.rounded(intraHist[0][p99], 4),
+					(all > 0) ? Utils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
+
+			// Show a double cumulative histogram plot
+			double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
+			double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
+
+			// Plot
+			String title = TITLE + " molecule linkage distance";
+			Plot plot = new Plot(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
+			double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
+			if (interIdHist[1].length > 0)
+				max = Math.max(max, interIdHist[1][interIdHist[1].length - 1]);
+			plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
+			plot.setColor(Color.blue);
+			plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
+			plot.setColor(Color.black);
+			Utils.display(title, plot);
+		}
+		else
+		{
+			log("Aborted clustering to check inter-molecule distances");
+		}
+	}
+	
 	private double distance2(double[] centre1, double[] centre2)
 	{
 		final double dx = centre1[0] - centre2[0];
@@ -1642,6 +1653,7 @@ public class PCPALMMolecules implements PlugIn
 		gd.addChoice("Blinking_distribution", BLINKING_DISTRIBUTION, BLINKING_DISTRIBUTION[blinkingDistribution]);
 		gd.addNumericField("Average_precision (nm)", sigmaS, 2);
 		gd.addCheckbox("Show_histograms", showHistograms);
+		gd.addCheckbox("Distance_analysis", distanceAnalysis);
 
 		gd.addChoice("Cluster_simulation", CLUSTER_SIMULATION, CLUSTER_SIMULATION[clusterSimulation]);
 		gd.addNumericField("Cluster_number", clusterNumber, 2);
@@ -1660,6 +1672,7 @@ public class PCPALMMolecules implements PlugIn
 		blinkingDistribution = gd.getNextChoiceIndex();
 		sigmaS = Math.abs(gd.getNextNumber());
 		showHistograms = gd.getNextBoolean();
+		distanceAnalysis = gd.getNextBoolean();
 		clusterSimulation = gd.getNextChoiceIndex();
 		clusterNumber = Math.abs(gd.getNextNumber());
 		clusterNumberSD = Math.abs(gd.getNextNumber());
