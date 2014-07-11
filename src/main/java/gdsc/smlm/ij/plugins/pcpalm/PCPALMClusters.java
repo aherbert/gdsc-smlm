@@ -31,6 +31,7 @@ import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.filter.PlugInFilter;
@@ -64,6 +65,7 @@ public class PCPALMClusters implements PlugInFilter
 	private static int maxN = 0;
 	private static boolean maximumLikelihood = false;
 	private static boolean showCumulativeHistogram = false;
+	private static boolean multiThread = true;
 
 	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
 
@@ -104,6 +106,8 @@ public class PCPALMClusters implements PlugInFilter
 		ClusteringEngine engine = new ClusteringEngine();
 		engine.setClusteringAlgorithm(clusteringAlgorithm);
 		engine.setTracker(new IJTrackProgress());
+		if (multiThread)
+			engine.setThreadCount(Prefs.getThreads());
 		IJ.showStatus("Clustering ...");
 		ArrayList<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
 		IJ.showStatus("");
@@ -244,6 +248,7 @@ public class PCPALMClusters implements PlugInFilter
 		gd.addSlider("Max_N", 0, 10, maxN);
 		gd.addCheckbox("Show_cumulative_histogram", showCumulativeHistogram);
 		gd.addCheckbox("Maximum_likelihood", maximumLikelihood);
+		gd.addCheckbox("Multi_thread", multiThread);
 
 		gd.showDialog();
 
@@ -256,6 +261,7 @@ public class PCPALMClusters implements PlugInFilter
 		maxN = (int) Math.abs(gd.getNextNumber());
 		showCumulativeHistogram = gd.getNextBoolean();
 		maximumLikelihood = gd.getNextBoolean();
+		multiThread = gd.getNextBoolean();
 
 		// Check arguments
 		try

@@ -20,20 +20,101 @@ import gdsc.smlm.results.TrackProgress;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
- * Find clusters of points using a partial centroid-linkage hierarchical clustering algorithm.
- * <p>
- * Points are added to the nearest cluster if they are below the distance threshold to the cluster centroid. The cluster
- * centroid is updated. All points above the cluster distance threshold remain as single molecules.
+ * Find clusters of points using a clustering algorithm.
  */
 public class ClusteringEngine
 {
+	/**
+	 * Used for multi-threaded clustering to store the closest pair in a region of the search space
+	 */
+	private class ClosestPair
+	{
+		double distance;
+		ExtendedClusterPoint point1, point2;
+
+		public ClosestPair(double distance, ExtendedClusterPoint point1, ExtendedClusterPoint point2)
+		{
+			this.distance = distance;
+			this.point1 = point1;
+			this.point2 = point2;
+		}
+
+		public ClosestPair()
+		{
+		}
+	}
+
+	/**
+	 * Use a runnable to allow multi-threaded operation. Input parameters
+	 * that are manipulated should have synchronized methods.
+	 */
+	private class ParticleLinkageWorker implements Runnable
+	{
+		ClosestPair pair;
+		ExtendedClusterPoint[][] grid;
+		int nXBins;
+		int nYBins;
+		double r2;
+		double minx;
+		double miny;
+		int[] clusterId;
+		int startXBin;
+		int endXBin;
+		int startYBin;
+		int endYBin;
+
+		public ParticleLinkageWorker(ClosestPair pair, ExtendedClusterPoint[][] grid, int nXBins, int nYBins,
+				double r2, double minx, double miny, int[] clusterId, int startXBin, int endXBin, int startYBin,
+				int endYBin)
+		{
+			this.pair = pair;
+			this.grid = grid;
+			this.nXBins = nXBins;
+			this.nYBins = nYBins;
+			this.r2 = r2;
+			this.minx = minx;
+			this.miny = miny;
+			this.clusterId = clusterId;
+			this.startXBin = startXBin;
+			this.endXBin = endXBin;
+			this.startYBin = startYBin;
+			this.endYBin = endYBin;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			ClosestPair result = findClosestParticle(grid, nXBins, nYBins, r2, minx, miny, clusterId, startXBin,
+					endXBin, startYBin, endYBin);
+			if (result != null)
+			{
+				pair.distance = result.distance;
+				pair.point1 = result.point1;
+				pair.point2 = result.point2;
+			}
+		}
+	}
+
+	private ExecutorService threadPool = null;
+	private int xBlock, yBlock;
+
 	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
 	private TrackProgress tracker;
 	private int pulseInterval = 0;
 	private boolean trackJoins = false;
+	private int threadCount = 1;
 	private double[] intraIdDistances = null;
 	private double[] interIdDistances = null;
 	private int intraIdCount, interIdCount;
@@ -267,8 +348,7 @@ public class ClusteringEngine
 
 		tracker.log("Clustering " + clusteringAlgorithm.toString() + " ...");
 
-		ArrayList<Cluster> clusters = runParticleLinkage(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth,
-				candidates, singles);
+		ArrayList<Cluster> clusters = runParticleLinkage(grid, nXBins, nYBins, r2, minx, miny, candidates, singles);
 
 		tracker.progress(1);
 
@@ -278,8 +358,7 @@ public class ClusteringEngine
 	}
 
 	private ArrayList<Cluster> runParticleLinkage(ExtendedClusterPoint[][] grid, int nXBins, int nYBins, double r2,
-			double minx, double miny, double xBinWidth, double yBinWidth, ArrayList<ExtendedClusterPoint> candidates,
-			ArrayList<Cluster> singles)
+			double minx, double miny, ArrayList<ExtendedClusterPoint> candidates, ArrayList<Cluster> singles)
 	{
 		int N = candidates.size();
 		int candidatesProcessed = 0;
@@ -296,22 +375,46 @@ public class ClusteringEngine
 			intraIdDistances = new double[candidates.size()];
 			interIdCount = intraIdCount = 0;
 		}
+
+		if (threadCount > 1)
+		{
+			// Set up for multi-threading
+			threadPool = Executors.newFixedThreadPool(threadCount);
+			
+			// Blocks must be overlapping by one bin to calculate all distances. 
+			// Ensure a minimum overlap to avoid wasting time.
+			xBlock = Math.max(nXBins / threadCount, 3);
+			yBlock = Math.max(nYBins / threadCount, 3);
+			
+			//System.out.printf("Block size %d x %d = %d\n", xBlock, yBlock, countBlocks(nXBins, nYBins));
+			// Increment the block size until the number of blocks to process is just above the thread count.
+			// This reduces thread overhead but still processes across many threads.
+			int counter = 0;
+			while (countBlocks(nXBins, nYBins) > 2*threadCount)
+			{
+				if (counter++ % 2 == 0)
+					xBlock++;
+				else
+					yBlock++;
+			}
+			//System.out.printf("Block size %d x %d = %d\n", xBlock, yBlock, countBlocks(nXBins, nYBins));
+		}
 		
-		while ((nProcessed = joinClosestParticle(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth,
-				clusterId)) > 0)
+		while ((nProcessed = joinClosestParticle(grid, nXBins, nYBins, r2, minx, miny, clusterId)) > 0)
 		{
 			if (tracker.stop())
 				return null;
 			candidatesProcessed += nProcessed;
 			tracker.progress(candidatesProcessed, N);
 		}
+		threadPool = null;
 
 		if (trackJoins)
 		{
 			interIdDistances = Arrays.copyOf(interIdDistances, interIdCount);
 			intraIdDistances = Arrays.copyOf(intraIdDistances, intraIdCount);
 		}
-		
+
 		tracker.log("Processed %d / %d", candidatesProcessed, N);
 		tracker.log("%d candidates linked into %d clusters", candidates.size(), nextClusterId);
 
@@ -366,6 +469,19 @@ public class ClusteringEngine
 		return singles;
 	}
 
+	private int countBlocks(int nXBins, int nYBins)
+	{
+		int nBlocks = 0;
+		for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+		{
+			for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+			{
+				nBlocks++;
+			}
+		}
+		return nBlocks;
+	}
+
 	/**
 	 * Search for the closest pair of particles, one of which is not in a cluster, below the squared radius distance and
 	 * join them
@@ -375,21 +491,159 @@ public class ClusteringEngine
 	 * @param nYBins
 	 * @param r2
 	 *            The squared radius distance
-	 * @param yBinWidth
-	 * @param xBinWidth
 	 * @param miny
 	 * @param minx
 	 * @param clusterId
 	 * @return The number of points assigned to clusters (either 0, 1, or 2)
 	 */
 	private int joinClosestParticle(ExtendedClusterPoint[][] grid, final int nXBins, final int nYBins, final double r2,
-			double minx, double miny, double xBinWidth, double yBinWidth, int[] clusterId)
+			double minx, double miny, int[] clusterId)
+	{
+		ClosestPair closest = null;
+
+		// Blocks must be overlapping by one bin to calculate all distances. There is no point multi-threading
+		// if there are not enough blocks since each overlap is double processed.		
+
+		if (threadPool == null || (nXBins < 3 && nYBins < 3))
+		{
+			int startXBin = 0;
+			int endXBin = nXBins;
+			int startYBin = 0;
+			int endYBin = nYBins;
+			closest = findClosestParticle(grid, nXBins, nYBins, r2, minx, miny, clusterId, startXBin, endXBin,
+					startYBin, endYBin);
+		}
+		else
+		{
+			// Use threads to find the closest pairs in blocks
+			List<Future<?>> futures = new LinkedList<Future<?>>();
+			List<ClosestPair> results = new LinkedList<ClosestPair>();
+
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			{
+				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				{
+					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
+
+					ClosestPair pair = new ClosestPair();
+					results.add(pair);
+					futures.add(threadPool.submit(new ParticleLinkageWorker(pair, grid, nXBins, nYBins, r2, minx, miny,
+							clusterId, startXBin, endXBin, startYBin, endYBin)));
+				}
+			}
+
+			// Finish processing data
+			waitForCompletion(futures);
+			futures.clear();
+
+			// Find the closest pair from all the results
+			for (ClosestPair result : results)
+			{
+				if (result.point1 != null)
+				{
+					if (closest == null || result.distance < closest.distance)
+						closest = result;
+				}
+			}
+		}
+
+		// Assign the closest pair.
+		if (closest != null)
+		{
+			int nProcessed = 1;
+
+			if (closest.point1.inCluster && closest.point2.inCluster)
+			{
+				// Error
+				throw new RuntimeException("Linkage between two particles already in a cluster");
+			}
+			else if (closest.point1.inCluster)
+			{
+				clusterId[closest.point2.id] = clusterId[closest.point1.id];
+				closest.point2.inCluster = true;
+			}
+			else if (closest.point2.inCluster)
+			{
+				clusterId[closest.point1.id] = clusterId[closest.point2.id];
+				closest.point1.inCluster = true;
+			}
+			// Create a new cluster if necessary
+			else
+			{
+				nProcessed = 2;
+				clusterId[closest.point1.id] = clusterId[closest.point2.id] = ++nextClusterId;
+				closest.point1.inCluster = closest.point2.inCluster = true;
+			}
+
+			if (trackJoins)
+			{
+				if (closest.point1.next.id == closest.point2.next.id)
+					intraIdDistances[intraIdCount++] = Math.sqrt(closest.distance);
+				else
+					interIdDistances[interIdCount++] = Math.sqrt(closest.distance);
+			}
+
+			return nProcessed;
+		}
+
+		// This should not happen if the density manager counted neighbours correctly
+		// (i.e. all points should have at least one neighbour)		
+		return 0;
+	}
+
+	/**
+	 * Waits for all threads to complete computation.
+	 * 
+	 * @param futures
+	 */
+	private void waitForCompletion(List<Future<?>> futures)
+	{
+		try
+		{
+			for (Future<?> f : futures)
+			{
+				f.get();
+			}
+		}
+		catch (ExecutionException ex)
+		{
+			ex.printStackTrace();
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Search for the closest pair of particles, one of which is not in a cluster, below the squared radius
+	 * distance
+	 * 
+	 * @param grid
+	 * @param nXBins
+	 * @param nYBins
+	 * @param r2
+	 *            The squared radius distance
+	 * @param miny
+	 * @param minx
+	 * @param clusterId
+	 * @param startXBin
+	 * @param endXBin
+	 * @param startYBin
+	 * @param endYBin
+	 * @return The pair of closest points (or null)
+	 */
+	private ClosestPair findClosestParticle(ExtendedClusterPoint[][] grid, final int nXBins, final int nYBins,
+			final double r2, double minx, double miny, int[] clusterId, int startXBin, int endXBin, int startYBin,
+			int endYBin)
 	{
 		double min = r2;
 		ExtendedClusterPoint pair1 = null, pair2 = null;
-		for (int yBin = 0; yBin < nYBins; yBin++)
+		for (int yBin = startYBin; yBin < endYBin; yBin++)
 		{
-			for (int xBin = 0; xBin < nXBins; xBin++)
+			for (int xBin = startXBin; xBin < endXBin; xBin++)
 			{
 				for (ExtendedClusterPoint c1 = grid[xBin][yBin]; c1 != null; c1 = c1.nextE)
 				{
@@ -489,49 +743,9 @@ public class ClusteringEngine
 				}
 			}
 		}
-
-		// Assign the closest pair.
 		if (pair1 != null)
-		{
-			int nProcessed = 1;
-
-			if (pair1.inCluster && pair2.inCluster)
-			{
-				// Error
-				throw new RuntimeException("Linkage between two particles already in a cluster");
-			}
-			else if (pair1.inCluster)
-			{
-				clusterId[pair2.id] = clusterId[pair1.id];
-				pair2.inCluster = true;
-			}
-			else if (pair2.inCluster)
-			{
-				clusterId[pair1.id] = clusterId[pair2.id];
-				pair1.inCluster = true;
-			}
-			// Create a new cluster if necessary
-			else
-			{
-				nProcessed = 2;
-				clusterId[pair1.id] = clusterId[pair2.id] = ++nextClusterId;
-				pair1.inCluster = pair2.inCluster = true;
-			}
-			
-			if (trackJoins)
-			{
-				if (pair1.next.id == pair2.next.id)
-					intraIdDistances[intraIdCount++] = Math.sqrt(min);
-				else
-					interIdDistances[interIdCount++] = Math.sqrt(min);
-			}
-
-			return nProcessed;
-		}
-
-		// This should not happen if the density manager counted neighbours correctly
-		// (i.e. all points should have at least one neighbour)		
-		return 0;
+			return new ClosestPair(min, pair1, pair2);
+		return null;
 	}
 
 	/**
@@ -1749,5 +1963,22 @@ public class ClusteringEngine
 	public double[] getInterIdDistances()
 	{
 		return interIdDistances;
+	}
+
+	/**
+	 * @return the thread count for multi-thread compatible algorithms
+	 */
+	public int getThreadCount()
+	{
+		return threadCount;
+	}
+
+	/**
+	 * @param threadCount
+	 *            the thread count for multi-thread compatible algorithms
+	 */
+	public void setThreadCount(int threadCount)
+	{
+		this.threadCount = threadCount;
 	}
 }
