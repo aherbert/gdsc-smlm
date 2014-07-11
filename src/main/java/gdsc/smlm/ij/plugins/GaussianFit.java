@@ -21,6 +21,7 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
+import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -53,7 +54,7 @@ import java.util.Arrays;
  */
 public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 {
-	private final static String TITLE = "Gaussian Fit"; 
+	private final static String TITLE = "Gaussian Fit";
 	private int smooth = (int) Prefs.get(Constants.smooth, 0);
 	private int boxSize = (int) Prefs.get(Constants.boxSize, 1);
 	private float background = (float) Prefs.get(Constants.background, 0);
@@ -366,7 +367,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		}
 
 		maxIndices = getMaxima(data, width, height);
-		
+
 		if (topN > 0 && maxIndices.length > topN)
 		{
 			maxIndices = Sort.sort(maxIndices, data);
@@ -544,7 +545,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			{
 				if (isLogProgress())
 				{
-					IJ.log("Failed to fit peak" + ((maxIndices.length > 1) ? "s" : "") + 
+					IJ.log("Failed to fit peak" + ((maxIndices.length > 1) ? "s" : "") +
 							((fitResult != null) ? getReason(fitResult.getStatus()) : ""));
 				}
 				imp.setOverlay(null);
@@ -633,7 +634,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			case FAILED_TO_CONVERGE:
 				return ": Failed to converge";
 			default:
-				return ": " + status.toString().toLowerCase(null).replace("_", " ");
+				return ": " + status.toString().toLowerCase().replace("_", " ");
 		}
 	}
 
@@ -803,6 +804,16 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			chiSquared = fitResult.getError();
 			float[] params = fitResult.getParameters();
 			convertParameters(params);
+			// Check the fit is within the data
+			if (params[Gaussian2DFunction.X_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > width ||
+					params[Gaussian2DFunction.Y_POSITION] < 0 || params[Gaussian2DFunction.Y_POSITION] > height)
+			{
+				fitResult = new FitResult(FitStatus.COORDINATES_MOVED, fitResult.getDegreesOfFreedom(),
+						fitResult.getError(), fitResult.getInitialParameters(), fitResult.getParameters(),
+						fitResult.getParameterStdDev(), fitResult.getNumberOfPeaks(),
+						fitResult.getNumberOfFittedParameters(), fitResult.getStatusData());
+				return null;
+			}
 			return params;
 		}
 
@@ -1053,7 +1064,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	}
 
 	/**
-	 * @param topN the topN to set
+	 * @param topN
+	 *            the topN to set
 	 */
 	public void setTopN(int topN)
 	{
