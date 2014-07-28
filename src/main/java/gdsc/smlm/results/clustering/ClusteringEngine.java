@@ -596,9 +596,9 @@ public class ClusteringEngine
 	private int countBlocks(int nXBins, int nYBins)
 	{
 		int nBlocks = 0;
-		for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+		for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 		{
-			for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+			for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 			{
 				nBlocks++;
 			}
@@ -639,10 +639,10 @@ public class ClusteringEngine
 			List<Future<?>> futures = new LinkedList<Future<?>>();
 			List<ClosestPair> results = new LinkedList<ClosestPair>();
 
-			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
 				int endYBin = Math.min(nYBins, startYBin + yBlock);
-				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
 					int endXBin = Math.min(nXBins, startXBin + xBlock);
 					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
@@ -1403,10 +1403,10 @@ public class ClusteringEngine
 			List<Future<?>> futures = new LinkedList<Future<?>>();
 			List<ClosestPair> results = new LinkedList<ClosestPair>();
 
-			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
 				int endYBin = Math.min(nYBins, startYBin + yBlock);
-				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
 					int endXBin = Math.min(nXBins, startXBin + xBlock);
 					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
@@ -1417,6 +1417,16 @@ public class ClusteringEngine
 							startXBin, endXBin, startYBin, endYBin)));
 				}
 			}
+//			for (int startYBin = 0; startYBin < nYBins; startYBin++)
+//			{
+//				for (int startXBin = 0; startXBin < nXBins; startXBin++)
+//				{
+//					ClosestPair pair = new ClosestPair();
+//					results.add(pair);
+//					futures.add(threadPool.submit(new ClosestWorker(pair, grid, nXBins, nYBins, r2,
+//							startXBin, startXBin+1, startYBin, startYBin+1, true)));
+//				}
+//			}
 
 			// Finish processing data
 			waitForCompletion(futures);
@@ -1502,7 +1512,7 @@ public class ClusteringEngine
 	 * @param endXBin
 	 * @param startYBin
 	 * @param endYBin
-	 * @return True if a join was made
+	 * @return The closest pair
 	 */
 	private ClosestPair findClosest(Cluster[][] grid, final int nXBins, final int nYBins, final double r2,
 			int startXBin, int endXBin, int startYBin, int endYBin)
@@ -1542,7 +1552,7 @@ public class ClusteringEngine
 							c2.neighbour++;
 						}
 					}
-
+					
 					if (yBin < nYBins - 1)
 					{
 						for (Cluster c2 = grid[xBin][yBin + 1]; c2 != null; c2 = c2.next)
@@ -1766,10 +1776,10 @@ public class ClusteringEngine
 			List<Future<?>> futures = new LinkedList<Future<?>>();
 			List<ClosestPair> results = new LinkedList<ClosestPair>();
 
-			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
 				int endYBin = Math.min(nYBins, startYBin + yBlock);
-				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
 					int endXBin = Math.min(nXBins, startXBin + xBlock);
 					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
@@ -2022,10 +2032,10 @@ public class ClusteringEngine
 			List<Future<?>> futures = new LinkedList<Future<?>>();
 			List<ClosestPair> results = new LinkedList<ClosestPair>();
 
-			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
 				int endYBin = Math.min(nYBins, startYBin + yBlock);
-				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
 					int endXBin = Math.min(nXBins, startXBin + xBlock);
 
