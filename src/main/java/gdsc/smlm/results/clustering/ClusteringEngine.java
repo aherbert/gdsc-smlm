@@ -38,11 +38,20 @@ public class ClusteringEngine
 	private class ClosestPair
 	{
 		double distance;
-		ExtendedClusterPoint point1, point2;
+		int time;
+		Object point1, point2;
 
-		public ClosestPair(double distance, ExtendedClusterPoint point1, ExtendedClusterPoint point2)
+		public ClosestPair(double distance, Object point1, Object point2)
 		{
 			this.distance = distance;
+			this.point1 = point1;
+			this.point2 = point2;
+		}
+
+		public ClosestPair(double distance, int time, Object point1, Object point2)
+		{
+			this.distance = distance;
+			this.time = time;
 			this.point1 = point1;
 			this.point2 = point2;
 		}
@@ -65,14 +74,13 @@ public class ClusteringEngine
 		double r2;
 		double minx;
 		double miny;
-		int[] clusterId;
 		int startXBin;
 		int endXBin;
 		int startYBin;
 		int endYBin;
 
 		public ParticleLinkageWorker(ClosestPair pair, ExtendedClusterPoint[][] grid, int nXBins, int nYBins,
-				double r2, double minx, double miny, int[] clusterId, int startXBin, int endXBin, int startYBin,
+				double r2, double minx, double miny, int startXBin, int endXBin, int startYBin,
 				int endYBin)
 		{
 			this.pair = pair;
@@ -82,7 +90,6 @@ public class ClusteringEngine
 			this.r2 = r2;
 			this.minx = minx;
 			this.miny = miny;
-			this.clusterId = clusterId;
 			this.startXBin = startXBin;
 			this.endXBin = endXBin;
 			this.startYBin = startYBin;
@@ -96,11 +103,124 @@ public class ClusteringEngine
 		 */
 		public void run()
 		{
-			ClosestPair result = findClosestParticle(grid, nXBins, nYBins, r2, minx, miny, clusterId, startXBin,
+			ClosestPair result = findClosestParticle(grid, nXBins, nYBins, r2, minx, miny, startXBin,
 					endXBin, startYBin, endYBin);
 			if (result != null)
 			{
 				pair.distance = result.distance;
+				pair.point1 = result.point1;
+				pair.point2 = result.point2;
+			}
+		}
+	}
+
+	/**
+	 * Use a runnable to allow multi-threaded operation. Input parameters
+	 * that are manipulated should have synchronized methods.
+	 */
+	private class ClosestWorker implements Runnable
+	{
+		ClosestPair pair;
+		Cluster[][] grid;
+		int nXBins;
+		int nYBins;
+		double r2;
+		int startXBin;
+		int endXBin;
+		int startYBin;
+		int endYBin;
+
+		public ClosestWorker(ClosestPair pair, Cluster[][] grid, int nXBins, int nYBins,
+				double r2, int startXBin, int endXBin, int startYBin,
+				int endYBin)
+		{
+			this.pair = pair;
+			this.grid = grid;
+			this.nXBins = nXBins;
+			this.nYBins = nYBins;
+			this.r2 = r2;
+			this.startXBin = startXBin;
+			this.endXBin = endXBin;
+			this.startYBin = startYBin;
+			this.endYBin = endYBin;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			ClosestPair result = findClosest(grid, nXBins, nYBins, r2, startXBin,				
+					endXBin, startYBin, endYBin);
+			if (result != null)
+			{
+				pair.distance = result.distance;
+				pair.point1 = result.point1;
+				pair.point2 = result.point2;
+			}
+		}
+	}
+
+	/**
+	 * Use a runnable to allow multi-threaded operation. Input parameters
+	 * that are manipulated should have synchronized methods.
+	 */
+	private class ClosestPriorityWorker implements Runnable
+	{
+		boolean timePriority;
+		ClosestPair pair;
+		TimeCluster[][] grid;
+		int nXBins;
+		int nYBins;
+		double r2;
+		int time;
+		int startXBin;
+		int endXBin;
+		int startYBin;
+		int endYBin;
+
+		public ClosestPriorityWorker(boolean timePriority, ClosestPair pair, TimeCluster[][] grid, int nXBins, int nYBins,
+				double r2, int time, int startXBin, int endXBin, int startYBin,
+				int endYBin)
+		{
+			this.timePriority = timePriority;
+			this.pair = pair;
+			this.grid = grid;
+			this.nXBins = nXBins;
+			this.nYBins = nYBins;
+			this.r2 = r2;
+			this.time = time;
+			this.startXBin = startXBin;
+			this.endXBin = endXBin;
+			this.startYBin = startYBin;
+			this.endYBin = endYBin;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			ClosestPair result = null;
+			if (timePriority)
+			{
+				result = findClosestTimePriority(grid, nXBins, nYBins, r2, time, startXBin,				
+					endXBin, startYBin, endYBin);
+			}
+			else
+			{
+				result = findClosestDistancePriority(grid, nXBins, nYBins, r2, time, startXBin,				
+						endXBin, startYBin, endYBin);
+			}
+			
+			if (result != null)
+			{
+				pair.distance = result.distance;
+				pair.time = result.time;
 				pair.point1 = result.point1;
 				pair.point2 = result.point2;
 			}
@@ -273,6 +393,7 @@ public class ClusteringEngine
 		}
 
 		tracker.progress(1);
+		threadPool = null;
 
 		tracker.log("Found %d clusters", (clusters == null) ? 0 : clusters.size());
 
@@ -376,30 +497,7 @@ public class ClusteringEngine
 			interIdCount = intraIdCount = 0;
 		}
 
-		if (threadCount > 1)
-		{
-			// Set up for multi-threading
-			threadPool = Executors.newFixedThreadPool(threadCount);
-			
-			// Blocks must be overlapping by one bin to calculate all distances. 
-			// Ensure a minimum overlap to avoid wasting time.
-			xBlock = Math.max(nXBins / threadCount, 3);
-			yBlock = Math.max(nYBins / threadCount, 3);
-			
-			//System.out.printf("Block size %d x %d = %d\n", xBlock, yBlock, countBlocks(nXBins, nYBins));
-			// Increment the block size until the number of blocks to process is just above the thread count.
-			// This reduces thread overhead but still processes across many threads.
-			int counter = 0;
-			while (countBlocks(nXBins, nYBins) > 2*threadCount)
-			{
-				if (counter++ % 2 == 0)
-					xBlock++;
-				else
-					yBlock++;
-			}
-			//System.out.printf("Block size %d x %d = %d\n", xBlock, yBlock, countBlocks(nXBins, nYBins));
-		}
-		
+		initialiseMultithreading(nXBins, nYBins);
 		while ((nProcessed = joinClosestParticle(grid, nXBins, nYBins, r2, minx, miny, clusterId)) > 0)
 		{
 			if (tracker.stop())
@@ -407,7 +505,6 @@ public class ClusteringEngine
 			candidatesProcessed += nProcessed;
 			tracker.progress(candidatesProcessed, N);
 		}
-		threadPool = null;
 
 		if (trackJoins)
 		{
@@ -469,6 +566,33 @@ public class ClusteringEngine
 		return singles;
 	}
 
+	private void initialiseMultithreading(int nXBins, int nYBins)
+	{
+		if (threadCount > 1)
+		{
+			// Set up for multi-threading
+			threadPool = Executors.newFixedThreadPool(threadCount);
+			
+			// Blocks must be overlapping by one bin to calculate all distances. 
+			// Ensure a minimum overlap to avoid wasting time.
+			xBlock = Math.max(nXBins / threadCount, 3);
+			yBlock = Math.max(nYBins / threadCount, 3);
+			
+			//System.out.printf("Block size %d x %d = %d\n", xBlock, yBlock, countBlocks(nXBins, nYBins));
+			// Increment the block size until the number of blocks to process is just above the thread count.
+			// This reduces thread overhead but still processes across many threads.
+			int counter = 0;
+			while (countBlocks(nXBins, nYBins) > 2*threadCount)
+			{
+				if (counter++ % 2 == 0)
+					xBlock++;
+				else
+					yBlock++;
+			}
+			//System.out.printf("Block size %d x %d = %d\n", xBlock, yBlock, countBlocks(nXBins, nYBins));
+		}
+	}
+
 	private int countBlocks(int nXBins, int nYBins)
 	{
 		int nBlocks = 0;
@@ -506,12 +630,8 @@ public class ClusteringEngine
 
 		if (threadPool == null || (nXBins < 3 && nYBins < 3))
 		{
-			int startXBin = 0;
-			int endXBin = nXBins;
-			int startYBin = 0;
-			int endYBin = nYBins;
-			closest = findClosestParticle(grid, nXBins, nYBins, r2, minx, miny, clusterId, startXBin, endXBin,
-					startYBin, endYBin);
+			closest = findClosestParticle(grid, nXBins, nYBins, r2, minx, miny, 0, nXBins,
+					0, nYBins);
 		}
 		else
 		{
@@ -530,7 +650,7 @@ public class ClusteringEngine
 					ClosestPair pair = new ClosestPair();
 					results.add(pair);
 					futures.add(threadPool.submit(new ParticleLinkageWorker(pair, grid, nXBins, nYBins, r2, minx, miny,
-							clusterId, startXBin, endXBin, startYBin, endYBin)));
+							startXBin, endXBin, startYBin, endYBin)));
 				}
 			}
 
@@ -552,34 +672,37 @@ public class ClusteringEngine
 		// Assign the closest pair.
 		if (closest != null)
 		{
+			ExtendedClusterPoint pair1 = (ExtendedClusterPoint) closest.point1;
+			ExtendedClusterPoint pair2 = (ExtendedClusterPoint) closest.point2;
+			
 			int nProcessed = 1;
 
-			if (closest.point1.inCluster && closest.point2.inCluster)
+			if (pair1.inCluster && pair2.inCluster)
 			{
 				// Error
 				throw new RuntimeException("Linkage between two particles already in a cluster");
 			}
-			else if (closest.point1.inCluster)
+			else if (pair1.inCluster)
 			{
-				clusterId[closest.point2.id] = clusterId[closest.point1.id];
-				closest.point2.inCluster = true;
+				clusterId[pair2.id] = clusterId[pair1.id];
+				pair2.inCluster = true;
 			}
-			else if (closest.point2.inCluster)
+			else if (pair2.inCluster)
 			{
-				clusterId[closest.point1.id] = clusterId[closest.point2.id];
-				closest.point1.inCluster = true;
+				clusterId[pair1.id] = clusterId[pair2.id];
+				pair1.inCluster = true;
 			}
 			// Create a new cluster if necessary
 			else
 			{
 				nProcessed = 2;
-				clusterId[closest.point1.id] = clusterId[closest.point2.id] = ++nextClusterId;
-				closest.point1.inCluster = closest.point2.inCluster = true;
+				clusterId[pair1.id] = clusterId[pair2.id] = ++nextClusterId;
+				pair1.inCluster = pair2.inCluster = true;
 			}
 
 			if (trackJoins)
 			{
-				if (closest.point1.next.id == closest.point2.next.id)
+				if (pair1.next.id == pair2.next.id)
 					intraIdDistances[intraIdCount++] = Math.sqrt(closest.distance);
 				else
 					interIdDistances[interIdCount++] = Math.sqrt(closest.distance);
@@ -628,7 +751,6 @@ public class ClusteringEngine
 	 *            The squared radius distance
 	 * @param miny
 	 * @param minx
-	 * @param clusterId
 	 * @param startXBin
 	 * @param endXBin
 	 * @param startYBin
@@ -636,7 +758,7 @@ public class ClusteringEngine
 	 * @return The pair of closest points (or null)
 	 */
 	private ClosestPair findClosestParticle(ExtendedClusterPoint[][] grid, final int nXBins, final int nYBins,
-			final double r2, double minx, double miny, int[] clusterId, int startXBin, int endXBin, int startYBin,
+			final double r2, double minx, double miny, int startXBin, int endXBin, int startYBin,
 			int endYBin)
 	{
 		double min = r2;
@@ -1232,6 +1354,7 @@ public class ClusteringEngine
 		int candidatesProcessed = 0;
 		int s = singles.size();
 		final boolean trackProgress = (tracker.getClass() != NullTrackProgress.class);
+		initialiseMultithreading(nXBins, nYBins);
 		while (joinClosest(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth, singles))
 		{
 			if (tracker.stop())
@@ -1268,14 +1391,129 @@ public class ClusteringEngine
 	private boolean joinClosest(Cluster[][] grid, final int nXBins, final int nYBins, final double r2, double minx,
 			double miny, double xBinWidth, double yBinWidth, ArrayList<Cluster> singles)
 	{
-		double min = r2;
-		Cluster pair1 = null, pair2 = null;
-		final double neighbourDistance = 2 * r2;
+		ClosestPair closest = null;
+
+		if (threadPool == null || (nXBins < 3 && nYBins < 3))
+		{
+			closest = findClosest(grid, nXBins, nYBins, r2, 0, nXBins, 0, nYBins);
+		}
+		else
+		{
+			// Use threads to find the closest pairs in blocks
+			List<Future<?>> futures = new LinkedList<Future<?>>();
+			List<ClosestPair> results = new LinkedList<ClosestPair>();
+
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			{
+				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				{
+					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
+
+					ClosestPair pair = new ClosestPair();
+					results.add(pair);
+					futures.add(threadPool.submit(new ClosestWorker(pair, grid, nXBins, nYBins, r2,
+							startXBin, endXBin, startYBin, endYBin)));
+				}
+			}
+
+			// Finish processing data
+			waitForCompletion(futures);
+			futures.clear();
+
+			// Find the closest pair from all the results
+			for (ClosestPair result : results)
+			{
+				if (result.point1 != null)
+				{
+					if (closest == null || result.distance < closest.distance)
+						closest = result;
+				}
+			}
+		}
+
+		// Check for singles
 		for (int yBin = 0; yBin < nYBins; yBin++)
 		{
 			for (int xBin = 0; xBin < nXBins; xBin++)
 			{
 				Cluster previous = null;
+				for (Cluster c1 = grid[xBin][yBin]; c1 != null; c1 = c1.next)
+				{
+					if (c1.neighbour == 0)
+					{
+						// Add singles to the singles list and remove from the grid
+						singles.add(c1);
+						if (previous == null)
+							grid[xBin][yBin] = c1.next;
+						else
+							previous.next = c1.next;
+					}
+					else
+					{
+						previous = c1;
+						c1.neighbour = 0;
+					}
+				}
+			}
+		}
+
+		// Join the closest pair
+		if (closest != null)
+		{
+			Cluster pair1 = (Cluster) closest.point1;
+			Cluster pair2 = (Cluster) closest.point2;
+			
+			pair2.add(pair1);
+
+			remove(grid, pair1);
+
+			// Reassign the updated grid position
+			final int xBin = (int) ((pair2.x - minx) / xBinWidth);
+			final int yBin = (int) ((pair2.y - miny) / yBinWidth);
+
+			if (xBin != pair2.xBin || yBin != pair2.yBin)
+			{
+				remove(grid, pair2);
+
+				// Build a single linked list
+				pair2.xBin = xBin;
+				pair2.yBin = yBin;
+				pair2.next = grid[xBin][yBin];
+				grid[xBin][yBin] = pair2;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Search for the closest pair of clusters that are below the squared radius distance
+	 * 
+	 * @param grid
+	 * @param nXBins
+	 * @param nYBins
+	 * @param r2
+	 *            The squared radius distance
+	 * @param startXBin
+	 * @param endXBin
+	 * @param startYBin
+	 * @param endYBin
+	 * @return True if a join was made
+	 */
+	private ClosestPair findClosest(Cluster[][] grid, final int nXBins, final int nYBins, final double r2,
+			int startXBin, int endXBin, int startYBin, int endYBin)
+	{
+		double min = r2;
+		Cluster pair1 = null, pair2 = null;
+		final double neighbourDistance = 2 * r2;
+		for (int yBin = startYBin; yBin < endYBin; yBin++)
+		{
+			for (int xBin = startXBin; xBin < endXBin; xBin++)
+			{
 				for (Cluster c1 = grid[xBin][yBin]; c1 != null; c1 = c1.next)
 				{
 					// Build a list of which cells to compare up to a maximum of 4
@@ -1388,52 +1626,12 @@ public class ClusteringEngine
 						pair1 = c1;
 						pair2 = other;
 					}
-
-					// Check for singles
-					if (c1.neighbour == 0)
-					{
-						// Add singles to the singles list and remove from the grid
-						singles.add(c1);
-						if (previous == null)
-							grid[xBin][yBin] = c1.next;
-						else
-							previous.next = c1.next;
-					}
-					else
-					{
-						previous = c1;
-						c1.neighbour = 0;
-					}
 				}
 			}
 		}
-
-		// Join the closest pair
 		if (pair1 != null)
-		{
-			pair2.add(pair1);
-
-			remove(grid, pair1);
-
-			// Reassign the updated grid position
-			final int xBin = (int) ((pair2.x - minx) / xBinWidth);
-			final int yBin = (int) ((pair2.y - miny) / yBinWidth);
-
-			if (xBin != pair2.xBin || yBin != pair2.yBin)
-			{
-				remove(grid, pair2);
-
-				// Build a single linked list
-				pair2.xBin = xBin;
-				pair2.yBin = yBin;
-				pair2.next = grid[xBin][yBin];
-				grid[xBin][yBin] = pair2;
-			}
-
-			return true;
-		}
-
-		return false;
+			return new ClosestPair(min, pair1, pair2);
+		return null;
 	}
 
 	/**
@@ -1494,6 +1692,7 @@ public class ClusteringEngine
 		int s = singles.size();
 		final boolean trackProgress = (tracker.getClass() != NullTrackProgress.class);
 		TimeCluster[][] newGrid = convertGrid(grid, nXBins, nYBins);
+		initialiseMultithreading(nXBins, nYBins);
 		while (joinClosestTimePriority(newGrid, nXBins, nYBins, r2, time, minx, miny, xBinWidth, yBinWidth, singles))
 		{
 			if (tracker.stop())
@@ -1553,7 +1752,126 @@ public class ClusteringEngine
 	 * @return True if a join was made
 	 */
 	private boolean joinClosestTimePriority(TimeCluster[][] grid, final int nXBins, final int nYBins, final double r2,
-			int time, double minx, double miny, double xBinWidth, double yBinWidth, ArrayList<Cluster> singles)
+			final int time, double minx, double miny, double xBinWidth, double yBinWidth, ArrayList<Cluster> singles)
+	{
+		ClosestPair closest = null;
+
+		if (threadPool == null || (nXBins < 3 && nYBins < 3))
+		{
+			closest = findClosestTimePriority(grid, nXBins, nYBins, r2, time, 0, nXBins, 0, nYBins);
+		}
+		else
+		{
+			// Use threads to find the closest pairs in blocks
+			List<Future<?>> futures = new LinkedList<Future<?>>();
+			List<ClosestPair> results = new LinkedList<ClosestPair>();
+
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			{
+				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				{
+					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
+
+					ClosestPair pair = new ClosestPair();
+					results.add(pair);
+					futures.add(threadPool.submit(new ClosestPriorityWorker(true, pair, grid, nXBins, nYBins, r2, time,
+							startXBin, endXBin, startYBin, endYBin)));
+				}
+			}
+
+			// Finish processing data
+			waitForCompletion(futures);
+			futures.clear();
+
+			// Find the closest pair from all the results
+			for (ClosestPair result : results)
+			{
+				if (result.point1 != null)
+				{
+					if (closest == null || (result.time < closest.time) || 
+							(result.time <= closest.time && result.distance < closest.distance))
+						closest = result;
+				}
+			}
+		}
+
+		// Check for singles
+		for (int yBin = 0; yBin < nYBins; yBin++)
+		{
+			for (int xBin = 0; xBin < nXBins; xBin++)
+			{
+				TimeCluster previous = null;
+				for (TimeCluster c1 = grid[xBin][yBin]; c1 != null; c1 = (TimeCluster) c1.next)
+				{
+					if (c1.neighbour == 0)
+					{
+						// Add singles to the singles list and remove from the grid
+						singles.add(c1);
+						if (previous == null)
+							grid[xBin][yBin] = (TimeCluster) c1.next;
+						else
+							previous.next = c1.next;
+					}
+					else
+					{
+						previous = c1;
+						c1.neighbour = 0;
+					}
+				}
+			}
+		}
+
+		// Join the closest pair
+		if (closest != null)
+		{
+			TimeCluster pair1 = (TimeCluster) closest.point1;
+			TimeCluster pair2 = (TimeCluster) closest.point2;
+
+			pair2.add(pair1);
+
+			remove(grid, pair1);
+
+			// Reassign the updated grid position
+			final int xBin = (int) ((pair2.x - minx) / xBinWidth);
+			final int yBin = (int) ((pair2.y - miny) / yBinWidth);
+
+			if (xBin != pair2.xBin || yBin != pair2.yBin)
+			{
+				remove(grid, pair2);
+
+				// Build a single linked list
+				pair2.xBin = xBin;
+				pair2.yBin = yBin;
+				pair2.next = grid[xBin][yBin];
+				grid[xBin][yBin] = pair2;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Search for the closest pair of clusters that are below the squared radius distance. Find the closest in
+	 * time and then distance.
+	 * 
+	 * @param grid
+	 * @param nXBins
+	 * @param nYBins
+	 * @param r2
+	 *            The squared radius distance
+	 * @param time
+	 * @param startXBin
+	 * @param endXBin
+	 * @param startYBin
+	 * @param endYBin
+	 * @return True if a join was made
+	 */
+	private ClosestPair findClosestTimePriority(TimeCluster[][] grid, final int nXBins, final int nYBins, final double r2, final int time,
+			int startXBin, int endXBin, int startYBin, int endYBin)
 	{
 		double minD = Double.POSITIVE_INFINITY;
 		int minT = Integer.MAX_VALUE;
@@ -1561,11 +1879,10 @@ public class ClusteringEngine
 		final double neighbourDistance = 2 * r2;
 		TimeCluster[] neighbourCells = new TimeCluster[5];
 		final boolean checkPulseInterval = pulseInterval > 0;
-		for (int yBin = 0; yBin < nYBins; yBin++)
+		for (int yBin = startYBin; yBin < endYBin; yBin++)
 		{
-			for (int xBin = 0; xBin < nXBins; xBin++)
+			for (int xBin = startXBin; xBin < endXBin; xBin++)
 			{
-				TimeCluster previous = null;
 				for (TimeCluster c1 = grid[xBin][yBin]; c1 != null; c1 = (TimeCluster) c1.next)
 				{
 					// Build a list of which cells to compare up to a maximum of 4
@@ -1607,7 +1924,7 @@ public class ClusteringEngine
 								if (d2 < neighbourDistance)
 								{
 									// Check if the two clusters can be merged
-									if (!c1.validUnion(c2))
+									if (gap == 0 && !c1.validUnion(c2))
 										continue;
 
 									// Count any possible neighbour
@@ -1635,54 +1952,14 @@ public class ClusteringEngine
 						pair1 = c1;
 						pair2 = other;
 					}
-
-					// Check for singles
-					if (c1.neighbour == 0)
-					{
-						// Add singles to the singles list and remove from the grid
-						singles.add(c1);
-						if (previous == null)
-							grid[xBin][yBin] = (TimeCluster) c1.next;
-						else
-							previous.next = c1.next;
-					}
-					else
-					{
-						previous = c1;
-						c1.neighbour = 0;
-					}
 				}
 			}
 		}
-
-		// Join the closest pair
 		if (pair1 != null)
-		{
-			pair2.add(pair1);
-
-			remove(grid, pair1);
-
-			// Reassign the updated grid position
-			final int xBin = (int) ((pair2.x - minx) / xBinWidth);
-			final int yBin = (int) ((pair2.y - miny) / yBinWidth);
-
-			if (xBin != pair2.xBin || yBin != pair2.yBin)
-			{
-				remove(grid, pair2);
-
-				// Build a single linked list
-				pair2.xBin = xBin;
-				pair2.yBin = yBin;
-				pair2.next = grid[xBin][yBin];
-				grid[xBin][yBin] = pair2;
-			}
-
-			return true;
-		}
-
-		return false;
+			return new ClosestPair(minD, minT, pair1, pair2);
+		return null;
 	}
-
+	
 	private ArrayList<Cluster> runClosestDistancePriority(Cluster[][] grid, int nXBins, int nYBins, double r2,
 			int time, double minx, double miny, double xBinWidth, double yBinWidth, ArrayList<Cluster> candidates,
 			ArrayList<Cluster> singles)
@@ -1692,6 +1969,7 @@ public class ClusteringEngine
 		int s = singles.size();
 		final boolean trackProgress = (tracker.getClass() != NullTrackProgress.class);
 		TimeCluster[][] newGrid = convertGrid(grid, nXBins, nYBins);
+		initialiseMultithreading(nXBins, nYBins);
 		while (joinClosestDistancePriority(newGrid, nXBins, nYBins, r2, time, minx, miny, xBinWidth, yBinWidth, singles))
 		{
 			if (tracker.stop())
@@ -1732,17 +2010,134 @@ public class ClusteringEngine
 			final double r2, int time, double minx, double miny, double xBinWidth, double yBinWidth,
 			ArrayList<Cluster> singles)
 	{
+		ClosestPair closest = null;
+
+		if (threadPool == null || (nXBins < 3 && nYBins < 3))
+		{
+			closest = findClosestDistancePriority(grid, nXBins, nYBins, r2, time, 0, nXBins, 0, nYBins);
+		}
+		else
+		{
+			// Use threads to find the closest pairs in blocks
+			List<Future<?>> futures = new LinkedList<Future<?>>();
+			List<ClosestPair> results = new LinkedList<ClosestPair>();
+
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock - 1)
+			{
+				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock - 1)
+				{
+					int endXBin = Math.min(nXBins, startXBin + xBlock);
+
+					ClosestPair pair = new ClosestPair();
+					results.add(pair);
+					futures.add(threadPool.submit(new ClosestPriorityWorker(false, pair, grid, nXBins, nYBins, r2, time,
+							startXBin, endXBin, startYBin, endYBin)));
+				}
+			}
+
+			// Finish processing data
+			waitForCompletion(futures);
+			futures.clear();
+
+			// Find the closest pair from all the results
+			for (ClosestPair result : results)
+			{
+				if (result.point1 != null)
+				{
+					if (closest == null || (result.distance < closest.distance) || 
+							(result.distance <= closest.distance && result.time < closest.time))
+						closest = result;
+				}
+			}
+		}
+
+		// Check for singles
+		for (int yBin = 0; yBin < nYBins; yBin++)
+		{
+			for (int xBin = 0; xBin < nXBins; xBin++)
+			{
+				TimeCluster previous = null;
+				for (TimeCluster c1 = grid[xBin][yBin]; c1 != null; c1 = (TimeCluster) c1.next)
+				{
+					if (c1.neighbour == 0)
+					{
+						// Add singles to the singles list and remove from the grid
+						singles.add(c1);
+						if (previous == null)
+							grid[xBin][yBin] = (TimeCluster) c1.next;
+						else
+							previous.next = c1.next;
+					}
+					else
+					{
+						previous = c1;
+						c1.neighbour = 0;
+					}
+				}
+			}
+		}
+
+		// Join the closest pair
+		if (closest != null)
+		{
+			TimeCluster pair1 = (TimeCluster) closest.point1;
+			TimeCluster pair2 = (TimeCluster) closest.point2;
+
+			pair2.add(pair1);
+
+			remove(grid, pair1);
+
+			// Reassign the updated grid position
+			final int xBin = (int) ((pair2.x - minx) / xBinWidth);
+			final int yBin = (int) ((pair2.y - miny) / yBinWidth);
+
+			if (xBin != pair2.xBin || yBin != pair2.yBin)
+			{
+				remove(grid, pair2);
+
+				// Build a single linked list
+				pair2.xBin = xBin;
+				pair2.yBin = yBin;
+				pair2.next = grid[xBin][yBin];
+				grid[xBin][yBin] = pair2;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+		
+	/**
+	 * Search for the closest pair of clusters that are below the squared radius distance. Find the closest in
+	 * distance and then time.
+	 * 
+	 * @param grid
+	 * @param nXBins
+	 * @param nYBins
+	 * @param r2
+	 *            The squared radius distance
+	 * @param time
+	 * @param startXBin
+	 * @param endXBin
+	 * @param startYBin
+	 * @param endYBin
+	 * @return True if a join was made
+	 */
+	private ClosestPair findClosestDistancePriority(TimeCluster[][] grid, final int nXBins, final int nYBins, final double r2, final int time,
+			int startXBin, int endXBin, int startYBin, int endYBin)
+	{		
 		double minD = Double.POSITIVE_INFINITY;
 		int minT = Integer.MAX_VALUE;
 		TimeCluster pair1 = null, pair2 = null;
 		final double neighbourDistance = 2 * r2;
 		TimeCluster[] neighbourCells = new TimeCluster[5];
 		final boolean checkPulseInterval = pulseInterval > 0;
-		for (int yBin = 0; yBin < nYBins; yBin++)
+		for (int yBin = startYBin; yBin < endYBin; yBin++)
 		{
-			for (int xBin = 0; xBin < nXBins; xBin++)
+			for (int xBin = startXBin; xBin < endXBin; xBin++)
 			{
-				TimeCluster previous = null;
 				for (TimeCluster c1 = grid[xBin][yBin]; c1 != null; c1 = (TimeCluster) c1.next)
 				{
 					// Build a list of which cells to compare up to a maximum of 4
@@ -1783,7 +2178,7 @@ public class ClusteringEngine
 								if (d2 < neighbourDistance)
 								{
 									// Check if the two clusters can be merged
-									if (!c1.validUnion(c2))
+									if (gap == 0 && !c1.validUnion(c2))
 										continue;
 
 									// Count any possible neighbour
@@ -1811,52 +2206,12 @@ public class ClusteringEngine
 						pair1 = c1;
 						pair2 = other;
 					}
-
-					// Check for singles
-					if (c1.neighbour == 0)
-					{
-						// Add singles to the singles list and remove from the grid
-						singles.add(c1);
-						if (previous == null)
-							grid[xBin][yBin] = (TimeCluster) c1.next;
-						else
-							previous.next = c1.next;
-					}
-					else
-					{
-						previous = c1;
-						c1.neighbour = 0;
-					}
 				}
 			}
 		}
-
-		// Join the closest pair
 		if (pair1 != null)
-		{
-			pair2.add(pair1);
-
-			remove(grid, pair1);
-
-			// Reassign the updated grid position
-			final int xBin = (int) ((pair2.x - minx) / xBinWidth);
-			final int yBin = (int) ((pair2.y - miny) / yBinWidth);
-
-			if (xBin != pair2.xBin || yBin != pair2.yBin)
-			{
-				remove(grid, pair2);
-
-				// Build a single linked list
-				pair2.xBin = xBin;
-				pair2.yBin = yBin;
-				pair2.next = grid[xBin][yBin];
-				grid[xBin][yBin] = pair2;
-			}
-
-			return true;
-		}
-
-		return false;
+			return new ClosestPair(minD, minT, pair1, pair2);
+		return null;
 	}
 
 	/**
