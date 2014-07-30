@@ -149,7 +149,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			{
 				unit = "um";
 				unitPerPixel /= 1000.0;
-			}			
+			}
 			cal.setUnit(unit);
 			cal.pixelHeight = cal.pixelWidth = unitPerPixel;
 			imp.setCalibration(cal);
@@ -600,17 +600,22 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	{
 		if (aquireLock())
 		{
-			createImage();
-			nextRepaintSize = (int) (size + size * repaintInterval);
+			try
+			{
+				createImage();
+				nextRepaintSize = (int) (size + size * repaintInterval);
 
-			// We direct manipulate the pixel buffer so this is not necessary
-			//ImageProcessor ip = imp.getProcessor();
-			//ip.setPixels(newPixels);
-			//imp.setProcessor(ip);
+				// We direct manipulate the pixel buffer so this is not necessary
+				//ImageProcessor ip = imp.getProcessor();
+				//ip.setPixels(newPixels);
+				//imp.setProcessor(ip);
 
-			imp.updateAndDraw();
-
-			releaseLock();
+				imp.updateAndDraw();
+			}
+			finally
+			{
+				releaseLock();
+			}
 		}
 	}
 
