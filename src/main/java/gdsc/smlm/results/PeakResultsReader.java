@@ -540,7 +540,12 @@ public class PeakResultsReader
 	private void showProgress(FileChannel channel) throws IOException
 	{
 		if (tracker != null)
+		{
 			tracker.progress(channel.position(), channel.size());
+			if (tracker.stop())
+				// Throw an IOException and it will be caught and ignored by all the file reading methods
+				throw new IOException("File read was cancelled");
+		}
 	}
 
 	private float[] readData(byte[] buffer, float[] params) throws IOException
