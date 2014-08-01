@@ -56,6 +56,7 @@ public class SeriesImageSource extends ImageSource
 	private int lastImageSize;
 	
 	private boolean logProgress = false;
+	private long lastTime = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -154,7 +155,14 @@ public class SeriesImageSource extends ImageSource
 		opener.setSilentMode(true);
 		Utils.setShowProgress(false);
 		if (logProgress)
-			IJ.log("Opening " + images.get(currentImage));
+		{
+	        long time = System.currentTimeMillis();
+	        if (time - lastTime > 500)
+	        {
+	        	lastTime = time;
+				IJ.log("Opening " + images.get(currentImage));
+	        }
+		}
 		ImagePlus imp = opener.openImage(images.get(currentImage++));
 		Utils.setShowProgress(true);
 		
