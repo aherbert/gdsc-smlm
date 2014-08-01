@@ -48,6 +48,16 @@ public class NullTrackProgress implements TrackProgress
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.TrackProgress#status(java.lang.String, java.lang.Object[])
+	 */
+	@Override
+	public void status(String format, Object... args)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.TrackProgress#stop()
 	 */
 	public boolean stop()

@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import ij.IJ;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -22,17 +20,19 @@ public interface TrackProgress
 {
 	/**
 	 * Specify progress as a fraction
+	 * 
 	 * @param fraction
 	 */
 	public void progress(double fraction);
-	
+
 	/**
 	 * Specify progress as the position relative to the total
+	 * 
 	 * @param position
 	 * @param total
 	 */
 	public void progress(long position, long total);
-	
+
 	/**
 	 * Logs a message on the progress
 	 * 
@@ -40,9 +40,18 @@ public interface TrackProgress
 	 * @param args
 	 */
 	public void log(String format, Object... args);
-	
+
+	/**
+	 * Sets the status on the progress
+	 * 
+	 * @param format
+	 * @param args
+	 */
+	public void status(String format, Object... args);
+
 	/**
 	 * Return true if the processing of results is active
+	 * 
 	 * @return
 	 */
 	public boolean stop();
