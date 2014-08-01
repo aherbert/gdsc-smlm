@@ -83,6 +83,7 @@ public class DriftCalculator implements PlugIn
 	private static PlotWindow plotx = null;
 	private static PlotWindow ploty = null;
 
+	private int interpolationStart, interpolationEnd;
 	private double[] lastdx;
 	private double[] lastdy;
 
@@ -158,20 +159,30 @@ public class DriftCalculator implements PlugIn
 			return;
 
 		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		if (results.size() < 2)
+		{
+			IJ.error(TITLE, "There are not enough fitting results for drift correction");
+			return;
+		}
 		double[][] drift = null;
+		int[] limits = findTimeLimits(results);
 		switch (method)
 		{
 			case 1:
-				drift = calculateUsingMarkers(results, rois, relativeError, smoothing, iterations);
+				drift = calculateUsingMarkers(results, limits, rois, relativeError, smoothing, iterations);
 				break;
 			default:
 				if (!showImageDialog())
 					return;
-				drift = calculateUsingFrames(results, Integer.parseInt(reconstructionSize));
+				drift = calculateUsingFrames(results, limits, Integer.parseInt(reconstructionSize));
 		}
 
 		if (drift == null)
 			return;
+
+		Utils.log("Drift correction interpolated for frames [%d - %d] of [%d - %d] (%s%%)", interpolationStart,
+				interpolationEnd, limits[0], limits[1],
+				Utils.rounded((100.0 * (interpolationEnd - interpolationStart + 1)) / (limits[1] - limits[0] + 1)));
 
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Apply drift correction to in-memory results?");
@@ -181,7 +192,7 @@ public class DriftCalculator implements PlugIn
 			return;
 		if (updateResults = gd.getNextBoolean())
 		{
-			IJ.log("Applying drift correction");
+			Utils.log("Applying drift correction");
 			final double[] dx = drift[0];
 			final double[] dy = drift[1];
 			for (PeakResult r : results)
@@ -294,16 +305,16 @@ public class DriftCalculator implements PlugIn
 	 * Adapted from the drift calculation method in QuickPALM.
 	 * 
 	 * @param results
+	 * @param limits
 	 * @param rois
 	 * @param relativeError
 	 * @param smoothWindow
 	 * @param iterations
 	 * @return the drift { dx[], dy[] }
 	 */
-	private double[][] calculateUsingMarkers(MemoryPeakResults results, Roi[] rois, double relativeError,
+	private double[][] calculateUsingMarkers(MemoryPeakResults results, int[] limits, Roi[] rois, double relativeError,
 			double smoothWindow, int iterations)
 	{
-		int[] limits = findTimeLimits(results);
 		Spot[][] roiSpots = findSpots(results, rois);
 
 		// Check we have enough data
@@ -428,6 +439,9 @@ public class DriftCalculator implements PlugIn
 				dy[t] = fy.value(t);
 			}
 		}
+
+		this.interpolationStart = startT;
+		this.interpolationEnd = endT;
 	}
 
 	private int[] findTimeLimits(MemoryPeakResults results)
@@ -693,7 +707,7 @@ public class DriftCalculator implements PlugIn
 		normalise(lastdy, originalDriftTimePoints);
 
 		// Extract the interpolated points and the original drift
-		double[][] interpolated = extractValues(completeT, limits[0], limits[1], dx, dy);
+		double[][] interpolated = extractValues(dx, limits[0], limits[1], dx, dy);
 		double[][] original = extractValues(originalDriftTimePoints, limits[0], limits[1], lastdx, lastdy);
 
 		plotx = plotDrift(plotx, null, interpolated, original, "Drift X", 1);
@@ -704,7 +718,7 @@ public class DriftCalculator implements PlugIn
 			String name, int index)
 	{
 		// Create plot
-		double[] a = Maths.limits(original[0]);
+		double[] a = Maths.limits(interpolated[0]);
 		double[] b = Maths.limits(original[index]);
 		b = Maths.limits(b, interpolated[index]);
 
@@ -730,13 +744,12 @@ public class DriftCalculator implements PlugIn
 	 * Calculates drift using images from N consecutive frames aligned to the overall image.
 	 * 
 	 * @param results
+	 * @params limits
 	 * @param reconstructionSize
 	 * @return the drift { dx[], dy[] }
 	 */
-	private double[][] calculateUsingFrames(MemoryPeakResults results, int reconstructionSize)
+	private double[][] calculateUsingFrames(MemoryPeakResults results, int[] limits, int reconstructionSize)
 	{
-		int[] limits = findTimeLimits(results);
-
 		double[] dx = new double[limits[1] + 1];
 		double[] dy = new double[dx.length];
 
@@ -759,20 +772,20 @@ public class DriftCalculator implements PlugIn
 			}
 			nextBlock.add(r);
 		}
-		
+
 		if (blocks.size() < 2)
 		{
 			tracker.log("ERROR : Require at least 2 images for drift calculation");
 			return null;
 		}
-		
+
 		// Check the final block has enough localisations
 		if (nextBlock.size() < minimimLocalisations)
 		{
-			blocks.remove(blocks.size()-1);
+			blocks.remove(blocks.size() - 1);
 			ArrayList<PeakResult> combinedBlock = blocks.get(blocks.size() - 1);
 			combinedBlock.addAll(nextBlock);
-			
+
 			if (blocks.size() < 2)
 			{
 				tracker.log("ERROR : Require at least 2 images for drift calculation");
