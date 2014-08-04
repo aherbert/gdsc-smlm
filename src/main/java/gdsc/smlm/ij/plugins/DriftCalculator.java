@@ -65,17 +65,18 @@ public class DriftCalculator implements PlugIn
 	private static String TITLE = "Drift Calculator";
 	private static String[] METHODS = new String[] { "Image Alignment", "Marked ROIs" };
 	private static int method = 0;
+	private static String[] UPDATE_METHODS = new String[] { "None", "Update", "New dataset", "New truncated dataset" };
+	private static int updateMethod = 0;
 
 	private static String inputOption = "";
-	private static int maxIterations = 10;
+	private static int maxIterations = 50;
 	private static double relativeError = 0.1;
 	private static double smoothing = 0.25;
 	private static int iterations = 1;
 	private static boolean plotDrift = true;
-	private static boolean updateResults = false;
 
 	// Parameters to control the image alignment algorithm
-	private static int frames = 500;
+	private static int frames = 2000;
 	private static int minimimLocalisations = 50;
 	private static String[] SIZES = new String[] { "128", "256", "512", "1024", "2048" };
 	private static String reconstructionSize = SIZES[1];
@@ -184,23 +185,7 @@ public class DriftCalculator implements PlugIn
 				interpolationEnd, limits[0], limits[1],
 				Utils.rounded((100.0 * (interpolationEnd - interpolationStart + 1)) / (limits[1] - limits[0] + 1)));
 
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Apply drift correction to in-memory results?");
-		gd.addCheckbox("Update_results", updateResults);
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return;
-		if (updateResults = gd.getNextBoolean())
-		{
-			Utils.log("Applying drift correction");
-			final double[] dx = drift[0];
-			final double[] dy = drift[1];
-			for (PeakResult r : results)
-			{
-				r.params[Gaussian2DFunction.X_POSITION] += dx[r.peak];
-				r.params[Gaussian2DFunction.Y_POSITION] += dy[r.peak];
-			}
-		}
+		applyDriftCorrection(results, drift);
 	}
 
 	private Roi[] getRois()
@@ -299,6 +284,56 @@ public class DriftCalculator implements PlugIn
 		return true;
 	}
 
+	private void applyDriftCorrection(MemoryPeakResults results, double[][] drift)
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Apply drift correction to in-memory results?");
+		gd.addChoice("Update_method", UPDATE_METHODS, UPDATE_METHODS[updateMethod]);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		updateMethod = gd.getNextChoiceIndex();
+		if (updateMethod == 0)
+			return;
+
+		final double[] dx = drift[0];
+		final double[] dy = drift[1];
+
+		if (updateMethod == 1)
+		{
+			// Update the results in memory
+			Utils.log("Applying drift correction to the results set: " + results.getName());
+			for (PeakResult r : results)
+			{
+				r.params[Gaussian2DFunction.X_POSITION] += dx[r.peak];
+				r.params[Gaussian2DFunction.Y_POSITION] += dy[r.peak];
+			}
+		}
+		else
+		{
+			// Create a new set of results
+			MemoryPeakResults newResults = new MemoryPeakResults(results.size());
+			newResults.copySettings(results);
+			newResults.setName(results.getName() + " (Corrected)");
+			MemoryPeakResults.addResults(newResults);
+			final boolean truncate = updateMethod == 3;
+			Utils.log("Creating %sdrift corrected results set: " + newResults.getName(),
+					(truncate) ? "truncated " : "");
+			for (PeakResult r : results)
+			{
+				if (truncate)
+				{
+					if (r.peak < interpolationStart || r.peak > interpolationEnd)
+						continue;
+				}
+				float[] params = Arrays.copyOf(r.params, r.params.length);
+				params[Gaussian2DFunction.X_POSITION] += dx[r.peak];
+				params[Gaussian2DFunction.Y_POSITION] += dy[r.peak];
+				newResults.add(r.peak, r.origX, r.origY, r.origValue, r.error, r.noise, params, r.paramsStdDev);
+			}
+		}
+	}
+	
 	/**
 	 * Calculates drift using the feducial markers within ROI.
 	 * <p>
