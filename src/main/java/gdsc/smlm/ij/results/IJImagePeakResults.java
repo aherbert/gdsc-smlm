@@ -373,7 +373,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		updateImage();
 	}
-
+	
 	private float[] getValue(int peak, float[] params, double error, float x, float y, int x1, int y1)
 	{
 		// Add a count to each adjacent pixel
@@ -425,6 +425,92 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		value[1] *= (1f - wx) * wy;
 		value[2] *= wx * (1f - wy);
 		value[3] *= wx * wy;
+	}
+	
+	/**
+	 * Simplified method to allow the Image to be reconstructed using just T,X,Y coordinates and a value
+	 * @param peak The peak frame
+	 * @param x The X coordinate
+	 * @param y The Y coordinate
+	 * @param v The value
+	 */
+	public void add(int peak, float x, float y, float v)
+	{
+		if (!imageActive)
+			return;
+
+		x = (x - bounds.x) * scale;
+		y = (y - bounds.y) * scale;
+
+		// Check bounds
+		if (x < 0 || x > xlimit || y < 0 || y > ylimit)
+			return;
+
+		checkAndUpdateToFrame(peak);
+
+		int x1 = (int) x;
+		int y1 = (int) y;
+
+		float[] value = getValue(peak, v, x, y, x1, y1);
+
+		int index = y1 * imageWidth + x1;
+
+		// Now add the values to the configured indices
+		synchronized (data)
+		{
+			size++;
+			if ((displayFlags & DISPLAY_REPLACE) != 0)
+			{
+				// Replace the data
+				data[index] = value[0];
+				data[index + imageWidth] = value[1];
+				data[index + 1] = value[2];
+				data[index + imageWidth + 1] = value[3];
+			}
+			else if ((displayFlags & DISPLAY_MAX) != 0)
+			{
+				// Use the highest value
+				data[index] = Math.max(data[index], value[0]);
+				data[index + imageWidth] = Math.max(data[index + imageWidth], value[1]);
+				data[index + 1] = Math.max(data[index + 1], value[2]);
+				data[index + imageWidth + 1] = Math.max(data[index + imageWidth + 1], value[3]);
+			}
+			else
+			{
+				// Add the data
+				data[index] += value[0];
+				data[index + imageWidth] += value[1];
+				data[index + 1] += value[2];
+				data[index + imageWidth + 1] += value[3];
+			}
+		}
+
+		updateImage();
+	}
+	
+	private float[] getValue(int peak, float v, float x, float y, int x1, int y1)
+	{
+		// Add a count to each adjacent pixel
+		float[] value = new float[] { v, v, v, v };
+
+		float wx, wy;
+
+		// Use bilinear weighting
+		if ((displayFlags & DISPLAY_WEIGHTED) != 0)
+		{
+			wx = x - x1;
+			wy = y - y1;
+		}
+		else
+		{
+			// Put the value on the nearest pixel by rounding the weights.
+			wx = Math.round(x - x1);
+			wy = Math.round(y - y1);
+		}
+
+		applyWeights(value, wx, wy);
+
+		return value;
 	}
 
 	/**
