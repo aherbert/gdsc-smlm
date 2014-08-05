@@ -15,7 +15,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.BatchRun;
