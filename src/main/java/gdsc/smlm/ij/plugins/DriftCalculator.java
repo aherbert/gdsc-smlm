@@ -79,9 +79,9 @@ public class DriftCalculator implements PlugIn
 	private static String TITLE = "Drift Calculator";
 
 	private static String driftFilename = "";
-	private static final String SUB_IMAGE_ALIGNMENT = "Sub-Image Alignment";
+	private static final String SUB_IMAGE_ALIGNMENT = "Localisation Sub-Images";
 	private static final String DRIFT_FILE = "Drift File";
-	private static final String STACK_ALIGNMENT = "Stack Alignment";
+	private static final String STACK_ALIGNMENT = "Reference Stack Alignment";
 	private static final String MARKED_ROIS = "Marked ROIs";
 	private static String method = "";
 	private static String[] UPDATE_METHODS = new String[] { "None", "Update", "New dataset", "New truncated dataset" };
@@ -269,7 +269,7 @@ public class DriftCalculator implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Compute the drift in localisation results");
+		gd.addMessage("Correct the drift in localisation results");
 		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
 		ArrayList<String> methods = new ArrayList<String>(4);
 		methods.add(SUB_IMAGE_ALIGNMENT);
@@ -324,7 +324,7 @@ public class DriftCalculator implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Compute the drift in localisation results using sub-image alignment");
+		gd.addMessage("Compute the drift using localisation sub-image alignment");
 		gd.addNumericField("Frames", frames, 0);
 		gd.addSlider("Minimum_localisations", 10, 50, minimimLocalisations);
 		gd.addChoice("FFT size", SIZES, reconstructionSize);
@@ -357,7 +357,7 @@ public class DriftCalculator implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Compute the drift in localisation results using a reference stack alignment");
+		gd.addMessage("Compute the drift using a reference stack alignment");
 
 		gd.addChoice("Stack_image", stackTitles, stackTitle);
 		gd.addMessage("Frame = previous + spacing");
