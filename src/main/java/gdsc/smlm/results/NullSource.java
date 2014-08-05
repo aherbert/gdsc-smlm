@@ -2,17 +2,6 @@ package gdsc.smlm.results;
 
 import java.awt.Rectangle;
 
-import com.thoughtworks.xstream.XStream;
-
-import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.results.ImageSource;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.WindowManager;
-import ij.io.FileInfo;
-import ij.process.ImageProcessor;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 

@@ -570,6 +570,7 @@ public class FilePeakResults extends AbstractPeakResults
 				if (showId)
 					// The peak is the second column
 					slice = scanner.nextInt();
+				scanner.close();
 			}
 			catch (InputMismatchException e)
 			{
