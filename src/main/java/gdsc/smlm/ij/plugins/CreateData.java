@@ -92,7 +92,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -1396,30 +1395,6 @@ public class CreateData implements PlugIn, ItemListener
 				}
 			}
 			return new double[] { sum.getMean(), sum.getVariance(), sum2.getMean(), sum2.getVariance() };
-		}
-	}
-
-	/**
-	 * Waits for all threads to complete computation.
-	 * 
-	 * @param futures
-	 */
-	private void waitForCompletion(List<Future<?>> futures)
-	{
-		try
-		{
-			for (Future<?> f : futures)
-			{
-				f.get();
-			}
-		}
-		catch (ExecutionException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
 		}
 	}
 
