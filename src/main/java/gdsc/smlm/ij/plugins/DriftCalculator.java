@@ -27,12 +27,14 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.TrackProgress;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.UnicodeReader;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.gui.Roi;
+import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
 import ij.process.Blitter;
@@ -42,15 +44,25 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
@@ -63,7 +75,9 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 public class DriftCalculator implements PlugIn
 {
 	private static String TITLE = "Drift Calculator";
-	private static String[] METHODS = new String[] { "Image Alignment", "Marked ROIs" };
+
+	private static String driftFilename = "";
+	private static String[] METHODS = new String[] { "Image Alignment", "Drift File", "Marked ROIs" };
 	private static int method = 0;
 	private static String[] UPDATE_METHODS = new String[] { "None", "Update", "New dataset", "New truncated dataset" };
 	private static int updateMethod = 0;
@@ -74,6 +88,7 @@ public class DriftCalculator implements PlugIn
 	private static double smoothing = 0.25;
 	private static int iterations = 1;
 	private static boolean plotDrift = true;
+	private static boolean saveDrift = false;
 
 	// Parameters to control the image alignment algorithm
 	private static int frames = 2000;
@@ -85,6 +100,7 @@ public class DriftCalculator implements PlugIn
 	private static PlotWindow ploty = null;
 
 	private int interpolationStart, interpolationEnd;
+	private double[] calculatedTimepoints;
 	private double[] lastdx;
 	private double[] lastdy;
 
@@ -169,8 +185,11 @@ public class DriftCalculator implements PlugIn
 		int[] limits = findTimeLimits(results);
 		switch (method)
 		{
+			case 2:
+				drift = calculateUsingMarkers(results, limits, rois);
+				break;
 			case 1:
-				drift = calculateUsingMarkers(results, limits, rois, relativeError, smoothing, iterations);
+				drift = calculateUsingDriftFile(limits);
 				break;
 			default:
 				if (!showImageDialog())
@@ -209,14 +228,15 @@ public class DriftCalculator implements PlugIn
 		String[] items = METHODS;
 		if (rois == null)
 		{
-			items = Arrays.copyOf(METHODS, 1);
-			method = 0;
+			items = Arrays.copyOf(METHODS, METHODS.length - 1);
+			if (method >= items.length)
+				method = 0;
 		}
 		gd.addChoice("Method", items, items[method]);
-		gd.addSlider("Max_iterations", 0, 100, maxIterations);
 		gd.addMessage("Stopping criteria");
+		gd.addSlider("Max_iterations", 0, 100, maxIterations);
 		gd.addNumericField("Relative_error", relativeError, 3);
-		gd.addMessage("loess smoothing parameters");
+		gd.addMessage("LOESS smoothing parameters");
 		gd.addSlider("Smoothing", 0.001, 1, smoothing);
 		gd.addSlider("Iterations", 1, 10, iterations);
 		gd.addCheckbox("Plot_drift", plotDrift);
@@ -237,6 +257,7 @@ public class DriftCalculator implements PlugIn
 		// Check arguments
 		try
 		{
+			Parameters.isPositive("Max iterations", maxIterations);
 			Parameters.isAboveZero("Relative error", relativeError);
 			Parameters.isPositive("Smoothing", smoothing);
 			Parameters.isEqualOrBelow("Smoothing", smoothing, 1);
@@ -289,10 +310,18 @@ public class DriftCalculator implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Apply drift correction to in-memory results?");
 		gd.addChoice("Update_method", UPDATE_METHODS, UPDATE_METHODS[updateMethod]);
+		// Option to save the drift unless it was loaded from file
+		if (method != 1)
+			gd.addCheckbox("Save_drift", saveDrift);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		updateMethod = gd.getNextChoiceIndex();
+		if (method != 1)
+		{
+			saveDrift = gd.getNextBoolean();
+			saveDrift(calculatedTimepoints, lastdx, lastdy);
+		}
 		if (updateMethod == 0)
 			return;
 
@@ -317,8 +346,7 @@ public class DriftCalculator implements PlugIn
 			newResults.setName(results.getName() + " (Corrected)");
 			MemoryPeakResults.addResults(newResults);
 			final boolean truncate = updateMethod == 3;
-			Utils.log("Creating %sdrift corrected results set: " + newResults.getName(),
-					(truncate) ? "truncated " : "");
+			Utils.log("Creating %sdrift corrected results set: " + newResults.getName(), (truncate) ? "truncated " : "");
 			for (PeakResult r : results)
 			{
 				if (truncate)
@@ -333,7 +361,7 @@ public class DriftCalculator implements PlugIn
 			}
 		}
 	}
-	
+
 	/**
 	 * Calculates drift using the feducial markers within ROI.
 	 * <p>
@@ -342,13 +370,9 @@ public class DriftCalculator implements PlugIn
 	 * @param results
 	 * @param limits
 	 * @param rois
-	 * @param relativeError
-	 * @param smoothWindow
-	 * @param iterations
 	 * @return the drift { dx[], dy[] }
 	 */
-	private double[][] calculateUsingMarkers(MemoryPeakResults results, int[] limits, Roi[] rois, double relativeError,
-			double smoothWindow, int iterations)
+	private double[][] calculateUsingMarkers(MemoryPeakResults results, int[] limits, Roi[] rois)
 	{
 		Spot[][] roiSpots = findSpots(results, rois);
 
@@ -357,12 +381,6 @@ public class DriftCalculator implements PlugIn
 		{
 			IJ.error("No peak fit results in the selected ROIs");
 			return null;
-		}
-
-		double smoothing = 0.2;
-		if (smoothWindow > 0 && smoothWindow <= 1)
-		{
-			smoothing = smoothWindow;
 		}
 
 		double[] dx = new double[limits[1] + 1];
@@ -375,7 +393,7 @@ public class DriftCalculator implements PlugIn
 		if (Double.isNaN(change))
 			return null;
 		double error = relativeError + 1;
-		IJ.log(String.format("Drift Calculator : Initial drift %g", change));
+		Utils.log("Drift Calculator : Initial drift %g", change);
 
 		for (int i = 1; i <= maxIterations && error > relativeError && change > 1e-16; i++)
 		{
@@ -386,16 +404,16 @@ public class DriftCalculator implements PlugIn
 			if (i > 1)
 			{
 				error = DoubleEquality.relativeError(change, lastChange);
-				IJ.log(String.format("Iteration %d : Total change %g : Relative change %g", i, change, error));
+				Utils.log("Iteration %d : Total change %g : Relative change %g", i, change, error);
 			}
 			else
-				IJ.log(String.format("Iteration %d : Total change %g", i, change));
+				Utils.log("Iteration %d : Total change %g", i, change);
 		}
 
 		interpolate(dx, dy, weights);
 
-		if (plotDrift)
-			plotDrift(limits, weights, dx, dy);
+		plotDrift(limits, dx, dy);
+		saveDrift(weights, dx, dy);
 
 		return new double[][] { dx, dy };
 	}
@@ -422,12 +440,12 @@ public class DriftCalculator implements PlugIn
 
 				if (Double.isNaN(newDx[t]))
 				{
-					IJ.log(String.format("Loess smoothing created bad X-estimate at point %d/%d", t, newDx.length));
+					Utils.log("ERROR : Loess smoothing created bad X-estimate at point %d/%d", t, newDx.length);
 					return false;
 				}
 				if (Double.isNaN(newDy[t]))
 				{
-					IJ.log(String.format("Loess smoothing created bad Y-estimate at point %d/%d", t, newDx.length));
+					Utils.log("ERROR : Loess smoothing created bad Y-estimate at point %d/%d", t, newDx.length);
 					return false;
 				}
 			}
@@ -625,6 +643,7 @@ public class DriftCalculator implements PlugIn
 		}
 
 		// Store the pure drift values for plotting
+		calculatedTimepoints = Arrays.copyOf(weights, weights.length);
 		lastdx = Arrays.copyOf(newDx, newDx.length);
 		lastdy = Arrays.copyOf(newDy, newDy.length);
 
@@ -730,20 +749,23 @@ public class DriftCalculator implements PlugIn
 		return values;
 	}
 
-	private void plotDrift(int[] limits, double[] originalDriftTimePoints, double[] dx, double[] dy)
+	private void plotDrift(int[] limits, double[] dx, double[] dy)
 	{
+		if (!plotDrift)
+			return;
+
 		// Build an array of timepoints from the min to the max
 		double[] completeT = new double[limits[1] + 1];
 		for (int i = limits[0]; i < completeT.length; i++)
 			completeT[i] = i;
 
 		// Drift should be centred around zero for the calculated points to produce a fair plot
-		normalise(lastdx, originalDriftTimePoints);
-		normalise(lastdy, originalDriftTimePoints);
+		normalise(lastdx, calculatedTimepoints);
+		normalise(lastdy, calculatedTimepoints);
 
 		// Extract the interpolated points and the original drift
 		double[][] interpolated = extractValues(dx, limits[0], limits[1], dx, dy);
-		double[][] original = extractValues(originalDriftTimePoints, limits[0], limits[1], lastdx, lastdy);
+		double[][] original = extractValues(calculatedTimepoints, limits[0], limits[1], lastdx, lastdy);
 
 		plotx = plotDrift(plotx, null, interpolated, original, "Drift X", 1);
 		ploty = plotDrift(ploty, plotx, interpolated, original, "Drift Y", 2);
@@ -776,10 +798,172 @@ public class DriftCalculator implements PlugIn
 	}
 
 	/**
+	 * Saves the T,X,Y values to file for all t in the originalDriftTimePoints array which are not zero.
+	 * 
+	 * @param originalDriftTimePoints
+	 * @param dx
+	 * @param dy
+	 */
+	private void saveDrift(double[] originalDriftTimePoints, double[] dx, double[] dy)
+	{
+		if (!saveDrift)
+			return;
+		if (!getDriftFilename())
+			return;
+		BufferedWriter out = null;
+		try
+		{
+			out = new BufferedWriter(new FileWriter(driftFilename));
+			out.write("Time\tX\tY\n");
+			for (int t = 0; t < dx.length; t++)
+			{
+				if (originalDriftTimePoints[t] != 0)
+				{
+					out.write(String.format("%d\t%f\t%f\n", t, dx[t], dy[t]));
+				}
+			}
+			Utils.log("Saved calculated drift to file: " + driftFilename);
+		}
+		catch (IOException e)
+		{
+		}
+		finally
+		{
+			try
+			{
+				out.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
+	}
+
+	/**
+	 * Calculates drift using T,X,Y records read from a file.
+	 * 
+	 * @param limits
+	 * @return the drift { dx[], dy[] }
+	 */
+	private double[][] calculateUsingDriftFile(int[] limits)
+	{
+		// Read drift TXY from file
+		calculatedTimepoints = new double[limits[1] + 1];
+		lastdx = new double[calculatedTimepoints.length];
+		lastdy = new double[calculatedTimepoints.length];
+
+		if (!getDriftFilename())
+			return null;
+
+		if (readDriftFile(limits) < 2)
+		{
+			Utils.log("ERROR : Not enough drift points within the time limits %d - %d", limits[0], limits[1]);
+			return null;
+		}
+
+		double[] dx = Arrays.copyOf(lastdx, lastdx.length);
+		double[] dy = Arrays.copyOf(lastdy, lastdy.length);
+
+		// Perform smoothing
+		if (smoothing > 0)
+		{
+			if (!smooth(dx, dy, calculatedTimepoints, smoothing, iterations))
+				return null;
+		}
+
+		// Average drift correction for the calculated points should be zero
+		normalise(dx, calculatedTimepoints);
+		normalise(dy, calculatedTimepoints);
+
+		interpolate(dx, dy, calculatedTimepoints);
+
+		plotDrift(limits, dx, dy);
+
+		return new double[][] { dx, dy };
+	}
+
+	private boolean getDriftFilename()
+	{
+		String[] path = Utils.decodePath(driftFilename);
+		OpenDialog chooser = new OpenDialog("Drift_file", path[0], path[1]);
+		if (chooser.getFileName() == null)
+			return false;
+		driftFilename = chooser.getDirectory() + chooser.getFileName();
+		return true;
+	}
+
+	/**
+	 * Read the drift file storing the T,X,Y into the class level calculatedTimepoints, lastdx and lastdy
+	 * arrays. Ignore any records where T is outside the limits.
+	 * 
+	 * @param limits
+	 * @return The number of records read
+	 */
+	private int readDriftFile(int[] limits)
+	{
+		int ok = 0;
+		BufferedReader input = null;
+		try
+		{
+			FileInputStream fis = new FileInputStream(driftFilename);
+			input = new BufferedReader(new UnicodeReader(fis, null));
+
+			String line;
+			Pattern pattern = Pattern.compile("[\t, ]+");
+			while ((line = input.readLine()) != null)
+			{
+				if (line.length() == 0)
+					continue;
+				if (Character.isDigit(line.charAt(0)))
+				{
+					try
+					{
+						Scanner scanner = new Scanner(line);
+						scanner.useDelimiter(pattern);
+						scanner.useLocale(Locale.US);
+						final int t = scanner.nextInt();
+						if (t < limits[0] || t > limits[1])
+							continue;
+						final double x = scanner.nextDouble();
+						final double y = scanner.nextDouble();
+						calculatedTimepoints[t] = ++ok;
+						lastdx[t] = x;
+						lastdy[t] = y;
+						scanner.close();
+					}
+					catch (InputMismatchException e)
+					{
+					}
+					catch (NoSuchElementException e)
+					{
+					}
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			// ignore
+		}
+		finally
+		{
+			try
+			{
+				if (input != null)
+					input.close();
+			}
+			catch (IOException e)
+			{
+				// Ignore
+			}
+		}
+		return ok;
+	}
+
+	/**
 	 * Calculates drift using images from N consecutive frames aligned to the overall image.
 	 * 
 	 * @param results
-	 * @params limits
+	 * @param limits
 	 * @param reconstructionSize
 	 * @return the drift { dx[], dy[] }
 	 */
@@ -853,10 +1037,10 @@ public class DriftCalculator implements PlugIn
 				iterations);
 		if (Double.isNaN(change))
 			return null;
-		if (plotDrift)
-			plotDrift(limits, originalDriftTimePoints, dx, dy);
+
+		plotDrift(limits, dx, dy);
 		double error = relativeError + 1;
-		IJ.log(String.format("Drift Calculator : Initial drift %g", change));
+		Utils.log("Drift Calculator : Initial drift %g", change);
 
 		for (int i = 1; i <= maxIterations && error > relativeError && change > 1e-16; i++)
 		{
@@ -865,19 +1049,18 @@ public class DriftCalculator implements PlugIn
 					iterations);
 			if (Double.isNaN(change))
 				return null;
-			if (plotDrift)
-				plotDrift(limits, originalDriftTimePoints, dx, dy);
+
+			plotDrift(limits, dx, dy);
 			if (i > 1)
 			{
 				error = DoubleEquality.relativeError(change, lastChange);
-				IJ.log(String.format("Iteration %d : Total change %g : Relative change %g", i, change, error));
+				Utils.log("Iteration %d : Total change %g : Relative change %g", i, change, error);
 			}
 			else
-				IJ.log(String.format("Iteration %d : Total change %g", i, change));
+				Utils.log("Iteration %d : Total change %g", i, change);
 		}
 
-		if (plotDrift)
-			plotDrift(limits, originalDriftTimePoints, dx, dy);
+		plotDrift(limits, dx, dy);
 
 		return new double[][] { dx, dy };
 	}
@@ -993,6 +1176,7 @@ public class DriftCalculator implements PlugIn
 		}
 
 		// Store the pure drift values for plotting
+		calculatedTimepoints = Arrays.copyOf(originalDriftTimePoints, originalDriftTimePoints.length);
 		lastdx = Arrays.copyOf(newDx, newDx.length);
 		lastdy = Arrays.copyOf(newDy, newDy.length);
 
