@@ -32,6 +32,9 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Contains helper functions
@@ -744,5 +747,29 @@ public class Utils
 		for (int i = 0; i < length; i++, start += increment)
 			data[i] = start;
 		return data;
+	}
+
+	/**
+	 * Waits for all threads to complete computation.
+	 * 
+	 * @param futures
+	 */
+	public static void waitForCompletion(List<Future<?>> futures)
+	{
+		try
+		{
+			for (Future<?> f : futures)
+			{
+				f.get();
+			}
+		}
+		catch (ExecutionException ex)
+		{
+			ex.printStackTrace();
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

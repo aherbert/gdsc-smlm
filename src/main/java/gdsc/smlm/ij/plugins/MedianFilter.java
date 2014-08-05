@@ -90,7 +90,7 @@ public class MedianFilter implements PlugInFilter
 		}
 
 		// Finish processing data
-		waitForCompletion(futures);
+		Utils.waitForCompletion(futures);
 
 		futures = new LinkedList<Future<?>>();
 
@@ -102,7 +102,7 @@ public class MedianFilter implements PlugInFilter
 		}
 
 		// Finish processing data
-		waitForCompletion(futures);
+		Utils.waitForCompletion(futures);
 
 		if (Utils.isInterrupted())
 			return;
@@ -117,7 +117,7 @@ public class MedianFilter implements PlugInFilter
 			}
 
 			// Finish processing data
-			waitForCompletion(futures);
+			Utils.waitForCompletion(futures);
 		}
 
 		// Update the image
@@ -134,30 +134,6 @@ public class MedianFilter implements PlugInFilter
 		long milliseconds = System.currentTimeMillis() - start;
 		Utils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius, interval, blockSize,
 				Utils.timeToString(milliseconds), Utils.timeToString((double) milliseconds / imp.getStackSize()));
-	}
-
-	/**
-	 * Waits for all threads to complete computation.
-	 * 
-	 * @param futures
-	 */
-	private void waitForCompletion(List<Future<?>> futures)
-	{
-		try
-		{
-			for (Future<?> f : futures)
-			{
-				f.get();
-			}
-		}
-		catch (ExecutionException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	private int showDialog()

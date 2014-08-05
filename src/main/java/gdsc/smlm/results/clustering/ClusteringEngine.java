@@ -13,6 +13,7 @@ package gdsc.smlm.results.clustering;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.DensityManager;
 import gdsc.smlm.results.NullTrackProgress;
 import gdsc.smlm.results.TrackProgress;
@@ -22,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -654,7 +654,7 @@ public class ClusteringEngine
 			}
 
 			// Finish processing data
-			waitForCompletion(futures);
+			Utils.waitForCompletion(futures);
 			futures.clear();
 
 			// Find the closest pair from all the results
@@ -713,30 +713,6 @@ public class ClusteringEngine
 		// This should not happen if the density manager counted neighbours correctly
 		// (i.e. all points should have at least one neighbour)		
 		return 0;
-	}
-
-	/**
-	 * Waits for all threads to complete computation.
-	 * 
-	 * @param futures
-	 */
-	private void waitForCompletion(List<Future<?>> futures)
-	{
-		try
-		{
-			for (Future<?> f : futures)
-			{
-				f.get();
-			}
-		}
-		catch (ExecutionException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -1415,7 +1391,7 @@ public class ClusteringEngine
 			}
 
 			// Finish processing data
-			waitForCompletion(futures);
+			Utils.waitForCompletion(futures);
 
 			// Find the closest pair from all the results
 			for (ClosestPair result : results)
@@ -1715,7 +1691,7 @@ public class ClusteringEngine
 			}
 
 			// Finish processing data
-			waitForCompletion(futures);
+			Utils.waitForCompletion(futures);
 			futures.clear();
 
 			// Find the closest pair from all the results
@@ -1937,7 +1913,7 @@ public class ClusteringEngine
 			}
 
 			// Finish processing data
-			waitForCompletion(futures);
+			Utils.waitForCompletion(futures);
 			futures.clear();
 
 			// Find the closest pair from all the results

@@ -705,7 +705,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			}
 
 			IJ.showStatus("Calculating blur ... Finishing");
-			waitForCompletion(futures);
+			Utils.waitForCompletion(futures);
 			threadPool.shutdown();
 			Utils.setShowProgress(false);
 			IJ.showStatus("Calculating blur ... Drawing");
@@ -744,30 +744,6 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			updateCurrentSlice(rawImp.getCurrentSlice());
 
 		IJ.showStatus("");
-	}
-
-	/**
-	 * Waits for all threads to complete computation.
-	 * 
-	 * @param futures
-	 */
-	public static void waitForCompletion(List<Future<?>> futures)
-	{
-		try
-		{
-			for (Future<?> f : futures)
-			{
-				f.get();
-			}
-		}
-		catch (ExecutionException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	private void clearSelectedFrames()

@@ -857,7 +857,7 @@ public class CreateData implements PlugIn, ItemListener
 			i++;
 		}
 		// Finish processing data
-		waitForCompletion(futures);
+		Utils.waitForCompletion(futures);
 		futures.clear();
 		if (Utils.isInterrupted())
 		{
@@ -878,7 +878,7 @@ public class CreateData implements PlugIn, ItemListener
 		}
 
 		// Finish
-		waitForCompletion(futures);
+		Utils.waitForCompletion(futures);
 		threadPool.shutdown();
 		IJ.showProgress(1);
 		if (Utils.isInterrupted())
