@@ -541,6 +541,11 @@ public class DriftCalculator implements PlugIn
 				error);
 		if (error < relativeError || change < 1e-16)
 			return true;
+		if (tracker.stop())
+		{
+			Utils.log("WARNING : Drift calculation was interrupted");
+			return true;
+		}
 		return false;
 	}
 
