@@ -86,10 +86,11 @@ public class About implements PlugIn
 		String version = Version.getVersion();
 		String buildDate = Version.getBuildDate();
 
+		BufferedReader input = null;
 		try
 		{
 			// Read the contents of the README file
-			BufferedReader input = new BufferedReader(new UnicodeReader(readmeStream, null));
+			input = new BufferedReader(new UnicodeReader(readmeStream, null));
 			String line;
 			while ((line = input.readLine()) != null)
 			{
@@ -113,6 +114,16 @@ public class About implements PlugIn
 			msg.append("Copyright (C) ").append(YEAR).append(" Alex Herbert\n");
 			msg.append("MRC Genome Damage and Stability Centre\n");
 			msg.append("University of Sussex, UK\n");
+		}
+		finally
+		{
+			try
+			{
+				input.close();
+			}
+			catch (IOException e)
+			{
+			}
 		}
 
 		// Build final message
