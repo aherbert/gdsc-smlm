@@ -43,7 +43,6 @@ public class AlignImagesFFT
 	{
 		None, Cubic, Gaussian
 	}
-	
 
 	private double lastXOffset = 0;
 	private double lastYOffset = 0;
@@ -54,7 +53,7 @@ public class AlignImagesFFT
 	// The location where the reference/target was inserted into the normalised FFT image
 	private Rectangle refImageBounds = new Rectangle();
 	private Rectangle targetImageBounds = new Rectangle();
-	
+
 	/**
 	 * Aligns all images in the target stack to the current processor in the reference.
 	 * <p>
@@ -711,9 +710,16 @@ public class AlignImagesFFT
 
 		int maxN = refFHT.getWidth();
 
-		ImageProcessor paddedTargetIp = padAndZero(targetIp, maxN, windowMethod, targetImageBounds);
-		FloatProcessor normalisedTargetIp = normalise(paddedTargetIp);
-		FHT targetFHT = fft(normalisedTargetIp, maxN);
+		// Allow the input target to be a FHT
+		FHT targetFHT;
+		if (targetIp instanceof FHT && targetIp.getWidth() == maxN)
+		{
+			targetFHT = (FHT) targetIp;
+		}
+		else
+		{
+			targetFHT = transformTarget(targetIp, windowMethod);
+		}
 		FloatProcessor subCorrMat = correlate(refFHT, targetFHT);
 
 		int originX = (maxN / 2);
@@ -775,6 +781,28 @@ public class AlignImagesFFT
 		lastYOffset = dCoord[1] - originY;
 
 		return new double[] { lastXOffset, lastYOffset, scoreMax };
+	}
+
+	/**
+	 * Transforms a target image processor for alignment with the initialised reference. The FHT can be passed to the
+	 * {@link #align(ImageProcessor, WindowMethod, Rectangle, SubPixelMethod)} method
+	 * <p>
+	 * If the {@link #init(ImageProcessor, WindowMethod, boolean)} method has not been called this returns null.
+	 * 
+	 * @param targetIp
+	 * @param windowMethod
+	 * @return The FHT
+	 */
+	public FHT transformTarget(ImageProcessor targetIp, WindowMethod windowMethod)
+	{
+		if (refFHT == null || targetIp == null)
+			return null;
+		int maxN = refFHT.getWidth();
+		FHT targetFHT;
+		ImageProcessor paddedTargetIp = padAndZero(targetIp, maxN, windowMethod, targetImageBounds);
+		FloatProcessor normalisedTargetIp = normalise(paddedTargetIp);
+		targetFHT = fft(normalisedTargetIp, maxN);
+		return targetFHT;
 	}
 
 	/**
