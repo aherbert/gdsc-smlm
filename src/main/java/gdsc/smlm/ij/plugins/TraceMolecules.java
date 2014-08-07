@@ -270,7 +270,7 @@ public class TraceMolecules implements PlugIn
 		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(results.size());
 		int id = 0;
 		for (PeakResult p : results.getResults())
-			points.add(new ClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.peak));
+			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(), p.peak));
 		return points;
 	}
 

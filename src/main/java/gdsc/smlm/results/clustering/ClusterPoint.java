@@ -18,25 +18,101 @@ package gdsc.smlm.results.clustering;
  */
 public class ClusterPoint
 {
-	public double x, y;
+	public double x, y, weight;
 	public int id, t;
 
 	// Used to construct a single linked list of points
 	public ClusterPoint next = null;
 
-	public ClusterPoint(int id, double x, double y)
+	/**
+	 * Create a cluster point
+	 * 
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @return The cluster point
+	 */
+	public static ClusterPoint newClusterPoint(int id, double x, double y)
+	{
+		return new ClusterPoint(id, x, y);
+	}
+
+	/**
+	 * Create a cluster point with time information
+	 * 
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @param t
+	 * @return The cluster point
+	 */
+	public static ClusterPoint newTimeClusterPoint(int id, double x, double y, int t)
+	{
+		return new ClusterPoint(id, x, y, t);
+	}
+
+	/**
+	 * Create a cluster point with weight information
+	 * 
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @param weight
+	 * @return The cluster point
+	 */
+	public static ClusterPoint newClusterPoint(int id, double x, double y, double weight)
+	{
+		return new ClusterPoint(id, x, y, weight);
+	}
+
+	/**
+	 * Create a cluster point with weight and time information
+	 * 
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @param weight
+	 * @param t
+	 * @return The cluster point
+	 */
+	public static ClusterPoint newTimeClusterPoint(int id, double x, double y, double weight, int t)
+	{
+		return new ClusterPoint(id, x, y, weight, t);
+	}
+
+	protected ClusterPoint(int id, double x, double y)
 	{
 		this.id = id;
 		this.x = x;
 		this.y = y;
+		weight = 1;
 		t = 0;
 	}
 
-	public ClusterPoint(int id, double x, double y, int t)
+	protected ClusterPoint(int id, double x, double y, int t)
 	{
 		this.id = id;
 		this.x = x;
 		this.y = y;
+		weight = 1;
+		this.t = t;
+	}
+
+	protected ClusterPoint(int id, double x, double y, double weight)
+	{
+		this.id = id;
+		this.x = x;
+		this.y = y;
+		this.weight = weight;
+		t = 0;
+	}
+
+	protected ClusterPoint(int id, double x, double y, double weight, int t)
+	{
+		this.id = id;
+		this.x = x;
+		this.y = y;
+		this.weight = weight;
 		this.t = t;
 	}
 

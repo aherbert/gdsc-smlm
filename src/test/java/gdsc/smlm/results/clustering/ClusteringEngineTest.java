@@ -55,7 +55,8 @@ public class ClusteringEngineTest
 		long t1 = runSpeedTest(points, ClusteringAlgorithm.Closest, radius);
 		long t2 = runSpeedTest(points, ClusteringAlgorithm.PairwiseWithoutNeighbours, radius);
 
-		System.out.printf("SpeedTest Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2, (double) t1 / t2);
+		System.out
+				.printf("SpeedTest Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2, (double) t1 / t2);
 		Assert.assertTrue(t2 < t1);
 	}
 
@@ -71,7 +72,8 @@ public class ClusteringEngineTest
 		long t1 = runSpeedTest(points, ClusteringAlgorithm.Closest, radius);
 		long t2 = runSpeedTest(points, ClusteringAlgorithm.PairwiseWithoutNeighbours, radius);
 
-		System.out.printf("SpeedTest Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2, (double) t1 / t2);
+		System.out
+				.printf("SpeedTest Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2, (double) t1 / t2);
 		Assert.assertTrue(t1 < t2);
 	}
 
@@ -90,7 +92,7 @@ public class ClusteringEngineTest
 		System.out.printf("SpeedTest Closest %d, Pairwise %d = %fx faster\n", t1, t2, (double) t1 / t2);
 		Assert.assertTrue(t2 < t1);
 	}
-	
+
 	@Test
 	public void canMultithreadParticleSingleLinkage()
 	{
@@ -100,9 +102,9 @@ public class ClusteringEngineTest
 	@Test
 	public void multithreadedParticleSingleLinkageIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ParticleSingleLinkage);	
-	}	
-	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ParticleSingleLinkage);
+	}
+
 	@Test
 	public void canMultithreadClosest()
 	{
@@ -112,21 +114,21 @@ public class ClusteringEngineTest
 	@Test
 	public void multithreadedClosestIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.Closest);	
-	}	
-	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.Closest);
+	}
+
 	@Test
 	public void canMultithreadClosestParticle()
 	{
 		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestParticle);
 	}
-	
+
 	@Test
 	public void multithreadedClosestParticleIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticle);	
-	}	
-	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticle);
+	}
+
 	@Test
 	public void canMultithreadClosestDistancePriority()
 	{
@@ -136,9 +138,9 @@ public class ClusteringEngineTest
 	@Test
 	public void multithreadedClosestDistancePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestDistancePriority);	
-	}	
-	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestDistancePriority);
+	}
+
 	@Test
 	public void canMultithreadClosestTimePriority()
 	{
@@ -148,9 +150,9 @@ public class ClusteringEngineTest
 	@Test
 	public void multithreadedClosestTimePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestTimePriority);	
-	}	
-	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestTimePriority);
+	}
+
 	@Test
 	public void canMultithreadClosestParticleDistancePriority()
 	{
@@ -160,9 +162,9 @@ public class ClusteringEngineTest
 	@Test
 	public void multithreadedClosestParticleDistancePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleDistancePriority);	
-	}	
-	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleDistancePriority);
+	}
+
 	@Test
 	public void canMultithreadClosestParticleTimePriority()
 	{
@@ -172,9 +174,9 @@ public class ClusteringEngineTest
 	@Test
 	public void multithreadedClosestParticleTimePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleTimePriority);	
-	}	
-	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleTimePriority);
+	}
+
 	private void runMultithreadingAlgorithmTest(ClusteringAlgorithm algorithm)
 	{
 		double radius = 50;
@@ -197,12 +199,12 @@ public class ClusteringEngineTest
 		Object[] points = new Object[Repeats];
 		for (int i = 0; i < Repeats; i++)
 			points[i] = createClusters(1000, 1000, 2, radius / 2, time);
-		
+
 		long t1 = runSpeedTest(points, algorithm, radius, time, 1);
 		long t2 = runSpeedTest(points, algorithm, radius, time, 8);
 
-		System.out.printf("Threading SpeedTest %s : Single %d, Multi-threaded %d = %fx faster\n", algorithm.toString(), 
-			t1, t2, (double) t1 / t2);
+		System.out.printf("Threading SpeedTest %s : Single %d, Multi-threaded %d = %fx faster\n", algorithm.toString(),
+				t1, t2, (double) t1 / t2);
 		Assert.assertTrue(t2 < t1);
 	}
 
@@ -210,7 +212,7 @@ public class ClusteringEngineTest
 	{
 		return runSpeedTest(points, algorithm, radius, 0, 1);
 	}
-	
+
 	private long runSpeedTest(Object[] points, ClusteringAlgorithm algorithm, double radius, int time, int threadCount)
 	{
 		ClusteringEngine engine = new ClusteringEngine();
@@ -241,8 +243,7 @@ public class ClusteringEngineTest
 		compareClusters(exp, obs);
 	}
 
-	private void compareClusters(ArrayList<Cluster> exp, ArrayList<Cluster> obs)
-			throws AssertionError
+	private void compareClusters(ArrayList<Cluster> exp, ArrayList<Cluster> obs) throws AssertionError
 	{
 		Collections.sort(exp);
 		Collections.sort(obs);
@@ -295,7 +296,7 @@ public class ClusteringEngineTest
 		for (int i = 0; i < points.size(); i++)
 		{
 			final ClusterPoint m = points.get(i);
-			clusters.add(new Cluster(new ClusterPoint(i, m.x, m.y)));
+			clusters.add(new Cluster(ClusterPoint.newClusterPoint(i, m.x, m.y)));
 		}
 
 		// Iteratively find the closest pair
@@ -349,7 +350,7 @@ public class ClusteringEngineTest
 	{
 		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(n);
 		while (n-- > 0)
-			points.add(new ClusterPoint(n, rand.nextDouble() * size, rand.nextDouble() * size));
+			points.add(ClusterPoint.newClusterPoint(n, rand.nextDouble() * size, rand.nextDouble() * size));
 		return points;
 	}
 
@@ -382,11 +383,11 @@ public class ClusteringEngineTest
 	private ArrayList<ClusterPoint> createClusters(int n, int size, int m, double radius, int t)
 	{
 		int[] time = new int[t];
-		for (int i=0; i < t; i++)
+		for (int i = 0; i < t; i++)
 			time[i] = i + 1;
 		return createClusters(n, size, m, radius, time);
 	}
-	
+
 	/**
 	 * Create n clusters of m points in a 2D distribution of size * size. Clusters will be spread in a radius*radius
 	 * square. Points will be selected randomly from the given frames.
@@ -402,7 +403,7 @@ public class ClusteringEngineTest
 	{
 		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(n);
 		int id = 0;
-		Random random  = null;
+		Random random = null;
 		if (time != null)
 		{
 			if (time.length < m)
@@ -418,14 +419,16 @@ public class ClusteringEngineTest
 				random.shuffle(time);
 				for (int i = m; i-- > 0;)
 				{
-					points.add(new ClusterPoint(id++, x + rand.nextDouble() * radius, y + rand.nextDouble() * radius, time[i]));
+					points.add(ClusterPoint.newTimeClusterPoint(id++, x + rand.nextDouble() * radius,
+							y + rand.nextDouble() * radius, time[i]));
 				}
 			}
 			else
 			{
 				for (int i = m; i-- > 0;)
 				{
-					points.add(new ClusterPoint(id++, x + rand.nextDouble() * radius, y + rand.nextDouble() * radius));
+					points.add(ClusterPoint.newClusterPoint(id++, x + rand.nextDouble() * radius, y +
+							rand.nextDouble() * radius));
 				}
 			}
 		}

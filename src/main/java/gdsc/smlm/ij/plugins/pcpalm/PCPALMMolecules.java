@@ -1339,7 +1339,7 @@ public class PCPALMMolecules implements PlugIn
 				}
 				final double x = localisationXy[0];
 				final double y = localisationXy[1];
-				molecules.add(new Molecule(x, y, i, 0));
+				molecules.add(new Molecule(x, y, i, 1));
 
 				// Store in pixels
 				float[] params = new float[7];
@@ -1512,7 +1512,7 @@ public class PCPALMMolecules implements PlugIn
 		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(molecules.size());
 		for (Molecule m : molecules)
 			// Precision was used to store the molecule ID
-			points.add(new ClusterPoint((int) m.precision, m.x, m.y));
+			points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
 		ClusteringEngine engine = new ClusteringEngine();
 		IJ.showStatus("Clustering to check inter-molecule distances");
 		engine.setTracker(new IJTrackProgress());

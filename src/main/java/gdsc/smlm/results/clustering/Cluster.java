@@ -1,5 +1,7 @@
 package gdsc.smlm.results.clustering;
 
+import gdsc.smlm.utils.Maths;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -18,7 +20,7 @@ package gdsc.smlm.results.clustering;
  */
 public class Cluster implements Comparable<Cluster>
 {
-	public double x, y, sumx, sumy;
+	public double x, y, sumx, sumy, sumw;
 	public int n;
 
 	// Used to construct a single linked list of clusters
@@ -27,7 +29,7 @@ public class Cluster implements Comparable<Cluster>
 	// Used to store potential clustering links
 	public Cluster closest = null;
 	public double d2;
-	
+
 	// Used to indicate this cluster has a neighbour
 	public int neighbour = 0;
 
@@ -39,9 +41,12 @@ public class Cluster implements Comparable<Cluster>
 	{
 		point.next = null;
 		head = point;
-		this.x = sumx = point.x;
-		this.y = sumy = point.y;
+		sumx = point.x * point.weight;
+		sumy = point.y * point.weight;
+		sumw = point.weight;
 		n = 1;
+		this.x = point.x;
+		this.y = point.y;
 	}
 
 	public double distance(Cluster other)
@@ -84,15 +89,39 @@ public class Cluster implements Comparable<Cluster>
 		tail.next = big;
 		head = small;
 
-		// Find the new centroid
-		sumx += other.sumx;
-		sumy += other.sumy;
-		n += other.n;
-		x = sumx / n;
-		y = sumy / n;
+		merge(other.x, other.y, other.sumx, other.sumy, other.sumw, other.n);
 
 		// Free the other cluster
 		other.clear();
+	}
+
+	/**
+	 * Find the new centroid when merging with the given parameters
+	 * 
+	 * @param otherX
+	 * @param otherY
+	 * @param otherSumX
+	 * @param otherSumY
+	 * @param otherSumW
+	 * @param otherN
+	 */
+	private void merge(double otherX, double otherY, double otherSumX, double otherSumY, double otherSumW, int otherN)
+	{
+		sumx += otherSumX;
+		sumy += otherSumY;
+		sumw += otherSumW;
+		n += otherN;
+
+		// Avoid minor drift during merge. This can effect the particle linkage algorithm when 
+		// merged points have the same coordinates. This is because clusters may have new coordinates 
+		// that are moved slightly and so the remaining points on the original coordinates join to 
+		// each other rather than the cluster.
+		// This could be improved by changing the particle linkage algorithm to have a minimum distance
+		// under which it prefers to join to clusters if they exist.
+		if (x != otherX)
+			x = sumx / sumw;
+		if (y != otherY)
+			y = sumy / sumw;
 	}
 
 	public void add(ClusterPoint point)
@@ -100,12 +129,7 @@ public class Cluster implements Comparable<Cluster>
 		point.next = null;
 		head = point;
 
-		// Find the new centroid
-		sumx += point.x;
-		sumy += point.y;
-		n ++;
-		x = sumx / n;
-		y = sumy / n;
+		merge(point.x, point.y, point.x * point.weight, point.y * point.weight, point.weight, 1);
 	}
 
 	protected void clear()
@@ -113,7 +137,7 @@ public class Cluster implements Comparable<Cluster>
 		head = null;
 		closest = null;
 		n = 0;
-		x = y = sumx = sumy = d2 = 0;
+		x = y = sumx = sumy = sumw = d2 = 0;
 	}
 
 	/**
@@ -157,7 +181,7 @@ public class Cluster implements Comparable<Cluster>
 	 */
 	public int compareTo(Cluster o)
 	{
-		// Sort by size then centroid x then y. 
+		// Sort by size, then centroid x then y, then the total weight. 
 		// The sort is arbitrary but allows comparison of two lists after sorting.
 		if (n < o.n)
 			return -1;
@@ -170,6 +194,10 @@ public class Cluster implements Comparable<Cluster>
 		if (y < o.y)
 			return -1;
 		if (y > o.y)
+			return 1;
+		if (sumw < o.sumw)
+			return -1;
+		if (sumw > o.sumw)
 			return 1;
 		return 0;
 	}

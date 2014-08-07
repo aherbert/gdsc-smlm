@@ -60,14 +60,16 @@ public class PCPALMClusters implements PlugInFilter
 	static String TITLE = "PC-PALM Clusters";
 
 	private static double distance = 50;
-	private static ClusteringAlgorithm sClusteringAlgorithm = ClusteringAlgorithm.Pairwise;
+	private static ClusteringAlgorithm sClusteringAlgorithm = ClusteringAlgorithm.ClosestParticle;
 	private static int minN = 1;
 	private static int maxN = 0;
 	private static boolean maximumLikelihood = false;
 	private static boolean showCumulativeHistogram = false;
 	private static boolean multiThread = true;
+	private static boolean sWeightedClustering = false;
 
-	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
+	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.ClosestParticle;
+	private boolean weightedClustering = false;
 
 	/*
 	 * (non-Javadoc)
@@ -219,7 +221,7 @@ public class PCPALMClusters implements PlugInFilter
 		int id = 0;
 		for (Molecule m : molecules)
 		{
-			points.add(new ClusterPoint(id++, m.x, m.y));
+			points.add(ClusterPoint.newClusterPoint(id++, m.x, m.y, (weightedClustering) ? m.photons : 1));
 		}
 		return points;
 	}
@@ -239,6 +241,9 @@ public class PCPALMClusters implements PlugInFilter
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
+		// Check if the molecules have weights
+		boolean haveWeights = checkForWeights();
+
 		gd.addMessage("Find clusters using centroid-linkage clustering.");
 
 		gd.addNumericField("Distance (nm)", distance, 0);
@@ -249,6 +254,8 @@ public class PCPALMClusters implements PlugInFilter
 		gd.addCheckbox("Show_cumulative_histogram", showCumulativeHistogram);
 		gd.addCheckbox("Maximum_likelihood", maximumLikelihood);
 		gd.addCheckbox("Multi_thread", multiThread);
+		if (haveWeights)
+			gd.addCheckbox("Weighted_clustering", sWeightedClustering);
 
 		gd.showDialog();
 
@@ -262,6 +269,8 @@ public class PCPALMClusters implements PlugInFilter
 		showCumulativeHistogram = gd.getNextBoolean();
 		maximumLikelihood = gd.getNextBoolean();
 		multiThread = gd.getNextBoolean();
+		if (haveWeights)
+			weightedClustering = sWeightedClustering = gd.getNextBoolean();
 
 		// Check arguments
 		try
@@ -275,6 +284,14 @@ public class PCPALMClusters implements PlugInFilter
 			return false;
 		}
 
+		return true;
+	}
+
+	private boolean checkForWeights()
+	{
+		for (Molecule m : PCPALMMolecules.molecules)
+			if (m.photons <= 0)
+				return false;
 		return true;
 	}
 
