@@ -136,8 +136,8 @@ public class ResequenceResults implements PlugIn
 		int t = 1; // The current frame in the results
 		int mapped = start; // The mapped frame in the results
 		int b = 1; // The current block size
-		if (tracker != null)
-			tracker.log("Map %d -> %d", t, mapped);
+
+		boolean print = true;
 		for (PeakResult r : results.getResults())
 		{
 			if (t != r.peak)
@@ -160,11 +160,17 @@ public class ResequenceResults implements PlugIn
 				}
 
 				t = r.peak;
-				if (tracker != null)
-					tracker.log("Map %d -> %d", t, mapped);
+				print = true;
 			}
 
 			r.peak = mapped;
+
+			if (print)
+			{
+				print = false;
+				if (tracker != null)
+					tracker.log("Map %d -> %d", t, mapped);
+			}
 		}
 
 		return true;
