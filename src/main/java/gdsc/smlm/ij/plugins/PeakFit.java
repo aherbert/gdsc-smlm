@@ -133,6 +133,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private boolean simpleFit = false;
 	private static int optionIntegrateFrames = 1;
 	private int integrateFrames = 1;
+	private static boolean optionInterlacedData = false;
+	private static int optionDataStart = 1;
+	private static int optionDataBlock = 1;
+	private static int optionDataSkip = 0;
+	private boolean interlacedData = false;
+	private int dataStart = 1;
+	private int dataBlock = 1;
+	private int dataSkip = 0;
 
 	private static String inputOption = "";
 	private static boolean showTable = true;
@@ -264,7 +272,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 
 			imageSource = new SeriesImageSource(getName(series.getImageList()), series);
-			((SeriesImageSource)imageSource).setLogProgress(true);
+			((SeriesImageSource) imageSource).setLogProgress(true);
 			plugin_flags |= NO_IMAGE_REQUIRED;
 		}
 		else
@@ -648,8 +656,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
 		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
 		gd.addSlider("Search_width", 2, 4.5, config.getSearch());
-		if (extraOptions)
+		if (extraOptions && !fitMaxima)
+		{
+			gd.addCheckbox("Interlaced_data", optionInterlacedData);
 			gd.addSlider("Integrate_frames", 1, 5, optionIntegrateFrames);
+		}
 
 		Component discardLabel = null;
 		if (!maximaIdentification)
@@ -778,8 +789,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textSmooth = numerics.get(n++);
 			textSmooth2 = numerics.get(n++);
 			textSearch = numerics.get(n++);
-			if (extraOptions)
+			if (extraOptions && !fitMaxima)
+			{
+				b++; // Skip over the interlaced data option
 				n++; // Skip over the integrate frames option
+			}
 			if (!maximaIdentification)
 			{
 				textFitSolver = choices.get(ch++);
@@ -1135,8 +1149,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
 		config.setSearch((int) gd.getNextNumber());
-		if (extraOptions)
+		if (extraOptions && !fitMaxima)
 		{
+			interlacedData = gd.getNextBoolean();
 			integrateFrames = optionIntegrateFrames = (int) gd.getNextNumber();
 		}
 
@@ -1256,6 +1271,45 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			else
 			{
 				fitConfig.setFitSolver(FitSolver.LVM);
+			}
+		}
+
+		// Extra parameters are needed for interlaced data
+		if (interlacedData)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
+					+ "Describe the regular repeat of the data:\n \n"
+					+ "Start = The first frame that contains data\n"
+					+ "Block = The number of continuous frames containing data\n"
+					+ "Skip = The number of continuous frames to ignore before the next data\n \n"
+					+ "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+			gd.addNumericField("Start", optionDataStart, 0);
+			gd.addNumericField("Block", optionDataBlock, 0);
+			gd.addNumericField("Skip", optionDataSkip, 0);
+
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+
+			if (!gd.wasCanceled())
+			{
+				dataStart = (int) gd.getNextNumber();
+				dataBlock = (int) gd.getNextNumber();
+				dataSkip = (int) gd.getNextNumber();
+
+				if (dataStart > 0 && dataBlock > 0 && dataSkip > 0)
+				{
+					// Store options for next time
+					optionInterlacedData = true;
+					optionDataStart = dataStart;
+					optionDataBlock = dataBlock;
+					optionDataSkip = dataSkip;
+				}
+			}
+			else
+			{
+				interlacedData = false;
 			}
 		}
 
@@ -1473,6 +1527,27 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				IJ.showStatus("Slice: " + slice + " / " + totalFrames);
 			}
 
+			int frame = slice + frameOffset;
+			if (interlacedData)
+			{
+				// Check if the frame is allowed:
+				//    Start
+				//      |
+				// |----|Block|Skip|Block|Skip|Block|Skip
+				// Note the source data is still read so that the source is incremented.
+				if (frame < dataStart)
+				{
+					//System.out.printf("Skipping %d\n", frame);
+					continue;
+				}
+				int frameInBlock = (frame - dataStart) % (dataBlock + dataSkip);
+				if (frameInBlock >= dataBlock)
+				{
+					//System.out.printf("Skipping %d\n", frame);
+					continue;
+				}
+			}
+			
 			float noise = Float.NaN;
 			if (ignoreBoundsForNoise)
 			{
@@ -1482,7 +1557,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				data = ImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
 			}
 
-			engine.run(createJob(slice + frameOffset, data, bounds, noise));
+			engine.run(createJob(frame, data, bounds, noise));
 
 			if (escapePressed())
 				shutdown = true;
