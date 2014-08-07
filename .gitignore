@@ -2,5 +2,5 @@
 .project
 .classpath
 build.sh
-macros
-plugins
+/macros
+/plugins
