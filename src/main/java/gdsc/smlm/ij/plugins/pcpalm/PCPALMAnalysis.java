@@ -19,13 +19,10 @@ import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.MaskDistribution;
-import gdsc.smlm.model.MaskDistribution3D;
-import gdsc.smlm.model.SpatialDistribution;
 import gdsc.smlm.utils.ImageWindow;
 import gdsc.smlm.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
@@ -41,7 +38,6 @@ import java.awt.Frame;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve.
@@ -83,7 +79,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	private static TextWindow resultsTable = null;
 
 	static ArrayList<CorrelationResult> results = new ArrayList<CorrelationResult>();
-	
+
 	// Area of the region cropped from the PCPALM Molecules list
 	double croppedArea = 0;
 
@@ -228,7 +224,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		{
 			return PCPALMMolecules.molecules;
 		}
-		
+
 		double pcw = PCPALMMolecules.maxx - PCPALMMolecules.minx;
 		double pch = PCPALMMolecules.maxy - PCPALMMolecules.miny;
 
@@ -387,6 +383,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			for (int i = molecules.size(); i-- > 0;)
 			{
 				final Molecule m = molecules.get(i);
+				// Optionally ignore molecules that are near the edge of the boundary
 				if (useBorder && (m.x < boundaryMinx || m.x > boundaryMaxx || m.y < boundaryMiny || m.y > boundaryMaxy))
 					continue;
 				N++;
@@ -1046,7 +1043,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			sb.append("PeakDensity (um^-2)\t");
 			sb.append("nm/pixel\t");
 			sb.append("Binary\t");
-			resultsTable = new TextWindow(TITLE, sb.toString(), (String)null, 800, 300);
+			resultsTable = new TextWindow(TITLE, sb.toString(), (String) null, 800, 300);
 		}
 	}
 }

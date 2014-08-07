@@ -92,15 +92,15 @@ public class ClusteringEngineTest
 	}
 	
 	@Test
-	public void canMultithreadParticleLinkage()
+	public void canMultithreadParticleSingleLinkage()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ParticleLinkage);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ParticleSingleLinkage);
 	}
 
 	@Test
-	public void multithreadedParticleLinkageIsFaster()
+	public void multithreadedParticleSingleLinkageIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ParticleLinkage);	
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ParticleSingleLinkage);	
 	}	
 	
 	@Test
@@ -113,6 +113,18 @@ public class ClusteringEngineTest
 	public void multithreadedClosestIsFaster()
 	{
 		runMultithreadingSpeedTest(ClusteringAlgorithm.Closest);	
+	}	
+	
+	@Test
+	public void canMultithreadClosestParticle()
+	{
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestParticle);
+	}
+	
+	@Test
+	public void multithreadedClosestParticleIsFaster()
+	{
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticle);	
 	}	
 	
 	@Test
@@ -137,6 +149,30 @@ public class ClusteringEngineTest
 	public void multithreadedClosestTimePriorityIsFaster()
 	{
 		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestTimePriority);	
+	}	
+	
+	@Test
+	public void canMultithreadClosestParticleDistancePriority()
+	{
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestParticleDistancePriority);
+	}
+
+	@Test
+	public void multithreadedClosestParticleDistancePriorityIsFaster()
+	{
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleDistancePriority);	
+	}	
+	
+	@Test
+	public void canMultithreadClosestParticleTimePriority()
+	{
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestParticleTimePriority);
+	}
+
+	@Test
+	public void multithreadedClosestParticleTimePriorityIsFaster()
+	{
+		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleTimePriority);	
 	}	
 	
 	private void runMultithreadingAlgorithmTest(ClusteringAlgorithm algorithm)

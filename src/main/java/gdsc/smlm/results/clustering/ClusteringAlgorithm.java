@@ -22,11 +22,16 @@ public enum ClusteringAlgorithm
 	 * Joins the closest pair of particles, one of which must not be in a cluster. Clusters are not joined and can
 	 * only grow when particles are added.
 	 */
-	ParticleLinkage,
+	ParticleSingleLinkage,
 	/**
 	 * Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively
 	 */
 	Closest,
+	/**
+	 * Hierarchical centroid-linkage clustering by joining the closest pair of any single particle and another single or
+	 * cluster. Clusters are not joined and can only grow when particles are added.
+	 */
+	ClosestParticle,
 	/**
 	 * Join the current set of closest pairs in a greedy algorithm. This method computes the pairwise distances and
 	 * joins the closest pairs without updating the centroid of each cluster, and the distances, after every join
@@ -51,5 +56,21 @@ public enum ClusteringAlgorithm
 	 * compared using time and distance thresholds with priority on the closest distance gap (within the time
 	 * threshold).
 	 */
-	ClosestTimePriority
+	ClosestTimePriority,
+	/**
+	 * Hierarchical centroid-linkage clustering by joining the closest pair of any single particle and another single or
+	 * cluster. Clusters are not joined and can only grow when particles are added.
+	 * <p>
+	 * Clusters are compared using time and distance thresholds with priority on the closest time gap (within the
+	 * distance threshold).
+	 */
+	ClosestParticleDistancePriority,
+	/**
+	 * Hierarchical centroid-linkage clustering by joining the closest pair of any single particle and another single or
+	 * cluster. Clusters are not joined and can only grow when particles are added.
+	 * <p>
+	 * Clusters are compared using time and distance thresholds with priority on the closest distance gap (within the
+	 * time threshold).
+	 */
+	ClosestParticleTimePriority
 }

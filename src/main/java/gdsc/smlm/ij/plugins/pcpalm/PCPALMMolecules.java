@@ -413,7 +413,7 @@ public class PCPALMMolecules implements PlugIn
 
 	private MemoryPeakResults cropToRoi(MemoryPeakResults results)
 	{
-		Rectangle bounds = results.getBounds();
+		Rectangle bounds = results.getBounds(true);
 		area = (bounds.width * bounds.height * results.getNmPerPixel() * results.getNmPerPixel()) / 1e6;
 		if (roiBounds == null)
 		{
@@ -920,8 +920,10 @@ public class PCPALMMolecules implements PlugIn
 
 		startLog();
 
+		int timeInFrames = Math.max(1, (int) Math.round(tThreshold / results.getCalibration().exposureTime));
+
 		ArrayList<Molecule> singles = new ArrayList<Molecule>();
-		molecules = traceMolecules(results, dThreshold, (int) tThreshold, singles);
+		molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
 		molecules.addAll(singles);
 	}
 
@@ -933,7 +935,7 @@ public class PCPALMMolecules implements PlugIn
 		gd.addMessage("Use distance and time thresholds to trace localisations into molecules.");
 
 		gd.addNumericField("Distance (nm)", dThreshold, 0);
-		gd.addNumericField("Time (frames)", tThreshold, 0);
+		gd.addNumericField("Time (seconds)", tThreshold, 2);
 
 		gd.showDialog();
 
@@ -941,13 +943,13 @@ public class PCPALMMolecules implements PlugIn
 			return false;
 
 		dThreshold = Math.abs(gd.getNextNumber());
-		tThreshold = (int) Math.abs(gd.getNextNumber());
+		tThreshold = Math.abs(gd.getNextNumber());
 
 		// Check arguments
 		try
 		{
 			Parameters.isAboveZero("Distance threshold", dThreshold);
-			Parameters.isEqualOrAbove("Time threshold", tThreshold, 1);
+			Parameters.isAboveZero("Time threshold", tThreshold);
 		}
 		catch (IllegalArgumentException ex)
 		{
@@ -1514,7 +1516,7 @@ public class PCPALMMolecules implements PlugIn
 		ClusteringEngine engine = new ClusteringEngine();
 		IJ.showStatus("Clustering to check inter-molecule distances");
 		engine.setTracker(new IJTrackProgress());
-		engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleLinkage);
+		engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleSingleLinkage);
 		engine.setTrackJoins(true);
 		ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
 		IJ.showStatus("");
@@ -1525,8 +1527,7 @@ public class PCPALMMolecules implements PlugIn
 
 			int all = interIdDistances.length + intraIdDistances.length;
 
-			log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%",
-					Utils.rounded(intraHist[0][p99], 4),
+			log("  * Fraction of inter-molecule particle linkage @ %s nm = %s %%", Utils.rounded(intraHist[0][p99], 4),
 					(all > 0) ? Utils.rounded(100.0 * interIdDistances.length / all, 4) : "0");
 
 			// Show a double cumulative histogram plot
@@ -1550,7 +1551,7 @@ public class PCPALMMolecules implements PlugIn
 			log("Aborted clustering to check inter-molecule distances");
 		}
 	}
-	
+
 	private double distance2(double[] centre1, double[] centre2)
 	{
 		final double dx = centre1[0] - centre2[0];
