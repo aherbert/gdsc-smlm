@@ -163,6 +163,7 @@ public class TraceMolecules implements PlugIn
 			IJ.error(TITLE, "No localisations in memory");
 			return;
 		}
+		altKeyDown = IJ.altKeyDown() || IJ.shiftKeyDown();
 
 		Trace[] traces = null;
 		int totalFiltered = 0;
@@ -569,7 +570,6 @@ public class TraceMolecules implements PlugIn
 
 	private boolean showDialog()
 	{
-		altKeyDown = IJ.altKeyDown();
 		TITLE = outputName + " Molecules";
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -631,8 +631,7 @@ public class TraceMolecules implements PlugIn
 		settings.refitOption = gd.getNextBoolean();
 		if (altKeyDown)
 		{
-			inputDebugMode = gd.getNextBoolean();
-			debugMode = inputDebugMode;
+			debugMode = inputDebugMode = gd.getNextBoolean();
 		}
 
 		if (gd.invalidNumber())
@@ -675,7 +674,6 @@ public class TraceMolecules implements PlugIn
 
 	private boolean showClusterDialog()
 	{
-		altKeyDown = IJ.altKeyDown();
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
@@ -730,8 +728,7 @@ public class TraceMolecules implements PlugIn
 		settings.refitOption = gd.getNextBoolean();
 		if (altKeyDown)
 		{
-			inputDebugMode = gd.getNextBoolean();
-			debugMode = inputDebugMode;
+			debugMode = inputDebugMode = gd.getNextBoolean();
 		}
 
 		if (gd.invalidNumber())
