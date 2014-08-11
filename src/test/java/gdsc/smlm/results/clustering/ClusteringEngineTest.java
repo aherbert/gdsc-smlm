@@ -1,6 +1,5 @@
 package gdsc.smlm.results.clustering;
 
-import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Random;
 
 import java.util.ArrayList;
@@ -213,6 +212,7 @@ public class ClusteringEngineTest
 		return runSpeedTest(points, algorithm, radius, 0, 1);
 	}
 
+	@SuppressWarnings("unchecked")
 	private long runSpeedTest(Object[] points, ClusteringAlgorithm algorithm, double radius, int time, int threadCount)
 	{
 		ClusteringEngine engine = new ClusteringEngine();
