@@ -267,18 +267,40 @@ public class TraceMolecules implements PlugIn
 
 	private List<ClusterPoint> convertToClusterPoints()
 	{
-		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(results.size());
+		return convertToClusterPoints(results.getResults());
+	}
+
+	/**
+	 * Convert a list of peak results into points for the clustering engine
+	 * 
+	 * @param peakResults
+	 * @return
+	 */
+	public static List<ClusterPoint> convertToClusterPoints(List<PeakResult> peakResults)
+	{
+		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(peakResults.size());
 		int id = 0;
-		for (PeakResult p : results.getResults())
+		for (PeakResult p : peakResults)
 			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(), p.peak));
 		return points;
 	}
 
 	private Trace[] convertToTraces(ArrayList<Cluster> clusters)
 	{
+		return convertToTraces(results.getResults(), clusters);
+	}
+
+	/**
+	 * Convert the clusters from the clustering engine into traces composed of the original list of peak results
+	 * 
+	 * @param peakResults
+	 * @param clusters
+	 * @return
+	 */
+	public static Trace[] convertToTraces(List<PeakResult> peakResults, ArrayList<Cluster> clusters)
+	{
 		Trace[] traces = new Trace[clusters.size()];
 		int i = 0;
-		List<PeakResult> peakResults = results.getResults();
 		for (Cluster cluster : clusters)
 		{
 			Trace trace = new Trace();

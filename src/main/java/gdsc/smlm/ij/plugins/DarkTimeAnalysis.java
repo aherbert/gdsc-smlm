@@ -13,19 +13,27 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
+import gdsc.smlm.results.clustering.Cluster;
+import gdsc.smlm.results.clustering.ClusteringAlgorithm;
+import gdsc.smlm.results.clustering.ClusteringEngine;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Computes a graph of the dark time and estimates the time threshold for the specified point in the
@@ -35,7 +43,11 @@ public class DarkTimeAnalysis implements PlugIn
 {
 	private static String TITLE = "Dark-time Analysis";
 
+	private static String[] METHOD = new String[] { "Tracing", "Clustering (Distance Priority)",
+			"Clustering (Time Priority)" };
+
 	private static String inputOption = "";
+	private static int method = 0;
 	private static double msPerFrame = 50;
 	private static double searchDistance = 100;
 	private static double maxDarkTime = 0;
@@ -80,6 +92,7 @@ public class DarkTimeAnalysis implements PlugIn
 		gd.addMessage("Compute the cumulative dark-time histogram");
 		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
 
+		gd.addChoice("Method", METHOD, METHOD[method]);
 		gd.addSlider("Search_distance (nm)", 5, 150, searchDistance);
 		gd.addNumericField("Max_dark_time (seconds)", maxDarkTime, 2);
 		gd.addSlider("Percentile", 0, 100, percentile);
@@ -90,6 +103,7 @@ public class DarkTimeAnalysis implements PlugIn
 			return false;
 
 		inputOption = gd.getNextChoice();
+		method = gd.getNextChoiceIndex();
 		searchDistance = gd.getNextNumber();
 		maxDarkTime = gd.getNextNumber();
 		percentile = gd.getNextNumber();
@@ -118,12 +132,43 @@ public class DarkTimeAnalysis implements PlugIn
 		int max = results.getResults().get(results.size() - 1).getEndFrame();
 
 		// Trace results
-		TraceManager tm = new TraceManager(results);
+		double d = searchDistance / results.getCalibration().nmPerPixel;
 		int range = max - min + 1;
-		if (maxDarkTime > 0 && results.getCalibration() != null && results.getCalibration().exposureTime > 0)
-			range = Math.max(1, (int) Math.round(maxDarkTime * 1000 / results.getCalibration().exposureTime));
-		tm.traceMolecules(searchDistance / results.getCalibration().nmPerPixel, range);
-		Trace[] traces = tm.getTraces();
+		if (maxDarkTime > 0)
+			range = Math.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
+
+		IJTrackProgress tracker = new IJTrackProgress();
+		tracker.status("Analysing ...");
+		
+		Trace[] traces;
+		ClusteringAlgorithm algorithm = ClusteringAlgorithm.ClosestParticleTimePriority;
+		switch (method)
+		{
+			case 2: // Clustering (Time Priority)
+				algorithm = ClusteringAlgorithm.ClosestParticleDistancePriority;
+				// Fall through ...
+				
+			case 1: // Clustering (Distance Priority)
+				ClusteringEngine engine = new ClusteringEngine();
+				engine.setTracker(tracker);
+				engine.setClusteringAlgorithm(algorithm);
+				engine.setTrackJoins(true);
+				engine.setThreadCount(Prefs.getThreads());
+				List<PeakResult> peakResults = results.getResults();
+				ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults),
+						d, range);
+				traces = TraceMolecules.convertToTraces(peakResults, clusters);
+				break;
+
+			case 0: // Tracing
+			default:
+				TraceManager tm = new TraceManager(results);
+				tm.setTracker(tracker);
+				tm.traceMolecules(d, range);
+				traces = tm.getTraces();
+		}
+		
+		tracker.status("Computing histogram ...");
 
 		// Build dark-time histogram
 		int[] times = new int[range];
@@ -181,6 +226,8 @@ public class DarkTimeAnalysis implements PlugIn
 				break;
 			}
 		}
+		
+		tracker.status("");
 	}
 
 	private void plotDarkTimeHistogram(StoredDataStatistics stats)
