@@ -66,6 +66,7 @@ import ij.gui.GenericDialog;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
+import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
@@ -832,6 +833,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (extraOptions)
 				textImageRollingWindow = numerics.get(n++);
 			textResultsDirectory = texts.get(t++);
+			textResultsDirectory.addMouseListener(this);
+
 			textBinaryResults = checkboxes.get(b++);
 			textResultsInMemory = checkboxes.get(b++);
 		}
@@ -1849,12 +1852,25 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (e.getSource() == textConfigFile)
 			{
 				String[] path = Utils.decodePath(textConfigFile.getText());
-				OpenDialog chooser = new OpenDialog("Configuration_File", path[0], path[1]);
+				OpenDialog chooser = new OpenDialog("Config_File", path[0], path[1]);
 				if (chooser.getFileName() != null)
 				{
 					String newFilename = chooser.getDirectory() + chooser.getFileName();
 					textConfigFile.setText(newFilename);
 				}
+			}
+			else if (e.getSource() == textResultsDirectory)
+			{
+				String directory = textResultsDirectory.getText();
+				
+				String defaultDir = OpenDialog.getDefaultDirectory();
+				OpenDialog.setDefaultDirectory(directory);
+				DirectoryChooser chooser = new DirectoryChooser(directory);
+				if (chooser.getDirectory() != null)
+				{
+					textResultsDirectory.setText(chooser.getDirectory());
+				}
+				OpenDialog.setDefaultDirectory(defaultDir);
 			}
 		}
 	}
