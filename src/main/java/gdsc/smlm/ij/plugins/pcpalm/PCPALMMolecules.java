@@ -39,6 +39,7 @@ import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
@@ -1518,6 +1519,7 @@ public class PCPALMMolecules implements PlugIn
 		engine.setTracker(new IJTrackProgress());
 		engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleSingleLinkage);
 		engine.setTrackJoins(true);
+		engine.setThreadCount(Prefs.getThreads());
 		ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
 		IJ.showStatus("");
 		if (clusters != null)
