@@ -38,6 +38,7 @@ public class DarkTimeAnalysis implements PlugIn
 	private static String inputOption = "";
 	private static double msPerFrame = 50;
 	private static double searchDistance = 100;
+	private static double maxDarkTime = 0;
 	private static double percentile = 99;
 	private static int nBins = 100;
 
@@ -80,6 +81,7 @@ public class DarkTimeAnalysis implements PlugIn
 		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
 
 		gd.addSlider("Search_distance (nm)", 5, 150, searchDistance);
+		gd.addNumericField("Max_dark_time (seconds)", maxDarkTime, 2);
 		gd.addSlider("Percentile", 0, 100, percentile);
 		gd.addSlider("Histogram_bins", 0, 100, nBins);
 		gd.showDialog();
@@ -89,6 +91,7 @@ public class DarkTimeAnalysis implements PlugIn
 
 		inputOption = gd.getNextChoice();
 		searchDistance = gd.getNextNumber();
+		maxDarkTime = gd.getNextNumber();
 		percentile = gd.getNextNumber();
 		nBins = (int) Math.abs(gd.getNextNumber());
 
@@ -117,6 +120,8 @@ public class DarkTimeAnalysis implements PlugIn
 		// Trace results
 		TraceManager tm = new TraceManager(results);
 		int range = max - min + 1;
+		if (maxDarkTime > 0 && results.getCalibration() != null && results.getCalibration().exposureTime > 0)
+			range = Math.max(1, (int) Math.round(maxDarkTime * 1000 / results.getCalibration().exposureTime));
 		tm.traceMolecules(searchDistance / results.getCalibration().nmPerPixel, range);
 		Trace[] traces = tm.getTraces();
 
@@ -171,8 +176,8 @@ public class DarkTimeAnalysis implements PlugIn
 		{
 			if (y[i] >= percentile)
 			{
-				Utils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, Utils.rounded(x[i]), 
-						Utils.rounded(x[i]/1000));
+				Utils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, Utils.rounded(x[i]),
+						Utils.rounded(x[i] / 1000));
 				break;
 			}
 		}
