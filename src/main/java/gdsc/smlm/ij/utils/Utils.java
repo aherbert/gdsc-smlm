@@ -793,4 +793,24 @@ public class Utils
 		OpenDialog.setDefaultDirectory(defaultDir);
 		return directory;
 	}
+
+	/**
+	 * Open a file selection dialog using the given title (and optionally the default path)
+	 * 
+	 * @param title
+	 *            The dialog title
+	 * @param filename
+	 *            The default path to start with
+	 * @return The path (or null if the dialog is cancelled)
+	 */
+	public static String getFilename(String title, String filename)
+	{
+		String[] path = Utils.decodePath(filename);
+		OpenDialog chooser = new OpenDialog(title, path[0], path[1]);
+		if (chooser.getFileName() != null)
+		{
+			return chooser.getDirectory() + chooser.getFileName();
+		}
+		return null;
+	}
 }

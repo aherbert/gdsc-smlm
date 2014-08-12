@@ -631,11 +631,9 @@ public class PCPALMFitting implements PlugIn
 	{
 		if (!saveCorrelationCurve)
 			return;
-		String[] path = Utils.decodePath(outputFilename);
-		OpenDialog chooser = new OpenDialog("Output_Correlation_File", path[0], path[1]);
-		if (chooser.getFileName() != null)
+		outputFilename = Utils.getFilename("Output_Correlation_File", outputFilename);
+		if (outputFilename != null)
 		{
-			outputFilename = chooser.getDirectory() + chooser.getFileName();
 			outputFilename = Utils.replaceExtension(outputFilename, "xls");
 
 			BufferedWriter output = null;
@@ -697,12 +695,9 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private boolean loadCorrelationCurve()
 	{
-		String[] path = Utils.decodePath(inputFilename);
-		OpenDialog chooser = new OpenDialog("Input_Correlation_File", path[0], path[1]);
-		if (chooser.getFileName() == null)
+		inputFilename = Utils.getFilename("Input_Correlation_File", inputFilename);
+		if (inputFilename == null)
 			return false;
-
-		inputFilename = chooser.getDirectory() + chooser.getFileName();
 
 		// Set the analysis variables
 		boolean spatialDomainSet = false;
