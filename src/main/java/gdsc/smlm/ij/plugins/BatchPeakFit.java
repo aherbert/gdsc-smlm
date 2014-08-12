@@ -40,7 +40,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
@@ -117,7 +116,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 			IJ.log("No settings for the fitting engine");
 			return;
 		}
-		
+
 		if (!new File(settings.resultsDirectory).exists())
 		{
 			if (!new File(settings.resultsDirectory).mkdirs())
@@ -230,10 +229,11 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 	private BatchSettings loadSettings(String configurationFilename)
 	{
 		BatchSettings settings = null;
+		FileInputStream fs = null;
 		try
 		{
-			FileInputStream fis = new FileInputStream(configurationFilename);
-			settings = (BatchSettings) xs.fromXML(fis);
+			fs = new FileInputStream(configurationFilename);
+			settings = (BatchSettings) xs.fromXML(fs);
 		}
 		catch (FileNotFoundException ex)
 		{
@@ -242,6 +242,20 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 		catch (XStreamException ex)
 		{
 			ex.printStackTrace();
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 		return settings;
 	}
@@ -293,7 +307,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 
 			// Ensure the state is restored after XStream object reconstruction
 			fitConfig.getFitConfiguration().initialiseState();
-			
+
 			String prefix = String.format(format, i);
 
 			// Save the settings
@@ -338,27 +352,35 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 	private String saveRunSettings(String prefix, String imageFilename, FitEngineConfiguration fitConfig)
 	{
 		BatchRun batchRun = new BatchRun(imageFilename, fitConfig);
-		FileOutputStream fos;
+		FileOutputStream fs = null;
 		try
 		{
 			String settingsFilename = prefix + ".xml";
-			fos = new FileOutputStream(settingsFilename);
-			OutputStreamWriter out = new OutputStreamWriter(fos, "UTF-8");
-			out.write(xs.toXML(batchRun));
-			out.close();
+			fs = new FileOutputStream(settingsFilename);
+			xs.toXML(batchRun, fs);
 			return settingsFilename;
 		}
 		catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
 		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
 		catch (XStreamException e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 		return null;
 	}
@@ -458,8 +480,19 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 					String newFilename = chooser.getDirectory() + chooser.getFileName();
 					if (!newFilename.endsWith(".xml"))
 						newFilename += ".xml";
-					FileOutputStream fs = new FileOutputStream(newFilename);
-					xs.toXML(batchSettings, fs);
+					FileOutputStream fs = null;
+					try
+					{
+						fs = new FileOutputStream(newFilename);
+						xs.toXML(batchSettings, fs);
+					}
+					finally
+					{
+						if (fs != null)
+						{
+							fs.close();
+						}
+					}
 
 					// Update dialog filename
 					configFilenameText.setText(newFilename);
