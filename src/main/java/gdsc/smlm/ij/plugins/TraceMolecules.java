@@ -53,7 +53,6 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.PolygonRoi;
-import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
@@ -541,12 +540,10 @@ public class TraceMolecules implements PlugIn
 	{
 		// Get the directory
 		IJ.showStatus("Saving trace data");
-		DirectoryChooser chooser = new DirectoryChooser("Trace_data_directory");
-		DirectoryChooser.setDefaultDirectory((settings.traceDataDirectory == null) ? "" : settings.traceDataDirectory);
-
-		if (chooser.getDirectory() != null)
+		String directory = Utils.getDirectory("Trace_data_directory", settings.traceDataDirectory);
+		if (directory != null)
 		{
-			settings.traceDataDirectory = chooser.getDirectory();
+			settings.traceDataDirectory = directory;
 			for (int i = 0; i < NAMES.length; i++)
 				saveTraceData((StoredDataStatistics) stats[i], NAMES[i], FILENAMES[i]);
 		}

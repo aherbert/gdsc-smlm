@@ -22,6 +22,7 @@ import ij.gui.ImageWindow;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.gui.ProgressBar;
+import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
@@ -771,5 +772,25 @@ public class Utils
 		{
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Open a directory selection dialog using the given title (and optionally the default directory)
+	 * 
+	 * @param title
+	 *            The dialog title
+	 * @param directory
+	 *            The default directory to start in
+	 * @return The directory (or null if the dialog is cancelled)
+	 */
+	public static String getDirectory(String title, String directory)
+	{
+		String defaultDir = OpenDialog.getDefaultDirectory();
+		if (directory != null && directory.length() > 0)
+			OpenDialog.setDefaultDirectory(directory);
+		DirectoryChooser chooser = new DirectoryChooser(title);
+		directory = chooser.getDirectory();
+		OpenDialog.setDefaultDirectory(defaultDir);
+		return directory;
 	}
 }

@@ -66,7 +66,6 @@ import ij.gui.GenericDialog;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
-import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
@@ -1861,16 +1860,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 			else if (e.getSource() == textResultsDirectory)
 			{
-				String directory = textResultsDirectory.getText();
-				
-				String defaultDir = OpenDialog.getDefaultDirectory();
-				OpenDialog.setDefaultDirectory(directory);
-				DirectoryChooser chooser = new DirectoryChooser(directory);
-				if (chooser.getDirectory() != null)
-				{
-					textResultsDirectory.setText(chooser.getDirectory());
-				}
-				OpenDialog.setDefaultDirectory(defaultDir);
+				String directory = Utils.getDirectory("Results_dir", textResultsDirectory.getText());
+				if (directory != null)
+					textResultsDirectory.setText(directory);
 			}
 		}
 	}
