@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.InputMismatchException;
-import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -403,17 +402,19 @@ public class PCPALMFitting implements PlugIn
 		try
 		{
 			int id = Integer.parseInt(fields[0]);
-			results.add(PCPALMAnalysis.results.get(id - 1));
-			return true;
+			for (CorrelationResult r : PCPALMAnalysis.results)
+			{
+				if (r.id == id)
+				{
+					results.add(r);
+					return true;
+				}
+			}
 		}
 		catch (NumberFormatException e)
 		{
-			return false;
 		}
-		catch (IndexOutOfBoundsException e)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	private ArrayList<String> buildTitlesList(ArrayList<CorrelationResult> results)
