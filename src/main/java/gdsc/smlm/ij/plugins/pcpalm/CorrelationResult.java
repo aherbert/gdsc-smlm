@@ -5,7 +5,7 @@ import gdsc.smlm.results.ImageSource;
 /**
  * Used to store the correlation (g(r)) result for the PC-PALM analysis
  */
-public class CorrelationResult
+public class CorrelationResult implements Comparable<CorrelationResult>
 {
 	public int id;
 	public ImageSource source;
@@ -15,8 +15,9 @@ public class CorrelationResult
 	public double[][] gr;
 	public boolean spatialDomain;
 
-	public CorrelationResult(int id, ImageSource source, double minx, double miny, double maxx, double maxy, double uniquePoints,
-			double nmPerPixel, double peakDensity, boolean binaryImage, double[][] gr, boolean spatialDomain)
+	public CorrelationResult(int id, ImageSource source, double minx, double miny, double maxx, double maxy,
+			double uniquePoints, double nmPerPixel, double peakDensity, boolean binaryImage, double[][] gr,
+			boolean spatialDomain)
 	{
 		this.id = id;
 		this.source = source;
@@ -30,5 +31,16 @@ public class CorrelationResult
 		this.binaryImage = binaryImage;
 		this.gr = gr;
 		this.spatialDomain = spatialDomain;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(CorrelationResult o)
+	{
+		return id - o.id;
 	}
 }

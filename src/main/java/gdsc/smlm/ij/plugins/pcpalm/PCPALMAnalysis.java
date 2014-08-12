@@ -21,6 +21,7 @@ import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.MaskDistribution;
 import gdsc.smlm.utils.ImageWindow;
 import gdsc.smlm.utils.Statistics;
+import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -36,8 +37,20 @@ import ij.text.TextWindow;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Rectangle;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
 /**
  * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve.
@@ -52,6 +65,7 @@ public class PCPALMAnalysis implements PlugInFilter
 {
 	static String TITLE = "PC-PALM Analysis";
 
+	private static String resultsDirectory = "";
 	private static double correlationDistance = 800; // nm
 	private static double correlationInterval = 20; // nm
 	private static boolean binaryImage = false;
@@ -80,6 +94,8 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	static ArrayList<CorrelationResult> results = new ArrayList<CorrelationResult>();
 
+	private boolean spatialDomain;
+
 	// Area of the region cropped from the PCPALM Molecules list
 	double croppedArea = 0;
 
@@ -90,6 +106,11 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
+		if ("save".equalsIgnoreCase(arg))
+			return saveResults();
+		if ("load".equalsIgnoreCase(arg))
+			return loadResults();
+
 		if (imp == null || imp.getRoi() == null || !imp.getRoi().isArea())
 		{
 			error("Require an input image with an area ROI.\n" + "Please create a binary molecule image using " +
@@ -102,6 +123,9 @@ public class PCPALMAnalysis implements PlugInFilter
 					PCPALMMolecules.TITLE);
 			return DONE;
 		}
+
+		spatialDomain = "spatial".equalsIgnoreCase(arg);
+
 		if (!showDialog())
 			return DONE;
 
@@ -126,6 +150,155 @@ public class PCPALMAnalysis implements PlugInFilter
 		IJ.showStatus(msg);
 		log(msg);
 		return DONE;
+	}
+
+	/**
+	 * Show a directory selection dialog for the results directory
+	 * 
+	 * @return True if a directory was selected
+	 */
+	private boolean getDirectory()
+	{
+		resultsDirectory = Utils.getDirectory("Results_directory", resultsDirectory);
+		return resultsDirectory != null;
+	}
+
+	/**
+	 * Save all the results to a directory
+	 * 
+	 * @return DONE
+	 */
+	private int saveResults()
+	{
+		if (results.isEmpty())
+		{
+			error("No results in memory");
+		}
+		else if (getDirectory())
+		{
+			XStream xs = new XStream(new DomDriver());
+			for (CorrelationResult result : results)
+				saveResult(xs, result);
+		}
+		return DONE;
+	}
+
+	private void saveResult(XStream xs, CorrelationResult result)
+	{
+		String outputFilename = String.format("%s/%s.%d.xml", resultsDirectory, (result.spatialDomain) ? "Spatial"
+				: "Frequency", result.id);
+		FileOutputStream fs = null;
+		try
+		{
+			fs = new FileOutputStream(outputFilename);
+			xs.toXML(result, fs);
+		}
+		catch (XStreamException ex)
+		{
+			//ex.printStackTrace();
+			IJ.log("Failed to save correlation result to file: " + outputFilename);
+		}
+		catch (Exception e)
+		{
+			IJ.log("Failed to save correlation result to file: " + outputFilename);
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Load all the results from a directory. File must have the XML suffix
+	 * 
+	 * @return DONE
+	 */
+	private int loadResults()
+	{
+		if (getDirectory())
+		{
+			File[] fileList = (new File(resultsDirectory)).listFiles(new FilenameFilter()
+			{
+				@Override
+				public boolean accept(File arg0, String arg1)
+				{
+					return arg1.endsWith("xml");
+				}
+			});
+			if (fileList == null)
+				return DONE;
+
+			int count = 0;
+			for (int i = 0; i < fileList.length; i++)
+			{
+				XStream xs = new XStream(new DomDriver());
+				if (fileList[i].isFile())
+					if (loadResult(xs, fileList[i].getPath()))
+						count++;
+			}
+			if (count > 0)
+				Collections.sort(results);
+			log("Loaded %d results", count);
+		}
+		return DONE;
+	}
+
+	private boolean loadResult(XStream xs, String path)
+	{
+		FileInputStream fs = null;
+		try
+		{
+			fs = new FileInputStream(path);
+			CorrelationResult result = (CorrelationResult) xs.fromXML(fs);
+			// Replace a result with the same id
+			for (int i = 0; i < results.size(); i++)
+			{
+				if (results.get(i).id == result.id)
+				{
+					results.set(i, result);
+					result = null;
+					break;
+				}
+			}
+			// Add to the results if we did not replace any
+			if (result != null)
+				results.add(result);
+			return true;
+		}
+		catch (XStreamException ex)
+		{
+			//ex.printStackTrace();
+			IJ.log("Failed to load correlation result from file: " + path);
+		}
+		catch (Exception e)
+		{
+			IJ.log("Failed to load correlation result from file: " + path);
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
 	}
 
 	private void error(String message)
@@ -161,42 +334,60 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		gd.addMessage("Analyse clusters using Pair Correlation.");
 
-		gd.addNumericField("Correlation_distance (nm)", correlationDistance, 0);
-		gd.addMessage("Frequency domain analysis");
-		gd.addCheckbox("Binary_image", binaryImage);
-		gd.addNumericField("Blinking_rate", blinkingRate, 2);
-		gd.addNumericField("nm_per_pixel", nmPerPixel, 2);
-		gd.addCheckbox("Show_error_bars", showErrorBars);
-		gd.addCheckbox("Apply_window", applyWindow);
-		gd.addCheckbox("Show_high_res_image", showHighResolutionImage);
-		gd.addCheckbox("Show_correlation_images", showCorrelationImages);
-		gd.addMessage("Spatial domain analysis");
-		gd.addCheckbox("Use_border", useBorder);
-		gd.addNumericField("Correlation_interval (nm)", correlationInterval, 0);
+		if (!spatialDomain)
+		{
+			gd.addMessage("-=- Frequency domain analysis -=-");
+			gd.addNumericField("Correlation_distance (nm)", correlationDistance, 0);
+			gd.addCheckbox("Binary_image", binaryImage);
+			gd.addNumericField("Blinking_rate", blinkingRate, 2);
+			gd.addNumericField("nm_per_pixel", nmPerPixel, 2);
+			gd.addCheckbox("Show_error_bars", showErrorBars);
+			gd.addCheckbox("Apply_window", applyWindow);
+			gd.addCheckbox("Show_high_res_image", showHighResolutionImage);
+			gd.addCheckbox("Show_correlation_images", showCorrelationImages);
+		}
+		else
+		{
+			gd.addMessage("-=- Spatial domain analysis -=-");
+			gd.addCheckbox("Use_border", useBorder);
+			gd.addNumericField("Correlation_interval (nm)", correlationInterval, 0);
+		}
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
-		correlationDistance = gd.getNextNumber();
-		binaryImage = gd.getNextBoolean();
-		blinkingRate = gd.getNextNumber();
-		nmPerPixel = gd.getNextNumber();
-		showErrorBars = gd.getNextBoolean();
-		applyWindow = gd.getNextBoolean();
-		showHighResolutionImage = gd.getNextBoolean();
-		showCorrelationImages = gd.getNextBoolean();
-		useBorder = gd.getNextBoolean();
-		correlationInterval = gd.getNextNumber();
+		if (!spatialDomain)
+		{
+			correlationDistance = gd.getNextNumber();
+			binaryImage = gd.getNextBoolean();
+			blinkingRate = gd.getNextNumber();
+			nmPerPixel = gd.getNextNumber();
+			showErrorBars = gd.getNextBoolean();
+			applyWindow = gd.getNextBoolean();
+			showHighResolutionImage = gd.getNextBoolean();
+			showCorrelationImages = gd.getNextBoolean();
+		}
+		else
+		{
+			useBorder = gd.getNextBoolean();
+			correlationInterval = gd.getNextNumber();
+		}
 
 		// Check arguments
 		try
 		{
-			Parameters.isAbove("Correlation distance", correlationDistance, 1);
-			Parameters.isEqualOrAbove("Blinking_rate", blinkingRate, 1);
-			Parameters.isAboveZero("nm per pixel", nmPerPixel);
-			Parameters.isAboveZero("Correlation interval", correlationInterval);
+			if (!spatialDomain)
+			{
+				Parameters.isAbove("Correlation distance", correlationDistance, 1);
+				Parameters.isEqualOrAbove("Blinking_rate", blinkingRate, 1);
+				Parameters.isAboveZero("nm per pixel", nmPerPixel);
+			}
+			else
+			{
+				Parameters.isAboveZero("Correlation interval", correlationInterval);
+			}
 		}
 		catch (IllegalArgumentException ex)
 		{
@@ -333,205 +524,211 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	private void analyse(ArrayList<Molecule> molecules)
 	{
-		// -----------------
-		// Analysis in the spatial domain
-		// -----------------
-
-		log("---");
-		log("Spatial domain analysis");
-		log("Computing density histogram");
-		long start = System.nanoTime();
-
-		// Compute all-vs-all distance matrix.
-		// Create histogram of distances at different radii.
-		final int nBins = (int) (correlationDistance / correlationInterval) + 1;
-		final double maxDistance2 = correlationDistance * correlationDistance;
-		int[] H = new int[nBins];
-
-		// TODO - Update this using a grid with a resolution of maxDistance to increase speed
-		// by only comparing to neighbours within range.
-
-		// An all-vs-all analysis does not account for a border. 
-		// A simple solution is to only process molecules within the border but compare them 
-		// to all molecules within the region. Thus every molecule has a complete circle of the max 
-		// radius around them to use:
-		// ----------------------
-		// |                    |
-		// |   --------------   |
-		// |   |  Within    |   |
-		// |   |  Border    |   |
-		// |   |            |   |
-		// |   --------------   |
-		// |      Region        |
-		// ----------------------
-		// If the fraction of points within the correlation distance of the edge is low then this 
-		// will not make much difference. 
-
-		final double boundaryMinx = (useBorder) ? minx + correlationDistance : minx;
-		final double boundaryMaxx = (useBorder) ? maxx - correlationDistance : maxx;
-		final double boundaryMiny = (useBorder) ? miny + correlationDistance : miny;
-		final double boundaryMaxy = (useBorder) ? maxy - correlationDistance : maxy;
-
-		int N = 0;
-		if (boundaryMaxx <= boundaryMinx || boundaryMaxy <= boundaryMiny)
-		{
-			log("ERROR: 'Use border' option of %s nm is not possible: Width = %s nm, Height = %s nm",
-					Utils.rounded(correlationDistance, 4), Utils.rounded(maxx - minx, 3), Utils.rounded(maxy - miny, 3));
-		}
-		else
-		{
-			for (int i = molecules.size(); i-- > 0;)
-			{
-				final Molecule m = molecules.get(i);
-				// Optionally ignore molecules that are near the edge of the boundary
-				if (useBorder && (m.x < boundaryMinx || m.x > boundaryMaxx || m.y < boundaryMiny || m.y > boundaryMaxy))
-					continue;
-				N++;
-
-				for (int j = molecules.size(); j-- > 0;)
-				{
-					if (i == j)
-						continue;
-
-					double d = m.distance2(molecules.get(j));
-					if (d < maxDistance2)
-					{
-						H[(int) (Math.sqrt(d) / correlationInterval)]++;
-					}
-				}
-			}
-		}
-
-		double[] r = new double[nBins + 1];
-		for (int i = 0; i <= nBins; i++)
-			r[i] = i * correlationInterval;
-		double[] pcf = new double[nBins];
-		if (N > 0)
-		{
-			// Note: Convert nm^2 to um^2
-			final double N_pi = N * Math.PI / 1000000.0;
-			for (int i = 0; i < nBins; i++)
-			{
-				// Pair-correlation is the count at the given distance divided by N and the area at distance ri:
-				// H(r_i) / (N x (pi x (r_i+1)^2 - pi x r_i^2))
-				pcf[i] = H[i] / (N_pi * (r[i + 1] * r[i + 1] - r[i] * r[i]));
-			}
-		}
-
-		// The final bin may be empty if the correlation interval was a factor of the correlation distance
-		if (pcf[pcf.length - 1] == 0)
-		{
-			r = Arrays.copyOf(r, nBins - 1);
-			pcf = Arrays.copyOf(pcf, nBins - 1);
-		}
-		else
-		{
-			r = Arrays.copyOf(r, nBins);
-		}
-
-		double[][] gr = new double[][] { r, pcf, null };
-
-		CorrelationResult result = new CorrelationResult(results.size() + 1, PCPALMMolecules.results.getSource(),
-				boundaryMinx, boundaryMiny, boundaryMaxx, boundaryMaxy, N, correlationInterval, 0, false, gr, true);
-		results.add(result);
-
 		// Check if the plots are currently shown
 		String spatialPlotTitle = TITLE + " molecules/um^2";
 		String frequencyDomainTitle = TITLE + " g(r)";
 		boolean noPlots = WindowManager.getFrame(spatialPlotTitle) == null &&
 				WindowManager.getFrame(frequencyDomainTitle) == null;
 
-		plotCorrelation(gr, 0, spatialPlotTitle, "molecules/um^2", true, false);
-
-		log("Spatial domain analysis computed in %s ms", Utils.rounded((System.nanoTime() - start) * 1e-6, 4));
-		log("---");
-
-		// -----------------
-		// Image correlation in the Frequency Domain
-		// -----------------
-		log("Frequency domain analysis");
-		start = System.nanoTime();
-
-		// Create a binary image for the molecules
-
-		ImageProcessor im = PCPALMMolecules.drawImage(molecules, minx, miny, maxx, maxy, nmPerPixel, true, binaryImage);
-		log("Image scale = %.2f nm/pixel : %d x %d pixels", nmPerPixel, im.getWidth(), im.getHeight());
-
-		// Apply a window function to the image to reduce FFT edge artifacts.
-		if (applyWindow)
+		long start = System.nanoTime();
+		if (spatialDomain)
 		{
-			im = applyWindow(im, imageWindow);
+			// -----------------
+			// Analysis in the spatial domain
+			// -----------------
+
+			log("---");
+			log("Spatial domain analysis");
+			log("Computing density histogram");
+
+			// Compute all-vs-all distance matrix.
+			// Create histogram of distances at different radii.
+			final int nBins = (int) (correlationDistance / correlationInterval) + 1;
+			final double maxDistance2 = correlationDistance * correlationDistance;
+			int[] H = new int[nBins];
+
+			// TODO - Update this using a grid with a resolution of maxDistance to increase speed
+			// by only comparing to neighbours within range.
+
+			// An all-vs-all analysis does not account for a border. 
+			// A simple solution is to only process molecules within the border but compare them 
+			// to all molecules within the region. Thus every molecule has a complete circle of the max 
+			// radius around them to use:
+			// ----------------------
+			// |                    |
+			// |   --------------   |
+			// |   |  Within    |   |
+			// |   |  Border    |   |
+			// |   |            |   |
+			// |   --------------   |
+			// |      Region        |
+			// ----------------------
+			// If the fraction of points within the correlation distance of the edge is low then this 
+			// will not make much difference. 
+
+			final double boundaryMinx = (useBorder) ? minx + correlationDistance : minx;
+			final double boundaryMaxx = (useBorder) ? maxx - correlationDistance : maxx;
+			final double boundaryMiny = (useBorder) ? miny + correlationDistance : miny;
+			final double boundaryMaxy = (useBorder) ? maxy - correlationDistance : maxy;
+
+			int N = 0;
+			if (boundaryMaxx <= boundaryMinx || boundaryMaxy <= boundaryMiny)
+			{
+				log("ERROR: 'Use border' option of %s nm is not possible: Width = %s nm, Height = %s nm",
+						Utils.rounded(correlationDistance, 4), Utils.rounded(maxx - minx, 3),
+						Utils.rounded(maxy - miny, 3));
+			}
+			else
+			{
+				for (int i = molecules.size(); i-- > 0;)
+				{
+					final Molecule m = molecules.get(i);
+					// Optionally ignore molecules that are near the edge of the boundary
+					if (useBorder &&
+							(m.x < boundaryMinx || m.x > boundaryMaxx || m.y < boundaryMiny || m.y > boundaryMaxy))
+						continue;
+					N++;
+
+					for (int j = molecules.size(); j-- > 0;)
+					{
+						if (i == j)
+							continue;
+
+						double d = m.distance2(molecules.get(j));
+						if (d < maxDistance2)
+						{
+							H[(int) (Math.sqrt(d) / correlationInterval)]++;
+						}
+					}
+				}
+			}
+
+			double[] r = new double[nBins + 1];
+			for (int i = 0; i <= nBins; i++)
+				r[i] = i * correlationInterval;
+			double[] pcf = new double[nBins];
+			if (N > 0)
+			{
+				// Note: Convert nm^2 to um^2
+				final double N_pi = N * Math.PI / 1000000.0;
+				for (int i = 0; i < nBins; i++)
+				{
+					// Pair-correlation is the count at the given distance divided by N and the area at distance ri:
+					// H(r_i) / (N x (pi x (r_i+1)^2 - pi x r_i^2))
+					pcf[i] = H[i] / (N_pi * (r[i + 1] * r[i + 1] - r[i] * r[i]));
+				}
+			}
+
+			// The final bin may be empty if the correlation interval was a factor of the correlation distance
+			if (pcf[pcf.length - 1] == 0)
+			{
+				r = Arrays.copyOf(r, nBins - 1);
+				pcf = Arrays.copyOf(pcf, nBins - 1);
+			}
+			else
+			{
+				r = Arrays.copyOf(r, nBins);
+			}
+
+			double[][] gr = new double[][] { r, pcf, null };
+
+			CorrelationResult result = new CorrelationResult(results.size() + 1, PCPALMMolecules.results.getSource(),
+					boundaryMinx, boundaryMiny, boundaryMaxx, boundaryMaxy, N, correlationInterval, 0, false, gr, true);
+			results.add(result);
+
+			plotCorrelation(gr, 0, spatialPlotTitle, "molecules/um^2", true, false);
+		}
+		else
+		{
+			// -----------------
+			// Image correlation in the Frequency Domain
+			// -----------------
+			log("Frequency domain analysis");
+
+			// Create a binary image for the molecules
+
+			ImageProcessor im = PCPALMMolecules.drawImage(molecules, minx, miny, maxx, maxy, nmPerPixel, true,
+					binaryImage);
+			log("Image scale = %.2f nm/pixel : %d x %d pixels", nmPerPixel, im.getWidth(), im.getHeight());
+
+			// Apply a window function to the image to reduce FFT edge artifacts.
+			if (applyWindow)
+			{
+				im = applyWindow(im, imageWindow);
+			}
+
+			if (showHighResolutionImage)
+			{
+				PCPALMMolecules.displayImage(PCPALMMolecules.results.getName() + " " +
+						((binaryImage) ? "Binary" : "Count") + " Image (high res)", im, nmPerPixel);
+			}
+
+			// Create weight image (including windowing)
+			ImageProcessor w = createWeightImage(im, applyWindow);
+
+			// Store the area of the image in um^2
+			weightedAreaInPx = areaInPx = im.getWidth() * im.getHeight();
+			if (applyWindow)
+			{
+				weightedAreaInPx *= w.getStatistics().mean;
+			}
+			area = areaInPx * nmPerPixel * nmPerPixel / 1e6;
+			weightedArea = weightedAreaInPx * nmPerPixel * nmPerPixel / 1e6;
+			noOfMolecules = molecules.size();
+
+			// Pad the images to the largest scale being investigated by the correlation function.
+			// Original Sengupta paper uses 800nm for the padding size.
+			// Limit to within 80% of the minimum dimension of the image.
+			double maxRadius = correlationDistance / nmPerPixel;
+			int imageSize = Math.min(im.getWidth(), im.getHeight());
+			if (imageSize < 1.25 * maxRadius)
+				maxRadius = imageSize / 1.25;
+			int pad = (int) Math.round(maxRadius);
+			log("Analysing up to %.0f nm = %d pixels", maxRadius * nmPerPixel, pad);
+			im = padImage(im, pad);
+			w = padImage(w, pad);
+
+			//		// Used for debugging
+			//		{
+			//			ImageProcessor w2 = w.duplicate();
+			//			w2.setMinAndMax(0, 1);
+			//			PCPALMMolecules.displayImage(PCPALMMolecules.results.getName() + " Binary Image Mask", w2, nmPerPixel);
+			//		}
+
+			final double peakDensity = getDensity(im);
+
+			// Create 2D auto-correlation
+			double[][] gr;
+			try
+			{
+				// Use the FFT library as it is multi-threaded. This may not be in the user's path.
+				gr = computeAutoCorrelationCurveFFT(im, w, pad, nmPerPixel, peakDensity);
+			}
+			catch (Exception e)
+			{
+				// Default to the ImageJ built-in FHT
+				gr = computeAutoCorrelationCurveFHT(im, w, pad, nmPerPixel, peakDensity);
+			}
+			if (gr == null)
+				return;
+
+			// Add the g(r) curve to the results
+			addResult(peakDensity, gr);
+
+			// Do not plot r=0 value on the curve
+			plotCorrelation(gr, 1, frequencyDomainTitle, "g(r)", false, showErrorBars);
+
+			if (noPlots)
+			{
+				// Position the plot underneath the other one
+				Frame f1 = WindowManager.getFrame(spatialPlotTitle);
+				Frame f2 = WindowManager.getFrame(frequencyDomainTitle);
+				f2.setLocation(f2.getLocation().x, f2.getLocation().y + f1.getHeight());
+			}
 		}
 
-		if (showHighResolutionImage)
-		{
-			PCPALMMolecules.displayImage(PCPALMMolecules.results.getName() + " " +
-					((binaryImage) ? "Binary" : "Count") + " Image (high res)", im, nmPerPixel);
-		}
-
-		// Create weight image (including windowing)
-		ImageProcessor w = createWeightImage(im, applyWindow);
-
-		// Store the area of the image in um^2
-		weightedAreaInPx = areaInPx = im.getWidth() * im.getHeight();
-		if (applyWindow)
-		{
-			weightedAreaInPx *= w.getStatistics().mean;
-		}
-		area = areaInPx * nmPerPixel * nmPerPixel / 1e6;
-		weightedArea = weightedAreaInPx * nmPerPixel * nmPerPixel / 1e6;
-		noOfMolecules = molecules.size();
-
-		// Pad the images to the largest scale being investigated by the correlation function.
-		// Original Sengupta paper uses 800nm for the padding size.
-		// Limit to within 80% of the minimum dimension of the image.
-		double maxRadius = correlationDistance / nmPerPixel;
-		int imageSize = Math.min(im.getWidth(), im.getHeight());
-		if (imageSize < 1.25 * maxRadius)
-			maxRadius = imageSize / 1.25;
-		int pad = (int) Math.round(maxRadius);
-		log("Analysing up to %.0f nm = %d pixels", maxRadius * nmPerPixel, pad);
-		im = padImage(im, pad);
-		w = padImage(w, pad);
-
-		//		// Used for debugging
-		//		{
-		//			ImageProcessor w2 = w.duplicate();
-		//			w2.setMinAndMax(0, 1);
-		//			PCPALMMolecules.displayImage(PCPALMMolecules.results.getName() + " Binary Image Mask", w2, nmPerPixel);
-		//		}
-
-		final double peakDensity = getDensity(im);
-
-		// Create 2D auto-correlation
-		try
-		{
-			// Use the FFT library as it is multi-threaded. This may not be in the user's path.
-			gr = computeAutoCorrelationCurveFFT(im, w, pad, nmPerPixel, peakDensity);
-		}
-		catch (Exception e)
-		{
-			// Default to the ImageJ built-in FHT
-			gr = computeAutoCorrelationCurveFHT(im, w, pad, nmPerPixel, peakDensity);
-		}
-		if (gr == null)
-			return;
-
-		// Add the g(r) curve to the results
-		addResult(peakDensity, gr);
-
-		// Do not plot r=0 value on the curve
-		plotCorrelation(gr, 1, frequencyDomainTitle, "g(r)", false, showErrorBars);
-
-		if (noPlots)
-		{
-			// Position the plot underneath the other one
-			Frame f1 = WindowManager.getFrame(spatialPlotTitle);
-			Frame f2 = WindowManager.getFrame(frequencyDomainTitle);
-			f2.setLocation(f2.getLocation().x, f2.getLocation().y + f1.getHeight());
-		}
-
-		log("Frequency domain analysis computed in %s ms", Utils.rounded((System.nanoTime() - start) * 1e-6, 4));
+		log("%s domain analysis computed in %s ms", (spatialDomain) ? "Spatial" : "Frequency",
+				Utils.rounded((System.nanoTime() - start) * 1e-6, 4));
 		log("---");
 	}
 
@@ -1006,7 +1203,6 @@ public class PCPALMAnalysis implements PlugInFilter
 		final double pch = (PCPALMMolecules.maxy - PCPALMMolecules.miny) / 100.0;
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(id - 1).append("+");
 		sb.append(id).append("\t");
 		sb.append(PCPALMMolecules.results.getName()).append("\t");
 		sb.append(IJ.d2s(minx)).append("\t");
