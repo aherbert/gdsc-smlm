@@ -20,6 +20,7 @@ import ij.Prefs;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -76,9 +77,10 @@ public class SettingsManager
 	public static boolean saveFitEngineConfiguration(FitEngineConfiguration config, String filename)
 	{
 		XStream xs = createXStream();
+		FileOutputStream fs = null;
 		try
 		{
-			FileOutputStream fs = new FileOutputStream(filename);
+			fs = new FileOutputStream(filename);
 			xs.toXML(config, fs);
 			return true;
 		}
@@ -89,6 +91,20 @@ public class SettingsManager
 		catch (XStreamException ex)
 		{
 			ex.printStackTrace();
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 		return false;
 	}
@@ -133,10 +149,11 @@ public class SettingsManager
 		XStream xs = createXStream();
 		FitEngineConfiguration config = null;
 
+		FileInputStream fs = null;
 		try
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			config = (FitEngineConfiguration) xs.fromXML(fis);
+			fs = new FileInputStream(filename);
+			config = (FitEngineConfiguration) xs.fromXML(fs);
 		}
 		catch (FileNotFoundException ex)
 		{
@@ -145,6 +162,20 @@ public class SettingsManager
 		catch (XStreamException ex)
 		{
 			ex.printStackTrace();
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return config;
@@ -174,9 +205,10 @@ public class SettingsManager
 	public static boolean saveSettings(GlobalSettings settings, String filename)
 	{
 		XStream xs = createXStream();
+		FileOutputStream fs = null;
 		try
 		{
-			FileOutputStream fs = new FileOutputStream(filename);
+			fs = new FileOutputStream(filename);
 			xs.toXML(settings, fs);
 			Prefs.set(Constants.settingsFilename, filename);
 			return true;
@@ -188,6 +220,20 @@ public class SettingsManager
 		catch (XStreamException ex)
 		{
 			ex.printStackTrace();
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 		return false;
 	}
@@ -214,10 +260,11 @@ public class SettingsManager
 		XStream xs = createXStream();
 		GlobalSettings config = null;
 
+		FileInputStream fs = null;
 		try
 		{
-			FileInputStream fis = new FileInputStream(filename);
-			config = (GlobalSettings) xs.fromXML(fis);
+			fs = new FileInputStream(filename);
+			config = (GlobalSettings) xs.fromXML(fs);
 		}
 		catch (FileNotFoundException ex)
 		{
@@ -226,6 +273,20 @@ public class SettingsManager
 		catch (XStreamException ex)
 		{
 			ex.printStackTrace();
+		}
+		finally
+		{
+			if (fs != null)
+			{
+				try
+				{
+					fs.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return config;
