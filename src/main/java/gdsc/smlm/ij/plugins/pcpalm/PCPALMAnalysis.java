@@ -111,7 +111,10 @@ public class PCPALMAnalysis implements PlugInFilter
 		if ("load".equalsIgnoreCase(arg))
 			return loadResults();
 
-		if (imp == null || imp.getRoi() == null || !imp.getRoi().isArea())
+		spatialDomain = "spatial".equalsIgnoreCase(arg);
+		
+		boolean noAreaRoi = (imp.getRoi() == null || !imp.getRoi().isArea());
+		if (imp == null || (!spatialDomain && noAreaRoi))
 		{
 			error("Require an input image with an area ROI.\n" + "Please create a binary molecule image using " +
 					PCPALMMolecules.TITLE);
@@ -123,8 +126,6 @@ public class PCPALMAnalysis implements PlugInFilter
 					PCPALMMolecules.TITLE);
 			return DONE;
 		}
-
-		spatialDomain = "spatial".equalsIgnoreCase(arg);
 
 		if (!showDialog())
 			return DONE;
@@ -334,10 +335,10 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		gd.addMessage("Analyse clusters using Pair Correlation.");
 
+		gd.addNumericField("Correlation_distance (nm)", correlationDistance, 0);
 		if (!spatialDomain)
 		{
 			gd.addMessage("-=- Frequency domain analysis -=-");
-			gd.addNumericField("Correlation_distance (nm)", correlationDistance, 0);
 			gd.addCheckbox("Binary_image", binaryImage);
 			gd.addNumericField("Blinking_rate", blinkingRate, 2);
 			gd.addNumericField("nm_per_pixel", nmPerPixel, 2);
@@ -358,9 +359,9 @@ public class PCPALMAnalysis implements PlugInFilter
 		if (gd.wasCanceled())
 			return false;
 
+		correlationDistance = gd.getNextNumber();
 		if (!spatialDomain)
 		{
-			correlationDistance = gd.getNextNumber();
 			binaryImage = gd.getNextBoolean();
 			blinkingRate = gd.getNextNumber();
 			nmPerPixel = gd.getNextNumber();
@@ -424,6 +425,10 @@ public class PCPALMAnalysis implements PlugInFilter
 		{
 			log("Roi = %s nm x %s nm = %s um^2", Utils.rounded(pcw, 3), Utils.rounded(pch, 3),
 					Utils.rounded(croppedArea, 3));
+			minx = PCPALMMolecules.minx;
+			maxx = PCPALMMolecules.maxx;
+			miny = PCPALMMolecules.miny;
+			maxy = PCPALMMolecules.maxy;
 			return PCPALMMolecules.molecules;
 		}
 
