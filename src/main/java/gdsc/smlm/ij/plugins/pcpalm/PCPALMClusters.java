@@ -28,23 +28,26 @@ import gdsc.smlm.results.clustering.ClusterPoint;
 import gdsc.smlm.results.clustering.ClusteringAlgorithm;
 import gdsc.smlm.results.clustering.ClusteringEngine;
 import gdsc.smlm.utils.Maths;
-import gdsc.smlm.utils.StoredDataStatistics;
 import gdsc.smlm.utils.UnicodeReader;
 import ij.IJ;
+import ij.Macro;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Locale;
@@ -70,19 +73,28 @@ public class PCPALMClusters implements PlugIn
 {
 	private class HistogramData
 	{
-		double[][] histogram;
+		float[][] histogram;
 		int frames;
 		double area;
 		String units;
+		public String filename = "";
 
-		public HistogramData(double[][] h, int f, double a, String u)
+		public HistogramData(float[][] h, int f, double a, String u)
 		{
 			histogram = h;
 			frames = f;
 			area = a;
 			units = u;
 		}
-		
+
+		public HistogramData(float[][] h)
+		{
+			histogram = h;
+			frames = 0;
+			area = 0;
+			units = "";
+		}
+
 		public boolean isCalibrated()
 		{
 			return frames > 0 && area > 0;
@@ -102,6 +114,9 @@ public class PCPALMClusters implements PlugIn
 	private static boolean sWeightedClustering = false;
 	private static boolean saveHistogram = false;
 	private static String histogramFile = "";
+	private static String noiseFile = "";
+	private static boolean sAutoSave = true;
+	private boolean autoSave = true;
 	private static boolean calibrateHistogram = false;
 	private static int frames = 1;
 	private static double area = 1;
@@ -113,8 +128,8 @@ public class PCPALMClusters implements PlugIn
 
 	private boolean fileInput = false;
 
-	// Set by the loadHistogram method
-	String frequencyTitle = "";
+	private int nMolecules = 0;
+	private double count = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -132,125 +147,30 @@ public class PCPALMClusters implements PlugIn
 		PCPALMMolecules.logSpacer();
 		long start = System.currentTimeMillis();
 
-		// Create a histogram of the cluster sizes
-		int observed = 1;
-		double count;
-		double[] cumulativeHistogram;
-		double mean;
-		String title = TITLE + " Molecules/cluster";
-		String xTitle = "Molecules/cluster";
-		String yTitle = "Frequency";
-		float[] xValues, yValues;
-
+		HistogramData histogramData;
 		if (fileInput)
 		{
-			// Load the histogram from file			
-			HistogramData histogramData = loadHistogram(histogramFile);
-			if (histogramData == null)
-				return;
-			double[][] hist = histogramData.histogram;
-
-			// Create the data required for fitting and plotting
-			xValues = convert(Utils.createHistogramAxis(hist[0]));
-			yValues = convert(Utils.createHistogramValues(hist[1]));
-			double sum = 0;
-			count = 0;
-			for (int i = 0; i < hist[0].length; i++)
-			{
-				count += hist[1][i];
-				sum += hist[1][i] * i;
-			}
-			mean = sum / count;
-			cumulativeHistogram = new double[hist[0].length];
-			final double norm = 1.0 / count;
-			count = 0;
-			for (int i = 0; i < hist[0].length; i++)
-			{
-				count += hist[1][i];
-				cumulativeHistogram[i] = count * norm;
-			}
+			histogramData = loadHistogram(histogramFile);
 		}
 		else
 		{
-			// Perform clustering analysis to generate the histogram of cluster sizes
-			PCPALMAnalysis analysis = new PCPALMAnalysis();
-			ArrayList<Molecule> molecules = analysis.cropToRoi(WindowManager.getCurrentImage());
-
-			if (molecules.size() < 2)
-			{
-				error("No results within the crop region");
-				return;
-			}
-
-			Utils.log("Using %d molecules (Density = %s um^-2)", molecules.size(),
-					Utils.rounded(molecules.size() / analysis.croppedArea));
-
-			long s1 = System.nanoTime();
-			ClusteringEngine engine = new ClusteringEngine();
-			engine.setClusteringAlgorithm(clusteringAlgorithm);
-			engine.setTracker(new IJTrackProgress());
-			if (multiThread)
-				engine.setThreadCount(Prefs.getThreads());
-			IJ.showStatus("Clustering ...");
-			ArrayList<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
-			IJ.showStatus("");
-
-			if (clusters == null)
-			{
-				Utils.log("Aborted");
-				return;
-			}
-			observed = molecules.size();
-			Utils.log("Finished : %d total clusters (%s ms)", clusters.size(),
-					Utils.rounded((System.nanoTime() - s1) / 1e6));
-
-			// Save cluster centroids to a results set in memory. Then they can be plotted.
-			MemoryPeakResults results = new MemoryPeakResults(clusters.size());
-			results.setName(TITLE);
-			// Set an arbitrary calibration so that the lifetime of the results is stored in the exposure time
-			// The results will be handled as a single mega-frame containing all localisation. 
-			results.setCalibration(new Calibration(100, 1, PCPALMMolecules.seconds * 1000));
-			// Make the standard deviation such that the Gaussian volume will be 95% at the distance threshold
-			final float sd = (float) (distance / 1.959964);
-			for (Cluster c : clusters)
-			{
-				results.add(new PeakResult((float) c.x, (float) c.y, sd, c.n));
-			}
-			MemoryPeakResults.addResults(results);
-
-			// Get the data for fitting
-			StoredDataStatistics data = new StoredDataStatistics();
-			for (Cluster c : clusters)
-				data.add(c.n);
-			cumulativeHistogram = BinomialFitter.getHistogram(data.getValues(), true);
-			mean = data.getMean();
-
-			float[] values = data.getFloatValues();
-			float yMax = (int) Math.ceil(Maths.max(values));
-			int nBins = (int) (yMax + 1);
-			float[][] hist = Utils.calcHistogram(values, 0, yMax, nBins);
-
-			saveHistogram(hist, xTitle, yTitle);
-
-			// Create the axes
-			xValues = Utils.createHistogramAxis(hist[0]);
-			yValues = Utils.createHistogramValues(hist[1]);
-			count = clusters.size();
+			histogramData = doClustering();
 		}
 
-		// TODO - option to load a noise histogram and subtract it before fitting.
-		// Either the clustering algorithm was run and the calibration was provided
-		// Or the histogram was loaded and we can detect if it is calibrated
-		// If the histogram is calibrated then ask the user if they wish to load a calibrated noise histogram
-		
-		// Updating the histogram will require:
-		// - replotting the noise adjusted histogram (leave the raw one)
-		// - the count to be updated
-		
-		// TODO make both routine above return a HistogramData object. This allows common processing from here.
-		
-		
-		// Plot the (noise adjusted) histogram
+		if (histogramData == null)
+			return;
+		float[][] hist = histogramData.histogram;
+
+		// Create a histogram of the cluster sizes
+		String title = TITLE + " Molecules/cluster";
+		String xTitle = "Molecules/cluster";
+		String yTitle = "Frequency";
+
+		// Create the data required for fitting and plotting
+		float[] xValues = Utils.createHistogramAxis(hist[0]);
+		float[] yValues = Utils.createHistogramValues(hist[1]);
+
+		// Plot the histogram
 		float yMax = Maths.max(yValues);
 		Plot plot = new Plot(title, xTitle, yTitle, xValues, yValues);
 		if (xValues.length > 0)
@@ -259,9 +179,36 @@ public class PCPALMClusters implements PlugIn
 			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, yMax * 1.05);
 		}
 		Utils.display(title, plot);
-		
+
+		HistogramData noiseData = loadNoiseHistogram(histogramData);
+		if (noiseData != null)
+		{
+			if (subtractNoise(histogramData, noiseData))
+			{
+				// Update the histogram
+				title += " (noise subtracted)";
+				xValues = Utils.createHistogramAxis(hist[0]);
+				yValues = Utils.createHistogramValues(hist[1]);
+				yMax = Maths.max(yValues);
+				plot = new Plot(title, xTitle, yTitle, xValues, yValues);
+				if (xValues.length > 0)
+				{
+					double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
+					plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, yMax * 1.05);
+				}
+				Utils.display(title, plot);
+
+				// Automatically save
+				if (autoSave &&
+						saveHistogram(histogramData, Utils.replaceExtension(histogramData.filename, ".noise.tsv")))
+				{
+					Utils.log("Saved noise-subtracted histogram to " + histogramData.filename);
+				}
+			}
+		}
+
 		// Fit the histogram
-		double[] fitParameters = fitBinomial(cumulativeHistogram, mean);
+		double[] fitParameters = fitBinomial(histogramData);
 		if (fitParameters != null)
 		{
 			// Add the binomial to the histogram
@@ -280,8 +227,8 @@ public class PCPALMClusters implements PlugIn
 			{
 				// Calculate the estimated number of clusters from the observed molecules:
 				// Actual = (Observed / p-value) / N
-				final double actual = (observed / p) / n;
-				Utils.log("Estimated number of clusters : (%d / %s) / %d = %s", (int) observed, Utils.rounded(p), n,
+				final double actual = (nMolecules / p) / n;
+				Utils.log("Estimated number of clusters : (%d / %s) / %d = %s", nMolecules, Utils.rounded(p), n,
 						Utils.rounded(actual));
 			}
 
@@ -317,80 +264,176 @@ public class PCPALMClusters implements PlugIn
 		return;
 	}
 
-	private float[] convert(double[] values)
+	/**
+	 * Extract the results from the PCPALM molecules using the area ROI and then do clustering to obtain the histogram
+	 * of molecules per cluster.
+	 * 
+	 * @return
+	 */
+	private HistogramData doClustering()
 	{
-		float[] data = new float[values.length];
-		for (int i = 0; i < data.length; i++)
-			data[i] = (float) values[i];
-		return data;
+		// Perform clustering analysis to generate the histogram of cluster sizes
+		PCPALMAnalysis analysis = new PCPALMAnalysis();
+		ArrayList<Molecule> molecules = analysis.cropToRoi(WindowManager.getCurrentImage());
+
+		if (molecules.size() < 2)
+		{
+			error("No results within the crop region");
+			return null;
+		}
+
+		Utils.log("Using %d molecules (Density = %s um^-2)", molecules.size(),
+				Utils.rounded(molecules.size() / analysis.croppedArea));
+
+		long s1 = System.nanoTime();
+		ClusteringEngine engine = new ClusteringEngine();
+		engine.setClusteringAlgorithm(clusteringAlgorithm);
+		engine.setTracker(new IJTrackProgress());
+		if (multiThread)
+			engine.setThreadCount(Prefs.getThreads());
+		IJ.showStatus("Clustering ...");
+		ArrayList<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
+		IJ.showStatus("");
+
+		if (clusters == null)
+		{
+			Utils.log("Aborted");
+			return null;
+		}
+		nMolecules = molecules.size();
+		Utils.log("Finished : %d total clusters (%s ms)", clusters.size(),
+				Utils.rounded((System.nanoTime() - s1) / 1e6));
+
+		// Save cluster centroids to a results set in memory. Then they can be plotted.
+		MemoryPeakResults results = new MemoryPeakResults(clusters.size());
+		results.setName(TITLE);
+		// Set an arbitrary calibration so that the lifetime of the results is stored in the exposure time
+		// The results will be handled as a single mega-frame containing all localisation. 
+		results.setCalibration(new Calibration(100, 1, PCPALMMolecules.seconds * 1000));
+		// Make the standard deviation such that the Gaussian volume will be 95% at the distance threshold
+		final float sd = (float) (distance / 1.959964);
+		for (Cluster c : clusters)
+		{
+			results.add(new PeakResult((float) c.x, (float) c.y, sd, c.n));
+		}
+		MemoryPeakResults.addResults(results);
+
+		// Get the data for fitting
+		float[] values = new float[clusters.size()];
+		for (int i = 0; i < values.length; i++)
+			values[i] = clusters.get(i).n;
+		float yMax = (int) Math.ceil(Maths.max(values));
+		int nBins = (int) (yMax + 1);
+		float[][] hist = Utils.calcHistogram(values, 0, yMax, nBins);
+
+		HistogramData histogramData = (calibrateHistogram) ? new HistogramData(hist, frames, area, units)
+				: new HistogramData(hist);
+
+		saveHistogram(histogramData);
+
+		return histogramData;
 	}
 
-	private void saveHistogram(float[][] hist, String xTitle, String yTitle)
+	/**
+	 * Convert molecules for clustering
+	 * 
+	 * @param molecules
+	 * @return
+	 */
+	private List<ClusterPoint> convertToPoint(ArrayList<Molecule> molecules)
+	{
+		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(molecules.size());
+		int id = 0;
+		for (Molecule m : molecules)
+		{
+			points.add(ClusterPoint.newClusterPoint(id++, m.x, m.y, (weightedClustering) ? m.photons : 1));
+		}
+		return points;
+	}
+
+	/**
+	 * Saves the histogram to the user selected file if the save histogram option is enabled.
+	 * 
+	 * @param histogramData
+	 * @return
+	 */
+	private boolean saveHistogram(HistogramData histogramData)
 	{
 		if (!saveHistogram)
-			return;
+			return false;
 		histogramFile = Utils.getFilename("Histogram_file", histogramFile);
-		if (histogramFile != null)
-		{
-			float[] values = hist[1];
-			//if (normaliseHistogram)
-			//{
-			//	values = Arrays.copyOf(values, values.length);
-			//	yTitle += "/(frame*" + units + ")";
-			//	final double normalisingFactor = 1.0 / (frames * area);
-			//	for (int i = 0; i < hist[1].length; i++)
-			//		values[i] *= normalisingFactor;
-			//}
+		return saveHistogram(histogramData, histogramFile);
+	}
 
-			histogramFile = Utils.replaceExtension(histogramFile, "tsv");
-			BufferedWriter output = null;
-			try
+	/**
+	 * Saves the histogram to the selected file. Updates the filename property of the histogram object.
+	 * 
+	 * @param histogramData
+	 * @param filename
+	 */
+	private boolean saveHistogram(HistogramData histogramData, String filename)
+	{
+		if (filename == null)
+			return false;
+
+		float[][] hist = histogramData.histogram;
+
+		filename = Utils.replaceExtension(filename, "tsv");
+		BufferedWriter output = null;
+		try
+		{
+			output = new BufferedWriter(new FileWriter(filename));
+			if (histogramData.isCalibrated())
 			{
-				output = new BufferedWriter(new FileWriter(histogramFile));
-				if (calibrateHistogram)
-				{
-					output.write(String.format("Frames  %d", frames));
-					output.newLine();
-					output.write(String.format("Area    %f", area));
-					output.newLine();
-					output.write(String.format("Units   %s", units));
-					output.newLine();
-				}
-				output.write(xTitle);
-				output.write("\t");
-				output.write(yTitle);
+				output.write(String.format("Frames  %d", frames));
 				output.newLine();
-				for (int i = 0; i < hist[0].length; i++)
+				output.write(String.format("Area    %f", area));
+				output.newLine();
+				output.write(String.format("Units   %s", units));
+				output.newLine();
+			}
+			output.write("Size\tFrequency");
+			output.newLine();
+			for (int i = 0; i < hist[0].length; i++)
+			{
+				output.write(String.format("%d\t%s", (int) hist[0][i], Utils.rounded(hist[1][i])));
+				output.newLine();
+			}
+
+			histogramData.filename = filename;
+			return true;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			IJ.log("Failed to save histogram to file: " + filename);
+		}
+		finally
+		{
+			if (output != null)
+			{
+				try
 				{
-					output.write(String.format("%d\t%s", (int) hist[0][i], Utils.rounded(values[i])));
-					output.newLine();
+					output.close();
 				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				IJ.log("Failed to save histogram to file: " + histogramFile);
-			}
-			finally
-			{
-				if (output != null)
+				catch (IOException e)
 				{
-					try
-					{
-						output.close();
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
+					e.printStackTrace();
 				}
 			}
 		}
+		return false;
 	}
 
+	/**
+	 * Load the histogram from the file. Assumes the histogram is [int, float] format and creates a contiguous histogram
+	 * from zero
+	 * 
+	 * @param filename
+	 * @return
+	 */
 	private HistogramData loadHistogram(String filename)
 	{
-		frequencyTitle = "";
 		BufferedReader input = null;
 		try
 		{
@@ -404,7 +447,7 @@ public class PCPALMClusters implements PlugIn
 			String line;
 			int count = 0;
 
-			ArrayList<double[]> data = new ArrayList<double[]>();
+			ArrayList<float[]> data = new ArrayList<float[]>();
 
 			// Read the header and store the calibration if present
 			while ((line = input.readLine()) != null)
@@ -440,10 +483,10 @@ public class PCPALMClusters implements PlugIn
 				try
 				{
 					int molecules = scanner.nextInt();
-					double frequency = scanner.nextDouble();
+					float frequency = scanner.nextFloat();
 
 					// Check for duplicates
-					for (double[] d : data)
+					for (float[] d : data)
 					{
 						if (d[0] == molecules)
 						{
@@ -452,7 +495,7 @@ public class PCPALMClusters implements PlugIn
 						}
 					}
 
-					data.add(new double[] { molecules, frequency });
+					data.add(new float[] { molecules, frequency });
 				}
 				catch (InputMismatchException e)
 				{
@@ -482,23 +525,25 @@ public class PCPALMClusters implements PlugIn
 
 			// Create a contiguous histogram from zero
 			int maxN = 0;
-			for (double[] d : data)
+			for (float[] d : data)
 			{
 				if (maxN < d[0])
 					maxN = (int) d[0];
 			}
 
-			double[][] hist = new double[2][maxN + 1];
+			float[][] hist = new float[2][maxN + 1];
 			for (int n = 0; n <= maxN; n++)
 			{
 				hist[0][n] = n;
-				for (double[] d : data)
+				for (float[] d : data)
 				{
 					if (n == d[0])
 						hist[1][n] = d[1];
 				}
 			}
-			return new HistogramData(hist, f, a, u);
+			HistogramData histogramData = new HistogramData(hist, f, a, u);
+			histogramData.filename = filename;
+			return histogramData;
 		}
 		catch (IOException e)
 		{
@@ -519,15 +564,39 @@ public class PCPALMClusters implements PlugIn
 		return null;
 	}
 
-	private List<ClusterPoint> convertToPoint(ArrayList<Molecule> molecules)
+	/**
+	 * If the histogram is calibrated then ask the user if they wish to subtract a calibrated noise histogram.
+	 * <p>
+	 * Loads a noise histogram from a user selected file and check the units match those provided
+	 * 
+	 * @param histogramData
+	 * @return The histogram (or null)
+	 */
+	private HistogramData loadNoiseHistogram(HistogramData histogramData)
 	{
-		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(molecules.size());
-		int id = 0;
-		for (Molecule m : molecules)
+		if (!histogramData.isCalibrated())
+			return null;
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.enableYesNoCancel();
+		gd.hideCancelButton();
+		gd.addMessage("The histogram is calibrated.\n \nDo you want to subtract a noise histogram before fitting?");
+		boolean allowSave = new File(histogramData.filename).exists();
+		if (allowSave)
+			gd.addCheckbox("Auto_save noise-subtracted histogram", sAutoSave);
+		gd.showDialog();
+		if (!gd.wasOKed())
+			return null;
+		if (allowSave)
+			autoSave = sAutoSave = gd.getNextBoolean();
+		noiseFile = Utils.getFilename("Noise_file", noiseFile);
+		if (noiseFile != null)
 		{
-			points.add(ClusterPoint.newClusterPoint(id++, m.x, m.y, (weightedClustering) ? m.photons : 1));
+			HistogramData data = loadHistogram(noiseFile);
+			// Check the data is calibrated with the same units
+			if (data.isCalibrated() && data.units.equalsIgnoreCase(histogramData.units))
+				return data;
 		}
-		return points;
+		return null;
 	}
 
 	/*
@@ -546,6 +615,8 @@ public class PCPALMClusters implements PlugIn
 		{
 			Utils.log(TITLE + " defaulting to File mode");
 			fileInput = true;
+			// Ensure this gets recorded
+			Recorder.recordOption("Method", "File");
 		}
 		else
 		{
@@ -647,6 +718,9 @@ public class PCPALMClusters implements PlugIn
 		return true;
 	}
 
+	/**
+	 * @return True if all the molecules have weights (allowing weighted clustering)
+	 */
 	private boolean checkForWeights()
 	{
 		for (Molecule m : PCPALMMolecules.molecules)
@@ -661,41 +735,100 @@ public class PCPALMClusters implements PlugIn
 		IJ.error(TITLE, message);
 	}
 
-	private double[] fitBinomial(double[] cumulativeHistogram, double mean)
+	/**
+	 * Normalise the histograms using the (frames*area). Subtract the noise from the histogram and then rescale.
+	 * 
+	 * @param histogramData
+	 * @param noiseData
+	 * @return
+	 */
+	private boolean subtractNoise(HistogramData histogramData, HistogramData noiseData)
 	{
-		double bestSS = Double.POSITIVE_INFINITY;
-		double[] parameters = null;
-		int worse = 0;
-		int N = (int) cumulativeHistogram.length - 1;
-		double[] values = Utils.newArray(cumulativeHistogram.length, 0.0, 1.0);
-		int min = minN;
-		if (maxN > 0 && N > maxN)
-			N = maxN;
-		if (min > N)
-			min = N;
+		float[] v1 = normalise(histogramData);
+		float[] v2 = normalise(noiseData);
+		int length = v1.length; // Math.max(v1.length, v2.length);
+		final double factor = (histogramData.frames * histogramData.area);
+		for (int i = 0; i < length; i++)
+		{
+			histogramData.histogram[1][i] = (float) (Math.max(0, v1[i] - v2[i]) * factor);
+		}
+		return true;
+	}
+
+	/**
+	 * Normalise the histogram using the (frames*area)
+	 * 
+	 * @param data
+	 * @return the normalised data
+	 */
+	private float[] normalise(HistogramData data)
+	{
+		float[] values = Arrays.copyOf(data.histogram[1], data.histogram[1].length);
+		final double normalisingFactor = 1.0 / (data.frames * data.area);
+		for (int i = 0; i < values.length; i++)
+			values[i] *= normalisingFactor;
+		return values;
+	}
+
+	/**
+	 * Fit a zero-truncated Binomial to the cumulative histogram
+	 * 
+	 * @param histogramData
+	 * @return
+	 */
+	private double[] fitBinomial(HistogramData histogramData)
+	{
+		// Get the mean and sum of the input histogram
+		double mean;
+		double sum = 0;
+		count = 0;
+		for (int i = 0; i < histogramData.histogram[1].length; i++)
+		{
+			count += histogramData.histogram[1][i];
+			sum += histogramData.histogram[1][i] * i;
+		}
+		mean = sum / count;
 
 		String name = "Zero-truncated Binomial distribution";
-
 		Utils.log("Mean cluster size = %s", Utils.rounded(mean));
 		Utils.log("Fitting cumulative " + name);
+
+		// Convert to a normalised double array for the binomial fitter
+		double[] histogram = new double[histogramData.histogram[1].length];
+		for (int i = 0; i < histogramData.histogram[1].length; i++)
+			histogram[i] = histogramData.histogram[1][i] / count;
 
 		// Plot the cumulative histogram
 		String title = TITLE + " Cumulative Distribution";
 		Plot plot = null;
 		if (showCumulativeHistogram)
 		{
+			// Create a cumulative histogram for fitting
+			double[] cumulativeHistogram = new double[histogram.length];
+			sum = 0;
+			for (int i = 0; i < histogram.length; i++)
+			{
+				sum += histogram[i];
+				cumulativeHistogram[i] = sum;
+			}
+
+			double[] values = Utils.newArray(histogram.length, 0.0, 1.0);
 			plot = new Plot(title, "N", "Cumulative Probability", values, cumulativeHistogram);
-			plot.setLimits(0, N, 0, 1.05);
+			plot.setLimits(0, histogram.length - 1, 0, 1.05);
 			plot.addPoints(values, cumulativeHistogram, Plot.CIRCLE);
 			Utils.display(title, plot);
 		}
 
-		// We need the original histogram, not the cumulative histogram
-		double[] histogram = new double[cumulativeHistogram.length];
-		for (int i = histogram.length; i-- > 1;)
-		{
-			histogram[i] = cumulativeHistogram[i] - cumulativeHistogram[i - 1];
-		}
+		// Do fitting for different N
+		double bestSS = Double.POSITIVE_INFINITY;
+		double[] parameters = null;
+		int worse = 0;
+		int N = histogram.length - 1;
+		int min = minN;
+		if (maxN > 0 && N > maxN)
+			N = maxN;
+		if (min > N)
+			min = N;
 
 		// Since varying the N should be done in integer steps do this
 		// for n=1,2,3,... until the SS peaks then falls off (is worse then the best 
