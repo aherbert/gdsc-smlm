@@ -30,7 +30,6 @@ import gdsc.smlm.results.clustering.ClusteringEngine;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.UnicodeReader;
 import ij.IJ;
-import ij.Macro;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
@@ -583,11 +582,31 @@ public class PCPALMClusters implements PlugIn
 		boolean allowSave = new File(histogramData.filename).exists();
 		if (allowSave)
 			gd.addCheckbox("Auto_save noise-subtracted histogram", sAutoSave);
+
+		// If this is a macro then the dialog will not have Yes or No pressed.
+		// Add a checkbox that can be read from the macro arguments by ImageJ.
+		String macroOption = "subtract";
+		if (IJ.isMacro())
+			gd.addCheckbox(macroOption, true);
+
 		gd.showDialog();
 		if (!gd.wasOKed())
 			return null;
 		if (allowSave)
 			autoSave = sAutoSave = gd.getNextBoolean();
+		
+		if (IJ.isMacro())
+		{
+			// If the macro option flag is not found then the arguments do not want this to run 
+			if (!gd.getNextBoolean())
+				return null;
+		}
+		else
+		{
+			// Ensure that the 'Yes' result is recorded for macros to detect 
+			Recorder.recordOption(macroOption);
+		}
+
 		noiseFile = Utils.getFilename("Noise_file", noiseFile);
 		if (noiseFile != null)
 		{
