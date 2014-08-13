@@ -20,6 +20,7 @@ import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.MaskDistribution;
 import gdsc.smlm.utils.ImageWindow;
+import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
@@ -757,7 +758,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		}
 
 		Plot plot = new Plot(plotTitle, "r (nm)", yAxisTitle, x, y);
-		plot.setLimits(0, x[x.length - 1], 0, max(y));
+		plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
 		Utils.display(plotTitle, plot);
 
 		if (showErrorBars)
@@ -771,15 +772,6 @@ public class PCPALMAnalysis implements PlugInFilter
 			Utils.display(plotTitle, plot);
 		}
 		return plot;
-	}
-
-	private static double max(double[] data)
-	{
-		double max = 0;
-		for (double d : data)
-			if (max < d)
-				max = d;
-		return max;
 	}
 
 	/**
