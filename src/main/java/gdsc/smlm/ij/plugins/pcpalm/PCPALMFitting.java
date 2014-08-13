@@ -271,7 +271,7 @@ public class PCPALMFitting implements PlugIn
 			spatialDomain = previous_spatialDomain;
 			return true;
 		}
-		if (inputOption.equals(INPUT_FROM_FILE))
+		else if (inputOption.equals(INPUT_FROM_FILE))
 		{
 			return loadCorrelationCurve();
 		}
@@ -515,7 +515,7 @@ public class PCPALMFitting implements PlugIn
 		ArrayList<double[]> curves = new ArrayList<double[]>();
 
 		// Fit the g(r) curve for r>0 to equation 2
-		double[] parameters = fitRandomModel(gr, PCPALMMolecules.sigmaS, proteinDensity);
+		double[] parameters = fitRandomModel(gr, estimatedPrecision, proteinDensity);
 		if (parameters != null)
 		{
 			log("  Plot %s: Over-counting estimate = %s", randomModel.getName(),
@@ -533,7 +533,7 @@ public class PCPALMFitting implements PlugIn
 		if (!valid1 || fitClusteredModels)
 		{
 			// Fit the g(r) curve for r>0 to equation 3
-			parameters = fitClusteredModel(gr, PCPALMMolecules.sigmaS, proteinDensity);
+			parameters = fitClusteredModel(gr, estimatedPrecision, proteinDensity);
 
 			if (parameters != null)
 			{
@@ -549,7 +549,7 @@ public class PCPALMFitting implements PlugIn
 			}
 
 			// Fit to an emulsion model for a distribution confined to circles
-			parameters = fitEmulsionModel(gr, PCPALMMolecules.sigmaS, proteinDensity);
+			parameters = fitEmulsionModel(gr, estimatedPrecision, proteinDensity);
 
 			if (parameters != null)
 			{
@@ -781,7 +781,7 @@ public class PCPALMFitting implements PlugIn
 
 				// Extract the first 3 fields
 				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter("\t");
+				scanner.useDelimiter("[\t ,]+");
 
 				double r, g;
 				try
@@ -792,11 +792,13 @@ public class PCPALMFitting implements PlugIn
 				catch (InputMismatchException e)
 				{
 					IJ.error(TITLE, "Incorrect fields on line " + count);
+					scanner.close();
 					return false;
 				}
 				catch (NoSuchElementException e)
 				{
 					IJ.error(TITLE, "Incorrect fields on line " + count);
+					scanner.close();
 					return false;
 				}
 				// Allow the file to be missing the curve error. This is only used for plotting anyway.
@@ -811,6 +813,7 @@ public class PCPALMFitting implements PlugIn
 				catch (NoSuchElementException e)
 				{
 				}
+				scanner.close();
 				data.add(new double[] { r, g, error });
 
 				// Read the next line
