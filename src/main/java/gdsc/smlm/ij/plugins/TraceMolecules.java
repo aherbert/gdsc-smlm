@@ -186,6 +186,7 @@ public class TraceMolecules implements PlugIn
 
 			ClusteringEngine engine = new ClusteringEngine();
 			engine.setClusteringAlgorithm(settings.getClusteringAlgorithm());
+			engine.setThreadCount(Prefs.getThreads());
 			engine.setTracker(new IJTrackProgress());
 			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(), settings.distanceThreshold /
 					results.getCalibration().nmPerPixel, timeInFrames(settings.timeThreshold));

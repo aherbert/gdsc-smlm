@@ -150,10 +150,9 @@ public class DarkTimeAnalysis implements PlugIn
 				
 			case 1: // Clustering (Distance Priority)
 				ClusteringEngine engine = new ClusteringEngine();
-				engine.setTracker(tracker);
 				engine.setClusteringAlgorithm(algorithm);
-				engine.setTrackJoins(true);
 				engine.setThreadCount(Prefs.getThreads());
+				engine.setTracker(tracker);
 				List<PeakResult> peakResults = results.getResults();
 				ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults),
 						d, range);

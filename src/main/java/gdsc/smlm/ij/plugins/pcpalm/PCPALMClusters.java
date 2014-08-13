@@ -287,9 +287,9 @@ public class PCPALMClusters implements PlugIn
 		long s1 = System.nanoTime();
 		ClusteringEngine engine = new ClusteringEngine();
 		engine.setClusteringAlgorithm(clusteringAlgorithm);
-		engine.setTracker(new IJTrackProgress());
 		if (multiThread)
 			engine.setThreadCount(Prefs.getThreads());
+		engine.setTracker(new IJTrackProgress());
 		IJ.showStatus("Clustering ...");
 		ArrayList<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
 		IJ.showStatus("");

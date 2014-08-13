@@ -1516,10 +1516,10 @@ public class PCPALMMolecules implements PlugIn
 			points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
 		ClusteringEngine engine = new ClusteringEngine();
 		IJ.showStatus("Clustering to check inter-molecule distances");
-		engine.setTracker(new IJTrackProgress());
 		engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleSingleLinkage);
 		engine.setTrackJoins(true);
 		engine.setThreadCount(Prefs.getThreads());
+		engine.setTracker(new IJTrackProgress());
 		ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
 		IJ.showStatus("");
 		if (clusters != null)
