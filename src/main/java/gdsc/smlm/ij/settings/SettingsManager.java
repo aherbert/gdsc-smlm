@@ -46,7 +46,9 @@ public class SettingsManager
 	}
 
 	/**
-	 * Convert a list of objects into sentence case names (e.g. pass in (Object[])enum.getValues()).
+	 * Convert a list of objects into names (e.g. pass in (Object[])enum.getValues()). The first letter is capitalised.
+	 * The rest of the name is converted to lowercase if it is all uppercase. Remaining mixed case names are left
+	 * unchanged.
 	 * <p>
 	 * Used to convert the settings enumerations into names used with dialogs.
 	 * 
@@ -59,10 +61,23 @@ public class SettingsManager
 		for (int i = 0; i < names.length; i++)
 		{
 			String name = objects[i].toString();
-			if (name.length() > 1) // Use sentence case
-				names[i] = name.charAt(0) + name.substring(1).toLowerCase();
-			else
-				names[i] = name;
+
+			if (name.length() > 0)
+			{
+				// Capitalise first letter
+				if (Character.isLowerCase(name.charAt(0)))
+					name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+
+				// Check if all upper-case
+				boolean isUpper = true;
+				for (int j = 0; j < name.length(); j++)
+					if (Character.isLetter(name.charAt(j)) && !Character.isUpperCase(name.charAt(j)))
+						isUpper = false;
+
+				if (isUpper) // Use sentence case
+					name = name.charAt(0) + name.substring(1).toLowerCase();
+			}
+			names[i] = name;
 		}
 		return names;
 	}
