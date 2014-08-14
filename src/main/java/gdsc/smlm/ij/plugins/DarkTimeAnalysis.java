@@ -139,13 +139,15 @@ public class DarkTimeAnalysis implements PlugIn
 
 		IJTrackProgress tracker = new IJTrackProgress();
 		tracker.status("Analysing ...");
+		tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...",
+				Utils.rounded(searchDistance), Utils.rounded(d), Utils.rounded(range*msPerFrame/1000.0), range);
 		
 		Trace[] traces;
-		ClusteringAlgorithm algorithm = ClusteringAlgorithm.ClosestParticleTimePriority;
+		ClusteringAlgorithm algorithm = ClusteringAlgorithm.ClosestParticleDistancePriority;
 		switch (method)
 		{
 			case 2: // Clustering (Time Priority)
-				algorithm = ClusteringAlgorithm.ClosestParticleDistancePriority;
+				algorithm = ClusteringAlgorithm.ClosestParticleTimePriority;
 				// Fall through ...
 				
 			case 1: // Clustering (Distance Priority)
