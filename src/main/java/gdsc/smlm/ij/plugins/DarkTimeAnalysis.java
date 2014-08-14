@@ -43,8 +43,18 @@ public class DarkTimeAnalysis implements PlugIn
 {
 	private static String TITLE = "Dark-time Analysis";
 
-	private static String[] METHOD = new String[] { "Tracing", "Clustering (Distance Priority)",
-			"Clustering (Time Priority)" };
+	private static String[] METHOD;
+	private static ClusteringAlgorithm[] algorithms = new ClusteringAlgorithm[] {
+			ClusteringAlgorithm.ClosestTimePriority, ClusteringAlgorithm.ClosestDistancePriority,
+			ClusteringAlgorithm.ClosestParticleTimePriority, ClusteringAlgorithm.ClosestParticleDistancePriority };
+	static
+	{
+		ArrayList<String> methods = new ArrayList<String>();
+		methods.add("Tracing");
+		for (ClusteringAlgorithm c : algorithms)
+			methods.add("Clustering (" + c.toString() + ")");
+		METHOD = methods.toArray(new String[methods.size()]);
+	}
 
 	private static String inputOption = "";
 	private static int method = 0;
@@ -139,36 +149,29 @@ public class DarkTimeAnalysis implements PlugIn
 
 		IJTrackProgress tracker = new IJTrackProgress();
 		tracker.status("Analysing ...");
-		tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...",
-				Utils.rounded(searchDistance), Utils.rounded(d), Utils.rounded(range*msPerFrame/1000.0), range);
-		
-		Trace[] traces;
-		ClusteringAlgorithm algorithm = ClusteringAlgorithm.ClosestParticleDistancePriority;
-		switch (method)
-		{
-			case 2: // Clustering (Time Priority)
-				algorithm = ClusteringAlgorithm.ClosestParticleTimePriority;
-				// Fall through ...
-				
-			case 1: // Clustering (Distance Priority)
-				ClusteringEngine engine = new ClusteringEngine();
-				engine.setClusteringAlgorithm(algorithm);
-				engine.setThreadCount(Prefs.getThreads());
-				engine.setTracker(tracker);
-				List<PeakResult> peakResults = results.getResults();
-				ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults),
-						d, range);
-				traces = TraceMolecules.convertToTraces(peakResults, clusters);
-				break;
+		tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...", Utils.rounded(searchDistance),
+				Utils.rounded(d), Utils.rounded(range * msPerFrame / 1000.0), range);
 
-			case 0: // Tracing
-			default:
-				TraceManager tm = new TraceManager(results);
-				tm.setTracker(tracker);
-				tm.traceMolecules(d, range);
-				traces = tm.getTraces();
+		Trace[] traces;
+		if (method == 0)
+		{
+			TraceManager tm = new TraceManager(results);
+			tm.setTracker(tracker);
+			tm.traceMolecules(d, range);
+			traces = tm.getTraces();
 		}
-		
+		else
+		{
+			ClusteringEngine engine = new ClusteringEngine();
+			engine.setClusteringAlgorithm(algorithms[method - 1]);
+			engine.setThreadCount(Prefs.getThreads());
+			engine.setTracker(tracker);
+			List<PeakResult> peakResults = results.getResults();
+			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults), d,
+					range);
+			traces = TraceMolecules.convertToTraces(peakResults, clusters);
+		}
+
 		tracker.status("Computing histogram ...");
 
 		// Build dark-time histogram
@@ -227,7 +230,7 @@ public class DarkTimeAnalysis implements PlugIn
 				break;
 			}
 		}
-		
+
 		tracker.status("");
 	}
 
