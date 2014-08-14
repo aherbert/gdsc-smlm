@@ -580,6 +580,7 @@ public class PCPALMAnalysis implements PlugInFilter
 				log("ERROR: 'Use border' option of %s nm is not possible: Width = %s nm, Height = %s nm",
 						Utils.rounded(correlationDistance, 4), Utils.rounded(maxx - minx, 3),
 						Utils.rounded(maxy - miny, 3));
+				return;
 			}
 			else
 			{
