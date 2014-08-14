@@ -81,7 +81,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
  */
 public class TraceMolecules implements PlugIn
 {
-	private String TITLE;
+	private String TITLE = "Trace/Cluster Molecules";
 	private String outputName;
 	private static double MIN_BLINKING_RATE = 1; // Should never be <= 0
 	private static String inputOption = "";
@@ -694,6 +694,7 @@ public class TraceMolecules implements PlugIn
 
 	private boolean showClusterDialog()
 	{
+		TITLE = outputName + " Molecules";
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
