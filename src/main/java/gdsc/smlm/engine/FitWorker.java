@@ -60,10 +60,11 @@ public class FitWorker implements Runnable
 	private Logger logger = null;
 	private long time = 0;
 
-	double smooth = 0;
-	double smooth2 = 0;
-	int border = 0;
-	int search = 1;
+	private double smooth = 0;
+	private double smooth2 = 0;
+	private int border = 0;
+	private int search;
+	private int fitting = 1;
 
 	// Used for fitting
 	private FitEngineConfiguration config;
@@ -117,6 +118,29 @@ public class FitWorker implements Runnable
 
 		id = ID;
 		ID += 1;
+	}
+
+	/**
+	 * Set the parameters for smoothing the image, searching for maxima and fitting maxima
+	 * 
+	 * @param smooth
+	 *            The first smoothing parameter
+	 * @param smooth2
+	 *            The second smoothing parameter (used for difference smoothing)
+	 * @param border
+	 *            The border of the image to ignore for fitting
+	 * @param search
+	 *            The block size to be used for searching for maxima
+	 * @param fitting 
+	 *            The block size to be used for fitting
+	 */
+	void setSearchParameters(double smooth, double smooth2, int border, int search, int fitting)
+	{
+		this.smooth = smooth;
+		this.smooth2 = smooth2;
+		this.border = border;
+		this.search = search;
+		this.fitting = fitting;
 	}
 
 	/**
@@ -251,8 +275,8 @@ public class FitWorker implements Runnable
 
 		if (params != null && params.fitTask == FitTask.MaximaIdentification)
 		{
-			final float sd0 = config.getFitConfiguration().getInitialPeakStdDev0();
-			final float sd1 = config.getFitConfiguration().getInitialPeakStdDev1();
+			final float sd0 = fitConfig.getInitialPeakStdDev0();
+			final float sd1 = fitConfig.getInitialPeakStdDev1();
 			ImageExtractor ie = new ImageExtractor(data, width, height);
 			float[] region = null;
 			for (int n = 0; n < maxIndices.length; n++)
@@ -262,7 +286,7 @@ public class FitWorker implements Runnable
 				// This would produce coords using the centre-of-mass.
 				final int x = xcoord[n];
 				final int y = ycoord[n];
-				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, search);
+				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
 				float b = Gaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
 						new float[] { data[maxIndices[n]] });
@@ -302,7 +326,7 @@ public class FitWorker implements Runnable
 				final int x = xcoord[n];
 				final int y = ycoord[n];
 
-				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, search);
+				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
 
 				if (logger != null)
@@ -663,23 +687,18 @@ public class FitWorker implements Runnable
 	 * @param height
 	 * @return Indices of the maxima
 	 */
-	public int[] getMaxima(float[] data, int width, int height)
+	private int[] getMaxima(float[] data, int width, int height)
 	{
 		// Find maxima
 		NonMaximumSuppression nms = new NonMaximumSuppression();
 
 		int[] maxIndices;
 
-		// Use the second smoothing parameter in the case of difference of box filters
-		
-		// Ensure the block size is at least 1 to find local maxima
-		int n = (int) Math.max(Math.max(smooth, smooth2), 1);
-
-		// Do a neighbour check when using a low smoothing amount
-		nms.setNeighbourCheck(n < 3);
+		// Do a neighbour check when using a low block size
+		nms.setNeighbourCheck(search < 3);
 
 		// Check upper limits are safe
-		n = Math.min(n, Math.min(width, height));
+		int n = Math.min(search, Math.min(width, height));
 		int border = Math.min(this.border, Math.min(width, height) / 2);
 
 		maxIndices = nms.blockFindInternal(data, width, height, n, border);
@@ -1115,8 +1134,7 @@ public class FitWorker implements Runnable
 		fittedNeighbourCount = 0;
 		if (!sliceResults.isEmpty())
 		{
-			float range = Math.max(config.getFitConfiguration().getInitialPeakWidth0(), config.getFitConfiguration()
-					.getInitialPeakWidth1()) / 2;
+			float range = Math.max(fitConfig.getInitialPeakWidth0(), fitConfig.getInitialPeakWidth1()) / 2;
 			float xmin2 = xmin - range;
 			float xmax2 = xmax + range;
 			float ymin2 = ymin - range;

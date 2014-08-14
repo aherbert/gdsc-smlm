@@ -29,7 +29,8 @@ public class FitEngineConfiguration implements Cloneable
 
 	private double smooth = 0.5;
 	private double smooth2 = 3;
-	private double search = 3;
+	private double search = 1;
+	private double fitting = 3;
 	private int failuresLimit = 3;
 	private boolean includeNeighbours = true;
 	private double neighbourHeightThreshold = 0.3;
@@ -87,7 +88,7 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * @return the search window size
+	 * @return the size of the region to search for local maxima
 	 */
 	public double getSearch()
 	{
@@ -96,12 +97,30 @@ public class FitEngineConfiguration implements Cloneable
 
 	/**
 	 * @param search
-	 *            the size of the window used for fitting around a maxima. The actual window is calculated dynamically
+	 *            the size of the region to search for local maxima. The actual window is calculated dynamically
 	 *            in conjunction with the peak widths.
 	 */
 	public void setSearch(double search)
 	{
 		this.search = search;
+	}
+
+	/**
+	 * @return the fitting window size
+	 */
+	public double getFitting()
+	{
+		return fitting;
+	}
+
+	/**
+	 * @param fitting
+	 *            the size of the window used for fitting around a maxima. The actual window is calculated dynamically
+	 *            in conjunction with the peak widths.
+	 */
+	public void setFitting(double fitting)
+	{
+		this.fitting = fitting;
 	}
 
 	/**

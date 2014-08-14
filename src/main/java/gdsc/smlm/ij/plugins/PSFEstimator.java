@@ -159,7 +159,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
 		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
-		gd.addSlider("Search_width", 2, 4.5, config.getSearch());
+		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
@@ -237,7 +238,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
-		config.setSearch((int) gd.getNextNumber());
+		config.setSearch(gd.getNextNumber());
+		config.setFitting(gd.getNextNumber());
 
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
@@ -270,7 +272,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			Parameters.isEqualOrBelow("P-value", settings.pValue, 0.5);
 			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isPositive("Smoothing2", config.getSmooth2());
-			Parameters.isAboveZero("Search", config.getSearch());
+			Parameters.isAboveZero("Search_width", config.getSearch());
+			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
 			Parameters.isAboveZero("Delta", fitConfig.getDelta());
 			Parameters.isAboveZero("Lambda", fitConfig.getLambda());

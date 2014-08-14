@@ -47,6 +47,7 @@ public class FitEngine
 	private double smooth2;
 	private int border;
 	private int search;
+	private int fitting;
 
 	/**
 	 * Return the actual smoothing window size calculated using the smoothing parameter and the configured peak widths.
@@ -95,6 +96,17 @@ public class FitEngine
 	public int getSearch()
 	{
 		return search;
+	}
+
+	/**
+	 * Return the actual fitting window size (2n+1) calculated using the fitting parameter and the configured peak
+	 * widths.
+	 * 
+	 * @return The size of the fitting window
+	 */
+	public int getFitting()
+	{
+		return fitting;
 	}
 
 	/**
@@ -150,10 +162,7 @@ public class FitEngine
 		{
 			// Note - Clone the configuration for each worker
 			FitWorker worker = new FitWorker((FitEngineConfiguration) (config.clone()), results, jobs);
-			worker.smooth = smooth;
-			worker.smooth2 = smooth2;
-			worker.border = this.border;
-			worker.search = search;
+			worker.setSearchParameters(smooth, smooth2, this.border, search, fitting);
 			Thread t = new Thread(worker);
 
 			workers.add(worker);
@@ -221,13 +230,18 @@ public class FitEngine
 		if (border < 1)
 			border = 1;
 
+		// Region for maxima finding
+		search = (int) Math.ceil(config.getSearch() * hwhmMax);
+		if (search < 1)
+			search = 1;
+
 		// TODO - What should this be to be robust?
 		// 3 sigma should cover 99% of the Gaussian curve
 
-		// Search region for peak fitting
-		search = (int) Math.ceil(config.getSearch() * widthMax);
-		if (search < 1)
-			search = 1;
+		// Region for peak fitting
+		fitting = (int) Math.ceil(config.getFitting() * widthMax);
+		if (fitting < 2)
+			fitting = 2;
 	}
 
 	public double getSmoothingWindow(double smoothingParameter, float hwhmMin)

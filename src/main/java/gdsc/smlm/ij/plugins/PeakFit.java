@@ -160,6 +160,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textSmooth;
 	private TextField textSmooth2;
 	private TextField textSearch;
+	private TextField textFitting;
 	private Choice textFitSolver;
 	private Choice textFitFunction;
 	private Choice textFitCriteria;
@@ -655,7 +656,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
 		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
-		gd.addSlider("Search_width", 2, 4.5, config.getSearch());
+		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 		if (extraOptions && !fitMaxima)
 		{
 			gd.addCheckbox("Interlaced_data", optionInterlacedData);
@@ -789,6 +791,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textSmooth = numerics.get(n++);
 			textSmooth2 = numerics.get(n++);
 			textSearch = numerics.get(n++);
+			textFitting = numerics.get(n++);
 			if (extraOptions && !fitMaxima)
 			{
 				b++; // Skip over the interlaced data option
@@ -1150,7 +1153,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
-		config.setSearch((int) gd.getNextNumber());
+		config.setSearch(gd.getNextNumber());
+		config.setFitting(gd.getNextNumber());
 		if (extraOptions && !fitMaxima)
 		{
 			interlacedData = gd.getNextBoolean();
@@ -1223,7 +1227,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isPositive("Smoothing2", config.getSmooth2());
-			Parameters.isAboveZero("Search", config.getSearch());
+			Parameters.isAboveZero("Search_width", config.getSearch());
+			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isPositive("Integrate frames", integrateFrames);
 			if (!maximaIdentification)
 			{
@@ -1665,6 +1670,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				IJ.log("Smoothing2 = " + w + " x " + w);
 			}
 			int w = 2 * engine.getSearch() + 1;
+			IJ.log("Search window = " + w + " x " + w);
+			w = 2 * engine.getFitting() + 1;
 			IJ.log("Fit window = " + w + " x " + w);
 			IJ.log("Coordinate shift = " + IJ.d2s(config.getFitConfiguration().getCoordinateShift(), 3));
 			IJ.log("Signal strength = " + IJ.d2s(fitConfig.getSignalStrength(), 3));
@@ -1948,6 +1955,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textSmooth.setText("" + config.getSmooth());
 				textSmooth2.setText("" + config.getSmooth2());
 				textSearch.setText("" + config.getSearch());
+				textFitting.setText("" + config.getFitting());
 				if (!maximaIdentification)
 				{
 					textFitSolver.select(fitConfig.getFitSolver().ordinal());

@@ -65,6 +65,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	private TextField textSmooth;
 	private TextField textSmooth2;
 	private TextField textSearch;
+	private TextField textFitting;
 	private Choice textFitSolver;
 	private Choice textFitFunction;
 	private Choice textFitCriteria;
@@ -124,7 +125,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		gd.addMessage("--- Maxima identification ---");
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
 		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
-		gd.addSlider("Search_width", 2, 4.5, config.getSearch());
+		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
@@ -181,6 +183,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			textSmooth = numerics.get(n++);
 			textSmooth2 = numerics.get(n++);
 			textSearch = numerics.get(n++);
+			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
 			textFitFunction = choices.get(ch++);
 			textFitCriteria = choices.get(ch++);
@@ -245,7 +248,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		fitConfig.setInitialAngleD((float) gd.getNextNumber());
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
-		config.setSearch((int) gd.getNextNumber());
+		config.setSearch(gd.getNextNumber());
+		config.setFitting(gd.getNextNumber());
 
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
@@ -278,7 +282,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
 			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isPositive("Smoothing2", config.getSmooth2());
-			Parameters.isAboveZero("Search", config.getSearch());
+			Parameters.isAboveZero("Search_width", config.getSearch());
+			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
 			Parameters.isAboveZero("Delta", fitConfig.getDelta());
 			Parameters.isAboveZero("Lambda", fitConfig.getLambda());
@@ -409,6 +414,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				textSmooth.setText("" + config.getSmooth());
 				textSmooth2.setText("" + config.getSmooth2());
 				textSearch.setText("" + config.getSearch());
+				textFitting.setText("" + config.getFitting());
 				textFitSolver.select(fitConfig.getFitSolver().ordinal());
 				textFitFunction.select(fitConfig.getFitFunction().ordinal());
 				textFitCriteria.select(fitConfig.getFitCriteria().ordinal());

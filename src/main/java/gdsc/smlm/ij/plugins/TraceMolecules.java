@@ -1522,9 +1522,11 @@ public class TraceMolecules implements PlugIn
 		// Allow fitting settings to be adjusted
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		gd.addMessage("--- Gaussian fitting ---");
-		gd.addSlider("Search_width", 2, 4.5, config.getSearch());
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
 		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
+		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+		
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
@@ -1559,10 +1561,11 @@ public class TraceMolecules implements PlugIn
 		fitOnlyCentroid = !gd.getNextBoolean();
 		distanceThreshold = (float) gd.getNextNumber();
 		expansionFactor = (float) gd.getNextNumber();
-		config.setSearch((int) gd.getNextNumber());
 
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
+		config.setSearch(gd.getNextNumber());
+		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 		fitConfig.setFitCriteria(gd.getNextChoiceIndex());
@@ -1588,7 +1591,8 @@ public class TraceMolecules implements PlugIn
 			Parameters.isAbove("Expansion factor", expansionFactor, 1);
 			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isPositive("Smoothing2", config.getSmooth2());
-			Parameters.isAboveZero("Search", config.getSearch());
+			Parameters.isAboveZero("Search_width", config.getSearch());
+			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
 			Parameters.isAboveZero("Delta", fitConfig.getDelta());
 			Parameters.isAboveZero("Lambda", fitConfig.getLambda());
@@ -1628,7 +1632,7 @@ public class TraceMolecules implements PlugIn
 
 		// Set up the limits
 		float stdDev = Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
-		float fitWidth = (float) (stdDev * config.getSearch() * ((fitOnlyCentroid) ? 1 : expansionFactor));
+		float fitWidth = (float) (stdDev * config.getFitting() * ((fitOnlyCentroid) ? 1 : expansionFactor));
 
 		IJ.showStatus("Refitting traces ...");
 
