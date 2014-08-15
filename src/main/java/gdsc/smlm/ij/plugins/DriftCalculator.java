@@ -93,6 +93,9 @@ public class DriftCalculator implements PlugIn
 	private static int maxIterations = 50;
 	private static double relativeError = 0.01;
 	private static double smoothing = 0.25;
+	private static boolean limitSmoothing = true;
+	private static int minSmoothingPoints = 10;
+	private static int maxSmoothingPoints = 50;
 	private static int iterations = 1;
 	private static boolean plotDrift = true;
 	private static boolean saveDrift = false;
@@ -383,6 +386,9 @@ public class DriftCalculator implements PlugIn
 		gd.addNumericField("Relative_error", relativeError, 3);
 		gd.addMessage("LOESS smoothing parameters");
 		gd.addSlider("Smoothing", 0.001, 1, smoothing);
+		gd.addCheckbox("Limit_smoothing", limitSmoothing);
+		gd.addSlider("Min_smoothing_points", 5, 50, minSmoothingPoints);
+		gd.addSlider("Max_smoothing_points", 5, 50, maxSmoothingPoints);
 		gd.addSlider("Iterations", 1, 10, iterations);
 		gd.addCheckbox("Plot_drift", plotDrift);
 
@@ -396,6 +402,9 @@ public class DriftCalculator implements PlugIn
 		maxIterations = (int) gd.getNextNumber();
 		relativeError = gd.getNextNumber();
 		smoothing = gd.getNextNumber();
+		limitSmoothing = gd.getNextBoolean();
+		minSmoothingPoints = (int) gd.getNextNumber();
+		maxSmoothingPoints = (int) gd.getNextNumber();
 		iterations = (int) gd.getNextNumber();
 		plotDrift = gd.getNextBoolean();
 
@@ -405,6 +414,12 @@ public class DriftCalculator implements PlugIn
 			Parameters.isPositive("Max iterations", maxIterations);
 			Parameters.isAboveZero("Relative error", relativeError);
 			Parameters.isPositive("Smoothing", smoothing);
+			if (limitSmoothing)
+			{
+				Parameters.isEqualOrAbove("Min smoothing points", minSmoothingPoints, 3);
+				Parameters.isEqualOrAbove("Max smoothing points", maxSmoothingPoints, 3);
+				Parameters.isEqualOrAbove("Max smoothing points", maxSmoothingPoints, minSmoothingPoints);
+			}
 			Parameters.isEqualOrBelow("Smoothing", smoothing, 1);
 			Parameters.isPositive("Iterations", iterations);
 		}
@@ -595,6 +610,9 @@ public class DriftCalculator implements PlugIn
 
 		double[] sum = new double[dx.length];
 		double[] weights = calculateWeights(roiSpots, dx.length, sum);
+
+		double smoothing = updateSmoothingParameter(weights);
+
 		lastdx = null;
 		double change = calculateDriftUsingMarkers(roiSpots, weights, sum, dx, dy, smoothing, iterations);
 		if (Double.isNaN(change))
@@ -617,6 +635,58 @@ public class DriftCalculator implements PlugIn
 		saveDrift(weights, dx, dy);
 
 		return new double[][] { dx, dy };
+	}
+
+	/**
+	 * Update the smoothing parameter using the upper and lower limits for the number of points to use for smoothing
+	 * 
+	 * @param data
+	 *            The data to be smoothed
+	 * @return The updated smoothing parameter
+	 */
+	private double updateSmoothingParameter(double[] data)
+	{
+		if (!limitSmoothing)
+			return smoothing;
+		
+		int n = countNonZeroValues(data);
+
+		int bandwidthInPoints = (int) (smoothing * n);
+
+		// Check the bounds for the smoothing
+		int original = bandwidthInPoints;
+		if (minSmoothingPoints > 0)
+		{
+			bandwidthInPoints = Math.max(bandwidthInPoints, minSmoothingPoints);
+		}
+		if (maxSmoothingPoints > 0)
+		{
+			bandwidthInPoints = Math.min(bandwidthInPoints, maxSmoothingPoints);
+		}
+
+		double newSmoothing = (double) bandwidthInPoints / n;
+		if (original != bandwidthInPoints)
+			Utils.log("Updated smoothing parameter for %d data points to %s (%d smoothing points)", n,
+					Utils.rounded(newSmoothing), bandwidthInPoints);
+
+		return newSmoothing;
+	}
+
+	/**
+	 * Count the number of points where the data array is not zero
+	 * 
+	 * @param data
+	 * @return the number of points
+	 */
+	private int countNonZeroValues(double[] data)
+	{
+		int n = 0;
+		for (double d : data)
+		{
+			if (d != 0)
+				n++;
+		}
+		return n;
 	}
 
 	private double getTotalDrift(double[] dx, double[] dy, double[] originalDriftTimePoints)
@@ -1103,6 +1173,8 @@ public class DriftCalculator implements PlugIn
 		double[] dx = Arrays.copyOf(lastdx, lastdx.length);
 		double[] dy = Arrays.copyOf(lastdy, lastdy.length);
 
+		double smoothing = updateSmoothingParameter(calculatedTimepoints);
+
 		// Perform smoothing
 		if (smoothing > 0)
 		{
@@ -1273,6 +1345,9 @@ public class DriftCalculator implements PlugIn
 
 		double[] originalDriftTimePoints = getOriginalDriftTimePoints(dx, blockT);
 		lastdx = null;
+
+		double smoothing = updateSmoothingParameter(originalDriftTimePoints);
+
 		double change = calculateDriftUsingFrames(blocks, blockT, bounds, scale, dx, dy, originalDriftTimePoints,
 				smoothing, iterations);
 		if (Double.isNaN(change))
@@ -1571,6 +1646,8 @@ public class DriftCalculator implements PlugIn
 			originalDriftTimePoints[t] = 1;
 			blockT[i] = t;
 		}
+
+		double smoothing = updateSmoothingParameter(originalDriftTimePoints);
 
 		lastdx = null;
 		double change = calculateDriftUsingImageStack(referenceIp, images, fhtImages, blockT, dx, dy,
