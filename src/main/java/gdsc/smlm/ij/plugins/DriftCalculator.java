@@ -319,18 +319,18 @@ public class DriftCalculator implements PlugIn
 		}
 		double[][] drift = null;
 		int[] limits = findTimeLimits(results);
-		if (method == MARKED_ROIS)
+		if (method.equals(MARKED_ROIS))
 		{
 			drift = calculateUsingMarkers(results, limits, rois);
 		}
-		else if (method == STACK_ALIGNMENT)
+		else if (method.equals(STACK_ALIGNMENT))
 		{
 			ImageStack stack = showStackDialog(stackTitles);
 			if (stack == null)
 				return;
 			drift = calculateUsingImageStack(stack, limits);
 		}
-		else if (method == DRIFT_FILE)
+		else if (method.equals(DRIFT_FILE))
 		{
 			drift = calculateUsingDriftFile(limits);
 		}
