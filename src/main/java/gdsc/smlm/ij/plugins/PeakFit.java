@@ -1561,7 +1561,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		if (interlacedData && !silentEnd && slice > 0)
 			Utils.log("Processed %d / %d interlaced frames (%s%%)", slice - ignored, slice,
-					Utils.rounded(100 * (slice - ignored), slice));
+					Utils.rounded(100.0 * (slice - ignored) / slice));
 
 		showResults();
 	}
