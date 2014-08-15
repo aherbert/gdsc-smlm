@@ -594,7 +594,7 @@ public class PCPALMClusters implements PlugIn
 			return null;
 		if (allowSave)
 			autoSave = sAutoSave = gd.getNextBoolean();
-		
+
 		if (IJ.isMacro())
 		{
 			// If the macro option flag is not found then the arguments do not want this to run 
@@ -769,7 +769,7 @@ public class PCPALMClusters implements PlugIn
 		final double factor = (histogramData.frames * histogramData.area);
 		for (int i = 0; i < length; i++)
 		{
-			histogramData.histogram[1][i] = (float) (Math.max(0, v1[i] - v2[i]) * factor);
+			histogramData.histogram[1][i] = (float) (Math.max(0, v1[i] - ((i < v2.length) ? v2[i] : 0)) * factor);
 		}
 		return true;
 	}
