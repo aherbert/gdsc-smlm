@@ -827,14 +827,10 @@ public class Utils
 	public static boolean isExtraOptions()
 	{
 		final String EXTRA = "extraoptions";
-		boolean extraOptions;
-		if (IJ.isMacro())
+		boolean extraOptions = IJ.altKeyDown() || IJ.shiftKeyDown();
+		if (!extraOptions && IJ.isMacro())
 		{
-			extraOptions = Macro.getOptions().contains(EXTRA);
-		}
-		else
-		{
-			extraOptions = IJ.altKeyDown() || IJ.shiftKeyDown();
+			extraOptions = (Macro.getOptions() != null && Macro.getOptions().contains(EXTRA));
 		}
 		if (extraOptions)
 			Recorder.recordOption(EXTRA);
