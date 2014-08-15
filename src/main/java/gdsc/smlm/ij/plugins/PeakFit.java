@@ -228,7 +228,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	public int setup(String arg, ImagePlus imp)
 	{
 		plugin_flags = FLAGS;
-		extraOptions = IJ.altKeyDown();
+		extraOptions = Utils.isExtraOptions();
 
 		maximaIdentification = (arg != null && arg.contains("spot"));
 		fitMaxima = (arg != null && arg.contains("maxima"));
@@ -1286,8 +1286,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
-					+ "Describe the regular repeat of the data:\n \n"
-					+ "Start = The first frame that contains data\n"
+					+ "Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n"
 					+ "Block = The number of continuous frames containing data\n"
 					+ "Skip = The number of continuous frames to ignore before the next data\n \n"
 					+ "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
@@ -1521,6 +1520,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		boolean shutdown = false;
 		int slice = 0;
+		int ignored = 0;
 		while (!shutdown)
 		{
 			// Noise can optionally be estimated from the entire frame
@@ -1535,26 +1535,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 
 			int frame = slice + frameOffset;
-			if (interlacedData)
+			if (interlacedData && ignoreFrame(frame))
 			{
-				// Check if the frame is allowed:
-				//    Start
-				//      |
-				// |----|Block|Skip|Block|Skip|Block|Skip
-				// Note the source data is still read so that the source is incremented.
-				if (frame < dataStart)
-				{
-					//System.out.printf("Skipping %d\n", frame);
-					continue;
-				}
-				int frameInBlock = (frame - dataStart) % (dataBlock + dataSkip);
-				if (frameInBlock >= dataBlock)
-				{
-					//System.out.printf("Skipping %d\n", frame);
-					continue;
-				}
+				ignored++;
+				continue;
 			}
-			
+
 			float noise = Float.NaN;
 			if (ignoreBoundsForNoise)
 			{
@@ -1573,7 +1559,38 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		engine.end(shutdown);
 		time = engine.getTime();
 
+		if (interlacedData && !silentEnd && slice > 0)
+			Utils.log("Processed %d / %d interlaced frames (%s%%)", slice - ignored, slice,
+					Utils.rounded(100 * (slice - ignored), slice));
+
 		showResults();
+	}
+
+	/**
+	 * Check if the frame should be ignored (relevant when using interlaced data)
+	 * 
+	 * @param frame
+	 * @return True if the frame should be ignored
+	 */
+	private boolean ignoreFrame(int frame)
+	{
+		// Check if the frame is allowed:
+		//    Start
+		//      |
+		// |----|Block|Skip|Block|Skip|Block|Skip
+		// Note the source data is still read so that the source is incremented.
+		if (frame < dataStart)
+		{
+			//System.out.printf("Skipping %d\n", frame);
+			return true;
+		}
+		int frameInBlock = (frame - dataStart) % (dataBlock + dataSkip);
+		if (frameInBlock >= dataBlock)
+		{
+			//System.out.printf("Skipping %d\n", frame);
+			return true;
+		}
+		return false;
 	}
 
 	private FitJob createJob(int slice, float[] data, Rectangle bounds2, float noise)
@@ -1656,28 +1673,29 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			IJ.log("-=-=-=-");
 			IJ.log("Peak Fit");
 			IJ.log("-=-=-=-");
-			IJ.log("Initial Peak SD = " + fitConfig.getInitialPeakStdDev0() + "," + fitConfig.getInitialPeakStdDev1());
+			Utils.log("Initial Peak SD = %s,%s", Utils.rounded(fitConfig.getInitialPeakStdDev0()),
+					Utils.rounded(fitConfig.getInitialPeakStdDev1()));
 			if ((engine.getSmooth() > 0 && engine.getSmooth() < 1))
 				IJ.log("Smoothing = 3 x 3 (Gaussian approximation)");
 			else
 			{
 				int w = 2 * (int) engine.getSmooth() + 1;
-				IJ.log("Smoothing = " + w + " x " + w);
+				Utils.log("Smoothing = %d x %d", w, w);
 			}
 			if (engine.getSmooth2() > engine.getSmooth())
 			{
 				int w = 2 * (int) engine.getSmooth2() + 1;
-				IJ.log("Smoothing2 = " + w + " x " + w);
+				Utils.log("Smoothing2 = %d x %d", w, w);
 			}
 			int w = 2 * engine.getSearch() + 1;
-			IJ.log("Search window = " + w + " x " + w);
+			Utils.log("Search window = %d x %d", w, w);
 			w = 2 * engine.getFitting() + 1;
-			IJ.log("Fit window = " + w + " x " + w);
-			IJ.log("Coordinate shift = " + IJ.d2s(config.getFitConfiguration().getCoordinateShift(), 3));
-			IJ.log("Signal strength = " + IJ.d2s(fitConfig.getSignalStrength(), 3));
+			Utils.log("Fit window = %d x %d", w, w);
+			IJ.log("Coordinate shift = " + Utils.rounded(config.getFitConfiguration().getCoordinateShift()));
+			IJ.log("Signal strength = " + Utils.rounded(fitConfig.getSignalStrength()));
 			if (extraOptions)
-				IJ.log("Noise = " + IJ.d2s(fitConfig.getNoise(), 3));
-			IJ.log("Width factor = " + IJ.d2s(fitConfig.getWidthFactor(), 3));
+				IJ.log("Noise = " + Utils.rounded(fitConfig.getNoise()));
+			IJ.log("Width factor = " + Utils.rounded(fitConfig.getWidthFactor()));
 			IJ.log("-=-=-=-");
 		}
 

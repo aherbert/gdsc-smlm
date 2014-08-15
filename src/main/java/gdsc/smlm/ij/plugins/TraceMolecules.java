@@ -162,7 +162,7 @@ public class TraceMolecules implements PlugIn
 			IJ.error(TITLE, "No localisations in memory");
 			return;
 		}
-		altKeyDown = IJ.altKeyDown() || IJ.shiftKeyDown();
+		altKeyDown = Utils.isExtraOptions();
 
 		Trace[] traces = null;
 		int totalFiltered = 0;
@@ -899,8 +899,7 @@ public class TraceMolecules implements PlugIn
 		settings.setOptimiserPlot(gd.getNextChoiceIndex());
 		if (altKeyDown)
 		{
-			inputOptimiseBlinkingRate = gd.getNextBoolean();
-			optimiseBlinkingRate = inputOptimiseBlinkingRate;
+			optimiseBlinkingRate = inputOptimiseBlinkingRate = gd.getNextBoolean();
 		}
 
 		if (gd.invalidNumber())

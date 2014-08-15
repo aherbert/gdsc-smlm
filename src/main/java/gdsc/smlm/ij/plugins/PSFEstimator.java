@@ -27,6 +27,7 @@ import gdsc.smlm.ij.settings.PSFEstimatorSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
@@ -118,8 +119,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	 */
 	private int showDialog(ImagePlus imp)
 	{
-		// Start with a free fit for the first time
-		if (IJ.altKeyDown())
+		// Start with a free fit for the first time if extra options are flagged
+		if (Utils.isExtraOptions())
 		{
 			fitFunction = FitFunction.FREE.ordinal();
 			initialPeakStdDev0 = 1;

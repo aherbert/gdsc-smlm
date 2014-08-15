@@ -17,6 +17,7 @@ import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Macro;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Plot;
@@ -24,6 +25,7 @@ import ij.gui.PlotWindow;
 import ij.gui.ProgressBar;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
+import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
@@ -812,5 +814,30 @@ public class Utils
 			return chooser.getDirectory() + chooser.getFileName();
 		}
 		return null;
+	}
+
+	/**
+	 * Determine if the plugin is running with extra options. Checks for the ImageJ shift or alt key down properties. If
+	 * running in a macro then searches the options string for the 'extraoptions' flag.
+	 * <p>
+	 * If the extra options are required then adds the 'extraoptions' flag to the macro recorder options.
+	 * 
+	 * @return True if extra options are required
+	 */
+	public static boolean isExtraOptions()
+	{
+		final String EXTRA = "extraoptions";
+		boolean extraOptions;
+		if (IJ.isMacro())
+		{
+			extraOptions = Macro.getOptions().contains(EXTRA);
+		}
+		else
+		{
+			extraOptions = IJ.altKeyDown() || IJ.shiftKeyDown();
+		}
+		if (extraOptions)
+			Recorder.recordOption(EXTRA);
+		return extraOptions;
 	}
 }
