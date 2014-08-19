@@ -27,7 +27,6 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.function.CCDCameraNoiseModel;
 import gdsc.smlm.fitting.logging.Logger;
-import gdsc.smlm.ij.AggregatedImageSource;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.SeriesImageSource;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -46,11 +45,13 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.ij.utils.SeriesOpener;
 import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.InterlacedImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
@@ -60,6 +61,7 @@ import gdsc.smlm.utils.TextUtils;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
@@ -114,7 +116,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private Rectangle bounds;
 	private static boolean optionIgnoreBoundsForNoise = true;
 	private boolean ignoreBoundsForNoise = false;
-	private int frameOffset = 0; // Used to set the current slice if not processing the stack
 	private Logger logger = null;
 
 	private ImageSource source = null;
@@ -124,7 +125,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
 	private ResultsSettings resultsSettings;
-	private boolean silentEnd = false;
+	private boolean silent = false;
 
 	// Flag for extra options in the dialog (shift-key down)
 	private boolean extraOptions = false;
@@ -141,6 +142,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private int dataStart = 1;
 	private int dataBlock = 1;
 	private int dataSkip = 0;
+	private static boolean optionShowProcessedFrames = false;
+	private boolean showProcessedFrames = false;
 
 	private static String inputOption = "";
 	private static boolean showTable = true;
@@ -299,7 +302,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					if (source instanceof IJImageSource)
 					{
 						tmpImageSource = (IJImageSource) source;
-						if (!tmpImageSource.open())
+						if (!tmpImageSource.openSource())
 						{
 							tmpImageSource = null;
 						}
@@ -523,9 +526,15 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		else
 			results.setName(source.getName() + " (" + config.getFitConfiguration().getFitSolver() + ")");
 		results.setBounds(bounds);
-		// Account for the frame integration
 		Calibration cal = new Calibration(calibration);
-		cal.exposureTime *= integrateFrames;
+		// Account for the frame integration
+		// TODO - Should we change this so that if integrate frames is used then the data 
+		// are converted to ExtendedPeakResult with a start and end frame
+		//cal.exposureTime *= integrateFrames;
+		//if (interlacedData)
+		//{
+		//	cal.exposureTime *= ((double)dataBlock / (dataBlock + dataSkip));
+		//}
 		results.setCalibration(cal);
 		results.setConfiguration(XmlUtils.toXML(config));
 
@@ -559,7 +568,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (time >= 0)
 		{
 			results.end();
-			if (silentEnd)
+			if (silent)
 				return;
 
 			String textTime = Utils.timeToString(time / 1000000.0);
@@ -631,6 +640,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			fitConfig.setMinIterations(0);
 			fitConfig.setNoise(0);
 			config.setNoiseMethod(Method.QuickResidualsLeastMeanOfSquares);
+			showProcessedFrames = false;
 		}
 
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -719,7 +729,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
 		gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
 		if (extraOptions)
+		{
 			gd.addNumericField("Image_window", resultsSettings.imageRollingWindow, 0);
+			gd.addCheckbox("Show_processed_frames", optionShowProcessedFrames);
+		}
 		gd.addMessage("--- File output ---");
 		gd.addStringField("Results_dir", resultsSettings.resultsDirectory);
 		gd.addCheckbox("Binary_results", resultsSettings.binaryResults);
@@ -833,7 +846,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textPrecision = numerics.get(n++);
 			textImageScale = numerics.get(n++);
 			if (extraOptions)
+			{
 				textImageRollingWindow = numerics.get(n++);
+				b++; // Skip over show processed frames option
+			}
 			textResultsDirectory = texts.get(t++);
 			textResultsDirectory.addMouseListener(this);
 
@@ -855,27 +871,57 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if ((flags & DONE) != 0)
 				return DONE;
 
-			frameOffset = 0;
 			if ((flags & DOES_STACKS) == 0)
 			{
 				// Save the slice number for the overlay
 				singleFrame = imp.getCurrentSlice();
 
-				// Note: When integrating frames it is possible to start from any slice. 
-				// To ensure consistent results when comparing fitting of a single plane to fitting a stack
-				// we ensure the slice corresponds to the start of an integration set
-				if (integrateFrames > 1)
-					singleFrame = 1 + integrateFrames * ((singleFrame - 1) / integrateFrames);
+				// Account for interlaced data
+				if (interlacedData)
+				{
+					int start = singleFrame;
 
-				// No stacks so create a new image source with a single frame (or multiple frames if integrating)
-				setSource(new IJImageSource(imp, singleFrame, integrateFrames - 1));
+					// Calculate the first frame that is not skipped
+					while (ignoreFrame(start) && start > dataStart)
+						start--;
+					if (start < dataStart)
+					{
+						log("The current frame (%d) is before the start of the interlaced data", singleFrame);
+						return DONE;
+					}
+					if (start != singleFrame)
+						log("Updated the current frame (%d) to a valid interlaced data frame (%d)", singleFrame, start);
+					singleFrame = start;
+				}
+
+				// Account for integrated frames
+				int endFrame = singleFrame;
+				if (integrateFrames > 1)
+				{
+					int totalFrames = 1;
+					while (totalFrames < integrateFrames)
+					{
+						endFrame++;
+						if (!ignoreFrame(endFrame))
+							totalFrames++;
+					}
+					log("Updated the image end frame (%d) to %d allow %d integrated frames", singleFrame, endFrame,
+							integrateFrames);
+				}
+
+				// Create a new image source with the correct frames
+				setSource(new IJImageSource(imp, singleFrame, endFrame - singleFrame));
 
 				// Store the image so the results can be added as an overlay
 				this.imp = imp;
 				this.imp.setOverlay(null);
-				// Save the slice number for the correct frame identification.
-				frameOffset = (singleFrame - 1) / integrateFrames;
 			}
+		}
+
+		// Allow interlaced data by wrapping the image source
+		if (interlacedData)
+		{
+			setSource(new InterlacedImageSource(this.source, dataStart, dataBlock, dataSkip));
 		}
 
 		// Allow frame aggregation by wrapping the image source
@@ -883,10 +929,17 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			setSource(new AggregatedImageSource(this.source, integrateFrames));
 		}
+
 		// Return the plugin flags (without the DOES_STACKS flag).
 		// The call to run(ImageProcessor) will process the image in 'this.imp' so we only want a 
 		// single call to be made.
 		return plugin_flags;
+	}
+
+	private void log(String format, Object... args)
+	{
+		if (!silent)
+			Utils.log(format, args);
 	}
 
 	private int showSimpleDialog(String filename)
@@ -1202,7 +1255,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		resultsSettings.precision = (float) gd.getNextNumber();
 		resultsSettings.imageScale = (float) gd.getNextNumber();
 		if (extraOptions)
+		{
 			resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
+			showProcessedFrames = optionShowProcessedFrames = gd.getNextBoolean();
+		}
 		resultsSettings.resultsDirectory = gd.getNextString();
 		resultsSettings.binaryResults = gd.getNextBoolean();
 		resultsSettings.resultsInMemory = gd.getNextBoolean();
@@ -1395,6 +1451,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			r.setPeakIdColumnName("Frame");
 			r.setShowCalibratedValues(resultsSettings.getResultsTable() == ResultsTable.CALIBRATED);
 			r.setClearAtStart(simpleFit);
+			r.setShowEndFrame(integrateFrames > 1);
 			resultsList.addOutput(r);
 		}
 	}
@@ -1509,6 +1566,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		int totalFrames = source.getFrames();
 
+		ImageStack stack = null;
+		if (showProcessedFrames)
+			stack = new ImageStack(bounds.width, bounds.height);
+
 		// Do not crop the region from the source if the bounds match the source dimensions
 		Rectangle cropBounds = (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth() && bounds.height == source
 				.getHeight()) ? null : bounds;
@@ -1520,7 +1581,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		boolean shutdown = false;
 		int slice = 0;
-		int ignored = 0;
 		while (!shutdown)
 		{
 			// Noise can optionally be estimated from the entire frame
@@ -1534,13 +1594,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				IJ.showStatus("Slice: " + slice + " / " + totalFrames);
 			}
 
-			int frame = slice + frameOffset;
-			if (interlacedData && ignoreFrame(frame))
-			{
-				ignored++;
-				continue;
-			}
-
 			float noise = Float.NaN;
 			if (ignoreBoundsForNoise)
 			{
@@ -1550,7 +1603,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				data = ImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
 			}
 
-			engine.run(createJob(frame, data, bounds, noise));
+			if (showProcessedFrames)
+			{
+				stack.addSlice(
+						String.format("Frame %d - %d", source.getStartFrameNumber(), source.getEndFrameNumber()), data);
+			}
+
+			// Get the frame number from the source to allow for interlaced and aggregated data
+			engine.run(createJob(source.getStartFrameNumber(), source.getEndFrameNumber(), data, bounds, noise));
 
 			if (escapePressed())
 				shutdown = true;
@@ -1559,9 +1619,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		engine.end(shutdown);
 		time = engine.getTime();
 
-		if (interlacedData && !silentEnd && slice > 0)
-			Utils.log("Processed %d / %d interlaced frames (%s%%)", slice - ignored, slice,
-					Utils.rounded(100.0 * (slice - ignored) / slice));
+		if (showProcessedFrames)
+			Utils.display("Processed frames", stack);
 
 		showResults();
 	}
@@ -1574,6 +1633,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 */
 	private boolean ignoreFrame(int frame)
 	{
+		if (!interlacedData)
+			return false;
+
 		// Check if the frame is allowed:
 		//    Start
 		//      |
@@ -1593,26 +1655,34 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		return false;
 	}
 
-	private FitJob createJob(int slice, float[] data, Rectangle bounds2, float noise)
+	private FitJob createJob(int slice, int endFrame, float[] data, Rectangle bounds2, float noise)
 	{
+		FitParameters fitParams = null;
+		if (slice != endFrame)
+		{
+			fitParams = new FitParameters();
+			fitParams.endT = endFrame;
+		}
+
 		if (maximaIdentification)
 		{
-			FitParameters fitParams = new FitParameters();
+			if (fitParams == null)
+				fitParams = new FitParameters();
 			fitParams.fitTask = FitTask.MaximaIdentification;
 			fitParams.noise = noise;
-			return new ParameterisedFitJob(fitParams, slice, data, bounds);
 		}
 		else if (!Float.isNaN(noise))
 		{
-			FitParameters fitParams = new FitParameters();
+			if (fitParams == null)
+				fitParams = new FitParameters();
 			fitParams.fitTask = FitTask.PSFFitting;
 			fitParams.noise = noise;
+		}
+
+		if (fitParams != null)
 			return new ParameterisedFitJob(fitParams, slice, data, bounds);
-		}
 		else
-		{
 			return new FitJob(slice, data, bounds);
-		}
 	}
 
 	private boolean escapePressed()
@@ -1848,20 +1918,20 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	}
 
 	/**
-	 * @return If true, do not output message showing the final time and count
+	 * @return If true, do not output any log messages (e.g. the final time and count)
 	 */
-	public boolean isSilentEnd()
+	public boolean isSilent()
 	{
-		return silentEnd;
+		return silent;
 	}
 
 	/**
-	 * @param silentEnd
-	 *            If true, do not output message showing the final time and count
+	 * @param silent
+	 *            If true, do not output any log messages (e.g. the final time and count)
 	 */
-	public void setSilentEnd(boolean silentEnd)
+	public void setSilent(boolean silent)
 	{
-		this.silentEnd = silentEnd;
+		this.silent = silent;
 	}
 
 	/*

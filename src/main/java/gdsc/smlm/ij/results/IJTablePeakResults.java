@@ -142,7 +142,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 		if (roiPainter != null && getSource() != null)
 		{
-			roiPainter.setTitle(getSource().getName());
+			roiPainter.setTitle(getSource().getOriginal().getName());
 
 			// Update the coordinate provider (avoids memory leaks with old objects lying around)
 			roiPainter.setCoordProvider(this);

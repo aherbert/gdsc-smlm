@@ -318,7 +318,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 			{
 				ResultsSettings resultsSettings = createResultsSettings(fitConfig, prefix);
 				PeakFit peakFit = new PeakFit(fitConfig, resultsSettings, settings.getCalibration());
-				peakFit.setSilentEnd(true);
+				peakFit.setSilent(true);
 				peakFit.run(imp, false);
 
 				int localisations = peakFit.getSize();

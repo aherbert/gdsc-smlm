@@ -31,20 +31,26 @@ public class NullSource extends ImageSource
 	}
 
 	@Override
-	public boolean open()
+	public boolean openSource()
 	{
 		return false;
 	}
 
 	@Override
-	public float[] next(Rectangle bounds)
+	protected float[] nextFrame(Rectangle bounds)
 	{
 		return null;
 	}
 
 	@Override
-	public float[] get(int frame, Rectangle bounds)
+	protected float[] getFrame(int frame, Rectangle bounds)
 	{
 		return null;
+	}
+	
+	@Override
+	public boolean isValid(int frame)
+	{
+		return false;
 	}
 }

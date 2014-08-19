@@ -54,7 +54,7 @@ public class SeriesImageSource extends ImageSource
 	private int lastImage;
 	private Object[] lastImageArray = null;
 	private int lastImageSize;
-	
+
 	private boolean logProgress = false;
 	private long lastTime = 0;
 
@@ -129,7 +129,7 @@ public class SeriesImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ResultsSource#open()
 	 */
 	@Override
-	public boolean open()
+	public boolean openSource()
 	{
 		// reset
 		setDimensions(0, 0, 0);
@@ -149,25 +149,25 @@ public class SeriesImageSource extends ImageSource
 		currentImageSize = currentSlice = 0;
 		if (currentImage >= images.size())
 			return null;
-		
+
 		// Disable the progress bar when opening files
 		Opener opener = new Opener();
 		opener.setSilentMode(true);
 		Utils.setShowProgress(false);
 		if (logProgress)
 		{
-	        long time = System.currentTimeMillis();
-	        if (time - lastTime > 500)
-	        {
-	        	lastTime = time;
+			long time = System.currentTimeMillis();
+			if (time - lastTime > 500)
+			{
+				lastTime = time;
 				IJ.log("Opening " + images.get(currentImage));
-	        }
+			}
 		}
 		ImagePlus imp = opener.openImage(images.get(currentImage++));
 		Utils.setShowProgress(true);
-		
+
 		//ImagePlus imp = IJ.openImage(images.get(currentImage++));
-		
+
 		if (imp == null)
 			return null;
 		imageArray = imp.getImageStack().getImageArray();
@@ -200,10 +200,10 @@ public class SeriesImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#next(java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
 	 */
 	@Override
-	public float[] next(Rectangle bounds)
+	protected float[] nextFrame(Rectangle bounds)
 	{
 		// Rolling access
 		if (imageArray != null)
@@ -223,10 +223,10 @@ public class SeriesImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#get(int, java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
 	 */
 	@Override
-	public float[] get(int frame, Rectangle bounds)
+	protected float[] getFrame(int frame, Rectangle bounds)
 	{
 		if (maxz == 0 || frame < 1)
 			return null;
@@ -246,7 +246,7 @@ public class SeriesImageSource extends ImageSource
 				if (imp != null)
 				{
 					lastImageArray = imp.getImageStack().getImageArray();
-					lastImageSize = imp.getStackSize(); 
+					lastImageSize = imp.getStackSize();
 				}
 			}
 		}
@@ -259,6 +259,17 @@ public class SeriesImageSource extends ImageSource
 			}
 		}
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#isValid(int)
+	 */
+	@Override
+	public boolean isValid(int frame)
+	{
+		return frame > 0 && frame <= frames;
 	}
 
 	/*
@@ -284,7 +295,8 @@ public class SeriesImageSource extends ImageSource
 	}
 
 	/**
-	 * @param logProgress Set to true to send progress to the ImageJ log
+	 * @param logProgress
+	 *            Set to true to send progress to the ImageJ log
 	 */
 	public void setLogProgress(boolean logProgress)
 	{

@@ -139,7 +139,7 @@ public class IJImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ResultsSource#open()
 	 */
 	@Override
-	public boolean open()
+	public boolean openSource()
 	{
 		if (imageArray == null && imageStack == null)
 		{
@@ -176,10 +176,10 @@ public class IJImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#next(java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
 	 */
 	@Override
-	public float[] next(Rectangle bounds)
+	protected float[] nextFrame(Rectangle bounds)
 	{
 		++slice;
 		if (singleFrame > 0)
@@ -193,10 +193,10 @@ public class IJImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#get(int, java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
 	 */
 	@Override
-	public float[] get(int frame, Rectangle bounds)
+	protected float[] getFrame(int frame, Rectangle bounds)
 	{
 		if (imageArray != null)
 		{
@@ -231,6 +231,16 @@ public class IJImageSource extends ImageSource
 		//xs.omitField(IJImageSource.class, "singleFrame");
 		xs.omitField(IJImageSource.class, "imageArray");
 		xs.omitField(IJImageSource.class, "imageStack");
+	}
+	
+	@Override
+	public boolean isValid(int frame)
+	{
+		if (singleFrame > 0)
+		{
+			return (frame >= singleFrame && frame <= singleFrame + extraFrames);
+		}
+		return frame > 0 && frame <= frames;
 	}
 
 	/*

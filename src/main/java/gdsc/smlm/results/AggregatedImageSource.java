@@ -1,8 +1,7 @@
-package gdsc.smlm.ij;
-
-import gdsc.smlm.results.ImageSource;
+package gdsc.smlm.results;
 
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -24,11 +23,11 @@ import com.thoughtworks.xstream.XStream;
  */
 public class AggregatedImageSource extends ImageSource
 {
-	private int aggregate;
-	private ImageSource imageSource;
+	private final int aggregate;
+	private final ImageSource imageSource;
 
 	// Used for frame-based read
-	private int lastFrame;
+	private int lastFrame, lastStartFrame, lastEndFrame;
 	private float[] lastImage = null;
 
 	/*
@@ -52,6 +51,8 @@ public class AggregatedImageSource extends ImageSource
 		//xs.omitField(getClass(), "frames");
 		//---
 		xs.omitField(AggregatedImageSource.class, "lastFrame");
+		xs.omitField(AggregatedImageSource.class, "lastStartFrame");
+		xs.omitField(AggregatedImageSource.class, "lastEndFrame");
 		xs.omitField(AggregatedImageSource.class, "lastImage");
 	}
 
@@ -111,34 +112,65 @@ public class AggregatedImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#open()
+	 * @see gdsc.smlm.results.ImageSource#getParent()
 	 */
 	@Override
-	public boolean open()
+	public ImageSource getParent()
 	{
-		return imageSource.open();
+		return imageSource;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#next(java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#getOriginal()
 	 */
 	@Override
-	public float[] next(Rectangle bounds)
+	public ImageSource getOriginal()
+	{
+		return imageSource.getOriginal();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ResultsSource#open()
+	 */
+	@Override
+	public boolean openSource()
+	{
+		return imageSource.openSource();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
+	 */
+	@Override
+	protected float[] nextFrame(Rectangle bounds)
 	{
 		// Aggregate frames consecutive frames
 		float[] image = imageSource.next(bounds);
 		if (image != null)
 		{
+			// Ensure the original image is not updated by creating a copy
+			image = Arrays.copyOf(image, image.length);
+
+			final int start = imageSource.getStartFrameNumber();
+			int end = imageSource.getEndFrameNumber();
 			for (int n = 1; n < aggregate; n++)
 			{
 				float[] image2 = imageSource.next(bounds);
 				if (image2 == null)
 					break;
+				end = imageSource.getEndFrameNumber();
 				for (int i = 0; i < image.length; i++)
 					image[i] += image2[i];
 			}
+			// Ensure that the frame number is recorded
+			setFrameNumber(start, end);
+			//System.out.printf("Aggregated %d-%d\n", start, end);
 		}
 		return image;
 	}
@@ -146,10 +178,10 @@ public class AggregatedImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#get(int, java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
 	 */
 	@Override
-	public float[] get(int frame, Rectangle bounds)
+	protected float[] getFrame(int frame, Rectangle bounds)
 	{
 		if (frame < 1)
 			return null;
@@ -157,26 +189,55 @@ public class AggregatedImageSource extends ImageSource
 		// Calculate if the cache is invalid
 		if (frame != lastFrame || lastImage == null)
 		{
-			// Calculate the required images
-			int firstRealFrame = (frame - 1) * aggregate + 1;
+			// Try and get the desired frame
+			float[] image = imageSource.get(frame, bounds);
+			if (image == null)
+				return null;
+			lastStartFrame = imageSource.getStartFrameNumber();
+			lastEndFrame = imageSource.getEndFrameNumber();
 
-			float[] image = imageSource.get(firstRealFrame, bounds);
-			if (image != null)
+			// Ensure the original image is not updated by creating a copy
+			image = Arrays.copyOf(image, image.length);
+
+			// Go forwards until the desired number of frames have been collated
+			int collated = 1;
+			int nextFrame = frame;
+			while (collated < aggregate && imageSource.isValid(++nextFrame))
 			{
-				for (int n = 1; n < aggregate; n++)
+				float[] image2 = imageSource.get(nextFrame, bounds);
+				if (image2 != null)
 				{
-					float[] image2 = imageSource.get(firstRealFrame + n, bounds);
-					if (image2 == null)
-						break;
+					lastEndFrame = imageSource.getEndFrameNumber();
 					for (int i = 0; i < image.length; i++)
 						image[i] += image2[i];
+					collated++;
 				}
 			}
 			// Cache the image
 			lastImage = image;
 			lastFrame = frame;
 		}
+		// Ensure that the frame number is recorded
+		setFrameNumber(lastStartFrame, lastEndFrame);
 		return lastImage;
+	}
+
+	/**
+	 * @param frame
+	 * @return
+	 */
+	@Override
+	public boolean isValid(int frame)
+	{
+		return imageSource.isValid(frame);
+	}
+
+	/**
+	 * @return The number of frames to aggregate
+	 */
+	public int getAggregate()
+	{
+		return aggregate;
 	}
 
 	/*
