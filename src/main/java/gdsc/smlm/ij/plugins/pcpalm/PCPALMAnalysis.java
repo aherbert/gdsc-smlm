@@ -110,7 +110,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			return loadResults();
 
 		spatialDomain = "spatial".equalsIgnoreCase(arg);
-		
+
 		boolean noAreaRoi = (imp.getRoi() == null || !imp.getRoi().isArea());
 		if (imp == null || (!spatialDomain && noAreaRoi))
 		{
@@ -530,8 +530,9 @@ public class PCPALMAnalysis implements PlugInFilter
 		// Check if the plots are currently shown
 		String spatialPlotTitle = TITLE + " molecules/um^2";
 		String frequencyDomainTitle = TITLE + " g(r)";
-		boolean noPlots = WindowManager.getFrame(spatialPlotTitle) == null &&
-				WindowManager.getFrame(frequencyDomainTitle) == null;
+
+		boolean noPlots;
+		String topPlotTitle;
 
 		long start = System.nanoTime();
 		if (spatialDomain)
@@ -640,6 +641,9 @@ public class PCPALMAnalysis implements PlugInFilter
 					boundaryMinx, boundaryMiny, boundaryMaxx, boundaryMaxy, N, correlationInterval, 0, false, gr, true);
 			results.add(result);
 
+			noPlots = WindowManager.getFrame(spatialPlotTitle) == null;
+			topPlotTitle = frequencyDomainTitle;
+
 			plotCorrelation(gr, 0, spatialPlotTitle, "molecules/um^2", true, false);
 		}
 		else
@@ -719,15 +723,24 @@ public class PCPALMAnalysis implements PlugInFilter
 			// Add the g(r) curve to the results
 			addResult(peakDensity, gr);
 
+			noPlots = WindowManager.getFrame(frequencyDomainTitle) == null;
+			topPlotTitle = spatialPlotTitle;
+
 			// Do not plot r=0 value on the curve
 			plotCorrelation(gr, 1, frequencyDomainTitle, "g(r)", false, showErrorBars);
+		}
 
-			if (noPlots)
+		if (noPlots)
+		{
+			// Position the plot underneath the other one
+			Frame f1 = WindowManager.getFrame(topPlotTitle);
+			if (f1 != null)
 			{
-				// Position the plot underneath the other one
-				Frame f1 = WindowManager.getFrame(spatialPlotTitle);
-				Frame f2 = WindowManager.getFrame(frequencyDomainTitle);
-				f2.setLocation(f2.getLocation().x, f2.getLocation().y + f1.getHeight());
+				String bottomPlotTitle = (topPlotTitle.equals(spatialPlotTitle) ? frequencyDomainTitle
+						: spatialPlotTitle);
+				Frame f2 = WindowManager.getFrame(bottomPlotTitle);
+				if (f2 != null)
+					f2.setLocation(f2.getLocation().x, f2.getLocation().y + f1.getHeight());
 			}
 		}
 
