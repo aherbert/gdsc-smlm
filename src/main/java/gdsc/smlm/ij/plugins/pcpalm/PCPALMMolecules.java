@@ -1072,7 +1072,7 @@ public class PCPALMMolecules implements PlugIn
 
 				if (clusterSimulation == 3)
 				{
-					// Generate a mask of cirlces then sample from that.
+					// Generate a mask of circles then sample from that.
 					// If we want to fill the mask completely then adjust the total steps to be the number of 
 					// circles that can fit inside the mask.
 					totalSteps = (int) (maskSize * maskSize / (Math.PI * Math.pow(clusterRadius / maskScale, 2)));
@@ -1514,12 +1514,10 @@ public class PCPALMMolecules implements PlugIn
 		for (Molecule m : molecules)
 			// Precision was used to store the molecule ID
 			points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
-		ClusteringEngine engine = new ClusteringEngine();
+		ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), ClusteringAlgorithm.ParticleSingleLinkage,
+				new IJTrackProgress());
 		IJ.showStatus("Clustering to check inter-molecule distances");
-		engine.setClusteringAlgorithm(ClusteringAlgorithm.ParticleSingleLinkage);
 		engine.setTrackJoins(true);
-		engine.setThreadCount(Prefs.getThreads());
-		engine.setTracker(new IJTrackProgress());
 		ArrayList<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);
 		IJ.showStatus("");
 		if (clusters != null)

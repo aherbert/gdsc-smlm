@@ -252,6 +252,26 @@ public class ClusteringEngine
 		setTracker(null);
 	}
 
+	public ClusteringEngine(int threadCount)
+	{
+		this.threadCount = threadCount;
+		setTracker(null);
+	}
+
+	public ClusteringEngine(int threadCount, ClusteringAlgorithm custeringAlgorithm)
+	{
+		this.threadCount = threadCount;
+		this.clusteringAlgorithm = custeringAlgorithm;
+		setTracker(null);
+	}
+
+	public ClusteringEngine(int threadCount, ClusteringAlgorithm custeringAlgorithm, TrackProgress tracker)
+	{
+		this.threadCount = threadCount;
+		this.clusteringAlgorithm = custeringAlgorithm;
+		setTracker(tracker);
+	}
+	
 	/**
 	 * Find the clusters of points within the specified radius
 	 * 

@@ -285,8 +285,7 @@ public class PCPALMClusters implements PlugIn
 				Utils.rounded(molecules.size() / analysis.croppedArea));
 
 		long s1 = System.nanoTime();
-		ClusteringEngine engine = new ClusteringEngine();
-		engine.setClusteringAlgorithm(clusteringAlgorithm);
+		ClusteringEngine engine = new ClusteringEngine(1, clusteringAlgorithm, new IJTrackProgress());
 		if (multiThread)
 			engine.setThreadCount(Prefs.getThreads());
 		engine.setTracker(new IJTrackProgress());

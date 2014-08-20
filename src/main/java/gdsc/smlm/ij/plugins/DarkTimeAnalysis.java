@@ -162,10 +162,7 @@ public class DarkTimeAnalysis implements PlugIn
 		}
 		else
 		{
-			ClusteringEngine engine = new ClusteringEngine();
-			engine.setClusteringAlgorithm(algorithms[method - 1]);
-			engine.setThreadCount(Prefs.getThreads());
-			engine.setTracker(tracker);
+			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
 			List<PeakResult> peakResults = results.getResults();
 			ArrayList<Cluster> clusters = engine.findClusters(TraceMolecules.convertToClusterPoints(peakResults), d,
 					range);

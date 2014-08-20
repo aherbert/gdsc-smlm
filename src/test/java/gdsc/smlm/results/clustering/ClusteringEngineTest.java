@@ -181,9 +181,7 @@ public class ClusteringEngineTest
 		double radius = 50;
 		int time = 10;
 		ArrayList<ClusterPoint> points = createClusters(500, 1000, 2, radius / 2, time);
-		ClusteringEngine engine = new ClusteringEngine();
-		engine.setClusteringAlgorithm(algorithm);
-		engine.setThreadCount(0);
+		ClusteringEngine engine = new ClusteringEngine(0, algorithm);
 		ArrayList<Cluster> exp = engine.findClusters(points, radius, time);
 		engine.setThreadCount(8);
 		ArrayList<Cluster> obs = engine.findClusters(points, radius, time);
@@ -215,9 +213,7 @@ public class ClusteringEngineTest
 	@SuppressWarnings("unchecked")
 	private long runSpeedTest(Object[] points, ClusteringAlgorithm algorithm, double radius, int time, int threadCount)
 	{
-		ClusteringEngine engine = new ClusteringEngine();
-		engine.setClusteringAlgorithm(algorithm);
-		engine.setThreadCount(threadCount);
+		ClusteringEngine engine = new ClusteringEngine(threadCount, algorithm);
 
 		// Initialise
 		engine.findClusters((ArrayList<ClusterPoint>) points[0], radius, time);

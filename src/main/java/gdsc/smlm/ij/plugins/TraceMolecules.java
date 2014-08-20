@@ -184,10 +184,8 @@ public class TraceMolecules implements PlugIn
 				}
 			}
 
-			ClusteringEngine engine = new ClusteringEngine();
-			engine.setClusteringAlgorithm(settings.getClusteringAlgorithm());
-			engine.setThreadCount(Prefs.getThreads());
-			engine.setTracker(new IJTrackProgress());
+			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), settings.getClusteringAlgorithm(),
+					new IJTrackProgress());
 			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(), settings.distanceThreshold /
 					results.getCalibration().nmPerPixel, timeInFrames(settings.timeThreshold));
 
@@ -1525,7 +1523,7 @@ public class TraceMolecules implements PlugIn
 		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
-		
+
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
