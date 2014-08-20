@@ -66,7 +66,7 @@ public class SpotInspector implements PlugIn, MouseListener
 	private MemoryPeakResults results;
 	private TextPanel textPanel;
 	private List<PeakResultRank> rankedResults;
-	
+
 	private static int currentId = 0;
 	private int id;
 
@@ -122,7 +122,8 @@ public class SpotInspector implements PlugIn, MouseListener
 
 		for (PeakResult r : results.getResults())
 		{
-			rankedResults.add(new PeakResultRank(r, getScore(r, a, gain, stdDevMax)));
+			float[] score = getScore(r, a, gain, stdDevMax);
+			rankedResults.add(new PeakResultRank(r, score[0], score[1]));
 		}
 		Collections.sort(rankedResults);
 
@@ -136,7 +137,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 		// Add a mouse listener to jump to the frame for the clicked line
 		textPanel = table.getResultsWindow().getTextPanel();
-		
+
 		// We must ignore old instances of this class from the mouse listeners
 		id = ++currentId;
 		textPanel.addMouseListener(this);
@@ -257,14 +258,16 @@ public class SpotInspector implements PlugIn, MouseListener
 				spotIp2.insert(spotIp, padX, padY);
 				spotIp = spotIp2;
 			}
-			spots.setPixels(spotIp.getPixels(), rank.rank + 1);
+			int slice = rank.rank + 1;
+			spots.setPixels(spotIp.getPixels(), slice);
+			spots.setSliceLabel(Utils.rounded(rank.originalScore), slice);
 		}
 
 		ImagePlus imp = Utils.display(TITLE, spots);
 		imp.setRoi((PointRoi) null);
 
 		// Make bigger		
-		for (int i = 9; i-- > 0;)
+		for (int i = 10; i-- > 0;)
 			imp.getWindow().getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
 	}
 
@@ -313,36 +316,51 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 	}
 
-	private float getScore(PeakResult r, double a, double gain, float stdDevMax)
+	private float[] getScore(PeakResult r, double a, double gain, float stdDevMax)
 	{
 		// Return score so high is better
-
+		float score;
+		boolean negative = false;
 		switch (sortOrderIndex)
 		{
 			case 9: // Shift
 				// We do not have the original centroid so use the original X/Y
-				return -Math.max(r.params[Gaussian2DFunction.X_POSITION] - r.origX + 0.5f,
-						r.params[Gaussian2DFunction.Y_POSITION] - r.origY + 0.5f);
+				score = Math.max(r.getXPosition() - r.origX + 0.5f, r.getYPosition() - r.origY + 0.5f);
+				negative = true;
+				break;
 			case 8: // Width factor
-				return -getFactor(Math.max(r.params[Gaussian2DFunction.X_WIDTH], r.params[Gaussian2DFunction.Y_WIDTH]),
-						stdDevMax);
+				score = getFactor(Math.max(r.getXWidth(), r.getYWidth()), stdDevMax);
+				negative = true;
+				break;
 			case 7:
-				return -r.params[Gaussian2DFunction.Y_WIDTH];
+				score = r.getYWidth();
+				negative = true;
+				break;
 			case 6:
-				return -r.params[Gaussian2DFunction.X_WIDTH];
+				score = r.getXWidth();
+				negative = true;
+				break;
 			case 5: // Original value
-				return (float) r.origValue;
+				score = (float) r.origValue;
+				break;
 			case 4: // Error
-				return -(float) r.error;
+				score = (float) r.error;
+				negative = true;
+				break;
 			case 3: // Signal
-				return (float) (r.getSignal() / gain);
+				score = (float) (r.getSignal() / gain);
+				break;
 			case 2: // Amplitude
-				return r.params[Gaussian2DFunction.AMPLITUDE];
+				score = r.getAmplitude();
+				break;
 			case 1: // Precision
-				return -(float) r.getPrecision(a, gain);
+				score = (float) r.getPrecision(a, gain);
+				negative = true;
+				break;
 			default: // SNR
-				return r.getSignal() / r.noise;
+				score = r.getSignal() / r.noise;
 		}
+		return new float[] { (negative) ? -score : score, score };
 	}
 
 	private float recoverScore(float score)
@@ -391,12 +409,13 @@ public class SpotInspector implements PlugIn, MouseListener
 	{
 		int rank;
 		PeakResult peakResult;
-		float score;
+		float score, originalScore;
 
-		public PeakResultRank(PeakResult r, float s)
+		public PeakResultRank(PeakResult r, float s, float original)
 		{
 			peakResult = r;
 			score = s;
+			originalScore = original;
 		}
 
 		public int compareTo(PeakResultRank o)
