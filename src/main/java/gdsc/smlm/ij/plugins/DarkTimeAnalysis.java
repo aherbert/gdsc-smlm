@@ -82,6 +82,12 @@ public class DarkTimeAnalysis implements PlugIn
 			return;
 
 		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return;
+		}
 		msPerFrame = results.getCalibration().exposureTime;
 		Utils.log("%s: %d localisations", TITLE, results.size());
 

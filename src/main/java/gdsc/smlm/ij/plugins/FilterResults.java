@@ -77,6 +77,12 @@ public class FilterResults implements PlugIn
 			return;
 		inputOption = ResultsManager.getInputSource(gd);
 		results = ResultsManager.loadInputResults(inputOption, false);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return;
+		}
 
 		analyseResults();
 

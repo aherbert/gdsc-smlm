@@ -315,7 +315,7 @@ public class DriftCalculator implements PlugIn
 			return;
 
 		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
-		if (results.size() < 2)
+		if (results == null || results.size() < 2)
 		{
 			IJ.error(TITLE, "There are not enough fitting results for drift correction");
 			return;

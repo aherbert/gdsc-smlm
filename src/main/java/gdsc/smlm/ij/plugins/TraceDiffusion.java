@@ -697,6 +697,12 @@ public class TraceDiffusion implements PlugIn
 
 		// Load the results
 		results = ResultsManager.loadInputResults(inputOption, true);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return false;
+		}
 
 		// Check the results have a calibrated exposure time
 		if (results.getCalibration() == null || results.getCalibration().exposureTime <= 0)

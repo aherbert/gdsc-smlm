@@ -119,6 +119,12 @@ public class NeighbourAnalysis implements PlugIn
 
 		// Load the results
 		results = ResultsManager.loadInputResults(inputOption, false);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return false;
+		}
 
 		return true;
 	}

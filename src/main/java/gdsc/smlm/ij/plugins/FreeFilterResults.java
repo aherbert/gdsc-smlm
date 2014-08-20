@@ -76,7 +76,11 @@ public class FreeFilterResults implements PlugIn, ItemListener
 
 		results = ResultsManager.loadInputResults(inputOption, false);
 		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
 			return;
+		}
 
 		// Filter results
 		Filter filter = Filter.fromXML(filterSettings.freeFilter);

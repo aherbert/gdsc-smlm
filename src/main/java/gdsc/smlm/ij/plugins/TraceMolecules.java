@@ -626,6 +626,12 @@ public class TraceMolecules implements PlugIn
 
 		// Load the results
 		results = ResultsManager.loadInputResults(inputOption, true);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return false;
+		}
 
 		// Store exposure time in seconds
 		exposureTime = results.getCalibration().exposureTime / 1000;
@@ -727,6 +733,12 @@ public class TraceMolecules implements PlugIn
 
 		// Load the results
 		results = ResultsManager.loadInputResults(inputOption, true);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return false;
+		}
 
 		// Store exposure time in seconds
 		exposureTime = results.getCalibration().exposureTime / 1000;
