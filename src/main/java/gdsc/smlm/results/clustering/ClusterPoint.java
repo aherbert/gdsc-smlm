@@ -19,7 +19,7 @@ package gdsc.smlm.results.clustering;
 public class ClusterPoint
 {
 	public double x, y, weight;
-	public int id, t;
+	public int id, start, end;
 
 	// Used to construct a single linked list of points
 	public ClusterPoint next = null;
@@ -43,12 +43,13 @@ public class ClusterPoint
 	 * @param id
 	 * @param x
 	 * @param y
-	 * @param t
+	 * @param start
+	 * @param end
 	 * @return The cluster point
 	 */
-	public static ClusterPoint newTimeClusterPoint(int id, double x, double y, int t)
+	public static ClusterPoint newTimeClusterPoint(int id, double x, double y, int start, int end)
 	{
-		return new ClusterPoint(id, x, y, t);
+		return new ClusterPoint(id, x, y, start, end);
 	}
 
 	/**
@@ -72,12 +73,13 @@ public class ClusterPoint
 	 * @param x
 	 * @param y
 	 * @param weight
-	 * @param t
+	 * @param start
+	 * @param end
 	 * @return The cluster point
 	 */
-	public static ClusterPoint newTimeClusterPoint(int id, double x, double y, double weight, int t)
+	public static ClusterPoint newTimeClusterPoint(int id, double x, double y, double weight, int start, int end)
 	{
-		return new ClusterPoint(id, x, y, weight, t);
+		return new ClusterPoint(id, x, y, weight, start, end);
 	}
 
 	protected ClusterPoint(int id, double x, double y)
@@ -86,16 +88,17 @@ public class ClusterPoint
 		this.x = x;
 		this.y = y;
 		weight = 1;
-		t = 0;
+		start = end = 0;
 	}
 
-	protected ClusterPoint(int id, double x, double y, int t)
+	protected ClusterPoint(int id, double x, double y, int start, int end)
 	{
 		this.id = id;
 		this.x = x;
 		this.y = y;
 		weight = 1;
-		this.t = t;
+		this.start = start;
+		this.end = end;
 	}
 
 	protected ClusterPoint(int id, double x, double y, double weight)
@@ -104,16 +107,17 @@ public class ClusterPoint
 		this.x = x;
 		this.y = y;
 		this.weight = weight;
-		t = 0;
+		start = end = 0;
 	}
 
-	protected ClusterPoint(int id, double x, double y, double weight, int t)
+	protected ClusterPoint(int id, double x, double y, double weight, int start, int end)
 	{
 		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.weight = weight;
-		this.t = t;
+		this.start = start;
+		this.end = end;
 	}
 
 	public double distance(ClusterPoint other)
@@ -128,5 +132,23 @@ public class ClusterPoint
 		final double dx = x - other.x;
 		final double dy = y - other.y;
 		return dx * dx + dy * dy;
+	}
+
+	/**
+	 * Get the time gap between the two points. If the points overlap then return 0.
+	 * 
+	 * @param other
+	 * @return the time gap
+	 */
+	public int gap(ClusterPoint other)
+	{
+		// Overlap:
+		// S-----------E
+		//         S---------E
+		//
+		// Gap:
+		// S-----------E
+		//                  S---------E
+		return Math.max(0, Math.max(start, other.start) - Math.min(end, other.end));
 	}
 }

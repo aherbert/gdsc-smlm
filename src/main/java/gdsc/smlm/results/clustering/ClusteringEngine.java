@@ -246,6 +246,7 @@ public class ClusteringEngine
 	private double[] interIdDistances = null;
 	private int intraIdCount, interIdCount;
 	private int nextClusterId;
+	private boolean useRange = false;
 
 	public ClusteringEngine()
 	{
@@ -271,7 +272,7 @@ public class ClusteringEngine
 		this.clusteringAlgorithm = custeringAlgorithm;
 		setTracker(tracker);
 	}
-	
+
 	/**
 	 * Find the clusters of points within the specified radius
 	 * 
@@ -914,18 +915,51 @@ public class ClusteringEngine
 	}
 
 	/**
-	 * Check there are at least two different time points in the data
+	 * Check there are at least two different time points in the data. Also check if any candidates have a different
+	 * start and end time.
 	 * 
 	 * @param candidates
 	 * @return true if there are no different time points
 	 */
 	private boolean noTimeInformation(ArrayList<Cluster> candidates)
 	{
-		final int firstT = candidates.get(0).head.t;
-		for (Cluster c : candidates)
-			if (firstT != c.head.t)
-				return false;
+		useRange = checkForTimeRange(candidates);
+		final int firstT = candidates.get(0).head.start;
+		if (useRange)
+		{
+			final int lastT = candidates.get(0).head.end;
+			for (Cluster c : candidates)
+			{
+				if (firstT != c.head.start)
+					return false;
+				if (lastT != c.head.end)
+					return false;
+			}
+		}
+		else
+		{
+			for (Cluster c : candidates)
+			{
+				if (firstT != c.head.start)
+					return false;
+			}
+		}
+
 		return true;
+	}
+
+	/**
+	 * Check if any of the candidates have a different start and end time
+	 * 
+	 * @param candidates
+	 * @return
+	 */
+	private boolean checkForTimeRange(ArrayList<Cluster> candidates)
+	{
+		for (Cluster c : candidates)
+			if (c.head.start != c.head.end)
+				return true;
+		return false;
 	}
 
 	/**
@@ -2019,7 +2053,7 @@ public class ClusteringEngine
 								if (d2 <= r2)
 								{
 									// Check if the two clusters can be merged
-									if (gap == 0 && !c1.validUnion(c2))
+									if (gap == 0 && validUnion(c1, c2))
 										continue;
 
 									// This is within the time and distance thresholds.									
@@ -2047,6 +2081,21 @@ public class ClusteringEngine
 		if (pair1 != null)
 			return new ClosestPair(minD, minT, pair1, pair2);
 		return null;
+	}
+
+	/**
+	 * Check if the union of two clusters is valid
+	 * 
+	 * @param c1
+	 * @param c2
+	 * @return
+	 */
+	private boolean validUnion(TimeCluster c1, TimeCluster c2)
+	{
+		if (useRange)
+			return c1.validUnionRange(c2);
+		else
+			return c1.validUnion(c2);
 	}
 
 	/**
@@ -2122,7 +2171,7 @@ public class ClusteringEngine
 								if (d2 <= r2)
 								{
 									// Check if the two clusters can be merged
-									if (gap == 0 && !c1.validUnion(c2))
+									if (gap == 0 && validUnion(c1, c2))
 										continue;
 
 									// This is within the time and distance thresholds.									
@@ -2365,7 +2414,7 @@ public class ClusteringEngine
 								if (d2 <= r2)
 								{
 									// Check if the two clusters can be merged
-									if (gap == 0 && !c1.validUnion(c2))
+									if (gap == 0 && validUnion(c1, c2))
 										continue;
 
 									// This is within the time and distance thresholds.									
@@ -2467,7 +2516,7 @@ public class ClusteringEngine
 								if (d2 <= r2)
 								{
 									// Check if the two clusters can be merged
-									if (gap == 0 && !c1.validUnion(c2))
+									if (gap == 0 && validUnion(c1, c2))
 										continue;
 
 									// This is within the time and distance thresholds.									

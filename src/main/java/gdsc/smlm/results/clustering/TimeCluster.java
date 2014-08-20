@@ -23,7 +23,8 @@ public class TimeCluster extends Cluster
 	public TimeCluster(ClusterPoint point)
 	{
 		super(point);
-		start = end = point.t;
+		start = point.start;
+		end = point.end;
 	}
 
 	/**
@@ -45,7 +46,24 @@ public class TimeCluster extends Cluster
 	}
 
 	/**
-	 * Check if the union of the cluster points has unique time values.
+	 * Check if the union of the cluster points has unique time values using the gap between each cluster point.
+	 * <p>
+	 * This check is only relevant if the {@link #gap(TimeCluster)} function returns zero.
+	 * 
+	 * @param other
+	 * @return
+	 */
+	public boolean validUnionRange(TimeCluster other)
+	{
+		for (ClusterPoint p1 = head; p1 != null; p1 = p1.next)
+			for (ClusterPoint p2 = other.head; p2 != null; p2 = p2.next)
+				if (p1.gap(p2) == 0)
+					return false;
+		return true;
+	}
+
+	/**
+	 * Check if the union of the cluster points has unique time values using the start time of each cluster point.
 	 * <p>
 	 * This check is only relevant if the {@link #gap(TimeCluster)} function returns zero.
 	 * 
@@ -56,7 +74,7 @@ public class TimeCluster extends Cluster
 	{
 		for (ClusterPoint p1 = head; p1 != null; p1 = p1.next)
 			for (ClusterPoint p2 = other.head; p2 != null; p2 = p2.next)
-				if (p1.t == p2.t)
+				if (p1.start == p2.start)
 					return false;
 		return true;
 	}

@@ -54,8 +54,8 @@ public class ClusteringEngineTest
 		long t1 = runSpeedTest(points, ClusteringAlgorithm.Closest, radius);
 		long t2 = runSpeedTest(points, ClusteringAlgorithm.PairwiseWithoutNeighbours, radius);
 
-		System.out
-				.printf("SpeedTest Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2, (double) t1 / t2);
+		System.out.printf("SpeedTest (Low Density) Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2,
+				(double) t1 / t2);
 		Assert.assertTrue(t2 < t1);
 	}
 
@@ -71,8 +71,8 @@ public class ClusteringEngineTest
 		long t1 = runSpeedTest(points, ClusteringAlgorithm.Closest, radius);
 		long t2 = runSpeedTest(points, ClusteringAlgorithm.PairwiseWithoutNeighbours, radius);
 
-		System.out
-				.printf("SpeedTest Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2, (double) t1 / t2);
+		System.out.printf("SpeedTest (High Density) Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2,
+				(double) t1 / t2);
 		Assert.assertTrue(t1 < t2);
 	}
 
@@ -416,7 +416,7 @@ public class ClusteringEngineTest
 				for (int i = m; i-- > 0;)
 				{
 					points.add(ClusterPoint.newTimeClusterPoint(id++, x + rand.nextDouble() * radius,
-							y + rand.nextDouble() * radius, time[i]));
+							y + rand.nextDouble() * radius, time[i], time[i]));
 				}
 			}
 			else
