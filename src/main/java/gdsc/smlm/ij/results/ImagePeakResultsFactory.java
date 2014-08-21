@@ -32,12 +32,15 @@ public class ImagePeakResultsFactory
 	 * @param bounds
 	 *            Define the bounding rectangle of the result coordinates
 	 * @param nmPerPixel
-	 *            The image scale in nanometers per pixel
+	 *            The results scale in nanometers per pixel
+	 * @param gain
+	 *            The results gain
 	 * @param imageScale
 	 *            Define the scale of the image relative to the bounding rectangle
 	 * @param precision
 	 *            For average precision plots this parameter specifies the fixed width of the PSF (in nm).
-	 * 
+	 * @param mode
+	 *            The mode for showing consecutive results in the same pixel location
 	 * @return The PeakResults image
 	 */
 	public static IJImagePeakResults createPeakResultsImage(ResultsImage resultsImage, boolean weighted,
@@ -72,7 +75,7 @@ public class ImagePeakResultsFactory
 				image = new IJImagePeakResults(title, bounds, imageScale);
 		}
 		int flags = 0;
-
+		
 		switch (resultsImage)
 		{
 			case SIGNAL_INTENSITY:

@@ -253,6 +253,9 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	}
 
 	/**
+	 * Set the width of a fixed-width PSF. This is before scale adjustment so is provided in terms of the original
+	 * fitted data.
+	 * 
 	 * @param width
 	 *            the width to set for a fixed-width Gaussian
 	 */
