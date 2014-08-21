@@ -68,6 +68,18 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int, float, float, float)
+	 */
+	@Override
+	public void add(int peak, float x, float y, float v)
+	{
+		throw new RuntimeException(
+				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
