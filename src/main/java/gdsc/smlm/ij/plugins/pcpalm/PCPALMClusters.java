@@ -135,7 +135,6 @@ public class PCPALMClusters implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
-	@Override
 	public void run(String arg)
 	{
 		if (!showDialog())

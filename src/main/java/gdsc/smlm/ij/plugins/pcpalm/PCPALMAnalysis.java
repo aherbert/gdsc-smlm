@@ -228,7 +228,6 @@ public class PCPALMAnalysis implements PlugInFilter
 		{
 			File[] fileList = (new File(resultsDirectory)).listFiles(new FilenameFilter()
 			{
-				@Override
 				public boolean accept(File arg0, String arg1)
 				{
 					return arg1.endsWith("xml");

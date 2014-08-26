@@ -57,7 +57,6 @@ public class IJTrackProgress implements TrackProgress
 	 * 
 	 * @see gdsc.smlm.results.TrackProgress#status(java.lang.String, java.lang.Object[])
 	 */
-	@Override
 	public void status(String format, Object... args)
 	{
 		IJ.showStatus(String.format(format, args));
