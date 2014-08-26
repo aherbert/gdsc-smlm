@@ -13,6 +13,7 @@ package gdsc.smlm.ij.utils;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.utils.Sort;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Overlay;
@@ -96,7 +97,7 @@ public class ImageROIPainter implements MouseListener
 		int points = 0;
 		float[] x = new float[index2 - index + 1];
 		float[] y = new float[x.length];
-		int slice = 1;
+		int[] slice = new int[x.length];
 		while (index <= index2)
 		{
 			double[] position = coordProvider.getCoordinates(textPanel.getLine(index));
@@ -104,7 +105,7 @@ public class ImageROIPainter implements MouseListener
 			if (position == null || position.length < 3)
 				continue;
 
-			slice = (int) position[0];
+			slice[points] = (int) position[0];
 			x[points] = (float) position[1];
 			y[points] = (float) position[2];
 			points++;
@@ -114,7 +115,63 @@ public class ImageROIPainter implements MouseListener
 		if (points == 0)
 			return;
 
-		addRoi(imp, slice, new PointRoi(x, y, points));
+		// Simple code to add the ROI onto a single slice: addRoi(imp, slice[0], new PointRoi(x, y, points));
+
+		// Add the ROI to each relevant slice
+
+		// Sort the slices
+		int[] indices = new int[points];
+		for (int i = 0; i < points; i++)
+			indices[i] = i;
+
+		Sort.sort(indices, slice);
+
+		Overlay o = new Overlay();
+
+		// Create an ROI for each slice
+		int start = 0;
+		for (int i = 0; i < points; i++)
+		{
+			if (slice[indices[i]] != slice[indices[start]])
+			{
+				appendRoi(x, y, slice, indices, o, start, i);
+				start = i;
+			}
+		}
+		appendRoi(x, y, slice, indices, o, start, points);
+
+		// Choose the first slice and add the final overlay
+		imp.setSlice(slice[indices[start]]);
+		if (imp.getWindow() != null)
+			imp.getWindow().toFront();
+		o.setStrokeColor(Color.green);
+		imp.setOverlay(o);
+	}
+
+	/**
+	 * Adds a new ROI to the overlay using the coordinates from start to end (non-inclusive)
+	 * 
+	 * @param x
+	 * @param y
+	 * @param slice
+	 * @param indices
+	 * @param o
+	 * @param start
+	 * @param end
+	 */
+	private void appendRoi(float[] x, float[] y, int[] slice, int[] indices, Overlay o, int start, int end)
+	{
+		int p = end - start;
+		float[] x2 = new float[p];
+		float[] y2 = new float[p];
+		for (int j = start, ii = 0; j < end; j++, ii++)
+		{
+			x2[ii] = x[indices[start]];
+			y2[ii] = y[indices[start]];
+		}
+		PointRoi roi = new PointRoi(x2, y2, p);
+		roi.setPosition(slice[indices[start]]);
+		o.add(roi);
 	}
 
 	public static void addRoi(ImagePlus imp, int slice, PointRoi roi)
