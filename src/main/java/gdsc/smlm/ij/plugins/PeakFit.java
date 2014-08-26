@@ -1303,7 +1303,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
 				Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 			}
-			Parameters.isAboveZero("Image precision", resultsSettings.precision);
+			if (resultsSettings.getResultsImage() == ResultsImage.SIGNAL_AV_PRECISION ||
+					resultsSettings.getResultsImage() == ResultsImage.LOCALISATIONS_AV_PRECISION)
+			{
+				Parameters.isAboveZero("Image precision", resultsSettings.precision);
+			}
 			Parameters.isAboveZero("Image scale", resultsSettings.imageScale);
 			if (extraOptions)
 				Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
