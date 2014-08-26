@@ -385,7 +385,11 @@ public class ResultsManager implements PlugIn, MouseListener
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("Image precision", resultsSettings.precision);
+			if (resultsSettings.getResultsImage() == ResultsImage.SIGNAL_AV_PRECISION ||
+					resultsSettings.getResultsImage() == ResultsImage.LOCALISATIONS_AV_PRECISION)
+			{
+				Parameters.isAboveZero("Image precision", resultsSettings.precision);
+			}
 			Parameters.isAboveZero("Image scale", resultsSettings.imageScale);
 			Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
 		}
