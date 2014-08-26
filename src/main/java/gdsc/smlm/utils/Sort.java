@@ -28,6 +28,41 @@ public class Sort
 	 * @param values
 	 * @return The indices
 	 */
+	public static int[] sort(int[] indices, final int[] values)
+	{
+		// Convert data for sorting
+		int[][] data = new int[indices.length][2];
+		for (int i = indices.length; i-- > 0;)
+		{
+			data[i][0] = values[indices[i]];
+			data[i][1] = indices[i];
+		}
+
+		Arrays.sort(data, new Comparator<int[]>()
+		{
+			public int compare(int[] o1, int[] o2)
+			{
+				// Largest first
+				return o2[0] - o1[0];
+			}
+		});
+
+		// Copy back
+		for (int i = indices.length; i-- > 0;)
+		{
+			indices[i] = data[i][1];
+		}
+
+		return indices;
+	}
+	
+	/**
+	 * Sorts the indices in descending order of their values
+	 * 
+	 * @param indices
+	 * @param values
+	 * @return The indices
+	 */
 	public static int[] sort(int[] indices, final float[] values)
 	{
 		// Convert data for sorting
