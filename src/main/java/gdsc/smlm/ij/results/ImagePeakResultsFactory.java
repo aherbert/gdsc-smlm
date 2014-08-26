@@ -38,7 +38,8 @@ public class ImagePeakResultsFactory
 	 * @param imageScale
 	 *            Define the scale of the image relative to the bounding rectangle
 	 * @param precision
-	 *            For average precision plots this parameter specifies the fixed width of the PSF (in nm).
+	 *            For average precision plots this parameter specifies the fixed width of the PSF (in nm). 
+	 *            If less than zero then defaults to the nmPerPixel value.
 	 * @param mode
 	 *            The mode for showing consecutive results in the same pixel location
 	 * @return The PeakResults image
@@ -61,7 +62,7 @@ public class ImagePeakResultsFactory
 						resultsImage == ResultsImage.LOCALISATIONS_AV_PRECISION)
 				{
 					// Fixed width display (in pixels)
-					image2.setWidth((float) (precision / nmPerPixel));
+					image2.setWidth((float) (((precision <= 0) ? nmPerPixel : precision) / nmPerPixel));
 				}
 				else if (resultsImage == ResultsImage.SIGNAL_PRECISION ||
 						resultsImage == ResultsImage.LOCALISATIONS_PRECISION)
