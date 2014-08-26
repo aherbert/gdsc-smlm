@@ -1375,7 +1375,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 		}
 
-		return SettingsManager.saveSettings(settings, filename);
+		boolean result = SettingsManager.saveSettings(settings, filename);
+		if (!result)
+		{
+			IJ.error(TITLE, "Failed to save settings to file " + filename);
+		}
+		return result;
 	}
 
 	/**
