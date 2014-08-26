@@ -102,6 +102,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			IJ.error(TITLE, "Unknown original source image");
 			return;
 		}
+		source = source.getOriginal();
 		if (!source.open())
 		{
 			IJ.error(TITLE, "Cannot open original source image: " + source.toString());

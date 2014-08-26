@@ -182,11 +182,11 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 						Point p = resultsWindow.getLocation();
 						p.y += resultsWindow.getHeight();
 						pairsWindow.setLocation(p);
-						pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(), results1.getSource().getName(),
+						pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(), results1.getSource().getOriginal().getName(),
 								this);
 					}
 					pairsWindow.getTextPanel().clear();
-					pairPainter.setTitle(results1.getSource().getName());
+					pairPainter.setTitle(results1.getSource().getOriginal().getName());
 
 					// Add the unmatched points
 					for (Coordinate c : FN)
@@ -212,7 +212,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 								.getName(), this);
 					}
 					triplesWindow.getTextPanel().clear();
-					triplePainter.setTitle(results1.getSource().getName());
+					triplePainter.setTitle(results1.getSource().getOriginal().getName());
 
 					HashMap<Pulse, Triple> map = new HashMap<Pulse, Triple>();
 					ArrayList<Triple> triples = new ArrayList<Triple>(pairs.size());

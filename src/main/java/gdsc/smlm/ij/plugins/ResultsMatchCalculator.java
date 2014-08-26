@@ -264,7 +264,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 					pairPainter = new ImageROIPainter(pairsWindow.getTextPanel(), "", this);
 				}
 				pairsWindow.getTextPanel().clear();
-				pairPainter.setTitle(results1.getSource().getName());
+				pairPainter.setTitle(results1.getSource().getOriginal().getName());
 				for (PointPair pair : pairs)
 					addPairResult(pair);
 			}
