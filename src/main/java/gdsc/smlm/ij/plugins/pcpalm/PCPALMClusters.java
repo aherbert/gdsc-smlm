@@ -280,8 +280,8 @@ public class PCPALMClusters implements PlugIn
 			return null;
 		}
 
-		Utils.log("Using %d molecules (Density = %s um^-2)", molecules.size(),
-				Utils.rounded(molecules.size() / analysis.croppedArea));
+		Utils.log("Using %d molecules (Density = %s um^-2) @ %s nm", molecules.size(),
+				Utils.rounded(molecules.size() / analysis.croppedArea), Utils.rounded(distance));
 
 		long s1 = System.nanoTime();
 		ClusteringEngine engine = new ClusteringEngine(1, clusteringAlgorithm, new IJTrackProgress());
