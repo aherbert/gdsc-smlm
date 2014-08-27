@@ -842,10 +842,15 @@ public class PCPALMClusters implements PlugIn
 		int worse = 0;
 		int N = histogram.length - 1;
 		int min = minN;
-		if (maxN > 0 && N > maxN)
-			N = maxN;
+		boolean restricted = (minN > 1);
 		if (min > N)
 			min = N;
+		if (maxN > 0 && N > maxN)
+		{
+			N = maxN;
+			restricted = true;
+		}
+		Utils.log("Fitting N from %d to %d%s", min, N, (restricted) ? " (custom-range)" : "");
 
 		// Since varying the N should be done in integer steps do this
 		// for n=1,2,3,... until the SS peaks then falls off (is worse then the best 
