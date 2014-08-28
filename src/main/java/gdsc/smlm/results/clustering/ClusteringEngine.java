@@ -433,7 +433,7 @@ public class ClusteringEngine
 		}
 
 		tracker.progress(1);
-		threadPool = null;
+		shutdownMultithreading();
 
 		tracker.log("Found %d clusters", (clusters == null) ? 0 : clusters.size());
 
@@ -513,7 +513,8 @@ public class ClusteringEngine
 				singles);
 
 		tracker.progress(1);
-
+		shutdownMultithreading();
+		
 		tracker.log("Found %d clusters", (clusters == null) ? 0 : clusters.size());
 
 		return clusters;
@@ -639,6 +640,15 @@ public class ClusteringEngine
 		}
 	}
 
+	private void shutdownMultithreading()
+	{
+		if (threadPool != null)
+		{
+			threadPool.shutdownNow();
+			threadPool = null;
+		}
+	}
+	
 	private int countBlocks(int nXBins, int nYBins)
 	{
 		int nBlocks = 0;
