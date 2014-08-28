@@ -596,7 +596,7 @@ public class DriftCalculator implements PlugIn
 	 */
 	private double[][] calculateUsingMarkers(MemoryPeakResults results, int[] limits, Roi[] rois)
 	{
-		Spot[][] roiSpots = findSpots(results, rois);
+		Spot[][] roiSpots = findSpots(results, rois, limits);
 
 		// Check we have enough data
 		if (roiSpots.length == 0)
@@ -608,7 +608,7 @@ public class DriftCalculator implements PlugIn
 		double[] dx = new double[limits[1] + 1];
 		double[] dy = new double[dx.length];
 
-		double[] sum = new double[dx.length];
+		double[] sum = new double[roiSpots.length];
 		double[] weights = calculateWeights(roiSpots, dx.length, sum);
 
 		double smoothing = updateSmoothingParameter(weights);
@@ -648,7 +648,7 @@ public class DriftCalculator implements PlugIn
 	{
 		if (!limitSmoothing)
 			return smoothing;
-		
+
 		int n = countNonZeroValues(data);
 
 		int bandwidthInPoints = (int) (smoothing * n);
@@ -825,34 +825,38 @@ public class DriftCalculator implements PlugIn
 	 * 
 	 * @param results
 	 * @param rois
+	 * @param limits
 	 * @return
 	 */
-	private Spot[][] findSpots(MemoryPeakResults results, Roi[] rois)
+	private Spot[][] findSpots(MemoryPeakResults results, Roi[] rois, int[] limits)
 	{
 		ArrayList<Spot[]> roiSpots = new ArrayList<Spot[]>(rois.length);
 		for (int i = 0; i < rois.length; i++)
 		{
-			Spot[] spots = findSpots(results, rois[i].getBounds());
+			Spot[] spots = findSpots(results, rois[i].getBounds(), limits);
 			if (spots.length > 0)
 				roiSpots.add(spots);
 		}
 		return roiSpots.toArray(new Spot[roiSpots.size()][]);
 	}
 
-	private Spot[] findSpots(MemoryPeakResults results, Rectangle bounds)
+	private Spot[] findSpots(MemoryPeakResults results, Rectangle bounds, int[] limits)
 	{
-		ArrayList<Spot> list = new ArrayList<Spot>(100);
-		int maxx = bounds.x + bounds.width;
-		int maxy = bounds.y + bounds.height;
+		ArrayList<Spot> list = new ArrayList<Spot>(limits[1] - limits[0] + 1);
+		final float minx = bounds.x;
+		final float miny = bounds.y;
+		final float maxx = bounds.x + bounds.width;
+		final float maxy = bounds.y + bounds.height;
 
 		// Find spots within the ROI
 		for (PeakResult r : results)
 		{
-			float x = r.params[Gaussian2DFunction.X_POSITION];
-			float y = r.params[Gaussian2DFunction.Y_POSITION];
-			if (x > bounds.x && x < maxx && y > bounds.y && y < maxy)
+			final float x = r.params[Gaussian2DFunction.X_POSITION];
+			if (x > minx && x < maxx)
 			{
-				list.add(new Spot(r.peak, x, y, r.getSignal()));
+				final float y = r.params[Gaussian2DFunction.Y_POSITION];
+				if (y > miny && y < maxy)
+					list.add(new Spot(r.peak, x, y, r.getSignal()));
 			}
 		}
 
@@ -867,8 +871,8 @@ public class DriftCalculator implements PlugIn
 			if (currentT != spot.t)
 			{
 				newList.add(spot);
+				currentT = spot.t;
 			}
-			currentT = spot.t;
 		}
 
 		return newList.toArray(new Spot[newList.size()]);
