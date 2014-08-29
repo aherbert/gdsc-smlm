@@ -709,7 +709,7 @@ public class DriftCalculator implements PlugIn
 				Utils.rounded(totalDrift), Utils.rounded(change), Utils.rounded(error));
 		if (error < relativeError || change < 1e-16)
 			return true;
-		if (tracker.stop())
+		if (tracker.isEnded())
 		{
 			Utils.log("WARNING : Drift calculation was interrupted");
 			return true;

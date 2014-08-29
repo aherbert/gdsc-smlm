@@ -57,9 +57,9 @@ public class NullTrackProgress implements TrackProgress
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.TrackProgress#stop()
+	 * @see gdsc.smlm.results.TrackProgress#isEnded()
 	 */
-	public boolean stop()
+	public boolean isEnded()
 	{
 		return false;
 	}

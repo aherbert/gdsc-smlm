@@ -50,9 +50,11 @@ public interface TrackProgress
 	public void status(String format, Object... args);
 
 	/**
-	 * Return true if the processing of results is active
+	 * Return true if the tracker is ended and the processing of results should stop.
+	 * <p>
+	 * This method can be checked by long running algorithms allowing them to be interrupted.
 	 * 
-	 * @return
+	 * @return True if ended
 	 */
-	public boolean stop();
+	public boolean isEnded();
 }

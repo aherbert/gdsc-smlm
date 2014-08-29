@@ -542,7 +542,7 @@ public class ClusteringEngine
 		initialiseMultithreading(nXBins, nYBins);
 		while ((nProcessed = joinClosestParticle(grid, nXBins, nYBins, r2, minx, miny, clusterId)) > 0)
 		{
-			if (tracker.stop())
+			if (tracker.isEnded())
 				return null;
 			candidatesProcessed += nProcessed;
 			tracker.progress(candidatesProcessed, N);
@@ -995,7 +995,7 @@ public class ClusteringEngine
 	{
 		while (findLinks(grid, nXBins, nYBins, r2))
 		{
-			if (tracker.stop())
+			if (tracker.isEnded())
 				return null;
 
 			joinLinks(grid, nXBins, nYBins, candidates);
@@ -1154,7 +1154,7 @@ public class ClusteringEngine
 		ArrayList<Cluster> joined = new ArrayList<Cluster>();
 		while (findLinksAndCountNeighbours(grid, nXBins, nYBins, r2, singles))
 		{
-			if (tracker.stop())
+			if (tracker.isEnded())
 				return null;
 
 			int joins = joinLinks(grid, nXBins, nYBins, r2, candidates, joined);
@@ -1423,7 +1423,7 @@ public class ClusteringEngine
 		initialiseMultithreading(nXBins, nYBins);
 		while (joinClosest(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth, single))
 		{
-			if (tracker.stop())
+			if (tracker.isEnded())
 				return null;
 
 			// The number of candidates that have been processed is incremented by the number of singles
@@ -1857,7 +1857,7 @@ public class ClusteringEngine
 		while (joinClosestTimePriority(newGrid, nXBins, nYBins, r2, time, minx, miny, xBinWidth, yBinWidth, singles,
 				single))
 		{
-			if (tracker.stop())
+			if (tracker.isEnded())
 				return null;
 
 			// The number of candidates that have been processed is incremented by the number of singles
@@ -2242,7 +2242,7 @@ public class ClusteringEngine
 		while (joinClosestDistancePriority(newGrid, nXBins, nYBins, r2, time, minx, miny, xBinWidth, yBinWidth,
 				singles, single))
 		{
-			if (tracker.stop())
+			if (tracker.isEnded())
 				return null;
 
 			// The number of candidates that have been processed is incremented by the number of singles

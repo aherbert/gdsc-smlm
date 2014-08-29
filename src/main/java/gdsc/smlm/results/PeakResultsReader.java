@@ -542,7 +542,7 @@ public class PeakResultsReader
 		if (tracker != null)
 		{
 			tracker.progress(channel.position(), channel.size());
-			if (tracker.stop())
+			if (tracker.isEnded())
 				// Throw an IOException and it will be caught and ignored by all the file reading methods
 				throw new IOException("File read was cancelled");
 		}
