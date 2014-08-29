@@ -234,6 +234,46 @@ public class ClusteringEngine
 		}
 	}
 
+	/**
+	 * Use a runnable to allow multi-threaded operation. Input parameters
+	 * that are manipulated should have synchronized methods.
+	 */
+	private class FindLinksWorker implements Runnable
+	{
+		boolean links = false;
+		Cluster[][] grid;
+		int nXBins;
+		int nYBins;
+		double r2;
+		int startXBin;
+		int endXBin;
+		int startYBin;
+		int endYBin;
+
+		public FindLinksWorker(Cluster[][] grid, int nXBins, int nYBins, double r2, int startXBin, int endXBin,
+				int startYBin, int endYBin)
+		{
+			this.grid = grid;
+			this.nXBins = nXBins;
+			this.nYBins = nYBins;
+			this.r2 = r2;
+			this.startXBin = startXBin;
+			this.endXBin = endXBin;
+			this.startYBin = startYBin;
+			this.endYBin = endYBin;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			links = findLinksAndCountNeighbours(grid, nXBins, nYBins, r2, startXBin, endXBin, startYBin, endYBin);
+		}
+	}
+
 	private ExecutorService threadPool = null;
 	private int xBlock, yBlock;
 
@@ -514,7 +554,7 @@ public class ClusteringEngine
 
 		tracker.progress(1);
 		shutdownMultithreading();
-		
+
 		tracker.log("Found %d clusters", (clusters == null) ? 0 : clusters.size());
 
 		return clusters;
@@ -648,7 +688,7 @@ public class ClusteringEngine
 			threadPool = null;
 		}
 	}
-	
+
 	private int countBlocks(int nXBins, int nYBins)
 	{
 		int nBlocks = 0;
@@ -1148,6 +1188,10 @@ public class ClusteringEngine
 			final double r2, final double minx, final double miny, final double xBinWidth, final double yBinWidth,
 			ArrayList<Cluster> candidates, ArrayList<Cluster> singles)
 	{
+		// The find method is multi-threaded
+		// The remaining join and update of the grid is single threaded
+		initialiseMultithreading(nXBins, nYBins);
+
 		// Store if the clusters have any neighbours within sqrt(2)*r and remove them 
 		// from the next loop.
 		int N = candidates.size();
@@ -1157,7 +1201,7 @@ public class ClusteringEngine
 			if (tracker.isEnded())
 				return null;
 
-			int joins = joinLinks(grid, nXBins, nYBins, r2, candidates, joined);
+			int joins = joinLinks(grid, nXBins, nYBins, r2, candidates, joined, singles);
 			if (joins == 0)
 				break; // This should not happen
 
@@ -1238,14 +1282,65 @@ public class ClusteringEngine
 	private boolean findLinksAndCountNeighbours(Cluster[][] grid, final int nXBins, final int nYBins, final double r2,
 			ArrayList<Cluster> singles)
 	{
+		if (threadPool == null)
+		{
+			return findLinksAndCountNeighbours(grid, nXBins, nYBins, r2, 0, nXBins, 0, nYBins);
+		}
+		else
+		{
+			// Use threads to find the closest pairs in blocks
+			List<Future<?>> futures = new LinkedList<Future<?>>();
+			List<FindLinksWorker> results = new LinkedList<FindLinksWorker>();
+
+			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
+			{
+				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
+				{
+					int endXBin = Math.min(nXBins, startXBin + xBlock);
+
+					FindLinksWorker worker = new FindLinksWorker(grid, nXBins, nYBins, r2, startXBin, endXBin,
+							startYBin, endYBin);
+					results.add(worker);
+					futures.add(threadPool.submit(worker));
+				}
+			}
+
+			// Finish processing data
+			Utils.waitForCompletion(futures);
+			futures.clear();
+
+			for (FindLinksWorker worker : results)
+			{
+				if (worker.links)
+					return true;
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Search for potential links between clusters that are below the squared radius distance. Store if the clusters
+	 * have any neighbours within 2*r^2.
+	 * 
+	 * @param grid
+	 * @param nXBins
+	 * @param nYBins
+	 * @param r2
+	 *            The squared radius distance
+	 * @return True if any links were made
+	 */
+	private boolean findLinksAndCountNeighbours(Cluster[][] grid, final int nXBins, final int nYBins, final double r2,
+			int startXBin, int endXBin, int startYBin, int endYBin)
+	{
 		Cluster[] neighbours = new Cluster[5];
 		boolean linked = false;
 		final double neighbourDistance = 2 * r2;
-		for (int yBin = 0; yBin < nYBins; yBin++)
+
+		for (int yBin = startYBin; yBin < endYBin; yBin++)
 		{
-			for (int xBin = 0; xBin < nXBins; xBin++)
+			for (int xBin = startXBin; xBin < endXBin; xBin++)
 			{
-				Cluster previous = null;
 				for (Cluster c1 = grid[xBin][yBin]; c1 != null; c1 = c1.next)
 				{
 					// Build a list of which cells to compare up to a maximum of 5
@@ -1281,8 +1376,8 @@ public class ClusteringEngine
 							final double d2 = c1.distance2(c2);
 							if (d2 < neighbourDistance)
 							{
-								c1.neighbour++;
-								c2.neighbour++;
+								c1.incrementNeighbour();
+								c2.incrementNeighbour();
 								if (d2 < min)
 								{
 									min = d2;
@@ -1295,23 +1390,8 @@ public class ClusteringEngine
 					if (other != null)
 					{
 						// Store the potential link between the two clusters
-						c1.link(other, min);
+						c1.linkSynchronized(other, min);
 						linked = true;
-					}
-
-					// Check for singles
-					if (c1.neighbour == 0)
-					{
-						// Add singles to the singles list and remove from the grid
-						singles.add(c1);
-						if (previous == null)
-							grid[xBin][yBin] = c1.next;
-						else
-							previous.next = c1.next;
-					}
-					else
-					{
-						previous = c1;
 					}
 				}
 			}
@@ -1329,10 +1409,12 @@ public class ClusteringEngine
 	 * @param r2
 	 * @param candidates
 	 *            Re-populate will all the remaining clusters
+	 * @param singles
+	 *            Add any clusters with no neighbours
 	 * @return The number of joins that were made
 	 */
 	private int joinLinks(Cluster[][] grid, int nXBins, int nYBins, double r2, ArrayList<Cluster> candidates,
-			ArrayList<Cluster> joined)
+			ArrayList<Cluster> joined, ArrayList<Cluster> singles)
 	{
 		candidates.clear();
 		joined.clear();
@@ -1343,6 +1425,7 @@ public class ClusteringEngine
 		{
 			for (int xBin = 0; xBin < nXBins; xBin++)
 			{
+				Cluster previous = null;
 				for (Cluster c1 = grid[xBin][yBin]; c1 != null; c1 = c1.next)
 				{
 					int joinFlag = 0;
@@ -1367,11 +1450,26 @@ public class ClusteringEngine
 					// Reset the link candidates
 					c1.closest = null;
 
-					// Store all remaining clusters
-					if (c1.n != 0)
+					// Check for singles
+					if (c1.neighbour == 0)
 					{
-						candidates.add(c1);
-						c1.neighbour = joinFlag;
+						// Add singles to the singles list and remove from the grid
+						singles.add(c1);
+						if (previous == null)
+							grid[xBin][yBin] = c1.next;
+						else
+							previous.next = c1.next;
+					}
+					else
+					{
+						previous = c1;
+
+						// Store all remaining clusters
+						if (c1.n != 0)
+						{
+							candidates.add(c1);
+							c1.neighbour = joinFlag;
+						}
 					}
 				}
 			}

@@ -176,6 +176,18 @@ public class ClusteringEngineTest
 		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleTimePriority);
 	}
 
+	@Test
+	public void canMultithreadPairwiseWithoutNeighbours()
+	{
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.PairwiseWithoutNeighbours);
+	}
+
+	@Test
+	public void multithreadedPairwiseWithoutNeighboursIsFaster()
+	{
+		runMultithreadingSpeedTest(ClusteringAlgorithm.PairwiseWithoutNeighbours);
+	}
+
 	private void runMultithreadingAlgorithmTest(ClusteringAlgorithm algorithm)
 	{
 		double radius = 50;

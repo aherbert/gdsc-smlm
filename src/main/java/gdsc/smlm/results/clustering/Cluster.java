@@ -1,7 +1,5 @@
 package gdsc.smlm.results.clustering;
 
-import gdsc.smlm.utils.Maths;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -158,6 +156,31 @@ public class Cluster implements Comparable<Cluster>
 
 		this.closest = other;
 		this.d2 = d2;
+	}
+
+	/**
+	 * Increment the neighbour counter in a thread safe method
+	 */
+	public synchronized void incrementNeighbour()
+	{
+		neighbour++;
+	}
+	
+	/**
+	 * Link the two clusters as potential merge candidates only if the squared distance is smaller than the other
+	 * clusters current closest.
+	 * <p>
+	 * Thread safe.
+	 * 
+	 * @param other
+	 * @param d2
+	 */
+	public synchronized void linkSynchronized(Cluster other, double d2)
+	{
+		// The entire method should be synchronized since the other cluster d2 is checked. 
+		// This may be updated by another thread unless the updates only occur within a 
+		// synchronized block
+		link(other, d2);
 	}
 
 	/**
