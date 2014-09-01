@@ -39,12 +39,12 @@ public enum ClusteringAlgorithm
 	 * hierarchical centroid-linkage clustering where centroid are computed after each link step. For example if A joins
 	 * B and C joins D in a single step but the new centroid of AB is closer to C than D.
 	 */
-	PairwiseWithoutNeighbours,
+	Pairwise,
 	/**
-	 * A variant of PairwiseWithoutNeighbours is to join the closest pairs only if the number of neighbours for each is
+	 * A variant of Pairwise is to join the closest pairs only if the number of neighbours for each is
 	 * 1. In the event that no pairs has only a single neighbour then only the closest pair is joined.
 	 */
-	Pairwise,
+	PairwiseWithoutNeighbours,
 	/**
 	 * Hierarchical centroid-linkage clustering by joining the closest pair of clusters iteratively. Clusters are
 	 * compared using time and distance thresholds with priority on the closest time gap (within the distance
