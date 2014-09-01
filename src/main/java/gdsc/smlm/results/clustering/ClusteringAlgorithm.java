@@ -43,6 +43,9 @@ public enum ClusteringAlgorithm
 	/**
 	 * A variant of Pairwise is to join the closest pairs only if the number of neighbours for each is
 	 * 1. In the event that no pairs has only a single neighbour then only the closest pair is joined.
+	 * <p>
+	 * In dense images this will return the same results as the Closest algorithm but will be much slower. It may be
+	 * faster for sparse density due to the greedy nature of the algorithm.
 	 */
 	PairwiseWithoutNeighbours,
 	/**
