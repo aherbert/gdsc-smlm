@@ -176,16 +176,18 @@ public class TraceMolecules implements PlugIn
 			if (!showClusterDialog())
 				return;
 
+			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), settings.getClusteringAlgorithm(),
+					new IJTrackProgress());
+
 			if (settings.splitPulses)
 			{
+				engine.setPulseInterval(settings.pulseInterval);
 				if (timeInFrames(settings.timeThreshold) > settings.pulseInterval)
 				{
 					settings.timeThreshold = settings.pulseInterval * exposureTime;
 				}
 			}
 
-			ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), settings.getClusteringAlgorithm(),
-					new IJTrackProgress());
 			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(), settings.distanceThreshold /
 					results.getCalibration().nmPerPixel, timeInFrames(settings.timeThreshold));
 
