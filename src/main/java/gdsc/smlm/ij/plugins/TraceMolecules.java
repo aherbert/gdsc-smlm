@@ -789,8 +789,12 @@ public class TraceMolecules implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Distance threshold", settings.distanceThreshold);
-			Parameters.isAboveZero("Time threshold", settings.timeThreshold);
-			Parameters.isPositive("Pulse interval", settings.pulseInterval);
+			if (settings.getClusteringAlgorithm() == ClusteringAlgorithm.ClosestDistancePriority ||
+					settings.getClusteringAlgorithm() == ClusteringAlgorithm.ClosestTimePriority)
+			{
+				Parameters.isAboveZero("Time threshold", settings.timeThreshold);
+				Parameters.isPositive("Pulse interval", settings.pulseInterval);
+			}
 			Parameters.isAboveZero("Histogram bins", settings.histogramBins);
 		}
 		catch (IllegalArgumentException e)
