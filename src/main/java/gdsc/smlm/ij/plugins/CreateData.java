@@ -985,6 +985,14 @@ public class CreateData implements PlugIn, ItemListener
 				throw new RuntimeException("Unknown PSF settings for image: " + imp.getTitle());
 			PSFSettings psfSettings = (PSFSettings) o;
 
+			// Check all the settings have values
+			if (psfSettings.nmPerPixel <= 0)
+				throw new RuntimeException("Missing nmPerPixel calibration settings for image: " + imp.getTitle());
+			if (psfSettings.nmPerSlice <= 0)
+				throw new RuntimeException("Missing nmPerSlice calibration settings for image: " + imp.getTitle());
+			if (psfSettings.zCentre <= 0)
+				throw new RuntimeException("Missing zCentre calibration settings for image: " + imp.getTitle());
+
 			// To save memory construct the Image PSF using only the slices that are within 
 			// the depth of field of the simulation
 			double minZ = 0, maxZ = 0;
@@ -1755,7 +1763,7 @@ public class CreateData implements PlugIn, ItemListener
 		if (results != null && settings.densityRadius > 0)
 		{
 			IJ.showStatus("Calculating density ...");
-			lastT = results.getResults().get(results.getResults().size()-1).peak;
+			lastT = results.getResults().get(results.getResults().size() - 1).peak;
 			ArrayList<float[]> coords = new ArrayList<float[]>();
 			int t = results.getResults().get(0).peak;
 			final double gain = settings.getTotalGain();
@@ -1849,7 +1857,7 @@ public class CreateData implements PlugIn, ItemListener
 			yCoords[i] = xy[1];
 		}
 		DensityManager dm = new DensityManager(xCoords, yCoords, results.getBounds());
-		int[] density = dm.calculateDensity((float)(settings.densityRadius / settings.pixelPitch), true);
+		int[] density = dm.calculateDensity((float) (settings.densityRadius / settings.pixelPitch), true);
 		for (int i : density)
 			stats[DENSITY].add(i);
 	}
