@@ -577,7 +577,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private ImageStack createStack(ImageStack stack, int minz, int maxz, final int magnification)
 	{
 		// Pad box radius with an extra pixel border to allow offset insertion
-		final int w = (2 * (boxRadius + 1) + 1) * magnification;
+		final int w = ((2 * boxRadius + 1) + 2) * magnification;
 		final int d = maxz - minz + stack.getSize();
 		ImageStack psf = new ImageStack(w, w, d);
 		for (int i = 1; i <= d; i++)
@@ -641,10 +641,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		final int y = (int) centre[1];
 		final int z = (int) centre[2];
 
-		// Note that a perfect alignment to the centre of a pixel would be 0.5,0.5. 
-		// Subtract this from the centre to align to the pixel edge.
-		final int insertX = (int) (magnification + Math.round((centre[0] - 0.5 - x) * magnification) % magnification);
-		final int insertY = (int) (magnification + Math.round((centre[1] - 0.5 - y) * magnification) % magnification);
+		final int insertX = getInsert(centre[0], x, magnification);
+		final int insertY = getInsert(centre[1], y, magnification);
 
 		int insertZ = maxz - z + 1;
 		//Utils.log("Insert point = %.2f,%.2f => %d,%d\n", centre[0] - x, centre[1] - y, insertX, insertY);
@@ -669,6 +667,41 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			psf.getProcessor(insertZ++).copyBits(fp, insertX, insertY, Blitter.ADD);
 		}
 		return true;
+	}
+
+	/**
+	 * Calculate the insertion position so that the spot is added at exactly the centre of the PSF
+	 * 
+	 * @param coord
+	 *            The coordinate
+	 * @param iCoord
+	 *            The coordinate rounded down to an integer
+	 * @param magnification
+	 *            The magnification
+	 * @return The insert position
+	 */
+	private final int getInsert(final double coord, final int iCoord, final int magnification)
+	{
+		// Note that a perfect alignment to the centre of a pixel would be 0.5,0.5.
+		// Insert should align the image into the middle:
+		// Offset in pixel       Insert
+		// 0.0               =>  +0.5
+		// 0.1               =>  +0.4
+		// 0.2               =>  +0.3
+		// 0.3               =>  +0.2
+		// 0.4               =>  +0.1
+		// 0.5               =>  +0.0
+		// 0.6               =>  -0.1
+		// 0.7               =>  -0.2
+		// 0.8               =>  -0.3
+		// 0.9               =>  -0.4
+		// 1.0               =>  -0.5
+
+		// Off set should range from 0 to 1
+		final double offset = (coord - iCoord);
+		// Insert point is in the opposite direction from the offset (range from -0.5 to 0.5)
+		final double insert = -1 * (offset - 0.5);
+		return magnification + (int) Math.round(insert * magnification);
 	}
 
 	/**
@@ -892,6 +925,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange)
 	{
 		IJ.showStatus("Fitting final PSF");
+		// Update the box radius since this is used in the fitSpot method.
 		boxRadius = psf.getWidth() / 2;
 		int x = boxRadius, y = boxRadius;
 		FitConfiguration fitConfig = config.getFitConfiguration();
