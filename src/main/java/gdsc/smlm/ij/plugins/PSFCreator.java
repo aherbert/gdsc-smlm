@@ -30,6 +30,7 @@ import gdsc.smlm.results.match.BasePoint;
 import gdsc.smlm.utils.ImageExtractor;
 import gdsc.smlm.utils.ImageWindow;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.Sort;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 import gdsc.smlm.utils.XmlUtils;
@@ -38,6 +39,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
@@ -45,9 +47,11 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.Blitter;
+import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Point;
@@ -71,7 +75,7 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
  * The input image must be a z-stack of diffraction limited spots for example quantum dots or fluorescent beads. Spots
  * will be used only when there are no spots within a specified distance to ensure a clean signal is extracted.
  */
-public class PSFCreator implements PlugInFilter, ItemListener
+public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 {
 	private final static String TITLE = "PSF Creator";
 
@@ -81,7 +85,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private static int startBackgroundFrames = 5;
 	private static int endBackgroundFrames = 5;
 	private static int magnification = 10;
-	private static double smoothing = 0.5;
+	private static double smoothing = 0.25;
 	private static boolean interactiveMode = false;
 	private static int interpolationMethod = ImageProcessor.BICUBIC;
 
@@ -96,6 +100,17 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private ExecutorService threadPool = null;
 	private double progress = 0;
 
+	// Private variables that are used during background threaded plotting of the cumulative signal 
+	private int[] indexLookup = null;
+	private double[] distances = null;
+	private double maxy = 1;
+	private ImageStack psf = null;
+	private double psfNmPerPixel = 0;
+	private int slice = 0;
+	private boolean normalise = false;
+	private boolean resetScale = true;	
+	private boolean plotLock = false;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -412,8 +427,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 				imp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
 				centres.size(), Utils.rounded(avSd, 4), Utils.rounded(fittedSd, 4));
 
-		// TODO - Show a plot of the amount of signal within 3xSD for each z position. This indicates
-		// how much the PSF has spread from the original Gaussian shape.
+		plotSignalAtSpecifiedSD(psf, fittedSd, 3);
+
+		plotSignalInteractive(psf, maxz, nmPerPixel / magnification);
 
 		IJ.showStatus("");
 	}
@@ -1149,5 +1165,238 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		//maximumIndex = findMinimumIndex(smoothSd, maximumIndex - start);
 		return smoothSd[smoothCzIndex];
+	}
+
+	/**
+	 * Show a plot of the amount of signal within N x SD for each z position. This indicates
+	 * how much the PSF has spread from the original Gaussian shape.
+	 * 
+	 * @param psf
+	 *            The PSF
+	 * @param fittedSd
+	 *            The width of the PSF
+	 * @param factor
+	 *            The factor to use
+	 */
+	private void plotSignalAtSpecifiedSD(ImageStack psf, double fittedSd, double factor)
+	{
+		// Get the bounds
+		int radius = (int) Math.round(fittedSd * magnification * factor);
+		int min = psf.getWidth() / 2 - radius;
+		int max = psf.getWidth() / 2 + radius;
+
+		// Create a circle mask of the PSF projection
+		ByteProcessor circle = new ByteProcessor(max - min + 1, max - min + 1);
+		circle.setColor(255);
+		circle.fillOval(0, 0, circle.getWidth(), circle.getHeight());
+		final byte[] mask = (byte[]) circle.getPixels();
+
+		// Sum the pixels within the mask for each slice
+		double[] z = new double[psf.getSize()];
+		double[] signal = new double[psf.getSize()];
+		for (int i = 0; i < psf.getSize(); i++)
+		{
+			double sum = 0;
+			float[] data = (float[]) psf.getProcessor(i + 1).getPixels();
+			for (int y = min, ii = 0; y <= max; y++)
+			{
+				int index = y * psf.getWidth() + min;
+				for (int x = min; x <= max; x++, ii++, index++)
+				{
+					if (mask[ii] != 0)
+						sum += data[index];
+				}
+			}
+			double total = 0;
+			for (float f : data)
+				total += f;
+			z[i] = i + 1;
+			signal[i] = 100 * sum / total;
+		}
+
+		// Plot the sum
+		String title = String.format("%% PSF signal at %s x SD", Utils.rounded(factor, 3));
+		Plot plot = new Plot(title, "z", "Signal", z, signal);
+		Utils.display(title, plot);
+	}
+
+	private synchronized boolean aquirePlotLock()
+	{
+		if (plotLock)
+			return false;
+		return plotLock = true;
+	}
+
+	private void plotSignalInteractive(ImageStack psf, int maxz, double nmPerPixel)
+	{
+		this.psf = psf;
+		this.psfNmPerPixel = nmPerPixel;
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Plot the cumulative signal verses distance from the PSF centre (slice=" + maxz + ")");
+		gd.addSlider("Slice", 1, psf.getSize(), maxz);
+		gd.addCheckbox("Normalise", normalise);
+		gd.addDialogListener(this);
+		if (!IJ.isMacro())
+		{
+			plotSignal(psf, maxz, psfNmPerPixel, normalise, true);
+		}
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		updatePlot();
+	}
+
+	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+	{
+		slice = (int) gd.getNextNumber();
+		boolean myNormalise = gd.getNextBoolean();
+		resetScale = myNormalise != normalise;
+		normalise = myNormalise;
+		updatePlot();
+		return true;
+	}
+
+	private void updatePlot()
+	{
+		if (aquirePlotLock())
+		{
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						boolean parametersChanged = true;
+						while (parametersChanged)
+						{
+							// Store the parameters to be processed
+							double mySlice = slice;
+							boolean myNormalise = normalise;
+
+							// Do something with parameters
+							plotSignal(psf, slice, psfNmPerPixel, myNormalise, resetScale);
+
+							// Check if the parameters have changed again
+							parametersChanged = (mySlice != slice || myNormalise != normalise);
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock = false;
+					}
+				}
+			}).start();
+		}
+	}
+
+	/**
+	 * Show a plot of the cumulative signal vs distance from the centre
+	 * 
+	 * @param psf
+	 *            The PSF
+	 * @param z
+	 *            The slice to plot
+	 * @param nmPerPixel
+	 *            The nm/pixel for the PSF
+	 * @param normalise
+	 *            normalise the sum to 1
+	 */
+	private void plotSignal(ImageStack psf, int z, double nmPerPixel, boolean normalise, boolean resetScale)
+	{
+		float[] data = (float[]) psf.getProcessor(z).getPixels();
+		final int size = psf.getWidth();
+
+		if (indexLookup == null || indexLookup.length != data.length)
+		{
+			// Precompute square distances
+			double[] d2 = new double[size];
+			for (int y = 0, y2 = -size / 2; y < size; y++, y2++)
+				d2[y] = y2 * y2;
+
+			// Precompute distances
+			double[] d = new double[data.length];
+			for (int y = 0, i = 0; y < size; y++)
+			{
+				for (int x = 0; x < size; x++, i++)
+				{
+					d[i] = Math.sqrt(d2[y] + d2[x]);
+				}
+			}
+
+			// Sort
+			int[] indices = Utils.newArray(d.length, 0, 1);
+			Sort.sort(indices, d, true);
+
+			// The sort is made in descending order so invert
+			Sort.reverse(indices);
+			Sort.reverse(d);
+
+			// Store a unique cumulative index for each distance
+			double lastD = d[0];
+			int lastI = 0;
+			int counter = 0;
+			StoredDataStatistics distance = new StoredDataStatistics();
+			indexLookup = new int[indices.length];
+			for (int i = 0; i < indices.length; i++)
+			{
+				if (lastD != d[i])
+				{
+					distance.add(lastD * nmPerPixel);
+					for (int j = lastI; j < i; j++)
+					{
+						indexLookup[indices[j]] = counter;
+					}
+					lastD = d[i];
+					lastI = i;
+					counter++;
+				}
+			}
+			// Do the final distance
+			distance.add(lastD * nmPerPixel);
+			for (int j = lastI; j < indices.length; j++)
+			{
+				indexLookup[indices[j]] = counter;
+			}
+			counter++;
+
+			distances = distance.getValues();
+		}
+
+		// Get the signal at each distance
+		double[] signal = new double[distances.length];
+		for (int i = 0; i < data.length; i++)
+		{
+			signal[indexLookup[i]] += data[i];
+		}
+
+		// Get the cumulative signal
+		for (int i = 1; i < signal.length; i++)
+			signal[i] += signal[i - 1];
+
+		if (normalise)
+		{
+			final double total = signal[signal.length - 1];
+			for (int i = 0; i < signal.length; i++)
+				signal[i] /= total;
+		}
+		
+		if (resetScale)
+			maxy = 0;
+		
+		maxy = Maths.maxDefault(maxy, signal);
+		
+		String title = "Cumulative signal";
+		Plot plot = new Plot(title, "Distance (nm)", "Signal", distances, signal);
+		plot.setLimits(0, distances[distances.length-1], 0, maxy);
+		Utils.display(title, plot);
+
+		// Update the PSF to the correct slice
+		ImagePlus imp = WindowManager.getImage("PSF");
+		if (imp != null)
+			imp.setSlice(z);
 	}
 }
