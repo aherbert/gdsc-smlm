@@ -30,6 +30,19 @@ public class Sort
 	 */
 	public static int[] sort(int[] indices, final int[] values)
 	{
+		return sort(indices, values, false);
+	}
+	
+	/**
+	 * Sorts the indices in descending order of their values
+	 * 
+	 * @param indices
+	 * @param values
+	 * @param sortValues
+	 * @return The indices
+	 */
+	public static int[] sort(int[] indices, final int[] values, boolean sortValues)
+	{
 		// Convert data for sorting
 		int[][] data = new int[indices.length][2];
 		for (int i = indices.length; i-- > 0;)
@@ -52,6 +65,13 @@ public class Sort
 		{
 			indices[i] = data[i][1];
 		}
+		if (sortValues)
+		{
+			for (int i = indices.length; i-- > 0;)
+			{
+				values[i] = data[i][0];
+			}
+		}
 
 		return indices;
 	}
@@ -64,6 +84,19 @@ public class Sort
 	 * @return The indices
 	 */
 	public static int[] sort(int[] indices, final float[] values)
+	{
+		return sort(indices, values, false);
+	}	
+	
+	/**
+	 * Sorts the indices in descending order of their values
+	 * 
+	 * @param indices
+	 * @param values
+	 * @param sortValues
+	 * @return The indices
+	 */
+	public static int[] sort(int[] indices, final float[] values, boolean sortValues)
 	{
 		// Convert data for sorting
 		float[][] data = new float[indices.length][2];
@@ -91,6 +124,13 @@ public class Sort
 		{
 			indices[i] = (int) data[i][1];
 		}
+		if (sortValues)
+		{
+			for (int i = indices.length; i-- > 0;)
+			{
+				values[i] = data[i][0];
+			}
+		}
 
 		return indices;
 	}
@@ -103,6 +143,19 @@ public class Sort
 	 * @return The indices
 	 */
 	public static int[] sort(int[] indices, final double[] values)
+	{
+		return sort(indices, values, false);
+	}
+	
+	/**
+	 * Sorts the indices in descending order of their values
+	 * 
+	 * @param indices
+	 * @param values
+	 * @param sortValues
+	 * @return The indices
+	 */
+	public static int[] sort(int[] indices, final double[] values, boolean sortValues)
 	{
 		// Convert data for sorting
 		double[][] data = new double[indices.length][2];
@@ -129,6 +182,13 @@ public class Sort
 		for (int i = indices.length; i-- > 0;)
 		{
 			indices[i] = (int) data[i][1];
+		}
+		if (sortValues)
+		{
+			for (int i = indices.length; i-- > 0;)
+			{
+				values[i] = data[i][0];
+			}
 		}
 
 		return indices;
