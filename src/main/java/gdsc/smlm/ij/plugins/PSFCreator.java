@@ -57,7 +57,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 
@@ -88,6 +92,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private FitConfiguration fitConfig;
 	private int boxRadius;
 	private static Point yesNoPosition = null;
+
+	private ExecutorService threadPool = null;
+	private double progress = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -211,7 +218,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		Utils.log("Finding spot locations...");
 		Utils.log("  %d spot%s without neighbours within %dpx", spots.length, ((spots.length == 1) ? "" : "s"),
 				(boxRadius * 2));
-		Statistics averageSd = new Statistics();
+		StoredDataStatistics averageSd = new StoredDataStatistics();
+		StoredDataStatistics averageA = new StoredDataStatistics();
 		Statistics averageRange = new Statistics();
 		for (int n = 1; n <= spots.length; n++)
 		{
@@ -290,13 +298,17 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			// Since the amplitude is not very consistent move from this peak to the 
 			// lowest width which is the in-focus spot.
 			maximumIndex = findMinimumIndex(smoothSd, maximumIndex - start);
-			averageSd.add(smoothSd[maximumIndex]);
 
 			// Find the centre at the amplitude peak
 			double cx = smoothX[maximumIndex] + x;
 			double cy = smoothY[maximumIndex] + y;
 			int cz = (int) newZ[maximumIndex];
 			double csd = smoothSd[maximumIndex];
+			double ca = smoothA[maximumIndex + start];
+
+			// The average should weight the SD using the signal for each spot
+			averageSd.add(smoothSd[maximumIndex]);
+			averageA.add(ca);
 
 			if (ignoreSpot(n, z, a, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cx, cy, cz, csd))
 			{
@@ -305,7 +317,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			}
 
 			// Store result
-			Utils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f\n", n, cx, cy, cz, csd);
+			Utils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f\n", n, cx, cy, cz, csd, ca);
 			centres.add(new double[] { cx, cy, cz, csd });
 		}
 
@@ -366,14 +378,23 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 			// This takes a long time so this should track progress
 			ok = addToPSF(maxz, magnification, psf, centre, spot, regionBounds, progress, increment);
-
 		}
+
+		IJ.showProgress(1);
+		if (threadPool != null)
+		{
+			threadPool.shutdownNow();
+			threadPool = null;
+		}
+
 		if (!ok)
 			return;
 
 		Utils.log("  Average background = %.2f", stats.getMean());
 
-		normalise(psf, maxz, averageSd.getMean() * magnification);
+		final double avSd = getAverage(averageSd, averageA, 2);
+
+		normalise(psf, maxz, avSd * magnification);
 		IJ.showProgress(1);
 
 		ImagePlus imp = Utils.display("PSF", psf);
@@ -389,9 +410,42 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, Av. SD = %s px, PSF SD = %s px\n",
 				imp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
-				centres.size(), Utils.rounded(averageSd.getMean(), 4), Utils.rounded(fittedSd, 4));
+				centres.size(), Utils.rounded(avSd, 4), Utils.rounded(fittedSd, 4));
+
+		// TODO - Show a plot of the amount of signal within 3xSD for each z position. This indicates
+		// how much the PSF has spread from the original Gaussian shape.
 
 		IJ.showStatus("");
+	}
+
+	private double getAverage(StoredDataStatistics averageSd, StoredDataStatistics averageA, int averageMethod)
+	{
+		if (averageMethod == 0)
+			return averageSd.getMean();
+		double[] sd = averageSd.getValues();
+		double[] w = averageA.getValues();
+		double sum = 0, sumW = 0;
+
+		if (averageMethod == 1)
+		{
+			// Weighted average using Amplitude
+		}
+		else if (averageMethod == 2)
+		{
+			// Weighted average using signal
+			for (int i = 0; i < sd.length; i++)
+			{
+				w[i] *= sd[i] * sd[i];
+			}
+		}
+
+		for (int i = 0; i < sd.length; i++)
+		{
+			sum += sd[i] * w[i];
+			sumW += w[i];
+		}
+
+		return sum / sumW;
 	}
 
 	private MemoryPeakResults fitSpot(ImageStack stack, final int width, final int height, final int x, final int y)
@@ -633,40 +687,77 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 	}
 
-	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, double[] centre, float[][] spot,
-			Rectangle regionBounds, double progress, double increment)
+	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, double[] centre, final float[][] spot,
+			final Rectangle regionBounds, double progress, final double increment)
 	{
 		// Calculate insert point in enlargement
 		final int x = (int) centre[0];
 		final int y = (int) centre[1];
 		final int z = (int) centre[2];
 
-		final int insertX = getInsert(centre[0], x, magnification);
-		final int insertY = getInsert(centre[1], y, magnification);
+		final double insertX = getInsert(centre[0], x, magnification);
+		final double insertY = getInsert(centre[1], y, magnification);
 
 		int insertZ = maxz - z + 1;
-		//Utils.log("Insert point = %.2f,%.2f => %d,%d\n", centre[0] - x, centre[1] - y, insertX, insertY);
+		//Utils.log("Insert point = %.2f,%.2f => %.2f,%.2f\n", centre[0] - x, centre[1] - y, insertX, insertY);
+
+		// Copy the processor using a weighted image
+		final int lowerX = (int) insertX;
+		final int lowerY = (int) insertY;
+
+		final double wx2 = insertX - lowerX;
+		final double wx1 = 1 - wx2;
+		final double wy2 = insertY - lowerY;
+		final double wy1 = 1 - wy2;
 
 		// Enlargement size
 		final int dstWidth = regionBounds.width * magnification;
 		final int dstHeight = regionBounds.height * magnification;
 
+		// Multi-thread for speed
+		if (threadPool == null)
+			threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+
+		List<Future<?>> futures = new LinkedList<Future<?>>();
+
 		for (int i = 0; i < spot.length; i++)
 		{
-			progress += increment;
-			IJ.showProgress(progress);
+			final ImageProcessor ip = psf.getProcessor(insertZ++);
+			final float[] spotData = spot[i];
+
+			futures.add(threadPool.submit(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if (Utils.isInterrupted())
+						return;
+
+					incrementProgress(increment);
+
+					// Enlarge
+					FloatProcessor fp = new FloatProcessor(regionBounds.width, regionBounds.height, spotData, null);
+					fp.setInterpolationMethod(interpolationMethod);
+					fp = (FloatProcessor) fp.resize(dstWidth, dstHeight);
+
+					// Add to the combined PSF using the correct offset
+					//psf.getProcessor(insertZ++).copyBits(fp, (int) Math.round(insertX), (int) Math.round(insertY), Blitter.ADD);
+
+					// Add to the combined PSF using the correct offset
+					copyBits(ip, fp, lowerX, lowerY, wx1 * wy1);
+					copyBits(ip, fp, lowerX + 1, lowerY, wx2 * wy1);
+					copyBits(ip, fp, lowerX, lowerY + 1, wx1 * wy2);
+					copyBits(ip, fp, lowerX + 1, lowerY + 1, wx2 * wy2);
+				}
+			}));
+
 			if (Utils.isInterrupted())
-				return false;
-
-			// Enlarge
-			FloatProcessor fp = new FloatProcessor(regionBounds.width, regionBounds.height, spot[i], null);
-			fp.setInterpolationMethod(interpolationMethod);
-			fp = (FloatProcessor) fp.resize(dstWidth, dstHeight);
-
-			// Add to the combined PSF using the correct offset
-			psf.getProcessor(insertZ++).copyBits(fp, insertX, insertY, Blitter.ADD);
+				break;
 		}
-		return true;
+
+		Utils.waitForCompletion(futures);
+
+		return !Utils.isInterrupted();
 	}
 
 	/**
@@ -680,7 +771,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 *            The magnification
 	 * @return The insert position
 	 */
-	private final int getInsert(final double coord, final int iCoord, final int magnification)
+	private final double getInsert(final double coord, final int iCoord, final int magnification)
 	{
 		// Note that a perfect alignment to the centre of a pixel would be 0.5,0.5.
 		// Insert should align the image into the middle:
@@ -701,7 +792,24 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		final double offset = (coord - iCoord);
 		// Insert point is in the opposite direction from the offset (range from -0.5 to 0.5)
 		final double insert = -1 * (offset - 0.5);
-		return magnification + (int) Math.round(insert * magnification);
+		//return magnification + (int) Math.round(insert * magnification);
+		return magnification + (insert * magnification);
+	}
+
+	private synchronized void incrementProgress(final double increment)
+	{
+		progress += increment;
+		IJ.showProgress(progress);
+	}
+
+	private void copyBits(ImageProcessor ip, FloatProcessor fp, int lowerX, int lowerY, double weight)
+	{
+		if (weight > 0)
+		{
+			fp = (FloatProcessor) fp.duplicate();
+			fp.multiply(weight);
+			ip.copyBits(fp, lowerX, lowerY, Blitter.ADD);
+		}
 	}
 
 	/**
