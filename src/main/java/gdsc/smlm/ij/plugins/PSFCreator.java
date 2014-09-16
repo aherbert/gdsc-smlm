@@ -93,7 +93,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	private static int interpolationMethod = ImageProcessor.BICUBIC;
 
 	private int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-	private ImagePlus imp;
+	private ImagePlus imp, psfImp;
 	private double nmPerPixel;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
@@ -104,17 +104,25 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	private double progress = 0;
 
 	// Private variables that are used during background threaded plotting of the cumulative signal 
+	private double[] z = null;
+	private double[] signal = null;
+	private String signalTitle = null;
+	private double[] signalLimits = null;
 	private int[] indexLookup = null;
 	private double[] distances = null;
 	private double maxy = 1;
 	private ImageStack psf = null;
 	private int zCentre = 0;
+	private double psfWidth = 0;
 	private double psfNmPerPixel = 0;
 	private int slice = 0;
 	private double distanceThreshold = 0;
 	private boolean normalise = false;
 	private boolean resetScale = true;
-	private boolean plotLock = false;
+	private boolean plotLock1 = false;
+	private boolean plotLock2 = false;
+	private boolean plotLock3 = false;
+	private boolean plotLock4 = false;
 
 	/*
 	 * (non-Javadoc)
@@ -416,24 +424,22 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		normalise(psf, maxz, avSd * magnification);
 		IJ.showProgress(1);
 
-		ImagePlus imp = Utils.display("PSF", psf);
-		imp.setSlice(maxz);
-		imp.resetDisplayRange();
-		imp.updateAndDraw();
+		psfImp = Utils.display("PSF", psf);
+		psfImp.setSlice(maxz);
+		psfImp.resetDisplayRange();
+		psfImp.updateAndDraw();
 
 		double fittedSd = fitPSF(psf, loess, maxz, averageRange.getMean());
 
 		// Add Image properties containing the PSF details
-		imp.setProperty("Info",
+		psfImp.setProperty("Info",
 				XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, centres.size())));
 
-		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm\n", imp.getTitle(),
+		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm\n", psfImp.getTitle(),
 				maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3), centres.size(),
 				Utils.rounded(fittedSd * nmPerPixel, 4));
 
-		plotSignalAtSpecifiedSD(psf, fittedSd, 3);
-
-		plotSignalInteractive(psf, maxz, nmPerPixel / magnification, fittedSd * nmPerPixel);
+		createInteractivePlots(psf, maxz, nmPerPixel / magnification, fittedSd * nmPerPixel);
 
 		IJ.showStatus("");
 	}
@@ -1169,6 +1175,127 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		return smoothSd[smoothCzIndex];
 	}
 
+	private PlotWindow getPlot(String title)
+	{
+		Frame f = WindowManager.getFrame(TITLE_AMPLITUDE);
+		if (f != null && f instanceof PlotWindow)
+			return (PlotWindow) f;
+		return null;
+	}
+
+	private synchronized boolean aquirePlotLock1()
+	{
+		if (plotLock1)
+			return false;
+		return plotLock1 = true;
+	}
+
+	private synchronized boolean aquirePlotLock2()
+	{
+		if (plotLock2)
+			return false;
+		return plotLock2 = true;
+	}
+
+	private synchronized boolean aquirePlotLock3()
+	{
+		if (plotLock3)
+			return false;
+		return plotLock3 = true;
+	}
+
+	private synchronized boolean aquirePlotLock4()
+	{
+		if (plotLock4)
+			return false;
+		return plotLock4 = true;
+	}
+
+	private void createInteractivePlots(ImageStack psf, int zCentre, double nmPerPixel, double psfWidth)
+	{
+		this.psf = psf;
+		this.zCentre = zCentre;
+		this.psfNmPerPixel = nmPerPixel;
+		this.psfWidth = psfWidth;
+
+		this.slice = zCentre;
+		this.distanceThreshold = psfWidth * 3;
+
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Plot the cumulative signal verses distance from the PSF centre.\n \nZ-centre = " + zCentre +
+				"\nPSF width = " + Utils.rounded(psfWidth) + " nm");
+		gd.addSlider("Slice", 1, psf.getSize(), slice);
+		final double maxDistance = (psf.getWidth() / 1.414213562) * nmPerPixel;
+		gd.addSlider("Distance", 0, maxDistance, distanceThreshold);
+		gd.addCheckbox("Normalise", normalise);
+		gd.addDialogListener(this);
+		if (!IJ.isMacro())
+			drawPlots();
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		drawPlots();
+	}
+
+	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+	{
+		slice = (int) gd.getNextNumber();
+
+		double myDistanceThreshold = gd.getNextNumber();
+		resetScale = resetScale || (myDistanceThreshold != distanceThreshold);
+		distanceThreshold = myDistanceThreshold;
+
+		boolean myNormalise = gd.getNextBoolean();
+		resetScale = resetScale || (myNormalise != normalise);
+		normalise = myNormalise;
+
+		drawPlots();
+		return true;
+	}
+
+	private void drawPlots()
+	{
+		updateSignalAtSpecifiedSDPlot();
+		updateCumulativeSignalPlot();
+	}
+
+	private void updateSignalAtSpecifiedSDPlot()
+	{
+		if (aquirePlotLock3())
+		{
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						boolean parametersChanged = true;
+						while (parametersChanged)
+						{
+							// Store the parameters to be processed
+							int mySlice = slice;
+
+							// Do something with parameters
+							plotSignalAtSpecifiedSD(psf, psfWidth / psfNmPerPixel, 3, mySlice);
+
+							// Check if the parameters have changed again
+							parametersChanged = (mySlice != slice);
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock3 = false;
+					}
+				}
+			}).start();
+		}
+	}
+
+
 	/**
 	 * Show a plot of the amount of signal within N x SD for each z position. This indicates
 	 * how much the PSF has spread from the original Gaussian shape.
@@ -1176,53 +1303,68 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	 * @param psf
 	 *            The PSF
 	 * @param fittedSd
-	 *            The width of the PSF
+	 *            The width of the PSF (in pixels)
 	 * @param factor
 	 *            The factor to use
+	 * @param slice
+	 *            The slice used to create the label
 	 */
-	private void plotSignalAtSpecifiedSD(ImageStack psf, double fittedSd, double factor)
+	private void plotSignalAtSpecifiedSD(ImageStack psf, double fittedSd, double factor, int slice)
 	{
-		// Get the bounds
-		int radius = (int) Math.round(fittedSd * magnification * factor);
-		int min = psf.getWidth() / 2 - radius;
-		int max = psf.getWidth() / 2 + radius;
-
-		// Create a circle mask of the PSF projection
-		ByteProcessor circle = new ByteProcessor(max - min + 1, max - min + 1);
-		circle.setColor(255);
-		circle.fillOval(0, 0, circle.getWidth(), circle.getHeight());
-		final byte[] mask = (byte[]) circle.getPixels();
-
-		// Sum the pixels within the mask for each slice
-		double[] z = new double[psf.getSize()];
-		double[] signal = new double[psf.getSize()];
-		for (int i = 0; i < psf.getSize(); i++)
+		if (z == null)
 		{
-			double sum = 0;
-			float[] data = (float[]) psf.getProcessor(i + 1).getPixels();
-			for (int y = min, ii = 0; y <= max; y++)
+			// Get the bounds
+			int radius = (int) Math.round(fittedSd * factor);
+			int min = psf.getWidth() / 2 - radius;
+			int max = psf.getWidth() / 2 + radius;
+
+			// Create a circle mask of the PSF projection
+			ByteProcessor circle = new ByteProcessor(max - min + 1, max - min + 1);
+			circle.setColor(255);
+			circle.fillOval(0, 0, circle.getWidth(), circle.getHeight());
+			final byte[] mask = (byte[]) circle.getPixels();
+
+			// Sum the pixels within the mask for each slice
+			z = new double[psf.getSize()];
+			signal = new double[psf.getSize()];
+			for (int i = 0; i < psf.getSize(); i++)
 			{
-				int index = y * psf.getWidth() + min;
-				for (int x = min; x <= max; x++, ii++, index++)
+				double sum = 0;
+				float[] data = (float[]) psf.getProcessor(i + 1).getPixels();
+				for (int y = min, ii = 0; y <= max; y++)
 				{
-					if (mask[ii] != 0)
-						sum += data[index];
+					int index = y * psf.getWidth() + min;
+					for (int x = min; x <= max; x++, ii++, index++)
+					{
+						if (mask[ii] != 0)
+							sum += data[index];
+					}
 				}
+				double total = 0;
+				for (float f : data)
+					total += f;
+				z[i] = i + 1;
+				signal[i] = 100 * sum / total;
 			}
-			double total = 0;
-			for (float f : data)
-				total += f;
-			z[i] = i + 1;
-			signal[i] = 100 * sum / total;
+			
+			signalTitle = String.format("%% PSF signal at %s x SD", Utils.rounded(factor, 3));
+			signalLimits = Maths.limits(signal);
 		}
 
 		// Plot the sum
-		String title = String.format("%% PSF signal at %s x SD", Utils.rounded(factor, 3));
+		boolean alignWindows = (WindowManager.getFrame(signalTitle) == null);
 
-		boolean alignWindows = (WindowManager.getFrame(title) == null);
-
-		Plot plot = new Plot(title, "z", "Signal", z, signal);
-		PlotWindow plotWindow = Utils.display(title, plot);
+		final double total = signal[slice - 1];
+		Plot plot = new Plot(signalTitle, "z", "Signal", z, signal);
+		plot.addLabel(
+				0,
+				0,
+				String.format("Total = %s. z = %s nm", Utils.rounded(total),
+						Utils.rounded((slice - zCentre) * nmPerSlice)));
+		plot.setColor(Color.green);
+		plot.drawLine(slice, signalLimits[0], slice, signalLimits[1]);
+		plot.setColor(Color.blue);
+		PlotWindow plotWindow = Utils.display(signalTitle, plot);
 
 		if (alignWindows && plotWindow != null)
 		{
@@ -1240,65 +1382,10 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			}
 		}
 	}
-
-	private PlotWindow getPlot(String title)
+	
+	private void updateCumulativeSignalPlot()
 	{
-		Frame f = WindowManager.getFrame(TITLE_AMPLITUDE);
-		if (f != null && f instanceof PlotWindow)
-			return (PlotWindow) f;
-		return null;
-	}
-
-	private synchronized boolean aquirePlotLock()
-	{
-		if (plotLock)
-			return false;
-		return plotLock = true;
-	}
-
-	private void plotSignalInteractive(ImageStack psf, int zCentre, double nmPerPixel, double psfWidth)
-	{
-		this.psf = psf;
-		this.zCentre = zCentre;
-		this.psfNmPerPixel = nmPerPixel;
-		this.distanceThreshold = psfWidth * 3;
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Plot the cumulative signal verses distance from the PSF centre.\n \nZ-centre = " + zCentre +
-				"\nPSF width = " + Utils.rounded(psfWidth) + " nm");
-		gd.addSlider("Slice", 1, psf.getSize(), zCentre);
-		final double maxDistance = (psf.getWidth() / 1.414213562) * nmPerPixel;
-		gd.addSlider("Distance", 0, maxDistance, distanceThreshold);
-		gd.addCheckbox("Normalise", normalise);
-		gd.addDialogListener(this);
-		if (!IJ.isMacro())
-		{
-			plotSignal(zCentre, normalise, true, distanceThreshold);
-		}
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return;
-		updatePlot();
-	}
-
-	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
-	{
-		slice = (int) gd.getNextNumber();
-
-		double myDistanceThreshold = gd.getNextNumber();
-		resetScale = resetScale || (myDistanceThreshold != distanceThreshold);
-		distanceThreshold = myDistanceThreshold;
-
-		boolean myNormalise = gd.getNextBoolean();
-		resetScale = resetScale || (myNormalise != normalise);
-		normalise = myNormalise;
-
-		updatePlot();
-		return true;
-	}
-
-	private void updatePlot()
-	{
-		if (aquirePlotLock())
+		if (aquirePlotLock4())
 		{
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
@@ -1321,7 +1408,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 							resetScale = false;
 
 							// Do something with parameters
-							plotSignal(mySlice, myNormalise, myResetScale, myDistanceThreshold);
+							plotCumulativeSignal(mySlice, myNormalise, myResetScale, myDistanceThreshold);
 
 							// Check if the parameters have changed again
 							parametersChanged = (mySlice != slice || resetScale || myNormalise != normalise || myDistanceThreshold != distanceThreshold);
@@ -1330,7 +1417,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 					finally
 					{
 						// Ensure the running flag is reset
-						plotLock = false;
+						plotLock4 = false;
 					}
 				}
 			}).start();
@@ -1349,7 +1436,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	 * @param distanceThreshold
 	 *            The distance threshold for the cumulative total shown in the plot label
 	 */
-	private void plotSignal(int z, boolean normalise, boolean resetScale, double distanceThreshold)
+	private void plotCumulativeSignal(int z, boolean normalise, boolean resetScale, double distanceThreshold)
 	{
 		float[] data = (float[]) psf.getProcessor(z).getPixels();
 		final int size = psf.getWidth();
@@ -1449,9 +1536,9 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		plot.setLimits(0, distances[distances.length - 1], 0, maxy);
 		plot.addLabel(0, 0, String.format("Total = %s (@ %s nm). z = %s nm", Utils.rounded(sum),
 				Utils.rounded(distanceThreshold), Utils.rounded((z - zCentre) * nmPerSlice)));
-		plot.setColor(Color.blue);
+		plot.setColor(Color.green);
 		plot.drawLine(distanceThreshold, 0, distanceThreshold, maxy);
-		plot.setColor(Color.red);
+		plot.setColor(Color.blue);
 		PlotWindow plotWindow = Utils.display(title, plot);
 
 		if (alignWindows && plotWindow != null)
@@ -1468,8 +1555,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		}
 
 		// Update the PSF to the correct slice
-		ImagePlus imp = WindowManager.getImage("PSF");
-		if (imp != null)
-			imp.setSlice(z);
+		if (psfImp != null)
+			psfImp.setSlice(z);
 	}
 }
