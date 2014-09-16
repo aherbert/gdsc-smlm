@@ -22,6 +22,11 @@ import org.apache.commons.math3.random.RandomGenerator;
  * <p>
  * The input image must be square. The X/Y centre is the middle of the square. The stack can have any number of slices.
  * The z-centre must be identified. Any pixels below zero will be set to zero.
+ * <p>
+ * The model can be used to draw a PSF for a point on an image. If the z coordinate is positive then the PSF image from
+ * a negative index (below the z-centre) is used. If the z-coordinate is negative then the PSF image from a positive
+ * index (above the z-centre) is used. I.e. the input stack is assumed to be imaged axially with increasing z-stage
+ * position moving the stage closer to the objective.
  */
 public class ImagePSFModel extends PSFModel
 {
@@ -334,8 +339,10 @@ public class ImagePSFModel extends PSFModel
 	{
 		double[] data = new double[x0range * x1range];
 
-		// Determine the slice of the PSF
-		final int slice = (int) Math.round(x2 / unitsPerSlice) + zCentre;
+		// Determine the slice of the PSF.
+		// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
+		// closer to the objective). Thus we invert the z-coordinate to find the appropriate slice.
+		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
 		if (slice < 0 || slice >= sumImage.length)
 			return data;
 		final double[] sumPsf = sumImage[slice];
