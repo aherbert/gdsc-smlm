@@ -1392,6 +1392,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		String title = "Cumulative signal";
 		Plot plot = new Plot(title, "Distance (nm)", "Signal", distances, signal);
 		plot.setLimits(0, distances[distances.length-1], 0, maxy);
+		plot.addLabel(0, 0, "Total = " + Utils.rounded(signal[signal.length - 1]));
 		Utils.display(title, plot);
 
 		// Update the PSF to the correct slice
