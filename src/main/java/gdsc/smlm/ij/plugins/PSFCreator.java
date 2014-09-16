@@ -104,21 +104,41 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	private double progress = 0;
 
 	// Private variables that are used during background threaded plotting of the cumulative signal 
-	private double[] z = null;
-	private double[] signal = null;
-	private String signalTitle = null;
-	private double[] signalLimits = null;
-	private int[] indexLookup = null;
-	private double[] distances = null;
-	private double maxy = 1;
 	private ImageStack psf = null;
 	private int zCentre = 0;
 	private double psfWidth = 0;
 	private double psfNmPerPixel = 0;
+
+	// Amplitude plot
+	private double[] z = null;
+	private double[] a;
+	private double[] smoothAz;
+	private double[] smoothA;
+
+	// PSF plot
+	private double[] xCoord = null;
+	private double[] yCoord;
+	private double[] sd;
+	private double[] newZ;
+	private double[] smoothX;
+	private double[] smoothY;
+	private double[] smoothSd;
+
+	// % PSF Signal plot
+	private double[] signalZ = null;
+	private double[] signal = null;
+	private String signalTitle = null;
+	private double[] signalLimits = null;
+
+	// Cumulative signal plot
+	private int[] indexLookup = null;
+	private double[] distances = null;
+	private double maxy = 1;
 	private int slice = 0;
 	private double distanceThreshold = 0;
 	private boolean normalise = false;
 	private boolean resetScale = true;
+
 	private boolean plotLock1 = false;
 	private boolean plotLock2 = false;
 	private boolean plotLock3 = false;
@@ -595,52 +615,96 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			final double[] xCoord, final double[] yCoord, final double[] sd, final double[] newZ,
 			final double[] smoothX, final double[] smoothY, double[] smoothSd, final int cz)
 	{
+		PlotWindow amplitudeWindow = null;
+
 		// Draw a plot of the amplitude
-		Plot plot2 = new Plot(TITLE_AMPLITUDE, "z", "Amplitude", smoothAz, smoothA);
-		double[] limits2 = Maths.limits(Maths.limits(a, smoothA));
-		plot2.setLimits(z[0], z[z.length - 1], limits2[0], limits2[1]);
-		plot2.addPoints(z, a, Plot.CIRCLE);
+		if (a != null)
+		{
+			Plot plot = new Plot(TITLE_AMPLITUDE, "z", "Amplitude", smoothAz, smoothA);
+			double[] limits2 = Maths.limits(Maths.limits(a), smoothA);
+			plot.setLimits(z[0], z[z.length - 1], limits2[0], limits2[1]);
+			plot.addPoints(z, a, Plot.CIRCLE);
 
-		// Add a line for the z-centre
-		plot2.setColor(Color.GREEN);
-		plot2.addPoints(new double[] { cz, cz }, limits2, Plot.LINE);
-		plot2.setColor(Color.BLACK);
+			// Add a line for the z-centre
+			plot.setColor(Color.GREEN);
+			plot.addPoints(new double[] { cz, cz }, limits2, Plot.LINE);
+			plot.setColor(Color.BLACK);
 
-		PlotWindow amplitudeWindow = Utils.display(TITLE_AMPLITUDE, plot2);
+			double amplitude = Double.NaN;
+			for (int i = 0; i < smoothAz.length; i++)
+			{
+				if (smoothAz[i] == cz)
+				{
+					amplitude = smoothA[i];
+					break;
+				}
+			}
+			double maxAmplitude = Double.NaN;
+			for (int i = 0; i < smoothAz.length; i++)
+			{
+				if (smoothAz[i] == zCentre)
+				{
+					maxAmplitude = smoothA[i];
+					break;
+				}
+			}
+			plot.addLabel(
+					0,
+					0,
+					String.format("Amplitude = %s (%sx). z = %s nm", Utils.rounded(amplitude),
+							Utils.rounded(amplitude / maxAmplitude), Utils.rounded((slice - zCentre) * nmPerSlice)));
+
+			amplitudeWindow = Utils.display(TITLE_AMPLITUDE, plot);
+		}
 
 		// Show plot of width, X centre, Y centre
-		Plot plot = new Plot(TITLE_PSF_PARAMETERS, "z", "px", newZ, smoothSd);
-		// Get the limits
-		double[] sd2 = invert(sd);
-		double[] limits = Maths.limits(Maths.limits(Maths.limits(Maths.limits(xCoord), yCoord), sd), sd2);
-		plot.setLimits(z[0], z[z.length - 1], limits[0], limits[1]);
-		plot.addPoints(newZ, invert(smoothSd), Plot.LINE);
-		plot.addPoints(z, sd, Plot.DOT);
-		plot.addPoints(z, sd2, Plot.DOT);
-		plot.setColor(Color.BLUE);
-		plot.addPoints(z, xCoord, Plot.DOT);
-		plot.addPoints(newZ, smoothX, Plot.LINE);
-		plot.setColor(Color.RED);
-		plot.addPoints(z, yCoord, Plot.DOT);
-		plot.addPoints(newZ, smoothY, Plot.LINE);
-
-		// Add a line for the z-centre
-		plot.setColor(Color.GREEN);
-		plot.addPoints(new double[] { cz, cz }, limits, Plot.LINE);
-		plot.setColor(Color.BLACK);
-
-		// Check if the window will need to be aligned
-		boolean alignWindows = (WindowManager.getFrame(TITLE_PSF_PARAMETERS) == null);
-
-		PlotWindow psfWindow = Utils.display(TITLE_PSF_PARAMETERS, plot);
-
-		if (alignWindows && psfWindow != null && amplitudeWindow != null)
+		if (xCoord != null)
 		{
-			// Put the two plots tiled together so both are visible
-			Point l = psfWindow.getLocation();
-			l.x = amplitudeWindow.getLocation().x;
-			l.y = amplitudeWindow.getLocation().y + amplitudeWindow.getHeight();
-			psfWindow.setLocation(l);
+			Plot plot = new Plot(TITLE_PSF_PARAMETERS, "z", "px", newZ, smoothSd);
+			// Get the limits
+			double[] sd2 = invert(sd);
+			double[] limits = Maths.limits(Maths.limits(Maths.limits(Maths.limits(xCoord), yCoord), sd), sd2);
+			plot.setLimits(z[0], z[z.length - 1], limits[0], limits[1]);
+			plot.addPoints(newZ, invert(smoothSd), Plot.LINE);
+			plot.addPoints(z, sd, Plot.DOT);
+			plot.addPoints(z, sd2, Plot.DOT);
+			plot.setColor(Color.BLUE);
+			plot.addPoints(z, xCoord, Plot.DOT);
+			plot.addPoints(newZ, smoothX, Plot.LINE);
+			plot.setColor(Color.RED);
+			plot.addPoints(z, yCoord, Plot.DOT);
+			plot.addPoints(newZ, smoothY, Plot.LINE);
+
+			// Add a line for the z-centre
+			plot.setColor(Color.GREEN);
+			plot.addPoints(new double[] { cz, cz }, limits, Plot.LINE);
+			plot.setColor(Color.BLACK);
+
+			double width = Double.NaN;
+			for (int i = 0; i < smoothSd.length; i++)
+			{
+				if (newZ[i] == cz)
+				{
+					width = smoothSd[i];
+					break;
+				}
+			}
+			plot.addLabel(0, 0, String.format("Width = %s nm (%sx). z = %s nm", Utils.rounded(width * nmPerPixel),
+					Utils.rounded(width * nmPerPixel / psfWidth), Utils.rounded((slice - zCentre) * nmPerSlice)));
+
+			// Check if the window will need to be aligned
+			boolean alignWindows = (WindowManager.getFrame(TITLE_PSF_PARAMETERS) == null);
+
+			PlotWindow psfWindow = Utils.display(TITLE_PSF_PARAMETERS, plot);
+
+			if (alignWindows && psfWindow != null && amplitudeWindow != null)
+			{
+				// Put the two plots tiled together so both are visible
+				Point l = psfWindow.getLocation();
+				l.x = amplitudeWindow.getLocation().x;
+				l.y = amplitudeWindow.getLocation().y + amplitudeWindow.getHeight();
+				psfWindow.setLocation(l);
+			}
 		}
 	}
 
@@ -1171,6 +1235,19 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 		showPlots(z, a, newZ, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cz);
 
+		// Store the data for replotting
+		this.z = z;
+		this.a = a;
+		this.smoothAz = newZ;
+		this.smoothA = smoothA;
+		this.xCoord = xCoord;
+		this.yCoord = yCoord;
+		this.sd = sd;
+		this.newZ = newZ;
+		this.smoothX = smoothX;
+		this.smoothY = smoothY;
+		this.smoothSd = smoothSd;
+
 		//maximumIndex = findMinimumIndex(smoothSd, maximumIndex - start);
 		return smoothSd[smoothCzIndex];
 	}
@@ -1255,8 +1332,83 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 	private void drawPlots()
 	{
+		updateAmplitudePlot();
+		updatePSFPlot();
 		updateSignalAtSpecifiedSDPlot();
 		updateCumulativeSignalPlot();
+	}
+
+	private void updateAmplitudePlot()
+	{
+		if (aquirePlotLock1())
+		{
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						boolean parametersChanged = true;
+						while (parametersChanged)
+						{
+							// Store the parameters to be processed
+							int mySlice = slice;
+
+							// Do something with parameters
+							showPlots(z, a, smoothAz, smoothA, null, null, null, null, null, null, null, mySlice);
+
+							// Check if the parameters have changed again
+							parametersChanged = (mySlice != slice);
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock1 = false;
+					}
+				}
+			}).start();
+		}
+	}
+
+	private void updatePSFPlot()
+	{
+		if (aquirePlotLock2())
+		{
+			// Run in a new thread to allow the GUI to continue updating
+			new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						// Continue while the parameter is changing
+						boolean parametersChanged = true;
+						while (parametersChanged)
+						{
+							// Store the parameters to be processed
+							int mySlice = slice;
+
+							// Do something with parameters
+							showPlots(z, null, null, null, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd,
+									mySlice);
+
+							// Check if the parameters have changed again
+							parametersChanged = (mySlice != slice);
+						}
+					}
+					finally
+					{
+						// Ensure the running flag is reset
+						plotLock2 = false;
+					}
+				}
+			}).start();
+		}
 	}
 
 	private void updateSignalAtSpecifiedSDPlot()
@@ -1295,7 +1447,6 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		}
 	}
 
-
 	/**
 	 * Show a plot of the amount of signal within N x SD for each z position. This indicates
 	 * how much the PSF has spread from the original Gaussian shape.
@@ -1311,7 +1462,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	 */
 	private void plotSignalAtSpecifiedSD(ImageStack psf, double fittedSd, double factor, int slice)
 	{
-		if (z == null)
+		if (signalZ == null)
 		{
 			// Get the bounds
 			int radius = (int) Math.round(fittedSd * factor);
@@ -1325,7 +1476,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			final byte[] mask = (byte[]) circle.getPixels();
 
 			// Sum the pixels within the mask for each slice
-			z = new double[psf.getSize()];
+			signalZ = new double[psf.getSize()];
 			signal = new double[psf.getSize()];
 			for (int i = 0; i < psf.getSize(); i++)
 			{
@@ -1343,10 +1494,10 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				double total = 0;
 				for (float f : data)
 					total += f;
-				z[i] = i + 1;
+				signalZ[i] = i + 1;
 				signal[i] = 100 * sum / total;
 			}
-			
+
 			signalTitle = String.format("%% PSF signal at %s x SD", Utils.rounded(factor, 3));
 			signalLimits = Maths.limits(signal);
 		}
@@ -1355,7 +1506,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		boolean alignWindows = (WindowManager.getFrame(signalTitle) == null);
 
 		final double total = signal[slice - 1];
-		Plot plot = new Plot(signalTitle, "z", "Signal", z, signal);
+		Plot plot = new Plot(signalTitle, "z", "Signal", signalZ, signal);
 		plot.addLabel(
 				0,
 				0,
@@ -1382,7 +1533,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			}
 		}
 	}
-	
+
 	private void updateCumulativeSignalPlot()
 	{
 		if (aquirePlotLock4())
