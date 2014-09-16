@@ -102,7 +102,7 @@ import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.random.Well44497b;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
@@ -123,7 +123,6 @@ public class CreateData implements PlugIn, ItemListener
 	private static String[] CONFINEMENT = { "None", "Mask", "Sphere" };
 	private static int SPHERE = 2;
 
-	private RandomGenerator random = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
 	private static String header = null;
@@ -220,7 +219,7 @@ public class CreateData implements PlugIn, ItemListener
 				settings.tOffLong * settings.stepsPerSecond / 1000.0, settings.nBlinksShort, settings.nBlinksLong);
 		imageModel.setUseGridWalk(settings.useGridWalk);
 		imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
-		imageModel.setRandomGenerator(random);
+		imageModel.setRandomGenerator(getRandomGenerator());
 		imageModel.setPhotonShapeParameter(settings.photonShape);
 		imageModel.setPhotonBudgetPerFrame(true);
 		imageModel.setRotation2D(settings.rotate2D);
@@ -404,7 +403,7 @@ public class CreateData implements PlugIn, ItemListener
 		double[] min = new double[3];
 		for (int i = 0; i < 3; i++)
 			min[i] = -max[i];
-		SpatialDistribution distribution = new UniformDistribution(min, max, random);
+		SpatialDistribution distribution = new UniformDistribution(min, max, getRandomGenerator());
 		return distribution;
 	}
 
@@ -510,7 +509,7 @@ public class CreateData implements PlugIn, ItemListener
 
 						// Create the distribution using the recommended number of bins
 						final int binCount = stats.getN() / 10;
-						EmpiricalDistribution dist = new EmpiricalDistribution(binCount, random);
+						EmpiricalDistribution dist = new EmpiricalDistribution(binCount, getRandomGenerator());
 						dist.load(values);
 						return dist;
 					}
@@ -2999,5 +2998,16 @@ public class CreateData implements PlugIn, ItemListener
 			compounds.add(m);
 		}
 		return compounds;
+	}
+
+	/**
+	 * Get a random generator. The generators used in the simulation can be adjusted by changing this method.
+	 * 
+	 * @return A random generator
+	 */
+	private RandomGenerator getRandomGenerator()
+	{
+		return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+		//return new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 	}
 }
