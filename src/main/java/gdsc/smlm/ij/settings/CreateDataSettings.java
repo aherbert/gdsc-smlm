@@ -114,7 +114,7 @@ public class CreateDataSettings
 	public boolean chooseHistograms = false;
 	public int histogramBins = 100;
 	public boolean removeOutliers = false;
-	public float densityRadius = 10;
+	public float densityRadius = 1000;
 
 	/**
 	 * Get the total gain (the EM-gain multiplied by the camera gain). If either the gain is disabled then it will be
