@@ -23,7 +23,6 @@ import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.DensityManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.Random;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -39,6 +38,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
+import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 /**
@@ -358,7 +359,7 @@ public class DensityImage implements PlugIn
 		Rectangle bounds = results.getBounds();
 		double xscale = (double) roiImageWidth / bounds.width;
 		double yscale = (double) roiImageHeight / bounds.height;
-		
+
 		// Compute relative to the results bounds (if present)
 		scaledRoiMinX = bounds.x + roiBounds.x / xscale;
 		scaledRoiMaxX = scaledRoiMinX + roiBounds.width / xscale;
@@ -449,7 +450,7 @@ public class DensityImage implements PlugIn
 		}
 
 		DensityManager dm = new DensityManager(results);
-		
+
 		// Compute this using the input density scores since the radius is the same.
 		final double l = (useSquareApproximation) ? dm.ripleysLFunction(radius) : dm.ripleysLFunction(density, radius);
 
@@ -659,7 +660,9 @@ public class DensityImage implements PlugIn
 		double[] upper = null;
 		double[] lower = null;
 		Rectangle bounds = results.getBounds();
-		Random rand = new Random();
+		// Use a uniform distribution for the coordinates
+		HaltonSequenceGenerator dist = new HaltonSequenceGenerator(2);
+		dist.skipTo(new Well19937c(System.currentTimeMillis() + System.identityHashCode(this)).nextInt());
 		for (int i = 0; i < iterations; i++)
 		{
 			IJ.showProgress(i, iterations);
@@ -670,8 +673,9 @@ public class DensityImage implements PlugIn
 			float[] y = new float[x.length];
 			for (int j = x.length; j-- > 0;)
 			{
-				x[j] = rand.next() * bounds.width;
-				y[j] = rand.next() * bounds.height;
+				final double[] d = dist.nextVector();
+				x[j] = (float) (d[0] * bounds.width);
+				y[j] = (float) (d[1] * bounds.height);
 			}
 			double[][] values2 = calculateLScores(new DensityManager(x, y, bounds));
 			if (upper == null)
