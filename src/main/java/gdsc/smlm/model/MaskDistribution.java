@@ -24,10 +24,14 @@ import org.apache.commons.math3.random.Well19937c;
  * X coordinates are returned in the interval -width/2 to width/2. These can be converted to different values using the
  * scale parameter. Likewise for the Y coordinates. E.g. a mask of 100x100 (range of -50:50) can be used to generate
  * coordinates in the range -100:100 using a scale of 2.
+ * <p>
+ * Sub pixel locations and z-depth are sampled from a uniform distribution. A Halton sequence is used by default but
+ * this can be changed by setting a custom uniform distribution.
  */
 public class MaskDistribution implements SpatialDistribution
 {
 	private RandomGenerator randomGenerator;
+	private UniformDistribution uniformDistribution;
 	private int[] mask;
 	private int[] indices;
 	private final int width, height, half_width, half_height;
@@ -90,13 +94,14 @@ public class MaskDistribution implements SpatialDistribution
 	 * @param scaleY
 	 *            Used to scale the mask Y-coordinate to a new value
 	 * @param randomGenerator
+	 *            Used to pick random pixels in the mask
 	 */
 	public MaskDistribution(byte[] mask, int width, int height, double depth, double scaleX, double scaleY,
 			RandomGenerator randomGenerator)
 	{
 		this(convert(mask), width, height, depth, scaleX, scaleY, randomGenerator);
 	}
-	
+
 	private static int[] convert(byte[] mask)
 	{
 		if (mask == null)
@@ -109,7 +114,7 @@ public class MaskDistribution implements SpatialDistribution
 		}
 		return newMask;
 	}
-	
+
 	/**
 	 * Create a distribution from the mask image (packed in YX order)
 	 * 
@@ -125,9 +130,35 @@ public class MaskDistribution implements SpatialDistribution
 	 * @param scaleY
 	 *            Used to scale the mask Y-coordinate to a new value
 	 * @param randomGenerator
+	 *            Used to pick random pixels in the mask
 	 */
 	public MaskDistribution(int[] mask, int width, int height, double depth, double scaleX, double scaleY,
 			RandomGenerator randomGenerator)
+	{
+		this(mask, width, height, depth, scaleX, scaleY, randomGenerator, null);
+	}
+
+	/**
+	 * Create a distribution from the mask image (packed in YX order)
+	 * 
+	 * @param mask
+	 * @param width
+	 *            The width of the mask in pixels
+	 * @param height
+	 *            the height of the mask in pixels
+	 * @param depth
+	 *            The mask depth
+	 * @param scaleX
+	 *            Used to scale the mask X-coordinate to a new value
+	 * @param scaleY
+	 *            Used to scale the mask Y-coordinate to a new value
+	 * @param randomGenerator
+	 *            Used to pick random pixels in the mask
+	 * @param uniformDistribution
+	 *            Used for sub-pixel location and z-depth
+	 */
+	public MaskDistribution(int[] mask, int width, int height, double depth, double scaleX, double scaleY,
+			RandomGenerator randomGenerator, UniformDistribution uniformDistribution)
 	{
 		if (width < 1 || height < 1)
 			throw new IllegalArgumentException("Dimensions must be above zero");
@@ -139,6 +170,7 @@ public class MaskDistribution implements SpatialDistribution
 			randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 
 		this.randomGenerator = randomGenerator;
+		setUniformDistribution(uniformDistribution);
 		this.mask = mask;
 		this.width = width;
 		this.scaleX = scaleX;
@@ -167,6 +199,15 @@ public class MaskDistribution implements SpatialDistribution
 			if (mask[i] != 0)
 				indices[count++] = i;
 		}
+
+		// Fischer-Yates shuffle the indices to scramble the mask positions
+		for (int i = indices.length; i-- > 1;)
+		{
+			final int j = randomGenerator.nextInt(i + 1);
+			final int tmp = indices[i];
+			indices[i] = indices[j];
+			indices[j] = tmp;
+		}
 	}
 
 	/*
@@ -176,14 +217,14 @@ public class MaskDistribution implements SpatialDistribution
 	 */
 	public double[] next()
 	{
-		double[] d = new double[3];
-		int randomPosition = randomGenerator.nextInt(indices.length);
+		final int randomPosition = randomGenerator.nextInt(indices.length);
 		// Ensure XY = 0 is the centre of the image
 		final int x = indices[randomPosition] % width - half_width;
 		final int y = indices[randomPosition] / width - half_height;
-		d[0] = (x + randomGenerator.nextDouble()) * scaleX;
-		d[1] = (y + randomGenerator.nextDouble()) * scaleY;
-		d[2] = min + randomGenerator.nextDouble() * depth;
+		final double[] d = uniformDistribution.nextUnit();
+		d[0] = (x + d[0]) * scaleX;
+		d[1] = (y + d[1]) * scaleY;
+		d[2] = min + d[2] * depth;
 		return d;
 	}
 
@@ -444,5 +485,18 @@ public class MaskDistribution implements SpatialDistribution
 	protected int[] getMask()
 	{
 		return mask;
+	}
+
+	/**
+	 * The UniformDistribution to pick the sub pixel x,y coordinates and z-depth
+	 * 
+	 * @param uniformDistribution
+	 *            the uniformDistribution to set
+	 */
+	public void setUniformDistribution(UniformDistribution uniformDistribution)
+	{
+		if (uniformDistribution == null)
+			uniformDistribution = new UniformDistribution(null, new double[] { 1, 1, 1 }, randomGenerator.nextInt());
+		this.uniformDistribution = uniformDistribution;
 	}
 }

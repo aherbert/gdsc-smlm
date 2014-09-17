@@ -128,6 +128,15 @@ public class UniformDistribution implements SpatialDistribution
 		return d;
 	}
 
+	/**
+	 * Return a vector with values in the unit domain ([0,1])
+	 * @return the vector populated with values in the unit domain ([0,1])
+	 */
+	public double[] nextUnit()
+	{
+		return vectorGenerator.nextVector();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
