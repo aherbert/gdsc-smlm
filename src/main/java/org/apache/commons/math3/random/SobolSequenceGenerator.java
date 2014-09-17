@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package gdsc.smlm.utils.random;
+package org.apache.commons.math3.random;
 
 import java.io.BufferedReader;
 import java.io.IOException;

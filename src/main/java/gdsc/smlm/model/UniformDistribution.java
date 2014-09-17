@@ -13,8 +13,7 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.utils.random.HaltonSequenceGenerator;
-
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
 import org.apache.commons.math3.random.Well44497b;
