@@ -13,42 +13,87 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import org.apache.commons.math3.random.JDKRandomGenerator;
+import gdsc.smlm.utils.random.HaltonSequenceGenerator;
+
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.RandomVectorGenerator;
+import org.apache.commons.math3.random.Well44497b;
 
 /**
- * Samples uniformly from the specified volume
+ * Samples uniformly from the specified volume.
+ * <p>
+ * Uses a Halton sequence generator by default. This can be overriden by passing in a vector sequence generator or by
+ * setting a random generator (which should produce uniform equi-distributed numbers in the domain [0,1]).
  */
 public class UniformDistribution implements SpatialDistribution
 {
+	/**
+	 * Wrap a standard random generator to create a vector generator for 3 dimensions
+	 */
+	private class VectorGeneratorWrapper implements RandomVectorGenerator
+	{
+		private RandomGenerator randomGenerator;
+
+		public VectorGeneratorWrapper(RandomGenerator randomGenerator)
+		{
+			if (randomGenerator == null)
+				randomGenerator = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+			this.randomGenerator = randomGenerator;
+		}
+
+		/**
+		 * @return
+		 */
+		@Override
+		public double[] nextVector()
+		{
+			return new double[] { randomGenerator.nextDouble(), randomGenerator.nextDouble(),
+					randomGenerator.nextDouble() };
+		}
+	}
+
 	private double[] min, max, range;
-	private RandomGenerator randomGenerator;
+	private RandomVectorGenerator vectorGenerator;
 
 	public UniformDistribution(double[] max)
 	{
-		this(null, max, null);
+		init(min, max, null);
 	}
 
 	public UniformDistribution(double[] min, double[] max)
 	{
-		this(min, max, null);
+		init(min, max, null);
 	}
 
-	public UniformDistribution(double[] max, RandomGenerator randomGenerator)
+	/**
+	 * @param min
+	 * @param max
+	 * @param seed Start at the i-th point in the Halton sequence
+	 */
+	public UniformDistribution(double[] min, double[] max, int seed)
 	{
-		this(null, max, randomGenerator);
+		HaltonSequenceGenerator randomVectorGenerator = new HaltonSequenceGenerator(3);
+		randomVectorGenerator.skipTo(Math.abs(seed));
+		init(min, max, randomVectorGenerator);
+	}
+	
+	/**
+	 * @param min
+	 * @param max
+	 * @param randomVectorGenerator
+	 *            Must produce vectors with dimension 3 (or above)
+	 */
+	public UniformDistribution(double[] min, double[] max, RandomVectorGenerator randomVectorGenerator)
+	{
+		init(min, max, randomVectorGenerator);
 	}
 
-	public UniformDistribution(double[] min, double[] max, RandomGenerator randomGenerator)
+	private void init(double[] min, double[] max, RandomVectorGenerator randomVectorGenerator)
 	{
-		if (randomGenerator == null)
-			randomGenerator = new JDKRandomGenerator();
 		if (min == null)
 			min = new double[0];
 		if (max == null)
 			max = new double[0];
-
-		this.randomGenerator = randomGenerator;
 
 		this.min = new double[3];
 		for (int i = 0; i < min.length; i++)
@@ -65,6 +110,10 @@ public class UniformDistribution implements SpatialDistribution
 		this.range = new double[3];
 		for (int i = 0; i < this.max.length; i++)
 			this.range[i] = this.max[i] - this.min[i];
+		
+		if (randomVectorGenerator == null)
+			randomVectorGenerator = new HaltonSequenceGenerator(3);
+		this.vectorGenerator = randomVectorGenerator;
 	}
 
 	/*
@@ -74,9 +123,9 @@ public class UniformDistribution implements SpatialDistribution
 	 */
 	public double[] next()
 	{
-		double[] d = new double[3];
+		double[] d = vectorGenerator.nextVector();
 		for (int i = 0; i < 3; i++)
-			d[i] = min[i] + randomGenerator.nextDouble() * range[i];
+			d[i] = min[i] + d[i] * range[i];
 		return d;
 	}
 
@@ -114,5 +163,15 @@ public class UniformDistribution implements SpatialDistribution
 	public void initialise(double[] xyz)
 	{
 		// Ignore		
+	}
+
+	/**
+	 * Set the random generator. The generator should produce uniform equi-distributed numbers in the domain [0,1].
+	 * 
+	 * @param randomGenerator If null then a Well generator is used
+	 */
+	public void setRandomGenerator(RandomGenerator randomGenerator)
+	{
+		this.vectorGenerator = new VectorGeneratorWrapper(randomGenerator);
 	}
 }

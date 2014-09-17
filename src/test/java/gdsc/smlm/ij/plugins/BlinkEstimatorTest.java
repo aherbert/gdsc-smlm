@@ -178,7 +178,7 @@ public class BlinkEstimatorTest
 
 		double[] max = new double[] { 256, 256, 32 };
 		double[] min = new double[3];
-		SpatialDistribution distribution = new UniformDistribution(min, max, rand);
+		SpatialDistribution distribution = new UniformDistribution(min, max, rand.nextInt());
 		List<CompoundMoleculeModel> compounds = new ArrayList<CompoundMoleculeModel>(1);
 		CompoundMoleculeModel c = new CompoundMoleculeModel(1, 0, 0, 0, Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 		c.setDiffusionRate(diffusionRate);

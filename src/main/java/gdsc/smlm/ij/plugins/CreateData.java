@@ -403,7 +403,10 @@ public class CreateData implements PlugIn, ItemListener
 		double[] min = new double[3];
 		for (int i = 0; i < 3; i++)
 			min[i] = -max[i];
-		SpatialDistribution distribution = new UniformDistribution(min, max, getRandomGenerator());
+		// Try using different distributions:
+		UniformDistribution distribution = new UniformDistribution(min, max, getRandomGenerator().nextInt());
+		//SpatialDistribution distribution = new UniformDistribution(min, max, new SobolSequenceGenerator(3));
+		//distribution.setRandomGenerator(getRandomGenerator());
 		return distribution;
 	}
 

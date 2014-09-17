@@ -1005,7 +1005,8 @@ public class PCPALMMolecules implements PlugIn
 		width -= 3 * sigmaS;
 		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 		RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
-		SpatialDistribution dist = new UniformDistribution(new double[] { width, width, 0 }, randomGenerator);
+		UniformDistribution dist = new UniformDistribution(null, new double[] { width, width, 0 },
+				randomGenerator.nextInt());
 
 		molecules = new ArrayList<Molecule>(nMolecules);
 		// Create some dummy results since the calibration is required for later analysis
