@@ -24,7 +24,7 @@ public class ExtendedClusterPoint extends ClusterPoint
 
 	public ExtendedClusterPoint(int id, double x, double y, int t, ClusterPoint other)
 	{
-		super(id, x, y, t);
+		super(id, x, y, t, t);
 		super.next = other;
 	}
 }
