@@ -42,6 +42,12 @@ public class CreateDataSettings
 	 * data indicate the correlation is around -0.35, i.e. shorter bursts are brighter.
 	 */
 	public int photonsPerSecond = 1000;
+
+	/**
+	 * For a simple localisation model the photons are randomly selected between photonsPerSecond and
+	 * photonsPerSecondMaximum
+	 */
+	public int photonsPerSecondMaximum = 2000;
 	/**
 	 * Set to true to use a custom distribution for the random photon emission. The default is to use a gamma
 	 * distribution with the defined shape parameter.
@@ -50,10 +56,12 @@ public class CreateDataSettings
 	public String photonDistribution = "";
 	public double photonShape = 2.5;
 	public double correlation = -0.35;
+	public String psfModel = "";
 	public String psfImageName = "";
 	public double wavelength = 561;
 	public double numericalAperture = 1.4;
 	public double pixelPitch = 107;
+	public double density = 1;
 	public double diffusionRate = 0;
 	public boolean compoundMolecules = false;
 	public String compoundText = "";

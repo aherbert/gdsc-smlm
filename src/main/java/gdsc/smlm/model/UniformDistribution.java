@@ -71,7 +71,11 @@ public class UniformDistribution implements SpatialDistribution
 	 */
 	public UniformDistribution(double[] min, double[] max, int seed)
 	{
-		HaltonSequenceGenerator randomVectorGenerator = new HaltonSequenceGenerator(3);
+		//HaltonSequenceGenerator randomVectorGenerator = new HaltonSequenceGenerator(3);
+		// The Halton sequence based on the prime of 2 does not provide great variety in the
+		// lesser significant digits when simulating a 512x512 pixel image. This is not suitable for
+		// PSF fitting since we require variation to at least 3 decimal places.
+		HaltonSequenceGenerator randomVectorGenerator = new HaltonSequenceGenerator(3, new int[] { 3, 5, 7}, null);
 		randomVectorGenerator.skipTo(Math.abs(seed));
 		init(min, max, randomVectorGenerator);
 	}

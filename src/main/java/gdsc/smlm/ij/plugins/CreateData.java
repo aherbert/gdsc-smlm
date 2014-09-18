@@ -65,6 +65,7 @@ import ij.io.FileSaver;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
+import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
@@ -122,6 +123,8 @@ public class CreateData implements PlugIn, ItemListener
 	private static int GRID = 2;
 	private static String[] CONFINEMENT = { "None", "Mask", "Sphere" };
 	private static int SPHERE = 2;
+
+	private static String[] PSF_MODELS = new String[] { "2D Gaussian", "Image" };
 
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
@@ -190,6 +193,7 @@ public class CreateData implements PlugIn, ItemListener
 	private int frame, maxT, totalFrames;
 
 	private XStream xs = null;
+	private boolean simpleMode = false;
 
 	/*
 	 * (non-Javadoc)
@@ -199,75 +203,160 @@ public class CreateData implements PlugIn, ItemListener
 	public void run(String arg)
 	{
 		integerDisplay[TOTAL_SIGNAL] = false;
-		imagePSF = (arg != null && arg.contains("image"));
+		simpleMode = (arg != null && arg.contains("simple"));
 
-		if (!showDialog())
-			return;
+		// Each localisation is a simulated emission of light from a point in space and time
+		List<LocalisationModel> localisations = null;
 
-		SpatialIllumination activationIllumination = createIllumination(settings.pulseRatio, settings.pulseInterval);
+		// Each localisation set is a collection of localisations that represent all localisations
+		// with the same ID that are on in the same image time frame (Note: the simulation
+		// can create many localisations per fluorophore per time frame which is useful when 
+		// modelling moving particles)
+		List<LocalisationModelSet> localisationSets = null;
 
-		// Generate additional frames so that each frame has the set number of simulation steps
-		int totalSteps = settings.seconds * settings.stepsPerSecond;
+		// Each fluorophore contains the on and off times when light was emitted 
+		List<? extends FluorophoreSequenceModel> fluorophores = null;
 
-		// Since we have an exponential decay of activations
-		// ensure half of the particles have activated by 30% of the frames.
-		double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
-
-		// Q. Does tOn/tOff change depending on the illumination strength?
-		ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, settings.tOn *
-				settings.stepsPerSecond / 1000.0, settings.tOffShort * settings.stepsPerSecond / 1000.0,
-				settings.tOffLong * settings.stepsPerSecond / 1000.0, settings.nBlinksShort, settings.nBlinksLong);
-		imageModel.setUseGridWalk(settings.useGridWalk);
-		imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
-		imageModel.setRandomGenerator(getRandomGenerator());
-		imageModel.setPhotonShapeParameter(settings.photonShape);
-		imageModel.setPhotonBudgetPerFrame(true);
-		imageModel.setRotation2D(settings.rotate2D);
-
-		IJ.showStatus("Creating molecules ...");
-		SpatialDistribution distribution = createDistribution();
-		List<CompoundMoleculeModel> compounds = createCompoundMolecules();
-		if (compounds == null)
-			return;
-		List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, settings.particles, distribution,
-				settings.rotateInitialOrientation);
-
-		// Activate fluorophores
-		IJ.showStatus("Creating fluorophores ...");
-		// Note: molecules list will be converted to compounds containing fluorophores
-		List<? extends FluorophoreSequenceModel> fluorophores = imageModel.createFluorophores(molecules, totalSteps);
-
-		if (fluorophores.isEmpty())
+		if (simpleMode)
 		{
-			IJ.error(TITLE, "No fluorophores created");
-			return;
+			if (!showSimpleDialog())
+				return;
+
+			// -----------------
+			// SIMPLE SIMULATION
+			// -----------------
+			// The simple simulation draws n random points per frame to achieve a specified density.
+			// No points will appear in multiple frames.
+			// Each point has a random number of photons sampled from a range.
+
+			settings.exposureTime = 1000; // 1 second frames
+
+			// Use the density to get the number per frame
+			final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
+			final int n = (int) Math.round(areaInUm * settings.density);
+
+			UniformDistribution dist = createUniformDistribution(0);
+			//UniformDistribution distBorder = createUniformDistributionWithPSFWidthBorder();
+			RandomGenerator random = null;
+
+			localisations = new ArrayList<LocalisationModel>(n * settings.seconds);
+			localisationSets = new ArrayList<LocalisationModelSet>(n * settings.seconds);
+
+			final int range = settings.photonsPerSecondMaximum - settings.photonsPerSecond + 1;
+			if (range > 1)
+				random = getRandomGenerator();
+
+			// Add frames at the specified density until the number of particles has been reached
+			int id = 0;
+			int t = 0;
+			while (id < settings.particles)
+			{
+				// Simulate random positions in the frame for the specified density
+				t++;
+				for (int j = 0; j < n; j++)
+				{
+					final double[] xyz = dist.next();
+
+					// Ignore within border. We do not want to draw things we cannot fit.
+					//if (!distBorder.isWithinXY(xyz))
+					//	continue;
+
+					// Simulate random photons
+					final int intensity = settings.photonsPerSecond + ((random != null) ? random.nextInt(range) : 0);
+
+					LocalisationModel m = new LocalisationModel(id, t, xyz, intensity, LocalisationModel.CONTINUOUS);
+					localisations.add(m);
+
+					// Each localisation can be a separate localisation set
+					LocalisationModelSet set = new LocalisationModelSet(id, t);
+					set.add(m);
+					localisationSets.add(set);
+
+					id++;
+				}
+			}
 		}
-
-		IJ.showStatus("Creating localisations ...");
-
-		// TODO - Output a molecule Id for each fluorophore if using compound molecules. This allows analysis
-		// of the ratio of trimers, dimers, monomers, etc that could be detected.
-
-		totalSteps = checkTotalSteps(totalSteps, fluorophores);
-
-		imageModel.setPhotonDistribution(createPhotonDistribution());
-		imageModel.setConfinementDistribution(createConfinementDistribution());
-		List<LocalisationModel> localisations = imageModel.createImage(molecules, settings.fixedFraction, totalSteps,
-				(double) settings.photonsPerSecond / settings.stepsPerSecond, settings.correlation,
-				settings.rotateDuringSimulation);
-
-		// Re-adjust the fluorophores to the correct time
-		if (settings.stepsPerSecond != 1)
+		else
 		{
-			final double scale = 1.0 / settings.stepsPerSecond;
-			for (FluorophoreSequenceModel f : fluorophores)
-				f.adjustTime(scale);
+			if (!showDialog())
+				return;
+
+			// ---------------
+			// FULL SIMULATION
+			// ---------------
+			// The full simulation draws n random points in space.
+			// The same molecule may appear in multiple frames, move and blink.
+			//
+			// Points are modelled as fluorophores that must be activated and then will 
+			// blink and photo-bleach. The molecules may diffuse and this can be simulated 
+			// with many steps per image frame. All steps from a frame are collected
+			// into a localisation set which can be drawn on the output image.
+
+			SpatialIllumination activationIllumination = createIllumination(settings.pulseRatio, settings.pulseInterval);
+
+			// Generate additional frames so that each frame has the set number of simulation steps
+			int totalSteps = settings.seconds * settings.stepsPerSecond;
+
+			// Since we have an exponential decay of activations
+			// ensure half of the particles have activated by 30% of the frames.
+			double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
+
+			// Q. Does tOn/tOff change depending on the illumination strength?
+			ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, settings.tOn *
+					settings.stepsPerSecond / 1000.0, settings.tOffShort * settings.stepsPerSecond / 1000.0,
+					settings.tOffLong * settings.stepsPerSecond / 1000.0, settings.nBlinksShort, settings.nBlinksLong);
+			imageModel.setUseGridWalk(settings.useGridWalk);
+			imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
+			imageModel.setRandomGenerator(getRandomGenerator());
+			imageModel.setPhotonShapeParameter(settings.photonShape);
+			imageModel.setPhotonBudgetPerFrame(true);
+			imageModel.setRotation2D(settings.rotate2D);
+
+			IJ.showStatus("Creating molecules ...");
+			SpatialDistribution distribution = createDistribution();
+			List<CompoundMoleculeModel> compounds = createCompoundMolecules();
+			if (compounds == null)
+				return;
+			List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, settings.particles,
+					distribution, settings.rotateInitialOrientation);
+
+			// Activate fluorophores
+			IJ.showStatus("Creating fluorophores ...");
+			// Note: molecules list will be converted to compounds containing fluorophores
+			fluorophores = imageModel.createFluorophores(molecules, totalSteps);
+
+			if (fluorophores.isEmpty())
+			{
+				IJ.error(TITLE, "No fluorophores created");
+				return;
+			}
+
+			IJ.showStatus("Creating localisations ...");
+
+			// TODO - Output a molecule Id for each fluorophore if using compound molecules. This allows analysis
+			// of the ratio of trimers, dimers, monomers, etc that could be detected.
+
+			totalSteps = checkTotalSteps(totalSteps, fluorophores);
+
+			imageModel.setPhotonDistribution(createPhotonDistribution());
+			imageModel.setConfinementDistribution(createConfinementDistribution());
+			localisations = imageModel.createImage(molecules, settings.fixedFraction, totalSteps,
+					(double) settings.photonsPerSecond / settings.stepsPerSecond, settings.correlation,
+					settings.rotateDuringSimulation);
+
+			// Re-adjust the fluorophores to the correct time
+			if (settings.stepsPerSecond != 1)
+			{
+				final double scale = 1.0 / settings.stepsPerSecond;
+				for (FluorophoreSequenceModel f : fluorophores)
+					f.adjustTime(scale);
+			}
+
+			// Integrate the frames
+			localisationSets = combineSimulationSteps(localisations);
+
+			localisationSets = filterToImageBounds(localisationSets);
 		}
-
-		// Integrate the frames
-		List<LocalisationModelSet> localisationSets = combineSimulationSteps(localisations);
-
-		localisationSets = filterToImageBounds(localisationSets);
 
 		datasetNumber++;
 
@@ -348,13 +437,7 @@ public class CreateData implements PlugIn, ItemListener
 					settings.maxBinaryDistance / settings.pixelPitch);
 		}
 
-		// Create distribution within a border. Ensure the focal plane is in the
-		// middle of the zDepth
-		final double psfWidth = PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture,
-				PSFCalculator.DEFAULT_PROPORTIONALITY_FACTOR) / settings.pixelPitch;
-		double border = psfWidth * 5;
-		border = Math.min(border, settings.size / 4);
-		return createUniformDistribution(border);
+		return createUniformDistributionWithPSFWidthBorder();
 	}
 
 	private SpatialDistribution createMaskDistribution(ImagePlus imp, double sliceDepth)
@@ -396,8 +479,39 @@ public class CreateData implements PlugIn, ItemListener
 		return mask;
 	}
 
-	private SpatialDistribution createUniformDistribution(double border)
+	private UniformDistribution createUniformDistributionWithPSFWidthBorder()
 	{
+		double psfWidth = getPSFWidth();
+		double border = psfWidth * 5;
+		border = Math.min(border, settings.size / 4);
+		return createUniformDistribution(border);
+	}
+
+	/**
+	 * Get the PSF width
+	 * 
+	 * @return
+	 */
+	private double getPSFWidth()
+	{
+		if (imagePSF)
+		{
+			// Assume the width is 1 pixel. This could be changed to have the PSF model report its FHWM.
+			return 1;
+		}
+		return PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture,
+				PSFCalculator.DEFAULT_PROPORTIONALITY_FACTOR) / settings.pixelPitch;
+	}
+
+	/**
+	 * Create distribution within an XY border
+	 * 
+	 * @param border
+	 * @return
+	 */
+	private UniformDistribution createUniformDistribution(double border)
+	{
+		// Ensure the focal plane is in the middle of the zDepth
 		double[] max = new double[] { settings.size / 2 - border, settings.size / 2 - border,
 				settings.depth / (2 * settings.pixelPitch) };
 		double[] min = new double[3];
@@ -949,6 +1063,19 @@ public class CreateData implements PlugIn, ItemListener
 		// Show image
 		String title = "Localisation Data";
 		ImagePlus imp = Utils.display(title, newStack);
+
+		ij.measure.Calibration cal = new ij.measure.Calibration();
+		String unit = "nm";
+		double unitPerPixel = settings.pixelPitch;
+		if (unitPerPixel > 100)
+		{
+			unit = "um";
+			unitPerPixel /= 1000.0;
+		}
+		cal.setUnit(unit);
+		cal.pixelHeight = cal.pixelWidth = unitPerPixel;
+		imp.setCalibration(cal);
+
 		imp.setDimensions(1, 1, newStack.getSize());
 		imp.resetDisplayRange();
 		imp.updateAndDraw();
@@ -1651,6 +1778,8 @@ public class CreateData implements PlugIn, ItemListener
 	private List<? extends FluorophoreSequenceModel> removeFilteredFluorophores(
 			List<? extends FluorophoreSequenceModel> fluorophores, List<LocalisationModel> localisations)
 	{
+		if (fluorophores == null)
+			return null;
 		Set<Integer> idSet = new TreeSet<Integer>();
 		for (LocalisationModel l : localisations)
 			idSet.add(l.getId());
@@ -1750,15 +1879,25 @@ public class CreateData implements PlugIn, ItemListener
 		stats[SAMPLED_T_ON].add(currentT / framesPerSecond);
 		stats[TOTAL_SIGNAL].add(signal);
 
-		for (FluorophoreSequenceModel f : fluorophores)
+		if (fluorophores != null)
 		{
-			stats[BLINKS].add(f.getNumberOfBlinks());
-			// On-time
-			for (double t : f.getOnTimes())
-				stats[T_ON].add(t);
-			// Off-time
-			for (double t : f.getOffTimes())
-				stats[T_OFF].add(t);
+			for (FluorophoreSequenceModel f : fluorophores)
+			{
+				stats[BLINKS].add(f.getNumberOfBlinks());
+				// On-time
+				for (double t : f.getOnTimes())
+					stats[T_ON].add(t);
+				// Off-time
+				for (double t : f.getOffTimes())
+					stats[T_OFF].add(t);
+			}
+		}
+		else
+		{
+			// show no blinks
+			stats[BLINKS].add(0);
+			stats[T_ON].add(1);
+			//stats[T_OFF].add(0);
 		}
 
 		// Compute density per frame
@@ -1788,7 +1927,7 @@ public class CreateData implements PlugIn, ItemListener
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(datasetNumber).append("\t");
-		sb.append(fluorophores.size()).append("\t");
+		sb.append((fluorophores == null) ? localisations.size() : fluorophores.size()).append("\t");
 		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append("\t");
 		sb.append(localisations.size()).append("\t");
 		if (imagePSF)
@@ -2186,7 +2325,7 @@ public class CreateData implements PlugIn, ItemListener
 	 */
 	private void saveFluorophores(List<? extends FluorophoreSequenceModel> fluorophores)
 	{
-		if (!settings.saveFluorophores)
+		if (!settings.saveFluorophores || fluorophores == null)
 			return;
 
 		String[] path = Utils.decodePath(settings.fluorophoresFilename);
@@ -2331,20 +2470,24 @@ public class CreateData implements PlugIn, ItemListener
 			addHeaderLine(sb, "Pixel_pitch (nm)", settings.pixelPitch);
 			addHeaderLine(sb, "Size", settings.size);
 			addHeaderLine(sb, "Depth", settings.depth);
-			addHeaderLine(sb, "Seconds", settings.seconds);
-			addHeaderLine(sb, "Exposure_time", settings.exposureTime);
-			addHeaderLine(sb, "Steps_per_second", settings.stepsPerSecond);
-			addHeaderLine(sb, "Illumination", settings.illumination);
-			addHeaderLine(sb, "Pulse_interval", settings.pulseInterval);
-			addHeaderLine(sb, "Pulse_ratio", settings.pulseRatio);
-			if (backgroundImages != null)
-				addHeaderLine(sb, "Background_image", settings.backgroundImage);
+			if (!simpleMode)
+			{
+				addHeaderLine(sb, "Seconds", settings.seconds);
+				addHeaderLine(sb, "Exposure_time", settings.exposureTime);
+				addHeaderLine(sb, "Steps_per_second", settings.stepsPerSecond);
+				addHeaderLine(sb, "Illumination", settings.illumination);
+				addHeaderLine(sb, "Pulse_interval", settings.pulseInterval);
+				addHeaderLine(sb, "Pulse_ratio", settings.pulseRatio);
+				if (backgroundImages != null)
+					addHeaderLine(sb, "Background_image", settings.backgroundImage);
+			}
 			addHeaderLine(sb, "Background", settings.background);
 			addHeaderLine(sb, "EM_gain", settings.getEmGain());
 			addHeaderLine(sb, "Camera_gain", settings.getCameraGain());
 			addHeaderLine(sb, "Quantum_efficiency", settings.getQuantumEfficiency());
 			addHeaderLine(sb, "Read_noise", settings.readNoise);
 			addHeaderLine(sb, "Bias", settings.bias);
+			addHeaderLine(sb, "PSF_model", settings.psfModel);
 			if (imagePSF)
 			{
 				addHeaderLine(sb, "PSF_image", settings.psfImageName);
@@ -2354,53 +2497,65 @@ public class CreateData implements PlugIn, ItemListener
 				addHeaderLine(sb, "Wavelength (nm)", settings.wavelength);
 				addHeaderLine(sb, "Numerical_aperture", settings.numericalAperture);
 			}
-			addHeaderLine(sb, "Distribution", settings.distribution);
-			if (settings.distribution.equals(DISTRIBUTION[MASK]))
+			if (!simpleMode)
 			{
-				addHeaderLine(sb, "Distribution_mask", settings.distributionMask);
-			}
-			else if (settings.distribution.equals(DISTRIBUTION[GRID]))
-			{
-				addHeaderLine(sb, "Cell_size", settings.cellSize);
-				addHeaderLine(sb, "p-binary", settings.probabilityBinary);
-				addHeaderLine(sb, "Min_binary_distance (nm)", settings.minBinaryDistance);
-				addHeaderLine(sb, "Max_binary_distance (nm)", settings.maxBinaryDistance);
+				addHeaderLine(sb, "Distribution", settings.distribution);
+				if (settings.distribution.equals(DISTRIBUTION[MASK]))
+				{
+					addHeaderLine(sb, "Distribution_mask", settings.distributionMask);
+				}
+				else if (settings.distribution.equals(DISTRIBUTION[GRID]))
+				{
+					addHeaderLine(sb, "Cell_size", settings.cellSize);
+					addHeaderLine(sb, "p-binary", settings.probabilityBinary);
+					addHeaderLine(sb, "Min_binary_distance (nm)", settings.minBinaryDistance);
+					addHeaderLine(sb, "Max_binary_distance (nm)", settings.maxBinaryDistance);
+				}
 			}
 			addHeaderLine(sb, "Particles", settings.particles);
-			addHeaderLine(sb, "Diffusion_rate", settings.diffusionRate);
-			addHeaderLine(sb, "Use_grid_walk", settings.useGridWalk);
-			addHeaderLine(sb, "Fixed_fraction", settings.fixedFraction);
-			if (settings.compoundMolecules)
+			if (simpleMode)
 			{
-				addHeaderLine(sb, "Compound_molecules", settings.compoundText.replaceAll("\n *", ""));
-				addHeaderLine(sb, "Rotate_initial_orientation", settings.rotateInitialOrientation);
-				addHeaderLine(sb, "Rotate_during_simulation", settings.rotateDuringSimulation);
-				addHeaderLine(sb, "Enable_2D_rotation", settings.rotate2D);
+				addHeaderLine(sb, "Density (um^-2)", settings.density);
+				addHeaderLine(sb, "Min_photons", settings.photonsPerSecond);
+				addHeaderLine(sb, "Max_photons", settings.photonsPerSecondMaximum);
 			}
-			addHeaderLine(sb, "Confinement", settings.confinement);
-			if (settings.confinement.equals(CONFINEMENT[SPHERE]))
-			{
-				addHeaderLine(sb, "Confinement_radius", settings.confinementRadius);
-			}
-			else if (settings.confinement.equals(CONFINEMENT[MASK]))
-			{
-				addHeaderLine(sb, "Confinement_radius", settings.confinementMask);
-			}
-			addHeaderLine(sb, "Photon", settings.photonsPerSecond);
-			if (settings.customPhotonDistribution)
-				addHeaderLine(sb, "Photon_distribution", settings.photonDistribution);
 			else
-				addHeaderLine(sb, "Photon_shape", settings.photonShape);
-			addHeaderLine(sb, "Correlation", settings.correlation);
-			addHeaderLine(sb, "On_time", settings.tOn);
-			addHeaderLine(sb, "Off_time_short", settings.tOffShort);
-			addHeaderLine(sb, "Off_time_long", settings.tOffLong);
-			addHeaderLine(sb, "n_Blinks_short", settings.nBlinksShort);
-			addHeaderLine(sb, "n_Blinks_long", settings.nBlinksLong);
-			addHeaderLine(sb, "n_Blinks_Geometric", settings.nBlinksGeometricDistribution);
-			addHeaderLine(sb, "Min_photons", settings.minPhotons);
-			addHeaderLine(sb, "Min_SNR_t1", settings.minSNRt1);
-			addHeaderLine(sb, "Min_SNR_tN", settings.minSNRtN);
+			{
+				addHeaderLine(sb, "Diffusion_rate", settings.diffusionRate);
+				addHeaderLine(sb, "Use_grid_walk", settings.useGridWalk);
+				addHeaderLine(sb, "Fixed_fraction", settings.fixedFraction);
+				if (settings.compoundMolecules)
+				{
+					addHeaderLine(sb, "Compound_molecules", settings.compoundText.replaceAll("\n *", ""));
+					addHeaderLine(sb, "Rotate_initial_orientation", settings.rotateInitialOrientation);
+					addHeaderLine(sb, "Rotate_during_simulation", settings.rotateDuringSimulation);
+					addHeaderLine(sb, "Enable_2D_rotation", settings.rotate2D);
+				}
+				addHeaderLine(sb, "Confinement", settings.confinement);
+				if (settings.confinement.equals(CONFINEMENT[SPHERE]))
+				{
+					addHeaderLine(sb, "Confinement_radius", settings.confinementRadius);
+				}
+				else if (settings.confinement.equals(CONFINEMENT[MASK]))
+				{
+					addHeaderLine(sb, "Confinement_radius", settings.confinementMask);
+				}
+				addHeaderLine(sb, "Photon", settings.photonsPerSecond);
+				if (settings.customPhotonDistribution)
+					addHeaderLine(sb, "Photon_distribution", settings.photonDistribution);
+				else
+					addHeaderLine(sb, "Photon_shape", settings.photonShape);
+				addHeaderLine(sb, "Correlation", settings.correlation);
+				addHeaderLine(sb, "On_time", settings.tOn);
+				addHeaderLine(sb, "Off_time_short", settings.tOffShort);
+				addHeaderLine(sb, "Off_time_long", settings.tOffLong);
+				addHeaderLine(sb, "n_Blinks_short", settings.nBlinksShort);
+				addHeaderLine(sb, "n_Blinks_long", settings.nBlinksLong);
+				addHeaderLine(sb, "n_Blinks_Geometric", settings.nBlinksGeometricDistribution);
+				addHeaderLine(sb, "Min_photons", settings.minPhotons);
+				addHeaderLine(sb, "Min_SNR_t1", settings.minSNRt1);
+				addHeaderLine(sb, "Min_SNR_tN", settings.minSNRtN);
+			}
 			resultsFileHeader = sb.toString();
 		}
 		return resultsFileHeader;
@@ -2411,6 +2566,267 @@ public class CreateData implements PlugIn, ItemListener
 		sb.append(String.format("# %-20s = %s\n", name, o.toString()));
 	}
 
+	/**
+	 * Show a dialog allowing the parameters for a simple simulation to be performed
+	 * 
+	 * @return True if the parameters were collected
+	 */
+	private boolean showSimpleDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+
+		globalSettings = SettingsManager.loadSettings();
+		settings = globalSettings.getCreateDataSettings();
+
+		// Image size
+		gd.addMessage("--- Image Size ---");
+		gd.addNumericField("Pixel_pitch (nm)", settings.pixelPitch, 2);
+		gd.addNumericField("Size (px)", settings.size, 0);
+		gd.addNumericField("Depth (nm)", settings.depth, 0);
+
+		// Noise model
+		gd.addMessage("--- Noise Model ---");
+		gd.addNumericField("Background (photons)", settings.background, 2);
+		gd.addNumericField("EM_gain", settings.getEmGain(), 2);
+		gd.addNumericField("Camera_gain (ADU/e-)", settings.getCameraGain(), 4);
+		gd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
+		gd.addNumericField("Read_noise (e-)", settings.readNoise, 2);
+		gd.addNumericField("Bias", settings.bias, 0);
+
+		// PSF Model
+		List<String> imageNames = addPSFOptions(gd);
+
+		gd.addMessage("--- Fluorophores ---");
+		Component splitLabel = gd.getMessage();
+		gd.addNumericField("Particles", settings.particles, 0);
+		gd.addNumericField("Density (um^-2)", settings.density, 2);
+		gd.addNumericField("Min_Photons", settings.photonsPerSecond, 0);
+		gd.addNumericField("Max_Photons", settings.photonsPerSecondMaximum, 0);
+
+		gd.addMessage("--- Save options ---");
+		gd.addCheckbox("Save_image", settings.saveImage);
+		gd.addCheckbox("Save_image_results", settings.saveImageResults);
+		gd.addCheckbox("Save_localisations", settings.saveLocalisations);
+
+		gd.addMessage("--- Report options ---");
+		gd.addCheckbox("Show_histograms", settings.showHistograms);
+		gd.addCheckbox("Choose_histograms", settings.chooseHistograms);
+		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
+		gd.addCheckbox("Remove_outliers", settings.removeOutliers);
+		gd.addSlider("Density_radius (nm)", 0, 2000, settings.densityRadius);
+
+		// Split into two columns
+		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
+		// to 4 columns: (label,field) x 2
+
+		if (gd.getLayout() != null)
+		{
+			GridBagLayout grid = (GridBagLayout) gd.getLayout();
+
+			int xOffset = 0, yOffset = 0;
+			int lastY = -1, rowCount = 0;
+			for (Component comp : gd.getComponents())
+			{
+				// Check if this should be the second major column
+				if (comp == splitLabel)
+				{
+					xOffset += 2;
+					yOffset -= rowCount;
+					rowCount = 0;
+				}
+				// Reposition the field
+				GridBagConstraints c = grid.getConstraints(comp);
+				if (lastY != c.gridy)
+					rowCount++;
+				lastY = c.gridy;
+				c.gridx = c.gridx + xOffset;
+				c.gridy = c.gridy + yOffset;
+				c.insets.left = c.insets.left + 10 * xOffset;
+				c.insets.top = 0;
+				c.insets.bottom = 0;
+				grid.setConstraints(comp, c);
+			}
+
+			if (IJ.isLinux())
+				gd.setBackground(new Color(238, 238, 238));
+		}
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		settings.pixelPitch = Math.abs(gd.getNextNumber());
+		settings.size = Math.abs((int) gd.getNextNumber());
+		settings.depth = Math.abs(gd.getNextNumber());
+
+		settings.background = Math.abs(gd.getNextNumber());
+		settings.setEmGain(Math.abs(gd.getNextNumber()));
+		settings.setCameraGain(Math.abs(gd.getNextNumber()));
+		settings.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
+		settings.readNoise = Math.abs(gd.getNextNumber());
+		settings.bias = Math.abs((int) gd.getNextNumber());
+
+		if (!collectPSFOptions(gd, imageNames))
+			return false;
+
+		settings.particles = Math.abs((int) gd.getNextNumber());
+		settings.density = Math.abs(gd.getNextNumber());
+		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
+		settings.photonsPerSecondMaximum = Math.abs((int) gd.getNextNumber());
+
+		settings.saveImage = gd.getNextBoolean();
+		settings.saveImageResults = gd.getNextBoolean();
+		settings.saveLocalisations = gd.getNextBoolean();
+
+		settings.showHistograms = gd.getNextBoolean();
+		settings.chooseHistograms = gd.getNextBoolean();
+		settings.histogramBins = (int) gd.getNextNumber();
+		settings.removeOutliers = gd.getNextBoolean();
+		settings.densityRadius = (float) gd.getNextNumber();
+
+		// Save before validation so that the current values are preserved.
+		SettingsManager.saveSettings(globalSettings);
+
+		if (gd.invalidNumber())
+			return false;
+
+		// Check arguments
+		try
+		{
+			Parameters.isAboveZero("Pixel Pitch", settings.pixelPitch);
+			Parameters.isAboveZero("Size", settings.size);
+			Parameters.isPositive("Depth", settings.depth);
+			Parameters.isPositive("Background", settings.background);
+			Parameters.isPositive("EM gain", settings.getEmGain());
+			Parameters.isPositive("Camera gain", settings.getCameraGain());
+			Parameters.isPositive("Read noise", settings.readNoise);
+			double noiseRange = settings.readNoise * settings.getCameraGain() * 4;
+			Parameters.isAbove(
+					"Bias must prevent clipping the read noise (@ +/- 4 StdDev) so must be above " +
+							Utils.rounded(noiseRange), settings.bias, noiseRange);
+			Parameters.isAboveZero("Particles", settings.particles);
+			Parameters.isAboveZero("Density", settings.density);
+			Parameters.isAboveZero("Min Photons", settings.photonsPerSecond);
+			Parameters.isEqualOrAbove("Max Photons", settings.photonsPerSecond, settings.photonsPerSecondMaximum);
+			if (!imagePSF)
+			{
+				Parameters.isAboveZero("Wavelength", settings.wavelength);
+				Parameters.isAboveZero("NA", settings.numericalAperture);
+				Parameters.isBelow("NA", settings.numericalAperture, 2);
+			}
+			Parameters.isAbove("Histogram bins", settings.histogramBins, 1);
+			Parameters.isPositive("Density radius", settings.densityRadius);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		return getHistogramOptions();
+	}
+
+	/**
+	 * Check if there are any suitable PSF images open. If so add a choice to allow the selection of the Gaussian or
+	 * Image PSF model. If no PSF images are open then add options for the wavelength and NA for the simulated
+	 * microscope.
+	 * 
+	 * @param gd
+	 * @return
+	 */
+	private List<String> addPSFOptions(GenericDialog gd)
+	{
+		gd.addMessage("--- PSF Model ---");
+		List<String> imageNames = PSFCombiner.createImageList();
+		if (!imageNames.isEmpty())
+		{
+			// Allow the user to select either a Gaussian or PSF model
+			gd.addChoice("PSF_model", PSF_MODELS, settings.psfModel);
+		}
+		else
+		{
+			// Default to a Gaussian
+			imagePSF = false;
+			Recorder.recordOption("PSF_model", PSF_MODELS[0]);
+			gd.addMessage(PSF_MODELS[0]);
+			settings.psfModel = PSF_MODELS[0];
+			gd.addNumericField("Wavelength (nm)", settings.wavelength, 2);
+			gd.addNumericField("Numerical_aperture", settings.numericalAperture, 2);
+		}
+		return imageNames;
+	}
+
+	/**
+	 * If there are any suitable PSF images open then get the selected PSF model and collect the parameters required to
+	 * configure it. If no PSF images are open then collect the wavelength and NA for the simulated microscope.
+	 * 
+	 * @param gd
+	 * @return
+	 */
+	private boolean collectPSFOptions(GenericDialog gd, List<String> imageNames)
+	{
+		if (!imageNames.isEmpty())
+		{
+			settings.psfModel = gd.getNextChoice();
+
+			imagePSF = settings.psfModel.equals(PSF_MODELS[1]);
+			// Show a second dialog to get the PSF parameters we need
+			GenericDialog gd2 = new GenericDialog(TITLE);
+			gd2.addMessage("Configure the " + settings.psfModel + " PSF model");
+			if (imagePSF)
+			{
+				gd2.addChoice("PSF_image", imageNames.toArray(new String[imageNames.size()]), settings.psfImageName);
+			}
+			else
+			{
+				gd2.addNumericField("Wavelength (nm)", settings.wavelength, 2);
+				gd2.addNumericField("Numerical_aperture", settings.numericalAperture, 2);
+			}
+			gd2.showDialog();
+			if (gd2.wasCanceled())
+				return false;
+			if (imagePSF)
+			{
+				settings.psfImageName = gd2.getNextChoice();
+			}
+			else
+			{
+				settings.wavelength = Math.abs(gd2.getNextNumber());
+				settings.numericalAperture = Math.abs(gd2.getNextNumber());
+			}
+		}
+		else
+		{
+			settings.wavelength = gd.getNextNumber();
+			settings.numericalAperture = gd.getNextNumber();
+		}
+		return true;
+	}
+
+	private boolean getHistogramOptions()
+	{
+		GenericDialog gd;
+		if (settings.showHistograms && settings.chooseHistograms)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Select the histograms to display");
+			for (int i = 0; i < displayHistograms.length; i++)
+				gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+			for (int i = 0; i < displayHistograms.length; i++)
+				displayHistograms[i] = gd.getNextBoolean();
+		}
+		return true;
+	}
+
+	/**
+	 * Show a dialog allowing the parameters for a simulation to be performed
+	 * 
+	 * @return True if the parameters were collected
+	 */
 	private boolean showDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -2440,21 +2856,8 @@ public class CreateData implements PlugIn, ItemListener
 		gd.addNumericField("Quantum_efficiency", settings.getQuantumEfficiency(), 2);
 		gd.addNumericField("Read_noise (e-)", settings.readNoise, 2);
 		gd.addNumericField("Bias", settings.bias, 0);
-		if (imagePSF)
-		{
-			List<String> imageNames = PSFCombiner.createImageList();
-			if (imageNames.isEmpty())
-			{
-				IJ.error(TITLE, "No suitable PSF images are open");
-				return false;
-			}
-			gd.addChoice("PSF_image", imageNames.toArray(new String[imageNames.size()]), settings.psfImageName);
-		}
-		else
-		{
-			gd.addNumericField("Wavelength (nm)", settings.wavelength, 2);
-			gd.addNumericField("Numerical_aperture", settings.numericalAperture, 2);
-		}
+
+		List<String> imageNames = addPSFOptions(gd);
 
 		gd.addMessage("--- Fluorophores ---");
 		Component splitLabel = gd.getMessage();
@@ -2555,15 +2958,8 @@ public class CreateData implements PlugIn, ItemListener
 		settings.readNoise = Math.abs(gd.getNextNumber());
 		settings.bias = Math.abs((int) gd.getNextNumber());
 
-		if (imagePSF)
-		{
-			settings.psfImageName = gd.getNextChoice();
-		}
-		else
-		{
-			settings.wavelength = Math.abs(gd.getNextNumber());
-			settings.numericalAperture = Math.abs(gd.getNextNumber());
-		}
+		if (!collectPSFOptions(gd, imageNames))
+			return false;
 
 		settings.distribution = gd.getNextChoice();
 		settings.particles = Math.abs((int) gd.getNextNumber());
@@ -2623,8 +3019,9 @@ public class CreateData implements PlugIn, ItemListener
 			Parameters.isPositive("Camera gain", settings.getCameraGain());
 			Parameters.isPositive("Read noise", settings.readNoise);
 			double noiseRange = settings.readNoise * settings.getCameraGain() * 4;
-			Parameters.isAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so", settings.bias,
-					noiseRange);
+			Parameters.isAbove(
+					"Bias must prevent clipping the read noise (@ +/- 4 StdDev) so must be above " +
+							Utils.rounded(noiseRange), settings.bias, noiseRange);
 			Parameters.isAboveZero("Particles", settings.particles);
 			Parameters.isAboveZero("Photons", settings.photonsPerSecond);
 			Parameters.isAboveZero("Photon shape", settings.photonShape);
@@ -2634,6 +3031,7 @@ public class CreateData implements PlugIn, ItemListener
 			{
 				Parameters.isAboveZero("Wavelength", settings.wavelength);
 				Parameters.isAboveZero("NA", settings.numericalAperture);
+				Parameters.isBelow("NA", settings.numericalAperture, 2);
 			}
 			Parameters.isPositive("Diffusion rate", settings.diffusionRate);
 			Parameters.isPositive("Fixed fraction", settings.fixedFraction);
@@ -2659,18 +3057,8 @@ public class CreateData implements PlugIn, ItemListener
 		if (gd.invalidNumber())
 			return false;
 
-		if (settings.showHistograms && settings.chooseHistograms)
-		{
-			gd = new GenericDialog(TITLE);
-			gd.addMessage("Select the histograms to display");
-			for (int i = 0; i < displayHistograms.length; i++)
-				gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
-			gd.showDialog();
-			if (gd.wasCanceled())
-				return false;
-			for (int i = 0; i < displayHistograms.length; i++)
-				displayHistograms[i] = gd.getNextBoolean();
-		}
+		if (!getHistogramOptions())
+			return false;
 
 		String[] maskImages = null;
 		if (settings.distribution.equals(DISTRIBUTION[MASK]))
