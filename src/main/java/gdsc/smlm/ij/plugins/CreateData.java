@@ -518,7 +518,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Get the PSF standard deviation for a Gaussian with the PSF half-width at half-maxima
+	 * Get the PSF standard deviation for a Gaussian using the PSF half-width at half-maxima
 	 * 
 	 * @return
 	 */
@@ -2023,16 +2023,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		sb.append((fluorophores == null) ? localisations.size() : fluorophores.size()).append("\t");
 		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append("\t");
 		sb.append(localisations.size()).append("\t");
-		if (imagePSF)
-		{
-			sb.append("-\t");
-		}
-		else
-		{
-			final double psfWidth = PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture,
-					PSFCalculator.DEFAULT_PROPORTIONALITY_FACTOR) / settings.pixelPitch;
-			sb.append(Utils.rounded(psfWidth, 4)).append("\t");
-		}
+		sb.append(Utils.rounded(getHWHM(), 4)).append("\t");
 		int nStats = (imagePSF) ? stats.length - 2 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
@@ -2219,7 +2210,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private String createHeader()
 	{
-		StringBuilder sb = new StringBuilder("Dataset\tMolecules\tPulses\tLocalisations\tPSF width");
+		StringBuilder sb = new StringBuilder("Dataset\tMolecules\tPulses\tLocalisations\tHWHM");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
