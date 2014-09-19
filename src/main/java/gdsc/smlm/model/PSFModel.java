@@ -30,17 +30,17 @@ public abstract class PSFModel
 
 	public PSFModel()
 	{
-		rand = new RandomDataGenerator();
+		setRandomGenerator(new RandomDataGenerator());
 	}
 
 	public PSFModel(RandomGenerator randomGenerator)
 	{
-		rand = new RandomDataGenerator(randomGenerator);
+		setRandomGenerator(randomGenerator);
 	}
 
 	public PSFModel(RandomDataGenerator randomDataGenerator)
 	{
-		rand = randomDataGenerator;
+		setRandomGenerator(randomDataGenerator);
 	}
 
 	/**
@@ -427,4 +427,28 @@ public abstract class PSFModel
 	 * @return the FWHM of the PSF
 	 */
 	public abstract double getFwhm();
+
+	/**
+	 * Set the random generator used for the random data generator to create data
+	 * 
+	 * @param randomGenerator
+	 */
+	public void setRandomGenerator(RandomGenerator randomGenerator)
+	{
+		if (randomGenerator == null)
+			throw new IllegalArgumentException("Random generator was null");
+		rand = new RandomDataGenerator(randomGenerator);
+	}
+
+	/**
+	 * Set the random data generator used to create data
+	 * 
+	 * @param randomGenerator
+	 */
+	public void setRandomGenerator(RandomDataGenerator randomDataGenerator)
+	{
+		if (randomDataGenerator == null)
+			throw new IllegalArgumentException("Random generator was null");
+		rand = randomDataGenerator;
+	}
 }

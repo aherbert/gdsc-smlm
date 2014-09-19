@@ -55,6 +55,23 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
+	 * @param randomGenerator
+	 * @param s0
+	 *            The Gaussian standard deviation dimension 0
+	 * @param s1
+	 *            The Gaussian standard deviation dimension 1
+	 * @param zDepth
+	 *            the Z-depth where the 3D PSF is twice the width (2 x FWHM)
+	 */
+	public GaussianPSFModel(RandomGenerator randomGenerator, double s0, double s1, double zDepth)
+	{
+		super(randomGenerator);
+		this.zeroS0 = s0;
+		this.zeroS1 = s1;
+		this.zDepth = zDepth;
+	}
+	
+	/**
 	 * @param randomDataGenerator
 	 * @param s0
 	 *            The Gaussian standard deviation dimension 0

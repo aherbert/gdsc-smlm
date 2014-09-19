@@ -22,12 +22,14 @@ public class PSFSettings
 	public double nmPerPixel = 100;
 	public double nmPerSlice = 20;
 	public int nImages = 1;
+	public double fwhm = 1;
 
-	public PSFSettings(int zCentre, double nmPerPixel, double nmPerSlice, int nImages)
+	public PSFSettings(int zCentre, double nmPerPixel, double nmPerSlice, int nImages, double fwhm)
 	{
 		this.zCentre = zCentre;
 		this.nmPerPixel = nmPerPixel;
 		this.nmPerSlice = nmPerSlice;
 		this.nImages = nImages;
+		this.fwhm = fwhm;
 	}
 }

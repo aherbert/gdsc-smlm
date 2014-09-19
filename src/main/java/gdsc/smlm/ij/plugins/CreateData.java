@@ -186,6 +186,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private AtomicInteger t1Removed;
 	private AtomicInteger tNRemoved;
 	private boolean imagePSF;
+	private double hwhm = 0;
 
 	private TreeSet<Integer> movingMolecules;
 	private boolean maskListContainsStacks;
@@ -488,26 +489,73 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private UniformDistribution createUniformDistributionWithPSFWidthBorder()
 	{
-		double psfWidth = getPSFWidth();
-		double border = psfWidth * 5;
+		double border = getHWHM() * 3;
 		border = Math.min(border, settings.size / 4);
 		return createUniformDistribution(border);
 	}
 
 	/**
-	 * Get the PSF width
+	 * Get the PSF half-width at half-maxima
 	 * 
 	 * @return
 	 */
-	private double getPSFWidth()
+	private double getHWHM()
 	{
-		if (imagePSF)
+		if (hwhm == 0)
 		{
-			// Assume the width is 1 pixel. This could be changed to have the PSF model report its FHWM.
-			return 1;
+			if (imagePSF)
+			{
+				hwhm = getImageHWHM();
+			}
+			else
+			{
+				hwhm = 0.5 *
+						PSFCalculator.calculateWidth(settings.wavelength, settings.numericalAperture,
+								PSFCalculator.DEFAULT_PROPORTIONALITY_FACTOR) / settings.pixelPitch;
+			}
 		}
-		return PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture,
-				PSFCalculator.DEFAULT_PROPORTIONALITY_FACTOR) / settings.pixelPitch;
+		return hwhm;
+	}
+
+	/**
+	 * Get the PSF standard deviation for a Gaussian with the PSF half-width at half-maxima
+	 * 
+	 * @return
+	 */
+	private double getPsfSD()
+	{
+		return 2.0 * getHWHM() / PSFCalculator.SD_TO_FWHM_FACTOR;
+	}
+	
+	/**
+	 * Get the PSF half-width at half-maxima from the Image PSF
+	 * 
+	 * @return
+	 */
+	private double getImageHWHM()
+	{
+		ImagePlus imp = WindowManager.getImage(settings.psfImageName);
+		if (imp == null)
+		{
+			IJ.error(TITLE, "Unable to create the PSF model from image: " + settings.psfImageName);
+			return -1;
+		}
+		Object o = XmlUtils.fromXML(imp.getProperty("Info").toString());
+		if (!(o != null && o instanceof PSFSettings))
+		{
+			IJ.error(TITLE, "Unknown PSF settings for image: " + imp.getTitle());
+			return -1;
+		}
+		PSFSettings psfSettings = (PSFSettings) o;
+		if (psfSettings.fwhm <= 0 || psfSettings.nmPerPixel <= 0)
+		{
+			IJ.error(TITLE, "Unknown PSF settings for image: " + imp.getTitle());
+			return -1;
+		}
+
+		// The width of the PSF is specified in pixels of the PSF image. Convert to the pixels of the 
+		// output image
+		return 0.5 * psfSettings.fwhm * psfSettings.nmPerPixel / settings.pixelPitch;
 	}
 
 	/**
@@ -951,8 +999,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Display image
 		ImageStack stack = new ImageStack(settings.size, settings.size, maxT);
 
-		final double psfWidth = PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture,
-				PSFCalculator.DEFAULT_PROPORTIONALITY_FACTOR) / settings.pixelPitch;
+		final double psfSD = getPsfSD();
+		if (psfSD <= 0)
+			return null;
 		ImagePSFModel imagePSFModel = null;
 
 		if (imagePSF)
@@ -988,7 +1037,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				lastT = l.getTime();
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, i, lastT,
-						createPSFModel(psfWidth, imagePSFModel), results, stack)));
+						createPSFModel(psfSD, imagePSFModel), results, stack)));
 			}
 			i++;
 		}
@@ -1105,7 +1154,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		results.setSource(new IJImageSource(imp));
 		results.setName(title + " (" + TITLE + ")");
-		results.setConfiguration(createConfiguration((float) psfWidth));
+		results.setConfiguration(createConfiguration((float) psfSD));
 		results.setBounds(new Rectangle(0, 0, settings.size, settings.size));
 		MemoryPeakResults.addResults(results);
 
@@ -1120,6 +1169,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return localisations;
 	}
 
+	/**
+	 * Create a PSF model from the image that contains all the z-slices needed to draw the given localisations
+	 * 
+	 * @param localisationSets
+	 * @return
+	 */
 	private ImagePSFModel createImagePSF(List<LocalisationModelSet> localisationSets)
 	{
 		ImagePlus imp = WindowManager.getImage(settings.psfImageName);
@@ -1142,6 +1197,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				throw new RuntimeException("Missing nmPerSlice calibration settings for image: " + imp.getTitle());
 			if (psfSettings.zCentre <= 0)
 				throw new RuntimeException("Missing zCentre calibration settings for image: " + imp.getTitle());
+			if (psfSettings.fwhm <= 0)
+				throw new RuntimeException("Missing FWHM calibration settings for image: " + imp.getTitle());
 
 			// To save memory construct the Image PSF using only the slices that are within 
 			// the depth of field of the simulation
@@ -1170,7 +1227,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			end = (end < 0) ? 0 : (end >= nSlices) ? nSlices - 1 : end;
 
 			return new ImagePSFModel(extractImageStack(imp, start, end), zCentre - start, psfSettings.nmPerPixel /
-					settings.pixelPitch, unitsPerSlice);
+					settings.pixelPitch, unitsPerSlice, psfSettings.fwhm);
 		}
 		catch (Exception e)
 		{
@@ -1191,18 +1248,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return image;
 	}
 
-	private PSFModel createPSFModel(double psfWidth, ImagePSFModel imagePSFModel)
+	private PSFModel createPSFModel(double sd, ImagePSFModel imagePSFModel)
 	{
 		if (imagePSF)
 		{
-			return imagePSFModel.copy();
+			PSFModel copy = imagePSFModel.copy();
+			copy.setRandomGenerator(createRandomGenerator());
+			return copy;
 		}
 		else
 		{
 			// TODO - Calibrate this correctly using our microscope parameters
 			// Set the 2 x FWHM using 500nm
-			RandomDataGenerator random = new RandomDataGenerator();
-			return new GaussianPSFModel(random, psfWidth, psfWidth, 500.0 / settings.pixelPitch);
+			return new GaussianPSFModel(createRandomGenerator(), sd, sd, 500.0 / settings.pixelPitch);
 		}
 	}
 
@@ -1938,10 +1996,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final ArrayList<float[]> coords = new ArrayList<float[]>();
 				int t = results.getResults().get(0).peak;
 				final Statistics densityStats = stats[DENSITY];
-				final float radius = (float) (settings.densityRadius / settings.pixelPitch);
+				final float radius = (float) (settings.densityRadius * getHWHM());
 				final Rectangle bounds = results.getBounds();
 				currentIndex = 0;
 				finalIndex = results.getResults().get(results.getResults().size() - 1).peak;
+				// TODO - Split results into singles (density = 0) and clustered (density > 0) 
 				for (PeakResult r : results.getResults())
 				{
 					if (t != r.peak)
@@ -2670,7 +2729,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addCheckbox("Choose_histograms", settings.chooseHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 		gd.addCheckbox("Remove_outliers", settings.removeOutliers);
-		gd.addSlider("Density_radius (nm)", 0, 2000, settings.densityRadius);
+		gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.densityRadius);
 
 		// Split into two columns
 		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
@@ -2954,7 +3013,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addCheckbox("Choose_histograms", settings.chooseHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 		gd.addCheckbox("Remove_outliers", settings.removeOutliers);
-		gd.addSlider("Density_radius (nm)", 0, 2000, settings.densityRadius);
+		gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.densityRadius);
 
 		// Split into two columns
 		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
