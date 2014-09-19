@@ -36,6 +36,7 @@ public class ImagePSFModel extends PSFModel
 	private double halfPsfWidthInPixels;
 	private double unitsPerPixel;
 	private double unitsPerSlice;
+	private double fwhm;
 
 	/**
 	 * @param image
@@ -46,19 +47,24 @@ public class ImagePSFModel extends PSFModel
 	 *            The distance between adjacent X/Y pixels
 	 * @param unitsPerSlice
 	 *            The distance between adjacent Z pixels
+	 * @param fwhm
+	 *            The full-width at half-maximum for the z-centre
 	 */
-	public ImagePSFModel(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice)
+	public ImagePSFModel(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice, double fwhm)
 	{
 		super();
-		init(image, zCentre, unitsPerPixel, unitsPerSlice);
+		init(image, zCentre, unitsPerPixel, unitsPerSlice, fwhm);
 	}
 
+	/**
+	 * Private constructor used in the {@link #copy()} method
+	 */
 	private ImagePSFModel()
 	{
 		super();
 	}
 
-	private void init(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice)
+	private void init(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice, double fwhm)
 	{
 		if (image == null || image.length == 0)
 			throw new IllegalArgumentException("Image cannot be null/empty");
@@ -188,30 +194,42 @@ public class ImagePSFModel extends PSFModel
 
 	/**
 	 * @param randomGenerator
-	 * @param s0
-	 *            The Gaussian standard deviation dimension 0
-	 * @param s1
-	 *            The Gaussian standard deviation dimension 1
+	 * @param image
+	 *            The image consisting of a stack of square pixel buffers. The buffers are stored in YX order.
+	 * @param zCentre
+	 *            The centre of the PSF image
+	 * @param unitsPerPixel
+	 *            The distance between adjacent X/Y pixels
+	 * @param unitsPerSlice
+	 *            The distance between adjacent Z pixels
+	 * @param fwhm
+	 *            The full-width at half-maximum for the z-centre
 	 */
 	public ImagePSFModel(RandomGenerator randomGenerator, float[][] image, int zCentre, double unitsPerPixel,
-			double unitsPerSlice)
+			double unitsPerSlice, double fwhm)
 	{
 		super(randomGenerator);
-		init(image, zCentre, unitsPerPixel, unitsPerSlice);
+		init(image, zCentre, unitsPerPixel, unitsPerSlice, fwhm);
 	}
 
 	/**
 	 * @param randomDataGenerator
-	 * @param s0
-	 *            The Gaussian standard deviation dimension 0
-	 * @param s1
-	 *            The Gaussian standard deviation dimension 1
+	 * @param image
+	 *            The image consisting of a stack of square pixel buffers. The buffers are stored in YX order.
+	 * @param zCentre
+	 *            The centre of the PSF image
+	 * @param unitsPerPixel
+	 *            The distance between adjacent X/Y pixels
+	 * @param unitsPerSlice
+	 *            The distance between adjacent Z pixels
+	 * @param fwhm
+	 *            The full-width at half-maximum for the z-centre
 	 */
 	public ImagePSFModel(RandomDataGenerator randomDataGenerator, float[][] image, int zCentre, double unitsPerPixel,
-			double unitsPerSlice)
+			double unitsPerSlice, double fwhm)
 	{
 		super(randomDataGenerator);
-		init(image, zCentre, unitsPerPixel, unitsPerSlice);
+		init(image, zCentre, unitsPerPixel, unitsPerSlice, fwhm);
 	}
 
 	/*
@@ -482,6 +500,16 @@ public class ImagePSFModel extends PSFModel
 		return x;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.PSFModel#getFwhm()
+	 */
+	public double getFwhm()
+	{
+		return fwhm;
+	}
+
 	/**
 	 * Produce a shallow copy of this object. This shares the pre-computed PSF image data but will allow
 	 * the copy to store its own version of the most recently created PSF. The copy has a new random data generator.
@@ -499,6 +527,7 @@ public class ImagePSFModel extends PSFModel
 		model.halfPsfWidthInPixels = halfPsfWidthInPixels;
 		model.unitsPerPixel = unitsPerPixel;
 		model.unitsPerSlice = unitsPerSlice;
+		model.fwhm = fwhm;
 		return model;
 	}
 }

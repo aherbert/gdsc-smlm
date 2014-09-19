@@ -399,4 +399,14 @@ public class GaussianPSFModel extends PSFModel
 	{
 		return s1;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.PSFModel#getFwhm()
+	 */
+	public double getFwhm()
+	{
+		return (s0 + s1) * Math.sqrt(2.0 * Math.log(2.0));
+	}
 }

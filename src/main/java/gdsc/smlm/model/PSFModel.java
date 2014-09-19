@@ -420,4 +420,11 @@ public abstract class PSFModel
 			}
 		}
 	}
+
+	/**
+	 * Get the Full-Width at Half-Maximum (FWHM) of the PSF
+	 * 
+	 * @return the FWHM of the PSF
+	 */
+	public abstract double getFwhm();
 }
