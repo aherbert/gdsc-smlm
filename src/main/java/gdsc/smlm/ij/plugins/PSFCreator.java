@@ -1471,8 +1471,8 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		{
 			// Get the bounds
 			int radius = (int) Math.round(fittedSd * factor);
-			int min = psf.getWidth() / 2 - radius;
-			int max = psf.getWidth() / 2 + radius;
+			int min = Math.max(0, psf.getWidth() / 2 - radius);
+			int max = Math.min(psf.getWidth() - 1, psf.getWidth() / 2 + radius);
 
 			// Create a circle mask of the PSF projection
 			ByteProcessor circle = new ByteProcessor(max - min + 1, max - min + 1);
@@ -1492,13 +1492,14 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 					int index = y * psf.getWidth() + min;
 					for (int x = min; x <= max; x++, ii++, index++)
 					{
-						if (mask[ii] != 0)
+						if (mask[ii] != 0 && data[index] > 0)
 							sum += data[index];
 					}
 				}
 				double total = 0;
 				for (float f : data)
-					total += f;
+					if (f > 0)
+						total += f;
 				signalZ[i] = i + 1;
 				signal[i] = 100 * sum / total;
 			}
@@ -1657,7 +1658,8 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		double[] signal = new double[distances.length];
 		for (int i = 0; i < data.length; i++)
 		{
-			signal[indexLookup[i]] += data[i];
+			if (data[i] > 0)
+				signal[indexLookup[i]] += data[i];
 		}
 
 		// Get the cumulative signal
@@ -1729,7 +1731,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		double[] p3 = new double[size];
 		double[] p4 = new double[size];
 		ImageProcessor ip = psf.getProcessor(maxz);
-		for (int i = 0, j=size-1; i < size; i++, j--)
+		for (int i = 0, j = size - 1; i < size; i++, j--)
 		{
 			p0[i] = i;
 			p1[i] = (ip.getf(i, cx) + ip.getf(i, cx2)) / 2.0;
@@ -1740,8 +1742,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 		// Find the FWHM for each line profile.
 		// Diagonals need to be scaled to the appropriate distance.
-		return (getFWHM(p0, p1) + getFWHM(p0, p2) + 
-				Math.sqrt(2)*getFWHM(p0, p3) + Math.sqrt(2)*getFWHM(p0, p4)) / 4.0;
+		return (getFWHM(p0, p1) + getFWHM(p0, p2) + Math.sqrt(2) * getFWHM(p0, p3) + Math.sqrt(2) * getFWHM(p0, p4)) / 4.0;
 	}
 
 	private double getFWHM(double[] x, double[] y)
@@ -1757,6 +1758,9 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				position = i;
 			}
 		}
+
+		if (max == 0)
+			return y.length;
 
 		// Store half-max
 		max *= 0.5;
@@ -1787,7 +1791,6 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			}
 		}
 
-		Utils.log("FWHM = %f", p2-p1);
 		return p2 - p1;
 	}
 }
