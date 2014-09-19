@@ -1013,8 +1013,12 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		nmPerPixel = settings.getCalibration().nmPerPixel;
 		config = settings.getFitEngineConfiguration();
 		fitConfig = config.getFitConfiguration();
-		boxRadius = (int) Math.ceil(radius *
-				Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()));
+		if (radius < 5 * Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))
+		{
+			radius = 5 * Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+			Utils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", Utils.rounded(radius));
+		}
+		boxRadius = (int) Math.ceil(radius);
 	}
 
 	/**
@@ -1722,16 +1726,22 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		double[] p0 = new double[size];
 		double[] p1 = new double[size];
 		double[] p2 = new double[size];
+		double[] p3 = new double[size];
+		double[] p4 = new double[size];
 		ImageProcessor ip = psf.getProcessor(maxz);
-		for (int i = 0; i < size; i++)
+		for (int i = 0, j=size-1; i < size; i++, j--)
 		{
 			p0[i] = i;
 			p1[i] = (ip.getf(i, cx) + ip.getf(i, cx2)) / 2.0;
 			p2[i] = (ip.getf(cx, i) + ip.getf(cx2, i)) / 2.0;
+			p3[i] = ip.getf(i, i);
+			p4[i] = ip.getf(i, j);
 		}
 
-		// Find the FWHM for each line profile
-		return (getFWHM(p0, p1) + getFWHM(p0, p2)) / 2.0;
+		// Find the FWHM for each line profile.
+		// Diagonals need to be scaled to the appropriate distance.
+		return (getFWHM(p0, p1) + getFWHM(p0, p2) + 
+				Math.sqrt(2)*getFWHM(p0, p3) + Math.sqrt(2)*getFWHM(p0, p4)) / 4.0;
 	}
 
 	private double getFWHM(double[] x, double[] y)
@@ -1747,7 +1757,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				position = i;
 			}
 		}
-		
+
 		// Store half-max
 		max *= 0.5;
 
@@ -1757,26 +1767,27 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 		// Find points defining the half-max
 		double p1 = 0, p2 = y.length;
-		
+
 		for (int i = position; i < y.length; i++)
 		{
 			if (y[i] < max)
 			{
 				// Interpolate:
-				p2 = i - (max - y[i]) / (y[i-1] - y[i]);
+				p2 = i - (max - y[i]) / (y[i - 1] - y[i]);
 				break;
 			}
 		}
-		for (int i = position; i-- > 0; )
+		for (int i = position; i-- > 0;)
 		{
 			if (y[i] < max)
 			{
 				// Interpolate:
-				p1 = i + (max - y[i]) / (y[i+1] - y[i]);
+				p1 = i + (max - y[i]) / (y[i + 1] - y[i]);
 				break;
 			}
 		}
 
+		Utils.log("FWHM = %f", p2-p1);
 		return p2 - p1;
 	}
 }
