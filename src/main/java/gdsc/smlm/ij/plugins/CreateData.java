@@ -38,6 +38,7 @@ import gdsc.smlm.model.MaskDistribution3D;
 import gdsc.smlm.model.MoleculeModel;
 import gdsc.smlm.model.PSFModel;
 import gdsc.smlm.model.RadialFalloffIllumination;
+import gdsc.smlm.model.RandomGeneratorFactory;
 import gdsc.smlm.model.SpatialDistribution;
 import gdsc.smlm.model.SpatialIllumination;
 import gdsc.smlm.model.SphericalDistribution;
@@ -103,6 +104,7 @@ import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.SobolSequenceGenerator;
 import org.apache.commons.math3.random.Well44497b;
 
 import com.thoughtworks.xstream.XStream;
@@ -111,16 +113,18 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 /**
  * Creates data using a simulated PSF
  */
-public class CreateData implements PlugIn, ItemListener
+public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
 	private static final String TITLE = "Create Data";
 
 	private static String[] ILLUMINATION = { "Uniform", "Radial" };
 	private static int RADIAL = 1;
-	private static String[] DISTRIBUTION = { "Uniform", "Mask", "Grid" };
+	private static String[] DISTRIBUTION = { "Uniform RNG", "Uniform Halton", "Uniform Sobol", "Mask", "Grid" };
 	//private static int UNIFORM = 0;
-	private static int MASK = 1;
-	private static int GRID = 2;
+	private static int UNIFORM_HALTON = 1;
+	private static int UNIFORM_SOBOL = 2;
+	private static int MASK = 3;
+	private static int GRID = 4;
 	private static String[] CONFINEMENT = { "None", "Mask", "Sphere" };
 	private static int SPHERE = 2;
 
@@ -217,6 +221,9 @@ public class CreateData implements PlugIn, ItemListener
 		// Each fluorophore contains the on and off times when light was emitted 
 		List<? extends FluorophoreSequenceModel> fluorophores = null;
 
+		// TODO - PSF Model to have getFWHM() method - use this to configure the border
+		// TODO - Label spots as singles or clustered using the PSF width and save these to diff results sets 
+
 		if (simpleMode)
 		{
 			if (!showSimpleDialog())
@@ -244,7 +251,7 @@ public class CreateData implements PlugIn, ItemListener
 
 			final int range = settings.photonsPerSecondMaximum - settings.photonsPerSecond + 1;
 			if (range > 1)
-				random = getRandomGenerator();
+				random = createRandomGenerator();
 
 			// Add frames at the specified density until the number of particles has been reached
 			int id = 0;
@@ -307,7 +314,7 @@ public class CreateData implements PlugIn, ItemListener
 					settings.tOffLong * settings.stepsPerSecond / 1000.0, settings.nBlinksShort, settings.nBlinksLong);
 			imageModel.setUseGridWalk(settings.useGridWalk);
 			imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
-			imageModel.setRandomGenerator(getRandomGenerator());
+			imageModel.setRandomGenerator(createRandomGenerator());
 			imageModel.setPhotonShapeParameter(settings.photonShape);
 			imageModel.setPhotonBudgetPerFrame(true);
 			imageModel.setRotation2D(settings.rotate2D);
@@ -517,10 +524,24 @@ public class CreateData implements PlugIn, ItemListener
 		double[] min = new double[3];
 		for (int i = 0; i < 3; i++)
 			min[i] = -max[i];
+
 		// Try using different distributions:
-		UniformDistribution distribution = new UniformDistribution(min, max, getRandomGenerator().nextInt());
-		//SpatialDistribution distribution = new UniformDistribution(min, max, new SobolSequenceGenerator(3));
-		//distribution.setRandomGenerator(getRandomGenerator());
+		final RandomGenerator rand1 = createRandomGenerator();
+
+		if (settings.distribution.equals(DISTRIBUTION[UNIFORM_HALTON]))
+		{
+			return new UniformDistribution(min, max, rand1.nextInt());
+		}
+
+		if (settings.distribution.equals(DISTRIBUTION[UNIFORM_SOBOL]))
+		{
+			SobolSequenceGenerator rvg = new SobolSequenceGenerator(3);
+			rvg.skipTo(rand1.nextInt());
+			return new UniformDistribution(min, max, rvg);
+		}
+
+		// Create a distribution using random generators for each dimension 
+		UniformDistribution distribution = new UniformDistribution(min, max, this);
 		return distribution;
 	}
 
@@ -626,7 +647,7 @@ public class CreateData implements PlugIn, ItemListener
 
 						// Create the distribution using the recommended number of bins
 						final int binCount = stats.getN() / 10;
-						EmpiricalDistribution dist = new EmpiricalDistribution(binCount, getRandomGenerator());
+						EmpiricalDistribution dist = new EmpiricalDistribution(binCount, createRandomGenerator());
 						dist.load(values);
 						return dist;
 					}
@@ -1900,29 +1921,42 @@ public class CreateData implements PlugIn, ItemListener
 			//stats[T_OFF].add(0);
 		}
 
-		// Compute density per frame
-		if (results != null && settings.densityRadius > 0)
+		if (results != null)
 		{
-			IJ.showStatus("Calculating density ...");
-			lastT = results.getResults().get(results.getResults().size() - 1).peak;
-			ArrayList<float[]> coords = new ArrayList<float[]>();
-			int t = results.getResults().get(0).peak;
 			final double gain = settings.getTotalGain();
 			for (PeakResult r : results.getResults())
 			{
-				if (t != r.peak)
-				{
-					IJ.showProgress(t, lastT);
-					calculateDensity(stats, coords);
-					coords.clear();
-				}
-				coords.add(new float[] { r.getXPosition(), r.getYPosition() });
-				t = r.peak;
 				stats[PRECISION].add(r.getPrecision(settings.pixelPitch, gain));
 				stats[WIDTH].add(r.getWidth());
 			}
-			calculateDensity(stats, coords);
-			IJ.showProgress(1);
+			// Compute density per frame. Multithread for speed
+			if (settings.densityRadius > 0)
+			{
+				IJ.showStatus("Calculating density ...");
+				ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+				List<Future<?>> futures = new LinkedList<Future<?>>();
+				final ArrayList<float[]> coords = new ArrayList<float[]>();
+				int t = results.getResults().get(0).peak;
+				final Statistics densityStats = stats[DENSITY];
+				final float radius = (float) (settings.densityRadius / settings.pixelPitch);
+				final Rectangle bounds = results.getBounds();
+				currentIndex = 0;
+				finalIndex = results.getResults().get(results.getResults().size() - 1).peak;
+				for (PeakResult r : results.getResults())
+				{
+					if (t != r.peak)
+					{
+						runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds);
+					}
+					coords.add(new float[] { r.getXPosition(), r.getYPosition() });
+					t = r.peak;
+				}
+				runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds);
+				Utils.waitForCompletion(futures);
+				threadPool.shutdownNow();
+				threadPool = null;
+				IJ.showProgress(1);
+			}
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -1987,20 +2021,41 @@ public class CreateData implements PlugIn, ItemListener
 		IJ.showStatus("");
 	}
 
-	private void calculateDensity(Statistics[] stats, ArrayList<float[]> coords)
+	private void runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
+			final ArrayList<float[]> coords, final Statistics densityStats, final float radius, final Rectangle bounds)
 	{
-		float[] xCoords = new float[coords.size()];
-		float[] yCoords = new float[xCoords.length];
+		final float[] xCoords = new float[coords.size()];
+		final float[] yCoords = new float[xCoords.length];
 		for (int i = 0; i < xCoords.length; i++)
 		{
 			float[] xy = coords.get(i);
 			xCoords[i] = xy[0];
 			yCoords[i] = xy[1];
 		}
-		DensityManager dm = new DensityManager(xCoords, yCoords, results.getBounds());
-		int[] density = dm.calculateDensity((float) (settings.densityRadius / settings.pixelPitch), true);
-		for (int i : density)
-			stats[DENSITY].add(i);
+		futures.add(threadPool.submit(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				incrementProgress();
+				final DensityManager dm = new DensityManager(xCoords, yCoords, bounds);
+				final int[] density = dm.calculateDensity(radius, true);
+				addDensity(densityStats, density);
+			}
+		}));
+		coords.clear();
+	}
+
+	private int currentIndex, finalIndex;
+
+	private synchronized void incrementProgress()
+	{
+		IJ.showProgress(currentIndex, finalIndex);
+	}
+
+	private synchronized void addDensity(Statistics stats, int[] density)
+	{
+		stats.add(density);
 	}
 
 	private boolean[] getChoosenHistograms()
@@ -2598,6 +2653,8 @@ public class CreateData implements PlugIn, ItemListener
 
 		gd.addMessage("--- Fluorophores ---");
 		Component splitLabel = gd.getMessage();
+		// Do not allow grid or mask distribution
+		gd.addChoice("Distribution", Arrays.copyOf(DISTRIBUTION, DISTRIBUTION.length - 2), settings.distribution);
 		gd.addNumericField("Particles", settings.particles, 0);
 		gd.addNumericField("Density (um^-2)", settings.density, 2);
 		gd.addNumericField("Min_Photons", settings.photonsPerSecond, 0);
@@ -2670,6 +2727,7 @@ public class CreateData implements PlugIn, ItemListener
 		if (!collectPSFOptions(gd, imageNames))
 			return false;
 
+		settings.distribution = gd.getNextChoice();
 		settings.particles = Math.abs((int) gd.getNextNumber());
 		settings.density = Math.abs(gd.getNextNumber());
 		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
@@ -3394,11 +3452,22 @@ public class CreateData implements PlugIn, ItemListener
 	/**
 	 * Get a random generator. The generators used in the simulation can be adjusted by changing this method.
 	 * 
+	 * @param seedAddition
+	 *            Added to the seed generated from the system time
 	 * @return A random generator
 	 */
-	private RandomGenerator getRandomGenerator()
+	private RandomGenerator createRandomGenerator(int seedAddition)
 	{
-		return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+		return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this) + seedAddition);
 		//return new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+	}
+
+	private int seedAddition = 0;
+
+	@Override
+	public RandomGenerator createRandomGenerator()
+	{
+		// Increment the seed to ensure that new generators are created at the same system time point
+		return createRandomGenerator(seedAddition++);
 	}
 }

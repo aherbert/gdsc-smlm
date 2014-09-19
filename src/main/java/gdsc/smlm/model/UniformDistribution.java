@@ -61,19 +61,37 @@ public class UniformDistribution implements SpatialDistribution
 	private double[] min, max, range;
 	private RandomVectorGenerator vectorGenerator;
 
+	/**
+	 * Create a new uniform distribution using a Halton sequence. The minimum bounds are set to zero.
+	 * 
+	 * @param max
+	 *            The maximum bounds for the distribution
+	 */
 	public UniformDistribution(double[] max)
 	{
 		init(min, max, null);
 	}
 
+	/**
+	 * Create a new uniform distribution using a Halton sequence
+	 * 
+	 * @param min
+	 *            The minimum bounds for the distribution
+	 * @param max
+	 *            The maximum bounds for the distribution
+	 */
 	public UniformDistribution(double[] min, double[] max)
 	{
 		init(min, max, null);
 	}
 
 	/**
+	 * Create a new uniform distribution using a Halton sequence
+	 * 
 	 * @param min
+	 *            The minimum bounds for the distribution
 	 * @param max
+	 *            The maximum bounds for the distribution
 	 * @param seed
 	 *            Start at the i-th point in the Halton sequence
 	 */
@@ -89,8 +107,12 @@ public class UniformDistribution implements SpatialDistribution
 	}
 
 	/**
+	 * Create a new uniform distribution using the given vector generator
+	 * 
 	 * @param min
+	 *            The minimum bounds for the distribution
 	 * @param max
+	 *            The maximum bounds for the distribution
 	 * @param randomVectorGenerator
 	 *            Must produce vectors with dimension 3 (or above)
 	 */
@@ -100,10 +122,14 @@ public class UniformDistribution implements SpatialDistribution
 	}
 
 	/**
+	 * Create a new uniform distribution using a new random number generator from the factory for each dimension
+	 * 
 	 * @param min
+	 *            The minimum bounds for the distribution
 	 * @param max
-	 * @param randomVectorGenerator
-	 *            Must produce vectors with dimension 3 (or above)
+	 *            The maximum bounds for the distribution
+	 * @param randomGeneratorFactory
+	 *            Must produce random number generators with uniform random numbers in the domain [0,1]
 	 */
 	public UniformDistribution(double[] min, double[] max, RandomGeneratorFactory randomGeneratorFactory)
 	{
