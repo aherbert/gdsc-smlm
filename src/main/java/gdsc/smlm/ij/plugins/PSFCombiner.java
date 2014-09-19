@@ -253,10 +253,12 @@ public class PSFCombiner implements PlugIn
 		imp.resetDisplayRange();
 		imp.updateAndDraw();
 
-		imp.setProperty("Info", XmlUtils.toXML(new PSFSettings(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages)));
+		final double fwhm = getFWHM();
+		imp.setProperty("Info",
+				XmlUtils.toXML(new PSFSettings(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
 
-		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images\n", imp.getTitle(), imp.getSlice(),
-				Utils.rounded(nmPerPixel, 3), Utils.rounded(nmPerSlice, 3), totalImages);
+		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
+				imp.getSlice(), Utils.rounded(nmPerPixel), Utils.rounded(nmPerSlice), totalImages, Utils.rounded(fwhm));
 	}
 
 	private double getNmPerPixel()
@@ -281,6 +283,16 @@ public class PSFCombiner implements PlugIn
 				return -1;
 			}
 		return nmPerSlice;
+	}
+
+	private double getFWHM()
+	{
+		double fwhm = 0;
+		for (PSF psf : input)
+		{
+			fwhm += psf.psfSettings.fwhm;
+		}
+		return fwhm / input.size();
 	}
 
 	private class PSF

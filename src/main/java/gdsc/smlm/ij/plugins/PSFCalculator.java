@@ -36,6 +36,11 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * University of Sussex. The Gaussian PSF Standard Deviation = f * lambda / (2 * NA).
 	 */
 	public static final double DEFAULT_PROPORTIONALITY_FACTOR = 1.52;
+	
+	/**
+	 * The factor for convering a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
+	 */
+	public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
 
 	private PSFCalculatorSettings settings;
 	private GenericDialog gd;
@@ -196,7 +201,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	public static double calculateStdDev(double wavelength, double numericalAperture, double proportionalityFactor)
 	{
 		double fwhm = calculateWidth(wavelength, numericalAperture, proportionalityFactor);
-		return fwhm / (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
+		return fwhm / SD_TO_FWHM_FACTOR;
 	}
 
 	/**

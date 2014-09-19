@@ -453,7 +453,8 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 		// Add Image properties containing the PSF details
 		psfImp.setProperty("Info",
-				XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, centres.size())));
+				XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, centres.size(),
+						PSFCalculator.SD_TO_FWHM_FACTOR * fittedSd)));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm\n", psfImp.getTitle(),
 				maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3), centres.size(),
