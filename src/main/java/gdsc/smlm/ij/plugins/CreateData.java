@@ -384,6 +384,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		//convertRelativeToAbsolute(molecules);
 		saveFluorophores(fluorophores);
+		saveImageResults(results);
 		saveLocalisations(localisations);
 
 		// The settings for the filenames may have changed
@@ -526,7 +527,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		return 2.0 * getHWHM() / PSFCalculator.SD_TO_FWHM_FACTOR;
 	}
-	
+
 	/**
 	 * Get the PSF half-width at half-maxima from the Image PSF
 	 * 
@@ -1158,7 +1159,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setBounds(new Rectangle(0, 0, settings.size, settings.size));
 		MemoryPeakResults.addResults(results);
 
-		saveImageResults(results);
 		List<LocalisationModel> localisations = toLocalisations(localisationSets);
 
 		savePulses(localisations, results, title);
@@ -2000,21 +2000,38 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final Rectangle bounds = results.getBounds();
 				currentIndex = 0;
 				finalIndex = results.getResults().get(results.getResults().size() - 1).peak;
-				// TODO - Split results into singles (density = 0) and clustered (density > 0) 
+				// Store the density for each result.
+				int[] allDensity = new int[results.size()];
+				int allIndex = 0;
 				for (PeakResult r : results.getResults())
 				{
 					if (t != r.peak)
 					{
-						runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds);
+						allIndex += runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds,
+								allDensity, allIndex);
 					}
 					coords.add(new float[] { r.getXPosition(), r.getYPosition() });
 					t = r.peak;
 				}
-				runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds);
+				runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds, allDensity, allIndex);
 				Utils.waitForCompletion(futures);
 				threadPool.shutdownNow();
 				threadPool = null;
 				IJ.showProgress(1);
+
+				// Split results into singles (density = 0) and clustered (density > 0)
+				MemoryPeakResults singles = copyMemoryPeakResults("Singles");
+				MemoryPeakResults clustered = copyMemoryPeakResults("Clustered");;
+				int i=0;
+				for (PeakResult r : results.getResults())
+				{
+					// Store density in the original value field
+					r.origValue = allDensity[i];
+					if (allDensity[i++]==0)
+						singles.add(r);
+					else
+						clustered.add(r);
+				}
 			}
 		}
 
@@ -2071,11 +2088,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		IJ.showStatus("");
 	}
 
-	private void runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
-			final ArrayList<float[]> coords, final Statistics densityStats, final float radius, final Rectangle bounds)
+	private int runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
+			final ArrayList<float[]> coords, final Statistics densityStats, final float radius, final Rectangle bounds,
+			final int[] allDensity, final int allIndex)
 	{
-		final float[] xCoords = new float[coords.size()];
-		final float[] yCoords = new float[xCoords.length];
+		final int size = coords.size();
+		final float[] xCoords = new float[size];
+		final float[] yCoords = new float[size];
 		for (int i = 0; i < xCoords.length; i++)
 		{
 			float[] xy = coords.get(i);
@@ -2091,9 +2110,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final DensityManager dm = new DensityManager(xCoords, yCoords, bounds);
 				final int[] density = dm.calculateDensity(radius, true);
 				addDensity(densityStats, density);
+
+				// Store the density for each result. This does not need to be synchronised 
+				// since the indices in different threads are unique.
+				for (int i = 0, index = allIndex; i < density.length; i++, index++)
+					allDensity[index] = density[i];
 			}
 		}));
 		coords.clear();
+		return size;
 	}
 
 	private int currentIndex, finalIndex;
@@ -2108,6 +2133,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		stats.add(density);
 	}
 
+	/**
+	 * Copy all the settings from the results into a new results set labelled with the name suffix
+	 * @param nameSuffix
+	 * @return The new results set
+	 */
+	private MemoryPeakResults copyMemoryPeakResults(String nameSuffix)
+	{
+		MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(this.results);
+		newResults.setName(newResults.getSource().getName() + " (" + TITLE + " " + nameSuffix + ")");
+		newResults.setSortAfterEnd(true);
+		newResults.begin();
+		MemoryPeakResults.addResults(newResults);
+		return newResults;
+	}
+	
 	private boolean[] getChoosenHistograms()
 	{
 		if (settings.chooseHistograms)
@@ -2281,11 +2322,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		sortLocalisationsByIdThenTime(localisations);
 
-		MemoryPeakResults traceResults = new MemoryPeakResults();
-		traceResults.copySettings(results);
-		traceResults.setName(title + " (" + TITLE + " Traced)");
-		traceResults.setSortAfterEnd(true);
-		traceResults.begin();
+		MemoryPeakResults traceResults = copyMemoryPeakResults("Traced");
 		LocalisationModel start = null;
 		int currentId = -1;
 		int n = 0;
@@ -2358,17 +2395,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.diffusionRate <= 0 || settings.fixedFraction >= 1)
 			return;
 
-		MemoryPeakResults fixedResults = new MemoryPeakResults();
-		fixedResults.copySettings(results);
-		fixedResults.setName(title + " (" + TITLE + " Fixed)");
-		fixedResults.setSortAfterEnd(true);
-		fixedResults.begin();
-
-		MemoryPeakResults movingResults = new MemoryPeakResults();
-		movingResults.copySettings(results);
-		movingResults.setName(title + " (" + TITLE + " Moving)");
-		movingResults.setSortAfterEnd(true);
-		movingResults.begin();
+		MemoryPeakResults fixedResults = copyMemoryPeakResults("Fixed");
+		MemoryPeakResults movingResults = copyMemoryPeakResults("Moving");
 
 		List<PeakResult> peakResults = results.getResults();
 		// Sort using the ID
