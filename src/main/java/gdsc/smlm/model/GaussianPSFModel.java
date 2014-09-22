@@ -61,14 +61,14 @@ public class GaussianPSFModel extends PSFModel
 	 * @param s1
 	 *            The Gaussian standard deviation dimension 1
 	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is twice the width (2 x FWHM)
+	 *            the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
 	 */
 	public GaussianPSFModel(RandomGenerator randomGenerator, double s0, double s1, double zDepth)
 	{
 		super(randomGenerator);
 		this.zeroS0 = s0;
 		this.zeroS1 = s1;
-		this.zDepth = zDepth;
+		setzDepth(zDepth);
 	}
 	
 	/**
@@ -99,7 +99,7 @@ public class GaussianPSFModel extends PSFModel
 		super(randomDataGenerator);
 		this.zeroS0 = s0;
 		this.zeroS1 = s1;
-		this.zDepth = zDepth;
+		setzDepth(zDepth);
 	}
 
 	/*
@@ -153,7 +153,7 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
-	 * Generate a scale so that at the configured zDepth the scale is 2.
+	 * Generate a scale so that at the configured zDepth the scale is 1.5.
 	 * 
 	 * @param z
 	 * @return The scale
@@ -162,14 +162,14 @@ public class GaussianPSFModel extends PSFModel
 	{
 		if (zDepth == 0) // Not 3D data
 			return 1;
+		
+		// PSF fitting on data from the GDSC microscope show that the PSF width spread can be modelled
+		// by a simple quadratic up to 1.5 times the width:
+		//   width = 1 + z^2 / 2
+		//         = 1.5 @ z=1
 
-		// Linear
-		//final double scale = 1 + Math.abs(z) / zDepth;
-
-		// Exponential - See http://bigwww.epfl.ch/smlm/challenge/index.html?p=material-methods
-		final double scale = 1 / Math.exp(-Math.abs(z) * Math.log(2) / zDepth);
-
-		return scale;
+		z /= zDepth; // Scale so z=1 at the configured z-depth
+		return 1.0 + z * z * 0.5;
 	}
 
 	/**
@@ -385,7 +385,7 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
-	 * @return the Z-depth where the 3D PSF is twice the width (2 x FWHM)
+	 * @return the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
 	 */
 	public double getzDepth()
 	{
@@ -394,11 +394,11 @@ public class GaussianPSFModel extends PSFModel
 
 	/**
 	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is twice the width (2 x FWHM)
+	 *            the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
 	 */
 	public void setzDepth(double zDepth)
 	{
-		this.zDepth = zDepth;
+		this.zDepth = Math.abs(zDepth);
 	}
 
 	/**

@@ -1258,9 +1258,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
-			// TODO - Calibrate this correctly using our microscope parameters
-			// Set the 2 x FWHM using 500nm
-			return new GaussianPSFModel(createRandomGenerator(), sd, sd, 500.0 / settings.pixelPitch);
+			// Calibration based on imaging fluorescent beads at 20nm intervals.
+			// Set the PSF to 1.5 x FWHM at 450nm
+			return new GaussianPSFModel(createRandomGenerator(), sd, sd, 450.0 / settings.pixelPitch);
 		}
 	}
 
