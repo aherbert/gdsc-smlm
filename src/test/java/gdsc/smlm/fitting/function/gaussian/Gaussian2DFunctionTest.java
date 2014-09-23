@@ -23,15 +23,13 @@ public abstract class Gaussian2DFunctionTest
 	float[] testangle1 = new float[] { (float) (Math.PI / 5), (float) (Math.PI / 3) };
 	float[] testcx1 = new float[] { 4.9f, 5.3f };
 	float[] testcy1 = new float[] { 4.8f, 5.1f };
-	float[] testwx1 = new float[] { 1.1f, 1.5f };
-	float[] testwy1 = new float[] { 1.2f, 1.7f };
+	float[][] testw1 = new float[][] { { 1.1f, 1.2f }, { 1.1f, 1.7f }, { 1.5f, 1.2f }, { 1.5f, 1.7f }, };
 
 	float[] testamplitude2 = new float[] { 20, 50 };
 	float[] testangle2 = new float[] { (float) (Math.PI / 6), (float) (Math.PI / 3) };
 	float[] testcx2 = new float[] { 4.8f, 5.3f };
 	float[] testcy2 = new float[] { 5.1f, 4.9f };
-	float[] testwx2 = new float[] { 1.1f, 1.3f };
-	float[] testwy2 = new float[] { 1.4f, 1.5f };
+	float[][] testw2 = new float[][] { { 1.2f, 1.4f }, { 1.2f, 1.5f }, { 1.3f, 1.4f }, { 1.3f, 1.5f }, };
 
 	int maxx = 10;
 	float background = 50;
@@ -61,16 +59,30 @@ public abstract class Gaussian2DFunctionTest
 			testangle2 = new float[] { 0 };
 		}
 		// Position is always evaluated
+
+		boolean noSecondWidth = false;
 		if (!f1.evaluatesWidth0())
 		{
-			testwx1 = new float[] { testwx1[0] };
-			testwx2 = new float[] { testwx2[0] };
+			// Just use 1 width
+			testw1 = new float[][] { testw1[0] };
+			testw2 = new float[][] { testw2[0] };
+			// If no width 0 then assume we have no width 1 as well
+			noSecondWidth = true;
 		}
-		if (!f1.evaluatesWidth1())
+		else if (!f1.evaluatesWidth1())
 		{
-			// No evaluation of second width is a circular function - use width 1
-			testwy1 = testwx1;
-			testwy2 = testwx2;
+			// No evaluation of second width needs only variation in width 0 so truncate 
+			testw1 = Arrays.copyOf(testw1, 2);
+			testw2 = Arrays.copyOf(testw2, 2);
+			noSecondWidth = true;
+		}
+		if (noSecondWidth)
+		{
+			for (int i = 0; i < testw1.length; i++)
+			{
+				testw1[i][1] = testw1[i][0];
+				testw2[i][1] = testw2[i][0];
+			}
 		}
 	}
 
@@ -148,20 +160,18 @@ public abstract class Gaussian2DFunctionTest
 						for (float angle1 : testangle1)
 							for (float cx1 : testcx1)
 								for (float cy1 : testcy1)
-									for (float wx1 : testwx1)
-										for (float wy1 : testwy1)
-										{
-											a = createParameters(background, amplitude1, angle1, cx1, cy1, wx1, wy1);
+									for (float[] w1 : testw1)
+									{
+										a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
 
-											f1.initialise(a);
-											float y1 = f1.eval(y * maxx + x, dyda);
-											float y2 = f1.eval(y * maxx + x);
-											
-											Assert.assertTrue(y1 + " != " + y2,
-													eq2.almostEqualComplement(y1, y2));
-										}
-	}	
-	
+										f1.initialise(a);
+										float y1 = f1.eval(y * maxx + x, dyda);
+										float y2 = f1.eval(y * maxx + x);
+
+										Assert.assertTrue(y1 + " != " + y2, eq2.almostEqualComplement(y1, y2));
+									}
+	}
+
 	@Test
 	public void functionComputesBackgroundGradient()
 	{
@@ -225,29 +235,28 @@ public abstract class Gaussian2DFunctionTest
 						for (float angle1 : testangle1)
 							for (float cx1 : testcx1)
 								for (float cy1 : testcy1)
-									for (float wx1 : testwx1)
-										for (float wy1 : testwy1)
-										{
-											a = createParameters(background, amplitude1, angle1, cx1, cy1, wx1, wy1);
+									for (float[] w1 : testw1)
+									{
+										a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
 
-											f1.initialise(a);
-											f1.eval(y * maxx + x, dyda);
+										f1.initialise(a);
+										f1.eval(y * maxx + x, dyda);
 
-											// Numerically solve gradient
-											a[targetParameter] += delta;
+										// Numerically solve gradient
+										a[targetParameter] += delta;
 
-											f1.initialise(a);
-											float value2 = f1.eval(y * maxx + x, dyda2);
+										f1.initialise(a);
+										float value2 = f1.eval(y * maxx + x, dyda2);
 
-											a[targetParameter] -= 2 * delta;
+										a[targetParameter] -= 2 * delta;
 
-											f1.initialise(a);
-											float value3 = f1.eval(y * maxx + x, dyda2);
+										f1.initialise(a);
+										float value3 = f1.eval(y * maxx + x, dyda2);
 
-											float gradient = (value2 - value3) / (2 * delta);
-											Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
-													eq.almostEqualComplement(gradient, dyda[gradientIndex]));
-										}
+										float gradient = (value2 - value3) / (2 * delta);
+										Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
+												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
+									}
 	}
 
 	private int findGradientIndex(Gaussian2DFunction f, int targetParameter)
@@ -262,7 +271,7 @@ public abstract class Gaussian2DFunctionTest
 	{
 		if (f2 == null)
 			return;
-		
+
 		float[] dyda = new float[f2.gradientIndices().length];
 		float[] a;
 
@@ -274,29 +283,27 @@ public abstract class Gaussian2DFunctionTest
 						for (float angle1 : testangle1)
 							for (float cx1 : testcx1)
 								for (float cy1 : testcy1)
-									for (float wx1 : testwx1)
-										for (float wy1 : testwy1)
-											// Peak 2
-											for (float amplitude2 : testamplitude2)
-												for (float angle2 : testangle2)
-													for (float cx2 : testcx2)
-														for (float cy2 : testcy2)
-															for (float wx2 : testwx2)
-																for (float wy2 : testwy2)
-																{
-																	a = createParameters(background, amplitude1,
-																			angle1, cx1, cy1, wx1, wy1, amplitude2,
-																			angle2, cx2, cy2, wx2, wy2);
+									for (float[] w1 : testw1)
+										// Peak 2
+										for (float amplitude2 : testamplitude2)
+											for (float angle2 : testangle2)
+												for (float cx2 : testcx2)
+													for (float cy2 : testcy2)
+														for (float[] w2 : testw2)
+														{
+															a = createParameters(background, amplitude1, angle1, cx1,
+																	cy1, w1[0], w1[1], amplitude2, angle2, cx2, cy2,
+																	w2[0], w2[1]);
 
-																	f2.initialise(a);
-																	float y1 = f2.eval(y * maxx + x, dyda);
-																	float y2 = f2.eval(y * maxx + x);
-																	
-																	Assert.assertTrue(y1 + " != " + y2,
-																			eq2.almostEqualComplement(y1, y2));
-																}
+															f2.initialise(a);
+															float y1 = f2.eval(y * maxx + x, dyda);
+															float y2 = f2.eval(y * maxx + x);
+
+															Assert.assertTrue(y1 + " != " + y2,
+																	eq2.almostEqualComplement(y1, y2));
+														}
 	}
-	
+
 	@Test
 	public void functionComputesBackgroundGradientWith2Peaks()
 	{
@@ -395,40 +402,75 @@ public abstract class Gaussian2DFunctionTest
 						for (float angle1 : testangle1)
 							for (float cx1 : testcx1)
 								for (float cy1 : testcy1)
-									for (float wx1 : testwx1)
-										for (float wy1 : testwy1)
-											// Peak 2
-											for (float amplitude2 : testamplitude2)
-												for (float angle2 : testangle2)
-													for (float cx2 : testcx2)
-														for (float cy2 : testcy2)
-															for (float wx2 : testwx2)
-																for (float wy2 : testwy2)
-																{
-																	a = createParameters(background, amplitude1,
-																			angle1, cx1, cy1, wx1, wy1, amplitude2,
-																			angle2, cx2, cy2, wx2, wy2);
+									for (float[] w1 : testw1)
+										// Peak 2
+										for (float amplitude2 : testamplitude2)
+											for (float angle2 : testangle2)
+												for (float cx2 : testcx2)
+													for (float cy2 : testcy2)
+														for (float[] w2 : testw2)
+														{
+															a = createParameters(background, amplitude1, angle1, cx1,
+																	cy1, w1[0], w1[1], amplitude2, angle2, cx2, cy2,
+																	w2[0], w2[1]);
 
-																	f2.initialise(a);
-																	f2.eval(y * maxx + x, dyda);
+															f2.initialise(a);
+															f2.eval(y * maxx + x, dyda);
 
-																	// Numerically solve gradient
-																	a[targetParameter] += delta;
+															// Numerically solve gradient
+															a[targetParameter] += delta;
 
-																	f2.initialise(a);
-																	float value2 = f2.eval(y * maxx + x, dyda2);
+															f2.initialise(a);
+															float value2 = f2.eval(y * maxx + x, dyda2);
 
-																	a[targetParameter] -= 2 * delta;
+															a[targetParameter] -= 2 * delta;
 
-																	f2.initialise(a);
-																	float value3 = f2.eval(y * maxx + x, dyda2);
+															f2.initialise(a);
+															float value3 = f2.eval(y * maxx + x, dyda2);
 
-																	float gradient = (value2 - value3) / (2 * delta);
-																	Assert.assertTrue(gradient + " != " +
-																			dyda[gradientIndex], eq
-																			.almostEqualComplement(gradient,
-																					dyda[gradientIndex]));
-																}
+															float gradient = (value2 - value3) / (2 * delta);
+															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
+																	eq.almostEqualComplement(gradient,
+																			dyda[gradientIndex]));
+														}
+	}
+
+	@Test
+	public void functionComputesGaussianIntegral()
+	{
+		float background = 0;
+		int maxx = 30;
+
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, flags);
+		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		final double WIDTH_TO_SD = 2 * Math.sqrt(2 * Math.log(2.0));
+		final double WIDTH_TO_SD2 = WIDTH_TO_SD * WIDTH_TO_SD;
+
+		for (float amplitude1 : testamplitude1)
+			for (float angle1 : testangle1)
+				for (float cx1 : new float[] { maxx / 2 + 0.373f })
+					for (float cy1 : new float[] { maxx / 2 + 0.876f })
+						for (float[] w1 : testw1)
+						{
+							float[] a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+
+							f.initialise(a);
+							f2.initialise(a);
+							double sum = 0;
+							for (int index = maxx * maxx; index-- > 0;)
+							{
+								float r1 = f.eval(index);
+								float r2 = f2.eval(index);
+								sum += r1;
+								final boolean ok = eq2.almostEqualComplement(r1, r2);
+								if (!ok)
+									Assert.assertTrue(
+											String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx), ok);
+							}
+
+							float integral = (float) (amplitude1 * 2.0 * Math.PI * w1[0] * w1[1] / WIDTH_TO_SD2);
+							Assert.assertTrue(sum + " != " + integral, eq.almostEqualComplement((float) sum, integral));
+						}
 	}
 
 	float[] createParameters(float... args)

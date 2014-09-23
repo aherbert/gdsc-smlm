@@ -69,7 +69,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		x1pos = a[Y_POSITION];
 		width = a[X_WIDTH];
 
-		aa = (float) (MinusFourLog2 / (width * width));
+		aa = (float) (MinusFourLog2 / ((double) width * (double) width));
 	}
 
 	/**
