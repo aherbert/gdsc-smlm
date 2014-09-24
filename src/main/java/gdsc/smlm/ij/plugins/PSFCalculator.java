@@ -16,15 +16,21 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.utils.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.plugin.PlugIn;
 
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.awt.Label;
 import java.awt.SystemColor;
 import java.awt.TextField;
+
+import xal.tools.math.BesselFunction;
 
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.
@@ -36,7 +42,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * University of Sussex. The Gaussian PSF Standard Deviation = f * lambda / (2 * NA).
 	 */
 	public static final double DEFAULT_PROPORTIONALITY_FACTOR = 1.52;
-	
+
 	/**
 	 * The factor for convering a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
 	 */
@@ -49,6 +55,9 @@ public class PSFCalculator implements PlugIn, DialogListener
 	private TextField widthPixelsText;
 	private TextField sdNmText;
 	private TextField sdPixelsText;
+
+	// Used for the PSF profile plot
+	private double[] x = null, y, y2;
 
 	public void run(String arg)
 	{
@@ -133,6 +142,9 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 		gd.addDialogListener(this);
 
+		plotProfile(calculateAiryWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
+				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor));
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -194,9 +206,10 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
-	 *            Microscope numerical aperture
+	 *            Microscope numerical aperture (NA)
 	 * @param proportionalityFactor
 	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
+	 * @return the SD in nm
 	 */
 	public static double calculateStdDev(double wavelength, double numericalAperture, double proportionalityFactor)
 	{
@@ -214,9 +227,10 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
-	 *            Microscope numerical aperture
+	 *            Microscope numerical aperture (NA)
 	 * @param proportionalityFactor
 	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
+	 * @return the SD in pixels
 	 */
 	public static double calculateStdDev(double pixelPitch, double magnification, double wavelength,
 			double numericalAperture, double proportionalityFactor)
@@ -232,7 +246,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 *            Objective magnification
 	 * @param size
 	 *            Size in nm
-	 * @return
+	 * @return the size in pixels
 	 */
 	private static double convertToPixels(double pixelPitch, double magnification, double size)
 	{
@@ -250,9 +264,10 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
-	 *            Microscope numerical aperture
+	 *            Microscope numerical aperture (NA)
 	 * @param proportionalityFactor
 	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
+	 * @return the width in nm
 	 */
 	public static double calculateWidth(double wavelength, double numericalAperture, double proportionalityFactor)
 	{
@@ -271,10 +286,10 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
-	 *            Microscope numerical aperture
+	 *            Microscope numerical aperture (NA)
 	 * @param proportionalityFactor
 	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
-	 * @return
+	 * @return the width in pixels
 	 */
 	public static double calculateWidth(double pixelPitch, double magnification, double wavelength,
 			double numericalAperture, double proportionalityFactor)
@@ -283,34 +298,150 @@ public class PSFCalculator implements PlugIn, DialogListener
 		return convertToPixels(pixelPitch, magnification, fwhm);
 	}
 
+	/**
+	 * Calculates the PSF peak width for the Airy disk.
+	 * <p>
+	 * Width is proportional to the lambda / (2*pi*NA). This method computes the width as proportionalityFactor * lambda
+	 * / (2 * pi * NA).
+	 * <p>
+	 * The proportionality factor should be determined by fitting the PSF of quantum dots on the microscope.
+	 * 
+	 * @param wavelength
+	 *            Wavelength of light in nanometers (nm)
+	 * @param numericalAperture
+	 *            Microscope numerical aperture (NA)
+	 * @param proportionalityFactor
+	 *            Expresses the proportional relationship between the diffraction limit and lambda/2piNA
+	 * @return the width in nm
+	 */
+	public static double calculateAiryWidth(double wavelength, double numericalAperture, double proportionalityFactor)
+	{
+		double width = proportionalityFactor * wavelength / (2.0 * Math.PI * numericalAperture);
+		return width;
+	}
+
+	/**
+	 * Calculates the PSF peak width for the Airy disk.
+	 * 
+	 * @param pixelPitch
+	 *            Camera pixel pitch in micrometers (nm)
+	 * @param magnification
+	 *            Objective magnification
+	 * @param wavelength
+	 *            Wavelength of light in nanometers (nm)
+	 * @param numericalAperture
+	 *            Microscope numerical aperture (NA)
+	 * @param proportionalityFactor
+	 *            Expresses the proportional relationship between the diffraction limit and lambda/2piNA
+	 * @return the width in pixels
+	 */
+	public static double calculateAiryWidth(double pixelPitch, double magnification, double wavelength,
+			double numericalAperture, double proportionalityFactor)
+	{
+		double width = calculateAiryWidth(wavelength, numericalAperture, proportionalityFactor);
+		return convertToPixels(pixelPitch, magnification, width);
+	}
+
+	private boolean lock = false;
+
+	private synchronized boolean aquireLock()
+	{
+		if (lock)
+			return false;
+		return lock = true;
+	}
+
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		if (e == null || e.getSource() == sdNmText || e.getSource() == sdPixelsText || e.getSource() == widthPixelsText)
+		if (e == null)
 			return true;
-
-		// Update width
-		if (readDialog())
+		Object o = e.getSource();
+		if (o == sdNmText || o == sdPixelsText)
+			return true;
+		if (widthNmText != null)
 		{
-			if (widthNmText != null)
-			{
-				pixelPitchLabel.setText(getPixelPitchLabel());
-				widthNmText.setText(IJ
-						.d2s(calculateWidth(settings.wavelength, settings.numericalAperture,
-								settings.proportionalityFactor), 3));
-				widthPixelsText.setText(IJ.d2s(
-						calculateWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
-								settings.wavelength, settings.numericalAperture, settings.proportionalityFactor), 3));
-			}
-			sdNmText.setText(IJ
-					.d2s(calculateStdDev(settings.wavelength, settings.numericalAperture,
-							settings.proportionalityFactor), 3));
-			sdPixelsText.setText(IJ.d2s(
-					calculateStdDev(settings.pixelPitch, settings.magnification * settings.beamExpander,
-							settings.wavelength, settings.numericalAperture, settings.proportionalityFactor), 3));
-			return true;
+			if (o == pixelPitchLabel || o == widthNmText || o == widthPixelsText)
+				return true;
 		}
 
-		return false;
+		if (aquireLock())
+		{
+			try
+			{
+				// Continue while the parameter is changing
+				boolean parametersChanged = true;
+				while (parametersChanged)
+				{
+					if (!readDialog())
+						return false;
+
+					// Store the parameters to be processed
+					double pixelPitch = settings.pixelPitch;
+					double magnification = settings.magnification;
+					double beamExpander = settings.beamExpander;
+					double wavelength = settings.wavelength;
+					double numericalAperture = settings.numericalAperture;
+					double proportionalityFactor = settings.proportionalityFactor;
+
+					// Do something with parameters
+					if (widthNmText != null)
+					{
+						pixelPitchLabel.setText(getPixelPitchLabel());
+						widthNmText.setText(IJ.d2s(
+								calculateWidth(wavelength, numericalAperture, proportionalityFactor), 3));
+						widthPixelsText.setText(IJ.d2s(
+								calculateWidth(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
+										proportionalityFactor), 3));
+					}
+					sdNmText.setText(IJ.d2s(calculateStdDev(wavelength, numericalAperture, proportionalityFactor), 3));
+					sdPixelsText.setText(IJ.d2s(
+							calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
+									proportionalityFactor), 3));
+
+					plotProfile(calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength,
+							numericalAperture, proportionalityFactor));
+
+					// Check if the parameters have changed again
+					parametersChanged = (pixelPitch != settings.pixelPitch) ||
+							(magnification != settings.magnification) || (beamExpander != settings.beamExpander) ||
+							(wavelength != settings.wavelength) || (numericalAperture != settings.numericalAperture) ||
+							(proportionalityFactor != settings.proportionalityFactor);
+				}
+			}
+			finally
+			{
+				// Ensure the running flag is reset
+				lock = false;
+			}
+		}
+
+		return true;
+	}
+
+	private void plotProfile(double scale)
+	{
+		if (x == null)
+		{
+			x = Utils.newArray(200, -10, 0.1);
+			y = new double[x.length];
+			y2 = new double[x.length];
+			for (int i = 0; i < x.length; i++)
+			{
+				y[i] = AiryPattern.intensity(x[i]);
+				y2[i] = AiryPattern.intensityGaussian(x[i]);
+			}
+		}
+		double[] x2 = new double[x.length];
+		for (int i = 0; i < x2.length; i++)
+		{
+			x2[i] = x[i] * scale;
+		}
+		String title = "PSF profile";
+		Plot p = new Plot(title, "px", "", x2, y);
+		p.setColor(Color.RED);
+		p.addPoints(x2, y2, Plot.LINE);
+		p.setColor(Color.BLUE);
+		Utils.display(title, p);
 	}
 
 	private String getPixelPitchLabel(double pixelPitch)
