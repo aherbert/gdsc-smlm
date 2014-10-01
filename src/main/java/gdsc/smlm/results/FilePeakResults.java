@@ -272,7 +272,7 @@ public class FilePeakResults extends AbstractPeakResults
 
 		if (this.calibration != null)
 		{
-			double s = (params[Gaussian2DFunction.X_WIDTH] + params[Gaussian2DFunction.Y_WIDTH]) * 0.5 *
+			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 					calibration.nmPerPixel;
 			float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain,
 					noise / calibration.gain);
@@ -350,8 +350,7 @@ public class FilePeakResults extends AbstractPeakResults
 
 			if (this.calibration != null)
 			{
-				double s = (result.params[Gaussian2DFunction.X_WIDTH] + result.params[Gaussian2DFunction.Y_WIDTH]) *
-						0.5 * calibration.nmPerPixel;
+				double s = result.getWidth() * calibration.nmPerPixel;
 				float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain,
 						result.noise / calibration.gain);
 				addResult(sb, precision);
