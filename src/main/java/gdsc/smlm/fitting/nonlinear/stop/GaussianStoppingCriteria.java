@@ -1,11 +1,10 @@
 package gdsc.smlm.fitting.nonlinear.stop;
 
-import java.util.Arrays;
-
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.fitting.function.GaussianFunction;
-import gdsc.smlm.fitting.logging.Logger;
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
+
+import java.util.Arrays;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -39,8 +38,8 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	private float minimumAmplitude = Float.NEGATIVE_INFINITY;
 	private float[] minimumPosition = null;
 	private float[] maximumPosition = null;
-	private float[] minimumWidth = null;
-	private float[] maximumWidth = null;
+	private float[] minimumSD = null;
+	private float[] maximumSD = null;
 
 	/**
 	 * @param func
@@ -168,19 +167,19 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 			if (isAbove(maximumPosition, a, i * 6 + Gaussian2DFunction.X_POSITION))
 				return true;
 
-			if (func.evaluatesWidth0())
+			if (func.evaluatesSD0())
 			{
-				if (isBelow(minimumWidth, a, i * 6 + Gaussian2DFunction.X_WIDTH))
+				if (isBelow(minimumSD, a, i * 6 + Gaussian2DFunction.X_SD))
 					return true;
-				if (isAbove(maximumWidth, a, i * 6 + Gaussian2DFunction.X_WIDTH))
+				if (isAbove(maximumSD, a, i * 6 + Gaussian2DFunction.X_SD))
 					return true;
 			}
 
-			if (func.evaluatesWidth1())
+			if (func.evaluatesSD1())
 			{
-				if (isBelow(minimumWidth, a, i * 6 + Gaussian2DFunction.Y_WIDTH))
+				if (isBelow(minimumSD, a, i * 6 + Gaussian2DFunction.Y_SD))
 					return true;
-				if (isAbove(maximumWidth, a, i * 6 + Gaussian2DFunction.Y_WIDTH))
+				if (isAbove(maximumSD, a, i * 6 + Gaussian2DFunction.Y_SD))
 					return true;
 			}
 		}
@@ -303,39 +302,39 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	}
 
 	/**
-	 * @param minimumWidth
-	 *            the minimum width for each dimension
+	 * @param minimumSD
+	 *            the minimum SD for each dimension
 	 */
-	public void setMinimumWidth(float[] minimumWidth)
+	public void setMinimumSD(float[] minimumSD)
 	{
-		if (func.evaluatesWidth0())
-			this.minimumWidth = checkArray(minimumWidth);
+		if (func.evaluatesSD0())
+			this.minimumSD = checkArray(minimumSD);
 	}
 
 	/**
-	 * @return the minimum width for each dimension
+	 * @return the minimum SD for each dimension
 	 */
-	public float[] getMinimumWidth()
+	public float[] getMinimumSD()
 	{
-		return minimumWidth;
+		return minimumSD;
 	}
 
 	/**
-	 * @param maximumWidth
-	 *            the maximum width for each dimension
+	 * @param maximumSD
+	 *            the maximum SD for each dimension
 	 */
-	public void setMaximumWidth(float[] maximumWidth)
+	public void setMaximumSD(float[] maximumSD)
 	{
-		if (func.evaluatesWidth0())
-			this.maximumWidth = checkArray(maximumWidth);
+		if (func.evaluatesSD0())
+			this.maximumSD = checkArray(maximumSD);
 	}
 
 	/**
-	 * @return the maximum width for each dimension
+	 * @return the maximum SD for each dimension
 	 */
-	public float[] getMaximumWidth()
+	public float[] getMaximumSD()
 	{
-		return maximumWidth;
+		return maximumSD;
 	}
 
 	private float[] checkArray(float[] array)
