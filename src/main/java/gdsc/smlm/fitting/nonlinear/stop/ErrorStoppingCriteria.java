@@ -1,6 +1,5 @@
 package gdsc.smlm.fitting.nonlinear.stop;
 
-import gdsc.smlm.fitting.logging.Logger;
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import gdsc.smlm.fitting.utils.DoubleEquality;
 
