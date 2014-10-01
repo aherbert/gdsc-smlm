@@ -229,7 +229,7 @@ public class BlinkEstimatorTest
 			float[] params = new float[7];
 			params[Gaussian2DFunction.X_POSITION] = (float) l.getX();
 			params[Gaussian2DFunction.Y_POSITION] = (float) l.getY();
-			params[Gaussian2DFunction.X_WIDTH] = params[Gaussian2DFunction.Y_WIDTH] = psfWidth;
+			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (l.getIntensity() / (2 * Math.PI * psfWidth * psfWidth));
 			results.add(l.getTime(), 0, 0, 0, 0, 0, params, null);
 		}
@@ -240,7 +240,7 @@ public class BlinkEstimatorTest
 			float[] params = new float[7];
 			params[Gaussian2DFunction.X_POSITION] = (float) (rand.nextDouble() * max[0]);
 			params[Gaussian2DFunction.Y_POSITION] = (float) (rand.nextDouble() * max[1]);
-			params[Gaussian2DFunction.X_WIDTH] = params[Gaussian2DFunction.Y_WIDTH] = psfWidth;
+			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			// Intensity doesn't matter at the moment for tracing
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (photons / (2 * Math.PI * psfWidth * psfWidth));
 			results.add(1 + rand.nextInt(totalSteps), 0, 0, 0, 0, 0, params, null);

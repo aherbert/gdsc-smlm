@@ -63,8 +63,6 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		super(maxx);
 	}
 
-	protected static final double MinusFourLog2 = (double) (-4.0 * Math.log(2.0));
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -79,34 +77,39 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 
 		// Precalculate multiplication factors
 		final double theta = a[ANGLE];
-		final double sigma_x = a[X_WIDTH];
-		final double sigma_y = a[Y_WIDTH];
+		final double sx = a[X_SD];
+		final double sy = a[Y_SD];
+		final double sx2 = sx * sx;
+		final double sy2 = sy * sy;
+		final double sx3 = sx2 * sx;
+		final double sy3 = sy2 * sy;
+		final double cosSqt = Math.cos(theta) * Math.cos(theta);
+		final double sinSqt = Math.sin(theta) * Math.sin(theta);
+		final double sincost = Math.sin(theta) * Math.cos(theta);
+		final double sin2t = Math.sin(2 * theta);
+		final double cos2t = Math.cos(2 * theta);
 
-		aa = (float) (MinusFourLog2 * Math.cos(theta) * Math.cos(theta) / (sigma_x * sigma_x) + MinusFourLog2 *
-				Math.sin(theta) * Math.sin(theta) / (sigma_y * sigma_y));
-		bb = (float) (-MinusFourLog2 * Math.sin(2 * theta) / (sigma_x * sigma_x) + MinusFourLog2 * Math.sin(2 * theta) /
-				(sigma_y * sigma_y));
-		cc = (float) (MinusFourLog2 * Math.sin(theta) * Math.sin(theta) / (sigma_x * sigma_x) + MinusFourLog2 *
-				Math.cos(theta) * Math.cos(theta) / (sigma_y * sigma_y));
+		// All prefactors are negated since the Gaussian uses the exponential to the negative:
+		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+		
+		aa = (float) -(0.5 * (cosSqt / sx2 + sinSqt / sy2));
+		bb = (float) -(0.25 * (-sin2t / sx2 + sin2t / sy2));
+		cc = (float) -(0.5 * (sinSqt / sx2 + cosSqt / sy2));;
 
 		// For the angle gradient
-		// Note that when sigma_x == sigma_y there will be no angle gradient
-		aa2 = (float) (MinusFourLog2 * -2.0 * Math.sin(theta) * Math.cos(theta) / (sigma_x * sigma_x) + MinusFourLog2 *
-				2.0 * Math.sin(theta) * Math.cos(theta) / (sigma_y * sigma_y));
-		bb2 = (float) (MinusFourLog2 * -2.0 * Math.cos(2 * theta) / (sigma_x * sigma_x) + MinusFourLog2 * 2.0 *
-				Math.cos(2 * theta) / (sigma_y * sigma_y));
-		cc2 = (float) (MinusFourLog2 * 2.0 * Math.sin(theta) * Math.cos(theta) / (sigma_x * sigma_x) + MinusFourLog2 *
-				-2.0 * Math.sin(theta) * Math.cos(theta) / (sigma_y * sigma_y));
+		aa2 = (float) -(-sincost / sx2 + sincost / sy2);
+		bb2 = (float) -(0.5 * (-cos2t / sx2 + cos2t / sy2));
+		cc2  = (float) -(sincost / sx2 - sincost / sy2);
 
 		// For the x-width gradient
-		ax = (float) (-2.0 * MinusFourLog2 * Math.cos(theta) * Math.cos(theta) / (sigma_x * sigma_x * sigma_x));
-		bx = (float) (2.0 * MinusFourLog2 * Math.sin(2 * theta) / (sigma_x * sigma_x * sigma_x));
-		cx = (float) (-2.0 * MinusFourLog2 * Math.sin(theta) * Math.sin(theta) / (sigma_x * sigma_x * sigma_x));
+		ax = (float) (cosSqt / sx3);
+		bx = (float) -(0.5 * sin2t / sx3);
+		cx = (float) (sinSqt / sx3);
 
 		// For the y-width gradient
-		ay = (float) (-2.0 * MinusFourLog2 * Math.sin(theta) * Math.sin(theta) / (sigma_y * sigma_y * sigma_y));
-		by = (float) (-2.0 * MinusFourLog2 * Math.sin(2 * theta) / (sigma_y * sigma_y * sigma_y));
-		cy = (float) (-2.0 * MinusFourLog2 * Math.cos(theta) * Math.cos(theta) / (sigma_y * sigma_y * sigma_y));
+		ay = (float) (sinSqt / sy3);
+		by = (float) (0.5 * sin2t / sy3);
+		cy = (float) (cosSqt / sy3);
 	}
 
 	/**
@@ -116,19 +119,16 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; Angle; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
-	 * angle of the ellipse. Position (p) is the position of the Gaussian in each of the N-dimensions. Width (w) is the
-	 * peak width at half-max in each of the N-dimensions. This produces an additional 1+2N coefficients per peak.
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
+	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
+	 * the standard deviation in each of the N-dimensions.
 	 * <p>
 	 * The equation per peak is:<br/>
 	 * y_peak = A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
 	 * Where: <br/>
-	 * a = 4*ln(2)*cos(r)^2 /lwX^2 + 4*ln(2)*sin(r)^2 /lwY^2 <br/>
-	 * b = -2*ln(2)*sin(2r)^2/lwX^2 + 2*ln(2)*sin(2r)^2/lwY^2 <br/>
-	 * c = 4*ln(2)*sin(r)^2 /lwX^2 + 4*ln(2)*cos(r)^2 /lwY^2
-	 * <p>
-	 * Note the use of the width as the peak width at half max. This can be converted to the Gaussian peak standard
-	 * deviation using: SD = pwhm / 2*sqrt(2*log(2)); SD = pwhm / 2.35482
+	 * a = cos(r)^2/(2*sx^2) + sin(r)^2 /(2*sy^2) <br/>
+	 * b = -sin(2r)^2/(4*sx^2) + sin(2r)^2/(4*sy^2) <br/>
+	 * c = sin(r)^2/(2*sx^2) + cos(r)^2/(2*sy^2)
 	 * 
 	 * @param x
 	 *            Input predictor
@@ -144,7 +144,6 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		dyda[0] = 1; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
-		;
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
@@ -221,13 +220,13 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesWidth0()
+	public boolean evaluatesSD0()
 	{
 		return true;
 	}
 
 	@Override
-	public boolean evaluatesWidth1()
+	public boolean evaluatesSD1()
 	{
 		return true;
 	}

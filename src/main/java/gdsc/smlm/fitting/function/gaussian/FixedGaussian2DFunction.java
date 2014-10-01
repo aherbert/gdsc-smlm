@@ -29,7 +29,7 @@ import gdsc.smlm.fitting.function.MultiPeakGaussian2DFunction;
 public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 3;
-	
+
 	protected float[] peakFactors;
 	protected float[] a;
 
@@ -47,7 +47,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	protected static final double MinusFourLog2 = (double) (-4.0 * Math.log(2.0));
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -60,11 +60,15 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		peakFactors = new float[npeaks];
 		for (int j = 0; j < npeaks; j++)
 		{
-    		final double sigma_x = a[j*6 + X_WIDTH];
-    		peakFactors[j] = (float) (MinusFourLog2 / (sigma_x * sigma_x));
+			final double sx = a[j * 6 + X_SD];
+			final double sx2 = sx * sx;
+
+			// All prefactors are negated since the Gaussian uses the exponential to the negative:
+			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+			peakFactors[j] = (float) -(0.5 / sx2);
 		}
 	}
-	
+
 	/**
 	 * Produce an output predicted value for a given set of input
 	 * predictors (x) and coefficients (a).
@@ -100,11 +104,11 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		// Track the position of the parameters
 		int apos = 0;
 		int dydapos = 0;
-		
+
 		// First parameter is the background level 
 		float y_fit = a[BACKGROUND];
 		dyda[dydapos++] = 1; // Gradient for a constant background is 1
-		
+
 		// Unpack the predictor into the dimensions
 		;
 		final int x1 = x / maxx;
@@ -120,21 +124,21 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y_fit;
 	}
 
-	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos,
-			final int dydapos, final float aa)
+	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos, final int dydapos,
+			final float aa)
 	{
-		final float h = a[apos+AMPLITUDE];
+		final float h = a[apos + AMPLITUDE];
 
-		final float dx = x0 - a[apos+X_POSITION];
-		final float dy = x1 - a[apos+Y_POSITION];
-		
+		final float dx = x0 - a[apos + X_POSITION];
+		final float dy = x1 - a[apos + Y_POSITION];
+
 		final float y = (float) (h * Math.exp(aa * dx * dx + aa * dy * dy));
 
 		// Calculate gradients
 		dy_da[dydapos] = y / h;
-		
-		dy_da[dydapos+1] = y * (-2.0f * aa * dx);
-		dy_da[dydapos+2] = y * (-2.0f * aa * dy);
+
+		dy_da[dydapos + 1] = y * (-2.0f * aa * dx);
+		dy_da[dydapos + 2] = y * (-2.0f * aa * dy);
 
 		return y;
 	}
@@ -199,13 +203,13 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesWidth0()
+	public boolean evaluatesSD0()
 	{
 		return false;
 	}
 
 	@Override
-	public boolean evaluatesWidth1()
+	public boolean evaluatesSD1()
 	{
 		return false;
 	}

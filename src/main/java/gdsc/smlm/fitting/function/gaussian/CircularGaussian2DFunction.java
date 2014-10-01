@@ -62,12 +62,17 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		peakFactors = new float[npeaks][2];
 		for (int j = 0; j < npeaks; j++)
 		{
-    		final double sigma_x = a[j*6 + X_WIDTH];
-    
-    		peakFactors[j][AA] = (float) (MinusFourLog2 / (sigma_x * sigma_x));
-    
-          	// For the x-width gradient
-    		peakFactors[j][AX] = (float) (-2.0 * MinusFourLog2 / (sigma_x * sigma_x * sigma_x));
+			final double sx = a[j * 6 + X_SD];
+			final double sx2 = sx * sx;
+			final double sx3 = sx2 * sx;
+
+			// All prefactors are negated since the Gaussian uses the exponential to the negative:
+			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+			
+			peakFactors[j][AA] = (float) -(0.5 / sx2);
+
+			// For the x-width gradient
+			peakFactors[j][AX] = (float) (1 / sx3);
 		}
 	}
 
@@ -75,23 +80,18 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * Produce an output predicted value for a given set of input
 	 * predictors (x) and coefficients (a).
 	 * <p>
-	 * Evaluates an 2-dimensional Gaussian function for multiple peaks.
+	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Position (p) is the position of
-	 * the Gaussian in each of the N-dimensions. Width (w) is the peak width at half-max in each of the N-dimensions.
-	 * This produces an additional 1+2N coefficients per peak.
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
+	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
+	 * the standard deviation in each of the N-dimensions.
 	 * <p>
 	 * The equation per peak is:<br/>
-	 * y_peak = A * product(N) [ exp(-4 * log(2) * (x[i]-p[i]) * (x[i]-p[i]) / (w[i] * w[i])) ]
-	 * <p>
-	 * The equation for all peaks is:<br/>
-	 * y = B + sum(npeaks) [ y_peak[i] ]
-	 * <p>
-	 * The number of peaks can be specified in the constructor.
-	 * <p>
-	 * Note the use of the width as the peak width at half max. This can be converted to the Gaussian peak standard
-	 * deviation using: SD = pwhm / 2*sqrt(2*log(2)); SD = pwhm / 2.35482
+	 * y_peak = A * exp( -( a(x-x0)^2 + c(y-y0)^2 ) )<br/>
+	 * Where: <br/>
+	 * a = 1/(2*sx^2) <br/>
+	 * c = 1/(2*sy^2)
 	 * 
 	 * @param x
 	 *            Input predictor
@@ -212,13 +212,13 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesWidth0()
+	public boolean evaluatesSD0()
 	{
 		return true;
 	}
 
 	@Override
-	public boolean evaluatesWidth1()
+	public boolean evaluatesSD1()
 	{
 		return false;
 	}

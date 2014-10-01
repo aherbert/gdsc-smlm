@@ -21,7 +21,7 @@ package gdsc.smlm.fitting.function;
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
  * specify which of the following parameters the function will evaluate:<br/>
- * background, amplitude, angle[N-1], position[N], width[N]
+ * background, amplitude, angle[N-1], position[N], sd[N]
  * <p>
  * The class provides the number of peaks and the gradient indices.
  */

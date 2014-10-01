@@ -19,8 +19,8 @@ package gdsc.smlm.fitting.function.gaussian;
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into
- * 2-dimensional data. The dimensions of the data must be specified to allow unpacking to coordinates.
+ * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
  */
@@ -43,41 +43,20 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 		super(maxx);
 	}
 
-	/**
-	 * Produce an output predicted value for a given set of input
-	 * predictors (x) and coefficients (a).
-	 * <p>
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * <p>
-	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Position (p) is the position of
-	 * the Gaussian in each of the N-dimensions. Width (w) is the peak width at half-max in each of the N-dimensions.
-	 * This produces an additional 1+2N coefficents per peak.
-	 * <p>
-	 * The equation per peak is:<br/>
-	 * y_peak = A * product(N) [ exp(-4 * log(2) * (x[i]-p[i]) * (x[i]-p[i]) / (w[i] * w[i])) ]
-	 * <p>
-	 * Note the use of the width as the peak width at half max. This can be converted to the Gaussian peak standard
-	 * deviation using: SD = pwhm / 2*sqrt(2*log(2)); SD = pwhm / 2.35482
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param x
-	 *            Input predictor
-	 * @param dyda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.gaussian.SingleCircularGaussian2DFunction#eval(int, float[])
 	 */
 	public float eval(final int x, final float[] dyda)
 	{
 		// Unpack the predictor into the dimensions
-		;
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
 		return background + gaussian(x0, x1, dyda);
 	}
-	
+
 	private float gaussian(final int x0, final int x1, final float[] dy_da)
 	{
 		final float h = amplitude;
@@ -97,14 +76,16 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 
 		return y;
 	}
-	
+
 	@Override
 	public boolean evaluatesBackground()
 	{
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
 	public int[] gradientIndices()

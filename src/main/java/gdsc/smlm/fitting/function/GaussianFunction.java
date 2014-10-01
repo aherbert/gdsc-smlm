@@ -21,7 +21,7 @@ package gdsc.smlm.fitting.function;
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
  * specify which of the following parameters the function will evaluate:<br/>
- * background, amplitude, angle[N-1], position[N], width[N]
+ * background, amplitude, angle[N-1], position[N], sd[N]
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
@@ -65,14 +65,14 @@ public abstract class GaussianFunction implements NonLinearFunction
 	public abstract boolean evaluatesPosition();
 
 	/**
-	 * @return True if the function can evaluate the width gradient for the 1st dimension
+	 * @return True if the function can evaluate the standard deviation gradient for the 1st dimension
 	 */
-	public abstract boolean evaluatesWidth0();
+	public abstract boolean evaluatesSD0();
 
 	/**
-	 * @return True if the function can evaluate the width gradient for the 2nd dimension
+	 * @return True if the function can evaluate the standard deviation gradient for the 2nd dimension
 	 */
-	public abstract boolean evaluatesWidth1();
+	public abstract boolean evaluatesSD1();
 
 	/**
 	 * @return The number of parameters per peak

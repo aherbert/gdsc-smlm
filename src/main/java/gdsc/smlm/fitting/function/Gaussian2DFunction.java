@@ -21,7 +21,7 @@ package gdsc.smlm.fitting.function;
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
  * specify which of the following parameters the function will evaluate:<br/>
- * background, amplitude, angle, position0, position1, width0, width1
+ * background, amplitude, angle, position0, position1, sd0, sd1
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
@@ -32,14 +32,14 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 	public static final int ANGLE = 2;
 	public static final int X_POSITION = 3;
 	public static final int Y_POSITION = 4;
-	public static final int X_WIDTH = 5;
-	public static final int Y_WIDTH = 6;
+	public static final int X_SD = 5;
+	public static final int Y_SD = 6;
 	
 	protected int maxx;
 	
 	public Gaussian2DFunction(int maxx)
 	{
-		this.maxx = maxx;
+		setMaxX(maxx);
 	}
 	
 	/**
@@ -59,6 +59,24 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 	}
 
 	/**
+	 * @maxx the maximum size in the first dimension. Default to 1 if not positive.
+	 */
+	public void setMaxX(int maxx)
+	{
+		if (maxx < 1)
+			maxx = 1;
+		this.maxx = maxx;
+	}
+
+	/**
+	 * @return the maximum size in the first dimension
+	 */
+	public int getMaxX()
+	{
+		return maxx;
+	}
+	
+	/**
 	 * Build the index array that maps the gradient index back to the original parameter index so that:<br/>
 	 * a[indices[i]] += dy_da[i]
 	 * 
@@ -73,7 +91,7 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 	protected static int[] createGradientIndices(int nPeaks, GaussianFunction gf)
 	{
 		// Parameters are: 
-		// Background + n * { Amplitude, Angle, Xpos, Ypos, Xwidth, yWidth }
+		// Background + n * { Amplitude, Angle, Xpos, Ypos, Xsd, Ysd }
 		int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getParametersPerPeak();
 		int[] indices = new int[nparams];
 
@@ -87,10 +105,10 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 				indices[p++] = i + ANGLE;
 			indices[p++] = i + X_POSITION;
 			indices[p++] = i + Y_POSITION;
-			if (gf.evaluatesWidth0())
-				indices[p++] = i + X_WIDTH;
-			if (gf.evaluatesWidth1())
-				indices[p++] = i + Y_WIDTH;
+			if (gf.evaluatesSD0())
+				indices[p++] = i + X_SD;
+			if (gf.evaluatesSD1())
+				indices[p++] = i + Y_SD;
 		}
 
 		return indices;

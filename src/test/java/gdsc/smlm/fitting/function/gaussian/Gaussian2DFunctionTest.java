@@ -26,7 +26,7 @@ public abstract class Gaussian2DFunctionTest
 	float[][] testw1 = new float[][] { { 1.1f, 1.2f }, { 1.1f, 1.7f }, { 1.5f, 1.2f }, { 1.5f, 1.7f }, };
 
 	float[] testamplitude2 = new float[] { 20, 50 };
-	float[] testangle2 = new float[] { (float) (Math.PI / 6), (float) (Math.PI / 3) };
+	float[] testangle2 = new float[] { (float) (Math.PI / 7), (float) (Math.PI / 11) };
 	float[] testcx2 = new float[] { 4.8f, 5.3f };
 	float[] testcy2 = new float[] { 5.1f, 4.9f };
 	float[][] testw2 = new float[][] { { 1.2f, 1.4f }, { 1.2f, 1.5f }, { 1.3f, 1.4f }, { 1.3f, 1.5f }, };
@@ -61,7 +61,7 @@ public abstract class Gaussian2DFunctionTest
 		// Position is always evaluated
 
 		boolean noSecondWidth = false;
-		if (!f1.evaluatesWidth0())
+		if (!f1.evaluatesSD0())
 		{
 			// Just use 1 width
 			testw1 = new float[][] { testw1[0] };
@@ -69,7 +69,7 @@ public abstract class Gaussian2DFunctionTest
 			// If no width 0 then assume we have no width 1 as well
 			noSecondWidth = true;
 		}
-		else if (!f1.evaluatesWidth1())
+		else if (!f1.evaluatesSD1())
 		{
 			// No evaluation of second width needs only variation in width 0 so truncate 
 			testw1 = Arrays.copyOf(testw1, 2);
@@ -122,9 +122,9 @@ public abstract class Gaussian2DFunctionTest
 				Assert.assertEquals("Position0", i + 2, gradientIndices[p++]);
 				Assert.assertEquals("Position1", i + 3, gradientIndices[p++]);
 			}
-			if (gf.evaluatesWidth0())
+			if (gf.evaluatesSD0())
 				Assert.assertEquals("Width0", i + 4, gradientIndices[p++]);
-			if (gf.evaluatesWidth1())
+			if (gf.evaluatesSD1())
 				Assert.assertEquals("Width1", i + 5, gradientIndices[p++]);
 		}
 	}
@@ -208,15 +208,15 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesXWidthGradient()
 	{
-		if (f1.evaluatesWidth0())
-			functionComputesTargetGradient(Gaussian2DFunction.X_WIDTH);
+		if (f1.evaluatesSD0())
+			functionComputesTargetGradient(Gaussian2DFunction.X_SD);
 	}
 
 	@Test
 	public void functionComputesYWidthGradient()
 	{
-		if (f1.evaluatesWidth1())
-			functionComputesTargetGradient(Gaussian2DFunction.Y_WIDTH);
+		if (f1.evaluatesSD1())
+			functionComputesTargetGradient(Gaussian2DFunction.Y_SD);
 	}
 
 	private void functionComputesTargetGradient(int targetParameter)
@@ -365,10 +365,10 @@ public abstract class Gaussian2DFunctionTest
 	{
 		if (f2 != null)
 		{
-			if (f2.evaluatesWidth0())
+			if (f2.evaluatesSD0())
 			{
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_WIDTH);
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_WIDTH + 6);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD + 6);
 			}
 		}
 	}
@@ -378,10 +378,10 @@ public abstract class Gaussian2DFunctionTest
 	{
 		if (f2 != null)
 		{
-			if (f2.evaluatesWidth1())
+			if (f2.evaluatesSD1())
 			{
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_WIDTH);
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_WIDTH + 6);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD + 6);
 			}
 		}
 	}
@@ -441,36 +441,50 @@ public abstract class Gaussian2DFunctionTest
 		float background = 0;
 		int maxx = 30;
 
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, maxx, flags);
+		Gaussian2DFunction f = f1;
+		f.setMaxX(maxx);
 		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, maxx, GaussianFunctionFactory.FIT_ELLIPTICAL);
-		final double WIDTH_TO_SD = 2 * Math.sqrt(2 * Math.log(2.0));
-		final double WIDTH_TO_SD2 = WIDTH_TO_SD * WIDTH_TO_SD;
 
-		for (float amplitude1 : testamplitude1)
-			for (float angle1 : testangle1)
-				for (float cx1 : new float[] { maxx / 2 + 0.373f })
-					for (float cy1 : new float[] { maxx / 2 + 0.876f })
-						for (float[] w1 : testw1)
-						{
-							float[] a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
-
-							f.initialise(a);
-							f2.initialise(a);
-							double sum = 0;
-							for (int index = maxx * maxx; index-- > 0;)
+		try
+		{
+			for (float amplitude1 : testamplitude1)
+				for (float angle1 : testangle1)
+					for (float cx1 : new float[] { maxx / 2 + 0.373f })
+						for (float cy1 : new float[] { maxx / 2 + 0.876f })
+							for (float[] w1 : testw1)
 							{
-								float r1 = f.eval(index);
-								float r2 = f2.eval(index);
-								sum += r1;
-								final boolean ok = eq2.almostEqualComplement(r1, r2);
-								if (!ok)
-									Assert.assertTrue(
-											String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx), ok);
-							}
+								float[] a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
 
-							float integral = (float) (amplitude1 * 2.0 * Math.PI * w1[0] * w1[1] / WIDTH_TO_SD2);
-							Assert.assertTrue(sum + " != " + integral, eq.almostEqualComplement((float) sum, integral));
-						}
+								f.initialise(a);
+								f2.initialise(a);
+								double sum = 0;
+								for (int index = maxx * maxx; index-- > 0;)
+								{
+									float r1 = f.eval(index);
+									float r2 = f2.eval(index);
+									//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
+									sum += r1;
+									final boolean ok = eq2.almostEqualComplement(r1, r2);
+									if (!ok)
+										Assert.assertTrue(
+												String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
+												ok);
+								}
+
+								float integral = (float) (amplitude1 * 2.0 * Math.PI * w1[0] * w1[1]);
+								Assert.assertTrue(sum + " != " + integral,
+										eq.almostEqualComplement((float) sum, integral));
+							}
+		}
+		catch (AssertionError e)
+		{
+			throw e;
+		}
+		finally
+		{
+			// Reset the function width
+			f.setMaxX(this.maxx);
+		}
 	}
 
 	float[] createParameters(float... args)

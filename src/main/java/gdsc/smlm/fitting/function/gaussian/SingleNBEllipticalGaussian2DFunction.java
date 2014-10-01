@@ -19,8 +19,8 @@ package gdsc.smlm.fitting.function.gaussian;
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into
- * 2-dimensional data. The dimensions of the data must be specified to allow unpacking to coordinates.
+ * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
  */
@@ -43,45 +43,20 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 		super(maxx);
 	}
 
-	/**
-	 * Produce an output predicted value for a given set of input
-	 * predictors (x) and coefficients (a).
-	 * <p>
-	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
-	 * <p>
-	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; Angle; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
-	 * angle of the ellipse. Position (p) is the position of the Gaussian in each of the N-dimensions. Width (w) is the
-	 * peak width at half-max in each of the N-dimensions. This produces an additional 1+2N coefficients per peak.
-	 * <p>
-	 * The equation per peak is:<br/>
-	 * y_peak = A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
-	 * Where: <br/>
-	 * a = 4*ln(2)*cos(r)^2 /lwX^2 + 4*ln(2)*sin(r)^2 /lwY^2 <br/>
-	 * b = -2*ln(2)*sin(2r)^2/lwX^2 + 2*ln(2)*sin(2r)^2/lwY^2 <br/>
-	 * c = 4*ln(2)*sin(r)^2 /lwX^2 + 4*ln(2)*cos(r)^2 /lwY^2
-	 * <p>
-	 * Note the use of the width as the peak width at half max. This can be converted to the Gaussian peak standard
-	 * deviation using: SD = pwhm / 2*sqrt(2*log(2)); SD = pwhm / 2.35482
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param x
-	 *            Input predictor
-	 * @param dyda
-	 *            Partial gradient of function with respect to each coefficient
-	 * @return The predicted value
-	 * 
-	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.gaussian.SingleEllipticalGaussian2DFunction#eval(int, float[])
 	 */
 	public float eval(final int x, final float[] dyda)
 	{
 		// Unpack the predictor into the dimensions
-		;
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
 		return background + gaussian(x0, x1, dyda);
 	}
-	
+
 	private float gaussian(final int x0, final int x1, final float[] dy_da)
 	{
 		final float h = amplitude;
@@ -94,23 +69,25 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 		// Calculate gradients
 		dy_da[0] = y / h;
 		dy_da[1] = y * (aa2 * dx * dx + bb2 * dx * dy + cc2 * dy * dy);
-		
+
 		dy_da[2] = y * (-2.0f * aa * dx - bb * dy);
 		dy_da[3] = y * (-2.0f * cc * dy - bb * dx);
-		
+
 		dy_da[4] = y * (ax * dx * dx + bx * dx * dy + cx * dy * dy);
 		dy_da[5] = y * (ay * dx * dx + by * dx * dy + cy * dy * dy);
 
 		return y;
 	}
-	
+
 	@Override
 	public boolean evaluatesBackground()
 	{
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
 	public int[] gradientIndices()

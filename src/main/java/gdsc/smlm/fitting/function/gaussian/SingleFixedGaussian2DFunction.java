@@ -54,8 +54,6 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		super(maxx);
 	}
 
-	protected static final double MinusFourLog2 = (double) (-4.0 * Math.log(2.0));
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -67,27 +65,34 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		amplitude = a[AMPLITUDE];
 		x0pos = a[X_POSITION];
 		x1pos = a[Y_POSITION];
-		width = a[X_WIDTH];
+		width = a[X_SD];
 
-		aa = (float) (MinusFourLog2 / ((double) width * (double) width));
+		final double sx = a[X_SD];
+		final double sx2 = sx * sx;
+		
+		// All prefactors are negated since the Gaussian uses the exponential to the negative:
+		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+		
+		aa = (float) -(0.5 / sx2);
 	}
 
 	/**
 	 * Produce an output predicted value for a given set of input
 	 * predictors (x) and coefficients (a).
 	 * <p>
-	 * Evaluates an 2-dimensional Gaussian function for a single peak.
+	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Position (p) is the position of
-	 * the Gaussian in each of the N-dimensions. Width (w) is the peak width at half-max in each of the N-dimensions.
-	 * This produces an additional 1+2N coefficents per peak.
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
+	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
+	 * the standard deviation in each of the N-dimensions.
 	 * <p>
 	 * The equation per peak is:<br/>
-	 * y_peak = A * product(N) [ exp(-4 * log(2) * (x[i]-p[i]) * (x[i]-p[i]) / (w[i] * w[i])) ]
-	 * <p>
-	 * Note the use of the width as the peak width at half max. This can be converted to the Gaussian peak standard
-	 * deviation using: SD = pwhm / 2*sqrt(2*log(2)); SD = pwhm / 2.35482
+	 * y_peak = A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
+	 * Where: <br/>
+	 * a = cos(r)^2/(2*sx^2) + sin(r)^2 /(2*sy^2) <br/>
+	 * b = -sin(2r)^2/(4*sx^2) + sin(2r)^2/(4*sy^2) <br/>
+	 * c = sin(r)^2/(2*sx^2) + cos(r)^2/(2*sy^2)
 	 * 
 	 * @param x
 	 *            Input predictor
@@ -103,7 +108,6 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		dyda[0] = 1; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
-		;
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
@@ -176,13 +180,13 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesWidth0()
+	public boolean evaluatesSD0()
 	{
 		return false;
 	}
 
 	@Override
-	public boolean evaluatesWidth1()
+	public boolean evaluatesSD1()
 	{
 		return false;
 	}

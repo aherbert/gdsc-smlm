@@ -69,50 +69,52 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		peakFactors = new float[npeaks][9];
 		for (int j = 0; j < npeaks; j++)
 		{
-    		final double theta = a[j*6 + ANGLE];
-    		final double sigma_x = a[j*6 + X_WIDTH];
-    		final double sigma_y = a[j*6 + Y_WIDTH];
-    
-    		peakFactors[j][AA] = (float) (MinusFourLog2 * Math.cos(theta) * Math.cos(theta) / (sigma_x * sigma_x) + 
-    									  MinusFourLog2 * Math.sin(theta) * Math.sin(theta) / (sigma_y * sigma_y));
-    		peakFactors[j][BB] = (float) (-MinusFourLog2 * Math.sin(2 * theta) / (sigma_x * sigma_x) + 
-    			           				  MinusFourLog2 * Math.sin(2 * theta) / (sigma_y * sigma_y));
-    		peakFactors[j][CC] = (float) (MinusFourLog2 * Math.sin(theta) * Math.sin(theta) / (sigma_x * sigma_x) + 
-    			          				  MinusFourLog2 * Math.cos(theta) * Math.cos(theta) / (sigma_y * sigma_y));
-    
-          	// For the x-width gradient
-    		peakFactors[j][AX] = (float) (-2.0 * MinusFourLog2 * Math.cos(theta) * Math.cos(theta) / (sigma_x * sigma_x * sigma_x));
-    		peakFactors[j][BX] =  (float) (2.0 * MinusFourLog2 * Math.sin(2 * theta) / (sigma_x * sigma_x * sigma_x));
-    		peakFactors[j][CX] = (float) (-2.0 * MinusFourLog2 * Math.sin(theta) * Math.sin(theta) / (sigma_x * sigma_x * sigma_x));
-          	
-          	// For the y-width gradient
-    		peakFactors[j][AY] = (float) (-2.0 * MinusFourLog2 * Math.sin(theta) * Math.sin(theta) / (sigma_y * sigma_y * sigma_y));
-    		peakFactors[j][BY] = (float) (-2.0 * MinusFourLog2 * Math.sin(2 * theta) / (sigma_y * sigma_y * sigma_y));
-    		peakFactors[j][CY] = (float) (-2.0 * MinusFourLog2 * Math.cos(theta) * Math.cos(theta) / (sigma_y * sigma_y * sigma_y));
+			final double theta = a[j * 6 + ANGLE];
+			final double sx = a[j * 6 + X_SD];
+			final double sy = a[j * 6 + Y_SD];
+			final double sx2 = sx * sx;
+			final double sy2 = sy * sy;
+			final double sx3 = sx2 * sx;
+			final double sy3 = sy2 * sy;
+			final double cosSqt = Math.cos(theta) * Math.cos(theta);
+			final double sinSqt = Math.sin(theta) * Math.sin(theta);
+			final double sin2t = Math.sin(2 * theta);
+
+			// All prefactors are negated since the Gaussian uses the exponential to the negative:
+			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+			
+			peakFactors[j][AA] = (float) -(0.5 * (cosSqt / sx2 + sinSqt / sy2));
+			peakFactors[j][BB] = (float) -(0.25 * (-sin2t / sx2 + sin2t / sy2));
+			peakFactors[j][CC] = (float) -(0.5 * (sinSqt / sx2 + cosSqt / sy2));;
+
+			// For the x-width gradient
+			peakFactors[j][AX] = (float) (cosSqt / sx3);
+			peakFactors[j][BX] = (float) -(0.5 * sin2t / sx3);
+			peakFactors[j][CX] = (float) (sinSqt / sx3);
+
+			// For the y-width gradient
+			peakFactors[j][AY] = (float) (sinSqt / sy3);
+			peakFactors[j][BY] = (float) (0.5 * sin2t / sy3);
+			peakFactors[j][CY] = (float) (cosSqt / sy3);
 		}
 	}
-
 	/**
 	 * Produce an output predicted value for a given set of input
 	 * predictors (x) and coefficients (a).
 	 * <p>
-	 * Evaluates an 2-dimensional Gaussian function for multiple peaks.
+	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Position (p) is the position of
-	 * the Gaussian in each of the N-dimensions. Width (w) is the peak width at half-max in each of the N-dimensions.
-	 * This produces an additional 1+2N coefficients per peak.
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
+	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
+	 * the standard deviation in each of the N-dimensions. This produces an additional 1+2N coefficients per peak.
 	 * <p>
 	 * The equation per peak is:<br/>
-	 * y_peak = A * product(N) [ exp(-4 * log(2) * (x[i]-p[i]) * (x[i]-p[i]) / (w[i] * w[i])) ]
-	 * <p>
-	 * The equation for all peaks is:<br/>
-	 * y = B + sum(npeaks) [ y_peak[i] ]
-	 * <p>
-	 * The number of peaks can be specified in the constructor.
-	 * <p>
-	 * Note the use of the width as the peak width at half max. This can be converted to the Gaussian peak standard
-	 * deviation using: SD = pwhm / 2*sqrt(2*log(2)); SD = pwhm / 2.35482
+	 * y_peak = A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
+	 * Where: <br/>
+	 * a = cos(r)^2/(2*sx^2) + sin(r)^2 /(2*sy^2) <br/>
+	 * b = -sin(2r)^2/(4*sx^2) + sin(2r)^2/(4*sy^2) <br/>
+	 * c = sin(r)^2/(2*sx^2) + cos(r)^2/(2*sy^2)
 	 * 
 	 * @param x
 	 *            Input predictor
@@ -243,13 +245,13 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesWidth0()
+	public boolean evaluatesSD0()
 	{
 		return true;
 	}
 
 	@Override
-	public boolean evaluatesWidth1()
+	public boolean evaluatesSD1()
 	{
 		return true;
 	}
