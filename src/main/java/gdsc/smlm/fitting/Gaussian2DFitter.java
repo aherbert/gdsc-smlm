@@ -314,8 +314,8 @@ public class Gaussian2DFitter
 			float angle = params[j + Gaussian2DFunction.ANGLE];
 			float xpos = params[j + Gaussian2DFunction.X_POSITION];
 			float ypos = params[j + Gaussian2DFunction.Y_POSITION];
-			float xWidth = params[j + Gaussian2DFunction.X_WIDTH];
-			float yWidth = params[j + Gaussian2DFunction.Y_WIDTH];
+			float sx = params[j + Gaussian2DFunction.X_SD];
+			float sy = params[j + Gaussian2DFunction.Y_SD];
 
 			// ----
 			// Check all input parameters and estimate them if necessary
@@ -336,11 +336,11 @@ public class Gaussian2DFitter
 			position[1] = Math.round(ypos);
 			int index = position[1] * maxx + position[0];
 
-			if (xWidth == 0)
+			if (sx == 0)
 			{
-				if (fitConfiguration.getInitialPeakWidth0() > 0)
+				if (fitConfiguration.getInitialPeakStdDev0() > 0)
 				{
-					xWidth = fitConfiguration.getInitialPeakWidth0();
+					sx = fitConfiguration.getInitialPeakStdDev0();
 				}
 				else
 				{
@@ -348,17 +348,17 @@ public class Gaussian2DFitter
 					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
 						return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0, null);
 
-					xWidth = half_max_linewidth(y, index, position, dim, 0, cumul_region, background);
+					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
 				}
 			}
 
-			if (yWidth == 0)
+			if (sy == 0)
 			{
 				if (fitConfiguration.isWidth1Fitting())
 				{
-					if (fitConfiguration.getInitialPeakWidth1() > 0)
+					if (fitConfiguration.getInitialPeakStdDev1() > 0)
 					{
-						yWidth = fitConfiguration.getInitialPeakWidth1();
+						sy = fitConfiguration.getInitialPeakStdDev1();
 					}
 					else
 					{
@@ -367,31 +367,26 @@ public class Gaussian2DFitter
 							return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0,
 									null);
 
-						yWidth = half_max_linewidth(y, index, position, dim, 1, cumul_region, background);
+						sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
 					}
 				}
 				else
 				{
-					yWidth = xWidth;
+					sy = sx;
 				}
 			}
 
 			// Guess the initial angle if input angle is out-of-bounds
 			if (angle == 0)
 			{
-				if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() < -Math.PI)
+				if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() >= -Math.PI &&
+						fitConfiguration.getInitialAngle() <= -Math.PI)
 				{
-					if (xWidth == yWidth)
+					if (sx != sy)
+					{
 						// There is no angle gradient information if the widths are equal. Zero and it will be ignored
-						angle = 0;
-					else
-						// The fit output angle is relative to the major axis.
-						// Initialise using the largest width as the major axis (x coordinate):
-						angle = (float) ((xWidth > yWidth) ? Math.atan2(yWidth, xWidth) : Math.atan2(xWidth, yWidth));
-				}
-				else
-				{
-					angle = fitConfiguration.getInitialAngle();
+						angle = fitConfiguration.getInitialAngle();
+					}
 				}
 			}
 
@@ -399,10 +394,10 @@ public class Gaussian2DFitter
 			if (xpos == position[0] && ypos == position[1])
 			{
 				// Estimate using centre of mass around peak index 
-				// Use 0.5 of the width estimate to calculate the range around the index that should be considered.
-				// Note: round(x) = (int)(x+0.5)
-				int range = (int) ((xWidth + yWidth + 2) / 4);
-				double[] com = findCentreOfMass(y, dim, range, position);
+				// Use 2 * SD estimate to calculate the range around the index that should be considered.
+				// SD = (sx+sy)/2 => Range = sx+sy
+				final int range = (int) Math.ceil(sx + sy + 0.5);
+				final double[] com = findCentreOfMass(y, dim, range, position);
 				xpos = (float) com[0];
 				ypos = (float) com[1];
 			}
@@ -412,8 +407,8 @@ public class Gaussian2DFitter
 			params[parameter++] = angle;
 			params[parameter++] = xpos;
 			params[parameter++] = ypos;
-			params[parameter++] = xWidth;
-			params[parameter++] = yWidth;
+			params[parameter++] = sx;
+			params[parameter++] = sy;
 		}
 
 		// Re-copy the parameters now they have all been set
@@ -442,7 +437,7 @@ public class Gaussian2DFitter
 			if (!fitConfiguration.isWidth1Fitting() && fitConfiguration.isWidth0Fitting())
 			{
 				// Ensure Y width is updated with the fitted X width
-				for (int i = Gaussian2DFunction.X_WIDTH; i < params.length; i += 6)
+				for (int i = Gaussian2DFunction.X_SD; i < params.length; i += 6)
 				{
 					params[i + 1] = params[i];
 					if (params_dev != null)
@@ -562,8 +557,8 @@ public class Gaussian2DFitter
 		//		}
 
 		// Commented out as this interferes with the PSF Estimator
-		float xWidth = params[i + 3];
-		float yWidth = params[i + 4];
+		float xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE];
+		float yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE];
 		// The fit will compute the angle from the major axis. 
 		// Standardise so it is always from the X-axis
 		if (yWidth > xWidth)

@@ -131,7 +131,7 @@ public class FitWorker implements Runnable
 	 *            The border of the image to ignore for fitting
 	 * @param search
 	 *            The block size to be used for searching for maxima
-	 * @param fitting 
+	 * @param fitting
 	 *            The block size to be used for fitting
 	 */
 	void setSearchParameters(double smooth, double smooth2, int border, int search, int fitting)
@@ -708,15 +708,13 @@ public class FitWorker implements Runnable
 
 	private float[] convertParameters(float[] params)
 	{
-		// Convert peak-width at half max to peak standard deviation
 		// Convert radians to degrees (if elliptical fitting)
-
-		for (int i = 6; i < params.length; i += 6)
+		if (fitConfig.isAngleFitting())
 		{
-			params[i - 1] = Gaussian2DFitter.fwhm2sd(params[i - 1]);
-			params[i] = Gaussian2DFitter.fwhm2sd(params[i]);
-			if (fitConfig.isAngleFitting())
+			for (int i = 6; i < params.length; i += 6)
+			{
 				params[i - 4] *= 180.0 / Math.PI;
+			}
 		}
 		return params;
 	}
@@ -991,10 +989,9 @@ public class FitWorker implements Runnable
 					float[] params = fitResult.getParameters();
 					for (int i = 0, j = 0; i < fitResult.getNumberOfPeaks(); i++, j += 6)
 					{
-						// Width is still in PWHM so we convert to SD using a factor
-						final float factor = (float) (Math.PI / (4 * Math.log(2)));
+						final float factor = (float) (2 * Math.PI);
 						float signal = factor * params[j + Gaussian2DFunction.AMPLITUDE] *
-								params[j + Gaussian2DFunction.X_WIDTH] * params[j + Gaussian2DFunction.Y_WIDTH];
+								params[j + Gaussian2DFunction.X_SD] * params[j + Gaussian2DFunction.Y_SD];
 
 						logger.info(
 								"Fit OK [%d]. Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f",
@@ -1004,10 +1001,10 @@ public class FitWorker implements Runnable
 								params[j + Gaussian2DFunction.Y_POSITION] -
 										initialParams[j + Gaussian2DFunction.Y_POSITION],
 								signal / noise,
-								getFactor(params[j + Gaussian2DFunction.X_WIDTH], initialParams[j +
-										Gaussian2DFunction.X_WIDTH]),
-								getFactor(params[j + Gaussian2DFunction.Y_WIDTH], initialParams[j +
-										Gaussian2DFunction.Y_WIDTH]));
+								getFactor(params[j + Gaussian2DFunction.X_SD], initialParams[j +
+										Gaussian2DFunction.X_SD]),
+								getFactor(params[j + Gaussian2DFunction.Y_SD], initialParams[j +
+										Gaussian2DFunction.Y_SD]));
 					}
 					break;
 
@@ -1129,12 +1126,12 @@ public class FitWorker implements Runnable
 
 		// Check all existing maxima. 
 		// Since these will be higher than the current peak it is prudent to extend the range that should be considered.
-		// Use half of the configured peak widths (half-width at half-max).
+		// Use the configured peak standard deviation.
 
 		fittedNeighbourCount = 0;
 		if (!sliceResults.isEmpty())
 		{
-			float range = Math.max(fitConfig.getInitialPeakWidth0(), fitConfig.getInitialPeakWidth1()) / 2;
+			float range = Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 			float xmin2 = xmin - range;
 			float xmax2 = xmax + range;
 			float ymin2 = ymin - range;
@@ -1178,8 +1175,8 @@ public class FitWorker implements Runnable
 				float regionSize = Math.max(width, height) / 2;
 				//int tmpSmooth = (int) Math.max(smooth, 1);
 				//float regionSize = 2 * tmpSmooth + 1;
-				if ((params[Gaussian2DFunction.X_WIDTH] > 0 && params[Gaussian2DFunction.X_WIDTH] < regionSize) ||
-						(params[Gaussian2DFunction.Y_WIDTH] > 0 && params[Gaussian2DFunction.Y_WIDTH] < regionSize))
+				if ((params[Gaussian2DFunction.X_SD] > 0 && params[Gaussian2DFunction.X_SD] < regionSize) ||
+						(params[Gaussian2DFunction.Y_SD] > 0 && params[Gaussian2DFunction.Y_SD] < regionSize))
 					return true;
 			}
 		}
@@ -1322,10 +1319,10 @@ public class FitWorker implements Runnable
 		// and finding the maxima on the original image data.
 
 		// Guess maxima using the fitted width as a single peak		
-		int x1 = Math.round(cx + vector[0] * params[Gaussian2DFunction.X_WIDTH] / 2);
-		int y1 = Math.round(cy + vector[1] * params[Gaussian2DFunction.Y_WIDTH] / 2);
-		int x2 = Math.round(cx - vector[0] * params[Gaussian2DFunction.X_WIDTH] / 2);
-		int y2 = Math.round(cy - vector[1] * params[Gaussian2DFunction.Y_WIDTH] / 2);
+		int x1 = Math.round(cx + vector[0] * params[Gaussian2DFunction.X_SD]);
+		int y1 = Math.round(cy + vector[1] * params[Gaussian2DFunction.Y_SD]);
+		int x2 = Math.round(cx - vector[0] * params[Gaussian2DFunction.X_SD]);
+		int y2 = Math.round(cy - vector[1] * params[Gaussian2DFunction.Y_SD]);
 
 		// Check bounds
 		if (x1 < 0)
@@ -1488,20 +1485,19 @@ public class FitWorker implements Runnable
 				if (fitConfig.isWidth0Fitting())
 				{
 					// Add the fitted standard deviation to the allowed shift
-					shift += Gaussian2DFitter.fwhm2sd(Math.max(params[Gaussian2DFunction.X_WIDTH],
-							params[Gaussian2DFunction.Y_WIDTH]));
+					shift += Math.max(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]);
 				}
 				else
 				{
+					// Quadrant analysis only happens when there are no neighbours or the neighbour fit failed.
 					if (config.isIncludeNeighbours())
-						// Quadrant analysis only happens when there are no neighbours or the neighbour fit failed.
 						// Assume that neighbours are insignificant and allow the shift to span half of the 
 						// fitted window.
 						shift = 0.5f * Math.max(regionBounds.width, regionBounds.height);
 					else
-						// Expand the allowed shift by the configured PWHM fit to allow close by peaks to be
+						// Expand the allowed shift by the configured SD fit to allow close by peaks to be
 						// included. Duplicate filtering will eliminate fits onto close by neighbours.
-						shift += Math.max(fitConfig.getInitialPeakWidth0(), fitConfig.getInitialPeakWidth1());
+						shift += 2 * Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 				}
 
 				int[] position = new int[2];
