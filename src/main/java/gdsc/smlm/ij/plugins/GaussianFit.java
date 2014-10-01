@@ -826,7 +826,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		config.setMaxIterations(getMaxIterations());
 		config.setSignificantDigits(getSignificantDigits());
 		config.setDelta(getDelta());
-		config.setInitialPeakWidth(Gaussian2DFitter.sd2fwhm(getInitialPeakStdDev()));
+		config.setInitialPeakStdDev(getInitialPeakStdDev());
 		config.setComputeDeviations(showDeviations);
 		config.setDuplicateDistance(0);
 

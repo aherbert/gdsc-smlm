@@ -982,10 +982,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// Restore fitting to default settings but maintain the calibrated width
-		final float width = fitConfig.getInitialPeakWidth0();
+		final float sd = fitConfig.getInitialPeakStdDev0();
 		config = new FitEngineConfiguration(new FitConfiguration());
 		fitConfig = config.getFitConfiguration();
-		fitConfig.setInitialPeakWidth(width);
+		fitConfig.setInitialPeakStdDev(sd);
 		fitConfig.setCoordinateShiftFactor(1.5f);
 		resultsSettings = new ResultsSettings();
 
@@ -1046,7 +1046,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			return true;
 
 		// Check for a PSF width
-		if (fitConfig.getInitialPeakWidth0() <= 0)
+		if (fitConfig.getInitialPeakStdDev0() <= 0)
 			return true;
 
 		return false;
