@@ -253,7 +253,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		float precision = 0;
 		if (this.calibration != null)
 		{
-			double s = (params[Gaussian2DFunction.X_WIDTH] + params[Gaussian2DFunction.Y_WIDTH]) * 0.5 *
+			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 					calibration.nmPerPixel;
 			precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain, noise /
 					calibration.gain);
@@ -271,18 +271,18 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			params[Gaussian2DFunction.AMPLITUDE] /= gain;
 			params[Gaussian2DFunction.BACKGROUND] /= gain;
 			params[Gaussian2DFunction.X_POSITION] *= nmPerPixel;
-			params[Gaussian2DFunction.X_WIDTH] *= nmPerPixel;
+			params[Gaussian2DFunction.X_SD] *= nmPerPixel;
 			params[Gaussian2DFunction.Y_POSITION] *= nmPerPixel;
-			params[Gaussian2DFunction.Y_WIDTH] *= nmPerPixel;
+			params[Gaussian2DFunction.Y_SD] *= nmPerPixel;
 			if (paramsDev != null)
 			{
 				paramsDev = Arrays.copyOf(paramsDev, paramsDev.length);
 				paramsDev[Gaussian2DFunction.AMPLITUDE] /= gain;
 				paramsDev[Gaussian2DFunction.BACKGROUND] /= gain;
 				paramsDev[Gaussian2DFunction.X_POSITION] *= nmPerPixel;
-				paramsDev[Gaussian2DFunction.X_WIDTH] *= nmPerPixel;
+				paramsDev[Gaussian2DFunction.X_SD] *= nmPerPixel;
 				paramsDev[Gaussian2DFunction.Y_POSITION] *= nmPerPixel;
-				paramsDev[Gaussian2DFunction.Y_WIDTH] *= nmPerPixel;
+				paramsDev[Gaussian2DFunction.Y_SD] *= nmPerPixel;
 			}
 		}
 		if (showDeviations)

@@ -122,7 +122,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			{
 				t = 0;
 				final double N = PeakResult.getSignal(params) / gain;
-				final double s = (params[Gaussian2DFunction.X_WIDTH] + params[Gaussian2DFunction.Y_WIDTH]) * 0.5 *
+				final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 						nmPerPixel;
 				final double precision = PeakResult.getPrecision(nmPerPixel, s, N, noise / gain);
 				sx = sy = (precision / nmPerPixel);
@@ -130,8 +130,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			else
 			{
 				t = params[Gaussian2DFunction.ANGLE];
-				sx = params[Gaussian2DFunction.X_WIDTH];
-				sy = params[Gaussian2DFunction.Y_WIDTH];
+				sx = params[Gaussian2DFunction.X_SD];
+				sy = params[Gaussian2DFunction.Y_SD];
 			}
 			psfParams = setPSFParameters(t, sx, sy, new double[5]);
 		}
