@@ -799,8 +799,8 @@ public class FitConfiguration implements Cloneable
 			if (signal == 0)
 			{
 				final float factor = (float) (Math.PI * 2);
-				signal = factor * peakParams[1 + offset] * peakParams[Gaussian2DFunction.X_SD + offset] *
-						peakParams[Gaussian2DFunction.Y_SD + offset];
+				signal = factor * peakParams[Gaussian2DFunction.AMPLITUDE + offset] *
+						peakParams[Gaussian2DFunction.X_SD + offset] * peakParams[Gaussian2DFunction.Y_SD + offset];
 			}
 			float sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD + offset]) * 0.5f;
 			double p = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain);
