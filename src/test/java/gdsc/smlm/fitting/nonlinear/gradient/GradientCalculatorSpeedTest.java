@@ -2,6 +2,7 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.function.CCDCameraNoiseModel;
+import gdsc.smlm.fitting.function.CameraNoiseModel;
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.fitting.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.fitting.function.gaussian.SingleCircularGaussian2DFunction;
@@ -16,7 +17,6 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator7;
 import gdsc.smlm.fitting.utils.DoubleEquality;
 
 import java.util.Random;
-
 import java.util.ArrayList;
 
 import org.junit.Assert;
@@ -152,7 +152,7 @@ public class GradientCalculatorSpeedTest
 				Assert.assertTrue("N-observations: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
 		} 
 		
-		func.setNoiseModel(new CCDCameraNoiseModel(10, true));
+		func.setNoiseModel(CameraNoiseModel.createNoiseModel(10, 0, true));
 		
 		for (int i = 0; i < paramsList.size(); i++)
 		{
