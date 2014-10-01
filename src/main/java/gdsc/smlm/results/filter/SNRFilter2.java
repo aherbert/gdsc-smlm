@@ -83,8 +83,8 @@ public class SNRFilter2 extends Filter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return getSNR(peak) >= this.snr && peak.getWidth() >= lowerSigmaThreshold &&
-				peak.getWidth() <= upperSigmaThreshold;
+		return getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold &&
+				peak.getSD() <= upperSigmaThreshold;
 	}
 
 	static float getSNR(PeakResult peak)

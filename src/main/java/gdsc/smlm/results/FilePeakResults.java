@@ -350,7 +350,7 @@ public class FilePeakResults extends AbstractPeakResults
 
 			if (this.calibration != null)
 			{
-				double s = result.getWidth() * calibration.nmPerPixel;
+				double s = result.getSD() * calibration.nmPerPixel;
 				float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain,
 						result.noise / calibration.gain);
 				addResult(sb, precision);

@@ -66,7 +66,7 @@ public class WidthFilter extends Filter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return peak.getWidth() <= sigmaThreshold;
+		return peak.getSD() <= sigmaThreshold;
 	}
 
 	@Override

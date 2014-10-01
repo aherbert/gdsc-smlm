@@ -1207,7 +1207,7 @@ public class PeakResultsReader
 				p.params[Gaussian2DFunction.Y_SD] *= widthConversion;
 
 				float signal = p.origValue;
-				p.params[Gaussian2DFunction.AMPLITUDE] = (float) (signal / (2 * Math.PI * p.getXWidth() * p.getYWidth()));
+				p.params[Gaussian2DFunction.AMPLITUDE] = (float) (signal / (2 * Math.PI * p.getXSD() * p.getYSD()));
 
 				// Q. Store the original fitted height as the original value?
 				//p.origValue = height;

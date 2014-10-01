@@ -66,7 +66,7 @@ public class PeakResult implements Comparable<PeakResult>
 		params = new float[7];
 		params[Gaussian2DFunction.X_POSITION] = x;
 		params[Gaussian2DFunction.Y_POSITION] = y;
-		params[Gaussian2DFunction.X_WIDTH] = params[Gaussian2DFunction.Y_WIDTH] = sd;
+		params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sd;
 		params[Gaussian2DFunction.AMPLITUDE] = (float) (signal / (Math.PI * 2 * sd * sd));
 	}
 
@@ -101,7 +101,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static float getSignal(float[] params)
 	{
-		return (float) (params[Gaussian2DFunction.AMPLITUDE] * 2 * Math.PI * params[Gaussian2DFunction.X_WIDTH] * params[Gaussian2DFunction.Y_WIDTH]);
+		return (float) (params[Gaussian2DFunction.AMPLITUDE] * 2 * Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]);
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class PeakResult implements Comparable<PeakResult>
 		if (peakId * 6 + 6 >= params.length)
 			return 0;
 		return (float) (params[peakId * 6 + Gaussian2DFunction.AMPLITUDE] * 2 * Math.PI *
-				params[peakId * 6 + Gaussian2DFunction.X_WIDTH] * params[peakId * 6 + Gaussian2DFunction.Y_WIDTH]);
+				params[peakId * 6 + Gaussian2DFunction.X_SD] * params[peakId * 6 + Gaussian2DFunction.Y_SD]);
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class PeakResult implements Comparable<PeakResult>
 	public double getPrecision(double a, double gain)
 	{
 		// Get peak standard deviation in nm. Just use the average of the X & Y.
-		final double s = a * getWidth();
+		final double s = a * getSD();
 		final double N = getSignal();
 		return getPrecision(a, s, N / gain, noise / gain);
 	}
@@ -174,11 +174,11 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * @return The average peak width in the X and Y dimension
+	 * @return The average peak standard deviation in the X and Y dimension
 	 */
-	public float getWidth()
+	public float getSD()
 	{
-		return Math.abs((params[Gaussian2DFunction.X_WIDTH] + params[Gaussian2DFunction.Y_WIDTH]) * 0.5f);
+		return (Math.abs(params[Gaussian2DFunction.X_SD]) + Math.abs(params[Gaussian2DFunction.Y_SD])) * 0.5f;
 	}
 
 	/**
@@ -222,19 +222,19 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * @return The x-dimension width for the first peak
+	 * @return The x-dimension standard deviation for the first peak
 	 */
-	public float getXWidth()
+	public float getXSD()
 	{
-		return params[Gaussian2DFunction.X_WIDTH];
+		return params[Gaussian2DFunction.X_SD];
 	}
 
 	/**
-	 * @return The y-dimension width for the first peak
+	 * @return The y-dimension standard deviation for the first peak
 	 */
-	public float getYWidth()
+	public float getYSD()
 	{
-		return params[Gaussian2DFunction.Y_WIDTH];
+		return params[Gaussian2DFunction.Y_SD];
 	}
 
 	/**
