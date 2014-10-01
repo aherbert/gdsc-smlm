@@ -25,7 +25,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitCriteria;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.fitting.function.CCDCameraNoiseModel;
+import gdsc.smlm.fitting.function.CameraNoiseModel;
 import gdsc.smlm.fitting.logging.Logger;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.SeriesImageSource;
@@ -1332,7 +1332,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				calibration.readNoise = (float) Math.abs(gd.getNextNumber());
 				calibration.bias = (float) Math.abs(gd.getNextNumber());
 				calibration.emCCD = gd.getNextBoolean();
-				fitConfig.setNoiseModel(new CCDCameraNoiseModel(calibration.readNoise, calibration.bias,
+				fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
 						calibration.emCCD));
 			}
 			else

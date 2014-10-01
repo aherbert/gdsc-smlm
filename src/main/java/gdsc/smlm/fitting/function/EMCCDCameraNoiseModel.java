@@ -17,14 +17,14 @@ package gdsc.smlm.fitting.function;
  * Defines the expected variance of a signal recorded on a CCD or EM-CCD Camera. The model assumes a Gaussian read
  * noise, photon shot noise and an EM-gain noise factor.
  */
-public class CCDCameraNoiseModel extends CameraNoiseModel
+public class EMCCDCameraNoiseModel extends CameraNoiseModel
 {
-	public CCDCameraNoiseModel(final float readNoise)
+	public EMCCDCameraNoiseModel(final float readNoise)
 	{
 		super(readNoise);
 	}
 
-	public CCDCameraNoiseModel(final float readNoise, final float bias)
+	public EMCCDCameraNoiseModel(final float readNoise, final float bias)
 	{
 		super(readNoise, bias);
 	}
@@ -36,7 +36,7 @@ public class CCDCameraNoiseModel extends CameraNoiseModel
 	 */
 	public float variance(final float value)
 	{
-		return readNoise2 + Math.max(value - bias, 0f);
+		return readNoise2 + Math.max(value - bias, 0f) * 2f;
 	}
 
 	/*
@@ -46,6 +46,6 @@ public class CCDCameraNoiseModel extends CameraNoiseModel
 	 */
 	public boolean isEmCCD()
 	{
-		return false;
+		return true;
 	}
 }
