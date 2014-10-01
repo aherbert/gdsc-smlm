@@ -1100,8 +1100,8 @@ public class PeakResultsReader
 			params[Gaussian2DFunction.AMPLITUDE] = amplitude;
 			params[Gaussian2DFunction.X_POSITION] = x;
 			params[Gaussian2DFunction.Y_POSITION] = y;
-			params[Gaussian2DFunction.X_WIDTH] = sx;
-			params[Gaussian2DFunction.Y_WIDTH] = sy;
+			params[Gaussian2DFunction.X_SD] = sx;
+			params[Gaussian2DFunction.Y_SD] = sy;
 
 			// Store the signal as the original value
 			return new PeakResult(peak, (int) x, (int) y, signal, chiSquared, 0.0f, params, null);
@@ -1177,7 +1177,7 @@ public class PeakResultsReader
 		{
 			if (p.peak == p.getEndFrame())
 			{
-				float width = p.params[Gaussian2DFunction.X_WIDTH];
+				float width = p.params[Gaussian2DFunction.X_SD];
 				float height = p.params[Gaussian2DFunction.AMPLITUDE];
 				float area = p.origValue;
 				pixelPitch.add(0.5 * width / Math.sqrt(area / (height * 2 * Math.PI)));
@@ -1203,8 +1203,8 @@ public class PeakResultsReader
 				p.params[Gaussian2DFunction.X_POSITION] /= nmPerPixel;
 				p.params[Gaussian2DFunction.Y_POSITION] /= nmPerPixel;
 				// Since the width is 2*pixel pitch
-				p.params[Gaussian2DFunction.X_WIDTH] *= widthConversion;
-				p.params[Gaussian2DFunction.Y_WIDTH] *= widthConversion;
+				p.params[Gaussian2DFunction.X_SD] *= widthConversion;
+				p.params[Gaussian2DFunction.Y_SD] *= widthConversion;
 
 				float signal = p.origValue;
 				p.params[Gaussian2DFunction.AMPLITUDE] = (float) (signal / (2 * Math.PI * p.getXWidth() * p.getYWidth()));
@@ -1312,8 +1312,8 @@ public class PeakResultsReader
 			params[Gaussian2DFunction.AMPLITUDE] = height;
 			params[Gaussian2DFunction.X_POSITION] = xc;
 			params[Gaussian2DFunction.Y_POSITION] = yc;
-			params[Gaussian2DFunction.X_WIDTH] = width;
-			params[Gaussian2DFunction.Y_WIDTH] = width;
+			params[Gaussian2DFunction.X_SD] = width;
+			params[Gaussian2DFunction.Y_SD] = width;
 
 			// Store the signal as the original value
 			return new ExtendedPeakResult(frame, (int) xc, (int) yc, area, 0.0, 0.0f, params, null, frame + length - 1,
