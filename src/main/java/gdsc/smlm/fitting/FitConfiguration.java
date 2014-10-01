@@ -38,8 +38,8 @@ public class FitConfiguration implements Cloneable
 	private Logger log = null;
 	private double delta = 0.0001;
 	private float initialAngle = 0; // Radians
-	private float initialPeakWidth0 = Gaussian2DFitter.sd2fwhm(1);
-	private float initialPeakWidth1 = Gaussian2DFitter.sd2fwhm(1);
+	private float initialSD0 = 1;
+	private float initialSD1 = 1;
 	private boolean computeDeviations = false;
 	private FitSolver fitSolver = FitSolver.LVM;
 	private int minIterations = 0;
@@ -48,7 +48,7 @@ public class FitConfiguration implements Cloneable
 	private FitFunction fitFunction;
 	private int flags;
 	private boolean backgroundFitting = true;
-	private float coordinateShift = Gaussian2DFitter.sd2fwhm(1); // * 0.5f;
+	private float coordinateShift = 1;
 	private float signalThreshold = 0;
 	private float signalStrength = 30;
 	private float precisionThreshold = 0;
@@ -268,41 +268,13 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param initialPeakWidth
-	 *            An estimate for the peak width used to initialise the fit for all dimensions
-	 */
-	public void setInitialPeakWidth(float initialPeakWidth)
-	{
-		setInitialPeakWidth0(initialPeakWidth);
-		setInitialPeakWidth1(initialPeakWidth);
-	}
-
-	/**
 	 * @param initialPeakStdDev
 	 *            An estimate for the peak standard deviation used to initialise the fit for all dimensions
 	 */
 	public void setInitialPeakStdDev(float initialPeakStdDev)
 	{
-		float initialPeakWidth = Gaussian2DFitter.sd2fwhm(initialPeakStdDev);
-		setInitialPeakWidth0(initialPeakWidth);
-		setInitialPeakWidth1(initialPeakWidth);
-	}
-
-	/**
-	 * @param initialPeakWidth0
-	 *            An estimate for the peak width used to initialise the fit for dimension 0
-	 */
-	public void setInitialPeakWidth0(float initialPeakWidth0)
-	{
-		this.initialPeakWidth0 = initialPeakWidth0;
-	}
-
-	/**
-	 * @return An estimate for the peak width used to initialise the fit for dimension 0
-	 */
-	public float getInitialPeakWidth0()
-	{
-		return initialPeakWidth0;
+		setInitialPeakStdDev0(initialPeakStdDev);
+		setInitialPeakStdDev1(initialPeakStdDev);
 	}
 
 	/**
@@ -311,7 +283,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setInitialPeakStdDev0(float initialPeakStdDev0)
 	{
-		this.initialPeakWidth0 = Gaussian2DFitter.sd2fwhm(initialPeakStdDev0);
+		this.initialSD0 = initialPeakStdDev0;
 	}
 
 	/**
@@ -319,24 +291,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public float getInitialPeakStdDev0()
 	{
-		return Gaussian2DFitter.fwhm2sd(initialPeakWidth0);
-	}
-
-	/**
-	 * @param initialPeakWidth1
-	 *            An estimate for the peak width used to initialise the fit for dimension 1
-	 */
-	public void setInitialPeakWidth1(float initialPeakWidth1)
-	{
-		this.initialPeakWidth1 = initialPeakWidth1;
-	}
-
-	/**
-	 * @return An estimate for the peak width used to initialise the fit for dimension 1
-	 */
-	public float getInitialPeakWidth1()
-	{
-		return initialPeakWidth1;
+		return initialSD0;
 	}
 
 	/**
@@ -345,7 +300,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setInitialPeakStdDev1(float initialPeakStdDev1)
 	{
-		this.initialPeakWidth1 = Gaussian2DFitter.sd2fwhm(initialPeakStdDev1);
+		this.initialSD1 = initialPeakStdDev1;
 	}
 
 	/**
@@ -353,7 +308,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public float getInitialPeakStdDev1()
 	{
-		return Gaussian2DFitter.fwhm2sd(initialPeakWidth1);
+		return initialSD1;
 	}
 
 	/**
@@ -583,9 +538,9 @@ public class FitConfiguration implements Cloneable
 	{
 		if (shiftFactor > 0)
 		{
-			float widthMax = (initialPeakWidth0 > 0) ? initialPeakWidth0 : Gaussian2DFitter.sd2fwhm(1);
-			if (initialPeakWidth1 > 0)
-				widthMax = Math.max(initialPeakWidth1, widthMax);
+			float widthMax = (initialSD0 > 0) ? initialSD0 : 1;
+			if (initialSD1 > 0)
+				widthMax = Math.max(initialSD1, widthMax);
 			setCoordinateShift(shiftFactor * widthMax / 2);
 		}
 		else
@@ -599,9 +554,9 @@ public class FitConfiguration implements Cloneable
 	 */
 	public float getCoordinateShiftFactor()
 	{
-		float widthMax = (initialPeakWidth0 > 0) ? initialPeakWidth0 : Gaussian2DFitter.sd2fwhm(1);
-		if (initialPeakWidth1 > 0)
-			widthMax = Math.max(initialPeakWidth1, widthMax);
+		float widthMax = (initialSD0 > 0) ? initialSD0 : Gaussian2DFitter.sd2fwhm(1);
+		if (initialSD1 > 0)
+			widthMax = Math.max(initialSD1, widthMax);
 		return coordinateShift * 2 / widthMax;
 	}
 
@@ -784,8 +739,10 @@ public class FitConfiguration implements Cloneable
 	{
 		final int offset = n * 6;
 		// Check spot movement
-		float xShift = peakParams[3 + offset] - initialParams[3 + offset];
-		float yShift = peakParams[4 + offset] - initialParams[4 + offset];
+		float xShift = peakParams[Gaussian2DFunction.X_POSITION + offset] -
+				initialParams[Gaussian2DFunction.X_POSITION + offset];
+		float yShift = peakParams[Gaussian2DFunction.Y_POSITION + offset] -
+				initialParams[Gaussian2DFunction.Y_POSITION + offset];
 		if (Math.abs(xShift) > coordinateShift || Math.abs(yShift) > coordinateShift)
 		{
 			if (log != null)
@@ -800,15 +757,9 @@ public class FitConfiguration implements Cloneable
 		if (signalStrength != 0)
 		{
 			// Signal = Amplitude * 2 * pi * sx * sy
-			// The fit function evaluates peak full width at half maximum. 
-			// So divide x/y-width by 2 * Math.sqrt(2 * Math.log(2)).
-			//
-			// x * y / (2 * Math.sqrt(2 * Math.log(2)))^2
-			// x * y / (4 * (Math.sqrt(2 * Math.log(2))^2))
-			// x * y / (4 * (2 * Math.log(2)))
-			// x * y / (8 * Math.log(2))
-			final float factor = (float) (Math.PI / (4 * Math.log(2)));
-			signal = factor * peakParams[1 + offset] * peakParams[5 + offset] * peakParams[6 + offset];
+			final float factor = (float) (Math.PI * 2);
+			signal = factor * peakParams[Gaussian2DFunction.AMPLITUDE + offset] *
+					peakParams[Gaussian2DFunction.X_SD + offset] * peakParams[Gaussian2DFunction.Y_SD + offset];
 
 			// Compare the signal to the desired signal strength
 			if (signal < signalThreshold)
@@ -823,15 +774,21 @@ public class FitConfiguration implements Cloneable
 		}
 
 		// Check widths
-		float xFactor = getFactor(peakParams[5 + offset], initialParams[5 + offset]);
-		float yFactor = getFactor(peakParams[6 + offset], initialParams[6 + offset]);
+		float xFactor = getFactor(peakParams[Gaussian2DFunction.X_SD + offset], initialParams[Gaussian2DFunction.X_SD +
+				offset]);
+		float yFactor = getFactor(peakParams[Gaussian2DFunction.Y_SD + offset], initialParams[Gaussian2DFunction.Y_SD +
+				offset]);
 		if (xFactor > widthFactor || yFactor > widthFactor)
 		{
 			if (log != null)
 			{
-				log.info("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n,
-						(peakParams[5 + offset] > initialParams[5 + offset]) ? xFactor : -xFactor,
-						(peakParams[6 + offset] > initialParams[6 + offset]) ? yFactor : -yFactor);
+				log.info(
+						"Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n",
+						n,
+						(peakParams[Gaussian2DFunction.X_SD + offset] > initialParams[Gaussian2DFunction.X_SD + offset]) ? xFactor
+								: -xFactor,
+						(peakParams[Gaussian2DFunction.Y_SD + offset] > initialParams[Gaussian2DFunction.Y_SD + offset]) ? yFactor
+								: -yFactor);
 			}
 			return setValidationResult(FitStatus.WIDTH_DIVERGED, new float[] { xFactor, yFactor });
 		}
@@ -841,12 +798,12 @@ public class FitConfiguration implements Cloneable
 		{
 			if (signal == 0)
 			{
-				final float factor = (float) (Math.PI / (4 * Math.log(2)));
-				signal = factor * peakParams[1 + offset] * peakParams[5 + offset] * peakParams[6 + offset];
+				final float factor = (float) (Math.PI * 2);
+				signal = factor * peakParams[1 + offset] * peakParams[Gaussian2DFunction.X_SD + offset] *
+						peakParams[Gaussian2DFunction.Y_SD + offset];
 			}
-			float fwhm = (peakParams[5 + offset] + peakParams[6 + offset]) * 0.5f;
-			double p = PeakResult.getPrecision(nmPerPixel, nmPerPixel * fwhm / (2 * Math.sqrt(2 * Math.log(2))),
-					signal / gain, noise / gain);
+			float sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD + offset]) * 0.5f;
+			double p = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain);
 			if (p > precisionThreshold)
 			{
 				if (log != null)
@@ -959,6 +916,10 @@ public class FitConfiguration implements Cloneable
 			fitFunction = FitFunction.CIRCULAR;
 		if (fitCriteria == null)
 			fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
+		if (initialSD0 == 0)
+			initialSD0 = 1;
+		if (initialSD1 == 0)
+			initialSD1 = 1;
 		setNoise(noise);
 		setFitFunction(fitFunction);
 	}
