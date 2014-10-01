@@ -295,7 +295,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				z[i] = peak.peak;
 				xCoord[i] = peak.getXPosition() - x;
 				yCoord[i] = peak.getYPosition() - y;
-				sd[i] = Math.max(peak.getXWidth(), peak.getYWidth());
+				sd[i] = Math.max(peak.getXSD(), peak.getYSD());
 				a[i] = peak.getAmplitude();
 				i++;
 			}
@@ -1162,7 +1162,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		for (PeakResult peak : results.getResults())
 		{
 			// Remove bad fits where the width/signal is above the expected
-			final float w = Math.max(peak.getXWidth(), peak.getYWidth());
+			final float w = Math.max(peak.getXSD(), peak.getYSD());
 			if (peak.getSignal() > maxSignal || w > maxWidth)
 				continue;
 

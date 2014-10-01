@@ -330,15 +330,15 @@ public class SpotInspector implements PlugIn, MouseListener
 				negative = true;
 				break;
 			case 8: // Width factor
-				score = getFactor(Math.max(r.getXWidth(), r.getYWidth()), stdDevMax);
+				score = getFactor(Math.max(r.getXSD(), r.getYSD()), stdDevMax);
 				negative = true;
 				break;
 			case 7:
-				score = r.getYWidth();
+				score = r.getYSD();
 				negative = true;
 				break;
 			case 6:
-				score = r.getXWidth();
+				score = r.getXSD();
 				negative = true;
 				break;
 			case 5: // Original value

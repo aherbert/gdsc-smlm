@@ -159,7 +159,7 @@ public class FilterResults implements PlugIn
 
 	private double getPrecision(PeakResult result, float signal)
 	{
-		final double s = result.getWidth() * results.getNmPerPixel();
+		final double s = result.getSD() * results.getNmPerPixel();
 		double precision = PeakResult.getPrecision(results.getNmPerPixel(), s, signal / results.getGain(),
 				result.noise / results.getGain());
 		return precision;
@@ -169,7 +169,7 @@ public class FilterResults implements PlugIn
 	{
 		// The X-width should be the largest (major axis)
 		// Q. Should a filter be used for the Y-width too?
-		return result.params[Gaussian2DFunction.X_WIDTH];
+		return result.params[Gaussian2DFunction.X_SD];
 	}
 
 	/**

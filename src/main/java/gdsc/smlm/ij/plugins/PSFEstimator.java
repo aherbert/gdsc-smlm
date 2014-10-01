@@ -349,11 +349,11 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		createResultsWindow();
 		int iteration = 0;
 		ignore[ANGLE] = !gf.evaluatesAngle();
-		ignore[X] = !gf.evaluatesWidth0();
-		ignore[Y] = !gf.evaluatesWidth1();
+		ignore[X] = !gf.evaluatesSD0();
+		ignore[Y] = !gf.evaluatesSD1();
 
 		double[] params = new double[] { gf.evaluatesAngle() ? initialPeakAngle : 0,
-				gf.evaluatesWidth0() ? initialPeakStdDev0 : 0, gf.evaluatesWidth1() ? initialPeakStdDev1 : 0, 0, 0 };
+				gf.evaluatesSD0() ? initialPeakStdDev0 : 0, gf.evaluatesSD1() ? initialPeakStdDev1 : 0, 0, 0 };
 		double[] params_dev = new double[3];
 		boolean[] identical = new boolean[4];
 		double[] p = new double[] { Double.NaN, Double.NaN, Double.NaN, Double.NaN };

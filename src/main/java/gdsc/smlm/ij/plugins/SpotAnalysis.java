@@ -1010,7 +1010,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			params[Gaussian2DFunction.X_POSITION] = cx;
 			params[Gaussian2DFunction.Y_POSITION] = cy;
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (spotSignal / (2 * Math.PI * psfWidth * psfWidth));
-			params[Gaussian2DFunction.X_WIDTH] = params[Gaussian2DFunction.Y_WIDTH] = psfWidth;
+			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			PeakResult result = new PeakResult(s.frame, (int) cx, (int) cy, 0, 0, 0, params, null);
 			if (trace == null)
 				trace = new Trace(result);
@@ -1389,7 +1389,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (gain * signal / (2 * Math.PI * psfWidth * psfWidth));
 			params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
 			params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
-			params[Gaussian2DFunction.X_WIDTH] = params[Gaussian2DFunction.Y_WIDTH] = psfWidth;
+			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			FitResult fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params);
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
@@ -1417,7 +1417,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (gain * signal / (2 * Math.PI * psfWidth * psfWidth));
 			params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
 			params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
-			params[Gaussian2DFunction.X_WIDTH] = params[Gaussian2DFunction.Y_WIDTH] = psfWidth;
+			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params);
 			if (fitResult.getStatus() == FitStatus.OK)
 			{

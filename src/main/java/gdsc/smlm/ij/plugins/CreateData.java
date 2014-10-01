@@ -1431,16 +1431,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (psfModel instanceof GaussianPSFModel)
 					{
 						GaussianPSFModel m = (GaussianPSFModel) psfModel;
-						params[Gaussian2DFunction.X_WIDTH] = (float) m.getS0();
-						params[Gaussian2DFunction.Y_WIDTH] = (float) m.getS1();
+						params[Gaussian2DFunction.X_SD] = (float) m.getS0();
+						params[Gaussian2DFunction.Y_SD] = (float) m.getS1();
 					}
 					else
 					{
-						params[Gaussian2DFunction.X_WIDTH] = params[Gaussian2DFunction.Y_WIDTH] = (float) (1.0 / Math
+						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (1.0 / Math
 								.sqrt(2.0 * Math.PI));
 					}
 					params[Gaussian2DFunction.AMPLITUDE] = (float) (newIntensity / (2 * Math.PI *
-							params[Gaussian2DFunction.X_WIDTH] * params[Gaussian2DFunction.Y_WIDTH]));
+							params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 
 					// The noise of the background image is currently in photons. Apply gain to convert to ADUs. 
 					double backgroundVariance = localStats[1] * totalGain * totalGain;
@@ -1468,7 +1468,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Ensure the new data is added before the intensity is updated. This avoids 
 					// syncronisation clashes in the getIntensity(...) function.
 					localisationSet.setData(new double[] { localStats[0], totalNoise,
-							params[Gaussian2DFunction.X_WIDTH], params[Gaussian2DFunction.Y_WIDTH], newIntensity });
+							params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD], newIntensity });
 
 					if (checkSNR)
 					{
@@ -1985,7 +1985,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			for (PeakResult r : results.getResults())
 			{
 				stats[PRECISION].add(r.getPrecision(settings.pixelPitch, gain));
-				stats[WIDTH].add(r.getWidth());
+				stats[WIDTH].add(r.getSD());
 			}
 			// Compute density per frame. Multithread for speed
 			if (settings.densityRadius > 0)
@@ -2340,10 +2340,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					params[Gaussian2DFunction.BACKGROUND] /= n;
 					params[Gaussian2DFunction.X_POSITION] /= n;
 					params[Gaussian2DFunction.Y_POSITION] /= n;
-					params[Gaussian2DFunction.X_WIDTH] /= n;
-					params[Gaussian2DFunction.Y_WIDTH] /= n;
+					params[Gaussian2DFunction.X_SD] /= n;
+					params[Gaussian2DFunction.Y_SD] /= n;
 					params[Gaussian2DFunction.AMPLITUDE] = (float) (params[Gaussian2DFunction.AMPLITUDE] / (2 *
-							Math.PI * params[Gaussian2DFunction.X_WIDTH] * params[Gaussian2DFunction.Y_WIDTH]));
+							Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 
 					ExtendedPeakResult p = new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
 							(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT,
@@ -2367,8 +2367,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			params[Gaussian2DFunction.Y_POSITION] += localisation.getY();
 			params[Gaussian2DFunction.AMPLITUDE] += localisation.getIntensity();
 			noise += data[1] * data[1];
-			params[Gaussian2DFunction.X_WIDTH] += data[2];
-			params[Gaussian2DFunction.Y_WIDTH] += data[3];
+			params[Gaussian2DFunction.X_SD] += data[2];
+			params[Gaussian2DFunction.Y_SD] += data[3];
 			n++;
 			lastT = localisation.getTime();
 		}
@@ -2379,10 +2379,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			params[Gaussian2DFunction.BACKGROUND] /= n;
 			params[Gaussian2DFunction.X_POSITION] /= n;
 			params[Gaussian2DFunction.Y_POSITION] /= n;
-			params[Gaussian2DFunction.X_WIDTH] /= n;
-			params[Gaussian2DFunction.Y_WIDTH] /= n;
+			params[Gaussian2DFunction.X_SD] /= n;
+			params[Gaussian2DFunction.Y_SD] /= n;
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (params[Gaussian2DFunction.AMPLITUDE] / (2 * Math.PI *
-					params[Gaussian2DFunction.X_WIDTH] * params[Gaussian2DFunction.Y_WIDTH]));
+					params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 
 			traceResults.add(new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()), (int) Math
 					.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT, currentId));

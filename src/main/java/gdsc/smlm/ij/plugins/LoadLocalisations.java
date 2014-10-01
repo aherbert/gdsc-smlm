@@ -89,8 +89,8 @@ public class LoadLocalisations implements PlugIn
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (l.getIntensity() / (2 * Math.PI));
 			params[Gaussian2DFunction.X_POSITION] = (float) l.getX();
 			params[Gaussian2DFunction.Y_POSITION] = (float) l.getY();
-			params[Gaussian2DFunction.X_WIDTH] = 1;
-			params[Gaussian2DFunction.Y_WIDTH] = 1;
+			params[Gaussian2DFunction.X_SD] = 1;
+			params[Gaussian2DFunction.Y_SD] = 1;
 			results.add(new PeakResult(l.getTime(), (int) l.getX(), (int) l.getY(), 0, 0, 0, params, null));
 		}
 

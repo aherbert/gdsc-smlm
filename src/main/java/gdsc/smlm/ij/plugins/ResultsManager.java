@@ -668,8 +668,8 @@ public class ResultsManager implements PlugIn, MouseListener
 					{
 						p.params[Gaussian2DFunction.X_POSITION] /= input_nmPerPixel;
 						p.params[Gaussian2DFunction.Y_POSITION] /= input_nmPerPixel;
-						p.params[Gaussian2DFunction.X_WIDTH] *= widthConversion;
-						p.params[Gaussian2DFunction.Y_WIDTH] *= widthConversion;
+						p.params[Gaussian2DFunction.X_SD] *= widthConversion;
+						p.params[Gaussian2DFunction.Y_SD] *= widthConversion;
 					}
 				}
 				if (noise == 0)
