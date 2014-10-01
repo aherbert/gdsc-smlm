@@ -510,9 +510,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			else
 			{
-				hwhm = 0.5 *
-						PSFCalculator.calculateWidth(settings.wavelength, settings.numericalAperture,
-								PSFCalculator.DEFAULT_PROPORTIONALITY_FACTOR) / settings.pixelPitch;
+				hwhm = 0.5 * PSFCalculator.SD_TO_FWHM_FACTOR *
+						PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture, 1) /
+						settings.pixelPitch;
 			}
 		}
 		return hwhm;
@@ -2021,13 +2021,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				// Split results into singles (density = 0) and clustered (density > 0)
 				MemoryPeakResults singles = copyMemoryPeakResults("Singles");
-				MemoryPeakResults clustered = copyMemoryPeakResults("Clustered");;
-				int i=0;
+				MemoryPeakResults clustered = copyMemoryPeakResults("Clustered");
+				;
+				int i = 0;
 				for (PeakResult r : results.getResults())
 				{
 					// Store density in the original value field
 					r.origValue = allDensity[i];
-					if (allDensity[i++]==0)
+					if (allDensity[i++] == 0)
 						singles.add(r);
 					else
 						clustered.add(r);
@@ -2135,6 +2136,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	/**
 	 * Copy all the settings from the results into a new results set labelled with the name suffix
+	 * 
 	 * @param nameSuffix
 	 * @return The new results set
 	 */
@@ -2148,7 +2150,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		MemoryPeakResults.addResults(newResults);
 		return newResults;
 	}
-	
+
 	private boolean[] getChoosenHistograms()
 	{
 		if (settings.chooseHistograms)

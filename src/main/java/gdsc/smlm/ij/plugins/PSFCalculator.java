@@ -17,7 +17,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.utils.AiryPattern;
+import gdsc.smlm.model.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
@@ -30,21 +30,19 @@ import java.awt.Label;
 import java.awt.SystemColor;
 import java.awt.TextField;
 
-import xal.tools.math.BesselFunction;
-
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.
  */
 public class PSFCalculator implements PlugIn, DialogListener
 {
 	/**
-	 * This is the proportionality factor (f) calculated from fitting quantum dots on the imaging microscope at the
-	 * University of Sussex. The Gaussian PSF Standard Deviation = f * lambda / (2 * NA).
+	 * This is the factor (f) for scaling an Airy width to a Gaussian approximation. The Gaussian PSF
+	 * Standard Deviation = f * lambda / (2 * pi * NA).
 	 */
-	public static final double DEFAULT_PROPORTIONALITY_FACTOR = 1.52;
+	public static final double AIRY_TO_GAUSSIAN = 1.323;
 
 	/**
-	 * The factor for convering a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
+	 * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
 	 */
 	public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
 
@@ -55,6 +53,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	private TextField widthPixelsText;
 	private TextField sdNmText;
 	private TextField sdPixelsText;
+	private TextField fwhmPixelsText;
 
 	// Used for the PSF profile plot
 	private double[] x = null, y, y2;
@@ -95,38 +94,40 @@ public class PSFCalculator implements PlugIn, DialogListener
 			gd.addNumericField("Pixel_pitch (um)", settings.pixelPitch, 2);
 			gd.addNumericField("Magnification", settings.magnification, 0);
 			gd.addNumericField("Beam_Expander", settings.beamExpander, 2);
+			gd.addMessage(getPixelPitchLabel(settings.pixelPitch * 1000.0));
+			pixelPitchLabel = (Label) gd.getMessage();
+			pixelPitchLabel.setText(getPixelPitchLabel());
 		}
-		gd.addMessage(getPixelPitchLabel(settings.pixelPitch * 1000.0));
 
-		gd.addNumericField("Wavelength (nm)", settings.wavelength, 0);
-		gd.addNumericField("Numerical_Aperture (NA)", settings.numericalAperture, 2);
-		gd.addNumericField("Proportionality_factor", settings.proportionalityFactor, 2);
+		gd.addSlider("Wavelength (nm)", 400, 750, settings.wavelength);
+		gd.addSlider("Numerical_Aperture (NA)", 1, 1.5, settings.numericalAperture);
+		gd.addMessage("*** Account for optical aberations and focus error ***");
+		gd.addSlider("Proportionality_factor", 1, 2.5, settings.proportionalityFactor);
 
 		if (!simpleMode)
 		{
-			gd.addNumericField("Width (nm)",
-					calculateWidth(settings.wavelength, settings.numericalAperture, settings.proportionalityFactor), 3);
+			gd.addNumericField("Airy Width (nm)", calculateAiryWidth(settings.wavelength, settings.numericalAperture),
+					3);
 			gd.addNumericField(
-					"Width (pixels)",
-					calculateWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
-							settings.wavelength, settings.numericalAperture, settings.proportionalityFactor), 3);
+					"Airy Width (pixels)",
+					calculateAiryWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
+							settings.wavelength, settings.numericalAperture), 3);
 		}
 		gd.addNumericField("StdDev (nm)",
 				calculateStdDev(settings.wavelength, settings.numericalAperture, settings.proportionalityFactor), 3);
-		gd.addNumericField(
-				"StdDev (pixels)",
-				calculateStdDev(settings.pixelPitch, settings.magnification * settings.beamExpander,
-						settings.wavelength, settings.numericalAperture, settings.proportionalityFactor), 3);
+		double sd = calculateStdDev(settings.pixelPitch, settings.magnification * settings.beamExpander,
+				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor);
+		gd.addNumericField("StdDev (pixels)", sd, 3);
+		gd.addNumericField("FWHM (pixels)", sd * SD_TO_FWHM_FACTOR, 3);
 
 		if (!simpleMode)
 		{
-			pixelPitchLabel = (Label) gd.getMessage();
-			pixelPitchLabel.setText(getPixelPitchLabel());
-			widthNmText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 4);
-			widthPixelsText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 3);
+			widthNmText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 5);
+			widthPixelsText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 4);
 		}
-		sdNmText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 2);
-		sdPixelsText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 1);
+		sdNmText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 3);
+		sdPixelsText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 2);
+		fwhmPixelsText = (TextField) gd.getNumericFields().get(gd.getNumericFields().size() - 1);
 
 		//widthNmText
 		if (!simpleMode)
@@ -136,14 +137,16 @@ public class PSFCalculator implements PlugIn, DialogListener
 		}
 		disableEditing(sdNmText);
 		disableEditing(sdPixelsText);
+		disableEditing(fwhmPixelsText);
 
 		if (!simpleMode)
 			gd.addMessage("Save StdDev pixel width to the fitting properties");
 
 		gd.addDialogListener(this);
 
-		plotProfile(calculateAiryWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
-				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor));
+		plotProfile(
+				calculateAiryWidth(settings.pixelPitch, settings.magnification * settings.beamExpander,
+						settings.wavelength, settings.numericalAperture), settings.proportionalityFactor);
 
 		gd.showDialog();
 
@@ -202,19 +205,22 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * <p>
 	 * <a href="http://en.wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile">http://en.
 	 * wikipedia.org/wiki/Airy_disk#Approximation_using_a_Gaussian_profile</a>
+	 * <p>
+	 * Using a scale factor of 1 results in the best match of the Gaussian to the Airy profile. A value above 1 should
+	 * be used to increase the width to account for deviation of the optical system from the theoretical limit and
+	 * out-of-focus objects.
 	 * 
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
 	 *            Microscope numerical aperture (NA)
-	 * @param proportionalityFactor
-	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
+	 * @param scaleFactor
+	 *            Scale factor to account for deviation of the optical system and out-of-focus objects (should be >=1)
 	 * @return the SD in nm
 	 */
-	public static double calculateStdDev(double wavelength, double numericalAperture, double proportionalityFactor)
+	public static double calculateStdDev(double wavelength, double numericalAperture, double scaleFactor)
 	{
-		double fwhm = calculateWidth(wavelength, numericalAperture, proportionalityFactor);
-		return fwhm / SD_TO_FWHM_FACTOR;
+		return scaleFactor * AIRY_TO_GAUSSIAN * calculateAiryWidth(wavelength, numericalAperture);
 	}
 
 	/**
@@ -228,14 +234,14 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
 	 *            Microscope numerical aperture (NA)
-	 * @param proportionalityFactor
-	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
+	 * @param scaleFactor
+	 *            Scale factor to account for deviation of the optical system and out-of-focus objects (should be >=1)
 	 * @return the SD in pixels
 	 */
 	public static double calculateStdDev(double pixelPitch, double magnification, double wavelength,
-			double numericalAperture, double proportionalityFactor)
+			double numericalAperture, double scaleFactor)
 	{
-		double sd = calculateStdDev(wavelength, numericalAperture, proportionalityFactor);
+		final double sd = calculateStdDev(wavelength, numericalAperture, scaleFactor);
 		return convertToPixels(pixelPitch, magnification, sd);
 	}
 
@@ -255,90 +261,39 @@ public class PSFCalculator implements PlugIn, DialogListener
 	}
 
 	/**
-	 * Calculates the expected PSF peak width at half maximum for a Gaussian approximation to the Airy disk.
+	 * Calculates the PSF peak width for the Airy disk at the first dark ring (zero intersection).
 	 * <p>
-	 * FWHM is proportional to the lambda / 2NA. This method computes the FWHM as proportionalityFactor * lambda / 2NA.
-	 * <p>
-	 * The proportionality factor should be determined by fitting the PSF of quantum dots on the microscope.
+	 * Width is the lambda / (2*pi*NA).
 	 * 
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
 	 *            Microscope numerical aperture (NA)
-	 * @param proportionalityFactor
-	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
 	 * @return the width in nm
 	 */
-	public static double calculateWidth(double wavelength, double numericalAperture, double proportionalityFactor)
+	public static double calculateAiryWidth(double wavelength, double numericalAperture)
 	{
-		// FWHM is proportional to the lambda / 2NA. 
-		double fwhm = proportionalityFactor * wavelength / (2.0 * numericalAperture);
-		return fwhm;
-	}
-
-	/**
-	 * Calculates the expected PSF peak width at half maximum for a Gaussian approximation to the Airy disk.
-	 * 
-	 * @param pixelPitch
-	 *            Camera pixel pitch in micrometers (nm)
-	 * @param magnification
-	 *            Objective magnification
-	 * @param wavelength
-	 *            Wavelength of light in nanometers (nm)
-	 * @param numericalAperture
-	 *            Microscope numerical aperture (NA)
-	 * @param proportionalityFactor
-	 *            Expresses the proportional relationship between the diffraction limit and lambda/2NA
-	 * @return the width in pixels
-	 */
-	public static double calculateWidth(double pixelPitch, double magnification, double wavelength,
-			double numericalAperture, double proportionalityFactor)
-	{
-		double fwhm = calculateWidth(wavelength, numericalAperture, proportionalityFactor);
-		return convertToPixels(pixelPitch, magnification, fwhm);
-	}
-
-	/**
-	 * Calculates the PSF peak width for the Airy disk.
-	 * <p>
-	 * Width is proportional to the lambda / (2*pi*NA). This method computes the width as proportionalityFactor * lambda
-	 * / (2 * pi * NA).
-	 * <p>
-	 * The proportionality factor should be determined by fitting the PSF of quantum dots on the microscope.
-	 * 
-	 * @param wavelength
-	 *            Wavelength of light in nanometers (nm)
-	 * @param numericalAperture
-	 *            Microscope numerical aperture (NA)
-	 * @param proportionalityFactor
-	 *            Expresses the proportional relationship between the diffraction limit and lambda/2piNA
-	 * @return the width in nm
-	 */
-	public static double calculateAiryWidth(double wavelength, double numericalAperture, double proportionalityFactor)
-	{
-		double width = proportionalityFactor * wavelength / (2.0 * Math.PI * numericalAperture);
+		double width = wavelength / (2.0 * Math.PI * numericalAperture);
 		return width;
 	}
 
 	/**
-	 * Calculates the PSF peak width for the Airy disk.
+	 * Calculates the PSF peak width for the Airy disk at the first dark ring (zero intersection).
 	 * 
 	 * @param pixelPitch
-	 *            Camera pixel pitch in micrometers (nm)
+	 *            Camera pixel pitch in micrometers (um)
 	 * @param magnification
 	 *            Objective magnification
 	 * @param wavelength
 	 *            Wavelength of light in nanometers (nm)
 	 * @param numericalAperture
 	 *            Microscope numerical aperture (NA)
-	 * @param proportionalityFactor
-	 *            Expresses the proportional relationship between the diffraction limit and lambda/2piNA
 	 * @return the width in pixels
 	 */
 	public static double calculateAiryWidth(double pixelPitch, double magnification, double wavelength,
-			double numericalAperture, double proportionalityFactor)
+			double numericalAperture)
 	{
-		double width = calculateAiryWidth(wavelength, numericalAperture, proportionalityFactor);
+		double width = calculateAiryWidth(wavelength, numericalAperture);
 		return convertToPixels(pixelPitch, magnification, width);
 	}
 
@@ -356,7 +311,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		if (e == null)
 			return true;
 		Object o = e.getSource();
-		if (o == sdNmText || o == sdPixelsText)
+		if (o == sdNmText || o == sdPixelsText || o == fwhmPixelsText)
 			return true;
 		if (widthNmText != null)
 		{
@@ -382,24 +337,25 @@ public class PSFCalculator implements PlugIn, DialogListener
 					double wavelength = settings.wavelength;
 					double numericalAperture = settings.numericalAperture;
 					double proportionalityFactor = settings.proportionalityFactor;
-
+					
 					// Do something with parameters
 					if (widthNmText != null)
 					{
 						pixelPitchLabel.setText(getPixelPitchLabel());
-						widthNmText.setText(IJ.d2s(
-								calculateWidth(wavelength, numericalAperture, proportionalityFactor), 3));
+						widthNmText.setText(IJ.d2s(calculateAiryWidth(wavelength, numericalAperture), 3));
 						widthPixelsText.setText(IJ.d2s(
-								calculateWidth(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
-										proportionalityFactor), 3));
+								calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength,
+										numericalAperture), 3));
 					}
 					sdNmText.setText(IJ.d2s(calculateStdDev(wavelength, numericalAperture, proportionalityFactor), 3));
-					sdPixelsText.setText(IJ.d2s(
-							calculateStdDev(pixelPitch, magnification * beamExpander, wavelength, numericalAperture,
-									proportionalityFactor), 3));
+					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
+							numericalAperture, proportionalityFactor);
+					sdPixelsText.setText(IJ.d2s(sd, 3));
+					fwhmPixelsText.setText(IJ.d2s(sd * SD_TO_FWHM_FACTOR, 3));
 
-					plotProfile(calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength,
-							numericalAperture, proportionalityFactor));
+					plotProfile(
+							calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength, numericalAperture),
+							proportionalityFactor);
 
 					// Check if the parameters have changed again
 					parametersChanged = (pixelPitch != settings.pixelPitch) ||
@@ -418,7 +374,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		return true;
 	}
 
-	private void plotProfile(double scale)
+	private void plotProfile(double airyWidth, double factor)
 	{
 		if (x == null)
 		{
@@ -428,20 +384,37 @@ public class PSFCalculator implements PlugIn, DialogListener
 			for (int i = 0; i < x.length; i++)
 			{
 				y[i] = AiryPattern.intensity(x[i]);
-				y2[i] = AiryPattern.intensityGaussian(x[i]);
 			}
 		}
 		double[] x2 = new double[x.length];
 		for (int i = 0; i < x2.length; i++)
 		{
-			x2[i] = x[i] * scale;
+			x2[i] = x[i] * airyWidth;
+			y2[i] = AiryPattern.intensityGaussian(x[i] / factor);
 		}
 		String title = "PSF profile";
 		Plot p = new Plot(title, "px", "", x2, y);
 		p.setColor(Color.RED);
 		p.addPoints(x2, y2, Plot.LINE);
+		final double sd = airyWidth * AIRY_TO_GAUSSIAN * factor;
+		final double sdHeight = 0.606530659; //intensityGaussian(1);
+		p.drawLine(-sd, 0, -sd, sdHeight);
+		p.drawLine(sd, 0, sd, sdHeight);
 		p.setColor(Color.BLUE);
 		Utils.display(title, p);
+	}
+
+	/**
+	 * Calculate the intensity of the Gaussian at distance x from the centre
+	 * 
+	 * @param x
+	 * @return The intensity
+	 */
+	public static double intensityGaussian(double x)
+	{
+		if (x == 0)
+			return 1;
+		return Math.exp(-0.5 * (x * x));
 	}
 
 	private String getPixelPitchLabel(double pixelPitch)
