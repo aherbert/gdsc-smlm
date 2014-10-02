@@ -2846,7 +2846,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isAboveZero("Particles", settings.particles);
 			Parameters.isAboveZero("Density", settings.density);
 			Parameters.isAboveZero("Min Photons", settings.photonsPerSecond);
-			Parameters.isEqualOrAbove("Max Photons", settings.photonsPerSecond, settings.photonsPerSecondMaximum);
+			Parameters.isEqualOrAbove("Max Photons", settings.photonsPerSecondMaximum, settings.photonsPerSecond);
 			if (!imagePSF)
 			{
 				Parameters.isAboveZero("Wavelength", settings.wavelength);
