@@ -46,6 +46,11 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 */
 	public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
 
+	/**
+	 * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM)
+	 */
+	public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
+
 	private PSFCalculatorSettings settings;
 	private GenericDialog gd;
 	private Label pixelPitchLabel;
@@ -118,7 +123,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		double sd = calculateStdDev(settings.pixelPitch, settings.magnification * settings.beamExpander,
 				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor);
 		gd.addNumericField("StdDev (pixels)", sd, 3);
-		gd.addNumericField("FWHM (pixels)", sd * SD_TO_FWHM_FACTOR, 3);
+		gd.addNumericField("HWHM (pixels)", sd * SD_TO_HWHM_FACTOR, 3);
 
 		if (!simpleMode)
 		{
@@ -188,7 +193,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 			}
 			Parameters.isAboveZero("Wavelength", settings.wavelength);
 			Parameters.isAboveZero("Numerical aperture", settings.numericalAperture);
-			Parameters.isEqualOrAbove("Proportionality factor", settings.proportionalityFactor, 1);
+			Parameters.isAboveZero("Proportionality factor", settings.proportionalityFactor);
 		}
 		catch (IllegalArgumentException ex)
 		{
@@ -351,7 +356,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
 							numericalAperture, proportionalityFactor);
 					sdPixelsText.setText(IJ.d2s(sd, 3));
-					fwhmPixelsText.setText(IJ.d2s(sd * SD_TO_FWHM_FACTOR, 3));
+					fwhmPixelsText.setText(IJ.d2s(sd * SD_TO_HWHM_FACTOR, 3));
 
 					plotProfile(
 							calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength, numericalAperture),
