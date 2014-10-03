@@ -34,6 +34,7 @@ public interface NonLinearFunction
 	 * @return The gradient indices
 	 */
 	int[] gradientIndices();
+
 	/**
 	 * The non-linear fitting function. Produce an output predicted value for a given input
 	 * predictor (x) and partial gradient for each of the coefficients (a).
@@ -67,13 +68,16 @@ public interface NonLinearFunction
 	 *            Partial gradient of function with respect to each coefficient identified by {@link #gradientIndices()}
 	 *            . Note: dyda.length must be >= to gradientIndices().length
 	 * @param w
-	 *            The output weight. Equivalent to the expected variance of the predicted value
+	 *            The output weight. Equivalent to the expected variance of the predicted value. This should not be zero
+	 *            to avoid divide by zero error.
 	 * @return The predicted value y
-	 * @throws NullPointerException If the output weight argument is null
-	 * @throws ArrayIndexOutOfBoundsException If the output weight argument is length 0
+	 * @throws NullPointerException
+	 *             If the output weight argument is null
+	 * @throws ArrayIndexOutOfBoundsException
+	 *             If the output weight argument is length 0
 	 */
 	float eval(final int x, final float[] dyda, final float[] w);
-	
+
 	/**
 	 * @return True if the {@link #eval(int, float[], float[])} can compute weights other than 1
 	 */
