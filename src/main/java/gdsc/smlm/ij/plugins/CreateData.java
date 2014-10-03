@@ -25,6 +25,7 @@ import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.ActivationEnergyImageModel;
+import gdsc.smlm.model.AiryPSFModel;
 import gdsc.smlm.model.CompoundMoleculeModel;
 import gdsc.smlm.model.FluorophoreSequenceModel;
 import gdsc.smlm.model.GaussianPSFModel;
@@ -66,7 +67,6 @@ import ij.io.FileSaver;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
-import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
@@ -128,7 +128,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static String[] CONFINEMENT = { "None", "Mask", "Sphere" };
 	private static int SPHERE = 2;
 
-	private static String[] PSF_MODELS = new String[] { "2D Gaussian", "Image" };
+	private static String[] PSF_MODELS = new String[] { "2D Gaussian", "Airy", "Image" };
 
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
@@ -222,9 +222,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Each fluorophore contains the on and off times when light was emitted 
 		List<? extends FluorophoreSequenceModel> fluorophores = null;
 
-		// TODO - PSF Model to have getFWHM() method - use this to configure the border
-		// TODO - Label spots as singles or clustered using the PSF width and save these to diff results sets 
-
 		if (simpleMode)
 		{
 			if (!showSimpleDialog())
@@ -238,6 +235,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Each point has a random number of photons sampled from a range.
 
 			settings.exposureTime = 1000; // 1 second frames
+
+			//// Testing with a single molecule 
+			//localisations = new ArrayList<LocalisationModel>(1);
+			//localisationSets = new ArrayList<LocalisationModelSet>(1);
+			//LocalisationModel m = new LocalisationModel(0, 1, new double[] { 0.4, 0.25, 0 }, settings.photonsPerSecond,
+			//		LocalisationModel.CONTINUOUS);
+			//localisations.add(m);
+			//
+			//// Each localisation can be a separate localisation set
+			//LocalisationModelSet set = new LocalisationModelSet(0, 1);
+			//set.add(m);
+			//localisationSets.add(set);
 
 			// Use the density to get the number per frame
 			final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
@@ -1007,6 +1016,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (imagePSF)
 		{
+			// Create one Image PSF model that can be copied
 			imagePSFModel = createImagePSF(localisationSets);
 			if (imagePSFModel == null)
 				return null;
@@ -1038,7 +1048,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				lastT = l.getTime();
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, i, lastT,
-						createPSFModel(psfSD, imagePSFModel), results, stack)));
+						createPSFModel(imagePSFModel), results, stack)));
 			}
 			i++;
 		}
@@ -1248,7 +1258,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return image;
 	}
 
-	private PSFModel createPSFModel(double sd, ImagePSFModel imagePSFModel)
+	private PSFModel createPSFModel(ImagePSFModel imagePSFModel)
 	{
 		if (imagePSF)
 		{
@@ -1256,11 +1266,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			copy.setRandomGenerator(createRandomGenerator());
 			return copy;
 		}
-		else
+		else if (settings.psfModel.equals(PSF_MODELS[0]))
 		{
 			// Calibration based on imaging fluorescent beads at 20nm intervals.
 			// Set the PSF to 1.5 x FWHM at 450nm
+			double sd = PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture, 1) /
+					settings.pixelPitch;
 			return new GaussianPSFModel(createRandomGenerator(), sd, sd, 450.0 / settings.pixelPitch);
+		}
+		else
+		{
+			// Airy pattern
+			double width = PSFCalculator.calculateAiryWidth(settings.wavelength, settings.numericalAperture) /
+					settings.pixelPitch;
+			AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, 450.0 / settings.pixelPitch);
+			m.setRing(2);
+			return m;
 		}
 	}
 
@@ -1291,7 +1312,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private class ImageGenerator implements Runnable
 	{
 		// Note use Poisson noise when not debugging
-		final boolean poissionNoise = true;
+		final boolean poissionNoise = false;
 
 		final List<LocalisationModelSet> localisations;
 		final List<LocalisationModelSet> newLocalisations;
@@ -1467,8 +1488,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					// Ensure the new data is added before the intensity is updated. This avoids 
 					// syncronisation clashes in the getIntensity(...) function.
-					localisationSet.setData(new double[] { localStats[0], totalNoise,
-							params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD], newIntensity });
+					localisationSet.setData(new double[] { localStats[0], totalNoise, params[Gaussian2DFunction.X_SD],
+							params[Gaussian2DFunction.Y_SD], newIntensity });
 
 					if (checkSNR)
 					{
@@ -2840,9 +2861,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Camera gain", settings.getCameraGain());
 			Parameters.isPositive("Read noise", settings.readNoise);
 			double noiseRange = settings.readNoise * settings.getCameraGain() * 4;
-			Parameters.isAbove(
-					"Bias must prevent clipping the read noise (@ +/- 4 StdDev) so must be above " +
-							Utils.rounded(noiseRange), settings.bias, noiseRange);
+			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ", settings.bias,
+					noiseRange);
 			Parameters.isAboveZero("Particles", settings.particles);
 			Parameters.isAboveZero("Density", settings.density);
 			Parameters.isAboveZero("Min Photons", settings.photonsPerSecond);
@@ -2886,9 +2906,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// Default to a Gaussian
 			imagePSF = false;
-			Recorder.recordOption("PSF_model", PSF_MODELS[0]);
-			gd.addMessage(PSF_MODELS[0]);
-			settings.psfModel = PSF_MODELS[0];
+			gd.addChoice("PSF_model", Arrays.copyOf(PSF_MODELS, PSF_MODELS.length - 1), settings.psfModel);
 			gd.addNumericField("Wavelength (nm)", settings.wavelength, 2);
 			gd.addNumericField("Numerical_aperture", settings.numericalAperture, 2);
 		}
@@ -2904,11 +2922,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private boolean collectPSFOptions(GenericDialog gd, List<String> imageNames)
 	{
+		settings.psfModel = gd.getNextChoice();
 		if (!imageNames.isEmpty())
 		{
-			settings.psfModel = gd.getNextChoice();
-
-			imagePSF = settings.psfModel.equals(PSF_MODELS[1]);
+			imagePSF = settings.psfModel.equals(PSF_MODELS[PSF_MODELS.length - 1]);
 			// Show a second dialog to get the PSF parameters we need
 			GenericDialog gd2 = new GenericDialog(TITLE);
 			gd2.addMessage("Configure the " + settings.psfModel + " PSF model");
@@ -3157,9 +3174,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Camera gain", settings.getCameraGain());
 			Parameters.isPositive("Read noise", settings.readNoise);
 			double noiseRange = settings.readNoise * settings.getCameraGain() * 4;
-			Parameters.isAbove(
-					"Bias must prevent clipping the read noise (@ +/- 4 StdDev) so must be above " +
-							Utils.rounded(noiseRange), settings.bias, noiseRange);
+			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ", settings.bias,
+					noiseRange);
 			Parameters.isAboveZero("Particles", settings.particles);
 			Parameters.isAboveZero("Photons", settings.photonsPerSecond);
 			Parameters.isAboveZero("Photon shape", settings.photonShape);
