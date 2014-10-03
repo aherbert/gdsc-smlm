@@ -70,7 +70,7 @@ public class GaussianPSFModel extends PSFModel
 		this.zeroS1 = s1;
 		setzDepth(zDepth);
 	}
-	
+
 	/**
 	 * @param randomDataGenerator
 	 * @param s0
@@ -162,7 +162,7 @@ public class GaussianPSFModel extends PSFModel
 	{
 		if (zDepth == 0) // Not 3D data
 			return 1;
-		
+
 		// PSF fitting on data from the GDSC microscope show that the PSF width spread can be modelled
 		// by a simple quadratic up to 1.5 times the width:
 		//   width = 1 + z^2 / 2
@@ -369,6 +369,21 @@ public class GaussianPSFModel extends PSFModel
 			for (int x = 0; x < x0range; x++, i++)
 			{
 				data[i] = deltaE0[x] * deltaE1;
+
+				//// Validate using numerical integration
+				//double sum2 = 0;
+				//for (int ii = 0; ii < 100; ii++)
+				//{
+				//	double xx = x + ii / 100.0;
+				//	double dx = (xx - x0) * (xx - x0) * denom0 * denom0;
+				//	for (int jj = 0; jj < 100; jj++)
+				//	{
+				//		double yy = y + jj / 100.0;
+				//		sum2 += Math.exp(-(dx + (yy - x1) * (yy - x1) * denom1 * denom1));
+				//	}
+				//}
+				//sum2 *= sum / 10000 / (Math.PI * 2 * s0 * s1);
+				//System.out.printf("sum=%g, sum2=%g\n", data[i], sum2);
 			}
 		}
 
