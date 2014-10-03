@@ -25,7 +25,7 @@ public class AiryPattern
 	 * <p>
 	 * See Abraham, et al (2009) Opt Express 17: 23352.
 	 */
-	private static final double FACTOR = 1.323;
+	public static final double FACTOR = 1.323;
 
 	/**
 	 * Calculate the intensity of the AiryPattern at distance x from the centre
@@ -57,6 +57,8 @@ public class AiryPattern
 
 	/**
 	 * Calculate the total power of the AiryPattern at distance x from the centre
+	 * <p>
+	 * Appears to be numerically unstable at x<<1.
 	 * 
 	 * @param x
 	 * @return The total power
