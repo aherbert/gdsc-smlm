@@ -13,11 +13,16 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.utils.Maths;
+
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
- * Contains methods for generating models of a Point Spread Function using a Airy pattern
+ * Contains methods for generating models of a Point Spread Function using a Airy pattern.
+ * <p>
+ * Out-of-focus regions are computed using a width spreading of the Airy pattern. A true diffraction model for
+ * out-of-focus regions is not implemented.
  */
 public class AiryPSFModel extends PSFModel
 {
@@ -26,6 +31,9 @@ public class AiryPSFModel extends PSFModel
 	private double w1;
 	private double zDepth = 0;
 	private int ring = 2;
+	private boolean singlePixelApproximation = false;
+	private int minSamplesPerDimension = 2;
+	private int maxSamplesPerDimension = 50;
 
 	/**
 	 * The zeros of J1(x) corresponding to the rings of the Airy pattern
@@ -309,10 +317,6 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Construct a Airy pattern on the provided data. Only evaluates the function up to the configured dark ring.
-	 * <p>
-	 * Builds the pixel approximation using the cumulative power function:<br/>
-	 * P(x) = 1 - (J0(x))^2- (J1(x))^2 <br/>
-	 * Where JN are Bessel functions and x is the distance from the centre
 	 * 
 	 * @param x0range
 	 *            The maximum range in dimension 0 (width)
@@ -338,7 +342,7 @@ public class AiryPSFModel extends PSFModel
 		this.w0 = w0;
 		this.w1 = w1;
 
-		// Limit to second dark ring
+		// Limit to nth dark ring
 		final double limit = RINGS[ring] * RINGS[ring];
 		double[] data = new double[x0range * x1range];
 
@@ -346,51 +350,240 @@ public class AiryPSFModel extends PSFModel
 		boolean clipped = (x0 - RINGS[ring] * w0 < 0) || (x1 - RINGS[ring] * w1 < 0) ||
 				(x0 + RINGS[ring] * w0 > x0range) || (x1 + RINGS[ring] * w0 > x1range);
 
-		// Single point approximation, offset by 0.5 pixels
+		// Offset by pixel centres by 0.5
 		x0 -= 0.5;
 		x1 -= 0.5;
-		int n = 0;
-		double integral = 0;
-		for (int y = 0, i = 0; y < x1range; y++)
-		{
-			double d1 = (y - x1) / w1;
-			d1 *= d1;
 
-			for (int x = 0; x < x0range; x++, i++)
+		// Pre-compute the Airy intensity used for interpolation.
+		// Find the maximum distance from the centre to the edge of the image (normalised using the widths)
+		final double max = Maths.max(x0 / w0, x1 / w1, (x0range - x0) / w0, (x1range - x1) / w1);
+		// Find the maximum distance needed to evaluate the Airy pattern
+		final double maxD = Math.min(RINGS[ring], Math.sqrt(2 * max * max));
+		// Limit the total samples used for interpolation but always sample at least every pixel:
+		final double samplesPerPixel = Math.max(200 / maxD, 1);
+		final int maxR = (int) Math.ceil(maxD * samplesPerPixel);
+		double[] radius = new double[maxR + 1];
+		double[] intensity = new double[maxR + 1];
+		for (int r = 0; r <= maxR; r++)
+		{
+			// TODO - To simulate out of focus planes the intensity function can be pre-computed using
+			// a different equation, e.g. Born-Wolf model.
+			// Note that the pixel width for evaluation (e.g. the dark rings) would need to be calculated
+			// and a different normalisation factor would have to be calculated for clipped data. This may be
+			// achieved by pre-calculation of widths and normalisation factors for different z-depths.
+			intensity[r] = AiryPattern.intensity(r / samplesPerPixel);
+			radius[r] = r / samplesPerPixel;
+		}
+
+		double integral = 0;
+
+		// Pre-calculate x offset
+		double[] d0 = new double[x0range];
+		double[] d02 = new double[x0range];
+		for (int x = 0; x < x0range; x++)
+		{
+			d0[x] = (x - x0) / w0;
+			d02[x] = d0[x] * d0[x];
+		}
+
+		if (singlePixelApproximation)
+		{
+			// Single point approximation
+			for (int y = 0, i = 0; y < x1range; y++)
 			{
-				double d0 = (x - x0) / w0;
-				d0 *= d0;
-				final double distance2 = d0 + d1;
-				if (distance2 < limit)
+				double d1 = (y - x1) / w1;
+				d1 *= d1;
+
+				for (int x = 0; x < x0range; x++, i++)
 				{
-					n++;
-					final double r = Math.sqrt(distance2);
-					final double a = AiryPattern.intensity(r);
-					data[i] = a;
-					integral += a;
+					final double distance2 = d02[x] + d1;
+					if (distance2 < limit)
+					{
+						final double a = intensity(d02[x], d1, limit, samplesPerPixel, intensity, radius);
+						// double a1 = AiryPattern.intensity(r);
+						//System.out.printf("%g vs %g (%g)\n", a, a1, a1 / a);
+						data[i] = a;
+						integral += a;
+					}
+				}
+			}
+		}
+		else
+		{
+			// Integration using Simpson's composite interval
+
+			// Set the number of subintervals adaptively, i.e. for small widths use more samples per pixel.
+			double nPixels = Math.PI * maxD * maxD;
+			double number = Math.sqrt(1000 / nPixels); // Approx 1000 (or so) samples across the image
+			final int N = Math.max(minSamplesPerDimension,
+					Math.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
+
+			final double range0 = 0.5 / w0;
+			final double range1 = 0.5 / w1;
+			// Allow any point of the square pixel to be within the limit 
+			final double pixelLimit = limit + Math.sqrt(0.5);
+
+			for (int y = 0, i = 0; y < x1range; y++)
+			{
+				final double d1 = (y - x1) / w1;
+				final double d12 = d1 * d1;
+
+				for (int x = 0; x < x0range; x++, i++)
+				{
+					final double distance2 = d02[x] + d12;
+					if (distance2 < pixelLimit)
+					{
+						final double a = integral(d0[x] - range0, d0[x] + range0, d1 - range1, d1 + range1, limit,
+								samplesPerPixel, intensity, radius, N) * w0 * w1;
+						// double a1 = AiryPattern.intensity(r);
+						//System.out.printf("%g vs %g (%g)\n", a, a1, a1 / a);
+						data[i] = a;
+						integral += a;
+					}
 				}
 			}
 		}
 
-		// We must normalise the integral we calculated to the correct power of the Airy pattern.
-		//System.out.printf("Norm = %g (%g) = %gx\n", n / 12.0, integral / POWER[2], (n / 12.0) / (integral / POWER[2]));
+		//System.out.printf("Integral = %g (nPixels=%g) w0=%g, power = %g (norm = %g) = %g (clipped=%b)\n", integral,
+		//		Math.PI * RINGS[ring] * w0 * RINGS[ring] * w1, w0, POWER[ring], integral / POWER[ring], (4 * Math.PI *
+		//				w0 * w1), clipped);
+
+		// We must normalise the integral we calculated to the correct power of the Airy pattern, 
+		// i.e. make the function we calculated a probability density that sums to 1.
 		if (clipped)
 		{
-			// Use the normalising approximation for square pixels to calculate the integral.
-			// TODO - check where this square pixel approximation is valid. It is used in the Mortensen
-			// formula for precision.
-			sum *= 1 / (n / 12.0);
+			// Analysis has shown on unclipped data that the integral up to the nth ring is:
+			// integral ~ POWER[ring] * (Math.PI * 4 * w0 * w1)
+			// i.e. the full power of the Airy pattern is (Math.PI * 4 * w0 * w1) 
+			sum *= 1.0 / (4 * Math.PI * w0 * w1);
 		}
 		else
 		{
-			// Note: This will be incorrect if the Airy pattern was clipped at the edge (i.e. does not represent
-			// the full area of the calculated Airy rings)
+			// The integral we calculated corresponds to the power at the nth ring
 			sum *= POWER[ring] / integral;
 		}
+
 		for (int i = 0; i < data.length; i++)
 			data[i] *= sum;
 
 		return data;
+	}
+
+	/**
+	 * Calculate the intensity of the Airy pattern at the given distances by interpolation using the lookup table
+	 * 
+	 * @param d0
+	 *            squared distance in dimension 0
+	 * @param d1
+	 *            squared distance in dimension 1
+	 * @param limit
+	 *            The squared distance limit of the Airy pattern
+	 * @param samplesPerPixel
+	 *            The number of samples per pixel of the pattern
+	 * @param intensity
+	 *            The Airy intensity at the provided radii
+	 * @param radius
+	 *            The radii
+	 * @return The intensity
+	 */
+	private double intensity(final double d0, final double d1, final double limit, final double samplesPerPixel,
+			final double[] intensity, final double[] radius)
+	{
+		final double distance2 = d0 + d1;
+		if (distance2 < limit)
+		{
+			final double r = Math.sqrt(distance2);
+			//return AiryPattern.intensity(r);
+
+			// Interpolate the intensity at this pixel
+			final int index = (int) (r * samplesPerPixel);
+			return intensity[index] + (intensity[index + 1] - intensity[index]) * (r - radius[index]) * samplesPerPixel;
+		}
+		return 0;
+	}
+
+	/**
+	 * Calculate the intensity of the Airy pattern between the specified ranges using the composite Simpson's rule
+	 * 
+	 * @param ax
+	 *            Lower limit of x
+	 * @param bx
+	 *            Upper limit of x
+	 * @param ay
+	 *            Lower limit of y
+	 * @param by
+	 *            Upper limit of y
+	 * @param limit
+	 *            The squared distance limit of the Airy pattern
+	 * @param samplesPerPixel
+	 *            The number of samples per pixel of the pattern
+	 * @param intensity
+	 *            The Airy intensity at the provided radii
+	 * @param radius
+	 *            The radii
+	 * @param N
+	 *            The number of subintervals
+	 * @return
+	 */
+	private double integral(final double ax, final double bx, final double ay, final double by, final double limit,
+			final double samplesPerPixel, final double[] intensity, final double[] radius, final int N)
+	{
+		final double h = (bx - ax) / N;
+		// TODO - The upper and lower bounds can be pre-computed since they are used for each pixel boundary 
+		double s = integral(ax * ax, ay, by, limit, samplesPerPixel, intensity, radius, N) +
+				integral(bx * bx, ay, by, limit, samplesPerPixel, intensity, radius, N);
+		for (int n = 1; n < N; n += 2)
+		{
+			final double x = ax + n * h;
+			s += 4 * integral(x * x, ay, by, limit, samplesPerPixel, intensity, radius, N);
+		}
+		for (int n = 2; n < N; n += 2)
+		{
+			final double x = ax + n * h;
+			s += 2 * integral(x * x, ay, by, limit, samplesPerPixel, intensity, radius, N);
+		}
+		return s * h / 3;
+	}
+
+	/**
+	 * Calculate the intensity of the Airy pattern between the specified ranges using the composite Simpson's rule
+	 * 
+	 * @param x2
+	 *            The squared x distance
+	 * @param ay
+	 *            Lower limit of y
+	 * @param by
+	 *            Upper limit of y
+	 * @param limit
+	 *            The squared distance limit of the Airy pattern
+	 * @param samplesPerPixel
+	 *            The number of samples per pixel of the pattern
+	 * @param intensity
+	 *            The Airy intensity at the provided radii
+	 * @param radius
+	 *            The radii
+	 * @param N
+	 *            The number of subintervals
+	 * @return
+	 */
+	private double integral(final double x2, final double ay, final double by, final double limit,
+			final double samplesPerPixel, final double[] intensity, final double[] radius, final int N)
+	{
+		final double h = (by - ay) / N;
+		// TODO - The upper and lower bounds can be pre-computed since they are used for each pixel boundary 
+		double s = intensity(x2, ay * ay, limit, samplesPerPixel, intensity, radius) +
+				intensity(x2, by * by, limit, samplesPerPixel, intensity, radius);
+		for (int n = 1; n < N; n += 2)
+		{
+			final double y = ay + n * h;
+			s += 4 * intensity(x2, y * y, limit, samplesPerPixel, intensity, radius);
+		}
+		for (int n = 2; n < N; n += 2)
+		{
+			final double y = ay + n * h;
+			s += 2 * intensity(x2, y * y, limit, samplesPerPixel, intensity, radius);
+		}
+		return s * h / 3;
 	}
 
 	private int clip(int x, int max)
@@ -466,5 +659,64 @@ public class AiryPSFModel extends PSFModel
 	{
 		if (ring < RINGS.length && ring > 1)
 			this.ring = ring;
+	}
+
+	/**
+	 * @return True if the Airy pattern is evaluated once per pixel, otherwise use Simpson's integration
+	 */
+	public boolean isSinglePixelApproximation()
+	{
+		return singlePixelApproximation;
+	}
+
+	/**
+	 * @param singlePixelApproximation
+	 *            True if the Airy pattern is evaluated once per pixel, otherwise use Simpson's integration
+	 */
+	public void setSinglePixelApproximation(boolean singlePixelApproximation)
+	{
+		this.singlePixelApproximation = singlePixelApproximation;
+	}
+
+	/**
+	 * @return The minimum number of samples per dimension for Simpson's integration over each pixel
+	 */
+	public int getMinSamplesPerDimension()
+	{
+		return minSamplesPerDimension;
+	}
+
+	/**
+	 * Set the minimum number of samples per dimension for Simpson's integration over each pixel. Must be above 0 and is
+	 * set to the next even number.
+	 * 
+	 * @param n
+	 *            The minimum number of samples per dimension for Simpson's integration over each pixel
+	 */
+	public void setMinSamplesPerDimension(int n)
+	{
+		if (n >= 2)
+			this.minSamplesPerDimension = (n % 2 == 0) ? n : n + 1;
+	}
+
+	/**
+	 * @return The maximum number of samples per dimension for Simpson's integration over each pixel
+	 */
+	public int getMaxSamplesPerDimension()
+	{
+		return maxSamplesPerDimension;
+	}
+
+	/**
+	 * Set the maximum number of samples per dimension for Simpson's integration over each pixel. Must be above 0 and is
+	 * set to the next even number.
+	 * 
+	 * @param n
+	 *            The maximum number of samples per dimension for Simpson's integration over each pixel
+	 */
+	public void setMaxSamplesPerDimension(int n)
+	{
+		if (n >= 2)
+			this.maxSamplesPerDimension = (n % 2 == 0) ? n : n + 1;
 	}
 }

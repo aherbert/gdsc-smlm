@@ -1,6 +1,6 @@
 package gdsc.smlm.model;
 
-import xal.tools.math.BesselFunction;
+import gdsc.smlm.utils.Bessel;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -16,7 +16,7 @@ import xal.tools.math.BesselFunction;
  *---------------------------------------------------------------------------*/
 
 /**
- * Simple class to calculate AiryPattern
+ * Simple class to calculate AiryPattern. 
  */
 public class AiryPattern
 {
@@ -37,7 +37,7 @@ public class AiryPattern
 	{
 		if (x == 0)
 			return 1;
-		final double y = BesselFunction.J1(x) / x;
+		final double y = Bessel.J1(x) / x;
 		return 4.0 * y * y;
 	}
 
@@ -67,8 +67,8 @@ public class AiryPattern
 	{
 		if (x == 0)
 			return 0;
-		final double j0 = BesselFunction.J0(x);
-		final double j1 = BesselFunction.J1(x);
+		final double j0 = Bessel.J0(x);
+		final double j1 = Bessel.J1(x);
 		return 1.0 - j0 * j0 - j1 * j1;
 	}
 }
