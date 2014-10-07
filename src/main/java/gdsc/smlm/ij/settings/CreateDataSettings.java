@@ -28,6 +28,7 @@ public class CreateDataSettings
 	public String distribution = "";
 	public String distributionMask = "";
 	public double distributionMaskSliceDepth = 25;
+	public boolean poissonNoise = true;
 	public double background = 1;
 	private double emGain = 255;
 	private double cameraGain = 0.1557;
