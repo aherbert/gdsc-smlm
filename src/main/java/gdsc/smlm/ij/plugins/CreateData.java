@@ -2149,6 +2149,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append("\t");
 		sb.append(localisations.size()).append("\t");
 		sb.append(Utils.rounded(getHWHM(), 4)).append("\t");
+		sb.append(Utils.rounded(getPsfSD(), 4)).append("\t");
 		int nStats = (imagePSF) ? stats.length - 2 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
@@ -2360,7 +2361,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private String createHeader()
 	{
-		StringBuilder sb = new StringBuilder("Dataset\tMolecules\tPulses\tLocalisations\tHWHM");
+		StringBuilder sb = new StringBuilder("Dataset\tMolecules\tPulses\tLocalisations\tHWHM\tSD");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
