@@ -58,7 +58,7 @@ public class GradientCalculator4 extends GradientCalculator
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da, w);
-				final double weight = 1 / w[0];
+				final double weight = getWeight(w[0]);
 
 				alpha[0][0] += dy_da[0] * weight * dy_da[0];
 				alpha[1][0] += dy_da[1] * weight * dy_da[0];
@@ -146,7 +146,7 @@ public class GradientCalculator4 extends GradientCalculator
 			for (int i = 0; i < n; i++)
 			{
 				final double dy = y[i] - func.eval(i, dy_da, w);
-				final double weight = 1 / w[0];
+				final double weight = getWeight(w[0]);
 
 				alpha[0][0] += dy_da[0] * weight * dy_da[0];
 				alpha[1][0] += dy_da[1] * weight * dy_da[0];
