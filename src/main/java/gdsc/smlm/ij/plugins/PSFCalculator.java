@@ -30,6 +30,8 @@ import java.awt.Label;
 import java.awt.SystemColor;
 import java.awt.TextField;
 
+import psf.bornwolf.BornWolfPSF.BornWolf;
+
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.
  */
@@ -93,7 +95,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		gd.addHelp(About.HELP_URL);
 
 		this.settings = settings;
-
+		
 		if (!simpleMode)
 		{
 			gd.addNumericField("Pixel_pitch (um)", settings.pixelPitch, 2);
