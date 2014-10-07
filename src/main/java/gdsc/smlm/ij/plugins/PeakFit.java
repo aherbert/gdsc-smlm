@@ -1877,8 +1877,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		ArrayList<PeakResult> processedResults = new ArrayList<PeakResult>(sliceCandidates.size());
 		for (PeakResult result : sliceCandidates)
 		{
-			// Add ExtendedPeakResults to the results (they are the result of previous fitting).
-			if (result instanceof ExtendedPeakResult)
+			// Add ExtendedPeakResults to the results if they span multiple frames (they are the result of previous fitting).
+			if (result instanceof ExtendedPeakResult && result.peak != result.getEndFrame())
 			{
 				processedResults.add(result);
 			}
