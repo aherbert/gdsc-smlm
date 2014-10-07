@@ -230,7 +230,7 @@ public class GradientCalculator
 	/**
 	 * Get the weight factor using the computed weight
 	 * <p>
-	 * Check if the weight is below 1 and add set to 1 to avoid excessive weights
+	 * Check if the weight is below 1 and set to 1 to avoid excessive weights.
 	 * 
 	 * @param w
 	 *            The computed weight
@@ -238,6 +238,7 @@ public class GradientCalculator
 	 */
 	protected double getWeight(float w)
 	{
+		// TODO - Check if there is a better way to smooth the weights rather than just truncating them at 1
 		return (w < 1) ? 1 : 1.0 / w;
 	}
 
