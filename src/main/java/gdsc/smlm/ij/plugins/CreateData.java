@@ -247,6 +247,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Draw the same point on the image repeatedly
 				n = 1;
 				dist = createFixedDistribution();
+
+				boolean emCCD = settings.getEmGain() > 1;
+				double sd = getPsfSD() * settings.pixelPitch;
+				double lowerP = getPrecision(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
+						emCCD);
+				double upperP = getPrecision(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
+						settings.background, emCCD);
+				Utils.log("Benchmarking expected precision: %s - %s nm : %s - %s px", Utils.rounded(lowerP),
+						Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
+						Utils.rounded(upperP / settings.pixelPitch));
 			}
 			else
 			{
@@ -409,6 +419,33 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		SettingsManager.saveSettings(globalSettings);
 
 		IJ.showStatus("Done");
+	}
+
+	/**
+	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b
+	 *            The background noise in photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public static double getPrecision(double a, double s, double N, double b, boolean emCCD)
+	{
+		// EM-CCD noise factor
+		final double F = (emCCD) ? 2 : 1;
+		final double a2 = a * a;
+		// Adjustment for square pixels
+		final double sa2 = s * s + a2 / 12.0;
+		// 16 / 9 = 1.7777777778
+		// 8 * pi = 25.13274123
+		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b * b) / (N * a2)));
 	}
 
 	/**
@@ -1386,7 +1423,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (Utils.isInterrupted())
 				return;
-			
+
 			final double psfSD = getPsfSD();
 
 			showProgress();
