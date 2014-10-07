@@ -199,6 +199,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private XStream xs = null;
 	private boolean simpleMode = false;
+	private boolean benchmarkMode = false;
+	private boolean extraOptions = false;
+	private boolean poissonNoise = true;
 
 	/*
 	 * (non-Javadoc)
@@ -209,6 +212,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		integerDisplay[TOTAL_SIGNAL] = false;
 		simpleMode = (arg != null && arg.contains("simple"));
+		benchmarkMode = (arg != null && arg.contains("benchmark"));
+		extraOptions = Utils.isExtraOptions();
 
 		// Each localisation is a simulated emission of light from a point in space and time
 		List<LocalisationModel> localisations = null;
@@ -222,42 +227,45 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Each fluorophore contains the on and off times when light was emitted 
 		List<? extends FluorophoreSequenceModel> fluorophores = null;
 
-		if (simpleMode)
+		if (simpleMode || benchmarkMode)
 		{
 			if (!showSimpleDialog())
 				return;
 
-			// -----------------
-			// SIMPLE SIMULATION
-			// -----------------
-			// The simple simulation draws n random points per frame to achieve a specified density.
-			// No points will appear in multiple frames.
-			// Each point has a random number of photons sampled from a range.
-
 			settings.exposureTime = 1000; // 1 second frames
 
-			//// Testing with a single molecule 
-			//localisations = new ArrayList<LocalisationModel>(1);
-			//localisationSets = new ArrayList<LocalisationModelSet>(1);
-			//LocalisationModel m = new LocalisationModel(0, 1, new double[] { 0.4, 0.25, 0 }, settings.photonsPerSecond,
-			//		LocalisationModel.CONTINUOUS);
-			//localisations.add(m);
-			//
-			//// Each localisation can be a separate localisation set
-			//LocalisationModelSet set = new LocalisationModelSet(0, 1);
-			//set.add(m);
-			//localisationSets.add(set);
+			// Number of spots per frame
+			int n;
+			SpatialDistribution dist;
 
-			// Use the density to get the number per frame
-			final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
-			final int n = (int) Math.round(areaInUm * settings.density);
+			if (benchmarkMode)
+			{
+				// --------------------
+				// BENCHMARK SIMULATION
+				// --------------------
+				// Draw the same point on the image repeatedly
+				n = 1;
+				dist = createFixedDistribution();
+			}
+			else
+			{
+				// -----------------
+				// SIMPLE SIMULATION
+				// -----------------
+				// The simple simulation draws n random points per frame to achieve a specified density.
+				// No points will appear in multiple frames.
+				// Each point has a random number of photons sampled from a range.
 
-			UniformDistribution dist = createUniformDistribution(0);
-			//UniformDistribution distBorder = createUniformDistributionWithPSFWidthBorder();
+				// Use the density to get the number per frame
+				final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
+				n = (int) Math.max(1, Math.round(areaInUm * settings.density));
+				dist = createUniformDistribution(0);
+			}
+
 			RandomGenerator random = null;
 
-			localisations = new ArrayList<LocalisationModel>(n * settings.seconds);
-			localisationSets = new ArrayList<LocalisationModelSet>(n * settings.seconds);
+			localisations = new ArrayList<LocalisationModel>(settings.particles);
+			localisationSets = new ArrayList<LocalisationModelSet>(settings.particles);
 
 			final int range = settings.photonsPerSecondMaximum - settings.photonsPerSecond + 1;
 			if (range > 1)
@@ -502,6 +510,40 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double border = getHWHM() * 3;
 		border = Math.min(border, settings.size / 4);
 		return createUniformDistribution(border);
+	}
+
+	private SpatialDistribution createFixedDistribution()
+	{
+		SpatialDistribution dist;
+		dist = new SpatialDistribution()
+		{
+			private double[] xyz = new double[] { settings.xPosition / settings.pixelPitch,
+					settings.yPosition / settings.pixelPitch, settings.zPosition / settings.pixelPitch };
+
+			@Override
+			public double[] next()
+			{
+				return xyz;
+			}
+
+			@Override
+			public boolean isWithinXY(double[] xyz)
+			{
+				return true;
+			}
+
+			@Override
+			public boolean isWithin(double[] xyz)
+			{
+				return true;
+			}
+
+			@Override
+			public void initialise(double[] xyz)
+			{
+			}
+		};
+		return dist;
 	}
 
 	/**
@@ -1048,7 +1090,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				lastT = l.getTime();
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, i, lastT,
-						createPSFModel(imagePSFModel), results, stack)));
+						createPSFModel(imagePSFModel), results, stack, poissonNoise)));
 			}
 			i++;
 		}
@@ -1069,7 +1111,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (stack.getPixels(t) == null)
 			{
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, maxT, t, null,
-						results, stack)));
+						results, stack, poissonNoise)));
 			}
 		}
 
@@ -1311,9 +1353,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private class ImageGenerator implements Runnable
 	{
-		// Note use Poisson noise when not debugging
-		final boolean poissionNoise = false;
-
 		final List<LocalisationModelSet> localisations;
 		final List<LocalisationModelSet> newLocalisations;
 		final int startIndex;
@@ -1321,10 +1360,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final PSFModel psfModel;
 		final MemoryPeakResults results;
 		final ImageStack stack;
+		final boolean poissonNoise;
 
 		public ImageGenerator(final List<LocalisationModelSet> localisationSets,
 				List<LocalisationModelSet> newLocalisations2, int startIndex, int t, PSFModel psfModel,
-				MemoryPeakResults results, ImageStack stack)
+				MemoryPeakResults results, ImageStack stack, boolean poissonNoise)
 		{
 			this.localisations = localisationSets;
 			this.newLocalisations = newLocalisations2;
@@ -1333,6 +1373,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.psfModel = psfModel;
 			this.results = results;
 			this.stack = stack;
+			this.poissonNoise = poissonNoise;
 		}
 
 		/*
@@ -1400,7 +1441,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 						final double photons = psfModel.create3D(data, settings.size, settings.size,
 								localisation.getIntensity(), localisation.getX(), localisation.getY(),
-								localisation.getZ(), poissionNoise);
+								localisation.getZ(), poissonNoise);
 						//addDraw(photons);
 						if (photons > 0)
 						{
@@ -2625,8 +2666,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			sb.append("# ").append(TITLE).append(" Parameters:\n");
 			addHeaderLine(sb, "Pixel_pitch (nm)", settings.pixelPitch);
 			addHeaderLine(sb, "Size", settings.size);
-			addHeaderLine(sb, "Depth", settings.depth);
-			if (!simpleMode)
+			if (!benchmarkMode)
+				addHeaderLine(sb, "Depth", settings.depth);
+			if (!(simpleMode || benchmarkMode))
 			{
 				addHeaderLine(sb, "Seconds", settings.seconds);
 				addHeaderLine(sb, "Exposure_time", settings.exposureTime);
@@ -2653,7 +2695,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				addHeaderLine(sb, "Wavelength (nm)", settings.wavelength);
 				addHeaderLine(sb, "Numerical_aperture", settings.numericalAperture);
 			}
-			if (!simpleMode)
+			if (!benchmarkMode)
 			{
 				addHeaderLine(sb, "Distribution", settings.distribution);
 				if (settings.distribution.equals(DISTRIBUTION[MASK]))
@@ -2669,7 +2711,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				}
 			}
 			addHeaderLine(sb, "Particles", settings.particles);
-			if (simpleMode)
+			if (benchmarkMode)
+			{
+				addHeaderLine(sb, "X_position", settings.xPosition);
+				addHeaderLine(sb, "Y_position", settings.yPosition);
+				addHeaderLine(sb, "Z_position", settings.zPosition);
+				addHeaderLine(sb, "Min_photons", settings.photonsPerSecond);
+				addHeaderLine(sb, "Max_photons", settings.photonsPerSecondMaximum);
+			}
+			else if (simpleMode)
 			{
 				addHeaderLine(sb, "Density (um^-2)", settings.density);
 				addHeaderLine(sb, "Min_photons", settings.photonsPerSecond);
@@ -2723,7 +2773,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Show a dialog allowing the parameters for a simple simulation to be performed
+	 * Show a dialog allowing the parameters for a simple/benchmark simulation to be performed
 	 * 
 	 * @return True if the parameters were collected
 	 */
@@ -2738,10 +2788,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addMessage("--- Image Size ---");
 		gd.addNumericField("Pixel_pitch (nm)", settings.pixelPitch, 2);
 		gd.addNumericField("Size (px)", settings.size, 0);
-		gd.addNumericField("Depth (nm)", settings.depth, 0);
+		if (!benchmarkMode)
+			gd.addNumericField("Depth (nm)", settings.depth, 0);
 
 		// Noise model
 		gd.addMessage("--- Noise Model ---");
+		if (extraOptions)
+			gd.addCheckbox("No_poisson_noise", !settings.poissonNoise);
 		gd.addNumericField("Background (photons)", settings.background, 2);
 		gd.addNumericField("EM_gain", settings.getEmGain(), 2);
 		gd.addNumericField("Camera_gain (ADU/e-)", settings.getCameraGain(), 4);
@@ -2755,9 +2808,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addMessage("--- Fluorophores ---");
 		Component splitLabel = gd.getMessage();
 		// Do not allow grid or mask distribution
-		gd.addChoice("Distribution", Arrays.copyOf(DISTRIBUTION, DISTRIBUTION.length - 2), settings.distribution);
+		if (!benchmarkMode)
+			gd.addChoice("Distribution", Arrays.copyOf(DISTRIBUTION, DISTRIBUTION.length - 2), settings.distribution);
 		gd.addNumericField("Particles", settings.particles, 0);
-		gd.addNumericField("Density (um^-2)", settings.density, 2);
+		if (!benchmarkMode)
+			gd.addNumericField("Density (um^-2)", settings.density, 2);
+		else
+		{
+			gd.addNumericField("X_position (nm)", settings.xPosition, 2);
+			gd.addNumericField("Y_position (nm)", settings.yPosition, 2);
+			gd.addNumericField("Z_position (nm)", settings.zPosition, 2);
+		}
 		gd.addNumericField("Min_Photons", settings.photonsPerSecond, 0);
 		gd.addNumericField("Max_Photons", settings.photonsPerSecondMaximum, 0);
 
@@ -2771,7 +2832,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addCheckbox("Choose_histograms", settings.chooseHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 		gd.addCheckbox("Remove_outliers", settings.removeOutliers);
-		gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.densityRadius);
+		if (!benchmarkMode)
+			gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.densityRadius);
 
 		// Split into two columns
 		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
@@ -2816,8 +2878,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		settings.pixelPitch = Math.abs(gd.getNextNumber());
 		settings.size = Math.abs((int) gd.getNextNumber());
-		settings.depth = Math.abs(gd.getNextNumber());
+		if (!benchmarkMode)
+			settings.depth = Math.abs(gd.getNextNumber());
 
+		if (extraOptions)
+			poissonNoise = settings.poissonNoise = !gd.getNextBoolean();
 		settings.background = Math.abs(gd.getNextNumber());
 		settings.setEmGain(Math.abs(gd.getNextNumber()));
 		settings.setCameraGain(Math.abs(gd.getNextNumber()));
@@ -2828,9 +2893,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (!collectPSFOptions(gd, imageNames))
 			return false;
 
-		settings.distribution = gd.getNextChoice();
+		if (!benchmarkMode)
+			settings.distribution = gd.getNextChoice();
 		settings.particles = Math.abs((int) gd.getNextNumber());
-		settings.density = Math.abs(gd.getNextNumber());
+		if (!benchmarkMode)
+			settings.density = Math.abs(gd.getNextNumber());
+		else
+		{
+			settings.xPosition = Math.abs(gd.getNextNumber());
+			settings.yPosition = Math.abs(gd.getNextNumber());
+			settings.zPosition = Math.abs(gd.getNextNumber());
+		}
 		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
 		settings.photonsPerSecondMaximum = Math.abs((int) gd.getNextNumber());
 
@@ -2842,7 +2915,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.chooseHistograms = gd.getNextBoolean();
 		settings.histogramBins = (int) gd.getNextNumber();
 		settings.removeOutliers = gd.getNextBoolean();
-		settings.densityRadius = (float) gd.getNextNumber();
+		if (!benchmarkMode)
+			settings.densityRadius = (float) gd.getNextNumber();
 
 		// Save before validation so that the current values are preserved.
 		SettingsManager.saveSettings(globalSettings);
@@ -2855,7 +2929,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			Parameters.isAboveZero("Pixel Pitch", settings.pixelPitch);
 			Parameters.isAboveZero("Size", settings.size);
-			Parameters.isPositive("Depth", settings.depth);
+			if (!benchmarkMode)
+				Parameters.isPositive("Depth", settings.depth);
 			Parameters.isPositive("Background", settings.background);
 			Parameters.isPositive("EM gain", settings.getEmGain());
 			Parameters.isPositive("Camera gain", settings.getCameraGain());
@@ -2864,7 +2939,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ", settings.bias,
 					noiseRange);
 			Parameters.isAboveZero("Particles", settings.particles);
-			Parameters.isAboveZero("Density", settings.density);
+			if (!benchmarkMode)
+				Parameters.isAboveZero("Density", settings.density);
 			Parameters.isAboveZero("Min Photons", settings.photonsPerSecond);
 			Parameters.isEqualOrAbove("Max Photons", settings.photonsPerSecondMaximum, settings.photonsPerSecond);
 			if (!imagePSF)
@@ -2874,7 +2950,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Parameters.isBelow("NA", settings.numericalAperture, 2);
 			}
 			Parameters.isAbove("Histogram bins", settings.histogramBins, 1);
-			Parameters.isPositive("Density radius", settings.densityRadius);
+			if (!benchmarkMode)
+				Parameters.isPositive("Density radius", settings.densityRadius);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -3005,6 +3082,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (backgroundImages != null)
 			gd.addChoice("Background_image", backgroundImages, settings.backgroundImage);
 
+		if (extraOptions)
+			gd.addCheckbox("No_poisson_noise", !settings.poissonNoise);
 		gd.addNumericField("Background (photons)", settings.background, 2);
 		gd.addNumericField("EM_gain", settings.getEmGain(), 2);
 		gd.addNumericField("Camera_gain (ADU/e-)", settings.getCameraGain(), 4);
@@ -3106,6 +3185,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (backgroundImages != null)
 			settings.backgroundImage = gd.getNextChoice();
 
+		if (extraOptions)
+			poissonNoise = settings.poissonNoise = !gd.getNextBoolean();
 		settings.background = Math.abs(gd.getNextNumber());
 		settings.setEmGain(Math.abs(gd.getNextNumber()));
 		settings.setCameraGain(Math.abs(gd.getNextNumber()));
