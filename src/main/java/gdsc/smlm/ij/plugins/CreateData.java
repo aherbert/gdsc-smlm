@@ -26,6 +26,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.ActivationEnergyImageModel;
 import gdsc.smlm.model.AiryPSFModel;
+import gdsc.smlm.model.AiryPattern;
 import gdsc.smlm.model.CompoundMoleculeModel;
 import gdsc.smlm.model.FluorophoreSequenceModel;
 import gdsc.smlm.model.GaussianPSFModel;
@@ -1385,6 +1386,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (Utils.isInterrupted())
 				return;
+			
+			final double psfSD = getPsfSD();
 
 			showProgress();
 
@@ -1496,10 +1499,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						params[Gaussian2DFunction.X_SD] = (float) m.getS0();
 						params[Gaussian2DFunction.Y_SD] = (float) m.getS1();
 					}
+					else if (psfModel instanceof AiryPSFModel)
+					{
+						AiryPSFModel m = (AiryPSFModel) psfModel;
+						params[Gaussian2DFunction.X_SD] = (float) (m.getW1() * AiryPattern.FACTOR);
+						params[Gaussian2DFunction.Y_SD] = (float) (m.getW1() * AiryPattern.FACTOR);
+					}
 					else
 					{
-						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) (1.0 / Math
-								.sqrt(2.0 * Math.PI));
+						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) psfSD;
 					}
 					params[Gaussian2DFunction.AMPLITUDE] = (float) (newIntensity / (2 * Math.PI *
 							params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
