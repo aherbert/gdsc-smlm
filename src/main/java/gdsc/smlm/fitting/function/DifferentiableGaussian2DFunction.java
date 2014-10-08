@@ -43,9 +43,9 @@ public class DifferentiableGaussian2DFunction implements DifferentiableMultivari
 		this.a = Arrays.copyOf(a, a.length);
 	}
 
-	public void addData(float[] y)
+	public void addData(int n, float[] y)
 	{
-		this.y = toDouble(y);
+		this.y = toDouble(n, y);
 	}
 
 	public double[] getY()
@@ -111,9 +111,9 @@ public class DifferentiableGaussian2DFunction implements DifferentiableMultivari
 		return values;
 	}
 
-	public static double[] toDouble(float[] in)
+	public static double[] toDouble(int n, float[] in)
 	{
-		double[] out = new double[in.length];
+		double[] out = new double[n];
 		for (int i = 0; i < out.length; i++)
 			out[i] = in[i];
 		return out;
