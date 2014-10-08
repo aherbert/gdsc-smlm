@@ -227,18 +227,33 @@ public class NonLinearFit implements FunctionSolver
 
 		if (y_fit != null)
 		{
-			float[] dy_da = new float[nparams];
 			for (int i = 0; i < n; i++)
-				y_fit[i] = func.eval(i, dy_da);
+				y_fit[i] = func.eval(i);
 		}
 
 		finalResidualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
-		error[0] = finalResidualSumOfSquares;
+		error[0] = getError(finalResidualSumOfSquares, noise, n, numberOfFittedParameters);
+
+		return FitStatus.OK;
+	}
+
+	/**
+	 * Compute the error
+	 * @param residualSumOfSquares
+	 * @param noise
+	 * @param numberOfFittedPoints
+	 * @param numberOfFittedParameters
+	 * @return
+	 */
+	public static double getError(double residualSumOfSquares, double noise, int numberOfFittedPoints,
+			int numberOfFittedParameters)
+	{
+		double error = residualSumOfSquares;
 
 		// Divide by the uncertainty in the individual measurements yi to get the chi-squared
 		if (noise > 0)
 		{
-			error[0] /= n * noise * noise;
+			error /= numberOfFittedPoints * noise * noise;
 		}
 
 		// This updates the chi-squared value to the average error for a single fitted
@@ -247,11 +262,11 @@ public class NonLinearFit implements FunctionSolver
 		// If a noise estimate was provided for individual measurements then this will be the
 		// reduced chi-square (see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/)
 		if (numberOfFittedPoints > numberOfFittedParameters)
-			error[0] /= (numberOfFittedPoints - numberOfFittedParameters);
+			error /= (numberOfFittedPoints - numberOfFittedParameters);
 		else
-			error[0] = 0;
+			error = 0;
 
-		return FitStatus.OK;
+		return error;
 	}
 
 	/**
@@ -364,21 +379,24 @@ public class NonLinearFit implements FunctionSolver
 	{
 		return numberOfFittedPoints;
 	}
-	
+
 	private NonLinearFunction func;
 	private StoppingCriteria sc;
-	
+
 	/**
-	 * Set the non-linear function for the {@link #fit(int, float[], float[], float[], float[], double[], double)} method
+	 * Set the non-linear function for the {@link #fit(int, float[], float[], float[], float[], double[], double)}
+	 * method
+	 * 
 	 * @param sc
 	 */
 	public void setNonLinearFunction(NonLinearFunction func)
 	{
 		this.func = func;
 	}
-	
+
 	/**
 	 * Set the stopping criteria for the {@link #fit(int, float[], float[], float[], float[], double[], double)} method
+	 * 
 	 * @param sc
 	 */
 	public void setStoppingCriteria(StoppingCriteria sc)
@@ -386,7 +404,9 @@ public class NonLinearFit implements FunctionSolver
 		this.sc = sc;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
 	 */
 	public FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise)
@@ -394,7 +414,9 @@ public class NonLinearFit implements FunctionSolver
 		return fit(n, y, y_fit, a, a_dev, error, func, sc, noise);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getResidualSumOfSquares()
 	 */
 	public double getResidualSumOfSquares()
@@ -402,7 +424,9 @@ public class NonLinearFit implements FunctionSolver
 		return finalResidualSumOfSquares;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getIterations()
 	 */
 	public int getIterations()

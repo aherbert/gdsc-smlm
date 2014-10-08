@@ -2,14 +2,7 @@ package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
-import gdsc.smlm.fitting.function.DifferentiableGaussian2DFunction;
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
-
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.util.Precision;
+import gdsc.smlm.fitting.function.NonLinearFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -29,26 +22,25 @@ import org.apache.commons.math3.util.Precision;
  *---------------------------------------------------------------------------*/
 
 /**
- * Uses Apache Commons Math Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
- * set of data points (x, y).
+ * Abstract class to allow use of Apache Commons Math optimisers.
  */
-public class ApacheNonLinearFit implements FunctionSolver
+public abstract class ApacheNonLinearFit implements FunctionSolver
 {
-	private Gaussian2DFunction gf;
+	protected NonLinearFunction f;
 
 	private int maxEvaluations = 20;
 	
-	private double totalSumOfSquares;
-	private double residualSumOfSquares;
-	private int numberOfFittedPoints;
-	private int iterations;
+	protected double totalSumOfSquares;
+	protected double residualSumOfSquares;
+	protected int numberOfFittedPoints;
+	protected int iterations;
 
 	/**
 	 * Default constructor
 	 */
-	public ApacheNonLinearFit(Gaussian2DFunction gf)
+	public ApacheNonLinearFit(NonLinearFunction f)
 	{
-		this.gf = gf;
+		this.f = f;
 	}
 
 	/*
@@ -56,70 +48,32 @@ public class ApacheNonLinearFit implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
 	 */
-	public FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise)
+	public abstract FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise);
+	
+	public double[] getInitialSolution(float[] params)
 	{
-		numberOfFittedPoints = n;
-
-		DifferentiableGaussian2DFunction func = new DifferentiableGaussian2DFunction(gf, a);
-		func.addData(y);
-
-		try
-		{
-			// Different convergence thresholds seem to have no effect on the resulting fit, only the number of
-			// iterations for convergence
-			double initialStepBoundFactor = 100;
-			double costRelativeTolerance = 1e-10;
-			double parRelativeTolerance = 1e-10;
-			double orthoTolerance = 1e-10;
-			double threshold = Precision.SAFE_MIN;
-
-			// Extract the parameters to be fitted
-			int[] gradientIndices = gf.gradientIndices();
-			double[] initialSolution = new double[gradientIndices.length];
-			for (int i = 0; i < gradientIndices.length; i++)
-				initialSolution[i] = a[gradientIndices[i]];
-
-			// TODO - Pass in stopping criteria.
-			// Do this if the fitting seems to be successful
-			
-			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
-					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
-			PointVectorValuePair optimum = optimizer.optimize(maxEvaluations, func, func.getY(), func.getWeights(),
-					initialSolution);
-
-			double[] parameters = optimum.getPoint();
-			for (int i = 0; i < gradientIndices.length; i++)
-				a[gradientIndices[i]] = (float) parameters[i];
-			iterations = optimizer.getEvaluations();
-			error[0] = optimizer.getChiSquare();
-			if (a_dev != null)
-			{
-				double[][] covar = optimizer.getCovariances();
-				for (int i = 0; i < gradientIndices.length; i++)
-					a_dev[gradientIndices[i]] = (float) covar[i][i];
-			}
-			residualSumOfSquares = optimizer.getRMS() * optimizer.getRMS() * n;
-			totalSumOfSquares = getSumOfSquares(n, y);
-		}
-		catch (TooManyEvaluationsException e)
-		{
-			return FitStatus.FAILED_TO_CONVERGE;
-		}
-		catch (ConvergenceException e)
-		{
-			// Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
-			return FitStatus.SINGULAR_NON_LINEAR_MODEL;
-		}
-		catch (Exception e)
-		{
-			// TODO - Find out the other exceptions from the fitter and add return values to match. 
-			return FitStatus.UNKNOWN;
-		}
-
-		return FitStatus.OK;
+		int[] indices = f.gradientIndices();
+		double[] initialSolution = new double[indices.length];
+		for (int i = 0; i < indices.length; i++)
+			initialSolution[i] = params[indices[i]];
+		return initialSolution;
+	}
+	
+	public void setSolution(float[] params, double[] solution)
+	{
+		int[] indices = f.gradientIndices();
+		for (int i = 0; i < indices.length; i++)
+			params[indices[i]] = (float) solution[i];
 	}
 
-	private double getSumOfSquares(final int n, float[] y)
+	public void setDeviations(float[] deviations, double[][] covar)
+	{
+		int[] indices = f.gradientIndices();
+		for (int i = 0; i < indices.length; i++)
+			deviations[indices[i]] = (float) covar[i][i];
+	}
+	
+	public static double getSumOfSquares(final int n, float[] y)
 	{
 		double sx = 0, ssx = 0;
 		for (int i = n; i-- > 0;)
@@ -148,7 +102,7 @@ public class ApacheNonLinearFit implements FunctionSolver
 	 */
 	public int getNumberOfFittedParameters()
 	{
-		return gf.gradientIndices().length;
+		return f.gradientIndices().length;
 	}
 
 	/*

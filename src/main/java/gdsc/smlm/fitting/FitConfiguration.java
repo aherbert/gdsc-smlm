@@ -21,7 +21,8 @@ import gdsc.smlm.fitting.function.GaussianFunction;
 import gdsc.smlm.fitting.function.GaussianFunctionFactory;
 import gdsc.smlm.fitting.function.NoiseModel;
 import gdsc.smlm.fitting.logging.Logger;
-import gdsc.smlm.fitting.nonlinear.ApacheNonLinearFit;
+import gdsc.smlm.fitting.nonlinear.ApacheLVMFitter;
+import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.fitting.nonlinear.NonLinearFit;
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
@@ -985,10 +986,16 @@ public class FitConfiguration implements Cloneable
 		GaussianFunction gf = getGaussianFunction();
 		switch (fitSolver)
 		{
+			case MLE:
+				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gf);
+				fitter.setMaxEvaluations(maxIterations);
+				// TODO - Configure stopping criteria ...
+				return fitter;
+			
 			case APACHE_LVM:
 				if (gf instanceof Gaussian2DFunction)
 				{
-					ApacheNonLinearFit apacheNLinFit = new ApacheNonLinearFit((Gaussian2DFunction) gf);
+					ApacheLVMFitter apacheNLinFit = new ApacheLVMFitter((Gaussian2DFunction) gf);
 					apacheNLinFit.setMaxEvaluations(maxIterations);
 					// TODO - Configure stopping criteria ...
 					return apacheNLinFit;
