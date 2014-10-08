@@ -39,5 +39,11 @@ public enum FitSolver
 	 * <p>
 	 * Uses the Jacobian matrix with a quasi-Newton optimisation (that approximates the inverted Hessian).
 	 */
-	APACHE_LVM
+	APACHE_LVM,
+	/**
+	 * Maximum Likelihood Estimator
+	 * <p>
+	 * Uses a Poisson noise model for the probability density function of the data.
+	 */
+	MLE
 }
