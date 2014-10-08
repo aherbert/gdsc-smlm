@@ -22,14 +22,14 @@ import gdsc.smlm.fitting.function.NonLinearFunction;
  *---------------------------------------------------------------------------*/
 
 /**
- * Abstract class to allow use of Apache Commons Math optimisers.
+ * Abstract class with utility methods for the FunctionSolver interface.
  */
-public abstract class ApacheNonLinearFit implements FunctionSolver
+public abstract class BaseFunctionSolver implements FunctionSolver
 {
 	protected NonLinearFunction f;
 
 	private int maxEvaluations = 20;
-	
+
 	protected double totalSumOfSquares;
 	protected double residualSumOfSquares;
 	protected int numberOfFittedPoints;
@@ -38,7 +38,7 @@ public abstract class ApacheNonLinearFit implements FunctionSolver
 	/**
 	 * Default constructor
 	 */
-	public ApacheNonLinearFit(NonLinearFunction f)
+	public BaseFunctionSolver(NonLinearFunction f)
 	{
 		this.f = f;
 	}
@@ -48,8 +48,9 @@ public abstract class ApacheNonLinearFit implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
 	 */
-	public abstract FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise);
-	
+	public abstract FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error,
+			double noise);
+
 	public double[] getInitialSolution(float[] params)
 	{
 		int[] indices = f.gradientIndices();
@@ -58,7 +59,7 @@ public abstract class ApacheNonLinearFit implements FunctionSolver
 			initialSolution[i] = params[indices[i]];
 		return initialSolution;
 	}
-	
+
 	public void setSolution(float[] params, double[] solution)
 	{
 		int[] indices = f.gradientIndices();
@@ -72,7 +73,7 @@ public abstract class ApacheNonLinearFit implements FunctionSolver
 		for (int i = 0; i < indices.length; i++)
 			deviations[indices[i]] = (float) covar[i][i];
 	}
-	
+
 	public static double getSumOfSquares(final int n, float[] y)
 	{
 		double sx = 0, ssx = 0;
@@ -83,6 +84,39 @@ public abstract class ApacheNonLinearFit implements FunctionSolver
 		}
 		final double sumOfSquares = ssx - (sx * sx) / (n);
 		return sumOfSquares;
+	}
+
+	/**
+	 * Compute the error
+	 * 
+	 * @param residualSumOfSquares
+	 * @param noise
+	 * @param numberOfFittedPoints
+	 * @param numberOfFittedParameters
+	 * @return the error
+	 */
+	public static double getError(double residualSumOfSquares, double noise, int numberOfFittedPoints,
+			int numberOfFittedParameters)
+	{
+		double error = residualSumOfSquares;
+
+		// Divide by the uncertainty in the individual measurements yi to get the chi-squared
+		if (noise > 0)
+		{
+			error /= numberOfFittedPoints * noise * noise;
+		}
+
+		// This updates the chi-squared value to the average error for a single fitted
+		// point using the degrees of freedom (N-M)?
+		// Note: This matches the mean squared error output from the MatLab fitting code.
+		// If a noise estimate was provided for individual measurements then this will be the
+		// reduced chi-square (see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/)
+		if (numberOfFittedPoints > numberOfFittedParameters)
+			error /= (numberOfFittedPoints - numberOfFittedParameters);
+		else
+			error = 0;
+
+		return error;
 	}
 
 	/*
@@ -144,7 +178,8 @@ public abstract class ApacheNonLinearFit implements FunctionSolver
 	}
 
 	/**
-	 * @param maxEvaluations the maxEvaluations to set
+	 * @param maxEvaluations
+	 *            the maxEvaluations to set
 	 */
 	public void setMaxEvaluations(int maxEvaluations)
 	{

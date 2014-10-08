@@ -1007,10 +1007,7 @@ public class FitConfiguration implements Cloneable
 
 			case LVM:
 			default:
-				StoppingCriteria sc = getStoppingCriteria();
-				NonLinearFit nlinfit = new NonLinearFit();
-				nlinfit.setStoppingCriteria(sc);
-				nlinfit.setNonLinearFunction(gf);
+				NonLinearFit nlinfit = new NonLinearFit(gf, getStoppingCriteria());
 				nlinfit.setInitialLambda(getLambda());
 				return nlinfit;
 		}

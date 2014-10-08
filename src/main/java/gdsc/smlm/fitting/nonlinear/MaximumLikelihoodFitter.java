@@ -45,7 +45,7 @@ import org.apache.commons.math3.optimization.direct.PowellOptimizer;
  * The expected number of occurrences can be modelled using any parameterised function, for example the Gaussian 2D
  * function.
  */
-public class MaximumLikelihoodFitter extends ApacheNonLinearFit
+public class MaximumLikelihoodFitter extends BaseFunctionSolver
 {
 	/**
 	 * Wrapper for any function to allow use of the Apache Commons optimiser for Maximum Likelihood Estimation.
@@ -147,7 +147,7 @@ public class MaximumLikelihoodFitter extends ApacheNonLinearFit
 			setSolution(a, optimum.getPoint());
 			iterations = optimizer.getEvaluations();
 
-			// Compute residuals to fit the NonLinearFit interface
+			// Compute residuals for the FunctionSolver interface
 			if (y_fit == null || y_fit.length < n)
 				y_fit = new float[n];
 			f.initialise(a);

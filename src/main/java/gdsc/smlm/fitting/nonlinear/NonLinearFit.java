@@ -1,16 +1,11 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.function.NonLinearFunction;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator3;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator4;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator5;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator6;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator7;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.fitting.utils.DoubleEquality;
 
 /*----------------------------------------------------------------------------- 
@@ -34,7 +29,7 @@ import gdsc.smlm.fitting.utils.DoubleEquality;
  * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
  */
-public class NonLinearFit implements FunctionSolver
+public class NonLinearFit extends BaseFunctionSolver
 {
 	private static final int SUM_OF_SQUARES_BEST = 0;
 	private static final int SUM_OF_SQUARES_OLD = 1;
@@ -42,6 +37,7 @@ public class NonLinearFit implements FunctionSolver
 
 	private EJMLLinearSolver solver = new EJMLLinearSolver();
 	private GradientCalculator calculator;
+	private StoppingCriteria sc;
 
 	private double[] beta = new double[0];
 	private double[] da;
@@ -53,56 +49,73 @@ public class NonLinearFit implements FunctionSolver
 	private double lambda;
 	private double[] sumOfSquaresWorking;
 
-	private double totalSumOfSquares;
 	private double initialResidualSumOfSquares;
-	private double finalResidualSumOfSquares;
-	private int numberOfFittedParameters;
-	private int numberOfFittedPoints;
 
 	/**
 	 * Default constructor
+	 * 
+	 * @param func
+	 *            The function to fit
 	 */
-	public NonLinearFit()
+	public NonLinearFit(NonLinearFunction func)
 	{
-		init(3, 1e-10f);
+		this(func, null);
 	}
 
 	/**
 	 * Default constructor
 	 * 
+	 * @param func
+	 *            The function to fit
+	 * @param sc
+	 *            The stopping criteria
+	 */
+	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc)
+	{
+		this(func, sc, 3, 1e-10f);
+	}
+
+	/**
+	 * Default constructor
+	 * 
+	 * @param func
+	 *            The function to fit
+	 * @param sc
+	 *            The stopping criteria
 	 * @param significantDigits
 	 *            Validate the Levenberg-Marquardt fit solution to the specified number of significant digits
 	 * @param maxAbsoluteError
 	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
 	 */
-	public NonLinearFit(int significantDigits, float maxAbsoluteError)
+	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc, int significantDigits, float maxAbsoluteError)
 	{
-		init(significantDigits, maxAbsoluteError);
+		super(func);
+		init(sc, significantDigits, maxAbsoluteError);
 	}
 
-	private void init(int significantDigits, float maxAbsoluteError)
+	private void init(StoppingCriteria sc, int significantDigits, float maxAbsoluteError)
 	{
+		setStoppingCriteria(sc);
 		solver.setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
 	}
 
-	private boolean nonLinearModel(int n, float[] y, float[] a, NonLinearFunction func, boolean initialStage)
+	private boolean nonLinearModel(int n, float[] y, float[] a, boolean initialStage)
 	{
 		// The NonLinearFunction evaluates a function with parameters a but only computes the gradient
 		// for m <= a.length parameters. The parameters can be accessed using the gradientIndices() method.  
 
-		int[] gradientIndices = func.gradientIndices();
+		int[] gradientIndices = f.gradientIndices();
 		int m = gradientIndices.length;
 
 		if (initialStage)
 		{
-			numberOfFittedParameters = m;
 			numberOfFittedPoints = n;
-			finalResidualSumOfSquares = 0;
+			residualSumOfSquares = 0;
 
 			lambda = initialLambda;
 			for (int j = a.length; j-- > 0;)
 				ap[j] = a[j];
-			sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = calculator.findLinearised(n, y, a, alpha, beta, func);
+			sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = calculator.findLinearised(n, y, a, alpha, beta, f);
 			initialResidualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
 			totalSumOfSquares = getSumOfSquares(n, y);
 			if (calculator.isNaNGradients())
@@ -139,7 +152,7 @@ public class NonLinearFit implements FunctionSolver
 		for (int j = m; j-- > 0;)
 			ap[gradientIndices[j]] = (float) (a[gradientIndices[j]] + da[j]);
 
-		sumOfSquaresWorking[SUM_OF_SQUARES_NEW] = calculator.findLinearised(n, y, ap, covar, da, func);
+		sumOfSquaresWorking[SUM_OF_SQUARES_NEW] = calculator.findLinearised(n, y, ap, covar, da, f);
 
 		if (calculator.isNaNGradients())
 		{
@@ -174,33 +187,21 @@ public class NonLinearFit implements FunctionSolver
 		return true;
 	}
 
-	private double getSumOfSquares(final int n, float[] y)
-	{
-		double sx = 0, ssx = 0;
-		for (int i = n; i-- > 0;)
-		{
-			sx += y[i];
-			ssx += y[i] * y[i];
-		}
-		final double sumOfSquares = ssx - (sx * sx) / (n);
-		return sumOfSquares;
-	}
-
 	private FitStatus doFit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error,
-			NonLinearFunction func, StoppingCriteria sc, double noise)
+			StoppingCriteria sc, double noise)
 	{
-		int[] gradientIndices = func.gradientIndices();
+		int[] gradientIndices = f.gradientIndices();
 		int nparams = gradientIndices.length;
 
 		sc.initialise(a);
-		if (!nonLinearModel(n, y, a, func, true))
+		if (!nonLinearModel(n, y, a, true))
 			return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS_IN_NON_LINEAR_MODEL
 					: FitStatus.SINGULAR_NON_LINEAR_MODEL;
 		sc.evaluate(sumOfSquaresWorking[SUM_OF_SQUARES_OLD], sumOfSquaresWorking[SUM_OF_SQUARES_NEW], a);
 
 		while (sc.areNotSatisfied())
 		{
-			if (!nonLinearModel(n, y, a, func, false))
+			if (!nonLinearModel(n, y, a, false))
 				return (calculator.isNaNGradients()) ? FitStatus.INVALID_GRADIENTS_IN_NON_LINEAR_MODEL
 						: FitStatus.SINGULAR_NON_LINEAR_MODEL;
 
@@ -228,45 +229,13 @@ public class NonLinearFit implements FunctionSolver
 		if (y_fit != null)
 		{
 			for (int i = 0; i < n; i++)
-				y_fit[i] = func.eval(i);
+				y_fit[i] = f.eval(i);
 		}
 
-		finalResidualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
-		error[0] = getError(finalResidualSumOfSquares, noise, n, numberOfFittedParameters);
+		residualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
+		error[0] = getError(residualSumOfSquares, noise, n, gradientIndices.length);
 
 		return FitStatus.OK;
-	}
-
-	/**
-	 * Compute the error
-	 * @param residualSumOfSquares
-	 * @param noise
-	 * @param numberOfFittedPoints
-	 * @param numberOfFittedParameters
-	 * @return
-	 */
-	public static double getError(double residualSumOfSquares, double noise, int numberOfFittedPoints,
-			int numberOfFittedParameters)
-	{
-		double error = residualSumOfSquares;
-
-		// Divide by the uncertainty in the individual measurements yi to get the chi-squared
-		if (noise > 0)
-		{
-			error /= numberOfFittedPoints * noise * noise;
-		}
-
-		// This updates the chi-squared value to the average error for a single fitted
-		// point using the degrees of freedom (N-M)?
-		// Note: This matches the mean squared error output from the MatLab fitting code.
-		// If a noise estimate was provided for individual measurements then this will be the
-		// reduced chi-square (see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/)
-		if (numberOfFittedPoints > numberOfFittedParameters)
-			error /= (numberOfFittedPoints - numberOfFittedParameters);
-		else
-			error = 0;
-
-		return error;
 	}
 
 	/**
@@ -288,8 +257,6 @@ public class NonLinearFit implements FunctionSolver
 	 * @param error
 	 *            Output parameter. The Mean-Squared Error (MSE) for the fit if noise is 0. If noise is provided then
 	 *            this will be applied to create a reduced chi-square measure.
-	 * @param func
-	 *            Non-linear fitting function
 	 * @param sc
 	 *            The stopping criteria for the function
 	 * @param noise
@@ -297,9 +264,9 @@ public class NonLinearFit implements FunctionSolver
 	 * @return The fit status
 	 */
 	public FitStatus fit(final int n, final float[] y, final float[] y_fit, final float[] a, final float[] a_dev,
-			final double[] error, final NonLinearFunction func, final StoppingCriteria sc, final double noise)
+			final double[] error, final StoppingCriteria sc, final double noise)
 	{
-		final int nparams = func.gradientIndices().length;
+		final int nparams = f.gradientIndices().length;
 
 		// Create dynamically for the parameter sizes
 		calculator = GradientCalculatorFactory.newCalculator(nparams);
@@ -315,7 +282,8 @@ public class NonLinearFit implements FunctionSolver
 		// Store the { best, previous, new } sum-of-squares values 
 		sumOfSquaresWorking = new double[3];
 
-		final FitStatus result = doFit(n, y, y_fit, a, a_dev, error, func, sc, noise);
+		final FitStatus result = doFit(n, y, y_fit, a, a_dev, error, sc, noise);
+		this.iterations = sc.getIteration();
 
 		return result;
 	}
@@ -349,39 +317,12 @@ public class NonLinearFit implements FunctionSolver
 	}
 
 	/**
-	 * @return the totalSumOfSquares
-	 */
-	public double getTotalSumOfSquares()
-	{
-		return totalSumOfSquares;
-	}
-
-	/**
 	 * @return the initialResidualSumOfSquares
 	 */
 	public double getInitialResidualSumOfSquares()
 	{
 		return initialResidualSumOfSquares;
 	}
-
-	/**
-	 * @return the numberOfFittedParameters
-	 */
-	public int getNumberOfFittedParameters()
-	{
-		return numberOfFittedParameters;
-	}
-
-	/**
-	 * @return the numberOfFittedPoints
-	 */
-	public int getNumberOfFittedPoints()
-	{
-		return numberOfFittedPoints;
-	}
-
-	private NonLinearFunction func;
-	private StoppingCriteria sc;
 
 	/**
 	 * Set the non-linear function for the {@link #fit(int, float[], float[], float[], float[], double[], double)}
@@ -391,7 +332,8 @@ public class NonLinearFit implements FunctionSolver
 	 */
 	public void setNonLinearFunction(NonLinearFunction func)
 	{
-		this.func = func;
+		if (func != null)
+			this.f = func;
 	}
 
 	/**
@@ -401,36 +343,19 @@ public class NonLinearFit implements FunctionSolver
 	 */
 	public void setStoppingCriteria(StoppingCriteria sc)
 	{
+		if (sc == null)
+			sc = new ErrorStoppingCriteria();
 		this.sc = sc;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#fit(int, float[], float[], float[], float[], double[],
+	 * double)
 	 */
 	public FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise)
 	{
-		return fit(n, y, y_fit, a, a_dev, error, func, sc, noise);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#getResidualSumOfSquares()
-	 */
-	public double getResidualSumOfSquares()
-	{
-		return finalResidualSumOfSquares;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#getIterations()
-	 */
-	public int getIterations()
-	{
-		return sc.getIteration();
+		return fit(n, y, y_fit, a, a_dev, error, sc, noise);
 	}
 }

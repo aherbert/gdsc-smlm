@@ -31,7 +31,7 @@ import org.apache.commons.math3.util.Precision;
  * Uses Apache Commons Math Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
  */
-public class ApacheLVMFitter extends ApacheNonLinearFit
+public class ApacheLVMFitter extends BaseFunctionSolver
 {
 	/**
 	 * Default constructor
