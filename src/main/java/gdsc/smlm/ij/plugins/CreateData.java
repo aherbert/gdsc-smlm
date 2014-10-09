@@ -202,7 +202,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean simpleMode = false;
 	private boolean benchmarkMode = false;
 	private boolean extraOptions = false;
+	
+	// Hold private variables for settings that are ignored in simple/benchmark mode 
 	private boolean poissonNoise = true;
+	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -1428,7 +1431,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			showProgress();
 
-			final boolean checkSNR = settings.minSNRt1 > 0 || settings.minSNRtN > 0;
+			final boolean checkSNR = minSNRt1 > 0 || minSNRtN > 0;
 			final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
 
 			// Adjust XY dimensions since they are centred on zero
@@ -1499,7 +1502,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						localisationSet.setData(new double[5]);
 						continue;
 					}
-					if (totalPhotons < settings.minPhotons)
+					if (totalPhotons < minPhotons)
 					{
 						photonsRemoved.incrementAndGet();
 						for (int i = 0; i < spotCount; i++)
@@ -3261,9 +3264,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.nBlinksLong = Math.abs(gd.getNextNumber());
 		settings.nBlinksGeometricDistribution = gd.getNextBoolean();
 
-		settings.minPhotons = gd.getNextNumber();
-		settings.minSNRt1 = gd.getNextNumber();
-		settings.minSNRtN = gd.getNextNumber();
+		minPhotons = settings.minPhotons = gd.getNextNumber();
+		minSNRt1 = settings.minSNRt1 = gd.getNextNumber();
+		minSNRtN = settings.minSNRtN = gd.getNextNumber();
 
 		settings.saveImage = gd.getNextBoolean();
 		settings.saveImageResults = gd.getNextBoolean();
