@@ -185,4 +185,25 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	{
 		this.maxEvaluations = maxEvaluations;
 	}
+
+	/**
+	 * Specifies if the function solver uses a bounded search. If true then the bounds can be set before a call to the
+	 * {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
+	 * 
+	 * @return True if the function solver uses a bounded search
+	 */
+	public boolean isBounded()
+	{
+		return false;
+	}
+
+	/**
+	 * Set the bounds for each of the fitted parameters
+	 * 
+	 * @param lower
+	 * @param upper
+	 */
+	public void setBounds(float[] lower, float[] upper)
+	{
+	}
 }
