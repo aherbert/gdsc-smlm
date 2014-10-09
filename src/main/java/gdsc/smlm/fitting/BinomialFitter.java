@@ -314,8 +314,7 @@ public class BinomialFitter
 		ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
 		// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
 		OptimizationData sigma = new CMAESOptimizer.Sigma(new double[] { (uB[0] - lB[0]) / 3 });
-		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
-				.log(function.p.length))));
+		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(2))));
 
 		try
 		{
