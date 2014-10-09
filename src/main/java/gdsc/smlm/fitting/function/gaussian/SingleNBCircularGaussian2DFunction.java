@@ -63,16 +63,17 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
+		final float dx2dy2 = dx * dx + dy * dy;
 
-		final float y = (float) (h * Math.exp(aa * (dx * dx + dy * dy)));
+		final float y = (float) (h * Math.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
 		dy_da[0] = y / h;
 
-		dy_da[1] = y * (-2.0f * aa * dx);
-		dy_da[2] = y * (-2.0f * aa * dy);
+		dy_da[1] = y * (aa2 * dx);
+		dy_da[2] = y * (aa2 * dy);
 
-		dy_da[3] = y * (ax * dx * dx + ax * dy * dy);
+		dy_da[3] = y * (ax * (dx2dy2));
 
 		return y;
 	}

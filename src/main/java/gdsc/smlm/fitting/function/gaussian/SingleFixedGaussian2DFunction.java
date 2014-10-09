@@ -42,6 +42,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 	protected float x1pos;
 
 	protected float aa;
+	protected float aa2;
 
 	/**
 	 * Constructor
@@ -74,6 +75,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 		
 		aa = (float) -(0.5 / sx2);
+		aa2 = -2.0f * aa;
 	}
 
 	/**
@@ -126,8 +128,8 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		// Calculate gradients
 		dy_da[1] = y / h;
 
-		dy_da[2] = y * (-2.0f * aa * dx);
-		dy_da[3] = y * (-2.0f * aa * dy);
+		dy_da[2] = y * (aa2 * dx);
+		dy_da[3] = y * (aa2 * dy);
 
 		return y;
 	}
@@ -146,7 +148,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
 
-		return background + amplitude * (float) Math.exp(aa * dx * dx + aa * dy * dy);
+		return background + amplitude * (float) Math.exp(aa * (dx * dx + dy * dy));
 	}
 
 	@Override

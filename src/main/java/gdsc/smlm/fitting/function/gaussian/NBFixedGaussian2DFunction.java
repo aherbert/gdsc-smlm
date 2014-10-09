@@ -59,7 +59,7 @@ public class NBFixedGaussian2DFunction extends FixedGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++)
 		{
-			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
+			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j][0], peakFactors[j][1]);
 			apos += 6;
 			dydapos += PARAMETERS_PER_PEAK;
 		}

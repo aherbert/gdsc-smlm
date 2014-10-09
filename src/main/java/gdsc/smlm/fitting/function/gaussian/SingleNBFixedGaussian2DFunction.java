@@ -69,8 +69,8 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 		// Calculate gradients
 		dy_da[0] = y / h;
 
-		dy_da[1] = y * (-2.0f * aa * dx);
-		dy_da[2] = y * (-2.0f * aa * dy);
+		dy_da[1] = y * (aa2 * dx);
+		dy_da[2] = y * (aa2 * dy);
 
 		return y;
 	}

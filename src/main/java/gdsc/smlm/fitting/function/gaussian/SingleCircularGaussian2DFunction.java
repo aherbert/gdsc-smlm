@@ -40,6 +40,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 	protected float x1pos;
 
 	protected float aa;
+	protected float aa2;
 	protected float ax;
 
 	/**
@@ -73,6 +74,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 		
 		aa = (float) -(0.5 / sx2);
+		aa2 = -2.0f * aa;
 
 		// For the x-width gradient
 		ax = (float) (1 / sx3);
@@ -121,16 +123,17 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
+		final float dx2dy2 = dx * dx + dy * dy;
 
-		final float y = (float) (h * Math.exp(aa * dx * dx + aa * dy * dy));
+		final float y = (float) (h * Math.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
 		dy_da[1] = y / h;
 
-		dy_da[2] = y * (-2.0f * aa * dx);
-		dy_da[3] = y * (-2.0f * aa * dy);
+		dy_da[2] = y * (aa2 * dx);
+		dy_da[3] = y * (aa2 * dy);
 
-		dy_da[4] = y * (ax * dx * dx + ax * dy * dy);
+		dy_da[4] = y * (ax * (dx2dy2));
 
 		return y;
 	}

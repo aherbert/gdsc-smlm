@@ -48,7 +48,8 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 	protected static final double MinusFourLog2 = (double) (-4.0 * Math.log(2.0));
 	protected static final int AA = 0;
-	protected static final int AX = 1;
+	protected static final int AA2 = 1;
+	protected static final int AX = 2;
 
 	/*
 	 * (non-Javadoc)
@@ -59,7 +60,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new float[npeaks][2];
+		peakFactors = new float[npeaks][3];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double sx = a[j * 6 + X_SD];
@@ -70,6 +71,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 			
 			peakFactors[j][AA] = (float) -(0.5 / sx2);
+			peakFactors[j][AA2] = -2.0f * peakFactors[j][AA];
 
 			// For the x-width gradient
 			peakFactors[j][AX] = (float) (1 / sx3);
@@ -112,7 +114,6 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		dyda[dydapos++] = 1; // Gradient for a constant background is 1
 		
 		// Unpack the predictor into the dimensions
-		;
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
@@ -133,19 +134,21 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		final float dx = x0 - a[apos+X_POSITION];
 		final float dy = x1 - a[apos+Y_POSITION];
+		final float dx2dy2 = dx * dx + dy * dy;
 		
 		final float aa = factors[AA];
+		final float aa2 = factors[AA2];
 		final float ax = factors[AX];
     	
-		final float y = (float) (h * Math.exp(aa * dx * dx + aa * dy * dy));
+		final float y = (float) (h * Math.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
 		dy_da[dydapos] = y / h;
 		
-		dy_da[dydapos+1] = y * (-2.0f * aa * dx);
-		dy_da[dydapos+2] = y * (-2.0f * aa * dy);
+		dy_da[dydapos+1] = y * (aa2 * dx);
+		dy_da[dydapos+2] = y * (aa2 * dy);
 		
-		dy_da[dydapos+3] = y * (ax * dx * dx + ax * dy * dy);
+		dy_da[dydapos+3] = y * (ax * (dx2dy2));
 
 		return y;
 	}

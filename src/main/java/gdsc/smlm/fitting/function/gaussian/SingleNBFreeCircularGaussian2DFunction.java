@@ -63,8 +63,11 @@ public class SingleNBFreeCircularGaussian2DFunction extends SingleFreeCircularGa
 
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
+		final float dx2 = dx * dx;
+		final float dxy = dx * dy;
+		final float dy2 = dy * dy;
 
-		final float y = (float) (h * Math.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy));
+		final float y = (float) (h * Math.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
 		dy_da[0] = y / h;
@@ -72,8 +75,8 @@ public class SingleNBFreeCircularGaussian2DFunction extends SingleFreeCircularGa
 		dy_da[1] = y * (-2.0f * aa * dx - bb * dy);
 		dy_da[2] = y * (-2.0f * cc * dy - bb * dx);
 
-		dy_da[3] = y * (ax * dx * dx + bx * dx * dy + cx * dy * dy);
-		dy_da[4] = y * (ay * dx * dx + by * dx * dy + cy * dy * dy);
+		dy_da[3] = y * (ax * dx2 + bx * dxy + cx * dy2);
+		dy_da[4] = y * (ay * dx2 + by * dxy + cy * dy2);
 
 		return y;
 	}

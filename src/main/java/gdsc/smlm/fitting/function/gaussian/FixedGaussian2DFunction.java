@@ -30,7 +30,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 3;
 
-	protected float[] peakFactors;
+	protected float[][] peakFactors;
 	protected float[] a;
 
 	/**
@@ -57,7 +57,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new float[npeaks];
+		peakFactors = new float[npeaks][2];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double sx = a[j * 6 + X_SD];
@@ -65,7 +65,8 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-			peakFactors[j] = (float) -(0.5 / sx2);
+			peakFactors[j][0] = (float) -(0.5 / sx2);
+			peakFactors[j][1] = -2.0f * peakFactors[j][0];
 		}
 	}
 
@@ -116,7 +117,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++)
 		{
-			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
+			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j][0], peakFactors[j][1]);
 			apos += 6;
 			dydapos += PARAMETERS_PER_PEAK;
 		}
@@ -125,20 +126,20 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos, final int dydapos,
-			final float aa)
+			final float aa, final float aa2)
 	{
 		final float h = a[apos + AMPLITUDE];
 
 		final float dx = x0 - a[apos + X_POSITION];
 		final float dy = x1 - a[apos + Y_POSITION];
 
-		final float y = (float) (h * Math.exp(aa * dx * dx + aa * dy * dy));
+		final float y = (float) (h * Math.exp(aa * (dx * dx + dy * dy)));
 
 		// Calculate gradients
 		dy_da[dydapos] = y / h;
 
-		dy_da[dydapos + 1] = y * (-2.0f * aa * dx);
-		dy_da[dydapos + 2] = y * (-2.0f * aa * dy);
+		dy_da[dydapos + 1] = y * (aa2 * dx);
+		dy_da[dydapos + 2] = y * (aa2 * dy);
 
 		return y;
 	}
@@ -162,7 +163,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++, apos += 6)
 		{
-			y_fit += gaussian(x0, x1, apos, peakFactors[j]);
+			y_fit += gaussian(x0, x1, apos, peakFactors[j][0]);
 		}
 
 		return y_fit;
