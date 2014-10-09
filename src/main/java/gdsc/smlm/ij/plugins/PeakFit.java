@@ -167,12 +167,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textFitting;
 	private Choice textFitSolver;
 	private Choice textFitFunction;
-	private Choice textFitCriteria;
-	private TextField textSignificantDigits;
-	private TextField textDelta;
-	private TextField textLambda;
-	private TextField textMinIterations;
-	private TextField textMaxIterations;
+	private Checkbox textFitBackground;
 	private TextField textFailuresLimit;
 	private Checkbox textIncludeNeighbours;
 	private TextField textNeighbourHeightThreshold;
@@ -562,11 +557,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		return true;
 	}
-	
+
 	private String getSolverName()
 	{
 		FitSolver solver = config.getFitConfiguration().getFitSolver();
-		String name = solver.toString(); 
+		String name = solver.toString();
 		if (solver == FitSolver.MLE)
 			name += " " + config.getFitConfiguration().getSearchMethod();
 		return name;
@@ -647,6 +642,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			integrateFrames = 1;
 			resultsSettings.imageRollingWindow = 0;
+			fitConfig.setBackgroundFitting(true);
 			fitConfig.setMinIterations(0);
 			fitConfig.setNoise(0);
 			config.setNoiseMethod(Method.QuickResidualsLeastMeanOfSquares);
@@ -692,15 +688,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 			String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 			gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
-
-			String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
-			gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
-			gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
-			gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
-			gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
 			if (extraOptions)
-				gd.addNumericField("Min_iterations", fitConfig.getMinIterations(), 0);
-			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+				gd.addCheckbox("Fit_background", fitConfig.isBackgroundFitting());
+
+			// Parameters specific to each Fit solver are collected in a second dialog 
+
 			gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
 			gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 			gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
@@ -824,13 +816,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			{
 				textFitSolver = choices.get(ch++);
 				textFitFunction = choices.get(ch++);
-				textFitCriteria = choices.get(ch++);
-				textSignificantDigits = numerics.get(n++);
-				textDelta = numerics.get(n++);
-				textLambda = numerics.get(n++);
 				if (extraOptions)
-					textMinIterations = numerics.get(n++);
-				textMaxIterations = numerics.get(n++);
+					textFitBackground = checkboxes.get(b++);
 				textFailuresLimit = numerics.get(n++);
 				textIncludeNeighbours = checkboxes.get(b++);
 				textNeighbourHeightThreshold = numerics.get(n++);
@@ -1228,14 +1215,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			fitConfig.setFitSolver(gd.getNextChoiceIndex());
 			fitConfig.setFitFunction(gd.getNextChoiceIndex());
-			fitConfig.setFitCriteria(gd.getNextChoiceIndex());
-
-			fitConfig.setSignificantDigits((int) gd.getNextNumber());
-			fitConfig.setDelta(gd.getNextNumber());
-			fitConfig.setLambda(gd.getNextNumber());
 			if (extraOptions)
-				fitConfig.setMinIterations((int) gd.getNextNumber());
-			fitConfig.setMaxIterations((int) gd.getNextNumber());
+				fitConfig.setBackgroundFitting(gd.getNextBoolean());
 			config.setFailuresLimit((int) gd.getNextNumber());
 			config.setIncludeNeighbours(gd.getNextBoolean());
 			config.setNeighbourHeightThreshold(gd.getNextNumber());
@@ -1298,10 +1279,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			Parameters.isPositive("Integrate frames", integrateFrames);
 			if (!maximaIdentification)
 			{
-				Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
-				Parameters.isAboveZero("Delta", fitConfig.getDelta());
-				Parameters.isAboveZero("Lambda", fitConfig.getLambda());
-				Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
 				Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
 				Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 				Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
@@ -1328,43 +1305,88 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			return false;
 		}
 
-		// Extra parameters are needed for the weighted LVM
-		if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+		// Second dialog for solver dependent parameters
+		if (!maximaIdentification)
 		{
-			gd = new GenericDialog(TITLE);
-			gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
-			gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
-			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-			gd.addCheckbox("EM-CCD", calibration.emCCD);
-			gd.showDialog();
-			if (!gd.wasCanceled())
+			if (fitConfig.getFitSolver() == FitSolver.MLE)
 			{
-				calibration.readNoise = (float) Math.abs(gd.getNextNumber());
+				gd = new GenericDialog(TITLE);
+				gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
+				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod
+						.values());
+				gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
+				gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return false;
 				calibration.bias = (float) Math.abs(gd.getNextNumber());
-				calibration.emCCD = gd.getNextBoolean();
-				fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
-						calibration.emCCD));
+				fitConfig.setBias(calibration.bias);
+				fitConfig.setSearchMethod(gd.getNextChoiceIndex());
+				fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
 			}
-			else
+			else if (fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
 			{
-				fitConfig.setFitSolver(FitSolver.LVM);
+				// Collect options for LVM fitting
+				gd = new GenericDialog(TITLE);
+				String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
+				gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
+				gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
+				gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
+				gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
+				if (extraOptions)
+					gd.addNumericField("Min_iterations", fitConfig.getMinIterations(), 0);
+				gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+
+				// Extra parameters are needed for the weighted LVM
+				if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+				{
+					gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
+					gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
+					gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+					gd.addCheckbox("EM-CCD", calibration.emCCD);
+				}
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return false;
+
+				fitConfig.setFitCriteria(gd.getNextChoiceIndex());
+
+				fitConfig.setSignificantDigits((int) gd.getNextNumber());
+				fitConfig.setDelta(gd.getNextNumber());
+				fitConfig.setLambda(gd.getNextNumber());
+				if (extraOptions)
+					fitConfig.setMinIterations((int) gd.getNextNumber());
+				fitConfig.setMaxIterations((int) gd.getNextNumber());
+
+				if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+				{
+					calibration.readNoise = (float) Math.abs(gd.getNextNumber());
+					calibration.bias = (float) Math.abs(gd.getNextNumber());
+					calibration.emCCD = gd.getNextBoolean();
+					fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
+							calibration.emCCD));
+				}
+
+				SettingsManager.saveSettings(settings, filename);
+
+				try
+				{
+					Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
+					Parameters.isAboveZero("Delta", fitConfig.getDelta());
+					Parameters.isAboveZero("Lambda", fitConfig.getLambda());
+					Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+				}
+				catch (IllegalArgumentException e)
+				{
+					IJ.error(TITLE, e.getMessage());
+					return false;
+				}
 			}
-		}
-		else if (fitConfig.getFitSolver() == FitSolver.MLE)
-		{
-			gd = new GenericDialog(TITLE);
-			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
-			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
-			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
-			gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
-			gd.showDialog();
-			if (gd.wasCanceled())
-				return false;
-			calibration.bias = (float) Math.abs(gd.getNextNumber());
-			fitConfig.setBias(calibration.bias);
-			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
-			fitConfig.setMaxFunctionEvaluations((int)gd.getNextNumber());
+			else if (fitConfig.getFitSolver() == FitSolver.APACHE_LVM)
+			{
+				// No options yet for Apache LVM fitting
+			}
 		}
 
 		// Extra parameters are needed for interlaced data
@@ -2083,13 +2105,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				{
 					textFitSolver.select(fitConfig.getFitSolver().ordinal());
 					textFitFunction.select(fitConfig.getFitFunction().ordinal());
-					textFitCriteria.select(fitConfig.getFitCriteria().ordinal());
-					textSignificantDigits.setText("" + fitConfig.getSignificantDigits());
-					textDelta.setText("" + fitConfig.getDelta());
-					textLambda.setText("" + fitConfig.getLambda());
 					if (extraOptions)
-						textMinIterations.setText("" + fitConfig.getMinIterations());
-					textMaxIterations.setText("" + fitConfig.getMaxIterations());
+						textFitBackground.setState(fitConfig.isBackgroundFitting());
 					textFailuresLimit.setText("" + config.getFailuresLimit());
 					textIncludeNeighbours.setState(config.isIncludeNeighbours());
 					textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
