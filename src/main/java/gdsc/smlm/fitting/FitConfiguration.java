@@ -23,6 +23,7 @@ import gdsc.smlm.fitting.function.NoiseModel;
 import gdsc.smlm.fitting.logging.Logger;
 import gdsc.smlm.fitting.nonlinear.ApacheLVMFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
+import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.fitting.nonlinear.NonLinearFit;
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
@@ -61,6 +62,9 @@ public class FitConfiguration implements Cloneable
 	private double lambda = 10;
 	private boolean computeResiduals = true;
 	private float duplicateDistance = 0.5f;
+	private float bias;
+	private int maxFunctionEvaluations = 1000;
+	private SearchMethod searchMethod = SearchMethod.POWELL; 
 
 	private StoppingCriteria stoppingCriteria = null;
 	private GaussianFunction gaussianFunction = null;
@@ -628,7 +632,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setWidthFactor(float widthFactor)
 	{
-		if (widthFactor > 0)
+		if (widthFactor > 1)
 		{
 			this.widthFactor = widthFactor;
 		}
@@ -917,6 +921,10 @@ public class FitConfiguration implements Cloneable
 			fitFunction = FitFunction.CIRCULAR;
 		if (fitCriteria == null)
 			fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
+		if (searchMethod == null)
+			searchMethod = SearchMethod.POWELL;
+		if (maxFunctionEvaluations == 0)
+			maxFunctionEvaluations = 1000;
 		if (initialSD0 == 0)
 			initialSD0 = 1;
 		if (initialSD1 == 0)
@@ -979,6 +987,68 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * @return the camera bias (used for maximum likelihood estimation)
+	 */
+	public float getBias()
+	{
+		return bias;
+	}
+
+	/**
+	 * @param bias
+	 *            the camera bias (used for maximum likelihood estimation to evaluate the correct value of the the
+	 *            observed count)
+	 */
+	public void setBias(float bias)
+	{
+		this.bias = bias;
+	}
+
+	/**
+	 * @return the maximum number of function evaluations for the Maximum Likelihood Estimator
+	 */
+	public int getMaxFunctionEvaluations()
+	{
+		return maxFunctionEvaluations;
+	}
+
+	/**
+	 * @param maxFunctionEvaluations
+	 *            the maximum number of function evaluations for the Maximum Likelihood Estimator
+	 */
+	public void setMaxFunctionEvaluations(int maxFunctionEvaluations)
+	{
+		this.maxFunctionEvaluations = maxFunctionEvaluations;
+	}
+
+	/**
+	 * @return the search for the Maximum Likelihood Estimator
+	 */
+	public SearchMethod getSearchMethod()
+	{
+		return searchMethod;
+	}
+
+	/**
+	 * @param searchMethod the search for the Maximum Likelihood Estimator
+	 */
+	public void setSearchMethod(int searchMethod)
+	{
+		if (searchMethod >= 0 && searchMethod < SearchMethod.values().length)
+		{
+			setSearchMethod(SearchMethod.values()[searchMethod]);
+		}
+	}
+	
+	/**
+	 * @param searchMethod the search for the Maximum Likelihood Estimator
+	 */
+	public void setSearchMethod(SearchMethod searchMethod)
+	{
+		this.searchMethod = searchMethod;
+	}
+
+	/**
 	 * @return The function solver for the current configuration
 	 */
 	public FunctionSolver getFunctionSolver()
@@ -988,10 +1058,12 @@ public class FitConfiguration implements Cloneable
 		{
 			case MLE:
 				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gf);
-				fitter.setMaxEvaluations(maxIterations);
+				fitter.setMaxEvaluations(maxFunctionEvaluations);
+				fitter.setMaxIterations(maxIterations);
+				fitter.setSearchMethod(searchMethod);
 				// TODO - Configure stopping criteria ...
 				return fitter;
-			
+
 			case APACHE_LVM:
 				if (gf instanceof Gaussian2DFunction)
 				{

@@ -27,6 +27,7 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.function.CameraNoiseModel;
 import gdsc.smlm.fitting.logging.Logger;
+import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.SeriesImageSource;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -522,9 +523,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (maximaIdentification)
 			results.setName(source.getName() + " (Maxima)");
 		else if (fitMaxima)
-			results.setName(source.getName() + " (" + config.getFitConfiguration().getFitSolver() + " Fit Maxima)");
+			results.setName(source.getName() + " (" + getSolverName() + " Fit Maxima)");
 		else
-			results.setName(source.getName() + " (" + config.getFitConfiguration().getFitSolver() + ")");
+			results.setName(source.getName() + " (" + getSolverName() + ")");
 		results.setBounds(bounds);
 		Calibration cal = new Calibration(calibration);
 		// Account for the frame integration
@@ -560,6 +561,15 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		return true;
+	}
+	
+	private String getSolverName()
+	{
+		FitSolver solver = config.getFitConfiguration().getFitSolver();
+		String name = solver.toString(); 
+		if (solver == FitSolver.MLE)
+			name += " " + config.getFitConfiguration().getSearchMethod();
+		return name;
 	}
 
 	protected void showResults()
@@ -1339,6 +1349,22 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			{
 				fitConfig.setFitSolver(FitSolver.LVM);
 			}
+		}
+		else if (fitConfig.getFitSolver() == FitSolver.MLE)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
+			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
+			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
+			gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+			calibration.bias = (float) Math.abs(gd.getNextNumber());
+			fitConfig.setBias(calibration.bias);
+			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
+			fitConfig.setMaxFunctionEvaluations((int)gd.getNextNumber());
 		}
 
 		// Extra parameters are needed for interlaced data

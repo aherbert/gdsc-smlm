@@ -23,7 +23,7 @@ import java.util.Arrays;
 /**
  * Fits a 2-dimensional Gaussian function for the specified peak. Can optionally fit an elliptical Gaussian function.
  * <p>
- * Performs fitting using the Levenberg-Marquardt algorithm.
+ * Performs fitting using the configured algorithm.
  */
 public class Gaussian2DFitter
 {
@@ -34,6 +34,8 @@ public class Gaussian2DFitter
 	private float[] y_fit = null;
 	// Allow calculation of residuals to be turned off (overwrite constructor fit configuration)
 	private boolean computeResiduals = true;
+
+	private int maximumWidthFactor = 3;
 
 	/**
 	 * Constructor
@@ -176,7 +178,8 @@ public class Gaussian2DFitter
 			params[j + Gaussian2DFunction.Y_POSITION] = index / maxx;
 		}
 
-		return fit(data, maxx, maxy, npeaks, params);
+		// We have estimated the background already
+		return fit(data, maxx, maxy, npeaks, params, true);
 	}
 
 	/**
@@ -266,25 +269,61 @@ public class Gaussian2DFitter
 	 */
 	public FitResult fit(final float[] data, final int maxx, final int maxy, final int npeaks, final float[] params)
 	{
+		return fit(data, maxx, maxy, npeaks, params, false);
+	}
+
+	/**
+	 * Accepts a single array containing 2-dimensional data and a list of the
+	 * peaks to fit. Data should be packed in descending dimension order,
+	 * e.g. Y,X : Index for [y,z] = MaxX*y + x.
+	 * <p>
+	 * Performs fitting using the specified method with a Levenberg-Marquardt algorithm.
+	 * <p>
+	 * Note that if the background parameter is zero it will be assumed that the input amplitude is the total height of
+	 * the peak. A new background will be estimated and the heights lowered by this estimated background to create the
+	 * amplitude estimate.
+	 * <p>
+	 * If a peak location is outside the region bounds and has no input width parameters set or from the fit
+	 * configuration then fitting will fail (this is because they cannot be estimated).
+	 * 
+	 * @param data
+	 *            The data to fit
+	 * @param maxx
+	 *            The data size in the x dimension
+	 * @param maxy
+	 *            The data size in the y dimension
+	 * @param npeaks
+	 *            The number of peaks
+	 * @param params
+	 *            The parameters of the peaks. Must have the Amplitude,Xpos,Ypos set. Other
+	 *            parameters that are zero will be estimated. This can optionally be ignored for the background
+	 *            parameter which is valid if zero.
+	 * @param zeroBackground
+	 *            Set to true if a zero value for the background parameter is the estimate
+	 * @return The fit result
+	 */
+	public FitResult fit(final float[] data, final int maxx, final int maxy, final int npeaks, final float[] params,
+			final boolean zeroBackground)
+	{
 		FitResult fitResult = null;
-		int[] dim = new int[] { maxx, maxy };
+		final int[] dim = new int[] { maxx, maxy };
 
 		// Working variables
-		int[] cumul_region = new int[] { 1, maxx, maxx * maxy };
-		int[] position = new int[2];
+		final int[] cumul_region = new int[] { 1, maxx, maxx * maxy };
+		final int[] position = new int[2];
 
 		// Fitting variables
-		float[] y = data; // Value at index
+		final float[] y = data; // Value at index
 		y_fit = (computeResiduals) ? new float[cumul_region[2]] : null; // Predicted points
 		solver = null;
 		float[] params_dev = null; // standard deviations for parameters for the fitting function
 		double[] error = { 0 }; // The fit Chi-squared value
-		int ySize = cumul_region[2];
+		final int ySize = cumul_region[2];
 
 		final int paramsPerPeak = 6;
 
 		float background = params[0];
-		if (background == 0)
+		if (background == 0 && !zeroBackground)
 		{
 			// Extract the heights
 			float[] heights = new float[npeaks];
@@ -426,6 +465,22 @@ public class Gaussian2DFitter
 		solver = fitConfiguration.getFunctionSolver();
 		if (fitConfiguration.isComputeDeviations())
 			params_dev = new float[params.length];
+
+		// Subtract the bias
+		float bias = 0;
+		if (fitConfiguration.getBias() > 0)
+		{
+			bias = Math.min(background, fitConfiguration.getBias());
+			params[0] -= bias;
+			for (int i = 0; i < ySize; i++)
+				y[i] -= bias;
+		}
+
+		if (solver.isBounded())
+		{
+			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
+		}
+
 		final double noise = 0; // //fitConfiguration.getNoise()
 		FitStatus result = solver.fit(ySize, y, y_fit, params, params_dev, error, noise);
 
@@ -433,6 +488,9 @@ public class Gaussian2DFitter
 
 		if (result == FitStatus.OK)
 		{
+			// Add the bias back to the background
+			params[0] += bias;
+
 			// Re-assemble all the parameters
 			if (!fitConfiguration.isWidth1Fitting() && fitConfiguration.isWidth0Fitting())
 			{
@@ -527,6 +585,65 @@ public class Gaussian2DFitter
 		}
 
 		return newCom;
+	}
+
+	/**
+	 * Sets the bounds for the fitted parameters
+	 * 
+	 * @param maxx
+	 *            The x range of the data
+	 * @param maxy
+	 *            The y range of the data
+	 * @param npeaks
+	 *            The number of peaks
+	 * @param params
+	 *            The estimated parameters
+	 * @param y
+	 *            The data
+	 * @param ySize
+	 *            The size of the data
+	 * @param paramsPerPeak
+	 *            The number of parameters per peak
+	 */
+	private void setBounds(final int maxx, final int maxy, final int npeaks, final float[] params, final float[] y,
+			final int ySize, final int paramsPerPeak)
+	{
+		// Create appropriate bounds for the parameters
+		float[] lower = new float[params.length];
+		float[] upper = new float[lower.length];
+		float yMax = 0;
+		for (int i = 0; i < ySize; i++)
+			if (yMax < y[i])
+				yMax = y[i];
+		if (fitConfiguration.isBackgroundFitting())
+			upper[0] = yMax;
+		final float wf = (fitConfiguration.getWidthFactor() > 1 && fitConfiguration.getWidthFactor() < maximumWidthFactor) ? fitConfiguration
+				.getWidthFactor() : maximumWidthFactor;
+		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+		{
+			// All functions evaluate the amplitude, x and y position.
+			// Lower bounds on these will be zero when the array is initialised.
+			upper[j + Gaussian2DFunction.AMPLITUDE] = yMax;
+			upper[j + Gaussian2DFunction.X_POSITION] = maxx;
+			upper[j + Gaussian2DFunction.Y_POSITION] = maxy;
+
+			if (fitConfiguration.isAngleFitting())
+			{
+				lower[j + Gaussian2DFunction.ANGLE] = (float) -Math.PI;
+				upper[j + Gaussian2DFunction.ANGLE] = (float) Math.PI;
+			}
+			if (fitConfiguration.isWidth0Fitting())
+			{
+				lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] / wf;
+				upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * wf;
+			}
+			if (fitConfiguration.isWidth1Fitting())
+			{
+				lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] / wf;
+				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * wf;
+			}
+		}
+		solver.setBounds(lower, upper);
 	}
 
 	/**
@@ -687,5 +804,28 @@ public class Gaussian2DFitter
 	public int getNumberOfFittedPoints()
 	{
 		return (solver != null) ? solver.getNumberOfFittedPoints() : 0;
+	}
+
+	/**
+	 * @return the maximum width factor to use to set the bounds for width parameter fitting
+	 */
+	public int getMaximumWidthFactor()
+	{
+		return maximumWidthFactor;
+	}
+
+	/**
+	 * Set the maximum width factor to use to set the bounds for width parameter fitting. If the fit configuration has a
+	 * smaller width factor then that will be used instead.
+	 * <p>
+	 * The bounds are set using the initial estimate w in the range w/f to w*f.
+	 * 
+	 * @param maximumWidthFactor
+	 *            the maximum width factor to use to set the bounds for width parameter fitting (must be above 1)
+	 */
+	public void setMaximumWidthFactor(int maximumWidthFactor)
+	{
+		if (maximumWidthFactor > 1)
+			this.maximumWidthFactor = maximumWidthFactor;
 	}
 }

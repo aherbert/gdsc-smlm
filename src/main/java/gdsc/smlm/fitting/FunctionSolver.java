@@ -1,6 +1,5 @@
 package gdsc.smlm.fitting;
 
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -48,7 +47,7 @@ public interface FunctionSolver
 	 */
 	public FitStatus fit(final int n, final float[] y, final float[] y_fit, final float[] a, final float[] a_dev,
 			final double[] error, final double noise);
-	
+
 	/**
 	 * @return the total Sum Of Squares of the input data points
 	 */
@@ -68,12 +67,12 @@ public interface FunctionSolver
 	 * @return the number Of Fitted Points
 	 */
 	public int getNumberOfFittedPoints();
-	
+
 	/**
 	 * @return The number of iterations used to solve the function
 	 */
 	public int getIterations();
-	
+
 	/**
 	 * Specifies if the function solver uses a bounded search. If true then the bounds can be set before a call to the
 	 * {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
@@ -83,7 +82,9 @@ public interface FunctionSolver
 	public boolean isBounded();
 
 	/**
-	 * Set the bounds for each of the fitted parameters
+	 * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the bounds can be
+	 * ignored
+	 * for the fixed parameters.
 	 * 
 	 * @param lower
 	 * @param upper

@@ -186,22 +186,20 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		this.maxEvaluations = maxEvaluations;
 	}
 
-	/**
-	 * Specifies if the function solver uses a bounded search. If true then the bounds can be set before a call to the
-	 * {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @return True if the function solver uses a bounded search
+	 * @see gdsc.smlm.fitting.FunctionSolver#isBounded()
 	 */
 	public boolean isBounded()
 	{
 		return false;
 	}
 
-	/**
-	 * Set the bounds for each of the fitted parameters
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param lower
-	 * @param upper
+	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(float[], float[])
 	 */
 	public void setBounds(float[] lower, float[] upper)
 	{
