@@ -7,8 +7,10 @@ import gdsc.smlm.fitting.function.NonLinearFunction;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
+import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.analysis.differentiation.MultivariateDifferentiableFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -21,6 +23,7 @@ import org.apache.commons.math3.optimization.SimpleBounds;
 import org.apache.commons.math3.optimization.SimpleValueChecker;
 import org.apache.commons.math3.optimization.direct.BOBYQAOptimizer;
 import org.apache.commons.math3.optimization.direct.CMAESOptimizer;
+import org.apache.commons.math3.optimization.direct.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optimization.direct.PowellOptimizer;
 import org.apache.commons.math3.optimization.general.ConjugateGradientFormula;
 import org.apache.commons.math3.optimization.general.NonLinearConjugateGradientOptimizer;
@@ -142,8 +145,31 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		@Override
 		public MultivariateVectorFunction gradient()
 		{
-			// TODO - This is required
-			return null;
+			// TODO - Check if this is valid:
+			// f(x) = l(x) - k * ln(l(x))
+			// 
+			// Since (k * ln(l(x)))' = (k * ln(l(x)))' * l'(x) 
+
+			// f'(x) = l'(x) - (k/l(x) * l'(x))
+			// f'(x) = l'(x) * (1 - k/l(x))
+			return new MultivariateVectorFunction()
+			{
+				public double[] value(double[] point) throws IllegalArgumentException
+				{
+					initialiseFunction(point);
+
+					double[] gradient = new double[point.length];
+					float[] dl_da = new float[point.length];
+					for (int i = 0; i < n; i++)
+					{
+						final double l = f.eval(i, dl_da);
+						final double k = y[i];
+						for (int j = 0; j < gradient.length; j++)
+							gradient[j] += dl_da[j] * (1 - (k / l));
+					}
+					return gradient;
+				}
+			};
 		}
 	}
 
@@ -157,19 +183,33 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		 */
 		POWELL,
 		/**
+		 * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
+		 */
+		POWELL_BOUNDED,
+		/**
 		 * Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm.
 		 * <p>
 		 * BOBYQA could also be considered as a replacement of any derivative-based optimizer when the derivatives are
-		 * approximated by finite differences.
+		 * approximated by finite differences. This is a bounded search.
 		 */
 		BOBYQA,
 		/**
 		 * Search using active Covariance Matrix Adaptation Evolution Strategy (CMA-ES).
 		 * <p>
 		 * The CMA-ES is a reliable stochastic optimization method which should be applied if derivative-based methods,
-		 * e.g. conjugate gradient, fail due to a rugged search landscape
+		 * e.g. conjugate gradient, fail due to a rugged search landscape. This is a bounded search.
 		 */
-		CMAES
+		CMAES,
+		/**
+		 * Search using a non-linear conjugate gradient optimiser. Use the Fletcher-Reeves update formulas for the
+		 * conjugate search directions.
+		 */
+		CONJUGATE_GRADIENT_FR,
+		/**
+		 * Search using a non-linear conjugate gradient optimiser. Use the Polak-Ribière update formulas for the
+		 * conjugate search directions.
+		 */
+		CONJUGATE_GRADIENT_PR
 	}
 
 	private SearchMethod searchMethod;
@@ -199,8 +239,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		{
 			double[] startPoint = getInitialSolution(a);
 
-			PointValuePair optimum;
-			if (searchMethod == SearchMethod.POWELL)
+			double[] solution;
+			if (searchMethod == SearchMethod.POWELL || searchMethod == SearchMethod.POWELL_BOUNDED)
 			{
 				// Non-differentiable version using Powell Optimiser
 				double rel = 1e-4; // Relative threshold.
@@ -217,8 +257,24 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				});
 
 				optimizer = o;
-				optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n), GoalType.MINIMIZE,
-						new InitialGuess(startPoint));
+
+				// Try using the mapping adapter
+				MultivariateFunction fun = new PoissonLikelihoodFunction(f, a, y, n);
+				if (searchMethod == SearchMethod.POWELL)
+				{
+					PointValuePair optimum = o.optimize(getMaxEvaluations(), fun, GoalType.MINIMIZE, new InitialGuess(
+							startPoint));
+					solution = optimum.getPointRef();
+				}
+				else
+				{
+					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower,
+							upper);
+
+					PointValuePair optimum = o.optimize(getMaxEvaluations(), adapter, GoalType.MINIMIZE,
+							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
+					solution = adapter.unboundedToBounded(optimum.getPointRef());
+				}
 			}
 			else if (searchMethod == SearchMethod.BOBYQA)
 			{
@@ -228,8 +284,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
 				optimizer = o;
-				optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n), GoalType.MINIMIZE,
-						new InitialGuess(startPoint), new SimpleBounds(lower, upper));
+				PointValuePair optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n),
+						GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(lower, upper));
+				solution = optimum.getPointRef();
 			}
 			else if (searchMethod == SearchMethod.CMAES)
 			{
@@ -252,22 +309,33 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						diagonalOnly, checkFeasableCount, random, generateStatistics, new SimpleValueChecker(1e-6,
 								1e-10));
 				optimizer = o;
-				optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n), GoalType.MINIMIZE,
-						new InitialGuess(startPoint), new SimpleBounds(lower, upper));
+				PointValuePair optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n),
+						GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(lower, upper));
+				solution = optimum.getPointRef();
 			}
 			else
 			{
-				// TODO - differentiable version using NonLinearConjugateGradientOptimiser
-				// Need to differentiate the log-likelihood function
+				// TODO - Check if this works. Are the gradients correct?
 
+				// The line search algorithm often fails. This is due to searching into a region where the 
+				// function evaluates to a negative so has been clipped. This means the upper bound of the line
+				// cannot be found. Maybe I can write a custom line search routine that copes with the bounds.
+				// Note that running it on an easy problem (200 photons with fixed fitting (no background)) the algorithm
+				// does sometimes produces results better than the Powell algorithm but it is slower.
+
+				// Rearrange to use the non-deprecated classes in org.apache.commons.math3.optim.nonlinear.scalar.gradient
 				NonLinearConjugateGradientOptimizer o = new NonLinearConjugateGradientOptimizer(
-						ConjugateGradientFormula.POLAK_RIBIERE);
+						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? ConjugateGradientFormula.FLETCHER_REEVES
+								: ConjugateGradientFormula.POLAK_RIBIERE);
 				optimizer = o;
-				optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n), GoalType.MINIMIZE,
-						new InitialGuess(startPoint));
+				MultivariateDifferentiableFunction fun = FunctionUtils
+						.toMultivariateDifferentiableFunction(new PoissonLikelihoodFunction(f, a, y, n));
+				o.setInitialStep(0.1);
+				PointValuePair optimum = o.optimize(getMaxEvaluations(), fun, GoalType.MINIMIZE, startPoint);
+				solution = optimum.getPointRef();
 			}
 
-			setSolution(a, optimum.getPointRef());
+			setSolution(a, solution);
 			iterations = optimizer.getEvaluations();
 
 			//System.out.printf("Iter = %d, %g @ %s\n", iterations, optimum.getValue(),
@@ -295,13 +363,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		}
 		catch (TooManyIterationsException e)
 		{
-			System.out.printf("Iterations = %d\n", e.getMax());
+			//System.out.printf("Too many iterations = %d\n", e.getMax());
 			//e.printStackTrace();
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
 		catch (TooManyEvaluationsException e)
 		{
-			System.out.printf("Evaluations = %d\n", optimizer.getEvaluations());
+			//System.out.printf("Too many evaluations = %d\n", e.getMax());
 			//e.printStackTrace();
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
@@ -312,7 +380,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		}
 		catch (Exception e)
 		{
-			// TODO - Find out the other exceptions from the fitter and add return values to match. 
+			// TODO - Find out the other exceptions from the fitter and add return values to match.
+			//e.printStackTrace();
+
 			return FitStatus.UNKNOWN;
 		}
 
@@ -361,7 +431,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	@Override
 	public boolean isBounded()
 	{
-		return searchMethod == SearchMethod.BOBYQA || searchMethod == SearchMethod.CMAES;
+		return searchMethod == SearchMethod.POWELL_BOUNDED || searchMethod == SearchMethod.BOBYQA ||
+				searchMethod == SearchMethod.CMAES;
 	}
 
 	/*
