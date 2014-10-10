@@ -15,6 +15,13 @@ public abstract class Gaussian2DFunctionTest
 	FloatEquality eq = new FloatEquality(2, 1e-3f);
 	FloatEquality eq2 = new FloatEquality(5, 1e-8f);
 
+	// Compute as per Numerical Recipes 5.7.
+	// Approximate error accuracy in single precision: Ef
+	// Step size for deerivatives:
+	// h ~ (Ef)^(1/3) * xc
+	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
+	final float h_ = (float) (Math.pow(1e-3f, 1.0 / 3));
+
 	int[] testx = new int[] { 4, 5, 6 };
 	int[] testy = new int[] { 4, 5, 6 };
 	float[] testbackground = new float[] { 0, 400 };
@@ -225,7 +232,6 @@ public abstract class Gaussian2DFunctionTest
 		float[] dyda = new float[f1.gradientIndices().length];
 		float[] dyda2 = new float[dyda.length];
 		float[] a;
-		float delta = 0.05f;
 
 		for (int x : testx)
 			for (int y : testy)
@@ -242,18 +248,28 @@ public abstract class Gaussian2DFunctionTest
 										f1.initialise(a);
 										f1.eval(y * maxx + x, dyda);
 
-										// Numerically solve gradient
-										a[targetParameter] += delta;
+										// Numerically solve gradient. 
+										// Calculate the step size h to be an exact numerical representation
+										final float xx = a[targetParameter];
+
+										// Get h to minimise roundoff error
+										float h = h_; //((xx == 0) ? 1 : xx) * h_;
+										final float temp = xx + h;
+										doNothing(temp);
+										h = temp - xx;
+
+										// Evaluate at (x+h) and (x-h)
+										a[targetParameter] = xx + h;
 
 										f1.initialise(a);
 										float value2 = f1.eval(y * maxx + x, dyda2);
 
-										a[targetParameter] -= 2 * delta;
+										a[targetParameter] = xx - h;
 
 										f1.initialise(a);
 										float value3 = f1.eval(y * maxx + x, dyda2);
 
-										float gradient = (value2 - value3) / (2 * delta);
+										float gradient = (value2 - value3) / (2 * h);
 										Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
 									}
@@ -392,7 +408,6 @@ public abstract class Gaussian2DFunctionTest
 		float[] dyda = new float[f2.gradientIndices().length];
 		float[] dyda2 = new float[dyda.length];
 		float[] a;
-		float delta = 0.05f;
 
 		for (int x : testx)
 			for (int y : testy)
@@ -417,22 +432,37 @@ public abstract class Gaussian2DFunctionTest
 															f2.initialise(a);
 															f2.eval(y * maxx + x, dyda);
 
-															// Numerically solve gradient
-															a[targetParameter] += delta;
+															// Numerically solve gradient. 
+															// Calculate the step size h to be an exact numerical representation
+															final float xx = a[targetParameter];
+
+															// Get h to minimise roundoff error
+															float h = h_; //((xx == 0) ? 1 : xx) * h_;
+															float temp = xx + h;
+															doNothing(temp);
+															h = temp - xx;
+
+															// Evaluate at (x+h) and (x-h)
+															a[targetParameter] = xx + h;
 
 															f2.initialise(a);
 															float value2 = f2.eval(y * maxx + x, dyda2);
 
-															a[targetParameter] -= 2 * delta;
+															a[targetParameter] = xx - h;
 
 															f2.initialise(a);
 															float value3 = f2.eval(y * maxx + x, dyda2);
 
-															float gradient = (value2 - value3) / (2 * delta);
+															float gradient = (value2 - value3) / (2 * h);
 															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 																	eq.almostEqualComplement(gradient,
 																			dyda[gradientIndex]));
 														}
+	}
+
+	private void doNothing(float f)
+	{
+
 	}
 
 	@Test
