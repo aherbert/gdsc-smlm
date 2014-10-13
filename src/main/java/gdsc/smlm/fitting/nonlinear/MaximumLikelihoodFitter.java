@@ -1,15 +1,13 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
-import gdsc.smlm.fitting.function.NonLinearFunction;
-
 import java.util.Arrays;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
+import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.function.NonLinearFunction;
+import gdsc.smlm.fitting.function.PoissonLikelihoodFunction;
+
 import org.apache.commons.math3.analysis.FunctionUtils;
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.analysis.differentiation.MultivariateDifferentiableFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -67,112 +65,6 @@ import com.sun.tools.javac.comp.Todo;
  */
 public class MaximumLikelihoodFitter extends BaseFunctionSolver
 {
-	/**
-	 * Wrapper for any function to allow use of the Apache Commons optimiser for Maximum Likelihood Estimation.
-	 * <p>
-	 * Uses the deprecated API since the new API for version 4.0 is not a fully documented final release.
-	 */
-	public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunction
-	{
-		private NonLinearFunction f;
-		private float[] a, y;
-		int n;
-
-		/**
-		 * @param f
-		 *            The function to be used to calculated the expected values
-		 * @param a
-		 *            The initial parameters for the gaussian function
-		 * @param y
-		 *            The observed values
-		 * @param n
-		 *            The number of observed values
-		 */
-		public PoissonLikelihoodFunction(NonLinearFunction f, float[] a, float[] y, int n)
-		{
-			this.f = f;
-			this.a = Arrays.copyOf(a, a.length);
-			this.y = y;
-			this.n = n;
-		}
-
-		/**
-		 * Copy the variables into the appropriate parameter positions for the NonLinearFunction
-		 * 
-		 * @param variables
-		 */
-		private void initialiseFunction(double[] variables)
-		{
-			int[] gradientIndices = f.gradientIndices();
-			for (int i = 0; i < gradientIndices.length; i++)
-				a[gradientIndices[i]] = (float) variables[i];
-			// Do not allow negative values to be computed (since log(-x) is undefined)
-			if (a[Gaussian2DFunction.AMPLITUDE] <= 0)
-				a[Gaussian2DFunction.AMPLITUDE] = 0.1f;
-			if (a[Gaussian2DFunction.BACKGROUND] < 0)
-				a[Gaussian2DFunction.BACKGROUND] = 0;
-
-			f.initialise(a);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-		 */
-		public double value(double[] variables)
-		{
-			initialiseFunction(variables);
-
-			// Compute the negative log-likelihood to be minimised
-			double ll = 0;
-			for (int i = 0; i < n; i++)
-			{
-				final double l = f.eval(i);
-				final double k = y[i];
-				ll += l - k * Math.log(l);
-			}
-			return ll;
-		}
-
-		@Override
-		public MultivariateFunction partialDerivative(int k)
-		{
-			// This is not required for the AbstractDifferentiableOptimizer classes
-			return null;
-		}
-
-		@Override
-		public MultivariateVectorFunction gradient()
-		{
-			// TODO - Check if this is valid:
-			// f(x) = l(x) - k * ln(l(x))
-			// 
-			// Since (k * ln(l(x)))' = (k * ln(l(x)))' * l'(x) 
-
-			// f'(x) = l'(x) - (k/l(x) * l'(x))
-			// f'(x) = l'(x) * (1 - k/l(x))
-			return new MultivariateVectorFunction()
-			{
-				public double[] value(double[] point) throws IllegalArgumentException
-				{
-					initialiseFunction(point);
-
-					double[] gradient = new double[point.length];
-					float[] dl_da = new float[point.length];
-					for (int i = 0; i < n; i++)
-					{
-						final double l = f.eval(i, dl_da);
-						final double k = y[i];
-						for (int j = 0; j < gradient.length; j++)
-							gradient[j] += dl_da[j] * (1 - (k / l));
-					}
-					return gradient;
-				}
-			};
-		}
-	}
-
 	// Maximum iterations for the Powell optimiser
 	private int maxIterations;
 
@@ -239,10 +131,16 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		{
 			double[] startPoint = getInitialSolution(a);
 
+			double ll;
 			double[] solution;
 			if (searchMethod == SearchMethod.POWELL || searchMethod == SearchMethod.POWELL_BOUNDED)
 			{
 				// Non-differentiable version using Powell Optimiser
+
+				// This is as per the method in Numerical Recipes 10.5 (Direction Set (Powell's) method)
+				// I could extend the optimiser and implement bounds on the directions moved. However the mapping
+				// adapter seems to work OK.
+
 				double rel = 1e-4; // Relative threshold.
 				double abs = 1e-10; // Absolute threshold.
 				PowellOptimizer o = new PowellOptimizer(rel, abs, new ConvergenceChecker<PointValuePair>()
@@ -265,15 +163,16 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					PointValuePair optimum = o.optimize(getMaxEvaluations(), fun, GoalType.MINIMIZE, new InitialGuess(
 							startPoint));
 					solution = optimum.getPointRef();
+					ll = optimum.getValue();
 				}
 				else
 				{
 					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower,
 							upper);
-
 					PointValuePair optimum = o.optimize(getMaxEvaluations(), adapter, GoalType.MINIMIZE,
 							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
 					solution = adapter.unboundedToBounded(optimum.getPointRef());
+					ll = optimum.getValue();
 				}
 			}
 			else if (searchMethod == SearchMethod.BOBYQA)
@@ -287,6 +186,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				PointValuePair optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n),
 						GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(lower, upper));
 				solution = optimum.getPointRef();
+				ll = optimum.getValue();
 			}
 			else if (searchMethod == SearchMethod.CMAES)
 			{
@@ -312,6 +212,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				PointValuePair optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n),
 						GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(lower, upper));
 				solution = optimum.getPointRef();
+				ll = optimum.getValue();
 			}
 			else
 			{
@@ -328,18 +229,41 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? ConjugateGradientFormula.FLETCHER_REEVES
 								: ConjugateGradientFormula.POLAK_RIBIERE);
 				optimizer = o;
+
+				// TODO - Can I apply a bounds adapter to the differentiable function. I will have to write one.
+				// However the gradients may become unstable at the edge of the bounds. 
+				// Or they will not change direction if the true solution is on the bounds since the gradient will
+				// always continue towards the bounds. This is key to the
+				// conjugate gradient method. It searches along a vector until the direction of the gradient
+				// is in the opposite direction (using dot products, i.e. cosine of angle between them)
+
+				// It may be better to write a bounded version of the conjugate gradient optimiser that truncates
+				// search directions at the bounds.
+
+				// NR 10.7 states there is no advantage of the variable metric DFP or BFGS methods over
+				// conjugate gradient methods.
+
+				// Try this:
+				// Adapt the conjugate gradient optimiser to use the gradient to pick the search direction
+				// and then for the line minimisation. However if the function is out of bounds then:
+				// - a) just stop at that point (no line minimisation) and switch direction
+				// - b) clip the variables at the bounds and continue 
+				// However the gradient is invalid when the function evaluates <0.
+				// Maybe just use the gradient for the search direction then use the line minimisation/rest
+				// as per the Powell optimiser. The bounds should limit the search.
+
 				MultivariateDifferentiableFunction fun = FunctionUtils
 						.toMultivariateDifferentiableFunction(new PoissonLikelihoodFunction(f, a, y, n));
 				o.setInitialStep(0.1);
 				PointValuePair optimum = o.optimize(getMaxEvaluations(), fun, GoalType.MINIMIZE, startPoint);
 				solution = optimum.getPointRef();
+				ll = optimum.getValue();
 			}
 
 			setSolution(a, solution);
 			iterations = optimizer.getEvaluations();
 
-			//System.out.printf("Iter = %d, %g @ %s\n", iterations, optimum.getValue(),
-			//		Arrays.toString(optimum.getPoint()));
+			System.out.printf("Iter = %d, %g @ %s\n", iterations, ll, Arrays.toString(solution));
 
 			// Compute residuals for the FunctionSolver interface
 			if (y_fit == null || y_fit.length < n)
