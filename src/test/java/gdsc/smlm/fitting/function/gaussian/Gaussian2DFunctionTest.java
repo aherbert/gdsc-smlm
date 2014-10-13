@@ -233,46 +233,51 @@ public abstract class Gaussian2DFunctionTest
 		float[] dyda2 = new float[dyda.length];
 		float[] a;
 
-		for (int x : testx)
-			for (int y : testy)
-				for (float background : testbackground)
-					// Peak 1
-					for (float amplitude1 : testamplitude1)
-						for (float angle1 : testangle1)
-							for (float cx1 : testcx1)
-								for (float cy1 : testcy1)
-									for (float[] w1 : testw1)
+		Gaussian2DFunction f1a = GaussianFunctionFactory.create2D(1, maxx, flags);
+		Gaussian2DFunction f1b = GaussianFunctionFactory.create2D(1, maxx, flags);
+
+		for (float background : testbackground)
+			// Peak 1
+			for (float amplitude1 : testamplitude1)
+				for (float angle1 : testangle1)
+					for (float cx1 : testcx1)
+						for (float cy1 : testcy1)
+							for (float[] w1 : testw1)
+							{
+								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								f1.initialise(a);
+
+								// Numerically solve gradient. 
+								// Calculate the step size h to be an exact numerical representation
+								final float xx = a[targetParameter];
+
+								// Get h to minimise roundoff error
+								float h = h_; //((xx == 0) ? 1 : xx) * h_;
+								final float temp = xx + h;
+								doNothing(temp);
+								h = temp - xx;
+
+								// Evaluate at (x+h) and (x-h)
+								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								a[targetParameter] = xx + h;
+								f1a.initialise(a);
+
+								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								a[targetParameter] = xx - h;
+								f1b.initialise(a);
+
+								for (int x : testx)
+									for (int y : testy)
 									{
-										a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
-
-										f1.initialise(a);
 										f1.eval(y * maxx + x, dyda);
-
-										// Numerically solve gradient. 
-										// Calculate the step size h to be an exact numerical representation
-										final float xx = a[targetParameter];
-
-										// Get h to minimise roundoff error
-										float h = h_; //((xx == 0) ? 1 : xx) * h_;
-										final float temp = xx + h;
-										doNothing(temp);
-										h = temp - xx;
-
-										// Evaluate at (x+h) and (x-h)
-										a[targetParameter] = xx + h;
-
-										f1.initialise(a);
-										float value2 = f1.eval(y * maxx + x, dyda2);
-
-										a[targetParameter] = xx - h;
-
-										f1.initialise(a);
-										float value3 = f1.eval(y * maxx + x, dyda2);
+										float value2 = f1a.eval(y * maxx + x, dyda2);
+										float value3 = f1b.eval(y * maxx + x, dyda2);
 
 										float gradient = (value2 - value3) / (2 * h);
 										Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
 									}
+							}
 	}
 
 	private int findGradientIndex(Gaussian2DFunction f, int targetParameter)
@@ -409,55 +414,62 @@ public abstract class Gaussian2DFunctionTest
 		float[] dyda2 = new float[dyda.length];
 		float[] a;
 
-		for (int x : testx)
-			for (int y : testy)
-				for (float background : testbackground)
-					// Peak 1
-					for (float amplitude1 : testamplitude1)
-						for (float angle1 : testangle1)
-							for (float cx1 : testcx1)
-								for (float cy1 : testcy1)
-									for (float[] w1 : testw1)
-										// Peak 2
-										for (float amplitude2 : testamplitude2)
-											for (float angle2 : testangle2)
-												for (float cx2 : testcx2)
-													for (float cy2 : testcy2)
-														for (float[] w2 : testw2)
+		Gaussian2DFunction f2a = GaussianFunctionFactory.create2D(2, maxx, flags);
+		Gaussian2DFunction f2b = GaussianFunctionFactory.create2D(2, maxx, flags);
+
+		for (float background : testbackground)
+			// Peak 1
+			for (float amplitude1 : testamplitude1)
+				for (float angle1 : testangle1)
+					for (float cx1 : testcx1)
+						for (float cy1 : testcy1)
+							for (float[] w1 : testw1)
+								// Peak 2
+								for (float amplitude2 : testamplitude2)
+									for (float angle2 : testangle2)
+										for (float cx2 : testcx2)
+											for (float cy2 : testcy2)
+												for (float[] w2 : testw2)
+												{
+													a = createParameters(background, amplitude1, angle1, cx1, cy1,
+															w1[0], w1[1], amplitude2, angle2, cx2, cy2, w2[0], w2[1]);
+
+													f2.initialise(a);
+
+													// Numerically solve gradient. 
+													// Calculate the step size h to be an exact numerical representation
+													final float xx = a[targetParameter];
+
+													// Get h to minimise roundoff error
+													float h = h_; //((xx == 0) ? 1 : xx) * h_;
+													float temp = xx + h;
+													doNothing(temp);
+													h = temp - xx;
+
+													// Evaluate at (x+h) and (x-h)
+													a = createParameters(background, amplitude1, angle1, cx1, cy1,
+															w1[0], w1[1], amplitude2, angle2, cx2, cy2, w2[0], w2[1]);
+													a[targetParameter] = xx + h;
+													f2a.initialise(a);
+
+													a = createParameters(background, amplitude1, angle1, cx1, cy1,
+															w1[0], w1[1], amplitude2, angle2, cx2, cy2, w2[0], w2[1]);
+													a[targetParameter] = xx - h;
+													f2b.initialise(a);
+
+													for (int x : testx)
+														for (int y : testy)
 														{
-															a = createParameters(background, amplitude1, angle1, cx1,
-																	cy1, w1[0], w1[1], amplitude2, angle2, cx2, cy2,
-																	w2[0], w2[1]);
-
-															f2.initialise(a);
 															f2.eval(y * maxx + x, dyda);
-
-															// Numerically solve gradient. 
-															// Calculate the step size h to be an exact numerical representation
-															final float xx = a[targetParameter];
-
-															// Get h to minimise roundoff error
-															float h = h_; //((xx == 0) ? 1 : xx) * h_;
-															float temp = xx + h;
-															doNothing(temp);
-															h = temp - xx;
-
-															// Evaluate at (x+h) and (x-h)
-															a[targetParameter] = xx + h;
-
-															f2.initialise(a);
-															float value2 = f2.eval(y * maxx + x, dyda2);
-
-															a[targetParameter] = xx - h;
-
-															f2.initialise(a);
-															float value3 = f2.eval(y * maxx + x, dyda2);
+															float value2 = f2a.eval(y * maxx + x, dyda2);
+															float value3 = f2b.eval(y * maxx + x, dyda2);
 
 															float gradient = (value2 - value3) / (2 * h);
 															Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 																	eq.almostEqualComplement(gradient,
 																			dyda[gradientIndex]));
 														}
+												}
 	}
 
 	private void doNothing(float f)
