@@ -24,31 +24,44 @@ import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 
 /**
- * Wrapper for any function to allow use of the Apache Commons optimiser for Maximum Likelihood Estimation.
+ * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson distribution:<br/>
+ * f(x) = l(x) - k * ln(l(x))<br/>
+ * Where:<br/>
+ * l(x) is the function (expected) value<br/>
+ * k is the observed value
  * <p>
- * Uses the deprecated API since the new API for version 4.0 is not a fully documented final release.
+ * The negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or for a chosen
+ * observed value.
+ * <p>
+ * This implements the Apache Commons Math API so that optimisers can be used for Maximum Likelihood Estimation. Uses
+ * the deprecated API since the new API for version 4.0 is not a fully documented final release.
  */
 public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunction
 {
 	private NonLinearFunction f;
-	private float[] a, y;
+	private float[] a, data;
 	private int n;
 
 	/**
+	 * Initialise the function.
+	 * <p>
+	 * The input parameters must be the full parameters for the non-linear function. Only those
+	 * parameters with gradient indices should be passed in to the functions to obtain the value (and gradient).
+	 * 
 	 * @param f
 	 *            The function to be used to calculated the expected values
 	 * @param a
 	 *            The initial parameters for the function
-	 * @param y
+	 * @param k
 	 *            The observed values
 	 * @param n
 	 *            The number of observed values
 	 */
-	public PoissonLikelihoodFunction(NonLinearFunction f, float[] a, float[] y, int n)
+	public PoissonLikelihoodFunction(NonLinearFunction f, float[] a, float[] k, int n)
 	{
 		this.f = f;
 		this.a = Arrays.copyOf(a, a.length);
-		this.y = y;
+		this.data = k;
 		this.n = n;
 	}
 
@@ -56,40 +69,26 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 	 * Copy the variables into the appropriate parameter positions for the NonLinearFunction
 	 * 
 	 * @param variables
-	 * @return true if the function could evaluate zero
 	 */
-	private boolean initialiseFunction(double[] variables)
+	private void initialiseFunction(double[] variables)
 	{
 		int[] gradientIndices = f.gradientIndices();
 		for (int i = 0; i < gradientIndices.length; i++)
 			a[gradientIndices[i]] = (float) variables[i];
-		// Do not allow negative values to be computed (since log(-x) is undefined)
-		boolean zero = true;
-
-		//		// TODO - Remove dependency on Gaussian2DFunction
-		//		// Pass in bounds to the function parameters that require restriction
-		//		if (a[Gaussian2DFunction.AMPLITUDE] < 0)
-		//		{
-		//			zero = true;
-		//			a[Gaussian2DFunction.AMPLITUDE] = 0;
-		//		}
-		//		if (a[Gaussian2DFunction.BACKGROUND] < 0)
-		//		{
-		//			zero = true;
-		//			a[Gaussian2DFunction.BACKGROUND] = 0;
-		//		}
 		f.initialise(a);
-		return zero;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Compute the value. Returns positive infinity if the function evaluates to zero (or below) at any point in the
+	 * observed values.
 	 * 
-	 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
+	 * @param variables
+	 *            The variables of the function
+	 * @return The negative log likelihood
 	 */
 	public double value(double[] variables)
 	{
-		boolean zero = initialiseFunction(variables);
+		initialiseFunction(variables);
 
 		// Compute the negative log-likelihood to be minimised
 		double ll = 0;
@@ -97,18 +96,24 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 		{
 			final double l = f.eval(i);
 
-			// If the function was called with arguments that could be zero, check for zero
-			// and return the worst likelihood score
-			if (zero && l <= 0)
+			// Check for zero and return the worst likelihood score
+			if (l <= 0)
+			{
 				// Since ln(0) -> -Infinity
 				return Double.POSITIVE_INFINITY;
+			}
 
-			final double k = y[i];
+			final double k = data[i];
 			ll += l - k * Math.log(l);
 		}
 		return ll;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateFunction#partialDerivative(int)
+	 */
 	@Override
 	public MultivariateFunction partialDerivative(int k)
 	{
@@ -128,7 +133,7 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 	 */
 	public double value(double[] variables, double[] gradient)
 	{
-		boolean zero = initialiseFunction(variables);
+		initialiseFunction(variables);
 
 		// Compute the negative log-likelihood to be minimised
 		// f(x) = l(x) - k * ln(l(x))
@@ -146,15 +151,14 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 		{
 			final double l = f.eval(i, dl_da);
 
-			// If the function was called with arguments that could be zero, check for zero
-			// and return the worst likelihood score
-			if (zero && l <= 0)
+			// Check for zero and return the worst likelihood score
+			if (l <= 0)
 			{
 				// Since ln(0) -> -Infinity
 				return Double.POSITIVE_INFINITY;
 			}
 
-			final double k = y[i];
+			final double k = data[i];
 			ll += l - k * Math.log(l);
 			for (int j = 0; j < gradient.length; j++)
 				gradient[j] += dl_da[j] - (dl_da[j] * k / l);
@@ -177,35 +181,24 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 	 */
 	public double value(double[] variables, double[] gradient, int i)
 	{
-		boolean zero = initialiseFunction(variables);
+		initialiseFunction(variables);
 
-		// Compute the negative log-likelihood to be minimised
-		// f(x) = l(x) - k * ln(l(x))
-		// 
-		// Since (k * ln(l(x)))' = (k * ln(l(x)))' * l'(x) 
-
-		// f'(x) = l'(x) - (k/l(x) * l'(x))
-		// f'(x) = l'(x) * (1 - k/l(x))
-
-		double ll = 0;
-		if (gradient == null)
-			gradient = new double[variables.length];
+		for (int j = 0; j < variables.length; j++)
+			gradient[j] = 0;
 		float[] dl_da = new float[variables.length];
 		final double l = f.eval(i, dl_da);
 
-		// If the function was called with arguments that could be zero, check for zero
-		// and return the worst likelihood score
-		if (zero && l <= 0)
+		// Check for zero and return the worst likelihood score
+		if (l <= 0)
 		{
 			// Since ln(0) -> -Infinity
 			return Double.POSITIVE_INFINITY;
 		}
 
-		final double k = y[i];
-		ll = l - k * Math.log(l);
+		final double k = data[i];
 		for (int j = 0; j < gradient.length; j++)
 			gradient[j] = dl_da[j] - (dl_da[j] * k / l);
-		return ll;
+		return l - k * Math.log(l);
 
 	}
 
@@ -221,34 +214,27 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 	 */
 	public double value(double[] variables, int i)
 	{
-		boolean zero = initialiseFunction(variables);
+		initialiseFunction(variables);
 
-		// Compute the negative log-likelihood to be minimised
-		// TODO - Check if this is valid:
-		// f(x) = l(x) - k * ln(l(x))
-		// 
-		// Since (k * ln(l(x)))' = (k * ln(l(x)))' * l'(x) 
-
-		// f'(x) = l'(x) - (k/l(x) * l'(x))
-		// f'(x) = l'(x) * (1 - k/l(x))
-
-		double ll = 0;
 		final double l = f.eval(i);
 
-		// If the function was called with arguments that could be zero, check for zero
-		// and return the worst likelihood score
-		if (zero && l <= 0)
+		// Check for zero and return the worst likelihood score
+		if (l <= 0)
 		{
 			// Since ln(0) -> -Infinity
 			return Double.POSITIVE_INFINITY;
 		}
 
-		final double k = y[i];
-		ll += l - k * Math.log(l);
-		return ll;
+		final double k = data[i];
+		return l - k * Math.log(l);
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateFunction#gradient()
+	 */
 	@Override
 	public MultivariateVectorFunction gradient()
 	{
@@ -258,7 +244,7 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 			{
 				double[] gradient = new double[point.length];
 				if (PoissonLikelihoodFunction.this.value(point, gradient) == Double.POSITIVE_INFINITY)
-					return new double[point.length];
+					return new double[point.length]; // No gradient if the function is invalid
 				return gradient;
 			}
 		};
