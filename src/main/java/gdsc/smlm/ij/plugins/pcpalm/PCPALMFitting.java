@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins.pcpalm;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.fitting.function.OptimiserFunction;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
@@ -62,6 +63,7 @@ import org.apache.commons.math3.optimization.PointVectorValuePair;
 import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.random.Well44497b;
 
 /**
  * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.
@@ -90,6 +92,8 @@ public class PCPALMFitting implements PlugIn
 	private static boolean saveCorrelationCurve = false;
 	private static String inputFilename = "";
 	private static String outputFilename = "";
+	private static int fitRestarts = 3;
+	private static boolean useLSE = false;
 	private static double fitAboveEstimatedPrecision = 0;
 	private static double fittingTolerance = 0; // Zero to ignore
 	private static double gr_protein_threshold = 1.5;
@@ -97,6 +101,8 @@ public class PCPALMFitting implements PlugIn
 	private RandomModelFunction randomModel;
 	private ClusteredModelFunctionGradient clusteredModel;
 	private EmulsionModelFunctionGradient emulsionModel;
+
+	private CMAESOptimizer cmaesOptimiser;
 
 	// Information criterion of models
 	private double ic1, ic2, ic3;
@@ -201,6 +207,8 @@ public class PCPALMFitting implements PlugIn
 		gd.addNumericField("Estimated_precision", estimatedPrecision, 2);
 		gd.addNumericField("Blinking_rate", blinkingRate, 2);
 		gd.addCheckbox("Show_error_bars", showErrorBars);
+		gd.addSlider("Fit_restarts", 0, 5, fitRestarts);
+		gd.addCheckbox("Refit_using_LSE", useLSE);
 		gd.addSlider("Fit_above_estimated_precision", 0, 2.5, fitAboveEstimatedPrecision);
 		gd.addSlider("Fitting_tolerance", 0, 200, fittingTolerance);
 		gd.addSlider("gr_random_threshold", 1, 2.5, gr_protein_threshold);
@@ -215,6 +223,8 @@ public class PCPALMFitting implements PlugIn
 		estimatedPrecision = gd.getNextNumber();
 		blinkingRate = gd.getNextNumber();
 		showErrorBars = gd.getNextBoolean();
+		fitRestarts = (int) Math.abs(gd.getNextNumber());
+		useLSE = gd.getNextBoolean();
 		fitAboveEstimatedPrecision = Math.abs(gd.getNextNumber());
 		fittingTolerance = Math.abs(gd.getNextNumber());
 		gr_protein_threshold = gd.getNextNumber();
@@ -515,13 +525,15 @@ public class PCPALMFitting implements PlugIn
 		ArrayList<double[]> curves = new ArrayList<double[]>();
 
 		// Fit the g(r) curve for r>0 to equation 2
-		double[] parameters = fitRandomModel(gr, estimatedPrecision, proteinDensity);
+		Color color = Color.red;
+		String resultColour = "Red";
+		double[] parameters = fitRandomModel(gr, estimatedPrecision, proteinDensity, resultColour);
 		if (parameters != null)
 		{
 			log("  Plot %s: Over-counting estimate = %s", randomModel.getName(),
 					Utils.rounded(peakDensity / parameters[1], 4));
-			log("  Plot %s == Red", randomModel.getName());
-			plot.setColor(Color.red);
+			log("  Plot %s == %s", randomModel.getName(), resultColour.toString());
+			plot.setColor(color);
 			plot.addPoints(randomModel.getX(), randomModel.value(parameters), Plot.LINE);
 			addNonFittedPoints(plot, gr, randomModel, parameters);
 			Utils.display(title, plot);
@@ -533,14 +545,16 @@ public class PCPALMFitting implements PlugIn
 		if (!valid1 || fitClusteredModels)
 		{
 			// Fit the g(r) curve for r>0 to equation 3
-			parameters = fitClusteredModel(gr, estimatedPrecision, proteinDensity);
+			color = Color.blue;
+			resultColour = "Blue";
+			parameters = fitClusteredModel(gr, estimatedPrecision, proteinDensity, resultColour);
 
 			if (parameters != null)
 			{
 				log("  Plot %s: Over-counting estimate = %s", clusteredModel.getName(),
 						Utils.rounded(peakDensity / parameters[1], 4));
-				log("  Plot %s == Blue", clusteredModel.getName());
-				plot.setColor(Color.blue);
+				log("  Plot %s == %s, ", clusteredModel.getName(), resultColour.toString());
+				plot.setColor(color);
 				plot.addPoints(clusteredModel.getX(), clusteredModel.value(parameters), Plot.LINE);
 				addNonFittedPoints(plot, gr, clusteredModel, parameters);
 				Utils.display(title, plot);
@@ -549,14 +563,16 @@ public class PCPALMFitting implements PlugIn
 			}
 
 			// Fit to an emulsion model for a distribution confined to circles
-			parameters = fitEmulsionModel(gr, estimatedPrecision, proteinDensity);
+			color = Color.magenta;
+			resultColour = "Magenta";
+			parameters = fitEmulsionModel(gr, estimatedPrecision, proteinDensity, resultColour);
 
 			if (parameters != null)
 			{
 				log("  Plot %s: Over-counting estimate = %s", emulsionModel.getName(),
 						Utils.rounded(peakDensity / parameters[1], 4));
-				log("  Plot %s == Magenta", emulsionModel.getName());
-				plot.setColor(Color.magenta);
+				log("  Plot %s == %s", emulsionModel.getName(), resultColour.toString());
+				plot.setColor(color);
 				plot.addPoints(emulsionModel.getX(), emulsionModel.value(parameters), Plot.LINE);
 				addNonFittedPoints(plot, gr, emulsionModel, parameters);
 				Utils.display(title, plot);
@@ -869,7 +885,7 @@ public class PCPALMFitting implements PlugIn
 	 *            The estimate protein density
 	 * @return The fitted parameters [precision, density]
 	 */
-	private double[] fitRandomModel(double[][] gr, double sigmaS, double proteinDensity)
+	private double[] fitRandomModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
 		randomModel = new RandomModelFunction();
 
@@ -978,7 +994,7 @@ public class PCPALMFitting implements PlugIn
 			}
 		}
 
-		addResult(randomModel.getName(), valid1, fitSigmaS, fitProteinDensity, 0, 0, 0, 0, ic1);
+		addResult(randomModel.getName(), resultColour, valid1, fitSigmaS, fitProteinDensity, 0, 0, 0, 0, ic1);
 
 		return parameters;
 	}
@@ -1003,7 +1019,7 @@ public class PCPALMFitting implements PlugIn
 	 *            The estimated protein density
 	 * @return The fitted parameters [precision, density, clusterRadius, clusterDensity]
 	 */
-	private double[] fitClusteredModel(double[][] gr, double sigmaS, double proteinDensity)
+	private double[] fitClusteredModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
 		clusteredModel = new ClusteredModelFunctionGradient();
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", clusteredModel.getName(),
@@ -1022,8 +1038,6 @@ public class PCPALMFitting implements PlugIn
 		double[] initialSolution = new double[] { sigmaS, proteinDensity, sigmaS * 5, 1 };
 		int evaluations = 0;
 
-		PointValuePair constrainedSolution;
-
 		// Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
 		// LVM fitting does not support constrained fitting so use a bounded optimiser.
 		ClusteredModelFunctionMultivariate clusteredModelMulti = new ClusteredModelFunctionMultivariate();
@@ -1034,71 +1048,54 @@ public class PCPALMFitting implements PlugIn
 		double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
 		double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0 };
 		// The amplitude and range should not extend beyond the limits of the g(r) curve.
-		double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
-				Maths.max(gr[1]) };
+		double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit,
+				Maths.max(clusteredModelMulti.getX()), Maths.max(gr[1]) };
 		log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", clusteredModel.getName(),
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
-		SimpleBounds bounds = new SimpleBounds(lB, uB);
 
-		// CMAESOptimizer or BOBYQAOptimizer support bounds
+		PointValuePair constrainedSolution = runCMAESOptimiser(gr, initialSolution, lB, uB, clusteredModelMulti);
 
-		// CMAESOptimiser based on Matlab code:
-		// https://www.lri.fr/~hansen/cmaes.m
-		// Take the defaults from the Matlab documentation
-		int maxIterations = 2000;
-		double stopFitness = 0; //Double.NEGATIVE_INFINITY;
-		boolean isActiveCMA = true;
-		int diagonalOnly = 0;
-		int checkFeasableCount = 1;
-		RandomGenerator random = new Well19937c();
-		boolean generateStatistics = false;
-		ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
-		// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
-		OptimizationData sigma = new CMAESOptimizer.Sigma(new double[] { (uB[0] - lB[0]) / 3, (uB[1] - lB[1]) / 3,
-				(uB[2] - lB[2]) / 3, (uB[3] - lB[3]) / 3 });
-		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(clusteredModel
-				.size()))));
-
-		CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
-				checkFeasableCount, random, generateStatistics, checker);
-		constrainedSolution = opt.optimize(new InitialGuess(initialSolution),
-				new ObjectiveFunction(clusteredModelMulti), GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(
-						maxIterations), new MaxEval(maxIterations * 2));
+		if (constrainedSolution == null)
+			return null;
 
 		parameters = constrainedSolution.getPointRef();
-		evaluations = opt.getEvaluations();
+		evaluations = cmaesOptimiser.getEvaluations();
 
 		// Refit using a LVM  
-		log("Re-fitting %s using a gradient optimisation", clusteredModel.getName());
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-		PointVectorValuePair lvmSolution;
-		try
+		if (useLSE)
 		{
-			lvmSolution = optimizer.optimize(3000, clusteredModel, clusteredModel.getY(), clusteredModel.getWeights(),
-					parameters);
-			evaluations += optimizer.getEvaluations();
-
-			double ss = 0;
-			double[] obs = clusteredModel.getY();
-			double[] exp = lvmSolution.getValue();
-			for (int i = 0; i < obs.length; i++)
-				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-			if (ss < constrainedSolution.getValue())
+			log("Re-fitting %s using a gradient optimisation", clusteredModel.getName());
+			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+			PointVectorValuePair lvmSolution;
+			try
 			{
-				log("Re-fitting %s improved the SS from %s to %s (-%s%%)", clusteredModel.getName(),
-						Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4),
-						Utils.rounded(100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
-				parameters = lvmSolution.getPoint();
+				lvmSolution = optimizer.optimize(3000, clusteredModel, clusteredModel.getY(),
+						clusteredModel.getWeights(), parameters);
+				evaluations += optimizer.getEvaluations();
+
+				double ss = 0;
+				double[] obs = clusteredModel.getY();
+				double[] exp = lvmSolution.getValue();
+				for (int i = 0; i < obs.length; i++)
+					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+				if (ss < constrainedSolution.getValue())
+				{
+					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", clusteredModel.getName(), Utils.rounded(
+							constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(100 *
+							(constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
+					parameters = lvmSolution.getPoint();
+				}
 			}
-		}
-		catch (TooManyEvaluationsException e)
-		{
-			log("Failed to re-fit %s: Too many evaluations (%d)", clusteredModel.getName(), optimizer.getEvaluations());
-		}
-		catch (ConvergenceException e)
-		{
-			log("Failed to re-fit %s: %s", clusteredModel.getName(), e.getMessage());
+			catch (TooManyEvaluationsException e)
+			{
+				log("Failed to re-fit %s: Too many evaluations (%d)", clusteredModel.getName(),
+						optimizer.getEvaluations());
+			}
+			catch (ConvergenceException e)
+			{
+				log("Failed to re-fit %s: %s", clusteredModel.getName(), e.getMessage());
+			}
 		}
 
 		clusteredModel.setLogging(false);
@@ -1166,10 +1163,76 @@ public class PCPALMFitting implements PlugIn
 			valid2 = false;
 		}
 
-		addResult(clusteredModel.getName(), valid2, fitSigmaS, fitProteinDensity, domainRadius, domainDensity,
-				nCluster, 0, ic2);
+		addResult(clusteredModel.getName(), resultColour, valid2, fitSigmaS, fitProteinDensity, domainRadius,
+				domainDensity, nCluster, 0, ic2);
 
 		return parameters;
+	}
+
+	private PointValuePair runCMAESOptimiser(double[][] gr, double[] initialSolution, double[] lB, double[] uB,
+			MultivariateFunction function)
+	{
+		// CMAESOptimiser based on Matlab code:
+		// https://www.lri.fr/~hansen/cmaes.m
+		// Take the defaults from the Matlab documentation
+		int maxIterations = 2000;
+		double stopFitness = 0; //Double.NEGATIVE_INFINITY;
+		boolean isActiveCMA = true;
+		int diagonalOnly = 0;
+		int checkFeasableCount = 1;
+		RandomGenerator random = new Well44497b(); //Well19937c();
+		boolean generateStatistics = false;
+		ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
+		// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
+		double[] range = new double[lB.length];
+		for (int i = 0; i < lB.length; i++)
+			range[i] = (uB[i] - lB[i]) / 3;
+		OptimizationData sigma = new CMAESOptimizer.Sigma(range);
+		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
+				.log(initialSolution.length))));
+		SimpleBounds bounds = new SimpleBounds(lB, uB);
+
+		PointValuePair bestSolution = null;
+		cmaesOptimiser = null;
+
+		// Restart the optimiser several times and take the best answer.
+		for (int i = -1; i < fitRestarts; i++)
+		{
+			try
+			{
+				// Start from the initial solution
+				CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
+						checkFeasableCount, random, generateStatistics, checker);
+				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution),
+						new ObjectiveFunction(function), GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(
+								maxIterations), new MaxEval(maxIterations * 2));
+				//System.out.printf("Iter %d a = %g\n", i, constrainedSolution.getValue());
+				if (bestSolution == null || constrainedSolution.getValue() < bestSolution.getValue())
+				{
+					bestSolution = constrainedSolution;
+					cmaesOptimiser = opt;
+				}
+				// Also restart from the current optimum
+				if (bestSolution == null)
+					continue;
+				opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly, checkFeasableCount,
+						random, generateStatistics, checker);
+				constrainedSolution = opt.optimize(new InitialGuess(bestSolution.getPointRef()), new ObjectiveFunction(
+						function), GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(maxIterations), new MaxEval(
+						maxIterations * 2));
+				//System.out.printf("Iter %d b = %g\n", i, constrainedSolution.getValue());
+				if (bestSolution == null || constrainedSolution.getValue() < bestSolution.getValue())
+				{
+					bestSolution = constrainedSolution;
+					cmaesOptimiser = opt;
+				}
+			}
+			catch (TooManyEvaluationsException e)
+			{
+				// ignore
+			}
+		}
+		return bestSolution;
 	}
 
 	/**
@@ -1183,7 +1246,7 @@ public class PCPALMFitting implements PlugIn
 	 *            The estimated protein density
 	 * @return The fitted parameters [precision, density, clusterRadius, clusterDensity]
 	 */
-	private double[] fitEmulsionModel(double[][] gr, double sigmaS, double proteinDensity)
+	private double[] fitEmulsionModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
 		emulsionModel = new EmulsionModelFunctionGradient();
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", emulsionModel.getName(),
@@ -1201,8 +1264,6 @@ public class PCPALMFitting implements PlugIn
 		// The model is: sigma, density, range, amplitude, alpha
 		double[] initialSolution = new double[] { sigmaS, proteinDensity, sigmaS * 5, 1, sigmaS * 5 };
 		int evaluations = 0;
-
-		PointValuePair constrainedSolution;
 
 		// Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
 		// LVM fitting does not support constrained fitting so use a bounded optimiser.
@@ -1229,66 +1290,49 @@ public class PCPALMFitting implements PlugIn
 		log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", emulsionModel.getName(),
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
-		SimpleBounds bounds = new SimpleBounds(lB, uB);
 
-		// CMAESOptimizer or BOBYQAOptimizer support bounds
+		PointValuePair constrainedSolution = runCMAESOptimiser(gr, initialSolution, lB, uB, emulsionModelMulti);
 
-		// CMAESOptimiser based on Matlab code:
-		// https://www.lri.fr/~hansen/cmaes.m
-		// Take the defaults from the Matlab documentation
-		int maxIterations = 2000;
-		double stopFitness = 0; //Double.NEGATIVE_INFINITY;
-		boolean isActiveCMA = true;
-		int diagonalOnly = 0;
-		int checkFeasableCount = 1;
-		RandomGenerator random = new Well19937c();
-		boolean generateStatistics = false;
-		ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
-		// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
-		OptimizationData sigma = new CMAESOptimizer.Sigma(new double[] { (uB[0] - lB[0]) / 3, (uB[1] - lB[1]) / 3,
-				(uB[2] - lB[2]) / 3, (uB[3] - lB[3]) / 3, (uB[4] - lB[4]) / 3 });
-		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math.log(emulsionModel
-				.size()))));
-
-		CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
-				checkFeasableCount, random, generateStatistics, checker);
-		constrainedSolution = opt.optimize(new InitialGuess(initialSolution),
-				new ObjectiveFunction(emulsionModelMulti), GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(
-						maxIterations), new MaxEval(maxIterations * 2));
+		if (constrainedSolution == null)
+			return null;
 
 		parameters = constrainedSolution.getPointRef();
-		evaluations = opt.getEvaluations();
+		evaluations = cmaesOptimiser.getEvaluations();
 
 		// Refit using a LVM  
-		log("Re-fitting %s using a gradient optimisation", emulsionModel.getName());
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-		PointVectorValuePair lvmSolution;
-		try
+		if (useLSE)
 		{
-			lvmSolution = optimizer.optimize(3000, emulsionModel, emulsionModel.getY(), emulsionModel.getWeights(),
-					parameters);
-			evaluations += optimizer.getEvaluations();
-
-			double ss = 0;
-			double[] obs = emulsionModel.getY();
-			double[] exp = lvmSolution.getValue();
-			for (int i = 0; i < obs.length; i++)
-				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-			if (ss < constrainedSolution.getValue())
+			log("Re-fitting %s using a gradient optimisation", emulsionModel.getName());
+			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+			PointVectorValuePair lvmSolution;
+			try
 			{
-				log("Re-fitting %s improved the SS from %s to %s (-%s%%)", emulsionModel.getName(),
-						Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4),
-						Utils.rounded(100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
-				parameters = lvmSolution.getPoint();
+				lvmSolution = optimizer.optimize(3000, emulsionModel, emulsionModel.getY(), emulsionModel.getWeights(),
+						parameters);
+				evaluations += optimizer.getEvaluations();
+
+				double ss = 0;
+				double[] obs = emulsionModel.getY();
+				double[] exp = lvmSolution.getValue();
+				for (int i = 0; i < obs.length; i++)
+					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+				if (ss < constrainedSolution.getValue())
+				{
+					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", emulsionModel.getName(), Utils.rounded(
+							constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(100 *
+							(constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
+					parameters = lvmSolution.getPoint();
+				}
 			}
-		}
-		catch (TooManyEvaluationsException e)
-		{
-			log("Failed to re-fit %s: Too many evaluations (%d)", emulsionModel.getName(), optimizer.getEvaluations());
-		}
-		catch (ConvergenceException e)
-		{
-			log("Failed to re-fit %s: %s", emulsionModel.getName(), e.getMessage());
+			catch (TooManyEvaluationsException e)
+			{
+				log("Failed to re-fit %s: Too many evaluations (%d)", emulsionModel.getName(),
+						optimizer.getEvaluations());
+			}
+			catch (ConvergenceException e)
+			{
+				log("Failed to re-fit %s: %s", emulsionModel.getName(), e.getMessage());
+			}
 		}
 
 		emulsionModel.setLogging(false);
@@ -1357,8 +1401,8 @@ public class PCPALMFitting implements PlugIn
 			valid2 = false;
 		}
 
-		addResult(emulsionModel.getName(), valid2, fitSigmaS, fitProteinDensity, domainRadius, domainDensity, nCluster,
-				coherence, ic3);
+		addResult(emulsionModel.getName(), resultColour, valid2, fitSigmaS, fitProteinDensity, domainRadius,
+				domainDensity, nCluster, coherence, ic3);
 
 		return parameters;
 	}
@@ -2003,6 +2047,7 @@ public class PCPALMFitting implements PlugIn
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append("Model\t");
+			sb.append("Colour\t");
 			sb.append("Valid\t");
 			sb.append("Precision (nm)\t");
 			sb.append("Density (um^-2)\t");
@@ -2016,19 +2061,25 @@ public class PCPALMFitting implements PlugIn
 		}
 	}
 
-	private void addResult(String model, boolean valid, double precision, double density, double domainRadius,
-			double domainDensity, double nCluster, double coherence, double ic)
+	private void addResult(String model, String resultColour, boolean valid, double precision, double density,
+			double domainRadius, double domainDensity, double nCluster, double coherence, double ic)
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(model).append("\t");
+		sb.append(resultColour.toString()).append("\t");
 		sb.append(valid).append("\t");
 		sb.append(Utils.rounded(precision, 4)).append("\t");
 		sb.append(Utils.rounded(density * 1e6, 4)).append("\t");
-		sb.append(Utils.rounded(domainRadius, 4)).append("\t");
-		sb.append(Utils.rounded(domainDensity, 4)).append("\t");
-		sb.append(Utils.rounded(nCluster, 4)).append("\t");
-		sb.append(Utils.rounded(coherence, 4)).append("\t");
+		sb.append(getString(domainRadius)).append("\t");
+		sb.append(getString(domainDensity)).append("\t");
+		sb.append(getString(nCluster)).append("\t");
+		sb.append(getString(coherence)).append("\t");
 		sb.append(Utils.rounded(ic, 4)).append("\t");
 		resultsTable.append(sb.toString());
+	}
+
+	private String getString(double value)
+	{
+		return (value == 0) ? "-" : Utils.rounded(value, 4);
 	}
 }
