@@ -1,34 +1,34 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.function.NonLinearFunction;
 import gdsc.smlm.fitting.function.PoissonLikelihoodFunction;
 
-import org.apache.commons.math3.analysis.FunctionUtils;
+import java.util.Arrays;
+
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.differentiation.MultivariateDifferentiableFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.optimization.BaseMultivariateOptimizer;
-import org.apache.commons.math3.optimization.ConvergenceChecker;
-import org.apache.commons.math3.optimization.GoalType;
-import org.apache.commons.math3.optimization.InitialGuess;
-import org.apache.commons.math3.optimization.PointValuePair;
-import org.apache.commons.math3.optimization.SimpleBounds;
-import org.apache.commons.math3.optimization.SimpleValueChecker;
-import org.apache.commons.math3.optimization.direct.BOBYQAOptimizer;
-import org.apache.commons.math3.optimization.direct.CMAESOptimizer;
-import org.apache.commons.math3.optimization.direct.MultivariateFunctionMappingAdapter;
-import org.apache.commons.math3.optimization.direct.PowellOptimizer;
-import org.apache.commons.math3.optimization.general.ConjugateGradientFormula;
-import org.apache.commons.math3.optimization.general.NonLinearConjugateGradientOptimizer;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.MaxIter;
+import org.apache.commons.math3.optim.OptimizationData;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.SimpleValueChecker;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer.Formula;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
-
-import com.sun.tools.javac.comp.Todo;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -61,6 +61,59 @@ import com.sun.tools.javac.comp.Todo;
  */
 public class MaximumLikelihoodFitter extends BaseFunctionSolver
 {
+	/**
+	 * Wrap the PoissonLikelihoodFunction with classes that implement the required interfaces
+	 */
+	private class PoissonWrapper
+	{
+		PoissonLikelihoodFunction fun;
+
+		public PoissonWrapper(PoissonLikelihoodFunction fun)
+		{
+			this.fun = fun;
+		}
+	}
+
+	private class MultivariatePoisson extends PoissonWrapper implements MultivariateFunction
+	{
+		public MultivariatePoisson(PoissonLikelihoodFunction fun)
+		{
+			super(fun);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
+		 */
+		@Override
+		public double value(double[] point)
+		{
+			return fun.value(point);
+		}
+	}
+
+	private class MultivariateVectorPoisson extends PoissonWrapper implements MultivariateVectorFunction
+	{
+		public MultivariateVectorPoisson(PoissonLikelihoodFunction fun)
+		{
+			super(fun);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
+		 */
+		@Override
+		public double[] value(double[] point)
+		{
+			double[] gradient = new double[point.length];
+			fun.value(point, gradient);
+			return gradient;
+		}
+	}
+
 	// Maximum iterations for the Powell optimiser
 	private int maxIterations;
 
@@ -116,20 +169,20 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
 	 */
-	@SuppressWarnings("deprecation")
 	public FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise)
 	{
 		numberOfFittedPoints = n;
 
-		BaseMultivariateOptimizer optimizer = null;
 		PoissonLikelihoodFunction maximumLikelihoodFunction = new PoissonLikelihoodFunction(f, a, y, n);
+		final double rel = 1e-4; // Relative threshold.
+		final double abs = 1e-10; // Absolute threshold.
 
 		try
 		{
 			double[] startPoint = getInitialSolution(a);
 
-			double ll;
-			double[] solution;
+			double ll = 0;
+			double[] solution = null;
 			if (searchMethod == SearchMethod.POWELL || searchMethod == SearchMethod.POWELL_BOUNDED)
 			{
 				// Non-differentiable version using Powell Optimiser
@@ -138,38 +191,32 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// I could extend the optimiser and implement bounds on the directions moved. However the mapping
 				// adapter seems to work OK.
 
-				double rel = 1e-4; // Relative threshold.
-				double abs = 1e-10; // Absolute threshold.
-				PowellOptimizer o = new PowellOptimizer(rel, abs, new ConvergenceChecker<PointValuePair>()
-				{
-					@Override
-					public boolean converged(int iteration, PointValuePair previous, PointValuePair current)
-					{
-						if (getMaxIterations() > 0 && iteration > getMaxIterations())
-							throw new TooManyIterationsException(getMaxIterations());
-						return false;
-					}
-				});
-
-				optimizer = o;
+				PowellOptimizer o = new PowellOptimizer(rel, abs);
 
 				// Try using the mapping adapter
+				MultivariateFunction fun = new MultivariatePoisson(maximumLikelihoodFunction);
+				OptimizationData maxIterationData = null;
+				if (getMaxIterations() > 0)
+					maxIterationData = new MaxIter(getMaxIterations());
 				if (searchMethod == SearchMethod.POWELL)
 				{
-					PointValuePair optimum = o.optimize(getMaxEvaluations(), maximumLikelihoodFunction,
+					PointValuePair optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
+							new ObjectiveFunction(new MultivariatePoisson(maximumLikelihoodFunction)),
 							GoalType.MINIMIZE, new InitialGuess(startPoint));
 					solution = optimum.getPointRef();
 					ll = optimum.getValue();
 				}
 				else
 				{
-					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
-							maximumLikelihoodFunction, lower, upper);
-					PointValuePair optimum = o.optimize(getMaxEvaluations(), adapter, GoalType.MINIMIZE,
+					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower,
+							upper);
+					PointValuePair optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
+							new ObjectiveFunction(adapter), GoalType.MINIMIZE,
 							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
 					solution = adapter.unboundedToBounded(optimum.getPointRef());
 					ll = optimum.getValue();
 				}
+				iterations = o.getEvaluations();
 			}
 			else if (searchMethod == SearchMethod.BOBYQA)
 			{
@@ -178,14 +225,18 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
-				optimizer = o;
-				PointValuePair optimum = o.optimize(getMaxEvaluations(), maximumLikelihoodFunction, GoalType.MINIMIZE,
-						new InitialGuess(startPoint), new SimpleBounds(lower, upper));
+				PointValuePair optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
+						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
+						startPoint), new SimpleBounds(lower, upper));
 				solution = optimum.getPointRef();
 				ll = optimum.getValue();
+				iterations = o.getEvaluations();
 			}
 			else if (searchMethod == SearchMethod.CMAES)
 			{
+				// TODO - Understand why the CMAES optimiser does not fit very well on test data. It appears 
+				// to converge too early and the likelihood scores are not as low as the other optimisers.
+				
 				// CMAESOptimiser based on Matlab code:
 				// https://www.lri.fr/~hansen/cmaes.m
 				// Take the defaults from the Matlab documentation
@@ -199,32 +250,54 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				double[] sigma = new double[lower.length];
 				for (int i = 0; i < sigma.length; i++)
 					sigma[i] = (upper[i] - lower[i]) / 3;
-				int popSize = (int) (4 + Math.floor(3 * Math.log(n)));
+				int popSize = (int) (4 + Math.floor(3 * Math.log(sigma.length)));
 
-				CMAESOptimizer o = new CMAESOptimizer(popSize, sigma, getMaxIterations(), stopFitness, isActiveCMA,
-						diagonalOnly, checkFeasableCount, random, generateStatistics, new SimpleValueChecker(1e-6,
-								1e-10));
-				optimizer = o;
-				PointValuePair optimum = o.optimize(getMaxEvaluations(), maximumLikelihoodFunction, GoalType.MINIMIZE,
-						new InitialGuess(startPoint), new SimpleBounds(lower, upper));
-				solution = optimum.getPointRef();
-				ll = optimum.getValue();
+				// The CMAES optimiser is random and restarting can overcome problems with quick convergence.
+				// The Apache commons documentations states that convergence should occur between 30N and 300N^2
+				// function evaluations
+				final int n30 = Math.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
+				int totalEvaluations = 0;
+				OptimizationData[] data = new OptimizationData[] { new InitialGuess(startPoint),
+						new CMAESOptimizer.PopulationSize(popSize), new MaxEval(getMaxEvaluations()),
+						new CMAESOptimizer.Sigma(sigma),
+						new ObjectiveFunction(new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE,
+						new SimpleBounds(lower, upper) };
+				// Iterate to prevent early convergence
+				int repeat = 0;
+				while (totalEvaluations < n30)
+				{
+					if (repeat++ > 1)
+					{
+						// Update the start point and population size
+						data[0] = new InitialGuess(solution);
+						popSize *= 2;
+						data[1] = new CMAESOptimizer.PopulationSize(popSize);
+					}
+					CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCMA, diagonalOnly,
+							checkFeasableCount, random, generateStatistics, new SimpleValueChecker(rel, abs));
+					PointValuePair optimum = o.optimize(data);
+					iterations += o.getIterations();
+					totalEvaluations += o.getEvaluations();
+					//System.out.printf("CMAES [%d] i=%d [%d], e=%d [%d]\n", repeat, o.getIterations(), iterations,
+					//		o.getEvaluations(), totalEvaluations);
+					if (solution == null || optimum.getValue() < ll)
+					{
+						solution = optimum.getPointRef();
+						ll = optimum.getValue();
+					}
+				}
 			}
 			else
 			{
-				// TODO - Check if this works. Are the gradients correct?
-
 				// The line search algorithm often fails. This is due to searching into a region where the 
 				// function evaluates to a negative so has been clipped. This means the upper bound of the line
 				// cannot be found. Maybe I can write a custom line search routine that copes with the bounds.
 				// Note that running it on an easy problem (200 photons with fixed fitting (no background)) the algorithm
 				// does sometimes produces results better than the Powell algorithm but it is slower.
 
-				// Rearrange to use the non-deprecated classes in org.apache.commons.math3.optim.nonlinear.scalar.gradient
 				NonLinearConjugateGradientOptimizer o = new NonLinearConjugateGradientOptimizer(
-						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? ConjugateGradientFormula.FLETCHER_REEVES
-								: ConjugateGradientFormula.POLAK_RIBIERE);
-				optimizer = o;
+						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? Formula.FLETCHER_REEVES
+								: Formula.POLAK_RIBIERE, new SimpleValueChecker(rel, abs));
 
 				// TODO - Can I apply a bounds adapter to the differentiable function. I will have to write one.
 				// However the gradients may become unstable at the edge of the bounds. 
@@ -248,16 +321,16 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// Maybe just use the gradient for the search direction then use the line minimisation/rest
 				// as per the Powell optimiser. The bounds should limit the search.
 
-				MultivariateDifferentiableFunction fun = FunctionUtils
-						.toMultivariateDifferentiableFunction(maximumLikelihoodFunction);
-				o.setInitialStep(0.1);
-				PointValuePair optimum = o.optimize(getMaxEvaluations(), fun, GoalType.MINIMIZE, startPoint);
+				PointValuePair optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
+						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
+						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
+						startPoint));
 				solution = optimum.getPointRef();
 				ll = optimum.getValue();
+				iterations = o.getIterations();
 			}
 
 			setSolution(a, solution);
-			iterations = optimizer.getEvaluations();
 
 			System.out.printf("Iter = %d, %g @ %s\n", iterations, ll, Arrays.toString(solution));
 
