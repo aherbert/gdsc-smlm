@@ -611,8 +611,8 @@ public class Gaussian2DFitter
 		// Create appropriate bounds for the parameters
 		float[] lower = new float[params.length];
 		float[] upper = new float[lower.length];
-		float yMax = 0;
-		for (int i = 0; i < ySize; i++)
+		float yMax = y[0];
+		for (int i = 1; i < ySize; i++)
 			if (yMax < y[i])
 				yMax = y[i];
 		if (fitConfiguration.isBackgroundFitting())
@@ -623,7 +623,7 @@ public class Gaussian2DFitter
 		{
 			// All functions evaluate the amplitude, x and y position.
 			// Lower bounds on these will be zero when the array is initialised.
-			upper[j + Gaussian2DFunction.AMPLITUDE] = yMax;
+			upper[j + Gaussian2DFunction.AMPLITUDE] = yMax * 2; // Allow the data to be incorrect
 			upper[j + Gaussian2DFunction.X_POSITION] = maxx;
 			upper[j + Gaussian2DFunction.Y_POSITION] = maxy;
 
