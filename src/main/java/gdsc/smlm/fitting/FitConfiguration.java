@@ -11,9 +11,6 @@ package gdsc.smlm.fitting;
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- * 
- * This is an adaption of the C-code contained in the CcpNmr Analysis Program:
- * CCPN website (http://www.ccpn.ac.uk/)
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.function.Gaussian2DFunction;

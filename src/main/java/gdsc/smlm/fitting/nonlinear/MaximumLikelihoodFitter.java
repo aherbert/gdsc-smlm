@@ -41,10 +41,6 @@ import com.sun.tools.javac.comp.Todo;
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- * 
- * This is an adaption of the C-code contained in the CcpNmr Analysis Program:
- *   CCPN website (http://www.ccpn.ac.uk/). 
- * The CCPN code was based on Numerical Recipes. 
  *---------------------------------------------------------------------------*/
 
 /**
@@ -126,6 +122,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		numberOfFittedPoints = n;
 
 		BaseMultivariateOptimizer optimizer = null;
+		PoissonLikelihoodFunction maximumLikelihoodFunction = new PoissonLikelihoodFunction(f, a, y, n);
 
 		try
 		{
@@ -157,18 +154,17 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				optimizer = o;
 
 				// Try using the mapping adapter
-				MultivariateFunction fun = new PoissonLikelihoodFunction(f, a, y, n);
 				if (searchMethod == SearchMethod.POWELL)
 				{
-					PointValuePair optimum = o.optimize(getMaxEvaluations(), fun, GoalType.MINIMIZE, new InitialGuess(
-							startPoint));
+					PointValuePair optimum = o.optimize(getMaxEvaluations(), maximumLikelihoodFunction,
+							GoalType.MINIMIZE, new InitialGuess(startPoint));
 					solution = optimum.getPointRef();
 					ll = optimum.getValue();
 				}
 				else
 				{
-					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower,
-							upper);
+					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
+							maximumLikelihoodFunction, lower, upper);
 					PointValuePair optimum = o.optimize(getMaxEvaluations(), adapter, GoalType.MINIMIZE,
 							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
 					solution = adapter.unboundedToBounded(optimum.getPointRef());
@@ -183,8 +179,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
 				optimizer = o;
-				PointValuePair optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n),
-						GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(lower, upper));
+				PointValuePair optimum = o.optimize(getMaxEvaluations(), maximumLikelihoodFunction, GoalType.MINIMIZE,
+						new InitialGuess(startPoint), new SimpleBounds(lower, upper));
 				solution = optimum.getPointRef();
 				ll = optimum.getValue();
 			}
@@ -209,8 +205,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						diagonalOnly, checkFeasableCount, random, generateStatistics, new SimpleValueChecker(1e-6,
 								1e-10));
 				optimizer = o;
-				PointValuePair optimum = o.optimize(getMaxEvaluations(), new PoissonLikelihoodFunction(f, a, y, n),
-						GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(lower, upper));
+				PointValuePair optimum = o.optimize(getMaxEvaluations(), maximumLikelihoodFunction, GoalType.MINIMIZE,
+						new InitialGuess(startPoint), new SimpleBounds(lower, upper));
 				solution = optimum.getPointRef();
 				ll = optimum.getValue();
 			}
@@ -253,7 +249,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// as per the Powell optimiser. The bounds should limit the search.
 
 				MultivariateDifferentiableFunction fun = FunctionUtils
-						.toMultivariateDifferentiableFunction(new PoissonLikelihoodFunction(f, a, y, n));
+						.toMultivariateDifferentiableFunction(maximumLikelihoodFunction);
 				o.setInitialStep(0.1);
 				PointValuePair optimum = o.optimize(getMaxEvaluations(), fun, GoalType.MINIMIZE, startPoint);
 				solution = optimum.getPointRef();
