@@ -15,10 +15,6 @@ package gdsc.smlm.fitting.function;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson distribution:<br/>
  * f(x) = l(x) - k * ln(l(x))<br/>
@@ -32,7 +28,7 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
  * This implements the Apache Commons Math API so that optimisers can be used for Maximum Likelihood Estimation. Uses
  * the deprecated API since the new API for version 4.0 is not a fully documented final release.
  */
-public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunction
+public class PoissonLikelihoodFunction
 {
 	private NonLinearFunction f;
 	private float[] a, data;
@@ -103,18 +99,6 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 			ll += l - k * Math.log(l);
 		}
 		return ll;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateFunction#partialDerivative(int)
-	 */
-	@Override
-	public MultivariateFunction partialDerivative(int k)
-	{
-		// This is not required for the AbstractDifferentiableOptimizer classes
-		return null;
 	}
 
 	/**
@@ -224,25 +208,5 @@ public class PoissonLikelihoodFunction implements DifferentiableMultivariateFunc
 		final double k = data[i];
 		return l - k * Math.log(l);
 
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateFunction#gradient()
-	 */
-	@Override
-	public MultivariateVectorFunction gradient()
-	{
-		return new MultivariateVectorFunction()
-		{
-			public double[] value(double[] point) throws IllegalArgumentException
-			{
-				double[] gradient = new double[point.length];
-				if (PoissonLikelihoodFunction.this.value(point, gradient) == Double.POSITIVE_INFINITY)
-					return new double[point.length]; // No gradient if the function is invalid
-				return gradient;
-			}
-		};
 	}
 }
