@@ -1,13 +1,21 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.function.DifferentiableGaussian2DFunction;
+import gdsc.smlm.fitting.function.ApacheMatrixWrapper;
+import gdsc.smlm.fitting.function.ApacheVectorWrapper;
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.MaxIter;
+import org.apache.commons.math3.optim.PointVectorValuePair;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
+import org.apache.commons.math3.optim.nonlinear.vector.Target;
+import org.apache.commons.math3.optim.nonlinear.vector.Weight;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.util.Precision;
 
 /*----------------------------------------------------------------------------- 
@@ -46,36 +54,47 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 	{
 		numberOfFittedPoints = n;
 
-		DifferentiableGaussian2DFunction func = new DifferentiableGaussian2DFunction((Gaussian2DFunction) f, a);
-		func.addData(n, y);
-
 		try
 		{
 			// Different convergence thresholds seem to have no effect on the resulting fit, only the number of
 			// iterations for convergence
-			double initialStepBoundFactor = 100;
-			double costRelativeTolerance = 1e-10;
-			double parRelativeTolerance = 1e-10;
-			double orthoTolerance = 1e-10;
-			double threshold = Precision.SAFE_MIN;
+			final double initialStepBoundFactor = 100;
+			final double costRelativeTolerance = 1e-10;
+			final double parRelativeTolerance = 1e-10;
+			final double orthoTolerance = 1e-10;
+			final double threshold = Precision.SAFE_MIN;
 
 			// Extract the parameters to be fitted
-			double[] initialSolution = getInitialSolution(a);
+			final double[] initialSolution = getInitialSolution(a);
 
-			// TODO - Pass in stopping criteria.
-			// Do this if the fitting seems to be successful
+			// TODO - Pass in more advanced stopping criteria.
 
+			// Create the target and weight arrays
+			final double[] yd = new double[n];
+			final double[] w = new double[n];
+			for (int i=0; i<n; i++)
+			{
+				yd[i] = y[i];
+				w[i] = 1;						
+			}
+			
 			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
-			PointVectorValuePair optimum = optimizer.optimize(getMaxEvaluations(), func, func.getY(),
-					func.getWeights(), initialSolution);
+			PointVectorValuePair optimum = optimizer.optimize(
+					new MaxIter(getMaxEvaluations()),
+					new MaxEval(Integer.MAX_VALUE),
+					new ModelFunctionJacobian(new ApacheMatrixWrapper(f, a, n)),
+					new ModelFunction(new ApacheVectorWrapper(f, a, n)),
+					new Target(yd),
+					new Weight(w),
+					new InitialGuess(initialSolution));
 
-			double[] parameters = optimum.getPoint();
+			final double[] parameters = optimum.getPoint();
 			setSolution(a, parameters);
 			iterations = optimizer.getEvaluations();
 			if (a_dev != null)
 			{
-				double[][] covar = optimizer.getCovariances();
+				double[][] covar = optimizer.computeCovariances(parameters, threshold);
 				setDeviations(a_dev, covar);
 			}
 			// Compute fitted function if desired 

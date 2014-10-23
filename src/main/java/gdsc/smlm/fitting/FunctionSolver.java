@@ -70,12 +70,26 @@ public interface FunctionSolver
 	public int getIterations();
 
 	/**
-	 * Specifies if the function solver uses a bounded search. If true then the bounds can be set before a call to the
-	 * {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
+	 * Specifies if the function solver supports a bounded search (i.e. a search of parameter space within the total
+	 * allowed space of valid parameters, or the parameter constraints). If true then the bounds can be set before a
+	 * call to the {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
 	 * 
-	 * @return True if the function solver uses a bounded search
+	 * @return True if the function solver supports a bounded search
 	 */
 	public boolean isBounded();
+
+	/**
+	 * Specifies if the function solver supports constraints on the parameters. If true then the bounds can be set
+	 * before a call to the {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
+	 * <p>
+	 * Note that constraints are to be used to specify the values that are absolutely not allowed. They are not meant to
+	 * be as restrictive as the bounds for a solver that supports a bounded search. For example the constraints on a
+	 * parameter may be 0 - Infinity but the bounds may be 5 - 15. A bounded solver can be used to search within the
+	 * expected range for a parameter.
+	 * 
+	 * @return True if the function solver supports a constrained search
+	 */
+	public boolean isConstrained();
 
 	/**
 	 * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the bounds can be
