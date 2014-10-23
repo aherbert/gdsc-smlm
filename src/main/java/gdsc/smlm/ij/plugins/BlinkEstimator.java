@@ -28,11 +28,19 @@ import ij.plugin.PlugIn;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.MaxIter;
+import org.apache.commons.math3.optim.PointVectorValuePair;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
+import org.apache.commons.math3.optim.nonlinear.vector.Target;
+import org.apache.commons.math3.optim.nonlinear.vector.Weight;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.util.Precision;
 
 /**
@@ -409,7 +417,6 @@ public class BlinkEstimator implements PlugIn
 	 *            Write the fitting results to the ImageJ log window
 	 * @return The fitted parameters [N, nBlink, tOff], or null if no fit was possible
 	 */
-	@SuppressWarnings("deprecation")
 	public double[] fit(double[] td, double[] ntd, int nFittedPoints, boolean log)
 	{
 		blinkingModel = new BlinkingFunction();
@@ -430,8 +437,16 @@ public class BlinkEstimator implements PlugIn
 		{
 			double[] obs = blinkingModel.getY();
 
-			PointVectorValuePair optimum = optimizer.optimize(1000, blinkingModel, obs, blinkingModel.getWeights(),
-					new double[] { ntd[0], 0.1, td[1] });
+			PointVectorValuePair optimum = optimizer.optimize(new MaxIter(1000), new MaxEval(Integer.MAX_VALUE),
+					new ModelFunctionJacobian(new MultivariateMatrixFunction()
+					{
+						@Override
+						public double[][] value(double[] point) throws IllegalArgumentException
+						{
+							return blinkingModel.jacobian(point);
+						}
+					}), new ModelFunction(blinkingModel), new Target(obs), new Weight(blinkingModel.getWeights()),
+					new InitialGuess(new double[] { ntd[0], 0.1, td[1] }));
 
 			blinkingModel.setLogging(false);
 
@@ -463,7 +478,14 @@ public class BlinkEstimator implements PlugIn
 
 			return parameters;
 		}
-		catch (TooManyEvaluationsException e)
+		catch (TooManyIterationsException e)
+		{
+			if (log)
+				Utils.log("  Failed to fit %d points: Too many iterations (%d)", blinkingModel.size(),
+						optimizer.getIterations());
+			return null;
+		}
+		catch (ConvergenceException e)
 		{
 			if (log)
 				Utils.log("  Failed to fit %d points", blinkingModel.size());
@@ -548,8 +570,7 @@ public class BlinkEstimator implements PlugIn
 	 * td = The dark time<br/>
 	 * tOff = The off-time<br/>
 	 */
-	@SuppressWarnings("deprecation")
-	public class BlinkingFunction extends LoggingOptimiserFunction implements DifferentiableMultivariateVectorFunction
+	public class BlinkingFunction extends LoggingOptimiserFunction implements MultivariateVectorFunction
 	{
 		public BlinkingFunction()
 		{

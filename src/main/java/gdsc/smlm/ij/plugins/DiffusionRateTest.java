@@ -36,8 +36,9 @@ import java.awt.Color;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.optimization.fitting.CurveFitter;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
+import org.apache.commons.math3.fitting.CurveFitter;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
@@ -180,8 +181,8 @@ public class DiffusionRateTest implements PlugIn
 		double[] yValues3D = new double[stats3D.length];
 		double[] upper = new double[stats2D.length];
 		double[] lower = new double[stats2D.length];
-		final CurveFitter fitter2D = new CurveFitter(new LevenbergMarquardtOptimizer());
-		final CurveFitter fitter3D = new CurveFitter(new LevenbergMarquardtOptimizer());
+		final CurveFitter<Parametric> fitter2D = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
+		final CurveFitter<Parametric> fitter3D = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
 		Statistics gradient2D = new Statistics();
 		Statistics gradient3D = new Statistics();
 		final int firstN = (useConfinement) ? fitN : totalSteps;
@@ -220,7 +221,7 @@ public class DiffusionRateTest implements PlugIn
 		final PolynomialFunction fitted2D = new PolynomialFunction(best2D);
 
 		final double[] init3D = { 0, 1 / gradient3D.getMean() }; // a - b x
-		final double[] best3D = fitter3D.fit(new PolynomialFunction.Parametric(), init2D);
+		final double[] best3D = fitter3D.fit(new PolynomialFunction.Parametric(), init3D);
 		final PolynomialFunction fitted3D = new PolynomialFunction(best3D);
 
 		// Create plot

@@ -19,25 +19,29 @@ import gdsc.smlm.utils.Maths;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.PointVectorValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
+import org.apache.commons.math3.optim.nonlinear.vector.Target;
+import org.apache.commons.math3.optim.nonlinear.vector.Weight;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
@@ -344,10 +348,21 @@ public class BinomialFitter
 				LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 				try
 				{
-					BinomialModelFunctionGradient gradientFunction = new BinomialModelFunctionGradient(histogram, n,
+					final BinomialModelFunctionGradient gradientFunction = new BinomialModelFunctionGradient(histogram, n,
 							zeroTruncated);
-					PointVectorValuePair lvmSolution = optimizer.optimize(3000, gradientFunction, gradientFunction.p,
-							gradientFunction.getWeights(), solution.getPoint());
+					PointVectorValuePair lvmSolution = optimizer.optimize(
+							new MaxIter(3000), 
+							new MaxEval(Integer.MAX_VALUE),
+							new ModelFunctionJacobian(new MultivariateMatrixFunction() {
+								@Override
+								public double[][] value(double[] point) throws IllegalArgumentException
+								{
+									return gradientFunction.jacobian(point);
+								}}),
+							new ModelFunction(gradientFunction),
+							new Target(gradientFunction.p),
+							new Weight(gradientFunction.getWeights()),
+							new InitialGuess(solution.getPointRef()));
 
 					double ss = 0;
 					double[] obs = gradientFunction.p;
@@ -364,9 +379,9 @@ public class BinomialFitter
 						return new PointValuePair(lvmSolution.getPoint(), ss);
 					}
 				}
-				catch (TooManyEvaluationsException e)
+				catch (TooManyIterationsException e)
 				{
-					log("Failed to re-fit: Too many evaluations (%d)", optimizer.getEvaluations());
+					log("Failed to re-fit: Too many iterations (%d)", optimizer.getIterations());
 				}
 				catch (ConvergenceException e)
 				{
@@ -507,7 +522,7 @@ public class BinomialFitter
 	 * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
 	 */
 	public class BinomialModelFunctionGradient extends BinomialModel implements
-			DifferentiableMultivariateVectorFunction
+			MultivariateVectorFunction
 	{
 		public BinomialModelFunctionGradient(double[] histogram, int trials, boolean zeroTruncated)
 		{
@@ -534,17 +549,6 @@ public class BinomialFitter
 		public double[] value(double[] point) throws IllegalArgumentException
 		{
 			return getP(point[0]);
-		}
-
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
 		}
 
 		double[][] jacobian(double[] variables)
