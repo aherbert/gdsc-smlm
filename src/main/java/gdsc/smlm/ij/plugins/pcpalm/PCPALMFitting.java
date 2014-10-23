@@ -13,7 +13,6 @@ package gdsc.smlm.ij.plugins.pcpalm;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.function.OptimiserFunction;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
@@ -24,7 +23,6 @@ import gdsc.smlm.utils.UnicodeReader;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
@@ -43,26 +41,30 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.PointVectorValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
+import org.apache.commons.math3.optim.nonlinear.vector.Target;
+import org.apache.commons.math3.optim.nonlinear.vector.Weight;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.random.Well44497b;
 
 /**
@@ -584,7 +586,7 @@ public class PCPALMFitting implements PlugIn
 		saveCorrelationCurve(gr, curves.toArray(new double[0][0]));
 	}
 
-	private void addNonFittedPoints(Plot plot, double[][] gr, ModelFunction model, double[] parameters)
+	private void addNonFittedPoints(Plot plot, double[][] gr, BaseModelFunction model, double[] parameters)
 	{
 		double[] x = new double[gr[0].length];
 		double[] y = new double[x.length];
@@ -604,7 +606,7 @@ public class PCPALMFitting implements PlugIn
 		plot.addPoints(x, y, Plot.CIRCLE);
 	}
 
-	private double[] extractCurve(double[][] gr, ModelFunction model, double[] parameters)
+	private double[] extractCurve(double[][] gr, BaseModelFunction model, double[] parameters)
 	{
 		double[] y = new double[gr[0].length - offset];
 		for (int i = offset; i < gr[0].length; i++)
@@ -887,7 +889,8 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private double[] fitRandomModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
-		randomModel = new RandomModelFunction();
+		final RandomModelFunction myFunction = new RandomModelFunction();
+		randomModel = myFunction;
 
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", randomModel.getName(),
 				sigmaS, proteinDensity * 1e6);
@@ -905,12 +908,20 @@ public class PCPALMFitting implements PlugIn
 		PointVectorValuePair optimum;
 		try
 		{
-			optimum = optimizer.optimize(1000, randomModel, randomModel.getY(), randomModel.getWeights(), new double[] {
-					sigmaS, proteinDensity });
+			optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE), new ModelFunctionJacobian(
+					new MultivariateMatrixFunction()
+					{
+						@Override
+						public double[][] value(double[] point) throws IllegalArgumentException
+						{
+							return myFunction.jacobian(point);
+						}
+					}), new ModelFunction(myFunction), new Target(myFunction.getY()),
+					new Weight(myFunction.getWeights()), new InitialGuess(new double[] { sigmaS, proteinDensity }));
 		}
-		catch (TooManyEvaluationsException e)
+		catch (TooManyIterationsException e)
 		{
-			log("Failed to fit %s: Too many evaluations (%d)", randomModel.getName(), optimizer.getEvaluations());
+			log("Failed to fit %s: Too many iterations (%d)", randomModel.getName(), optimizer.getIterations());
 			return null;
 		}
 		catch (ConvergenceException e)
@@ -1021,7 +1032,8 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private double[] fitClusteredModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
-		clusteredModel = new ClusteredModelFunctionGradient();
+		final ClusteredModelFunctionGradient myFunction = new ClusteredModelFunctionGradient();
+		clusteredModel = myFunction;
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", clusteredModel.getName(),
 				sigmaS, proteinDensity * 1e6);
 
@@ -1070,8 +1082,16 @@ public class PCPALMFitting implements PlugIn
 			PointVectorValuePair lvmSolution;
 			try
 			{
-				lvmSolution = optimizer.optimize(3000, clusteredModel, clusteredModel.getY(),
-						clusteredModel.getWeights(), parameters);
+				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+						new ModelFunctionJacobian(new MultivariateMatrixFunction()
+						{
+							@Override
+							public double[][] value(double[] point) throws IllegalArgumentException
+							{
+								return myFunction.jacobian(point);
+							}
+						}), new ModelFunction(myFunction), new Target(myFunction.getY()),
+						new Weight(myFunction.getWeights()), new InitialGuess(parameters));
 				evaluations += optimizer.getEvaluations();
 
 				double ss = 0;
@@ -1087,10 +1107,10 @@ public class PCPALMFitting implements PlugIn
 					parameters = lvmSolution.getPoint();
 				}
 			}
-			catch (TooManyEvaluationsException e)
+			catch (TooManyIterationsException e)
 			{
-				log("Failed to re-fit %s: Too many evaluations (%d)", clusteredModel.getName(),
-						optimizer.getEvaluations());
+				log("Failed to re-fit %s: Too many iterations (%d)", clusteredModel.getName(),
+						optimizer.getIterations());
 			}
 			catch (ConvergenceException e)
 			{
@@ -1248,7 +1268,8 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private double[] fitEmulsionModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
-		emulsionModel = new EmulsionModelFunctionGradient();
+		final EmulsionModelFunctionGradient myFunction = new EmulsionModelFunctionGradient();
+		emulsionModel = myFunction;
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", emulsionModel.getName(),
 				sigmaS, proteinDensity * 1e6);
 
@@ -1307,8 +1328,16 @@ public class PCPALMFitting implements PlugIn
 			PointVectorValuePair lvmSolution;
 			try
 			{
-				lvmSolution = optimizer.optimize(3000, emulsionModel, emulsionModel.getY(), emulsionModel.getWeights(),
-						parameters);
+				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+						new ModelFunctionJacobian(new MultivariateMatrixFunction()
+						{
+							@Override
+							public double[][] value(double[] point) throws IllegalArgumentException
+							{
+								return myFunction.jacobian(point);
+							}
+						}), new ModelFunction(myFunction), new Target(myFunction.getY()),
+						new Weight(myFunction.getWeights()), new InitialGuess(parameters));
 				evaluations += optimizer.getEvaluations();
 
 				double ss = 0;
@@ -1324,10 +1353,9 @@ public class PCPALMFitting implements PlugIn
 					parameters = lvmSolution.getPoint();
 				}
 			}
-			catch (TooManyEvaluationsException e)
+			catch (TooManyIterationsException e)
 			{
-				log("Failed to re-fit %s: Too many evaluations (%d)", emulsionModel.getName(),
-						optimizer.getEvaluations());
+				log("Failed to re-fit %s: Too many iterations (%d)", emulsionModel.getName(), optimizer.getIterations());
 			}
 			catch (ConvergenceException e)
 			{
@@ -1410,9 +1438,9 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Abstract base model function class for common functionality.
 	 */
-	public abstract class ModelFunction extends LoggingOptimiserFunction
+	public abstract class BaseModelFunction extends LoggingOptimiserFunction
 	{
-		public ModelFunction(String name)
+		public BaseModelFunction(String name)
 		{
 			super(name);
 		}
@@ -1442,8 +1470,7 @@ public class PCPALMFitting implements PlugIn
 	 * <p>
 	 * p = average protein density
 	 */
-	@SuppressWarnings("deprecation")
-	public class RandomModelFunction extends ModelFunction implements DifferentiableMultivariateVectorFunction
+	public class RandomModelFunction extends BaseModelFunction implements MultivariateVectorFunction
 	{
 		public RandomModelFunction()
 		{
@@ -1565,22 +1592,6 @@ public class PCPALMFitting implements PlugIn
 			}
 			return values;
 		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
-		 */
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
-		}
 	}
 
 	/**
@@ -1607,7 +1618,7 @@ public class PCPALMFitting implements PlugIn
 	 * Note: The clustered model described in the PLoS One paper models g(r)protein using the exponential directly, i.e.
 	 * there is no convolution !!!
 	 */
-	public abstract class ClusteredModelFunction extends ModelFunction
+	public abstract class ClusteredModelFunction extends BaseModelFunction
 	{
 		public ClusteredModelFunction()
 		{
@@ -1746,9 +1757,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
 	 */
-	@SuppressWarnings("deprecation")
-	public class ClusteredModelFunctionGradient extends ClusteredModelFunction implements
-			DifferentiableMultivariateVectorFunction
+	public class ClusteredModelFunctionGradient extends ClusteredModelFunction implements MultivariateVectorFunction
 	{
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
@@ -1767,22 +1776,6 @@ public class PCPALMFitting implements PlugIn
 				values[i] = evaluate(x.get(i), variables[0], variables[1], variables[2], variables[3]);
 			}
 			return values;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
-		 */
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
 		}
 	}
 
@@ -1829,7 +1822,7 @@ public class PCPALMFitting implements PlugIn
 	 * <p>
 	 * Note: Described in figure 3 of Veatch, et al (2012) Plos One, e31457
 	 */
-	public abstract class EmulsionModelFunction extends ModelFunction
+	public abstract class EmulsionModelFunction extends BaseModelFunction
 	{
 		public EmulsionModelFunction()
 		{
@@ -1982,9 +1975,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
 	 */
-	@SuppressWarnings("deprecation")
-	public class EmulsionModelFunctionGradient extends EmulsionModelFunction implements
-			DifferentiableMultivariateVectorFunction
+	public class EmulsionModelFunctionGradient extends EmulsionModelFunction implements MultivariateVectorFunction
 	{
 		/*
 		 * (non-Javadoc)
@@ -2000,22 +1991,6 @@ public class PCPALMFitting implements PlugIn
 				values[i] = evaluate(x.get(i), variables[0], variables[1], variables[2], variables[3], variables[4]);
 			}
 			return values;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
-		 */
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
 		}
 	}
 

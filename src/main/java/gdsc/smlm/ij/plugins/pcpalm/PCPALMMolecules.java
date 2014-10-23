@@ -22,7 +22,6 @@ import gdsc.smlm.ij.plugins.ResultsManager;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.MaskDistribution;
-import gdsc.smlm.model.SpatialDistribution;
 import gdsc.smlm.model.StandardFluorophoreSequenceModel;
 import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -57,23 +56,28 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.analysis.function.Gaussian;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.PointVectorValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
 import org.apache.commons.math3.optim.nonlinear.vector.MultivariateVectorOptimizer;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.Target;
+import org.apache.commons.math3.optim.nonlinear.vector.Weight;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -773,16 +777,23 @@ public class PCPALMMolecules implements PlugIn
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private double[] optimiseLeastSquares(float[] x, float[] y, double[] initialSolution)
 	{
 		// Least-squares optimisation using numerical gradients
-		SkewNormalDifferentiableFunction sn = new SkewNormalDifferentiableFunction(initialSolution);
-		sn.addData(x, y);
+		final SkewNormalDifferentiableFunction myFunction = new SkewNormalDifferentiableFunction(initialSolution);
+		myFunction.addData(x, y);
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 
-		PointVectorValuePair optimum = optimizer.optimize(1000, sn, sn.calculateTarget(), sn.calculateWeights(),
-				initialSolution);
+		PointVectorValuePair optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+				new ModelFunctionJacobian(new MultivariateMatrixFunction()
+				{
+					@Override
+					public double[][] value(double[] point) throws IllegalArgumentException
+					{
+						return myFunction.jacobian(point);
+					}
+				}), new ModelFunction(myFunction), new Target(myFunction.calculateTarget()),
+				new Weight(myFunction.calculateWeights()), new InitialGuess(initialSolution));
 
 		double[] skewParameters = optimum.getPoint();
 		return skewParameters;
@@ -2039,9 +2050,8 @@ public class PCPALMMolecules implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
 	 */
-	@SuppressWarnings("deprecation")
 	public class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction implements
-			DifferentiableMultivariateVectorFunction
+			MultivariateVectorFunction
 	{
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
@@ -2085,22 +2095,6 @@ public class PCPALMMolecules implements PlugIn
 			for (int i = 0; i < values.length; i++)
 				values[i] = evaluate(x.get(i), variables);
 			return values;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
-		 */
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
 		}
 	}
 
