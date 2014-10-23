@@ -33,8 +33,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.optimization.fitting.CurveFitter;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
+import org.apache.commons.math3.fitting.CurveFitter;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 
 /**
  * Opens a folder of images and computes a Mean-Variance Test.
@@ -241,7 +242,7 @@ public class MeanVarianceTest implements PlugIn
 		double[] mean = new double[total];
 		double[] variance = new double[mean.length];
 		Statistics gainStats = new Statistics();
-		final CurveFitter fitter = new CurveFitter(new LevenbergMarquardtOptimizer());
+		final CurveFitter<Parametric> fitter = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
 		for (int i = start, j = 0; i < images.size(); i++)
 		{
 			ImageSample sample = images.get(i);

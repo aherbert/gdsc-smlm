@@ -43,24 +43,29 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.PointVectorValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optimization.PointVectorValuePair;
-import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
+import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
+import org.apache.commons.math3.optim.nonlinear.vector.Target;
+import org.apache.commons.math3.optim.nonlinear.vector.Weight;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
@@ -821,9 +826,18 @@ public class TraceDiffusion implements PlugIn
 		PointVectorValuePair lvmSolution;
 		try
 		{
-			LinearFunction function = new LinearFunction(x, y, settings.fitLength);
+			final LinearFunction function = new LinearFunction(x, y, settings.fitLength);
 			double[] parameters = new double[] { function.guess() };
-			lvmSolution = optimizer.optimize(1000, function, function.getY(), function.getWeights(), parameters);
+			lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+					new ModelFunctionJacobian(new MultivariateMatrixFunction()
+					{
+						@Override
+						public double[][] value(double[] point) throws IllegalArgumentException
+						{
+							return function.jacobian(point);
+						}
+					}), new ModelFunction(function), new Target(function.getY()), new Weight(function.getWeights()),
+					new InitialGuess(parameters));
 
 			double ss = 0;
 			double[] obs = function.getY();
@@ -840,9 +854,9 @@ public class TraceDiffusion implements PlugIn
 			plot.drawLine(0, 0, x[x.length - 1], x[x.length - 1] * 4 * D);
 			Utils.display(title, plot);
 		}
-		catch (TooManyEvaluationsException e)
+		catch (TooManyIterationsException e)
 		{
-			Utils.log("Failed to fit : Too many evaluations (%d)", optimizer.getEvaluations());
+			Utils.log("Failed to fit : Too many iterations (%d)", optimizer.getIterations());
 		}
 		catch (ConvergenceException e)
 		{
@@ -851,8 +865,7 @@ public class TraceDiffusion implements PlugIn
 		return D;
 	}
 
-	@SuppressWarnings("deprecation")
-	public class LinearFunction implements DifferentiableMultivariateVectorFunction
+	public class LinearFunction implements MultivariateVectorFunction
 	{
 		double[] x, y;
 
@@ -901,29 +914,11 @@ public class TraceDiffusion implements PlugIn
 			return values;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
-		 */
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
-		}
-
 		double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation:
 			// y = ax
 			// y' = x
-
-			final double a = variables[0];
 			double[][] jacobian = new double[x.length][variables.length];
 
 			for (int i = 0; i < jacobian.length; ++i)
@@ -975,9 +970,17 @@ public class TraceDiffusion implements PlugIn
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 		try
 		{
-			JumpDistanceFunction function = new JumpDistanceFunction(jdHistogram[0], jdHistogram[1], estimatedD);
-			PointVectorValuePair lvmSolution = optimizer.optimize(1000, function, function.getY(),
-					function.getWeights(), function.guess());
+			final JumpDistanceFunction function = new JumpDistanceFunction(jdHistogram[0], jdHistogram[1], estimatedD);
+			PointVectorValuePair lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+					new ModelFunctionJacobian(new MultivariateMatrixFunction()
+					{
+						@Override
+						public double[][] value(double[] point) throws IllegalArgumentException
+						{
+							return function.jacobian(point);
+						}
+					}), new ModelFunction(function), new Target(function.getY()), new Weight(function.getWeights()),
+					new InitialGuess(function.guess()));
 
 			fitParams[n] = lvmSolution.getPointRef();
 			SS[n] = calculateSumOfSquares(function.getY(), lvmSolution.getValueRef());
@@ -993,9 +996,9 @@ public class TraceDiffusion implements PlugIn
 
 			addToPlot(function, fitParams[n], jdHistogram, title, plot, Color.magenta);
 		}
-		catch (TooManyEvaluationsException e)
+		catch (TooManyIterationsException e)
 		{
-			Utils.log("Failed to fit : Too many evaluations (%d)", optimizer.getEvaluations());
+			Utils.log("Failed to fit : Too many iterations (%d)", optimizer.getIterations());
 		}
 		catch (ConvergenceException e)
 		{
@@ -1051,14 +1054,22 @@ public class TraceDiffusion implements PlugIn
 				SS[n] = constrainedSolution.getValue();
 
 				// Try and improve using a LVM fit
-				MixedJumpDistanceFunctionGradient mixedFunctionGradient = new MixedJumpDistanceFunctionGradient(
+				final MixedJumpDistanceFunctionGradient mixedFunctionGradient = new MixedJumpDistanceFunctionGradient(
 						jdHistogram[0], jdHistogram[1], estimatedD, n + 1);
 
 				PointVectorValuePair lvmSolution;
 				try
 				{
-					lvmSolution = optimizer.optimize(3000, mixedFunctionGradient, mixedFunctionGradient.getY(),
-							mixedFunctionGradient.getWeights(), fitParams[n]);
+					lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+							new ModelFunctionJacobian(new MultivariateMatrixFunction()
+							{
+								@Override
+								public double[][] value(double[] point) throws IllegalArgumentException
+								{
+									return mixedFunctionGradient.jacobian(point);
+								}
+							}), new ModelFunction(mixedFunctionGradient), new Target(mixedFunctionGradient.getY()),
+							new Weight(mixedFunctionGradient.getWeights()), new InitialGuess(fitParams[n]));
 					double ss = calculateSumOfSquares(mixedFunctionGradient.getY(), lvmSolution.getValue());
 					// All fitted parameters must be above zero
 					if (ss < SS[n] && Maths.min(lvmSolution.getPoint()) > 0)
@@ -1070,7 +1081,7 @@ public class TraceDiffusion implements PlugIn
 						evaluations += optimizer.getEvaluations();
 					}
 				}
-				catch (TooManyEvaluationsException e)
+				catch (TooManyIterationsException e)
 				{
 					//Utils.log("Failed to re-fit : Too many evaluations (%d)", optimizer.getEvaluations());
 				}
@@ -1276,8 +1287,7 @@ public class TraceDiffusion implements PlugIn
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	public class JumpDistanceFunction extends Function implements DifferentiableMultivariateVectorFunction
+	public class JumpDistanceFunction extends Function implements MultivariateVectorFunction
 	{
 		public JumpDistanceFunction(double[] x, double[] y, double estimatedD)
 		{
@@ -1311,22 +1321,6 @@ public class TraceDiffusion implements PlugIn
 				values[i] = 1 - Math.exp(-x[i] / fourD);
 			}
 			return values;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
-		 */
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
 		}
 
 		/*
@@ -1462,7 +1456,7 @@ public class TraceDiffusion implements PlugIn
 	}
 
 	public class MixedJumpDistanceFunctionGradient extends MixedJumpDistanceFunction implements
-			DifferentiableMultivariateVectorFunction
+			MultivariateVectorFunction
 	{
 		public MixedJumpDistanceFunctionGradient(double[] x, double[] y, double estimatedD, int n)
 		{
@@ -1477,22 +1471,6 @@ public class TraceDiffusion implements PlugIn
 		public double[] value(double[] point) throws IllegalArgumentException
 		{
 			return getValue(point);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
-		 */
-		public MultivariateMatrixFunction jacobian()
-		{
-			return new MultivariateMatrixFunction()
-			{
-				public double[][] value(double[] variables)
-				{
-					return jacobian(variables);
-				}
-			};
 		}
 
 		/*
