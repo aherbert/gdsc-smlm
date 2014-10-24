@@ -126,7 +126,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		/**
 		 * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
 		 */
-		POWELL_BOUNDED("Powell Unbounded"),
+		POWELL_BOUNDED("Powell (bounded)"),
 		/**
 		 * Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm.
 		 * <p>
@@ -157,20 +157,21 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière");
 
 		private String name;
-		
+
 		private SearchMethod(String name)
 		{
 			this.name = name;
 		}
-		
+
 		@Override
 		public String toString()
 		{
 			return name;
 		}
 	}
-	
+
 	private SearchMethod searchMethod;
+	private boolean gradientLineMinimisation= true;
 	private double[] lower, upper;
 
 	/**
@@ -308,7 +309,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			{
 				// The line search algorithm often fails. This is due to searching into a region where the 
 				// function evaluates to a negative so has been clipped. This means the upper bound of the line
-				// cannot be found. Maybe I can write a custom line search routine that copes with the bounds.
+				// cannot be found.
 				// Note that running it on an easy problem (200 photons with fixed fitting (no background)) the algorithm
 				// does sometimes produces results better than the Powell algorithm but it is slower.
 
@@ -316,54 +317,89 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? Formula.FLETCHER_REEVES
 								: Formula.POLAK_RIBIERE, new SimpleValueChecker(rel, abs));
 
-				// TODO - Can I apply a bounds adapter to the differentiable function. I will have to write one.
-				// However the gradients may become unstable at the edge of the bounds. 
-				// Or they will not change direction if the true solution is on the bounds since the gradient will
-				// always continue towards the bounds. This is key to the
-				// conjugate gradient method. It searches along a vector until the direction of the gradient
-				// is in the opposite direction (using dot products, i.e. cosine of angle between them)
-
-				// It may be better to write a bounded version of the conjugate gradient optimiser that truncates
-				// search directions at the bounds.
+				// Note: The gradients may become unstable at the edge of the bounds. Or they will not change 
+				// direction if the true solution is on the bounds since the gradient will always continue 
+				// towards the bounds. This is key to the conjugate gradient method. It searches along a vector 
+				// until the direction of the gradient is in the opposite direction (using dot products, i.e. 
+				// cosine of angle between them)
 
 				// NR 10.7 states there is no advantage of the variable metric DFP or BFGS methods over
-				// conjugate gradient methods.
+				// conjugate gradient methods. So I will try these first.
 
 				// Try this:
 				// Adapt the conjugate gradient optimiser to use the gradient to pick the search direction
-				// and then for the line minimisation. However if the function is out of bounds then:
-				// - a) just stop at that point (no line minimisation) and switch direction
-				// - b) clip the variables at the bounds and continue 
-				// However the gradient is invalid when the function evaluates <0.
-				// Maybe just use the gradient for the search direction then use the line minimisation/rest
+				// and then for the line minimisation. However if the function is out of bounds then clip the 
+				// variables at the bounds and continue. 
+				// If the current point is at the bounds and the gradient is to continue out of bounds then 
+				// clip the gradient too.
+
+				// Or: just use the gradient for the search direction then use the line minimisation/rest
 				// as per the Powell optimiser. The bounds should limit the search.
-				
-				// I tried a Bounded conjugate gradient optimiser with clipped variables.
+
+				// I tried a Bounded conjugate gradient optimiser with clipped variables:
 				// This sometimes works. However when the variables go a long way out of the expected range the gradients
 				// can have vastly different magnitudes. This results in the algorithm stalling since the gradients
 				// can be close to zero and the some of the parameters are no longer adjusted.
 				// Perhaps this can be looked for and the algorithm then gives up and resorts to a Powell optimiser from 
 				// the current point.
 
+				// Changed the bracketing step to very small (default is 1, changed to 0.001). This improves the 
+				// performance. The gradient direction is very sensitive to small changes in the coordinates so a 
+				// tighter bracketing of the line search helps.
+
+				// Tried using a non-gradient method for the line search copied from the Powell optimiser:
+				// This also works when the bracketing step is small but the number of iterations is higher.
+				
+				// 24.10.2014: I have tried to get conjugate gradient to work but the gradient function 
+				// must not behave suitably for the optimiser. In the current state both methods of using a 
+				// Bounded Conjugate Gradient Optimiser perform poorly relative to other optimisers:
+				// Simulated : n=1000, signal=200, x=0.53, y=0.47
+				// LVM : n=1000, signal=171, x=0.537, y=0.471 (1.003s)
+				// Powell : n=1000, signal=187, x=0.537, y=0.48 (1.238s)
+				// Gradient based PR (constrained): n=858, signal=161, x=0.533, y=0.474 (2.54s)
+				// Gradient based PR (bounded): n=948, signal=161, x=0.533, y=0.473 (2.67s)
+				// Non-gradient based : n=1000, signal=151.47, x=0.535, y=0.474 (1.626s)
+				// The conjugate optimisers are slower, under predict the signal by the most and in the case of 
+				// the gradient based optimiser, fail to converge on some problems. This is worse when constrained
+				// fitting is used and not tightly bounded fitting.
+				// I will leave the code in as an option but would not recommend using it. I may remove it in the 
+				// future.
+				
+				// Note: It is strange that the non-gradient based line minimisation is more successful.
+				// It may be that the gradient function is not accurate (due to round off error) or that it is
+				// simple wrong when far from the optimum. My JUnit tests only evaluate the function within the 
+				// expected range of the answer.
+				
+				// Note the default step size on the Powell optimiser is 1 but the initial directions are unit vectors.
+				// So our bracketing step should be a minimum of 1 / average length of the first gradient vector to prevent
+				// the first step being too large when bracketing.
+				final double gradient[] = new double[startPoint.length];
+				maximumLikelihoodFunction.value(startPoint, gradient);
+				double l = 0;
+				for (double d : gradient)
+					l += d * d;
+				final double bracketingStep = Math.min(0.001, ((l>1) ? 1.0/l : 1));
+				//System.out.printf("Bracketing step = %f (length=%f)\n", bracketingStep, l);
+
+				o.setUseGradientLineSearch(gradientLineMinimisation);
+				
 				PointValuePair optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
 						startPoint), new SimpleBounds(lower, upper),
-						new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(0.05)
-						);
+						new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(bracketingStep));
 				solution = optimum.getPointRef();
 				ll = optimum.getValue();
 				iterations = o.getIterations();
-				
-				double[] gradient = new double[solution.length];
-				maximumLikelihoodFunction.value(solution, gradient);
-				System.out.printf("Iter = %d, %g @ %s : %s\n", iterations, ll, Arrays.toString(solution),
-						Arrays.toString(gradient));
+
+				//maximumLikelihoodFunction.value(solution, gradient);
+				//System.out.printf("Iter = %d, %g @ %s : %s\n", iterations, ll, Arrays.toString(solution),
+				//		Arrays.toString(gradient));
 			}
 
 			setSolution(a, solution);
 
-			System.out.printf("Iter = %d, %g @ %s\n", iterations, ll, Arrays.toString(solution));
+			//System.out.printf("Iter = %d, %g @ %s\n", iterations, ll, Arrays.toString(solution));
 
 			// Compute residuals for the FunctionSolver interface
 			if (y_fit == null || y_fit.length < n)
@@ -388,13 +424,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		catch (TooManyIterationsException e)
 		{
 			//System.out.printf("Too many iterations = %d\n", e.getMax());
-			//e.printStackTrace();
+			e.printStackTrace();
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
 		catch (TooManyEvaluationsException e)
 		{
 			//System.out.printf("Too many evaluations = %d\n", e.getMax());
-			//e.printStackTrace();
+			e.printStackTrace();
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
 		catch (ConvergenceException e)
@@ -405,7 +441,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		catch (Exception e)
 		{
 			// TODO - Find out the other exceptions from the fitter and add return values to match.
-			//e.printStackTrace();
+			e.printStackTrace();
 
 			return FitStatus.UNKNOWN;
 		}
@@ -447,6 +483,26 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		this.searchMethod = searchMethod;
 	}
 
+	/**
+	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+	 * 
+	 * @return the gradientLineMinimisation True if using the gradient for line minimisation
+	 */
+	public boolean isGradientLineMinimisation()
+	{
+		return gradientLineMinimisation;
+	}
+
+	/**
+	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+	 * 
+	 * @param gradientLineMinimisation Set to true to use the gradient for line minimisation
+	 */
+	public void setGradientLineMinimisation(boolean gradientLineMinimisation)
+	{
+		this.gradientLineMinimisation = gradientLineMinimisation;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
