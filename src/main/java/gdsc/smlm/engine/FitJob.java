@@ -26,14 +26,27 @@ public class FitJob
 {
 	public enum Status
 	{
-		Pending, InProgress, Finished
+		PENDING("Pending"), IN_PROGRESS("In-progress"), FINISHED("Finished");
+
+		private String name;
+
+		private Status(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	private int id = 0;
 	int slice;
 	float[] data;
 	Rectangle bounds;
-	Status status = Status.Pending;
+	Status status = Status.PENDING;
 
 	/**
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
@@ -147,7 +160,7 @@ public class FitJob
 	 */
 	public void start()
 	{
-		status = Status.InProgress;
+		status = Status.IN_PROGRESS;
 	}
 
 	/**
@@ -155,7 +168,7 @@ public class FitJob
 	 */
 	public void finished()
 	{
-		status = Status.Finished;
+		status = Status.FINISHED;
 	}
 
 	/**

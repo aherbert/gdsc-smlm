@@ -21,13 +21,26 @@ public enum FitQueue
 	/**
 	 * Block additions if there is a backlog
 	 */
-	BLOCKING,
+	BLOCKING("Blocking"),
 	/**
 	 * Allow all additions if there is a backlog
 	 */
-	NON_BLOCKING,
+	NON_BLOCKING("Non-blocking"),
 	/**
 	 * Ignore additions if there is a backlog
 	 */
-	IGNORE
+	IGNORE("Ignore");
+
+	private String name;
+
+	private FitQueue(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }

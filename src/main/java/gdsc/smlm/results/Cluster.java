@@ -25,7 +25,7 @@ public class Cluster
 {
 	public enum CentroidMethod
 	{
-		Standard, SignalWeighted
+		STANDARD, SIGNAL_WEIGHTED
 	}
 
 	protected ArrayList<PeakResult> results = new ArrayList<PeakResult>(2);
@@ -62,7 +62,7 @@ public class Cluster
 		{
 			switch (method)
 			{
-				case SignalWeighted:
+				case SIGNAL_WEIGHTED:
 					float[] weights = new float[results.size()];
 					int i = 0;
 					for (PeakResult result : results)
@@ -72,7 +72,7 @@ public class Cluster
 					// Normalise weights?
 					return getCentroid(results, weights);
 
-				case Standard:
+				case STANDARD:
 				default:
 					return getCentroid();
 			}

@@ -305,7 +305,7 @@ public class PCPALMMolecules implements PlugIn
 		else
 		{
 			gd.addMessage("Prepare molecules for cluster analysis.\nComputes a binary image from raw localisation data");
-			ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+			ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 			if (!titles.isEmpty())
 				gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
 			gd.addChoice("Run_mode", RUN_MODE, RUN_MODE[runMode]);
@@ -1526,7 +1526,7 @@ public class PCPALMMolecules implements PlugIn
 		for (Molecule m : molecules)
 			// Precision was used to store the molecule ID
 			points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
-		ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), ClusteringAlgorithm.ParticleSingleLinkage,
+		ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(), ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE,
 				new IJTrackProgress());
 		IJ.showStatus("Clustering to check inter-molecule distances");
 		engine.setTrackJoins(true);

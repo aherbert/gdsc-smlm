@@ -22,8 +22,8 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer.Formula;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer;
@@ -122,37 +122,54 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		/**
 		 * Search using Powell's conjugate direction method
 		 */
-		POWELL,
+		POWELL("Powell"),
 		/**
 		 * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
 		 */
-		POWELL_BOUNDED,
+		POWELL_BOUNDED("Powell Unbounded"),
 		/**
 		 * Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm.
 		 * <p>
 		 * BOBYQA could also be considered as a replacement of any derivative-based optimizer when the derivatives are
 		 * approximated by finite differences. This is a bounded search.
 		 */
-		BOBYQA,
+		BOBYQA("BOBYQA"),
 		/**
 		 * Search using active Covariance Matrix Adaptation Evolution Strategy (CMA-ES).
 		 * <p>
 		 * The CMA-ES is a reliable stochastic optimization method which should be applied if derivative-based methods,
 		 * e.g. conjugate gradient, fail due to a rugged search landscape. This is a bounded search.
 		 */
-		CMAES,
+		CMAES("CMAES"),
 		/**
 		 * Search using a non-linear conjugate gradient optimiser. Use the Fletcher-Reeves update formulas for the
 		 * conjugate search directions.
+		 * <p>
+		 * This is a bounded search using simple truncation of coordinates at the bounds of the search space.
 		 */
-		CONJUGATE_GRADIENT_FR,
+		CONJUGATE_GRADIENT_FR("Conjugate Gradient Fletcher-Reeves"),
 		/**
 		 * Search using a non-linear conjugate gradient optimiser. Use the Polak-Ribière update formulas for the
 		 * conjugate search directions.
+		 * <p>
+		 * This is a bounded search using simple truncation of coordinates at the bounds of the search space.
 		 */
-		CONJUGATE_GRADIENT_PR
-	}
+		CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière");
 
+		private String name;
+		
+		private SearchMethod(String name)
+		{
+			this.name = name;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+	
 	private SearchMethod searchMethod;
 	private double[] lower, upper;
 
@@ -236,7 +253,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			{
 				// TODO - Understand why the CMAES optimiser does not fit very well on test data. It appears 
 				// to converge too early and the likelihood scores are not as low as the other optimisers.
-				
+
 				// CMAESOptimiser based on Matlab code:
 				// https://www.lri.fr/~hansen/cmaes.m
 				// Take the defaults from the Matlab documentation
@@ -295,7 +312,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// Note that running it on an easy problem (200 photons with fixed fitting (no background)) the algorithm
 				// does sometimes produces results better than the Powell algorithm but it is slower.
 
-				NonLinearConjugateGradientOptimizer o = new NonLinearConjugateGradientOptimizer(
+				BoundedNonLinearConjugateGradientOptimizer o = new BoundedNonLinearConjugateGradientOptimizer(
 						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? Formula.FLETCHER_REEVES
 								: Formula.POLAK_RIBIERE, new SimpleValueChecker(rel, abs));
 
@@ -320,14 +337,28 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// However the gradient is invalid when the function evaluates <0.
 				// Maybe just use the gradient for the search direction then use the line minimisation/rest
 				// as per the Powell optimiser. The bounds should limit the search.
+				
+				// I tried a Bounded conjugate gradient optimiser with clipped variables.
+				// This sometimes works. However when the variables go a long way out of the expected range the gradients
+				// can have vastly different magnitudes. This results in the algorithm stalling since the gradients
+				// can be close to zero and the some of the parameters are no longer adjusted.
+				// Perhaps this can be looked for and the algorithm then gives up and resorts to a Powell optimiser from 
+				// the current point.
 
 				PointValuePair optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
-						startPoint));
+						startPoint), new SimpleBounds(lower, upper),
+						new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(0.05)
+						);
 				solution = optimum.getPointRef();
 				ll = optimum.getValue();
 				iterations = o.getIterations();
+				
+				double[] gradient = new double[solution.length];
+				maximumLikelihoodFunction.value(solution, gradient);
+				System.out.printf("Iter = %d, %g @ %s : %s\n", iterations, ll, Arrays.toString(solution),
+						Arrays.toString(gradient));
 			}
 
 			setSolution(a, solution);
@@ -424,8 +455,33 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	@Override
 	public boolean isBounded()
 	{
-		return searchMethod == SearchMethod.POWELL_BOUNDED || searchMethod == SearchMethod.BOBYQA ||
-				searchMethod == SearchMethod.CMAES;
+		switch (searchMethod)
+		{
+			case POWELL_BOUNDED:
+			case BOBYQA:
+			case CMAES:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isConstrained()
+	 */
+	@Override
+	public boolean isConstrained()
+	{
+		switch (searchMethod)
+		{
+			case CONJUGATE_GRADIENT_FR:
+			case CONJUGATE_GRADIENT_PR:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	/*

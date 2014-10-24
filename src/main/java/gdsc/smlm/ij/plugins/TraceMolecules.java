@@ -595,7 +595,7 @@ public class TraceMolecules implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getClusteringSettings();
@@ -705,7 +705,7 @@ public class TraceMolecules implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getClusteringSettings();
@@ -789,8 +789,8 @@ public class TraceMolecules implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Distance threshold", settings.distanceThreshold);
-			if (settings.getClusteringAlgorithm() == ClusteringAlgorithm.ClosestDistancePriority ||
-					settings.getClusteringAlgorithm() == ClusteringAlgorithm.ClosestTimePriority)
+			if (settings.getClusteringAlgorithm() == ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY ||
+					settings.getClusteringAlgorithm() == ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY)
 			{
 				Parameters.isAboveZero("Time threshold", settings.timeThreshold);
 				Parameters.isPositive("Pulse interval", settings.pulseInterval);
@@ -1308,9 +1308,9 @@ public class TraceMolecules implements PlugIn
 		int w = 400, h = 400;
 		switch (settings.getOptimiserPlot())
 		{
-			case None:
+			case NONE:
 				return;
-			case Bilinear:
+			case BILINEAR:
 				fp = createBilinearPlot(results, w, h);
 				break;
 			default:
@@ -1336,7 +1336,7 @@ public class TraceMolecules implements PlugIn
 	 */
 	private void showPlot()
 	{
-		if (settings.getOptimiserPlot() == OptimiserPlot.None)
+		if (settings.getOptimiserPlot() == OptimiserPlot.NONE)
 			return;
 
 		// Display the image
@@ -1874,7 +1874,7 @@ public class TraceMolecules implements PlugIn
 		final int h = source.getHeight();
 
 		// Get the coordinates and the spot bounds
-		float[] centre = trace.getCentroid(CentroidMethod.SignalWeighted);
+		float[] centre = trace.getCentroid(CentroidMethod.SIGNAL_WEIGHTED);
 		int minX = (int) Math.floor(centre[0] - fitWidth);
 		int maxX = (int) Math.ceil(centre[0] + fitWidth);
 		int minY = (int) Math.floor(centre[1] - fitWidth);

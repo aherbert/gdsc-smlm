@@ -104,7 +104,7 @@ public class PCPALMClusters implements PlugIn
 
 	private static int runMode = 0;
 	private static double distance = 50;
-	private static ClusteringAlgorithm sClusteringAlgorithm = ClusteringAlgorithm.ClosestParticle;
+	private static ClusteringAlgorithm sClusteringAlgorithm = ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
 	private static int minN = 1;
 	private static int maxN = 0;
 	private static boolean maximumLikelihood = false;
@@ -122,7 +122,7 @@ public class PCPALMClusters implements PlugIn
 	private static String[] UNITS = { "pixels^2", "um^2" };
 	private static String units = UNITS[0];
 
-	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.ClosestParticle;
+	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
 	private boolean weightedClustering = false;
 
 	private boolean fileInput = false;

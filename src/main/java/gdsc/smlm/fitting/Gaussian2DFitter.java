@@ -476,9 +476,15 @@ public class Gaussian2DFitter
 				y[i] -= bias;
 		}
 
+		// Bounds are more restrictive than constraints
 		if (solver.isBounded())
 		{
 			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
+		}
+		else if (solver.isConstrained())
+		{
+			//setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
+			setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		}
 
 		final double noise = 0; // //fitConfiguration.getNoise()
@@ -642,6 +648,41 @@ public class Gaussian2DFitter
 				lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] / wf;
 				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * wf;
 			}
+		}
+		solver.setBounds(lower, upper);
+	}
+
+	/**
+	 * Sets the constraints for the fitted parameters. This functions set the lower bounds of the background and
+	 * amplitude to zero.
+	 * 
+	 * @param maxx
+	 *            The x range of the data
+	 * @param maxy
+	 *            The y range of the data
+	 * @param npeaks
+	 *            The number of peaks
+	 * @param params
+	 *            The estimated parameters
+	 * @param y
+	 *            The data
+	 * @param ySize
+	 *            The size of the data
+	 * @param paramsPerPeak
+	 *            The number of parameters per peak
+	 */
+	private void setConstraints(final int maxx, final int maxy, final int npeaks, final float[] params,
+			final float[] y, final int ySize, final int paramsPerPeak)
+	{
+		// Create appropriate bounds for the parameters
+		float[] lower = new float[params.length];
+		float[] upper = new float[lower.length];
+		Arrays.fill(lower, Float.NEGATIVE_INFINITY);
+		Arrays.fill(upper, Float.POSITIVE_INFINITY);
+		lower[Gaussian2DFunction.BACKGROUND] = 0;
+		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+		{
+			lower[j + Gaussian2DFunction.AMPLITUDE] = 0;
 		}
 		solver.setBounds(lower, upper);
 	}

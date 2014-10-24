@@ -36,12 +36,38 @@ public class AlignImagesFFT
 {
 	public enum WindowMethod
 	{
-		None, Hanning, Cosine, Tukey
+		NONE("None"), HANNING("Hanning"), COSINE("Cosine"), TUKEY("Tukey");
+
+		private String name;
+
+		private WindowMethod(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	public enum SubPixelMethod
 	{
-		None, Cubic, Gaussian
+		NONE("None"), CUBIC("Cubic"), GAUSSIAN("Gaussian");
+
+		private String name;
+
+		private SubPixelMethod(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	private double lastXOffset = 0;
@@ -620,10 +646,10 @@ public class AlignImagesFFT
 		double[] dCoord = new double[] { iCoord[0], iCoord[1] };
 
 		String estimatedScore = "";
-		if (subPixelMethod != SubPixelMethod.None)
+		if (subPixelMethod != SubPixelMethod.NONE)
 		{
 			double[] centre = null;
-			if (subPixelMethod == SubPixelMethod.Cubic)
+			if (subPixelMethod == SubPixelMethod.CUBIC)
 			{
 				centre = performCubicFit(subCorrMat, iCoord[0], iCoord[1]);
 			}
@@ -746,10 +772,10 @@ public class AlignImagesFFT
 		double[] centre = null;
 		switch (subPixelMethod)
 		{
-			case Cubic:
+			case CUBIC:
 				centre = performCubicFit(subCorrMat, iCoord[0], iCoord[1]);
 				break;
-			case Gaussian:
+			case GAUSSIAN:
 				// Perform sub-peak analysis using the method taken from Jpiv
 				centre = performGaussianFit(subCorrMat, iCoord[0], iCoord[1]);
 				// Check the centre has not moved too far
@@ -1159,7 +1185,7 @@ public class AlignImagesFFT
 		// However this involves shifting the image and windowing. The average depends on both
 		// and so would have to be solved iteratively.		
 
-		if (windowMethod != WindowMethod.None)
+		if (windowMethod != WindowMethod.NONE)
 		{
 			// Use separable for speed. 
 			//ip = applyWindow(ip, windowMethod);
@@ -1242,15 +1268,15 @@ public class AlignImagesFFT
 
 		switch (windowMethod)
 		{
-			case Hanning:
+			case HANNING:
 				wx = hanning(maxx);
 				wy = hanning(maxy);
 				break;
-			case Cosine:
+			case COSINE:
 				wx = cosine(maxx);
 				wy = cosine(maxy);
 				break;
-			case Tukey:
+			case TUKEY:
 				wx = tukey(maxx, ALPHA);
 				wy = tukey(maxy, ALPHA);
 				break;
@@ -1312,13 +1338,13 @@ public class AlignImagesFFT
 		WindowFunction wf = null;
 		switch (windowMethod)
 		{
-			case Hanning: //
+			case HANNING: //
 				wf = instance.new Hanning();
 				break;
-			case Cosine:
+			case COSINE:
 				wf = instance.new Cosine();
 				break;
-			case Tukey:
+			case TUKEY:
 				wf = instance.new Tukey(ALPHA);
 				break;
 			default:

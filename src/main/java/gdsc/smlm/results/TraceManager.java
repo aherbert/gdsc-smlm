@@ -35,17 +35,30 @@ public class TraceManager
 		 * Search the latest localisations first. This is equivalent to a downwards search. When a localisation is found
 		 * no more time points will be searched.
 		 */
-		LatestForerunner,
+		LATEST_FORERUNNER("Latest forerunner"),
 		/**
 		 * Search the earliest localisations first. This is equivalent to a depth first search. When a localisation is
 		 * found no more time points will be searched.
 		 */
-		EarliestForerunner,
+		EARLIEST_FORERUNNER("Earliest forerunner"),
 		/**
 		 * Search all time points within the distance threshold. This is slower as all time points are searched. It is
 		 * equivalent to single-linkage clustering with a time constraint on joined localisations.
 		 */
-		SingleLinkage
+		SINGLE_LINKAGE("Single linkage");
+
+		private String name;
+
+		private TraceMode(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	private MemoryPeakResults results;
@@ -61,7 +74,7 @@ public class TraceManager
 	private int activationFrameWindow = 0;
 	private double distanceExclusion = 0;
 	private boolean filterActivationFrames = false;
-	private TraceMode traceMode = TraceMode.LatestForerunner;
+	private TraceMode traceMode = TraceMode.LATEST_FORERUNNER;
 	private int pulseInterval = 0;
 
 	/**
@@ -709,7 +722,7 @@ public class TraceManager
 		// Check that the next farthest spot is above the exclusion distance
 		float nextMinD = Float.POSITIVE_INFINITY;
 		int currentT;
-		if (traceMode == TraceMode.EarliestForerunner)
+		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
 		{
 			currentT = endLocalisations[pastIndex].t;
 			for (int i = pastIndex; i < currentIndex; i++)
@@ -752,7 +765,7 @@ public class TraceManager
 				currentT = endLocalisations[i].t;
 			}
 		}
-		else if (traceMode == TraceMode.LatestForerunner)
+		else if (traceMode == TraceMode.LATEST_FORERUNNER)
 		{
 			currentT = endLocalisations[currentIndex].t;
 			for (int i = currentIndex; i-- > pastIndex;)
@@ -877,7 +890,7 @@ public class TraceManager
 		float nextMinD = Float.POSITIVE_INFINITY;
 		int currentT;
 
-		if (traceMode == TraceMode.EarliestForerunner)
+		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
 		{
 			currentT = endLocalisations[pastIndex].t;
 			for (int i = pastIndex; i < currentIndex; i++)
@@ -934,7 +947,7 @@ public class TraceManager
 				currentT = endLocalisations[i].t;
 			}
 		}
-		else if (traceMode == TraceMode.LatestForerunner)
+		else if (traceMode == TraceMode.LATEST_FORERUNNER)
 		{
 			currentT = endLocalisations[currentIndex].t;
 			for (int i = currentIndex; i-- > pastIndex;)

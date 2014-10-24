@@ -66,8 +66,8 @@ public class SNRHysteresisFilter extends HysteresisFilter
 		if (snr >= upperSnr)
 			return PeakStatus.OK;
 		else if (snr >= lowerSnr)
-			return PeakStatus.Candidate;
-		return PeakStatus.Reject;
+			return PeakStatus.CANDIDATE;
+		return PeakStatus.REJECT;
 	}
 
 	@Override

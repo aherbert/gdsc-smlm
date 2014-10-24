@@ -605,7 +605,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Select identified maxima for fitting");
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.showDialog();
 
@@ -645,7 +645,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			fitConfig.setBackgroundFitting(true);
 			fitConfig.setMinIterations(0);
 			fitConfig.setNoise(0);
-			config.setNoiseMethod(Method.QuickResidualsLeastMeanOfSquares);
+			config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
 			showProcessedFrames = false;
 		}
 
@@ -1383,7 +1383,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					return false;
 				}
 			}
-			else if (fitConfig.getFitSolver() == FitSolver.APACHE_LVM)
+			else if (fitConfig.getFitSolver() == FitSolver.LVM_QUASI_NEWTON)
 			{
 				// No options yet for Apache LVM fitting
 			}
@@ -1725,14 +1725,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			if (fitParams == null)
 				fitParams = new FitParameters();
-			fitParams.fitTask = FitTask.MaximaIdentification;
+			fitParams.fitTask = FitTask.MAXIMA_IDENITIFICATION;
 			fitParams.noise = noise;
 		}
 		else if (!Float.isNaN(noise))
 		{
 			if (fitParams == null)
 				fitParams = new FitParameters();
-			fitParams.fitTask = FitTask.PSFFitting;
+			fitParams.fitTask = FitTask.PSF_FITTING;
 			fitParams.noise = noise;
 		}
 

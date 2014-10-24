@@ -537,7 +537,7 @@ public class DensityImage implements PlugIn
 
 		gd.addMessage("Show an image using the localisation density");
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addNumericField("Radius", radius, 3);
 		if (!titles.isEmpty())

@@ -772,7 +772,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 			// Use a Tukey window to roll-off the image edges
 			//spot[i] = imageWindow.applySeperable(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.Tukey);
-			spot[i] = ImageWindow.applyWindow(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.Tukey);
+			spot[i] = ImageWindow.applyWindow(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.TUKEY);
 		}
 	}
 

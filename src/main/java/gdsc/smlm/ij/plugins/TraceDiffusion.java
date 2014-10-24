@@ -673,7 +673,7 @@ public class TraceDiffusion implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getClusteringSettings();

@@ -22,8 +22,21 @@ public class FitParameters
 {
 	public enum FitTask
 	{
-		PSFFitting,
-		MaximaIdentification
+		PSF_FITTING("PSF Fitting"),
+		MAXIMA_IDENITIFICATION("Maxima Identification");
+
+		private String name;
+
+		private FitTask(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}	
 	
 	private float[] offset = null;
@@ -51,7 +64,7 @@ public class FitParameters
 	/**
 	 * The task to perform
 	 */
-	public FitTask fitTask = FitTask.PSFFitting;
+	public FitTask fitTask = FitTask.PSF_FITTING;
 	/**
 	 * The frame acquisition end time for the input data. Used when data represents multiple frames.  
 	 */

@@ -15,6 +15,21 @@ package gdsc.smlm.ij.results;
 
 public enum ResultsImage
 {
-	NONE, LOCALISATIONS, SIGNAL_INTENSITY, FRAME_NUMBER, PSF, LOCALISATIONS_PRECISION, SIGNAL_PRECISION, 
-		LOCALISATIONS_AV_PRECISION, SIGNAL_AV_PRECISION, ERROR
+	NONE("None"), LOCALISATIONS("Localisations"), SIGNAL_INTENSITY("Signal intenisty"), FRAME_NUMBER("Frame number"), PSF(
+			"PSF"), LOCALISATIONS_PRECISION("Localisations (width=precision)"), SIGNAL_PRECISION(
+			"Signal (width=precision)"), LOCALISATIONS_AV_PRECISION("Localisations (width=av.precision)"), SIGNAL_AV_PRECISION(
+			"Signal (width=av.precision)"), ERROR("Fit error");
+
+	private String name;
+
+	private ResultsImage(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }

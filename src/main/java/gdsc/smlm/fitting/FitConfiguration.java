@@ -1061,7 +1061,7 @@ public class FitConfiguration implements Cloneable
 				// TODO - Configure stopping criteria ...
 				return fitter;
 
-			case APACHE_LVM:
+			case LVM_QUASI_NEWTON:
 				if (gf instanceof Gaussian2DFunction)
 				{
 					ApacheLVMFitter apacheNLinFit = new ApacheLVMFitter((Gaussian2DFunction) gf);

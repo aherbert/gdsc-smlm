@@ -163,8 +163,8 @@ public class DriftCalculator implements PlugIn
 			for (int i = from; i < to && i < ip.length; i++)
 			{
 				incrementProgress();
-				double[] result = aligner.align(ip[i], WindowMethod.Tukey, alignBounds,
-						AlignImagesFFT.SubPixelMethod.Cubic);
+				double[] result = aligner.align(ip[i], WindowMethod.TUKEY, alignBounds,
+						AlignImagesFFT.SubPixelMethod.CUBIC);
 				// Create a result for failures
 				if (result == null)
 					result = new double[] { Double.NaN, Double.NaN, t[i] };
@@ -289,8 +289,8 @@ public class DriftCalculator implements PlugIn
 			{
 				incrementProgress();
 				images[i] = stack.getProcessor(i + 1);
-				AlignImagesFFT.applyWindowSeparable(images[i], WindowMethod.Tukey);
-				fhtImages[i] = aligner.transformTarget(images[i], WindowMethod.None);
+				AlignImagesFFT.applyWindowSeparable(images[i], WindowMethod.TUKEY);
+				fhtImages[i] = aligner.transformTarget(images[i], WindowMethod.NONE);
 			}
 		}
 	}
@@ -371,7 +371,7 @@ public class DriftCalculator implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Correct the drift in localisation results");
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		ArrayList<String> methods = new ArrayList<String>(4);
 		methods.add(SUB_IMAGE_ALIGNMENT);
 		methods.add(DRIFT_FILE);
@@ -1480,7 +1480,7 @@ public class DriftCalculator implements PlugIn
 		// Align
 		tracker.status("Aligning images");
 		final AlignImagesFFT aligner = new AlignImagesFFT();
-		aligner.init(reference, WindowMethod.None, false);
+		aligner.init(reference, WindowMethod.NONE, false);
 		final Rectangle alignBounds = AlignImagesFFT.createHalfMaxBounds(reference.getWidth(), reference.getHeight(),
 				reference.getWidth(), reference.getHeight());
 
@@ -1631,7 +1631,7 @@ public class DriftCalculator implements PlugIn
 		FloatProcessor referenceIp = stack.getProcessor(1).toFloat(0, null);
 		// We do not care about the window method because this processor will not 
 		// actually be used for alignment, it is a reference for the FHT size		
-		aligner.init(referenceIp, WindowMethod.None, false);
+		aligner.init(referenceIp, WindowMethod.NONE, false);
 		for (int i = 0; i < images.length; i += imagesPerThread)
 		{
 			futures.add(threadPool.submit(new ImageFHTInitialiser(stack, images, aligner, fhtImages, i, i +
@@ -1743,7 +1743,7 @@ public class DriftCalculator implements PlugIn
 		else
 		{
 			// Ensure the reference is windowed
-			AlignImagesFFT.applyWindowSeparable(reference, WindowMethod.Tukey);
+			AlignImagesFFT.applyWindowSeparable(reference, WindowMethod.TUKEY);
 		}
 
 		return calculateDrift(blockT, 1f, dx, dy, originalDriftTimePoints, smoothing, iterations, fhtImages, reference,

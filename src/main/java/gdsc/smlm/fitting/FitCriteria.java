@@ -21,18 +21,31 @@ public enum FitCriteria
 	/**
 	 * Stop fitting when the least-squared-error does not change significantly
 	 */
-	LEAST_SQUARED_ERROR,
+	LEAST_SQUARED_ERROR("Least-squared error"),
 	/**
 	 * Stop fitting when the least-squared-error does not change significantly.
 	 * Add an additional check for slowly improving or plateaued fitting is performed.
 	 */
-	LEAST_SQUARED_PLUS,
+	LEAST_SQUARED_PLUS("Least-squared error plateau"),
 	/**
 	 * Stop fitting when the XY coordinates do not change significantly
 	 */
-	COORDINATES,
+	COORDINATES("Co-ordinates"),
 	/**
 	 * Stop fitting when the parameters do not change significantly
 	 */
-	PARAMETERS
+	PARAMETERS("Parameters");
+
+	private String name;
+
+	private FitCriteria(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }

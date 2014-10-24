@@ -273,7 +273,7 @@ public class FitWorker implements Runnable
 
 		ResultFilter filter = null;
 
-		if (params != null && params.fitTask == FitTask.MaximaIdentification)
+		if (params != null && params.fitTask == FitTask.MAXIMA_IDENITIFICATION)
 		{
 			final float sd0 = fitConfig.getInitialPeakStdDev0();
 			final float sd1 = fitConfig.getInitialPeakStdDev1();

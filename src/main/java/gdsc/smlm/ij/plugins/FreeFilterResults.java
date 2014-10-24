@@ -106,7 +106,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Select a dataset to filter");
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		GlobalSettings gs = SettingsManager.loadSettings();
 		filterSettings = gs.getFilterSettings();

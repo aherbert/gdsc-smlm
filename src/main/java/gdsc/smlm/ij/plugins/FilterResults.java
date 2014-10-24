@@ -71,7 +71,7 @@ public class FilterResults implements PlugIn
 		// Show a dialog allowing the results set to be filtered
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Select a dataset to filter");
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;

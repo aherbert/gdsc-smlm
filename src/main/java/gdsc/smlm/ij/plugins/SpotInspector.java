@@ -435,7 +435,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addChoice("Ranking", SORT_ORDER, SORT_ORDER[sortOrderIndex]);
 		gd.addSlider("Radius", 1, 15, radius);

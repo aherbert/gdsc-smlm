@@ -21,17 +21,30 @@ public enum FitFunction
 	/**
 	 * Fixed width fitting
 	 */
-	FIXED,
+	FIXED("Fixed"),
 	/**
 	 * Fit XY width simultaneously
 	 */
-	CIRCULAR,
+	CIRCULAR("Circular"),
 	/**
 	 * Fit XY width independently
 	 */
-	FREE_CIRCULAR,
+	FREE_CIRCULAR("Free circular"),
 	/**
 	 * Fit elliptical Gaussian
 	 */
-	FREE
+	FREE("Free");
+
+	private String name;
+
+	private FitFunction(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }

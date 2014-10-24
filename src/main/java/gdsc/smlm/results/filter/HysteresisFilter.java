@@ -43,7 +43,7 @@ public abstract class HysteresisFilter extends Filter
 
 	protected enum PeakStatus
 	{
-		OK, Candidate, Reject
+		OK, CANDIDATE, REJECT
 	}
 
 	public HysteresisFilter(double searchDistance)
@@ -69,7 +69,7 @@ public abstract class HysteresisFilter extends Filter
 					ok.add(result);
 					traceResults.add(result);
 					break;
-				case Candidate:
+				case CANDIDATE:
 					candidates.add(result);
 					traceResults.add(result);
 					break;
@@ -92,7 +92,7 @@ public abstract class HysteresisFilter extends Filter
 
 		// Trace through candidates
 		TraceManager tm = new TraceManager(traceResults);
-		tm.setTraceMode(TraceMode.LatestForerunner);
+		tm.setTraceMode(TraceMode.LATEST_FORERUNNER);
 		tm.traceMolecules(distanceThreshold, 1);
 		Trace[] traces = tm.getTraces();
 

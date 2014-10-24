@@ -31,35 +31,48 @@ public class NoiseEstimator
 		/**
 		 * Use all pixels
 		 */
-		AllPixels,
+		ALL_PIXELS("All pixels"),
 		/**
 		 * Use a range around the lowest pixel in the image
 		 */
-		LowestPixels,
+		LOWEST_PIXELS("Lowest pixels"),
 		/**
 		 * Use the psuedo-residuals and calculate the least median of squares
 		 */
-		ResidualsLeastMedianOfSquares,
+		RESIDUALS_LEAST_MEDIAN_OF_SQUARES("Residuals least-median-of-squares"),
 		/**
 		 * Use the psuedo-residuals and calculate the least trimmed of squares
 		 */
-		ResidualsLeastTrimmedOfSquares,
+		RESIDUALS_LEAST_TRIMMED_OF_SQUARES("Residuals least-trimmed-of-squares"),
 		/**
 		 * Use the psuedo-residuals and calculate the least mean of squares
 		 */
-		ResidualsLeastMeanOfSquares,
+		RESIDUALS_LEAST_MEAN_OF_SQUARES("Residuals least-mean-of-squares"),
 		/**
 		 * Use the psuedo-residuals ignoring image border and calculate the least median of squares
 		 */
-		QuickResidualsLeastMedianOfSquares,
+		QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES("Quick residuals least-median-of-squares"),
 		/**
 		 * Use the psuedo-residuals ignoring image border and calculate the least trimmed of squares
 		 */
-		QuickResidualsLeastTrimmedOfSquares,
+		QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES("Quick residuals least-trimmed-of-squares"),
 		/**
 		 * Use the psuedo-residuals ignoring image border and calculate the least mean of squares
 		 */
-		QuickResidualsLeastMeanOfSquares,
+		QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES("Quick residuals least-mean-of-squares");
+
+		private String name;
+
+		private Method(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	private float[] data;
@@ -103,31 +116,31 @@ public class NoiseEstimator
 
 		switch (method)
 		{
-			case QuickResidualsLeastTrimmedOfSquares:
+			case QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES:
 				ne = new ResidualsLeastTrimmedSquareEstimator(true);
 				break;
 
-			case QuickResidualsLeastMedianOfSquares:
+			case QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES:
 				ne = new ResidualsLeastMedianSquareEstimator(true);
 				break;
 
-			case QuickResidualsLeastMeanOfSquares:
+			case QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES:
 				ne = new ResidualsLeastMeanSquareEstimator(true);
 				break;
 
-			case ResidualsLeastTrimmedOfSquares:
+			case RESIDUALS_LEAST_TRIMMED_OF_SQUARES:
 				ne = new ResidualsLeastTrimmedSquareEstimator(false);
 				break;
 
-			case ResidualsLeastMedianOfSquares:
+			case RESIDUALS_LEAST_MEDIAN_OF_SQUARES:
 				ne = new ResidualsLeastMedianSquareEstimator(false);
 				break;
 
-			case ResidualsLeastMeanOfSquares:
+			case RESIDUALS_LEAST_MEAN_OF_SQUARES:
 				ne = new ResidualsLeastMeanSquareEstimator(false);
 				break;
 
-			case LowestPixels:
+			case LOWEST_PIXELS:
 				ne = new MinEstimator(range);
 				break;
 

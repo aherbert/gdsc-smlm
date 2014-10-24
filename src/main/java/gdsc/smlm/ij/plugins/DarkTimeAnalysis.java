@@ -45,8 +45,8 @@ public class DarkTimeAnalysis implements PlugIn
 
 	private static String[] METHOD;
 	private static ClusteringAlgorithm[] algorithms = new ClusteringAlgorithm[] {
-			ClusteringAlgorithm.ClosestTimePriority, ClusteringAlgorithm.ClosestDistancePriority,
-			ClusteringAlgorithm.ClosestParticleTimePriority, ClusteringAlgorithm.ClosestParticleDistancePriority };
+			ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY, ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY,
+			ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY, ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY };
 	static
 	{
 		ArrayList<String> methods = new ArrayList<String>();
@@ -106,7 +106,7 @@ public class DarkTimeAnalysis implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the cumulative dark-time histogram");
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addChoice("Method", METHOD, METHOD[method]);
 		gd.addSlider("Search_distance (nm)", 5, 150, searchDistance);

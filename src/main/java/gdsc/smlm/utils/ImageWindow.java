@@ -19,7 +19,7 @@ package gdsc.smlm.utils;
 public class ImageWindow
 {
 	public enum WindowFunction {
-		Hanning, Cosine, Tukey
+		HANNING, COSINE, TUKEY
 	}
 
 	// Allow cached window weights
@@ -49,15 +49,15 @@ public class ImageWindow
 		{
 			switch (windowFunction)
 			{
-			case Hanning:
+			case HANNING:
 				wx = hanning(maxx);
 				wy = hanning(maxy);
 				break;
-			case Cosine:
+			case COSINE:
 				wx = cosine(maxx);
 				wy = cosine(maxy);
 				break;
-			case Tukey:
+			case TUKEY:
 			default:
 				wx = tukey(maxx, ALPHA);
 				wy = tukey(maxy, ALPHA);
@@ -98,15 +98,15 @@ public class ImageWindow
 
 		switch (windowFunction)
 		{
-		case Hanning:
+		case HANNING:
 			wx = hanning(maxx);
 			wy = hanning(maxy);
 			break;
-		case Cosine:
+		case COSINE:
 			wx = cosine(maxx);
 			wy = cosine(maxy);
 			break;
-		case Tukey:
+		case TUKEY:
 			wx = tukey(maxx, ALPHA);
 			wy = tukey(maxy, ALPHA);
 			break;
@@ -145,13 +145,13 @@ public class ImageWindow
 		WindowMethod wf = null;
 		switch (windowFunction)
 		{
-		case Hanning:
+		case HANNING:
 			wf = instance.new Hanning();
 			break;
-		case Cosine:
+		case COSINE:
 			wf = instance.new Cosine();
 			break;
-		case Tukey:
+		case TUKEY:
 			wf = instance.new Tukey(ALPHA);
 		}
 

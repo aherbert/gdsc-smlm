@@ -28,11 +28,11 @@ public class Parameters
 		/**
 		 * Value is greater than zero
 		 */
-		AboveZero,
+		ABOVE_ZERO,
 		/**
 		 * Value is zero or above
 		 */
-		Positive
+		POSITIVE
 	}
 	
 	/**
@@ -119,9 +119,9 @@ public class Parameters
 	 */
 	public static void isValid(String name, double value, EnumSet<Requirement> requirements)
 	{
-		if (requirements.contains(Requirement.AboveZero))
+		if (requirements.contains(Requirement.ABOVE_ZERO))
 			isAboveZero(name, value);
-		if (requirements.contains(Requirement.Positive))
+		if (requirements.contains(Requirement.POSITIVE))
 			isPositive(name, value);
 	}
 }

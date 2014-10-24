@@ -22,7 +22,20 @@ public class FRC
 {
 	public enum ThresholdMethod
 	{
-		Fixed_1_over_7, Half_Bit, Three_Sigma
+		FIXED_1_OVER_7("Fixed 1/7"), HALF_BIT("Half-bit"), THREE_SIGMA("Three sigma");
+
+		private String name;
+
+		private ThresholdMethod(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	};
 
 	// Properties controlling the algorithm
@@ -383,13 +396,13 @@ public class FRC
 		{
 			switch (method)
 			{
-				case Half_Bit:
+				case HALF_BIT:
 					threshold[i] = ((0.2071 * Math.sqrt(frcCurve[i][2]) + 1.9102) / (1.2701 * Math.sqrt(frcCurve[i][2]) + 0.9102));
 					break;
-				case Three_Sigma:
+				case THREE_SIGMA:
 					threshold[i] = (3.0 / Math.sqrt(frcCurve[i][2] / 2.0));
 					break;
-				case Fixed_1_over_7:
+				case FIXED_1_OVER_7:
 				default:
 					threshold[i] = 0.1428;
 			}
@@ -502,11 +515,11 @@ public class FRC
 		// The half-bit and 3-sigma curves are often above 1 at close to zero spatial frequency.
 		// This means that any FRC curve starting at 1 may cross the line twice. 
 		// If so the second crossing is the one that is desired.
-			case Half_Bit:
-			case Three_Sigma:
+			case HALF_BIT:
+			case THREE_SIGMA:
 				return (intersections.length > 1) ? intersections[1] : intersections[0];
 
-			case Fixed_1_over_7:
+			case FIXED_1_OVER_7:
 			default:
 				return intersections[0];
 		}

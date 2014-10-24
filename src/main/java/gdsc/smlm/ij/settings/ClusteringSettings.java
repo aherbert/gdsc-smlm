@@ -24,14 +24,27 @@ public class ClusteringSettings
 {
 	public enum OptimiserPlot
 	{
-		None, Nearest_Neighbour, Bilinear
+		NONE("None"), NEAREST_NEIGHBOUR("Nearest neighbour"), BILINEAR("Bi-linear");
+
+		private String name;
+
+		private OptimiserPlot(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 	
 	public double distanceThreshold = 50;
 	public double distanceExclusion = 0;
 	public double timeThreshold = 5;
-	private TraceManager.TraceMode traceMode = TraceMode.LatestForerunner; 
-	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise; 
+	private TraceManager.TraceMode traceMode = TraceMode.LATEST_FORERUNNER; 
+	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE; 
 	public int pulseInterval = 0;
 	public int pulseWindow = 0;
 	public boolean splitPulses = false;
@@ -42,7 +55,7 @@ public class ClusteringSettings
 	public double minTimeThreshold = 0;
 	public double maxTimeThreshold = 20;
 	public int optimiserSteps = 10;
-	private OptimiserPlot optimiserPlot = OptimiserPlot.Bilinear;
+	private OptimiserPlot optimiserPlot = OptimiserPlot.BILINEAR;
 	public boolean saveTraces = false;
 	public boolean showHistograms = false;
 	public boolean saveTraceData = false;
@@ -60,7 +73,7 @@ public class ClusteringSettings
 	public OptimiserPlot getOptimiserPlot()
 	{
 		if (optimiserPlot == null)
-			optimiserPlot = OptimiserPlot.None;
+			optimiserPlot = OptimiserPlot.NONE;
 		return optimiserPlot;
 	}
 	
@@ -72,7 +85,7 @@ public class ClusteringSettings
 	public void setOptimiserPlot(int optimiserPlot)
 	{
 		if (optimiserPlot < 0 || optimiserPlot >= OptimiserPlot.values().length)
-			this.optimiserPlot = OptimiserPlot.None;
+			this.optimiserPlot = OptimiserPlot.NONE;
 		else
 			this.optimiserPlot = OptimiserPlot.values()[optimiserPlot];
 	}
@@ -80,7 +93,7 @@ public class ClusteringSettings
 	public TraceMode getTraceMode()
 	{
 		if (traceMode == null)
-			traceMode = TraceMode.LatestForerunner;
+			traceMode = TraceMode.LATEST_FORERUNNER;
 		return traceMode;
 	}
 	
@@ -92,7 +105,7 @@ public class ClusteringSettings
 	public void setTraceMode(int traceMode)
 	{
 		if (traceMode < 0 || traceMode >= TraceMode.values().length)
-			this.traceMode = TraceMode.LatestForerunner;
+			this.traceMode = TraceMode.LATEST_FORERUNNER;
 		else
 			this.traceMode = TraceMode.values()[traceMode];
 	}
@@ -100,7 +113,7 @@ public class ClusteringSettings
 	public ClusteringAlgorithm getClusteringAlgorithm()
 	{
 		if (clusteringAlgorithm == null)
-			clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
+			clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE;
 		return clusteringAlgorithm;
 	}
 	
@@ -112,7 +125,7 @@ public class ClusteringSettings
 	public void setClusteringAlgorithm(int clusteringAlgorithm)
 	{
 		if (clusteringAlgorithm < 0 || clusteringAlgorithm >= ClusteringAlgorithm.values().length)
-			this.clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
+			this.clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE;
 		else
 			this.clusteringAlgorithm = ClusteringAlgorithm.values()[clusteringAlgorithm];
 	}

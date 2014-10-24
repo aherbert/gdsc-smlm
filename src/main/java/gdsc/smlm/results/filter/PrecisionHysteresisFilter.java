@@ -72,8 +72,8 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		if (p <= lowerPrecision)
 			return PeakStatus.OK;
 		else if (p <= upperPrecision)
-			return PeakStatus.Candidate;
-		return PeakStatus.Reject;
+			return PeakStatus.CANDIDATE;
+		return PeakStatus.REJECT;
 	}
 
 	@Override

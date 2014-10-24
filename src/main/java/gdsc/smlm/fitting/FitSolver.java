@@ -23,24 +23,38 @@ public enum FitSolver
 	 * <p>
 	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
 	 */
-	LVM,
+	LVM("LVM"),
 	/**
 	 * Custom Levenberg-Marquardt least-squares fitting with weights. The weights require a function that provides the
 	 * expected variance for each data point. Without weights the results match the LVM method. 
 	 * <p>
 	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
 	 */
-	LVM_WEIGHTED,
+	LVM_WEIGHTED("LVM (Weighted)"),
 	/**
 	 * Apache Commons Math LVM least-squares fitting
 	 * <p>
 	 * Uses the Jacobian matrix with a quasi-Newton optimisation (that approximates the inverted Hessian).
 	 */
-	APACHE_LVM,
+	LVM_QUASI_NEWTON("LVM (Quasi-Newton)"),
 	/**
 	 * Maximum Likelihood Estimator
 	 * <p>
 	 * Uses a Poisson noise model for the probability density function of the data.
 	 */
-	MLE
+	MLE("Maximum Likelihood");
+
+	private String name;
+
+	private FitSolver(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
+	}
+
 }

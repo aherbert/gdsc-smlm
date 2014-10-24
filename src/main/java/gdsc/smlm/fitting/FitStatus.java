@@ -21,45 +21,59 @@ public enum FitStatus
 	/**
 	 * 
 	 */
-	OK,
+	OK("OK"),
 	/**
 	 * 
 	 */
-	SINGULAR_NON_LINEAR_MODEL,
+	SINGULAR_NON_LINEAR_MODEL("Singular non-linear model"),
 	/**
 	 * 
 	 */
-	SINGULAR_NON_LINEAR_SOLUTION,
+	SINGULAR_NON_LINEAR_SOLUTION("Singular non-linear solution"),
 	/**
 	 * 
 	 */
-	INVALID_GRADIENTS_IN_NON_LINEAR_MODEL,
+	INVALID_GRADIENTS_IN_NON_LINEAR_MODEL("Invalid gradients in non-linear model"),
 	/**
 	 * 
 	 */
-	FAILED_TO_CONVERGE,
+	FAILED_TO_CONVERGE("Failed to converge"),
 	/**
 	 * 
 	 */
-	BAD_PARAMETERS,
+	BAD_PARAMETERS("Bad parameters"),
 	/**
 	 * 
 	 */
-	COORDINATES_MOVED,
+	COORDINATES_MOVED("Co-ordinates moved"),
 	/**
 	 * 
 	 */
-	INSUFFICIENT_SIGNAL,
+	INSUFFICIENT_SIGNAL("Insufficient signal"),
 	/**
 	 * 
 	 */
-	WIDTH_DIVERGED,
+	WIDTH_DIVERGED("Width diverged"),
 	/**
 	 * 
 	 */
-	INSUFFICIENT_PRECISION,
+	INSUFFICIENT_PRECISION("Insufficient precision"),
 	/**
 	 * 
 	 */
-	UNKNOWN
+	UNKNOWN("Unknown");
+
+	private String name;
+
+	private FitStatus(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
+	}
+
 }

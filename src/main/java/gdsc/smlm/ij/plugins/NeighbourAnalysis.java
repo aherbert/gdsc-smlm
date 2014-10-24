@@ -107,7 +107,7 @@ public class NeighbourAnalysis implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addNumericField("Distance_Threshold (px)", distanceThreshold, 4);
 		gd.addNumericField("Time_Threshold (frames)", timeThreshold, 0);

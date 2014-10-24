@@ -186,7 +186,7 @@ public class FIRE implements PlugIn
 
 		gd.addMessage("Compute the resolution using Fourier Ring Correlation");
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addCheckbox("Random_split", randomSplit);
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);

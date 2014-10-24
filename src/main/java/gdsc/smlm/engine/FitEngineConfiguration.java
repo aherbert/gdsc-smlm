@@ -32,7 +32,7 @@ public class FitEngineConfiguration implements Cloneable
 	private boolean includeNeighbours = true;
 	private double neighbourHeightThreshold = 0.3;
 	private double residualsThreshold = 1;
-	private NoiseEstimator.Method noiseMethod = Method.QuickResidualsLeastMeanOfSquares;
+	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
 
 	/**
 	 * Constructor
@@ -261,6 +261,6 @@ public class FitEngineConfiguration implements Cloneable
 			fitConfiguration = new FitConfiguration();
 		fitConfiguration.initialiseState();
 		if (noiseMethod == null)
-			noiseMethod = Method.QuickResidualsLeastMeanOfSquares;
+			noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
 	}
 }

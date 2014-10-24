@@ -104,8 +104,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		GenericDialog gd = new GenericDialog(TITLE);
 
 		gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
-		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.Memory);
-		ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.Memory);
+		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY);
+		ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.MEMORY);
 		gd.addNumericField("Distance", dThreshold, 2);
 
 		gd.addSlider("Increments", 0, 10, increments);

@@ -62,7 +62,20 @@ public class ResultsManager implements PlugIn, MouseListener
 {
 	public enum InputSource
 	{
-		File, Memory, MemoryTraced, None
+		FILE("File"), MEMORY("Memory"), MEMORY_TRACED("Memory (Traced)"), NONE("None");
+
+		private String name;
+
+		private InputSource(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	private static String TITLE = "Peak Results Manager";
@@ -325,7 +338,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		gd.addMessage("Read the Peak Results and output to a new format");
 
 		gd.addMessage("Select the Peak Results");
-		addInput(gd, inputOption, InputSource.Memory, InputSource.File);
+		addInput(gd, inputOption, InputSource.MEMORY, InputSource.FILE);
 
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
@@ -468,11 +481,11 @@ public class ResultsManager implements PlugIn, MouseListener
 		for (InputSource input : inputs)
 		{
 			ResultsManager.addInputSource(source, input);
-			if (input == InputSource.File)
+			if (input == InputSource.FILE)
 				fileInput = true;
 		}
 		if (source.isEmpty())
-			addInputSource(source, InputSource.None);
+			addInputSource(source, InputSource.NONE);
 
 		String[] options = source.toArray(new String[source.size()]);
 		// Find the option
@@ -512,22 +525,22 @@ public class ResultsManager implements PlugIn, MouseListener
 	{
 		switch (input)
 		{
-			case None:
+			case NONE:
 				source.add(INPUT_NONE);
 				break;
 
-			case File:
+			case FILE:
 				source.add(INPUT_FILE);
 				break;
 
-			case Memory:
+			case MEMORY:
 				for (String name : MemoryPeakResults.getResultNames())
 				{
 					addInputSource(source, MemoryPeakResults.getResults(name), false);
 				}
 				break;
 
-			case MemoryTraced:
+			case MEMORY_TRACED:
 				for (String name : MemoryPeakResults.getResultNames())
 				{
 					addInputSource(source, MemoryPeakResults.getResults(name), true);

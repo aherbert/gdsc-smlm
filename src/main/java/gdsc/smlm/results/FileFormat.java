@@ -18,5 +18,19 @@ package gdsc.smlm.results;
  */
 public enum FileFormat
 {
-	SMLMText, SMLMBinary, RapidSTORM, NSTORM, SMLMTable, Unknown
+	SMLM_TEXT("SMLM Text"), SMLM_BINARY("SMLM Binary"), RAPID_STORM("RapidSTORM"), NSTORM("NSTORM"), SMLM_TABLE(
+			"SMLM Table"), UNKNOWN("Unknown");
+
+	private String name;
+
+	private FileFormat(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }

@@ -751,7 +751,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	private ImageProcessor applyWindow(ImageProcessor im, ImageWindow imageWindow)
 	{
 		float[] image = (float[]) im.toFloat(0, null).getPixels();
-		image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(), ImageWindow.WindowFunction.Tukey);
+		image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(), ImageWindow.WindowFunction.TUKEY);
 		return new FloatProcessor(im.getWidth(), im.getHeight(), image, null);
 	}
 

@@ -123,7 +123,7 @@ public class BlinkEstimator implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage("Compute the blinking rate by fitting counts to dark-time.\nSee Annibale et al (2011) PLos ONE 6, e22678.");
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addNumericField("Max_dark_time (frames)", s_maxDarkTime, 0);
 		gd.addCheckbox("Relative_distance", s_relativeDistance);

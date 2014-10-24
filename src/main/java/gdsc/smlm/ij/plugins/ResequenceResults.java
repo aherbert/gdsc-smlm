@@ -73,7 +73,7 @@ public class ResequenceResults implements PlugIn
 				+ "Skip = The number of continuous frames to ignore before the next data\n \n"
 				+ "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
 
-		ResultsManager.addInput(gd, inputOption, InputSource.Memory);
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.addNumericField("Start", start, 0);
 		gd.addNumericField("Block", block, 0);
 		gd.addNumericField("Skip", skip, 0);

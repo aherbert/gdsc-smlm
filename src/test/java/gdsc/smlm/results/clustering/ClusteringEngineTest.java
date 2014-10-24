@@ -25,7 +25,7 @@ public class ClusteringEngineTest
 		{
 			for (int size : new int[] { 2000, 1000, 500, 400, 300, 200, 100 })
 			{
-				testClusting(ClusteringAlgorithm.Closest, radius, 100, size);
+				testClusting(ClusteringAlgorithm.CENTROID_LINKAGE, radius, 100, size);
 			}
 		}
 	}
@@ -37,7 +37,7 @@ public class ClusteringEngineTest
 		{
 			for (int size : new int[] { 2000, 1000, 500, 400, 300, 200, 100 })
 			{
-				testClusting(ClusteringAlgorithm.PairwiseWithoutNeighbours, radius, 100, size);
+				testClusting(ClusteringAlgorithm.PAIRWISE_WITHOUT_NEIGHBOURS, radius, 100, size);
 			}
 		}
 	}
@@ -51,8 +51,8 @@ public class ClusteringEngineTest
 		for (int i = 0; i < Repeats; i++)
 			points[i] = createClusters(50, 1000, 2, radius / 2);
 
-		long t1 = runSpeedTest(points, ClusteringAlgorithm.Closest, radius);
-		long t2 = runSpeedTest(points, ClusteringAlgorithm.PairwiseWithoutNeighbours, radius);
+		long t1 = runSpeedTest(points, ClusteringAlgorithm.CENTROID_LINKAGE, radius);
+		long t2 = runSpeedTest(points, ClusteringAlgorithm.PAIRWISE_WITHOUT_NEIGHBOURS, radius);
 
 		System.out.printf("SpeedTest (Low Density) Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2,
 				(double) t1 / t2);
@@ -68,8 +68,8 @@ public class ClusteringEngineTest
 		for (int i = 0; i < Repeats; i++)
 			points[i] = createClusters(500, 1000, 2, radius / 2);
 
-		long t1 = runSpeedTest(points, ClusteringAlgorithm.Closest, radius);
-		long t2 = runSpeedTest(points, ClusteringAlgorithm.PairwiseWithoutNeighbours, radius);
+		long t1 = runSpeedTest(points, ClusteringAlgorithm.CENTROID_LINKAGE, radius);
+		long t2 = runSpeedTest(points, ClusteringAlgorithm.PAIRWISE_WITHOUT_NEIGHBOURS, radius);
 
 		System.out.printf("SpeedTest (High Density) Closest %d, PairwiseWithoutNeighbours %d = %fx faster\n", t1, t2,
 				(double) t1 / t2);
@@ -85,8 +85,8 @@ public class ClusteringEngineTest
 			points[i] = createPoints(500, 1000);
 		double radius = 50;
 
-		long t1 = runSpeedTest(points, ClusteringAlgorithm.Closest, radius);
-		long t2 = runSpeedTest(points, ClusteringAlgorithm.Pairwise, radius);
+		long t1 = runSpeedTest(points, ClusteringAlgorithm.CENTROID_LINKAGE, radius);
+		long t2 = runSpeedTest(points, ClusteringAlgorithm.PAIRWISE, radius);
 
 		System.out.printf("SpeedTest Closest %d, Pairwise %d = %fx faster\n", t1, t2, (double) t1 / t2);
 		Assert.assertTrue(t2 < t1);
@@ -95,97 +95,97 @@ public class ClusteringEngineTest
 	@Test
 	public void canMultithreadParticleSingleLinkage()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ParticleSingleLinkage);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE);
 	}
 
 	@Test
 	public void multithreadedParticleSingleLinkageIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ParticleSingleLinkage);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE);
 	}
 
 	@Test
 	public void canMultithreadClosest()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.Closest);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.CENTROID_LINKAGE);
 	}
 
 	@Test
 	public void multithreadedClosestIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.Closest);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.CENTROID_LINKAGE);
 	}
 
 	@Test
 	public void canMultithreadClosestParticle()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestParticle);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE);
 	}
 
 	@Test
 	public void multithreadedClosestParticleIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticle);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE);
 	}
 
 	@Test
 	public void canMultithreadClosestDistancePriority()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestDistancePriority);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY);
 	}
 
 	@Test
 	public void multithreadedClosestDistancePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestDistancePriority);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY);
 	}
 
 	@Test
 	public void canMultithreadClosestTimePriority()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestTimePriority);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY);
 	}
 
 	@Test
 	public void multithreadedClosestTimePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestTimePriority);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY);
 	}
 
 	@Test
 	public void canMultithreadClosestParticleDistancePriority()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestParticleDistancePriority);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY);
 	}
 
 	@Test
 	public void multithreadedClosestParticleDistancePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleDistancePriority);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY);
 	}
 
 	@Test
 	public void canMultithreadClosestParticleTimePriority()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.ClosestParticleTimePriority);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY);
 	}
 
 	@Test
 	public void multithreadedClosestParticleTimePriorityIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.ClosestParticleTimePriority);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY);
 	}
 
 	@Test
 	public void canMultithreadPairwiseWithoutNeighbours()
 	{
-		runMultithreadingAlgorithmTest(ClusteringAlgorithm.PairwiseWithoutNeighbours);
+		runMultithreadingAlgorithmTest(ClusteringAlgorithm.PAIRWISE_WITHOUT_NEIGHBOURS);
 	}
 
 	@Test
 	public void multithreadedPairwiseWithoutNeighboursIsFaster()
 	{
-		runMultithreadingSpeedTest(ClusteringAlgorithm.PairwiseWithoutNeighbours);
+		runMultithreadingSpeedTest(ClusteringAlgorithm.PAIRWISE_WITHOUT_NEIGHBOURS);
 	}
 
 	private void runMultithreadingAlgorithmTest(ClusteringAlgorithm algorithm)

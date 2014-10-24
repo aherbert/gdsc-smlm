@@ -277,7 +277,7 @@ public class ClusteringEngine
 	private ExecutorService threadPool = null;
 	private int xBlock, yBlock;
 
-	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.Pairwise;
+	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE;
 	private TrackProgress tracker;
 	private int pulseInterval = 0;
 	private boolean trackJoins = false;
@@ -335,7 +335,7 @@ public class ClusteringEngine
 	 */
 	public ArrayList<Cluster> findClusters(List<ClusterPoint> points, double radius, int time)
 	{
-		if (clusteringAlgorithm == ClusteringAlgorithm.ParticleSingleLinkage)
+		if (clusteringAlgorithm == ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE)
 			return runParticleSingleLinkage(points, radius);
 
 		// Get the density around each point. Points with no density cannot be clustered.
@@ -379,12 +379,12 @@ public class ClusteringEngine
 		// Check for time information if required
 		switch (clusteringAlgorithm)
 		{
-			case ClosestDistancePriority:
-			case ClosestTimePriority:
+			case CENTROID_LINKAGE_DISTANCE_PRIORITY:
+			case CENTROID_LINKAGE_TIME_PRIORITY:
 				if (noTimeInformation(candidates))
 				{
 					tracker.log("No time information among candidates");
-					clusteringAlgorithm = ClusteringAlgorithm.Closest;
+					clusteringAlgorithm = ClusteringAlgorithm.CENTROID_LINKAGE;
 				}
 
 				// All other methods do not use time information	
@@ -414,7 +414,7 @@ public class ClusteringEngine
 		// Assign to a grid
 		final int maxBins = 500;
 		// If tracking potential neighbours then the cells must be larger to cover the increased distance
-		final double cellSize = (clusteringAlgorithm == ClusteringAlgorithm.Pairwise) ? radius : radius * 1.4142;
+		final double cellSize = (clusteringAlgorithm == ClusteringAlgorithm.PAIRWISE) ? radius : radius * 1.4142;
 		final double xBinWidth = Math.max(cellSize, (maxx - minx) / maxBins);
 		final double yBinWidth = Math.max(cellSize, (maxy - miny) / maxBins);
 		final int nXBins = 1 + (int) ((maxx - minx) / xBinWidth);
@@ -438,35 +438,35 @@ public class ClusteringEngine
 		boolean single = false;
 		switch (clusteringAlgorithm)
 		{
-			case Pairwise:
+			case PAIRWISE:
 				clusters = runPairwise(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth, candidates, singles);
 				break;
 
-			case PairwiseWithoutNeighbours:
+			case PAIRWISE_WITHOUT_NEIGHBOURS:
 				clusters = runPairwiseWithoutNeighbours(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth,
 						candidates, singles);
 				break;
 
-			case ClosestParticleTimePriority:
+			case PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY:
 				single = true;
 
-			case ClosestTimePriority:
+			case CENTROID_LINKAGE_TIME_PRIORITY:
 				clusters = runClosestTimePriority(grid, nXBins, nYBins, r2, time, minx, miny, xBinWidth, yBinWidth,
 						candidates, singles, single);
 				break;
 
-			case ClosestParticleDistancePriority:
+			case PARTICLE_CENTROID_LINKAGE_DISTANCE_PRIORITY:
 				single = true;
 
-			case ClosestDistancePriority:
+			case CENTROID_LINKAGE_DISTANCE_PRIORITY:
 				clusters = runClosestDistancePriority(grid, nXBins, nYBins, r2, time, minx, miny, xBinWidth, yBinWidth,
 						candidates, singles, single);
 				break;
 
-			case ClosestParticle:
+			case PARTICLE_CENTROID_LINKAGE:
 				single = true;
 
-			case Closest:
+			case CENTROID_LINKAGE:
 			default:
 				clusters = runClosest(grid, nXBins, nYBins, r2, minx, miny, xBinWidth, yBinWidth, candidates, singles,
 						single);

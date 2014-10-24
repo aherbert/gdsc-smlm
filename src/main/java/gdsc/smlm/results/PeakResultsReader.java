@@ -127,7 +127,7 @@ public class PeakResultsReader
 
 	private void guessFormat()
 	{
-		format = FileFormat.Unknown;
+		format = FileFormat.UNKNOWN;
 
 		// This cannot be done for empty header
 		if (header.length() == 0)
@@ -140,7 +140,7 @@ public class PeakResultsReader
 		}
 		else if (header.contains("origX\torigY\torigValue\tError\tNoise\tSignal\tSNR\tBackground"))
 		{
-			format = FileFormat.SMLMTable;
+			format = FileFormat.SMLM_TABLE;
 			// Header contains:
 			// [#]
 			// [Source]
@@ -176,7 +176,7 @@ public class PeakResultsReader
 		// Check for RapidSTORM stuff in the header
 		else if (header.contains("<localizations "))
 		{
-			format = FileFormat.RapidSTORM;
+			format = FileFormat.RAPID_STORM;
 		}
 		else
 		{
@@ -185,7 +185,7 @@ public class PeakResultsReader
 			// Extract information about the file format
 			if (version.length() > 0)
 			{
-				format = (version.contains("Binary")) ? FileFormat.SMLMBinary : FileFormat.SMLMText;
+				format = (version.contains("Binary")) ? FileFormat.SMLM_BINARY : FileFormat.SMLM_TEXT;
 				deviations = version.contains(".D1");
 				// Extended marker has a bit flag:
 				// 1 = showEndFrame
@@ -203,8 +203,8 @@ public class PeakResultsReader
 			else
 			{
 				// The original files did not have the version tag
-				format = (version.contains("Binary")) ? FileFormat.SMLMBinary : FileFormat.SMLMText;
-				deviations = header.contains((format == FileFormat.SMLMBinary) ? "iiiifdfffffffffffffff" : "+/-");
+				format = (version.contains("Binary")) ? FileFormat.SMLM_BINARY : FileFormat.SMLM_TEXT;
+				deviations = header.contains((format == FileFormat.SMLM_BINARY) ? "iiiifdfffffffffffffff" : "+/-");
 				readEndFrame = readId = false;
 			}
 		}
@@ -216,7 +216,7 @@ public class PeakResultsReader
 	public boolean isBinary()
 	{
 		getFormat();
-		return format == FileFormat.SMLMBinary;
+		return format == FileFormat.SMLM_BINARY;
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class PeakResultsReader
 			getHeader();
 			if (header != null && header.length() > 0)
 			{
-				if (format == FileFormat.RapidSTORM)
+				if (format == FileFormat.RAPID_STORM)
 				{
 					// RapidSTORM has a resolution attribute in the header in units of px m^-1
 					Pattern pattern = Pattern.compile("resolution=\"([^ ]+) px m");
@@ -373,20 +373,20 @@ public class PeakResultsReader
 	public MemoryPeakResults getResults()
 	{
 		getHeader();
-		if (header == null || format == null || format == FileFormat.Unknown)
+		if (header == null || format == null || format == FileFormat.UNKNOWN)
 			return null;
 
 		// Use a switch statement with no break statements to fall through
 		switch (format)
 		{
-			case SMLMBinary:
-			case SMLMText:
+			case SMLM_BINARY:
+			case SMLM_TEXT:
 				// Read SMLM data
 				getName();
 				getSource();
 				getBounds();
 				getConfiguration();
-			case RapidSTORM:
+			case RAPID_STORM:
 				// RapidSTORM has calibration too 
 				getCalibration();
 			default:
@@ -396,16 +396,16 @@ public class PeakResultsReader
 		MemoryPeakResults results = null;
 		switch (format)
 		{
-			case SMLMBinary:
+			case SMLM_BINARY:
 				results = readBinary();
 				break;
-			case SMLMText:
+			case SMLM_TEXT:
 				results = readText();
 				break;
-			case SMLMTable:
+			case SMLM_TABLE:
 				results = readTable();
 				break;
-			case RapidSTORM:
+			case RAPID_STORM:
 				results = readRapidSTORM();
 				break;
 			case NSTORM:
