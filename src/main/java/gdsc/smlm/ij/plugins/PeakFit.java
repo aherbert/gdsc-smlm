@@ -1321,6 +1321,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 						.values());
 				gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
 				gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
+				gd.addCheckbox("Gradient_line_minimisation", fitConfig.isGradientLineMinimisation());
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return false;
@@ -1328,6 +1329,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				fitConfig.setBias(calibration.bias);
 				fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 				fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
+				fitConfig.setGradientLineMinimisation(gd.getNextBoolean());
 			}
 			else if (fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
 			{

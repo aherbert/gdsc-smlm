@@ -61,7 +61,8 @@ public class FitConfiguration implements Cloneable
 	private float duplicateDistance = 0.5f;
 	private float bias;
 	private int maxFunctionEvaluations = 1000;
-	private SearchMethod searchMethod = SearchMethod.POWELL; 
+	private SearchMethod searchMethod = SearchMethod.POWELL;
+	private boolean gradientLineMinimisation = true;
 
 	private StoppingCriteria stoppingCriteria = null;
 	private GaussianFunction gaussianFunction = null;
@@ -1046,6 +1047,26 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+	 * 
+	 * @return the gradientLineMinimisation True if using the gradient for line minimisation
+	 */
+	public boolean isGradientLineMinimisation()
+	{
+		return gradientLineMinimisation;
+	}
+
+	/**
+	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
+	 * 
+	 * @param gradientLineMinimisation Set to true to use the gradient for line minimisation
+	 */
+	public void setGradientLineMinimisation(boolean gradientLineMinimisation)
+	{
+		this.gradientLineMinimisation = gradientLineMinimisation;
+	}
+	
+	/**
 	 * @return The function solver for the current configuration
 	 */
 	public FunctionSolver getFunctionSolver()
@@ -1058,6 +1079,7 @@ public class FitConfiguration implements Cloneable
 				fitter.setMaxEvaluations(maxFunctionEvaluations);
 				fitter.setMaxIterations(maxIterations);
 				fitter.setSearchMethod(searchMethod);
+				fitter.setGradientLineMinimisation(gradientLineMinimisation);
 				// TODO - Configure stopping criteria ...
 				return fitter;
 
