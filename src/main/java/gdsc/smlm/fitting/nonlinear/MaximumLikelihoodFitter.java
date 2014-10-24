@@ -4,8 +4,6 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.function.NonLinearFunction;
 import gdsc.smlm.fitting.function.PoissonLikelihoodFunction;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
