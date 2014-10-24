@@ -68,14 +68,14 @@ public class SettingsManager
 				if (Character.isLowerCase(name.charAt(0)))
 					name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
 
-				// Check if all upper-case
-				boolean isUpper = true;
-				for (int j = 0; j < name.length(); j++)
-					if (Character.isLetter(name.charAt(j)) && !Character.isUpperCase(name.charAt(j)))
-						isUpper = false;
-
-				if (isUpper) // Use sentence case
-					name = name.charAt(0) + name.substring(1).toLowerCase();
+				//// Check if all upper-case
+				//boolean isUpper = true;
+				//for (int j = 0; j < name.length(); j++)
+				//	if (Character.isLetter(name.charAt(j)) && !Character.isUpperCase(name.charAt(j)))
+				//		isUpper = false;
+				//
+				//if (isUpper) // Use sentence case
+				//	name = name.charAt(0) + name.substring(1).toLowerCase();
 			}
 			names[i] = name;
 		}
