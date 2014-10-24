@@ -141,7 +141,7 @@ public class IJImageSource extends ImageSource
 	@Override
 	public boolean openSource()
 	{
-		if (imageArray == null && imageStack == null)
+		if (nullImageArray() && imageStack == null)
 		{
 			// Try and find the image using the name or path
 			ImagePlus imp = null;
@@ -171,6 +171,21 @@ public class IJImageSource extends ImageSource
 		}
 		slice = 0;
 		return true;
+	}
+
+	/**
+	 * @return True is the image array or any part of it is null
+	 */
+	private boolean nullImageArray()
+	{
+		if (imageArray == null)
+			return true;
+		// Check the image array. This is set to null when an image is closed by ImageJ
+		// allowing us to detect when the image is still available
+		for (Object o : imageArray)
+			if (o == null)
+				return true;
+		return false;
 	}
 
 	/*
@@ -232,7 +247,7 @@ public class IJImageSource extends ImageSource
 		xs.omitField(IJImageSource.class, "imageArray");
 		xs.omitField(IJImageSource.class, "imageStack");
 	}
-	
+
 	@Override
 	public boolean isValid(int frame)
 	{

@@ -348,7 +348,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		time = -1;
 
-		initialiseImage(imageSource, getBounds(imp), false);
+		if (!initialiseImage(imageSource, getBounds(imp), false))
+		{
+			IJ.error(TITLE, "Failed to initialise the source image: " + imageSource.getName());
+			return DONE;
+		}
 
 		int flags = showDialog(imp);
 		if ((flags & DONE) == 0)
@@ -1862,9 +1866,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
 		if (results == null || results.size() == 0)
+		{
+			log("No results for maxima fitting");
 			return;
-		if (source == null)
-			return;
+		}
+		// No check for imageSource since this has been check in the calling method
 
 		int totalFrames = source.getFrames();
 
