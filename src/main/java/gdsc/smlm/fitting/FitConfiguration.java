@@ -27,6 +27,7 @@ import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.ParameterStoppingCriteria;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.utils.Maths;
 
 /**
  * Specifies the fitting configuration for Gaussian fitting
@@ -543,10 +544,8 @@ public class FitConfiguration implements Cloneable
 	{
 		if (shiftFactor > 0)
 		{
-			float widthMax = (initialSD0 > 0) ? initialSD0 : 1;
-			if (initialSD1 > 0)
-				widthMax = Math.max(initialSD1, widthMax);
-			setCoordinateShift(shiftFactor * widthMax / 2);
+			final float widthMax = Maths.max(initialSD0, initialSD1, 1);
+			setCoordinateShift(shiftFactor * widthMax);
 		}
 		else
 		{
@@ -559,10 +558,8 @@ public class FitConfiguration implements Cloneable
 	 */
 	public float getCoordinateShiftFactor()
 	{
-		float widthMax = (initialSD0 > 0) ? initialSD0 : Gaussian2DFitter.sd2fwhm(1);
-		if (initialSD1 > 0)
-			widthMax = Math.max(initialSD1, widthMax);
-		return coordinateShift * 2 / widthMax;
+		final float widthMax = Maths.max(initialSD0, initialSD1, 1);
+		return coordinateShift / widthMax;
 	}
 
 	/**
@@ -744,9 +741,9 @@ public class FitConfiguration implements Cloneable
 	{
 		final int offset = n * 6;
 		// Check spot movement
-		float xShift = peakParams[Gaussian2DFunction.X_POSITION + offset] -
+		final float xShift = peakParams[Gaussian2DFunction.X_POSITION + offset] -
 				initialParams[Gaussian2DFunction.X_POSITION + offset];
-		float yShift = peakParams[Gaussian2DFunction.Y_POSITION + offset] -
+		final float yShift = peakParams[Gaussian2DFunction.Y_POSITION + offset] -
 				initialParams[Gaussian2DFunction.Y_POSITION + offset];
 		if (Math.abs(xShift) > coordinateShift || Math.abs(yShift) > coordinateShift)
 		{
