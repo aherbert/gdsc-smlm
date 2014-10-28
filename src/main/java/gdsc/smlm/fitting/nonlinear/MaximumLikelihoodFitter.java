@@ -4,6 +4,8 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.function.NonLinearFunction;
 import gdsc.smlm.fitting.function.PoissonLikelihoodFunction;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
@@ -20,6 +22,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
@@ -152,7 +155,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		 * <p>
 		 * This is a bounded search using simple truncation of coordinates at the bounds of the search space.
 		 */
-		CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière");
+		CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière"),
+		/**
+		 * Search using a Broyden-Fletcher-Goldfarb-Shanno (BFGS) gradient optimiser.
+		 */
+		BFGS("BFGS Gradient");
 
 		private String name;
 
@@ -197,8 +204,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		{
 			double[] startPoint = getInitialSolution(a);
 
-			double ll = 0;
-			double[] solution = null;
+			PointValuePair optimum = null;
 			if (searchMethod == SearchMethod.POWELL || searchMethod == SearchMethod.POWELL_BOUNDED)
 			{
 				// Non-differentiable version using Powell Optimiser
@@ -216,23 +222,22 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					maxIterationData = new MaxIter(getMaxIterations());
 				if (searchMethod == SearchMethod.POWELL)
 				{
-					PointValuePair optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
+					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
 							new ObjectiveFunction(new MultivariatePoisson(maximumLikelihoodFunction)),
 							GoalType.MINIMIZE, new InitialGuess(startPoint));
-					solution = optimum.getPointRef();
-					ll = optimum.getValue();
 				}
 				else
 				{
 					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower,
 							upper);
-					PointValuePair optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
+					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
 							new ObjectiveFunction(adapter), GoalType.MINIMIZE,
 							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
-					solution = adapter.unboundedToBounded(optimum.getPointRef());
-					ll = optimum.getValue();
+					double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
+					optimum = new PointValuePair(solution, optimum.getValue());
 				}
-				iterations = o.getEvaluations();
+				iterations = o.getIterations();
+				evaluations = o.getEvaluations();
 			}
 			else if (searchMethod == SearchMethod.BOBYQA)
 			{
@@ -241,12 +246,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
-				PointValuePair optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
+				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
 						startPoint), new SimpleBounds(lower, upper));
-				solution = optimum.getPointRef();
-				ll = optimum.getValue();
-				iterations = o.getEvaluations();
+				iterations = o.getIterations();
+				evaluations = o.getEvaluations();
 			}
 			else if (searchMethod == SearchMethod.CMAES)
 			{
@@ -272,7 +276,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// The Apache commons documentations states that convergence should occur between 30N and 300N^2
 				// function evaluations
 				final int n30 = Math.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
-				int totalEvaluations = 0;
+				evaluations = 0;
 				OptimizationData[] data = new OptimizationData[] { new InitialGuess(startPoint),
 						new CMAESOptimizer.PopulationSize(popSize), new MaxEval(getMaxEvaluations()),
 						new CMAESOptimizer.Sigma(sigma),
@@ -280,28 +284,53 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						new SimpleBounds(lower, upper) };
 				// Iterate to prevent early convergence
 				int repeat = 0;
-				while (totalEvaluations < n30)
+				while (evaluations < n30)
 				{
 					if (repeat++ > 1)
 					{
 						// Update the start point and population size
-						data[0] = new InitialGuess(solution);
+						data[0] = new InitialGuess(optimum.getPointRef());
 						popSize *= 2;
 						data[1] = new CMAESOptimizer.PopulationSize(popSize);
 					}
 					CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCMA, diagonalOnly,
 							checkFeasableCount, random, generateStatistics, new SimpleValueChecker(rel, abs));
-					PointValuePair optimum = o.optimize(data);
+					PointValuePair result = o.optimize(data);
 					iterations += o.getIterations();
-					totalEvaluations += o.getEvaluations();
+					evaluations += o.getEvaluations();
 					//System.out.printf("CMAES [%d] i=%d [%d], e=%d [%d]\n", repeat, o.getIterations(), iterations,
 					//		o.getEvaluations(), totalEvaluations);
-					if (solution == null || optimum.getValue() < ll)
+					if (optimum == null || result.getValue() < optimum.getValue())
 					{
-						solution = optimum.getPointRef();
-						ll = optimum.getValue();
+						optimum = result;
 					}
 				}
+			}
+			else if (searchMethod == SearchMethod.BFGS)
+			{
+				// NR:
+				// BFGS can use an approximate line search minimisation where as Powell and conjugate gradient
+				// methods require a more accurate line minimisation.
+				// "Since the function may not be a quadratic approximation when we move far along the local gradient
+				// we can use a backtracking strategy along the direction of the full Newton step to choose an
+				// appropriate step." 
+				// Reading NR 9.7 it appears that the search does not do a full minimisation but takes appropriate
+				// steps in the direction of the current gradient.
+				//BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs));
+				BFGSOptimizer o = new BFGSOptimizer(null);
+				
+				// TODO - Configure maximum step length for each dimension using the bounds
+				o.setMaximumStepLength(10);				
+
+				// The GoalType is always minimise so no need to pass this in
+				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
+						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
+						new MultivariatePoisson(maximumLikelihoodFunction)), new InitialGuess(
+						startPoint), new SimpleBounds(lower, upper),
+						new BFGSOptimizer.GradientChecker(rel, abs),
+						new BFGSOptimizer.PositionChecker(rel, abs));
+				iterations = o.getIterations();
+				evaluations = o.getEvaluations();
 			}
 			else
 			{
@@ -381,23 +410,25 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				o.setUseGradientLineSearch(gradientLineMinimisation);
 				
-				PointValuePair optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
+				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
 						startPoint), new SimpleBounds(lower, upper),
 						new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(bracketingStep));
-				solution = optimum.getPointRef();
-				ll = optimum.getValue();
 				iterations = o.getIterations();
+				evaluations = o.getEvaluations();
 
 				//maximumLikelihoodFunction.value(solution, gradient);
 				//System.out.printf("Iter = %d, %g @ %s : %s\n", iterations, ll, Arrays.toString(solution),
 				//		Arrays.toString(gradient));
 			}
 
+			final double[] solution = optimum.getPointRef();
+			final double ll = optimum.getValue();
+			
 			setSolution(a, solution);
 
-			//System.out.printf("Iter = %d, %g @ %s\n", iterations, ll, Arrays.toString(solution));
+			System.out.printf("Iter = %d, Eval = %d, %g @ %s\n", iterations, evaluations, ll, Arrays.toString(solution));
 
 			// Compute residuals for the FunctionSolver interface
 			if (y_fit == null || y_fit.length < n)
@@ -438,8 +469,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		}
 		catch (Exception e)
 		{
-			// TODO - Find out the other exceptions from the fitter and add return values to match.
-			e.printStackTrace();
+			// TODO - Find out the other exceptions from the fitters and add return values to match.
+			//e.printStackTrace();
 
 			return FitStatus.UNKNOWN;
 		}
@@ -532,6 +563,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		{
 			case CONJUGATE_GRADIENT_FR:
 			case CONJUGATE_GRADIENT_PR:
+			case BFGS:
 				return true;
 			default:
 				return false;
