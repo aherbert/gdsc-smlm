@@ -473,6 +473,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	 * @throws MathIllegalStateException
 	 *             if no bracket can be found.
 	 */
+	@SuppressWarnings("unused")
 	private double findUpperBoundWithChecks(final UnivariateFunction f, final double a, final double h)
 	{
 		noBracket = false;
