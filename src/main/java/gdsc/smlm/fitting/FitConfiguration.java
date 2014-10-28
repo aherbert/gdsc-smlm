@@ -63,6 +63,8 @@ public class FitConfiguration implements Cloneable
 	private int maxFunctionEvaluations = 1000;
 	private SearchMethod searchMethod = SearchMethod.POWELL;
 	private boolean gradientLineMinimisation = true;
+	private double relativeThreshold = 1e-4;
+	private double absoluteThreshold = 1e-10;
 
 	private StoppingCriteria stoppingCriteria = null;
 	private GaussianFunction gaussianFunction = null;
@@ -1065,6 +1067,38 @@ public class FitConfiguration implements Cloneable
 	{
 		this.gradientLineMinimisation = gradientLineMinimisation;
 	}
+
+	/**
+	 * @return the relative threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public double getRelativeThreshold()
+	{
+		return relativeThreshold;
+	}
+
+	/**
+	 * @param relativeThreshold the relative threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public void setRelativeThreshold(double relativeThreshold)
+	{
+		this.relativeThreshold = relativeThreshold;
+	}
+
+	/**
+	 * @return the absolute threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public double getAbsoluteThreshold()
+	{
+		return absoluteThreshold;
+	}
+
+	/**
+	 * @param absoluteThreshold the absolute threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public void setAbsoluteThreshold(double absoluteThreshold)
+	{
+		this.absoluteThreshold = absoluteThreshold;
+	}
 	
 	/**
 	 * @return The function solver for the current configuration
@@ -1076,6 +1110,8 @@ public class FitConfiguration implements Cloneable
 		{
 			case MLE:
 				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gf);
+				fitter.setRelativeThreshold(relativeThreshold);
+				fitter.setAbsoluteThreshold(absoluteThreshold);
 				fitter.setMaxEvaluations(maxFunctionEvaluations);
 				fitter.setMaxIterations(maxIterations);
 				fitter.setSearchMethod(searchMethod);

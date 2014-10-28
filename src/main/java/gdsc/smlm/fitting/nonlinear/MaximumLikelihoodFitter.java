@@ -176,7 +176,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	}
 
 	private SearchMethod searchMethod;
-	private boolean gradientLineMinimisation= true;
+	private boolean gradientLineMinimisation = true;
+	private double relativeThreshold = 1e-4, absoluteThreshold = 1e-10;
 	private double[] lower, upper;
 
 	/**
@@ -197,8 +198,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		numberOfFittedPoints = n;
 
 		PoissonLikelihoodFunction maximumLikelihoodFunction = new PoissonLikelihoodFunction(f, a, y, n);
-		final double rel = 1e-4; // Relative threshold.
-		final double abs = 1e-10; // Absolute threshold.
 
 		try
 		{
@@ -213,7 +212,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// I could extend the optimiser and implement bounds on the directions moved. However the mapping
 				// adapter seems to work OK.
 
-				PowellOptimizer o = new PowellOptimizer(rel, abs);
+				PowellOptimizer o = new PowellOptimizer(relativeThreshold, absoluteThreshold);
 
 				// Try using the mapping adapter
 				MultivariateFunction fun = new MultivariatePoisson(maximumLikelihoodFunction);
@@ -222,17 +221,16 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					maxIterationData = new MaxIter(getMaxIterations());
 				if (searchMethod == SearchMethod.POWELL)
 				{
-					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
-							new ObjectiveFunction(new MultivariatePoisson(maximumLikelihoodFunction)),
-							GoalType.MINIMIZE, new InitialGuess(startPoint));
+					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
+							new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
+							startPoint));
 				}
 				else
 				{
 					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower,
 							upper);
-					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
-							new ObjectiveFunction(adapter), GoalType.MINIMIZE,
-							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
+					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
+							adapter), GoalType.MINIMIZE, new InitialGuess(adapter.boundedToUnbounded(startPoint)));
 					double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
 					optimum = new PointValuePair(solution, optimum.getValue());
 				}
@@ -246,9 +244,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
-				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
-						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
-						startPoint), new SimpleBounds(lower, upper));
+				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunction(new MultivariatePoisson(
+						maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(
+						lower, upper));
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
 			}
@@ -294,7 +292,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						data[1] = new CMAESOptimizer.PopulationSize(popSize);
 					}
 					CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCMA, diagonalOnly,
-							checkFeasableCount, random, generateStatistics, new SimpleValueChecker(rel, abs));
+							checkFeasableCount, random, generateStatistics, new SimpleValueChecker(relativeThreshold,
+									absoluteThreshold));
 					PointValuePair result = o.optimize(data);
 					iterations += o.getIterations();
 					evaluations += o.getEvaluations();
@@ -318,17 +317,17 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// steps in the direction of the current gradient.
 				//BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs));
 				BFGSOptimizer o = new BFGSOptimizer(null);
-				
+
 				// TODO - Configure maximum step length for each dimension using the bounds
-				o.setMaximumStepLength(10);				
+				o.setMaximumStepLength(10);
 
 				// The GoalType is always minimise so no need to pass this in
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
-						new MultivariatePoisson(maximumLikelihoodFunction)), new InitialGuess(
-						startPoint), new SimpleBounds(lower, upper),
-						new BFGSOptimizer.GradientChecker(rel, abs),
-						new BFGSOptimizer.PositionChecker(rel, abs));
+						new MultivariatePoisson(maximumLikelihoodFunction)), new InitialGuess(startPoint),
+						new SimpleBounds(lower, upper), new BFGSOptimizer.GradientChecker(relativeThreshold,
+								absoluteThreshold), new BFGSOptimizer.PositionChecker(relativeThreshold,
+								absoluteThreshold));
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
 			}
@@ -342,7 +341,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				BoundedNonLinearConjugateGradientOptimizer o = new BoundedNonLinearConjugateGradientOptimizer(
 						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? Formula.FLETCHER_REEVES
-								: Formula.POLAK_RIBIERE, new SimpleValueChecker(rel, abs));
+								: Formula.POLAK_RIBIERE, new SimpleValueChecker(relativeThreshold, absoluteThreshold));
 
 				// Note: The gradients may become unstable at the edge of the bounds. Or they will not change 
 				// direction if the true solution is on the bounds since the gradient will always continue 
@@ -376,7 +375,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				// Tried using a non-gradient method for the line search copied from the Powell optimiser:
 				// This also works when the bracketing step is small but the number of iterations is higher.
-				
+
 				// 24.10.2014: I have tried to get conjugate gradient to work but the gradient function 
 				// must not behave suitably for the optimiser. In the current state both methods of using a 
 				// Bounded Conjugate Gradient Optimiser perform poorly relative to other optimisers:
@@ -391,12 +390,12 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// fitting is used and not tightly bounded fitting.
 				// I will leave the code in as an option but would not recommend using it. I may remove it in the 
 				// future.
-				
+
 				// Note: It is strange that the non-gradient based line minimisation is more successful.
 				// It may be that the gradient function is not accurate (due to round off error) or that it is
 				// simple wrong when far from the optimum. My JUnit tests only evaluate the function within the 
 				// expected range of the answer.
-				
+
 				// Note the default step size on the Powell optimiser is 1 but the initial directions are unit vectors.
 				// So our bracketing step should be a minimum of 1 / average length of the first gradient vector to prevent
 				// the first step being too large when bracketing.
@@ -405,11 +404,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				double l = 0;
 				for (double d : gradient)
 					l += d * d;
-				final double bracketingStep = Math.min(0.001, ((l>1) ? 1.0/l : 1));
+				final double bracketingStep = Math.min(0.001, ((l > 1) ? 1.0 / l : 1));
 				//System.out.printf("Bracketing step = %f (length=%f)\n", bracketingStep, l);
 
 				o.setUseGradientLineSearch(gradientLineMinimisation);
-				
+
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
@@ -424,11 +423,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			}
 
 			final double[] solution = optimum.getPointRef();
-			final double ll = optimum.getValue();
-			
+
 			setSolution(a, solution);
 
-			System.out.printf("Iter = %d, Eval = %d, %g @ %s\n", iterations, evaluations, ll, Arrays.toString(solution));
+			//System.out.printf("Iter = %d, Eval = %d, %g @ %s\n", iterations, evaluations, optimum.getValue(), 
+			//	Arrays.toString(solution));
 
 			// Compute residuals for the FunctionSolver interface
 			if (y_fit == null || y_fit.length < n)
@@ -525,13 +524,48 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	/**
 	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
 	 * 
-	 * @param gradientLineMinimisation Set to true to use the gradient for line minimisation
+	 * @param gradientLineMinimisation
+	 *            Set to true to use the gradient for line minimisation
 	 */
 	public void setGradientLineMinimisation(boolean gradientLineMinimisation)
 	{
 		this.gradientLineMinimisation = gradientLineMinimisation;
 	}
-	
+
+	/**
+	 * @return the relative threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public double getRelativeThreshold()
+	{
+		return relativeThreshold;
+	}
+
+	/**
+	 * @param relativeThreshold
+	 *            the relative threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public void setRelativeThreshold(double relativeThreshold)
+	{
+		this.relativeThreshold = relativeThreshold;
+	}
+
+	/**
+	 * @return the absolute threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public double getAbsoluteThreshold()
+	{
+		return absoluteThreshold;
+	}
+
+	/**
+	 * @param absoluteThreshold
+	 *            the absolute threshold for convergence in the Maximum Likelihood Estimator
+	 */
+	public void setAbsoluteThreshold(double absoluteThreshold)
+	{
+		this.absoluteThreshold = absoluteThreshold;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

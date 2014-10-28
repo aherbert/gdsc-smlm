@@ -1320,6 +1320,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod
 						.values());
 				gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
+				gd.addStringField("Relative_threshold", "" + fitConfig.getRelativeThreshold());
+				gd.addStringField("Absolute_threshold", "" + fitConfig.getAbsoluteThreshold());
+				gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
 				gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
 				gd.addCheckbox("Gradient_line_minimisation", fitConfig.isGradientLineMinimisation());
 				gd.showDialog();
@@ -1328,8 +1331,34 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				calibration.bias = (float) Math.abs(gd.getNextNumber());
 				fitConfig.setBias(calibration.bias);
 				fitConfig.setSearchMethod(gd.getNextChoiceIndex());
+				try
+				{
+					fitConfig.setRelativeThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
+					fitConfig.setAbsoluteThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
+				}
+				catch (NumberFormatException e)
+				{
+					fitConfig.setRelativeThreshold(0);
+					fitConfig.setAbsoluteThreshold(0);
+				}
+				fitConfig.setMaxIterations((int) gd.getNextNumber());
 				fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
 				fitConfig.setGradientLineMinimisation(gd.getNextBoolean());
+
+				SettingsManager.saveSettings(settings, filename);
+
+				try
+				{
+					Parameters.isAboveZero("Relative threshold", fitConfig.getRelativeThreshold());
+					Parameters.isAboveZero("Absolute threshold", fitConfig.getAbsoluteThreshold());
+					Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+					Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
+				}
+				catch (IllegalArgumentException e)
+				{
+					IJ.error(TITLE, e.getMessage());
+					return false;
+				}
 			}
 			else if (fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
 			{
