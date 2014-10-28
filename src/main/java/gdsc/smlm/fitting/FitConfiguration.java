@@ -544,7 +544,7 @@ public class FitConfiguration implements Cloneable
 	{
 		if (shiftFactor > 0)
 		{
-			final float widthMax = Maths.max(initialSD0, initialSD1, 1);
+			final float widthMax = Maths.max(initialSD0, initialSD1);
 			setCoordinateShift(shiftFactor * widthMax);
 		}
 		else
@@ -558,7 +558,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public float getCoordinateShiftFactor()
 	{
-		final float widthMax = Maths.max(initialSD0, initialSD1, 1);
+		final float widthMax = Maths.max(initialSD0, initialSD1);
 		return coordinateShift / widthMax;
 	}
 
