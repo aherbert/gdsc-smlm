@@ -4,8 +4,6 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.function.NonLinearFunction;
 import gdsc.smlm.fitting.function.PoissonLikelihoodFunction;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
@@ -452,13 +450,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		catch (TooManyIterationsException e)
 		{
 			//System.out.printf("Too many iterations = %d\n", e.getMax());
-			e.printStackTrace();
+			//e.printStackTrace();
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
 		catch (TooManyEvaluationsException e)
 		{
 			//System.out.printf("Too many evaluations = %d\n", e.getMax());
-			e.printStackTrace();
+			//e.printStackTrace();
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
 		catch (ConvergenceException e)
