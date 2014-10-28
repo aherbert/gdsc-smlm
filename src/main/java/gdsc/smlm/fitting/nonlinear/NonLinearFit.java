@@ -283,7 +283,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		sumOfSquaresWorking = new double[3];
 
 		final FitStatus result = doFit(n, y, y_fit, a, a_dev, error, sc, noise);
-		this.iterations = sc.getIteration();
+		this.evaluations = this.iterations = sc.getIteration();
 
 		return result;
 	}

@@ -30,6 +30,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	protected double residualSumOfSquares;
 	protected int numberOfFittedPoints;
 	protected int iterations;
+	protected int evaluations;
 
 	/**
 	 * Default constructor
@@ -167,6 +168,17 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	public int getIterations()
 	{
 		return iterations;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#getEvaluations()
+	 */
+	@Override
+	public int getEvaluations()
+	{
+		return evaluations;
 	}
 
 	/**

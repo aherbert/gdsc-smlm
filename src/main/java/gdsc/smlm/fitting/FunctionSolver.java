@@ -70,6 +70,11 @@ public interface FunctionSolver
 	public int getIterations();
 
 	/**
+	 * @return The number of function evaluations used to solve the function
+	 */
+	public int getEvaluations();
+
+	/**
 	 * Specifies if the function solver supports a bounded search (i.e. a search of parameter space within the total
 	 * allowed space of valid parameters, or the parameter constraints). If true then the bounds can be set before a
 	 * call to the {@link #fit(int, float[], float[], float[], float[], double[], double)} method.

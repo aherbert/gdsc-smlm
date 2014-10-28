@@ -91,7 +91,8 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 
 			final double[] parameters = optimum.getPoint();
 			setSolution(a, parameters);
-			iterations = optimizer.getEvaluations();
+			iterations = optimizer.getIterations();
+			evaluations = optimizer.getEvaluations();
 			if (a_dev != null)
 			{
 				double[][] covar = optimizer.computeCovariances(parameters, threshold);
