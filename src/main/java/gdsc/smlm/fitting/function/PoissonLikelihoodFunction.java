@@ -34,11 +34,14 @@ public class PoissonLikelihoodFunction
 	private float[] a, data;
 	private int n;
 
+	private double lastScore;
+	private double[] lastVariables;
+
 	/**
 	 * Initialise the function.
 	 * <p>
-	 * The input parameters must be the full parameters for the non-linear function. Only those
-	 * parameters with gradient indices should be passed in to the functions to obtain the value (and gradient).
+	 * The input parameters must be the full parameters for the non-linear function. Only those parameters with gradient
+	 * indices should be passed in to the functions to obtain the value (and gradient).
 	 * 
 	 * @param f
 	 *            The function to be used to calculated the expected values
@@ -80,6 +83,10 @@ public class PoissonLikelihoodFunction
 	 */
 	public double value(double[] variables)
 	{
+		// Check if we have a cached score
+		if (sameVariables(variables))
+			return lastScore;
+
 		initialiseFunction(variables);
 
 		// Compute the negative log-likelihood to be minimised
@@ -102,6 +109,23 @@ public class PoissonLikelihoodFunction
 	}
 
 	/**
+	 * Check if the variable match those last used for computation of the value
+	 * @param variables
+	 * @return True if the variables are the same
+	 */
+	private boolean sameVariables(double[] variables)
+	{
+		if (lastVariables != null)
+		{
+			for (int i = 0; i < variables.length; i++)
+				if (variables[i] != lastVariables[i])
+					return false;
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Compute the value and gradient of the function. Returns positive infinity if the function evaluates to zero (or
 	 * below) at any point in the observed values. In this case the gradient computed so far will be invalid.
 	 * 
@@ -114,6 +138,11 @@ public class PoissonLikelihoodFunction
 	public double value(double[] variables, double[] gradient)
 	{
 		initialiseFunction(variables);
+
+		// Cache the score we compute. This is useful for routine computing the gradient and 
+		// value in two separate calls (e.g. the Apache Commons Math3 optimisers)
+		lastScore = Double.POSITIVE_INFINITY;
+		lastVariables = variables.clone();
 
 		// Compute the negative log-likelihood to be minimised
 		// f(x) = l(x) - k * ln(l(x))
@@ -132,23 +161,24 @@ public class PoissonLikelihoodFunction
 			final double l = f.eval(i, dl_da);
 
 			final double k = data[i];
-			
+
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
 			{
 				// Since ln(0) -> -Infinity
-				ll = Double.POSITIVE_INFINITY;
+				return Double.POSITIVE_INFINITY;
 			}
 			else
 			{
 				ll += l - k * Math.log(l);
 			}
-			
+
 			// Continue to work out the gradient since this does not involve logs.
 			// Note: if l==0 then we get divide by zero and a NaN value
 			for (int j = 0; j < gradient.length; j++)
 				gradient[j] += dl_da[j] - (dl_da[j] * k / l);
 		}
+		lastScore = ll;
 		return ll;
 	}
 
