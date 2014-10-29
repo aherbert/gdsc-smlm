@@ -7,9 +7,9 @@ import org.junit.Test;
 /**
  * Contains tests for the Gaussian functions in single or double precision
  * <p>
- * The tests show that there is very little (if any) time penalty when using double precision for the 
- * calculations. However the precision of the single-precision functions is 1e-4 when using reasonable
- * Gaussian parameters. This could effect the convergence of optimisers/fitters if using single precision math.
+ * The tests show that there is very little (if any) time penalty when using double precision for the calculations.
+ * However the precision of the single-precision functions is 1e-4 when using reasonable Gaussian parameters. This could
+ * effect the convergence of optimisers/fitters if using single precision math.
  */
 public class PrecisionTest
 {
@@ -401,13 +401,27 @@ public class PrecisionTest
 	@Test
 	public void circularSinglePrecisionIsFasterWithGradients()
 	{
-		singlePrecisionIsFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx));
+		singlePrecisionIsFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
+				false);
 	}
 
 	@Test
 	public void circularSinglePrecisionIsFaster()
 	{
-		singlePrecisionIsFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx));
+		singlePrecisionIsFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false);
+	}
+
+	@Test
+	public void circularSinglePrecisionIsFasterWithGradientsNoSum()
+	{
+		singlePrecisionIsFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
+				true);
+	}
+
+	@Test
+	public void circularSinglePrecisionIsFasterNoSum()
+	{
+		singlePrecisionIsFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), true);
 	}
 
 	@Test
@@ -438,8 +452,7 @@ public class PrecisionTest
 			{
 				maxx *= 2;
 				System.out.printf("maxx = %d\n", maxx);
-				functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx),
-						1e-3);
+				functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
 			}
 		}
 		catch (AssertionError e)
@@ -453,15 +466,27 @@ public class PrecisionTest
 	@Test
 	public void fixedSinglePrecisionIsFasterWithGradients()
 	{
-		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx));
+		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false);
 	}
 
 	@Test
 	public void fixedSinglePrecisionIsFaster()
 	{
-		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx));
+		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false);
 	}
-	
+
+	@Test
+	public void fixedSinglePrecisionIsFasterWithGradientsNoSum()
+	{
+		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true);
+	}
+
+	@Test
+	public void fixedSinglePrecisionIsFasterNoSum()
+	{
+		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true);
+	}
+
 	private void functionsComputeSameValue(int maxx, SinglePrecision f1, DoublePrecision f2, final double precision)
 	{
 		f1.setMaxX(maxx);
@@ -502,7 +527,7 @@ public class PrecisionTest
 		Assert.assertEquals("Different totals", t2, t1, precision);
 	}
 
-	private void singlePrecisionIsFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2)
+	private void singlePrecisionIsFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
 	{
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
@@ -511,19 +536,65 @@ public class PrecisionTest
 		p1[Gaussian.X_POSITION] = (float) (p2[Gaussian.X_POSITION] = (float) (0.123 + maxx / 2));
 		p1[Gaussian.Y_POSITION] = (float) (p2[Gaussian.Y_POSITION] = (float) (0.789 + maxx / 2));
 
-		long time1 = runSingleWithGradients(maxx, f1, p1);
-		time1 = runSingleWithGradients(maxx, f1, p1);
-		time1 += runSingleWithGradients(maxx, f1, p1);
-		long time2 = runDoubleWithGradients(maxx, f2, p2);
-		time2 = runDoubleWithGradients(maxx, f2, p2);
-		time2 += runDoubleWithGradients(maxx, f2, p2);
+		long time1, time2;
 
-		System.out.printf("Gradient %s = %d, %s = %d => (%f)\n", f1.getClass().getSimpleName(),
-				time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
+		if (noSum)
+		{
+			time1 = runSingleWithGradientsNoSum(maxx, f1, p1);
+			time1 = runSingleWithGradientsNoSum(maxx, f1, p1);
+			time1 += runSingleWithGradientsNoSum(maxx, f1, p1);
+			time2 = runDoubleWithGradientsNoSum(maxx, f2, p2);
+			time2 = runDoubleWithGradientsNoSum(maxx, f2, p2);
+			time2 += runDoubleWithGradientsNoSum(maxx, f2, p2);
+		}
+		else
+		{
+			time1 = runSingleWithGradients(maxx, f1, p1);
+			time1 = runSingleWithGradients(maxx, f1, p1);
+			time1 += runSingleWithGradients(maxx, f1, p1);
+			time2 = runDoubleWithGradients(maxx, f2, p2);
+			time2 = runDoubleWithGradients(maxx, f2, p2);
+			time2 += runDoubleWithGradients(maxx, f2, p2);
+		}
+
+		System.out.printf("%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "", f1.getClass()
+				.getSimpleName(), time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
 		Assert.assertTrue(time1 < time2);
 	}
 
+	@SuppressWarnings("unused")
 	private long runSingleWithGradients(int maxx, SinglePrecision f, float[] p)
+	{
+		f.initialise(p);
+		final int n = params1.length;
+		float[] g = new float[n];
+		double[] tg = new double[n];
+
+		// Warm up
+		for (int j = 0; j < 10; j++)
+		{
+			for (int i = 0; i < maxx; i++)
+			{
+				f.eval(i, g);
+			}
+		}
+
+		long time = System.nanoTime();
+		double sum = 0;
+		for (int j = 0; j < MAX_ITER; j++)
+		{
+			sum = 0;
+			for (int i = 0; i < maxx; i++)
+			{
+				sum += f.eval(i, g);
+				for (int k = 0; k < n; k++)
+					tg[k] += g[k];
+			}
+		}
+		return System.nanoTime() - time;
+	}
+
+	private long runSingleWithGradientsNoSum(int maxx, SinglePrecision f, float[] p)
 	{
 		f.initialise(p);
 		float[] g = new float[params1.length];
@@ -538,23 +609,24 @@ public class PrecisionTest
 		}
 
 		long time = System.nanoTime();
-		double sum = 0;
 		for (int j = 0; j < MAX_ITER; j++)
 		{
-			sum = 0;
 			for (int i = 0; i < maxx; i++)
 			{
-				sum += f.eval(i, g);
+				f.eval(i, g);
 			}
 		}
 		return System.nanoTime() - time;
 	}
 
+	@SuppressWarnings("unused")
 	private long runDoubleWithGradients(int maxx, DoublePrecision f, double[] p)
 	{
 		f.initialise(p);
-		double[] g = new double[params1.length];
-
+		final int n = params1.length;
+		double[] g = new double[n];
+		double[] tg = new double[n];
+		
 		// Warm up
 		for (int j = 0; j < 10; j++)
 		{
@@ -572,12 +644,39 @@ public class PrecisionTest
 			for (int i = 0; i < maxx; i++)
 			{
 				sum += f.eval(i, g);
+				for (int k = 0; k < n; k++)
+					tg[k] += g[k];
 			}
 		}
 		return System.nanoTime() - time;
 	}
 
-	private void singlePrecisionIsFaster(int maxx, SinglePrecision f1, DoublePrecision f2)
+	private long runDoubleWithGradientsNoSum(int maxx, DoublePrecision f, double[] p)
+	{
+		f.initialise(p);
+		double[] g = new double[params1.length];
+
+		// Warm up
+		for (int j = 0; j < 10; j++)
+		{
+			for (int i = 0; i < maxx; i++)
+			{
+				f.eval(i, g);
+			}
+		}
+
+		long time = System.nanoTime();
+		for (int j = 0; j < MAX_ITER; j++)
+		{
+			for (int i = 0; i < maxx; i++)
+			{
+				f.eval(i, g);
+			}
+		}
+		return System.nanoTime() - time;
+	}
+
+	private void singlePrecisionIsFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
 	{
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
@@ -586,18 +685,32 @@ public class PrecisionTest
 		p1[Gaussian.X_POSITION] = (float) (p2[Gaussian.X_POSITION] = (float) (0.123 + maxx / 2));
 		p1[Gaussian.Y_POSITION] = (float) (p2[Gaussian.Y_POSITION] = (float) (0.789 + maxx / 2));
 
-		long time1 = runSingle(maxx, f1, p1);
-		time1 = runSingle(maxx, f1, p1);
-		time1 += runSingle(maxx, f1, p1);
-		long time2 = runDouble(maxx, f2, p2);
-		time2 = runDouble(maxx, f2, p2);
-		time2 += runDouble(maxx, f2, p2);
+		long time1, time2;
+		if (noSum)
+		{
+			time1 = runSingleNoSum(maxx, f1, p1);
+			time1 = runSingleNoSum(maxx, f1, p1);
+			time1 += runSingleNoSum(maxx, f1, p1);
+			time2 = runDoubleNoSum(maxx, f2, p2);
+			time2 = runDoubleNoSum(maxx, f2, p2);
+			time2 += runDoubleNoSum(maxx, f2, p2);
+		}
+		else
+		{
+			time1 = runSingle(maxx, f1, p1);
+			time1 = runSingle(maxx, f1, p1);
+			time1 += runSingle(maxx, f1, p1);
+			time2 = runDouble(maxx, f2, p2);
+			time2 = runDouble(maxx, f2, p2);
+			time2 += runDouble(maxx, f2, p2);
+		}
 
-		System.out.printf("%s = %d, %s = %d => (%f)\n", f1.getClass().getSimpleName(),
+		System.out.printf("%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "", f1.getClass().getSimpleName(),
 				time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
 		Assert.assertTrue(time1 < time2);
 	}
 
+	@SuppressWarnings("unused")
 	private long runSingle(int maxx, SinglePrecision f, float[] p)
 	{
 		// Warm up
@@ -624,6 +737,31 @@ public class PrecisionTest
 		return System.nanoTime() - time;
 	}
 
+	private long runSingleNoSum(int maxx, SinglePrecision f, float[] p)
+	{
+		// Warm up
+		for (int j = 0; j < 10; j++)
+		{
+			f.initialise(p);
+			for (int i = 0; i < maxx; i++)
+			{
+				f.eval(i);
+			}
+		}
+
+		long time = System.nanoTime();
+		for (int j = 0; j < MAX_ITER; j++)
+		{
+			f.initialise(p);
+			for (int i = 0; i < maxx; i++)
+			{
+				f.eval(i);
+			}
+		}
+		return System.nanoTime() - time;
+	}
+
+	@SuppressWarnings("unused")
 	private long runDouble(int maxx, DoublePrecision f, double[] p)
 	{
 		// Warm up
@@ -645,6 +783,30 @@ public class PrecisionTest
 			for (int i = 0; i < maxx; i++)
 			{
 				sum += f.eval(i);
+			}
+		}
+		return System.nanoTime() - time;
+	}
+
+	private long runDoubleNoSum(int maxx, DoublePrecision f, double[] p)
+	{
+		// Warm up
+		for (int j = 0; j < 10; j++)
+		{
+			f.initialise(p);
+			for (int i = 0; i < maxx; i++)
+			{
+				f.eval(i);
+			}
+		}
+
+		long time = System.nanoTime();
+		for (int j = 0; j < MAX_ITER; j++)
+		{
+			f.initialise(p);
+			for (int i = 0; i < maxx; i++)
+			{
+				f.eval(i);
 			}
 		}
 		return System.nanoTime() - time;
