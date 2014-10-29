@@ -64,7 +64,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-			peakFactors[j][0] = (float) -(0.5 / sx2);
+			peakFactors[j][0] = (float) (-0.5 / sx2);
 			peakFactors[j][1] = -2.0f * peakFactors[j][0];
 		}
 	}

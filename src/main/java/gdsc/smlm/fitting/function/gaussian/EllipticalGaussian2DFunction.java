@@ -86,18 +86,18 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 			
-			peakFactors[j][AA] = (float) -(0.5 * (cosSqt / sx2 + sinSqt / sy2));
-			peakFactors[j][BB] = (float) -(0.25 * (-sin2t / sx2 + sin2t / sy2));
-			peakFactors[j][CC] = (float) -(0.5 * (sinSqt / sx2 + cosSqt / sy2));;
+			peakFactors[j][AA] = (float) (-0.5 * (cosSqt / sx2 + sinSqt / sy2));
+			peakFactors[j][BB] = (float) (-0.25 * (-sin2t / sx2 + sin2t / sy2));
+			peakFactors[j][CC] = (float) (-0.5 * (sinSqt / sx2 + cosSqt / sy2));;
 
 			// For the angle gradient
 			peakFactors[j][AA2] = (float) -(-sincost / sx2 + sincost / sy2);
-			peakFactors[j][BB2] = (float) -(0.5 * (-cos2t / sx2 + cos2t / sy2));
+			peakFactors[j][BB2] = (float) (-0.5 * (-cos2t / sx2 + cos2t / sy2));
 			peakFactors[j][CC2] = (float) -(sincost / sx2 - sincost / sy2);
 
 			// For the x-width gradient
 			peakFactors[j][AX] = (float) (cosSqt / sx3);
-			peakFactors[j][BX] = (float) -(0.5 * sin2t / sx3);
+			peakFactors[j][BX] = (float) (-0.5 * sin2t / sx3);
 			peakFactors[j][CX] = (float) (sinSqt / sx3);
 
 			// For the y-width gradient

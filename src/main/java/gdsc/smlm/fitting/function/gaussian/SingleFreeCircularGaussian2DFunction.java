@@ -86,13 +86,13 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 		
-		aa = (float) -(0.5 * (cosSqt / sx2 + sinSqt / sy2));
-		bb = (float) -(0.25 * (-sin2t / sx2 + sin2t / sy2));
-		cc = (float) -(0.5 * (sinSqt / sx2 + cosSqt / sy2));;
+		aa = (float) (-0.5 * (cosSqt / sx2 + sinSqt / sy2));
+		bb = (float) (-0.25 * (-sin2t / sx2 + sin2t / sy2));
+		cc = (float) (-0.5 * (sinSqt / sx2 + cosSqt / sy2));;
 
 		// For the x-width gradient
 		ax = (float) (cosSqt / sx3);
-		bx = (float) -(0.5 * sin2t / sx3);
+		bx = (float) (-0.5 * sin2t / sx3);
 		cx = (float) (sinSqt / sx3);
 
 		// For the y-width gradient

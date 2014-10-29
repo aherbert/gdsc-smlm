@@ -69,7 +69,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 			
-			peakFactors[j][AA] = (float) -(0.5 / sx2);
+			peakFactors[j][AA] = (float) (-0.5 / sx2);
 			peakFactors[j][AA2] = -2.0f * peakFactors[j][AA];
 
 			// For the x-width gradient

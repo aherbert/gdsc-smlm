@@ -72,7 +72,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 		
-		aa = (float) -(0.5 / sx2);
+		aa = (float) (-0.5 / sx2);
 		aa2 = -2.0f * aa;
 
 		// For the x-width gradient

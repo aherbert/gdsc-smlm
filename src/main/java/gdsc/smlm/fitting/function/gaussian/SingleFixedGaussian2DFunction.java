@@ -73,7 +73,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 		
-		aa = (float) -(0.5 / sx2);
+		aa = (float) (-0.5 / sx2);
 		aa2 = -2.0f * aa;
 	}
 
@@ -106,7 +106,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 	public float eval(final int x, final float[] dyda)
 	{
 		// First parameter is the background level 
-		dyda[0] = 1; // Gradient for a constant background is 1
+		dyda[0] = 1.0f; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
