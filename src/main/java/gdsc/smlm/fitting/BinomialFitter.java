@@ -44,6 +44,7 @@ import org.apache.commons.math3.optim.nonlinear.vector.Weight;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Fit a binomial distribution to a histogram
@@ -293,7 +294,7 @@ public class BinomialFitter
 
 		// The model is only fitting the probability p
 		// For a binomial n*p = mean => p = mean/n
-		double[] initialSolution = new double[] { Math.min(mean / n, 1) };
+		double[] initialSolution = new double[] { FastMath.min(mean / n, 1) };
 
 		// Create the function
 		BinomialModelFunction function = new BinomialModelFunction(histogram, n, zeroTruncated);

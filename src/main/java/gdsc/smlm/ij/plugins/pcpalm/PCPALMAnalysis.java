@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.math3.util.FastMath;
+
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
@@ -687,7 +689,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			// Original Sengupta paper uses 800nm for the padding size.
 			// Limit to within 80% of the minimum dimension of the image.
 			double maxRadius = correlationDistance / nmPerPixel;
-			int imageSize = Math.min(im.getWidth(), im.getHeight());
+			int imageSize = FastMath.min(im.getWidth(), im.getHeight());
 			if (imageSize < 1.25 * maxRadius)
 				maxRadius = imageSize / 1.25;
 			int pad = (int) Math.round(maxRadius);
@@ -1082,7 +1084,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	private FloatProcessor pad(ImageProcessor ip)
 	{
 		// Pad to a power of 2
-		final int size = Math.max(ip.getWidth(), ip.getHeight());
+		final int size = FastMath.max(ip.getWidth(), ip.getHeight());
 		int newSize = nextPowerOfTwo(size);
 		if (size > newSize)
 			return null; // Error

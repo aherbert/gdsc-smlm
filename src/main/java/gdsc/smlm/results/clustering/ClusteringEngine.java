@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Find clusters of points using a clustering algorithm.
  */
@@ -415,8 +417,8 @@ public class ClusteringEngine
 		final int maxBins = 500;
 		// If tracking potential neighbours then the cells must be larger to cover the increased distance
 		final double cellSize = (clusteringAlgorithm == ClusteringAlgorithm.PAIRWISE) ? radius : radius * 1.4142;
-		final double xBinWidth = Math.max(cellSize, (maxx - minx) / maxBins);
-		final double yBinWidth = Math.max(cellSize, (maxy - miny) / maxBins);
+		final double xBinWidth = FastMath.max(cellSize, (maxx - minx) / maxBins);
+		final double yBinWidth = FastMath.max(cellSize, (maxy - miny) / maxBins);
 		final int nXBins = 1 + (int) ((maxx - minx) / xBinWidth);
 		final int nYBins = 1 + (int) ((maxy - miny) / yBinWidth);
 		Cluster[][] grid = new Cluster[nXBins][nYBins];
@@ -531,8 +533,8 @@ public class ClusteringEngine
 		// Assign to a grid
 		final int maxBins = 500;
 		final double cellSize = radius * 1.01; // Add an error margin
-		final double xBinWidth = Math.max(cellSize, (maxx - minx) / maxBins);
-		final double yBinWidth = Math.max(cellSize, (maxy - miny) / maxBins);
+		final double xBinWidth = FastMath.max(cellSize, (maxx - minx) / maxBins);
+		final double yBinWidth = FastMath.max(cellSize, (maxy - miny) / maxBins);
 		final int nXBins = 1 + (int) ((maxx - minx) / xBinWidth);
 		final int nYBins = 1 + (int) ((maxy - miny) / yBinWidth);
 		ExtendedClusterPoint[][] grid = new ExtendedClusterPoint[nXBins][nYBins];
@@ -662,8 +664,8 @@ public class ClusteringEngine
 			threadPool = Executors.newFixedThreadPool(threadCount);
 
 			// Ensure a minimum block size to avoid wasting time.
-			xBlock = Math.max(nXBins / threadCount, MIN_BLOCK_SIZE);
-			yBlock = Math.max(nYBins / threadCount, MIN_BLOCK_SIZE);
+			xBlock = FastMath.max(nXBins / threadCount, MIN_BLOCK_SIZE);
+			yBlock = FastMath.max(nYBins / threadCount, MIN_BLOCK_SIZE);
 
 			//System.out.printf("Block size %d x %d = %d\n", xBlock, yBlock, countBlocks(nXBins, nYBins));
 			// Increment the block size until the number of blocks to process is just above the thread count.
@@ -736,10 +738,10 @@ public class ClusteringEngine
 
 			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
-				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				int endYBin = FastMath.min(nYBins, startYBin + yBlock);
 				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
-					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					int endXBin = FastMath.min(nXBins, startXBin + xBlock);
 					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
 
 					ClosestPair pair = new ClosestPair();
@@ -1294,10 +1296,10 @@ public class ClusteringEngine
 
 			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
-				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				int endYBin = FastMath.min(nYBins, startYBin + yBlock);
 				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
-					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					int endXBin = FastMath.min(nXBins, startXBin + xBlock);
 
 					FindLinksWorker worker = new FindLinksWorker(grid, nXBins, nYBins, r2, startXBin, endXBin,
 							startYBin, endYBin);
@@ -1570,10 +1572,10 @@ public class ClusteringEngine
 
 			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
-				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				int endYBin = FastMath.min(nYBins, startYBin + yBlock);
 				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
-					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					int endXBin = FastMath.min(nXBins, startXBin + xBlock);
 					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
 
 					ClosestPair pair = new ClosestPair();
@@ -2032,10 +2034,10 @@ public class ClusteringEngine
 
 			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
-				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				int endYBin = FastMath.min(nYBins, startYBin + yBlock);
 				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
-					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					int endXBin = FastMath.min(nXBins, startXBin + xBlock);
 					//System.out.printf("Block [%d-%d, %d-%d]\n", startXBin, endXBin, startYBin, endYBin);
 
 					ClosestPair pair = new ClosestPair();
@@ -2395,10 +2397,10 @@ public class ClusteringEngine
 
 			for (int startYBin = 0; startYBin < nYBins; startYBin += yBlock)
 			{
-				int endYBin = Math.min(nYBins, startYBin + yBlock);
+				int endYBin = FastMath.min(nYBins, startYBin + yBlock);
 				for (int startXBin = 0; startXBin < nXBins; startXBin += xBlock)
 				{
-					int endXBin = Math.min(nXBins, startXBin + xBlock);
+					int endXBin = FastMath.min(nXBins, startXBin + xBlock);
 
 					ClosestPair pair = new ClosestPair();
 					results.add(pair);
@@ -2709,7 +2711,7 @@ public class ClusteringEngine
 	 */
 	public void setPulseInterval(int pulseInterval)
 	{
-		this.pulseInterval = Math.max(0, pulseInterval);
+		this.pulseInterval = FastMath.max(0, pulseInterval);
 	}
 
 	/**

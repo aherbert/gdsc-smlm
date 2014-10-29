@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.smlm.fitting.function.MultiPeakGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -179,7 +181,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float by = factors[BY];
 		final float cy = factors[CY];
 
-		final float y = (float) (h * Math.exp(aa * dx2 + bb * dxy + cc * dy2));
+		final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
 		dy_da[dydapos] = y / h;
@@ -230,7 +232,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float bb = factors[BB];
 		final float cc = factors[CC];
 
-		return (float) (h * Math.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy));
+		return (float) (h * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy));
 	}
 
 	@Override

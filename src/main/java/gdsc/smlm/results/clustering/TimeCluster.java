@@ -1,5 +1,7 @@
 package gdsc.smlm.results.clustering;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -42,7 +44,7 @@ public class TimeCluster extends Cluster
 		// Gap:
 		// |-----------|
 		//                  |---------|
-		return Math.max(0, Math.max(start, other.start) - Math.min(end, other.end));
+		return FastMath.max(0, FastMath.max(start, other.start) - FastMath.min(end, other.end));
 	}
 
 	/**
@@ -84,8 +86,8 @@ public class TimeCluster extends Cluster
 		super.add(other);
 
 		// Update the start and end points
-		start = Math.min(start, other.start);
-		end = Math.max(end, other.end);
+		start = FastMath.min(start, other.start);
+		end = FastMath.max(end, other.end);
 	}
 
 	/*

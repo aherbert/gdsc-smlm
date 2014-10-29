@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Contains helper functions
  */
@@ -500,8 +502,8 @@ public class Utils
 				double lower = stats.getStatistics().getPercentile(25);
 				double upper = stats.getStatistics().getPercentile(75);
 				double iqr = upper - lower;
-				yMin = Math.max(lower - iqr, yMin);
-				yMax = Math.min(upper + iqr, yMax);
+				yMin = FastMath.max(lower - iqr, yMin);
+				yMax = FastMath.min(upper + iqr, yMax);
 				break;
 
 			case 2:

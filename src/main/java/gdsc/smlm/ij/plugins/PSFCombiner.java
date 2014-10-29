@@ -30,6 +30,8 @@ import ij.process.ImageProcessor;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Produces an average PSF image from multiple PSF images.
  * <p>
@@ -326,8 +328,8 @@ public class PSFCombiner implements PlugIn
 		 */
 		public void crop(int zDepth)
 		{
-			int minZ = Math.max(1, psfSettings.zCentre - zDepth);
-			int maxZ = Math.min(psfStack.getSize(), psfSettings.zCentre + zDepth);
+			int minZ = FastMath.max(1, psfSettings.zCentre - zDepth);
+			int maxZ = FastMath.min(psfStack.getSize(), psfSettings.zCentre + zDepth);
 			psfStack = psfStack.crop(0, 0, minZ, psfStack.getWidth(), psfStack.getHeight(), maxZ - minZ + 1);
 
 			// Update range

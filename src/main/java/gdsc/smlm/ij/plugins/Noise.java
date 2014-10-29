@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -132,7 +134,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 				twoMethods;
 
 		int start = imp.getCurrentSlice();
-		int end = Math.min(imp.getStackSize(), start + 100);
+		int end = FastMath.min(imp.getStackSize(), start + 100);
 		int size = end - start + 1;
 		double[] xValues = new double[size];
 		double[] yValues1 = new double[size];
@@ -162,8 +164,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		if (twoMethods)
 		{
 			double[] b2 = Tools.getMinMax(yValues2);
-			b1[0] = Math.min(b1[0], b2[0]);
-			b1[1] = Math.max(b1[1], b2[1]);
+			b1[0] = FastMath.min(b1[0], b2[0]);
+			b1[1] = FastMath.max(b1[1], b2[1]);
 		}
 
 		String title = imp.getTitle() + " Noise";

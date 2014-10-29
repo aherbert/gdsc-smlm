@@ -12,6 +12,7 @@ package gdsc.smlm.utils;
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Provides a rolling median on a fixed size data set. The median is maintained using a double-linked list data
@@ -336,8 +337,8 @@ public class MedianWindowDLL
 	 */
 	public double getMedian(int start, int end)
 	{
-		end = Math.min(data.length - 1, Math.abs(end));
-		start = Math.max(0, Math.abs(start));
+		end = FastMath.min(data.length - 1, Math.abs(end));
+		start = FastMath.max(0, Math.abs(start));
 
 		final int length = end - start + 1;
 		if (length == 0)

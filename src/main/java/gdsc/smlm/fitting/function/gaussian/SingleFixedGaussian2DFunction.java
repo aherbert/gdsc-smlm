@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -120,7 +122,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
 
-		final float y = (float) (h * Math.exp(aa * (dx * dx + dy * dy)));
+		final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
 
 		// Calculate gradients
 		dy_da[1] = y / h;
@@ -145,7 +147,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
 
-		return background + amplitude * (float) Math.exp(aa * (dx * dx + dy * dy));
+		return background + amplitude * (float) FastMath.exp(aa * (dx * dx + dy * dy));
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -147,7 +149,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		final float dxy = dx * dy;
 		final float dy2 = dy * dy;
 
-		final float y = (float) (h * Math.exp(aa * dx2 + bb * dxy + cc * dy2));
+		final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
 		dy_da[1] = y / h;
@@ -175,7 +177,7 @@ public class SingleFreeCircularGaussian2DFunction extends Gaussian2DFunction
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
 
-		return background + amplitude * (float) Math.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		return background + amplitude * (float) FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -604,7 +605,7 @@ public class ImageSourceTest
 		while ((d = source.next()) != null)
 		{
 			// Get the range for the data
-			int endE = Math.min(i + 2, expected.length - 1);
+			int endE = FastMath.min(i + 2, expected.length - 1);
 			int startFrame = expected[i];
 			int endFrame = expected[endE];
 
@@ -656,7 +657,7 @@ public class ImageSourceTest
 		{
 			// Get the range for the data
 			int e = frames[i];
-			int endE = Math.min(e + 2, expected.length - 1);
+			int endE = FastMath.min(e + 2, expected.length - 1);
 			int startFrame = expected[e];
 			int endFrame = expected[endE];
 			

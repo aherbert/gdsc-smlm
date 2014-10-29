@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.
  */
@@ -700,7 +702,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 				if (p2 != null)
 					score = p1.score(p2, dThreshold);
 				if (p3 != null)
-					score = Math.max(score, p1.score(p2, dThreshold));
+					score = FastMath.max(score, p1.score(p2, dThreshold));
 			}
 		}
 

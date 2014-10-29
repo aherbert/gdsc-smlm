@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Fits local maxima using a 2D Gaussian.
  */
@@ -466,7 +468,7 @@ public class FitWorker implements Runnable
 		else
 		{
 			// Check upper limits are safe
-			int tmpSmooth = Math.min((int) smooth, Math.min(width, height) / 2);
+			int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
 
 			if (tmpSmooth <= border)
 			{
@@ -698,8 +700,8 @@ public class FitWorker implements Runnable
 		nms.setNeighbourCheck(search < 3);
 
 		// Check upper limits are safe
-		int n = Math.min(search, Math.min(width, height));
-		int border = Math.min(this.border, Math.min(width, height) / 2);
+		int n = FastMath.min(search, FastMath.min(width, height));
+		int border = FastMath.min(this.border, FastMath.min(width, height) / 2);
 
 		maxIndices = nms.blockFindInternal(data, width, height, n, border);
 
@@ -1131,7 +1133,7 @@ public class FitWorker implements Runnable
 		fittedNeighbourCount = 0;
 		if (!sliceResults.isEmpty())
 		{
-			float range = Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+			float range = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 			float xmin2 = xmin - range;
 			float xmax2 = xmax + range;
 			float ymin2 = ymin - range;
@@ -1172,8 +1174,8 @@ public class FitWorker implements Runnable
 			if (fitResult.getStatus() == FitStatus.WIDTH_DIVERGED)
 			{
 				float[] params = fitResult.getParameters();
-				float regionSize = Math.max(width, height) / 2;
-				//int tmpSmooth = (int) Math.max(smooth, 1);
+				float regionSize = FastMath.max(width, height) / 2;
+				//int tmpSmooth = (int) FastMath.max(smooth, 1);
 				//float regionSize = 2 * tmpSmooth + 1;
 				if ((params[Gaussian2DFunction.X_SD] > 0 && params[Gaussian2DFunction.X_SD] < regionSize) ||
 						(params[Gaussian2DFunction.Y_SD] > 0 && params[Gaussian2DFunction.Y_SD] < regionSize))
@@ -1303,7 +1305,7 @@ public class FitWorker implements Runnable
 		{
 			vector = (AC2 > BD2) ? new int[] { 1, 1 } : new int[] { 1, -1 };
 		}
-		double score = Math.max(score1, score2);
+		double score = FastMath.max(score1, score2);
 
 		if (logger != null)
 			logger.info("Residue analysis = %f (%d,%d)", score, vector[0], vector[1]);
@@ -1414,7 +1416,7 @@ public class FitWorker implements Runnable
 		float shift = fitConfig.getCoordinateShift();
 		int maxIterations = fitConfig.getMaxIterations();
 
-		fitConfig.setCoordinateShift(Math.min(width, height));
+		fitConfig.setCoordinateShift(FastMath.min(width, height));
 		fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
 
 		//FitResult newFitResult = gf.fit(region, width, height, peaks, heights);
@@ -1485,7 +1487,7 @@ public class FitWorker implements Runnable
 				if (fitConfig.isWidth0Fitting())
 				{
 					// Add the fitted standard deviation to the allowed shift
-					shift += Math.max(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]);
+					shift += FastMath.max(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]);
 				}
 				else
 				{
@@ -1493,11 +1495,11 @@ public class FitWorker implements Runnable
 					if (config.isIncludeNeighbours())
 						// Assume that neighbours are insignificant and allow the shift to span half of the 
 						// fitted window.
-						shift = 0.5f * Math.max(regionBounds.width, regionBounds.height);
+						shift = 0.5f * FastMath.max(regionBounds.width, regionBounds.height);
 					else
 						// Expand the allowed shift by the configured SD fit to allow close by peaks to be
 						// included. Duplicate filtering will eliminate fits onto close by neighbours.
-						shift += 2 * Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+						shift += 2 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 				}
 
 				int[] position = new int[2];

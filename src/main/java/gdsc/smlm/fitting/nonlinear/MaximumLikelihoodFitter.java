@@ -28,6 +28,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.FastMath;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -272,7 +273,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// The CMAES optimiser is random and restarting can overcome problems with quick convergence.
 				// The Apache commons documentations states that convergence should occur between 30N and 300N^2
 				// function evaluations
-				final int n30 = Math.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
+				final int n30 = FastMath.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
 				evaluations = 0;
 				OptimizationData[] data = new OptimizationData[] { new InitialGuess(startPoint),
 						new CMAESOptimizer.PopulationSize(popSize), new MaxEval(getMaxEvaluations()),
@@ -403,7 +404,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				double l = 0;
 				for (double d : gradient)
 					l += d * d;
-				final double bracketingStep = Math.min(0.001, ((l > 1) ? 1.0 / l : 1));
+				final double bracketingStep = FastMath.min(0.001, ((l > 1) ? 1.0 / l : 1));
 				//System.out.printf("Bracketing step = %f (length=%f)\n", bracketingStep, l);
 
 				o.setUseGradientLineSearch(gradientLineMinimisation);

@@ -30,6 +30,8 @@ import ij.process.ByteProcessor;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.
  */
@@ -145,7 +147,7 @@ public class FilterResults implements PlugIn
 
 	private float getDrift(PeakResult result)
 	{
-		float drift = Math.max(Math.abs(result.origX - result.params[Gaussian2DFunction.X_POSITION]),
+		float drift = FastMath.max(Math.abs(result.origX - result.params[Gaussian2DFunction.X_POSITION]),
 				Math.abs(result.origY - result.params[Gaussian2DFunction.Y_POSITION]));
 		return drift;
 	}

@@ -17,6 +17,7 @@ import gdsc.smlm.utils.Maths;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Contains methods for generating models of a Point Spread Function using a Airy pattern.
@@ -358,9 +359,9 @@ public class AiryPSFModel extends PSFModel
 		// Find the maximum distance from the centre to the edge of the image (normalised using the widths)
 		final double max = Maths.max(x0 / w0, x1 / w1, (x0range - x0) / w0, (x1range - x1) / w1);
 		// Find the maximum distance needed to evaluate the Airy pattern
-		final double maxD = Math.min(RINGS[ring], Math.sqrt(2 * max * max));
+		final double maxD = FastMath.min(RINGS[ring], Math.sqrt(2 * max * max));
 		// Limit the total samples used for interpolation but always sample at least every pixel:
-		final double samplesPerPixel = Math.max(200 / maxD, 1);
+		final double samplesPerPixel = FastMath.max(200 / maxD, 1);
 		final int maxR = (int) Math.ceil(maxD * samplesPerPixel);
 		double[] radius = new double[maxR + 1];
 		double[] intensity = new double[maxR + 1];
@@ -415,8 +416,8 @@ public class AiryPSFModel extends PSFModel
 			// Set the number of subintervals adaptively, i.e. for small widths use more samples per pixel.
 			double nPixels = Math.PI * maxD * maxD;
 			double number = Math.sqrt(1000 / nPixels); // Approx 1000 (or so) samples across the image
-			final int N = Math.max(minSamplesPerDimension,
-					Math.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
+			final int N = FastMath.max(minSamplesPerDimension,
+					FastMath.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
 
 			final double range0 = 0.5 / w0;
 			final double range1 = 0.5 / w1;

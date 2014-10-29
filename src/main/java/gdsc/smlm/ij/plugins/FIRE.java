@@ -41,6 +41,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Computes the Fourier Image Resolution of an image
  */
@@ -289,7 +291,7 @@ public class FIRE implements PlugIn
 		boolean weighted = true;
 		boolean equalised = false;
 		if (fourierImageScale == 0)
-			this.imageScale = imageSize / (float) Math.max(bounds.x + bounds.width, bounds.y + bounds.height);
+			this.imageScale = imageSize / (float) FastMath.max(bounds.x + bounds.width, bounds.y + bounds.height);
 		else
 			// TODO - The coordinates should be adjusted if the max-min can fit inside a smaller power of 2
 			this.imageScale = fourierImageScale;
@@ -364,8 +366,8 @@ public class FIRE implements PlugIn
 			xValues[i] = radius * conversion;
 			yValues[i] = frcCurve[i][1];
 
-			yMin = Math.min(yMin, yValues[i]);
-			yMax = Math.max(yMax, yValues[i]);
+			yMin = FastMath.min(yMin, yValues[i]);
+			yMax = FastMath.max(yMax, yValues[i]);
 			if (frcNoSmooth != null)
 				yValuesNotSmooth[i] = frcNoSmooth[i][1];
 		}
@@ -433,8 +435,8 @@ public class FIRE implements PlugIn
 			double fire = f.calculateFireNumber(method, imageScale, ip1.getWidth() - 1);
 			y.add(fire);
 
-			yMin = Math.min(yMin, fire);
-			yMax = Math.max(yMax, fire);
+			yMin = FastMath.min(yMin, fire);
+			yMax = FastMath.max(yMax, fire);
 		}
 
 		// Add the final fire number

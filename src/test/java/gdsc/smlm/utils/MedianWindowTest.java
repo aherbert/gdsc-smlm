@@ -3,6 +3,7 @@ package gdsc.smlm.utils;
 import java.util.Arrays;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -592,8 +593,8 @@ public class MedianWindowTest
 
 	static double calculateMedian(double[] data, int position, int radius)
 	{
-		final int start = Math.max(0, position - radius);
-		final int end = Math.min(position + radius + 1, data.length);
+		final int start = FastMath.max(0, position - radius);
+		final int end = FastMath.min(position + radius + 1, data.length);
 		double[] cache = new double[end - start];
 		for (int i = start, j = 0; i < end; i++, j++)
 			cache[j] = data[i];
@@ -604,8 +605,8 @@ public class MedianWindowTest
 
 	static double calculateMedian2(double[] data, int position, int radius)
 	{
-		final int start = Math.max(0, position - radius);
-		final int end = Math.min(position + radius + 1, data.length);
+		final int start = FastMath.max(0, position - radius);
+		final int end = FastMath.min(position + radius + 1, data.length);
 		double[] cache = new double[end - start];
 		for (int i = start, j = 0; i < end; i++, j++)
 			cache[j] = data[i];

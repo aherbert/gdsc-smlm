@@ -98,8 +98,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			{
 				final double pi = p[i];
 				final double ci = c[i];
-				final double difference = FastMath.abs(pi - ci);
-				final double size = FastMath.max(FastMath.abs(pi), FastMath.abs(ci));
+				final double difference = Math.abs(pi - ci);
+				final double size = FastMath.max(Math.abs(pi), Math.abs(ci));
 				if (difference > size * relative && difference > absolute)
 				{
 					return false;
@@ -332,7 +332,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				sumdg += dg[i] * dg[i];
 				sumxi += xi[i] * xi[i];
 			}
-			if (fac > FastMath.sqrt(EPS * sumdg * sumxi))
+			if (fac > Math.sqrt(EPS * sumdg * sumxi))
 			{
 				fac = 1.0 / fac;
 				final double fad = 1.0 / fae;
@@ -462,13 +462,13 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 			final int n = xOld.length;
 			check = false;
-
+			
 			// Limit the search step size for each dimension
 			double scale = 1;
 			for (int i = 0; i < n; i++)
 			{
-				if (FastMath.abs(searchDirection[i]) * scale > maximumStepLength[i])
-					scale = maximumStepLength[i] / FastMath.abs(searchDirection[i]);
+				if (Math.abs(searchDirection[i]) * scale > maximumStepLength[i])
+					scale = maximumStepLength[i] / Math.abs(searchDirection[i]);
 			}
 			if (scale < 1)
 			{
@@ -488,7 +488,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			double test = 0.0;
 			for (int i = 0; i < n; i++)
 			{
-				final double temp = FastMath.abs(searchDirection[i]) / FastMath.max(FastMath.abs(xOld[i]), 1.0);
+				final double temp = Math.abs(searchDirection[i]) / FastMath.max(Math.abs(xOld[i]), 1.0);
 				if (temp > test)
 					test = temp;
 			}
@@ -558,9 +558,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 							if (disc < 0.0)
 								tmplam = 0.5 * alam;
 							else if (b <= 0.0)
-								tmplam = (-b + FastMath.sqrt(disc)) / (3.0 * a);
+								tmplam = (-b + Math.sqrt(disc)) / (3.0 * a);
 							else
-								tmplam = -slope / (b + FastMath.sqrt(disc));
+								tmplam = -slope / (b + Math.sqrt(disc));
 						}
 						// Ensure the lambda is <= 0.5 lamda1, i.e. we take a step smaller than last time
 						if (tmplam > 0.5 * alam)

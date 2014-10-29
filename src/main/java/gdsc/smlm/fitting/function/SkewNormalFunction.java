@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.function;
 
 import org.apache.commons.math3.special.Erf;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Calculate the value of the Skew Normal distribution
@@ -115,10 +116,10 @@ public class SkewNormalFunction
 	private static double normal(double x)
 	{
 		// 1/sqrt(2*pi) = 0.39894228 
-		//return 0.39894228 * Math.exp(-0.5 * x*x);
+		//return 0.39894228 * FastMath.exp(-0.5 * x*x);
 
 		// Do not normalise the area under the graph to 1. This allows the amplitude to be correctly modelled.
-		return Math.exp(-0.5 * x * x);
+		return FastMath.exp(-0.5 * x * x);
 	}
 
 	/**

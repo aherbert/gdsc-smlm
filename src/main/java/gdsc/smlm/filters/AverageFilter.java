@@ -1,5 +1,7 @@
 package gdsc.smlm.filters;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -535,8 +537,8 @@ public class AverageFilter
 		float[] newData = floatBuffer(data.length);
 
 		// Boundary control
-		final int xwidth = Math.min(n, maxx - 1);
-		final int ywidth = Math.min(n, maxy - 1);
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
 
 		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
 		for (int y = -ywidth, d = 0; y <= ywidth; y++)
@@ -1134,8 +1136,8 @@ public class AverageFilter
 		float[] newData = floatBuffer(data.length);
 
 		// Boundary control
-		final int xwidth = Math.min(n, maxx - 1);
-		final int ywidth = Math.min(n, maxy - 1);
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
 		final int xlimit = maxx - xwidth;
 		final int ylimit = maxy - ywidth;
 
@@ -1870,8 +1872,8 @@ public class AverageFilter
 		int[] newData = intBuffer(data.length);
 
 		// Boundary control
-		final int xwidth = Math.min(n, maxx - 1);
-		final int ywidth = Math.min(n, maxy - 1);
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
 
 		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
 		for (int y = -ywidth, d = 0; y <= ywidth; y++)
@@ -2468,8 +2470,8 @@ public class AverageFilter
 		int[] newData = intBuffer(data.length);
 
 		// Boundary control
-		final int xwidth = Math.min(n, maxx - 1);
-		final int ywidth = Math.min(n, maxy - 1);
+		final int xwidth = FastMath.min(n, maxx - 1);
+		final int ywidth = FastMath.min(n, maxy - 1);
 		final int xlimit = maxx - xwidth;
 		final int ylimit = maxy - ywidth;
 

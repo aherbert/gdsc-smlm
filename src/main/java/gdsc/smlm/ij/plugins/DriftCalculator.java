@@ -71,6 +71,7 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Calculates drift in localisation results. Can use the feducial markers within ROI added to the ROI manager or by
@@ -657,11 +658,11 @@ public class DriftCalculator implements PlugIn
 		int original = bandwidthInPoints;
 		if (minSmoothingPoints > 0)
 		{
-			bandwidthInPoints = Math.max(bandwidthInPoints, minSmoothingPoints);
+			bandwidthInPoints = FastMath.max(bandwidthInPoints, minSmoothingPoints);
 		}
 		if (maxSmoothingPoints > 0)
 		{
-			bandwidthInPoints = Math.min(bandwidthInPoints, maxSmoothingPoints);
+			bandwidthInPoints = FastMath.min(bandwidthInPoints, maxSmoothingPoints);
 		}
 
 		double newSmoothing = (double) bandwidthInPoints / n;
@@ -1343,7 +1344,7 @@ public class DriftCalculator implements PlugIn
 
 		// Calculate a scale to use when constructing the images for alignment
 		Rectangle bounds = results.getBounds(true);
-		float scale = (reconstructionSize - 1f) / Math.max(bounds.width, bounds.height);
+		float scale = (reconstructionSize - 1f) / FastMath.max(bounds.width, bounds.height);
 
 		threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 
@@ -1580,7 +1581,7 @@ public class DriftCalculator implements PlugIn
 	 */
 	private int getImagesPerThread(final ImageProcessor[] images)
 	{
-		return Math.max(1, (int) Math.round((double) images.length / Prefs.getThreads()));
+		return FastMath.max(1, (int) Math.round((double) images.length / Prefs.getThreads()));
 	}
 
 	private IJImagePeakResults newImage(Rectangle bounds, float imageScale)
@@ -1610,7 +1611,7 @@ public class DriftCalculator implements PlugIn
 	{
 		// Update the limits using the stack size
 		int upperT = startFrame + frameSpacing * (stack.getSize() - 1);
-		limits[1] = Math.max(limits[1], upperT);
+		limits[1] = FastMath.max(limits[1], upperT);
 
 		// TODO - Truncate the stack if there are far too many frames for the localisation limits
 

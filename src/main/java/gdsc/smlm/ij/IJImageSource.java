@@ -1,9 +1,5 @@
 package gdsc.smlm.ij;
 
-import java.awt.Rectangle;
-
-import com.thoughtworks.xstream.XStream;
-
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
@@ -12,6 +8,12 @@ import ij.ImageStack;
 import ij.WindowManager;
 import ij.io.FileInfo;
 import ij.process.ImageProcessor;
+
+import java.awt.Rectangle;
+
+import org.apache.commons.math3.util.FastMath;
+
+import com.thoughtworks.xstream.XStream;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -130,7 +132,7 @@ public class IJImageSource extends ImageSource
 		this(imp);
 		// Ensure only a single frame is processed
 		singleFrame = startFrame;
-		this.extraFrames = Math.max(0, extraFrames);
+		this.extraFrames = FastMath.max(0, extraFrames);
 	}
 
 	/*

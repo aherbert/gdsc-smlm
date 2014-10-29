@@ -1,5 +1,7 @@
 package gdsc.smlm.model;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.smlm.utils.Bessel;
 
 /*----------------------------------------------------------------------------- 
@@ -52,7 +54,7 @@ public class AiryPattern
 		if (x == 0)
 			return 1;
 		x /= FACTOR;
-		return Math.exp(-0.5 * (x * x));
+		return FastMath.exp(-0.5 * (x * x));
 	}
 
 	/**

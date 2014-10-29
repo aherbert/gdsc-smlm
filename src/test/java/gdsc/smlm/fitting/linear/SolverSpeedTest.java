@@ -1,17 +1,14 @@
 package gdsc.smlm.fitting.linear;
 
-import java.util.ArrayList;
-
-import java.util.Arrays;
-
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.function.gaussian.SingleFreeCircularGaussian2DFunction;
-import gdsc.smlm.fitting.linear.EJMLLinearSolver;
-import gdsc.smlm.fitting.linear.GaussJordan;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -403,7 +400,7 @@ public class SolverSpeedTest
 
 	private ArrayList<float[][]> copyAfloat(ArrayList<float[][]> a, int iter)
 	{
-		iter = Math.min(a.size(), iter);
+		iter = FastMath.min(a.size(), iter);
 		ArrayList<float[][]> a2 = new ArrayList<float[][]>(iter);
 		for (int i = 0; i < iter; i++)
 			a2.add(copyfloat(a.get(i)));
@@ -421,7 +418,7 @@ public class SolverSpeedTest
 
 	private ArrayList<float[]> copyBfloat(ArrayList<float[]> b, int iter)
 	{
-		iter = Math.min(b.size(), iter);
+		iter = FastMath.min(b.size(), iter);
 		ArrayList<float[]> b2 = new ArrayList<float[]>(iter);
 		for (int i = 0; i < iter; i++)
 			b2.add(Arrays.copyOf(b.get(i), b.get(i).length));
@@ -430,7 +427,7 @@ public class SolverSpeedTest
 
 	private ArrayList<double[][]> copyAdouble(ArrayList<float[][]> a, int iter)
 	{
-		iter = Math.min(a.size(), iter);
+		iter = FastMath.min(a.size(), iter);
 		ArrayList<double[][]> a2 = new ArrayList<double[][]>(iter);
 		for (int i = 0; i < iter; i++)
 			a2.add(copydouble(a.get(i)));
@@ -448,7 +445,7 @@ public class SolverSpeedTest
 
 	private ArrayList<double[]> copyBdouble(ArrayList<float[]> b, int iter)
 	{
-		iter = Math.min(b.size(), iter);
+		iter = FastMath.min(b.size(), iter);
 		ArrayList<double[]> b2 = new ArrayList<double[]>(iter);
 		for (int i = 0; i < iter; i++)
 			b2.add(copydouble(b.get(i)));
@@ -465,7 +462,7 @@ public class SolverSpeedTest
 
 	protected void solveGaussJordan(ArrayList<double[][]> A, ArrayList<double[]> B, int ITER, GaussJordan solver)
 	{
-		ITER = Math.min(ITER, A.size());
+		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
 			solver.solve(A.get(i), B.get(i));
@@ -475,7 +472,7 @@ public class SolverSpeedTest
 	protected void solveLinearWithInversion(ArrayList<double[][]> A, ArrayList<double[]> B, int ITER,
 			EJMLLinearSolver solver)
 	{
-		ITER = Math.min(ITER, A.size());
+		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
 			solver.solveLinearWithInversion(A.get(i), B.get(i));
@@ -484,7 +481,7 @@ public class SolverSpeedTest
 
 	protected void solveLinear(ArrayList<double[][]> A, ArrayList<double[]> B, int ITER, EJMLLinearSolver solver)
 	{
-		ITER = Math.min(ITER, A.size());
+		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
 			solver.solveLinear(A.get(i), B.get(i));
@@ -493,7 +490,7 @@ public class SolverSpeedTest
 
 	protected void solveCholesky(ArrayList<double[][]> A, ArrayList<double[]> B, int ITER, EJMLLinearSolver solver)
 	{
-		ITER = Math.min(ITER, A.size());
+		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
 			solver.solveCholesky(A.get(i), B.get(i));
@@ -502,7 +499,7 @@ public class SolverSpeedTest
 
 	protected void solveCholeskyLDLT(ArrayList<double[][]> A, ArrayList<double[]> B, int ITER, EJMLLinearSolver solver)
 	{
-		ITER = Math.min(ITER, A.size());
+		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
 			solver.solveCholeskyLDLT(A.get(i), B.get(i));
@@ -511,7 +508,7 @@ public class SolverSpeedTest
 
 	protected void solve(ArrayList<double[][]> A, ArrayList<double[]> B, int ITER, EJMLLinearSolver solver)
 	{
-		ITER = Math.min(ITER, A.size());
+		ITER = FastMath.min(ITER, A.size());
 		for (int i = 0; i < ITER; i++)
 		{
 			solver.solve(A.get(i), B.get(i));

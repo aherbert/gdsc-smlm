@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -61,7 +63,7 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
 
-		final float y = (float) (h * Math.exp(aa * (dx * dx + dy * dy)));
+		final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
 
 		// Calculate gradients
 		dy_da[0] = y / h;

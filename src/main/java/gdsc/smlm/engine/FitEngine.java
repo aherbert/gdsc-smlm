@@ -23,6 +23,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Fits local maxima using a 2D Gaussian.
  * <p>
@@ -205,10 +207,10 @@ public class FitEngine
 		// Use 1 if zero to get at least a single pixel width
 		float widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 		if (initialPeakStdDev1 > 0)
-			widthMin = Math.min(initialPeakStdDev1, widthMin);
+			widthMin = FastMath.min(initialPeakStdDev1, widthMin);
 		float widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 		if (initialPeakStdDev1 > 0)
-			widthMax = Math.max(initialPeakStdDev1, widthMax);
+			widthMax = FastMath.max(initialPeakStdDev1, widthMax);
 
 		// Get the half-width at half maximim
 		float hwhmMin = Gaussian2DFitter.sd2fwhm(widthMin) / 2;

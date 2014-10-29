@@ -8,9 +8,9 @@ import gdsc.smlm.fitting.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.fitting.utils.FloatEquality;
 
 import java.util.Random;
-
 import java.util.ArrayList;
 
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -365,7 +365,7 @@ public class SpeedTest
 
 	protected ArrayList<float[]> copyList(ArrayList<float[]> paramsList, int iter)
 	{
-		iter = Math.min(iter, paramsList.size());
+		iter = FastMath.min(iter, paramsList.size());
 
 		ArrayList<float[]> params2List = new ArrayList<float[]>(iter);
 		for (int i = 0; i < iter; i++)

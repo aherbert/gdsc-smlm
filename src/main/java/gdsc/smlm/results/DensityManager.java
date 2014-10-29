@@ -17,6 +17,8 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
 
 import java.awt.Rectangle;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Calculate the density of localisations around a given position using a square block of specified width
  */
@@ -225,9 +227,9 @@ public class DensityManager
 
 			// Get the bounds
 			int minU = u - resolution - 1;
-			int maxU = Math.min(u + resolution, maxx - 1);
+			int maxU = FastMath.min(u + resolution, maxx - 1);
 			int minV = v - resolution - 1;
-			int maxV = Math.min(v + resolution, maxy - 1);
+			int maxV = FastMath.min(v + resolution, maxy - 1);
 
 			// Compute sum from rolling sum using:
 			// sum(u,v) = 

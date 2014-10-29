@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.smlm.fitting.function.MultiPeakGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -137,7 +139,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float aa2 = factors[AA2];
 		final float ax = factors[AX];
     	
-		final float y = (float) (h * Math.exp(aa * (dx2dy2)));
+		final float y = (float) (h * FastMath.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
 		dy_da[dydapos] = y / h;
@@ -184,7 +186,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		final float aa = factors[AA];
 
-		return h * (float) Math.exp(aa * (dx * dx + dy * dy));
+		return h * (float) FastMath.exp(aa * (dx * dx + dy * dy));
 	}
 
 	@Override

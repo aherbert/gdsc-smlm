@@ -41,6 +41,7 @@ import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
 import org.apache.commons.math3.optim.nonlinear.vector.Target;
 import org.apache.commons.math3.optim.nonlinear.vector.Weight;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 
 /**
@@ -608,7 +609,7 @@ public class BlinkEstimator implements PlugIn
 				double td = this.x.get(i);
 
 				final double a = (1 - td) / tOff;
-				final double b = Math.exp(a);
+				final double b = FastMath.exp(a);
 
 				// value  = N * (1 + nBlink * b)
 				//        = N + N * nBlink * exp(a)
@@ -677,7 +678,7 @@ public class BlinkEstimator implements PlugIn
 		 */
 		public double evaluate(double td, double N, double nBlink, double tOff)
 		{
-			return N * (1.0 + nBlink * Math.exp((1 - td) / tOff));
+			return N * (1.0 + nBlink * FastMath.exp((1 - td) / tOff));
 		}
 
 		public double evaluate(double td, double[] parameters)

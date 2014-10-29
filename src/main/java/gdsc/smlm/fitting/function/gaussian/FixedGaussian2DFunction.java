@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.smlm.fitting.function.MultiPeakGaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -130,7 +132,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float dx = x0 - a[apos + X_POSITION];
 		final float dy = x1 - a[apos + Y_POSITION];
 
-		final float y = (float) (h * Math.exp(aa * (dx * dx + dy * dy)));
+		final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
 
 		// Calculate gradients
 		dy_da[dydapos] = y / h;
@@ -173,7 +175,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float dx = x0 - a[apos + X_POSITION];
 		final float dy = x1 - a[apos + Y_POSITION];
 
-		return h * (float) Math.exp(aa * (dx * dx + dy * dy));
+		return h * (float) FastMath.exp(aa * (dx * dx + dy * dy));
 	}
 
 	@Override

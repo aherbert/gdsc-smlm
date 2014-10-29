@@ -15,6 +15,8 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -356,10 +358,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			else if ((displayFlags & DISPLAY_MAX) != 0)
 			{
 				// Use the highest value
-				data[index] = Math.max(data[index], value[0]);
-				data[index + imageWidth] = Math.max(data[index + imageWidth], value[1]);
-				data[index + 1] = Math.max(data[index + 1], value[2]);
-				data[index + imageWidth + 1] = Math.max(data[index + imageWidth + 1], value[3]);
+				data[index] = FastMath.max(data[index], value[0]);
+				data[index + imageWidth] = FastMath.max(data[index + imageWidth], value[1]);
+				data[index + 1] = FastMath.max(data[index + 1], value[2]);
+				data[index + imageWidth + 1] = FastMath.max(data[index + imageWidth + 1], value[3]);
 			}
 			else
 			{
@@ -470,10 +472,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			else if ((displayFlags & DISPLAY_MAX) != 0)
 			{
 				// Use the highest value
-				data[index] = Math.max(data[index], value[0]);
-				data[index + imageWidth] = Math.max(data[index + imageWidth], value[1]);
-				data[index + 1] = Math.max(data[index + 1], value[2]);
-				data[index + imageWidth + 1] = Math.max(data[index + imageWidth + 1], value[3]);
+				data[index] = FastMath.max(data[index], value[0]);
+				data[index + imageWidth] = FastMath.max(data[index + imageWidth], value[1]);
+				data[index + 1] = FastMath.max(data[index + 1], value[2]);
+				data[index + imageWidth + 1] = FastMath.max(data[index + imageWidth + 1], value[3]);
 			}
 			else
 			{
@@ -656,7 +658,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			{
 				// Use the highest value
 				for (int i = 0; i < nPoints; i++)
-					data[indices[i]] = Math.max(data[indices[i]], values[i]);
+					data[indices[i]] = FastMath.max(data[indices[i]], values[i]);
 			}
 			else
 			{

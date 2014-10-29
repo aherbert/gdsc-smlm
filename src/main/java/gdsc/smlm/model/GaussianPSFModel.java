@@ -379,7 +379,7 @@ public class GaussianPSFModel extends PSFModel
 				//	for (int jj = 0; jj < 100; jj++)
 				//	{
 				//		double yy = y + jj / 100.0;
-				//		sum2 += Math.exp(-(dx + (yy - x1) * (yy - x1) * denom1 * denom1));
+				//		sum2 += FastMath.exp(-(dx + (yy - x1) * (yy - x1) * denom1 * denom1));
 				//	}
 				//}
 				//sum2 *= sum / 10000 / (Math.PI * 2 * s0 * s1);

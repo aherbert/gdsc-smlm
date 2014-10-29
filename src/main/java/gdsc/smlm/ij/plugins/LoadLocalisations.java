@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Loads the localisation files created by Create Data into memory
  */
@@ -116,8 +118,8 @@ public class LoadLocalisations implements PlugIn
 				max = l.getZ();
 		}
 
-		maxz = Math.min(maxz, max);
-		minz = Math.max(minz, min);
+		maxz = FastMath.min(maxz, max);
+		minz = FastMath.max(minz, min);
 
 		String msg = String.format("%d localisations with %.2f <= z <= %.2f", localisations.size(), min, max);
 

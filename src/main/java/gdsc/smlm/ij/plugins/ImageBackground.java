@@ -22,6 +22,8 @@ import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Produces a background intensity image and a mask from a sample image.
  * <p>
@@ -137,7 +139,7 @@ public class ImageBackground implements PlugInFilter
 	{
 		float[] data = (float[]) background.getPixels();
 		for (int i = 0; i < data.length; i++)
-			data[i] = (float) Math.max(0f, data[i] - bias);
+			data[i] = (float) FastMath.max(0f, data[i] - bias);
 		background.resetMinAndMax();
 	}
 }

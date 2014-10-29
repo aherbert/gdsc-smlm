@@ -19,9 +19,9 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -44,6 +44,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Extract the spots from the original image into a stack, ordering the spots by various rankings.
@@ -178,8 +179,8 @@ public class SpotInspector implements PlugIn, MouseListener
 				double upper = stats.getPercentile(75);
 				double iqr = upper - lower;
 
-				yMin = Math.max(lower - iqr, stats.getMin());
-				yMax = Math.min(upper + iqr, stats.getMax());
+				yMin = FastMath.max(lower - iqr, stats.getMin());
+				yMax = FastMath.min(upper + iqr, stats.getMax());
 
 				IJ.log(String.format("Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(),
 						yMin, yMax));
@@ -229,8 +230,8 @@ public class SpotInspector implements PlugIn, MouseListener
 			// Extract a region but crop to the image bounds
 			int minX = x - radius;
 			int minY = y - radius;
-			int maxX = Math.min(x + radius + 1, w);
-			int maxY = Math.min(y + radius + 1, h);
+			int maxX = FastMath.min(x + radius + 1, w);
+			int maxY = FastMath.min(y + radius + 1, h);
 
 			int padX = 0, padY = 0;
 			if (minX < 0)
@@ -285,7 +286,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		float stdDevMax = (fitConfig.getInitialPeakStdDev0() > 0) ? fitConfig.getInitialPeakStdDev0() : 1;
 		if (fitConfig.getInitialPeakStdDev1() > 0)
-			stdDevMax = Math.max(fitConfig.getInitialPeakStdDev1(), stdDevMax);
+			stdDevMax = FastMath.max(fitConfig.getInitialPeakStdDev1(), stdDevMax);
 		return stdDevMax;
 	}
 
@@ -326,11 +327,11 @@ public class SpotInspector implements PlugIn, MouseListener
 		{
 			case 9: // Shift
 				// We do not have the original centroid so use the original X/Y
-				score = Math.max(r.getXPosition() - r.origX + 0.5f, r.getYPosition() - r.origY + 0.5f);
+				score = FastMath.max(r.getXPosition() - r.origX + 0.5f, r.getYPosition() - r.origY + 0.5f);
 				negative = true;
 				break;
 			case 8: // Width factor
-				score = getFactor(Math.max(r.getXSD(), r.getYSD()), stdDevMax);
+				score = getFactor(FastMath.max(r.getXSD(), r.getYSD()), stdDevMax);
 				negative = true;
 				break;
 			case 7:

@@ -1,5 +1,7 @@
 package gdsc.smlm.results.clustering;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -149,6 +151,6 @@ public class ClusterPoint
 		// Gap:
 		// S-----------E
 		//                  S---------E
-		return Math.max(0, Math.max(start, other.start) - Math.min(end, other.end));
+		return FastMath.max(0, FastMath.max(start, other.start) - FastMath.min(end, other.end));
 	}
 }

@@ -5,6 +5,8 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -222,7 +224,7 @@ public class Cluster
 		double sxm = Math.sqrt(sumXi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
 		double sym = Math.sqrt(sumYi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
 
-		double sPeak = Math.max(sxm, sym);
+		double sPeak = FastMath.max(sxm, sym);
 
 		// Debugging
 		//System.out.printf("n=%d, av precision=%f, av deviation=%f (%f,%f) : weighted precision=%f\n", n, ss / n,

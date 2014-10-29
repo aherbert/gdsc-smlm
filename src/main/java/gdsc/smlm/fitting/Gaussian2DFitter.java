@@ -20,6 +20,8 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Fits a 2-dimensional Gaussian function for the specified peak. Can optionally fit an elliptical Gaussian function.
  * <p>
@@ -234,7 +236,7 @@ public class Gaussian2DFitter
 			// Set background using the minimum value in the data
 			background = data[0];
 			for (int i = maxx * maxy; --i > 0;)
-				background = Math.min(background, data[i]);
+				background = FastMath.min(background, data[i]);
 		}
 
 		return background;
@@ -470,7 +472,7 @@ public class Gaussian2DFitter
 		float bias = 0;
 		if (fitConfiguration.getBias() > 0)
 		{
-			bias = Math.min(background, fitConfiguration.getBias());
+			bias = FastMath.min(background, fitConfiguration.getBias());
 			params[0] -= bias;
 			for (int i = 0; i < ySize; i++)
 				y[i] -= bias;
@@ -539,7 +541,7 @@ public class Gaussian2DFitter
 					y_fit[i] = y[i] - y_fit[i];
 			}
 
-			fitResult = new FitResult(result, Math.max(ySize - solver.getNumberOfFittedParameters(), 0), error[0],
+			fitResult = new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0), error[0],
 					initialParams, params, params_dev, npeaks, solver.getNumberOfFittedParameters(), statusData);
 		}
 		else

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
@@ -68,8 +69,8 @@ public class FRC
 		IJ.showStatus("Calculating complex FFT images...");
 
 		// Pad images to the same size
-		final int maxWidth = Math.max(ip1.getWidth(), ip2.getWidth());
-		final int maxHeight = Math.max(ip1.getHeight(), ip2.getHeight());
+		final int maxWidth = FastMath.max(ip1.getWidth(), ip2.getWidth());
+		final int maxHeight = FastMath.max(ip1.getHeight(), ip2.getHeight());
 		ip1 = pad(ip1, maxWidth, maxHeight);
 		ip2 = pad(ip2, maxWidth, maxHeight);
 
@@ -213,7 +214,7 @@ public class FRC
 		taperX = getWindowFunction(taperX, dataImage.getWidth());
 		taperY = getWindowFunction(taperY, dataImage.getHeight());
 
-		final int size = Math.max(dataImage.getWidth(), dataImage.getHeight());
+		final int size = FastMath.max(dataImage.getWidth(), dataImage.getHeight());
 
 		// Pad to a power of 2
 		int newSize = 0;

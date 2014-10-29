@@ -66,6 +66,7 @@ import org.apache.commons.math3.optim.nonlinear.vector.Weight;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.
@@ -307,7 +308,7 @@ public class PCPALMFitting implements PlugIn
 		for (CorrelationResult r : results)
 		{
 			peakDensity += r.peakDensity;
-			size = Math.max(size, r.gr[0].length);
+			size = FastMath.max(size, r.gr[0].length);
 		}
 		peakDensity /= results.size();
 
@@ -1493,14 +1494,14 @@ public class PCPALMFitting implements PlugIn
 
 				final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
 				final double b = -r * r / (4 * sigma * sigma);
-				final double c = Math.exp(b);
+				final double c = FastMath.exp(b);
 
 				// value  = a * c
 
 				// Differentiate with respect to sigma:
 				// value' = a' * c + a * c'  [ Product rule ]
-				// c = Math.exp(b)
-				// c' = b' * Math.exp(b)     [ Chain rule ]
+				// c = FastMath.exp(b)
+				// c' = b' * FastMath.exp(b)     [ Chain rule ]
 				// value' = a' * c + a * b' * c
 				jacobian[i][0] = (-2 * a / sigma) * c + a * (-2 * b / sigma) * c;
 
@@ -1560,7 +1561,7 @@ public class PCPALMFitting implements PlugIn
 		 */
 		public double evaluate(double r, final double sigma, final double density)
 		{
-			return (1.0 / (4 * Math.PI * density * sigma * sigma)) * Math.exp(-r * r / (4 * sigma * sigma)) + 1;
+			return (1.0 / (4 * Math.PI * density * sigma * sigma)) * FastMath.exp(-r * r / (4 * sigma * sigma)) + 1;
 		}
 
 		/**
@@ -1643,18 +1644,18 @@ public class PCPALMFitting implements PlugIn
 
 				final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
 				final double b = -r * r / (4 * sigma * sigma);
-				final double c = Math.exp(b);
+				final double c = FastMath.exp(b);
 
 				final double d = -r / range;
-				final double e = Math.exp(d);
+				final double e = FastMath.exp(d);
 
 				// value  = a * c + 
 				//          amplitude * e + 1
 
 				// Differentiate with respect to sigma:
 				// value' = a' * c + a * c'  [ Product rule ]
-				// c = Math.exp(b)
-				// c' = b' * Math.exp(b)     [ Chain rule ]
+				// c = FastMath.exp(b)
+				// c' = b' * FastMath.exp(b)     [ Chain rule ]
 				// value' = a' * c + a * b' * c
 				jacobian[i][0] = (-2 * a / sigma) * c + a * (-2 * b / sigma) * c;
 
@@ -1665,8 +1666,8 @@ public class PCPALMFitting implements PlugIn
 
 				// Differentiate with respect to range:
 				// value' = amplitude * e'
-				// e = Math.exp(d)
-				// e' = d' * Math.exp(d)     [ Chain rule ]
+				// e = FastMath.exp(d)
+				// e' = d' * FastMath.exp(d)     [ Chain rule ]
 				jacobian[i][2] = amplitude * (-1 * d / range) * e;
 
 				// Differentiate with respect to amplitude:
@@ -1734,8 +1735,8 @@ public class PCPALMFitting implements PlugIn
 				final double amplitude)
 		{
 			final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma)) *
-					Math.exp(-r * r / (4 * sigma * sigma));
-			final double gr_protein = amplitude * Math.exp(-r / range) + 1;
+					FastMath.exp(-r * r / (4 * sigma * sigma));
+			final double gr_protein = amplitude * FastMath.exp(-r / range) + 1;
 			return gr_stoch + gr_protein;
 		}
 
@@ -1848,10 +1849,10 @@ public class PCPALMFitting implements PlugIn
 
 				final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
 				final double b = -r * r / (4 * sigma * sigma);
-				final double c = Math.exp(b);
+				final double c = FastMath.exp(b);
 
 				final double d = -r / alpha;
-				final double e = Math.exp(d);
+				final double e = FastMath.exp(d);
 				final double f = 0.5 * Math.PI * r / range;
 				final double g = Math.cos(f);
 
@@ -1860,8 +1861,8 @@ public class PCPALMFitting implements PlugIn
 
 				// Differentiate with respect to sigma:
 				// value' = a' * c + a * c'  [ Product rule ]
-				// c = Math.exp(b)
-				// c' = b' * Math.exp(b)     [ Chain rule ]
+				// c = FastMath.exp(b)
+				// c' = b' * FastMath.exp(b)     [ Chain rule ]
 				// value' = a' * c + a * b' * c
 				jacobian[i][0] = (-2 * a / sigma) * c + a * (-2 * b / sigma) * c;
 
@@ -1882,8 +1883,8 @@ public class PCPALMFitting implements PlugIn
 
 				// Differentiate with respect to alpha:
 				// value' = amplitude * e' * g
-				// e = Math.exp(d)
-				// e' = d' * Math.exp(d)     [ Chain rule ]
+				// e = FastMath.exp(d)
+				// e' = d' * FastMath.exp(d)     [ Chain rule ]
 				// e' = d' * e               
 				jacobian[i][4] = amplitude * (-1 * d / alpha) * e * g;
 			}
@@ -1952,8 +1953,8 @@ public class PCPALMFitting implements PlugIn
 				final double amplitude, final double alpha)
 		{
 			final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma)) *
-					Math.exp(-r * r / (4 * sigma * sigma));
-			final double gr_protein = amplitude * Math.exp(-r / alpha) * Math.cos(0.5 * Math.PI * r / range) + 1;
+					FastMath.exp(-r * r / (4 * sigma * sigma));
+			final double gr_protein = amplitude * FastMath.exp(-r / alpha) * Math.cos(0.5 * Math.PI * r / range) + 1;
 			return gr_stoch + gr_protein;
 		}
 

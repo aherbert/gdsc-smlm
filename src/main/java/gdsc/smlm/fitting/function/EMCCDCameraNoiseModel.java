@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -36,7 +38,7 @@ public class EMCCDCameraNoiseModel extends CameraNoiseModel
 	 */
 	public float variance(final float value)
 	{
-		return readNoise2 + Math.max(value - bias, 0f) * 2f;
+		return readNoise2 + FastMath.max(value - bias, 0f) * 2f;
 	}
 
 	/*

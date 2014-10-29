@@ -13,6 +13,8 @@ package gdsc.smlm.filters;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Computes the block sum for each point within the array.
  */
@@ -478,8 +480,8 @@ public class SumFilter
 		float[] newData = floatBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 
 		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
 		int d = 0;
@@ -995,8 +997,8 @@ public class SumFilter
 		float[] newData = floatBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 
@@ -1079,8 +1081,8 @@ public class SumFilter
 		float[] newData = floatBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 
@@ -1615,8 +1617,8 @@ public class SumFilter
 		int[] newData = intBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 
 		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
 		int d = 0;
@@ -2132,8 +2134,8 @@ public class SumFilter
 		int[] newData = intBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 
@@ -2216,8 +2218,8 @@ public class SumFilter
 		int[] newData = intBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 

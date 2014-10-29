@@ -75,6 +75,7 @@ import java.util.TreeSet;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
@@ -1647,7 +1648,7 @@ public class TraceMolecules implements PlugIn
 		//          find the correct spot using Euclidian distance.
 
 		// Set up the limits
-		float stdDev = Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+		float stdDev = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 		float fitWidth = (float) (stdDev * config.getFitting() * ((fitOnlyCentroid) ? 1 : expansionFactor));
 
 		IJ.showStatus("Refitting traces ...");
@@ -1881,10 +1882,10 @@ public class TraceMolecules implements PlugIn
 		int maxY = (int) Math.ceil(centre[1] + fitWidth);
 
 		// Account for crops at the edge of the image
-		minX = Math.max(0, minX);
-		maxX = Math.min(w, maxX);
-		minY = Math.max(0, minY);
-		maxY = Math.min(h, maxY);
+		minX = FastMath.max(0, minX);
+		maxX = FastMath.min(w, maxX);
+		minY = FastMath.max(0, minY);
+		maxY = FastMath.min(h, maxY);
 
 		int width = maxX - minX;
 		int height = maxY - minY;

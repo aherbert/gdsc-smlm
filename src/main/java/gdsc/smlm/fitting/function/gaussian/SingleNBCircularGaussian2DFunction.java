@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -62,7 +64,7 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 		final float dy = x1 - x1pos;
 		final float dx2dy2 = dx * dx + dy * dy;
 
-		final float y = (float) (h * Math.exp(aa * (dx2dy2)));
+		final float y = (float) (h * FastMath.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
 		dy_da[0] = y / h;

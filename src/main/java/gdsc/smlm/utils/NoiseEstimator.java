@@ -3,6 +3,7 @@ package gdsc.smlm.utils;
 import java.util.Arrays;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.util.FastMath;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -203,10 +204,10 @@ public class NoiseEstimator
 
 			int x = index % maxx;
 			int y = index / maxx;
-			int ys = Math.max(y - range, 0);
-			int ye = Math.min(y + range, maxy - 1);
-			int xs = Math.max(x - range, 0);
-			int xe = Math.min(x + range, maxx - 1);
+			int ys = FastMath.max(y - range, 0);
+			int ye = FastMath.min(y + range, maxy - 1);
+			int xs = FastMath.max(x - range, 0);
+			int xe = FastMath.min(x + range, maxx - 1);
 
 			SummaryStatistics stats = new SummaryStatistics();
 			for (int y2 = ys; y2 <= ye; y2++)

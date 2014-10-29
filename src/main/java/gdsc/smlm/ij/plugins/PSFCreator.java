@@ -69,6 +69,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Produces an average PSF image using selected diffraction limited spots from a sample image.
@@ -295,7 +296,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				z[i] = peak.peak;
 				xCoord[i] = peak.getXPosition() - x;
 				yCoord[i] = peak.getYPosition() - y;
-				sd[i] = Math.max(peak.getXSD(), peak.getYSD());
+				sd[i] = FastMath.max(peak.getXSD(), peak.getYSD());
 				a[i] = peak.getAmplitude();
 				i++;
 			}
@@ -768,7 +769,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		for (int i = 0; i < spot.length; i++)
 		{
 			for (int j = 0; j < spot[i].length; j++)
-				spot[i][j] = Math.max(spot[i][j] - min, 0);
+				spot[i][j] = FastMath.max(spot[i][j] - min, 0);
 
 			// Use a Tukey window to roll-off the image edges
 			//spot[i] = imageWindow.applySeperable(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.Tukey);
@@ -946,8 +947,8 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		float[] data = (float[]) psf.getPixels(n);
 		double foregroundSum = 0;
 		int foregroundN = 0;
-		final int min = Math.max(0, (int) (cx - 3 * sigma));
-		final int max = Math.min(psf.getWidth() - 1, (int) Math.ceil(cx + 3 * sigma));
+		final int min = FastMath.max(0, (int) (cx - 3 * sigma));
+		final int max = FastMath.min(psf.getWidth() - 1, (int) Math.ceil(cx + 3 * sigma));
 
 		// Precompute square distances within 3 sigma of the centre
 		final double r2 = 3 * sigma * 3 * sigma;
@@ -1013,9 +1014,9 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		nmPerPixel = settings.getCalibration().nmPerPixel;
 		config = settings.getFitEngineConfiguration();
 		fitConfig = config.getFitConfiguration();
-		if (radius < 5 * Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))
+		if (radius < 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))
 		{
-			radius = 5 * Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+			radius = 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 			Utils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", Utils.rounded(radius));
 		}
 		boxRadius = (int) Math.ceil(radius);
@@ -1155,14 +1156,14 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		int i = 0;
 
 		// Set limits for the fit
-		final float maxWidth = Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()) *
+		final float maxWidth = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()) *
 				magnification * 4;
 		final float maxSignal = 2; // PSF is normalised to 1  
 
 		for (PeakResult peak : results.getResults())
 		{
 			// Remove bad fits where the width/signal is above the expected
-			final float w = Math.max(peak.getXSD(), peak.getYSD());
+			final float w = FastMath.max(peak.getXSD(), peak.getYSD());
 			if (peak.getSignal() > maxSignal || w > maxWidth)
 				continue;
 
@@ -1471,8 +1472,8 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		{
 			// Get the bounds
 			int radius = (int) Math.round(fittedSd * factor);
-			int min = Math.max(0, psf.getWidth() / 2 - radius);
-			int max = Math.min(psf.getWidth() - 1, psf.getWidth() / 2 + radius);
+			int min = FastMath.max(0, psf.getWidth() / 2 - radius);
+			int max = FastMath.min(psf.getWidth() - 1, psf.getWidth() / 2 + radius);
 
 			// Create a circle mask of the PSF projection
 			ByteProcessor circle = new ByteProcessor(max - min + 1, max - min + 1);

@@ -68,6 +68,7 @@ import org.apache.commons.math3.optim.nonlinear.vector.Weight;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
@@ -166,7 +167,7 @@ public class TraceDiffusion implements PlugIn
 			if (!settings.truncate)
 			{
 				for (Trace trace : traces)
-					length = Math.max(length, trace.size());
+					length = FastMath.max(length, trace.size());
 			}
 
 			// Extract the mean-squared distance statistics
@@ -346,7 +347,7 @@ public class TraceDiffusion implements PlugIn
 				int size = Integer.MAX_VALUE;
 				for (int i = stats.length - 1; i-- > 0;)
 					if (stats[i].getN() > 0)
-						size = Math.min(size, stats[i].getN());
+						size = FastMath.min(size, stats[i].getN());
 				if (size < Integer.MAX_VALUE)
 				{
 					Random random = new Random();
@@ -439,7 +440,7 @@ public class TraceDiffusion implements PlugIn
 		final double error = precision * precision / (1e6 * exposureTime);
 		for (double msd : msdPerMoleculeAdjacent.getValues())
 		{
-			dStarPerMolecule.add(Math.max(0, msd * diffusionCoefficientConversion - error));
+			dStarPerMolecule.add(FastMath.max(0, msd * diffusionCoefficientConversion - error));
 		}
 		return dStarPerMolecule;
 	}
@@ -795,7 +796,7 @@ public class TraceDiffusion implements PlugIn
 		for (int i = 1; i < x.length; i++)
 		{
 			double value = y[i] + sd[i];
-			max = Math.max(max, value);
+			max = FastMath.max(max, value);
 		}
 		plot.setLimits(0, x[x.length - 1] + exposureTime * 0.5, 0, max);
 		plot.setColor(Color.blue);
@@ -871,7 +872,7 @@ public class TraceDiffusion implements PlugIn
 
 		public LinearFunction(double[] x, double[] y, int length)
 		{
-			int to = Math.min(x.length, 1 + length);
+			int to = FastMath.min(x.length, 1 + length);
 			this.x = Arrays.copyOfRange(x, 1, to);
 			this.y = Arrays.copyOfRange(y, 1, to);
 		}
@@ -1304,7 +1305,7 @@ public class TraceDiffusion implements PlugIn
 
 		public double evaluate(double x, double[] params)
 		{
-			return 1 - Math.exp(-x / (4 * params[0]));
+			return 1 - FastMath.exp(-x / (4 * params[0]));
 		}
 
 		/*
@@ -1318,7 +1319,7 @@ public class TraceDiffusion implements PlugIn
 			final double fourD = 4 * variables[0];
 			for (int i = 0; i < values.length; i++)
 			{
-				values[i] = 1 - Math.exp(-x[i] / fourD);
+				values[i] = 1 - FastMath.exp(-x[i] / fourD);
 			}
 			return values;
 		}
@@ -1350,7 +1351,7 @@ public class TraceDiffusion implements PlugIn
 			for (int i = 0; i < jacobian.length; ++i)
 			{
 				final double b = -x[i] / fourD;
-				jacobian[i][0] = Math.exp(b) * b / d;
+				jacobian[i][0] = FastMath.exp(b) * b / d;
 			}
 
 			//// Check numerically ...
@@ -1419,7 +1420,7 @@ public class TraceDiffusion implements PlugIn
 			for (int i = 0; i < n; i++)
 			{
 				final double f = params[i * 2];
-				sum += f * Math.exp(-x / (4 * params[i * 2 + 1]));
+				sum += f * FastMath.exp(-x / (4 * params[i * 2 + 1]));
 				total += f;
 			}
 			return 1 - sum / total;
@@ -1447,7 +1448,7 @@ public class TraceDiffusion implements PlugIn
 				double sum = 0;
 				for (int j = 0; j < n; j++)
 				{
-					sum += f[j] * Math.exp(-x[i] / (fourD[j]));
+					sum += f[j] * FastMath.exp(-x[i] / (fourD[j]));
 				}
 				values[i] = 1 - sum;
 			}
@@ -1541,15 +1542,15 @@ public class TraceDiffusion implements PlugIn
 				for (int j = 0; j < n; j++)
 				{
 					// Gradient for the diffusion coefficient
-					jacobian[i][j * 2 + 1] = fraction[j] * Math.exp(b[j]) * b[j] / variables[j * 2 + 1];
+					jacobian[i][j * 2 + 1] = fraction[j] * FastMath.exp(b[j]) * b[j] / variables[j * 2 + 1];
 
 					// Gradient for the fraction f
-					jacobian[i][j * 2] = total_f[j] * Math.exp(b[j]);
+					jacobian[i][j * 2] = total_f[j] * FastMath.exp(b[j]);
 					for (int k = 0; k < n; k++)
 					{
 						if (j == k)
 							continue;
-						jacobian[i][j * 2] += f_total[k] * Math.exp(b[k]);
+						jacobian[i][j * 2] += f_total[k] * FastMath.exp(b[k]);
 					}
 				}
 			}

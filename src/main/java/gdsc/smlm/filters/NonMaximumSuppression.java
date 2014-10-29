@@ -2,6 +2,8 @@ package gdsc.smlm.filters;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -54,8 +56,8 @@ public class NonMaximumSuppression
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 
@@ -198,8 +200,8 @@ public class NonMaximumSuppression
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 
 		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
 		int d = 0;
@@ -318,8 +320,8 @@ public class NonMaximumSuppression
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 
@@ -573,12 +575,12 @@ public class NonMaximumSuppression
 				int mj = y;
 				int i = (n + 1) * (mi / (n + 1));
 				int j = (n + 1) * (mj / (n + 1));
-				int i_plus_n = Math.min(i + n + 1, maxx - 1);
-				int j_plus_n = Math.min(j + n + 1, maxy - 1);
-				int mi_minus_n = Math.max(mi - n, 0);
-				int mi_plus_n = Math.min(mi + n, maxx - 1);
-				int mj_minus_n = Math.max(mj - n, 0);
-				int mj_plus_n = Math.min(mj + n, maxy - 1);
+				int i_plus_n = FastMath.min(i + n + 1, maxx - 1);
+				int j_plus_n = FastMath.min(j + n + 1, maxy - 1);
+				int mi_minus_n = FastMath.max(mi - n, 0);
+				int mi_plus_n = FastMath.min(mi + n, maxx - 1);
+				int mj_minus_n = FastMath.max(mj - n, 0);
+				int mj_plus_n = FastMath.min(mj + n, maxy - 1);
 
 				// A
 				for (int jj = mj_minus_n; jj < j; jj++)
@@ -816,12 +818,12 @@ public class NonMaximumSuppression
 				int i = (n + 1) * ((mi - border) / (n + 1)) + border; // Blocks n+1 wide
 				int j = (n + 1) * ((mj - border) / (n + 1)) + border; // Blocks n+1 wide
 				// The block boundaries will have been truncated on the final block. Ensure this is swept
-				int i_plus_n = Math.min(i + n + 1, maxx - border - 1);
-				int j_plus_n = Math.min(j + n + 1, maxy - border - 1);
-				int mi_minus_n = Math.max(mi - n, 0);
-				int mi_plus_n = Math.min(mi + n, maxx - 1);
-				int mj_minus_n = Math.max(mj - n, 0);
-				int mj_plus_n = Math.min(mj + n, maxy - 1);
+				int i_plus_n = FastMath.min(i + n + 1, maxx - border - 1);
+				int j_plus_n = FastMath.min(j + n + 1, maxy - border - 1);
+				int mi_minus_n = FastMath.max(mi - n, 0);
+				int mi_plus_n = FastMath.min(mi + n, maxx - 1);
+				int mj_minus_n = FastMath.max(mj - n, 0);
+				int mj_plus_n = FastMath.min(mj + n, maxy - 1);
 
 				//System.out.printf("Block [%d,%d] => [%d,%d]\n", x, y, i, j);
 
@@ -1890,7 +1892,7 @@ public class NonMaximumSuppression
 		if (fractionAboveBackground != 1)
 		{
 			float heightThreshold2 = background / (1 - fractionAboveBackground);
-			heightThreshold = Math.max(heightThreshold, heightThreshold2);
+			heightThreshold = FastMath.max(heightThreshold, heightThreshold2);
 		}
 		return heightThreshold;
 	}
@@ -2074,8 +2076,8 @@ public class NonMaximumSuppression
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 
@@ -2218,8 +2220,8 @@ public class NonMaximumSuppression
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 
 		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
 		int d = 0;
@@ -2338,8 +2340,8 @@ public class NonMaximumSuppression
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
-		int xwidth = Math.min(n, maxx - 1);
-		int ywidth = Math.min(n, maxy - 1);
+		int xwidth = FastMath.min(n, maxx - 1);
+		int ywidth = FastMath.min(n, maxy - 1);
 		int xlimit = maxx - xwidth;
 		int ylimit = maxy - ywidth;
 
@@ -2593,12 +2595,12 @@ public class NonMaximumSuppression
 				int mj = y;
 				int i = (n + 1) * (mi / (n + 1));
 				int j = (n + 1) * (mj / (n + 1));
-				int i_plus_n = Math.min(i + n + 1, maxx - 1);
-				int j_plus_n = Math.min(j + n + 1, maxy - 1);
-				int mi_minus_n = Math.max(mi - n, 0);
-				int mi_plus_n = Math.min(mi + n, maxx - 1);
-				int mj_minus_n = Math.max(mj - n, 0);
-				int mj_plus_n = Math.min(mj + n, maxy - 1);
+				int i_plus_n = FastMath.min(i + n + 1, maxx - 1);
+				int j_plus_n = FastMath.min(j + n + 1, maxy - 1);
+				int mi_minus_n = FastMath.max(mi - n, 0);
+				int mi_plus_n = FastMath.min(mi + n, maxx - 1);
+				int mj_minus_n = FastMath.max(mj - n, 0);
+				int mj_plus_n = FastMath.min(mj + n, maxy - 1);
 
 				// A
 				for (int jj = mj_minus_n; jj < j; jj++)
@@ -2836,12 +2838,12 @@ public class NonMaximumSuppression
 				int i = (n + 1) * ((mi - border) / (n + 1)) + border; // Blocks n+1 wide
 				int j = (n + 1) * ((mj - border) / (n + 1)) + border; // Blocks n+1 wide
 				// The block boundaries will have been truncated on the final block. Ensure this is swept
-				int i_plus_n = Math.min(i + n + 1, maxx - border - 1);
-				int j_plus_n = Math.min(j + n + 1, maxy - border - 1);
-				int mi_minus_n = Math.max(mi - n, 0);
-				int mi_plus_n = Math.min(mi + n, maxx - 1);
-				int mj_minus_n = Math.max(mj - n, 0);
-				int mj_plus_n = Math.min(mj + n, maxy - 1);
+				int i_plus_n = FastMath.min(i + n + 1, maxx - border - 1);
+				int j_plus_n = FastMath.min(j + n + 1, maxy - border - 1);
+				int mi_minus_n = FastMath.max(mi - n, 0);
+				int mi_plus_n = FastMath.min(mi + n, maxx - 1);
+				int mj_minus_n = FastMath.max(mj - n, 0);
+				int mj_plus_n = FastMath.min(mj + n, maxy - 1);
 
 				//System.out.printf("Block [%d,%d] => [%d,%d]\n", x, y, i, j);
 

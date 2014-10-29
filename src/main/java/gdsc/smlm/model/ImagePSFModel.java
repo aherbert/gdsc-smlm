@@ -15,6 +15,7 @@ package gdsc.smlm.model;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Generates a Point Spread Function using an image constructed from diffraction limited spots imaged axially through
@@ -390,7 +391,7 @@ public class ImagePSFModel extends PSFModel
 			if (v[y + 1] < 0)
 				continue;
 			final int lowerV = v[y];
-			final int upperV = Math.min(v[y + 1], psfWidth - 1);
+			final int upperV = FastMath.min(v[y + 1], psfWidth - 1);
 			for (int x = 0, i = y * x0range; x < x0range; x++, i++)
 			{
 				if (u[x] > psfWidth - 1)
@@ -465,8 +466,8 @@ public class ImagePSFModel extends PSFModel
 		//		if (upperU < 0 || upperV < 0)
 		//			return 0;
 
-		upperU = Math.min(upperU, psfWidth - 1);
-		//upperV = Math.min(upperV, psfWidth - 1);
+		upperU = FastMath.min(upperU, psfWidth - 1);
+		//upperV = FastMath.min(upperV, psfWidth - 1);
 
 		int index = upperV * psfWidth + upperU;
 		double sum = s[index];

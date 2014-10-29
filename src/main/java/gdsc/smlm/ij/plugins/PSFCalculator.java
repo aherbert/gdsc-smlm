@@ -30,6 +30,8 @@ import java.awt.Label;
 import java.awt.SystemColor;
 import java.awt.TextField;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.
  */
@@ -419,7 +421,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	{
 		if (x == 0)
 			return 1;
-		return Math.exp(-0.5 * (x * x));
+		return FastMath.exp(-0.5 * (x * x));
 	}
 
 	private String getPixelPitchLabel(double pixelPitch)

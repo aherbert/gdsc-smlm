@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Calculates the match between a set of predicted points and the actual points.
  */
@@ -766,7 +768,7 @@ public class MatchCalculator
 		// This penalises too few or too many predictions
 		int p1 = countTimePoints(actualPoints);
 		int p2 = countTimePoints(predictedPoints);
-		score /= Math.max(p1, p2);
+		score /= FastMath.max(p1, p2);
 		
 		return new MatchResult(n, tp, fp, fn, score);
 	}

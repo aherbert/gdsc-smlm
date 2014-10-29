@@ -18,6 +18,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -97,7 +99,7 @@ public class MedianFilter implements PlugInFilter
 		IJ.showStatus("Calculating medians...");
 		for (int i = 0; i < size; i += blockSize)
 		{
-			futures.add(threadPool.submit(new ImageGenerator(imageStack, mean, i, Math.min(i + blockSize, size))));
+			futures.add(threadPool.submit(new ImageGenerator(imageStack, mean, i, FastMath.min(i + blockSize, size))));
 		}
 
 		// Finish processing data
@@ -325,7 +327,7 @@ public class MedianFilter implements PlugInFilter
 					// Interpolate
 					for (int slice = 0; slice < nSlices; slice += interval)
 					{
-						int end = Math.min(slice + interval, nSlices - 1);
+						int end = FastMath.min(slice + interval, nSlices - 1);
 						final float increment = (data[end] - data[slice]) / (end - slice);
 						for (int s = slice + 1, i = 1; s < end; s++, i++)
 						{
@@ -433,7 +435,7 @@ public class MedianFilter implements PlugInFilter
 					float[] increment = new float[nPixels];
 					for (int slice = 0; slice < nSlices; slice += interval)
 					{
-						int end = Math.min(slice + interval, nSlices - 1);
+						int end = FastMath.min(slice + interval, nSlices - 1);
 						for (int pixel = 0; pixel < nPixels; pixel++)
 							increment[pixel] = (data[pixel][end] - data[pixel][slice]) / (end - slice);
 						for (int s = slice + 1, i = 1; s < end; s++, i++)

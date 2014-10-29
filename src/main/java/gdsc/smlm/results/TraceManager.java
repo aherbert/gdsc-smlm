@@ -21,6 +21,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Trace localisations through a time stack to identify single molecules
  */
@@ -252,7 +254,7 @@ public class TraceManager
 			final int currentIndex = nextIndex;
 			final int t = localisations[currentIndex].t;
 			nextIndex = index[t + 1];
-			int pastT = Math.max(t - timeThreshold, 0);
+			int pastT = FastMath.max(t - timeThreshold, 0);
 			if (pulseInterval > 0)
 			{
 				// Support for splitting traces across pulse boundaries. Simply round the
@@ -1182,7 +1184,7 @@ public class TraceManager
 	 */
 	public void setPulseInterval(int pulseInterval)
 	{
-		this.pulseInterval = Math.max(0, pulseInterval);
+		this.pulseInterval = FastMath.max(0, pulseInterval);
 	}
 
 	/**
@@ -1266,9 +1268,9 @@ public class TraceManager
 				if (nextIndex != currentIndex)
 					break;
 			}
-			final int pastEndIndex = endIndex[Math.max(t - timeThreshold, 0)];
+			final int pastEndIndex = endIndex[FastMath.max(t - timeThreshold, 0)];
 			final int currentEndIndex = endIndex[t];
-			final int futureIndex = Math.max(nextIndex, index[Math.min(t + 1 + timeThreshold, index.length - 1)]);
+			final int futureIndex = FastMath.max(nextIndex, index[FastMath.min(t + 1 + timeThreshold, index.length - 1)]);
 
 			// Process all spots from this frame.
 			for (int index = currentIndex; index < nextIndex; index++)

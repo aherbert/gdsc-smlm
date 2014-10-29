@@ -107,6 +107,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
 import org.apache.commons.math3.random.Well44497b;
+import org.apache.commons.math3.util.FastMath;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
@@ -272,7 +273,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				// Use the density to get the number per frame
 				final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
-				n = (int) Math.max(1, Math.round(areaInUm * settings.density));
+				n = (int) FastMath.max(1, Math.round(areaInUm * settings.density));
 				dist = createUniformDistribution(0);
 			}
 
@@ -549,7 +550,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private UniformDistribution createUniformDistributionWithPSFWidthBorder()
 	{
 		double border = getHWHM() * 3;
-		border = Math.min(border, settings.size / 4);
+		border = FastMath.min(border, settings.size / 4);
 		return createUniformDistribution(border);
 	}
 
@@ -1699,10 +1700,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			int x1max = spots[0].x1max;
 			for (int i = 1; i < spotCount; i++)
 			{
-				x0min = Math.min(x0min, spots[i].x0min);
-				x1min = Math.min(x1min, spots[i].x1min);
-				x0max = Math.max(x0max, spots[i].x0max);
-				x1max = Math.max(x1max, spots[i].x1max);
+				x0min = FastMath.min(x0min, spots[i].x0min);
+				x1min = FastMath.min(x1min, spots[i].x1min);
+				x0max = FastMath.max(x0max, spots[i].x0max);
+				x1max = FastMath.max(x1max, spots[i].x1max);
 			}
 
 			final int x0range = x0max - x0min;
@@ -1840,14 +1841,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				ip.setInterpolationMethod(ImageProcessor.BILINEAR);
 				ip = ip.resize(settings.size, settings.size);
 				float[] data = (float[]) ip.getPixels();
-				final double max = Math.max(0, Maths.max(data));
+				final double max = FastMath.max(0, Maths.max(data));
 				if (max != 0)
 				{
 					final double scale = settings.background / max;
 					for (int i = 0; i < backgroundPixels.length; i++)
 					{
 						// Ignore pixels below zero
-						backgroundPixels[i] = (float) (Math.max(0, data[i]) * scale);
+						backgroundPixels[i] = (float) (FastMath.max(0, data[i]) * scale);
 					}
 					return;
 				}

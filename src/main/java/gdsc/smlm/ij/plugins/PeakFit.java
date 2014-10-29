@@ -98,6 +98,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.JFileChooser;
 
+import org.apache.commons.math3.util.FastMath;
+
 //import ij.io.OpenDialog;
 
 /**
@@ -996,7 +998,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (showImage)
 		{
 			resultsSettings.setResultsImage(ResultsImage.SIGNAL_INTENSITY);
-			resultsSettings.imageScale = (float) Math.ceil(1024 / (Math.max(bounds.width, bounds.height)));
+			resultsSettings.imageScale = (float) Math.ceil(1024 / (FastMath.max(bounds.width, bounds.height)));
 			resultsSettings.weightedImage = true;
 			resultsSettings.equalisedImage = true;
 		}
@@ -1667,7 +1669,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				.getHeight()) ? null : bounds;
 
 		// Use the FitEngine to allow multi-threading.
-		FitEngine engine = createFitEngine(Math.min(totalFrames, Prefs.getThreads()));
+		FitEngine engine = createFitEngine(FastMath.min(totalFrames, Prefs.getThreads()));
 
 		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
 
@@ -1910,7 +1912,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		List<PeakResult> candidateMaxima = results.getResults();
 
 		// Use the FitEngine to allow multi-threading.
-		FitEngine engine = createFitEngine(Math.min(totalFrames, Prefs.getThreads()));
+		FitEngine engine = createFitEngine(FastMath.min(totalFrames, Prefs.getThreads()));
 
 		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
 

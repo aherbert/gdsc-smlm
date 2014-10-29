@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Computes a graph of the dark time and estimates the time threshold for the specified point in the
  * cumulative histogram.
@@ -151,7 +153,7 @@ public class DarkTimeAnalysis implements PlugIn
 		double d = searchDistance / results.getCalibration().nmPerPixel;
 		int range = max - min + 1;
 		if (maxDarkTime > 0)
-			range = Math.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
+			range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
 
 		IJTrackProgress tracker = new IJTrackProgress();
 		tracker.status("Analysing ...");

@@ -82,6 +82,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Use the PC-PALM protocol to prepare a set of localisations into molecules. This can be used for for clustering
@@ -617,8 +618,8 @@ public class PCPALMMolecules implements PlugIn
 			{
 				double iqr = upper - lower;
 
-				yMin = Math.max(lower - iqr, stats.getMin());
-				yMax = Math.min(upper + iqr, stats.getMax());
+				yMin = FastMath.max(lower - iqr, stats.getMin());
+				yMax = FastMath.min(upper + iqr, stats.getMax());
 
 				if (logFitParameters)
 					Utils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(),
@@ -932,7 +933,7 @@ public class PCPALMMolecules implements PlugIn
 
 		startLog();
 
-		int timeInFrames = Math.max(1, (int) Math.round(tThreshold / results.getCalibration().exposureTime));
+		int timeInFrames = FastMath.max(1, (int) Math.round(tThreshold / results.getCalibration().exposureTime));
 
 		ArrayList<Molecule> singles = new ArrayList<Molecule>();
 		molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
@@ -1551,7 +1552,7 @@ public class PCPALMMolecules implements PlugIn
 			Plot plot = new Plot(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
 			double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
 			if (interIdHist[1].length > 0)
-				max = Math.max(max, interIdHist[1][interIdHist[1].length - 1]);
+				max = FastMath.max(max, interIdHist[1][interIdHist[1].length - 1]);
 			plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
 			plot.setColor(Color.blue);
 			plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
@@ -1719,7 +1720,7 @@ public class PCPALMMolecules implements PlugIn
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
-			p = Math.max(Math.min(gd.getNextNumber(), 100), 0) / 100;
+			p = FastMath.max(FastMath.min(gd.getNextNumber(), 100), 0) / 100;
 		}
 		return true;
 	}
@@ -1886,7 +1887,7 @@ public class PCPALMMolecules implements PlugIn
 		double yrange = maxy - miny;
 		if (xrange > 0 || yrange > 0)
 		{
-			lowResNmPerPixel = Math.max(xrange, yrange) / lowResolutionImageSize;
+			lowResNmPerPixel = FastMath.max(xrange, yrange) / lowResolutionImageSize;
 		}
 		else
 		{

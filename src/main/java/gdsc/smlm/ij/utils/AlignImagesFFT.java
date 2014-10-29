@@ -12,6 +12,8 @@ import ij.util.Tools;
 
 import java.awt.Rectangle;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Aligns an image stack to a reference image using XY translation to maximise the correlation. Takes in:
  * <ul>
@@ -111,9 +113,9 @@ public class AlignImagesFFT
 			return null;
 
 		// Fourier transforms use the largest power-two dimension that covers both images
-		int maxN = Math.max(refIp.getWidth(), refIp.getHeight());
-		int maxM = Math.max(targetImp.getWidth(), targetImp.getHeight());
-		maxN = Math.max(maxN, maxM);
+		int maxN = FastMath.max(refIp.getWidth(), refIp.getHeight());
+		int maxM = FastMath.max(targetImp.getWidth(), targetImp.getHeight());
+		maxN = FastMath.max(maxN, maxM);
 
 		this.normalisedRefIp = padAndZero(refIp, maxN, windowMethod, refImageBounds);
 		if (showNormalisedImage)
@@ -237,7 +239,7 @@ public class AlignImagesFFT
 			return;
 
 		// Fourier transforms use the largest power-two dimension that covers both images
-		int maxN = Math.max(refIp.getWidth(), refIp.getHeight());
+		int maxN = FastMath.max(refIp.getWidth(), refIp.getHeight());
 
 		this.normalisedRefIp = padAndZero(refIp, maxN, windowMethod, refImageBounds);
 
@@ -439,9 +441,9 @@ public class AlignImagesFFT
 				double sumSquares = 0;
 
 				int minU = xxx - halfNU - 1;
-				int maxU = Math.min(minU + NU, maxx - 1);
+				int maxU = FastMath.min(minU + NU, maxx - 1);
 				int minV = yyy - halfNV - 1;
-				int maxV = Math.min(minV + NV, maxy - 1);
+				int maxV = FastMath.min(minV + NV, maxy - 1);
 
 				// Compute sum from rolling sum using:
 				// sum(u,v) = 
@@ -549,8 +551,8 @@ public class AlignImagesFFT
 	{
 		// Restrict translation so that at least half of the smaller image width/height 
 		// is within the larger image (half-max translation)
-		int maxx = Math.max(width1, width2);
-		int maxy = Math.max(height1, height2);
+		int maxx = FastMath.max(width1, width2);
+		int maxy = FastMath.max(height1, height2);
 		maxx /= 2;
 		maxy /= 2;
 		return new Rectangle(-maxx, -maxy, 2 * maxx, 2 * maxy);

@@ -2,6 +2,8 @@ package gdsc.smlm.utils;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -93,7 +95,7 @@ public class MedianWindowFloat
 	 */
 	public void setPosition(int position)
 	{
-		position = Math.max(0, position);
+		position = FastMath.max(0, position);
 		// If moving backwards then delete the cache
 		if (position < this.position)
 			cache = null;
@@ -174,8 +176,8 @@ public class MedianWindowFloat
 		// Keep          +++++++++++++++++++
 		// Add                              ======
 
-		final int newStart = Math.max(0, position - radius);
-		final int newEnd = Math.min(position + radius + 1, data.length);
+		final int newStart = FastMath.max(0, position - radius);
+		final int newEnd = FastMath.min(position + radius + 1, data.length);
 		final int newLength = newEnd - newStart;
 
 		// Speed tests have shown that if the total increment is more than half the radius it 
@@ -191,8 +193,8 @@ public class MedianWindowFloat
 			// This point is only reached when we have a set of sorted numbers in the cache 
 			// and we want to replace N of them with N new numbers.
 
-			final int cacheStart = Math.max(0, cachePosition - radius);
-			final int cacheEnd = Math.min(cachePosition + radius + 1, data.length);
+			final int cacheStart = FastMath.max(0, cachePosition - radius);
+			final int cacheEnd = FastMath.min(cachePosition + radius + 1, data.length);
 			final int middle = cache.length / 2;
 			final float middleValue = cache[middle];
 

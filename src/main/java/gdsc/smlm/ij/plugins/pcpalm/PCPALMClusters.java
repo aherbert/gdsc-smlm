@@ -56,6 +56,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
@@ -763,11 +764,11 @@ public class PCPALMClusters implements PlugIn
 	{
 		float[] v1 = normalise(histogramData);
 		float[] v2 = normalise(noiseData);
-		int length = v1.length; // Math.max(v1.length, v2.length);
+		int length = v1.length; // FastMath.max(v1.length, v2.length);
 		final double factor = (histogramData.frames * histogramData.area);
 		for (int i = 0; i < length; i++)
 		{
-			histogramData.histogram[1][i] = (float) (Math.max(0, v1[i] - ((i < v2.length) ? v2[i] : 0)) * factor);
+			histogramData.histogram[1][i] = (float) (FastMath.max(0, v1[i] - ((i < v2.length) ? v2[i] : 0)) * factor);
 		}
 		return true;
 	}

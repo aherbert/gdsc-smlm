@@ -6,6 +6,8 @@ import gdsc.smlm.results.PeakResult;
 import java.awt.Rectangle;
 import java.util.Collection;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -152,10 +154,10 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		int ymax = (int) Math.ceil(y + height * scale);
 
 		// Clip range
-		xmin = Math.max(xmin, 0);
-		xmax = (int) Math.min(xmax, xlimit);
-		ymin = Math.max(ymin, 0);
-		ymax = (int) Math.min(ymax, ylimit);
+		xmin = FastMath.max(xmin, 0);
+		xmax = (int) FastMath.min(xmax, xlimit);
+		ymin = FastMath.max(ymin, 0);
+		ymax = (int) FastMath.min(ymax, ylimit);
 
 		// Compute Gaussian PSF
 		int[] index = new int[(xmax - xmin + 1) * (ymax - ymin + 1)];
@@ -168,7 +170,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 				index[i] = ii;
 				final float dx = (x0 - x) / scale;
 				final float dy = (y0 - y) / scale;
-				value[i] = (float) (amplitude * Math.exp(a * dx * dx + b * dx * dy + c * dy * dy));
+				value[i] = (float) (amplitude * FastMath.exp(a * dx * dx + b * dx * dy + c * dy * dy));
 				i++;
 			}
 

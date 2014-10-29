@@ -30,12 +30,12 @@ import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.FileFormat;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.PeakResultsReader;
-import gdsc.smlm.results.FileFormat;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -54,6 +54,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Opens peaks results and displays/converts them
@@ -185,7 +187,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		for (; size < list.size(); size += batchSize)
 		{
 			IJ.showProgress(size, list.size());
-			for (int j = size; j < Math.min(list.size(), size + batchSize); j++)
+			for (int j = size; j < FastMath.min(list.size(), size + batchSize); j++)
 				batch.add(list.get(j));
 			output.addAll(batch);
 			batch.clear();

@@ -13,6 +13,8 @@ import ij.util.Tools;
 import java.awt.AWTEvent;
 import java.awt.Label;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -87,9 +89,9 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 				double sumSquares = 0;
 
 				int minU = x - radius - 1;
-				int maxU = Math.min(x + radius, maxx - 1);
+				int maxU = FastMath.min(x + radius, maxx - 1);
 				int minV = y - radius - 1;
-				int maxV = Math.min(y + radius, maxy - 1);
+				int maxV = FastMath.min(y + radius, maxy - 1);
 
 				// Compute sum from rolling sum using:
 				// sum(u,v) = 
