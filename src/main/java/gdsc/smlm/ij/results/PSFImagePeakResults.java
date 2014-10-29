@@ -27,11 +27,11 @@ import org.apache.commons.math3.util.FastMath;
 public class PSFImagePeakResults extends IJImagePeakResults
 {
 	private boolean fixedWidth = false;
-	private float psfWidth = 0;
+	private float psfWidth = 0f;
 	private boolean calculatedPrecision = false;
 
-	private double nmPerPixel = 100;
-	private float gain = 1;
+	private double nmPerPixel = 100.0;
+	private float gain = 1f;
 
 	// Multiplication factors and variables for plotting the fixed Gaussian
 	private double[] fixedParams = null;
@@ -119,10 +119,10 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		else
 		{
 			// Precalculate multiplication factors
-			double t, sx, sy;
+			final double t, sx, sy;
 			if (calculatedPrecision && nmPerPixel > 0)
 			{
-				t = 0;
+				t = 0.0;
 				final double N = PeakResult.getSignal(params) / gain;
 				final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 						nmPerPixel;
@@ -194,19 +194,19 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		{
 			// sin(0) == 0
 			// cos(0) == 1
-			a = -(1 / (2 * sx * sx));
-			b = 0;
-			c = -(1 / (2 * sy * sy));
+			a = (-1.0 / (2.0 * sx * sx));
+			b = 0.0;
+			c = (-1.0 / (2.0 * sy * sy));
 
 			// Calculate the range for the PSF as 3 sigma.
-			width = 3 * sx;
-			height = 3 * sy;
+			width = 3.0 * sx;
+			height = 3.0 * sy;
 		}
 		else
 		{
-			a = -(Math.cos(t) * Math.cos(t) / (2 * sx * sx) + Math.sin(t) * Math.sin(t) / (2 * sy * sy));
-			b = -(-Math.sin(2 * t) / (2 * sx * sx) + Math.sin(2 * t) / (2 * sy * sy));
-			c = -(Math.sin(t) * Math.sin(t) / (2 * sx * sx) + Math.cos(t) * Math.cos(t) / (2 * sy * sy));
+			a = -(Math.cos(t) * Math.cos(t) / (2.0 * sx * sx) + Math.sin(t) * Math.sin(t) / (2.0 * sy * sy));
+			b = -(-Math.sin(2.0 * t) / (2.0 * sx * sx) + Math.sin(2.0 * t) / (2.0 * sy * sy));
+			c = -(Math.sin(t) * Math.sin(t) / (2.0 * sx * sx) + Math.cos(t) * Math.cos(t) / (2.0 * sy * sy));
 
 			// Note that the Gaussian2DFitter returns the angle of the major axis (sx) relative to the x-axis.
 			// The angle is in the range -pi/2 to pi/2
@@ -224,8 +224,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			final double t2 = t1 + Math.PI / 2; // Angle around the ellipse from 0 to 2pi for the y-axis
 
 			// Calculate the size of the ellipse at 3 sigma
-			width = Math.abs(3 * (sx * Math.cos(t1) * Math.cos(phi) - sy * Math.sin(t1) * Math.sin(phi)));
-			height = Math.abs(3 * (sx * Math.cos(t2) * Math.sin(phi) + sy * Math.sin(t2) * Math.cos(phi)));
+			width = Math.abs(3.0 * (sx * Math.cos(t1) * Math.cos(phi) - sy * Math.sin(t1) * Math.sin(phi)));
+			height = Math.abs(3.0 * (sx * Math.cos(t2) * Math.sin(phi) + sy * Math.sin(t2) * Math.cos(phi)));
 		}
 
 		params[0] = a;
@@ -280,7 +280,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		if (width > 0)
 		{
 			fixedWidth = true;
-			fixedParams = setPSFParameters(0, width, width, new double[5]);
+			fixedParams = setPSFParameters(0.0, width, width, new double[5]);
 		}
 		else
 		{
