@@ -181,10 +181,13 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float by = factors[BY];
 		final float cy = factors[CY];
 
-		final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		//final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
-		dy_da[dydapos] = y / h;
+		//dy_da[dydapos] = y / h;
+
+		dy_da[dydapos] = (float) (FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		final float y = h * dy_da[dydapos];
 		dy_da[dydapos + 1] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
 		dy_da[dydapos + 2] = y * (-2.0f * aa * dx - bb * dy);

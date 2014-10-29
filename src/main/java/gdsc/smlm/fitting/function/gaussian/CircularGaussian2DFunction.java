@@ -20,15 +20,15 @@ import gdsc.smlm.fitting.function.MultiPeakGaussian2DFunction;
 /**
  * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into
- * 2-dimensional data. The dimensions of the data must be specified to allow unpacking to coordinates.
+ * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
  */
 public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 4;
-	
+
 	protected float[][] peakFactors;
 	protected float[] a;
 
@@ -68,7 +68,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-			
+
 			peakFactors[j][AA] = (float) (-0.5 / sx2);
 			peakFactors[j][AA2] = -2.0f * peakFactors[j][AA];
 
@@ -107,11 +107,11 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		// Track the position of the parameters
 		int apos = 0;
 		int dydapos = 0;
-		
+
 		// First parameter is the background level 
 		float y_fit = a[BACKGROUND];
 		dyda[dydapos++] = 1; // Gradient for a constant background is 1
-		
+
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
@@ -126,28 +126,31 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y_fit;
 	}
 
-	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos,
-			final int dydapos, float[] factors)
+	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos, final int dydapos,
+			float[] factors)
 	{
-		final float h = a[apos+AMPLITUDE];
+		final float h = a[apos + AMPLITUDE];
 
-		final float dx = x0 - a[apos+X_POSITION];
-		final float dy = x1 - a[apos+Y_POSITION];
+		final float dx = x0 - a[apos + X_POSITION];
+		final float dy = x1 - a[apos + Y_POSITION];
 		final float dx2dy2 = dx * dx + dy * dy;
-		
+
 		final float aa = factors[AA];
 		final float aa2 = factors[AA2];
 		final float ax = factors[AX];
-    	
-		final float y = (float) (h * FastMath.exp(aa * (dx2dy2)));
+
+		//final float y = (float) (h * FastMath.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
-		dy_da[dydapos] = y / h;
-		
-		dy_da[dydapos+1] = y * (aa2 * dx);
-		dy_da[dydapos+2] = y * (aa2 * dy);
-		
-		dy_da[dydapos+3] = y * (ax * (dx2dy2));
+		//dy_da[dydapos] = y / h;
+
+		dy_da[dydapos] = (float) (FastMath.exp(aa * (dx2dy2)));
+		final float y = h * dy_da[dydapos];
+		final float yaa2 = y * aa2;
+		dy_da[dydapos + 1] = yaa2 * dx;
+		dy_da[dydapos + 2] = yaa2 * dy;
+
+		dy_da[dydapos + 3] = y * (ax * (dx2dy2));
 
 		return y;
 	}
@@ -194,7 +197,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		return true;
 	}
-	
+
 	@Override
 	public boolean evaluatesAmplitude()
 	{

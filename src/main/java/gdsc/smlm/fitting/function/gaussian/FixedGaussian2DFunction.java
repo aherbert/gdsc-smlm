@@ -132,13 +132,16 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float dx = x0 - a[apos + X_POSITION];
 		final float dy = x1 - a[apos + Y_POSITION];
 
-		final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
+		//final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
 
 		// Calculate gradients
-		dy_da[dydapos] = y / h;
-
-		dy_da[dydapos + 1] = y * (aa2 * dx);
-		dy_da[dydapos + 2] = y * (aa2 * dy);
+		//dy_da[dydapos] = y / h;
+		
+		dy_da[dydapos] = (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+		final float y = h * dy_da[dydapos];
+		final float yaa2 = y * aa2;
+		dy_da[dydapos + 1] = yaa2 * dx;
+		dy_da[dydapos + 2] = yaa2 * dy;
 
 		return y;
 	}

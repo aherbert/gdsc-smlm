@@ -159,10 +159,13 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		final float dxy = dx * dy;
 		final float dy2 = dy * dy;
 
-		final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		//final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
-		dy_da[1] = y / h;
+		//dy_da[1] = y / h;
+		
+		dy_da[1] = (float) (FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		final float y = h * dy_da[1];
 		dy_da[2] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
 		dy_da[3] = y * (-2.0f * aa * dx - bb * dy);

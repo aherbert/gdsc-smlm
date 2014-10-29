@@ -63,13 +63,16 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 		final float dx = x0 - x0pos;
 		final float dy = x1 - x1pos;
 
-		final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
+		//final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
 
 		// Calculate gradients
-		dy_da[0] = y / h;
+		//dy_da[0] = y / h;
 
-		dy_da[1] = y * (aa2 * dx);
-		dy_da[2] = y * (aa2 * dy);
+		dy_da[0] = (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+		final float y = h * dy_da[0];
+		final float yaa2 = y * aa2;
+		dy_da[1] = yaa2 * dx;
+		dy_da[2] = yaa2 * dy;
 
 		return y;
 	}

@@ -68,10 +68,10 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 		final double sx = a[X_SD];
 		final double sx2 = sx * sx;
 		final double sx3 = sx2 * sx;
-		
+
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-		
+
 		aa = (float) (-0.5 / sx2);
 		aa2 = -2.0f * aa;
 
@@ -124,13 +124,16 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 		final float dy = x1 - x1pos;
 		final float dx2dy2 = dx * dx + dy * dy;
 
-		final float y = (float) (h * FastMath.exp(aa * (dx2dy2)));
+		//final float y = (float) (h * FastMath.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
-		dy_da[1] = y / h;
+		//dy_da[1] = y / h;
 
-		dy_da[2] = y * (aa2 * dx);
-		dy_da[3] = y * (aa2 * dy);
+		dy_da[1] = (float) (FastMath.exp(aa * (dx2dy2)));
+		final float y = h * dy_da[1];
+		final float yaa2 = y * aa2;
+		dy_da[2] = yaa2 * dx;
+		dy_da[3] = yaa2 * dy;
 
 		dy_da[4] = y * (ax * (dx2dy2));
 

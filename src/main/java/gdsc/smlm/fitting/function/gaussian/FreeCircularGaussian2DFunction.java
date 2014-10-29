@@ -47,7 +47,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 	protected static final double MinusFourLog2 = (double) (-4.0 * Math.log(2.0));
 	protected static final int AA = 0;
-	protected static final int BB= 1;
+	protected static final int BB = 1;
 	protected static final int CC = 2;
 	protected static final int AX = 3;
 	protected static final int BX = 4;
@@ -81,10 +81,11 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-			
+
 			peakFactors[j][AA] = (float) (-0.5 * (cosSqt / sx2 + sinSqt / sy2));
 			peakFactors[j][BB] = (float) (-0.25 * (-sin2t / sx2 + sin2t / sy2));
-			peakFactors[j][CC] = (float) (-0.5 * (sinSqt / sx2 + cosSqt / sy2));;
+			peakFactors[j][CC] = (float) (-0.5 * (sinSqt / sx2 + cosSqt / sy2));
+			;
 
 			// For the x-width gradient
 			peakFactors[j][AX] = (float) (cosSqt / sx3);
@@ -97,6 +98,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 			peakFactors[j][CY] = (float) (cosSqt / sy3);
 		}
 	}
+
 	/**
 	 * Produce an output predicted value for a given set of input
 	 * predictors (x) and coefficients (a).
@@ -128,11 +130,11 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		// Track the position of the parameters
 		int apos = 0;
 		int dydapos = 0;
-		
+
 		// First parameter is the background level 
 		float y_fit = a[BACKGROUND];
 		dyda[dydapos++] = 1; // Gradient for a constant background is 1
-		
+
 		// Unpack the predictor into the dimensions
 		;
 		final int x1 = x / maxx;
@@ -148,16 +150,17 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y_fit;
 	}
 
-	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos, final int dydapos, final float[] factors)
+	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos, final int dydapos,
+			final float[] factors)
 	{
-		final float h = a[apos+AMPLITUDE];
+		final float h = a[apos + AMPLITUDE];
 
-		final float dx = x0 - a[apos+X_POSITION];
-		final float dy = x1 - a[apos+Y_POSITION];
+		final float dx = x0 - a[apos + X_POSITION];
+		final float dy = x1 - a[apos + Y_POSITION];
 		final float dx2 = dx * dx;
 		final float dxy = dx * dy;
 		final float dy2 = dy * dy;
-		
+
 		final float aa = factors[AA];
 		final float bb = factors[BB];
 		final float cc = factors[CC];
@@ -167,21 +170,22 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final float ay = factors[AY];
 		final float by = factors[BY];
 		final float cy = factors[CY];
-    	
-		final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+
+		//final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
-		dy_da[dydapos] = y / h;
-		
-		dy_da[dydapos+1] = y * (-2.0f * aa * dx - bb * dy);
-		dy_da[dydapos+2] = y * (-2.0f * cc * dy - bb * dx);
-		
-		dy_da[dydapos+3] = y * (ax * dx2 + bx * dxy + cx * dy2);
-		dy_da[dydapos+4] = y * (ay * dx2 + by * dxy + cy * dy2);
+		//dy_da[dydapos] = y / h;
+
+		dy_da[dydapos] = (float) (FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		final float y = h * dy_da[dydapos];
+		dy_da[dydapos + 1] = y * (-2.0f * aa * dx - bb * dy);
+		dy_da[dydapos + 2] = y * (-2.0f * cc * dy - bb * dx);
+
+		dy_da[dydapos + 3] = y * (ax * dx2 + bx * dxy + cx * dy2);
+		dy_da[dydapos + 4] = y * (ay * dx2 + by * dxy + cy * dy2);
 
 		return y;
 	}
-
 
 	/*
 	 * (non-Javadoc)
@@ -221,7 +225,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		return h * (float) FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
-	
+
 	@Override
 	public boolean evaluatesBackground()
 	{
