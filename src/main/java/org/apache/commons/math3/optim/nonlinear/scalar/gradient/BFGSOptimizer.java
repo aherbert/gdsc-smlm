@@ -44,7 +44,7 @@ import org.apache.commons.math3.util.FastMath;
 public class BFGSOptimizer extends GradientMultivariateOptimizer
 {
 	/** Maximum step length used in line search. */
-	private double maximumStepLength = 100;
+	private double[] maximumStepLength = null;
 
 	/** Convergence tolerance on gradient */
 	private GradientChecker gradientChecker = null;
@@ -156,6 +156,38 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
+	 * Specify the maximum step length in each dimension
+	 */
+	public static class StepLength implements OptimizationData
+	{
+		private double[] step;
+
+		/**
+		 * Build an instance
+		 * 
+		 * @param step
+		 *            The maximum step size in each dimension
+		 */
+		public StepLength(double[] step)
+		{
+			this.step = step;
+		}
+
+		public double[] getStep()
+		{
+			return step;
+		}
+	}
+
+	/**
+	 * Constructor
+	 */
+	public BFGSOptimizer()
+	{
+		super(null);
+	}
+
+	/**
 	 * @param checker
 	 *            Convergence checker.
 	 */
@@ -201,10 +233,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		final double EPS = epsilon;
 
-		double[] dg = new double[n];
 		double[] hdg = new double[n];
 		double[] xi = new double[n];
-		double[][] hessin = new double[n][n];
+		double[][] hessian = new double[n][n];
 
 		// Get the gradient for the the bounded point
 		double[] unbounded = p.clone();
@@ -212,14 +243,12 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		double[] g = computeObjectiveGradient(p);
 		checkGradients(g, unbounded);
 
-		double sum = 0;
+		// Initialise the hessian and search direction
 		for (int i = 0; i < n; i++)
 		{
-			hessin[i][i] = 1.0;
+			hessian[i][i] = 1.0;
 			xi[i] = -g[i];
-			sum += p[i] * p[i];
 		}
-		final double stpmax = maximumStepLength * FastMath.max(FastMath.sqrt(sum), n);
 
 		PointValuePair current = null;
 
@@ -242,7 +271,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			}
 
 			// Move along the search direction.
-			final double[] pnew = lineSearch.lineSearch(p, fp, g, xi, stpmax);
+			final double[] pnew = lineSearch.lineSearch(p, fp, g, xi);
 
 			// TODO - Can we assume the new point is within the bounds and remove the 
 			// bounds check on the point and the gradient?
@@ -274,7 +303,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			p = pnew;
 
 			// Save the old gradient
-			dg = g;
+			double[] dg = g;
 
 			// Get the gradient for the the bounded point
 			g = computeObjectiveGradient(p);
@@ -293,7 +322,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			{
 				hdg[i] = 0.0;
 				for (int j = 0; j < n; j++)
-					hdg[i] += hessin[i][j] * dg[j];
+					hdg[i] += hessian[i][j] * dg[j];
 			}
 			double fac = 0, fae = 0, sumdg = 0, sumxi = 0;
 			for (int i = 0; i < n; i++)
@@ -313,8 +342,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				{
 					for (int j = i; j < n; j++)
 					{
-						hessin[i][j] += fac * xi[i] * xi[j] - fad * hdg[i] * hdg[j] + fae * dg[i] * dg[j];
-						hessin[j][i] = hessin[i][j];
+						hessian[i][j] += fac * xi[i] * xi[j] - fad * hdg[i] * hdg[j] + fae * dg[i] * dg[j];
+						hessian[j][i] = hessian[i][j];
 					}
 				}
 			}
@@ -322,7 +351,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			{
 				xi[i] = 0.0;
 				for (int j = 0; j < n; j++)
-					xi[i] -= hessin[i][j] * g[j];
+					xi[i] -= hessian[i][j] * g[j];
 			}
 		}
 	}
@@ -335,6 +364,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 *            Optimization data.
 	 *            The following data will be looked for:
 	 *            <ul>
+	 *            <li>{@link GradientChecker}</li>
+	 *            <li>{@link PositionChecker}</li>
 	 *            <li>{@link MaximumStepLength}</li>
 	 *            </ul>
 	 */
@@ -355,6 +386,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			else if (data instanceof PositionChecker)
 			{
 				positionChecker = (PositionChecker) data;
+			}
+			else if (data instanceof StepLength)
+			{
+				maximumStepLength = ((StepLength) data).getStep();
 			}
 		}
 
@@ -387,7 +422,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 * Internal class for a line search with backtracking
 	 * <p>
 	 * Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm has been changed to support
-	 * bounds on the point and checking for bad function evaluations when backtracking.
+	 * bounds on the point, limits on the search direction in all dimensions and checking for bad function evaluations 
+	 * when backtracking.
 	 */
 	private class LineStepSearch
 	{
@@ -414,12 +450,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		 *            The old point function gradient
 		 * @param searchDirection
 		 *            The search direction
-		 * @param stepMax
-		 *            The maximum step to take in the search direction
 		 * @return The new point
 		 */
-		double[] lineSearch(double[] xOld, final double fOld, double[] gradient, double[] searchDirection,
-				final double stepMax)
+		double[] lineSearch(double[] xOld, final double fOld, double[] gradient, double[] searchDirection)
 		{
 			final double ALF = 1.0e-4, TOLX = epsilon;
 			double alam2 = 0.0, f2 = 0.0;
@@ -430,17 +463,20 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			final int n = xOld.length;
 			check = false;
 
-			// Limit the search step
-			// TODO - add support for limiting the step size for each dimension			
-			double sum = 0.0;
+			// Limit the search step size for each dimension
+			double scale = 1;
 			for (int i = 0; i < n; i++)
-				sum += searchDirection[i] * searchDirection[i];
-			sum = FastMath.sqrt(sum);
-			if (sum > stepMax)
+			{
+				if (FastMath.abs(searchDirection[i]) * scale > maximumStepLength[i])
+					scale = maximumStepLength[i] / FastMath.abs(searchDirection[i]);
+			}
+			if (scale < 1)
+			{
+				// Scale the entire search direction
 				for (int i = 0; i < n; i++)
-					// Scale if attempted step is too big
-					searchDirection[i] *= stepMax / sum;
-					
+					searchDirection[i] *= scale;
+			}
+
 			double slope = 0.0;
 			for (int i = 0; i < n; i++)
 				slope += gradient[i] * searchDirection[i];
@@ -467,12 +503,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				{
 					// Convergence (insignificant step).
 					// Since we use the old f and x then we do not need to compute the objective value
-					for (int i = 0; i < n; i++)
-						x[i] = xOld[i];
 					check = true;
 					f = fOld;
 					//System.out.printf("alam %f < alamin %f\n", alam, alamin);
-					return x;
+					return xOld;
 				}
 
 				for (int i = 0; i < n; i++)
@@ -654,26 +688,5 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				r[i] = 0;
 			}
 		return isNaN;
-	}
-
-	/**
-	 * @return The maximum step length used in line search
-	 */
-	public double getMaximumStepLength()
-	{
-		return maximumStepLength;
-	}
-
-	/**
-	 * Set the maximum step length used in line search
-	 * 
-	 * @param maximumStepLength
-	 *            the maximum step length used in line search
-	 */
-	public void setMaximumStepLength(double maximumStepLength)
-	{
-		if (maximumStepLength < epsilon)
-			throw new IllegalArgumentException("Maximum step length must be higher than machine epsilon: " + epsilon);
-		this.maximumStepLength = maximumStepLength;
 	}
 }

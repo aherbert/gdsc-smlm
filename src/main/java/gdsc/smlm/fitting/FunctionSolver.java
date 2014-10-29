@@ -84,7 +84,7 @@ public interface FunctionSolver
 	public boolean isBounded();
 
 	/**
-	 * Specifies if the function solver supports constraints on the parameters. If true then the bounds can be set
+	 * Specifies if the function solver supports constraints on the parameters. If true then the constraints can be set
 	 * before a call to the {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
 	 * <p>
 	 * Note that constraints are to be used to specify the values that are absolutely not allowed. They are not meant to
@@ -98,11 +98,21 @@ public interface FunctionSolver
 
 	/**
 	 * Set the bounds for each of the parameters. If a subset of the parameters are fitted then the bounds can be
-	 * ignored
-	 * for the fixed parameters.
+	 * ignored for the fixed parameters.
+	 * <p>
+	 * The bounds can be used to set the expected range for a parameter.
 	 * 
 	 * @param lower
 	 * @param upper
 	 */
 	public void setBounds(float[] lower, float[] upper);
+
+	/**
+	 * Set the constraints for each of the parameters. If a subset of the parameters are fitted then the bounds can be
+	 * ignored for the fixed parameters.
+	 * 
+	 * @param lower
+	 * @param upper
+	 */
+	public void setConstraints(float[] lower, float[] upper);
 }

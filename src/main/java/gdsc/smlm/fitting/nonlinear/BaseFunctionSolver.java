@@ -217,7 +217,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	@Override
 	public boolean isConstrained()
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -228,6 +227,16 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	@Override
 	public void setBounds(float[] lower, float[] upper)
+	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#setConstraints(float[], float[])
+	 */
+	@Override
+	public void setConstraints(float[] lower, float[] upper)
 	{
 	}
 }

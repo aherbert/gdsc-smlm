@@ -177,6 +177,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	private boolean gradientLineMinimisation = true;
 	private double relativeThreshold = 1e-4, absoluteThreshold = 1e-10;
 	private double[] lower, upper;
+	private double[] lowerConstraint, upperConstraint;
 
 	/**
 	 * Default constructor
@@ -305,27 +306,27 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			}
 			else if (searchMethod == SearchMethod.BFGS)
 			{
-				// NR:
 				// BFGS can use an approximate line search minimisation where as Powell and conjugate gradient
-				// methods require a more accurate line minimisation.
-				// "Since the function may not be a quadratic approximation when we move far along the local gradient
-				// we can use a backtracking strategy along the direction of the full Newton step to choose an
-				// appropriate step." 
-				// Reading NR 9.7 it appears that the search does not do a full minimisation but takes appropriate
-				// steps in the direction of the current gradient.
-				//BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs));
-				BFGSOptimizer o = new BFGSOptimizer(null);
+				// methods require a more accurate line minimisation. The BFGS search does not do a full 
+				// minimisation but takes appropriate steps in the direction of the current gradient.
 
-				// TODO - Configure maximum step length for each dimension using the bounds
-				o.setMaximumStepLength(10);
+				// Do not use the convergence checker on the value of the function. Use the convergence on the 
+				// point coordinate and gradient
+				//BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs));
+				BFGSOptimizer o = new BFGSOptimizer();
+
+				// Configure maximum step length for each dimension using the bounds
+				double[] stepLength = new double[lower.length];
+				for (int i = 0; i < stepLength.length; i++)
+					stepLength[i] = (upper[i] - lower[i]) * 0.3333333;
 
 				// The GoalType is always minimise so no need to pass this in
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), new InitialGuess(startPoint),
-						new SimpleBounds(lower, upper), new BFGSOptimizer.GradientChecker(relativeThreshold,
-								absoluteThreshold), new BFGSOptimizer.PositionChecker(relativeThreshold,
-								absoluteThreshold));
+						new SimpleBounds(lowerConstraint, upperConstraint), new BFGSOptimizer.GradientChecker(
+								relativeThreshold, absoluteThreshold), new BFGSOptimizer.PositionChecker(
+								relativeThreshold, absoluteThreshold), new BFGSOptimizer.StepLength(stepLength));
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
 			}
@@ -410,7 +411,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
-						startPoint), new SimpleBounds(lower, upper),
+						startPoint), new SimpleBounds(lowerConstraint, upperConstraint),
 						new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(bracketingStep));
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
@@ -425,7 +426,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			setSolution(a, solution);
 
 			//System.out.printf("Iter = %d, Eval = %d, %g @ %s\n", iterations, evaluations, optimum.getValue(), 
-			//	Arrays.toString(solution));
+			//	java.util.Arrays.toString(solution));
 
 			// Compute residuals for the FunctionSolver interface
 			if (y_fit == null || y_fit.length < n)
@@ -577,6 +578,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			case POWELL_BOUNDED:
 			case BOBYQA:
 			case CMAES:
+			case BFGS:
 				return true;
 			default:
 				return false;
@@ -619,6 +621,26 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		{
 			lower[i] = lowerB[indices[i]];
 			upper[i] = upperB[indices[i]];
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setConstraints(float[], float[])
+	 */
+	@Override
+	public void setConstraints(float[] lowerB, float[] upperB)
+	{
+		// Extract the bounds for the parameters we are fitting
+		int[] indices = f.gradientIndices();
+
+		lowerConstraint = new double[indices.length];
+		upperConstraint = new double[indices.length];
+		for (int i = 0; i < indices.length; i++)
+		{
+			lowerConstraint[i] = lowerB[indices[i]];
+			upperConstraint[i] = upperB[indices[i]];
 		}
 	}
 }

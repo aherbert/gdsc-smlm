@@ -62,7 +62,7 @@ public class FitConfiguration implements Cloneable
 	private float duplicateDistance = 0.5f;
 	private float bias;
 	private int maxFunctionEvaluations = 1000;
-	private SearchMethod searchMethod = SearchMethod.POWELL;
+	private SearchMethod searchMethod = SearchMethod.BFGS;
 	private boolean gradientLineMinimisation = true;
 	private double relativeThreshold = 1e-4;
 	private double absoluteThreshold = 1e-10;
