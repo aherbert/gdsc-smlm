@@ -173,7 +173,7 @@ public class BlinkEstimatorTest
 		int totalSteps = 100;
 		double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
 
-		ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, tOn, tOff, nBlinks, 0, 0);
+		ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, tOn, 0, tOff, 0, nBlinks);
 		imageModel.setRandomGenerator(rand);
 
 		double[] max = new double[] { 256, 256, 32 };
@@ -192,7 +192,7 @@ public class BlinkEstimatorTest
 		totalSteps = checkTotalSteps(totalSteps, fluorophores);
 
 		imageModel.setUseGridWalk(false);
-		List<LocalisationModel> localisations = imageModel.createImage(compounds, fixedFraction, totalSteps, photons,
+		List<LocalisationModel> localisations = imageModel.createImage(molecules, fixedFraction, totalSteps, photons,
 				0.5, false);
 
 		//		// Remove localisations to simulate missed counts. 
