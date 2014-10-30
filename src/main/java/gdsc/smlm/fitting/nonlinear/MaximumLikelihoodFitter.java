@@ -240,7 +240,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			else if (searchMethod == SearchMethod.BOBYQA)
 			{
 				// Differentiable approximation using Powell's BOBYQA algorithm.
-				// This is slower than the Powell optimiser
+				// This is slower than the Powell optimiser and requires a high number of evaluations.
 				int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
