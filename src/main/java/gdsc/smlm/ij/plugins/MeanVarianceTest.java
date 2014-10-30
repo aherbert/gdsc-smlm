@@ -18,6 +18,7 @@ import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
@@ -75,15 +76,14 @@ public class MeanVarianceTest implements PlugIn
 
 	private class ImageSample
 	{
-		ImagePlus imp;
+		String title;
+		float[][] slices;
 		double exposure;
 		double[] means;
 		List<PairSample> samples;
 
 		public ImageSample(ImagePlus imp)
 		{
-			this.imp = imp;
-
 			// Check stack has two slices
 			if (imp.getStackSize() < 2)
 				throw new IllegalArgumentException("Image must have at least 2-slices: " + imp.getTitle());
@@ -115,19 +115,57 @@ public class MeanVarianceTest implements PlugIn
 				// If no exposure was found: assume exposure 0 for first input image otherwise set an arbitrary exposure
 				exposure = (exposureCounter == 1) ? 0 : 9999;
 			}
+
+			title = imp.getTitle();
+
+			// Get all the pixels into a float stack. 
+			// Look for saturated pixels that will invalidate the test.
+			final int size = imp.getStackSize();
+			float[][] slices = new float[size][];
+			final float saturated = getSaturation(imp);
+			ImageStack stack = imp.getImageStack();
+			for (int slice = 1; slice <= size; slice++)
+			{
+				final float[] thisSlice = slices[slice - 1] = (float[]) stack.getProcessor(slice).toFloat(0, null)
+						.getPixels();
+				checkSaturation(slice, thisSlice, saturated);
+			}
+		}
+
+		private float getSaturation(ImagePlus imp)
+		{
+			switch (imp.getBitDepth())
+			{
+				case 8:
+				case 24:
+					return 255f;
+				case 16:
+					return 65535f;
+				case 32:
+					// float images cannot be saturated
+					return Float.NaN;
+			}
+			throw new IllegalArgumentException("Cannot determine saturation level for image: " + imp.getTitle());
+		}
+
+		private void checkSaturation(int i, float[] data, float saturated)
+		{
+			if (saturated == Float.NaN)
+				return;
+			for (float f : data)
+				if (f >= saturated)
+					throw new IllegalArgumentException("Image " + title + " has saturated pixels in slice: " + i);
 		}
 
 		public void compute()
 		{
-			final int size = imp.getStackSize();
+			final int size = slices.length;
 			samples = new ArrayList<PairSample>(((size - 1) * size) / 2);
 
 			// Cache data
-			float[][] slices = new float[size][];
 			means = new double[size];
 			for (int slice1 = 0; slice1 < size; slice1++)
 			{
-				slices[slice1] = (float[]) imp.getImageStack().getProcessor(slice1 + 1).toFloat(0, null).getPixels();
 				means[slice1] = new Statistics(slices[slice1]).getMean();
 			}
 
@@ -261,7 +299,7 @@ public class MeanVarianceTest implements PlugIn
 				}
 
 				StringBuilder sb = new StringBuilder();
-				sb.append(sample.imp.getTitle()).append("\t");
+				sb.append(sample.title).append("\t");
 				sb.append(sample.exposure).append("\t");
 				sb.append(pair.slice1).append("\t");
 				sb.append(pair.slice2).append("\t");
@@ -357,6 +395,7 @@ public class MeanVarianceTest implements PlugIn
 			{
 				Utils.log(e.getMessage());
 			}
+			imp.close();
 			imp = series.nextImage();
 		}
 		// Sort to ensure all 0 exposure images are first, the remaining order is arbitrary
