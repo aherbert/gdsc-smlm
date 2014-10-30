@@ -44,6 +44,7 @@ import org.apache.commons.math3.optim.nonlinear.vector.Weight;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.ArithmeticUtils;
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -349,21 +350,18 @@ public class BinomialFitter
 				LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 				try
 				{
-					final BinomialModelFunctionGradient gradientFunction = new BinomialModelFunctionGradient(histogram, n,
-							zeroTruncated);
-					PointVectorValuePair lvmSolution = optimizer.optimize(
-							new MaxIter(3000), 
-							new MaxEval(Integer.MAX_VALUE),
-							new ModelFunctionJacobian(new MultivariateMatrixFunction() {
-								@Override
-								public double[][] value(double[] point) throws IllegalArgumentException
-								{
-									return gradientFunction.jacobian(point);
-								}}),
-							new ModelFunction(gradientFunction),
-							new Target(gradientFunction.p),
-							new Weight(gradientFunction.getWeights()),
-							new InitialGuess(solution.getPointRef()));
+					final BinomialModelFunctionGradient gradientFunction = new BinomialModelFunctionGradient(histogram,
+							n, zeroTruncated);
+					PointVectorValuePair lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(
+							Integer.MAX_VALUE), new ModelFunctionJacobian(new MultivariateMatrixFunction()
+					{
+						@Override
+						public double[][] value(double[] point) throws IllegalArgumentException
+						{
+							return gradientFunction.jacobian(point);
+						}
+					}), new ModelFunction(gradientFunction), new Target(gradientFunction.p), new Weight(
+							gradientFunction.getWeights()), new InitialGuess(solution.getPointRef()));
 
 					double ss = 0;
 					double[] obs = gradientFunction.p;
@@ -426,6 +424,16 @@ public class BinomialFitter
 		double[] p;
 		int startIndex;
 
+		/**
+		 * Create a new Binomial model using the input p-values
+		 * 
+		 * @param p
+		 *            The observed p-value
+		 * @param trials
+		 *            The number of trials
+		 * @param zeroTruncated
+		 *            Set to true to ignore the x=0 datapoint
+		 */
 		public BinomialModel(double[] p, int trials, boolean zeroTruncated)
 		{
 			this.trials = trials;
@@ -434,7 +442,7 @@ public class BinomialFitter
 		}
 
 		/**
-		 * Get the cumulative probability function for the input pValue ignoring the X=0 data point
+		 * Get the probability function for the input pValue
 		 * 
 		 * @param pValue
 		 * @return
@@ -451,21 +459,21 @@ public class BinomialFitter
 			// http://www.vosesoftware.com/ModelRiskHelp/index.htm#Distributions/Discrete_distributions/Zero-truncated_binomial_distribution.htm
 			// pi = 1 / ( 1 - f(0) )
 			// Fzt(x) = pi . F(x)
-			//
-			// This is equivalent to:
-			// Fzt(x) = F(x) / ( 1 - f(0) ) = F(x) / cumul( F(x) )
 
-			double cumul = 0;
 			double[] p2 = new double[p.length];
-			for (int i = startIndex; i < p.length; i++)
+			for (int i = startIndex; i <= trials; i++)
 			{
 				p2[i] = dist.probability(i);
-				cumul += p2[i];
 			}
 
-			for (int i = 1; i < p.length; i++)
+			// Renormalise if necessary
+			if (startIndex == 1)
 			{
-				p2[i] /= cumul;
+				final double pi = 1.0 / (1.0 - dist.probability(0));
+				for (int i = 1; i <= trials; i++)
+				{
+					p2[i] *= pi;
+				}
 			}
 
 			return p2;
@@ -522,9 +530,10 @@ public class BinomialFitter
 	/**
 	 * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
 	 */
-	public class BinomialModelFunctionGradient extends BinomialModel implements
-			MultivariateVectorFunction
+	public class BinomialModelFunctionGradient extends BinomialModel implements MultivariateVectorFunction
 	{
+		long[] nC;
+
 		public BinomialModelFunctionGradient(double[] histogram, int trials, boolean zeroTruncated)
 		{
 			super(histogram, trials, zeroTruncated);
@@ -533,6 +542,13 @@ public class BinomialFitter
 			//p = Arrays.copyOfRange(p, 1, p.length);
 			// BUT then we would have to override the getP() method since this has 
 			// an offset of 1 and assumes the index of p is X.
+
+			final int n = trials;
+			nC = new long[n + 1];
+			for (int k = 0; k <= n; k++)
+			{
+				nC[k] = ArithmeticUtils.binomialCoefficient(n, k);
+			}
 		}
 
 		public double[] getWeights()
@@ -552,20 +568,86 @@ public class BinomialFitter
 			return getP(point[0]);
 		}
 
+		// Set the delta using the desired fractional accuracy.
+		// See Numerical Recipes, The Art of Scientific Computing (2nd edition) Chapter 5.7
+		// on numerical derivatives
+		final double delta = Math.pow(1e-6, 1.0 / 3);
+
 		double[][] jacobian(double[] variables)
 		{
-			// Compute the gradients using numerical differentiation
-			final double pValue = variables[0];
-			double[][] jacobian = new double[p.length][1];
+			// We could do analytical differentiation for the normal binomial:
+			// pmf = nCk * p^k * (1-p)^(n-k)
+			// pmf' = nCk * k*p^(k-1) * (1-p)^(n-k) +
+			//        nCk * p^k * (n-k) * (1-p)^(n-k-1) * -1
 
-			final double delta = 0.001 * pValue;
-			double[] p2 = getP(pValue);
-			double[] p3 = getP(pValue + delta);
+			final double p = variables[0];
+			double[][] jacobian = new double[this.p.length][1];
 
-			for (int i = 0; i < jacobian.length; ++i)
+			// Compute the gradient using analytical differentiation
+			final int n = trials;
+
+			if (startIndex == 0)
 			{
-				jacobian[i][0] = (p3[i] - p2[i]) / delta;
+    			for (int k = 0; k <= n; ++k)
+    			{
+    				//jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) + 
+    				//		nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1;
+    				
+    				// Optimise
+    				jacobian[k][0] = nC[k] * (k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) - 
+    						Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1));
+    			}
 			}
+			else
+			{
+				// Account for zero-truncated distribution 
+				jacobian[0][0] = 0;
+
+				// In the zero-truncated Binomial all values are scaled by a factor
+				// pi = 1.0 / (1.0 - dist.probability(0));
+
+				// We must apply the product rule with pi as f
+				// (f.g)' = f'.g +f.g'
+
+				// So far we have only computed g' for the original Binomial
+
+		 		//double pi = dist.probability(0);
+				final double p_n = Math.pow(1 - p, n);
+		 		final double f = 1.0 / (1.0 - nC[0] * p_n);
+				final double ff = -1 / Math.pow(1.0 - nC[0] * p_n, 2) +
+						n * Math.pow(1 - p, n - 1);
+
+				for (int k = 1; k <= n; ++k)
+				{
+					final double pk = Math.pow(p, k);
+					final double p_n_k = Math.pow(1 - p, n - k);
+					
+					final double g = nC[k] * pk * p_n_k;
+					// Differentiate as above
+					final double gg = nC[k] * (k * Math.pow(p, k - 1) * p_n_k - 
+							pk * (n - k) * Math.pow(1 - p, n - k - 1));
+					jacobian[k][0] = ff * g + f * gg;
+				}
+			}
+
+			//			// Compute the gradients using numerical differentiation
+			//			// Set the step h for computing the function around the desired point 
+			//			final double h = delta * p;
+			//
+			//			// Ensure we stay within the 0-1 bounds
+			//			final double upperP = Math.min(1, p + h);
+			//			final double lowerP = Math.max(0, p - h);
+			//			final double diff = upperP - lowerP;
+			//			double[] upper = getP(upperP);
+			//			double[] lower = getP(lowerP);
+			//
+			//			for (int i = startIndex; i <= trials; i++)
+			//			{
+			//				double g = (upper[i] - lower[i]) / diff;
+			//				if (trials > 1)
+			//					System.out.printf("(%d,%f)[%d] %f vs %f\n", trials, p, i, jacobian[i][0], g);
+			//				jacobian[i][0] = g;
+			//			}
 			return jacobian;
 		}
 	}
