@@ -15,32 +15,24 @@ import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-public class ApacheMatrixWrapper extends ApacheFunctionWrapper implements MultivariateMatrixFunction
+/**
+ * Wrap the NonLinearFunction to allow use with the Apache Commons Math library
+ */
+public class MultivariateMatrixFunctionWrapper extends NonLinearFunctionWrapper implements MultivariateMatrixFunction
 {
-	public ApacheMatrixWrapper(NonLinearFunction fun, double[] a, int n)
+	public MultivariateMatrixFunctionWrapper(NonLinearFunction fun, double[] a, int n)
 	{
 		super(fun, a, n);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.commons.math3.analysis.MultivariateMatrixFunction#value(double[])
+	 */
 	@Override
 	public double[][] value(double[] point) throws IllegalArgumentException
 	{
-		initialiseFunction(point);
-		
-		double[][] jacobian = new double[n][point.length];
-		double[] dyda = new double[point.length];
-
-		for (int i = 0; i < jacobian.length; ++i)
-		{
-			//float y = gf.eval(x.get(i).intValue());
-			// Assume linear X from 0..N
-			fun.eval(i, dyda);
-
-			// Differentiate with respect to each parameter:
-			for (int j = 0; j < dyda.length; j++)
-				jacobian[i][j] = dyda[j];
-		}
-
-		return jacobian;
+		return computeJacobian(point);
 	}
 }

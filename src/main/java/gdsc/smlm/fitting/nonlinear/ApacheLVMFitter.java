@@ -1,8 +1,8 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.function.ApacheMatrixWrapper;
-import gdsc.smlm.fitting.function.ApacheVectorWrapper;
+import gdsc.smlm.fitting.function.MultivariateMatrixFunctionWrapper;
+import gdsc.smlm.fitting.function.MultivariateVectorFunctionWrapper;
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 
 import org.apache.commons.math3.exception.ConvergenceException;
@@ -82,8 +82,8 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
 			PointVectorValuePair optimum = optimizer
 					.optimize(new MaxIter(getMaxEvaluations()), new MaxEval(Integer.MAX_VALUE),
-							new ModelFunctionJacobian(new ApacheMatrixWrapper(f, a, n)), new ModelFunction(
-									new ApacheVectorWrapper(f, a, n)), new Target(yd), new Weight(w), new InitialGuess(
+							new ModelFunctionJacobian(new MultivariateMatrixFunctionWrapper(f, a, n)), new ModelFunction(
+									new MultivariateVectorFunctionWrapper(f, a, n)), new Target(yd), new Weight(w), new InitialGuess(
 									initialSolution));
 
 			final double[] parameters = optimum.getPoint();

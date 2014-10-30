@@ -15,9 +15,12 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-public class ApacheVectorWrapper extends ApacheFunctionWrapper implements MultivariateVectorFunction
+/**
+ * Wrap the NonLinearFunction to allow use with the Apache Commons Math library
+ */
+public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper implements MultivariateVectorFunction
 {
-	public ApacheVectorWrapper(NonLinearFunction fun, double[] a, int n)
+	public MultivariateVectorFunctionWrapper(NonLinearFunction fun, double[] a, int n)
 	{
 		super(fun, a, n);
 	}
@@ -30,13 +33,6 @@ public class ApacheVectorWrapper extends ApacheFunctionWrapper implements Multiv
 	@Override
 	public double[] value(double[] point)
 	{
-		initialiseFunction(point);
-		double[] values = new double[n];
-		for (int i = 0; i < values.length; i++)
-		{
-			// Assume linear X from 0..N
-			values[i] = fun.eval(i);
-		}
-		return values;
+		return computeValue(point);
 	}
 }
