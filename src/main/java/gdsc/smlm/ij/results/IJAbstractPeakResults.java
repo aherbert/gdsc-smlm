@@ -21,7 +21,7 @@ import gdsc.smlm.results.Calibration;
  */
 public abstract class IJAbstractPeakResults extends AbstractPeakResults
 {
-	public void setCalibration(double nmPerPixel, float gain)
+	public void setCalibration(double nmPerPixel, double gain)
 	{
 		Calibration calibration = new Calibration();
 		calibration.nmPerPixel = nmPerPixel;

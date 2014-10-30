@@ -284,9 +284,9 @@ public class SpotInspector implements PlugIn, MouseListener
 			return -1;
 		}
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		float stdDevMax = (fitConfig.getInitialPeakStdDev0() > 0) ? fitConfig.getInitialPeakStdDev0() : 1;
+		float stdDevMax = (float) ((fitConfig.getInitialPeakStdDev0() > 0) ? fitConfig.getInitialPeakStdDev0() : 1);
 		if (fitConfig.getInitialPeakStdDev1() > 0)
-			stdDevMax = FastMath.max(fitConfig.getInitialPeakStdDev1(), stdDevMax);
+			stdDevMax = (float) FastMath.max(fitConfig.getInitialPeakStdDev1(), stdDevMax);
 		return stdDevMax;
 	}
 

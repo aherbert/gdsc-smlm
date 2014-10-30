@@ -26,6 +26,7 @@ import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.utils.ImageExtractor;
 import gdsc.smlm.utils.Sort;
@@ -74,7 +75,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private double delta = Prefs.get(Constants.delta, 0.01);
 	private boolean singleFit = Prefs.get(Constants.singleFit, false);
 	private int singleRegionSize = (int) Prefs.get(Constants.singleRegionSize, 10);
-	private float initialPeakStdDev = (float) Prefs.get(Constants.initialPeakStdDev0, 0);
+	private double initialPeakStdDev = (double) Prefs.get(Constants.initialPeakStdDev0, 0);
 	private boolean showDeviations = Prefs.get(Constants.showDeviations, false);
 	private boolean filterResults = Prefs.get(Constants.filterResults, false);
 
@@ -280,7 +281,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		delta = gd.getNextNumber();
 		singleFit = gd.getNextBoolean();
 		singleRegionSize = (int) gd.getNextNumber();
-		initialPeakStdDev = (float) gd.getNextNumber();
+		initialPeakStdDev = (double) gd.getNextNumber();
 		logProgress = gd.getNextBoolean();
 		showDeviations = gd.getNextBoolean();
 		filterResults = gd.getNextBoolean();
@@ -496,7 +497,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				IJ.log("Combined fit");
 
 			// Estimate height from smoothed data
-			float[] estimatedHeights = new float[maxIndices.length];
+			double[] estimatedHeights = new double[maxIndices.length];
 			for (int i = 0; i < estimatedHeights.length; i++)
 				estimatedHeights[i] = smoothData[maxIndices[i]];
 
@@ -504,13 +505,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			setupPeakFiltering(config);
 
 			long time = System.nanoTime();
-			float[] params = fitMultiple(data, width, height, maxIndices, estimatedHeights);
+			double[] params = fitMultiple(data, width, height, maxIndices, estimatedHeights);
 			ellapsed = System.nanoTime() - time;
 
 			if (params != null)
 			{
-				float[] initialParams = convertParameters(fitResult.getInitialParameters());
-				float[] paramsDev = convertParameters(fitResult.getParameterStdDev());
+				double[] initialParams = convertParameters(fitResult.getInitialParameters());
+				double[] paramsDev = convertParameters(fitResult.getParameterStdDev());
 				Rectangle regionBounds = new Rectangle();
 
 				int[] xpoints = new int[maxIndices.length];
@@ -526,14 +527,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					if (filterResults && config.validatePeak(n, initialParams, params) != FitStatus.OK)
 						continue;
 
-					float[] peakParams = extractParams(params, i);
-					float[] peakParamsDev = extractParams(paramsDev, i);
+					double[] peakParams = extractParams(params, i);
+					double[] peakParamsDev = extractParams(paramsDev, i);
 
 					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, nMaxima, x, y, data[maxIndices[n]]);
 
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
-					float xf = peakParams[3];
-					float yf = peakParams[4];
+					double xf = peakParams[3];
+					double yf = peakParams[4];
 					xpoints[nMaxima] = (int) (xf + 0.5);
 					ypoints[nMaxima] = (int) (yf + 0.5);
 					nMaxima++;
@@ -581,14 +582,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					IJ.log("Fitting peak " + (n + 1));
 				}
 
-				float[] peakParams = fitSingle(gf, region, regionBounds.width, regionBounds.height, newIndex,
+				double[] peakParams = fitSingle(gf, region, regionBounds.width, regionBounds.height, newIndex,
 						smoothData[maxIndices[n]]);
 				ellapsed += System.nanoTime() - time;
 
 				// Output fit result
 				if (peakParams != null)
 				{
-					float[] peakParamsDev = null;
+					double[] peakParamsDev = null;
 					if (showDeviations)
 					{
 						peakParamsDev = convertParameters(fitResult.getParameterStdDev());
@@ -597,8 +598,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, n, x, y, data[maxIndices[n]]);
 
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
-					float xf = peakParams[3];
-					float yf = peakParams[4];
+					double xf = peakParams[3];
+					double yf = peakParams[4];
 					xpoints[nMaxima] = (int) (xf + 0.5);
 					ypoints[nMaxima] = (int) (yf + 0.5);
 					nMaxima++;
@@ -638,23 +639,23 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		}
 	}
 
-	private static float[] extractParams(float[] params, int i)
+	private static double[] extractParams(double[] params, int i)
 	{
 		if (params == null)
 			return null;
 
-		return new float[] { params[0], params[i], params[i + 1], params[i + 2], params[i + 3], params[i + 4],
+		return new double[] { params[0], params[i], params[i + 1], params[i + 2], params[i + 3], params[i + 4],
 				params[i + 5] };
 	}
 
-	private void addResult(Rectangle bounds, Rectangle regionBounds, float[] data, float[] params, float[] paramsDev,
+	private void addResult(Rectangle bounds, Rectangle regionBounds, float[] data, double[] params, double[] paramsDev,
 			int n, int x, int y, float value)
 	{
 		x += bounds.x;
 		y += bounds.y;
 		params[3] += bounds.x + regionBounds.x;
 		params[4] += bounds.y + regionBounds.y;
-		results.add(n + 1, x, y, value, chiSquared, 0f, params, paramsDev);
+		results.add(n + 1, x, y, value, chiSquared, 0f, Utils.toFloat(params), Utils.toFloat(paramsDev));
 	}
 
 	/**
@@ -713,7 +714,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 *         <p>
 	 *         Null if no fit is possible.
 	 */
-	public float[] fitMultiple(float[] data, int width, int height, int[] maxIndices)
+	public double[] fitMultiple(float[] data, int width, int height, int[] maxIndices)
 	{
 		return fitMultiple(data, width, height, maxIndices, null);
 	}
@@ -738,7 +739,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 *         <p>
 	 *         Null if no fit is possible.
 	 */
-	private float[] fitMultiple(float[] data, int width, int height, int[] maxIndices, float[] estimatedHeights)
+	private double[] fitMultiple(float[] data, int width, int height, int[] maxIndices, double[] estimatedHeights)
 	{
 		if (data == null || data.length != width * height)
 			return null;
@@ -747,11 +748,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			return null;
 
 		Gaussian2DFitter gf = createGaussianFitter();
-		this.fitResult = gf.fit(data, width, height, maxIndices, estimatedHeights);
+		this.fitResult = gf.fit(Utils.toDouble(data), width, height, maxIndices, estimatedHeights);
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
 			chiSquared = fitResult.getError();
-			float[] params = fitResult.getParameters();
+			double[] params = fitResult.getParameters();
 			convertParameters(params);
 			return params;
 		}
@@ -759,7 +760,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		return null;
 	}
 
-	private float[] convertParameters(float[] params)
+	private double[] convertParameters(double[] params)
 	{
 		if (params == null)
 			return null;
@@ -796,13 +797,15 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 *         <p>
 	 *         Null if no fit is possible.
 	 */
-	private float[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height, int index, float estimatedHeight)
+	private double[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height, int index,
+			double estimatedHeight)
 	{
-		this.fitResult = gf.fit(data, width, height, new int[] { index }, new float[] { estimatedHeight });
+		this.fitResult = gf.fit(Utils.toDouble(data), width, height, new int[] { index },
+				new double[] { estimatedHeight });
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
 			chiSquared = fitResult.getError();
-			float[] params = fitResult.getParameters();
+			double[] params = fitResult.getParameters();
 			convertParameters(params);
 			// Check the fit is within the data
 			if (params[Gaussian2DFunction.X_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > width ||
@@ -863,7 +866,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	protected void setupPeakFiltering(FitConfiguration config)
 	{
 		int Mk = getSmooth() * 2 + 1;
-		float halfMk = 0.5f * Mk;
+		double halfMk = 0.5f * Mk;
 		config.setCoordinateShift(halfMk);
 		config.setSignalStrength(0);
 		config.setWidthFactor(3);
@@ -930,11 +933,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		}
 
 		Gaussian2DFitter gf = createGaussianFitter();
-		FitResult fitResult = gf.fit(data, width, height, new int[] { maxIndex });
+		FitResult fitResult = gf.fit(Utils.toDouble(data), width, height, new int[] { maxIndex });
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
 			chiSquared = fitResult.getError();
-			float[] params = fitResult.getParameters();
+			double[] params = fitResult.getParameters();
 
 			// Check bounds
 			if (params[3] < 0 || params[3] >= width || params[4] < 0 || params[4] >= height)
@@ -1254,7 +1257,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * @param initialPeakStdDev
 	 *            the initial peak standard deviation. This is estimated from the data if zero
 	 */
-	public void setInitialPeakStdDev(float initialPeakStdDev)
+	public void setInitialPeakStdDev(double initialPeakStdDev)
 	{
 		this.initialPeakStdDev = initialPeakStdDev;
 	}
@@ -1262,7 +1265,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	/**
 	 * @return the the initial peak standard deviation
 	 */
-	public float getInitialPeakStdDev()
+	public double getInitialPeakStdDev()
 	{
 		return initialPeakStdDev;
 	}

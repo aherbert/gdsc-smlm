@@ -21,12 +21,12 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class EMCCDCameraNoiseModel extends CameraNoiseModel
 {
-	public EMCCDCameraNoiseModel(final float readNoise)
+	public EMCCDCameraNoiseModel(final double readNoise)
 	{
 		super(readNoise);
 	}
 
-	public EMCCDCameraNoiseModel(final float readNoise, final float bias)
+	public EMCCDCameraNoiseModel(final double readNoise, final double bias)
 	{
 		super(readNoise, bias);
 	}
@@ -34,11 +34,11 @@ public class EMCCDCameraNoiseModel extends CameraNoiseModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.function.CameraNoiseModel#variance(float)
+	 * @see gdsc.smlm.fitting.function.CameraNoiseModel#variance(double)
 	 */
-	public float variance(final float value)
+	public double variance(final double value)
 	{
-		return readNoise2 + FastMath.max(value - bias, 0f) * 2f;
+		return readNoise2 + FastMath.max(value - bias, 0.0) * 2.0;
 	}
 
 	/*

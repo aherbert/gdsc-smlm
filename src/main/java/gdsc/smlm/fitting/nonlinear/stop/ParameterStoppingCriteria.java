@@ -2,7 +2,7 @@ package gdsc.smlm.fitting.nonlinear.stop;
 
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.fitting.function.GaussianFunction;
-import gdsc.smlm.fitting.utils.FloatEquality;
+import gdsc.smlm.fitting.utils.DoubleEquality;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -20,17 +20,16 @@ import gdsc.smlm.fitting.utils.FloatEquality;
 /**
  * Defines the stopping criteria for the {@link gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
  * <p>
- * Stop when successive iterations with a reduced error move the fitted coordinates by less than a specified
- * distance.
+ * Stop when successive iterations with a reduced error move the fitted coordinates by less than a specified distance.
  * <p>
  * The criteria also ensure that amplitude, coordinates and peak-widths are held positive, otherwise fitting is stopped.
  */
 public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 {
 	private int significantDigits = 3;
-	private float angleLimit = 1e-3f;
+	private double angleLimit = 1e-3f;
 
-	private FloatEquality eq;
+	private DoubleEquality eq;
 
 	/**
 	 * @param func
@@ -39,16 +38,16 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	public ParameterStoppingCriteria(GaussianFunction func)
 	{
 		super(func);
-		eq = new FloatEquality(significantDigits, 1e-16f);
+		eq = new DoubleEquality(significantDigits, 1e-16);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria#logParameters(double, double, float[])
+	 * @see gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria#logParameters(double, double, double[])
 	 */
 	@Override
-	protected StringBuffer logParameters(double oldError, double newError, float[] a)
+	protected StringBuffer logParameters(double oldError, double newError, double[] a)
 	{
 		if (log != null)
 		{
@@ -60,21 +59,21 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 				if (func.evaluatesBackground())
 				{
 					sb.append(", Back=[");
-					sb.append(FloatEquality.relativeError(bestA[0], a[0]));
+					sb.append(DoubleEquality.relativeError(bestA[0], a[0]));
 					sb.append("]");
 				}
 
 				for (int i = 0; i < peaks; i++)
 				{
 					sb.append(", Peak").append(i + 1).append("=[");
-					sb.append(FloatEquality.relativeError(bestA[i * 6 + Gaussian2DFunction.AMPLITUDE], a[i * 6 +
+					sb.append(DoubleEquality.relativeError(bestA[i * 6 + Gaussian2DFunction.AMPLITUDE], a[i * 6 +
 							Gaussian2DFunction.AMPLITUDE]));
 					sb.append(",");
 
 					if (func.evaluatesAngle())
 					{
-						float x = bestA[i * 6 + Gaussian2DFunction.ANGLE];
-						float y = a[i * 6 + Gaussian2DFunction.ANGLE];
+						double x = bestA[i * 6 + Gaussian2DFunction.ANGLE];
+						double y = a[i * 6 + Gaussian2DFunction.ANGLE];
 						sb.append(relativeAngle(x, y));
 					}
 					else
@@ -83,7 +82,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 					for (int j = 0, k = i * 6 + Gaussian2DFunction.X_POSITION; j < 2 * dimensions; j++, k++)
 					{
 						sb.append(",");
-						sb.append(FloatEquality.relativeError(bestA[k], a[k]));
+						sb.append(DoubleEquality.relativeError(bestA[k], a[k]));
 					}
 					sb.append("]");
 				}
@@ -96,10 +95,10 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria#noCoordinateChange(float[])
+	 * @see gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria#noCoordinateChange(double[])
 	 */
 	@Override
-	protected boolean noCoordinateChange(float[] a)
+	protected boolean noCoordinateChange(double[] a)
 	{
 		// Old code does not correctly compute difference in angles. This is ignored for now.
 		//return eq.almostEqualComplement(bestA, a);
@@ -120,8 +119,8 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 			// Use this to compare if the angle has changed significantly relative to the maximum it could change.
 			if (func.evaluatesAngle())
 			{
-				float x = bestA[i * 6 + Gaussian2DFunction.ANGLE];
-				float y = a[i * 6 + Gaussian2DFunction.ANGLE];
+				double x = bestA[i * 6 + Gaussian2DFunction.ANGLE];
+				double y = a[i * 6 + Gaussian2DFunction.ANGLE];
 				if (relativeAngle(x, y) > angleLimit)
 					return false;
 			}
@@ -136,10 +135,10 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 		return true;
 	}
 
-	private float relativeAngle(float x, float y)
+	private double relativeAngle(double x, double y)
 	{
-		float angle = (float) Math.atan2(Math.sin(x - y), Math.cos(x - y));
-		final float halfPi = (float) Math.PI / 2;
+		final double angle = Math.atan2(Math.sin(x - y), Math.cos(x - y));
+		final double halfPi = Math.PI / 2;
 		return Math.abs(angle / halfPi);
 	}
 
@@ -153,7 +152,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	{
 		this.significantDigits = significantDigits;
 		eq.setSignificantDigits(significantDigits);
-		angleLimit = (float) (1.0 / Math.pow(10, significantDigits - 1));
+		angleLimit = 1.0 / Math.pow(10, significantDigits - 1);
 	}
 
 	/**

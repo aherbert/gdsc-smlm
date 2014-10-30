@@ -125,6 +125,7 @@ public class AverageFilterTest
 							width, height, boxSize);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void floatCompareRollingBlockAverageNxNInternalAndRollingBlockAverageNxNInternalTransposed(
 			AverageFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
@@ -434,6 +435,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -498,6 +500,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -562,6 +565,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -626,6 +630,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -713,6 +718,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -777,6 +783,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -808,6 +815,7 @@ public class AverageFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void floatRollingBlockAverageNxNInternalIsFasterThanRollingBlockAverageNxNInternalTransposed()
 	{
@@ -1368,6 +1376,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -1454,6 +1463,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -1540,6 +1550,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -1603,6 +1614,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -1666,6 +1678,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -1729,6 +1742,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -1843,6 +1857,7 @@ public class AverageFilterTest
 							height, boxSize);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void intCompareRollingBlockAverageNxNInternalAndRollingBlockAverageNxNInternalTransposed(
 			AverageFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
@@ -2152,6 +2167,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -2215,6 +2231,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -2279,6 +2296,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -2343,6 +2361,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -2430,6 +2449,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -2494,6 +2514,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -2525,6 +2546,7 @@ public class AverageFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void intRollingBlockAverageNxNInternalIsFasterThanRollingBlockAverageNxNInternalTransposed()
 	{
@@ -3085,6 +3107,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -3171,6 +3194,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -3257,6 +3281,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -3320,6 +3345,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -3383,6 +3409,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)
@@ -3446,6 +3473,7 @@ public class AverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
+		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
 		for (int width : primes)
 			for (int height : primes)

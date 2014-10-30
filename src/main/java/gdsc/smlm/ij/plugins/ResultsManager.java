@@ -102,7 +102,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	private TextField text2;
 
 	private static double input_nmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
-	private static float input_gain = (float) Prefs.get(Constants.inputGain, 1);
+	private static double input_gain = Prefs.get(Constants.inputGain, 1);
 	private static double input_exposureTime = Prefs.get(Constants.inputExposureTime, 0);
 	private static float input_noise = (float) Prefs.get(Constants.inputNoise, 0);
 
@@ -257,7 +257,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	}
 
 	private void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds, double nmPerPixel,
-			float gain)
+			double gain)
 	{
 		if (resultsSettings.getResultsImage() != ResultsImage.NONE)
 		{
@@ -390,8 +390,8 @@ public class ResultsManager implements PlugIn, MouseListener
 		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
 		resultsSettings.weightedImage = gd.getNextBoolean();
 		resultsSettings.equalisedImage = gd.getNextBoolean();
-		resultsSettings.precision = (float) gd.getNextNumber();
-		resultsSettings.imageScale = (float) gd.getNextNumber();
+		resultsSettings.precision = gd.getNextNumber();
+		resultsSettings.imageScale = gd.getNextNumber();
 		resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
 		resultsSettings.resultsFilename = gd.getNextString();
 		resultsSettings.binaryResults = gd.getNextBoolean();
@@ -660,7 +660,7 @@ public class ResultsManager implements PlugIn, MouseListener
 				if (gd.wasCanceled())
 					return null;
 				input_nmPerPixel = Math.abs(gd.getNextNumber());
-				input_gain = Math.abs((float) gd.getNextNumber());
+				input_gain = Math.abs(gd.getNextNumber());
 				input_exposureTime = Math.abs(gd.getNextNumber());
 				if (noise == 0)
 					input_noise = Math.abs((float) gd.getNextNumber());
@@ -676,8 +676,7 @@ public class ResultsManager implements PlugIn, MouseListener
 				if (convert && input_nmPerPixel > 0)
 				{
 					// Note: NSTORM stores 2xSD
-					final double widthConversion = (reader != null && reader.getFormat() == FileFormat.NSTORM) 
-							? 1.0 / (2 * input_nmPerPixel)
+					final double widthConversion = (reader != null && reader.getFormat() == FileFormat.NSTORM) ? 1.0 / (2 * input_nmPerPixel)
 							: 1.0 / input_nmPerPixel;
 					for (PeakResult p : results.getResults())
 					{

@@ -37,8 +37,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 {
 	// Store the ROI painters that have been attached to TextPanels so they can be updated
 	// with a new image source
-	private static HashMap<TextPanel,ImageROIPainter> map = new HashMap<TextPanel,ImageROIPainter>(); 
-	
+	private static HashMap<TextPanel, ImageROIPainter> map = new HashMap<TextPanel, ImageROIPainter>();
+
 	private boolean showDeviations = true;
 	private boolean showEndFrame = false;
 	private boolean clearAtStart = false;
@@ -48,8 +48,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private String sourceText = null;
 	private String tableTitle = "Fit Results";
 	private TextWindow resultsWindow;
-	private float gain = 1;
-	private float nmPerPixel = 1;
+	private double gain = 1;
+	private double nmPerPixel = 1;
 	private boolean addCounter = false;
 
 	private int indexT = -1, indexX = -1, indexY = -1;
@@ -93,7 +93,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			if (cal != null)
 			{
 				gain = cal.gain;
-				nmPerPixel = (float) cal.nmPerPixel;
+				nmPerPixel = cal.nmPerPixel;
 			}
 			else
 			{
@@ -109,14 +109,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private void createResultsWindow()
 	{
 		String header = createResultsHeader();
-		
+
 		ImageROIPainter roiPainter = null;
 		for (Frame f : WindowManager.getNonImageWindows())
 		{
 			if (f != null && tableTitle.equals(f.getTitle()) && f instanceof TextWindow)
 			{
 				resultsWindow = (TextWindow) f;
-				
+
 				// Check if the existing table matches the desired header
 				String currentHeader = resultsWindow.getTextPanel().getColumnHeadings();
 				if (!currentHeader.startsWith(header))
@@ -124,7 +124,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 					resultsWindow = null;
 					continue;
 				}
-				
+
 				roiPainter = map.get(resultsWindow.getTextPanel());
 			}
 		}
@@ -133,7 +133,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		{
 			resultsWindow = new TextWindow(tableTitle, header, "", 800, 300);
 			roiPainter = new ImageROIPainter(resultsWindow.getTextPanel(), "", this);
-			
+
 			// The ROI painter adds itself to the TextPanel as a mouse listener. However
 			// the TextPanel addMouseListener() adds to the private TextCanvas object so it 
 			// cannot be retrieved. Store the painter in a global lookup table.

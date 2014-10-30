@@ -19,26 +19,26 @@ public class PoissonLikelihoodFunctionTest
 	// Step size for deerivatives:
 	// h ~ (Ef)^(1/3) * xc
 	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
-	final float h_ = (float) (Math.pow(1e-3f, 1.0 / 3));
+	final double h_ = (double) (Math.pow(1e-3f, 1.0 / 3));
 
 	int[] testx = new int[] { 4, 5, 6 };
 	int[] testy = new int[] { 4, 5, 6 };
 	// Do not test zero background since this is an edge case for the likelihood function
-	float[] testbackground_ = new float[] { 10, 400 };
+	double[] testbackground_ = new double[] { 10, 400 };
 
-	float[] testamplitude1_ = new float[] { 15, 55, 105 };
-	float[] testangle1_ = new float[] { (float) (Math.PI / 5), (float) (Math.PI / 3) };
-	float[] testcx1_ = new float[] { 4.9f, 5.3f };
-	float[] testcy1_ = new float[] { 4.8f, 5.1f };
-	float[][] testw1_ = new float[][] { { 1.1f, 1.4f }, { 1.1f, 1.7f }, { 1.5f, 1.2f }, { 1.3f, 1.7f }, };
+	double[] testamplitude1_ = new double[] { 15, 55, 105 };
+	double[] testangle1_ = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
+	double[] testcx1_ = new double[] { 4.9, 5.3 };
+	double[] testcy1_ = new double[] { 4.8, 5.1 };
+	double[][] testw1_ = new double[][] { { 1.1, 1.4 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.3, 1.7 }, };
 
-	float[] testbackground, testamplitude1, testangle1, testcx1, testcy1;
-	float[][] testw1;
+	double[] testbackground, testamplitude1, testangle1, testcx1, testcy1;
+	double[][] testw1;
 
 	int maxx = 10;
-	float background = 50;
-	float angle = 0;
-	float width = 5;
+	double background = 50;
+	double angle = 0;
+	double width = 5;
 
 	@Test
 	public void fitFixedComputesGradientPerDatum()
@@ -100,15 +100,15 @@ public class PoissonLikelihoodFunctionTest
 		testw1 = testw1_;
 		if (!f1.evaluatesBackground())
 		{
-			testbackground = new float[] { testbackground[0] };
+			testbackground = new double[] { testbackground[0] };
 		}
 		if (!f1.evaluatesAmplitude())
 		{
-			testamplitude1 = new float[] { testamplitude1[0] };
+			testamplitude1 = new double[] { testamplitude1[0] };
 		}
 		if (!f1.evaluatesAngle())
 		{
-			testangle1 = new float[] { 0 };
+			testangle1 = new double[] { 0 };
 		}
 		// Position is always evaluated
 
@@ -116,7 +116,7 @@ public class PoissonLikelihoodFunctionTest
 		if (!f1.evaluatesSD0())
 		{
 			// Just use 1 width
-			testw1 = new float[][] { testw1[0] };
+			testw1 = new double[][] { testw1[0] };
 			// If no width 0 then assume we have no width 1 as well
 			noSecondWidth = true;
 		}
@@ -154,27 +154,27 @@ public class PoissonLikelihoodFunctionTest
 		int gradientIndex = findGradientIndex(f1, targetParameter);
 		double[] dyda = new double[indices.length];
 		double[] dyda2 = new double[indices.length];
-		float[] a;
+		double[] a;
 
 		PoissonLikelihoodFunction ff1;
 
 		int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		for (float background : testbackground)
-			for (float amplitude1 : testamplitude1)
-				for (float angle1 : testangle1)
-					for (float cx1 : testcx1)
-						for (float cy1 : testcy1)
-							for (float[] w1 : testw1)
+		for (double background : testbackground)
+			for (double amplitude1 : testamplitude1)
+				for (double angle1 : testangle1)
+					for (double cx1 : testcx1)
+						for (double cy1 : testcy1)
+							for (double[] w1 : testw1)
 							{
 								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
 
 								// Create y as a function we would want to move towards
-								float[] a2 = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								double[] a2 = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
 								a2[targetParameter] *= 1.3;
 								f1.initialise(a2);
-								float[] data = new float[maxx * maxx];
+								double[] data = new double[maxx * maxx];
 								for (int i = 0; i < n; i++)
 									data[i] = f1.eval(i);
 
@@ -182,11 +182,11 @@ public class PoissonLikelihoodFunctionTest
 
 								// Numerically solve gradient. 
 								// Calculate the step size h to be an exact numerical representation
-								final float xx = a[targetParameter];
+								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								float h = h_; // ((xx == 0) ? 1 : xx) * h_;
-								final float temp = xx + h;
+								double h = h_; // ((xx == 0) ? 1 : xx) * h_;
+								final double temp = xx + h;
 								doNothing(temp);
 								h = temp - xx;
 
@@ -249,7 +249,7 @@ public class PoissonLikelihoodFunctionTest
 		DoubleEquality tmp = eq;
 		eq = eqPerDatum;
 		functionComputesGradient(GaussianFunctionFactory.FIT_ELLIPTICAL);
-		eq =tmp;
+		eq = tmp;
 	}
 
 	@Test
@@ -292,15 +292,15 @@ public class PoissonLikelihoodFunctionTest
 		testw1 = testw1_;
 		if (!f1.evaluatesBackground())
 		{
-			testbackground = new float[] { testbackground[0] };
+			testbackground = new double[] { testbackground[0] };
 		}
 		if (!f1.evaluatesAmplitude())
 		{
-			testamplitude1 = new float[] { testamplitude1[0] };
+			testamplitude1 = new double[] { testamplitude1[0] };
 		}
 		if (!f1.evaluatesAngle())
 		{
-			testangle1 = new float[] { 0 };
+			testangle1 = new double[] { 0 };
 		}
 		// Position is always evaluated
 
@@ -308,7 +308,7 @@ public class PoissonLikelihoodFunctionTest
 		if (!f1.evaluatesSD0())
 		{
 			// Just use 1 width
-			testw1 = new float[][] { testw1[0] };
+			testw1 = new double[][] { testw1[0] };
 			// If no width 0 then assume we have no width 1 as well
 			noSecondWidth = true;
 		}
@@ -347,27 +347,27 @@ public class PoissonLikelihoodFunctionTest
 		int gradientIndex = findGradientIndex(f1, targetParameter);
 		double[] dyda = new double[indices.length];
 		double[] dyda2 = new double[indices.length];
-		float[] a;
+		double[] a;
 
 		PoissonLikelihoodFunction ff1;
 
 		int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		for (float background : testbackground)
-			for (float amplitude1 : testamplitude1)
-				for (float angle1 : testangle1)
-					for (float cx1 : testcx1)
-						for (float cy1 : testcy1)
-							for (float[] w1 : testw1)
+		for (double background : testbackground)
+			for (double amplitude1 : testamplitude1)
+				for (double angle1 : testangle1)
+					for (double cx1 : testcx1)
+						for (double cy1 : testcy1)
+							for (double[] w1 : testw1)
 							{
 								a = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
 
 								// Create y as a function we would want to move towards
-								float[] a2 = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
+								double[] a2 = createParameters(background, amplitude1, angle1, cx1, cy1, w1[0], w1[1]);
 								a2[targetParameter] *= 1.3;
 								f1.initialise(a2);
-								float[] data = new float[maxx * maxx];
+								double[] data = new double[maxx * maxx];
 								for (int i = 0; i < n; i++)
 									data[i] = f1.eval(i);
 
@@ -375,11 +375,11 @@ public class PoissonLikelihoodFunctionTest
 
 								// Numerically solve gradient. 
 								// Calculate the step size h to be an exact numerical representation
-								final float xx = a[targetParameter];
+								final double xx = a[targetParameter];
 
 								// Get h to minimise roundoff error
-								float h = h_; // ((xx == 0) ? 1 : xx) * h_;
-								final float temp = xx + h;
+								double h = h_; // ((xx == 0) ? 1 : xx) * h_;
+								final double temp = xx + h;
 								doNothing(temp);
 								h = temp - xx;
 
@@ -411,7 +411,7 @@ public class PoissonLikelihoodFunctionTest
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
 	}
 
-	private double[] getVariables(int[] indices, float[] a)
+	private double[] getVariables(int[] indices, double[] a)
 	{
 		double[] variables = new double[indices.length];
 		for (int i = 0; i < indices.length; i++)
@@ -429,12 +429,12 @@ public class PoissonLikelihoodFunctionTest
 		return i;
 	}
 
-	private void doNothing(float f)
+	private void doNothing(double f)
 	{
 
 	}
 
-	float[] createParameters(float... args)
+	double[] createParameters(double... args)
 	{
 		return args;
 	}

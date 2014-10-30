@@ -18,7 +18,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -45,9 +45,9 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.SingleEllipticalGaussian2DFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.gaussian.SingleEllipticalGaussian2DFunction#eval(int, double[])
 	 */
-	public float eval(final int x, final float[] dyda)
+	public double eval(final int x, final double[] dyda)
 	{
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -56,28 +56,28 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 		return background + gaussian(x0, x1, dyda);
 	}
 
-	private float gaussian(final int x0, final int x1, final float[] dy_da)
+	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final float h = amplitude;
+		final double h = amplitude;
 
-		final float dx = x0 - x0pos;
-		final float dy = x1 - x1pos;
-		final float dx2 = dx * dx;
-		final float dxy = dx * dy;
-		final float dy2 = dy * dy;
+		final double dx = x0 - x0pos;
+		final double dy = x1 - x1pos;
+		final double dx2 = dx * dx;
+		final double dxy = dx * dy;
+		final double dy2 = dy * dy;
 
-		//final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		//final double y = (double) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
 		//dy_da[0] = y / h;
 		
-		dy_da[0] = (float) (FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
-		final float y = h * dy_da[0]; 
+		dy_da[0] = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		final double y = h * dy_da[0]; 
 		
 		dy_da[1] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
-		dy_da[2] = y * (-2.0f * aa * dx - bb * dy);
-		dy_da[3] = y * (-2.0f * cc * dy - bb * dx);
+		dy_da[2] = y * (-2.0 * aa * dx - bb * dy);
+		dy_da[3] = y * (-2.0 * cc * dy - bb * dx);
 
 		dy_da[4] = y * (ax * dx2 + bx * dxy + cx * dy2);
 		dy_da[5] = y * (ay * dx2 + by * dxy + cy * dy2);

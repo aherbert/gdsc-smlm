@@ -43,12 +43,12 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
+	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, double[], double[], double[], double[], double[], double)
 	 */
-	public abstract FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error,
+	public abstract FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
 			double noise);
 
-	public double[] getInitialSolution(float[] params)
+	public double[] getInitialSolution(double[] params)
 	{
 		int[] indices = f.gradientIndices();
 		double[] initialSolution = new double[indices.length];
@@ -57,21 +57,21 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		return initialSolution;
 	}
 
-	public void setSolution(float[] params, double[] solution)
+	public void setSolution(double[] params, double[] solution)
 	{
 		int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
-			params[indices[i]] = (float) solution[i];
+			params[indices[i]] = (double) solution[i];
 	}
 
-	public void setDeviations(float[] deviations, double[][] covar)
+	public void setDeviations(double[] deviations, double[][] covar)
 	{
 		int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
-			deviations[indices[i]] = (float) Math.sqrt(covar[i][i]);
+			deviations[indices[i]] = (double) Math.sqrt(covar[i][i]);
 	}
 
-	public static double getSumOfSquares(final int n, float[] y)
+	public static double getSumOfSquares(final int n, double[] y)
 	{
 		double sx = 0, ssx = 0;
 		for (int i = n; i-- > 0;)
@@ -223,20 +223,20 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(float[], float[])
+	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
 	 */
 	@Override
-	public void setBounds(float[] lower, float[] upper)
+	public void setBounds(double[] lower, double[] upper)
 	{
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#setConstraints(float[], float[])
+	 * @see gdsc.smlm.fitting.FunctionSolver#setConstraints(double[], double[])
 	 */
 	@Override
-	public void setConstraints(float[] lower, float[] upper)
+	public void setConstraints(double[] lower, double[] upper)
 	{
 	}
 }

@@ -21,9 +21,9 @@ public class FitResult
 	private FitStatus status;
 	private int degreesOfFreedom;
 	private double error;
-	private float[] initialParameters;
-	private float[] parameters;
-	private float[] parametersDev;
+	private double[] initialParameters;
+	private double[] parameters;
+	private double[] parametersDev;
 	private int nPeaks;
 	private int nFittedParameters;
 	private Object data;
@@ -41,8 +41,8 @@ public class FitResult
 	 * @param nFittedParameters
 	 * @param data
 	 */
-	public FitResult(FitStatus status, int degreesOfFreedom, double error, float[] initialParameters,
-			float[] parameters, float[] parametersDev, int nPeaks, int nFittedParameters, Object data)
+	public FitResult(FitStatus status, int degreesOfFreedom, double error, double[] initialParameters,
+			double[] parameters, double[] parametersDev, int nPeaks, int nFittedParameters, Object data)
 	{
 		this.status = status;
 		this.degreesOfFreedom = degreesOfFreedom;
@@ -99,7 +99,7 @@ public class FitResult
 	/**
 	 * @return the initial parameters
 	 */
-	public float[] getInitialParameters()
+	public double[] getInitialParameters()
 	{
 		return initialParameters;
 	}
@@ -115,7 +115,7 @@ public class FitResult
 	 * 
 	 * @return the fitted parameters
 	 */
-	public float[] getParameters()
+	public double[] getParameters()
 	{
 		return parameters;
 	}
@@ -131,7 +131,7 @@ public class FitResult
 	 * 
 	 * @return the fitted parameters
 	 */
-	public float[] getParameterStdDev()
+	public double[] getParameterStdDev()
 	{
 		return parametersDev;
 	}

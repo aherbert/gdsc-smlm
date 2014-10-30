@@ -20,7 +20,7 @@ import gdsc.smlm.fitting.function.MultiPeakGaussian2DFunction;
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -29,8 +29,8 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 6;
 
-	protected float[][] peakFactors;
-	protected float[] a;
+	protected double[][] peakFactors;
+	protected double[] a;
 
 	/**
 	 * Constructor
@@ -61,13 +61,13 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(float[])
+	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
-	public void initialise(float[] a)
+	public void initialise(double[] a)
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new float[npeaks][12];
+		peakFactors = new double[npeaks][12];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double theta = a[j * 6 + ANGLE];
@@ -86,24 +86,24 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
 			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 			
-			peakFactors[j][AA] = (float) (-0.5 * (cosSqt / sx2 + sinSqt / sy2));
-			peakFactors[j][BB] = (float) (-0.25 * (-sin2t / sx2 + sin2t / sy2));
-			peakFactors[j][CC] = (float) (-0.5 * (sinSqt / sx2 + cosSqt / sy2));;
-
+			peakFactors[j][AA] = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
+			peakFactors[j][BB] = -0.25 * (-sin2t / sx2 + sin2t / sy2);
+			peakFactors[j][CC] = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
+			
 			// For the angle gradient
-			peakFactors[j][AA2] = (float) -(-sincost / sx2 + sincost / sy2);
-			peakFactors[j][BB2] = (float) (-0.5 * (-cos2t / sx2 + cos2t / sy2));
-			peakFactors[j][CC2] = (float) -(sincost / sx2 - sincost / sy2);
+			peakFactors[j][AA2] = -(-sincost / sx2 + sincost / sy2);
+			peakFactors[j][BB2] = -0.5 * (-cos2t / sx2 + cos2t / sy2);
+			peakFactors[j][CC2] = -(sincost / sx2 - sincost / sy2);
 
 			// For the x-width gradient
-			peakFactors[j][AX] = (float) (cosSqt / sx3);
-			peakFactors[j][BX] = (float) (-0.5 * sin2t / sx3);
-			peakFactors[j][CX] = (float) (sinSqt / sx3);
+			peakFactors[j][AX] = cosSqt / sx3;
+			peakFactors[j][BX] = -0.5 * sin2t / sx3;
+			peakFactors[j][CX] = sinSqt / sx3;
 
 			// For the y-width gradient
-			peakFactors[j][AY] = (float) (sinSqt / sy3);
-			peakFactors[j][BY] = (float) (0.5 * sin2t / sy3);
-			peakFactors[j][CY] = (float) (cosSqt / sy3);
+			peakFactors[j][AY] = sinSqt / sy3;
+			peakFactors[j][BY] = 0.5 * sin2t / sy3;
+			peakFactors[j][CY] = cosSqt / sy3;
 		}
 	}
 
@@ -131,16 +131,16 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 *            Partial gradient of function with respect to each coefficient
 	 * @return The predicted value
 	 * 
-	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])
 	 */
-	public float eval(final int x, final float[] dyda)
+	public double eval(final int x, final double[] dyda)
 	{
 		// Track the position of the parameters
 		int apos = 0;
 		int dydapos = 0;
 
 		// First parameter is the background level 
-		float y_fit = a[BACKGROUND];
+		double y_fit = a[BACKGROUND];
 		dyda[dydapos++] = 1; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
@@ -157,41 +157,41 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y_fit;
 	}
 
-	protected float gaussian(final int x0, final int x1, final float[] dy_da, final int apos, final int dydapos,
-			final float[] factors)
+	protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos, final int dydapos,
+			final double[] factors)
 	{
-		final float h = a[apos + AMPLITUDE];
+		final double h = a[apos + AMPLITUDE];
 
-		final float dx = x0 - a[apos + X_POSITION];
-		final float dy = x1 - a[apos + Y_POSITION];
-		final float dx2 = dx * dx;
-		final float dxy = dx * dy;
-		final float dy2 = dy * dy;
+		final double dx = x0 - a[apos + X_POSITION];
+		final double dy = x1 - a[apos + Y_POSITION];
+		final double dx2 = dx * dx;
+		final double dxy = dx * dy;
+		final double dy2 = dy * dy;
 
-		final float aa = factors[AA];
-		final float bb = factors[BB];
-		final float cc = factors[CC];
-		final float aa2 = factors[AA2];
-		final float bb2 = factors[BB2];
-		final float cc2 = factors[CC2];
-		final float ax = factors[AX];
-		final float bx = factors[BX];
-		final float cx = factors[CX];
-		final float ay = factors[AY];
-		final float by = factors[BY];
-		final float cy = factors[CY];
+		final double aa = factors[AA];
+		final double bb = factors[BB];
+		final double cc = factors[CC];
+		final double aa2 = factors[AA2];
+		final double bb2 = factors[BB2];
+		final double cc2 = factors[CC2];
+		final double ax = factors[AX];
+		final double bx = factors[BX];
+		final double cx = factors[CX];
+		final double ay = factors[AY];
+		final double by = factors[BY];
+		final double cy = factors[CY];
 
-		//final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		//final double y = (double) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
 		//dy_da[dydapos] = y / h;
 
-		dy_da[dydapos] = (float) (FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
-		final float y = h * dy_da[dydapos];
+		dy_da[dydapos] = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		final double y = h * dy_da[dydapos];
 		dy_da[dydapos + 1] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
-		dy_da[dydapos + 2] = y * (-2.0f * aa * dx - bb * dy);
-		dy_da[dydapos + 3] = y * (-2.0f * cc * dy - bb * dx);
+		dy_da[dydapos + 2] = y * (-2.0 * aa * dx - bb * dy);
+		dy_da[dydapos + 3] = y * (-2.0 * cc * dy - bb * dx);
 
 		dy_da[dydapos + 4] = y * (ax * dx2 + bx * dxy + cx * dy2);
 		dy_da[dydapos + 5] = y * (ay * dx2 + by * dxy + cy * dy2);
@@ -204,13 +204,13 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
 	 */
-	public float eval(final int x)
+	public double eval(final int x)
 	{
 		// Track the position of the parameters
 		int apos = 0;
 
 		// First parameter is the background level 
-		float y_fit = a[BACKGROUND];
+		double y_fit = a[BACKGROUND];
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -224,18 +224,18 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		return y_fit;
 	}
 
-	protected float gaussian(final int x0, final int x1, final int apos, final float[] factors)
+	protected double gaussian(final int x0, final int x1, final int apos, final double[] factors)
 	{
-		final float h = a[apos + AMPLITUDE];
+		final double h = a[apos + AMPLITUDE];
 
-		final float dx = x0 - a[apos + X_POSITION];
-		final float dy = x1 - a[apos + Y_POSITION];
+		final double dx = x0 - a[apos + X_POSITION];
+		final double dy = x1 - a[apos + Y_POSITION];
 
-		final float aa = factors[AA];
-		final float bb = factors[BB];
-		final float cc = factors[CC];
+		final double aa = factors[AA];
+		final double bb = factors[BB];
+		final double cc = factors[CC];
 
-		return (float) (h * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy));
+		return h * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override

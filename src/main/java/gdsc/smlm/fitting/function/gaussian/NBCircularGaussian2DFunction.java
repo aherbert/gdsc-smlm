@@ -16,7 +16,7 @@ package gdsc.smlm.fitting.function.gaussian;
 /**
  * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -39,16 +39,16 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.CircularGaussian2DFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.gaussian.CircularGaussian2DFunction#eval(int, double[])
 	 */
-	public float eval(final int x, final float[] dyda)
+	public double eval(final int x, final double[] dyda)
 	{
 		// Track the position of the parameters
 		int apos = 0;
 		int dydapos = 0;
 
 		// First parameter is the background level 
-		float y_fit = a[BACKGROUND];
+		double y_fit = a[BACKGROUND];
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;

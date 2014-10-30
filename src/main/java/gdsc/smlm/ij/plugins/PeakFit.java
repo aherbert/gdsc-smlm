@@ -985,11 +985,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// Restore fitting to default settings but maintain the calibrated width
-		final float sd = fitConfig.getInitialPeakStdDev0();
+		final double sd = fitConfig.getInitialPeakStdDev0();
 		config = new FitEngineConfiguration(new FitConfiguration());
 		fitConfig = config.getFitConfiguration();
 		fitConfig.setInitialPeakStdDev(sd);
-		fitConfig.setCoordinateShiftFactor(1.5f);
+		fitConfig.setCoordinateShiftFactor(1.5);
 		resultsSettings = new ResultsSettings();
 
 		// Do simple results output
@@ -998,7 +998,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (showImage)
 		{
 			resultsSettings.setResultsImage(ResultsImage.SIGNAL_INTENSITY);
-			resultsSettings.imageScale = (float) Math.ceil(1024 / (FastMath.max(bounds.width, bounds.height)));
+			resultsSettings.imageScale = Math.ceil(1024 / (FastMath.max(bounds.width, bounds.height)));
 			resultsSettings.weightedImage = true;
 			resultsSettings.equalisedImage = true;
 		}
@@ -1135,7 +1135,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		calibration.gain = (float) gd.getNextNumber();
+		calibration.gain = gd.getNextNumber();
 		return true;
 	}
 
@@ -1171,7 +1171,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		fitConfig.setInitialPeakStdDev((float) gd.getNextNumber());
+		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
 		return true;
 	}
 
@@ -1196,16 +1196,16 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		String filename = gd.getNextString();
 
 		calibration.nmPerPixel = gd.getNextNumber();
-		calibration.gain = (float) gd.getNextNumber();
+		calibration.gain = gd.getNextNumber();
 		calibration.exposureTime = gd.getNextNumber();
 		if (isCrop)
 			ignoreBoundsForNoise = optionIgnoreBoundsForNoise = gd.getNextBoolean();
 
-		fitConfig.setInitialPeakStdDev0((float) gd.getNextNumber());
+		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		if (!maximaIdentification)
 		{
-			fitConfig.setInitialPeakStdDev1((float) gd.getNextNumber());
-			fitConfig.setInitialAngleD((float) gd.getNextNumber());
+			fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
+			fitConfig.setInitialAngleD(gd.getNextNumber());
 		}
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
@@ -1228,17 +1228,17 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			config.setNeighbourHeightThreshold(gd.getNextNumber());
 			config.setResidualsThreshold(gd.getNextNumber());
 
-			fitConfig.setDuplicateDistance((float) gd.getNextNumber());
+			fitConfig.setDuplicateDistance(gd.getNextNumber());
 
-			fitConfig.setCoordinateShiftFactor((float) gd.getNextNumber());
-			fitConfig.setSignalStrength((float) gd.getNextNumber());
+			fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
+			fitConfig.setSignalStrength(gd.getNextNumber());
 			if (extraOptions)
 			{
-				fitConfig.setNoise((float) gd.getNextNumber());
+				fitConfig.setNoise(gd.getNextNumber());
 				config.setNoiseMethod(gd.getNextChoiceIndex());
 			}
-			fitConfig.setWidthFactor((float) gd.getNextNumber());
-			fitConfig.setPrecisionThreshold((float) gd.getNextNumber());
+			fitConfig.setWidthFactor(gd.getNextNumber());
+			fitConfig.setPrecisionThreshold(gd.getNextNumber());
 		}
 
 		resultsSettings.logProgress = gd.getNextBoolean();
@@ -1249,8 +1249,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		resultsSettings.setResultsImage(gd.getNextChoiceIndex());
 		resultsSettings.weightedImage = gd.getNextBoolean();
 		resultsSettings.equalisedImage = gd.getNextBoolean();
-		resultsSettings.precision = (float) gd.getNextNumber();
-		resultsSettings.imageScale = (float) gd.getNextNumber();
+		resultsSettings.precision = gd.getNextNumber();
+		resultsSettings.imageScale = gd.getNextNumber();
 		if (extraOptions)
 		{
 			resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
@@ -1330,7 +1330,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return false;
-				calibration.bias = (float) Math.abs(gd.getNextNumber());
+				calibration.bias = Math.abs(gd.getNextNumber());
 				fitConfig.setBias(calibration.bias);
 				fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 				try
@@ -1398,8 +1398,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 				if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
 				{
-					calibration.readNoise = (float) Math.abs(gd.getNextNumber());
-					calibration.bias = (float) Math.abs(gd.getNextNumber());
+					calibration.readNoise = Math.abs(gd.getNextNumber());
+					calibration.bias = Math.abs(gd.getNextNumber());
 					calibration.emCCD = gd.getNextBoolean();
 					fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
 							calibration.emCCD));

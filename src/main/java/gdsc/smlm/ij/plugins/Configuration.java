@@ -241,11 +241,11 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		filename = gd.getNextString();
 
 		calibration.nmPerPixel = gd.getNextNumber();
-		calibration.gain = (float) gd.getNextNumber();
+		calibration.gain = gd.getNextNumber();
 		calibration.exposureTime = gd.getNextNumber();
-		fitConfig.setInitialPeakStdDev0((float) gd.getNextNumber());
-		fitConfig.setInitialPeakStdDev1((float) gd.getNextNumber());
-		fitConfig.setInitialAngleD((float) gd.getNextNumber());
+		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
+		fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
+		fitConfig.setInitialAngleD(gd.getNextNumber());
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
 		config.setSearch(gd.getNextNumber());
@@ -264,12 +264,12 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
 
-		fitConfig.setDuplicateDistance((float) gd.getNextNumber());
+		fitConfig.setDuplicateDistance(gd.getNextNumber());
 
-		fitConfig.setCoordinateShiftFactor((float) gd.getNextNumber());
-		fitConfig.setSignalStrength((float) gd.getNextNumber());
-		fitConfig.setWidthFactor((float) gd.getNextNumber());
-		fitConfig.setPrecisionThreshold((float) gd.getNextNumber());
+		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
+		fitConfig.setSignalStrength(gd.getNextNumber());
+		fitConfig.setWidthFactor(gd.getNextNumber());
+		fitConfig.setPrecisionThreshold(gd.getNextNumber());
 
 		// Check arguments
 		try

@@ -19,15 +19,15 @@ package gdsc.smlm.fitting.function;
  */
 public abstract class CameraNoiseModel implements NoiseModel
 {
-	protected float bias = 0;
-	protected float readNoise2 = 0;
+	protected double bias = 0;
+	protected double readNoise2 = 0;
 
-	protected CameraNoiseModel(final float readNoise)
+	protected CameraNoiseModel(final double readNoise)
 	{
 		setReadNoise(readNoise);
 	}
 
-	protected CameraNoiseModel(final float readNoise, final float bias)
+	protected CameraNoiseModel(final double readNoise, final double bias)
 	{
 		setReadNoise(readNoise);
 		setBias(bias);
@@ -40,7 +40,7 @@ public abstract class CameraNoiseModel implements NoiseModel
 	 * @param emCCD
 	 * @return
 	 */
-	public static CameraNoiseModel createNoiseModel(final float readNoise, final float bias, final boolean emCCD)
+	public static CameraNoiseModel createNoiseModel(final double readNoise, final double bias, final boolean emCCD)
 	{
 		return (emCCD) ? new EMCCDCameraNoiseModel(readNoise, bias) : new CCDCameraNoiseModel(readNoise, bias); 
 	}
@@ -64,14 +64,14 @@ public abstract class CameraNoiseModel implements NoiseModel
 	 * The em-ccd noise factor is sqrt(2) for EM CCD cameras, otherwise it is 1. This is only applied to the signal
 	 * noise standard deviation. Applying it directly to the signal variance uses a factor of sqrt(2)^2 = 2.
 	 * 
-	 * @see gdsc.smlm.fitting.function.NoiseModel#variance(float)
+	 * @see gdsc.smlm.fitting.function.NoiseModel#variance(double)
 	 */
-	public abstract float variance(final float value);
+	public abstract double variance(final double value);
 
 	/**
 	 * @return the bias
 	 */
-	public float getBias()
+	public double getBias()
 	{
 		return bias;
 	}
@@ -80,7 +80,7 @@ public abstract class CameraNoiseModel implements NoiseModel
 	 * @param bias
 	 *            the bias to set
 	 */
-	public void setBias(float bias)
+	public void setBias(double bias)
 	{
 		this.bias = bias;
 	}
@@ -88,16 +88,16 @@ public abstract class CameraNoiseModel implements NoiseModel
 	/**
 	 * @return the read noise
 	 */
-	public float getReadNoise()
+	public double getReadNoise()
 	{
-		return (float) Math.sqrt(readNoise2);
+		return (double) Math.sqrt(readNoise2);
 	}
 
 	/**
 	 * @param readNoise
 	 *            the read noise to set
 	 */
-	public void setReadNoise(float readNoise)
+	public void setReadNoise(double readNoise)
 	{
 		readNoise2 = readNoise * readNoise;
 	}

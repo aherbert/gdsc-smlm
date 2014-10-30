@@ -59,7 +59,7 @@ public class WidthFilter extends Filter
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			sigmaThreshold = Gaussian2DFitter.fwhm2sd(Float.parseFloat(match.group(1)) * width);
+			sigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(Float.parseFloat(match.group(1)) * width);
 		}
 	}
 

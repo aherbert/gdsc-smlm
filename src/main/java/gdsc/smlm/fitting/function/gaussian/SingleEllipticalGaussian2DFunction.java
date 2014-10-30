@@ -20,7 +20,7 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -33,23 +33,23 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		gradientIndices = createGradientIndices(1, new SingleEllipticalGaussian2DFunction(1));
 	}
 
-	protected float background;
-	protected float amplitude;
-	protected float x0pos;
-	protected float x1pos;
+	protected double background;
+	protected double amplitude;
+	protected double x0pos;
+	protected double x1pos;
 
-	protected float aa;
-	protected float bb;
-	protected float cc;
-	protected float aa2;
-	protected float bb2;
-	protected float cc2;
-	protected float ax;
-	protected float bx;
-	protected float cx;
-	protected float ay;
-	protected float by;
-	protected float cy;
+	protected double aa;
+	protected double bb;
+	protected double cc;
+	protected double aa2;
+	protected double bb2;
+	protected double cc2;
+	protected double ax;
+	protected double bx;
+	protected double cx;
+	protected double ay;
+	protected double by;
+	protected double cy;
 
 	/**
 	 * Constructor
@@ -65,9 +65,9 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(float[])
+	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
-	public void initialise(float[] a)
+	public void initialise(double[] a)
 	{
 		background = a[BACKGROUND];
 		amplitude = a[AMPLITUDE];
@@ -91,24 +91,24 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 		
-		aa = (float) (-0.5 * (cosSqt / sx2 + sinSqt / sy2));
-		bb = (float) (-0.25 * (-sin2t / sx2 + sin2t / sy2));
-		cc = (float) (-0.5 * (sinSqt / sx2 + cosSqt / sy2));;
+		aa = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
+		bb = -0.25 * (-sin2t / sx2 + sin2t / sy2);
+		cc = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
 
 		// For the angle gradient
-		aa2 = (float) -(-sincost / sx2 + sincost / sy2);
-		bb2 = (float) (-0.5 * (-cos2t / sx2 + cos2t / sy2));
-		cc2  = (float) -(sincost / sx2 - sincost / sy2);
+		aa2 = -(-sincost / sx2 + sincost / sy2);
+		bb2 = -0.5 * (-cos2t / sx2 + cos2t / sy2);
+		cc2  = -(sincost / sx2 - sincost / sy2);
 
 		// For the x-width gradient
-		ax = (float) (cosSqt / sx3);
-		bx = (float) (-0.5 * sin2t / sx3);
-		cx = (float) (sinSqt / sx3);
+		ax = cosSqt / sx3;
+		bx = -0.5 * sin2t / sx3;
+		cx = sinSqt / sx3;
 
 		// For the y-width gradient
-		ay = (float) (sinSqt / sy3);
-		by = (float) (0.5 * sin2t / sy3);
-		cy = (float) (cosSqt / sy3);
+		ay = sinSqt / sy3;
+		by = 0.5 * sin2t / sy3;
+		cy = cosSqt / sy3;
 	}
 
 	/**
@@ -135,9 +135,9 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	 *            Partial gradient of function with respect to each coefficient
 	 * @return The predicted value
 	 * 
-	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])
 	 */
-	public float eval(final int x, final float[] dyda)
+	public double eval(final int x, final double[] dyda)
 	{
 		// First parameter is the background level 
 		dyda[0] = 1; // Gradient for a constant background is 1
@@ -149,27 +149,27 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		return background + gaussian(x0, x1, dyda);
 	}
 
-	private float gaussian(final int x0, final int x1, final float[] dy_da)
+	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final float h = amplitude;
+		final double h = amplitude;
 
-		final float dx = x0 - x0pos;
-		final float dy = x1 - x1pos;
-		final float dx2 = dx * dx;
-		final float dxy = dx * dy;
-		final float dy2 = dy * dy;
+		final double dx = x0 - x0pos;
+		final double dy = x1 - x1pos;
+		final double dx2 = dx * dx;
+		final double dxy = dx * dy;
+		final double dy2 = dy * dy;
 
-		//final float y = (float) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
+		//final double y = (double) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
 
 		// Calculate gradients
 		//dy_da[1] = y / h;
 		
-		dy_da[1] = (float) (FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
-		final float y = h * dy_da[1];
+		dy_da[1] = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		final double y = h * dy_da[1];
 		dy_da[2] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
-		dy_da[3] = y * (-2.0f * aa * dx - bb * dy);
-		dy_da[4] = y * (-2.0f * cc * dy - bb * dx);
+		dy_da[3] = y * (-2.0 * aa * dx - bb * dy);
+		dy_da[4] = y * (-2.0 * cc * dy - bb * dx);
 
 		dy_da[5] = y * (ax * dx2 + bx * dxy + cx * dy2);
 		dy_da[6] = y * (ay * dx2 + by * dxy + cy * dy2);
@@ -182,16 +182,16 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
 	 */
-	public float eval(final int x)
+	public double eval(final int x)
 	{
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
-		final float dx = x0 - x0pos;
-		final float dy = x1 - x1pos;
+		final double dx = x0 - x0pos;
+		final double dy = x1 - x1pos;
 
-		return background + amplitude * (float) FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		return background + amplitude * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override

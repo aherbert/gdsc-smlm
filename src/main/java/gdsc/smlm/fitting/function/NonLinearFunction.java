@@ -25,7 +25,7 @@ public interface NonLinearFunction
 	 * @param a
 	 *            An array of coefficients
 	 */
-	void initialise(final float[] a);
+	void initialise(final double[] a);
 
 	/**
 	 * The function will evaluate the gradient for up to n parameters where n <= a.length. This method
@@ -46,7 +46,7 @@ public interface NonLinearFunction
 	 *            . Note: dyda.length must be >= to gradientIndices().length
 	 * @return The predicted value y
 	 */
-	float eval(final int x, final float[] dyda);
+	double eval(final int x, final double[] dyda);
 
 	/**
 	 * The non-linear fitting function. Produce an output predicted value for a given input
@@ -56,7 +56,7 @@ public interface NonLinearFunction
 	 *            Predictor
 	 * @return The predicted value y
 	 */
-	float eval(final int x);
+	double eval(final int x);
 
 	/**
 	 * The non-linear fitting function. Produce an output predicted value for a given input
@@ -76,10 +76,10 @@ public interface NonLinearFunction
 	 * @throws ArrayIndexOutOfBoundsException
 	 *             If the output weight argument is length 0
 	 */
-	float eval(final int x, final float[] dyda, final float[] w);
+	double eval(final int x, final double[] dyda, final double[] w);
 
 	/**
-	 * @return True if the {@link #eval(int, float[], float[])} can compute weights other than 1
+	 * @return True if the {@link #eval(int, double[], double[])} can compute weights other than 1
 	 */
 	boolean canComputeWeights();
 }

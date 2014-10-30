@@ -191,9 +191,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
+	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, double[], double[], double[], double[], double[], double)
 	 */
-	public FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise)
+	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
 	{
 		numberOfFittedPoints = n;
 
@@ -431,7 +431,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 			// Compute residuals for the FunctionSolver interface
 			if (y_fit == null || y_fit.length < n)
-				y_fit = new float[n];
+				y_fit = new double[n];
 			f.initialise(a);
 			residualSumOfSquares = 0;
 			for (int i = 0; i < n; i++)
@@ -608,10 +608,10 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setBounds(float[], float[])
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setBounds(double[], double[])
 	 */
 	@Override
-	public void setBounds(float[] lowerB, float[] upperB)
+	public void setBounds(double[] lowerB, double[] upperB)
 	{
 		// Extract the bounds for the parameters we are fitting
 		int[] indices = f.gradientIndices();
@@ -628,10 +628,10 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setConstraints(float[], float[])
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setConstraints(double[], double[])
 	 */
 	@Override
-	public void setConstraints(float[] lowerB, float[] upperB)
+	public void setConstraints(double[] lowerB, double[] upperB)
 	{
 		// Extract the bounds for the parameters we are fitting
 		int[] indices = f.gradientIndices();

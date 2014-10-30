@@ -26,7 +26,7 @@ public class Calibration
 	 * The gain (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units
 	 * (ADUs) to photons.
 	 */
-	public float gain = 37.7f;
+	public double gain = 37.7;
 	/**
 	 * The exposure time in milliseconds per frame
 	 */
@@ -35,11 +35,11 @@ public class Calibration
 	/**
 	 * The CCD camera Gaussian read noise (in ADUs)
 	 */
-	public float readNoise;
+	public double readNoise;
 	/**
 	 * The CCD camera bias (in ADUs)
 	 */
-	public float bias;
+	public double bias;
 	/**
 	 * True if the CCD camera was run in Electron Multiplying (EM) mode
 	 */
@@ -73,7 +73,7 @@ public class Calibration
 	 * @param gain
 	 * @param exposureTime
 	 */
-	public Calibration(double nmPerPixel, float gain, double exposureTime)
+	public Calibration(double nmPerPixel, double gain, double exposureTime)
 	{
 		this.nmPerPixel = nmPerPixel;
 		if (gain <= 0)

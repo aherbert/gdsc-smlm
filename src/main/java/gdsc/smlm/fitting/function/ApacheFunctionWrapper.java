@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting.function;
 
-import java.util.Arrays;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -21,13 +19,13 @@ import java.util.Arrays;
 public abstract class ApacheFunctionWrapper
 {
 	NonLinearFunction fun;
-	float[] a;
+	double[] a;
 	int n;
 
-	public ApacheFunctionWrapper(NonLinearFunction fun, float[] a, int n)
+	public ApacheFunctionWrapper(NonLinearFunction fun, double[] a, int n)
 	{
 		this.fun = fun;
-		this.a = Arrays.copyOf(a, a.length);
+		this.a = a.clone();
 		this.n = n;
 	}
 
@@ -35,7 +33,7 @@ public abstract class ApacheFunctionWrapper
 	{
 		int[] gradientIndices = fun.gradientIndices();
 		for (int i = 0; i < gradientIndices.length; i++)
-			a[gradientIndices[i]] = (float)variables[i];
+			a[gradientIndices[i]] = variables[i];
 		fun.initialise(a);
 	}
 }

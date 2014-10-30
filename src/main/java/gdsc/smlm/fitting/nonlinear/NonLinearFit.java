@@ -43,7 +43,7 @@ public class NonLinearFit extends BaseFunctionSolver
 
 	private double[] beta = new double[0];
 	private double[] da;
-	private float[] ap = new float[0];
+	private double[] ap = new double[0];
 
 	private double[][] covar;
 	private double[][] alpha;
@@ -74,7 +74,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	 */
 	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc)
 	{
-		this(func, sc, 3, 1e-10f);
+		this(func, sc, 3, 1e-10);
 	}
 
 	/**
@@ -89,19 +89,19 @@ public class NonLinearFit extends BaseFunctionSolver
 	 * @param maxAbsoluteError
 	 *            Validate the Levenberg-Marquardt fit solution using the specified maximum absolute error
 	 */
-	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc, int significantDigits, float maxAbsoluteError)
+	public NonLinearFit(NonLinearFunction func, StoppingCriteria sc, int significantDigits, double maxAbsoluteError)
 	{
 		super(func);
 		init(sc, significantDigits, maxAbsoluteError);
 	}
 
-	private void init(StoppingCriteria sc, int significantDigits, float maxAbsoluteError)
+	private void init(StoppingCriteria sc, int significantDigits, double maxAbsoluteError)
 	{
 		setStoppingCriteria(sc);
 		solver.setEqual(new DoubleEquality(significantDigits, maxAbsoluteError));
 	}
 
-	private boolean nonLinearModel(int n, float[] y, float[] a, boolean initialStage)
+	private boolean nonLinearModel(int n, double[] y, double[] a, boolean initialStage)
 	{
 		// The NonLinearFunction evaluates a function with parameters a but only computes the gradient
 		// for m <= a.length parameters. The parameters can be accessed using the gradientIndices() method.  
@@ -152,7 +152,7 @@ public class NonLinearFit extends BaseFunctionSolver
 
 		// Update the parameters. Ensure to use the gradient indices to update the correct parameters
 		for (int j = m; j-- > 0;)
-			ap[gradientIndices[j]] = (float) (a[gradientIndices[j]] + da[j]);
+			ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
 
 		sumOfSquaresWorking[SUM_OF_SQUARES_NEW] = calculator.findLinearised(n, y, ap, covar, da, f);
 
@@ -189,7 +189,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		return true;
 	}
 
-	private FitStatus doFit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error,
+	private FitStatus doFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
 			StoppingCriteria sc, double noise)
 	{
 		int[] gradientIndices = f.gradientIndices();
@@ -225,7 +225,7 @@ public class NonLinearFit extends BaseFunctionSolver
 				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
 
 			for (int i = 0; i < nparams; i++)
-				a_dev[gradientIndices[i]] = (float) Math.sqrt(FastMath.max(covar[i][i], 0));
+				a_dev[gradientIndices[i]] = (double) Math.sqrt(FastMath.max(covar[i][i], 0));
 		}
 
 		if (y_fit != null)
@@ -265,7 +265,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	 *            Estimate of the noise in the individual measurements
 	 * @return The fit status
 	 */
-	public FitStatus fit(final int n, final float[] y, final float[] y_fit, final float[] a, final float[] a_dev,
+	public FitStatus fit(final int n, final double[] y, final double[] y_fit, final double[] a, final double[] a_dev,
 			final double[] error, final StoppingCriteria sc, final double noise)
 	{
 		final int nparams = f.gradientIndices().length;
@@ -279,7 +279,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		da = new double[nparams];
 		covar = new double[nparams][nparams];
 		alpha = new double[nparams][nparams];
-		ap = new float[a.length];
+		ap = new double[a.length];
 
 		// Store the { best, previous, new } sum-of-squares values 
 		sumOfSquaresWorking = new double[3];
@@ -327,7 +327,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	}
 
 	/**
-	 * Set the non-linear function for the {@link #fit(int, float[], float[], float[], float[], double[], double)}
+	 * Set the non-linear function for the {@link #fit(int, double[], double[], double[], double[], double[], double)}
 	 * method
 	 * 
 	 * @param sc
@@ -339,7 +339,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	}
 
 	/**
-	 * Set the stopping criteria for the {@link #fit(int, float[], float[], float[], float[], double[], double)} method
+	 * Set the stopping criteria for the {@link #fit(int, double[], double[], double[], double[], double[], double)} method
 	 * 
 	 * @param sc
 	 */
@@ -353,10 +353,10 @@ public class NonLinearFit extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#fit(int, float[], float[], float[], float[], double[],
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#fit(int, double[], double[], double[], double[], double[],
 	 * double)
 	 */
-	public FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise)
+	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
 	{
 		return fit(n, y, y_fit, a, a_dev, error, sc, noise);
 	}

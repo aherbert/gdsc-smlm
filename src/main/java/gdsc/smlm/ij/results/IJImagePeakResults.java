@@ -327,8 +327,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (!imageActive)
 			return;
 
-		float x = (params[3] - bounds.x) * scale;
-		float y = (params[4] - bounds.y) * scale;
+		final float x = (params[3] - bounds.x) * scale;
+		final float y = (params[4] - bounds.y) * scale;
 
 		// Check bounds
 		if (x < 0 || x > xlimit || y < 0 || y > ylimit)
@@ -336,8 +336,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		checkAndUpdateToFrame(peak);
 
-		int x1 = (int) x;
-		int y1 = (int) y;
+		final int x1 = (int) x;
+		final int y1 = (int) y;
 
 		float[] value = getValue(peak, params, error, x, y, x1, y1);
 

@@ -39,7 +39,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	private static final int DEFAULT_SIZE_WITH_DEVIATIONS = 144;
 
 	public static final double DEFAULT_NM_PER_PIXEL = 100;
-	public static final float DEFAULT_GAIN = 1;
+	public static final double DEFAULT_GAIN = 1;
 
 	private ArrayList<PeakResult> results;
 	private boolean sortAfterEnd;
@@ -210,7 +210,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	{
 		results.trimToSize();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -459,6 +459,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 
 	/**
 	 * Get the nm-per-pixel from the calibration, or if not available, return the {@link #DEFAULT_NM_PER_PIXEL}
+	 * 
 	 * @return the nmPerPixel
 	 */
 	public double getNmPerPixel()
@@ -468,9 +469,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 
 	/**
 	 * Get the gain from the calibration, or if not available, return the {@link #DEFAULT_GAIN}
+	 * 
 	 * @return the gain
 	 */
-	public float getGain()
+	public double getGain()
 	{
 		return (calibration != null) ? calibration.gain : DEFAULT_GAIN;
 	}
@@ -490,7 +492,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	 * Copy the results. Create new objects for the properties (avoiding a shallow copy) but does not
 	 * deep copy all of the peak results. Allows results to be resorted but not modified.
 	 */
-	public MemoryPeakResults copy() 
+	public MemoryPeakResults copy()
 	{
 		MemoryPeakResults copy;
 		try

@@ -33,7 +33,7 @@ public class Gaussian2DFitter
 	private FunctionSolver solver;
 
 	// The last successful fit. Used to compute the residuals.
-	private float[] y_fit = null;
+	private double[] y_fit = null;
 	// Allow calculation of residuals to be turned off (overwrite constructor fit configuration)
 	private boolean computeResiduals = true;
 
@@ -54,13 +54,13 @@ public class Gaussian2DFitter
 		computeResiduals = fitConfiguration.isComputeResiduals();
 	}
 
-	static float half_max_position(float[] data, int index, int[] point, int[] dim, int dimension, int[] cumul_region,
-			int dirn, float background)
+	static double half_max_position(double[] data, int index, int[] point, int[] dim, int dimension,
+			int[] cumul_region, int dirn, double background)
 	{
 		int i, i_start, i_end, i_step;
-		float v = data[index];
-		float v_half = 0.5f * (v + background);
-		float v_prev = v, v_this;
+		double v = data[index];
+		double v_half = 0.5f * (v + background);
+		double v_prev = v, v_this;
 		int jump;
 
 		if (dirn == 1)
@@ -96,10 +96,10 @@ public class Gaussian2DFitter
 			return 0f;
 	}
 
-	public static float half_max_linewidth(float[] data, int index, int[] point, int[] dim, int dimension,
-			int[] cumul_region, float background)
+	public static double half_max_linewidth(double[] data, int index, int[] point, int[] dim, int dimension,
+			int[] cumul_region, double background)
 	{
-		float linewidth, a, b;
+		double linewidth, a, b;
 
 		a = half_max_position(data, index, point, dim, dimension, cumul_region, 1, background);
 		b = half_max_position(data, index, point, dim, dimension, cumul_region, -1, background);
@@ -128,7 +128,7 @@ public class Gaussian2DFitter
 	 *            The index of the peaks
 	 * @return The fit result
 	 */
-	public FitResult fit(final float[] data, final int maxx, final int maxy, final int[] peaks)
+	public FitResult fit(final double[] data, final int maxx, final int maxy, final int[] peaks)
 	{
 		return fit(data, maxx, maxy, peaks, null);
 	}
@@ -152,23 +152,23 @@ public class Gaussian2DFitter
 	 *            An initial estimate of the peak heights (can be null)
 	 * @return The fit result
 	 */
-	public FitResult fit(final float[] data, final int maxx, final int maxy, final int[] peaks, float[] heights)
+	public FitResult fit(final double[] data, final int maxx, final int maxy, final int[] peaks, double[] heights)
 	{
 		int npeaks = peaks.length;
 
 		final int paramsPerPeak = 6;
 
-		float[] params = new float[1 + paramsPerPeak * npeaks];
+		double[] params = new double[1 + paramsPerPeak * npeaks];
 
 		// Get peak heights
 		if (heights == null || heights.length != peaks.length)
 		{
-			heights = new float[peaks.length];
+			heights = new double[peaks.length];
 			for (int i = 0; i < peaks.length; i++)
 				heights[i] = data[peaks[i]];
 		}
 
-		float background = getBackground(data, maxx, maxy, heights);
+		double background = getBackground(data, maxx, maxy, heights);
 
 		// Set the initial parameters
 		params[0] = background;
@@ -199,7 +199,7 @@ public class Gaussian2DFitter
 	 * @param heights
 	 * @return The background estimate
 	 */
-	public static float getBackground(final float[] data, final int maxx, final int maxy, final float[] heights)
+	public static double getBackground(final double[] data, final int maxx, final int maxy, final double[] heights)
 	{
 		// TODO - What is the best method for setting the background?
 		// 1. Min in data
@@ -215,7 +215,7 @@ public class Gaussian2DFitter
 		// multiple peaks.
 		// -----
 
-		float background = 0;
+		double background = 0;
 
 		if (heights.length == 1)
 		{
@@ -269,7 +269,7 @@ public class Gaussian2DFitter
 	 *            parameters that are zero will be estimated.
 	 * @return The fit result
 	 */
-	public FitResult fit(final float[] data, final int maxx, final int maxy, final int npeaks, final float[] params)
+	public FitResult fit(final double[] data, final int maxx, final int maxy, final int npeaks, final double[] params)
 	{
 		return fit(data, maxx, maxy, npeaks, params, false);
 	}
@@ -304,7 +304,7 @@ public class Gaussian2DFitter
 	 *            Set to true if a zero value for the background parameter is the estimate
 	 * @return The fit result
 	 */
-	public FitResult fit(final float[] data, final int maxx, final int maxy, final int npeaks, final float[] params,
+	public FitResult fit(final double[] data, final int maxx, final int maxy, final int npeaks, final double[] params,
 			final boolean zeroBackground)
 	{
 		FitResult fitResult = null;
@@ -315,20 +315,20 @@ public class Gaussian2DFitter
 		final int[] position = new int[2];
 
 		// Fitting variables
-		final float[] y = data; // Value at index
-		y_fit = (computeResiduals) ? new float[cumul_region[2]] : null; // Predicted points
+		final double[] y = data; // Value at index
+		y_fit = (computeResiduals) ? new double[cumul_region[2]] : null; // Predicted points
 		solver = null;
-		float[] params_dev = null; // standard deviations for parameters for the fitting function
+		double[] params_dev = null; // standard deviations for parameters for the fitting function
 		double[] error = { 0 }; // The fit Chi-squared value
 		final int ySize = cumul_region[2];
 
 		final int paramsPerPeak = 6;
 
-		float background = params[0];
+		double background = params[0];
 		if (background == 0 && !zeroBackground)
 		{
 			// Extract the heights
-			float[] heights = new float[npeaks];
+			double[] heights = new double[npeaks];
 			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 			{
 				heights[i] = params[j + Gaussian2DFunction.AMPLITUDE];
@@ -343,7 +343,7 @@ public class Gaussian2DFitter
 			}
 		}
 
-		float[] initialParams = Arrays.copyOf(params, params.length);
+		double[] initialParams = Arrays.copyOf(params, params.length);
 
 		int zeroHeight = 0;
 		int parameter = 1;
@@ -351,12 +351,12 @@ public class Gaussian2DFitter
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 		{
 			// Get the parameters
-			float height = params[j + Gaussian2DFunction.AMPLITUDE];
-			float angle = params[j + Gaussian2DFunction.ANGLE];
-			float xpos = params[j + Gaussian2DFunction.X_POSITION];
-			float ypos = params[j + Gaussian2DFunction.Y_POSITION];
-			float sx = params[j + Gaussian2DFunction.X_SD];
-			float sy = params[j + Gaussian2DFunction.Y_SD];
+			double height = params[j + Gaussian2DFunction.AMPLITUDE];
+			double angle = params[j + Gaussian2DFunction.ANGLE];
+			double xpos = params[j + Gaussian2DFunction.X_POSITION];
+			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
+			double sx = params[j + Gaussian2DFunction.X_SD];
+			double sy = params[j + Gaussian2DFunction.Y_SD];
 
 			// ----
 			// Check all input parameters and estimate them if necessary
@@ -373,8 +373,8 @@ public class Gaussian2DFitter
 			}
 
 			// Set-up for estimating peak width at half maximum 
-			position[0] = Math.round(xpos);
-			position[1] = Math.round(ypos);
+			position[0] = (int) Math.round(xpos);
+			position[1] = (int) Math.round(ypos);
 			int index = position[1] * maxx + position[0];
 
 			if (sx == 0)
@@ -439,8 +439,8 @@ public class Gaussian2DFitter
 				// SD = (sx+sy)/2 => Range = sx+sy
 				final int range = (int) Math.ceil(sx + sy + 0.5);
 				final double[] com = findCentreOfMass(y, dim, range, position);
-				xpos = (float) com[0];
-				ypos = (float) com[1];
+				xpos = (double) com[0];
+				ypos = (double) com[1];
 			}
 
 			// Set all the parameters
@@ -466,10 +466,10 @@ public class Gaussian2DFitter
 		fitConfiguration.initialise(npeaks, maxx, initialParams);
 		solver = fitConfiguration.getFunctionSolver();
 		if (fitConfiguration.isComputeDeviations())
-			params_dev = new float[params.length];
+			params_dev = new double[params.length];
 
 		// Subtract the bias
-		float bias = 0;
+		double bias = 0;
 		if (fitConfiguration.getBias() > 0)
 		{
 			bias = FastMath.min(background, fitConfiguration.getBias());
@@ -557,7 +557,7 @@ public class Gaussian2DFitter
 	/**
 	 * Finds the centre of the image using the centre of mass within the given range of the specified centre-of-mass.
 	 */
-	private double[] findCentreOfMass(final float[] subImage, final int[] dimensions, final int range,
+	private double[] findCentreOfMass(final double[] subImage, final int[] dimensions, final int range,
 			final int[] centre)
 	{
 		int[] min = new int[2];
@@ -579,7 +579,7 @@ public class Gaussian2DFitter
 			int index = dimensions[0] * y + min[0];
 			for (int x = min[0]; x <= max[0]; x++, index++)
 			{
-				float value = subImage[index];
+				double value = subImage[index];
 				sum += value;
 				newCom[0] += x * value;
 				newCom[1] += y * value;
@@ -612,19 +612,19 @@ public class Gaussian2DFitter
 	 * @param paramsPerPeak
 	 *            The number of parameters per peak
 	 */
-	private void setBounds(final int maxx, final int maxy, final int npeaks, final float[] params, final float[] y,
+	private void setBounds(final int maxx, final int maxy, final int npeaks, final double[] params, final double[] y,
 			final int ySize, final int paramsPerPeak)
 	{
 		// Create appropriate bounds for the parameters
-		float[] lower = new float[params.length];
-		float[] upper = new float[lower.length];
-		float yMax = y[0];
+		double[] lower = new double[params.length];
+		double[] upper = new double[lower.length];
+		double yMax = y[0];
 		for (int i = 1; i < ySize; i++)
 			if (yMax < y[i])
 				yMax = y[i];
 		if (fitConfiguration.isBackgroundFitting())
 			upper[0] = yMax;
-		final float wf = (fitConfiguration.getWidthFactor() > 1 && fitConfiguration.getWidthFactor() < maximumWidthFactor) ? fitConfiguration
+		final double wf = (fitConfiguration.getWidthFactor() > 1 && fitConfiguration.getWidthFactor() < maximumWidthFactor) ? fitConfiguration
 				.getWidthFactor() : maximumWidthFactor;
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 		{
@@ -636,8 +636,8 @@ public class Gaussian2DFitter
 
 			if (fitConfiguration.isAngleFitting())
 			{
-				lower[j + Gaussian2DFunction.ANGLE] = (float) -Math.PI;
-				upper[j + Gaussian2DFunction.ANGLE] = (float) Math.PI;
+				lower[j + Gaussian2DFunction.ANGLE] = (double) -Math.PI;
+				upper[j + Gaussian2DFunction.ANGLE] = (double) Math.PI;
 			}
 			if (fitConfiguration.isWidth0Fitting())
 			{
@@ -672,12 +672,12 @@ public class Gaussian2DFitter
 	 * @param paramsPerPeak
 	 *            The number of parameters per peak
 	 */
-	private void setConstraints(final int maxx, final int maxy, final int npeaks, final float[] params,
-			final float[] y, final int ySize, final int paramsPerPeak)
+	private void setConstraints(final int maxx, final int maxy, final int npeaks, final double[] params,
+			final double[] y, final int ySize, final int paramsPerPeak)
 	{
 		// Create appropriate bounds for the parameters
-		float[] lower = new float[params.length];
-		float[] upper = new float[lower.length];
+		double[] lower = new double[params.length];
+		double[] upper = new double[lower.length];
 		Arrays.fill(lower, Float.NEGATIVE_INFINITY);
 		Arrays.fill(upper, Float.POSITIVE_INFINITY);
 		lower[Gaussian2DFunction.BACKGROUND] = 0;
@@ -697,7 +697,7 @@ public class Gaussian2DFitter
 	 * @param params
 	 * @param params_dev
 	 */
-	private void correctAngle(final int i, final float[] params, final float[] params_dev)
+	private void correctAngle(final int i, final double[] params, final double[] params_dev)
 	{
 		double angle = params[i];
 
@@ -716,8 +716,8 @@ public class Gaussian2DFitter
 		//		}
 
 		// Commented out as this interferes with the PSF Estimator
-		float xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE];
-		float yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE];
+		double xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE];
+		double yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE];
 		// The fit will compute the angle from the major axis. 
 		// Standardise so it is always from the X-axis
 		if (yWidth > xWidth)
@@ -737,15 +737,15 @@ public class Gaussian2DFitter
 
 		// Return in 0 - 180 degrees domain since the Gaussian has 2-fold symmetry,
 		// i.e. angle -10 == 170
-		params[i] = (float) ((angle < 0) ? angle + Math.PI : angle);
+		params[i] = (double) ((angle < 0) ? angle + Math.PI : angle);
 
 		// Return in -90 - 90 degrees domain since 0 should be no angle
 		params[i] -= Math.PI / 2;
 	}
 
-	private void swap(final int i, final float[] params)
+	private void swap(final int i, final double[] params)
 	{
-		float tmp = params[i];
+		double tmp = params[i];
 		params[i] = params[i + 1];
 		params[i + 1] = tmp;
 	}
@@ -756,9 +756,9 @@ public class Gaussian2DFitter
 	 * @param fwhm
 	 * @return sd
 	 */
-	public static float fwhm2sd(float fwhm)
+	public static double fwhm2sd(double fwhm)
 	{
-		return (float) (fwhm / (2 * Math.sqrt(2 * Math.log(2))));
+		return (double) (fwhm / (2 * Math.sqrt(2 * Math.log(2))));
 	}
 
 	/**
@@ -767,15 +767,15 @@ public class Gaussian2DFitter
 	 * @param sd
 	 * @return fwhm
 	 */
-	public static float sd2fwhm(final float sd)
+	public static double sd2fwhm(final double sd)
 	{
-		return (float) (sd * 2 * Math.sqrt(2 * Math.log(2)));
+		return (double) (sd * 2 * Math.sqrt(2 * Math.log(2)));
 	}
 
 	/**
 	 * @return the residuals from the last successful fit. If fitting failed then this is null.
 	 */
-	public float[] getResiduals()
+	public double[] getResiduals()
 	{
 		return y_fit;
 	}

@@ -31,7 +31,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	private boolean calculatedPrecision = false;
 
 	private double nmPerPixel = 100.0;
-	private float gain = 1f;
+	private double gain = 1;
 
 	// Multiplication factors and variables for plotting the fixed Gaussian
 	private double[] fixedParams = null;

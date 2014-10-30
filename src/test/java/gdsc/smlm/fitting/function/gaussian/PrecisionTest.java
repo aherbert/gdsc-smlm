@@ -17,6 +17,7 @@ public class PrecisionTest
 	int Double = 2;
 
 	private int MAX_ITER = 200000;
+	double SPEED_UP_FACTOR = 1.1;
 
 	int maxx = 10;
 	// Use realistic values for a camera with a bias of 500
@@ -398,28 +399,28 @@ public class PrecisionTest
 		}
 	}
 
-	@Test
-	public void circularSinglePrecisionIsFasterWithGradients()
+	@Test(expected = java.lang.AssertionError.class)
+	public void circularSinglePrecisionIsNotMuchFasterWithGradients()
 	{
 		singlePrecisionIsFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
 				false);
 	}
 
-	@Test
-	public void circularSinglePrecisionIsFaster()
+	@Test(expected = java.lang.AssertionError.class)
+	public void circularSinglePrecisionIsNotMuchFaster()
 	{
 		singlePrecisionIsFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false);
 	}
 
-	@Test
-	public void circularSinglePrecisionIsFasterWithGradientsNoSum()
+	@Test(expected = java.lang.AssertionError.class)
+	public void circularSinglePrecisionIsNotMuchFasterWithGradientsNoSum()
 	{
 		singlePrecisionIsFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
 				true);
 	}
 
-	@Test
-	public void circularSinglePrecisionIsFasterNoSum()
+	@Test(expected = java.lang.AssertionError.class)
+	public void circularSinglePrecisionIsNotMuchFasterNoSum()
 	{
 		singlePrecisionIsFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), true);
 	}
@@ -463,14 +464,14 @@ public class PrecisionTest
 		}
 	}
 
-	@Test
-	public void fixedSinglePrecisionIsFasterWithGradients()
+	@Test(expected = java.lang.AssertionError.class)
+	public void fixedSinglePrecisionIsNotMuchFasterWithGradients()
 	{
 		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false);
 	}
 
-	@Test
-	public void fixedSinglePrecisionIsFaster()
+	@Test(expected = java.lang.AssertionError.class)
+	public void fixedSinglePrecisionIsNotMuchFaster()
 	{
 		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false);
 	}
@@ -481,8 +482,8 @@ public class PrecisionTest
 		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true);
 	}
 
-	@Test
-	public void fixedSinglePrecisionIsFasterNoSum()
+	@Test(expected = java.lang.AssertionError.class)
+	public void fixedSinglePrecisionIsNotMuchFasterNoSum()
 	{
 		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true);
 	}
@@ -559,7 +560,7 @@ public class PrecisionTest
 
 		System.out.printf("%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "", f1.getClass()
 				.getSimpleName(), time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
-		Assert.assertTrue(time1 < time2);
+		Assert.assertTrue(time1 * SPEED_UP_FACTOR < time2);
 	}
 
 	@SuppressWarnings("unused")
@@ -707,7 +708,7 @@ public class PrecisionTest
 
 		System.out.printf("%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "", f1.getClass().getSimpleName(),
 				time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
-		Assert.assertTrue(time1 < time2);
+		Assert.assertTrue(time1 * SPEED_UP_FACTOR < time2);
 	}
 
 	@SuppressWarnings("unused")

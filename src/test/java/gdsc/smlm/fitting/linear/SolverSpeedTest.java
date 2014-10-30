@@ -349,23 +349,22 @@ public class SolverSpeedTest
 	{
 		// Generate a 2D Gaussian
 		SingleFreeCircularGaussian2DFunction func = new SingleFreeCircularGaussian2DFunction(10);
-		float[] a = new float[] {
+		double[] a = new double[] {
 				// Background, Amplitude, Angle, Xpos, Ypos, Xwidth, yWidth
-				20f + rand.nextFloat() * 5f, 10f + rand.nextFloat() * 5f, 0, 5f + rand.nextFloat() * 2f,
-				5f + rand.nextFloat() * 2f, 5f + rand.nextFloat() * 2f, 5f + rand.nextFloat() * 2f };
-		float[] dyda = new float[a.length];
+				20 + rand.nextDouble() * 5, 10 + rand.nextDouble() * 5, 0, 5 + rand.nextDouble() * 2,
+				5 + rand.nextDouble() * 2, 5 + rand.nextDouble() * 2, 5 + rand.nextDouble() * 2 };
 		int[] x = new int[100];
-		float[] y = new float[100];
+		double[] y = new double[100];
 		func.initialise(a);
 		for (int i = 0; i < x.length; i++)
 		{
 			// Add random noise
-			y[i] = func.eval(i, dyda) + ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() * 5f : rand.nextFloat() * 5f);
+			y[i] = func.eval(i) + ((rand.nextDouble() < 0.5) ? -rand.nextDouble() * 5 : rand.nextDouble() * 5);
 		}
 
 		// Randomise parameters
 		for (int i = 0; i < a.length; i++)
-			a[i] += (rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat();
+			a[i] += (rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble();
 
 		// Compute the Hessian and parameter gradient vector
 		GradientCalculator calc = new GradientCalculator(6);
@@ -374,7 +373,7 @@ public class SolverSpeedTest
 		calc.findLinearised(y.length, y, a, alpha2, beta2, func);
 
 		// Update the Hessian using a lambda shift
-		float lambda = 1.001f;
+		double lambda = 1.001;
 		for (int i = 0; i < alpha2.length; i++)
 			alpha2[i][i] *= lambda;
 

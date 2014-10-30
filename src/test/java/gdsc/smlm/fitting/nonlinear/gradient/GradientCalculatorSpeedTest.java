@@ -27,13 +27,13 @@ public class GradientCalculatorSpeedTest
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
-	float Background = 20;
-	float Amplitude = 10;
-	float Angle = 0;
-	float Xpos = 5;
-	float Ypos = 5;
-	float Xwidth = 5;
-	float Ywidth = 5;
+	double Background = 20;
+	double Amplitude = 10;
+	double Angle = 0;
+	double Xpos = 5;
+	double Ypos = 5;
+	double Xwidth = 5;
+	double Ywidth = 5;
 
 	Random rand;
 
@@ -121,8 +121,8 @@ public class GradientCalculatorSpeedTest
 		double[][] alpha2 = new double[nparams][nparams];
 		double[] beta2 = new double[nparams];
 
-		ArrayList<float[]> paramsList = new ArrayList<float[]>(iter);
-		ArrayList<float[]> yList = new ArrayList<float[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
 		int[] x = createData(1, iter, paramsList, yList);
 
@@ -180,8 +180,8 @@ public class GradientCalculatorSpeedTest
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
 
-		ArrayList<float[]> paramsList = new ArrayList<float[]>(iter);
-		ArrayList<float[]> yList = new ArrayList<float[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
 		int[] x = createData(1, iter, paramsList, yList);
 
@@ -219,8 +219,8 @@ public class GradientCalculatorSpeedTest
 		double[][] alpha = new double[7][7];
 		double[] beta = new double[7];
 
-		ArrayList<float[]> paramsList = new ArrayList<float[]>(iter);
-		ArrayList<float[]> yList = new ArrayList<float[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
 
 		int[] x = createData(1, iter, paramsList, yList);
 
@@ -259,61 +259,61 @@ public class GradientCalculatorSpeedTest
 	 *            set on output
 	 * @return
 	 */
-	private float[] floatCreateGaussianData(int npeaks, float[] params)
+	private double[] doubleCreateGaussianData(int npeaks, double[] params)
 	{
 		int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
 		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth);
-		params[0] = Background + rand.nextFloat() * 5f;
+		params[0] = Background + rand.nextDouble() * 5;
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{
-			params[j] = Amplitude + rand.nextFloat() * 5f;
-			params[j + 1] = 0f; //(float) (Math.PI / 4.0); // Angle
-			params[j + 2] = Xpos + rand.nextFloat() * 2f;
-			params[j + 3] = Ypos + rand.nextFloat() * 2f;
-			params[j + 4] = Xwidth + rand.nextFloat() * 2f;
+			params[j] = Amplitude + rand.nextDouble() * 5;
+			params[j + 1] = 0; //(double) (Math.PI / 4.0); // Angle
+			params[j + 2] = Xpos + rand.nextDouble() * 2;
+			params[j + 3] = Ypos + rand.nextDouble() * 2;
+			params[j + 4] = Xwidth + rand.nextDouble() * 2;
 			params[j + 5] = params[j + 4];
 		}
 
-		float[] dy_da = new float[params.length];
-		float[] y = new float[n];
+		double[] dy_da = new double[params.length];
+		double[] y = new double[n];
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
 		{
 			// Add random noise
-			y[i] = func.eval(i, dy_da) + ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() * 5f : rand.nextFloat() * 5f);
+			y[i] = func.eval(i, dy_da) + ((rand.nextDouble() < 0.5) ? -rand.nextDouble() * 5 : rand.nextDouble() * 5);
 		}
 
 		// Randomise only the necessary parameters (i.e. not angle and X & Y widths should be the same)
-		params[0] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
+		params[0] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{
-			params[j + 1] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
-			params[j + 3] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
-			params[j + 4] += ((rand.nextFloat() < 0.5f) ? -rand.nextFloat() : rand.nextFloat());
+			params[j + 1] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
+			params[j + 3] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
+			params[j + 4] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
 			params[j + 5] = params[j + 4];
 		}
 
 		return y;
 	}
 
-	protected int[] createData(int npeaks, int iter, ArrayList<float[]> paramsList, ArrayList<float[]> yList)
+	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
 		int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			float[] params = new float[1 + 6 * npeaks];
-			float[] y = floatCreateGaussianData(npeaks, params);
+			double[] params = new double[1 + 6 * npeaks];
+			double[] y = doubleCreateGaussianData(npeaks, params);
 			paramsList.add(params);
 			yList.add(y);
 		}
 		return x;
 	}
 
-	protected ArrayList<double[]> copyList(ArrayList<float[]> paramsList)
+	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
 		ArrayList<double[]> params2List = new ArrayList<double[]>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
@@ -323,7 +323,7 @@ public class GradientCalculatorSpeedTest
 		return params2List;
 	}
 
-	private double[] copydouble(float[] d)
+	private double[] copydouble(double[] d)
 	{
 		double[] d2 = new double[d.length];
 		for (int i = 0; i < d.length; i++)

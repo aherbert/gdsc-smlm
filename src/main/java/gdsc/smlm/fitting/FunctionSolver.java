@@ -41,7 +41,7 @@ public interface FunctionSolver
 	 *            Estimate of the noise in the individual measurements
 	 * @return The fit status
 	 */
-	public FitStatus fit(final int n, final float[] y, final float[] y_fit, final float[] a, final float[] a_dev,
+	public FitStatus fit(final int n, final double[] y, final double[] y_fit, final double[] a, final double[] a_dev,
 			final double[] error, final double noise);
 
 	/**
@@ -77,7 +77,7 @@ public interface FunctionSolver
 	/**
 	 * Specifies if the function solver supports a bounded search (i.e. a search of parameter space within the total
 	 * allowed space of valid parameters, or the parameter constraints). If true then the bounds can be set before a
-	 * call to the {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
+	 * call to the {@link #fit(int, double[], double[], double[], double[], double[], double)} method.
 	 * 
 	 * @return True if the function solver supports a bounded search
 	 */
@@ -85,7 +85,7 @@ public interface FunctionSolver
 
 	/**
 	 * Specifies if the function solver supports constraints on the parameters. If true then the constraints can be set
-	 * before a call to the {@link #fit(int, float[], float[], float[], float[], double[], double)} method.
+	 * before a call to the {@link #fit(int, double[], double[], double[], double[], double[], double)} method.
 	 * <p>
 	 * Note that constraints are to be used to specify the values that are absolutely not allowed. They are not meant to
 	 * be as restrictive as the bounds for a solver that supports a bounded search. For example the constraints on a
@@ -105,7 +105,7 @@ public interface FunctionSolver
 	 * @param lower
 	 * @param upper
 	 */
-	public void setBounds(float[] lower, float[] upper);
+	public void setBounds(double[] lower, double[] upper);
 
 	/**
 	 * Set the constraints for each of the parameters. If a subset of the parameters are fitted then the bounds can be
@@ -114,5 +114,5 @@ public interface FunctionSolver
 	 * @param lower
 	 * @param upper
 	 */
-	public void setConstraints(float[] lower, float[] upper);
+	public void setConstraints(double[] lower, double[] upper);
 }

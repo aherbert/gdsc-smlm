@@ -83,9 +83,9 @@ public abstract class GaussianFunction implements NonLinearFunction
 	 *             if the noise model is null
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[], float[])
 	 */
-	public float eval(final int x, final float[] dyda, final float[] w) throws NullPointerException
+	public double eval(final int x, final double[] dyda, final double[] w) throws NullPointerException
 	{
-		final float value = eval(x, dyda);
+		final double value = eval(x, dyda);
 		//w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
 		// Just throw a null pointer exception if noiseModel is null
 		w[0] = noiseModel.variance(value);

@@ -20,7 +20,7 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -33,15 +33,15 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		gradientIndices = createGradientIndices(1, new SingleFixedGaussian2DFunction(1));
 	}
 
-	protected float width;
+	protected double width;
 
-	protected float background;
-	protected float amplitude;
-	protected float x0pos;
-	protected float x1pos;
+	protected double background;
+	protected double amplitude;
+	protected double x0pos;
+	protected double x1pos;
 
-	protected float aa;
-	protected float aa2;
+	protected double aa;
+	protected double aa2;
 
 	/**
 	 * Constructor
@@ -57,9 +57,9 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.function.NonLinearFunction#initialise(float[])
+	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
-	public void initialise(float[] a)
+	public void initialise(double[] a)
 	{
 		background = a[BACKGROUND];
 		amplitude = a[AMPLITUDE];
@@ -73,8 +73,8 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
 		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 		
-		aa = (float) (-0.5 / sx2);
-		aa2 = -2.0f * aa;
+		aa = -0.5 / sx2;
+		aa2 = -2.0 * aa;
 	}
 
 	/**
@@ -101,9 +101,9 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 	 *            Partial gradient of function with respect to each coefficient
 	 * @return The predicted value
 	 * 
-	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])
 	 */
-	public float eval(final int x, final float[] dyda)
+	public double eval(final int x, final double[] dyda)
 	{
 		// First parameter is the background level 
 		dyda[0] = 1.0f; // Gradient for a constant background is 1
@@ -115,21 +115,21 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		return background + gaussian(x0, x1, dyda);
 	}
 
-	private float gaussian(final int x0, final int x1, final float[] dy_da)
+	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final float h = amplitude;
+		final double h = amplitude;
 
-		final float dx = x0 - x0pos;
-		final float dy = x1 - x1pos;
+		final double dx = x0 - x0pos;
+		final double dy = x1 - x1pos;
 
-		//final float y = (float) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
+		//final double y = (double) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
 
 		// Calculate gradients
 		//dy_da[1] = y / h;
 
-		dy_da[1] = (float) (FastMath.exp(aa * (dx * dx + dy * dy)));;
-		final float y = h * dy_da[1];
-		final float yaa2 = y * aa2;
+		dy_da[1] = FastMath.exp(aa * (dx * dx + dy * dy));
+		final double y = h * dy_da[1];
+		final double yaa2 = y * aa2;
 		dy_da[2] = yaa2 * dx;
 		dy_da[3] = yaa2 * dy;
 
@@ -141,16 +141,16 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
 	 */
-	public float eval(final int x)
+	public double eval(final int x)
 	{
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
-		final float dx = x0 - x0pos;
-		final float dy = x1 - x1pos;
+		final double dx = x0 - x0pos;
+		final double dy = x1 - x1pos;
 
-		return background + amplitude * (float) FastMath.exp(aa * (dx * dx + dy * dy));
+		return background + amplitude * (double) FastMath.exp(aa * (dx * dx + dy * dy));
 	}
 
 	@Override
@@ -204,7 +204,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 	/**
 	 * @return the width
 	 */
-	public float getWidth()
+	public double getWidth()
 	{
 		return width;
 	}

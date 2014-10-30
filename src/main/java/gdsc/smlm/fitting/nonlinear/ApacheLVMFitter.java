@@ -48,9 +48,9 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, float[], float[], float[], float[], double[], double)
+	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, double[], double[], double[], double[], double[], double)
 	 */
-	public FitStatus fit(int n, float[] y, float[] y_fit, float[] a, float[] a_dev, double[] error, double noise)
+	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
 	{
 		numberOfFittedPoints = n;
 
@@ -72,22 +72,19 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 			// Create the target and weight arrays
 			final double[] yd = new double[n];
 			final double[] w = new double[n];
-			for (int i=0; i<n; i++)
+			for (int i = 0; i < n; i++)
 			{
 				yd[i] = y[i];
-				w[i] = 1;						
+				w[i] = 1;
 			}
-			
+
 			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
-			PointVectorValuePair optimum = optimizer.optimize(
-					new MaxIter(getMaxEvaluations()),
-					new MaxEval(Integer.MAX_VALUE),
-					new ModelFunctionJacobian(new ApacheMatrixWrapper(f, a, n)),
-					new ModelFunction(new ApacheVectorWrapper(f, a, n)),
-					new Target(yd),
-					new Weight(w),
-					new InitialGuess(initialSolution));
+			PointVectorValuePair optimum = optimizer
+					.optimize(new MaxIter(getMaxEvaluations()), new MaxEval(Integer.MAX_VALUE),
+							new ModelFunctionJacobian(new ApacheMatrixWrapper(f, a, n)), new ModelFunction(
+									new ApacheVectorWrapper(f, a, n)), new Target(yd), new Weight(w), new InitialGuess(
+									initialSolution));
 
 			final double[] parameters = optimum.getPoint();
 			setSolution(a, parameters);

@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting;
 
-import gdsc.smlm.fitting.logging.ConsoleLogger;
-
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;

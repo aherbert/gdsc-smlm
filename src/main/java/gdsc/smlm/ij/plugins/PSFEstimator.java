@@ -62,9 +62,9 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	private static TextWindow resultsWindow = null;
 
 	private int fitFunction = FitFunction.FREE.ordinal();
-	private float initialPeakStdDev0 = 1;
-	private float initialPeakStdDev1 = 1;
-	private float initialPeakAngle = 0;
+	private double initialPeakStdDev0 = 1;
+	private double initialPeakStdDev1 = 1;
+	private double initialPeakAngle = 0;
 
 	private GlobalSettings globalSettings;
 	private FitEngineConfiguration config;
@@ -227,9 +227,9 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 	private boolean readDialog(GenericDialog gd)
 	{
-		initialPeakStdDev0 = (float) gd.getNextNumber();
-		initialPeakStdDev1 = (float) gd.getNextNumber();
-		initialPeakAngle = (float) gd.getNextNumber();
+		initialPeakStdDev0 = gd.getNextNumber();
+		initialPeakStdDev1 = gd.getNextNumber();
+		initialPeakAngle = gd.getNextNumber();
 
 		settings.numberOfPeaks = (int) gd.getNextNumber();
 		settings.pValue = gd.getNextNumber();
@@ -255,9 +255,9 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
 
-		fitConfig.setCoordinateShiftFactor((float) gd.getNextNumber());
-		fitConfig.setSignalStrength((float) gd.getNextNumber());
-		fitConfig.setWidthFactor((float) gd.getNextNumber());
+		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
+		fitConfig.setSignalStrength(gd.getNextNumber());
+		fitConfig.setWidthFactor(gd.getNextNumber());
 
 		if (gd.invalidNumber())
 			return false;
@@ -345,7 +345,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		// Use the fit configuration to generate a Gaussian function to test what is being evaluated
 		GaussianFunction gf = config.getFitConfiguration().createGaussianFunction(1, 1,
-				new float[] { 0, 10, initialPeakAngle, 0, 0, initialPeakStdDev0, initialPeakStdDev1 });
+				new double[] { 0, 10, initialPeakAngle, 0, 0, initialPeakStdDev0, initialPeakStdDev1 });
 		createResultsWindow();
 		int iteration = 0;
 		ignore[ANGLE] = !gf.evaluatesAngle();

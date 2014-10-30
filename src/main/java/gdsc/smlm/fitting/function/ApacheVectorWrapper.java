@@ -17,7 +17,7 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 
 public class ApacheVectorWrapper extends ApacheFunctionWrapper implements MultivariateVectorFunction
 {
-	public ApacheVectorWrapper(NonLinearFunction fun, float[] a, int n)
+	public ApacheVectorWrapper(NonLinearFunction fun, double[] a, int n)
 	{
 		super(fun, a, n);
 	}

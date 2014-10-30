@@ -37,9 +37,9 @@ public class FitConfiguration implements Cloneable
 	private FitCriteria fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
 	private Logger log = null;
 	private double delta = 0.0001;
-	private float initialAngle = 0; // Radians
-	private float initialSD0 = 1;
-	private float initialSD1 = 1;
+	private double initialAngle = 0; // Radians
+	private double initialSD0 = 1;
+	private double initialSD1 = 1;
 	private boolean computeDeviations = false;
 	private FitSolver fitSolver = FitSolver.LVM;
 	private int minIterations = 0;
@@ -48,19 +48,19 @@ public class FitConfiguration implements Cloneable
 	private FitFunction fitFunction;
 	private int flags;
 	private boolean backgroundFitting = true;
-	private float coordinateShift = 1;
-	private float signalThreshold = 0;
-	private float signalStrength = 30;
-	private float precisionThreshold = 0;
+	private double coordinateShift = 1;
+	private double signalThreshold = 0;
+	private double signalStrength = 30;
+	private double precisionThreshold = 0;
 	private double nmPerPixel = 0;
-	private float gain = 0;
-	private float noise = 0;
-	private float widthFactor = 2;
+	private double gain = 0;
+	private double noise = 0;
+	private double widthFactor = 2;
 	private boolean fitValidation = true;
 	private double lambda = 10;
 	private boolean computeResiduals = true;
-	private float duplicateDistance = 0.5f;
-	private float bias;
+	private double duplicateDistance = 0.5f;
+	private double bias;
 	private int maxFunctionEvaluations = 1000;
 	private SearchMethod searchMethod = SearchMethod.BFGS;
 	private boolean gradientLineMinimisation = true;
@@ -89,7 +89,7 @@ public class FitConfiguration implements Cloneable
 	 * @param params
 	 *            The Gaussian parameters
 	 */
-	public void initialise(int npeaks, int maxx, float[] params)
+	public void initialise(int npeaks, int maxx, double[] params)
 	{
 		gaussianFunction = createGaussianFunction(npeaks, maxx, params);
 		stoppingCriteria = createStoppingCriteria(gaussianFunction, params);
@@ -104,7 +104,7 @@ public class FitConfiguration implements Cloneable
 	 *            The Gaussian parameters
 	 * @return The stopping criteria
 	 */
-	public StoppingCriteria createStoppingCriteria(GaussianFunction func, float[] params)
+	public StoppingCriteria createStoppingCriteria(GaussianFunction func, double[] params)
 	{
 		StoppingCriteria stoppingCriteria;
 		if (fitCriteria == FitCriteria.PARAMETERS)
@@ -141,16 +141,16 @@ public class FitConfiguration implements Cloneable
 	 * @param func
 	 * @param sc
 	 */
-	protected void addPeakRestrictions(GaussianFunction func, GaussianStoppingCriteria sc, float[] params)
+	protected void addPeakRestrictions(GaussianFunction func, GaussianStoppingCriteria sc, double[] params)
 	{
 		// TODO - Check if it is worth using this to stop fitting early or simply do it at the end.
 		sc.setMinimumAmplitude(0);
 
-		//		sc.setMinimumPosition(new float[] { 2, 2 });
-		//		sc.setMaximumPosition(new float[] { func.getDimensions()[0], func.getDimensions()[0] });
+		//		sc.setMinimumPosition(new double[] { 2, 2 });
+		//		sc.setMaximumPosition(new double[] { func.getDimensions()[0], func.getDimensions()[0] });
 		//
-		//		sc.setMinimumWidth(new float[] { 2, 2 });
-		//		sc.setMaximumWidth(new float[] { 12, 12 });
+		//		sc.setMinimumWidth(new double[] { 2, 2 });
+		//		sc.setMaximumWidth(new double[] { 12, 12 });
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class FitConfiguration implements Cloneable
 	 *            The Gaussian parameters
 	 * @return The function
 	 */
-	public GaussianFunction createGaussianFunction(int npeaks, int maxx, float[] params)
+	public GaussianFunction createGaussianFunction(int npeaks, int maxx, double[] params)
 	{
 		int flags = this.flags;
 
@@ -243,7 +243,7 @@ public class FitConfiguration implements Cloneable
 	 * @param initialAngle
 	 *            the initialAngle to set (in radians)
 	 */
-	public void setInitialAngle(float initialAngle)
+	public void setInitialAngle(double initialAngle)
 	{
 		this.initialAngle = initialAngle;
 	}
@@ -252,15 +252,15 @@ public class FitConfiguration implements Cloneable
 	 * @param initialAngle
 	 *            the initialAngle to set (in degrees)
 	 */
-	public void setInitialAngleD(float initialAngle)
+	public void setInitialAngleD(double initialAngle)
 	{
-		this.initialAngle = (float) (initialAngle * Math.PI / 180.0);
+		this.initialAngle = (double) (initialAngle * Math.PI / 180.0);
 	}
 
 	/**
 	 * @return the initialAngle (in radians)
 	 */
-	public float getInitialAngle()
+	public double getInitialAngle()
 	{
 		return initialAngle;
 	}
@@ -268,16 +268,16 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the initialAngle (in degrees)
 	 */
-	public float getInitialAngleD()
+	public double getInitialAngleD()
 	{
-		return (float) (initialAngle * 180.0 / Math.PI);
+		return (double) (initialAngle * 180.0 / Math.PI);
 	}
 
 	/**
 	 * @param initialPeakStdDev
 	 *            An estimate for the peak standard deviation used to initialise the fit for all dimensions
 	 */
-	public void setInitialPeakStdDev(float initialPeakStdDev)
+	public void setInitialPeakStdDev(double initialPeakStdDev)
 	{
 		setInitialPeakStdDev0(initialPeakStdDev);
 		setInitialPeakStdDev1(initialPeakStdDev);
@@ -287,7 +287,7 @@ public class FitConfiguration implements Cloneable
 	 * @param initialPeakStdDev0
 	 *            An estimate for the peak standard deviation used to initialise the fit for dimension 0
 	 */
-	public void setInitialPeakStdDev0(float initialPeakStdDev0)
+	public void setInitialPeakStdDev0(double initialPeakStdDev0)
 	{
 		this.initialSD0 = initialPeakStdDev0;
 	}
@@ -295,7 +295,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return An estimate for the peak standard deviation used to initialise the fit for dimension 0
 	 */
-	public float getInitialPeakStdDev0()
+	public double getInitialPeakStdDev0()
 	{
 		return initialSD0;
 	}
@@ -304,7 +304,7 @@ public class FitConfiguration implements Cloneable
 	 * @param initialPeakStdDev1
 	 *            An estimate for the peak standard deviation used to initialise the fit for dimension 1
 	 */
-	public void setInitialPeakStdDev1(float initialPeakStdDev1)
+	public void setInitialPeakStdDev1(double initialPeakStdDev1)
 	{
 		this.initialSD1 = initialPeakStdDev1;
 	}
@@ -312,7 +312,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return An estimate for the peak standard deviation used to initialise the fit for dimension 1
 	 */
-	public float getInitialPeakStdDev1()
+	public double getInitialPeakStdDev1()
 	{
 		return initialSD1;
 	}
@@ -504,7 +504,7 @@ public class FitConfiguration implements Cloneable
 
 	/**
 	 * @param fitValidation
-	 *            True if fit should be validated with {@link #validatePeak(int, float[], float[])}
+	 *            True if fit should be validated with {@link #validatePeak(int, double[], double[])}
 	 */
 	public void setFitValidation(boolean fitValidation)
 	{
@@ -523,7 +523,7 @@ public class FitConfiguration implements Cloneable
 	 * @param coordinateShift
 	 *            The maximum absolute coordinate shift for a good fit
 	 */
-	public void setCoordinateShift(float coordinateShift)
+	public void setCoordinateShift(double coordinateShift)
 	{
 		this.coordinateShift = coordinateShift;
 	}
@@ -531,7 +531,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the coordinateShift
 	 */
-	public float getCoordinateShift()
+	public double getCoordinateShift()
 	{
 		return coordinateShift;
 	}
@@ -540,11 +540,11 @@ public class FitConfiguration implements Cloneable
 	 * @param shiftFactor
 	 *            The maximum absolute coordinate shift for a good fit, relative to the largest peak width
 	 */
-	public void setCoordinateShiftFactor(float shiftFactor)
+	public void setCoordinateShiftFactor(double shiftFactor)
 	{
 		if (shiftFactor > 0)
 		{
-			final float widthMax = Maths.max(initialSD0, initialSD1);
+			final double widthMax = Maths.max(initialSD0, initialSD1);
 			setCoordinateShift(shiftFactor * widthMax);
 		}
 		else
@@ -556,9 +556,9 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the coordinateShift relative the the largest peak width
 	 */
-	public float getCoordinateShiftFactor()
+	public double getCoordinateShiftFactor()
 	{
-		final float widthMax = Maths.max(initialSD0, initialSD1);
+		final double widthMax = Maths.max(initialSD0, initialSD1);
 		return coordinateShift / widthMax;
 	}
 
@@ -567,7 +567,7 @@ public class FitConfiguration implements Cloneable
 	 *            The signal strength. Used to determine the signal strength for a good fit (signalThreshold = noise x
 	 *            signalStrength)
 	 */
-	public void setSignalStrength(float signalStrength)
+	public void setSignalStrength(double signalStrength)
 	{
 		this.signalStrength = signalStrength;
 		setSignalThreshold();
@@ -576,7 +576,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the signal strength
 	 */
-	public float getSignalStrength()
+	public double getSignalStrength()
 	{
 		return signalStrength;
 	}
@@ -585,7 +585,7 @@ public class FitConfiguration implements Cloneable
 	 * @return the precision threshold. Used to determine if the peak is a good fit. Requires that the image is
 	 *         calibrated
 	 */
-	public float getPrecisionThreshold()
+	public double getPrecisionThreshold()
 	{
 		return precisionThreshold;
 	}
@@ -594,7 +594,7 @@ public class FitConfiguration implements Cloneable
 	 * @param precisionThreshold
 	 *            the precisionThreshold to set
 	 */
-	public void setPrecisionThreshold(float precisionThreshold)
+	public void setPrecisionThreshold(double precisionThreshold)
 	{
 		this.precisionThreshold = precisionThreshold;
 	}
@@ -604,7 +604,7 @@ public class FitConfiguration implements Cloneable
 	 *            The image noise. Used to determine the signal strength for a good fit (signalThreshold = noise x
 	 *            signalStrength)
 	 */
-	public void setNoise(float noise)
+	public void setNoise(double noise)
 	{
 		this.noise = noise;
 		setSignalThreshold();
@@ -613,7 +613,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the image noise
 	 */
-	public float getNoise()
+	public double getNoise()
 	{
 		return noise;
 	}
@@ -627,7 +627,7 @@ public class FitConfiguration implements Cloneable
 	 * @param widthFactor
 	 *            The factor difference allowed between widths for a good fit
 	 */
-	public void setWidthFactor(float widthFactor)
+	public void setWidthFactor(double widthFactor)
 	{
 		if (widthFactor > 1)
 		{
@@ -642,7 +642,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the widthFactor
 	 */
-	public float getWidthFactor()
+	public double getWidthFactor()
 	{
 		return widthFactor;
 	}
@@ -700,7 +700,7 @@ public class FitConfiguration implements Cloneable
 	 *            The fitted peak parameters
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validateFit(int nPeaks, float[] initialParams, float[] peakParams)
+	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] peakParams)
 	{
 		for (int n = 0; n < nPeaks; n++)
 		{
@@ -721,7 +721,7 @@ public class FitConfiguration implements Cloneable
 	 *            The fitted peak parameters
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validateFit(float[] initialParams, float[] peakParams)
+	public FitStatus validateFit(double[] initialParams, double[] peakParams)
 	{
 		return validatePeak(0, initialParams, peakParams);
 	}
@@ -737,13 +737,13 @@ public class FitConfiguration implements Cloneable
 	 *            The fitted peak parameters
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validatePeak(int n, float[] initialParams, float[] peakParams)
+	public FitStatus validatePeak(int n, double[] initialParams, double[] peakParams)
 	{
 		final int offset = n * 6;
 		// Check spot movement
-		final float xShift = peakParams[Gaussian2DFunction.X_POSITION + offset] -
+		final double xShift = peakParams[Gaussian2DFunction.X_POSITION + offset] -
 				initialParams[Gaussian2DFunction.X_POSITION + offset];
-		final float yShift = peakParams[Gaussian2DFunction.Y_POSITION + offset] -
+		final double yShift = peakParams[Gaussian2DFunction.Y_POSITION + offset] -
 				initialParams[Gaussian2DFunction.Y_POSITION + offset];
 		if (Math.abs(xShift) > coordinateShift || Math.abs(yShift) > coordinateShift)
 		{
@@ -751,15 +751,15 @@ public class FitConfiguration implements Cloneable
 			{
 				log.info("Bad peak %d: Fitted coordinates moved (x=%g,y=%g)", n, xShift, yShift);
 			}
-			return setValidationResult(FitStatus.COORDINATES_MOVED, new float[] { xShift, yShift });
+			return setValidationResult(FitStatus.COORDINATES_MOVED, new double[] { xShift, yShift });
 		}
 
 		// Check signal threshold
-		float signal = 0;
+		double signal = 0;
 		if (signalStrength != 0)
 		{
 			// Signal = Amplitude * 2 * pi * sx * sy
-			final float factor = (float) (Math.PI * 2);
+			final double factor = (double) (Math.PI * 2);
 			signal = factor * peakParams[Gaussian2DFunction.AMPLITUDE + offset] *
 					peakParams[Gaussian2DFunction.X_SD + offset] * peakParams[Gaussian2DFunction.Y_SD + offset];
 
@@ -776,9 +776,9 @@ public class FitConfiguration implements Cloneable
 		}
 
 		// Check widths
-		float xFactor = getFactor(peakParams[Gaussian2DFunction.X_SD + offset], initialParams[Gaussian2DFunction.X_SD +
+		double xFactor = getFactor(peakParams[Gaussian2DFunction.X_SD + offset], initialParams[Gaussian2DFunction.X_SD +
 				offset]);
-		float yFactor = getFactor(peakParams[Gaussian2DFunction.Y_SD + offset], initialParams[Gaussian2DFunction.Y_SD +
+		double yFactor = getFactor(peakParams[Gaussian2DFunction.Y_SD + offset], initialParams[Gaussian2DFunction.Y_SD +
 				offset]);
 		if (xFactor > widthFactor || yFactor > widthFactor)
 		{
@@ -792,7 +792,7 @@ public class FitConfiguration implements Cloneable
 						(peakParams[Gaussian2DFunction.Y_SD + offset] > initialParams[Gaussian2DFunction.Y_SD + offset]) ? yFactor
 								: -yFactor);
 			}
-			return setValidationResult(FitStatus.WIDTH_DIVERGED, new float[] { xFactor, yFactor });
+			return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] { xFactor, yFactor });
 		}
 
 		// Check precision
@@ -800,11 +800,11 @@ public class FitConfiguration implements Cloneable
 		{
 			if (signal == 0)
 			{
-				final float factor = (float) (Math.PI * 2);
+				final double factor = (double) (Math.PI * 2);
 				signal = factor * peakParams[Gaussian2DFunction.AMPLITUDE + offset] *
 						peakParams[Gaussian2DFunction.X_SD + offset] * peakParams[Gaussian2DFunction.Y_SD + offset];
 			}
-			float sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD + offset]) * 0.5f;
+			double sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD + offset]) * 0.5f;
 			double p = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain);
 			if (p > precisionThreshold)
 			{
@@ -826,7 +826,7 @@ public class FitConfiguration implements Cloneable
 	 * @param g
 	 * @return
 	 */
-	private static float getFactor(float f, float g)
+	private static double getFactor(double f, double g)
 	{
 		if (f > g)
 			return f / g;
@@ -871,7 +871,7 @@ public class FitConfiguration implements Cloneable
 	 * @param duplicateDistance
 	 *            The distance within which spots are considered duplicates
 	 */
-	public void setDuplicateDistance(final float duplicateDistance)
+	public void setDuplicateDistance(final double duplicateDistance)
 	{
 		this.duplicateDistance = duplicateDistance;
 	}
@@ -879,7 +879,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return The distance within which spots are considered duplicates
 	 */
-	public float getDuplicateDistance()
+	public double getDuplicateDistance()
 	{
 		return duplicateDistance;
 	}
@@ -950,7 +950,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the gain
 	 */
-	public float getGain()
+	public double getGain()
 	{
 		return gain;
 	}
@@ -959,7 +959,7 @@ public class FitConfiguration implements Cloneable
 	 * @param gain
 	 *            the gain to use when evaluating a fitted peak's localisation precision
 	 */
-	public void setGain(float gain)
+	public void setGain(double gain)
 	{
 		this.gain = gain;
 	}
@@ -986,7 +986,7 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * @return the camera bias (used for maximum likelihood estimation)
 	 */
-	public float getBias()
+	public double getBias()
 	{
 		return bias;
 	}
@@ -996,7 +996,7 @@ public class FitConfiguration implements Cloneable
 	 *            the camera bias (used for maximum likelihood estimation to evaluate the correct value of the the
 	 *            observed count)
 	 */
-	public void setBias(float bias)
+	public void setBias(double bias)
 	{
 		this.bias = bias;
 	}

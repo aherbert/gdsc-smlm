@@ -1596,10 +1596,10 @@ public class TraceMolecules implements PlugIn
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
 
-		fitConfig.setCoordinateShiftFactor((float) gd.getNextNumber());
-		fitConfig.setSignalStrength((float) gd.getNextNumber());
-		fitConfig.setWidthFactor((float) gd.getNextNumber());
-		fitConfig.setPrecisionThreshold((float) gd.getNextNumber());
+		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
+		fitConfig.setSignalStrength(gd.getNextNumber());
+		fitConfig.setWidthFactor(gd.getNextNumber());
+		fitConfig.setPrecisionThreshold(gd.getNextNumber());
 
 		// Check arguments
 		try
@@ -1648,7 +1648,7 @@ public class TraceMolecules implements PlugIn
 		//          find the correct spot using Euclidian distance.
 
 		// Set up the limits
-		float stdDev = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+		final double stdDev = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 		float fitWidth = (float) (stdDev * config.getFitting() * ((fitOnlyCentroid) ? 1 : expansionFactor));
 
 		IJ.showStatus("Refitting traces ...");
@@ -1753,14 +1753,14 @@ public class TraceMolecules implements PlugIn
 				if (fitResult == null)
 				{
 					final float[] centre = traces[id].getCentroid();
-					float minD = Float.POSITIVE_INFINITY;
+					double minD = Double.POSITIVE_INFINITY;
 					for (int n = 0; n < indices.length; n++)
 					{
 						// Since the fit has failed we use the initial parameters
-						float[] params = job.getFitResult(n).getInitialParameters();
-						final float dx = params[Gaussian2DFunction.X_POSITION] - centre[0];
-						final float dy = params[Gaussian2DFunction.X_POSITION] - centre[1];
-						float d = dx * dx + dy * dy;
+						final double[] params = job.getFitResult(n).getInitialParameters();
+						final double dx = params[Gaussian2DFunction.X_POSITION] - centre[0];
+						final double dy = params[Gaussian2DFunction.X_POSITION] - centre[1];
+						final double d = dx * dx + dy * dy;
 						if (minD > d)
 						{
 							minD = d;

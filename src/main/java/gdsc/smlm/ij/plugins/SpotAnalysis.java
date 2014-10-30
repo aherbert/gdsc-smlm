@@ -990,7 +990,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 	{
 		if (onFrames.isEmpty() || !updated)
 			return;
-		
+
 		createResultsWindow();
 
 		id++;
@@ -1054,7 +1054,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			if (!gd.wasOKed())
 				return;
 		}
-		
+
 		// For all spots in the results window, get the ID and then save the traces to memory
 		if (!resultsWindowShowing())
 			return;
@@ -1374,7 +1374,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			drawProfiles();
 
 			// Fit the PSF using a Gaussian
-			float[] data = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
+			float[] data2 = (float[]) rawImp.getImageStack().getProcessor(slice).getPixels();
+			double[] data = Utils.toDouble(data2);
 			FitConfiguration fitConfiguration = new FitConfiguration();
 			fitConfiguration.setFitFunction(FitFunction.FIXED);
 			fitConfiguration.setBackgroundFitting(true);
@@ -1383,10 +1384,10 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			fitConfiguration.setComputeResiduals(false);
 			fitConfiguration.setComputeDeviations(false);
 			Gaussian2DFitter gf = new Gaussian2DFitter(fitConfiguration);
-			float[] params = new float[7];
-			float psfWidth = Float.parseFloat(widthTextField.getText());
-			params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];
-			params[Gaussian2DFunction.AMPLITUDE] = (float) (gain * signal / (2 * Math.PI * psfWidth * psfWidth));
+			double[] params = new double[7];
+			double psfWidth = Double.parseDouble(widthTextField.getText());
+			params[Gaussian2DFunction.BACKGROUND] = smoothMean[slice - 1];
+			params[Gaussian2DFunction.AMPLITUDE] = (gain * signal / (2 * Math.PI * psfWidth * psfWidth));
 			params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
 			params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
@@ -1410,8 +1411,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			if (blurImp == null)
 				return;
 
-			data = (float[]) blurImp.getImageStack().getProcessor(slice).getPixels();
-			params = new float[7];
+			data2 = (float[]) blurImp.getImageStack().getProcessor(slice).getPixels();
+			data = Utils.toDouble(data2);
+			params = new double[7];
 			//float psfWidth = Float.parseFloat(widthTextField.getText());
 			params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];
 			params[Gaussian2DFunction.AMPLITUDE] = (float) (gain * signal / (2 * Math.PI * psfWidth * psfWidth));

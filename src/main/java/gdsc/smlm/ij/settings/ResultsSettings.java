@@ -26,8 +26,8 @@ public class ResultsSettings
 	private ResultsImage resultsImage = ResultsImage.LOCALISATIONS;
 	public boolean weightedImage = true;
 	public boolean equalisedImage = true;
-	public float precision = 0.3f;
-	public float imageScale = 8;
+	public double precision = 0.3;
+	public double imageScale = 8;
 	public int imageRollingWindow = 0;
 	public String resultsDirectory = null;
 	public String resultsFilename = null;

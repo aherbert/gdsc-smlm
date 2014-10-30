@@ -31,7 +31,7 @@ import java.util.Arrays;
 public class PoissonLikelihoodFunction
 {
 	private NonLinearFunction f;
-	private float[] a, data;
+	private double[] a, data;
 	private int n;
 
 	private double lastScore;
@@ -52,7 +52,7 @@ public class PoissonLikelihoodFunction
 	 * @param n
 	 *            The number of observed values
 	 */
-	public PoissonLikelihoodFunction(NonLinearFunction f, float[] a, float[] k, int n)
+	public PoissonLikelihoodFunction(NonLinearFunction f, double[] a, double[] k, int n)
 	{
 		this.f = f;
 		this.a = Arrays.copyOf(a, a.length);
@@ -69,7 +69,7 @@ public class PoissonLikelihoodFunction
 	{
 		int[] gradientIndices = f.gradientIndices();
 		for (int i = 0; i < gradientIndices.length; i++)
-			a[gradientIndices[i]] = (float) variables[i];
+			a[gradientIndices[i]] = variables[i];
 		f.initialise(a);
 	}
 
@@ -87,6 +87,7 @@ public class PoissonLikelihoodFunction
 		if (sameVariables(variables))
 			return lastScore;
 
+		lastVariables = null;
 		initialiseFunction(variables);
 
 		// Compute the negative log-likelihood to be minimised
@@ -155,7 +156,7 @@ public class PoissonLikelihoodFunction
 		double ll = 0;
 		for (int j = 0; j < variables.length; j++)
 			gradient[j] = 0;
-		float[] dl_da = new float[variables.length];
+		double[] dl_da = new double[variables.length];
 		for (int i = 0; i < n; i++)
 		{
 			final double l = f.eval(i, dl_da);
@@ -168,10 +169,7 @@ public class PoissonLikelihoodFunction
 				// Since ln(0) -> -Infinity
 				return Double.POSITIVE_INFINITY;
 			}
-			else
-			{
-				ll += l - k * Math.log(l);
-			}
+			ll += l - k * Math.log(l);
 
 			// Continue to work out the gradient since this does not involve logs.
 			// Note: if l==0 then we get divide by zero and a NaN value
@@ -201,7 +199,7 @@ public class PoissonLikelihoodFunction
 
 		for (int j = 0; j < variables.length; j++)
 			gradient[j] = 0;
-		float[] dl_da = new float[variables.length];
+		double[] dl_da = new double[variables.length];
 		final double l = f.eval(i, dl_da);
 
 		// Check for zero and return the worst likelihood score

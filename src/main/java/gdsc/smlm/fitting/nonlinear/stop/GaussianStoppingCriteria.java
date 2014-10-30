@@ -35,11 +35,11 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	protected int dimensions;
 	protected GaussianFunction func;
 
-	private float minimumAmplitude = Float.NEGATIVE_INFINITY;
-	private float[] minimumPosition = null;
-	private float[] maximumPosition = null;
-	private float[] minimumSD = null;
-	private float[] maximumSD = null;
+	private double minimumAmplitude = Float.NEGATIVE_INFINITY;
+	private double[] minimumPosition = null;
+	private double[] maximumPosition = null;
+	private double[] minimumSD = null;
+	private double[] maximumSD = null;
 
 	/**
 	 * @param func
@@ -55,10 +55,10 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, float[])
+	 * @see gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, double[])
 	 */
 	@Override
-	public void evaluate(double oldError, double newError, float[] a)
+	public void evaluate(double oldError, double newError, double[] a)
 	{
 		StringBuffer sb = logParameters(oldError, newError, a);
 
@@ -115,7 +115,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 *            The parameters
 	 * @return The string
 	 */
-	protected StringBuffer logParameters(double oldError, double newError, float[] a)
+	protected StringBuffer logParameters(double oldError, double newError, double[] a)
 	{
 		if (log != null)
 		{
@@ -141,7 +141,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 		return null;
 	}
 
-	protected boolean noCoordinateChange(float[] a)
+	protected boolean noCoordinateChange(double[] a)
 	{
 		for (int i = 0; i < peaks; i++)
 		{
@@ -155,7 +155,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 		return true;
 	}
 
-	private boolean invalidCoordinates(float[] a)
+	private boolean invalidCoordinates(double[] a)
 	{
 		for (int i = 0; i < peaks; i++)
 		{
@@ -194,7 +194,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param paramIndex
 	 * @return
 	 */
-	private boolean isBelow(float[] threshold, float[] params, int paramIndex)
+	private boolean isBelow(double[] threshold, double[] params, int paramIndex)
 	{
 		if (threshold != null)
 		{
@@ -215,7 +215,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param paramIndex
 	 * @return
 	 */
-	private boolean isAbove(float[] threshold, float[] params, int paramIndex)
+	private boolean isAbove(double[] threshold, double[] params, int paramIndex)
 	{
 		if (threshold != null)
 		{
@@ -251,7 +251,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param minimumAmplitude
 	 *            the minimum amplitude
 	 */
-	public void setMinimumAmplitude(float minimumAmplitude)
+	public void setMinimumAmplitude(double minimumAmplitude)
 	{
 		if (func.evaluatesAmplitude())
 			this.minimumAmplitude = minimumAmplitude;
@@ -260,7 +260,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	/**
 	 * @return the minimum amplitude
 	 */
-	public float getMinimumAmplitude()
+	public double getMinimumAmplitude()
 	{
 		return minimumAmplitude;
 	}
@@ -269,7 +269,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param minimumPosition
 	 *            the minimum position for each dimension
 	 */
-	public void setMinimumPosition(float[] minimumPosition)
+	public void setMinimumPosition(double[] minimumPosition)
 	{
 		if (func.evaluatesPosition())
 			this.minimumPosition = checkArray(minimumPosition);
@@ -278,7 +278,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	/**
 	 * @return the minimum position for each dimension
 	 */
-	public float[] getMinimumPosition()
+	public double[] getMinimumPosition()
 	{
 		return minimumPosition;
 	}
@@ -287,7 +287,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param maximumPosition
 	 *            the maximum position for each dimension
 	 */
-	public void setMaximumPosition(float[] maximumPosition)
+	public void setMaximumPosition(double[] maximumPosition)
 	{
 		if (func.evaluatesPosition())
 			this.maximumPosition = checkArray(maximumPosition);
@@ -296,7 +296,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	/**
 	 * @return the maximum position for each dimension
 	 */
-	public float[] getMaximumPosition()
+	public double[] getMaximumPosition()
 	{
 		return maximumPosition;
 	}
@@ -305,7 +305,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param minimumSD
 	 *            the minimum SD for each dimension
 	 */
-	public void setMinimumSD(float[] minimumSD)
+	public void setMinimumSD(double[] minimumSD)
 	{
 		if (func.evaluatesSD0())
 			this.minimumSD = checkArray(minimumSD);
@@ -314,7 +314,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	/**
 	 * @return the minimum SD for each dimension
 	 */
-	public float[] getMinimumSD()
+	public double[] getMinimumSD()
 	{
 		return minimumSD;
 	}
@@ -323,7 +323,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	 * @param maximumSD
 	 *            the maximum SD for each dimension
 	 */
-	public void setMaximumSD(float[] maximumSD)
+	public void setMaximumSD(double[] maximumSD)
 	{
 		if (func.evaluatesSD0())
 			this.maximumSD = checkArray(maximumSD);
@@ -332,12 +332,12 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	/**
 	 * @return the maximum SD for each dimension
 	 */
-	public float[] getMaximumSD()
+	public double[] getMaximumSD()
 	{
 		return maximumSD;
 	}
 
-	private float[] checkArray(float[] array)
+	private double[] checkArray(double[] array)
 	{
 		return (array == null || array.length != func.getNDimensions()) ? null : array;
 	}

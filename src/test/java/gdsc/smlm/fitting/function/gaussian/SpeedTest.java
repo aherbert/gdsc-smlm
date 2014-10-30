@@ -4,11 +4,10 @@ import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.fitting.function.GaussianFunction;
 import gdsc.smlm.fitting.function.GaussianFunctionFactory;
-import gdsc.smlm.fitting.function.gaussian.EllipticalGaussian2DFunction;
-import gdsc.smlm.fitting.utils.FloatEquality;
+import gdsc.smlm.fitting.utils.DoubleEquality;
 
-import java.util.Random;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
@@ -25,17 +24,17 @@ public class SpeedTest
 
 	private int MAX_ITER = 20000;
 	private int blockWidth = 10;
-	private float Background = 20;
-	private float Amplitude = 10;
-	private float Xpos = 5;
-	private float Ypos = 5;
-	private float Xwidth = 5;
+	private double Background = 20;
+	private double Amplitude = 10;
+	private double Xpos = 5;
+	private double Ypos = 5;
+	private double Xwidth = 5;
 	private Random rand;
-	private static ArrayList<float[]> paramsListSinglePeak = null;
-	private static ArrayList<float[]> yListSinglePeak;
+	private static ArrayList<double[]> paramsListSinglePeak = null;
+	private static ArrayList<double[]> yListSinglePeak;
 	private static int[] x;
-	private static ArrayList<float[]> paramsListDoublePeak;
-	private static ArrayList<float[]> yListDoublePeak;
+	private static ArrayList<double[]> paramsListDoublePeak;
+	private static ArrayList<double[]> yListDoublePeak;
 
 	public SpeedTest()
 	{
@@ -46,11 +45,11 @@ public class SpeedTest
 
 		if (paramsListSinglePeak == null)
 		{
-			paramsListSinglePeak = new ArrayList<float[]>(MAX_ITER);
-			yListSinglePeak = new ArrayList<float[]>(MAX_ITER);
+			paramsListSinglePeak = new ArrayList<double[]>(MAX_ITER);
+			yListSinglePeak = new ArrayList<double[]>(MAX_ITER);
 			x = createData(1, MAX_ITER, paramsListSinglePeak, yListSinglePeak);
-			paramsListDoublePeak = new ArrayList<float[]>(MAX_ITER);
-			yListDoublePeak = new ArrayList<float[]>(MAX_ITER);
+			paramsListDoublePeak = new ArrayList<double[]>(MAX_ITER);
+			yListDoublePeak = new ArrayList<double[]>(MAX_ITER);
 			x = createData(2, MAX_ITER, paramsListDoublePeak, yListDoublePeak);
 		}
 	}
@@ -203,16 +202,16 @@ public class SpeedTest
 
 	void f1ComputesSameAsf2(int npeaks, int flags1, int flags2)
 	{
-		FloatEquality eq = new FloatEquality(2, 1e-10f);
+		DoubleEquality eq = new DoubleEquality(2, 1e-10);
 		int iter = 2000;
-		ArrayList<float[]> paramsList2 = (npeaks == 1) ? copyList(paramsListSinglePeak, iter) : copyList(
+		ArrayList<double[]> paramsList2 = (npeaks == 1) ? copyList(paramsListSinglePeak, iter) : copyList(
 				paramsListDoublePeak, iter);
 
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, flags1);
 		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, flags2);
 
-		float[] dyda1 = new float[1 + npeaks * 6];
-		float[] dyda2 = new float[1 + npeaks * 6];
+		double[] dyda1 = new double[1 + npeaks * 6];
+		double[] dyda2 = new double[1 + npeaks * 6];
 
 		int[] gradientIndices = f1.gradientIndices();
 		int[] g1 = new int[gradientIndices.length];
@@ -237,8 +236,8 @@ public class SpeedTest
 
 			for (int j = 0; j < x.length; j++)
 			{
-				float y1 = f1.eval(x[j], dyda1);
-				float y2 = f2.eval(x[j], dyda2);
+				double y1 = f1.eval(x[j], dyda1);
+				double y2 = f2.eval(x[j], dyda2);
 
 				Assert.assertTrue("Not same y[" + j + "] @ " + i + " " + y1 + " != " + y2,
 						eq.almostEqualComplement(y1, y2));
@@ -253,14 +252,14 @@ public class SpeedTest
 	void f1FasterThanf2(int npeaks, int flags1, int flags2)
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
-		
-		ArrayList<float[]> paramsList2 = (npeaks == 1) ? paramsListSinglePeak : paramsListDoublePeak;
+
+		ArrayList<double[]> paramsList2 = (npeaks == 1) ? paramsListSinglePeak : paramsListDoublePeak;
 
 		// Use the full list of parameters to build the functions
 		GaussianFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, flags1);
 		GaussianFunction f2 = GaussianFunctionFactory.create2D(npeaks, blockWidth, flags2);
 
-		float[] dyda = new float[1 + npeaks * 6];
+		double[] dyda = new double[1 + npeaks * 6];
 
 		for (int i = 0; i < paramsList2.size(); i++)
 		{
@@ -309,7 +308,7 @@ public class SpeedTest
 	 *            set on output
 	 * @return
 	 */
-	private float[] floatCreateGaussianData(int npeaks, float[] params)
+	private double[] doubleCreateGaussianData(int npeaks, double[] params)
 	{
 		int n = blockWidth * blockWidth;
 
@@ -319,15 +318,15 @@ public class SpeedTest
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{
 			params[j] = Amplitude + rand.nextFloat() * 5f;
-			params[j + 1] = 0f; //(float) (Math.PI / 4.0); // Angle
+			params[j + 1] = 0f; //(double) (Math.PI / 4.0); // Angle
 			params[j + 2] = Xpos + rand.nextFloat() * 2f;
 			params[j + 3] = Ypos + rand.nextFloat() * 2f;
 			params[j + 4] = Xwidth + rand.nextFloat() * 2f;
 			params[j + 5] = params[j + 4];
 		}
 
-		float[] dy_da = new float[params.length];
-		float[] y = new float[n];
+		double[] dy_da = new double[params.length];
+		double[] y = new double[n];
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
 		{
@@ -348,26 +347,26 @@ public class SpeedTest
 		return y;
 	}
 
-	protected int[] createData(int npeaks, int iter, ArrayList<float[]> paramsList, ArrayList<float[]> yList)
+	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
 		int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
 			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
-			float[] params = new float[1 + 6 * npeaks];
-			float[] y = floatCreateGaussianData(npeaks, params);
+			double[] params = new double[1 + 6 * npeaks];
+			double[] y = doubleCreateGaussianData(npeaks, params);
 			paramsList.add(params);
 			yList.add(y);
 		}
 		return x;
 	}
 
-	protected ArrayList<float[]> copyList(ArrayList<float[]> paramsList, int iter)
+	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList, int iter)
 	{
 		iter = FastMath.min(iter, paramsList.size());
 
-		ArrayList<float[]> params2List = new ArrayList<float[]>(iter);
+		ArrayList<double[]> params2List = new ArrayList<double[]>(iter);
 		for (int i = 0; i < iter; i++)
 		{
 			params2List.add(paramsList.get(i));

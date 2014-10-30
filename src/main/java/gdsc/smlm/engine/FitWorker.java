@@ -25,6 +25,7 @@ import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.fitting.function.GaussianFunction;
 import gdsc.smlm.fitting.logging.Logger;
+import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
@@ -111,11 +112,11 @@ public class FitWorker implements Runnable
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
 		gf = new Gaussian2DFitter(fitConfig);
-		duplicateDistance2 = fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance();
+		duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		calculateNoise = config.getFitConfiguration().getNoise() <= 0;
 		if (!calculateNoise)
 		{
-			noise = config.getFitConfiguration().getNoise();
+			noise = (float) config.getFitConfiguration().getNoise();
 		}
 
 		id = ID;
@@ -277,10 +278,10 @@ public class FitWorker implements Runnable
 
 		if (params != null && params.fitTask == FitTask.MAXIMA_IDENITIFICATION)
 		{
-			final float sd0 = fitConfig.getInitialPeakStdDev0();
-			final float sd1 = fitConfig.getInitialPeakStdDev1();
+			final float sd0 = (float) fitConfig.getInitialPeakStdDev0();
+			final float sd1 = (float) fitConfig.getInitialPeakStdDev1();
 			ImageExtractor ie = new ImageExtractor(data, width, height);
-			float[] region = null;
+			double[] region = null;
 			for (int n = 0; n < maxIndices.length; n++)
 			{
 				// Find the background using the perimeter of the data.
@@ -290,13 +291,13 @@ public class FitWorker implements Runnable
 				final int y = ycoord[n];
 				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
-				float b = Gaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
-						new float[] { data[maxIndices[n]] });
+				final float b = (float) Gaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
+						new double[] { data[maxIndices[n]] });
 
 				// Offset the coords to the centre of the pixel. Note the bounds will be added later.
 				// Subtract the background to get the amplitude estimate.
-				float amplitude = smoothData[maxIndices[n]] - ((differenceOfSmoothing) ? 0 : b);
-				float[] peakParams = new float[] { b, amplitude, 0, xcoord[n] + 0.5f, ycoord[n] + 0.5f, sd0, sd1 };
+				final float amplitude = smoothData[maxIndices[n]] - ((differenceOfSmoothing) ? 0 : b);
+				final float[] peakParams = new float[] { b, amplitude, 0, xcoord[n] + 0.5f, ycoord[n] + 0.5f, sd0, sd1 };
 				sliceResults.add(createResult(bounds.x + xcoord[n], bounds.y + ycoord[n], data[maxIndices[n]], 0,
 						noise, peakParams, null));
 			}
@@ -320,7 +321,7 @@ public class FitWorker implements Runnable
 
 			// Extract each peak and fit individually until N consecutive failures
 			ImageExtractor ie = new ImageExtractor(data, width, height);
-			float[] region = null;
+			double[] region = null;
 			for (int n = 0, failures = 0; n < maxIndices.length && !finished; n++)
 			{
 				failures++;
@@ -340,14 +341,15 @@ public class FitWorker implements Runnable
 				// Check fit result
 				if (fitResult.getStatus() == FitStatus.OK)
 				{
-					float[] peakParams = fitResult.getParameters();
+					double[] peakParams = fitResult.getParameters();
 					convertParameters(peakParams);
 
-					float[] peakParamsDev = null;
+					double[] peakParamsDev = null;
 					if (fitConfig.isComputeDeviations())
 					{
 						peakParamsDev = fitResult.getParameterStdDev();
-						convertParameters(peakParamsDev);
+						if (peakParamsDev != null)
+							convertParameters(peakParamsDev);
 					}
 
 					int npeaks = addResults(sliceResults, n, x, y, bounds, regionBounds, peakParams, peakParamsDev,
@@ -500,7 +502,7 @@ public class FitWorker implements Runnable
 	}
 
 	private int addResults(LinkedList<PeakResult> peakResults, int n, int x, int y, Rectangle bounds,
-			Rectangle regionBounds, float[] peakParams, float[] peakParamsDev, float value, double error, float noise)
+			Rectangle regionBounds, double[] peakParams, double[] peakParamsDev, float value, double error, float noise)
 	{
 		x += bounds.x;
 		y += bounds.y;
@@ -514,9 +516,10 @@ public class FitWorker implements Runnable
 
 		if (npeaks == 1)
 		{
-			peakParams[Gaussian2DFunction.X_POSITION] += 0.5f;
-			peakParams[Gaussian2DFunction.Y_POSITION] += 0.5f;
-			if (addSingleResult(peakResults, x, y, regionBounds, peakParams, peakParamsDev, value, error, noise))
+			peakParams[Gaussian2DFunction.X_POSITION] += 0.5;
+			peakParams[Gaussian2DFunction.Y_POSITION] += 0.5;
+			if (addSingleResult(peakResults, x, y, regionBounds, Utils.toFloat(peakParams),
+					Utils.toFloat(peakParamsDev), value, error, noise))
 				count++;
 		}
 		else
@@ -524,15 +527,17 @@ public class FitWorker implements Runnable
 			final int currentResultsSize = peakResults.size();
 			for (int i = 0; i < npeaks; i++)
 			{
-				float[] params = new float[] { peakParams[0], peakParams[i * 6 + 1], peakParams[i * 6 + 2],
-						peakParams[i * 6 + 3] + 0.5f, peakParams[i * 6 + 4] + 0.5f, peakParams[i * 6 + 5],
-						peakParams[i * 6 + 6] };
+				float[] params = new float[] { (float) peakParams[0], (float) peakParams[i * 6 + 1],
+						(float) peakParams[i * 6 + 2], (float) (peakParams[i * 6 + 3] + 0.5),
+						(float) (peakParams[i * 6 + 4] + 0.5), (float) peakParams[i * 6 + 5],
+						(float) peakParams[i * 6 + 6] };
 				float[] paramsStdDev = null;
 				if (peakParamsDev != null)
 				{
-					paramsStdDev = new float[] { peakParamsDev[0], peakParamsDev[i * 6 + 1], peakParamsDev[i * 6 + 2],
-							peakParamsDev[i * 6 + 3], peakParamsDev[i * 6 + 4], peakParamsDev[i * 6 + 5],
-							peakParamsDev[i * 6 + 6] };
+					paramsStdDev = new float[] { (float) peakParamsDev[0], (float) peakParamsDev[i * 6 + 1],
+							(float) peakParamsDev[i * 6 + 2], (float) peakParamsDev[i * 6 + 3],
+							(float) peakParamsDev[i * 6 + 4], (float) peakParamsDev[i * 6 + 5],
+							(float) peakParamsDev[i * 6 + 6] };
 				}
 				if (addSingleResult(peakResults, currentResultsSize, x, y, regionBounds, params, paramsStdDev, value,
 						error, noise))
@@ -708,7 +713,7 @@ public class FitWorker implements Runnable
 		return maxIndices;
 	}
 
-	private float[] convertParameters(float[] params)
+	private double[] convertParameters(double[] params)
 	{
 		// Convert radians to degrees (if elliptical fitting)
 		if (fitConfig.isAngleFitting())
@@ -743,7 +748,7 @@ public class FitWorker implements Runnable
 	 *         <p>
 	 *         Null if no fit is possible.
 	 */
-	private FitResult fit(Gaussian2DFitter gf, float[] region, Rectangle regionBounds, int[] maxIndices, int n,
+	private FitResult fit(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, int[] maxIndices, int n,
 			float[] smoothData)
 	{
 		int width = regionBounds.width;
@@ -799,7 +804,7 @@ public class FitWorker implements Runnable
 			// Create the parameters for the fit
 			final int parametersPerPeak = 6;
 			int npeaks = 1 + neighbours;
-			float[] params = new float[1 + npeaks * parametersPerPeak];
+			double[] params = new double[1 + npeaks * parametersPerPeak];
 
 			// Note: If difference-of-smoothing is performed the heights have background subtracted so 
 			// it must be added back 
@@ -847,7 +852,7 @@ public class FitWorker implements Runnable
 					// This will speed up evaluation of the fitting function.
 					region = Arrays.copyOf(region, width * height);
 
-					float[] funcParams = new float[1 + parametersPerPeak * fittedNeighbourCount];
+					final double[] funcParams = new double[1 + parametersPerPeak * fittedNeighbourCount];
 					for (int i = 0, j = 0; i < fittedNeighbourCount; i++, j += parametersPerPeak)
 					{
 						PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
@@ -864,10 +869,9 @@ public class FitWorker implements Runnable
 					func.initialise(funcParams);
 
 					// Subtract fitted peaks
-					float[] dyda = new float[funcParams.length];
 					for (int i = 0; i < region.length; i++)
 					{
-						region[i] -= func.eval(i, dyda);
+						region[i] -= func.eval(i);
 					}
 				}
 				else
@@ -914,9 +918,9 @@ public class FitWorker implements Runnable
 				// Extract the first fitted peak
 				final int degreesOfFreedom = fitResult.getDegreesOfFreedom();
 				double error = fitResult.getError();
-				final float[] initialParameters = truncate(fitResult.getInitialParameters());
-				final float[] parameters = truncate(fitResult.getParameters());
-				final float[] parametersDev = (fitResult.getParameterStdDev() != null) ? truncate(fitResult
+				final double[] initialParameters = truncate(fitResult.getInitialParameters());
+				final double[] parameters = truncate(fitResult.getParameters());
+				final double[] parametersDev = (fitResult.getParameterStdDev() != null) ? truncate(fitResult
 						.getParameterStdDev()) : null;
 				final int nPeaks = 1;
 				final int nFittedParameters = fitResult.getNumberOfFittedParameters() % 6 +
@@ -950,15 +954,15 @@ public class FitWorker implements Runnable
 				amplitude += background;
 				background = 0;
 			}
-			float[] params = new float[] { background, amplitude, 0, x - regionBounds.x, y - regionBounds.y, 0, 0 };
+			final double[] params = new double[] { background, amplitude, 0, x - regionBounds.x, y - regionBounds.y, 0, 0 };
 			fitResult = gf.fit(region, width, height, 1, params);
 			printFitResults(fitResult, region, width, height, 1, -neighbours, gf.getIterations());
 
 			final int degreesOfFreedom = fitResult.getDegreesOfFreedom();
 			double error = fitResult.getError();
-			final float[] initialParameters = fitResult.getInitialParameters();
-			final float[] parameters = fitResult.getParameters();
-			final float[] parametersDev = fitResult.getParameterStdDev();
+			final double[] initialParameters = fitResult.getInitialParameters();
+			final double[] parameters = fitResult.getParameters();
+			final double[] parametersDev = fitResult.getParameterStdDev();
 			final int nPeaks = 1;
 			final int nFittedParameters = fitResult.getNumberOfFittedParameters();
 
@@ -987,12 +991,12 @@ public class FitWorker implements Runnable
 			{
 				case OK:
 					// Show the shift, signal and width spread
-					float[] initialParams = fitResult.getInitialParameters();
-					float[] params = fitResult.getParameters();
+					final double[] initialParams = fitResult.getInitialParameters();
+					final double[] params = fitResult.getParameters();
 					for (int i = 0, j = 0; i < fitResult.getNumberOfPeaks(); i++, j += 6)
 					{
 						final float factor = (float) (2 * Math.PI);
-						float signal = factor * params[j + Gaussian2DFunction.AMPLITUDE] *
+						final double signal = factor * params[j + Gaussian2DFunction.AMPLITUDE] *
 								params[j + Gaussian2DFunction.X_SD] * params[j + Gaussian2DFunction.Y_SD];
 
 						logger.info(
@@ -1011,7 +1015,7 @@ public class FitWorker implements Runnable
 					break;
 
 				case BAD_PARAMETERS:
-					float[] p = fitResult.getInitialParameters();
+					final double[] p = fitResult.getInitialParameters();
 					logger.info("Bad parameters: %f,%f,%f,%f,%f,%f,%f", p[0], p[1], p[2], p[3], p[4], p[5], p[6]);
 					break;
 
@@ -1024,7 +1028,7 @@ public class FitWorker implements Runnable
 		return fitResult;
 	}
 
-	private void printFitResults(FitResult fitResult, float[] region, int width, int height, int npeaks, int doublet,
+	private void printFitResults(FitResult fitResult, double[] region, int width, int height, int npeaks, int doublet,
 			int iterations)
 	{
 		// **********
@@ -1045,7 +1049,7 @@ public class FitWorker implements Runnable
 		//				gf.getFinalResdiualSumOfSquares(), fitResult.getStatus().toString(), ic);
 	}
 
-	private void printFitResults(FitResult fitResult, float[] region, int width, int height, int npeaks, int doublet,
+	private void printFitResults(FitResult fitResult, double[] region, int width, int height, int npeaks, int doublet,
 			int iterations, double AICc1, double AICc2)
 	{
 		// **********
@@ -1067,16 +1071,16 @@ public class FitWorker implements Runnable
 	 * @param g
 	 * @return The relative change factor (negative if g is bigger than f)
 	 */
-	private static float getFactor(float f, float g)
+	private static double getFactor(double f, double g)
 	{
 		if (f > g)
 			return f / g;
 		return -g / f;
 	}
 
-	private float[] truncate(float[] array)
+	private static double[] truncate(double[] array)
 	{
-		float[] newArray = new float[7];
+		double[] newArray = new double[7];
 		for (int i = 0; i < newArray.length; i++)
 			newArray[i] = array[i];
 		return newArray;
@@ -1133,7 +1137,7 @@ public class FitWorker implements Runnable
 		fittedNeighbourCount = 0;
 		if (!sliceResults.isEmpty())
 		{
-			float range = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+			float range = (float) FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
 			float xmin2 = xmin - range;
 			float xmax2 = xmax + range;
 			float ymin2 = ymin - range;
@@ -1173,8 +1177,8 @@ public class FitWorker implements Runnable
 			// check the width is reasonable given the size of the fitted region.
 			if (fitResult.getStatus() == FitStatus.WIDTH_DIVERGED)
 			{
-				float[] params = fitResult.getParameters();
-				float regionSize = FastMath.max(width, height) / 2;
+				final double [] params = fitResult.getParameters();
+				final double regionSize = FastMath.max(width, height) * 0.5;
 				//int tmpSmooth = (int) FastMath.max(smooth, 1);
 				//float regionSize = 2 * tmpSmooth + 1;
 				if ((params[Gaussian2DFunction.X_SD] > 0 && params[Gaussian2DFunction.X_SD] < regionSize) ||
@@ -1185,7 +1189,7 @@ public class FitWorker implements Runnable
 		return false;
 	}
 
-	private FitResult quadrantAnalysis(FitResult fitResult, float[] region, Rectangle regionBounds, float[] smoothData)
+	private FitResult quadrantAnalysis(FitResult fitResult, double[] region, Rectangle regionBounds, float[] smoothData)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
 		/*
@@ -1208,13 +1212,13 @@ public class FitWorker implements Runnable
 
 		final int width = regionBounds.width;
 		final int height = regionBounds.height;
-		float[] params = fitResult.getParameters();
-		int cx = (int) Math.round(params[Gaussian2DFunction.X_POSITION]);
-		int cy = (int) Math.round(params[Gaussian2DFunction.Y_POSITION]);
+		final double[] params = fitResult.getParameters();
+		final int cx = (int) Math.round(params[Gaussian2DFunction.X_POSITION]);
+		final int cy = (int) Math.round(params[Gaussian2DFunction.Y_POSITION]);
 		if (cx < 0 || cx >= width || cy < 0 || cy >= height) // Bad fits may be out of bounds
 			return null;
 
-		float[] residuals = gf.getResiduals();
+		final double[] residuals = gf.getResiduals();
 
 		// Compute quadrants
 
@@ -1288,15 +1292,15 @@ public class FitWorker implements Runnable
 			}
 		}
 
-		double AC = A + C;
-		double BD = B + D;
-		double score1 = Math.abs(AC - BD) / ABCD;
+		final double AC = A + C;
+		final double BD = B + D;
+		final double score1 = Math.abs(AC - BD) / ABCD;
 
-		double AC2 = A2 + C2;
-		double BD2 = B2 + D2;
-		double score2 = Math.abs(AC2 - BD2) / ABCD2;
+		final double AC2 = A2 + C2;
+		final double BD2 = B2 + D2;
+		final double score2 = Math.abs(AC2 - BD2) / ABCD2;
 
-		int[] vector;
+		final int[] vector;
 		if (score1 > score2)
 		{
 			vector = (AC > BD) ? new int[] { 0, 1 } : new int[] { 1, 0 };
@@ -1305,7 +1309,7 @@ public class FitWorker implements Runnable
 		{
 			vector = (AC2 > BD2) ? new int[] { 1, 1 } : new int[] { 1, -1 };
 		}
-		double score = FastMath.max(score1, score2);
+		final double score = FastMath.max(score1, score2);
 
 		if (logger != null)
 			logger.info("Residue analysis = %f (%d,%d)", score, vector[0], vector[1]);
@@ -1321,10 +1325,10 @@ public class FitWorker implements Runnable
 		// and finding the maxima on the original image data.
 
 		// Guess maxima using the fitted width as a single peak		
-		int x1 = Math.round(cx + vector[0] * params[Gaussian2DFunction.X_SD]);
-		int y1 = Math.round(cy + vector[1] * params[Gaussian2DFunction.Y_SD]);
-		int x2 = Math.round(cx - vector[0] * params[Gaussian2DFunction.X_SD]);
-		int y2 = Math.round(cy - vector[1] * params[Gaussian2DFunction.Y_SD]);
+		int x1 = (int) Math.round(cx + vector[0] * params[Gaussian2DFunction.X_SD]);
+		int y1 = (int) Math.round(cy + vector[1] * params[Gaussian2DFunction.Y_SD]);
+		int x2 = (int) Math.round(cx - vector[0] * params[Gaussian2DFunction.X_SD]);
+		int y2 = (int) Math.round(cy - vector[1] * params[Gaussian2DFunction.Y_SD]);
 
 		// Check bounds
 		if (x1 < 0)
@@ -1395,7 +1399,7 @@ public class FitWorker implements Runnable
 		// -+-+-
 		// Estimate params using the single fitted peak
 		// -+-+-
-		float[] doubletParams = new float[1 + 2 * 6];
+		final double[] doubletParams = new double[1 + 2 * 6];
 
 		doubletParams[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
 		doubletParams[Gaussian2DFunction.AMPLITUDE] = params[Gaussian2DFunction.AMPLITUDE] * 0.5f;
@@ -1407,20 +1411,20 @@ public class FitWorker implements Runnable
 		// -+-+-
 
 		// Store the residual sum-of-squares from the previous fit
-		double singleSumOfSquares = gf.getFinalResidualSumOfSquares();
+		final double singleSumOfSquares = gf.getFinalResidualSumOfSquares();
 
 		// Disable checking of position movement since we guessed the 2-peak location.
 		// Increase the iterations level then reset afterwards.
 
 		// TODO - Should width and signal validation be disabled too?
-		float shift = fitConfig.getCoordinateShift();
-		int maxIterations = fitConfig.getMaxIterations();
+		double shift = fitConfig.getCoordinateShift();
+		final int maxIterations = fitConfig.getMaxIterations();
 
 		fitConfig.setCoordinateShift(FastMath.min(width, height));
 		fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
 
 		//FitResult newFitResult = gf.fit(region, width, height, peaks, heights);
-		FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams);
+		final FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams);
 
 		fitConfig.setCoordinateShift(shift);
 		fitConfig.setMaxIterations(maxIterations);
@@ -1434,17 +1438,17 @@ public class FitWorker implements Runnable
 			// bias corrected Akaike Information Criterion (AICc):
 			// http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/
 
-			double doubleSumOfSquares = gf.getFinalResidualSumOfSquares();
+			final double doubleSumOfSquares = gf.getFinalResidualSumOfSquares();
 
-			int length = width * height;
+			final int length = width * height;
 			//double SStotal = gf.getTotalSumOfSquares();
 			//double adjustedR2 = getAdjustedCoefficientOfDetermination(singleSumOfSquares, SStotal, length,
 			//		fitResult.getInitialParameters().length);
 			//double newAdjustedR2 = getAdjustedCoefficientOfDetermination(doubleSumOfSquares, SStotal, length,
 			//		newFitResult.getInitialParameters().length);
 
-			double ic1 = getInformationCriterion(singleSumOfSquares, length, fitResult.getInitialParameters().length);
-			double ic2 = getInformationCriterion(doubleSumOfSquares, length, newFitResult.getInitialParameters().length);
+			final double ic1 = getInformationCriterion(singleSumOfSquares, length, fitResult.getInitialParameters().length);
+			final double ic2 = getInformationCriterion(doubleSumOfSquares, length, newFitResult.getInitialParameters().length);
 
 			if (logger != null)
 				logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,
@@ -1461,14 +1465,14 @@ public class FitWorker implements Runnable
 			}
 
 			// Check if either coordinate is outside the fitted region.
-			float[] newParams = newFitResult.getParameters();
+			final double[] newParams = newFitResult.getParameters();
 			for (int n = 0; n < 2; n++)
 			{
 				// Note that during processing the data is assumed to refer to the top-left
 				// corner of the pixel. The coordinates should be represented in the middle of the pixel 
 				// so add a 0.5 shift to the coordinates.
-				final float xpos = newParams[Gaussian2DFunction.X_POSITION + n * 6] + 0.5f;
-				final float ypos = newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5f;
+				final double xpos = newParams[Gaussian2DFunction.X_POSITION + n * 6] + 0.5;
+				final double ypos = newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5;
 				if (xpos < 0 || xpos > regionBounds.width || ypos < 0 || ypos > regionBounds.height)
 				{
 					if (logger != null)
@@ -1495,7 +1499,7 @@ public class FitWorker implements Runnable
 					if (config.isIncludeNeighbours())
 						// Assume that neighbours are insignificant and allow the shift to span half of the 
 						// fitted window.
-						shift = 0.5f * FastMath.max(regionBounds.width, regionBounds.height);
+						shift = 0.5 * FastMath.max(regionBounds.width, regionBounds.height);
 					else
 						// Expand the allowed shift by the configured SD fit to allow close by peaks to be
 						// included. Duplicate filtering will eliminate fits onto close by neighbours.
@@ -1506,9 +1510,9 @@ public class FitWorker implements Runnable
 				int nPeaks = 0;
 				for (int n = 0; n < 2; n++)
 				{
-					float xShift = newParams[Gaussian2DFunction.X_POSITION + n * 6] -
+					final double xShift = newParams[Gaussian2DFunction.X_POSITION + n * 6] -
 							params[Gaussian2DFunction.X_POSITION];
-					float yShift = newParams[Gaussian2DFunction.Y_POSITION + n * 6] -
+					final double yShift = newParams[Gaussian2DFunction.Y_POSITION + n * 6] -
 							params[Gaussian2DFunction.Y_POSITION];
 					if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
 					{
@@ -1528,12 +1532,12 @@ public class FitWorker implements Runnable
 				}
 
 				// Copy the OK peaks into a new result
-				float[] newInitialParams = newFitResult.getInitialParameters();
-				float[] newParamStdDev = newFitResult.getParameterStdDev();
+				final double[] newInitialParams = newFitResult.getInitialParameters();
+				final double[] newParamStdDev = newFitResult.getParameterStdDev();
 
-				float[] okInitialParams = new float[1 + nPeaks * 6];
-				float[] okParams = new float[1 + nPeaks * 6];
-				float[] okParamStdDev = new float[1 + nPeaks * 6];
+				final double[] okInitialParams = new double[1 + nPeaks * 6];
+				final double[] okParams = new double[1 + nPeaks * 6];
+				final double[] okParamStdDev = new double[1 + nPeaks * 6];
 
 				okInitialParams[0] = newInitialParams[0];
 				okParams[0] = params[0];
@@ -1555,7 +1559,7 @@ public class FitWorker implements Runnable
 						newFitResult.getNumberOfFittedParameters() / 2;
 
 				double error = newFitResult.getError();
-				double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
+				final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
 				error = r2;
 
 				return new FitResult(newFitResult.getStatus(), newFitResult.getDegreesOfFreedom(), error,

@@ -38,15 +38,15 @@ public class ImagePeakResultsFactory
 	 * @param imageScale
 	 *            Define the scale of the image relative to the bounding rectangle
 	 * @param precision
-	 *            For average precision plots this parameter specifies the fixed width of the PSF (in nm). 
+	 *            For average precision plots this parameter specifies the fixed width of the PSF (in nm).
 	 *            If less than zero then defaults to the nmPerPixel value.
 	 * @param mode
 	 *            The mode for showing consecutive results in the same pixel location
 	 * @return The PeakResults image
 	 */
 	public static IJImagePeakResults createPeakResultsImage(ResultsImage resultsImage, boolean weighted,
-			boolean equalised, String title, Rectangle bounds, double nmPerPixel, float gain, float imageScale,
-			float precision, ResultsMode mode)
+			boolean equalised, String title, Rectangle bounds, double nmPerPixel, double gain, double imageScale,
+			double precision, ResultsMode mode)
 	{
 		IJImagePeakResults image;
 		switch (resultsImage)
@@ -57,7 +57,7 @@ public class ImagePeakResultsFactory
 			case SIGNAL_AV_PRECISION:
 			case LOCALISATIONS_AV_PRECISION:
 				// Special case for full PSF image
-				PSFImagePeakResults image2 = new PSFImagePeakResults(title, bounds, imageScale);
+				PSFImagePeakResults image2 = new PSFImagePeakResults(title, bounds, (float) imageScale);
 				if (resultsImage == ResultsImage.SIGNAL_AV_PRECISION ||
 						resultsImage == ResultsImage.LOCALISATIONS_AV_PRECISION)
 				{
@@ -73,10 +73,10 @@ public class ImagePeakResultsFactory
 				break;
 
 			default:
-				image = new IJImagePeakResults(title, bounds, imageScale);
+				image = new IJImagePeakResults(title, bounds, (float) imageScale);
 		}
 		int flags = 0;
-		
+
 		switch (resultsImage)
 		{
 			case SIGNAL_INTENSITY:

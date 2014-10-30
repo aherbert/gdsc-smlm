@@ -17,7 +17,7 @@ import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 
 public class ApacheMatrixWrapper extends ApacheFunctionWrapper implements MultivariateMatrixFunction
 {
-	public ApacheMatrixWrapper(NonLinearFunction fun, float[] a, int n)
+	public ApacheMatrixWrapper(NonLinearFunction fun, double[] a, int n)
 	{
 		super(fun, a, n);
 	}
@@ -28,7 +28,7 @@ public class ApacheMatrixWrapper extends ApacheFunctionWrapper implements Multiv
 		initialiseFunction(point);
 		
 		double[][] jacobian = new double[n][point.length];
-		float[] dyda = new float[point.length];
+		double[] dyda = new double[point.length];
 
 		for (int i = 0; i < jacobian.length; ++i)
 		{

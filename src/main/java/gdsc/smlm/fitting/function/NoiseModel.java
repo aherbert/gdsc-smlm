@@ -25,5 +25,5 @@ public interface NoiseModel
 	 *            The model value
 	 * @return The expected variance of the value
 	 */
-	float variance(final float value);
+	double variance(final double value);
 }

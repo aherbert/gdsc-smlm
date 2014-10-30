@@ -418,7 +418,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				ImageExtractor ie = new ImageExtractor((float[]) stack.getPixels(slice), width, height);
 				if (regionBounds == null)
 					regionBounds = ie.getBoxRegionBounds((int) centre[0], (int) centre[1], boxRadius);
-				spot[slice - 1] = ie.crop(regionBounds, null);
+				spot[slice - 1] = ie.crop(regionBounds);
 			}
 
 			float b = getBackground(spot);
@@ -514,7 +514,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			ImageExtractor ie = new ImageExtractor((float[]) stack.getPixels(slice), width, height);
 			if (regionBounds == null)
 				regionBounds = ie.getBoxRegionBounds(x, y, boxRadius);
-			float[] region = ie.crop(regionBounds, null);
+			float[] region = ie.crop(regionBounds);
 
 			// Fit only a spot in the centre
 			FitParameters params = new FitParameters();
@@ -1131,7 +1131,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		boxRadius = psf.getWidth() / 2;
 		int x = boxRadius, y = boxRadius;
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		float shift = fitConfig.getCoordinateShiftFactor();
+		final double shift = fitConfig.getCoordinateShiftFactor();
 		fitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0() * magnification);
 		fitConfig.setInitialPeakStdDev1(fitConfig.getInitialPeakStdDev1() * magnification);
 		// Need to be updated after the widths have been set
@@ -1156,8 +1156,9 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		int i = 0;
 
 		// Set limits for the fit
-		final float maxWidth = FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()) *
-				magnification * 4;
+		final float maxWidth = (float) (FastMath.max(fitConfig.getInitialPeakStdDev0(),
+				fitConfig.getInitialPeakStdDev1()) *
+				magnification * 4);
 		final float maxSignal = 2; // PSF is normalised to 1  
 
 		for (PeakResult peak : results.getResults())

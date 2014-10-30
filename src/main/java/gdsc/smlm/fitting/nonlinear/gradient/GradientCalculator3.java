@@ -31,13 +31,13 @@ public class GradientCalculator3 extends GradientCalculator
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], float[] float[], double[][], double[],
+	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
 	 * gdsc.fitting.function.NonLinearFunction)
 	 */
-	public double findLinearised(int[] x, float[] y, float[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		float[] dy_da = new float[a.length];
+		double[] dy_da = new double[a.length];
 
 		for (int i = 0; i < beta.length; i++)
 		{
@@ -50,7 +50,7 @@ public class GradientCalculator3 extends GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			float[] w = new float[1];
+			double[] w = new double[1];
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da, w);
@@ -109,13 +109,13 @@ public class GradientCalculator3 extends GradientCalculator
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, float[] float[], double[][],
+	 * @see gdsc.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[] double[], double[][],
 	 * double[], gdsc.fitting.function.NonLinearFunction)
 	 */
-	public double findLinearised(int n, float[] y, float[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		float[] dy_da = new float[a.length];
+		double[] dy_da = new double[a.length];
 
 		for (int i = 0; i < beta.length; i++)
 		{
@@ -128,7 +128,7 @@ public class GradientCalculator3 extends GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			float[] w = new float[1];
+			double[] w = new double[1];
 			for (int i = 0; i < n; i++)
 			{
 				final double dy = y[i] - func.eval(i, dy_da, w);

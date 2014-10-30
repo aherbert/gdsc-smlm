@@ -24,7 +24,7 @@ import java.util.Arrays;
  * {@code
  * StoppingCritera sc; // Passed in
  * 
- * float oldError = // ... Initialised;
+ * double oldError = // ... Initialised;
  * sc.initialise(a);
  * while (sc.areNotSatisfied()) 
  * {
@@ -52,7 +52,7 @@ public abstract class StoppingCriteria
 	private int iteration;
 	protected boolean notSatisfied;
 	protected boolean areAchieved;
-	protected float[] bestA;
+	protected double[] bestA;
 	private int minimumIterations = 0;
 	private int maximumIterations = 20;
 
@@ -63,7 +63,7 @@ public abstract class StoppingCriteria
 	 * @param a
 	 *            Set of m coefficients for the fit
 	 */
-	public void initialise(float[] a)
+	public void initialise(double[] a)
 	{
 		iteration = 0;
 		notSatisfied = true;
@@ -76,7 +76,7 @@ public abstract class StoppingCriteria
 	 * 
 	 * @param a
 	 */
-	protected void copyCoefficients(float[] a)
+	protected void copyCoefficients(double[] a)
 	{
 		this.bestA = Arrays.copyOf(a, a.length); // Deep copy
 	}
@@ -97,10 +97,10 @@ public abstract class StoppingCriteria
 	 * @param a
 	 *            Set of m coefficients for the current best fit (matches whichever error is lowest)
 	 */
-	public abstract void evaluate(double oldError, double newError, float[] a);
+	public abstract void evaluate(double oldError, double newError, double[] a);
 
 	/**
-	 * Increment the current iteration and set the best coefficient values (using {@link #copyCoefficients(float[]) })
+	 * Increment the current iteration and set the best coefficient values (using {@link #copyCoefficients(double[]) })
 	 * if the fit was improved.
 	 * <p>
 	 * Sets the notSatisfied flag to false if the maximum number of iterations is reached.
@@ -108,7 +108,7 @@ public abstract class StoppingCriteria
 	 * @param a The parameters
 	 * @param improved Flag to indicate if the parameters have improved the fit
 	 */
-	protected void increment(float[] a, boolean improved)
+	protected void increment(double[] a, boolean improved)
 	{
 		iteration++;
 		if (improved)
@@ -120,7 +120,7 @@ public abstract class StoppingCriteria
 	}
 
 	/**
-	 * Called after each {@link #evaluate(double, double, float[]) } method to check if the fitting should continue
+	 * Called after each {@link #evaluate(double, double, double[]) } method to check if the fitting should continue
 	 * 
 	 * @return True if the stopping criteria have not been met (i.e. fitting should continue)
 	 */

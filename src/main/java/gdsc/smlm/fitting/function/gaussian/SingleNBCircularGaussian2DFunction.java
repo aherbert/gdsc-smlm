@@ -18,7 +18,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, float[])} function is assumed to be a linear index into 2-dimensional
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
  * data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
@@ -45,9 +45,9 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.function.gaussian.SingleCircularGaussian2DFunction#eval(int, float[])
+	 * @see gdsc.smlm.fitting.function.gaussian.SingleCircularGaussian2DFunction#eval(int, double[])
 	 */
-	public float eval(final int x, final float[] dyda)
+	public double eval(final int x, final double[] dyda)
 	{
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -56,22 +56,22 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 		return background + gaussian(x0, x1, dyda);
 	}
 
-	private float gaussian(final int x0, final int x1, final float[] dy_da)
+	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final float h = amplitude;
+		final double h = amplitude;
 
-		final float dx = x0 - x0pos;
-		final float dy = x1 - x1pos;
-		final float dx2dy2 = dx * dx + dy * dy;
+		final double dx = x0 - x0pos;
+		final double dy = x1 - x1pos;
+		final double dx2dy2 = dx * dx + dy * dy;
 
-		//final float y = (float) (h * FastMath.exp(aa * (dx2dy2)));
+		//final double y = (double) (h * FastMath.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
 		//dy_da[0] = y / h;
 		
-		dy_da[0] = (float) (FastMath.exp(aa * (dx2dy2)));
-		final float y = h * dy_da[0];
-		final float yaa2 = y * aa2;
+		dy_da[0] = FastMath.exp(aa * (dx2dy2));
+		final double y = h * dy_da[0];
+		final double yaa2 = y * aa2;
 		dy_da[1] = yaa2 * dx;
 		dy_da[2] = yaa2 * dy;
 

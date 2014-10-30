@@ -72,8 +72,8 @@ public class WidthFilter2 extends Filter
 		if (match.find())
 		{
 			float s = Float.parseFloat(match.group(1));
-			lowerSigmaThreshold = Gaussian2DFitter.fwhm2sd(s * minWidth);
-			upperSigmaThreshold = Gaussian2DFitter.fwhm2sd(s * maxWidth);
+			lowerSigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(s * minWidth);
+			upperSigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(s * maxWidth);
 		}
 	}
 

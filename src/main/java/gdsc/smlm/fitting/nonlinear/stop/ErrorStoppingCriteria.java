@@ -45,10 +45,10 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.model.StoppingCriteria#initialise(float[])
+	 * @see gdsc.fitting.model.StoppingCriteria#initialise(double[])
 	 */
 	@Override
-	public void initialise(float[] a)
+	public void initialise(double[] a)
 	{
 		super.initialise(a);
 		iterationCount = 0;
@@ -69,9 +69,9 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.fitting.model.StoppingCriteria#copyCoefficients(float[])
+	 * @see gdsc.fitting.model.StoppingCriteria#copyCoefficients(double[])
 	 */
-	protected void copyCoefficients(float[] a)
+	protected void copyCoefficients(double[] a)
 	{
 		// Do nothing
 	}
@@ -79,10 +79,10 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, float[])
+	 * @see gdsc.smlm.fitting.nonlinear.stoppingCriteria#evaluate(double, double, double[])
 	 */
 	@Override
-	public void evaluate(double oldError, double newError, float[] a)
+	public void evaluate(double oldError, double newError, double[] a)
 	{
 		// Use a comparison of error to a set number of significant digits
 
@@ -171,11 +171,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 
 		if (log != null)
 		{
-			log.info(
-					"iter = %d, error = %f -> %f : %s : Continue = %b",
-					getIteration(),
-					oldError,
-					newError,
+			log.info("iter = %d, error = %f -> %f : %s : Continue = %b", getIteration(), oldError, newError,
 					(result == 1) ? "worse" : "Delta = " + DoubleEquality.relativeError(oldError, newError) +
 							((result == 0) ? " (negligible)" : ""), notSatisfied);
 		}
@@ -264,13 +260,13 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	 * improvements in error are at the same level of floating point accuracy then convergence is achieved.
 	 * <p>
 	 * Note that no check is made that the amount of improvement in error is small (as is done using the standard
-	 * significant digits check). Thus it is possible that a plateau will be detected when the error value is
-	 * still significantly improving (but by the same amount each step). Chances of this will be minimised by using a
-	 * maximum number of iterations approximately twice that which allows reasonable fits to converge. E.g. If typical
-	 * fitted data converges within 10 iterations to 6 significant digits then the maximum iterations should be set to
-	 * 20.
+	 * significant digits check). Thus it is possible that a plateau will be detected when the error value is still
+	 * significantly improving (but by the same amount each step). Chances of this will be minimised by using a maximum
+	 * number of iterations approximately twice that which allows reasonable fits to converge. E.g. If typical fitted
+	 * data converges within 10 iterations to 6 significant digits then the maximum iterations should be set to 20.
 	 * 
-	 * @param avoidPlateau Set to true to avoid plateaus
+	 * @param avoidPlateau
+	 *            Set to true to avoid plateaus
 	 */
 	public void setAvoidPlateau(boolean avoidPlateau)
 	{

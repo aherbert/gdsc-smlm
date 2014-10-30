@@ -53,10 +53,10 @@ public class GradientCalculator
 	 *            Non-linear fitting function
 	 * @return The sum-of-squares value for the fit
 	 */
-	public double findLinearised(int[] x, float[] y, float[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		float[] dy_da = new float[a.length];
+		double[] dy_da = new double[a.length];
 
 		for (int i = 0; i < nparams; i++)
 		{
@@ -69,7 +69,7 @@ public class GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			float[] w = new float[1];
+			double[] w = new double[1];
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da, w);
@@ -106,7 +106,7 @@ public class GradientCalculator
 
 				for (int j = 0; j < nparams; j++)
 				{
-					float wgt = dy_da[j];
+					double wgt = dy_da[j];
 
 					for (int k = 0; k <= j; k++)
 						alpha[j][k] += wgt * dy_da[k];
@@ -145,15 +145,15 @@ public class GradientCalculator
 	 *            m)
 	 * @param func
 	 *            Non-linear fitting function
-	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[])},
-	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, float[], float[])},
+	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])},
+	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[], double[])},
 	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()}
 	 * @return The sum-of-squares value for the fit. GradientCalculator.FAILED if the gradients contain NaN.
 	 */
-	public double findLinearised(int n, float[] y, float[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		float[] dy_da = new float[a.length];
+		double[] dy_da = new double[a.length];
 
 		for (int i = 0; i < nparams; i++)
 		{
@@ -166,7 +166,7 @@ public class GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			float[] w = new float[1];
+			double[] w = new double[1];
 			for (int i = 0; i < n; i++)
 			{
 				final double dy = y[i] - func.eval(i, dy_da, w);
@@ -203,7 +203,7 @@ public class GradientCalculator
 
 				for (int j = 0; j < nparams; j++)
 				{
-					final float wgt = dy_da[j];
+					final double wgt = dy_da[j];
 
 					for (int k = 0; k <= j; k++)
 						alpha[j][k] += wgt * dy_da[k];
@@ -232,7 +232,7 @@ public class GradientCalculator
 	 *            The computed weight
 	 * @return The weight factor
 	 */
-	protected double getWeight(float w)
+	protected double getWeight(double w)
 	{
 		// TODO - Check if there is a better way to smooth the weights rather than just truncating them at 1
 		return (w < 1) ? 1 : 1.0 / w;

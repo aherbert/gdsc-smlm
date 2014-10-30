@@ -201,20 +201,20 @@ public class FitEngine
 		// Use smallest width for smoothing and largest for the border and fitting region
 
 		FitConfiguration fitConfiguration = config.getFitConfiguration();
-		float initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
-		float initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
+		final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
 
 		// Use 1 if zero to get at least a single pixel width
-		float widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
+		double widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 		if (initialPeakStdDev1 > 0)
 			widthMin = FastMath.min(initialPeakStdDev1, widthMin);
-		float widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
+		double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
 		if (initialPeakStdDev1 > 0)
 			widthMax = FastMath.max(initialPeakStdDev1, widthMax);
 
 		// Get the half-width at half maximim
-		float hwhmMin = Gaussian2DFitter.sd2fwhm(widthMin) / 2;
-		float hwhmMax = Gaussian2DFitter.sd2fwhm(widthMax) / 2;
+		final double hwhmMin = Gaussian2DFitter.sd2fwhm(widthMin) / 2;
+		final double hwhmMax = Gaussian2DFitter.sd2fwhm(widthMax) / 2;
 
 		// Width of smoothing box (can be zero)
 		smooth = getSmoothingWindow(config.getSmooth(), hwhmMin);
@@ -246,7 +246,7 @@ public class FitEngine
 			fitting = 2;
 	}
 
-	public double getSmoothingWindow(double smoothingParameter, float hwhmMin)
+	public double getSmoothingWindow(double smoothingParameter, double hwhmMin)
 	{
 		double smooth = smoothingParameter * hwhmMin;
 		// Only allow non-integer amounts below 1 for Gaussian smoothing
