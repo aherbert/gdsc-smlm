@@ -148,7 +148,8 @@ public class PoissonLikelihoodFunction
 		// Compute the negative log-likelihood to be minimised
 		// f(x) = l(x) - k * ln(l(x))
 		// 
-		// Since (k * ln(l(x)))' = (k * ln(l(x)))' * l'(x) 
+		// Since (k * ln(l(x)))' = (k * ln(l(x))') * l'(x)
+		//                       = (k / l(x)) * l'(x)
 
 		// f'(x) = l'(x) - (k/l(x) * l'(x))
 		// f'(x) = l'(x) * (1 - k/l(x))
