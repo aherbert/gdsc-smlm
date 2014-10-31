@@ -1207,38 +1207,44 @@ public class PCPALMFitting implements PlugIn
 		boundedEvaluations = 0;
 		final MaxEval maxEvaluations = new MaxEval(2000);
 		MultivariateOptimizer opt = null;
-		try
+		for (int iteration = 0; iteration <= fitRestarts; iteration++)
 		{
-			opt = new BFGSOptimizer();
-			final double relativeThreshold = 1e-6;
-			final double absoluteThreshold = 1e-10;
+			try
+			{
+				opt = new BFGSOptimizer();
+				final double relativeThreshold = 1e-6;
+				final double absoluteThreshold = 1e-10;
 
-			// Configure maximum step length for each dimension using the bounds
-			double[] stepLength = new double[lB.length];
-			for (int i = 0; i < stepLength.length; i++)
-				stepLength[i] = (uB[i] - lB[i]) * 0.3333333;
+				// Configure maximum step length for each dimension using the bounds
+				double[] stepLength = new double[lB.length];
+				for (int i = 0; i < stepLength.length; i++)
+					stepLength[i] = (uB[i] - lB[i]) * 0.3333333;
 
-			// The GoalType is always minimise so no need to pass this in
-			optimum = opt.optimize(maxEvaluations, gradient, objective, new InitialGuess(initialSolution),
-					new SimpleBounds(lB, uB), new BFGSOptimizer.GradientChecker(relativeThreshold, absoluteThreshold),
-					new BFGSOptimizer.PositionChecker(relativeThreshold, absoluteThreshold),
-					new BFGSOptimizer.StepLength(stepLength));
-			if (debug)
-				System.out.printf("BFGS = %g (%d)\n", optimum.getValue(), opt.getEvaluations());
-		}
-		catch (TooManyEvaluationsException e)
-		{
-		}
-		catch (RuntimeException e)
-		{
-		}
-		finally
-		{
-			boundedEvaluations += opt.getEvaluations();
+				// The GoalType is always minimise so no need to pass this in
+				optimum = opt.optimize(maxEvaluations, gradient, objective, 
+						new InitialGuess((optimum==null) ? initialSolution : optimum.getPointRef()),
+						new SimpleBounds(lB, uB), new BFGSOptimizer.GradientChecker(relativeThreshold,
+								absoluteThreshold), new BFGSOptimizer.PositionChecker(relativeThreshold,
+								absoluteThreshold), new BFGSOptimizer.StepLength(stepLength));
+				if (debug)
+					System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(), opt.getEvaluations());
+			}
+			catch (TooManyEvaluationsException e)
+			{
+				break; // No need to restart
+			}
+			catch (RuntimeException e)
+			{
+				break; // No need to restart
+			}
+			finally
+			{
+				boundedEvaluations += opt.getEvaluations();
+			}
 		}
 
 		// Try a CMAES optimiser which is non-deterministic. To overcome this we perform restarts.
-		
+
 		// CMAESOptimiser based on Matlab code:
 		// https://www.lri.fr/~hansen/cmaes.m
 		// Take the defaults from the Matlab documentation
@@ -1264,8 +1270,8 @@ public class PCPALMFitting implements PlugIn
 			try
 			{
 				// Start from the initial solution
-				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA,
-						diagonalOnly, checkFeasableCount, random, generateStatistics, checker);
+				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
+						checkFeasableCount, random, generateStatistics, checker);
 				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution), objective,
 						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
 				if (debug)
@@ -1292,8 +1298,8 @@ public class PCPALMFitting implements PlugIn
 			try
 			{
 				// Also restart from the current optimum
-				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA,
-						diagonalOnly, checkFeasableCount, random, generateStatistics, checker);
+				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
+						checkFeasableCount, random, generateStatistics, checker);
 				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(optimum.getPointRef()), objective,
 						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
 				if (debug)
