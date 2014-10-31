@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.utils;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -157,10 +159,11 @@ public class DoubleEquality
 	public static boolean almostEqualRelativeOrAbsolute(double A, double B, double maxRelativeError, double maxAbsoluteError)
 	{
 		// Check the two numbers are within an absolute distance.
-		// This condition will also avoid divide by zero later
-		if (Math.abs(A - B) < maxAbsoluteError)
+		final double difference = Math.abs(A - B);
+		if (difference <= maxAbsoluteError)
 			return true;
-		if (relativeError(A, B) <= maxRelativeError)
+		final double size = FastMath.max(Math.abs(A), Math.abs(B));
+		if (difference <= size * maxRelativeError)
 			return true;
 		return false;
 	}
