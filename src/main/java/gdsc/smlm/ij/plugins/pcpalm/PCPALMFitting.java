@@ -57,7 +57,10 @@ import org.apache.commons.math3.optim.PointVectorValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
+import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
 import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
@@ -105,7 +108,7 @@ public class PCPALMFitting implements PlugIn
 	private ClusteredModelFunctionGradient clusteredModel;
 	private EmulsionModelFunctionGradient emulsionModel;
 
-	private CMAESOptimizer cmaesOptimiser;
+	private int boundedEvaluations;
 
 	// Information criterion of models
 	private double ic1, ic2, ic3;
@@ -1053,27 +1056,26 @@ public class PCPALMFitting implements PlugIn
 
 		// Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
 		// LVM fitting does not support constrained fitting so use a bounded optimiser.
-		ClusteredModelFunctionMultivariate clusteredModelMulti = new ClusteredModelFunctionMultivariate();
-		double[] x = clusteredModel.getX();
-		clusteredModelMulti.addData(x, clusteredModel.getY());
+		SumOfSquaresModelFunction clusteredModelMulti = new SumOfSquaresModelFunction(clusteredModel);
+		double[] x = clusteredModelMulti.x;
 
 		// Put some bounds around the initial guess. Use the fitting tolerance (in %) if provided.
 		double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
 		double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0 };
 		// The amplitude and range should not extend beyond the limits of the g(r) curve.
-		double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit,
-				Maths.max(clusteredModelMulti.getX()), Maths.max(gr[1]) };
+		double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
+				Maths.max(gr[1]) };
 		log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", clusteredModel.getName(),
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
 
-		PointValuePair constrainedSolution = runCMAESOptimiser(gr, initialSolution, lB, uB, clusteredModelMulti);
+		PointValuePair constrainedSolution = runBoundedOptimiser(gr, initialSolution, lB, uB, clusteredModelMulti);
 
 		if (constrainedSolution == null)
 			return null;
 
 		parameters = constrainedSolution.getPointRef();
-		evaluations = cmaesOptimiser.getEvaluations();
+		evaluations = boundedEvaluations;
 
 		// Refit using a LVM  
 		if (useLSE)
@@ -1190,13 +1192,56 @@ public class PCPALMFitting implements PlugIn
 		return parameters;
 	}
 
-	private PointValuePair runCMAESOptimiser(double[][] gr, double[] initialSolution, double[] lB, double[] uB,
-			MultivariateFunction function)
+	private PointValuePair runBoundedOptimiser(double[][] gr, double[] initialSolution, double[] lB, double[] uB,
+			SumOfSquaresModelFunction function)
 	{
+		// Create the functions to optimise
+		ObjectiveFunction objective = new ObjectiveFunction(new SumOfSquaresMultivariateFunction(function));
+		ObjectiveFunctionGradient gradient = new ObjectiveFunctionGradient(new SumOfSquaresMultivariateVectorFunction(
+				function));
+
+		final boolean debug = false;
+
+		// Try a BFGS optimiser since this will produce a deterministic solution and can respect bounds.
+		PointValuePair optimum = null;
+		boundedEvaluations = 0;
+		final MaxEval maxEvaluations = new MaxEval(2000);
+		MultivariateOptimizer opt = null;
+		try
+		{
+			opt = new BFGSOptimizer();
+			final double relativeThreshold = 1e-6;
+			final double absoluteThreshold = 1e-10;
+
+			// Configure maximum step length for each dimension using the bounds
+			double[] stepLength = new double[lB.length];
+			for (int i = 0; i < stepLength.length; i++)
+				stepLength[i] = (uB[i] - lB[i]) * 0.3333333;
+
+			// The GoalType is always minimise so no need to pass this in
+			optimum = opt.optimize(maxEvaluations, gradient, objective, new InitialGuess(initialSolution),
+					new SimpleBounds(lB, uB), new BFGSOptimizer.GradientChecker(relativeThreshold, absoluteThreshold),
+					new BFGSOptimizer.PositionChecker(relativeThreshold, absoluteThreshold),
+					new BFGSOptimizer.StepLength(stepLength));
+			if (debug)
+				System.out.printf("BFGS = %g (%d)\n", optimum.getValue(), opt.getEvaluations());
+		}
+		catch (TooManyEvaluationsException e)
+		{
+		}
+		catch (RuntimeException e)
+		{
+		}
+		finally
+		{
+			boundedEvaluations += opt.getEvaluations();
+		}
+
+		// Try a CMAES optimiser which is non-deterministic. To overcome this we perform restarts.
+		
 		// CMAESOptimiser based on Matlab code:
 		// https://www.lri.fr/~hansen/cmaes.m
 		// Take the defaults from the Matlab documentation
-		int maxIterations = 2000;
 		double stopFitness = 0; //Double.NEGATIVE_INFINITY;
 		boolean isActiveCMA = true;
 		int diagonalOnly = 0;
@@ -1213,47 +1258,64 @@ public class PCPALMFitting implements PlugIn
 				.log(initialSolution.length))));
 		SimpleBounds bounds = new SimpleBounds(lB, uB);
 
-		PointValuePair bestSolution = null;
-		cmaesOptimiser = null;
-
 		// Restart the optimiser several times and take the best answer.
-		for (int i = -1; i < fitRestarts; i++)
+		for (int iteration = 0; iteration <= fitRestarts; iteration++)
 		{
 			try
 			{
 				// Start from the initial solution
-				CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
-						checkFeasableCount, random, generateStatistics, checker);
-				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution),
-						new ObjectiveFunction(function), GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(
-								maxIterations), new MaxEval(maxIterations * 2));
-				//System.out.printf("Iter %d a = %g\n", i, constrainedSolution.getValue());
-				if (bestSolution == null || constrainedSolution.getValue() < bestSolution.getValue())
+				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA,
+						diagonalOnly, checkFeasableCount, random, generateStatistics, checker);
+				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution), objective,
+						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
+				if (debug)
+					System.out.printf("CMAES Iter %d initial = %g (%d)\n", iteration, constrainedSolution.getValue(),
+							opt.getEvaluations());
+				boundedEvaluations += opt.getEvaluations();
+				if (optimum == null || constrainedSolution.getValue() < optimum.getValue())
 				{
-					bestSolution = constrainedSolution;
-					cmaesOptimiser = opt;
-				}
-				// Also restart from the current optimum
-				if (bestSolution == null)
-					continue;
-				opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly, checkFeasableCount,
-						random, generateStatistics, checker);
-				constrainedSolution = opt.optimize(new InitialGuess(bestSolution.getPointRef()), new ObjectiveFunction(
-						function), GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(maxIterations), new MaxEval(
-						maxIterations * 2));
-				//System.out.printf("Iter %d b = %g\n", i, constrainedSolution.getValue());
-				if (bestSolution == null || constrainedSolution.getValue() < bestSolution.getValue())
-				{
-					bestSolution = constrainedSolution;
-					cmaesOptimiser = opt;
+					optimum = constrainedSolution;
 				}
 			}
 			catch (TooManyEvaluationsException e)
 			{
-				// ignore
+			}
+			catch (TooManyIterationsException e)
+			{
+			}
+			finally
+			{
+				boundedEvaluations += maxEvaluations.getMaxEval();
+			}
+			if (optimum == null)
+				continue;
+			try
+			{
+				// Also restart from the current optimum
+				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA,
+						diagonalOnly, checkFeasableCount, random, generateStatistics, checker);
+				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(optimum.getPointRef()), objective,
+						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
+				if (debug)
+					System.out.printf("CMAES Iter %d restart = %g (%d)\n", iteration, constrainedSolution.getValue(),
+							opt.getEvaluations());
+				if (constrainedSolution.getValue() < optimum.getValue())
+				{
+					optimum = constrainedSolution;
+				}
+			}
+			catch (TooManyEvaluationsException e)
+			{
+			}
+			catch (TooManyIterationsException e)
+			{
+			}
+			finally
+			{
+				boundedEvaluations += maxEvaluations.getMaxEval();
 			}
 		}
-		return bestSolution;
+		return optimum;
 	}
 
 	/**
@@ -1289,10 +1351,9 @@ public class PCPALMFitting implements PlugIn
 
 		// Constrain the fitting to be close to the estimated precision (sigmaS) and protein density.
 		// LVM fitting does not support constrained fitting so use a bounded optimiser.
-		EmulsionModelFunctionMultivariate emulsionModelMulti = new EmulsionModelFunctionMultivariate();
-		double[] x = emulsionModel.getX();
-		double[] y = emulsionModel.getY();
-		emulsionModelMulti.addData(x, y);
+		SumOfSquaresModelFunction emulsionModelMulti = new SumOfSquaresModelFunction(emulsionModel);
+		double[] x = emulsionModelMulti.x;
+		double[] y = emulsionModelMulti.y;
 
 		// Range should be equal to the first time the g(r) curve crosses 1
 		for (int i = 0; i < x.length; i++)
@@ -1313,13 +1374,13 @@ public class PCPALMFitting implements PlugIn
 				Utils.rounded(lB[0], 4), Utils.rounded(uB[0], 4), Utils.rounded(lB[1] * 1e6, 4),
 				Utils.rounded(uB[1] * 1e6, 4));
 
-		PointValuePair constrainedSolution = runCMAESOptimiser(gr, initialSolution, lB, uB, emulsionModelMulti);
+		PointValuePair constrainedSolution = runBoundedOptimiser(gr, initialSolution, lB, uB, emulsionModelMulti);
 
 		if (constrainedSolution == null)
 			return null;
 
 		parameters = constrainedSolution.getPointRef();
-		evaluations = cmaesOptimiser.getEvaluations();
+		evaluations = boundedEvaluations;
 
 		// Refit using a LVM  
 		if (useLSE)
@@ -1456,6 +1517,23 @@ public class PCPALMFitting implements PlugIn
 		 * @return
 		 */
 		public abstract double evaluate(double r, final double[] parameters);
+
+		/**
+		 * Evaluate the jacobian of the correlation function for all data points (see
+		 * {@link #addData(double[], double[])})
+		 * 
+		 * @param parameters
+		 * @return The jacobian
+		 */
+		public abstract double[][] jacobian(double[] parameters);
+
+		/**
+		 * Get the value of the function for all data points corresponding to the last call to
+		 * {@link #jacobian(double[])}
+		 * 
+		 * @return The corresponding value
+		 */
+		public abstract double[] getValue();
 	}
 
 	/**
@@ -1473,30 +1551,40 @@ public class PCPALMFitting implements PlugIn
 	 */
 	public class RandomModelFunction extends BaseModelFunction implements MultivariateVectorFunction
 	{
+		double[] lastValue = null;
+
 		public RandomModelFunction()
 		{
 			super("Random Model");
 		}
 
+		@Override
+		public double[] getValue()
+		{
+			return lastValue;
+		}
+
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
 
-		private double[][] jacobian(double[] variables)
+		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation
 			final double sigma = variables[0];
 			final double density = variables[1];
-			double[][] jacobian = new double[x.size()][2];
+			final double[][] jacobian = new double[x.size()][2];
+			lastValue = new double[x.size()];
 
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double r = this.x.get(i);
+				final double r = this.x.get(i);
 
 				final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
 				final double b = -r * r / (4 * sigma * sigma);
 				final double c = FastMath.exp(b);
 
 				// value  = a * c
+				lastValue[i] = a * c;
 
 				// Differentiate with respect to sigma:
 				// value' = a' * c + a * c'  [ Product rule ]
@@ -1529,19 +1617,20 @@ public class PCPALMFitting implements PlugIn
 			// Compute the gradients using numerical differentiation
 			final double sigma = variables[0];
 			final double density = variables[1];
-			double[][] jacobian = new double[x.size()][2];
+			final double[][] jacobian = new double[x.size()][2];
+			lastValue = new double[x.size()];
 
 			final double delta = 0.001;
-			double[][] d = new double[variables.length][variables.length];
+			final double[][] d = new double[variables.length][variables.length];
 			for (int i = 0; i < variables.length; i++)
 				d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter ?
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double r = this.x.get(i);
-				double value = evaluate(r, sigma, density);
+				final double r = this.x.get(i);
+				final double value = lastValue[i] = evaluate(r, sigma, density);
 				for (int j = 0; j < variables.length; j++)
 				{
-					double value2 = evaluate(r, sigma + d[0][j], density + d[1][j]);
+					final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
 			}
@@ -1621,26 +1710,35 @@ public class PCPALMFitting implements PlugIn
 	 */
 	public abstract class ClusteredModelFunction extends BaseModelFunction
 	{
+		double[] lastValue = null;
+
 		public ClusteredModelFunction()
 		{
 			super("Clustered Model");
 		}
 
+		@Override
+		public double[] getValue()
+		{
+			return lastValue;
+		}
+
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
 
-		double[][] jacobian(double[] variables)
+		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation
 			final double sigma = variables[0];
 			final double density = variables[1];
 			final double range = variables[2];
 			final double amplitude = variables[3];
-			double[][] jacobian = new double[x.size()][variables.length];
+			final double[][] jacobian = new double[x.size()][variables.length];
+			lastValue = new double[x.size()];
 
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double r = this.x.get(i);
+				final double r = this.x.get(i);
 
 				final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
 				final double b = -r * r / (4 * sigma * sigma);
@@ -1651,6 +1749,7 @@ public class PCPALMFitting implements PlugIn
 
 				// value  = a * c + 
 				//          amplitude * e + 1
+				lastValue[i] = a * c + amplitude * e + 1;
 
 				// Differentiate with respect to sigma:
 				// value' = a' * c + a * c'  [ Product rule ]
@@ -1696,7 +1795,8 @@ public class PCPALMFitting implements PlugIn
 			final double density = variables[1];
 			final double range = variables[2];
 			final double amplitude = variables[3];
-			double[][] jacobian = new double[x.size()][variables.length];
+			final double[][] jacobian = new double[x.size()][variables.length];
+			lastValue = new double[x.size()];
 
 			final double delta = 0.001;
 			double[][] d = new double[variables.length][variables.length];
@@ -1704,11 +1804,11 @@ public class PCPALMFitting implements PlugIn
 				d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter ?
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double r = this.x.get(i);
-				double value = evaluate(r, sigma, density, range, amplitude);
+				final double r = this.x.get(i);
+				final double value = lastValue[i] = evaluate(r, sigma, density, range, amplitude);
 				for (int j = 0; j < variables.length; j++)
 				{
-					double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j], amplitude +
+					final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j], amplitude +
 							d[3][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
@@ -1780,25 +1880,129 @@ public class PCPALMFitting implements PlugIn
 		}
 	}
 
-	/**
-	 * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
-	 */
-	public class ClusteredModelFunctionMultivariate extends ClusteredModelFunction implements MultivariateFunction
+	public class SumOfSquaresModelFunction
 	{
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-		 */
-		public double value(double[] parameters)
+		BaseModelFunction f;
+		double[] x, y;
+
+		// Cache the value
+		double[] lastParameters;
+		double lastSS;
+
+		public SumOfSquaresModelFunction(BaseModelFunction f)
 		{
+			this.f = f;
+			x = f.getX();
+			y = f.getY();
+		}
+
+		public double evaluate(double[] parameters)
+		{
+			if (sameVariables(parameters))
+				return lastSS;
+
+			lastParameters = null;
+
 			double ss = 0;
-			for (int i = x.size(); i-- > 0;)
+			for (int i = x.length; i-- > 0;)
 			{
-				double dx = y.get(i) - evaluate(x.get(i), parameters);
+				final double dx = f.evaluate(x[i], parameters) - y[i];
 				ss += dx * dx;
 			}
 			return ss;
+		}
+
+		/**
+		 * Check if the variable match those last used for computation of the value
+		 * 
+		 * @param parameters
+		 * @return True if the variables are the same
+		 */
+		private boolean sameVariables(double[] parameters)
+		{
+			if (lastParameters != null)
+			{
+				for (int i = 0; i < parameters.length; i++)
+					if (parameters[i] != lastParameters[i])
+						return false;
+				return true;
+			}
+			return false;
+		}
+
+		public double[] gradient(double[] parameters)
+		{
+			// We can compute the jacobian for all the functions.
+			// To get the gradient for the SS we need:
+			// f(x) = (g(x) - y)^2
+			// f'(x) = 2 * (g(x) - y) * g'(x)
+
+			final double[][] jacobian = f.jacobian(parameters);
+			final double[] gx = f.getValue();
+			lastSS = 0;
+			lastParameters = parameters.clone();
+
+			final double[] gradient = new double[parameters.length];
+			for (int i = 0; i < x.length; i++)
+			{
+				final double dx = gx[i] - y[i];
+				lastSS += dx * dx;
+				final double twodx = 2 * dx;
+				for (int j = 0; j < gradient.length; j++)
+				{
+					final double g1 = twodx * jacobian[i][j];
+					gradient[j] += g1;
+
+					//// Check this is correct
+					//final double[] p = parameters.clone();
+					//final double h = 0.01 * p[j]; // p[j] is unlikely to be zero
+					//p[j] += h;
+					//final double dx1 = f.evaluate(x[i], p) - y[i];
+					//final double ss1 = dx1 * dx1;
+					//double delta = p[j];
+					//p[j] -= h;
+					//delta -= p[j];
+					//final double dx2 = f.evaluate(x[i], p) - y[i];
+					//final double ss2 = dx2 * dx2;
+					//final double g2 = (ss1 - ss2) / delta;
+					//if (!gdsc.smlm.fitting.utils.DoubleEquality.almostEqualRelativeOrAbsolute(g1, g2, 1e-2, 1e-5))
+					//	System.out.printf("[%d][%d] %f == %f\n", i, j, g1, g2);
+				}
+
+			}
+			return gradient;
+		}
+	}
+
+	public class SumOfSquaresMultivariateFunction implements MultivariateFunction
+	{
+		SumOfSquaresModelFunction f;
+
+		public SumOfSquaresMultivariateFunction(SumOfSquaresModelFunction f)
+		{
+			this.f = f;
+		}
+
+		@Override
+		public double value(double[] point)
+		{
+			return f.evaluate(point);
+		}
+	}
+
+	public class SumOfSquaresMultivariateVectorFunction implements MultivariateVectorFunction
+	{
+		SumOfSquaresModelFunction f;
+
+		public SumOfSquaresMultivariateVectorFunction(SumOfSquaresModelFunction f)
+		{
+			this.f = f;
+		}
+
+		@Override
+		public double[] value(double[] point) throws IllegalArgumentException
+		{
+			return f.gradient(point);
 		}
 	}
 
@@ -1825,15 +2029,23 @@ public class PCPALMFitting implements PlugIn
 	 */
 	public abstract class EmulsionModelFunction extends BaseModelFunction
 	{
+		double[] lastValue = null;
+
 		public EmulsionModelFunction()
 		{
 			super("Emulsion Clustered Model");
 		}
 
+		@Override
+		public double[] getValue()
+		{
+			return lastValue;
+		}
+
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
 
-		double[][] jacobian(double[] variables)
+		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation
 			final double sigma = variables[0];
@@ -1841,11 +2053,12 @@ public class PCPALMFitting implements PlugIn
 			final double range = variables[2];
 			final double amplitude = variables[3];
 			final double alpha = variables[4];
-			double[][] jacobian = new double[x.size()][variables.length];
+			final double[][] jacobian = new double[x.size()][variables.length];
+			lastValue = new double[x.size()];
 
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double r = this.x.get(i);
+				final double r = this.x.get(i);
 
 				final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
 				final double b = -r * r / (4 * sigma * sigma);
@@ -1858,6 +2071,7 @@ public class PCPALMFitting implements PlugIn
 
 				// value  = a * c + 
 				//          amplitude * e * g + 1
+				lastValue[i] = a * c + amplitude * e * g + 1;
 
 				// Differentiate with respect to sigma:
 				// value' = a' * c + a * c'  [ Product rule ]
@@ -1912,19 +2126,20 @@ public class PCPALMFitting implements PlugIn
 			final double range = variables[2];
 			final double amplitude = variables[3];
 			final double alpha = variables[4];
-			double[][] jacobian = new double[x.size()][variables.length];
+			final double[][] jacobian = new double[x.size()][variables.length];
+			lastValue = new double[x.size()];
 
 			final double delta = 0.001;
-			double[][] d = new double[variables.length][variables.length];
+			final double[][] d = new double[variables.length][variables.length];
 			for (int i = 0; i < variables.length; i++)
 				d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter ?
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double r = this.x.get(i);
-				double value = evaluate(r, sigma, density, range, amplitude, alpha);
+				final double r = this.x.get(i);
+				final double value = lastValue[i] = evaluate(r, sigma, density, range, amplitude, alpha);
 				for (int j = 0; j < variables.length; j++)
 				{
-					double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j], amplitude +
+					final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j], amplitude +
 							d[3][j], alpha + d[4][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
@@ -1992,28 +2207,6 @@ public class PCPALMFitting implements PlugIn
 				values[i] = evaluate(x.get(i), variables[0], variables[1], variables[2], variables[3], variables[4]);
 			}
 			return values;
-		}
-	}
-
-	/**
-	 * Allow optimisation using Apache Commons Math 3 MultivariateFunction optimisers
-	 */
-	public class EmulsionModelFunctionMultivariate extends EmulsionModelFunction implements MultivariateFunction
-	{
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
-		 */
-		public double value(double[] parameters)
-		{
-			double ss = 0;
-			for (int i = x.size(); i-- > 0;)
-			{
-				double dx = y.get(i) - evaluate(x.get(i), parameters);
-				ss += dx * dx;
-			}
-			return ss;
 		}
 	}
 
