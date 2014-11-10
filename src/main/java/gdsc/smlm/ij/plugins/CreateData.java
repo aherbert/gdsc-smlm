@@ -203,7 +203,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean simpleMode = false;
 	private boolean benchmarkMode = false;
 	private boolean extraOptions = false;
-	
+
 	// Hold private variables for settings that are ignored in simple/benchmark mode 
 	private boolean poissonNoise = true;
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
@@ -254,13 +254,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				boolean emCCD = settings.getEmGain() > 1;
 				double sd = getPsfSD() * settings.pixelPitch;
-				double lowerP = getPrecision(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
+				double lowerP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
 						emCCD);
-				double upperP = getPrecision(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
+				double upperP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
 						settings.background, emCCD);
-				Utils.log("Benchmarking expected precision: %s - %s nm : %s - %s px", Utils.rounded(lowerP),
+				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
+						emCCD);
+				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
+						emCCD);
+				Utils.log("Benchmarking expected localisation precision: %s - %s nm : %s - %s px", Utils.rounded(lowerP),
 						Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
 						Utils.rounded(upperP / settings.pixelPitch));
+				Utils.log("Benchmarking expected signal precision: %s - %s photons", Utils.rounded(lowerN),
+						Utils.rounded(upperN));
 			}
 			else
 			{
@@ -426,7 +432,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera
+	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera 
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383)
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
@@ -440,7 +447,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 *            True if an emCCD camera
 	 * @return The location precision in nm in each dimension (X/Y)
 	 */
-	public static double getPrecision(double a, double s, double N, double b, boolean emCCD)
+	public static double getPrecisionX(double a, double s, double N, double b, boolean emCCD)
 	{
 		// EM-CCD noise factor
 		final double F = (emCCD) ? 2 : 1;
@@ -450,6 +457,33 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// 16 / 9 = 1.7777777778
 		// 8 * pi = 25.13274123
 		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b * b) / (N * a2)));
+	}
+
+	/**
+	 * Calculate the signal precision. Uses the Thompson formula 
+	 * (Thompson, et al (2002) Biophysical Journal 82, 2775-2783)
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b
+	 *            The background noise in photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The signal precision in photons
+	 */
+	public static double getPrecisionN(double a, double s, double N, double b, boolean emCCD)
+	{
+		// EM-CCD noise factor
+		// TODO: Find out if this is valid? It appears to work on a quick test on benchmark data.
+		final double F = (emCCD) ? 2 : 1;
+		final double a2 = a * a;
+		//final double sa2 = s * s + a2 / 12.0;
+		// 4 * pi = 12.56637061
+		return Math.sqrt(F * (N + (12.56637061 * s * s * b * b) / a2));
 	}
 
 	/**
