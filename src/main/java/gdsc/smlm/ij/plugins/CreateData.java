@@ -254,16 +254,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				boolean emCCD = settings.getEmGain() > 1;
 				double sd = getPsfSD() * settings.pixelPitch;
-				double lowerP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
-						emCCD);
-				double upperP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
+				double lowerP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
 						settings.background, emCCD);
+				double upperP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
+						emCCD);
 				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
 						emCCD);
-				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
-						emCCD);
-				Utils.log("Benchmarking expected localisation precision: %s - %s nm : %s - %s px", Utils.rounded(lowerP),
-						Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
+				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
+						settings.background, emCCD);
+				Utils.log("Benchmarking expected localisation precision: %s - %s nm : %s - %s px",
+						Utils.rounded(lowerP), Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
 						Utils.rounded(upperP / settings.pixelPitch));
 				Utils.log("Benchmarking expected signal precision: %s - %s photons", Utils.rounded(lowerN),
 						Utils.rounded(upperN));
@@ -432,7 +432,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera 
+	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383)
 	 * 
 	 * @param a
@@ -460,7 +460,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Calculate the signal precision. Uses the Thompson formula 
+	 * Calculate the signal precision. Uses the Thompson formula
 	 * (Thompson, et al (2002) Biophysical Journal 82, 2775-2783)
 	 * 
 	 * @param a
