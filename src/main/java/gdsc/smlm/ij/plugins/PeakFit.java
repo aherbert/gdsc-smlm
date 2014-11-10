@@ -1314,116 +1314,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Second dialog for solver dependent parameters
 		if (!maximaIdentification)
 		{
-			if (fitConfig.getFitSolver() == FitSolver.MLE)
-			{
-				gd = new GenericDialog(TITLE);
-				gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
-				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-				String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod
-						.values());
-				gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
-				gd.addStringField("Relative_threshold", "" + fitConfig.getRelativeThreshold());
-				gd.addStringField("Absolute_threshold", "" + fitConfig.getAbsoluteThreshold());
-				gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
-				gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
-				gd.addCheckbox("Gradient_line_minimisation", fitConfig.isGradientLineMinimisation());
-				gd.showDialog();
-				if (gd.wasCanceled())
-					return false;
-				calibration.bias = Math.abs(gd.getNextNumber());
-				fitConfig.setBias(calibration.bias);
-				fitConfig.setSearchMethod(gd.getNextChoiceIndex());
-				try
-				{
-					fitConfig.setRelativeThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
-					fitConfig.setAbsoluteThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
-				}
-				catch (NumberFormatException e)
-				{
-					fitConfig.setRelativeThreshold(0);
-					fitConfig.setAbsoluteThreshold(0);
-				}
-				fitConfig.setMaxIterations((int) gd.getNextNumber());
-				fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
-				fitConfig.setGradientLineMinimisation(gd.getNextBoolean());
-
-				SettingsManager.saveSettings(settings, filename);
-
-				try
-				{
-					Parameters.isAboveZero("Relative threshold", fitConfig.getRelativeThreshold());
-					Parameters.isAboveZero("Absolute threshold", fitConfig.getAbsoluteThreshold());
-					Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
-					Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
-				}
-				catch (IllegalArgumentException e)
-				{
-					IJ.error(TITLE, e.getMessage());
-					return false;
-				}
-			}
-			else if (fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
-			{
-				// Collect options for LVM fitting
-				gd = new GenericDialog(TITLE);
-				String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
-				gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
-				gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
-				gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
-				gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
-				if (extraOptions)
-					gd.addNumericField("Min_iterations", fitConfig.getMinIterations(), 0);
-				gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
-
-				// Extra parameters are needed for the weighted LVM
-				if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
-				{
-					gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
-					gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
-					gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-					gd.addCheckbox("EM-CCD", calibration.emCCD);
-				}
-				gd.showDialog();
-				if (gd.wasCanceled())
-					return false;
-
-				fitConfig.setFitCriteria(gd.getNextChoiceIndex());
-
-				fitConfig.setSignificantDigits((int) gd.getNextNumber());
-				fitConfig.setDelta(gd.getNextNumber());
-				fitConfig.setLambda(gd.getNextNumber());
-				if (extraOptions)
-					fitConfig.setMinIterations((int) gd.getNextNumber());
-				fitConfig.setMaxIterations((int) gd.getNextNumber());
-
-				if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
-				{
-					calibration.readNoise = Math.abs(gd.getNextNumber());
-					calibration.bias = Math.abs(gd.getNextNumber());
-					calibration.emCCD = gd.getNextBoolean();
-					fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
-							calibration.emCCD));
-				}
-
-				SettingsManager.saveSettings(settings, filename);
-
-				try
-				{
-					Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
-					Parameters.isAboveZero("Delta", fitConfig.getDelta());
-					Parameters.isAboveZero("Lambda", fitConfig.getLambda());
-					Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
-				}
-				catch (IllegalArgumentException e)
-				{
-					IJ.error(TITLE, e.getMessage());
-					return false;
-				}
-			}
-			else if (fitConfig.getFitSolver() == FitSolver.LVM_QUASI_NEWTON)
-			{
-				// No options yet for Apache LVM fitting
-			}
+			if (!configureFitSolver(settings, filename, extraOptions))
+				return false;
 		}
 
 		// Extra parameters are needed for interlaced data
@@ -1470,6 +1362,133 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			IJ.error(TITLE, "Failed to save settings to file " + filename);
 		}
 		return result;
+	}
+
+	/**
+	 * Show a dialog to configure the fit solver. The updated settings are saved to the settings file. An error
+	 * message is shown if the dialog is cancelled or the configuration is invalid.
+	 * 
+	 * @param settings
+	 * @param filename
+	 * @param extraOptions
+	 *            True if extra configuration options should be allowed
+	 * @return True if the configuration succeeded
+	 */
+	public static boolean configureFitSolver(GlobalSettings settings, String filename, boolean extraOptions)
+	{
+		FitConfiguration fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
+		Calibration calibration = settings.getCalibration();
+		if (fitConfig.getFitSolver() == FitSolver.MLE)
+		{
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
+			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
+			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
+			gd.addStringField("Relative_threshold", "" + fitConfig.getRelativeThreshold());
+			gd.addStringField("Absolute_threshold", "" + fitConfig.getAbsoluteThreshold());
+			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+			gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
+			gd.addCheckbox("Gradient_line_minimisation", fitConfig.isGradientLineMinimisation());
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+			calibration.bias = Math.abs(gd.getNextNumber());
+			fitConfig.setBias(calibration.bias);
+			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
+			try
+			{
+				fitConfig.setRelativeThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
+				fitConfig.setAbsoluteThreshold(Math.abs(Double.parseDouble(gd.getNextString())));
+			}
+			catch (NumberFormatException e)
+			{
+				fitConfig.setRelativeThreshold(0);
+				fitConfig.setAbsoluteThreshold(0);
+			}
+			fitConfig.setMaxIterations((int) gd.getNextNumber());
+			fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
+			fitConfig.setGradientLineMinimisation(gd.getNextBoolean());
+
+			SettingsManager.saveSettings(settings, filename);
+
+			try
+			{
+				Parameters.isAboveZero("Relative threshold", fitConfig.getRelativeThreshold());
+				Parameters.isAboveZero("Absolute threshold", fitConfig.getAbsoluteThreshold());
+				Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+				Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
+			}
+			catch (IllegalArgumentException e)
+			{
+				IJ.error(TITLE, e.getMessage());
+				return false;
+			}
+		}
+		else if (fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+		{
+			// Collect options for LVM fitting
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("LVM requires additional parameters");
+			String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
+			gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
+			gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
+			gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
+			gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
+			if (extraOptions)
+				gd.addNumericField("Min_iterations", fitConfig.getMinIterations(), 0);
+			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+
+			// Extra parameters are needed for the weighted LVM
+			if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+			{
+				gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
+				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
+				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.addCheckbox("EM-CCD", calibration.emCCD);
+			}
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+
+			fitConfig.setFitCriteria(gd.getNextChoiceIndex());
+
+			fitConfig.setSignificantDigits((int) gd.getNextNumber());
+			fitConfig.setDelta(gd.getNextNumber());
+			fitConfig.setLambda(gd.getNextNumber());
+			if (extraOptions)
+				fitConfig.setMinIterations((int) gd.getNextNumber());
+			fitConfig.setMaxIterations((int) gd.getNextNumber());
+
+			if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+			{
+				calibration.readNoise = Math.abs(gd.getNextNumber());
+				calibration.bias = Math.abs(gd.getNextNumber());
+				calibration.emCCD = gd.getNextBoolean();
+				fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
+						calibration.emCCD));
+			}
+
+			SettingsManager.saveSettings(settings, filename);
+
+			try
+			{
+				Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
+				Parameters.isAboveZero("Delta", fitConfig.getDelta());
+				Parameters.isAboveZero("Lambda", fitConfig.getLambda());
+				Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+			}
+			catch (IllegalArgumentException e)
+			{
+				IJ.error(TITLE, e.getMessage());
+				return false;
+			}
+		}
+		else if (fitConfig.getFitSolver() == FitSolver.LVM_QUASI_NEWTON)
+		{
+			// No options yet for Apache LVM fitting
+		}
+		return true;
 	}
 
 	/**

@@ -17,8 +17,8 @@ import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitCriteria;
 import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.function.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.ResultsTable;
@@ -29,9 +29,9 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
-import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.utils.Random;
 import ij.IJ;
 import ij.ImagePlus;
@@ -167,15 +167,13 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		Component splitLabel = gd.getMessage();
 
 		FitConfiguration fitConfig = config.getFitConfiguration();
+		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
+		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
-		gd.addChoice("Fit_function", functionNames, functionNames[fitFunction]);
+		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 
-		String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
-		gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
-		gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
-		gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
-		gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
-		gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+		// Parameters specific to each Fit solver are collected in a second dialog 
+
 		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
@@ -243,13 +241,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		config.setFitting(gd.getNextNumber());
 
 		FitConfiguration fitConfig = config.getFitConfiguration();
+		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
-		fitConfig.setFitCriteria(gd.getNextChoiceIndex());
-
-		fitConfig.setSignificantDigits((int) gd.getNextNumber());
-		fitConfig.setDelta(gd.getNextNumber());
-		fitConfig.setLambda(gd.getNextNumber());
-		fitConfig.setMaxIterations((int) gd.getNextNumber());
 		config.setFailuresLimit((int) gd.getNextNumber());
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
@@ -275,10 +268,6 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			Parameters.isPositive("Smoothing2", config.getSmooth2());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
-			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
-			Parameters.isAboveZero("Delta", fitConfig.getDelta());
-			Parameters.isAboveZero("Lambda", fitConfig.getLambda());
-			Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
 			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
@@ -301,7 +290,11 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			return false;
 		}
 
-		SettingsManager.saveSettings(globalSettings);
+		String filename = SettingsManager.getSettingsFilename();
+		SettingsManager.saveSettings(globalSettings, filename);
+		
+		if (!PeakFit.configureFitSolver(globalSettings, filename, false))
+			return false;
 
 		return true;
 	}

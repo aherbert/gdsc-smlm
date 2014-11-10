@@ -15,7 +15,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitCriteria;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -68,11 +67,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	private TextField textFitting;
 	private Choice textFitSolver;
 	private Choice textFitFunction;
-	private Choice textFitCriteria;
-	private TextField textSignificantDigits;
-	private TextField textDelta;
-	private TextField textLambda;
-	private TextField textMaxIterations;
 	private TextField textFailuresLimit;
 	private Checkbox textIncludeNeighbours;
 	private TextField textNeighbourHeightThreshold;
@@ -136,16 +130,13 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 
-		String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
-		gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
-		gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
-		gd.addNumericField("Coord_delta", fitConfig.getDelta(), 4);
-		gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
-		gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
+		// Parameters specific to each Fit solver are collected in a second dialog 
+
 		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
+		
 		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
 
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
@@ -186,11 +177,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
 			textFitFunction = choices.get(ch++);
-			textFitCriteria = choices.get(ch++);
-			textSignificantDigits = numerics.get(n++);
-			textDelta = numerics.get(n++);
-			textLambda = numerics.get(n++);
-			textMaxIterations = numerics.get(n++);
 			textFailuresLimit = numerics.get(n++);
 			textIncludeNeighbours = checkboxes.get(b++);
 			textNeighbourHeightThreshold = numerics.get(n++);
@@ -253,12 +239,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
-		fitConfig.setFitCriteria(gd.getNextChoiceIndex());
 
-		fitConfig.setSignificantDigits((int) gd.getNextNumber());
-		fitConfig.setDelta(gd.getNextNumber());
-		fitConfig.setLambda(gd.getNextNumber());
-		fitConfig.setMaxIterations((int) gd.getNextNumber());
 		config.setFailuresLimit((int) gd.getNextNumber());
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
@@ -284,10 +265,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			Parameters.isPositive("Smoothing2", config.getSmooth2());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
-			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
-			Parameters.isAboveZero("Delta", fitConfig.getDelta());
-			Parameters.isAboveZero("Lambda", fitConfig.getLambda());
-			Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
 			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
@@ -307,6 +284,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			return;
 
 		configurationChanged = SettingsManager.saveSettings(settings, filename);
+		
+		PeakFit.configureFitSolver(settings, filename, false);		
 	}
 
 	public boolean isConfigurationChanged()
@@ -417,11 +396,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				textFitting.setText("" + config.getFitting());
 				textFitSolver.select(fitConfig.getFitSolver().ordinal());
 				textFitFunction.select(fitConfig.getFitFunction().ordinal());
-				textFitCriteria.select(fitConfig.getFitCriteria().ordinal());
-				textSignificantDigits.setText("" + fitConfig.getSignificantDigits());
-				textDelta.setText("" + fitConfig.getDelta());
-				textLambda.setText("" + fitConfig.getLambda());
-				textMaxIterations.setText("" + fitConfig.getMaxIterations());
 				textFailuresLimit.setText("" + config.getFailuresLimit());
 				textIncludeNeighbours.setState(config.isIncludeNeighbours());
 				textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
