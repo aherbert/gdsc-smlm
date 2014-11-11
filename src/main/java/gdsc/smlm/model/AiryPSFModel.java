@@ -401,8 +401,6 @@ public class AiryPSFModel extends PSFModel
 					if (distance2 < limit)
 					{
 						final double a = intensity(d02[x], d1, limit, samplesPerPixel, intensity, radius);
-						// double a1 = AiryPattern.intensity(r);
-						//System.out.printf("%g vs %g (%g)\n", a, a1, a1 / a);
 						data[i] = a;
 						integral += a;
 					}
@@ -416,13 +414,14 @@ public class AiryPSFModel extends PSFModel
 			// Set the number of subintervals adaptively, i.e. for small widths use more samples per pixel.
 			double nPixels = Math.PI * maxD * maxD;
 			double number = Math.sqrt(1000 / nPixels); // Approx 1000 (or so) samples across the image
-			final int N = FastMath.max(minSamplesPerDimension,
+			final int nSubintervals = FastMath.max(minSamplesPerDimension,
 					FastMath.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
 
 			final double range0 = 0.5 / w0;
 			final double range1 = 0.5 / w1;
 			// Allow any point of the square pixel to be within the limit 
 			final double pixelLimit = limit + Math.sqrt(0.5);
+			final double rescale = w0 * w1;
 
 			for (int y = 0, i = 0; y < x1range; y++)
 			{
@@ -435,9 +434,7 @@ public class AiryPSFModel extends PSFModel
 					if (distance2 < pixelLimit)
 					{
 						final double a = integral(d0[x] - range0, d0[x] + range0, d1 - range1, d1 + range1, limit,
-								samplesPerPixel, intensity, radius, N) * w0 * w1;
-						// double a1 = AiryPattern.intensity(r);
-						//System.out.printf("%g vs %g (%g)\n", a, a1, a1 / a);
+								samplesPerPixel, intensity, radius, nSubintervals) * rescale;
 						data[i] = a;
 						integral += a;
 					}
