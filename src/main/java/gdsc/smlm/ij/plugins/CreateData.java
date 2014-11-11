@@ -252,16 +252,33 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				n = 1;
 				dist = createFixedDistribution();
 
+				final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
+
+				// Background is in photons. Convert to ADUs
+				double backgroundVariance = settings.background * totalGain * totalGain;
+				// Add EM-CCD noise factor.
+				// TODO: Determine if this is correct. The Mortensen formula also includes this factor 
+				// so maybe this is "double-counting" the EM-CCD 
+				if (settings.getEmGain() > 1)
+					backgroundVariance *= 2;
+
+				// Read noise is in electrons. Convert to ADUs
+				double readNoise = settings.readNoise;
+				if (settings.getCameraGain() != 0)
+					readNoise *= settings.getCameraGain();
+
+				final double readVariance = readNoise * readNoise;
+
+				// Get the expected value at the pixel at each pixel in photons. Assuming a Poisson distribution this 
+				// is equal to the total variance at the pixel.
+				final double b2 = (backgroundVariance + readVariance) / (totalGain * totalGain);
+
 				boolean emCCD = settings.getEmGain() > 1;
 				double sd = getPsfSD() * settings.pixelPitch;
-				double lowerP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
-						settings.background, emCCD);
-				double upperP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
-						emCCD);
-				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, settings.background,
-						emCCD);
-				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
-						settings.background, emCCD);
+				double lowerP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+				double upperP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 				Utils.log("Benchmarking expected localisation precision: %s - %s nm : %s - %s px",
 						Utils.rounded(lowerP), Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
 						Utils.rounded(upperP / settings.pixelPitch));
@@ -432,8 +449,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera
-	 * (Mortensen, et al (2010) Nature Methods 7, 377-383)
+	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
@@ -441,14 +458,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 *            The peak standard deviation in nm
 	 * @param N
 	 *            The peak signal in photons
-	 * @param b
-	 *            The background noise in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
 	 * @param emCCD
 	 *            True if an emCCD camera
 	 * @return The location precision in nm in each dimension (X/Y)
 	 */
-	public static double getPrecisionX(double a, double s, double N, double b, boolean emCCD)
+	public static double getPrecisionX(double a, double s, double N, double b2, boolean emCCD)
 	{
+		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background. 
+		// If the background is X then the variance of a Poisson distribution will be X 
+		// and the standard deviation at each pixel will be sqrt(X). Thus the Mortensen formula
+		// can be used without knowing the background explicitly by using the variance of the pixels.
+
 		// EM-CCD noise factor
 		final double F = (emCCD) ? 2 : 1;
 		final double a2 = a * a;
@@ -456,12 +480,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double sa2 = s * s + a2 / 12.0;
 		// 16 / 9 = 1.7777777778
 		// 8 * pi = 25.13274123
-		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b * b) / (N * a2)));
+		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b2) / (N * a2)));
 	}
 
 	/**
-	 * Calculate the signal precision. Uses the Thompson formula
-	 * (Thompson, et al (2002) Biophysical Journal 82, 2775-2783)
+	 * Calculate the signal precision. Uses the Thompson formula:
+	 * (Thompson, et al (2002) Biophysical Journal 82, 2775-2783), equation 19
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
@@ -469,13 +493,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 *            The peak standard deviation in nm
 	 * @param N
 	 *            The peak signal in photons
-	 * @param b
-	 *            The background noise in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
 	 * @param emCCD
 	 *            True if an emCCD camera
 	 * @return The signal precision in photons
 	 */
-	public static double getPrecisionN(double a, double s, double N, double b, boolean emCCD)
+	public static double getPrecisionN(double a, double s, double N, double b2, boolean emCCD)
 	{
 		// EM-CCD noise factor
 		// TODO: Find out if this is valid? It appears to work on a quick test on benchmark data.
@@ -483,7 +509,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double a2 = a * a;
 		//final double sa2 = s * s + a2 / 12.0;
 		// 4 * pi = 12.56637061
-		return Math.sqrt(F * (N + (12.56637061 * s * s * b * b) / a2));
+		return Math.sqrt(F * (N + (12.56637061 * s * s * b2) / a2));
+		//return Math.sqrt(F * (N + (12.56637061 * sa2 * b2) / a2));
 	}
 
 	/**
