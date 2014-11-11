@@ -160,9 +160,23 @@ public class Utils
 	public static PlotWindow display(String title, Plot plot)
 	{
 		newWindow = false;
-		Frame plotWindow = WindowManager.getFrame(title);
+		Frame plotWindow = null;
+		int[] wList = WindowManager.getIDList();
+		int len = wList != null ? wList.length : 0;
+		for (int i = 0; i < len; i++)
+		{
+			ImagePlus imp = WindowManager.getImage(wList[i]);
+			if (imp != null && imp.getWindow() instanceof PlotWindow)
+			{
+				if (imp.getTitle().equals(title))
+				{
+					plotWindow = imp.getWindow();
+					break;
+				}
+			}
+		}
 		PlotWindow p;
-		if (plotWindow == null || !(plotWindow instanceof PlotWindow))
+		if (plotWindow == null)
 		{
 			p = plot.show();
 			newWindow = true;
