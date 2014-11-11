@@ -82,7 +82,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			String[] methodNames = new String[methods.length];
 			for (int i = 0; i < methods.length; i++)
 			{
-				methodNames[i] = methods[i].name();
+				methodNames[i] = methods[i].toString();
 			}
 
 			gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
