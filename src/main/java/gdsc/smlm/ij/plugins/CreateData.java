@@ -100,6 +100,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
@@ -254,36 +257,50 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
 
-				// Background is in photons. Convert to ADUs
-				double backgroundVariance = settings.background * totalGain * totalGain;
-				// Add EM-CCD noise factor.
-				// TODO: Determine if this is correct. The Mortensen formula also includes this factor 
-				// so maybe this is "double-counting" the EM-CCD 
-				if (settings.getEmGain() > 1)
-					backgroundVariance *= 2;
+				// Background is in photons
+				double backgroundVariance = settings.background;
+				// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
+				// so this is "double-counting" the EM-CCD.  
+				//if (settings.getEmGain() > 1)
+				//	backgroundVariance *= 2;
 
-				// Read noise is in electrons. Convert to ADUs
-				double readNoise = settings.readNoise;
+				// Read noise is in electrons. Convert to Photons
+				double readNoise = settings.readNoise / totalGain;
 				if (settings.getCameraGain() != 0)
 					readNoise *= settings.getCameraGain();
 
 				final double readVariance = readNoise * readNoise;
 
-				// Get the expected value at the pixel at each pixel in photons. Assuming a Poisson distribution this 
+				// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
 				// is equal to the total variance at the pixel.
-				final double b2 = (backgroundVariance + readVariance) / (totalGain * totalGain);
+				final double b2 = backgroundVariance + readVariance;
 
 				boolean emCCD = settings.getEmGain() > 1;
 				double sd = getPsfSD() * settings.pixelPitch;
+
+				// The precision calculation is dependent on the model. The classic Mortensen formula
+				// is for a Gaussian Mask Estimator. Use other equation for MLE. The formula provided 
+				// for WLSE requires an offset to the background used to stabilise the fitting. This is
+				// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
+				// is the same as MLE with the caveat of numerical instability.
+
 				double lowerP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 				double upperP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+				double lowerMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+				double upperMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
-				Utils.log("Benchmarking expected localisation precision: %s - %s nm : %s - %s px",
-						Utils.rounded(lowerP), Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
+				//final double b = Math.sqrt(b2);
+				Utils.log(TITLE + " Benchmark:\nExpected background (b^2) = %s photons (%s ADUs)", Utils.rounded(b2),
+						Utils.rounded(b2 * totalGain));
+				Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP),
+						Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
 						Utils.rounded(upperP / settings.pixelPitch));
-				Utils.log("Benchmarking expected signal precision: %s - %s photons", Utils.rounded(lowerN),
-						Utils.rounded(upperN));
+				Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
+						Utils.rounded(upperMLP), Utils.rounded(lowerMLP / settings.pixelPitch),
+						Utils.rounded(upperMLP / settings.pixelPitch));
+				Utils.log("Signal precision: %s - %s photons : %s - %s ADUs", Utils.rounded(lowerN),
+						Utils.rounded(upperN), Utils.rounded(lowerN * totalGain), Utils.rounded(upperN * totalGain));
 			}
 			else
 			{
@@ -449,8 +466,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
-	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6
+	 * Calculate the localisation precision for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
@@ -484,7 +501,81 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Calculate the signal precision. Uses the Thompson formula:
+	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public static double getMLPrecisionX(double a, double s, double N, double b2, boolean emCCD)
+	{
+		// EM-CCD noise factor
+		final double F = (emCCD) ? 2 : 1;
+		final double a2 = a * a;
+		// Adjustment for square pixels
+		final double sa2 = s * s + a2 / 12.0;
+
+		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
+		final double I1 = computeI1(rho, 0);
+		//System.out.printf("I1 = %f\n", I1);
+
+		return Math.sqrt(F * (sa2 / N) * (1 / I1));
+	}
+
+	/**
+	 * Compute the function I1 using numerical integration.
+	 * 
+	 * <pre>
+	 * I1 = 1 + sum [ ln(t) / (1 + t/rho) ] dt
+	 *    = - sum [ t * ln(t) / (t + rho) ] dt
+	 * </pre>
+	 * 
+	 * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
+	 * 
+	 * @param rho
+	 * @param method
+	 *            The integration method
+	 * @return the I1 value
+	 */
+	private static double computeI1(final double rho, final int method)
+	{
+		if (rho == 0)
+			return 1;
+
+		UnivariateIntegrator i;
+		switch (method)
+		{
+			case 0:
+			default:
+				// This supports finding the integral without evaluating the end points (which at t=0 is undefined)
+				i = new IterativeLegendreGaussIntegrator(20, 1e-4, 1e-8, 3, 200);
+		}
+
+		// Specify the function to integrate
+		UnivariateFunction f = new UnivariateFunction()
+		{
+			@Override
+			public double value(double x)
+			{
+				return x * Math.log(x) / (x + rho);
+			}
+		};
+		return -i.integrate(2000, f, 0, 1);
+	}
+
+	/**
+	 * Calculate the signal precision for least squares fitting. Uses the Thompson formula:
 	 * (Thompson, et al (2002) Biophysical Journal 82, 2775-2783), equation 19
 	 * 
 	 * @param a
@@ -504,13 +595,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	public static double getPrecisionN(double a, double s, double N, double b2, boolean emCCD)
 	{
 		// EM-CCD noise factor
-		// TODO: Find out if this is valid? It appears to work on a quick test on benchmark data.
 		final double F = (emCCD) ? 2 : 1;
 		final double a2 = a * a;
-		//final double sa2 = s * s + a2 / 12.0;
 		// 4 * pi = 12.56637061
+
+		// Original Thompson formula modified for EM-gain noise factor.
+		// TODO : None of my fitters approach this limit when background is >0 photon. Perhaps check it
+		// against the numbers of the FandPLimitTool.
 		return Math.sqrt(F * (N + (12.56637061 * s * s * b2) / a2));
-		//return Math.sqrt(F * (N + (12.56637061 * sa2 * b2) / a2));
+
+		// Modified to account for ~30% error 
+		// TODO: Find out if this is valid? It does not appear to work on a quick test on benchmark data.
+		// The error is closer to 20% for LSE and less for MLE.
+		// 16 / 9 = 1.7777777778
+		//final double sa2 = s * s + a2 / 12.0;
+		//return Math.sqrt(F * 1.7777777778 * (N + (12.56637061 * sa2 * b2) / a2));
+		//return Math.sqrt(F * N * (1.7777777778 + (12.56637061 * sa2 * b2) / (N * a2)));
 	}
 
 	/**
@@ -1614,7 +1714,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					params[Gaussian2DFunction.AMPLITUDE] = (float) (newIntensity / (2 * Math.PI *
 							params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 
-					// The noise of the background image is currently in photons. Apply gain to convert to ADUs. 
+					// The variance of the background image is currently in photons^2. Apply gain to convert to ADUs. 
 					double backgroundVariance = localStats[1] * totalGain * totalGain;
 
 					// EM-gain noise factor: Adds sqrt(2) to the electrons input to the register.
@@ -1635,7 +1735,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// *-*-*-*-*
 
 					// Overall noise can be calculated from the ‘root of sum of squares’ equation
-					float totalNoise = (float) Math.sqrt(backgroundVariance + readVariance);
+					final double totalNoise = Math.sqrt(backgroundVariance + readVariance);
 
 					// Ensure the new data is added before the intensity is updated. This avoids 
 					// syncronisation clashes in the getIntensity(...) function.
@@ -1659,7 +1759,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					newLocalisations.add(localisationSet);
 					// Use extended result to store the ID
-					results.addSync(new ExtendedPeakResult(t, origX, origY, 0, 0, totalNoise, params, null, t,
+					results.addSync(new ExtendedPeakResult(t, origX, origY, 0, 0, (float) totalNoise, params, null, t,
 							localisationSet.getId()));
 				}
 
