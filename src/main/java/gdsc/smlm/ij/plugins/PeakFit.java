@@ -567,7 +567,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private String getSolverName()
 	{
 		FitSolver solver = config.getFitConfiguration().getFitSolver();
-		String name = solver.toString();
+		String name = solver.getShortName();
 		if (solver == FitSolver.MLE)
 			name += " " + config.getFitConfiguration().getSearchMethod();
 		return name;
