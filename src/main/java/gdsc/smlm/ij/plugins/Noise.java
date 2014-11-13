@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.NoiseEstimator;
+import gdsc.smlm.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -176,11 +177,14 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		plot.setLimits(a[0], a[1], b1[0]-0.05*range, b1[1]+0.05*range);
 		plot.setColor(Color.blue);
 		plot.draw();
-		if (method1 != method2)
+		String label = String.format("Blue = %s", Utils.rounded(new Statistics(yValues1).getMean()));
+		if (twoMethods)
 		{
 			plot.setColor(Color.red);
 			plot.addPoints(xValues, yValues2, Plot.LINE);
+			label += String.format(", Red = %s", Utils.rounded(new Statistics(yValues2).getMean()));
 		}
+		plot.addLabel(0, 0, label);
 
 		Utils.display(title, plot);
 
