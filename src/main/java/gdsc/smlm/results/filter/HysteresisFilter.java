@@ -84,9 +84,12 @@ public abstract class HysteresisFilter extends Filter
 		// Find average precision of the candidates and use it for the search
 		// distance
 		SummaryStatistics stats = new SummaryStatistics();
+		final double nmPerPixel = peakResults.getNmPerPixel();
+		final double gain = peakResults.getGain();
+		final boolean emCCD = peakResults.isEMCCD();
 		for (PeakResult peakResult : candidates)
 		{
-			stats.addValue(peakResult.getPrecision(peakResults.getNmPerPixel(), peakResults.getGain()));
+			stats.addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
 		}
 		double distanceThreshold = stats.getMean() * searchDistance / peakResults.getNmPerPixel();
 

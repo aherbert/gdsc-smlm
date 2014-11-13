@@ -32,6 +32,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	private double nmPerPixel = 100.0;
 	private double gain = 1;
+	private boolean emCCD = true;
 
 	// Multiplication factors and variables for plotting the fixed Gaussian
 	private double[] fixedParams = null;
@@ -64,6 +65,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		{
 			nmPerPixel = calibration.nmPerPixel;
 			gain = calibration.gain;
+			emCCD = calibration.emCCD;
 		}
 	}
 
@@ -126,7 +128,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 				final double N = PeakResult.getSignal(params) / gain;
 				final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 						nmPerPixel;
-				final double precision = PeakResult.getPrecision(nmPerPixel, s, N, noise / gain);
+				final double precision = PeakResult.getPrecision(nmPerPixel, s, N, noise / gain, emCCD);
 				sx = sy = (precision / nmPerPixel);
 			}
 			else

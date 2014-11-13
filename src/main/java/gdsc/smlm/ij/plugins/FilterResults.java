@@ -44,6 +44,9 @@ public class FilterResults implements PlugIn
 
 	private FilterSettings filterSettings = new FilterSettings();
 
+	private double nmPerPixel, gain;
+	private boolean emCCD;
+
 	// Used to pass data from analyseResults() to checkLimits()
 	private float minDrift = Float.MAX_VALUE;
 	private float maxDrift = 0;
@@ -85,7 +88,7 @@ public class FilterResults implements PlugIn
 			IJ.showStatus("");
 			return;
 		}
-
+		
 		analyseResults();
 
 		if (!showDialog())
@@ -100,6 +103,10 @@ public class FilterResults implements PlugIn
 	private void analyseResults()
 	{
 		IJ.showStatus("Analysing results ...");
+
+		nmPerPixel = results.getNmPerPixel();
+		gain = results.getGain();
+		emCCD = results.isEMCCD();
 
 		int size = results.size();
 		int i = 0;
@@ -158,12 +165,12 @@ public class FilterResults implements PlugIn
 			return 0;
 		return signal / result.noise;
 	}
-
+	
 	private double getPrecision(PeakResult result, float signal)
 	{
 		final double s = result.getSD() * results.getNmPerPixel();
-		double precision = PeakResult.getPrecision(results.getNmPerPixel(), s, signal / results.getGain(),
-				result.noise / results.getGain());
+		double precision = PeakResult.getPrecision(nmPerPixel, s, signal / gain,
+				result.noise / gain, emCCD);
 		return precision;
 	}
 

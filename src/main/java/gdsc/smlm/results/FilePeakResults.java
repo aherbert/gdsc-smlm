@@ -275,7 +275,7 @@ public class FilePeakResults extends AbstractPeakResults
 			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 					calibration.nmPerPixel;
 			float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain,
-					noise / calibration.gain);
+					noise / calibration.gain, calibration.emCCD);
 			addResult(sb, precision);
 		}
 
@@ -352,7 +352,7 @@ public class FilePeakResults extends AbstractPeakResults
 			{
 				double s = result.getSD() * calibration.nmPerPixel;
 				float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain,
-						result.noise / calibration.gain);
+						result.noise / calibration.gain, calibration.emCCD);
 				addResult(sb, precision);
 			}
 			sb.append("\n");

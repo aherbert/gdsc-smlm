@@ -203,7 +203,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		addDeviation(sb);
 		if (this.calibration != null)
 		{
-			sb.append("Precision");
+			sb.append("Precision (nm)");
 		}
 		return sb.toString();
 	}
@@ -253,10 +253,10 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		float precision = 0;
 		if (this.calibration != null)
 		{
-			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
+			final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 					calibration.nmPerPixel;
 			precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain, noise /
-					calibration.gain);
+					calibration.gain, calibration.emCCD);
 		}
 		float snr = (noise > 0) ? signal / noise : 0;
 		if (showCalibratedValues)

@@ -36,6 +36,8 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	double nmPerPixel;
 	@XStreamOmitField
 	double gain;
+	@XStreamOmitField
+	boolean emCCD = true;
 
 	public PrecisionHysteresisFilter(double searchDistance, float lowerPrecision, float range)
 	{
@@ -62,13 +64,14 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		upperPrecision = lowerPrecision + range;
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
+		emCCD = peakResults.isEMCCD();
 		super.setup(peakResults);
 	}
 
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
-		double p = result.getPrecision(nmPerPixel, gain);
+		double p = result.getPrecision(nmPerPixel, gain, emCCD);
 		if (p <= lowerPrecision)
 			return PeakStatus.OK;
 		else if (p <= upperPrecision)

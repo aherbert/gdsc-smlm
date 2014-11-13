@@ -398,11 +398,12 @@ public class TraceDiffusion implements PlugIn
 		precision = 0;
 		final double nmPerPixel = results.getNmPerPixel();
 		final double gain = results.getGain();
+		final boolean emCCD = results.isEMCCD();
 		int n = 0;
 		for (Trace trace : traces)
 		{
 			for (PeakResult r : trace.getPoints())
-				precision += r.getPrecision(nmPerPixel, gain);
+				precision += r.getPrecision(nmPerPixel, gain, emCCD);
 			n += trace.size();
 		}
 		precision /= n;

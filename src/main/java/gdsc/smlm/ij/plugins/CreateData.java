@@ -284,8 +284,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 				// is the same as MLE with the caveat of numerical instability.
 
-				double lowerP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
-				double upperP = getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+				double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+				double upperP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double lowerMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 				double upperMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
@@ -463,41 +463,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		SettingsManager.saveSettings(globalSettings);
 
 		IJ.showStatus("Done");
-	}
-
-	/**
-	 * Calculate the localisation precision for least squares estimation. Uses the Mortensen formula for an EMCCD camera
-	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
-	 * 
-	 * @param a
-	 *            The size of the pixels in nm
-	 * @param s
-	 *            The peak standard deviation in nm
-	 * @param N
-	 *            The peak signal in photons
-	 * @param b2
-	 *            The expected number of photons per pixel from a background with spatially constant
-	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
-	 *            of the image pixels)
-	 * @param emCCD
-	 *            True if an emCCD camera
-	 * @return The location precision in nm in each dimension (X/Y)
-	 */
-	public static double getPrecisionX(double a, double s, double N, double b2, boolean emCCD)
-	{
-		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background. 
-		// If the background is X then the variance of a Poisson distribution will be X 
-		// and the standard deviation at each pixel will be sqrt(X). Thus the Mortensen formula
-		// can be used without knowing the background explicitly by using the variance of the pixels.
-
-		// EM-CCD noise factor
-		final double F = (emCCD) ? 2 : 1;
-		final double a2 = a * a;
-		// Adjustment for square pixels
-		final double sa2 = s * s + a2 / 12.0;
-		// 16 / 9 = 1.7777777778
-		// 8 * pi = 25.13274123
-		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b2) / (N * a2)));
 	}
 
 	/**
@@ -2254,9 +2219,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (results != null)
 		{
 			final double gain = settings.getTotalGain();
+			final boolean emCCD = (settings.getEmGain() > 1);
 			for (PeakResult r : results.getResults())
 			{
-				stats[PRECISION].add(r.getPrecision(settings.pixelPitch, gain));
+				stats[PRECISION].add(r.getPrecision(settings.pixelPitch, gain, emCCD));
 				stats[WIDTH].add(r.getSD());
 			}
 			// Compute density per frame. Multithread for speed

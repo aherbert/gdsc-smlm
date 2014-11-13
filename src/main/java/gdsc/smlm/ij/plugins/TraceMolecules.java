@@ -811,12 +811,15 @@ public class TraceMolecules implements PlugIn
 	{
 		// Get an estimate of the number of molecules without blinking
 		SummaryStatistics stats = new SummaryStatistics();
+		final double nmPerPixel = this.results.getNmPerPixel();
+		final double gain = this.results.getGain();
+		final boolean emCCD = this.results.isEMCCD();
 		for (PeakResult result : this.results.getResults())
-			stats.addValue(result.getPrecision(this.results.getNmPerPixel(), this.results.getGain()));
+			stats.addValue(result.getPrecision(nmPerPixel, gain, emCCD));
 		// Use twice the precision to get the initial distance threshold
 
 		// Use 2.5x sigma as per the PC-PALM protocol in Sengupta, et al (2013) Nature Protocols 8, 345
-		double dEstimate = stats.getMean() * 2.5 / this.results.getNmPerPixel();
+		double dEstimate = stats.getMean() * 2.5 / nmPerPixel;
 		int n = manager.traceMolecules(dEstimate, 1);
 		//for (double d : new double[] { 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4 })
 		//	System.out.printf("d=%.2f, estimate=%d\n", d,

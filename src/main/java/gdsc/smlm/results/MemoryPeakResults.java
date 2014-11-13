@@ -40,6 +40,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 
 	public static final double DEFAULT_NM_PER_PIXEL = 100;
 	public static final double DEFAULT_GAIN = 1;
+	public static final boolean DEFAULT_EMCCD = true;
 
 	private ArrayList<PeakResult> results;
 	private boolean sortAfterEnd;
@@ -475,6 +476,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	public double getGain()
 	{
 		return (calibration != null) ? calibration.gain : DEFAULT_GAIN;
+	}
+	
+	/**
+	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
+	 * 
+	 * @return the gain
+	 */
+	public boolean isEMCCD()
+	{
+		return (calibration != null) ? calibration.emCCD : DEFAULT_EMCCD;
 	}
 
 	/*

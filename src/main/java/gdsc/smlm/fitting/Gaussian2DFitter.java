@@ -470,7 +470,7 @@ public class Gaussian2DFitter
 
 		// Subtract the bias
 		double bias = 0;
-		if (fitConfiguration.getBias() > 0)
+		if (fitConfiguration.isRemoveBiasBeforeFitting())
 		{
 			bias = FastMath.min(background, fitConfiguration.getBias());
 			params[0] -= bias;

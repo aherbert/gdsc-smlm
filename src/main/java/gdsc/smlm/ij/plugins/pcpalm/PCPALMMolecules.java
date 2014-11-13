@@ -549,11 +549,12 @@ public class PCPALMMolecules implements PlugIn
 	public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results)
 	{
 		ArrayList<Molecule> molecules = new ArrayList<Molecule>(results.size());
-		double nmPerPixel = results.getNmPerPixel();
-		double gain = results.getGain();
+		final double nmPerPixel = results.getNmPerPixel();
+		final double gain = results.getGain();
+		final boolean emCCD = results.isEMCCD();
 		for (PeakResult r : results.getResults())
 		{
-			double p = r.getPrecision(nmPerPixel, gain);
+			double p = r.getPrecision(nmPerPixel, gain, emCCD);
 			// Remove EMCCD adjustment
 			//p /= Math.sqrt(PeakResult.F);
 			molecules.add(new Molecule(r.getXPosition() * nmPerPixel, r.getYPosition() * nmPerPixel, p, r.getSignal() /
@@ -870,11 +871,12 @@ public class PCPALMMolecules implements PlugIn
 		tm.traceMolecules(distanceThreshold, time);
 		Trace[] traces = tm.getTraces();
 		ArrayList<Molecule> molecules = new ArrayList<Molecule>(traces.length);
-		double nmPerPixel = results.getNmPerPixel();
-		double gain = results.getGain();
+		final double nmPerPixel = results.getNmPerPixel();
+		final double gain = results.getGain();
+		final boolean emCCD = results.isEMCCD();
 		for (Trace t : traces)
 		{
-			double p = t.getLocalisationPrecision(nmPerPixel, gain);
+			double p = t.getLocalisationPrecision(nmPerPixel, gain, emCCD);
 			if (t.size() == 1)
 			{
 				float[] centroid = t.getCentroid();

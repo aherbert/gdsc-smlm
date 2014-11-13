@@ -57,6 +57,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	// All the fields that will be updated when reloading the configuration file
 	private TextField textNmPerPixel;
 	private TextField textGain;
+	private Checkbox textEMCCD;
 	private TextField textExposure;
 	private TextField textInitialPeakStdDev0;
 	private TextField textInitialPeakStdDev1;
@@ -109,6 +110,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		gd.addStringField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
 		gd.addNumericField("Gain", calibration.gain, 2);
+		gd.addCheckbox("EM-CCD", calibration.emCCD);
 		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
 
 		gd.addMessage("--- Gaussian parameters ---");
@@ -167,6 +169,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 			textNmPerPixel = numerics.get(n++);
 			textGain = numerics.get(n++);
+			textEMCCD = checkboxes.get(b++);
 			textExposure = numerics.get(n++);
 			textInitialPeakStdDev0 = numerics.get(n++);
 			textInitialPeakStdDev1 = numerics.get(n++);
@@ -228,6 +231,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 		calibration.nmPerPixel = gd.getNextNumber();
 		calibration.gain = gd.getNextNumber();
+		calibration.emCCD = gd.getNextBoolean();
 		calibration.exposureTime = gd.getNextNumber();
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
@@ -386,6 +390,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 				textNmPerPixel.setText("" + calibration.nmPerPixel);
 				textGain.setText("" + calibration.gain);
+				textEMCCD.setState(calibration.emCCD);
 				textExposure.setText("" + calibration.exposureTime);
 				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
 				textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());

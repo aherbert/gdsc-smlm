@@ -121,10 +121,11 @@ public class SpotInspector implements PlugIn, MouseListener
 		rankedResults = new ArrayList<PeakResultRank>(results.size());
 		final double a = results.getNmPerPixel();
 		final double gain = results.getGain();
+		final boolean emCCD = results.isEMCCD();
 
 		for (PeakResult r : results.getResults())
 		{
-			float[] score = getScore(r, a, gain, stdDevMax);
+			float[] score = getScore(r, a, gain, emCCD, stdDevMax);
 			rankedResults.add(new PeakResultRank(r, score[0], score[1]));
 		}
 		Collections.sort(rankedResults);
@@ -318,7 +319,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 	}
 
-	private float[] getScore(PeakResult r, double a, double gain, float stdDevMax)
+	private float[] getScore(PeakResult r, double a, double gain, boolean emCCD, float stdDevMax)
 	{
 		// Return score so high is better
 		float score;
@@ -356,7 +357,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				score = r.getAmplitude();
 				break;
 			case 1: // Precision
-				score = (float) r.getPrecision(a, gain);
+				score = (float) r.getPrecision(a, gain, emCCD);
 				negative = true;
 				break;
 			default: // SNR

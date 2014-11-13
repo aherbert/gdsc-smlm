@@ -159,6 +159,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	// All the fields that will be updated when reloading the configuration file
 	private TextField textNmPerPixel;
 	private TextField textGain;
+	private Checkbox textEMCCD;
 	private TextField textExposure;
 	private TextField textInitialPeakStdDev0;
 	private TextField textInitialPeakStdDev1;
@@ -662,6 +663,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.addStringField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
 		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+		gd.addCheckbox("EM-CCD", calibration.emCCD);
 		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
 
 		if (isCrop)
@@ -802,6 +804,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			textNmPerPixel = numerics.get(n++);
 			textGain = numerics.get(n++);
+			textEMCCD = checkboxes.get(b++);
 			textExposure = numerics.get(n++);
 			textInitialPeakStdDev0 = numerics.get(n++);
 			if (!maximaIdentification)
@@ -1132,10 +1135,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				"A value of 1 means no conversion to photons will occur.");
 		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
 		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+		gd.addCheckbox("EM-CCD", calibration.emCCD);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
 		calibration.gain = gd.getNextNumber();
+		calibration.emCCD = gd.getNextBoolean();
 		return true;
 	}
 
@@ -1197,6 +1202,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		calibration.nmPerPixel = gd.getNextNumber();
 		calibration.gain = gd.getNextNumber();
+		calibration.emCCD = gd.getNextBoolean();
 		calibration.exposureTime = gd.getNextNumber();
 		if (isCrop)
 			ignoreBoundsForNoise = optionIgnoreBoundsForNoise = gd.getNextBoolean();
@@ -1310,6 +1316,18 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
+		
+		// If precision filtering then we need the camera bias
+		if (fitConfig.getPrecisionThreshold() > 0)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Precision filtering requires the camera bias:");
+			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+			calibration.bias = Math.abs(gd.getNextNumber());
+		}
 
 		// Second dialog for solver dependent parameters
 		if (!maximaIdentification)
@@ -1378,8 +1396,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		FitConfiguration fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
+		
+		// Ensure the bias is only removed if required by the solver
+		fitConfig.setRemoveBiasBeforeFitting(false);
+		
 		if (fitConfig.getFitSolver() == FitSolver.MLE)
 		{
+			fitConfig.setRemoveBiasBeforeFitting(true);
+			
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
 			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
@@ -1445,7 +1469,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
 				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
 				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-				gd.addCheckbox("EM-CCD", calibration.emCCD);
 			}
 			gd.showDialog();
 			if (gd.wasCanceled())
@@ -1464,7 +1487,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			{
 				calibration.readNoise = Math.abs(gd.getNextNumber());
 				calibration.bias = Math.abs(gd.getNextNumber());
-				calibration.emCCD = gd.getNextBoolean();
 				fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
 						calibration.emCCD));
 			}
@@ -1907,6 +1929,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Add the calibration for precision filtering
 		fitConfig.setNmPerPixel(calibration.nmPerPixel);
 		fitConfig.setGain(calibration.gain);
+		fitConfig.setEmCCD(calibration.emCCD);
 	}
 
 	/**
@@ -2148,6 +2171,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 				textNmPerPixel.setText("" + calibration.nmPerPixel);
 				textGain.setText("" + calibration.gain);
+				textEMCCD.setState(calibration.emCCD);
 				textExposure.setText("" + calibration.exposureTime);
 				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
 				if (!maximaIdentification)

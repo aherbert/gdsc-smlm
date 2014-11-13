@@ -563,15 +563,18 @@ public class TraceManager
 		if (traces != null)
 		{
 			final double nmPerPixel, gain;
+			final boolean emCCD;
 			if (calibration != null)
 			{
 				nmPerPixel = calibration.nmPerPixel;
 				gain = calibration.gain;
+				emCCD = calibration.emCCD;
 			}
 			else
 			{
 				nmPerPixel = 100;
 				gain = 1;
+				emCCD = true;
 			}
 			for (int i = 0; i < traces.length; i++)
 			{
@@ -587,7 +590,7 @@ public class TraceManager
 				}
 
 				traces[i].resetCentroid();
-				float sd = (float) (traces[i].getLocalisationPrecision(nmPerPixel, gain) / nmPerPixel);
+				float sd = (float) (traces[i].getLocalisationPrecision(nmPerPixel, gain, emCCD) / nmPerPixel);
 				float[] centroid = traces[i].getCentroid();
 				float background = 0;
 				double noise = 0;
@@ -645,7 +648,7 @@ public class TraceManager
 		// TODO - Add the tracing settings
 		return results;
 	}
-	
+
 	/**
 	 * From the given index, move forward to a localisation with a new start time frame. If no more frames return
 	 * the number of localisations.
@@ -1270,7 +1273,8 @@ public class TraceManager
 			}
 			final int pastEndIndex = endIndex[FastMath.max(t - timeThreshold, 0)];
 			final int currentEndIndex = endIndex[t];
-			final int futureIndex = FastMath.max(nextIndex, index[FastMath.min(t + 1 + timeThreshold, index.length - 1)]);
+			final int futureIndex = FastMath.max(nextIndex,
+					index[FastMath.min(t + 1 + timeThreshold, index.length - 1)]);
 
 			// Process all spots from this frame.
 			for (int index = currentIndex; index < nextIndex; index++)

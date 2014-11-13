@@ -20,14 +20,6 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
  */
 public class PeakResult implements Comparable<PeakResult>
 {
-	/**
-	 * Adjustment factor for the precision calculation for an EMCCD camera.
-	 * <p>
-	 * The Mortensen paper uses a factor of 2 for EMCCD cameras. This value can be calibrated experimentally. The value
-	 * for the camera (Photometrics Evolve2) at the GDSC is 1.83.
-	 */
-	public static final double F = 1.83;
-
 	public int peak;
 	public int origX;
 	public int origY;
@@ -122,22 +114,28 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera
+	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
+	 * @param gain
+	 *            The gain used to convert ADUs to photons
+	 * @param emCCD
+	 *            True if an emCCD camera
 	 * @return The location precision in nm of the first peak
 	 */
-	public double getPrecision(double a, double gain)
+	public double getPrecision(final double a, final double gain, boolean emCCD)
 	{
 		// Get peak standard deviation in nm. Just use the average of the X & Y.
 		final double s = a * getSD();
 		final double N = getSignal();
-		return getPrecision(a, s, N / gain, noise / gain);
+		return getPrecision(a, s, N / gain, noise / gain, true);
 	}
 
 	/**
-	 * Calculate the localisation precision. Uses the Mortensen method for an EMCCD camera
+	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
@@ -146,16 +144,88 @@ public class PeakResult implements Comparable<PeakResult>
 	 * @param N
 	 *            The peak signal in photons
 	 * @param b
-	 *            The background noise in photons
+	 *            The background noise standard deviation in photons
+	 * @param emCCD
+	 *            True if an emCCD camera
 	 * @return The location precision in nm in each dimension (X/Y)
 	 */
-	public static double getPrecision(double a, double s, double N, double b)
+	public static double getPrecision(double a, double s, double N, double b, boolean emCCD)
 	{
+		// Get background expected value. This is what is actually used in the Mortensen method
+		final double b2 = b * b;
+
+		if (emCCD)
+		{
+			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
+			// Since this has been squared then divide by 2.
+			return getPrecisionX(a, s, N, b2 / 2.0, 2);
+		}
+		else
+		{
+			return getPrecisionX(a, s, N, b2, 1);
+		}
+	}
+
+	/**
+	 * Calculate the localisation precision for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * If the expected photons per pixel is unknown then use the standard deviation across the image and the method
+	 * {@link #getPrecision(double, double, double, double, boolean)}.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public static double getPrecisionX(final double a, final double s, final double N, final double b2, boolean emCCD)
+	{
+		// EM-CCD noise factor
+		final double F = (emCCD) ? 2 : 1;
+		return getPrecisionX(a, s, N, b2, F);
+	}
+
+	/**
+	 * Calculate the localisation precision for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param F
+	 *            EM-CCD noise factor (usually 2 for an EM-CCD camera, else 1)
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public static double getPrecisionX(final double a, final double s, final double N, final double b2, final double F)
+	{
+		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background. 
+		// If the background is X then the variance of a Poisson distribution will be X 
+		// and the standard deviation at each pixel will be sqrt(X). Thus the Mortensen formula
+		// can be used without knowing the background explicitly by using the variance of the pixels.
+
 		final double a2 = a * a;
-		final double sa2 = s * s + a2 / 12.0; // Adjustment for square pixels
+		// Adjustment for square pixels
+		final double sa2 = s * s + a2 / 12.0;
 		// 16 / 9 = 1.7777777778
 		// 8 * pi = 25.13274123
-		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b * b) / (N * a2)));
+		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b2) / (N * a2)));
 	}
 
 	public int compareTo(PeakResult o)

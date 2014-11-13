@@ -98,6 +98,9 @@ public class SummariseResults implements PlugIn
 		{
 
 			int ii = 0;
+			final double nmPerPixel = result.getNmPerPixel();
+			final double gain = result.getGain();
+			final boolean emCCD = result.isEMCCD();
 			for (PeakResult peakResult : result.getResults())
 			{
 				if (peakResult == null)
@@ -105,7 +108,7 @@ public class SummariseResults implements PlugIn
 					System.out.printf("Null result in summary @ %d\n", ++ii);
 					continue;
 				}
-				stats[0].addValue(peakResult.getPrecision(result.getNmPerPixel(), result.getGain()));
+				stats[0].addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
 				stats[1].addValue(peakResult.getSignal() / peakResult.noise);
 			}
 		}

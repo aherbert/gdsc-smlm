@@ -54,6 +54,7 @@ public class FitConfiguration implements Cloneable
 	private double precisionThreshold = 0;
 	private double nmPerPixel = 0;
 	private double gain = 0;
+	private boolean emCCD = true;
 	private double noise = 0;
 	private double widthFactor = 2;
 	private boolean fitValidation = true;
@@ -61,6 +62,7 @@ public class FitConfiguration implements Cloneable
 	private boolean computeResiduals = true;
 	private double duplicateDistance = 0.5f;
 	private double bias;
+	private boolean removeBiasBeforeFitting = false;
 	private int maxFunctionEvaluations = 1000;
 	private SearchMethod searchMethod = SearchMethod.BFGS;
 	private boolean gradientLineMinimisation = true;
@@ -805,14 +807,24 @@ public class FitConfiguration implements Cloneable
 						peakParams[Gaussian2DFunction.X_SD + offset] * peakParams[Gaussian2DFunction.Y_SD + offset];
 			}
 			double sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD + offset]) * 0.5f;
-			double p = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain);
-			if (p > precisionThreshold)
+
+			double precision;
+			// We can calculate the precision using the estimated noise for the image or using the expected number
+			// of background photons at the location.
+			//precision = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
+
+			// Check using the formula which uses the estimated background.
+			// This allows for better filtering when the background is variable, e.g. when imaging cells.
+			precision = PeakResult.getPrecisionX(nmPerPixel, nmPerPixel * sd, signal / gain,
+					Math.max(0, peakParams[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+			
+			if (precision > precisionThreshold)
 			{
 				if (log != null)
 				{
-					log.info("Bad peak %d: Insufficient precision (%gx)\n", n, p);
+					log.info("Bad peak %d: Insufficient precision (%gx)\n", n, precision);
 				}
-				return setValidationResult(FitStatus.INSUFFICIENT_PRECISION, p);
+				return setValidationResult(FitStatus.INSUFFICIENT_PRECISION, precision);
 			}
 		}
 
@@ -965,6 +977,25 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * @return True if using an EM-CCD camera
+	 */
+	public boolean isEmCCD()
+	{
+		return emCCD;
+	}
+
+	/**
+	 * Specify if an EM-CCD camera is used. This is relevant when validating results using the localisation precision.
+	 * 
+	 * @param emCCD
+	 *            Set to true if using an EM-CCD camera
+	 */
+	public void setEmCCD(boolean emCCD)
+	{
+		this.emCCD = emCCD;
+	}
+
+	/**
 	 * @return the noise model
 	 */
 	public NoiseModel getNoiseModel()
@@ -993,12 +1024,31 @@ public class FitConfiguration implements Cloneable
 
 	/**
 	 * @param bias
-	 *            the camera bias (used for maximum likelihood estimation to evaluate the correct value of the the
+	 *            the camera bias (used for maximum likelihood estimation to evaluate the correct value of the
 	 *            observed count)
 	 */
 	public void setBias(double bias)
 	{
 		this.bias = bias;
+	}
+
+	/**
+	 * @return Set to true if the bias should be removed from the data before fitting, e.g. for maximum likelihood
+	 *         estimation.
+	 */
+	public boolean isRemoveBiasBeforeFitting()
+	{
+		return removeBiasBeforeFitting;
+	}
+
+	/**
+	 * @param removeBiasBeforeFitting
+	 *            Set to true if the bias should be removed from the data before fitting, e.g. for maximum likelihood
+	 *            estimation.
+	 */
+	public void setRemoveBiasBeforeFitting(boolean removeBiasBeforeFitting)
+	{
+		this.removeBiasBeforeFitting = removeBiasBeforeFitting;
 	}
 
 	/**
@@ -1027,7 +1077,8 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param searchMethod the search for the Maximum Likelihood Estimator
+	 * @param searchMethod
+	 *            the search for the Maximum Likelihood Estimator
 	 */
 	public void setSearchMethod(int searchMethod)
 	{
@@ -1036,9 +1087,10 @@ public class FitConfiguration implements Cloneable
 			setSearchMethod(SearchMethod.values()[searchMethod]);
 		}
 	}
-	
+
 	/**
-	 * @param searchMethod the search for the Maximum Likelihood Estimator
+	 * @param searchMethod
+	 *            the search for the Maximum Likelihood Estimator
 	 */
 	public void setSearchMethod(SearchMethod searchMethod)
 	{
@@ -1058,7 +1110,8 @@ public class FitConfiguration implements Cloneable
 	/**
 	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
 	 * 
-	 * @param gradientLineMinimisation Set to true to use the gradient for line minimisation
+	 * @param gradientLineMinimisation
+	 *            Set to true to use the gradient for line minimisation
 	 */
 	public void setGradientLineMinimisation(boolean gradientLineMinimisation)
 	{
@@ -1074,7 +1127,8 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param relativeThreshold the relative threshold for convergence in the Maximum Likelihood Estimator
+	 * @param relativeThreshold
+	 *            the relative threshold for convergence in the Maximum Likelihood Estimator
 	 */
 	public void setRelativeThreshold(double relativeThreshold)
 	{
@@ -1090,13 +1144,14 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param absoluteThreshold the absolute threshold for convergence in the Maximum Likelihood Estimator
+	 * @param absoluteThreshold
+	 *            the absolute threshold for convergence in the Maximum Likelihood Estimator
 	 */
 	public void setAbsoluteThreshold(double absoluteThreshold)
 	{
 		this.absoluteThreshold = absoluteThreshold;
 	}
-	
+
 	/**
 	 * @return The function solver for the current configuration
 	 */

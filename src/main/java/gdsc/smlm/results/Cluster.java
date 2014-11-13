@@ -154,7 +154,7 @@ public class Cluster
 	 *            The gain (to convert ADUs back to photons)
 	 * @return The weighted localisation precision of the group peak (in nm)
 	 */
-	public double getLocalisationPrecision(double a, double gain)
+	public double getLocalisationPrecision(double a, double gain, boolean emCCD)
 	{
 		final int n = size();
 		if (n == 0)
@@ -171,7 +171,7 @@ public class Cluster
 				centroid = new float[] { result.params[Gaussian2DFunction.X_POSITION],
 						result.params[Gaussian2DFunction.Y_POSITION] };
 			}
-			return result.getPrecision(a, gain);
+			return result.getPrecision(a, gain, emCCD);
 		}
 
 		float[] photons = new float[results.size()];
@@ -212,7 +212,7 @@ public class Cluster
 			sumXi2Ni += dx * dx * Ni;
 			sumYi2Ni += dy * dy * Ni;
 			//double sigma = result.getWidth();
-			double sigma = result.getPrecision(a, gain);
+			double sigma = result.getPrecision(a, gain, emCCD);
 			//ss += sigma;
 			//sdx += Math.abs(dx);
 			//sdy += Math.abs(dy);

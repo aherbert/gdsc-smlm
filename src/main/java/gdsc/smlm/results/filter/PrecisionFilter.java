@@ -29,6 +29,8 @@ public class PrecisionFilter extends Filter
 	@XStreamOmitField
 	double nmPerPixel = 100;
 	@XStreamOmitField
+	boolean emCCD = true;
+	@XStreamOmitField
 	double gain = 1;
 
 	public PrecisionFilter(float precision)
@@ -53,12 +55,13 @@ public class PrecisionFilter extends Filter
 	{
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
+		emCCD = peakResults.isEMCCD();
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return peak.getPrecision(nmPerPixel, gain) <= precision;
+		return peak.getPrecision(nmPerPixel, gain, emCCD) <= precision;
 	}
 
 	@Override
