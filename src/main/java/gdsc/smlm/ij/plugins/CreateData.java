@@ -284,14 +284,27 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 				// is the same as MLE with the caveat of numerical instability.
 
-				double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+				double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
+						emCCD);
 				double upperP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double lowerMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 				double upperMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 				//final double b = Math.sqrt(b2);
-				Utils.log(TITLE + " Benchmark:\nExpected background (b^2) = %s photons (%s ADUs)", Utils.rounded(b2),
+				Utils.log(TITLE + " Benchmark");
+				double[] xyz = dist.next().clone();
+				double offset = settings.size * 0.5;
+				for (int i = 0; i < 2; i++)
+					xyz[i] += offset;
+				Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.pixelPitch), Utils.rounded(xyz[0]));
+				Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.pixelPitch), Utils.rounded(xyz[1]));
+				Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.pixelPitch));
+				Utils.log("Signal (N) = %s - %s photons : %s - %s ADUs", Utils.rounded(settings.photonsPerSecond),
+						Utils.rounded(settings.photonsPerSecondMaximum),
+						Utils.rounded(settings.photonsPerSecond * totalGain),
+						Utils.rounded(settings.photonsPerSecondMaximum * totalGain));
+				Utils.log("Expected background (b^2) = %s photons (%s ADUs)", Utils.rounded(b2),
 						Utils.rounded(b2 * totalGain));
 				Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP),
 						Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
@@ -1562,7 +1575,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
 
 			// Adjust XY dimensions since they are centred on zero
-			final double xoffset = settings.size / 2;
+			final double xoffset = settings.size * 0.5;
 
 			float[] image = createBackground(null);
 			float[] imageCache = Arrays.copyOf(image, image.length);
