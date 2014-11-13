@@ -13,6 +13,7 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -31,6 +32,8 @@ public class PrecisionFilter extends Filter
 	@XStreamOmitField
 	boolean emCCD = true;
 	@XStreamOmitField
+	double bias = 0;
+	@XStreamOmitField
 	double gain = 1;
 
 	public PrecisionFilter(float precision)
@@ -43,24 +46,37 @@ public class PrecisionFilter extends Filter
 	{
 		return "Precision " + precision;
 	}
-	
+
 	@Override
 	protected String generateType()
 	{
 		return "Precision";
 	}
-	
+
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		if (peakResults.getCalibration() != null)
+		{
+			bias = peakResults.getCalibration().bias;
+		}
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
+		if (bias != 0)
+		{
+			// Use the estimated background for the peak
+			final double s = nmPerPixel * peak.getSD();
+			final double N = peak.getSignal();
+			return PeakResult.getPrecisionX(nmPerPixel, s, N,
+					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= precision;
+		}
+		// Use the background noise to estimate precision 
 		return peak.getPrecision(nmPerPixel, gain, emCCD) <= precision;
 	}
 
@@ -86,8 +102,10 @@ public class PrecisionFilter extends Filter
 	{
 		return "Filter results using an upper precision threshold.";
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getNumberOfParameters()
 	 */
 	@Override
@@ -95,8 +113,10 @@ public class PrecisionFilter extends Filter
 	{
 		return 1;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
 	 */
 	@Override
@@ -105,8 +125,10 @@ public class PrecisionFilter extends Filter
 		checkIndex(index);
 		return precision;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
 	 */
 	@Override
@@ -115,8 +137,10 @@ public class PrecisionFilter extends Filter
 		checkIndex(index);
 		return "Precision";
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
 	 */
 	@Override

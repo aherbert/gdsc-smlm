@@ -91,7 +91,7 @@ public abstract class HysteresisFilter extends Filter
 		{
 			stats.addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
 		}
-		double distanceThreshold = stats.getMean() * searchDistance / peakResults.getNmPerPixel();
+		double distanceThreshold = stats.getMean() * searchDistance / nmPerPixel;
 
 		// Trace through candidates
 		TraceManager tm = new TraceManager(traceResults);

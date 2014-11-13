@@ -116,6 +116,8 @@ public class PeakResult implements Comparable<PeakResult>
 	/**
 	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
@@ -136,6 +138,8 @@ public class PeakResult implements Comparable<PeakResult>
 	/**
 	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * This method will use the background noise to approximate the expected background value of each pixel.
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm

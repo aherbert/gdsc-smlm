@@ -13,6 +13,7 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -38,6 +39,8 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	double gain;
 	@XStreamOmitField
 	boolean emCCD = true;
+	@XStreamOmitField
+	double bias = 0;
 
 	public PrecisionHysteresisFilter(double searchDistance, float lowerPrecision, float range)
 	{
@@ -51,13 +54,13 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	{
 		return String.format("Precision Hysteresis %.2f +%.2f (@%.2fx)", lowerPrecision, range, searchDistance);
 	}
-	
+
 	@Override
 	protected String generateType()
 	{
 		return "Precision Hysteresis";
 	}
-	
+
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
@@ -65,13 +68,27 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		if (peakResults.getCalibration() != null)
+		{
+			bias = peakResults.getCalibration().bias;
+		}
 		super.setup(peakResults);
 	}
 
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
-		double p = result.getPrecision(nmPerPixel, gain, emCCD);
+		double p;
+		if (bias != 0)
+		{
+			// Use the estimated background for the peak
+			final double s = nmPerPixel * result.getSD();
+			final double N = result.getSignal();
+			p = PeakResult.getPrecisionX(nmPerPixel, s, N,
+					Math.max(0, result.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+		}
+		// Use the background noise to estimate precision 
+		p = result.getPrecision(nmPerPixel, gain, emCCD);
 		if (p <= lowerPrecision)
 			return PeakStatus.OK;
 		else if (p <= upperPrecision)
