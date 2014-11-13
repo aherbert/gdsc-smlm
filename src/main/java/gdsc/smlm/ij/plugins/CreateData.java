@@ -264,12 +264,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				//if (settings.getEmGain() > 1)
 				//	backgroundVariance *= 2;
 
+				final double backgroundVarianceInADUs = settings.background * totalGain * totalGain *
+						((settings.getEmGain() > 1) ? 2 : 1);
+
 				// Read noise is in electrons. Convert to Photons
 				double readNoise = settings.readNoise / totalGain;
 				if (settings.getCameraGain() != 0)
 					readNoise *= settings.getCameraGain();
 
 				final double readVariance = readNoise * readNoise;
+
+				double readVarianceInADUs = settings.readNoise *
+						((settings.getCameraGain() != 0) ? settings.getCameraGain() : 1);
+				readVarianceInADUs *= readVarianceInADUs;
 
 				// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
 				// is equal to the total variance at the pixel.
@@ -304,8 +311,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						Utils.rounded(settings.photonsPerSecondMaximum),
 						Utils.rounded(settings.photonsPerSecond * totalGain),
 						Utils.rounded(settings.photonsPerSecondMaximum * totalGain));
-				Utils.log("Expected background (b^2) = %s photons (%s ADUs)", Utils.rounded(b2),
-						Utils.rounded(b2 * totalGain));
+				final double noiseInADUs = Math.sqrt(readVarianceInADUs + backgroundVarianceInADUs);
+				Utils.log("Pixel noise = %s photons : %s ADUs", Utils.rounded(noiseInADUs / totalGain),
+						Utils.rounded(noiseInADUs));
+				Utils.log("Expected background variance pre EM-gain (b^2) = %s photons^2 (%s ADUs^2) "
+						+ "[includes read variance converted to photons]", Utils.rounded(b2),
+						Utils.rounded(b2 * totalGain * totalGain));
 				Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP),
 						Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
 						Utils.rounded(upperP / settings.pixelPitch));
