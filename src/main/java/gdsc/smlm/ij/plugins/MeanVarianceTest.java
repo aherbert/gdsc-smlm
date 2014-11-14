@@ -334,7 +334,11 @@ public class MeanVarianceTest implements PlugIn
 		double[] xlimits = Maths.limits(mean);
 		double[] ylimits = Maths.limits(variance);
 		double xrange = (xlimits[1] - xlimits[0]) * 0.05;
+		if (xrange == 0)
+			xrange = 0.05;
 		double yrange = (ylimits[1] - ylimits[0]) * 0.05;
+		if (yrange == 0)
+			yrange = 0.05;
 		plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
 		plot.setColor(Color.blue);
 		plot.addPoints(mean, variance, Plot.CROSS);
