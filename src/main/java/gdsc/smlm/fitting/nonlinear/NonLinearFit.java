@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import org.apache.commons.math3.util.FastMath;
-
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.function.NonLinearFunction;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -192,8 +190,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	private FitStatus doFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
 			StoppingCriteria sc, double noise)
 	{
-		int[] gradientIndices = f.gradientIndices();
-		int nparams = gradientIndices.length;
+		final int[] gradientIndices = f.gradientIndices();
 
 		sc.initialise(a);
 		if (!nonLinearModel(n, y, a, true))
@@ -224,8 +221,7 @@ public class NonLinearFit extends BaseFunctionSolver
 			if (!solver.invert(covar))
 				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
 
-			for (int i = 0; i < nparams; i++)
-				a_dev[gradientIndices[i]] = (double) Math.sqrt(FastMath.max(covar[i][i], 0));
+			setDeviations(a_dev, covar);
 		}
 
 		if (y_fit != null)

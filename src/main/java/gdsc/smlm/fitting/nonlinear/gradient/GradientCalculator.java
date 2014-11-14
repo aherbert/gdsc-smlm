@@ -37,6 +37,8 @@ public class GradientCalculator
 
 	/**
 	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
+	 * <p>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
 	 * @param x
 	 *            n observations
@@ -97,7 +99,7 @@ public class GradientCalculator
 		{
 			for (int i = 0; i < x.length; i++)
 			{
-				double dy = y[i] - func.eval(x[i], dy_da);
+				final double dy = y[i] - func.eval(x[i], dy_da);
 
 				// Compute:
 				// - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
@@ -106,7 +108,7 @@ public class GradientCalculator
 
 				for (int j = 0; j < nparams; j++)
 				{
-					double wgt = dy_da[j];
+					final double wgt = dy_da[j];
 
 					for (int k = 0; k <= j; k++)
 						alpha[j][k] += wgt * dy_da[k];
@@ -131,6 +133,8 @@ public class GradientCalculator
 	 * Assumes the n observations (x) are sequential integers from 0.
 	 * <p>
 	 * If the function supports weights then these will be used to compute the SS and curvature matrix.
+	 * <p>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
 	 * @param n
 	 *            The number of data points
@@ -148,7 +152,7 @@ public class GradientCalculator
 	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])},
 	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[], double[])},
 	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()}
-	 * @return The sum-of-squares value for the fit. GradientCalculator.FAILED if the gradients contain NaN.
+	 * @return The sum-of-squares value for the fit.
 	 */
 	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
@@ -264,5 +268,95 @@ public class GradientCalculator
 	public boolean isNaNGradients()
 	{
 		return badGradients;
+	}
+
+	/**
+	 * Compute Fisher's Information Matrix (I).
+	 * <pre>
+	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
+	 * </pre>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param a
+	 *            Set of m coefficients
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return I
+	 */
+	public double[][] fisherInformationMatrix(int[] x, double[] a, NonLinearFunction func)
+	{
+		double[] dy_da = new double[a.length];
+
+		double[][] alpha = new double[nparams][nparams];
+
+		func.initialise(a);
+
+		for (int i = 0; i < x.length; i++)
+		{
+			final double y = func.eval(x[i], dy_da);
+
+			for (int j = 0; j < nparams; j++)
+			{
+				final double dy_db = dy_da[j] / y;
+
+				for (int k = 0; k <= j; k++)
+					alpha[j][k] += dy_db * dy_da[k];
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nparams - 1; i++)
+			for (int j = i + 1; j < nparams; j++)
+				alpha[i][j] = alpha[j][i];
+
+		checkGradients(alpha, new double[nparams], nparams, 0);
+		return alpha;
+	}
+
+	/**
+	 * Compute Fisher's Information Matrix (I).
+	 * <pre>
+	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
+	 * </pre>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * 
+	 * @param n
+	 *            The number of data points
+	 * @param a
+	 *            Set of m coefficients
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return I
+	 */
+	public double[][] fisherInformationMatrix(int n, double[] a, NonLinearFunction func)
+	{
+		double[] dy_da = new double[a.length];
+
+		double[][] alpha = new double[nparams][nparams];
+
+		func.initialise(a);
+
+		for (int i = 0; i < n; i++)
+		{
+			final double y = func.eval(i, dy_da);
+
+			for (int j = 0; j < nparams; j++)
+			{
+				final double dy_db = dy_da[j] / y;
+
+				for (int k = 0; k <= j; k++)
+					alpha[j][k] += dy_db * dy_da[k];
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nparams - 1; i++)
+			for (int j = i + 1; j < nparams; j++)
+				alpha[i][j] = alpha[j][i];
+
+		checkGradients(alpha, new double[nparams], nparams, 0);
+		return alpha;
 	}
 }

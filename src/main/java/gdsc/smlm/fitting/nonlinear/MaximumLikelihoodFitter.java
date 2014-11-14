@@ -3,6 +3,8 @@ package gdsc.smlm.fitting.nonlinear;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.function.NonLinearFunction;
 import gdsc.smlm.fitting.function.PoissonLikelihoodFunction;
+import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -443,7 +445,16 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 			if (a_dev != null)
 			{
-				// Covariance not supported for this fitter
+				// The Maximum Likelihood estimator returns the optimum fit the covariance can be obtained
+				// from the Fisher Information Matrix. 
+				int[] gradientIndices = f.gradientIndices();
+				final int nparams = gradientIndices.length;
+				GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
+				double[][] I = calculator.fisherInformationMatrix(n, a, f);
+				for (int i = 0; i < gradientIndices.length; i++)
+					a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i][i]);
+				// The following method just uses the sqrt but does not invert the covariance matrix
+				//setDeviations(a_dev, covar);
 			}
 
 			error[0] = NonLinearFit.getError(residualSumOfSquares, noise, n, f.gradientIndices().length);

@@ -68,7 +68,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	{
 		int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
-			deviations[indices[i]] = (double) Math.sqrt(covar[i][i]);
+			deviations[indices[i]] = Math.sqrt(covar[i][i]);
 	}
 
 	public static double getSumOfSquares(final int n, double[] y)
