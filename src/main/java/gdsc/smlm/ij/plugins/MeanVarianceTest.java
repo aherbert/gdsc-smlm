@@ -15,6 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.SeriesOpener;
 import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
@@ -121,7 +122,7 @@ public class MeanVarianceTest implements PlugIn
 			// Get all the pixels into a float stack. 
 			// Look for saturated pixels that will invalidate the test.
 			final int size = imp.getStackSize();
-			float[][] slices = new float[size][];
+			slices = new float[size][];
 			final float saturated = getSaturation(imp);
 			ImageStack stack = imp.getImageStack();
 			for (int slice = 1; slice <= size; slice++)
@@ -330,7 +331,11 @@ public class MeanVarianceTest implements PlugIn
 		// Plot mean verses variance. Gradient is gain in ADU/e.
 		String title = TITLE + " results";
 		Plot plot = new Plot(title, "Mean", "Variance");
-		plot.setLimits(mean[0], mean[mean.length - 1], variance[0], variance[variance.length - 1]);
+		double[] xlimits = Maths.limits(mean);
+		double[] ylimits = Maths.limits(variance);
+		double xrange = (xlimits[1] - xlimits[0]) * 0.05;
+		double yrange = (ylimits[1] - ylimits[0]) * 0.05;
+		plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
 		plot.setColor(Color.blue);
 		plot.addPoints(mean, variance, Plot.CROSS);
 		plot.setColor(Color.red);
