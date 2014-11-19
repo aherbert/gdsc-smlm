@@ -22,6 +22,7 @@ import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.fitting.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -39,6 +40,7 @@ import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
@@ -78,6 +80,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private double initialPeakStdDev = (double) Prefs.get(Constants.initialPeakStdDev0, 0);
 	private boolean showDeviations = Prefs.get(Constants.showDeviations, false);
 	private boolean filterResults = Prefs.get(Constants.filterResults, false);
+	private boolean showFit = Prefs.get(Constants.showFit, false);
 
 	private int flags = DOES_16 | DOES_8G | DOES_32 | FINAL_PROCESSING | SNAPSHOT;
 	private ImagePlus imp;
@@ -170,6 +173,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		gd.addCheckbox("Log_progress", logProgress);
 		gd.addCheckbox("Show_deviations", showDeviations);
 		gd.addCheckbox("Filter_results", filterResults);
+		gd.addCheckbox("Show_fit", showFit);
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
@@ -285,6 +289,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		logProgress = gd.getNextBoolean();
 		showDeviations = gd.getNextBoolean();
 		filterResults = gd.getNextBoolean();
+		showFit = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
@@ -337,6 +342,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		Prefs.set(Constants.logProgress, logProgress);
 		Prefs.set(Constants.showDeviations, showDeviations);
 		Prefs.set(Constants.filterResults, filterResults);
+		Prefs.set(Constants.showFit, showFit);
 		Prefs.set(Constants.maxIterations, maxIterations);
 		Prefs.set(Constants.significantDigits, significantDigits);
 		Prefs.set(Constants.delta, delta);
@@ -510,6 +516,12 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 			if (params != null)
 			{
+				// Copy all the valid parameters into a new array
+				double[] validParams = new double[params.length];
+				int c = 0;
+				int validPeaks = 0;
+				validParams[c++] = params[0];
+
 				double[] initialParams = convertParameters(fitResult.getInitialParameters());
 				double[] paramsDev = convertParameters(fitResult.getParameterStdDev());
 				Rectangle regionBounds = new Rectangle();
@@ -527,6 +539,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					if (filterResults && config.validatePeak(n, initialParams, params) != FitStatus.OK)
 						continue;
 
+					if (showFit)
+					{
+						// Copy the valid parameters
+						validPeaks++;
+						for (int ii = i, j=0; j < 6; ii++, j++)
+							validParams[c++] = params[ii];
+					}
+
 					double[] peakParams = extractParams(params, i);
 					double[] peakParamsDev = extractParams(paramsDev, i);
 
@@ -541,6 +561,21 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				}
 
 				setOverlay(nMaxima, xpoints, ypoints);
+
+				// Draw the fit
+				if (showFit && validPeaks != 0)
+				{
+					double[] pixels = new double[data.length];
+					EllipticalGaussian2DFunction f = new EllipticalGaussian2DFunction(validPeaks, width);
+					f.initialise(validParams);
+					for (int x = 0; x < pixels.length; x++)
+						pixels[x] = f.eval(x);
+					FloatProcessor fp = new FloatProcessor(width, height, pixels);
+					// Insert into a full size image
+					FloatProcessor fp2 = new FloatProcessor(ip.getWidth(), ip.getHeight());
+					fp2.insert(fp, bounds.x, bounds.y);
+					Utils.display(TITLE, fp2);
+				}
 			}
 			else
 			{
@@ -766,14 +801,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			return null;
 
 		// Convert coordinates with 0.5 pixel offset
-		// Convert peak-width at half max to peak standard deviation
 		// Convert radians to degrees (if elliptical fitting)
 		for (int i = 6; i < params.length; i += 6)
 		{
-			params[i - 3] += 0.5f;
-			params[i - 2] += 0.5f;
-			params[i - 1] = Gaussian2DFitter.fwhm2sd(params[i - 1]);
-			params[i] = Gaussian2DFitter.fwhm2sd(params[i]);
+			params[i - 3] += 0.5;
+			params[i - 2] += 0.5;
 			if (isEllipticalFitting())
 				params[i - 4] *= 180.0 / Math.PI;
 		}

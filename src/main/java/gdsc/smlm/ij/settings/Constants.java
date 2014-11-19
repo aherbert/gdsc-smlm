@@ -46,6 +46,7 @@ public class Constants
 	public static final String initialPeakStdDev0 = "gdsc.smlm.initialPeakStdDev0";
 	public static final String showDeviations = "gdsc.smlm.showDeviations";
 	public static final String filterResults = "gdsc.smlm.filterResults";
+	public static final String showFit = "gdsc.smlm.showFit";
 	// -=-=-=-
 
 	public static final String algorithm = "gdsc.smlm.algorithm";
