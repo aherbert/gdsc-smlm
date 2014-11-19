@@ -51,6 +51,7 @@ import java.util.Collection;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.TestUtils;
 
 /**
@@ -292,7 +293,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		String filename = SettingsManager.getSettingsFilename();
 		SettingsManager.saveSettings(globalSettings, filename);
-		
+
 		if (!PeakFit.configureFitSolver(globalSettings, filename, false))
 			return false;
 
@@ -425,21 +426,60 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		if (ignore[ANGLE])
 			return tryAgain;
 
-		double p = TestUtils.tTest(0, sampleNew[ANGLE]);
-		if (p < settings.pValue)
+		// TODO - This needs to be checked. The angle is relative to the major axis (X). 
+		// It could be close to 0, 90 or 180 to allow it to be ignored.
+
+		final double[] angles = sampleNew[ANGLE].getValues();
+
+		for (double testAngle : new double[] { 0, 90, 180 })
 		{
-			log("NOTE: Angle is not significant: %g ~ 0.0 (p=%g) => Re-run with fixed zero angle",
-					sampleNew[ANGLE].getMean(), p);
-			ignore[ANGLE] = true;
-			fitFunction = FitFunction.FREE_CIRCULAR.ordinal();
-			if (settings.updatePreferences)
+			// The angle will be in the 0-180 domain.
+			// We need to compute the Statistical summary around the testAngle.
+			StatisticalSummary sampleStats;
+			if (testAngle == 0 || testAngle == 180)
 			{
-				config.getFitConfiguration().setFitFunction(fitFunction);
+				SummaryStatistics stats = new SummaryStatistics();
+				boolean zeroAngle = (testAngle == 0);
+				for (double a : angles)
+				{
+					if (zeroAngle)
+					{
+						// Convert to -90-90 domain
+						if (a > 90)
+							a -= 180;
+					}
+					else
+					{
+						// Convert to 90-270 domain
+						if (a < 90)
+							a += 180;
+					}
+					stats.addValue(a);
+				}
+				sampleStats = stats;
 			}
-			tryAgain = true;
+			else
+			{
+				// Already in the 0-180 domain around the angle 90
+				sampleStats = sampleNew[ANGLE];
+			}
+
+			final double p = TestUtils.tTest(testAngle, sampleStats);
+			if (p < settings.pValue)
+			{
+				log("NOTE: Angle is not significant: %g ~ %g (p=%g) => Re-run with fixed zero angle",
+						sampleNew[ANGLE].getMean(), testAngle, p);
+				ignore[ANGLE] = true;
+				fitFunction = FitFunction.FREE_CIRCULAR.ordinal();
+				if (settings.updatePreferences)
+				{
+					config.getFitConfiguration().setFitFunction(fitFunction);
+				}
+				tryAgain = true;
+			}
+			else
+				debug("  NOTE: Angle is significant: %g !~ %g (p=%g)", sampleNew[ANGLE].getMean(), testAngle, p);
 		}
-		else
-			debug("  NOTE: Angle is significant: %g !~ 0.0 (p=%g)", sampleNew[ANGLE].getMean(), p);
 		return tryAgain;
 	}
 
