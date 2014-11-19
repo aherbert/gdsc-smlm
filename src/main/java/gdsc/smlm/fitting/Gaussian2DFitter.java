@@ -690,7 +690,7 @@ public class Gaussian2DFitter
 
 	/**
 	 * Swap the axes so that the major axis is the X axis.
-	 * Correct the fit angle to lie within the -90-90 degree domain from the major-axis
+	 * Correct the fit angle to lie within the 0-180 degree domain from the major-axis.
 	 * 
 	 * @param i
 	 *            The angle position within the parameter array
@@ -737,10 +737,7 @@ public class Gaussian2DFitter
 
 		// Return in 0 - 180 degrees domain since the Gaussian has 2-fold symmetry,
 		// i.e. angle -10 == 170
-		params[i] = (double) ((angle < 0) ? angle + Math.PI : angle);
-
-		// Return in -90 - 90 degrees domain since 0 should be no angle
-		params[i] -= Math.PI / 2;
+		params[i] = (angle < 0) ? angle + Math.PI : angle;
 	}
 
 	private void swap(final int i, final double[] params)
