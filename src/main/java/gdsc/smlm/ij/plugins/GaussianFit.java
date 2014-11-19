@@ -567,6 +567,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				{
 					double[] pixels = new double[data.length];
 					EllipticalGaussian2DFunction f = new EllipticalGaussian2DFunction(validPeaks, width);
+					invertParameters(validParams);
 					f.initialise(validParams);
 					for (int x = 0; x < pixels.length; x++)
 						pixels[x] = f.eval(x);
@@ -812,6 +813,23 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		return params;
 	}
 
+	private double[] invertParameters(double[] params)
+	{
+		if (params == null)
+			return null;
+
+		// Convert coordinates with 0.5 pixel offset
+		// Convert radians to degrees (if elliptical fitting)
+		for (int i = 6; i < params.length; i += 6)
+		{
+			params[i - 3] -= 0.5;
+			params[i - 2] -= 0.5;
+			if (isEllipticalFitting())
+				params[i - 4] /= 180.0 / Math.PI;
+		}
+		return params;
+	}
+	
 	/**
 	 * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
 	 * <p>
