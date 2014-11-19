@@ -177,29 +177,29 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sb.append("#\t");
 		if (sourceText != null)
 			sb.append("Source\t");
-		sb.append(peakIdColumnName).append("\t");
+		sb.append(peakIdColumnName);
 		if (showEndFrame)
-			sb.append("End ").append(peakIdColumnName).append("\t");
-		sb.append("origX\t");
-		sb.append("origY\t");
-		sb.append("origValue\t");
-		sb.append("Error\t");
-		sb.append("Noise\t");
-		sb.append("Signal\t");
-		sb.append("SNR\t");
-		sb.append("Background\t");
+			sb.append("\tEnd ").append(peakIdColumnName);
+		sb.append("\torigX");
+		sb.append("\torigY");
+		sb.append("\torigValue");
+		sb.append("\tError");
+		sb.append("\tNoise");
+		sb.append("\tSignal");
+		sb.append("\tSNR");
+		sb.append("\tBackground");
 		addDeviation(sb);
-		sb.append("Amplitude\t");
+		sb.append("\tAmplitude");
 		addDeviation(sb);
-		sb.append("Angle\t");
+		sb.append("\tAngle");
 		addDeviation(sb);
-		sb.append("X\t");
+		sb.append("\tX");
 		addDeviation(sb);
-		sb.append("Y\t");
+		sb.append("\tY");
 		addDeviation(sb);
-		sb.append("X SD\t");
+		sb.append("\tX SD");
 		addDeviation(sb);
-		sb.append("Y SD\t");
+		sb.append("\tY SD");
 		addDeviation(sb);
 		if (this.calibration != null)
 		{
@@ -231,7 +231,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private void addDeviation(StringBuilder sb)
 	{
 		if (showDeviations)
-			sb.append("+/-\t");
+			sb.append("\t+/-");
 	}
 
 	/*
