@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Bessel;
+import gdsc.smlm.utils.Convolution;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
@@ -405,9 +406,11 @@ public class EMGainAnalysis implements PlugInFilter
 
 		if (s > 0)
 		{
-			// TODO - Use Fourier Transform when the kernel is large
-
-			gg = Maths.convolve(g, kernel);
+			// Use Fourier Transform when the convolution is large
+			if (g.length * kernel.length > 100000)
+				gg = Convolution.convolveFFT(g, kernel);
+			else
+				gg = Convolution.convolve(g, kernel);
 			// The convolution will have created a larger array so we must adjust the offset for this
 			c0 -= radius;
 		}
