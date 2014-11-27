@@ -2,7 +2,7 @@ package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.function.NonLinearFunction;
-import gdsc.smlm.fitting.function.PoissonLikelihoodFunction;
+import gdsc.smlm.fitting.function.PoissonLikelihoodWrapper;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 
@@ -68,9 +68,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	 */
 	private class PoissonWrapper
 	{
-		PoissonLikelihoodFunction fun;
+		PoissonLikelihoodWrapper fun;
 
-		public PoissonWrapper(PoissonLikelihoodFunction fun)
+		public PoissonWrapper(PoissonLikelihoodWrapper fun)
 		{
 			this.fun = fun;
 		}
@@ -78,7 +78,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 	private class MultivariatePoisson extends PoissonWrapper implements MultivariateFunction
 	{
-		public MultivariatePoisson(PoissonLikelihoodFunction fun)
+		public MultivariatePoisson(PoissonLikelihoodWrapper fun)
 		{
 			super(fun);
 		}
@@ -97,7 +97,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 	private class MultivariateVectorPoisson extends PoissonWrapper implements MultivariateVectorFunction
 	{
-		public MultivariateVectorPoisson(PoissonLikelihoodFunction fun)
+		public MultivariateVectorPoisson(PoissonLikelihoodWrapper fun)
 		{
 			super(fun);
 		}
@@ -199,7 +199,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	{
 		numberOfFittedPoints = n;
 
-		PoissonLikelihoodFunction maximumLikelihoodFunction = new PoissonLikelihoodFunction(f, a, y, n);
+		PoissonLikelihoodWrapper maximumLikelihoodFunction = new PoissonLikelihoodWrapper(f, a, y, n);
 
 		try
 		{

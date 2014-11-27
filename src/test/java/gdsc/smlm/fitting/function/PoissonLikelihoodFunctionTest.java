@@ -156,7 +156,7 @@ public class PoissonLikelihoodFunctionTest
 		double[] dyda2 = new double[indices.length];
 		double[] a;
 
-		PoissonLikelihoodFunction ff1;
+		PoissonLikelihoodWrapper ff1;
 
 		int n = maxx * maxx;
 		int count = 0, total = 0;
@@ -178,7 +178,7 @@ public class PoissonLikelihoodFunctionTest
 								for (int i = 0; i < n; i++)
 									data[i] = f1.eval(i);
 
-								ff1 = new PoissonLikelihoodFunction(f1, a, data, n);
+								ff1 = new PoissonLikelihoodWrapper(f1, a, data, n);
 
 								// Numerically solve gradient. 
 								// Calculate the step size h to be an exact numerical representation
@@ -349,7 +349,7 @@ public class PoissonLikelihoodFunctionTest
 		double[] dyda2 = new double[indices.length];
 		double[] a;
 
-		PoissonLikelihoodFunction ff1;
+		PoissonLikelihoodWrapper ff1;
 
 		int n = maxx * maxx;
 		int count = 0, total = 0;
@@ -371,7 +371,7 @@ public class PoissonLikelihoodFunctionTest
 								for (int i = 0; i < n; i++)
 									data[i] = f1.eval(i);
 
-								ff1 = new PoissonLikelihoodFunction(f1, a, data, n);
+								ff1 = new PoissonLikelihoodWrapper(f1, a, data, n);
 
 								// Numerically solve gradient. 
 								// Calculate the step size h to be an exact numerical representation

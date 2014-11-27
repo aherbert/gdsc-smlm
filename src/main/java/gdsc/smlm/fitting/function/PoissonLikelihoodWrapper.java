@@ -24,11 +24,8 @@ import java.util.Arrays;
  * <p>
  * The negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or for a chosen
  * observed value.
- * <p>
- * This implements the Apache Commons Math API so that optimisers can be used for Maximum Likelihood Estimation. Uses
- * the deprecated API since the new API for version 4.0 is not a fully documented final release.
  */
-public class PoissonLikelihoodFunction
+public class PoissonLikelihoodWrapper
 {
 	private NonLinearFunction f;
 	private double[] a, data;
@@ -52,7 +49,7 @@ public class PoissonLikelihoodFunction
 	 * @param n
 	 *            The number of observed values
 	 */
-	public PoissonLikelihoodFunction(NonLinearFunction f, double[] a, double[] k, int n)
+	public PoissonLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n)
 	{
 		this.f = f;
 		this.a = Arrays.copyOf(a, a.length);
