@@ -50,16 +50,15 @@ public class PeakResult implements Comparable<PeakResult>
 	 * @param sd
 	 * @param signal
 	 */
-	public PeakResult(float x, float y, float sd, int signal)
+	public PeakResult(float x, float y, float sd, float signal)
 	{
-		// TODO Auto-generated constructor stub
 		origX = (int) Math.round(x);
 		origY = (int) Math.round(y);
 		params = new float[7];
 		params[Gaussian2DFunction.X_POSITION] = x;
 		params[Gaussian2DFunction.Y_POSITION] = y;
 		params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sd;
-		params[Gaussian2DFunction.AMPLITUDE] = (float) (signal / (Math.PI * 2 * sd * sd));
+		params[Gaussian2DFunction.SIGNAL] = signal;
 	}
 
 	/**
@@ -69,7 +68,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public float getSignal()
 	{
-		return getSignal(params);
+		return params[Gaussian2DFunction.SIGNAL];
 	}
 
 	/**
@@ -81,36 +80,8 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public float getSignal(int peakId)
 	{
-		return getSignal(peakId, params);
-	}
-
-	/**
-	 * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
-	 * 
-	 * @param params
-	 *            The peak parameters
-	 * @return The signal of the first peak
-	 */
-	public static float getSignal(float[] params)
-	{
-		return (float) (params[Gaussian2DFunction.AMPLITUDE] * 2 * Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]);
-	}
-
-	/**
-	 * Get the signal strength for the nth peak (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
-	 * 
-	 * @param peakId
-	 *            The peak number
-	 * @param params
-	 *            The peak parameters
-	 * @return The signal of the nth peak
-	 */
-	public static float getSignal(int peakId, float[] params)
-	{
-		if (peakId * 6 + 6 >= params.length)
-			return 0;
-		return (float) (params[peakId * 6 + Gaussian2DFunction.AMPLITUDE] * 2 * Math.PI *
-				params[peakId * 6 + Gaussian2DFunction.X_SD] * params[peakId * 6 + Gaussian2DFunction.Y_SD]);
+		final int index = peakId * 6 + Gaussian2DFunction.SIGNAL;
+		return (index < params.length) ? params[index] : 0;
 	}
 
 	/**
@@ -238,9 +209,9 @@ public class PeakResult implements Comparable<PeakResult>
 		if (peak == o.peak)
 		{
 			// Sort by peak height: Descending
-			if (params[Gaussian2DFunction.AMPLITUDE] > o.params[Gaussian2DFunction.AMPLITUDE])
+			if (params[Gaussian2DFunction.SIGNAL] > o.params[Gaussian2DFunction.SIGNAL])
 				return -1;
-			if (params[Gaussian2DFunction.AMPLITUDE] < o.params[Gaussian2DFunction.AMPLITUDE])
+			if (params[Gaussian2DFunction.SIGNAL] < o.params[Gaussian2DFunction.SIGNAL])
 				return 1;
 			return 0;
 		}
@@ -264,11 +235,23 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Get the amplitude for the first peak. Amplitude = Signal / (2*pi*sd0*sd1).
+	 * 
 	 * @return The amplitude for the first peak
 	 */
 	public float getAmplitude()
 	{
-		return params[Gaussian2DFunction.AMPLITUDE];
+		return getAmplitude(params);
+	}
+
+	/**
+	 * Get the amplitude for the first peak. Amplitude = Signal / (2*pi*sd0*sd1).
+	 * 
+	 * @return The amplitude for the first peak
+	 */
+	public static float getAmplitude(float[] params)
+	{
+		return (float) (params[Gaussian2DFunction.SIGNAL] / (2 * Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 	}
 
 	/**

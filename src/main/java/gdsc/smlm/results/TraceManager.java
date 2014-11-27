@@ -530,12 +530,12 @@ public class TraceManager
 				PeakResult result = traces[i].getHead();
 				if (result == null)
 					continue;
-				float[] centroid = traces[i].getCentroid();
-				float sd = traces[i].getStandardDeviation();
-				float background = 0;
-				float amplitude = traces[i].getAmplitude();
-				float[] params = new float[] { background, amplitude, 0, centroid[0], centroid[1], sd, sd };
-				int endFrame = traces[i].getTail().getEndFrame();
+				final float[] centroid = traces[i].getCentroid();
+				final float sd = traces[i].getStandardDeviation();
+				final float background = 0;
+				final float signal = (float) traces[i].getSignal();
+				final float[] params = new float[] { background, signal, 0, centroid[0], centroid[1], sd, sd };
+				final int endFrame = traces[i].getTail().getEndFrame();
 				results.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue, 0, 0,
 						params, null, endFrame, i + 1));
 			}

@@ -1008,7 +1008,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			float[] params = new float[7];
 			params[Gaussian2DFunction.X_POSITION] = cx;
 			params[Gaussian2DFunction.Y_POSITION] = cy;
-			params[Gaussian2DFunction.AMPLITUDE] = (float) (spotSignal / (2 * Math.PI * psfWidth * psfWidth));
+			params[Gaussian2DFunction.SIGNAL] = (float) (spotSignal);
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			PeakResult result = new PeakResult(s.frame, (int) cx, (int) cy, 0, 0, 0, params, null);
 			if (trace == null)
@@ -1387,15 +1387,15 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			double[] params = new double[7];
 			double psfWidth = Double.parseDouble(widthTextField.getText());
 			params[Gaussian2DFunction.BACKGROUND] = smoothMean[slice - 1];
-			params[Gaussian2DFunction.AMPLITUDE] = (gain * signal / (2 * Math.PI * psfWidth * psfWidth));
+			params[Gaussian2DFunction.SIGNAL] = (gain * signal);
 			params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
 			params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-			FitResult fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params);
+			FitResult fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, false);
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
 				params = fitResult.getParameters();
-				double spotSignal = 2 * Math.PI * psfWidth * psfWidth * params[Gaussian2DFunction.AMPLITUDE] / gain;
+				final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
 				rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
 						Utils.rounded(spotSignal / noise, 3)));
 				ImageROIPainter.addRoi(rawImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
@@ -1416,15 +1416,15 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			params = new double[7];
 			//float psfWidth = Float.parseFloat(widthTextField.getText());
 			params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];
-			params[Gaussian2DFunction.AMPLITUDE] = (float) (gain * signal / (2 * Math.PI * psfWidth * psfWidth));
+			params[Gaussian2DFunction.SIGNAL] = (float) (gain * signal);
 			params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
 			params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-			fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params);
+			fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, false);
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
 				params = fitResult.getParameters();
-				double spotSignal = 2 * Math.PI * psfWidth * psfWidth * params[Gaussian2DFunction.AMPLITUDE] / gain;
+				final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
 				blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
 						Utils.rounded(spotSignal / noise, 3)));
 				ImageROIPainter.addRoi(blurImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],

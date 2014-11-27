@@ -45,6 +45,11 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		super(npeaks, maxx);
 	}
 
+	protected static final int N = 0;
+	protected static final int HEIGHT = 1;
+	protected static final int AA = 2;
+	protected static final int AA2 = 3;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -54,16 +59,20 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new double[npeaks][2];
+		peakFactors = new double[npeaks][4];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double sx = a[j * 6 + X_SD];
 			final double sx2 = sx * sx;
 
+			peakFactors[j][N] = ONE_OVER_TWO_PI / sx2;
+			peakFactors[j][HEIGHT] = a[j * 6 + SIGNAL] * peakFactors[j][N];
+
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
-			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-			peakFactors[j][0] = -0.5 / sx2;
-			peakFactors[j][1] = -2.0 * peakFactors[j][0];
+			// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+
+			peakFactors[j][AA] = -0.5 / sx2;
+			peakFactors[j][AA2] = -2.0 * peakFactors[j][AA];
 		}
 	}
 
@@ -74,20 +83,15 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * Evaluates an 2-dimensional Gaussian function for multiple peaks.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Position (p) is the position of
-	 * the Gaussian in each of the N-dimensions. Width (w) is the peak width at half-max in each of the N-dimensions.
-	 * This produces an additional 1+2N coefficients per peak.
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the volume of the Gaussian. Angle (r) is the rotation
+	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
+	 * the standard deviation in each of the N-dimensions.
 	 * <p>
 	 * The equation per peak is:<br/>
-	 * y_peak = A * product(N) [ exp(-4 * log(2) * (x[i]-p[i]) * (x[i]-p[i]) / (w[i] * w[i])) ]
-	 * <p>
-	 * The equation for all peaks is:<br/>
-	 * y = B + sum(npeaks) [ y_peak[i] ]
-	 * <p>
-	 * The number of peaks can be specified in the constructor.
-	 * <p>
-	 * Note the use of the width as the peak width at half max. This can be converted to the Gaussian peak standard
-	 * deviation using: SD = pwhm / 2*sqrt(2*log(2)); SD = pwhm / 2.35482
+	 * y_peak = A/(2*pi*sx*sy) * exp( -( a(x-x0)^2 + c(y-y0)^2 ) )<br/>
+	 * Where: <br/>
+	 * a = 1/(2*sx^2) <br/>
+	 * c = 1/(2*sy^2)
 	 * 
 	 * @param x
 	 *            Input predictor
@@ -105,16 +109,15 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		// First parameter is the background level 
 		double y_fit = a[BACKGROUND];
-		dyda[dydapos++] = 1; // Gradient for a constant background is 1
+		dyda[dydapos++] = 1.0; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
-		;
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
 		for (int j = 0; j < npeaks; j++)
 		{
-			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j][0], peakFactors[j][1]);
+			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
 			apos += 6;
 			dydapos += PARAMETERS_PER_PEAK;
 		}
@@ -123,21 +126,18 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos, final int dydapos,
-			final double aa, final double aa2)
+			final double[] factors)
 	{
-		final double h = a[apos + AMPLITUDE];
-
 		final double dx = x0 - a[apos + X_POSITION];
 		final double dy = x1 - a[apos + Y_POSITION];
 
-		//final double y = (double) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
-
 		// Calculate gradients
-		//dy_da[dydapos] = y / h;
-		
-		dy_da[dydapos] = FastMath.exp(aa * (dx * dx + dy * dy));
-		final double y = h * dy_da[dydapos];
-		final double yaa2 = y * aa2;
+
+		final double aadx2dy2 = factors[AA] * (dx * dx + dy * dy);
+		final double exp = FastMath.exp(aadx2dy2);
+		dy_da[dydapos] = factors[N] * exp;
+		final double y = factors[HEIGHT] * exp;
+		final double yaa2 = y * factors[AA2];
 		dy_da[dydapos + 1] = yaa2 * dx;
 		dy_da[dydapos + 2] = yaa2 * dy;
 
@@ -163,20 +163,18 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++, apos += 6)
 		{
-			y_fit += gaussian(x0, x1, apos, peakFactors[j][0]);
+			y_fit += gaussian(x0, x1, apos, peakFactors[j]);
 		}
 
 		return y_fit;
 	}
 
-	protected double gaussian(final int x0, final int x1, final int apos, final double aa)
+	protected double gaussian(final int x0, final int x1, final int apos, final double[] factors)
 	{
-		final double h = a[apos + AMPLITUDE];
-
 		final double dx = x0 - a[apos + X_POSITION];
 		final double dy = x1 - a[apos + Y_POSITION];
 
-		return h * FastMath.exp(aa * (dx * dx + dy * dy));
+		return factors[HEIGHT] * FastMath.exp(factors[AA] * (dx * dx + dy * dy));
 	}
 
 	@Override
@@ -186,7 +184,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAmplitude()
+	public boolean evaluatesSignal()
 	{
 		return true;
 	}

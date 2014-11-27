@@ -102,6 +102,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math3.analysis.integration.RombergIntegrator;
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
@@ -307,6 +309,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.pixelPitch), Utils.rounded(xyz[0]));
 				Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.pixelPitch), Utils.rounded(xyz[1]));
 				Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.pixelPitch));
+				final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.pixelPitch);
+				Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa),
+						Utils.rounded(sa / settings.pixelPitch));
 				Utils.log("Signal (N) = %s - %s photons : %s - %s ADUs", Utils.rounded(settings.photonsPerSecond),
 						Utils.rounded(settings.photonsPerSecondMaximum),
 						Utils.rounded(settings.photonsPerSecond * totalGain),
@@ -517,13 +522,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
 		final double I1 = computeI1(rho, 0);
-		//System.out.printf("I1 = %f\n", I1);
 
 		return Math.sqrt(F * (sa2 / N) * (1 / I1));
 	}
 
 	/**
-	 * Compute the function I1 using numerical integration.
+	 * Compute the function I1 using numerical integration. See Mortensen, et al (2010) Nature Methods 7, 377-383), SI
+	 * equation 43.
 	 * 
 	 * <pre>
 	 * I1 = 1 + sum [ ln(t) / (1 + t/rho) ] dt
@@ -542,13 +547,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (rho == 0)
 			return 1;
 
+		final double relativeAccuracy = 1e-4;
+		final double absoluteAccuracy = 1e-8;
+		final int minimalIterationCount = 3;
+		final int maximalIterationCount = 32;
+
 		UnivariateIntegrator i;
 		switch (method)
 		{
-			case 0:
+		// These integrators do not converge, presumably because log(0) is undefined.
+			case 2:
+				i = new SimpsonIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
+						maximalIterationCount);
+				break;
+
+			case 1:
+				i = new RombergIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
+						maximalIterationCount);
+				break;
+
 			default:
-				// This supports finding the integral without evaluating the end points (which at t=0 is undefined)
-				i = new IterativeLegendreGaussIntegrator(20, 1e-4, 1e-8, 3, 200);
+				// This supports finding the integral without evaluating the end points (which at x=0 is undefined)
+				i = new IterativeLegendreGaussIntegrator(20, relativeAccuracy, absoluteAccuracy, minimalIterationCount,
+						maximalIterationCount);
 		}
 
 		// Specify the function to integrate
@@ -560,7 +581,25 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return x * Math.log(x) / (x + rho);
 			}
 		};
-		return -i.integrate(2000, f, 0, 1);
+		final double i1 = -i.integrate(2000, f, 0, 1);
+		//System.out.printf("I1 = %f (%d)\n", i1, i.getEvaluations());
+
+		// The function requires more evaluations and sometimes does not converge even with the Gauss integrator,
+		// presumably because log(x) significantly changes as x -> 0 where as x log(x) in the function above 
+		// is more stable
+
+		//		UnivariateFunction f2 = new UnivariateFunction()
+		//		{
+		//			@Override
+		//			public double value(double x)
+		//			{
+		//				return Math.log(x) / ( 1 + x / rho);
+		//			}
+		//		};
+		//		double i2 = 1 + i.integrate(2000, f2, 0, 1);
+		//		System.out.printf("I1 (B) = %f (%d)\n", i2, i.getEvaluations());
+
+		return i1;
 	}
 
 	/**
@@ -754,7 +793,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			else
 			{
 				hwhm = 0.5 * PSFCalculator.SD_TO_FWHM_FACTOR *
-						PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture, 1) /
+						PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture) /
 						settings.pixelPitch;
 			}
 		}
@@ -1233,8 +1272,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Add drawn spots to memory
 		results = new MemoryPeakResults();
-		results.setCalibration(new Calibration(settings.pixelPitch, (float) settings.getTotalGain(),
-				settings.exposureTime));
+		Calibration c = new Calibration(settings.pixelPitch, (float) settings.getTotalGain(),
+				settings.exposureTime);
+		c.emCCD = (settings.getEmGain() > 1);
+		c.bias = settings.bias;
+		c.readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1); 
+		results.setCalibration(c);
 		results.setSortAfterEnd(true);
 		results.begin();
 
@@ -1504,7 +1547,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// Calibration based on imaging fluorescent beads at 20nm intervals.
 			// Set the PSF to 1.5 x FWHM at 450nm
-			double sd = PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture, 1) /
+			double sd = PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture) /
 					settings.pixelPitch;
 			return new GaussianPSFModel(createRandomGenerator(), sd, sd, 450.0 / settings.pixelPitch);
 		}
@@ -1700,8 +1743,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					{
 						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) psfSD;
 					}
-					params[Gaussian2DFunction.AMPLITUDE] = (float) (newIntensity / (2 * Math.PI *
-							params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
+					params[Gaussian2DFunction.SIGNAL] = (float) newIntensity;
 
 					// The variance of the background image is currently in photons^2. Apply gain to convert to ADUs. 
 					double backgroundVariance = localStats[1] * totalGain * totalGain;
@@ -1766,7 +1808,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Apply EM gain and add Gaussian read noise after all the photons have been simulated
 			final boolean tubbsModel = true;
-			if (settings.getEmGain() >= 1)
+			if (settings.getEmGain() > 1) // This could be >=1 but the rest of the code ignores EM-gain if it is <=1
 			{
 				// See: https://www.andor.com/learning-academy/sensitivity-making-sense-of-sensitivity
 				// there is a statistical variation in the overall number of electrons generated from an initial 
@@ -2304,7 +2346,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append("\t");
 		sb.append(localisations.size()).append("\t");
 		sb.append(Utils.rounded(getHWHM(), 4)).append("\t");
-		sb.append(Utils.rounded(getPsfSD(), 4)).append("\t");
+		double s = getPsfSD();
+		sb.append(Utils.rounded(s, 4)).append("\t");
+		s *= settings.pixelPitch;
+		final double sa = PSFCalculator.squarePixelAdjustment(s, settings.pixelPitch) / settings.pixelPitch;
+		sb.append(Utils.rounded(sa, 4)).append("\t");
 		int nStats = (imagePSF) ? stats.length - 2 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
@@ -2516,7 +2562,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private String createHeader()
 	{
-		StringBuilder sb = new StringBuilder("Dataset\tMolecules\tPulses\tLocalisations\tHWHM\tSD");
+		StringBuilder sb = new StringBuilder("Dataset\tMolecules\tPulses\tLocalisations\tHWHM\tS\tSa");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
@@ -2605,8 +2651,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					params[Gaussian2DFunction.Y_POSITION] /= n;
 					params[Gaussian2DFunction.X_SD] /= n;
 					params[Gaussian2DFunction.Y_SD] /= n;
-					params[Gaussian2DFunction.AMPLITUDE] = (float) (params[Gaussian2DFunction.AMPLITUDE] / (2 *
-							Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 
 					ExtendedPeakResult p = new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
 							(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT,
@@ -2628,7 +2672,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			params[Gaussian2DFunction.BACKGROUND] += data[0];
 			params[Gaussian2DFunction.X_POSITION] += localisation.getX();
 			params[Gaussian2DFunction.Y_POSITION] += localisation.getY();
-			params[Gaussian2DFunction.AMPLITUDE] += localisation.getIntensity();
+			params[Gaussian2DFunction.SIGNAL] += localisation.getIntensity();
 			noise += data[1] * data[1];
 			params[Gaussian2DFunction.X_SD] += data[2];
 			params[Gaussian2DFunction.Y_SD] += data[3];
@@ -2644,8 +2688,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			params[Gaussian2DFunction.Y_POSITION] /= n;
 			params[Gaussian2DFunction.X_SD] /= n;
 			params[Gaussian2DFunction.Y_SD] /= n;
-			params[Gaussian2DFunction.AMPLITUDE] = (float) (params[Gaussian2DFunction.AMPLITUDE] / (2 * Math.PI *
-					params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 
 			traceResults.add(new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()), (int) Math
 					.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT, currentId));

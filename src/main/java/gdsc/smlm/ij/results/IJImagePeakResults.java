@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.results;
 
+import gdsc.smlm.fitting.function.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.XmlUtils;
 import ij.ImagePlus;
@@ -384,7 +385,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		// Use the signal for the count
 		if ((displayFlags & DISPLAY_SIGNAL) != 0)
 		{
-			float signal = PeakResult.getSignal(params);
+			final float signal = params[Gaussian2DFunction.SIGNAL];
 			for (int i = 0; i < 4; i++)
 				value[i] = signal;
 		}

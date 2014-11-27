@@ -146,13 +146,8 @@ public class FitConfiguration implements Cloneable
 	protected void addPeakRestrictions(GaussianFunction func, GaussianStoppingCriteria sc, double[] params)
 	{
 		// TODO - Check if it is worth using this to stop fitting early or simply do it at the end.
-		sc.setMinimumAmplitude(0);
-
-		//		sc.setMinimumPosition(new double[] { 2, 2 });
-		//		sc.setMaximumPosition(new double[] { func.getDimensions()[0], func.getDimensions()[0] });
-		//
-		//		sc.setMinimumWidth(new double[] { 2, 2 });
-		//		sc.setMaximumWidth(new double[] { 12, 12 });
+		sc.setMinimumSignal(0);
+		// We could also set min and max positions and widths
 	}
 
 	/**
@@ -757,14 +752,9 @@ public class FitConfiguration implements Cloneable
 		}
 
 		// Check signal threshold
-		double signal = 0;
+		final double signal = peakParams[Gaussian2DFunction.SIGNAL + offset];
 		if (signalStrength != 0)
 		{
-			// Signal = Amplitude * 2 * pi * sx * sy
-			final double factor = (double) (Math.PI * 2);
-			signal = factor * peakParams[Gaussian2DFunction.AMPLITUDE + offset] *
-					peakParams[Gaussian2DFunction.X_SD + offset] * peakParams[Gaussian2DFunction.Y_SD + offset];
-
 			// Compare the signal to the desired signal strength
 			if (signal < signalThreshold)
 			{
@@ -800,15 +790,10 @@ public class FitConfiguration implements Cloneable
 		// Check precision
 		if (precisionThreshold > 0 && nmPerPixel > 0 && gain > 0)
 		{
-			if (signal == 0)
-			{
-				final double factor = (double) (Math.PI * 2);
-				signal = factor * peakParams[Gaussian2DFunction.AMPLITUDE + offset] *
-						peakParams[Gaussian2DFunction.X_SD + offset] * peakParams[Gaussian2DFunction.Y_SD + offset];
-			}
-			double sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD + offset]) * 0.5f;
+			final double sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD +
+					offset]) * 0.5;
 
-			double precision;
+			final double precision;
 			// We can calculate the precision using the estimated noise for the image or using the expected number
 			// of background photons at the location.
 			//precision = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
@@ -817,7 +802,7 @@ public class FitConfiguration implements Cloneable
 			// This allows for better filtering when the background is variable, e.g. when imaging cells.
 			precision = PeakResult.getPrecisionX(nmPerPixel, nmPerPixel * sd, signal / gain,
 					Math.max(0, peakParams[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
-			
+
 			if (precision > precisionThreshold)
 			{
 				if (log != null)

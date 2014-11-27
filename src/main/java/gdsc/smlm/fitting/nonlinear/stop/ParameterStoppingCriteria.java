@@ -22,7 +22,7 @@ import gdsc.smlm.fitting.utils.DoubleEquality;
  * <p>
  * Stop when successive iterations with a reduced error move the fitted coordinates by less than a specified distance.
  * <p>
- * The criteria also ensure that amplitude, coordinates and peak-widths are held positive, otherwise fitting is stopped.
+ * The criteria also ensure that signal, coordinates and peak-widths are held positive, otherwise fitting is stopped.
  */
 public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 {
@@ -66,8 +66,8 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 				for (int i = 0; i < peaks; i++)
 				{
 					sb.append(", Peak").append(i + 1).append("=[");
-					sb.append(DoubleEquality.relativeError(bestA[i * 6 + Gaussian2DFunction.AMPLITUDE], a[i * 6 +
-							Gaussian2DFunction.AMPLITUDE]));
+					sb.append(DoubleEquality.relativeError(bestA[i * 6 + Gaussian2DFunction.SIGNAL], a[i * 6 +
+							Gaussian2DFunction.SIGNAL]));
 					sb.append(",");
 
 					if (func.evaluatesAngle())
@@ -111,8 +111,8 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 
 		for (int i = 0; i < peaks; i++)
 		{
-			if (!eq.almostEqualComplement(bestA[i * 6 + Gaussian2DFunction.AMPLITUDE], a[i * 6 +
-					Gaussian2DFunction.AMPLITUDE]))
+			if (!eq.almostEqualComplement(bestA[i * 6 + Gaussian2DFunction.SIGNAL], a[i * 6 +
+					Gaussian2DFunction.SIGNAL]))
 				return false;
 
 			// Calculate the smallest angle between the two angles. This should be in the range 0 - 90 degrees.

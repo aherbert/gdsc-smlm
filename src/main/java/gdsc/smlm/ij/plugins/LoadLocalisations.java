@@ -88,7 +88,7 @@ public class LoadLocalisations implements PlugIn
 			}
 
 			float[] params = new float[7];
-			params[Gaussian2DFunction.AMPLITUDE] = (float) (l.getIntensity() / (2 * Math.PI));
+			params[Gaussian2DFunction.SIGNAL] = (float) (l.getIntensity());
 			params[Gaussian2DFunction.X_POSITION] = (float) l.getX();
 			params[Gaussian2DFunction.Y_POSITION] = (float) l.getY();
 			params[Gaussian2DFunction.X_SD] = 1;

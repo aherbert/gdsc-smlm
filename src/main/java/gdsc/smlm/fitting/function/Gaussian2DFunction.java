@@ -24,8 +24,10 @@ package gdsc.smlm.fitting.function;
  */
 public abstract class Gaussian2DFunction extends GaussianFunction
 {
+	public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI; 
+
 	public static final int BACKGROUND = 0;
-	public static final int AMPLITUDE = 1;
+	public static final int SIGNAL = 1;
 	public static final int ANGLE = 2;
 	public static final int X_POSITION = 3;
 	public static final int Y_POSITION = 4;
@@ -97,7 +99,7 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 			indices[p++] = 0;
 		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
 		{
-			indices[p++] = i + AMPLITUDE;
+			indices[p++] = i + SIGNAL;
 			if (gf.evaluatesAngle())
 				indices[p++] = i + ANGLE;
 			indices[p++] = i + X_POSITION;

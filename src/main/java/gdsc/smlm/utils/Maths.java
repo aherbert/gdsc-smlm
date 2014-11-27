@@ -2,8 +2,6 @@ package gdsc.smlm.utils;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.util.FastMath;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 

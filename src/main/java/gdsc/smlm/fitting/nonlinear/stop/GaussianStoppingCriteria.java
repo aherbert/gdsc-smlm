@@ -25,7 +25,7 @@ import java.util.Arrays;
  * Stop when successive iterations with a reduced error move the fitted X,Y coordinates by less than a specified
  * distance (delta).
  * <p>
- * The criteria also ensure that amplitude, coordinates and peak-widths are held positive, otherwise fitting is stopped.
+ * The criteria also ensure that signal, coordinates and peak-widths are held positive, otherwise fitting is stopped.
  */
 public class GaussianStoppingCriteria extends StoppingCriteria
 {
@@ -35,7 +35,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	protected int dimensions;
 	protected GaussianFunction func;
 
-	private double minimumAmplitude = Float.NEGATIVE_INFINITY;
+	private double minimumSignal = Float.NEGATIVE_INFINITY;
 	private double[] minimumPosition = null;
 	private double[] maximumPosition = null;
 	private double[] minimumSD = null;
@@ -159,7 +159,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	{
 		for (int i = 0; i < peaks; i++)
 		{
-			if (a[i * 6 + Gaussian2DFunction.AMPLITUDE] < minimumAmplitude)
+			if (a[i * 6 + Gaussian2DFunction.SIGNAL] < minimumSignal)
 				return true;
 
 			if (isBelow(minimumPosition, a, i * 6 + Gaussian2DFunction.X_POSITION))
@@ -248,21 +248,21 @@ public class GaussianStoppingCriteria extends StoppingCriteria
 	}
 
 	/**
-	 * @param minimumAmplitude
-	 *            the minimum amplitude
+	 * @param minimumSignal
+	 *            the minimum signal
 	 */
-	public void setMinimumAmplitude(double minimumAmplitude)
+	public void setMinimumSignal(double minimumSignal)
 	{
-		if (func.evaluatesAmplitude())
-			this.minimumAmplitude = minimumAmplitude;
+		if (func.evaluatesSignal())
+			this.minimumSignal = minimumSignal;
 	}
 
 	/**
-	 * @return the minimum amplitude
+	 * @return the minimum signal
 	 */
-	public double getMinimumAmplitude()
+	public double getMinimumSignal()
 	{
-		return minimumAmplitude;
+		return minimumSignal;
 	}
 
 	/**

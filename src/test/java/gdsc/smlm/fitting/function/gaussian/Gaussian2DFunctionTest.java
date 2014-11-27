@@ -17,10 +17,10 @@ public abstract class Gaussian2DFunctionTest
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
-	// Step size for deerivatives:
+	// Step size for derivatives:
 	// h ~ (Ef)^(1/3) * xc
 	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
-	final double h_ = (double) (Math.pow(1e-3f, 1.0 / 3));
+	final double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
 
 	int[] testx = new int[] { 4, 5, 6 };
 	int[] testy = new int[] { 4, 5, 6 };
@@ -29,14 +29,14 @@ public abstract class Gaussian2DFunctionTest
 	double[] testamplitude1 = new double[] { 15, 55, 105 };
 	double[] testangle1 = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
 	double[] testcx1 = new double[] { 4.9, 5.3 };
-	double[] testcy1 = new double[] { 4.8, 5.1 };
-	double[][] testw1 = new double[][] { { 1.1, 1.2 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.5, 1.7 }, };
+	double[] testcy1 = new double[] { 4.8, 5.2 };
+	double[][] testw1 = new double[][] { { 1.1, 1.2 }, { 1.5, 1.2 }, { 1.1, 1.7 }, { 1.5, 1.7 }, };
 
 	double[] testamplitude2 = new double[] { 20, 50 };
 	double[] testangle2 = new double[] { (double) (Math.PI / 7), (double) (Math.PI / 11) };
 	double[] testcx2 = new double[] { 4.8, 5.3 };
 	double[] testcy2 = new double[] { 5.1, 4.9 };
-	double[][] testw2 = new double[][] { { 1.2, 1.4 }, { 1.2, 1.5 }, { 1.3, 1.4 }, { 1.3, 1.5 }, };
+	double[][] testw2 = new double[][] { { 1.2, 1.4 }, { 1.3, 1.4 }, { 1.2, 1.5 }, { 1.3, 1.5 }, };
 
 	int maxx = 10;
 	double background = 50;
@@ -55,7 +55,7 @@ public abstract class Gaussian2DFunctionTest
 		{
 			testbackground = new double[] { testbackground[0] };
 		}
-		if (!f1.evaluatesAmplitude())
+		if (!f1.evaluatesSignal())
 		{
 			testamplitude1 = new double[] { testamplitude1[0] };
 			testamplitude2 = new double[] { testamplitude2[0] };
@@ -120,7 +120,7 @@ public abstract class Gaussian2DFunctionTest
 			Assert.assertEquals("Background", 0, gradientIndices[p++]);
 		for (int peak = 1, i = 1; peak <= npeaks; peak++, i += 6)
 		{
-			if (gf.evaluatesAmplitude())
+			if (gf.evaluatesSignal())
 				Assert.assertEquals("Amplitude", i, gradientIndices[p++]);
 			if (gf.evaluatesAngle())
 				Assert.assertEquals("Angle", i + 1, gradientIndices[p++]);
@@ -189,8 +189,8 @@ public abstract class Gaussian2DFunctionTest
 	@Test
 	public void functionComputesAmplitudeGradient()
 	{
-		if (f1.evaluatesAmplitude())
-			functionComputesTargetGradient(Gaussian2DFunction.AMPLITUDE);
+		if (f1.evaluatesSignal())
+			functionComputesTargetGradient(Gaussian2DFunction.SIGNAL);
 	}
 
 	@Test
@@ -274,6 +274,7 @@ public abstract class Gaussian2DFunctionTest
 										double value3 = f1b.eval(y * maxx + x, dyda2);
 
 										double gradient = (value2 - value3) / (2 * h);
+										//System.out.printf("%f == [%d] %f?\n", gradient, gradientIndex, dyda[gradientIndex]);
 										Assert.assertTrue(gradient + " != " + dyda[gradientIndex],
 												eq.almostEqualComplement(gradient, dyda[gradientIndex]));
 									}
@@ -340,10 +341,10 @@ public abstract class Gaussian2DFunctionTest
 	{
 		if (f2 != null)
 		{
-			if (f2.evaluatesAmplitude())
+			if (f2.evaluatesSignal())
 			{
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.AMPLITUDE);
-				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.AMPLITUDE + 6);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
+				functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL + 6);
 			}
 		}
 	}
@@ -478,7 +479,7 @@ public abstract class Gaussian2DFunctionTest
 	}
 
 	@Test
-	public void functionComputesGaussianIntegral()
+	public void functionComputesGaussian()
 	{
 		double background = 0;
 		int maxx = 30;
@@ -513,9 +514,8 @@ public abstract class Gaussian2DFunctionTest
 												ok);
 								}
 
-								double integral = (double) (amplitude1 * 2.0 * Math.PI * w1[0] * w1[1]);
-								Assert.assertTrue(sum + " != " + integral,
-										eq.almostEqualComplement((double) sum, integral));
+								Assert.assertTrue(sum + " != " + amplitude1,
+										eq.almostEqualComplement((double) sum, amplitude1));
 							}
 		}
 		catch (AssertionError e)

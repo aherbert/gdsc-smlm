@@ -58,18 +58,14 @@ public class SingleNBFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 
 	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final double h = amplitude;
-
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
 
-		//final double y = (double) (h * FastMath.exp(aa * (dx * dx + dy * dy)));
-
 		// Calculate gradients
-		//dy_da[0] = y / h;
 
-		dy_da[0] = FastMath.exp(aa * (dx * dx + dy * dy));
-		final double y = h * dy_da[0];
+		final double exp = FastMath.exp(aa * (dx * dx + dy * dy));
+		dy_da[0] = n * exp;
+		final double y = height * exp;
 		final double yaa2 = y * aa2;
 		dy_da[1] = yaa2 * dx;
 		dy_da[2] = yaa2 * dy;

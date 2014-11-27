@@ -234,21 +234,6 @@ public class Cluster
 	}
 
 	/**
-	 * Estimate the amplitude of the cluster using the average amplitude of the cluster
-	 * 
-	 * @return The amplitude estimate
-	 */
-	public float getAmplitude()
-	{
-		if (results.isEmpty())
-			return 0;
-		double sum = 0;
-		for (PeakResult result : results)
-			sum += result.params[Gaussian2DFunction.AMPLITUDE];
-		return (float) (sum / results.size());
-	}
-
-	/**
 	 * @return The first PeakResult in the cluster (or null)
 	 */
 	public PeakResult getHead()

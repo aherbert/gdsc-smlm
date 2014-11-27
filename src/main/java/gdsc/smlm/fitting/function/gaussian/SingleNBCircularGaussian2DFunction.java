@@ -58,24 +58,20 @@ public class SingleNBCircularGaussian2DFunction extends SingleCircularGaussian2D
 
 	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final double h = amplitude;
-
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
-		final double dx2dy2 = dx * dx + dy * dy;
-
-		//final double y = (double) (h * FastMath.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
-		//dy_da[0] = y / h;
-		
-		dy_da[0] = FastMath.exp(aa * (dx2dy2));
-		final double y = h * dy_da[0];
+
+		final double aadx2dy2 = aa * (dx * dx + dy * dy);
+		final double exp = FastMath.exp(aadx2dy2);
+		dy_da[0] = n * exp;
+		final double y = height * exp;
 		final double yaa2 = y * aa2;
 		dy_da[1] = yaa2 * dx;
 		dy_da[2] = yaa2 * dy;
 
-		dy_da[3] = y * (ax * (dx2dy2));
+		dy_da[3] = ax * y * (1 + aadx2dy2);
 
 		return y;
 	}

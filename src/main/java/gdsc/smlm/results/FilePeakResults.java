@@ -177,6 +177,9 @@ public class FilePeakResults extends AbstractPeakResults
 		int extended = isShowEndFrame() ? 1 : 0;
 		extended += isShowId() ? 2 : 0;
 		sb.append(extended);
+		// Version 1 had signal and amplitude in the results
+		// Version 2 has only signal in the results
+		sb.append(".V2");
 		return sb.toString();
 	}
 
@@ -204,8 +207,7 @@ public class FilePeakResults extends AbstractPeakResults
 		names.add("origValue");
 		names.add("Error");
 		names.add("Noise");
-		names.add("Signal");
-		for (String field : new String[] { "Background", "Amplitude", "Angle", "X", "Y", "X SD", "Y SD" })
+		for (String field : new String[] { "Background", "Signal", "Angle", "X", "Y", "X SD", "Y SD" })
 		{
 			names.add(field);
 			if (showDeviations)
@@ -252,9 +254,8 @@ public class FilePeakResults extends AbstractPeakResults
 			return;
 
 		StringBuilder sb = new StringBuilder();
-		float signal = PeakResult.getSignal(params);
 
-		addStandardData(sb, 0, peak, peak, origX, origY, origValue, chiSquared, noise, signal);
+		addStandardData(sb, 0, peak, peak, origX, origY, origValue, chiSquared, noise);
 
 		// Add the parameters		
 		if (showDeviations)
@@ -274,8 +275,8 @@ public class FilePeakResults extends AbstractPeakResults
 		{
 			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 					calibration.nmPerPixel;
-			float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain,
-					noise / calibration.gain, calibration.emCCD);
+			float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s,
+					params[Gaussian2DFunction.SIGNAL] / calibration.gain, noise / calibration.gain, calibration.emCCD);
 			addResult(sb, precision);
 		}
 
@@ -284,7 +285,7 @@ public class FilePeakResults extends AbstractPeakResults
 	}
 
 	private void addStandardData(StringBuilder sb, final int id, final int peak, final int endPeak, final int origX,
-			final int origY, final float origValue, final double chiSquared, final float noise, final float signal)
+			final int origY, final float origValue, final double chiSquared, final float noise)
 	{
 		if (showId)
 		{
@@ -307,8 +308,6 @@ public class FilePeakResults extends AbstractPeakResults
 		sb.append(chiSquared);
 		sb.append("\t");
 		sb.append(noise);
-		sb.append("\t");
-		sb.append(signal);
 	}
 
 	private void addResult(StringBuilder sb, float... args)
@@ -328,11 +327,9 @@ public class FilePeakResults extends AbstractPeakResults
 		StringBuilder sb = new StringBuilder();
 		for (PeakResult result : results)
 		{
-			float signal = result.getSignal();
-
 			// Add the standard data
 			addStandardData(sb, result.getId(), result.peak, result.getEndFrame(), result.origX, result.origY,
-					result.origValue, result.error, result.noise, signal);
+					result.origValue, result.error, result.noise);
 
 			// Add the parameters		
 			if (showDeviations)
@@ -351,8 +348,9 @@ public class FilePeakResults extends AbstractPeakResults
 			if (this.calibration != null)
 			{
 				double s = result.getSD() * calibration.nmPerPixel;
-				float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, signal / calibration.gain,
-						result.noise / calibration.gain, calibration.emCCD);
+				float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s,
+						result.params[Gaussian2DFunction.SIGNAL] / calibration.gain, result.noise / calibration.gain,
+						calibration.emCCD);
 				addResult(sb, precision);
 			}
 			sb.append("\n");

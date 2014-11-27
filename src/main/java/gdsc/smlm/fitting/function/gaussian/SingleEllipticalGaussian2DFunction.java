@@ -20,8 +20,8 @@ import gdsc.smlm.fitting.function.Gaussian2DFunction;
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
  * <p>
- * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into 2-dimensional
- * data. The dimensions of the data must be specified to allow unpacking to coordinates.
+ * The single parameter x in the {@link #eval(int, double[])} function is assumed to be a linear index into
+ * 2-dimensional data. The dimensions of the data must be specified to allow unpacking to coordinates.
  * <p>
  * Data should be packed in descending dimension order, e.g. Y,X : Index for [x,y] = MaxX*y + x.
  */
@@ -34,19 +34,22 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	protected double background;
-	protected double amplitude;
 	protected double x0pos;
 	protected double x1pos;
 
+	protected double n;
+	protected double height;
 	protected double aa;
 	protected double bb;
 	protected double cc;
 	protected double aa2;
 	protected double bb2;
 	protected double cc2;
+	protected double nx;
 	protected double ax;
 	protected double bx;
 	protected double cx;
+	protected double ny;
 	protected double ay;
 	protected double by;
 	protected double cy;
@@ -70,7 +73,6 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	public void initialise(double[] a)
 	{
 		background = a[BACKGROUND];
-		amplitude = a[AMPLITUDE];
 		x0pos = a[X_POSITION];
 		x1pos = a[Y_POSITION];
 
@@ -88,9 +90,12 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		final double sin2t = Math.sin(2 * theta);
 		final double cos2t = Math.cos(2 * theta);
 
+		n = ONE_OVER_TWO_PI / (sx * sy);
+		height = a[SIGNAL] * n;
+
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
-		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
-		
+		// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+
 		aa = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
 		bb = -0.25 * (-sin2t / sx2 + sin2t / sy2);
 		cc = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
@@ -98,14 +103,16 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		// For the angle gradient
 		aa2 = -(-sincost / sx2 + sincost / sy2);
 		bb2 = -0.5 * (-cos2t / sx2 + cos2t / sy2);
-		cc2  = -(sincost / sx2 - sincost / sy2);
+		cc2 = -(sincost / sx2 - sincost / sy2);
 
 		// For the x-width gradient
+		nx = -1 / sx;
 		ax = cosSqt / sx3;
 		bx = -0.5 * sin2t / sx3;
 		cx = sinSqt / sx3;
 
 		// For the y-width gradient
+		ny = -1 / sy;
 		ay = sinSqt / sy3;
 		by = 0.5 * sin2t / sy3;
 		cy = cosSqt / sy3;
@@ -118,12 +125,12 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the volume of the Gaussian. Angle (r) is the rotation
 	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
 	 * the standard deviation in each of the N-dimensions.
 	 * <p>
 	 * The equation per peak is:<br/>
-	 * y_peak = A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
+	 * y_peak = A/(2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
 	 * Where: <br/>
 	 * a = cos(r)^2/(2*sx^2) + sin(r)^2 /(2*sy^2) <br/>
 	 * b = -sin(2r)^2/(4*sx^2) + sin(2r)^2/(4*sy^2) <br/>
@@ -140,7 +147,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	public double eval(final int x, final double[] dyda)
 	{
 		// First parameter is the background level 
-		dyda[0] = 1; // Gradient for a constant background is 1
+		dyda[0] = 1.0; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -151,28 +158,24 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 
 	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final double h = amplitude;
-
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
 		final double dx2 = dx * dx;
 		final double dxy = dx * dy;
 		final double dy2 = dy * dy;
 
-		//final double y = (double) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
-
 		// Calculate gradients
-		//dy_da[1] = y / h;
-		
-		dy_da[1] = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-		final double y = h * dy_da[1];
+
+		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		dy_da[1] = n * exp;
+		final double y = height * exp;
 		dy_da[2] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
 
 		dy_da[3] = y * (-2.0 * aa * dx - bb * dy);
 		dy_da[4] = y * (-2.0 * cc * dy - bb * dx);
 
-		dy_da[5] = y * (ax * dx2 + bx * dxy + cx * dy2);
-		dy_da[6] = y * (ay * dx2 + by * dxy + cy * dy2);
+		dy_da[5] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+		dy_da[6] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
 
 		return y;
 	}
@@ -191,7 +194,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
 
-		return background + amplitude * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		return background + height * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override
@@ -207,7 +210,7 @@ public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAmplitude()
+	public boolean evaluatesSignal()
 	{
 		return true;
 	}

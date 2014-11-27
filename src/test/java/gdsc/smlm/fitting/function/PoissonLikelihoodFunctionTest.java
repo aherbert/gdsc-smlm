@@ -12,14 +12,14 @@ public class PoissonLikelihoodFunctionTest
 	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
 	DoubleEquality eq = new DoubleEquality(3, 0.001);
 
-	String[] NAME = { "BACKGROUND", "AMPLITUDE", "ANGLE", "X_POSITION", "Y_POSITION", "X_SD", "Y_SD" };
+	String[] NAME = { "BACKGROUND", "SIGNAL", "ANGLE", "X_POSITION", "Y_POSITION", "X_SD", "Y_SD" };
 
 	// Compute as per Numerical Recipes 5.7.
 	// Approximate error accuracy in single precision: Ef
 	// Step size for deerivatives:
 	// h ~ (Ef)^(1/3) * xc
 	// xc is the characteristic scale over which x changes, assumed to be 1 (not x as per NR since x is close to zero)
-	final double h_ = (double) (Math.pow(1e-3f, 1.0 / 3));
+	final double h_ = 0.01; //(double) (Math.pow(1e-3f, 1.0 / 3));
 
 	int[] testx = new int[] { 4, 5, 6 };
 	int[] testy = new int[] { 4, 5, 6 };
@@ -29,7 +29,7 @@ public class PoissonLikelihoodFunctionTest
 	double[] testamplitude1_ = new double[] { 15, 55, 105 };
 	double[] testangle1_ = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
 	double[] testcx1_ = new double[] { 4.9, 5.3 };
-	double[] testcy1_ = new double[] { 4.8, 5.1 };
+	double[] testcy1_ = new double[] { 4.8, 5.2 };
 	double[][] testw1_ = new double[][] { { 1.1, 1.4 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.3, 1.7 }, };
 
 	double[] testbackground, testamplitude1, testangle1, testcx1, testcy1;
@@ -102,7 +102,7 @@ public class PoissonLikelihoodFunctionTest
 		{
 			testbackground = new double[] { testbackground[0] };
 		}
-		if (!f1.evaluatesAmplitude())
+		if (!f1.evaluatesSignal())
 		{
 			testamplitude1 = new double[] { testamplitude1[0] };
 		}
@@ -136,8 +136,8 @@ public class PoissonLikelihoodFunctionTest
 
 		if (f1.evaluatesBackground())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.BACKGROUND);
-		if (f1.evaluatesAmplitude())
-			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.AMPLITUDE);
+		if (f1.evaluatesSignal())
+			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.SIGNAL);
 		if (f1.evaluatesAngle())
 			functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.ANGLE);
 		functionComputesTargetGradientPerDatum(f1, Gaussian2DFunction.X_POSITION);
@@ -294,7 +294,7 @@ public class PoissonLikelihoodFunctionTest
 		{
 			testbackground = new double[] { testbackground[0] };
 		}
-		if (!f1.evaluatesAmplitude())
+		if (!f1.evaluatesSignal())
 		{
 			testamplitude1 = new double[] { testamplitude1[0] };
 		}
@@ -329,8 +329,8 @@ public class PoissonLikelihoodFunctionTest
 		double fraction = 90;
 		if (f1.evaluatesBackground())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.BACKGROUND, fraction);
-		if (f1.evaluatesAmplitude())
-			functionComputesTargetGradient(f1, Gaussian2DFunction.AMPLITUDE, fraction);
+		if (f1.evaluatesSignal())
+			functionComputesTargetGradient(f1, Gaussian2DFunction.SIGNAL, fraction);
 		if (f1.evaluatesAngle())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.ANGLE, fraction);
 		functionComputesTargetGradient(f1, Gaussian2DFunction.X_POSITION, fraction);

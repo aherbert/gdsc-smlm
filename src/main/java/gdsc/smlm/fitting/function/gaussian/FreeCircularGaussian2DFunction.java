@@ -45,15 +45,19 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		super(npeaks, maxx);
 	}
 
-	protected static final int AA = 0;
-	protected static final int BB = 1;
-	protected static final int CC = 2;
-	protected static final int AX = 3;
-	protected static final int BX = 4;
-	protected static final int CX = 5;
-	protected static final int AY = 6;
-	protected static final int BY = 7;
-	protected static final int CY = 8;
+	protected static final int N = 0;
+	protected static final int HEIGHT = 1;
+	protected static final int AA = 2;
+	protected static final int BB = 3;
+	protected static final int CC = 4;
+	protected static final int NX = 5;
+	protected static final int AX = 6;
+	protected static final int BX = 7;
+	protected static final int CX = 8;
+	protected static final int NY = 9;
+	protected static final int AY = 10;
+	protected static final int BY = 11;
+	protected static final int CY = 12;
 
 	/*
 	 * (non-Javadoc)
@@ -64,7 +68,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new double[npeaks][9];
+		peakFactors = new double[npeaks][13];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double theta = a[j * 6 + ANGLE];
@@ -78,19 +82,24 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 			final double sinSqt = Math.sin(theta) * Math.sin(theta);
 			final double sin2t = Math.sin(2.0 * theta);
 
+			peakFactors[j][N] = ONE_OVER_TWO_PI / (sx*sy);
+			peakFactors[j][HEIGHT] = a[j * 6 + SIGNAL] * peakFactors[j][N];
+
 			// All prefactors are negated since the Gaussian uses the exponential to the negative:
-			// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+			// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 
 			peakFactors[j][AA] = -0.5 * (cosSqt / sx2 + sinSqt / sy2);
 			peakFactors[j][BB] = -0.25 * (-sin2t / sx2 + sin2t / sy2);
 			peakFactors[j][CC] = -0.5 * (sinSqt / sx2 + cosSqt / sy2);
 
 			// For the x-width gradient
+			peakFactors[j][NX] = -1.0 / sx;
 			peakFactors[j][AX] = cosSqt / sx3;
 			peakFactors[j][BX] = -0.5 * sin2t / sx3;
 			peakFactors[j][CX] = sinSqt / sx3;
 
 			// For the y-width gradient
+			peakFactors[j][NY] = -1.0 / sy;
 			peakFactors[j][AY] = sinSqt / sy3;
 			peakFactors[j][BY] = 0.5 * sin2t / sy3;
 			peakFactors[j][CY] = cosSqt / sy3;
@@ -104,12 +113,12 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the volume of the Gaussian. Angle (r) is the rotation
 	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
 	 * the standard deviation in each of the N-dimensions. This produces an additional 1+2N coefficients per peak.
 	 * <p>
 	 * The equation per peak is:<br/>
-	 * y_peak = A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
+	 * y_peak = A/(2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )<br/>
 	 * Where: <br/>
 	 * a = cos(r)^2/(2*sx^2) + sin(r)^2 /(2*sy^2) <br/>
 	 * b = -sin(2r)^2/(4*sx^2) + sin(2r)^2/(4*sy^2) <br/>
@@ -131,10 +140,9 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		// First parameter is the background level 
 		double y_fit = a[BACKGROUND];
-		dyda[dydapos++] = 1; // Gradient for a constant background is 1
+		dyda[dydapos++] = 1.0; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
-		;
 		final int x1 = x / maxx;
 		final int x0 = x % maxx;
 
@@ -151,8 +159,6 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos, final int dydapos,
 			final double[] factors)
 	{
-		final double h = a[apos + AMPLITUDE];
-
 		final double dx = x0 - a[apos + X_POSITION];
 		final double dy = x1 - a[apos + Y_POSITION];
 		final double dx2 = dx * dx;
@@ -162,25 +168,25 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final double aa = factors[AA];
 		final double bb = factors[BB];
 		final double cc = factors[CC];
+		final double nx = factors[NX];
 		final double ax = factors[AX];
 		final double bx = factors[BX];
 		final double cx = factors[CX];
+		final double ny = factors[NY];
 		final double ay = factors[AY];
 		final double by = factors[BY];
 		final double cy = factors[CY];
 
-		//final double y = (double) (h * FastMath.exp(aa * dx2 + bb * dxy + cc * dy2));
-
 		// Calculate gradients
-		//dy_da[dydapos] = y / h;
+		final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+		dy_da[dydapos] = factors[N] * exp;
+		final double y = factors[HEIGHT] * exp;
 
-		dy_da[dydapos] = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
-		final double y = h * dy_da[dydapos];
 		dy_da[dydapos + 1] = y * (-2.0 * aa * dx - bb * dy);
 		dy_da[dydapos + 2] = y * (-2.0 * cc * dy - bb * dx);
 
-		dy_da[dydapos + 3] = y * (ax * dx2 + bx * dxy + cx * dy2);
-		dy_da[dydapos + 4] = y * (ay * dx2 + by * dxy + cy * dy2);
+		dy_da[dydapos + 3] = y * (nx + ax * dx2 + bx * dxy + cx * dy2);
+		dy_da[dydapos + 4] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
 
 		return y;
 	}
@@ -212,8 +218,6 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 	protected double gaussian(final int x0, final int x1, final int apos, final double[] factors)
 	{
-		final double h = a[apos + AMPLITUDE];
-
 		final double dx = x0 - a[apos + X_POSITION];
 		final double dy = x1 - a[apos + Y_POSITION];
 
@@ -221,7 +225,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 		final double bb = factors[BB];
 		final double cc = factors[CC];
 
-		return h * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
+		return factors[HEIGHT] * FastMath.exp(aa * dx * dx + bb * dx * dy + cc * dy * dy);
 	}
 
 	@Override
@@ -231,7 +235,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAmplitude()
+	public boolean evaluatesSignal()
 	{
 		return true;
 	}

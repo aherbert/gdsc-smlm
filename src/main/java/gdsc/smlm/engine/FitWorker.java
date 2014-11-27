@@ -88,7 +88,7 @@ public class FitWorker implements Runnable
 	private float[] data;
 	private boolean differenceOfSmoothing;
 	private float noise, background;
-	private final boolean calculateNoise;
+	private final boolean calculateNoise, estimateSignal;
 	// The coordinate of the maxima	
 	private int[] xcoord = null, ycoord = null;
 	// Contains the index in the list of maxima for any neighbours
@@ -118,6 +118,8 @@ public class FitWorker implements Runnable
 		{
 			noise = (float) config.getFitConfiguration().getNoise();
 		}
+		// We can estimate the signal for a single peak when the fitting window covers enough of the Gaussian
+		estimateSignal = config.getFitting() > 2.5;
 
 		id = ID;
 		ID += 1;
@@ -154,7 +156,7 @@ public class FitWorker implements Runnable
 	 */
 	public void run(FitJob job)
 	{
-		long start = System.nanoTime();
+		final long start = System.nanoTime();
 		job.start();
 		this.slice = job.slice;
 
@@ -292,12 +294,13 @@ public class FitWorker implements Runnable
 				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
 				final float b = (float) Gaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
-						new double[] { data[maxIndices[n]] });
+						1);
 
 				// Offset the coords to the centre of the pixel. Note the bounds will be added later.
-				// Subtract the background to get the amplitude estimate.
+				// Subtract the background to get the amplitude estimate then convert to signal.
 				final float amplitude = smoothData[maxIndices[n]] - ((differenceOfSmoothing) ? 0 : b);
-				final float[] peakParams = new float[] { b, amplitude, 0, xcoord[n] + 0.5f, ycoord[n] + 0.5f, sd0, sd1 };
+				final float signal = (float) (amplitude * 2.0 * Math.PI * sd0 * sd1);
+				final float[] peakParams = new float[] { b, signal, 0, xcoord[n] + 0.5f, ycoord[n] + 0.5f, sd0, sd1 };
 				sliceResults.add(createResult(bounds.x + xcoord[n], bounds.y + ycoord[n], data[maxIndices[n]], 0,
 						noise, peakParams, null));
 			}
@@ -445,7 +448,7 @@ public class FitWorker implements Runnable
 		return (float) ne.getNoise(method);
 	}
 
-	private void finish(FitJob job, long start)
+	private void finish(FitJob job, final long start)
 	{
 		time += System.nanoTime() - start;
 		job.finished();
@@ -810,8 +813,7 @@ public class FitWorker implements Runnable
 			// it must be added back 
 
 			// The main peak
-			params[Gaussian2DFunction.AMPLITUDE] = smoothData[maxIndices[n]] +
-					((differenceOfSmoothing) ? background : 0);
+			params[Gaussian2DFunction.SIGNAL] = smoothData[maxIndices[n]] + ((differenceOfSmoothing) ? background : 0);
 			params[Gaussian2DFunction.X_POSITION] = x - regionBounds.x;
 			params[Gaussian2DFunction.Y_POSITION] = y - regionBounds.y;
 
@@ -819,7 +821,7 @@ public class FitWorker implements Runnable
 			for (int i = 0, j = parametersPerPeak; i < neighbourCount; i++, j += parametersPerPeak)
 			{
 				int n2 = neighbourIndices[i];
-				params[j + Gaussian2DFunction.AMPLITUDE] = smoothData[maxIndices[n2]] +
+				params[j + Gaussian2DFunction.SIGNAL] = smoothData[maxIndices[n2]] +
 						((differenceOfSmoothing) ? background : 0);
 				params[j + Gaussian2DFunction.X_POSITION] = xcoord[n2] - regionBounds.x;
 				params[j + Gaussian2DFunction.Y_POSITION] = ycoord[n2] - regionBounds.y;
@@ -832,7 +834,7 @@ public class FitWorker implements Runnable
 				// in the fitter.
 				for (int i = 0, j = 0; i <= neighbourCount; i++, j += parametersPerPeak)
 				{
-					if (params[j + Gaussian2DFunction.AMPLITUDE] < background)
+					if (params[j + Gaussian2DFunction.SIGNAL] < background)
 					{
 						background = 0;
 						break;
@@ -846,6 +848,10 @@ public class FitWorker implements Runnable
 
 			if (fittedNeighbourCount > 0)
 			{
+				// The fitted result will be relative to (0,0) and have a 0.5 pixel offset applied
+				final double xOffset = regionBounds.x + 0.5;
+				final double yOffset = regionBounds.y + 0.5;
+
 				if (subtractFittedPeaks)
 				{
 					// Subtract the already fitted peaks from the data. 
@@ -860,8 +866,8 @@ public class FitWorker implements Runnable
 						for (int k = 1; k <= 6; k++)
 							funcParams[j + k] = result.params[k];
 						// Adjust position relative to extracted region
-						funcParams[j + Gaussian2DFunction.X_POSITION] -= regionBounds.x;
-						funcParams[j + Gaussian2DFunction.Y_POSITION] -= regionBounds.y;
+						funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
+						funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
 					}
 
 					GaussianFunction func = fitConfig.createGaussianFunction(fittedNeighbourCount, regionBounds.width,
@@ -885,10 +891,10 @@ public class FitWorker implements Runnable
 							params[j + k] = result.params[k];
 
 						// Add background to amplitude (required since the background will be re-estimated)
-						params[j + Gaussian2DFunction.AMPLITUDE] += result.params[Gaussian2DFunction.BACKGROUND];
+						params[j + Gaussian2DFunction.SIGNAL] += result.params[Gaussian2DFunction.BACKGROUND];
 						// Adjust position relative to extracted region
-						params[j + Gaussian2DFunction.X_POSITION] -= regionBounds.x;
-						params[j + Gaussian2DFunction.Y_POSITION] -= regionBounds.y;
+						params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
+						params[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
 					}
 				}
 			}
@@ -896,18 +902,18 @@ public class FitWorker implements Runnable
 			// Subtract the background from all estimated peak amplitudes
 			if (background != 0)
 			{
-				params[0] = background;
-				for (int j = Gaussian2DFunction.AMPLITUDE; j < params.length; j += parametersPerPeak)
+				params[Gaussian2DFunction.BACKGROUND] = background;
+				for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
 					params[j] -= background;
 			}
 
 			// Increase the iterations for a multiple fit.
 
-			int maxIterations = fitConfig.getMaxIterations();
+			final int maxIterations = fitConfig.getMaxIterations();
 			fitConfig.setMaxIterations(maxIterations + maxIterations * (npeaks - 1) *
 					ITERATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
-			fitResult = gf.fit(region, width, height, npeaks, params);
+			fitResult = gf.fit(region, width, height, npeaks, params, true);
 
 			printFitResults(fitResult, region, width, height, npeaks, 0, gf.getIterations());
 
@@ -943,19 +949,32 @@ public class FitWorker implements Runnable
 		if (fitResult == null)
 		{
 			// Single fit
-			//int newIndex = (y - regionBounds.y) * regionBounds.width + x - regionBounds.x;
-			//int[] peaks = new int[] { newIndex };
-			//float[] heights = new float[] { smoothData[maxIndices[n]] + ((differenceOfSmoothing) ? 0 : background) };
-			//fitResult = gf.fit(region, width, height, peaks, heights);
 
-			float amplitude = smoothData[maxIndices[n]] - ((differenceOfSmoothing) ? 0 : background);
-			if (amplitude < 0)
+			// TODO - See if this changes fitting accuracy/speed
+			// Estimate the signal here instead of using the amplitude.
+			// Do this when the fitting window covers enough of the Gaussian (e.g. 2.5xSD).
+			boolean amplitudeEstimate = false;
+			float signal = 0;
+			if (estimateSignal)
 			{
-				amplitude += background;
-				background = 0;
+				double sum = 0;
+				final int size = width * height;
+				for (int i = size; i-- > 0;)
+					sum += region[i];
+				signal = (float) (sum - background * size);
 			}
-			final double[] params = new double[] { background, amplitude, 0, x - regionBounds.x, y - regionBounds.y, 0, 0 };
-			fitResult = gf.fit(region, width, height, 1, params);
+			if (signal <= 0)
+			{
+				amplitudeEstimate = true;
+				signal = smoothData[maxIndices[n]] - ((differenceOfSmoothing) ? 0 : background);
+				if (signal < 0)
+				{
+					signal += background;
+					background = 0;
+				}
+			}
+			final double[] params = new double[] { background, signal, 0, x - regionBounds.x, y - regionBounds.y, 0, 0 };
+			fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate);
 			printFitResults(fitResult, region, width, height, 1, -neighbours, gf.getIterations());
 
 			final int degreesOfFreedom = fitResult.getDegreesOfFreedom();
@@ -975,7 +994,7 @@ public class FitWorker implements Runnable
 			// Only compute quadrant improvement if fitted as a single peak. If fitting multiple peaks
 			// then we would expect the quadrant to be skewed by the neighbours.
 			// TODO - Subtract the fitted peaks surrounding the central peak and then perform quadrant analysis
-			// Irrespective of the neighbours.
+			// irrespective of the neighbours.
 			if (//neighbours == 0 && 
 			canPerformQuadrantAnalysis(fitResult, width, height))
 			{
@@ -995,10 +1014,6 @@ public class FitWorker implements Runnable
 					final double[] params = fitResult.getParameters();
 					for (int i = 0, j = 0; i < fitResult.getNumberOfPeaks(); i++, j += 6)
 					{
-						final float factor = (float) (2 * Math.PI);
-						final double signal = factor * params[j + Gaussian2DFunction.AMPLITUDE] *
-								params[j + Gaussian2DFunction.X_SD] * params[j + Gaussian2DFunction.Y_SD];
-
 						logger.info(
 								"Fit OK [%d]. Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f",
 								i,
@@ -1006,7 +1021,7 @@ public class FitWorker implements Runnable
 										initialParams[j + Gaussian2DFunction.X_POSITION],
 								params[j + Gaussian2DFunction.Y_POSITION] -
 										initialParams[j + Gaussian2DFunction.Y_POSITION],
-								signal / noise,
+								params[j + Gaussian2DFunction.SIGNAL] / noise,
 								getFactor(params[j + Gaussian2DFunction.X_SD], initialParams[j +
 										Gaussian2DFunction.X_SD]),
 								getFactor(params[j + Gaussian2DFunction.Y_SD], initialParams[j +
@@ -1177,7 +1192,7 @@ public class FitWorker implements Runnable
 			// check the width is reasonable given the size of the fitted region.
 			if (fitResult.getStatus() == FitStatus.WIDTH_DIVERGED)
 			{
-				final double [] params = fitResult.getParameters();
+				final double[] params = fitResult.getParameters();
 				final double regionSize = FastMath.max(width, height) * 0.5;
 				//int tmpSmooth = (int) FastMath.max(smooth, 1);
 				//float regionSize = 2 * tmpSmooth + 1;
@@ -1402,10 +1417,10 @@ public class FitWorker implements Runnable
 		final double[] doubletParams = new double[1 + 2 * 6];
 
 		doubletParams[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
-		doubletParams[Gaussian2DFunction.AMPLITUDE] = params[Gaussian2DFunction.AMPLITUDE] * 0.5f;
+		doubletParams[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
 		doubletParams[Gaussian2DFunction.X_POSITION] = x1;
 		doubletParams[Gaussian2DFunction.Y_POSITION] = y1;
-		doubletParams[6 + Gaussian2DFunction.AMPLITUDE] = params[Gaussian2DFunction.AMPLITUDE] * 0.5f;
+		doubletParams[6 + Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
 		doubletParams[6 + Gaussian2DFunction.X_POSITION] = x2;
 		doubletParams[6 + Gaussian2DFunction.Y_POSITION] = y2;
 		// -+-+-
@@ -1424,7 +1439,7 @@ public class FitWorker implements Runnable
 		fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
 
 		//FitResult newFitResult = gf.fit(region, width, height, peaks, heights);
-		final FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams);
+		final FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams, false);
 
 		fitConfig.setCoordinateShift(shift);
 		fitConfig.setMaxIterations(maxIterations);
@@ -1447,8 +1462,10 @@ public class FitWorker implements Runnable
 			//double newAdjustedR2 = getAdjustedCoefficientOfDetermination(doubleSumOfSquares, SStotal, length,
 			//		newFitResult.getInitialParameters().length);
 
-			final double ic1 = getInformationCriterion(singleSumOfSquares, length, fitResult.getInitialParameters().length);
-			final double ic2 = getInformationCriterion(doubleSumOfSquares, length, newFitResult.getInitialParameters().length);
+			final double ic1 = getInformationCriterion(singleSumOfSquares, length,
+					fitResult.getInitialParameters().length);
+			final double ic2 = getInformationCriterion(doubleSumOfSquares, length,
+					newFitResult.getInitialParameters().length);
 
 			if (logger != null)
 				logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,

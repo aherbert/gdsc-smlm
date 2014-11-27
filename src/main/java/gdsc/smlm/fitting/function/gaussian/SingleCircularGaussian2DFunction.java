@@ -34,10 +34,11 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	protected double background;
-	protected double amplitude;
 	protected double x0pos;
 	protected double x1pos;
 
+	protected double n;
+	protected double height;
 	protected double aa;
 	protected double aa2;
 	protected double ax;
@@ -61,22 +62,23 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 	public void initialise(double[] a)
 	{
 		background = a[BACKGROUND];
-		amplitude = a[AMPLITUDE];
 		x0pos = a[X_POSITION];
 		x1pos = a[Y_POSITION];
 
 		final double sx = a[X_SD];
 		final double sx2 = sx * sx;
-		final double sx3 = sx2 * sx;
 
+		n = ONE_OVER_TWO_PI / sx2;
+		height = a[SIGNAL] * n;
+		
 		// All prefactors are negated since the Gaussian uses the exponential to the negative:
-		// A * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
+		// (A/2*pi*sx*sy) * exp( -( a(x-x0)^2 + 2b(x-x0)(y-y0) + c(y-y0)^2 ) )
 
 		aa = -0.5 / sx2;
 		aa2 = -2.0 * aa;
 
 		// For the x-width gradient
-		ax = 1.0 / sx3;
+		ax = -2 / sx;
 	}
 
 	/**
@@ -86,12 +88,12 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the height of the Gaussian. Angle (r) is the rotation
+	 * Amplitude; Angle; position[N]; sd[N]. Amplitude (A) is the volume of the Gaussian. Angle (r) is the rotation
 	 * angle of the ellipse. Position (x,y) is the position of the Gaussian in each of the N-dimensions. SD (sx,sy) is
 	 * the standard deviation in each of the N-dimensions.
 	 * <p>
 	 * The equation per peak is:<br/>
-	 * y_peak = A * exp( -( a(x-x0)^2 + c(y-y0)^2 ) )<br/>
+	 * y_peak = A/(2*pi*sx*sy) * exp( -( a(x-x0)^2 + c(y-y0)^2 ) )<br/>
 	 * Where: <br/>
 	 * a = 1/(2*sx^2) <br/>
 	 * c = 1/(2*sy^2)
@@ -107,7 +109,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 	public double eval(final int x, final double[] dyda)
 	{
 		// First parameter is the background level 
-		dyda[0] = 1; // Gradient for a constant background is 1
+		dyda[0] = 1.0; // Gradient for a constant background is 1
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -118,24 +120,20 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 
 	private double gaussian(final int x0, final int x1, final double[] dy_da)
 	{
-		final double h = amplitude;
-
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
-		final double dx2dy2 = dx * dx + dy * dy;
-
-		//final double y = (double) (h * FastMath.exp(aa * (dx2dy2)));
 
 		// Calculate gradients
-		//dy_da[1] = y / h;
 
-		dy_da[1] = FastMath.exp(aa * (dx2dy2));
-		final double y = h * dy_da[1];
+		final double aadx2dy2 = aa * (dx * dx + dy * dy);
+		final double exp = FastMath.exp(aadx2dy2);
+		dy_da[1] = n * exp;
+		final double y = height * exp;
 		final double yaa2 = y * aa2;
 		dy_da[2] = yaa2 * dx;
 		dy_da[3] = yaa2 * dy;
 
-		dy_da[4] = y * (ax * (dx2dy2));
+		dy_da[4] = ax * y * (1 + aadx2dy2);
 
 		return y;
 	}
@@ -154,7 +152,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 		final double dx = x0 - x0pos;
 		final double dy = x1 - x1pos;
 
-		return background + amplitude * FastMath.exp(aa * (dx * dx + dy * dy));
+		return background + height * FastMath.exp(aa * (dx * dx + dy * dy));
 	}
 
 	@Override
@@ -170,7 +168,7 @@ public class SingleCircularGaussian2DFunction extends Gaussian2DFunction
 	}
 
 	@Override
-	public boolean evaluatesAmplitude()
+	public boolean evaluatesSignal()
 	{
 		return true;
 	}

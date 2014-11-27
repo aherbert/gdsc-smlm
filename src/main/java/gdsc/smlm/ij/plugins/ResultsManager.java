@@ -629,8 +629,9 @@ public class ResultsManager implements PlugIn, MouseListener
 			// Check for Calibration
 			Calibration calibration = results.getCalibration();
 			final float noise = getNoise(results);
-			if (calibration == null || calibration.nmPerPixel == 0 || calibration.gain <= 1 ||
-					calibration.exposureTime == 0 || noise == 0)
+			// Do not check for calibration readNoise, bias, emCCD			
+			if (calibration == null || calibration.nmPerPixel <= 0 || calibration.gain <= 0 ||
+					calibration.exposureTime <= 0 || noise <= 0)
 			{
 				String msg = "partially calibrated";
 				boolean convert = false;
@@ -641,11 +642,11 @@ public class ResultsManager implements PlugIn, MouseListener
 					msg = "uncalibrated";
 				}
 
-				if (calibration.nmPerPixel == 0)
+				if (calibration.nmPerPixel <= 0)
 					calibration.nmPerPixel = input_nmPerPixel;
-				if (calibration.gain == 1)
+				if (calibration.gain <= 0)
 					calibration.gain = input_gain;
-				if (calibration.exposureTime == 0)
+				if (calibration.exposureTime <= 0)
 					calibration.exposureTime = input_exposureTime;
 
 				GenericDialog gd = new GenericDialog(TITLE);
@@ -653,7 +654,7 @@ public class ResultsManager implements PlugIn, MouseListener
 				gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
 				gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
 				gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
-				if (noise == 0)
+				if (noise <= 0)
 					gd.addNumericField("Noise (ADU)", input_noise, 2);
 				gd.addCheckbox("Convert_nm_to_pixels", convert);
 				gd.showDialog();

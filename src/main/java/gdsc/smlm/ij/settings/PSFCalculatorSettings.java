@@ -23,5 +23,6 @@ public class PSFCalculatorSettings
 	public double beamExpander = 1;
 	public double wavelength = 500;
 	public double numericalAperture = 1.4;
+	public boolean adjustForSquarePixels = true;
 	public double proportionalityFactor = 1.52;
 }

@@ -385,7 +385,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 					// Update recommended values. Only use if significant
 					params[X] = sampleNew[X].getMean();
-					params[Y] = (!ignore[Y] && !identical[XY]) ? sampleNew[Y].getMean() : sampleNew[X].getMean();
+					params[Y] = (!ignore[Y] && !identical[XY]) ? sampleNew[Y].getMean() : params[X];
 					params[ANGLE] = (!ignore[ANGLE]) ? sampleNew[ANGLE].getMean() : 0;
 
 					// update starting configuration
@@ -426,12 +426,12 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		if (ignore[ANGLE])
 			return tryAgain;
 
-		// TODO - This needs to be checked. The angle is relative to the major axis (X). 
-		// It could be close to 0, 90 or 180 to allow it to be ignored.
+		// The angle is relative to the major axis (X). 
+		// It could be close to 0, 90 or 180 to allow it to be ignored in favour of a free circular function.
 
 		final double[] angles = sampleNew[ANGLE].getValues();
 
-		for (double testAngle : new double[] { 0, 90, 180 })
+		for (double testAngle : new double[] { 90, 0, 180 })
 		{
 			// The angle will be in the 0-180 domain.
 			// We need to compute the Statistical summary around the testAngle.
@@ -465,17 +465,18 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			}
 
 			final double p = TestUtils.tTest(testAngle, sampleStats);
-			if (p < settings.pValue)
+			if (p > settings.pValue)
 			{
 				log("NOTE: Angle is not significant: %g ~ %g (p=%g) => Re-run with fixed zero angle",
-						sampleNew[ANGLE].getMean(), testAngle, p);
+						sampleStats.getMean(), testAngle, p);
 				ignore[ANGLE] = true;
 				fitFunction = FitFunction.FREE_CIRCULAR.ordinal();
-				if (settings.updatePreferences)
-				{
+				//if (settings.updatePreferences)
+				//{
 					config.getFitConfiguration().setFitFunction(fitFunction);
-				}
+				//}
 				tryAgain = true;
+				break;
 			}
 			else
 				debug("  NOTE: Angle is significant: %g !~ %g (p=%g)", sampleNew[ANGLE].getMean(), testAngle, p);
@@ -491,10 +492,10 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => Re-run with circular function",
 					sampleNew[X].getMean(), sampleNew[Y].getMean());
 			fitFunction = FitFunction.CIRCULAR.ordinal();
-			if (settings.updatePreferences)
-			{
+			//if (settings.updatePreferences)
+			//{
 				config.getFitConfiguration().setFitFunction(fitFunction);
-			}
+			//}
 			tryAgain = true;
 		}
 		return tryAgain;

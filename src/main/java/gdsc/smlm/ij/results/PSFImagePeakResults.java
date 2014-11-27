@@ -111,9 +111,9 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		//   f(x,y) = A exp(-(a(x-x0)(x-x0) + 2b(x-x0)(y-y0) + c(y-y0)(y-y0)))
 		// See: http://en.wikipedia.org/wiki/Gaussian_function#Two-dimensional_Gaussian_function
 
-		float amplitude = ((displayFlags & DISPLAY_SIGNAL) != 0) ? params[Gaussian2DFunction.AMPLITUDE] : 1;
+		final float amplitude = ((displayFlags & DISPLAY_SIGNAL) != 0) ? PeakResult.getAmplitude(params) : 1;
 
-		double[] psfParams;
+		final double[] psfParams;
 		if (fixedWidth)
 		{
 			psfParams = fixedParams;
@@ -125,9 +125,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			if (calculatedPrecision && nmPerPixel > 0)
 			{
 				t = 0.0;
-				final double N = PeakResult.getSignal(params) / gain;
-				final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-						nmPerPixel;
+				final double N = params[Gaussian2DFunction.SIGNAL] / gain;
+				final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
 				final double precision = PeakResult.getPrecision(nmPerPixel, s, N, noise / gain, emCCD);
 				sx = sy = (precision / nmPerPixel);
 			}
@@ -162,8 +161,8 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		ymax = (int) FastMath.min(ymax, ylimit);
 
 		// Compute Gaussian PSF
-		int[] index = new int[(xmax - xmin + 1) * (ymax - ymin + 1)];
-		float[] value = new float[index.length];
+		final int[] index = new int[(xmax - xmin + 1) * (ymax - ymin + 1)];
+		final float[] value = new float[index.length];
 		int i = 0;
 		for (int y0 = ymin; y0 <= ymax; y0++)
 			for (int x0 = xmin; x0 <= xmax; x0++)

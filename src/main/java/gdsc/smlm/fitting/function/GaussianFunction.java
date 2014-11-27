@@ -47,9 +47,9 @@ public abstract class GaussianFunction implements NonLinearFunction
 	public abstract boolean evaluatesBackground();
 
 	/**
-	 * @return True if the function can evaluate the amplitude gradient
+	 * @return True if the function can evaluate the signal gradient
 	 */
-	public abstract boolean evaluatesAmplitude();
+	public abstract boolean evaluatesSignal();
 
 	/**
 	 * @return True if the function can evaluate the angle gradient
