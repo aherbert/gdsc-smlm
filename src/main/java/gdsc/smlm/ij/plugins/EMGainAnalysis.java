@@ -15,6 +15,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
+import java.awt.Rectangle;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -86,6 +87,14 @@ public class EMGainAnalysis implements PlugInFilter
 
 		// We need > 10^7 pixels from flat white-light images under constant exposure ...
 		final int size = getSize(h);
+		Roi roi = imp.getRoi();
+		Rectangle bounds;
+		if (roi == null)
+			bounds = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
+		else
+			bounds = roi.getBounds();
+		Utils.log("Analysing %s [x=%d,y=%d,width=%d,height=%d]", imp.getTitle(), bounds.x, bounds.y, bounds.width,
+				bounds.height);
 		Utils.log("Histogram contains %d pixels", size);
 		if (size < MINIMUM_PIXELS)
 			Utils.log("WARNING : Recommend at least %d pixels (%sx more)", MINIMUM_PIXELS,
@@ -150,13 +159,35 @@ public class EMGainAnalysis implements PlugInFilter
 			for (int i = 0; i < tmp.length; i++)
 				data[i] += tmp[i];
 		}
+
+		// Avoid super-saturated pixels by using 98% of histogram
+		long sum = 0;
+		for (int i = 0; i < data.length; i++)
+		{
+			sum += data[i];
+		}
+
+		final long sum2 = (long) (sum * 0.99);
+		sum = 0;
+		for (int i = 0; i < data.length; i++)
+		{
+			sum += data[i];
+			if (sum > sum2)
+			{
+				for (; i < data.length; i++)
+					data[i] = 0;
+				break;
+			}
+		}
+
 		return data;
 	}
 
 	private static int[] getHistogram(ImageProcessor ip, Roi roi)
 	{
 		ip.setRoi(roi);
-		return ip.getHistogram();
+		int[] h = ip.getHistogram();
+		return h;
 	}
 
 	/**
@@ -182,7 +213,13 @@ public class EMGainAnalysis implements PlugInFilter
 		// Assuming a gamma_distribution(shape,scale) then mean = shape * scale
 		// scale = gain
 		// shape = Photons = mean / gain
-		final double mean = getMean(h) - bias;
+		double mean = getMean(h) - bias;
+		// Note: if the bias is too high then the mean will be negative. Just move the bias.
+		while (mean < 0)
+		{
+			bias -= 1;
+			mean += 1;
+		}
 		double photons = mean / gain;
 
 		if (simulate)
@@ -205,8 +242,8 @@ public class EMGainAnalysis implements PlugInFilter
 		final int maxEval = 3000;
 
 		// Set bounds
-		double[] lower = new double[] { 0, 0.5 * gain, 0, bias - gain };
-		double[] upper = new double[] { (limits[1] - limits[0]) / gain, 2 * gain, gain, bias + gain };
+		double[] lower = new double[] { 0, 0.5 * gain, 0, bias - noise };
+		double[] upper = new double[] { (limits[1] - limits[0]) / gain, 2 * gain, gain, bias + noise };
 
 		// Restart until converged.
 		// TODO - Maybe fix this with a better optimiser. This needs to be tested on real data.
