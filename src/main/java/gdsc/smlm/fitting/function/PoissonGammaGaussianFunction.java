@@ -80,14 +80,18 @@ public class PoissonGammaGaussianFunction
 	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
 	 * al (2010) Nature Methods 7, 377-383.
 	 * 
-	 * @param cij
+	 * @param o
 	 *            The observed count
-	 * @param eta
+	 * @param e
 	 *            The expected count
 	 * @return The likelihood
 	 */
-	public double likelihood(final double cij, final double eta)
+	public double likelihood(final double o, final double e)
 	{
+		// Use the same variables as the Python code
+		final double cij = o;
+		final double eta = alpha * e; // convert to photons
+		
 		// [Poisson PMF] multiplied by the [value at zero]:
 		// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
 		// FastMath.exp(-eta) * [eta * alpha]
@@ -136,7 +140,7 @@ public class PoissonGammaGaussianFunction
 			}
 		}
 
-		return Math.log(temp);
+		return temp;
 	}
 
 	/**
@@ -149,9 +153,9 @@ public class PoissonGammaGaussianFunction
 	 *            The expected count
 	 * @return The log-likelihood
 	 */
-	public double logLikelihood(final double cij, final double eta)
+	public double logLikelihood(final double o, final double e)
 	{
-		return Math.log(likelihood(cij, eta));
+		return Math.log(likelihood(o, e));
 	}
 
 	private double gauss(final double x)

@@ -56,11 +56,12 @@ public class PoissonGammaGaussianLikelihoodWrapper
 	 * indices should be passed in to the functions to obtain the value (and gradient).
 	 * 
 	 * @param f
-	 *            The function to be used to calculated the expected values
+	 *            The function to be used to calculated the expected values (if modelling EMCCD data this should
+	 *            evaluate the value without the bias)
 	 * @param a
 	 *            The initial parameters for the function
 	 * @param k
-	 *            The observed values
+	 *            The observed values (if using EMCCD data the bias should be subtracted)
 	 * @param n
 	 *            The number of observed values
 	 * @param alpha
@@ -111,8 +112,7 @@ public class PoissonGammaGaussianLikelihoodWrapper
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			final double eta = f.eval(i);
-			ll -= p.likelihood(data[i], eta);
+			ll -= p.likelihood(data[i], f.eval(i));
 		}
 		lastScore = ll;
 		return ll;
@@ -148,8 +148,6 @@ public class PoissonGammaGaussianLikelihoodWrapper
 	public double value(double[] variables, int i)
 	{
 		initialiseFunction(variables);
-
-		final double mu = f.eval(i);
-		return -p.logLikelihood(data[i], mu);
+		return -p.logLikelihood(data[i], f.eval(i));
 	}
 }

@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.fitting.function.PoissonGammaGaussianFunction;
+import gdsc.smlm.fitting.utils.DoubleEquality;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Bessel;
 import gdsc.smlm.utils.Convolution;
@@ -57,7 +59,7 @@ public class EMGainAnalysis implements PlugInFilter
 	private final int MINIMUM_PIXELS = 1000000;
 
 	private static double bias = 500, gain = 40, noise = 3;
-	private static boolean _simulate = false;
+	private static boolean _simulate = false, showApproximation = false;
 	private boolean simulate = false, extraOptions = false;
 	private static double _photons = 1, _bias = 500, _gain = 40, _noise = 3;
 
@@ -87,14 +89,17 @@ public class EMGainAnalysis implements PlugInFilter
 
 		// We need > 10^7 pixels from flat white-light images under constant exposure ...
 		final int size = getSize(h);
-		Roi roi = imp.getRoi();
-		Rectangle bounds;
-		if (roi == null)
-			bounds = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
-		else
-			bounds = roi.getBounds();
-		Utils.log("Analysing %s [x=%d,y=%d,width=%d,height=%d]", imp.getTitle(), bounds.x, bounds.y, bounds.width,
-				bounds.height);
+		if (imp != null)
+		{
+			Roi roi = imp.getRoi();
+			Rectangle bounds;
+			if (roi == null)
+				bounds = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
+			else
+				bounds = roi.getBounds();
+			Utils.log("Analysing %s [x=%d,y=%d,width=%d,height=%d]", imp.getTitle(), bounds.x, bounds.y, bounds.width,
+					bounds.height);
+		}
 		Utils.log("Histogram contains %d pixels", size);
 		if (size < MINIMUM_PIXELS)
 			Utils.log("WARNING : Recommend at least %d pixels (%sx more)", MINIMUM_PIXELS,
@@ -319,6 +324,21 @@ public class EMGainAnalysis implements PlugInFilter
 
 		plot.addLabel(0, 0, label);
 
+		// Show the PoissonGammaGaussian approximation
+		if (showApproximation)
+		{
+			double[] f = new double[x.length];
+			PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / gain, noise);
+			for (int i = 0; i < f.length; i++)
+			{
+				f[i] = fun.likelihood(x[i] - bias, photons * gain);
+				//System.out.printf("x=%d, g=%f, f=%f, error=%f\n", (int) x[i], g[i], f[i],
+				//		DoubleEquality.relativeError(g[i], f[i]));
+			}
+			plot.setColor(Color.blue);
+			plot.addPoints(x, f, Plot.LINE);
+		}
+
 		Utils.display(TITLE, plot);
 	}
 
@@ -538,6 +558,7 @@ public class EMGainAnalysis implements PlugInFilter
 		gd.addNumericField("Bias (estimate)", bias, 0);
 		gd.addNumericField("Gain (estimate)", gain, 2);
 		gd.addNumericField("Noise (estimate)", noise, 2);
+		gd.addCheckbox("Show_approximation", showApproximation);
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -557,6 +578,7 @@ public class EMGainAnalysis implements PlugInFilter
 		bias = gd.getNextNumber();
 		gain = gd.getNextNumber();
 		noise = FastMath.abs(gd.getNextNumber());
+		showApproximation = gd.getNextBoolean();
 
 		if (gd.invalidNumber() || bias < 0 || gain < 1)
 			return DONE;
