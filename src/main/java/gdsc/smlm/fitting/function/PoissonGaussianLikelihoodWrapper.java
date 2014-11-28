@@ -89,7 +89,7 @@ public class PoissonGaussianLikelihoodWrapper
 		if (sameVariables(variables))
 			return lastScore;
 
-		lastVariables = null;
+		lastVariables = variables.clone();
 		initialiseFunction(variables);
 
 		// Compute the negative log-likelihood to be minimised
@@ -99,6 +99,7 @@ public class PoissonGaussianLikelihoodWrapper
 			final double mu = f.eval(i);
 			ll -= PoissonGaussianFunction.pseudoLikelihood(data[i], mu, s2, usePicard);
 		}
+		lastScore = ll;
 		return ll;
 	}
 

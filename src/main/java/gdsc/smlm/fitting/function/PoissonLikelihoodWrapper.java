@@ -84,7 +84,8 @@ public class PoissonLikelihoodWrapper
 		if (sameVariables(variables))
 			return lastScore;
 
-		lastVariables = null;
+		lastScore = Double.POSITIVE_INFINITY;
+		lastVariables = variables.clone();
 		initialiseFunction(variables);
 
 		// Compute the negative log-likelihood to be minimised
@@ -103,6 +104,7 @@ public class PoissonLikelihoodWrapper
 			final double k = data[i];
 			ll += l - k * Math.log(l);
 		}
+		lastScore = ll;
 		return ll;
 	}
 
@@ -135,12 +137,12 @@ public class PoissonLikelihoodWrapper
 	 */
 	public double value(double[] variables, double[] gradient)
 	{
-		initialiseFunction(variables);
-
 		// Cache the score we compute. This is useful for routine computing the gradient and 
 		// value in two separate calls (e.g. the Apache Commons Math3 optimisers)
 		lastScore = Double.POSITIVE_INFINITY;
 		lastVariables = variables.clone();
+
+		initialiseFunction(variables);
 
 		// Compute the negative log-likelihood to be minimised
 		// f(x) = l(x) - k * ln(l(x))
