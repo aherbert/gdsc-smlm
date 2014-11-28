@@ -915,7 +915,6 @@ public class PCPALMFitting implements PlugIn
 			optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE), new ModelFunctionJacobian(
 					new MultivariateMatrixFunction()
 					{
-						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return myFunction.jacobian(point);
@@ -1088,7 +1087,6 @@ public class PCPALMFitting implements PlugIn
 				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 						new ModelFunctionJacobian(new MultivariateMatrixFunction()
 						{
-							@Override
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
 								return myFunction.jacobian(point);
@@ -1399,7 +1397,6 @@ public class PCPALMFitting implements PlugIn
 				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 						new ModelFunctionJacobian(new MultivariateMatrixFunction()
 						{
-							@Override
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
 								return myFunction.jacobian(point);
@@ -1989,7 +1986,6 @@ public class PCPALMFitting implements PlugIn
 			this.f = f;
 		}
 
-		@Override
 		public double value(double[] point)
 		{
 			return f.evaluate(point);
@@ -2005,7 +2001,6 @@ public class PCPALMFitting implements PlugIn
 			this.f = f;
 		}
 
-		@Override
 		public double[] value(double[] point) throws IllegalArgumentException
 		{
 			return f.gradient(point);

@@ -121,7 +121,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getTotalSumOfSquares()
 	 */
-	@Override
 	public double getTotalSumOfSquares()
 	{
 		return totalSumOfSquares;
@@ -132,7 +131,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedParameters()
 	 */
-	@Override
 	public int getNumberOfFittedParameters()
 	{
 		return f.gradientIndices().length;
@@ -143,7 +141,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedPoints()
 	 */
-	@Override
 	public int getNumberOfFittedPoints()
 	{
 		return numberOfFittedPoints;
@@ -154,7 +151,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getResidualSumOfSquares()
 	 */
-	@Override
 	public double getResidualSumOfSquares()
 	{
 		return residualSumOfSquares;
@@ -175,7 +171,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getEvaluations()
 	 */
-	@Override
 	public int getEvaluations()
 	{
 		return evaluations;
@@ -203,7 +198,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#isBounded()
 	 */
-	@Override
 	public boolean isBounded()
 	{
 		return false;
@@ -214,7 +208,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#isConstrained()
 	 */
-	@Override
 	public boolean isConstrained()
 	{
 		return false;
@@ -225,7 +218,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
 	 */
-	@Override
 	public void setBounds(double[] lower, double[] upper)
 	{
 	}
@@ -235,7 +227,6 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#setConstraints(double[], double[])
 	 */
-	@Override
 	public void setConstraints(double[] lower, double[] upper)
 	{
 	}

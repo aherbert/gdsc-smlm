@@ -64,7 +64,6 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
 	 */
-	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
@@ -75,7 +74,6 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])
 	 */
-	@Override
 	public double eval(int x, double[] dyda)
 	{
 		return fun.eval(x, dyda);
@@ -86,7 +84,6 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int)
 	 */
-	@Override
 	public double eval(int x)
 	{
 		return fun.eval(x);
@@ -97,7 +94,6 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[], double[])
 	 */
-	@Override
 	public double eval(int x, double[] dyda, double[] w)
 	{
 		return fun.eval(x, dyda, w);
@@ -108,7 +104,6 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
 	 */
-	@Override
 	public boolean canComputeWeights()
 	{
 		return fun.canComputeWeights();

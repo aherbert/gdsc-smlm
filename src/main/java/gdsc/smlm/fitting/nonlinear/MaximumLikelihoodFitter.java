@@ -88,7 +88,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
-		@Override
 		public double value(double[] point)
 		{
 			return fun.value(point);
@@ -107,7 +106,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
-		@Override
 		public double[] value(double[] point)
 		{
 			double[] gradient = new double[point.length];

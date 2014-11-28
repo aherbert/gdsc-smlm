@@ -30,7 +30,6 @@ public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper 
 	 * 
 	 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 	 */
-	@Override
 	public double[] value(double[] point)
 	{
 		return computeValue(point);

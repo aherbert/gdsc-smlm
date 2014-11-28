@@ -789,7 +789,6 @@ public class PCPALMMolecules implements PlugIn
 		PointVectorValuePair optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 				new ModelFunctionJacobian(new MultivariateMatrixFunction()
 				{
-					@Override
 					public double[][] value(double[] point) throws IllegalArgumentException
 					{
 						return myFunction.jacobian(point);

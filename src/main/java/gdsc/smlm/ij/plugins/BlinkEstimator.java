@@ -441,7 +441,6 @@ public class BlinkEstimator implements PlugIn
 			PointVectorValuePair optimum = optimizer.optimize(new MaxIter(1000), new MaxEval(Integer.MAX_VALUE),
 					new ModelFunctionJacobian(new MultivariateMatrixFunction()
 					{
-						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return blinkingModel.jacobian(point);

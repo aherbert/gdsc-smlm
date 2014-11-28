@@ -51,7 +51,6 @@ public class UniformDistribution implements SpatialDistribution
 		/**
 		 * @return
 		 */
-		@Override
 		public double[] nextVector()
 		{
 			return new double[] { rng1.nextDouble(), rng2.nextDouble(), rng3.nextDouble() };

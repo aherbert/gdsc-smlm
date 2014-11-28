@@ -575,7 +575,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Specify the function to integrate
 		UnivariateFunction f = new UnivariateFunction()
 		{
-			@Override
 			public double value(double x)
 			{
 				return x * Math.log(x) / (x + rho);
@@ -751,25 +750,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			private double[] xyz = new double[] { settings.xPosition / settings.pixelPitch,
 					settings.yPosition / settings.pixelPitch, settings.zPosition / settings.pixelPitch };
 
-			@Override
 			public double[] next()
 			{
 				return xyz;
 			}
 
-			@Override
 			public boolean isWithinXY(double[] xyz)
 			{
 				return true;
 			}
 
-			@Override
 			public boolean isWithin(double[] xyz)
 			{
 				return true;
 			}
 
-			@Override
 			public void initialise(double[] xyz)
 			{
 			}
@@ -2413,7 +2408,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		futures.add(threadPool.submit(new Runnable()
 		{
-			@Override
 			public void run()
 			{
 				incrementProgress();
@@ -3884,7 +3878,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private int seedAddition = 0;
 
-	@Override
 	public RandomGenerator createRandomGenerator()
 	{
 		// Increment the seed to ensure that new generators are created at the same system time point

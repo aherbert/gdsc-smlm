@@ -68,7 +68,9 @@ public class ConvolutionTest
 		double[] kernel = createKernel(s);
 
 		// Warm up
+		@SuppressWarnings("unused")
 		double[] r1 = Convolution.convolve(data, kernel);
+		@SuppressWarnings("unused")
 		double[] r2 = Convolution.convolveFFT(data, kernel);
 
 		long t1 = System.nanoTime();

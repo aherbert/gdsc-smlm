@@ -817,7 +817,6 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 			futures.add(threadPool.submit(new Runnable()
 			{
-				@Override
 				public void run()
 				{
 					if (Utils.isInterrupted())
@@ -1352,7 +1351,6 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
-				@Override
 				public void run()
 				{
 					try
@@ -1388,7 +1386,6 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
-				@Override
 				public void run()
 				{
 					try
@@ -1425,7 +1422,6 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
-				@Override
 				public void run()
 				{
 					try
@@ -1549,7 +1545,6 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
-				@Override
 				public void run()
 				{
 					try

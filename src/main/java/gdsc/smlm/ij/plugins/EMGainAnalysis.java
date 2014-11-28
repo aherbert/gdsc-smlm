@@ -328,7 +328,6 @@ public class EMGainAnalysis implements PlugInFilter
 		{
 			int eval = 0;
 
-			@Override
 			public double value(double[] point)
 			{
 				IJ.showProgress(++eval, maxEval);

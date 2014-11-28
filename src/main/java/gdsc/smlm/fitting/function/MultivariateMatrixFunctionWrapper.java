@@ -30,7 +30,6 @@ public class MultivariateMatrixFunctionWrapper extends NonLinearFunctionWrapper 
 	 * 
 	 * @see org.apache.commons.math3.analysis.MultivariateMatrixFunction#value(double[])
 	 */
-	@Override
 	public double[][] value(double[] point) throws IllegalArgumentException
 	{
 		return computeJacobian(point);

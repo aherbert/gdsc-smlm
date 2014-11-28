@@ -833,7 +833,6 @@ public class TraceDiffusion implements PlugIn
 			lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 					new ModelFunctionJacobian(new MultivariateMatrixFunction()
 					{
-						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return function.jacobian(point);
@@ -976,7 +975,6 @@ public class TraceDiffusion implements PlugIn
 			PointVectorValuePair lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 					new ModelFunctionJacobian(new MultivariateMatrixFunction()
 					{
-						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return function.jacobian(point);
@@ -1065,7 +1063,6 @@ public class TraceDiffusion implements PlugIn
 					lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 							new ModelFunctionJacobian(new MultivariateMatrixFunction()
 							{
-								@Override
 								public double[][] value(double[] point) throws IllegalArgumentException
 								{
 									return mixedFunctionGradient.jacobian(point);
