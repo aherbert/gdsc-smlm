@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.fitting.function.PoissonGammaGaussianFunction;
-import gdsc.smlm.fitting.utils.DoubleEquality;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Bessel;
 import gdsc.smlm.utils.Convolution;
@@ -333,7 +332,7 @@ public class EMGainAnalysis implements PlugInFilter
 			{
 				f[i] = fun.likelihood(x[i] - bias, photons * gain);
 				//System.out.printf("x=%d, g=%f, f=%f, error=%f\n", (int) x[i], g[i], f[i],
-				//		DoubleEquality.relativeError(g[i], f[i]));
+				//		gdsc.smlm.fitting.utils.DoubleEquality.relativeError(g[i], f[i]));
 			}
 			plot.setColor(Color.blue);
 			plot.addPoints(x, f, Plot.LINE);
