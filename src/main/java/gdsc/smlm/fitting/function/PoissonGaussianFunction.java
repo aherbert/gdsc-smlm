@@ -143,7 +143,7 @@ public class PoissonGaussianFunction
 	}
 
 	/**
-	 * Get the probability of observation x
+	 * Get the log(p) of observation x
 	 * 
 	 * @param x
 	 *            The observation value
@@ -153,15 +153,12 @@ public class PoissonGaussianFunction
 	 *            The variance of the Gaussian distribution
 	 * @param usePicardApproximation
 	 *            Use the Picard approximation for the initial saddle point. The default is Pade.
-	 * @return The probability
+	 * @return The log of the probability
 	 */
 	public static double logProbability(final double x, final double mu, final double sigmasquared,
 			final boolean usePicardApproximation)
 	{
-		double saddlepoint = (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
-		saddlepoint = newton_iteration(x, mu, sigmasquared, saddlepoint);
-		final double logP = sp_approx(x, mu, sigmasquared, saddlepoint);
-		return logP + LOG_NORMALISATION;
+		return pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
 	}
 
 	/**
