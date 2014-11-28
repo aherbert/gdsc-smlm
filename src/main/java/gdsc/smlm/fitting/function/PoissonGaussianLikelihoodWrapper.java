@@ -77,8 +77,7 @@ public class PoissonGaussianLikelihoodWrapper
 	}
 
 	/**
-	 * Compute the value. Returns positive infinity if the function evaluates to zero (or below) at any point in the
-	 * observed values.
+	 * Compute the value.
 	 * 
 	 * @param variables
 	 *            The variables of the function
@@ -122,8 +121,7 @@ public class PoissonGaussianLikelihoodWrapper
 	}
 
 	/**
-	 * Compute the value of the function at observed value i. Returns positive infinity if the function
-	 * evaluates to zero (or below) at the observed value.
+	 * Compute the value of the function at observed value i.
 	 * 
 	 * @param variables
 	 *            The variables of the function
