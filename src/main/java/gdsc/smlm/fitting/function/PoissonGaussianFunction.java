@@ -20,7 +20,7 @@ import org.apache.commons.math3.util.FastMath;
  * zero.
  * <p>
  * The implementation uses the saddle-point approximation described in Snyder, et al (1995) Compensation for readout
- * noise in CCD images. J.Opt. Soc. Am. 12, 272-283.
+ * noise in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted from the C source code provided in the appendix. 
  */
 public class PoissonGaussianFunction
 {
@@ -104,6 +104,23 @@ public class PoissonGaussianFunction
 	}
 
 	/**
+	 * Get a pseudo-likelihood of observation x.
+	 * <p>
+	 * This is equivalent to the {@link #logProbability(double)} without the normalisation of the probability density
+	 * function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for use as the
+	 * likelihood function in maximum likelihood estimation since all values will differ by the same constant but will
+	 * evaluate faster.
+	 * 
+	 * @param x
+	 *            The observation value
+	 * @return The pseudo log-likelihood of the probability
+	 */
+	public double pseudoLikelihood(final double x)
+	{
+		return pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation);
+	}
+
+	/**
 	 * Get the probability of observation x
 	 * 
 	 * @param x
@@ -121,8 +138,8 @@ public class PoissonGaussianFunction
 	{
 		double saddlepoint = (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
 		saddlepoint = newton_iteration(x, mu, sigmasquared, saddlepoint);
-		final double l = sp_approx(x, mu, sigmasquared, saddlepoint);
-		return FastMath.exp(l) * NORMALISATION;
+		final double logP = sp_approx(x, mu, sigmasquared, saddlepoint);
+		return FastMath.exp(logP) * NORMALISATION;
 	}
 
 	/**
@@ -143,8 +160,34 @@ public class PoissonGaussianFunction
 	{
 		double saddlepoint = (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
 		saddlepoint = newton_iteration(x, mu, sigmasquared, saddlepoint);
-		final double l = sp_approx(x, mu, sigmasquared, saddlepoint);
-		return l + LOG_NORMALISATION;
+		final double logP = sp_approx(x, mu, sigmasquared, saddlepoint);
+		return logP + LOG_NORMALISATION;
+	}
+
+	/**
+	 * Get a pseudo-likelihood of observation x.
+	 * <p>
+	 * This is equivalent to the {@link #logProbability(double)} without the normalisation of the probability density
+	 * function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for use as the
+	 * likelihood function in maximum likelihood estimation since all values will differ by the same constant but will
+	 * evaluate faster.
+	 * 
+	 * @param x
+	 *            The observation value
+	 * @param mu
+	 *            The mean of the Poisson distribution
+	 * @param sigmasquared
+	 *            The variance of the Gaussian distribution
+	 * @param usePicardApproximation
+	 *            Use the Picard approximation for the initial saddle point. The default is Pade.
+	 * @return The probability
+	 */
+	public static double pseudoLikelihood(final double x, final double mu, final double sigmasquared,
+			final boolean usePicardApproximation)
+	{
+		double saddlepoint = (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
+		saddlepoint = newton_iteration(x, mu, sigmasquared, saddlepoint);
+		return sp_approx(x, mu, sigmasquared, saddlepoint);
 	}
 
 	/**
@@ -214,7 +257,7 @@ public class PoissonGaussianFunction
 			final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
 			change = (x + sigmasquared * saddlepoint - mu_exp_minus_s) / (sigmasquared + mu_exp_minus_s);
 			saddlepoint -= change;
-		} while (FastMath.abs(change) > EPSILON * Math.abs(saddlepoint));
+		} while (FastMath.abs(change) > EPSILON * FastMath.abs(saddlepoint));
 		return saddlepoint;
 	}
 

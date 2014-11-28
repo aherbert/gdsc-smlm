@@ -27,9 +27,9 @@ import java.util.Arrays;
  */
 public class PoissonLikelihoodWrapper
 {
-	private NonLinearFunction f;
-	private double[] a, data;
-	private int n;
+	final private NonLinearFunction f;
+	final private double[] a, data;
+	final private int n;
 
 	private double lastScore;
 	private double[] lastVariables;
