@@ -96,8 +96,7 @@ public class PoissonGaussianLikelihoodWrapper
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			final double mu = f.eval(i);
-			ll -= PoissonGaussianFunction.pseudoLikelihood(data[i], mu, s2, usePicard);
+			ll -= PoissonGaussianFunction.pseudoLikelihood(data[i], f.eval(i), s2, usePicard);
 		}
 		lastScore = ll;
 		return ll;
@@ -133,8 +132,6 @@ public class PoissonGaussianLikelihoodWrapper
 	public double value(double[] variables, int i)
 	{
 		initialiseFunction(variables);
-
-		final double mu = f.eval(i);
-		return -PoissonGaussianFunction.pseudoLikelihood(data[i], mu, s2, usePicard);
+		return -PoissonGaussianFunction.pseudoLikelihood(data[i], f.eval(i), s2, usePicard);
 	}
 }
