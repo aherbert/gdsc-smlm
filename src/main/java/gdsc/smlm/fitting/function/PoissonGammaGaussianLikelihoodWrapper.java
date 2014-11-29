@@ -105,6 +105,7 @@ public class PoissonGammaGaussianLikelihoodWrapper
 		if (sameVariables(variables))
 			return lastScore;
 
+		lastScore = Double.POSITIVE_INFINITY;
 		lastVariables = variables.clone();
 		initialiseFunction(variables);
 
@@ -112,7 +113,12 @@ public class PoissonGammaGaussianLikelihoodWrapper
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			ll -= p.likelihood(data[i], f.eval(i));
+			final double l = p.likelihood(data[i], f.eval(i));
+			if (l == Double.NEGATIVE_INFINITY)
+			{
+				return Double.POSITIVE_INFINITY;
+			}
+			ll -= l;
 		}
 		lastScore = ll;
 		return ll;
