@@ -72,6 +72,7 @@ public class FitConfiguration implements Cloneable
 	private StoppingCriteria stoppingCriteria = null;
 	private GaussianFunction gaussianFunction = null;
 	private NoiseModel noiseModel = null;
+	private FunctionSolver functionSolver = null;
 
 	/**
 	 * Default constructor
@@ -383,6 +384,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setMaxIterations(int maxIterations)
 	{
+		invalidateFunctionSolver();
 		this.maxIterations = maxIterations;
 	}
 
@@ -836,6 +838,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setLambda(double lambda)
 	{
+		invalidateFunctionSolver();
 		this.lambda = lambda;
 	}
 
@@ -925,6 +928,7 @@ public class FitConfiguration implements Cloneable
 			initialSD1 = 1;
 		setNoise(noise);
 		setFitFunction(fitFunction);
+		invalidateFunctionSolver();
 	}
 
 	/**
@@ -996,6 +1000,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setNoiseModel(NoiseModel noiseModel)
 	{
+		invalidateFunctionSolver();
 		this.noiseModel = noiseModel;
 	}
 
@@ -1050,6 +1055,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setMaxFunctionEvaluations(int maxFunctionEvaluations)
 	{
+		invalidateFunctionSolver();
 		this.maxFunctionEvaluations = maxFunctionEvaluations;
 	}
 
@@ -1079,6 +1085,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setSearchMethod(SearchMethod searchMethod)
 	{
+		invalidateFunctionSolver();
 		this.searchMethod = searchMethod;
 	}
 
@@ -1100,6 +1107,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setGradientLineMinimisation(boolean gradientLineMinimisation)
 	{
+		invalidateFunctionSolver();
 		this.gradientLineMinimisation = gradientLineMinimisation;
 	}
 
@@ -1117,6 +1125,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setRelativeThreshold(double relativeThreshold)
 	{
+		invalidateFunctionSolver();		
 		this.relativeThreshold = relativeThreshold;
 	}
 
@@ -1134,6 +1143,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setAbsoluteThreshold(double absoluteThreshold)
 	{
+		invalidateFunctionSolver();
 		this.absoluteThreshold = absoluteThreshold;
 	}
 
@@ -1142,11 +1152,25 @@ public class FitConfiguration implements Cloneable
 	 */
 	public FunctionSolver getFunctionSolver()
 	{
-		GaussianFunction gf = getGaussianFunction();
+		if (functionSolver == null)
+			functionSolver = createFitSolver();
+		return functionSolver;
+	}
+	
+	/**
+	 * Call this when a property changes that will change the function solver 
+	 */
+	private void invalidateFunctionSolver()
+	{
+		functionSolver = null;
+	}
+
+	private FunctionSolver createFitSolver()
+	{
 		switch (fitSolver)
 		{
 			case MLE:
-				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gf);
+				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gaussianFunction);
 				fitter.setRelativeThreshold(relativeThreshold);
 				fitter.setAbsoluteThreshold(absoluteThreshold);
 				fitter.setMaxEvaluations(maxFunctionEvaluations);
@@ -1157,9 +1181,9 @@ public class FitConfiguration implements Cloneable
 				return fitter;
 
 			case LVM_QUASI_NEWTON:
-				if (gf instanceof Gaussian2DFunction)
+				if (gaussianFunction instanceof Gaussian2DFunction)
 				{
-					ApacheLVMFitter apacheNLinFit = new ApacheLVMFitter((Gaussian2DFunction) gf);
+					ApacheLVMFitter apacheNLinFit = new ApacheLVMFitter((Gaussian2DFunction) gaussianFunction);
 					apacheNLinFit.setMaxEvaluations(maxIterations);
 					// TODO - Configure stopping criteria ...
 					return apacheNLinFit;
@@ -1167,11 +1191,11 @@ public class FitConfiguration implements Cloneable
 				// else fall through to default fitter
 
 			case LVM_WEIGHTED:
-				gf.setNoiseModel(getNoiseModel());
+				gaussianFunction.setNoiseModel(getNoiseModel());
 
 			case LVM:
 			default:
-				NonLinearFit nlinfit = new NonLinearFit(gf, getStoppingCriteria());
+				NonLinearFit nlinfit = new NonLinearFit(gaussianFunction, getStoppingCriteria());
 				nlinfit.setInitialLambda(getLambda());
 				return nlinfit;
 		}
