@@ -19,7 +19,7 @@ import gdsc.smlm.engine.FitJob;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.fitting.function.GaussianFunction;
+import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.GlobalSettings;

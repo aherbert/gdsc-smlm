@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
-import gdsc.smlm.fitting.utils.DoubleEquality;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.model.ActivationEnergyImageModel;
 import gdsc.smlm.model.CompoundMoleculeModel;
 import gdsc.smlm.model.FluorophoreSequenceModel;
@@ -14,6 +13,7 @@ import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.utils.DoubleEquality;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 

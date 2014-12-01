@@ -16,7 +16,7 @@ package gdsc.smlm.fitting;
  * CCPN website (http://www.ccpn.ac.uk/)
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import java.util.Arrays;
 
@@ -283,7 +283,7 @@ public class Gaussian2DFitter
 	 *            parameters that are zero will be estimated.
 	 * @param amplitudeEstimate
 	 *            Set to true if the parameters have amplitude estimated in the
-	 *            {@link gdsc.smlm.fitting.function.Gaussian2DFunction.SIGNAL} field. The
+	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */
@@ -328,7 +328,7 @@ public class Gaussian2DFitter
 	 *            Set to true if a zero value for the background parameter is the estimate
 	 * @param amplitudeEstimate
 	 *            Set to true if the parameters have amplitude estimated in the
-	 *            {@link gdsc.smlm.fitting.function.Gaussian2DFunction.SIGNAL} field. The
+	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */

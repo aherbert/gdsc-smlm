@@ -1,8 +1,8 @@
 package gdsc.smlm.fitting.linear;
 
 import gdsc.smlm.TestSettings;
-import gdsc.smlm.fitting.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;

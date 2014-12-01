@@ -13,11 +13,6 @@ package gdsc.smlm.fitting;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
-import gdsc.smlm.fitting.function.GaussianFunction;
-import gdsc.smlm.fitting.function.GaussianFunctionFactory;
-import gdsc.smlm.fitting.function.NoiseModel;
-import gdsc.smlm.fitting.logging.Logger;
 import gdsc.smlm.fitting.nonlinear.ApacheLVMFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
@@ -26,8 +21,13 @@ import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria;
 import gdsc.smlm.fitting.nonlinear.stop.ParameterStoppingCriteria;
+import gdsc.smlm.function.NoiseModel;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.logging.Logger;
 
 /**
  * Specifies the fitting configuration for Gaussian fitting

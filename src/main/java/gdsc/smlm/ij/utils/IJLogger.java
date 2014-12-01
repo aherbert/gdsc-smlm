@@ -5,7 +5,7 @@ import ij.IJ;
 /**
  * Log to the ImageJ log window
  */
-public class IJLogger implements gdsc.smlm.fitting.logging.Logger
+public class IJLogger implements gdsc.smlm.utils.logging.Logger
 {
 	/* (non-Javadoc)
 	 * @see gdsc.smlm.fitting.logging.Logger#info(java.lang.String)

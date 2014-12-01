@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.fitting.function.NonLinearFunction;
+import gdsc.smlm.function.NonLinearFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -149,9 +149,9 @@ public class GradientCalculator
 	 *            m)
 	 * @param func
 	 *            Non-linear fitting function
-	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])},
-	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[], double[])},
-	 * @see {@link gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()}
+	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[])},
+	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[], double[])},
+	 * @see {@link gdsc.smlm.function.NonLinearFunction#canComputeWeights()}
 	 * @return The sum-of-squares value for the fit.
 	 */
 	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)

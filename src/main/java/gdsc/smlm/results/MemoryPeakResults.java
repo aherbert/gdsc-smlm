@@ -1,6 +1,6 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.utils;
 
-import gdsc.smlm.fitting.function.OptimiserFunction;
+import gdsc.smlm.function.OptimiserFunction;
 import ij.IJ;
 
 /**

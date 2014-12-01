@@ -1,15 +1,15 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.TestSettings;
-import gdsc.smlm.fitting.function.CameraNoiseModel;
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
-import gdsc.smlm.fitting.function.gaussian.EllipticalGaussian2DFunction;
-import gdsc.smlm.fitting.function.gaussian.SingleCircularGaussian2DFunction;
-import gdsc.smlm.fitting.function.gaussian.SingleEllipticalGaussian2DFunction;
-import gdsc.smlm.fitting.function.gaussian.SingleFixedGaussian2DFunction;
-import gdsc.smlm.fitting.function.gaussian.SingleFreeCircularGaussian2DFunction;
-import gdsc.smlm.fitting.function.gaussian.SingleNBFixedGaussian2DFunction;
-import gdsc.smlm.fitting.utils.DoubleEquality;
+import gdsc.smlm.function.CameraNoiseModel;
+import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.SingleCircularGaussian2DFunction;
+import gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
+import gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
+import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
+import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
+import gdsc.smlm.utils.DoubleEquality;
 
 import java.util.ArrayList;
 import java.util.Random;

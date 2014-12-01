@@ -2,7 +2,7 @@ package gdsc.smlm.model;
 
 import java.awt.Rectangle;
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 

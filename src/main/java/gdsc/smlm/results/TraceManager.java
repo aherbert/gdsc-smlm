@@ -13,7 +13,7 @@ package gdsc.smlm.results;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;

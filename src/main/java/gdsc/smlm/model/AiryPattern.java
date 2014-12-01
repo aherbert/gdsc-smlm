@@ -2,7 +2,7 @@ package gdsc.smlm.model;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.smlm.utils.Bessel;
+import gdsc.smlm.function.Bessel;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

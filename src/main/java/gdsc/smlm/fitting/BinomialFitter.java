@@ -13,9 +13,9 @@ package gdsc.smlm.fitting;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.logging.Logger;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.logging.Logger;
 
 import java.util.Arrays;
 

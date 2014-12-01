@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.fitting.function.NonLinearFunction;
+import gdsc.smlm.function.NonLinearFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

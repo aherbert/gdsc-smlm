@@ -13,7 +13,7 @@ package gdsc.smlm.results;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.UnicodeReader;
 import gdsc.smlm.utils.XmlUtils;

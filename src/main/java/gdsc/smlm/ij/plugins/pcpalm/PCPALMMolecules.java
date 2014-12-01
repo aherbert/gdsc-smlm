@@ -13,8 +13,8 @@ package gdsc.smlm.ij.plugins.pcpalm;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
-import gdsc.smlm.fitting.function.SkewNormalFunction;
+import gdsc.smlm.function.SkewNormalFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;

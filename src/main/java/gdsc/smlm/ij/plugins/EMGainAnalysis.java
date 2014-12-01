@@ -1,8 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.fitting.function.PoissonGammaGaussianFunction;
+import gdsc.smlm.function.Bessel;
+import gdsc.smlm.function.PoissonGammaGaussianFunction;
 import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.utils.Bessel;
 import gdsc.smlm.utils.Convolution;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.StoredDataStatistics;

@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.results;
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.XmlUtils;
 import ij.ImagePlus;

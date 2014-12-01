@@ -1,8 +1,8 @@
 package gdsc.smlm.fitting.nonlinear.stop;
 
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
-import gdsc.smlm.fitting.function.GaussianFunction;
-import gdsc.smlm.fitting.utils.DoubleEquality;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunction;
+import gdsc.smlm.utils.DoubleEquality;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

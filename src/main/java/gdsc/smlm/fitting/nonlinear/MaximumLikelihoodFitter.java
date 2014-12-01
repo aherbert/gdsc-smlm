@@ -1,10 +1,10 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.function.NonLinearFunction;
-import gdsc.smlm.fitting.function.PoissonLikelihoodWrapper;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.PoissonLikelihoodWrapper;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;

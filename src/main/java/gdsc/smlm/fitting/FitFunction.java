@@ -14,24 +14,24 @@ package gdsc.smlm.fitting;
  *---------------------------------------------------------------------------*/
 
 /**
- * Define the 2D Gaussian fitting function
+ * Define the fitting function
  */
 public enum FitFunction
 {
 	/**
-	 * Fixed width fitting
+	 * Fixed width 2D Gaussian
 	 */
 	FIXED("Fixed"),
 	/**
-	 * Fit XY width simultaneously
+	 * Fit 2D Gaussian with XY width simultaneously 
 	 */
 	CIRCULAR("Circular"),
 	/**
-	 * Fit XY width independently
+	 * Fit 2D Gaussian with XY width independently
 	 */
 	FREE_CIRCULAR("Free circular"),
 	/**
-	 * Fit elliptical Gaussian
+	 * Fit elliptical 2D Gaussian
 	 */
 	FREE("Free");
 

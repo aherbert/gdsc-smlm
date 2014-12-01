@@ -1,9 +1,9 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.function.MultivariateMatrixFunctionWrapper;
-import gdsc.smlm.fitting.function.MultivariateVectorFunctionWrapper;
-import gdsc.smlm.fitting.function.Gaussian2DFunction;
+import gdsc.smlm.function.MultivariateMatrixFunctionWrapper;
+import gdsc.smlm.function.MultivariateVectorFunctionWrapper;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;

@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import gdsc.smlm.fitting.logging.Logger;
+import gdsc.smlm.utils.logging.Logger;
 
 import java.util.Arrays;
 

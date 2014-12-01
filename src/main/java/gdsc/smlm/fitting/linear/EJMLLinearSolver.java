@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.linear;
 
-import gdsc.smlm.fitting.utils.DoubleEquality;
+import gdsc.smlm.utils.DoubleEquality;
 
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
