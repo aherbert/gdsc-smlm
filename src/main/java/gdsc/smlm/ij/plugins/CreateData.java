@@ -627,19 +627,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double F = (emCCD) ? 2 : 1;
 		final double a2 = a * a;
 		// 4 * pi = 12.56637061
+		
+		// Adjustment for square pixels
+		//final double sa2 = s * s + a2 / 12.0;
 
 		// Original Thompson formula modified for EM-gain noise factor.
-		// TODO : None of my fitters approach this limit when background is >0 photon. Perhaps check it
-		// against the numbers of the FandPLimitTool.
-		return Math.sqrt(F * (N + (12.56637061 * s * s * b2) / a2));
+		
+		// TODO - Investigate if this limit is correct
+		
+		// My fitters approach this limit when background is 0 photon and EM-gain = 0.
+		// The fitters are above this limit when background is >0 photon and EM-gain = 0.
 
-		// Modified to account for ~30% error 
-		// TODO: Find out if this is valid? It does not appear to work on a quick test on benchmark data.
-		// The error is closer to 20% for LSE and less for MLE.
-		// 16 / 9 = 1.7777777778
-		//final double sa2 = s * s + a2 / 12.0;
-		//return Math.sqrt(F * 1.7777777778 * (N + (12.56637061 * sa2 * b2) / a2));
-		//return Math.sqrt(F * N * (1.7777777778 + (12.56637061 * sa2 * b2) / (N * a2)));
+		// The MLE fitter can approach this limit when background is 0 photon and EM-gain = 25.
+		
+		return Math.sqrt(F * (N + (12.56637061 * s * s * b2) / a2));
+		//return Math.sqrt(F * (N + (12.56637061 * sa2 * b2) / a2));
 	}
 
 	/**
