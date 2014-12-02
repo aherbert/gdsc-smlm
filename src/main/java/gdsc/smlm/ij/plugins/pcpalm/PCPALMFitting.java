@@ -48,12 +48,14 @@ import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.GradientChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.PointVectorValuePair;
+import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -1221,8 +1223,8 @@ public class PCPALMFitting implements PlugIn
 				// The GoalType is always minimise so no need to pass this in
 				optimum = opt.optimize(maxEvaluations, gradient, objective, 
 						new InitialGuess((optimum==null) ? initialSolution : optimum.getPointRef()),
-						new SimpleBounds(lB, uB), new BFGSOptimizer.GradientChecker(relativeThreshold,
-								absoluteThreshold), new BFGSOptimizer.PositionChecker(relativeThreshold,
+						new SimpleBounds(lB, uB), new GradientChecker(relativeThreshold,
+								absoluteThreshold), new PositionChecker(relativeThreshold,
 								absoluteThreshold), new BFGSOptimizer.StepLength(stepLength));
 				if (debug)
 					System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(), opt.getEvaluations());

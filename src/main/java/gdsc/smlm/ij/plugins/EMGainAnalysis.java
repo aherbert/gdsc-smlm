@@ -26,7 +26,7 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
@@ -241,7 +241,7 @@ public class EMGainAnalysis implements PlugInFilter
 		Utils.display(TITLE, plot);
 
 		// Perform a fit
-		PowellOptimizer o = new PowellOptimizer(1e-6, 1e-16);
+		CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16);
 		double[] startPoint = new double[] { photons, gain, noise, bias };
 		final int maxEval = 3000;
 

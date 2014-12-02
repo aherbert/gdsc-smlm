@@ -22,8 +22,10 @@ import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.GradientChecker;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GradientMultivariateOptimizer;
 import org.apache.commons.math3.util.FastMath;
 
@@ -57,103 +59,6 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	private double[] lower, upper;
 
 	private double sign = 0;
-
-	/**
-	 * Check if the coordinates have converged
-	 */
-	public abstract static class CoordinateChecker implements OptimizationData
-	{
-		final double relative, absolute;
-
-		/**
-		 * Build an instance with specified thresholds.
-		 *
-		 * In order to perform only relative checks, the absolute tolerance
-		 * must be set to a negative value. In order to perform only absolute
-		 * checks, the relative tolerance must be set to a negative value.
-		 *
-		 * @param relativeThreshold
-		 *            relative tolerance threshold
-		 * @param absoluteThreshold
-		 *            absolute tolerance threshold
-		 */
-		public CoordinateChecker(double relative, double absolute)
-		{
-			this.relative = relative;
-			this.absolute = absolute;
-		}
-
-		/**
-		 * Check if the coordinates have converged
-		 * 
-		 * @param p
-		 *            Previous
-		 * @param c
-		 *            Current
-		 * @return True if converged
-		 */
-		public boolean converged(final double[] p, final double[] c)
-		{
-			for (int i = 0; i < p.length; ++i)
-			{
-				final double pi = p[i];
-				final double ci = c[i];
-				final double difference = Math.abs(pi - ci);
-				final double size = FastMath.max(Math.abs(pi), Math.abs(ci));
-				if (difference > size * relative && difference > absolute)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-	}
-
-	/**
-	 * Check if the gradient has converged
-	 */
-	public static class GradientChecker extends CoordinateChecker
-	{
-		/**
-		 * Build an instance with specified thresholds.
-		 *
-		 * In order to perform only relative checks, the absolute tolerance
-		 * must be set to a negative value. In order to perform only absolute
-		 * checks, the relative tolerance must be set to a negative value.
-		 *
-		 * @param relativeThreshold
-		 *            relative tolerance threshold
-		 * @param absoluteThreshold
-		 *            absolute tolerance threshold
-		 */
-		public GradientChecker(double relative, double absolute)
-		{
-			super(relative, absolute);
-		}
-	}
-
-	/**
-	 * Check if the position has converged
-	 */
-	public static class PositionChecker extends CoordinateChecker
-	{
-		/**
-		 * Build an instance with specified thresholds.
-		 *
-		 * In order to perform only relative checks, the absolute tolerance
-		 * must be set to a negative value. In order to perform only absolute
-		 * checks, the relative tolerance must be set to a negative value.
-		 *
-		 * @param relativeThreshold
-		 *            relative tolerance threshold
-		 * @param absoluteThreshold
-		 *            absolute tolerance threshold
-		 */
-		public PositionChecker(double relative, double absolute)
-		{
-			super(relative, absolute);
-		}
-	}
 
 	/**
 	 * Specify the maximum step length in each dimension

@@ -1,21 +1,26 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import java.util.Arrays;
+
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.PoissonLikelihoodWrapper;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.optim.GradientChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -27,7 +32,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinear
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
@@ -91,6 +96,80 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		public double value(double[] point)
 		{
 			return fun.value(point);
+		}
+
+		public boolean isMapped()
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Map the specified indices using the sqrt function for use with the Powell optimiser
+	 */
+	private class MappedMultivariatePoisson extends MultivariatePoisson
+	{
+		final int[] map;
+
+		public MappedMultivariatePoisson(PoissonLikelihoodWrapper fun, int[] map)
+		{
+			super(fun);
+			this.map = map;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
+		 */
+		public double value(double[] point)
+		{
+			return fun.value(unmap(point));
+		}
+
+		/**
+		 * Convert the unmapped point to the mapped equivalent. The mapped point is used by the Powell optimiser.
+		 * <p>
+		 * This is done by square rooting the value of the mapped indices.
+		 * 
+		 * @param point
+		 * @return The mapped point
+		 */
+		public double[] map(double[] point)
+		{
+			point = point.clone();
+			for (int i : map)
+			{
+				point[i] = Math.sqrt(FastMath.abs(point[i])) * FastMath.signum(point[i]);
+			}
+			return point;
+		}
+
+		/**
+		 * Convert the mapped point to the unmapped equivalent. The unmapped point is used to evaluate the function.
+		 * <p>
+		 * This is done by squaring the value of the mapped indices.
+		 * 
+		 * @param point
+		 * @return The unmapped point
+		 */
+		public double[] unmap(double[] point)
+		{
+			point = point.clone();
+			for (int i : map)
+			{
+				//point[i] = point[i] * point[i] * FastMath.signum(point[i]);
+				if (point[i] > 0)
+					point[i] = point[i] * point[i];
+				else
+					point[i] = -(point[i] * point[i]);
+			}
+			return point;
+		}
+
+		public boolean isMapped()
+		{
+			return true;
 		}
 	}
 
@@ -180,12 +259,15 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	private double[] lower, upper;
 	private double[] lowerConstraint, upperConstraint;
 
+	// The function to use for the Powell optimiser (which may have parameters mapped using the sqrt function) 
+	private MultivariatePoisson powellFunction = null;
+
 	/**
 	 * Default constructor
 	 */
-	public MaximumLikelihoodFitter(NonLinearFunction gf)
+	public MaximumLikelihoodFitter(NonLinearFunction f)
 	{
-		super(gf);
+		super(f);
 	}
 
 	/*
@@ -212,23 +294,81 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// I could extend the optimiser and implement bounds on the directions moved. However the mapping
 				// adapter seems to work OK.
 
-				PowellOptimizer o = new PowellOptimizer(relativeThreshold, absoluteThreshold);
+				CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold);
 
-				// Try using the mapping adapter
-				MultivariateFunction fun = new MultivariatePoisson(maximumLikelihoodFunction);
 				OptimizationData maxIterationData = null;
 				if (getMaxIterations() > 0)
 					maxIterationData = new MaxIter(getMaxIterations());
+
 				if (searchMethod == SearchMethod.POWELL)
 				{
-					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
-							new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
-							startPoint));
+					if (powellFunction == null)
+					{
+						// When benchmarking the precision of the fitting to a Gaussian 2D function against the
+						// theoretical precision calculated by the Mortensen formula the Powell optimiser produces
+						// inaccurate XY fits with too low a precision. This may be because the search space is not 
+						// adequately sampled. 
+						// We must map all the parameters into the same range. This is done in the Mortensen MLE 
+						// Python code by using the sqrt of the number of photons and background.
+						if (f instanceof Gaussian2DFunction)
+						{
+							Gaussian2DFunction gf = (Gaussian2DFunction) f;
+							// Re-map signal and background using the sqrt
+							int[] indices = gf.gradientIndices();
+							int[] map = new int[indices.length];
+							int count = 0;
+							// Background is always first
+							if (indices[0] == Gaussian2DFunction.BACKGROUND)
+							{
+								map[count++] = 0;
+							}
+							// Look for the Signal in multiple peak 2D Gaussians
+							for (int i = 1; i < indices.length; i++)
+								if (indices[i] % 6 == Gaussian2DFunction.SIGNAL)
+								{
+									map[count++] = i;
+								}
+							if (count > 0)
+							{
+								powellFunction = new MappedMultivariatePoisson(maximumLikelihoodFunction,
+										Arrays.copyOf(map, count));
+							}
+						}
+						if (powellFunction == null)
+						{
+							powellFunction = new MultivariatePoisson(maximumLikelihoodFunction);
+						}
+					}
+
+					// Update the maximum likelihood function in the Powell function wrapper
+					powellFunction.fun = maximumLikelihoodFunction;
+
+					// TODO - Try the Powell optimiser with restarts and see if this overcomes problems with
+					// accuracy and precision. 
+					// Look at the Python code for the Powell optimiser and Numerical Recipes. Perhaps there
+					// is a better implementation.
+
+					if (powellFunction.isMapped())
+					{
+						MappedMultivariatePoisson adapter = (MappedMultivariatePoisson) powellFunction;
+						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
+								powellFunction), GoalType.MINIMIZE, new InitialGuess(adapter.map(startPoint)),
+								new PositionChecker(relativeThreshold, absoluteThreshold));
+						double[] solution = adapter.unmap(optimum.getPointRef());
+						optimum = new PointValuePair(solution, optimum.getValue());
+					}
+					else
+					{
+						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
+								powellFunction), GoalType.MINIMIZE, new InitialGuess(startPoint), new PositionChecker(
+								relativeThreshold, absoluteThreshold));
+					}
 				}
 				else
 				{
-					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower,
-							upper);
+					// Try using the mapping adapter for a bounded Powell search
+					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
+							new MultivariatePoisson(maximumLikelihoodFunction), lower, upper);
 					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
 							adapter), GoalType.MINIMIZE, new InitialGuess(adapter.boundedToUnbounded(startPoint)));
 					double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
@@ -325,9 +465,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariatePoisson(maximumLikelihoodFunction)), new InitialGuess(startPoint),
-						new SimpleBounds(lowerConstraint, upperConstraint), new BFGSOptimizer.GradientChecker(
-								relativeThreshold, absoluteThreshold), new BFGSOptimizer.PositionChecker(
-								relativeThreshold, absoluteThreshold), new BFGSOptimizer.StepLength(stepLength));
+						new SimpleBounds(lowerConstraint, upperConstraint), new GradientChecker(relativeThreshold,
+								absoluteThreshold), new PositionChecker(relativeThreshold, absoluteThreshold),
+						new BFGSOptimizer.StepLength(stepLength));
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
 			}
