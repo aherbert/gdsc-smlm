@@ -58,7 +58,7 @@ import org.apache.commons.math3.util.FastMath;
  * This class supports both the Fletcher-Reeves and the Polak-Ribière
  * update formulas for the conjugate search directions.
  * It also supports optional preconditioning. <br/>
- * The class is based on the org.apache.commons.math3.optimization.general.NonLinearConjugateGradientOptimizer but
+ * The class is based on the org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer but
  * updated to support bounds checking on the current point within the optimisation space.
  */
 public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivariateOptimizer
