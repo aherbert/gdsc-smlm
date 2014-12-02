@@ -33,6 +33,7 @@ public class ImagePSFModel extends PSFModel
 {
 	//private double[][] inputImage;
 	private double[][] sumImage;
+	private double[][] cumulativeImage;
 	private int psfWidth, xyCentre, zCentre;
 	private double halfPsfWidthInPixels;
 	private double unitsPerPixel;
@@ -105,9 +106,13 @@ public class ImagePSFModel extends PSFModel
 		//for (int i = 0; i < sumImage.length; i++)
 		//	inputImage[i] = Arrays.copyOf(sumImage[i], sumImage[i].length);
 
-		// Then create a rolling sum table.
+		// Then create a rolling sum table and cumulative sum image
+		cumulativeImage = new double[sumImage.length][];
 		for (int i = 0; i < sumImage.length; i++)
+		{
+			cumulativeImage[i] = calculateCumulativeImage(sumImage[i]);
 			calculateRollingSums(sumImage[i]);
+		}
 	}
 
 	private double[][] duplicate(float[][] image)
@@ -161,9 +166,21 @@ public class ImagePSFModel extends PSFModel
 		return sum;
 	}
 
+	private double[] calculateCumulativeImage(double[] s)
+	{
+		double[] c = new double[s.length];
+		double sum = 0;
+		for (int i = 0; i < s.length; i++)
+		{
+			sum += s[i];
+			c[i] = sum;
+		}
+		return c;
+	}
+
 	private void calculateRollingSums(double[] s)
 	{
-		// Compute the rolling sum and sum of squares
+		// Compute the rolling sum
 		// s(u,v) = f(u,v) + s(u-1,v) + s(u,v-1) - s(u-1,v-1) 
 		// where s(u,v) = 0 when either u,v < 0
 
@@ -521,6 +538,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		ImagePSFModel model = new ImagePSFModel();
 		model.sumImage = sumImage;
+		model.cumulativeImage = cumulativeImage;
 		//model.inputImage = inputImage;
 		model.psfWidth = psfWidth;
 		model.xyCentre = xyCentre;
@@ -530,5 +548,82 @@ public class ImagePSFModel extends PSFModel
 		model.unitsPerSlice = unitsPerSlice;
 		model.fwhm = fwhm;
 		return model;
+	}
+
+	@Override
+	public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2)
+	{
+		if (n <= 0)
+			return insertSample(data, width, height, null, null);
+		double[][] sample = sample(n, x0, x1, x2);
+		return insertSample(data, width, height, sample[0], sample[1]);
+	}
+
+	@Override
+	public int sample3D(double[] data, int width, int height, int n, double x0, double x1, double x2)
+	{
+		if (n <= 0)
+			return insertSample(data, width, height, null, null);
+		double[][] sample = sample(n, x0, x1, x2);
+		return insertSample(data, width, height, sample[0], sample[1]);
+	}
+
+	private double[][] sample(int n, double x0, double x1, double x2)
+	{
+		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
+		if (slice < 0 || slice >= sumImage.length)
+			return new double[][] { null, null };
+
+		final double[] sumPsf = cumulativeImage[slice];
+
+		final RandomGenerator random = rand.getRandomGenerator();
+
+		// Ensure the generated index is adjusted to the correct position
+		// The index will be generated at 0,0 of a pixel in the PSF image.
+		// We must subtract half the PSF width so that the middle is zero and then 
+		// add half a pixel so the sample is at 0.5,0.5 in the pixel:
+		// x = x0 + ((index % psfWidth) - (0.5*psfWidth) + 0.5) * unitsPerPixel		
+		//   = x0 + ((index % psfWidth) * unitsPerPixel) - (0.5*psfWidth) + 0.5) * unitsPerPixel
+		//   = x0 + ((index % psfWidth) * unitsPerPixel) - halfPsfWidthInPixels + 0.5 * unitsPerPixel
+		
+		x0 = x0 - halfPsfWidthInPixels + 0.5 * unitsPerPixel;
+		x1 = x1 - halfPsfWidthInPixels + 0.5 * unitsPerPixel;
+		
+		final double max = sumPsf[sumPsf.length - 1];
+		final double[] x = new double[n];
+		final double[] y = new double[n];
+		for (int i = 0; i < n; i++)
+		{
+			final double p = random.nextDouble() * max;
+			final int index = findIndex(sumPsf, p);
+			x[i] = x0 + ((index % psfWidth) * this.unitsPerPixel);
+			y[i] = x1 + ((index / psfWidth) * this.unitsPerPixel);
+		}
+
+		return new double[][] { x, y };
+	}
+
+	private int findIndex(double[] sumPsf, double p)
+	{
+		// This could be optimised
+		int i = 0;
+		for (int j = psfWidth; j < sumPsf.length; j += psfWidth)
+		{
+			if (sumPsf[j] > p)
+				break;
+			i = j;
+		}
+
+		return findIndex(sumPsf, p, i);
+	}
+
+	private int findIndex(double[] sumPsf, double p, int i)
+	{
+		for (; i < sumPsf.length; i++)
+			if (sumPsf[i] > p)
+			{
+				return i;
+			}
+		return sumPsf.length - 1;
 	}
 }

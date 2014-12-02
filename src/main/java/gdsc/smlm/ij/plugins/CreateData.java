@@ -112,6 +112,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
 import org.apache.commons.math3.random.Well44497b;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 import com.thoughtworks.xstream.XStream;
@@ -192,6 +193,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private AtomicInteger photonsRemoved;
 	private AtomicInteger t1Removed;
 	private AtomicInteger tNRemoved;
+	private SummaryStatistics photonStats;
 	private boolean imagePSF;
 	private double hwhm = 0;
 
@@ -825,9 +827,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return -1;
 		}
 		PSFSettings psfSettings = (PSFSettings) o;
-		if (psfSettings.fwhm <= 0 || psfSettings.nmPerPixel <= 0)
+		if (psfSettings.fwhm <= 0)
 		{
-			IJ.error(TITLE, "Unknown PSF settings for image: " + imp.getTitle());
+			IJ.error(TITLE, "Unknown PSF FWHM setting for image: " + imp.getTitle());
+			return -1;
+		}
+		if (psfSettings.nmPerPixel <= 0)
+		{
+			IJ.error(TITLE, "Unknown PSF nm/pixel setting for image: " + imp.getTitle());
 			return -1;
 		}
 
@@ -1264,14 +1271,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		photonsRemoved = new AtomicInteger();
 		t1Removed = new AtomicInteger();
 		tNRemoved = new AtomicInteger();
+		photonStats = new SummaryStatistics();
 
 		// Add drawn spots to memory
 		results = new MemoryPeakResults();
-		Calibration c = new Calibration(settings.pixelPitch, (float) settings.getTotalGain(),
-				settings.exposureTime);
+		Calibration c = new Calibration(settings.pixelPitch, (float) settings.getTotalGain(), settings.exposureTime);
 		c.emCCD = (settings.getEmGain() > 1);
 		c.bias = settings.bias;
-		c.readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1); 
+		c.readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 		results.setCalibration(c);
 		results.setSortAfterEnd(true);
 		results.begin();
@@ -1308,6 +1315,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Count all the frames to process
 		frame = 0;
 		totalFrames = maxT;
+
+		// Collect statistics on the number of photons actually simulated
 
 		// Process all frames
 		int i = 0;
@@ -1356,14 +1365,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.end();
 
 		if (photonsRemoved.get() > 0)
-			IJ.log(String.format("Removed %d localisations with less than %.1f photons", photonsRemoved.get(),
-					settings.minPhotons));
+			Utils.log("Removed %d localisations with less than %.1f photons", photonsRemoved.get(), settings.minPhotons);
 		if (t1Removed.get() > 0)
-			IJ.log(String.format("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(),
-					settings.minSNRt1));
+			Utils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(), settings.minSNRt1);
 		if (tNRemoved.get() > 0)
-			IJ.log(String.format("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(),
-					settings.minSNRtN));
+			Utils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(), settings.minSNRtN);
+		if (photonStats.getN() > 0)
+			Utils.log("Average photons = %s +/- %s", Utils.rounded(photonStats.getMean()),
+					Utils.rounded(photonStats.getStandardDeviation()));
 
 		//System.out.printf("rawPhotons = %f\n", rawPhotons.getMean());
 		//System.out.printf("drawPhotons = %f\n", drawPhotons.getMean());
@@ -1449,6 +1458,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		saveFixedAndMoving(results, title);
 
 		return localisations;
+	}
+
+	private synchronized void addPhotons(double p)
+	{
+		photonStats.addValue(p);
 	}
 
 	/**
@@ -1564,16 +1578,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private class Spot
 	{
-		double[] psf;
-		int x0min, x0max, x1min, x1max;
+		final double[] psf;
+		final int x0min, x0max, x1min, x1max;
+		final int[] samplePositions;
 
-		public Spot(double[] psf, int x0min, int x0max, int x1min, int x1max)
+		public Spot(double[] psf, int x0min, int x0max, int x1min, int x1max, int[] samplePositions)
 		{
 			this.psf = psf;
 			this.x0min = x0min;
 			this.x0max = x0max;
 			this.x1min = x1min;
 			this.x1max = x1max;
+			this.samplePositions = samplePositions;
 		}
 	}
 
@@ -1671,15 +1687,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 						//addRaw(localisation.getIntensity());
 
-						final double photons = psfModel.create3D(data, settings.size, settings.size,
-								localisation.getIntensity(), localisation.getX(), localisation.getY(),
-								localisation.getZ(), poissonNoise);
+						final double photons;
+						int[] samplePositions = null;
+						if (poissonNoise)
+						{
+							final int samples = (int) random.nextPoisson(localisation.getIntensity());
+							photons = psfModel.sample3D(data, settings.size, settings.size,
+									samples, localisation.getX(), localisation.getY(),
+									localisation.getZ());
+							samplePositions = psfModel.getSamplePositions();
+						}
+						else
+						{
+							photons = psfModel.create3D(data, settings.size, settings.size,
+									localisation.getIntensity(), localisation.getX(), localisation.getY(),
+									localisation.getZ(), false);
+						}
 						//addDraw(photons);
 						if (photons > 0)
 						{
 							totalPhotons += photons;
 							spots[spotCount++] = new Spot(psfModel.getPSF(), psfModel.getX0min(), psfModel.getX0max(),
-									psfModel.getX1min(), psfModel.getX1max());
+									psfModel.getX1min(), psfModel.getX1max(), samplePositions);
 						}
 						localisation.setIntensity(photons * totalGain);
 					}
@@ -1696,13 +1725,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						photonsRemoved.incrementAndGet();
 						for (int i = 0; i < spotCount; i++)
 						{
-							Spot spot = spots[i];
-							psfModel.erase(data, settings.size, settings.size, spot.psf, spot.x0min, spot.x0max,
-									spot.x1min, spot.x1max);
+							erase(data, spots[i]);
 						}
 						localisationSet.setData(new double[5]);
 						continue;
 					}
+
+					addPhotons(totalPhotons);
 
 					LocalisationModel localisation = localisationSet.toLocalisation();
 
@@ -1774,9 +1803,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						{
 							for (int i = 0; i < spotCount; i++)
 							{
-								Spot spot = spots[i];
-								psfModel.erase(data, settings.size, settings.size, spot.psf, spot.x0min, spot.x0max,
-										spot.x1min, spot.x1max);
+								erase(data, spots[i]);
 							}
 							localisationSet.setData(new double[5]);
 							continue;
@@ -1866,6 +1893,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Send to output
 			stack.setPixels(image, t);
+		}
+
+		private void erase(float[] data, Spot spot)
+		{
+			if (spot.samplePositions != null)
+			{
+				psfModel.eraseSample(data, settings.size, settings.size);
+			}
+			else
+			{
+				psfModel.erase(data, settings.size, settings.size, spot.psf, spot.x0min, spot.x0max, spot.x1min,
+						spot.x1max);
+			}
 		}
 
 		/**
@@ -2351,7 +2391,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			double centre = (alwaysRemoveOutliers[i]) ? ((StoredDataStatistics) stats[i]).getStatistics()
 					.getPercentile(50) : stats[i].getMean();
-			sb.append(Utils.rounded(centre, 3)).append("\t");
+			sb.append(Utils.rounded(centre, 4)).append("\t");
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
@@ -3179,7 +3219,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (!benchmarkMode)
 				Parameters.isAboveZero("Density", settings.density);
 			Parameters.isAboveZero("Min Photons", settings.photonsPerSecond);
-			Parameters.isEqualOrAbove("Max Photons", settings.photonsPerSecondMaximum, settings.photonsPerSecond);
+			if (settings.photonsPerSecondMaximum < settings.photonsPerSecond)
+				settings.photonsPerSecondMaximum = settings.photonsPerSecond;
 			if (!imagePSF)
 			{
 				Parameters.isAboveZero("Wavelength", settings.wavelength);

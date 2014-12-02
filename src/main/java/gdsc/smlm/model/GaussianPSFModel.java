@@ -441,4 +441,59 @@ public class GaussianPSFModel extends PSFModel
 	{
 		return (s0 + s1) * Math.sqrt(2.0 * Math.log(2.0));
 	}
+
+	@Override
+	public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2)
+	{
+		if (n <= 0)
+			return insertSample(data, width, height, null, null);
+		final double scale = createWidthScale(x2);
+		double[][] sample = sample(n, x0, x1, scale * zeroS0, scale * zeroS1);
+		return insertSample(data, width, height, sample[0], sample[1]);
+	}
+
+	@Override
+	public int sample3D(double[] data, int width, int height, int n, double x0, double x1, double x2)
+	{
+		if (n <= 0)
+			return insertSample(data, width, height, null, null);
+		final double scale = createWidthScale(x2);
+		double[][] sample = sample(n, x0, x1, scale * zeroS0, scale * zeroS1);
+		return insertSample(data, width, height, sample[0], sample[1]);
+	}
+
+	/**
+	 * Sample from a Gaussian distribution
+	 * 
+	 * @param n
+	 *            The number of samples
+	 * @param x0
+	 *            The Gaussian centre in dimension 0
+	 * @param x1
+	 *            The Gaussian centre in dimension 1
+	 * @param s0
+	 *            The Gaussian standard deviation dimension 0
+	 * @param s1
+	 *            The Gaussian standard deviation dimension 1
+	 * @return The sample x and y values
+	 */
+	public double[][] sample(final int n, final double x0, final double x1, final double s0, final double s1)
+	{
+		this.s0 = s0;
+		this.s1 = s1;
+		final double[] x = sample(n, x0, s0);
+		final double[] y = sample(n, x1, s1);
+		return new double[][] { x, y };
+	}
+
+	private double[] sample(final int n, final double mu, final double sigma)
+	{
+		final double[] x = new double[n];
+		final RandomGenerator random = rand.getRandomGenerator();
+		for (int i = 0; i < n; i++)
+		{
+			x[i] = sigma * random.nextGaussian() + mu;
+		}
+		return x;
+	}
 }

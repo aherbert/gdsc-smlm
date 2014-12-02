@@ -13,6 +13,8 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -21,12 +23,13 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public abstract class PSFModel
 {
-	private RandomDataGenerator rand;
+	protected RandomDataGenerator rand;
 	private double[] psf;
 	private int x0min;
 	private int x1min;
 	private int x0max;
 	private int x1max;
+	private int[] samplePositions;
 
 	public PSFModel()
 	{
@@ -150,7 +153,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * @return The minimum position in dimension 0 for the last drawn PSF
+	 * @return The minimum position in dimension 0 for the last drawn/sampled PSF
 	 */
 	public int getX0min()
 	{
@@ -158,7 +161,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * @return The maximum position in dimension 0 for the last drawn PSF
+	 * @return The maximum position in dimension 0 for the last drawn/sampled PSF
 	 */
 	public int getX0max()
 	{
@@ -166,7 +169,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * @return The minimum position in dimension 1 for the last drawn PSF
+	 * @return The minimum position in dimension 1 for the last drawn/sampled PSF
 	 */
 	public int getX1min()
 	{
@@ -174,7 +177,7 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * @return The maximum position in dimension 1 for the last drawn PSF
+	 * @return The maximum position in dimension 1 for the last drawn/sampled PSF
 	 */
 	public int getX1max()
 	{
@@ -427,6 +430,265 @@ public abstract class PSFModel
 	 * @return the FWHM of the PSF
 	 */
 	public abstract double getFwhm();
+
+	/**
+	 * Sample a PSF function on the provided data.
+	 * 
+	 * @param data
+	 *            The data (can be null)
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param n
+	 *            The number of samples
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @return The number of samples drawn on the image (useful to detect samples outside the image bounds)
+	 */
+	public abstract int sample3D(float[] data, final int width, final int height, final int n, double x0, double x1,
+			double x2);
+
+	/**
+	 * Sample a PSF function on the provided data.
+	 * 
+	 * @param data
+	 *            The data (can be null)
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param n
+	 *            The number of samples
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @return The number of samples drawn on the image (useful to detect samples outside the image bounds)
+	 */
+	public abstract int sample3D(double[] data, final int width, final int height, final int n, double x0, double x1,
+			double x2);
+
+	/**
+	 * Sample a PSF function on the provided data.
+	 * 
+	 * @param data
+	 *            The data (can be null)
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param n
+	 *            The number of samples
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @return The number of samples drawn on the image (useful to detect samples outside the image bounds)
+	 */
+	public double sample2D(float[] data, final int width, final int height, final int n, double x0, double x1)
+	{
+		return sample3D(data, width, height, n, x0, x1, 0);
+	}
+
+	/**
+	 * Sample a PSF function on the provided data.
+	 * 
+	 * @param data
+	 *            The data (can be null)
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param n
+	 *            The number of samples
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @return The number of samples drawn on the image (useful to detect samples outside the image bounds)
+	 */
+	public double sample2D(double[] data, final int width, final int height, final int n, double x0, double x1)
+	{
+		return sample3D(data, width, height, n, x0, x1, 0);
+	}
+
+	/**
+	 * Insert a set of sampled XY positions into the data
+	 * 
+	 * @param data
+	 *            The data
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param x
+	 *            The x-positions
+	 * @param y
+	 *            The y-positions
+	 * @return The number of samples that were inside the data bounds
+	 */
+	protected int insertSample(double[] data, final int width, final int height, double[] x, double[] y)
+	{
+		int n = 0;
+		samplePositions = new int[(x == null) ? 0 : x.length];
+
+		x0max = x1max = 0;
+		x0min = x1min = width;
+		for (int i = 0; i < samplePositions.length; i++)
+		{
+			if (x[i] < 0 || x[i] >= width || y[i] < 0 || y[i] >= height)
+				continue;
+			final int xp = (int) x[i];
+			final int yp = (int) y[i];
+			if (x0min > xp)
+				x0min = xp;
+			if (x0max < xp)
+				x0max = xp;
+			if (x1min > yp)
+				x1min = yp;
+			if (x1max < yp)
+				x1max = yp;
+			final int index = yp * width + xp;
+			samplePositions[n++] = index;
+			data[index] += 1;
+		}
+
+		if (n < samplePositions.length)
+			samplePositions = Arrays.copyOf(samplePositions, n);
+		return samplePositions.length;
+	}
+
+	/**
+	 * Insert a set of sampled XY positions into the data
+	 * 
+	 * @param data
+	 *            The data
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param x
+	 *            The x-positions
+	 * @param y
+	 *            The y-positions
+	 * @return The number of samples that were inside the data bounds
+	 */
+	protected int insertSample(float[] data, final int width, final int height, double[] x, double[] y)
+	{
+		int n = 0;
+		samplePositions = new int[(x == null) ? 0 : x.length];
+
+		x0max = x1max = 0;
+		x0min = x1min = width;
+		for (int i = 0; i < samplePositions.length; i++)
+		{
+			if (x[i] < 0 || x[i] >= width || y[i] < 0 || y[i] >= height)
+				continue;
+			final int xp = (int) x[i];
+			final int yp = (int) y[i];
+			if (x0min > xp)
+				x0min = xp;
+			if (x0max < xp)
+				x0max = xp;
+			if (x1min > yp)
+				x1min = yp;
+			if (x1max < yp)
+				x1max = yp;
+			final int index = yp * width + xp;
+			samplePositions[n++] = index;
+			data[index] += 1;
+		}
+
+		if (n < samplePositions.length)
+			samplePositions = Arrays.copyOf(samplePositions, n);
+		return samplePositions.length;
+	}
+
+	/**
+	 * Return the positions where samples were added to the data. The size of the array should equal the number of
+	 * samples added by a sample(...) method.
+	 * 
+	 * @return The positions in the data where samples where added
+	 */
+	public int[] getSamplePositions()
+	{
+		return samplePositions;
+	}
+
+	/**
+	 * Remove the last added PSF from the data. This can be invoked after any call to sample a
+	 * PSF into an input data array.
+	 * 
+	 * @param data
+	 * @param width
+	 * @param height
+	 */
+	public void eraseSample(float[] data, int width, int height)
+	{
+		eraseSample(data, width, height, samplePositions);
+	}
+
+	/**
+	 * Remove the last added PSF from the data. This can be invoked after any call to sample a
+	 * PSF into an input data array.
+	 * 
+	 * @param data
+	 * @param width
+	 * @param height
+	 */
+	public void eraseSample(double[] data, int width, int height)
+	{
+		eraseSample(data, width, height, samplePositions);
+	}
+
+	/**
+	 * Remove the PSF from the data. Can be invoked using a saved copy of the PSF previously drawn by the model obtained
+	 * from the appropriate get() methods.
+	 * 
+	 * @param data
+	 * @param width
+	 * @param height
+	 * @param samplePositions
+	 */
+	public void eraseSample(double[] data, int width, int height, int[] samplePositions)
+	{
+		if (samplePositions == null)
+			return;
+
+		// Remove from the input data
+		for (int i : samplePositions)
+		{
+			data[i] -= 1;
+		}
+	}
+
+	/**
+	 * Remove the PSF from the data. Can be invoked using a saved copy of the PSF previously drawn by the model obtained
+	 * from the appropriate get() methods.
+	 * 
+	 * @param data
+	 * @param width
+	 * @param height
+	 * @param samplePositions
+	 */
+	public void eraseSample(float[] data, int width, int height, int[] samplePositions)
+	{
+		if (samplePositions == null)
+			return;
+
+		// Remove from the input data
+		for (int i : samplePositions)
+		{
+			data[i] -= 1;
+		}
+	}
 
 	/**
 	 * Set the random generator used for the random data generator to create data

@@ -13,10 +13,19 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.utils.DoubleEquality;
 import gdsc.smlm.utils.Maths;
 
+import java.util.Arrays;
+
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
+import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -35,6 +44,12 @@ public class AiryPSFModel extends PSFModel
 	private boolean singlePixelApproximation = false;
 	private int minSamplesPerDimension = 2;
 	private int maxSamplesPerDimension = 50;
+
+	// Used for the random sampling of the Airy function
+	private static int SAMPLE_RINGS = 4;
+	private static double[] r;
+	private static double[] sum;
+	private static PolynomialSplineFunction spline;
 
 	/**
 	 * The zeros of J1(x) corresponding to the rings of the Airy pattern
@@ -716,5 +731,119 @@ public class AiryPSFModel extends PSFModel
 	{
 		if (n >= 2)
 			this.maxSamplesPerDimension = (n % 2 == 0) ? n : n + 1;
+	}
+
+	@Override
+	public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2)
+	{
+		if (n <= 0)
+			return insertSample(data, width, height, null, null);
+		final double scale = createWidthScale(x2);
+		double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
+		return insertSample(data, width, height, sample[0], sample[1]);
+	}
+
+	@Override
+	public int sample3D(double[] data, int width, int height, int n, double x0, double x1, double x2)
+	{
+		if (n <= 0)
+			return insertSample(data, width, height, null, null);
+		final double scale = createWidthScale(x2);
+		double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
+		return insertSample(data, width, height, sample[0], sample[1]);
+	}
+
+	/**
+	 * Sample from an Airy distribution
+	 * 
+	 * @param n
+	 *            The number of samples
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param w0
+	 *            The Airy width for dimension 0
+	 * @param w1
+	 *            The Airy width for dimension 1
+	 * @return The sample x and y values
+	 */
+	public double[][] sample(final int n, final double x0, final double x1, final double w0, final double w1)
+	{
+		this.w0 = w0;
+		this.w1 = w1;
+		createAiryDistribution();
+		double[] x = new double[n];
+		double[] y = new double[n];
+
+		final RandomGenerator random = rand.getRandomGenerator();
+		UnitSphereRandomVectorGenerator vg = new UnitSphereRandomVectorGenerator(2, random);
+		int c = 0;
+		for (int i = 0; i < n; i++)
+		{
+			final double p = random.nextDouble();
+			if (p > POWER[SAMPLE_RINGS])
+			{
+				// TODO - We could add a simple interpolation here using a spline from AiryPattern.power()
+				continue;
+			}
+			final double r = spline.value(p);
+
+			// Convert to xy using a random vector generator
+			final double[] v = vg.nextVector();
+			x[c] = v[0] * r * w0 + x0;
+			y[c] = v[1] * r * w1 + x1;
+			c++;
+		}
+
+		if (c < n)
+		{
+			x = Arrays.copyOf(x, c);
+			y = Arrays.copyOf(y, c);
+		}
+		return new double[][] { x, y };
+	}
+
+	private static void createAiryDistribution()
+	{
+		if (sum != null)
+			return;
+
+		final double relativeAccuracy = 1e-4;
+		final double absoluteAccuracy = 1e-8;
+		final int minimalIterationCount = 3;
+		final int maximalIterationCount = 32;
+
+		UnivariateIntegrator integrator = new SimpsonIntegrator(relativeAccuracy, absoluteAccuracy,
+				minimalIterationCount, maximalIterationCount);
+		UnivariateFunction f = new UnivariateFunction()
+		{
+			public double value(double x)
+			{
+				// The pattern profile is in one dimension. 
+				// Multiply by the perimeter of a circle to convert to 2D volume then normalise by 4 pi
+				//return AiryPattern.intensity(x) * 2 * Math.PI * x / (4 * Math.PI);
+				return AiryPattern.intensity(x) * 0.5 * x;
+			}
+		};
+
+		// Integrate up to a set number of dark rings
+		int samples = 1000;
+		final double step = RINGS[SAMPLE_RINGS] / samples;
+		double to = 0, from = 0;
+		r = new double[samples + 1];
+		sum = new double[samples + 1];
+		for (int i = 1; i < sum.length; i++)
+		{
+			from = to;
+			r[i] = to = step * i;
+			sum[i] = integrator.integrate(2000, f, from, to) + sum[i - 1];
+		}
+
+		if (DoubleEquality.relativeError(sum[samples], POWER[SAMPLE_RINGS]) > 1e-3)
+			throw new RuntimeException("Failed to create the Airy distribution");
+
+		SplineInterpolator si = new SplineInterpolator();
+		spline = si.interpolate(sum, r);
 	}
 }
