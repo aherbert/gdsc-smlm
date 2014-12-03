@@ -200,19 +200,18 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			// Move along the search direction.
 			final double[] pnew = lineSearch.lineSearch(p, fp, g, xi);
 
-			// TODO - Can we assume the new point is within the bounds and remove the 
-			// bounds check on the point and the gradient?
-			final boolean recompute = applyBounds(pnew);
+			// We assume the new point in on/within the bounds since the line search is constrained
+			//final boolean recompute = applyBounds(pnew);
 			double fret = lineSearch.f;
 
 			// Test for convergence on change in position
 			if (positionChecker.converged(p, pnew))
 			{
 				//System.out.printf("Position converged\n");
-				if (recompute)
-				{
-					fret = computeObjectiveValue(pnew);
-				}
+				//if (recompute)
+				//{
+				//	fret = computeObjectiveValue(pnew);
+				//}
 				return new PointValuePair(pnew, fret);
 			}
 
@@ -233,7 +232,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			// If necessary recompute the function value. 
 			// Doing this after the gradient evaluation allows the value to be cached when 
 			// computing the objective gradient
-			fp = (recompute) ? computeObjectiveValue(p) : fret;
+			fp = fret; //(recompute) ? computeObjectiveValue(p) : fret;
 
 			// Test for convergence on zero gradient.
 			double test = 0;
@@ -535,7 +534,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		// Numerical Recipes set the position convergence very low
 		if (positionChecker == null)
 			positionChecker = new PositionChecker(4 * epsilon, 0);
-		
+
 		// Set a tolerance? If not then the routine will iterate until position convergence
 		//if (gradientTolerance == 0)
 		//	gradientTolerance = 1e-6;
@@ -594,11 +593,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 * 
 	 * @param r
 	 * @param point
-	 * @return true if NaN gradients
 	 */
-	private boolean checkGradients(double[] r, double[] point)
+	private void checkGradients(double[] r, double[] point)
 	{
-		return checkGradients(r, point, sign);
+		checkGradients(r, point, sign);
 	}
 
 	/**
@@ -608,9 +606,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 * @param r
 	 * @param point
 	 * @param sign
-	 * @return true if NaN gradients
 	 */
-	private boolean checkGradients(double[] r, double[] point, final double sign)
+	private void checkGradients(double[] r, double[] point, final double sign)
 	{
 		if (isUpper)
 		{
@@ -624,13 +621,12 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				if (point[i] <= lower[i] && Math.signum(r[i]) == -sign)
 					r[i] = 0;
 		}
-		boolean isNaN = false;
-		for (int i = 0; i < point.length; i++)
-			if (Double.isNaN(r[i]))
-			{
-				isNaN = true;
-				r[i] = 0;
-			}
-		return isNaN;
+		//boolean isNaN = false;
+		//for (int i = 0; i < point.length; i++)
+		//	if (Double.isNaN(r[i]))
+		//	{
+		//		isNaN = true;
+		//		r[i] = 0;
+		//	}
 	}
 }
