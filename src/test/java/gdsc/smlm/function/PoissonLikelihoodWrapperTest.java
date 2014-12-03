@@ -10,7 +10,7 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class PoissonLikelihoodFunctionTest
+public class PoissonLikelihoodWrapperTest
 {
 	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
 	DoubleEquality eq = new DoubleEquality(3, 0.001);
