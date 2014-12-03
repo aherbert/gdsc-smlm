@@ -107,10 +107,35 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 			// Continue to work out the gradient since this does not involve logs.
 			// Note: if l==0 then we get divide by zero and a NaN value
+			final double factor = 1 - k / l;
 			for (int j = 0; j < gradient.length; j++)
-				gradient[j] += dl_da[j] - (dl_da[j] * k / l);
+			{
+				//gradient[j] += dl_da[j] - (dl_da[j] * k / l);
+				//gradient[j] += dl_da[j] * (1 - k / l);
+				gradient[j] += dl_da[j] * factor;
+			}
 		}
 		return ll;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
+	 */
+	public double computeLikelihood(int i)
+	{
+		final double l = f.eval(i);
+
+		// Check for zero and return the worst likelihood score
+		if (l <= 0)
+		{
+			// Since ln(0) -> -Infinity
+			return Double.POSITIVE_INFINITY;
+		}
+
+		final double k = data[i];
+		return l - k * Math.log(l);
 	}
 
 	/*
@@ -133,28 +158,13 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 
 		final double k = data[i];
+		final double factor = 1 - k / l;
 		for (int j = 0; j < gradient.length; j++)
-			gradient[j] = dl_da[j] - (dl_da[j] * k / l);
-		return l - k * Math.log(l);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
-	 */
-	public double computeLikelihood(int i)
-	{
-		final double l = f.eval(i);
-
-		// Check for zero and return the worst likelihood score
-		if (l <= 0)
 		{
-			// Since ln(0) -> -Infinity
-			return Double.POSITIVE_INFINITY;
+			//gradient[j] = dl_da[j] - (dl_da[j] * k / l);
+			//gradient[j] = dl_da[j] * (1 - k / l);
+			gradient[j] = dl_da[j] * factor;
 		}
-
-		final double k = data[i];
 		return l - k * Math.log(l);
 	}
 
