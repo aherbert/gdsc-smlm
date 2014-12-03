@@ -261,13 +261,37 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 	// The function to use for the Powell optimiser (which may have parameters mapped using the sqrt function) 
 	private MultivariatePoisson powellFunction = null;
+	private final boolean mapGaussian;
 
 	/**
 	 * Default constructor
+	 * 
+	 * @param f
+	 *            The function
 	 */
 	public MaximumLikelihoodFitter(NonLinearFunction f)
 	{
 		super(f);
+		mapGaussian = false;
+	}
+
+	/**
+	 * Constructor for Gaussian2D functions. When using the Powell optimiser the background and signal parameters can be
+	 * scaled using the sqrt() function. Parameters are reduced before passing to the Powell optimiser. The parameters
+	 * are expanded before evaluation of the function. This allows faster exploration of the larger parameter range
+	 * expected for the background and signal within the
+	 * Powell optimiser.
+	 * 
+	 * @param f
+	 *            The function
+	 * @param mapGaussian
+	 *            Set to true to map the background and signal parameters using sqrt() before passing to the Powell
+	 *            optimiser.
+	 */
+	public MaximumLikelihoodFitter(Gaussian2DFunction f, boolean mapGaussian)
+	{
+		super(f);
+		this.mapGaussian = mapGaussian;
 	}
 
 	/*
@@ -294,7 +318,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// I could extend the optimiser and implement bounds on the directions moved. However the mapping
 				// adapter seems to work OK.
 
-				CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold);
+				final boolean basisConvergence = false;
+				CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold, null,
+						basisConvergence);
 
 				OptimizationData maxIterationData = null;
 				if (getMaxIterations() > 0)
@@ -304,13 +330,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				{
 					if (powellFunction == null)
 					{
-						// When benchmarking the precision of the fitting to a Gaussian 2D function against the
-						// theoretical precision calculated by the Mortensen formula the Powell optimiser produces
-						// inaccurate XY fits with too low a precision. This may be because the search space is not 
-						// adequately sampled. 
 						// We must map all the parameters into the same range. This is done in the Mortensen MLE 
 						// Python code by using the sqrt of the number of photons and background.
-						if (f instanceof Gaussian2DFunction)
+						if (mapGaussian)
 						{
 							Gaussian2DFunction gf = (Gaussian2DFunction) f;
 							// Re-map signal and background using the sqrt
@@ -343,25 +365,20 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					// Update the maximum likelihood function in the Powell function wrapper
 					powellFunction.fun = maximumLikelihoodFunction;
 
-					// TODO - Try the Powell optimiser with restarts and see if this overcomes problems with
-					// accuracy and precision. 
-					// Look at the Python code for the Powell optimiser and Numerical Recipes. Perhaps there
-					// is a better implementation.
-
+					OptimizationData positionChecker = null; //new PositionChecker(relativeThreshold, absoluteThreshold)
 					if (powellFunction.isMapped())
 					{
 						MappedMultivariatePoisson adapter = (MappedMultivariatePoisson) powellFunction;
 						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
 								powellFunction), GoalType.MINIMIZE, new InitialGuess(adapter.map(startPoint)),
-								new PositionChecker(relativeThreshold, absoluteThreshold));
+								positionChecker);
 						double[] solution = adapter.unmap(optimum.getPointRef());
 						optimum = new PointValuePair(solution, optimum.getValue());
 					}
 					else
 					{
 						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
-								powellFunction), GoalType.MINIMIZE, new InitialGuess(startPoint), new PositionChecker(
-								relativeThreshold, absoluteThreshold));
+								powellFunction), GoalType.MINIMIZE, new InitialGuess(startPoint), positionChecker);
 					}
 				}
 				else

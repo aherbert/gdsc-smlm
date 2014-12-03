@@ -37,13 +37,12 @@ import org.apache.commons.math3.optim.univariate.SimpleUnivariateValueChecker;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.MathArrays;
 
 /**
  * Powell's algorithm.
  * <p>
  * The class is based on the org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer but updated to
- * support improved update of the search direction.
+ * support: (a) convergence on the position; (b) convergence when using the original basis vectors.
  */
 public class CustomPowellOptimizer extends MultivariateOptimizer
 {
@@ -65,7 +64,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	private final LineSearch line;
 	/** Convergence tolerance on position */
 	private PositionChecker positionChecker = null;
-	
+	/** Only allow convergence when using initial basis vectors */
+	private final boolean basisConvergence;
+
 	/**
 	 * This constructor allows to specify a user-defined convergence checker,
 	 * in addition to the parameters that control the default convergence
@@ -79,14 +80,17 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 *            Absolute threshold.
 	 * @param checker
 	 *            Convergence checker.
+	 * @param basisConvergence
+	 *            Only allow convergence when using initial basis vectors
 	 * @throws NotStrictlyPositiveException
 	 *             if {@code abs <= 0}.
 	 * @throws NumberIsTooSmallException
 	 *             if {@code rel < 2 * Math.ulp(1d)}.
 	 */
-	public CustomPowellOptimizer(double rel, double abs, ConvergenceChecker<PointValuePair> checker)
+	public CustomPowellOptimizer(double rel, double abs, ConvergenceChecker<PointValuePair> checker,
+			boolean basisConvergence)
 	{
-		this(rel, abs, FastMath.sqrt(rel), FastMath.sqrt(abs), checker);
+		this(rel, abs, FastMath.sqrt(rel), FastMath.sqrt(abs), checker, basisConvergence);
 	}
 
 	/**
@@ -104,13 +108,16 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 *            Absolute threshold for the internal line search optimizer.
 	 * @param checker
 	 *            Convergence checker.
+	 * @param basisConvergence
+	 *            Only allow convergence when using initial basis vectors. If true then the vectors are reset if they
+	 *            have been modified and the search continues.
 	 * @throws NotStrictlyPositiveException
 	 *             if {@code abs <= 0}.
 	 * @throws NumberIsTooSmallException
 	 *             if {@code rel < 2 * Math.ulp(1d)}.
 	 */
 	public CustomPowellOptimizer(double rel, double abs, double lineRel, double lineAbs,
-			ConvergenceChecker<PointValuePair> checker)
+			ConvergenceChecker<PointValuePair> checker, boolean basisConvergence)
 	{
 		super(checker);
 
@@ -124,6 +131,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		}
 		relativeThreshold = rel;
 		absoluteThreshold = abs;
+		this.basisConvergence = basisConvergence;
 
 		// Create the line search optimizer.
 		line = new LineSearch(lineRel, lineAbs);
@@ -145,7 +153,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 */
 	public CustomPowellOptimizer(double rel, double abs)
 	{
-		this(rel, abs, null);
+		this(rel, abs, null, false);
 	}
 
 	/**
@@ -166,7 +174,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 */
 	public CustomPowellOptimizer(double rel, double abs, double lineRel, double lineAbs)
 	{
-		this(rel, abs, lineRel, lineAbs, null);
+		this(rel, abs, lineRel, lineAbs, null, false);
 	}
 
 	/** {@inheritDoc} */
@@ -177,13 +185,13 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		final double[] guess = getStartPoint();
 		final int n = guess.length;
 
-		double[][] direc = new double[n][n];
-		for (int i = 0; i < n; i++)
-		{
-			direc[i][i] = 1;
-		}
+		// Mark when we have modified the basis vectors
+		boolean nonBasis = false;
+		double[][] direc = createBasisVectors(n);
 
 		final ConvergenceChecker<PointValuePair> checker = getConvergenceChecker();
+
+		//int resets = 0;
 
 		double[] x = guess;
 		double fVal = computeObjectiveValue(x);
@@ -192,21 +200,18 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		{
 			incrementIterationCount();
 
-			double fX = fVal;
+			final double fX = fVal;
 			double fX2 = 0;
 			double delta = 0;
 			int bigInd = 0;
 
 			for (int i = 0; i < n; i++)
 			{
-				final double[] d = MathArrays.copyOf(direc[i]);
-
 				fX2 = fVal;
 
-				final UnivariatePointValuePair optimum = line.search(x, d);
+				final UnivariatePointValuePair optimum = line.search(x, direc[i]);
 				fVal = optimum.getValue();
-				final double alphaMin = optimum.getPoint();
-				x = newPoint(x, d, alphaMin);
+				x = newPoint(x, direc[i], optimum.getPoint());
 
 				if ((fX2 - fVal) > delta)
 				{
@@ -223,9 +228,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			}
 			else
 			{
-    			// Default convergence check on value
-    			//stop = 2 * (fX - fVal) <= (relativeThreshold * (FastMath.abs(fX) + FastMath.abs(fVal)) + absoluteThreshold);
-    			stop = DoubleEquality.almostEqualRelativeOrAbsolute(fX, fVal, relativeThreshold, absoluteThreshold);
+				// Default convergence check on value
+				//stop = 2 * (fX - fVal) <= (relativeThreshold * (FastMath.abs(fX) + FastMath.abs(fVal)) + absoluteThreshold);
+				stop = DoubleEquality.almostEqualRelativeOrAbsolute(fX, fVal, relativeThreshold, absoluteThreshold);
 			}
 
 			final PointValuePair previous = new PointValuePair(x1, fX);
@@ -234,33 +239,55 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			{ // User-defined stopping criteria.
 				stop = checker.converged(getIterations(), previous, current);
 			}
+
+			boolean reset = false;
 			if (stop)
 			{
-				if (goal == GoalType.MINIMIZE)
+				// Only allow convergence using the basis vectors, i.e. we cannot move along any dimension
+				if (basisConvergence && nonBasis)
 				{
-					return (fVal < fX) ? current : previous;
+					// Reset to the basis vectors and continue
+					reset = true;
+					//resets++;
 				}
 				else
 				{
-					return (fVal > fX) ? current : previous;
+					//System.out.printf("Resets = %d\n", resets);
+					if (goal == GoalType.MINIMIZE)
+					{
+						return (fVal < fX) ? current : previous;
+					}
+					else
+					{
+						return (fVal > fX) ? current : previous;
+					}
 				}
 			}
 
-			// -=-= Original code 
+			if (reset)
+			{
+				direc = createBasisVectors(n);
+				nonBasis = false;
+			}
+
 			final double[] d = new double[n];
 			final double[] x2 = new double[n];
 			for (int i = 0; i < n; i++)
 			{
 				d[i] = x[i] - x1[i];
-				//x2[i] = 2 * x[i] - x1[i];
 				x2[i] = x[i] + d[i];
 			}
 
 			x1 = x.clone();
 			fX2 = computeObjectiveValue(x2);
 
+			// See if we can continue along the overall search direction to find a better value
 			if (fX > fX2)
 			{
+				// Check if:
+				// 1. The decrease along the average direction was not due to any single direction's decrease
+				// 2. There is a substantial second derivative along the average direction and we are close to
+				// it minimum
 				double t = 2 * (fX + fX2 - 2 * fVal);
 				double temp = fX - fVal - delta;
 				t *= temp * temp;
@@ -271,111 +298,34 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				{
 					final UnivariatePointValuePair optimum = line.search(x, d);
 					fVal = optimum.getValue();
-					final double alphaMin = optimum.getPoint();
-					final double[][] result = newPointAndDirection(x, d, alphaMin);
-					x = result[0];
+					if (reset)
+					{
+						x = newPoint(x, d, optimum.getPoint());
+						continue;
+					}
+					else
+					{
+						final double[][] result = newPointAndDirection(x, d, optimum.getPoint());
+						x = result[0];
 
-					final int lastInd = n - 1;
-					direc[bigInd] = direc[lastInd];
-					direc[lastInd] = result[1];
+						final int lastInd = n - 1;
+						direc[bigInd] = direc[lastInd];
+						direc[lastInd] = result[1];
+						nonBasis = true;
+					}
 				}
 			}
-			// -=-= End Original code 
-
-			//			// -=-
-			//			// Here we could implement the quadratic convergence scheme outlined in
-			//			// Numerical Recipes CH 10.5, p.420:
-			//			// 1. You can reinitialise the set of directions ui to the basis vectors ei after 
-			//			// every N iterations
-			//			// -=-
-			//
-			//			// Compute new direction
-			//			final double[] d = new double[n];
-			//			for (int i = 0; i < n; i++)
-			//			{
-			//				d[i] = x[i] - x1[i];
-			//			}
-			//
-			//			boolean classic = false;
-			//			if (classic)
-			//			{
-			//				// Classic Powell algorithm with quadratic convergence
-			//				if (getIterations() % n == 0)
-			//				{
-			//					// Reset the direction set
-			//					direc = new double[n][n];
-			//					for (int i = 0; i < n; i++)
-			//					{
-			//						direc[i][i] = 1;
-			//					}
-			//				}
-			//				else
-			//				{
-			//					// Rotate the direction set and store the new direction
-			//					final int lastInd = n - 1;
-			//					for (int i = 0; i < lastInd; i++)
-			//					{
-			//						direc[i] = direc[i + 1];
-			//					}
-			//					direc[lastInd] = d;
-			//
-			//					// Find the minimum along the new direction
-			//					final UnivariatePointValuePair optimum = line.search(x, d);
-			//					fVal = optimum.getValue();
-			//					final double alphaMin = optimum.getPoint();
-			//					x = newPoint(x, d, alphaMin);
-			//				}
-			//			}
-			//			else
-			//			{
-			//				// Modified algorithm that discards the direction of biggest change in 
-			//				// favour of the overall direction
-			//				final double[] x2 = new double[n];
-			//				for (int i = 0; i < n; i++)
-			//				{
-			//					x2[i] = x[i] + d[i];
-			//				}
-			//				fX2 = computeObjectiveValue(x2);
-			//
-			//				if (fX > fX2)
-			//				{
-			//					double t = 2 * (fX + fX2 - 2 * fVal);
-			//					double temp = fX - fVal - delta;
-			//					t *= temp * temp;
-			//					temp = fX - fX2;
-			//					t -= delta * temp * temp;
-			//
-			//					if (t < 0.0)
-			//					{
-			//						final UnivariatePointValuePair optimum = line.search(x, d);
-			//						fVal = optimum.getValue();
-			//						final double alphaMin = optimum.getPoint();
-			//						final double[][] result = newPointAndDirection(x, d, alphaMin);
-			//						x = result[0];
-			//
-			//						// Q. Why do we choose n-1?
-			//						// This discards the direction with the biggest change in favour of the direction at the end
-			//						// then sets the new direction to the end.
-			//						final int lastInd = n - 1;
-			//						direc[bigInd] = direc[lastInd];
-			//						direc[lastInd] = result[1];
-			//
-			//						// We should remove the direction with the biggest change
-			//						// Shift all directions upwards
-			//						// Put the new direction at the end
-			//						// This will maintain the order of the basis vector direction set
-			//						//for (int i = bigInd; i < lastInd; i++)
-			//						//{
-			//						//	direc[i] = direc[i + 1];
-			//						//}
-			//						//direc[lastInd] = result[1];
-			//					}
-			//				}
-			//			}
-			//			
-			//			// Store old point
-			//			x1 = x.clone();			
 		}
+	}
+
+	private double[][] createBasisVectors(final int n)
+	{
+		double[][] direc = new double[n][n];
+		for (int i = 0; i < n; i++)
+		{
+			direc[i][i] = 1;
+		}
+		return direc;
 	}
 
 	/**
@@ -391,7 +341,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 * @return a 2-element array containing the new point (at index 0) and
 	 *         the new direction (at index 1).
 	 */
-	private double[][] newPointAndDirection(double[] p, double[] d, double optimum)
+	private double[][] newPointAndDirection(final double[] p, final double[] d, final double optimum)
 	{
 		final int n = p.length;
 		final double[] nP = new double[n];
@@ -410,8 +360,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	}
 
 	/**
-	 * Compute a new point (in the original space) and a new direction
-	 * vector, resulting from the line search.
+	 * Compute a new point (in the original space) resulting from the line search.
 	 *
 	 * @param p
 	 *            Point used in the line search.
@@ -419,10 +368,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 *            Direction used in the line search.
 	 * @param optimum
 	 *            Optimum found by the line search.
-	 * @return a 2-element array containing the new point (at index 0) and
-	 *         the new direction (at index 1).
+	 * @return array containing the new point.
 	 */
-	private double[] newPoint(double[] p, double[] d, double optimum)
+	private double[] newPoint(final double[] p, final double[] d, final double optimum)
 	{
 		final int n = p.length;
 		final double[] nP = new double[n];
@@ -487,15 +435,15 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			final int n = p.length;
 			final UnivariateFunction f = new UnivariateFunction()
 			{
+				final double[] x = new double[n];
+
 				public double value(double alpha)
 				{
-					final double[] x = new double[n];
 					for (int i = 0; i < n; i++)
 					{
 						x[i] = p[i] + alpha * d[i];
 					}
-					final double obj = CustomPowellOptimizer.this.computeObjectiveValue(x);
-					return obj;
+					return CustomPowellOptimizer.this.computeObjectiveValue(x);
 				}
 			};
 
@@ -508,7 +456,6 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 					new SearchInterval(bracket.getLo(), bracket.getHi(), bracket.getMid()));
 		}
 	}
-
 
 	/**
 	 * Scans the list of (required and optional) optimization data that
@@ -540,7 +487,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 
 		checkParameters();
 	}
-	
+
 	/**
 	 * @throws MathUnsupportedOperationException
 	 *             if bounds were passed to the {@link #optimize(OptimizationData[]) optimize} method.
