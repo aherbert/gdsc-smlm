@@ -22,7 +22,6 @@ import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.optim.GradientChecker;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.PositionChecker;
@@ -49,7 +48,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	private double[] maximumStepLength = null;
 
 	/** Convergence tolerance on gradient */
-	private GradientChecker gradientChecker = null;
+	private double gradientTolerance;
 
 	/** Convergence tolerance on position */
 	private PositionChecker positionChecker = null;
@@ -81,6 +80,30 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		public double[] getStep()
 		{
 			return step;
+		}
+	}
+
+	/**
+	 * Specify the tolerance on the gradient convergence with zero
+	 */
+	public static class GradientTolerance implements OptimizationData
+	{
+		private double tolerance;
+
+		/**
+		 * Build an instance
+		 * 
+		 * @param tolerance
+		 *            The tolerance on the gradient
+		 */
+		public GradientTolerance(double tolerance)
+		{
+			this.tolerance = tolerance;
+		}
+
+		public double getTolerance()
+		{
+			return tolerance;
 		}
 	}
 
@@ -143,10 +166,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		double[][] hessian = new double[n][n];
 
 		// Get the gradient for the the bounded point
-		double[] unbounded = p.clone();
 		applyBounds(p);
 		double[] g = computeObjectiveGradient(p);
-		checkGradients(g, unbounded);
+		checkGradients(g, p);
 
 		// Initialise the hessian and search direction
 		for (int i = 0; i < n; i++)
@@ -180,26 +202,20 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 			// TODO - Can we assume the new point is within the bounds and remove the 
 			// bounds check on the point and the gradient?
-			unbounded = pnew.clone();
-			final double fret;
-			if (applyBounds(pnew))
-			{
-				// Recompute the objective value within the bounds
-				fret = computeObjectiveValue(pnew);
-			}
-			else
-			{
-				fret = lineSearch.f;
-			}
+			final boolean recompute = applyBounds(pnew);
+			double fret = lineSearch.f;
 
 			// Test for convergence on change in position
 			if (positionChecker.converged(p, pnew))
 			{
 				//System.out.printf("Position converged\n");
+				if (recompute)
+				{
+					fret = computeObjectiveValue(pnew);
+				}
 				return new PointValuePair(pnew, fret);
 			}
 
-			fp = fret;
 			// Update the line direction
 			for (int i = 0; i < n; i++)
 			{
@@ -210,12 +226,27 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			// Save the old gradient
 			double[] dg = g;
 
-			// Get the gradient for the the bounded point
+			// Get the gradient for the new point
 			g = computeObjectiveGradient(p);
-			checkGradients(g, unbounded);
+			checkGradients(g, p);
 
-			// Test for convergence on zero gradient. 
-			if (gradientChecker.converged(dg, g))
+			// If necessary recompute the function value. 
+			// Doing this after the gradient evaluation allows the value to be cached when 
+			// computing the objective gradient
+			fp = (recompute) ? computeObjectiveValue(p) : fret;
+
+			// Test for convergence on zero gradient.
+			double test = 0;
+			for (int i = 0; i < n; i++)
+			{
+				final double temp = Math.abs(g[i]) * FastMath.max(Math.abs(p[i]), 1);
+				//final double temp = Math.abs(g[i]);
+				if (test < temp)
+					test = temp;
+			}
+			// Compute the biggest gradient relative to the objective function
+			test /= FastMath.max(Math.abs(fp), 1);
+			if (test < gradientTolerance)
 			{
 				//System.out.printf("Gradient converged\n");
 				return new PointValuePair(p, fp);
@@ -284,17 +315,17 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		// not provided in the argument list.
 		for (OptimizationData data : optData)
 		{
-			if (data instanceof GradientChecker)
-			{
-				gradientChecker = (GradientChecker) data;
-			}
-			else if (data instanceof PositionChecker)
+			if (data instanceof PositionChecker)
 			{
 				positionChecker = (PositionChecker) data;
 			}
 			else if (data instanceof StepLength)
 			{
 				maximumStepLength = ((StepLength) data).getStep();
+			}
+			else if (data instanceof GradientTolerance)
+			{
+				gradientTolerance = ((GradientTolerance) data).getTolerance();
 			}
 		}
 
@@ -327,7 +358,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	 * Internal class for a line search with backtracking
 	 * <p>
 	 * Adapted from NR::lnsrch, as discussed in Numerical Recipes section 9.7. The algorithm has been changed to support
-	 * bounds on the point, limits on the search direction in all dimensions and checking for bad function evaluations 
+	 * bounds on the point, limits on the search direction in all dimensions and checking for bad function evaluations
 	 * when backtracking.
 	 */
 	private class LineStepSearch
@@ -367,7 +398,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 			final int n = xOld.length;
 			check = false;
-			
+
 			// Limit the search step size for each dimension
 			double scale = 1;
 			for (int i = 0; i < n; i++)
@@ -500,6 +531,14 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				if (lower[i] > upper[i])
 					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
 		}
+
+		// Numerical Recipes set the position convergence very low
+		if (positionChecker == null)
+			positionChecker = new PositionChecker(4 * epsilon, 0);
+		
+		// Set a tolerance? If not then the routine will iterate until position convergence
+		//if (gradientTolerance == 0)
+		//	gradientTolerance = 1e-6;
 	}
 
 	/**
@@ -550,7 +589,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
-	 * Check if the point falls outside configured bounds truncating the gradient to zero
+	 * Check if the point falls on or outside configured bounds truncating the gradient to zero
 	 * if it is moving further outside the bounds
 	 * 
 	 * @param r
@@ -563,7 +602,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
-	 * Check if the point falls outside configured bounds truncating the gradient to zero
+	 * Check if the point falls on or outside configured bounds truncating the gradient to zero
 	 * if it is moving further outside the bounds (defined by the sign of the search direction)
 	 * 
 	 * @param r

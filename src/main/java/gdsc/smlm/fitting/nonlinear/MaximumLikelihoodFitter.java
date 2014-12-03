@@ -17,13 +17,11 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.optim.GradientChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -559,12 +557,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					stepLength[i] = (upper[i] - lower[i]) * 0.3333333;
 
 				// The GoalType is always minimise so no need to pass this in
+				OptimizationData positionChecker = null;
+				//new org.apache.commons.math3.optim.PositionChecker(relativeThreshold, absoluteThreshold);
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
 						new MultivariateVectorLikelihood(maximumLikelihoodFunction)), new ObjectiveFunction(
 						new MultivariateLikelihood(maximumLikelihoodFunction)), new InitialGuess(startPoint),
-						new SimpleBounds(lowerConstraint, upperConstraint), new GradientChecker(relativeThreshold,
-								absoluteThreshold), new PositionChecker(relativeThreshold, absoluteThreshold),
-						new BFGSOptimizer.StepLength(stepLength));
+						new SimpleBounds(lowerConstraint, upperConstraint), new BFGSOptimizer.GradientTolerance(
+								relativeThreshold), positionChecker, new BFGSOptimizer.StepLength(stepLength));
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
 			}
