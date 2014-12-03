@@ -1397,28 +1397,35 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		FitConfiguration fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
 		
-		// Ensure the bias is only removed if required by the solver
-		fitConfig.setRemoveBiasBeforeFitting(false);
-		
 		if (fitConfig.getFitSolver() == FitSolver.MLE)
 		{
-			fitConfig.setRemoveBiasBeforeFitting(true);
-			
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
 			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
+			gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
+			gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+			gd.addCheckbox("EM-CCD", calibration.emCCD);
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
 			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
 			gd.addStringField("Relative_threshold", "" + fitConfig.getRelativeThreshold());
 			gd.addStringField("Absolute_threshold", "" + fitConfig.getAbsoluteThreshold());
 			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
 			gd.addNumericField("Max_function_evaluations", fitConfig.getMaxFunctionEvaluations(), 0);
-			gd.addCheckbox("Gradient_line_minimisation", fitConfig.isGradientLineMinimisation());
+			if (extraOptions)
+				gd.addCheckbox("Gradient_line_minimisation", fitConfig.isGradientLineMinimisation());
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
 			calibration.bias = Math.abs(gd.getNextNumber());
+			fitConfig.setModelCamera(gd.getNextBoolean());
+			calibration.readNoise = Math.abs(gd.getNextNumber());
+			calibration.gain = Math.abs(gd.getNextNumber());
+			calibration.emCCD = gd.getNextBoolean();
 			fitConfig.setBias(calibration.bias);
+			fitConfig.setReadNoise(calibration.readNoise);
+			fitConfig.setGain(calibration.gain);
+			fitConfig.setEmCCD(calibration.emCCD);
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 			try
 			{
@@ -1432,7 +1439,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 			fitConfig.setMaxIterations((int) gd.getNextNumber());
 			fitConfig.setMaxFunctionEvaluations((int) gd.getNextNumber());
-			fitConfig.setGradientLineMinimisation(gd.getNextBoolean());
+			if (extraOptions)
+				fitConfig.setGradientLineMinimisation(gd.getNextBoolean());
+			else
+				// This option is for the Conjugate Gradient optimiser and makes it less stable
+				fitConfig.setGradientLineMinimisation(false);
 
 			SettingsManager.saveSettings(settings, filename);
 

@@ -198,14 +198,14 @@ public class PoissonLikelihoodFunctionTest
 									{
 										int i = y * maxx + x;
 										a[targetParameter] = xx;
-										ff1.value(getVariables(indices, a), dyda, i);
+										ff1.likelihood(getVariables(indices, a), dyda, i);
 
 										// Evaluate at (x+h) and (x-h)
 										a[targetParameter] = xx + h;
-										double value2 = ff1.value(getVariables(indices, a), dyda2, i);
+										double value2 = ff1.likelihood(getVariables(indices, a), dyda2, i);
 
 										a[targetParameter] = xx - h;
-										double value3 = ff1.value(getVariables(indices, a), dyda2, i);
+										double value3 = ff1.likelihood(getVariables(indices, a), dyda2, i);
 
 										double gradient = (value2 - value3) / (2 * h);
 										boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
@@ -386,14 +386,14 @@ public class PoissonLikelihoodFunctionTest
 								doNothing(temp);
 								h = temp - xx;
 
-								ff1.value(getVariables(indices, a), dyda);
+								ff1.likelihood(getVariables(indices, a), dyda);
 
 								// Evaluate at (x+h) and (x-h)
 								a[targetParameter] = xx + h;
-								double value2 = ff1.value(getVariables(indices, a), dyda2);
+								double value2 = ff1.likelihood(getVariables(indices, a), dyda2);
 
 								a[targetParameter] = xx - h;
-								double value3 = ff1.value(getVariables(indices, a), dyda2);
+								double value3 = ff1.likelihood(getVariables(indices, a), dyda2);
 
 								double gradient = (value2 - value3) / (2 * h);
 								boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||

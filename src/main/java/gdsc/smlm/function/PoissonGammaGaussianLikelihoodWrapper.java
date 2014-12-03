@@ -3,7 +3,7 @@ package gdsc.smlm.function;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2014 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -12,8 +12,6 @@ package gdsc.smlm.function;
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
-
-import java.util.Arrays;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson-Gamma-Gaussian
@@ -38,16 +36,9 @@ import java.util.Arrays;
  * <p>
  * The negative log-likelihood can be evaluated over the entire set of observed values or for a chosen observed value.
  */
-public class PoissonGammaGaussianLikelihoodWrapper
+public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
 {
-	final private NonLinearFunction f;
-	final private double[] a, data;
-	final private int n;
-
 	final private PoissonGammaGaussianFunction p;
-
-	private double lastScore;
-	private double[] lastVariables;
 
 	/**
 	 * Initialise the function.
@@ -72,88 +63,49 @@ public class PoissonGammaGaussianLikelihoodWrapper
 	public PoissonGammaGaussianLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n, double alpha,
 			double s)
 	{
-		this.f = f;
-		this.a = Arrays.copyOf(a, a.length);
-		this.data = k;
-		this.n = n;
-		this.p = new PoissonGammaGaussianFunction(alpha, s);
+		super(f, a, k, n);
+		p = new PoissonGammaGaussianFunction(alpha, s);
 	}
 
-	/**
-	 * Copy the variables into the appropriate parameter positions for the NonLinearFunction
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param variables
+	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
 	 */
-	private void initialiseFunction(double[] variables)
+	public double computeLikelihood()
 	{
-		int[] gradientIndices = f.gradientIndices();
-		for (int i = 0; i < gradientIndices.length; i++)
-			a[gradientIndices[i]] = variables[i];
-		f.initialise(a);
-	}
-
-	/**
-	 * Compute the value
-	 * 
-	 * @param variables
-	 *            The variables of the function
-	 * @return The negative log likelihood
-	 */
-	public double value(double[] variables)
-	{
-		// Check if we have a cached score
-		if (sameVariables(variables))
-			return lastScore;
-
-		lastScore = Double.POSITIVE_INFINITY;
-		lastVariables = variables.clone();
-		initialiseFunction(variables);
-
 		// Compute the negative log-likelihood
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			final double l = p.likelihood(data[i], f.eval(i));
+			final double l = p.logLikelihood(data[i], f.eval(i));
 			if (l == Double.NEGATIVE_INFINITY)
 			{
 				return Double.POSITIVE_INFINITY;
 			}
 			ll -= l;
 		}
-		lastScore = ll;
 		return ll;
 	}
 
-	/**
-	 * Check if the variable match those last used for computation of the value
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param variables
-	 * @return True if the variables are the same
+	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
 	 */
-	private boolean sameVariables(double[] variables)
+	public double computeLikelihood(int i)
 	{
-		if (lastVariables != null)
-		{
-			for (int i = 0; i < variables.length; i++)
-				if (variables[i] != lastVariables[i])
-					return false;
-			return true;
-		}
-		return false;
+		return -p.logLikelihood(data[i], f.eval(i));
 	}
 
-	/**
-	 * Compute the value of the function at observed value i
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param variables
-	 *            The variables of the function
-	 * @param i
-	 *            Observed value i
-	 * @return The negative log likelihood
+	 * @see gdsc.smlm.function.LikelihoodWrapper#canComputeGradient()
 	 */
-	public double value(double[] variables, int i)
+	@Override
+	public boolean canComputeGradient()
 	{
-		initialiseFunction(variables);
-		return -p.logLikelihood(data[i], f.eval(i));
+		return false;
 	}
 }

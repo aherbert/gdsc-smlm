@@ -1,13 +1,16 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import java.util.Arrays;
-
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
+import gdsc.smlm.function.LikelihoodWrapper;
 import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
+import gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
 import gdsc.smlm.function.PoissonLikelihoodWrapper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+
+import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -54,7 +57,7 @@ import org.apache.commons.math3.util.FastMath;
  * Uses Maximum Likelihood Estimation (MLE) to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
  * <p>
- * The probability mass function for observed value k is modelled as a Poisson process:<br/>
+ * By default the probability mass function for observed value k is modelled as a Poisson process:<br/>
  * pmf = e^-k.(l^k / k!) <br/>
  * where: <br/>
  * k = Observed number of occurrences <br/>
@@ -65,25 +68,28 @@ import org.apache.commons.math3.util.FastMath;
  * <p>
  * The expected number of occurrences can be modelled using any parameterised function, for example the Gaussian 2D
  * function.
+ * <p>
+ * The probability mass function can be changed to a Poisson-Gaussian or Poisson-Gamma-Gaussian distribution in order to
+ * model the counts from a CCD/EMCCD camera.
  */
 public class MaximumLikelihoodFitter extends BaseFunctionSolver
 {
 	/**
-	 * Wrap the PoissonLikelihoodFunction with classes that implement the required interfaces
+	 * Wrap the LikelihoodFunction with classes that implement the required interfaces
 	 */
-	private class PoissonWrapper
+	private class Likelihood
 	{
-		PoissonLikelihoodWrapper fun;
+		LikelihoodWrapper fun;
 
-		public PoissonWrapper(PoissonLikelihoodWrapper fun)
+		public Likelihood(LikelihoodWrapper fun)
 		{
 			this.fun = fun;
 		}
 	}
 
-	private class MultivariatePoisson extends PoissonWrapper implements MultivariateFunction
+	private class MultivariateLikelihood extends Likelihood implements MultivariateFunction
 	{
-		public MultivariatePoisson(PoissonLikelihoodWrapper fun)
+		public MultivariateLikelihood(LikelihoodWrapper fun)
 		{
 			super(fun);
 		}
@@ -95,7 +101,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		 */
 		public double value(double[] point)
 		{
-			return fun.value(point);
+			return fun.likelihood(point);
 		}
 
 		public boolean isMapped()
@@ -107,11 +113,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	/**
 	 * Map the specified indices using the sqrt function for use with the Powell optimiser
 	 */
-	private class MappedMultivariatePoisson extends MultivariatePoisson
+	private class MappedMultivariateLikelihood extends MultivariateLikelihood
 	{
 		final int[] map;
 
-		public MappedMultivariatePoisson(PoissonLikelihoodWrapper fun, int[] map)
+		public MappedMultivariateLikelihood(LikelihoodWrapper fun, int[] map)
 		{
 			super(fun);
 			this.map = map;
@@ -124,7 +130,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		 */
 		public double value(double[] point)
 		{
-			return fun.value(unmap(point));
+			return fun.likelihood(unmap(point));
 		}
 
 		/**
@@ -173,9 +179,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		}
 	}
 
-	private class MultivariateVectorPoisson extends PoissonWrapper implements MultivariateVectorFunction
+	private class MultivariateVectorLikelihood extends Likelihood implements MultivariateVectorFunction
 	{
-		public MultivariateVectorPoisson(PoissonLikelihoodWrapper fun)
+		public MultivariateVectorLikelihood(LikelihoodWrapper fun)
 		{
 			super(fun);
 		}
@@ -188,7 +194,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		public double[] value(double[] point)
 		{
 			double[] gradient = new double[point.length];
-			fun.value(point, gradient);
+			fun.likelihood(point, gradient);
 			return gradient;
 		}
 	}
@@ -201,47 +207,86 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		/**
 		 * Search using Powell's conjugate direction method
 		 */
-		POWELL("Powell"),
+		POWELL("Powell", false),
 		/**
 		 * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
 		 */
-		POWELL_BOUNDED("Powell (bounded)"),
+		POWELL_BOUNDED("Powell (bounded)", false),
 		/**
 		 * Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm.
 		 * <p>
 		 * BOBYQA could also be considered as a replacement of any derivative-based optimizer when the derivatives are
 		 * approximated by finite differences. This is a bounded search.
 		 */
-		BOBYQA("BOBYQA"),
+		BOBYQA("BOBYQA", false),
 		/**
 		 * Search using active Covariance Matrix Adaptation Evolution Strategy (CMA-ES).
 		 * <p>
 		 * The CMA-ES is a reliable stochastic optimization method which should be applied if derivative-based methods,
 		 * e.g. conjugate gradient, fail due to a rugged search landscape. This is a bounded search.
 		 */
-		CMAES("CMAES"),
+		CMAES("CMAES", false),
 		/**
 		 * Search using a non-linear conjugate gradient optimiser. Use the Fletcher-Reeves update formulas for the
 		 * conjugate search directions.
 		 * <p>
 		 * This is a bounded search using simple truncation of coordinates at the bounds of the search space.
 		 */
-		CONJUGATE_GRADIENT_FR("Conjugate Gradient Fletcher-Reeves"),
+		CONJUGATE_GRADIENT_FR("Conjugate Gradient Fletcher-Reeves", true),
 		/**
 		 * Search using a non-linear conjugate gradient optimiser. Use the Polak-Ribière update formulas for the
 		 * conjugate search directions.
 		 * <p>
 		 * This is a bounded search using simple truncation of coordinates at the bounds of the search space.
 		 */
-		CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière"),
+		CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière", true),
 		/**
 		 * Search using a Broyden-Fletcher-Goldfarb-Shanno (BFGS) gradient optimiser.
 		 */
-		BFGS("BFGS Gradient");
+		BFGS("BFGS", true);
 
-		private String name;
+		private final String name;
+		private final boolean usesGradient;
 
-		private SearchMethod(String name)
+		private SearchMethod(String name, boolean usesGradient)
+		{
+			this.name = name;
+			this.usesGradient = usesGradient;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+
+		/**
+		 * @return True if the search method uses the gradient of the likelihood function
+		 */
+		public boolean usesGradients()
+		{
+			return usesGradient;
+		}
+	}
+
+	public enum LikelihoodFunction
+	{
+		/**
+		 * Use a Poisson likelihood model
+		 */
+		POISSON("Poisson"),
+		/**
+		 * Use a Poisson likelihood model
+		 */
+		POISSON_GAUSSIAN("Poisson+Gaussian"),
+		/**
+		 * Use a Poisson likelihood model
+		 */
+		POISSON_GAMMA_GAUSSIAN("Poisson+Gamma+Gaussian");
+
+		private final String name;
+
+		private LikelihoodFunction(String name)
 		{
 			this.name = name;
 		}
@@ -253,14 +298,18 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		}
 	}
 
-	private SearchMethod searchMethod;
+	private SearchMethod searchMethod = SearchMethod.POWELL;
+	private LikelihoodFunction likelihoodFunction = LikelihoodFunction.POISSON;
+	private double alpha;
+	private double sigma;
+
 	private boolean gradientLineMinimisation = true;
 	private double relativeThreshold = 1e-4, absoluteThreshold = 1e-10;
 	private double[] lower, upper;
 	private double[] lowerConstraint, upperConstraint;
 
 	// The function to use for the Powell optimiser (which may have parameters mapped using the sqrt function) 
-	private MultivariatePoisson powellFunction = null;
+	private MultivariateLikelihood powellFunction = null;
 	private final boolean mapGaussian;
 
 	/**
@@ -303,7 +352,38 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	{
 		numberOfFittedPoints = n;
 
-		PoissonLikelihoodWrapper maximumLikelihoodFunction = new PoissonLikelihoodWrapper(f, a, y, n);
+		LikelihoodWrapper maximumLikelihoodFunction;
+
+		// We can use different likelihood wrapper functions:
+		switch (likelihoodFunction)
+		{
+			case POISSON_GAMMA_GAUSSIAN:
+				// Poisson-Gamma-Gaussian - EM-CCD data
+				if (alpha > 0 && sigma > 0)
+				{
+					maximumLikelihoodFunction = new PoissonGammaGaussianLikelihoodWrapper(f, a, y, n, alpha, sigma);
+					break;
+				}
+
+			case POISSON_GAUSSIAN:
+				// Poisson-Gaussian - CCD data
+				if (sigma > 0)
+				{
+					maximumLikelihoodFunction = new PoissonGaussianLikelihoodWrapper(f, a, y, n, sigma);
+					break;
+				}
+
+			case POISSON:
+			default:
+				// Poisson - most counting data
+				maximumLikelihoodFunction = new PoissonLikelihoodWrapper(f, a, y, n);
+		}
+
+		// Check if the method requires the gradient but it cannot be computed
+		if (searchMethod.usesGradient && !maximumLikelihoodFunction.canComputeGradient())
+		{
+			maximumLikelihoodFunction = new PoissonLikelihoodWrapper(f, a, y, n);
+		}
 
 		try
 		{
@@ -352,13 +432,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 								}
 							if (count > 0)
 							{
-								powellFunction = new MappedMultivariatePoisson(maximumLikelihoodFunction,
+								powellFunction = new MappedMultivariateLikelihood(maximumLikelihoodFunction,
 										Arrays.copyOf(map, count));
 							}
 						}
 						if (powellFunction == null)
 						{
-							powellFunction = new MultivariatePoisson(maximumLikelihoodFunction);
+							powellFunction = new MultivariateLikelihood(maximumLikelihoodFunction);
 						}
 					}
 
@@ -368,7 +448,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					OptimizationData positionChecker = null; //new PositionChecker(relativeThreshold, absoluteThreshold)
 					if (powellFunction.isMapped())
 					{
-						MappedMultivariatePoisson adapter = (MappedMultivariatePoisson) powellFunction;
+						MappedMultivariateLikelihood adapter = (MappedMultivariateLikelihood) powellFunction;
 						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
 								powellFunction), GoalType.MINIMIZE, new InitialGuess(adapter.map(startPoint)),
 								positionChecker);
@@ -385,7 +465,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				{
 					// Try using the mapping adapter for a bounded Powell search
 					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
-							new MultivariatePoisson(maximumLikelihoodFunction), lower, upper);
+							new MultivariateLikelihood(maximumLikelihoodFunction), lower, upper);
 					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
 							adapter), GoalType.MINIMIZE, new InitialGuess(adapter.boundedToUnbounded(startPoint)));
 					double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
@@ -401,9 +481,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
-				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunction(new MultivariatePoisson(
-						maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(startPoint), new SimpleBounds(
-						lower, upper));
+				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunction(
+						new MultivariateLikelihood(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
+						startPoint), new SimpleBounds(lower, upper));
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
 			}
@@ -435,8 +515,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				OptimizationData[] data = new OptimizationData[] { new InitialGuess(startPoint),
 						new CMAESOptimizer.PopulationSize(popSize), new MaxEval(getMaxEvaluations()),
 						new CMAESOptimizer.Sigma(sigma),
-						new ObjectiveFunction(new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE,
-						new SimpleBounds(lower, upper) };
+						new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)),
+						GoalType.MINIMIZE, new SimpleBounds(lower, upper) };
 				// Iterate to prevent early convergence
 				int repeat = 0;
 				while (evaluations < n30)
@@ -480,8 +560,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				// The GoalType is always minimise so no need to pass this in
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
-						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
-						new MultivariatePoisson(maximumLikelihoodFunction)), new InitialGuess(startPoint),
+						new MultivariateVectorLikelihood(maximumLikelihoodFunction)), new ObjectiveFunction(
+						new MultivariateLikelihood(maximumLikelihoodFunction)), new InitialGuess(startPoint),
 						new SimpleBounds(lowerConstraint, upperConstraint), new GradientChecker(relativeThreshold,
 								absoluteThreshold), new PositionChecker(relativeThreshold, absoluteThreshold),
 						new BFGSOptimizer.StepLength(stepLength));
@@ -550,14 +630,14 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				// Note: It is strange that the non-gradient based line minimisation is more successful.
 				// It may be that the gradient function is not accurate (due to round off error) or that it is
-				// simple wrong when far from the optimum. My JUnit tests only evaluate the function within the 
+				// simply wrong when far from the optimum. My JUnit tests only evaluate the function within the 
 				// expected range of the answer.
 
 				// Note the default step size on the Powell optimiser is 1 but the initial directions are unit vectors.
 				// So our bracketing step should be a minimum of 1 / average length of the first gradient vector to prevent
 				// the first step being too large when bracketing.
 				final double gradient[] = new double[startPoint.length];
-				maximumLikelihoodFunction.value(startPoint, gradient);
+				maximumLikelihoodFunction.likelihood(startPoint, gradient);
 				double l = 0;
 				for (double d : gradient)
 					l += d * d;
@@ -567,8 +647,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				o.setUseGradientLineSearch(gradientLineMinimisation);
 
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()), new ObjectiveFunctionGradient(
-						new MultivariateVectorPoisson(maximumLikelihoodFunction)), new ObjectiveFunction(
-						new MultivariatePoisson(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
+						new MultivariateVectorLikelihood(maximumLikelihoodFunction)), new ObjectiveFunction(
+						new MultivariateLikelihood(maximumLikelihoodFunction)), GoalType.MINIMIZE, new InitialGuess(
 						startPoint), new SimpleBounds(lowerConstraint, upperConstraint),
 						new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(bracketingStep));
 				iterations = o.getIterations();
@@ -675,6 +755,58 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	public void setSearchMethod(SearchMethod searchMethod)
 	{
 		this.searchMethod = searchMethod;
+	}
+
+	/**
+	 * @return the likelihood function to model the count
+	 */
+	public LikelihoodFunction getLikelihoodFunction()
+	{
+		return likelihoodFunction;
+	}
+
+	/**
+	 * @param likelihoodFunction
+	 *            the likelihood function to model the count
+	 */
+	public void setLikelihoodFunction(LikelihoodFunction likelihoodFunction)
+	{
+		this.likelihoodFunction = likelihoodFunction;
+	}
+
+	/**
+	 * @return the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood function
+	 */
+	public double getAlpha()
+	{
+		return alpha;
+	}
+
+	/**
+	 * @param alpha
+	 *            the alpha for the gamma component of the Poisson-Gamma-Gaussian likelihood function
+	 */
+	public void setAlpha(double alpha)
+	{
+		this.alpha = alpha;
+	}
+
+	/**
+	 * @return the sigma for the Gaussian component of the Poisson-Gaussian/Poisson-Gamma-Gaussian likelihood function
+	 */
+	public double getSigma()
+	{
+		return sigma;
+	}
+
+	/**
+	 * @param sigma
+	 *            the sigma for the Gaussian component of the Poisson-Gaussian/Poisson-Gamma-Gaussian likelihood
+	 *            function
+	 */
+	public void setSigma(double sigma)
+	{
+		this.sigma = sigma;
 	}
 
 	/**

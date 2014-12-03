@@ -55,18 +55,19 @@ public class FitConfiguration implements Cloneable
 	private double nmPerPixel = 0;
 	private double gain = 0;
 	private boolean emCCD = true;
+	private boolean modelCamera = false;
 	private double noise = 0;
 	private double widthFactor = 2;
 	private boolean fitValidation = true;
 	private double lambda = 10;
 	private boolean computeResiduals = true;
 	private double duplicateDistance = 0.5f;
-	private double bias;
-	private boolean removeBiasBeforeFitting = false;
+	private double bias = 0;
+	private double readNoise = 0;
 	private int maxFunctionEvaluations = 1000;
 	private SearchMethod searchMethod = SearchMethod.BFGS;
-	private boolean gradientLineMinimisation = true;
-	private double relativeThreshold = 1e-4;
+	private boolean gradientLineMinimisation = false;
+	private double relativeThreshold = 1e-6;
 	private double absoluteThreshold = 1e-10;
 
 	private StoppingCriteria stoppingCriteria = null;
@@ -962,6 +963,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setGain(double gain)
 	{
+		invalidateFunctionSolver();
 		this.gain = gain;
 	}
 
@@ -982,6 +984,27 @@ public class FitConfiguration implements Cloneable
 	public void setEmCCD(boolean emCCD)
 	{
 		this.emCCD = emCCD;
+	}
+
+	/**
+	 * @return True if modelling the camera noise during maximum likelihood fitting
+	 */
+	public boolean isModelCamera()
+	{
+		return modelCamera;
+	}
+
+	/**
+	 * Specify if the camera noise should be modelled during maximum likelihood fitting. If true then the read noise
+	 * must be set. If the EmCCD property is true then the gain must also be set.
+	 * 
+	 * @param modelCamera
+	 *            Set to true to model the camera
+	 */
+	public void setModelCamera(boolean modelCamera)
+	{
+		invalidateFunctionSolver();
+		this.modelCamera = modelCamera;
 	}
 
 	/**
@@ -1023,22 +1046,30 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * @return the camera read noise (used for maximum likelihood estimation)
+	 */
+	public double getReadNoise()
+	{
+		return readNoise;
+	}
+
+	/**
+	 * @param readNoise
+	 *            the camera read noise (used for maximum likelihood estimation)
+	 */
+	public void setReadNoise(double readNoise)
+	{
+		invalidateFunctionSolver();
+		this.readNoise = readNoise;
+	}
+
+	/**
 	 * @return Set to true if the bias should be removed from the data before fitting, e.g. for maximum likelihood
 	 *         estimation.
 	 */
 	public boolean isRemoveBiasBeforeFitting()
 	{
-		return removeBiasBeforeFitting;
-	}
-
-	/**
-	 * @param removeBiasBeforeFitting
-	 *            Set to true if the bias should be removed from the data before fitting, e.g. for maximum likelihood
-	 *            estimation.
-	 */
-	public void setRemoveBiasBeforeFitting(boolean removeBiasBeforeFitting)
-	{
-		this.removeBiasBeforeFitting = removeBiasBeforeFitting;
+		return fitSolver == FitSolver.MLE;
 	}
 
 	/**
@@ -1125,7 +1156,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setRelativeThreshold(double relativeThreshold)
 	{
-		invalidateFunctionSolver();		
+		invalidateFunctionSolver();
 		this.relativeThreshold = relativeThreshold;
 	}
 
@@ -1156,9 +1187,9 @@ public class FitConfiguration implements Cloneable
 			functionSolver = createFitSolver();
 		return functionSolver;
 	}
-	
+
 	/**
-	 * Call this when a property changes that will change the function solver 
+	 * Call this when a property changes that will change the function solver
 	 */
 	private void invalidateFunctionSolver()
 	{
@@ -1177,7 +1208,31 @@ public class FitConfiguration implements Cloneable
 				fitter.setMaxIterations(maxIterations);
 				fitter.setSearchMethod(searchMethod);
 				fitter.setGradientLineMinimisation(gradientLineMinimisation);
+
+				if (modelCamera)
+				{
+					// Specify the likelihood function to use
+					if (emCCD)
+					{
+						// EMCCD = Poisson+Gamma+Gaussian
+						fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAMMA_GAUSSIAN);
+						fitter.setAlpha(1.0 / gain);
+						fitter.setSigma(readNoise);
+					}
+					else
+					{
+						// CCD = Poisson+Gaussian
+						fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAUSSIAN);
+						fitter.setSigma(readNoise);
+					}
+				}
+				else
+				{
+					fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON);
+				}
+
 				// TODO - Configure stopping criteria ...
+
 				return fitter;
 
 			case LVM_QUASI_NEWTON:
