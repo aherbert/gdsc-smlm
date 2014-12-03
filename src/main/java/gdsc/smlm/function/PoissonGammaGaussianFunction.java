@@ -145,9 +145,9 @@ public class PoissonGammaGaussianFunction
 	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
 	 * al (2010) Nature Methods 7, 377-383.
 	 * 
-	 * @param cij
+	 * @param o
 	 *            The observed count
-	 * @param eta
+	 * @param e
 	 *            The expected count
 	 * @return The log-likelihood
 	 */
