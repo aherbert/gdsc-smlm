@@ -529,7 +529,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		else
 			results.setName(source.getName() + " (" + getSolverName() + ")");
 		results.setBounds(bounds);
-		Calibration cal = new Calibration(calibration);
+		Calibration cal = calibration.copy();
 		// Account for the frame integration
 		// TODO - Should we change this so that if integrate frames is used then the data 
 		// are converted to ExtendedPeakResult with a start and end frame
