@@ -16,7 +16,7 @@ package gdsc.smlm.results;
 /**
  * Contain the calibration settings for the microscope
  */
-public class Calibration
+public class Calibration implements Cloneable
 {
 	/**
 	 * The image pixel size in nanometers
@@ -77,13 +77,20 @@ public class Calibration
 	 */
 	public Calibration copy()
 	{
+		return (Calibration) clone();
+	}
+
+	public Object clone()
+	{
+		Calibration c;
 		try
 		{
-			return (Calibration) super.clone();
+			c = (Calibration) super.clone();
 		}
 		catch (CloneNotSupportedException e)
 		{
 			return null;
 		}
+		return c;
 	}
 }
