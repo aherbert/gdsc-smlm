@@ -50,6 +50,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	/** Convergence tolerance on gradient */
 	private double gradientTolerance;
 
+	/** Maximum number of restarts on the convergence point */
+	private int restarts = 0;
+
 	/** Convergence tolerance on position */
 	private PositionChecker positionChecker = null;
 
@@ -108,6 +111,30 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
+	 * Specify the maximum number of restarts on the converged point
+	 */
+	public static class MaximumRestarts implements OptimizationData
+	{
+		private int restarts;
+
+		/**
+		 * Build an instance
+		 * 
+		 * @param restarts
+		 *            The restarts on the gradient
+		 */
+		public MaximumRestarts(int restarts)
+		{
+			this.restarts = restarts;
+		}
+
+		public int getRestarts()
+		{
+			return restarts;
+		}
+	}
+
+	/**
 	 * Constructor
 	 */
 	public BFGSOptimizer()
@@ -146,18 +173,94 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		return super.optimize(optData);
 	}
 
+	private int converged;
+	private static final int CHECKER = 0;
+	private static final int POSITION = 1;
+	private static final int GRADIENT = 2;
+
 	/** {@inheritDoc} */
 	@Override
 	protected PointValuePair doOptimize()
 	{
 		final ConvergenceChecker<PointValuePair> checker = getConvergenceChecker();
 		double[] p = getStartPoint();
-		final int n = p.length;
 
 		// Assume minimisation
 		sign = -1;
 
 		LineStepSearch lineSearch = new LineStepSearch();
+
+		if (restarts <= 0)
+			return bfgs(checker, p, lineSearch);
+
+		// Note: Position might converge if the hessian becomes singular or non-positive-definite
+		// In this case the simple check is to restart the algorithm.
+
+		PointValuePair lastResult = null;
+		PointValuePair result = null;
+		//int lastConverge = 0;
+		int iteration = 0;
+		//int initialConvergenceIteration = 0;
+		//int[] count = new int[3];
+		while (iteration <= restarts)
+		{
+			iteration++;
+			result = bfgs(checker, p, lineSearch);
+			//count[converged]++;
+
+			//if (lastResult == null)
+			//	initialConvergenceIteration = getIterations();
+				
+			if (converged == GRADIENT)
+			{
+				// If no gradient remains then we cannot move anywhere so return
+				break;
+			}
+
+			if (lastResult != null)
+			{
+				//// Check if the optimum was improved using the last convergence criteria
+				//if (lastConverge == CHECKER)
+				//{
+				//	if (checker.converged(getIterations(), lastResult, result))
+				//	{
+				//		break;
+				//	}
+				//}
+				//else
+				//{
+				//	if (positionChecker.converged(lastResult.getPointRef(), result.getPointRef()))
+				//	{
+				//		break;
+				//	}
+				//}
+
+				// Check if the optimum was improved using the convergence criteria
+				if (checker != null && checker.converged(getIterations(), lastResult, result))
+				{
+					break;
+				}
+				if (positionChecker.converged(lastResult.getPointRef(), result.getPointRef()))
+				{
+					break;
+				}
+			}
+
+			// Store the new optimum and repeat
+			lastResult = result;
+			//lastConverge = converged;
+			p = lastResult.getPointRef();
+		}
+
+		//System.out.printf("Iter=%d (%d > %d): %s\n", iteration, initialConvergenceIteration, getIterations(),
+		//		java.util.Arrays.toString(count));
+
+		return result;
+	}
+
+	protected PointValuePair bfgs(ConvergenceChecker<PointValuePair> checker, double[] p, LineStepSearch lineSearch)
+	{
+		final int n = p.length;
 
 		final double EPS = epsilon;
 
@@ -193,6 +296,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				if (previous != null && checker.converged(getIterations(), previous, current))
 				{
 					// We have found an optimum.
+					converged = CHECKER;
 					return current;
 				}
 			}
@@ -201,17 +305,12 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			final double[] pnew = lineSearch.lineSearch(p, fp, g, xi);
 
 			// We assume the new point in on/within the bounds since the line search is constrained
-			//final boolean recompute = applyBounds(pnew);
 			double fret = lineSearch.f;
 
 			// Test for convergence on change in position
 			if (positionChecker.converged(p, pnew))
 			{
-				//System.out.printf("Position converged\n");
-				//if (recompute)
-				//{
-				//	fret = computeObjectiveValue(pnew);
-				//}
+				converged = POSITION;
 				return new PointValuePair(pnew, fret);
 			}
 
@@ -232,7 +331,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			// If necessary recompute the function value. 
 			// Doing this after the gradient evaluation allows the value to be cached when 
 			// computing the objective gradient
-			fp = fret; //(recompute) ? computeObjectiveValue(p) : fret;
+			fp = fret;
 
 			// Test for convergence on zero gradient.
 			double test = 0;
@@ -247,7 +346,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			test /= FastMath.max(Math.abs(fp), 1);
 			if (test < gradientTolerance)
 			{
-				//System.out.printf("Gradient converged\n");
+				converged = GRADIENT;
 				return new PointValuePair(p, fp);
 			}
 
@@ -325,6 +424,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			else if (data instanceof GradientTolerance)
 			{
 				gradientTolerance = ((GradientTolerance) data).getTolerance();
+			}
+			else if (data instanceof MaximumRestarts)
+			{
+				restarts = ((MaximumRestarts) data).getRestarts();
 			}
 		}
 
