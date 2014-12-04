@@ -265,7 +265,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			noise /= gain;
 			params = Arrays.copyOf(params, params.length);
 			params[Gaussian2DFunction.SIGNAL] /= gain;
-			params[Gaussian2DFunction.BACKGROUND] /= gain;
+			params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] - calibration.bias) / gain);
 			params[Gaussian2DFunction.X_POSITION] *= nmPerPixel;
 			params[Gaussian2DFunction.X_SD] *= nmPerPixel;
 			params[Gaussian2DFunction.Y_POSITION] *= nmPerPixel;
@@ -285,14 +285,14 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		{
 			if (paramsDev == null)
 				paramsDev = new float[7];
-			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr, params[0], paramsDev[0],
-					params[1], paramsDev[1], params[2], paramsDev[2], params[3], paramsDev[3], params[4], paramsDev[4],
-					params[5], paramsDev[5], params[6], paramsDev[6], precision);
+			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr, params[0], paramsDev[0], params[1],
+					paramsDev[1], params[2], paramsDev[2], params[3], paramsDev[3], params[4], paramsDev[4], params[5],
+					paramsDev[5], params[6], paramsDev[6], precision);
 		}
 		else
 		{
-			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr, params[0], params[1],
-					params[2], params[3], params[4], params[5], params[6], precision);
+			addResult(peak, endFrame, origX, origY, origValue, error, noise, snr, params[0], params[1], params[2],
+					params[3], params[4], params[5], params[6], precision);
 		}
 	}
 
