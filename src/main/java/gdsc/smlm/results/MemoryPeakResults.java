@@ -514,7 +514,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 			if (bounds != null)
 				copy.bounds = new Rectangle(bounds);
 			if (calibration != null)
-				copy.calibration = new Calibration(calibration);
+				copy.calibration = calibration.copy();
 			if (results != null)
 				copy.results = new ArrayList<PeakResult>(results);
 

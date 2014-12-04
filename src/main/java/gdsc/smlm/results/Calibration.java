@@ -31,7 +31,7 @@ public class Calibration
 	 * The exposure time in milliseconds per frame
 	 */
 	public double exposureTime;
-	
+
 	/**
 	 * The CCD camera Gaussian read noise (in ADUs)
 	 */
@@ -53,18 +53,6 @@ public class Calibration
 	}
 
 	/**
-	 * Copy constructor
-	 * 
-	 * @param calibration
-	 */
-	public Calibration(Calibration calibration)
-	{
-		this.nmPerPixel = calibration.nmPerPixel;
-		this.gain = calibration.gain;
-		this.exposureTime = calibration.exposureTime;
-	}
-
-	/**
 	 * Parameterised constructor.
 	 * <p>
 	 * If gain is zero then set to 1.
@@ -80,5 +68,22 @@ public class Calibration
 			gain = 1;
 		this.gain = gain;
 		this.exposureTime = exposureTime;
+	}
+
+	/**
+	 * Copy the calibration
+	 * 
+	 * @return A copy
+	 */
+	public Calibration copy()
+	{
+		try
+		{
+			return (Calibration) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
 	}
 }
