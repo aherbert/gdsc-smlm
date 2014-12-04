@@ -105,6 +105,7 @@ public class CreateDataSettings
 	public double minPhotons = 30;
 	public double minSNRt1 = 0;
 	public double minSNRtN = 0;
+	public boolean rawImage = false;
 	public boolean saveImage = false;
 	public boolean saveImageResults = false;
 	public boolean saveLocalisations = false;

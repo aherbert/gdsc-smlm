@@ -627,19 +627,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double F = (emCCD) ? 2 : 1;
 		final double a2 = a * a;
 		// 4 * pi = 12.56637061
-		
+
 		// Adjustment for square pixels
 		//final double sa2 = s * s + a2 / 12.0;
 
 		// Original Thompson formula modified for EM-gain noise factor.
-		
+
 		// TODO - Investigate if this limit is correct
-		
+
 		// My fitters approach this limit when background is 0 photon and EM-gain = 0.
 		// The fitters are above this limit when background is >0 photon and EM-gain = 0.
 
 		// The MLE fitter can approach this limit when background is 0 photon and EM-gain = 25.
-		
+
 		return Math.sqrt(F * (N + (12.56637061 * s * s * b2) / a2));
 		//return Math.sqrt(F * (N + (12.56637061 * sa2 * b2) / a2));
 	}
@@ -1386,40 +1386,44 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		IJ.showStatus("Displaying image ...");
 
-		// Get the global limits and ensure all values can be represented
-		Object[] imageArray = stack.getImageArray();
-		float[] limits = Maths.limits((float[]) imageArray[0]);
-		for (int j = 1; j < imageArray.length; j++)
-			limits = Maths.limits(limits, (float[]) imageArray[j]);
 		ImageStack newStack = stack;
-		limits[0] = 0; // Leave bias in place
-		// Check if the image will fit in a 16-bit range
-		if ((limits[1] - limits[0]) < 65535)
+
+		if (!settings.rawImage)
 		{
-			// Convert to 16-bit
-			newStack = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
-			// Account for rounding
-			final float min = (float) (limits[0] - 0.5);
-			for (int j = 0; j < imageArray.length; j++)
+			// Get the global limits and ensure all values can be represented
+			Object[] imageArray = stack.getImageArray();
+			float[] limits = Maths.limits((float[]) imageArray[0]);
+			for (int j = 1; j < imageArray.length; j++)
+				limits = Maths.limits(limits, (float[]) imageArray[j]);
+			limits[0] = 0; // Leave bias in place
+			// Check if the image will fit in a 16-bit range
+			if ((limits[1] - limits[0]) < 65535)
 			{
-				float[] image = (float[]) imageArray[j];
-				short[] pixels = new short[image.length];
-				for (int k = 0; k < pixels.length; k++)
+				// Convert to 16-bit
+				newStack = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
+				// Account for rounding
+				final float min = (float) (limits[0] - 0.5);
+				for (int j = 0; j < imageArray.length; j++)
 				{
-					pixels[k] = (short) (image[k] - min);
+					float[] image = (float[]) imageArray[j];
+					short[] pixels = new short[image.length];
+					for (int k = 0; k < pixels.length; k++)
+					{
+						pixels[k] = (short) (image[k] - min);
+					}
+					newStack.setPixels(pixels, j + 1);
 				}
-				newStack.setPixels(pixels, j + 1);
 			}
-		}
-		else
-		{
-			// Keep as 32-bit but round to whole numbers
-			for (int j = 0; j < imageArray.length; j++)
+			else
 			{
-				float[] pixels = (float[]) imageArray[j];
-				for (int k = 0; k < pixels.length; k++)
+				// Keep as 32-bit but round to whole numbers
+				for (int j = 0; j < imageArray.length; j++)
 				{
-					pixels[k] = Math.round(pixels[k]);
+					float[] pixels = (float[]) imageArray[j];
+					for (int k = 0; k < pixels.length; k++)
+					{
+						pixels[k] = Math.round(pixels[k]);
+					}
 				}
 			}
 		}
@@ -1694,9 +1698,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						if (poissonNoise)
 						{
 							final int samples = (int) random.nextPoisson(localisation.getIntensity());
-							photons = psfModel.sample3D(data, settings.size, settings.size,
-									samples, localisation.getX(), localisation.getY(),
-									localisation.getZ());
+							photons = psfModel.sample3D(data, settings.size, settings.size, samples,
+									localisation.getX(), localisation.getY(), localisation.getZ());
 							samplePositions = psfModel.getSamplePositions();
 						}
 						else
@@ -3102,6 +3105,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Max_Photons", settings.photonsPerSecondMaximum, 0);
 
 		gd.addMessage("--- Save options ---");
+		gd.addCheckbox("Raw_image", settings.rawImage);
 		gd.addCheckbox("Save_image", settings.saveImage);
 		gd.addCheckbox("Save_image_results", settings.saveImageResults);
 		gd.addCheckbox("Save_localisations", settings.saveLocalisations);
@@ -3186,6 +3190,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
 		settings.photonsPerSecondMaximum = Math.abs((int) gd.getNextNumber());
 
+		settings.rawImage = gd.getNextBoolean();
 		settings.saveImage = gd.getNextBoolean();
 		settings.saveImageResults = gd.getNextBoolean();
 		settings.saveLocalisations = gd.getNextBoolean();
@@ -3400,6 +3405,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		gd.addMessage("--- Save options ---");
 		Component splitLabel2 = gd.getMessage();
+		gd.addCheckbox("Raw_image", settings.rawImage);
 		gd.addCheckbox("Save_image", settings.saveImage);
 		gd.addCheckbox("Save_image_results", settings.saveImageResults);
 		gd.addCheckbox("Save_fluorophores", settings.saveFluorophores);
@@ -3499,6 +3505,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		minSNRt1 = settings.minSNRt1 = gd.getNextNumber();
 		minSNRtN = settings.minSNRtN = gd.getNextNumber();
 
+		settings.rawImage = gd.getNextBoolean();
 		settings.saveImage = gd.getNextBoolean();
 		settings.saveImageResults = gd.getNextBoolean();
 		settings.saveFluorophores = gd.getNextBoolean();
