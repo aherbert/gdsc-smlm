@@ -54,7 +54,6 @@ import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.PointVectorValuePair;
-import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -1212,7 +1211,6 @@ public class PCPALMFitting implements PlugIn
 			{
 				opt = new BFGSOptimizer();
 				final double relativeThreshold = 1e-6;
-				final double absoluteThreshold = 1e-10;
 
 				// Configure maximum step length for each dimension using the bounds
 				double[] stepLength = new double[lB.length];
@@ -1222,8 +1220,7 @@ public class PCPALMFitting implements PlugIn
 				// The GoalType is always minimise so no need to pass this in
 				optimum = opt.optimize(maxEvaluations, gradient, objective, new InitialGuess(
 						(optimum == null) ? initialSolution : optimum.getPointRef()), new SimpleBounds(lB, uB),
-						new BFGSOptimizer.GradientTolerance(relativeThreshold), new PositionChecker(relativeThreshold,
-								absoluteThreshold), new BFGSOptimizer.StepLength(stepLength));
+						new BFGSOptimizer.GradientTolerance(relativeThreshold), new BFGSOptimizer.StepLength(stepLength));
 				if (debug)
 					System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(), opt.getEvaluations());
 			}
