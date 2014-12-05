@@ -936,6 +936,20 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			setSource(new AggregatedImageSource(this.source, integrateFrames));
 		}
 
+		// Ask if the user wants to log progress on multiple frame images
+		if (resultsSettings.logProgress && source.getFrames() > 1)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Warning: Log progress on multiple-frame image will be slow");
+			gd.addCheckbox("Log_progress", resultsSettings.logProgress);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return DONE;
+			resultsSettings.logProgress = gd.getNextBoolean();
+			if (!resultsSettings.logProgress)
+				SettingsManager.saveSettings(settings, filename);
+		}
+		
 		// Return the plugin flags (without the DOES_STACKS flag).
 		// The call to run(ImageProcessor) will process the image in 'this.imp' so we only want a 
 		// single call to be made.
