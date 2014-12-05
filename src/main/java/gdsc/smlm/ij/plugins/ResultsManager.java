@@ -173,7 +173,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		//if (title == null || title.length() == 0)
 		//	output.setSource(TITLE);
 
-		addTableResults(output, showDeviations, showEndFrame);
+		addTableResults(results, output, showDeviations, showEndFrame);
 		addImageResults(output, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
 		addFileResults(output, showDeviations, showEndFrame, showId);
 
@@ -244,13 +244,26 @@ public class ResultsManager implements PlugIn, MouseListener
 		return false;
 	}
 
-	private void addTableResults(PeakResultsList resultsList, boolean showDeviations, boolean showEndFrame)
+	private void addTableResults(MemoryPeakResults results, PeakResultsList resultsList, boolean showDeviations, boolean showEndFrame)
 	{
 		if (resultsSettings.getResultsTable() != ResultsTable.NONE)
 		{
 			IJTablePeakResults r = new IJTablePeakResults(showDeviations);
 			r.setPeakIdColumnName("Frame");
 			r.setShowCalibratedValues(resultsSettings.getResultsTable() == ResultsTable.CALIBRATED);
+			// Get a bias if required
+			Calibration calibration = results.getCalibration();
+			if (r.isShowCalibratedValues() && calibration.bias == 0)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage("Calibrated results requires a camera bias");
+				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.showDialog();
+				if (!gd.wasCanceled())
+				{
+					calibration.bias = Math.abs(gd.getNextNumber());
+				}
+			}
 			r.setShowEndFrame(showEndFrame);
 			resultsList.addOutput(r);
 		}
@@ -444,7 +457,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		{
 			roiBounds = null;
 		}
-
+		
 		return SettingsManager.saveSettings(settings);
 	}
 

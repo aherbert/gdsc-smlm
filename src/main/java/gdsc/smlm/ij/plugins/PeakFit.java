@@ -950,6 +950,21 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				SettingsManager.saveSettings(settings, filename);
 		}
 		
+		// Get a bias if required
+		if (resultsSettings.getResultsTable() == ResultsTable.CALIBRATED && calibration.bias == 0)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Calibrated results requires a camera bias");
+			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			gd.showDialog();
+			if (!gd.wasCanceled())
+			{
+				calibration.bias = Math.abs(gd.getNextNumber());
+				if (calibration.bias > 0)
+					SettingsManager.saveSettings(settings, filename);
+			}
+		}
+		
 		// Return the plugin flags (without the DOES_STACKS flag).
 		// The call to run(ImageProcessor) will process the image in 'this.imp' so we only want a 
 		// single call to be made.
@@ -1218,6 +1233,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		calibration.gain = gd.getNextNumber();
 		calibration.emCCD = gd.getNextBoolean();
 		calibration.exposureTime = gd.getNextNumber();
+		// Note: The bias and read noise will just end up being what was in the configuration file
+		// One fix for this is to save/load only the settings that are required from the configuration file
+		// (the others will remain unchanged). This will require a big refactor of the settings save/load.
+		// The simple fix is to create a plugin to allow the configuration to be changed for results.
 		if (isCrop)
 			ignoreBoundsForNoise = optionIgnoreBoundsForNoise = gd.getNextBoolean();
 

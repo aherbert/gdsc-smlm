@@ -19,6 +19,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -130,7 +131,24 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 		Collections.sort(rankedResults);
 
-		// Prepare results table
+		// Prepare results table. Get bias if necessary
+		if (showCalibratedValues)
+		{
+			// Get a bias if required
+			Calibration calibration = results.getCalibration();
+			if (calibration.bias == 0)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage("Calibrated results requires a camera bias");
+				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.showDialog();
+				if (!gd.wasCanceled())
+				{
+					calibration.bias = Math.abs(gd.getNextNumber());
+				}
+			}
+		}
+		
 		IJTablePeakResults table = new IJTablePeakResults(false, results.getName(), true);
 		table.copySettings(results);
 		table.setTableTitle(TITLE);
