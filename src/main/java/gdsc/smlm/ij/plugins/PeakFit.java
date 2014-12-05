@@ -1151,7 +1151,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		calibration.nmPerPixel = gd.getNextNumber();
+		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
 		return true;
 	}
 
@@ -1168,7 +1168,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		calibration.gain = gd.getNextNumber();
+		calibration.gain = Math.abs(gd.getNextNumber());
 		calibration.emCCD = gd.getNextBoolean();
 		return true;
 	}
@@ -1182,7 +1182,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		calibration.exposureTime = gd.getNextNumber();
+		calibration.exposureTime = Math.abs(gd.getNextNumber());
 		return true;
 	}
 
@@ -1205,7 +1205,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
+		fitConfig.setInitialPeakStdDev(Math.abs(gd.getNextNumber()));
 		return true;
 	}
 
@@ -1229,10 +1229,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		String filename = gd.getNextString();
 
-		calibration.nmPerPixel = gd.getNextNumber();
-		calibration.gain = gd.getNextNumber();
+		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
+		calibration.gain = Math.abs(gd.getNextNumber());
 		calibration.emCCD = gd.getNextBoolean();
-		calibration.exposureTime = gd.getNextNumber();
+		calibration.exposureTime = Math.abs(gd.getNextNumber());
 		// Note: The bias and read noise will just end up being what was in the configuration file
 		// One fix for this is to save/load only the settings that are required from the configuration file
 		// (the others will remain unchanged). This will require a big refactor of the settings save/load.
