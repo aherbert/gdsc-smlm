@@ -26,7 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * Filters PeakFit results that are stored in memory using the configured filters.
+ * Allows results held in memory to be renamed.
  */
 public class RenameResults implements PlugIn
 {
