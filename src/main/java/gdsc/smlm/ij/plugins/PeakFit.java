@@ -567,10 +567,15 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private String getSolverName()
 	{
-		FitSolver solver = config.getFitConfiguration().getFitSolver();
+		return getSolverName(config.getFitConfiguration());
+	}
+	
+	public static String getSolverName(FitConfiguration fitConfig)
+	{
+		FitSolver solver = fitConfig.getFitSolver();
 		String name = solver.getShortName();
 		if (solver == FitSolver.MLE)
-			name += " " + config.getFitConfiguration().getSearchMethod();
+			name += " " + fitConfig.getSearchMethod();
 		return name;
 	}
 
