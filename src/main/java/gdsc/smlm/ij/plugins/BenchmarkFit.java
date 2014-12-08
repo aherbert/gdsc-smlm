@@ -170,7 +170,7 @@ public class BenchmarkFit implements PlugIn
 			}
 		}
 
-		// TODO Show a table of the results
+		// Show a table of the results
 		summariseResults();
 
 		// TODO Optionally show histograms
@@ -348,7 +348,7 @@ public class BenchmarkFit implements PlugIn
 			lc[Gaussian2DFunction.BACKGROUND] = 0;
 			lc[Gaussian2DFunction.SIGNAL] = 0;
 		}
-		solver.setBounds(lc, uc);
+		solver.setConstraints(lc, uc);
 	}
 
 	private void summariseResults()
@@ -370,6 +370,7 @@ public class BenchmarkFit implements PlugIn
 		int n = 2 * regionSize + 1;
 		//sb.append(n).append("x");
 		sb.append(n).append("\t");
+		// TODO - Add details of the noise model for the MLE
 		sb.append(fitConfig.getFitFunction().toString() + ":" + PeakFit.getSolverName(fitConfig)).append("\t");
 		final double recall = (double) (stats[0].getN() / 5) / benchmarkParameters.molecules;
 		sb.append(Utils.rounded(recall));
