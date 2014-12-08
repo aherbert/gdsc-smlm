@@ -174,12 +174,12 @@ public class ImageConverter
 	 * @param buffer
 	 * @return The double array data
 	 */
-	public static double[] getData(ImageProcessor ip, double[] buffer)
+	public static double[] getDoubleData(ImageProcessor ip, double[] buffer)
 	{
 		if (ip == null)
 			return null;
 
-		return getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), ip.getRoi(), buffer);
+		return getDoubleData(ip.getPixels(), ip.getWidth(), ip.getHeight(), ip.getRoi(), buffer);
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class ImageConverter
 	 * @param buffer
 	 * @return The double array data
 	 */
-	public static double[] getData(final Object oPixels, final int width, final int height, final Rectangle bounds,
+	public static double[] getDoubleData(final Object oPixels, final int width, final int height, final Rectangle bounds,
 			double[] buffer)
 	{
 		if (oPixels == null)
