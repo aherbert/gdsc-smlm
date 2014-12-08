@@ -124,6 +124,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
 	private static final String TITLE = "Create Data";
+	public static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
 	private static String[] ILLUMINATION = { "Uniform", "Radial" };
 	private static int RADIAL = 1;
@@ -215,6 +216,96 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean poissonNoise = true;
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
 
+	// Store the parameters for the last benchmark
+	public class BenchmarkParameters
+	{
+		/**
+		 * Number of frames in the simulated image
+		 */
+		int frames;
+		/**
+		 * Gaussian standard deviation
+		 */
+		double s;
+		/**
+		 * Pixel pitch in nm
+		 */
+		double a;
+		/**
+		 * The average number of photons per frame
+		 */
+		double signal;
+		/**
+		 * The x and y positions of the localisation in each frame
+		 */
+		double x, y;
+		double bias;
+		/**
+		 * True if EM-gain was modelled
+		 */
+		boolean emCCD;
+		/**
+		 * Total gain
+		 */
+		double gain;
+		/**
+		 * Read noise in ADUs
+		 */
+		double readNoise;
+		/**
+		 * Background
+		 */
+		double b;
+		/**
+		 * The actual number of simulated photons in each frame of the benchmark image. Some frames may be empty (due to
+		 * signal filtering or Poisson sampling)
+		 */
+		double[] p;
+		/**
+		 * The number of frames with a simulated photon count
+		 */
+		int molecules;
+
+		double precisionN, precisionX, precisionXML;
+
+		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double bias,
+				boolean emCCD, double gain, double readNoise, double b)
+		{
+			this.frames = frames;
+			this.s = s;
+			this.a = a;
+			this.signal = signal;
+			this.x = x;
+			this.y = y;
+			this.bias = bias;
+			this.emCCD = emCCD;
+			this.gain = gain;
+			this.readNoise = readNoise;
+			this.b = b;
+			p = new double[frames];
+		}
+
+		public void setPhotons(MemoryPeakResults results)
+		{
+			molecules = results.size();
+			double sum = 0;
+			for (PeakResult result : results)
+			{
+				int i = result.peak - 1;
+				if (p[i] != 0)
+					throw new RuntimeException("Multiple peaks on the same frame: " + result.peak);
+				p[i] = result.getSignal();
+				sum += p[i];
+			}
+			sum /= molecules;
+			Utils.log("Created %d frames, %d molecules. Simulated signal %s : average %s", frame, molecules,
+					Utils.rounded(signal), Utils.rounded(sum));
+			signal = sum;
+		}
+	}
+
+	static BenchmarkParameters benchmarkParameters = null;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -226,6 +317,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		simpleMode = (arg != null && arg.contains("simple"));
 		benchmarkMode = (arg != null && arg.contains("benchmark"));
 		extraOptions = Utils.isExtraOptions();
+		benchmarkParameters = null;
 
 		// Each localisation is a simulated emission of light from a point in space and time
 		List<LocalisationModel> localisations = null;
@@ -332,6 +424,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						Utils.rounded(upperMLP / settings.pixelPitch));
 				Utils.log("Signal precision: %s - %s photons : %s - %s ADUs", Utils.rounded(lowerN),
 						Utils.rounded(upperN), Utils.rounded(lowerN * totalGain), Utils.rounded(upperN * totalGain));
+
+				// Store the benchmark settings when not using variable photons
+				if (settings.photonsPerSecond == settings.photonsPerSecondMaximum)
+				{
+					// Store read noise in ADUs
+					readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
+					benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
+							settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
+							settings.background);
+					benchmarkParameters.precisionN = lowerN;
+					benchmarkParameters.precisionX = lowerP;
+					benchmarkParameters.precisionXML = lowerMLP;
+				}
 			}
 			else
 			{
@@ -1429,8 +1534,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Show image
-		String title = "Localisation Data";
-		ImagePlus imp = Utils.display(title, newStack);
+		ImagePlus imp = Utils.display(CREATE_DATA_IMAGE_TITLE, newStack);
 
 		ij.measure.Calibration cal = new ij.measure.Calibration();
 		String unit = "nm";
@@ -1451,17 +1555,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		saveImage(imp);
 
 		results.setSource(new IJImageSource(imp));
-		results.setName(title + " (" + TITLE + ")");
+		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
 		results.setConfiguration(createConfiguration((float) psfSD));
 		results.setBounds(new Rectangle(0, 0, settings.size, settings.size));
 		MemoryPeakResults.addResults(results);
 
+		if (benchmarkMode)
+			benchmarkParameters.setPhotons(results);
+
 		List<LocalisationModel> localisations = toLocalisations(localisationSets);
 
-		savePulses(localisations, results, title);
+		savePulses(localisations, results, CREATE_DATA_IMAGE_TITLE);
 
 		// Saved the fixed and moving localisations into different datasets
-		saveFixedAndMoving(results, title);
+		saveFixedAndMoving(results, CREATE_DATA_IMAGE_TITLE);
 
 		return localisations;
 	}
