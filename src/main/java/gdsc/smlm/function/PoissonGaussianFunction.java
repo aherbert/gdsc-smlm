@@ -281,6 +281,7 @@ public class PoissonGaussianFunction
 
 		// Check for negative sqrt
 		final double argument_to_sqrt = bterm * bterm + 4 * mu * (2 * sigmasquared + x);
+		// This check is needed if x is very negative
 		if (argument_to_sqrt < 0)
 			// Revert to Taylor approximation
 			return (mu - x) / (mu + sigmasquared);
