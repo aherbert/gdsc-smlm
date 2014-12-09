@@ -28,6 +28,7 @@ import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -35,6 +36,10 @@ import ij.text.TextWindow;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Fits the benchmark image created by CreateData plugin.
@@ -52,15 +57,135 @@ public class BenchmarkFit implements PlugIn
 	private FitConfiguration fitConfig;
 	private ImagePlus imp;
 	private CreateData.BenchmarkParameters benchmarkParameters;
-	private double[] data = null;
-	private Statistics[] stats = new Statistics[9];
 	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)",
-			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ns)", "dN (photons)" };
+			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dN (photons)" };
 	private static final int TIME = 7;
 	private static final int ACTUAL_SIGNAL = 8;
 	private double[] answer = new double[7];
 	private double[] lb, ub = null;
 	private double[] lc, uc = null;
+
+	private class Worker implements Runnable
+	{
+		volatile boolean finished = false;
+		final BlockingQueue<Integer> jobs;
+		final Statistics[] stats = new Statistics[9];
+		final ImageStack stack;
+		final Rectangle region;
+		final double[][] xy;
+		final FitConfiguration fitConfig;
+
+		double[] data = null;
+
+		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region, double[][] xy,
+				FitConfiguration fitConfig)
+		{
+			this.jobs = jobs;
+			this.stack = stack;
+			this.region = region;
+			this.fitConfig = (FitConfiguration) fitConfig.clone();
+			// Clone the positions array
+			this.xy = new double[xy.length][];
+			for (int i = 0; i < xy.length; i++)
+				this.xy[i] = xy[i].clone();
+			for (int i = 0; i < stats.length; i++)
+				stats[i] = (showHistograms) ? new StoredDataStatistics() : new Statistics();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			try
+			{
+				while (!finished)
+				{
+					Integer job = jobs.take();
+					if (job == null || job.intValue() < 0 || finished)
+						break;
+					run(job.intValue());
+				}
+			}
+			catch (InterruptedException e)
+			{
+				System.out.println(e.toString());
+				throw new RuntimeException(e);
+			}
+			finally
+			{
+				finished = true;
+			}
+		}
+
+		private void run(int frame)
+		{
+			// Extract the data
+			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(),
+					region, data);
+
+			// Get the background and signal estimate
+			final double b = getBackground(data, region.width, region.height);
+			final double signal = getSignal(data, b);
+
+			// Find centre-of-mass estimate
+			getCentreOfMass(data, region.width, region.height, xy[0]);
+
+			double[] initialParams = new double[7];
+			initialParams[Gaussian2DFunction.BACKGROUND] = b;
+			initialParams[Gaussian2DFunction.SIGNAL] = signal;
+			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = psfWidth;
+
+			// Subtract the bias
+			final double bias = benchmarkParameters.bias;
+			if (fitConfig.isRemoveBiasBeforeFitting())
+			{
+				initialParams[0] -= bias;
+				for (int i = 0; i < data.length; i++)
+					data[i] -= bias;
+			}
+
+			double[] error = new double[1];
+			double[][] result = new double[xy.length][];
+			int c = 0;
+			long start = System.nanoTime();
+			for (double[] centre : xy)
+			{
+				// Do fitting
+				final double[] params = initialParams.clone();
+				params[Gaussian2DFunction.X_POSITION] = centre[0];
+				params[Gaussian2DFunction.Y_POSITION] = centre[1];
+				fitConfig.initialise(1, region.width, params);
+				FunctionSolver solver = fitConfig.getFunctionSolver();
+				if (solver.isBounded())
+					setBounds(solver);
+				if (solver.isConstrained())
+					setConstraints(solver);
+				if (solver.fit(data.length, data, null, params, null, error, 0) == FitStatus.OK)
+				{
+					// Subtract the fitted bias from the background
+					if (!fitConfig.isRemoveBiasBeforeFitting())
+						params[0] -= bias;
+					result[c++] = params;
+				}
+			}
+			long time = System.nanoTime() - start;
+
+			// Store the results from each run
+			for (int i = 0; i < c; i++)
+			{
+				final double[] params = result[i];
+				for (int j = 0; j < params.length; j++)
+				{
+					stats[j].add(params[j] - answer[j]);
+				}
+				stats[7].add(time);
+				stats[8].add(params[Gaussian2DFunction.SIGNAL] - benchmarkParameters.p[frame]);
+			}
+		}
+	}
 
 	public void run(String arg)
 	{
@@ -122,9 +247,6 @@ public class BenchmarkFit implements PlugIn
 		if (gd.invalidNumber())
 			return false;
 
-		for (int i = 0; i < stats.length; i++)
-			stats[i] = (showHistograms) ? new StoredDataStatistics() : new Statistics();
-
 		return PeakFit.configureFitSolver(settings, filename, false);
 	}
 
@@ -161,88 +283,89 @@ public class BenchmarkFit implements PlugIn
 		final double[][] xy = new double[][] { { 0, 0 }, { x, y }, { x, y + 1 }, { x + 1, y }, { x + 1, y + 1 } };
 
 		final ImageStack stack = imp.getImageStack();
-		for (int i = 0; i < benchmarkParameters.frames; i++)
+
+		// Create a pool of workers
+		int nThreads = Prefs.getThreads();
+		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 3);
+		List<Worker> workers = new LinkedList<Worker>();
+		List<Thread> threads = new LinkedList<Thread>();
+		for (int i = 0; i < nThreads; i++)
 		{
-			// Only fit if there were simulated photons
-			if (benchmarkParameters.p[i] > 0)
-			{
-				fit(stack, region, xy, i);
-			}
+			Worker worker = new Worker(jobs, stack, region, xy, fitConfig);
+			Thread t = new Thread(worker);
+			workers.add(worker);
+			threads.add(t);
+			t.start();
 		}
 
+		// Fit the frames with simulated photons
+		final int totalFrames = benchmarkParameters.frames;
+		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
+		for (int i = 0; i < totalFrames; i++)
+		{
+			if (benchmarkParameters.p[i] > 0)
+			{
+				put(jobs, i);
+				if (i % step == 0)
+				{
+					IJ.showProgress(i, totalFrames);
+					IJ.showStatus("Frame: " + i + " / " + totalFrames);
+				}
+			}
+		}
+		// Finish all the worker threads by passing in a null job
+		for (int i = 0; i < threads.size(); i++)
+		{
+			put(jobs, -1);
+		}
+		IJ.showProgress(1);
+		IJ.showStatus("Collecting results ...");
+
+		// Collect the results
+		Statistics[] stats = new Statistics[NAMES.length];
+		for (int i = 0; i < threads.size(); i++)
+		{
+			try
+			{
+				threads.get(i).join();
+				Statistics[] next = workers.get(i).stats;
+				for (int j = 0; j < next.length; j++)
+				{
+					if (stats[j] == null)
+						stats[j] = next[j];
+					else
+						stats[j].add(next[j]);
+				}
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		threads.clear();
+		workers.clear();
+
 		// Show a table of the results
-		summariseResults();
+		summariseResults(stats);
 
 		// TODO Optionally show histograms
 		if (showHistograms)
 		{
 
 		}
+		
+		IJ.showStatus("");		
 	}
 
-	private void fit(ImageStack stack, Rectangle region, double[][] xy, int frame)
+	private void put(BlockingQueue<Integer> jobs, int i)
 	{
-		// Extract the data
-		data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
-				data);
-
-		// Get the background and signal estimate
-		final double b = getBackground(data, region.width, region.height);
-		final double signal = getSignal(data, b);
-
-		// Find centre-of-mass estimate
-		getCentreOfMass(data, region.width, region.height, xy[0]);
-
-		double[] initialParams = new double[7];
-		initialParams[Gaussian2DFunction.BACKGROUND] = b;
-		initialParams[Gaussian2DFunction.SIGNAL] = signal;
-		initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = psfWidth;
-
-		// Subtract the bias
-		final double bias = benchmarkParameters.bias;
-		if (fitConfig.isRemoveBiasBeforeFitting())
+		try
 		{
-			initialParams[0] -= bias;
-			for (int i = 0; i < data.length; i++)
-				data[i] -= bias;
+			jobs.put(i);
 		}
-
-		double[] error = new double[1];
-		double[][] result = new double[xy.length][];
-		int c = 0;
-		long start = System.nanoTime();
-		for (double[] centre : xy)
+		catch (InterruptedException e)
 		{
-			// Do fitting
-			final double[] params = initialParams.clone();
-			params[Gaussian2DFunction.X_POSITION] = centre[0];
-			params[Gaussian2DFunction.Y_POSITION] = centre[1];
-			fitConfig.initialise(1, region.width, params);
-			FunctionSolver solver = fitConfig.getFunctionSolver();
-			if (solver.isBounded())
-				setBounds(solver);
-			if (solver.isConstrained())
-				setConstraints(solver);
-			if (solver.fit(data.length, data, null, params, null, error, 0) == FitStatus.OK)
-			{
-				// Subtract the fitted bias from the background
-				if (!fitConfig.isRemoveBiasBeforeFitting())
-					params[0] -= bias;
-				result[c++] = params;
-			}
-		}
-		long time = System.nanoTime() - start;
-
-		// Store the results from each run
-		for (int i = 0; i < c; i++)
-		{
-			final double[] params = result[i];
-			for (int j = 0; j < params.length; j++)
-			{
-				stats[j].add(params[j] - answer[j]);
-			}
-			stats[7].add(time);
-			stats[8].add(params[Gaussian2DFunction.SIGNAL] - benchmarkParameters.p[frame]);
+			throw new RuntimeException("Unexpected interruption", e);
 		}
 	}
 
@@ -254,7 +377,7 @@ public class BenchmarkFit implements PlugIn
 	 * @param maxy
 	 * @return The background
 	 */
-	private double getBackground(double[] data, int maxx, int maxy)
+	private static double getBackground(double[] data, int maxx, int maxy)
 	{
 		double background = 0;
 		for (int xi = 0; xi < maxx; xi++)
@@ -273,7 +396,7 @@ public class BenchmarkFit implements PlugIn
 	 *            background
 	 * @return The signal
 	 */
-	private double getSignal(double[] data, double b)
+	private static double getSignal(double[] data, double b)
 	{
 		double s = 0;
 		for (double d : data)
@@ -291,7 +414,7 @@ public class BenchmarkFit implements PlugIn
 	 * @param com
 	 *            The centre-of-mass
 	 */
-	private void getCentreOfMass(double[] data, int maxx, int maxy, double[] com)
+	private static void getCentreOfMass(double[] data, int maxx, int maxy, double[] com)
 	{
 		com[0] = com[1] = 0;
 		double sum = 0;
@@ -351,7 +474,7 @@ public class BenchmarkFit implements PlugIn
 		solver.setConstraints(lc, uc);
 	}
 
-	private void summariseResults()
+	private void summariseResults(Statistics[] stats)
 	{
 		createTable();
 		StringBuilder sb = new StringBuilder();
@@ -370,8 +493,16 @@ public class BenchmarkFit implements PlugIn
 		int n = 2 * regionSize + 1;
 		//sb.append(n).append("x");
 		sb.append(n).append("\t");
-		// TODO - Add details of the noise model for the MLE
-		sb.append(fitConfig.getFitFunction().toString() + ":" + PeakFit.getSolverName(fitConfig)).append("\t");
+		sb.append(Utils.rounded(psfWidth * benchmarkParameters.a)).append("\t");
+		sb.append(fitConfig.getFitFunction().toString() + ":" + PeakFit.getSolverName(fitConfig));
+		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
+		{
+			// Add details of the noise model for the MLE
+			sb.append(":EM=").append(fitConfig.isEmCCD());
+			sb.append(":G=").append(fitConfig.getGain());
+			sb.append(":N=").append(fitConfig.getReadNoise());
+		}
+		sb.append("\t");
 		final double recall = (double) (stats[0].getN() / 5) / benchmarkParameters.molecules;
 		sb.append(Utils.rounded(recall));
 
@@ -384,7 +515,7 @@ public class BenchmarkFit implements PlugIn
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;
 		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? benchmarkParameters.a : 0;
-		convert[TIME] = 1;
+		convert[TIME] = 1e-6;
 		convert[ACTUAL_SIGNAL] = 1 / benchmarkParameters.gain;
 
 		for (int i = 0; i < stats.length; i++)
@@ -418,7 +549,7 @@ public class BenchmarkFit implements PlugIn
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Molecules\tS (nm)\ta (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tMethod\tRecall");
+				"Molecules\tS (nm)\ta (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tRecall");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]).append("\t+/-");
