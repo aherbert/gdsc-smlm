@@ -31,7 +31,10 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 import java.awt.Rectangle;
@@ -50,17 +53,26 @@ public class BenchmarkFit implements PlugIn
 
 	private static int regionSize = 3;
 	private static double psfWidth = 1;
+	private static double lastS = 0;
 	private static boolean showHistograms = false;
+	private static int histogramBins = 100;
 
 	private static TextWindow summaryTable = null;
+
+	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)",
+			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)" };
+	private static final int TIME = 7;
+	private static final int ACTUAL_SIGNAL = 8;
+	private static boolean[] displayHistograms = new boolean[NAMES.length];
+	static
+	{
+		for (int i = 0; i < displayHistograms.length; i++)
+			displayHistograms[i] = true;
+	}
 
 	private FitConfiguration fitConfig;
 	private ImagePlus imp;
 	private CreateData.BenchmarkParameters benchmarkParameters;
-	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)",
-			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dN (photons)" };
-	private static final int TIME = 7;
-	private static final int ACTUAL_SIGNAL = 8;
 	private double[] answer = new double[7];
 	private double[] lb, ub = null;
 	private double[] lc, uc = null;
@@ -218,6 +230,13 @@ public class BenchmarkFit implements PlugIn
 				"Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
 				Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa / benchmarkParameters.a)));
 
+		// For each new benchmark width, reset the PSF width to the square pixel adjustment
+		if (lastS != benchmarkParameters.s)
+		{
+			lastS = benchmarkParameters.s;
+			psfWidth = sa / benchmarkParameters.a;
+		}
+		
 		String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
 		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
@@ -247,7 +266,44 @@ public class BenchmarkFit implements PlugIn
 		if (gd.invalidNumber())
 			return false;
 
-		return PeakFit.configureFitSolver(settings, filename, false);
+		if (!PeakFit.configureFitSolver(settings, filename, false))
+			return false;
+
+		if (showHistograms)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Select the histograms to display");
+			gd.addNumericField("Histogram_bins", histogramBins, 0);
+
+			boolean[] histograms = new boolean[NAMES.length];
+			Arrays.fill(histograms, true);
+
+			// Do not allow display if the function has no data
+			switch (fitConfig.getFitFunction())
+			{
+				case FIXED:
+					histograms[Gaussian2DFunction.X_SD] = false;
+				case CIRCULAR:
+					histograms[Gaussian2DFunction.Y_SD] = false;
+				case FREE_CIRCULAR:
+					histograms[Gaussian2DFunction.ANGLE] = false;
+				case FREE:
+				default:
+			}
+
+			for (int i = 0; i < displayHistograms.length; i++)
+				if (histograms[i])
+					gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+			histogramBins = (int) Math.abs(gd.getNextNumber());
+			for (int i = 0; i < displayHistograms.length; i++)
+				if (histograms[i])
+					displayHistograms[i] = gd.getNextBoolean();
+		}
+
+		return true;
 	}
 
 	private void run()
@@ -348,13 +404,66 @@ public class BenchmarkFit implements PlugIn
 		// Show a table of the results
 		summariseResults(stats);
 
-		// TODO Optionally show histograms
+		// Optionally show histograms
 		if (showHistograms)
 		{
+			IJ.showStatus("Calculating histograms ...");
+			boolean[] chosenHistograms = displayHistograms;
 
+			// Do not allow display if the function has no data
+			switch (fitConfig.getFitFunction())
+			{
+				case FIXED:
+					chosenHistograms[Gaussian2DFunction.X_SD] = false;
+				case CIRCULAR:
+					chosenHistograms[Gaussian2DFunction.Y_SD] = false;
+				case FREE_CIRCULAR:
+					chosenHistograms[Gaussian2DFunction.ANGLE] = false;
+				case FREE:
+				default:
+			}
+
+			int[] idList = new int[NAMES.length];
+			int count = 0;
+			double[] convert = getConversionFactors(stats);
+
+			boolean requireRetile = false;
+			for (int i = 0; i < NAMES.length; i++)
+			{
+				if (chosenHistograms[i])
+				{
+					int id = idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i], 0,
+							0, histogramBins);
+					ImageWindow win = getWindow(id);
+					if (win instanceof PlotWindow)
+					{
+						((PlotWindow) win).addLabel(
+								0,
+								0,
+								String.format("%s +/- %s", Utils.rounded(stats[i].getMean() * convert[i]),
+										Utils.rounded(stats[i].getStandardDeviation() * convert[i])));
+					}
+					requireRetile = requireRetile || Utils.isNewWindow();
+				}
+			}
+
+			if (count > 0 && requireRetile)
+			{
+				idList = Arrays.copyOf(idList, count);
+				new WindowOrganiser().tileWindows(idList);
+			}
 		}
-		
-		IJ.showStatus("");		
+
+		IJ.showStatus("");
+	}
+
+	private ImageWindow getWindow(int id)
+	{
+		ImageWindow win = null;
+		ImagePlus imp = WindowManager.getImage(id);
+		if (imp != null)
+			win = imp.getWindow();
+		return win;
 	}
 
 	private void put(BlockingQueue<Integer> jobs, int i)
@@ -507,16 +616,7 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(recall));
 
 		// Convert to units of the image (ADUs and pixels)		
-		double[] convert = new double[stats.length];
-		convert[Gaussian2DFunction.BACKGROUND] = 1 / benchmarkParameters.gain;
-		convert[Gaussian2DFunction.SIGNAL] = 1 / benchmarkParameters.gain;
-		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
-		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
-		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
-		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;
-		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? benchmarkParameters.a : 0;
-		convert[TIME] = 1e-6;
-		convert[ACTUAL_SIGNAL] = 1 / benchmarkParameters.gain;
+		double[] convert = getConversionFactors(stats);
 
 		for (int i = 0; i < stats.length; i++)
 		{
@@ -527,6 +627,21 @@ public class BenchmarkFit implements PlugIn
 				sb.append("\t0\t0");
 		}
 		summaryTable.append(sb.toString());
+	}
+
+	private double[] getConversionFactors(Statistics[] stats)
+	{
+		double[] convert = new double[stats.length];
+		convert[Gaussian2DFunction.BACKGROUND] = 1 / benchmarkParameters.gain;
+		convert[Gaussian2DFunction.SIGNAL] = 1 / benchmarkParameters.gain;
+		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
+		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
+		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
+		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;
+		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? benchmarkParameters.a : 0;
+		convert[TIME] = 1e-6;
+		convert[ACTUAL_SIGNAL] = 1 / benchmarkParameters.gain;
+		return convert;
 	}
 
 	private double distanceFromCentre(double x)
