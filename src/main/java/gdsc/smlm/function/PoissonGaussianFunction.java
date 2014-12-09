@@ -17,10 +17,12 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is assumed to have mean of
- * zero.
+ * zero. If no mean (zero or below) is provided for the Poisson distribution then the probability density function
+ * matches that of the Gaussian.
  * <p>
  * The implementation uses the saddle-point approximation described in Snyder, et al (1995) Compensation for readout
- * noise in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted from the C source code provided in the appendix. 
+ * noise in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted from the C source code provided in the
+ * appendix.
  */
 public class PoissonGaussianFunction
 {
@@ -36,21 +38,29 @@ public class PoissonGaussianFunction
 	private boolean usePicardApproximation = false;
 	private final double mu;
 	private final double sigmasquared;
+	private final boolean noPoisson;
+
+	private final double probabilityNormalisation;
+	private final double logNormalisation;
 
 	/**
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param sigmasquared
-	 *            The variance of the Gaussian distribution
+	 *            The variance of the Gaussian distribution (must be positive)
 	 */
 	private PoissonGaussianFunction(final double mu, final double sigmasquared)
 	{
-		if (mu <= 0)
-			throw new IllegalArgumentException("Poisson mean must be strictly positive");
+		noPoisson = (mu <= 0);
+		//if (mu <= 0)
+		//	throw new IllegalArgumentException("Poisson mean must be strictly positive");
 		if (sigmasquared <= 0)
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
 		this.mu = mu;
 		this.sigmasquared = sigmasquared;
+
+		probabilityNormalisation = getProbabilityNormalisation(sigmasquared);
+		logNormalisation = getLogNormalisation(sigmasquared);
 	}
 
 	/**
@@ -70,7 +80,7 @@ public class PoissonGaussianFunction
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param var
-	 *            The variance of the Gaussian distribution
+	 *            The variance of the Gaussian distribution (must be positive)
 	 * @throws IllegalArgumentException
 	 *             if the mean or variance is zero or below
 	 */
@@ -88,7 +98,8 @@ public class PoissonGaussianFunction
 	 */
 	public double probability(final double x)
 	{
-		return probability(x, mu, sigmasquared, usePicardApproximation);
+		return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisation : getProbability(x,
+				mu, sigmasquared, usePicardApproximation);
 	}
 
 	/**
@@ -100,7 +111,8 @@ public class PoissonGaussianFunction
 	 */
 	public double logProbability(final double x)
 	{
-		return logProbability(x, mu, sigmasquared, usePicardApproximation);
+		return (noPoisson) ? (-0.5 * x * x / sigmasquared) + logNormalisation : getPseudoLikelihood(x, mu,
+				sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
 	}
 
 	/**
@@ -117,7 +129,8 @@ public class PoissonGaussianFunction
 	 */
 	public double pseudoLikelihood(final double x)
 	{
-		return pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation);
+		return (noPoisson) ? pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) : getPseudoLikelihood(x, mu,
+				sigmasquared, usePicardApproximation);
 	}
 
 	/**
@@ -126,14 +139,41 @@ public class PoissonGaussianFunction
 	 * @param x
 	 *            The observation value
 	 * @param mu
-	 *            The mean of the Poisson distribution
+	 *            The mean of the Poisson distribution (if zero or below the probability is that of the Gaussian)
 	 * @param sigmasquared
-	 *            The variance of the Gaussian distribution
+	 *            The variance of the Gaussian distribution (must be positive)
 	 * @param usePicardApproximation
 	 *            Use the Picard approximation for the initial saddle point. The default is Pade.
 	 * @return The probability
 	 */
 	public static double probability(final double x, final double mu, final double sigmasquared,
+			final boolean usePicardApproximation)
+	{
+		// If no Poisson mean then just use the Gaussian
+		if (mu <= 0)
+			return FastMath.exp(-0.5 * x * x / sigmasquared) * getProbabilityNormalisation(sigmasquared);
+		return getProbability(x, mu, sigmasquared, usePicardApproximation);
+	}
+
+	private static double getProbabilityNormalisation(double sigmasquared)
+	{
+		return NORMALISATION / Math.sqrt(sigmasquared);
+	}
+
+	/**
+	 * Get the probability of observation x
+	 * 
+	 * @param x
+	 *            The observation value
+	 * @param mu
+	 *            The mean of the Poisson distribution (must be positive)
+	 * @param sigmasquared
+	 *            The variance of the Gaussian distribution (must be positive)
+	 * @param usePicardApproximation
+	 *            Use the Picard approximation for the initial saddle point. The default is Pade.
+	 * @return The probability
+	 */
+	private static double getProbability(final double x, final double mu, final double sigmasquared,
 			final boolean usePicardApproximation)
 	{
 		double saddlepoint = (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
@@ -148,9 +188,9 @@ public class PoissonGaussianFunction
 	 * @param x
 	 *            The observation value
 	 * @param mu
-	 *            The mean of the Poisson distribution
+	 *            The mean of the Poisson distribution (if zero or below the probability is that of the Gaussian)
 	 * @param sigmasquared
-	 *            The variance of the Gaussian distribution
+	 *            The variance of the Gaussian distribution (must be positive)
 	 * @param usePicardApproximation
 	 *            Use the Picard approximation for the initial saddle point. The default is Pade.
 	 * @return The log of the probability
@@ -158,7 +198,16 @@ public class PoissonGaussianFunction
 	public static double logProbability(final double x, final double mu, final double sigmasquared,
 			final boolean usePicardApproximation)
 	{
-		return pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
+		// If no Poisson mean then just use the Gaussian
+		if (mu <= 0)
+			return (-0.5 * x * x / sigmasquared) + getLogNormalisation(sigmasquared);
+
+		return getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
+	}
+
+	private static double getLogNormalisation(double sigmasquared)
+	{
+		return LOG_NORMALISATION - Math.log(sigmasquared) * 0.5;
 	}
 
 	/**
@@ -172,14 +221,42 @@ public class PoissonGaussianFunction
 	 * @param x
 	 *            The observation value
 	 * @param mu
-	 *            The mean of the Poisson distribution
+	 *            The mean of the Poisson distribution (if zero or below the probability is that of the Gaussian)
 	 * @param sigmasquared
-	 *            The variance of the Gaussian distribution
+	 *            The variance of the Gaussian distribution (must be positive)
 	 * @param usePicardApproximation
 	 *            Use the Picard approximation for the initial saddle point. The default is Pade.
 	 * @return The probability
 	 */
 	public static double pseudoLikelihood(final double x, final double mu, final double sigmasquared,
+			final boolean usePicardApproximation)
+	{
+		// If no Poisson mean then just use the Gaussian
+		if (mu <= 0)
+			return (-0.5 * x * x / sigmasquared);
+
+		return getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation);
+	}
+
+	/**
+	 * Get a pseudo-likelihood of observation x.
+	 * <p>
+	 * This is equivalent to the {@link #logProbability(double)} without the normalisation of the probability density
+	 * function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for use as the
+	 * likelihood function in maximum likelihood estimation since all values will differ by the same constant but will
+	 * evaluate faster.
+	 * 
+	 * @param x
+	 *            The observation value
+	 * @param mu
+	 *            The mean of the Poisson distribution (must be positive)
+	 * @param sigmasquared
+	 *            The variance of the Gaussian distribution (must be positive)
+	 * @param usePicardApproximation
+	 *            Use the Picard approximation for the initial saddle point. The default is Pade.
+	 * @return The probability
+	 */
+	private static double getPseudoLikelihood(final double x, final double mu, final double sigmasquared,
 			final boolean usePicardApproximation)
 	{
 		double saddlepoint = (usePicardApproximation) ? picard(x, mu, sigmasquared) : pade(x, mu, sigmasquared);
@@ -202,8 +279,14 @@ public class PoissonGaussianFunction
 		// Original code
 		//return -Math.log(0.5 * (bterm + Math.sqrt(bterm * bterm + 4 * mu * (2 * sigmasquared + x))) / mu);
 
+		// Check for negative sqrt
+		final double argument_to_sqrt = bterm * bterm + 4 * mu * (2 * sigmasquared + x);
+		if (argument_to_sqrt < 0)
+			// Revert to Taylor approximation
+			return (mu - x) / (mu + sigmasquared);
+
 		// Check for negative log
-		final double argument_to_log = 0.5 * (bterm + Math.sqrt(bterm * bterm + 4 * mu * (2 * sigmasquared + x))) / mu;
+		final double argument_to_log = 0.5 * (bterm + Math.sqrt(argument_to_sqrt)) / mu;
 		if (argument_to_log <= 0)
 			// Revert to Taylor approximation
 			return (mu - x) / (mu + sigmasquared);
@@ -256,6 +339,20 @@ public class PoissonGaussianFunction
 			saddlepoint -= change;
 		} while (FastMath.abs(change) > EPSILON * FastMath.abs(saddlepoint));
 		return saddlepoint;
+
+		//for (int i = 0; i < 200; i++)
+		//{
+		//	final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
+		//	change = (x + sigmasquared * saddlepoint - mu_exp_minus_s) / (sigmasquared + mu_exp_minus_s);
+		//	saddlepoint -= change;
+		//	if (FastMath.abs(change) <= EPSILON * FastMath.abs(saddlepoint))
+		//		return saddlepoint;
+		//}
+		//// This happens when we cannot converge
+		//System.out.printf("No Newton convergence: x=%f, mu=%f, s2=%f, %f -> %f : logP=%f, p=%f\n", x, mu, sigmasquared,
+		//		initial_saddlepoint, saddlepoint, sp_approx(x, mu, sigmasquared, initial_saddlepoint),
+		//		FastMath.exp(sp_approx(x, mu, sigmasquared, initial_saddlepoint)) * NORMALISATION);
+		//return initial_saddlepoint;
 	}
 
 	/**
