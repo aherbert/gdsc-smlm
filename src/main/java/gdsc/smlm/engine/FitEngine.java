@@ -17,7 +17,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.results.PeakResults;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -34,12 +34,12 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class FitEngine
 {
-	private BlockingQueue<FitJob> jobs = null;
-	private List<FitWorker> workers = new LinkedList<FitWorker>();
-	private List<Thread> threads = new LinkedList<Thread>();
+	private final BlockingQueue<FitJob> jobs;
+	private final List<FitWorker> workers;
+	private final List<Thread> threads;
 	private long time;
-	private FitQueue queueType;
-	private PeakResults results;
+	private final FitQueue queueType;
+	private final PeakResults results;
 	private boolean isAlive = true;
 
 	private FitJob sum = null;
@@ -125,7 +125,7 @@ public class FitEngine
 	 */
 	public FitEngine(FitEngineConfiguration config, PeakResults results, int threads, FitQueue queueType)
 	{
-		init(config, results, threads, queueType, -1);
+		this(config, results, threads, queueType, -1);
 	}
 
 	/**
@@ -144,15 +144,23 @@ public class FitEngine
 	 */
 	public FitEngine(FitEngineConfiguration config, PeakResults results, int threads, FitQueue queueType, int border)
 	{
-		init(config, results, threads, queueType, border);
-	}
-
-	private void init(FitEngineConfiguration config, PeakResults results, int threads, FitQueue queueType, int border)
-	{
 		if (threads < 1)
 			threads = 1;
 
-		createQueue(queueType, threads);
+		workers = new ArrayList<FitWorker>(threads);
+		this.threads = new ArrayList<Thread>(threads);
+		this.queueType = queueType;
+		switch (queueType)
+		{
+			case BLOCKING:
+			default:
+				this.jobs = new ArrayBlockingQueue<FitJob>(threads * 3);
+				break;
+			case NON_BLOCKING:
+			case IGNORE:
+				this.jobs = new LinkedBlockingQueue<FitJob>();
+				break;
+		}
 		this.results = results;
 
 		initialiseWidths(config);
@@ -171,21 +179,6 @@ public class FitEngine
 			this.threads.add(t);
 
 			t.start();
-		}
-	}
-
-	private void createQueue(FitQueue queueType, int threads)
-	{
-		this.queueType = queueType;
-		switch (queueType)
-		{
-			case BLOCKING:
-				this.jobs = new ArrayBlockingQueue<FitJob>(threads * 3);
-				break;
-			case NON_BLOCKING:
-			case IGNORE:
-				this.jobs = new LinkedBlockingQueue<FitJob>();
-				break;
 		}
 	}
 
