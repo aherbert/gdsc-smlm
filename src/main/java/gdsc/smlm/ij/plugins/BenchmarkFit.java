@@ -138,12 +138,14 @@ public class BenchmarkFit implements PlugIn
 			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(),
 					region, data);
 
+			final int size = region.height;
+
 			// Get the background and signal estimate
-			final double b = getBackground(data, region.width, region.height);
+			final double b = getBackground(data, size, size);
 			final double signal = getSignal(data, b);
 
 			// Find centre-of-mass estimate
-			getCentreOfMass(data, region.width, region.height, xy[0]);
+			getCentreOfMass(data, size, size, xy[0]);
 
 			double[] initialParams = new double[7];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
@@ -154,7 +156,7 @@ public class BenchmarkFit implements PlugIn
 			final double bias = benchmarkParameters.bias;
 			if (fitConfig.isRemoveBiasBeforeFitting())
 			{
-				initialParams[0] -= bias;
+				initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
 				for (int i = 0; i < data.length; i++)
 					data[i] -= bias;
 			}
@@ -169,7 +171,7 @@ public class BenchmarkFit implements PlugIn
 				final double[] params = initialParams.clone();
 				params[Gaussian2DFunction.X_POSITION] = centre[0];
 				params[Gaussian2DFunction.Y_POSITION] = centre[1];
-				fitConfig.initialise(1, region.width, params);
+				fitConfig.initialise(1, size, params);
 				FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
 					setBounds(solver);
@@ -177,9 +179,17 @@ public class BenchmarkFit implements PlugIn
 					setConstraints(solver);
 				if (solver.fit(data.length, data, null, params, null, error, 0) == FitStatus.OK)
 				{
+					// Reject fits that are outside the bounds of the data
+					if (params[Gaussian2DFunction.SIGNAL] < 0 || params[Gaussian2DFunction.X_POSITION] < 0 ||
+							params[Gaussian2DFunction.Y_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > size ||
+							params[Gaussian2DFunction.Y_POSITION] > size)
+					{
+						continue;
+					}
+
 					// Subtract the fitted bias from the background
 					if (!fitConfig.isRemoveBiasBeforeFitting())
-						params[0] -= bias;
+						params[Gaussian2DFunction.BACKGROUND] -= bias;
 					result[c++] = params;
 				}
 			}
@@ -236,7 +246,7 @@ public class BenchmarkFit implements PlugIn
 			lastS = benchmarkParameters.s;
 			psfWidth = sa / benchmarkParameters.a;
 		}
-		
+
 		String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
 		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
