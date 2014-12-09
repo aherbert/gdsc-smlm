@@ -224,4 +224,28 @@ public class Statistics
 		}
 		return 0;
 	}
+
+	/**
+	 * Add the statistics to the data
+	 * 
+	 * @param statistics
+	 */
+	public void add(Statistics statistics)
+	{
+		n += statistics.n;
+		s += statistics.s;
+		ss += statistics.ss;
+	}
+
+	/**
+	 * Add the statistics to the data. Synchronized for thread safety.
+	 * 
+	 * @param statistics
+	 */
+	synchronized public void safeAdd(Statistics statistics)
+	{
+		n += statistics.n;
+		s += statistics.s;
+		ss += statistics.ss;
+	}
 }

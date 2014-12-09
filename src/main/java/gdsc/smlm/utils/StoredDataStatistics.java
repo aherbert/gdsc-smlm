@@ -29,13 +29,13 @@ public class StoredDataStatistics extends Statistics
 	{
 		super();
 	}
-	
+
 	public StoredDataStatistics(int capacity)
 	{
 		super();
 		values = new double[capacity];
 	}
-	
+
 	public StoredDataStatistics(float[] data)
 	{
 		super(data);
@@ -45,7 +45,7 @@ public class StoredDataStatistics extends Statistics
 	{
 		super(data);
 	}
-	
+
 	public StoredDataStatistics(int[] data)
 	{
 		super(data);
@@ -121,7 +121,7 @@ public class StoredDataStatistics extends Statistics
 		if (data == null)
 			return;
 		checkCapacity(data.length);
-		for (final double value : data)
+		for (final int value : data)
 		{
 			values[n++] = value;
 			s += value;
@@ -215,12 +215,43 @@ public class StoredDataStatistics extends Statistics
 
 	/**
 	 * @return object used to compute descriptive statistics. The object is cached
-	 * @see {@link org.apache.commons.math3.stat.descriptive.DescriptiveStatistics }  
+	 * @see {@link org.apache.commons.math3.stat.descriptive.DescriptiveStatistics }
 	 */
 	public DescriptiveStatistics getStatistics()
 	{
 		if (stats == null)
 			stats = new DescriptiveStatistics(values);
 		return stats;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.utils.Statistics#add(gdsc.smlm.utils.Statistics)
+	 */
+	@Override
+	public void add(Statistics statistics)
+	{
+		if (statistics instanceof StoredDataStatistics)
+		{
+			StoredDataStatistics extra = (StoredDataStatistics) statistics;
+			if (extra.n > 0)
+			{
+				checkCapacity(extra.n);
+				System.arraycopy(extra.values, 0, values, n, extra.n);
+			}
+		}
+		super.add(statistics);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.utils.Statistics#safeAdd(gdsc.smlm.utils.Statistics)
+	 */
+	@Override
+	synchronized public void safeAdd(Statistics statistics)
+	{
+		this.add(statistics);
 	}
 }
