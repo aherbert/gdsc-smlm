@@ -56,6 +56,8 @@ public class PoissonGammaGaussianFunction
 	 * <p>
 	 * The input parameters must be the full parameters for the non-linear function. Only those parameters with gradient
 	 * indices should be passed in to the functions to obtain the value (and gradient).
+	 * <p>
+	 * Note: Negative parameters are made absolute
 	 * 
 	 * @param alpha
 	 *            Inverse gain of the EMCCD chip
@@ -64,8 +66,8 @@ public class PoissonGammaGaussianFunction
 	 */
 	public PoissonGammaGaussianFunction(double alpha, double s)
 	{
-		this.alpha = alpha;
-		this.sigma = s;
+		this.alpha = Math.abs(alpha);
+		this.sigma = Math.abs(s);
 		twoSigma2 = 2 * s * s;
 		sqrt2sigma2 = Math.sqrt(2 * s * s);
 		sqrt2piSigma2 = Math.sqrt(2 * Math.PI * s * s);
