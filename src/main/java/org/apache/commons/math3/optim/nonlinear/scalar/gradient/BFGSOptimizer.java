@@ -18,9 +18,11 @@
 
 package org.apache.commons.math3.optim.nonlinear.scalar.gradient;
 
+import java.util.Locale;
+
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.exception.util.LocalizedFormats;
+import org.apache.commons.math3.exception.util.Localizable;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
@@ -52,6 +54,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/** Maximum number of restarts on the convergence point */
 	private int restarts = 0;
+
+	/** Maximum number of restarts in the event of roundoff error */
+	private int roundoffRestarts = 3;
 
 	/** Convergence tolerance on position */
 	private PositionChecker positionChecker = null;
@@ -111,7 +116,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	}
 
 	/**
-	 * Specify the maximum number of restarts on the converged point
+	 * Specify the maximum number of restarts on the converged point in the event that the gradient has not yet
+	 * converged on zero.
 	 */
 	public static class MaximumRestarts implements OptimizationData
 	{
@@ -134,6 +140,24 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		}
 	}
 
+
+	/**
+	 * Specify the maximum number of restarts in the event of roundoff error.
+	 */
+	public static class MaximumRoundoffRestarts extends MaximumRestarts
+	{
+		/**
+		 * Build an instance
+		 * 
+		 * @param restarts
+		 *            The restarts on the gradient
+		 */
+		public MaximumRoundoffRestarts(int restarts)
+		{
+			super(restarts);
+		}
+	}
+	
 	/**
 	 * Constructor
 	 */
@@ -177,6 +201,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	private static final int CHECKER = 0;
 	private static final int POSITION = 1;
 	private static final int GRADIENT = 2;
+	private static final int ROUNDOFF_ERROR = 3;
 
 	/** {@inheritDoc} */
 	@Override
@@ -190,11 +215,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		LineStepSearch lineSearch = new LineStepSearch();
 
+		// In case there are no restarts
 		if (restarts <= 0)
-			return bfgs(checker, p, lineSearch);
-
-		// Note: Position might converge if the hessian becomes singular or non-positive-definite
-		// In this case the simple check is to restart the algorithm.
+			return bfgsWithRoundoffCheck(checker, p, lineSearch);
 
 		PointValuePair lastResult = null;
 		PointValuePair result = null;
@@ -205,12 +228,12 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		while (iteration <= restarts)
 		{
 			iteration++;
-			result = bfgs(checker, p, lineSearch);
+			result = bfgsWithRoundoffCheck(checker, p, lineSearch);
 			//count[converged]++;
 
 			//if (lastResult == null)
 			//	initialConvergenceIteration = getIterations();
-				
+
 			if (converged == GRADIENT)
 			{
 				// If no gradient remains then we cannot move anywhere so return
@@ -258,6 +281,41 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		return result;
 	}
 
+	/**
+	 * Repeat the BFGS algorithm until it converges without roundoff error on the search direction
+	 * 
+	 * @param checker
+	 * @param p
+	 * @param lineSearch
+	 * @return
+	 */
+	protected PointValuePair bfgsWithRoundoffCheck(ConvergenceChecker<PointValuePair> checker, double[] p,
+			LineStepSearch lineSearch)
+	{
+		// Note: Position might converge if the hessian becomes singular or non-positive-definite
+		// In this case the simple check is to restart the algorithm.
+		int iteration = 0;
+
+		PointValuePair result = bfgs(checker, p, lineSearch);
+		
+		// Allow restarts in the case of roundoff convergence
+		while (converged == ROUNDOFF_ERROR && iteration < roundoffRestarts)
+		{
+			iteration++;
+			p = result.getPointRef();
+			result = bfgs(checker, p, lineSearch);
+		}
+		
+		// If restarts did not work then this is a failure
+		if (converged == ROUNDOFF_ERROR)
+			throw new LineSearchRoundoffException();
+		
+		//if (iteration > 0)
+		//	System.out.printf("Restarts for roundoff error = %d\n", iteration);
+		
+		return result;
+	}
+
 	protected PointValuePair bfgs(ConvergenceChecker<PointValuePair> checker, double[] p, LineStepSearch lineSearch)
 	{
 		final int n = p.length;
@@ -302,9 +360,21 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			}
 
 			// Move along the search direction.
-			final double[] pnew = lineSearch.lineSearch(p, fp, g, xi);
+			final double[] pnew;
+			try
+			{
+				pnew = lineSearch.lineSearch(p, fp, g, xi);
+			}
+			catch (LineSearchRoundoffException e)
+			{
+				// This can happen if the Hessian is nearly singular or non-positive-definite.
+				// In this case the algorithm should be restarted.
+				converged = ROUNDOFF_ERROR;
+				//System.out.printf("Roundoff error, iter=%d\n", getIterations());
+				return new PointValuePair(p, fp);
+			}
 
-			// We assume the new point in on/within the bounds since the line search is constrained
+			// We assume the new point is on/within the bounds since the line search is constrained
 			double fret = lineSearch.f;
 
 			// Test for convergence on change in position
@@ -429,6 +499,10 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			{
 				restarts = ((MaximumRestarts) data).getRestarts();
 			}
+			else if (data instanceof MaximumRoundoffRestarts)
+			{
+				roundoffRestarts = ((MaximumRoundoffRestarts) data).getRestarts();
+			}
 		}
 
 		checkParameters();
@@ -454,6 +528,30 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		// ISO standard is 2^-52 = 2.220446049e-16
 
 		return machEps;
+	}
+
+	public static class LineSearchRoundoffException extends RuntimeException
+	{
+		private static final long serialVersionUID = -8974644703023090107L;
+		private final double slope;
+
+		public LineSearchRoundoffException(double slope)
+		{
+			super();
+			this.slope = slope;
+		}
+
+		public LineSearchRoundoffException()
+		{
+			super();
+			this.slope = 0;
+		}
+
+		@Override
+		public String getMessage()
+		{
+			return (slope != 0) ? "Round-off problem. Slope = " + slope : "Round-off problem";
+		}
 	}
 
 	/**
@@ -489,8 +587,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		 * @param searchDirection
 		 *            The search direction
 		 * @return The new point
+		 * @throws LineSearchRoundoffException
+		 *             if the slope of the line search is positive
 		 */
 		double[] lineSearch(double[] xOld, final double fOld, double[] gradient, double[] searchDirection)
+				throws LineSearchRoundoffException
 		{
 			final double ALF = 1.0e-4, TOLX = epsilon;
 			double alam2 = 0.0, f2 = 0.0;
@@ -502,17 +603,20 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			check = false;
 
 			// Limit the search step size for each dimension
-			double scale = 1;
-			for (int i = 0; i < n; i++)
+			if (maximumStepLength != null)
 			{
-				if (Math.abs(searchDirection[i]) * scale > maximumStepLength[i])
-					scale = maximumStepLength[i] / Math.abs(searchDirection[i]);
-			}
-			if (scale < 1)
-			{
-				// Scale the entire search direction
+				double scale = 1;
 				for (int i = 0; i < n; i++)
-					searchDirection[i] *= scale;
+				{
+					if (Math.abs(searchDirection[i]) * scale > maximumStepLength[i])
+						scale = maximumStepLength[i] / Math.abs(searchDirection[i]);
+				}
+				if (scale < 1)
+				{
+					// Scale the entire search direction
+					for (int i = 0; i < n; i++)
+						searchDirection[i] *= scale;
+				}
 			}
 
 			double slope = 0.0;
@@ -520,8 +624,9 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 				slope += gradient[i] * searchDirection[i];
 			if (slope >= 0.0)
 			{
-				throw new RuntimeException("Roundoff problem in line search");
+				throw new LineSearchRoundoffException(slope);
 			}
+
 			// Compute lambda min
 			double test = 0.0;
 			for (int i = 0; i < n; i++)
@@ -531,6 +636,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 					test = temp;
 			}
 			double alamin = TOLX / test;
+
 			// Always try the full step first
 			double alam = 1.0;
 			// Count the number of backtracking steps
@@ -631,16 +737,47 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		{
 			for (int i = 0; i < lower.length; i++)
 				if (lower[i] > upper[i])
-					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
+					throw new MathUnsupportedOperationException(createError("Lower bound must be below upper bound"));
 		}
 
 		// Numerical Recipes set the position convergence very low
 		if (positionChecker == null)
 			positionChecker = new PositionChecker(4 * epsilon, 0);
 
+		// Ensure that the step length is strictly positive
+		if (maximumStepLength == null)
+		{
+			for (int i = 0; i < maximumStepLength.length; i++)
+			{
+				if (maximumStepLength[i] <= 0)
+					throw new MathUnsupportedOperationException(
+							createError("Maximum step length must be strictly positive"));
+			}
+		}
+
 		// Set a tolerance? If not then the routine will iterate until position convergence
 		//if (gradientTolerance == 0)
 		//	gradientTolerance = 1e-6;
+	}
+
+	private Localizable createError(final String message)
+	{
+		return new Localizable()
+		{
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String getSourceString()
+			{
+				return message;
+			}
+
+			@Override
+			public String getLocalizedString(Locale locale)
+			{
+				return message;
+			}
+		};
 	}
 
 	/**
