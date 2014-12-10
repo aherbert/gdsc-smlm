@@ -331,6 +331,7 @@ public class BenchmarkFit implements PlugIn
 		if (!new Rectangle(0, 0, imp.getWidth(), imp.getHeight()).contains(region))
 		{
 			IJ.error(TITLE, "Fit region does not fit within the image");
+			return;
 		}
 
 		// Adjust the centre & account for 0.5 pixel offset during fitting
@@ -600,7 +601,7 @@ public class BenchmarkFit implements PlugIn
 		for (int i = 0; i < stats.length; i++)
 		{
 			if (convert[i] != 0)
-				sb.append("\t").append(Utils.rounded(stats[i].getMean() * convert[i])).append("\t")
+				sb.append("\t").append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append("\t")
 						.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
 			else
 				sb.append("\t0\t0");
@@ -616,7 +617,7 @@ public class BenchmarkFit implements PlugIn
 	 */
 	private double[] getConversionFactors()
 	{
-		double[] convert = new double[NAMES.length];
+		final double[] convert = new double[NAMES.length];
 		convert[Gaussian2DFunction.BACKGROUND] = 1 / benchmarkParameters.gain;
 		convert[Gaussian2DFunction.SIGNAL] = 1 / benchmarkParameters.gain;
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
@@ -634,7 +635,7 @@ public class BenchmarkFit implements PlugIn
 	private double distanceFromCentre(double x)
 	{
 		x -= 0.5;
-		int i = (int) Math.round(x);
+		final int i = (int) Math.round(x);
 		x = x - i;
 		return x * benchmarkParameters.a;
 	}
