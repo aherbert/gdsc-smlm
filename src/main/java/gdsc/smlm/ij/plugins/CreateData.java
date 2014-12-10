@@ -177,6 +177,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		integerDisplay = new boolean[NAMES.length];
 		integerDisplay[SIGNAL] = true;
 		integerDisplay[SIGNAL_CONTINUOUS] = true;
+		integerDisplay[TOTAL_SIGNAL] = false;
 		integerDisplay[BLINKS] = true;
 		integerDisplay[SAMPLED_BLINKS] = true;
 		integerDisplay[SAMPLED_T_ON] = false;
@@ -313,11 +314,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	public void run(String arg)
 	{
-		integerDisplay[TOTAL_SIGNAL] = false;
 		simpleMode = (arg != null && arg.contains("simple"));
 		benchmarkMode = (arg != null && arg.contains("benchmark"));
 		extraOptions = Utils.isExtraOptions();
-		benchmarkParameters = null;
 
 		// Each localisation is a simulated emission of light from a point in space and time
 		List<LocalisationModel> localisations = null;
@@ -334,7 +333,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (simpleMode || benchmarkMode)
 		{
 			if (!showSimpleDialog())
+			{
 				return;
+			}
+			benchmarkParameters = null;
 
 			settings.exposureTime = 1000; // 1 second frames
 
@@ -494,6 +496,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
+			benchmarkParameters = null;
 			if (!showDialog())
 				return;
 
