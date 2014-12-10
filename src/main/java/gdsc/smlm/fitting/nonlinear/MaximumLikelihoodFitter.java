@@ -554,7 +554,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// Configure maximum step length for each dimension using the bounds
 				double[] stepLength = new double[lower.length];
 				for (int i = 0; i < stepLength.length; i++)
+				{
 					stepLength[i] = (upper[i] - lower[i]) * 0.3333333;
+					if (stepLength[i] <= 0)
+						stepLength[i] = Double.POSITIVE_INFINITY;
+				}
 
 				// The GoalType is always minimise so no need to pass this in
 				OptimizationData positionChecker = null;
@@ -709,13 +713,19 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		catch (ConvergenceException e)
 		{
 			// Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
+			//System.out.printf("Singular non linear model = %s\n", e.getMessage());
 			return FitStatus.SINGULAR_NON_LINEAR_MODEL;
+		}
+		catch (BFGSOptimizer.LineSearchRoundoffException e)
+		{
+			//System.out.println("BFGS error: " + e.getMessage());
+			//e.printStackTrace();
+			return FitStatus.FAILED_TO_CONVERGE;
 		}
 		catch (Exception e)
 		{
-			// TODO - Find out the other exceptions from the fitters and add return values to match.
-			//e.printStackTrace();
-
+			//System.out.printf("Unknown error = %s\n", e.getMessage());
+			e.printStackTrace();
 			return FitStatus.UNKNOWN;
 		}
 
