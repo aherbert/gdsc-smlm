@@ -31,7 +31,6 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.ImageWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -444,15 +443,6 @@ public class BenchmarkFit implements PlugIn
 		IJ.showStatus("");
 	}
 
-	private ImageWindow getWindow(int id)
-	{
-		ImageWindow win = null;
-		ImagePlus imp = WindowManager.getImage(id);
-		if (imp != null)
-			win = imp.getWindow();
-		return win;
-	}
-
 	private void put(BlockingQueue<Integer> jobs, int i)
 	{
 		try
@@ -578,7 +568,7 @@ public class BenchmarkFit implements PlugIn
 		sb.append(benchmarkParameters.molecules).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.s)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.a)).append("\t");
-		sb.append(Utils.rounded(getSa())).append("\t");
+		sb.append(Utils.rounded(getSa() * benchmarkParameters.a)).append("\t");
 		// Report XY in nm from the pixel centre
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append("\t");
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append("\t");
