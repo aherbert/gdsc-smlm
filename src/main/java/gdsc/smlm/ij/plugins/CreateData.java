@@ -402,8 +402,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				double offset = settings.size * 0.5;
 				for (int i = 0; i < 2; i++)
 					xyz[i] += offset;
-				Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.pixelPitch), Utils.rounded(xyz[0]));
-				Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.pixelPitch), Utils.rounded(xyz[1]));
+				Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.pixelPitch), Utils.rounded(xyz[0], 6));
+				Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.pixelPitch), Utils.rounded(xyz[1], 6));
 				Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.pixelPitch));
 				final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.pixelPitch);
 				Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa),
