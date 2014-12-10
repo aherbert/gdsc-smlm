@@ -32,7 +32,6 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
-import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -60,9 +59,12 @@ public class BenchmarkFit implements PlugIn
 	private static TextWindow summaryTable = null;
 
 	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)",
-			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)" };
+			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)", "dSax (nm)",
+			"dSay (nm)" };
 	private static final int TIME = 7;
 	private static final int ACTUAL_SIGNAL = 8;
+	private static final int ADJUSTED_X_SD = 9;
+	private static final int ADJUSTED_Y_SD = 10;
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
@@ -81,11 +83,12 @@ public class BenchmarkFit implements PlugIn
 	{
 		volatile boolean finished = false;
 		final BlockingQueue<Integer> jobs;
-		final Statistics[] stats = new Statistics[9];
+		final Statistics[] stats = new Statistics[NAMES.length];
 		final ImageStack stack;
 		final Rectangle region;
 		final double[][] xy;
 		final FitConfiguration fitConfig;
+		final double sa;
 
 		double[] data = null;
 
@@ -102,6 +105,7 @@ public class BenchmarkFit implements PlugIn
 				this.xy[i] = xy[i].clone();
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms) ? new StoredDataStatistics() : new Statistics();
+			sa = getSa();
 		}
 
 		/*
@@ -205,6 +209,8 @@ public class BenchmarkFit implements PlugIn
 				}
 				stats[7].add(time);
 				stats[8].add(params[Gaussian2DFunction.SIGNAL] - benchmarkParameters.p[frame]);
+				stats[9].add(params[Gaussian2DFunction.X_SD] - sa);
+				stats[10].add(params[Gaussian2DFunction.Y_SD] - sa);
 			}
 		}
 	}
@@ -235,16 +241,16 @@ public class BenchmarkFit implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		final double sa = PSFCalculator.squarePixelAdjustment(benchmarkParameters.s, benchmarkParameters.a);
+		final double sa = getSa();
 		gd.addMessage(String.format(
 				"Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
-				Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa / benchmarkParameters.a)));
+				Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa)));
 
 		// For each new benchmark width, reset the PSF width to the square pixel adjustment
 		if (lastS != benchmarkParameters.s)
 		{
 			lastS = benchmarkParameters.s;
-			psfWidth = sa / benchmarkParameters.a;
+			psfWidth = sa;
 		}
 
 		String filename = SettingsManager.getSettingsFilename();
@@ -285,35 +291,28 @@ public class BenchmarkFit implements PlugIn
 			gd.addMessage("Select the histograms to display");
 			gd.addNumericField("Histogram_bins", histogramBins, 0);
 
-			boolean[] histograms = new boolean[NAMES.length];
-			Arrays.fill(histograms, true);
-
-			// Do not allow display if the function has no data
-			switch (fitConfig.getFitFunction())
-			{
-				case FIXED:
-					histograms[Gaussian2DFunction.X_SD] = false;
-				case CIRCULAR:
-					histograms[Gaussian2DFunction.Y_SD] = false;
-				case FREE_CIRCULAR:
-					histograms[Gaussian2DFunction.ANGLE] = false;
-				case FREE:
-				default:
-			}
+			double[] convert = getConversionFactors();
 
 			for (int i = 0; i < displayHistograms.length; i++)
-				if (histograms[i])
+				if (convert[i] != 0)
 					gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
 			histogramBins = (int) Math.abs(gd.getNextNumber());
 			for (int i = 0; i < displayHistograms.length; i++)
-				if (histograms[i])
+				if (convert[i] != 0)
 					displayHistograms[i] = gd.getNextBoolean();
 		}
 
 		return true;
+	}
+
+	private double getSa()
+	{
+		final double sa = PSFCalculator.squarePixelAdjustment(benchmarkParameters.s, benchmarkParameters.a) /
+				benchmarkParameters.a;
+		return sa;
 	}
 
 	private void run()
@@ -418,41 +417,19 @@ public class BenchmarkFit implements PlugIn
 		if (showHistograms)
 		{
 			IJ.showStatus("Calculating histograms ...");
-			boolean[] chosenHistograms = displayHistograms;
-
-			// Do not allow display if the function has no data
-			switch (fitConfig.getFitFunction())
-			{
-				case FIXED:
-					chosenHistograms[Gaussian2DFunction.X_SD] = false;
-				case CIRCULAR:
-					chosenHistograms[Gaussian2DFunction.Y_SD] = false;
-				case FREE_CIRCULAR:
-					chosenHistograms[Gaussian2DFunction.ANGLE] = false;
-				case FREE:
-				default:
-			}
 
 			int[] idList = new int[NAMES.length];
 			int count = 0;
-			double[] convert = getConversionFactors(stats);
+			double[] convert = getConversionFactors();
 
 			boolean requireRetile = false;
 			for (int i = 0; i < NAMES.length; i++)
 			{
-				if (chosenHistograms[i])
+				if (displayHistograms[i] && convert[i] != 0)
 				{
-					int id = idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i], 0,
-							0, histogramBins);
-					ImageWindow win = getWindow(id);
-					if (win instanceof PlotWindow)
-					{
-						((PlotWindow) win).addLabel(
-								0,
-								0,
-								String.format("%s +/- %s", Utils.rounded(stats[i].getMean() * convert[i]),
-										Utils.rounded(stats[i].getStandardDeviation() * convert[i])));
-					}
+					idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i], 0,
+							0, histogramBins, String.format("%s +/- %s", Utils.rounded(stats[i].getMean() * convert[i]),
+									Utils.rounded(stats[i].getStandardDeviation() * convert[i])));
 					requireRetile = requireRetile || Utils.isNewWindow();
 				}
 			}
@@ -596,10 +573,12 @@ public class BenchmarkFit implements PlugIn
 	private void summariseResults(Statistics[] stats)
 	{
 		createTable();
+
 		StringBuilder sb = new StringBuilder();
 		sb.append(benchmarkParameters.molecules).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.s)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.a)).append("\t");
+		sb.append(Utils.rounded(getSa())).append("\t");
 		// Report XY in nm from the pixel centre
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append("\t");
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append("\t");
@@ -626,7 +605,7 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(recall));
 
 		// Convert to units of the image (ADUs and pixels)		
-		double[] convert = getConversionFactors(stats);
+		double[] convert = getConversionFactors();
 
 		for (int i = 0; i < stats.length; i++)
 		{
@@ -639,9 +618,15 @@ public class BenchmarkFit implements PlugIn
 		summaryTable.append(sb.toString());
 	}
 
-	private double[] getConversionFactors(Statistics[] stats)
+	/**
+	 * Get the factors to convert the ADUs/pixel units in the statistics array into calibrated photons and nm units. Set
+	 * the conversion to zero if the function does not fit the specified statistic.
+	 * 
+	 * @return The conversion factors
+	 */
+	private double[] getConversionFactors()
 	{
-		double[] convert = new double[stats.length];
+		double[] convert = new double[NAMES.length];
 		convert[Gaussian2DFunction.BACKGROUND] = 1 / benchmarkParameters.gain;
 		convert[Gaussian2DFunction.SIGNAL] = 1 / benchmarkParameters.gain;
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
@@ -651,6 +636,8 @@ public class BenchmarkFit implements PlugIn
 		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? benchmarkParameters.a : 0;
 		convert[TIME] = 1e-6;
 		convert[ACTUAL_SIGNAL] = 1 / benchmarkParameters.gain;
+		convert[ADJUSTED_X_SD] = convert[Gaussian2DFunction.X_SD];
+		convert[ADJUSTED_Y_SD] = convert[Gaussian2DFunction.Y_SD];
 		return convert;
 	}
 
@@ -674,7 +661,7 @@ public class BenchmarkFit implements PlugIn
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Molecules\tS (nm)\ta (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tRecall");
+				"Molecules\tS (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tRecall");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]).append("\t+/-");

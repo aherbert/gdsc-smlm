@@ -478,7 +478,31 @@ public class Utils
 	public static int showHistogram(String title, StoredDataStatistics stats, String name, double minWidth,
 			int removeOutliers, int bins)
 	{
-		return showHistogram(title, stats, name, minWidth, removeOutliers, bins, true);
+		return showHistogram(title, stats, name, minWidth, removeOutliers, bins, true, null);
+	}
+
+	/**
+	 * Show a histogram of the data
+	 * 
+	 * @param title
+	 *            The title to prepend to the plot name
+	 * @param stats
+	 * @param name
+	 *            The name of plotted statistic
+	 * @param minWidth
+	 *            The minimum bin width to use (e.g. set to 1 for integer values)
+	 * @param removeOutliers
+	 *            Remove outliers. 1 - 1.5x IQR. 2 - remove top 2%.
+	 * @param bins
+	 *            The number of bins to use
+	 * @param label
+	 *            The label to add
+	 * @return The histogram window ID
+	 */
+	public static int showHistogram(String title, StoredDataStatistics stats, String name, double minWidth,
+			int removeOutliers, int bins, String label)
+	{
+		return showHistogram(title, stats, name, minWidth, removeOutliers, bins, true, label);
 	}
 
 	/**
@@ -497,10 +521,12 @@ public class Utils
 	 *            The number of bins to use
 	 * @param barChart
 	 *            Use a bar chart, else plot non-zero bin counts as a line plot
+	 * @param label
+	 *            The label to add
 	 * @return The histogram window ID
 	 */
 	public static int showHistogram(String title, StoredDataStatistics stats, String name, double minWidth,
-			int removeOutliers, int bins, boolean barChart)
+			int removeOutliers, int bins, boolean barChart, String label)
 	{
 		double[] values = stats.getValues();
 		if (values == null || values.length < 2)
@@ -550,7 +576,7 @@ public class Utils
 		//			}
 		//			
 		//			// Set the number of bins as the most needed to separate the data points. 
-		//			// This prevents gaps in the histogram
+		//			// This prevents gaps xin the histogram
 		//			if (resolution != Double.POSITIVE_INFINITY)
 		//			{
 		//				int numBins = 1 + (int)((yMax - yMin) / resolution);
@@ -596,6 +622,8 @@ public class Utils
 			double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
 			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, getMaximum(yValues) * 1.05);
 		}
+		if (label != null)
+			plot.addLabel(0, 0, label);
 		PlotWindow window = Utils.display(title, plot);
 		return window.getImagePlus().getID();
 	}
