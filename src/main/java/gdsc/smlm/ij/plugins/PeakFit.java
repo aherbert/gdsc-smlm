@@ -1557,7 +1557,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 		else if (fitConfig.getFitSolver() == FitSolver.LVM_QUASI_NEWTON)
 		{
-			// No options yet for Apache LVM fitting
+			// No options yet for Apache LVM fitting. Save options for consistency
+			SettingsManager.saveSettings(settings, filename);
 		}
 		return true;
 	}
