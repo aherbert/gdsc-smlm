@@ -1,6 +1,5 @@
 package gdsc.smlm.function.gaussian;
 
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -23,17 +22,22 @@ public class GaussianFunctionFactory
 	public static final int FIT_ANGLE = 2;
 	public static final int FIT_X_WIDTH = 4;
 	public static final int FIT_Y_WIDTH = 8;
+	public static final int FIT_SIGNAL = 16;
 
-	public static final int FIT_ELLIPTICAL = FIT_BACKGROUND | FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH;
-	public static final int FIT_FREE_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_Y_WIDTH;
-	public static final int FIT_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH;
-	public static final int FIT_FIXED = FIT_BACKGROUND;
+	public static final int FIT_ELLIPTICAL = FIT_BACKGROUND | FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
+	public static final int FIT_FREE_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
+	public static final int FIT_CIRCLE = FIT_BACKGROUND | FIT_X_WIDTH | FIT_SIGNAL;
+	public static final int FIT_FIXED = FIT_BACKGROUND | FIT_SIGNAL;
 
-	public static final int FIT_NB_ELLIPTICAL = FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH;
-	public static final int FIT_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH;
-	public static final int FIT_NB_CIRCLE = FIT_X_WIDTH;
-	public static final int FIT_NB_FIXED = 0;
+	public static final int FIT_NB_ELLIPTICAL = FIT_ANGLE | FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
+	public static final int FIT_NB_FREE_CIRCLE = FIT_X_WIDTH | FIT_Y_WIDTH | FIT_SIGNAL;
+	public static final int FIT_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL;
+	public static final int FIT_NB_FIXED = FIT_SIGNAL;
 
+	// Special options for fixed function to be able to fix the signal
+	public static final int FIT_NS_FIXED = FIT_BACKGROUND;
+	public static final int FIT_NS_NB_FIXED = 0;
+	
 	/**
 	 * Create the correct 2D Gaussian function for the specified parameters
 	 * 
@@ -57,9 +61,12 @@ public class GaussianFunctionFactory
 					return new SingleFreeCircularGaussian2DFunction(maxx);
 				if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
 					return new SingleCircularGaussian2DFunction(maxx);
+				
+				// Fixed function
+				if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+					return new SingleFixedGaussian2DFunction(maxx);
 
-				// Assume that each width will be the same and just use the first one
-				return new SingleFixedGaussian2DFunction(maxx);
+				return new SingleNSFixedGaussian2DFunction(maxx);
 			}
 
 			if ((flags & FIT_ANGLE) == FIT_ANGLE)
@@ -69,8 +76,11 @@ public class GaussianFunctionFactory
 			if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
 				return new SingleNBCircularGaussian2DFunction(maxx);
 
-			// Assume that each width will be the same and just use the first one
-			return new SingleNBFixedGaussian2DFunction(maxx);
+			// Fixed function
+			if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+				return new SingleNBFixedGaussian2DFunction(maxx);
+
+			return new SingleNSNBFixedGaussian2DFunction(maxx);
 		}
 		else
 		{
@@ -83,8 +93,11 @@ public class GaussianFunctionFactory
 				if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
 					return new CircularGaussian2DFunction(nPeaks, maxx);
 
-				// Assume that each width will be the same and just use the first one
-				return new FixedGaussian2DFunction(nPeaks, maxx);
+				// Fixed function
+				if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+					return new FixedGaussian2DFunction(nPeaks, maxx);
+
+				return new NSFixedGaussian2DFunction(nPeaks, maxx);
 			}
 
 			if ((flags & FIT_ANGLE) == FIT_ANGLE)
@@ -94,8 +107,11 @@ public class GaussianFunctionFactory
 			if ((flags & FIT_X_WIDTH) == FIT_X_WIDTH)
 				return new NBCircularGaussian2DFunction(nPeaks, maxx);
 
-			// Assume that each width will be the same and just use the first one
-			return new NBFixedGaussian2DFunction(nPeaks, maxx);
+			// Fixed function
+			if ((flags & FIT_SIGNAL) == FIT_SIGNAL)
+				return new NBFixedGaussian2DFunction(nPeaks, maxx);
+
+			return new NSNBFixedGaussian2DFunction(nPeaks, maxx);
 		}
 	}
 }

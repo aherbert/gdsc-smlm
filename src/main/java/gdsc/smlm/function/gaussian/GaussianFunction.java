@@ -21,7 +21,7 @@ import gdsc.smlm.function.NonLinearFunction;
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
  * specify which of the following parameters the function will evaluate:<br/>
- * background, amplitude, angle[N-1], position[N], sd[N]
+ * background, signal, angle[N-1], position[N], sd[N]
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */

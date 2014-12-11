@@ -48,6 +48,7 @@ public class FitConfiguration implements Cloneable
 	private FitFunction fitFunction;
 	private int flags;
 	private boolean backgroundFitting = true;
+	private boolean notSignalFitting = false;
 	private double coordinateShift = 1;
 	private double signalThreshold = 0;
 	private double signalStrength = 30;
@@ -169,6 +170,9 @@ public class FitConfiguration implements Cloneable
 
 		if (isBackgroundFitting())
 			flags |= GaussianFunctionFactory.FIT_BACKGROUND;
+		if (isNotSignalFitting())
+			// Remove signal fitting (on by default)
+			flags &= ~GaussianFunctionFactory.FIT_SIGNAL;
 
 		GaussianFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, flags);
 		//f.initialise(params);
@@ -417,7 +421,7 @@ public class FitConfiguration implements Cloneable
 
 	/**
 	 * @param backgroundFitting
-	 *            True if fitting the peak widths
+	 *            True if fitting the background
 	 */
 	public void setBackgroundFitting(boolean backgroundFitting)
 	{
@@ -430,6 +434,26 @@ public class FitConfiguration implements Cloneable
 	public boolean isBackgroundFitting()
 	{
 		return backgroundFitting;
+	}
+
+	/**
+	 * Use this to turn off fitting of the signal. This should be used with caution. The setting only applies to fixed
+	 * width fitting and can be used to benchmark position accuracy when fitting signals of known strength.
+	 * 
+	 * @param noSignalFitting
+	 *            True if not fitting the signal
+	 */
+	public void setNotSignalFitting(boolean noSignalFitting)
+	{
+		this.notSignalFitting = noSignalFitting;
+	}
+
+	/**
+	 * @return True if not fitting the signal
+	 */
+	public boolean isNotSignalFitting()
+	{
+		return notSignalFitting;
 	}
 
 	/**

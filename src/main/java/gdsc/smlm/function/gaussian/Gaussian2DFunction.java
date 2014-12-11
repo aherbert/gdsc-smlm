@@ -18,7 +18,7 @@ package gdsc.smlm.function.gaussian;
  * <p>
  * The function will calculate the value of the Gaussian and evaluate the gradient of a set of parameters. The class can
  * specify which of the following parameters the function will evaluate:<br/>
- * background, amplitude, angle, position0, position1, sd0, sd1
+ * background, signal, angle, position0, position1, sd0, sd1
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
@@ -90,7 +90,7 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 	protected static int[] createGradientIndices(int nPeaks, GaussianFunction gf)
 	{
 		// Parameters are: 
-		// Background + n * { Amplitude, Angle, Xpos, Ypos, Xsd, Ysd }
+		// Background + n * { Signal, Angle, Xpos, Ypos, Xsd, Ysd }
 		int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getParametersPerPeak();
 		int[] indices = new int[nparams];
 
@@ -99,9 +99,11 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 			indices[p++] = 0;
 		for (int n = 0, i = 0; n < nPeaks; n++, i += 6)
 		{
-			indices[p++] = i + SIGNAL;
+			if (gf.evaluatesSignal())
+				indices[p++] = i + SIGNAL;
 			if (gf.evaluatesAngle())
 				indices[p++] = i + ANGLE;
+			// All functions evaluate the position gradient
 			indices[p++] = i + X_POSITION;
 			indices[p++] = i + Y_POSITION;
 			if (gf.evaluatesSD0())
