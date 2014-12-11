@@ -53,6 +53,8 @@ public class BenchmarkFit implements PlugIn
 	private static double psfWidth = 1;
 	private static double lastS = 0;
 	private static boolean showHistograms = false;
+	private static boolean backgroundFitting = true;
+	private static boolean signalFitting = true;
 	private static int histogramBins = 100;
 
 	private static TextWindow summaryTable = null;
@@ -144,8 +146,11 @@ public class BenchmarkFit implements PlugIn
 			final int size = region.height;
 
 			// Get the background and signal estimate
-			final double b = getBackground(data, size, size);
-			final double signal = getSignal(data, b);
+			final double b = (backgroundFitting) ? getBackground(data, size, size)
+					: answer[Gaussian2DFunction.BACKGROUND] + benchmarkParameters.bias;
+			final double signal = (signalFitting) ? getSignal(data, b) 
+					//: benchmarkParameters.p[frame];
+					: answer[Gaussian2DFunction.SIGNAL];
 
 			// Find centre-of-mass estimate
 			getCentreOfMass(data, size, size, xy[0]);
@@ -181,7 +186,8 @@ public class BenchmarkFit implements PlugIn
 					setBounds(solver);
 				if (solver.isConstrained())
 					setConstraints(solver);
-				if (solver.fit(data.length, data, null, params, null, error, 0) == FitStatus.OK)
+				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0); 
+				if (status == FitStatus.OK)
 				{
 					// Reject fits that are outside the bounds of the data
 					if (params[Gaussian2DFunction.SIGNAL] < 0 || params[Gaussian2DFunction.X_POSITION] < 0 ||
@@ -196,6 +202,10 @@ public class BenchmarkFit implements PlugIn
 						params[Gaussian2DFunction.BACKGROUND] -= bias;
 					result[c++] = params;
 				}
+				else
+				{
+					//System.out.println(status);
+				}					
 			}
 			long time = System.nanoTime() - start;
 
@@ -303,6 +313,9 @@ public class BenchmarkFit implements PlugIn
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addCheckbox("Background_fitting", backgroundFitting);
+		gd.addMessage("Signal fitting can be disabled for " + FitFunction.FIXED.toString() + " function");
+		gd.addCheckbox("Signal_fitting", signalFitting);
 		gd.addCheckbox("Show_histograms", showHistograms);
 
 		gd.showDialog();
@@ -314,6 +327,8 @@ public class BenchmarkFit implements PlugIn
 		psfWidth = Math.abs(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
+		backgroundFitting = gd.getNextBoolean();
+		signalFitting = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
 
 		if (regionSize < 1)
@@ -382,7 +397,8 @@ public class BenchmarkFit implements PlugIn
 		answer[Gaussian2DFunction.Y_POSITION] -= (region.y + 0.5);
 
 		// Configure for fitting
-		fitConfig.setBackgroundFitting(true);
+		fitConfig.setBackgroundFitting(backgroundFitting);
+		fitConfig.setNotSignalFitting(!signalFitting);
 		fitConfig.setComputeDeviations(false);
 
 		// Fit using the centre-of-mass estimate and 4 corners of image
@@ -627,15 +643,15 @@ public class BenchmarkFit implements PlugIn
 	private double[] getConversionFactors()
 	{
 		final double[] convert = new double[NAMES.length];
-		convert[Gaussian2DFunction.BACKGROUND] = 1 / benchmarkParameters.gain;
-		convert[Gaussian2DFunction.SIGNAL] = 1 / benchmarkParameters.gain;
+		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
+		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting()) ? 0 : 1 / benchmarkParameters.gain;
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;
 		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? benchmarkParameters.a : 0;
 		convert[TIME] = 1e-6;
-		convert[ACTUAL_SIGNAL] = 1 / benchmarkParameters.gain;
+		convert[ACTUAL_SIGNAL] = convert[Gaussian2DFunction.SIGNAL];
 		convert[ADJUSTED_X_SD] = convert[Gaussian2DFunction.X_SD];
 		convert[ADJUSTED_Y_SD] = convert[Gaussian2DFunction.Y_SD];
 		return convert;

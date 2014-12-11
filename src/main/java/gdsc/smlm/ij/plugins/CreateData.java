@@ -258,8 +258,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		double b;
 		/**
-		 * The actual number of simulated photons in each frame of the benchmark image. Some frames may be empty (due to
-		 * signal filtering or Poisson sampling)
+		 * The actual number of simulated ADUs in each frame of the benchmark image. Some frames may be empty (due to
+		 * signal filtering or Poisson sampling). The count is after gain has been applied to the photons.
 		 */
 		double[] p;
 		/**
@@ -300,8 +300,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			sum /= molecules;
 			Utils.log("Created %d frames, %d molecules. Simulated signal %s : average %s", frame, molecules,
-					Utils.rounded(signal), Utils.rounded(sum));
-			signal = sum;
+					Utils.rounded(signal), Utils.rounded(sum / gain));
+			// Reset the average signal (in photons)
+			signal = sum / gain;
 		}
 	}
 
