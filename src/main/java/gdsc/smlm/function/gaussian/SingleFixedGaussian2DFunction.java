@@ -197,14 +197,6 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction
 		return 3;
 	}
 
-	/**
-	 * @return the width
-	 */
-	public double getWidth()
-	{
-		return width;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
