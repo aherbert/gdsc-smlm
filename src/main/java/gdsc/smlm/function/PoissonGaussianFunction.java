@@ -26,7 +26,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class PoissonGaussianFunction
 {
-	private static final double EPSILON = 1e-6;
+	private static final double EPSILON = 1e-4; // 1e-6
 	private static final double NORMALISATION = 1 / Math.sqrt(2 * Math.PI);
 	private static final double LOG_NORMALISATION = Math.log(NORMALISATION);
 
@@ -331,29 +331,34 @@ public class PoissonGaussianFunction
 	private static double newton_iteration(final double x, final double mu, final double sigmasquared,
 			final double initial_saddlepoint)
 	{
-		double change;
+		double change = 0;
 		double saddlepoint = initial_saddlepoint;
-		do
+
+		// Original code can infinite loop
+		//		do
+		//		{
+		//			final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
+		//			change = (x + sigmasquared * saddlepoint - mu_exp_minus_s) / (sigmasquared + mu_exp_minus_s);
+		//			saddlepoint -= change;
+		//		} while (FastMath.abs(change) > EPSILON * FastMath.abs(saddlepoint));
+		//		return saddlepoint;
+
+		// Limit the number of iterations
+		for (int i = 0; i < 20; i++)
 		{
 			final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
 			change = (x + sigmasquared * saddlepoint - mu_exp_minus_s) / (sigmasquared + mu_exp_minus_s);
 			saddlepoint -= change;
-		} while (FastMath.abs(change) > EPSILON * FastMath.abs(saddlepoint));
-		return saddlepoint;
+			if (FastMath.abs(change) <= EPSILON * FastMath.abs(saddlepoint))
+				return saddlepoint;
+		}
 
-		//for (int i = 0; i < 200; i++)
-		//{
-		//	final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
-		//	change = (x + sigmasquared * saddlepoint - mu_exp_minus_s) / (sigmasquared + mu_exp_minus_s);
-		//	saddlepoint -= change;
-		//	if (FastMath.abs(change) <= EPSILON * FastMath.abs(saddlepoint))
-		//		return saddlepoint;
-		//}
-		//// This happens when we cannot converge
-		//System.out.printf("No Newton convergence: x=%f, mu=%f, s2=%f, %f -> %f : logP=%f, p=%f\n", x, mu, sigmasquared,
+		// This happens when we cannot converge
+		//System.out.printf("No Newton convergence: x=%f, mu=%f, s2=%f, %s -> %s : logP=%f, p=%f\n", x, mu, sigmasquared,
 		//		initial_saddlepoint, saddlepoint, sp_approx(x, mu, sigmasquared, initial_saddlepoint),
 		//		FastMath.exp(sp_approx(x, mu, sigmasquared, initial_saddlepoint)) * NORMALISATION);
-		//return initial_saddlepoint;
+
+		return saddlepoint; //initial_saddlepoint;
 	}
 
 	/**
