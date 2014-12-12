@@ -592,6 +592,7 @@ public class BenchmarkFit implements PlugIn
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(benchmarkParameters.molecules).append("\t");
+		sb.append(Utils.rounded(benchmarkParameters.signal)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.s)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.a)).append("\t");
 		sb.append(Utils.rounded(getSa() * benchmarkParameters.a)).append("\t");
@@ -677,7 +678,7 @@ public class BenchmarkFit implements PlugIn
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Molecules\tS (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tRecall");
+				"Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tRecall");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]).append("\t+/-");
