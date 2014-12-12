@@ -609,7 +609,15 @@ public class BenchmarkFit implements PlugIn
 		//sb.append(n).append("x");
 		sb.append(n).append("\t");
 		sb.append(Utils.rounded(psfWidth * benchmarkParameters.a)).append("\t");
-		sb.append(fitConfig.getFitFunction().toString() + ":" + PeakFit.getSolverName(fitConfig));
+		sb.append(fitConfig.getFitFunction().toString());
+		if (fitConfig.getFitFunction() == FitFunction.FIXED)
+		{
+			if (!signalFitting)
+				sb.append("NS");
+			if (!backgroundFitting)
+				sb.append("NB");
+		}
+		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 		{
 			// Add details of the noise model for the MLE
