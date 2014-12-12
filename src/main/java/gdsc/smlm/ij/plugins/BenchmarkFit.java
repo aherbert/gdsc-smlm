@@ -620,11 +620,16 @@ public class BenchmarkFit implements PlugIn
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 		{
+			sb.append(":Camera\t");
+			
 			// Add details of the noise model for the MLE
-			sb.append(":EM=").append(fitConfig.isEmCCD());
+			sb.append("EM=").append(fitConfig.isEmCCD());
 			sb.append(":G=").append(fitConfig.getGain());
 			sb.append(":N=").append(fitConfig.getReadNoise());
 		}
+		else
+			sb.append("\t");
+			
 		sb.append("\t");
 		final double recall = (double) (stats[0].getN() / 5) / benchmarkParameters.molecules;
 		sb.append(Utils.rounded(recall));
@@ -686,7 +691,7 @@ public class BenchmarkFit implements PlugIn
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tRecall");
+				"Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions\tRecall");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]).append("\t+/-");
