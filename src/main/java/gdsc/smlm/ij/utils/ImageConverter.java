@@ -161,7 +161,6 @@ public class ImageConverter
 			buffer = new float[size];
 		return buffer;
 	}
-	
 
 	/**
 	 * Get the data from the image processor as a double array (include cropping to the ROI). Data is duplicated if the
@@ -196,8 +195,8 @@ public class ImageConverter
 	 * @param buffer
 	 * @return The double array data
 	 */
-	public static double[] getDoubleData(final Object oPixels, final int width, final int height, final Rectangle bounds,
-			double[] buffer)
+	public static double[] getDoubleData(final Object oPixels, final int width, final int height,
+			final Rectangle bounds, double[] buffer)
 	{
 		if (oPixels == null)
 			return null;
@@ -222,7 +221,8 @@ public class ImageConverter
 			else
 			{
 				double[] pixels2 = allocate(buffer, pixels.length);
-				System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
+				for (int i = 0; i < pixels.length; i++)
+					pixels2[i] = pixels[i];
 				return pixels2;
 			}
 		}
@@ -288,5 +288,5 @@ public class ImageConverter
 		if (buffer == null || buffer.length < size)
 			buffer = new double[size];
 		return buffer;
-	}	
+	}
 }
