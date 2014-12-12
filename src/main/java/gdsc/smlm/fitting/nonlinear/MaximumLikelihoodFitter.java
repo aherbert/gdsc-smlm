@@ -397,8 +397,21 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// adapter seems to work OK.
 
 				final boolean basisConvergence = false;
-				CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold, null,
-						basisConvergence);
+				
+				// Perhaps these thresholds should be tighter?
+				// The default is to use the sqrt() of the overall tolerance
+				//final double lineRel = FastMath.sqrt(relativeThreshold);
+				//final double lineAbs = FastMath.sqrt(absoluteThreshold);
+				//final double lineRel = relativeThreshold * 1e2;
+				//final double lineAbs = absoluteThreshold * 1e2;
+				
+				// Since we are fitting only a small number of parameters then just use the same tolerance 
+				// for each search direction
+				final double lineRel = relativeThreshold;
+				final double lineAbs = absoluteThreshold;
+
+				CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold, lineRel,
+						lineAbs, null, basisConvergence);
 
 				OptimizationData maxIterationData = null;
 				if (getMaxIterations() > 0)
@@ -443,7 +456,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					// Update the maximum likelihood function in the Powell function wrapper
 					powellFunction.fun = maximumLikelihoodFunction;
 
-					OptimizationData positionChecker = null; //new PositionChecker(relativeThreshold, absoluteThreshold)
+					OptimizationData positionChecker = null;
+					// new org.apache.commons.math3.optim.PositionChecker(relativeThreshold, absoluteThreshold);
 					if (powellFunction.isMapped())
 					{
 						MappedMultivariateLikelihood adapter = (MappedMultivariateLikelihood) powellFunction;

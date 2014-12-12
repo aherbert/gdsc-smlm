@@ -382,17 +382,21 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	}
 
 	/**
+	 * Value that will pass the precondition check for {@link BrentOptimizer} but will not pass the convergence
+	 * check, so that the custom checker
+	 * will always decide when to stop the line search.
+	 */
+	private static final double REL_TOL_UNUSED;
+	static {
+		REL_TOL_UNUSED = 2 * FastMath.ulp(1d);
+	}
+	
+	/**
 	 * Class for finding the minimum of the objective function along a given
 	 * direction.
 	 */
 	private class LineSearch extends BrentOptimizer
 	{
-		/**
-		 * Value that will pass the precondition check for {@link BrentOptimizer} but will not pass the convergence
-		 * check, so that the custom checker
-		 * will always decide when to stop the line search.
-		 */
-		private static final double REL_TOL_UNUSED = 1e-15;
 		/**
 		 * Value that will pass the precondition check for {@link BrentOptimizer} but will not pass the convergence
 		 * check, so that the custom checker
