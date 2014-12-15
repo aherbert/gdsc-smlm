@@ -148,8 +148,8 @@ public class BenchmarkFit implements PlugIn
 			// Get the background and signal estimate
 			final double b = (backgroundFitting) ? getBackground(data, size, size)
 					: answer[Gaussian2DFunction.BACKGROUND] + benchmarkParameters.bias;
-			final double signal = (signalFitting) ? getSignal(data, b) 
-					//: benchmarkParameters.p[frame];
+			final double signal = (signalFitting) ? getSignal(data, b)
+			//: benchmarkParameters.p[frame];
 					: answer[Gaussian2DFunction.SIGNAL];
 
 			// Find centre-of-mass estimate
@@ -186,7 +186,7 @@ public class BenchmarkFit implements PlugIn
 					setBounds(solver);
 				if (solver.isConstrained())
 					setConstraints(solver);
-				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0); 
+				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
 				if (status == FitStatus.OK)
 				{
 					// Reject fits that are outside the bounds of the data
@@ -205,7 +205,7 @@ public class BenchmarkFit implements PlugIn
 				else
 				{
 					//System.out.println(status);
-				}					
+				}
 			}
 			long time = System.nanoTime() - start;
 
@@ -622,7 +622,7 @@ public class BenchmarkFit implements PlugIn
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 		{
 			sb.append(":Camera\t");
-			
+
 			// Add details of the noise model for the MLE
 			sb.append("EM=").append(fitConfig.isEmCCD());
 			sb.append(":G=").append(fitConfig.getGain());
@@ -630,7 +630,7 @@ public class BenchmarkFit implements PlugIn
 		}
 		else
 			sb.append("\t");
-			
+
 		sb.append("\t");
 		final double recall = (double) (stats[0].getN() / 5) / benchmarkParameters.molecules;
 		sb.append(Utils.rounded(recall));
@@ -659,7 +659,8 @@ public class BenchmarkFit implements PlugIn
 	{
 		final double[] convert = new double[NAMES.length];
 		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
-		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting()) ? 0 : 1 / benchmarkParameters.gain;
+		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() && fitConfig.getFitFunction() == FitFunction.FIXED) ? 0
+				: 1 / benchmarkParameters.gain;
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;

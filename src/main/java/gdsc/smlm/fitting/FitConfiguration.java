@@ -449,7 +449,7 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @return True if not fitting the signal
+	 * @return True if not fitting the signal. The setting only applies to fixed width fitting
 	 */
 	public boolean isNotSignalFitting()
 	{
