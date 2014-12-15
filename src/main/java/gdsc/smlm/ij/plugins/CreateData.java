@@ -3294,9 +3294,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			settings.density = Math.abs(gd.getNextNumber());
 		else
 		{
-			settings.xPosition = Math.abs(gd.getNextNumber());
-			settings.yPosition = Math.abs(gd.getNextNumber());
-			settings.zPosition = Math.abs(gd.getNextNumber());
+			settings.xPosition = gd.getNextNumber();
+			settings.yPosition = gd.getNextNumber();
+			settings.zPosition = gd.getNextNumber();
 		}
 		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
 		settings.photonsPerSecondMaximum = Math.abs((int) gd.getNextNumber());
