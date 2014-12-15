@@ -612,11 +612,12 @@ public class BenchmarkFit implements PlugIn
 		sb.append(fitConfig.getFitFunction().toString());
 		if (fitConfig.getFitFunction() == FitFunction.FIXED)
 		{
+			// Only fixed fitting can ignore the signal
 			if (!signalFitting)
 				sb.append("NS");
-			if (!backgroundFitting)
-				sb.append("NB");
 		}
+		if (!backgroundFitting)
+			sb.append("NB");
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 		{
