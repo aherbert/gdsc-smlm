@@ -386,8 +386,18 @@ public class BenchmarkFit implements PlugIn
 		Rectangle region = new Rectangle(x - regionSize, y - regionSize, 2 * regionSize + 1, 2 * regionSize + 1);
 		if (!new Rectangle(0, 0, imp.getWidth(), imp.getHeight()).contains(region))
 		{
-			IJ.error(TITLE, "Fit region does not fit within the image");
-			return;
+			// Check if it is incorrect by only 1 pixel
+			if (region.width <= imp.getWidth() + 1 && region.height <= imp.getHeight() + 1)
+			{
+				Utils.log("Adjusting region %s to fit within image bounds (%dx%d)", region.toString(), imp.getWidth(),
+						imp.getHeight());
+				region = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
+			}
+			else
+			{
+				IJ.error(TITLE, "Fit region does not fit within the image");
+				return;
+			}
 		}
 
 		// Adjust the centre & account for 0.5 pixel offset during fitting
