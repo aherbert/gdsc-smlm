@@ -699,14 +699,12 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			{
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
 				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix. 
-				int[] gradientIndices = f.gradientIndices();
+				final int[] gradientIndices = f.gradientIndices();
 				final int nparams = gradientIndices.length;
 				GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
-				double[][] I = calculator.fisherInformationMatrix(n, a, f);
+				final double[] I = calculator.fisherInformationDiagonal(n, a, f);
 				for (int i = 0; i < gradientIndices.length; i++)
-					a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i][i]);
-				// The following method just uses the sqrt but does not invert the covariance matrix
-				//setDeviations(a_dev, covar);
+					a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i]);
 			}
 
 			error[0] = NonLinearFit.getError(residualSumOfSquares, noise, n, f.gradientIndices().length);

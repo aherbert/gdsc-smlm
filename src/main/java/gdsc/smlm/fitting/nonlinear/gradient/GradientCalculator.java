@@ -30,7 +30,7 @@ public class GradientCalculator
 	 * @param nparams
 	 *            The number of gradient parameters
 	 */
-	public GradientCalculator(int nparams)
+	public GradientCalculator(final int nparams)
 	{
 		this.nparams = nparams;
 	}
@@ -55,10 +55,11 @@ public class GradientCalculator
 	 *            Non-linear fitting function
 	 * @return The sum-of-squares value for the fit
 	 */
-	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(final int[] x, final double[] y, final double[] a, final double[][] alpha,
+			final double[] beta, final NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[a.length];
 
 		for (int i = 0; i < nparams; i++)
 		{
@@ -71,7 +72,7 @@ public class GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			double[] w = new double[1];
+			final double[] w = new double[1];
 			for (int i = 0; i < x.length; i++)
 			{
 				final double dy = y[i] - func.eval(x[i], dy_da, w);
@@ -154,10 +155,11 @@ public class GradientCalculator
 	 * @see {@link gdsc.smlm.function.NonLinearFunction#canComputeWeights()}
 	 * @return The sum-of-squares value for the fit.
 	 */
-	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(final int n, final double[] y, final double[] a, final double[][] alpha,
+			final double[] beta, final NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[a.length];
 
 		for (int i = 0; i < nparams; i++)
 		{
@@ -170,7 +172,7 @@ public class GradientCalculator
 
 		if (func.canComputeWeights())
 		{
-			double[] w = new double[1];
+			final double[] w = new double[1];
 			for (int i = 0; i < n; i++)
 			{
 				final double dy = y[i] - func.eval(i, dy_da, w);
@@ -236,19 +238,19 @@ public class GradientCalculator
 	 *            The computed weight
 	 * @return The weight factor
 	 */
-	protected double getWeight(double w)
+	protected double getWeight(final double w)
 	{
 		// TODO - Check if there is a better way to smooth the weights rather than just truncating them at 1
 		return (w < 1) ? 1 : 1.0 / w;
 	}
 
-	protected double checkGradients(double[][] alpha, double[] beta, int nparams, double ssx)
+	protected double checkGradients(final double[][] alpha, final double[] beta, int nparams, final double ssx)
 	{
-		badGradients = checkGradients(alpha, beta, nparams);
+		badGradients = checkIsNaN(alpha, beta, nparams);
 		return ssx;
 	}
 
-	private boolean checkGradients(double[][] alpha, double[] beta, int nparams)
+	private boolean checkIsNaN(final double[][] alpha, final double[] beta, final int nparams)
 	{
 		for (int i = 0; i < nparams; i++)
 		{
@@ -257,6 +259,39 @@ public class GradientCalculator
 			for (int j = 0; j <= i; j++)
 				if (Double.isNaN(alpha[i][j]))
 					return true;
+		}
+
+		return false;
+	}
+
+	protected void checkGradients(double[][] alpha, int nparams)
+	{
+		badGradients = checkIsNaN(alpha, nparams);
+	}
+
+	private boolean checkIsNaN(final double[][] alpha, final int nparams)
+	{
+		for (int i = 0; i < nparams; i++)
+		{
+			for (int j = 0; j <= i; j++)
+				if (Double.isNaN(alpha[i][j]))
+					return true;
+		}
+
+		return false;
+	}
+
+	protected void checkGradients(final double[] beta, final int nparams)
+	{
+		badGradients = checkIsNaN(beta, nparams);
+	}
+
+	private boolean checkIsNaN(final double[] beta, final int nparams)
+	{
+		for (int i = 0; i < nparams; i++)
+		{
+			if (Double.isNaN(beta[i]))
+				return true;
 		}
 
 		return false;
@@ -272,9 +307,11 @@ public class GradientCalculator
 
 	/**
 	 * Compute Fisher's Information Matrix (I).
+	 * 
 	 * <pre>
 	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
+	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
 	 * @param x
@@ -285,41 +322,18 @@ public class GradientCalculator
 	 *            Non-linear fitting function
 	 * @return I
 	 */
-	public double[][] fisherInformationMatrix(int[] x, double[] a, NonLinearFunction func)
+	public double[][] fisherInformationMatrix(int[] x, final double[] a, final NonLinearFunction func)
 	{
-		double[] dy_da = new double[a.length];
-
-		double[][] alpha = new double[nparams][nparams];
-
-		func.initialise(a);
-
-		for (int i = 0; i < x.length; i++)
-		{
-			final double y = func.eval(x[i], dy_da);
-
-			for (int j = 0; j < nparams; j++)
-			{
-				final double dy_db = dy_da[j] / y;
-
-				for (int k = 0; k <= j; k++)
-					alpha[j][k] += dy_db * dy_da[k];
-			}
-		}
-
-		// Generate symmetric matrix
-		for (int i = 0; i < nparams - 1; i++)
-			for (int j = i + 1; j < nparams; j++)
-				alpha[i][j] = alpha[j][i];
-
-		checkGradients(alpha, new double[nparams], nparams, 0);
-		return alpha;
+		return fisherInformationMatrix(x.length, a, func);
 	}
 
 	/**
 	 * Compute Fisher's Information Matrix (I).
+	 * 
 	 * <pre>
 	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
+	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * 
 	 * @param n
@@ -330,21 +344,21 @@ public class GradientCalculator
 	 *            Non-linear fitting function
 	 * @return I
 	 */
-	public double[][] fisherInformationMatrix(int n, double[] a, NonLinearFunction func)
+	public double[][] fisherInformationMatrix(final int n, final double[] a, final NonLinearFunction func)
 	{
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[a.length];
 
-		double[][] alpha = new double[nparams][nparams];
+		final double[][] alpha = new double[nparams][nparams];
 
 		func.initialise(a);
 
 		for (int i = 0; i < n; i++)
 		{
-			final double y = func.eval(i, dy_da);
+			final double yi = 1.0 / func.eval(i, dy_da);
 
 			for (int j = 0; j < nparams; j++)
 			{
-				final double dy_db = dy_da[j] / y;
+				final double dy_db = dy_da[j] * yi;
 
 				for (int k = 0; k <= j; k++)
 					alpha[j][k] += dy_db * dy_da[k];
@@ -356,7 +370,67 @@ public class GradientCalculator
 			for (int j = i + 1; j < nparams; j++)
 				alpha[i][j] = alpha[j][i];
 
-		checkGradients(alpha, new double[nparams], nparams, 0);
+		checkGradients(alpha, nparams);
+		return alpha;
+	}
+
+	/**
+	 * Compute the central diagonal of Fisher's Information Matrix (I).
+	 * 
+	 * <pre>
+	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
+	 * </pre>
+	 * 
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param a
+	 *            Set of m coefficients
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return Iaa
+	 */
+	public double[] fisherInformationDiagonal(final int[] x, final double[] a, final NonLinearFunction func)
+	{
+		return fisherInformationDiagonal(x.length, a, func);
+	}
+
+	/**
+	 * Compute the central diagonal of Fisher's Information Matrix (I).
+	 * 
+	 * <pre>
+	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
+	 * </pre>
+	 * 
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * 
+	 * @param n
+	 *            The number of data points
+	 * @param a
+	 *            Set of m coefficients
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return Iaa
+	 */
+	public double[] fisherInformationDiagonal(final int n, final double[] a, final NonLinearFunction func)
+	{
+		final double[] dy_da = new double[a.length];
+
+		final double[] alpha = new double[nparams];
+
+		func.initialise(a);
+
+		for (int i = 0; i < n; i++)
+		{
+			final double yi = 1.0 / func.eval(i, dy_da);
+			for (int j = 0; j < nparams; j++)
+			{
+				alpha[j] += dy_da[j] * dy_da[j] * yi;
+			}
+		}
+
+		checkGradients(alpha, nparams);
 		return alpha;
 	}
 }
