@@ -258,6 +258,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		double b;
 		/**
+		 * Background noise in photons per pixel (used in the precision calculations)
+		 */
+		double b2;
+		/**
 		 * The actual number of simulated ADUs in each frame of the benchmark image. Some frames may be empty (due to
 		 * signal filtering or Poisson sampling). The count is after gain has been applied to the photons.
 		 */
@@ -270,7 +274,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double precisionN, precisionX, precisionXML;
 
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double bias,
-				boolean emCCD, double gain, double readNoise, double b)
+				boolean emCCD, double gain, double readNoise, double b, double b2)
 		{
 			this.frames = frames;
 			this.s = s;
@@ -283,6 +287,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.gain = gain;
 			this.readNoise = readNoise;
 			this.b = b;
+			this.b2 = b2;
 			p = new double[frames];
 		}
 
@@ -299,7 +304,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				sum += p[i];
 			}
 			sum /= molecules;
-			Utils.log("Created %d frames, %d molecules. Simulated signal %s : average %s", frame, molecules,
+			Utils.log("Created %d frames, %d molecules. Simulated signal %s : average %s", frames, molecules,
 					Utils.rounded(signal), Utils.rounded(sum / gain));
 			// Reset the average signal (in photons)
 			signal = sum / gain;
@@ -435,7 +440,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 					benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
 							settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
-							settings.background);
+							settings.background, b2);
 					benchmarkParameters.precisionN = lowerN;
 					benchmarkParameters.precisionX = lowerP;
 					benchmarkParameters.precisionXML = lowerMLP;
