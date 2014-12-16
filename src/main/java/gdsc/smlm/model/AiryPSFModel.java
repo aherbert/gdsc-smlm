@@ -772,7 +772,8 @@ public class AiryPSFModel extends PSFModel
 	{
 		this.w0 = w0;
 		this.w1 = w1;
-		createAiryDistribution();
+		if (spline == null)
+			createAiryDistribution();
 		double[] x = new double[n];
 		double[] y = new double[n];
 
@@ -804,11 +805,11 @@ public class AiryPSFModel extends PSFModel
 		return new double[][] { x, y };
 	}
 
-	private static void createAiryDistribution()
+	private static synchronized void createAiryDistribution()
 	{
-		if (sum != null)
+		if (spline != null)
 			return;
-
+		
 		final double relativeAccuracy = 1e-4;
 		final double absoluteAccuracy = 1e-8;
 		final int minimalIterationCount = 3;
