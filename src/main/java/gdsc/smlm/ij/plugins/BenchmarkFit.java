@@ -77,6 +77,7 @@ public class BenchmarkFit implements PlugIn
 	private ImagePlus imp;
 	private CreateData.BenchmarkParameters benchmarkParameters;
 	private double[] answer = new double[7];
+	private Rectangle region = null;
 
 	private class Worker implements Runnable
 	{
@@ -383,7 +384,7 @@ public class BenchmarkFit implements PlugIn
 		// Set up the fit region. Always round down since 0.5 is the centre of the pixel.
 		int x = (int) benchmarkParameters.x;
 		int y = (int) benchmarkParameters.y;
-		Rectangle region = new Rectangle(x - regionSize, y - regionSize, 2 * regionSize + 1, 2 * regionSize + 1);
+		region = new Rectangle(x - regionSize, y - regionSize, 2 * regionSize + 1, 2 * regionSize + 1);
 		if (!new Rectangle(0, 0, imp.getWidth(), imp.getHeight()).contains(region))
 		{
 			// Check if it is incorrect by only 1 pixel
@@ -615,9 +616,8 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append("\t");
-		int n = 2 * regionSize + 1;
-		//sb.append(n).append("x");
-		sb.append(n).append("\t");
+		sb.append(region.width).append("x");
+		sb.append(region.height).append("\t");
 		sb.append(Utils.rounded(psfWidth * benchmarkParameters.a)).append("\t");
 		sb.append(fitConfig.getFitFunction().toString());
 		if (fitConfig.getFitFunction() == FitFunction.FIXED)
