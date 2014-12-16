@@ -1487,7 +1487,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (tNRemoved.get() > 0)
 			Utils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(), settings.minSNRtN);
 		if (photonStats.getN() > 0)
-			Utils.log("Average photons = %s +/- %s", Utils.rounded(photonStats.getMean()),
+			Utils.log("Average photons rendered = %s +/- %s", Utils.rounded(photonStats.getMean()),
 					Utils.rounded(photonStats.getStandardDeviation()));
 
 		//System.out.printf("rawPhotons = %f\n", rawPhotons.getMean());
@@ -1731,11 +1731,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final boolean poissonNoise;
 
 		public ImageGenerator(final List<LocalisationModelSet> localisationSets,
-				List<LocalisationModelSet> newLocalisations2, int startIndex, int t, PSFModel psfModel,
+				List<LocalisationModelSet> newLocalisations, int startIndex, int t, PSFModel psfModel,
 				MemoryPeakResults results, ImageStack stack, boolean poissonNoise)
 		{
 			this.localisations = localisationSets;
-			this.newLocalisations = newLocalisations2;
+			this.newLocalisations = newLocalisations;
 			this.startIndex = startIndex;
 			this.t = t;
 			this.psfModel = psfModel;
@@ -1797,7 +1797,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						continue;
 
 					// Draw each localisation in the set. Store the PSF so we can remove it later
-					double totalPhotons = 0;
+					double totalPhotonsRendered = 0;
 					Spot[] spots = new Spot[localisationSet.size()];
 					int spotCount = 0;
 					for (LocalisationModel localisation : localisationSet.getLocalisations())
@@ -1809,39 +1809,44 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 						//addRaw(localisation.getIntensity());
 
-						final double photons;
+						final double photonsRendered, intensity;
 						int[] samplePositions = null;
 						if (poissonNoise)
 						{
 							final int samples = (int) random.nextPoisson(localisation.getIntensity());
-							photons = psfModel.sample3D(data, settings.size, settings.size, samples,
+							intensity = samples;
+							photonsRendered = psfModel.sample3D(data, settings.size, settings.size, samples,
 									localisation.getX(), localisation.getY(), localisation.getZ());
 							samplePositions = psfModel.getSamplePositions();
 						}
 						else
 						{
-							photons = psfModel.create3D(data, settings.size, settings.size,
-									localisation.getIntensity(), localisation.getX(), localisation.getY(),
+							intensity = localisation.getIntensity();
+							photonsRendered = psfModel.create3D(data, settings.size, settings.size,
+									intensity, localisation.getX(), localisation.getY(),
 									localisation.getZ(), false);
 						}
 						//addDraw(photons);
-						if (photons > 0)
+						if (photonsRendered > 0)
 						{
-							totalPhotons += photons;
+							totalPhotonsRendered += photonsRendered;
 							spots[spotCount++] = new Spot(psfModel.getPSF(), psfModel.getX0min(), psfModel.getX0max(),
 									psfModel.getX1min(), psfModel.getX1max(), samplePositions);
 						}
-						localisation.setIntensity(photons * totalGain);
+						// Update the intensity using the gain.
+						// Use the sampled intensity and not the photons rendered. This is the intensity that should be
+						// fitted by any function irrespective of whether the photons were actually sampled on the image.
+						localisation.setIntensity(intensity * totalGain);
 					}
 
 					// Skip if nothing has been drawn. Note that is the localisation set is skipped then the 
 					// intensity must be set to zero to prevent the SNR checks using the eliminated neighbours.
-					if (totalPhotons == 0)
+					if (totalPhotonsRendered == 0)
 					{
 						localisationSet.setData(new double[5]);
 						continue;
 					}
-					if (totalPhotons < minPhotons)
+					if (totalPhotonsRendered < minPhotons)
 					{
 						photonsRemoved.incrementAndGet();
 						for (int i = 0; i < spotCount; i++)
@@ -1852,12 +1857,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						continue;
 					}
 
-					addPhotons(totalPhotons);
+					addPhotons(totalPhotonsRendered);
 
 					LocalisationModel localisation = localisationSet.toLocalisation();
 
 					// Account for gain 
-					final double newIntensity = totalPhotons * totalGain;
+					totalPhotonsRendered *= totalGain;
 
 					// Add to memory. 0.5 is the centre of the pixel so just round down.
 					// int origX = (int) Math.round(localisation.getX());
@@ -1888,7 +1893,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					{
 						params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = (float) psfSD;
 					}
-					params[Gaussian2DFunction.SIGNAL] = (float) newIntensity;
+					// Use the actual intensity (not the total photons rendered)
+					params[Gaussian2DFunction.SIGNAL] = (float) localisation.getIntensity();
 
 					// The variance of the background image is currently in photons^2. Apply gain to convert to ADUs. 
 					double backgroundVariance = localStats[1] * totalGain * totalGain;
@@ -1915,12 +1921,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					// Ensure the new data is added before the intensity is updated. This avoids 
 					// syncronisation clashes in the getIntensity(...) function.
+					// Use the total photons rendered for signal filtering.
 					localisationSet.setData(new double[] { localStats[0], totalNoise, params[Gaussian2DFunction.X_SD],
-							params[Gaussian2DFunction.Y_SD], newIntensity });
+							params[Gaussian2DFunction.Y_SD], totalPhotonsRendered });
 
 					if (checkSNR)
 					{
-						if (badLocalisation(localisationSet, newIntensity, totalNoise))
+						if (badLocalisation(localisationSet, totalPhotonsRendered, totalNoise))
 						{
 							for (int i = 0; i < spotCount; i++)
 							{
