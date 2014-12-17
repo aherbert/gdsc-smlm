@@ -1569,6 +1569,7 @@ public class TraceMolecules implements PlugIn
 
 		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
+		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Width_factor", 0.01, 5, fitConfig.getWidthFactor());
 		gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
 
@@ -1601,6 +1602,7 @@ public class TraceMolecules implements PlugIn
 
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		fitConfig.setSignalStrength(gd.getNextNumber());
+		fitConfig.setMinPhotons(gd.getNextNumber());
 		fitConfig.setWidthFactor(gd.getNextNumber());
 		fitConfig.setPrecisionThreshold(gd.getNextNumber());
 

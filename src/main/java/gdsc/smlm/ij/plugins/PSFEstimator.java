@@ -183,6 +183,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
+		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Width_factor", 0.01, 5, fitConfig.getWidthFactor());
 
 		if (gd.getLayout() != null)
@@ -251,6 +252,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		fitConfig.setSignalStrength(gd.getNextNumber());
+		fitConfig.setMinPhotons(gd.getNextNumber());
 		fitConfig.setWidthFactor(gd.getNextNumber());
 
 		if (gd.invalidNumber())
@@ -274,6 +276,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
 			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
 			Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
 		}
 		catch (IllegalArgumentException e)
