@@ -201,7 +201,6 @@ public class Cluster
 
 		i = 0;
 		double sumXi2Ni = 0, sumYi2Ni = 0, sumS2 = 0;
-		//double ss = 0, sdx = 0, sdy = 0;
 		for (PeakResult result : results)
 		{
 			final float Ni = photons[i++];
@@ -211,12 +210,7 @@ public class Cluster
 
 			sumXi2Ni += dx * dx * Ni;
 			sumYi2Ni += dy * dy * Ni;
-			//double sigma = result.getWidth();
-			double sigma = result.getPrecision(a, gain, emCCD);
-			//ss += sigma;
-			//sdx += Math.abs(dx);
-			//sdy += Math.abs(dy);
-			sumS2 += sigma * sigma * Ni;
+			sumS2 += result.getVariance(a, gain, emCCD) * Ni;
 		}
 
 		double sumNin = sumNi * n;
@@ -225,10 +219,6 @@ public class Cluster
 		double sym = Math.sqrt(sumYi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
 
 		double sPeak = FastMath.max(sxm, sym);
-
-		// Debugging
-		//System.out.printf("n=%d, av precision=%f, av deviation=%f (%f,%f) : weighted precision=%f\n", n, ss / n,
-		//		getStandardDeviation() * a, sdx / n, sdy / n, sPeak);
 
 		return sPeak;
 	}
