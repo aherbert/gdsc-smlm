@@ -851,7 +851,7 @@ public class FitConfiguration implements Cloneable
 				{
 					// This may be slow due to the integration required within the formula.
 					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-							Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD, 5);
+							Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
 				}
 				catch (Exception e)
 				{
