@@ -100,11 +100,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
-import org.apache.commons.math3.analysis.integration.RombergIntegrator;
-import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
-import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
@@ -398,8 +393,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
 						emCCD);
 				double upperP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
-				double lowerMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
-				double upperMLP = getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+				double lowerMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+				double upperMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 				//final double b = Math.sqrt(b2);
@@ -608,113 +603,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		SettingsManager.saveSettings(globalSettings);
 
 		IJ.showStatus("Done");
-	}
-
-	/**
-	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
-	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
-	 * 
-	 * @param a
-	 *            The size of the pixels in nm
-	 * @param s
-	 *            The peak standard deviation in nm
-	 * @param N
-	 *            The peak signal in photons
-	 * @param b2
-	 *            The expected number of photons per pixel from a background with spatially constant
-	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
-	 *            of the image pixels)
-	 * @param emCCD
-	 *            True if an emCCD camera
-	 * @return The location precision in nm in each dimension (X/Y)
-	 */
-	public static double getMLPrecisionX(double a, double s, double N, double b2, boolean emCCD)
-	{
-		// EM-CCD noise factor
-		final double F = (emCCD) ? 2 : 1;
-		final double a2 = a * a;
-		// Adjustment for square pixels
-		final double sa2 = s * s + a2 / 12.0;
-
-		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
-		final double I1 = computeI1(rho, 0);
-
-		return Math.sqrt(F * (sa2 / N) * (1 / I1));
-	}
-
-	/**
-	 * Compute the function I1 using numerical integration. See Mortensen, et al (2010) Nature Methods 7, 377-383), SI
-	 * equation 43.
-	 * 
-	 * <pre>
-	 * I1 = 1 + sum [ ln(t) / (1 + t/rho) ] dt
-	 *    = - sum [ t * ln(t) / (t + rho) ] dt
-	 * </pre>
-	 * 
-	 * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
-	 * 
-	 * @param rho
-	 * @param method
-	 *            The integration method
-	 * @return the I1 value
-	 */
-	private static double computeI1(final double rho, final int method)
-	{
-		if (rho == 0)
-			return 1;
-
-		final double relativeAccuracy = 1e-4;
-		final double absoluteAccuracy = 1e-8;
-		final int minimalIterationCount = 3;
-		final int maximalIterationCount = 32;
-
-		UnivariateIntegrator i;
-		switch (method)
-		{
-		// These integrators do not converge, presumably because log(0) is undefined.
-			case 2:
-				i = new SimpsonIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
-						maximalIterationCount);
-				break;
-
-			case 1:
-				i = new RombergIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
-						maximalIterationCount);
-				break;
-
-			default:
-				// This supports finding the integral without evaluating the end points (which at x=0 is undefined)
-				i = new IterativeLegendreGaussIntegrator(20, relativeAccuracy, absoluteAccuracy, minimalIterationCount,
-						maximalIterationCount);
-		}
-
-		// Specify the function to integrate
-		UnivariateFunction f = new UnivariateFunction()
-		{
-			public double value(double x)
-			{
-				return x * Math.log(x) / (x + rho);
-			}
-		};
-		final double i1 = -i.integrate(2000, f, 0, 1);
-		//System.out.printf("I1 = %f (%d)\n", i1, i.getEvaluations());
-
-		// The function requires more evaluations and sometimes does not converge even with the Gauss integrator,
-		// presumably because log(x) significantly changes as x -> 0 where as x log(x) in the function above 
-		// is more stable
-
-		//		UnivariateFunction f2 = new UnivariateFunction()
-		//		{
-		//			@Override
-		//			public double value(double x)
-		//			{
-		//				return Math.log(x) / ( 1 + x / rho);
-		//			}
-		//		};
-		//		double i2 = 1 + i.integrate(2000, f2, 0, 1);
-		//		System.out.printf("I1 (B) = %f (%d)\n", i2, i.getEvaluations());
-
-		return i1;
 	}
 
 	/**

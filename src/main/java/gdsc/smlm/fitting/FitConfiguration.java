@@ -740,15 +740,15 @@ public class FitConfiguration implements Cloneable
 	 *            The number of peaks
 	 * @param initialParams
 	 *            The initial peak parameters
-	 * @param peakParams
+	 * @param params
 	 *            The fitted peak parameters
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] peakParams)
+	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params)
 	{
 		for (int n = 0; n < nPeaks; n++)
 		{
-			validatePeak(n, initialParams, peakParams);
+			validatePeak(n, initialParams, params);
 			if (result != FitStatus.OK)
 				break;
 		}
@@ -761,13 +761,13 @@ public class FitConfiguration implements Cloneable
 	 * 
 	 * @param initialParams
 	 *            The initial peak parameters
-	 * @param peakParams
+	 * @param params
 	 *            The fitted peak parameters
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validateFit(double[] initialParams, double[] peakParams)
+	public FitStatus validateFit(double[] initialParams, double[] params)
 	{
-		return validatePeak(0, initialParams, peakParams);
+		return validatePeak(0, initialParams, params);
 	}
 
 	/**
@@ -777,17 +777,17 @@ public class FitConfiguration implements Cloneable
 	 *            The peak number
 	 * @param initialParams
 	 *            The initial peak parameters
-	 * @param peakParams
+	 * @param params
 	 *            The fitted peak parameters
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validatePeak(int n, double[] initialParams, double[] peakParams)
+	public FitStatus validatePeak(int n, double[] initialParams, double[] params)
 	{
 		final int offset = n * 6;
 		// Check spot movement
-		final double xShift = peakParams[Gaussian2DFunction.X_POSITION + offset] -
+		final double xShift = params[Gaussian2DFunction.X_POSITION + offset] -
 				initialParams[Gaussian2DFunction.X_POSITION + offset];
-		final double yShift = peakParams[Gaussian2DFunction.Y_POSITION + offset] -
+		final double yShift = params[Gaussian2DFunction.Y_POSITION + offset] -
 				initialParams[Gaussian2DFunction.Y_POSITION + offset];
 		if (Math.abs(xShift) > coordinateShift || Math.abs(yShift) > coordinateShift)
 		{
@@ -799,7 +799,7 @@ public class FitConfiguration implements Cloneable
 		}
 
 		// Check signal threshold
-		final double signal = peakParams[Gaussian2DFunction.SIGNAL + offset];
+		final double signal = params[Gaussian2DFunction.SIGNAL + offset];
 		// Compare the signal to the desired signal strength
 		if (signal < signalThreshold)
 		{
@@ -813,9 +813,9 @@ public class FitConfiguration implements Cloneable
 		}
 
 		// Check widths
-		double xFactor = getFactor(peakParams[Gaussian2DFunction.X_SD + offset], initialParams[Gaussian2DFunction.X_SD +
+		double xFactor = getFactor(params[Gaussian2DFunction.X_SD + offset], initialParams[Gaussian2DFunction.X_SD +
 				offset]);
-		double yFactor = getFactor(peakParams[Gaussian2DFunction.Y_SD + offset], initialParams[Gaussian2DFunction.Y_SD +
+		double yFactor = getFactor(params[Gaussian2DFunction.Y_SD + offset], initialParams[Gaussian2DFunction.Y_SD +
 				offset]);
 		if (xFactor > widthFactor || yFactor > widthFactor)
 		{
@@ -824,9 +824,9 @@ public class FitConfiguration implements Cloneable
 				log.info(
 						"Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n",
 						n,
-						(peakParams[Gaussian2DFunction.X_SD + offset] > initialParams[Gaussian2DFunction.X_SD + offset]) ? xFactor
+						(params[Gaussian2DFunction.X_SD + offset] > initialParams[Gaussian2DFunction.X_SD + offset]) ? xFactor
 								: -xFactor,
-						(peakParams[Gaussian2DFunction.Y_SD + offset] > initialParams[Gaussian2DFunction.Y_SD + offset]) ? yFactor
+						(params[Gaussian2DFunction.Y_SD + offset] > initialParams[Gaussian2DFunction.Y_SD + offset]) ? yFactor
 								: -yFactor);
 			}
 			return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] { xFactor, yFactor });
@@ -835,18 +835,27 @@ public class FitConfiguration implements Cloneable
 		// Check precision
 		if (precisionThreshold > 0 && nmPerPixel > 0 && gain > 0)
 		{
-			final double sd = (peakParams[Gaussian2DFunction.X_SD + offset] + peakParams[Gaussian2DFunction.Y_SD +
-					offset]) * 0.5;
+			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) * 0.5;
 
 			final double precision;
 			// We can calculate the precision using the estimated noise for the image or using the expected number
 			// of background photons at the location.
 			//precision = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
 
-			// Check using the formula which uses the estimated background.
-			// This allows for better filtering when the background is variable, e.g. when imaging cells.
-			precision = PeakResult.getPrecisionX(nmPerPixel, nmPerPixel * sd, signal / gain,
-					Math.max(0, peakParams[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+			// If using a MLE then can get the deviations directly from the results assuming that maximum likelihood
+			// achieves the Cramer-Roa lower bounds.
+			if (fitSolver == FitSolver.MLE)
+			{
+				precision = PeakResult.getMLPrecisionX(nmPerPixel, nmPerPixel * sd, signal / gain,
+						Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD, 5);
+			}
+			else
+			{
+				// Check using the formula which uses the estimated background.
+				// This allows for better filtering when the background is variable, e.g. when imaging cells.
+				precision = PeakResult.getPrecisionX(nmPerPixel, nmPerPixel * sd, signal / gain,
+						Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+			}
 
 			if (precision > precisionThreshold)
 			{

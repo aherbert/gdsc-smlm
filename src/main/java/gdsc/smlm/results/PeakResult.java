@@ -2,6 +2,10 @@ package gdsc.smlm.results;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -201,6 +205,131 @@ public class PeakResult implements Comparable<PeakResult>
 		// 16 / 9 = 1.7777777778
 		// 8 * pi = 25.13274123
 		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b2) / (N * a2)));
+	}
+
+	/**
+	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public static double getMLPrecisionX(double a, double s, double N, double b2, boolean emCCD)
+	{
+		// EM-CCD noise factor
+		final double F = (emCCD) ? 2 : 1;
+		final double a2 = a * a;
+		// Adjustment for square pixels
+		final double sa2 = s * s + a2 / 12.0;
+
+		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
+		final double I1 = computeI1(rho, 20);
+
+		return Math.sqrt(F * (sa2 / N) * (1 / I1));
+	}
+
+	/**
+	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @param integrationPoints
+	 *            the number of integration points for the LegendreGaussIntegrator
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public static double getMLPrecisionX(double a, double s, double N, double b2, boolean emCCD, int integrationPoints)
+	{
+		// EM-CCD noise factor
+		final double F = (emCCD) ? 2 : 1;
+		final double a2 = a * a;
+		// Adjustment for square pixels
+		final double sa2 = s * s + a2 / 12.0;
+
+		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
+		final double I1 = computeI1(rho, integrationPoints);
+
+		return Math.sqrt(F * (sa2 / N) * (1 / I1));
+	}
+
+	/**
+	 * Compute the function I1 using numerical integration. See Mortensen, et al (2010) Nature Methods 7, 377-383), SI
+	 * equation 43.
+	 * 
+	 * <pre>
+	 * I1 = 1 + sum [ ln(t) / (1 + t/rho) ] dt
+	 *    = - sum [ t * ln(t) / (t + rho) ] dt
+	 * </pre>
+	 * 
+	 * Where sum is the integral between 0 and 1. In the case of rho=0 the function returns 1;
+	 * 
+	 * @param rho
+	 * @param integrationPoints
+	 *            the number of integration points for the LegendreGaussIntegrator
+	 * @return the I1 value
+	 */
+	private static double computeI1(final double rho, int integrationPoints)
+	{
+		if (rho == 0)
+			return 1;
+
+		final double relativeAccuracy = 1e-4;
+		final double absoluteAccuracy = 1e-8;
+		final int minimalIterationCount = 3;
+		final int maximalIterationCount = 32;
+
+		// Use an integrator that does not use the boundary since log(0) is undefined.
+		UnivariateIntegrator i = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
+				absoluteAccuracy, minimalIterationCount, maximalIterationCount);
+
+		// Specify the function to integrate
+		UnivariateFunction f = new UnivariateFunction()
+		{
+			public double value(double x)
+			{
+				return x * Math.log(x) / (x + rho);
+			}
+		};
+		final double i1 = -i.integrate(2000, f, 0, 1);
+		//System.out.printf("I1 = %f (%d)\n", i1, i.getEvaluations());
+
+		// The function requires more evaluations and sometimes does not converge,
+		// presumably because log(x) significantly changes as x -> 0 where as x log(x) in the function above 
+		// is more stable
+
+		//		UnivariateFunction f2 = new UnivariateFunction()
+		//		{
+		//			@Override
+		//			public double value(double x)
+		//			{
+		//				return Math.log(x) / ( 1 + x / rho);
+		//			}
+		//		};
+		//		double i2 = 1 + i.integrate(2000, f2, 0, 1);
+		//		System.out.printf("I1 (B) = %f (%d)\n", i2, i.getEvaluations());
+
+		return i1;
 	}
 
 	public int compareTo(PeakResult o)
