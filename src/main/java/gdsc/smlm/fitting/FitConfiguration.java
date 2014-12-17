@@ -53,7 +53,7 @@ public class FitConfiguration implements Cloneable
 	private double signalThreshold = 0;
 	private double signalStrength = 0;
 	private double minPhotons = 30;
-	private double precisionThreshold = 40;
+	private double precisionThreshold = 1600; // == 40nm * 40nm;
 	private double nmPerPixel = 0;
 	private double gain = 0;
 	private boolean emCCD = true;
