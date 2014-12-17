@@ -75,6 +75,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	private TextField textDuplicateDistance;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
+	private TextField textMinPhotons;
 	private TextField textPrecisionThreshold;
 	private TextField textWidthFactor;
 
@@ -145,6 +146,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
+		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Width_factor", 0.01, 5, fitConfig.getWidthFactor());
 		gd.addNumericField("Precision_threshold", fitConfig.getPrecisionThreshold(), 2);
 
@@ -187,6 +189,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			textDuplicateDistance = numerics.get(n++);
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
+			textMinPhotons = numerics.get(n++);
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
 		}
@@ -253,6 +256,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		fitConfig.setSignalStrength(gd.getNextNumber());
+		fitConfig.setMinPhotons(gd.getNextNumber());
 		fitConfig.setWidthFactor(gd.getNextNumber());
 		fitConfig.setPrecisionThreshold(gd.getNextNumber());
 
@@ -275,6 +279,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			Parameters.isPositive("Duplicate distance", fitConfig.getDuplicateDistance());
 			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
 			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
 			Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
 			Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 		}
@@ -408,6 +413,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
 				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 				textSignalStrength.setText("" + fitConfig.getSignalStrength());
+				textMinPhotons.setText("" + fitConfig.getMinPhotons());
 				textWidthFactor.setText("" + fitConfig.getWidthFactor());
 				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 			}

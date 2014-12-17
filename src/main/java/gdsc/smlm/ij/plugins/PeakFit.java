@@ -178,6 +178,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textDuplicateDistance;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
+	private TextField textMinPhotons;
 	private TextField textPrecisionThreshold;
 	private TextField textNoise;
 	private Choice textNoiseMethod;
@@ -718,6 +719,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 			gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
+			gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 			if (extraOptions)
 			{
 				gd.addNumericField("Noise", fitConfig.getNoise(), 2);
@@ -839,6 +841,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textDuplicateDistance = numerics.get(n++);
 				textCoordinateShiftFactor = numerics.get(n++);
 				textSignalStrength = numerics.get(n++);
+				textMinPhotons = numerics.get(n++);
 				textPrecisionThreshold = numerics.get(n++);
 				if (extraOptions)
 				{
@@ -1276,6 +1279,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 			fitConfig.setSignalStrength(gd.getNextNumber());
+			fitConfig.setMinPhotons(gd.getNextNumber());
 			if (extraOptions)
 			{
 				fitConfig.setNoise(gd.getNextNumber());
@@ -1335,6 +1339,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				Parameters.isPositive("Duplicate distance", fitConfig.getDuplicateDistance());
 				Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
 				Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+				Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
 				if (extraOptions)
 					Parameters.isPositive("Noise", fitConfig.getNoise());
 				Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
@@ -2246,6 +2251,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
 					textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 					textSignalStrength.setText("" + fitConfig.getSignalStrength());
+					textMinPhotons.setText("" + fitConfig.getMinPhotons());
 					textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 					if (extraOptions)
 					{

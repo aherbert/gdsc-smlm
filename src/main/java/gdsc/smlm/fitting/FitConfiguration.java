@@ -52,6 +52,7 @@ public class FitConfiguration implements Cloneable
 	private double coordinateShift = 1;
 	private double signalThreshold = 0;
 	private double signalStrength = 30;
+	private double minPhotons = 30;
 	private double precisionThreshold = 0;
 	private double nmPerPixel = 0;
 	private double gain = 0;
@@ -588,8 +589,8 @@ public class FitConfiguration implements Cloneable
 
 	/**
 	 * @param signalStrength
-	 *            The signal strength. Used to determine the signal strength for a good fit (signalThreshold = noise x
-	 *            signalStrength)
+	 *            The signal strength. Used to determine the signal strength for a good fit (signalThreshold =
+	 *            max(gain x minPhotons, noise x signalStrength).
 	 */
 	public void setSignalStrength(double signalStrength)
 	{
@@ -603,6 +604,25 @@ public class FitConfiguration implements Cloneable
 	public double getSignalStrength()
 	{
 		return signalStrength;
+	}
+
+	/**
+	 * @return The minimum number of photons
+	 */
+	public double getMinPhotons()
+	{
+		return minPhotons;
+	}
+
+	/**
+	 * @param minPhotons
+	 *            The minimum number of photons. Used to determine the signal strength for a good fit (signalThreshold =
+	 *            max(gain x minPhotons, noise x signalStrength).
+	 */
+	public void setMinPhotons(double minPhotons)
+	{
+		this.minPhotons = minPhotons;
+		setSignalThreshold();
 	}
 
 	/**
@@ -625,8 +645,8 @@ public class FitConfiguration implements Cloneable
 
 	/**
 	 * @param noise
-	 *            The image noise. Used to determine the signal strength for a good fit (signalThreshold = noise x
-	 *            signalStrength)
+	 *            The image noise. Used to determine the signal strength for a good fit (signalThreshold =
+	 *            max(gain x minPhotons, noise x signalStrength).
 	 */
 	public void setNoise(double noise)
 	{
@@ -644,7 +664,7 @@ public class FitConfiguration implements Cloneable
 
 	private void setSignalThreshold()
 	{
-		signalThreshold = noise * signalStrength;
+		signalThreshold = Math.max(noise * signalStrength, minPhotons * gain);
 	}
 
 	/**
@@ -780,18 +800,16 @@ public class FitConfiguration implements Cloneable
 
 		// Check signal threshold
 		final double signal = peakParams[Gaussian2DFunction.SIGNAL + offset];
-		if (signalStrength != 0)
+		// Compare the signal to the desired signal strength
+		if (signal < signalThreshold)
 		{
-			// Compare the signal to the desired signal strength
-			if (signal < signalThreshold)
+			if (log != null)
 			{
-				if (log != null)
-				{
-					log.info("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
-				}
-				//System.out.printf("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
-				return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal / noise);
+				log.info("Bad peak %d: Insufficient signal %g (SNR=%g)\n", n, signal / ((gain > 0) ? gain : 1), signal /
+						noise);
 			}
+			//System.out.printf("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
+			return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
 		}
 
 		// Check widths
@@ -983,12 +1001,14 @@ public class FitConfiguration implements Cloneable
 
 	/**
 	 * @param gain
-	 *            the gain to use when evaluating a fitted peak's localisation precision
+	 *            the gain to use when evaluating a fitted peak's localisation precision. Also used to determine the
+	 *            signal threshold (signalThreshold = max(gain x minPhotons, noise x signalStrength)
 	 */
 	public void setGain(double gain)
 	{
 		invalidateFunctionSolver();
 		this.gain = gain;
+		setSignalThreshold();
 	}
 
 	/**
