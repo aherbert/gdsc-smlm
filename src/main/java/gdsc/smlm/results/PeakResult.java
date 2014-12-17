@@ -111,6 +111,72 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Calculate the localisation variance. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param gain
+	 *            The gain used to convert ADUs to photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location variance in nm of the first peak
+	 */
+	public double getVariance(final double a, final double gain, boolean emCCD)
+	{
+		// Get peak standard deviation in nm. Just use the average of the X & Y.
+		final double s = a * getSD();
+		final double N = getSignal();
+		return getVariance(a, s, N / gain, noise / gain, emCCD);
+	}
+
+	/**
+	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * <p>
+	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param gain
+	 *            The gain used to convert ADUs to photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location precision in nm of the first peak
+	 */
+	public double getMLPrecision(final double a, final double gain, boolean emCCD)
+	{
+		// Get peak standard deviation in nm. Just use the average of the X & Y.
+		final double s = a * getSD();
+		final double N = getSignal();
+		return getMLPrecision(a, s, N / gain, noise / gain, emCCD);
+	}
+
+	/**
+	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * <p>
+	 * This method will use the background noise of the peak to approximate the expected background value of each pixel.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param gain
+	 *            The gain used to convert ADUs to photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location variance in nm of the first peak
+	 */
+	public double getMLVariance(final double a, final double gain, boolean emCCD)
+	{
+		// Get peak standard deviation in nm. Just use the average of the X & Y.
+		final double s = a * getSD();
+		final double N = getSignal();
+		return getMLVariance(a, s, N / gain, noise / gain, emCCD);
+	}
+
+	/**
 	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>
@@ -143,6 +209,114 @@ public class PeakResult implements Comparable<PeakResult>
 		else
 		{
 			return getPrecisionX(a, s, N, b2, 1);
+		}
+	}
+
+	/**
+	 * Calculate the localisation variance. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * This method will use the background noise to approximate the expected background value of each pixel.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b
+	 *            The background noise standard deviation in photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public static double getVariance(double a, double s, double N, double b, boolean emCCD)
+	{
+		// Get background expected value. This is what is actually used in the Mortensen method
+		final double b2 = b * b;
+
+		if (emCCD)
+		{
+			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
+			// Since this has been squared then divide by 2.
+			return getVarianceX(a, s, N, b2 / 2.0, 2);
+		}
+		else
+		{
+			return getVarianceX(a, s, N, b2, 1);
+		}
+	}
+
+	/**
+	 * Calculate the localisation precision for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * <p>
+	 * This method will use the background noise to approximate the expected background value of each pixel.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b
+	 *            The background noise standard deviation in photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location precision in nm in each dimension (X/Y)
+	 */
+	public static double getMLPrecision(double a, double s, double N, double b, boolean emCCD)
+	{
+		// Get background expected value. This is what is actually used in the Mortensen method
+		final double b2 = b * b;
+
+		if (emCCD)
+		{
+			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
+			// Since this has been squared then divide by 2.
+			return getMLPrecisionX(a, s, N, b2 / 2.0, true);
+		}
+		else
+		{
+			return getMLPrecisionX(a, s, N, b2, false);
+		}
+	}
+
+	/**
+	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * <p>
+	 * This method will use the background noise to approximate the expected background value of each pixel.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b
+	 *            The background noise standard deviation in photons
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public static double getMLVariance(double a, double s, double N, double b, boolean emCCD)
+	{
+		// Get background expected value. This is what is actually used in the Mortensen method
+		final double b2 = b * b;
+
+		if (emCCD)
+		{
+			// If an emCCD camera was used then the input standard deviation will already be amplified 
+			// by the EM-gain sqrt(2) factor. To prevent double counting this factor we must divide by it.
+			// Since this has been squared then divide by 2.
+			return getMLVarianceX(a, s, N, b2 / 2.0, true);
+		}
+		else
+		{
+			return getMLVarianceX(a, s, N, b2, false);
 		}
 	}
 
