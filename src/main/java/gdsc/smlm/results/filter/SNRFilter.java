@@ -24,9 +24,9 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 public class SNRFilter extends Filter
 {
 	@XStreamAsAttribute
-	float snr;
+	final double snr;
 
-	public SNRFilter(float snr)
+	public SNRFilter(double snr)
 	{
 		this.snr = snr;
 	}
@@ -54,9 +54,9 @@ public class SNRFilter extends Filter
 		return getSNR(peak) >= this.snr;
 	}
 
-	static float getSNR(PeakResult peak)
+	static double getSNR(PeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Float.POSITIVE_INFINITY;
+		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Double.POSITIVE_INFINITY;
 	}
 
 	@Override

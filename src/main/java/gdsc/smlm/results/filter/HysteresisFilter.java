@@ -37,7 +37,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public abstract class HysteresisFilter extends Filter
 {
 	@XStreamAsAttribute
-	double searchDistance = 2;
+	final double searchDistance;
 	@XStreamOmitField
 	Set<PeakResult> ok;
 

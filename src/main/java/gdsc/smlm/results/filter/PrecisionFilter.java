@@ -26,7 +26,9 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class PrecisionFilter extends Filter
 {
 	@XStreamAsAttribute
-	float precision;
+	final double precision;
+	@XStreamOmitField
+	final double variance;
 	@XStreamOmitField
 	double nmPerPixel = 100;
 	@XStreamOmitField
@@ -36,9 +38,10 @@ public class PrecisionFilter extends Filter
 	@XStreamOmitField
 	double gain = 1;
 
-	public PrecisionFilter(float precision)
+	public PrecisionFilter(double precision)
 	{
 		this.precision = precision;
+		variance = precision * precision;
 	}
 
 	@Override
@@ -73,11 +76,11 @@ public class PrecisionFilter extends Filter
 			// Use the estimated background for the peak
 			final double s = nmPerPixel * peak.getSD();
 			final double N = peak.getSignal();
-			return PeakResult.getPrecisionX(nmPerPixel, s, N,
-					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= precision;
+			return PeakResult.getVarianceX(nmPerPixel, s, N,
+					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= variance;
 		}
 		// Use the background noise to estimate precision 
-		return peak.getPrecision(nmPerPixel, gain, emCCD) <= precision;
+		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
 	}
 
 	@Override

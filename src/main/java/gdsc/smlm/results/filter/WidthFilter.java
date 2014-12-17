@@ -13,7 +13,6 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -29,11 +28,11 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class WidthFilter extends Filter
 {
 	@XStreamAsAttribute
-	float width;
+	final double width;
 	@XStreamOmitField
-	float sigmaThreshold;
+	double sigmaThreshold;
 
-	public WidthFilter(float width)
+	public WidthFilter(double width)
 	{
 		this.width = width;
 	}
@@ -54,12 +53,12 @@ public class WidthFilter extends Filter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the width limit
-		sigmaThreshold = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialPeakWidth0>([\\d\\.]+)");
+		sigmaThreshold = Double.POSITIVE_INFINITY;
+		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			sigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(Float.parseFloat(match.group(1)) * width);
+			sigmaThreshold = Double.parseDouble(match.group(1)) * width;
 		}
 	}
 

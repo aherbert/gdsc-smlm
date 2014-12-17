@@ -27,13 +27,13 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class SNRHysteresisFilter extends HysteresisFilter
 {
 	@XStreamAsAttribute
-	float lowerSnr;
+	final double lowerSnr;
 	@XStreamAsAttribute
-	float range;
+	final double range;
 	@XStreamOmitField
-	float upperSnr;
+	double upperSnr;
 
-	public SNRHysteresisFilter(double searchDistance, float lowerSnr, float range)
+	public SNRHysteresisFilter(double searchDistance, double lowerSnr, double range)
 	{
 		super(searchDistance);
 		this.lowerSnr = lowerSnr;
@@ -62,7 +62,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
-		final float snr = SNRFilter.getSNR(result);
+		final double snr = SNRFilter.getSNR(result);
 		if (snr >= upperSnr)
 			return PeakStatus.OK;
 		else if (snr >= lowerSnr)

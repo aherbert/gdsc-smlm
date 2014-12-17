@@ -25,11 +25,11 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class SignalFilter extends Filter
 {
 	@XStreamAsAttribute
-	float signal;
+	final double signal;
 	@XStreamOmitField
-	float signalThreshold;
+	double signalThreshold;
 
-	public SignalFilter(float signal)
+	public SignalFilter(double signal)
 	{
 		this.signal = signal;
 	}
@@ -50,7 +50,7 @@ public class SignalFilter extends Filter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the signal limit using the gain
-		signalThreshold = (float) (signal * peakResults.getCalibration().gain);
+		signalThreshold = signal * peakResults.getCalibration().gain;
 	}
 
 	@Override

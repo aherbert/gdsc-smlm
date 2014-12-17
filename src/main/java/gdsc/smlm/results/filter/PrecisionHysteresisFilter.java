@@ -28,11 +28,13 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class PrecisionHysteresisFilter extends HysteresisFilter
 {
 	@XStreamAsAttribute
-	float lowerPrecision;
+	final double lowerPrecision;
 	@XStreamAsAttribute
-	float range;
+	final double range;
 	@XStreamOmitField
-	float upperPrecision;
+	final double lowerVariance;
+	@XStreamOmitField
+	final double upperVariance;
 	@XStreamOmitField
 	double nmPerPixel;
 	@XStreamOmitField
@@ -42,11 +44,14 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@XStreamOmitField
 	double bias = 0;
 
-	public PrecisionHysteresisFilter(double searchDistance, float lowerPrecision, float range)
+	public PrecisionHysteresisFilter(double searchDistance, double lowerPrecision, double range)
 	{
 		super(searchDistance);
 		this.lowerPrecision = lowerPrecision;
 		this.range = Math.abs(range);
+		double upperPrecision = lowerPrecision + range;
+		lowerVariance = lowerPrecision * lowerPrecision;
+		upperVariance = upperPrecision * upperPrecision;
 	}
 
 	@Override
@@ -64,7 +69,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		upperPrecision = lowerPrecision + range;
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
@@ -78,20 +82,23 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
-		double p;
+		final double variance;
 		if (bias != 0)
 		{
 			// Use the estimated background for the peak
 			final double s = nmPerPixel * result.getSD();
 			final double N = result.getSignal();
-			p = PeakResult.getPrecisionX(nmPerPixel, s, N,
+			variance = PeakResult.getVarianceX(nmPerPixel, s, N,
 					Math.max(0, result.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
 		}
-		// Use the background noise to estimate precision 
-		p = result.getPrecision(nmPerPixel, gain, emCCD);
-		if (p <= lowerPrecision)
+		else
+		{
+			// Use the background noise to estimate precision 
+			variance = result.getVariance(nmPerPixel, gain, emCCD);
+		}
+		if (variance <= lowerVariance)
 			return PeakStatus.OK;
-		else if (p <= upperPrecision)
+		else if (variance <= upperVariance)
 			return PeakStatus.CANDIDATE;
 		return PeakStatus.REJECT;
 	}
@@ -105,7 +112,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	public String getNumericalValueName()
 	{
-		return "Precision + " + (upperPrecision - lowerPrecision);
+		return "Precision +" + range;
 	}
 
 	/*

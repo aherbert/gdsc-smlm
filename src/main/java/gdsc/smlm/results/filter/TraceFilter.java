@@ -30,9 +30,9 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class TraceFilter extends Filter
 {
 	@XStreamAsAttribute
-	double d;
+	final double d;
 	@XStreamAsAttribute
-	int t;
+	final int t;
 	@XStreamOmitField
 	Set<PeakResult> ok;
 

@@ -24,19 +24,19 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 public class CoordinateFilter extends Filter
 {
 	@XStreamAsAttribute
-	float minX;
+	final double minX;
 	@XStreamAsAttribute
-	float maxX;
+	final double maxX;
 	@XStreamAsAttribute
-	float minY;
+	final double minY;
 	@XStreamAsAttribute
-	float maxY;
+	final double maxY;
 
-	public CoordinateFilter(float minX, float maxX, float minY, float maxY)
+	public CoordinateFilter(double minX, double maxX, double minY, double maxY)
 	{
 		if (maxX < minX)
 		{
-			float f = maxX;
+			double f = maxX;
 			maxX = minX;
 			minX = f;
 		}
@@ -44,7 +44,7 @@ public class CoordinateFilter extends Filter
 		this.maxX = maxX;
 		if (maxY < minY)
 		{
-			float f = maxY;
+			double f = maxY;
 			maxY = minY;
 			minY = f;
 		}

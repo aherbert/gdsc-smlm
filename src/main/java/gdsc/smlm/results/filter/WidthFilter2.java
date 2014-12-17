@@ -13,7 +13,6 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -29,19 +28,19 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class WidthFilter2 extends Filter
 {
 	@XStreamAsAttribute
-	float minWidth;
+	final double minWidth;
 	@XStreamAsAttribute
-	float maxWidth;
+	final double maxWidth;
 	@XStreamOmitField
-	float lowerSigmaThreshold;
+	double lowerSigmaThreshold;
 	@XStreamOmitField
-	float upperSigmaThreshold;
+	double upperSigmaThreshold;
 
-	public WidthFilter2(float minWidth, float maxWidth)
+	public WidthFilter2(double minWidth, double maxWidth)
 	{
 		if (maxWidth < minWidth)
 		{
-			float f = maxWidth;
+			double f = maxWidth;
 			maxWidth = minWidth;
 			minWidth = f;
 		}
@@ -66,14 +65,14 @@ public class WidthFilter2 extends Filter
 	{
 		// Set the width limit
 		lowerSigmaThreshold = 0;
-		upperSigmaThreshold = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialPeakWidth0>([\\d\\.]+)");
+		upperSigmaThreshold = Double.POSITIVE_INFINITY;
+		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			float s = Float.parseFloat(match.group(1));
-			lowerSigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(s * minWidth);
-			upperSigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(s * maxWidth);
+			double s = Double.parseDouble(match.group(1));
+			lowerSigmaThreshold = s * minWidth;
+			upperSigmaThreshold = s * maxWidth;
 		}
 	}
 

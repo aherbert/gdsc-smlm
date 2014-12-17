@@ -13,7 +13,6 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -29,22 +28,22 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class SNRFilter2 extends Filter
 {
 	@XStreamAsAttribute
-	float snr;
+	final double snr;
 	@XStreamAsAttribute
-	float minWidth;
+	final double minWidth;
 	@XStreamAsAttribute
-	float maxWidth;
+	final double maxWidth;
 	@XStreamOmitField
-	float lowerSigmaThreshold;
+	double lowerSigmaThreshold;
 	@XStreamOmitField
-	float upperSigmaThreshold;
+	double upperSigmaThreshold;
 
-	public SNRFilter2(float snr, float minWidth, float maxWidth)
+	public SNRFilter2(double snr, double minWidth, double maxWidth)
 	{
 		this.snr = snr;
 		if (maxWidth < minWidth)
 		{
-			float f = maxWidth;
+			double f = maxWidth;
 			maxWidth = minWidth;
 			minWidth = f;
 		}
@@ -69,27 +68,26 @@ public class SNRFilter2 extends Filter
 	{
 		// Set the width limit
 		lowerSigmaThreshold = 0;
-		upperSigmaThreshold = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialPeakWidth0>([\\d\\.]+)");
+		upperSigmaThreshold = Double.POSITIVE_INFINITY;
+		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			float s = Float.parseFloat(match.group(1));
-			lowerSigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(s * minWidth);
-			upperSigmaThreshold = (float) Gaussian2DFitter.fwhm2sd(s * maxWidth);
+			double s = Double.parseDouble(match.group(1));
+			lowerSigmaThreshold = s * minWidth;
+			upperSigmaThreshold = s * maxWidth;
 		}
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold &&
-				peak.getSD() <= upperSigmaThreshold;
+		return getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
 	}
 
-	static float getSNR(PeakResult peak)
+	static double getSNR(PeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Float.POSITIVE_INFINITY;
+		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Double.POSITIVE_INFINITY;
 	}
 
 	@Override
