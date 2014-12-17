@@ -631,7 +631,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public double getPrecisionThreshold()
 	{
-		return precisionThreshold;
+		return (precisionThreshold>0) ? Math.sqrt(precisionThreshold) : 0;
 	}
 
 	/**
@@ -640,7 +640,8 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setPrecisionThreshold(double precisionThreshold)
 	{
-		this.precisionThreshold = precisionThreshold;
+		// Store the squared threshold
+		this.precisionThreshold = precisionThreshold * precisionThreshold;
 	}
 
 	/**
@@ -837,28 +838,39 @@ public class FitConfiguration implements Cloneable
 		{
 			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) * 0.5;
 
-			final double precision;
+			double variance = 0;
 			// We can calculate the precision using the estimated noise for the image or using the expected number
 			// of background photons at the location.
 			//precision = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
 
-			// If using a MLE then can get the deviations directly from the results assuming that maximum likelihood
-			// achieves the Cramer-Roa lower bounds.
+			// Check using the formula which uses the estimated background.
+			// This allows for better filtering when the background is variable, e.g. when imaging cells.
 			if (fitSolver == FitSolver.MLE)
 			{
-				precision = PeakResult.getMLPrecisionX(nmPerPixel, nmPerPixel * sd, signal / gain,
-						Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD, 5);
+				try
+				{
+					// This may be slow due to the integration required within the formula.
+					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
+							Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD, 5);
+				}
+				catch (Exception e)
+				{
+					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
+					// problems with the integration
+
+					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
+							Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+				}
 			}
 			else
 			{
-				// Check using the formula which uses the estimated background.
-				// This allows for better filtering when the background is variable, e.g. when imaging cells.
-				precision = PeakResult.getPrecisionX(nmPerPixel, nmPerPixel * sd, signal / gain,
+				variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
 						Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
 			}
 
-			if (precision > precisionThreshold)
+			if (variance > precisionThreshold)
 			{
+				final double precision = Math.sqrt(variance);
 				if (log != null)
 				{
 					log.info("Bad peak %d: Insufficient precision (%gx)\n", n, precision);
