@@ -1624,6 +1624,7 @@ public class TraceMolecules implements PlugIn
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
 			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
 			Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
 			Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 		}
