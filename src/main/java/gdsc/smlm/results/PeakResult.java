@@ -326,7 +326,8 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD)
 	{
-		return getMLVarianceX(a, s, N, b2, emCCD, 20);
+		// The class JUnit test shows that 10 integration points is the fastest for realistic input parameters.
+		return getMLVarianceX(a, s, N, b2, emCCD, 10);
 	}
 
 	/**
