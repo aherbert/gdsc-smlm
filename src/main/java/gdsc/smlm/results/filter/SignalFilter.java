@@ -27,7 +27,7 @@ public class SignalFilter extends Filter
 	@XStreamAsAttribute
 	final double signal;
 	@XStreamOmitField
-	double signalThreshold;
+	float signalThreshold;
 
 	public SignalFilter(double signal)
 	{
@@ -50,7 +50,7 @@ public class SignalFilter extends Filter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the signal limit using the gain
-		signalThreshold = signal * peakResults.getCalibration().gain;
+		signalThreshold = (float) (signal * peakResults.getCalibration().gain);
 	}
 
 	@Override

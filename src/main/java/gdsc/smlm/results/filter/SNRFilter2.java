@@ -28,17 +28,17 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class SNRFilter2 extends Filter
 {
 	@XStreamAsAttribute
-	final double snr;
+	final float snr;
 	@XStreamAsAttribute
 	final double minWidth;
 	@XStreamAsAttribute
 	final double maxWidth;
 	@XStreamOmitField
-	double lowerSigmaThreshold;
+	float lowerSigmaThreshold;
 	@XStreamOmitField
-	double upperSigmaThreshold;
+	float upperSigmaThreshold;
 
-	public SNRFilter2(double snr, double minWidth, double maxWidth)
+	public SNRFilter2(float snr, double minWidth, double maxWidth)
 	{
 		this.snr = snr;
 		if (maxWidth < minWidth)
@@ -68,14 +68,14 @@ public class SNRFilter2 extends Filter
 	{
 		// Set the width limit
 		lowerSigmaThreshold = 0;
-		upperSigmaThreshold = Double.POSITIVE_INFINITY;
+		upperSigmaThreshold = Float.POSITIVE_INFINITY;
 		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
 			double s = Double.parseDouble(match.group(1));
-			lowerSigmaThreshold = s * minWidth;
-			upperSigmaThreshold = s * maxWidth;
+			lowerSigmaThreshold = (float) (s * minWidth);
+			upperSigmaThreshold = (float) (s * maxWidth);
 		}
 	}
 
@@ -85,9 +85,9 @@ public class SNRFilter2 extends Filter
 		return getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
 	}
 
-	static double getSNR(PeakResult peak)
+	static float getSNR(PeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Double.POSITIVE_INFINITY;
+		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Float.POSITIVE_INFINITY;
 	}
 
 	@Override

@@ -32,9 +32,9 @@ public class WidthFilter2 extends Filter
 	@XStreamAsAttribute
 	final double maxWidth;
 	@XStreamOmitField
-	double lowerSigmaThreshold;
+	float lowerSigmaThreshold;
 	@XStreamOmitField
-	double upperSigmaThreshold;
+	float upperSigmaThreshold;
 
 	public WidthFilter2(double minWidth, double maxWidth)
 	{
@@ -65,14 +65,14 @@ public class WidthFilter2 extends Filter
 	{
 		// Set the width limit
 		lowerSigmaThreshold = 0;
-		upperSigmaThreshold = Double.POSITIVE_INFINITY;
+		upperSigmaThreshold = Float.POSITIVE_INFINITY;
 		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
 			double s = Double.parseDouble(match.group(1));
-			lowerSigmaThreshold = s * minWidth;
-			upperSigmaThreshold = s * maxWidth;
+			lowerSigmaThreshold = (float) (s * minWidth);
+			upperSigmaThreshold = (float) (s * maxWidth);
 		}
 	}
 
