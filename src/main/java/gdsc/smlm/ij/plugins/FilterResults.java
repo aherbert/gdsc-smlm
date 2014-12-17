@@ -88,7 +88,7 @@ public class FilterResults implements PlugIn
 			IJ.showStatus("");
 			return;
 		}
-		
+
 		analyseResults();
 
 		if (!showDialog())
@@ -108,6 +108,9 @@ public class FilterResults implements PlugIn
 		gain = results.getGain();
 		emCCD = results.isEMCCD();
 
+		double maxVariance = maxPrecision * maxPrecision;
+		double minVariance = minPrecision * minPrecision;
+
 		int size = results.size();
 		int i = 0;
 		for (PeakResult result : results.getResults())
@@ -115,31 +118,32 @@ public class FilterResults implements PlugIn
 			if (i % 64 == 0)
 				IJ.showProgress(i, size);
 
-			float drift = getDrift(result);
+			final float drift = getDrift(result);
 			if (maxDrift < drift)
 				maxDrift = drift;
 			if (minDrift > drift)
 				minDrift = drift;
 
-			float signal = result.getSignal();
+			final float signal = result.getSignal();
 			if (maxSignal < signal)
 				maxSignal = signal;
 			if (minSignal > signal)
 				minSignal = signal;
 
-			float snr = getSNR(signal, result);
+			final float snr = getSNR(result);
 			if (maxSNR < snr)
 				maxSNR = snr;
 			if (minSNR > snr)
 				minSNR = snr;
 
-			double precision = getPrecision(result, signal);
-			if (maxPrecision < precision)
-				maxPrecision = precision;
-			if (minPrecision > precision)
-				minPrecision = precision;
+			// Use variance to avoid sqrt()
+			final double variance = getVariance(result);
+			if (maxVariance < variance)
+				maxVariance = variance;
+			if (minVariance > variance)
+				minVariance = variance;
 
-			float width = getWidth(result);
+			final float width = getWidth(result);
 			averageWidth += width;
 			if (maxWidth < width)
 				maxWidth = width;
@@ -147,6 +151,9 @@ public class FilterResults implements PlugIn
 				minWidth = width;
 		}
 		averageWidth /= results.size();
+
+		maxPrecision = Math.sqrt(maxVariance);
+		minPrecision = Math.sqrt(minVariance);
 
 		IJ.showProgress(1);
 		IJ.showStatus("");
@@ -159,19 +166,17 @@ public class FilterResults implements PlugIn
 		return drift;
 	}
 
-	private float getSNR(float signal, PeakResult result)
+	private float getSNR(PeakResult result)
 	{
 		if (result.noise <= 0)
 			return 0;
-		return signal / result.noise;
+		return result.getSignal() / result.noise;
 	}
-	
-	private double getPrecision(PeakResult result, float signal)
+
+	private double getVariance(PeakResult result)
 	{
-		final double s = result.getSD() * results.getNmPerPixel();
-		double precision = PeakResult.getPrecision(nmPerPixel, s, signal / gain,
-				result.noise / gain, emCCD);
-		return precision;
+		return PeakResult.getVariance(nmPerPixel, result.getSD() * nmPerPixel, result.getSignal() / gain, result.noise /
+				gain, emCCD);
 	}
 
 	private float getWidth(PeakResult result)
@@ -237,29 +242,26 @@ public class FilterResults implements PlugIn
 		}
 
 		int i = 0;
-		int size = results.size();
+		final int size = results.size();
+		final double maxVariance = filterSettings.maxPrecision * filterSettings.maxPrecision;
 		for (PeakResult result : results.getResults())
 		{
 			if (i % 64 == 0)
 				IJ.showProgress(i, size);
 
-			float drift = getDrift(result);
-			if (drift > filterSettings.maxDrift)
+			if (getDrift(result) > filterSettings.maxDrift)
 				continue;
 
-			float signal = result.getSignal();
-			if (signal < filterSettings.minSignal)
+			if (result.getSignal() < filterSettings.minSignal)
 				continue;
 
-			float snr = getSNR(signal, result);
-			if (snr < filterSettings.minSNR)
+			if (getSNR(result) < filterSettings.minSNR)
 				continue;
 
-			double precision = getPrecision(result, signal);
-			if (precision > filterSettings.maxPrecision)
+			if (getVariance(result) > maxVariance)
 				continue;
 
-			float width = getWidth(result);
+			final float width = getWidth(result);
 			if (width < filterSettings.minWidth || width > filterSettings.maxWidth)
 				continue;
 
