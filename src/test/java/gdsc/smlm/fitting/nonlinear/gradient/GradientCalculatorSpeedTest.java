@@ -166,6 +166,14 @@ public class GradientCalculatorSpeedTest
 			for (int j = 0; j < beta.length; j++)
 				Assert.assertTrue("Observations+Noise: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
 		}
+		
+		// Only the diagonal Fisher Information has been unrolled into the other calculators
+		for (int i = 0; i < paramsList.size(); i++)
+		{
+			beta = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
+			beta2 = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
+			Assert.assertTrue("Not same diagonal @ " + i, eq.almostEqualComplement(beta, beta2));
+		} 
 	}
 	
 	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams)
@@ -204,7 +212,27 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		log("GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", start1, nparams, start2, (1.0 * start1) / start2);
+		log("Linearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", start1, nparams, start2, (1.0 * start1) / start2);
+		if (TestSettings.ASSERT_SPEED_TESTS)
+			Assert.assertTrue(start2 < start1);
+		
+		for (int i = 0; i < paramsList.size(); i++)
+			calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
+
+		for (int i = 0; i < paramsList.size(); i++)
+			calc2.fisherInformationDiagonal(x.length, paramsList.get(i), func);
+
+		start1 = System.nanoTime();
+		for (int i = 0; i < paramsList.size(); i++)
+			calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
+		start1 = System.nanoTime() - start1;
+
+		start2 = System.nanoTime();
+		for (int i = 0; i < paramsList.size(); i++)
+			calc2.fisherInformationDiagonal(x.length, paramsList.get(i), func);
+		start2 = System.nanoTime() - start2;
+
+		log("Fisher Diagonal GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", start1, nparams, start2, (1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(start2 < start1);
 	}

@@ -34,7 +34,8 @@ public class GradientCalculator7 extends GradientCalculator
 	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
 	 * gdsc.fitting.function.NonLinearFunction)
 	 */
-	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
+			NonLinearFunction func)
 	{
 		double ssx = 0;
 		double[] dy_da = new double[a.length];
@@ -316,5 +317,35 @@ public class GradientCalculator7 extends GradientCalculator
 		alpha[5][6] = alpha[6][5];
 
 		return checkGradients(alpha, beta, nparams, ssx);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#fisherInformationDiagonal(int, double[],
+	 * gdsc.smlm.function.NonLinearFunction)
+	 */
+	public double[] fisherInformationDiagonal(final int n, final double[] a, final NonLinearFunction func)
+	{
+		final double[] dy_da = new double[a.length];
+
+		final double[] alpha = new double[nparams];
+
+		func.initialise(a);
+
+		for (int i = 0; i < n; i++)
+		{
+			final double yi = 1.0 / func.eval(i, dy_da);
+			alpha[0] += dy_da[0] * dy_da[0] * yi;
+			alpha[1] += dy_da[1] * dy_da[1] * yi;
+			alpha[2] += dy_da[2] * dy_da[2] * yi;
+			alpha[3] += dy_da[3] * dy_da[3] * yi;
+			alpha[4] += dy_da[4] * dy_da[4] * yi;
+			alpha[5] += dy_da[5] * dy_da[5] * yi;
+			alpha[6] += dy_da[6] * dy_da[6] * yi;
+		}
+
+		checkGradients(alpha, nparams);
+		return alpha;
 	}
 }
