@@ -107,7 +107,7 @@ public class PeakResult implements Comparable<PeakResult>
 		// Get peak standard deviation in nm. Just use the average of the X & Y.
 		final double s = a * getSD();
 		final double N = getSignal();
-		return getPrecision(a, s, N / gain, noise / gain, true);
+		return getPrecision(a, s, N / gain, noise / gain, emCCD);
 	}
 
 	/**
@@ -194,6 +194,57 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static double getPrecisionX(final double a, final double s, final double N, final double b2, final double F)
 	{
+		return Math.sqrt(getVarianceX(a, s, N, b2, F));
+	}
+
+	/**
+	 * Calculate the localisation variance for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * <p>
+	 * If the expected photons per pixel is unknown then use the standard deviation across the image and the method
+	 * {@link #getPrecision(double, double, double, double, boolean)}.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public static double getVarianceX(final double a, final double s, final double N, final double b2, boolean emCCD)
+	{
+		// EM-CCD noise factor
+		final double F = (emCCD) ? 2 : 1;
+		return getVarianceX(a, s, N, b2, F);
+	}
+
+	/**
+	 * Calculate the localisation variance for least squares estimation. Uses the Mortensen formula for an EMCCD camera
+	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param F
+	 *            EM-CCD noise factor (usually 2 for an EM-CCD camera, else 1)
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public static double getVarianceX(final double a, final double s, final double N, final double b2, final double F)
+	{
 		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background. 
 		// If the background is X then the variance of a Poisson distribution will be X 
 		// and the standard deviation at each pixel will be sqrt(X). Thus the Mortensen formula
@@ -204,7 +255,7 @@ public class PeakResult implements Comparable<PeakResult>
 		final double sa2 = s * s + a2 / 12.0;
 		// 16 / 9 = 1.7777777778
 		// 8 * pi = 25.13274123
-		return Math.sqrt(F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b2) / (N * a2)));
+		return F * (sa2 / N) * (1.7777777778 + (25.13274123 * sa2 * b2) / (N * a2));
 	}
 
 	/**
@@ -227,16 +278,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static double getMLPrecisionX(double a, double s, double N, double b2, boolean emCCD)
 	{
-		// EM-CCD noise factor
-		final double F = (emCCD) ? 2 : 1;
-		final double a2 = a * a;
-		// Adjustment for square pixels
-		final double sa2 = s * s + a2 / 12.0;
-
-		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
-		final double I1 = computeI1(rho, 20);
-
-		return Math.sqrt(F * (sa2 / N) * (1 / I1));
+		return Math.sqrt(getMLVarianceX(a, s, N, b2, emCCD));
 	}
 
 	/**
@@ -261,6 +303,54 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static double getMLPrecisionX(double a, double s, double N, double b2, boolean emCCD, int integrationPoints)
 	{
+		return Math.sqrt(getMLVarianceX(a, s, N, b2, emCCD, integrationPoints));
+	}
+
+	/**
+	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD)
+	{
+		return getMLVarianceX(a, s, N, b2, emCCD, 20);
+	}
+
+	/**
+	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
+	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * 
+	 * @param a
+	 *            The size of the pixels in nm
+	 * @param s
+	 *            The peak standard deviation in nm
+	 * @param N
+	 *            The peak signal in photons
+	 * @param b2
+	 *            The expected number of photons per pixel from a background with spatially constant
+	 *            expectation value across the image (Note that this is b^2 not b, which could be the standard deviation
+	 *            of the image pixels)
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @param integrationPoints
+	 *            the number of integration points for the LegendreGaussIntegrator
+	 * @return The location variance in nm in each dimension (X/Y)
+	 */
+	public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD, int integrationPoints)
+	{
 		// EM-CCD noise factor
 		final double F = (emCCD) ? 2 : 1;
 		final double a2 = a * a;
@@ -270,7 +360,7 @@ public class PeakResult implements Comparable<PeakResult>
 		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
 		final double I1 = computeI1(rho, integrationPoints);
 
-		return Math.sqrt(F * (sa2 / N) * (1 / I1));
+		return F * (sa2 / N) * (1 / I1);
 	}
 
 	/**
