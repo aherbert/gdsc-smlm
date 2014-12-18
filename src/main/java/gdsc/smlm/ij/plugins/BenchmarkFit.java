@@ -108,6 +108,8 @@ public class BenchmarkFit implements PlugIn
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms) ? new StoredDataStatistics() : new Statistics();
 			sa = getSa();
+			
+			createBounds();			
 		}
 
 		/*
@@ -198,6 +200,24 @@ public class BenchmarkFit implements PlugIn
 						continue;
 					}
 
+					// Q. Should we do width bounds checking?
+					if (fitConfig.isWidth0Fitting())
+					{
+						if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
+								params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
+						{
+							continue;
+						}
+					}
+					if (fitConfig.isWidth1Fitting())
+					{
+						if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
+								params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
+						{
+							continue;
+						}
+					}
+
 					// Subtract the fitted bias from the background
 					if (!fitConfig.isRemoveBiasBeforeFitting())
 						params[Gaussian2DFunction.BACKGROUND] -= bias;
@@ -227,6 +247,11 @@ public class BenchmarkFit implements PlugIn
 
 		private void setBounds(FunctionSolver solver)
 		{
+			solver.setBounds(lb, ub);
+		}
+		
+		private void createBounds()
+		{
 			if (ub == null)
 			{
 				ub = new double[7];
@@ -248,7 +273,6 @@ public class BenchmarkFit implements PlugIn
 				lb[Gaussian2DFunction.Y_SD] = s / wf;
 				ub[Gaussian2DFunction.Y_SD] = s * wf;
 			}
-			solver.setBounds(lb, ub);
 		}
 
 		private void setConstraints(FunctionSolver solver)
