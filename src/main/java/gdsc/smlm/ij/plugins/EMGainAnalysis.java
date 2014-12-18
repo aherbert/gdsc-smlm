@@ -241,7 +241,7 @@ public class EMGainAnalysis implements PlugInFilter
 		Utils.display(TITLE, plot);
 
 		// Perform a fit
-		CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16);
+		CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16, 1e-6, 1e-16);
 		double[] startPoint = new double[] { photons, gain, noise, bias };
 		final int maxEval = 3000;
 
