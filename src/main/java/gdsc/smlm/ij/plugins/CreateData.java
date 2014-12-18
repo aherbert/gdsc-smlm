@@ -100,6 +100,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math3.distribution.CustomGammaDistribution;
+import org.apache.commons.math3.distribution.GammaDistribution;
+import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
@@ -393,8 +396,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
 						emCCD);
 				double upperP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
-				double lowerMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
-				double upperMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+				double lowerMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
+						b2, emCCD);
+				double upperMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2,
+						emCCD);
 				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 				//final double b = Math.sqrt(b2);
@@ -915,6 +920,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (pulseInterval > 1)
 				return new UniformIllumination(1, intensity, pulseInterval);
+			uniformBackground = true;
 			return new UniformIllumination(intensity);
 		}
 	}
@@ -1665,8 +1671,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				if (settings.getCameraGain() != 0)
 					readNoise *= settings.getCameraGain();
 
+				RandomGenerator r = random.getRandomGenerator();
 				for (int i = 0; i < imageReadNoise.length; i++)
-					imageReadNoise[i] += random.nextGaussian(0, readNoise);
+					imageReadNoise[i] += readNoise * r.nextGaussian();
 			}
 
 			// Extract the localisations and draw if we have a PSF model
@@ -1710,9 +1717,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						else
 						{
 							intensity = localisation.getIntensity();
-							photonsRendered = psfModel.create3D(data, settings.size, settings.size,
-									intensity, localisation.getX(), localisation.getY(),
-									localisation.getZ(), false);
+							photonsRendered = psfModel.create3D(data, settings.size, settings.size, intensity,
+									localisation.getX(), localisation.getY(), localisation.getZ(), false);
 						}
 						//addDraw(photons);
 						if (photonsRendered > 0)
@@ -1845,7 +1851,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			// Apply EM gain and add Gaussian read noise after all the photons have been simulated
-			final boolean tubbsModel = true;
+			final boolean tubbsModel = false;
 			if (settings.getEmGain() > 1) // This could be >=1 but the rest of the code ignores EM-gain if it is <=1
 			{
 				// See: https://www.andor.com/learning-academy/sensitivity-making-sense-of-sensitivity
@@ -1880,11 +1886,24 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				else
 				{
 					// Standard gamma distribution
+					// This is what is modelled in the Poisson-Gamma-Gaussian likelihood model
+
+					// Since the call random.nextGamma(...) creates a Gamma distribution 
+					// which pre-calculates factors only using the scale parameter we 
+					// create a custom gamma distribution where the shape can be set as a property.
+					CustomGammaDistribution dist = new CustomGammaDistribution(random.getRandomGenerator(), 1,
+							settings.getEmGain(), GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+
 					for (int i = 0; i < image.length; i++)
 					{
 						if (image[i] <= 0)
+						{
+							// What about modelling spontaneous electron events?
 							continue;
-						image[i] = (float) random.nextGamma(image[i], settings.getEmGain());
+						}
+						//image[i] = (float) random.nextGamma(image[i], settings.getEmGain());
+						dist.setShapeUnsafe(image[i]);
+						image[i] = (float) dist.sample();
 					}
 				}
 			}
@@ -2028,6 +2047,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	private float[] backgroundPixels = null;
+	private boolean uniformBackground = false;
 
 	private float[] createBackground(RandomDataGenerator random)
 	{
@@ -2040,10 +2060,24 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			createBackgroundPixels();
 			pixels2 = Arrays.copyOf(backgroundPixels, backgroundPixels.length);
 
-			// Add Poisson noise
-			for (int i = 0; i < pixels2.length; i++)
+			// Add Poisson noise.
+			if (uniformBackground)
 			{
-				pixels2[i] = random.nextPoisson(pixels2[i]);
+				// If using a uniform illumination then we can use a fixed Poisson distribution
+				PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(), pixels2[0],
+		                PoissonDistribution.DEFAULT_EPSILON,
+		                PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+				for (int i = 0; i < pixels2.length; i++)
+				{
+					pixels2[i] = dist.sample();
+				}
+			}
+			else
+			{
+				for (int i = 0; i < pixels2.length; i++)
+				{
+					pixels2[i] = random.nextPoisson(pixels2[i]);
+				}
 			}
 		}
 		else
