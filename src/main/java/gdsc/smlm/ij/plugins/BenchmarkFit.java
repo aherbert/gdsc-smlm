@@ -19,6 +19,7 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -57,7 +58,7 @@ public class BenchmarkFit implements PlugIn
 	private static boolean signalFitting = true;
 	private static int histogramBins = 100;
 
-	private static TextWindow summaryTable = null;
+	private static TextWindow summaryTable = null, analysisTable = null;
 
 	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)",
 			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)", "dSax (nm)",
@@ -79,6 +80,57 @@ public class BenchmarkFit implements PlugIn
 	private double[] answer = new double[7];
 	private Rectangle region = null;
 
+	// Used to store all the results for cross-method comparison
+	private double[][][] results;
+	private long[] resultsTime;
+
+	public class BenchmarkResult
+	{
+		/**
+		 * The parameters used to create the data
+		 */
+		final BenchmarkParameters benchmarkParameters;
+		/**
+		 * The actual parameters (with XY position adjusted for the region size)
+		 */
+		final double[] answer;
+		/**
+		 * The string description of the parameters used to create and then fit the data
+		 */
+		final String parameters;
+		/**
+		 * Results conversion factors
+		 */
+		final double[] convert;
+		/**
+		 * The results of fitting the data. Results are only stored if fitting was successful.
+		 */
+		final double[][][] results;
+		/**
+		 * The time for fitting the data.
+		 */
+		final long[] resultsTime;
+
+		public BenchmarkResult(BenchmarkParameters benchmarkParameters, double[] answer, String parameters,
+				double[] convert, double[][][] results, long[] resultsTime)
+		{
+			this.benchmarkParameters = benchmarkParameters;
+			this.answer = answer;
+			this.parameters = parameters;
+			this.convert = convert;
+			this.results = results;
+			this.resultsTime = resultsTime;
+		}
+	}
+
+	/**
+	 * Store all the results from fitting on the same benchmark dataset
+	 */
+	public static LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<BenchmarkFit.BenchmarkResult>();
+
+	/**
+	 * Used to allow multi-threading of the fitting method
+	 */
 	private class Worker implements Runnable
 	{
 		volatile boolean finished = false;
@@ -230,18 +282,13 @@ public class BenchmarkFit implements PlugIn
 			}
 			long time = System.nanoTime() - start;
 
-			// Store the results from each run
-			for (int i = 0; i < c; i++)
+			addResults(stats, answer, benchmarkParameters.p[frame], sa, time, result, c);
+
+			// If all the centre start-points were successful then store the results for later analysis
+			if (c == xy.length)
 			{
-				final double[] params = result[i];
-				for (int j = 0; j < params.length; j++)
-				{
-					stats[j].add(params[j] - answer[j]);
-				}
-				stats[7].add(time);
-				stats[8].add(params[Gaussian2DFunction.SIGNAL] - benchmarkParameters.p[frame]);
-				stats[9].add(params[Gaussian2DFunction.X_SD] - sa);
-				stats[10].add(params[Gaussian2DFunction.Y_SD] - sa);
+				results[frame] = result;
+				resultsTime[frame] = time;
 			}
 		}
 
@@ -290,25 +337,67 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
+	/**
+	 * Add the results to the statistics
+	 * 
+	 * @param stats
+	 * @param answer
+	 * @param photons
+	 * @param sa
+	 * @param time
+	 * @param result
+	 * @param c
+	 */
+	private static void addResults(Statistics[] stats, double[] answer, double photons, double sa, long time,
+			double[][] result, int c)
+	{
+		// Store the results from each run
+		for (int i = 0; i < c; i++)
+		{
+			final double[] params = result[i];
+			for (int j = 0; j < params.length; j++)
+			{
+				stats[j].add(params[j] - answer[j]);
+			}
+			stats[8].add(params[Gaussian2DFunction.SIGNAL] - photons);
+			stats[9].add(params[Gaussian2DFunction.X_SD] - sa);
+			stats[10].add(params[Gaussian2DFunction.Y_SD] - sa);
+		}
+
+		stats[7].add(time);
+	}
+
 	public void run(String arg)
 	{
-		if (CreateData.benchmarkParameters == null)
+		if ("analysis".equals(arg))
 		{
-			IJ.error(TITLE, "No benchmark parameters in memory");
-			return;
+			if (benchmarkResults.isEmpty())
+			{
+				IJ.error(TITLE, "No benchmark results in memory");
+				return;
+			}
+			runAnalysis();
 		}
-		benchmarkParameters = CreateData.benchmarkParameters;
-		imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
-		if (imp == null || imp.getStackSize() != benchmarkParameters.frames)
+		else
 		{
-			IJ.error(TITLE, "No benchmark image to match the parameters in memory");
-			return;
+			if (CreateData.benchmarkParameters == null)
+			{
+				IJ.error(TITLE, "No benchmark parameters in memory");
+				return;
+			}
+			benchmarkParameters = CreateData.benchmarkParameters;
+			imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
+			if (imp == null || imp.getStackSize() != benchmarkParameters.frames)
+			{
+				IJ.error(TITLE, "No benchmark image to match the parameters in memory");
+				return;
+			}
+
+			if (!showDialog())
+				return;
+
+			run();
 		}
-
-		if (!showDialog())
-			return;
-
-		run();
 	}
 
 	private boolean showDialog()
@@ -443,7 +532,7 @@ public class BenchmarkFit implements PlugIn
 
 		// Create a pool of workers
 		int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 3);
+		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 		List<Worker> workers = new LinkedList<Worker>();
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
@@ -455,11 +544,17 @@ public class BenchmarkFit implements PlugIn
 			t.start();
 		}
 
-		// Fit the frames with simulated photons
 		final int totalFrames = benchmarkParameters.frames;
+
+		// Store all the fitting results
+		results = new double[totalFrames][][];
+		resultsTime = new long[totalFrames];
+
+		// Fit the frames
 		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
 		for (int i = 0; i < totalFrames; i++)
 		{
+			// Only fit if there were simulated photons
 			if (benchmarkParameters.p[i] > 0)
 			{
 				put(jobs, i);
@@ -475,24 +570,13 @@ public class BenchmarkFit implements PlugIn
 		{
 			put(jobs, -1);
 		}
-		IJ.showProgress(1);
-		IJ.showStatus("Collecting results ...");
 
-		// Collect the results
-		Statistics[] stats = new Statistics[NAMES.length];
+		// Wait for all to finish
 		for (int i = 0; i < threads.size(); i++)
 		{
 			try
 			{
 				threads.get(i).join();
-				Statistics[] next = workers.get(i).stats;
-				for (int j = 0; j < next.length; j++)
-				{
-					if (stats[j] == null)
-						stats[j] = next[j];
-					else
-						stats[j].add(next[j]);
-				}
 			}
 			catch (InterruptedException e)
 			{
@@ -500,6 +584,23 @@ public class BenchmarkFit implements PlugIn
 			}
 		}
 		threads.clear();
+
+		IJ.showProgress(1);
+		IJ.showStatus("Collecting results ...");
+
+		// Collect the results
+		Statistics[] stats = new Statistics[NAMES.length];
+		for (int i = 0; i < workers.size(); i++)
+		{
+			Statistics[] next = workers.get(i).stats;
+			for (int j = 0; j < next.length; j++)
+			{
+				if (stats[j] == null)
+					stats[j] = next[j];
+				else
+					stats[j].add(next[j]);
+			}
+		}
 		workers.clear();
 
 		// Show a table of the results
@@ -626,6 +727,8 @@ public class BenchmarkFit implements PlugIn
 		createTable();
 
 		StringBuilder sb = new StringBuilder();
+
+		// Create the benchmark settings and the fitting settings
 		sb.append(benchmarkParameters.getMolecules()).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.getSignal())).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.s)).append("\t");
@@ -667,12 +770,24 @@ public class BenchmarkFit implements PlugIn
 		else
 			sb.append("\t");
 
-		sb.append("\t");
-		final double recall = (double) (stats[0].getN() / 5) / benchmarkParameters.getMolecules();
-		sb.append(Utils.rounded(recall));
-
 		// Convert to units of the image (ADUs and pixels)		
 		double[] convert = getConversionFactors();
+
+		// Store the results for fitting on this benchmark dataset
+		BenchmarkResult benchmarkResult = new BenchmarkResult(benchmarkParameters, answer, sb.toString(), convert,
+				this.results, this.resultsTime);
+		if (!benchmarkResults.isEmpty())
+		{
+			// Clear the results if the benchmark has changed
+			if (benchmarkResults.getFirst().benchmarkParameters.id != benchmarkParameters.id)
+				benchmarkResults.clear();
+		}
+		benchmarkResults.add(benchmarkResult);
+
+		// Now output the actual results ...		
+		sb.append("\t");
+		final double recall = (stats[0].getN() / 5.0) / benchmarkParameters.getMolecules();
+		sb.append(Utils.rounded(recall));
 
 		for (int i = 0; i < stats.length; i++)
 		{
@@ -726,14 +841,100 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
+	private void createAnalysisTable()
+	{
+		if (analysisTable == null || !analysisTable.isVisible())
+		{
+			analysisTable = new TextWindow(TITLE + " Combined Analysis", createHeader(), "", 1000, 300);
+			analysisTable.setVisible(true);
+		}
+	}
+
 	private String createHeader()
 	{
-		StringBuilder sb = new StringBuilder(
-				"Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions\tRecall");
+		StringBuilder sb = new StringBuilder(createParameterHeader() + "\tRecall");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]).append("\t+/-");
 		}
 		return sb.toString();
+	}
+
+	private String createParameterHeader()
+	{
+		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
+	}
+
+	private void runAnalysis()
+	{
+		benchmarkParameters = benchmarkResults.getFirst().benchmarkParameters;
+		final double sa = getSa();
+
+		// Build a list of all the frames which have results
+		int[] valid = new int[benchmarkParameters.frames];
+		for (BenchmarkResult benchmarkResult : benchmarkResults)
+		{
+			for (int i = 0; i < valid.length; i++)
+				if (benchmarkResult.results[i] != null)
+					valid[i]++;
+		}
+
+		final int target = benchmarkResults.size();
+
+		// Check that we have data
+		if (!validData(valid, target))
+		{
+			IJ.error(TITLE, "No frames have fitting results from all methods");
+			return;
+		}
+
+		createAnalysisTable();
+
+		// Create the results using only frames where all the fitting methods were successful
+		for (BenchmarkResult benchmarkResult : benchmarkResults)
+		{
+			final double[] answer = benchmarkResult.answer;
+
+			Statistics[] stats = new Statistics[NAMES.length];
+			for (int i = 0; i < stats.length; i++)
+				stats[i] = new Statistics();
+
+			for (int i = 0; i < valid.length; i++)
+			{
+				if (valid[i] < target)
+					continue;
+
+				addResults(stats, answer, benchmarkParameters.p[i], sa, benchmarkResult.resultsTime[i],
+						benchmarkResult.results[i], benchmarkResult.results[i].length);
+			}
+
+			StringBuilder sb = new StringBuilder(benchmarkResult.parameters);
+
+			// Now output the actual results ...		
+			sb.append("\t");
+			final double recall = (stats[0].getN() / 5.0) / benchmarkParameters.getMolecules();
+			sb.append(Utils.rounded(recall));
+
+			// Convert to units of the image (ADUs and pixels)		
+			final double[] convert = benchmarkResult.convert;
+
+			for (int i = 0; i < stats.length; i++)
+			{
+				if (convert[i] != 0)
+					sb.append("\t").append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append("\t")
+							.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
+				else
+					sb.append("\t0\t0");
+			}
+			analysisTable.append(sb.toString());
+		}
+	}
+
+	private boolean validData(int[] valid, int target)
+	{
+		for (int i = 0; i < valid.length; i++)
+			if (valid[i] == target)
+				return true;
+		return false;
 	}
 }
