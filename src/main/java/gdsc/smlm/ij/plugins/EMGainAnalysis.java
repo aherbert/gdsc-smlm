@@ -286,7 +286,7 @@ public class EMGainAnalysis implements PlugInFilter
 		final double[] y = getY(h, limits);
 
 		Plot plot = new Plot(TITLE, "ADU", "Frequency");
-		final double yMax = Maths.max(y);
+		double yMax = Maths.max(y);
 		plot.setLimits(limits[0], limits[1], 0, yMax);
 		plot.setColor(Color.black);
 		plot.addPoints(x, y, Plot.DOT);
@@ -391,21 +391,18 @@ public class EMGainAnalysis implements PlugInFilter
 				Utils.rounded(noise), Utils.rounded(photons));
 		Utils.log(label);
 
-		// Replot
-		g = pdf(max, photons, gain, noise, (int) bias);
-		plot = new Plot(TITLE, "ADU", "Frequency");
-		plot.setLimits(limits[0], limits[1], 0, yMax);
-		plot.setColor(Color.black);
-		plot.addPoints(x, y, Plot.DOT);
-		plot.setColor(Color.red);
-		plot.addPoints(x, g, Plot.LINE);
-
-		plot.addLabel(0, 0, label);
+		if (simulate)
+		{
+			Utils.log("Relative Error bias=%s, gain=%s, noise=%s, photons=%s",
+					Utils.rounded(relativeError(bias, _bias)), Utils.rounded(relativeError(gain, _gain)),
+					Utils.rounded(relativeError(noise, _noise)), Utils.rounded(relativeError(photons, _photons)));
+		}
 
 		// Show the PoissonGammaGaussian approximation
+		double[] f = null;
 		if (showApproximation)
 		{
-			double[] f = new double[x.length];
+			f = new double[x.length];
 			PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / gain, noise);
 			final double expected = photons * gain;
 			for (int i = 0; i < f.length; i++)
@@ -414,11 +411,34 @@ public class EMGainAnalysis implements PlugInFilter
 				//System.out.printf("x=%d, g=%f, f=%f, error=%f\n", (int) x[i], g[i], f[i],
 				//		gdsc.smlm.fitting.utils.DoubleEquality.relativeError(g[i], f[i]));
 			}
+			yMax = Maths.maxDefault(yMax, f);
+		}
+
+		// Replot
+		g = pdf(max, photons, gain, noise, (int) bias);
+		plot = new Plot(TITLE, "ADU", "Frequency");
+		plot.setLimits(limits[0], limits[1], 0, yMax * 1.05);
+		plot.setColor(Color.black);
+		plot.addPoints(x, y, Plot.DOT);
+		plot.setColor(Color.red);
+		plot.addPoints(x, g, Plot.LINE);
+
+		plot.addLabel(0, 0, label);
+
+		if (showApproximation)
+		{
 			plot.setColor(Color.blue);
 			plot.addPoints(x, f, Plot.LINE);
 		}
 
 		Utils.display(TITLE, plot);
+	}
+
+	private double relativeError(double a, double b)
+	{
+		//return gdsc.smlm.utils.DoubleEquality.relativeError(a, b);
+		final double d = a - b; // Math.abs(a - b);
+		return d / b;
 	}
 
 	private MultivariateFunction getFunction(final int[] limits, final double[] y, final int max, final int maxEval)
@@ -466,11 +486,10 @@ public class EMGainAnalysis implements PlugInFilter
 	private double[] pdfEMGain(final double p, final double m)
 	{
 		StoredDataStatistics stats = new StoredDataStatistics(100);
-		double g = FastMath.exp(-p);
-		stats.add(g);
+		stats.add(FastMath.exp(-p));
 		for (int c = 1;; c++)
 		{
-			g = Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
+			final double g = Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
 			stats.add(g);
 			final double delta = g / stats.getSum();
 			if (delta < 1e-4)
@@ -496,9 +515,9 @@ public class EMGainAnalysis implements PlugInFilter
 	{
 		if (max == 0)
 			return pdfEMGain(p, m);
-		double[] g = new double[max];
+		double[] g = new double[max + 1];
 		g[0] = FastMath.exp(-p);
-		for (int c = 1; c < max; c++)
+		for (int c = 1; c <= max; c++)
 			g[c] = Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
 		return g;
 	}
@@ -652,7 +671,7 @@ public class EMGainAnalysis implements PlugInFilter
 			_gain = gd.getNextNumber();
 			_noise = FastMath.abs(gd.getNextNumber());
 			_photons = FastMath.abs(gd.getNextNumber());
-			simulationSize = (int)FastMath.abs(gd.getNextNumber());
+			simulationSize = (int) FastMath.abs(gd.getNextNumber());
 			usePDF = gd.getNextBoolean();
 			if (gd.invalidNumber() || _bias < 0 || _gain < 1 || _photons == 0 || simulationSize == 0)
 				return DONE;
