@@ -407,9 +407,10 @@ public class EMGainAnalysis implements PlugInFilter
 		{
 			double[] f = new double[x.length];
 			PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / gain, noise);
+			final double expected = photons * gain;
 			for (int i = 0; i < f.length; i++)
 			{
-				f[i] = fun.likelihood(x[i] - bias, photons * gain);
+				f[i] = fun.likelihood(x[i] - bias, expected);
 				//System.out.printf("x=%d, g=%f, f=%f, error=%f\n", (int) x[i], g[i], f[i],
 				//		gdsc.smlm.fitting.utils.DoubleEquality.relativeError(g[i], f[i]));
 			}
