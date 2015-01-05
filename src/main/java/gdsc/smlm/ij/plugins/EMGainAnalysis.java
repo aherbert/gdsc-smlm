@@ -19,6 +19,9 @@ import java.awt.Color;
 import java.awt.Rectangle;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.distribution.CustomGammaDistribution;
+import org.apache.commons.math3.distribution.GammaDistribution;
+import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
@@ -61,6 +64,8 @@ public class EMGainAnalysis implements PlugInFilter
 	private static boolean _simulate = false, showApproximation = false;
 	private boolean simulate = false, extraOptions = false;
 	private static double _photons = 1, _bias = 500, _gain = 40, _noise = 3;
+	private static int simulationSize = 20000;
+	private static boolean usePDF = false;
 
 	private ImagePlus imp;
 
@@ -84,7 +89,7 @@ public class EMGainAnalysis implements PlugInFilter
 	public void run(ImageProcessor ip)
 	{
 		// Calculate the histogram
-		final int[] h = (simulate) ? simulateHistogram() : buildHistogram(imp);
+		final int[] h = (simulate) ? simulateHistogram(usePDF ? 0 : 1) : buildHistogram(imp);
 
 		// We need > 10^7 pixels from flat white-light images under constant exposure ...
 		final int size = getSize(h);
@@ -107,11 +112,39 @@ public class EMGainAnalysis implements PlugInFilter
 		fit(h);
 	}
 
-	private int[] simulateHistogram()
+	/**
+	 * Simulate the histogram for fitting
+	 * 
+	 * @param method
+	 *            0 - sample from the fitted PDF, 1 - sample from a Poisson-Gamma-Gaussian
+	 * @return The histogram
+	 */
+	private int[] simulateHistogram(int method)
+	{
+		IJ.showStatus("Simulating histogram ...");
+		int[] h;
+		switch (method)
+		{
+			case 1:
+				h = simulateFromPoissonGammaGaussian();
+				break;
+
+			case 0:
+			default:
+				h = simulateFromPDF();
+		}
+		IJ.showStatus("");
+		return h;
+	}
+
+	/**
+	 * Random sample from the cumulative probability distribution function that is used during fitting
+	 * 
+	 * @return The histogram
+	 */
+	private int[] simulateFromPDF()
 	{
 		final double[] g = pdf(0, _photons, _gain, _noise, (int) _bias);
-
-		IJ.showStatus("Simulating histogram ...");
 
 		// Get cumulative probability
 		double sum = 0;
@@ -128,7 +161,7 @@ public class EMGainAnalysis implements PlugInFilter
 		// Randomly sample
 		RandomGenerator random = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
 		int[] h = new int[g.length];
-		final int steps = 20000; // MINIMUM_PIXELS;
+		final int steps = simulationSize;
 		for (int n = 0; n < steps; n++)
 		{
 			if (n % 64 == 0)
@@ -141,7 +174,53 @@ public class EMGainAnalysis implements PlugInFilter
 					break;
 				}
 		}
-		IJ.showStatus("");
+		return h;
+	}
+
+	/**
+	 * Randomly generate a histogram from poisson-gamma-gaussian samples
+	 * 
+	 * @return The histogram
+	 */
+	private int[] simulateFromPoissonGammaGaussian()
+	{
+		// Randomly sample
+		RandomGenerator random = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+
+		PoissonDistribution poisson = new PoissonDistribution(random, _photons, PoissonDistribution.DEFAULT_EPSILON,
+				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+
+		CustomGammaDistribution gamma = new CustomGammaDistribution(random, _photons, _gain,
+				GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+
+		final int steps = simulationSize;
+		int[] sample = new int[steps];
+		for (int n = 0; n < steps; n++)
+		{
+			if (n % 64 == 0)
+				IJ.showProgress(n, steps);
+
+			// Poisson
+			double d = poisson.sample();
+
+			// Gamma
+			if (d > 0)
+			{
+				gamma.setShapeUnsafe(d);
+				d = gamma.sample();
+			}
+
+			// Gaussian
+			d += _noise * random.nextGaussian();
+
+			// Convert the sample to a count 
+			sample[n] = (int) Math.round(d + _bias);
+		}
+
+		int max = Maths.max(sample);
+		int[] h = new int[max + 1];
+		for (int s : sample)
+			h[s]++;
 		return h;
 	}
 
@@ -548,15 +627,17 @@ public class EMGainAnalysis implements PlugInFilter
 		if (extraOptions)
 		{
 			gd.addCheckbox("Simulate", _simulate);
-			gd.addNumericField("sBias", _bias, 0);
-			gd.addNumericField("sGain", _gain, 2);
-			gd.addNumericField("sNoise", _noise, 2);
-			gd.addNumericField("sPhotons", _photons, 2);
+			gd.addNumericField("Bias", _bias, 0);
+			gd.addNumericField("Gain", _gain, 2);
+			gd.addNumericField("Noise", _noise, 2);
+			gd.addNumericField("Photons", _photons, 2);
+			gd.addNumericField("Samples", simulationSize, 0);
+			gd.addCheckbox("Sample_PDF", usePDF);
 		}
 
-		gd.addNumericField("Bias (estimate)", bias, 0);
-		gd.addNumericField("Gain (estimate)", gain, 2);
-		gd.addNumericField("Noise (estimate)", noise, 2);
+		gd.addNumericField("Bias_estimate", bias, 0);
+		gd.addNumericField("Gain_estimate", gain, 2);
+		gd.addNumericField("Noise_estimate", noise, 2);
 		gd.addCheckbox("Show_approximation", showApproximation);
 		gd.showDialog();
 
@@ -570,7 +651,9 @@ public class EMGainAnalysis implements PlugInFilter
 			_gain = gd.getNextNumber();
 			_noise = FastMath.abs(gd.getNextNumber());
 			_photons = FastMath.abs(gd.getNextNumber());
-			if (gd.invalidNumber() || _bias < 0 || _gain < 1 || _photons == 0)
+			simulationSize = (int)FastMath.abs(gd.getNextNumber());
+			usePDF = gd.getNextBoolean();
+			if (gd.invalidNumber() || _bias < 0 || _gain < 1 || _photons == 0 || simulationSize == 0)
 				return DONE;
 		}
 
