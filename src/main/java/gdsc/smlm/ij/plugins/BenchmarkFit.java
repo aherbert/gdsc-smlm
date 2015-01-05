@@ -108,8 +108,8 @@ public class BenchmarkFit implements PlugIn
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms) ? new StoredDataStatistics() : new Statistics();
 			sa = getSa();
-			
-			createBounds();			
+
+			createBounds();
 		}
 
 		/*
@@ -249,7 +249,7 @@ public class BenchmarkFit implements PlugIn
 		{
 			solver.setBounds(lb, ub);
 		}
-		
+
 		private void createBounds()
 		{
 			if (ub == null)
@@ -259,7 +259,7 @@ public class BenchmarkFit implements PlugIn
 
 				// Background could be zero so always have an upper limit
 				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * benchmarkParameters.b * benchmarkParameters.gain);
-				double signal = benchmarkParameters.signal * benchmarkParameters.gain;
+				double signal = benchmarkParameters.getSignal() * benchmarkParameters.gain;
 				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
 				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
@@ -399,7 +399,7 @@ public class BenchmarkFit implements PlugIn
 	{
 		// Initialise the answer. Convert to units of the image (ADUs and pixels)
 		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.b * benchmarkParameters.gain;
-		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.signal * benchmarkParameters.gain;
+		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal() * benchmarkParameters.gain;
 		answer[Gaussian2DFunction.X_POSITION] = benchmarkParameters.x;
 		answer[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.y;
 		answer[Gaussian2DFunction.X_SD] = benchmarkParameters.s / benchmarkParameters.a;
@@ -626,8 +626,8 @@ public class BenchmarkFit implements PlugIn
 		createTable();
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(benchmarkParameters.molecules).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.signal)).append("\t");
+		sb.append(benchmarkParameters.getMolecules()).append("\t");
+		sb.append(Utils.rounded(benchmarkParameters.getSignal())).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.s)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.a)).append("\t");
 		sb.append(Utils.rounded(getSa() * benchmarkParameters.a)).append("\t");
@@ -638,7 +638,7 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.b)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.b2)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.signal / Math.sqrt(benchmarkParameters.b2))).append("\t");
+		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(benchmarkParameters.b2))).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append("\t");
@@ -668,7 +668,7 @@ public class BenchmarkFit implements PlugIn
 			sb.append("\t");
 
 		sb.append("\t");
-		final double recall = (double) (stats[0].getN() / 5) / benchmarkParameters.molecules;
+		final double recall = (double) (stats[0].getN() / 5) / benchmarkParameters.getMolecules();
 		sb.append(Utils.rounded(recall));
 
 		// Convert to units of the image (ADUs and pixels)		

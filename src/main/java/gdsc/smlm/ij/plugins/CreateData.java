@@ -216,64 +216,72 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
 
 	// Store the parameters for the last benchmark
-	public class BenchmarkParameters
+	public static class BenchmarkParameters
 	{
+		private static int nextId = 1;
+
+		/**
+		 * The parameter set identifier
+		 */
+		final int id;
 		/**
 		 * Number of frames in the simulated image
 		 */
-		int frames;
+		final int frames;
 		/**
 		 * Gaussian standard deviation
 		 */
-		double s;
+		final double s;
 		/**
 		 * Pixel pitch in nm
 		 */
-		double a;
+		final double a;
 		/**
 		 * The average number of photons per frame
 		 */
-		double signal;
+		private double signal;
 		/**
 		 * The x and y positions of the localisation in each frame
 		 */
-		double x, y;
-		double bias;
+		final double x, y;
+		final double bias;
 		/**
 		 * True if EM-gain was modelled
 		 */
-		boolean emCCD;
+		final boolean emCCD;
 		/**
 		 * Total gain
 		 */
-		double gain;
+		final double gain;
 		/**
 		 * Read noise in ADUs
 		 */
-		double readNoise;
+		final double readNoise;
 		/**
 		 * Background
 		 */
-		double b;
+		final double b;
 		/**
 		 * Background noise in photons per pixel (used in the precision calculations)
 		 */
-		double b2;
+		final double b2;
 		/**
 		 * The actual number of simulated ADUs in each frame of the benchmark image. Some frames may be empty (due to
 		 * signal filtering or Poisson sampling). The count is after gain has been applied to the photons.
 		 */
-		double[] p;
+		final double[] p;
 		/**
 		 * The number of frames with a simulated photon count
 		 */
-		int molecules;
+		private int molecules;
 
-		double precisionN, precisionX, precisionXML;
+		final double precisionN, precisionX, precisionXML;
 
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double bias,
-				boolean emCCD, double gain, double readNoise, double b, double b2)
+				boolean emCCD, double gain, double readNoise, double b, double b2, double precisionN,
+				double precisionX, double precisionXML)
 		{
+			id = nextId++;
 			this.frames = frames;
 			this.s = s;
 			this.a = a;
@@ -286,6 +294,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.readNoise = readNoise;
 			this.b = b;
 			this.b2 = b2;
+			this.precisionN = precisionN;
+			this.precisionX = precisionX;
+			this.precisionXML = precisionXML;
 			p = new double[frames];
 		}
 
@@ -306,6 +317,23 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					Utils.rounded(signal), Utils.rounded(sum / gain));
 			// Reset the average signal (in photons)
 			signal = sum / gain;
+		}
+
+		/**
+		 * @return The average number of photons per frame
+		 */
+		public double getSignal()
+		{
+			return signal;
+		}
+
+		/**
+		 * @return
+		 *         The number of frames with a simulated photon count
+		 */
+		public int getMolecules()
+		{
+			return molecules;
 		}
 	}
 
@@ -440,10 +468,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 					benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
 							settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
-							settings.background, b2);
-					benchmarkParameters.precisionN = lowerN;
-					benchmarkParameters.precisionX = lowerP;
-					benchmarkParameters.precisionXML = lowerMLP;
+							settings.background, b2, lowerN, lowerP, lowerMLP);
 				}
 			}
 			else
@@ -2065,8 +2090,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				// If using a uniform illumination then we can use a fixed Poisson distribution
 				PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(), pixels2[0],
-		                PoissonDistribution.DEFAULT_EPSILON,
-		                PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+						PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 				for (int i = 0; i < pixels2.length; i++)
 				{
 					pixels2[i] = dist.sample();
