@@ -766,13 +766,11 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		{
 			private static final long serialVersionUID = 1L;
 
-			@Override
 			public String getSourceString()
 			{
 				return message;
 			}
 
-			@Override
 			public String getLocalizedString(Locale locale)
 			{
 				return message;
