@@ -83,7 +83,7 @@ public class BenchmarkFit implements PlugIn
 	private Rectangle region = null;
 
 	// Used to store all the results for cross-method comparison
-	private double[][][] results;
+	private double[][] results;
 	private long[] resultsTime;
 
 	public class BenchmarkResult
@@ -107,14 +107,14 @@ public class BenchmarkFit implements PlugIn
 		/**
 		 * The results of fitting the data. Results are only stored if fitting was successful.
 		 */
-		final double[][][] results;
+		final double[][] results;
 		/**
 		 * The time for fitting the data.
 		 */
 		final long[] resultsTime;
 
 		public BenchmarkResult(BenchmarkParameters benchmarkParameters, double[] answer, String parameters,
-				double[] convert, double[][][] results, long[] resultsTime)
+				double[] convert, double[][] results, long[] resultsTime)
 		{
 			this.benchmarkParameters = benchmarkParameters;
 			this.answer = answer;
@@ -198,6 +198,7 @@ public class BenchmarkFit implements PlugIn
 					region, data);
 
 			final int size = region.height;
+			final int totalFrames = benchmarkParameters.frames;
 
 			// Get the background and signal estimate
 			final double b = (backgroundFitting) ? getBackground(data, size, size)
@@ -208,7 +209,7 @@ public class BenchmarkFit implements PlugIn
 
 			// Find centre-of-mass estimate
 			if (comFitting)
-				getCentreOfMass(data, size, size, xy[0]);
+				getCentreOfMass(data, size, size, xy[xy.length - 1]);
 
 			double[] initialParams = new double[7];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
@@ -227,10 +228,13 @@ public class BenchmarkFit implements PlugIn
 
 			double[] error = new double[1];
 			double[][] result = new double[xy.length][];
+			long[] time = new long[xy.length];
 			int c = 0;
-			long start = System.nanoTime();
+			int resultPosition = frame;
 			for (double[] centre : xy)
 			{
+				long start = System.nanoTime();
+
 				// Do fitting
 				final double[] params = initialParams.clone();
 				params[Gaussian2DFunction.X_POSITION] = centre[0];
@@ -242,54 +246,26 @@ public class BenchmarkFit implements PlugIn
 				if (solver.isConstrained())
 					setConstraints(solver);
 				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
-				if (status == FitStatus.OK)
+				if (isValid(status, params, size))
 				{
-					// Reject fits that are outside the bounds of the data
-					if (params[Gaussian2DFunction.SIGNAL] < 0 || params[Gaussian2DFunction.X_POSITION] < 0 ||
-							params[Gaussian2DFunction.Y_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > size ||
-							params[Gaussian2DFunction.Y_POSITION] > size)
-					{
-						continue;
-					}
-
-					// Q. Should we do width bounds checking?
-					if (fitConfig.isWidth0Fitting())
-					{
-						if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
-								params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
-						{
-							continue;
-						}
-					}
-					if (fitConfig.isWidth1Fitting())
-					{
-						if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
-								params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
-						{
-							continue;
-						}
-					}
-
 					// Subtract the fitted bias from the background
 					if (!fitConfig.isRemoveBiasBeforeFitting())
 						params[Gaussian2DFunction.BACKGROUND] -= bias;
-					result[c++] = params;
+					result[c] = params;
+					time[c] = System.nanoTime() - start;
+					// Store all the results for later analysis
+					results[resultPosition] = params;
+					resultsTime[resultPosition] = time[c];
+					c++;
 				}
 				else
 				{
 					//System.out.println(status);
 				}
+				resultPosition += totalFrames;
 			}
-			long time = System.nanoTime() - start;
 
 			addResults(stats, answer, benchmarkParameters.p[frame], sa, time, result, c);
-
-			// If all the centre start-points were successful then store the results for later analysis
-			if (c == xy.length)
-			{
-				results[frame] = result;
-				resultsTime[frame] = time;
-			}
 		}
 
 		private void setBounds(FunctionSolver solver)
@@ -335,6 +311,43 @@ public class BenchmarkFit implements PlugIn
 			}
 			solver.setConstraints(lc, uc);
 		}
+
+		private boolean isValid(FitStatus status, double[] params, int size)
+		{
+			if (status != FitStatus.OK)
+			{
+				return false;
+			}
+
+			// Reject fits that are outside the bounds of the data
+			if (params[Gaussian2DFunction.SIGNAL] < 0 || params[Gaussian2DFunction.X_POSITION] < 0 ||
+					params[Gaussian2DFunction.Y_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > size ||
+					params[Gaussian2DFunction.Y_POSITION] > size)
+			{
+				return false;
+			}
+
+			// Q. Should we do width bounds checking?
+			if (fitConfig.isWidth0Fitting())
+			{
+				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
+						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
+				{
+					return false;
+				}
+			}
+			if (fitConfig.isWidth1Fitting())
+			{
+				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
+						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 	}
 
 	/**
@@ -347,24 +360,39 @@ public class BenchmarkFit implements PlugIn
 	 * @param time
 	 * @param result
 	 * @param c
+	 *            Count of the number of results
 	 */
-	private static void addResults(Statistics[] stats, double[] answer, double photons, double sa, long time,
+	private static void addResults(Statistics[] stats, double[] answer, double photons, double sa, long[] time,
 			double[][] result, int c)
 	{
 		// Store the results from each run
 		for (int i = 0; i < c; i++)
 		{
-			final double[] params = result[i];
-			for (int j = 0; j < params.length; j++)
-			{
-				stats[j].add(params[j] - answer[j]);
-			}
-			stats[8].add(params[Gaussian2DFunction.SIGNAL] - photons);
-			stats[9].add(params[Gaussian2DFunction.X_SD] - sa);
-			stats[10].add(params[Gaussian2DFunction.Y_SD] - sa);
+			addResult(stats, answer, photons, sa, result[i], time[i]);
 		}
+	}
 
+	/**
+	 * Add the given results to the statistics
+	 * 
+	 * @param stats
+	 * @param answer
+	 * @param photons
+	 * @param sa
+	 * @param result
+	 * @param time
+	 */
+	private static void addResult(Statistics[] stats, double[] answer, double photons, double sa, double[] result,
+			long time)
+	{
+		for (int j = 0; j < result.length; j++)
+		{
+			stats[j].add(result[j] - answer[j]);
+		}
 		stats[7].add(time);
+		stats[8].add(result[Gaussian2DFunction.SIGNAL] - photons);
+		stats[9].add(result[Gaussian2DFunction.X_SD] - sa);
+		stats[10].add(result[Gaussian2DFunction.Y_SD] - sa);
 	}
 
 	public void run(String arg)
@@ -548,8 +576,8 @@ public class BenchmarkFit implements PlugIn
 		final int totalFrames = benchmarkParameters.frames;
 
 		// Store all the fitting results
-		results = new double[totalFrames][][];
-		resultsTime = new long[totalFrames];
+		results = new double[totalFrames * getNumberOfStartPoints()][];
+		resultsTime = new long[results.length];
 
 		// Fit the frames
 		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
@@ -664,22 +692,22 @@ public class BenchmarkFit implements PlugIn
 		// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at 
 		// startOffset pixels total distance 
 		final double distance = Math.sqrt(startOffset * startOffset * 0.5);
-		
-		// Add space for centre-of-mass at the start of the array
+
 		double[][] xy = new double[(comFitting) ? 5 : 4][];
 		int ii = 0;
-		if (comFitting)
-			xy[ii++] = new double[2];
 		for (int x = -1; x <= 1; x += 2)
 			for (int y = -1; y <= 1; y += 2)
 			{
 				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION] + x * distance,
 						answer[Gaussian2DFunction.X_POSITION] + y * distance };
 			}
+		// Add space for centre-of-mass at the end of the array
+		if (comFitting)
+			xy[ii++] = new double[2];
 		return xy;
 	}
-	
-	private double getNumberOfStartPoints()
+
+	private int getNumberOfStartPoints()
 	{
 		return (comFitting) ? 5 : 4;
 	}
@@ -815,7 +843,8 @@ public class BenchmarkFit implements PlugIn
 
 		// Now output the actual results ...		
 		sb.append("\t");
-		final double recall = (stats[0].getN() / getNumberOfStartPoints()) / benchmarkParameters.getMolecules();
+		final double recall = (stats[0].getN() / (double) getNumberOfStartPoints()) /
+				benchmarkParameters.getMolecules();
 		sb.append(Utils.rounded(recall));
 
 		for (int i = 0; i < stats.length; i++)
@@ -899,8 +928,15 @@ public class BenchmarkFit implements PlugIn
 		benchmarkParameters = benchmarkResults.getFirst().benchmarkParameters;
 		final double sa = getSa();
 
+		// The fitting could have used centre-of-mass or not making the number of points different.
+		// Find the shortest array (this will be the one where the centre-of-mass was not used)
+		int length = Integer.MAX_VALUE;
+		for (BenchmarkResult benchmarkResult : benchmarkResults)
+			if (length > benchmarkResult.results.length)
+				length = benchmarkResult.results.length;
+
 		// Build a list of all the frames which have results
-		int[] valid = new int[benchmarkParameters.frames];
+		int[] valid = new int[length];
 		for (BenchmarkResult benchmarkResult : benchmarkResults)
 		{
 			for (int i = 0; i < valid.length; i++)
@@ -916,6 +952,10 @@ public class BenchmarkFit implements PlugIn
 			IJ.error(TITLE, "No frames have fitting results from all methods");
 			return;
 		}
+
+		// Get the number of start points valid for all the results 
+		final int totalFrames = benchmarkParameters.frames;
+		final double numberOfStartPoints = (double) (length / totalFrames);
 
 		createAnalysisTable();
 
@@ -933,15 +973,15 @@ public class BenchmarkFit implements PlugIn
 				if (valid[i] < target)
 					continue;
 
-				addResults(stats, answer, benchmarkParameters.p[i], sa, benchmarkResult.resultsTime[i],
-						benchmarkResult.results[i], benchmarkResult.results[i].length);
+				addResult(stats, answer, benchmarkParameters.p[i % totalFrames], sa, benchmarkResult.results[i],
+						benchmarkResult.resultsTime[i]);
 			}
 
 			StringBuilder sb = new StringBuilder(benchmarkResult.parameters);
 
 			// Now output the actual results ...		
 			sb.append("\t");
-			final double recall = (stats[0].getN() / getNumberOfStartPoints()) / benchmarkParameters.getMolecules();
+			final double recall = (stats[0].getN() / numberOfStartPoints) / benchmarkParameters.getMolecules();
 			sb.append(Utils.rounded(recall));
 
 			// Convert to units of the image (ADUs and pixels)		
