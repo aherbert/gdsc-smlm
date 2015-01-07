@@ -53,9 +53,11 @@ public class BenchmarkFit implements PlugIn
 	private static int regionSize = 3;
 	private static double psfWidth = 1;
 	private static double lastS = 0;
-	private static boolean showHistograms = false;
+	private static double startOffset = 0.5;
+	private static boolean comFitting = false;
 	private static boolean backgroundFitting = true;
 	private static boolean signalFitting = true;
+	private static boolean showHistograms = false;
 	private static int histogramBins = 100;
 
 	private static TextWindow summaryTable = null, analysisTable = null;
@@ -146,17 +148,14 @@ public class BenchmarkFit implements PlugIn
 		private double[] lb, ub = null;
 		private double[] lc, uc = null;
 
-		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region, double[][] xy,
-				FitConfiguration fitConfig)
+		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region, FitConfiguration fitConfig)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
 			this.region = region;
 			this.fitConfig = (FitConfiguration) fitConfig.clone();
-			// Clone the positions array
-			this.xy = new double[xy.length][];
-			for (int i = 0; i < xy.length; i++)
-				this.xy[i] = xy[i].clone();
+			this.xy = getStartPoints();
+
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms) ? new StoredDataStatistics() : new Statistics();
 			sa = getSa();
@@ -208,7 +207,8 @@ public class BenchmarkFit implements PlugIn
 					: answer[Gaussian2DFunction.SIGNAL];
 
 			// Find centre-of-mass estimate
-			getCentreOfMass(data, size, size, xy[0]);
+			if (comFitting)
+				getCentreOfMass(data, size, size, xy[0]);
 
 			double[] initialParams = new double[7];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
@@ -427,6 +427,8 @@ public class BenchmarkFit implements PlugIn
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addNumericField("Start_offset", startOffset, 3);
+		gd.addCheckbox("Include_CoM_fit", comFitting);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
 		gd.addMessage("Signal fitting can be disabled for " + FitFunction.FIXED.toString() + " function");
 		gd.addCheckbox("Signal_fitting", signalFitting);
@@ -441,6 +443,8 @@ public class BenchmarkFit implements PlugIn
 		psfWidth = Math.abs(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
+		startOffset = Math.abs(gd.getNextNumber());
+		comFitting = gd.getNextBoolean();
 		backgroundFitting = gd.getNextBoolean();
 		signalFitting = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
@@ -525,9 +529,6 @@ public class BenchmarkFit implements PlugIn
 		fitConfig.setNotSignalFitting(!signalFitting);
 		fitConfig.setComputeDeviations(false);
 
-		// Fit using the centre-of-mass estimate and 4 corners of image
-		final double[][] xy = new double[][] { { 0, 0 }, { x, y }, { x, y + 1 }, { x + 1, y }, { x + 1, y + 1 } };
-
 		final ImageStack stack = imp.getImageStack();
 
 		// Create a pool of workers
@@ -537,7 +538,7 @@ public class BenchmarkFit implements PlugIn
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, region, xy, fitConfig);
+			Worker worker = new Worker(jobs, stack, region, fitConfig);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -653,6 +654,34 @@ public class BenchmarkFit implements PlugIn
 		{
 			throw new RuntimeException("Unexpected interruption", e);
 		}
+	}
+
+	/**
+	 * @return The starting points for the fitting
+	 */
+	private double[][] getStartPoints()
+	{
+		// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at 
+		// startOffset pixels total distance 
+		final double distance = Math.sqrt(startOffset * startOffset * 0.5);
+		
+		// Add space for centre-of-mass at the start of the array
+		double[][] xy = new double[(comFitting) ? 5 : 4][];
+		int ii = 0;
+		if (comFitting)
+			xy[ii++] = new double[2];
+		for (int x = -1; x <= 1; x += 2)
+			for (int y = -1; y <= 1; y += 2)
+			{
+				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION] + x * distance,
+						answer[Gaussian2DFunction.X_POSITION] + y * distance };
+			}
+		return xy;
+	}
+	
+	private double getNumberOfStartPoints()
+	{
+		return (comFitting) ? 5 : 4;
 	}
 
 	/**
@@ -786,7 +815,7 @@ public class BenchmarkFit implements PlugIn
 
 		// Now output the actual results ...		
 		sb.append("\t");
-		final double recall = (stats[0].getN() / 5.0) / benchmarkParameters.getMolecules();
+		final double recall = (stats[0].getN() / getNumberOfStartPoints()) / benchmarkParameters.getMolecules();
 		sb.append(Utils.rounded(recall));
 
 		for (int i = 0; i < stats.length; i++)
@@ -912,7 +941,7 @@ public class BenchmarkFit implements PlugIn
 
 			// Now output the actual results ...		
 			sb.append("\t");
-			final double recall = (stats[0].getN() / 5.0) / benchmarkParameters.getMolecules();
+			final double recall = (stats[0].getN() / getNumberOfStartPoints()) / benchmarkParameters.getMolecules();
 			sb.append(Utils.rounded(recall));
 
 			// Convert to units of the image (ADUs and pixels)		
