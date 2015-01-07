@@ -42,6 +42,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Fits the benchmark image created by CreateData plugin.
@@ -53,6 +54,7 @@ public class BenchmarkFit implements PlugIn
 	private static int regionSize = 3;
 	private static double psfWidth = 1;
 	private static double lastS = 0;
+	private static boolean offsetFitting = true;
 	private static double startOffset = 0.5;
 	private static boolean comFitting = false;
 	private static boolean backgroundFitting = true;
@@ -81,6 +83,7 @@ public class BenchmarkFit implements PlugIn
 	private CreateData.BenchmarkParameters benchmarkParameters;
 	private double[] answer = new double[7];
 	private Rectangle region = null;
+	private AtomicInteger comValid = new AtomicInteger();
 
 	// Used to store all the results for cross-method comparison
 	private double[][] results;
@@ -209,7 +212,14 @@ public class BenchmarkFit implements PlugIn
 
 			// Find centre-of-mass estimate
 			if (comFitting)
+			{
 				getCentreOfMass(data, size, size, xy[xy.length - 1]);
+
+				double dx = xy[xy.length - 1][0] - answer[Gaussian2DFunction.X_POSITION];
+				double dy = xy[xy.length - 1][1] - answer[Gaussian2DFunction.Y_POSITION];
+				if (dx * dx + dy * dy < startOffset * startOffset)
+					comValid.incrementAndGet();
+			}
 
 			double[] initialParams = new double[7];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
@@ -455,6 +465,7 @@ public class BenchmarkFit implements PlugIn
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addCheckbox("Offset_fit", offsetFitting);
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
 		gd.addCheckbox("Background_fitting", backgroundFitting);
@@ -471,11 +482,18 @@ public class BenchmarkFit implements PlugIn
 		psfWidth = Math.abs(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
+		offsetFitting = gd.getNextBoolean();
 		startOffset = Math.abs(gd.getNextNumber());
 		comFitting = gd.getNextBoolean();
 		backgroundFitting = gd.getNextBoolean();
 		signalFitting = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
+
+		if (!comFitting && !offsetFitting)
+		{
+			IJ.error(TITLE, "No initial fitting positions");
+			return false;
+		}
 
 		if (regionSize < 1)
 			regionSize = 1;
@@ -614,6 +632,10 @@ public class BenchmarkFit implements PlugIn
 		}
 		threads.clear();
 
+		if (comFitting)
+			Utils.log(TITLE + ": CoM within start offset = %d / %d (%s%%)", comValid.intValue(), totalFrames,
+					Utils.rounded((100.0 * comValid.intValue()) / totalFrames));
+
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
 
@@ -689,18 +711,29 @@ public class BenchmarkFit implements PlugIn
 	 */
 	private double[][] getStartPoints()
 	{
-		// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at 
-		// startOffset pixels total distance 
-		final double distance = Math.sqrt(startOffset * startOffset * 0.5);
-
-		double[][] xy = new double[(comFitting) ? 5 : 4][];
+		double[][] xy = new double[getNumberOfStartPoints()][];
 		int ii = 0;
-		for (int x = -1; x <= 1; x += 2)
-			for (int y = -1; y <= 1; y += 2)
+
+		if (offsetFitting)
+		{
+			if (startOffset == 0)
 			{
-				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION] + x * distance,
-						answer[Gaussian2DFunction.X_POSITION] + y * distance };
+				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION], answer[Gaussian2DFunction.Y_POSITION] };
 			}
+			else
+			{
+				// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at 
+				// startOffset pixels total distance 
+				final double distance = Math.sqrt(startOffset * startOffset * 0.5);
+
+				for (int x = -1; x <= 1; x += 2)
+					for (int y = -1; y <= 1; y += 2)
+					{
+						xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION] + x * distance,
+								answer[Gaussian2DFunction.Y_POSITION] + y * distance };
+					}
+			}
+		}
 		// Add space for centre-of-mass at the end of the array
 		if (comFitting)
 			xy[ii++] = new double[2];
@@ -709,7 +742,10 @@ public class BenchmarkFit implements PlugIn
 
 	private int getNumberOfStartPoints()
 	{
-		return (comFitting) ? 5 : 4;
+		int n = (offsetFitting) ? 1 : 0;
+		if (startOffset > 0)
+			n *= 4;
+		return (comFitting) ? n + 1 : n;
 	}
 
 	/**
