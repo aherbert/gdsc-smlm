@@ -291,7 +291,8 @@ public class BenchmarkFit implements PlugIn
 				lb = new double[7];
 
 				// Background could be zero so always have an upper limit
-				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * benchmarkParameters.b * benchmarkParameters.gain);
+				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * benchmarkParameters.getBackground() *
+						benchmarkParameters.gain);
 				double signal = benchmarkParameters.getSignal() * benchmarkParameters.gain;
 				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
@@ -537,7 +538,7 @@ public class BenchmarkFit implements PlugIn
 	private void run()
 	{
 		// Initialise the answer. Convert to units of the image (ADUs and pixels)
-		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.b * benchmarkParameters.gain;
+		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground() * benchmarkParameters.gain;
 		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal() * benchmarkParameters.gain;
 		answer[Gaussian2DFunction.X_POSITION] = benchmarkParameters.x;
 		answer[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.y;
@@ -832,7 +833,7 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.gain)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.b)).append("\t");
+		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.b2)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(benchmarkParameters.b2))).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append("\t");

@@ -260,7 +260,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		/**
 		 * Background
 		 */
-		final double b;
+		private double b;
 		/**
 		 * Background noise in photons per pixel (used in the precision calculations)
 		 */
@@ -270,6 +270,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * signal filtering or Poisson sampling). The count is after gain has been applied to the photons.
 		 */
 		final double[] p;
+		/**
+		 * The actual number of simulated background ADUs in each frame of the benchmark image. The count is after gain
+		 * has been applied to the photons.
+		 */
+		final double[] background;
 		/**
 		 * The number of frames with a simulated photon count
 		 */
@@ -298,25 +303,33 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.precisionX = precisionX;
 			this.precisionXML = precisionXML;
 			p = new double[frames];
+			background = new double[frames];
 		}
 
 		public void setPhotons(MemoryPeakResults results)
 		{
 			molecules = results.size();
-			double sum = 0;
+			double sum = 0, sum2 = 0;
+			;
 			for (PeakResult result : results)
 			{
 				int i = result.peak - 1;
 				if (p[i] != 0)
 					throw new RuntimeException("Multiple peaks on the same frame: " + result.peak);
 				p[i] = result.getSignal();
+				background[i] = result.getBackground() - bias;
 				sum += p[i];
+				sum2 += background[i];
 			}
 			sum /= molecules;
-			Utils.log("Created %d frames, %d molecules. Simulated signal %s : average %s", frames, molecules,
-					Utils.rounded(signal), Utils.rounded(sum / gain));
-			// Reset the average signal (in photons)
+			sum2 /= molecules;
+			Utils.log(
+					"Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
+					frames, molecules, Utils.rounded(signal), Utils.rounded(sum / gain), Utils.rounded(b),
+					Utils.rounded(sum2 / gain));
+			// Reset the average signal and background (in photons)
 			signal = sum / gain;
+			b = sum2 / gain;
 		}
 
 		/**
@@ -334,6 +347,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public int getMolecules()
 		{
 			return molecules;
+		}
+
+		/**
+		 * @return the average number of background photons per frame
+		 */
+		public double getBackground()
+		{
+			return b;
 		}
 	}
 
