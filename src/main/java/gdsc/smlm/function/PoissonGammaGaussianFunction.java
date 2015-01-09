@@ -32,8 +32,8 @@ import org.apache.commons.math3.util.FastMath;
  * as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7,
  * 377-383. This Java implementation is based on the Python code.
  * <P>
- * The mean of the Poisson distribution is set using the expected value. The scale (EM-gain) for the Gamma distribution and
- * standard deviation of the Gaussian is fixed and set in the constructor. The mean of the Gaussian is assumed to be
+ * The mean of the Poisson distribution is set using the expected value. The scale (EM-gain) for the Gamma distribution
+ * and standard deviation of the Gaussian is fixed and set in the constructor. The mean of the Gaussian is assumed to be
  * zero.
  */
 public class PoissonGammaGaussianFunction
@@ -91,61 +91,105 @@ public class PoissonGammaGaussianFunction
 		// Use the same variables as the Python code
 		final double cij = o;
 		final double eta = alpha * e; // convert to photons
-		
-		// [Poisson PMF] multiplied by the [value at zero]:
-		// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
-		// FastMath.exp(-eta) * [eta * alpha]
-		final double f0 = alpha * FastMath.exp(-eta) * eta;
 
-		// ?
-		final double fp0 = f0 * 0.5 * alpha * (eta - 2);
-
-		// The cumulative normal distribution of the read noise
-		// at the observed count
-		final double conv0 = 0.5 * (1 + Erf.erf(cij / (sqrt2sigma2)));
-
-		// [Noise * Gaussian PMF at observed count] + 
-		//  [observed count * cumulative distribution of read noise at observed count]
-		// [sigma*FastMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
-		final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
-
-		// ? 
-		double temp = (f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gauss(cij));
-
-		if (cij > 0.0)
+		if (sigma == 0)
 		{
-			// The observed count converted to photons
-			final double nij = alpha * cij;
+			// No convolution with a Gaussian. Simply evaluate for a Poisson-Gamma distribution.
 
-			if (eta * nij > 10000)
+			// Any observed count above zero
+			if (cij > 0.0)
 			{
-				// Approximate Bessel function i1(x) when using large x:
-				// i1(x) ~ exp(x)/sqrt(2*pi*x)
-				// However the entire equation is logged (creating transform),
-				// evaluated then raised to e to prevent overflow error on 
-				// large exp(x)
+				// The observed count converted to photons
+				final double nij = alpha * cij;
 
-				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
-						Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
-				temp += (FastMath.exp(transform) - f0 - fp0 * cij);
+				if (eta * nij > 10000)
+				{
+					// Approximate Bessel function i1(x) when using large x:
+					// i1(x) ~ exp(x)/sqrt(2*pi*x)
+					// However the entire equation is logged (creating transform),
+					// evaluated then raised to e to prevent overflow error on 
+					// large exp(x)
+
+					final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
+							Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+					return FastMath.exp(transform);
+				}
+				else
+				{
+					// Second part of equation 135
+					return Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) *
+							Bessel.I1(2 * Math.sqrt(eta * nij));
+				}
+			}
+			else if (cij == 0.0)
+			{
+				return FastMath.exp(-eta);
 			}
 			else
 			{
-				// Second part of equation 135 but not sure what the 
-				// -f0-fp0*cij term is.
-				// This indicates that temp should already be the first
-				// part of eq.135: exp(-eta)*delta(cij)
-				temp += (Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij)) -
-						f0 - fp0 * cij);
+				return 0;
 			}
 		}
+		else
+		{
+			// [Poisson PMF] multiplied by the [value at zero]:
+			// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
+			// FastMath.exp(-eta) * [eta * alpha]
+			final double f0 = alpha * FastMath.exp(-eta) * eta;
 
-		return temp;
+			// ?
+			final double fp0 = f0 * 0.5 * alpha * (eta - 2);
+
+			// The cumulative normal distribution of the read noise
+			// at the observed count
+			final double conv0 = 0.5 * (1 + Erf.erf(cij / (sqrt2sigma2)));
+
+			// [Noise * Gaussian PMF at observed count] + 
+			//  [observed count * cumulative distribution of read noise at observed count]
+			// [sigma*FastMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
+			final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
+
+			// ? 
+			double temp = (f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gauss(cij));
+
+			if (cij > 0.0)
+			{
+				// The observed count converted to photons
+				final double nij = alpha * cij;
+
+				if (eta * nij > 10000)
+				{
+					// Approximate Bessel function i1(x) when using large x:
+					// i1(x) ~ exp(x)/sqrt(2*pi*x)
+					// However the entire equation is logged (creating transform),
+					// evaluated then raised to e to prevent overflow error on 
+					// large exp(x)
+
+					final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
+							Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+					temp += (FastMath.exp(transform) - f0 - fp0 * cij);
+				}
+				else
+				{
+					// Second part of equation 135 but not sure what the 
+					// -f0-fp0*cij term is.
+					// This indicates that temp should already be the first
+					// part of eq.135: exp(-eta)*delta(cij)
+					temp += (Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) *
+							Bessel.I1(2 * Math.sqrt(eta * nij)) - f0 - fp0 * cij);
+				}
+			}
+
+			return temp;
+		}
 	}
 
 	/**
 	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
 	 * al (2010) Nature Methods 7, 377-383.
+	 * <p>
+	 * Note this will return Double.NEGATIVE_INFINITY if there is no Gaussian standard deviation and the observed count
+	 * is below zero (since the likelihood is zero).
 	 * 
 	 * @param o
 	 *            The observed count
