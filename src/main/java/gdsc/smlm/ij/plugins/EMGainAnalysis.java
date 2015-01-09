@@ -4,6 +4,7 @@ import gdsc.smlm.function.Bessel;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Convolution;
+import gdsc.smlm.utils.DoubleEquality;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
@@ -11,12 +12,15 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
@@ -61,9 +65,10 @@ public class EMGainAnalysis implements PlugInFilter
 	private final int MINIMUM_PIXELS = 1000000;
 
 	private static double bias = 500, gain = 40, noise = 3;
-	private static boolean _simulate = false, showApproximation = false;
+	private static boolean _simulate = false, showApproximation = false, relativeDelta = false;
 	private boolean simulate = false, extraOptions = false;
 	private static double _photons = 1, _bias = 500, _gain = 40, _noise = 3;
+	private static double head = 0.01, tail = 0.025;
 	private static int simulationSize = 20000;
 	private static boolean usePDF = false;
 
@@ -77,6 +82,13 @@ public class EMGainAnalysis implements PlugInFilter
 	public int setup(String arg, ImagePlus imp)
 	{
 		extraOptions = Utils.isExtraOptions();
+
+		if ("pmf".equals(arg))
+		{
+			plotPMF();
+			return DONE;
+		}
+
 		if (imp == null && !extraOptions)
 		{
 			IJ.noImage();
@@ -686,5 +698,137 @@ public class EMGainAnalysis implements PlugInFilter
 			return DONE;
 
 		return (simulate) ? NO_IMAGE_REQUIRED : FLAGS;
+	}
+
+	private void plotPMF()
+	{
+		if (!showPMFDialog())
+			return;
+
+		final int gaussWidth = 5;
+		int dummyBias = (int) Math.max(500, gaussWidth * _noise + 1);
+
+		double[] pmf = pdf(0, _photons, _gain, _noise, dummyBias);
+		double[] x = Utils.newArray(pmf.length, 0, 1.0);
+		double yMax = Maths.max(pmf);
+
+		// Truncate x
+		int max = 0;
+		double sum = 0;
+		double p = 1 - tail;
+		while (sum < p && max < pmf.length)
+		{
+			sum += pmf[max];
+			max++;
+		}
+
+		int min = pmf.length;
+		sum = 0;
+		p = 1 - head;
+		while (sum < p && min > 0)
+		{
+			min--;
+			sum += pmf[min];
+		}
+
+		//int min = (int) (dummyBias - gaussWidth * _noise);
+		pmf = Arrays.copyOfRange(pmf, min, max);
+		x = Arrays.copyOfRange(x, min, max);
+
+		// Get the approximation
+		double[] f = new double[x.length];
+		PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / _gain, _noise);
+		final double expected = _photons * gain;
+		for (int i = 0; i < f.length; i++)
+		{
+			// Adjust the x-values to remove the dummy bias
+			x[i] -= dummyBias;
+			f[i] = fun.likelihood(x[i], expected);
+		}
+		if (showApproximation)
+			yMax = Maths.maxDefault(yMax, f);
+
+		String label = String.format("Gain=%s, noise=%s, photons=%s", Utils.rounded(_gain), Utils.rounded(_noise),
+				Utils.rounded(_photons));
+
+		Plot plot = new Plot("PMF", "Photons", "p");
+		plot.setLimits(x[0], x[x.length - 1], 0, yMax);
+		plot.setColor(Color.red);
+		plot.addPoints(x, pmf, Plot.LINE);
+		if (showApproximation)
+		{
+			plot.setColor(Color.blue);
+			plot.addPoints(x, f, Plot.LINE);
+		}
+
+		plot.setColor(Color.magenta);
+		plot.drawLine(_photons, 0, _photons, yMax);
+		plot.setColor(Color.black);
+		plot.addLabel(0, 0, label);
+		PlotWindow win1 = Utils.display("PMF", plot);
+
+		// Plot the difference between the actual and approximation
+		double[] delta = new double[f.length];
+		for (int i = 0; i < f.length; i++)
+		{
+			if (pmf[i] == 0 && f[i] == 0)
+				continue;
+			if (relativeDelta)
+				delta[i] = DoubleEquality.relativeError(f[i], pmf[i]) * Math.signum(f[i] - pmf[i]);
+			else
+				delta[i] = f[i] - pmf[i];
+		}
+
+		Plot plot2 = new Plot("PMF delta", "Photons", (relativeDelta) ? "Relative delta" : "delta");
+		double[] limits = Maths.limits(delta);
+		plot2.setLimits(x[0], x[x.length - 1], limits[0], limits[1]);
+		plot2.setColor(Color.red);
+		plot2.addPoints(x, delta, Plot.LINE);
+		plot2.setColor(Color.magenta);
+		plot2.drawLine(_photons, limits[0], _photons, limits[1]);
+		plot2.setColor(Color.black);
+		plot2.addLabel(0, 0, label);
+		PlotWindow win2 = Utils.display("PMF delta", plot2);
+
+		if (Utils.isNewWindow())
+		{
+			Point p2 = win2.getLocation();
+			p2.y += win1.getHeight();
+			win2.setLocation(p2);
+		}
+	}
+
+	private boolean showPMFDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		gd.addMessage("Plot the probability mass function for EM-gain");
+
+		gd.addNumericField("Gain", _gain, 2);
+		gd.addNumericField("Noise", _noise, 2);
+		gd.addNumericField("Photons", _photons, 2);
+		gd.addCheckbox("Show_approximation", showApproximation);
+		gd.addNumericField("Remove_head", head, 3);
+		gd.addNumericField("Remove_tail", tail, 3);
+		gd.addCheckbox("Relative_delta", relativeDelta);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		_gain = gd.getNextNumber();
+		_noise = FastMath.abs(gd.getNextNumber());
+		_photons = FastMath.abs(gd.getNextNumber());
+		showApproximation = gd.getNextBoolean();
+		head = FastMath.abs(gd.getNextNumber());
+		tail = FastMath.abs(gd.getNextNumber());
+		relativeDelta = gd.getNextBoolean();
+
+		if (gd.invalidNumber() || _bias < 0 || _gain < 1 || _photons == 0 || tail > 0.5 || head > 0.5)
+			return false;
+
+		return true;
 	}
 }
