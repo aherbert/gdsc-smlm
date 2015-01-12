@@ -13,6 +13,11 @@ package gdsc.smlm.function;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
+import org.apache.commons.math3.exception.NumberIsTooLargeException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
@@ -51,6 +56,9 @@ public class PoissonGammaGaussianFunction
 	private final double sqrt2sigma2;
 	private final double sqrt2piSigma2;
 
+	private boolean useApproximation = true;
+	private boolean useSimpleIntegration = true;
+
 	/**
 	 * Initialise the function.
 	 * <p>
@@ -77,8 +85,7 @@ public class PoissonGammaGaussianFunction
 	private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
 
 	/**
-	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
-	 * al (2010) Nature Methods 7, 377-383.
+	 * Compute the likelihood
 	 * 
 	 * @param o
 	 *            The observed count
@@ -130,58 +137,181 @@ public class PoissonGammaGaussianFunction
 				return 0;
 			}
 		}
+		else if (useApproximation)
+		{
+			return mortensenApproximation(cij, eta);
+		}
 		else
 		{
-			// [Poisson PMF] multiplied by the [value at zero]:
-			// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
-			// FastMath.exp(-eta) * [eta * alpha]
-			final double f0 = alpha * FastMath.exp(-eta) * eta;
+			// This code is the full evaluation of equation 7 from the supplementary information  
+			// of the paper Chao, et al (2013) Nature Methods 10, 335-338.
+			// It is the full evaluation of a Poisson-Gamma-Gaussian convolution PMF. 
 
-			// ?
-			final double fp0 = f0 * 0.5 * alpha * (eta - 2);
+			final double sk = sigma; // Read noise
+			final double g = 1.0 / alpha; // Gain
+			final double z = o; // Observed pixel value
+			final double vk = eta; // Expected number of photons
 
-			// The cumulative normal distribution of the read noise
-			// at the observed count
-			final double conv0 = 0.5 * (1 + Erf.erf(cij / (sqrt2sigma2)));
+			// Compute the integral to infinity of:
+			// exp( -((z-u)/(sqrt(2)*s)).^2 - u/g ) * sqrt(vk*u/g) .* besseli(1, 2 * sqrt(vk*u/g)) ./ u;
 
-			// [Noise * Gaussian PMF at observed count] + 
-			//  [observed count * cumulative distribution of read noise at observed count]
-			// [sigma*FastMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
-			final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
+			final double vk_g = vk * alpha; // vk / g
+			final double sqrt2sigma = Math.sqrt(2) * sk;
 
-			// ? 
-			double temp = (f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gauss(cij));
-
-			if (cij > 0.0)
+			// Specify the function to integrate
+			UnivariateFunction f = new UnivariateFunction()
 			{
-				// The observed count converted to photons
-				final double nij = alpha * cij;
-
-				if (eta * nij > 10000)
+				public double value(double u)
 				{
-					// Approximate Bessel function i1(x) when using large x:
-					// i1(x) ~ exp(x)/sqrt(2*pi*x)
-					// However the entire equation is logged (creating transform),
-					// evaluated then raised to e to prevent overflow error on 
-					// large exp(x)
-
-					final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
-							Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
-					temp += (FastMath.exp(transform) - f0 - fp0 * cij);
+					return eval(sqrt2sigma, z, vk_g, g, u);
 				}
-				else
+			};
+
+			// Integrate to infinity is not necessary. The convolution of the function with the 
+			// Gaussian should be adequately sampled using a nxSD around the maximum.
+			// Find a bracket containing the maximum
+			double lower, upper;
+			double maxU = Math.max(1, o);
+			double rLower = maxU;
+			double rUpper = maxU + 1;
+			double f1 = f.value(rLower);
+			double f2 = f.value(rUpper);
+
+			// Calculate the simple integral and the range
+			double sum = f1 + f2;
+			boolean searchUp = f2 > f1;
+
+			if (searchUp)
+			{
+				while (f2 > f1)
 				{
-					// Second part of equation 135 but not sure what the 
-					// -f0-fp0*cij term is.
-					// This indicates that temp should already be the first
-					// part of eq.135: exp(-eta)*delta(cij)
-					temp += (Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) *
-							Bessel.I1(2 * Math.sqrt(eta * nij)) - f0 - fp0 * cij);
+					f1 = f2;
+					rUpper += 1;
+					f2 = f.value(rUpper);
+					sum += f2;
+				}
+				maxU = rUpper - 1;
+			}
+			else
+			{
+				// Ensure that u stays above zero
+				while (f1 > f2 && rLower > 1)
+				{
+					f2 = f1;
+					rLower -= 1;
+					f1 = f.value(rLower);
+					sum += f1;
+				}
+				maxU = (rLower > 1) ? rLower + 1 : rLower;
+			}
+
+			lower = Math.max(0, maxU - 5 * sk);
+			upper = maxU + 5 * sk;
+
+			if (useSimpleIntegration && lower > 0)
+			{
+				// If we are not at the zero boundary then we can use a simple integration by adding the 
+				// remaining points in the range
+				for (double u = rLower - 1; u >= lower; u -= 1)
+				{
+					sum += f.value(u);
+				}
+				for (double u = rUpper + 1; u <= upper; u += 1)
+				{
+					sum += f.value(u);
+				}
+			}
+			else
+			{
+				// Use Legendre-Gauss integrator
+				try
+				{
+					final double relativeAccuracy = 1e-4;
+					final double absoluteAccuracy = 1e-8;
+					final int minimalIterationCount = 3;
+					final int maximalIterationCount = 32;
+					final int integrationPoints = 16;
+
+					// Use an integrator that does not use the boundary since u=0 is undefined (divide by zero)
+					UnivariateIntegrator i = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
+							absoluteAccuracy, minimalIterationCount, maximalIterationCount);
+
+					sum = i.integrate(2000, f, lower, upper);
+				}
+				catch (TooManyEvaluationsException ex)
+				{
+					return mortensenApproximation(cij, eta);
 				}
 			}
 
-			return temp;
+			// Compute the final probability
+			//final double 
+			f1 = z / sqrt2sigma;
+			return (FastMath.exp(-vk) / (sqrt2pi * sk)) * (FastMath.exp(-(f1 * f1)) + sum);
 		}
+	}
+
+	private double mortensenApproximation(final double cij, final double eta)
+	{
+		// This code is adapted from the Python source code within the supplementary information of 
+		// the paper Mortensen, et al (2010) Nature Methods 7, 377-383.
+
+		// [Poisson PMF] multiplied by the [value at zero]:
+		// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
+		// FastMath.exp(-eta) * [eta * alpha]
+		final double f0 = alpha * FastMath.exp(-eta) * eta;
+
+		// ?
+		final double fp0 = f0 * 0.5 * alpha * (eta - 2);
+
+		// The cumulative normal distribution of the read noise
+		// at the observed count
+		final double conv0 = 0.5 * (1 + Erf.erf(cij / (sqrt2sigma2)));
+
+		// [Noise * Gaussian PMF at observed count] + 
+		//  [observed count * cumulative distribution of read noise at observed count]
+		// [sigma*FastMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
+		final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
+
+		// ? 
+		double temp = (f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gauss(cij));
+
+		if (cij > 0.0)
+		{
+			// The observed count converted to photons
+			final double nij = alpha * cij;
+
+			if (eta * nij > 10000)
+			{
+				// Approximate Bessel function i1(x) when using large x:
+				// i1(x) ~ exp(x)/sqrt(2*pi*x)
+				// However the entire equation is logged (creating transform),
+				// evaluated then raised to e to prevent overflow error on 
+				// large exp(x)
+
+				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
+						Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+				temp += (FastMath.exp(transform) - f0 - fp0 * cij);
+			}
+			else
+			{
+				// Second part of equation 135 but not sure what the 
+				// -f0-fp0*cij term is.
+				// This indicates that temp should already be the first
+				// part of eq.135: exp(-eta)*delta(cij)
+				temp += (Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij)) -
+						f0 - fp0 * cij);
+			}
+		}
+
+		return temp;
+	}
+
+	private double eval(double sqrt2sigma, double z, double vk_g, double g, double u)
+	{
+		final double f1 = (z - u) / sqrt2sigma;
+		final double f2 = Math.sqrt(vk_g * u);
+		return FastMath.exp(-(f1 * f1) - u / g) * f2 * Bessel.I1(2 * f2) / u;
 	}
 
 	/**
@@ -205,5 +335,55 @@ public class PoissonGammaGaussianFunction
 	private double gauss(final double x)
 	{
 		return FastMath.exp(-(x * x) / twoSigma2) / sqrt2piSigma2;
+	}
+
+	/**
+	 * @return the useApproximation
+	 */
+	public boolean isUseApproximation()
+	{
+		return useApproximation;
+	}
+
+	/**
+	 * @param useApproximation
+	 *            the useApproximation to set
+	 */
+	public void setUseApproximation(boolean useApproximation)
+	{
+		this.useApproximation = useApproximation;
+	}
+
+	/**
+	 * @return the useSimpleIntegration
+	 */
+	public boolean isUseSimpleIntegration()
+	{
+		return useSimpleIntegration;
+	}
+
+	/**
+	 * @param useSimpleIntegration
+	 *            the useSimpleIntegration to set
+	 */
+	public void setUseSimpleIntegration(boolean useSimpleIntegration)
+	{
+		this.useSimpleIntegration = useSimpleIntegration;
+	}
+
+	/**
+	 * @return the alpha
+	 */
+	public double getAlpha()
+	{
+		return alpha;
+	}
+
+	/**
+	 * @return the sigma
+	 */
+	public double getSigma()
+	{
+		return sigma;
 	}
 }
