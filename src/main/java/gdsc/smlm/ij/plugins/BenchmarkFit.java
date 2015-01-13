@@ -931,7 +931,7 @@ public class BenchmarkFit implements PlugIn
 	{
 		if (summaryTable == null || !summaryTable.isVisible())
 		{
-			summaryTable = new TextWindow(TITLE, createHeader(), "", 1000, 300);
+			summaryTable = new TextWindow(TITLE, createHeader(false), "", 1000, 300);
 			summaryTable.setVisible(true);
 		}
 	}
@@ -940,14 +940,16 @@ public class BenchmarkFit implements PlugIn
 	{
 		if (analysisTable == null || !analysisTable.isVisible())
 		{
-			analysisTable = new TextWindow(TITLE + " Combined Analysis", createHeader(), "", 1000, 300);
+			analysisTable = new TextWindow(TITLE + " Combined Analysis", createHeader(true), "", 1000, 300);
 			analysisTable.setVisible(true);
 		}
 	}
 
-	private String createHeader()
+	private String createHeader(boolean extraRecall)
 	{
 		StringBuilder sb = new StringBuilder(createParameterHeader() + "\tRecall");
+		if (extraRecall)
+			sb.append("\tOrigRecall");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]).append("\t+/-");
@@ -974,11 +976,18 @@ public class BenchmarkFit implements PlugIn
 
 		// Build a list of all the frames which have results
 		int[] valid = new int[length];
+		int j = 0;
+		int[] count = new int[benchmarkResults.size()];
 		for (BenchmarkResult benchmarkResult : benchmarkResults)
 		{
+			int c = 0;
 			for (int i = 0; i < valid.length; i++)
 				if (benchmarkResult.results[i] != null)
+				{
+					c++;
 					valid[i]++;
+				}
+			count[j++] = c;
 		}
 
 		final int target = benchmarkResults.size();
@@ -997,6 +1006,7 @@ public class BenchmarkFit implements PlugIn
 		createAnalysisTable();
 
 		// Create the results using only frames where all the fitting methods were successful
+		j = 0;
 		for (BenchmarkResult benchmarkResult : benchmarkResults)
 		{
 			final double[] answer = benchmarkResult.answer;
@@ -1020,6 +1030,10 @@ public class BenchmarkFit implements PlugIn
 			sb.append("\t");
 			final double recall = (stats[0].getN() / numberOfStartPoints) / benchmarkParameters.getMolecules();
 			sb.append(Utils.rounded(recall));
+			// Add the original recall
+			sb.append("\t");
+			final double recall2 = (count[j++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
+			sb.append(Utils.rounded(recall2));
 
 			// Convert to units of the image (ADUs and pixels)		
 			final double[] convert = benchmarkResult.convert;
