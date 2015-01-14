@@ -198,10 +198,13 @@ public class PCPALMClusters implements PlugIn
 				Utils.display(title, plot);
 
 				// Automatically save
-				if (autoSave &&
-						saveHistogram(histogramData, Utils.replaceExtension(histogramData.filename, ".noise.tsv")))
+				if (autoSave)
 				{
-					Utils.log("Saved noise-subtracted histogram to " + histogramData.filename);
+					String newFilename = Utils.replaceExtension(histogramData.filename, ".noise.tsv");
+					if (saveHistogram(histogramData, newFilename))
+					{
+						Utils.log("Saved noise-subtracted histogram to " + newFilename);
+					}
 				}
 			}
 		}
@@ -383,11 +386,11 @@ public class PCPALMClusters implements PlugIn
 			output = new BufferedWriter(new FileWriter(filename));
 			if (histogramData.isCalibrated())
 			{
-				output.write(String.format("Frames  %d", frames));
+				output.write(String.format("Frames  %d", histogramData.frames));
 				output.newLine();
-				output.write(String.format("Area    %f", area));
+				output.write(String.format("Area    %f", histogramData.area));
 				output.newLine();
-				output.write(String.format("Units   %s", units));
+				output.write(String.format("Units   %s", histogramData.units));
 				output.newLine();
 			}
 			output.write("Size\tFrequency");
