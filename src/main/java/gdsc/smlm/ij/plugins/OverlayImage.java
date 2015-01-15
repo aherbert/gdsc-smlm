@@ -11,6 +11,7 @@ import ij.gui.Roi;
 import ij.plugin.PlugIn;
 
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 /**
  * This plugin is extracted from ij.plugins.OverlayCommands to allow an image to be added with a transparent
@@ -20,19 +21,18 @@ public class OverlayImage implements PlugIn
 {
 	private static int opacity = 100;
 	private static boolean transparent = true, replace = true;
+	private static String title = "";
 
 	public void run(String arg)
 	{
-		addImage(false);
+		addImage();
 	}
 
 	/**
 	 * Adapted from ij.plugins.OverlayCommands#addImage(boolean) with the additional option for setting the zero pixels
 	 * to transparent.
-	 * 
-	 * @param createImageRoi
 	 */
-	void addImage(boolean createImageRoi)
+	void addImage()
 	{
 		ImagePlus imp = IJ.getImage();
 		int[] wList = WindowManager.getIDList();
@@ -42,11 +42,20 @@ public class OverlayImage implements PlugIn
 			return;
 		}
 		String[] titles = new String[wList.length];
+		int count = 0;
 		for (int i = 0; i < wList.length; i++)
 		{
 			ImagePlus imp2 = WindowManager.getImage(wList[i]);
-			titles[i] = imp2 != null ? imp2.getTitle() : "";
+			if (imp2 != null && imp2 != imp && imp.getWidth() >= imp2.getWidth() && imp.getHeight() >= imp2.getHeight())
+				titles[count++] = imp2.getTitle();
 		}
+		if (count < 1)
+		{
+			IJ.error("Add Image...", "The command requires at least one valid overlay image.");
+			return;
+		}
+		titles = Arrays.copyOf(titles, count);
+
 		int x = 0, y = 0;
 		Roi roi = imp.getRoi();
 		if (roi != null && roi.isArea())
@@ -55,55 +64,27 @@ public class OverlayImage implements PlugIn
 			x = r.x;
 			y = r.y;
 		}
-		int index = 0;
-		if (wList.length == 2)
-		{
-			ImagePlus i1 = WindowManager.getImage(wList[0]);
-			ImagePlus i2 = WindowManager.getImage(wList[1]);
-			if (i2.getWidth() < i1.getWidth() && i2.getHeight() < i1.getHeight())
-				index = 1;
-		}
-		else if (imp.getID() == wList[0])
-			index = 1;
 
-		String title = createImageRoi ? "Create Image ROI" : "Add Image...";
-		GenericDialog gd = new GenericDialog(title);
-		if (createImageRoi)
-			gd.addChoice("Image:", titles, titles[index]);
-		else
-		{
-			gd.addChoice("Image to add:", titles, titles[index]);
-			gd.addNumericField("X location:", x, 0);
-			gd.addNumericField("Y location:", y, 0);
-			gd.addCheckbox("Transparent background", transparent);
-			gd.addCheckbox("Replace overlay", replace);
-		}
+		GenericDialog gd = new GenericDialog("Add Image...");
+		gd.addChoice("Image to add:", titles, title);
+		gd.addNumericField("X location:", x, 0);
+		gd.addNumericField("Y location:", y, 0);
 		gd.addNumericField("Opacity (0-100%):", opacity, 0);
-		//gd.addCheckbox("Create image selection", createImageRoi);
+		gd.addCheckbox("Transparent background", transparent);
+		gd.addCheckbox("Replace overlay", replace);
+
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		index = gd.getNextChoiceIndex();
-		if (!createImageRoi)
-		{
-			x = (int) gd.getNextNumber();
-			y = (int) gd.getNextNumber();
-			transparent = gd.getNextBoolean();
-			replace = gd.getNextBoolean();
-		}
+
+		title = gd.getNextChoice();
+		x = (int) gd.getNextNumber();
+		y = (int) gd.getNextNumber();
 		opacity = (int) gd.getNextNumber();
-		//createImageRoi = gd.getNextBoolean();
-		ImagePlus overlay = WindowManager.getImage(wList[index]);
-		if (wList.length == 2)
-		{
-			ImagePlus i1 = WindowManager.getImage(wList[0]);
-			ImagePlus i2 = WindowManager.getImage(wList[1]);
-			if (i2.getWidth() < i1.getWidth() && i2.getHeight() < i1.getHeight())
-			{
-				imp = i1;
-				overlay = i2;
-			}
-		}
+		transparent = gd.getNextBoolean();
+		replace = gd.getNextBoolean();
+
+		ImagePlus overlay = WindowManager.getImage(title);
 		if (overlay == imp)
 		{
 			IJ.error("Add Image...", "Image to be added cannot be the same as\n\"" + imp.getTitle() + "\".");
@@ -114,28 +95,18 @@ public class OverlayImage implements PlugIn
 			IJ.error("Add Image...", "Image to be added cannnot be larger than\n\"" + imp.getTitle() + "\".");
 			return;
 		}
-		if (createImageRoi && x == 0 && y == 0)
-		{
-			x = imp.getWidth() / 2 - overlay.getWidth() / 2;
-			y = imp.getHeight() / 2 - overlay.getHeight() / 2;
-		}
+
 		ImageRoi roi2 = new ImageRoi(x, y, overlay.getProcessor());
 		roi2.setZeroTransparent(transparent);
-		roi = roi2;
-		roi.setName(overlay.getShortTitle());
+		roi2.setName(overlay.getShortTitle());
 		if (opacity != 100)
-			((ImageRoi) roi).setOpacity(opacity / 100.0);
-		if (createImageRoi)
-			imp.setRoi(roi);
-		else
-		{
-			Overlay overlayList = imp.getOverlay();
-			if (overlayList == null || replace)
-				overlayList = new Overlay();
-			overlayList.add(roi);
-			imp.setOverlay(overlayList);
-			Undo.setup(Undo.OVERLAY_ADDITION, imp);
-		}
-	}
+			roi2.setOpacity(opacity / 100.0);
 
+		Overlay overlayList = imp.getOverlay();
+		if (overlayList == null || replace)
+			overlayList = new Overlay();
+		overlayList.add(roi2);
+		imp.setOverlay(overlayList);
+		Undo.setup(Undo.OVERLAY_ADDITION, imp);
+	}
 }
