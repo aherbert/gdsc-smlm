@@ -616,7 +616,7 @@ public class DriftCalculator implements PlugIn
 
 		lastdx = null;
 		double change = calculateDriftUsingMarkers(roiSpots, weights, sum, dx, dy, smoothing, iterations);
-		if (Double.isNaN(change))
+		if (Double.isNaN(change) || tracker.isEnded())
 			return null;
 		Utils.log("Drift Calculator : Initial drift " + Utils.rounded(change));
 
@@ -630,6 +630,9 @@ public class DriftCalculator implements PlugIn
 				break;
 		}
 
+		if (tracker.isEnded())
+			return null;
+		
 		interpolate(dx, dy, weights);
 
 		plotDrift(limits, dx, dy);
@@ -1355,7 +1358,7 @@ public class DriftCalculator implements PlugIn
 
 		double change = calculateDriftUsingFrames(blocks, blockT, bounds, scale, dx, dy, originalDriftTimePoints,
 				smoothing, iterations);
-		if (Double.isNaN(change))
+		if (Double.isNaN(change) || tracker.isEnded())
 			return null;
 
 		plotDrift(limits, dx, dy);
@@ -1374,6 +1377,9 @@ public class DriftCalculator implements PlugIn
 				break;
 		}
 
+		if (tracker.isEnded())
+			return null;
+		
 		plotDrift(limits, dx, dy);
 
 		return new double[][] { dx, dy };
@@ -1641,6 +1647,9 @@ public class DriftCalculator implements PlugIn
 		Utils.waitForCompletion(futures);
 		tracker.progress(1);
 
+		if (tracker.isEnded())
+			return null;
+		
 		double[] dx = new double[limits[1] + 1];
 		double[] dy = new double[dx.length];
 
@@ -1657,7 +1666,7 @@ public class DriftCalculator implements PlugIn
 		lastdx = null;
 		double change = calculateDriftUsingImageStack(referenceIp, images, fhtImages, blockT, dx, dy,
 				originalDriftTimePoints, smoothing, iterations);
-		if (Double.isNaN(change))
+		if (Double.isNaN(change) || tracker.isEnded())
 			return null;
 
 		plotDrift(limits, dx, dy);
@@ -1675,7 +1684,10 @@ public class DriftCalculator implements PlugIn
 			if (converged(i, change, getTotalDrift(dx, dy, originalDriftTimePoints)))
 				break;
 		}
-
+		
+		if (tracker.isEnded())
+			return null;
+		
 		plotDrift(limits, dx, dy);
 
 		return new double[][] { dx, dy };
