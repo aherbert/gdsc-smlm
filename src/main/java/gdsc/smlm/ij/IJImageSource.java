@@ -83,7 +83,11 @@ public class IJImageSource extends ImageSource
 		}
 		width = imp.getWidth();
 		height = imp.getHeight();
-		frames = imp.getStackSize();
+		// Store the number of valid frames
+		if (singleFrame > 0)
+			frames = 1 + this.extraFrames;
+		else
+			frames = imp.getStackSize();			
 		slice = 0;
 		FileInfo info = imp.getOriginalFileInfo();
 		if (info != null)
