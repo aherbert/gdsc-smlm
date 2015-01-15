@@ -19,7 +19,7 @@ import java.awt.Rectangle;
 public class OverlayImage implements PlugIn
 {
 	private static int opacity = 100;
-	private static boolean transparent = true;
+	private static boolean transparent = true, replace = true;
 
 	public void run(String arg)
 	{
@@ -76,6 +76,7 @@ public class OverlayImage implements PlugIn
 			gd.addNumericField("X location:", x, 0);
 			gd.addNumericField("Y location:", y, 0);
 			gd.addCheckbox("Transparent background", transparent);
+			gd.addCheckbox("Replace overlay", replace);
 		}
 		gd.addNumericField("Opacity (0-100%):", opacity, 0);
 		//gd.addCheckbox("Create image selection", createImageRoi);
@@ -88,6 +89,7 @@ public class OverlayImage implements PlugIn
 			x = (int) gd.getNextNumber();
 			y = (int) gd.getNextNumber();
 			transparent = gd.getNextBoolean();
+			replace = gd.getNextBoolean();
 		}
 		opacity = (int) gd.getNextNumber();
 		//createImageRoi = gd.getNextBoolean();
@@ -128,7 +130,7 @@ public class OverlayImage implements PlugIn
 		else
 		{
 			Overlay overlayList = imp.getOverlay();
-			if (overlayList == null)
+			if (overlayList == null || replace)
 				overlayList = new Overlay();
 			overlayList.add(roi);
 			imp.setOverlay(overlayList);
