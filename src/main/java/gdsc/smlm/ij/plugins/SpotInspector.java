@@ -284,6 +284,8 @@ public class SpotInspector implements PlugIn, MouseListener
 			spots.setSliceLabel(Utils.rounded(rank.originalScore), slice);
 		}
 
+		source.close();
+		
 		ImagePlus imp = Utils.display(TITLE, spots);
 		imp.setRoi((PointRoi) null);
 

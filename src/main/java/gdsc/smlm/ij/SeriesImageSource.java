@@ -126,15 +126,13 @@ public class SeriesImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#open()
+	 * @see gdsc.smlm.results.ImageSource#openSource()
 	 */
 	@Override
 	public boolean openSource()
 	{
 		// reset
-		setDimensions(0, 0, 0);
-		imageArray = lastImageArray = null;
-		currentImageSize = lastImageSize = 0;
+		close();
 
 		if (images.isEmpty())
 			return false;
@@ -142,6 +140,18 @@ public class SeriesImageSource extends ImageSource
 		// Open the first image to initialise dimensions
 		currentImage = 0;
 		return getNextImage() != null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#close()
+	 */
+	public void close()
+	{
+		setDimensions(0, 0, 0);
+		imageArray = lastImageArray = null;
+		currentImageSize = lastImageSize = 0;
 	}
 
 	private Object[] getNextImage()

@@ -24,6 +24,7 @@ public class MemoryImageSource extends ImageSource
 {
 	private int counter;
 	private float[][] data;
+	private boolean freeMemoryOnClose;
 
 	/**
 	 * Create a new image source
@@ -57,10 +58,23 @@ public class MemoryImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ImageSource#openSource()
 	 */
 	@Override
-	public boolean openSource()
+	protected boolean openSource()
 	{
 		counter = 0;
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#close()
+	 */
+	@Override
+	public void close()
+	{
+		// Free the memory
+		if (freeMemoryOnClose)
+			data = new float[0][0];
 	}
 
 	/*
@@ -128,5 +142,25 @@ public class MemoryImageSource extends ImageSource
 	{
 		super.init(xs);
 		xs.omitField(MemoryImageSource.class, "counter");
+	}
+
+	/**
+	 * @return Set to true if freeing the memory on calling {@link #close()}
+	 */
+	public boolean isFreeMemoryOnClose()
+	{
+		return freeMemoryOnClose;
+	}
+
+	/**
+	 * Set this to true to free the memory when the {@link #close()} method is called. No subsequent calls to
+	 * {@link #open()} will be valid.
+	 * 
+	 * @param freeMemoryOnClose
+	 *            Set to true to free the memory on calling {@link #close()}
+	 */
+	public void setFreeMemoryOnClose(boolean freeMemoryOnClose)
+	{
+		this.freeMemoryOnClose = freeMemoryOnClose;
 	}
 }

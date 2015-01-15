@@ -56,6 +56,11 @@ public abstract class ImageSource
 	protected abstract boolean openSource();
 
 	/**
+	 * Closes the source
+	 */
+	public abstract void close();
+	
+	/**
 	 * Get the width of the results. The frame returned by {@link #next()} will be equal to width * height.
 	 * 
 	 * @return

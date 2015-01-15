@@ -302,7 +302,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					if (source instanceof IJImageSource)
 					{
 						tmpImageSource = (IJImageSource) source;
-						if (!tmpImageSource.openSource())
+						if (!tmpImageSource.open())
 						{
 							tmpImageSource = null;
 						}
@@ -1813,6 +1813,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			Utils.display("Processed frames", stack);
 
 		showResults();
+		
+		source.close();
 	}
 
 	/**
@@ -2051,6 +2053,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		time = engine.getTime();
 
 		showResults();
+		
+		source.close();
 	}
 
 	private boolean processResults(FitEngine engine, ArrayList<PeakResult> sliceCandidates, int slice)

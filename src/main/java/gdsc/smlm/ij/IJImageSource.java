@@ -138,10 +138,10 @@ public class IJImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#open()
+	 * @see gdsc.smlm.results.ImageSource#openSource()
 	 */
 	@Override
-	public boolean openSource()
+	protected boolean openSource()
 	{
 		if (nullImageArray() && imageStack == null)
 		{
@@ -173,6 +173,18 @@ public class IJImageSource extends ImageSource
 		}
 		slice = 0;
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#close()
+	 */
+	@Override
+	public void close()
+	{
+		imageArray = null;
+		imageStack = null;
 	}
 
 	/**

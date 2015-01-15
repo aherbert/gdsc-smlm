@@ -130,19 +130,30 @@ public class InterlacedImageSource extends ImageSource
 	{
 		return imageSource.getOriginal();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#open()
+	 * @see gdsc.smlm.results.ResultsSource#openSource()
 	 */
 	@Override
-	public boolean openSource()
+	protected boolean openSource()
 	{
 		// Assume frame start at 1 and set the intial skip		
 		final int initialSkip = (start - 1);
 		counter = -initialSkip;
 		return imageSource.openSource();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ResultsSource#close()
+	 */
+	@Override
+	public void close()
+	{
+		imageSource.close();
 	}
 
 	/*

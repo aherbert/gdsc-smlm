@@ -1576,7 +1576,10 @@ public class TraceMolecules implements PlugIn
 		gd.addCheckbox("Debug_failures", debugFailures);
 		gd.showDialog();
 		if (!gd.wasOKed())
+		{
+			source.close();
 			return;
+		}
 
 		// Get parameters for the fit
 		fitOnlyCentroid = !gd.getNextBoolean();
@@ -1631,6 +1634,7 @@ public class TraceMolecules implements PlugIn
 		catch (IllegalArgumentException e)
 		{
 			IJ.error(TITLE, e.getMessage());
+			source.close();
 			return;
 		}
 
@@ -1870,6 +1874,8 @@ public class TraceMolecules implements PlugIn
 
 		refitResults.end();
 		MemoryPeakResults.addResults(refitResults);
+		
+		source.close();
 	}
 
 	private ImageStack slices;
@@ -1882,7 +1888,7 @@ public class TraceMolecules implements PlugIn
 
 		// Get the coordinates and the spot bounds
 		float[] centre = trace.getCentroid(CentroidMethod.SIGNAL_WEIGHTED);
-		int minX = (int) Math.floor(centre[0] - fitWidth);
+		int minX = (int) Math.floor(centre[0] - fitWidth);		
 		int maxX = (int) Math.ceil(centre[0] + fitWidth);
 		int minY = (int) Math.floor(centre[1] - fitWidth);
 		int maxY = (int) Math.ceil(centre[1] + fitWidth);

@@ -134,12 +134,23 @@ public class AggregatedImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#open()
+	 * @see gdsc.smlm.results.ResultsSource#openSource()
 	 */
 	@Override
-	public boolean openSource()
+	protected boolean openSource()
 	{
 		return imageSource.openSource();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ResultsSource#close()
+	 */
+	@Override
+	public void close()
+	{
+		imageSource.close();
 	}
 
 	/*

@@ -31,9 +31,15 @@ public class NullSource extends ImageSource
 	}
 
 	@Override
-	public boolean openSource()
+	protected boolean openSource()
 	{
 		return false;
+	}
+
+	@Override
+	public void close()
+	{
+		// Nothing to do
 	}
 
 	@Override
@@ -47,7 +53,7 @@ public class NullSource extends ImageSource
 	{
 		return null;
 	}
-	
+
 	@Override
 	public boolean isValid(int frame)
 	{
