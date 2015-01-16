@@ -412,7 +412,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 		gd.addStringField("Config_filename", configFilename);
 		gd.addCheckbox("Create_config_file", false);
 
-		if (!java.awt.GraphicsEnvironment.isHeadless())
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 		{
 			configFilenameText = (TextField) gd.getStringFields().get(0);
 			configFilenameText.setColumns(30);

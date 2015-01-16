@@ -290,7 +290,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		gd.addCheckbox("Enumerate_early attributes first", enumerateEarly);
 		gd.addCheckbox("Show_demo_filters", false);
 
-		if (!java.awt.GraphicsEnvironment.isHeadless())
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 		{
 			Checkbox cb = (Checkbox) gd.getCheckboxes().get(1);
 			cb.addItemListener(this);

@@ -114,7 +114,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		gd.addTextAreas(filterSettings.freeFilter, null, 20, 80);
 		gd.addCheckbox("Show_demo_filters", false);
 
-		if (!java.awt.GraphicsEnvironment.isHeadless())
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 		{
 			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
 			cb.addItemListener(this);

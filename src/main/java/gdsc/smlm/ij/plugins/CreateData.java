@@ -3774,7 +3774,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			gd.addCheckbox("Enable_2D_rotation", settings.rotate2D);
 			gd.addCheckbox("Show_example_compounds", false);
 
-			if (!java.awt.GraphicsEnvironment.isHeadless())
+			if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 			{
 				@SuppressWarnings("rawtypes")
 				Vector v = gd.getCheckboxes();
