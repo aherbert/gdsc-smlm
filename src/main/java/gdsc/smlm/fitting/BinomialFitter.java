@@ -293,6 +293,14 @@ public class BinomialFitter
 				histogram[i] /= cumul;
 		}
 
+		int nFittedPoints = Math.min(histogram.length, n + 1) - ((zeroTruncated) ? 1 : 0);
+		if (nFittedPoints < 1)
+		{
+			log("No points to fit (%d): Histogram.length = %d, n = %d, zero-truncated = %b", nFittedPoints,
+					histogram.length, n, zeroTruncated);
+			return null;
+		}
+
 		// The model is only fitting the probability p
 		// For a binomial n*p = mean => p = mean/n
 		double[] initialSolution = new double[] { FastMath.min(mean / n, 1) };
@@ -344,7 +352,8 @@ public class BinomialFitter
 					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 				return new PointValuePair(solution.getPointRef(), ss);
 			}
-			else
+			// We can do a LVM refit if the number of fitted points is more than 1
+			else if (nFittedPoints > 1)
 			{
 				// Improve SS fit with a gradient based LVM optimizer
 				LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
@@ -587,15 +596,16 @@ public class BinomialFitter
 
 			if (startIndex == 0)
 			{
-    			for (int k = 0; k <= n; ++k)
-    			{
-    				//jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) + 
-    				//		nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1;
-    				
-    				// Optimise
-    				jacobian[k][0] = nC[k] * (k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) - 
-    						Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1));
-    			}
+				for (int k = 0; k <= n; ++k)
+				{
+					//jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) + 
+					//		nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1;
+
+					// Optimise
+					jacobian[k][0] = nC[k] *
+							(k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) - Math.pow(p, k) * (n - k) *
+									Math.pow(1 - p, n - k - 1));
+				}
 			}
 			else
 			{
@@ -610,21 +620,20 @@ public class BinomialFitter
 
 				// So far we have only computed g' for the original Binomial
 
-		 		//double pi = dist.probability(0);
+				//double pi = dist.probability(0);
 				final double p_n = Math.pow(1 - p, n);
-		 		final double f = 1.0 / (1.0 - nC[0] * p_n);
-				final double ff = -1 / Math.pow(1.0 - nC[0] * p_n, 2) +
-						n * Math.pow(1 - p, n - 1);
+				final double f = 1.0 / (1.0 - nC[0] * p_n);
+				final double ff = -1 / Math.pow(1.0 - nC[0] * p_n, 2) + n * Math.pow(1 - p, n - 1);
 
 				for (int k = 1; k <= n; ++k)
 				{
 					final double pk = Math.pow(p, k);
 					final double p_n_k = Math.pow(1 - p, n - k);
-					
+
 					final double g = nC[k] * pk * p_n_k;
 					// Differentiate as above
-					final double gg = nC[k] * (k * Math.pow(p, k - 1) * p_n_k - 
-							pk * (n - k) * Math.pow(1 - p, n - k - 1));
+					final double gg = nC[k] *
+							(k * Math.pow(p, k - 1) * p_n_k - pk * (n - k) * Math.pow(1 - p, n - k - 1));
 					jacobian[k][0] = ff * g + f * gg;
 				}
 			}
