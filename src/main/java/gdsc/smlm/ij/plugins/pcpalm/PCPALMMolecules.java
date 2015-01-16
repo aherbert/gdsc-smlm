@@ -888,8 +888,9 @@ public class PCPALMMolecules implements PlugIn
 						.add(new Molecule(centroid[0] * nmPerPixel, centroid[1] * nmPerPixel, p, t.getSignal() / gain));
 			}
 		}
-		log("  %d molecules traced using d=%.2f nm, t=%d frames. (%d singles)", molecules.size(), distance, time,
-				singles.size(), molecules.size());
+		log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
+				results.size(), molecules.size(), singles.size(), molecules.size() - singles.size(), distance, time,
+				Utils.rounded(time * results.getCalibration().exposureTime / 1000.0));
 		return molecules;
 	}
 
@@ -935,7 +936,8 @@ public class PCPALMMolecules implements PlugIn
 		startLog();
 
 		// Convert seconds to frames
-		int timeInFrames = FastMath.max(1, (int) Math.round(tThreshold * 1000.0 / results.getCalibration().exposureTime));
+		int timeInFrames = FastMath.max(1,
+				(int) Math.round(tThreshold * 1000.0 / results.getCalibration().exposureTime));
 
 		ArrayList<Molecule> singles = new ArrayList<Molecule>();
 		molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
