@@ -791,7 +791,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// Add a mouse listener to the config file field
-		if (!java.awt.GraphicsEnvironment.isHeadless())
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 		{
 			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
@@ -1204,7 +1204,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Add ability to run the PSF Calculator to get the width
 		gd.addCheckbox("Run_PSF_calculator", false);
 		gd.addNumericField("Gaussian_SD", fitConfig.getInitialPeakStdDev0(), 3);
-		if (!java.awt.GraphicsEnvironment.isHeadless())
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 		{
 			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
 			cb.addItemListener(this);
