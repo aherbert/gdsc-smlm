@@ -140,7 +140,7 @@ public class Cluster implements Comparable<Cluster>
 
 	/**
 	 * Link the two clusters as potential merge candidates only if the squared distance is smaller than the other
-	 * clusters current closest
+	 * cluster's current closest
 	 * 
 	 * @param other
 	 * @param d2
@@ -168,7 +168,7 @@ public class Cluster implements Comparable<Cluster>
 	
 	/**
 	 * Link the two clusters as potential merge candidates only if the squared distance is smaller than the other
-	 * clusters current closest.
+	 * cluster's current closest.
 	 * <p>
 	 * Thread safe.
 	 * 

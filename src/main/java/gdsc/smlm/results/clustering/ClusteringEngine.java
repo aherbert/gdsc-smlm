@@ -345,7 +345,9 @@ public class ClusteringEngine
 		// of any other pair:
 		//
 		// Set point C on the circle drawn with radius R around both points A and B. Distance A-B > R.
-		// When the angle ACB is <90 then the line C-B intersects A's circle. If ACB = 90 then the 
+		// When the angle ACB is <90 then the line C-B intersects A's circle, i.e. joining C to B can
+		// create a new centroid within the search radius of A. The same is true if joining C to A, the 
+		// new centroid could be closer to A than distance R. If ACB = 90 then the 
 		// line C-B cannot intersect A's circle. Distance AB = sqrt(2R^2) = sqrt(2) * R
 		//
 		//        -------   ------   
