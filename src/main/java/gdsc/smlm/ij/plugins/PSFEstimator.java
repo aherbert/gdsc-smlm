@@ -703,7 +703,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 					continue;
 				StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
 				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins, "Mean = " +
-						Utils.rounded(stats.getMean()));
+						Utils.rounded(stats.getMean()) + ". Median = " + Utils.rounded(sampleNew[ii].getPercentile(50)));
 				requireRetile = requireRetile || Utils.isNewWindow();
 			}
 			if (requireRetile && count > 0)
