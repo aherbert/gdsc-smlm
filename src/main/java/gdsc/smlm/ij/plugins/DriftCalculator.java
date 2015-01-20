@@ -164,6 +164,7 @@ public class DriftCalculator implements PlugIn
 			for (int i = from; i < to && i < ip.length; i++)
 			{
 				incrementProgress();
+				// Window method is ignored since the image processor is already an FHT image
 				double[] result = aligner.align(ip[i], WindowMethod.TUKEY, alignBounds,
 						AlignImagesFFT.SubPixelMethod.CUBIC);
 				// Create a result for failures
@@ -1664,6 +1665,8 @@ public class DriftCalculator implements PlugIn
 		double smoothing = updateSmoothingParameter(originalDriftTimePoints);
 
 		lastdx = null;
+		// For the first iteration calculate drift to the first image in the stack
+		// (since the average projection may have a large drift blurring the image)
 		double change = calculateDriftUsingImageStack(referenceIp, images, fhtImages, blockT, dx, dy,
 				originalDriftTimePoints, smoothing, iterations);
 		if (Double.isNaN(change) || tracker.isEnded())
@@ -1753,11 +1756,9 @@ public class DriftCalculator implements PlugIn
 				reference.copyBits(ip, 0, 0, Blitter.ADD);
 			}
 		}
-		else
-		{
-			// Ensure the reference is windowed
-			AlignImagesFFT.applyWindowSeparable(reference, WindowMethod.TUKEY);
-		}
+		
+		// Ensure the reference is windowed
+		AlignImagesFFT.applyWindowSeparable(reference, WindowMethod.TUKEY);
 
 		return calculateDrift(blockT, 1f, dx, dy, originalDriftTimePoints, smoothing, iterations, fhtImages, reference,
 				false);
