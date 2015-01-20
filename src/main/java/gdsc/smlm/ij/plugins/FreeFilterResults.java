@@ -32,6 +32,7 @@ import gdsc.smlm.results.filter.TraceFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
 import gdsc.smlm.utils.TextUtils;
+import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -111,7 +112,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		GlobalSettings gs = SettingsManager.loadSettings();
 		filterSettings = gs.getFilterSettings();
 
-		gd.addTextAreas(filterSettings.freeFilter, null, 20, 80);
+		gd.addTextAreas(XmlUtils.prettyPrintXml(filterSettings.freeFilter), null, 20, 80);
 		gd.addCheckbox("Show_demo_filters", false);
 
 		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
