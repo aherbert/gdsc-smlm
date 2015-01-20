@@ -112,7 +112,16 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		GlobalSettings gs = SettingsManager.loadSettings();
 		filterSettings = gs.getFilterSettings();
 
-		gd.addTextAreas(XmlUtils.prettyPrintXml(filterSettings.freeFilter), null, 20, 80);
+		String text;
+		try
+		{
+			text = XmlUtils.prettyPrintXml(filterSettings.freeFilter);
+		}
+		catch (Exception e)
+		{
+			text = filterSettings.freeFilter;
+		}
+		gd.addTextAreas(text, null, 20, 80);
 		gd.addCheckbox("Show_demo_filters", false);
 
 		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
