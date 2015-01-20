@@ -2109,7 +2109,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (uniformBackground)
 			{
 				// We can do N random samples thus ensuring the background average is constant
-				int samples = (int) Math.round(pixels2[0] * pixels2.length);
+				final int samples = (int) Math.round(pixels2[0] * pixels2.length);
 
 				// Only do sampling if the number of samples is valid
 				if (samples > 1)
