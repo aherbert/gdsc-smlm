@@ -28,16 +28,20 @@ import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.InterlacedImageSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.utils.Random;
+import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
+import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
@@ -47,6 +51,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -67,6 +72,18 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	private double initialPeakStdDev1 = 1;
 	private double initialPeakAngle = 0;
 
+	private boolean extraOptions;
+	private static int optionIntegrateFrames = 1;
+	private int integrateFrames = 1;
+	private static boolean optionInterlacedData = false;
+	private static int optionDataStart = 1;
+	private static int optionDataBlock = 1;
+	private static int optionDataSkip = 0;
+	private boolean interlacedData = false;
+	private int dataStart = 1;
+	private int dataBlock = 1;
+	private int dataSkip = 0;
+
 	private GlobalSettings globalSettings;
 	private FitEngineConfiguration config;
 	private PSFEstimatorSettings settings;
@@ -80,6 +97,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	private static final int X = 1;
 	private static final int Y = 2;
 	private static final int XY = 3;
+	private static final String[] NAMES = { "Angle", "X SD", "Y SD" };
 	DescriptiveStatistics[] sampleNew = new DescriptiveStatistics[3];
 	DescriptiveStatistics[] sampleOld = new DescriptiveStatistics[3];
 	boolean[] ignore = new boolean[3];
@@ -98,6 +116,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
+		extraOptions = Utils.isExtraOptions();
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -121,7 +140,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	private int showDialog(ImagePlus imp)
 	{
 		// Start with a free fit for the first time if extra options are flagged
-		if (Utils.isExtraOptions())
+		if (extraOptions)
 		{
 			fitFunction = FitFunction.FREE.ordinal();
 			initialPeakStdDev0 = 1;
@@ -135,6 +154,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			initialPeakStdDev0 = fitConfig.getInitialPeakStdDev0();
 			initialPeakStdDev1 = fitConfig.getInitialPeakStdDev1();
 			initialPeakAngle = fitConfig.getInitialAngle();
+			interlacedData = false;
+			integrateFrames = 1;
 		}
 
 		this.imp = imp;
@@ -158,11 +179,19 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addCheckbox("Update_preferences", settings.updatePreferences);
 		gd.addCheckbox("Log_progress", settings.debugPSFEstimator);
 		gd.addCheckbox("Iterate", settings.iterate);
+		gd.addCheckbox("Show_histograms", settings.showHistograms);
+		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
 		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+
+		if (extraOptions)
+		{
+			gd.addCheckbox("Interlaced_data", optionInterlacedData);
+			gd.addSlider("Integrate_frames", 1, 5, optionIntegrateFrames);
+		}
 
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
@@ -236,11 +265,19 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		settings.updatePreferences = gd.getNextBoolean();
 		settings.debugPSFEstimator = gd.getNextBoolean();
 		settings.iterate = gd.getNextBoolean();
+		settings.showHistograms = gd.getNextBoolean();
+		settings.histogramBins = (int) gd.getNextNumber();
 
 		config.setSmooth(gd.getNextNumber());
 		config.setSmooth2(gd.getNextNumber());
 		config.setSearch(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
+
+		if (extraOptions)
+		{
+			interlacedData = gd.getNextBoolean();
+			integrateFrames = optionIntegrateFrames = (int) gd.getNextNumber();
+		}
 
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
@@ -267,10 +304,12 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			Parameters.isPositive("Number of peaks", settings.numberOfPeaks);
 			Parameters.isAboveZero("P-value", settings.pValue);
 			Parameters.isEqualOrBelow("P-value", settings.pValue, 0.5);
+			if (settings.showHistograms)
+				Parameters.isAboveZero("Histogram bins", settings.histogramBins);
 			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isPositive("Smoothing2", config.getSmooth2());
-			Parameters.isAboveZero("Search_width", config.getSearch());
-			Parameters.isAboveZero("Fitting_width", config.getFitting());
+			Parameters.isAboveZero("Search width", config.getSearch());
+			Parameters.isAboveZero("Fitting width", config.getFitting());
 			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
@@ -299,6 +338,44 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		if (!PeakFit.configureFitSolver(globalSettings, filename, false))
 			return false;
+
+		// Extra parameters are needed for interlaced data
+		if (interlacedData)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
+					+ "Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n"
+					+ "Block = The number of continuous frames containing data\n"
+					+ "Skip = The number of continuous frames to ignore before the next data\n \n"
+					+ "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+			gd.addNumericField("Start", optionDataStart, 0);
+			gd.addNumericField("Block", optionDataBlock, 0);
+			gd.addNumericField("Skip", optionDataSkip, 0);
+
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+
+			if (!gd.wasCanceled())
+			{
+				dataStart = (int) gd.getNextNumber();
+				dataBlock = (int) gd.getNextNumber();
+				dataSkip = (int) gd.getNextNumber();
+
+				if (dataStart > 0 && dataBlock > 0 && dataSkip > 0)
+				{
+					// Store options for next time
+					optionInterlacedData = true;
+					optionDataStart = dataStart;
+					optionDataBlock = dataBlock;
+					optionDataSkip = dataSkip;
+				}
+			}
+			else
+			{
+				interlacedData = false;
+			}
+		}
 
 		return true;
 	}
@@ -476,7 +553,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 				fitFunction = FitFunction.FREE_CIRCULAR.ordinal();
 				//if (settings.updatePreferences)
 				//{
-					config.getFitConfiguration().setFitFunction(fitFunction);
+				config.getFitConfiguration().setFitFunction(fitFunction);
 				//}
 				tryAgain = true;
 				break;
@@ -497,7 +574,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			fitFunction = FitFunction.CIRCULAR.ordinal();
 			//if (settings.updatePreferences)
 			//{
-				config.getFitConfiguration().setFitFunction(fitFunction);
+			config.getFitConfiguration().setFitFunction(fitFunction);
 			//}
 			tryAgain = true;
 		}
@@ -549,7 +626,19 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		ImageStack stack = imp.getImageStack();
 		Rectangle roi = stack.getProcessor(1).getRoi();
 
-		fitter.initialiseImage(new IJImageSource(imp), roi, true);
+		ImageSource source = new IJImageSource(imp);
+		// Allow interlaced data by wrapping the image source
+		if (interlacedData)
+		{
+			source = new InterlacedImageSource(source, dataStart, dataBlock, dataSkip);
+		}
+		// Allow frame aggregation by wrapping the image source
+		if (integrateFrames > 1)
+		{
+			source = new AggregatedImageSource(source, integrateFrames);
+		}
+		fitter.initialiseImage(source, roi, true);
+
 		fitter.addPeakResults(this);
 		fitter.initialiseFitting();
 
@@ -562,12 +651,15 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		Random rand = new Random();
 		rand.shuffle(slices);
 
+		IJ.showStatus("Fitting ...");
+		
 		// Use multi-threaded code for speed
 		int i;
 		for (i = 0; i < slices.length; i++)
 		{
 			int slice = slices[i];
 			//debug("  Processing slice = %d\n", slice);
+			IJ.showProgress(size(), settings.numberOfPeaks);
 
 			ImageProcessor ip = stack.getProcessor(slice);
 			ip.setRoi(roi); // stack processor does not set the bounds required by ImageConverter
@@ -582,9 +674,10 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		// Wait until we have enough results
 		while (!sampleSizeReached() && !engine.isQueueEmpty())
 		{
+			IJ.showProgress(size(), settings.numberOfPeaks);
 			try
 			{
-				Thread.sleep(10);
+				Thread.sleep(50);
 			}
 			catch (InterruptedException e)
 			{
@@ -593,6 +686,9 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		}
 		// End now if we have enough samples
 		engine.end(sampleSizeReached());
+		
+		IJ.showStatus("");
+		IJ.showProgress(1);
 
 		// This count will be an over-estimate given that the provider is ahead of the consumer
 		// in this multi-threaded system
@@ -602,6 +698,29 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		setParams(X, params, params_dev, sampleNew[X]);
 		setParams(Y, params, params_dev, sampleNew[Y]);
 
+		if (settings.showHistograms)
+		{
+			int[] idList = new int[NAMES.length];
+			int count = 0;
+
+			boolean requireRetile = false;
+			for (int ii = 0; ii < 3; ii++)
+			{
+				if (sampleNew[ii].getN() == 0)
+					continue;
+
+				StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
+				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins, "Mean = " +
+						Utils.rounded(stats.getMean()));
+				requireRetile = requireRetile || Utils.isNewWindow();
+			}
+			if (count > 0 && requireRetile)
+			{
+				idList = Arrays.copyOf(idList, count);
+				new WindowOrganiser().tileWindows(idList);
+			}
+		}
+
 		if (size() < 2)
 		{
 			log("ERROR: Insufficient number of fitted peaks, terminating ...");
@@ -610,7 +729,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		return true;
 	}
 
-	private void setParams(int i, double[] params, double[] params_dev, StatisticalSummary sample)
+	private void setParams(int i, double[] params, double[] params_dev, DescriptiveStatistics sample)
 	{
 		if (sample.getN() > 0)
 		{
@@ -657,10 +776,10 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		sb.append("Angle\t");
 		sb.append("+/-\t");
 		sb.append("p(Angle same)\t");
-		sb.append("X width\t");
+		sb.append("X SD\t");
 		sb.append("+/-\t");
 		sb.append("p(X same)\t");
-		sb.append("Y width\t");
+		sb.append("Y SD\t");
 		sb.append("+/-\t");
 		sb.append("p(Y same)\t");
 		sb.append("p(XY same)\t");

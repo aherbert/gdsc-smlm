@@ -23,4 +23,6 @@ public class PSFEstimatorSettings
 	public boolean updatePreferences = true;
 	public boolean debugPSFEstimator = false;
 	public boolean iterate = true;
+	public boolean showHistograms = false;
+	public int histogramBins = 100;
 }
