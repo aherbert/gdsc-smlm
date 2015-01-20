@@ -67,7 +67,6 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	private static final String TITLE = "PSF Estimator";
 	private static TextWindow resultsWindow = null;
 
-	private int fitFunction = FitFunction.FREE.ordinal();
 	private double initialPeakStdDev0 = 1;
 	private double initialPeakStdDev1 = 1;
 	private double initialPeakAngle = 0;
@@ -139,21 +138,14 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	 */
 	private int showDialog(ImagePlus imp)
 	{
-		// Start with a free fit for the first time if extra options are flagged
-		if (extraOptions)
+		// Keep class variables for the parameters we are fitting 
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		initialPeakStdDev0 = fitConfig.getInitialPeakStdDev0();
+		initialPeakStdDev1 = fitConfig.getInitialPeakStdDev1();
+		initialPeakAngle = fitConfig.getInitialAngle();
+
+		if (!extraOptions)
 		{
-			fitFunction = FitFunction.FREE.ordinal();
-			initialPeakStdDev0 = 1;
-			initialPeakStdDev1 = 1;
-			initialPeakAngle = 0;
-		}
-		else
-		{
-			FitConfiguration fitConfig = config.getFitConfiguration();
-			fitFunction = fitConfig.getFitFunction().ordinal();
-			initialPeakStdDev0 = fitConfig.getInitialPeakStdDev0();
-			initialPeakStdDev1 = fitConfig.getInitialPeakStdDev1();
-			initialPeakAngle = fitConfig.getInitialAngle();
 			interlacedData = false;
 			integrateFrames = 1;
 		}
@@ -162,7 +154,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
-		gd.addMessage("Estimate 2D Gaussian to fit maxima.\nHold ALT when running plugin to reset");
+		gd.addMessage("Estimate 2D Gaussian to fit maxima");
 
 		gd.addNumericField("Initial_StdDev0", initialPeakStdDev0, 3);
 		gd.addNumericField("Initial_StdDev1", initialPeakStdDev1, 3);
@@ -196,7 +188,6 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addMessage("--- Gaussian fitting ---");
 		Component splitLabel = gd.getMessage();
 
-		FitConfiguration fitConfig = config.getFitConfiguration();
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
@@ -275,7 +266,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 		if (extraOptions)
 		{
-			interlacedData = gd.getNextBoolean();
+			interlacedData = optionInterlacedData = gd.getNextBoolean();
 			integrateFrames = optionIntegrateFrames = (int) gd.getNextNumber();
 		}
 
@@ -398,10 +389,13 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			break;
 		}
 		if (result < INSUFFICIENT_PEAKS)
+		{
 			log("Finished. Check the table for final parameters");
 
-		if (settings.updatePreferences)
-			SettingsManager.saveSettings(globalSettings);
+			// Only save if successful
+			if (settings.updatePreferences)
+				SettingsManager.saveSettings(globalSettings);
+		}
 	}
 
 	private static final int TRY_AGAIN = 0;
@@ -435,7 +429,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		addToResultTable(iteration++, 0, params, params_dev, p);
 
 		if (!calculateStatistics(fitter, params, params_dev))
-			return INSUFFICIENT_PEAKS;
+			return (Utils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
 
 		if (!addToResultTable(iteration++, size(), params, params_dev, p))
 			return BAD_ESTIMATE;
@@ -445,7 +439,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		do
 		{
 			if (!calculateStatistics(fitter, params, params_dev))
-				return INSUFFICIENT_PEAKS;
+				return (Utils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
 
 			try
 			{
@@ -550,11 +544,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 				log("NOTE: Angle is not significant: %g ~ %g (p=%g) => Re-run with fixed zero angle",
 						sampleStats.getMean(), testAngle, p);
 				ignore[ANGLE] = true;
-				fitFunction = FitFunction.FREE_CIRCULAR.ordinal();
-				//if (settings.updatePreferences)
-				//{
-				config.getFitConfiguration().setFitFunction(fitFunction);
-				//}
+				config.getFitConfiguration().setFitFunction(FitFunction.FREE_CIRCULAR);
 				tryAgain = true;
 				break;
 			}
@@ -571,11 +561,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		{
 			log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => Re-run with circular function",
 					sampleNew[X].getMean(), sampleNew[Y].getMean());
-			fitFunction = FitFunction.CIRCULAR.ordinal();
-			//if (settings.updatePreferences)
-			//{
-			config.getFitConfiguration().setFitFunction(fitFunction);
-			//}
+			config.getFitConfiguration().setFitFunction(FitFunction.CIRCULAR);
 			tryAgain = true;
 		}
 		return tryAgain;
@@ -652,7 +638,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		rand.shuffle(slices);
 
 		IJ.showStatus("Fitting ...");
-		
+
 		// Use multi-threaded code for speed
 		int i;
 		for (i = 0; i < slices.length; i++)
@@ -666,11 +652,19 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			FitJob job = new FitJob(slice, ImageConverter.getData(ip), roi);
 			engine.run(job);
 
-			if (sampleSizeReached())
+			if (sampleSizeReached() || Utils.isInterrupted())
 			{
 				break;
 			}
 		}
+
+		if (Utils.isInterrupted())
+		{
+			IJ.showProgress(1);
+			engine.end(true);
+			return false;
+		}
+
 		// Wait until we have enough results
 		while (!sampleSizeReached() && !engine.isQueueEmpty())
 		{
@@ -686,7 +680,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		}
 		// End now if we have enough samples
 		engine.end(sampleSizeReached());
-		
+
 		IJ.showStatus("");
 		IJ.showProgress(1);
 
@@ -702,22 +696,19 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		{
 			int[] idList = new int[NAMES.length];
 			int count = 0;
-
 			boolean requireRetile = false;
 			for (int ii = 0; ii < 3; ii++)
 			{
 				if (sampleNew[ii].getN() == 0)
 					continue;
-
 				StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
 				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins, "Mean = " +
 						Utils.rounded(stats.getMean()));
 				requireRetile = requireRetile || Utils.isNewWindow();
 			}
-			if (count > 0 && requireRetile)
+			if (requireRetile && count > 0)
 			{
-				idList = Arrays.copyOf(idList, count);
-				new WindowOrganiser().tileWindows(idList);
+				new WindowOrganiser().tileWindows(Arrays.copyOf(idList, count));
 			}
 		}
 
