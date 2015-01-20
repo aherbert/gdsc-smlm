@@ -310,7 +310,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			molecules = results.size();
 			double sum = 0, sum2 = 0;
-			;
 			for (PeakResult result : results)
 			{
 				int i = result.peak - 1;
@@ -2109,12 +2108,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Add Poisson noise.
 			if (uniformBackground)
 			{
-				// If using a uniform illumination then we can use a fixed Poisson distribution
-				PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(), pixels2[0],
-						PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-				for (int i = 0; i < pixels2.length; i++)
+				// We can do N random samples thus ensuring the background average is constant
+				int samples = (int) Math.round(pixels2[0] * pixels2.length);
+
+				// Only do sampling if the number of samples is valid
+				if (samples > 1)
 				{
-					pixels2[i] = dist.sample();
+					pixels2 = new float[pixels2.length];
+					final int upper = pixels2.length - 1;
+					for (int i = 0; i < samples; i++)
+					{
+						pixels2[random.nextInt(0, upper)] += 1;
+					}
+				}
+				else
+				{
+					// If using a uniform illumination then we can use a fixed Poisson distribution
+					PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(), pixels2[0],
+							PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+					for (int i = 0; i < pixels2.length; i++)
+					{
+						pixels2[i] = dist.sample();
+					}
 				}
 			}
 			else
