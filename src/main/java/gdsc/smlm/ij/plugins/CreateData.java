@@ -2145,21 +2145,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			pixels2 = new float[settings.size * settings.size];
 		}
 
-		// Read noise is after EM gain is applied.
-		// It is a constant error when reading the number of accumulated electrons in the CCD.
-
-		// // Add Gaussian read noise
-		// if (settings.readNoise > 0)
-		// {
-		// if (random == null)
-		// random = new RandomDataGenerator();
-		// for (int i = 0; i < pixels2.length; i++)
-		// {
-		// pixels2[i] += Math.round(random.nextGaussian(0,
-		// settings.readNoise));
-		// }
-		// }
-
 		return pixels2;
 	}
 
