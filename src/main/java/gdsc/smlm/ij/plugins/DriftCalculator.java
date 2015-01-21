@@ -21,6 +21,7 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.utils.AlignImagesFFT;
+import gdsc.smlm.ij.utils.AlignImagesFFT.SubPixelMethod;
 import gdsc.smlm.ij.utils.AlignImagesFFT.WindowMethod;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -109,6 +110,8 @@ public class DriftCalculator implements PlugIn
 	private static String stackTitle = "";
 	private static int startFrame = 1;
 	private static int frameSpacing = 1;
+	private static int interpolationMethod = ImageProcessor.BILINEAR;
+	private static SubPixelMethod subPixelMethod = AlignImagesFFT.SubPixelMethod.CUBIC;
 
 	private static PlotWindow plotx = null;
 	private static PlotWindow ploty = null;
@@ -165,8 +168,7 @@ public class DriftCalculator implements PlugIn
 			{
 				incrementProgress();
 				// Window method is ignored since the image processor is already an FHT image
-				double[] result = aligner.align(ip[i], WindowMethod.TUKEY, alignBounds,
-						AlignImagesFFT.SubPixelMethod.CUBIC);
+				double[] result = aligner.align(ip[i], WindowMethod.TUKEY, alignBounds, subPixelMethod);
 				// Create a result for failures
 				if (result == null)
 					result = new double[] { Double.NaN, Double.NaN, t[i] };
@@ -209,8 +211,7 @@ public class DriftCalculator implements PlugIn
 				ip[i] = images[i].duplicate();
 				if (dx[i] != 0 || dy[i] != 0)
 				{
-					// Use Bilinear for speed
-					ip[i].setInterpolationMethod(ImageProcessor.BILINEAR);
+					ip[i].setInterpolationMethod(interpolationMethod);
 					ip[i].translate(dx[i], dy[i]);
 				}
 			}
@@ -478,6 +479,11 @@ public class DriftCalculator implements PlugIn
 		gd.addMessage("Frame = previous + spacing");
 		gd.addNumericField("Start_frame", startFrame, 0);
 		gd.addSlider("Frame_spacing", 1, 20, frameSpacing);
+		String[] methods = ImageProcessor.getInterpolationMethods();
+		gd.addChoice("Interpolation_method", methods, methods[interpolationMethod]);
+		methods = new String[] { AlignImagesFFT.SubPixelMethod.CUBIC.toString(),
+				AlignImagesFFT.SubPixelMethod.GAUSSIAN.toString() };
+		gd.addChoice("Sub-pixel_method", methods, subPixelMethod.toString());
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -486,6 +492,9 @@ public class DriftCalculator implements PlugIn
 		stackTitle = gd.getNextChoice();
 		startFrame = (int) gd.getNextNumber();
 		frameSpacing = (int) gd.getNextNumber();
+		interpolationMethod = gd.getNextChoiceIndex();
+		subPixelMethod = (gd.getNextChoiceIndex() == 0) ? AlignImagesFFT.SubPixelMethod.CUBIC
+				: AlignImagesFFT.SubPixelMethod.GAUSSIAN;
 
 		try
 		{
@@ -633,7 +642,7 @@ public class DriftCalculator implements PlugIn
 
 		if (tracker.isEnded())
 			return null;
-		
+
 		interpolate(dx, dy, weights);
 
 		plotDrift(limits, dx, dy);
@@ -1380,7 +1389,7 @@ public class DriftCalculator implements PlugIn
 
 		if (tracker.isEnded())
 			return null;
-		
+
 		plotDrift(limits, dx, dy);
 
 		return new double[][] { dx, dy };
@@ -1650,7 +1659,7 @@ public class DriftCalculator implements PlugIn
 
 		if (tracker.isEnded())
 			return null;
-		
+
 		double[] dx = new double[limits[1] + 1];
 		double[] dy = new double[dx.length];
 
@@ -1687,10 +1696,10 @@ public class DriftCalculator implements PlugIn
 			if (converged(i, change, getTotalDrift(dx, dy, originalDriftTimePoints)))
 				break;
 		}
-		
+
 		if (tracker.isEnded())
 			return null;
-		
+
 		plotDrift(limits, dx, dy);
 
 		return new double[][] { dx, dy };
@@ -1756,7 +1765,7 @@ public class DriftCalculator implements PlugIn
 				reference.copyBits(ip, 0, 0, Blitter.ADD);
 			}
 		}
-		
+
 		// Ensure the reference is windowed
 		AlignImagesFFT.applyWindowSeparable(reference, WindowMethod.TUKEY);
 
