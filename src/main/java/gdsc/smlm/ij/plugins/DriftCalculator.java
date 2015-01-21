@@ -444,6 +444,9 @@ public class DriftCalculator implements PlugIn
 		gd.addNumericField("Frames", frames, 0);
 		gd.addSlider("Minimum_localisations", 10, 50, minimimLocalisations);
 		gd.addChoice("FFT size", SIZES, reconstructionSize);
+		String[] methods = new String[] { AlignImagesFFT.SubPixelMethod.CUBIC.toString(),
+				AlignImagesFFT.SubPixelMethod.GAUSSIAN.toString() };
+		gd.addChoice("Sub-pixel_method", methods, subPixelMethod.toString());
 
 		gd.showDialog();
 
@@ -453,6 +456,8 @@ public class DriftCalculator implements PlugIn
 		frames = (int) gd.getNextNumber();
 		minimimLocalisations = (int) gd.getNextNumber();
 		reconstructionSize = gd.getNextChoice();
+		subPixelMethod = (gd.getNextChoiceIndex() == 0) ? AlignImagesFFT.SubPixelMethod.CUBIC
+				: AlignImagesFFT.SubPixelMethod.GAUSSIAN;
 
 		// Check arguments
 		try
