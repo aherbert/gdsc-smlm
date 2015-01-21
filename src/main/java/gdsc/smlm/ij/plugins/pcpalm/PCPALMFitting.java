@@ -1259,14 +1259,14 @@ public class PCPALMFitting implements PlugIn
 				.log(initialSolution.length))));
 		SimpleBounds bounds = new SimpleBounds(lB, uB);
 
+		opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
+				checkFeasableCount, random, generateStatistics, checker);
 		// Restart the optimiser several times and take the best answer.
 		for (int iteration = 0; iteration <= fitRestarts; iteration++)
 		{
 			try
 			{
 				// Start from the initial solution
-				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
-						checkFeasableCount, random, generateStatistics, checker);
 				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution), objective,
 						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
 				if (debug)
@@ -1293,8 +1293,6 @@ public class PCPALMFitting implements PlugIn
 			try
 			{
 				// Also restart from the current optimum
-				opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
-						checkFeasableCount, random, generateStatistics, checker);
 				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(optimum.getPointRef()), objective,
 						GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
 				if (debug)
