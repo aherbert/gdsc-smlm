@@ -392,7 +392,7 @@ public class DriftCalculator implements PlugIn
 		gd.addCheckbox("Limit_smoothing", limitSmoothing);
 		gd.addSlider("Min_smoothing_points", 5, 50, minSmoothingPoints);
 		gd.addSlider("Max_smoothing_points", 5, 50, maxSmoothingPoints);
-		gd.addSlider("Iterations", 1, 10, iterations);
+		gd.addSlider("Smoothing_iterations", 1, 10, iterations);
 		gd.addCheckbox("Plot_drift", plotDrift);
 
 		gd.showDialog();
@@ -424,7 +424,7 @@ public class DriftCalculator implements PlugIn
 				Parameters.isEqualOrAbove("Max smoothing points", maxSmoothingPoints, minSmoothingPoints);
 			}
 			Parameters.isEqualOrBelow("Smoothing", smoothing, 1);
-			Parameters.isPositive("Iterations", iterations);
+			Parameters.isPositive("Smoothing iterations", iterations);
 		}
 		catch (IllegalArgumentException e)
 		{
