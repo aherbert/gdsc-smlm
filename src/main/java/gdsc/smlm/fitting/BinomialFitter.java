@@ -24,6 +24,7 @@ import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -54,6 +55,7 @@ public class BinomialFitter
 {
 	private Logger logger = null;
 	private boolean maximumLikelihood = true;
+	private int fitRestarts = 5;
 
 	public BinomialFitter()
 	{
@@ -332,15 +334,69 @@ public class BinomialFitter
 
 		try
 		{
-			GoalType goalType = (maximumLikelihood) ? GoalType.MAXIMIZE : GoalType.MINIMIZE;
-			CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
-					checkFeasableCount, random, generateStatistics, checker);
-			PointValuePair solution = opt.optimize(new InitialGuess(initialSolution), new ObjectiveFunction(function),
-					goalType, bounds, sigma, popSize, new MaxIter(maxIterations), new MaxEval(maxIterations * 2));
-			if (solution == null)
-				return null;
+			PointValuePair solution = null;
+			boolean noRefit = maximumLikelihood;
+			if (n == 1 && zeroTruncated)
+			{
+				// No need to fit
+				solution = new PointValuePair(new double[] { 1 }, 0);
+				noRefit = true;
+			}
+			else
+			{
+				GoalType goalType = (maximumLikelihood) ? GoalType.MAXIMIZE : GoalType.MINIMIZE;
 
-			if (maximumLikelihood)
+				// Iteratively fit
+				CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
+						checkFeasableCount, random, generateStatistics, checker);
+				for (int iteration = 0; iteration <= fitRestarts; iteration++)
+				{
+					try
+					{
+						// Start from the initial solution
+						PointValuePair result = opt.optimize(new InitialGuess(initialSolution), new ObjectiveFunction(
+								function), goalType, bounds, sigma, popSize, new MaxIter(maxIterations), new MaxEval(
+								maxIterations * 2));
+						//System.out.printf("CMAES Iter %d initial = %g (%d)\n", iteration, result.getValue(),
+						//		opt.getEvaluations());
+						if (solution == null || result.getValue() < solution.getValue())
+						{
+							solution = result;
+						}
+					}
+					catch (TooManyEvaluationsException e)
+					{
+					}
+					catch (TooManyIterationsException e)
+					{
+					}
+					if (solution == null)
+						continue;
+					try
+					{
+						// Also restart from the current optimum
+						PointValuePair result = opt.optimize(new InitialGuess(solution.getPointRef()),
+								new ObjectiveFunction(function), goalType, bounds, sigma, popSize, new MaxIter(
+										maxIterations), new MaxEval(maxIterations * 2));
+						//System.out.printf("CMAES Iter %d restart = %g (%d)\n", iteration, result.getValue(),
+						//		opt.getEvaluations());
+						if (result.getValue() < solution.getValue())
+						{
+							solution = result;
+						}
+					}
+					catch (TooManyEvaluationsException e)
+					{
+					}
+					catch (TooManyIterationsException e)
+					{
+					}
+				}
+				if (solution == null)
+					return null;
+			}
+
+			if (noRefit)
 			{
 				// Although we fit the log-likelihood, return the sum-of-squares to allow 
 				// comparison across different n
@@ -681,5 +737,25 @@ public class BinomialFitter
 	public void setMaximumLikelihood(boolean maximumLikelihood)
 	{
 		this.maximumLikelihood = maximumLikelihood;
+	}
+
+	/**
+	 * @return the number of restarts for fitting
+	 */
+	public int getFitRestarts()
+	{
+		return fitRestarts;
+	}
+
+	/**
+	 * Since fitting uses a bounded search seeded with random movements, restarting can improve the fit. Control the
+	 * number of restarts used fot fitting.
+	 * 
+	 * @param fitRestarts
+	 *            the number of restarts for fitting
+	 */
+	public void setFitRestarts(int fitRestarts)
+	{
+		this.fitRestarts = Math.max(0, fitRestarts);
 	}
 }
