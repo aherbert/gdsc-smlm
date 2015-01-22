@@ -20,6 +20,7 @@ public class CreateDataSettings
 {
 	public int size = 512;
 	public double depth = 3000;
+	public boolean fixedDepth = false;
 	public int seconds = 100;
 	public int exposureTime = 100;
 	public int stepsPerSecond = 10;

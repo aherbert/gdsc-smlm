@@ -53,6 +53,7 @@ import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.Random;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 import gdsc.smlm.utils.TextUtils;
@@ -209,6 +210,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private XStream xs = null;
 	private boolean simpleMode = false;
 	private boolean benchmarkMode = false;
+	private boolean spotMode = false;
 	private boolean extraOptions = false;
 
 	// Hold private variables for settings that are ignored in simple/benchmark mode 
@@ -366,9 +368,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	public void run(String arg)
 	{
+		extraOptions = Utils.isExtraOptions();
 		simpleMode = (arg != null && arg.contains("simple"));
 		benchmarkMode = (arg != null && arg.contains("benchmark"));
-		extraOptions = Utils.isExtraOptions();
+		spotMode = (arg != null && arg.contains("spot"));
 
 		// Each localisation is a simulated emission of light from a point in space and time
 		List<LocalisationModel> localisations = null;
@@ -382,7 +385,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Each fluorophore contains the on and off times when light was emitted 
 		List<? extends FluorophoreSequenceModel> fluorophores = null;
 
-		if (simpleMode || benchmarkMode)
+		if (simpleMode || benchmarkMode || spotMode)
 		{
 			if (!showSimpleDialog())
 			{
@@ -393,7 +396,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			settings.exposureTime = 1000; // 1 second frames
 
 			// Number of spots per frame
-			int n;
+			int n = 0;
+			int[] nextN = null;
 			SpatialDistribution dist;
 
 			if (benchmarkMode)
@@ -405,91 +409,23 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				n = 1;
 				dist = createFixedDistribution();
 
-				final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
+				reportAndSaveFittingLimits(dist);
+			}
+			else if (spotMode)
+			{
+				// ---------------
+				// SPOT SIMULATION
+				// ---------------
+				// The spot simulation draws 0 or 1 random point per frame. 
+				// Ensure we have 50% of the frames with a spot.
+				nextN = new int[settings.particles * 2];
+				Arrays.fill(nextN, 0, settings.particles, 1);
+				Random rand = new Random();
+				rand.shuffle(nextN);
 
-				// Background is in photons
-				double backgroundVariance = settings.background;
-				// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
-				// so this is "double-counting" the EM-CCD.  
-				//if (settings.getEmGain() > 1)
-				//	backgroundVariance *= 2;
-
-				final double backgroundVarianceInADUs = settings.background * totalGain * totalGain *
-						((settings.getEmGain() > 1) ? 2 : 1);
-
-				// Read noise is in electrons. Convert to Photons
-				double readNoise = settings.readNoise / totalGain;
-				if (settings.getCameraGain() != 0)
-					readNoise *= settings.getCameraGain();
-
-				final double readVariance = readNoise * readNoise;
-
-				double readVarianceInADUs = settings.readNoise *
-						((settings.getCameraGain() != 0) ? settings.getCameraGain() : 1);
-				readVarianceInADUs *= readVarianceInADUs;
-
-				// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
-				// is equal to the total variance at the pixel.
-				final double b2 = backgroundVariance + readVariance;
-
-				boolean emCCD = settings.getEmGain() > 1;
-				double sd = getPsfSD() * settings.pixelPitch;
-
-				// The precision calculation is dependent on the model. The classic Mortensen formula
-				// is for a Gaussian Mask Estimator. Use other equation for MLE. The formula provided 
-				// for WLSE requires an offset to the background used to stabilise the fitting. This is
-				// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
-				// is the same as MLE with the caveat of numerical instability.
-
-				double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
-						emCCD);
-				double upperP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
-				double lowerMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum,
-						b2, emCCD);
-				double upperMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2,
-						emCCD);
-				double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
-				double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
-				//final double b = Math.sqrt(b2);
-				Utils.log(TITLE + " Benchmark");
-				double[] xyz = dist.next().clone();
-				double offset = settings.size * 0.5;
-				for (int i = 0; i < 2; i++)
-					xyz[i] += offset;
-				Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.pixelPitch), Utils.rounded(xyz[0], 6));
-				Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.pixelPitch), Utils.rounded(xyz[1], 6));
-				Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.pixelPitch));
-				final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.pixelPitch);
-				Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa),
-						Utils.rounded(sa / settings.pixelPitch));
-				Utils.log("Signal (N) = %s - %s photons : %s - %s ADUs", Utils.rounded(settings.photonsPerSecond),
-						Utils.rounded(settings.photonsPerSecondMaximum),
-						Utils.rounded(settings.photonsPerSecond * totalGain),
-						Utils.rounded(settings.photonsPerSecondMaximum * totalGain));
-				final double noiseInADUs = Math.sqrt(readVarianceInADUs + backgroundVarianceInADUs);
-				Utils.log("Pixel noise = %s photons : %s ADUs", Utils.rounded(noiseInADUs / totalGain),
-						Utils.rounded(noiseInADUs));
-				Utils.log("Expected background variance pre EM-gain (b^2) = %s photons^2 (%s ADUs^2) "
-						+ "[includes read variance converted to photons]", Utils.rounded(b2),
-						Utils.rounded(b2 * totalGain * totalGain));
-				Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP),
-						Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
-						Utils.rounded(upperP / settings.pixelPitch));
-				Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
-						Utils.rounded(upperMLP), Utils.rounded(lowerMLP / settings.pixelPitch),
-						Utils.rounded(upperMLP / settings.pixelPitch));
-				Utils.log("Signal precision: %s - %s photons : %s - %s ADUs", Utils.rounded(lowerN),
-						Utils.rounded(upperN), Utils.rounded(lowerN * totalGain), Utils.rounded(upperN * totalGain));
-
-				// Store the benchmark settings when not using variable photons
-				if (settings.photonsPerSecond == settings.photonsPerSecondMaximum)
-				{
-					// Store read noise in ADUs
-					readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
-					benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
-							settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
-							settings.background, b2, lowerN, lowerP, lowerMLP);
-				}
+				// Only put spots in the central part of the image
+				double border = settings.size / 4.0;
+				dist = createUniformDistribution(border);
 			}
 			else
 			{
@@ -520,6 +456,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			int t = 0;
 			while (id < settings.particles)
 			{
+				// Allow the number per frame to be specified
+				if (nextN != null)
+				{
+					if (t >= nextN.length)
+						break;
+					n = nextN[t];
+				}
+
 				// Simulate random positions in the frame for the specified density
 				t++;
 				for (int j = 0; j < n; j++)
@@ -653,6 +597,97 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		SettingsManager.saveSettings(globalSettings);
 
 		IJ.showStatus("Done");
+	}
+
+	/**
+	 * Output the theoretical limits for fitting a Gaussian and store the benchmark settings
+	 * 
+	 * @param dist
+	 *            The distribution
+	 */
+	private void reportAndSaveFittingLimits(SpatialDistribution dist)
+	{
+		final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
+
+		// Background is in photons
+		double backgroundVariance = settings.background;
+		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
+		// so this is "double-counting" the EM-CCD.  
+		//if (settings.getEmGain() > 1)
+		//	backgroundVariance *= 2;
+
+		final double backgroundVarianceInADUs = settings.background * totalGain * totalGain *
+				((settings.getEmGain() > 1) ? 2 : 1);
+
+		// Read noise is in electrons. Convert to Photons
+		double readNoise = settings.readNoise / totalGain;
+		if (settings.getCameraGain() != 0)
+			readNoise *= settings.getCameraGain();
+
+		final double readVariance = readNoise * readNoise;
+
+		double readVarianceInADUs = settings.readNoise *
+				((settings.getCameraGain() != 0) ? settings.getCameraGain() : 1);
+		readVarianceInADUs *= readVarianceInADUs;
+
+		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
+		// is equal to the total variance at the pixel.
+		final double b2 = backgroundVariance + readVariance;
+
+		boolean emCCD = settings.getEmGain() > 1;
+		double sd = getPsfSD() * settings.pixelPitch;
+
+		// The precision calculation is dependent on the model. The classic Mortensen formula
+		// is for a Gaussian Mask Estimator. Use other equation for MLE. The formula provided 
+		// for WLSE requires an offset to the background used to stabilise the fitting. This is
+		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
+		// is the same as MLE with the caveat of numerical instability.
+
+		double lowerP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+		double upperP = PeakResult.getPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+		double lowerMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2,
+				emCCD);
+		double upperMLP = PeakResult.getMLPrecisionX(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+		double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
+		double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
+		//final double b = Math.sqrt(b2);
+		Utils.log(TITLE + " Benchmark");
+		double[] xyz = dist.next().clone();
+		double offset = settings.size * 0.5;
+		for (int i = 0; i < 2; i++)
+			xyz[i] += offset;
+		Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.pixelPitch), Utils.rounded(xyz[0], 6));
+		Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.pixelPitch), Utils.rounded(xyz[1], 6));
+		Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.pixelPitch));
+		final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.pixelPitch);
+		Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa), Utils.rounded(sa / settings.pixelPitch));
+		Utils.log("Signal (N) = %s - %s photons : %s - %s ADUs", Utils.rounded(settings.photonsPerSecond),
+				Utils.rounded(settings.photonsPerSecondMaximum), Utils.rounded(settings.photonsPerSecond * totalGain),
+				Utils.rounded(settings.photonsPerSecondMaximum * totalGain));
+		final double noiseInADUs = Math.sqrt(readVarianceInADUs + backgroundVarianceInADUs);
+		Utils.log("Pixel noise = %s photons : %s ADUs", Utils.rounded(noiseInADUs / totalGain),
+				Utils.rounded(noiseInADUs));
+		Utils.log("Expected background variance pre EM-gain (b^2) = %s photons^2 (%s ADUs^2) "
+				+ "[includes read variance converted to photons]", Utils.rounded(b2),
+				Utils.rounded(b2 * totalGain * totalGain));
+		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP),
+				Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
+				Utils.rounded(upperP / settings.pixelPitch));
+		Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
+				Utils.rounded(upperMLP), Utils.rounded(lowerMLP / settings.pixelPitch),
+				Utils.rounded(upperMLP / settings.pixelPitch));
+		Utils.log("Signal precision: %s - %s photons : %s - %s ADUs", Utils.rounded(lowerN), Utils.rounded(upperN),
+				Utils.rounded(lowerN * totalGain), Utils.rounded(upperN * totalGain));
+
+		// Store the benchmark settings when not using variable photons
+		if (settings.photonsPerSecond == settings.photonsPerSecondMaximum)
+		{
+			// Store read noise in ADUs
+			readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
+			benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
+					settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
+					settings.background, b2, lowerN, lowerP, lowerMLP);
+		}
 	}
 
 	/**
@@ -901,16 +936,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Create distribution within an XY border
 	 * 
 	 * @param border
+	 * @param fixedDepth
 	 * @return
 	 */
 	private UniformDistribution createUniformDistribution(double border)
 	{
+		double depth = (settings.fixedDepth) ? settings.depth / settings.pixelPitch : settings.depth /
+				(2 * settings.pixelPitch);
+
 		// Ensure the focal plane is in the middle of the zDepth
-		double[] max = new double[] { settings.size / 2 - border, settings.size / 2 - border,
-				settings.depth / (2 * settings.pixelPitch) };
+		double[] max = new double[] { settings.size / 2 - border, settings.size / 2 - border, depth };
 		double[] min = new double[3];
 		for (int i = 0; i < 3; i++)
 			min[i] = -max[i];
+		if (settings.fixedDepth)
+			min[2] = max[2];
 
 		// Try using different distributions:
 		final RandomGenerator rand1 = createRandomGenerator();
@@ -3039,7 +3079,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			addHeaderLine(sb, "Pixel_pitch (nm)", settings.pixelPitch);
 			addHeaderLine(sb, "Size", settings.size);
 			if (!benchmarkMode)
+			{
 				addHeaderLine(sb, "Depth", settings.depth);
+				addHeaderLine(sb, "Fixed depth", settings.fixedDepth);
+			}
 			if (!(simpleMode || benchmarkMode))
 			{
 				addHeaderLine(sb, "Seconds", settings.seconds);
@@ -3067,7 +3110,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				addHeaderLine(sb, "Wavelength (nm)", settings.wavelength);
 				addHeaderLine(sb, "Numerical_aperture", settings.numericalAperture);
 			}
-			if (!benchmarkMode)
+			if (!(benchmarkMode || spotMode))
 			{
 				addHeaderLine(sb, "Distribution", settings.distribution);
 				if (settings.distribution.equals(DISTRIBUTION[MASK]))
@@ -3094,6 +3137,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			else if (simpleMode)
 			{
 				addHeaderLine(sb, "Density (um^-2)", settings.density);
+				addHeaderLine(sb, "Min_photons", settings.photonsPerSecond);
+				addHeaderLine(sb, "Max_photons", settings.photonsPerSecondMaximum);
+			}
+			else if (spotMode)
+			{
 				addHeaderLine(sb, "Min_photons", settings.photonsPerSecond);
 				addHeaderLine(sb, "Max_photons", settings.photonsPerSecondMaximum);
 			}
@@ -3161,7 +3209,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Pixel_pitch (nm)", settings.pixelPitch, 2);
 		gd.addNumericField("Size (px)", settings.size, 0);
 		if (!benchmarkMode)
+		{
 			gd.addNumericField("Depth (nm)", settings.depth, 0);
+			gd.addCheckbox("Fixed_depth", settings.fixedDepth);
+		}
 
 		// Noise model
 		gd.addMessage("--- Noise Model ---");
@@ -3180,12 +3231,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addMessage("--- Fluorophores ---");
 		Component splitLabel = gd.getMessage();
 		// Do not allow grid or mask distribution
-		if (!benchmarkMode)
+		if (simpleMode)
 			gd.addChoice("Distribution", Arrays.copyOf(DISTRIBUTION, DISTRIBUTION.length - 2), settings.distribution);
 		gd.addNumericField("Particles", settings.particles, 0);
-		if (!benchmarkMode)
+		if (simpleMode)
 			gd.addNumericField("Density (um^-2)", settings.density, 2);
-		else
+		else if (benchmarkMode)
 		{
 			gd.addNumericField("X_position (nm)", settings.xPosition, 2);
 			gd.addNumericField("Y_position (nm)", settings.yPosition, 2);
@@ -3205,7 +3256,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addCheckbox("Choose_histograms", settings.chooseHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 		gd.addCheckbox("Remove_outliers", settings.removeOutliers);
-		if (!benchmarkMode)
+		if (simpleMode)
 			gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.densityRadius);
 
 		// Split into two columns
@@ -3252,7 +3303,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.pixelPitch = Math.abs(gd.getNextNumber());
 		settings.size = Math.abs((int) gd.getNextNumber());
 		if (!benchmarkMode)
-			settings.depth = Math.abs(gd.getNextNumber());
+		{
+			// Allow negative depth
+			settings.depth = gd.getNextNumber();
+			settings.fixedDepth = gd.getNextBoolean();
+		}
 
 		if (extraOptions)
 			poissonNoise = settings.poissonNoise = !gd.getNextBoolean();
@@ -3266,12 +3321,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (!collectPSFOptions(gd, imageNames))
 			return false;
 
-		if (!benchmarkMode)
+		if (simpleMode)
 			settings.distribution = gd.getNextChoice();
 		settings.particles = Math.abs((int) gd.getNextNumber());
-		if (!benchmarkMode)
+		if (simpleMode)
 			settings.density = Math.abs(gd.getNextNumber());
-		else
+		else if (benchmarkMode)
 		{
 			settings.xPosition = gd.getNextNumber();
 			settings.yPosition = gd.getNextNumber();
@@ -3289,7 +3344,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.chooseHistograms = gd.getNextBoolean();
 		settings.histogramBins = (int) gd.getNextNumber();
 		settings.removeOutliers = gd.getNextBoolean();
-		if (!benchmarkMode)
+		if (simpleMode)
 			settings.densityRadius = (float) gd.getNextNumber();
 
 		// Save before validation so that the current values are preserved.
@@ -3303,7 +3358,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			Parameters.isAboveZero("Pixel Pitch", settings.pixelPitch);
 			Parameters.isAboveZero("Size", settings.size);
-			if (!benchmarkMode)
+			if (!benchmarkMode && !settings.fixedDepth)
 				Parameters.isPositive("Depth", settings.depth);
 			Parameters.isPositive("Background", settings.background);
 			Parameters.isPositive("EM gain", settings.getEmGain());
@@ -3313,7 +3368,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ", settings.bias,
 					noiseRange);
 			Parameters.isAboveZero("Particles", settings.particles);
-			if (!benchmarkMode)
+			if (simpleMode)
 				Parameters.isAboveZero("Density", settings.density);
 			Parameters.isAboveZero("Min Photons", settings.photonsPerSecond);
 			if (settings.photonsPerSecondMaximum < settings.photonsPerSecond)
@@ -3325,7 +3380,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Parameters.isBelow("NA", settings.numericalAperture, 2);
 			}
 			Parameters.isAbove("Histogram bins", settings.histogramBins, 1);
-			if (!benchmarkMode)
+			if (simpleMode)
 				Parameters.isPositive("Density radius", settings.densityRadius);
 		}
 		catch (IllegalArgumentException e)
@@ -3448,6 +3503,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Pixel_pitch (nm)", settings.pixelPitch, 2);
 		gd.addNumericField("Size (px)", settings.size, 0);
 		gd.addNumericField("Depth (nm)", settings.depth, 0);
+		gd.addCheckbox("Fixed_depth", settings.fixedDepth);
 		gd.addNumericField("Seconds", settings.seconds, 0);
 		gd.addNumericField("Exposure_time (ms)", settings.exposureTime, 0);
 		gd.addSlider("Steps_per_second", 1, 15, settings.stepsPerSecond);
@@ -3552,6 +3608,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.pixelPitch = Math.abs(gd.getNextNumber());
 		settings.size = Math.abs((int) gd.getNextNumber());
 		settings.depth = Math.abs(gd.getNextNumber());
+		settings.fixedDepth = gd.getNextBoolean();
 		settings.seconds = Math.abs((int) gd.getNextNumber());
 		settings.exposureTime = Math.abs((int) gd.getNextNumber());
 		settings.stepsPerSecond = Math.abs((int) gd.getNextNumber());
@@ -3623,7 +3680,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			Parameters.isAboveZero("Pixel Pitch", settings.pixelPitch);
 			Parameters.isAboveZero("Size", settings.size);
-			Parameters.isPositive("Depth", settings.depth);
+			if (!settings.fixedDepth)
+				Parameters.isPositive("Depth", settings.depth);
 			Parameters.isAboveZero("Seconds", settings.seconds);
 			Parameters.isAboveZero("Exposure time", settings.exposureTime);
 			Parameters.isAboveZero("Steps per second", settings.stepsPerSecond);
