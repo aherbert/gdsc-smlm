@@ -1,6 +1,7 @@
 package gdsc.smlm.filters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
@@ -1908,10 +1909,9 @@ public class NonMaximumSuppression
 	{
 		if (array.length == size)
 			return array;
-		int[] results = new int[size];
-		while (size-- > 0)
-			results[size] = array[size];
-		return results;
+		if (size == 0)
+			return new int[0];
+		return Arrays.copyOf(array, size);
 	}
 
 	/**
