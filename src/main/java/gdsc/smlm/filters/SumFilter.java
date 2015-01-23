@@ -18,7 +18,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Computes the block sum for each point within the array.
  */
-public class SumFilter
+public class SumFilter implements Cloneable
 {
 	private float[] floatDataBuffer = null;
 	private float[] floatRowBuffer = null;
@@ -2286,5 +2286,26 @@ public class SumFilter
 		{
 			data[index] = newData[index];
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public Object clone()
+	{
+		try
+		{
+			SumFilter o = (SumFilter) super.clone();
+			o.floatDataBuffer = null;
+			o.floatRowBuffer = null;
+			return o;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// Ignore
+		}
+		return null;
 	}
 }

@@ -13,6 +13,9 @@ package gdsc.smlm.engine;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.filters.AverageSpotFilter;
+import gdsc.smlm.filters.MaximaSpotFilter;
+import gdsc.smlm.filters.TopHatBoxSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.results.PeakResults;
@@ -50,6 +53,7 @@ public class FitEngine
 	private int border;
 	private int search;
 	private int fitting;
+	private MaximaSpotFilter spotFilter;
 
 	/**
 	 * Return the actual smoothing window size calculated using the smoothing parameter and the configured peak widths.
@@ -112,6 +116,14 @@ public class FitEngine
 	}
 
 	/**
+	 * @return The filter used for identifying candidate local maxima
+	 */
+	public MaximaSpotFilter getSpotFilter()
+	{
+		return (MaximaSpotFilter) spotFilter.clone();
+	}
+
+	/**
 	 * Constructor
 	 * 
 	 * @param config
@@ -167,12 +179,14 @@ public class FitEngine
 		if (border >= 0)
 			this.border = border;
 
+		createSpotFilter(config);
+
 		// Create the workers
 		for (int i = 0; i < threads; i++)
 		{
-			// Note - Clone the configuration for each worker
+			// Note - Clone the configuration and spot filter for each worker
 			FitWorker worker = new FitWorker((FitEngineConfiguration) (config.clone()), results, jobs);
-			worker.setSearchParameters(smooth, smooth2, this.border, search, fitting);
+			worker.setSearchParameters(getSpotFilter(), fitting);
 			Thread t = new Thread(worker);
 
 			workers.add(worker);
@@ -213,10 +227,9 @@ public class FitEngine
 		smooth = getSmoothingWindow(config.getSmooth(), hwhmMin);
 		smooth2 = getSmoothingWindow(config.getSmooth2(), hwhmMin);
 
-		if ((smooth > 0 && smooth < 1) && smooth2 < 1)
+		if (smooth2 <= smooth)
 		{
-			// Cannot perform difference of smoothing with both windows between 0 and 1.
-			// (Only a 3x3 Gaussian is supported and so this would result in both filters being the same.)
+			// Cannot perform difference of smoothing
 			smooth2 = 0;
 		}
 
@@ -230,24 +243,38 @@ public class FitEngine
 		if (search < 1)
 			search = 1;
 
-		// TODO - What should this be to be robust?
-		// 3 sigma should cover 99% of the Gaussian curve
-
 		// Region for peak fitting
 		fitting = (int) Math.ceil(config.getFitting() * widthMax);
 		if (fitting < 2)
 			fitting = 2;
 	}
 
-	public double getSmoothingWindow(double smoothingParameter, double hwhmMin)
+	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)
 	{
-		double smooth = smoothingParameter * hwhmMin;
-		// Only allow non-integer amounts below 1 for Gaussian smoothing
-		if (smooth > 1)
-			smooth = (int) smooth;
-		else if (smooth < 0)
-			smooth = 0;
-		return smooth;
+		return AverageSpotFilter.convert(smoothingParameter * hwhmMin);
+	}
+
+	private void createSpotFilter(FitEngineConfiguration config)
+	{
+		// Create the SpotFilter
+		switch (config.getDataFilter())
+		{
+			case TOP_HAT:
+				if (smooth2 > 0)
+				{
+					spotFilter = new TopHatBoxSpotFilter(search, border, smooth, smooth2);
+					break;
+				}
+				// If no second smoothing size then revert to the mean filter
+
+			case MEAN:
+				spotFilter = new AverageSpotFilter(search, border, smooth);
+				break;
+
+			case GAUSSIAN:
+			case MEDIAN:
+				throw new RuntimeException("Not yet implemented: " + config.getDataFilter().toString());
+		}
 	}
 
 	/**

@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.results.ResultsImage;
@@ -304,6 +305,12 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 			// Skip settings that do not make sense
 			if (fitConfig.getSmooth2() > 0 && fitConfig.getSmooth2() <= fitConfig.getSmooth())
 				continue;
+			if (fitConfig.getDataFilter() != DataFilter.TOP_HAT)
+			{
+				// For now only process configurations with no second smoothing when it is not required
+				if (fitConfig.getSmooth2() != 0)
+					continue;
+			}
 
 			// Ensure the state is restored after XStream object reconstruction
 			fitConfig.getFitConfiguration().initialiseState();

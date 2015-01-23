@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
@@ -174,8 +175,9 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addCheckbox("Show_histograms", settings.showHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 
+		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
-		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
@@ -259,8 +261,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		settings.showHistograms = gd.getNextBoolean();
 		settings.histogramBins = (int) gd.getNextNumber();
 
+		config.setDataFilter(gd.getNextChoiceIndex());
 		config.setSmooth(gd.getNextNumber());
-		config.setSmooth2(gd.getNextNumber());
 		config.setSearch(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 
@@ -298,7 +300,6 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			if (settings.showHistograms)
 				Parameters.isAboveZero("Histogram bins", settings.histogramBins);
 			Parameters.isPositive("Smoothing", config.getSmooth());
-			Parameters.isPositive("Smoothing2", config.getSmooth2());
 			Parameters.isAboveZero("Search width", config.getSearch());
 			Parameters.isAboveZero("Fitting width", config.getFitting());
 			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
@@ -327,6 +328,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		String filename = SettingsManager.getSettingsFilename();
 		SettingsManager.saveSettings(globalSettings, filename);
 
+		if (!PeakFit.configureDataFilter(globalSettings, filename, false))
+			return false;
 		if (!PeakFit.configureFitSolver(globalSettings, filename, false))
 			return false;
 

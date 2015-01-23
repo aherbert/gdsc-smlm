@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
@@ -62,8 +63,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	private TextField textInitialPeakStdDev0;
 	private TextField textInitialPeakStdDev1;
 	private TextField textInitialAngleD;
+	private Choice textDataFilter;
 	private TextField textSmooth;
-	private TextField textSmooth2;
 	private TextField textSearch;
 	private TextField textFitting;
 	private Choice textFitSolver;
@@ -120,8 +121,9 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		gd.addNumericField("Initial_Angle", fitConfig.getInitialAngle(), 3);
 
 		gd.addMessage("--- Maxima identification ---");
+		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
-		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
@@ -176,8 +178,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			textInitialPeakStdDev0 = numerics.get(n++);
 			textInitialPeakStdDev1 = numerics.get(n++);
 			textInitialAngleD = numerics.get(n++);
+			textDataFilter = choices.get(ch++);
 			textSmooth = numerics.get(n++);
-			textSmooth2 = numerics.get(n++);
 			textSearch = numerics.get(n++);
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
@@ -239,8 +241,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
 		fitConfig.setInitialAngleD(gd.getNextNumber());
+		config.setDataFilter(gd.getNextChoiceIndex());
 		config.setSmooth(gd.getNextNumber());
-		config.setSmooth2(gd.getNextNumber());
 		config.setSearch(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 
@@ -270,7 +272,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
 			Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
 			Parameters.isPositive("Smoothing", config.getSmooth());
-			Parameters.isPositive("Smoothing2", config.getSmooth2());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
@@ -294,6 +295,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 		configurationChanged = SettingsManager.saveSettings(settings, filename);
 		
+		PeakFit.configureDataFilter(settings, filename, false);		
 		PeakFit.configureFitSolver(settings, filename, false);		
 	}
 
@@ -400,8 +402,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
 				textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
 				textInitialAngleD.setText("" + fitConfig.getInitialAngle());
+				textDataFilter.select(config.getDataFilter().ordinal());
 				textSmooth.setText("" + config.getSmooth());
-				textSmooth2.setText("" + config.getSmooth2());
 				textSearch.setText("" + config.getSearch());
 				textFitting.setText("" + config.getFitting());
 				textFitSolver.select(fitConfig.getFitSolver().ordinal());

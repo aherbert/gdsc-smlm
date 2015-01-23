@@ -45,8 +45,8 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	public static final int STRIPED_INTERNAL = 4;
 	public static final int ROLLING_BLOCK_INTERNAL = 5;
 
-	private int boxSize = (int) Prefs.get(Constants.boxSize, 1);
-	private int boxSize2 = (int) Prefs.get(Constants.boxSize2, 0);
+	private double boxSize = Prefs.get(Constants.boxSize, 1);
+	private double boxSize2 = Prefs.get(Constants.boxSize2, 0);
 	private int algorithm = (int) Prefs.get(Constants.algorithm, 1);
 	private boolean gaussian = Prefs.getBoolean("gdsc.fitting.boxSize", true);
 
@@ -95,14 +95,14 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		boxSize = (int) Prefs.get(Constants.boxSize, 1);
-		boxSize2 = (int) Prefs.get(Constants.boxSize2, 0);
+		boxSize = Prefs.get(Constants.boxSize, 1);
+		boxSize2 = Prefs.get(Constants.boxSize2, 0);
 		algorithm = (int) Prefs.get(Constants.algorithm, 1);
 
 		gd.addMessage("Smooth image:\n" + "- Within a 2n+1 box\n");
-		gd.addSlider("Box_size", 1, 15, boxSize);
+		gd.addSlider("Box_size", 0.1, 5, boxSize);
 		if (is32bit)
-			gd.addSlider("Box_size2", 1, 15, boxSize2);
+			gd.addSlider("Box_size2", 0, 15, boxSize2);
 		gd.addChoice("Algorithm", ALGORITHMS, ALGORITHMS[algorithm]);
 		gd.addCheckbox("Gaussian 3x3", gaussian);
 
@@ -123,9 +123,9 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 */
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		boxSize = (int) gd.getNextNumber();
+		boxSize = gd.getNextNumber();
 		if (is32bit)
-			boxSize2 = (int) gd.getNextNumber();
+			boxSize2 = gd.getNextNumber();
 		if (gd.invalidNumber())
 			return false;
 		algorithm = gd.getNextChoiceIndex();
@@ -142,7 +142,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 			IJ.error(TITLE, ex.getMessage());
 			return false;
 		}
-		
+
 		Prefs.set(Constants.boxSize, boxSize);
 		if (is32bit)
 			Prefs.set(Constants.boxSize2, boxSize2);
@@ -195,77 +195,52 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		ip.resetMinAndMax();
 	}
 
-	private void smooth(float[] data, final int width, final int height, final int boxSize)
+	private void smooth(float[] data, final int width, final int height, final double boxSize)
 	{
 		AverageFilter av = new AverageFilter();
 
-		if (gaussian && boxSize == 1)
+		if (boxSize <= 1)
 		{
-			av.blockGaussian3x3(data, width, height);
+			if (gaussian)
+				av.blockGaussian3x3(data, width, height);
+			else
+				av.blockAverage3x3(data, width, height, (float) boxSize);
 		}
 		else
 		{
+			int iBoxSize = (int) boxSize;
 			switch (algorithm)
 			{
 				case ROLLING_BLOCK_INTERNAL:
-					av.rollingBlockAverageInternal(data, width, height, boxSize);
+					av.rollingBlockAverageInternal(data, width, height, iBoxSize);
 					break;
 				case STRIPED_INTERNAL:
-					av.stripedBlockAverageInternal(data, width, height, boxSize);
+					av.stripedBlockAverageInternal(data, width, height, iBoxSize);
 					break;
 				case STANDARD_INTERNAL:
-					av.blockAverageInternal(data, width, height, boxSize);
+					av.blockAverageInternal(data, width, height, iBoxSize);
 					break;
 				case ROLLING_BLOCK:
-					av.rollingBlockAverage(data, width, height, boxSize);
+					av.rollingBlockAverage(data, width, height, iBoxSize);
 					break;
 				case STRIPED:
-					av.stripedBlockAverage(data, width, height, boxSize);
+					av.stripedBlockAverage(data, width, height, iBoxSize);
 					break;
 				case STANDARD:
 				default:
-					av.blockAverage(data, width, height, boxSize);
+					av.blockAverage(data, width, height, iBoxSize);
 					break;
 			}
 		}
 	}
 
-	/**
-	 * @param boxSize
-	 *            the boxSize to set
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
-	public void setboxSize(int boxSize)
-	{
-		this.boxSize = boxSize;
-	}
-
-	/**
-	 * @return the boxSize
-	 */
-	public int getboxSize()
-	{
-		return boxSize;
-	}
-
 	public void setNPasses(int nPasses)
 	{
 		// Nothing to do		
-	}
-
-	/**
-	 * @param algorithm
-	 *            the algorithm to set
-	 */
-	public void setAlgorithm(int algorithm)
-	{
-		this.algorithm = algorithm;
-	}
-
-	/**
-	 * @return the algorithm
-	 */
-	public int getAlgorithm()
-	{
-		return algorithm;
 	}
 }

@@ -16,8 +16,8 @@ package gdsc.smlm.engine;
 import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.engine.filter.DistanceResultFilter;
 import gdsc.smlm.engine.filter.ResultFilter;
-import gdsc.smlm.filters.AverageFilter;
-import gdsc.smlm.filters.NonMaximumSuppression;
+import gdsc.smlm.filters.MaximaSpotFilter;
+import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
@@ -30,7 +30,6 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.utils.ImageExtractor;
 import gdsc.smlm.utils.NoiseEstimator;
-import gdsc.smlm.utils.Sort;
 import gdsc.smlm.utils.logging.Logger;
 
 import java.awt.Rectangle;
@@ -63,10 +62,7 @@ public class FitWorker implements Runnable
 	private Logger logger = null;
 	private long time = 0;
 
-	private double smooth = 0;
-	private double smooth2 = 0;
-	private int border = 0;
-	private int search;
+	private MaximaSpotFilter spotFilter = null;
 	private int fitting = 1;
 
 	// Used for fitting
@@ -75,7 +71,6 @@ public class FitWorker implements Runnable
 
 	private PeakResults results;
 	private BlockingQueue<FitJob> jobs;
-	private AverageFilter filter = new AverageFilter();
 	private Gaussian2DFitter gf;
 
 	// Used for fitting methods
@@ -84,13 +79,11 @@ public class FitWorker implements Runnable
 	private int slice;
 	private int endT;
 	private Rectangle bounds;
-	private int borderLimitX, borderLimitY;
+	private int border, borderLimitX, borderLimitY;
 	private float[] data;
-	private boolean differenceOfSmoothing;
+	private boolean relativeIntensity;
 	private float noise, background;
 	private final boolean calculateNoise, estimateSignal;
-	// The coordinate of the maxima	
-	private int[] xcoord = null, ycoord = null;
 	// Contains the index in the list of maxima for any neighbours
 	private int neighbourCount = 0;
 	private int[] neighbourIndices = null;
@@ -128,24 +121,17 @@ public class FitWorker implements Runnable
 	/**
 	 * Set the parameters for smoothing the image, searching for maxima and fitting maxima
 	 * 
-	 * @param smooth
-	 *            The first smoothing parameter
-	 * @param smooth2
-	 *            The second smoothing parameter (used for difference smoothing)
-	 * @param border
-	 *            The border of the image to ignore for fitting
-	 * @param search
-	 *            The block size to be used for searching for maxima
+	 * @param spotFilter
+	 *            The spot filter for identifying fitting candidates
 	 * @param fitting
 	 *            The block size to be used for fitting
 	 */
-	void setSearchParameters(double smooth, double smooth2, int border, int search, int fitting)
+	void setSearchParameters(MaximaSpotFilter spotFilter, int fitting)
 	{
-		this.smooth = smooth;
-		this.smooth2 = smooth2;
-		this.border = border;
-		this.search = search;
+		this.spotFilter = spotFilter;
+		this.border = spotFilter.getBorder();
 		this.fitting = fitting;
+		this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
 	}
 
 	/**
@@ -174,78 +160,17 @@ public class FitWorker implements Runnable
 		FitParameters params = job.getFitParameters();
 		this.endT = (params != null) ? params.endT : -1;
 
-		// TODO: Test if using a true Gaussian filter would be faster.
-		// Smoothing:
-		// Either use a single smoothing pass or do a difference-of-smoothing
-		float[] smoothData = null;
-		differenceOfSmoothing = false;
-		if (smooth > 0)
-		{
-			// Single smoothing (Box filter)
-			smoothData = applySmoothing(data, width, height, smooth);
-			//new ij.ImagePlus("smooth", new ij.process.FloatProcessor(width, height, Arrays.copyOf(smoothData,
-			//		smoothData.length), null)).show();
-		}
-		if (smooth2 > smooth && smooth2 > 0)
-		{
-			if (smoothData == null)
-				smoothData = Arrays.copyOf(data, width * height);
+		Spot[] spots = indentifySpots(job, width, height, params);
 
-			// Difference-of-smoothing (Top-Hat Box filter)
-			// See: E. J. Breen, G. H. Joss, and K. L. Williams, “Locating objects of interest
-			// within biological images: The top hat box ﬁlter,” J. Comput.-Assist.
-			// Microsc., vol. 3, no. 2, pp. 97–102, 1991.
-			float[] smooth2Data = applySmoothing(data, width, height, smooth2);
-			//new ij.ImagePlus("smooth2", new ij.process.FloatProcessor(width, height, smooth2Data, null)).show();
-			for (int i = 0; i < smoothData.length; i++)
-			{
-				smoothData[i] -= smooth2Data[i];
-			}
-			differenceOfSmoothing = true;
-			//new ij.ImagePlus("smoothDiff", new ij.process.FloatProcessor(width, height, smoothData, null)).show();
-		}
-		if (smoothData == null)
-			smoothData = data;
-
-		int[] maxIndices;
-		if (params != null && params.maxIndices != null)
-		{
-			maxIndices = params.maxIndices;
-		}
-		else
-		{
-			// Non-maximum suppression
-			maxIndices = getMaxima(smoothData, width, height);
-		}
-
-		if (logger != null)
-			logger.info("%d: Slice %d: %d candidates", id, slice, maxIndices.length);
-
-		sliceResults = new LinkedList<PeakResult>();
-		job.setResults(sliceResults);
-		job.setIndices(maxIndices);
-
-		if (maxIndices.length == 0)
+		if (spots.length == 0)
 		{
 			finish(job, start);
 			return;
 		}
 
-		// Sort the maxima
-		if (maxIndices.length > 1)
-			// sortIgnoreEqual is numerically unstable due to the implementation of the standard libraries
-			Sort.sort(maxIndices, smoothData);
-
 		fittedBackground = 0;
 
-		allocateArrays(maxIndices.length);
-
-		// Compute the x/y locations of each maxima
-		for (int n = 0; n < maxIndices.length; n++)
-		{
-			ycoord[n] = maxIndices[n] / width;
-			xcoord[n] = maxIndices[n] % width;
-		}
+		allocateArrays(spots.length);
 
 		// Always get the noise and store it with the results.
 		boolean updatedNoise = false;
@@ -284,13 +209,13 @@ public class FitWorker implements Runnable
 			final float sd1 = (float) fitConfig.getInitialPeakStdDev1();
 			ImageExtractor ie = new ImageExtractor(data, width, height);
 			double[] region = null;
-			for (int n = 0; n < maxIndices.length; n++)
+			for (int n = 0; n < spots.length; n++)
 			{
 				// Find the background using the perimeter of the data.
 				// TODO - Perhaps the Gaussian Fitter should be used to produce the initial estimates but no actual fit done.
 				// This would produce coords using the centre-of-mass.
-				final int x = xcoord[n];
-				final int y = ycoord[n];
+				final int x = spots[n].x;
+				final int y = spots[n].y;
 				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
 				final float b = (float) Gaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
@@ -298,11 +223,11 @@ public class FitWorker implements Runnable
 
 				// Offset the coords to the centre of the pixel. Note the bounds will be added later.
 				// Subtract the background to get the amplitude estimate then convert to signal.
-				final float amplitude = smoothData[maxIndices[n]] - ((differenceOfSmoothing) ? 0 : b);
+				final float amplitude = spots[n].intensity - ((relativeIntensity) ? 0 : b);
 				final float signal = (float) (amplitude * 2.0 * Math.PI * sd0 * sd1);
-				final float[] peakParams = new float[] { b, signal, 0, xcoord[n] + 0.5f, ycoord[n] + 0.5f, sd0, sd1 };
-				sliceResults.add(createResult(bounds.x + xcoord[n], bounds.y + ycoord[n], data[maxIndices[n]], 0,
-						noise, peakParams, null));
+				final float[] peakParams = new float[] { b, signal, 0, x + 0.5f, y + 0.5f, sd0, sd1 };
+				final int index = y * width + x;
+				sliceResults.add(createResult(bounds.x + x, bounds.y + y, data[index], 0, noise, peakParams, null));
 			}
 		}
 		else
@@ -311,26 +236,27 @@ public class FitWorker implements Runnable
 			int success = 0;
 
 			// Track failures
-			int[] failed = new int[maxIndices.length];
+			int[] failed = new int[spots.length];
 			int failedCount = 0;
 
 			// Allow the results to be filtered for certain peaks
 			if (params != null && params.filter != null)
 			{
 				// TODO - Check if this works.
-				filter = new DistanceResultFilter(params.filter, params.distanceThreshold, maxIndices.length);
+				filter = new DistanceResultFilter(params.filter, params.distanceThreshold, spots.length);
 				//filter = new OptimumDistanceResultFilter(params.filter, params.distanceThreshold, maxIndices.length);
 			}
 
 			// Extract each peak and fit individually until N consecutive failures
 			ImageExtractor ie = new ImageExtractor(data, width, height);
 			double[] region = null;
-			for (int n = 0, failures = 0; n < maxIndices.length && !finished; n++)
+			for (int n = 0, failures = 0; n < spots.length && !finished; n++)
 			{
 				failures++;
 
-				final int x = xcoord[n];
-				final int y = ycoord[n];
+				final int x = spots[n].x;
+				final int y = spots[n].y;
+				final int index = y * width + x;
 
 				Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
@@ -338,7 +264,7 @@ public class FitWorker implements Runnable
 				if (logger != null)
 					logger.info("Fitting %d:%d [%d,%d]", slice, n + 1, x + bounds.x, y + bounds.y);
 
-				FitResult fitResult = fit(gf, region, regionBounds, maxIndices, n, smoothData);
+				FitResult fitResult = fit(gf, region, regionBounds, spots, n);
 				job.setFitResult(n, fitResult);
 
 				// Check fit result
@@ -356,7 +282,7 @@ public class FitWorker implements Runnable
 					}
 
 					int npeaks = addResults(sliceResults, n, x, y, bounds, regionBounds, peakParams, peakParamsDev,
-							data[maxIndices[n]], fitResult.getError(), noise);
+							data[index], fitResult.getError(), noise);
 
 					// Add to filtered output results
 					if (filter != null && npeaks != 0)
@@ -368,7 +294,7 @@ public class FitWorker implements Runnable
 						{
 							results[npeaks] = iter.next();
 						}
-						filter.filter(fitResult, maxIndices[n], results);
+						filter.filter(fitResult, index, results);
 					}
 
 					// Q. Should this be a failure if the npeaks == 0 (i.e. outside the border; was a duplicate)?
@@ -382,7 +308,7 @@ public class FitWorker implements Runnable
 					if (filter != null)
 					{
 						// Check the start position for the distance to the filter positions
-						filter.filter(fitResult, maxIndices[n], x + 0.5f, y + 0.5f);
+						filter.filter(fitResult, index, x + 0.5f, y + 0.5f);
 					}
 
 					// Add the failed jobs to a list.
@@ -394,7 +320,7 @@ public class FitWorker implements Runnable
 			}
 
 			if (logger != null)
-				logger.info("Slice %d: %d / %d", slice, success, maxIndices.length);
+				logger.info("Slice %d: %d / %d", slice, success, spots.length);
 		}
 
 		float offsetx = bounds.x;
@@ -433,6 +359,57 @@ public class FitWorker implements Runnable
 		finish(job, start);
 	}
 
+	private Spot[] indentifySpots(FitJob job, int width, int height, FitParameters params)
+	{
+		Spot[] spots;
+		int[] maxIndices = null;
+
+		// Only sub-classes may require the indices
+		boolean requireIndices = (job.getClass() != FitJob.class);
+
+		if (params != null && params.maxIndices != null)
+		{
+			// Extract the desired spots
+			maxIndices = params.maxIndices;
+			float[] data2 = spotFilter.preprocessData(data, width, height);
+			spots = new Spot[maxIndices.length];
+			for (int n = 0; n < maxIndices.length; n++)
+			{
+				final int y = maxIndices[n] / width;
+				final int x = maxIndices[n] % width;
+				final float intensity = data2[maxIndices[n]];
+				spots[n] = new Spot(x, y, intensity);
+			}
+			// Sort the maxima
+			Arrays.sort(spots);
+		}
+		else
+		{
+			// Run the filter to get the spot
+			spots = spotFilter.rank(data, width, height);
+			// Extract the indices
+			if (requireIndices)
+			{
+				maxIndices = new int[spots.length];
+				for (int n = 0; n < maxIndices.length; n++)
+				{
+					maxIndices[n] = spots[n].y * width + spots[n].x;
+				}
+			}
+		}
+
+		if (logger != null)
+			logger.info("%d: Slice %d: %d candidates", id, slice, maxIndices.length);
+
+		sliceResults = new LinkedList<PeakResult>();
+		if (requireIndices)
+		{
+			job.setResults(sliceResults);
+			job.setIndices(maxIndices);
+		}
+		return spots;
+	}
+
 	/**
 	 * Estimate the noise in the data
 	 * 
@@ -454,43 +431,8 @@ public class FitWorker implements Runnable
 		job.finished();
 	}
 
-	private float[] applySmoothing(float[] data, int width, int height, double smooth)
-	{
-		// Smoothing destructively modifies the data so create a copy
-		float[] smoothData = Arrays.copyOf(data, width * height);
-
-		if (smooth < 1)
-		{
-			// Do a 3x3 Gaussian approximation for less than 1 pixel smoothing
-			//   1 2 1
-			//   2 4 2
-			//   1 2 1
-			if (smooth <= border)
-				filter.blockGaussian3x3Internal(smoothData, width, height);
-			else
-				filter.blockGaussian3x3(smoothData, width, height);
-		}
-		else
-		{
-			// Check upper limits are safe
-			int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
-
-			if (tmpSmooth <= border)
-			{
-				filter.rollingBlockAverageInternal(smoothData, width, height, tmpSmooth);
-			}
-			else
-			{
-				filter.rollingBlockAverage(smoothData, width, height, tmpSmooth);
-			}
-		}
-		return smoothData;
-	}
-
 	private void allocateArrays(int length)
 	{
-		xcoord = allocateArray(xcoord, length);
-		ycoord = allocateArray(ycoord, length);
 		neighbourIndices = allocateArray(neighbourIndices, length);
 		// Allocate enough room for all fits to be doublets 
 		fittedNeighbourIndices = allocateArray(fittedNeighbourIndices, length *
@@ -668,7 +610,7 @@ public class FitWorker implements Runnable
 	/**
 	 * @param x
 	 * @param y
-	 * @return True if the fitted position iis inside the border
+	 * @return True if the fitted position is inside the border
 	 */
 	private boolean insideBorder(float x, float y)
 	{
@@ -685,35 +627,6 @@ public class FitWorker implements Runnable
 		final float dx = params1[Gaussian2DFunction.X_POSITION] - params2[Gaussian2DFunction.X_POSITION];
 		final float dy = params1[Gaussian2DFunction.Y_POSITION] - params2[Gaussian2DFunction.Y_POSITION];
 		return dx * dx + dy * dy;
-	}
-
-	/**
-	 * Find the indices of the maxima using the currently configured parameters
-	 * <p>
-	 * Data must be arranged in yx block order, i.e. height rows of width.
-	 * 
-	 * @param data
-	 * @param width
-	 * @param height
-	 * @return Indices of the maxima
-	 */
-	private int[] getMaxima(float[] data, int width, int height)
-	{
-		// Find maxima
-		NonMaximumSuppression nms = new NonMaximumSuppression();
-
-		int[] maxIndices;
-
-		// Do a neighbour check when using a low block size
-		nms.setNeighbourCheck(search < 3);
-
-		// Check upper limits are safe
-		int n = FastMath.min(search, FastMath.min(width, height));
-		int border = FastMath.min(this.border, FastMath.min(width, height) / 2);
-
-		maxIndices = nms.blockFindInternal(data, width, height, n, border);
-
-		return maxIndices;
 	}
 
 	private double[] convertParameters(double[] params)
@@ -740,10 +653,10 @@ public class FitWorker implements Runnable
 	 * @param region
 	 * @param w
 	 * @param height
-	 * @param maxIndices
-	 *            All the indices of the maxima
+	 * @param spots
+	 *            All the maxima
 	 * @param n
-	 *            The maxima
+	 *            The maxima to fit
 	 * @param smoothData
 	 *            The smoothed image data
 	 * @return Array containing the fitted curve data: The first value is the Background. The remaining values are
@@ -751,17 +664,15 @@ public class FitWorker implements Runnable
 	 *         <p>
 	 *         Null if no fit is possible.
 	 */
-	private FitResult fit(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, int[] maxIndices, int n,
-			float[] smoothData)
+	private FitResult fit(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, Spot[] spots, int n)
 	{
 		int width = regionBounds.width;
 		int height = regionBounds.height;
-		int x = xcoord[n];
-		int y = ycoord[n];
+		int x = spots[n].x;
+		int y = spots[n].y;
 
 		// Analyse neighbours and include them in the fit if they are within a set height of this peak.
-		int neighbours = (config.isIncludeNeighbours()) ? findNeighbours(regionBounds, n, x, y, smoothData, maxIndices)
-				: 0;
+		int neighbours = (config.isIncludeNeighbours()) ? findNeighbours(regionBounds, n, x, y, spots) : 0;
 
 		// Estimate background
 		float background = 0;
@@ -813,7 +724,7 @@ public class FitWorker implements Runnable
 			// it must be added back 
 
 			// The main peak
-			params[Gaussian2DFunction.SIGNAL] = smoothData[maxIndices[n]] + ((differenceOfSmoothing) ? background : 0);
+			params[Gaussian2DFunction.SIGNAL] = spots[n].intensity + ((relativeIntensity) ? background : 0);
 			params[Gaussian2DFunction.X_POSITION] = x - regionBounds.x;
 			params[Gaussian2DFunction.Y_POSITION] = y - regionBounds.y;
 
@@ -821,13 +732,12 @@ public class FitWorker implements Runnable
 			for (int i = 0, j = parametersPerPeak; i < neighbourCount; i++, j += parametersPerPeak)
 			{
 				int n2 = neighbourIndices[i];
-				params[j + Gaussian2DFunction.SIGNAL] = smoothData[maxIndices[n2]] +
-						((differenceOfSmoothing) ? background : 0);
-				params[j + Gaussian2DFunction.X_POSITION] = xcoord[n2] - regionBounds.x;
-				params[j + Gaussian2DFunction.Y_POSITION] = ycoord[n2] - regionBounds.y;
+				params[j + Gaussian2DFunction.SIGNAL] = spots[n2].intensity + ((relativeIntensity) ? background : 0);
+				params[j + Gaussian2DFunction.X_POSITION] = spots[n2].x - regionBounds.x;
+				params[j + Gaussian2DFunction.Y_POSITION] = spots[n2].y - regionBounds.y;
 			}
 
-			if (!differenceOfSmoothing)
+			if (!relativeIntensity)
 			{
 				// In the case of uneven illumination the peaks may be below the background.
 				// Check the heights are positive. Otherwise set it to zero and it will be re-estimated
@@ -966,7 +876,7 @@ public class FitWorker implements Runnable
 			if (signal <= 0)
 			{
 				amplitudeEstimate = true;
-				signal = smoothData[maxIndices[n]] - ((differenceOfSmoothing) ? 0 : background);
+				signal = spots[n].intensity - ((relativeIntensity) ? 0 : background);
 				if (signal < 0)
 				{
 					signal += background;
@@ -998,7 +908,7 @@ public class FitWorker implements Runnable
 			if (//neighbours == 0 && 
 			canPerformQuadrantAnalysis(fitResult, width, height))
 			{
-				FitResult newFitResult = quadrantAnalysis(fitResult, region, regionBounds, smoothData);
+				FitResult newFitResult = quadrantAnalysis(fitResult, region, regionBounds);
 				if (newFitResult != null)
 					fitResult = newFitResult;
 			}
@@ -1108,11 +1018,10 @@ public class FitWorker implements Runnable
 	 * @param n
 	 * @param x
 	 * @param y
-	 * @param smoothData
-	 * @param maxIndices
+	 * @param spots
 	 * @return The number of neighbours
 	 */
-	private int findNeighbours(Rectangle regionBounds, int n, int x, int y, float[] smoothData, int[] maxIndices)
+	private int findNeighbours(Rectangle regionBounds, int n, int x, int y, Spot[] spots)
 	{
 		int xmin = regionBounds.x;
 		int xmax = xmin + regionBounds.width - 1;
@@ -1120,27 +1029,26 @@ public class FitWorker implements Runnable
 		int ymax = ymin + regionBounds.height - 1;
 
 		float heightThreshold;
-		if (differenceOfSmoothing)
+		if (relativeIntensity)
 		{
-			// No background when performing difference-of-smoothing
-			heightThreshold = (float) (smoothData[maxIndices[n]] * config.getNeighbourHeightThreshold());
+			// No background when spot filter has relative intensity
+			heightThreshold = (float) (spots[n].intensity * config.getNeighbourHeightThreshold());
 		}
 		else
 		{
-			if (smoothData[maxIndices[n]] < background)
-				heightThreshold = smoothData[maxIndices[n]];
+			if (spots[n].intensity < background)
+				heightThreshold = spots[n].intensity;
 			else
-				heightThreshold = (float) ((smoothData[maxIndices[n]] - background) *
-						config.getNeighbourHeightThreshold() + background);
+				heightThreshold = (float) ((spots[n].intensity - background) * config.getNeighbourHeightThreshold() + background);
 		}
 
 		// TODO - Speed this up by storing the maxima in a grid and only compare the neighbouring grid cells
 
 		// Check all maxima that are lower than this
 		neighbourCount = 0;
-		for (int i = n + 1; i < maxIndices.length; i++)
+		for (int i = n + 1; i < spots.length; i++)
 		{
-			if (canIgnore(xcoord[i], ycoord[i], xmin, xmax, ymin, ymax, smoothData[maxIndices[i]], heightThreshold))
+			if (canIgnore(spots[i].x, spots[i].y, xmin, xmax, ymin, ymax, spots[i].intensity, heightThreshold))
 				continue;
 			neighbourIndices[neighbourCount++] = i;
 		}
@@ -1204,7 +1112,7 @@ public class FitWorker implements Runnable
 		return false;
 	}
 
-	private FitResult quadrantAnalysis(FitResult fitResult, double[] region, Rectangle regionBounds, float[] smoothData)
+	private FitResult quadrantAnalysis(FitResult fitResult, double[] region, Rectangle regionBounds)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
 		/*

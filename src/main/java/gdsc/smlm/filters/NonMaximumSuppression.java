@@ -21,7 +21,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Computes the local maxima.
  */
-public class NonMaximumSuppression
+public class NonMaximumSuppression implements Cloneable
 {
 	private float background = 0;
 	private float fractionAboveBackground = 0;
@@ -3759,5 +3759,27 @@ public class NonMaximumSuppression
 			return findBlockMaxima2x2(data, maxx, maxy);
 
 		return findBlockMaximaNxN(data, maxx, maxy, n);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public Object clone()
+	{
+		try
+		{
+			NonMaximumSuppression o = (NonMaximumSuppression) super.clone();
+			o.newDataFloat = null;
+			o.newDataInt = null;
+			o.maximaFlagBuffer = null;
+			return o;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// Ignore
+		}
+		return null;
 	}
 }

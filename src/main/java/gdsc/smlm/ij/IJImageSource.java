@@ -133,10 +133,11 @@ public class IJImageSource extends ImageSource
 	 */
 	public IJImageSource(ImagePlus imp, int startFrame, int extraFrames)
 	{
-		this(imp);
+		super(imp.getTitle());
 		// Ensure only a single frame is processed
 		singleFrame = startFrame;
 		this.extraFrames = FastMath.max(0, extraFrames);
+		initialise(imp);
 	}
 
 	/*

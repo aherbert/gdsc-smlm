@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
@@ -1542,8 +1543,9 @@ public class TraceMolecules implements PlugIn
 		// Allow fitting settings to be adjusted
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		gd.addMessage("--- Gaussian fitting ---");
+		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
-		gd.addSlider("Smoothing2", 0, 5, config.getSmooth2());
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
@@ -1586,8 +1588,8 @@ public class TraceMolecules implements PlugIn
 		distanceThreshold = (float) gd.getNextNumber();
 		expansionFactor = (float) gd.getNextNumber();
 
+		config.setDataFilter(gd.getNextChoiceIndex());
 		config.setSmooth(gd.getNextNumber());
-		config.setSmooth2(gd.getNextNumber());
 		config.setSearch(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
@@ -1639,6 +1641,11 @@ public class TraceMolecules implements PlugIn
 		}
 
 		debugFailures = gd.getNextBoolean();
+
+		if (!PeakFit.configureDataFilter(globalSettings, filename, false))
+			return;
+		if (!PeakFit.configureFitSolver(globalSettings, filename, false))
+			return;
 
 		// Adjust settings for a single maxima
 		config.setIncludeNeighbours(false);

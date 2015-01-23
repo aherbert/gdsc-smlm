@@ -31,7 +31,7 @@ import org.apache.commons.math3.util.FastMath;
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
  */
-public class AverageFilter
+public class AverageFilter implements Cloneable
 {
 	private float[] floatDataBuffer = null;
 	private float[] floatRowBuffer = null;
@@ -53,6 +53,11 @@ public class AverageFilter
 	private int intGetAverage(int sum, int boxArea)
 	{
 		return sum / boxArea;
+	}
+
+	private int intGetAverage(float sum, final float divisor)
+	{
+		return (int) (sum * divisor);
 	}
 
 	/**
@@ -628,8 +633,60 @@ public class AverageFilter
 	}
 
 	/**
+	 * Compute the weighted block average within a 3x3 size block around each point.
+	 * Only pixels with a full block are processed. Pixels within border regions
+	 * are unchanged.
+	 * <p>
+	 * Uses a normalised [[w, w, w], [w, 1, w], [w, w, w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The weight
+	 */
+	public void blockAverage3x3Internal(float[] data, final int maxx, final int maxy, final float w)
+	{
+		float[] newData = floatBuffer(data.length);
+
+		final float divisor = (float) (1.0 / (1 + 8 * w));
+
+		for (int y = 1; y < maxy - 1; y++)
+		{
+			int index0 = (y - 1) * maxx + 1;
+			int index1 = y * maxx + 1;
+			int index2 = (y + 1) * maxx + 1;
+			for (int x = 1; x < maxx - 1; x++)
+			{
+				float sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1 + 1] +
+						data[index2 - 1] + data[index2] + data[index2 + 1];
+				sum *= w;
+				sum += data[index1];
+				newData[index1] = floatGetAverage(sum, divisor);
+				index0++;
+				index1++;
+				index2++;
+			}
+		}
+
+		// Copy back
+		for (int y = 1; y < maxy - 1; y++)
+		{
+			int index = y * maxx + 1;
+			for (int x = 1; x < maxx - 1; x++, index++)
+			{
+				data[index] = newData[index];
+			}
+		}
+	}
+
 	/**
-	 * Compute an approximate Guassian convolution within a 3x3 size block around each point.
+	 * Compute an approximate Gaussian convolution within a 3x3 size block around each point.
 	 * Only pixels with a full block are processed. Pixels within border regions
 	 * are unchanged.
 	 * <p>
@@ -657,9 +714,8 @@ public class AverageFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 
-						2 * data[index1 - 1] + 4 * data[index1] + 2 * data[index1 + 1] + 
-						data[index2 - 1] + 2 * data[index2] + data[index2 + 1];
+				float sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] + 4 *
+						data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] + data[index2 + 1];
 				newData[index1] = floatGetAverage(sum, divisor);
 				index0++;
 				index1++;
@@ -1292,7 +1348,100 @@ public class AverageFilter
 	}
 
 	/**
-	 * Compute an approximate Guassian convolution within a 3x3 size block around each point.
+	 * Compute the weighted block average within a 3x3 size block around each point.
+	 * <p>
+	 * Uses a normalised [[w, w, w], [w, 1, w], [w, w, w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified.
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The weight
+	 */
+	public void blockAverage3x3(float[] data, final int maxx, final int maxy, final float w)
+	{
+		float[] newData = floatBuffer(data.length);
+
+		// Boundary control
+		final int xwidth = 1;
+		final int ywidth = 1;
+		final int xlimit = maxx - xwidth;
+		final int ylimit = maxy - ywidth;
+
+		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		int[] xoffset = new int[offset.length];
+		int[] yoffset = new int[offset.length];
+		for (int y = -ywidth, d = 0; y <= ywidth; y++)
+			for (int x = -xwidth; x <= xwidth; x++)
+				if (x != 0 || y != 0)
+				{
+					offset[d] = maxx * y + x;
+					xoffset[d] = x;
+					yoffset[d] = y;
+					d++;
+				}
+
+		final float divisor = (float) (1.0 / (1 + 8 * w));
+
+		for (int y = 0; y < maxy; y++)
+		{
+			int index0 = (y - 1) * maxx;
+			int index1 = y * maxx;
+			int index2 = (y + 1) * maxx;
+			for (int x = 0; x < maxx; x++)
+			{
+				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
+				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+
+				// Sweep neighbourhood
+				float sum = 0;
+				if (isInnerXY)
+				{
+					sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1 + 1] +
+							data[index2 - 1] + data[index2] + data[index2 + 1];
+				}
+				else
+				{
+					for (int d = offset.length; d-- > 0;)
+					{
+						// Get the pixel with boundary checking
+						int yy = y + yoffset[d];
+						int xx = x + xoffset[d];
+						if (xx <= 0)
+							xx = 0;
+						else if (xx >= maxx)
+							xx = maxx - 1;
+						if (yy <= 0)
+							yy = 0;
+						else if (yy >= maxy)
+							yy = maxy - 1;
+						sum += data[xx + yy * maxx];
+					}
+				}
+				sum *= w;
+				sum += data[index1];
+				newData[index1] = floatGetAverage(sum, divisor);
+
+				index0++;
+				index1++;
+				index2++;
+			}
+		}
+
+		// Copy back
+		for (int index = data.length; index-- > 0;)
+		{
+			data[index] = newData[index];
+		}
+	}
+
+	/**
+	 * Compute an approximate Gaussian convolution within a 3x3 size block around each point.
 	 * <p>
 	 * Uses a normalised [[1, 2, 1], [2, 4, 2], [1, 2, 1]] convolution kernel.
 	 * <p>
@@ -1328,7 +1477,8 @@ public class AverageFilter
 					d++;
 				}
 
-		float[] kernel = new float[] { 1f / 16, 2f / 16, 1f / 16, 2f / 16, /*4f / 16,*/ 2f / 16, 1f / 16, 2f / 16, 1f / 16 };
+		float[] kernel = new float[] { 1f / 16, 2f / 16, 1f / 16, 2f / 16, /* 4f / 16, */2f / 16, 1f / 16, 2f / 16,
+				1f / 16 };
 		final float divisor = (float) (1.0 / 16.0);
 
 		for (int y = 0; y < maxy; y++)
@@ -1389,7 +1539,7 @@ public class AverageFilter
 	// The following code is copied directly from above. 
 	// All 'float' have been replaced with 'int'. Changes must then be made for intGetAverage(...)
 	// ----------------------------------------------------
-	
+
 	/**
 	 * Compute the block average within a 2n+1 size block around each point.
 	 * Only pixels with a full block are processed. Pixels within border regions
@@ -1962,8 +2112,61 @@ public class AverageFilter
 		}
 	}
 
+
 	/**
-	 * Compute an approximate Guassian convolution within a 3x3 size block around each point.
+	 * Compute the weighted block average within a 3x3 size block around each point.
+	 * Only pixels with a full block are processed. Pixels within border regions
+	 * are unchanged.
+	 * <p>
+	 * Uses a normalised [[w, w, w], [w, 1, w], [w, w, w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The weight
+	 */
+	public void blockAverage3x3Internal(int[] data, final int maxx, final int maxy, final int w)
+	{
+		int[] newData = intBuffer(data.length);
+
+		final float divisor = (float) (1.0 / (1 + 8 * w));
+
+		for (int y = 1; y < maxy - 1; y++)
+		{
+			int index0 = (y - 1) * maxx + 1;
+			int index1 = y * maxx + 1;
+			int index2 = (y + 1) * maxx + 1;
+			for (int x = 1; x < maxx - 1; x++)
+			{
+				int sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1 + 1] +
+						data[index2 - 1] + data[index2] + data[index2 + 1];
+				float fsum = sum * w + data[index1];
+				newData[index1] = intGetAverage(fsum, divisor);
+				index0++;
+				index1++;
+				index2++;
+			}
+		}
+
+		// Copy back
+		for (int y = 1; y < maxy - 1; y++)
+		{
+			int index = y * maxx + 1;
+			for (int x = 1; x < maxx - 1; x++, index++)
+			{
+				data[index] = newData[index];
+			}
+		}
+	}
+	
+	/**
+	 * Compute an approximate Gaussian convolution within a 3x3 size block around each point.
 	 * Only pixels with a full block are processed. Pixels within border regions
 	 * are unchanged.
 	 * <p>
@@ -1991,9 +2194,8 @@ public class AverageFilter
 			int index2 = (y + 1) * maxx + 1;
 			for (int x = 1; x < maxx - 1; x++)
 			{
-				int sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 
-						2 * data[index1 - 1] + 4 * data[index1] + 2 * data[index1 + 1] + 
-						data[index2 - 1] + 2 * data[index2] + data[index2 + 1];
+				int sum = data[index0 - 1] + 2 * data[index0] + data[index0 + 1] + 2 * data[index1 - 1] + 4 *
+						data[index1] + 2 * data[index1 + 1] + data[index2 - 1] + 2 * data[index2] + data[index2 + 1];
 				newData[index1] = intGetAverage(sum, divisor);
 				index0++;
 				index1++;
@@ -2011,7 +2213,7 @@ public class AverageFilter
 			}
 		}
 	}
-	
+
 	private int[] intBuffer(int size)
 	{
 		if (intDataBuffer == null || intDataBuffer.length < size)
@@ -2626,7 +2828,99 @@ public class AverageFilter
 	}
 
 	/**
-	 * Compute an approximate Guassian convolution within a 3x3 size block around each point.
+	 * Compute the weighted block average within a 3x3 size block around each point.
+	 * <p>
+	 * Uses a normalised [[w, w, w], [w, 1, w], [w, w, w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified.
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The weight
+	 */
+	public void blockAverage3x3(int[] data, final int maxx, final int maxy, final float w)
+	{
+		int[] newData = intBuffer(data.length);
+
+		// Boundary control
+		final int xwidth = 1;
+		final int ywidth = 1;
+		final int xlimit = maxx - xwidth;
+		final int ylimit = maxy - ywidth;
+
+		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
+		int[] xoffset = new int[offset.length];
+		int[] yoffset = new int[offset.length];
+		for (int y = -ywidth, d = 0; y <= ywidth; y++)
+			for (int x = -xwidth; x <= xwidth; x++)
+				if (x != 0 || y != 0)
+				{
+					offset[d] = maxx * y + x;
+					xoffset[d] = x;
+					yoffset[d] = y;
+					d++;
+				}
+
+		final float divisor = (float) (1.0 / (1 + 8 * w));
+
+		for (int y = 0; y < maxy; y++)
+		{
+			int index0 = (y - 1) * maxx;
+			int index1 = y * maxx;
+			int index2 = (y + 1) * maxx;
+			for (int x = 0; x < maxx; x++)
+			{
+				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
+				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
+
+				// Sweep neighbourhood
+				int sum = 0;
+				if (isInnerXY)
+				{
+					sum = data[index0 - 1] + data[index0] + data[index0 + 1] + data[index1 - 1] + data[index1 + 1] +
+							data[index2 - 1] + data[index2] + data[index2 + 1];
+				}
+				else
+				{
+					for (int d = offset.length; d-- > 0;)
+					{
+						// Get the pixel with boundary checking
+						int yy = y + yoffset[d];
+						int xx = x + xoffset[d];
+						if (xx <= 0)
+							xx = 0;
+						else if (xx >= maxx)
+							xx = maxx - 1;
+						if (yy <= 0)
+							yy = 0;
+						else if (yy >= maxy)
+							yy = maxy - 1;
+						sum += data[xx + yy * maxx];
+					}
+				}
+				float fsum = sum * w + data[index1];
+				newData[index1] = intGetAverage(fsum, divisor);
+
+				index0++;
+				index1++;
+				index2++;
+			}
+		}
+
+		// Copy back
+		for (int index = data.length; index-- > 0;)
+		{
+			data[index] = newData[index];
+		}
+	}
+
+	/**
+	 * Compute an approximate Gaussian convolution within a 3x3 size block around each point.
 	 * <p>
 	 * Uses a normalised [[1, 2, 1], [2, 4, 2], [1, 2, 1]] convolution kernel.
 	 * <p>
@@ -2662,7 +2956,7 @@ public class AverageFilter
 					d++;
 				}
 
-		int[] kernel = new int[] { 1, 2, 1, 2, /*4,*/ 2, 1, 2, 1 };
+		int[] kernel = new int[] { 1, 2, 1, 2, /* 4, */2, 1, 2, 1 };
 		final int divisor = 16;
 
 		for (int y = 0; y < maxy; y++)
@@ -2715,5 +3009,28 @@ public class AverageFilter
 		{
 			data[index] = newData[index];
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public Object clone()
+	{
+		try
+		{
+			AverageFilter o = (AverageFilter) super.clone();
+			o.floatDataBuffer = null;
+			o.floatRowBuffer = null;
+			o.intDataBuffer = null;
+			o.intRowBuffer = null;
+			return o;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// Ignore
+		}
+		return null;
 	}
 }

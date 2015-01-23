@@ -33,6 +33,7 @@ public class FitEngineConfiguration implements Cloneable
 	private double neighbourHeightThreshold = 0.3;
 	private double residualsThreshold = 1;
 	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
+	private DataFilter dataFilter = DataFilter.MEAN;
 
 	/**
 	 * Constructor
@@ -71,8 +72,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * Use this parameter to perform a difference-of-smoothing filter to identify peaks. The second smoothing window
-	 * should be larger than the first. The second smoothed image is subtracted from the first to create a
+	 * Use this parameter to perform a difference-of-smoothing (Top-hat) filter to identify peaks. The second smoothing
+	 * window should be larger than the first. The second smoothed image is subtracted from the first to create a
 	 * difference-of-smoothing such as a difference-of-Gaussians band-pass filter.
 	 * 
 	 * @param smooth2
@@ -262,5 +263,36 @@ public class FitEngineConfiguration implements Cloneable
 		fitConfiguration.initialiseState();
 		if (noiseMethod == null)
 			noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
+		if (dataFilter == null)
+			dataFilter = DataFilter.MEAN;
+	}
+
+	/**
+	 * @return the filter to apply to the data before identifying local maxima
+	 */
+	public DataFilter getDataFilter()
+	{
+		return dataFilter;
+	}
+
+	/**
+	 * @param DataFilter
+	 *            the filter to apply to the data before identifying local maxima
+	 */
+	public void setDataFilter(DataFilter dataFilter)
+	{
+		this.dataFilter = dataFilter;
+	}
+
+	/**
+	 * @param DataFilter
+	 *            the filter to apply to the data before identifying local maxima
+	 */
+	public void setDataFilter(int dataFilter)
+	{
+		if (dataFilter >= 0 && dataFilter < DataFilter.values().length)
+		{
+			setDataFilter(DataFilter.values()[dataFilter]);
+		}
 	}
 }
