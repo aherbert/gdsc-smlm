@@ -672,15 +672,20 @@ public class BenchmarkFit implements PlugIn
 			{
 				if (displayHistograms[i] && convert[i] != 0)
 				{
-					idList[count++] = Utils.showHistogram(
+					// We will have to convert the values...
+					double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
+					for (int j=0; j<tmp.length; j++)
+						tmp[j] *= convert[i];
+					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
+					idList[count++] = Utils.showH\istogram(
 							TITLE,
-							(StoredDataStatistics) stats[i],
+							tmpStats,
 							NAMES[i],
 							0,
 							0,
 							histogramBins,
-							String.format("%s +/- %s", Utils.rounded(stats[i].getMean() * convert[i]),
-									Utils.rounded(stats[i].getStandardDeviation() * convert[i])));
+							String.format("%s +/- %s", Utils.rounded(tmpStats.getMean()),
+									Utils.rounded(tmpStats.getStandardDeviation())));
 					requireRetile = requireRetile || Utils.isNewWindow();
 				}
 			}
