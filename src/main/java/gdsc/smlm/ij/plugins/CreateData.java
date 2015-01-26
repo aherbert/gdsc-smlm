@@ -2148,11 +2148,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Add Poisson noise.
 			if (uniformBackground)
 			{
-				// We can do N random samples thus ensuring the background average is constant
-				final int samples = (int) Math.round(pixels2[0] * pixels2.length);
+				// We can do N random samples thus ensuring the background average is constant.
+				// Note: The number of samples must be Poisson distributed.
+				final int samples = (int) random.nextPoisson(pixels2[0] * pixels2.length);
 
 				// Only do sampling if the number of samples is valid
-				if (samples > 1)
+				if (samples >= 1)
 				{
 					pixels2 = new float[pixels2.length];
 					final int upper = pixels2.length - 1;
