@@ -13,9 +13,12 @@ package gdsc.smlm.engine;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.filters.AverageSpotFilter;
+import gdsc.smlm.filters.AverageDataProcessor;
+import gdsc.smlm.filters.DataProcessor;
+import gdsc.smlm.filters.DoublePassSpotFilter;
 import gdsc.smlm.filters.MaximaSpotFilter;
-import gdsc.smlm.filters.TopHatBoxSpotFilter;
+import gdsc.smlm.filters.MedianDataProcessor;
+import gdsc.smlm.filters.SinglePassSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.results.PeakResults;
@@ -251,29 +254,36 @@ public class FitEngine
 
 	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)
 	{
-		return AverageSpotFilter.convert(smoothingParameter * hwhmMin);
+		return AverageDataProcessor.convert(smoothingParameter * hwhmMin);
 	}
 
 	private void createSpotFilter(FitEngineConfiguration config)
 	{
-		// Create the SpotFilter
-		switch (config.getDataFilter())
+		DataProcessor processor1 = createDataProcessor(config.getDataFilter(), smooth);
+		if (config.isDifferenceFilter())
 		{
-			case TOP_HAT:
-				if (smooth2 > 0)
-				{
-					spotFilter = new TopHatBoxSpotFilter(search, border, smooth, smooth2);
-					break;
-				}
-				// If no second smoothing size then revert to the mean filter
+			DataProcessor processor2 = createDataProcessor(config.getDataFilter2(), smooth2);
+			spotFilter = new DoublePassSpotFilter(search, border, processor1, processor2);
+		}
+		else
+		{
+			spotFilter = new SinglePassSpotFilter(search, border, processor1);
+		}
+	}
 
+	private DataProcessor createDataProcessor(DataFilter dataFilter, double parameter)
+	{
+		switch (dataFilter)
+		{
 			case MEAN:
-				spotFilter = new AverageSpotFilter(search, border, smooth);
-				break;
+				return new AverageDataProcessor(border, parameter);
 
-			case GAUSSIAN:
 			case MEDIAN:
-				throw new RuntimeException("Not yet implemented: " + config.getDataFilter().toString());
+				return new MedianDataProcessor(border, parameter);
+				
+			case GAUSSIAN:
+			default:
+				throw new RuntimeException("Not yet implemented: " + dataFilter.toString());
 		}
 	}
 

@@ -24,7 +24,7 @@ import org.apache.commons.math3.util.FastMath;
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter. A simple
  * weighted approximation is used for less than 1 pixel smoothing.
  */
-public class AverageSpotFilter extends MaximaSpotFilter
+public class AverageDataProcessor extends DataProcessor
 {
 	private final double smooth;
 	private AverageFilter filter = new AverageFilter();
@@ -32,8 +32,6 @@ public class AverageSpotFilter extends MaximaSpotFilter
 	/**
 	 * Constructor
 	 * 
-	 * @param search
-	 *            The search width for non-maximum suppression
 	 * @param border
 	 *            The border to ignore for maxima
 	 * @param smooth
@@ -41,11 +39,9 @@ public class AverageSpotFilter extends MaximaSpotFilter
 	 * @throws IllegalArgumentException
 	 *             if smooth is below zero
 	 */
-	public AverageSpotFilter(int search, int border, double smooth)
+	public AverageDataProcessor(int border, double smooth)
 	{
-		super(search, border);
-		if (smooth < 0)
-			throw new IllegalArgumentException("The smoothing width must be positive");
+		super(border);
 		this.smooth = convert(smooth);
 	}
 
@@ -77,24 +73,14 @@ public class AverageSpotFilter extends MaximaSpotFilter
 		return true;
 	}
 
-	@Override
-	public float[] preprocessData(float[] data, int width, int height)
-	{
-		if (smooth > 0)
-			data = applySmoothing(data, width, height, smooth);
-		return data;
-	}
-
 	/**
-	 * Apply a box smoothing filter to the data
-	 * 
 	 * @param data
 	 * @param width
 	 * @param height
-	 * @param smooth
 	 * @return
 	 */
-	protected float[] applySmoothing(float[] data, int width, int height, double smooth)
+	@Override
+	public float[] process(float[] data, int width, int height)
 	{
 		// Smoothing destructively modifies the data so create a copy
 		float[] smoothData = Arrays.copyOf(data, width * height);
@@ -139,18 +125,28 @@ public class AverageSpotFilter extends MaximaSpotFilter
 	 */
 	public Object clone()
 	{
-		AverageSpotFilter f = (AverageSpotFilter) super.clone();
+		AverageDataProcessor f = (AverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.filter = (AverageFilter) filter.clone();
 		return f;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#getName()
+	 */
 	@Override
 	public String getName()
 	{
 		return "Average Filter";
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#getParameters()
+	 */
 	@Override
 	public List<String> getParameters()
 	{

@@ -1444,10 +1444,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 
-		if (config.getDataFilter() == DataFilter.TOP_HAT)
+		if (config.isDifferenceFilter())
 		{
 			GenericDialog gd = new GenericDialog(TITLE);
-			gd.addMessage(config.getDataFilter().toString() + " requires additional parameters");
+			gd.addMessage("Difference filter requires additional parameters");
+			String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+			gd.addChoice("Spot_filter2", filterNames, filterNames[config.getDataFilter().ordinal()]);
 			gd.addSlider("Smoothing2", config.getSmooth(), 3 * config.getSmooth(), config.getSmooth2());
 			gd.showDialog();
 			if (gd.wasCanceled())
@@ -1457,7 +1459,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			try
 			{
-				Parameters.isAbove("Smoothing2", config.getSmooth2(), config.getSmooth());
+				Parameters.isPositive("Smoothing2", config.getSmooth2());
 			}
 			catch (IllegalArgumentException e)
 			{

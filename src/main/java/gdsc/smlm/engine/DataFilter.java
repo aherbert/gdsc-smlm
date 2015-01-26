@@ -23,10 +23,6 @@ public enum DataFilter
 	 */
 	MEAN("Mean"),
 	/**
-	 * Use a difference of means within two box areas
-	 */
-	TOP_HAT("Top-hat"),
-	/**
 	 * Use a Gaussian with a specified radius
 	 */
 	GAUSSIAN("Gaussian"),

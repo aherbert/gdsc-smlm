@@ -34,6 +34,8 @@ public class FitEngineConfiguration implements Cloneable
 	private double residualsThreshold = 1;
 	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
 	private DataFilter dataFilter = DataFilter.MEAN;
+	private boolean differenceFilter = false;
+	private DataFilter dataFilter2 = DataFilter.MEAN;
 
 	/**
 	 * Constructor
@@ -265,6 +267,8 @@ public class FitEngineConfiguration implements Cloneable
 			noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
 		if (dataFilter == null)
 			dataFilter = DataFilter.MEAN;
+		if (dataFilter2 == null)
+			dataFilter2 = DataFilter.MEAN;
 	}
 
 	/**
@@ -293,6 +297,56 @@ public class FitEngineConfiguration implements Cloneable
 		if (dataFilter >= 0 && dataFilter < DataFilter.values().length)
 		{
 			setDataFilter(DataFilter.values()[dataFilter]);
+		}
+	}
+
+	/**
+	 * @return Set to true to perform difference filtering
+	 */
+	public boolean isDifferenceFilter()
+	{
+		return differenceFilter;
+	}
+
+	/**
+	 * Set to true to perform difference filtering. The data will be filtered twice and the output from the second
+	 * filter subtracted from the first. This allows the second filter to be used to obtain a local background, e.g.
+	 * difference-of-Gaussians filtering.
+	 * 
+	 * @param differenceFilter
+	 *            Set to true to perform difference filtering
+	 */
+	public void setDifferenceFilter(boolean differenceFilter)
+	{
+		this.differenceFilter = differenceFilter;
+	}
+
+	/**
+	 * @return the second filter to apply to the data before identifying local maxima
+	 */
+	public DataFilter getDataFilter2()
+	{
+		return dataFilter2;
+	}
+
+	/**
+	 * @param dataFilter2
+	 *            the second filter to apply to the data before identifying local maxima
+	 */
+	public void setDataFilter2(DataFilter dataFilter2)
+	{
+		this.dataFilter2 = dataFilter2;
+	}
+
+	/**
+	 * @param dataFilter
+	 *            the second filter to apply to the data before identifying local maxima
+	 */
+	public void setDataFilter2(int dataFilter2)
+	{
+		if (dataFilter2 >= 0 && dataFilter2 < DataFilter.values().length)
+		{
+			setDataFilter2(DataFilter.values()[dataFilter2]);
 		}
 	}
 }

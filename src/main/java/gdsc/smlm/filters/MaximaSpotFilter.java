@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -59,6 +58,9 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	protected Spot[] find(final float[] data, final int width, final int height)
 	{
 		final float[] data2 = preprocessData(data, width, height);
+
+		//gdsc.smlm.ij.utils.Utils.display("Spot Filter", new FloatProcessor(width, height, data2));
+
 		final int[] maxIndices = getMaxima(data2, width, height);
 		if (maxIndices.length == 0)
 			return null;
