@@ -302,15 +302,8 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 			if (fitConfig == null)
 				continue;
 
-			// Skip settings that do not make sense
-			if (fitConfig.getSmooth2() > 0 && fitConfig.getSmooth2() <= fitConfig.getSmooth())
-				continue;
-			if (fitConfig.getDataFilter() != DataFilter.TOP_HAT)
-			{
-				// For now only process configurations with no second smoothing when it is not required
-				if (fitConfig.getSmooth2() != 0)
-					continue;
-			}
+			// No need to skip settings that do not make sense as we will catch exceptions.
+			// This relies on the fit engine throw exceptions for invalid settings.
 
 			// Ensure the state is restored after XStream object reconstruction
 			fitConfig.getFitConfiguration().initialiseState();
@@ -324,26 +317,19 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 			if (settings.runPeakFit)
 			{
 				ResultsSettings resultsSettings = createResultsSettings(fitConfig, prefix);
-				PeakFit peakFit = new PeakFit(fitConfig, resultsSettings, settings.getCalibration());
-				peakFit.setSilent(true);
-				peakFit.run(imp, false);
+				try
+				{
+					PeakFit peakFit = new PeakFit(fitConfig, resultsSettings, settings.getCalibration());
+					peakFit.setSilent(true);
+					peakFit.run(imp, false);
 
-				int localisations = peakFit.getSize();
-				long time = peakFit.getTime();
-				double t = time / 1000000.0;
-				String units = "ms";
-				if (t > 1000)
-				{
-					t /= 1000;
-					units = "s";
+					IJ.log(String.format("%s : %s : Size %d : Time = %s", imageFilename, settingsFilename,
+							peakFit.getSize(), Utils.timeToString(peakFit.getTime())));
 				}
-				if (t > 3000)
+				catch (Exception e)
 				{
-					t /= 60;
-					units = "min";
+					// Ignore this as we assume this is from incorrect fit configuration
 				}
-				IJ.log(String.format("%s : %s : Size %d : Time = %f %s", imageFilename, settingsFilename,
-						localisations, t, units));
 			}
 		}
 
