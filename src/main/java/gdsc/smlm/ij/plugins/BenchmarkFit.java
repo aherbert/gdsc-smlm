@@ -677,7 +677,7 @@ public class BenchmarkFit implements PlugIn
 					for (int j=0; j<tmp.length; j++)
 						tmp[j] *= convert[i];
 					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
-					idList[count++] = Utils.showH\istogram(
+					idList[count++] = Utils.showHistogram(
 							TITLE,
 							tmpStats,
 							NAMES[i],
