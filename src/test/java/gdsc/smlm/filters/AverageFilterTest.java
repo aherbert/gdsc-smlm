@@ -921,7 +921,7 @@ public class AverageFilterTest
 		float[] data2 = floatClone(data1);
 
 		filter.blockAverageNxN(data1, width, height, boxSize);
-		filter.rollingBlockAverageNxN(data2, width, height, boxSize);
+		filter.stripedBlockAverageNxN(data2, width, height, boxSize);
 
 		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
 	}
