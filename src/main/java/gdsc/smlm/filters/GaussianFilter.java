@@ -32,6 +32,14 @@ public class GaussianFilter implements Cloneable
 	private int lastUnitLength;
 
 	/**
+	 * Use the default accuracy of 0.02
+	 */
+	public GaussianFilter()
+	{
+		this(0.02);
+	}
+
+	/**
 	 * @param accuracy
 	 *            Accuracy of kernel, should not be above 0.02. Better (lower)
 	 *            accuracy needs slightly more computing time.
