@@ -31,15 +31,17 @@ public class GaussianDataProcessor extends DataProcessor
 	 * 
 	 * @param border
 	 *            The border to ignore for maxima
-	 * @param sigma
-	 *            The Gaussian standard deviation.
+	 * @param smooth
+	 *            The distance into neighbouring pixels to extend. The resulting standard deviation can be found using
+	 *            {@link #getSigma()}
 	 * @throws IllegalArgumentException
 	 *             if smooth is below zero
 	 */
-	public GaussianDataProcessor(int border, double sigma)
+	public GaussianDataProcessor(int border, double smooth)
 	{
 		super(border);
-		this.sigma = sigma;
+		// Make the 3 SD reach the desired smoothing distance. We add 0.5 pixels to always cover the target pixel. 		
+		this.sigma = (smooth + 0.5) / 3;
 		filter = new GaussianFilter(0.02);
 	}
 
@@ -66,9 +68,9 @@ public class GaussianDataProcessor extends DataProcessor
 	}
 
 	/**
-	 * @return the smoothing width
+	 * @return the Gaussian standard deviation
 	 */
-	public double getSmooth()
+	public double getSigma()
 	{
 		return sigma;
 	}
