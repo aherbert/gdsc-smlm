@@ -84,15 +84,30 @@ public class MedianDataProcessor extends DataProcessor
 			smoothData = Arrays.copyOf(data, width * height);
 
 			// Check upper limits are safe
-			int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
+			final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
 
-			if (tmpSmooth <= getBorder())
+			// JUnit speed tests show that the rolling median is faster on windows of n<=3
+			if (tmpSmooth <= 3)
 			{
-				filter.blockMedianInternal(smoothData, width, height, tmpSmooth);
+				if (tmpSmooth <= getBorder())
+				{
+					filter.rollingMedianInternal(smoothData, width, height, tmpSmooth);
+				}
+				else
+				{
+					filter.rollingMedian(smoothData, width, height, tmpSmooth);
+				}
 			}
 			else
 			{
-				filter.blockMedian(smoothData, width, height, tmpSmooth);
+				if (tmpSmooth <= getBorder())
+				{
+					filter.blockMedianInternal(smoothData, width, height, tmpSmooth);
+				}
+				else
+				{
+					filter.blockMedian(smoothData, width, height, tmpSmooth);
+				}
 			}
 		}
 		return smoothData;

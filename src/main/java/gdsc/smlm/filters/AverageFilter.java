@@ -110,7 +110,7 @@ public class AverageFilter implements Cloneable
 
 		float[] newData = floatBuffer(data.length);
 
-		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
+		final float divisor = (float) (1.0 / (blockSize * blockSize));
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -396,13 +396,13 @@ public class AverageFilter implements Cloneable
 	 */
 	public void stripedBlockAverageNxNInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
-		int blockSize = 2 * n + 1;
+		final int blockSize = 2 * n + 1;
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
 		float[] newData = floatBuffer(data.length);
 
-		final float divisor = (float) (1.0 / ((2 * n + 1) * (2 * n + 1)));
+		final float divisor = (float) (1.0 / (blockSize * blockSize));
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -539,15 +539,18 @@ public class AverageFilter implements Cloneable
 	 */
 	public void blockAverageNxNInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
+		// The size of the region 
+		final int nX = (2 * n + 1);
+		final int nY = (2 * n + 1);
+
+		if (maxx < nX || maxy < nY)
+			return;
+
 		float[] newData = floatBuffer(data.length);
 
-		// Boundary control
-		final int xwidth = FastMath.min(n, maxx - 1);
-		final int ywidth = FastMath.min(n, maxy - 1);
-
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		for (int y = -ywidth, d = 0; y <= ywidth; y++)
-			for (int x = -xwidth; x <= xwidth; x++)
+		int[] offset = new int[nX * nY - 1];
+		for (int y = -n, d = 0; y <= n; y++)
+			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
 				{
 					offset[d] = maxx * y + x;
@@ -1590,7 +1593,7 @@ public class AverageFilter implements Cloneable
 
 		int[] newData = intBuffer(data.length);
 
-		final int divisor = (2 * n + 1) * (2 * n + 1);
+		final int divisor = blockSize * blockSize;
 
 		// X-direction
 		for (int y = 0; y < maxy; y++)
@@ -1882,7 +1885,7 @@ public class AverageFilter implements Cloneable
 
 		int[] newData = intBuffer(data.length);
 
-		final int divisor = (2 * n + 1) * (2 * n + 1);
+		final int divisor = blockSize * blockSize;
 
 		// NOTE: 
 		// To increase speed when sweeping the arrays:
@@ -2019,15 +2022,18 @@ public class AverageFilter implements Cloneable
 	 */
 	public void blockAverageNxNInternal(int[] data, final int maxx, final int maxy, final int n)
 	{
+		// The size of the region 
+		final int nX = (2 * n + 1);
+		final int nY = (2 * n + 1);
+
+		if (maxx < nX || maxy < nY)
+			return;
+
 		int[] newData = intBuffer(data.length);
 
-		// Boundary control
-		final int xwidth = FastMath.min(n, maxx - 1);
-		final int ywidth = FastMath.min(n, maxy - 1);
-
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		for (int y = -ywidth, d = 0; y <= ywidth; y++)
-			for (int x = -xwidth; x <= xwidth; x++)
+		int[] offset = new int[nX * nY - 1];
+		for (int y = -n, d = 0; y <= n; y++)
+			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
 				{
 					offset[d] = maxx * y + x;
@@ -2112,7 +2118,6 @@ public class AverageFilter implements Cloneable
 		}
 	}
 
-
 	/**
 	 * Compute the weighted block average within a 3x3 size block around each point.
 	 * Only pixels with a full block are processed. Pixels within border regions
@@ -2164,7 +2169,7 @@ public class AverageFilter implements Cloneable
 			}
 		}
 	}
-	
+
 	/**
 	 * Compute an approximate Gaussian convolution within a 3x3 size block around each point.
 	 * Only pixels with a full block are processed. Pixels within border regions

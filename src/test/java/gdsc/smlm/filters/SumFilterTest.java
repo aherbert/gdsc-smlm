@@ -42,7 +42,7 @@ public class SumFilterTest
 
 	// COPY CODE FROM HERE...
 	@Test
-	public void floatBlockSumNxNInternalAndRollingBlockSumNxNReturnSameResult()
+	public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
 		SumFilter filter = new SumFilter();
 
@@ -67,7 +67,7 @@ public class SumFilterTest
 	}
 
 	@Test
-	public void floatBlockSumNxNInternalAndStripedBlockSumNxNReturnSameResult()
+	public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
 	{
 		SumFilter filter = new SumFilter();
 
@@ -91,7 +91,7 @@ public class SumFilterTest
 	}
 
 	@Test
-	public void floatBlockSum3x3InternalAndRollingBlockSumNxNReturnSameResult()
+	public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
 		SumFilter filter = new SumFilter();
 

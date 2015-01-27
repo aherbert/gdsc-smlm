@@ -42,7 +42,7 @@ public class AverageFilterTest
 
 	// COPY CODE FROM HERE...
 	@Test
-	public void floatBlockAverageNxNInternalAndRollingBlockAverageNxNReturnSameResult()
+	public void floatBlockAverageNxNInternalAndRollingBlockAverageNxNInternalReturnSameResult()
 	{
 		AverageFilter filter = new AverageFilter();
 
@@ -67,7 +67,7 @@ public class AverageFilterTest
 	}
 
 	@Test
-	public void floatBlockAverageNxNInternalAndStripedBlockAverageNxNReturnSameResult()
+	public void floatBlockAverageNxNInternalAndStripedBlockAverageNxNInternalReturnSameResult()
 	{
 		AverageFilter filter = new AverageFilter();
 
@@ -91,7 +91,7 @@ public class AverageFilterTest
 	}
 
 	@Test
-	public void floatBlockAverage3x3InternalAndRollingBlockAverageNxNReturnSameResult()
+	public void floatBlockAverage3x3InternalAndRollingBlockAverageNxNInternalReturnSameResult()
 	{
 		AverageFilter filter = new AverageFilter();
 
@@ -1774,7 +1774,7 @@ public class AverageFilterTest
 	}
 
 	@Test
-	public void intBlockAverageNxNInternalAndRollingBlockAverageNxNReturnSameResult()
+	public void intBlockAverageNxNInternalAndRollingBlockAverageNxNInternalReturnSameResult()
 	{
 		AverageFilter filter = new AverageFilter();
 
@@ -1799,7 +1799,7 @@ public class AverageFilterTest
 	}
 
 	@Test
-	public void intBlockAverageNxNInternalAndStripedBlockAverageNxNReturnSameResult()
+	public void intBlockAverageNxNInternalAndStripedBlockAverageNxNInternalReturnSameResult()
 	{
 		AverageFilter filter = new AverageFilter();
 
@@ -1823,7 +1823,7 @@ public class AverageFilterTest
 	}
 
 	@Test
-	public void intBlockAverage3x3InternalAndRollingBlockAverageNxNReturnSameResult()
+	public void intBlockAverage3x3InternalAndRollingBlockAverageNxNInternalReturnSameResult()
 	{
 		AverageFilter filter = new AverageFilter();
 

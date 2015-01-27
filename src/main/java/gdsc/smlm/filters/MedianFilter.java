@@ -76,15 +76,15 @@ public class MedianFilter implements Cloneable
 	 */
 	public void blockMedianNxNInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
+		final int blockSize = 2 * n + 1;
+		if (maxx < blockSize || maxy < blockSize)
+			return;
+
 		float[] newData = floatBuffer(floatDataBuffer, data.length);
 
-		// Boundary control
-		final int xwidth = FastMath.min(n, maxx - 1);
-		final int ywidth = FastMath.min(n, maxy - 1);
-
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		for (int y = -ywidth, d = 0; y <= ywidth; y++)
-			for (int x = -xwidth; x <= xwidth; x++)
+		int[] offset = new int[blockSize * blockSize - 1];
+		for (int y = -n, d = 0; y <= n; y++)
+			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
 				{
 					offset[d] = maxx * y + x;
@@ -141,12 +141,15 @@ public class MedianFilter implements Cloneable
 	{
 		float[] newData = floatBuffer(floatDataBuffer, data.length);
 		init(9, data[1 * maxx + 1]);
-		for (int y = 1; y < maxy - 1; y++)
+		// Boundary control
+		final int xlimit = maxx - 1;
+		final int ylimit = maxy - 1;
+		for (int y = 1; y < ylimit; y++)
 		{
-			int index0 = (y - 1) * maxx + 1;
 			int index1 = y * maxx + 1;
-			int index2 = (y + 1) * maxx + 1;
-			for (int x = 1; x < maxx - 1; x++)
+			int index0 = index1 - maxx;
+			int index2 = index1 + maxx;
+			for (int x = 1; x < xlimit; x++)
 			{
 				reset();
 				add(data[index0 - 1]);
@@ -166,10 +169,10 @@ public class MedianFilter implements Cloneable
 		}
 
 		// Copy back
-		for (int y = 1; y < maxy - 1; y++)
+		for (int y = 1; y < ylimit; y++)
 		{
 			int index = y * maxx + 1;
-			for (int x = 1; x < maxx - 1; x++, index++)
+			for (int x = 1; x < xlimit; x++, index++)
 			{
 				data[index] = newData[index];
 			}
@@ -432,39 +435,25 @@ public class MedianFilter implements Cloneable
 		init(9, data[1 * maxx + 1]);
 
 		// Boundary control
-		final int xwidth = 1;
-		final int ywidth = 1;
-		final int xlimit = maxx - xwidth;
-		final int ylimit = maxy - ywidth;
+		final int xlimit = maxx - 1;
+		final int ylimit = maxy - 1;
 
-		int[] offset = new int[8];
-		int[] xoffset = new int[offset.length];
-		int[] yoffset = new int[offset.length];
-		for (int y = -ywidth, d = 0; y <= ywidth; y++)
-			for (int x = -xwidth; x <= xwidth; x++)
-				if (x != 0 || y != 0)
-				{
-					offset[d] = maxx * y + x;
-					xoffset[d] = x;
-					yoffset[d] = y;
-					d++;
-				}
+		int[] xoffset = new int[] { -1, 0, 1, -1, 1, -1, 0, 1 };
+		int[] yoffset = new int[] { -1, -1, -1, 0, 0, 1, 1, 1 };
 
 		for (int y = 0; y < maxy; y++)
 		{
-			int index0 = (y - 1) * maxx;
 			int index1 = y * maxx;
-			int index2 = (y + 1) * maxx;
+			int index0 = index1 - maxx;
+			int index2 = index1 + maxx;
+			final boolean isInnerY = (y > 0 && y < ylimit);
 			for (int x = 0; x < maxx; x++)
 			{
-				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
-				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
-
 				reset();
 				add(data[index1]);
 
 				// Sweep neighbourhood
-				if (isInnerXY)
+				if (isInnerY && (x > 0 && x < xlimit))
 				{
 					add(data[index0 - 1]);
 					add(data[index0]);
@@ -477,20 +466,21 @@ public class MedianFilter implements Cloneable
 				}
 				else
 				{
-					for (int d = offset.length; d-- > 0;)
+					for (int d = xoffset.length; d-- > 0;)
 					{
 						// Get the pixel with boundary checking
 						int yy = y + yoffset[d];
 						int xx = x + xoffset[d];
-						if (xx <= 0)
-							xx = 0;
-						else if (xx >= maxx)
-							xx = maxx - 1;
-						if (yy <= 0)
+						if (yy < 0)
 							yy = 0;
-						else if (yy >= maxy)
-							yy = maxy - 1;
-						add(data[xx + yy * maxx]);
+						else if (yy == maxy)
+							yy = ylimit;
+						if (xx < 0)
+							add(data[yy * maxx]);
+						else if (xx == maxx)
+							add(data[xlimit + yy * maxx]);
+						else
+							add(data[xx + yy * maxx]);
 					}
 				}
 				newData[index1] = getMedian();
@@ -502,6 +492,171 @@ public class MedianFilter implements Cloneable
 
 		// Copy back
 		System.arraycopy(newData, 0, data, 0, length);
+	}
+
+	/**
+	 * Compute the rolling median within a 2n+1 size rolling around each point.
+	 * Only pixels with a full block are processed. Pixels within border regions
+	 * are unchanged.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param n
+	 *            The rolling size
+	 */
+	public void rollingMedianInternal(float[] data, final int maxx, final int maxy, final int n)
+	{
+		if (n == 1)
+			rollingMedian3x3Internal(data, maxx, maxy);
+		else
+			rollingMedianNxNInternal(data, maxx, maxy, n);
+	}
+
+	/**
+	 * Compute the rolling median within a 2n+1 size rolling around each point.
+	 * Only pixels with a full block are processed. Pixels within border regions
+	 * are unchanged.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param n
+	 *            The rolling size
+	 */
+	public void rollingMedianNxNInternal(float[] data, final int maxx, final int maxy, final int n)
+	{
+		final int blockSize = 2 * n + 1;
+		if (maxx < blockSize || maxy < blockSize)
+			return;
+
+		final int length = maxx * maxy;
+		float[] newData = floatBuffer(floatDataBuffer, length);
+
+		// Hold the pointers to the image data for nY rows 
+		final int[] p = new int[blockSize];
+		// Buffer to hold the initial region
+		final float[] values = new float[blockSize * blockSize];
+		for (int y = n; y < maxy - n; y++)
+		{
+			// Set up the pointers to the image data at x=0, y=?
+			int i = 0;
+			for (int yy = y - n; yy <= y + n; yy++)
+			{
+				p[i] = maxx * yy;
+				// zero the first column of the region
+				values[i++] = 0;
+			}
+
+			// Fill the initial region
+
+			for (int x = -n; x < n; x++)
+			{
+				for (int d = 0; d < p.length; d++)
+				{
+					values[i++] = data[p[d]++];
+				}
+			}
+
+			// Initialise the rolling window
+			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+
+			// For each position up to the limit, add the next column and increment
+			int index = y * maxx + n;
+			for (int x = n; x < maxx - n; x++)
+			{
+				for (int j = 0; j < p.length; j++)
+					window.add(data[p[j]++]);
+				newData[index++] = window.getMedian();
+			}
+		}
+
+		// Copy back
+		for (int y = n; y < maxy - n; y++)
+		{
+			int index = y * maxx + n;
+			for (int x = n; x < maxx - n; x++, index++)
+			{
+				data[index] = newData[index];
+			}
+		}
+	}
+
+	/**
+	 * Compute the rolling median within a 3x3 size rolling around each point.
+	 * Only pixels with a full block are processed. Pixels within border regions
+	 * are unchanged.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 */
+	public void rollingMedian3x3Internal(float[] data, final int maxx, final int maxy)
+	{
+		final int length = maxx * maxy;
+		float[] newData = floatBuffer(floatDataBuffer, length);
+
+		// Boundary control
+		final int xlimit = maxx - 1;
+		final int ylimit = maxy - 1;
+
+		// Buffer to hold the initial region
+		final float[] values = new float[9];
+		for (int y = 1; y < ylimit; y++)
+		{
+			int p1 = y * maxx;
+			int p0 = p1 - maxx;
+			int p2 = p1 + maxx;
+
+			int i = 0;
+			values[i++] = 0;
+			values[i++] = 0;
+			values[i++] = 0;
+			values[i++] = data[p0++];
+			values[i++] = data[p1++];
+			values[i++] = data[p2++];
+			values[i++] = data[p0++];
+			values[i++] = data[p1++];
+			values[i++] = data[p2++];
+
+			// Initialise the rolling window
+			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+
+			// For each position up to the limit, add the next column and increment
+			int index = p1 - 1;
+			for (int x = 1; x < xlimit; x++)
+			{
+				window.add(data[p0++]);
+				window.add(data[p1++]);
+				window.add(data[p2++]);
+				newData[index++] = window.getMedian();
+			}
+		}
+
+		// Copy back
+		for (int y = 1; y < ylimit; y++)
+		{
+			int index = y * maxx + 1;
+			for (int x = 1; x < xlimit; x++, index++)
+			{
+				data[index] = newData[index];
+			}
+		}
 	}
 
 	/**
@@ -550,28 +705,32 @@ public class MedianFilter implements Cloneable
 		final int ywidth = FastMath.min(n, maxy - 1);
 		final int xlimit = maxx - xwidth - 1;
 
-		int kernelX = (2 * xwidth + 1);
-		int kernelY = (2 * ywidth + 1);
+		// The size of the region 
+		final int nX = (2 * xwidth + 1);
+		final int nY = (2 * ywidth + 1);
 
-		// Hold the pointers to the image data
-		int[] p = new int[kernelY];
-		float[] values = new float[kernelX * kernelY];
+		// Hold the pointers to the image data for nY rows 
+		final int[] p = new int[nY];
+		// Buffer to hold the initial region
+		final float[] values = new float[nX * nY];
 		int index = 0;
 		for (int y = 0; y < maxy; y++)
 		{
 			// Set up the pointers to the image data at x=0, y=?
 			int i = 0;
-			for (int yy = y - ywidth, d = 0; yy <= y + ywidth; yy++)
+			for (int yy = y - ywidth; yy <= y + ywidth; yy++)
 			{
 				if (yy < 0)
-					p[d] = 0;
-				if (yy >= maxy)
-					p[d] = length - maxx;
+					p[i] = 0;
+				else if (yy >= maxy)
+					p[i] = length - maxx;
 				else
-					p[d] = maxx * yy;
-				// zero the first column
+					p[i] = maxx * yy;
+				// zero the first column of the region
 				values[i++] = 0;
 			}
+
+			// Fill the initial region
 
 			// The columns below x==0 use x=0
 			for (int x = -xwidth; x < 0; x++)
@@ -582,12 +741,9 @@ public class MedianFilter implements Cloneable
 			// The remaining columns increment. Do not include x==xwidth
 			for (int x = 0; x < xwidth; x++)
 			{
-				boolean increment = x < xlimit;
 				for (int d = 0; d < p.length; d++)
 				{
-					values[i++] = data[p[d]];
-					if (increment)
-						p[d]++;
+					values[i++] = data[p[d]++];
 				}
 			}
 
@@ -601,7 +757,7 @@ public class MedianFilter implements Cloneable
 					window.add(data[p[j]++]);
 				newData[index++] = window.getMedian();
 			}
-			
+
 			// Add the last column but do not increment
 			for (int x = xlimit; x < maxx; x++)
 			{
@@ -629,7 +785,64 @@ public class MedianFilter implements Cloneable
 	 */
 	public void rollingMedian3x3(float[] data, final int maxx, final int maxy)
 	{
-		throw new RuntimeException("Not implemented");
+		final int length = maxx * maxy;
+		float[] newData = floatBuffer(floatDataBuffer, length);
+
+		// Boundary control
+		final int xlimit = maxx - 2;
+		final int ylimit = maxy - 1;
+
+		// Buffer to hold the initial region
+		final float[] values = new float[9];
+		int index = 0;
+		for (int y = 0; y < maxy; y++)
+		{
+			// Set up the pointers to the image data at x=0, y=?
+			int i = 0;
+			int p1 = maxx * y;
+			int p0 = (y > 0) ? p1 - maxx : p1;
+			int p2 = (y < ylimit) ? p1 + maxx : p1;
+
+			values[i++] = 0;
+			values[i++] = 0;
+			values[i++] = 0;
+
+			// Fill the initial region
+
+			// The columns below x==0 use x=0
+			values[i++] = data[p0];
+			values[i++] = data[p1];
+			values[i++] = data[p2];
+
+			// The remaining columns increment. Do not include x==xwidth
+			values[i++] = data[p0++];
+			values[i++] = data[p1++];
+			values[i++] = data[p2++];
+
+			// Initialise the rolling window
+			MedianWindowDLLFloat window = new MedianWindowDLLFloat(values);
+
+			// For each position up to the limit, add the next column and increment
+			for (int x = 0; x < xlimit; x++)
+			{
+				window.add(data[p0++]);
+				window.add(data[p1++]);
+				window.add(data[p2++]);
+				newData[index++] = window.getMedian();
+			}
+
+			// Add the last column but do not increment
+			for (int x = xlimit; x < maxx; x++)
+			{
+				window.add(data[p0]);
+				window.add(data[p1]);
+				window.add(data[p2]);
+				newData[index++] = window.getMedian();
+			}
+		}
+
+		// Copy back
+		System.arraycopy(newData, 0, data, 0, length);
 	}
 
 	/*

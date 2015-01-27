@@ -96,7 +96,7 @@ public class AverageDataProcessor extends DataProcessor
 		else
 		{
 			// Check upper limits are safe
-			int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
+			final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
 
 			if (tmpSmooth <= getBorder())
 			{

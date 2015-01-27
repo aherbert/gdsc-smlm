@@ -477,16 +477,15 @@ public class SumFilter implements Cloneable
 	 */
 	public void blockSumNxNInternal(float[] data, final int maxx, final int maxy, final int n)
 	{
+		final int blockSize = 2 * n + 1;
+		if (maxx < blockSize || maxy < blockSize)
+			return;
+
 		float[] newData = floatBuffer(data.length);
 
-		// Boundary control
-		int xwidth = FastMath.min(n, maxx - 1);
-		int ywidth = FastMath.min(n, maxy - 1);
-
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int d = 0;
-		for (int y = -ywidth; y <= ywidth; y++)
-			for (int x = -xwidth; x <= xwidth; x++)
+		int[] offset = new int[blockSize * blockSize - 1];
+		for (int y = -n, d = 0; y <= n; y++)
+			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
 				{
 					offset[d] = maxx * y + x;
@@ -1614,16 +1613,15 @@ public class SumFilter implements Cloneable
 	 */
 	public void blockSumNxNInternal(int[] data, final int maxx, final int maxy, final int n)
 	{
+		final int blockSize = 2 * n + 1;
+		if (maxx < blockSize || maxy < blockSize)
+			return;
+
 		int[] newData = intBuffer(data.length);
 
-		// Boundary control
-		int xwidth = FastMath.min(n, maxx - 1);
-		int ywidth = FastMath.min(n, maxy - 1);
-
-		int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
-		int d = 0;
-		for (int y = -ywidth; y <= ywidth; y++)
-			for (int x = -xwidth; x <= xwidth; x++)
+		int[] offset = new int[blockSize * blockSize - 1];
+		for (int y = -n, d = 0; y <= n; y++)
+			for (int x = -n; x <= n; x++)
 				if (x != 0 || y != 0)
 				{
 					offset[d] = maxx * y + x;
