@@ -200,7 +200,7 @@ public class MedianWindow
 
 			if (sortedScan)
 			{
-				// Method using direct search of the cached array
+				// Method using search of the cached array with sorted numbers to remove
 
 				// Extract numbers to remove
 				double[] dataToRemove = new double[position - cachePosition];

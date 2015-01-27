@@ -200,7 +200,7 @@ public class MedianWindowFloat
 
 			if (sortedScan)
 			{
-				// Method using direct search of the cached array
+				// Method using search of the cached array with sorted numbers to remove
 
 				// Extract numbers to remove
 				float[] dataToRemove = new float[position - cachePosition];
