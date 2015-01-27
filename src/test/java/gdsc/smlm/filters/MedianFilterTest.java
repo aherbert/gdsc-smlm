@@ -15,10 +15,10 @@ public class MedianFilterTest
 	private gdsc.smlm.utils.Random rand;
 
 	private boolean debug = false;
-	private int InternalITER3 = 500;
-	private int InternalITER = 50;
-	private int ITER3 = 200;
-	private int ITER = 20;
+	private int InternalITER3 = 200;
+	private int InternalITER = 20;
+	private int ITER3 = 100;
+	private int ITER = 10;
 
 	// TODO - The test data should be representative of the final use case
 	int[] primes = new int[] { 113, 97, 53, 29 };
@@ -420,9 +420,10 @@ public class MedianFilterTest
 	{
 		float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
-			data[i] = i;
+			//data[i] = i;
+			data[i] = rand.next();
 
-		rand.shuffle(data);
+		//rand.shuffle(data);
 
 		return data;
 	}
