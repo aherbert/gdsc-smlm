@@ -1546,6 +1546,7 @@ public class TraceMolecules implements PlugIn
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
+		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
@@ -1590,6 +1591,7 @@ public class TraceMolecules implements PlugIn
 
 		config.setDataFilter(gd.getNextChoiceIndex());
 		config.setSmooth(gd.getNextNumber());
+		config.setDifferenceFilter(gd.getNextBoolean());
 		config.setSearch(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());

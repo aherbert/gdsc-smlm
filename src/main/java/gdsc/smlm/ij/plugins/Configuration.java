@@ -65,6 +65,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	private TextField textInitialAngleD;
 	private Choice textDataFilter;
 	private TextField textSmooth;
+	private Checkbox textDifferenceFilter;
 	private TextField textSearch;
 	private TextField textFitting;
 	private Choice textFitSolver;
@@ -124,6 +125,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
+		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
@@ -180,6 +182,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			textInitialAngleD = numerics.get(n++);
 			textDataFilter = choices.get(ch++);
 			textSmooth = numerics.get(n++);
+			textDifferenceFilter = checkboxes.get(b++);
 			textSearch = numerics.get(n++);
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
@@ -243,6 +246,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		fitConfig.setInitialAngleD(gd.getNextNumber());
 		config.setDataFilter(gd.getNextChoiceIndex());
 		config.setSmooth(gd.getNextNumber());
+		config.setDifferenceFilter(gd.getNextBoolean());
 		config.setSearch(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 
@@ -404,6 +408,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				textInitialAngleD.setText("" + fitConfig.getInitialAngle());
 				textDataFilter.select(config.getDataFilter().ordinal());
 				textSmooth.setText("" + config.getSmooth());
+				textDifferenceFilter.setState(config.isDifferenceFilter());
 				textSearch.setText("" + config.getSearch());
 				textFitting.setText("" + config.getFitting());
 				textFitSolver.select(fitConfig.getFitSolver().ordinal());

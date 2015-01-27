@@ -79,8 +79,8 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 			config.setDifferenceFilter(differenceFilter);
 			if (differenceFilter)
 			{
-				config.setDataFilter(filter2);
-				config.setSmooth(smooth2);
+				config.setDataFilter2(filter2);
+				config.setSmooth2(smooth2);
 			}
 			SettingsManager.saveSettings(settings);
 			return DONE;
