@@ -140,7 +140,7 @@ public class MedianFilter implements Cloneable
 	public void blockMedian3x3Internal(float[] data, final int maxx, final int maxy)
 	{
 		float[] newData = floatBuffer(floatDataBuffer, data.length);
-		init(9, data[1 * maxx + 1]);
+		init(9, data[maxx + 1]);
 		// Boundary control
 		final int xlimit = maxx - 1;
 		final int ylimit = maxy - 1;
@@ -432,7 +432,7 @@ public class MedianFilter implements Cloneable
 	{
 		final int length = maxx * maxy;
 		float[] newData = floatBuffer(floatDataBuffer, length);
-		init(9, data[1 * maxx + 1]);
+		init(9, data[maxx + 1]);
 
 		// Boundary control
 		final int xlimit = maxx - 1;

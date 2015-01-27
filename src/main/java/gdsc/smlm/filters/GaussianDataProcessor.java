@@ -1,9 +1,9 @@
 package gdsc.smlm.filters;
 
+import gdsc.smlm.ij.utils.Utils;
+
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -19,43 +19,28 @@ import org.apache.commons.math3.util.FastMath;
  *---------------------------------------------------------------------------*/
 
 /**
- * Identifies candidate spots (local maxima) in an image. The image is smoothed with an median box filter.
+ * Identifies candidate spots (local maxima) in an image. The image is smoothed with a Gaussian filter.
  */
-public class MedianDataProcessor extends DataProcessor
+public class GaussianDataProcessor extends DataProcessor
 {
-	private final int smooth;
-	private MedianFilter filter = new MedianFilter();
+	private final double sigma;
+	private GaussianFilter filter;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param border
 	 *            The border to ignore for maxima
-	 * @param smooth
-	 *            The smoothing width to apply to the data
+	 * @param sigma
+	 *            The Gaussian standard deviation.
 	 * @throws IllegalArgumentException
 	 *             if smooth is below zero
 	 */
-	public MedianDataProcessor(int border, double smooth)
+	public GaussianDataProcessor(int border, double sigma)
 	{
 		super(border);
-		this.smooth = convert(smooth);
-	}
-
-	/**
-	 * Convert the smoothing parameter to the value which is used for the MedianFilter.
-	 * We only use int smoothing. Values below zero are set to zero.
-	 * 
-	 * @see MedianFilter
-	 * 
-	 * @param smooth
-	 * @return The adjusted value
-	 */
-	public static int convert(double smooth)
-	{
-		if (smooth < 0)
-			return 0;
-		return (int) smooth;
+		this.sigma = sigma;
+		filter = new GaussianFilter(0.02);
 	}
 
 	/**
@@ -68,37 +53,14 @@ public class MedianDataProcessor extends DataProcessor
 	public float[] process(float[] data, int width, int height)
 	{
 		float[] smoothData = data;
-		if (smooth > 0)
+		if (sigma > 0)
 		{
 			// Smoothing destructively modifies the data so create a copy
 			smoothData = Arrays.copyOf(data, width * height);
-
-			// Check upper limits are safe
-			final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
-
-			// JUnit speed tests show that the rolling median is faster on windows of n<=3
-			if (tmpSmooth <= 3)
-			{
-				if (tmpSmooth <= getBorder())
-				{
-					filter.rollingMedianInternal(smoothData, width, height, tmpSmooth);
-				}
-				else
-				{
-					filter.rollingMedian(smoothData, width, height, tmpSmooth);
-				}
-			}
+			if (GaussianFilter.getBorder(sigma) <= getBorder())
+				filter.convolveInternal(smoothData, width, height, sigma);
 			else
-			{
-				if (tmpSmooth <= getBorder())
-				{
-					filter.blockMedianInternal(smoothData, width, height, tmpSmooth);
-				}
-				else
-				{
-					filter.blockMedian(smoothData, width, height, tmpSmooth);
-				}
-			}
+				filter.convolve(smoothData, width, height, sigma);
 		}
 		return smoothData;
 	}
@@ -106,9 +68,9 @@ public class MedianDataProcessor extends DataProcessor
 	/**
 	 * @return the smoothing width
 	 */
-	public int getSmooth()
+	public double getSmooth()
 	{
-		return smooth;
+		return sigma;
 	}
 
 	/*
@@ -118,9 +80,9 @@ public class MedianDataProcessor extends DataProcessor
 	 */
 	public Object clone()
 	{
-		MedianDataProcessor f = (MedianDataProcessor) super.clone();
+		GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (MedianFilter) filter.clone();
+		f.filter = (GaussianFilter) filter.clone();
 		return f;
 	}
 
@@ -132,7 +94,7 @@ public class MedianDataProcessor extends DataProcessor
 	@Override
 	public String getName()
 	{
-		return "Median Filter";
+		return "Gaussian Filter";
 	}
 
 	/*
@@ -144,7 +106,8 @@ public class MedianDataProcessor extends DataProcessor
 	public List<String> getParameters()
 	{
 		List<String> list = super.getParameters();
-		list.add("smooth = " + smooth);
+		list.add("sigma = " + Utils.rounded(sigma));
+		list.add("width = " + Utils.rounded(filter.getHalfWidth(sigma)));
 		return list;
 	}
 }

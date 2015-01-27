@@ -16,6 +16,7 @@ package gdsc.smlm.engine;
 import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.DataProcessor;
 import gdsc.smlm.filters.DoublePassSpotFilter;
+import gdsc.smlm.filters.GaussianDataProcessor;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SinglePassSpotFilter;
@@ -282,6 +283,8 @@ public class FitEngine
 				return new MedianDataProcessor(border, parameter);
 				
 			case GAUSSIAN:
+				return new GaussianDataProcessor(border, parameter);
+				
 			default:
 				throw new RuntimeException("Not yet implemented: " + dataFilter.toString());
 		}

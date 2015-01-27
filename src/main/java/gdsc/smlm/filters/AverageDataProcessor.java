@@ -63,16 +63,6 @@ public class AverageDataProcessor extends DataProcessor
 		return (int) smooth;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
-	 */
-	public boolean isAbsoluteIntensity()
-	{
-		return true;
-	}
-
 	/**
 	 * @param data
 	 * @param width
@@ -82,29 +72,33 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public float[] process(float[] data, int width, int height)
 	{
-		// Smoothing destructively modifies the data so create a copy
-		float[] smoothData = Arrays.copyOf(data, width * height);
-
-		if (smooth < 1)
+		float[] smoothData = data;
+		if (smooth > 0)
 		{
-			// Use a weighted smoothing for less than 1 pixel box size
-			if (smooth <= getBorder())
-				filter.blockAverage3x3Internal(smoothData, width, height, (float) smooth);
-			else
-				filter.blockAverage3x3(smoothData, width, height, (float) smooth);
-		}
-		else
-		{
-			// Check upper limits are safe
-			final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
+			// Smoothing destructively modifies the data so create a copy
+			smoothData = Arrays.copyOf(data, width * height);
 
-			if (tmpSmooth <= getBorder())
+			if (smooth < 1)
 			{
-				filter.rollingBlockAverageInternal(smoothData, width, height, tmpSmooth);
+				// Use a weighted smoothing for less than 1 pixel box size
+				if (smooth <= getBorder())
+					filter.blockAverage3x3Internal(smoothData, width, height, (float) smooth);
+				else
+					filter.blockAverage3x3(smoothData, width, height, (float) smooth);
 			}
 			else
 			{
-				filter.rollingBlockAverage(smoothData, width, height, tmpSmooth);
+				// Check upper limits are safe
+				final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
+
+				if (tmpSmooth <= getBorder())
+				{
+					filter.rollingBlockAverageInternal(smoothData, width, height, tmpSmooth);
+				}
+				else
+				{
+					filter.rollingBlockAverage(smoothData, width, height, tmpSmooth);
+				}
 			}
 		}
 		return smoothData;
