@@ -5,7 +5,7 @@ import java.awt.Rectangle;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2015 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -504,7 +504,6 @@ public class GaussianFilter implements Cloneable
 			kernel[0][i] = (float) v;
 			rsum -= v;
 			kernel[1][i] = (float) rsum;
-			//IJ.log("k["+i+"]="+(float)v+" sum="+(float)rsum);
 		}
 		return kernel;
 	}
@@ -519,7 +518,6 @@ public class GaussianFilter implements Cloneable
 		try
 		{
 			GaussianFilter o = (GaussianFilter) super.clone();
-			o.kernel = null;
 			return o;
 		}
 		catch (CloneNotSupportedException e)
