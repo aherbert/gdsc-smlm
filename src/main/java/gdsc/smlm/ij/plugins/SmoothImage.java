@@ -13,11 +13,19 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.filters.AverageFilter;
-import gdsc.smlm.ij.settings.Constants;
+import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.filters.AverageDataProcessor;
+import gdsc.smlm.filters.DataProcessor;
+import gdsc.smlm.filters.DoublePassSpotFilter;
+import gdsc.smlm.filters.GaussianDataProcessor;
+import gdsc.smlm.filters.MaximaSpotFilter;
+import gdsc.smlm.filters.MedianDataProcessor;
+import gdsc.smlm.filters.SinglePassSpotFilter;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.Prefs;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
@@ -28,7 +36,6 @@ import ij.process.ImageProcessor;
 
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
-import java.util.Arrays;
 
 /**
  * Smooths the selected rectangular ROI using a mean filter.
@@ -36,22 +43,21 @@ import java.util.Arrays;
 public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 {
 	private final static String TITLE = "Smooth Image";
-	public static final String[] ALGORITHMS = { "Standard", "Striped", "Rolling block", "Standard internal",
-			"Striped internal", "Rolling block internal" };
-	public static final int STANDARD = 0;
-	public static final int STRIPED = 1;
-	public static final int ROLLING_BLOCK = 2;
-	public static final int STANDARD_INTERNAL = 3;
-	public static final int STRIPED_INTERNAL = 4;
-	public static final int ROLLING_BLOCK_INTERNAL = 5;
+	private static final String[] filterNames;
+	private static final DataFilter[] filters;
+	static
+	{
+		filters = DataFilter.values();
+		filterNames = SettingsManager.getNames((Object[]) filters);
+	}
 
-	private double boxSize = Prefs.get(Constants.boxSize, 1);
-	private double boxSize2 = Prefs.get(Constants.boxSize2, 0);
-	private int algorithm = (int) Prefs.get(Constants.algorithm, 1);
-	private boolean gaussian = Prefs.getBoolean("gdsc.fitting.boxSize", true);
+	private int filter1 = 0;
+	private double smooth1 = 1;
+	private boolean differenceFilter = false;
+	private int filter2 = 0;
+	private double smooth2 = 3;
 
 	private int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
-	private boolean is32bit = false;
 
 	/*
 	 * (non-Javadoc)
@@ -62,8 +68,21 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	{
 		if (arg.equals("final"))
 		{
-			imp.resetDisplayRange();
+			//imp.resetDisplayRange();
 			imp.updateAndDraw();
+			
+			// Save the settings
+			GlobalSettings settings = SettingsManager.loadSettings();
+			FitEngineConfiguration config = settings.getFitEngineConfiguration();
+			config.setDataFilter(filter1);
+			config.setSmooth(smooth1);
+			config.setDifferenceFilter(differenceFilter);
+			if (differenceFilter)
+			{
+				config.setDataFilter(filter2);
+				config.setSmooth(smooth2);
+			}
+			SettingsManager.saveSettings(settings);
 			return DONE;
 		}
 
@@ -73,7 +92,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 			return DONE;
 		}
 
-		is32bit = (imp.getBitDepth() == 32);
 		Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() != Roi.RECTANGLE)
 		{
@@ -95,16 +113,15 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		boxSize = Prefs.get(Constants.boxSize, 1);
-		boxSize2 = Prefs.get(Constants.boxSize2, 0);
-		algorithm = (int) Prefs.get(Constants.algorithm, 1);
+		GlobalSettings settings = SettingsManager.loadSettings();
+		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 
-		gd.addMessage("Smooth image:\n" + "- Within a 2n+1 box\n");
-		gd.addSlider("Box_size", 0.1, 5, boxSize);
-		if (is32bit)
-			gd.addSlider("Box_size2", 0, 15, boxSize2);
-		gd.addChoice("Algorithm", ALGORITHMS, ALGORITHMS[algorithm]);
-		gd.addCheckbox("Gaussian 3x3", gaussian);
+		gd.addMessage("Smooth image:");
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
+		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
+		gd.addChoice("Spot_filter2", filterNames, filterNames[config.getDataFilter2().ordinal()]);
+		gd.addSlider("Smoothing2", 1.5, 5, config.getSmooth2());
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
@@ -123,33 +140,15 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 */
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		boxSize = gd.getNextNumber();
-		if (is32bit)
-			boxSize2 = gd.getNextNumber();
-		if (gd.invalidNumber())
-			return false;
-		algorithm = gd.getNextChoiceIndex();
-		gaussian = gd.getNextBoolean();
-
-		// Check arguments
-		try
+		filter1 = gd.getNextChoiceIndex();
+		smooth1 = gd.getNextNumber();
+		if (differenceFilter = gd.getNextBoolean())
 		{
-			Parameters.isAboveZero("Box size", boxSize);
-			Parameters.isPositive("Box size2", boxSize2);
-		}
-		catch (IllegalArgumentException ex)
-		{
-			IJ.error(TITLE, ex.getMessage());
-			return false;
+			filter2 = gd.getNextChoiceIndex();
+			smooth2 = gd.getNextNumber();
 		}
 
-		Prefs.set(Constants.boxSize, boxSize);
-		if (is32bit)
-			Prefs.set(Constants.boxSize2, boxSize2);
-		Prefs.set(Constants.algorithm, algorithm);
-		Prefs.set("gdsc.fitting.boxSize", gaussian);
-
-		return true;
+		return !gd.invalidNumber();
 	}
 
 	/*
@@ -165,72 +164,49 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		FloatProcessor fp = ip.crop().toFloat(0, null);
 
 		float[] data = (float[]) fp.getPixels();
-		float[] data2 = null;
+
+		MaximaSpotFilter filter = createSpotFilter();
 		int width = fp.getWidth();
 		int height = fp.getHeight();
+		data = filter.preprocessData(data, width, height);
+		
+		//System.out.println(filter.getDescription());
 
-		if (is32bit && boxSize2 > boxSize)
-		{
-			data2 = Arrays.copyOf(data, data.length);
-			smooth(data2, width, height, boxSize2);
-			//new ij.ImagePlus("smoothImage2", new ij.process.FloatProcessor(width, height, data2, null)).show();
-		}
-
-		smooth(data, width, height, boxSize);
-		//new ij.ImagePlus("smoothImage", new ij.process.FloatProcessor(width, height, Arrays.copyOf(data, data.length),
-		//		null)).show();
-
-		if (data2 != null)
-		{
-			for (int i = 0; i < data.length; i++)
-				data[i] -= data2[i];
-		}
-
-		//new ImagePlus("smoothImageDiff", new FloatProcessor(width, height, data, null)).show();
-
-		for (int index = data.length; index-- > 0;)
-		{
-			ip.setf(bounds.x + index % width, bounds.y + index / width, data[index]);
-		}
-		ip.resetMinAndMax();
+		fp = new FloatProcessor(width, height, data); 
+		ip.insert(fp, bounds.x, bounds.y);
+		//ip.resetMinAndMax();
+		ip.setMinAndMax(fp.getMin(), fp.getMax());
 	}
 
-	private void smooth(float[] data, final int width, final int height, final double boxSize)
+	private MaximaSpotFilter createSpotFilter()
 	{
-		AverageFilter av = new AverageFilter();
-
-		if (boxSize <= 1)
+		DataProcessor processor1 = createDataProcessor(filter1, smooth1);
+		if (differenceFilter)
 		{
-			if (gaussian)
-				av.blockGaussian3x3(data, width, height);
-			else
-				av.blockAverage3x3(data, width, height, (float) boxSize);
+			DataProcessor processor2 = createDataProcessor(filter2, smooth2);
+			return new DoublePassSpotFilter(1, 0, processor1, processor2);
 		}
 		else
 		{
-			int iBoxSize = (int) boxSize;
-			switch (algorithm)
-			{
-				case ROLLING_BLOCK_INTERNAL:
-					av.rollingBlockAverageInternal(data, width, height, iBoxSize);
-					break;
-				case STRIPED_INTERNAL:
-					av.stripedBlockAverageInternal(data, width, height, iBoxSize);
-					break;
-				case STANDARD_INTERNAL:
-					av.blockAverageInternal(data, width, height, iBoxSize);
-					break;
-				case ROLLING_BLOCK:
-					av.rollingBlockAverage(data, width, height, iBoxSize);
-					break;
-				case STRIPED:
-					av.stripedBlockAverage(data, width, height, iBoxSize);
-					break;
-				case STANDARD:
-				default:
-					av.blockAverage(data, width, height, iBoxSize);
-					break;
-			}
+			return new SinglePassSpotFilter(1, 0, processor1);
+		}
+	}
+
+	private DataProcessor createDataProcessor(int dataFilter, double parameter)
+	{
+		switch (filters[dataFilter])
+		{
+			case MEAN:
+				return new AverageDataProcessor(0, parameter);
+
+			case MEDIAN:
+				return new MedianDataProcessor(0, parameter);
+
+			case GAUSSIAN:
+				return new GaussianDataProcessor(0, parameter);
+
+			default:
+				throw new RuntimeException("Not yet implemented: " + filters[dataFilter]);
 		}
 	}
 
