@@ -101,6 +101,14 @@ public class MatchResult
 	}
 
 	/**
+	 * @return the n
+	 */
+	public int getNumberActual()
+	{
+		return tp + fn;
+	}
+
+	/**
 	 * @return the tp
 	 */
 	public int getTruePositives()
