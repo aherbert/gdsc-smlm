@@ -22,18 +22,15 @@ package gdsc.smlm.results.match;
  */
 public class MatchResult
 {
-	private int n;
-	private int tp;
-	private int fp;
-	private int fn;
-	private double precision = 0;
-	private double recall = 0;
-	private double jaccard = 0;
-	private double rmsd = 0;
+	private final int tp;
+	private final int fp;
+	private final int fn;
+	private final double precision;
+	private final double recall;
+	private final double jaccard;
+	private final double rmsd;
 
 	/**
-	 * @param n
-	 *            The number of predictions
 	 * @param tp
 	 *            The number of true positives
 	 * @param fp
@@ -42,26 +39,27 @@ public class MatchResult
 	 *            The number of false negatives
 	 * @param rmsd The root mean squared distance between true positives
 	 */
-	public MatchResult(int n, int tp, int fp, int fn, double rmsd)
+	public MatchResult(int tp, int fp, int fn, double rmsd)
 	{
-		this.n = n;
 		this.tp = tp;
 		this.fp = fp;
 		this.fn = fn;
 		this.rmsd = rmsd;
 
 		if (tp + fp > 0)
-		{
 			precision = (double) tp / (tp + fp);
-		}
+		else
+			precision = 0;
+		
 		if (tp + fn > 0)
-		{
 			recall = (double) tp / (tp + fn);
-		}
+		else
+			recall = 0;
+		
 		if (tp + fp + fn > 0)
-		{
 			jaccard = (double) tp / (tp + fp + fn);
-		}
+		else
+			jaccard = 0;
 	}
 
 	/**
@@ -97,11 +95,11 @@ public class MatchResult
 	 */
 	public int getNumberPredicted()
 	{
-		return n;
+		return tp + fp;
 	}
 
 	/**
-	 * @return the n
+	 * @return the number of actual
 	 */
 	public int getNumberActual()
 	{

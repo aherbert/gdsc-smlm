@@ -90,12 +90,11 @@ public class MatchCalculator
 	{
 		dThreshold *= dThreshold; // We will use the squared distance
 
-		int predictedPointsLength = (predictedPoints != null) ? predictedPoints.length : 0;
-		int actualPointsLength = (actualPoints != null) ? actualPoints.length : 0;
+		final int predictedPointsLength = (predictedPoints != null) ? predictedPoints.length : 0;
+		final int actualPointsLength = (actualPoints != null) ? actualPoints.length : 0;
 
-		int n = predictedPointsLength;
 		int tp = 0; // true positives (actual with matched predicted point)
-		int fp = n; // false positives (actual with no matched predicted point)
+		int fp = predictedPointsLength; // false positives (actual with no matched predicted point)
 		int fn = actualPointsLength; // false negatives (predicted point with no actual point)
 		double rmsd = 0;
 
@@ -105,13 +104,13 @@ public class MatchCalculator
 				FP.addAll(asList(predictedPoints));
 			if (FN != null)
 				FN.addAll(asList(actualPoints));
-			return new MatchResult(n, tp, fp, fn, rmsd);
+			return new MatchResult(tp, fp, fn, rmsd);
 		}
 
 		// loop over the two arrays assigning the closest unassigned pair
-		boolean[] resultAssignment = new boolean[n];
+		boolean[] resultAssignment = new boolean[predictedPointsLength];
 		boolean[] roiAssignment = new boolean[fn];
-		ArrayList<Assignment> assignments = new ArrayList<Assignment>(n);
+		ArrayList<Assignment> assignments = new ArrayList<Assignment>(predictedPointsLength);
 
 		int[] falsePositives = null, falseNegatives = null;
 		if (FP != null)
@@ -145,7 +144,7 @@ public class MatchCalculator
 			assignments.clear();
 
 			// Process each result
-			for (int predictedId = n; predictedId-- > 0;)
+			for (int predictedId = predictedPointsLength; predictedId-- > 0;)
 			{
 				if (resultAssignment[predictedId])
 					continue; // Already assigned
@@ -271,7 +270,7 @@ public class MatchCalculator
 
 		if (tp > 0)
 			rmsd = Math.sqrt(rmsd / tp);
-		return new MatchResult(n, tp, fp, fn, rmsd);
+		return new MatchResult(tp, fp, fn, rmsd);
 	}
 
 	private static Collection<Coordinate> asList(Coordinate[] points)
@@ -345,12 +344,11 @@ public class MatchCalculator
 	{
 		dThreshold *= dThreshold; // We will use the squared distance
 
-		int predictedPointsLength = (predictedPoints != null) ? predictedPoints.length : 0;
-		int actualPointsLength = (actualPoints != null) ? actualPoints.length : 0;
+		final int predictedPointsLength = (predictedPoints != null) ? predictedPoints.length : 0;
+		final int actualPointsLength = (actualPoints != null) ? actualPoints.length : 0;
 
-		int n = predictedPointsLength;
 		int tp = 0; // true positives (actual with matched predicted point)
-		int fp = n; // false positives (actual with no matched predicted point)
+		int fp = predictedPointsLength; // false positives (actual with no matched predicted point)
 		int fn = actualPointsLength; // false negatives (predicted point with no actual point)
 		double rmsd = 0;
 
@@ -360,13 +358,13 @@ public class MatchCalculator
 				FP.addAll(asList(predictedPoints));
 			if (FN != null)
 				FN.addAll(asList(actualPoints));
-			return new MatchResult(n, tp, fp, fn, rmsd);
+			return new MatchResult(tp, fp, fn, rmsd);
 		}
 
 		// loop over the two arrays assigning the closest unassigned pair
-		boolean[] resultAssignment = new boolean[n];
+		boolean[] resultAssignment = new boolean[predictedPointsLength];
 		boolean[] roiAssignment = new boolean[fn];
-		ArrayList<Assignment> assignments = new ArrayList<Assignment>(n);
+		ArrayList<Assignment> assignments = new ArrayList<Assignment>(predictedPointsLength);
 
 		int[] falsePositives = null, falseNegatives = null;
 		if (FP != null)
@@ -402,7 +400,7 @@ public class MatchCalculator
 			assignments.clear();
 
 			// Process each result
-			for (int predictedId = n; predictedId-- > 0;)
+			for (int predictedId = predictedPointsLength; predictedId-- > 0;)
 			{
 				if (resultAssignment[predictedId])
 					continue; // Already assigned
@@ -535,7 +533,7 @@ public class MatchCalculator
 
 		if (tp > 0)
 			rmsd = Math.sqrt(rmsd / tp);
-		return new MatchResult(n, tp, fp, fn, rmsd);
+		return new MatchResult(tp, fp, fn, rmsd);
 	}
 
 	private static int[] ascendingArray(int length)
@@ -576,12 +574,11 @@ public class MatchCalculator
 		final float floatDThreshold = (float) dThreshold;
 		final double dThreshold2 = dThreshold * dThreshold;
 
-		int predictedPointsLength = (predictedPoints != null) ? predictedPoints.length : 0;
-		int actualPointsLength = (actualPoints != null) ? actualPoints.length : 0;
+		final int predictedPointsLength = (predictedPoints != null) ? predictedPoints.length : 0;
+		final int actualPointsLength = (actualPoints != null) ? actualPoints.length : 0;
 
-		int n = predictedPointsLength;
 		int tp = 0; // true positives (actual with matched predicted point)
-		int fp = n; // false positives (actual with no matched predicted point)
+		int fp = predictedPointsLength; // false positives (actual with no matched predicted point)
 		int fn = actualPointsLength; // false negatives (predicted point with no actual point)
 		double score = 0;
 
@@ -591,13 +588,13 @@ public class MatchCalculator
 				FP.addAll(asList(predictedPoints));
 			if (FN != null)
 				FN.addAll(asList(actualPoints));
-			return new MatchResult(n, tp, fp, fn, score);
+			return new MatchResult(tp, fp, fn, score);
 		}
 
 		// loop over the two arrays assigning the closest unassigned pair
-		boolean[] resultAssignment = new boolean[n];
+		boolean[] resultAssignment = new boolean[predictedPointsLength];
 		boolean[] roiAssignment = new boolean[fn];
-		ArrayList<Assignment> assignments = new ArrayList<Assignment>(n);
+		ArrayList<Assignment> assignments = new ArrayList<Assignment>(predictedPointsLength);
 
 		int[] falsePositives = null, falseNegatives = null;
 		if (FP != null)
@@ -762,15 +759,15 @@ public class MatchCalculator
 					FN.add(actualPoints[i]);
 			}
 		}
-		
+
 		// Every time-point has the chance to contribute to the score.
 		// Normalise score by the maximum of the number of actual/predicted time points.
 		// This penalises too few or too many predictions
 		int p1 = countTimePoints(actualPoints);
 		int p2 = countTimePoints(predictedPoints);
 		score /= FastMath.max(p1, p2);
-		
-		return new MatchResult(n, tp, fp, fn, score);
+
+		return new MatchResult(tp, fp, fn, score);
 	}
 
 	private static int countTimePoints(Pulse[] actualPoints)

@@ -227,9 +227,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final int id;
 		/**
-		 * Number of frames in the simulated image
+		 * Number of molecules in the simulated image
 		 */
-		final int frames;
+		final int molecules;
 		/**
 		 * Gaussian standard deviation
 		 */
@@ -279,11 +279,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double b2;
 
-		public SimulationParameters(int frames, double s, double a, double minSignal, double maxSignal, double depth,
+		public SimulationParameters(int molecules, double s, double a, double minSignal, double maxSignal, double depth,
 				boolean fixedDepth, double bias, boolean emCCD, double gain, double readNoise, double b, double b2)
 		{
 			id = nextId++;
-			this.frames = frames;
+			this.molecules = molecules;
 			this.s = s;
 			this.a = a;
 			this.minSignal = minSignal;
@@ -508,8 +508,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Only put spots in the central part of the image
 				double border = settings.size / 4.0;
 				dist = createUniformDistribution(border);
-
-				saveSimulationParameters(nextN.length);
 			}
 			else
 			{
@@ -524,8 +522,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
 				n = (int) FastMath.max(1, Math.round(areaInUm * settings.density));
 				dist = createUniformDistribution(0);
-
-				saveSimulationParameters(settings.particles);
 			}
 
 			RandomGenerator random = null;
@@ -574,6 +570,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					id++;
 				}
 			}
+			
+			if (!benchmarkMode)
+				saveSimulationParameters(id);
 		}
 		else
 		{
@@ -780,9 +779,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	/**
 	 * Output the theoretical limits for fitting a Gaussian and store the benchmark settings
 	 * 
-	 * @param frames
+	 * @param particles
 	 */
-	private void saveSimulationParameters(int frames)
+	private void saveSimulationParameters(int particles)
 	{
 		final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
 
@@ -809,7 +808,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Store read noise in ADUs
 		readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
-		simulationParameters = new SimulationParameters(frames, sd, settings.pixelPitch, settings.photonsPerSecond,
+		simulationParameters = new SimulationParameters(particles, sd, settings.pixelPitch, settings.photonsPerSecond,
 				settings.photonsPerSecondMaximum, settings.depth, settings.fixedDepth, settings.bias, emCCD, totalGain,
 				readNoise, settings.background, b2);
 	}

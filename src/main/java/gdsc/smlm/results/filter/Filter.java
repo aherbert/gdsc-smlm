@@ -77,12 +77,11 @@ public abstract class Filter implements Comparable<Filter>
 	 */
 	public MatchResult score(List<MemoryPeakResults> resultsList)
 	{
-		int n = 0, tp = 0, fp = 0, fn = 0;
+		int tp = 0, fp = 0, fn = 0;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
 
-			n += peakResults.size();
 			for (PeakResult peak : peakResults.getResults())
 			{
 				boolean isTrue = peak.origValue != 0;
@@ -99,7 +98,7 @@ public abstract class Filter implements Comparable<Filter>
 				// Default: true negative
 			}
 		}
-		return new MatchResult(n, tp, fp, fn, 0);
+		return new MatchResult(tp, fp, fn, 0);
 	}
 
 	/**

@@ -158,7 +158,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2, double dThreshold,
 			int increments, double delta)
 	{
-		int n = 0, tp = 0, fp = 0, fn = 0;
+		int tp = 0, fp = 0, fn = 0;
 		//double rmsd = 0;
 
 		boolean requirePairs = showPairs || saveClassifications;
@@ -202,7 +202,6 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			MatchResult result = MatchCalculator.analyseResults2D(actual, predicted, maxDistance, TP, FP, FN, matches);
 
 			// Aggregate
-			n += result.getNumberPredicted();
 			tp += result.getTruePositives();
 			fp += result.getFalsePositives();
 			fn += result.getFalseNegatives();
@@ -305,7 +304,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			int fp2 = fp + tp - tp2;
 			int fn2 = fn + tp - tp2;
 
-			MatchResult result = new MatchResult(n, tp2, fp2, fn2, (tp2 > 0) ? Math.sqrt(rms / tp2) : 0);
+			MatchResult result = new MatchResult(tp2, fp2, fn2, (tp2 > 0) ? Math.sqrt(rms / tp2) : 0);
 
 			MatchResult idResult1 = null, idResult2 = null;
 			if (doIdAnalysis)
@@ -327,9 +326,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				// Create Data plugin with actual fluorophore Ids.
 				// => Only the recall will be valid: tp / (tp + fn)
 				if (doIdAnalysis1)
-					idResult1 = new MatchResult(id1.size(), matchId1.size(), 0, id1.size() - matchId1.size(), 0);
+					idResult1 = new MatchResult(matchId1.size(), 0, id1.size() - matchId1.size(), 0);
 				if (doIdAnalysis2)
-					idResult2 = new MatchResult(id2.size(), matchId2.size(), 0, id2.size() - matchId2.size(), 0);
+					idResult2 = new MatchResult(matchId2.size(), 0, id2.size() - matchId2.size(), 0);
 			}
 
 			addResult(inputOption1, inputOption2, distanceThreshold, result, idResult1, idResult2);
@@ -375,11 +374,13 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param results
 	 * @return
 	 */
-	private HashMap<Integer, ArrayList<Coordinate>> getCoordinates(List<PeakResult> results)
+	public static HashMap<Integer, ArrayList<Coordinate>> getCoordinates(List<PeakResult> results)
 	{
 		HashMap<Integer, ArrayList<Coordinate>> coords = new HashMap<Integer, ArrayList<Coordinate>>();
 		if (results.size() > 0)
 		{
+			ResultsMatchCalculator instance = new ResultsMatchCalculator();
+			
 			// Do not use HashMap directly to build the coords object since there 
 			// will be many calls to getEntry(). Instead sort the results and use 
 			// a new list for each time point
@@ -400,7 +401,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				final float x = p.getXPosition();
 				final float y = p.getYPosition();
 				for (int t = p.peak - minT, i = p.getEndFrame() - p.peak + 1; i-- > 0; t++)
-					tmpCoords.get(t).add(new PeakResultPoint(t + minT, x, y, p));
+					tmpCoords.get(t).add(instance.new PeakResultPoint(t + minT, x, y, p));
 			}
 
 			// Put in the map
@@ -444,7 +445,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param t
 	 * @return
 	 */
-	private Coordinate[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
+	public static Coordinate[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
 	{
 		if (coords.containsKey(t))
 		{
