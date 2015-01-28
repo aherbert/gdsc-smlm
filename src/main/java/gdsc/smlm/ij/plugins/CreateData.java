@@ -1548,7 +1548,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setBounds(new Rectangle(0, 0, settings.size, settings.size));
 		MemoryPeakResults.addResults(results);
 
-		if (benchmarkMode)
+		if (benchmarkMode && benchmarkParameters != null)
 			benchmarkParameters.setPhotons(results);
 
 		List<LocalisationModel> localisations = toLocalisations(localisationSets);
