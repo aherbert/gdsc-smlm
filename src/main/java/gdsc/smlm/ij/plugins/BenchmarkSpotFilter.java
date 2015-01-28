@@ -57,13 +57,14 @@ public class BenchmarkSpotFilter implements PlugIn
 		filterNames = SettingsManager.getNames((Object[]) filters);
 	}
 
+	private static int search = 2;
+	private static int border = 2;
 	private static int dataFilter = 0;
 	private static double smoothing = 1;
 	private static boolean differenceFilter = false;
 	private static int dataFilter2 = 0;
 	private static double smoothing2 = 3;
 	private static double distance = 1.5;
-	private static double top = 10;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
 	private long time = 0;
@@ -285,13 +286,14 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addMessage(String.format("Fits the benchmark image created by CreateData plugin.\nPSF width = %s",
 				Utils.rounded(simulationParameters.s / simulationParameters.a)));
 
+		gd.addSlider("Search", 0, 5, search);
+		gd.addSlider("Border", 0, 5, border);
 		gd.addChoice("Spot_filter", filterNames, filterNames[dataFilter]);
 		gd.addSlider("Smoothing", 0, 4.5, smoothing);
 		gd.addCheckbox("Difference_filter", differenceFilter);
 		gd.addChoice("Spot_filter2", filterNames, filterNames[dataFilter2]);
 		gd.addSlider("Smoothing2", 1.5, 6, smoothing2);
 		gd.addSlider("Match_distance", 1, 3, distance);
-		gd.addNumericField("Top_N", top, 0);
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
@@ -300,28 +302,29 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
+		search = Math.abs((int) gd.getNextNumber());
+		border = Math.abs((int) gd.getNextNumber());
 		dataFilter = gd.getNextChoiceIndex();
 		smoothing = Math.abs(gd.getNextNumber());
 		differenceFilter = gd.getNextBoolean();
 		dataFilter2 = gd.getNextChoiceIndex();
 		smoothing2 = Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
-		top = Math.abs((int) gd.getNextNumber());
 		if (extraOptions)
 			debug = sDebug = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
 
-		if (top < 1)
-			top = 1;
+		if (search < 1)
+			search = 1;
 
 		return true;
 	}
 
 	private void run()
 	{
-		MaximaSpotFilter spotFilter = FitEngine.createSpotFilter(1, 0, filters[dataFilter], smoothing,
+		MaximaSpotFilter spotFilter = FitEngine.createSpotFilter(search, border, filters[dataFilter], smoothing,
 				differenceFilter, filters[dataFilter2], smoothing2);
 
 		// Extract all the results in memory into a list per frame
@@ -431,6 +434,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
 		sb.append(Utils.rounded(signal / Math.sqrt(simulationParameters.b2))).append("\t");
+		sb.append(search).append("\t");
+		sb.append(border).append("\t");
 		sb.append(filterNames[dataFilter]).append("\t");
 		sb.append(Utils.rounded(smoothing)).append("\t");
 		if (differenceFilter)
@@ -500,7 +505,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private String createHeader(boolean extraRecall)
 	{
 		StringBuilder sb = new StringBuilder(
-				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\tFilter\tParam\tFilter2\tParam2\td\t");
+				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\t");
+		sb.append("Search\tBorder\tFilter\tParam\tFilter2\tParam2\td\t");
 		sb.append("N\tTP\tFP\tRecall\tPrecision\tJaccard\tTP\tFP\tRecall\tPrecision\tJaccard\tTime (ms)");
 		return sb.toString();
 	}
