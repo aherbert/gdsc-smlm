@@ -14,14 +14,9 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.filters.AverageDataProcessor;
-import gdsc.smlm.filters.DataProcessor;
-import gdsc.smlm.filters.DoublePassSpotFilter;
-import gdsc.smlm.filters.GaussianDataProcessor;
 import gdsc.smlm.filters.MaximaSpotFilter;
-import gdsc.smlm.filters.MedianDataProcessor;
-import gdsc.smlm.filters.SinglePassSpotFilter;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
@@ -70,7 +65,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		{
 			//imp.resetDisplayRange();
 			imp.updateAndDraw();
-			
+
 			// Save the settings
 			GlobalSettings settings = SettingsManager.loadSettings();
 			FitEngineConfiguration config = settings.getFitEngineConfiguration();
@@ -118,10 +113,10 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 
 		gd.addMessage("Smooth image:");
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
+		gd.addSlider("Smoothing", 0, 4.5, config.getSmooth());
 		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
 		gd.addChoice("Spot_filter2", filterNames, filterNames[config.getDataFilter2().ordinal()]);
-		gd.addSlider("Smoothing2", 1.5, 5, config.getSmooth2());
+		gd.addSlider("Smoothing2", 1.5, 6, config.getSmooth2());
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
@@ -169,10 +164,10 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		int width = fp.getWidth();
 		int height = fp.getHeight();
 		data = filter.preprocessData(data, width, height);
-		
+
 		//System.out.println(filter.getDescription());
 
-		fp = new FloatProcessor(width, height, data); 
+		fp = new FloatProcessor(width, height, data);
 		ip.insert(fp, bounds.x, bounds.y);
 		//ip.resetMinAndMax();
 		ip.setMinAndMax(fp.getMin(), fp.getMax());
@@ -180,34 +175,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 
 	private MaximaSpotFilter createSpotFilter()
 	{
-		DataProcessor processor1 = createDataProcessor(filter1, smooth1);
-		if (differenceFilter)
-		{
-			DataProcessor processor2 = createDataProcessor(filter2, smooth2);
-			return new DoublePassSpotFilter(1, 0, processor1, processor2);
-		}
-		else
-		{
-			return new SinglePassSpotFilter(1, 0, processor1);
-		}
-	}
-
-	private DataProcessor createDataProcessor(int dataFilter, double parameter)
-	{
-		switch (filters[dataFilter])
-		{
-			case MEAN:
-				return new AverageDataProcessor(0, parameter);
-
-			case MEDIAN:
-				return new MedianDataProcessor(0, parameter);
-
-			case GAUSSIAN:
-				return new GaussianDataProcessor(0, parameter);
-
-			default:
-				throw new RuntimeException("Not yet implemented: " + filters[dataFilter]);
-		}
+		return FitEngine.createSpotFilter(1, 0, filters[filter1], smooth1, differenceFilter, filters[filter2], smooth2);
 	}
 
 	/*

@@ -25,7 +25,8 @@ public abstract class DataProcessor implements Cloneable
 	private final int border;
 
 	/**
-	 * @param border The border that can be ignored
+	 * @param border
+	 *            The border that can be ignored
 	 */
 	public DataProcessor(int border)
 	{
@@ -92,4 +93,11 @@ public abstract class DataProcessor implements Cloneable
 		list.add("border = " + border);
 		return list;
 	}
+
+	/**
+	 * Get the width spread of data used to process each position
+	 * 
+	 * @return The spread
+	 */
+	public abstract double getSpread();
 }

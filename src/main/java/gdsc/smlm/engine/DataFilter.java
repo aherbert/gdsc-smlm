@@ -19,15 +19,19 @@ package gdsc.smlm.engine;
 public enum DataFilter
 {
 	/**
-	 * Use a mean within a specified box area
+	 * Use a mean within a specified area
 	 */
 	MEAN("Mean"),
+	/**
+	 * Use a mean within a specified box area. The box has integer size.
+	 */
+	BLOCK_MEAN("Block mean"),
 	/**
 	 * Use a Gaussian with a specified radius
 	 */
 	GAUSSIAN("Gaussian"),
 	/**
-	 * Use a median within a specified box area
+	 * Use a median within a specified box area. The box has integer size.
 	 */
 	MEDIAN("Median");
 

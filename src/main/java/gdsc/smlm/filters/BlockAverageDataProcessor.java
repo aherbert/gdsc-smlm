@@ -1,5 +1,7 @@
 package gdsc.smlm.filters;
 
+import gdsc.smlm.ij.utils.Utils;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,12 +21,12 @@ import org.apache.commons.math3.util.FastMath;
  *---------------------------------------------------------------------------*/
 
 /**
- * Identifies candidate spots (local maxima) in an image. The image is smoothed with an median box filter.
+ * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter.
  */
-public class MedianDataProcessor extends DataProcessor
+public class BlockAverageDataProcessor extends DataProcessor
 {
-	private final int smooth;
-	private MedianFilter filter = new MedianFilter();
+	private final double smooth;
+	private AverageFilter filter = new AverageFilter();
 
 	/**
 	 * Constructor
@@ -34,22 +36,22 @@ public class MedianDataProcessor extends DataProcessor
 	 * @param smooth
 	 *            The smoothing width to apply to the data
 	 */
-	public MedianDataProcessor(int border, double smooth)
+	public BlockAverageDataProcessor(int border, double smooth)
 	{
 		super(border);
 		this.smooth = convert(smooth);
 	}
 
 	/**
-	 * Convert the smoothing parameter to the value which is used for the MedianFilter.
+	 * Convert the smoothing parameter to the value which is used for the AverageFilter.
 	 * We only use int smoothing. Values below zero are set to zero.
 	 * 
-	 * @see MedianFilter
+	 * @see AverageFilter
 	 * 
 	 * @param smooth
 	 * @return The adjusted value
 	 */
-	public static int convert(double smooth)
+	public static double convert(double smooth)
 	{
 		if (smooth < 0)
 			return 0;
@@ -74,28 +76,13 @@ public class MedianDataProcessor extends DataProcessor
 			// Check upper limits are safe
 			final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
 
-			// JUnit speed tests show that the rolling median is faster on windows of n<=3
-			if (tmpSmooth <= 3)
+			if (tmpSmooth <= getBorder())
 			{
-				if (tmpSmooth <= getBorder())
-				{
-					filter.rollingMedianInternal(smoothData, width, height, tmpSmooth);
-				}
-				else
-				{
-					filter.rollingMedian(smoothData, width, height, tmpSmooth);
-				}
+				filter.rollingBlockAverageInternal(smoothData, width, height, tmpSmooth);
 			}
 			else
 			{
-				if (tmpSmooth <= getBorder())
-				{
-					filter.blockMedianInternal(smoothData, width, height, tmpSmooth);
-				}
-				else
-				{
-					filter.blockMedian(smoothData, width, height, tmpSmooth);
-				}
+				filter.rollingBlockAverage(smoothData, width, height, tmpSmooth);
 			}
 		}
 		return smoothData;
@@ -104,7 +91,7 @@ public class MedianDataProcessor extends DataProcessor
 	/**
 	 * @return the smoothing width
 	 */
-	public int getSmooth()
+	public double getSmooth()
 	{
 		return smooth;
 	}
@@ -116,9 +103,9 @@ public class MedianDataProcessor extends DataProcessor
 	 */
 	public Object clone()
 	{
-		MedianDataProcessor f = (MedianDataProcessor) super.clone();
+		BlockAverageDataProcessor f = (BlockAverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (MedianFilter) filter.clone();
+		f.filter = (AverageFilter) filter.clone();
 		return f;
 	}
 
@@ -130,7 +117,7 @@ public class MedianDataProcessor extends DataProcessor
 	@Override
 	public String getName()
 	{
-		return "Median Filter";
+		return "Block Average Filter";
 	}
 
 	/*
@@ -142,7 +129,7 @@ public class MedianDataProcessor extends DataProcessor
 	public List<String> getParameters()
 	{
 		List<String> list = super.getParameters();
-		list.add("smooth = " + smooth);
+		list.add("smooth = " + Utils.rounded(smooth));
 		return list;
 	}
 

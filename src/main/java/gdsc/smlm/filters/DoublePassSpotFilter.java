@@ -45,6 +45,9 @@ public class DoublePassSpotFilter extends MaximaSpotFilter
 			throw new IllegalArgumentException("Processor 1 is null");
 		if (processor2 == null)
 			throw new IllegalArgumentException("Processor 2 is null");
+		// TODO : This is a simple protection from invalid difference-of-smoothing. It could be improved.
+		if (processor2.getSpread() < processor1.getSpread())
+			throw new IllegalArgumentException("Processor 2 acts on a smaller spread of data than processor 1");
 		this.processor1 = processor1;
 		this.processor2 = processor2;
 	}

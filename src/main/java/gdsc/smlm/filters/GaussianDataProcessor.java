@@ -34,15 +34,26 @@ public class GaussianDataProcessor extends DataProcessor
 	 * @param smooth
 	 *            The distance into neighbouring pixels to extend. The resulting standard deviation can be found using
 	 *            {@link #getSigma()}
-	 * @throws IllegalArgumentException
-	 *             if smooth is below zero
 	 */
 	public GaussianDataProcessor(int border, double smooth)
 	{
 		super(border);
-		// Make the 3 SD reach the desired smoothing distance. We add 0.5 pixels to always cover the target pixel. 		
-		this.sigma = (smooth + 0.5) / 3;
+		this.sigma = getSigma(smooth);
 		filter = new GaussianFilter(0.02);
+	}
+
+	/**
+	 * Get the Gaussian standard deviation for the desired smoothing distance.
+	 * Make the 3 SD reach the desired smoothing distance. We add 0.5 pixels to always cover the target pixel.
+	 * 
+	 * @return the Gaussian standard deviation for the desired smoothing distance.
+	 */
+	public static double getSigma(double smooth)
+	{
+		if (smooth < 0)
+			return (0.5 - smooth) / 3;
+		else
+			return (0.5 + smooth) / 3;
 	}
 
 	/**
@@ -111,5 +122,16 @@ public class GaussianDataProcessor extends DataProcessor
 		list.add("sigma = " + Utils.rounded(sigma));
 		list.add("width = " + Utils.rounded(filter.getHalfWidth(sigma)));
 		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#getSpread()
+	 */
+	@Override
+	public double getSpread()
+	{
+		return 6 * sigma;
 	}
 }

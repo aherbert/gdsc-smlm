@@ -5,8 +5,6 @@ import gdsc.smlm.ij.utils.Utils;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math3.util.FastMath;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -27,7 +25,7 @@ import org.apache.commons.math3.util.FastMath;
 public class AverageDataProcessor extends DataProcessor
 {
 	private final double smooth;
-	private AverageFilter filter = new AverageFilter();
+	private AreaAverageFilter filter = new AreaAverageFilter();
 
 	/**
 	 * Constructor
@@ -36,8 +34,6 @@ public class AverageDataProcessor extends DataProcessor
 	 *            The border to ignore for maxima
 	 * @param smooth
 	 *            The smoothing width to apply to the data
-	 * @throws IllegalArgumentException
-	 *             if smooth is below zero
 	 */
 	public AverageDataProcessor(int border, double smooth)
 	{
@@ -46,10 +42,8 @@ public class AverageDataProcessor extends DataProcessor
 	}
 
 	/**
-	 * Convert the smoothing parameter to the value which is used for the AverageFilter.
-	 * We only use int smoothing above 1, all values below 1 use the input value. Values below zero are set to zero.
-	 * 
-	 * @see AverageFilter
+	 * Convert the smoothing parameter to the value which is used for the AreaAverageFilter.
+	 * Values below zero are set to zero.
 	 * 
 	 * @param smooth
 	 * @return The adjusted value
@@ -58,9 +52,7 @@ public class AverageDataProcessor extends DataProcessor
 	{
 		if (smooth < 0)
 			return 0;
-		if (smooth < 1)
-			return smooth;
-		return (int) smooth;
+		return smooth;
 	}
 
 	/**
@@ -78,28 +70,10 @@ public class AverageDataProcessor extends DataProcessor
 			// Smoothing destructively modifies the data so create a copy
 			smoothData = Arrays.copyOf(data, width * height);
 
-			if (smooth < 1)
-			{
-				// Use a weighted smoothing for less than 1 pixel box size
-				if (smooth <= getBorder())
-					filter.blockAverage3x3Internal(smoothData, width, height, (float) smooth);
-				else
-					filter.blockAverage3x3(smoothData, width, height, (float) smooth);
-			}
+			if (smooth <= getBorder())
+				filter.areaAverageInternal(smoothData, width, height, smooth);
 			else
-			{
-				// Check upper limits are safe
-				final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
-
-				if (tmpSmooth <= getBorder())
-				{
-					filter.rollingBlockAverageInternal(smoothData, width, height, tmpSmooth);
-				}
-				else
-				{
-					filter.rollingBlockAverage(smoothData, width, height, tmpSmooth);
-				}
-			}
+				filter.areaAverage(smoothData, width, height, smooth);
 		}
 		return smoothData;
 	}
@@ -121,7 +95,7 @@ public class AverageDataProcessor extends DataProcessor
 	{
 		AverageDataProcessor f = (AverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (AverageFilter) filter.clone();
+		f.filter = (AreaAverageFilter) filter.clone();
 		return f;
 	}
 
@@ -147,5 +121,16 @@ public class AverageDataProcessor extends DataProcessor
 		List<String> list = super.getParameters();
 		list.add("smooth = " + Utils.rounded(smooth));
 		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#getSpread()
+	 */
+	@Override
+	public double getSpread()
+	{
+		return 2 * smooth + 1;
 	}
 }

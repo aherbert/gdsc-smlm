@@ -14,6 +14,7 @@ package gdsc.smlm.engine;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.filters.AverageDataProcessor;
+import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.DataProcessor;
 import gdsc.smlm.filters.DoublePassSpotFilter;
 import gdsc.smlm.filters.GaussianDataProcessor;
@@ -231,11 +232,12 @@ public class FitEngine
 		smooth = getSmoothingWindow(config.getSmooth(), hwhmMin);
 		smooth2 = getSmoothingWindow(config.getSmooth2(), hwhmMin);
 
-		if (smooth2 <= smooth)
-		{
-			// Cannot perform difference of smoothing
-			smooth2 = 0;
-		}
+		// Removed this check now that there are different data filters
+		//if (smooth2 <= smooth)
+		//{
+		//	// Cannot perform difference of smoothing
+		//	smooth2 = 0;
+		//}
 
 		// Border where peaks are ignored
 		border = (int) Math.floor(config.getSmooth() * hwhmMax);
@@ -255,36 +257,67 @@ public class FitEngine
 
 	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)
 	{
-		return AverageDataProcessor.convert(smoothingParameter * hwhmMin);
+		//return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
+		return smoothingParameter * hwhmMin;
 	}
 
 	private void createSpotFilter(FitEngineConfiguration config)
 	{
-		DataProcessor processor1 = createDataProcessor(config.getDataFilter(), smooth);
-		if (config.isDifferenceFilter())
+		spotFilter = createSpotFilter(search, border, config.getDataFilter(), smooth, config.isDifferenceFilter(),
+				config.getDataFilter2(), smooth2);
+	}
+
+	/**
+	 * Create the spot filter that will be used in the fitting
+	 * 
+	 * @param search
+	 * @param border
+	 * @param dataFilter
+	 * @param smooth
+	 * @param differenceFilter
+	 * @param dataFilter2
+	 * @param smooth2
+	 * @return the spot filter
+	 */
+	public static MaximaSpotFilter createSpotFilter(int search, int border, DataFilter dataFilter, double smooth,
+			boolean differenceFilter, DataFilter dataFilter2, double smooth2)
+	{
+		DataProcessor processor1 = createDataProcessor(border, dataFilter, smooth);
+		if (differenceFilter)
 		{
-			DataProcessor processor2 = createDataProcessor(config.getDataFilter2(), smooth2);
-			spotFilter = new DoublePassSpotFilter(search, border, processor1, processor2);
+			DataProcessor processor2 = createDataProcessor(border, dataFilter2, smooth2);
+			return new DoublePassSpotFilter(search, border, processor1, processor2);
 		}
 		else
 		{
-			spotFilter = new SinglePassSpotFilter(search, border, processor1);
+			return new SinglePassSpotFilter(search, border, processor1);
 		}
 	}
 
-	private DataProcessor createDataProcessor(DataFilter dataFilter, double parameter)
+	/**
+	 * Create a data processor for the spot filter
+	 * 
+	 * @param border
+	 * @param dataFilter
+	 * @param parameter
+	 * @return the data processor
+	 */
+	public static DataProcessor createDataProcessor(int border, DataFilter dataFilter, double parameter)
 	{
 		switch (dataFilter)
 		{
 			case MEAN:
 				return new AverageDataProcessor(border, parameter);
 
+			case BLOCK_MEAN:
+				return new BlockAverageDataProcessor(border, parameter);
+
 			case MEDIAN:
 				return new MedianDataProcessor(border, parameter);
-				
+
 			case GAUSSIAN:
 				return new GaussianDataProcessor(border, parameter);
-				
+
 			default:
 				throw new RuntimeException("Not yet implemented: " + dataFilter.toString());
 		}
