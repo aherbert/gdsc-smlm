@@ -588,10 +588,24 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		IJ.showProgress(1.0);
 		if (time >= 0)
 		{
-			results.end();
 			if (silent)
+			{
+				results.end();
 				return;
-
+			}
+			
+			// Check if we are sorting
+			IJ.showStatus("Finalising results ...");
+			for (PeakResults r : results.toArray())
+				if (r instanceof MemoryPeakResults)
+				{
+					if (((MemoryPeakResults) r).isSortAfterEnd());
+					IJ.showStatus("Sorting " + r.size() + " results ...");
+					break;
+				}
+			
+			results.end();
+			
 			String textTime = Utils.timeToString(time / 1000000.0);
 
 			int size = getSize();
