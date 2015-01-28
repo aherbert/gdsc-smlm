@@ -217,6 +217,88 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean poissonNoise = true;
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
 
+	// Store the parameters for the last simulation for spot data
+	public static class SimulationParameters
+	{
+		private static int nextId = 1;
+
+		/**
+		 * The parameter set identifier
+		 */
+		final int id;
+		/**
+		 * Number of frames in the simulated image
+		 */
+		final int frames;
+		/**
+		 * Gaussian standard deviation
+		 */
+		final double s;
+		/**
+		 * Pixel pitch in nm
+		 */
+		final double a;
+		/**
+		 * The min number of photons per frame
+		 */
+		final double minSignal;
+		/**
+		 * The max number of photons per frame
+		 */
+		final double maxSignal;
+		/**
+		 * The z-position depth
+		 */
+		final double depth;
+		/**
+		 * True if the depth is fixed
+		 */
+		final boolean fixedDepth;
+		/**
+		 * The camera bias
+		 */
+		final double bias;
+		/**
+		 * True if EM-gain was modelled
+		 */
+		final boolean emCCD;
+		/**
+		 * Total gain
+		 */
+		final double gain;
+		/**
+		 * Read noise in ADUs
+		 */
+		final double readNoise;
+		/**
+		 * Background
+		 */
+		final double b;
+		/**
+		 * Background noise in photons per pixel (used in the precision calculations)
+		 */
+		final double b2;
+
+		public SimulationParameters(int frames, double s, double a, double minSignal, double maxSignal, double depth,
+				boolean fixedDepth, double bias, boolean emCCD, double gain, double readNoise, double b, double b2)
+		{
+			id = nextId++;
+			this.frames = frames;
+			this.s = s;
+			this.a = a;
+			this.minSignal = minSignal;
+			this.maxSignal = maxSignal;
+			this.depth = depth;
+			this.fixedDepth = fixedDepth;
+			this.bias = bias;
+			this.emCCD = emCCD;
+			this.gain = gain;
+			this.readNoise = readNoise;
+			this.b = b;
+			this.b2 = b2;
+		}
+	}
+
 	// Store the parameters for the last benchmark
 	public static class BenchmarkParameters
 	{
@@ -360,6 +442,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	static BenchmarkParameters benchmarkParameters = null;
+	static SimulationParameters simulationParameters = null;
 
 	/*
 	 * (non-Javadoc)
@@ -388,10 +471,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (simpleMode || benchmarkMode || spotMode)
 		{
 			if (!showSimpleDialog())
-			{
 				return;
-			}
 			benchmarkParameters = null;
+			simulationParameters = null;
 
 			settings.exposureTime = 1000; // 1 second frames
 
@@ -426,6 +508,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Only put spots in the central part of the image
 				double border = settings.size / 4.0;
 				dist = createUniformDistribution(border);
+
+				saveSimulationParameters(nextN.length);
 			}
 			else
 			{
@@ -440,6 +524,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
 				n = (int) FastMath.max(1, Math.round(areaInUm * settings.density));
 				dist = createUniformDistribution(0);
+
+				saveSimulationParameters(settings.particles);
 			}
 
 			RandomGenerator random = null;
@@ -491,9 +577,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
-			benchmarkParameters = null;
 			if (!showDialog())
 				return;
+			benchmarkParameters = null;
+			simulationParameters = null;
 
 			// ---------------
 			// FULL SIMULATION
@@ -688,6 +775,43 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
 					settings.background, b2, lowerN, lowerP, lowerMLP);
 		}
+	}
+
+	/**
+	 * Output the theoretical limits for fitting a Gaussian and store the benchmark settings
+	 * 
+	 * @param frames
+	 */
+	private void saveSimulationParameters(int frames)
+	{
+		final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
+
+		// Background is in photons
+		double backgroundVariance = settings.background;
+		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
+		// so this is "double-counting" the EM-CCD.  
+		//if (settings.getEmGain() > 1)
+		//	backgroundVariance *= 2;
+
+		// Read noise is in electrons. Convert to Photons
+		double readNoise = settings.readNoise / totalGain;
+		if (settings.getCameraGain() != 0)
+			readNoise *= settings.getCameraGain();
+
+		final double readVariance = readNoise * readNoise;
+
+		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
+		// is equal to the total variance at the pixel.
+		final double b2 = backgroundVariance + readVariance;
+
+		boolean emCCD = settings.getEmGain() > 1;
+		double sd = getPsfSD() * settings.pixelPitch;
+
+		// Store read noise in ADUs
+		readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
+		simulationParameters = new SimulationParameters(frames, sd, settings.pixelPitch, settings.photonsPerSecond,
+				settings.photonsPerSecondMaximum, settings.depth, settings.fixedDepth, settings.bias, emCCD, totalGain,
+				readNoise, settings.background, b2);
 	}
 
 	/**
