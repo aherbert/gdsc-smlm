@@ -162,7 +162,7 @@ public class MatchCalculator
 
 					if (dMatrix != null)
 					{
-						if (dMatrix[predictedId][actualId] < d2Min)
+						if (dMatrix[predictedId][actualId] <= d2Min)
 						{
 							d2Min = dMatrix[predictedId][actualId];
 							targetId = actualId;
@@ -175,14 +175,14 @@ public class MatchCalculator
 						// Calculate in steps for increased speed (allows early exit)
 						float dx = actualPoint.getX() - x;
 						dx *= dx;
-						if (dx < d2Min)
+						if (dx <= d2Min)
 						{
 							float dy = actualPoint.getY() - y;
 							dy *= dy;
-							if (dy < d2Min)
+							if (dy <= d2Min)
 							{
 								final float d2 = dx + dy;
-								if (d2 < d2Min)
+								if (d2 <= d2Min)
 								{
 									d2Min = d2;
 									targetId = actualId;
@@ -419,7 +419,7 @@ public class MatchCalculator
 
 					if (dMatrix != null)
 					{
-						if (dMatrix[predictedId][actualId] < d2Min)
+						if (dMatrix[predictedId][actualId] <= d2Min)
 						{
 							d2Min = dMatrix[predictedId][actualId];
 							targetId = actualId;
@@ -432,18 +432,18 @@ public class MatchCalculator
 						// Calculate in steps for increased speed (allows early exit)
 						float dx = actualPoint.getX() - x;
 						dx *= dx;
-						if (dx < d2Min)
+						if (dx <= d2Min)
 						{
 							float dy = actualPoint.getY() - y;
 							dy *= dy;
-							if (dy < d2Min)
+							if (dy <= d2Min)
 							{
 								float dz = actualPoint.getZ() - z;
 								dz *= dz;
-								if (dz < d2Min)
+								if (dz <= d2Min)
 								{
 									final float d2 = dx + dy + dz;
-									if (d2 < d2Min)
+									if (d2 <= d2Min)
 									{
 										d2Min = d2;
 										targetId = actualId;
