@@ -488,7 +488,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[] r = new double[allSpots.size() + 1];
 		double[] p = new double[r.length];
 		double[] j = new double[r.length];
-		double[] f = new double[r.length];
 		int[] truePositives = new int[r.length];
 		int[] falsePositives = new int[r.length];
 		double[] rank = new double[r.length];
@@ -509,7 +508,6 @@ public class BenchmarkSpotFilter implements PlugIn
 			r[i] = (double) tp / n;
 			p[i] = (double) tp / (tp + fp);
 			j[i] = (double) tp / (fp + n);
-			f[i] = MatchResult.calculateFScore(p[i], r[i], 1);
 			truePositives[i] = tp;
 			falsePositives[i] = fp;
 			rank[i] = i;
@@ -542,12 +540,10 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.addPoints(rank, r, Plot.LINE);
 			plot.setColor(Color.black);
 			plot.addPoints(rank, j, Plot.LINE);
-			plot.setColor(Color.yellow);
-			plot.addPoints(rank, f, Plot.LINE);
 			plot.setColor(Color.magenta);
-			plot.drawLine(rank[index], 0, rank[index], Maths.max(p[index], r[index], j[index], f[index]));
+			plot.drawLine(rank[index], 0, rank[index], Maths.max(p[index], r[index], j[index]));
 			plot.setColor(Color.black);
-			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, F-1=Yellow");
+			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black");
 
 			PlotWindow pw = Utils.display(title, plot);
 
