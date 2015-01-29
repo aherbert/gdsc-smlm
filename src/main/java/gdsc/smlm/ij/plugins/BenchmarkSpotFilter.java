@@ -25,15 +25,20 @@ import gdsc.smlm.results.match.BasePoint;
 import gdsc.smlm.results.match.Coordinate;
 import gdsc.smlm.results.match.MatchCalculator;
 import gdsc.smlm.results.match.MatchResult;
+import gdsc.smlm.utils.Maths;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
+import java.awt.Color;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,6 +70,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static int dataFilter2 = 0;
 	private static double smoothing2 = 3;
 	private static double distance = 1.5;
+	private static double recallFraction = 98;
+	private static boolean showPlot = true;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
 	private long time = 0;
@@ -283,8 +290,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage(String.format("Fits the benchmark image created by CreateData plugin.\nPSF width = %s",
-				Utils.rounded(simulationParameters.s / simulationParameters.a)));
+		gd.addMessage(String
+				.format("Finds spots in the benchmark image created by CreateData plugin.\nPSF width = %s\n \nConfigure the spot filter:",
+						Utils.rounded(simulationParameters.s / simulationParameters.a)));
 
 		gd.addSlider("Search", 0, 5, search);
 		gd.addSlider("Border", 0, 5, border);
@@ -293,7 +301,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addCheckbox("Difference_filter", differenceFilter);
 		gd.addChoice("Spot_filter2", filterNames, filterNames[dataFilter2]);
 		gd.addSlider("Smoothing2", 1.5, 6, smoothing2);
+		gd.addMessage("Scoring options:");
 		gd.addSlider("Match_distance", 1, 3, distance);
+		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
+		gd.addCheckbox("Show_plots", showPlot);
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
@@ -310,6 +321,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		dataFilter2 = gd.getNextChoiceIndex();
 		smoothing2 = Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
+		recallFraction = Math.abs(gd.getNextNumber());
+		showPlot = gd.getNextBoolean();
 		if (extraOptions)
 			debug = sDebug = gd.getNextBoolean();
 
@@ -328,8 +341,8 @@ public class BenchmarkSpotFilter implements PlugIn
 				differenceFilter, filters[dataFilter2], smoothing2);
 
 		// Extract all the results in memory into a list per frame
-		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator.getCoordinates(results
-				.getResults(), true);
+		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator.getCoordinates(
+				results.getResults(), true);
 
 		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
 
@@ -425,8 +438,9 @@ public class BenchmarkSpotFilter implements PlugIn
 			fn += result.result.getFalseNegatives();
 			allSpots.addAll(Arrays.asList(result.spots));
 		}
-		final int molecules = tp + fn;
-		
+		MatchResult allResult = new MatchResult(tp, fp, fn, 0);
+		final int n = allResult.getNumberActual();
+
 		StringBuilder sb = new StringBuilder();
 
 		double signal = (simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
@@ -435,9 +449,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(imp.getStackSize()).append("\t");
 		sb.append(imp.getWidth()).append("\t");
 		sb.append(imp.getHeight()).append("\t");
-		sb.append(molecules).append("\t");
-		double density = ((double) molecules / imp.getStackSize()) /
-				(imp.getWidth() * imp.getHeight()) / (simulationParameters.a * simulationParameters.a / 1e6);
+		sb.append(n).append("\t");
+		double density = ((double) n / imp.getStackSize()) / (imp.getWidth() * imp.getHeight()) /
+				(simulationParameters.a * simulationParameters.a / 1e6);
 		sb.append(Utils.rounded(density)).append("\t");
 		sb.append(Utils.rounded(signal)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
@@ -449,6 +463,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
 		sb.append(Utils.rounded(signal / Math.sqrt(simulationParameters.b2))).append("\t");
+		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
 		sb.append(search).append("\t");
 		sb.append(border).append("\t");
 		sb.append(filterNames[dataFilter]).append("\t");
@@ -463,28 +478,96 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(distance)).append("\t");
 
 		// Add the results
-		
-		addResult(sb, new MatchResult(tp, fp, fn, 0));
+
+		addResult(sb, allResult);
 
 		// Rank the scored spots by intensity
 		Collections.sort(allSpots);
-		Collections.reverse(allSpots);
 
-		// Output the match results when there are no more true positives
-		int i = 0;
-		while (i < allSpots.size() && !allSpots.get(i).match)
-			i++;
-		tp = fp = 0; // fn will be the same
-		while (i < allSpots.size())
+		// Produce Recall, Precision, Jaccard for each cut of the spot candidates
+		double[] r = new double[allSpots.size() + 1];
+		double[] p = new double[r.length];
+		double[] j = new double[r.length];
+		double[] f = new double[r.length];
+		int[] truePositives = new int[r.length];
+		int[] falsePositives = new int[r.length];
+		double[] rank = new double[r.length];
+		// Note: fn = n - tp
+		fn = n;
+		tp = fp = 0;
+		int i = 1;
+		p[0] = 1;
+		for (ScoredSpot s : allSpots)
 		{
-			if (allSpots.get(i).match)
+			if (s.match)
+			{
 				tp++;
+				fn--;
+			}
 			else
 				fp++;
+			r[i] = (double) tp / n;
+			p[i] = (double) tp / (tp + fp);
+			j[i] = (double) tp / (fp + n);
+			f[i] = MatchResult.calculateFScore(p[i], r[i], 1);
+			truePositives[i] = tp;
+			falsePositives[i] = fp;
+			rank[i] = i;
 			i++;
 		}
-		addResult(sb, new MatchResult(tp, fp, fn, 0));
+
+		// Output the match results when the recall achieves the fraction of the maximum.
+		final double target = r[r.length - 1] * recallFraction / 100;
+		int index = 0;
+		while (index < r.length && r[index] < target)
+		{
+			index++;
+		}
+		addResult(sb, new MatchResult(truePositives[index], falsePositives[index], allResult.getNumberActual() -
+				truePositives[index], 0));
 		sb.append(Utils.rounded(time / 1e6));
+
+		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
+		final double auc = prArea(truePositives, falsePositives, p, allResult.getNumberActual());
+		sb.append("\t").append(Utils.rounded(auc));
+		
+		if (showPlot)
+		{
+			String title = TITLE + " Performance";
+			Plot plot = new Plot(title, "Spot Rank", "");
+			plot.setLimits(0, rank.length, 0, 1.05);
+			plot.setColor(Color.blue);
+			plot.addPoints(rank, p, Plot.LINE);
+			plot.setColor(Color.red);
+			plot.addPoints(rank, r, Plot.LINE);
+			plot.setColor(Color.black);
+			plot.addPoints(rank, j, Plot.LINE);
+			plot.setColor(Color.yellow);
+			plot.addPoints(rank, f, Plot.LINE);
+			plot.setColor(Color.magenta);
+			plot.drawLine(rank[index], 0, rank[index], Maths.max(p[index], r[index], j[index], f[index]));
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, F-1=Yellow");
+
+			PlotWindow pw = Utils.display(title, plot);
+
+			title = TITLE + " Precision-Recall";
+			plot = new Plot(title, "Recall", "Precision");
+			plot.setLimits(0, 1, 0, 1);
+			plot.setColor(Color.red);
+			plot.addPoints(r, p, Plot.LINE);
+			plot.drawLine(r[r.length-1], p[r.length-1], r[r.length-1], 0);
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc));
+			PlotWindow pw2 = Utils.display(title, plot);
+			if (Utils.isNewWindow())
+			{
+				Point point = pw.getLocation();
+				point.x = pw.getLocation().x;
+				point.y += pw.getHeight();
+				pw2.setLocation(point);
+			}
+		}
 
 		summaryTable.append(sb.toString());
 	}
@@ -510,11 +593,67 @@ public class BenchmarkSpotFilter implements PlugIn
 	private String createHeader(boolean extraRecall)
 	{
 		StringBuilder sb = new StringBuilder(
-				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\t");
+				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
 		sb.append("Search\tBorder\tFilter\tParam\tFilter2\tParam2\td\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
-		sb.append("Time (ms)");
+		sb.append("Time (ms)\t");
+		sb.append("AUC");
 		return sb.toString();
+	}
+
+	/**
+	 * Calculates an estimate of the area under the PR curve. (The
+	 * curve is defined by {@link #prPoints()}.) The area is an
+	 * underestimate of the area under the actual PR curve.
+	 * <p>
+	 * This code was extracted from mloss.roc.Curve.
+	 * 
+	 * @see https://github.com/kboyd/Roc
+	 *
+	 * @return Area under the PR curve
+	 */
+	public static double prArea(int[] truePositiveCounts, int[] falsePositiveCounts, double[] precision,
+			int totalPositives)
+	{
+		double area = 0.0;
+		int posCount, prevPosCount;
+		double base, height, prevHeight;
+		for (int countIndex = 1; countIndex < truePositiveCounts.length; countIndex++)
+		{
+			// There are 3 cases:
+			// 1. Positive count increased: trapezoid between current
+			//    height and previous height.  (This case handles the
+			//    first point and it just so happens both heights are
+			//    the same.)
+			// 2. Negative count increased: height decreased and there
+			//    is no area
+			// 3. Positive and negative counts increased: rectangle at
+			//    current height (to lower-bound curve)
+
+			// Only calculate an area if the positives have increased
+			posCount = truePositiveCounts[countIndex];
+			prevPosCount = truePositiveCounts[countIndex - 1];
+			if (posCount > prevPosCount)
+			{
+				base = (double) (posCount - prevPosCount);
+				height = precision[countIndex];
+				if (falsePositiveCounts[countIndex] > // Neg counts
+				falsePositiveCounts[countIndex - 1])
+				{
+					// Rectangle
+					area += base * height;
+				}
+				else
+				{
+					// Trapezoid
+					prevHeight = precision[countIndex - 1];
+					area += base * (prevHeight + height) * 0.5;
+				}
+			}
+		}
+		// The number of positives was factored out of all the base
+		// computations.  Put it back in and return.
+		return area / (double) totalPositives;
 	}
 }
