@@ -526,9 +526,15 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(time / 1e6));
 
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
-		final double auc = prArea(truePositives, falsePositives, p, allResult.getNumberActual());
-		sb.append("\t").append(Utils.rounded(auc));
+		final double auc = auc(p, r, 0);
+		final double auc2 = auc(p, r, r[r.length-1] * 0.5);
+
+		// TODO - Add code to compute the AUC using the adjusted precision curve
+		// which used the maximum precision for recall >= r
 		
+		sb.append("\t").append(Utils.rounded(auc));
+		sb.append("\t").append(Utils.rounded(auc2));
+
 		if (showPlot)
 		{
 			String title = TITLE + " Performance";
@@ -552,7 +558,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.setLimits(0, 1, 0, 1);
 			plot.setColor(Color.red);
 			plot.addPoints(r, p, Plot.LINE);
-			plot.drawLine(r[r.length-1], p[r.length-1], r[r.length-1], 0);
+			plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc));
 			PlotWindow pw2 = Utils.display(title, plot);
@@ -594,62 +600,63 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");
-		sb.append("AUC");
+		sb.append("AUC\tAUC2");
 		return sb.toString();
 	}
 
 	/**
-	 * Calculates an estimate of the area under the PR curve. (The
-	 * curve is defined by {@link #prPoints()}.) The area is an
-	 * underestimate of the area under the actual PR curve.
+	 * Calculates an estimate of the area under the precision-recall curve.
 	 * <p>
-	 * This code was extracted from mloss.roc.Curve.
-	 * 
-	 * @see https://github.com/kboyd/Roc
+	 * The estimate is computed using integration above the recall limit. Below the limit a simple linear interpolation
+	 * is used. If no recall values are above the limit then the full integration is performed.
 	 *
+	 * @param precision
+	 * @param recall
+	 * @param recallLimit
+	 *            Set to 0 to compute the full area.
 	 * @return Area under the PR curve
 	 */
-	public static double prArea(int[] truePositiveCounts, int[] falsePositiveCounts, double[] precision,
-			int totalPositives)
+	public static double auc(double[] precision, double[] recall, double recallLimit)
 	{
 		double area = 0.0;
-		int posCount, prevPosCount;
-		double base, height, prevHeight;
-		for (int countIndex = 1; countIndex < truePositiveCounts.length; countIndex++)
+		int k;
+		
+		if (recallLimit > 0)
 		{
-			// There are 3 cases:
-			// 1. Positive count increased: trapezoid between current
-			//    height and previous height.  (This case handles the
-			//    first point and it just so happens both heights are
-			//    the same.)
-			// 2. Negative count increased: height decreased and there
-			//    is no area
-			// 3. Positive and negative counts increased: rectangle at
-			//    current height (to lower-bound curve)
-
-			// Only calculate an area if the positives have increased
-			posCount = truePositiveCounts[countIndex];
-			prevPosCount = truePositiveCounts[countIndex - 1];
-			if (posCount > prevPosCount)
-			{
-				base = (double) (posCount - prevPosCount);
-				height = precision[countIndex];
-				if (falsePositiveCounts[countIndex] > // Neg counts
-				falsePositiveCounts[countIndex - 1])
-				{
-					// Rectangle
-					area += base * height;
-				}
-				else
-				{
-					// Trapezoid
-					prevHeight = precision[countIndex - 1];
-					area += base * (prevHeight + height) * 0.5;
-				}
-			}
+			// Move from high to low recall and find the first point below the limit
+    		k = recall.length - 1;
+    		while (k > 0 && recall[k] > recallLimit)
+    			k--;
+    
+    		if (k > 0)
+    		{
+    			// Find the first point where precision was not 1
+    			int kk=0;
+    			while (precision[kk+1]==1)
+    				kk++;
+    
+    			// Full precision of 1 up to point kk
+    			area += (recall[kk] - recall[0]);
+    			
+    			// Interpolate from precision at kk to k
+    			area += (precision[k] + precision[kk]) * 0.5 * (recall[k] - recall[kk]);
+    			k++;
+    		}
 		}
-		// The number of positives was factored out of all the base
-		// computations.  Put it back in and return.
-		return area / (double) totalPositives;
+		else
+		{
+			// Complete integration
+			k = 1;
+		}
+
+		// Do the rest
+		double prevR = recall[k - 1];
+		for (; k < precision.length; k++)
+		{
+			final double delta = recall[k] - prevR;
+			area += precision[k] * delta;
+			prevR = recall[k];
+		}
+		return area;
 	}
 }
