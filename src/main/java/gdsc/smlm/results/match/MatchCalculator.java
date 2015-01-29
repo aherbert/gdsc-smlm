@@ -217,7 +217,7 @@ public class MatchCalculator
 					roiAssignment[closest.getTargetId()] = true;
 
 					// If within accuracy then classify as a match
-					if (closest.getDistance() < dThreshold)
+					if (closest.getDistance() <= dThreshold)
 					{
 						tp++;
 						fn--;
@@ -480,7 +480,7 @@ public class MatchCalculator
 					roiAssignment[closest.getTargetId()] = true;
 
 					// If within accuracy then classify as a match
-					if (closest.getDistance() < dThreshold)
+					if (closest.getDistance() <= dThreshold)
 					{
 						tp++;
 						fn--;
