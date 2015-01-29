@@ -521,7 +521,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Use the density to get the number per frame
 				final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
 				n = (int) FastMath.max(1, Math.round(areaInUm * settings.density));
-				dist = createUniformDistribution(0);
+				dist = createUniformDistributionWithPSFWidthBorder();
 			}
 
 			RandomGenerator random = null;
@@ -1059,7 +1059,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * Create distribution within an XY border
 	 * 
 	 * @param border
-	 * @param fixedDepth
 	 * @return
 	 */
 	private UniformDistribution createUniformDistribution(double border)

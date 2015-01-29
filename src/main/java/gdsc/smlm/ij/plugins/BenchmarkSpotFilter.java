@@ -138,7 +138,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.stack = stack;
 			this.spotFilter = (MaximaSpotFilter) spotFilter.clone();
 			this.actualCoordinates = actualCoordinates;
-			this.results = results;
+			this.results = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
 		}
 
 		/*
@@ -329,7 +329,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Extract all the results in memory into a list per frame
 		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator.getCoordinates(results
-				.getResults());
+				.getResults(), true);
 
 		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
 
@@ -388,7 +388,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		IJ.showStatus("Collecting results ...");
 
 		for (Worker w : workers)
+		{
 			time += w.time;
+			filterResults.putAll(w.results);
+		}
 
 		// Show a table of the results
 		summariseResults(filterResults);
@@ -412,6 +415,18 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		createTable();
 
+		// Create the overall match score
+		int tp = 0, fp = 0, fn = 0;
+		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
+		for (FilterResult result : filterResults.values())
+		{
+			tp += result.result.getTruePositives();
+			fp += result.result.getFalsePositives();
+			fn += result.result.getFalseNegatives();
+			allSpots.addAll(Arrays.asList(result.spots));
+		}
+		final int molecules = tp + fn;
+		
 		StringBuilder sb = new StringBuilder();
 
 		double signal = (simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
@@ -420,8 +435,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(imp.getStackSize()).append("\t");
 		sb.append(imp.getWidth()).append("\t");
 		sb.append(imp.getHeight()).append("\t");
-		sb.append(simulationParameters.molecules).append("\t");
-		double density = ((double) simulationParameters.molecules / imp.getStackSize()) /
+		sb.append(molecules).append("\t");
+		double density = ((double) molecules / imp.getStackSize()) /
 				(imp.getWidth() * imp.getHeight()) / (simulationParameters.a * simulationParameters.a / 1e6);
 		sb.append(Utils.rounded(density)).append("\t");
 		sb.append(Utils.rounded(signal)).append("\t");
@@ -447,18 +462,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			sb.append("-\t-\t");
 		sb.append(Utils.rounded(distance)).append("\t");
 
-		// Create the overall match score
-		int tp = 0, fp = 0, fn = 0;
-		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
-		for (FilterResult result : filterResults.values())
-		{
-			tp += result.result.getTruePositives();
-			fp += result.result.getFalsePositives();
-			fn += result.result.getFalseNegatives();
-			allSpots.addAll(Arrays.asList(result.spots));
-		}
-		// Add the number of actual points
-		sb.append(tp + fn).append("\t");
+		// Add the results
+		
 		addResult(sb, new MatchResult(tp, fp, fn, 0));
 
 		// Rank the scored spots by intensity
@@ -507,7 +512,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\t");
 		sb.append("Search\tBorder\tFilter\tParam\tFilter2\tParam2\td\t");
-		sb.append("N\tTP\tFP\tRecall\tPrecision\tJaccard\tTP\tFP\tRecall\tPrecision\tJaccard\tTime (ms)");
+		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
+		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
+		sb.append("Time (ms)");
 		return sb.toString();
 	}
 }

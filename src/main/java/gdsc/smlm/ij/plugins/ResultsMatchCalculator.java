@@ -244,7 +244,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		{
 			String header = createResultsHeader(doIdAnalysis);
 			Utils.refreshHeadings(resultsWindow, header, true);
-			
+
 			if (showTable && (resultsWindow == null || !resultsWindow.isShowing()))
 			{
 				resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
@@ -376,11 +376,25 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 */
 	public static HashMap<Integer, ArrayList<Coordinate>> getCoordinates(List<PeakResult> results)
 	{
+		return getCoordinates(results, false);
+	}
+
+	/**
+	 * Build a map between the peak id (time point) and a list of coordinates
+	 * 
+	 * @param results
+	 * @param integerCoordinates
+	 *            True if the values should be rounded down to integers
+	 * @return
+	 */
+	public static HashMap<Integer, ArrayList<Coordinate>> getCoordinates(List<PeakResult> results,
+			boolean integerCoordinates)
+	{
 		HashMap<Integer, ArrayList<Coordinate>> coords = new HashMap<Integer, ArrayList<Coordinate>>();
 		if (results.size() > 0)
 		{
 			ResultsMatchCalculator instance = new ResultsMatchCalculator();
-			
+
 			// Do not use HashMap directly to build the coords object since there 
 			// will be many calls to getEntry(). Instead sort the results and use 
 			// a new list for each time point
@@ -398,8 +412,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			// Add the results to the lists
 			for (PeakResult p : results)
 			{
-				final float x = p.getXPosition();
-				final float y = p.getYPosition();
+				final float x = (integerCoordinates) ? (int) p.getXPosition() : p.getXPosition();
+				final float y = (integerCoordinates) ? (int) p.getYPosition() : p.getYPosition();
 				for (int t = p.peak - minT, i = p.getEndFrame() - p.peak + 1; i-- > 0; t++)
 					tmpCoords.get(t).add(instance.new PeakResultPoint(t + minT, x, y, p));
 			}
