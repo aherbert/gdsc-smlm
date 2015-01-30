@@ -29,6 +29,144 @@ public class AreaAverageFilter implements Cloneable
 	private SumFilter filter = new SumFilter();
 	private AverageFilter avFilter = new AverageFilter();
 
+	private boolean simpleInterpolation = true;
+
+	/**
+	 * Compute the block average within a 2w+1 size block around each point.
+	 * Pixels within border regions (width = ceil(w)) are unchanged.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The width
+	 */
+	public void areaAverageUsingSumsInternal(float[] data, final int maxx, final int maxy, final double w)
+	{
+		if (w < 1)
+		{
+			// For small widths then use a dedicated filter
+			avFilter.blockAverage3x3Internal(data, maxx, maxy, (float) w);
+			return;
+		}
+
+		final int n = (int) w;
+		final int n1 = (n == w) ? n : n + 1;
+		final int blockSize = 2 * n1 + 1;
+		if (maxx < blockSize || maxy < blockSize)
+			return;
+
+		if (n == n1)
+		{
+			// There is no edge
+			avFilter.rollingBlockAverageInternal(data, maxx, maxy, n);
+			return;
+		}
+
+		// Calculate the sum in the n and n+1 regions
+		final float[] sum1 = data.clone();
+		filter.rollingBlockSumInternal(sum1, maxx, maxy, n);
+		final float[] sum2 = data.clone();
+		filter.rollingBlockSumInternal(sum2, maxx, maxy, n1);
+
+		// Get the average by adding the inner sum to the weighted edge pixels.  
+		final double area = (2 * w + 1) * (2 * w + 1);
+
+		final float edgeWeight;
+
+		if (simpleInterpolation)
+		{
+			edgeWeight = (float) (w - n);
+		}
+		else
+		{
+			// Use the area to produce the weighting
+			final int inner = (2 * n + 1) * (2 * n + 1);
+			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+			edgeWeight = (float) ((area - inner) / (outer - inner));
+		}
+
+		final float norm = (float) (1.0 / area);
+
+		for (int y = n1; y < maxy - n1; y++)
+		{
+			int index = y * maxx + n1;
+			for (int x = n1; x < maxx - n1; x++, index++)
+			{
+				data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
+			}
+		}
+	}
+
+	/**
+	 * Compute the block average within a 2w+1 size block around each point.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The width
+	 */
+	public void areaAverageUsingSums(float[] data, final int maxx, final int maxy, final double w)
+	{
+		if (w < 1)
+		{
+			// For small widths then use a dedicated filter
+			avFilter.blockAverage3x3(data, maxx, maxy, (float) w);
+			return;
+		}
+
+		final int n = (int) w;
+		final int n1 = (n == w) ? n : n + 1;
+
+		if (n == n1 || (maxx < n1 && maxy < n1))
+		{
+			// There is no edge
+			avFilter.rollingBlockAverage(data, maxx, maxy, n);
+			return;
+		}
+
+		// Calculate the sum in the n and n+1 regions
+		final float[] sum1 = data.clone();
+		filter.rollingBlockSum(sum1, maxx, maxy, n);
+		final float[] sum2 = data.clone();
+		filter.rollingBlockSum(sum2, maxx, maxy, n1);
+
+		// Get the average by adding the inner sum to the weighted edge pixels.  
+		final double area = (2 * w + 1) * (2 * w + 1);
+
+		final float edgeWeight;
+
+		if (simpleInterpolation)
+		{
+			edgeWeight = (float) (w - n);
+		}
+		else
+		{
+			// Use the area to produce the weighting
+			final int inner = (2 * n + 1) * (2 * n + 1);
+			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+			edgeWeight = (float) ((area - inner) / (outer - inner));
+		}
+
+		final float norm = (float) (1.0 / area);
+
+		for (int index = 0; index < sum1.length; index++)
+		{
+			data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
+		}
+	}
+
 	/**
 	 * Compute the block average within a 2w+1 size block around each point.
 	 * Pixels within border regions (width = ceil(w)) are unchanged.
@@ -67,22 +205,35 @@ public class AreaAverageFilter implements Cloneable
 		}
 
 		// Calculate the sum in the n and n+1 regions
-		final float[] sum1 = data.clone();
-		filter.rollingBlockSumInternal(sum1, maxx, maxy, n);
-		final float[] sum2 = data.clone();
-		filter.rollingBlockSumInternal(sum2, maxx, maxy, n1);
+		final float[] av1 = data.clone();
+		avFilter.rollingBlockAverageInternal(av1, maxx, maxy, n);
+		final float[] av2 = data.clone();
+		avFilter.rollingBlockAverageInternal(av2, maxx, maxy, n1);
 
-		// Get the average by adding the inner sum to the weighted edge pixels.  
-		// The area of the region will be (2 * w + 1)^2
-		final float norm = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
-		final float edgeWeight = (float) (w - n);
+		// Get the average by weighting the two
+		final float outerWeight;
+
+		if (simpleInterpolation)
+		{
+			outerWeight = (float) (w - n);
+		}
+		else
+		{
+			// Use the area to produce the weighting
+			final int inner = (2 * n + 1) * (2 * n + 1);
+			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+			final double area = (2 * w + 1) * (2 * w + 1);
+			outerWeight = (float) ((area - inner) / (outer - inner));
+		}
+
+		final float innerWeight = 1 - outerWeight;
 
 		for (int y = n1; y < maxy - n1; y++)
 		{
 			int index = y * maxx + n1;
 			for (int x = n1; x < maxx - n1; x++, index++)
 			{
-				data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
+				data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
 			}
 		}
 	}
@@ -121,19 +272,32 @@ public class AreaAverageFilter implements Cloneable
 		}
 
 		// Calculate the sum in the n and n+1 regions
-		final float[] sum1 = data.clone();
-		filter.rollingBlockSum(sum1, maxx, maxy, n);
-		final float[] sum2 = data.clone();
-		filter.rollingBlockSum(sum2, maxx, maxy, n1);
+		final float[] av1 = data.clone();
+		avFilter.rollingBlockAverage(av1, maxx, maxy, n);
+		final float[] av2 = data.clone();
+		avFilter.rollingBlockAverage(av2, maxx, maxy, n1);
 
-		// Get the average by adding the inner sum to the weighted edge pixels.  
-		// The area of the region will be (2 * w + 1)^2
-		final float norm = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
-		final float edgeWeight = (float) (w - n);
+		// Get the average by weighting the two
+		final float outerWeight;
 
-		for (int index = 0; index < sum1.length; index++)
+		if (simpleInterpolation)
 		{
-			data[index] = norm * (sum1[index] + edgeWeight * (sum2[index] - sum1[index]));
+			outerWeight = (float) (w - n);
+		}
+		else
+		{
+			// Use the area to produce the weighting
+			final int inner = (2 * n + 1) * (2 * n + 1);
+			final int outer = (2 * n1 + 1) * (2 * n1 + 1);
+			final double area = (2 * w + 1) * (2 * w + 1);
+			outerWeight = (float) ((area - inner) / (outer - inner));
+		}
+
+		final float innerWeight = 1 - outerWeight;
+
+		for (int index = 0; index < av1.length; index++)
+		{
+			data[index] = av1[index] * innerWeight + av2[index] * outerWeight;
 		}
 	}
 
@@ -156,5 +320,25 @@ public class AreaAverageFilter implements Cloneable
 			// Ignore
 		}
 		return null;
+	}
+
+	/**
+	 * @return true for simple interpolation
+	 */
+	public boolean isSimpleInterpolation()
+	{
+		return simpleInterpolation;
+	}
+
+	/**
+	 * The average for block size n and n+1 is linear interpolated. Set this to true to use a weight of (w-n) for the
+	 * outer average. Set to false to use a weight based on the area of the edge pixels in the (2w+1) region.
+	 * 
+	 * @param simpleInterpolation
+	 *            true for simple interpolation
+	 */
+	public void setSimpleInterpolation(boolean simpleInterpolation)
+	{
+		this.simpleInterpolation = simpleInterpolation;
 	}
 }
