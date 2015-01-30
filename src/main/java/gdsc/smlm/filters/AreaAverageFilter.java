@@ -29,7 +29,7 @@ public class AreaAverageFilter implements Cloneable
 	private SumFilter filter = new SumFilter();
 	private AverageFilter avFilter = new AverageFilter();
 
-	private boolean simpleInterpolation = false;
+	private boolean simpleInterpolation = true;
 
 	/**
 	 * Compute the block average within a 2w+1 size block around each point.
@@ -64,7 +64,7 @@ public class AreaAverageFilter implements Cloneable
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		if (n == n1 && n > 0)
+		if (n == n1)
 		{
 			// There is no edge
 			avFilter.rollingBlockAverageInternal(data, maxx, maxy, n);
@@ -143,7 +143,7 @@ public class AreaAverageFilter implements Cloneable
 		final int n = (int) w;
 		final int n1 = (n == w) ? n : n + 1;
 
-		if ((n == n1 && n > 0) || (maxx < n1 && maxy < n1))
+		if (n == n1 || (maxx < n1 && maxy < n1))
 		{
 			// There is no edge
 			avFilter.rollingBlockAverage(data, maxx, maxy, n);
@@ -222,7 +222,7 @@ public class AreaAverageFilter implements Cloneable
 		if (maxx < blockSize || maxy < blockSize)
 			return;
 
-		if (n == n1 && n > 0)
+		if (n == n1)
 		{
 			// There is no edge
 			avFilter.rollingBlockAverageInternal(data, maxx, maxy, n);
@@ -300,7 +300,7 @@ public class AreaAverageFilter implements Cloneable
 		final int n = (int) w;
 		final int n1 = (n == w) ? n : n + 1;
 
-		if ((n == n1 && n > 0) || (maxx < n1 && maxy < n1))
+		if (n == n1 || (maxx < n1 && maxy < n1))
 		{
 			// There is no edge
 			avFilter.rollingBlockAverage(data, maxx, maxy, n);
