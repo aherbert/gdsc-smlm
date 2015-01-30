@@ -70,7 +70,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static int dataFilter2 = 0;
 	private static double smoothing2 = 3;
 	private static double distance = 1.5;
-	private static double recallFraction = 98;
+	private static double recallFraction = 100;
 	private static boolean showPlot = true;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
