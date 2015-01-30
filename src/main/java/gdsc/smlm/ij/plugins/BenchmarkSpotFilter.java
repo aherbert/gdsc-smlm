@@ -515,12 +515,16 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		// Output the match results when the recall achieves the fraction of the maximum.
-		final double target = r[r.length - 1] * recallFraction / 100;
+		double target = r[r.length - 1];
+		if (recallFraction < 100)
+			target *= recallFraction / 100.0;
 		int index = 0;
 		while (index < r.length && r[index] < target)
 		{
 			index++;
 		}
+		if (index == r.length)
+			index--;
 		addResult(sb, new MatchResult(truePositives[index], falsePositives[index], allResult.getNumberActual() -
 				truePositives[index], 0));
 		sb.append(Utils.rounded(time / 1e6));
@@ -632,7 +636,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		if (precision == null || recall == null)
 			return 0;
-		
+
 		double area = 0.0;
 		int k;
 
@@ -671,7 +675,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		double prevP = 1;
 		if (recall[0] == 0)
 			k++;
-		
+
 		for (; k < precision.length; k++)
 		{
 			final double delta = recall[k] - prevR;
