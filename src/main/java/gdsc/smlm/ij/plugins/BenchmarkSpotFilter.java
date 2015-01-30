@@ -527,11 +527,18 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
 		final double auc = auc(p, r, 0);
-		final double auc2 = auc(p, r, r[r.length-1] * 0.5);
-
-		// TODO - Add code to compute the AUC using the adjusted precision curve
+		// Compute the AUC using the adjusted precision curve
 		// which used the maximum precision for recall >= r
-		
+		double[] maxp = new double[p.length];
+		double max = 0;
+		for (int k = maxp.length; k-- > 0;)
+		{
+			if (max < p[k])
+				max = p[k];
+			maxp[k] = max;
+		}
+		final double auc2 = auc(maxp, r, 0);
+
 		sb.append("\t").append(Utils.rounded(auc));
 		sb.append("\t").append(Utils.rounded(auc2));
 
@@ -542,6 +549,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.setLimits(0, rank.length, 0, 1.05);
 			plot.setColor(Color.blue);
 			plot.addPoints(rank, p, Plot.LINE);
+			//plot.addPoints(rank, maxp, Plot.DOT);
 			plot.setColor(Color.red);
 			plot.addPoints(rank, r, Plot.LINE);
 			plot.setColor(Color.black);
@@ -555,12 +563,13 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			title = TITLE + " Precision-Recall";
 			plot = new Plot(title, "Recall", "Precision");
-			plot.setLimits(0, 1, 0, 1);
+			plot.setLimits(0, 1, 0, 1.05);
 			plot.setColor(Color.red);
 			plot.addPoints(r, p, Plot.LINE);
+			//plot.addPoints(r, maxp, Plot.DOT);
 			plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 			plot.setColor(Color.black);
-			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc));
+			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
 			PlotWindow pw2 = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 			{
@@ -608,7 +617,10 @@ public class BenchmarkSpotFilter implements PlugIn
 	 * Calculates an estimate of the area under the precision-recall curve.
 	 * <p>
 	 * The estimate is computed using integration above the recall limit. Below the limit a simple linear interpolation
-	 * is used. If no recall values are above the limit then the full integration is performed.
+	 * is used from the given point to precision 1 at recall 0. This avoids noise in the lower recall section of the
+	 * curve.
+	 * <p>
+	 * If no recall values are above the limit then the full integration is performed.
 	 *
 	 * @param precision
 	 * @param recall
@@ -618,44 +630,54 @@ public class BenchmarkSpotFilter implements PlugIn
 	 */
 	public static double auc(double[] precision, double[] recall, double recallLimit)
 	{
+		if (precision == null || recall == null)
+			return 0;
+		
 		double area = 0.0;
 		int k;
-		
+
 		if (recallLimit > 0)
 		{
 			// Move from high to low recall and find the first point below the limit
-    		k = recall.length - 1;
-    		while (k > 0 && recall[k] > recallLimit)
-    			k--;
-    
-    		if (k > 0)
-    		{
-    			// Find the first point where precision was not 1
-    			int kk=0;
-    			while (precision[kk+1]==1)
-    				kk++;
-    
-    			// Full precision of 1 up to point kk
-    			area += (recall[kk] - recall[0]);
-    			
-    			// Interpolate from precision at kk to k
-    			area += (precision[k] + precision[kk]) * 0.5 * (recall[k] - recall[kk]);
-    			k++;
-    		}
+			k = recall.length - 1;
+			while (k > 0 && recall[k] > recallLimit)
+				k--;
+
+			if (k > 0)
+			{
+				// Find the first point where precision was not 1
+				int kk = 0;
+				while (precision[kk + 1] == 1)
+					kk++;
+
+				// Full precision of 1 up to point kk
+				area += (recall[kk] - recall[0]);
+
+				// Interpolate from precision at kk to k
+				area += (precision[k] + precision[kk]) * 0.5 * (recall[k] - recall[kk]);
+
+				// Increment to start the remaining integral
+				k++;
+			}
 		}
 		else
 		{
-			// Complete integration
-			k = 1;
+			// Complete integration from start
+			k = 0;
 		}
 
-		// Do the rest
-		double prevR = recall[k - 1];
+		// Integrate the rest
+		double prevR = 0;
+		double prevP = 1;
+		if (recall[0] == 0)
+			k++;
+		
 		for (; k < precision.length; k++)
 		{
 			final double delta = recall[k] - prevR;
-			area += precision[k] * delta;
+			area += (precision[k] + prevP) * 0.5 * delta;
 			prevR = recall[k];
+			prevP = precision[k];
 		}
 		return area;
 	}
