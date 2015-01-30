@@ -82,6 +82,9 @@ public class BenchmarkSpotFilter implements PlugIn
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 
+	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
+	private static int lastId = -1;
+
 	private class ScoredSpot implements Comparable<ScoredSpot>
 	{
 		final boolean match;
@@ -340,9 +343,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		MaximaSpotFilter spotFilter = FitEngine.createSpotFilter(search, border, filters[dataFilter], smoothing,
 				differenceFilter, filters[dataFilter2], smoothing2);
 
-		// Extract all the results in memory into a list per frame
-		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator.getCoordinates(
-				results.getResults(), true);
+		// Extract all the results in memory into a list per frame. This can be cached
+		if (lastId != simulationParameters.id)
+		{
+			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), true);
+			lastId = simulationParameters.id;
+		}
 
 		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
 
