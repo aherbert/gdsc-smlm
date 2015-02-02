@@ -536,10 +536,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(time / 1e6));
 
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
-		final double auc = auc(p, r, 0);
+		final double auc = auc(p, r);
 		// Compute the AUC using the adjusted precision curve
 		// which used the maximum precision for recall >= r
-		double[] maxp = new double[p.length];
+		final double[] maxp = new double[p.length];
 		double max = 0;
 		for (int k = maxp.length; k-- > 0;)
 		{
@@ -547,7 +547,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				max = p[k];
 			maxp[k] = max;
 		}
-		final double auc2 = auc(maxp, r, 0);
+		final double auc2 = auc(maxp, r);
 
 		sb.append("\t").append(Utils.rounded(auc));
 		sb.append("\t").append(Utils.rounded(auc2));
@@ -685,7 +685,41 @@ public class BenchmarkSpotFilter implements PlugIn
 		for (; k < precision.length; k++)
 		{
 			final double delta = recall[k] - prevR;
-			area += (precision[k] + prevP) * 0.5 * delta;
+			if (precision[k] == prevP)
+				area += prevP * delta;
+			else
+				// Interpolate
+				area += (precision[k] + prevP) * 0.5 * delta;
+			prevR = recall[k];
+			prevP = precision[k];
+		}
+		return area;
+	}
+
+	/**
+	 * Calculates an estimate of the area under the precision-recall curve.
+	 * <p>
+	 * Assumes the first values in the two arrays are precision 1 at recall 0.
+	 *
+	 * @param precision
+	 * @param recall
+	 * @return Area under the PR curve
+	 */
+	private static double auc(double[] precision, double[] recall)
+	{
+		double area = 0.0;
+
+		double prevR = 0;
+		double prevP = 1;
+
+		for (int k = 1; k < precision.length; k++)
+		{
+			final double delta = recall[k] - prevR;
+			if (precision[k] == prevP)
+				area += prevP * delta;
+			else
+				// Interpolate
+				area += (precision[k] + prevP) * 0.5 * delta;
 			prevR = recall[k];
 			prevP = precision[k];
 		}
