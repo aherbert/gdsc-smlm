@@ -54,7 +54,6 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.PolygonRoi;
-import ij.io.OpenDialog;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
@@ -363,17 +362,40 @@ public class TraceMolecules implements PlugIn
 
 	private void saveTraces(Trace[] traces)
 	{
-		saveTraces(results, traces, createSettingsComment());
+		filename = saveTraces(results, traces, createSettingsComment(), filename, 0);
 	}
 
-	static void saveTraces(MemoryPeakResults sourceResults, Trace[] traces, String comment)
+	/**
+	 * Save the traces to the file. A File open dialog is presented and the selected filename returned.
+	 * <p>
+	 * If the id is above zero then the file open dialog title will have the id appended and the filename is searched
+	 * for .[0-9]+. and it is replaced with .id.
+	 * 
+	 * @param sourceResults
+	 * @param traces
+	 * @param comment
+	 * @param filename
+	 *            The initial filename
+	 * @param id
+	 *            The traces id (used if above 0)
+	 * @return The select filename (or null)
+	 */
+	static String saveTraces(MemoryPeakResults sourceResults, Trace[] traces, String comment, String filename, int id)
 	{
 		IJ.showStatus("Saving traces");
-		String[] path = Utils.decodePath(filename);
-		OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
-		if (chooser.getFileName() != null)
+		String title = "Traces_File";
+		if (id > 0)
 		{
-			filename = chooser.getDirectory() + chooser.getFileName();
+			title += id;
+			String regex = "\\.[0-9]+\\.";
+			if (filename.matches(regex))
+				filename.replaceAll(regex, "." + (id) + ".");
+			else
+				Utils.replaceExtension(filename, id + ".xls");
+		}
+		filename = Utils.getFilename(title, filename);
+		if (filename != null)
+		{
 			filename = Utils.replaceExtension(filename, "xls");
 
 			boolean showDeviations = (traces.length > 0 && traces[0].getHead().paramsStdDev != null);
@@ -393,6 +415,7 @@ public class TraceMolecules implements PlugIn
 			}
 		}
 		IJ.showStatus("");
+		return filename;
 	}
 
 	private String createSettingsComment()
@@ -1883,7 +1906,7 @@ public class TraceMolecules implements PlugIn
 
 		refitResults.end();
 		MemoryPeakResults.addResults(refitResults);
-		
+
 		source.close();
 	}
 
@@ -1897,7 +1920,7 @@ public class TraceMolecules implements PlugIn
 
 		// Get the coordinates and the spot bounds
 		float[] centre = trace.getCentroid(CentroidMethod.SIGNAL_WEIGHTED);
-		int minX = (int) Math.floor(centre[0] - fitWidth);		
+		int minX = (int) Math.floor(centre[0] - fitWidth);
 		int maxX = (int) Math.ceil(centre[0] + fitWidth);
 		int minY = (int) Math.floor(centre[1] - fitWidth);
 		int maxY = (int) Math.ceil(centre[1] + fitWidth);
