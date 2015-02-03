@@ -478,7 +478,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	}
 
 	/**
-	 * Add a list of input sources to the generic dialog. The choice field will be named 'input'. If a file input option
+	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If a file input option
 	 * is selected then a field will be added name 'Input_file'.
 	 * <p>
 	 * If the source is a memory source then it will not be added if it is empty. If not empty then a summary of the
@@ -502,6 +502,22 @@ public class ResultsManager implements PlugIn, MouseListener
 		if (source.isEmpty())
 			addInputSource(source, InputSource.NONE);
 
+		addInputSourceToDialog(gd, inputName, inputOption, source, fileInput);
+	}
+
+	/**
+	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If the file input option
+	 * is true then a field will be added name 'Input_file'.
+	 * 
+	 * @param gd
+	 * @param inputName
+	 * @param inputOption The option to select by default
+	 * @param source
+	 * @param fileInput
+	 */
+	public static void addInputSourceToDialog(GenericDialog gd, String inputName, String inputOption,
+			ArrayList<String> source, boolean fileInput)
+	{
 		String[] options = source.toArray(new String[source.size()]);
 		// Find the option
 		inputOption = removeSizeSuffix(inputOption);
