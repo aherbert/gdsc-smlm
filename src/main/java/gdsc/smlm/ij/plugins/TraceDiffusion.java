@@ -32,7 +32,6 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -103,13 +102,19 @@ public class TraceDiffusion implements PlugIn
 	private static boolean displayDHistogram = true;
 
 	private static boolean saveTraceDistances = false;
-	private static String filename = "";
+	private static String distancesFilename = "";
 	private static double minFraction = 0.1;
 	private static double minDifference = 2;
+	private static boolean multipleInputs = false;
+	private static String tracesFilename = "";
 
 	private GlobalSettings globalSettings;
 	private ClusteringSettings settings;
 	private MemoryPeakResults results;
+
+	// The number of additional datasets
+	private int additionalDatasets = 0;
+
 	// Store exposure time in seconds
 	private double exposureTime = 0;
 	private double precision;
@@ -131,36 +136,29 @@ public class TraceDiffusion implements PlugIn
 			return;
 		}
 
-		if (!showDialog())
+		// -=-=-
+		// Get the traces:
+		// - Trace a single dataset (and store in memory)
+		// - Combine trace results held in memory
+		// -=-=-
+
+		if (!showTraceDialog())
 			return;
 
-		TraceManager manager = new TraceManager(results);
+		Trace[] traces = getTraces();
 
-		// Run the tracing
-		manager.setTracker(new IJTrackProgress());
-		manager.setDistanceExclusion(settings.distanceExclusion / results.getCalibration().nmPerPixel);
-		manager.traceMolecules(settings.distanceThreshold / results.getCalibration().nmPerPixel, 1);
-		Trace[] traces = manager.getTraces();
+		// -=-=-
+		// Analyse the traces
+		// -=-=-
 
-		traces = filterTraces(traces, settings.minimumTraceLength);
+		if (!showDialog())
+			return;
 
 		int count = traces.length;
 		double D = 0;
 		double[][] jdParams = null;
 		if (count > 0)
 		{
-			//--- Save results ---
-
-			// Save the traces to memory
-			TraceMolecules.saveResults(results, traces, "Tracks");
-
-			// Sort traces by time to assist the results source in extracting frames sequentially.
-			// Do this before saving to assist in debugging using the saved traces file.
-			TraceMolecules.sortByTime(traces);
-
-			if (settings.saveTraces)
-				TraceMolecules.saveTraces(results, traces, createSettingsComment());
-
 			//--- MSD Analysis ---
 
 			// Conversion constants
@@ -384,8 +382,6 @@ public class TraceDiffusion implements PlugIn
 		}
 
 		summarise(traces, D, jdParams);
-
-		IJ.showStatus(String.format("%d localisations => %d traces", results.size(), count));
 	}
 
 	private void display(String title, Plot plot)
@@ -402,8 +398,8 @@ public class TraceDiffusion implements PlugIn
 
 	private void showHistogram(StoredDataStatistics stats, String title, boolean alwaysRemoveOutliers)
 	{
-		int id = Utils.showHistogram(TITLE, stats, title, 0,
-				(settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0, settings.histogramBins);
+		int id = Utils.showHistogram(TITLE, stats, title, 0, (settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0,
+				settings.histogramBins);
 		if (Utils.isNewWindow())
 			idList[idCount++] = id;
 	}
@@ -416,7 +412,7 @@ public class TraceDiffusion implements PlugIn
 			new WindowOrganiser().tileWindows(idList);
 		}
 	}
-	
+
 	/**
 	 * Calculate the average precision of localisation in the traces
 	 * 
@@ -480,16 +476,15 @@ public class TraceDiffusion implements PlugIn
 			StoredDataStatistics msdPerMoleculeAdjacent, StoredDataStatistics dStarPerMolecule,
 			StoredDataStatistics dStarPerMoleculeAdjacent)
 	{
-		String[] path = Utils.decodePath(filename);
-		OpenDialog chooser = new OpenDialog("Trace_distances_File", path[0], path[1]);
-		if (chooser.getFileName() != null)
+		distancesFilename = Utils.getFilename("Trace_Distances_File", distancesFilename);
+		if (distancesFilename != null)
 		{
-			filename = Utils.replaceExtension(chooser.getDirectory() + chooser.getFileName(), "xls");
+			distancesFilename = Utils.replaceExtension(distancesFilename, "xls");
 
 			OutputStreamWriter out = null;
 			try
 			{
-				FileOutputStream fos = new FileOutputStream(filename);
+				FileOutputStream fos = new FileOutputStream(distancesFilename);
 				out = new OutputStreamWriter(fos, "UTF-8");
 				double[] msd = msdPerMolecule.getValues();
 				double[] msd2 = msdPerMoleculeAdjacent.getValues();
@@ -548,11 +543,12 @@ public class TraceDiffusion implements PlugIn
 	/**
 	 * Filter traces that are not the minimum length
 	 * 
+	 * @param name
 	 * @param traces
 	 * @param minimumTraceLength
 	 * @return The new traces
 	 */
-	private Trace[] filterTraces(Trace[] traces, int minimumTraceLength)
+	private Trace[] filterTraces(String name, Trace[] traces, int minimumTraceLength)
 	{
 		int count = 0;
 		for (int i = 0; i < traces.length; i++)
@@ -561,7 +557,8 @@ public class TraceDiffusion implements PlugIn
 				traces[count++] = traces[i];
 		}
 
-		Utils.log("%d Traces filtered to %d using minimum length %d", traces.length, count, minimumTraceLength);
+		Utils.log("Results %s : %d Traces filtered to %d using minimum length %d", name, traces.length, count,
+				minimumTraceLength);
 		return Arrays.copyOf(traces, count);
 	}
 
@@ -592,7 +589,12 @@ public class TraceDiffusion implements PlugIn
 
 		// Add to the summary table
 		StringBuilder sb = new StringBuilder();
-		sb.append(results.getName()).append("\t");
+		sb.append(results.getName());
+		if (additionalDatasets > 0)
+		{
+			sb.append(" + ").append(additionalDatasets).append(" others");
+		}
+		sb.append("\t");
 		sb.append(Utils.rounded(exposureTime * 1000, 3)).append("\t");
 		sb.append(Utils.rounded(settings.distanceThreshold, 3)).append("\t");
 		sb.append(Utils.rounded(settings.distanceExclusion, 3)).append("\t");
@@ -642,7 +644,7 @@ public class TraceDiffusion implements PlugIn
 
 		tileNewWindows();
 
-		IJ.showStatus("");
+		IJ.showStatus("Finished " + TITLE);
 	}
 
 	private String format(double[] jumpD)
@@ -690,7 +692,7 @@ public class TraceDiffusion implements PlugIn
 		return sb.toString();
 	}
 
-	private boolean showDialog()
+	private boolean showTraceDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -703,20 +705,12 @@ public class TraceDiffusion implements PlugIn
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 0);
 		gd.addNumericField("Distance_Exclusion (nm)", settings.distanceExclusion, 0);
 		gd.addSlider("Min_trace_length", 2, 20, settings.minimumTraceLength);
-		gd.addCheckbox("Truncate_traces", settings.truncate);
-		gd.addCheckbox("Internal_distances", settings.internalDistances);
-		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
-		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
-		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
-		gd.addSlider("Minimum_difference", 0, 10, minDifference);
-		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
 		gd.addCheckbox("Save_traces", settings.saveTraces);
-		gd.addCheckbox("Save_trace_distances", saveTraceDistances);
-		gd.addCheckbox("Show_histograms", settings.showHistograms);
+		gd.addCheckbox("Multiple_inputs", multipleInputs);
 
 		gd.showDialog();
 
-		if (gd.wasCanceled() || !readDialog(gd))
+		if (gd.wasCanceled() || !readTraceDialog(gd))
 			return false;
 
 		// Update the settings
@@ -750,12 +744,198 @@ public class TraceDiffusion implements PlugIn
 		return true;
 	}
 
-	private boolean readDialog(GenericDialog gd)
+	private boolean readTraceDialog(GenericDialog gd)
 	{
 		inputOption = ResultsManager.getInputSource(gd);
 		settings.distanceThreshold = gd.getNextNumber();
 		settings.distanceExclusion = Math.abs(gd.getNextNumber());
 		settings.minimumTraceLength = (int) Math.abs(gd.getNextNumber());
+		settings.saveTraces = gd.getNextBoolean();
+		multipleInputs = gd.getNextBoolean();
+
+		if (gd.invalidNumber())
+			return false;
+
+		// Check arguments
+		try
+		{
+			Parameters.isAboveZero("Distance threshold", settings.distanceThreshold);
+			Parameters.isAbove("Min trace length", settings.minimumTraceLength, 1);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		return true;
+	}
+
+	private Trace[] getTraces()
+	{
+		ArrayList<MemoryPeakResults> allResults = new ArrayList<MemoryPeakResults>();
+		allResults.add(results);
+
+		final double nmPerPixel = results.getCalibration().nmPerPixel;
+		if (multipleInputs)
+		{
+			// Get additional results sets with the same calibration
+			MemoryPeakResults r = nextInput(nmPerPixel, allResults);
+			while (r != null)
+			{
+				allResults.add(r);
+				r = nextInput(nmPerPixel, allResults);
+			}
+		}
+
+		ArrayList<Trace> allTraces = new ArrayList<Trace>();
+		additionalDatasets = -1;
+		for (MemoryPeakResults r : allResults)
+		{
+			additionalDatasets++;
+
+			TraceManager manager = new TraceManager(r);
+
+			// Run the tracing
+			manager.setTracker(new IJTrackProgress());
+			manager.setDistanceExclusion(settings.distanceExclusion / nmPerPixel);
+			manager.traceMolecules(settings.distanceThreshold / nmPerPixel, 1);
+			Trace[] traces = manager.getTraces();
+
+			traces = filterTraces(r.getName(), traces, settings.minimumTraceLength);
+			allTraces.addAll(Arrays.asList(traces));
+
+			//--- Save results ---
+			if (traces.length > 0)
+			{
+				// Save the traces to memory
+				TraceMolecules.saveResults(r, traces, "Tracks");
+
+				if (settings.saveTraces)
+				{
+					// Sort traces by time to assist the results source in extracting frames sequentially.
+					// Do this before saving to assist in debugging using the saved traces file.
+					TraceMolecules.sortByTime(traces);
+					String newFilename = TraceMolecules.saveTraces(r, traces, createSettingsComment(), tracesFilename,
+							additionalDatasets);
+					// Only keep the main filename in memory
+					if (additionalDatasets == 0)
+						tracesFilename = newFilename;
+				}
+			}
+		}
+
+		if (additionalDatasets > 0)
+			Utils.log("Multiple inputs provide %d traces", allTraces.size());
+
+		return allTraces.toArray(new Trace[allTraces.size()]);
+	}
+
+	private MemoryPeakResults nextInput(double nmPerPixel, ArrayList<MemoryPeakResults> allResults)
+	{
+		ArrayList<String> source = new ArrayList<String>(3);
+		boolean fileInput = false;
+
+		for (MemoryPeakResults r : MemoryPeakResults.getAllResults())
+		{
+			if (notValid(r, allResults, nmPerPixel))
+				continue;
+			ResultsManager.addInputSource(source, r, false);
+		}
+		if (source.isEmpty())
+			return null;
+
+		String inputOption;
+
+		// if a macro then use the recorder to get the option
+
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Select additional inputs ...\n \nPress cancel to continue with the analysis.");
+		
+		// If in macro mode then we must just use the String input field to allow the macro
+		// IJ to return the field values from the macro arguments. Using a Choice input
+		// will always return a field value.
+
+		String fieldName = "Input" + allResults.size();
+		if (IJ.isMacro())
+			// Use blank default value so bad macro parameters return nothing
+			gd.addStringField(fieldName, "");
+		else
+			ResultsManager.addInputSourceToDialog(gd, fieldName, "", source, fileInput);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return null;
+
+		if (IJ.isMacro())
+			inputOption = gd.getNextString();
+		else
+			inputOption = ResultsManager.getInputSource(gd);
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
+		if (results == null || results.size() == 0)
+		{
+			return null;
+		}
+
+		// Check the results have the same calibrated exposure time and pixel size
+		if (results.getCalibration() == null || results.getCalibration().exposureTime / 1000.0 != exposureTime ||
+				results.getNmPerPixel() != nmPerPixel)
+		{
+			return null;
+		}
+
+		return results;
+	}
+
+	private boolean notValid(MemoryPeakResults r, ArrayList<MemoryPeakResults> allResults, double nmPerPixel)
+	{
+		// Check the calibration is the same
+		if (r.getNmPerPixel() != nmPerPixel)
+			return true;
+		if (r.getCalibration().exposureTime / 1000.0 != exposureTime)
+			return true;
+		// Check the results have not already been chosen
+		for (MemoryPeakResults r2 : allResults)
+		{
+			if (r2.getName().equals(r.getName()))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean showDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		globalSettings = SettingsManager.loadSettings();
+		settings = globalSettings.getClusteringSettings();
+
+		gd.addCheckbox("Truncate_traces", settings.truncate);
+		gd.addCheckbox("Internal_distances", settings.internalDistances);
+		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
+		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
+		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
+		gd.addSlider("Minimum_difference", 0, 10, minDifference);
+		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
+		gd.addCheckbox("Save_trace_distances", saveTraceDistances);
+		gd.addCheckbox("Show_histograms", settings.showHistograms);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled() || !readDialog(gd))
+			return false;
+
+		// Update the settings
+		SettingsManager.saveSettings(globalSettings);
+
+		return true;
+	}
+
+	private boolean readDialog(GenericDialog gd)
+	{
+		inputOption = ResultsManager.getInputSource(gd);
 		settings.truncate = gd.getNextBoolean();
 		settings.internalDistances = gd.getNextBoolean();
 		//settings.subSampledDistances = gd.getNextBoolean();
@@ -763,7 +943,6 @@ public class TraceDiffusion implements PlugIn
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
 		minFraction = Math.abs(gd.getNextNumber());
-		settings.saveTraces = gd.getNextBoolean();
 		saveTraceDistances = gd.getNextBoolean();
 		settings.showHistograms = gd.getNextBoolean();
 
@@ -794,8 +973,6 @@ public class TraceDiffusion implements PlugIn
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("Distance threshold", settings.distanceThreshold);
-			Parameters.isAbove("Min trace length", settings.minimumTraceLength, 1);
 			Parameters.isAboveZero("Histogram bins", settings.histogramBins);
 			Parameters.isAbove("Fit length", settings.fitLength, 1);
 			Parameters.isAboveZero("Jump distance", settings.jumpDistance);
@@ -873,7 +1050,7 @@ public class TraceDiffusion implements PlugIn
 			// Add the fit to the plot
 			plot.setColor(Color.magenta);
 			plot.drawLine(0, 0, x[x.length - 1], x[x.length - 1] * 4 * D);
-			display(title, plot);			
+			display(title, plot);
 		}
 		catch (TooManyIterationsException e)
 		{
