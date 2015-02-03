@@ -397,7 +397,8 @@ public class PCPALMFitting implements PlugIn
 		// will always return a field value.
 
 		if (IJ.isMacro())
-			gd.addStringField("R_" + n, titles.get(0));
+			// Use blank default value so bad macro parameters return nothing
+			gd.addStringField("R_" + n, "");
 		else
 			gd.addChoice("R_" + n, titles.toArray(new String[titles.size()]), "");
 
