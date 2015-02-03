@@ -31,6 +31,7 @@ import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
@@ -112,6 +113,10 @@ public class TraceDiffusion implements PlugIn
 	// Store exposure time in seconds
 	private double exposureTime = 0;
 	private double precision;
+
+	// Used to tile new plot windows
+	private int[] idList = new int[20];
+	private int idCount = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -320,24 +325,20 @@ public class TraceDiffusion implements PlugIn
 			String jdTitle = TITLE + " Jump Distance";
 			Plot jdPlot = new Plot(jdTitle, "Distance (um^2/second)", "Cumulative Probability", jdHistogram[0],
 					jdHistogram[1]);
-			Utils.display(jdTitle, jdPlot);
+			display(jdTitle, jdPlot);
 
 			// Plot the per-trace histogram of MSD and D*
 			if (settings.showHistograms)
 			{
 				if (displayMSDHistogram)
 				{
-					Utils.showHistogram(TITLE, msdPerMoleculeAllVsAll, "MSD/Molecule (all-vs-all)", 0,
-							(settings.removeOutliers) ? 1 : 0, settings.histogramBins);
-					Utils.showHistogram(TITLE, msdPerMoleculeAdjacent, "MSD/Molecule (adjacent)", 0,
-							(settings.removeOutliers) ? 1 : 0, settings.histogramBins);
+					showHistogram(msdPerMoleculeAllVsAll, "MSD/Molecule (all-vs-all)");
+					showHistogram(msdPerMoleculeAdjacent, "MSD/Molecule (adjacent)");
 				}
 				if (displayDHistogram)
 				{
-					Utils.showHistogram(TITLE, dStarPerMoleculeAllVsAll, "D*/Molecule (all-vs-all)", 0,
-							(settings.removeOutliers) ? 1 : 0, settings.histogramBins);
-					Utils.showHistogram(TITLE, dStarPerMoleculeAdjacent, "D*/Molecule (adjacent)", 0,
-							(settings.removeOutliers) ? 1 : 0, settings.histogramBins);
+					showHistogram(dStarPerMoleculeAllVsAll, "D*/Molecule (all-vs-all)");
+					showHistogram(dStarPerMoleculeAdjacent, "D*/Molecule (adjacent)");
 				}
 			}
 
@@ -387,6 +388,35 @@ public class TraceDiffusion implements PlugIn
 		IJ.showStatus(String.format("%d localisations => %d traces", results.size(), count));
 	}
 
+	private void display(String title, Plot plot)
+	{
+		PlotWindow pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			idList[idCount++] = pw.getImagePlus().getID();
+	}
+
+	private void showHistogram(StoredDataStatistics stats, String title)
+	{
+		showHistogram(stats, title, false);
+	}
+
+	private void showHistogram(StoredDataStatistics stats, String title, boolean alwaysRemoveOutliers)
+	{
+		int id = Utils.showHistogram(TITLE, stats, title, 0,
+				(settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0, settings.histogramBins);
+		if (Utils.isNewWindow())
+			idList[idCount++] = id;
+	}
+
+	private void tileNewWindows()
+	{
+		if (idCount > 0)
+		{
+			idList = Arrays.copyOf(idList, idCount);
+			new WindowOrganiser().tileWindows(idList);
+		}
+	}
+	
 	/**
 	 * Calculate the average precision of localisation in the traces
 	 * 
@@ -601,26 +631,16 @@ public class TraceDiffusion implements PlugIn
 		{
 			IJ.showStatus("Calculating histograms ...");
 
-			int[] idList = new int[NAMES.length];
-			int count = 0;
-
-			boolean requireRetile = false;
 			for (int i = 0; i < NAMES.length; i++)
 			{
 				if (displayHistograms[i])
 				{
-					idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i], 0,
-							(settings.removeOutliers || alwaysRemoveOutliers[i]) ? 2 : 0, settings.histogramBins);
-					requireRetile = requireRetile || Utils.isNewWindow();
+					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i]);
 				}
 			}
-
-			if (count > 0 && requireRetile)
-			{
-				idList = Arrays.copyOf(idList, count);
-				new WindowOrganiser().tileWindows(idList);
-			}
 		}
+
+		tileNewWindows();
 
 		IJ.showStatus("");
 	}
@@ -806,7 +826,7 @@ public class TraceDiffusion implements PlugIn
 			plot.drawLine(x[i], y[i] - sd[i], x[i], y[i] + sd[i]);
 		}
 		plot.setColor(Color.red);
-		Utils.display(title, plot);
+		display(title, plot);
 		return plot;
 	}
 
@@ -853,7 +873,7 @@ public class TraceDiffusion implements PlugIn
 			// Add the fit to the plot
 			plot.setColor(Color.magenta);
 			plot.drawLine(0, 0, x[x.length - 1], x[x.length - 1] * 4 * D);
-			Utils.display(title, plot);
+			display(title, plot);			
 		}
 		catch (TooManyIterationsException e)
 		{
@@ -1213,7 +1233,7 @@ public class TraceDiffusion implements PlugIn
 
 		plot.setColor(color);
 		plot.addPoints(x, y, Plot.LINE);
-		Utils.display(title, plot);
+		display(title, plot);
 	}
 
 	private double calculateSumOfSquares(double[] obs, double[] exp)
