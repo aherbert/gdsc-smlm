@@ -279,8 +279,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double b2;
 
-		public SimulationParameters(int molecules, double s, double a, double minSignal, double maxSignal, double depth,
-				boolean fixedDepth, double bias, boolean emCCD, double gain, double readNoise, double b, double b2)
+		public SimulationParameters(int molecules, double s, double a, double minSignal, double maxSignal,
+				double depth, boolean fixedDepth, double bias, boolean emCCD, double gain, double readNoise, double b,
+				double b2)
 		{
 			id = nextId++;
 			this.molecules = molecules;
@@ -570,7 +571,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					id++;
 				}
 			}
-			
+
 			if (!benchmarkMode)
 				saveSimulationParameters(id);
 		}
@@ -1911,21 +1912,25 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 						//addRaw(localisation.getIntensity());
 
-						final double photonsRendered, intensity;
+						double photonsRendered = 0;
+						double intensity = localisation.getIntensity();
 						int[] samplePositions = null;
-						if (poissonNoise)
+						if (intensity > 0)
 						{
-							final int samples = (int) random.nextPoisson(localisation.getIntensity());
-							intensity = samples;
-							photonsRendered = psfModel.sample3D(data, settings.size, settings.size, samples,
-									localisation.getX(), localisation.getY(), localisation.getZ());
-							samplePositions = psfModel.getSamplePositions();
-						}
-						else
-						{
-							intensity = localisation.getIntensity();
-							photonsRendered = psfModel.create3D(data, settings.size, settings.size, intensity,
-									localisation.getX(), localisation.getY(), localisation.getZ(), false);
+							if (poissonNoise)
+							{
+								final int samples = (int) random.nextPoisson(localisation.getIntensity());
+								intensity = samples;
+								photonsRendered = psfModel.sample3D(data, settings.size, settings.size, samples,
+										localisation.getX(), localisation.getY(), localisation.getZ());
+								samplePositions = psfModel.getSamplePositions();
+							}
+							else
+							{
+								intensity = localisation.getIntensity();
+								photonsRendered = psfModel.create3D(data, settings.size, settings.size, intensity,
+										localisation.getX(), localisation.getY(), localisation.getZ(), false);
+							}
 						}
 						//addDraw(photons);
 						if (photonsRendered > 0)
