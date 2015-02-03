@@ -37,6 +37,7 @@ import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 import java.awt.Color;
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -81,6 +82,7 @@ public class TraceDiffusion implements PlugIn
 	private static TextWindow summaryTable = null;
 
 	private static final String[] NAMES = new String[] { "Total Signal", "Signal/Frame", "t-On (s)" };
+	private static final boolean[] ROUNDED = new boolean[] { false, false, true };
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
@@ -102,6 +104,9 @@ public class TraceDiffusion implements PlugIn
 	private static boolean displayDHistogram = true;
 
 	private static boolean saveTraceDistances = false;
+	private static boolean saveRawData = false;
+	private static String rawDataDirectory = "";
+	private boolean directoryChosen = false;
 	private static String distancesFilename = "";
 	private static double minFraction = 0.1;
 	private static double minDifference = 2;
@@ -318,6 +323,8 @@ public class TraceDiffusion implements PlugIn
 			}
 
 			// Calculate the cumulative jump-distance histogram
+			if (saveRawData)
+				saveStatistics(jumpDistances, "Jump Distance", "Distance (um^2/second)", false);
 			double[][] jdHistogram = Maths.cumulativeHistogram(jumpDistances.getValues(), true);
 			// Always show the jump distance histogram
 			String jdTitle = TITLE + " Jump Distance";
@@ -393,11 +400,14 @@ public class TraceDiffusion implements PlugIn
 
 	private void showHistogram(StoredDataStatistics stats, String title)
 	{
-		showHistogram(stats, title, false);
+		showHistogram(stats, title, false, false);
 	}
 
-	private void showHistogram(StoredDataStatistics stats, String title, boolean alwaysRemoveOutliers)
+	private void showHistogram(StoredDataStatistics stats, String title, boolean alwaysRemoveOutliers, boolean rounded)
 	{
+		if (saveRawData)
+			saveStatistics(stats, title, title, rounded);
+
 		int id = Utils.showHistogram(TITLE, stats, title, 0, (settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0,
 				settings.histogramBins);
 		if (Utils.isNewWindow())
@@ -481,20 +491,22 @@ public class TraceDiffusion implements PlugIn
 		{
 			distancesFilename = Utils.replaceExtension(distancesFilename, "xls");
 
-			OutputStreamWriter out = null;
+			BufferedWriter out = null;
 			try
 			{
 				FileOutputStream fos = new FileOutputStream(distancesFilename);
-				out = new OutputStreamWriter(fos, "UTF-8");
+				out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
 				double[] msd = msdPerMolecule.getValues();
 				double[] msd2 = msdPerMoleculeAdjacent.getValues();
 				double[] dStar = dStarPerMolecule.getValues();
 				double[] dStar2 = dStarPerMoleculeAdjacent.getValues();
-				out.write(String.format("#%d traces : Precision = %s nm : Exposure time = %s s\n", nTraces,
+				out.write(String.format("#%d traces : Precision = %s nm : Exposure time = %s s", nTraces,
 						Utils.rounded(precision, 4), Utils.rounded(exposureTime, 4)));
+				out.newLine();
 				out.write(String
-						.format("#TraceId\tMSD all-vs-all (um^2/s)\tMSD adjacent (um^2/s)\tD* all-vs-all(um^2/s)\tD* adjacent(um^2/s)\tDistances (um^2) per %ss ... \n",
+						.format("#TraceId\tMSD all-vs-all (um^2/s)\tMSD adjacent (um^2/s)\tD* all-vs-all(um^2/s)\tD* adjacent(um^2/s)\tDistances (um^2) per %ss ... ",
 								Utils.rounded(exposureTime, 4)));
+				out.newLine();
 				for (int i = 0; i < msd.length; i++)
 				{
 					out.write(Integer.toString(i + 1));
@@ -511,7 +523,7 @@ public class TraceDiffusion implements PlugIn
 						out.write('\t');
 						out.write(Utils.rounded(d, 4));
 					}
-					out.write('\n');
+					out.newLine();
 				}
 			}
 			catch (Exception e)
@@ -528,6 +540,103 @@ public class TraceDiffusion implements PlugIn
 					catch (IOException e)
 					{
 					}
+				}
+			}
+		}
+	}
+
+	private void saveMSD(double[] x, double[] y, double[] se)
+	{
+		if (!directoryChosen)
+			rawDataDirectory = Utils.getDirectory("Data_directory", rawDataDirectory);
+		directoryChosen = true;
+		if (rawDataDirectory == null)
+			return;
+		String filename = rawDataDirectory + "MSD.txt";
+
+		BufferedWriter out = null;
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(filename);
+			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
+			out.write("Time (s)\tDistance (um^2)\tS.E.");
+			out.newLine();
+			for (int i = 0; i < x.length; i++)
+			{
+				out.write(Utils.rounded(x[i]));
+				out.write('\t');
+				out.write(Double.toString(y[i]));
+				out.write('\t');
+				out.write(Double.toString(se[i]));
+				out.newLine();
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		finally
+		{
+			if (out != null)
+			{
+				try
+				{
+					out.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
+	}
+
+	private void saveStatistics(StoredDataStatistics stats, String title, String label, boolean rounded)
+	{
+		if (!directoryChosen)
+			rawDataDirectory = Utils.getDirectory("Data_directory", rawDataDirectory);
+		directoryChosen = true;
+		if (rawDataDirectory == null)
+			return;
+		String filename = rawDataDirectory + title.replace("/", " per ") + ".txt";
+
+		BufferedWriter out = null;
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(filename);
+			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
+			out.write(label);
+			out.newLine();
+			double[] data = stats.getValues();
+			Arrays.sort(data);
+			if (rounded)
+			{
+				for (double d : data)
+				{
+					out.write(Utils.rounded(d, 4));
+					out.newLine();
+				}
+			}
+			else
+			{
+				for (double d : data)
+				{
+					out.write(Double.toString(d));
+					out.newLine();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		finally
+		{
+			if (out != null)
+			{
+				try
+				{
+					out.close();
+				}
+				catch (IOException e)
+				{
 				}
 			}
 		}
@@ -637,7 +746,7 @@ public class TraceDiffusion implements PlugIn
 			{
 				if (displayHistograms[i])
 				{
-					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i]);
+					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i], ROUNDED[i]);
 				}
 			}
 		}
@@ -851,7 +960,7 @@ public class TraceDiffusion implements PlugIn
 
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Select additional inputs ...\n \nPress cancel to continue with the analysis.");
-		
+
 		// If in macro mode then we must just use the String input field to allow the macro
 		// IJ to return the field values from the macro arguments. Using a Choice input
 		// will always return a field value.
@@ -888,6 +997,17 @@ public class TraceDiffusion implements PlugIn
 		return results;
 	}
 
+	/**
+	 * Check if the results are valid for inclusion as additional datasets
+	 * 
+	 * @param r
+	 *            The results
+	 * @param allResults
+	 *            All the current results
+	 * @param nmPerPixel
+	 *            The calibrated pixel size of the primary results
+	 * @return True if the results are not valid to be included
+	 */
 	private boolean notValid(MemoryPeakResults r, ArrayList<MemoryPeakResults> allResults, double nmPerPixel)
 	{
 		// Check the calibration is the same
@@ -920,6 +1040,7 @@ public class TraceDiffusion implements PlugIn
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
 		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
 		gd.addCheckbox("Save_trace_distances", saveTraceDistances);
+		gd.addCheckbox("Save_raw_data", saveRawData);
 		gd.addCheckbox("Show_histograms", settings.showHistograms);
 
 		gd.showDialog();
@@ -944,6 +1065,7 @@ public class TraceDiffusion implements PlugIn
 		minDifference = Math.abs(gd.getNextNumber());
 		minFraction = Math.abs(gd.getNextNumber());
 		saveTraceDistances = gd.getNextBoolean();
+		saveRawData = gd.getNextBoolean();
 		settings.showHistograms = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
@@ -988,6 +1110,9 @@ public class TraceDiffusion implements PlugIn
 
 	private Plot plotMSD(double[] x, double[] y, double[] sd, String title)
 	{
+		if (saveRawData)
+			saveMSD(x, y, sd);
+
 		Plot plot = new Plot(title, "Time (s)", "Distance (um^2)", x, y);
 		// Set limits before any plotting
 		double max = 0;
