@@ -60,8 +60,10 @@ public class CreateDataSettings
 	public double correlation = -0.35;
 	public String psfModel = "";
 	public String psfImageName = "";
+	public boolean enterWidth = false;
 	public double wavelength = 561;
 	public double numericalAperture = 1.4;
+	public double psfSD = 130;
 	public double pixelPitch = 107;
 	public double density = 1;
 	public double diffusionRate = 0;

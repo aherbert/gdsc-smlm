@@ -1002,9 +1002,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			else
 			{
-				hwhm = 0.5 * PSFCalculator.SD_TO_FWHM_FACTOR *
-						PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture) /
-						settings.pixelPitch;
+				final double sd = (settings.enterWidth) ? settings.psfSD : PSFCalculator.calculateStdDev(
+						settings.wavelength, settings.numericalAperture);
+
+				hwhm = 0.5 * PSFCalculator.SD_TO_FWHM_FACTOR * sd / settings.pixelPitch;
 			}
 		}
 		return hwhm;
@@ -1780,15 +1781,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// Calibration based on imaging fluorescent beads at 20nm intervals.
 			// Set the PSF to 1.5 x FWHM at 450nm
-			double sd = PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture) /
-					settings.pixelPitch;
+			double sd = getPsfSD();
 			return new GaussianPSFModel(createRandomGenerator(), sd, sd, 450.0 / settings.pixelPitch);
 		}
 		else
 		{
 			// Airy pattern
-			double width = PSFCalculator.calculateAiryWidth(settings.wavelength, settings.numericalAperture) /
-					settings.pixelPitch;
+			double width = getPsfSD() / PSFCalculator.AIRY_TO_GAUSSIAN;
 			AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, 450.0 / settings.pixelPitch);
 			m.setRing(2);
 			return m;
@@ -3532,19 +3531,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		gd.addMessage("--- PSF Model ---");
 		List<String> imageNames = PSFCombiner.createImageList();
-		if (!imageNames.isEmpty())
+		String[] models = PSF_MODELS;
+		if (imageNames.isEmpty())
 		{
-			// Allow the user to select either a Gaussian or PSF model
-			gd.addChoice("PSF_model", PSF_MODELS, settings.psfModel);
-		}
-		else
-		{
-			// Default to a Gaussian
 			imagePSF = false;
-			gd.addChoice("PSF_model", Arrays.copyOf(PSF_MODELS, PSF_MODELS.length - 1), settings.psfModel);
-			gd.addNumericField("Wavelength (nm)", settings.wavelength, 2);
-			gd.addNumericField("Numerical_aperture", settings.numericalAperture, 2);
+			models = Arrays.copyOf(PSF_MODELS, PSF_MODELS.length - 1);
 		}
+		gd.addChoice("PSF_model", models, settings.psfModel);
+		gd.addCheckbox("Enter_width", settings.enterWidth);
 		return imageNames;
 	}
 
@@ -3558,39 +3552,67 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean collectPSFOptions(GenericDialog gd, List<String> imageNames)
 	{
 		settings.psfModel = gd.getNextChoice();
+		settings.enterWidth = gd.getNextBoolean();
 		if (!imageNames.isEmpty())
-		{
 			imagePSF = settings.psfModel.equals(PSF_MODELS[PSF_MODELS.length - 1]);
-			// Show a second dialog to get the PSF parameters we need
-			GenericDialog gd2 = new GenericDialog(TITLE);
-			gd2.addMessage("Configure the " + settings.psfModel + " PSF model");
-			if (imagePSF)
+
+		// Show a second dialog to get the PSF parameters we need
+		GenericDialog gd2 = new GenericDialog(TITLE);
+		gd2.addMessage("Configure the " + settings.psfModel + " PSF model");
+		if (imagePSF)
+		{
+			gd2.addChoice("PSF_image", imageNames.toArray(new String[imageNames.size()]), settings.psfImageName);
+		}
+		else
+		{
+			if (settings.enterWidth)
 			{
-				gd2.addChoice("PSF_image", imageNames.toArray(new String[imageNames.size()]), settings.psfImageName);
+				gd2.addNumericField("PSF_SD (nm)", settings.psfSD, 2);
 			}
 			else
 			{
 				gd2.addNumericField("Wavelength (nm)", settings.wavelength, 2);
 				gd2.addNumericField("Numerical_aperture", settings.numericalAperture, 2);
 			}
-			gd2.showDialog();
-			if (gd2.wasCanceled())
-				return false;
-			if (imagePSF)
+		}
+		gd2.showDialog();
+		if (gd2.wasCanceled())
+			return false;
+		if (imagePSF)
+		{
+			settings.psfImageName = gd2.getNextChoice();
+		}
+		else
+		{
+			if (settings.enterWidth)
 			{
-				settings.psfImageName = gd2.getNextChoice();
+				settings.psfSD = Math.abs(gd2.getNextNumber());
 			}
 			else
 			{
 				settings.wavelength = Math.abs(gd2.getNextNumber());
 				settings.numericalAperture = Math.abs(gd2.getNextNumber());
 			}
+
+			try
+			{
+				if (settings.enterWidth)
+				{
+					Parameters.isAboveZero("PSF SD", settings.psfSD);
+				}
+				else
+				{
+					Parameters.isAboveZero("Wavelength", settings.wavelength);
+					Parameters.isAboveZero("NA", settings.numericalAperture);
+				}
+			}
+			catch (IllegalArgumentException e)
+			{
+				IJ.error(TITLE, e.getMessage());
+				return false;
+			}
 		}
-		else
-		{
-			settings.wavelength = gd.getNextNumber();
-			settings.numericalAperture = gd.getNextNumber();
-		}
+
 		return true;
 	}
 
