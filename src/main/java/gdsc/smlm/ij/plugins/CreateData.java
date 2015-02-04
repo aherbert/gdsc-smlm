@@ -2623,7 +2623,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Split results into singles (density = 0) and clustered (density > 0)
 				MemoryPeakResults singles = copyMemoryPeakResults("Singles");
 				MemoryPeakResults clustered = copyMemoryPeakResults("Clustered");
-				;
+
 				int i = 0;
 				for (PeakResult r : results.getResults())
 				{
