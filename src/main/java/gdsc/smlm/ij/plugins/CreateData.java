@@ -1723,7 +1723,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// To save memory construct the Image PSF using only the slices that are within 
 			// the depth of field of the simulation
-			double minZ = 0, maxZ = 0;
+			double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
 			for (LocalisationModelSet l : localisationSets)
 			{
 				for (LocalisationModel m : l.getLocalisations())
@@ -1741,13 +1741,25 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			int zCentre = psfSettings.zCentre - 1;
 
 			// Calculate the start/end slices to cover the depth of field
+			// This logic must match the ImagePSFModel.
 			final double unitsPerSlice = psfSettings.nmPerSlice / settings.pixelPitch;
-			int start = (int) Math.round(minZ / unitsPerSlice) + zCentre;
-			int end = (int) Math.round(maxZ / unitsPerSlice) + zCentre;
-			start = (start < 0) ? 0 : (start >= nSlices) ? nSlices - 1 : start;
-			end = (end < 0) ? 0 : (end >= nSlices) ? nSlices - 1 : end;
+			// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
+			// closer to the objective). Thus we invert the z-coordinate to find the appropriate slice.
+			int upper = (int) Math.round(-minZ / unitsPerSlice) + zCentre;
+			int lower = (int) Math.round(-maxZ / unitsPerSlice) + zCentre;
+			upper = (upper < 0) ? 0 : (upper >= nSlices) ? nSlices - 1 : upper;
+			lower = (lower < 0) ? 0 : (lower >= nSlices) ? nSlices - 1 : lower;
 
-			return new ImagePSFModel(extractImageStack(imp, start, end), zCentre - start, psfSettings.nmPerPixel /
+			// We cannot just extract the correct slices since the 
+			// Image PSF requires the z-centre for normalisation
+			if (!(lower <= zCentre && upper >= zCentre))
+			{
+				// Ensure we include the zCentre
+				lower = Math.min(lower, zCentre);
+				upper = Math.max(upper, zCentre);
+			}
+
+			return new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower, psfSettings.nmPerPixel /
 					settings.pixelPitch, unitsPerSlice, psfSettings.fwhm);
 		}
 		catch (Exception e)
