@@ -24,11 +24,12 @@ public class FitEngineConfiguration implements Cloneable
 {
 	private FitConfiguration fitConfiguration;
 
-	// Analysis shows the best area-under-precision-recall curve using a mean filter with 1 SD smoothing or
-	// a Gaussian filter with 2-2.5 SD smoothing. The Gaussian filter is more robust to width mismatch but
-	// the mean filter will be faster as it uses a smaller block size.
+	// Analysis shows the best area-under-precision-recall curve using a mean filter with 1-1.5 SD smoothing or
+	// a Gaussian filter with 2-3 SD smoothing. The Gaussian filter is more robust to width mismatch but
+	// the mean filter will be faster as it uses a smaller block size. Setting the parameter at a higher level 
+	// allows the filter to work on out-of-focus spots which will have a wider PSF.
 	
-	private double smooth = 1;
+	private double smooth = 1.3;
 	private double smooth2 = 3;
 	private double search = 1;
 	private double fitting = 3;
