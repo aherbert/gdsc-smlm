@@ -21,6 +21,10 @@ package gdsc.smlm.filters;
  * is computed. The larger block is subtracted from the smaller block to give the edge sum. The average is then computed
  * using the sum of the smaller block and a proportion of the edge sum.
  * <p>
+ * Note: The algorithm allocates a disproportionate weighting to the corner pixels. Each edge pixel should get a
+ * weighting of w and corner pixels w*w. Using simple weighting of the inner and outer blocks results in all the outer
+ * pixels receiving the same weight.
+ * <p>
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
  */
@@ -29,7 +33,7 @@ public class AreaAverageFilter implements Cloneable
 	private SumFilter filter = new SumFilter();
 	private AverageFilter avFilter = new AverageFilter();
 
-	private boolean simpleInterpolation = true;
+	private boolean simpleInterpolation = false;
 
 	/**
 	 * Compute the block average within a 2w+1 size block around each point.
@@ -48,13 +52,6 @@ public class AreaAverageFilter implements Cloneable
 	 */
 	public void areaAverageUsingSumsInternal(float[] data, final int maxx, final int maxy, final double w)
 	{
-		//if (w < 1)
-		//{
-		//	// For small widths then use a dedicated filter
-		//	avFilter.blockAverage3x3Internal(data, maxx, maxy, (float) w);
-		//	return;
-		//}
-
 		if (w <= 0)
 			return;
 
@@ -130,13 +127,6 @@ public class AreaAverageFilter implements Cloneable
 	 */
 	public void areaAverageUsingSums(float[] data, final int maxx, final int maxy, final double w)
 	{
-		//if (w < 1)
-		//{
-		//	// For small widths then use a dedicated filter
-		//	avFilter.blockAverage3x3(data, maxx, maxy, (float) w);
-		//	return;
-		//}
-
 		if (w <= 0)
 			return;
 
@@ -204,15 +194,8 @@ public class AreaAverageFilter implements Cloneable
 	 * @param w
 	 *            The width
 	 */
-	public void areaAverageInternal(float[] data, final int maxx, final int maxy, final double w)
+	public void areaAverageUsingAveragesInternal(float[] data, final int maxx, final int maxy, final double w)
 	{
-		//if (w < 1)
-		//{
-		//	// For small widths then use a dedicated filter
-		//	avFilter.blockAverage3x3Internal(data, maxx, maxy, (float) w);
-		//	return;
-		//}
-
 		if (w <= 0)
 			return;
 
@@ -285,15 +268,8 @@ public class AreaAverageFilter implements Cloneable
 	 * @param w
 	 *            The width
 	 */
-	public void areaAverage(float[] data, final int maxx, final int maxy, final double w)
+	public void areaAverageUsingAverages(float[] data, final int maxx, final int maxy, final double w)
 	{
-		//if (w < 1)
-		//{
-		//	// For small widths then use a dedicated filter
-		//	avFilter.blockAverage3x3(data, maxx, maxy, (float) w);
-		//	return;
-		//}
-
 		if (w <= 0)
 			return;
 
@@ -375,7 +351,7 @@ public class AreaAverageFilter implements Cloneable
 	}
 
 	/**
-	 * The average for block size n and n+1 is linear interpolated. Set this to true to use a weight of (w-n) for the
+	 * The average for block size n and n+1 is linearly interpolated. Set this to true to use a weight of (w-n) for the
 	 * outer average. Set to false to use a weight based on the area of the edge pixels in the (2w+1) region.
 	 * 
 	 * @param simpleInterpolation
