@@ -21,7 +21,6 @@ public class AreaAverageFilterTest
 	//int[] primes = new int[] { 1024 };
 	float[] boxSizes = new float[] { 15.5f, 9.5f, 5.5f, 3.5f, 2.5f };
 
-
 	private float[] floatCreateData(int width, int height)
 	{
 		float[] data = new float[width * height];
@@ -30,13 +29,13 @@ public class AreaAverageFilterTest
 
 		return data;
 	}
-	
+
 	private float[] floatClone(float[] data1)
 	{
 		float[] data2 = Arrays.copyOf(data1, data1.length);
 		return data2;
 	}
-	
+
 	private void floatArrayEquals(String message, float[] data1, float[] data2, float boxSize)
 	{
 		Assert.assertArrayEquals(message, data1, data2, 1e-2f);
@@ -54,7 +53,8 @@ public class AreaAverageFilterTest
 		for (int width : primes)
 			for (int height : primes)
 				for (float boxSize : boxSizes)
-					floatCompareAreaAverageNxNInternalAndAreaAverageUsingSumsNxNInternalReturnSameResult(width, height, boxSize);
+					floatCompareAreaAverageNxNInternalAndAreaAverageUsingSumsNxNInternalReturnSameResult(width, height,
+							boxSize);
 	}
 
 	private void floatCompareAreaAverageNxNInternalAndAreaAverageUsingSumsNxNInternalReturnSameResult(int width,
@@ -154,5 +154,120 @@ public class AreaAverageFilterTest
 			dataSet.add(floatCreateData(primes[0], primes[0]));
 		}
 		return dataSet;
+	}
+
+	@Test
+	public void areaAverageCorrectlyInterpolatesBetweenBlocks()
+	{
+		rand = new gdsc.smlm.utils.Random(-30051976);
+		int max = 50;
+		float[] data = floatCreateData(max, max);
+		AreaAverageFilter filter = new AreaAverageFilter();
+		int n = 30;
+		float[][] results = new float[n + 1][];
+		double[] w = new double[n + 1];
+		int count = 0;
+		for (int i = 0; i <= n; i++)
+		{
+			w[count] = i / 10.0;
+			results[count] = data.clone();
+			filter.areaAverage(results[count], max, max, w[count]);
+			count++;
+		}
+
+		// Pick some points and see if they are monototically interpolated between integer blocks
+		int[] p = new int[] { 10, 20, 30, 40 };
+		for (int x : p)
+		{
+			for (int y : p)
+			{
+				int index = y * max + x;
+				double[] yy = new double[count];
+				int c = 0;
+				for (float[] data1 : results)
+				{
+					yy[c++] = data1[index];
+				}
+				
+				// Debugging
+				//String title = "AreaAverage";
+				//ij.gui.Plot plot = new ij.gui.Plot(title, "width", "Mean", w, yy);
+				//gdsc.smlm.ij.utils.Utils.display(title, plot);
+
+				for (int i = 0; i < n; i += 10)
+				{
+					boolean up = yy[i + 10] > yy[i];
+					for (int j = i + 1; j < i + 10; j++)
+					{
+						if (up)
+						{
+							Assert.assertTrue(yy[j] >= yy[j - 1]);
+							Assert.assertTrue(yy[j] <= yy[j + 1]);
+						}
+						else
+						{
+							Assert.assertTrue(yy[j] <= yy[j - 1]);
+							Assert.assertTrue(yy[j] >= yy[j + 1]);
+						}
+					}
+				}
+
+			}
+		}
+	}
+
+	@Test
+	public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks()
+	{
+		rand = new gdsc.smlm.utils.Random(-30051976);
+		int max = 50;
+		float[] data = floatCreateData(max, max);
+		AreaAverageFilter filter = new AreaAverageFilter();
+		int n = 30;
+		float[][] results = new float[n + 1][];
+		double[] w = new double[n + 1];
+		int count = 0;
+		for (int i = 0; i <= n; i++)
+		{
+			w[count] = i / 10.0;
+			results[count] = data.clone();
+			filter.areaAverageInternal(results[count], max, max, w[count]);
+			count++;
+		}
+
+		// Pick some points and see if they are monototically interpolated between integer blocks
+		int[] p = new int[] { 10, 20, 30, 40 };
+		for (int x : p)
+		{
+			for (int y : p)
+			{
+				int index = y * max + x;
+				double[] yy = new double[count];
+				int c = 0;
+				for (float[] data1 : results)
+				{
+					yy[c++] = data1[index];
+				}
+
+				for (int i = 0; i < n; i += 10)
+				{
+					boolean up = yy[i + 10] > yy[i];
+					for (int j = i + 1; j < i + 10; j++)
+					{
+						if (up)
+						{
+							Assert.assertTrue(yy[j] >= yy[j - 1]);
+							Assert.assertTrue(yy[j] <= yy[j + 1]);
+						}
+						else
+						{
+							Assert.assertTrue(yy[j] <= yy[j - 1]);
+							Assert.assertTrue(yy[j] >= yy[j + 1]);
+						}
+					}
+				}
+
+			}
+		}
 	}
 }
