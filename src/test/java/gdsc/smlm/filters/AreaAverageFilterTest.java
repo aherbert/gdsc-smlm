@@ -12,8 +12,8 @@ public class AreaAverageFilterTest
 	private gdsc.smlm.utils.Random rand;
 
 	private boolean debug = false;
-	private int ITER = 30;
-	private int InternalITER = 50;
+	private int ITER = 100;
+	private int InternalITER = 300;
 
 	// TODO - The test data should be representative of the final use case
 	int[] primes = new int[] { 113, 97, 53, 29 };
