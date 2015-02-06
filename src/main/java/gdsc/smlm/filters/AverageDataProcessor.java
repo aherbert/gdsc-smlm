@@ -24,8 +24,9 @@ import java.util.List;
  */
 public class AverageDataProcessor extends DataProcessor
 {
-	private final double smooth;
-	private AreaAverageFilter filter = new AreaAverageFilter();
+	private final float smooth;
+	private final int iSmooth;
+	private AverageFilter filter = new AverageFilter();
 
 	/**
 	 * Constructor
@@ -38,7 +39,9 @@ public class AverageDataProcessor extends DataProcessor
 	public AverageDataProcessor(int border, double smooth)
 	{
 		super(border);
-		this.smooth = convert(smooth);
+		this.smooth = (float)convert(smooth);
+		// Store the smoothing value as an integer
+		iSmooth = ((int) smooth == smooth) ? (int) smooth : 0;
 	}
 
 	/**
@@ -70,10 +73,33 @@ public class AverageDataProcessor extends DataProcessor
 			// Smoothing destructively modifies the data so create a copy
 			smoothData = Arrays.copyOf(data, width * height);
 
-			if (smooth <= getBorder())
-				filter.areaAverageInternal(smoothData, width, height, smooth);
+			// Q. Should we do the correct average using the AverageFilter
+			// or should we the interpolated AreaAverage filter?
+
+			if (iSmooth > 1)
+			{
+				// Integer smoothing is faster using a rolling block algorithm
+				if (smooth <= getBorder())
+				{
+					filter.rollingBlockAverageInternal(smoothData, width, height, iSmooth);
+				}
+				else
+				{
+					filter.rollingBlockAverage(smoothData, width, height, iSmooth);
+				}
+			}
 			else
-				filter.areaAverage(smoothData, width, height, smooth);
+			{
+				// Float smoothing must use the striped block algorithm
+				if (smooth <= getBorder())
+				{
+					filter.stripedBlockAverageInternal(smoothData, width, height, smooth);
+				}
+				else
+				{
+					filter.stripedBlockAverage(smoothData, width, height, smooth);
+				}
+			}
 		}
 		return smoothData;
 	}
@@ -95,7 +121,7 @@ public class AverageDataProcessor extends DataProcessor
 	{
 		AverageDataProcessor f = (AverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (AreaAverageFilter) filter.clone();
+		f.filter = (AverageFilter) filter.clone();
 		return f;
 	}
 
