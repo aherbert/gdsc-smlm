@@ -1,5 +1,7 @@
 package gdsc.smlm.filters;
 
+import gdsc.smlm.utils.StoredDataStatistics;
+
 import java.awt.Rectangle;
 
 /*----------------------------------------------------------------------------- 
@@ -16,7 +18,7 @@ import java.awt.Rectangle;
  *---------------------------------------------------------------------------*/
 
 /**
- * Computes the mean using a circular maske.
+ * Computes the mean using a circular mask.
  * <p>
  * Adapted from ij.plugin.filter.RankFilters
  */
@@ -27,7 +29,7 @@ public class CircularMeanFilter implements Cloneable
 
 	/**
 	 * Compute the mean.
-	 * Pixels within border regions (defined by 1x radius) are unchanged.
+	 * Pixels within border regions (defined by 1 x radius) are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
 	 * 
@@ -164,12 +166,12 @@ public class CircularMeanFilter implements Cloneable
 			int cacheLineP, Rectangle roi, int y, double[] sums, float maxValue, boolean smallKernel)
 	{
 		int valuesP = roi.x + y * width;
-		
+
 		// NOTE:
 		// The incremental algorithm does not work.
 		// The full calculation is always true in the original source code.
 		boolean fullCalculation = true;// smallKernel; //for small kernel, always use the full area, not incremental algorithm
-		
+
 		for (int x = 0; x < roi.width; x++, valuesP++)
 		{ // x is with respect to roi.x
 			if (fullCalculation)
@@ -287,11 +289,8 @@ public class CircularMeanFilter implements Cloneable
 	 * Create a circular kernel (structuring element) of a given radius.
 	 *
 	 * @param radius
-	 *            :
 	 *            Radius = 0.5 includes the 4 neighbors of the pixel in the center,
 	 *            radius = 1 corresponds to a 3x3 kernel size.
-	 * @param width
-	 *            : width of the roi (or image if roi width=image width) for filtering.
 	 * @return:
 	 *          The output is an array that gives the length of each line of the structuring element
 	 *          (kernel) to the left (negative) and to the right (positive):
@@ -306,12 +305,14 @@ public class CircularMeanFilter implements Cloneable
 	 *          Note that kernel width and height are the same for the circular kernels used here,
 	 *          but treated separately for the case of future extensions with non-circular kernels.
 	 */
-	protected int[] makeLineRadii(double radius)
+	private int[] makeLineRadii(double radius)
 	{
 		// Cache the kernel
 		if (kernel != null && lastRadius == radius)
 			return kernel;
 		lastRadius = radius;
+
+		//System.out.println(java.util.Arrays.toString(getRadii(10, 0.1)));
 
 		if (radius >= 1.5 && radius < 1.75) //this code creates the same sizes as the previous RankFilters
 			radius = 1.75;
@@ -337,6 +338,48 @@ public class CircularMeanFilter implements Cloneable
 		kernel[kernel.length - 1] = kRadius;
 		//for (int i=0; i<kHeight;i++)IJ.log(i+": "+kernel[2*i]+"-"+kernel[2*i+1]);
 		return kernel;
+	}
+
+	/**
+	 * Get the radii where different smoothing will be applied
+	 * 
+	 * @param max
+	 *            The maximum radii to include
+	 * @param increment
+	 *            The increment to use between radii
+	 * @return The radiis where a different smoothing will be applied
+	 */
+	public static double[] getRadii(double max, double increment)
+	{
+		StoredDataStatistics radii = new StoredDataStatistics();
+		double lastN = 0;
+		if (increment < 0)
+			increment = 0.1;
+		for (double r = 0.5; r <= max; r += increment)
+		{
+			int nPoints = getNPoints(r);
+			if (nPoints > lastN)
+				radii.add(r);
+			lastN = nPoints;
+		}
+		return radii.getValues();
+	}
+
+	private static int getNPoints(double radius)
+	{
+		if (radius >= 1.5 && radius < 1.75) //this code creates the same sizes as the previous RankFilters
+			radius = 1.75;
+		else if (radius >= 2.5 && radius < 2.85)
+			radius = 2.85;
+		int r2 = (int) (radius * radius) + 1;
+		int kRadius = (int) (Math.sqrt(r2 + 1e-10));
+		int nPoints = 2 * kRadius + 1;
+		for (int y = 1; y <= kRadius; y++)
+		{
+			int dx = (int) (Math.sqrt(r2 - y * y + 1e-10));
+			nPoints += 4 * dx + 2;
+		}
+		return nPoints;
 	}
 
 	//kernel height
