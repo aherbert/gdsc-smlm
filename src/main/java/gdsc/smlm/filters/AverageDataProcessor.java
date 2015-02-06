@@ -69,11 +69,18 @@ public class AverageDataProcessor extends DataProcessor
 		// Store the smoothing value as an integer
 		iSmooth = ((int) smooth == smooth) ? (int) smooth : 0;
 
-		// Only create the filter we need
-		if (smooth > areaFilterLimit)
-			areaFilter = new AreaAverageFilter();
-		else
+		// Only create the area filter if we need it
+		if (iSmooth > 0)
+		{
 			filter = new AverageFilter();
+		}
+		else
+		{
+			if (smooth > areaFilterLimit)
+				areaFilter = new AreaAverageFilter();
+			else
+				filter = new AverageFilter();
+		}
 	}
 
 	/**
