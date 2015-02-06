@@ -689,4 +689,69 @@ public class AverageFilterTest
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
 	}
-}
+
+	@Test
+	public void stripedBlock7x7IsFasterThanStripedBlockNxN()
+	{
+		DataFilter slow = new DataFilter("stripedBlockNxN", false)
+		{
+			public void filter(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverageNxN(data, width, height, (int) boxSize);
+			}
+
+			public void filterInternal(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
+			}
+		};
+		DataFilter fast = new DataFilter("stripedBlock7x7", false)
+		{
+			public void filter(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverage7x7(data, width, height);
+			}
+
+			public void filterInternal(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverage7x7Internal(data, width, height);
+			}
+		};
+
+		int[] testBoxSizes = new int[] { 3 };
+		speedTest(fast, slow, testBoxSizes);
+		speedTestInternal(fast, slow, testBoxSizes);
+	}
+
+	@Test
+	public void interpolatedStripedBlock7x7IsFasterThanStripedBlockNxN()
+	{
+		DataFilter slow = new DataFilter("stripedBlockNxN", true)
+		{
+			public void filter(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverageNxN(data, width, height, boxSize);
+			}
+
+			public void filterInternal(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
+			}
+		};
+		DataFilter fast = new DataFilter("stripedBlock7x7", true)
+		{
+			public void filter(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverage7x7(data, width, height, boxSize);
+			}
+
+			public void filterInternal(float[] data, int width, int height, float boxSize)
+			{
+				f.stripedBlockAverage7x7Internal(data, width, height, boxSize);
+			}
+		};
+
+		int[] testBoxSizes = new int[] { 3 };
+		speedTest(fast, slow, testBoxSizes);
+		speedTestInternal(fast, slow, testBoxSizes);
+	}}

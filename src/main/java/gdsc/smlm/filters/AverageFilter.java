@@ -248,6 +248,8 @@ public class AverageFilter implements Cloneable
 			stripedBlockAverage3x3Internal(data, maxx, maxy);
 		else if (n == 2)
 			stripedBlockAverage5x5Internal(data, maxx, maxy);
+		else if (n == 3)
+			stripedBlockAverage7x7Internal(data, maxx, maxy);
 		else
 			stripedBlockAverageNxNInternal(data, maxx, maxy, n);
 	}
@@ -276,6 +278,8 @@ public class AverageFilter implements Cloneable
 			stripedBlockAverage3x3Internal(data, maxx, maxy, w);
 		else if (w <= 2)
 			stripedBlockAverage5x5Internal(data, maxx, maxy, w);
+		else if (w <= 3)
+			stripedBlockAverage7x7Internal(data, maxx, maxy, w);
 		else
 			stripedBlockAverageNxNInternal(data, maxx, maxy, w);
 	}
@@ -462,8 +466,7 @@ public class AverageFilter implements Cloneable
 			int index2 = maxy + y;
 			for (int x = 0; x <= maxx - 3; x++, index++)
 			{
-				float sum = data[index] + data[index + 1] + data[index + 2];
-				newData[index2] = sum;
+				newData[index2] = data[index] + data[index + 1] + data[index + 2];
 				index2 += maxy;
 			}
 		}
@@ -476,8 +479,7 @@ public class AverageFilter implements Cloneable
 			int index2 = x + maxx;
 			for (int y = 0; y <= maxy - 3; y++, index++)
 			{
-				float sum = newData[index] + newData[index + 1] + newData[index + 2];
-				data[index2] = sum * divisor;
+				data[index2] = (newData[index] + newData[index + 1] + newData[index + 2]) * divisor;
 				index2 += maxx;
 			}
 		}
@@ -557,7 +559,7 @@ public class AverageFilter implements Cloneable
 	 */
 	public void stripedBlockAverage5x5Internal(float[] data, final int maxx, final int maxy)
 	{
-		if (maxx < 3 || maxy < 3)
+		if (maxx < 5 || maxy < 5)
 			return;
 
 		float[] newData = floatBuffer(data.length);
@@ -603,7 +605,7 @@ public class AverageFilter implements Cloneable
 	 * Only pixels with a full block are processed. Pixels within border regions
 	 * are unchanged.
 	 * <p>
-	 * Uses a normalised [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+	 * Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified
 	 * 
@@ -653,6 +655,126 @@ public class AverageFilter implements Cloneable
 			for (int y = 0; y <= maxy - 5; y++, index++)
 			{
 				data[index2] = (w1 * (newData[index] + newData[index + 4]) + newData[index + 1] + newData[index + 2] + newData[index + 3]) *
+						divisor;
+				index2 += maxx;
+			}
+		}
+	}
+
+	/**
+	 * Compute the block average within a 7x7 size block around each point.
+	 * Only pixels with a full block are processed. Pixels within border regions
+	 * are unchanged.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 */
+	public void stripedBlockAverage7x7Internal(float[] data, final int maxx, final int maxy)
+	{
+		if (maxx < 7 || maxy < 7)
+			return;
+
+		float[] newData = floatBuffer(data.length);
+
+		final float divisor = (float) (1.0 / 49);
+
+		// NOTE: 
+		// To increase speed when sweeping the arrays:
+		//   newData is XY ordinal => x * maxy + y
+		//   data is YX ordinal    => y * maxx + x
+
+		// X-direction
+		for (int y = 0; y < maxy; y++)
+		{
+			int index = y * maxx;
+			int index2 = 3 * maxy + y;
+			for (int x = 0; x <= maxx - 7; x++, index++)
+			{
+				float sum = data[index] + data[index + 1] + data[index + 2] + data[index + 3] + data[index + 4] +
+						data[index + 5] + data[index + 6];
+				newData[index2] = sum;
+				index2 += maxy;
+			}
+		}
+
+		// Y-direction. 
+		// Only sweep over the interior
+		for (int x = 3; x < maxx - 3; x++)
+		{
+			int index = x * maxy;
+			int index2 = x + 3 * maxx;
+			for (int y = 0; y <= maxy - 7; y++, index++)
+			{
+				float sum = newData[index] + newData[index + 1] + newData[index + 2] + newData[index + 3] +
+						newData[index + 4] + newData[index + 5] + newData[index + 6];
+				data[index2] = sum * divisor;
+				index2 += maxx;
+			}
+		}
+	}
+
+	/**
+	 * Compute the block average within a 7x7 size block around each point.
+	 * Only pixels with a full block are processed. Pixels within border regions
+	 * are unchanged.
+	 * <p>
+	 * Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The weight (should be between 1 and 2)
+	 */
+	public void stripedBlockAverage7x7Internal(float[] data, final int maxx, final int maxy, final float w)
+	{
+		if (maxx < 7 || maxy < 7)
+			return;
+
+		float[] newData = floatBuffer(data.length);
+
+		final float w1 = (w < 3) ? w - (int) w : 1;
+		final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
+
+		// NOTE: 
+		// To increase speed when sweeping the arrays:
+		//   newData is XY ordinal => x * maxy + y
+		//   data is YX ordinal    => y * maxx + x
+
+		// X-direction
+		for (int y = 0; y < maxy; y++)
+		{
+			int index = y * maxx;
+			int index2 = 3 * maxy + y;
+			for (int x = 0; x <= maxx - 7; x++, index++)
+			{
+				newData[index2] = w1 * (data[index] + data[index + 6]) + data[index + 1] + data[index + 2] +
+						data[index + 3] + data[index + 4] + data[index + 5];
+				index2 += maxy;
+			}
+		}
+
+		// Y-direction. 
+		// Only sweep over the interior
+		for (int x = 3; x < maxx - 3; x++)
+		{
+			int index = x * maxy;
+			int index2 = x + 3 * maxx;
+			for (int y = 0; y <= maxy - 7; y++, index++)
+			{
+				data[index2] = (w1 * (newData[index] + newData[index + 6]) + newData[index + 1] + newData[index + 2] +
+						newData[index + 3] + newData[index + 4] + newData[index + 5]) *
 						divisor;
 				index2 += maxx;
 			}
@@ -1272,6 +1394,8 @@ public class AverageFilter implements Cloneable
 			stripedBlockAverage3x3(data, maxx, maxy);
 		else if (n == 2)
 			stripedBlockAverage5x5(data, maxx, maxy);
+		else if (n == 3)
+			stripedBlockAverage7x7(data, maxx, maxy);
 		else
 			stripedBlockAverageNxN(data, maxx, maxy, n);
 	}
@@ -1298,6 +1422,8 @@ public class AverageFilter implements Cloneable
 			stripedBlockAverage3x3(data, maxx, maxy, w);
 		else if (w <= 2)
 			stripedBlockAverage5x5(data, maxx, maxy, w);
+		else if (w <= 3)
+			stripedBlockAverage7x7(data, maxx, maxy, w);
 		else
 			stripedBlockAverageNxN(data, maxx, maxy, w);
 	}
@@ -1667,10 +1793,8 @@ public class AverageFilter implements Cloneable
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4];
-
 				// Store result in transpose
-				outData[centreIndex] = sum;
+				outData[centreIndex] = row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4];
 				centreIndex += height;
 			}
 		}
@@ -1691,10 +1815,8 @@ public class AverageFilter implements Cloneable
 			for (int x = 0; x < width; x++)
 			{
 				// Sum strips
-				float sum = row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4];
-
 				// Store result in transpose
-				outData[centreIndex] = sum * divisor;
+				outData[centreIndex] = (row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4]) * divisor;
 				centreIndex += height;
 			}
 		}
@@ -1703,7 +1825,7 @@ public class AverageFilter implements Cloneable
 	/**
 	 * Compute the block average within a 5x5 size block around each point.
 	 * <p>
-	 * Uses a normalised [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+	 * Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
 	 * <p>
 	 * Note: the input data is destructively modified.
 	 * 
@@ -1772,6 +1894,149 @@ public class AverageFilter implements Cloneable
 		}
 	}
 
+	/**
+	 * Compute the block average within a 7x7 size block around each point.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 */
+	public void stripedBlockAverage7x7(float[] data, final int maxx, final int maxy)
+	{
+		float[] newData = floatBuffer(data.length);
+
+		final float divisor = (float) (1.0 / 49);
+
+		// NOTE: 
+		// To increase speed when sweeping the arrays and allow for reusing code:
+		//   newData is XY ordinal => x * maxy + y
+		//   data is YX ordinal    => y * maxx + x
+
+		// X-direction
+		int width = maxx;
+		int height = maxy;
+		float[] inData = data;
+		float[] outData = newData;
+
+		float[] row = floatRowBuffer(width + 6);
+		for (int y = 0; y < height; y++)
+		{
+			extractRow3(inData, y, width, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				// Store result in transpose
+				outData[centreIndex] = row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] + row[x + 5] +
+						row[x + 6];
+				centreIndex += height;
+			}
+		}
+
+		// Y-direction. 
+		width = maxy;
+		height = maxx;
+		inData = newData;
+		outData = data;
+
+		row = floatRowBuffer(width + 6);
+		for (int y = 0; y < height; y++)
+		{
+			// Extract row (pad ends)
+			extractRow3(inData, y, width, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				// Store result in transpose
+				outData[centreIndex] = (row[x] + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] + row[x + 5] + row[x + 6]) *
+						divisor;
+				centreIndex += height;
+			}
+		}
+	}
+
+	/**
+	 * Compute the block average within a 7x7 size block around each point.
+	 * <p>
+	 * Uses a normalised [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+	 * <p>
+	 * Note: the input data is destructively modified.
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param w
+	 *            The weight (should be between 2 and 3)
+	 */
+	public void stripedBlockAverage7x7(float[] data, final int maxx, final int maxy, final float w)
+	{
+		float[] newData = floatBuffer(data.length);
+
+		final float w1 = (w < 3) ? w - (int) w : 1;
+		final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
+
+		// NOTE: 
+		// To increase speed when sweeping the arrays and allow for reusing code:
+		//   newData is XY ordinal => x * maxy + y
+		//   data is YX ordinal    => y * maxx + x
+
+		// X-direction
+		int width = maxx;
+		int height = maxy;
+		float[] inData = data;
+		float[] outData = newData;
+
+		float[] row = floatRowBuffer(width + 6);
+		for (int y = 0; y < height; y++)
+		{
+			extractRow3(inData, y, width, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				// Store result in transpose
+				outData[centreIndex] = w1 * (row[x] + row[x + 6]) + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] +
+						row[x + 5];
+				centreIndex += height;
+			}
+		}
+
+		// Y-direction. 
+		width = maxy;
+		height = maxx;
+		inData = newData;
+		outData = data;
+
+		row = floatRowBuffer(width + 6);
+		for (int y = 0; y < height; y++)
+		{
+			// Extract row (pad ends)
+			extractRow3(inData, y, width, row);
+
+			int centreIndex = y;
+			for (int x = 0; x < width; x++)
+			{
+				// Sum strips
+				// Store result in transpose
+				outData[centreIndex] = (w1 * (row[x] + row[x + 6]) + row[x + 1] + row[x + 2] + row[x + 3] + row[x + 4] + row[x + 5]) *
+						divisor;
+				centreIndex += height;
+			}
+		}
+	}
+
 	private float[] floatRowBuffer(int size)
 	{
 		if (floatRowBuffer == null || floatRowBuffer.length < size)
@@ -1818,6 +2083,18 @@ public class AverageFilter implements Cloneable
 
 		// Fill in data
 		System.arraycopy(inData, index, row, 2, width);
+	}
+
+	private void extractRow3(float[] inData, int y, int width, float[] row)
+	{
+		final int index = y * width;
+
+		// Pad ends
+		row[0] = row[1] = row[2] = inData[index];
+		row[3 + width] = row[4 + width] = row[5 + width] = inData[index + width - 1];
+
+		// Fill in data
+		System.arraycopy(inData, index, row, 3, width);
 	}
 
 	/**
