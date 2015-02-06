@@ -19,16 +19,20 @@ import java.util.List;
  *---------------------------------------------------------------------------*/
 
 /**
- * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter. A simple
- * weighted approximation is used for less than 1 pixel smoothing.
+ * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter. When the box
+ * size is large then the smoothing switches to using an interpolation between two block sizes. This is an approximation
+ * due to incorrect weighting of the corners. Note that at large sizes the corners are a fraction of the total edge
+ * pixels so the difference is minor.
+ * 
+ * @see gdsc.smlm.filters.AreaAverageFilter
  */
 public class AverageDataProcessor extends DataProcessor
 {
 	/**
-	 * Define the smoothing size at which the smoothing switches to using an interpolation between two block sizes.
-	 * Below this limit the smoothing uses an exact mean filter.
+	 * Define the default smoothing size at which the smoothing switches to using an interpolation between two block
+	 * sizes. Below this limit the smoothing uses an exact mean filter.
 	 */
-	public static int AREA_FILTER_LIMIT = 3;
+	public static final int AREA_FILTER_LIMIT = 3;
 
 	private final float smooth;
 	private final int iSmooth;
@@ -45,13 +49,28 @@ public class AverageDataProcessor extends DataProcessor
 	 */
 	public AverageDataProcessor(int border, double smooth)
 	{
+		this(border, smooth, AREA_FILTER_LIMIT);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param border
+	 *            The border to ignore for maxima
+	 * @param smooth
+	 *            The smoothing width to apply to the data
+	 * @param areaFilterLimit
+	 *            The limit to switch to simple area interpolation
+	 */
+	public AverageDataProcessor(int border, double smooth, int areaFilterLimit)
+	{
 		super(border);
 		this.smooth = (float) convert(smooth);
 		// Store the smoothing value as an integer
 		iSmooth = ((int) smooth == smooth) ? (int) smooth : 0;
 
 		// Only create the filter we need
-		if (smooth > AREA_FILTER_LIMIT)
+		if (smooth > areaFilterLimit)
 			areaFilter = new AreaAverageFilter();
 		else
 			filter = new AverageFilter();
@@ -105,7 +124,7 @@ public class AverageDataProcessor extends DataProcessor
 				// At this point the difference between the filters is small (the area average filter
 				// is biased to the corners) so switch to the faster filter.
 
-				if (smooth > AREA_FILTER_LIMIT)
+				if (areaFilter != null)
 				{
 					if (smooth <= getBorder())
 					{
