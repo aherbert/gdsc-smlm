@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.internal.ArrayComparisonFailure;
 
 public class AreaAverageFilterTest
 {
