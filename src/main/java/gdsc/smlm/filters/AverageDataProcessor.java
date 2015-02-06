@@ -24,9 +24,16 @@ import java.util.List;
  */
 public class AverageDataProcessor extends DataProcessor
 {
+	/**
+	 * Define the smoothing size at which the smoothing switches to using an interpolation between two block sizes.
+	 * Below this limit the smoothing uses an exact mean filter.
+	 */
+	public static int AREA_FILTER_LIMIT = 3;
+
 	private final float smooth;
 	private final int iSmooth;
-	private AverageFilter filter = new AverageFilter();
+	private AverageFilter filter = null;
+	private AreaAverageFilter areaFilter = null;
 
 	/**
 	 * Constructor
@@ -39,9 +46,15 @@ public class AverageDataProcessor extends DataProcessor
 	public AverageDataProcessor(int border, double smooth)
 	{
 		super(border);
-		this.smooth = (float)convert(smooth);
+		this.smooth = (float) convert(smooth);
 		// Store the smoothing value as an integer
 		iSmooth = ((int) smooth == smooth) ? (int) smooth : 0;
+
+		// Only create the filter we need
+		if (smooth > AREA_FILTER_LIMIT)
+			areaFilter = new AreaAverageFilter();
+		else
+			filter = new AverageFilter();
 	}
 
 	/**
@@ -73,9 +86,6 @@ public class AverageDataProcessor extends DataProcessor
 			// Smoothing destructively modifies the data so create a copy
 			smoothData = Arrays.copyOf(data, width * height);
 
-			// Q. Should we do the correct average using the AverageFilter
-			// or should we the interpolated AreaAverage filter?
-
 			if (iSmooth > 1)
 			{
 				// Integer smoothing is faster using a rolling block algorithm
@@ -90,14 +100,32 @@ public class AverageDataProcessor extends DataProcessor
 			}
 			else
 			{
-				// Float smoothing must use the striped block algorithm
-				if (smooth <= getBorder())
+				// Float smoothing must use the striped block algorithm or the area average filter.
+				// The area average filter is faster when above a 7x7 block size.
+				// At this point the difference between the filters is small (the area average filter
+				// is biased to the corners) so switch to the faster filter.
+
+				if (smooth > AREA_FILTER_LIMIT)
 				{
-					filter.stripedBlockAverageInternal(smoothData, width, height, smooth);
+					if (smooth <= getBorder())
+					{
+						areaFilter.areaAverageUsingSumsInternal(smoothData, width, height, smooth);
+					}
+					else
+					{
+						areaFilter.areaAverageUsingSums(smoothData, width, height, smooth);
+					}
 				}
 				else
 				{
-					filter.stripedBlockAverage(smoothData, width, height, smooth);
+					if (smooth <= getBorder())
+					{
+						filter.stripedBlockAverageInternal(smoothData, width, height, smooth);
+					}
+					else
+					{
+						filter.stripedBlockAverage(smoothData, width, height, smooth);
+					}
 				}
 			}
 		}
@@ -121,7 +149,10 @@ public class AverageDataProcessor extends DataProcessor
 	{
 		AverageDataProcessor f = (AverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (AverageFilter) filter.clone();
+		if (filter != null)
+			f.filter = (AverageFilter) filter.clone();
+		else
+			f.areaFilter = (AreaAverageFilter) areaFilter.clone();
 		return f;
 	}
 
