@@ -15,6 +15,7 @@ package gdsc.smlm.engine;
 
 import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
+import gdsc.smlm.filters.CircularMeanDataProcessor;
 import gdsc.smlm.filters.DataProcessor;
 import gdsc.smlm.filters.DoublePassSpotFilter;
 import gdsc.smlm.filters.GaussianDataProcessor;
@@ -311,6 +312,9 @@ public class FitEngine
 
 			case BLOCK_MEAN:
 				return new BlockAverageDataProcessor(border, parameter);
+
+			case CIRCULAR_MEAN:
+				return new CircularMeanDataProcessor(border, parameter);
 
 			case MEDIAN:
 				return new MedianDataProcessor(border, parameter);

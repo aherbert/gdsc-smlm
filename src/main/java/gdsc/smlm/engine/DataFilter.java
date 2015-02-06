@@ -27,6 +27,10 @@ public enum DataFilter
 	 */
 	BLOCK_MEAN("Block mean"),
 	/**
+	 * Use a mean within a specified circle area
+	 */
+	CIRCULAR_MEAN("Circular mean"),
+	/**
 	 * Use a Gaussian with a specified radius
 	 */
 	GAUSSIAN("Gaussian"),
