@@ -68,6 +68,7 @@ public class ClusteringSettings
 	public boolean internalDistances = false;
 	public boolean subSampledDistances = false;
 	public int fitLength = 6;
+	public int fitRestarts = 3;
 	public int jumpDistance = 1;
 	
 	public OptimiserPlot getOptimiserPlot()

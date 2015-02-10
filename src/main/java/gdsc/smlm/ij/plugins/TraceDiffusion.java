@@ -325,7 +325,7 @@ public class TraceDiffusion implements PlugIn
 				saveTraceDistances(traces.length, distances, msdPerMoleculeAllVsAll, msdPerMoleculeAdjacent,
 						dStarPerMoleculeAllVsAll, dStarPerMoleculeAdjacent);
 			}
-			
+
 			if (displayTraceLength)
 			{
 				StoredDataStatistics lengths = calculateTraceLengths(distances);
@@ -1061,6 +1061,7 @@ public class TraceDiffusion implements PlugIn
 		gd.addCheckbox("Internal_distances", settings.internalDistances);
 		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
 		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
+		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
 		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
 		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
@@ -1085,6 +1086,7 @@ public class TraceDiffusion implements PlugIn
 		settings.internalDistances = gd.getNextBoolean();
 		//settings.subSampledDistances = gd.getNextBoolean();
 		settings.fitLength = (int) Math.abs(gd.getNextNumber());
+		settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
 		minFraction = Math.abs(gd.getNextNumber());
@@ -1388,125 +1390,163 @@ public class TraceDiffusion implements PlugIn
 			OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
 					.log(mixedFunction.x.length))));
 
-			CMAESOptimizer opt = null;
-			try
+			// TODO - Iterate this for stability in the initial guess
+			CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
+					checkFeasableCount, random, generateStatistics, checker);
+
+			int evaluations = 0;
+			PointValuePair constrainedSolution = null;
+
+			for (int i = 0; i <= settings.fitRestarts; i++)
 			{
-				// TODO - Iterate this for stability in the initial guess
-
-				opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly, checkFeasableCount,
-						random, generateStatistics, checker);
-				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(mixedFunction.guess()),
-						new ObjectiveFunction(mixedFunction), GoalType.MINIMIZE, bounds, sigma, popSize, new MaxIter(
-								maxIterations), new MaxEval(maxIterations * 2));
-
-				int evaluations = opt.getEvaluations();
-				fitParams[n] = constrainedSolution.getPointRef();
-				SS[n] = constrainedSolution.getValue();
-
-				// TODO - Try a bounded BFGS optimiser
-
-				// Try and improve using a LVM fit
-				final MixedJumpDistanceFunctionGradient mixedFunctionGradient = new MixedJumpDistanceFunctionGradient(
-						jdHistogram[0], jdHistogram[1], estimatedD, n + 1);
-
-				PointVectorValuePair lvmSolution;
+				// Try from the initial guess
 				try
 				{
-					lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-							new ModelFunctionJacobian(new MultivariateMatrixFunction()
-							{
-								public double[][] value(double[] point) throws IllegalArgumentException
-								{
-									return mixedFunctionGradient.jacobian(point);
-								}
-							}), new ModelFunction(mixedFunctionGradient), new Target(mixedFunctionGradient.getY()),
-							new Weight(mixedFunctionGradient.getWeights()), new InitialGuess(fitParams[n]));
-					double ss = calculateSumOfSquares(mixedFunctionGradient.getY(), lvmSolution.getValue());
-					// All fitted parameters must be above zero
-					if (ss < SS[n] && Maths.min(lvmSolution.getPoint()) > 0)
+					PointValuePair solution = opt.optimize(new InitialGuess(mixedFunction.guess()),
+							new ObjectiveFunction(mixedFunction), GoalType.MINIMIZE, bounds, sigma, popSize,
+							new MaxIter(maxIterations), new MaxEval(maxIterations * 2));
+					if (constrainedSolution == null || solution.getValue() < constrainedSolution.getValue())
 					{
-						//Utils.log("  Re-fitting improved the SS from %s to %s (-%s%%)", Utils.rounded(SS[n], 4),
-						//		Utils.rounded(ss, 4), Utils.rounded(100 * (SS[n] - ss) / SS[n], 4));
-						fitParams[n] = lvmSolution.getPoint();
-						SS[n] = ss;
-						evaluations += optimizer.getEvaluations();
+						evaluations = opt.getEvaluations();
+						constrainedSolution = solution;
+						//Utils.log("[%da] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+						//		solution.getValue(), evaluations);
 					}
 				}
-				catch (TooManyIterationsException e)
+				catch (TooManyEvaluationsException e)
 				{
-					//Utils.log("Failed to re-fit : Too many evaluations (%d)", optimizer.getEvaluations());
-				}
-				catch (ConvergenceException e)
-				{
-					//Utils.log("Failed to re-fit : %s", e.getMessage());
 				}
 
-				// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-				ic[n] = Maths.getInformationCriterion(SS[n], mixedFunction.x.length, fitParams[n].length - 1);
+				if (constrainedSolution == null)
+					continue;
 
-				double[] d = new double[n + 1];
-				double[] f = new double[n + 1];
-				double sum = 0;
-				for (int i = 0; i < d.length; i++)
+				// Try from the current optimum
+				try
 				{
-					f[i] = fitParams[n][i * 2];
-					sum += f[i];
-					d[i] = fitParams[n][i * 2 + 1];
-				}
-				for (int i = 0; i < f.length; i++)
-					f[i] /= sum;
-				// Sort by coefficient size
-				sort(d, f);
-				coefficients[n] = d;
-				fractions[n] = f;
-
-				Utils.log("Fit Jump distance (N=%d) : D = %s um^2/s (%s), SS = %f, IC = %s (%d evaluations)", n + 1,
-						format(d), format(f), SS[n], Utils.rounded(ic[n], 4), evaluations);
-
-				boolean valid = true;
-				for (int i = 0; i < f.length; i++)
-				{
-					// Check the fit has fractions above the minimum fraction
-					if (f[i] < minFraction)
+					PointValuePair solution = opt.optimize(new InitialGuess(constrainedSolution.getPointRef()),
+							new ObjectiveFunction(mixedFunction), GoalType.MINIMIZE, bounds, sigma, popSize,
+							new MaxIter(maxIterations), new MaxEval(maxIterations * 2));
+					if (constrainedSolution == null || solution.getValue() < constrainedSolution.getValue())
 					{
-						Utils.log("Fraction is less than the minimum fraction: %s < %s", Utils.rounded(f[i]),
-								Utils.rounded(minFraction));
-						valid = false;
-						break;
-					}
-					// Check the coefficients are different
-					if (i + 1 < f.length && d[i] / d[i + 1] < minDifference)
-					{
-						Utils.log("Coefficients are not different: %s / %s = %s < %s", Utils.rounded(d[i]),
-								Utils.rounded(d[i + 1]), Utils.rounded(d[i] / d[i + 1]), Utils.rounded(minDifference));
-						valid = false;
-						break;
+						evaluations = opt.getEvaluations();
+						constrainedSolution = solution;
+						//Utils.log("[%db] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+						//		solution.getValue(), evaluations);
 					}
 				}
-
-				if (!valid)
-					break;
-
-				// Store the best model
-				if (bestIC > ic[n])
+				catch (TooManyEvaluationsException e)
 				{
-					bestIC = ic[n];
-					best = n;
 				}
-
-				// Store the best multi model
-				if (bestMultiIC < ic[n])
-				{
-					break;
-				}
-
-				bestMultiIC = ic[n];
-				bestMulti = n;
 			}
-			catch (TooManyEvaluationsException e)
+
+			if (constrainedSolution == null)
 			{
-				Utils.log("Failed to fit : Too many evaluations (%d)", opt.getEvaluations());
+				Utils.log("Failed to fit N=%d", n + 1);
+				break;
 			}
+
+			fitParams[n] = constrainedSolution.getPointRef();
+			SS[n] = constrainedSolution.getValue();
+
+			// TODO - Try a bounded BFGS optimiser
+
+			// Try and improve using a LVM fit
+			final MixedJumpDistanceFunctionGradient mixedFunctionGradient = new MixedJumpDistanceFunctionGradient(
+					jdHistogram[0], jdHistogram[1], estimatedD, n + 1);
+
+			PointVectorValuePair lvmSolution;
+			try
+			{
+				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+						new ModelFunctionJacobian(new MultivariateMatrixFunction()
+						{
+							public double[][] value(double[] point) throws IllegalArgumentException
+							{
+								return mixedFunctionGradient.jacobian(point);
+							}
+						}), new ModelFunction(mixedFunctionGradient), new Target(mixedFunctionGradient.getY()),
+						new Weight(mixedFunctionGradient.getWeights()), new InitialGuess(fitParams[n]));
+				double ss = calculateSumOfSquares(mixedFunctionGradient.getY(), lvmSolution.getValue());
+				// All fitted parameters must be above zero
+				if (ss < SS[n] && Maths.min(lvmSolution.getPoint()) > 0)
+				{
+					//Utils.log("  Re-fitting improved the SS from %s to %s (-%s%%)", Utils.rounded(SS[n], 4),
+					//		Utils.rounded(ss, 4), Utils.rounded(100 * (SS[n] - ss) / SS[n], 4));
+					fitParams[n] = lvmSolution.getPoint();
+					SS[n] = ss;
+					evaluations += optimizer.getEvaluations();
+				}
+			}
+			catch (TooManyIterationsException e)
+			{
+				//Utils.log("Failed to re-fit : Too many evaluations (%d)", optimizer.getEvaluations());
+			}
+			catch (ConvergenceException e)
+			{
+				//Utils.log("Failed to re-fit : %s", e.getMessage());
+			}
+
+			// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
+			ic[n] = Maths.getInformationCriterion(SS[n], mixedFunction.x.length, fitParams[n].length - 1);
+
+			double[] d = new double[n + 1];
+			double[] f = new double[n + 1];
+			double sum = 0;
+			for (int i = 0; i < d.length; i++)
+			{
+				f[i] = fitParams[n][i * 2];
+				sum += f[i];
+				d[i] = fitParams[n][i * 2 + 1];
+			}
+			for (int i = 0; i < f.length; i++)
+				f[i] /= sum;
+			// Sort by coefficient size
+			sort(d, f);
+			coefficients[n] = d;
+			fractions[n] = f;
+
+			Utils.log("Fit Jump distance (N=%d) : D = %s um^2/s (%s), SS = %f, IC = %s (%d evaluations)", n + 1,
+					format(d), format(f), SS[n], Utils.rounded(ic[n], 4), evaluations);
+
+			boolean valid = true;
+			for (int i = 0; i < f.length; i++)
+			{
+				// Check the fit has fractions above the minimum fraction
+				if (f[i] < minFraction)
+				{
+					Utils.log("Fraction is less than the minimum fraction: %s < %s", Utils.rounded(f[i]),
+							Utils.rounded(minFraction));
+					valid = false;
+					break;
+				}
+				// Check the coefficients are different
+				if (i + 1 < f.length && d[i] / d[i + 1] < minDifference)
+				{
+					Utils.log("Coefficients are not different: %s / %s = %s < %s", Utils.rounded(d[i]),
+							Utils.rounded(d[i + 1]), Utils.rounded(d[i] / d[i + 1]), Utils.rounded(minDifference));
+					valid = false;
+					break;
+				}
+			}
+
+			if (!valid)
+				break;
+
+			// Store the best model
+			if (bestIC > ic[n])
+			{
+				bestIC = ic[n];
+				best = n;
+			}
+
+			// Store the best multi model
+			if (bestMultiIC < ic[n])
+			{
+				break;
+			}
+
+			bestMultiIC = ic[n];
+			bestMulti = n;
 
 			n++;
 		}
