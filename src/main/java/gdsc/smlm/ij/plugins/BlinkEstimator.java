@@ -22,7 +22,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.plugin.PlugIn;
 
 import java.awt.Color;
@@ -198,7 +198,7 @@ public class BlinkEstimator implements PlugIn
 			adjustedR2[n] = this.adjustedR2;
 		}
 
-		// Plot
+		// SuperPlot
 		plot("Fitted points", "N", nPoints, parameters[0]);
 		plot("Fitted points", "nBlinks", nPoints, parameters[1]);
 		plot("Fitted points", "tOff", nPoints, parameters[2]);
@@ -223,7 +223,7 @@ public class BlinkEstimator implements PlugIn
 	private void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y)
 	{
 		String title = TITLE + " " + yAxisTitle;
-		Plot plot = new Plot(title, xAxisTitle, yAxisTitle, x, y);
+		SuperPlot plot = new SuperPlot(title, xAxisTitle, yAxisTitle, x, y);
 		Utils.display(title, plot);
 	}
 
@@ -251,11 +251,11 @@ public class BlinkEstimator implements PlugIn
 		if (showPlots)
 		{
 			String title = TITLE + " Molecule Counts";
-			Plot plot = new Plot(title, "td (ms)", "Count", td, Ntd);
+			SuperPlot plot = new SuperPlot(title, "td (ms)", "Count", td, Ntd);
 			Utils.display(title, plot);
 
 			plot.setColor(Color.red);
-			plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), Plot.CIRCLE);
+			plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), SuperPlot.CIRCLE);
 
 			// Add the rest that is not fitted
 			double[] xOther = new double[td.length - blinkingModel.size()];
@@ -267,7 +267,7 @@ public class BlinkEstimator implements PlugIn
 			}
 
 			plot.setColor(Color.blue);
-			plot.addPoints(xOther, yOther, Plot.CROSS);
+			plot.addPoints(xOther, yOther, SuperPlot.CROSS);
 			Utils.display(title, plot);
 		}
 

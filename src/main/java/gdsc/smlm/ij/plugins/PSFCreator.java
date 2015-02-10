@@ -41,7 +41,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.gui.PlotWindow;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -622,14 +622,14 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		// Draw a plot of the amplitude
 		if (a != null)
 		{
-			Plot plot = new Plot(TITLE_AMPLITUDE, "z", "Amplitude", smoothAz, smoothA);
+			SuperPlot plot = new SuperPlot(TITLE_AMPLITUDE, "z", "Amplitude", smoothAz, smoothA);
 			double[] limits2 = Maths.limits(Maths.limits(a), smoothA);
 			plot.setLimits(z[0], z[z.length - 1], limits2[0], limits2[1]);
-			plot.addPoints(z, a, Plot.CIRCLE);
+			plot.addPoints(z, a, SuperPlot.CIRCLE);
 
 			// Add a line for the z-centre
 			plot.setColor(Color.GREEN);
-			plot.addPoints(new double[] { cz, cz }, limits2, Plot.LINE);
+			plot.addPoints(new double[] { cz, cz }, limits2, SuperPlot.LINE);
 			plot.setColor(Color.BLACK);
 
 			double amplitude = Double.NaN;
@@ -662,24 +662,24 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		// Show plot of width, X centre, Y centre
 		if (xCoord != null)
 		{
-			Plot plot = new Plot(TITLE_PSF_PARAMETERS, "z", "px", newZ, smoothSd);
+			SuperPlot plot = new SuperPlot(TITLE_PSF_PARAMETERS, "z", "px", newZ, smoothSd);
 			// Get the limits
 			double[] sd2 = invert(sd);
 			double[] limits = Maths.limits(Maths.limits(Maths.limits(Maths.limits(xCoord), yCoord), sd), sd2);
 			plot.setLimits(z[0], z[z.length - 1], limits[0], limits[1]);
-			plot.addPoints(newZ, invert(smoothSd), Plot.LINE);
-			plot.addPoints(z, sd, Plot.DOT);
-			plot.addPoints(z, sd2, Plot.DOT);
+			plot.addPoints(newZ, invert(smoothSd), SuperPlot.LINE);
+			plot.addPoints(z, sd, SuperPlot.DOT);
+			plot.addPoints(z, sd2, SuperPlot.DOT);
 			plot.setColor(Color.BLUE);
-			plot.addPoints(z, xCoord, Plot.DOT);
-			plot.addPoints(newZ, smoothX, Plot.LINE);
+			plot.addPoints(z, xCoord, SuperPlot.DOT);
+			plot.addPoints(newZ, smoothX, SuperPlot.LINE);
 			plot.setColor(Color.RED);
-			plot.addPoints(z, yCoord, Plot.DOT);
-			plot.addPoints(newZ, smoothY, Plot.LINE);
+			plot.addPoints(z, yCoord, SuperPlot.DOT);
+			plot.addPoints(newZ, smoothY, SuperPlot.LINE);
 
 			// Add a line for the z-centre
 			plot.setColor(Color.GREEN);
-			plot.addPoints(new double[] { cz, cz }, limits, Plot.LINE);
+			plot.addPoints(new double[] { cz, cz }, limits, SuperPlot.LINE);
 			plot.setColor(Color.BLACK);
 
 			double width = Double.NaN;
@@ -1305,7 +1305,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		this.distanceThreshold = psfWidth * 3;
 
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Plot the cumulative signal verses distance from the PSF centre.\n \nZ-centre = " + zCentre +
+		gd.addMessage("SuperPlot the cumulative signal verses distance from the PSF centre.\n \nZ-centre = " + zCentre +
 				"\nPSF width = " + Utils.rounded(psfWidth) + " nm");
 		gd.addSlider("Slice", 1, psf.getSize(), slice);
 		final double maxDistance = (psf.getWidth() / 1.414213562) * nmPerPixel;
@@ -1506,11 +1506,11 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			signalLimits = Maths.limits(signal);
 		}
 
-		// Plot the sum
+		// SuperPlot the sum
 		boolean alignWindows = (WindowManager.getFrame(signalTitle) == null);
 
 		final double total = signal[slice - 1];
-		Plot plot = new Plot(signalTitle, "z", "Signal", signalZ, signal);
+		SuperPlot plot = new SuperPlot(signalTitle, "z", "Signal", signalZ, signal);
 		plot.addLabel(
 				0,
 				0,
@@ -1687,7 +1687,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 		boolean alignWindows = (WindowManager.getFrame(title) == null);
 
-		Plot plot = new Plot(title, "Distance (nm)", "Signal", distances, signal);
+		SuperPlot plot = new SuperPlot(title, "Distance (nm)", "Signal", distances, signal);
 		plot.setLimits(0, distances[distances.length - 1], 0, maxy);
 		plot.addLabel(0, 0, String.format("Total = %s (@ %s nm). z = %s nm", Utils.rounded(sum),
 				Utils.rounded(distanceThreshold), Utils.rounded((z - zCentre) * nmPerSlice)));

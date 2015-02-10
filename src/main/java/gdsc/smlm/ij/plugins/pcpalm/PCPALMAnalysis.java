@@ -26,8 +26,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
 import ij.gui.Roi;
+import ij.gui.SuperPlot;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
@@ -757,7 +757,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		return new FloatProcessor(im.getWidth(), im.getHeight(), image, null);
 	}
 
-	public static Plot plotCorrelation(double[][] gr, int offset, String plotTitle, String yAxisTitle,
+	public static SuperPlot plotCorrelation(double[][] gr, int offset, String plotTitle, String yAxisTitle,
 			boolean barChart, boolean showErrorBars)
 	{
 		double[] x = new double[gr[1].length - offset];
@@ -772,7 +772,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			showErrorBars = false;
 		}
 
-		Plot plot = new Plot(plotTitle, "r (nm)", yAxisTitle, x, y);
+		SuperPlot plot = new SuperPlot(plotTitle, "r (nm)", yAxisTitle, x, y);
 		plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
 		Utils.display(plotTitle, plot);
 
@@ -1014,7 +1014,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		// double[] H = new double[x.length];
 		// for (int i = 0; i < x.length; i++)
 		// H[i] = gr[i].getN();
-		// Plot p = new Plot("Histogram", "r", "F", x, H);
+		// SuperPlot p = new SuperPlot("Histogram", "r", "F", x, H);
 		// Utils.display("Histogram", p);
 
 		return new double[][] { x, y, sd };

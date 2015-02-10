@@ -41,7 +41,7 @@ import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
@@ -595,7 +595,7 @@ public class PCPALMMolecules implements PlugIn
 	public double calculateAveragePrecision(ArrayList<Molecule> molecules, String title, int histogramBins,
 			boolean logFitParameters, boolean removeOutliers)
 	{
-		// Plot histogram of the precision
+		// SuperPlot histogram of the precision
 		float[] data = new float[molecules.size()];
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
@@ -642,10 +642,10 @@ public class PCPALMMolecules implements PlugIn
 		float[] xValues = Utils.createHistogramAxis(hist[0]);
 		float[] yValues = Utils.createHistogramValues(hist[1]);
 
-		Plot plot = null;
+		SuperPlot plot = null;
 		if (title != null)
 		{
-			plot = new Plot(title, "Precision", "Frequency", xValues, yValues);
+			plot = new SuperPlot(title, "Precision", "Frequency", xValues, yValues);
 			Utils.display(title, plot);
 		}
 
@@ -730,7 +730,7 @@ public class PCPALMMolecules implements PlugIn
 			for (int i = 0; i < y.length; i++)
 				x[i] += dx;
 			plot.setColor(Color.red);
-			addToPlot(plot, x, skewParameters, Plot.LINE);
+			addToPlot(plot, x, skewParameters, SuperPlot.LINE);
 
 			plot.setColor(Color.black);
 			Utils.display(title, plot);
@@ -824,7 +824,7 @@ public class PCPALMMolecules implements PlugIn
 	 * @param alpha
 	 * @param shape
 	 */
-	private void addToPlot(Plot plot, float[] x, double[] parameters, int shape)
+	private void addToPlot(SuperPlot plot, float[] x, double[] parameters, int shape)
 	{
 		SkewNormalFunction sn = new SkewNormalFunction(parameters);
 		float[] y = new float[x.length];
@@ -1474,7 +1474,7 @@ public class PCPALMMolecules implements PlugIn
 	{
 		String title = TITLE + " " + label;
 		double yMax = Maths.max(stats.getValues());
-		Plot plot;
+		SuperPlot plot;
 		double[][] hist = null;
 		if (integerBins)
 		{
@@ -1493,9 +1493,9 @@ public class PCPALMMolecules implements PlugIn
 			//	hist[1][i] = fHist[1][i];
 			//}
 
-			// Plot
+			// SuperPlot
 			yMax = Maths.max(yValues);
-			plot = new Plot(title, label, "Frequency", xValues, yValues);
+			plot = new SuperPlot(title, label, "Frequency", xValues, yValues);
 			if (xValues.length > 0)
 			{
 				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
@@ -1511,8 +1511,8 @@ public class PCPALMMolecules implements PlugIn
 			double[] xValues = hist[0];
 			double[] yValues = hist[1];
 
-			// Plot
-			plot = new Plot(title, label, "Frequency", xValues, yValues);
+			// SuperPlot
+			plot = new SuperPlot(title, label, "Frequency", xValues, yValues);
 		}
 
 		Utils.display(title, plot);
@@ -1551,15 +1551,15 @@ public class PCPALMMolecules implements PlugIn
 			double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
 			double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
 
-			// Plot
+			// SuperPlot
 			String title = TITLE + " molecule linkage distance";
-			Plot plot = new Plot(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
+			SuperPlot plot = new SuperPlot(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
 			double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
 			if (interIdHist[1].length > 0)
 				max = FastMath.max(max, interIdHist[1][interIdHist[1].length - 1]);
 			plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
 			plot.setColor(Color.blue);
-			plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
+			plot.addPoints(interIdHist[0], interIdHist[1], SuperPlot.LINE);
 			plot.setColor(Color.black);
 			Utils.display(title, plot);
 		}

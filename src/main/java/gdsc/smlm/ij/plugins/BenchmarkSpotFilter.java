@@ -32,7 +32,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
@@ -555,15 +555,15 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (showPlot)
 		{
 			String title = TITLE + " Performance";
-			Plot plot = new Plot(title, "Spot Rank", "");
+			SuperPlot plot = new SuperPlot(title, "Spot Rank", "");
 			plot.setLimits(0, rank.length, 0, 1.05);
 			plot.setColor(Color.blue);
-			plot.addPoints(rank, p, Plot.LINE);
-			//plot.addPoints(rank, maxp, Plot.DOT);
+			plot.addPoints(rank, p, SuperPlot.LINE);
+			//plot.addPoints(rank, maxp, SuperPlot.DOT);
 			plot.setColor(Color.red);
-			plot.addPoints(rank, r, Plot.LINE);
+			plot.addPoints(rank, r, SuperPlot.LINE);
 			plot.setColor(Color.black);
-			plot.addPoints(rank, j, Plot.LINE);
+			plot.addPoints(rank, j, SuperPlot.LINE);
 			plot.setColor(Color.magenta);
 			plot.drawLine(rank[index], 0, rank[index], Maths.max(p[index], r[index], j[index]));
 			plot.setColor(Color.black);
@@ -572,11 +572,11 @@ public class BenchmarkSpotFilter implements PlugIn
 			PlotWindow pw = Utils.display(title, plot);
 
 			title = TITLE + " Precision-Recall";
-			plot = new Plot(title, "Recall", "Precision");
+			plot = new SuperPlot(title, "Recall", "Precision");
 			plot.setLimits(0, 1, 0, 1.05);
 			plot.setColor(Color.red);
-			plot.addPoints(r, p, Plot.LINE);
-			//plot.addPoints(r, maxp, Plot.DOT);
+			plot.addPoints(r, p, SuperPlot.LINE);
+			//plot.addPoints(r, maxp, SuperPlot.DOT);
 			plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));

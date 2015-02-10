@@ -26,7 +26,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
@@ -175,7 +175,7 @@ public class DiffusionRateTest implements PlugIn
 			showExample(totalSteps, diffusionSigma, random);
 		}
 
-		// Plot a graph of mean squared distance
+		// SuperPlot a graph of mean squared distance
 		double[] xValues = new double[stats2D.length];
 		double[] yValues2D = new double[stats2D.length];
 		double[] yValues3D = new double[stats3D.length];
@@ -226,22 +226,22 @@ public class DiffusionRateTest implements PlugIn
 
 		// Create plot
 		String title = TITLE;
-		Plot plot = new Plot(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues2D);
+		SuperPlot plot = new SuperPlot(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues2D);
 		double[] limits = Maths.limits(upper);
 		limits = Maths.limits(limits, lower);
 		limits = Maths.limits(limits, yValues3D);
 		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
 		plot.setColor(Color.blue);
-		plot.addPoints(xValues, lower, Plot.LINE);
-		plot.addPoints(xValues, upper, Plot.LINE);
+		plot.addPoints(xValues, lower, SuperPlot.LINE);
+		plot.addPoints(xValues, upper, SuperPlot.LINE);
 		plot.setColor(Color.magenta);
-		plot.addPoints(xValues, yValues3D, Plot.LINE);
+		plot.addPoints(xValues, yValues3D, SuperPlot.LINE);
 		plot.setColor(Color.red);
 		plot.addPoints(new double[] { xValues[0], xValues[xValues.length - 1] },
-				new double[] { fitted2D.value(xValues[0]), fitted2D.value(xValues[xValues.length - 1]) }, Plot.LINE);
+				new double[] { fitted2D.value(xValues[0]), fitted2D.value(xValues[xValues.length - 1]) }, SuperPlot.LINE);
 		plot.setColor(Color.green);
 		plot.addPoints(new double[] { xValues[0], xValues[xValues.length - 1] },
-				new double[] { fitted3D.value(xValues[0]), fitted3D.value(xValues[xValues.length - 1]) }, Plot.LINE);
+				new double[] { fitted3D.value(xValues[0]), fitted3D.value(xValues[xValues.length - 1]) }, SuperPlot.LINE);
 		plot.setColor(Color.black);
 
 		Utils.display(title, plot);
@@ -382,18 +382,18 @@ public class DiffusionRateTest implements PlugIn
 			xValues[j] = (float) (j + 1) / settings.stepsPerSecond;
 		}
 
-		// Plot x and y coords on a timeline
+		// SuperPlot x and y coords on a timeline
 		String title = TITLE + " example coordinates";
-		Plot plot = new Plot(title, "Time (seconds)", "Distance (um)");
+		SuperPlot plot = new SuperPlot(title, "Time (seconds)", "Distance (um)");
 		float[] xUm = convertToUm(x);
 		float[] yUm = convertToUm(y);
 		float[] limits = Maths.limits(xUm);
 		limits = Maths.limits(limits, yUm);
 		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
 		plot.setColor(Color.red);
-		plot.addPoints(xValues, xUm, Plot.LINE);
+		plot.addPoints(xValues, xUm, SuperPlot.LINE);
 		plot.setColor(Color.blue);
-		plot.addPoints(xValues, yUm, Plot.LINE);
+		plot.addPoints(xValues, yUm, SuperPlot.LINE);
 
 		Utils.display(title, plot);
 

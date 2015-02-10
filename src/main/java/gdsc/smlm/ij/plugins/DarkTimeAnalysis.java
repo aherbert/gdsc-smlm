@@ -28,7 +28,7 @@ import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.plugin.PlugIn;
 
 import java.util.ArrayList;
@@ -201,7 +201,7 @@ public class DarkTimeAnalysis implements PlugIn
 			times[i] += times[i - 1];
 		int total = times[times.length - 1];
 
-		// Plot dark-time up to 100%
+		// SuperPlot dark-time up to 100%
 		double[] x = new double[range];
 		double[] y = new double[range];
 		int truncate = 0;
@@ -222,7 +222,7 @@ public class DarkTimeAnalysis implements PlugIn
 		}
 
 		String title = "Cumulative Dark-time";
-		Plot plot = new Plot(title, "Time (ms)", "Percentile", x, y);
+		SuperPlot plot = new SuperPlot(title, "Time (ms)", "Percentile", x, y);
 		Utils.display(title, plot);
 
 		// Report percentile
@@ -258,8 +258,8 @@ public class DarkTimeAnalysis implements PlugIn
 			for (int i = 0; i < xValues.length; i++)
 				xValues[i] *= msPerFrame;
 
-			// Plot
-			Plot plot = new Plot("Dark-time", "Time (ms)", "Frequency", xValues, yValues);
+			// SuperPlot
+			SuperPlot plot = new SuperPlot("Dark-time", "Time (ms)", "Frequency", xValues, yValues);
 			if (xValues.length > 0)
 			{
 				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);

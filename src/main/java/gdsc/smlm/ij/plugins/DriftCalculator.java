@@ -35,7 +35,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.gui.PlotWindow;
 import ij.gui.Roi;
 import ij.io.OpenDialog;
@@ -1111,12 +1111,12 @@ public class DriftCalculator implements PlugIn
 		double[] b = Maths.limits(original[index]);
 		b = Maths.limits(b, interpolated[index]);
 
-		Plot plot = new Plot(name, "Frame", "Drift (px)", (float[]) null, (float[]) null);
+		SuperPlot plot = new SuperPlot(name, "Frame", "Drift (px)", (float[]) null, (float[]) null);
 		plot.setLimits(a[0], a[1], b[0], b[1]);
 		plot.setColor(new Color(0, 0, 155)); // De-saturated blue
-		plot.addPoints(original[0], original[index], Plot.CROSS);
+		plot.addPoints(original[0], original[index], SuperPlot.CROSS);
 		plot.setColor(java.awt.Color.RED);
-		plot.addPoints(interpolated[0], interpolated[index], Plot.LINE);
+		plot.addPoints(interpolated[0], interpolated[index], SuperPlot.LINE);
 		src = Utils.display(name, plot);
 
 		if (Utils.isNewWindow() && parent != null)

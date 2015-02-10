@@ -8,7 +8,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
@@ -170,7 +170,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		}
 
 		String title = imp.getTitle() + " Noise";
-		Plot plot = new Plot(title, "Slice", "Noise", xValues, yValues1);
+		SuperPlot plot = new SuperPlot(title, "Slice", "Noise", xValues, yValues1);
 		double range = b1[1] - b1[0];
 		if (range == 0)
 			range = 1;
@@ -181,7 +181,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		if (twoMethods)
 		{
 			plot.setColor(Color.red);
-			plot.addPoints(xValues, yValues2, Plot.LINE);
+			plot.addPoints(xValues, yValues2, SuperPlot.LINE);
 			label += String.format(", Red = %s", Utils.rounded(new Statistics(yValues2).getMean()));
 		}
 		plot.addLabel(0, 0, label);

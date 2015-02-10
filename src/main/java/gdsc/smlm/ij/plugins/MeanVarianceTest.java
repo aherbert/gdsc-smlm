@@ -22,7 +22,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
@@ -328,9 +328,9 @@ public class MeanVarianceTest implements PlugIn
 		// Construct the polynomial that best fits the data.
 		final PolynomialFunction fitted = new PolynomialFunction(best);
 
-		// Plot mean verses variance. Gradient is gain in ADU/e.
+		// SuperPlot mean verses variance. Gradient is gain in ADU/e.
 		String title = TITLE + " results";
-		Plot plot = new Plot(title, "Mean", "Variance");
+		SuperPlot plot = new SuperPlot(title, "Mean", "Variance");
 		double[] xlimits = Maths.limits(mean);
 		double[] ylimits = Maths.limits(variance);
 		double xrange = (xlimits[1] - xlimits[0]) * 0.05;
@@ -341,10 +341,10 @@ public class MeanVarianceTest implements PlugIn
 			yrange = 0.05;
 		plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
 		plot.setColor(Color.blue);
-		plot.addPoints(mean, variance, Plot.CROSS);
+		plot.addPoints(mean, variance, SuperPlot.CROSS);
 		plot.setColor(Color.red);
 		plot.addPoints(new double[] { mean[0], mean[mean.length - 1] },
-				new double[] { fitted.value(mean[0]), fitted.value(mean[mean.length - 1]) }, Plot.LINE);
+				new double[] { fitted.value(mean[0]), fitted.value(mean[mean.length - 1]) }, SuperPlot.LINE);
 		Utils.display(title, plot);
 
 		final double avBiasNoise = Math.sqrt(noiseStats.getMean());

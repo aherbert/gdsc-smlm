@@ -21,7 +21,7 @@ import gdsc.smlm.model.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.plugin.PlugIn;
 
 import java.awt.AWTEvent;
@@ -440,9 +440,9 @@ public class PSFCalculator implements PlugIn, DialogListener
 			y2[i] = AiryPattern.intensityGaussian(x[i] / factor);
 		}
 		String title = "PSF profile";
-		Plot p = new Plot(title, "px", "", x2, y);
+		SuperPlot p = new SuperPlot(title, "px", "", x2, y);
 		p.setColor(Color.RED);
-		p.addPoints(x2, y2, Plot.LINE);
+		p.addPoints(x2, y2, SuperPlot.LINE);
 		final double sd = airyWidth * AIRY_TO_GAUSSIAN * factor;
 		final double sdHeight = 0.606530659; //intensityGaussian(1);
 		p.drawLine(-sd, 0, -sd, sdHeight);

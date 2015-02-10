@@ -29,7 +29,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.SuperPlot;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
@@ -374,19 +374,19 @@ public class FIRE implements PlugIn
 
 		String title = name + " FRC Curve";
 		double[] dummy = null;
-		Plot plot = new Plot(title, String.format("Spatial Frequency (%s^-1)", units), "FRC", dummy, dummy);
+		SuperPlot plot = new SuperPlot(title, String.format("Spatial Frequency (%s^-1)", units), "FRC", dummy, dummy);
 		plot.setLimits(0, xValues[xValues.length - 1], yMin, yMax);
 
 		plot.setColor(Color.BLACK);
-		plot.addPoints(xValues, yValues, Plot.LINE);
+		plot.addPoints(xValues, yValues, SuperPlot.LINE);
 
 		plot.setColor(Color.BLUE);
-		plot.addPoints(xValues, threshold, Plot.LINE);
+		plot.addPoints(xValues, threshold, SuperPlot.LINE);
 
 		if (frcNoSmooth != null)
 		{
 			plot.setColor(Color.RED);
-			plot.addPoints(xValues, yValuesNotSmooth, Plot.LINE);
+			plot.addPoints(xValues, yValuesNotSmooth, SuperPlot.LINE);
 		}
 
 		Utils.display(title, plot);
@@ -452,7 +452,7 @@ public class FIRE implements PlugIn
 		}
 
 		String title = name + " FRC Time Evolution";
-		Plot plot = new Plot(title, "Frames", "Resolution", (float[]) null, (float[]) null);
+		SuperPlot plot = new SuperPlot(title, "Frames", "Resolution", (float[]) null, (float[]) null);
 		plot.setLimits(xValues[0], xValues[xValues.length - 1], yMin, yMax);
 		plot.addPoints(xValues, yValues, 1);
 

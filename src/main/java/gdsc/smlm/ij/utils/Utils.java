@@ -23,6 +23,7 @@ import ij.gui.ImageWindow;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.gui.ProgressBar;
+import ij.gui.SuperPlot;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.plugin.frame.Recorder;
@@ -594,8 +595,8 @@ public class Utils
 		if (barChart)
 		{
 			// Standard histogram
-			xValues = Utils.createHistogramAxis(hist[0]);
-			yValues = Utils.createHistogramValues(hist[1]);
+			xValues = hist[0]; //Utils.createHistogramAxis(hist[0]);
+			yValues = hist[1]; //Utils.createHistogramValues(hist[1]);
 		}
 		else
 		{
@@ -616,12 +617,13 @@ public class Utils
 			yValues = Arrays.copyOf(yValues, c);
 		}
 
-		Plot plot = new Plot(title, name, "Frequency", xValues, yValues);
+		SuperPlot plot = new SuperPlot(title, name, "Frequency");
 		if (xValues.length > 0)
 		{
 			double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
 			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, getMaximum(yValues) * 1.05);
 		}
+		plot.addPoints(xValues, yValues, (barChart) ? SuperPlot.BAR : Plot.LINE);
 		if (label != null)
 			plot.addLabel(0, 0, label);
 		PlotWindow window = Utils.display(title, plot);
