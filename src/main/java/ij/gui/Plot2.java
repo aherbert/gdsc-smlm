@@ -14,42 +14,42 @@ import java.lang.reflect.Field;
 /**
  * Extension of the ij.gui.Plot class to add functionality
  */
-public class SuperPlot extends Plot
+public class Plot2 extends Plot
 {
 	/** Draw a bar plot */
 	public static final int BAR = 999;
 
-	public SuperPlot(String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
+	public Plot2(String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
 	{
 		super(title, xLabel, yLabel, xValues, yValues);
 	}
 
-	public SuperPlot(String title, String xLabel, String yLabel, double[] xValues, double[] yValues)
+	public Plot2(String title, String xLabel, String yLabel, double[] xValues, double[] yValues)
 	{
 		super(title, xLabel, yLabel, xValues, yValues);
 	}
 
-	public SuperPlot(String dummy, String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
+	public Plot2(String dummy, String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
 	{
 		super(title, xLabel, yLabel, xValues, yValues);
 	}
 
-	public SuperPlot(String title, String xLabel, String yLabel)
+	public Plot2(String title, String xLabel, String yLabel)
 	{
 		super(title, xLabel, yLabel, (float[]) null, (float[]) null);
 	}
 
-	public SuperPlot(String title, String xLabel, String yLabel, int flags)
+	public Plot2(String title, String xLabel, String yLabel, int flags)
 	{
 		super(title, xLabel, yLabel, (float[]) null, (float[]) null, flags);
 	}
 
-	public SuperPlot(String title, String xLabel, String yLabel, float[] xValues, float[] yValues, int flags)
+	public Plot2(String title, String xLabel, String yLabel, float[] xValues, float[] yValues, int flags)
 	{
 		super(title, xLabel, yLabel, xValues, yValues, flags);
 	}
 
-	public SuperPlot(String title, String xLabel, String yLabel, double[] xValues, double[] yValues, int flags)
+	public Plot2(String title, String xLabel, String yLabel, double[] xValues, double[] yValues, int flags)
 	{
 		super(title, xLabel, yLabel, xValues, yValues, flags);
 	}
@@ -198,7 +198,7 @@ public class SuperPlot extends Plot
 			return null;
 		}
 		ImageWindow.centerNextImage();
-		SuperPlotWindow pw = new SuperPlotWindow(this);
+		PlotWindow2 pw = new PlotWindow2(this);
 		ImagePlus imp = pw.getImagePlus();
 		if (IJ.isMacro() && imp != null) // wait for plot to be displayed
 			IJ.selectWindow(imp.getID());

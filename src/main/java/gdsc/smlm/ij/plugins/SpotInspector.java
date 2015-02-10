@@ -30,7 +30,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
@@ -317,7 +317,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		if (plotScore)
 		{
 			String title = TITLE + " Score";
-			SuperPlot plot = new SuperPlot(title, "Rank", SORT_ORDER[sortOrderIndex], xValues, yValues);
+			Plot2 plot = new Plot2(title, "Rank", SORT_ORDER[sortOrderIndex], xValues, yValues);
 			plot.setLimits(1, xValues.length, yMin, yMax);
 
 			Utils.display(title, plot);

@@ -27,7 +27,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 
@@ -697,7 +697,7 @@ public class DensityImage implements PlugIn
 		}
 
 		String title = results.getName() + " Ripley's (L(r) - r) / r";
-		SuperPlot plot = new SuperPlot(title, "Radius", "(L(r) - r) / r", values[0], values[1]);
+		Plot2 plot = new Plot2(title, "Radius", "(L(r) - r) / r", values[0], values[1]);
 		// Get the limits
 		double yMin = min(0, values[1]);
 		double yMax = max(0, values[1]);

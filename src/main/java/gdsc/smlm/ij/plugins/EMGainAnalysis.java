@@ -11,7 +11,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
@@ -297,11 +297,11 @@ public class EMGainAnalysis implements PlugInFilter
 		final double[] x = getX(limits);
 		final double[] y = getY(h, limits);
 
-		SuperPlot plot = new SuperPlot(TITLE, "ADU", "Frequency");
+		Plot2 plot = new Plot2(TITLE, "ADU", "Frequency");
 		double yMax = Maths.max(y);
 		plot.setLimits(limits[0], limits[1], 0, yMax);
 		plot.setColor(Color.black);
-		plot.addPoints(x, y, SuperPlot.DOT);
+		plot.addPoints(x, y, Plot2.DOT);
 		Utils.display(TITLE, plot);
 
 		// Estimate remaining parameters. 
@@ -328,7 +328,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double[] g = pdf(max, photons, gain, noise, (int) bias);
 
 		plot.setColor(Color.blue);
-		plot.addPoints(x, g, SuperPlot.LINE);
+		plot.addPoints(x, g, Plot2.LINE);
 		Utils.display(TITLE, plot);
 
 		// Perform a fit
@@ -428,19 +428,19 @@ public class EMGainAnalysis implements PlugInFilter
 
 		// Replot
 		g = pdf(max, photons, gain, noise, (int) bias);
-		plot = new SuperPlot(TITLE, "ADU", "Frequency");
+		plot = new Plot2(TITLE, "ADU", "Frequency");
 		plot.setLimits(limits[0], limits[1], 0, yMax * 1.05);
 		plot.setColor(Color.black);
-		plot.addPoints(x, y, SuperPlot.DOT);
+		plot.addPoints(x, y, Plot2.DOT);
 		plot.setColor(Color.red);
-		plot.addPoints(x, g, SuperPlot.LINE);
+		plot.addPoints(x, g, Plot2.LINE);
 
 		plot.addLabel(0, 0, label);
 
 		if (showApproximation)
 		{
 			plot.setColor(Color.blue);
-			plot.addPoints(x, f, SuperPlot.LINE);
+			plot.addPoints(x, f, Plot2.LINE);
 		}
 
 		Utils.display(TITLE, plot);
@@ -754,14 +754,14 @@ public class EMGainAnalysis implements PlugInFilter
 		String label = String.format("Gain=%s, noise=%s, photons=%s", Utils.rounded(_gain), Utils.rounded(_noise),
 				Utils.rounded(_photons));
 
-		SuperPlot plot = new SuperPlot("PMF", "ADUs", "p");
+		Plot2 plot = new Plot2("PMF", "ADUs", "p");
 		plot.setLimits(x[0], x[x.length - 1], 0, yMax);
 		plot.setColor(Color.red);
-		plot.addPoints(x, pmf, SuperPlot.LINE);
+		plot.addPoints(x, pmf, Plot2.LINE);
 		if (showApproximation)
 		{
 			plot.setColor(Color.blue);
-			plot.addPoints(x, f, SuperPlot.LINE);
+			plot.addPoints(x, f, Plot2.LINE);
 		}
 
 		plot.setColor(Color.magenta);
@@ -782,11 +782,11 @@ public class EMGainAnalysis implements PlugInFilter
 				delta[i] = f[i] - pmf[i];
 		}
 
-		SuperPlot plot2 = new SuperPlot("PMF delta", "ADUs", (relativeDelta) ? "Relative delta" : "delta");
+		Plot2 plot2 = new Plot2("PMF delta", "ADUs", (relativeDelta) ? "Relative delta" : "delta");
 		double[] limits = Maths.limits(delta);
 		plot2.setLimits(x[0], x[x.length - 1], limits[0], limits[1]);
 		plot2.setColor(Color.red);
-		plot2.addPoints(x, delta, SuperPlot.LINE);
+		plot2.addPoints(x, delta, Plot2.LINE);
 		plot2.setColor(Color.magenta);
 		plot2.drawLine(_photons*_gain, limits[0], _photons*_gain, limits[1]);
 		plot2.setColor(Color.black);

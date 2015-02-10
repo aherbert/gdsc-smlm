@@ -33,7 +33,7 @@ import ij.IJ;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
@@ -171,7 +171,7 @@ public class PCPALMClusters implements PlugIn
 
 		// SuperPlot the histogram
 		float yMax = Maths.max(yValues);
-		SuperPlot plot = new SuperPlot(title, xTitle, yTitle, xValues, yValues);
+		Plot2 plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
 		if (xValues.length > 0)
 		{
 			double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
@@ -189,7 +189,7 @@ public class PCPALMClusters implements PlugIn
 				xValues = Utils.createHistogramAxis(hist[0]);
 				yValues = Utils.createHistogramValues(hist[1]);
 				yMax = Maths.max(yValues);
-				plot = new SuperPlot(title, xTitle, yTitle, xValues, yValues);
+				plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
 				if (xValues.length > 0)
 				{
 					double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
@@ -248,13 +248,13 @@ public class PCPALMClusters implements PlugIn
 			y[n + 1] = 0;
 
 			// Redraw the plot since the limits may have changed
-			plot = new SuperPlot(title, xTitle, yTitle, xValues, yValues);
+			plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
 			double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
 			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
 					Maths.maxDefault(yMax, y) * 1.05);
 			plot.setColor(Color.magenta);
-			plot.addPoints(x, y, SuperPlot.LINE);
-			plot.addPoints(x, y, SuperPlot.CIRCLE);
+			plot.addPoints(x, y, Plot2.LINE);
+			plot.addPoints(x, y, Plot2.CIRCLE);
 			plot.setColor(Color.black);
 			Utils.display(title, plot);
 		}
@@ -821,7 +821,7 @@ public class PCPALMClusters implements PlugIn
 
 		// SuperPlot the cumulative histogram
 		String title = TITLE + " Cumulative Distribution";
-		SuperPlot plot = null;
+		Plot2 plot = null;
 		if (showCumulativeHistogram)
 		{
 			// Create a cumulative histogram for fitting
@@ -834,9 +834,9 @@ public class PCPALMClusters implements PlugIn
 			}
 
 			double[] values = Utils.newArray(histogram.length, 0.0, 1.0);
-			plot = new SuperPlot(title, "N", "Cumulative Probability", values, cumulativeHistogram);
+			plot = new Plot2(title, "N", "Cumulative Probability", values, cumulativeHistogram);
 			plot.setLimits(0, histogram.length - 1, 0, 1.05);
-			plot.addPoints(values, cumulativeHistogram, SuperPlot.CIRCLE);
+			plot.addPoints(values, cumulativeHistogram, Plot2.CIRCLE);
 			Utils.display(title, plot);
 		}
 
@@ -892,7 +892,7 @@ public class PCPALMClusters implements PlugIn
 		return parameters;
 	}
 
-	private void addToPlot(int n, double p, String title, SuperPlot plot, Color color)
+	private void addToPlot(int n, double p, String title, Plot2 plot, Color color)
 	{
 		double[] x = new double[n + 1];
 		double[] y = new double[n + 1];
@@ -915,7 +915,7 @@ public class PCPALMClusters implements PlugIn
 		}
 
 		plot.setColor(color);
-		plot.addPoints(x, y, SuperPlot.LINE);
+		plot.addPoints(x, y, Plot2.LINE);
 		//plot.addPoints(x, y, SuperPlot.CIRCLE);
 		Utils.display(title, plot);
 	}

@@ -24,7 +24,7 @@ import ij.gui.ImageWindow;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.gui.ProgressBar;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.plugin.frame.Recorder;
@@ -618,13 +618,13 @@ public class Utils
 			yValues = Arrays.copyOf(yValues, c);
 		}
 
-		SuperPlot plot = new SuperPlot(title, name, "Frequency");
+		Plot2 plot = new Plot2(title, name, "Frequency");
 		if (xValues.length > 0)
 		{
 			double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
 			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, Maths.max(yValues) * 1.05);
 		}
-		plot.addPoints(xValues, yValues, (barChart) ? SuperPlot.BAR : Plot.LINE);
+		plot.addPoints(xValues, yValues, (barChart) ? Plot2.BAR : Plot.LINE);
 		if (label != null)
 			plot.addLabel(0, 0, label);
 		PlotWindow window = Utils.display(title, plot);

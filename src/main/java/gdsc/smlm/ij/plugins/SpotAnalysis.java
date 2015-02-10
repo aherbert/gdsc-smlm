@@ -36,7 +36,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GUI;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.ZProjector;
@@ -878,13 +878,13 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
 	private void showProfile(String title, double[] xValues, double[] yValues, double[] yValues2)
 	{
-		SuperPlot plot = new SuperPlot(title, "Frame", "Signal", xValues, yValues);
+		Plot2 plot = new Plot2(title, "Frame", "Signal", xValues, yValues);
 		double[] limits = Maths.limits(yValues);
 		plot.setLimits(xValues[0], xValues[xValues.length - 1], limits[0], limits[1]);
 		plot.draw();
 
 		plot.setColor(Color.red);
-		plot.addPoints(xValues, yValues2, SuperPlot.LINE);
+		plot.addPoints(xValues, yValues2, Plot2.LINE);
 
 		plot.setColor(Color.magenta);
 
@@ -900,7 +900,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 				ony[c] = yValues[s.frame - 1];
 				c++;
 			}
-			plot.addPoints(onx, ony, SuperPlot.CIRCLE);
+			plot.addPoints(onx, ony, Plot2.CIRCLE);
 		}
 
 		// Add the candidate frames
@@ -916,12 +916,12 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 				ony[c] = yValues[i - 1];
 				c++;
 			}
-			plot.addPoints(onx, ony, SuperPlot.BOX);
+			plot.addPoints(onx, ony, Plot2.BOX);
 			plot.setColor(Color.magenta);
 		}
 
 		// Overlay current position
-		plot.addPoints(new double[] { rawImp.getCurrentSlice(), rawImp.getCurrentSlice() }, limits, SuperPlot.LINE);
+		plot.addPoints(new double[] { rawImp.getCurrentSlice(), rawImp.getCurrentSlice() }, limits, Plot2.LINE);
 
 		plot.setColor(Color.blue);
 		Utils.display(title, plot);

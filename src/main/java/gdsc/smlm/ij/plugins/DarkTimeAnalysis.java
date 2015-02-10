@@ -27,7 +27,7 @@ import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
 import java.util.ArrayList;
@@ -221,7 +221,7 @@ public class DarkTimeAnalysis implements PlugIn
 		}
 
 		String title = "Cumulative Dark-time";
-		SuperPlot plot = new SuperPlot(title, "Time (ms)", "Percentile", x, y);
+		Plot2 plot = new Plot2(title, "Time (ms)", "Percentile", x, y);
 		Utils.display(title, plot);
 
 		// Report percentile

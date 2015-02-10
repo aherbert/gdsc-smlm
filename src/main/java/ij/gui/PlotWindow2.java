@@ -6,7 +6,7 @@ import ij.plugin.filter.Analyzer;
 /**
  * Extension of the ij.gui.PlotWindow class to add functionality
  */
-public class SuperPlotWindow extends PlotWindow
+public class PlotWindow2 extends PlotWindow
 {
 	private static final long serialVersionUID = 5935603633626914545L;
 	
@@ -20,19 +20,19 @@ public class SuperPlotWindow extends PlotWindow
 	private static long time = 0;
 	private static boolean lock = false;
 
-	public SuperPlotWindow(Plot plot)
+	public PlotWindow2(Plot plot)
 	{
 		super(plot);
 	}
 
 	@Deprecated
-	public SuperPlotWindow(String title, String xLabel, String yLabel, double[] xValues, double[] yValues)
+	public PlotWindow2(String title, String xLabel, String yLabel, double[] xValues, double[] yValues)
 	{
 		super(title, xLabel, yLabel, xValues, yValues);
 	}
 
 	@Deprecated
-	public SuperPlotWindow(String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
+	public PlotWindow2(String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
 	{
 		super(title, xLabel, yLabel, xValues, yValues);
 	}

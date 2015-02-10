@@ -26,7 +26,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
@@ -226,22 +226,22 @@ public class DiffusionRateTest implements PlugIn
 
 		// Create plot
 		String title = TITLE;
-		SuperPlot plot = new SuperPlot(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues2D);
+		Plot2 plot = new Plot2(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues2D);
 		double[] limits = Maths.limits(upper);
 		limits = Maths.limits(limits, lower);
 		limits = Maths.limits(limits, yValues3D);
 		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
 		plot.setColor(Color.blue);
-		plot.addPoints(xValues, lower, SuperPlot.LINE);
-		plot.addPoints(xValues, upper, SuperPlot.LINE);
+		plot.addPoints(xValues, lower, Plot2.LINE);
+		plot.addPoints(xValues, upper, Plot2.LINE);
 		plot.setColor(Color.magenta);
-		plot.addPoints(xValues, yValues3D, SuperPlot.LINE);
+		plot.addPoints(xValues, yValues3D, Plot2.LINE);
 		plot.setColor(Color.red);
 		plot.addPoints(new double[] { xValues[0], xValues[xValues.length - 1] },
-				new double[] { fitted2D.value(xValues[0]), fitted2D.value(xValues[xValues.length - 1]) }, SuperPlot.LINE);
+				new double[] { fitted2D.value(xValues[0]), fitted2D.value(xValues[xValues.length - 1]) }, Plot2.LINE);
 		plot.setColor(Color.green);
 		plot.addPoints(new double[] { xValues[0], xValues[xValues.length - 1] },
-				new double[] { fitted3D.value(xValues[0]), fitted3D.value(xValues[xValues.length - 1]) }, SuperPlot.LINE);
+				new double[] { fitted3D.value(xValues[0]), fitted3D.value(xValues[xValues.length - 1]) }, Plot2.LINE);
 		plot.setColor(Color.black);
 
 		Utils.display(title, plot);
@@ -384,16 +384,16 @@ public class DiffusionRateTest implements PlugIn
 
 		// SuperPlot x and y coords on a timeline
 		String title = TITLE + " example coordinates";
-		SuperPlot plot = new SuperPlot(title, "Time (seconds)", "Distance (um)");
+		Plot2 plot = new Plot2(title, "Time (seconds)", "Distance (um)");
 		float[] xUm = convertToUm(x);
 		float[] yUm = convertToUm(y);
 		float[] limits = Maths.limits(xUm);
 		limits = Maths.limits(limits, yUm);
 		plot.setLimits(0, totalSteps / settings.stepsPerSecond, limits[0], limits[1]);
 		plot.setColor(Color.red);
-		plot.addPoints(xValues, xUm, SuperPlot.LINE);
+		plot.addPoints(xValues, xUm, Plot2.LINE);
 		plot.setColor(Color.blue);
-		plot.addPoints(xValues, yUm, SuperPlot.LINE);
+		plot.addPoints(xValues, yUm, Plot2.LINE);
 
 		Utils.display(title, plot);
 

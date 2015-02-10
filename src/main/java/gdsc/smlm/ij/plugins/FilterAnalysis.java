@@ -35,7 +35,7 @@ import gdsc.smlm.results.match.MatchResult;
 import gdsc.smlm.utils.UnicodeReader;
 import ij.IJ;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
@@ -650,12 +650,12 @@ public class FilterAnalysis implements PlugIn
 		int i = 0;
 		for (NamedPlot p : plots)
 		{
-			SuperPlot plot = new SuperPlot(p.name, p.xAxisName, "Jaccard", p.xValues, p.yValues);
+			Plot2 plot = new Plot2(p.name, p.xAxisName, "Jaccard", p.xValues, p.yValues);
 			plot.setLimits(p.xValues[0], p.xValues[p.xValues.length - 1], 0, 1);
 			plot.setColor(Color.RED);
 			plot.draw();
 			plot.setColor(Color.BLUE);
-			plot.addPoints(p.xValues, p.yValues, SuperPlot.CROSS);
+			plot.addPoints(p.xValues, p.yValues, Plot2.CROSS);
 			PlotWindow plotWindow = Utils.display(p.name, plot);
 			list[i++] = plotWindow.getImagePlus().getID();
 		}

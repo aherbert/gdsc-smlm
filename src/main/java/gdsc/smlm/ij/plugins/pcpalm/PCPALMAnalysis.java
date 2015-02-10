@@ -27,7 +27,7 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
@@ -757,7 +757,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		return new FloatProcessor(im.getWidth(), im.getHeight(), image, null);
 	}
 
-	public static SuperPlot plotCorrelation(double[][] gr, int offset, String plotTitle, String yAxisTitle,
+	public static Plot2 plotCorrelation(double[][] gr, int offset, String plotTitle, String yAxisTitle,
 			boolean barChart, boolean showErrorBars)
 	{
 		double[] x = new double[gr[1].length - offset];
@@ -772,7 +772,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			showErrorBars = false;
 		}
 
-		SuperPlot plot = new SuperPlot(plotTitle, "r (nm)", yAxisTitle, x, y);
+		Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle, x, y);
 		plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
 		Utils.display(plotTitle, plot);
 

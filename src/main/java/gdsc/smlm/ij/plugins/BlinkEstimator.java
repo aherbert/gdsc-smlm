@@ -22,7 +22,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
 import ij.gui.GenericDialog;
-import ij.gui.SuperPlot;
+import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
 import java.awt.Color;
@@ -223,7 +223,7 @@ public class BlinkEstimator implements PlugIn
 	private void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y)
 	{
 		String title = TITLE + " " + yAxisTitle;
-		SuperPlot plot = new SuperPlot(title, xAxisTitle, yAxisTitle, x, y);
+		Plot2 plot = new Plot2(title, xAxisTitle, yAxisTitle, x, y);
 		Utils.display(title, plot);
 	}
 
@@ -251,11 +251,11 @@ public class BlinkEstimator implements PlugIn
 		if (showPlots)
 		{
 			String title = TITLE + " Molecule Counts";
-			SuperPlot plot = new SuperPlot(title, "td (ms)", "Count", td, Ntd);
+			Plot2 plot = new Plot2(title, "td (ms)", "Count", td, Ntd);
 			Utils.display(title, plot);
 
 			plot.setColor(Color.red);
-			plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), SuperPlot.CIRCLE);
+			plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), Plot2.CIRCLE);
 
 			// Add the rest that is not fitted
 			double[] xOther = new double[td.length - blinkingModel.size()];
@@ -267,7 +267,7 @@ public class BlinkEstimator implements PlugIn
 			}
 
 			plot.setColor(Color.blue);
-			plot.addPoints(xOther, yOther, SuperPlot.CROSS);
+			plot.addPoints(xOther, yOther, Plot2.CROSS);
 			Utils.display(title, plot);
 		}
 
