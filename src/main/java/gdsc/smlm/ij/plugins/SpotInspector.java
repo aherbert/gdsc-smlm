@@ -23,6 +23,7 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.utils.StoredDataStatistics;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -148,7 +149,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				}
 			}
 		}
-		
+
 		IJTablePeakResults table = new IJTablePeakResults(false, results.getName(), true);
 		table.copySettings(results);
 		table.setTableTitle(TITLE);
@@ -285,7 +286,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 
 		source.close();
-		
+
 		ImagePlus imp = Utils.display(TITLE, spots);
 		imp.setRoi((PointRoi) null);
 
@@ -327,15 +328,9 @@ public class SpotInspector implements PlugIn, MouseListener
 	{
 		if (plotHistogram)
 		{
-			float[][] hist = Utils.calcHistogram(data, yMin, yMax, histogramBins);
-
-			float[] xValues = Utils.createHistogramAxis(hist[0]);
-			float[] yValues = Utils.createHistogramValues(hist[1]);
-
 			String title = TITLE + " Histogram";
-			SuperPlot plot = new SuperPlot(title, SORT_ORDER[sortOrderIndex], "Frequency", xValues, yValues);
-
-			Utils.display(title, plot);
+			Utils.showHistogram(title, new StoredDataStatistics(data), SORT_ORDER[sortOrderIndex], 0,
+					(removeOutliers) ? 1 : 0, histogramBins);
 		}
 	}
 
