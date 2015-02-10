@@ -9,10 +9,11 @@ import ij.plugin.filter.Analyzer;
 public class PlotWindow2 extends PlotWindow
 {
 	private static final long serialVersionUID = 5935603633626914545L;
-	
+
 	private static int precision = Analyzer.getPrecision();
 	private static boolean scientific;
-	static {
+	static
+	{
 		int measurements = Analyzer.getMeasurements();
 		scientific = (measurements & Measurements.SCIENTIFIC_NOTATION) != 0;
 	}
@@ -37,6 +38,34 @@ public class PlotWindow2 extends PlotWindow
 		super(title, xLabel, yLabel, xValues, yValues);
 	}
 
+	private boolean askForPrecision;
+
+	public void saveAsText()
+	{
+		requireNewPrecision();
+		super.saveAsText();
+	}
+
+	public void showList()
+	{
+		requireNewPrecision();
+		super.showList();
+	}
+
+	public void copyToClipboard()
+	{
+		requireNewPrecision();
+		super.copyToClipboard();
+	}
+
+	/**
+	 * Set a flag to show a dialog to ask for the precision if one second has elapsed since the last time
+	 */
+	private void requireNewPrecision()
+	{
+		askForPrecision = System.currentTimeMillis() > time + 1000;
+	}
+
 	/**
 	 * Override the getPrecision function to allow the user to select the precision for the numbers
 	 * 
@@ -46,8 +75,8 @@ public class PlotWindow2 extends PlotWindow
 	@Override
 	public int getPrecision(float[] values)
 	{
-		// Show a dialog to ask for the precision if one second has elapsed
-		if (System.currentTimeMillis() > time + 1000 && lock())
+		// Use a simple lock to ensure no two threads ask at the same time
+		if (askForPrecision && lock())
 		{
 			GenericDialog gd = new GenericDialog("Plot precision");
 			gd.addSlider("Plot_precision", 0, 9, precision);
@@ -62,7 +91,7 @@ public class PlotWindow2 extends PlotWindow
 				if (!gd.invalidNumber())
 				{
 					precision = Math.max(0, Math.min(p, 9));
-					
+
 					if (update)
 					{
 						Analyzer.setPrecision(p);
@@ -71,6 +100,7 @@ public class PlotWindow2 extends PlotWindow
 				}
 			}
 			time = System.currentTimeMillis();
+			askForPrecision = false;
 			lock = false;
 		}
 
@@ -99,7 +129,7 @@ public class PlotWindow2 extends PlotWindow
 			digits = 0;
 		return digits;
 	}
-
+	
 	private synchronized boolean lock()
 	{
 		if (!lock)
