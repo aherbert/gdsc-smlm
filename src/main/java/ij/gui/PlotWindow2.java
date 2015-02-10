@@ -40,18 +40,21 @@ public class PlotWindow2 extends PlotWindow
 
 	private boolean askForPrecision;
 
+	@Override
 	public void saveAsText()
 	{
 		requireNewPrecision();
 		super.saveAsText();
 	}
 
+	@Override
 	public void showList()
 	{
 		requireNewPrecision();
 		super.showList();
 	}
 
+	@Override
 	public void copyToClipboard()
 	{
 		requireNewPrecision();
