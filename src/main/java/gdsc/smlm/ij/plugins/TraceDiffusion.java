@@ -30,7 +30,7 @@ import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.gui.GenericDialog;
-import ij.gui.Plot;
+import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
@@ -102,6 +102,7 @@ public class TraceDiffusion implements PlugIn
 
 	private static boolean displayMSDHistogram = true;
 	private static boolean displayDHistogram = true;
+	private static boolean displayTraceLength = false;
 
 	private static boolean saveTraceDistances = false;
 	private static boolean saveRawData = false;
@@ -185,7 +186,8 @@ public class TraceDiffusion implements PlugIn
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (subSample) ? new StoredDataStatistics() : new Statistics();
 
-			ArrayList<double[]> distances = (saveTraceDistances) ? new ArrayList<double[]>(traces.length) : null;
+			ArrayList<double[]> distances = (saveTraceDistances || displayTraceLength) ? new ArrayList<double[]>(
+					traces.length) : null;
 
 			// Store all the jump distances at the specified interval
 			StoredDataStatistics jumpDistances = new StoredDataStatistics();
@@ -210,7 +212,7 @@ public class TraceDiffusion implements PlugIn
 				{
 					final float x = results.get(0).getXPosition();
 					final float y = results.get(0).getYPosition();
-					if (saveTraceDistances)
+					if (distances != null)
 					{
 						double[] msd = new double[traceLength - 1];
 						for (int j = 1; j < traceLength; j++)
@@ -299,6 +301,8 @@ public class TraceDiffusion implements PlugIn
 					}
 				}
 
+				// TODO - Add a track length histogram
+
 				// Calculate the average displacement for the trace (do not simply use the largest 
 				// time separation since this will miss moving molecules that end up at the origin)
 				sumD += sumD_adjacent;
@@ -321,6 +325,12 @@ public class TraceDiffusion implements PlugIn
 				saveTraceDistances(traces.length, distances, msdPerMoleculeAllVsAll, msdPerMoleculeAdjacent,
 						dStarPerMoleculeAllVsAll, dStarPerMoleculeAdjacent);
 			}
+			
+			if (displayTraceLength)
+			{
+				StoredDataStatistics lengths = calculateTraceLengths(distances);
+				showHistogram(lengths, "Trace length (um)");
+			}
 
 			// Calculate the cumulative jump-distance histogram
 			if (saveRawData)
@@ -328,11 +338,11 @@ public class TraceDiffusion implements PlugIn
 			double[][] jdHistogram = Maths.cumulativeHistogram(jumpDistances.getValues(), true);
 			// Always show the jump distance histogram
 			String jdTitle = TITLE + " Jump Distance";
-			Plot jdPlot = new Plot(jdTitle, "Distance (um^2/second)", "Cumulative Probability", jdHistogram[0],
+			Plot2 jdPlot = new Plot2(jdTitle, "Distance (um^2/second)", "Cumulative Probability", jdHistogram[0],
 					jdHistogram[1]);
 			display(jdTitle, jdPlot);
 
-			// Plot the per-trace histogram of MSD and D*
+			// SuperPlot the per-trace histogram of MSD and D*
 			if (settings.showHistograms)
 			{
 				if (displayMSDHistogram)
@@ -379,7 +389,7 @@ public class TraceDiffusion implements PlugIn
 			}
 
 			String title = TITLE + " MSD";
-			Plot plot = plotMSD(x, y, sd, title);
+			Plot2 plot = plotMSD(x, y, sd, title);
 
 			// Fit the MSD using a linear fit that must pass through 0,0
 			D = fitMSD(x, y, title, plot);
@@ -391,7 +401,22 @@ public class TraceDiffusion implements PlugIn
 		summarise(traces, D, jdParams);
 	}
 
-	private void display(String title, Plot plot)
+	public StoredDataStatistics calculateTraceLengths(ArrayList<double[]> distances)
+	{
+		StoredDataStatistics lengths = new StoredDataStatistics();
+		for (double[] trace : distances)
+		{
+			double sum = 0;
+			for (double d : trace)
+			{
+				sum += Math.sqrt(d);
+			}
+			lengths.add(sum);
+		}
+		return lengths;
+	}
+
+	private void display(String title, Plot2 plot)
 	{
 		PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
@@ -1056,7 +1081,6 @@ public class TraceDiffusion implements PlugIn
 
 	private boolean readDialog(GenericDialog gd)
 	{
-		inputOption = ResultsManager.getInputSource(gd);
 		settings.truncate = gd.getNextBoolean();
 		settings.internalDistances = gd.getNextBoolean();
 		//settings.subSampledDistances = gd.getNextBoolean();
@@ -1081,6 +1105,7 @@ public class TraceDiffusion implements PlugIn
 				gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
 			gd.addCheckbox("MSD/Molecule", displayMSDHistogram);
 			gd.addCheckbox("D*/Molecule", displayDHistogram);
+			gd.addCheckbox("Trace_length", displayTraceLength);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -1090,6 +1115,7 @@ public class TraceDiffusion implements PlugIn
 				displayHistograms[i] = gd.getNextBoolean();
 			displayMSDHistogram = gd.getNextBoolean();
 			displayDHistogram = gd.getNextBoolean();
+			displayTraceLength = gd.getNextBoolean();
 		}
 
 		// Check arguments
@@ -1108,12 +1134,12 @@ public class TraceDiffusion implements PlugIn
 		return true;
 	}
 
-	private Plot plotMSD(double[] x, double[] y, double[] sd, String title)
+	private Plot2 plotMSD(double[] x, double[] y, double[] sd, String title)
 	{
 		if (saveRawData)
 			saveMSD(x, y, sd);
 
-		Plot plot = new Plot(title, "Time (s)", "Distance (um^2)", x, y);
+		Plot2 plot = new Plot2(title, "Time (s)", "Distance (um^2)", x, y);
 		// Set limits before any plotting
 		double max = 0;
 		for (int i = 1; i < x.length; i++)
@@ -1143,7 +1169,7 @@ public class TraceDiffusion implements PlugIn
 	 * @param plot
 	 * @return
 	 */
-	private double fitMSD(double[] x, double[] y, String title, Plot plot)
+	private double fitMSD(double[] x, double[] y, String title, Plot2 plot)
 	{
 		double D = 0;
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
@@ -1265,7 +1291,7 @@ public class TraceDiffusion implements PlugIn
 	 * @return
 	 */
 	private double[][] fitJumpDistance(StoredDataStatistics jumpDistances, double[][] jdHistogram, String title,
-			Plot plot)
+			Plot2 plot)
 	{
 		final double meanDistance = Math.sqrt(jumpDistances.getMean()) * 1e3;
 		final double beta = meanDistance / precision;
@@ -1365,6 +1391,8 @@ public class TraceDiffusion implements PlugIn
 			CMAESOptimizer opt = null;
 			try
 			{
+				// TODO - Iterate this for stability in the initial guess
+
 				opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly, checkFeasableCount,
 						random, generateStatistics, checker);
 				PointValuePair constrainedSolution = opt.optimize(new InitialGuess(mixedFunction.guess()),
@@ -1374,6 +1402,8 @@ public class TraceDiffusion implements PlugIn
 				int evaluations = opt.getEvaluations();
 				fitParams[n] = constrainedSolution.getPointRef();
 				SS[n] = constrainedSolution.getValue();
+
+				// TODO - Try a bounded BFGS optimiser
 
 				// Try and improve using a LVM fit
 				final MixedJumpDistanceFunctionGradient mixedFunctionGradient = new MixedJumpDistanceFunctionGradient(
@@ -1516,7 +1546,7 @@ public class TraceDiffusion implements PlugIn
 		}
 	}
 
-	private void addToPlot(Function function, double[] params, double[][] jdHistogram, String title, Plot plot,
+	private void addToPlot(Function function, double[] params, double[][] jdHistogram, String title, Plot2 plot,
 			Color color)
 	{
 		final double max = jdHistogram[0][jdHistogram[0].length - 1];
@@ -1534,7 +1564,7 @@ public class TraceDiffusion implements PlugIn
 		y[nPoints] = function.evaluate(max, params);
 
 		plot.setColor(color);
-		plot.addPoints(x, y, Plot.LINE);
+		plot.addPoints(x, y, Plot2.LINE);
 		display(title, plot);
 	}
 
