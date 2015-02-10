@@ -71,7 +71,8 @@ public class GaussianFilter implements Cloneable
 		if (roi.width < 1 || roi.height < 1)
 			return;
 		// Q. Should the extra lines parameter be used here?
-		blur1Direction(data, roi, maxx, maxy, sigma, true, 0); // <- extraLines=border
+		blur1Direction(data, roi, maxx, maxy, sigma, true, border);
+		//blur1Direction(data, roi, maxx, maxy, sigma, true, 0);
 		blur1Direction(data, roi, maxx, maxy, sigma, false, 0);
 	}
 
