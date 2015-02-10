@@ -301,8 +301,6 @@ public class TraceDiffusion implements PlugIn
 					}
 				}
 
-				// TODO - Add a track length histogram
-
 				// Calculate the average displacement for the trace (do not simply use the largest 
 				// time separation since this will miss moving molecules that end up at the origin)
 				sumD += sumD_adjacent;
@@ -1390,7 +1388,7 @@ public class TraceDiffusion implements PlugIn
 			OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
 					.log(mixedFunction.x.length))));
 
-			// TODO - Iterate this for stability in the initial guess
+			// Iterate this for stability in the initial guess
 			CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
 					checkFeasableCount, random, generateStatistics, checker);
 
