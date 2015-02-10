@@ -7,6 +7,7 @@ import ij.WindowManager;
 import ij.macro.Interpreter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import ij.util.Tools;
 
 import java.lang.reflect.Field;
 
@@ -66,8 +67,20 @@ public class SuperPlot extends Plot
 	@Override
 	public void addPoints(float[] x, float[] y, int shape)
 	{
+		if (xValues == null)
+		{
+			// Set the limits if this is the first set of data. The limits are usually set in the constructor
+			// but we may want to not pass in the values to the constructor and then immediately call 
+			// addPoints(x, y, SuperPlot.BAR)
+			double[] a = Tools.getMinMax(x);
+			xMin = a[0];
+			xMax = a[1];
+			a = Tools.getMinMax(y);
+			yMin = a[0];
+			yMax = a[1];
+		}
+		
 		// This only works if the addPoints super method ignores the BAR option but still store the values
-
 		setup();
 		switch (shape)
 		{

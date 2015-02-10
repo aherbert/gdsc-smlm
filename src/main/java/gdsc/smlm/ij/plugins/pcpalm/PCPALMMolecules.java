@@ -639,13 +639,18 @@ public class PCPALMMolecules implements PlugIn
 
 		float[][] hist = Utils.calcHistogram(data, yMin, yMax, histogramBins);
 
-		float[] xValues = Utils.createHistogramAxis(hist[0]);
-		float[] yValues = Utils.createHistogramValues(hist[1]);
-
 		SuperPlot plot = null;
 		if (title != null)
 		{
-			plot = new SuperPlot(title, "Precision", "Frequency", xValues, yValues);
+			plot = new SuperPlot(title, "Precision", "Frequency");
+			float[] xValues = hist[0];
+			float[] yValues = hist[1];
+			if (xValues.length > 0)
+			{
+				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
+				plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, Maths.max(yValues) * 1.05);
+			}
+			plot.addPoints(xValues, yValues, SuperPlot.BAR);
 			Utils.display(title, plot);
 		}
 
@@ -1473,34 +1478,12 @@ public class PCPALMMolecules implements PlugIn
 	private double[][] plot(StoredDataStatistics stats, String label, boolean integerBins)
 	{
 		String title = TITLE + " " + label;
-		double yMax = Maths.max(stats.getValues());
 		SuperPlot plot;
 		double[][] hist = null;
 		if (integerBins)
 		{
-			int nBins = (int) (Math.ceil(yMax) + 1);
-			float[][] fHist = Utils.calcHistogram(stats.getFloatValues(), 0, yMax, nBins);
-
-			// Create the axes
-			float[] xValues = Utils.createHistogramAxis(fHist[0]);
-			float[] yValues = Utils.createHistogramValues(fHist[1]);
-
-			//// Copy for return
-			//hist = new double[2][fHist[0].length];
-			//for (int i=0; i<fHist[0].length; i++)
-			//{
-			//	hist[0][i] = fHist[0][i];
-			//	hist[1][i] = fHist[1][i];
-			//}
-
-			// SuperPlot
-			yMax = Maths.max(yValues);
-			plot = new SuperPlot(title, label, "Frequency", xValues, yValues);
-			if (xValues.length > 0)
-			{
-				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-				plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, yMax * 1.05);
-			}
+			// The histogram is not need for the return statement
+			Utils.showHistogram(title, stats, label, 1, 0, 0);
 		}
 		else
 		{
@@ -1511,11 +1494,11 @@ public class PCPALMMolecules implements PlugIn
 			double[] xValues = hist[0];
 			double[] yValues = hist[1];
 
-			// SuperPlot
+			// Plot
 			plot = new SuperPlot(title, label, "Frequency", xValues, yValues);
+			Utils.display(title, plot);
 		}
 
-		Utils.display(title, plot);
 		return hist;
 	}
 

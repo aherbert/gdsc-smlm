@@ -13,6 +13,7 @@ package gdsc.smlm.ij.utils;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
@@ -621,22 +622,13 @@ public class Utils
 		if (xValues.length > 0)
 		{
 			double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, getMaximum(yValues) * 1.05);
+			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, Maths.max(yValues) * 1.05);
 		}
 		plot.addPoints(xValues, yValues, (barChart) ? SuperPlot.BAR : Plot.LINE);
 		if (label != null)
 			plot.addLabel(0, 0, label);
 		PlotWindow window = Utils.display(title, plot);
 		return window.getImagePlus().getID();
-	}
-
-	private static float getMaximum(float[] values)
-	{
-		float max = Float.NEGATIVE_INFINITY;
-		for (float f : values)
-			if (max < f)
-				max = f;
-		return max;
 	}
 
 	/**
