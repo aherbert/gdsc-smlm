@@ -23,7 +23,6 @@ import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.clustering.Cluster;
 import gdsc.smlm.results.clustering.ClusteringAlgorithm;
 import gdsc.smlm.results.clustering.ClusteringEngine;
-import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.Prefs;
@@ -243,30 +242,13 @@ public class DarkTimeAnalysis implements PlugIn
 	{
 		if (nBins > 0)
 		{
-			String title = "Dark-time";
-
-			// Ensure the bin width is never less than 1
-			float yMax = (int) Math.ceil(Maths.max(stats.getFloatValues()));
-			int newBins = (int) (yMax + 1);
-			float[][] hist = Utils.calcHistogram(stats.getFloatValues(), 0, yMax, (nBins > newBins) ? newBins : nBins);
-
-			// Create the axes
-			float[] xValues = Utils.createHistogramAxis(hist[0]);
-			float[] yValues = Utils.createHistogramValues(hist[1]);
-
 			// Convert the X-axis to milliseconds
+			double[] xValues = stats.getValues();
 			for (int i = 0; i < xValues.length; i++)
 				xValues[i] *= msPerFrame;
-
-			// SuperPlot
-			SuperPlot plot = new SuperPlot("Dark-time", "Time (ms)", "Frequency", xValues, yValues);
-			if (xValues.length > 0)
-			{
-				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-				plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
-						Maths.max(yValues) * 1.05);
-			}
-			Utils.display(title, plot);
+			
+			// Ensure the bin width is never less than 1
+			Utils.showHistogram("Dark-time", new StoredDataStatistics(xValues), "Time (ms)", 1, 0, nBins);
 		}
 	}
 }
