@@ -14,9 +14,12 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.FitEngine;
+import gdsc.smlm.engine.DataFilterType;
+import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
@@ -55,21 +58,15 @@ import java.util.concurrent.BlockingQueue;
 public class BenchmarkSpotFilter implements PlugIn
 {
 	private static final String TITLE = "Benchmark Spot Filter";
-	private static final String[] filterNames;
-	private static final DataFilter[] filters;
-	static
-	{
-		filters = DataFilter.values();
-		filterNames = SettingsManager.getNames((Object[]) filters);
-	}
 
-	private static int search = 1;
-	private static int border = 2;
-	private static int dataFilter = 0;
-	private static double smoothing = 1;
-	private static boolean differenceFilter = false;
-	private static int dataFilter2 = 0;
-	private static double smoothing2 = 3;
+	private static FitConfiguration fitConfig;
+	private static FitEngineConfiguration config;
+	static {
+		fitConfig = new FitConfiguration();
+		config = new FitEngineConfiguration(fitConfig);
+		config.setSearch(1);
+	}
+	
 	private static int analysisBorder = 0;
 	private static double distance = 1.5;
 	private static double recallFraction = 100;
@@ -327,13 +324,14 @@ public class BenchmarkSpotFilter implements PlugIn
 				.format("Finds spots in the benchmark image created by CreateData plugin.\nPSF width = %s\n \nConfigure the spot filter:",
 						Utils.rounded(simulationParameters.s / simulationParameters.a)));
 
-		gd.addSlider("Search", 0, 5, search);
-		gd.addSlider("Border", 0, 5, border);
-		gd.addChoice("Spot_filter", filterNames, filterNames[dataFilter]);
-		gd.addSlider("Smoothing", 0, 4.5, smoothing);
-		gd.addCheckbox("Difference_filter", differenceFilter);
-		gd.addChoice("Spot_filter2", filterNames, filterNames[dataFilter2]);
-		gd.addSlider("Smoothing2", 1.5, 6, smoothing2);
+		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
+		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
+		
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, analysisBorder);
 		gd.addSlider("Match_distance", 1, 3, distance);
@@ -347,13 +345,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		search = Math.abs((int) gd.getNextNumber());
-		border = Math.abs((int) gd.getNextNumber());
-		dataFilter = gd.getNextChoiceIndex();
-		smoothing = Math.abs(gd.getNextNumber());
-		differenceFilter = gd.getNextBoolean();
-		dataFilter2 = gd.getNextChoiceIndex();
-		smoothing2 = Math.abs(gd.getNextNumber());
+		config.setDataFilterType(gd.getNextChoiceIndex());
+		config.setDataFilter(gd.getNextChoiceIndex(), 0);
+		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
+		config.setSearch(gd.getNextNumber());
+		config.setBorder(gd.getNextNumber());
 		analysisBorder = Math.abs((int) gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
@@ -364,16 +360,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (gd.invalidNumber())
 			return false;
 
-		if (search < 1)
-			search = 1;
-
+		GlobalSettings settings = new GlobalSettings();
+		settings.setFitEngineConfiguration(config);
+		if (!PeakFit.configureDataFilter(settings, null, false))
+			return false;
+		
 		return true;
 	}
 
 	private void run()
 	{
-		MaximaSpotFilter spotFilter = FitEngine.createSpotFilter(search, border, filters[dataFilter], smoothing,
-				differenceFilter, filters[dataFilter2], smoothing2);
+		MaximaSpotFilter spotFilter = config.createSpotFilter(false);
 
 		// Extract all the results in memory into a list per frame. This can be cached
 		if (lastId != simulationParameters.id)
@@ -445,7 +442,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		// Show a table of the results
-		summariseResults(filterResults);
+		summariseResults(filterResults, spotFilter);
 
 		// Debugging.
 		//addSpotsToMemory(filterResults);
@@ -489,7 +486,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
-	private void summariseResults(HashMap<Integer, FilterResult> filterResults)
+	private void summariseResults(HashMap<Integer, FilterResult> filterResults, MaximaSpotFilter spotFilter)
 	{
 		createTable();
 
@@ -529,17 +526,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
 		sb.append(Utils.rounded(signal / Math.sqrt(simulationParameters.b2))).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
-		sb.append(search).append("\t");
-		sb.append(border).append("\t");
-		sb.append(filterNames[dataFilter]).append("\t");
-		sb.append(Utils.rounded(smoothing)).append("\t");
-		if (differenceFilter)
-		{
-			sb.append(filterNames[dataFilter2]).append("\t");
-			sb.append(Utils.rounded(smoothing2)).append("\t");
-		}
-		else
-			sb.append("-\t-\t");
+		sb.append(spotFilter.getSearch()).append("\t");
+		sb.append(spotFilter.getBorder()).append("\t");
+		sb.append(config.getDataFilterType()).append("\t");
+		sb.append(config.getDataFilter(0)).append("\t");
+		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
+		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
 		sb.append(Utils.rounded(distance)).append("\t");
 
@@ -675,7 +667,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append("Search\tBorder\tFilter\tParam\tFilter2\tParam2\tA.Border\td\t");
+		sb.append("Search\tBorder\tType\tFilter\tParam\tDescription\tA.Border\td\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");

@@ -14,6 +14,7 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
@@ -63,10 +64,11 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	private TextField textInitialPeakStdDev0;
 	private TextField textInitialPeakStdDev1;
 	private TextField textInitialAngleD;
+	private Choice textDataFilterType;
 	private Choice textDataFilter;
 	private TextField textSmooth;
-	private Checkbox textDifferenceFilter;
 	private TextField textSearch;
+	private TextField textBorder;
 	private TextField textFitting;
 	private Choice textFitSolver;
 	private Choice textFitFunction;
@@ -122,11 +124,13 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		gd.addNumericField("Initial_Angle", fitConfig.getInitialAngle(), 3);
 
 		gd.addMessage("--- Maxima identification ---");
+		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
-		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
 		gd.addMessage("--- Gaussian fitting ---");
@@ -180,10 +184,11 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			textInitialPeakStdDev0 = numerics.get(n++);
 			textInitialPeakStdDev1 = numerics.get(n++);
 			textInitialAngleD = numerics.get(n++);
+			textDataFilterType = choices.get(ch++);
 			textDataFilter = choices.get(ch++);
 			textSmooth = numerics.get(n++);
-			textDifferenceFilter = checkboxes.get(b++);
 			textSearch = numerics.get(n++);
+			textBorder = numerics.get(n++);
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
 			textFitFunction = choices.get(ch++);
@@ -244,10 +249,11 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
 		fitConfig.setInitialAngleD(gd.getNextNumber());
-		config.setDataFilter(gd.getNextChoiceIndex());
-		config.setSmooth(gd.getNextNumber());
-		config.setDifferenceFilter(gd.getNextBoolean());
+		config.setDataFilterType(gd.getNextChoiceIndex());
+		config.setDataFilter(gd.getNextChoiceIndex(), 0);
+		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
+		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
@@ -275,7 +281,6 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialPeakStdDev0());
 			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
 			Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
-			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
@@ -406,10 +411,11 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
 				textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
 				textInitialAngleD.setText("" + fitConfig.getInitialAngle());
-				textDataFilter.select(config.getDataFilter().ordinal());
-				textSmooth.setText("" + config.getSmooth());
-				textDifferenceFilter.setState(config.isDifferenceFilter());
+				textDataFilterType.select(config.getDataFilterType().ordinal());
+				textDataFilter.select(config.getDataFilter(0).ordinal());
+				textSmooth.setText("" + config.getSmooth(0));
 				textSearch.setText("" + config.getSearch());
+				textBorder.setText("" + config.getBorder());
 				textFitting.setText("" + config.getFitting());
 				textFitSolver.select(fitConfig.getFitSolver().ordinal());
 				textFitFunction.select(fitConfig.getFitFunction().ordinal());

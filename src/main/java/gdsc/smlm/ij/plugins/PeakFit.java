@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
@@ -166,10 +167,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textInitialPeakStdDev0;
 	private TextField textInitialPeakStdDev1;
 	private TextField textInitialAngleD;
+	private Choice textDataFilterType;
 	private Choice textDataFilter;
 	private TextField textSmooth;
-	private Checkbox textDifferenceFilter;
 	private TextField textSearch;
+	private TextField textBorder;
 	private TextField textFitting;
 	private Choice textFitSolver;
 	private Choice textFitFunction;
@@ -593,19 +595,20 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				results.end();
 				return;
 			}
-			
+
 			// Check if we are sorting
 			IJ.showStatus("Finalising results ...");
 			for (PeakResults r : results.toArray())
 				if (r instanceof MemoryPeakResults)
 				{
-					if (((MemoryPeakResults) r).isSortAfterEnd());
+					if (((MemoryPeakResults) r).isSortAfterEnd())
+						;
 					IJ.showStatus("Sorting " + r.size() + " results ...");
 					break;
 				}
-			
+
 			results.end();
-			
+
 			String textTime = Utils.timeToString(time / 1000000.0);
 
 			int size = getSize();
@@ -701,11 +704,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.addNumericField("Initial_StdDev1", fitConfig.getInitialPeakStdDev1(), 3);
 			gd.addNumericField("Initial_Angle", fitConfig.getInitialAngle(), 3);
 		}
+		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
-		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 		if (extraOptions && !fitMaxima)
 		{
@@ -838,10 +843,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textInitialPeakStdDev1 = numerics.get(n++);
 				textInitialAngleD = numerics.get(n++);
 			}
+			textDataFilterType = choices.get(ch++);
 			textDataFilter = choices.get(ch++);
 			textSmooth = numerics.get(n++);
-			textDifferenceFilter = checkboxes.get(b++);
 			textSearch = numerics.get(n++);
+			textBorder = numerics.get(n++);
 			textFitting = numerics.get(n++);
 			if (extraOptions && !fitMaxima)
 			{
@@ -1274,10 +1280,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
 			fitConfig.setInitialAngleD(gd.getNextNumber());
 		}
-		config.setDataFilter(gd.getNextChoiceIndex());
-		config.setSmooth(gd.getNextNumber());
-		config.setDifferenceFilter(gd.getNextBoolean());
+		config.setDataFilterType(gd.getNextChoiceIndex());
+		config.setDataFilter(gd.getNextChoiceIndex(), 0);
+		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
+		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 		if (extraOptions && !fitMaxima)
 		{
@@ -1347,7 +1354,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
 				Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
 			}
-			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isPositive("Integrate frames", integrateFrames);
@@ -1391,7 +1397,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return false;
 			calibration.bias = Math.abs(gd.getNextNumber());
 		}
-		
+
 		if (!configureDataFilter(settings, filename, extraOptions))
 			return false;
 
@@ -1462,29 +1468,65 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 
-		if (config.isDifferenceFilter())
+		final int n;
+		switch (config.getDataFilterType())
 		{
+			case JURY:
+				n = Integer.MAX_VALUE;
+				break;
+
+			case DIFFERENCE:
+				n = 2;
+				break;
+
+			case SINGLE:
+			default:
+				return true;
+		}
+
+		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+
+		for (int i = 1; i < n; i++)
+		{
+			int filter = i + 1;
 			GenericDialog gd = new GenericDialog(TITLE);
-			gd.addMessage("Difference filter requires additional parameters");
-			String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-			gd.addChoice("Spot_filter2", filterNames, filterNames[config.getDataFilter().ordinal()]);
-			gd.addSlider("Smoothing2", config.getSmooth(), 3 * config.getSmooth(), config.getSmooth2());
+			gd.addMessage("Configure the additional filters");
+			String fieldName = "Spot_filter" + filter;
+			if (IJ.isMacro())
+				// Use blank default value so bad macro parameters return nothing
+				gd.addStringField(fieldName, "");
+			else
+				gd.addChoice(fieldName, filterNames, filterNames[config.getDataFilter(i).ordinal()]);
+			gd.addSlider("Smoothing" + filter, 0, 4.5, config.getSmooth(i));
 			gd.showDialog();
-			if (gd.wasCanceled())
-				return false;
-
-			SettingsManager.saveSettings(settings, filename);
-
-			try
+			if (!gd.wasCanceled())
 			{
-				Parameters.isPositive("Smoothing2", config.getSmooth2());
+				if (IJ.isMacro())
+				{
+					boolean found = false;
+					String filterName = gd.getNextString();
+					for (int j = 0; j < filterNames.length; j++)
+						if (filterNames[j].equals(filterName))
+						{
+							config.setDataFilter(j, i);
+							found = true;
+							break;
+						}
+					
+					if (!found)
+						break;
+				}
+				else
+					config.setDataFilter(gd.getNextChoiceIndex(), i);
+				config.setSmooth(Math.abs(gd.getNextNumber()), i);
 			}
-			catch (IllegalArgumentException e)
+			else
 			{
-				IJ.error(TITLE, e.getMessage());
-				return false;
+				break;
 			}
 		}
+		if (filename != null)
+			SettingsManager.saveSettings(settings, filename);
 		return true;
 	}
 
@@ -1551,7 +1593,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				// This option is for the Conjugate Gradient optimiser and makes it less stable
 				fitConfig.setGradientLineMinimisation(false);
 
-			SettingsManager.saveSettings(settings, filename);
+			if (filename != null)
+				SettingsManager.saveSettings(settings, filename);
 
 			try
 			{
@@ -1608,7 +1651,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 						calibration.emCCD));
 			}
 
-			SettingsManager.saveSettings(settings, filename);
+			if (filename != null)
+				SettingsManager.saveSettings(settings, filename);
 
 			try
 			{
@@ -1626,7 +1670,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		else if (fitConfig.getFitSolver() == FitSolver.LVM_QUASI_NEWTON)
 		{
 			// No options yet for Apache LVM fitting. Save options for consistency
-			SettingsManager.saveSettings(settings, filename);
+			if (filename != null)
+				SettingsManager.saveSettings(settings, filename);
 		}
 		return true;
 	}
@@ -2289,10 +2334,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
 					textInitialAngleD.setText("" + fitConfig.getInitialAngle());
 				}
-				textDataFilter.select(config.getDataFilter().ordinal());
-				textSmooth.setText("" + config.getSmooth());
-				textDifferenceFilter.setState(config.isDifferenceFilter());
+				textDataFilterType.select(config.getDataFilterType().ordinal());
+				textDataFilter.select(config.getDataFilter(0).ordinal());
+				textSmooth.setText("" + config.getSmooth(0));
 				textSearch.setText("" + config.getSearch());
+				textBorder.setText("" + config.getBorder());
 				textFitting.setText("" + config.getFitting());
 				if (!maximaIdentification)
 				{

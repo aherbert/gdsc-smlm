@@ -504,7 +504,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.setSortAfterEnd(true);
 		results.begin();
-		FitEngine engine = new FitEngine(config, results, Prefs.getThreads(), FitQueue.BLOCKING, 0);
+		FitEngine engine = new FitEngine(config, results, Prefs.getThreads(), FitQueue.BLOCKING);
 
 		List<ParameterisedFitJob> jobItems = new ArrayList<ParameterisedFitJob>(stack.getSize());
 

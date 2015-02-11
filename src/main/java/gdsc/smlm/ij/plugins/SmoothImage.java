@@ -14,10 +14,11 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.filters.DataProcessor;
+import gdsc.smlm.filters.DoublePassSpotFilter;
 import gdsc.smlm.filters.MaximaSpotFilter;
-import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.filters.SinglePassSpotFilter;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.ImagePlus;
@@ -46,11 +47,11 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		filterNames = SettingsManager.getNames((Object[]) filters);
 	}
 
-	private int filter1 = 0;
-	private double smooth1 = 1;
-	private boolean differenceFilter = false;
-	private int filter2 = 0;
-	private double smooth2 = 3;
+	private static int filter1 = 0;
+	private static double smooth1 = 1;
+	private static boolean differenceFilter = false;
+	private static int filter2 = 0;
+	private static double smooth2 = 3;
 
 	private int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
 
@@ -66,18 +67,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 			//imp.resetDisplayRange();
 			imp.updateAndDraw();
 
-			// Save the settings
-			GlobalSettings settings = SettingsManager.loadSettings();
-			FitEngineConfiguration config = settings.getFitEngineConfiguration();
-			config.setDataFilter(filter1);
-			config.setSmooth(smooth1);
-			config.setDifferenceFilter(differenceFilter);
-			if (differenceFilter)
-			{
-				config.setDataFilter2(filter2);
-				config.setSmooth2(smooth2);
-			}
-			SettingsManager.saveSettings(settings);
 			return DONE;
 		}
 
@@ -108,15 +97,12 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		GlobalSettings settings = SettingsManager.loadSettings();
-		FitEngineConfiguration config = settings.getFitEngineConfiguration();
-
 		gd.addMessage("Smooth image:");
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
-		gd.addSlider("Smoothing", 0, 4.5, config.getSmooth());
-		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
-		gd.addChoice("Spot_filter2", filterNames, filterNames[config.getDataFilter2().ordinal()]);
-		gd.addSlider("Smoothing2", 1.5, 6, config.getSmooth2());
+		gd.addChoice("Spot_filter", filterNames, filterNames[filter1]);
+		gd.addSlider("Smoothing", 0, 4.5, smooth1);
+		gd.addCheckbox("Difference_filter", differenceFilter);
+		gd.addChoice("Spot_filter2", filterNames, filterNames[filter2]);
+		gd.addSlider("Smoothing2", 1.5, 6, smooth2);
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
@@ -142,7 +128,6 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 			filter2 = gd.getNextChoiceIndex();
 			smooth2 = gd.getNextNumber();
 		}
-
 		return !gd.invalidNumber();
 	}
 
@@ -175,7 +160,15 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 
 	private MaximaSpotFilter createSpotFilter()
 	{
-		return FitEngine.createSpotFilter(1, 0, filters[filter1], smooth1, differenceFilter, filters[filter2], smooth2);
+		final int search = 1;
+		final int border = 0;
+		DataProcessor processor0 = FitEngineConfiguration.createDataProcessor(border, filters[filter1], smooth1);
+		if (differenceFilter)
+		{
+			DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border, filters[filter2], smooth2);
+			return new DoublePassSpotFilter(search, border, processor0, processor1);
+		}
+		return new SinglePassSpotFilter(search, border, processor0);
 	}
 
 	/*

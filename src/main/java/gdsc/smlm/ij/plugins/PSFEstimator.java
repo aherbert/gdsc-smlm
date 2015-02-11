@@ -14,6 +14,7 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitJob;
@@ -175,11 +176,13 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addCheckbox("Show_histograms", settings.showHistograms);
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 
+		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
-		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
 		if (extraOptions)
@@ -262,10 +265,11 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		settings.showHistograms = gd.getNextBoolean();
 		settings.histogramBins = (int) gd.getNextNumber();
 
-		config.setDataFilter(gd.getNextChoiceIndex());
-		config.setSmooth(gd.getNextNumber());
-		config.setDifferenceFilter(gd.getNextBoolean());
+		config.setDataFilterType(gd.getNextChoiceIndex());
+		config.setDataFilter(gd.getNextChoiceIndex(), 0);
+		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
+		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 
 		if (extraOptions)
@@ -301,7 +305,6 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			Parameters.isEqualOrBelow("P-value", settings.pValue, 0.5);
 			if (settings.showHistograms)
 				Parameters.isAboveZero("Histogram bins", settings.histogramBins);
-			Parameters.isPositive("Smoothing", config.getSmooth());
 			Parameters.isAboveZero("Search width", config.getSearch());
 			Parameters.isAboveZero("Fitting width", config.getFitting());
 			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());

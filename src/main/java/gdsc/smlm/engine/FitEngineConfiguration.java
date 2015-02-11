@@ -13,7 +13,22 @@ package gdsc.smlm.engine;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import java.util.Arrays;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.smlm.filters.AverageDataProcessor;
+import gdsc.smlm.filters.BlockAverageDataProcessor;
+import gdsc.smlm.filters.CircularMeanDataProcessor;
+import gdsc.smlm.filters.DataProcessor;
+import gdsc.smlm.filters.DoublePassSpotFilter;
+import gdsc.smlm.filters.GaussianDataProcessor;
+import gdsc.smlm.filters.JurySpotFilter;
+import gdsc.smlm.filters.MaximaSpotFilter;
+import gdsc.smlm.filters.MedianDataProcessor;
+import gdsc.smlm.filters.SinglePassSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.utils.NoiseEstimator;
 import gdsc.smlm.utils.NoiseEstimator.Method;
 
@@ -28,19 +43,18 @@ public class FitEngineConfiguration implements Cloneable
 	// a Gaussian filter with 2-3 SD smoothing. The Gaussian filter is more robust to width mismatch but
 	// the mean filter will be faster as it uses a smaller block size. Setting the parameter at a higher level 
 	// allows the filter to work on out-of-focus spots which will have a wider PSF.
-	
-	private double smooth = 1.3;
-	private double smooth2 = 3;
+
+	private double[] smooth = new double[] { 1.3 };
 	private double search = 1;
+	private double border = 1;
 	private double fitting = 3;
 	private int failuresLimit = 3;
 	private boolean includeNeighbours = true;
 	private double neighbourHeightThreshold = 0.3;
 	private double residualsThreshold = 1;
 	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
-	private DataFilter dataFilter = DataFilter.MEAN;
-	private boolean differenceFilter = false;
-	private DataFilter dataFilter2 = DataFilter.MEAN;
+	private DataFilterType dataFilterType = DataFilterType.SINGLE;
+	private DataFilter[] dataFilter = new DataFilter[] { DataFilter.MEAN };
 
 	/**
 	 * Constructor
@@ -53,43 +67,29 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * @param n
+	 *            The filter number
 	 * @return the smoothing window size
 	 */
-	public double getSmooth()
+	public double getSmooth(int n)
 	{
-		return smooth;
+		if (n < this.smooth.length)
+			return smooth[n];
+		return 0;
 	}
 
 	/**
 	 * @param smooth
 	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
 	 *            peak widths.
+	 * @param n
+	 *            The filter number
 	 */
-	public void setSmooth(double smooth)
+	public void setSmooth(double smooth, int n)
 	{
-		this.smooth = smooth;
-	}
-
-	/**
-	 * @return the second smoothing window size
-	 */
-	public double getSmooth2()
-	{
-		return smooth2;
-	}
-
-	/**
-	 * Use this parameter to perform a difference-of-smoothing (Top-hat) filter to identify peaks. The second smoothing
-	 * window should be larger than the first. The second smoothed image is subtracted from the first to create a
-	 * difference-of-smoothing such as a difference-of-Gaussians band-pass filter.
-	 * 
-	 * @param smooth2
-	 *            the size of the second smoothing window. The actual window is calculated dynamically in conjunction
-	 *            with the peak widths.
-	 */
-	public void setSmooth2(double smooth2)
-	{
-		this.smooth2 = smooth2;
+		if (this.smooth.length <= n)
+			this.smooth = Arrays.copyOf(this.smooth, n + 1);
+		this.smooth[n] = smooth;
 	}
 
 	/**
@@ -108,6 +108,24 @@ public class FitEngineConfiguration implements Cloneable
 	public void setSearch(double search)
 	{
 		this.search = search;
+	}
+
+	/**
+	 * @return the border
+	 *            the size of the border region to ignore. The actual window is calculated dynamically
+	 *            in conjunction with the peak widths.
+	 */
+	public double getBorder()
+	{
+		return border;
+	}
+
+	/**
+	 * @param border the size of the border region to ignore
+	 */
+	public void setBorder(double border)
+	{
+		this.border = border;
 	}
 
 	/**
@@ -271,87 +289,248 @@ public class FitEngineConfiguration implements Cloneable
 		if (noiseMethod == null)
 			noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
 		if (dataFilter == null)
-			dataFilter = DataFilter.MEAN;
-		if (dataFilter2 == null)
-			dataFilter2 = DataFilter.MEAN;
+			dataFilter = new DataFilter[] { DataFilter.MEAN };
+		if (smooth == null)
+			smooth = new double[] { 1.3 };
+		// Do this last as it resizes the dataFilter and smooth arrays
+		if (dataFilterType == null)
+			setDataFilterType(DataFilterType.SINGLE);
 	}
 
 	/**
-	 * @return the filter to apply to the data before identifying local maxima
+	 * @return the type of filter to apply to the data before identifying local maxima
 	 */
-	public DataFilter getDataFilter()
+	public DataFilterType getDataFilterType()
 	{
-		return dataFilter;
+		return dataFilterType;
 	}
 
 	/**
-	 * @param DataFilter
-	 *            the filter to apply to the data before identifying local maxima
+	 * @param DataFilterType
+	 *            the type of filter to apply to the data before identifying local maxima
 	 */
-	public void setDataFilter(DataFilter dataFilter)
+	public void setDataFilterType(DataFilterType dataFilterType)
 	{
-		this.dataFilter = dataFilter;
-	}
+		this.dataFilterType = dataFilterType;
 
-	/**
-	 * @param DataFilter
-	 *            the filter to apply to the data before identifying local maxima
-	 */
-	public void setDataFilter(int dataFilter)
-	{
-		if (dataFilter >= 0 && dataFilter < DataFilter.values().length)
+		// Resize the filter arrays to discard unused filters
+		final int n;
+		switch (dataFilterType)
 		{
-			setDataFilter(DataFilter.values()[dataFilter]);
+			case JURY:
+				return;
+
+			case DIFFERENCE:
+				n = 2;
+				break;
+
+			case SINGLE:
+			default:
+				n = 1;
+		}
+		this.dataFilter = Arrays.copyOf(this.dataFilter, n);
+		this.smooth = Arrays.copyOf(this.smooth, n);
+	}
+
+	/**
+	 * @param DataFilterType
+	 *            the type of filter to apply to the data before identifying local maxima
+	 */
+	public void setDataFilterType(int dataFilterType)
+	{
+		if (dataFilterType >= 0 && dataFilterType < DataFilterType.values().length)
+		{
+			setDataFilterType(DataFilterType.values()[dataFilterType]);
 		}
 	}
 
 	/**
-	 * @return Set to true to perform difference filtering
+	 * @param n
+	 *            The filter number
+	 * @return the filter to apply to the data before identifying local maxima
 	 */
-	public boolean isDifferenceFilter()
+	public DataFilter getDataFilter(int n)
 	{
-		return differenceFilter;
+		if (n < this.dataFilter.length)
+			return dataFilter[n];
+		return DataFilter.MEAN;
 	}
 
 	/**
-	 * Set to true to perform difference filtering. The data will be filtered twice and the output from the second
-	 * filter subtracted from the first. This allows the second filter to be used to obtain a local background, e.g.
-	 * difference-of-Gaussians filtering.
-	 * 
-	 * @param differenceFilter
-	 *            Set to true to perform difference filtering
+	 * @param DataFilter
+	 *            the filter to apply to the data before identifying local maxima
+	 * @param n
+	 *            The filter number
 	 */
-	public void setDifferenceFilter(boolean differenceFilter)
+	public void setDataFilter(DataFilter dataFilter, int n)
 	{
-		this.differenceFilter = differenceFilter;
+		if (this.dataFilter.length <= n)
+			this.dataFilter = Arrays.copyOf(this.dataFilter, n + 1);
+		this.dataFilter[n] = dataFilter;
 	}
 
 	/**
-	 * @return the second filter to apply to the data before identifying local maxima
+	 * @param DataFilter
+	 *            the filter to apply to the data before identifying local maxima
+	 * @param n
+	 *            The filter number
 	 */
-	public DataFilter getDataFilter2()
+	public void setDataFilter(int dataFilter, int n)
 	{
-		return dataFilter2;
-	}
-
-	/**
-	 * @param dataFilter2
-	 *            the second filter to apply to the data before identifying local maxima
-	 */
-	public void setDataFilter2(DataFilter dataFilter2)
-	{
-		this.dataFilter2 = dataFilter2;
-	}
-
-	/**
-	 * @param dataFilter
-	 *            the second filter to apply to the data before identifying local maxima
-	 */
-	public void setDataFilter2(int dataFilter2)
-	{
-		if (dataFilter2 >= 0 && dataFilter2 < DataFilter.values().length)
+		if (dataFilter >= 0 && dataFilter < DataFilter.values().length)
 		{
-			setDataFilter2(DataFilter.values()[dataFilter2]);
+			setDataFilter(DataFilter.values()[dataFilter], n);
+		}
+	}
+
+	/**
+	 * Get the relative fitting width. This is calculated using the maximum peak standard deviation multiplied by the
+	 * fitting parameter.
+	 * 
+	 * @return The fitting width
+	 */
+	public int getRelativeFitting()
+	{
+		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
+		final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+
+		double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
+		if (initialPeakStdDev1 > 0)
+			widthMax = FastMath.max(initialPeakStdDev1, widthMax);
+
+		// Region for peak fitting
+		int fitting = (int) Math.ceil(getFitting() * widthMax);
+		if (fitting < 2)
+			fitting = 2;
+		return fitting;
+	}
+
+	/**
+	 * Create the spot filter for identifying candidate maxima. The actual border, search width and smoothing parameters
+	 * can be configured relative to the configured standard deviations or left absolute. The standard deviation is used
+	 * to determine the Half-Width at Half-Maximum (HWHM) for each dimension and the parameters set as follows.
+	 * 
+	 * <pre>
+	 * 
+	 * int search = (int) Math.ceil(getSearch() * hwhmMax);
+	 * int border = (int) Math.floor(getBorder() * hwhmMax);
+	 * // For each filter
+	 * double smooth = getSmooth(i) * hwhmMin;
+	 * 
+	 * </pre>
+	 * 
+	 * @param relative
+	 *            True if the parameters should be made relative to the configured standard deviations
+	 * @return
+	 */
+	public MaximaSpotFilter createSpotFilter(boolean relative)
+	{
+		final double hwhmMin, hwhmMax;
+
+		if (relative)
+		{
+			// Use smallest width for smoothing and largest for the border and fitting region
+			FitConfiguration fitConfiguration = getFitConfiguration();
+			final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
+			final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+
+			// Use 1 if zero to get at least a single pixel width
+			double widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
+			if (initialPeakStdDev1 > 0)
+				widthMin = FastMath.min(initialPeakStdDev1, widthMin);
+			double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
+			if (initialPeakStdDev1 > 0)
+				widthMax = FastMath.max(initialPeakStdDev1, widthMax);
+
+			// Get the half-width at half maximim
+			hwhmMin = Gaussian2DFitter.sd2fwhm(widthMin) / 2;
+			hwhmMax = Gaussian2DFitter.sd2fwhm(widthMax) / 2;
+		}
+		else
+		{
+			hwhmMin = hwhmMax = 1;
+		}
+
+		// Region for maxima finding
+		int search = (int) Math.ceil(getSearch() * hwhmMax);
+		if (search < 1)
+			search = 1;
+
+		// Border where peaks are ignored
+		int border = (int) Math.floor(getBorder() * hwhmMax);
+		if (border < 0)
+			border = 0;
+
+		DataProcessor processor0 = createDataProcessor(border, 0, hwhmMin);
+		final int nFilters = Math.min(dataFilter.length, smooth.length);
+
+		switch (dataFilterType)
+		{
+			case JURY:
+				if (nFilters > 1)
+				{
+					DataProcessor[] processors = new DataProcessor[nFilters];
+					processors[0] = processor0;
+					for (int i = 1; i < nFilters; i++)
+						processors[i] = createDataProcessor(border, i, hwhmMin);
+					return new JurySpotFilter(search, border, processors);
+				}
+
+			case DIFFERENCE:
+				if (nFilters > 1)
+				{
+					DataProcessor processor1 = createDataProcessor(border, 1, hwhmMin);
+					return new DoublePassSpotFilter(search, border, processor0, processor1);
+				}
+
+			case SINGLE:
+			default:
+				return new SinglePassSpotFilter(search, border, processor0);
+		}
+	}
+
+	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)
+	{
+		//return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
+		return smoothingParameter * hwhmMin;
+	}
+
+	private DataProcessor createDataProcessor(int border, int n, double hwhm)
+	{
+		if (n < dataFilter.length && n < smooth.length)
+			return createDataProcessor(border, getDataFilter(n), getSmoothingWindow(getSmooth(n), hwhm));
+		return null;
+	}
+
+	/**
+	 * Create a data processor for the spot filter
+	 * 
+	 * @param border
+	 * @param dataFilter
+	 * @param parameter
+	 * @return the data processor
+	 */
+	public static DataProcessor createDataProcessor(int border, DataFilter dataFilter, double parameter)
+	{
+		switch (dataFilter)
+		{
+			case MEAN:
+				return new AverageDataProcessor(border, parameter);
+
+			case BLOCK_MEAN:
+				return new BlockAverageDataProcessor(border, parameter);
+
+			case CIRCULAR_MEAN:
+				return new CircularMeanDataProcessor(border, parameter);
+
+			case MEDIAN:
+				return new MedianDataProcessor(border, parameter);
+
+			case GAUSSIAN:
+				return new GaussianDataProcessor(border, parameter);
+
+			default:
+				throw new RuntimeException("Not yet implemented: " + dataFilter.toString());
 		}
 	}
 }

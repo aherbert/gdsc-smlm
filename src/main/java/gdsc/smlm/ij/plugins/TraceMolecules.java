@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -1566,11 +1567,13 @@ public class TraceMolecules implements PlugIn
 		// Allow fitting settings to be adjusted
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		gd.addMessage("--- Gaussian fitting ---");
+		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter().ordinal()]);
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth());
-		gd.addCheckbox("Difference_filter", config.isDifferenceFilter());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
@@ -1612,10 +1615,11 @@ public class TraceMolecules implements PlugIn
 		distanceThreshold = (float) gd.getNextNumber();
 		expansionFactor = (float) gd.getNextNumber();
 
-		config.setDataFilter(gd.getNextChoiceIndex());
-		config.setSmooth(gd.getNextNumber());
-		config.setDifferenceFilter(gd.getNextBoolean());
+		config.setDataFilterType(gd.getNextChoiceIndex());
+		config.setDataFilter(gd.getNextChoiceIndex(), 0);
+		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
+		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
@@ -1641,8 +1645,6 @@ public class TraceMolecules implements PlugIn
 		{
 			Parameters.isAboveZero("Distance threshold", distanceThreshold);
 			Parameters.isAbove("Expansion factor", expansionFactor, 1);
-			Parameters.isPositive("Smoothing", config.getSmooth());
-			Parameters.isPositive("Smoothing2", config.getSmooth2());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isAboveZero("Significant digits", fitConfig.getSignificantDigits());
@@ -1683,7 +1685,7 @@ public class TraceMolecules implements PlugIn
 		refitResults.setSortAfterEnd(true);
 		refitResults.begin();
 		// No border since we know where the peaks are and we must not miss them due to truncated searching 
-		FitEngine engine = new FitEngine(config, refitResults, Prefs.getThreads(), FitQueue.BLOCKING, 0);
+		FitEngine engine = new FitEngine(config, refitResults, Prefs.getThreads(), FitQueue.BLOCKING);
 
 		// Either : Only fit the centroid
 		// or     : Extract a bigger region, allowing all fits to run as normal and then 
