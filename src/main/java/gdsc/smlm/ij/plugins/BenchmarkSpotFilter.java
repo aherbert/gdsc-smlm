@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -75,6 +76,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
 	private long time = 0;
+
+	private static int id = 1;
 
 	private static TextWindow summaryTable = null;
 
@@ -415,7 +418,34 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Show a table of the results
 		summariseResults(filterResults);
 
+		// Debugging.
+		//addSpotsToMemory(filterResults);
+
 		IJ.showStatus("");
+	}
+
+	/**
+	 * Add all the true-positives to memory as a new results set
+	 * 
+	 * @param filterResults
+	 */
+	void addSpotsToMemory(HashMap<Integer, FilterResult> filterResults)
+	{
+		MemoryPeakResults results = new MemoryPeakResults();
+		results.setName(TITLE + " TP " + id++);
+		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
+		{
+			int peak = result.getKey();
+			for (ScoredSpot spot : result.getValue().spots)
+			{
+				if (spot.match)
+				{
+					final float[] params = new float[] { 0, spot.spot.intensity, 0, spot.spot.x, spot.spot.y, 0, 0 };
+					results.add(peak, spot.spot.x, spot.spot.y, spot.spot.intensity, 0d, 0f, params, null);
+				}
+			}
+		}
+		MemoryPeakResults.addResults(results);
 	}
 
 	private void put(BlockingQueue<Integer> jobs, int i)
