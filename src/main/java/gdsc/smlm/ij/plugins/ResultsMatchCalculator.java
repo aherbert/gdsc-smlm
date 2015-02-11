@@ -297,7 +297,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			final double d2 = distanceThreshold * distanceThreshold;
 			for (double d : pairDistances)
 			{
-				if (d < d2)
+				if (d <= d2)
 				{
 					rms += d;
 					tp2++;
@@ -317,7 +317,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				int i = 0;
 				for (PointPair pair : allMatches)
 				{
-					if (pairDistances[i++] < d2)
+					if (pairDistances[i++] <= d2)
 					{
 						if (doIdAnalysis1)
 							matchId1.add(((PeakResultPoint) pair.getPoint1()).peakResult.getId());
