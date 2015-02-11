@@ -95,7 +95,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	 * @param height
 	 * @return Indices of the maxima
 	 */
-	private int[] getMaxima(float[] data, int width, int height)
+	protected int[] getMaxima(float[] data, int width, int height)
 	{
 		// Check upper limits are safe
 		final int n = FastMath.min(search, FastMath.min(width, height));
