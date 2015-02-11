@@ -63,13 +63,14 @@ public class BenchmarkSpotFilter implements PlugIn
 		filterNames = SettingsManager.getNames((Object[]) filters);
 	}
 
-	private static int search = 2;
+	private static int search = 1;
 	private static int border = 2;
 	private static int dataFilter = 0;
 	private static double smoothing = 1;
 	private static boolean differenceFilter = false;
 	private static int dataFilter2 = 0;
 	private static double smoothing2 = 3;
+	private static int analysisBorder = 0;
 	private static double distance = 1.5;
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
@@ -194,6 +195,32 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Score the spots that are matches
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 
+			// Remove spots at the border from analysis
+			if (analysisBorder > 0)
+			{
+				final int xlimit = stack.getWidth() - analysisBorder;
+				final int ylimit = stack.getHeight() - analysisBorder;
+				Coordinate[] actual2 = new Coordinate[actual.length];
+				int count = 0;
+				for (Coordinate c : actual)
+				{
+					if (c.getX() < analysisBorder || c.getX() > xlimit || c.getY() < analysisBorder ||
+							c.getY() > ylimit)
+						continue;
+					actual2[count++] = c;
+				}
+				actual = Arrays.copyOf(actual2, count);
+				count = 0;
+				Spot[] spots2 = new Spot[spots.length];
+				for (Spot s : spots)
+				{
+					if (s.x < analysisBorder || s.x > xlimit || s.y < analysisBorder || s.y > ylimit)
+						continue;
+					spots2[count++] = s;
+				}
+				spots = Arrays.copyOf(spots2, count);
+			}
+
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
 			MatchResult result;
 
@@ -308,6 +335,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addChoice("Spot_filter2", filterNames, filterNames[dataFilter2]);
 		gd.addSlider("Smoothing2", 1.5, 6, smoothing2);
 		gd.addMessage("Scoring options:");
+		gd.addSlider("Analysis_border", 0, 5, analysisBorder);
 		gd.addSlider("Match_distance", 1, 3, distance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
@@ -326,6 +354,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		differenceFilter = gd.getNextBoolean();
 		dataFilter2 = gd.getNextChoiceIndex();
 		smoothing2 = Math.abs(gd.getNextNumber());
+		analysisBorder = Math.abs((int) gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
@@ -511,6 +540,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		else
 			sb.append("-\t-\t");
+		sb.append(analysisBorder).append("\t");
 		sb.append(Utils.rounded(distance)).append("\t");
 
 		// Add the results
@@ -645,7 +675,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append("Search\tBorder\tFilter\tParam\tFilter2\tParam2\td\t");
+		sb.append("Search\tBorder\tFilter\tParam\tFilter2\tParam2\tA.Border\td\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");
