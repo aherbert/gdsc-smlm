@@ -265,6 +265,13 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 			// Round to integer
 			bounds.x = (int) Math.floor(minX);
 			bounds.y = (int) Math.floor(minY);
+
+			// For compatibility with drawing images add one to the limits if they are integers
+			if (maxX == (int) maxX)
+				maxX += 1;
+			if (maxY == (int) maxY)
+				maxY += 1;
+
 			bounds.width = (int) Math.ceil(maxX) - bounds.x;
 			bounds.height = (int) Math.ceil(maxY) - bounds.y;
 		}
@@ -477,7 +484,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	{
 		return (calibration != null) ? calibration.gain : DEFAULT_GAIN;
 	}
-	
+
 	/**
 	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
 	 * 

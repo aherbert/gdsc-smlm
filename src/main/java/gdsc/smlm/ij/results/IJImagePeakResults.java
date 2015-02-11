@@ -376,7 +376,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		updateImage();
 	}
-	
+
 	private float[] getValue(int peak, float[] params, double error, float x, float y, int x1, int y1)
 	{
 		// Add a count to each adjacent pixel
@@ -429,13 +429,18 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		value[2] *= wx * (1f - wy);
 		value[3] *= wx * wy;
 	}
-	
+
 	/**
 	 * Simplified method to allow the Image to be reconstructed using just T,X,Y coordinates and a value
-	 * @param peak The peak frame
-	 * @param x The X coordinate
-	 * @param y The Y coordinate
-	 * @param v The value
+	 * 
+	 * @param peak
+	 *            The peak frame
+	 * @param x
+	 *            The X coordinate
+	 * @param y
+	 *            The Y coordinate
+	 * @param v
+	 *            The value
 	 */
 	public void add(int peak, float x, float y, float v)
 	{
@@ -458,6 +463,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		int index = y1 * imageWidth + x1;
 
+		// Avoid overrun
+		final int xDelta = (x == xlimit) ? 0 : 1;
+		final int yDelta = (y == ylimit) ? 0 : imageWidth;
+		
 		// Now add the values to the configured indices
 		synchronized (data)
 		{
@@ -466,31 +475,31 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			{
 				// Replace the data
 				data[index] = value[0];
-				data[index + imageWidth] = value[1];
-				data[index + 1] = value[2];
-				data[index + imageWidth + 1] = value[3];
+				data[index + yDelta] = value[1];
+				data[index + xDelta] = value[2];
+				data[index + yDelta + xDelta] = value[3];
 			}
 			else if ((displayFlags & DISPLAY_MAX) != 0)
 			{
 				// Use the highest value
 				data[index] = FastMath.max(data[index], value[0]);
-				data[index + imageWidth] = FastMath.max(data[index + imageWidth], value[1]);
-				data[index + 1] = FastMath.max(data[index + 1], value[2]);
-				data[index + imageWidth + 1] = FastMath.max(data[index + imageWidth + 1], value[3]);
+				data[index + yDelta] = FastMath.max(data[index + yDelta], value[1]);
+				data[index + xDelta] = FastMath.max(data[index + xDelta], value[2]);
+				data[index + yDelta + xDelta] = FastMath.max(data[index + yDelta + xDelta], value[3]);
 			}
 			else
 			{
 				// Add the data
 				data[index] += value[0];
-				data[index + imageWidth] += value[1];
-				data[index + 1] += value[2];
-				data[index + imageWidth + 1] += value[3];
+				data[index + yDelta] += value[1];
+				data[index + xDelta] += value[2];
+				data[index + yDelta + xDelta] += value[3];
 			}
 		}
 
 		updateImage();
 	}
-	
+
 	private float[] getValue(int peak, float v, float x, float y, int x1, int y1)
 	{
 		// Add a count to each adjacent pixel
@@ -616,15 +625,44 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			float[] value = getValue(result.peak, result.params, result.error, x, y, x1, y1);
 
 			int index = y1 * imageWidth + x1;
-
-			indices[nPoints] = index;
-			indices[nPoints + 1] = index + imageWidth;
-			indices[nPoints + 2] = index + 1;
-			indices[nPoints + 3] = index + imageWidth + 1;
-			values[nPoints] = value[0];
-			values[nPoints + 1] = value[1];
-			values[nPoints + 2] = value[2];
-			values[nPoints + 3] = value[3];
+			
+			// Avoid overrun
+			if (x == xlimit)
+			{
+				// Check for y overrun
+				final int yDelta = (y == ylimit) ? 0 : imageWidth;
+				indices[nPoints] = index;
+				indices[nPoints + 1] = index + yDelta;
+				indices[nPoints + 2] = index;
+				indices[nPoints + 3] = index + yDelta;
+				values[nPoints] = value[0];
+				values[nPoints + 1] = value[1];
+				values[nPoints + 2] = value[2];
+				values[nPoints + 3] = value[3];
+			}
+			else if (y == ylimit)
+			{
+				// Here there is not x overrun
+				indices[nPoints] = index;
+				indices[nPoints + 1] = index;
+				indices[nPoints + 2] = index + 1;
+				indices[nPoints + 3] = index + 1;
+				values[nPoints] = value[0];
+				values[nPoints + 1] = value[1];
+				values[nPoints + 2] = value[2];
+				values[nPoints + 3] = value[3];
+			}
+			else
+			{
+				indices[nPoints] = index;
+				indices[nPoints + 1] = index + imageWidth;
+				indices[nPoints + 2] = index + 1;
+				indices[nPoints + 3] = index + imageWidth + 1;
+				values[nPoints] = value[0];
+				values[nPoints + 1] = value[1];
+				values[nPoints + 2] = value[2];
+				values[nPoints + 3] = value[3];
+			}
 
 			nPoints += 4;
 
