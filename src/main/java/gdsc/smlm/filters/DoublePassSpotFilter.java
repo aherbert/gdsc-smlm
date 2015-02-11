@@ -59,7 +59,7 @@ public class DoublePassSpotFilter extends MaximaSpotFilter
 	 */
 	public boolean isAbsoluteIntensity()
 	{
-		return true;
+		return false;
 	}
 
 	/*
