@@ -862,13 +862,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textCoordinateShiftFactor = numerics.get(n++);
 				textSignalStrength = numerics.get(n++);
 				textMinPhotons = numerics.get(n++);
+				textWidthFactor = numerics.get(n++);
 				textPrecisionThreshold = numerics.get(n++);
 				if (extraOptions)
 				{
 					textNoise = numerics.get(n++);
 					textNoiseMethod = choices.get(ch++);
 				}
-				textWidthFactor = numerics.get(n++);
 			}
 			textLogProgress = checkboxes.get(b++);
 			if (!maximaIdentification)
@@ -2308,13 +2308,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 					textSignalStrength.setText("" + fitConfig.getSignalStrength());
 					textMinPhotons.setText("" + fitConfig.getMinPhotons());
+					textWidthFactor.setText("" + fitConfig.getWidthFactor());
 					textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 					if (extraOptions)
 					{
 						textNoise.setText("" + fitConfig.getNoise());
 						textNoiseMethod.select(config.getNoiseMethod().ordinal());
 					}
-					textWidthFactor.setText("" + fitConfig.getWidthFactor());
 				}
 				textLogProgress.setState(resultsSettings.logProgress);
 				if (!maximaIdentification)
