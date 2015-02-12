@@ -525,11 +525,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
 		sb.append(Utils.rounded(signal / Math.sqrt(simulationParameters.b2))).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
-		sb.append(spotFilter.getName()).append("\t");
+		sb.append(config.getDataFilterType()).append("\t");
+		//sb.append(spotFilter.getName()).append("\t");
 		sb.append(spotFilter.getSearch()).append("\t");
 		sb.append(spotFilter.getBorder()).append("\t");
-		sb.append(Utils.rounded(spotFilter.getSpread())).append("\t");
-		sb.append(config.getDataFilterType()).append("\t");
+		sb.append(Utils.rounded((spotFilter.getSpread()-1)/2.0)).append("\t");
 		sb.append(config.getDataFilter(0)).append("\t");
 		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
 		sb.append(spotFilter.getDescription()).append("\t");
@@ -668,7 +668,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append("Name\tSearch\tBorder\tSpread\tType\tFilter\tParam\tDescription\tA.Border\td\t");
+		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\td\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");
