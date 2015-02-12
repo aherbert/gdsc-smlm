@@ -1467,6 +1467,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		FitEngineConfiguration config = settings.getFitEngineConfiguration();
 
+		int numberOfFilters = 1;
 		final int n;
 		switch (config.getDataFilterType())
 		{
@@ -1480,7 +1481,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			case SINGLE:
 			default:
-				return true;
+				n = 1;
 		}
 
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
@@ -1520,12 +1521,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				else
 					filterIndex = gd.getNextChoiceIndex();
 				config.setDataFilter(filterIndex, Math.abs(gd.getNextNumber()), i);
+				numberOfFilters++;
 			}
 			else
 			{
 				break;
 			}
 		}
+		config.setNumberOfFilters(numberOfFilters);
 		if (filename != null)
 			SettingsManager.saveSettings(settings, filename);
 		return true;

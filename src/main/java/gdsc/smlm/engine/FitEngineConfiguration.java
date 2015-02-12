@@ -306,7 +306,7 @@ public class FitEngineConfiguration implements Cloneable
 
 	private void resizeFilters(int n)
 	{
-		if (this.dataFilter == null || this.dataFilter.length != n)
+		if (this.dataFilter == null || this.dataFilter.length < n)
 		{
 			this.dataFilter = Arrays.copyOf(this.dataFilter, n);
 			this.smooth = Arrays.copyOf(this.smooth, n);
@@ -380,6 +380,20 @@ public class FitEngineConfiguration implements Cloneable
 		{
 			setDataFilter(DataFilter.values()[dataFilter], smooth, n);
 		}
+	}
+
+	/**
+	 * Set the number of filters to use. Call this method when all the filters have been set to clear any other stored
+	 * filters from memory. This allows the user to call {@link #setDataFilter(DataFilter, double, int)} 3 times when
+	 * then configuration has more than 3 filters already stored.
+	 * 
+	 * @param n The number of filters
+	 */
+	public void setNumberOfFilters(int n)
+	{
+		if (n < 1)
+			n = 1;
+		resizeFilters(n);
 	}
 
 	/**
