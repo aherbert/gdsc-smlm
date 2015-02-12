@@ -190,7 +190,7 @@ public class AverageDataProcessor extends DataProcessor
 	@Override
 	public String getName()
 	{
-		return "Average Filter";
+		return "Average";
 	}
 
 	/*

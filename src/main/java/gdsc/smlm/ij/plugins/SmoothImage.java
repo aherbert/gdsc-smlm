@@ -16,9 +16,9 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.DataProcessor;
-import gdsc.smlm.filters.DoublePassSpotFilter;
+import gdsc.smlm.filters.DifferenceSpotFilter;
 import gdsc.smlm.filters.MaximaSpotFilter;
-import gdsc.smlm.filters.SinglePassSpotFilter;
+import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.ImagePlus;
@@ -166,9 +166,9 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 		if (differenceFilter)
 		{
 			DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border, filters[filter2], smooth2);
-			return new DoublePassSpotFilter(search, border, processor0, processor1);
+			return new DifferenceSpotFilter(search, border, processor0, processor1);
 		}
-		return new SinglePassSpotFilter(search, border, processor0);
+		return new SingleSpotFilter(search, border, processor0);
 	}
 
 	/*

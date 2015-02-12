@@ -107,7 +107,7 @@ public class GaussianDataProcessor extends DataProcessor
 	@Override
 	public String getName()
 	{
-		return "Gaussian Filter";
+		return "Gaussian";
 	}
 
 	/*

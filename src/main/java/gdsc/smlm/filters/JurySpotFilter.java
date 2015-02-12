@@ -137,7 +137,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	@Override
 	public String getName()
 	{
-		return "Jury Filter";
+		return "Jury";
 	}
 
 	/*
@@ -152,5 +152,19 @@ public final class JurySpotFilter extends MaximaSpotFilter
 		for (int i = 0; i < processors.length; i++)
 			list.add("Filter = " + processors[i].getDescription());
 		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#getSpread()
+	 */
+	@Override
+	public double getSpread()
+	{
+		double max = processors[0].getSpread();
+		for (int i = 1; i < processors.length; i++)
+			max = Math.max(processors[i].getSpread(), max);
+		return max;
 	}
 }

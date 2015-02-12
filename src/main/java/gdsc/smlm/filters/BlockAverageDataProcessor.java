@@ -117,7 +117,7 @@ public class BlockAverageDataProcessor extends DataProcessor
 	@Override
 	public String getName()
 	{
-		return "Block Average Filter";
+		return "Block Average";
 	}
 
 	/*

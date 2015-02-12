@@ -19,7 +19,7 @@ import java.util.List;
  * Identifies candidate spots (local maxima) in an image. The image is pre-processed with two filters and the second
  * subtracted from the first.
  */
-public class DoublePassSpotFilter extends MaximaSpotFilter
+public class DifferenceSpotFilter extends MaximaSpotFilter
 {
 	private DataProcessor processor1;
 	private DataProcessor processor2;
@@ -38,7 +38,7 @@ public class DoublePassSpotFilter extends MaximaSpotFilter
 	 * @throws IllegalArgumentException
 	 *             if either processor is null
 	 */
-	public DoublePassSpotFilter(int search, int border, DataProcessor processor1, DataProcessor processor2)
+	public DifferenceSpotFilter(int search, int border, DataProcessor processor1, DataProcessor processor2)
 	{
 		super(search, border);
 		if (processor1 == null)
@@ -86,7 +86,7 @@ public class DoublePassSpotFilter extends MaximaSpotFilter
 	 */
 	public Object clone()
 	{
-		DoublePassSpotFilter f = (DoublePassSpotFilter) super.clone();
+		DifferenceSpotFilter f = (DifferenceSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.processor1 = (DataProcessor) processor1.clone();
 		f.processor2 = (DataProcessor) processor2.clone();
@@ -99,7 +99,7 @@ public class DoublePassSpotFilter extends MaximaSpotFilter
 	@Override
 	public String getName()
 	{
-		return "Double-Pass Filter";
+		return "Difference";
 	}
 
 	/* (non-Javadoc)
@@ -112,5 +112,16 @@ public class DoublePassSpotFilter extends MaximaSpotFilter
 		list.add("Filter 1 = " + processor1.getDescription());
 		list.add("Filter 2 = " + processor2.getDescription());
 		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#getSpread()
+	 */
+	@Override
+	public double getSpread()
+	{
+		return Math.max(processor1.getSpread(), processor2.getSpread());
 	}
 }

@@ -104,7 +104,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public String getName()
 	{
-		return "Circular Mean Filter";
+		return "Circular Mean";
 	}
 
 	/*

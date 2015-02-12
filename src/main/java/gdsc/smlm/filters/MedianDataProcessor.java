@@ -130,7 +130,7 @@ public class MedianDataProcessor extends DataProcessor
 	@Override
 	public String getName()
 	{
-		return "Median Filter";
+		return "Median";
 	}
 
 	/*

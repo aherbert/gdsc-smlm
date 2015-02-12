@@ -115,4 +115,11 @@ public abstract class SpotFilter implements Cloneable
 	 * @return The parameters of the filter
 	 */
 	public abstract List<String> getParameters();
+
+	/**
+	 * Get the width spread of data used to process each position
+	 * 
+	 * @return The spread
+	 */
+	public abstract double getSpread();
 }

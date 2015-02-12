@@ -21,12 +21,12 @@ import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.CircularMeanDataProcessor;
 import gdsc.smlm.filters.DataProcessor;
-import gdsc.smlm.filters.DoublePassSpotFilter;
+import gdsc.smlm.filters.DifferenceSpotFilter;
 import gdsc.smlm.filters.GaussianDataProcessor;
 import gdsc.smlm.filters.JurySpotFilter;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.MedianDataProcessor;
-import gdsc.smlm.filters.SinglePassSpotFilter;
+import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.utils.NoiseEstimator;
@@ -493,12 +493,12 @@ public class FitEngineConfiguration implements Cloneable
 				if (nFilters > 1)
 				{
 					DataProcessor processor1 = createDataProcessor(border, 1, hwhmMin);
-					return new DoublePassSpotFilter(search, border, processor0, processor1);
+					return new DifferenceSpotFilter(search, border, processor0, processor1);
 				}
 
 			case SINGLE:
 			default:
-				return new SinglePassSpotFilter(search, border, processor0);
+				return new SingleSpotFilter(search, border, processor0);
 		}
 	}
 

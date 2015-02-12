@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Identifies candidate spots (local maxima) in an image. The image is pre-processed with a single filter.
  */
-public class SinglePassSpotFilter extends MaximaSpotFilter
+public class SingleSpotFilter extends MaximaSpotFilter
 {
 	private DataProcessor processor;
 
@@ -34,7 +34,7 @@ public class SinglePassSpotFilter extends MaximaSpotFilter
 	 * @throws IllegalArgumentException
 	 *             if processor is null
 	 */
-	public SinglePassSpotFilter(int search, int border, DataProcessor processor)
+	public SingleSpotFilter(int search, int border, DataProcessor processor)
 	{
 		super(search, border);
 		if (processor == null)
@@ -70,7 +70,7 @@ public class SinglePassSpotFilter extends MaximaSpotFilter
 	 */
 	public Object clone()
 	{
-		SinglePassSpotFilter f = (SinglePassSpotFilter) super.clone();
+		SingleSpotFilter f = (SingleSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.processor = (DataProcessor) processor.clone();
 		return f;
@@ -84,7 +84,7 @@ public class SinglePassSpotFilter extends MaximaSpotFilter
 	@Override
 	public String getName()
 	{
-		return "Single-Pass Filter";
+		return "Single";
 	}
 
 	/*
@@ -98,5 +98,16 @@ public class SinglePassSpotFilter extends MaximaSpotFilter
 		List<String> list = super.getParameters();
 		list.add("Filter = " + processor.getDescription());
 		return list;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#getSpread()
+	 */
+	@Override
+	public double getSpread()
+	{
+		return processor.getSpread();
 	}
 }
