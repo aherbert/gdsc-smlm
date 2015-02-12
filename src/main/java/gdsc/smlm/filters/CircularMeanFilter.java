@@ -365,7 +365,13 @@ public class CircularMeanFilter implements Cloneable
 		return radii.getValues();
 	}
 
-	private static int getNPoints(double radius)
+	/**
+	 * Count the number of points in the circle mask for the given radius
+	 * 
+	 * @param radius
+	 * @return The number of points
+	 */
+	public static int getNPoints(double radius)
 	{
 		if (radius >= 1.5 && radius < 1.75) //this code creates the same sizes as the previous RankFilters
 			radius = 1.75;
@@ -383,7 +389,7 @@ public class CircularMeanFilter implements Cloneable
 	}
 
 	/**
-	 * Get the diameter of the pixel circle
+	 * Get the diameter of the pixel region used
 	 * 
 	 * @param radius
 	 * @return The diameter
@@ -394,6 +400,18 @@ public class CircularMeanFilter implements Cloneable
 		int kRadius = (int) (Math.sqrt(r2 + 1e-10));
 		int kHeight = 2 * kRadius + 1;
 		return kHeight;
+	}
+
+	/**
+	 * Count the number of points in the circle mask for the given radius. Then convert it into an approximate radius
+	 * using sqrt(nPoints/pi)
+	 * 
+	 * @param radius
+	 * @return The diameter
+	 */
+	public static double getPixelRadius(double radius)
+	{
+		return Math.sqrt(getNPoints(radius) / Math.PI);
 	}
 
 	//kernel height
