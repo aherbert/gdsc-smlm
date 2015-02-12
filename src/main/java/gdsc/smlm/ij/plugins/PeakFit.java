@@ -1281,8 +1281,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			fitConfig.setInitialAngleD(gd.getNextNumber());
 		}
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), 0);
-		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
@@ -1490,6 +1489,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			int filter = i + 1;
 			GenericDialog gd = new GenericDialog(TITLE);
+			gd.enableYesNoCancel();
 			gd.addMessage("Configure the additional filters");
 			String fieldName = "Spot_filter" + filter;
 			if (IJ.isMacro())
@@ -1499,26 +1499,27 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				gd.addChoice(fieldName, filterNames, filterNames[config.getDataFilter(i).ordinal()]);
 			gd.addSlider("Smoothing" + filter, 0, 4.5, config.getSmooth(i));
 			gd.showDialog();
-			if (!gd.wasCanceled())
+			if (gd.wasCanceled())
+				return false;
+			if (gd.wasOKed())
 			{
+				int filterIndex = -1;
 				if (IJ.isMacro())
 				{
-					boolean found = false;
 					String filterName = gd.getNextString();
 					for (int j = 0; j < filterNames.length; j++)
 						if (filterNames[j].equals(filterName))
 						{
-							config.setDataFilter(j, i);
-							found = true;
+							filterIndex = j;
 							break;
 						}
 					
-					if (!found)
+					if (filterIndex < 0)
 						break;
 				}
 				else
-					config.setDataFilter(gd.getNextChoiceIndex(), i);
-				config.setSmooth(Math.abs(gd.getNextNumber()), i);
+					filterIndex = gd.getNextChoiceIndex();
+				config.setDataFilter(filterIndex, Math.abs(gd.getNextNumber()), i);
 			}
 			else
 			{

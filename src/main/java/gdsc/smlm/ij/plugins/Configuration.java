@@ -250,8 +250,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
 		fitConfig.setInitialAngleD(gd.getNextNumber());
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), 0);
-		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());

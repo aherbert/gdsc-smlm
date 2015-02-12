@@ -346,8 +346,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			return false;
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), 0);
-		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		analysisBorder = Math.abs((int) gd.getNextNumber());

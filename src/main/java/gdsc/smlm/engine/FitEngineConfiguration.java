@@ -44,7 +44,6 @@ public class FitEngineConfiguration implements Cloneable
 	// the mean filter will be faster as it uses a smaller block size. Setting the parameter at a higher level 
 	// allows the filter to work on out-of-focus spots which will have a wider PSF.
 
-	private double[] smooth = new double[] { 1.3 };
 	private double search = 1;
 	private double border = 1;
 	private double fitting = 3;
@@ -54,6 +53,7 @@ public class FitEngineConfiguration implements Cloneable
 	private double residualsThreshold = 1;
 	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
 	private DataFilterType dataFilterType = DataFilterType.SINGLE;
+	private double[] smooth = new double[] { 1.3 };
 	private DataFilter[] dataFilter = new DataFilter[] { DataFilter.MEAN };
 
 	/**
@@ -64,32 +64,6 @@ public class FitEngineConfiguration implements Cloneable
 	public FitEngineConfiguration(FitConfiguration fitConfiguration)
 	{
 		this.fitConfiguration = fitConfiguration;
-	}
-
-	/**
-	 * @param n
-	 *            The filter number
-	 * @return the smoothing window size
-	 */
-	public double getSmooth(int n)
-	{
-		if (n < this.smooth.length)
-			return smooth[n];
-		return 0;
-	}
-
-	/**
-	 * @param smooth
-	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
-	 *            peak widths.
-	 * @param n
-	 *            The filter number
-	 */
-	public void setSmooth(double smooth, int n)
-	{
-		if (this.smooth.length <= n)
-			this.smooth = Arrays.copyOf(this.smooth, n + 1);
-		this.smooth[n] = smooth;
 	}
 
 	/**
@@ -112,8 +86,8 @@ public class FitEngineConfiguration implements Cloneable
 
 	/**
 	 * @return the border
-	 *            the size of the border region to ignore. The actual window is calculated dynamically
-	 *            in conjunction with the peak widths.
+	 *         the size of the border region to ignore. The actual window is calculated dynamically
+	 *         in conjunction with the peak widths.
 	 */
 	public double getBorder()
 	{
@@ -121,7 +95,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param border the size of the border region to ignore
+	 * @param border
+	 *            the size of the border region to ignore
 	 */
 	public void setBorder(double border)
 	{
@@ -288,10 +263,8 @@ public class FitEngineConfiguration implements Cloneable
 		fitConfiguration.initialiseState();
 		if (noiseMethod == null)
 			noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
-		if (dataFilter == null)
-			dataFilter = new DataFilter[] { DataFilter.MEAN };
-		if (smooth == null)
-			smooth = new double[] { 1.3 };
+		if (dataFilter == null || smooth == null)
+			setDataFilter(DataFilter.MEAN, 1.3, 0);
 		// Do this last as it resizes the dataFilter and smooth arrays
 		if (dataFilterType == null)
 			setDataFilterType(DataFilterType.SINGLE);
@@ -328,8 +301,16 @@ public class FitEngineConfiguration implements Cloneable
 			default:
 				n = 1;
 		}
-		this.dataFilter = Arrays.copyOf(this.dataFilter, n);
-		this.smooth = Arrays.copyOf(this.smooth, n);
+		resizeFilters(n);
+	}
+
+	private void resizeFilters(int n)
+	{
+		if (this.dataFilter == null || this.dataFilter.length != n)
+		{
+			this.dataFilter = Arrays.copyOf(this.dataFilter, n);
+			this.smooth = Arrays.copyOf(this.smooth, n);
+		}
 	}
 
 	/**
@@ -357,29 +338,47 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param DataFilter
-	 *            the filter to apply to the data before identifying local maxima
 	 * @param n
 	 *            The filter number
+	 * @return the smoothing window size
 	 */
-	public void setDataFilter(DataFilter dataFilter, int n)
+	public double getSmooth(int n)
 	{
-		if (this.dataFilter.length <= n)
-			this.dataFilter = Arrays.copyOf(this.dataFilter, n + 1);
-		this.dataFilter[n] = dataFilter;
+		if (n < this.smooth.length)
+			return smooth[n];
+		return 0;
 	}
 
 	/**
 	 * @param DataFilter
 	 *            the filter to apply to the data before identifying local maxima
+	 * @param smooth
+	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
+	 *            peak widths.
 	 * @param n
 	 *            The filter number
 	 */
-	public void setDataFilter(int dataFilter, int n)
+	public void setDataFilter(DataFilter dataFilter, double smooth, int n)
+	{
+		resizeFilters(n + 1);
+		this.dataFilter[n] = dataFilter;
+		this.smooth[n] = smooth;
+	}
+
+	/**
+	 * @param DataFilter
+	 *            the filter to apply to the data before identifying local maxima
+	 * @param smooth
+	 *            the size of the smoothing window. The actual window is calculated dynamically in conjunction with the
+	 *            peak widths.
+	 * @param n
+	 *            The filter number
+	 */
+	public void setDataFilter(int dataFilter, double smooth, int n)
 	{
 		if (dataFilter >= 0 && dataFilter < DataFilter.values().length)
 		{
-			setDataFilter(DataFilter.values()[dataFilter], n);
+			setDataFilter(DataFilter.values()[dataFilter], smooth, n);
 		}
 	}
 

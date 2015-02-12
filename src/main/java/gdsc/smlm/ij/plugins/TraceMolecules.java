@@ -1616,8 +1616,7 @@ public class TraceMolecules implements PlugIn
 		expansionFactor = (float) gd.getNextNumber();
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), 0);
-		config.setSmooth(Math.abs(gd.getNextNumber()), 0);
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
