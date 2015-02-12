@@ -391,7 +391,9 @@ public class CircularMeanFilter implements Cloneable
 	public static int getDiameter(double radius)
 	{
 		int r2 = (int) (radius * radius) + 1;
-		return (int) (Math.sqrt(r2 + 1e-10));
+		int kRadius = (int) (Math.sqrt(r2 + 1e-10));
+		int kHeight = 2 * kRadius + 1;
+		return kHeight;
 	}
 
 	//kernel height
