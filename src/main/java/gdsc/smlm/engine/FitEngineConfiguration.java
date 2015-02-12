@@ -393,7 +393,12 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		if (n < 1)
 			n = 1;
-		resizeFilters(n);
+		// Truncate the filter
+		if (this.dataFilter != null)
+		{
+			this.dataFilter = Arrays.copyOf(this.dataFilter, n);
+			this.smooth = Arrays.copyOf(this.smooth, n);
+		}
 	}
 
 	/**
