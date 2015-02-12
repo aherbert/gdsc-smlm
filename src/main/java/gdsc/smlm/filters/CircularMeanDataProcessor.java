@@ -128,6 +128,6 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public double getSpread()
 	{
-		return 6 * radius;
+		return CircularMeanFilter.getDiameter(radius);
 	}
 }

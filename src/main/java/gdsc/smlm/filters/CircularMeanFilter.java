@@ -382,6 +382,18 @@ public class CircularMeanFilter implements Cloneable
 		return nPoints;
 	}
 
+	/**
+	 * Get the diameter of the pixel circle
+	 * 
+	 * @param radius
+	 * @return The diameter
+	 */
+	public static int getDiameter(double radius)
+	{
+		int r2 = (int) (radius * radius) + 1;
+		return (int) (Math.sqrt(r2 + 1e-10));
+	}
+
 	//kernel height
 	private int kHeight(int[] lineRadii)
 	{
