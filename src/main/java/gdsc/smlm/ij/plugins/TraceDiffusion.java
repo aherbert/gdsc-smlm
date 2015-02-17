@@ -619,7 +619,7 @@ public class TraceDiffusion implements PlugIn
 		directoryChosen = true;
 		if (rawDataDirectory == null)
 			return;
-		String filename = rawDataDirectory + title.replace("/", " per ") + ".txt";
+		String filename = rawDataDirectory + title.replace("/", " per ").replace("*", "star") + ".txt";
 
 		BufferedWriter out = null;
 		try
