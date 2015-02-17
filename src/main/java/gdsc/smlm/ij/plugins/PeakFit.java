@@ -1490,8 +1490,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			int filter = i + 1;
 			GenericDialog gd = new GenericDialog(TITLE);
-			gd.enableYesNoCancel();
-			gd.addMessage("Configure the additional filters");
+			gd.enableYesNoCancel("Add", "Continue");
+			gd.addMessage(String.format(
+					"Configure the %s filter.\nClick continue to proceed with the current set of %d.", config
+							.getDataFilterType().toString(), i));
 			String fieldName = "Spot_filter" + filter;
 			if (IJ.isMacro())
 				// Use blank default value so bad macro parameters return nothing
@@ -1514,7 +1516,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 							filterIndex = j;
 							break;
 						}
-					
+
 					if (filterIndex < 0)
 						break;
 				}
