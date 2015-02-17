@@ -61,12 +61,13 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
-	static {
+	static
+	{
 		fitConfig = new FitConfiguration();
 		config = new FitEngineConfiguration(fitConfig);
 		config.setSearch(1);
 	}
-	
+
 	private static int analysisBorder = 0;
 	private static double distance = 1.5;
 	private static double recallFraction = 100;
@@ -143,7 +144,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		long time = 0;
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, MaximaSpotFilter spotFilter,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, HashMap<Integer, FilterResult> results)
+				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
@@ -331,7 +332,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
-		
+
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, analysisBorder);
 		gd.addSlider("Match_distance", 1, 3, distance);
@@ -363,7 +364,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		settings.setFitEngineConfiguration(config);
 		if (!PeakFit.configureDataFilter(settings, null, false))
 			return false;
-		
+
 		return true;
 	}
 
@@ -378,8 +379,6 @@ public class BenchmarkSpotFilter implements PlugIn
 			lastId = simulationParameters.id;
 		}
 
-		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
-
 		final ImageStack stack = imp.getImageStack();
 
 		// Create a pool of workers
@@ -389,7 +388,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, spotFilter, actualCoordinates, filterResults);
+			Worker worker = new Worker(jobs, stack, spotFilter, actualCoordinates);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -434,6 +433,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
 
+		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
 		for (Worker w : workers)
 		{
 			time += w.time;
@@ -529,7 +529,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		//sb.append(spotFilter.getName()).append("\t");
 		sb.append(spotFilter.getSearch()).append("\t");
 		sb.append(spotFilter.getBorder()).append("\t");
-		sb.append(Utils.rounded((spotFilter.getSpread()-1)/2.0)).append("\t");
+		sb.append(Utils.rounded((spotFilter.getSpread() - 1) / 2.0)).append("\t");
 		sb.append(config.getDataFilter(0)).append("\t");
 		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
 		sb.append(spotFilter.getDescription()).append("\t");
