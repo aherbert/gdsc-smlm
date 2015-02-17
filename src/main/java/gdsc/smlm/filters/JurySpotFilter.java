@@ -2,6 +2,7 @@ package gdsc.smlm.filters;
 
 import gdsc.smlm.utils.NotImplementedException;
 
+import java.util.Arrays;
 import java.util.List;
 
 /*----------------------------------------------------------------------------- 
@@ -81,10 +82,10 @@ public final class JurySpotFilter extends MaximaSpotFilter
 			}
 		}
 
-		// Note: A simple jury using the any non-zero point in the maxima intensity will work if the background 
+		// Note: A simple jury using any non-zero point in the maxima intensity will work if the background 
 		// noise is uniform. If the noise is sloped then larger filters may result in the centre of the maxima 
 		// moving and the jury will return two smaller candidates in adjacent pixels. To mitigate this we get the 
-		// maxima again. 
+		// maxima again from the image where maxima where found. 
 		final int[] maxIndices = getMaxima(intensity, width, height);
 		if (maxIndices.length == 0)
 			return null;
@@ -92,14 +93,18 @@ public final class JurySpotFilter extends MaximaSpotFilter
 		// Normalise the intensity across all processors
 		final float divisor = (float) (1.0 / processors.length);
 
+		int count = 0;
 		final Spot[] spots = new Spot[maxIndices.length];
 		for (int n = 0; n < maxIndices.length; n++)
 		{
-			final int y = maxIndices[n] / width;
-			final int x = maxIndices[n] % width;
-			spots[n] = new Spot(x, y, sum[maxIndices[n]] * divisor);
+			if (intensity[maxIndices[n]] > 0)
+			{
+				final int y = maxIndices[n] / width;
+				final int x = maxIndices[n] % width;
+				spots[count++] = new Spot(x, y, sum[maxIndices[n]] * divisor);
+			}
 		}
-		return spots;
+		return Arrays.copyOf(spots, count);
 	}
 
 	/*
