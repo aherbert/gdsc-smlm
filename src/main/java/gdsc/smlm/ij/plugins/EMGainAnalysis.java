@@ -68,11 +68,12 @@ public class EMGainAnalysis implements PlugInFilter
 	private static boolean _simulate = false, showApproximation = false, relativeDelta = false;
 	private boolean simulate = false, extraOptions = false;
 	private static double _photons = 1, _bias = 500, _gain = 40, _noise = 3;
-	private static double head = 0.01, tail = 0.025, offset = 0;
+	private static double head = 0.01, tail = 0.025, _offset = 0;
 	private static int simulationSize = 20000;
 	private static boolean usePDF = false;
 
 	private ImagePlus imp;
+	private double offset = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -571,7 +572,7 @@ public class EMGainAnalysis implements PlugInFilter
 				sum += kernel[j];
 			for (int j = 0; j < kernel.length; j++)
 				kernel[j] /= sum;
-			
+
 			// Use Fourier Transform when the convolution is large
 			if (g.length * kernel.length > 100000)
 				gg = Convolution.convolveFFT(g, kernel);
@@ -765,7 +766,7 @@ public class EMGainAnalysis implements PlugInFilter
 		}
 
 		plot.setColor(Color.magenta);
-		plot.drawLine(_photons*_gain, 0, _photons*_gain, yMax);
+		plot.drawLine(_photons * _gain, 0, _photons * _gain, yMax);
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, label);
 		PlotWindow win1 = Utils.display("PMF", plot);
@@ -788,9 +789,9 @@ public class EMGainAnalysis implements PlugInFilter
 		plot2.setColor(Color.red);
 		plot2.addPoints(x, delta, Plot2.LINE);
 		plot2.setColor(Color.magenta);
-		plot2.drawLine(_photons*_gain, limits[0], _photons*_gain, limits[1]);
+		plot2.drawLine(_photons * _gain, limits[0], _photons * _gain, limits[1]);
 		plot2.setColor(Color.black);
-		plot2.addLabel(0, 0, label + ((offset==0) ? "" : ", expected = " + Utils.rounded(expected/_gain)));
+		plot2.addLabel(0, 0, label + ((offset == 0) ? "" : ", expected = " + Utils.rounded(expected / _gain)));
 		PlotWindow win2 = Utils.display("PMF delta", plot2);
 
 		if (Utils.isNewWindow())
@@ -812,7 +813,8 @@ public class EMGainAnalysis implements PlugInFilter
 		gd.addNumericField("Noise", _noise, 2);
 		gd.addNumericField("Photons", _photons, 2);
 		gd.addCheckbox("Show_approximation", showApproximation);
-		gd.addNumericField("Approximation_offset (%)", offset, 2);
+		if (extraOptions)
+			gd.addNumericField("Approximation_offset (%)", _offset, 2);
 		gd.addNumericField("Remove_head", head, 3);
 		gd.addNumericField("Remove_tail", tail, 3);
 		gd.addCheckbox("Relative_delta", relativeDelta);
@@ -826,7 +828,8 @@ public class EMGainAnalysis implements PlugInFilter
 		_noise = FastMath.abs(gd.getNextNumber());
 		_photons = FastMath.abs(gd.getNextNumber());
 		showApproximation = gd.getNextBoolean();
-		offset = gd.getNextNumber();
+		if (extraOptions)
+			offset = _offset = gd.getNextNumber();
 		head = FastMath.abs(gd.getNextNumber());
 		tail = FastMath.abs(gd.getNextNumber());
 		relativeDelta = gd.getNextBoolean();
