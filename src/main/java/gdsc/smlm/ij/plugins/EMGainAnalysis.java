@@ -770,7 +770,7 @@ public class EMGainAnalysis implements PlugInFilter
 		plot.addLabel(0, 0, label);
 		PlotWindow win1 = Utils.display("PMF", plot);
 
-		// SuperPlot the difference between the actual and approximation
+		// Plot the difference between the actual and approximation
 		double[] delta = new double[f.length];
 		for (int i = 0; i < f.length; i++)
 		{
