@@ -26,6 +26,8 @@ import java.util.List;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
+import org.apache.commons.math3.exception.NumberIsTooLargeException;
+import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -568,10 +570,13 @@ public abstract class ImageModel
 			if (photonDistribution == null)
 			{
 				photonScale = 1;
-				// Model using a gamma distribution
-				final double scaleParameter = photonBudget / photonShapeParameter;
-				photonDistribution = new GammaDistribution(random, photonShapeParameter, scaleParameter,
-						ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+				// Model using a gamma distribution if we have a shape parameter
+				if (photonShapeParameter > 0)
+				{
+					final double scaleParameter = photonBudget / photonShapeParameter;
+					photonDistribution = new GammaDistribution(random, photonShapeParameter, scaleParameter,
+							ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+				}
 			}
 			else
 			{
@@ -579,10 +584,18 @@ public abstract class ImageModel
 				photonScale = photonBudget / photonDistribution.getNumericalMean();
 			}
 
-			// Generate photons sampling from the photon budget
-			for (int i = 0; i < nMolecules; i++)
+			if (photonDistribution == null)
 			{
-				photons[i] = photonDistribution.sample() * photonScale;
+				// No distribution so use the same number for all
+				Arrays.fill(photons, photonBudget);
+			}
+			else
+			{
+				// Generate photons sampling from the photon budget
+				for (int i = 0; i < nMolecules; i++)
+				{
+					photons[i] = photonDistribution.sample() * photonScale;
+				}
 			}
 		}
 

@@ -3856,7 +3856,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					noiseRange);
 			Parameters.isAboveZero("Particles", settings.particles);
 			Parameters.isAboveZero("Photons", settings.photonsPerSecond);
-			Parameters.isAboveZero("Photon shape", settings.photonShape);
 			Parameters.isEqualOrBelow("Correlation", settings.correlation, 1);
 			Parameters.isEqualOrAbove("Correlation", settings.correlation, -1);
 			if (!imagePSF)
