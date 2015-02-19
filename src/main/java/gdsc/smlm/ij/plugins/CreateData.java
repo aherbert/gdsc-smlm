@@ -122,7 +122,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
  */
 public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 {
-	private static final String TITLE = "Create Data";
+	public static final String TITLE = "Create Data";
 	public static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
 	private static String[] ILLUMINATION = { "Uniform", "Radial" };
@@ -774,6 +774,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
 					settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
 					settings.background, b2, lowerN, lowerP, lowerMLP);
+		}
+		else
+		{
+			Utils.log(
+					"Warning: Benchmark settings are only stored in memory when the number of photons is fixed. Min %s != Max %s",
+					Utils.rounded(settings.photonsPerSecond), Utils.rounded(settings.photonsPerSecondMaximum));
 		}
 	}
 

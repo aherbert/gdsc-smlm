@@ -26,6 +26,7 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
+import gdsc.smlm.utils.TextUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -412,7 +413,12 @@ public class BenchmarkFit implements PlugIn
 		{
 			if (benchmarkResults.isEmpty())
 			{
-				IJ.error(TITLE, "No benchmark results in memory");
+				IJ.error(
+						TITLE,
+						"No benchmark results in memory.\n \n" +
+								TextUtils
+										.wrap("Run the Fit Benchmark Data plugin and results will be stored for comparison analysis.",
+												60));
 				return;
 			}
 			runAnalysis();
@@ -421,7 +427,12 @@ public class BenchmarkFit implements PlugIn
 		{
 			if (CreateData.benchmarkParameters == null)
 			{
-				IJ.error(TITLE, "No benchmark parameters in memory");
+				IJ.error(
+						TITLE,
+						"No benchmark parameters in memory.\n \n" +
+								TextUtils.wrap("Run the " + CreateData.TITLE +
+										" plugin in benchmark mode with a fixed number of photons per localisation.",
+										60));
 				return;
 			}
 			benchmarkParameters = CreateData.benchmarkParameters;
@@ -674,7 +685,7 @@ public class BenchmarkFit implements PlugIn
 				{
 					// We will have to convert the values...
 					double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
-					for (int j=0; j<tmp.length; j++)
+					for (int j = 0; j < tmp.length; j++)
 						tmp[j] *= convert[i];
 					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
 					idList[count++] = Utils.showHistogram(
