@@ -26,6 +26,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Roi;
 import ij.gui.Plot2;
 import ij.plugin.filter.PlugInFilter;
@@ -765,18 +766,13 @@ public class PCPALMAnalysis implements PlugInFilter
 		System.arraycopy(gr[0], offset, x, 0, x.length);
 		System.arraycopy(gr[1], offset, y, 0, y.length);
 
-		if (barChart)
-		{
-			x = Utils.createHistogramAxis(x);
-			y = Utils.createHistogramValues(y);
-			showErrorBars = false;
-		}
-
-		Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle, x, y);
+		Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle);
 		plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
+		plot.addPoints(x, y, (barChart) ? Plot2.BAR : Plot.LINE);
+		
 		Utils.display(plotTitle, plot);
 
-		if (showErrorBars)
+		if (showErrorBars && !barChart)
 		{
 			plot.setColor(Color.magenta);
 			for (int i = 0; i < x.length; i++)
@@ -786,6 +782,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			}
 			Utils.display(plotTitle, plot);
 		}
+		
 		return plot;
 	}
 
