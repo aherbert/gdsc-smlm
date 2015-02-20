@@ -1,7 +1,5 @@
 package gdsc.smlm.filters;
 
-import gdsc.smlm.utils.NotImplementedException;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -73,7 +71,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 		for (int i = 0; i < processors.length; i++)
 		{
 			final float[] data2 = processors[i].process(data, width, height);
-			for (int j = 0; j < data2.length; j++)
+			for (int j = 0; j < sum.length; j++)
 				sum[j] += data2[j];
 			final int[] maxIndices = getMaxima(data2, width, height);
 			for (final int index : maxIndices)
@@ -115,8 +113,19 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	@Override
 	public float[] preprocessData(float[] data, int width, int height)
 	{
-		// Not needed as we override the filter method directly
-		throw new NotImplementedException();
+		// Run all the processors and store the total maxima intensity at each index
+		final float[] intensity = new float[width * height];
+		final float[] sum = new float[intensity.length];
+		for (int i = 0; i < processors.length; i++)
+		{
+			final float[] data2 = processors[i].process(data, width, height);
+			for (int j = 0; j < sum.length; j++)
+				sum[j] += data2[j];
+		}
+		final float divisor = (float) (1.0 / processors.length);
+		for (int j = 0; j < sum.length; j++)
+			sum[j] *= divisor;
+		return sum;
 	}
 
 	/*
