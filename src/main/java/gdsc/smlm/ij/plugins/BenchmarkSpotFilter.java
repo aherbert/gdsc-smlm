@@ -330,8 +330,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
-		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
-		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
+		gd.addSlider("Search_width", 1, 4, config.getSearch());
+		gd.addSlider("Border", 0, 5, config.getBorder());
 
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, analysisBorder);
@@ -348,8 +348,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
-		config.setSearch(gd.getNextNumber());
-		config.setBorder(gd.getNextNumber());
+		config.setSearch((int) gd.getNextNumber());
+		config.setBorder((int) gd.getNextNumber());
 		analysisBorder = Math.abs((int) gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
