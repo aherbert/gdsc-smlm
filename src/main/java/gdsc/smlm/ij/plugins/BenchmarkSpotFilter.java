@@ -511,7 +511,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(imp.getWidth()).append("\t");
 		sb.append(imp.getHeight()).append("\t");
 		sb.append(n).append("\t");
-		double density = ((double) n / imp.getStackSize()) / (imp.getWidth() * imp.getHeight()) /
+		final int w = imp.getWidth() - 2 * analysisBorder;
+		final int h = imp.getHeight() - 2 * analysisBorder;
+		double density = ((double) n / imp.getStackSize()) / (w*h) /
 				(simulationParameters.a * simulationParameters.a / 1e6);
 		sb.append(Utils.rounded(density)).append("\t");
 		sb.append(Utils.rounded(signal)).append("\t");
