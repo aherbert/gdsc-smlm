@@ -58,7 +58,7 @@ import java.util.Arrays;
 public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 {
 	private final static String TITLE = "Gaussian Fit";
-	private int smooth = (int) Prefs.get(Constants.smooth, 0);
+	private double smooth = Prefs.get(Constants.smooth, 0);
 	private int boxSize = (int) Prefs.get(Constants.boxSize, 1);
 	private float background = (float) Prefs.get(Constants.background, 0);
 	private float peakHeight = (float) Prefs.get(Constants.peakHeight, 0);
@@ -144,7 +144,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		gd.addMessage("Fit 2D Gaussian to identified maxima");
 
 		gd.addMessage("--- Image smoothing ---\n" + "- Within a 2n+1 box\n");
-		gd.addSlider("Smoothing", 0, 15, smooth);
+		gd.addSlider("Smoothing", 0, 4.5, smooth);
 
 		gd.addMessage("--- Maxima identification ---\n" + "- Within a 2n+1 box\n");
 		gd.addSlider("Box_size", 1, 15, boxSize);
@@ -267,7 +267,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 */
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		smooth = (int) gd.getNextNumber();
+		smooth = gd.getNextNumber();
 		boxSize = (int) gd.getNextNumber();
 		background = (float) gd.getNextNumber();
 		peakHeight = (float) gd.getNextNumber();
@@ -368,9 +368,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		if (getSmooth() > 0)
 		{
-			// Smoothing destructively modifies the data so create a copy
+			// No need for a copy since we are using a snapshot buffer
 			AverageFilter filter = new AverageFilter();
-			filter.blockAverage(data, width, height, getSmooth());
+			filter.blockAverage(data, width, height, (float) getSmooth());
 		}
 
 		maxIndices = getMaxima(data, width, height);
@@ -449,15 +449,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (getSmooth() > 0)
 		{
 			// Smoothing destructively modifies the data so create a copy
-			smoothData = new float[width * height];
-			for (int i = data.length; i-- > 0;)
-				smoothData[i] = data[i];
+			smoothData = Arrays.copyOf(data, width * height);
 			AverageFilter filter = new AverageFilter();
 			//filter.blockAverage(smoothData, width, height, smooth);
 			if (smooth <= border)
-				filter.rollingBlockAverageInternal(smoothData, width, height, smooth);
+				filter.blockAverageInternal(smoothData, width, height, (float) smooth);
 			else
-				filter.rollingBlockAverage(smoothData, width, height, smooth);
+				filter.blockAverage(smoothData, width, height, (float) smooth);
 		}
 		Sort.sort(maxIndices, smoothData);
 
@@ -543,7 +541,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					{
 						// Copy the valid parameters
 						validPeaks++;
-						for (int ii = i, j=0; j < 6; ii++, j++)
+						for (int ii = i, j = 0; j < 6; ii++, j++)
 							validParams[c++] = params[ii];
 					}
 
@@ -829,7 +827,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		}
 		return params;
 	}
-	
+
 	/**
 	 * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
 	 * <p>
@@ -915,7 +913,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 	protected void setupPeakFiltering(FitConfiguration config)
 	{
-		int Mk = getSmooth() * 2 + 1;
+		double Mk = getSmooth() * 2 + 1;
 		double halfMk = 0.5f * Mk;
 		config.setCoordinateShift(halfMk);
 		config.setSignalStrength(0);
@@ -1010,7 +1008,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * @param smooth
 	 *            the smooth to set
 	 */
-	public void setSmooth(int smooth)
+	public void setSmooth(double smooth)
 	{
 		this.smooth = smooth;
 	}
@@ -1018,7 +1016,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	/**
 	 * @return the smooth
 	 */
-	public int getSmooth()
+	public double getSmooth()
 	{
 		return smooth;
 	}
