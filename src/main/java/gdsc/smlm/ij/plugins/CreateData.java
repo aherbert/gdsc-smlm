@@ -3013,6 +3013,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private void saveFixedAndMoving(MemoryPeakResults results, String title)
 	{
+		if (simpleMode || benchmarkMode || spotMode)
+			return;
 		if (settings.diffusionRate <= 0 || settings.fixedFraction >= 1)
 			return;
 
