@@ -105,9 +105,6 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 
 	public PSFEstimator()
 	{
-		globalSettings = SettingsManager.loadSettings();
-		config = globalSettings.getFitEngineConfiguration();
-		settings = globalSettings.getPsfEstimatorSettings();
 	}
 
 	/*
@@ -122,6 +119,19 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		{
 			IJ.noImage();
 			return DONE;
+		}
+		
+		globalSettings = SettingsManager.loadSettings();
+		settings = globalSettings.getPsfEstimatorSettings();
+		// Reset
+		if (IJ.altKeyDown())
+		{
+			config = new FitEngineConfiguration(new FitConfiguration());
+			globalSettings.setFitEngineConfiguration(config);
+		}
+		else
+		{
+			config = globalSettings.getFitEngineConfiguration();
 		}
 
 		Roi roi = imp.getRoi();
