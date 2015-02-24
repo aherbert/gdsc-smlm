@@ -1608,6 +1608,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				Parameters.isAboveZero("Absolute threshold", fitConfig.getAbsoluteThreshold());
 				Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
 				Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
+				fitConfig.getFunctionSolver();
 			}
 			catch (IllegalArgumentException e)
 			{

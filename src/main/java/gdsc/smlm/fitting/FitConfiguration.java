@@ -631,7 +631,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public double getPrecisionThreshold()
 	{
-		return (precisionThreshold>0) ? Math.sqrt(precisionThreshold) : 0;
+		return (precisionThreshold > 0) ? Math.sqrt(precisionThreshold) : 0;
 	}
 
 	/**
@@ -1249,7 +1249,7 @@ public class FitConfiguration implements Cloneable
 	public FunctionSolver getFunctionSolver()
 	{
 		if (functionSolver == null)
-			functionSolver = createFitSolver();
+			functionSolver = createFunctionSolver();
 		return functionSolver;
 	}
 
@@ -1261,11 +1261,20 @@ public class FitConfiguration implements Cloneable
 		functionSolver = null;
 	}
 
-	private FunctionSolver createFitSolver()
+	private FunctionSolver createFunctionSolver()
 	{
 		switch (fitSolver)
 		{
 			case MLE:
+				// Only the Poisson likelihood function supports gradients
+				if (searchMethod.usesGradients() && modelCamera)
+				{
+					throw new IllegalArgumentException(String.format(
+							"The derivative based search method '%s' can only be used with the "
+									+ "'%s' likelihood function, i.e. no model camera noise", searchMethod,
+							MaximumLikelihoodFitter.LikelihoodFunction.POISSON));
+				}
+
 				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gaussianFunction);
 				fitter.setRelativeThreshold(relativeThreshold);
 				fitter.setAbsoluteThreshold(absoluteThreshold);
