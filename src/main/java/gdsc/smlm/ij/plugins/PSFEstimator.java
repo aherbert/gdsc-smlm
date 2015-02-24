@@ -124,7 +124,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getPsfEstimatorSettings();
 		// Reset
-		if (IJ.altKeyDown())
+		if (IJ.controlKeyDown())
 		{
 			config = new FitEngineConfiguration(new FitConfiguration());
 			globalSettings.setFitEngineConfiguration(config);
