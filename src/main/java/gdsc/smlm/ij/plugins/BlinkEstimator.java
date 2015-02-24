@@ -63,7 +63,7 @@ public class BlinkEstimator implements PlugIn
 	private static int s_nFittedPoints = 5;
 	private static int rangeFittedPoints = 0;
 	private static boolean fitIntercept = true;
-	private static boolean s_timeAtLowerBound = false;
+	private static boolean s_timeAtLowerBound = true;
 
 	private BlinkingFunction blinkingModel;
 	private double r2;
@@ -127,10 +127,10 @@ public class BlinkEstimator implements PlugIn
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addNumericField("Max_dark_time (frames)", s_maxDarkTime, 0);
-		gd.addCheckbox("Relative_distance", s_relativeDistance);
 		gd.addNumericField("Histogram_bins", histogramBins, 0);
 		gd.addCheckbox("Show_histogram", showHistogram);
 		gd.addSlider("Search_distance", 0.5, 5, s_searchDistance);
+		gd.addCheckbox("Relative_distance", s_relativeDistance);
 		gd.addSlider("Fitted_points", 4, 15, s_nFittedPoints);
 		gd.addSlider("Range_of_fitted_points", 0, 15, rangeFittedPoints);
 		gd.addCheckbox("Time_at_lower_bound", s_timeAtLowerBound);
@@ -142,10 +142,10 @@ public class BlinkEstimator implements PlugIn
 
 		inputOption = gd.getNextChoice();
 		maxDarkTime = s_maxDarkTime = (int) gd.getNextNumber();
-		relativeDistance = s_relativeDistance = gd.getNextBoolean();
 		histogramBins = (int) gd.getNextNumber();
 		showHistogram = gd.getNextBoolean();
 		searchDistance = s_searchDistance = gd.getNextNumber();
+		relativeDistance = s_relativeDistance = gd.getNextBoolean();
 		nFittedPoints = s_nFittedPoints = (int) gd.getNextNumber();
 		rangeFittedPoints = (int) gd.getNextNumber();
 		timeAtLowerBound = s_timeAtLowerBound = gd.getNextBoolean();
@@ -353,7 +353,7 @@ public class BlinkEstimator implements PlugIn
 	 * The returned Td values are the lower bounds of the dark time, i.e. t-threshold 1 equals 0 dark frames (0ms),
 	 * t-threshold 2 equals 1 dark frame (n ms per frame), etc. This behaviour can be changed by setting the
 	 * {@link #timeAtLowerBound} flag to false. Then the time will reflect the upper bounds of the dark time, i.e.
-	 * t-threshold 1 equals 0 dark frames (n ms per frame), t-threshold 2 equals 1 dark frame (2n ms per frame), etc.
+	 * t-threshold 1 equals 1 dark frames (n ms per frame), t-threshold 2 equals 2 dark frames (2n ms per frame), etc.
 	 * 
 	 * @param Ntd
 	 * @return
