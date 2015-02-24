@@ -370,7 +370,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		{
 			// No need for a copy since we are using a snapshot buffer
 			AverageFilter filter = new AverageFilter();
-			filter.blockAverage(data, width, height, (float) getSmooth());
+			filter.stripedBlockAverage(data, width, height, (float) getSmooth());
 		}
 
 		maxIndices = getMaxima(data, width, height);
@@ -453,9 +453,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			AverageFilter filter = new AverageFilter();
 			//filter.blockAverage(smoothData, width, height, smooth);
 			if (smooth <= border)
-				filter.blockAverageInternal(smoothData, width, height, (float) smooth);
+				filter.stripedBlockAverageInternal(smoothData, width, height, (float) smooth);
 			else
-				filter.blockAverage(smoothData, width, height, (float) smooth);
+				filter.stripedBlockAverage(smoothData, width, height, (float) smooth);
 		}
 		Sort.sort(maxIndices, smoothData);
 
