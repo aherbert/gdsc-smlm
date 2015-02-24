@@ -356,6 +356,9 @@ public class DiffusionRateTest implements PlugIn
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
+		
+		if (settings.diffusionRate == 0)
+			IJ.error(TITLE, "Warning : Diffusion rate is zero");
 
 		if (gd.invalidNumber())
 			return false;
