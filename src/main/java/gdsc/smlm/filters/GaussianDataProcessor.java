@@ -44,16 +44,14 @@ public class GaussianDataProcessor extends DataProcessor
 
 	/**
 	 * Get the Gaussian standard deviation for the desired smoothing distance.
-	 * Make the 3 SD reach the desired smoothing distance. We add 0.3333 pixels to always cover the target pixel.
 	 * 
 	 * @return the Gaussian standard deviation for the desired smoothing distance.
 	 */
 	public static double getSigma(double smooth)
 	{
 		if (smooth < 0)
-			return (0.333333 - smooth) / 3;
-		else
-			return (0.333333 + smooth) / 3;
+			return 0;
+		return smooth;
 	}
 
 	/**
