@@ -17,17 +17,20 @@ import gdsc.smlm.ij.utils.SeriesOpener;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
+import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +41,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
 import org.apache.commons.math3.fitting.CurveFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.util.MathArrays;
 
 /**
  * Opens a folder of images and computes a Mean-Variance Test.
@@ -160,13 +164,11 @@ public class MeanVarianceTest implements PlugIn
 					throw new IllegalArgumentException("Image " + title + " has saturated pixels in slice: " + i);
 		}
 
-		public void compute(boolean consecutive)
+		public void compute(boolean consecutive, double start, double end)
 		{
 			final int size = slices.length;
-			if (consecutive)
-				samples = new ArrayList<PairSample>(size - 1);
-			else
-				samples = new ArrayList<PairSample>(((size - 1) * size) / 2);
+			final int nSamples = (consecutive) ? size - 1 : ((size - 1) * size) / 2;
+			samples = new ArrayList<PairSample>(nSamples);
 
 			// Cache data
 			means = new double[size];
@@ -177,17 +179,21 @@ public class MeanVarianceTest implements PlugIn
 
 			// Compute mean and variance.
 			// See http://www.photometrics.com/resources/whitepapers/mean-variance.php
-			for (int slice1 = 0; slice1 < size; slice1++)
+			final double step = (end - start) / nSamples;
+			for (int slice1 = 0, c = 0; slice1 < size; slice1++)
 			{
 				float[] data1 = slices[slice1];
 				for (int slice2 = slice1 + 1; slice2 < size; slice2++)
 				{
+					if (c++ % 16 == 0)
+						IJ.showProgress(start + c * step);
 					float[] data2 = slices[slice2];
 					Statistics s = new Statistics();
 					for (int i = 0; i < data1.length; i++)
 						s.add(data1[i] - data2[i]);
 					double variance = s.getVariance() / 2.0;
 					samples.add(new PairSample(slice1 + 1, slice2 + 1, means[slice1], means[slice2], variance));
+
 					if (consecutive)
 						break;
 				}
@@ -219,6 +225,7 @@ public class MeanVarianceTest implements PlugIn
 		String inputDirectory = "";
 		if (singleImage)
 		{
+			IJ.showStatus("Loading images...");
 			images = getImages();
 			if (images.size() == 0)
 			{
@@ -275,13 +282,12 @@ public class MeanVarianceTest implements PlugIn
 			cameraGain = gd.getNextNumber();
 		}
 
-		//IJ.showProgress(currentIndex, finalIndex);
 		IJ.showStatus("Computing mean & variance");
+		final double nImages = images.size();
 		for (int i = 0; i < images.size(); i++)
 		{
 			IJ.showStatus(String.format("Computing mean & variance %d/%d", i + 1, images.size()));
-			IJ.showProgress(i, images.size());
-			images.get(i).compute(singleImage);
+			images.get(i).compute(singleImage, i / nImages, (i + 1) / nImages);
 		}
 		IJ.showProgress(1);
 
@@ -323,13 +329,15 @@ public class MeanVarianceTest implements PlugIn
 			total += images.get(i).samples.size();
 		double[] mean = new double[total];
 		double[] variance = new double[mean.length];
-		Statistics gainStats = new Statistics();
+		Statistics gainStats = (singleImage) ? new StoredDataStatistics(total) : new Statistics();
 		final CurveFitter<Parametric> fitter = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
 		for (int i = (singleImage) ? 0 : start, j = 0; i < images.size(); i++)
 		{
 			ImageSample sample = images.get(i);
 			for (PairSample pair : sample.samples)
 			{
+				if (j % 16 == 0)
+					IJ.showProgress(j, total);
 				mean[j] = pair.getMean();
 				variance[j] = pair.variance;
 				// Gain is in ADU / e
@@ -356,20 +364,38 @@ public class MeanVarianceTest implements PlugIn
 				j++;
 			}
 		}
+		IJ.showProgress(1);
 
 		if (singleImage)
 		{
+			StoredDataStatistics stats = (StoredDataStatistics) gainStats;
 			Utils.log(TITLE);
-			double gain = gainStats.getMean();
 			if (emMode)
 			{
-				Utils.log("Single-image mode: EM-CCD camera");
-				gain /= 2;
+				double[] values = stats.getValues();
+				MathArrays.scaleInPlace(0.5, values);
+				stats = new StoredDataStatistics(values);
 			}
-			else
+
+			// Plot the gain over time
+			String title = TITLE + " Gain vs Frame";
+			Plot2 plot = new Plot2(title, "Slice", "Gain", Utils.newArray(gainStats.getN(), 1, 1.0), stats.getValues());
+			PlotWindow pw = Utils.display(title, plot);
+
+			// Show a histogram
+			String label = String.format("Mean = %s, Median = %s", Utils.rounded(stats.getMean()),
+					Utils.rounded(stats.getMedian()));
+			int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
+			if (Utils.isNewWindow())
 			{
-				Utils.log("Single-image mode: Standard camera");
+				Point point = pw.getLocation();
+				point.x = pw.getLocation().x;
+				point.y += pw.getHeight();
+				WindowManager.getImage(id).getWindow().setLocation(point);
 			}
+
+			Utils.log("Single-image mode: %s camera", (emMode) ? "EM-CCD" : "Standard");
+			final double gain = stats.getMedian();
 
 			if (emMode)
 			{
