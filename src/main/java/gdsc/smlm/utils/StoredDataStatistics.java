@@ -252,4 +252,12 @@ public class StoredDataStatistics extends Statistics
 	{
 		this.add(statistics);
 	}
+
+	/**
+	 * @return The median
+	 */
+	public double getMedian()
+	{
+		return getStatistics().getPercentile(50);
+	}
 }
