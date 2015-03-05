@@ -53,7 +53,9 @@ public class MeanVarianceTest implements PlugIn
 {
 	private static final String TITLE = "Mean Variance Test";
 	private static double cameraGain = 0;
+	private static double _bias = 500;
 	private int exposureCounter = 0;
+	private boolean singleImage;
 
 	private class PairSample
 	{
@@ -158,10 +160,13 @@ public class MeanVarianceTest implements PlugIn
 					throw new IllegalArgumentException("Image " + title + " has saturated pixels in slice: " + i);
 		}
 
-		public void compute()
+		public void compute(boolean consecutive)
 		{
 			final int size = slices.length;
-			samples = new ArrayList<PairSample>(((size - 1) * size) / 2);
+			if (consecutive)
+				samples = new ArrayList<PairSample>(size - 1);
+			else
+				samples = new ArrayList<PairSample>(((size - 1) * size) / 2);
 
 			// Cache data
 			means = new double[size];
@@ -183,6 +188,8 @@ public class MeanVarianceTest implements PlugIn
 						s.add(data1[i] - data2[i]);
 					double variance = s.getVariance() / 2.0;
 					samples.add(new PairSample(slice1 + 1, slice2 + 1, means[slice1], means[slice2], variance));
+					if (consecutive)
+						break;
 				}
 				slices[slice1] = null; // Allow garbage collection
 			}
@@ -196,35 +203,63 @@ public class MeanVarianceTest implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		String inputDirectory = IJ.getDirectory("Select image series ...");
-		if (inputDirectory == null)
-			return;
-
-		SeriesOpener series = new SeriesOpener(inputDirectory, false);
-		series.setVariableSize(true);
-		if (series.getNumberOfImages() < 3)
+		if (Utils.isExtraOptions())
 		{
-			IJ.error(TITLE, "Not enough images in the selected directory");
-			return;
-		}
-		if (!IJ.showMessageWithCancel(TITLE, String.format("Analyse %d images, first image:\n%s",
-				series.getNumberOfImages(), series.getImageList()[0])))
-		{
-			return;
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("Perform single image analysis on the current image?");
+			gd.addNumericField("Bias", _bias, 0);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return;
+			singleImage = true;
+			_bias = Math.abs(gd.getNextNumber());
 		}
 
-		IJ.showStatus("Loading images");
-		List<ImageSample> images = getImages(series);
-
-		if (images.size() < 3)
+		List<ImageSample> images;
+		String inputDirectory = "";
+		if (singleImage)
 		{
-			IJ.error(TITLE, "Not enough images for analysis");
-			return;
+			images = getImages();
+			if (images.size() == 0)
+			{
+				IJ.error(TITLE, "Not enough images for analysis");
+				return;
+			}
 		}
-		if (images.get(0).exposure != 0)
+		else
 		{
-			IJ.error(TITLE, "First image in series must have exposure 0 (Bias image)");
-			return;
+			inputDirectory = IJ.getDirectory("Select image series ...");
+			if (inputDirectory == null)
+				return;
+
+			SeriesOpener series = new SeriesOpener(inputDirectory, false);
+			series.setVariableSize(true);
+			if (series.getNumberOfImages() < 3)
+			{
+				IJ.error(TITLE, "Not enough images in the selected directory");
+				return;
+			}
+			if (!IJ.showMessageWithCancel(
+					TITLE,
+					String.format("Analyse %d images, first image:\n%s", series.getNumberOfImages(),
+							series.getImageList()[0])))
+			{
+				return;
+			}
+
+			IJ.showStatus("Loading images");
+			images = getImages(series);
+
+			if (images.size() < 3)
+			{
+				IJ.error(TITLE, "Not enough images for analysis");
+				return;
+			}
+			if (images.get(0).exposure != 0)
+			{
+				IJ.error(TITLE, "First image in series must have exposure 0 (Bias image)");
+				return;
+			}
 		}
 
 		boolean emMode = (arg != null && arg.contains("em"));
@@ -246,7 +281,7 @@ public class MeanVarianceTest implements PlugIn
 		{
 			IJ.showStatus(String.format("Computing mean & variance %d/%d", i + 1, images.size()));
 			IJ.showProgress(i, images.size());
-			images.get(i).compute();
+			images.get(i).compute(singleImage);
 		}
 		IJ.showProgress(1);
 
@@ -257,22 +292,30 @@ public class MeanVarianceTest implements PlugIn
 		int start = 0;
 		Statistics biasStats = new Statistics();
 		Statistics noiseStats = new Statistics();
-		while (start < images.size())
+		final double bias;
+		if (singleImage)
 		{
-			ImageSample sample = images.get(start);
-			if (sample.exposure == 0)
-			{
-				biasStats.add(sample.means);
-				for (PairSample pair : sample.samples)
-				{
-					noiseStats.add(pair.variance);
-				}
-				start++;
-			}
-			else
-				break;
+			bias = _bias;
 		}
-		final double bias = biasStats.getMean();
+		else
+		{
+			while (start < images.size())
+			{
+				ImageSample sample = images.get(start);
+				if (sample.exposure == 0)
+				{
+					biasStats.add(sample.means);
+					for (PairSample pair : sample.samples)
+					{
+						noiseStats.add(pair.variance);
+					}
+					start++;
+				}
+				else
+					break;
+			}
+			bias = biasStats.getMean();
+		}
 
 		// Get the mean-variance data
 		int total = 0;
@@ -282,7 +325,7 @@ public class MeanVarianceTest implements PlugIn
 		double[] variance = new double[mean.length];
 		Statistics gainStats = new Statistics();
 		final CurveFitter<Parametric> fitter = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
-		for (int i = start, j = 0; i < images.size(); i++)
+		for (int i = (singleImage) ? 0 : start, j = 0; i < images.size(); i++)
 		{
 			ImageSample sample = images.get(i);
 			for (PairSample pair : sample.samples)
@@ -314,67 +357,98 @@ public class MeanVarianceTest implements PlugIn
 			}
 		}
 
-		IJ.showStatus("Computing fit");
-
-		// Sort
-		int[] indices = rank(mean);
-		mean = reorder(mean, indices);
-		variance = reorder(variance, indices);
-
-		// Compute optimal coefficients.
-		final double[] init = { 0, 1 / gainStats.getMean() }; // a - b x
-		final double[] best = fitter.fit(new PolynomialFunction.Parametric(), init);
-
-		// Construct the polynomial that best fits the data.
-		final PolynomialFunction fitted = new PolynomialFunction(best);
-
-		// SuperPlot mean verses variance. Gradient is gain in ADU/e.
-		String title = TITLE + " results";
-		Plot2 plot = new Plot2(title, "Mean", "Variance");
-		double[] xlimits = Maths.limits(mean);
-		double[] ylimits = Maths.limits(variance);
-		double xrange = (xlimits[1] - xlimits[0]) * 0.05;
-		if (xrange == 0)
-			xrange = 0.05;
-		double yrange = (ylimits[1] - ylimits[0]) * 0.05;
-		if (yrange == 0)
-			yrange = 0.05;
-		plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
-		plot.setColor(Color.blue);
-		plot.addPoints(mean, variance, Plot2.CROSS);
-		plot.setColor(Color.red);
-		plot.addPoints(new double[] { mean[0], mean[mean.length - 1] },
-				new double[] { fitted.value(mean[0]), fitted.value(mean[mean.length - 1]) }, Plot2.LINE);
-		Utils.display(title, plot);
-
-		final double avBiasNoise = Math.sqrt(noiseStats.getMean());
-
-		Utils.log(TITLE);
-		Utils.log("  Directory = %s", inputDirectory);
-		Utils.log("  Bias = %s +/- %s (ADU)", Utils.rounded(bias, 4), Utils.rounded(avBiasNoise, 4));
-		Utils.log("  Variance = %s + %s * mean", Utils.rounded(best[0], 4), Utils.rounded(best[1], 4));
-		if (emMode)
+		if (singleImage)
 		{
-			final double emGain = best[1] / (2 * cameraGain);
+			Utils.log(TITLE);
+			double gain = gainStats.getMean();
+			if (emMode)
+			{
+				Utils.log("Single-image mode: EM-CCD camera");
+				gain /= 2;
+			}
+			else
+			{
+				Utils.log("Single-image mode: Standard camera");
+			}
 
-			// Noise is standard deviation of the bias image divided by the total gain (in ADU/e-)
-			final double totalGain = emGain * cameraGain;
-			Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(avBiasNoise / totalGain, 4),
-					Utils.rounded(avBiasNoise, 4));
-
-			Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
-			Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
-			Utils.log("  Total Gain = %s (ADU/e-)", Utils.rounded(totalGain, 4));
+			if (emMode)
+			{
+				final double totalGain = gain;
+				final double emGain = totalGain / cameraGain;
+				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(cameraGain, 4));
+				Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
+				Utils.log("  Total Gain = %s (ADU/e-)", Utils.rounded(totalGain, 4));
+			}
+			else
+			{
+				cameraGain = gain;
+				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(cameraGain, 4));
+			}
 		}
 		else
 		{
-			// Noise is standard deviation of the bias image divided by the gain (in ADU/e-)
-			cameraGain = best[1];
-			final double readNoise = avBiasNoise / cameraGain;
-			Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(readNoise, 4),
-					Utils.rounded(readNoise * cameraGain, 4));
+			IJ.showStatus("Computing fit");
 
-			Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
+			// Sort
+			int[] indices = rank(mean);
+			mean = reorder(mean, indices);
+			variance = reorder(variance, indices);
+
+			// Compute optimal coefficients.
+			final double[] init = { 0, 1 / gainStats.getMean() }; // a - b x
+			final double[] best = fitter.fit(new PolynomialFunction.Parametric(), init);
+
+			// Construct the polynomial that best fits the data.
+			final PolynomialFunction fitted = new PolynomialFunction(best);
+
+			// SuperPlot mean verses variance. Gradient is gain in ADU/e.
+			String title = TITLE + " results";
+			Plot2 plot = new Plot2(title, "Mean", "Variance");
+			double[] xlimits = Maths.limits(mean);
+			double[] ylimits = Maths.limits(variance);
+			double xrange = (xlimits[1] - xlimits[0]) * 0.05;
+			if (xrange == 0)
+				xrange = 0.05;
+			double yrange = (ylimits[1] - ylimits[0]) * 0.05;
+			if (yrange == 0)
+				yrange = 0.05;
+			plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
+			plot.setColor(Color.blue);
+			plot.addPoints(mean, variance, Plot2.CROSS);
+			plot.setColor(Color.red);
+			plot.addPoints(new double[] { mean[0], mean[mean.length - 1] }, new double[] { fitted.value(mean[0]),
+					fitted.value(mean[mean.length - 1]) }, Plot2.LINE);
+			Utils.display(title, plot);
+
+			final double avBiasNoise = Math.sqrt(noiseStats.getMean());
+
+			Utils.log(TITLE);
+			Utils.log("  Directory = %s", inputDirectory);
+			Utils.log("  Bias = %s +/- %s (ADU)", Utils.rounded(bias, 4), Utils.rounded(avBiasNoise, 4));
+			Utils.log("  Variance = %s + %s * mean", Utils.rounded(best[0], 4), Utils.rounded(best[1], 4));
+			if (emMode)
+			{
+				final double emGain = best[1] / (2 * cameraGain);
+
+				// Noise is standard deviation of the bias image divided by the total gain (in ADU/e-)
+				final double totalGain = emGain * cameraGain;
+				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(avBiasNoise / totalGain, 4),
+						Utils.rounded(avBiasNoise, 4));
+
+				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
+				Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
+				Utils.log("  Total Gain = %s (ADU/e-)", Utils.rounded(totalGain, 4));
+			}
+			else
+			{
+				// Noise is standard deviation of the bias image divided by the gain (in ADU/e-)
+				cameraGain = best[1];
+				final double readNoise = avBiasNoise / cameraGain;
+				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(readNoise, 4),
+						Utils.rounded(readNoise * cameraGain, 4));
+
+				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
+			}
 		}
 		IJ.showStatus("");
 	}
@@ -419,6 +493,24 @@ public class MeanVarianceTest implements PlugIn
 				return 0;
 			}
 		});
+		return images;
+	}
+
+	private List<ImageSample> getImages()
+	{
+		List<ImageSample> images = new ArrayList<ImageSample>(1);
+		ImagePlus imp = WindowManager.getCurrentImage();
+		if (imp != null)
+		{
+			try
+			{
+				images.add(new ImageSample(imp));
+			}
+			catch (IllegalArgumentException e)
+			{
+				Utils.log(e.getMessage());
+			}
+		}
 		return images;
 	}
 
