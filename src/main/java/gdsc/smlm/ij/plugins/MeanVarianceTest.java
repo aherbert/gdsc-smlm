@@ -89,7 +89,7 @@ public class MeanVarianceTest implements PlugIn
 		double[] means;
 		List<PairSample> samples;
 
-		public ImageSample(ImagePlus imp)
+		public ImageSample(ImagePlus imp, double start, double end)
 		{
 			// Check stack has two slices
 			if (imp.getStackSize() < 2)
@@ -131,8 +131,11 @@ public class MeanVarianceTest implements PlugIn
 			slices = new float[size][];
 			final float saturated = getSaturation(imp);
 			ImageStack stack = imp.getImageStack();
-			for (int slice = 1; slice <= size; slice++)
+			final double step = (end - start) / size;
+			for (int slice = 1, c = 0; slice <= size; slice++)
 			{
+				if (c++ % 16 == 0)
+					IJ.showProgress(start + c * step);
 				final float[] thisSlice = slices[slice - 1] = (float[]) stack.getProcessor(slice).toFloat(0, null)
 						.getPixels();
 				checkSaturation(slice, thisSlice, saturated);
@@ -492,21 +495,25 @@ public class MeanVarianceTest implements PlugIn
 
 	private List<ImageSample> getImages(SeriesOpener series)
 	{
-		List<ImageSample> images = new ArrayList<ImageSample>(series.getNumberOfImages());
+		final double nImages = series.getNumberOfImages();
+		List<ImageSample> images = new ArrayList<ImageSample>((int) nImages);
 		ImagePlus imp = series.nextImage();
+		int c = 0;
 		while (imp != null)
 		{
 			try
 			{
-				images.add(new ImageSample(imp));
+				images.add(new ImageSample(imp, c / nImages, (c + 1) / nImages));
 			}
 			catch (IllegalArgumentException e)
 			{
 				Utils.log(e.getMessage());
 			}
+			c++;
 			imp.close();
 			imp = series.nextImage();
 		}
+		IJ.showProgress(1);
 		// Sort to ensure all 0 exposure images are first, the remaining order is arbitrary
 		Collections.sort(images, new Comparator<ImageSample>()
 		{
@@ -530,13 +537,14 @@ public class MeanVarianceTest implements PlugIn
 		{
 			try
 			{
-				images.add(new ImageSample(imp));
+				images.add(new ImageSample(imp, 0, 1));
 			}
 			catch (IllegalArgumentException e)
 			{
 				Utils.log(e.getMessage());
 			}
 		}
+		IJ.showProgress(1);
 		return images;
 	}
 
