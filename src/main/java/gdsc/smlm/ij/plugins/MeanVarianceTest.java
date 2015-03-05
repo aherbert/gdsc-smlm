@@ -214,14 +214,23 @@ public class MeanVarianceTest implements PlugIn
 	{
 		if (Utils.isExtraOptions())
 		{
-			GenericDialog gd = new GenericDialog(TITLE);
-			gd.addMessage("Perform single image analysis on the current image?");
-			gd.addNumericField("Bias", _bias, 0);
-			gd.showDialog();
-			if (gd.wasCanceled())
+			ImagePlus imp = WindowManager.getCurrentImage();
+			if (imp.getStackSize() > 1)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage("Perform single image analysis on the current image?");
+				gd.addNumericField("Bias", _bias, 0);
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return;
+				singleImage = true;
+				_bias = Math.abs(gd.getNextNumber());
+			}
+			else
+			{
+				IJ.error(TITLE, "Single-image mode requires a stack");
 				return;
-			singleImage = true;
-			_bias = Math.abs(gd.getNextNumber());
+			}
 		}
 
 		List<ImageSample> images;
