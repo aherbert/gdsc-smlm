@@ -267,6 +267,12 @@ public class SeriesOpener
 		return true;
 	}
 
+	/**
+	 * Set to true to allow subsequent images after the first to have different XY dimensions
+	 * 
+	 * @param variableSize
+	 *            True for vairable size images
+	 */
 	public void setVariableSize(boolean variableSize)
 	{
 		this.variableSize = variableSize;
