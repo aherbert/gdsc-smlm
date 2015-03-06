@@ -443,8 +443,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Show a table of the results
 		summariseResults(filterResults, spotFilter);
 
-		// Debugging.
-		//addSpotsToMemory(filterResults);
+		// Debugging the matches
+		if (debug)
+			addSpotsToMemory(filterResults);
 
 		IJ.showStatus("");
 	}
