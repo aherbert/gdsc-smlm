@@ -532,7 +532,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		//sb.append(spotFilter.getName()).append("\t");
 		sb.append(spotFilter.getSearch()).append("\t");
 		sb.append(spotFilter.getBorder()).append("\t");
-		sb.append(Utils.rounded((spotFilter.getSpread() - 1) / 2.0)).append("\t");
+		sb.append(Utils.rounded(spotFilter.getSpread())).append("\t");
 		sb.append(config.getDataFilter(0)).append("\t");
 		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
 		sb.append(spotFilter.getDescription()).append("\t");
