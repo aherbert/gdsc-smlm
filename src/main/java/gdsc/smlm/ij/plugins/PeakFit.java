@@ -2089,6 +2089,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Add the calibration for precision filtering
 		fitConfig.setNmPerPixel(calibration.nmPerPixel);
 		fitConfig.setGain(calibration.gain);
+		fitConfig.setBias(calibration.bias);
 		fitConfig.setEmCCD(calibration.emCCD);
 	}
 
