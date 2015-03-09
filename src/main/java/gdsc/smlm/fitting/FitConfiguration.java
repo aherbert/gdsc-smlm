@@ -891,7 +891,26 @@ public class FitConfiguration implements Cloneable
 			}
 			else
 			{
-				variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
+				if (fitSolver == FitSolver.MLE)
+				{
+					try
+					{
+						// This may be slow due to the integration required within the formula.
+						variance = PeakResult.getMLVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain,
+								emCCD);
+					}
+					catch (Exception e)
+					{
+						// Catch all exceptions. They are likely to be a TooManyIterationsException and other
+						// problems with the integration
+						variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain,
+								emCCD);
+					}
+				}
+				else
+				{
+					variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
+				}
 			}
 
 			if (variance > precisionThreshold)
