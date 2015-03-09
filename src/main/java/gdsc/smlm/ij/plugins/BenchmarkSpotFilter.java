@@ -514,7 +514,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(w).append("\t");
 		sb.append(h).append("\t");
 		sb.append(n).append("\t");
-		double density = ((double) n / imp.getStackSize()) / (w*h) /
+		double density = ((double) n / imp.getStackSize()) / (w * h) /
 				(simulationParameters.a * simulationParameters.a / 1e6);
 		sb.append(Utils.rounded(density)).append("\t");
 		sb.append(Utils.rounded(signal)).append("\t");
@@ -589,6 +589,17 @@ public class BenchmarkSpotFilter implements PlugIn
 			index--;
 		addResult(sb, new MatchResult(truePositives[index], falsePositives[index], allResult.getNumberActual() -
 				truePositives[index], 0));
+
+		// Output the match results at the maximum jaccard score
+		int maxIndex = 0;
+		for (int ii = 1; ii < r.length; ii++)
+		{
+			if (j[maxIndex] < j[ii])
+				maxIndex = ii;
+		}
+		addResult(sb, new MatchResult(truePositives[maxIndex], falsePositives[maxIndex], allResult.getNumberActual() -
+				truePositives[maxIndex], 0));
+		
 		sb.append(Utils.rounded(time / 1e6));
 
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
@@ -622,6 +633,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.addPoints(rank, j, Plot2.LINE);
 			plot.setColor(Color.magenta);
 			plot.drawLine(rank[index], 0, rank[index], Maths.max(p[index], r[index], j[index]));
+			plot.setColor(Color.lightGray);
+			plot.drawLine(rank[maxIndex], 0, rank[maxIndex], Maths.max(p[maxIndex], r[maxIndex], j[maxIndex]));
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black");
 
@@ -672,6 +685,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
 		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\td\t");
+		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");
