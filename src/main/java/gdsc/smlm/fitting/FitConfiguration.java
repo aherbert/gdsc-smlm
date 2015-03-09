@@ -54,6 +54,7 @@ public class FitConfiguration implements Cloneable
 	private double signalStrength = 0;
 	private double minPhotons = 30;
 	private double precisionThreshold = 1600; // == 40nm * 40nm;
+	private boolean precisionUsingBackground = false;
 	private double nmPerPixel = 0;
 	private double gain = 0;
 	private boolean emCCD = true;
@@ -645,6 +646,27 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * @return True if calculating the precision using the fitted background
+	 */
+	public boolean isPrecisionUsingBackground()
+	{
+		return precisionUsingBackground;
+	}
+
+	/**
+	 * Set to true to calculate the precision using the fitted background. Set to false to use the configured noise
+	 * (which may not be reflective of the noise at the fit location). Using false will be consistent with results
+	 * analysis performed using a global estimated noise.
+	 * 
+	 * @param precisionUsingBackground
+	 *            True if calculating the precision using the fitted background
+	 */
+	public void setPrecisionUsingBackground(boolean precisionUsingBackground)
+	{
+		this.precisionUsingBackground = precisionUsingBackground;
+	}
+
+	/**
 	 * @param noise
 	 *            The image noise. Used to determine the signal strength for a good fit (signalThreshold =
 	 *            max(gain x minPhotons, noise x signalStrength).
@@ -841,31 +863,35 @@ public class FitConfiguration implements Cloneable
 			double variance = 0;
 			// We can calculate the precision using the estimated noise for the image or using the expected number
 			// of background photons at the location.
-			//precision = PeakResult.getPrecision(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
-
-			// Check using the formula which uses the estimated background.
-			// This allows for better filtering when the background is variable, e.g. when imaging cells.
-			if (fitSolver == FitSolver.MLE)
+			if (precisionUsingBackground)
 			{
-				try
+				// Check using the formula which uses the estimated background.
+				// This allows for better filtering when the background is variable, e.g. when imaging cells.
+				if (fitSolver == FitSolver.MLE)
 				{
-					// This may be slow due to the integration required within the formula.
-					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-							Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+					try
+					{
+						// This may be slow due to the integration required within the formula.
+						variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
+								Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+					}
+					catch (Exception e)
+					{
+						// Catch all exceptions. They are likely to be a TooManyIterationsException and other
+						// problems with the integration
+						variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
+								Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+					}
 				}
-				catch (Exception e)
+				else
 				{
-					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
-					// problems with the integration
-
 					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
 							Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
 				}
 			}
 			else
 			{
-				variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-						Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+				variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
 			}
 
 			if (variance > precisionThreshold)
