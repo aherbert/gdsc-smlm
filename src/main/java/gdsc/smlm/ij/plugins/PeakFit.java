@@ -1389,11 +1389,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (fitConfig.getPrecisionThreshold() > 0)
 		{
 			gd = new GenericDialog(TITLE);
-			gd.addMessage("Precision filtering requires the camera bias:");
+			gd.addMessage("Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
+			gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
 			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
+			fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
 			calibration.bias = Math.abs(gd.getNextNumber());
 		}
 
