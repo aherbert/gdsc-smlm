@@ -41,6 +41,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.PolygonRoi;
@@ -69,6 +70,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -450,7 +452,34 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		psfImp.resetDisplayRange();
 		psfImp.updateAndDraw();
 
-		double fittedSd = fitPSF(psf, loess, maxz, averageRange.getMean());
+		double[][] fitCom = new double[2][psf.getSize()];
+		Arrays.fill(fitCom[0], Double.NaN);
+		Arrays.fill(fitCom[1], Double.NaN);
+		double fittedSd = fitPSF(psf, loess, maxz, averageRange.getMean(), fitCom);
+
+		// Compute the drift in the PSF:
+		// - Use fitted centre if available; otherwise find CoM for each frame
+		// - express relative to the average centre
+
+		double[][] com = calculateCentreOfMass(psf, fitCom, nmPerPixel / magnification);
+		double[] slice = Utils.newArray(psf.getSize(), 1, 1.0);
+		String title = TITLE + " CoM Drift";
+		Plot2 plot = new Plot2(title, "Slice", "Drift (nm)");
+		double[] limitsX = getLimits(com[0]);
+		double[] limitsY = getLimits(com[1]);
+		plot.setLimits(1, psf.getSize(), Math.min(limitsX[0], limitsY[0]), Math.max(limitsX[1], limitsY[1]));
+		plot.setColor(Color.red);
+		plot.addPoints(slice, com[0], Plot.DOT);
+		plot.addPoints(slice, loess.smooth(slice, com[0]), Plot.LINE);
+		plot.setColor(Color.blue);
+		plot.addPoints(slice, com[1], Plot.DOT);
+		plot.addPoints(slice, loess.smooth(slice, com[1]), Plot.LINE);
+		Utils.display(title, plot);
+
+		// TODO - Redraw the PSF with drift correction applied. 
+		// This means that the final image should have no drift.
+		// This is relevant when combining PSF images. It doesn't matter too much for simulations 
+		// unless the drift is large.
 
 		// Add Image properties containing the PSF details
 		final double fwhm = getFWHM(psf, maxz);
@@ -464,6 +493,24 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		createInteractivePlots(psf, maxz, nmPerPixel / magnification, fittedSd * nmPerPixel);
 
 		IJ.showStatus("");
+	}
+
+	/**
+	 * Get the limits of the array ignoring outliers more than 1.5x the inter quartile range
+	 * 
+	 * @param data
+	 * @return
+	 */
+	private double[] getLimits(double[] data)
+	{
+		double[] limits = Maths.limits(data);
+		DescriptiveStatistics stats = new DescriptiveStatistics(data);
+		double lower = stats.getPercentile(25);
+		double upper = stats.getPercentile(75);
+		double iqr = upper - lower;
+		limits[0] = FastMath.max(lower - iqr, limits[0]);
+		limits[1] = FastMath.min(upper + iqr, limits[1]);
+		return limits;
 	}
 
 	private double getAverage(StoredDataStatistics averageSd, StoredDataStatistics averageA, int averageMethod)
@@ -1006,6 +1053,65 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		}
 	}
 
+	/**
+	 * Calculate the centre of mass and express it relative to the average centre
+	 * 
+	 * @param psf
+	 * @param fitCom
+	 * @param nmPerPixel
+	 * @return The centre of mass
+	 */
+	private double[][] calculateCentreOfMass(ImageStack psf, double[][] fitCom, double nmPerPixel)
+	{
+		final int size = psf.getSize();
+		double[][] com = new double[2][size];
+		final int offset = psf.getWidth() / 2;
+		for (int i = 0; i < size; i++)
+		{
+			float[] data = (float[]) psf.getPixels(i + 1);
+			double sumX = 0, sumY = 0, sum = 0;
+			for (int y = 0, j = 0; y < psf.getHeight(); y++)
+			{
+				for (int x = 0; x < psf.getWidth(); x++, j++)
+				{
+					sum += data[j];
+					sumX += x * data[j];
+					sumY += y * data[j];
+				}
+			}
+			double comX = sumX / sum - offset;
+			double comY = sumY / sum - offset;
+			com[0][i] = comX;
+			com[1][i] = comY;
+			//if (!Double.isNaN(fitCom[0][i]))
+			//{
+			//	// Interlacing the fit centre of mass is not consistent. There appears to be a large discrepancy
+			//	// between the pixel centre-of-mass and the fit CoM. A small test shows correlation of
+			//	// 0.11 and 0.066. Spearman's rank is 0.16. Basically it messes the data and effects smoothing.
+			//	//System.out.printf("CoM = [ %f , %f ] == [ %f , %f ]\n", comX, comY, fitCom[0][i], fitCom[1][i]);
+			//	//com[0][i] = fitCom[0][i];
+			//	//com[1][i] = fitCom[1][i];
+			//}
+		}
+
+		// Smooth the curve ...
+		//		LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
+		//		double[] slice = Utils.newArray(psf.getSize(), 1, 1.0);
+		//		com[0] = loess.smooth(slice, com[0]);
+		//		com[1] = loess.smooth(slice, com[1]);
+
+		// Express relative to the average centre
+		final double avX = new Statistics(com[0]).getMean();
+		final double avY = new Statistics(com[1]).getMean();
+		for (int i = 0; i < size; i++)
+		{
+			com[0][i] = (com[0][i] - avX) * nmPerPixel;
+			com[1][i] = (com[1][i] - avY) * nmPerPixel;
+		}
+
+		return com;
+	}
+
 	private void loadConfiguration()
 	{
 		String filename = SettingsManager.getSettingsFilename();
@@ -1121,9 +1227,10 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	 * @param psf
 	 * @param loess
 	 * @param averageRange
+	 * @param fitCom
 	 * @return The width of the PSF in the z-centre
 	 */
-	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange)
+	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange, double[][] fitCom)
 	{
 		IJ.showStatus("Fitting final PSF");
 		// Update the box radius since this is used in the fitSpot method.
@@ -1168,8 +1275,8 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				continue;
 
 			z[i] = peak.peak;
-			xCoord[i] = peak.getXPosition() - x;
-			yCoord[i] = peak.getYPosition() - y;
+			fitCom[0][peak.peak - 1] = xCoord[i] = peak.getXPosition() - x;
+			fitCom[1][peak.peak - 1] = yCoord[i] = peak.getYPosition() - y;
 			sd[i] = w;
 			a[i] = peak.getAmplitude();
 			i++;
