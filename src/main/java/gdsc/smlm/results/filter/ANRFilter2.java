@@ -23,12 +23,12 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Filter results using a signal-to-noise ratio (SNR) threshold and width range
+ * Filter results using an amplitude-to-noise ratio (ANR) threshold and width range
  */
-public class SNRFilter2 extends Filter
+public class ANRFilter2 extends Filter
 {
 	@XStreamAsAttribute
-	final float snr;
+	final float anr;
 	@XStreamAsAttribute
 	final double minWidth;
 	@XStreamAsAttribute
@@ -38,9 +38,9 @@ public class SNRFilter2 extends Filter
 	@XStreamOmitField
 	float upperSigmaThreshold;
 
-	public SNRFilter2(float snr, double minWidth, double maxWidth)
+	public ANRFilter2(float anr, double minWidth, double maxWidth)
 	{
-		this.snr = snr;
+		this.anr = anr;
 		if (maxWidth < minWidth)
 		{
 			double f = maxWidth;
@@ -54,13 +54,13 @@ public class SNRFilter2 extends Filter
 	@Override
 	protected String generateName()
 	{
-		return "SNR " + snr + ", width " + minWidth + "-" + maxWidth;
+		return "ANR " + anr + ", width " + minWidth + "-" + maxWidth;
 	}
 
 	@Override
 	protected String generateType()
 	{
-		return "SNR2";
+		return "ANR2";
 	}
 
 	@Override
@@ -82,24 +82,24 @@ public class SNRFilter2 extends Filter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
+		return getANR(peak) >= this.anr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
 	}
 
-	static float getSNR(PeakResult peak)
+	static float getANR(PeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Float.POSITIVE_INFINITY;
+		return (peak.noise > 0) ? peak.getAmplitude() / peak.noise : Float.POSITIVE_INFINITY;
 	}
 
 	@Override
 	public double getNumericalValue()
 	{
-		return snr;
+		return anr;
 	}
 
 	@Override
 	public String getNumericalValueName()
 	{
-		return "SNR";
+		return "ANR";
 	}
 
 	/*
@@ -110,7 +110,7 @@ public class SNRFilter2 extends Filter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using a lower SNR threshold and width range. (Width is relative to initial peak width.)";
+		return "Filter results using a lower ANR threshold and width range. (Width is relative to initial peak width.)";
 	}
 
 	/*
@@ -136,7 +136,7 @@ public class SNRFilter2 extends Filter
 		switch (index)
 		{
 			case 0:
-				return snr;
+				return anr;
 			case 1:
 				return minWidth;
 			default:
@@ -156,7 +156,7 @@ public class SNRFilter2 extends Filter
 		switch (index)
 		{
 			case 0:
-				return "SNR";
+				return "ANR";
 			case 1:
 				return "Min width";
 			default:
@@ -176,11 +176,11 @@ public class SNRFilter2 extends Filter
 		switch (index)
 		{
 			case 0:
-				return new SNRFilter2(updateParameter(snr, delta), minWidth, maxWidth);
+				return new ANRFilter2(updateParameter(anr, delta), minWidth, maxWidth);
 			case 1:
-				return new SNRFilter2(snr, updateParameter(minWidth, delta), maxWidth);
+				return new ANRFilter2(anr, updateParameter(minWidth, delta), maxWidth);
 			default:
-				return new SNRFilter2(snr, minWidth, updateParameter(maxWidth, delta));
+				return new ANRFilter2(anr, minWidth, updateParameter(maxWidth, delta));
 		}
 	}
 }

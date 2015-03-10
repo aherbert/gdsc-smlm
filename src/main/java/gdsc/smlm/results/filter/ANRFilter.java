@@ -19,28 +19,28 @@ import gdsc.smlm.results.PeakResult;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
- * Filter results using a signal-to-noise ratio (SNR) threshold
+ * Filter results using an amplitude-to-noise ratio (ANR) threshold
  */
-public class SNRFilter extends Filter
+public class ANRFilter extends Filter
 {
 	@XStreamAsAttribute
-	final float snr;
+	final float anr;
 
-	public SNRFilter(float snr)
+	public ANRFilter(float anr)
 	{
-		this.snr = snr;
+		this.anr = anr;
 	}
 
 	@Override
 	protected String generateName()
 	{
-		return "SNR " + snr;
+		return "ANR " + anr;
 	}
 
 	@Override
 	protected String generateType()
 	{
-		return "SNR";
+		return "ANR";
 	}
 
 	@Override
@@ -51,24 +51,24 @@ public class SNRFilter extends Filter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return getSNR(peak) >= this.snr;
+		return getANR(peak) >= this.anr;
 	}
 
-	static float getSNR(PeakResult peak)
+	static float getANR(PeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Float.POSITIVE_INFINITY;
+		return (peak.noise > 0) ? peak.getAmplitude() / peak.noise : Float.POSITIVE_INFINITY;
 	}
 
 	@Override
 	public double getNumericalValue()
 	{
-		return snr;
+		return anr;
 	}
 
 	@Override
 	public String getNumericalValueName()
 	{
-		return "SNR";
+		return "ANR";
 	}
 
 	/*
@@ -79,7 +79,7 @@ public class SNRFilter extends Filter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using a lower SNR threshold.";
+		return "Filter results using a lower ANR threshold.";
 	}
 
 	/*
@@ -102,7 +102,7 @@ public class SNRFilter extends Filter
 	public double getParameterValue(int index)
 	{
 		checkIndex(index);
-		return snr;
+		return anr;
 	}
 
 	/*
@@ -114,7 +114,7 @@ public class SNRFilter extends Filter
 	public String getParameterName(int index)
 	{
 		checkIndex(index);
-		return "SNR";
+		return "ANR";
 	}
 
 	/*
@@ -126,6 +126,6 @@ public class SNRFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new SNRFilter(updateParameter(snr, delta));
+		return new ANRFilter(updateParameter(anr, delta));
 	}
 }
