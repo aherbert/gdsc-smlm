@@ -621,8 +621,13 @@ public class Utils
 		Plot2 plot = new Plot2(title, name, "Frequency");
 		if (xValues.length > 0)
 		{
-			double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, Maths.max(yValues) * 1.05);
+			float dx = 0;
+			if (barChart)
+				dx = (xValues.length == 1) ? 1 : (xValues[1] - xValues[0]);
+			float xMax = xValues[xValues.length - 1] + dx;
+			double xPadding = 0.05 * (xMax - xValues[0]);
+			plot.setLimits(xValues[0] - xPadding, xMax + xPadding, 0,
+					Maths.max(yValues) * 1.05);
 		}
 		plot.addPoints(xValues, yValues, (barChart) ? Plot2.BAR : Plot.LINE);
 		if (label != null)
