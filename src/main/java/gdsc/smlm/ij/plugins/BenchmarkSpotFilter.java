@@ -29,6 +29,7 @@ import gdsc.smlm.results.match.Coordinate;
 import gdsc.smlm.results.match.MatchCalculator;
 import gdsc.smlm.results.match.MatchResult;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -38,10 +39,10 @@ import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,6 +73,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static double distance = 1.5;
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
+	private static boolean showFailuresPlot = true;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
 	private long time = 0;
@@ -86,16 +88,28 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static int lastId = -1;
+	
+	int idCount = 0;
+	int[] idList = new int[4];	
 
 	private class ScoredSpot implements Comparable<ScoredSpot>
 	{
 		final boolean match;
 		final Spot spot;
+		int fails;
+
+		public ScoredSpot(boolean match, Spot spot, int fails)
+		{
+			this.match = match;
+			this.spot = spot;
+			this.fails = fails;
+		}
 
 		public ScoredSpot(boolean match, Spot spot)
 		{
 			this.match = match;
 			this.spot = spot;
+			this.fails = 0;
 		}
 
 		/*
@@ -222,6 +236,9 @@ public class BenchmarkSpotFilter implements PlugIn
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
 			MatchResult result;
 
+			// Store the count of false positives since the last true positive
+			int fails = 0;
+
 			if (actual.length > 0)
 			{
 				Coordinate[] predicted = getCoordinates(spots);
@@ -230,15 +247,29 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				result = MatchCalculator.analyseResults2D(actual, predicted, distance, TP, FP, null, null);
 
-				// Store the true and false positives
-				int i = 0;
+				// Store the true and false positives. Maintain the original ranked order.
 				for (Coordinate c : TP)
 				{
-					scoredSpots[i++] = new ScoredSpot(true, ((SpotCoordinate) c).spot);
+					SpotCoordinate sc = (SpotCoordinate) c;
+					scoredSpots[sc.id] = new ScoredSpot(true, sc.spot);
 				}
 				for (Coordinate c : FP)
 				{
-					scoredSpots[i++] = new ScoredSpot(false, ((SpotCoordinate) c).spot);
+					SpotCoordinate sc = (SpotCoordinate) c;
+					scoredSpots[sc.id] = new ScoredSpot(false, sc.spot);
+				}
+
+				// Store the number of fails (negatives) before each positive 
+				for (int i = 0; i < spots.length; i++)
+				{
+					scoredSpots[i].fails = fails++;
+					if (scoredSpots[i].match)
+					{
+						//if (fails > 60)
+						//	System.out.printf("%d @ %d : %d,%d\n", fails, frame, scoredSpots[i].spot.x,
+						//		scoredSpots[i].spot.y);
+						fails = 0;
+					}
 				}
 			}
 			else
@@ -248,7 +279,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				for (int i = 0; i < spots.length; i++)
 				{
-					scoredSpots[i] = new ScoredSpot(false, spots[i]);
+					scoredSpots[i] = new ScoredSpot(false, spots[i], fails++);
 				}
 			}
 
@@ -266,17 +297,19 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			Coordinate[] coords = new Coordinate[spots.length];
 			for (int i = 0; i < spots.length; i++)
-				coords[i] = new SpotCoordinate(spots[i]);
+				coords[i] = new SpotCoordinate(i, spots[i]);
 			return coords;
 		}
 
 		private class SpotCoordinate extends BasePoint
 		{
+			int id;
 			Spot spot;
 
-			public SpotCoordinate(Spot spot)
+			public SpotCoordinate(int id, Spot spot)
 			{
 				super(spot.x, spot.y);
+				this.id = id;
 				this.spot = spot;
 			}
 		}
@@ -338,6 +371,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addSlider("Match_distance", 1, 3, distance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
+		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
@@ -354,6 +388,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		distance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
+		showFailuresPlot = gd.getNextBoolean();
 		if (extraOptions)
 			debug = sDebug = gd.getNextBoolean();
 
@@ -440,9 +475,17 @@ public class BenchmarkSpotFilter implements PlugIn
 			filterResults.putAll(w.results);
 		}
 
-		// Show a table of the results
-		summariseResults(filterResults, spotFilter);
+		double[][] h = histogramFailures(filterResults);
 
+		// Show a table of the results
+		summariseResults(filterResults, spotFilter, h);
+
+		if (idCount > 0)
+		{
+			idList = Arrays.copyOf(idList, idCount);
+			new WindowOrganiser().tileWindows(idList);
+		}
+		
 		// Debugging the matches
 		if (debug)
 			addSpotsToMemory(filterResults);
@@ -474,6 +517,49 @@ public class BenchmarkSpotFilter implements PlugIn
 		MemoryPeakResults.addResults(results);
 	}
 
+	/**
+	 * Histogram the number of negatives preceeding each positive
+	 * 
+	 * @param filterResults
+	 */
+	private double[][] histogramFailures(HashMap<Integer, FilterResult> filterResults)
+	{
+		StoredDataStatistics stats = new StoredDataStatistics();
+		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
+		{
+			for (ScoredSpot spot : result.getValue().spots)
+			{
+				if (spot.match)
+				{
+					stats.add(spot.fails);
+				}
+			}
+		}
+		String xTitle = "Preceeding Negatives";
+
+		double[][] h = Maths.cumulativeHistogram(stats.getValues(), true);
+
+		if (showFailuresPlot)
+		{
+			final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 100);
+			if (Utils.isNewWindow())
+				idList[idCount++] = id;
+
+			String title = TITLE + " " + xTitle + " Cumulative";
+			Plot2 plot = new Plot2(title, xTitle, "Frequency");
+			double xMax = h[0][h[0].length - 1] + 1;
+			double xPadding = 0.05 * (xMax - h[0][0]);
+			plot.setLimits(h[0][0] - xPadding, xMax + xPadding, 0, 1.05);
+			plot.setColor(Color.blue);
+			plot.addPoints(h[0], h[1], Plot2.BAR);
+			PlotWindow pw = Utils.display(title, plot);
+				if (Utils.isNewWindow())
+					idList[idCount++] = pw.getImagePlus().getID();
+		}
+
+		return h;
+	}
+
 	private void put(BlockingQueue<Integer> jobs, int i)
 	{
 		try
@@ -486,7 +572,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
-	private void summariseResults(HashMap<Integer, FilterResult> filterResults, MaximaSpotFilter spotFilter)
+	private void summariseResults(HashMap<Integer, FilterResult> filterResults, MaximaSpotFilter spotFilter,
+			double[][] cumul)
 	{
 		createTable();
 
@@ -580,15 +667,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		double target = r[r.length - 1];
 		if (recallFraction < 100)
 			target *= recallFraction / 100.0;
-		int index = 0;
-		while (index < r.length && r[index] < target)
+		int fractionIndex = 0;
+		while (fractionIndex < r.length && r[fractionIndex] < target)
 		{
-			index++;
+			fractionIndex++;
 		}
-		if (index == r.length)
-			index--;
-		addResult(sb, new MatchResult(truePositives[index], falsePositives[index], allResult.getNumberActual() -
-				truePositives[index], 0));
+		if (fractionIndex == r.length)
+			fractionIndex--;
+		addResult(
+				sb,
+				new MatchResult(truePositives[fractionIndex], falsePositives[fractionIndex], allResult
+						.getNumberActual() - truePositives[fractionIndex], 0));
 
 		// Output the match results at the maximum jaccard score
 		int maxIndex = 0;
@@ -599,7 +688,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		addResult(sb, new MatchResult(truePositives[maxIndex], falsePositives[maxIndex], allResult.getNumberActual() -
 				truePositives[maxIndex], 0));
-		
+
 		sb.append(Utils.rounded(time / 1e6));
 
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
@@ -619,6 +708,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("\t").append(Utils.rounded(auc));
 		sb.append("\t").append(Utils.rounded(auc2));
 
+		// Output the number of fit failures that must be processed to capture fractions of the true positives
+		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.95)));
+		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.99)));
+		sb.append("\t").append(Utils.rounded(cumul[0][cumul[0].length - 1]));
+
 		if (showPlot)
 		{
 			String title = TITLE + " Performance";
@@ -626,40 +720,47 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.setLimits(0, rank.length, 0, 1.05);
 			plot.setColor(Color.blue);
 			plot.addPoints(rank, p, Plot2.LINE);
-			//plot.addPoints(rank, maxp, SuperPlot.DOT);
+			//plot.addPoints(rank, maxp, Plot2.DOT);
 			plot.setColor(Color.red);
 			plot.addPoints(rank, r, Plot2.LINE);
 			plot.setColor(Color.black);
 			plot.addPoints(rank, j, Plot2.LINE);
 			plot.setColor(Color.magenta);
-			plot.drawLine(rank[index], 0, rank[index], Maths.max(p[index], r[index], j[index]));
-			plot.setColor(Color.lightGray);
+			plot.drawLine(rank[fractionIndex], 0, rank[fractionIndex],
+					Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex]));
+			plot.setColor(Color.pink);
 			plot.drawLine(rank[maxIndex], 0, rank[maxIndex], Maths.max(p[maxIndex], r[maxIndex], j[maxIndex]));
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black");
 
 			PlotWindow pw = Utils.display(title, plot);
+			if (Utils.isNewWindow())
+				idList[idCount++] = pw.getImagePlus().getID();
 
 			title = TITLE + " Precision-Recall";
 			plot = new Plot2(title, "Recall", "Precision");
 			plot.setLimits(0, 1, 0, 1.05);
 			plot.setColor(Color.red);
 			plot.addPoints(r, p, Plot2.LINE);
-			//plot.addPoints(r, maxp, SuperPlot.DOT);
+			//plot.addPoints(r, maxp, Plot2.DOT);
 			plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
 			PlotWindow pw2 = Utils.display(title, plot);
 			if (Utils.isNewWindow())
-			{
-				Point point = pw.getLocation();
-				point.x = pw.getLocation().x;
-				point.y += pw.getHeight();
-				pw2.setLocation(point);
-			}
+				idList[idCount++] = pw2.getImagePlus().getID();
 		}
 
 		summaryTable.append(sb.toString());
+	}
+
+	private double getFailures(double[][] cumul, double fraction)
+	{
+		int i = 0;
+		final double[] sum = cumul[1];
+		while (sum[i] < fraction && i < sum.length)
+			i++;
+		return i;
 	}
 
 	private void addResult(StringBuilder sb, MatchResult matchResult)
@@ -689,7 +790,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");
-		sb.append("AUC\tAUC2");
+		sb.append("AUC\tAUC2\t");
+		sb.append("fail95\tfail99\tfail100");
 		return sb.toString();
 	}
 
