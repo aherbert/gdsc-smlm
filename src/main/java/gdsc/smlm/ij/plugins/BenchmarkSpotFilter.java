@@ -88,9 +88,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static int lastId = -1;
-	
+
 	int idCount = 0;
-	int[] idList = new int[4];	
+	int[] idList = new int[4];
 
 	private class ScoredSpot implements Comparable<ScoredSpot>
 	{
@@ -485,7 +485,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			idList = Arrays.copyOf(idList, idCount);
 			new WindowOrganiser().tileWindows(idList);
 		}
-		
+
 		// Debugging the matches
 		if (debug)
 			addSpotsToMemory(filterResults);
@@ -535,7 +535,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				}
 			}
 		}
-		String xTitle = "Preceeding Negatives";
+		String xTitle = "Failures";
 
 		double[][] h = Maths.cumulativeHistogram(stats.getValues(), true);
 
@@ -553,8 +553,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.setColor(Color.blue);
 			plot.addPoints(h[0], h[1], Plot2.BAR);
 			PlotWindow pw = Utils.display(title, plot);
-				if (Utils.isNewWindow())
-					idList[idCount++] = pw.getImagePlus().getID();
+			if (Utils.isNewWindow())
+				idList[idCount++] = pw.getImagePlus().getID();
 		}
 
 		return h;
@@ -791,7 +791,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");
 		sb.append("AUC\tAUC2\t");
-		sb.append("fail95\tfail99\tfail100");
+		sb.append("Fail95\tFail99\tFail100");
 		return sb.toString();
 	}
 
