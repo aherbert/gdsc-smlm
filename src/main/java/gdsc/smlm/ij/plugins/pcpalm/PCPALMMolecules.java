@@ -595,7 +595,7 @@ public class PCPALMMolecules implements PlugIn
 	public double calculateAveragePrecision(ArrayList<Molecule> molecules, String title, int histogramBins,
 			boolean logFitParameters, boolean removeOutliers)
 	{
-		// SuperPlot histogram of the precision
+		// Plot histogram of the precision
 		float[] data = new float[molecules.size()];
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
@@ -1534,7 +1534,7 @@ public class PCPALMMolecules implements PlugIn
 			double[][] intraIdHist = Maths.cumulativeHistogram(intraIdDistances, false);
 			double[][] interIdHist = Maths.cumulativeHistogram(interIdDistances, false);
 
-			// SuperPlot
+			// Plot
 			String title = TITLE + " molecule linkage distance";
 			Plot2 plot = new Plot2(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
 			double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;

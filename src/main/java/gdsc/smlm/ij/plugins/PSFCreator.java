@@ -1412,7 +1412,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		this.distanceThreshold = psfWidth * 3;
 
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("SuperPlot the cumulative signal verses distance from the PSF centre.\n \nZ-centre = " + zCentre +
+		gd.addMessage("Plot the cumulative signal verses distance from the PSF centre.\n \nZ-centre = " + zCentre +
 				"\nPSF width = " + Utils.rounded(psfWidth) + " nm");
 		gd.addSlider("Slice", 1, psf.getSize(), slice);
 		final double maxDistance = (psf.getWidth() / 1.414213562) * nmPerPixel;
@@ -1613,7 +1613,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			signalLimits = Maths.limits(signal);
 		}
 
-		// SuperPlot the sum
+		// Plot the sum
 		boolean alignWindows = (WindowManager.getFrame(signalTitle) == null);
 
 		final double total = signal[slice - 1];

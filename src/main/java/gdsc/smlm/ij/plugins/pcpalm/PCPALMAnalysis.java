@@ -1011,7 +1011,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		// double[] H = new double[x.length];
 		// for (int i = 0; i < x.length; i++)
 		// H[i] = gr[i].getN();
-		// SuperPlot p = new SuperPlot("Histogram", "r", "F", x, H);
+		// Plot2 p = new Plot2("Histogram", "r", "F", x, H);
 		// Utils.display("Histogram", p);
 
 		return new double[][] { x, y, sd };

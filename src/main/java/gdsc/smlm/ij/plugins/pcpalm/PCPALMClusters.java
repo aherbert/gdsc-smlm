@@ -169,7 +169,7 @@ public class PCPALMClusters implements PlugIn
 		float[] xValues = Utils.createHistogramAxis(hist[0]);
 		float[] yValues = Utils.createHistogramValues(hist[1]);
 
-		// SuperPlot the histogram
+		// Plot the histogram
 		float yMax = Maths.max(yValues);
 		Plot2 plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
 		if (xValues.length > 0)
@@ -819,7 +819,7 @@ public class PCPALMClusters implements PlugIn
 		for (int i = 0; i < histogramData.histogram[1].length; i++)
 			histogram[i] = histogramData.histogram[1][i] / count;
 
-		// SuperPlot the cumulative histogram
+		// Plot the cumulative histogram
 		String title = TITLE + " Cumulative Distribution";
 		Plot2 plot = null;
 		if (showCumulativeHistogram)
@@ -916,7 +916,7 @@ public class PCPALMClusters implements PlugIn
 
 		plot.setColor(color);
 		plot.addPoints(x, y, Plot2.LINE);
-		//plot.addPoints(x, y, SuperPlot.CIRCLE);
+		//plot.addPoints(x, y, Plot2.CIRCLE);
 		Utils.display(title, plot);
 	}
 }

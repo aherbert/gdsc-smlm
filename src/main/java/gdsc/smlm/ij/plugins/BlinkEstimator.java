@@ -198,7 +198,7 @@ public class BlinkEstimator implements PlugIn
 			adjustedR2[n] = this.adjustedR2;
 		}
 
-		// SuperPlot
+		// Plot
 		plot("Fitted points", "N", nPoints, parameters[0]);
 		plot("Fitted points", "nBlinks", nPoints, parameters[1]);
 		plot("Fitted points", "tOff", nPoints, parameters[2]);

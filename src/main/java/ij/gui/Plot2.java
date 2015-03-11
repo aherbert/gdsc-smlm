@@ -71,7 +71,7 @@ public class Plot2 extends Plot
 		{
 			// Set the limits if this is the first set of data. The limits are usually set in the constructor
 			// but we may want to not pass in the values to the constructor and then immediately call 
-			// addPoints(x, y, SuperPlot.BAR)
+			// addPoints(x, y, Plot2.BAR)
 			double[] a = Tools.getMinMax(x);
 			xMin = a[0];
 			xMax = a[1];

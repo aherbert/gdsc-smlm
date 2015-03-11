@@ -175,7 +175,7 @@ public class DiffusionRateTest implements PlugIn
 			showExample(totalSteps, diffusionSigma, random);
 		}
 
-		// SuperPlot a graph of mean squared distance
+		// Plot a graph of mean squared distance
 		double[] xValues = new double[stats2D.length];
 		double[] yValues2D = new double[stats2D.length];
 		double[] yValues3D = new double[stats3D.length];
@@ -385,7 +385,7 @@ public class DiffusionRateTest implements PlugIn
 			xValues[j] = (float) (j + 1) / settings.stepsPerSecond;
 		}
 
-		// SuperPlot x and y coords on a timeline
+		// Plot x and y coords on a timeline
 		String title = TITLE + " example coordinates";
 		Plot2 plot = new Plot2(title, "Time (seconds)", "Distance (um)");
 		float[] xUm = convertToUm(x);

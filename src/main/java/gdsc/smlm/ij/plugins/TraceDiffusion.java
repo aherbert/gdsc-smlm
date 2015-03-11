@@ -340,7 +340,7 @@ public class TraceDiffusion implements PlugIn
 					jdHistogram[1]);
 			display(jdTitle, jdPlot);
 
-			// SuperPlot the per-trace histogram of MSD and D*
+			// Plot the per-trace histogram of MSD and D*
 			if (settings.showHistograms)
 			{
 				if (displayMSDHistogram)

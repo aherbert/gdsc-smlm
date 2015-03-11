@@ -200,7 +200,7 @@ public class DarkTimeAnalysis implements PlugIn
 			times[i] += times[i - 1];
 		int total = times[times.length - 1];
 
-		// SuperPlot dark-time up to 100%
+		// Plot dark-time up to 100%
 		double[] x = new double[range];
 		double[] y = new double[range];
 		int truncate = 0;

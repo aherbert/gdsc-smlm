@@ -439,7 +439,7 @@ public class MeanVarianceTest implements PlugIn
 			// Construct the polynomial that best fits the data.
 			final PolynomialFunction fitted = new PolynomialFunction(best);
 
-			// SuperPlot mean verses variance. Gradient is gain in ADU/e.
+			// Plot mean verses variance. Gradient is gain in ADU/e.
 			String title = TITLE + " results";
 			Plot2 plot = new Plot2(title, "Mean", "Variance");
 			double[] xlimits = Maths.limits(mean);
