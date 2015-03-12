@@ -67,17 +67,37 @@ public class Plot2 extends Plot
 	@Override
 	public void addPoints(float[] x, float[] y, int shape)
 	{
-		if (xValues == null)
+		// Set the limits if this is the first set of data. The limits are usually set in the constructor
+		// but we may want to not pass in the values to the constructor and then immediately call 
+		// addPoints(x, y, Plot2.BAR)
+		boolean setLimits = false;
+		try
 		{
-			// Set the limits if this is the first set of data. The limits are usually set in the constructor
-			// but we may want to not pass in the values to the constructor and then immediately call 
-			// addPoints(x, y, Plot2.BAR)
-			double[] a = Tools.getMinMax(x);
-			xMin = a[0];
-			xMax = a[1];
-			a = Tools.getMinMax(y);
-			yMin = a[0];
-			yMax = a[1];
+			// Check for any values
+			Field f = Plot.class.getDeclaredField("xValues");
+			f.setAccessible(true);
+			Object value = f.get(this);
+			setLimits = (value == null);
+		}
+		catch (Exception e)
+		{
+			// Ignore
+		}
+		if (setLimits)
+		{
+			try
+			{
+				double[] a = Tools.getMinMax(x);
+				setFieldValue("xMin", a[0]);
+				setFieldValue("xMax", a[1]);
+				a = Tools.getMinMax(y);
+				setFieldValue("yMin", a[0]);
+				setFieldValue("yMax", a[1]);
+			}
+			catch (Exception e)
+			{
+				// Ignore
+			}
 		}
 		
 		// This only works if the addPoints super method ignores the BAR option but still store the values
@@ -105,6 +125,13 @@ public class Plot2 extends Plot
 		}
 
 		super.addPoints(x, y, shape);
+	}
+
+	private void setFieldValue(String name, Object value) throws Exception
+	{
+		Field f = Plot.class.getDeclaredField(name);
+		f.setAccessible(true);
+		f.set(this, value);
 	}
 
 	private float[] arrayToLog(float[] val)
