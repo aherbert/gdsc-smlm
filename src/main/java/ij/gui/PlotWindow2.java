@@ -23,7 +23,7 @@ public class PlotWindow2 extends PlotWindow
 
 	/**
 	 * Construct a plot window.
-	 * This method throws an exception on some platforms since the super constructor is package private.
+	 * This method throws an IllegalAccessError on some platforms since the super constructor is package private.
 	 * @param plot
 	 */
 	PlotWindow2(Plot plot)
