@@ -613,7 +613,20 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
-		sb.append(Utils.rounded(signal / Math.sqrt(simulationParameters.b2))).append("\t");
+		
+		// Compute the noise
+		double noise = simulationParameters.b2;
+		if (simulationParameters.emCCD)
+		{
+			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
+			//final double b2 = backgroundVariance + readVariance
+			//                = simulationParameters.b + readVariance
+			// This should be applied only to the background variance.
+			final double readVariance = noise - simulationParameters.b; 
+			noise = simulationParameters.b * 2 + readVariance;
+		}
+		
+		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
 		sb.append(config.getDataFilterType()).append("\t");
 		//sb.append(spotFilter.getName()).append("\t");

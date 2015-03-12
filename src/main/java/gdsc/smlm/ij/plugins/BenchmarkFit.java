@@ -851,7 +851,20 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.b2)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(benchmarkParameters.b2))).append("\t");
+		
+		// Compute the noise
+		double noise = benchmarkParameters.b2;
+		if (benchmarkParameters.emCCD)
+		{
+			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
+			//final double b2 = backgroundVariance + readVariance
+			//                = benchmarkParameters.getBackground() + readVariance
+			// This should be applied only to the background variance.
+			final double readVariance = noise - benchmarkParameters.getBackground(); 
+			noise = benchmarkParameters.getBackground() * 2 + readVariance;
+		}
+		
+		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(noise))).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append("\t");
