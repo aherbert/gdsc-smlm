@@ -10,6 +10,7 @@ import ij.process.ImageProcessor;
 import ij.util.Tools;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * Extension of the ij.gui.Plot class to add functionality
@@ -67,6 +68,8 @@ public class Plot2 extends Plot
 	@Override
 	public void addPoints(float[] x, float[] y, int shape)
 	{
+		// Override to allow a Bar plot. If this fails due to an exception then a line plot will be used.
+		
 		// Set the limits if this is the first set of data. The limits are usually set in the constructor
 		// but we may want to not pass in the values to the constructor and then immediately call 
 		// addPoints(x, y, Plot2.BAR)
@@ -99,29 +102,49 @@ public class Plot2 extends Plot
 				// Ignore
 			}
 		}
-		
+
 		// This only works if the addPoints super method ignores the BAR option but still store the values
-		setup();
-		switch (shape)
+		try
 		{
-			case BAR:
-				ImageProcessor ip = getProcessor();
-				int flags = 0;
-				try
-				{
-					Field f = Plot.class.getDeclaredField("flags");
-					f.setAccessible(true);
-					flags = f.getInt(this);
-				}
-				catch (Exception e)
-				{
-					// Ignore
-				}
-				float[] xValues = createHistogramAxis(x);
-				float[] yValues = createHistogramValues(y);
-				drawFloatPolyline(ip, ((flags & X_LOG_NUMBERS) != 0) ? arrayToLog(xValues) : xValues,
-						((flags & Y_LOG_NUMBERS) != 0) ? arrayToLog(yValues) : yValues, xValues.length);
-				break;
+			Method m = Plot.class.getDeclaredMethod("setup");
+			m.setAccessible(true);
+			m.invoke(this);
+
+			switch (shape)
+			{
+				case BAR:
+					ImageProcessor ip = getProcessor();
+					int flags = 0;
+					try
+					{
+						Field f = Plot.class.getDeclaredField("flags");
+						f.setAccessible(true);
+						flags = f.getInt(this);
+					}
+					catch (Exception e)
+					{
+						// Ignore
+					}
+					float[] xValues = createHistogramAxis(x);
+					float[] yValues = createHistogramValues(y);
+
+					m = Plot.class.getDeclaredMethod("drawFloatPolyline", ImageProcessor.class, float[].class,
+							float[].class, int.class);
+					m.setAccessible(true);
+
+					if ((flags & X_LOG_NUMBERS) != 0)
+						xValues = arrayToLog(xValues);
+					if ((flags & Y_LOG_NUMBERS) != 0)
+						yValues = arrayToLog(yValues);
+
+					m.invoke(this, ip, xValues, yValues, xValues.length);
+					break;
+			}
+		}
+		catch (Exception e)
+		{
+			// Revert to drawing a line
+			shape = Plot.LINE;
 		}
 
 		super.addPoints(x, y, shape);
@@ -196,39 +219,53 @@ public class Plot2 extends Plot
 	@Override
 	public PlotWindow show()
 	{
-		draw();
-		ImageProcessor ip = getProcessor();
-		if (Prefs.useInvertingLut && (ip instanceof ByteProcessor) && !Interpreter.isBatchMode() &&
-				IJ.getInstance() != null)
+		// Override to show a PlotWindow2 object
+
+		try
 		{
-			ip.invertLut();
-			ip.invert();
+			Method m = Plot.class.getDeclaredMethod("draw");
+			m.setAccessible(true);
+			m.invoke(this);
+
+			ImageProcessor ip = getProcessor();
+			if (Prefs.useInvertingLut && (ip instanceof ByteProcessor) && !Interpreter.isBatchMode() &&
+					IJ.getInstance() != null)
+			{
+				ip.invertLut();
+				ip.invert();
+			}
+			if ((IJ.macroRunning() && IJ.getInstance() == null) || Interpreter.isBatchMode())
+			{
+				String title = "";
+				try
+				{
+					Field f = Plot.class.getDeclaredField("title");
+					f.setAccessible(true);
+					title = f.get(this).toString();
+				}
+				catch (Exception e)
+				{
+					// Ignore
+				}
+				ImagePlus imp = new ImagePlus(title, ip);
+				WindowManager.setTempCurrentImage(imp);
+				imp.setProperty("XValues", xValues); //Allows values to be retrieved by 
+				imp.setProperty("YValues", yValues); // by Plot.getValues() macro function
+				Interpreter.addBatchModeImage(imp);
+				return null;
+			}
+			ImageWindow.centerNextImage();
+			PlotWindow2 pw = new PlotWindow2(this);
+			ImagePlus imp = pw.getImagePlus();
+			if (IJ.isMacro() && imp != null) // wait for plot to be displayed
+				IJ.selectWindow(imp.getID());
+			return pw;
 		}
-		if ((IJ.macroRunning() && IJ.getInstance() == null) || Interpreter.isBatchMode())
+		catch (Exception e)
 		{
-			String title = "";
-			try
-			{
-				Field f = Plot.class.getDeclaredField("title");
-				f.setAccessible(true);
-				title = f.get(this).toString();
-			}
-			catch (Exception e)
-			{
-				// Ignore
-			}
-			ImagePlus imp = new ImagePlus(title, ip);
-			WindowManager.setTempCurrentImage(imp);
-			imp.setProperty("XValues", xValues); //Allows values to be retrieved by 
-			imp.setProperty("YValues", yValues); // by Plot.getValues() macro function
-			Interpreter.addBatchModeImage(imp);
-			return null;
+			// Ignore
 		}
-		ImageWindow.centerNextImage();
-		PlotWindow2 pw = new PlotWindow2(this);
-		ImagePlus imp = pw.getImagePlus();
-		if (IJ.isMacro() && imp != null) // wait for plot to be displayed
-			IJ.selectWindow(imp.getID());
-		return pw;
+
+		return super.show();
 	}
 }
