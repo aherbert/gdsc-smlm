@@ -134,7 +134,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static int MASK = 3;
 	private static int GRID = 4;
 	private static String[] CONFINEMENT = { "None", "Mask", "Sphere" };
-	private static int SPHERE = 2;
+	private static int CONFINEMENT_MASK = 1;
+	private static int CONFINEMENT_SPHERE = 2;
 
 	private static String[] PSF_MODELS = new String[] { "2D Gaussian", "Airy", "Image" };
 
@@ -1115,7 +1116,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				return createMaskDistribution(imp, settings.confinementMaskSliceDepth);
 			}
 		}
-		else if (settings.confinement.equals(CONFINEMENT[SPHERE]))
+		else if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 		{
 			return new SphericalDistribution(settings.confinementRadius / settings.pixelPitch);
 		}
@@ -3305,7 +3306,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					addHeaderLine(sb, "Enable_2D_rotation", settings.rotate2D);
 				}
 				addHeaderLine(sb, "Confinement", settings.confinement);
-				if (settings.confinement.equals(CONFINEMENT[SPHERE]))
+				if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 				{
 					addHeaderLine(sb, "Confinement_radius", settings.confinementRadius);
 				}
@@ -3956,7 +3957,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (settings.diffusionRate > 0 && settings.fixedFraction < 1)
 		{
-			if (settings.confinement.equals(CONFINEMENT[SPHERE]))
+			if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 			{
 				gd = new GenericDialog(TITLE);
 				gd.addMessage("Select the sphere radius for the diffusion confinement");
@@ -3966,7 +3967,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					return false;
 				settings.confinementRadius = gd.getNextNumber();
 			}
-			else if (settings.confinement.equals(CONFINEMENT[MASK]))
+			else if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_MASK]))
 			{
 				if (maskImages == null)
 					maskImages = createDistributionImageList();
