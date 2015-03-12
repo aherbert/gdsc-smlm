@@ -21,7 +21,12 @@ public class PlotWindow2 extends PlotWindow
 	private static long time = 0;
 	private static boolean lock = false;
 
-	public PlotWindow2(Plot plot)
+	/**
+	 * Construct a plot window.
+	 * This method throws an exception on some platforms since the super constructor is package private.
+	 * @param plot
+	 */
+	PlotWindow2(Plot plot)
 	{
 		super(plot);
 	}
@@ -132,7 +137,7 @@ public class PlotWindow2 extends PlotWindow
 			digits = 0;
 		return digits;
 	}
-	
+
 	private synchronized boolean lock()
 	{
 		if (!lock)

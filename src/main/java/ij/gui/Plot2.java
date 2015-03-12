@@ -69,7 +69,7 @@ public class Plot2 extends Plot
 	public void addPoints(float[] x, float[] y, int shape)
 	{
 		// Override to allow a Bar plot. If this fails due to an exception then a line plot will be used.
-		
+
 		// Set the limits if this is the first set of data. The limits are usually set in the constructor
 		// but we may want to not pass in the values to the constructor and then immediately call 
 		// addPoints(x, y, Plot2.BAR)
@@ -82,7 +82,7 @@ public class Plot2 extends Plot
 			Object value = f.get(this);
 			setLimits = (value == null);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			// Ignore
 		}
@@ -121,7 +121,7 @@ public class Plot2 extends Plot
 						f.setAccessible(true);
 						flags = f.getInt(this);
 					}
-					catch (Exception e)
+					catch (Throwable e)
 					{
 						// Ignore
 					}
@@ -141,7 +141,7 @@ public class Plot2 extends Plot
 					break;
 			}
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			// Revert to drawing a line
 			shape = Plot.LINE;
@@ -243,7 +243,7 @@ public class Plot2 extends Plot
 					f.setAccessible(true);
 					title = f.get(this).toString();
 				}
-				catch (Exception e)
+				catch (Throwable e)
 				{
 					// Ignore
 				}
@@ -255,13 +255,14 @@ public class Plot2 extends Plot
 				return null;
 			}
 			ImageWindow.centerNextImage();
+			// This may throw an IllegalAccessError on some platforms
 			PlotWindow2 pw = new PlotWindow2(this);
 			ImagePlus imp = pw.getImagePlus();
 			if (IJ.isMacro() && imp != null) // wait for plot to be displayed
 				IJ.selectWindow(imp.getID());
 			return pw;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			// Ignore
 		}
