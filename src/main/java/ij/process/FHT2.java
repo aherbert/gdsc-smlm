@@ -19,7 +19,8 @@ public class FHT2 extends FHT
 	{
 		super(floatProcessor, isFrequencyDomain);
 	}
-
+	
+	@Override
 	void transposeR(float[] x, int maxN)
 	{
 		//		int r, c;
