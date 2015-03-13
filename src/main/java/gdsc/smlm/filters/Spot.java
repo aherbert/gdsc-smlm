@@ -59,7 +59,6 @@ public class Spot implements Comparable<Spot>, Cloneable
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	@Override
 	public int compareTo(Spot o)
 	{
 		if (intensity > o.intensity)
