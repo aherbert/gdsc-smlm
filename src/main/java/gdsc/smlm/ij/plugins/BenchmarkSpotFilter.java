@@ -88,9 +88,12 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static int lastId = -1;
+	
+	// Used by the Benchmark Spot Fit plugin
+	static HashMap<Integer, FilterResult> filterResults = null;
 
-	int idCount = 0;
-	int[] idList = new int[4];
+	private int idCount = 0;
+	private int[] idList = new int[4];
 
 	private class ScoredSpot implements Comparable<ScoredSpot>
 	{
@@ -338,7 +341,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		results = MemoryPeakResults.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
 		if (results == null)
 		{
-			IJ.error(TITLE, "No benchmark resuls in memory");
+			IJ.error(TITLE, "No benchmark results in memory");
 			return;
 		}
 
@@ -467,7 +470,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
 
-		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
+		filterResults = new HashMap<Integer, BenchmarkSpotFilter.FilterResult>();
 		for (Worker w : workers)
 		{
 			time += w.time;
