@@ -19,6 +19,8 @@ public class Plot2 extends Plot
 {
 	/** Draw a bar plot */
 	public static final int BAR = 999;
+	
+	private static boolean failedOverride = false;
 
 	public Plot2(String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
 	{
@@ -69,6 +71,13 @@ public class Plot2 extends Plot
 	public void addPoints(float[] x, float[] y, int shape)
 	{
 		// Override to allow a Bar plot. If this fails due to an exception then a line plot will be used.
+		if (failedOverride)
+		{
+			if (shape == Plot2.BAR)
+				shape = Plot.LINE;
+			super.addPoints(x, y, shape);
+			return;
+		}
 
 		// Set the limits if this is the first set of data. The limits are usually set in the constructor
 		// but we may want to not pass in the values to the constructor and then immediately call 
@@ -144,6 +153,7 @@ public class Plot2 extends Plot
 		catch (Throwable e)
 		{
 			// Revert to drawing a line
+			failedOverride = true;
 			shape = Plot.LINE;
 		}
 
@@ -220,7 +230,9 @@ public class Plot2 extends Plot
 	public PlotWindow show()
 	{
 		// Override to show a PlotWindow2 object
-
+		if (failedOverride)
+			return super.show();
+			
 		try
 		{
 			Method m = Plot.class.getDeclaredMethod("draw");
@@ -265,6 +277,7 @@ public class Plot2 extends Plot
 		catch (Throwable e)
 		{
 			// Ignore
+			failedOverride = true;
 		}
 
 		return super.show();

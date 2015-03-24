@@ -117,7 +117,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
-		@Override
 		public int compareTo(ScoredSpot o)
 		{
 			if (spot.intensity > o.spot.intensity)
