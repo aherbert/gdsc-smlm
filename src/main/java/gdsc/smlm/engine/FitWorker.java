@@ -33,9 +33,10 @@ import gdsc.smlm.utils.NoiseEstimator;
 import gdsc.smlm.utils.logging.Logger;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.math3.util.FastMath;
@@ -74,7 +75,7 @@ public class FitWorker implements Runnable
 	private Gaussian2DFitter gf;
 
 	// Used for fitting methods
-	private LinkedList<PeakResult> sliceResults;
+	private ArrayList<PeakResult> sliceResults;
 	private double fittedBackground;
 	private int slice;
 	private int endT;
@@ -288,16 +289,16 @@ public class FitWorker implements Runnable
 					if (filter != null && npeaks != 0)
 					{
 						// Check all result peaks for the distance to the filter positions
-						Iterator<PeakResult> iter = sliceResults.descendingIterator();
 						PeakResult[] results = new PeakResult[npeaks];
-						while (iter.hasNext() && npeaks-- > 0)
+						for (int i = sliceResults.size(); npeaks-- > 0;)
 						{
-							results[npeaks] = iter.next();
+							results[npeaks] = sliceResults.get(--i);
 						}
 						filter.filter(fitResult, index, results);
 					}
 
-					// Q. Should this be a failure if the npeaks == 0 (i.e. outside the border; was a duplicate)?
+					// Q. Should this be a failure if the npeaks == 0 (i.e. outside the border; was a duplicate)
+					// or if the filter removed a peak?
 					// At the moment just let the fitting continue until real failures occur.
 					failures = 0;
 					success++;
@@ -377,7 +378,7 @@ public class FitWorker implements Runnable
 				for (int n = 0; n < maxIndices.length; n++)
 				{
 					maxIndices[n] = spots[n].y * width + spots[n].x;
-				}				
+				}
 			}
 			else if (params.maxIndices != null)
 			{
@@ -396,7 +397,7 @@ public class FitWorker implements Runnable
 				Arrays.sort(spots);
 			}
 		}
-		
+
 		if (spots == null)
 		{
 			// Run the filter to get the spot
@@ -415,7 +416,7 @@ public class FitWorker implements Runnable
 		if (logger != null)
 			logger.info("%d: Slice %d: %d candidates", id, slice, maxIndices.length);
 
-		sliceResults = new LinkedList<PeakResult>();
+		sliceResults = new ArrayList<PeakResult>(maxIndices.length);
 		if (requireIndices)
 		{
 			job.setResults(sliceResults);
@@ -460,8 +461,8 @@ public class FitWorker implements Runnable
 		return array;
 	}
 
-	private int addResults(LinkedList<PeakResult> peakResults, int n, int x, int y, Rectangle bounds,
-			Rectangle regionBounds, double[] peakParams, double[] peakParamsDev, float value, double error, float noise)
+	private int addResults(List<PeakResult> peakResults, int n, int x, int y, Rectangle bounds, Rectangle regionBounds,
+			double[] peakParams, double[] peakParamsDev, float value, double error, float noise)
 	{
 		x += bounds.x;
 		y += bounds.y;
@@ -520,7 +521,7 @@ public class FitWorker implements Runnable
 	 * @param noise
 	 * @return
 	 */
-	private boolean addSingleResult(LinkedList<PeakResult> peakResults, int x, int y, Rectangle regionBounds,
+	private boolean addSingleResult(List<PeakResult> peakResults, int x, int y, Rectangle regionBounds,
 			float[] peakParams, float[] peakParamsDev, float value, double error, float noise)
 	{
 		peakParams[Gaussian2DFunction.X_POSITION] += regionBounds.x;
@@ -571,7 +572,7 @@ public class FitWorker implements Runnable
 	 * @param noise
 	 * @return
 	 */
-	private boolean addSingleResult(LinkedList<PeakResult> peakResults, final int currentResultsSize, int x, int y,
+	private boolean addSingleResult(List<PeakResult> peakResults, final int currentResultsSize, int x, int y,
 			Rectangle regionBounds, float[] peakParams, float[] peakParamsDev, float value, double error, float noise)
 	{
 		peakParams[Gaussian2DFunction.X_POSITION] += regionBounds.x;
