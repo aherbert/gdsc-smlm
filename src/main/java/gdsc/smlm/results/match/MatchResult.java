@@ -46,20 +46,16 @@ public class MatchResult
 		this.fn = fn;
 		this.rmsd = rmsd;
 
-		if (tp + fp > 0)
-			precision = (double) tp / (tp + fp);
-		else
-			precision = 0;
-		
-		if (tp + fn > 0)
-			recall = (double) tp / (tp + fn);
-		else
-			recall = 0;
-		
-		if (tp + fp + fn > 0)
-			jaccard = (double) tp / (tp + fp + fn);
-		else
-			jaccard = 0;
+		precision = divide(tp, tp + fp);
+		recall = divide(tp, tp + fn);
+		jaccard = divide(tp, tp + fp + fn);
+	}
+	
+	private static double divide(final double numerator, final int denominator)
+	{
+		if (denominator == 0)
+			return 0;
+		return numerator / denominator;
 	}
 
 	/**
