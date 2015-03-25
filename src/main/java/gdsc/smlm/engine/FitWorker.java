@@ -473,13 +473,16 @@ public class FitWorker implements Runnable
 		// Note that during processing the data is assumed to refer to the top-left
 		// corner of the pixel. The coordinates should be represented in the middle of the pixel 
 		// so add a 0.5 shift to the coordinates.
+		for (int i = 0; i < npeaks; i++)
+		{
+			peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+			peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+		}
 
 		if (npeaks == 1)
 		{
-			peakParams[Gaussian2DFunction.X_POSITION] += 0.5;
-			peakParams[Gaussian2DFunction.Y_POSITION] += 0.5;
-			if (addSingleResult(peakResults, x, y, regionBounds, Utils.toFloat(peakParams),
-					Utils.toFloat(peakParamsDev), value, error, noise))
+			if (addSingleResult(peakResults, x, y, Utils.toFloat(peakParams), Utils.toFloat(peakParamsDev), value,
+					error, noise))
 				count++;
 		}
 		else
@@ -488,9 +491,8 @@ public class FitWorker implements Runnable
 			for (int i = 0; i < npeaks; i++)
 			{
 				float[] params = new float[] { (float) peakParams[0], (float) peakParams[i * 6 + 1],
-						(float) peakParams[i * 6 + 2], (float) (peakParams[i * 6 + 3] + 0.5),
-						(float) (peakParams[i * 6 + 4] + 0.5), (float) peakParams[i * 6 + 5],
-						(float) peakParams[i * 6 + 6] };
+						(float) peakParams[i * 6 + 2], (float) peakParams[i * 6 + 3], (float) peakParams[i * 6 + 4],
+						(float) peakParams[i * 6 + 5], (float) peakParams[i * 6 + 6] };
 				float[] paramsStdDev = null;
 				if (peakParamsDev != null)
 				{
@@ -499,8 +501,7 @@ public class FitWorker implements Runnable
 							(float) peakParamsDev[i * 6 + 4], (float) peakParamsDev[i * 6 + 5],
 							(float) peakParamsDev[i * 6 + 6] };
 				}
-				if (addSingleResult(peakResults, currentResultsSize, x, y, regionBounds, params, paramsStdDev, value,
-						error, noise))
+				if (addSingleResult(peakResults, currentResultsSize, x, y, params, paramsStdDev, value, error, noise))
 					count++;
 			}
 		}
@@ -513,7 +514,6 @@ public class FitWorker implements Runnable
 	 * @param peakResults
 	 * @param x
 	 * @param y
-	 * @param regionBounds
 	 * @param peakParams
 	 * @param peakParamsDev
 	 * @param value
@@ -521,12 +521,9 @@ public class FitWorker implements Runnable
 	 * @param noise
 	 * @return
 	 */
-	private boolean addSingleResult(List<PeakResult> peakResults, int x, int y, Rectangle regionBounds,
-			float[] peakParams, float[] peakParamsDev, float value, double error, float noise)
+	private boolean addSingleResult(List<PeakResult> peakResults, int x, int y, float[] peakParams,
+			float[] peakParamsDev, float value, double error, float noise)
 	{
-		peakParams[Gaussian2DFunction.X_POSITION] += regionBounds.x;
-		peakParams[Gaussian2DFunction.Y_POSITION] += regionBounds.y;
-
 		// Check if the position is inside the border
 		if (insideBorder(peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION]))
 		{
@@ -573,11 +570,8 @@ public class FitWorker implements Runnable
 	 * @return
 	 */
 	private boolean addSingleResult(List<PeakResult> peakResults, final int currentResultsSize, int x, int y,
-			Rectangle regionBounds, float[] peakParams, float[] peakParamsDev, float value, double error, float noise)
+			float[] peakParams, float[] peakParamsDev, float value, double error, float noise)
 	{
-		peakParams[Gaussian2DFunction.X_POSITION] += regionBounds.x;
-		peakParams[Gaussian2DFunction.Y_POSITION] += regionBounds.y;
-
 		// Check if the position is inside the border
 		if (insideBorder(peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION]))
 		{
