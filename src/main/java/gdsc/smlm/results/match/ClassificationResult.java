@@ -236,8 +236,9 @@ public class ClassificationResult
 	 */
 	public double getMCC()
 	{
-		if (tp != 0 || fp != 0 || tn != 0 || fn != 0)
-			return (tp * tn - fp * fn) / Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn));
+		final double d = (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn);
+		if (d != 0)
+			return (tp * tn - fp * fn) / Math.sqrt(d);
 		return 0;
 	}
 
