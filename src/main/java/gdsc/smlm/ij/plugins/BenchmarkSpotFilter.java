@@ -92,6 +92,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	// Used by the Benchmark Spot Fit plugin
 	static int filterResultsId = 0;
 	static HashMap<Integer, FilterResult> filterResults = null;
+	static String filterName = null;
 
 	private int idCount = 0;
 	private int[] idList = new int[4];
@@ -473,6 +474,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		filterResultsId++;
 		filterResults = new HashMap<Integer, FilterResult>();
+		filterName = spotFilter.getDescription();
 		for (Worker w : workers)
 		{
 			time += w.time;
