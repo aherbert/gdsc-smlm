@@ -1802,7 +1802,7 @@ public class TraceMolecules implements PlugIn
 						// Since the fit has failed we use the initial parameters
 						final double[] params = job.getFitResult(n).getInitialParameters();
 						final double dx = params[Gaussian2DFunction.X_POSITION] - centre[0];
-						final double dy = params[Gaussian2DFunction.X_POSITION] - centre[1];
+						final double dy = params[Gaussian2DFunction.Y_POSITION] - centre[1];
 						final double d = dx * dx + dy * dy;
 						if (minD > d)
 						{
