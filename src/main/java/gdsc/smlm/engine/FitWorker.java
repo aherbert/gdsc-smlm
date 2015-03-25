@@ -137,6 +137,9 @@ public class FitWorker implements Runnable
 
 	/**
 	 * Locate all the peaks in the image specified by the fit job
+	 * <p>
+	 * WARNING: The FitWorker fits a sub-region of the data for each maxima. It then updates the FitResult parameters 
+	 * with an offset reflecting the position. The initialParameters are not updated with this offset.  
 	 * 
 	 * @param job
 	 *            The fit job
@@ -267,6 +270,8 @@ public class FitWorker implements Runnable
 
 				FitResult fitResult = fit(gf, region, regionBounds, spots, n);
 				job.setFitResult(n, fitResult);
+				
+				// Q. Should we add the regionBounds offset here to the params and initialParams in the FitResult?
 
 				// Check fit result
 				if (fitResult.getStatus() == FitStatus.OK)
@@ -473,6 +478,11 @@ public class FitWorker implements Runnable
 		// Note that during processing the data is assumed to refer to the top-left
 		// corner of the pixel. The coordinates should be represented in the middle of the pixel 
 		// so add a 0.5 shift to the coordinates.
+
+		// WARNING: We do not update the initialParameters in the FitResult with the same offset.
+		// I do not think they are used downstream of the FitWorker apart from debugging but it may 
+		// have to be addressed in the future.
+
 		for (int i = 0; i < npeaks; i++)
 		{
 			peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
