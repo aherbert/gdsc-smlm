@@ -144,6 +144,14 @@ public class ClassificationResult
 	}
 
 	/**
+	 * @return the total number of predictions
+	 */
+	public int getTotal()
+	{
+		return tp + fp + tn + fn;
+	}
+
+	/**
 	 * @return the number of positives
 	 */
 	public int getP()
@@ -228,7 +236,7 @@ public class ClassificationResult
 	 */
 	public double getMCC()
 	{
-		if (tp > 0 || fp > 0 || tn > 0 || fn > 0)
+		if (tp != 0 || fp != 0 || tn != 0 || fn != 0)
 			return (tp * tn - fp * fn) / Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn));
 		return 0;
 	}
