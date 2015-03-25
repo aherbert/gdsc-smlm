@@ -1,5 +1,7 @@
 package gdsc.smlm.engine;
 
+import gdsc.smlm.filters.Spot;
+
 import java.util.List;
 
 /*----------------------------------------------------------------------------- 
@@ -45,6 +47,10 @@ public class FitParameters
 	 * The noise for the image data
 	 */
 	public float noise = Float.NaN;
+	/**
+	 * The spots to fit within the data
+	 */
+	public Spot[] spots = null;
 	/**
 	 * The maxima to fit within the data
 	 */

@@ -361,29 +361,43 @@ public class FitWorker implements Runnable
 
 	private Spot[] indentifySpots(FitJob job, int width, int height, FitParameters params)
 	{
-		Spot[] spots;
+		Spot[] spots = null;
 		int[] maxIndices = null;
 
 		// Only sub-classes may require the indices
 		boolean requireIndices = (job.getClass() != FitJob.class);
 
-		if (params != null && params.maxIndices != null)
+		if (params != null)
 		{
-			// Extract the desired spots
-			maxIndices = params.maxIndices;
-			float[] data2 = spotFilter.preprocessData(data, width, height);
-			spots = new Spot[maxIndices.length];
-			for (int n = 0; n < maxIndices.length; n++)
+			if (params.spots != null)
 			{
-				final int y = maxIndices[n] / width;
-				final int x = maxIndices[n] % width;
-				final float intensity = data2[maxIndices[n]];
-				spots[n] = new Spot(x, y, intensity);
+				spots = params.spots;
+				// Get the indices
+				maxIndices = new int[spots.length];
+				for (int n = 0; n < maxIndices.length; n++)
+				{
+					maxIndices[n] = spots[n].y * width + spots[n].x;
+				}				
 			}
-			// Sort the maxima
-			Arrays.sort(spots);
+			else if (params.maxIndices != null)
+			{
+				// Extract the desired spots
+				maxIndices = params.maxIndices;
+				float[] data2 = spotFilter.preprocessData(data, width, height);
+				spots = new Spot[maxIndices.length];
+				for (int n = 0; n < maxIndices.length; n++)
+				{
+					final int y = maxIndices[n] / width;
+					final int x = maxIndices[n] % width;
+					final float intensity = data2[maxIndices[n]];
+					spots[n] = new Spot(x, y, intensity);
+				}
+				// Sort the maxima
+				Arrays.sort(spots);
+			}
 		}
-		else
+		
+		if (spots == null)
 		{
 			// Run the filter to get the spot
 			spots = spotFilter.rank(data, width, height);
