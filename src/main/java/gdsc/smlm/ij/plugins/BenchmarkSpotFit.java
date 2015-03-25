@@ -14,16 +14,30 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitParameters;
+import gdsc.smlm.engine.FitWorker;
+import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
+import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.NullPeakResults;
+import gdsc.smlm.results.match.BasePoint;
+import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.Coordinate;
+import gdsc.smlm.results.match.MatchCalculator;
+import gdsc.smlm.results.match.PointPair;
+import gdsc.smlm.utils.NoiseEstimator.Method;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -31,9 +45,9 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,7 +70,14 @@ public class BenchmarkSpotFit implements PlugIn
 	{
 		fitConfig = new FitConfiguration();
 		config = new FitEngineConfiguration(fitConfig);
-		// Set some default fit settings here
+		// Set some default fit settings here ...
+		// Ensure all candidates are fitted
+		config.setFailuresLimit(0);
+		fitConfig.setFitValidation(false);
+		fitConfig.setBackgroundFitting(true);
+		fitConfig.setMinIterations(0);
+		fitConfig.setNoise(0);
+		config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
 	}
 
 	private static double fractionPositives = 100;
@@ -74,14 +95,12 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static HashMap<Integer, FilterCandidates> filterCandidates;
+	private static int nP, nN;
 
 	private static int lastId = -1, lastFilterId = -1;
 	private static double lastFractionPositives = -1;
 	private static double lastFractionNegativesAfterAllPositives = -1;
 	private static int lastNegativesAfterAllPositives = -1;
-
-	private int idCount = 0;
-	private int[] idList = new int[4];
 
 	public class FilterCandidates implements Cloneable
 	{
@@ -89,6 +108,8 @@ public class BenchmarkSpotFit implements PlugIn
 		final ScoredSpot[] spots;
 		int tp, fp, tn, fn;
 		FitResult[] fitResult;
+		boolean[] fitMatch;
+		double[] d2;
 
 		public FilterCandidates(int p, int n, ScoredSpot[] spots)
 		{
@@ -123,11 +144,14 @@ public class BenchmarkSpotFit implements PlugIn
 		volatile boolean finished = false;
 		final BlockingQueue<Integer> jobs;
 		final ImageStack stack;
+		final FitWorker fitWorker;
 		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
 		final HashMap<Integer, FilterCandidates> filterCandidates;
 		final HashMap<Integer, FilterCandidates> results;
+		final Rectangle bounds;
 
 		float[] data = null;
+		List<PointPair> matches = new ArrayList<PointPair>();
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
 				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
@@ -135,9 +159,11 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			this.jobs = jobs;
 			this.stack = stack;
+			this.fitWorker = new FitWorker((FitEngineConfiguration) config.clone(), new NullPeakResults(), null);
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
 			this.results = new HashMap<Integer, FilterCandidates>();
+			bounds = new Rectangle(0, 0, stack.getWidth(), stack.getHeight());
 		}
 
 		/*
@@ -178,57 +204,88 @@ public class BenchmarkSpotFit implements PlugIn
 			FitResult[] fitResult = new FitResult[candidates.spots.length];
 
 			// Fit the candidates and store the results
-			for (int i = 0; i < candidates.spots.length; i++)
+			FitParameters parameters = new FitParameters();
+			Spot[] spots = new Spot[candidates.spots.length];
+			for (int i = 0; i < spots.length; i++)
 			{
-				ScoredSpot spot = candidates.spots[i];
-				// TODO : Copy this from the BenchmarkFit plugin which uses minimal fit settings.
-
+				spots[i] = candidates.spots[i].spot;
 			}
+			parameters.spots = spots;
 
-			// TODO - Compute the matches of the fitted spots to the simulated positions
-			// Copy this from the BenchmarkSpotFilter plugin
+			ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
+			fitWorker.run(job); // Results will be stored in the fit job 
+
+			// Compute the matches of the fitted spots to the simulated positions
+			final boolean[] fitMatch = new boolean[spots.length];
+			final double[] d2 = new double[spots.length];
+			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
+			if (actual.length > 0)
+			{
+				BasePoint[] predicted = new BasePoint[spots.length];
+				matches.clear();
+
+				int count = 0;
+				for (int i = 0; i < spots.length; i++)
+				{
+					fitResult[i] = job.getFitResult(i);
+					if (fitResult[i].getStatus() == FitStatus.OK)
+					{
+						final double[] params = job.getFitResult(i).getParameters();
+						predicted[count++] = new BasePoint((float) params[Gaussian2DFunction.X_POSITION],
+								(float) params[Gaussian2DFunction.Y_POSITION], i);
+					}
+				}
+				// If we made any fits then score them
+				if (count > 0)
+				{
+					predicted = Arrays.copyOf(predicted, count);
+					// Pass in a list to get the point pairs so we have access to the distance
+					MatchCalculator.analyseResults2D(actual, predicted, distance, null, null, null, matches);
+
+					// Store the fits that match and get the squared distance
+					for (PointPair pair : matches)
+					{
+						final BasePoint p = (BasePoint) pair.getPoint2();
+						final int i = (int) p.getZ();
+						fitMatch[i] = true;
+						d2[i] = pair.getXYDistance2();
+					}
+				}
+			}
 
 			// Mark the results 
 			for (int i = 0; i < candidates.spots.length; i++)
 			{
 				ScoredSpot spot = candidates.spots[i];
 
-				// Check if the fit succeeded
-				boolean ok = true; //fitResult[i].getStatus() == FitStatus.OK;
-
-				// Store if the candidate position was valid
-				boolean match = spot.match;
-
-				if (ok)
+				// Score if the candidates still match after fitting
+				if (spot.match)
 				{
-					// Since the fit produced coordinates we can check if the final position matches 
-					// an actual spot location
-					// i.e. TP must start as valid candidates and finish as matches
-					// TODO - use the match calculator results
-					match = match && true;
-
-					if (match)
+					// This is a positive candidate
+					if (fitMatch[i])
 						tp++;
 					else
-						fp++;
+						fn++;
 				}
 				else
 				{
-					// Since the fit was not OK we use the original match label to set true or false negative					
-					if (match)
-						fn++;
+					// This is a negative candidate
+					if (fitMatch[i])
+						fp++;
 					else
 						tn++;
 				}
 			}
 
-			// Store the results using a copy of the original
+			// Store the results using a copy of the original (to preserve the candidates for repeat analysis)
 			candidates = (FilterCandidates) candidates.clone();
 			candidates.tp = tp;
 			candidates.fp = fp;
 			candidates.tn = tn;
 			candidates.fn = fn;
 			candidates.fitResult = fitResult;
+			candidates.fitMatch = fitMatch;
+			candidates.d2 = d2;
 			results.put(frame, candidates);
 		}
 	}
@@ -265,7 +322,12 @@ public class BenchmarkSpotFit implements PlugIn
 			IJ.error(TITLE, "No benchmark spot candidates in memory");
 			return;
 		}
-
+		if (BenchmarkSpotFilter.simulationId != simulationParameters.id)
+		{
+			IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
+			return;
+		}
+		
 		if (!showDialog())
 			return;
 
@@ -286,7 +348,17 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
 		gd.addSlider("Match_distance", 1, 3, distance);
 
-		// TODO: Collect options for fitting
+		// Collect options for fitting
+		gd.addNumericField("Initial_StdDev0", getSa(), 3);
+		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
+		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
+		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
+		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
+		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
+		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
+		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
 
 		if (extraOptions)
 		{
@@ -301,6 +373,16 @@ public class BenchmarkSpotFit implements PlugIn
 		fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
+
+		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
+		config.setFitting(gd.getNextNumber());
+		fitConfig.setFitSolver(gd.getNextChoiceIndex());
+		fitConfig.setFitFunction(gd.getNextChoiceIndex());
+		config.setIncludeNeighbours(gd.getNextBoolean());
+		config.setNeighbourHeightThreshold(gd.getNextNumber());
+		config.setResidualsThreshold(gd.getNextNumber());
+		fitConfig.setDuplicateDistance(gd.getNextNumber());
+
 		if (extraOptions)
 		{
 		}
@@ -319,14 +401,17 @@ public class BenchmarkSpotFit implements PlugIn
 	private void run()
 	{
 		// Extract all the results in memory into a list per frame. This can be cached
+		boolean refresh = false;
 		if (lastId != simulationParameters.id)
 		{
-			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), true);
+			// Do not get integer coordinates
+			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), false);
 			lastId = simulationParameters.id;
+			refresh = true;
 		}
 
 		// Extract all the candidates into a list per frame. This can be cached if the settings have not changed
-		if (lastFilterId != BenchmarkSpotFilter.filterResultsId || lastFractionPositives != fractionPositives ||
+		if (refresh || lastFilterId != BenchmarkSpotFilter.filterResultsId || lastFractionPositives != fractionPositives ||
 				lastFractionNegativesAfterAllPositives != fractionNegativesAfterAllPositives ||
 				lastNegativesAfterAllPositives != negativesAfterAllPositives)
 		{
@@ -396,16 +481,7 @@ public class BenchmarkSpotFit implements PlugIn
 			results.putAll(w.results);
 		}
 
-		// TODO - Summarise the fitting results. N fits, N failures. 
-		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
 		summariseResults(results);
-
-		// Tile new windows
-		if (idCount > 0)
-		{
-			idList = Arrays.copyOf(idList, idCount);
-			new WindowOrganiser().tileWindows(idList);
-		}
 
 		IJ.showStatus("");
 	}
@@ -424,11 +500,14 @@ public class BenchmarkSpotFit implements PlugIn
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
 		HashMap<Integer, FilterCandidates> subset = new HashMap<Integer, FilterCandidates>();
+		nP = nN = 0;
 		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
 		{
 			FilterResult r = result.getValue();
 
 			// Determine the number of positives to find
+			nP += r.result.getTruePositives();
+			nN += r.result.getFalsePositives();
 			final int targetP = (int) Math.round(r.result.getTruePositives() * f1);
 			// Count the number of positive & negatives
 			int p = 0, n = 0;
@@ -491,8 +570,119 @@ public class BenchmarkSpotFit implements PlugIn
 	{
 		createTable();
 
+		// Summarise the fitting results. N fits, N failures. 
+		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
+		int tp = 0, fp = 0, tn = 0, fn = 0;
+		int failP = 0, failN = 0;
+		for (FilterCandidates result : filterCandidates.values())
+		{
+			tp += result.tp;
+			fp += result.fp;
+			tn += result.tn;
+			fn += result.fn;
+			for (int i=0; i<result.fitResult.length; i++)
+			{
+				if (result.fitResult[i].getStatus() != FitStatus.OK)
+				{
+					if (result.spots[i].match)
+						failP++;
+					else
+						failN++;
+				}
+			}
+		}
+		ClassificationResult r = new ClassificationResult(tp, fp, tn, fn);
+
 		StringBuilder sb = new StringBuilder();
+
+		// Add information about the simulation
+		final double signal = (simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
+		final int n = results.size();
+		sb.append(imp.getStackSize()).append("\t");
+		final int w = imp.getWidth();
+		final int h = imp.getHeight();
+		sb.append(w).append("\t");
+		sb.append(h).append("\t");
+		sb.append(n).append("\t");
+		double density = ((double) n / imp.getStackSize()) / (w * h) /
+				(simulationParameters.a * simulationParameters.a / 1e6);
+		sb.append(Utils.rounded(density)).append("\t");
+		sb.append(Utils.rounded(signal)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.depth)).append("\t");
+		sb.append(simulationParameters.fixedDepth).append("\t");
+		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
+
+		// Compute the noise
+		double noise = simulationParameters.b2;
+		if (simulationParameters.emCCD)
+		{
+			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
+			//final double b2 = backgroundVariance + readVariance
+			//                = simulationParameters.b + readVariance
+			// This should be applied only to the background variance.
+			final double readVariance = noise - simulationParameters.b;
+			noise = simulationParameters.b * 2 + readVariance;
+		}
+
+		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
+		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
+
+		sb.append(BenchmarkSpotFilter.filterName).append("\t");
+
+		add(sb, nP + nN);
+		add(sb, nP);
+		add(sb, nN);
+		add(sb, PeakFit.getSolverName(config.getFitConfiguration()));
+		add(sb, config.getFitting());
+
+		// Q. Should I add other fit configuration here?
+
+		add(sb, 100.0 * r.getP() / nP);
+		add(sb, 100.0 * r.getN() / nN);
+		add(sb, r.getTotal());
+		add(sb, r.getP());
+		add(sb, r.getN());
+		add(sb, failP);
+		add(sb, failN);
+		add(sb, tp);
+		add(sb, fp);
+		add(sb, tn);
+		add(sb, fn);
+
+		add(sb, r.getTPR());
+		add(sb, r.getTNR());
+		add(sb, r.getPPV());
+		add(sb, r.getNPV());
+		add(sb, r.getFPR());
+		add(sb, r.getFDR());
+		add(sb, r.getAccuracy());
+		add(sb, r.getFScore(1));
+		add(sb, r.getJaccard());
+		add(sb, r.getMCC());
+		add(sb, r.getInformedness());
+		add(sb, r.getMarkedness());
+
 		summaryTable.append(sb.toString());
+	}
+
+	private static void add(StringBuilder sb, String value)
+	{
+		sb.append(value).append("\t");
+	}
+
+	private static void add(StringBuilder sb, int value)
+	{
+		sb.append(value).append("\t");
+	}
+
+	private static void add(StringBuilder sb, double value)
+	{
+		add(sb, Utils.rounded(value));
 	}
 
 	private void createTable()
@@ -506,7 +696,47 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private String createHeader(boolean extraRecall)
 	{
-		StringBuilder sb = new StringBuilder("");
+		StringBuilder sb = new StringBuilder(
+				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
+		sb.append("Filter\t");
+		sb.append("Spots\t");
+		sb.append("nP\t");
+		sb.append("nN\t");
+		sb.append("Solver\t");
+		sb.append("Fitting\t");
+
+		sb.append("% nP\t");
+		sb.append("% nN\t");
+		sb.append("Total\t");
+		sb.append("P\t");
+		sb.append("N\t");
+		sb.append("Fail P\t");
+		sb.append("Fail N\t");
+		sb.append("TP\t");
+		sb.append("FP\t");
+		sb.append("TN\t");
+		sb.append("FN\t");
+
+		sb.append("TPR\t");
+		sb.append("TNR\t");
+		sb.append("PPV\t");
+		sb.append("NPV\t");
+		sb.append("FPR\t");
+		sb.append("FDR\t");
+		sb.append("ACC\t");
+		sb.append("F1\t");
+		sb.append("Jaccard\t");
+		sb.append("MCC\t");
+		sb.append("Informedness\t");
+		sb.append("Markedness\t");
+
 		return sb.toString();
+	}
+
+	private double getSa()
+	{
+		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a) /
+				simulationParameters.a;
+		return sa;
 	}
 }
