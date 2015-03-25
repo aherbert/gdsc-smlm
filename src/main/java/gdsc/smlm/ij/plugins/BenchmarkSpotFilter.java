@@ -90,6 +90,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static int lastId = -1;
 
 	// Used by the Benchmark Spot Fit plugin
+	static int simulationId = 0;
 	static int filterResultsId = 0;
 	static HashMap<Integer, FilterResult> filterResults = null;
 	static String filterName = null;
@@ -473,6 +474,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		IJ.showStatus("Collecting results ...");
 
 		filterResultsId++;
+		simulationId = simulationParameters.id;
 		filterResults = new HashMap<Integer, FilterResult>();
 		filterName = spotFilter.getDescription();
 		for (Worker w : workers)
