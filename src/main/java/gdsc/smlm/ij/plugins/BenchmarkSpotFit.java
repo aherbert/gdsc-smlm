@@ -17,6 +17,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
@@ -92,6 +93,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private ImagePlus imp;
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
+	private MaximaSpotFilter spotFilter;
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static HashMap<Integer, FilterCandidates> filterCandidates;
@@ -159,7 +161,11 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			this.jobs = jobs;
 			this.stack = stack;
-			this.fitWorker = new FitWorker((FitEngineConfiguration) config.clone(), new NullPeakResults(), null);
+			this.fitWorker = new FitWorker((FitEngineConfiguration) (config.clone()), new NullPeakResults(), null);
+
+			final int fitting = config.getRelativeFitting();
+			fitWorker.setSearchParameters(spotFilter, fitting);
+
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
 			this.results = new HashMap<Integer, FilterCandidates>();
@@ -209,11 +215,17 @@ public class BenchmarkSpotFit implements PlugIn
 			for (int i = 0; i < spots.length; i++)
 			{
 				spots[i] = candidates.spots[i].spot;
+				//System.out.printf("Fit %d [%d,%d = %.1f]\n", i+1, spots[i].x, spots[i].y, spots[i].intensity);
 			}
 			parameters.spots = spots;
 
 			ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
 			fitWorker.run(job); // Results will be stored in the fit job 
+
+			for (int i = 0; i < spots.length; i++)
+			{
+				fitResult[i] = job.getFitResult(i);
+			}
 
 			// Compute the matches of the fitted spots to the simulated positions
 			final boolean[] fitMatch = new boolean[spots.length];
@@ -227,13 +239,17 @@ public class BenchmarkSpotFit implements PlugIn
 				int count = 0;
 				for (int i = 0; i < spots.length; i++)
 				{
-					fitResult[i] = job.getFitResult(i);
 					if (fitResult[i].getStatus() == FitStatus.OK)
 					{
 						final double[] params = job.getFitResult(i).getParameters();
 						predicted[count++] = new BasePoint((float) params[Gaussian2DFunction.X_POSITION],
 								(float) params[Gaussian2DFunction.Y_POSITION], i);
 					}
+					//else if (candidates.spots[i].match)
+					//{
+					//	System.out.printf("[%d] %s: [%d,%d = %.1f]\n", frame, fitResult[i].getStatus().toString(),
+					//			spots[i].x, spots[i].y, spots[i].intensity);
+					//}
 				}
 				// If we made any fits then score them
 				if (count > 0)
@@ -305,6 +321,9 @@ public class BenchmarkSpotFit implements PlugIn
 			IJ.error(TITLE, "No benchmark spot parameters in memory");
 			return;
 		}
+		// This is required to initialise the FitWorker
+		spotFilter = BenchmarkSpotFilter.spotFilter;
+
 		imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
 		if (imp == null)
 		{
@@ -327,7 +346,7 @@ public class BenchmarkSpotFit implements PlugIn
 			IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
 			return;
 		}
-		
+
 		if (!showDialog())
 			return;
 
@@ -411,7 +430,8 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 
 		// Extract all the candidates into a list per frame. This can be cached if the settings have not changed
-		if (refresh || lastFilterId != BenchmarkSpotFilter.filterResultsId || lastFractionPositives != fractionPositives ||
+		if (refresh || lastFilterId != BenchmarkSpotFilter.filterResultsId ||
+				lastFractionPositives != fractionPositives ||
 				lastFractionNegativesAfterAllPositives != fractionNegativesAfterAllPositives ||
 				lastNegativesAfterAllPositives != negativesAfterAllPositives)
 		{
@@ -580,7 +600,7 @@ public class BenchmarkSpotFit implements PlugIn
 			fp += result.fp;
 			tn += result.tn;
 			fn += result.fn;
-			for (int i=0; i<result.fitResult.length; i++)
+			for (int i = 0; i < result.fitResult.length; i++)
 			{
 				if (result.fitResult[i].getStatus() != FitStatus.OK)
 				{
@@ -632,7 +652,7 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
 
-		sb.append(BenchmarkSpotFilter.filterName).append("\t");
+		sb.append(spotFilter.getDescription()).append("\t");
 
 		add(sb, nP + nN);
 		add(sb, nP);
