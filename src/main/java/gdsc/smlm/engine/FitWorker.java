@@ -120,14 +120,15 @@ public class FitWorker implements Runnable
 	}
 
 	/**
-	 * Set the parameters for smoothing the image, searching for maxima and fitting maxima
+	 * Set the parameters for smoothing the image, searching for maxima and fitting maxima. This should be called before
+	 * the {@link #run()} method to configure the fitting.
 	 * 
 	 * @param spotFilter
 	 *            The spot filter for identifying fitting candidates
 	 * @param fitting
 	 *            The block size to be used for fitting
 	 */
-	void setSearchParameters(MaximaSpotFilter spotFilter, int fitting)
+	public void setSearchParameters(MaximaSpotFilter spotFilter, int fitting)
 	{
 		this.spotFilter = spotFilter;
 		this.border = spotFilter.getBorder();
@@ -138,8 +139,8 @@ public class FitWorker implements Runnable
 	/**
 	 * Locate all the peaks in the image specified by the fit job
 	 * <p>
-	 * WARNING: The FitWorker fits a sub-region of the data for each maxima. It then updates the FitResult parameters 
-	 * with an offset reflecting the position. The initialParameters are not updated with this offset.  
+	 * WARNING: The FitWorker fits a sub-region of the data for each maxima. It then updates the FitResult parameters
+	 * with an offset reflecting the position. The initialParameters are not updated with this offset.
 	 * 
 	 * @param job
 	 *            The fit job
@@ -270,7 +271,7 @@ public class FitWorker implements Runnable
 
 				FitResult fitResult = fit(gf, region, regionBounds, spots, n);
 				job.setFitResult(n, fitResult);
-				
+
 				// Q. Should we add the regionBounds offset here to the params and initialParams in the FitResult?
 
 				// Check fit result
