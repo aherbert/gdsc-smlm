@@ -93,7 +93,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	static int simulationId = 0;
 	static int filterResultsId = 0;
 	static HashMap<Integer, FilterResult> filterResults = null;
-	static String filterName = null;
+	static MaximaSpotFilter spotFilter = null;
 
 	private int idCount = 0;
 	private int[] idList = new int[4];
@@ -410,7 +410,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private void run()
 	{
-		MaximaSpotFilter spotFilter = config.createSpotFilter(false);
+		spotFilter = config.createSpotFilter(false);
 
 		// Extract all the results in memory into a list per frame. This can be cached
 		if (lastId != simulationParameters.id)
@@ -476,7 +476,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		filterResultsId++;
 		simulationId = simulationParameters.id;
 		filterResults = new HashMap<Integer, FilterResult>();
-		filterName = spotFilter.getDescription();
 		for (Worker w : workers)
 		{
 			time += w.time;
