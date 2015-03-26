@@ -76,6 +76,7 @@ public class FitWorker implements Runnable
 
 	// Used for fitting methods
 	private ArrayList<PeakResult> sliceResults;
+	private boolean useFittedBackground = false;
 	private double fittedBackground;
 	private int slice;
 	private int endT;
@@ -694,7 +695,10 @@ public class FitWorker implements Runnable
 		// Analyse neighbours and include them in the fit if they are within a set height of this peak.
 		int neighbours = (config.isIncludeNeighbours()) ? findNeighbours(regionBounds, n, x, y, spots) : 0;
 
-		// Estimate background
+		// Estimate background.
+		// Note that using the background from previous fit results leads to an 
+		// inconsistency in the results when the fitting parameters are changed which may be unexpected, 
+		// e.g. altering the max iterations.
 		float background = 0;
 		if (fittedNeighbourCount > 0)
 		{
@@ -711,7 +715,7 @@ public class FitWorker implements Runnable
 		}
 		else
 		{
-			if (!sliceResults.isEmpty())
+			if (useFittedBackground && !sliceResults.isEmpty())
 			{
 				// Use the average background from all results
 				background = (float) (fittedBackground / sliceResults.size());
@@ -1715,5 +1719,25 @@ public class FitWorker implements Runnable
 	public boolean isFinished()
 	{
 		return finished;
+	}
+
+	/**
+	 * @return Use the average fitted background as the background estimate for new fits
+	 */
+	public boolean isUseFittedBackground()
+	{
+		return useFittedBackground;
+	}
+
+	/**
+	 * Set to true to use the average fitted background as the background estimate for new fits. The default is to use
+	 * the image average as the background for all fits.
+	 * 
+	 * @param Use
+	 *            the average fitted background as the background estimate for new fits
+	 */
+	public void setUseFittedBackground(boolean useFittedBackground)
+	{
+		this.useFittedBackground = useFittedBackground;
 	}
 }
