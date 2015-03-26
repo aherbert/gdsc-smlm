@@ -98,8 +98,22 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void initialise(int npeaks, int maxx, double[] params)
 	{
-		gaussianFunction = createGaussianFunction(npeaks, maxx, params);
-		stoppingCriteria = createStoppingCriteria(gaussianFunction, params);
+		// Check if the Gaussian function is invalid
+		if (gaussianFunction != null &&
+				(gaussianFunction.getNPeaks() != npeaks || gaussianFunction.getDimensions()[0] != maxx))
+		{
+			invalidateGaussianFunction();
+		}
+		if (gaussianFunction == null)
+		{
+			invalidateFunctionSolver();
+			gaussianFunction = createGaussianFunction(npeaks, maxx, params);
+		}
+		if (stoppingCriteria == null)
+		{
+			invalidateFunctionSolver();
+			stoppingCriteria = createStoppingCriteria(gaussianFunction, params);
+		}
 	}
 
 	/**
@@ -199,6 +213,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setFitCriteria(FitCriteria fitCriteria)
 	{
+		invalidateStoppingCriteria();
 		this.fitCriteria = fitCriteria;
 	}
 
@@ -233,6 +248,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setDelta(double delta)
 	{
+		invalidateStoppingCriteria();
 		this.delta = delta;
 	}
 
@@ -374,6 +390,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setMinIterations(int minIterations)
 	{
+		invalidateStoppingCriteria();
 		this.minIterations = minIterations;
 	}
 
@@ -391,6 +408,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setMaxIterations(int maxIterations)
 	{
+		invalidateStoppingCriteria();
 		invalidateFunctionSolver();
 		this.maxIterations = maxIterations;
 	}
@@ -410,6 +428,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setSignificantDigits(int significantDigits)
 	{
+		invalidateStoppingCriteria();
 		this.significantDigits = significantDigits;
 	}
 
@@ -427,6 +446,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setBackgroundFitting(boolean backgroundFitting)
 	{
+		invalidateGaussianFunction();
 		this.backgroundFitting = backgroundFitting;
 	}
 
@@ -447,6 +467,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setNotSignalFitting(boolean noSignalFitting)
 	{
+		invalidateGaussianFunction();
 		this.notSignalFitting = noSignalFitting;
 	}
 
@@ -500,6 +521,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public void setFitFunction(FitFunction fitFunction)
 	{
+		invalidateGaussianFunction();
 		this.fitFunction = fitFunction;
 		switch (fitFunction)
 		{
@@ -723,11 +745,27 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * Call this when a property changes that will change the stopping criteria
+	 */
+	private void invalidateStoppingCriteria()
+	{
+		stoppingCriteria = null;
+	}
+
+	/**
 	 * @return the gaussianFunction
 	 */
 	public GaussianFunction getGaussianFunction()
 	{
 		return gaussianFunction;
+	}
+
+	/**
+	 * Call this when a property changes that will change the Gaussian function
+	 */
+	private void invalidateGaussianFunction()
+	{
+		gaussianFunction = null;
 	}
 
 	/**
@@ -1006,6 +1044,11 @@ public class FitConfiguration implements Cloneable
 			// Ensure the object reference is passed through.
 			// All other fields are primitives and so should be copied by Object.clone().
 			f.log = log;
+			// Reset instance specific objects
+			f.stoppingCriteria = null;
+			f.gaussianFunction = null;
+			f.noiseModel = null;
+			f.functionSolver = null;
 			return f;
 		}
 		catch (CloneNotSupportedException e)
