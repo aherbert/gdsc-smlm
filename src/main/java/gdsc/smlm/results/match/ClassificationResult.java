@@ -168,7 +168,7 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The true positive rate (recall, sensitivity, hit rate)
+	 * @return The true positive rate (recall, sensitivity, hit rate) = tp / (tp + fn)
 	 */
 	public double getTPR()
 	{
@@ -176,7 +176,7 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The true negative rate (specificity)
+	 * @return The true negative rate (specificity) = tn / (fp + tn)
 	 */
 	public double getTNR()
 	{
@@ -184,15 +184,15 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The positive predictive value (precision)
+	 * @return The positive predictive value (precision) = tp / (tp + fp)
 	 */
 	public double getPPV()
 	{
-		return precision; // divide(tp, tp + fp);
+		return precision;
 	}
 
 	/**
-	 * @return The negative predictive value
+	 * @return The negative predictive value = tn / (tn + fn)
 	 */
 	public double getNPV()
 	{
@@ -200,7 +200,7 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The false positive rate (fall-out)
+	 * @return The false positive rate (fall-out) = fp / (fp + tn)
 	 */
 	public double getFPR()
 	{
@@ -208,7 +208,7 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The false discovery rate
+	 * @return The false discovery rate = fp / (tp + fp)
 	 */
 	public double getFDR()
 	{
@@ -216,7 +216,7 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The accuracy
+	 * @return The accuracy = (tp + tn) / (tp + fp + tn + fn)
 	 */
 	public double getAccuracy()
 	{
@@ -244,7 +244,7 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The informedness
+	 * @return The informedness (TPR + TNR - 1)
 	 */
 	public double getInformedness()
 	{
@@ -252,7 +252,7 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The markedness
+	 * @return The markedness (PPV + NPV - 1)
 	 */
 	public double getMarkedness()
 	{
