@@ -236,10 +236,11 @@ public class ClassificationResult
 	 */
 	public double getMCC()
 	{
-		final double d = (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn);
+		final double d = (double) (tp + fp) * (double) (tp + fn) * (double) (tn + fp) * (double) (tn + fn);
+		double mcc = 0;
 		if (d != 0)
-			return (tp * tn - fp * fn) / Math.sqrt(d);
-		return 0;
+			mcc = ((double)(tp * tn) - (double)(fp * fn)) / Math.sqrt(d);
+		return Math.max(-1, Math.min(1, mcc));
 	}
 
 	/**
