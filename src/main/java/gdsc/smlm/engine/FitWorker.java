@@ -715,16 +715,7 @@ public class FitWorker implements Runnable
 		}
 		else
 		{
-			if (useFittedBackground && !sliceResults.isEmpty())
-			{
-				// Use the average background from all results
-				background = (float) (fittedBackground / sliceResults.size());
-			}
-			else
-			{
-				// Initial guess using image mean
-				background = this.background;
-			}
+			background = getSingleFittingBackground();
 		}
 
 		FitResult fitResult = null;
@@ -820,8 +811,10 @@ public class FitWorker implements Runnable
 					for (int i = 0, j = (1 + neighbourCount) * parametersPerPeak; i < fittedNeighbourCount; i++, j += parametersPerPeak)
 					{
 						PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
-						// Copy Amplitude,Angle,Xpos,Ypos,Xwidth,Ywidth
-						for (int k = 1; k <= parametersPerPeak; k++)
+						// Get the Amplitude (since the params array stores the signal)
+						params[j + Gaussian2DFunction.SIGNAL] = result.getAmplitude();
+						// Copy Angle,Xpos,Ypos,Xwidth,Ywidth
+						for (int k = 2; k <= parametersPerPeak; k++)
 							params[j + k] = result.params[k];
 
 						// Add background to amplitude (required since the background will be re-estimated)
@@ -842,7 +835,6 @@ public class FitWorker implements Runnable
 			}
 
 			// Increase the iterations for a multiple fit.
-
 			final int maxIterations = fitConfig.getMaxIterations();
 			fitConfig.setMaxIterations(maxIterations + maxIterations * (npeaks - 1) *
 					ITERATION_INCREASE_FOR_MULTIPLE_PEAKS);
@@ -851,7 +843,7 @@ public class FitWorker implements Runnable
 
 			printFitResults(fitResult, region, width, height, npeaks, 0, gf.getIterations());
 
-			fitConfig.setMaxIterations(maxIterations);
+			fitConfig.setMaxIterations(maxIterations); 
 
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
@@ -877,6 +869,8 @@ public class FitWorker implements Runnable
 				if (logger != null)
 					logger.info("Multiple-fit failed, resorting to single-fit");
 				fitResult = null;
+				
+				background = getSingleFittingBackground();
 			}
 		}
 
@@ -975,6 +969,25 @@ public class FitWorker implements Runnable
 		}
 
 		return fitResult;
+	}
+
+	/**
+	 * @return The background estimate when fitting a single peak
+	 */
+	private float getSingleFittingBackground()
+	{
+		float background;
+		if (useFittedBackground && !sliceResults.isEmpty())
+		{
+			// Use the average background from all results
+			background = (float) (fittedBackground / sliceResults.size());
+		}
+		else
+		{
+			// Initial guess using image mean
+			background = this.background;
+		}
+		return background;
 	}
 
 	private void printFitResults(FitResult fitResult, double[] region, int width, int height, int npeaks, int doublet,
