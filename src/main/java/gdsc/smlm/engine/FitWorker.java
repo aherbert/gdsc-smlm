@@ -420,9 +420,9 @@ public class FitWorker implements Runnable
 		}
 
 		if (logger != null)
-			logger.info("%d: Slice %d: %d candidates", id, slice, maxIndices.length);
+			logger.info("%d: Slice %d: %d candidates", id, slice, spots.length);
 
-		sliceResults = new ArrayList<PeakResult>(maxIndices.length);
+		sliceResults = new ArrayList<PeakResult>(spots.length);
 		if (requireIndices)
 		{
 			job.setResults(sliceResults);
@@ -986,12 +986,12 @@ public class FitWorker implements Runnable
 		//		int length = width * height;
 		//		//double adjustedR2 = getAdjustedCoefficientOfDetermination(gf.getFinalResdiualSumOfSquares(),
 		//		//		gf.getTotalSumOfSquares(), length, fitResult.getInitialParameters().length);
-		//		double ic = getInformationCriterion(gf.getFinalResdiualSumOfSquares(), length,
+		//		double ic = getInformationCriterion(gf.getFinalResidualSumOfSquares(), length,
 		//				fitResult.getInitialParameters().length);
 		//
-		//		System.out.printf("[%dx%d] p %d i %d d %d : SS %f : %f : %f (%s). %f\n", width, height, npeaks, iterations,
-		//				doublet, gf.getTotalSumOfSquares(), gf.getInitialResdiualSumOfSquares(),
-		//				gf.getFinalResdiualSumOfSquares(), fitResult.getStatus().toString(), ic);
+		//		System.out.printf("[%dx%d] p %d i %d d %d : SS %f : %f (%s). %f\n", width, height, npeaks, iterations,
+		//				doublet, gf.getTotalSumOfSquares(), 
+		//				gf.getFinalResidualSumOfSquares(), fitResult.getStatus().toString(), ic);
 	}
 
 	private void printFitResults(FitResult fitResult, double[] region, int width, int height, int npeaks, int doublet,
