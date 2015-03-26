@@ -37,6 +37,7 @@ import gdsc.smlm.results.match.BasePoint;
 import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.Coordinate;
 import gdsc.smlm.results.match.MatchCalculator;
+import gdsc.smlm.results.match.MatchResult;
 import gdsc.smlm.results.match.PointPair;
 import gdsc.smlm.utils.NoiseEstimator.Method;
 import ij.IJ;
@@ -681,11 +682,29 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, r.getFPR());
 		add(sb, r.getFDR());
 		add(sb, r.getAccuracy());
-		add(sb, r.getFScore(1));
-		add(sb, r.getJaccard());
 		add(sb, r.getMCC());
 		add(sb, r.getInformedness());
 		add(sb, r.getMarkedness());
+
+		// Score the fitting results compared to the original simulation.
+		// TP are all candidates that can be matched to a spot
+		// FP are all candidates that cannot be matched to a spot
+		// FN = The number of missed spots
+		MatchResult m = new MatchResult(r.getP(), r.getN(), simulationParameters.molecules - r.getP(), 0);
+		add(sb, m.getRecall());
+		add(sb, m.getPrecision());
+		add(sb, m.getFScore(1));
+		add(sb, m.getJaccard());
+
+		// TP are all fit results that can be matched to a spot
+		// FP are all fit results that cannot be matched to a spot or that failed to fit
+		// (Set FP to zero to indicate that the filtering of bad fit results is perfect) 
+		// FN = The number of missed spots
+		m = new MatchResult(tp, 0, simulationParameters.molecules - tp, 0);
+		add(sb, m.getRecall());
+		add(sb, m.getPrecision());
+		add(sb, m.getFScore(1));
+		add(sb, m.getJaccard());
 
 		summaryTable.append(sb.toString());
 	}
@@ -744,11 +763,18 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("FPR\t");
 		sb.append("FDR\t");
 		sb.append("ACC\t");
-		sb.append("F1\t");
-		sb.append("Jaccard\t");
 		sb.append("MCC\t");
 		sb.append("Informedness\t");
 		sb.append("Markedness\t");
+
+		sb.append("Recall\t");
+		sb.append("Precision\t");
+		sb.append("F1\t");
+		sb.append("Jaccard\t");
+		sb.append("Recall\t");
+		sb.append("Precision\t");
+		sb.append("F1\t");
+		sb.append("Jaccard\t");
 
 		return sb.toString();
 	}
