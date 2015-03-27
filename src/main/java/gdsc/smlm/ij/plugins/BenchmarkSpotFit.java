@@ -33,6 +33,7 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
+import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.match.BasePoint;
 import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.Coordinate;
@@ -47,9 +48,11 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,7 +89,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double fractionPositives = 100;
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
-	private static double distance = 1.5;
+	private static double distance = 100;
 
 	private boolean extraOptions = false;
 
@@ -96,6 +99,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 	private MaximaSpotFilter spotFilter;
+	private double distanceInPixels;
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static HashMap<Integer, FilterCandidates> filterCandidates;
@@ -105,6 +109,9 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double lastFractionPositives = -1;
 	private static double lastFractionNegativesAfterAllPositives = -1;
 	private static int lastNegativesAfterAllPositives = -1;
+
+	// Allow other plugins to access the results
+	static HashMap<Integer, FilterCandidates> fitResults;
 
 	public class FilterCandidates implements Cloneable
 	{
@@ -258,7 +265,7 @@ public class BenchmarkSpotFit implements PlugIn
 				{
 					predicted = Arrays.copyOf(predicted, count);
 					// Pass in a list to get the point pairs so we have access to the distance
-					MatchCalculator.analyseResults2D(actual, predicted, distance, null, null, null, matches);
+					MatchCalculator.analyseResults2D(actual, predicted, distanceInPixels, null, null, null, matches);
 
 					// Store the fits that match and get the squared distance
 					for (PointPair pair : matches)
@@ -361,16 +368,16 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(String
-				.format("Fit candidate spots in the benchmark image created by CreateData plugin\nand identified by the Spot Filter plugin.\nPSF width = %s\n \nConfigure the fitting:",
-						Utils.rounded(simulationParameters.s / simulationParameters.a)));
+				.format("Fit candidate spots in the benchmark image created by CreateData plugin\nand identified by the Spot Filter plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
+						Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
 
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
-		gd.addSlider("Match_distance", 1, 3, distance);
+		gd.addSlider("Match_distance (nm)", 20, 150, distance);
 
 		// Collect options for fitting
-		gd.addNumericField("Initial_StdDev0", getSa(), 3);
+		gd.addNumericField("Initial_StdDev0", getSa() / simulationParameters.a, 3);
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
@@ -394,6 +401,7 @@ public class BenchmarkSpotFit implements PlugIn
 		fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
+		distanceInPixels = distance / simulationParameters.a;
 
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
@@ -497,13 +505,13 @@ public class BenchmarkSpotFit implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
 
-		HashMap<Integer, FilterCandidates> results = new HashMap<Integer, FilterCandidates>();
+		fitResults = new HashMap<Integer, FilterCandidates>();
 		for (Worker w : workers)
 		{
-			results.putAll(w.results);
+			fitResults.putAll(w.results);
 		}
 
-		summariseResults(results);
+		summariseResults(fitResults);
 
 		IJ.showStatus("");
 	}
@@ -595,6 +603,9 @@ public class BenchmarkSpotFit implements PlugIn
 		// Summarise the fitting results. N fits, N failures. 
 		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
 		StoredDataStatistics stats = new StoredDataStatistics();
+		StoredDataStatistics precisionStats = new StoredDataStatistics();
+		final double nmPerPixel = simulationParameters.a;
+		final boolean mle = fitConfig.getFitSolver() == FitSolver.MLE;
 		int tp = 0, fp = 0, tn = 0, fn = 0;
 		int failP = 0, failN = 0;
 		for (FilterCandidates result : filterCandidates.values())
@@ -613,7 +624,19 @@ public class BenchmarkSpotFit implements PlugIn
 						failN++;
 				}
 				if (result.fitMatch[i])
-					stats.add(Math.sqrt(result.d2[i]));
+				{
+					stats.add(Math.sqrt(result.d2[i]) * nmPerPixel);
+					final double[] p = result.fitResult[i].getParameters();
+					final double s = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
+					final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
+					final double b2 = Math.max(0, (p[Gaussian2DFunction.BACKGROUND] - simulationParameters.bias) /
+							simulationParameters.gain);
+					if (mle)
+						precisionStats
+								.add(PeakResult.getMLPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
+					else
+						precisionStats.add(PeakResult.getPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
+				}
 			}
 		}
 
@@ -716,9 +739,24 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, m.getFScore(1));
 		add(sb, m.getJaccard());
 
-		String label = String.format("Recall = %s. Mean = %s px", Utils.rounded(m.getRecall()),
-				Utils.rounded(stats.getMean()));
-		Utils.showHistogram(TITLE + " Match Distance", stats, "Distance (px)", 0, 0, 100, label);
+		double mean = stats.getMean();
+		add(sb, mean);
+
+		String label = String.format("Recall = %s. Mean = %s nm", Utils.rounded(m.getRecall()), Utils.rounded(mean));
+		int id1 = Utils.showHistogram(TITLE, stats, "Match Distance (nm)", 0, 0, 100, label);
+
+		mean = precisionStats.getMean();
+		add(sb, mean);
+
+		label = String.format("Mean = %s nm", Utils.rounded(mean));
+		int id2 = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 100, true, label);
+		if (Utils.isNewWindow())
+		{
+			ImageWindow pw = WindowManager.getImage(id1).getWindow();
+			Point point = pw.getLocation();
+			point.y += pw.getHeight();
+			WindowManager.getImage(id2).getWindow().setLocation(point);
+		}
 
 		summaryTable.append(sb.toString());
 	}
@@ -789,14 +827,15 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Precision\t");
 		sb.append("F1\t");
 		sb.append("Jaccard\t");
+		sb.append("Av.Distance (nm)\t");
+		sb.append("Av.Precision (nm)\t");
 
 		return sb.toString();
 	}
 
 	private double getSa()
 	{
-		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a) /
-				simulationParameters.a;
+		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a);
 		return sa;
 	}
 }
