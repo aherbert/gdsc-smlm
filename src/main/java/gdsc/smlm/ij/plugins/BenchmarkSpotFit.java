@@ -40,6 +40,7 @@ import gdsc.smlm.results.match.MatchCalculator;
 import gdsc.smlm.results.match.MatchResult;
 import gdsc.smlm.results.match.PointPair;
 import gdsc.smlm.utils.NoiseEstimator.Method;
+import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -566,9 +567,9 @@ public class BenchmarkSpotFit implements PlugIn
 			}
 
 			// Debug
-			System.out.printf("Frame %d : %d / (%d + %d). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
-					r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(), p, n,
-					nAfter, (double) n / (n + p));
+			//System.out.printf("Frame %d : %d / (%d + %d). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
+			//		r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(), p, n,
+			//		nAfter, (double) n / (n + p));
 
 			subset.put(result.getKey(), new FilterCandidates(p, n, Arrays.copyOf(r.spots, count)));
 		}
@@ -593,6 +594,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 		// Summarise the fitting results. N fits, N failures. 
 		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
+		StoredDataStatistics stats = new StoredDataStatistics();
 		int tp = 0, fp = 0, tn = 0, fn = 0;
 		int failP = 0, failN = 0;
 		for (FilterCandidates result : filterCandidates.values())
@@ -610,8 +612,11 @@ public class BenchmarkSpotFit implements PlugIn
 					else
 						failN++;
 				}
+				if (result.fitMatch[i])
+					stats.add(Math.sqrt(result.d2[i]));
 			}
 		}
+
 		ClassificationResult r = new ClassificationResult(tp, fp, tn, fn);
 
 		StringBuilder sb = new StringBuilder();
@@ -675,18 +680,22 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, tn);
 		add(sb, fn);
 
-		add(sb, r.getTPR());
-		add(sb, r.getTNR());
-		add(sb, r.getPPV());
-		add(sb, r.getNPV());
-		add(sb, r.getFPR());
-		add(sb, r.getFDR());
-		add(sb, r.getAccuracy());
-		add(sb, r.getMCC());
-		add(sb, r.getInformedness());
-		add(sb, r.getMarkedness());
+		// These score are not useful since they assess the filtering performance and we have 
+		// done 'perfect' filtering where all matches are allowed and other fits are discarded.
+		//add(sb, r.getTPR());
+		//add(sb, r.getTNR());
+		//add(sb, r.getPPV());
+		//add(sb, r.getNPV());
+		//add(sb, r.getFPR());
+		//add(sb, r.getFDR());
+		//add(sb, r.getAccuracy());
+		//add(sb, r.getMCC());
+		//add(sb, r.getInformedness());
+		//add(sb, r.getMarkedness());
 
 		// Score the fitting results compared to the original simulation.
+
+		// Score the candidate selection:
 		// TP are all candidates that can be matched to a spot
 		// FP are all candidates that cannot be matched to a spot
 		// FN = The number of missed spots
@@ -696,6 +705,7 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, m.getFScore(1));
 		add(sb, m.getJaccard());
 
+		// Score the fitting results:
 		// TP are all fit results that can be matched to a spot
 		// FP are all fit results that cannot be matched to a spot or that failed to fit
 		// (Set FP to zero to indicate that the filtering of bad fit results is perfect) 
@@ -705,6 +715,10 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, m.getPrecision());
 		add(sb, m.getFScore(1));
 		add(sb, m.getJaccard());
+
+		String label = String.format("Recall = %s. Mean = %s px", Utils.rounded(m.getRecall()),
+				Utils.rounded(stats.getMean()));
+		Utils.showHistogram(TITLE + " Match Distance", stats, "Distance (px)", 0, 0, 100, label);
 
 		summaryTable.append(sb.toString());
 	}
@@ -756,16 +770,16 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("TN\t");
 		sb.append("FN\t");
 
-		sb.append("TPR\t");
-		sb.append("TNR\t");
-		sb.append("PPV\t");
-		sb.append("NPV\t");
-		sb.append("FPR\t");
-		sb.append("FDR\t");
-		sb.append("ACC\t");
-		sb.append("MCC\t");
-		sb.append("Informedness\t");
-		sb.append("Markedness\t");
+		//sb.append("TPR\t");
+		//sb.append("TNR\t");
+		//sb.append("PPV\t");
+		//sb.append("NPV\t");
+		//sb.append("FPR\t");
+		//sb.append("FDR\t");
+		//sb.append("ACC\t");
+		//sb.append("MCC\t");
+		//sb.append("Informedness\t");
+		//sb.append("Markedness\t");
 
 		sb.append("Recall\t");
 		sb.append("Precision\t");
