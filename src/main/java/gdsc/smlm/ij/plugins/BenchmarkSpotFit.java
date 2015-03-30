@@ -105,12 +105,13 @@ public class BenchmarkSpotFit implements PlugIn
 	private static HashMap<Integer, FilterCandidates> filterCandidates;
 	private static int nP, nN;
 
-	private static int lastId = -1, lastFilterId = -1;
+	static int lastId = -1, lastFilterId = -1;
 	private static double lastFractionPositives = -1;
 	private static double lastFractionNegativesAfterAllPositives = -1;
 	private static int lastNegativesAfterAllPositives = -1;
 
 	// Allow other plugins to access the results
+	static int fitResultsId = 0;
 	static HashMap<Integer, FilterCandidates> fitResults;
 
 	public class FilterCandidates implements Cloneable
@@ -121,6 +122,7 @@ public class BenchmarkSpotFit implements PlugIn
 		FitResult[] fitResult;
 		boolean[] fitMatch;
 		double[] d2;
+		float noise;
 
 		public FilterCandidates(int p, int n, ScoredSpot[] spots)
 		{
@@ -311,6 +313,9 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.fitResult = fitResult;
 			candidates.fitMatch = fitMatch;
 			candidates.d2 = d2;
+			// Noise should be the same for all results
+			if (!job.getResults().isEmpty())
+				candidates.noise = job.getResults().get(0).noise;
 			results.put(frame, candidates);
 		}
 	}
@@ -505,6 +510,7 @@ public class BenchmarkSpotFit implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
 
+		fitResultsId++;
 		fitResults = new HashMap<Integer, FilterCandidates>();
 		for (Worker w : workers)
 		{

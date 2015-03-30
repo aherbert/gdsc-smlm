@@ -2,7 +2,7 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.match.MatchResult;
+import gdsc.smlm.results.match.ClassificationResult;
 
 import java.util.List;
 
@@ -75,9 +75,9 @@ public abstract class Filter implements Comparable<Filter>
 	 *            a list of results to analyse
 	 * @return the score
 	 */
-	public MatchResult score(List<MemoryPeakResults> resultsList)
+	public ClassificationResult score(List<MemoryPeakResults> resultsList)
 	{
-		int tp = 0, fp = 0, fn = 0;
+		int tp = 0, fp = 0, tn = 0, fn = 0;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
@@ -93,12 +93,16 @@ public abstract class Filter implements Comparable<Filter>
 					else
 						fn++; // false negative
 				}
-				else if (isPositive)
-					fp++; // false positive
-				// Default: true negative
+				else
+				{
+					if (isPositive)
+						fp++; // false positive
+					else
+						tn++; // true negative
+				}				
 			}
 		}
-		return new MatchResult(tp, fp, fn, 0);
+		return new ClassificationResult(tp, fp, tn, fn);
 	}
 
 	/**
@@ -233,7 +237,7 @@ public abstract class Filter implements Comparable<Filter>
 	 * @return The new filter
 	 */
 	public abstract Filter adjustParameter(int index, double delta);
-	
+
 	/**
 	 * Adjust the specified parameter value.
 	 * <p>
@@ -263,13 +267,13 @@ public abstract class Filter implements Comparable<Filter>
 	{
 		return (float) (value + value * delta);
 	}
-	
+
 	/**
 	 * Adjust the specified parameter value.
 	 * <p>
 	 * A positive delta will adjust the parameter to be larger. A negative delta will adjust the parameter to be
-	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%. The adjustment is rounded
-	 * up to the next valid integer to ensure a new parameter value is created.
+	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%. The adjustment is rounded up to the
+	 * next valid integer to ensure a new parameter value is created.
 	 * 
 	 * @param value
 	 * @param delta
@@ -277,7 +281,7 @@ public abstract class Filter implements Comparable<Filter>
 	 */
 	protected int updateParameter(int value, double delta)
 	{
-		final int update = (int)Math.ceil(value * Math.abs(delta));
+		final int update = (int) Math.ceil(value * Math.abs(delta));
 		if (delta < 0)
 			return value - update;
 		return value + update;
