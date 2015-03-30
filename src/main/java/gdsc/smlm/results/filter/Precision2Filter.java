@@ -13,6 +13,7 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -20,9 +21,9 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Filter results using a precision threshold
+ * Filter results using a precision threshold. Calculates the precision using the true fitted background if a bias is provided.
  */
-public class PrecisionFilter extends Filter
+public class Precision2Filter extends Filter
 {
 	@XStreamAsAttribute
 	final double precision;
@@ -33,9 +34,11 @@ public class PrecisionFilter extends Filter
 	@XStreamOmitField
 	boolean emCCD = true;
 	@XStreamOmitField
+	double bias = 0;
+	@XStreamOmitField
 	double gain = 1;
 
-	public PrecisionFilter(double precision)
+	public Precision2Filter(double precision)
 	{
 		this.precision = precision;
 	}
@@ -59,11 +62,23 @@ public class PrecisionFilter extends Filter
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		if (peakResults.getCalibration() != null)
+		{
+			bias = peakResults.getCalibration().bias;
+		}
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
+		if (bias != 0)
+		{
+			// Use the estimated background for the peak
+			final double s = nmPerPixel * peak.getSD();
+			final double N = peak.getSignal();
+			return PeakResult.getVarianceX(nmPerPixel, s, N / gain,
+					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= variance;
+		}
 		// Use the background noise to estimate precision 
 		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
 	}
@@ -88,7 +103,7 @@ public class PrecisionFilter extends Filter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using an upper precision threshold.";
+		return "Filter results using an upper precision threshold (uses fitted background to set noise).";
 	}
 
 	/*
@@ -135,6 +150,6 @@ public class PrecisionFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new PrecisionFilter(updateParameter(precision, delta));
+		return new Precision2Filter(updateParameter(precision, delta));
 	}
 }

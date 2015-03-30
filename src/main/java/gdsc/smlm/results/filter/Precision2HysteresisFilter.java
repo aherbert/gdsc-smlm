@@ -13,6 +13,7 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -20,11 +21,12 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Filter results using a precision threshold. Any results below the lower precision limit are included. Any
- * results above the upper precision limit are excluded. Any results between the limits are included only if they can be
- * traced through time, optionally via other candidates, to a valid result.
+ * Filter results using a precision threshold.. Calculates the precision using the true fitted background if a bias is
+ * provided. Any results below the lower precision limit are included. Any results above the upper precision limit are
+ * excluded. Any results between the limits are included only if they can be traced through time, optionally via other
+ * candidates, to a valid result.
  */
-public class PrecisionHysteresisFilter extends HysteresisFilter
+public class Precision2HysteresisFilter extends HysteresisFilter
 {
 	@XStreamAsAttribute
 	final double lowerPrecision;
@@ -40,8 +42,10 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	double gain;
 	@XStreamOmitField
 	boolean emCCD = true;
+	@XStreamOmitField
+	double bias = 0;
 
-	public PrecisionHysteresisFilter(double searchDistance, double lowerPrecision, double range)
+	public Precision2HysteresisFilter(double searchDistance, double lowerPrecision, double range)
 	{
 		super(searchDistance);
 		this.lowerPrecision = lowerPrecision;
@@ -69,14 +73,30 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		if (peakResults.getCalibration() != null)
+		{
+			bias = peakResults.getCalibration().bias;
+		}
 		super.setup(peakResults);
 	}
 
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
-		// Use the background noise to estimate precision 
-		final double variance = result.getVariance(nmPerPixel, gain, emCCD);
+		final double variance;
+		if (bias != 0)
+		{
+			// Use the estimated background for the peak
+			final double s = nmPerPixel * result.getSD();
+			final double N = result.getSignal();
+			variance = PeakResult.getVarianceX(nmPerPixel, s, N / gain,
+					Math.max(0, result.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
+		}
+		else
+		{
+			// Use the background noise to estimate precision 
+			variance = result.getVariance(nmPerPixel, gain, emCCD);
+		}
 		if (variance <= lowerVariance)
 			return PeakStatus.OK;
 		else if (variance <= upperVariance)
@@ -104,7 +124,8 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using a precision threshold. Any results below the lower precision " +
+		return "Filter results using a precision threshold (uses fitted background to set noise)." +
+				"Any results below the lower precision " +
 				"limit are included. Any results above the upper precision limit are excluded. " +
 				super.getDescription();
 	}
@@ -172,11 +193,11 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		switch (index)
 		{
 			case 0:
-				return new PrecisionHysteresisFilter(updateParameter(searchDistance, delta), lowerPrecision, range);
+				return new Precision2HysteresisFilter(updateParameter(searchDistance, delta), lowerPrecision, range);
 			case 1:
-				return new PrecisionHysteresisFilter(searchDistance, updateParameter(lowerPrecision, delta), range);
+				return new Precision2HysteresisFilter(searchDistance, updateParameter(lowerPrecision, delta), range);
 			default:
-				return new PrecisionHysteresisFilter(searchDistance, lowerPrecision, updateParameter(range, delta));
+				return new Precision2HysteresisFilter(searchDistance, lowerPrecision, updateParameter(range, delta));
 		}
 	}
 }
