@@ -55,13 +55,13 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	protected String generateName()
 	{
-		return String.format("Precision Hysteresis %.2f +%.2f (@%.2fx)", lowerPrecision, range, searchDistance);
+		return String.format("Precision2 Hysteresis %.2f +%.2f (@%.2fx)", lowerPrecision, range, searchDistance);
 	}
 
 	@Override
 	protected String generateType()
 	{
-		return "Precision Hysteresis";
+		return "Precision2 Hysteresis";
 	}
 
 	@Override

@@ -46,13 +46,13 @@ public class PrecisionFilter2 extends Filter
 	@Override
 	protected String generateName()
 	{
-		return "Precision " + precision;
+		return "Precision2 " + precision;
 	}
 
 	@Override
 	protected String generateType()
 	{
-		return "Precision";
+		return "Precision2";
 	}
 
 	@Override
