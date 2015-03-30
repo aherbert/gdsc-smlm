@@ -24,7 +24,7 @@ import gdsc.smlm.results.filter.AndFilter;
 import gdsc.smlm.results.filter.CoordinateFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.OrFilter;
-import gdsc.smlm.results.filter.Precision2Filter;
+import gdsc.smlm.results.filter.PrecisionFilter2;
 import gdsc.smlm.results.filter.PrecisionFilter;
 import gdsc.smlm.results.filter.PrecisionHysteresisFilter;
 import gdsc.smlm.results.filter.SNRFilter;
@@ -181,7 +181,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new ANRFilter(11));
 		demo(new ANRFilter2(11, 0.75, 1.95));
 		demo(new PrecisionFilter(30));
-		demo(new Precision2Filter(30));
+		demo(new PrecisionFilter2(30));
 		demo(new SNRHysteresisFilter(2, 10, 20));
 		demo(new PrecisionHysteresisFilter(2, 20, 30));
 		demo(new TraceFilter(0.5, 1));

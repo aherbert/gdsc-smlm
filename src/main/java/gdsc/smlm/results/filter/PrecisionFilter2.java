@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a precision threshold. Calculates the precision using the true fitted background if a bias is provided.
  */
-public class Precision2Filter extends Filter
+public class PrecisionFilter2 extends Filter
 {
 	@XStreamAsAttribute
 	final double precision;
@@ -38,7 +38,7 @@ public class Precision2Filter extends Filter
 	@XStreamOmitField
 	double gain = 1;
 
-	public Precision2Filter(double precision)
+	public PrecisionFilter2(double precision)
 	{
 		this.precision = precision;
 	}
@@ -150,6 +150,6 @@ public class Precision2Filter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new Precision2Filter(updateParameter(precision, delta));
+		return new PrecisionFilter2(updateParameter(precision, delta));
 	}
 }

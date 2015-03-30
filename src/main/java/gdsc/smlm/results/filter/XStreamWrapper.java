@@ -37,15 +37,20 @@ public abstract class XStreamWrapper
 
 			// Add aliases for all Filter classes
 			addAlias(AndFilter.class);
+			addAlias(ANRFilter.class);
+			addAlias(ANRFilter2.class);
 			addAlias(CombinedFilter.class);
 			addAlias(CoordinateFilter.class);
 			addAlias(Filter.class);
 			addAlias(HysteresisFilter.class);
 			addAlias(OrFilter.class);
 			addAlias(PrecisionFilter.class);
+			addAlias(PrecisionFilter2.class);
 			addAlias(PrecisionHysteresisFilter.class);
+			addAlias(PrecisionHysteresisFilter2.class);
 			addAlias(SignalFilter.class);
 			addAlias(SNRFilter.class);
+			addAlias(SNRFilter2.class);
 			addAlias(SNRHysteresisFilter.class);
 			addAlias(TraceFilter.class);
 			addAlias(WidthFilter.class);

@@ -26,7 +26,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * excluded. Any results between the limits are included only if they can be traced through time, optionally via other
  * candidates, to a valid result.
  */
-public class Precision2HysteresisFilter extends HysteresisFilter
+public class PrecisionHysteresisFilter2 extends HysteresisFilter
 {
 	@XStreamAsAttribute
 	final double lowerPrecision;
@@ -45,7 +45,7 @@ public class Precision2HysteresisFilter extends HysteresisFilter
 	@XStreamOmitField
 	double bias = 0;
 
-	public Precision2HysteresisFilter(double searchDistance, double lowerPrecision, double range)
+	public PrecisionHysteresisFilter2(double searchDistance, double lowerPrecision, double range)
 	{
 		super(searchDistance);
 		this.lowerPrecision = lowerPrecision;
@@ -193,11 +193,11 @@ public class Precision2HysteresisFilter extends HysteresisFilter
 		switch (index)
 		{
 			case 0:
-				return new Precision2HysteresisFilter(updateParameter(searchDistance, delta), lowerPrecision, range);
+				return new PrecisionHysteresisFilter2(updateParameter(searchDistance, delta), lowerPrecision, range);
 			case 1:
-				return new Precision2HysteresisFilter(searchDistance, updateParameter(lowerPrecision, delta), range);
+				return new PrecisionHysteresisFilter2(searchDistance, updateParameter(lowerPrecision, delta), range);
 			default:
-				return new Precision2HysteresisFilter(searchDistance, lowerPrecision, updateParameter(range, delta));
+				return new PrecisionHysteresisFilter2(searchDistance, lowerPrecision, updateParameter(range, delta));
 		}
 	}
 }
