@@ -31,14 +31,13 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@XStreamAsAttribute
 	final float range;
 	@XStreamOmitField
-	final float upperSnr;
+	float upperSnr;
 
 	public SNRHysteresisFilter(double searchDistance, float lowerSnr, float range)
 	{
 		super(searchDistance);
 		this.lowerSnr = lowerSnr;
 		this.range = Math.abs(range);
-		upperSnr = lowerSnr + range;
 	}
 
 	@Override
@@ -57,6 +56,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		super.setup(peakResults);
+		upperSnr = lowerSnr + range;
 	}
 
 	@Override

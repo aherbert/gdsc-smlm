@@ -28,7 +28,7 @@ public class PrecisionFilter extends Filter
 	@XStreamAsAttribute
 	final double precision;
 	@XStreamOmitField
-	final double variance;
+	double variance;
 	@XStreamOmitField
 	double nmPerPixel = 100;
 	@XStreamOmitField
@@ -41,7 +41,6 @@ public class PrecisionFilter extends Filter
 	public PrecisionFilter(double precision)
 	{
 		this.precision = precision;
-		variance = precision * precision;
 	}
 
 	@Override
@@ -59,6 +58,7 @@ public class PrecisionFilter extends Filter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		variance = precision * precision;
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
@@ -75,7 +75,7 @@ public class PrecisionFilter extends Filter
 		{
 			// Use the estimated background for the peak
 			final double s = nmPerPixel * peak.getSD();
-			final double N = peak.getSignal();
+			final double N = peak.getSignal() / gain;
 			return PeakResult.getVarianceX(nmPerPixel, s, N,
 					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= variance;
 		}

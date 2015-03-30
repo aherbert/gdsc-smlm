@@ -32,9 +32,9 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@XStreamAsAttribute
 	final double range;
 	@XStreamOmitField
-	final double lowerVariance;
+	double lowerVariance;
 	@XStreamOmitField
-	final double upperVariance;
+	double upperVariance;
 	@XStreamOmitField
 	double nmPerPixel;
 	@XStreamOmitField
@@ -49,9 +49,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		super(searchDistance);
 		this.lowerPrecision = lowerPrecision;
 		this.range = Math.abs(range);
-		double upperPrecision = lowerPrecision + range;
-		lowerVariance = lowerPrecision * lowerPrecision;
-		upperVariance = upperPrecision * upperPrecision;
 	}
 
 	@Override
@@ -69,6 +66,9 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
+		lowerVariance = lowerPrecision * lowerPrecision;
+		final double upperPrecision = lowerPrecision + range;
+		upperVariance = upperPrecision * upperPrecision;
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
