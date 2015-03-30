@@ -62,9 +62,11 @@ public class BenchmarkFilterAnalysis implements PlugIn
 {
 	private static final String TITLE = "Filter Analysis";
 	private static TextWindow resultsWindow = null;
+	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
 
 	private static boolean showResultsTable = true;
+	private static boolean showSummaryTable = true;
 	private static int plotTopN = 0;
 	private ArrayList<NamedPlot> plots;
 	private static boolean calculateSensitivity = false;
@@ -197,8 +199,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			cal.readNoise = simulationParameters.readNoise;
 			r.setCalibration(cal);
 			// Set the configuration used for fitting
-			r.setConfiguration(XmlUtils.toXML(BenchmarkSpotFit.fitConfig));			
-			
+			r.setConfiguration(XmlUtils.toXML(BenchmarkSpotFit.fitConfig));
+
 			for (Entry<Integer, FilterCandidates> entry : BenchmarkSpotFit.fitResults.entrySet())
 			{
 				final int peak = entry.getKey().intValue();
@@ -240,6 +242,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addMessage(String.format("%d results, %d True-Positives", total, tp));
 
 		gd.addCheckbox("Show_table", showResultsTable);
+		gd.addCheckbox("Show_summary", showSummaryTable);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
@@ -255,12 +258,13 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private boolean readDialog(GenericDialog gd)
 	{
 		showResultsTable = gd.getNextBoolean();
+		showSummaryTable = gd.getNextBoolean();
 		plotTopN = (int) Math.abs(gd.getNextNumber());
 		calculateSensitivity = gd.getNextBoolean();
 		delta = gd.getNextNumber();
 
 		// Check there is one output
-		if (!showResultsTable && !calculateSensitivity && plotTopN < 1)
+		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1)
 		{
 			IJ.error(TITLE, "No output selected");
 			return false;
@@ -299,6 +303,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
 		createResultsWindow();
+		createSummaryWindow();
 		plots = new ArrayList<NamedPlot>(plotTopN);
 		bestFilter = new HashMap<String, FilterScore>();
 		bestFilterOrder = new LinkedList<String>();
@@ -313,6 +318,15 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 		IJ.showProgress(1);
 		IJ.showStatus("");
+
+		// Add a spacer to the summary table
+		if (showSummaryTable)
+		{
+			if (isHeadless)
+				IJ.log("");
+			else
+				summaryWindow.append("");
+		}
 
 		showPlots();
 		calculateSensitivity(resultsList);
@@ -459,6 +473,25 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 	}
 
+	private void createSummaryWindow()
+	{
+		if (!showSummaryTable)
+			return;
+
+		if (isHeadless)
+		{
+			IJ.log(createResultsHeader());
+		}
+		else
+		{
+			if (summaryWindow == null || !summaryWindow.isShowing())
+			{
+				String header = createResultsHeader();
+				summaryWindow = new TextWindow(TITLE + " Summary", header, "", 900, 300);
+			}
+		}
+	}
+
 	private String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -563,7 +596,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 		}
 
-		if (allSameType && calculateSensitivity)
+		if (allSameType)
 		{
 			if (bestFilter.containsKey(type))
 			{
@@ -575,6 +608,20 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			{
 				bestFilter.put(type, new FilterScore(maxFilter, maxScore));
 				bestFilterOrder.add(type);
+			}
+
+			if (showSummaryTable)
+			{
+				ClassificationResult r = maxFilter.score(resultsList);
+				String text = createResult(maxFilter, r);
+				if (isHeadless)
+				{
+					IJ.log(text);
+				}
+				else
+				{
+					summaryWindow.append(text);
+				}
 			}
 		}
 
@@ -667,54 +714,60 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		if (showResultsTable)
 		{
-			StringBuilder sb = new StringBuilder();
-			sb.append(filter.getName());
-
-			add(sb, r.getTP() + r.getFP());
-			add(sb, r.getTP());
-			add(sb, r.getFP());
-			add(sb, r.getTN());
-			add(sb, r.getFN());
-
-			add(sb, r.getTPR());
-			add(sb, r.getTNR());
-			add(sb, r.getPPV());
-			add(sb, r.getNPV());
-			add(sb, r.getFPR());
-			add(sb, r.getFDR());
-			add(sb, r.getAccuracy());
-			add(sb, r.getMCC());
-			add(sb, r.getInformedness());
-			add(sb, r.getMarkedness());
-
-			add(sb, r.getRecall());
-			add(sb, r.getPrecision());
-			add(sb, r.getFScore(1));
-			add(sb, r.getJaccard());
-
-			// Score relative to the original simulated number of spots
-			// Score the fitting results:
-			// TP are all fit results that can be matched to a spot
-			// FP are all fit results that cannot be matched to a spot
-			// FN = The number of missed spots
-			final int tp = r.getTP();
-			final int fp = r.getFP();
-			MatchResult m = new MatchResult(tp, fp, simulationParameters.molecules - tp, 0);
-			add(sb, m.getRecall());
-			add(sb, m.getPrecision());
-			add(sb, m.getFScore(1));
-			add(sb, m.getJaccard());
+			String text = createResult(filter, r);
 
 			if (isHeadless)
 			{
-				IJ.log(sb.toString());
+				IJ.log(text);
 			}
 			else
 			{
-				resultsWindow.append(sb.toString());
+				resultsWindow.append(text);
 			}
 		}
 		return r;
+	}
+
+	public String createResult(Filter filter, ClassificationResult r)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(filter.getName());
+
+		add(sb, r.getTP() + r.getFP());
+		add(sb, r.getTP());
+		add(sb, r.getFP());
+		add(sb, r.getTN());
+		add(sb, r.getFN());
+
+		add(sb, r.getTPR());
+		add(sb, r.getTNR());
+		add(sb, r.getPPV());
+		add(sb, r.getNPV());
+		add(sb, r.getFPR());
+		add(sb, r.getFDR());
+		add(sb, r.getAccuracy());
+		add(sb, r.getMCC());
+		add(sb, r.getInformedness());
+		add(sb, r.getMarkedness());
+
+		add(sb, r.getRecall());
+		add(sb, r.getPrecision());
+		add(sb, r.getFScore(1));
+		add(sb, r.getJaccard());
+
+		// Score relative to the original simulated number of spots
+		// Score the fitting results:
+		// TP are all fit results that can be matched to a spot
+		// FP are all fit results that cannot be matched to a spot
+		// FN = The number of missed spots
+		final int tp = r.getTP();
+		final int fp = r.getFP();
+		MatchResult m = new MatchResult(tp, fp, simulationParameters.molecules - tp, 0);
+		add(sb, m.getRecall());
+		add(sb, m.getPrecision());
+		add(sb, m.getFScore(1));
+		add(sb, m.getJaccard());
+		return sb.toString();
 	}
 
 	private static void add(StringBuilder sb, String value)
