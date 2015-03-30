@@ -30,6 +30,7 @@ import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.MatchResult;
 import gdsc.smlm.utils.UnicodeReader;
+import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
@@ -195,6 +196,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			cal.emCCD = simulationParameters.emCCD;
 			cal.readNoise = simulationParameters.readNoise;
 			r.setCalibration(cal);
+			// Set the configuration used for fitting
+			r.setConfiguration(XmlUtils.toXML(BenchmarkSpotFit.fitConfig));			
+			
 			for (Entry<Integer, FilterCandidates> entry : BenchmarkSpotFit.fitResults.entrySet())
 			{
 				final int peak = entry.getKey().intValue();

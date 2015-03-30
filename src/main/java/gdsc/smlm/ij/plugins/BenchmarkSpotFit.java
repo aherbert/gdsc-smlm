@@ -70,7 +70,7 @@ public class BenchmarkSpotFit implements PlugIn
 {
 	private static final String TITLE = "Benchmark Spot Fit";
 
-	private static FitConfiguration fitConfig;
+	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
 	static
 	{
