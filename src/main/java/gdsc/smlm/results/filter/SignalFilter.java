@@ -37,7 +37,7 @@ public class SignalFilter extends Filter
 	@Override
 	protected String generateName()
 	{
-		return "signal " + signal;
+		return "Signal " + signal;
 	}
 
 	@Override
