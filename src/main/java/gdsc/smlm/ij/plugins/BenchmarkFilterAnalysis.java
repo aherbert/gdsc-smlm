@@ -303,7 +303,6 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
 		createResultsWindow();
-		createSummaryWindow();
 		plots = new ArrayList<NamedPlot>(plotTopN);
 		bestFilter = new HashMap<String, FilterScore>();
 		bestFilterOrder = new LinkedList<String>();
@@ -319,9 +318,21 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
-		// Add a spacer to the summary table
 		if (showSummaryTable)
 		{
+			createSummaryWindow();
+			List<FilterScore> filters = new ArrayList<FilterScore>(bestFilter.values());
+			Collections.sort(filters);
+			for (FilterScore fs : filters)
+			{
+				ClassificationResult r = fs.filter.score(resultsList);
+				String text = createResult(fs.filter, r);
+				if (isHeadless)
+					IJ.log(text);
+				else
+					summaryWindow.append(text);
+			}
+			// Add a spacer to the summary table
 			if (isHeadless)
 				IJ.log("");
 			else
@@ -609,20 +620,6 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				bestFilter.put(type, new FilterScore(maxFilter, maxScore));
 				bestFilterOrder.add(type);
 			}
-
-			if (showSummaryTable)
-			{
-				ClassificationResult r = maxFilter.score(resultsList);
-				String text = createResult(maxFilter, r);
-				if (isHeadless)
-				{
-					IJ.log(text);
-				}
-				else
-				{
-					summaryWindow.append(text);
-				}
-			}
 		}
 
 		// Add spacer at end of each result set
@@ -785,7 +782,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		add(sb, Utils.rounded(value));
 	}
 
-	public class FilterScore
+	public class FilterScore implements Comparable<FilterScore>
 	{
 		Filter filter;
 		double score;
@@ -799,6 +796,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			this.filter = filter;
 			this.score = score;
+		}
+
+		@Override
+		public int compareTo(FilterScore that)
+		{
+			if (this.score > that.score)
+				return -1;
+			if (this.score < that.score)
+				return 1;
+			return 0;
 		}
 	}
 
