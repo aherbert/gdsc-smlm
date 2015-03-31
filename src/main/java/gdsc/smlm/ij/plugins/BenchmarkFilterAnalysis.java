@@ -35,7 +35,6 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -76,6 +75,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private HashMap<String, FilterScore> bestFilter;
 	private LinkedList<String> bestFilterOrder;
 
+	private static List<FilterSet> filterList = null;
 	private static int lastId = 0;
 	private static List<MemoryPeakResults> resultsList = null;
 
@@ -156,12 +156,24 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		GlobalSettings gs = SettingsManager.loadSettings();
 		FilterSettings filterSettings = gs.getFilterSettings();
 
-		String[] path = Utils.decodePath(filterSettings.filterSetFilename);
-		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
-		if (chooser.getFileName() != null)
+		String oldFilename = filterSettings.filterSetFilename;
+		String filename = Utils.getFilename("Filter_File", filterSettings.filterSetFilename);
+		if (filename != null)
 		{
 			IJ.showStatus("Reading filters ...");
-			filterSettings.filterSetFilename = chooser.getDirectory() + chooser.getFileName();
+			filterSettings.filterSetFilename = filename;
+			
+			// Allow the filters to be cached
+			if (filename.equals(oldFilename) && filterList != null)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.enableYesNoCancel();
+				gd.hideCancelButton();
+				gd.addMessage("The same filter file was selected.\n \nRe-use the last filters?");
+				gd.showDialog();
+				if (gd.wasOKed())
+					return filterList;
+			}
 
 			BufferedReader input = null;
 			try
@@ -172,7 +184,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				if (o != null && o instanceof List<?>)
 				{
 					SettingsManager.saveSettings(gs);
-					return (List<FilterSet>) o;
+					filterList = (List<FilterSet>) o; 
+					return filterList;
 				}
 				IJ.log("No filter sets defined in the specified file: " + filterSettings.filterSetFilename);
 			}
