@@ -66,6 +66,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
 
+	private static int failCount = 3;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
 	private static int plotTopN = 0;
@@ -231,6 +232,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					}
 				}
 			}
+			
+			// We need to sort by frame then candidate order but this is already done 
+			// since the candidates are in the original ranked order
+			
 			if (r.size() > 0)
 				resultsList.add(r);
 		}
@@ -253,6 +258,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 		gd.addMessage(String.format("%d results, %d True-Positives", total, tp));
 
+		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
@@ -286,6 +292,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private boolean readDialog(GenericDialog gd)
 	{
+		failCount = (int)Math.abs(gd.getNextNumber());
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
 		plotTopN = (int) Math.abs(gd.getNextNumber());
@@ -535,17 +542,17 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("Name\t");
+		sb.append("Name\tFail");
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
-				sb.append(COLUMNS[i]).append("\t");
+				sb.append("\t").append(COLUMNS[i]);
 
 		// Always show the results compared to the original simulation
-		sb.append("oRecall\t");
-		sb.append("oPrecision\t");
-		sb.append("oF1\t");
-		sb.append("oJaccard\t");
+		sb.append("\toRecall");
+		sb.append("\toPrecision");
+		sb.append("\toF1");
+		sb.append("\toJaccard");
 		return sb.toString();
 	}
 
@@ -720,7 +727,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private ClassificationResult run(Filter filter, List<MemoryPeakResults> resultsList)
 	{
-		ClassificationResult r = filter.score(resultsList);
+		ClassificationResult r = filter.score(resultsList, failCount);
 
 		if (showResultsTable)
 		{
@@ -741,7 +748,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	public String createResult(Filter filter, ClassificationResult r)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(filter.getName());
+		sb.append(filter.getName()).append("\t").append(failCount);
 
 		int i = 0;
 		add(sb, r.getTP() + r.getFP(), i++);
