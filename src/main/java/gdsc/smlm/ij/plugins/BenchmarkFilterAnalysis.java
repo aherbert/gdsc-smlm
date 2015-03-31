@@ -72,6 +72,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private ArrayList<NamedPlot> plots;
 	private static boolean calculateSensitivity = false;
 	private static double delta = 0.1;
+	private static int scoreIndex;
+
 	private HashMap<String, FilterScore> bestFilter;
 	private LinkedList<String> bestFilterOrder;
 
@@ -81,8 +83,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private boolean isHeadless;
 
-	private static String[] COLUMNS = { "nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC",
-			"MCC", "Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard" };
+	private static String[] COLUMNS = { "nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR",
+			"ACC", "MCC", "Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard" };
 
 	private static boolean[] showColumns;
 	static
@@ -90,6 +92,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		showColumns = new boolean[COLUMNS.length];
 		Arrays.fill(showColumns, true);
 		showColumns[0] = false; // nP
+		
+		scoreIndex = COLUMNS.length - 1;
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
@@ -162,7 +166,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			IJ.showStatus("Reading filters ...");
 			filterSettings.filterSetFilename = filename;
-			
+
 			// Allow the filters to be cached
 			if (filename.equals(oldFilename) && filterList != null)
 			{
@@ -184,7 +188,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				if (o != null && o instanceof List<?>)
 				{
 					SettingsManager.saveSettings(gs);
-					filterList = (List<FilterSet>) o; 
+					filterList = (List<FilterSet>) o;
 					return filterList;
 				}
 				IJ.log("No filter sets defined in the specified file: " + filterSettings.filterSetFilename);
@@ -245,10 +249,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					}
 				}
 			}
-			
+
 			// We need to sort by frame then candidate order but this is already done 
 			// since the candidates are in the original ranked order
-			
+
 			if (r.size() > 0)
 				resultsList.add(r);
 		}
@@ -277,6 +281,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
+		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
 
 		gd.showDialog();
 
@@ -305,12 +310,13 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private boolean readDialog(GenericDialog gd)
 	{
-		failCount = (int)Math.abs(gd.getNextNumber());
+		failCount = (int) Math.abs(gd.getNextNumber());
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
 		plotTopN = (int) Math.abs(gd.getNextNumber());
 		calculateSensitivity = gd.getNextBoolean();
 		delta = gd.getNextNumber();
+		scoreIndex = gd.getNextChoiceIndex();
 
 		// Check there is one output
 		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1)
@@ -343,8 +349,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	 * using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table, e.g.
 	 * precision, Jaccard, F-score.
 	 * <p>
-	 * For each filter set a plot is shown of the Jaccard score verses the filter value, thus filters should be provided
-	 * in ascending numerical order otherwise they are sorted.
+	 * For each filter set a plot is shown of the score verses the filter value, thus filters should be provided in
+	 * ascending numerical order otherwise they are sorted.
 	 * 
 	 * @param resultsList
 	 * @param filterSets
@@ -410,7 +416,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		int i = 0;
 		for (NamedPlot p : plots)
 		{
-			Plot2 plot = new Plot2(p.name, p.xAxisName, "Jaccard", p.xValues, p.yValues);
+			Plot2 plot = new Plot2(p.name, p.xAxisName, COLUMNS[scoreIndex], p.xValues, p.yValues);
 			plot.setLimits(p.xValues[0], p.xValues[p.xValues.length - 1], 0, 1);
 			plot.setColor(Color.RED);
 			plot.draw();
@@ -626,17 +632,17 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			else if (!type.equals(filter.getType()))
 				allSameType = false;
 
-			final double jaccard = s.getJaccard();
-			if (filter == null || maxScore < jaccard)
+			final double score = getScore(s);
+			if (filter == null || maxScore < score)
 			{
-				maxScore = jaccard;
+				maxScore = score;
 				maxFilter = filter;
 			}
 
 			if (!isHeadless)
 			{
 				xValues[i] = filter.getNumericalValue();
-				yValues[i++] = jaccard;
+				yValues[i++] = score;
 			}
 		}
 
@@ -715,6 +721,55 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 
 		return count;
+	}
+
+	public double getScore(ClassificationResult s)
+	{
+		// This order must match the COLUMNS order 
+		switch (scoreIndex)
+		{
+			case 0:
+				return s.getTP() + s.getFP();
+			case 1:
+				return s.getTP();
+			case 2:
+				return s.getFP();
+			case 3:
+				return s.getTN();
+			case 4:
+				return s.getFN();
+			case 5:
+				return s.getTPR();
+			case 6:
+				return s.getTNR();
+			case 7:
+				return s.getPPV();
+			case 8:
+				return s.getNPV();
+			case 9:
+				return s.getFPR();
+			case 10:
+				return s.getFNR();
+			case 11:
+				return s.getFDR();
+			case 12:
+				return s.getAccuracy();
+			case 13:
+				return s.getMCC();
+			case 14:
+				return s.getInformedness();
+			case 15:
+				return s.getMarkedness();
+			case 16:
+				return s.getRecall();
+			case 17:
+				return s.getPrecision();
+			case 18:
+				return s.getFScore(1);
+			case 19:
+				return s.getJaccard();
+		}
+		return 0;
 	}
 
 	private NamedPlot getNamedPlot(String title)
