@@ -208,6 +208,14 @@ public class ClassificationResult
 	}
 
 	/**
+	 * @return The false negative rate = fn / (fn + tp)
+	 */
+	public double getFNR()
+	{
+		return divide(fn, fn + tp);
+	}
+
+	/**
 	 * @return The false discovery rate = fp / (tp + fp)
 	 */
 	public double getFDR()

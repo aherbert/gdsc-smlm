@@ -45,6 +45,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -65,7 +66,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
 
-	private static boolean showResultsTable = true;
+	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
 	private static int plotTopN = 0;
 	private ArrayList<NamedPlot> plots;
@@ -78,6 +79,17 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static List<MemoryPeakResults> resultsList = null;
 
 	private boolean isHeadless;
+
+	private static String[] COLUMNS = { "nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC",
+			"MCC", "Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard" };
+
+	private static boolean[] showColumns;
+	static
+	{
+		showColumns = new boolean[COLUMNS.length];
+		Arrays.fill(showColumns, true);
+		showColumns[0] = false; // nP
+	}
 
 	private CreateData.SimulationParameters simulationParameters;
 
@@ -251,6 +263,23 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		if (gd.wasCanceled() || !readDialog(gd))
 			return false;
+
+		if (showResultsTable || showSummaryTable)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addHelp(About.HELP_URL);
+
+			gd.addMessage("Select the results:");
+			for (int i = 0; i < COLUMNS.length; i++)
+				gd.addCheckbox(COLUMNS[i], showColumns[i]);
+			gd.showDialog();
+
+			if (gd.wasCanceled())
+				return false;
+
+			for (int i = 0; i < COLUMNS.length; i++)
+				showColumns[i] = gd.getNextBoolean();
+		}
 
 		return true;
 	}
@@ -507,32 +536,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Name\t");
-		sb.append("N\t");
-		sb.append("TP\t");
-		sb.append("FP\t");
-		sb.append("TN\t");
-		sb.append("FN\t");
 
-		sb.append("TPR\t");
-		sb.append("TNR\t");
-		sb.append("PPV\t");
-		sb.append("NPV\t");
-		sb.append("FPR\t");
-		sb.append("FDR\t");
-		sb.append("ACC\t");
-		sb.append("MCC\t");
-		sb.append("Informedness\t");
-		sb.append("Markedness\t");
+		for (int i = 0; i < COLUMNS.length; i++)
+			if (showColumns[i])
+				sb.append(COLUMNS[i]).append("\t");
 
-		sb.append("Recall\t");
-		sb.append("Precision\t");
-		sb.append("F1\t");
-		sb.append("Jaccard\t");
-
-		sb.append("Recall\t");
-		sb.append("Precision\t");
-		sb.append("F1\t");
-		sb.append("Jaccard\t");
+		// Always show the results compared to the original simulation
+		sb.append("oRecall\t");
+		sb.append("oPrecision\t");
+		sb.append("oF1\t");
+		sb.append("oJaccard\t");
 		return sb.toString();
 	}
 
@@ -730,27 +743,29 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		StringBuilder sb = new StringBuilder();
 		sb.append(filter.getName());
 
-		add(sb, r.getTP() + r.getFP());
-		add(sb, r.getTP());
-		add(sb, r.getFP());
-		add(sb, r.getTN());
-		add(sb, r.getFN());
+		int i = 0;
+		add(sb, r.getTP() + r.getFP(), i++);
+		add(sb, r.getTP(), i++);
+		add(sb, r.getFP(), i++);
+		add(sb, r.getTN(), i++);
+		add(sb, r.getFN(), i++);
 
-		add(sb, r.getTPR());
-		add(sb, r.getTNR());
-		add(sb, r.getPPV());
-		add(sb, r.getNPV());
-		add(sb, r.getFPR());
-		add(sb, r.getFDR());
-		add(sb, r.getAccuracy());
-		add(sb, r.getMCC());
-		add(sb, r.getInformedness());
-		add(sb, r.getMarkedness());
+		add(sb, r.getTPR(), i++);
+		add(sb, r.getTNR(), i++);
+		add(sb, r.getPPV(), i++);
+		add(sb, r.getNPV(), i++);
+		add(sb, r.getFPR(), i++);
+		add(sb, r.getFNR(), i++);
+		add(sb, r.getFDR(), i++);
+		add(sb, r.getAccuracy(), i++);
+		add(sb, r.getMCC(), i++);
+		add(sb, r.getInformedness(), i++);
+		add(sb, r.getMarkedness(), i++);
 
-		add(sb, r.getRecall());
-		add(sb, r.getPrecision());
-		add(sb, r.getFScore(1));
-		add(sb, r.getJaccard());
+		add(sb, r.getRecall(), i++);
+		add(sb, r.getPrecision(), i++);
+		add(sb, r.getFScore(1), i++);
+		add(sb, r.getJaccard(), i++);
 
 		// Score relative to the original simulated number of spots
 		// Score the fitting results:
@@ -772,9 +787,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		sb.append("\t").append(value);
 	}
 
-	private static void add(StringBuilder sb, int value)
+	private static void add(StringBuilder sb, int value, int i)
 	{
-		sb.append("\t").append(value);
+		if (showColumns[i])
+			sb.append("\t").append(value);
+	}
+
+	private static void add(StringBuilder sb, double value, int i)
+	{
+		if (showColumns[i])
+			add(sb, Utils.rounded(value));
 	}
 
 	private static void add(StringBuilder sb, double value)
