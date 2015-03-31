@@ -19,6 +19,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.filter.AndFilter;
 import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.results.filter.OrFilter;
 import gdsc.smlm.results.filter.PrecisionFilter;
 import gdsc.smlm.results.filter.SNRFilter;
 import gdsc.smlm.results.filter.WidthFilter;
@@ -343,6 +344,8 @@ public class CreateFilters implements PlugIn, ItemListener
 		comment("Combined filters");
 		IJ.log("");
 		demo(new AndFilter(new SNRFilter(10), new WidthFilter(2)), new String[] { "10:20:1", "1.5:2.5:0.2" });
+		demo(new OrFilter(new PrecisionFilter(30), new AndFilter(new SNRFilter(10), new WidthFilter(2))), new String[] {
+				"30:40:2", "10:20:1", "1.5:2.5:0.2" });
 		IJ.log("");
 	}
 
