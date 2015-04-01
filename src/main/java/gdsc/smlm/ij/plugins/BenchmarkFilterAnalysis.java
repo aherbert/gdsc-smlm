@@ -77,6 +77,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private HashMap<String, FilterScore> bestFilter;
 	private LinkedList<String> bestFilterOrder;
 
+	private static boolean reUseFilters = true;
 	private static List<FilterSet> filterList = null;
 	private static int lastId = 0;
 	private static List<MemoryPeakResults> resultsList = null;
@@ -171,12 +172,15 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			if (filename.equals(oldFilename) && filterList != null)
 			{
 				GenericDialog gd = new GenericDialog(TITLE);
-				gd.enableYesNoCancel();
 				gd.hideCancelButton();
-				gd.addMessage("The same filter file was selected.\n \nRe-use the last filters?");
+				gd.addMessage("The same filter file was selected.");
+				gd.addCheckbox("Re-use_filters", reUseFilters);
 				gd.showDialog();
-				if (gd.wasOKed())
-					return filterList;
+				if (!gd.wasCanceled())
+				{
+					if ((reUseFilters = gd.getNextBoolean()))
+						return filterList;
+				}
 			}
 
 			BufferedReader input = null;
@@ -387,11 +391,11 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				else
 					summaryWindow.append(text);
 			}
-			// Add a spacer to the summary table
-			if (isHeadless)
-				IJ.log("");
-			else
-				summaryWindow.append("");
+//			// Add a spacer to the summary table
+//			if (isHeadless)
+//				IJ.log("");
+//			else
+//				summaryWindow.append("");
 		}
 
 		showPlots();
