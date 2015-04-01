@@ -29,6 +29,7 @@ import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.MatchResult;
+import gdsc.smlm.utils.Sort;
 import gdsc.smlm.utils.UnicodeReader;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
@@ -66,6 +67,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static TextWindow sensitivityWindow = null;
 
 	private static int failCount = 3;
+	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
 	private static int plotTopN = 0;
@@ -80,6 +82,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static boolean reUseFilters = true;
 	private static List<FilterSet> filterList = null;
 	private static int lastId = 0;
+	private static boolean lastRank = false;
 	private static List<MemoryPeakResults> resultsList = null;
 
 	private boolean isHeadless;
@@ -93,7 +96,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		showColumns = new boolean[COLUMNS.length];
 		Arrays.fill(showColumns, true);
 		showColumns[0] = false; // nP
-		
+
 		scoreIndex = COLUMNS.length - 1;
 	}
 
@@ -222,9 +225,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private List<MemoryPeakResults> readResults()
 	{
-		if (resultsList == null || lastId != BenchmarkSpotFit.fitResultsId)
+		if (resultsList == null || lastId != BenchmarkSpotFit.fitResultsId || lastRank != rerankBySignal)
 		{
 			lastId = BenchmarkSpotFit.fitResultsId;
+			lastRank = rerankBySignal;
 			resultsList = new LinkedList<MemoryPeakResults>();
 			MemoryPeakResults r = new MemoryPeakResults();
 			Calibration cal = new Calibration(simulationParameters.a, simulationParameters.gain, 100);
@@ -239,23 +243,39 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			{
 				final int peak = entry.getKey().intValue();
 				final FilterCandidates result = entry.getValue();
+
+				// Results are in order of candidate ranking.
+				int[] indices = Utils.newArray(result.fitResult.length, 0, 1);
+				if (rerankBySignal)
+				{
+					// Change to signal intensity.
+					double[] score = new double[result.fitResult.length];
+					for (int i = 0; i < result.fitResult.length; i++)
+					{
+						final FitResult fitResult = result.fitResult[i];
+						if (fitResult.getStatus() == FitStatus.OK)
+						{
+							score[i] = fitResult.getParameters()[Gaussian2DFunction.SIGNAL];
+						}
+					}
+					Sort.sort(indices, score);
+				}
+
 				for (int i = 0; i < result.fitResult.length; i++)
 				{
-					final FitResult fitResult = result.fitResult[i];
+					final int index = indices[i];
+					final FitResult fitResult = result.fitResult[index];
 					if (fitResult.getStatus() == FitStatus.OK)
 					{
 						// Assume we are not fitting doublets and the fit result will have 1 peak
 						final float[] params = Utils.toFloat(fitResult.getParameters());
 						final int origX = (int) params[Gaussian2DFunction.X_POSITION];
 						final int origY = (int) params[Gaussian2DFunction.Y_POSITION];
-						r.add(peak, origX, origY, (result.fitMatch[i]) ? 1 : 0, fitResult.getError(), result.noise,
+						r.add(peak, origX, origY, (result.fitMatch[index]) ? 1 : 0, fitResult.getError(), result.noise,
 								params, null);
 					}
 				}
 			}
-
-			// We need to sort by frame then candidate order but this is already done 
-			// since the candidates are in the original ranked order
 
 			if (r.size() > 0)
 				resultsList.add(r);
@@ -280,6 +300,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addMessage(String.format("%d results, %d True-Positives", total, tp));
 
 		gd.addSlider("Fail_count", 0, 20, failCount);
+		gd.addCheckbox("Rank_by_signal", rerankBySignal);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
@@ -308,6 +329,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			for (int i = 0; i < COLUMNS.length; i++)
 				showColumns[i] = gd.getNextBoolean();
 		}
+		
+		// We may have to read the results again if the ranking option has changed
+		if (lastRank != rerankBySignal)
+			readResults();
 
 		return true;
 	}
@@ -315,6 +340,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private boolean readDialog(GenericDialog gd)
 	{
 		failCount = (int) Math.abs(gd.getNextNumber());
+		rerankBySignal = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
 		plotTopN = (int) Math.abs(gd.getNextNumber());
@@ -391,11 +417,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				else
 					summaryWindow.append(text);
 			}
-//			// Add a spacer to the summary table
-//			if (isHeadless)
-//				IJ.log("");
-//			else
-//				summaryWindow.append("");
+			// Add a spacer to the summary table if we have multiple results
+			if (filters.size() > 1)
+			{
+				if (isHeadless)
+					IJ.log("");
+				else
+					summaryWindow.append("");
+			}
 		}
 
 		showPlots();
