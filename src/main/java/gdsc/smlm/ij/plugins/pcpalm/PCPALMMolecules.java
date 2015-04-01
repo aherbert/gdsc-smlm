@@ -648,7 +648,8 @@ public class PCPALMMolecules implements PlugIn
 			if (xValues.length > 0)
 			{
 				double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-				plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, Maths.max(yValues) * 1.05);
+				plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
+						Maths.max(yValues) * 1.05);
 			}
 			plot.addPoints(xValues, yValues, Plot2.BAR);
 			Utils.display(title, plot);
@@ -894,7 +895,7 @@ public class PCPALMMolecules implements PlugIn
 			}
 		}
 		log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
-				results.size(), molecules.size(), singles.size(), molecules.size() - singles.size(), distance, time,
+				results.size(), molecules.size() + singles.size(), singles.size(), molecules.size(), distance, time,
 				Utils.rounded(time * results.getCalibration().exposureTime / 1000.0));
 		return molecules;
 	}
