@@ -380,7 +380,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			Collections.sort(filters);
 			for (FilterScore fs : filters)
 			{
-				ClassificationResult r = fs.filter.score(resultsList);
+				ClassificationResult r = fs.filter.score(resultsList, failCount);
 				String text = createResult(fs.filter, r);
 				if (isHeadless)
 					IJ.log(text);
@@ -444,7 +444,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 				Filter filter = bestFilter.get(type).filter;
 
-				ClassificationResult s = filter.score(resultsList);
+				ClassificationResult s = filter.score(resultsList, failCount);
 
 				String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
 						Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
@@ -466,8 +466,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					Filter higher = filter.adjustParameter(index, delta);
 					Filter lower = filter.adjustParameter(index, -delta);
 
-					ClassificationResult sHigher = higher.score(resultsList);
-					ClassificationResult sLower = lower.score(resultsList);
+					ClassificationResult sHigher = higher.score(resultsList, failCount);
+					ClassificationResult sLower = lower.score(resultsList, failCount);
 
 					StringBuilder sb = new StringBuilder();
 					sb.append("\t").append(filter.getParameterName(index)).append("\t");
