@@ -597,7 +597,7 @@ public class FitConfiguration implements Cloneable
 		}
 		else
 		{
-			setCoordinateShift(Float.POSITIVE_INFINITY);
+			setCoordinateShift(Double.POSITIVE_INFINITY);
 		}
 	}
 
@@ -724,7 +724,7 @@ public class FitConfiguration implements Cloneable
 		}
 		else
 		{
-			this.widthFactor = Float.POSITIVE_INFINITY;
+			this.widthFactor = Double.POSITIVE_INFINITY;
 		}
 	}
 
@@ -874,10 +874,10 @@ public class FitConfiguration implements Cloneable
 		}
 
 		// Check widths
-		double xFactor = getFactor(params[Gaussian2DFunction.X_SD + offset], initialParams[Gaussian2DFunction.X_SD +
-				offset]);
-		double yFactor = getFactor(params[Gaussian2DFunction.Y_SD + offset], initialParams[Gaussian2DFunction.Y_SD +
-				offset]);
+		final double xFactor = getFactor(params[Gaussian2DFunction.X_SD + offset],
+				initialParams[Gaussian2DFunction.X_SD + offset]);
+		final double yFactor = getFactor(params[Gaussian2DFunction.Y_SD + offset],
+				initialParams[Gaussian2DFunction.Y_SD + offset]);
 		if (xFactor > widthFactor || yFactor > widthFactor)
 		{
 			if (log != null)
