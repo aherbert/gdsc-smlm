@@ -1108,7 +1108,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.diffusionRate <= 0 || settings.fixedFraction >= 1)
 			return null;
 
-		if (settings.confinement.equals(CONFINEMENT[MASK]))
+		if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_MASK]))
 		{
 			ImagePlus imp = WindowManager.getImage(settings.confinementMask);
 			if (imp != null)
@@ -3310,9 +3310,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				{
 					addHeaderLine(sb, "Confinement_radius", settings.confinementRadius);
 				}
-				else if (settings.confinement.equals(CONFINEMENT[MASK]))
+				else if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_MASK]))
 				{
-					addHeaderLine(sb, "Confinement_radius", settings.confinementMask);
+					addHeaderLine(sb, "Confinement_mask", settings.confinementMask);
 				}
 				addHeaderLine(sb, "Photon", settings.photonsPerSecond);
 				if (settings.customPhotonDistribution)
