@@ -31,6 +31,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -72,8 +73,10 @@ public class BenchmarkSpotFit implements PlugIn
 
 	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
+	private static Calibration cal;
 	static
 	{
+		cal = new Calibration();
 		fitConfig = new FitConfiguration();
 		config = new FitEngineConfiguration(fitConfig);
 		// Set some default fit settings here ...
@@ -426,6 +429,17 @@ public class BenchmarkSpotFit implements PlugIn
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
+		settings.setCalibration(cal);
+		// Copy simulation defaults if a new simulation
+		if (lastId != simulationParameters.id)
+		{
+			cal.nmPerPixel = simulationParameters.a;
+			cal.gain = simulationParameters.gain;
+			cal.exposureTime = 100;
+			cal.readNoise = simulationParameters.readNoise;
+			cal.bias = simulationParameters.bias;
+			cal.emCCD = simulationParameters.emCCD;
+		}
 		if (!PeakFit.configureFitSolver(settings, null, extraOptions))
 			return false;
 

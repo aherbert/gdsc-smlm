@@ -126,4 +126,12 @@ public class GlobalSettings
 	{
 		this.resultsSettings = resultsSettings;
 	}
+
+	/**
+	 * @param calibration
+	 */
+	public void setCalibration(Calibration calibration)
+	{
+		this.calibration = calibration;
+	}
 }
