@@ -482,6 +482,7 @@ public class FitEngineConfiguration implements Cloneable
 		DataProcessor processor0 = createDataProcessor(border, 0, hwhmMin);
 		final int nFilters = Math.min(dataFilter.length, smooth.length);
 
+		final MaximaSpotFilter spotFilter;
 		switch (dataFilterType)
 		{
 			case JURY:
@@ -491,20 +492,28 @@ public class FitEngineConfiguration implements Cloneable
 					processors[0] = processor0;
 					for (int i = 1; i < nFilters; i++)
 						processors[i] = createDataProcessor(border, i, hwhmMin);
-					return new JurySpotFilter(search, border, processors);
+					spotFilter = new JurySpotFilter(search, border, processors);
+					break;
 				}
 
 			case DIFFERENCE:
 				if (nFilters > 1)
 				{
 					DataProcessor processor1 = createDataProcessor(border, 1, hwhmMin);
-					return new DifferenceSpotFilter(search, border, processor0, processor1);
+					spotFilter = new DifferenceSpotFilter(search, border, processor0, processor1);
+					break;
 				}
 
 			case SINGLE:
 			default:
-				return new SingleSpotFilter(search, border, processor0);
+				spotFilter = new SingleSpotFilter(search, border, processor0);
 		}
+		
+		// Note: It is possible to configure the score data processor here. However small tests 
+		// show this often reduces performance and the additional parameters make it harder to 
+		// configure. It is a subject for future work.
+		
+		return spotFilter;
 	}
 
 	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)

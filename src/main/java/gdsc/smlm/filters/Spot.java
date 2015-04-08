@@ -20,12 +20,41 @@ public class Spot implements Comparable<Spot>, Cloneable
 {
 	final public int x, y;
 	final public float intensity;
+	private float score;
 
+	/**
+	 * Constructor that sets the score (for sorting) equal to the intensity
+	 * 
+	 * @param x
+	 *            The x-coordinate
+	 * @param y
+	 *            The y-coordinate
+	 * @param intensity
+	 *            The intensity of the spot
+	 */
 	public Spot(int x, int y, float intensity)
 	{
 		this.x = x;
 		this.y = y;
+		this.intensity = score = intensity;
+	}
+
+	/**
+	 * @param x
+	 *            The x-coordinate
+	 * @param y
+	 *            The y-coordinate
+	 * @param intensity
+	 *            The intensity of the spot
+	 * @param score
+	 *            The score used for sorting
+	 */
+	public Spot(int x, int y, float intensity, float score)
+	{
+		this.x = x;
+		this.y = y;
 		this.intensity = intensity;
+		this.score = score;
 	}
 
 	/**
@@ -61,13 +90,13 @@ public class Spot implements Comparable<Spot>, Cloneable
 	 */
 	public int compareTo(Spot o)
 	{
-		if (intensity > o.intensity)
+		if (score > o.score)
 			return -1;
-		if (intensity < o.intensity)
+		if (score < o.score)
 			return 1;
 		return 0;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -84,5 +113,22 @@ public class Spot implements Comparable<Spot>, Cloneable
 			// Ignore
 		}
 		return null;
+	}
+
+	/**
+	 * @return the score used for sorting the spots
+	 */
+	public float getScore()
+	{
+		return score;
+	}
+
+	/**
+	 * @param score
+	 *            the score to set for sorting the spots
+	 */
+	public void setScore(float score)
+	{
+		this.score = score;
 	}
 }
