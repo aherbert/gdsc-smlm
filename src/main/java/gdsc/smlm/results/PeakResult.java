@@ -5,6 +5,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -507,6 +508,8 @@ public class PeakResult implements Comparable<PeakResult>
 	/**
 	 * Calculate the localisation variance for Maximum Likelihood estimation. Uses the Mortensen formula for an EMCCD
 	 * camera (Mortensen, et al (2010) Nature Methods 7, 377-383), SI equation 54.
+	 * <p>
+	 * In the event of failure to integrate the formula the variance for Least Squares Estimation is returned.
 	 * 
 	 * @param a
 	 *            The size of the pixels in nm
@@ -522,7 +525,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 *            True if an emCCD camera
 	 * @param integrationPoints
 	 *            the number of integration points for the LegendreGaussIntegrator
-	 * @return The location variance in nm in each dimension (X/Y). Returns zero if a NaN is computed.
+	 * @return The location variance in nm in each dimension (X/Y)
 	 */
 	public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD, int integrationPoints)
 	{
@@ -533,12 +536,19 @@ public class PeakResult implements Comparable<PeakResult>
 		final double sa2 = s * s + a2 / 12.0;
 
 		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
-		final double I1 = computeI1(rho, integrationPoints);
+		try
+		{
+			final double I1 = computeI1(rho, integrationPoints);
+			if (I1 > 0)
+				return F * (sa2 / N) * (1 / I1);
+			//else 
+			//	System.out.printf("Invalid I1 = %f\n", I1);
+		}
+		catch (TooManyEvaluationsException e)
+		{
 
-		final double var = F * (sa2 / N) * (1 / I1);
-		if (Double.isNaN(var))
-			return 0;
-		return var;
+		}
+		return getVarianceX(a, s, N, b2, emCCD);
 	}
 
 	/**
