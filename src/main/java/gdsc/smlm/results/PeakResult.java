@@ -522,7 +522,7 @@ public class PeakResult implements Comparable<PeakResult>
 	 *            True if an emCCD camera
 	 * @param integrationPoints
 	 *            the number of integration points for the LegendreGaussIntegrator
-	 * @return The location variance in nm in each dimension (X/Y)
+	 * @return The location variance in nm in each dimension (X/Y). Returns zero if a NaN is computed.
 	 */
 	public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD, int integrationPoints)
 	{
@@ -535,7 +535,10 @@ public class PeakResult implements Comparable<PeakResult>
 		final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
 		final double I1 = computeI1(rho, integrationPoints);
 
-		return F * (sa2 / N) * (1 / I1);
+		final double var = F * (sa2 / N) * (1 / I1);
+		if (Double.isNaN(var))
+			return 0;
+		return var;
 	}
 
 	/**
