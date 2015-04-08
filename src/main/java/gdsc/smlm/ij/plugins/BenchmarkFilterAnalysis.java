@@ -80,6 +80,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private LinkedList<String> bestFilterOrder;
 
 	private static boolean reUseFilters = true;
+	private static String oldFilename = "";
 	private static List<FilterSet> filterList = null;
 	private static int lastId = 0;
 	private static boolean lastRank = false;
@@ -164,7 +165,6 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		GlobalSettings gs = SettingsManager.loadSettings();
 		FilterSettings filterSettings = gs.getFilterSettings();
 
-		String oldFilename = filterSettings.filterSetFilename;
 		String filename = Utils.getFilename("Filter_File", filterSettings.filterSetFilename);
 		if (filename != null)
 		{
@@ -187,6 +187,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 
 			BufferedReader input = null;
+			oldFilename = "";
 			try
 			{
 				FileInputStream fis = new FileInputStream(filterSettings.filterSetFilename);
@@ -196,6 +197,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				{
 					SettingsManager.saveSettings(gs);
 					filterList = (List<FilterSet>) o;
+					oldFilename = filename;
 					return filterList;
 				}
 				IJ.log("No filter sets defined in the specified file: " + filterSettings.filterSetFilename);
