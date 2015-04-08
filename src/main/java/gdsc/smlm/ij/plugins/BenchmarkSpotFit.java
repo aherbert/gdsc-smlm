@@ -82,7 +82,12 @@ public class BenchmarkSpotFit implements PlugIn
 		// Set some default fit settings here ...
 		// Ensure all candidates are fitted
 		config.setFailuresLimit(0);
-		fitConfig.setFitValidation(false);
+		fitConfig.setFitValidation(true);
+		fitConfig.setMinPhotons(0); // Do not allow negative photons 
+		fitConfig.setCoordinateShiftFactor(0); // Disable
+		fitConfig.setPrecisionThreshold(0);
+		fitConfig.setWidthFactor(0);
+		
 		fitConfig.setBackgroundFitting(true);
 		fitConfig.setMinIterations(0);
 		fitConfig.setNoise(0);
