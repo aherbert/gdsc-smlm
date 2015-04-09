@@ -43,7 +43,9 @@ import ij.text.TextWindow;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,11 +72,15 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
+	private static boolean saveBestFilter = false;
+	private static String filterFilename = "";
 	private static int plotTopN = 0;
 	private ArrayList<NamedPlot> plots;
 	private static boolean calculateSensitivity = false;
 	private static double delta = 0.1;
 	private static int scoreIndex;
+	private static String resultsTitle;
+	private String resultsPrefix, resultsPrefix2;
 
 	private HashMap<String, FilterScore> bestFilter;
 	private LinkedList<String> bestFilterOrder;
@@ -305,10 +311,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addCheckbox("Rank_by_signal", rerankBySignal);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
+		gd.addCheckbox("Save_best_filter", saveBestFilter);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
+		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
 
@@ -331,7 +339,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			for (int i = 0; i < COLUMNS.length; i++)
 				showColumns[i] = gd.getNextBoolean();
 		}
-		
+
 		// We may have to read the results again if the ranking option has changed
 		if (lastRank != rerankBySignal)
 			readResults();
@@ -345,10 +353,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		rerankBySignal = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
+		saveBestFilter = gd.getNextBoolean();
 		plotTopN = (int) Math.abs(gd.getNextNumber());
 		calculateSensitivity = gd.getNextBoolean();
 		delta = gd.getNextNumber();
 		scoreIndex = gd.getNextChoiceIndex();
+		resultsTitle = gd.getNextString();
+		resultsPrefix = resultsTitle + "\t";
+		resultsPrefix2 = "\t" + failCount;
 
 		// Check there is one output
 		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1)
@@ -405,11 +417,13 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
+		List<FilterScore> filters = new ArrayList<FilterScore>(bestFilter.values());
+		if (showSummaryTable || saveBestFilter)
+			Collections.sort(filters);
+
 		if (showSummaryTable)
 		{
 			createSummaryWindow();
-			List<FilterScore> filters = new ArrayList<FilterScore>(bestFilter.values());
-			Collections.sort(filters);
 			for (FilterScore fs : filters)
 			{
 				ClassificationResult r = fs.filter.score(resultsList, failCount);
@@ -428,6 +442,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					summaryWindow.append("");
 			}
 		}
+
+		if (saveBestFilter)
+			saveFilter(filters.get(0).filter);
 
 		showPlots();
 		calculateSensitivity(resultsList);
@@ -596,7 +613,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("Name\tFail");
+		sb.append("Title\tName\tFail");
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
@@ -699,12 +716,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		// Add spacer at end of each result set
 		if (isHeadless)
 		{
-			if (showResultsTable)
+			if (showResultsTable && filterSet.size() > 1)
 				IJ.log("");
 		}
 		else
 		{
-			if (showResultsTable)
+			if (showResultsTable && filterSet.size() > 1)
 				resultsWindow.append("");
 
 			if (plotTopN > 0)
@@ -850,8 +867,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	public String createResult(Filter filter, ClassificationResult r)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(filter.getName()).append("\t").append(failCount);
+		StringBuilder sb = new StringBuilder(resultsPrefix);
+		sb.append(filter.getName()).append(resultsPrefix2);
 
 		int i = 0;
 		add(sb, r.getTP() + r.getFP(), i++);
@@ -912,6 +929,51 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static void add(StringBuilder sb, double value)
 	{
 		add(sb, Utils.rounded(value));
+	}
+
+	private void saveFilter(Filter filter)
+	{
+		// Save the filter to file
+		String filename = Utils.getFilename("Best_Filter_File", filterFilename);
+		if (filename != null)
+		{
+			List<Filter> filters = new LinkedList<Filter>();
+			filters.add(filter);
+			FilterSet set = new FilterSet(filter.getName(), filters);
+			List<FilterSet> list = new LinkedList<FilterSet>();
+			list.add(set);
+
+			OutputStreamWriter out = null;
+			try
+			{
+				filterFilename = filename;
+				// Append .xml if no suffix
+				if (filename.lastIndexOf('.') < 0)
+					filterFilename += ".xml";
+
+				FileOutputStream fos = new FileOutputStream(filterFilename);
+				out = new OutputStreamWriter(fos, "UTF-8");
+				out.write(XmlUtils.prettyPrintXml(XmlUtils.toXML(list)));
+			}
+			catch (Exception e)
+			{
+				IJ.log("Unable to save the filter sets to file: " + e.getMessage());
+			}
+			finally
+			{
+				if (out != null)
+				{
+					try
+					{
+						out.close();
+					}
+					catch (IOException e)
+					{
+						// Ignore
+					}
+				}
+			}
+		}
 	}
 
 	public class FilterScore implements Comparable<FilterScore>
