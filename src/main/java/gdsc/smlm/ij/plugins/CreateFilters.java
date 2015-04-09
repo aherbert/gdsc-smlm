@@ -27,7 +27,6 @@ import gdsc.smlm.utils.TextUtils;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
-import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 
 import java.awt.Checkbox;
@@ -237,16 +236,15 @@ public class CreateFilters implements PlugIn, ItemListener
 	{
 		// Save the output to file
 		IJ.showStatus("Saving filters");
-		String[] path = Utils.decodePath(filterSettings.filterSetFilename);
-		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
-		if (chooser.getFileName() != null)
+		String filename = Utils.getFilename("Filter_File", filterSettings.filterSetFilename);
+		if (filename != null)
 		{
 			OutputStreamWriter out = null;
 			try
 			{
-				filterSettings.filterSetFilename = chooser.getDirectory() + chooser.getFileName();
+				filterSettings.filterSetFilename = filename;
 				// Append .xml if no suffix
-				if (chooser.getFileName().lastIndexOf('.') < 0)
+				if (filename.lastIndexOf('.') < 0)
 					filterSettings.filterSetFilename += ".xml";
 
 				FileOutputStream fos = new FileOutputStream(filterSettings.filterSetFilename);
