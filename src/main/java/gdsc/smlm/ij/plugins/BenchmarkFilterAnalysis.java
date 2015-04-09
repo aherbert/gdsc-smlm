@@ -371,7 +371,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			resultsPrefix2 += "-" + (failCount + failCountRange);
 
 		// Check there is one output
-		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1)
+		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1 && !saveBestFilter)
 		{
 			IJ.error(TITLE, "No output selected");
 			return false;
