@@ -69,11 +69,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static TextWindow sensitivityWindow = null;
 
 	private static int failCount = 3;
+	private static int failCountRange = 0;
 	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
 	private static String filterFilename = "";
-	private static int summaryTopN = 1;
+	private static int summaryTopN = 0;
 	private static int plotTopN = 0;
 	private static boolean saveBestFilter = false;
 	private ArrayList<NamedPlot> plots;
@@ -309,6 +310,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addMessage(String.format("%d results, %d True-Positives", total, tp));
 
 		gd.addSlider("Fail_count", 0, 20, failCount);
+		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
 		gd.addCheckbox("Rank_by_signal", rerankBySignal);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
@@ -352,6 +354,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private boolean readDialog(GenericDialog gd)
 	{
 		failCount = (int) Math.abs(gd.getNextNumber());
+		failCountRange = (int) Math.abs(gd.getNextNumber());
 		rerankBySignal = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
@@ -364,6 +367,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		resultsTitle = gd.getNextString();
 		resultsPrefix = resultsTitle + "\t";
 		resultsPrefix2 = "\t" + failCount;
+		if (failCountRange > 0)
+			resultsPrefix2 += "-" + (failCount + failCountRange);
 
 		// Check there is one output
 		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1)
@@ -430,7 +435,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			int n = 0;
 			for (FilterScore fs : filters)
 			{
-				ClassificationResult r = fs.filter.score(resultsList, failCount);
+				ClassificationResult r = scoreFilter(fs.filter, resultsList);
 				String text = createResult(fs.filter, r);
 				if (isHeadless)
 					IJ.log(text);
@@ -503,7 +508,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 				Filter filter = bestFilter.get(type).filter;
 
-				ClassificationResult s = filter.score(resultsList, failCount);
+				ClassificationResult s = scoreFilter(filter, resultsList);
 
 				String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
 						Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
@@ -525,8 +530,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					Filter higher = filter.adjustParameter(index, delta);
 					Filter lower = filter.adjustParameter(index, -delta);
 
-					ClassificationResult sHigher = higher.score(resultsList, failCount);
-					ClassificationResult sLower = lower.score(resultsList, failCount);
+					ClassificationResult sHigher = scoreFilter(higher, resultsList);
+					ClassificationResult sLower = scoreFilter(lower, resultsList);
 
 					StringBuilder sb = new StringBuilder();
 					sb.append("\t").append(filter.getParameterName(index)).append("\t");
@@ -854,7 +859,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private ClassificationResult run(Filter filter, List<MemoryPeakResults> resultsList)
 	{
-		ClassificationResult r = filter.score(resultsList, failCount);
+		ClassificationResult r = scoreFilter(filter, resultsList);
 
 		if (showResultsTable)
 		{
@@ -870,6 +875,30 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 		}
 		return r;
+	}
+
+	/**
+	 * Score the filter using the results list and the configured fail count
+	 * 
+	 * @param filter
+	 * @param resultsList
+	 * @return The score
+	 */
+	private ClassificationResult scoreFilter(Filter filter, List<MemoryPeakResults> resultsList)
+	{
+		if (failCountRange == 0)
+			return filter.score(resultsList, failCount);
+		
+		int tp = 0, fp = 0, tn = 0, fn = 0;
+		for (int i = 0; i <= failCountRange; i++)
+		{
+			final ClassificationResult r = filter.score(resultsList, failCount + i);
+			tp += r.getTP();
+			fp += r.getFP();
+			tn += r.getTN();
+			fn += r.getFN();
+		}
+		return new ClassificationResult(tp, fp, tn, fn);
 	}
 
 	public String createResult(Filter filter, ClassificationResult r)
