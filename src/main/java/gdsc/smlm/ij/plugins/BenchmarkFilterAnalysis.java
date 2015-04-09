@@ -72,9 +72,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
-	private static boolean saveBestFilter = false;
 	private static String filterFilename = "";
+	private static int summaryTopN = 1;
 	private static int plotTopN = 0;
+	private static boolean saveBestFilter = false;
 	private ArrayList<NamedPlot> plots;
 	private static boolean calculateSensitivity = false;
 	private static double delta = 0.1;
@@ -311,8 +312,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addCheckbox("Rank_by_signal", rerankBySignal);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
-		gd.addCheckbox("Save_best_filter", saveBestFilter);
+		gd.addSlider("Summary_top_n", 0, 20, summaryTopN);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
+		gd.addCheckbox("Save_best_filter", saveBestFilter);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
@@ -353,8 +355,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		rerankBySignal = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
-		saveBestFilter = gd.getNextBoolean();
+		summaryTopN = (int) Math.abs(gd.getNextNumber());
 		plotTopN = (int) Math.abs(gd.getNextNumber());
+		saveBestFilter = gd.getNextBoolean();
 		calculateSensitivity = gd.getNextBoolean();
 		delta = gd.getNextNumber();
 		scoreIndex = gd.getNextChoiceIndex();
@@ -424,6 +427,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		if (showSummaryTable)
 		{
 			createSummaryWindow();
+			int n = 0;
 			for (FilterScore fs : filters)
 			{
 				ClassificationResult r = fs.filter.score(resultsList, failCount);
@@ -432,9 +436,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					IJ.log(text);
 				else
 					summaryWindow.append(text);
+				n++;
+				if (summaryTopN > 0 && n >= summaryTopN)
+					break;
 			}
 			// Add a spacer to the summary table if we have multiple results
-			if (filters.size() > 1)
+			if (n > 1)
 			{
 				if (isHeadless)
 					IJ.log("");
