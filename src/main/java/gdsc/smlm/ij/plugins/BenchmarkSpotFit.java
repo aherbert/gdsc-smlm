@@ -764,17 +764,18 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, m.getFScore(1));
 		add(sb, m.getJaccard());
 
-		double mean = stats.getMean();
-		add(sb, mean);
+		// The mean may be subject to extreme outliers so use the median
+		double median = stats.getMedian();
+		add(sb, median);
 
-		String label = String.format("Recall = %s. Mean = %s nm", Utils.rounded(m.getRecall()), Utils.rounded(mean));
+		String label = String.format("Recall = %s. Median = %s nm", Utils.rounded(m.getRecall()), Utils.rounded(median));
 		int id1 = Utils.showHistogram(TITLE, stats, "Match Distance (nm)", 0, 0, 100, label);
 
-		mean = precisionStats.getMean();
-		add(sb, mean);
+		median = precisionStats.getMedian();
+		add(sb, median);
 
-		label = String.format("Mean = %s nm", Utils.rounded(mean));
-		int id2 = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 100, true, label);
+		label = String.format("Median = %s nm", Utils.rounded(median));
+		int id2 = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 100, label);
 		if (Utils.isNewWindow())
 		{
 			ImageWindow pw = WindowManager.getImage(id1).getWindow();
@@ -852,8 +853,8 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Precision\t");
 		sb.append("F1\t");
 		sb.append("Jaccard\t");
-		sb.append("Av.Distance (nm)\t");
-		sb.append("Av.Precision (nm)\t");
+		sb.append("Med.Distance (nm)\t");
+		sb.append("Med.Precision (nm)\t");
 
 		return sb.toString();
 	}
