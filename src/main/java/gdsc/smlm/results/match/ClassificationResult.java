@@ -216,11 +216,11 @@ public class ClassificationResult
 	}
 
 	/**
-	 * @return The false discovery rate = fp / (tp + fp)
+	 * @return The false discovery rate (1 - precision) = fp / (tp + fp)
 	 */
 	public double getFDR()
 	{
-		return divide(fp, tp + fp);
+		return 1 - precision; // divide(fp, tp + fp);
 	}
 
 	/**
