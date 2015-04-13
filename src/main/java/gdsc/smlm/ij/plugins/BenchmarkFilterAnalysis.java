@@ -80,7 +80,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private ArrayList<NamedPlot> plots;
 	private static boolean calculateSensitivity = false;
 	private static double delta = 0.1;
+	private static int criteriaIndex;
+	private static double criteriaLimit = 0.9;
+	private double minCriteria = 0;
+	private boolean invertCriteria = false;
 	private static int scoreIndex;
+	private boolean invertScore = false;
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2;
 
@@ -106,7 +111,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		Arrays.fill(showColumns, true);
 		showColumns[0] = false; // nP
 
-		scoreIndex = COLUMNS.length - 1;
+		criteriaIndex = COLUMNS.length - 3;
+		scoreIndex = COLUMNS.length - 4;
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
@@ -319,6 +325,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addCheckbox("Save_best_filter", saveBestFilter);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
+		gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
+		gd.addNumericField("Criteria_limit", criteriaLimit, 2);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
 		gd.addStringField("Title", resultsTitle, 20);
 
@@ -363,6 +371,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		saveBestFilter = gd.getNextBoolean();
 		calculateSensitivity = gd.getNextBoolean();
 		delta = gd.getNextNumber();
+		criteriaIndex = gd.getNextChoiceIndex();
+		criteriaLimit = gd.getNextNumber();
 		scoreIndex = gd.getNextChoiceIndex();
 		resultsTitle = gd.getNextString();
 		resultsPrefix = resultsTitle + "\t";
@@ -388,6 +398,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
+
+		invertCriteria = requiresInversion(criteriaIndex);
+		minCriteria = (invertCriteria) ? -criteriaLimit : criteriaLimit;
+		invertScore = requiresInversion(scoreIndex);
 
 		return !gd.invalidNumber();
 	}
@@ -424,6 +438,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 		IJ.showProgress(1);
 		IJ.showStatus("");
+
+		if (bestFilter.isEmpty())
+		{
+			IJ.log("Warning: No filters pass the criteria");
+			return;
+		}
 
 		List<FilterScore> filters = new ArrayList<FilterScore>(bestFilter.values());
 		if (showSummaryTable || saveBestFilter)
@@ -697,10 +717,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				allSameType = false;
 
 			final double score = getScore(s);
-			if (filter == null || maxScore < score)
+
+			// Check if the criteria are achieved
+			if (getCriteria(s) >= minCriteria)
 			{
-				maxScore = score;
-				maxFilter = filter;
+				// Check if the score is better
+				if (filter == null || maxScore < score)
+				{
+					maxScore = score;
+					maxFilter = filter;
+				}
 			}
 
 			if (!isHeadless)
@@ -708,6 +734,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				xValues[i] = filter.getNumericalValue();
 				yValues[i++] = score;
 			}
+		}
+
+		// We may have no filters that pass the criteria
+		if (maxFilter == null)
+		{
+			if (allSameType)
+			{
+				IJ.log("Warning: Filter does not pass the criteria: " + type);
+			}
+			return count;
 		}
 
 		if (allSameType)
@@ -787,10 +823,26 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		return count;
 	}
 
-	public double getScore(ClassificationResult s)
+	private double getCriteria(ClassificationResult s)
+	{
+		return getScore(s, criteriaIndex, invertCriteria);
+	}
+
+	private double getScore(ClassificationResult s)
+	{
+		return getScore(s, scoreIndex, invertScore);
+	}
+
+	private double getScore(ClassificationResult s, final int index, final boolean invert)
+	{
+		final double score = getScore(s, index);
+		return (invert) ? -score : score;
+	}
+
+	private double getScore(ClassificationResult s, final int index)
 	{
 		// This order must match the COLUMNS order 
-		switch (scoreIndex)
+		switch (index)
 		{
 			case 0:
 				return s.getTP() + s.getFP();
@@ -834,6 +886,22 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				return s.getJaccard();
 		}
 		return 0;
+	}
+
+	private boolean requiresInversion(final int index)
+	{
+		switch (index)
+		{
+			case 2: // FP
+			case 4: // FN
+			case 9: // FPR
+			case 10: // FNR
+			case 11: // FDR
+				return true;
+
+			default:
+				return false;
+		}
 	}
 
 	private NamedPlot getNamedPlot(String title)
@@ -888,7 +956,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	{
 		if (failCountRange == 0)
 			return filter.score(resultsList, failCount);
-		
+
 		int tp = 0, fp = 0, tn = 0, fn = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
