@@ -221,6 +221,12 @@ public class BenchmarkSpotFit implements PlugIn
 
 		private void run(int frame)
 		{
+			if (Utils.isInterrupted())
+			{
+				finished = true;
+				return;
+			}
+			
 			// Extract the data
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
@@ -527,6 +533,14 @@ public class BenchmarkSpotFit implements PlugIn
 		threads.clear();
 
 		IJ.showProgress(1);
+		
+		if (Utils.isInterrupted())
+		{
+			IJ.showProgress(1);
+			IJ.showStatus("Aborted");
+			return;
+		}
+		
 		IJ.showStatus("Collecting results ...");
 
 		fitResultsId++;
