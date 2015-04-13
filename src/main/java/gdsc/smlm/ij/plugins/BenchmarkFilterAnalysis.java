@@ -375,7 +375,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		criteriaLimit = gd.getNextNumber();
 		scoreIndex = gd.getNextChoiceIndex();
 		resultsTitle = gd.getNextString();
-		resultsPrefix = resultsTitle + "\t";
+		
+		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
 		resultsPrefix2 = "\t" + failCount;
 		if (failCountRange > 0)
 			resultsPrefix2 += "-" + (failCount + failCountRange);
@@ -644,8 +645,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private String createResultsHeader()
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("Title\tName\tFail");
+		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
+		sb.append("\tTitle\tName\tFail");
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])

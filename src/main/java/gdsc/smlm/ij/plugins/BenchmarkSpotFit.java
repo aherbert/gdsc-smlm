@@ -122,6 +122,8 @@ public class BenchmarkSpotFit implements PlugIn
 	static int fitResultsId = 0;
 	static HashMap<Integer, FilterCandidates> fitResults;
 
+	public static String tablePrefix, resultPrefix;
+
 	public class FilterCandidates implements Cloneable
 	{
 		final int p, n;
@@ -720,13 +722,15 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append("\t");
 
-		sb.append(spotFilter.getDescription()).append("\t");
+		sb.append(spotFilter.getDescription());
 
 		add(sb, nP + nN);
 		add(sb, nP);
 		add(sb, nN);
 		add(sb, PeakFit.getSolverName(config.getFitConfiguration()));
 		add(sb, config.getFitting());
+		
+		resultPrefix = sb.toString();
 
 		// Q. Should I add other fit configuration here?
 
@@ -803,12 +807,12 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private static void add(StringBuilder sb, String value)
 	{
-		sb.append(value).append("\t");
+		sb.append("\t").append(value);
 	}
 
 	private static void add(StringBuilder sb, int value)
 	{
-		sb.append(value).append("\t");
+		sb.append("\t").append(value);
 	}
 
 	private static void add(StringBuilder sb, double value)
@@ -835,6 +839,8 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("nN\t");
 		sb.append("Solver\t");
 		sb.append("Fitting\t");
+		
+		tablePrefix = sb.toString();
 
 		sb.append("% nP\t");
 		sb.append("% nN\t");
