@@ -838,10 +838,11 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("nP\t");
 		sb.append("nN\t");
 		sb.append("Solver\t");
-		sb.append("Fitting\t");
+		sb.append("Fitting");
 		
 		tablePrefix = sb.toString();
 
+		sb.append("\t");
 		sb.append("% nP\t");
 		sb.append("% nN\t");
 		sb.append("Total\t");
