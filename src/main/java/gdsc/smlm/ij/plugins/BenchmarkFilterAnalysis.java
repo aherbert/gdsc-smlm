@@ -326,7 +326,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
 		gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
-		gd.addNumericField("Criteria_limit", criteriaLimit, 2);
+		gd.addNumericField("Criteria_limit", criteriaLimit, 4);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
 		gd.addStringField("Title", resultsTitle, 20);
 
