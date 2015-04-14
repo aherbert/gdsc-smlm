@@ -710,17 +710,17 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			if (count++ % 16 == 0)
 				IJ.showProgress(count, total);
 
-			ClassificationResult s = run(filter, resultsList);
-
 			if (type == null)
 				type = filter.getType();
 			else if (!type.equals(filter.getType()))
 				allSameType = false;
-
-			final double score = getScore(s);
+			
+			final double[] result = run(filter, resultsList);
+			final double score = result[0];
+			final double criteria = result[1];
 
 			// Check if the criteria are achieved
-			if (getCriteria(s) >= minCriteria)
+			if (criteria >= minCriteria)
 			{
 				// Check if the score is better
 				if (filter == null || maxScore < score)
@@ -926,11 +926,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		return max;
 	}
 
-	private ClassificationResult run(Filter filter, List<MemoryPeakResults> resultsList)
+	private double[] run(Filter filter, List<MemoryPeakResults> resultsList)
 	{
 		ClassificationResult r = scoreFilter(filter, resultsList);
+		final double score = getScore(r);
+		final double criteria = getCriteria(r);		
 
-		if (showResultsTable)
+		// Show the result if it achieves the criteria limit 
+		if (showResultsTable && criteria >= minCriteria)
 		{
 			String text = createResult(filter, r);
 
@@ -943,7 +946,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				resultsWindow.append(text);
 			}
 		}
-		return r;
+		return new double[] { score, criteria };
 	}
 
 	/**
