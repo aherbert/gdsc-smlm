@@ -3,6 +3,7 @@ package gdsc.smlm.results.filter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.match.ClassificationResult;
+import gdsc.smlm.results.match.FractionClassificationResult;
 
 import java.util.List;
 
@@ -134,14 +135,14 @@ public abstract class Filter implements Comparable<Filter>
 			{
 				boolean isTrue = peak.origValue != 0;
 				boolean isPositive = accept(peak);
-				
+
 				// Reset fail count for new frames
 				if (frame != peak.peak)
 				{
 					frame = peak.peak;
 					failCount = 0;
 				}
-				
+
 				// Reject all peaks if we have exceeded the fail count
 				if (failCount > failures)
 				{
@@ -152,7 +153,7 @@ public abstract class Filter implements Comparable<Filter>
 					// Otherwise assess the peak
 					isPositive = accept(peak);
 				}
-				
+
 				if (isPositive)
 				{
 					failCount = 0;
@@ -161,7 +162,7 @@ public abstract class Filter implements Comparable<Filter>
 				{
 					failCount++;
 				}
-				
+
 				if (isTrue)
 				{
 					if (isPositive)
@@ -179,6 +180,89 @@ public abstract class Filter implements Comparable<Filter>
 			}
 		}
 		return new ClassificationResult(tp, fp, tn, fn);
+	}
+
+	/**
+	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
+	 * true or false.
+	 * <p>
+	 * Any input PeakResult with an original value that is not zero will be treated as a true result, all other results
+	 * are false. The filter is run and the results are marked as true positive, false negative and false positive.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * 
+	 * @param resultsList
+	 *            a list of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @return the score
+	 */
+	public FractionClassificationResult fractionScore(List<MemoryPeakResults> resultsList, int failures)
+	{
+		int fp = 0, tn = 0;
+		double tp = 0, fn = 0;
+		for (MemoryPeakResults peakResults : resultsList)
+		{
+			setup(peakResults);
+
+			int frame = -1;
+			int failCount = 0;
+			for (PeakResult peak : peakResults.getResults())
+			{
+				boolean isTrue = peak.origValue != 0;
+				boolean isPositive = accept(peak);
+
+				// Reset fail count for new frames
+				if (frame != peak.peak)
+				{
+					frame = peak.peak;
+					failCount = 0;
+				}
+
+				// Reject all peaks if we have exceeded the fail count
+				if (failCount > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
+
+				if (isPositive)
+				{
+					failCount = 0;
+				}
+				else
+				{
+					failCount++;
+				}
+
+				if (isTrue)
+				{
+					if (isPositive)
+					{
+						tp += peak.origValue; // true positive
+						fp += 1 - peak.origValue;
+					}
+					else
+					{
+						fn += peak.origValue; // false negative
+						tn += 1 - peak.origValue;
+					}
+				}
+				else
+				{
+					if (isPositive)
+						fp++; // false positive
+					else
+						tn++; // true negative
+				}
+			}
+		}
+		return new FractionClassificationResult(tp, fp, tn, fn);
 	}
 
 	/**

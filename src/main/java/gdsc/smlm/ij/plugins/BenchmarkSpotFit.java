@@ -107,7 +107,6 @@ public class BenchmarkSpotFit implements PlugIn
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 	private MaximaSpotFilter spotFilter;
-	private double distanceInPixels;
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static HashMap<Integer, FilterCandidates> filterCandidates;
@@ -121,6 +120,7 @@ public class BenchmarkSpotFit implements PlugIn
 	// Allow other plugins to access the results
 	static int fitResultsId = 0;
 	static HashMap<Integer, FilterCandidates> fitResults;
+	static double distanceInPixels;
 
 	public static String tablePrefix, resultPrefix;
 
@@ -131,7 +131,7 @@ public class BenchmarkSpotFit implements PlugIn
 		int tp, fp, tn, fn;
 		FitResult[] fitResult;
 		boolean[] fitMatch;
-		double[] d2;
+		double[] d;
 		float noise;
 
 		public FilterCandidates(int p, int n, ScoredSpot[] spots)
@@ -256,7 +256,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 			// Compute the matches of the fitted spots to the simulated positions
 			final boolean[] fitMatch = new boolean[spots.length];
-			final double[] d2 = new double[spots.length];
+			final double[] d = new double[spots.length];
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			if (actual.length > 0)
 			{
@@ -291,7 +291,7 @@ public class BenchmarkSpotFit implements PlugIn
 						final BasePoint p = (BasePoint) pair.getPoint2();
 						final int i = (int) p.getZ();
 						fitMatch[i] = true;
-						d2[i] = pair.getXYDistance2();
+						d[i] = pair.getXYDistance();
 					}
 				}
 			}
@@ -328,7 +328,7 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.fn = fn;
 			candidates.fitResult = fitResult;
 			candidates.fitMatch = fitMatch;
-			candidates.d2 = d2;
+			candidates.d = d;
 			// Noise should be the same for all results
 			if (!job.getResults().isEmpty())
 				candidates.noise = job.getResults().get(0).noise;
@@ -666,7 +666,7 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 				if (result.fitMatch[i])
 				{
-					stats.add(Math.sqrt(result.d2[i]) * nmPerPixel);
+					stats.add(result.d[i] * nmPerPixel);
 					final double[] p = result.fitResult[i].getParameters();
 					final double s = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
 					final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;

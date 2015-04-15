@@ -27,8 +27,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.XStreamWrapper;
-import gdsc.smlm.results.match.ClassificationResult;
-import gdsc.smlm.results.match.MatchResult;
+import gdsc.smlm.results.match.FractionClassificationResult;
 import gdsc.smlm.utils.Sort;
 import gdsc.smlm.utils.UnicodeReader;
 import gdsc.smlm.utils.XmlUtils;
@@ -68,7 +67,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
 
-	private static int failCount = 3;
+	private static int failCount = 1;
 	private static int failCountRange = 0;
 	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
@@ -87,8 +86,11 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private boolean invertCriteria = false;
 	private static int scoreIndex;
 	private boolean invertScore = false;
+	private static double upperMatchDistance = 100;
+	private static double partialMatchDistance = 100;
+
 	private static String resultsTitle;
-	private String resultsPrefix, resultsPrefix2;
+	private String resultsPrefix, resultsPrefix2, resultsPrefix3;
 
 	private HashMap<String, FilterScore> bestFilter;
 	private LinkedList<String> bestFilterOrder;
@@ -98,6 +100,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static List<FilterSet> filterList = null;
 	private static int lastId = 0;
 	private static boolean lastRank = false;
+	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
 	private static List<MemoryPeakResults> resultsList = null;
 
 	private boolean isHeadless;
@@ -113,7 +116,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		showColumns[0] = false; // nP
 
 		criteriaIndex = COLUMNS.length - 3;
-		scoreIndex = COLUMNS.length - 4;
+		scoreIndex = COLUMNS.length - 1;
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
@@ -242,11 +245,21 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private List<MemoryPeakResults> readResults()
 	{
-		if (resultsList == null || lastId != BenchmarkSpotFit.fitResultsId || lastRank != rerankBySignal)
+		if (resultsList == null || lastId != BenchmarkSpotFit.fitResultsId || lastRank != rerankBySignal ||
+				lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance)
 		{
 			lastId = BenchmarkSpotFit.fitResultsId;
 			lastRank = rerankBySignal;
+			lastUpperMatchDistance = upperMatchDistance;
+			lastPartialMatchDistance = partialMatchDistance;
 			resultsList = new LinkedList<MemoryPeakResults>();
+
+			final double fuzzyMax = BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
+			final double fuzzyMin = BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0;
+			final double fuzzyRange = fuzzyMax - fuzzyMin;
+			resultsPrefix3 = "\t" + Utils.rounded(fuzzyMin * simulationParameters.a) + "\t" +
+					Utils.rounded(fuzzyMax * simulationParameters.a);
+
 			MemoryPeakResults r = new MemoryPeakResults();
 			Calibration cal = new Calibration(simulationParameters.a, simulationParameters.gain, 100);
 			cal.bias = simulationParameters.bias;
@@ -288,8 +301,22 @@ public class BenchmarkFilterAnalysis implements PlugIn
 						final float[] params = Utils.toFloat(fitResult.getParameters());
 						final int origX = (int) params[Gaussian2DFunction.X_POSITION];
 						final int origY = (int) params[Gaussian2DFunction.Y_POSITION];
-						r.add(peak, origX, origY, (result.fitMatch[index]) ? 1 : 0, fitResult.getError(), result.noise,
-								params, null);
+						// Binary classification uses a score of 1 (match) or 0 (no match)
+						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
+						float score = 0;
+						if (result.fitMatch[index] && result.d[index] <= fuzzyMax)
+						{
+							// TODO - linearly interpolate from the minimum to the maximum match distance
+							if (result.d[index] <= fuzzyMin)
+							{
+								score = 1;
+							}
+							else
+							{
+								score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
+							}
+						}
+						r.add(peak, origX, origY, score, fitResult.getError(), result.noise, params, null);
 					}
 				}
 			}
@@ -330,6 +357,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
 		gd.addNumericField("Criteria_limit", criteriaLimit, 4);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
+		gd.addMessage("Fitting results match distance = " +
+				Utils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.a) + " nm");
+		gd.addSlider("Upper_match_distance (%)", 0, 100, upperMatchDistance);
+		gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
 		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
@@ -355,7 +386,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 
 		// We may have to read the results again if the ranking option has changed
-		if (lastRank != rerankBySignal)
+		if (lastRank != rerankBySignal || lastPartialMatchDistance != partialMatchDistance ||
+				lastUpperMatchDistance != upperMatchDistance)
 			readResults();
 
 		return true;
@@ -377,8 +409,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		criteriaIndex = gd.getNextChoiceIndex();
 		criteriaLimit = gd.getNextNumber();
 		scoreIndex = gd.getNextChoiceIndex();
+		upperMatchDistance = Math.abs(gd.getNextNumber());
+		partialMatchDistance = Math.abs(gd.getNextNumber());
 		resultsTitle = gd.getNextString();
-		
+
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
 		resultsPrefix2 = "\t" + failCount;
 		if (failCountRange > 0)
@@ -396,6 +430,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			Parameters.isAboveZero("Delta", delta);
 			Parameters.isBelow("Delta", delta, 1);
+			Parameters.isEqualOrBelow("Partial match distance", partialMatchDistance, upperMatchDistance);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -459,7 +494,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			int n = 0;
 			for (FilterScore fs : filters)
 			{
-				ClassificationResult r = scoreFilter(fs.filter, resultsList);
+				FractionClassificationResult r = scoreFilter(fs.filter, resultsList);
 				String text = createResult(fs.filter, r);
 				if (isHeadless)
 					IJ.log(text);
@@ -532,7 +567,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 				Filter filter = bestFilter.get(type).filter;
 
-				ClassificationResult s = scoreFilter(filter, resultsList);
+				FractionClassificationResult s = scoreFilter(filter, resultsList);
 
 				String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
 						Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
@@ -554,8 +589,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					Filter higher = filter.adjustParameter(index, delta);
 					Filter lower = filter.adjustParameter(index, -delta);
 
-					ClassificationResult sHigher = scoreFilter(higher, resultsList);
-					ClassificationResult sLower = scoreFilter(lower, resultsList);
+					FractionClassificationResult sHigher = scoreFilter(higher, resultsList);
+					FractionClassificationResult sLower = scoreFilter(lower, resultsList);
 
 					StringBuilder sb = new StringBuilder();
 					sb.append("\t").append(filter.getParameterName(index)).append("\t");
@@ -653,7 +688,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private String createResultsHeader()
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
-		sb.append("\tTitle\tName\tFail");
+		sb.append("\tTitle\tName\tFail\tLower (nm)\tUpper (nm)");
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
@@ -721,7 +756,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				type = filter.getType();
 			else if (!type.equals(filter.getType()))
 				allSameType = false;
-			
+
 			final double[] result = run(filter, resultsList);
 			final double score = result[0];
 			final double criteria = result[1];
@@ -831,23 +866,23 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		return count;
 	}
 
-	private double getCriteria(ClassificationResult s)
+	private double getCriteria(FractionClassificationResult s)
 	{
 		return getScore(s, criteriaIndex, invertCriteria);
 	}
 
-	private double getScore(ClassificationResult s)
+	private double getScore(FractionClassificationResult s)
 	{
 		return getScore(s, scoreIndex, invertScore);
 	}
 
-	private double getScore(ClassificationResult s, final int index, final boolean invert)
+	private double getScore(FractionClassificationResult s, final int index, final boolean invert)
 	{
 		final double score = getScore(s, index);
 		return (invert) ? -score : score;
 	}
 
-	private double getScore(ClassificationResult s, final int index)
+	private double getScore(FractionClassificationResult s, final int index)
 	{
 		// This order must match the COLUMNS order 
 		switch (index)
@@ -935,9 +970,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private double[] run(Filter filter, List<MemoryPeakResults> resultsList)
 	{
-		ClassificationResult r = scoreFilter(filter, resultsList);
+		FractionClassificationResult r = scoreFilter(filter, resultsList);
 		final double score = getScore(r);
-		final double criteria = getCriteria(r);		
+		final double criteria = getCriteria(r);
 
 		// Show the result if it achieves the criteria limit 
 		if (showResultsTable && criteria >= minCriteria)
@@ -963,27 +998,27 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	 * @param resultsList
 	 * @return The score
 	 */
-	private ClassificationResult scoreFilter(Filter filter, List<MemoryPeakResults> resultsList)
+	private FractionClassificationResult scoreFilter(Filter filter, List<MemoryPeakResults> resultsList)
 	{
 		if (failCountRange == 0)
-			return filter.score(resultsList, failCount);
+			return filter.fractionScore(resultsList, failCount);
 
-		int tp = 0, fp = 0, tn = 0, fn = 0;
+		double tp = 0, fp = 0, tn = 0, fn = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
-			final ClassificationResult r = filter.score(resultsList, failCount + i);
+			final FractionClassificationResult r = filter.fractionScore(resultsList, failCount + i);
 			tp += r.getTP();
 			fp += r.getFP();
 			tn += r.getTN();
 			fn += r.getFN();
 		}
-		return new ClassificationResult(tp, fp, tn, fn);
+		return new FractionClassificationResult(tp, fp, tn, fn);
 	}
 
-	public String createResult(Filter filter, ClassificationResult r)
+	public String createResult(Filter filter, FractionClassificationResult r)
 	{
 		StringBuilder sb = new StringBuilder(resultsPrefix);
-		sb.append(filter.getName()).append(resultsPrefix2);
+		sb.append(filter.getName()).append(resultsPrefix2).append(resultsPrefix3);
 
 		int i = 0;
 		add(sb, r.getTP() + r.getFP(), i++);
@@ -1014,9 +1049,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		// TP are all fit results that can be matched to a spot
 		// FP are all fit results that cannot be matched to a spot
 		// FN = The number of missed spots
-		final int tp = r.getTP();
-		final int fp = r.getFP();
-		MatchResult m = new MatchResult(tp, fp, simulationParameters.molecules - tp, 0);
+		final double tp = r.getTP();
+		final double fp = r.getFP();
+		FractionClassificationResult m = new FractionClassificationResult(tp, fp, 0, simulationParameters.molecules -
+				tp);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
 		add(sb, m.getFScore(1));
@@ -1029,6 +1065,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		sb.append("\t").append(value);
 	}
 
+	@SuppressWarnings("unused")
 	private static void add(StringBuilder sb, int value, int i)
 	{
 		if (showColumns[i])
