@@ -73,6 +73,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
+	private static boolean clearTables = false;
 	private static String filterFilename = "";
 	private static int summaryTopN = 0;
 	private static int plotTopN = 0;
@@ -320,6 +321,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addCheckbox("Rank_by_signal", rerankBySignal);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
+		gd.addCheckbox("Clear_tables", clearTables);
 		gd.addSlider("Summary_top_n", 0, 20, summaryTopN);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
 		gd.addCheckbox("Save_best_filter", saveBestFilter);
@@ -366,6 +368,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		rerankBySignal = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
+		clearTables = gd.getNextBoolean();
 		summaryTopN = (int) Math.abs(gd.getNextNumber());
 		plotTopN = (int) Math.abs(gd.getNextNumber());
 		saveBestFilter = gd.getNextBoolean();
@@ -621,6 +624,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				String header = createResultsHeader();
 				resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
 			}
+			if (clearTables)
+				resultsWindow.getTextPanel().clear();
 		}
 	}
 
@@ -640,6 +645,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				String header = createResultsHeader();
 				summaryWindow = new TextWindow(TITLE + " Summary", header, "", 900, 300);
 			}
+			if (clearTables)
+				summaryWindow.getTextPanel().clear();
 		}
 	}
 
