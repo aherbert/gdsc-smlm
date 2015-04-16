@@ -201,7 +201,7 @@ public abstract class Filter implements Comparable<Filter>
 	 */
 	public FractionClassificationResult fractionScore(List<MemoryPeakResults> resultsList, int failures)
 	{
-		int fp = 0, tn = 0;
+		double fp = 0, tn = 0;
 		double tp = 0, fn = 0;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
@@ -255,14 +255,14 @@ public abstract class Filter implements Comparable<Filter>
 						tp += peak.origValue; // true positive
 						// Q. Should the partial score be balanced?
 						//fp += max - peak.origValue;
-						fp += 1 - peak.origValue;
+						fp += 1f - peak.origValue;
 					}
 					else
 					{
 						fn += peak.origValue; // false negative
 						// Q. Should the partial score be balanced?
 						//tn += max - peak.origValue;
-						tn += 1 - peak.origValue;
+						tn += 1f - peak.origValue;
 					}
 				}
 				else
