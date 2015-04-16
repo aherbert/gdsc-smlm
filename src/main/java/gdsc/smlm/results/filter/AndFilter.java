@@ -30,17 +30,24 @@ public class AndFilter extends CombinedFilter
 	{
 		return "&&";
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#accept(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return filter1.accept(peak) && filter2.accept(peak);
+		if (!filter1.accept(peak))
+			return false;
+		return filter2.accept(peak);
+		//return filter1.accept(peak) && filter2.accept(peak);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getDescription()
 	 */
 	@Override
@@ -48,7 +55,7 @@ public class AndFilter extends CombinedFilter
 	{
 		return "Filter results using the combination of two filters. Results must pass both filters.";
 	}
-	
+
 	@Override
 	protected Filter createFilter(Filter f1, Filter f2)
 	{
