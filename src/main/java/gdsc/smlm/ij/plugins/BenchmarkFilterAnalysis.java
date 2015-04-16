@@ -261,6 +261,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			resultsPrefix3 = "\t" + Utils.rounded(fuzzyMin * simulationParameters.a) + "\t" +
 					Utils.rounded(fuzzyMax * simulationParameters.a);
 
+			// Normalise the matches so the fuzzy weighting sums to the original true positive count 
+			//int tp = 0;
+			//double sum = 0;
+
 			MemoryPeakResults r = new MemoryPeakResults();
 			Calibration cal = new Calibration(simulationParameters.a, simulationParameters.gain, 100);
 			cal.bias = simulationParameters.bias;
@@ -321,6 +325,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 								score = (float) (0.5 * (1 + Math.cos(((result.d[index] - fuzzyMin) / fuzzyRange) *
 										Math.PI)));
 							}
+							//tp++;
+							//sum += score;
 						}
 						r.add(peak, origX, origY, score, fitResult.getError(), result.noise, params, null);
 					}
@@ -328,7 +334,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 
 			if (r.size() > 0)
+			{
+				// Normalise the fuzzy weighting
+				//final double w = tp / sum;
+				//for (PeakResult result : r.getResults())
+				//{
+				//	if (result.origValue != 0)
+				//		result.origValue *= w;
+				//}			
 				resultsList.add(r);
+			}
 		}
 		return resultsList;
 	}
@@ -752,6 +767,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		boolean allSameType = true;
 		Filter maxFilter = null;
 		double maxScore = -1;
+		double maxCriteria = 0;
 
 		for (Filter filter : filterSet.getFilters())
 		{
@@ -777,6 +793,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					maxFilter = filter;
 				}
 			}
+			else if (maxCriteria < criteria)
+			{
+				maxCriteria = criteria;
+			}
 
 			if (!isHeadless)
 			{
@@ -790,7 +810,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			if (allSameType)
 			{
-				IJ.log("Warning: Filter does not pass the criteria: " + type);
+				Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s", type,
+						Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria));
 			}
 			return count;
 		}

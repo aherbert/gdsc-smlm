@@ -186,8 +186,9 @@ public abstract class Filter implements Comparable<Filter>
 	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
 	 * true or false.
 	 * <p>
-	 * Any input PeakResult with an original value that is not zero will be treated as a true result, all other results
-	 * are false. The filter is run and the results are marked as true positive, false negative and false positive.
+	 * Any input PeakResult with an original value that is not zero will be treated as a true result with a weighting
+	 * equal to the score (instead of the classic weighting of one), all other results are false. The filter is run and
+	 * the results are marked as true positive, false negative and false positive.
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
@@ -205,6 +206,13 @@ public abstract class Filter implements Comparable<Filter>
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
+			// Q. Should the partial score be balanced?
+			//float max = 0;
+			//for (PeakResult peak : peakResults.getResults())
+			//{
+			//	if (max < peak.origValue)
+			//		max = peak.origValue;
+			//}
 
 			int frame = -1;
 			int failCount = 0;
@@ -245,11 +253,15 @@ public abstract class Filter implements Comparable<Filter>
 					if (isPositive)
 					{
 						tp += peak.origValue; // true positive
+						// Q. Should the partial score be balanced?
+						//fp += max - peak.origValue;
 						fp += 1 - peak.origValue;
 					}
 					else
 					{
 						fn += peak.origValue; // false negative
+						// Q. Should the partial score be balanced?
+						//tn += max - peak.origValue;
 						tn += 1 - peak.origValue;
 					}
 				}
