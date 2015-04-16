@@ -186,6 +186,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 			final int fitting = config.getRelativeFitting();
 			fitWorker.setSearchParameters(spotFilter, fitting);
+			fitWorker.setUpdateInitialParameters(true);
 
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;

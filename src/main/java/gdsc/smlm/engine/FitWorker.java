@@ -94,6 +94,8 @@ public class FitWorker implements Runnable
 	private int[] fittedNeighbourIndices = null;
 	private float duplicateDistance2;
 
+	private boolean updateInitialParameters = false;
+
 	private volatile boolean finished = false;
 
 	static int ID = 0;
@@ -141,7 +143,7 @@ public class FitWorker implements Runnable
 	 * Locate all the peaks in the image specified by the fit job
 	 * <p>
 	 * WARNING: The FitWorker fits a sub-region of the data for each maxima. It then updates the FitResult parameters
-	 * with an offset reflecting the position. The initialParameters are not updated with this offset.
+	 * with an offset reflecting the position. The initialParameters are not updated with this offset unless configured.
 	 * 
 	 * @param job
 	 *            The fit job
@@ -321,7 +323,15 @@ public class FitWorker implements Runnable
 
 					// Add the failed jobs to a list.
 					failed[failedCount++] = n;
+
+					if (updateInitialParameters)
+						// Update the coordinates for failed fits
+						updateCoordinates(regionBounds, fitResult.getParameters());
 				}
+
+				if (updateInitialParameters)
+					// Update the initial coordinates
+					updateCoordinates(regionBounds, fitResult.getInitialParameters());
 
 				if (config.getFailuresLimit() != 0 && failures >= config.getFailuresLimit())
 					break;
@@ -481,9 +491,7 @@ public class FitWorker implements Runnable
 		// corner of the pixel. The coordinates should be represented in the middle of the pixel 
 		// so add a 0.5 shift to the coordinates.
 
-		// WARNING: We do not update the initialParameters in the FitResult with the same offset.
-		// I do not think they are used downstream of the FitWorker apart from debugging but it may 
-		// have to be addressed in the future.
+		// WARNING: We do not update the initialParameters in the FitResult with the same offset unless configured.
 
 		for (int i = 0; i < npeaks; i++)
 		{
@@ -518,6 +526,23 @@ public class FitWorker implements Runnable
 			}
 		}
 		return count;
+	}
+
+	private void updateCoordinates(Rectangle regionBounds, double[] params)
+	{
+		if (params != null)
+		{
+			int npeaks = params.length / 6;
+
+			// Note that during processing the data is assumed to refer to the top-left
+			// corner of the pixel. The coordinates should be represented in the middle of the pixel 
+			// so add a 0.5 shift to the coordinates.
+			for (int i = 0; i < npeaks; i++)
+			{
+				params[i * 6 + Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+				params[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+			}
+		}
 	}
 
 	/**
@@ -843,7 +868,7 @@ public class FitWorker implements Runnable
 
 			printFitResults(fitResult, region, width, height, npeaks, 0, gf.getIterations());
 
-			fitConfig.setMaxIterations(maxIterations); 
+			fitConfig.setMaxIterations(maxIterations);
 
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
@@ -869,7 +894,7 @@ public class FitWorker implements Runnable
 				if (logger != null)
 					logger.info("Multiple-fit failed, resorting to single-fit");
 				fitResult = null;
-				
+
 				background = getSingleFittingBackground();
 			}
 		}
@@ -1752,5 +1777,25 @@ public class FitWorker implements Runnable
 	public void setUseFittedBackground(boolean useFittedBackground)
 	{
 		this.useFittedBackground = useFittedBackground;
+	}
+
+	/**
+	 * If true update the initial parameters in each FitResult with the offset
+	 * 
+	 * @return the updateInitialParameters
+	 */
+	public boolean isUpdateInitialParameters()
+	{
+		return updateInitialParameters;
+	}
+
+	/**
+	 * Set to true to update the initial parameters in each FitResult with the offset
+	 * 
+	 * @param updateInitialParameters
+	 */
+	public void setUpdateInitialParameters(boolean updateInitialParameters)
+	{
+		this.updateInitialParameters = updateInitialParameters;
 	}
 }

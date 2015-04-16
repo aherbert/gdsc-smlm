@@ -304,6 +304,11 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					{
 						// Assume we are not fitting doublets and the fit result will have 1 peak
 						final float[] params = Utils.toFloat(fitResult.getParameters());
+						// To allow the shift filter to function the X/Y position coordinates must be relative
+						final double[] initial = fitResult.getInitialParameters();
+						params[Gaussian2DFunction.X_POSITION] -= initial[Gaussian2DFunction.X_POSITION];
+						params[Gaussian2DFunction.Y_POSITION] -= initial[Gaussian2DFunction.Y_POSITION];
+						// These will be incorrect due to the relative adjustment above...
 						final int origX = (int) params[Gaussian2DFunction.X_POSITION];
 						final int origY = (int) params[Gaussian2DFunction.Y_POSITION];
 
@@ -765,7 +770,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		// Track if all the filters are the same type. If so then we can calculate the sensitivity of each parameter.
 		String type = null;
 		boolean allSameType = true;
-		Filter maxFilter = null;
+		Filter maxFilter = null, criteriaFilter = null;
 		double maxScore = -1;
 		double maxCriteria = 0;
 
@@ -796,6 +801,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			else if (maxCriteria < criteria)
 			{
 				maxCriteria = criteria;
+				criteriaFilter = filter;
 			}
 
 			if (!isHeadless)
@@ -810,8 +816,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			if (allSameType)
 			{
-				Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s", type,
-						Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria));
+				Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
+						Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria), criteriaFilter.getName());
 			}
 			return count;
 		}
