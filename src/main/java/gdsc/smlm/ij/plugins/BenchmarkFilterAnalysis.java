@@ -90,7 +90,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static double partialMatchDistance = 100;
 
 	private static String resultsTitle;
-	private String resultsPrefix, resultsPrefix2, resultsPrefix3;
+	private String resultsPrefix, resultsPrefix2;
+	private static String resultsPrefix3;
 
 	private HashMap<String, FilterScore> bestFilter;
 	private LinkedList<String> bestFilterOrder;
@@ -301,19 +302,24 @@ public class BenchmarkFilterAnalysis implements PlugIn
 						final float[] params = Utils.toFloat(fitResult.getParameters());
 						final int origX = (int) params[Gaussian2DFunction.X_POSITION];
 						final int origY = (int) params[Gaussian2DFunction.Y_POSITION];
+
 						// Binary classification uses a score of 1 (match) or 0 (no match)
 						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
 						float score = 0;
 						if (result.fitMatch[index] && result.d[index] <= fuzzyMax)
 						{
-							// TODO - linearly interpolate from the minimum to the maximum match distance
 							if (result.d[index] <= fuzzyMin)
 							{
 								score = 1;
 							}
 							else
 							{
-								score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
+								// Interpolate from the minimum to the maximum match distance:
+								// Linear 
+								//score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
+								// Cosine
+								score = (float) (0.5 * (1 + Math.cos(((result.d[index] - fuzzyMin) / fuzzyRange) *
+										Math.PI)));
 							}
 						}
 						r.add(peak, origX, origY, score, fitResult.getError(), result.noise, params, null);
