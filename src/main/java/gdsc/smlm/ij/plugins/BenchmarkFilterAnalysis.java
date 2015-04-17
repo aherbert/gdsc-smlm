@@ -1177,7 +1177,6 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			this.score = score;
 		}
 
-		@Override
 		public int compareTo(FilterScore that)
 		{
 			if (this.score > that.score)
