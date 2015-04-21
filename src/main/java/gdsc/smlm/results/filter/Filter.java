@@ -134,7 +134,7 @@ public abstract class Filter implements Comparable<Filter>
 			for (PeakResult peak : peakResults.getResults())
 			{
 				boolean isTrue = peak.origValue != 0;
-				boolean isPositive = accept(peak);
+				final boolean isPositive;
 
 				// Reset fail count for new frames
 				if (frame != peak.peak)
@@ -219,7 +219,7 @@ public abstract class Filter implements Comparable<Filter>
 			for (PeakResult peak : peakResults.getResults())
 			{
 				boolean isTrue = peak.origValue != 0;
-				boolean isPositive = accept(peak);
+				final boolean isPositive;
 
 				// Reset fail count for new frames
 				if (frame != peak.peak)
