@@ -175,7 +175,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			return;
 		}
 
-		analyse(resultsList, filterSets);
+		long time = analyse(resultsList, filterSets);
+
+		IJ.showStatus("Finished : " + Utils.timeToString(time));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -486,7 +488,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	 * @param resultsList
 	 * @param filterSets
 	 */
-	private void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
+	private long analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
 		createResultsWindow();
 		plots = new ArrayList<NamedPlot>(plotTopN);
@@ -494,6 +496,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		bestFilterOrder = new LinkedList<String>();
 
 		IJ.showStatus("Analysing filters ...");
+		long time = System.currentTimeMillis();
 		int total = countFilters(filterSets);
 		int count = 0;
 		for (FilterSet filterSet : filterSets)
@@ -501,13 +504,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			IJ.showStatus("Analysing " + filterSet.getName() + " ...");
 			count = run(filterSet, resultsList, count, total);
 		}
+		time = System.currentTimeMillis() - time;
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
 		if (bestFilter.isEmpty())
 		{
 			IJ.log("Warning: No filters pass the criteria");
-			return;
+			return time;
 		}
 
 		List<FilterScore> filters = new ArrayList<FilterScore>(bestFilter.values());
@@ -545,6 +549,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		showPlots();
 		calculateSensitivity(resultsList);
+
+		return time;
 	}
 
 	private int countFilters(List<FilterSet> filterSets)
