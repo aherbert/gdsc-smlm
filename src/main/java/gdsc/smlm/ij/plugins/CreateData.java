@@ -148,7 +148,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static final String[] NAMES = new String[] { "Signal/Frame", "Signal/Frame (continuous)", "Total Signal",
 			"Blinks", "t-On", "t-Off", "Sampled blinks", "Sampled t-On", "Sampled t-Off", "Noise", "SNR",
-			"SNR (continuous)", "Density", "Precision", "Width" };
+			"SNR (continuous)", "Density", "Precision", "Width", "X", "Y", "Z" };
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
@@ -170,6 +170,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static final int DENSITY = 12;
 	private static final int PRECISION = 13;
 	private static final int WIDTH = 14;
+	private static final int X = 15;
+	private static final int Y = 16;
+	private static final int Z = 17;
 
 	private static boolean[] integerDisplay;
 	static
@@ -2514,6 +2517,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		int blinks = 0; // Number of blinks
 		int currentT = 0; // On-time of current pulse
 		double signal = 0;
+		final double centreOffset = settings.size * 0.5;
 		// Used to convert the sampled times in frames into seconds
 		final double framesPerSecond = 1000.0 / settings.exposureTime;
 		for (LocalisationModel l : localisations)
@@ -2571,6 +2575,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			lastT = l.getTime();
+
+			stats[X].add((l.getX() - centreOffset) * settings.pixelPitch);
+			stats[Y].add((l.getY() - centreOffset) * settings.pixelPitch);
+			stats[Z].add(l.getZ() * settings.pixelPitch);
 		}
 		// Final fluorophore
 		stats[SAMPLED_BLINKS].add(blinks);
