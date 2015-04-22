@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.NoiseEstimator;
 import gdsc.smlm.utils.Statistics;
@@ -17,6 +18,7 @@ import ij.util.Tools;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -142,12 +144,15 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		double[] yValues2 = (twoMethods) ? new double[size] : null;
 
 		ImageStack stack = imp.getImageStack();
+		Rectangle bounds = imp.getProcessor().getRoi();
+		float[] buffer = null;
 		for (int slice = start, i = 0; slice <= end; slice++, i++)
 		{
 			IJ.showProgress(i, size);
-			ImageProcessor ip = stack.getProcessor(slice);
-			NoiseEstimator ne = new NoiseEstimator((float[]) ip.toFloat(0, null).getPixels(), ip.getWidth(),
-					ip.getHeight());
+			final ImageProcessor ip = stack.getProcessor(slice);
+			buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(),
+					ip.getHeight(), bounds, buffer);
+			final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 			ne.preserveResiduals = preserveResiduals;
 			ne.setRange(lowestPixelsRange);
 			xValues[i] = slice;
@@ -202,7 +207,10 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		double[] result = new double[NoiseEstimator.Method.values().length + 1];
 		int i = 0;
 		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
-		NoiseEstimator ne = new NoiseEstimator((float[]) ip.toFloat(0, null).getPixels(), ip.getWidth(), ip.getHeight());
+		Rectangle bounds = ip.getRoi();
+		float[] buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(),
+				ip.getHeight(), bounds, null);
+		NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 		ne.preserveResiduals = true;
 		for (NoiseEstimator.Method m : NoiseEstimator.Method.values())
 		{
