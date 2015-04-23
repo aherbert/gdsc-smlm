@@ -298,6 +298,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					Sort.sort(indices, score);
 				}
 
+				// Data about the match is stored in small arrays of size equal to the number of matches.
+				// Create an array holding the full index position corresponding to each match.
+				int[] positionIndex = new int[result.dMatch.length];
+				int count = 0;
+				for (int i = 0; i < result.fitMatch.length; i++)
+				{
+					if (result.fitMatch[i])
+						positionIndex[count++] = i;
+				}
+
 				for (int i = 0; i < result.fitResult.length; i++)
 				{
 					final int index = indices[i];
@@ -317,23 +327,32 @@ public class BenchmarkFilterAnalysis implements PlugIn
 						// Binary classification uses a score of 1 (match) or 0 (no match)
 						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
 						float score = 0;
-						if (result.fitMatch[index] && result.d[index] <= fuzzyMax)
+						if (result.fitMatch[index])
 						{
-							if (result.d[index] <= fuzzyMin)
+							int position = getPosition(positionIndex, index);
+							double distance = result.dMatch[position];
+							
+							// TODO - report on the depth of matches
+							double depth = result.zMatch[position];
+							
+							if (distance <= fuzzyMax)
 							{
-								score = 1;
+								if (distance <= fuzzyMin)
+								{
+									score = 1;
+								}
+								else
+								{
+									// Interpolate from the minimum to the maximum match distance:
+									// Linear 
+									//score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
+									// Cosine
+									score = (float) (0.5 * (1 + Math
+											.cos(((distance - fuzzyMin) / fuzzyRange) * Math.PI)));
+								}
+								//tp++;
+								//sum += score;
 							}
-							else
-							{
-								// Interpolate from the minimum to the maximum match distance:
-								// Linear 
-								//score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
-								// Cosine
-								score = (float) (0.5 * (1 + Math.cos(((result.d[index] - fuzzyMin) / fuzzyRange) *
-										Math.PI)));
-							}
-							//tp++;
-							//sum += score;
 						}
 						r.add(peak, origX, origY, score, fitResult.getError(), result.noise, params, null);
 					}
@@ -353,6 +372,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 		}
 		return resultsList;
+	}
+
+	private int getPosition(int[] positionIndex, int index)
+	{
+		for (int c = 0; c < positionIndex.length; c++)
+			if (positionIndex[c] == index)
+				return c;
+		throw new RuntimeException("Cannot find the position for the match");
 	}
 
 	private boolean showDialog(List<MemoryPeakResults> resultsList)
