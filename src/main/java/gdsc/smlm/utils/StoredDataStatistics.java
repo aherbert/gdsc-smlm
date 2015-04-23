@@ -258,6 +258,24 @@ public class StoredDataStatistics extends Statistics
 	 */
 	public double getMedian()
 	{
+		// Check for negatives
+		for (double d : values)
+		{
+			if (d < 0)
+			{
+				if (n == 0)
+					return Double.NaN;
+				if (n == 1)
+					return values[0];
+
+				double[] data = getValues();
+				Arrays.sort(data);
+				return (data[(data.length - 1) / 2] + data[data.length / 2]) * 0.5;
+			}
+		}
+
+		// This does not work when the array contains negative data due to the 
+		// implementation of the library using partially sorted data
 		return getStatistics().getPercentile(50);
 	}
 }
