@@ -676,7 +676,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return d;
 	}
 
-	private class PeakResultPoint extends BasePoint
+	public class PeakResultPoint extends BasePoint
 	{
 		int t;
 		PeakResult peakResult;
