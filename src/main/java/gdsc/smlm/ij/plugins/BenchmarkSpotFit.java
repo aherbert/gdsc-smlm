@@ -27,6 +27,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
+import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -49,11 +50,10 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.ImageWindow;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +87,7 @@ public class BenchmarkSpotFit implements PlugIn
 		fitConfig.setCoordinateShiftFactor(0); // Disable
 		fitConfig.setPrecisionThreshold(0);
 		fitConfig.setWidthFactor(0);
-		
+
 		fitConfig.setBackgroundFitting(true);
 		fitConfig.setMinIterations(0);
 		fitConfig.setNoise(0);
@@ -130,9 +130,21 @@ public class BenchmarkSpotFit implements PlugIn
 		final ScoredSpot[] spots;
 		int tp, fp, tn, fn;
 		FitResult[] fitResult;
+		// Store if the candidates match a position
 		boolean[] fitMatch;
-		double[] d;
+		/**
+		 * Store the distance to the actual spots that were matched by a candidate. Size equals the number of trues in
+		 * the fitMatch array.
+		 */
+		double[] dMatch;
 		float noise;
+		/** Store the z-position of the actual spots for later analysis. Size is the number of actual spots */
+		double[] zPosition;
+		/**
+		 * Store the z-position of the actual spots that were matched by a candidate. Size equals the number of trues in
+		 * the fitMatch array.
+		 */
+		double[] zMatch;
 
 		public FilterCandidates(int p, int n, ScoredSpot[] spots)
 		{
@@ -229,7 +241,7 @@ public class BenchmarkSpotFit implements PlugIn
 				finished = true;
 				return;
 			}
-			
+
 			// Extract the data
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
@@ -257,10 +269,20 @@ public class BenchmarkSpotFit implements PlugIn
 
 			// Compute the matches of the fitted spots to the simulated positions
 			final boolean[] fitMatch = new boolean[spots.length];
-			final double[] d = new double[spots.length];
+			double[] dMatch = new double[spots.length];
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
+			final double[] zPosition = new double[actual.length];
+			double[] zMatch = new double[spots.length];
+			int matchCount = 0;
 			if (actual.length > 0)
 			{
+				// Build a list of the coordinates z-depth using the PeakResultPoint
+				for (int i = 0; i < actual.length; i++)
+				{
+					PeakResultPoint p = (PeakResultPoint) actual[i];
+					zPosition[i] = p.peakResult.error;
+				}
+
 				BasePoint[] predicted = new BasePoint[spots.length];
 				matches.clear();
 
@@ -289,13 +311,19 @@ public class BenchmarkSpotFit implements PlugIn
 					// Store the fits that match and get the squared distance
 					for (PointPair pair : matches)
 					{
-						final BasePoint p = (BasePoint) pair.getPoint2();
-						final int i = (int) p.getZ();
+						final BasePoint p2 = (BasePoint) pair.getPoint2();
+						final int i = (int) p2.getZ();
 						fitMatch[i] = true;
-						d[i] = pair.getXYDistance();
+						dMatch[matchCount] = pair.getXYDistance();
+
+						// Store the depth of the spot that matches
+						final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
+						zMatch[matchCount++] = p1.peakResult.error;
 					}
 				}
 			}
+			dMatch = Arrays.copyOf(dMatch, matchCount);
+			zMatch = Arrays.copyOf(zMatch, matchCount);
 
 			// Mark the results 
 			for (int i = 0; i < candidates.spots.length; i++)
@@ -329,7 +357,9 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.fn = fn;
 			candidates.fitResult = fitResult;
 			candidates.fitMatch = fitMatch;
-			candidates.d = d;
+			candidates.dMatch = dMatch;
+			candidates.zMatch = zMatch;
+			candidates.zPosition = zPosition;
 			// Noise should be the same for all results
 			if (!job.getResults().isEmpty())
 				candidates.noise = job.getResults().get(0).noise;
@@ -467,6 +497,8 @@ public class BenchmarkSpotFit implements PlugIn
 		if (lastId != simulationParameters.id)
 		{
 			// Do not get integer coordinates
+			// The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
+			// from the MemoryPeakResults
 			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), false);
 			lastId = simulationParameters.id;
 			refresh = true;
@@ -536,14 +568,14 @@ public class BenchmarkSpotFit implements PlugIn
 		threads.clear();
 
 		IJ.showProgress(1);
-		
+
 		if (Utils.isInterrupted())
 		{
 			IJ.showProgress(1);
 			IJ.showStatus("Aborted");
 			return;
 		}
-		
+
 		IJ.showStatus("Collecting results ...");
 
 		fitResultsId++;
@@ -644,7 +676,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 		// Summarise the fitting results. N fits, N failures. 
 		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
-		StoredDataStatistics stats = new StoredDataStatistics();
+		StoredDataStatistics distanceStats = new StoredDataStatistics();
+		StoredDataStatistics depthStats = new StoredDataStatistics();
 		StoredDataStatistics precisionStats = new StoredDataStatistics();
 		final double nmPerPixel = simulationParameters.a;
 		final boolean mle = fitConfig.getFitSolver() == FitSolver.MLE;
@@ -656,6 +689,7 @@ public class BenchmarkSpotFit implements PlugIn
 			fp += result.fp;
 			tn += result.tn;
 			fn += result.fn;
+			int count = 0;
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
 				if (result.fitResult[i].getStatus() != FitStatus.OK)
@@ -667,7 +701,8 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 				if (result.fitMatch[i])
 				{
-					stats.add(result.d[i] * nmPerPixel);
+					distanceStats.add(result.dMatch[count] * nmPerPixel);
+					depthStats.add(result.zMatch[count++] * nmPerPixel);
 					final double[] p = result.fitResult[i].getParameters();
 					final double s = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
 					final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
@@ -730,7 +765,7 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, nN);
 		add(sb, PeakFit.getSolverName(config.getFitConfiguration()));
 		add(sb, config.getFitting());
-		
+
 		resultPrefix = sb.toString();
 
 		// Q. Should I add other fit configuration here?
@@ -784,23 +819,39 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, m.getJaccard());
 
 		// The mean may be subject to extreme outliers so use the median
-		double median = stats.getMedian();
+		double median = distanceStats.getMedian();
 		add(sb, median);
 
-		String label = String.format("Recall = %s. Median = %s nm", Utils.rounded(m.getRecall()), Utils.rounded(median));
-		int id1 = Utils.showHistogram(TITLE, stats, "Match Distance (nm)", 0, 0, 100, label);
+		int[] idList = new int[3];
+		int idCount = 0;
+
+		String label = String.format("Recall = %s. n = %d. Median = %s nm", Utils.rounded(m.getRecall()),
+				distanceStats.getN(), Utils.rounded(median));
+		int id = Utils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 100, label);
+		if (Utils.isNewWindow())
+			idList[idCount++] = id;
+
+		median = depthStats.getMedian();
+		add(sb, median);
+
+		label = String.format("n = %d. Median = %s nm", depthStats.getN(), Utils.rounded(median));
+		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 100, label);
+		if (Utils.isNewWindow())
+			idList[idCount++] = id;
 
 		median = precisionStats.getMedian();
 		add(sb, median);
 
-		label = String.format("Median = %s nm", Utils.rounded(median));
-		int id2 = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 100, label);
+		label = String.format("n = %d. Median = %s nm", precisionStats.getN(), Utils.rounded(median));
+		id = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 100, label);
 		if (Utils.isNewWindow())
+			idList[idCount++] = id;
+
+		if (idCount != 0)
 		{
-			ImageWindow pw = WindowManager.getImage(id1).getWindow();
-			Point point = pw.getLocation();
-			point.y += pw.getHeight();
-			WindowManager.getImage(id2).getWindow().setLocation(point);
+			idList = Arrays.copyOf(idList, idCount);
+			WindowOrganiser wo = new WindowOrganiser();
+			wo.tileWindows(idList);
 		}
 
 		summaryTable.append(sb.toString());
@@ -840,7 +891,7 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("nN\t");
 		sb.append("Solver\t");
 		sb.append("Fitting");
-		
+
 		tablePrefix = sb.toString();
 
 		sb.append("\t");
@@ -876,6 +927,7 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("F1\t");
 		sb.append("Jaccard\t");
 		sb.append("Med.Distance (nm)\t");
+		sb.append("Med.Depth (nm)\t");
 		sb.append("Med.Precision (nm)\t");
 
 		return sb.toString();

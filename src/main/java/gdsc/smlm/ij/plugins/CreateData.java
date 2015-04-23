@@ -2066,9 +2066,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					}
 
 					newLocalisations.add(localisationSet);
-					// Use extended result to store the ID
-					results.addSync(new ExtendedPeakResult(t, origX, origY, 0, 0, (float) totalNoise, params, null, t,
-							localisationSet.getId()));
+					// Use extended result to store the ID.
+					// Store the z position in the error.
+					results.addSync(new ExtendedPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise,
+							params, null, t, localisationSet.getId()));
 				}
 
 				for (int i = 0; i < image.length; i++)
