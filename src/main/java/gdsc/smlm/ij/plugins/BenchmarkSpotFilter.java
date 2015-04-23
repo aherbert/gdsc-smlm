@@ -359,10 +359,15 @@ public class BenchmarkSpotFilter implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage(String
-				.format("Finds spots in the benchmark image created by CreateData plugin.\nPSF width = %s\n \nConfigure the spot filter:",
-						Utils.rounded(simulationParameters.s / simulationParameters.a)));
-
+		StringBuilder sb = new StringBuilder();
+		sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
+		sb.append("PSF width = ").append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append(" px\n");
+		sb.append("Simulation depth = ").append(Utils.rounded(simulationParameters.depth)).append(" nm");
+		if (simulationParameters.fixedDepth)
+			sb.append( " (fixed)");
+		sb.append("\n \nConfigure the spot filter:");
+		gd.addMessage(sb.toString());
+		
 		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
 		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
