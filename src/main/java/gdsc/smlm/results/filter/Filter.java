@@ -66,6 +66,50 @@ public abstract class Filter implements Comparable<Filter>
 	}
 
 	/**
+	 * Filter the results
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * 
+	 * @param results
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @return the filtered results
+	 */
+	public MemoryPeakResults filter(MemoryPeakResults results, int failures)
+	{
+		MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(results);
+		setup(results);
+		int frame = -1;
+		int failCount = 0;
+		for (PeakResult peak : results.getResults())
+		{
+			if (frame != peak.peak)
+			{
+				frame = peak.peak;
+				failCount = 0;
+			}
+
+			// Reject all peaks if we have exceeded the fail count
+			final boolean isPositive;
+			if (failCount > failures)
+			{
+				isPositive = false;
+			}
+			else
+			{
+				// Otherwise assess the peak
+				isPositive = accept(peak);
+			}
+
+			if (isPositive)
+				newResults.add(peak);
+		}
+		return newResults;
+	}
+
+	/**
 	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
 	 * true or false.
 	 * <p>
@@ -134,7 +178,6 @@ public abstract class Filter implements Comparable<Filter>
 			for (PeakResult peak : peakResults.getResults())
 			{
 				boolean isTrue = peak.origValue != 0;
-				final boolean isPositive;
 
 				// Reset fail count for new frames
 				if (frame != peak.peak)
@@ -144,6 +187,7 @@ public abstract class Filter implements Comparable<Filter>
 				}
 
 				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
 				if (failCount > failures)
 				{
 					isPositive = false;
@@ -219,7 +263,6 @@ public abstract class Filter implements Comparable<Filter>
 			for (PeakResult peak : peakResults.getResults())
 			{
 				boolean isTrue = peak.origValue != 0;
-				final boolean isPositive;
 
 				// Reset fail count for new frames
 				if (frame != peak.peak)
@@ -229,6 +272,7 @@ public abstract class Filter implements Comparable<Filter>
 				}
 
 				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
 				if (failCount > failures)
 				{
 					isPositive = false;
