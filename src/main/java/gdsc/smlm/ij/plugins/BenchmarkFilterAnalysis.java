@@ -28,7 +28,9 @@ import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.results.match.FractionClassificationResult;
+import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Sort;
+import gdsc.smlm.utils.StoredDataStatistics;
 import gdsc.smlm.utils.UnicodeReader;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
@@ -40,6 +42,7 @@ import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -52,6 +55,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 /**
  * Run different filtering methods on a set of benchmark fitting results outputting performance statistics on the
@@ -88,6 +94,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private boolean invertScore = false;
 	private static double upperMatchDistance = 100;
 	private static double partialMatchDistance = 100;
+	private static boolean depthRecallAnalysis = true;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2;
@@ -103,6 +110,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static boolean lastRank = false;
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
 	private static List<MemoryPeakResults> resultsList = null;
+	private static StoredDataStatistics depthStats, depthFitStats;
 
 	private boolean isHeadless;
 
@@ -256,6 +264,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			lastUpperMatchDistance = upperMatchDistance;
 			lastPartialMatchDistance = partialMatchDistance;
 			resultsList = new LinkedList<MemoryPeakResults>();
+			depthStats = new StoredDataStatistics();
+			depthFitStats = new StoredDataStatistics();
 
 			final double fuzzyMax = BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
 			final double fuzzyMin = BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0;
@@ -280,6 +290,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			{
 				final int peak = entry.getKey().intValue();
 				final FilterCandidates result = entry.getValue();
+				depthStats.add(result.zPosition);
 
 				// Results are in order of candidate ranking.
 				int[] indices = Utils.newArray(result.fitResult.length, 0, 1);
@@ -327,16 +338,18 @@ public class BenchmarkFilterAnalysis implements PlugIn
 						// Binary classification uses a score of 1 (match) or 0 (no match)
 						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
 						float score = 0;
+						double depth = 0;
 						if (result.fitMatch[index])
 						{
 							int position = getPosition(positionIndex, index);
 							double distance = result.dMatch[position];
-							
-							// TODO - report on the depth of matches
-							double depth = result.zMatch[position];
-							
+
+							// Store depth of matches for later analysis
+							depth = result.zMatch[position];
+
 							if (distance <= fuzzyMax)
 							{
+								depthFitStats.add(depth);
 								if (distance <= fuzzyMin)
 								{
 									score = 1;
@@ -354,7 +367,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 								//sum += score;
 							}
 						}
-						r.add(peak, origX, origY, score, fitResult.getError(), result.noise, params, null);
+
+						// Use a custom peak result so that the depth can be stored.
+						r.add(new DepthPeakResult(peak, origX, origY, score, fitResult.getError(), result.noise,
+								params, depth));
 					}
 				}
 			}
@@ -416,6 +432,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				Utils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.a) + " nm");
 		gd.addSlider("Upper_match_distance (%)", 0, 100, upperMatchDistance);
 		gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
+		if (!simulationParameters.fixedDepth)
+			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
 		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
@@ -466,6 +484,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		scoreIndex = gd.getNextChoiceIndex();
 		upperMatchDistance = Math.abs(gd.getNextNumber());
 		partialMatchDistance = Math.abs(gd.getNextNumber());
+		if (!simulationParameters.fixedDepth)
+			depthRecallAnalysis = gd.getNextBoolean();
 		resultsTitle = gd.getNextString();
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
@@ -576,6 +596,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		showPlots();
 		calculateSensitivity(resultsList);
+		depthAnalysis(filters.get(0).filter);
 
 		return time;
 	}
@@ -849,8 +870,11 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			if (allSameType)
 			{
-				Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
-						Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria), criteriaFilter.getName());
+				if (criteriaFilter != null)
+					Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
+							Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria), criteriaFilter.getName());
+				else
+					Utils.log("Warning: Filter does not pass the criteria: %s", type);
 			}
 			return count;
 		}
@@ -1194,6 +1218,120 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * @param filter
+	 */
+	private void depthAnalysis(Filter filter)
+	{
+		// TODO : This analysis ignores the partial match distance.
+		// Use the score for each result to get a weighted histogram. 
+
+		if (!depthRecallAnalysis || simulationParameters.fixedDepth)
+			return;
+
+		// Build a histogram of the number of spots at different depths
+		final double[] depths = depthStats.getValues();
+		final double range = simulationParameters.depth / simulationParameters.a / 2;
+		double[] limits = { -range, range };
+
+		final int bins = Math.max(10, simulationParameters.molecules / 50);
+		double[][] h = Utils.calcHistogram(depths, limits[0], limits[1], bins);
+		double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
+
+		// To get the number of TP at each depth will require that the filter is run 
+		// manually to get the results that pass.
+		MemoryPeakResults results = filter.filter(resultsList.get(0), failCount);
+
+		double[] depths2 = new double[results.size()];
+		int count = 0;
+		for (PeakResult r : results.getResults())
+		{
+			if (r.origValue != 0)
+				depths2[count++] = ((DepthPeakResult) r).depth;
+		}
+		depths2 = Arrays.copyOf(depths2, count);
+
+		// Build a histogram using the same limits
+		double[][] h3 = Utils.calcHistogram(depths2, limits[0], limits[1], bins);
+
+		// Convert pixel depth to nm
+		for (int i = 0; i < h[0].length; i++)
+			h[0][i] *= simulationParameters.a;
+		limits[0] *= simulationParameters.a;
+		limits[1] *= simulationParameters.a;
+
+		// Produce a histogram of the number of spots at each depth
+		String title = TITLE + " Depth Histogram";
+		Plot2 plot = new Plot2(title, "Depth (nm)", "Frequency");
+		plot.setLimits(limits[0], limits[1], 0, Maths.max(h[1]));
+		plot.setColor(Color.black);
+		plot.addPoints(h[0], h[1], Plot2.BAR);
+		plot.setColor(Color.blue);
+		plot.addPoints(h[0], h2[1], Plot2.BAR);
+		plot.setColor(Color.red);
+		plot.addPoints(h[0], h3[1], Plot2.BAR);
+		plot.addLabel(0, 0, "Black = Spots; Blue = Fitted; Red = Filtered");
+		PlotWindow pw = Utils.display(title, plot);
+
+		// Interpolate
+		final double halfBinWidth = (h[0][1] - h[0][0]) * 0.5;
+		// Remove final value of the histogram as this is at the upper limit of the range (i.e. count zero)
+		h[0] = Arrays.copyOf(h[0], h[0].length - 1);
+		h[1] = Arrays.copyOf(h[1], h[0].length);
+		h2[1] = Arrays.copyOf(h2[1], h[0].length);
+		h3[1] = Arrays.copyOf(h3[1], h[0].length);
+
+		LoessInterpolator l = new LoessInterpolator(0.2, 1);
+		PolynomialSplineFunction spline = l.interpolate(h[0], h[1]);
+		PolynomialSplineFunction spline2 = l.interpolate(h[0], h2[1]);
+		PolynomialSplineFunction spline3 = l.interpolate(h[0], h3[1]);
+
+		// Increase the number of points to show a smooth curve
+		double[] points = new double[bins * 5];
+		limits = Maths.limits(h[0]);
+		final double interval = (limits[1] - limits[0]) / (points.length - 1);
+		double[] v = new double[points.length];
+		double[] v2 = new double[points.length];
+		double[] v3 = new double[points.length];
+		for (int i = 0; i < points.length - 1; i++)
+		{
+			points[i] = limits[0] + i * interval;
+			v[i] = spline.value(points[i]);
+			v2[i] = spline2.value(points[i]);
+			v3[i] = spline3.value(points[i]);
+			points[i] += halfBinWidth;
+		}
+		// Final point on the limit of the spline range
+		int ii = points.length - 1;
+		v[ii] = spline.value(limits[1]);
+		v2[ii] = spline2.value(limits[1]);
+		v3[ii] = spline3.value(limits[1]);
+		points[ii] = limits[1] + halfBinWidth;
+
+		// Calculate recall
+		for (int i = 0; i < v.length; i++)
+		{
+			v2[i] = v2[i] / v[i];
+			v3[i] = v3[i] / v[i];
+		}
+
+		title = TITLE + " Depth Histogram (normalised)";
+		plot = new Plot2(title, "Depth (nm)", "Recall");
+		plot.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0, Maths.max(v2));
+		plot.setColor(Color.blue);
+		plot.addPoints(points, v2, Plot2.LINE);
+		plot.setColor(Color.red);
+		plot.addPoints(points, v3, Plot2.LINE);
+		plot.addLabel(0, 0, "Blue = Fitted; Red = Filtered");
+		PlotWindow pw2 = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+		{
+			Point p = pw.getLocation();
+			p.y += pw.getHeight();
+			pw2.setLocation(p);
+		}
+	}
+
 	public class FilterScore implements Comparable<FilterScore>
 	{
 		Filter filter;
@@ -1247,6 +1385,18 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			if (score < o.score)
 				return 1;
 			return 0;
+		}
+	}
+
+	private class DepthPeakResult extends PeakResult
+	{
+		double depth;
+
+		public DepthPeakResult(int peak, int origX, int origY, float score, double error, float noise, float[] params,
+				double depth)
+		{
+			super(peak, origX, origY, score, error, noise, params, null);
+			this.depth = depth;
 		}
 	}
 }
