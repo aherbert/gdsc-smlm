@@ -298,6 +298,92 @@ public class Utils
 	}
 
 	/**
+	 * Calculate a histogram given the provided data
+	 * 
+	 * @param data
+	 * @param numBins
+	 *            The number of histogram bins between min and max
+	 * @return The histogram as a pair of arrays: { value[], frequency[] }
+	 */
+	public static double[][] calcHistogram(double[] data, int numBins)
+	{
+		double min = Double.POSITIVE_INFINITY;
+		double max = Double.NEGATIVE_INFINITY;
+		for (double f : data)
+		{
+			if (min > f)
+				min = f;
+			if (max < f)
+				max = f;
+		}
+		return calcHistogram(data, min, max, numBins);
+	}
+
+	/**
+	 * Calculate a histogram given the provided data.
+	 * <p>
+	 * The histogram will create the specified number of bins to accommodate all data between the minimum and maximum
+	 * inclusive. The number of bins must be above one so that min and max are in different bins. If min and max are the
+	 * same then the number of bins is set to 1.
+	 * 
+	 * @param data
+	 * @param min
+	 *            The minimum value to include (inclusive)
+	 * @param max
+	 *            The maximum value to include (inclusive)
+	 * @param numBins
+	 *            The number of histogram bins between min and max (must be above one)
+	 * @return The histogram as a pair of arrays: { value[], frequency[] }
+	 */
+	public static double[][] calcHistogram(double[] data, double min, double max, int numBins)
+	{
+		// Parameter check
+		if (numBins < 2)
+			numBins = 2;
+		if (max < min)
+		{
+			double tmp = max;
+			max = min;
+			min = tmp;
+		}
+		final double binSize;
+		if (max == min)
+		{
+			numBins = 1;
+			binSize = 1;
+		}
+		else
+		{
+			binSize = (max - min) / (numBins - 1);
+		}
+
+		final double[] value = new double[numBins];
+		final double[] frequency = new double[numBins];
+
+		for (int i = 0; i < numBins; i++)
+		{
+			value[i] = (min + i * binSize);
+		}
+
+		for (double d : data)
+		{
+			int bin = (int) ((d - min) / binSize);
+			if (bin < 0)
+			{ /* this data is smaller than min */
+			}
+			else if (bin >= numBins)
+			{ /* this data point is bigger than max */
+			}
+			else
+			{
+				frequency[bin]++;
+			}
+		}
+
+		return new double[][] { value, frequency };
+	}
+	
+	/**
 	 * For the provided histogram x-axis bins, produce an x-axis for plotting. This functions doubles up the histogram
 	 * x-positions to allow plotting a square line profile using the ImageJ plot command.
 	 * 
