@@ -1281,7 +1281,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		h2[1] = Arrays.copyOf(h2[1], h[0].length);
 		h3[1] = Arrays.copyOf(h3[1], h[0].length);
 
-		LoessInterpolator l = new LoessInterpolator(0.2, 1);
+		// Use minimum of 3 points for smoothing
+		// Ensure we use at least 15% of data
+		double bandwidth = Math.max(3.0 / h[0].length, 0.15);
+		LoessInterpolator l = new LoessInterpolator(bandwidth, 1);
 		PolynomialSplineFunction spline = l.interpolate(h[0], h[1]);
 		PolynomialSplineFunction spline2 = l.interpolate(h[0], h2[1]);
 		PolynomialSplineFunction spline3 = l.interpolate(h[0], h3[1]);
