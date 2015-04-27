@@ -24,6 +24,7 @@ import gdsc.smlm.results.filter.AndFilter;
 import gdsc.smlm.results.filter.CoordinateFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.MultiFilter;
+import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.OrFilter;
 import gdsc.smlm.results.filter.PrecisionFilter2;
 import gdsc.smlm.results.filter.PrecisionFilter;
@@ -192,6 +193,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new TraceFilter(0.5, 1));
 		demo(new CoordinateFilter(15.5f, 234.5f, 80.99f, 133f));
 		demo(new MultiFilter(30, 45f, 0.7, 1.5, 0.5, 45));
+		demo(new MultiFilter2(30, 45f, 0.7, 1.5, 0.5, 45));
 
 		comment("Combined filters");
 		IJ.log("");
