@@ -167,7 +167,7 @@ public class MultiFilter2 extends Filter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using an multiple thresholds: Signal, SNR, width, shift and precision";
+		return "Filter results using an multiple thresholds: Signal, SNR, width, shift and precision (uses fitted background to set noise)";
 	}
 
 	/*
