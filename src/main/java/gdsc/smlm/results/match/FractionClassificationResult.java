@@ -61,7 +61,7 @@ public class FractionClassificationResult
 	 * Return the F-Score statistic, a weighted combination of the precision and recall
 	 * 
 	 * @param precision
-	 * @param recall
+	 * @param recall 
 	 * @param beta
 	 *            The weight
 	 * @return The F-Score
