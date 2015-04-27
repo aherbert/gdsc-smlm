@@ -1352,7 +1352,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		title = TITLE + " Depth Histogram (normalised)";
 		plot = new Plot2(title, "Depth (nm)", "Recall");
-		plot.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0, Maths.max(v2));
+		plot.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0, Maths.min(1, Maths.max(v2)));
 		plot.setColor(Color.blue);
 		plot.addPoints(points, v2, Plot2.LINE);
 		plot.setColor(Color.red);
