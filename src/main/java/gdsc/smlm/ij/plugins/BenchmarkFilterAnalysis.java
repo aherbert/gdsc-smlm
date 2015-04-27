@@ -561,11 +561,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			IJ.showStatus("Analysing " + filterSet.getName() + " ...");
 			count = run(filterSet, resultsList, count, total);
+			if (count < 0)
+				break;
 		}
 		time = System.currentTimeMillis() - time;
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
+		if (Utils.isInterrupted())
+			return time;
+		
 		if (bestFilter.isEmpty())
 		{
 			IJ.log("Warning: No filters pass the criteria");
@@ -863,7 +868,11 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		for (Filter filter : filterSet.getFilters())
 		{
 			if (count++ % 16 == 0)
+			{
 				IJ.showProgress(count, total);
+				if (Utils.isInterrupted())
+					return -1;
+			}
 
 			if (type == null)
 				type = filter.getType();
