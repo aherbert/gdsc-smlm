@@ -43,6 +43,7 @@ public abstract class XStreamWrapper
 			addAlias(CoordinateFilter.class);
 			addAlias(Filter.class);
 			addAlias(HysteresisFilter.class);
+			addAlias(MultiFilter.class);
 			addAlias(OrFilter.class);
 			addAlias(PrecisionFilter.class);
 			addAlias(PrecisionFilter2.class);
