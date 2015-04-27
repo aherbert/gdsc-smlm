@@ -81,6 +81,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static boolean clearTables = false;
 	private static String filterFilename = "";
 	private static int summaryTopN = 0;
+	private static double summaryDepth = 500;
 	private static int plotTopN = 0;
 	private static boolean saveBestFilter = false;
 	private ArrayList<NamedPlot> plots;
@@ -429,6 +430,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addCheckbox("Show_summary", showSummaryTable);
 		gd.addCheckbox("Clear_tables", clearTables);
 		gd.addSlider("Summary_top_n", 0, 20, summaryTopN);
+		gd.addNumericField("Summary_depth (nm)", summaryDepth, 0);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
 		gd.addCheckbox("Save_best_filter", saveBestFilter);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
@@ -483,6 +485,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		showSummaryTable = gd.getNextBoolean();
 		clearTables = gd.getNextBoolean();
 		summaryTopN = (int) Math.abs(gd.getNextNumber());
+		summaryDepth = Math.abs(gd.getNextNumber());
 		plotTopN = (int) Math.abs(gd.getNextNumber());
 		saveBestFilter = gd.getNextBoolean();
 		calculateSensitivity = gd.getNextBoolean();
@@ -577,10 +580,29 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		{
 			createSummaryWindow();
 			int n = 0;
+			final double range = summaryDepth / simulationParameters.a / 2;
+			int np = 0;
+			for (double depth : depthStats.getValues())
+			{
+				if (Math.abs(depth) < range)
+					np++;
+			}
 			for (FilterScore fs : filters)
 			{
 				FractionClassificationResult r = scoreFilter(fs.filter, resultsList);
 				String text = createResult(fs.filter, r);
+
+				// Show the recall at the specified depth
+				MemoryPeakResults results = fs.filter.filter(resultsList.get(0), failCount);
+				int tp = 0;
+				for (PeakResult result : results.getResults())
+				{
+					if (result.origValue != 0 && Math.abs(((DepthPeakResult) result).depth) <= range)
+						tp++;
+				}
+
+				text += "\t" + Utils.rounded((double) tp / np);
+
 				if (isHeadless)
 					IJ.log(text);
 				else
@@ -738,13 +760,13 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		if (isHeadless)
 		{
-			IJ.log(createResultsHeader());
+			IJ.log(createResultsHeader(false));
 		}
 		else
 		{
 			if (resultsWindow == null || !resultsWindow.isShowing())
 			{
-				String header = createResultsHeader();
+				String header = createResultsHeader(false);
 				resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
 			}
 			if (clearTables)
@@ -759,13 +781,13 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		if (isHeadless)
 		{
-			IJ.log(createResultsHeader());
+			IJ.log(createResultsHeader(true));
 		}
 		else
 		{
 			if (summaryWindow == null || !summaryWindow.isShowing())
 			{
-				String header = createResultsHeader();
+				String header = createResultsHeader(true);
 				summaryWindow = new TextWindow(TITLE + " Summary", header, "", 900, 300);
 			}
 			if (clearTables)
@@ -773,7 +795,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 	}
 
-	private String createResultsHeader()
+	private String createResultsHeader(boolean depthSummary)
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
 		sb.append("\tTitle\tName\tFail\tLower (nm)\tUpper (nm)");
@@ -787,6 +809,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		sb.append("\toPrecision");
 		sb.append("\toF1");
 		sb.append("\toJaccard");
+		if (depthSummary)
+			sb.append("\tDepth Recall");
 		return sb.toString();
 	}
 
@@ -1022,7 +1046,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			case 17:
 				return s.getPrecision();
 			case 18:
-				return s.getFScore(1);
+				return s.getF1Score();
 			case 19:
 				return s.getJaccard();
 		}
@@ -1139,7 +1163,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		add(sb, r.getRecall(), i++);
 		add(sb, r.getPrecision(), i++);
-		add(sb, r.getFScore(1), i++);
+		add(sb, r.getF1Score(), i++);
 		add(sb, r.getJaccard(), i++);
 
 		// Score relative to the original simulated number of spots
@@ -1153,7 +1177,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				tp);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
-		add(sb, m.getFScore(1));
+		add(sb, m.getF1Score());
 		add(sb, m.getJaccard());
 		return sb.toString();
 	}
