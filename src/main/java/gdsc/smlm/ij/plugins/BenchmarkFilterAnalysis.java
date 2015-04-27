@@ -570,7 +570,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		if (Utils.isInterrupted())
 			return time;
-		
+
 		if (bestFilter.isEmpty())
 		{
 			IJ.log("Warning: No filters pass the criteria");
@@ -920,13 +920,30 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			return count;
 		}
 
+		boolean allowDuplicates = true; // This could be an option?
+
 		if (allSameType)
 		{
 			if (bestFilter.containsKey(type))
 			{
-				FilterScore filterScore = bestFilter.get(type);
-				if (filterScore.score < maxScore)
-					filterScore.update(maxFilter, maxScore);
+				if (allowDuplicates)
+				{
+					// Duplicate type: create a unique key
+					// Start at 2 to show it is the second one of the same type
+					int n = 2; 
+					while (bestFilter.containsKey(type + n))
+						n++;
+					type += n;
+					bestFilter.put(type, new FilterScore(maxFilter, maxScore));
+					bestFilterOrder.add(type);
+				}
+				else
+				{
+					// Replace
+					FilterScore filterScore = bestFilter.get(type);
+					if (filterScore.score < maxScore)
+						filterScore.update(maxFilter, maxScore);
+				}
 			}
 			else
 			{
