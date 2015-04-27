@@ -67,9 +67,8 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		lowerVariance = lowerPrecision * lowerPrecision;
-		final double upperPrecision = lowerPrecision + range;
-		upperVariance = upperPrecision * upperPrecision;
+		lowerVariance = PrecisionFilter.getVarianceLimit(lowerPrecision);
+		upperVariance = PrecisionFilter.getVarianceLimit(lowerPrecision + range);		
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();

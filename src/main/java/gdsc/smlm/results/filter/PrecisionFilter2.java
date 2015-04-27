@@ -21,7 +21,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Filter results using a precision threshold. Calculates the precision using the true fitted background if a bias is provided.
+ * Filter results using a precision threshold. Calculates the precision using the true fitted background if a bias is
+ * provided.
  */
 public class PrecisionFilter2 extends Filter
 {
@@ -58,7 +59,7 @@ public class PrecisionFilter2 extends Filter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		variance = precision * precision;
+		variance = PrecisionFilter.getVarianceLimit(precision);
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();

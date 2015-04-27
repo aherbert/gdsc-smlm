@@ -13,19 +13,21 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision
+ * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision. Calculates the
+ * precision using the true fitted background if a bias is provided.
  */
-public class MultiFilter extends Filter
+public class MultiFilter2 extends Filter
 {
 	@XStreamAsAttribute
 	final double signal;
@@ -56,8 +58,10 @@ public class MultiFilter extends Filter
 	boolean emCCD = true;
 	@XStreamOmitField
 	double gain = 1;
+	@XStreamOmitField
+	double bias = 0;
 
-	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double precision)
+	public MultiFilter2(double signal, float snr, double minWidth, double maxWidth, double shift, double precision)
 	{
 		this.signal = signal;
 		this.snr = snr;
@@ -112,6 +116,10 @@ public class MultiFilter extends Filter
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		if (peakResults.getCalibration() != null)
+		{
+			bias = peakResults.getCalibration().bias;
+		}
 	}
 
 	@Override
@@ -126,6 +134,15 @@ public class MultiFilter extends Filter
 			return false;
 		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
 			return false;
+		// Use the background directly
+		if (bias != 0)
+		{
+			// Use the estimated background for the peak
+			final double s = nmPerPixel * peak.getSD();
+			final double N = peak.getSignal();
+			return PeakResult.getVarianceX(nmPerPixel, s, N / gain,
+					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= variance;
+		}
 		// Use the background noise to estimate precision
 		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
 	}
@@ -227,6 +244,6 @@ public class MultiFilter extends Filter
 		checkIndex(index);
 		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, precision };
 		params[index] = updateParameter(params[index], delta);
-		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5]);
+		return new MultiFilter2(params[0], (float) params[1], params[2], params[3], params[4], params[5]);
 	}
 }

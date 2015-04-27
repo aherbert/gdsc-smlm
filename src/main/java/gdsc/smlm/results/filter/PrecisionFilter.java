@@ -55,12 +55,20 @@ public class PrecisionFilter extends Filter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		variance = precision * precision;
+		variance = getVarianceLimit(precision);
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
 	}
 
+	public static double getVarianceLimit(double precision)
+	{
+		if (precision > 0)
+			return precision * precision;
+		else
+			return Double.POSITIVE_INFINITY;
+	}
+	
 	@Override
 	public boolean accept(PeakResult peak)
 	{
