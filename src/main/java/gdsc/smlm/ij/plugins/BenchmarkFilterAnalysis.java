@@ -121,8 +121,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	static
 	{
 		showColumns = new boolean[COLUMNS.length];
-		Arrays.fill(showColumns, true);
-		showColumns[0] = false; // nP
+		//Arrays.fill(showColumns, true);
+		//showColumns[0] = false; // nP
+
+		showColumns[1] = true; // TP
+		showColumns[2] = true; // FP
+		showColumns[3] = true; // TN
+		showColumns[4] = true; // FN
+		showColumns[COLUMNS.length - 4] = true; // Recall
+		showColumns[COLUMNS.length - 3] = true; // Precision
+		showColumns[COLUMNS.length - 1] = true; // Jaccard
 
 		criteriaIndex = COLUMNS.length - 3;
 		scoreIndex = COLUMNS.length - 1;
