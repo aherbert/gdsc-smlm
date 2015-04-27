@@ -974,7 +974,7 @@ public class FilterAnalysis implements PlugIn
 			sb.append(s.getJaccard()).append("\t");
 			sb.append(s.getPrecision()).append("\t");
 			sb.append(s.getRecall()).append("\t");
-			sb.append(s.getFScore(1));
+			sb.append(s.getF1Score());
 			if (isHeadless)
 			{
 				IJ.log(sb.toString());

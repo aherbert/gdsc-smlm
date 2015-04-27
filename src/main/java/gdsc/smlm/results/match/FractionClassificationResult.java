@@ -68,8 +68,8 @@ public class FractionClassificationResult
 	 */
 	public static double calculateFScore(double precision, double recall, double beta)
 	{
-		double b2 = beta * beta;
-		double f = ((1.0 + b2) * precision * recall) / (b2 * precision + recall);
+		final double b2 = beta * beta;
+		final double f = ((1.0 + b2) * precision * recall) / (b2 * precision + recall);
 		return (Double.isNaN(f) ? 0 : f);
 	}
 
@@ -85,6 +85,17 @@ public class FractionClassificationResult
 		return calculateFScore(precision, recall, beta);
 	}
 
+	/**
+	 * Return the F1-Score statistic, a equal weighted combination of the precision and recall
+	 * 
+	 * @return The F1-Score
+	 */
+	public double getF1Score()
+	{
+		final double f = (2 * precision * recall) / (precision + recall);
+		return (Double.isNaN(f) ? 0 : f);
+	}
+	
 	/**
 	 * @return the precision
 	 */

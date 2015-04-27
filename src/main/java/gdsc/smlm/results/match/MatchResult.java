@@ -37,7 +37,8 @@ public class MatchResult
 	 *            The number of false positives
 	 * @param fn
 	 *            The number of false negatives
-	 * @param rmsd The root mean squared distance between true positives
+	 * @param rmsd
+	 *            The root mean squared distance between true positives
 	 */
 	public MatchResult(int tp, int fp, int fn, double rmsd)
 	{
@@ -50,7 +51,7 @@ public class MatchResult
 		recall = divide(tp, tp + fn);
 		jaccard = divide(tp, tp + fp + fn);
 	}
-	
+
 	private static double divide(final double numerator, final int denominator)
 	{
 		if (denominator == 0)
@@ -69,8 +70,8 @@ public class MatchResult
 	 */
 	public static double calculateFScore(double precision, double recall, double beta)
 	{
-		double b2 = beta * beta;
-		double f = ((1.0 + b2) * precision * recall) / (b2 * precision + recall);
+		final double b2 = beta * beta;
+		final double f = ((1.0 + b2) * precision * recall) / (b2 * precision + recall);
 		return (Double.isNaN(f) ? 0 : f);
 	}
 
@@ -84,6 +85,17 @@ public class MatchResult
 	public double getFScore(double beta)
 	{
 		return calculateFScore(precision, recall, beta);
+	}
+
+	/**
+	 * Return the F1-Score statistic, a equal weighted combination of the precision and recall
+	 * 
+	 * @return The F1-Score
+	 */
+	public double getF1Score()
+	{
+		final double f = (2 * precision * recall) / (precision + recall);
+		return (Double.isNaN(f) ? 0 : f);
 	}
 
 	/**

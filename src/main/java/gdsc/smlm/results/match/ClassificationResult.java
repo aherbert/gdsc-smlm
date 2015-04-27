@@ -67,8 +67,8 @@ public class ClassificationResult
 	 */
 	public static double calculateFScore(double precision, double recall, double beta)
 	{
-		double b2 = beta * beta;
-		double f = ((1.0 + b2) * precision * recall) / (b2 * precision + recall);
+		final double b2 = beta * beta;
+		final double f = ((1.0 + b2) * precision * recall) / (b2 * precision + recall);
 		return (Double.isNaN(f) ? 0 : f);
 	}
 
@@ -82,6 +82,17 @@ public class ClassificationResult
 	public double getFScore(double beta)
 	{
 		return calculateFScore(precision, recall, beta);
+	}
+
+	/**
+	 * Return the F1-Score statistic, a equal weighted combination of the precision and recall
+	 * 
+	 * @return The F1-Score
+	 */
+	public double getF1Score()
+	{
+		final double f = (2 * precision * recall) / (precision + recall);
+		return (Double.isNaN(f) ? 0 : f);
 	}
 
 	/**
@@ -247,7 +258,7 @@ public class ClassificationResult
 		final double d = (double) (tp + fp) * (double) (tp + fn) * (double) (tn + fp) * (double) (tn + fn);
 		double mcc = 0;
 		if (d != 0)
-			mcc = ((double)(tp * tn) - (double)(fp * fn)) / Math.sqrt(d);
+			mcc = ((double) (tp * tn) - (double) (fp * fn)) / Math.sqrt(d);
 		return Math.max(-1, Math.min(1, mcc));
 	}
 

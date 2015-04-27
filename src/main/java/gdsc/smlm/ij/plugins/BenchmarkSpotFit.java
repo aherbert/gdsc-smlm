@@ -804,7 +804,7 @@ public class BenchmarkSpotFit implements PlugIn
 		MatchResult m = new MatchResult(r.getP(), r.getN(), simulationParameters.molecules - r.getP(), 0);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
-		add(sb, m.getFScore(1));
+		add(sb, m.getF1Score());
 		add(sb, m.getJaccard());
 
 		// Score the fitting results:
@@ -815,7 +815,7 @@ public class BenchmarkSpotFit implements PlugIn
 		m = new MatchResult(tp, 0, simulationParameters.molecules - tp, 0);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
-		add(sb, m.getFScore(1));
+		add(sb, m.getF1Score());
 		add(sb, m.getJaccard());
 
 		// The mean may be subject to extreme outliers so use the median
