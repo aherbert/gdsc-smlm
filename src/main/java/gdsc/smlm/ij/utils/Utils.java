@@ -629,7 +629,7 @@ public class Utils
 				// Get the inter quartile range
 				double lower = stats.getStatistics().getPercentile(25);
 				double upper = stats.getStatistics().getPercentile(75);
-				double iqr = upper - lower;
+				double iqr = 1.5 * (upper - lower);
 				yMin = FastMath.max(lower - iqr, yMin);
 				yMax = FastMath.min(upper + iqr, yMax);
 				break;
