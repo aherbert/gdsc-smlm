@@ -316,7 +316,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 				Parameters.isAboveZero("Histogram bins", settings.histogramBins);
 			Parameters.isAboveZero("Search width", config.getSearch());
 			Parameters.isAboveZero("Fitting width", config.getFitting());
-			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
+			Parameters.isPositive("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());

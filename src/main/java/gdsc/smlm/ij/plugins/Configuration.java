@@ -282,7 +282,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
-			Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
+			Parameters.isPositive("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Duplicate distance", fitConfig.getDuplicateDistance());

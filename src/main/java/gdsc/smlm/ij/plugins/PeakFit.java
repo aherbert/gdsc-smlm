@@ -1358,7 +1358,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			Parameters.isPositive("Integrate frames", integrateFrames);
 			if (!maximaIdentification)
 			{
-				Parameters.isAboveZero("Failures limit", config.getFailuresLimit());
+				Parameters.isPositive("Failures limit", config.getFailuresLimit());
 				Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 				Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 				Parameters.isPositive("Duplicate distance", fitConfig.getDuplicateDistance());

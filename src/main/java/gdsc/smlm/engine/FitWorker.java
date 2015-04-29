@@ -333,7 +333,7 @@ public class FitWorker implements Runnable
 					// Update the initial coordinates
 					updateCoordinates(regionBounds, fitResult.getInitialParameters());
 
-				if (config.getFailuresLimit() != 0 && failures >= config.getFailuresLimit())
+				if (config.getFailuresLimit() >= 0 && failures >= config.getFailuresLimit())
 					break;
 			}
 
