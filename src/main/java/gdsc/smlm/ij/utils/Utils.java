@@ -619,9 +619,9 @@ public class Utils
 		double[] values = stats.getValues();
 		if (values == null || values.length < 2)
 			return 0;
-		Arrays.sort(values);
-		double yMin = values[0];
-		double yMax = values[values.length - 1];
+		double[] limits = Maths.limits(values);
+		double yMin = limits[0];
+		double yMax = limits[1];
 
 		switch (removeOutliers)
 		{
@@ -675,9 +675,9 @@ public class Utils
 
 		title += " " + name;
 
-		float[][] hist = Utils.calcHistogram(stats.getFloatValues(), yMin, yMax, bins);
+		double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
 
-		float[] xValues, yValues;
+		double[] xValues, yValues;
 
 		if (barChart)
 		{
@@ -689,8 +689,8 @@ public class Utils
 		{
 			// Line plot of non-zero values
 			int c = 0;
-			xValues = new float[hist[0].length];
-			yValues = new float[xValues.length];
+			xValues = new double[hist[0].length];
+			yValues = new double[xValues.length];
 			for (int i = 0; i < xValues.length; i++)
 			{
 				if (hist[1][i] != 0)
@@ -707,10 +707,10 @@ public class Utils
 		Plot2 plot = new Plot2(title, name, "Frequency");
 		if (xValues.length > 0)
 		{
-			float dx = 0;
+			double dx = 0;
 			if (barChart)
 				dx = (xValues.length == 1) ? 1 : (xValues[1] - xValues[0]);
-			float xMax = xValues[xValues.length - 1] + dx;
+			double xMax = xValues[xValues.length - 1] + dx;
 			double xPadding = 0.05 * (xMax - xValues[0]);
 			plot.setLimits(xValues[0] - xPadding, xMax + xPadding, 0,
 					Maths.max(yValues) * 1.05);
