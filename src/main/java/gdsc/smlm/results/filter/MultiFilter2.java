@@ -87,7 +87,7 @@ public class MultiFilter2 extends Filter
 	@Override
 	protected String generateType()
 	{
-		return "Multi";
+		return "Multi2";
 	}
 
 	@Override
