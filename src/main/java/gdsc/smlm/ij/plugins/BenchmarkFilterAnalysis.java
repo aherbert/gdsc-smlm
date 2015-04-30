@@ -44,6 +44,7 @@ import ij.text.TextWindow;
 import java.awt.Color;
 import java.awt.Point;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,7 +89,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static boolean calculateSensitivity = false;
 	private static double delta = 0.1;
 	private static int criteriaIndex;
-	private static double criteriaLimit = 0.9;
+	private static double criteriaLimit = 0.95;
 	private double minCriteria = 0;
 	private boolean invertCriteria = false;
 	private static int scoreIndex;
@@ -106,6 +107,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 	private static boolean reUseFilters = true;
 	private static String oldFilename = "";
+	private static long lastModified = 0;
 	private static List<FilterSet> filterList = null;
 	private static int lastId = 0;
 	private static boolean lastRank = false;
@@ -210,7 +212,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			filterSettings.filterSetFilename = filename;
 
 			// Allow the filters to be cached
-			if (filename.equals(oldFilename) && filterList != null)
+			if (isSameFile(filename))
 			{
 				GenericDialog gd = new GenericDialog(TITLE);
 				gd.hideCancelButton();
@@ -225,20 +227,20 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 
 			BufferedReader input = null;
-			oldFilename = "";
+			setLastFile(null);
 			try
 			{
-				FileInputStream fis = new FileInputStream(filterSettings.filterSetFilename);
+				FileInputStream fis = new FileInputStream(filename);
 				input = new BufferedReader(new UnicodeReader(fis, null));
 				Object o = XStreamWrapper.getInstance().fromXML(input);
 				if (o != null && o instanceof List<?>)
 				{
 					SettingsManager.saveSettings(gs);
 					filterList = (List<FilterSet>) o;
-					oldFilename = filename;
+					setLastFile(filename);
 					return filterList;
 				}
-				IJ.log("No filter sets defined in the specified file: " + filterSettings.filterSetFilename);
+				IJ.log("No filter sets defined in the specified file: " + filename);
 			}
 			catch (Exception e)
 			{
@@ -261,6 +263,44 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 		}
 		return null;
+	}
+
+	public boolean isSameFile(String filename)
+	{
+		if (filterList == null)
+			return false;
+		if (filename.equals(oldFilename))
+		{
+			try
+			{
+				File f = new File(filename);
+				if (lastModified == f.lastModified())
+				{
+					return true;
+				}
+			}
+			catch (Exception e)
+			{
+			}
+		}
+		return false;
+	}
+
+	private void setLastFile(String filename)
+	{
+		oldFilename = filename;
+		if (oldFilename != null)
+		{
+			try
+			{
+				File f = new File(filename);
+				lastModified = f.lastModified();
+			}
+			catch (Exception e)
+			{
+				lastModified = 0;
+			}
+		}
 	}
 
 	private List<MemoryPeakResults> readResults()
@@ -1379,11 +1419,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		plot.setLimits(limits[0], limits[1], 0, Maths.max(h[1]));
 		plot.setColor(Color.black);
 		plot.addPoints(h[0], h[1], Plot2.BAR);
+		plot.addLabel(0, 0, "Black = Spots; Blue = Fitted; Red = Filtered");
 		plot.setColor(Color.blue);
 		plot.addPoints(h[0], h2[1], Plot2.BAR);
 		plot.setColor(Color.red);
 		plot.addPoints(h[0], h3[1], Plot2.BAR);
-		plot.addLabel(0, 0, "Black = Spots; Blue = Fitted; Red = Filtered");
+		plot.setColor(Color.magenta);
 		PlotWindow pw = Utils.display(title, plot);
 
 		// Interpolate
@@ -1431,14 +1472,22 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			v3[i] = v3[i] / v[i];
 		}
 
+		final double halfSummaryDepth = summaryDepth * 0.5;
+
 		title = TITLE + " Depth Histogram (normalised)";
 		plot = new Plot2(title, "Depth (nm)", "Recall");
 		plot.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0, Maths.min(1, Maths.max(v2)));
+		plot.setColor(Color.black);
+		plot.addLabel(0, 0, "Blue = Fitted; Red = Filtered");
 		plot.setColor(Color.blue);
 		plot.addPoints(points, v2, Plot2.LINE);
 		plot.setColor(Color.red);
 		plot.addPoints(points, v3, Plot2.LINE);
-		plot.addLabel(0, 0, "Blue = Fitted; Red = Filtered");
+		plot.setColor(Color.magenta);
+		plot.drawLine(-halfSummaryDepth, 0, -halfSummaryDepth,
+				spline3.value(-halfSummaryDepth) / spline.value(-halfSummaryDepth));
+		plot.drawLine(halfSummaryDepth, 0, halfSummaryDepth,
+				spline3.value(halfSummaryDepth) / spline.value(halfSummaryDepth));
 		PlotWindow pw2 = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 		{
