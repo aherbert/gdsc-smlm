@@ -159,4 +159,28 @@ public class SNRHysteresisFilter extends HysteresisFilter
 				return new SNRHysteresisFilter(searchDistance, lowerSnr, updateParameter(range, delta));
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new SNRHysteresisFilter(parameters[0], (float)parameters[1], (float)parameters[2]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMax(parameters, 0, searchDistance);
+		setMin(parameters, 1, lowerSnr);
+		setMin(parameters, 2, range);
+	}
 }

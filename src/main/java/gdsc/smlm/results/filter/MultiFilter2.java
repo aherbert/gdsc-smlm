@@ -59,7 +59,7 @@ public class MultiFilter2 extends Filter
 	@XStreamOmitField
 	double gain = 1;
 	@XStreamOmitField
-	double bias = 0;
+	double bias = -1;
 
 	public MultiFilter2(double signal, float snr, double minWidth, double maxWidth, double shift, double precision)
 	{
@@ -116,6 +116,7 @@ public class MultiFilter2 extends Filter
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		bias = -1;
 		if (peakResults.getCalibration() != null)
 		{
 			bias = peakResults.getCalibration().bias;
@@ -135,7 +136,7 @@ public class MultiFilter2 extends Filter
 		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
 			return false;
 		// Use the background directly
-		if (bias != 0)
+		if (bias != -1)
 		{
 			// Use the estimated background for the peak
 			final double s = nmPerPixel * peak.getSD();
@@ -245,5 +246,33 @@ public class MultiFilter2 extends Filter
 		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, precision };
 		params[index] = updateParameter(params[index], delta);
 		return new MultiFilter2(params[0], (float) params[1], params[2], params[3], params[4], params[5]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new MultiFilter2(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
+				parameters[5]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, signal);
+		setMin(parameters, 1, snr);
+		setMin(parameters, 2, minWidth);
+		setMax(parameters, 3, maxWidth);
+		setMax(parameters, 4, shift);
+		setMax(parameters, 5, precision);
 	}
 }

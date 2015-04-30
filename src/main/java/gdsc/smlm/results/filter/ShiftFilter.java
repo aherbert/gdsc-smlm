@@ -138,4 +138,26 @@ public class ShiftFilter extends Filter
 		checkIndex(index);
 		return new ShiftFilter(updateParameter(shift, delta));
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new ShiftFilter(parameters[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMax(parameters, 0, shift);
+	}
 }

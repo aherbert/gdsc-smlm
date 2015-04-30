@@ -128,4 +128,26 @@ public class SignalFilter extends Filter
 		checkIndex(index);
 		return new SignalFilter(updateParameter(signal, delta));
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new SignalFilter(parameters[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, signal);
+	}
 }

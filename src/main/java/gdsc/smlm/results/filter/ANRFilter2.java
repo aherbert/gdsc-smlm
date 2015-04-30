@@ -183,4 +183,28 @@ public class ANRFilter2 extends Filter
 				return new ANRFilter2(anr, minWidth, updateParameter(maxWidth, delta));
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new ANRFilter2((float)parameters[0], parameters[1], parameters[2]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, anr);
+		setMin(parameters, 1, minWidth);
+		setMax(parameters, 2, maxWidth);
+	}
 }

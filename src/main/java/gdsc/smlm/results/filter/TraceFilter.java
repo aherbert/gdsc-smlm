@@ -168,4 +168,27 @@ public class TraceFilter extends Filter
 				return new TraceFilter(d, updateParameter(t, delta));
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new TraceFilter(parameters[0], (int) parameters[1]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMax(parameters, 0, d);
+		setMax(parameters, 1, t);
+	}
 }

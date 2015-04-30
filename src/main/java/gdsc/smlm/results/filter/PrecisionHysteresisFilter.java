@@ -178,4 +178,28 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 				return new PrecisionHysteresisFilter(searchDistance, lowerPrecision, updateParameter(range, delta));
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new PrecisionHysteresisFilter(parameters[0], parameters[1], parameters[2]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMax(parameters, 0, searchDistance);
+		setMax(parameters, 1, lowerPrecision);
+		setMax(parameters, 2, range);
+	}
 }

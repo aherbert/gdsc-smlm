@@ -175,4 +175,30 @@ public class CoordinateFilter extends Filter
 				return new CoordinateFilter(minX, maxX, minY, updateParameter(maxY, delta));
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new CoordinateFilter((float) parameters[0], (float) parameters[1], (float) parameters[2],
+				(float) parameters[3]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, minX);
+		setMax(parameters, 1, maxX);
+		setMin(parameters, 2, minY);
+		setMax(parameters, 3, maxY);
+	}
 }

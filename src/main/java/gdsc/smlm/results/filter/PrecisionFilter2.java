@@ -35,7 +35,7 @@ public class PrecisionFilter2 extends Filter
 	@XStreamOmitField
 	boolean emCCD = true;
 	@XStreamOmitField
-	double bias = 0;
+	double bias = -1;
 	@XStreamOmitField
 	double gain = 1;
 
@@ -63,6 +63,7 @@ public class PrecisionFilter2 extends Filter
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		bias = -1;
 		if (peakResults.getCalibration() != null)
 		{
 			bias = peakResults.getCalibration().bias;
@@ -72,7 +73,7 @@ public class PrecisionFilter2 extends Filter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		if (bias != 0)
+		if (bias != -1)
 		{
 			// Use the estimated background for the peak
 			final double s = nmPerPixel * peak.getSD();
@@ -152,5 +153,27 @@ public class PrecisionFilter2 extends Filter
 	{
 		checkIndex(index);
 		return new PrecisionFilter2(updateParameter(precision, delta));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new PrecisionFilter2(parameters[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMax(parameters, 0, precision);
 	}
 }

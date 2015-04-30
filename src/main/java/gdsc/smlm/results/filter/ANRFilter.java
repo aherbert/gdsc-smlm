@@ -128,4 +128,26 @@ public class ANRFilter extends Filter
 		checkIndex(index);
 		return new ANRFilter(updateParameter(anr, delta));
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new ANRFilter((float) parameters[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, anr);
+	}
 }

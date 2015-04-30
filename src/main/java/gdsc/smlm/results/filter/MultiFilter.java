@@ -229,4 +229,32 @@ public class MultiFilter extends Filter
 		params[index] = updateParameter(params[index], delta);
 		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5]);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new MultiFilter(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
+				parameters[5]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, signal);
+		setMin(parameters, 1, snr);
+		setMin(parameters, 2, minWidth);
+		setMax(parameters, 3, maxWidth);
+		setMax(parameters, 4, shift);
+		setMax(parameters, 5, precision);
+	}
 }

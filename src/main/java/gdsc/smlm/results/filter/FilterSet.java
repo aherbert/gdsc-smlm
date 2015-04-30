@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Specify a named set of filters
@@ -26,6 +27,11 @@ public class FilterSet
 	@XStreamAsAttribute
 	private String name;
 	private List<Filter> filters;
+
+	@XStreamOmitField
+	private Filter weakest;
+	@XStreamOmitField
+	private boolean initialisedWeakest;
 
 	public FilterSet(String name, List<Filter> filters)
 	{
@@ -45,6 +51,7 @@ public class FilterSet
 
 	/**
 	 * The name of the set. If empty return the name of the first filter in the set.
+	 * 
 	 * @return the name
 	 */
 	public String getName()
@@ -104,8 +111,59 @@ public class FilterSet
 		return null;
 	}
 
+	/**
+	 * Sort the filters
+	 */
 	public void sort()
 	{
 		Collections.sort(filters);
+	}
+
+	/**
+	 * Check all filters in the set are the same type. If so find the parameters that are the weakest and generate a new
+	 * filter.
+	 * 
+	 * @return The weakest filter
+	 */
+	public Filter createWeakestFilter()
+	{
+		if (!initialisedWeakest)
+		{
+			weakest = createWeakest();
+			initialisedWeakest = true;
+		}
+		return weakest;
+	}
+
+	private Filter createWeakest()
+	{
+		if (size() == 0)
+			return null;
+		
+		// Check for the same type
+		final Filter f1 = filters.get(0);
+		final String type = f1.getType();
+		for (Filter f : filters)
+		{
+			// Use the != since the Strings should be immutable
+			//if (f.getType() != type)
+			if (!f.getType().equals(type))
+				return null;
+		}
+		
+		// Initialise the parameters
+		double[] parameters = new double[f1.getNumberOfParameters()];
+		for (int i=0; i<parameters.length; i++)
+		{
+			parameters[i] = f1.getParameterValue(i);
+		}
+		
+		// Find the weakest
+		for (Filter f : filters)
+		{
+			f.weakestParameters(parameters);
+		}
+		
+		return f1.create(parameters);
 	}
 }

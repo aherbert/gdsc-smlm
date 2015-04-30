@@ -104,8 +104,104 @@ public abstract class Filter implements Comparable<Filter>
 			}
 
 			if (isPositive)
+			{
+				failCount = 0;
 				newResults.add(peak);
+			}
+			else
+			{
+				failCount++;
+			}
 		}
+		return newResults;
+	}
+
+	/**
+	 * Filter the results
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * The number of failures before each peak is stored in the origX property of the PeakResult.
+	 * 
+	 * @param results
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param score
+	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn ]
+	 * @return the filtered results
+	 */
+	public MemoryPeakResults filterSubset(MemoryPeakResults results, int failures, double[] score)
+	{
+		MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(results);
+		setup(results);
+		int frame = -1;
+		int failCount = 0;
+		double fp = 0, fn = 0;
+		double tp = 0, tn = 0;
+		for (PeakResult peak : results.getResults())
+		{
+			final boolean isTrue = peak.origValue != 0;
+
+			if (frame != peak.peak)
+			{
+				frame = peak.peak;
+				failCount = 0;
+			}
+
+			// Reject all peaks if we have exceeded the fail count
+			final boolean isPositive;
+			if (failCount > failures)
+			{
+				isPositive = false;
+			}
+			else
+			{
+				// Otherwise assess the peak
+				isPositive = accept(peak);
+			}
+
+			if (isPositive)
+			{
+				peak.origX = failCount;
+				failCount = 0;
+				newResults.add(peak);
+			}
+			else
+			{
+				failCount++;
+			}
+
+			if (isTrue)
+			{
+				if (isPositive)
+				{
+					tp += peak.origValue; // true positive
+					fp += 1f - peak.origValue;
+				}
+				else
+				{
+					fn += peak.origValue; // false negative
+					tn += 1f - peak.origValue;
+				}
+			}
+			else
+			{
+				if (isPositive)
+					fp++; // false positive
+				else
+					tn++; // true negative
+			}
+		}
+		if (score != null && score.length > 3)
+		{
+			score[0] = tp;
+			score[1] = fp;
+			score[2] = tn;
+			score[3] = fn;
+		}
+
 		return newResults;
 	}
 
@@ -129,7 +225,52 @@ public abstract class Filter implements Comparable<Filter>
 
 			for (PeakResult peak : peakResults.getResults())
 			{
-				boolean isTrue = peak.origValue != 0;
+				final boolean isTrue = peak.origValue != 0;
+				boolean isPositive = accept(peak);
+				if (isTrue)
+				{
+					if (isPositive)
+						tp++; // true positive
+					else
+						fn++; // false negative
+				}
+				else
+				{
+					if (isPositive)
+						fp++; // false positive
+					else
+						tn++; // true negative
+				}
+			}
+		}
+		return new ClassificationResult(tp, fp, tn, fn);
+	}
+
+	/**
+	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
+	 * true or false.
+	 * <p>
+	 * Any input PeakResult with an original value that is not zero will be treated as a true result, all other results
+	 * are false. The filter is run and the results are marked as true positive, false negative and false positive.
+	 * 
+	 * @param resultsList
+	 *            a list of results to analyse
+	 * @param tn
+	 *            The initial true negatives (used when the results have been pre-filtered)
+	 * @param fn
+	 *            The initial false negatives (used when the results have been pre-filtered)
+	 * @return
+	 */
+	public ClassificationResult score(List<MemoryPeakResults> resultsList, int tn, int fn)
+	{
+		int tp = 0, fp = 0;
+		for (MemoryPeakResults peakResults : resultsList)
+		{
+			setup(peakResults);
+
+			for (PeakResult peak : peakResults.getResults())
+			{
+				final boolean isTrue = peak.origValue != 0;
 				boolean isPositive = accept(peak);
 				if (isTrue)
 				{
@@ -177,7 +318,7 @@ public abstract class Filter implements Comparable<Filter>
 			int failCount = 0;
 			for (PeakResult peak : peakResults.getResults())
 			{
-				boolean isTrue = peak.origValue != 0;
+				final boolean isTrue = peak.origValue != 0;
 
 				// Reset fail count for new frames
 				if (frame != peak.peak)
@@ -185,6 +326,92 @@ public abstract class Filter implements Comparable<Filter>
 					frame = peak.peak;
 					failCount = 0;
 				}
+
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
+				if (failCount > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
+
+				if (isPositive)
+				{
+					failCount = 0;
+				}
+				else
+				{
+					failCount++;
+				}
+
+				if (isTrue)
+				{
+					if (isPositive)
+						tp++; // true positive
+					else
+						fn++; // false negative
+				}
+				else
+				{
+					if (isPositive)
+						fp++; // false positive
+					else
+						tn++; // true negative
+				}
+			}
+		}
+		return new ClassificationResult(tp, fp, tn, fn);
+	}
+
+	/**
+	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
+	 * true or false.
+	 * <p>
+	 * Any input PeakResult with an original value that is not zero will be treated as a true result, all other results
+	 * are false. The filter is run and the results are marked as true positive, false negative and false positive.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * Note that this method is to be used to score a subset that was generated using
+	 * {@link #filterSubset(MemoryPeakResults, int)} since the number of consecutive failures before each peak are
+	 * expected to be stored in the origX property.
+	 * 
+	 * @param resultsList
+	 *            a list of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param tn
+	 *            The initial true negatives (used when the results have been pre-filtered)
+	 * @param fn
+	 *            The initial false negatives (used when the results have been pre-filtered)
+	 * @return the score
+	 */
+	public ClassificationResult scoreSubset(List<MemoryPeakResults> resultsList, int failures, int tn, int fn)
+	{
+		int tp = 0, fp = 0;
+		for (MemoryPeakResults peakResults : resultsList)
+		{
+			setup(peakResults);
+
+			int frame = -1;
+			int failCount = 0;
+			for (PeakResult peak : peakResults.getResults())
+			{
+				final boolean isTrue = peak.origValue != 0;
+
+				// Reset fail count for new frames
+				if (frame != peak.peak)
+				{
+					frame = peak.peak;
+					failCount = 0;
+				}
+
+				failCount += peak.origX;
 
 				// Reject all peaks if we have exceeded the fail count
 				final boolean isPositive;
@@ -245,24 +472,17 @@ public abstract class Filter implements Comparable<Filter>
 	 */
 	public FractionClassificationResult fractionScore(List<MemoryPeakResults> resultsList, int failures)
 	{
-		double fp = 0, tn = 0;
-		double tp = 0, fn = 0;
+		double fp = 0, fn = 0;
+		double tp = 0, tn = 0;
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
-			// Q. Should the partial score be balanced?
-			//float max = 0;
-			//for (PeakResult peak : peakResults.getResults())
-			//{
-			//	if (max < peak.origValue)
-			//		max = peak.origValue;
-			//}
 
 			int frame = -1;
 			int failCount = 0;
 			for (PeakResult peak : peakResults.getResults())
 			{
-				boolean isTrue = peak.origValue != 0;
+				final boolean isTrue = peak.origValue != 0;
 
 				// Reset fail count for new frames
 				if (frame != peak.peak)
@@ -297,15 +517,106 @@ public abstract class Filter implements Comparable<Filter>
 					if (isPositive)
 					{
 						tp += peak.origValue; // true positive
-						// Q. Should the partial score be balanced?
-						//fp += max - peak.origValue;
 						fp += 1f - peak.origValue;
 					}
 					else
 					{
 						fn += peak.origValue; // false negative
-						// Q. Should the partial score be balanced?
-						//tn += max - peak.origValue;
+						tn += 1f - peak.origValue;
+					}
+				}
+				else
+				{
+					if (isPositive)
+						fp++; // false positive
+					else
+						tn++; // true negative
+				}
+			}
+		}
+		return new FractionClassificationResult(tp, fp, tn, fn);
+	}
+
+	/**
+	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
+	 * true or false.
+	 * <p>
+	 * Any input PeakResult with an original value that is not zero will be treated as a true result with a weighting
+	 * equal to the score (instead of the classic weighting of one), all other results are false. The filter is run and
+	 * the results are marked as true positive, false negative and false positive.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * Note that this method is to be used to score a subset that was generated using
+	 * {@link #filterSubset(MemoryPeakResults, int)} since the number of consecutive failures before each peak are
+	 * expected to be stored in the origX property.
+	 * 
+	 * @param resultsList
+	 *            a list of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param tn
+	 *            The initial true negatives (used when the results have been pre-filtered)
+	 * @param fn
+	 *            The initial false negatives (used when the results have been pre-filtered)
+	 * @return the score
+	 */
+	public FractionClassificationResult fractionScoreSubset(List<MemoryPeakResults> resultsList, int failures,
+			double tn, double fn)
+	{
+		double fp = 0;
+		double tp = 0;
+		for (MemoryPeakResults peakResults : resultsList)
+		{
+			setup(peakResults);
+
+			int frame = -1;
+			int failCount = 0;
+			for (PeakResult peak : peakResults.getResults())
+			{
+				final boolean isTrue = peak.origValue != 0;
+
+				// Reset fail count for new frames
+				if (frame != peak.peak)
+				{
+					frame = peak.peak;
+					failCount = 0;
+				}
+
+				failCount += peak.origX;
+
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
+				if (failCount > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
+
+				if (isPositive)
+				{
+					failCount = 0;
+				}
+				else
+				{
+					failCount++;
+				}
+
+				if (isTrue)
+				{
+					if (isPositive)
+					{
+						tp += peak.origValue; // true positive
+						fp += 1f - peak.origValue;
+					}
+					else
+					{
+						fn += peak.origValue; // false negative
 						tn += 1f - peak.origValue;
 					}
 				}
@@ -502,4 +813,34 @@ public abstract class Filter implements Comparable<Filter>
 			return value - update;
 		return value + update;
 	}
+
+	protected void setMin(double[] parameters, int index, double value)
+	{
+		if (parameters[index] > value)
+			parameters[index] = value;
+	}
+
+	protected void setMax(double[] parameters, int index, double value)
+	{
+		if (parameters[index] < value)
+			parameters[index] = value;
+	}
+
+	/**
+	 * Create a new filter with the specified parameters
+	 * 
+	 * @param parameters
+	 * @return A new filter
+	 */
+	public abstract Filter create(double... parameters);
+
+	/**
+	 * Update the input array if the Filter's parameters are weaker. This method can be used to find the weakest
+	 * parameters across a set of filters of the same type. The weakest filter can then be used to create a subset of
+	 * pre-filtered results to use for testing the filter set.
+	 * 
+	 * @param parameters
+	 *            The parameters
+	 */
+	public abstract void weakestParameters(double[] parameters);
 }

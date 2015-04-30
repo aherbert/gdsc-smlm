@@ -858,9 +858,52 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		filterSet.sort();
 
-		// Track if all the filters are the same type. If so then we can calculate the sensitivity of each parameter.
-		String type = null;
-		boolean allSameType = true;
+		// Get the weakest filter and subset the results if possible
+		Filter weakest = null;
+		boolean subset = false;
+		double tn = 0, fn = 0;
+		boolean allSameType = false;
+		String type = filterSet.getFilters().get(0).getType();
+		if (failCountRange == 0)
+		{
+			weakest = filterSet.createWeakestFilter();
+			if (weakest != null)
+			{
+				// Can only create a weakest filter if they are the same type
+				subset = allSameType = true;
+				List<MemoryPeakResults> resultsList2 = new ArrayList<MemoryPeakResults>(resultsList.size());
+				double[] score = null;
+				for (MemoryPeakResults r : resultsList)
+				{
+					double[] score2 = new double[4];
+					resultsList2.add(weakest.filterSubset(r, failCount, score2));
+					if (score == null)
+						score = score2;
+					else
+					{
+						for (int j = 0; j < score.length; j++)
+							score[j] += score2[j];
+					}
+				}
+				resultsList = resultsList2;
+				tn = score[2];
+				fn = score[3];
+			}
+		}
+		else
+		{
+			// Check if the filters are the same type
+			allSameType = true;
+			for (Filter filter : filterSet.getFilters())
+			{
+				if (!filter.getType().equals(type))
+				{
+					allSameType = false;
+					break;
+				}
+			}
+		}
+
 		Filter maxFilter = null, criteriaFilter = null;
 		double maxScore = -1;
 		double maxCriteria = 0;
@@ -874,12 +917,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					return -1;
 			}
 
-			if (type == null)
-				type = filter.getType();
-			else if (!type.equals(filter.getType()))
-				allSameType = false;
-
-			final double[] result = run(filter, resultsList);
+			final double[] result = run(filter, resultsList, subset, tn, fn);
 			final double score = result[0];
 			final double criteria = result[1];
 
@@ -930,7 +968,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				{
 					// Duplicate type: create a unique key
 					// Start at 2 to show it is the second one of the same type
-					int n = 2; 
+					int n = 2;
 					while (bestFilter.containsKey(type + n))
 						n++;
 					type += n;
@@ -1116,9 +1154,26 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		return max;
 	}
 
-	private double[] run(Filter filter, List<MemoryPeakResults> resultsList)
+	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn)
 	{
-		FractionClassificationResult r = scoreFilter(filter, resultsList);
+		FractionClassificationResult r;
+		if (subset)
+		{
+			r = filter.fractionScoreSubset(resultsList, failCount, tn, fn);
+
+			//// DEBUG - Test if the two methods produce the same results
+			//FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.resultsList);
+			//if (!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
+			//		!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
+			//		!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTN(), r2.getTN(), 1e-6, 1e-10) ||
+			//		!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
+			//{
+			//	System.out.printf("TP %f != %f, FP %f != %f, TN %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(),
+			//			r.getFP(), r2.getFP(), r.getTN(), r2.getTN(), r.getFN(), r2.getFN());
+			//}
+		}
+		else
+			r = scoreFilter(filter, resultsList);
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
 

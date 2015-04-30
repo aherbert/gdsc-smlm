@@ -13,6 +13,8 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import java.util.Arrays;
+
 import gdsc.smlm.results.MemoryPeakResults;
 
 /**
@@ -142,4 +144,33 @@ public abstract class CombinedFilter extends Filter
 	 * @return
 	 */
 	protected abstract Filter createFilter(Filter f1, Filter f2);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
+		double[] p2 = Arrays.copyOfRange(parameters, filter1.getNumberOfParameters(), parameters.length);
+		return createFilter(filter1.create(p1), filter2.create(p2));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		double[] p1 = Arrays.copyOf(parameters, filter1.getNumberOfParameters());
+		double[] p2 = Arrays.copyOfRange(parameters, filter1.getNumberOfParameters(), parameters.length);
+		filter1.weakestParameters(p1);
+		filter2.weakestParameters(p2);
+		System.arraycopy(p1, 0, parameters, 0, p1.length);
+		System.arraycopy(p2, p1.length, parameters, p1.length, p2.length);
+	}
 }

@@ -170,4 +170,27 @@ public class WidthFilter2 extends Filter
 				return new WidthFilter2(minWidth, updateParameter(maxWidth, delta));
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new WidthFilter2(parameters[0], parameters[1]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, minWidth);
+		setMax(parameters, 1, maxWidth);
+	}
 }

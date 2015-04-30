@@ -24,7 +24,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * <p>
  * Requires the bias to be configured at or above zero. If the background is below the configured bias or there is no
  * bias then the filter resorts to a signal-to-noise filter. If there is a background level above the bias then this is
- * assumed to be the variance of the photon shot noise and the noise is taken at the square root of the background level.
+ * assumed to be the variance of the photon shot noise and the noise is taken at the square root of the background
+ * level.
  */
 public class SBRFilter extends Filter
 {
@@ -141,5 +142,27 @@ public class SBRFilter extends Filter
 	{
 		checkIndex(index);
 		return new SBRFilter(updateParameter(sbr, delta));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new SBRFilter((float) parameters[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMin(parameters, 0, sbr);
 	}
 }

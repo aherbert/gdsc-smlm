@@ -43,7 +43,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@XStreamOmitField
 	boolean emCCD = true;
 	@XStreamOmitField
-	double bias = 0;
+	double bias = -1;
 
 	public PrecisionHysteresisFilter2(double searchDistance, double lowerPrecision, double range)
 	{
@@ -72,6 +72,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
+		bias = -1;
 		if (peakResults.getCalibration() != null)
 		{
 			bias = peakResults.getCalibration().bias;
@@ -83,7 +84,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	protected PeakStatus getStatus(PeakResult result)
 	{
 		final double variance;
-		if (bias != 0)
+		if (bias != -1)
 		{
 			// Use the estimated background for the peak
 			final double s = nmPerPixel * result.getSD();
@@ -198,5 +199,29 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 			default:
 				return new PrecisionHysteresisFilter2(searchDistance, lowerPrecision, updateParameter(range, delta));
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#create(double[])
+	 */
+	@Override
+	public Filter create(double... parameters)
+	{
+		return new PrecisionHysteresisFilter2(parameters[0], parameters[1], parameters[2]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMax(parameters, 0, searchDistance);
+		setMax(parameters, 1, lowerPrecision);
+		setMax(parameters, 2, range);
 	}
 }
