@@ -49,6 +49,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
@@ -106,6 +108,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private LinkedList<String> bestFilterOrder;
 
 	private static boolean reUseFilters = true;
+	private static boolean expandFilters = true;
 	private static String oldFilename = "";
 	private static long lastModified = 0;
 	private static List<FilterSet> filterList = null;
@@ -237,6 +240,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				{
 					SettingsManager.saveSettings(gs);
 					filterList = (List<FilterSet>) o;
+
+					// Option to enumerate filters
+					expandFilters();
+
 					setLastFile(filename);
 					return filterList;
 				}
@@ -263,6 +270,112 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * If filters have been provided in FiltersSets of 3 then expand the filters into a set assuming the three represent
+	 * min:max:increment.
+	 */
+	private void expandFilters()
+	{
+		boolean[] canExpand = new boolean[filterList.size()];
+		int c = 0;
+		boolean doIt = false;
+		for (FilterSet filterSet : filterList)
+		{
+			if (filterSet.size() == 3 && filterSet.allSameType())
+			{
+				// Check we have min:max:increment
+				Filter f1 = filterSet.getFilters().get(0);
+				Filter f2 = filterSet.getFilters().get(1);
+				Filter f3 = filterSet.getFilters().get(2);
+				int n = f1.getNumberOfParameters();
+				boolean ok = true;
+				for (int i = 0; i < n; i++)
+				{
+					if (f1.getParameterValue(i) == f2.getParameterValue(i))
+						// No expansion of this parameter
+						continue;
+
+					if (f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0)
+						// This can be expanded
+						continue;
+
+					// Nothing else is allowed
+					ok = false;
+					break;
+				}
+				canExpand[c] = ok;
+				if (ok)
+					doIt = true;
+			}
+			c++;
+		}
+
+		if (!doIt)
+			return;
+
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.hideCancelButton();
+		gd.addMessage("The filter file contains potential triples of min:max:increment.");
+		gd.addCheckbox("Expand_filters", expandFilters);
+		gd.showDialog();
+		if (!gd.wasCanceled())
+		{
+			if (!(expandFilters = gd.getNextBoolean()))
+				return;
+		}
+
+		List<FilterSet> filterList2 = new LinkedList<FilterSet>();
+		c = 0;
+		for (FilterSet filterSet : filterList)
+		{
+			if (!canExpand[c])
+			{
+				filterList2.add(filterSet);
+				continue;
+			}
+
+			List<Filter> list = new LinkedList<Filter>();
+
+			Filter f1 = filterSet.getFilters().get(0);
+			Filter f2 = filterSet.getFilters().get(1);
+			Filter f3 = filterSet.getFilters().get(2);
+			final int n = f1.getNumberOfParameters();
+
+			list.add(f1);
+			for (int i = 0; i < n; i++)
+			{
+				// Use Big Decimal for the enumeration to preserve the precision of the input text
+				// (i.e. using doubles for an enumeration can lose precision and fail to correctly enumerate)
+				BigDecimal min = new BigDecimal(f1.getParameterValue(i));
+				BigDecimal max = new BigDecimal(f2.getParameterValue(i));
+				BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
+
+				if (min.equals(max))
+					continue;
+
+				List<Filter> list2 = new LinkedList<Filter>();
+				for (Filter f : list)
+				{
+					double[] parameters = new double[n];
+					for (int j = 0; j < n; j++)
+						parameters[j] = f.getParameterValue(j);
+					// We always have the min value set from the first filter so start at the next increment
+					for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
+					{
+						parameters[i] = bd.doubleValue();
+						list2.add(f.create(parameters));
+					}
+				}
+				list.addAll(list2);
+			}
+
+			filterList2.add(new FilterSet(filterSet.getName(), list));
+		}
+
+		filterList = filterList2;
+		Utils.log("Expanded input to %d filters in %d sets", countFilters(filterList), filterList.size());
 	}
 
 	public boolean isSameFile(String filename)
@@ -1388,7 +1501,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		double[] limits = { -range, range };
 
 		final int bins = Math.max(10, simulationParameters.molecules / 50);
-		double[][] h = Utils.calcHistogram(depths, limits[0], limits[1], bins);
+		double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
 		double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
 
 		// To get the number of TP at each depth will require that the filter is run 
@@ -1408,44 +1521,48 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		double[][] h3 = Utils.calcHistogram(depths2, limits[0], limits[1], bins);
 
 		// Convert pixel depth to nm
-		for (int i = 0; i < h[0].length; i++)
-			h[0][i] *= simulationParameters.a;
+		for (int i = 0; i < h1[0].length; i++)
+			h1[0][i] *= simulationParameters.a;
 		limits[0] *= simulationParameters.a;
 		limits[1] *= simulationParameters.a;
 
 		// Produce a histogram of the number of spots at each depth
 		String title = TITLE + " Depth Histogram";
 		Plot2 plot = new Plot2(title, "Depth (nm)", "Frequency");
-		plot.setLimits(limits[0], limits[1], 0, Maths.max(h[1]));
+		plot.setLimits(limits[0], limits[1], 0, Maths.max(h1[1]));
 		plot.setColor(Color.black);
-		plot.addPoints(h[0], h[1], Plot2.BAR);
+		plot.addPoints(h1[0], h1[1], Plot2.BAR);
 		plot.addLabel(0, 0, "Black = Spots; Blue = Fitted; Red = Filtered");
 		plot.setColor(Color.blue);
-		plot.addPoints(h[0], h2[1], Plot2.BAR);
+		plot.addPoints(h1[0], h2[1], Plot2.BAR);
 		plot.setColor(Color.red);
-		plot.addPoints(h[0], h3[1], Plot2.BAR);
+		plot.addPoints(h1[0], h3[1], Plot2.BAR);
 		plot.setColor(Color.magenta);
 		PlotWindow pw = Utils.display(title, plot);
 
 		// Interpolate
-		final double halfBinWidth = (h[0][1] - h[0][0]) * 0.5;
+		final double halfBinWidth = (h1[0][1] - h1[0][0]) * 0.5;
 		// Remove final value of the histogram as this is at the upper limit of the range (i.e. count zero)
-		h[0] = Arrays.copyOf(h[0], h[0].length - 1);
-		h[1] = Arrays.copyOf(h[1], h[0].length);
-		h2[1] = Arrays.copyOf(h2[1], h[0].length);
-		h3[1] = Arrays.copyOf(h3[1], h[0].length);
+		h1[0] = Arrays.copyOf(h1[0], h1[0].length - 1);
+		h1[1] = Arrays.copyOf(h1[1], h1[0].length);
+		h2[1] = Arrays.copyOf(h2[1], h1[0].length);
+		h3[1] = Arrays.copyOf(h3[1], h1[0].length);
 
 		// Use minimum of 3 points for smoothing
 		// Ensure we use at least 15% of data
-		double bandwidth = Math.max(3.0 / h[0].length, 0.15);
-		LoessInterpolator l = new LoessInterpolator(bandwidth, 1);
-		PolynomialSplineFunction spline = l.interpolate(h[0], h[1]);
-		PolynomialSplineFunction spline2 = l.interpolate(h[0], h2[1]);
-		PolynomialSplineFunction spline3 = l.interpolate(h[0], h3[1]);
+		double bandwidth = Math.max(3.0 / h1[0].length, 0.15);
+		LoessInterpolator loess = new LoessInterpolator(bandwidth, 1);
+		PolynomialSplineFunction spline1 = loess.interpolate(h1[0], h1[1]);
+		PolynomialSplineFunction spline2 = loess.interpolate(h1[0], h2[1]);
+		PolynomialSplineFunction spline3 = loess.interpolate(h1[0], h3[1]);
+		LinearInterpolator lin = new LinearInterpolator();
+		PolynomialSplineFunction spline1b = lin.interpolate(h1[0], h1[1]);
+		PolynomialSplineFunction spline2b = lin.interpolate(h1[0], h2[1]);
+		PolynomialSplineFunction spline3b = lin.interpolate(h1[0], h3[1]);
 
 		// Increase the number of points to show a smooth curve
 		double[] points = new double[bins * 5];
-		limits = Maths.limits(h[0]);
+		limits = Maths.limits(h1[0]);
 		final double interval = (limits[1] - limits[0]) / (points.length - 1);
 		double[] v = new double[points.length];
 		double[] v2 = new double[points.length];
@@ -1453,16 +1570,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		for (int i = 0; i < points.length - 1; i++)
 		{
 			points[i] = limits[0] + i * interval;
-			v[i] = spline.value(points[i]);
-			v2[i] = spline2.value(points[i]);
-			v3[i] = spline3.value(points[i]);
+			v[i] = getSplineValue(spline1, spline1b, points[i]);
+			v2[i] = getSplineValue(spline2, spline2b, points[i]);
+			v3[i] = getSplineValue(spline3, spline3b, points[i]);
 			points[i] += halfBinWidth;
 		}
 		// Final point on the limit of the spline range
 		int ii = points.length - 1;
-		v[ii] = spline.value(limits[1]);
-		v2[ii] = spline2.value(limits[1]);
-		v3[ii] = spline3.value(limits[1]);
+		v[ii] = getSplineValue(spline1, spline1b, limits[1]);
+		v2[ii] = getSplineValue(spline2, spline2b, limits[1]);
+		v3[ii] = getSplineValue(spline3, spline3b, limits[1]);
 		points[ii] = limits[1] + halfBinWidth;
 
 		// Calculate recall
@@ -1484,10 +1601,18 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		plot.setColor(Color.red);
 		plot.addPoints(points, v3, Plot2.LINE);
 		plot.setColor(Color.magenta);
-		plot.drawLine(-halfSummaryDepth, 0, -halfSummaryDepth,
-				spline3.value(-halfSummaryDepth) / spline.value(-halfSummaryDepth));
-		plot.drawLine(halfSummaryDepth, 0, halfSummaryDepth,
-				spline3.value(halfSummaryDepth) / spline.value(halfSummaryDepth));
+		plot.drawLine(
+				-halfSummaryDepth,
+				0,
+				-halfSummaryDepth,
+				getSplineValue(spline3, spline3b, -halfSummaryDepth - halfBinWidth) /
+						getSplineValue(spline1, spline1b, -halfSummaryDepth - halfBinWidth));
+		plot.drawLine(
+				halfSummaryDepth,
+				0,
+				halfSummaryDepth,
+				getSplineValue(spline3, spline3b, halfSummaryDepth - halfBinWidth) /
+						getSplineValue(spline1, spline1b, halfSummaryDepth - halfBinWidth));
 		PlotWindow pw2 = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 		{
@@ -1495,6 +1620,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			p.y += pw.getHeight();
 			pw2.setLocation(p);
 		}
+	}
+
+	private double getSplineValue(PolynomialSplineFunction spline, PolynomialSplineFunction spline2, double x)
+	{
+		double y = spline.value(x);
+		if (Double.isNaN(y))
+			y = spline2.value(x);
+		return y;
 	}
 
 	public class FilterScore implements Comparable<FilterScore>
