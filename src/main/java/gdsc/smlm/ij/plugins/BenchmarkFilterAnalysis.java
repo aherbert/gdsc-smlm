@@ -325,6 +325,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			if (!(expandFilters = gd.getNextBoolean()))
 				return;
 		}
+		
+		IJ.showStatus("Expanding filters ...");
 
 		List<FilterSet> filterList2 = new LinkedList<FilterSet>();
 		c = 0;
@@ -343,6 +345,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			Filter f3 = filterSet.getFilters().get(2);
 			final int n = f1.getNumberOfParameters();
 
+			// Initialise with a filter set at the minimum for each parameter
 			list.add(f1);
 			for (int i = 0; i < n; i++)
 			{
@@ -353,6 +356,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
 
 				if (min.equals(max))
+					// No expansion of this parameter
 					continue;
 
 				List<Filter> list2 = new LinkedList<Filter>();
@@ -361,6 +365,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					double[] parameters = new double[n];
 					for (int j = 0; j < n; j++)
 						parameters[j] = f.getParameterValue(j);
+					
 					// We always have the min value set from the first filter so start at the next increment
 					for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
 					{
@@ -374,6 +379,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			filterList2.add(new FilterSet(filterSet.getName(), list));
 		}
 
+		IJ.showStatus("");
+		
 		filterList = filterList2;
 		Utils.log("Expanded input to %d filters in %d sets", countFilters(filterList), filterList.size());
 	}
@@ -1500,7 +1507,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		final double range = simulationParameters.depth / simulationParameters.a / 2;
 		double[] limits = { -range, range };
 
-		final int bins = Math.max(10, simulationParameters.molecules / 50);
+		final int bins = Math.max(10, simulationParameters.molecules / 100);
 		double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
 		double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
 
@@ -1548,13 +1555,17 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		h2[1] = Arrays.copyOf(h2[1], h1[0].length);
 		h3[1] = Arrays.copyOf(h3[1], h1[0].length);
 
+		// TODO : Fix the smoothing since LOESS sometimes does not work.
+		// Perhaps allow configuration of the number of histogram bins and the smoothing bandwidth.
+		
 		// Use minimum of 3 points for smoothing
-		// Ensure we use at least 15% of data
+		// Ensure we use at least x% of data
 		double bandwidth = Math.max(3.0 / h1[0].length, 0.15);
 		LoessInterpolator loess = new LoessInterpolator(bandwidth, 1);
 		PolynomialSplineFunction spline1 = loess.interpolate(h1[0], h1[1]);
 		PolynomialSplineFunction spline2 = loess.interpolate(h1[0], h2[1]);
 		PolynomialSplineFunction spline3 = loess.interpolate(h1[0], h3[1]);
+		// Use a second interpolator in case the LOESS fails
 		LinearInterpolator lin = new LinearInterpolator();
 		PolynomialSplineFunction spline1b = lin.interpolate(h1[0], h1[1]);
 		PolynomialSplineFunction spline2b = lin.interpolate(h1[0], h2[1]);
