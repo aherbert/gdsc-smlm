@@ -137,21 +137,11 @@ public class FilterSet
 
 	private Filter createWeakest()
 	{
-		if (size() == 0)
+		if (!allSameType())
 			return null;
 		
-		// Check for the same type
-		final Filter f1 = filters.get(0);
-		final String type = f1.getType();
-		for (Filter f : filters)
-		{
-			// Use the != since the Strings should be immutable
-			//if (f.getType() != type)
-			if (!f.getType().equals(type))
-				return null;
-		}
-		
 		// Initialise the parameters
+		final Filter f1 = filters.get(0);
 		double[] parameters = new double[f1.getNumberOfParameters()];
 		for (int i=0; i<parameters.length; i++)
 		{
@@ -165,5 +155,25 @@ public class FilterSet
 		}
 		
 		return f1.create(parameters);
+	}
+	
+	/**
+	 * @return True if all the filters are the same type
+	 */
+	public boolean allSameType()
+	{
+		if (size() == 0)
+			return false;
+		
+		// Check for the same type
+		final String type = filters.get(0).getType();
+		for (Filter f : filters)
+		{
+			// Use the != since the Strings should be immutable
+			//if (f.getType() != type)
+			if (!f.getType().equals(type))
+				return false;
+		}
+		return true;		
 	}
 }
