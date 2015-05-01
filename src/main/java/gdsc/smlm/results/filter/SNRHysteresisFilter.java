@@ -33,9 +33,9 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@XStreamOmitField
 	float upperSnr;
 
-	public SNRHysteresisFilter(double searchDistance, float lowerSnr, float range)
+	public SNRHysteresisFilter(double searchDistance, int searchDistanceMode, float lowerSnr, float range)
 	{
-		super(searchDistance);
+		super(searchDistance, searchDistanceMode);
 		this.lowerSnr = lowerSnr;
 		this.range = Math.abs(range);
 	}
@@ -43,7 +43,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@Override
 	protected String generateName()
 	{
-		return String.format("SNR Hysteresis %.2f +%.2f (@%.2fx)", lowerSnr, range, searchDistance);
+		return String.format("SNR Hysteresis %.2f +%.2f (@%.2f %s)", lowerSnr, range, searchDistance, getSearchName());
 	}
 
 	@Override
@@ -55,8 +55,8 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		super.setup(peakResults);
 		upperSnr = lowerSnr + range;
+		super.setup(peakResults);
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@Override
 	public int getNumberOfParameters()
 	{
-		return 3;
+		return 4;
 	}
 
 	/*
@@ -114,6 +114,8 @@ public class SNRHysteresisFilter extends HysteresisFilter
 			case 0:
 				return searchDistance;
 			case 1:
+				return searchDistanceMode;
+			case 2:
 				return lowerSnr;
 			default:
 				return range;
@@ -134,6 +136,8 @@ public class SNRHysteresisFilter extends HysteresisFilter
 			case 0:
 				return "Search distance";
 			case 1:
+				return "Search mode";
+			case 2:
 				return "Lower SNR";
 			default:
 				return "Range";
@@ -152,11 +156,16 @@ public class SNRHysteresisFilter extends HysteresisFilter
 		switch (index)
 		{
 			case 0:
-				return new SNRHysteresisFilter(updateParameter(searchDistance, delta), lowerSnr, range);
+				return new SNRHysteresisFilter(updateParameter(searchDistance, delta), searchDistanceMode, lowerSnr,
+						range);
 			case 1:
-				return new SNRHysteresisFilter(searchDistance, updateParameter(lowerSnr, delta), range);
+				return this;
+			case 2:
+				return new SNRHysteresisFilter(searchDistance, searchDistanceMode, updateParameter(lowerSnr, delta),
+						range);
 			default:
-				return new SNRHysteresisFilter(searchDistance, lowerSnr, updateParameter(range, delta));
+				return new SNRHysteresisFilter(searchDistance, searchDistanceMode, lowerSnr, updateParameter(range,
+						delta));
 		}
 	}
 
@@ -168,7 +177,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new SNRHysteresisFilter(parameters[0], (float)parameters[1], (float)parameters[2]);
+		return new SNRHysteresisFilter(parameters[0], (int) parameters[1], (float) parameters[2], (float) parameters[3]);
 	}
 
 	/*
@@ -180,7 +189,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	public void weakestParameters(double[] parameters)
 	{
 		setMax(parameters, 0, searchDistance);
-		setMin(parameters, 1, lowerSnr);
-		setMin(parameters, 2, range);
+		setMin(parameters, 2, lowerSnr);
+		setMin(parameters, 3, range);
 	}
 }

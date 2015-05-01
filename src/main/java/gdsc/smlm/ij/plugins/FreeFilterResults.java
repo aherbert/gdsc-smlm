@@ -188,8 +188,8 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new ANRFilter2(11, 0.75, 1.95));
 		demo(new PrecisionFilter(30));
 		demo(new PrecisionFilter2(30));
-		demo(new SNRHysteresisFilter(2, 10, 20));
-		demo(new PrecisionHysteresisFilter(2, 20, 30));
+		demo(new SNRHysteresisFilter(50, 1, 10, 20));
+		demo(new PrecisionHysteresisFilter(2, 0, 20, 30));
 		demo(new TraceFilter(0.5, 1));
 		demo(new CoordinateFilter(15.5f, 234.5f, 80.99f, 133f));
 		demo(new MultiFilter(30, 45f, 0.7, 1.5, 0.5, 45));

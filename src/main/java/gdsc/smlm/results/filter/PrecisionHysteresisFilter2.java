@@ -45,9 +45,9 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@XStreamOmitField
 	double bias = -1;
 
-	public PrecisionHysteresisFilter2(double searchDistance, double lowerPrecision, double range)
+	public PrecisionHysteresisFilter2(double searchDistance, int searchDistanceMode, double lowerPrecision, double range)
 	{
-		super(searchDistance);
+		super(searchDistance, searchDistanceMode);
 		this.lowerPrecision = lowerPrecision;
 		this.range = Math.abs(range);
 	}
@@ -55,7 +55,8 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	protected String generateName()
 	{
-		return String.format("Precision2 Hysteresis %.2f +%.2f (@%.2fx)", lowerPrecision, range, searchDistance);
+		return String.format("Precision2 Hysteresis %.2f +%.2f (@%.2f %s)", lowerPrecision, range, searchDistance,
+				getSearchName());
 	}
 
 	@Override
@@ -68,7 +69,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		lowerVariance = PrecisionFilter.getVarianceLimit(lowerPrecision);
-		upperVariance = PrecisionFilter.getVarianceLimit(lowerPrecision + range);		
+		upperVariance = PrecisionFilter.getVarianceLimit(lowerPrecision + range);
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
@@ -113,7 +114,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	public String getNumericalValueName()
 	{
-		return "Precision +" + range;
+		return "Precision2 +" + range;
 	}
 
 	/*
@@ -138,7 +139,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	public int getNumberOfParameters()
 	{
-		return 3;
+		return 4;
 	}
 
 	/*
@@ -155,6 +156,8 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 			case 0:
 				return searchDistance;
 			case 1:
+				return searchDistanceMode;
+			case 2:
 				return lowerPrecision;
 			default:
 				return range;
@@ -175,6 +178,8 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 			case 0:
 				return "Search distance";
 			case 1:
+				return "Search distance mode";
+			case 2:
 				return "Lower Precision";
 			default:
 				return "Range";
@@ -193,11 +198,16 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 		switch (index)
 		{
 			case 0:
-				return new PrecisionHysteresisFilter2(updateParameter(searchDistance, delta), lowerPrecision, range);
+				return new PrecisionHysteresisFilter2(updateParameter(searchDistance, delta), searchDistanceMode,
+						lowerPrecision, range);
 			case 1:
-				return new PrecisionHysteresisFilter2(searchDistance, updateParameter(lowerPrecision, delta), range);
+				return this;
+			case 2:
+				return new PrecisionHysteresisFilter2(searchDistance, searchDistanceMode, updateParameter(
+						lowerPrecision, delta), range);
 			default:
-				return new PrecisionHysteresisFilter2(searchDistance, lowerPrecision, updateParameter(range, delta));
+				return new PrecisionHysteresisFilter2(searchDistance, searchDistanceMode, lowerPrecision,
+						updateParameter(range, delta));
 		}
 	}
 
@@ -209,7 +219,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new PrecisionHysteresisFilter2(parameters[0], parameters[1], parameters[2]);
+		return new PrecisionHysteresisFilter2(parameters[0], (int) parameters[1], parameters[2], parameters[3]);
 	}
 
 	/*
@@ -221,7 +231,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	public void weakestParameters(double[] parameters)
 	{
 		setMax(parameters, 0, searchDistance);
-		setMax(parameters, 1, lowerPrecision);
-		setMax(parameters, 2, range);
+		setMax(parameters, 2, lowerPrecision);
+		setMax(parameters, 3, range);
 	}
 }

@@ -38,6 +38,8 @@ public abstract class HysteresisFilter extends Filter
 {
 	@XStreamAsAttribute
 	final double searchDistance;
+	@XStreamAsAttribute
+	final int searchDistanceMode;
 	@XStreamOmitField
 	Set<PeakResult> ok;
 
@@ -46,9 +48,31 @@ public abstract class HysteresisFilter extends Filter
 		OK, CANDIDATE, REJECT
 	}
 
-	public HysteresisFilter(double searchDistance)
+	/**
+	 * @param searchDistance
+	 * @param searchDistanceMode
+	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
+	 */
+	public HysteresisFilter(double searchDistance, int searchDistanceMode)
 	{
 		this.searchDistance = searchDistance;
+		this.searchDistanceMode = searchDistanceMode;
+	}
+	
+	/**
+	 * @return The name of the configured search distance mode
+	 */
+	public String getSearchName()
+	{
+		switch (searchDistanceMode)
+		{
+			case 1:
+				return "Absolute";
+
+			case 0:
+			default:
+				return "Candidate precision";
+		}
 	}
 
 	@Override
@@ -79,19 +103,22 @@ public abstract class HysteresisFilter extends Filter
 		}
 
 		if (candidates.isEmpty())
-			return;
-
-		// Find average precision of the candidates and use it for the search
-		// distance
-		SummaryStatistics stats = new SummaryStatistics();
-		final double nmPerPixel = peakResults.getNmPerPixel();
-		final double gain = peakResults.getGain();
-		final boolean emCCD = peakResults.isEMCCD();
-		for (PeakResult peakResult : candidates)
 		{
-			stats.addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
+			// No candidates for tracing so just return
+			return;
 		}
-		double distanceThreshold = stats.getMean() * searchDistance / nmPerPixel;
+
+		double distanceThreshold;
+		switch (searchDistanceMode)
+		{
+			case 1:
+				distanceThreshold = searchDistance / peakResults.getNmPerPixel();
+				break;
+
+			case 0:
+			default:
+				distanceThreshold = getSearchDistanceUsingCandidates(peakResults, candidates);
+		}
 
 		// Trace through candidates
 		TraceManager tm = new TraceManager(traceResults);
@@ -124,6 +151,28 @@ public abstract class HysteresisFilter extends Filter
 				}
 			}
 		}
+	}
+
+	/**
+	 * Find average precision of the candidates and use it for the search
+	 * distance
+	 * 
+	 * @param peakResults
+	 * @param candidates
+	 * @return
+	 */
+	private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults, LinkedList<PeakResult> candidates)
+	{
+		SummaryStatistics stats = new SummaryStatistics();
+		final double nmPerPixel = peakResults.getNmPerPixel();
+		final double gain = peakResults.getGain();
+		final boolean emCCD = peakResults.isEMCCD();
+		for (PeakResult peakResult : candidates)
+		{
+			stats.addValue(peakResult.getPrecision(nmPerPixel, gain, emCCD));
+		}
+		double distanceThreshold = stats.getMean() * searchDistance / nmPerPixel;
+		return distanceThreshold;
 	}
 
 	protected abstract PeakStatus getStatus(PeakResult result);
