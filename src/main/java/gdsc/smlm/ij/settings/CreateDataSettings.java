@@ -51,11 +51,11 @@ public class CreateDataSettings
 	 */
 	public int photonsPerSecondMaximum = 2000;
 	/**
-	 * Set to true to use a custom distribution for the random photon emission. The default is to use a gamma
+	 * Define the distribution for the random photon emission. The default is to use a gamma
 	 * distribution with the defined shape parameter.
 	 */
-	public boolean customPhotonDistribution = false;
 	public String photonDistribution = "";
+	public String photonDistributionFile = "";
 	public double photonShape = 2.5;
 	public double correlation = -0.35;
 	public String psfModel = "";

@@ -722,7 +722,7 @@ public class BenchmarkSpotFit implements PlugIn
 		StringBuilder sb = new StringBuilder();
 
 		// Add information about the simulation
-		final double signal = (simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
+		final double signal = simulationParameters.signalPerFrame; //(simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
 		final int n = results.size();
 		sb.append(imp.getStackSize()).append("\t");
 		final int w = imp.getWidth();
@@ -753,6 +753,11 @@ public class BenchmarkSpotFit implements PlugIn
 			// This should be applied only to the background variance.
 			final double readVariance = noise - simulationParameters.b;
 			noise = simulationParameters.b * 2 + readVariance;
+		}
+
+		if (simulationParameters.fullSimulation)
+		{
+			// The total signal is spread over frames
 		}
 
 		sb.append(Utils.rounded(signal / Math.sqrt(noise))).append("\t");

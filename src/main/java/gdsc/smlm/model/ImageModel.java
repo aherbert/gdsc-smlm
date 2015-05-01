@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -48,7 +46,6 @@ public abstract class ImageModel
 	private int confinementAttempts = 5;
 	private boolean useGridWalk = true;
 	private boolean useGeometricDistribution = false;
-	private double photonShapeParameter = 2.5;
 	private boolean photonBudgetPerFrame = true;
 	private boolean rotation2D = false;
 
@@ -434,8 +431,7 @@ public abstract class ImageModel
 	 * {@link #isPhotonBudgetPerFrame()}). Each frame signal output will be subject to Poisson sampling.
 	 * <p>
 	 * If the input correlation is zero then the number of photons will be sampled from the configured photon
-	 * distribution or, if this is null, from a gamma distribution with a mean of the specified photon budget and the
-	 * shape parameter defined by {@link #setPhotonShapeParameter(double)}.
+	 * distribution or, if this is null, will be uniform.
 	 * <p>
 	 * A random fraction of the fluorophores will move using a random walk with the diffusion coefficient defined in the
 	 * compound.
@@ -563,37 +559,21 @@ public abstract class ImageModel
 		{
 			// Sample from the provided distribution. Do not over-write the class level distribution to allow 
 			// running again with a different shape parameter / photon budget.
-			RealDistribution photonDistribution = getPhotonDistribution();
-			final double photonScale;
-			if (photonDistribution == null)
-			{
-				photonScale = 1;
-				// Model using a gamma distribution if we have a shape parameter
-				if (photonShapeParameter > 0)
-				{
-					final double scaleParameter = photonBudget / photonShapeParameter;
-					photonDistribution = new GammaDistribution(random, photonShapeParameter, scaleParameter,
-							ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-				}
-			}
-			else
+			if (photonDistribution != null)
 			{
 				// Ensure the custom distribution is scaled to the correct photon budget
-				photonScale = photonBudget / photonDistribution.getNumericalMean();
-			}
+				final double photonScale = photonBudget / photonDistribution.getNumericalMean();
 
-			if (photonDistribution == null)
-			{
-				// No distribution so use the same number for all
-				Arrays.fill(photons, photonBudget);
-			}
-			else
-			{
 				// Generate photons sampling from the photon budget
 				for (int i = 0; i < nMolecules; i++)
 				{
 					photons[i] = photonDistribution.sample() * photonScale;
 				}
+			}
+			else
+			{
+				// No distribution so use the same number for all
+				Arrays.fill(photons, photonBudget);
 			}
 		}
 
@@ -879,23 +859,6 @@ public abstract class ImageModel
 	public void setUseGeometricDistribution(boolean useGeometricDistribution)
 	{
 		this.useGeometricDistribution = useGeometricDistribution;
-	}
-
-	/**
-	 * @return the photon budget shape parameter for the gamma distribution
-	 */
-	public double getPhotonShapeParameter()
-	{
-		return photonShapeParameter;
-	}
-
-	/**
-	 * @param photonShapeParameter
-	 *            the photon budget shape parameter for the gamma distribution
-	 */
-	public void setPhotonShapeParameter(double photonShapeParameter)
-	{
-		this.photonShapeParameter = photonShapeParameter;
 	}
 
 	/**

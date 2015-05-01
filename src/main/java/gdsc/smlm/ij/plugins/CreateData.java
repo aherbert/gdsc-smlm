@@ -102,9 +102,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
+import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -136,6 +138,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static String[] CONFINEMENT = { "None", "Mask", "Sphere" };
 	private static int CONFINEMENT_MASK = 1;
 	private static int CONFINEMENT_SPHERE = 2;
+	private static String[] PHOTON_DISTRIBUTION = { "Uniform", "Gamma", "Custom", "Fixed", "Correlated" };
+	private static int PHOTON_UNIFORM = 0;
+	private static int PHOTON_GAMMA = 1;
+	private static int PHOTON_CUSTOM = 2;
+	private static int PHOTON_FIXED = 3;
+	private static int PHOTON_CORRELATED = 4;
 
 	private static String[] PSF_MODELS = new String[] { "2D Gaussian", "Airy", "Image" };
 
@@ -235,6 +243,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final int molecules;
 		/**
+		 * True if using a full simulation of fluorophores with a lifetime. False is for single random localisations per
+		 * frame.
+		 */
+		final boolean fullSimulation;
+		/**
 		 * Gaussian standard deviation
 		 */
 		final double s;
@@ -250,6 +263,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * The max number of photons per frame
 		 */
 		final double maxSignal;
+		/**
+		 * The average signal per frame
+		 */
+		final double signalPerFrame;
 		/**
 		 * The z-position depth
 		 */
@@ -283,16 +300,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double b2;
 
-		public SimulationParameters(int molecules, double s, double a, double minSignal, double maxSignal,
-				double depth, boolean fixedDepth, double bias, boolean emCCD, double gain, double readNoise, double b,
-				double b2)
+		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
+				double maxSignal, double signalPerFrame, double depth, boolean fixedDepth, double bias, boolean emCCD,
+				double gain, double readNoise, double b, double b2)
 		{
 			id = nextId++;
 			this.molecules = molecules;
+			this.fullSimulation = fullSimulation;
 			this.s = s;
 			this.a = a;
 			this.minSignal = minSignal;
 			this.maxSignal = maxSignal;
+			this.signalPerFrame = signalPerFrame;
 			this.depth = depth;
 			this.fixedDepth = fixedDepth;
 			this.bias = bias;
@@ -575,9 +594,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					id++;
 				}
 			}
-
-			if (!benchmarkMode)
-				saveSimulationParameters(id);
 		}
 		else
 		{
@@ -613,7 +629,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			imageModel.setUseGridWalk(settings.useGridWalk);
 			imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
 			imageModel.setRandomGenerator(createRandomGenerator());
-			imageModel.setPhotonShapeParameter(settings.photonShape);
 			imageModel.setPhotonBudgetPerFrame(true);
 			imageModel.setRotation2D(settings.rotate2D);
 
@@ -645,8 +660,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			imageModel.setPhotonDistribution(createPhotonDistribution());
 			imageModel.setConfinementDistribution(createConfinementDistribution());
+			// Only use the correlation if selcted for the distribution
+			final double correlation = (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution)) ? settings.correlation
+					: 0;
 			localisations = imageModel.createImage(molecules, settings.fixedFraction, totalSteps,
-					(double) settings.photonsPerSecond / settings.stepsPerSecond, settings.correlation,
+					(double) settings.photonsPerSecond / settings.stepsPerSecond, correlation,
 					settings.rotateDuringSimulation);
 
 			// Re-adjust the fluorophores to the correct time
@@ -675,7 +693,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		fluorophores = removeFilteredFluorophores(fluorophores, localisations);
 
-		showSummary(fluorophores, localisations);
+		double signalPerFrame = showSummary(fluorophores, localisations);
+
+		if (!benchmarkMode)
+		{
+			boolean fullSimulation = (!(simpleMode || spotMode));
+			saveSimulationParameters(localisations.size(), fullSimulation, signalPerFrame);
+		}
 
 		IJ.showStatus("Saving data ...");
 
@@ -788,11 +812,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Output the theoretical limits for fitting a Gaussian and store the benchmark settings
+	 * Store the simulation settings
 	 * 
 	 * @param particles
 	 */
-	private void saveSimulationParameters(int particles)
+	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
 		final double totalGain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
 
@@ -819,9 +843,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Store read noise in ADUs
 		readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
-		simulationParameters = new SimulationParameters(particles, sd, settings.pixelPitch, settings.photonsPerSecond,
-				settings.photonsPerSecondMaximum, settings.depth, settings.fixedDepth, settings.bias, emCCD, totalGain,
-				readNoise, settings.background, b2);
+		simulationParameters = new SimulationParameters(particles, fullSimulation, sd, settings.pixelPitch,
+				settings.photonsPerSecond, settings.photonsPerSecondMaximum, signalPerFrame, settings.depth,
+				settings.fixedDepth, settings.bias, emCCD, totalGain, readNoise, settings.background, b2);
 	}
 
 	/**
@@ -1167,18 +1191,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private RealDistribution createPhotonDistribution()
 	{
-		if (settings.customPhotonDistribution)
+		if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.photonDistribution))
 		{
 			// Get the distribution file
-			String[] path = Utils.decodePath(settings.photonDistribution);
-			OpenDialog chooser = new OpenDialog("Photon_distribution", path[0], path[1]);
-			if (chooser.getFileName() != null)
+			String filename = Utils.getFilename("Photon_distribution", settings.photonDistributionFile);
+			if (filename != null)
 			{
-				String newFilename = chooser.getDirectory() + chooser.getFileName();
-				settings.photonDistribution = newFilename;
+				settings.photonDistributionFile = filename;
 				try
 				{
-					InputStream is = new FileInputStream(new File(settings.photonDistribution));
+					InputStream is = new FileInputStream(new File(settings.photonDistributionFile));
 					BufferedReader in = new BufferedReader(new UnicodeReader(is, null));
 					StoredDataStatistics stats = new StoredDataStatistics();
 					try
@@ -1227,9 +1249,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Ignore
 				}
 			}
+			Utils.log("Failed to load custom photon distribution from file: %s. Default to fixed.",
+					settings.photonDistributionFile);
 		}
-		// Fall back to a non-custom distribution
-		settings.customPhotonDistribution = false;
+		else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.photonDistribution))
+		{
+			UniformRealDistribution dist = new UniformRealDistribution(createRandomGenerator(),
+					settings.photonsPerSecond, settings.photonsPerSecondMaximum);
+			return dist;
+		}
+		else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.photonDistribution))
+		{
+			final double scaleParameter = settings.photonsPerSecond / settings.photonShape;
+			GammaDistribution dist = new GammaDistribution(createRandomGenerator(), settings.photonShape,
+					scaleParameter, ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+			return dist;
+		}
+		else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution))
+		{
+			// No distribution required
+			return null;
+		}
+
+		settings.photonDistribution = PHOTON_DISTRIBUTION[PHOTON_FIXED];
 		return null;
 	}
 
@@ -2494,7 +2536,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return newFluorophores;
 	}
 
-	private void showSummary(List<? extends FluorophoreSequenceModel> fluorophores,
+	private double showSummary(List<? extends FluorophoreSequenceModel> fluorophores,
 			List<LocalisationModel> localisations)
 	{
 		IJ.showStatus("Calculating statistics ...");
@@ -2686,7 +2728,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (java.awt.GraphicsEnvironment.isHeadless())
 		{
 			IJ.log(sb.toString());
-			return;
+			return stats[SIGNAL].getMean();
 		}
 		else
 		{
@@ -2721,6 +2763,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 		}
 		IJ.showStatus("");
+		return stats[SIGNAL].getMean();
 	}
 
 	private int runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
@@ -3324,11 +3367,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					addHeaderLine(sb, "Confinement_mask", settings.confinementMask);
 				}
 				addHeaderLine(sb, "Photon", settings.photonsPerSecond);
-				if (settings.customPhotonDistribution)
-					addHeaderLine(sb, "Photon_distribution", settings.photonDistribution);
-				else
+				addHeaderLine(sb, "Photon_distribution", settings.photonDistribution);
+				if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.photonDistribution))
+					addHeaderLine(sb, "Photon_distribution_file", settings.photonDistributionFile);
+				else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.photonDistribution))
+					addHeaderLine(sb, "Photon_max", settings.photonsPerSecondMaximum);
+				else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.photonDistribution))
 					addHeaderLine(sb, "Photon_shape", settings.photonShape);
-				addHeaderLine(sb, "Correlation", settings.correlation);
+				else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution))
+					addHeaderLine(sb, "Correlation", settings.correlation);
 				addHeaderLine(sb, "On_time", settings.tOn);
 				addHeaderLine(sb, "Off_time_short", settings.tOffShort);
 				addHeaderLine(sb, "Off_time_long", settings.tOffLong);
@@ -3714,9 +3761,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addSlider("Fixed_fraction (%)", 0, 100, settings.fixedFraction * 100);
 		gd.addChoice("Confinement", CONFINEMENT, settings.confinement);
 		gd.addNumericField("Photons (sec^-1)", settings.photonsPerSecond, 0);
-		gd.addCheckbox("Custom_photon_distribution", settings.customPhotonDistribution);
-		gd.addNumericField("Photon shape", settings.photonShape, 2);
-		gd.addNumericField("Correlation (to total tOn)", settings.correlation, 2);
+		gd.addChoice("Photon_distribution", PHOTON_DISTRIBUTION, settings.photonDistribution);
 		gd.addNumericField("On_time (ms)", settings.tOn, 2);
 		gd.addNumericField("Off_time_short (ms)", settings.tOffShort, 2);
 		gd.addNumericField("Off_time_long (ms)", settings.tOffLong, 2);
@@ -3818,9 +3863,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.fixedFraction = Math.abs(gd.getNextNumber() / 100.0);
 		settings.confinement = gd.getNextChoice();
 		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
-		settings.customPhotonDistribution = gd.getNextBoolean();
-		settings.photonShape = Math.abs(gd.getNextNumber());
-		settings.correlation = gd.getNextNumber();
+		settings.photonDistribution = gd.getNextChoice();
 		settings.tOn = Math.abs(gd.getNextNumber());
 		settings.tOffShort = Math.abs(gd.getNextNumber());
 		settings.tOffLong = Math.abs(gd.getNextNumber());
@@ -3874,8 +3917,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					noiseRange);
 			Parameters.isAboveZero("Particles", settings.particles);
 			Parameters.isAboveZero("Photons", settings.photonsPerSecond);
-			Parameters.isEqualOrBelow("Correlation", settings.correlation, 1);
-			Parameters.isEqualOrAbove("Correlation", settings.correlation, -1);
 			if (!imagePSF)
 			{
 				Parameters.isAboveZero("Wavelength", settings.wavelength);
@@ -4033,6 +4074,63 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				logExampleCompounds();
 				return false;
 			}
+		}
+
+		SettingsManager.saveSettings(globalSettings);
+
+		gd = new GenericDialog(TITLE);
+		gd.addMessage("Configure the photon distribution: " + settings.photonDistribution);
+		if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.photonDistribution))
+		{
+			// Nothing more to be done
+			return true;
+		}
+		else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.photonDistribution))
+		{
+			gd.addNumericField("Max_Photons (sec^-1)", settings.photonsPerSecondMaximum, 0);
+		}
+		else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.photonDistribution))
+		{
+			gd.addNumericField("Photon_shape", settings.photonShape, 2);
+		}
+		else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution))
+		{
+			gd.addNumericField("Correlation (to total tOn)", settings.correlation, 2);
+		}
+		else
+		{
+			// Nothing more to be done
+			return true;
+		}
+
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+
+		try
+		{
+			if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.photonDistribution))
+			{
+				settings.photonsPerSecondMaximum = Math.abs((int) gd.getNextNumber());
+				if (settings.photonsPerSecondMaximum < settings.photonsPerSecond)
+					settings.photonsPerSecondMaximum = settings.photonsPerSecond;
+			}
+			else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.photonDistribution))
+			{
+				settings.photonShape = Math.abs(gd.getNextNumber());
+				Parameters.isAbove("Photon shape", settings.photonShape, 0);
+			}
+			else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution))
+			{
+				settings.correlation = gd.getNextNumber();
+				Parameters.isEqualOrBelow("Correlation", settings.correlation, 1);
+				Parameters.isEqualOrAbove("Correlation", settings.correlation, -1);
+			}
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
 		}
 
 		SettingsManager.saveSettings(globalSettings);
