@@ -171,6 +171,6 @@ public abstract class CombinedFilter extends Filter
 		filter1.weakestParameters(p1);
 		filter2.weakestParameters(p2);
 		System.arraycopy(p1, 0, parameters, 0, p1.length);
-		System.arraycopy(p2, p1.length, parameters, p1.length, p2.length);
+		System.arraycopy(p2, 0, parameters, p1.length, p2.length);
 	}
 }
