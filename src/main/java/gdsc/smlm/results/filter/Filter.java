@@ -725,6 +725,22 @@ public abstract class Filter implements Comparable<Filter>
 			return -1;
 		if (v1 > v2)
 			return 1;
+		
+		// Use all the parameters
+		if (getNumberOfParameters() == o.getNumberOfParameters())
+		{
+			//for (int i=getNumberOfParameters(); i-- > 0; )
+			for (int i=0; i<getNumberOfParameters(); i++)
+			{
+				final double d1 = getParameterValue(i);
+				final double d2 = o.getParameterValue(i);
+				if (d1 < d2)
+					return -1;
+				if (d1 > d2)
+					return 1;
+			}
+		}
+		
 		return 0;
 	}
 
