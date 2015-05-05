@@ -1254,9 +1254,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.photonDistribution))
 		{
-			UniformRealDistribution dist = new UniformRealDistribution(createRandomGenerator(),
-					settings.photonsPerSecond, settings.photonsPerSecondMaximum);
-			return dist;
+			if (settings.photonsPerSecond < settings.photonsPerSecondMaximum)
+			{
+				UniformRealDistribution dist = new UniformRealDistribution(createRandomGenerator(),
+						settings.photonsPerSecond, settings.photonsPerSecondMaximum);
+				return dist;
+			}
 		}
 		else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.photonDistribution))
 		{
