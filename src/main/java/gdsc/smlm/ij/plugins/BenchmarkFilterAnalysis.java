@@ -376,6 +376,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				list.addAll(list2);
 			}
 
+			// Sort the filters
+			Collections.sort(list);
+			
 			filterList2.add(new FilterSet(filterSet.getName(), list));
 		}
 
