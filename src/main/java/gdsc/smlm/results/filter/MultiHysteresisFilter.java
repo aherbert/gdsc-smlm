@@ -110,9 +110,10 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	protected String generateName()
 	{
 		return String
-				.format("Multi Hysteresis: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision=%.1f+%.1f",
+				.format("Multi Hysteresis: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision=%.1f+%.1f (@%.2f %s)",
 						strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
-						rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision);
+						rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision, searchDistance,
+						getSearchName());
 	}
 
 	@Override
