@@ -209,7 +209,10 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	public void weakestParameters(double[] parameters)
 	{
 		setMax(parameters, 0, searchDistance);
-		setMax(parameters, 2, lowerPrecision);
-		setMax(parameters, 3, range);
+		//setMax(parameters, 2, lowerPrecision);
+		//setMax(parameters, 3, range);
+		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold  
+		setMax(parameters, 2, lowerPrecision + range);
+		parameters[3] = 0;
 	}
 }

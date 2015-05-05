@@ -189,7 +189,10 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	public void weakestParameters(double[] parameters)
 	{
 		setMax(parameters, 0, searchDistance);
+		//setMin(parameters, 2, lowerSnr);
+		//setMin(parameters, 3, range);
+		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold  
 		setMin(parameters, 2, lowerSnr);
-		setMin(parameters, 3, range);
+		parameters[3] = 0;
 	}
 }
