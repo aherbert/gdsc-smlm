@@ -125,6 +125,85 @@ public abstract class Filter implements Comparable<Filter>
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
 	 * 
 	 * @param results
+	 * @param score
+	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn ]
+	 * @return the filtered results
+	 */
+	public MemoryPeakResults filterSubset(MemoryPeakResults results, double[] score)
+	{
+		MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(results);
+		setup(results);
+		int frame = -1;
+		int failCount = 0;
+		double fp = 0, fn = 0;
+		double tp = 0, tn = 0;
+		for (PeakResult peak : results.getResults())
+		{
+			final boolean isTrue = peak.origValue != 0;
+
+			if (frame != peak.peak)
+			{
+				frame = peak.peak;
+				failCount = 0;
+			}
+
+			// Reject all peaks if we have exceeded the fail count
+			final boolean isPositive = accept(peak);
+
+			if (isPositive)
+			{
+				peak.origX = failCount;
+				failCount = 0;
+				newResults.add(peak);
+			}
+			else
+			{
+				failCount++;
+			}
+
+			if (isTrue)
+			{
+				if (isPositive)
+				{
+					tp += peak.origValue; // true positive
+					fp += 1f - peak.origValue;
+				}
+				else
+				{
+					fn += peak.origValue; // false negative
+					tn += 1f - peak.origValue;
+				}
+			}
+			else
+			{
+				if (isPositive)
+					fp++; // false positive
+				else
+					tn++; // true negative
+			}
+		}
+
+		if (score != null && score.length > 3)
+		{
+			score[0] = tp;
+			score[1] = fp;
+			score[2] = tn;
+			score[3] = fn;
+		}
+
+		return newResults;
+	}
+
+	/**
+	 * Filter the results
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * The number of failures before each peak is stored in the origX property of the PeakResult.
+	 * 
+	 * @param results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param score
@@ -194,6 +273,7 @@ public abstract class Filter implements Comparable<Filter>
 					tn++; // true negative
 			}
 		}
+
 		if (score != null && score.length > 3)
 		{
 			score[0] = tp;
@@ -567,6 +647,7 @@ public abstract class Filter implements Comparable<Filter>
 	{
 		double fp = 0;
 		double tp = 0;
+
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
@@ -725,12 +806,12 @@ public abstract class Filter implements Comparable<Filter>
 			return -1;
 		if (v1 > v2)
 			return 1;
-		
+
 		// Use all the parameters
 		if (getNumberOfParameters() == o.getNumberOfParameters())
 		{
 			//for (int i=getNumberOfParameters(); i-- > 0; )
-			for (int i=0; i<getNumberOfParameters(); i++)
+			for (int i = 0; i < getNumberOfParameters(); i++)
 			{
 				final double d1 = getParameterValue(i);
 				final double d2 = o.getParameterValue(i);
@@ -740,7 +821,7 @@ public abstract class Filter implements Comparable<Filter>
 					return 1;
 			}
 		}
-		
+
 		return 0;
 	}
 
@@ -859,4 +940,16 @@ public abstract class Filter implements Comparable<Filter>
 	 *            The parameters
 	 */
 	public abstract void weakestParameters(double[] parameters);
+
+	/**
+	 * Some filters requires all the data in a subset for scoring analysis. Others can create a subset using the fail
+	 * count parameter for a smaller subset that will evaluate faster. This method returns true if the subset can be
+	 * created using the fail count parameter that will be used to score the subset.
+	 * 
+	 * @return True if the {@link #filterSubset(MemoryPeakResults, int, double[])} is valid
+	 */
+	public boolean subsetWithFailCount()
+	{
+		return true;
+	}
 }

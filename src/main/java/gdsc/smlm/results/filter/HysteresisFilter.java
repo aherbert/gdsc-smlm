@@ -58,7 +58,7 @@ public abstract class HysteresisFilter extends Filter
 		this.searchDistance = searchDistance;
 		this.searchDistanceMode = searchDistanceMode;
 	}
-	
+
 	/**
 	 * @return The name of the configured search distance mode
 	 */
@@ -199,5 +199,16 @@ public abstract class HysteresisFilter extends Filter
 		return "Any results between the limits (candidates) are included only if they can be traced "
 				+ "through time, potentially via other candidates, to a valid result. The distance used for "
 				+ "tracing is the search distance multiplied by the average precision of the candidates.";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#subsetWithFailCount()
+	 */
+	@Override
+	public boolean subsetWithFailCount()
+	{
+		return false;
 	}
 }

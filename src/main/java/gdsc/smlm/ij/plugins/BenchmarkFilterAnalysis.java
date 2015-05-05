@@ -325,14 +325,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			if (!(expandFilters = gd.getNextBoolean()))
 				return;
 		}
-		
+
 		IJ.showStatus("Expanding filters ...");
 
 		List<FilterSet> filterList2 = new LinkedList<FilterSet>();
 		c = 0;
 		for (FilterSet filterSet : filterList)
 		{
-			if (!canExpand[c])
+			if (!canExpand[c++])
 			{
 				filterList2.add(filterSet);
 				continue;
@@ -365,7 +365,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					double[] parameters = new double[n];
 					for (int j = 0; j < n; j++)
 						parameters[j] = f.getParameterValue(j);
-					
+
 					// We always have the min value set from the first filter so start at the next increment
 					for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
 					{
@@ -378,12 +378,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 			// Sort the filters
 			Collections.sort(list);
-			
+
 			filterList2.add(new FilterSet(filterSet.getName(), list));
 		}
 
 		IJ.showStatus("");
-		
+
 		filterList = filterList2;
 		Utils.log("Expanded input to %d filters in %d sets", countFilters(filterList), filterList.size());
 	}
@@ -1036,10 +1036,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				subset = allSameType = true;
 				List<MemoryPeakResults> resultsList2 = new ArrayList<MemoryPeakResults>(resultsList.size());
 				double[] score = null;
+				// Some filters may require all the data, e.g. Hysteresis filters
+				boolean withFailCount = weakest.subsetWithFailCount();
 				for (MemoryPeakResults r : resultsList)
 				{
 					double[] score2 = new double[4];
-					resultsList2.add(weakest.filterSubset(r, failCount, score2));
+					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset(r, failCount, score2) : weakest
+							.filterSubset(r, score2);
+					resultsList2.add(r2);
 					if (score == null)
 						score = score2;
 					else
@@ -1387,11 +1391,12 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		sb.append(filter.getName()).append(resultsPrefix2).append(resultsPrefix3);
 
 		int i = 0;
-		add(sb, r.getTP() + r.getFP(), i++);
-		add(sb, r.getTP(), i++);
-		add(sb, r.getFP(), i++);
-		add(sb, r.getTN(), i++);
-		add(sb, r.getFN(), i++);
+
+		addCount(sb, r.getTP() + r.getFP(), i++);
+		addCount(sb, r.getTP(), i++);
+		addCount(sb, r.getFP(), i++);
+		addCount(sb, r.getTN(), i++);
+		addCount(sb, r.getFN(), i++);
 
 		add(sb, r.getTPR(), i++);
 		add(sb, r.getTNR(), i++);
@@ -1436,6 +1441,26 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	{
 		if (showColumns[i])
 			sb.append("\t").append(value);
+	}
+
+	private static void addCount(StringBuilder sb, double value, int i)
+	{
+		if (showColumns[i])
+		{
+			// Check if the double holds an integer count
+			if ((int) value == value)
+			{
+				sb.append("\t").append((int) value);
+			}
+			else
+			{
+				// Otherwise add the counts using at least 2 dp
+				if (value > 100)
+					sb.append("\t").append(IJ.d2s(value));
+				else
+					add(sb, Utils.rounded(value));
+			}
+		}
 	}
 
 	private static void add(StringBuilder sb, double value, int i)
@@ -1560,7 +1585,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		// TODO : Fix the smoothing since LOESS sometimes does not work.
 		// Perhaps allow configuration of the number of histogram bins and the smoothing bandwidth.
-		
+
 		// Use minimum of 3 points for smoothing
 		// Ensure we use at least x% of data
 		double bandwidth = Math.max(3.0 / h1[0].length, 0.15);

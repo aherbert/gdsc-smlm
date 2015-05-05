@@ -123,7 +123,7 @@ public abstract class CombinedFilter extends Filter
 			return filter1.getParameterName(index);
 		return filter2.getParameterName(index - filter1.getNumberOfParameters());
 	}
-	
+
 	@Override
 	public Filter adjustParameter(int index, double delta)
 	{
@@ -138,7 +138,8 @@ public abstract class CombinedFilter extends Filter
 	}
 
 	/**
-	 * Create a new combined filter from the two input filters 
+	 * Create a new combined filter from the two input filters
+	 * 
 	 * @param f1
 	 * @param f2
 	 * @return
@@ -172,5 +173,16 @@ public abstract class CombinedFilter extends Filter
 		filter2.weakestParameters(p2);
 		System.arraycopy(p1, 0, parameters, 0, p1.length);
 		System.arraycopy(p2, 0, parameters, p1.length, p2.length);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#subsetWithFailCount()
+	 */
+	@Override
+	public boolean subsetWithFailCount()
+	{
+		return filter1.subsetWithFailCount() && filter2.subsetWithFailCount();
 	}
 }
