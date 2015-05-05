@@ -45,6 +45,8 @@ public abstract class XStreamWrapper
 			addAlias(HysteresisFilter.class);
 			addAlias(MultiFilter.class);
 			addAlias(MultiFilter2.class);
+			addAlias(MultiHysteresisFilter.class);
+			addAlias(MultiHysteresisFilter2.class);
 			addAlias(OrFilter.class);
 			addAlias(PrecisionFilter.class);
 			addAlias(PrecisionFilter2.class);

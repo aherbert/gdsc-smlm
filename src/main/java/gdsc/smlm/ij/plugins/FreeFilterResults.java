@@ -25,6 +25,8 @@ import gdsc.smlm.results.filter.CoordinateFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.MultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.smlm.results.filter.MultiHysteresisFilter;
+import gdsc.smlm.results.filter.MultiHysteresisFilter2;
 import gdsc.smlm.results.filter.OrFilter;
 import gdsc.smlm.results.filter.PrecisionFilter2;
 import gdsc.smlm.results.filter.PrecisionFilter;
@@ -194,6 +196,8 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new CoordinateFilter(15.5f, 234.5f, 80.99f, 133f));
 		demo(new MultiFilter(30, 45f, 0.7, 1.5, 0.5, 45));
 		demo(new MultiFilter2(30, 45f, 0.7, 1.5, 0.5, 45));
+		demo(new MultiHysteresisFilter(2, 0, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
+		demo(new MultiHysteresisFilter2(2, 0, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
 
 		comment("Combined filters");
 		IJ.log("");
