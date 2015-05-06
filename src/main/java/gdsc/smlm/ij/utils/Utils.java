@@ -1032,4 +1032,15 @@ public class Utils
 	{
 		return n + " " + name + ((Math.abs(n) == 1) ? "" : "s");
 	}
+
+	/**
+	 * Check if the string is null or length zero. Does not check for a string of whitespace.
+	 * 
+	 * @param string
+	 * @return true if the string is null or length zero
+	 */
+	public static boolean isNullOrEmpty(String string)
+	{
+		return string == null || string.length() == 0;
+	}
 }

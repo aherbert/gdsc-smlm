@@ -278,19 +278,21 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	 */
 	private void expandFilters()
 	{
-		boolean[] canExpand = new boolean[filterList.size()];
+		long[] expanded = new long[filterList.size()];
+		String[] name = new String[expanded.length];
 		int c = 0;
 		boolean doIt = false;
 		for (FilterSet filterSet : filterList)
 		{
 			if (filterSet.size() == 3 && filterSet.allSameType())
 			{
+				name[c] = filterSet.getName();
 				// Check we have min:max:increment
 				Filter f1 = filterSet.getFilters().get(0);
 				Filter f2 = filterSet.getFilters().get(1);
 				Filter f3 = filterSet.getFilters().get(2);
 				int n = f1.getNumberOfParameters();
-				boolean ok = true;
+				long combinations = 1;
 				for (int i = 0; i < n; i++)
 				{
 					if (f1.getParameterValue(i) == f2.getParameterValue(i))
@@ -298,16 +300,28 @@ public class BenchmarkFilterAnalysis implements PlugIn
 						continue;
 
 					if (f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0)
+					{
+						BigDecimal min = new BigDecimal(f1.getParameterValue(i));
+						BigDecimal max = new BigDecimal(f2.getParameterValue(i));
+						BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
+						long extra = 1;
+						for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
+							extra++;
+						combinations *= extra;
+
 						// This can be expanded
 						continue;
+					}
 
 					// Nothing else is allowed
-					ok = false;
+					combinations = 0;
 					break;
 				}
-				canExpand[c] = ok;
-				if (ok)
+				if (combinations > 0)
+				{
+					expanded[c] = combinations;
 					doIt = true;
+				}
 			}
 			c++;
 		}
@@ -317,7 +331,18 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.hideCancelButton();
-		gd.addMessage("The filter file contains potential triples of min:max:increment.");
+		StringBuilder sb = new StringBuilder("The filter file contains potential triples of min:max:increment.\n \n");
+		for (c = 0; c < expanded.length; c++)
+		{
+			if (expanded[c] > 0)
+			{
+				sb.append("Expand set [").append((c + 1)).append("]");
+				if (!Utils.isNullOrEmpty(name[c]))
+					sb.append(" ").append(name[c]);
+				sb.append(" to ").append(expanded[c]).append(" filters\n");
+			}
+		}
+		gd.addMessage(sb.toString());
 		gd.addCheckbox("Expand_filters", expandFilters);
 		gd.showDialog();
 		if (!gd.wasCanceled())
@@ -332,7 +357,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		c = 0;
 		for (FilterSet filterSet : filterList)
 		{
-			if (!canExpand[c++])
+			if (expanded[c] == 0)
 			{
 				filterList2.add(filterSet);
 				continue;
@@ -385,7 +410,8 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		IJ.showStatus("");
 
 		filterList = filterList2;
-		Utils.log("Expanded input to %d filters in %d sets", countFilters(filterList), filterList.size());
+		Utils.log("Expanded input to %d filters in %s", countFilters(filterList),
+				Utils.pleural(filterList.size(), "set"));
 	}
 
 	public boolean isSameFile(String filename)
