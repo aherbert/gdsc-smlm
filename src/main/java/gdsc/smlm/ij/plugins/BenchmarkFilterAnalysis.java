@@ -295,12 +295,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				long combinations = 1;
 				for (int i = 0; i < n; i++)
 				{
-					if (f1.getParameterValue(i) == f2.getParameterValue(i))
-						// No expansion of this parameter
-						continue;
-
 					if (f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0)
 					{
+						// This can be expanded ... Count the combinations
 						BigDecimal min = new BigDecimal(f1.getParameterValue(i));
 						BigDecimal max = new BigDecimal(f2.getParameterValue(i));
 						BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
@@ -308,16 +305,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 						for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
 							extra++;
 						combinations *= extra;
-
-						// This can be expanded
-						continue;
 					}
-
-					// Nothing else is allowed
-					combinations = 0;
-					break;
 				}
-				if (combinations > 0)
+				if (combinations > 1)
 				{
 					expanded[c] = combinations;
 					doIt = true;
@@ -380,9 +370,11 @@ public class BenchmarkFilterAnalysis implements PlugIn
 				BigDecimal max = new BigDecimal(f2.getParameterValue(i));
 				BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
 
-				if (min.equals(max))
+				if (!(f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0))
+				{
 					// No expansion of this parameter
 					continue;
+				}
 
 				List<Filter> list2 = new LinkedList<Filter>();
 				for (Filter f : list)
