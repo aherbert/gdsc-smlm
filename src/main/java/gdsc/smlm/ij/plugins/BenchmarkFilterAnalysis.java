@@ -936,12 +936,31 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	{
 		// Use absolute in case this is not a local maximum. We are mainly interested in how
 		// flat the curve is at this point in relation to parameter changes.
-		double abs1 = Math.abs(s - s1);
-		double abs2 = Math.abs(s - s2);
-		double dydx1 = (abs1) / dx1;
-		double dydx2 = (abs2) / dx2;
-		double relativeSensitivity = (abs1 + abs2) * 0.5;
-		double sensitivity = (dydx1 + dydx2) * 0.5;
+		double abs = 0, dydx = 0;
+		int count = 0;
+		if (dx1 > 0)
+		{
+			double abs1 = Math.abs(s - s1);
+			double dydx1 = abs1 / dx1;
+			abs += abs1;
+			dydx += dydx1;
+			count++;
+		}
+		if (dx2 > 0)
+		{
+			double abs2 = Math.abs(s - s2);
+			double dydx2 = abs2 / dx2;
+			abs += abs2;
+			dydx += dydx2;
+			count++;
+		}
+
+		double relativeSensitivity = 0, sensitivity = 0;
+		if (count != 0)
+		{
+			relativeSensitivity = abs / count;
+			sensitivity = dydx / count;
+		}
 
 		sb.append(Utils.rounded(relativeSensitivity, 4)).append("\t");
 		sb.append(Utils.rounded(sensitivity, 4)).append("\t");
