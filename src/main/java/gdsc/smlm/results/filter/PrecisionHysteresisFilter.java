@@ -41,6 +41,16 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@XStreamOmitField
 	boolean emCCD = true;
 
+	/**
+	 * @param searchDistance
+	 * @param searchDistanceMode
+	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
+	 * @param timeThreshold
+	 * @param timeThresholdMode
+	 *            0 = frames; 1 = seconds
+	 * @param strictPrecision
+	 * @param range
+	 */
 	public PrecisionHysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold,
 			int timeThresholdMode, double strictPrecision, double range)
 	{

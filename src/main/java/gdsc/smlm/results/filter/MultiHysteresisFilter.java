@@ -86,6 +86,26 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@XStreamOmitField
 	double gain = 1;
 
+	/**
+	 * @param searchDistance
+	 * @param searchDistanceMode
+	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
+	 * @param timeThreshold
+	 * @param timeThresholdMode
+	 *            0 = frames; 1 = seconds
+	 * @param strictSignal
+	 * @param rangeSignal
+	 * @param strictSnr
+	 * @param rangeSnr
+	 * @param strictMinWidth
+	 * @param rangeMinWidth
+	 * @param strictMaxWidth
+	 * @param rangeMaxWidth
+	 * @param strictShift
+	 * @param rangeShift
+	 * @param strictPrecision
+	 * @param rangePrecision
+	 */
 	public MultiHysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold,
 			int timeThresholdMode, double strictSignal, double rangeSignal, float strictSnr, float rangeSnr,
 			double strictMinWidth, double rangeMinWidth, double strictMaxWidth, double rangeMaxWidth,
