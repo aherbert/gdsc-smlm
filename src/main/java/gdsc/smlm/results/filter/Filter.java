@@ -62,6 +62,7 @@ public abstract class Filter implements Comparable<Filter>
 			if (accept(peak))
 				newResults.add(peak);
 		}
+		end();
 		return newResults;
 	}
 
@@ -113,6 +114,7 @@ public abstract class Filter implements Comparable<Filter>
 				failCount++;
 			}
 		}
+		end();
 		return newResults;
 	}
 
@@ -183,6 +185,7 @@ public abstract class Filter implements Comparable<Filter>
 					tn++; // true negative
 			}
 		}
+		end();
 
 		if (score != null && score.length > 3)
 		{
@@ -273,6 +276,7 @@ public abstract class Filter implements Comparable<Filter>
 					tn++; // true negative
 			}
 		}
+		end();
 
 		if (score != null && score.length > 3)
 		{
@@ -302,7 +306,6 @@ public abstract class Filter implements Comparable<Filter>
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
-
 			for (PeakResult peak : peakResults.getResults())
 			{
 				final boolean isTrue = peak.origValue != 0;
@@ -322,6 +325,7 @@ public abstract class Filter implements Comparable<Filter>
 						tn++; // true negative
 				}
 			}
+			end();
 		}
 		return new ClassificationResult(tp, fp, tn, fn);
 	}
@@ -347,7 +351,6 @@ public abstract class Filter implements Comparable<Filter>
 		for (MemoryPeakResults peakResults : resultsList)
 		{
 			setup(peakResults);
-
 			for (PeakResult peak : peakResults.getResults())
 			{
 				final boolean isTrue = peak.origValue != 0;
@@ -367,6 +370,7 @@ public abstract class Filter implements Comparable<Filter>
 						tn++; // true negative
 				}
 			}
+			end();
 		}
 		return new ClassificationResult(tp, fp, tn, fn);
 	}
@@ -443,6 +447,7 @@ public abstract class Filter implements Comparable<Filter>
 						tn++; // true negative
 				}
 			}
+			end();
 		}
 		return new ClassificationResult(tp, fp, tn, fn);
 	}
@@ -529,6 +534,7 @@ public abstract class Filter implements Comparable<Filter>
 						tn++; // true negative
 				}
 			}
+			end();
 		}
 		return new ClassificationResult(tp, fp, tn, fn);
 	}
@@ -613,6 +619,7 @@ public abstract class Filter implements Comparable<Filter>
 						tn++; // true negative
 				}
 			}
+			end();
 		}
 		return new FractionClassificationResult(tp, fp, tn, fn);
 	}
@@ -709,6 +716,7 @@ public abstract class Filter implements Comparable<Filter>
 						tn++; // true negative
 				}
 			}
+			end();
 		}
 		return new FractionClassificationResult(tp, fp, tn, fn);
 	}
@@ -727,6 +735,14 @@ public abstract class Filter implements Comparable<Filter>
 	 * @return true if the peak should be accepted, otherwise false to reject.
 	 */
 	public abstract boolean accept(PeakResult peak);
+
+	/**
+	 * Called after the accept method has been called for each peak in the results. Allows memory clean-up of the
+	 * results.
+	 */
+	public void end()
+	{
+	}
 
 	/**
 	 * @return The numerical value of the filter. Used for plotting value against performance score.

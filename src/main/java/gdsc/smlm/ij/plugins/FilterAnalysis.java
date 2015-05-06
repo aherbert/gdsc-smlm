@@ -573,7 +573,7 @@ public class FilterAnalysis implements PlugIn
 				List<Filter> filters = new LinkedList<Filter>();
 				for (int snr = minSnr; snr <= maxSnr; snr++)
 				{
-					filters.add(new AndFilter(wf, new SNRHysteresisFilter(2, 0, snr, snrGap)));
+					filters.add(new AndFilter(wf, new SNRHysteresisFilter(2, 0, 1, 0, snr, snrGap)));
 				}
 				filterSets.add(new FilterSet(filters));
 			}
@@ -589,7 +589,7 @@ public class FilterAnalysis implements PlugIn
 			List<Filter> filters = new LinkedList<Filter>();
 			for (int precision = minPrecision; precision <= maxPrecision; precision++)
 			{
-				filters.add(new PrecisionHysteresisFilter(2, 0, precision, precisionGap));
+				filters.add(new PrecisionHysteresisFilter(2, 0, 1, 0, precision, precisionGap));
 			}
 			filterSets.add(new FilterSet(filters));
 		}

@@ -81,6 +81,18 @@ public abstract class CombinedFilter extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#end()
+	 */
+	@Override
+	public void end()
+	{
+		filter1.end();
+		filter2.end();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getNumericalValue()
 	 */
 	@Override

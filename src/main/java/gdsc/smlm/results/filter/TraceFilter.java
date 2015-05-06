@@ -165,7 +165,7 @@ public class TraceFilter extends Filter
 		switch (index)
 		{
 			case 0:
-				return new TraceFilter(updateParameter(d, delta, HysteresisFilter.DEFAULT_ABSOLUTE_RANGE), t);
+				return new TraceFilter(updateParameter(d, delta, HysteresisFilter.DEFAULT_ABSOLUTE_DISTANCE_RANGE), t);
 			default:
 				return new TraceFilter(d, updateParameter(t, delta, DEFAULT_TIME_RANGE));
 		}

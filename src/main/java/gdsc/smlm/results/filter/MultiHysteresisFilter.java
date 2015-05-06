@@ -86,12 +86,12 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@XStreamOmitField
 	double gain = 1;
 
-	public MultiHysteresisFilter(double searchDistance, int searchDistanceMode, double strictSignal,
-			double rangeSignal, float strictSnr, float rangeSnr, double strictMinWidth, double rangeMinWidth,
-			double strictMaxWidth, double rangeMaxWidth, double strictShift, double rangeShift, double strictPrecision,
-			double rangePrecision)
+	public MultiHysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold,
+			int timeThresholdMode, double strictSignal, double rangeSignal, float strictSnr, float rangeSnr,
+			double strictMinWidth, double rangeMinWidth, double strictMaxWidth, double rangeMaxWidth,
+			double strictShift, double rangeShift, double strictPrecision, double rangePrecision)
 	{
-		super(searchDistance, searchDistanceMode);
+		super(searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode);
 		this.strictSignal = Math.max(0, strictSignal);
 		this.rangeSignal = Math.max(0, rangeSignal);
 		this.strictSnr = Math.max(0, strictSnr);
@@ -110,10 +110,9 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	protected String generateName()
 	{
 		return String
-				.format("Multi Hysteresis: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision=%.1f+%.1f (@%.2f %s)",
+				.format("Multi Hysteresis: Signal=%.1f-%.1f, SNR=%.1f-%.1f, MinWidth=%.2f-%.2f, MaxWidth=%.2f+%.2f, Shift=%.2f+%.2f, Precision=%.1f+%.1f (%s)",
 						strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
-						rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision, searchDistance,
-						getSearchName());
+						rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision, getTraceParameters());
 	}
 
 	@Override
@@ -224,7 +223,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@Override
 	public int getNumberOfParameters()
 	{
-		return 14;
+		return 12 + super.getNumberOfParameters();
 	}
 
 	/*
@@ -236,33 +235,34 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	public double getParameterValue(int index)
 	{
 		checkIndex(index);
+		if (index < super.getNumberOfParameters())
+		{
+			return super.getParameterValue(index);
+		}
+		index -= super.getNumberOfParameters();
 		switch (index)
 		{
 			case 0:
-				return searchDistance;
-			case 1:
-				return searchDistanceMode;
-			case 2:
 				return strictSignal;
-			case 3:
+			case 1:
 				return rangeSignal;
-			case 4:
+			case 2:
 				return strictSnr;
-			case 5:
+			case 3:
 				return rangeSnr;
-			case 6:
+			case 4:
 				return strictMinWidth;
-			case 7:
+			case 5:
 				return rangeMinWidth;
-			case 8:
+			case 6:
 				return strictMaxWidth;
-			case 9:
+			case 7:
 				return rangeMaxWidth;
-			case 10:
+			case 8:
 				return strictShift;
-			case 11:
+			case 9:
 				return rangeShift;
-			case 12:
+			case 10:
 				return strictPrecision;
 			default:
 				return rangePrecision;
@@ -278,33 +278,34 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	public String getParameterName(int index)
 	{
 		checkIndex(index);
+		if (index < super.getNumberOfParameters())
+		{
+			return super.getParameterName(index);
+		}
+		index -= super.getNumberOfParameters();
 		switch (index)
 		{
 			case 0:
-				return "Search distance";
-			case 1:
-				return "Search mode";
-			case 2:
 				return "Strict Signal";
-			case 3:
+			case 1:
 				return "Range Signal";
-			case 4:
+			case 2:
 				return "Strict SNR";
-			case 5:
+			case 3:
 				return "Range SNR";
-			case 6:
+			case 4:
 				return "Strict Min Width";
-			case 7:
+			case 5:
 				return "Range Min Width";
-			case 8:
+			case 6:
 				return "Strict Max Width";
-			case 9:
+			case 7:
 				return "Range Max Width";
-			case 10:
+			case 8:
 				return "Strict Shift";
-			case 11:
+			case 9:
 				return "Range Shift";
-			case 12:
+			case 10:
 				return "Strict Precision";
 			default:
 				return "Range Precision";
@@ -312,6 +313,8 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	}
 
 	static double[] defaultRange = new double[]{
+		0,
+		0,
 		0,
 		0,
 		SignalFilter.DEFAULT_RANGE,
@@ -337,13 +340,16 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		if (index == 1)
+		// No adjustment of the mode parameters
+		if (index == 1 || index == 3)
 			return this;
-		double[] parameters = new double[] { searchDistance, searchDistanceMode, strictSignal, rangeSignal, strictSnr,
-				rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth, rangeMaxWidth, strictShift, rangeShift,
-				strictPrecision, rangePrecision };
+		double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
+				strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
+				rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision };
 		if (index == 0)
 			parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());
+		else if (index == 2)
+			parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
 		else
 			parameters[index] = updateParameter(parameters[index], delta, defaultRange[index]);
 		return create(parameters);
@@ -357,9 +363,10 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new MultiHysteresisFilter(parameters[0], (int) parameters[1], parameters[2], parameters[3],
-				(float) parameters[4], (float) parameters[5], parameters[6], parameters[7], parameters[8],
-				parameters[9], parameters[10], parameters[11], parameters[12], parameters[13]);
+		return new MultiHysteresisFilter(parameters[0], (int) parameters[1], parameters[2], (int) parameters[3],
+				parameters[4], parameters[5], (float) parameters[6], (float) parameters[7], parameters[8],
+				parameters[9], parameters[10], parameters[11], parameters[12], parameters[13], parameters[14],
+				parameters[15]);
 	}
 
 	/*
@@ -370,19 +377,20 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@Override
 	public void weakestParameters(double[] parameters)
 	{
-		setMax(parameters, 0, searchDistance);
+		super.weakestParameters(parameters);
+		
 		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold  
-		setMin(parameters, 2, strictSignal - rangeSignal);
-		parameters[3] = 0;
-		setMin(parameters, 4, strictSnr - rangeSnr);
+		setMin(parameters, 4, strictSignal - rangeSignal);
 		parameters[5] = 0;
-		setMin(parameters, 6, strictMinWidth - rangeMinWidth);
+		setMin(parameters, 6, strictSnr - rangeSnr);
 		parameters[7] = 0;
-		setMax(parameters, 8, strictMaxWidth + rangeMaxWidth);
+		setMin(parameters, 8, strictMinWidth - rangeMinWidth);
 		parameters[9] = 0;
-		setMax(parameters, 10, strictShift + rangeShift);
+		setMax(parameters, 10, strictMaxWidth + rangeMaxWidth);
 		parameters[11] = 0;
-		setMax(parameters, 12, strictPrecision + rangePrecision);
+		setMax(parameters, 12, strictShift + rangeShift);
 		parameters[13] = 0;
+		setMax(parameters, 14, strictPrecision + rangePrecision);
+		parameters[15] = 0;
 	}
 }

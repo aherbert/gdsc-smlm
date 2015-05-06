@@ -190,14 +190,14 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new ANRFilter2(11, 0.75, 1.95));
 		demo(new PrecisionFilter(30));
 		demo(new PrecisionFilter2(30));
-		demo(new SNRHysteresisFilter(50, 1, 10, 20));
-		demo(new PrecisionHysteresisFilter(2, 0, 20, 30));
+		demo(new SNRHysteresisFilter(50, 1, 2, 1, 10, 20));
+		demo(new PrecisionHysteresisFilter(2, 0, 1, 0, 20, 30));
 		demo(new TraceFilter(0.5, 1));
 		demo(new CoordinateFilter(15.5f, 234.5f, 80.99f, 133f));
 		demo(new MultiFilter(30, 45f, 0.7, 1.5, 0.5, 45));
 		demo(new MultiFilter2(30, 45f, 0.7, 1.5, 0.5, 45));
-		demo(new MultiHysteresisFilter(2, 0, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
-		demo(new MultiHysteresisFilter2(2, 0, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
+		demo(new MultiHysteresisFilter(2, 0, 1, 0, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
+		demo(new MultiHysteresisFilter2(2, 0, 2, 1, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
 
 		comment("Combined filters");
 		IJ.log("");

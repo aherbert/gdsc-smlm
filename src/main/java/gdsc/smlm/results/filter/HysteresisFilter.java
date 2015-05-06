@@ -36,13 +36,19 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public abstract class HysteresisFilter extends Filter
 {
-	static double DEFAULT_ABSOLUTE_RANGE = 200;
-	static double DEFAULT_RELATIVE_RANGE = 1;
-	
+	static double DEFAULT_ABSOLUTE_DISTANCE_RANGE = 200;
+	static double DEFAULT_RELATIVE_DISTANCE_RANGE = 1;
+	static double DEFAULT_SECONDS_TIME_RANGE = 5;
+	static double DEFAULT_FRAMES_TIME_RANGE = 10;
+
 	@XStreamAsAttribute
 	final double searchDistance;
 	@XStreamAsAttribute
 	final int searchDistanceMode;
+	@XStreamAsAttribute
+	final double timeThreshold;
+	@XStreamAsAttribute
+	final int timeThresholdMode;
 	@XStreamOmitField
 	Set<PeakResult> ok;
 
@@ -55,11 +61,16 @@ public abstract class HysteresisFilter extends Filter
 	 * @param searchDistance
 	 * @param searchDistanceMode
 	 *            0 = relative to the precision of the candidates; 1 = Absolute (in nm)
+	 * @param timeThreshold
+	 * @param timeThresholdMode
+	 *            0 = frames; 1 = seconds
 	 */
-	public HysteresisFilter(double searchDistance, int searchDistanceMode)
+	public HysteresisFilter(double searchDistance, int searchDistanceMode, double timeThreshold, int timeThresholdMode)
 	{
 		this.searchDistance = Math.max(0, searchDistance);
 		this.searchDistanceMode = searchDistanceMode;
+		this.timeThreshold = Math.max(0, timeThreshold);
+		this.timeThresholdMode = timeThresholdMode;
 	}
 
 	/**
@@ -77,20 +88,122 @@ public abstract class HysteresisFilter extends Filter
 				return "Candidate precision";
 		}
 	}
-	
+
 	protected double getDefaultSearchRange()
 	{
 		switch (searchDistanceMode)
 		{
 			case 1:
-				return DEFAULT_ABSOLUTE_RANGE;
+				return DEFAULT_ABSOLUTE_DISTANCE_RANGE;
 
 			case 0:
 			default:
-				return DEFAULT_RELATIVE_RANGE;
+				return DEFAULT_RELATIVE_DISTANCE_RANGE;
 		}
 	}
 
+	/**
+	 * @return The name of the configured time threshold mode
+	 */
+	public String getTimeName()
+	{
+		switch (timeThresholdMode)
+		{
+			case 1:
+				return "Seconds";
+
+			case 0:
+			default:
+				return "Frames";
+		}
+	}
+
+	protected double getDefaultTimeRange()
+	{
+		switch (timeThresholdMode)
+		{
+			case 1:
+				return DEFAULT_SECONDS_TIME_RANGE;
+
+			case 0:
+			default:
+				return DEFAULT_FRAMES_TIME_RANGE;
+		}
+	}
+
+	protected String getTraceParameters()
+	{
+		return String.format("@%.2f %s, %.2f %s", searchDistance, getSearchName(), timeThreshold, getTimeName());
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getNumberOfParameters()
+	 */
+	@Override
+	public int getNumberOfParameters()
+	{
+		return 4;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
+	 */
+	@Override
+	public double getParameterValue(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return searchDistance;
+			case 1:
+				return searchDistanceMode;
+			case 2:
+				return timeThreshold;
+			default:
+				return timeThresholdMode;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 */
+	@Override
+	public String getParameterName(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return "Search distance";
+			case 1:
+				return "Search distance mode";
+			case 2:
+				return "Time threshold";
+			default:
+				return "Time threshold mode";
+		}
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
+	 */
+	@Override
+	public void weakestParameters(double[] parameters)
+	{
+		setMax(parameters, 0, searchDistance);
+		setMax(parameters, 2, timeThreshold);
+	}
+	
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
@@ -136,10 +249,34 @@ public abstract class HysteresisFilter extends Filter
 				distanceThreshold = getSearchDistanceUsingCandidates(peakResults, candidates);
 		}
 
+		if (distanceThreshold <= 0)
+			return;
+
+		int timeThreshold;
+		switch (searchDistanceMode)
+		{
+			case 1:
+				if (peakResults.getCalibration() != null)
+				{
+					timeThreshold = (int) Math.round((this.timeThreshold / peakResults.getCalibration().exposureTime));
+				}
+				else
+					timeThreshold = 1;
+
+				break;
+
+			case 0:
+			default:
+				timeThreshold = (int) this.timeThreshold;
+		}
+
+		if (timeThreshold <= 0)
+			return;
+
 		// Trace through candidates
 		TraceManager tm = new TraceManager(traceResults);
 		tm.setTraceMode(TraceMode.LATEST_FORERUNNER);
-		tm.traceMolecules(distanceThreshold, 1);
+		tm.traceMolecules(distanceThreshold, timeThreshold);
 		Trace[] traces = tm.getTraces();
 
 		for (Trace trace : traces)
@@ -202,6 +339,18 @@ public abstract class HysteresisFilter extends Filter
 	public boolean accept(PeakResult peak) throws NullPointerException
 	{
 		return ok.contains(peak);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#end()
+	 */
+	@Override
+	public void end()
+	{
+		ok.clear();
+		ok = null;
 	}
 
 	/*
