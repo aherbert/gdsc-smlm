@@ -27,6 +27,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class WidthFilter2 extends Filter
 {
+	static double DEFAULT_MIN_RANGE = 1;
+	
 	@XStreamAsAttribute
 	final double minWidth;
 	@XStreamAsAttribute
@@ -44,8 +46,8 @@ public class WidthFilter2 extends Filter
 			maxWidth = minWidth;
 			minWidth = f;
 		}
-		this.minWidth = minWidth;
-		this.maxWidth = maxWidth;
+		this.minWidth = Math.max(0, minWidth);
+		this.maxWidth = Math.max(0, maxWidth);
 	}
 
 	@Override
@@ -165,9 +167,9 @@ public class WidthFilter2 extends Filter
 		switch (index)
 		{
 			case 0:
-				return new WidthFilter2(updateParameter(minWidth, delta), maxWidth);
+				return new WidthFilter2(updateParameter(minWidth, delta, DEFAULT_MIN_RANGE), maxWidth);
 			default:
-				return new WidthFilter2(minWidth, updateParameter(maxWidth, delta));
+				return new WidthFilter2(minWidth, updateParameter(maxWidth, delta, WidthFilter.DEFAULT_RANGE));
 		}
 	}
 

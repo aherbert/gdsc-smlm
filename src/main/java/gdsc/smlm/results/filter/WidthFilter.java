@@ -27,6 +27,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class WidthFilter extends Filter
 {
+	static double DEFAULT_RANGE = 1;
+	
 	@XStreamAsAttribute
 	final double width;
 	@XStreamOmitField
@@ -34,7 +36,7 @@ public class WidthFilter extends Filter
 
 	public WidthFilter(double width)
 	{
-		this.width = width;
+		this.width = Math.max(0, width);
 	}
 
 	@Override
@@ -135,7 +137,7 @@ public class WidthFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new WidthFilter(updateParameter(width, delta));
+		return new WidthFilter(updateParameter(width, delta, DEFAULT_RANGE));
 	}
 
 	/*

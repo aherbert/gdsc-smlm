@@ -36,7 +36,7 @@ public class SBRFilter extends Filter
 
 	public SBRFilter(float sbr)
 	{
-		this.sbr = sbr;
+		this.sbr = Math.max(0, sbr);
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class SBRFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new SBRFilter(updateParameter(sbr, delta));
+		return new SBRFilter(updateParameter(sbr, delta, SNRFilter.DEFAULT_RANGE));
 	}
 
 	/*

@@ -23,12 +23,14 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
  */
 public class SNRFilter extends Filter
 {
+	static double DEFAULT_RANGE = 10;
+	
 	@XStreamAsAttribute
 	final float snr;
 
 	public SNRFilter(float snr)
 	{
-		this.snr = snr;
+		this.snr = Math.max(0, snr);
 	}
 
 	@Override
@@ -126,7 +128,7 @@ public class SNRFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new SNRFilter(updateParameter(snr, delta));
+		return new SNRFilter(updateParameter(snr, delta, DEFAULT_RANGE));
 	}
 
 	/*

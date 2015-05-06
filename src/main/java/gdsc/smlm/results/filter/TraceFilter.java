@@ -29,6 +29,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class TraceFilter extends Filter
 {
+	static int DEFAULT_TIME_RANGE = 10;
+	
 	@XStreamAsAttribute
 	final double d;
 	@XStreamAsAttribute
@@ -38,8 +40,8 @@ public class TraceFilter extends Filter
 
 	public TraceFilter(double d, int t)
 	{
-		this.d = d;
-		this.t = t;
+		this.d = Math.max(0, d);
+		this.t = Math.max(0, t);
 	}
 
 	@Override
@@ -163,9 +165,9 @@ public class TraceFilter extends Filter
 		switch (index)
 		{
 			case 0:
-				return new TraceFilter(updateParameter(d, delta), t);
+				return new TraceFilter(updateParameter(d, delta, HysteresisFilter.DEFAULT_ABSOLUTE_RANGE), t);
 			default:
-				return new TraceFilter(d, updateParameter(t, delta));
+				return new TraceFilter(d, updateParameter(t, delta, DEFAULT_TIME_RANGE));
 		}
 	}
 

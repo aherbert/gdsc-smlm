@@ -28,6 +28,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class ShiftFilter extends Filter
 {
+	static double DEFAULT_RANGE = 10;
+	
 	@XStreamAsAttribute
 	final double shift;
 	@XStreamOmitField
@@ -35,7 +37,7 @@ public class ShiftFilter extends Filter
 
 	public ShiftFilter(double shift)
 	{
-		this.shift = shift;
+		this.shift = Math.max(0, shift);
 	}
 
 	@Override
@@ -136,7 +138,7 @@ public class ShiftFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new ShiftFilter(updateParameter(shift, delta));
+		return new ShiftFilter(updateParameter(shift, delta, DEFAULT_RANGE));
 	}
 
 	/*

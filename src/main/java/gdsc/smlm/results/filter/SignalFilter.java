@@ -24,6 +24,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class SignalFilter extends Filter
 {
+	static double DEFAULT_RANGE = 30;
+	
 	@XStreamAsAttribute
 	final double signal;
 	@XStreamOmitField
@@ -31,7 +33,7 @@ public class SignalFilter extends Filter
 
 	public SignalFilter(double signal)
 	{
-		this.signal = signal;
+		this.signal = Math.max(0, signal);
 	}
 
 	@Override
@@ -126,7 +128,7 @@ public class SignalFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new SignalFilter(updateParameter(signal, delta));
+		return new SignalFilter(updateParameter(signal, delta, DEFAULT_RANGE));
 	}
 
 	/*

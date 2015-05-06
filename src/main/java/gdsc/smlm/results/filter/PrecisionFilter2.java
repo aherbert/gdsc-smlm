@@ -41,7 +41,7 @@ public class PrecisionFilter2 extends Filter
 
 	public PrecisionFilter2(double precision)
 	{
-		this.precision = precision;
+		this.precision = Math.max(0, precision);
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class PrecisionFilter2 extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new PrecisionFilter2(updateParameter(precision, delta));
+		return new PrecisionFilter2(updateParameter(precision, delta, PrecisionFilter.DEFAULT_RANGE));
 	}
 
 	/*

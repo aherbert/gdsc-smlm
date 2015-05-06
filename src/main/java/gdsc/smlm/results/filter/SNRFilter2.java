@@ -40,15 +40,15 @@ public class SNRFilter2 extends Filter
 
 	public SNRFilter2(float snr, double minWidth, double maxWidth)
 	{
-		this.snr = snr;
+		this.snr = Math.max(0, snr);
 		if (maxWidth < minWidth)
 		{
 			double f = maxWidth;
 			maxWidth = minWidth;
 			minWidth = f;
 		}
-		this.minWidth = minWidth;
-		this.maxWidth = maxWidth;
+		this.minWidth = Math.max(0, minWidth);
+		this.maxWidth = Math.max(0, maxWidth);
 	}
 
 	@Override
@@ -176,11 +176,11 @@ public class SNRFilter2 extends Filter
 		switch (index)
 		{
 			case 0:
-				return new SNRFilter2(updateParameter(snr, delta), minWidth, maxWidth);
+				return new SNRFilter2(updateParameter(snr, delta, SNRFilter.DEFAULT_RANGE), minWidth, maxWidth);
 			case 1:
-				return new SNRFilter2(snr, updateParameter(minWidth, delta), maxWidth);
+				return new SNRFilter2(snr, updateParameter(minWidth, delta, WidthFilter2.DEFAULT_MIN_RANGE), maxWidth);
 			default:
-				return new SNRFilter2(snr, minWidth, updateParameter(maxWidth, delta));
+				return new SNRFilter2(snr, minWidth, updateParameter(maxWidth, delta, WidthFilter.DEFAULT_RANGE));
 		}
 	}
 
@@ -192,7 +192,7 @@ public class SNRFilter2 extends Filter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new SNRFilter2((float)parameters[0], parameters[1], parameters[2]);
+		return new SNRFilter2((float) parameters[0], parameters[1], parameters[2]);
 	}
 
 	/*

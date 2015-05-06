@@ -36,6 +36,9 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public abstract class HysteresisFilter extends Filter
 {
+	static double DEFAULT_ABSOLUTE_RANGE = 200;
+	static double DEFAULT_RELATIVE_RANGE = 1;
+	
 	@XStreamAsAttribute
 	final double searchDistance;
 	@XStreamAsAttribute
@@ -55,7 +58,7 @@ public abstract class HysteresisFilter extends Filter
 	 */
 	public HysteresisFilter(double searchDistance, int searchDistanceMode)
 	{
-		this.searchDistance = searchDistance;
+		this.searchDistance = Math.max(0, searchDistance);
 		this.searchDistanceMode = searchDistanceMode;
 	}
 
@@ -72,6 +75,19 @@ public abstract class HysteresisFilter extends Filter
 			case 0:
 			default:
 				return "Candidate precision";
+		}
+	}
+	
+	protected double getDefaultSearchRange()
+	{
+		switch (searchDistanceMode)
+		{
+			case 1:
+				return DEFAULT_ABSOLUTE_RANGE;
+
+			case 0:
+			default:
+				return DEFAULT_RELATIVE_RANGE;
 		}
 	}
 

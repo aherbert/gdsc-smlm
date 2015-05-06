@@ -40,15 +40,15 @@ public class ANRFilter2 extends Filter
 
 	public ANRFilter2(float anr, double minWidth, double maxWidth)
 	{
-		this.anr = anr;
+		this.anr = Math.max(0, anr);
 		if (maxWidth < minWidth)
 		{
 			double f = maxWidth;
 			maxWidth = minWidth;
 			minWidth = f;
 		}
-		this.minWidth = minWidth;
-		this.maxWidth = maxWidth;
+		this.minWidth = Math.max(0, minWidth);
+		this.maxWidth = Math.max(0, maxWidth);
 	}
 
 	@Override
@@ -176,11 +176,11 @@ public class ANRFilter2 extends Filter
 		switch (index)
 		{
 			case 0:
-				return new ANRFilter2(updateParameter(anr, delta), minWidth, maxWidth);
+				return new ANRFilter2(updateParameter(anr, delta, SNRFilter.DEFAULT_RANGE), minWidth, maxWidth);
 			case 1:
-				return new ANRFilter2(anr, updateParameter(minWidth, delta), maxWidth);
+				return new ANRFilter2(anr, updateParameter(minWidth, delta, WidthFilter2.DEFAULT_MIN_RANGE), maxWidth);
 			default:
-				return new ANRFilter2(anr, minWidth, updateParameter(maxWidth, delta));
+				return new ANRFilter2(anr, minWidth, updateParameter(maxWidth, delta, WidthFilter.DEFAULT_RANGE));
 		}
 	}
 

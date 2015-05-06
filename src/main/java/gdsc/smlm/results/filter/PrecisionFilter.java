@@ -24,6 +24,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class PrecisionFilter extends Filter
 {
+	static double DEFAULT_RANGE = 10;
+	
 	@XStreamAsAttribute
 	final double precision;
 	@XStreamOmitField
@@ -37,7 +39,7 @@ public class PrecisionFilter extends Filter
 
 	public PrecisionFilter(double precision)
 	{
-		this.precision = precision;
+		this.precision = Math.max(0, precision);
 	}
 
 	@Override
@@ -143,7 +145,7 @@ public class PrecisionFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new PrecisionFilter(updateParameter(precision, delta));
+		return new PrecisionFilter(updateParameter(precision, delta, DEFAULT_RANGE));
 	}
 
 	/*

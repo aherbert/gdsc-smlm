@@ -23,6 +23,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
  */
 public class CoordinateFilter extends Filter
 {
+	static double DEFAULT_RANGE = 1;
+	
 	@XStreamAsAttribute
 	final float minX;
 	@XStreamAsAttribute
@@ -166,13 +168,13 @@ public class CoordinateFilter extends Filter
 		switch (index)
 		{
 			case 0:
-				return new CoordinateFilter(updateParameter(minX, delta), maxX, minY, maxY);
+				return new CoordinateFilter(updateParameter(minX, delta, DEFAULT_RANGE), maxX, minY, maxY);
 			case 1:
-				return new CoordinateFilter(minX, updateParameter(maxX, delta), minY, maxY);
+				return new CoordinateFilter(minX, updateParameter(maxX, delta, DEFAULT_RANGE), minY, maxY);
 			case 2:
-				return new CoordinateFilter(minX, maxX, updateParameter(minY, delta), maxY);
+				return new CoordinateFilter(minX, maxX, updateParameter(minY, delta, DEFAULT_RANGE), maxY);
 			default:
-				return new CoordinateFilter(minX, maxX, minY, updateParameter(maxY, delta));
+				return new CoordinateFilter(minX, maxX, minY, updateParameter(maxY, delta, DEFAULT_RANGE));
 		}
 	}
 

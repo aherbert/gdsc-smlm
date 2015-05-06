@@ -63,18 +63,18 @@ public class MultiFilter2 extends Filter
 
 	public MultiFilter2(double signal, float snr, double minWidth, double maxWidth, double shift, double precision)
 	{
-		this.signal = signal;
-		this.snr = snr;
+		this.signal = Math.max(0, signal);
+		this.snr = Math.max(0, snr);
 		if (maxWidth < minWidth)
 		{
 			double f = maxWidth;
 			maxWidth = minWidth;
 			minWidth = f;
 		}
-		this.minWidth = minWidth;
-		this.maxWidth = maxWidth;
-		this.shift = shift;
-		this.precision = precision;
+		this.minWidth = Math.max(0, minWidth);
+		this.maxWidth = Math.max(0, maxWidth);
+		this.shift = Math.max(0, shift);
+		this.precision = Math.max(0, precision);
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class MultiFilter2 extends Filter
 	{
 		checkIndex(index);
 		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, precision };
-		params[index] = updateParameter(params[index], delta);
+		params[index] = updateParameter(params[index], delta, MultiFilter.defaultRange[index]);
 		return new MultiFilter2(params[0], (float) params[1], params[2], params[3], params[4], params[5]);
 	}
 

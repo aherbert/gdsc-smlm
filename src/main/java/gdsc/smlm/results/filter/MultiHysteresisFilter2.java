@@ -96,18 +96,18 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 			double rangePrecision)
 	{
 		super(searchDistance, searchDistanceMode);
-		this.strictSignal = strictSignal;
-		this.rangeSignal = rangeSignal;
-		this.strictSnr = strictSnr;
-		this.rangeSnr = rangeSnr;
-		this.strictMinWidth = strictMinWidth;
-		this.rangeMinWidth = rangeMinWidth;
-		this.strictMaxWidth = strictMaxWidth;
-		this.rangeMaxWidth = rangeMaxWidth;
-		this.strictShift = strictShift;
-		this.rangeShift = rangeShift;
-		this.strictPrecision = strictPrecision;
-		this.rangePrecision = rangePrecision;
+		this.strictSignal = Math.max(0, strictSignal);
+		this.rangeSignal = Math.max(0, rangeSignal);
+		this.strictSnr = Math.max(0, strictSnr);
+		this.rangeSnr = Math.max(0, rangeSnr);
+		this.strictMinWidth = Math.max(0, strictMinWidth);
+		this.rangeMinWidth = Math.max(0, rangeMinWidth);
+		this.strictMaxWidth = Math.max(0, strictMaxWidth);
+		this.rangeMaxWidth = Math.max(0, rangeMaxWidth);
+		this.strictShift = Math.max(0, strictShift);
+		this.rangeShift = Math.max(0, rangeShift);
+		this.strictPrecision = Math.max(0, strictPrecision);
+		this.rangePrecision = Math.max(0, rangePrecision);
 	}
 
 	@Override
@@ -348,7 +348,10 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 		double[] parameters = new double[] { searchDistance, searchDistanceMode, strictSignal, rangeSignal, strictSnr,
 				rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth, rangeMaxWidth, strictShift, rangeShift,
 				strictPrecision, rangePrecision };
-		parameters[index] = updateParameter(parameters[index], delta);
+		if (index == 0)
+			parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());
+		else
+			parameters[index] = updateParameter(parameters[index], delta, MultiHysteresisFilter.defaultRange[index]);
 		return create(parameters);
 	}
 

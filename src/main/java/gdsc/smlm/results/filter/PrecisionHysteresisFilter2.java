@@ -48,8 +48,8 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	public PrecisionHysteresisFilter2(double searchDistance, int searchDistanceMode, double lowerPrecision, double range)
 	{
 		super(searchDistance, searchDistanceMode);
-		this.lowerPrecision = lowerPrecision;
-		this.range = Math.abs(range);
+		this.lowerPrecision = Math.max(0, lowerPrecision);
+		this.range = Math.max(0, range);
 	}
 
 	@Override
@@ -198,16 +198,16 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 		switch (index)
 		{
 			case 0:
-				return new PrecisionHysteresisFilter2(updateParameter(searchDistance, delta), searchDistanceMode,
-						lowerPrecision, range);
+				return new PrecisionHysteresisFilter2(updateParameter(searchDistance, delta, getDefaultSearchRange()),
+						searchDistanceMode, lowerPrecision, range);
 			case 1:
 				return this;
 			case 2:
 				return new PrecisionHysteresisFilter2(searchDistance, searchDistanceMode, updateParameter(
-						lowerPrecision, delta), range);
+						lowerPrecision, delta, PrecisionFilter.DEFAULT_RANGE), range);
 			default:
 				return new PrecisionHysteresisFilter2(searchDistance, searchDistanceMode, lowerPrecision,
-						updateParameter(range, delta));
+						updateParameter(range, delta, PrecisionFilter.DEFAULT_RANGE));
 		}
 	}
 

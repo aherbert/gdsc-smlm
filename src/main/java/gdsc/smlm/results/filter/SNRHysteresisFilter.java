@@ -156,16 +156,16 @@ public class SNRHysteresisFilter extends HysteresisFilter
 		switch (index)
 		{
 			case 0:
-				return new SNRHysteresisFilter(updateParameter(searchDistance, delta), searchDistanceMode, lowerSnr,
-						range);
+				return new SNRHysteresisFilter(updateParameter(searchDistance, delta, getDefaultSearchRange()),
+						searchDistanceMode, lowerSnr, range);
 			case 1:
 				return this;
 			case 2:
-				return new SNRHysteresisFilter(searchDistance, searchDistanceMode, updateParameter(lowerSnr, delta),
-						range);
+				return new SNRHysteresisFilter(searchDistance, searchDistanceMode, updateParameter(lowerSnr, delta,
+						SNRFilter.DEFAULT_RANGE), range);
 			default:
 				return new SNRHysteresisFilter(searchDistance, searchDistanceMode, lowerSnr, updateParameter(range,
-						delta));
+						delta, SNRFilter.DEFAULT_RANGE));
 		}
 	}
 

@@ -853,6 +853,10 @@ public abstract class Filter implements Comparable<Filter>
 	 * <p>
 	 * A positive delta will adjust the parameter to be larger. A negative delta will adjust the parameter to be
 	 * smaller. The adjustment is relative to the parameter value, e.g. 0.1 is 10%.
+	 * <p>
+	 * Filters can adjust the parameter by a different amount, e.g. by the delta multiplied by a range expected to
+	 * change the filter performance. This may be relevant in the case where the value is presently zero since no
+	 * relative change is possible.
 	 * 
 	 * @param index
 	 *            The parameter index
@@ -870,11 +874,16 @@ public abstract class Filter implements Comparable<Filter>
 	 * 
 	 * @param value
 	 * @param delta
+	 * @param defaultRange
+	 *            The default range to apply the delta to in the case where the value is zero and no relative adjustment
+	 *            is possible.
 	 * @return
 	 */
-	protected double updateParameter(double value, double delta)
+	protected double updateParameter(double value, double delta, double defaultRange)
 	{
-		return value + value * delta;
+		if (value != 0)
+			return (float) (value + value * delta);
+		return (float) (value + defaultRange * delta);
 	}
 
 	/**
@@ -885,11 +894,16 @@ public abstract class Filter implements Comparable<Filter>
 	 * 
 	 * @param value
 	 * @param delta
+	 * @param defaultRange
+	 *            The default range to apply the delta to in the case where the value is zero and no relative adjustment
+	 *            is possible.
 	 * @return
 	 */
-	protected float updateParameter(float value, double delta)
+	protected float updateParameter(float value, double delta, double defaultRange)
 	{
-		return (float) (value + value * delta);
+		if (value != 0)
+			return (float) (value + value * delta);
+		return (float) (value + defaultRange * delta);
 	}
 
 	/**
@@ -901,11 +915,18 @@ public abstract class Filter implements Comparable<Filter>
 	 * 
 	 * @param value
 	 * @param delta
+	 * @param defaultRange
+	 *            The default range to apply the delta to in the case where the value is zero and no relative adjustment
+	 *            is possible.
 	 * @return
 	 */
-	protected int updateParameter(int value, double delta)
+	protected int updateParameter(int value, double delta, int defaultRange)
 	{
-		final int update = (int) Math.ceil(value * Math.abs(delta));
+		final int update;
+		if (value != 0)
+			update = (int) Math.ceil(value * Math.abs(delta));
+		else
+			update = (int) Math.ceil(defaultRange * Math.abs(delta));
 		if (delta < 0)
 			return value - update;
 		return value + update;

@@ -28,7 +28,7 @@ public class ANRFilter extends Filter
 
 	public ANRFilter(float anr)
 	{
-		this.anr = anr;
+		this.anr = Math.max(0, anr);
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class ANRFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new ANRFilter(updateParameter(anr, delta));
+		return new ANRFilter(updateParameter(anr, delta, SNRFilter.DEFAULT_RANGE));
 	}
 
 	/*
