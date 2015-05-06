@@ -252,31 +252,31 @@ public abstract class HysteresisFilter extends Filter
 		if (distanceThreshold <= 0)
 			return;
 
-		int timeThreshold;
-		switch (searchDistanceMode)
+		int myTimeThreshold;
+		switch (timeThresholdMode)
 		{
 			case 1:
 				if (peakResults.getCalibration() != null)
 				{
-					timeThreshold = (int) Math.round((this.timeThreshold / peakResults.getCalibration().exposureTime));
+					myTimeThreshold = (int) Math.round((this.timeThreshold / peakResults.getCalibration().exposureTime));
 				}
 				else
-					timeThreshold = 1;
+					myTimeThreshold = 1;
 
 				break;
 
 			case 0:
 			default:
-				timeThreshold = (int) this.timeThreshold;
+				myTimeThreshold = (int) this.timeThreshold;
 		}
 
-		if (timeThreshold <= 0)
+		if (myTimeThreshold <= 0)
 			return;
 
 		// Trace through candidates
 		TraceManager tm = new TraceManager(traceResults);
 		tm.setTraceMode(TraceMode.LATEST_FORERUNNER);
-		tm.traceMolecules(distanceThreshold, timeThreshold);
+		tm.traceMolecules(distanceThreshold, myTimeThreshold);
 		Trace[] traces = tm.getTraces();
 
 		for (Trace trace : traces)
