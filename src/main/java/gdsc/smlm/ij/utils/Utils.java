@@ -382,7 +382,7 @@ public class Utils
 
 		return new double[][] { value, frequency };
 	}
-	
+
 	/**
 	 * For the provided histogram x-axis bins, produce an x-axis for plotting. This functions doubles up the histogram
 	 * x-positions to allow plotting a square line profile using the ImageJ plot command.
@@ -712,8 +712,7 @@ public class Utils
 				dx = (xValues.length == 1) ? 1 : (xValues[1] - xValues[0]);
 			double xMax = xValues[xValues.length - 1] + dx;
 			double xPadding = 0.05 * (xMax - xValues[0]);
-			plot.setLimits(xValues[0] - xPadding, xMax + xPadding, 0,
-					Maths.max(yValues) * 1.05);
+			plot.setLimits(xValues[0] - xPadding, xMax + xPadding, 0, Maths.max(yValues) * 1.05);
 		}
 		plot.addPoints(xValues, yValues, (barChart) ? Plot2.BAR : Plot.LINE);
 		if (label != null)
@@ -996,5 +995,41 @@ public class Utils
 		for (int i = 0; i < a.length; i++)
 			b[i] = (float) a[i];
 		return b;
+	}
+
+	/**
+	 * Return "s" if the size is not 1 otherwise returns an empty string. This can be used to add an s where necessary
+	 * to adjectives:
+	 * 
+	 * <pre>
+	 * System.out.printf(&quot;Created %d thing%s\n&quot;, n, Utils.pleural(n));
+	 * </pre>
+	 * 
+	 * @param n
+	 *            The number of things
+	 * @return "s" or empty string
+	 */
+	public static String pleural(int n)
+	{
+		return (Math.abs(n) == 1) ? "" : "s";
+	}
+
+	/**
+	 * Return "s" if the size is not 1 otherwise returns an empty string. This can be used to add an s where necessary
+	 * to adjectives:
+	 * 
+	 * <pre>
+	 * System.out.printf(&quot;Created %s\n&quot;, Utils.pleural(n, &quot;thing&quot;));
+	 * </pre>
+	 * 
+	 * @param n
+	 *            The number of things
+	 * @param name
+	 *            The name of the thing
+	 * @return "s" or empty string
+	 */
+	public static String pleural(int n, String name)
+	{
+		return n + " " + name + ((Math.abs(n) == 1) ? "" : "s");
 	}
 }
