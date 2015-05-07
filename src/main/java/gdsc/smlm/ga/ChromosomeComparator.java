@@ -1,6 +1,8 @@
 package gdsc.smlm.ga;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -16,7 +18,7 @@ import java.util.Comparator;
  *---------------------------------------------------------------------------*/
 
 /**
- * Mutates the sequence by selecting random positions and random shifts.
+ * Sorts chromosome using the fitness, highest first.
  */
 public class ChromosomeComparator implements Comparator<Chromosome>
 {
@@ -33,5 +35,15 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 		if (chromosome1.getFitness() < chromosome2.getFitness())
 			return 1;
 		return 0;
+	}
+
+	/**
+	 * Sort the list
+	 * 
+	 * @param list
+	 */
+	public static void sort(List<Chromosome> list)
+	{
+		Collections.sort(list, new ChromosomeComparator());
 	}
 }
