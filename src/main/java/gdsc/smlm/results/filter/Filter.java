@@ -5,6 +5,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.FractionClassificationResult;
+import gdsc.smlm.utils.NotImplementedException;
 
 import java.util.List;
 
@@ -994,56 +995,48 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	@Override
 	public int length()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public double[] sequence()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public double[] mutationStepRange()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public double[] lowerLimit()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public double[] upperLimit()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public void setFitness(double fitness)
 	{
-		// TODO Auto-generated method stub
-		
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public double getFitness()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		throw new NotImplementedException();
 	}
 
 	@Override
 	public double distance(Chromosome other)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		throw new NotImplementedException();
 	}
 }
