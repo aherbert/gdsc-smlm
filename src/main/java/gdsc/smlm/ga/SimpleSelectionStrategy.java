@@ -57,18 +57,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 			return individuals;
 		ArrayList<Chromosome> subset = new ArrayList<Chromosome>();
 		subset.addAll(individuals);
-		Collections.sort(subset, new Comparator<Chromosome>()
-		{
-			@Override
-			public int compare(Chromosome arg0, Chromosome arg1)
-			{
-				if (arg0.getFitness() > arg1.getFitness())
-					return -1;
-				if (arg0.getFitness() < arg1.getFitness())
-					return 1;
-				return 0;
-			}
-		});
+		Collections.sort(subset, new ChromosomeComparator());
 		int size = (int) Math.round(subset.size() * fraction);
 		if (size < 2)
 			size = 2;
