@@ -22,6 +22,8 @@ public class SimpleMutator extends Randomiser implements Mutator
 {
 	final double fraction;
 
+	private double[] stepSize, lower, upper;
+
 	/**
 	 * @param random
 	 * @param fraction
@@ -31,6 +33,24 @@ public class SimpleMutator extends Randomiser implements Mutator
 	{
 		super(random);
 		this.fraction = fraction;
+	}
+
+	/**
+	 * Override the mutation parameters that are obtained from the Chromosome interface.
+	 * The arrays must match the fixed size of the Chromosome sequences to be mutated.
+	 * 
+	 * @param stepSize
+	 *            The mutation step size
+	 * @param lower
+	 *            The lower limit for the sequence positions
+	 * @param upper
+	 *            The upper limit for the sequence positions
+	 */
+	public void overrideChromosomeSettings(double[] stepSize, double[] lower, double[] upper)
+	{
+		this.stepSize = stepSize;
+		this.lower = lower;
+		this.upper = upper;
 	}
 
 	/**
@@ -52,9 +72,9 @@ public class SimpleMutator extends Randomiser implements Mutator
 		if (mean > 0)
 		{
 			int count = (int) random.nextPoisson(mean);
-			final double[] step = chromosome.mutationStepRange();
-			final double[] min = chromosome.lowerLimit();
-			final double[] max = chromosome.upperLimit();
+			final double[] step = (stepSize == null) ? chromosome.mutationStepRange() : stepSize;
+			final double[] min = (lower == null) ? chromosome.lowerLimit() : lower;
+			final double[] max = (upper == null) ? chromosome.upperLimit() : upper;
 
 			while (count-- > 0)
 			{
