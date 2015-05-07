@@ -1,5 +1,6 @@
 package gdsc.smlm.results.filter;
 
+import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.match.ClassificationResult;
@@ -12,7 +13,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2015 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -25,7 +26,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter a set of peak results into accepted/rejected.
  */
-public abstract class Filter implements Comparable<Filter>
+public abstract class Filter implements Comparable<Filter>, Chromosome
 {
 	@XStreamOmitField
 	private String name;
@@ -988,5 +989,61 @@ public abstract class Filter implements Comparable<Filter>
 	public boolean subsetWithFailCount()
 	{
 		return true;
+	}
+
+	@Override
+	public int length()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double[] sequence()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] mutationStepRange()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] lowerLimit()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] upperLimit()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setFitness(double fitness)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public double getFitness()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double distance(Chromosome other)
+	{
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

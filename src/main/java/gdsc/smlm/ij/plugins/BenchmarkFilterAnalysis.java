@@ -16,6 +16,16 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ga.Chromosome;
+import gdsc.smlm.ga.ChromosomeComparator;
+import gdsc.smlm.ga.FitnessFunction;
+import gdsc.smlm.ga.Population;
+import gdsc.smlm.ga.Recombiner;
+import gdsc.smlm.ga.SelectionStrategy;
+import gdsc.smlm.ga.SimpleMutator;
+import gdsc.smlm.ga.SimpleRecombiner;
+import gdsc.smlm.ga.SimpleSelectionStrategy;
+import gdsc.smlm.ga.ToleranceChecker;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -61,6 +71,8 @@ import java.util.Map.Entry;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.Well44497b;
 
 /**
  * Run different filtering methods on a set of benchmark fitting results outputting performance statistics on the
@@ -69,12 +81,13 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
  * Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table,
  * e.g. precision, Jaccard, F-score.
  */
-public class BenchmarkFilterAnalysis implements PlugIn
+public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 {
 	private static final String TITLE = "Filter Analysis";
 	private static TextWindow resultsWindow = null;
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
+	private static TextWindow gaWindow = null;
 
 	private static int failCount = 1;
 	private static int failCountRange = 0;
@@ -99,6 +112,14 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static double upperMatchDistance = 100;
 	private static double partialMatchDistance = 100;
 	private static boolean depthRecallAnalysis = true;
+	private static boolean evolve = false;
+
+	private static int populationSize = 500;
+	private static int failureLimit = 10;
+	private static double crossoverRate = 0.2;
+	private static double meanChildren = 2;
+	private static double mutationRate = 0.1;
+	private static double selectionFraction = 0.2;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2;
@@ -244,6 +265,10 @@ public class BenchmarkFilterAnalysis implements PlugIn
 
 					// Option to enumerate filters
 					expandFilters();
+
+					// Sort so that the filters are in a nice order
+					for (FilterSet filterSet : filterList)
+						filterSet.sort();
 
 					setLastFile(filename);
 					return filterList;
@@ -626,6 +651,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
 		if (!simulationParameters.fixedDepth)
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
+		gd.addCheckbox("Evolve", evolve);
 		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
@@ -679,6 +705,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		partialMatchDistance = Math.abs(gd.getNextNumber());
 		if (!simulationParameters.fixedDepth)
 			depthRecallAnalysis = gd.getNextBoolean();
+		evolve = gd.getNextBoolean();
 		resultsTitle = gd.getNextString();
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
@@ -1009,6 +1036,27 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		}
 	}
 
+	private void createGAWindow()
+	{
+		if (isHeadless)
+		{
+			String header = createResultsHeader(false);
+			header += "\tIteration";
+			IJ.log(header);
+		}
+		else
+		{
+			if (gaWindow == null || !gaWindow.isShowing())
+			{
+				String header = createResultsHeader(false);
+				header += "\tIteration";
+				gaWindow = new TextWindow(TITLE + " Evolution", header, "", 900, 300);
+			}
+			if (clearTables)
+				gaWindow.getTextPanel().clear();
+		}
+	}
+	
 	private String createResultsHeader(boolean depthSummary)
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
@@ -1064,8 +1112,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
 		double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
 		int i = 0;
-
-		filterSet.sort();
+		List<MemoryPeakResults> resultsListToScore = resultsList;
 
 		// Get the weakest filter and subset the results if possible
 		Filter weakest = null;
@@ -1080,7 +1127,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			{
 				// Can only create a weakest filter if they are the same type
 				subset = allSameType = true;
-				List<MemoryPeakResults> resultsList2 = new ArrayList<MemoryPeakResults>(resultsList.size());
+				resultsListToScore = new ArrayList<MemoryPeakResults>(resultsList.size());
 				double[] score = null;
 				// Some filters may require all the data, e.g. Hysteresis filters
 				boolean withFailCount = weakest.subsetWithFailCount();
@@ -1089,7 +1136,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					double[] score2 = new double[4];
 					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset(r, failCount, score2) : weakest
 							.filterSubset(r, score2);
-					resultsList2.add(r2);
+					resultsListToScore.add(r2);
 					if (score == null)
 						score = score2;
 					else
@@ -1098,7 +1145,6 @@ public class BenchmarkFilterAnalysis implements PlugIn
 							score[j] += score2[j];
 					}
 				}
-				resultsList = resultsList2;
 				tn = score[2];
 				fn = score[3];
 			}
@@ -1117,6 +1163,45 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			}
 		}
 
+		if (evolve && allSameType)
+		{
+			// TODO: Implement the Chromosome interface for all Filters.
+
+			stopTimer();
+			
+			createGAWindow();
+
+			Filter filter = filterSet.getFilters().get(0);
+			double[] stepSize = filter.mutationStepRange();
+			// TODO: Ask the user for the mutation step parameters.
+
+			startTimer();
+
+			// Create the genetic algorithm
+			RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
+			SimpleMutator mutator = new SimpleMutator(random, mutationRate);
+			mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], null);
+			Recombiner recombiner = new SimpleRecombiner(random, crossoverRate, meanChildren);
+			SelectionStrategy selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction);
+			checker = new ToleranceChecker(1e-4, 1e-10);
+			population = new Population(null); //filterSet.getFilters());
+			population.setPopulationSize(populationSize);
+			population.setFailureLimit(failureLimit);
+
+			this.ga_resultsList = resultsList;
+			this.ga_resultsListToScore = resultsListToScore;
+			this.ga_tn = tn;
+			this.ga_fn = fn;
+			this.ga_subset = subset;
+
+			// Evolve
+			population.evolve(mutator, recombiner, this, selectionStrategy, checker);
+
+			// Now update the filter set for final assessment
+			ArrayList<Filter> filters = new ArrayList<Filter>();
+			filterSet = new FilterSet(filterSet.getName(), filters);
+		}
+
 		Filter maxFilter = null, criteriaFilter = null;
 		double maxScore = -1;
 		double maxCriteria = 0;
@@ -1130,7 +1215,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 					return -1;
 			}
 
-			final double[] result = run(filter, resultsList, subset, tn, fn);
+			final double[] result = run(filter, resultsListToScore, subset, tn, fn);
 			final double score = result[0];
 			final double criteria = result[1];
 
@@ -1781,5 +1866,116 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			super(peak, origX, origY, score, error, noise, params, null);
 			this.depth = depth;
 		}
+	}
+
+	// Used to implement the FitnessFunction interface 
+	private ToleranceChecker checker;
+	private Population population;
+
+	private List<MemoryPeakResults> ga_resultsList = null;
+	private List<MemoryPeakResults> ga_resultsListToScore = null;
+	private double ga_tn, ga_fn;
+	private boolean ga_subset;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
+	 */
+	@Override
+	public void initialise(List<? extends Chromosome> individuals)
+	{
+		// Create the weakest filter to subset the result to score
+		if (ga_resultsListToScore == null)
+		{
+			ga_tn = 0;
+			ga_fn = 0;
+
+			ArrayList<Filter> filters = new ArrayList<Filter>(individuals.size());
+			for (Chromosome c : individuals)
+				filters.add((Filter) c);
+			FilterSet filterSet = new FilterSet(filters);
+			Filter weakest = filterSet.createWeakestFilter();
+			if (weakest != null)
+			{
+				ga_resultsListToScore = new ArrayList<MemoryPeakResults>(ga_resultsList.size());
+				double[] score = null;
+				// Some filters may require all the data, e.g. Hysteresis filters
+				final boolean withFailCount = weakest.subsetWithFailCount();
+				for (MemoryPeakResults r : ga_resultsList)
+				{
+					double[] score2 = new double[4];
+					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset(r, failCount, score2) : weakest
+							.filterSubset(r, score2);
+					ga_resultsListToScore.add(r2);
+					if (score == null)
+						score = score2;
+					else
+					{
+						for (int j = 0; j < score.length; j++)
+							score[j] += score2[j];
+					}
+				}
+				ga_tn = score[2];
+				ga_fn = score[3];
+			}
+			else
+			{
+				ga_resultsListToScore = ga_resultsList;
+				ga_subset = false;
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.FitnessFunction#fitness(gdsc.smlm.ga.Chromosome)
+	 */
+	@Override
+	public double fitness(Chromosome chromosome)
+	{
+		Filter filter = (Filter) chromosome;
+		FractionClassificationResult r;
+		if (ga_subset)
+			r = filter.fractionScoreSubset(ga_resultsListToScore, failCount, ga_tn, ga_fn);
+		else
+			r = scoreFilter(filter, ga_resultsListToScore);
+		double score = getScore(r);
+		final double criteria = getCriteria(r);
+
+		// Make sure all individuals who pass the criteria are above those that do not.
+		// This will work unless we are scoring using the counts (i.e. scores that may exceed 1) 
+		if (criteria >= minCriteria)
+			score += 1;
+
+		return score;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.FitnessFunction#shutdown()
+	 */
+	@Override
+	public void shutdown()
+	{
+		// Report the score for the best filter
+		List<? extends Chromosome> individuals = population.getIndividuals();
+		ChromosomeComparator.sort(individuals);
+
+		Filter filter = (Filter) individuals.get(0);
+		
+		FractionClassificationResult r;
+		if (ga_subset)
+			r = filter.fractionScoreSubset(ga_resultsListToScore, failCount, ga_tn, ga_fn);
+		else
+			r = scoreFilter(filter, ga_resultsListToScore);
+		
+		String text = createResult(filter, r);
+		gaWindow.append(text + "\t" + checker.getIterations());
+		
+		// Set to null so the subset is initialised next time
+		this.ga_resultsListToScore = null;
 	}
 }

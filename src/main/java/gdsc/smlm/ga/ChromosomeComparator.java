@@ -42,8 +42,8 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 	 * 
 	 * @param list
 	 */
-	public static void sort(List<Chromosome> list)
+	public static void sort(List<? extends Chromosome> individuals)
 	{
-		Collections.sort(list, new ChromosomeComparator());
+		Collections.sort(individuals, new ChromosomeComparator());
 	}
 }
