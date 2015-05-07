@@ -119,6 +119,7 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	private static StoredDataStatistics depthStats, depthFitStats;
 
 	private boolean isHeadless;
+	private long totalTime = 0, currentTime;
 
 	private static String[] COLUMNS = { "nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR",
 			"ACC", "MCC", "Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard" };
@@ -197,9 +198,9 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			return;
 		}
 
-		long time = analyse(resultsList, filterSets);
+		analyse(resultsList, filterSets);
 
-		IJ.showStatus("Finished : " + Utils.timeToString(time));
+		IJ.showStatus("Finished : " + Utils.timeToString(totalTime));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -727,15 +728,15 @@ public class BenchmarkFilterAnalysis implements PlugIn
 	 * @param resultsList
 	 * @param filterSets
 	 */
-	private long analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
+	private void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
 		createResultsWindow();
 		plots = new ArrayList<NamedPlot>(plotTopN);
 		bestFilter = new HashMap<String, FilterScore>();
 		bestFilterOrder = new LinkedList<String>();
 
+		startTimer();
 		IJ.showStatus("Analysing filters ...");
-		long time = System.currentTimeMillis();
 		int total = countFilters(filterSets);
 		int count = 0;
 		for (FilterSet filterSet : filterSets)
@@ -745,17 +746,17 @@ public class BenchmarkFilterAnalysis implements PlugIn
 			if (count < 0)
 				break;
 		}
-		time = System.currentTimeMillis() - time;
+		stopTimer();
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
 		if (Utils.isInterrupted())
-			return time;
+			return;
 
 		if (bestFilter.isEmpty())
 		{
 			IJ.log("Warning: No filters pass the criteria");
-			return time;
+			return;
 		}
 
 		List<FilterScore> filters = new ArrayList<FilterScore>(bestFilter.values());
@@ -813,8 +814,16 @@ public class BenchmarkFilterAnalysis implements PlugIn
 		showPlots();
 		calculateSensitivity(resultsList);
 		depthAnalysis(filters.get(0).filter);
+	}
 
-		return time;
+	private void startTimer()
+	{
+		currentTime = System.currentTimeMillis();
+	}
+
+	private void stopTimer()
+	{
+		totalTime += System.currentTimeMillis() - currentTime;
 	}
 
 	private int countFilters(List<FilterSet> filterSets)
