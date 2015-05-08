@@ -212,6 +212,56 @@ public abstract class CombinedFilter extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#lowerLimit()
+	 */
+	@Override
+	public double[] lowerLimit()
+	{
+		double[] l1 = filter1.lowerLimit();
+		double[] l2 = filter2.lowerLimit();
+		if (l1 == null && l2 == null)
+			return null;
+		return combine(getLowerLimit(filter1, l1), getLowerLimit(filter2, l2));
+	}
+
+	private double[] getLowerLimit(Filter filter, double[] lower)
+	{
+		if (lower == null)
+		{
+			// Default to zero on the lower so no need to fill
+			lower = new double[filter.length()];
+		}
+		return lower;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		double[] u1 = filter1.upperLimit();
+		double[] u2 = filter2.upperLimit();
+		if (u1 == null && u2 == null)
+			return null;
+		return combine(getUpperLimit(filter1, u1), getUpperLimit(filter2, u2));
+	}
+
+	private double[] getUpperLimit(Filter filter, double[] upper)
+	{
+		if (upper == null)
+		{
+			upper = new double[filter.length()];
+			Arrays.fill(upper, Double.POSITIVE_INFINITY);
+		}
+		return upper;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
 	@Override

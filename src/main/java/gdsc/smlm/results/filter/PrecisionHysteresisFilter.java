@@ -130,7 +130,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		return 2 + super.getNumberOfParameters();
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -173,15 +172,9 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 		}
 	}
 
-	static double[] defaultRange = new double[]{
-		0,
-		0,
-		0,
-		0,
-		PrecisionFilter.DEFAULT_RANGE,
-		PrecisionFilter.DEFAULT_RANGE
-	};
-	
+	static double[] defaultRange = new double[] { 0, 0, 0, 0, PrecisionFilter.DEFAULT_RANGE,
+			PrecisionFilter.DEFAULT_RANGE };
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -213,7 +206,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new PrecisionHysteresisFilter(parameters[0], (int) parameters[1], parameters[2], (int)parameters[3], 
+		return new PrecisionHysteresisFilter(parameters[0], (int) parameters[1], parameters[2], (int) parameters[3],
 				parameters[4], parameters[5]);
 	}
 
@@ -226,7 +219,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	public void weakestParameters(double[] parameters)
 	{
 		super.weakestParameters(parameters);
-		
+
 		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold  
 		setMax(parameters, 4, strictPrecision + range);
 		parameters[5] = 0;
@@ -241,6 +234,18 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	public int length()
 	{
 		return 4;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		return new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, PrecisionFilter.UPPER_LIMIT,
+				PrecisionFilter.UPPER_LIMIT };
 	}
 
 	/*

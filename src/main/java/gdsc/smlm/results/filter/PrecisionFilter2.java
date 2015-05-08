@@ -191,6 +191,17 @@ public class PrecisionFilter2 extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		return new double[] { PrecisionFilter.UPPER_LIMIT };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
 	@Override

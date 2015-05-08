@@ -290,6 +290,18 @@ public class MultiFilter2 extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		return new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, WidthFilter.UPPER_LIMIT,
+				WidthFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT };
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
 	@Override

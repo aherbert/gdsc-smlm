@@ -25,6 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class PrecisionFilter extends Filter
 {
 	static double DEFAULT_RANGE = 10;
+	static double UPPER_LIMIT = 70;
 	
 	@XStreamAsAttribute
 	final double precision;
@@ -181,6 +182,17 @@ public class PrecisionFilter extends Filter
 		return 1;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		return new double[] { UPPER_LIMIT };
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

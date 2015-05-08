@@ -29,7 +29,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class ShiftFilter extends Filter
 {
 	static double DEFAULT_RANGE = 10;
-	
+	static double UPPER_LIMIT = 2;
+
 	@XStreamAsAttribute
 	final double shift;
 	@XStreamOmitField
@@ -172,6 +173,17 @@ public class ShiftFilter extends Filter
 	public int length()
 	{
 		return 1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		return new double[] { UPPER_LIMIT };
 	}
 
 	/*

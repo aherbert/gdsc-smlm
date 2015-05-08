@@ -28,7 +28,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class WidthFilter2 extends Filter
 {
 	static double DEFAULT_MIN_RANGE = 1;
-	
+
 	@XStreamAsAttribute
 	final double minWidth;
 	@XStreamAsAttribute
@@ -205,6 +205,17 @@ public class WidthFilter2 extends Filter
 	public int length()
 	{
 		return 2;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		return new double[] { WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT };
 	}
 
 	/*
