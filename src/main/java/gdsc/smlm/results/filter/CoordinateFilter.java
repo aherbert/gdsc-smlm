@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 public class CoordinateFilter extends Filter
 {
 	static double DEFAULT_RANGE = 1;
-	
+
 	@XStreamAsAttribute
 	final float minX;
 	@XStreamAsAttribute
@@ -202,5 +202,39 @@ public class CoordinateFilter extends Filter
 		setMax(parameters, 1, maxX);
 		setMin(parameters, 2, minY);
 		setMax(parameters, 3, maxY);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return 4;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		// Ignore the mode parameters
+		return new double[] { minX, maxX, minY, maxY };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return new double[] { DEFAULT_RANGE, DEFAULT_RANGE, DEFAULT_RANGE, DEFAULT_RANGE };
 	}
 }

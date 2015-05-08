@@ -28,7 +28,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class WidthFilter extends Filter
 {
 	static double DEFAULT_RANGE = 1;
-	
+
 	@XStreamAsAttribute
 	final double width;
 	@XStreamOmitField
@@ -160,5 +160,38 @@ public class WidthFilter extends Filter
 	public void weakestParameters(double[] parameters)
 	{
 		setMax(parameters, 0, width);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return 1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		return new double[] { width };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return new double[] { DEFAULT_RANGE };
 	}
 }

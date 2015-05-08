@@ -162,4 +162,37 @@ public class ShiftFilter extends Filter
 	{
 		setMax(parameters, 0, shift);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return 1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		return new double[] { shift };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return new double[] { DEFAULT_RANGE };
+	}
 }

@@ -275,4 +275,37 @@ public class MultiFilter2 extends Filter
 		setMax(parameters, 4, shift);
 		setMax(parameters, 5, precision);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return 6;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		return new double[] { signal, snr, minWidth, maxWidth, shift, precision };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return MultiFilter.defaultRange;
+	}
 }

@@ -197,4 +197,45 @@ public abstract class CombinedFilter extends Filter
 	{
 		return filter1.subsetWithFailCount() && filter2.subsetWithFailCount();
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return filter1.length() + filter2.length();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		return combine(filter1.sequence(), filter2.sequence());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return combine(filter1.mutationStepRange(), filter2.mutationStepRange());
+	}
+	
+	private static double[] combine(double[] s1, double[] s2)
+	{
+		double[] s = new double[s1.length + s2.length];
+		System.arraycopy(s1, 0, s, 0, s1.length);
+		System.arraycopy(s2, 0, s, s1.length, s2.length);
+		return s;
+	}
 }

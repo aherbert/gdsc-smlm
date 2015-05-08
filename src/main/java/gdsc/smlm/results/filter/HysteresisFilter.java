@@ -13,6 +13,7 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -135,7 +136,7 @@ public abstract class HysteresisFilter extends Filter
 	{
 		return String.format("@%.2f %s, %.2f %s", searchDistance, getSearchName(), timeThreshold, getTimeName());
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -191,7 +192,6 @@ public abstract class HysteresisFilter extends Filter
 		}
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -203,7 +203,7 @@ public abstract class HysteresisFilter extends Filter
 		setMax(parameters, 0, searchDistance);
 		setMax(parameters, 2, timeThreshold);
 	}
-	
+
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
@@ -258,7 +258,8 @@ public abstract class HysteresisFilter extends Filter
 			case 1:
 				if (peakResults.getCalibration() != null)
 				{
-					myTimeThreshold = (int) Math.round((this.timeThreshold / peakResults.getCalibration().exposureTime));
+					myTimeThreshold = (int) Math
+							.round((this.timeThreshold / peakResults.getCalibration().exposureTime));
 				}
 				else
 					myTimeThreshold = 1;
@@ -375,5 +376,24 @@ public abstract class HysteresisFilter extends Filter
 	public boolean subsetWithFailCount()
 	{
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#newChromosome(double[])
+	 */
+	@Override
+	public Chromosome newChromosome(double[] sequence)
+	{
+		// Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
+		// so add it back
+		double[] parameters = new double[sequence.length];
+		parameters[0] = sequence[0];
+		parameters[1] = searchDistanceMode;
+		parameters[2] = sequence[1];
+		parameters[3] = timeThresholdMode;
+		System.arraycopy(sequence, 2, parameters, 4, sequence.length - 2);
+		return create(parameters);
 	}
 }

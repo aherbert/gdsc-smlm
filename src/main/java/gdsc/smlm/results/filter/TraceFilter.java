@@ -29,6 +29,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class TraceFilter extends Filter
 {
+	static double DEFAULT_DISTANCE_RANGE = 2;
 	static int DEFAULT_TIME_RANGE = 10;
 	
 	@XStreamAsAttribute
@@ -165,7 +166,7 @@ public class TraceFilter extends Filter
 		switch (index)
 		{
 			case 0:
-				return new TraceFilter(updateParameter(d, delta, HysteresisFilter.DEFAULT_ABSOLUTE_DISTANCE_RANGE), t);
+				return new TraceFilter(updateParameter(d, delta, DEFAULT_DISTANCE_RANGE), t);
 			default:
 				return new TraceFilter(d, updateParameter(t, delta, DEFAULT_TIME_RANGE));
 		}
@@ -192,5 +193,39 @@ public class TraceFilter extends Filter
 	{
 		setMax(parameters, 0, d);
 		setMax(parameters, 1, t);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return 2;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		// Ignore the mode parameters
+		return new double[] { d, t };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return new double[] { DEFAULT_DISTANCE_RANGE, DEFAULT_TIME_RANGE };
 	}
 }

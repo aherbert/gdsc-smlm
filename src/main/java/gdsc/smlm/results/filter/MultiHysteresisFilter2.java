@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -416,5 +417,72 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 		parameters[13] = 0;
 		setMax(parameters, 14, strictPrecision + rangePrecision);
 		parameters[15] = 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#newChromosome(double[])
+	 */
+	@Override
+	public Chromosome newChromosome(double[] sequence)
+	{
+		// Override the default Hysteresis filter implementation for speed since this is the filter we
+		// will most likely optimise using the genetic algorithm
+		return new MultiHysteresisFilter2(sequence[0], searchDistanceMode, sequence[1], timeThresholdMode,
+				sequence[2], sequence[3], (float) sequence[4], (float) sequence[5], sequence[6],
+				sequence[7], sequence[8], sequence[9], sequence[10], sequence[11], sequence[12],
+				sequence[13]);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return 14;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		// Ignore the mode parameters
+		return new double[] { searchDistance, timeThreshold, strictSignal, rangeSignal, strictSnr, rangeSnr,
+				strictMinWidth, rangeMinWidth, strictMaxWidth, rangeMaxWidth, strictShift, rangeShift, strictPrecision,
+				rangePrecision };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return new double[] {
+    		getDefaultSearchRange(),
+    		getDefaultTimeRange(),
+    		SignalFilter.DEFAULT_RANGE,
+    		SignalFilter.DEFAULT_RANGE,
+    		SNRFilter.DEFAULT_RANGE,
+    		SNRFilter.DEFAULT_RANGE,
+    		WidthFilter2.DEFAULT_MIN_RANGE,
+    		WidthFilter2.DEFAULT_MIN_RANGE,
+    		WidthFilter.DEFAULT_RANGE,
+    		WidthFilter.DEFAULT_RANGE,
+    		ShiftFilter.DEFAULT_RANGE,
+    		ShiftFilter.DEFAULT_RANGE,
+    		PrecisionFilter.DEFAULT_RANGE,		
+    		PrecisionFilter.DEFAULT_RANGE
+		};		
 	}
 }

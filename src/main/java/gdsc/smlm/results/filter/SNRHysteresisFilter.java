@@ -153,15 +153,8 @@ public class SNRHysteresisFilter extends HysteresisFilter
 		}
 	}
 
-	static double[] defaultRange = new double[]{
-		0,
-		0,
-		0,
-		0,
-		SNRFilter.DEFAULT_RANGE,
-		SNRFilter.DEFAULT_RANGE
-	};
-	
+	static double[] defaultRange = new double[] { 0, 0, 0, 0, SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE };
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -206,9 +199,44 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	public void weakestParameters(double[] parameters)
 	{
 		super.weakestParameters(parameters);
-		
+
 		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold  
 		setMin(parameters, 4, strictSnr);
 		parameters[5] = 0;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	@Override
+	public int length()
+	{
+		return 4;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	@Override
+	public double[] sequence()
+	{
+		// Ignore the mode parameters
+		return new double[] { searchDistance, timeThreshold, strictSnr, range };
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
+	 */
+	@Override
+	public double[] mutationStepRange()
+	{
+		return new double[] { getDefaultSearchRange(), getDefaultTimeRange(), SNRFilter.DEFAULT_RANGE,
+				SNRFilter.DEFAULT_RANGE };
 	}
 }

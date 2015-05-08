@@ -5,9 +5,10 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.FractionClassificationResult;
-import gdsc.smlm.utils.NotImplementedException;
 
 import java.util.List;
+
+import org.apache.commons.math3.util.FastMath;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
@@ -33,6 +34,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	private String name;
 	@XStreamOmitField
 	private String type;
+	@XStreamOmitField
+	private double fitness;
 
 	/**
 	 * Generate the name of the filter using the filter settings
@@ -992,51 +995,78 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#newChromosome(double[])
+	 */
 	@Override
-	public int length()
+	public Chromosome newChromosome(double[] sequence)
 	{
-		throw new NotImplementedException();
+		return create(sequence);
 	}
 
-	@Override
-	public double[] sequence()
-	{
-		throw new NotImplementedException();
-	}
-
-	@Override
-	public double[] mutationStepRange()
-	{
-		throw new NotImplementedException();
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#lowerLimit()
+	 */
 	@Override
 	public double[] lowerLimit()
 	{
-		throw new NotImplementedException();
+		// Set zero as the lower limit
+		return new double[length()];
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#upperLimit()
+	 */
 	@Override
 	public double[] upperLimit()
 	{
-		throw new NotImplementedException();
+		// No need for upper limits on filters
+		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#setFitness(double)
+	 */
 	@Override
 	public void setFitness(double fitness)
 	{
-		throw new NotImplementedException();
+		this.fitness = fitness;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#getFitness()
+	 */
 	@Override
 	public double getFitness()
 	{
-		throw new NotImplementedException();
+		return fitness;
 	}
 
+	/**
+	 * Return the Manhattan (city-block) distance between two chromosomes. This measure is intended to return if the
+	 * sequences are the same (zero distance) or not). It is not intended for use in distance analysis.
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#distance(gdsc.smlm.ga.Chromosome)
+	 */
 	@Override
 	public double distance(Chromosome other)
 	{
-		throw new NotImplementedException();
+		final int n = FastMath.min(length(), other.length());
+		double[] s1 = sequence();
+		double[] s2 = other.sequence();
+		double d = 0;
+		for (int i = 0; i < n; i++)
+			d += Math.abs(s1[i] - s2[i]);
+		return d;
 	}
 }
