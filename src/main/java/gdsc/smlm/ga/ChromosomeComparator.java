@@ -38,12 +38,23 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 	}
 
 	/**
-	 * Sort the list
+	 * Sort the list (highest first)
 	 * 
 	 * @param list
 	 */
 	public static void sort(List<? extends Chromosome> individuals)
 	{
 		Collections.sort(individuals, new ChromosomeComparator());
+	}
+
+	/**
+	 * Sort the list (lowest first)
+	 * 
+	 * @param list
+	 */
+	public static void sortAscending(List<? extends Chromosome> individuals)
+	{
+		Collections.sort(individuals, new ChromosomeComparator());
+		Collections.reverse(individuals);
 	}
 }

@@ -1,8 +1,6 @@
 package gdsc.smlm.ga;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -53,7 +51,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	@Override
 	public List<? extends Chromosome> select(List<? extends Chromosome> individuals)
 	{
-		if (individuals == null || individuals.size() < 2)
+		if (individuals == null || individuals.size() < 3)
 			return individuals;
 		ArrayList<Chromosome> subset = new ArrayList<Chromosome>();
 		subset.addAll(individuals);
