@@ -94,6 +94,6 @@ public class SimpleMutator extends Randomiser implements Mutator
 			}
 		}
 
-		return chromosome.create(sequence);
+		return chromosome.newChromosome(sequence);
 	}
 }

@@ -39,7 +39,7 @@ public interface Chromosome
 	 *            the chromosome sequence (must equal the current length)
 	 * @return A new chromosome with the given sequence
 	 */
-	Chromosome create(double... sequence);
+	Chromosome newChromosome(double[] sequence);
 
 	/**
 	 * Get the range for mutation at each position in the sequence. This defines how far each position in the sequence

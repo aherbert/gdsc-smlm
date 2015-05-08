@@ -126,8 +126,8 @@ public class SimpleRecombiner extends Randomiser implements Recombiner
 		// If the first swap position was at the start then reverse them.
 		Chromosome c1 = (positions[0] == 0) ? chromosome2 : chromosome1;
 		Chromosome c2 = (positions[0] == 0) ? chromosome1 : chromosome2;
-		c1 = c1.create(n1);
-		c2 = c2.create(n2);
+		c1 = c1.newChromosome(n1);
+		c2 = c2.newChromosome(n2);
 
 		// Ensure the child order is random
 		return (ran.nextDouble() < 0.5) ? new ChromosomePair(c1, c2) : new ChromosomePair(c2, c1);
