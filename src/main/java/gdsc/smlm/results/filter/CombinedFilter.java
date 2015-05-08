@@ -197,7 +197,7 @@ public abstract class CombinedFilter extends Filter
 	{
 		return filter1.subsetWithFailCount() && filter2.subsetWithFailCount();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -230,12 +230,31 @@ public abstract class CombinedFilter extends Filter
 	{
 		return combine(filter1.mutationStepRange(), filter2.mutationStepRange());
 	}
-	
+
 	private static double[] combine(double[] s1, double[] s2)
 	{
 		double[] s = new double[s1.length + s2.length];
 		System.arraycopy(s1, 0, s, 0, s1.length);
 		System.arraycopy(s2, 0, s, s1.length, s2.length);
+		return s;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getChromosomeParameters()
+	 */
+	public int[] getChromosomeParameters()
+	{
+		int[] s1 = filter1.getChromosomeParameters();
+		int[] s2 = filter2.getChromosomeParameters();
+		int[] s = new int[s1.length + s2.length];
+		System.arraycopy(s1, 0, s, 0, s1.length);
+		// Copy the next array but offset the index by the number of parameters in filter 1
+		// so that getParameterName(int) works OK
+		final int n1 = filter1.getNumberOfParameters();
+		for (int i = 0, j = s1.length; i < s2.length; i++, j++)
+			s[j] = s2[i] + n1;
 		return s;
 	}
 }

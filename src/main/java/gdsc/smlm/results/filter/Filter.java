@@ -1,6 +1,7 @@
 package gdsc.smlm.results.filter;
 
 import gdsc.smlm.ga.Chromosome;
+import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.match.ClassificationResult;
@@ -1068,5 +1069,17 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		for (int i = 0; i < n; i++)
 			d += Math.abs(s1[i] - s2[i]);
 		return d;
+	}
+
+	/**
+	 * Get the indices of the parameters that are included in the Chromosome interface. This can be used to look up the
+	 * name of the parameter using {@link #getParameterName(int)}.
+	 * 
+	 * @return The indices of the parameters that are included in the Chromosome interface
+	 */
+	public int[] getChromosomeParameters()
+	{
+		// Assume all the parameters are included in the Chromosome
+		return Utils.newArray(getNumberOfParameters(), 0, 1);
 	}
 }

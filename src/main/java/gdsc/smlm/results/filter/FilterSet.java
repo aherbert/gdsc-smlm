@@ -32,6 +32,8 @@ public class FilterSet
 	private Filter weakest;
 	@XStreamOmitField
 	private boolean initialisedWeakest;
+	@XStreamOmitField
+	private int allSameType = 0;
 
 	public FilterSet(String name, List<Filter> filters)
 	{
@@ -139,32 +141,42 @@ public class FilterSet
 	{
 		if (!allSameType())
 			return null;
-		
+
 		// Initialise the parameters
 		final Filter f1 = filters.get(0);
 		double[] parameters = new double[f1.getNumberOfParameters()];
-		for (int i=0; i<parameters.length; i++)
+		for (int i = 0; i < parameters.length; i++)
 		{
 			parameters[i] = f1.getParameterValue(i);
 		}
-		
+
 		// Find the weakest
 		for (Filter f : filters)
 		{
 			f.weakestParameters(parameters);
 		}
-		
+
 		return f1.create(parameters);
 	}
-	
+
 	/**
 	 * @return True if all the filters are the same type
 	 */
 	public boolean allSameType()
 	{
+		if (allSameType == 0)
+			allSameType = checkAllSameType();
+		return (allSameType == 1);
+	}
+
+	/**
+	 * @return 1 if all the filters are the same type, -1 otherwise
+	 */
+	private int checkAllSameType()
+	{
 		if (size() == 0)
-			return false;
-		
+			return -1;
+
 		// Check for the same type
 		final String type = filters.get(0).getType();
 		for (Filter f : filters)
@@ -172,8 +184,8 @@ public class FilterSet
 			// Use the != since the Strings should be immutable
 			//if (f.getType() != type)
 			if (!f.getType().equals(type))
-				return false;
+				return -1;
 		}
-		return true;		
+		return 1;
 	}
 }
