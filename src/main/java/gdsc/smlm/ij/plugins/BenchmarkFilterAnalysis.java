@@ -1115,8 +1115,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private int run(FilterSet filterSet, int setNumber, List<MemoryPeakResults> resultsList, final int count,
 			final int total)
 	{
-		double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
-		double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
 		int originalSize = filterSet.size();
 
 		// Get the weakest filter and subset the results if possible
@@ -1203,6 +1201,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
 
+		double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
+		double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
 		Filter maxFilter = null, criteriaFilter = null;
 		double maxScore = -1;
 		double maxCriteria = 0;
