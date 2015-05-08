@@ -111,36 +111,35 @@ public class Population
 		int fails = 0;
 		int target = populationSize - individuals.size();
 		ArrayList<Chromosome> newIndividuals = new ArrayList<Chromosome>(target);
+		int previousSize = -1;
 		while (newIndividuals.size() < target && fails < failureLimit)
 		{
+			previousSize = newIndividuals.size();
+			
 			// Select two individuals for recombination
 			ChromosomePair pair = selectionStrategy.next();
 			Chromosome[] children = recombiner.cross(pair.c1, pair.c2);
-			if (children == null || children.length == 0)
+			if (children != null && children.length != 0)
 			{
+				// New children have been generated so mutate them
+				for (int i = 0; i < children.length && newIndividuals.size() < target; i++)
+				{
+					Chromosome c = mutator.mutate(children[i]);
+					if (c == null)
+						continue;
+
+					// Ignore duplicates
+					if (isDuplicate(newIndividuals, c))
+						continue;
+
+					newIndividuals.add(c);
+				}
+			}
+
+			if (previousSize == newIndividuals.size())
 				fails++;
-				continue;
-			}
-
-			// New children have been generated so mutate them
-			for (int i = 0; i < children.length && newIndividuals.size() < target; i++)
-			{
-				Chromosome c = mutator.mutate(children[i]);
-				if (c == null)
-				{
-					fails++;
-					continue;
-				}
-
-				// Ignore duplicates
-				if (isDuplicate(newIndividuals, c))
-				{
-					fails++;
-					continue;
-				}
-
-				newIndividuals.add(c);
-			}
+			else
+				fails = 0;
 		}
 		selectionStrategy.finishBreeding();
 

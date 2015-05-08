@@ -94,9 +94,11 @@ public class SimpleMutator extends Randomiser implements Mutator
 			//final double[] min = (lower == null) ? chromosome.lowerLimit() : lower;
 			//final double[] max = (upper == null) ? chromosome.upperLimit() : upper;
 
+			// Bounds are inclusive so subtract 1
+			final int upper = chromosome.length() - 1;
 			while (count-- > 0)
 			{
-				int i = random.nextInt(0, chromosome.length());
+				int i = random.nextInt(0, upper);
 				sequence[i] = random.nextGaussian(sequence[i], step[i]);
 				// Check limits
 				if (min != null)

@@ -93,10 +93,13 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 		}
 		else
 		{
-			first = random.nextInt(0, individuals.size());
-			second = random.nextInt(0, individuals.size());
-			while (second != first)
-				second = random.nextInt(0, individuals.size());
+			// Bounds are inclusive so subtract 1
+			final int upper = individuals.size() - 1;
+			first = random.nextInt(0, upper);
+			second = random.nextInt(0, upper);
+			// Avoid crossover with the same parent
+			while (second == first)
+				second = random.nextInt(0, upper);
 		}
 		return new ChromosomePair(individuals.get(first), individuals.get(second));
 	}

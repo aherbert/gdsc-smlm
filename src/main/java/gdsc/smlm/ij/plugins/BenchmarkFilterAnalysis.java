@@ -116,8 +116,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private static boolean evolve = false;
 
 	private static int populationSize = 500;
-	private static int failureLimit = 10;
+	private static int failureLimit = 5;
 	private static double tolerance = 1e-4;
+	private static int convergedCount = 2;
 	private static double crossoverRate = 0.2;
 	private static double meanChildren = 2;
 	private static double mutationRate = 0.1;
@@ -773,9 +774,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		for (FilterSet filterSet : filterSets)
 		{
 			setNumber++;
-			count = run(filterSet, setNumber, resultsList, count, total);
-			if (count < 0)
+			if (run(filterSet, setNumber, resultsList, count, total) < 0)
 				break;
+			count += filterSet.size();
 		}
 		stopTimer();
 		IJ.showProgress(1);
@@ -1111,12 +1112,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		return sb.toString();
 	}
 
-	private int run(FilterSet filterSet, int setNumber, List<MemoryPeakResults> resultsList, int count, final int total)
+	private int run(FilterSet filterSet, int setNumber, List<MemoryPeakResults> resultsList, final int count,
+			final int total)
 	{
 		double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
 		double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
-		int i = 0;
-		List<MemoryPeakResults> resultsListToScore = resultsList;
+		int originalSize = filterSet.size();
 
 		// Get the weakest filter and subset the results if possible
 		final boolean allSameType = filterSet.allSameType();
@@ -1132,13 +1133,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 
 			Filter filter = filterSet.getFilters().get(0);
 			double[] stepSize = filter.mutationStepRange().clone();
+			double[] upper = filter.upperLimit().clone();
 			// Ask the user for the mutation step parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
 			gd.addMessage("Configure the genetic algorithm for [" + setNumber + "] " + filterSet.getName());
 			gd.addNumericField(prefix + "Population_size", populationSize, 0);
 			gd.addNumericField(prefix + "Failure_limit", failureLimit, 0);
-			gd.addNumericField(prefix + "Tolerance", tolerance, -4);
+			gd.addNumericField(prefix + "Tolerance", tolerance, -1);
+			gd.addNumericField(prefix + "Converged_count", convergedCount, 0);
 			gd.addSlider(prefix + "Mutation_rate", 0.05, 1, mutationRate);
 			gd.addSlider(prefix + "Crossover_rate", 0.05, 1, crossoverRate);
 			gd.addSlider(prefix + "Mean_children", 0.05, 3, meanChildren);
@@ -1148,7 +1151,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			gd.addMessage("Configure the step size for each parameter");
 			int[] indices = filter.getChromosomeParameters();
 			for (int j = 0; j < indices.length; j++)
-				gd.addNumericField(getDialogName(prefix, filter.getParameterName(indices[j])), stepSize[j], 2);
+				gd.addNumericField(getDialogName(prefix, filter.getParameterName(indices[j])), stepSize[j] * delta, 2);
 
 			gd.showDialog();
 
@@ -1161,6 +1164,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 					populationSize = 10;
 				failureLimit = (int) Math.abs(gd.getNextNumber());
 				tolerance = Math.abs(gd.getNextNumber());
+				convergedCount = (int) gd.getNextNumber(); // Allow negatives
 				mutationRate = Math.abs(gd.getNextNumber());
 				crossoverRate = Math.abs(gd.getNextNumber());
 				meanChildren = Math.abs(gd.getNextNumber());
@@ -1173,21 +1177,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 				// Create the genetic algorithm
 				RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
 				SimpleMutator mutator = new SimpleMutator(random, mutationRate);
-				// Override the settings with the step length, a min of zero and no max
-				mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], null);
+				// Override the settings with the step length, a min of zero and the configured upper
+				mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
 				Recombiner recombiner = new SimpleRecombiner(random, crossoverRate, meanChildren);
 				SelectionStrategy selectionStrategy;
 				if (rampedSelection)
 					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction);
 				else
 					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction);
-				ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3);
-				ga_population = new Population(null); //filterSet.getFilters());
+				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
+				ga_population = new Population(filterSet.getFilters());
 				ga_population.setPopulationSize(populationSize);
 				ga_population.setFailureLimit(failureLimit);
 
 				// Evolve
 				ga_statusPrefix = "Evolving [" + setNumber + "] " + filterSet.getName() + " ... ";
+				ga_iteration = 0;
 				updateGAStatus();
 				ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
@@ -1205,17 +1210,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		initialiseScoring(filterSet);
 
 		// Score the filters and report the results if configured.
-
+		// Note that count and total may have changed after running the genetic algorithm
+		// so use fractional progress.
+		double totalProgress = (double) count / total;
+		double stepSize = ((double) originalSize / total) / filterSet.size();
+		int i = 0;
 		for (Filter filter : filterSet.getFilters())
 		{
-			if (count++ % 16 == 0)
+			if (i % 16 == 0)
 			{
-				IJ.showProgress(count, total);
+				IJ.showProgress(totalProgress + i * stepSize);
 				if (Utils.isInterrupted())
 					return -1;
 			}
 
-			final double[] result = run(filter, resultsListToScore, ga_subset, ga_tn, ga_fn);
+			final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn);
 			final double score = result[0];
 			final double criteria = result[1];
 
@@ -1238,8 +1247,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			if (!isHeadless)
 			{
 				xValues[i] = filter.getNumericalValue();
-				yValues[i++] = score;
+				yValues[i] = score;
 			}
+			i++;
 		}
 
 		// We may have no filters that pass the criteria
@@ -1254,7 +1264,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 				else
 					Utils.log("Warning: Filter does not pass the criteria: %s", type);
 			}
-			return count;
+			return 0;
 		}
 
 		boolean allowDuplicates = true; // This could be an option?
@@ -1348,7 +1358,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			}
 		}
 
-		return count;
+		return 0;
 	}
 
 	private String getDialogName(String prefix, String parameterName)
@@ -1879,25 +1889,36 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	 */
 	private class InterruptChecker extends ToleranceChecker
 	{
-		public InterruptChecker(double relative, double absolute)
+		final int convergedCount;
+		int count = 0;
+
+		public InterruptChecker(double relative, double absolute, int convergedCount)
 		{
 			super(relative, absolute);
+			this.convergedCount = convergedCount;
 		}
 
 		@Override
 		public boolean converged(Chromosome previous, Chromosome current)
 		{
+			if (super.converged(previous, current))
+				count++;
+			else
+				count = 0;
+			// Allow no convergence except when escape is pressed
+			if (convergedCount >= 0 && count > convergedCount)
+				return true;
 			if (IJ.escapePressed())
 			{
 				Utils.log("STOPPED " + ga_statusPrefix);
-				IJ.resetEscape(); // Allow the plugin to continue
+				IJ.resetEscape(); // Allow the plugin to continue processing
+				return true;
 			}
-			return super.converged(previous, current);
+			return false;
 		}
 	}
 
 	// Used to implement the FitnessFunction interface 
-	private ToleranceChecker ga_checker;
 	private String ga_statusPrefix;
 	private Population ga_population;
 
@@ -1906,6 +1927,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private List<MemoryPeakResults> ga_resultsListToScore = null;
 	private double ga_tn, ga_fn;
 	private boolean ga_subset;
+	private int ga_count, ga_total, ga_iteration;
 
 	/*
 	 * (non-Javadoc)
@@ -1915,6 +1937,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	@Override
 	public void initialise(List<? extends Chromosome> individuals)
 	{
+		ga_count = 0;
+		ga_total = individuals.size();
+		ga_iteration++;
 		updateGAStatus();
 		initialiseScoring(new FilterSet(populationToFilters(individuals)));
 	}
@@ -1977,6 +2002,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	@Override
 	public double fitness(Chromosome chromosome)
 	{
+		if (ga_count++ % 16 == 0)
+		{
+			IJ.showProgress(ga_count, ga_total);
+		}
+
 		Filter filter = (Filter) chromosome;
 		FractionClassificationResult r;
 		if (ga_subset)
@@ -2015,11 +2045,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			r = scoreFilter(filter, ga_resultsListToScore);
 
 		String text = createResult(filter, r);
-		gaWindow.append(text + "\t" + ga_checker.getIterations());
+		gaWindow.append(text + "\t" + ga_iteration);
 	}
 
 	private void updateGAStatus()
 	{
-		IJ.showStatus(ga_statusPrefix + ga_checker.getIterations());
+		IJ.showStatus(ga_statusPrefix + ga_iteration);
 	}
 }
