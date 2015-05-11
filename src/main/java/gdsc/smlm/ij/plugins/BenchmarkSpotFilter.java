@@ -425,6 +425,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		final ImageStack stack = imp.getImageStack();
+		
+		// Clear old results to free memory
+		if (filterResults != null)
+			filterResults.clear();
+		filterResults = null;
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();

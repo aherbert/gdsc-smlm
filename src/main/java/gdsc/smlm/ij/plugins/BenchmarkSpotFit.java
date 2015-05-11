@@ -520,6 +520,11 @@ public class BenchmarkSpotFit implements PlugIn
 
 		final ImageStack stack = imp.getImageStack();
 
+		// Clear old results to free memory
+		if (fitResults != null)
+			fitResults.clear();
+		fitResults = null;
+
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
