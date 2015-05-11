@@ -38,6 +38,10 @@ import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
 import java.awt.Rectangle;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,6 +65,8 @@ public class BenchmarkFit implements PlugIn
 	private static boolean backgroundFitting = true;
 	private static boolean signalFitting = true;
 	private static boolean showHistograms = false;
+	private static boolean saveRawData = false;
+	private static String rawDataDirectory = "";
 	private static int histogramBins = 100;
 
 	private static TextWindow summaryTable = null, analysisTable = null;
@@ -161,7 +167,7 @@ public class BenchmarkFit implements PlugIn
 			this.xy = getStartPoints();
 
 			for (int i = 0; i < stats.length; i++)
-				stats[i] = (showHistograms) ? new StoredDataStatistics() : new Statistics();
+				stats[i] = (showHistograms || saveRawData) ? new StoredDataStatistics() : new Statistics();
 			sa = getSa();
 
 			createBounds();
@@ -484,6 +490,7 @@ public class BenchmarkFit implements PlugIn
 		gd.addMessage("Signal fitting can be disabled for " + FitFunction.FIXED.toString() + " function");
 		gd.addCheckbox("Signal_fitting", signalFitting);
 		gd.addCheckbox("Show_histograms", showHistograms);
+		gd.addCheckbox("Save_raw_data", saveRawData);
 
 		gd.showDialog();
 
@@ -500,6 +507,7 @@ public class BenchmarkFit implements PlugIn
 		backgroundFitting = gd.getNextBoolean();
 		signalFitting = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
+		saveRawData = gd.getNextBoolean();
 
 		if (!comFitting && !offsetFitting)
 		{
@@ -708,7 +716,61 @@ public class BenchmarkFit implements PlugIn
 			}
 		}
 
+		if (saveRawData)
+		{
+			String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
+			if (dir != null)
+				saveData(stats, dir);
+		}
+
 		IJ.showStatus("");
+	}
+
+	private void saveData(Statistics[] stats, String dir)
+	{
+		rawDataDirectory = dir;
+		for (int i = 0; i < NAMES.length; i++)
+		{
+			saveStatistics((StoredDataStatistics) stats[i], NAMES[i]);
+		}
+	}
+
+	private void saveStatistics(StoredDataStatistics stats, String title)
+	{
+		String filename = rawDataDirectory + title.replace(" ", "_") + ".txt";
+
+		BufferedWriter out = null;
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(filename);
+			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
+			//out.write(title);
+			//out.newLine();
+			double[] data = stats.getValues();
+			Arrays.sort(data);
+			for (double d : data)
+			{
+				//out.write(Utils.rounded(d, 4)); // rounded
+				out.write(Double.toString(d));
+				out.newLine();
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		finally
+		{
+			if (out != null)
+			{
+				try
+				{
+					out.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
 	}
 
 	private void put(BlockingQueue<Integer> jobs, int i)
@@ -851,7 +913,7 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.b2)).append("\t");
-		
+
 		// Compute the noise
 		double noise = benchmarkParameters.b2;
 		if (benchmarkParameters.emCCD)
@@ -860,10 +922,10 @@ public class BenchmarkFit implements PlugIn
 			//final double b2 = backgroundVariance + readVariance
 			//                = benchmarkParameters.getBackground() + readVariance
 			// This should be applied only to the background variance.
-			final double readVariance = noise - benchmarkParameters.getBackground(); 
+			final double readVariance = noise - benchmarkParameters.getBackground();
 			noise = benchmarkParameters.getBackground() * 2 + readVariance;
 		}
-		
+
 		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(noise))).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append("\t");
