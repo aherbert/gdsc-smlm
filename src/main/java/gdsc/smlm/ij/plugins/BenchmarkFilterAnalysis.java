@@ -97,6 +97,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private static boolean showSummaryTable = true;
 	private static boolean clearTables = false;
 	private static String filterFilename = "";
+	private static String filterSetFilename = "";
 	private static int summaryTopN = 0;
 	private static double summaryDepth = 500;
 	private static int plotTopN = 0;
@@ -119,11 +120,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private static int failureLimit = 5;
 	private static double tolerance = 1e-4;
 	private static int convergedCount = 2;
-	private static double crossoverRate = 0.2;
+	private static double crossoverRate = 0.5;
 	private static double meanChildren = 2;
-	private static double mutationRate = 0.1;
+	private static double mutationRate = 0.5;
 	private static double selectionFraction = 0.2;
-	private static boolean rampedSelection = false;
+	private static boolean rampedSelection = true;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2;
@@ -1196,6 +1197,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 
 				// Now update the filter set for final assessment
 				filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
+
+				// Option to save the filters
+				saveFilterSet(filterSet, setNumber);
 			}
 		}
 
@@ -1624,46 +1628,77 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private void saveFilter(Filter filter)
 	{
 		// Save the filter to file
-		String filename = Utils.getFilename("Best_Filter_File", filterFilename);
+		String filename = getFilename("Best_Filter_File", filterFilename);
 		if (filename != null)
 		{
+			filterFilename = filename;
+			
 			List<Filter> filters = new LinkedList<Filter>();
 			filters.add(filter);
-			FilterSet set = new FilterSet(filter.getName(), filters);
+			FilterSet filterSet = new FilterSet(filter.getName(), filters);
 			List<FilterSet> list = new LinkedList<FilterSet>();
-			list.add(set);
-
-			OutputStreamWriter out = null;
-			try
+			list.add(filterSet);
+			saveFilterSet(filterSet, filename);
+		}
+	}
+	
+	private static String getFilename(String title, String filename)
+	{
+		filename = getFilename(title, filename);
+		// Use XML extension
+		if (filename != null)
+			filename = Utils.replaceExtension(filename, ".xml");
+		return filename;
+	}
+	
+	private static void saveFilterSet(FilterSet filterSet, String filename)
+	{
+		OutputStreamWriter out = null;
+		try
+		{
+			List<FilterSet> list = new LinkedList<FilterSet>();
+			list.add(filterSet);
+			FileOutputStream fos = new FileOutputStream(filename);
+			out = new OutputStreamWriter(fos, "UTF-8");
+			out.write(XmlUtils.prettyPrintXml(XmlUtils.toXML(list)));
+		}
+		catch (Exception e)
+		{
+			IJ.log("Unable to save the filter sets to file: " + e.getMessage());
+		}
+		finally
+		{
+			if (out != null)
 			{
-				filterFilename = filename;
-				// Append .xml if no suffix
-				if (filename.lastIndexOf('.') < 0)
-					filterFilename += ".xml";
-
-				FileOutputStream fos = new FileOutputStream(filterFilename);
-				out = new OutputStreamWriter(fos, "UTF-8");
-				out.write(XmlUtils.prettyPrintXml(XmlUtils.toXML(list)));
-			}
-			catch (Exception e)
-			{
-				IJ.log("Unable to save the filter sets to file: " + e.getMessage());
-			}
-			finally
-			{
-				if (out != null)
+				try
 				{
-					try
-					{
-						out.close();
-					}
-					catch (IOException e)
-					{
-						// Ignore
-					}
+					out.close();
+				}
+				catch (IOException e)
+				{
+					// Ignore
 				}
 			}
 		}
+	}
+
+	/**
+	 * Save the filter set to a file prompted from the user  
+	 * @param filterSet
+	 * @param setNumber
+	 */
+	private void saveFilterSet(FilterSet filterSet, int setNumber)
+	{
+		stopTimer();
+
+		String filename = Utils.getFilename("Filter_set_" + setNumber, filterSetFilename);
+		if (filename != null)
+		{
+			filterSetFilename = filename;
+			saveFilterSet(filterSet, filename);
+		}
+		
+		startTimer();
 	}
 
 	/**
