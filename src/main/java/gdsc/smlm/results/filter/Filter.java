@@ -1062,6 +1062,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	@Override
 	public double distance(Chromosome other)
 	{
+		// NOTE: If the distance is required for a certain type of analysis then this could be done
+		// using injection of an interface for calculating the distance.
+
 		final int n = FastMath.min(length(), other.length());
 		double[] s1 = sequence();
 		double[] s2 = other.sequence();
@@ -1069,6 +1072,25 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		for (int i = 0; i < n; i++)
 			d += Math.abs(s1[i] - s2[i]);
 		return d;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#equals(gdsc.smlm.ga.Chromosome)
+	 */
+	@Override
+	public boolean equals(Chromosome other)
+	{
+		if (length() != other.length())
+			return false;
+		final int n = length();
+		double[] s1 = sequence();
+		double[] s2 = other.sequence();
+		for (int i = 0; i < n; i++)
+			if (s1[i] != s2[i])
+				return false;
+		return true;
 	}
 
 	/**

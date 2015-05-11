@@ -88,4 +88,11 @@ public interface Chromosome
 	 * @return the distance (zero is a match)
 	 */
 	double distance(Chromosome other);
+
+	/**
+	 * Calculate if equal to another chromosome
+	 * @param other the other chromosome
+	 * @return true if the same
+	 */
+	boolean equals(Chromosome other);
 }

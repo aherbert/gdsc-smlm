@@ -115,7 +115,7 @@ public class Population
 		while (newIndividuals.size() < target && fails < failureLimit)
 		{
 			previousSize = newIndividuals.size();
-			
+
 			// Select two individuals for recombination
 			ChromosomePair pair = selectionStrategy.next();
 			Chromosome[] children = recombiner.cross(pair.c1, pair.c2);
@@ -159,11 +159,30 @@ public class Population
 	 */
 	private boolean isDuplicate(ArrayList<? extends Chromosome> newIndividuals, Chromosome c)
 	{
+		final double[] s = c.sequence();
 		for (Chromosome i : this.individuals)
-			if (i.distance(c) == 0)
+			if (match(i, s))
 				return true;
 		for (Chromosome i : newIndividuals)
-			if (i.distance(c) == 0)
+			if (match(i, s))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Check if a chromosome matches the sequence
+	 * 
+	 * @param c
+	 *            The chromosome
+	 * @param s
+	 *            The sequence
+	 * @return True if a match
+	 */
+	private boolean match(Chromosome c, double[] s)
+	{
+		final double[] s2 = c.sequence();
+		for (int i = 0; i < s.length; i++)
+			if (s[i] == s2[i])
 				return true;
 		return false;
 	}
