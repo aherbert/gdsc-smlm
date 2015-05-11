@@ -182,9 +182,9 @@ public class Population
 	{
 		final double[] s2 = c.sequence();
 		for (int i = 0; i < s.length; i++)
-			if (s[i] == s2[i])
-				return true;
-		return false;
+			if (s[i] != s2[i])
+				return false;
+		return true;
 	}
 
 	/**
