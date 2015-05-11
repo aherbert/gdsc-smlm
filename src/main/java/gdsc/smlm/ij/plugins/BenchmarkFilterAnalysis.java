@@ -120,9 +120,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private static int failureLimit = 5;
 	private static double tolerance = 1e-4;
 	private static int convergedCount = 2;
-	private static double crossoverRate = 0.5;
+	private static double crossoverRate = 1;
 	private static double meanChildren = 2;
-	private static double mutationRate = 0.5;
+	private static double mutationRate = 1;
 	private static double selectionFraction = 0.2;
 	private static boolean rampedSelection = true;
 
