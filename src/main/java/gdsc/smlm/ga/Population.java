@@ -108,32 +108,43 @@ public class Population
 		if (individuals.size() >= populationSize)
 			return;
 
-		int fails = 0;
 		ArrayList<Chromosome> newIndividuals = new ArrayList<Chromosome>(populationSize - individuals.size());
 
 		// Check for a minimum population size & mutate the individuals to achieve it.
 		// This allows a seed population of 1 to evolve.
 		final int minSize = Math.max(2, individuals.get(0).length());
 		int target = minSize - individuals.size();
-		int next = 0;
-		while (newIndividuals.size() < target && fails < failureLimit)
+		if (target > 0)
 		{
-			Chromosome c = mutator.mutate(individuals.get(next++ % individuals.size()));
-			if (c != null && !isDuplicate(newIndividuals, c))
+			int next = 0;
+			int fails = 0;
+			while (newIndividuals.size() < target && fails < failureLimit)
 			{
-				newIndividuals.add(c);
-				fails = 0;
+				Chromosome c = mutator.mutate(individuals.get(next++ % individuals.size()));
+				if (c != null && !isDuplicate(newIndividuals, c))
+				{
+					newIndividuals.add(c);
+					fails = 0;
+				}
+				else
+				{
+					fails++;
+				}
 			}
-			else
-			{
-				fails++;
-			}
+
+			// Combine the lists
+			newIndividuals.addAll(individuals);
+			individuals = newIndividuals;
+
+			if (individuals.size() < 2)
+				return; // Failed to mutate anything to achieve a breeding population
 		}
 
 		// Now breed the population
 		selectionStrategy.initialiseBreeding(individuals);
 		target = populationSize - individuals.size();
 		int previousSize = -1;
+		int fails = 0;
 		while (newIndividuals.size() < target && fails < failureLimit)
 		{
 			previousSize = newIndividuals.size();
@@ -219,7 +230,7 @@ public class Population
 	{
 		Chromosome best = null;
 		double max = Double.NEGATIVE_INFINITY;
-		
+
 		// Subset only those with no fitness score (the others must be unchanged)
 		ArrayList<Chromosome> subset = new ArrayList<Chromosome>(individuals.size());
 		for (Chromosome c : individuals)
@@ -248,7 +259,7 @@ public class Population
 			}
 		}
 		fitnessFunction.shutdown();
-		
+
 		return best;
 	}
 

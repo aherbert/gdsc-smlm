@@ -128,7 +128,10 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 	public void initialiseBreeding(List<? extends Chromosome> individuals)
 	{
 		if (individuals != null && individuals.size() < 2)
+		{
 			individuals = null;
+			return;
+		}
 		this.sorted = new ArrayList<Chromosome>(individuals);
 		ChromosomeComparator.sort(this.sorted);
 		n = 0;
