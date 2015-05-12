@@ -20,8 +20,8 @@ public class InvalidPopulationSize extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
-	public InvalidPopulationSize()
+	public InvalidPopulationSize(int size, int minSize)
 	{
-		super("Population size must be at least 2");
+		super("Population size (" + size + ") must be at least " + minSize);
 	}
 }

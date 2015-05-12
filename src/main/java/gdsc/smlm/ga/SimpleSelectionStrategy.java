@@ -42,7 +42,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 
 	/**
 	 * Select the top individuals using the configured fraction. The resulting subset will be at least size 2 (unless
-	 * the input is smaller).
+	 * the input is smaller or there are not enough valid individuals (fitness above zero)).
 	 * 
 	 * @param individuals
 	 * @return the subset
@@ -51,10 +51,15 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	@Override
 	public List<? extends Chromosome> select(List<? extends Chromosome> individuals)
 	{
-		if (individuals == null || individuals.size() < 3)
+		if (individuals == null || individuals.size() < 2)
 			return individuals;
 		ArrayList<Chromosome> subset = new ArrayList<Chromosome>();
-		subset.addAll(individuals);
+		// Add only those with a fitness score
+		for (Chromosome c : individuals)
+			if (c.getFitness() > 0)
+				subset.add(c);
+		if (subset.size() < 3)
+			return subset;
 		ChromosomeComparator.sort(subset);
 		int size = (int) Math.round(subset.size() * fraction);
 		if (size < 2)
@@ -70,7 +75,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	@Override
 	public void initialiseBreeding(List<? extends Chromosome> individuals)
 	{
-		if (individuals != null && individuals.size() == 1)
+		if (individuals != null && individuals.size() < 2)
 			individuals = null;
 		this.individuals = individuals;
 	}

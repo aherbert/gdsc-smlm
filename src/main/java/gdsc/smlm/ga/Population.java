@@ -42,15 +42,15 @@ public class Population
 	public Population(List<? extends Chromosome> individuals)
 	{
 		if (individuals == null)
-			throw new InvalidPopulationSize();
+			throw new InvalidPopulationSize(0, 1);
 		checkSize(individuals.size());
 		this.individuals = individuals;
 	}
 
 	private void checkSize(int size)
 	{
-		if (size < 2)
-			throw new InvalidPopulationSize();
+		if (size < 1)
+			throw new InvalidPopulationSize(0, 1);
 	}
 
 	/**
@@ -66,7 +66,8 @@ public class Population
 	 * <p>
 	 * The population will grow until the desired population size by recombination of individual pairs chosen from the
 	 * population by the selection strategy. Child sequences will be subject to mutation. The fitness of all the
-	 * individuals in the new population is evaluated and convergence checked for the fittest individual.
+	 * individuals in the new population is evaluated and convergence checked for the fittest individual. If the initial
+	 * population is small (<2 or <Chromosome.length()) then mutation will be used to expand it before recombination.
 	 * <p>
 	 * The process of grow, evaluate, select is repeated until convergence.
 	 * <p>
@@ -107,10 +108,31 @@ public class Population
 		if (individuals.size() >= populationSize)
 			return;
 
-		selectionStrategy.initialiseBreeding(individuals);
 		int fails = 0;
-		int target = populationSize - individuals.size();
-		ArrayList<Chromosome> newIndividuals = new ArrayList<Chromosome>(target);
+		ArrayList<Chromosome> newIndividuals = new ArrayList<Chromosome>(populationSize - individuals.size());
+
+		// Check for a minimum population size & mutate the individuals to achieve it.
+		// This allows a seed population of 1 to evolve.
+		final int minSize = Math.max(2, individuals.get(0).length());
+		int target = minSize - individuals.size();
+		int next = 0;
+		while (newIndividuals.size() < target && fails < failureLimit)
+		{
+			Chromosome c = mutator.mutate(individuals.get(next++ % individuals.size()));
+			if (c != null && !isDuplicate(newIndividuals, c))
+			{
+				newIndividuals.add(c);
+				fails = 0;
+			}
+			else
+			{
+				fails++;
+			}
+		}
+
+		// Now breed the population
+		selectionStrategy.initialiseBreeding(individuals);
+		target = populationSize - individuals.size();
 		int previousSize = -1;
 		while (newIndividuals.size() < target && fails < failureLimit)
 		{
@@ -195,9 +217,26 @@ public class Population
 	 */
 	private Chromosome evaluateFitness(FitnessFunction fitnessFunction)
 	{
-		fitnessFunction.initialise(individuals);
 		Chromosome best = null;
 		double max = Double.NEGATIVE_INFINITY;
+		
+		// Subset only those with no fitness score (the others must be unchanged)
+		ArrayList<Chromosome> subset = new ArrayList<Chromosome>(individuals.size());
+		for (Chromosome c : individuals)
+		{
+			final double f = c.getFitness();
+			if (f == 0)
+			{
+				subset.add(c);
+			}
+			else if (max < f)
+			{
+				max = f;
+				best = c;
+			}
+		}
+
+		fitnessFunction.initialise(subset);
 		for (Chromosome c : individuals)
 		{
 			final double f = fitnessFunction.fitness(c);
@@ -209,6 +248,7 @@ public class Population
 			}
 		}
 		fitnessFunction.shutdown();
+		
 		return best;
 	}
 
