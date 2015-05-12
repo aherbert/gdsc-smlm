@@ -125,6 +125,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private static double mutationRate = 1;
 	private static double selectionFraction = 0.2;
 	private static boolean rampedSelection = true;
+	private static boolean strictFitness = true;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2;
@@ -1146,6 +1147,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			gd.addSlider(prefix + "Mean_children", 0.05, 3, meanChildren);
 			gd.addSlider(prefix + "Selection_fraction", 0.05, 0.5, selectionFraction);
 			gd.addCheckbox(prefix + "Ramped_selection", rampedSelection);
+			gd.addCheckbox(prefix + "Strict_fitness", strictFitness);
 
 			gd.addMessage("Configure the step size for each parameter");
 			int[] indices = filter.getChromosomeParameters();
@@ -1632,7 +1634,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		if (filename != null)
 		{
 			filterFilename = filename;
-			
+
 			List<Filter> filters = new LinkedList<Filter>();
 			filters.add(filter);
 			FilterSet filterSet = new FilterSet(filter.getName(), filters);
@@ -1641,7 +1643,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			saveFilterSet(filterSet, filename);
 		}
 	}
-	
+
 	private static String getFilename(String title, String filename)
 	{
 		filename = getFilename(title, filename);
@@ -1650,7 +1652,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			filename = Utils.replaceExtension(filename, ".xml");
 		return filename;
 	}
-	
+
 	private static void saveFilterSet(FilterSet filterSet, String filename)
 	{
 		OutputStreamWriter out = null;
@@ -1683,7 +1685,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	}
 
 	/**
-	 * Save the filter set to a file prompted from the user  
+	 * Save the filter set to a file prompted from the user
+	 * 
 	 * @param filterSet
 	 * @param setNumber
 	 */
@@ -1697,7 +1700,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 			filterSetFilename = filename;
 			saveFilterSet(filterSet, filename);
 		}
-		
+
 		startTimer();
 	}
 
@@ -2051,10 +2054,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		double score = getScore(r);
 		final double criteria = getCriteria(r);
 
-		// Make sure all individuals who pass the criteria are above those that do not.
-		// This will work unless we are scoring using the counts (i.e. scores that may exceed 1) 
-		if (criteria >= minCriteria)
-			score += 1;
+		if (strictFitness)
+		{
+			// No fitness for those below the criteria 
+			if (criteria < minCriteria)
+				score = 0;
+		}
+		else
+		{
+			// Make sure all individuals who pass the criteria are above those that do not.
+			// This will work unless we are scoring using the counts (i.e. scores that may exceed 1) 
+			if (criteria >= minCriteria)
+				score += 1;
+		}
 
 		return score;
 	}
