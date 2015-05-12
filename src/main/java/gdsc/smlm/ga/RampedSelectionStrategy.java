@@ -172,7 +172,8 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			}
 			else
 			{
-				first = random.nextInt(0, n);
+				// Restrict the upper limit to the population range
+				first = random.nextInt(0, Math.min(n, sorted.size() - 1));
 			}
 			n++;
 
@@ -182,7 +183,7 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			while (second == first)
 				second = nextSample();
 		}
-		System.out.printf("Next [%d] %d x %d\n", n, first, second);
+		//System.out.printf("Next [%d] %d x %d\n", n, first, second);
 		return new ChromosomePair(sorted.get(first), sorted.get(second));
 	}
 
