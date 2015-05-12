@@ -1646,7 +1646,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 
 	private static String getFilename(String title, String filename)
 	{
-		filename = getFilename(title, filename);
+		filename = Utils.getFilename(title, filename);
 		// Use XML extension
 		if (filename != null)
 			filename = Utils.replaceExtension(filename, ".xml");
@@ -1694,7 +1694,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	{
 		stopTimer();
 
-		String filename = Utils.getFilename("Filter_set_" + setNumber, filterSetFilename);
+		String filename = getFilename("Filter_set_" + setNumber, filterSetFilename);
 		if (filename != null)
 		{
 			filterSetFilename = filename;
