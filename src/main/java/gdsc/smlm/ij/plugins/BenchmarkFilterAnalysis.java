@@ -1218,7 +1218,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// Final evaluation does not need to assess all the filters if we have run the GA.
 		// It can just assess the top 1 required for the summary.
-		if (evolve && !showResultsTable && xValues == null)
+		if (best != null && !showResultsTable && xValues == null)
 		{
 			// Only assess the top 1 filter for the summary
 			List<Filter> list = new ArrayList<Filter>();
@@ -2105,7 +2105,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	double limit = 0;
-	
+
 	@Override
 	public void progress(double fraction)
 	{
@@ -2116,12 +2116,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			IJ.showProgress(fraction);
 			return;
 		}
-		
+
 		// Show only 2% changes
 		if (fraction < limit)
 			return;
-		
-		limit = fraction + 0.02;		
+
+		limit = fraction + 0.02;
 		IJ.showProgress(fraction);
 	}
 
