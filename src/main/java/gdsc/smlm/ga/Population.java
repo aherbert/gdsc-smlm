@@ -1,5 +1,7 @@
 package gdsc.smlm.ga;
 
+import gdsc.smlm.results.TrackProgress;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,9 @@ public class Population
 	private List<? extends Chromosome> individuals;
 	private int populationSize = 500;
 	private int failureLimit = 3;
+	private int iteration = 0;
+	// This introduces a dependency on another gdsc.smlm package
+	private TrackProgress tracker = null;
 
 	/**
 	 * Create a population of individuals
@@ -100,11 +105,17 @@ public class Population
 			current = evaluateFitness(fitnessFunction);
 			converged = checker.converged(previous, current);
 		}
+		if (tracker != null)
+			tracker.status("Converged [%d]", iteration);
 		return current;
 	}
 
 	private void grow(SelectionStrategy selectionStrategy, Mutator mutator, Recombiner recombiner)
 	{
+		iteration++;
+		if (tracker != null)
+			tracker.status("Grow [%d]", iteration);
+
 		if (individuals.size() >= populationSize)
 			return;
 
@@ -116,6 +127,9 @@ public class Population
 		int target = minSize - individuals.size();
 		if (target > 0)
 		{
+			if (tracker != null)
+				tracker.progress(individuals.size(), populationSize);
+
 			int next = 0;
 			int fails = 0;
 			while (newIndividuals.size() < target && fails < failureLimit)
@@ -125,6 +139,8 @@ public class Population
 				{
 					newIndividuals.add(c);
 					fails = 0;
+					if (tracker != null)
+						tracker.progress(newIndividuals.size() + individuals.size(), populationSize);
 				}
 				else
 				{
@@ -137,7 +153,11 @@ public class Population
 			individuals = newIndividuals;
 
 			if (individuals.size() < 2)
+			{
+				if (tracker != null)
+					tracker.progress(1);
 				return; // Failed to mutate anything to achieve a breeding population
+			}
 		}
 
 		// Now breed the population
@@ -172,7 +192,11 @@ public class Population
 			if (previousSize == newIndividuals.size())
 				fails++;
 			else
+			{
 				fails = 0;
+				if (tracker != null)
+					tracker.progress(newIndividuals.size() + individuals.size(), populationSize);
+			}
 		}
 		selectionStrategy.finishBreeding();
 
@@ -228,11 +252,15 @@ public class Population
 	 */
 	private Chromosome evaluateFitness(FitnessFunction fitnessFunction)
 	{
+		if (tracker != null)
+			tracker.status("Score [%d]", iteration);
+
 		Chromosome best = null;
 		double max = Double.NEGATIVE_INFINITY;
 
 		// Subset only those with no fitness score (the others must be unchanged)
 		ArrayList<Chromosome> subset = new ArrayList<Chromosome>(individuals.size());
+		long count = 0;
 		for (Chromosome c : individuals)
 		{
 			final double f = c.getFitness();
@@ -240,15 +268,20 @@ public class Population
 			{
 				subset.add(c);
 			}
-			else if (max < f)
+			else
 			{
-				max = f;
-				best = c;
+				if (tracker != null)
+					tracker.progress(++count, individuals.size());
+				if (max < f)
+				{
+					max = f;
+					best = c;
+				}
 			}
 		}
 
 		fitnessFunction.initialise(subset);
-		for (Chromosome c : individuals)
+		for (Chromosome c : subset)
 		{
 			final double f = fitnessFunction.fitness(c);
 			c.setFitness(f);
@@ -257,6 +290,8 @@ public class Population
 				max = f;
 				best = c;
 			}
+			if (tracker != null)
+				tracker.progress(++count, individuals.size());
 		}
 		fitnessFunction.shutdown();
 
@@ -271,6 +306,11 @@ public class Population
 	 */
 	private void select(SelectionStrategy selection)
 	{
+		if (tracker != null)
+		{
+			tracker.status("Select [%d]", iteration);
+			//selection.setTracker(tracker);
+		}
 		individuals = selection.select(individuals);
 		checkSize(individuals.size());
 	}
@@ -316,5 +356,35 @@ public class Population
 	public void setFailureLimit(int failureLimit)
 	{
 		this.failureLimit = failureLimit;
+	}
+
+	/**
+	 * @return the tracker
+	 */
+	public TrackProgress getTracker()
+	{
+		return tracker;
+	}
+
+	/**
+	 * Set a tracker to allow the progress to be followed
+	 * 
+	 * @param tracker
+	 *            the tracker to set
+	 */
+	public void setTracker(TrackProgress tracker)
+	{
+		this.tracker = tracker;
+	}
+
+	/**
+	 * Get the iteration. The iteration is increased each time the population grows as part of the [grow, evaluate,
+	 * select] cycle.
+	 * 
+	 * @return the iteration
+	 */
+	public int getIteration()
+	{
+		return iteration;
 	}
 }

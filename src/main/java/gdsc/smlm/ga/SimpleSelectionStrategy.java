@@ -1,5 +1,7 @@
 package gdsc.smlm.ga;
 
+import gdsc.smlm.results.TrackProgress;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	final double fraction;
 
 	private List<? extends Chromosome> individuals = null;
+	TrackProgress tracker = null;
 
 	/**
 	 * @param random
@@ -60,10 +63,14 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 				subset.add(c);
 		if (subset.size() < 3)
 			return subset;
+		if (tracker != null)
+			tracker.progress(0.5);
 		ChromosomeComparator.sort(subset);
 		int size = (int) Math.round(subset.size() * fraction);
 		if (size < 2)
 			size = 2;
+		if (tracker != null)
+			tracker.progress(1);
 		return subset.subList(0, size);
 	}
 
@@ -119,5 +126,15 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	{
 		// Free memory
 		individuals = null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.SelectionStrategy#setTracker(gdsc.smlm.results.TrackProgress)
+	 */
+	public void setTracker(TrackProgress tracker)
+	{
+		this.tracker = tracker;
 	}
 }

@@ -62,11 +62,15 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 		if (sorted.size() < 3)
 			return sorted;
 
-		// Sort the list
-		ChromosomeComparator.sort(sorted);
 		int size = (int) Math.round(sorted.size() * fraction);
 		if (size < 2)
 			size = 2;
+		
+		if (tracker!= null)
+			tracker.progress(0, size);
+		
+		// Sort the list
+		ChromosomeComparator.sort(sorted);
 
 		// Create the output subset
 		ArrayList<Chromosome> subset = new ArrayList<Chromosome>(size);
@@ -90,6 +94,9 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 		// Now pick chromosomes using the cumulative as the upper limit
 		while (subset.size() < size)
 		{
+			if (tracker!= null)
+				tracker.progress(subset.size(), size);
+			
 			// Used to check we pick something
 			final long previous = cumulative;
 
@@ -115,6 +122,9 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			if (previous == cumulative)
 				throw new RuntimeException("Failed to select a candidate. Size = " + subset.size() + " / " + size);
 		}
+		
+		if (tracker!= null)
+			tracker.progress(1);
 
 		return subset;
 	}

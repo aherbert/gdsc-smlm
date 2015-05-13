@@ -1,5 +1,7 @@
 package gdsc.smlm.ga;
 
+import gdsc.smlm.results.TrackProgress;
+
 import java.util.List;
 
 /*----------------------------------------------------------------------------- 
@@ -42,9 +44,17 @@ public interface SelectionStrategy
 	 * @return The next pair
 	 */
 	ChromosomePair next();
-	
+
 	/**
 	 * Finish selection of pairs for breeding
 	 */
 	void finishBreeding();
+
+	/**
+	 * Set the tracker used to track progress. This should be used in the {@link #select(List)} method. It is possible
+	 * to know the end point when breeding and so it is not advised to use the tracker in the {@link #next()} method.
+	 * 
+	 * @param tracker
+	 */
+	void setTracker(TrackProgress tracker);
 }
