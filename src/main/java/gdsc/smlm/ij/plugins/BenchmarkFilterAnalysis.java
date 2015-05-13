@@ -1123,6 +1123,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		final boolean allSameType = filterSet.allSameType();
 
 		this.ga_resultsList = resultsList;
+		Chromosome best = null;
 
 		if (evolve && allSameType)
 		{
@@ -1195,7 +1196,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 				ga_statusPrefix = "Evolving [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 				updateGAStatus();
-				ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
+				best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
 				// Now update the filter set for final assessment
 				filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
@@ -1207,11 +1208,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
 
-		double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
-		double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
+		double[] xValues = (isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
+		double[] yValues = (xValues == null) ? null : new double[xValues.length];
 		Filter maxFilter = null, criteriaFilter = null;
 		double maxScore = -1;
 		double maxCriteria = 0;
+
+		// Final evaluation does not need to assess all the filters if we have run the GA.
+		// It can just assess the top 1 required for the summary.
+		if (evolve && !showResultsTable && xValues == null)
+		{
+			// Only assess the top 1 filter for the summary
+			List<Filter> list = new ArrayList<Filter>();
+			list.add((Filter) best);
+			filterSet = new FilterSet(filterSet.getName(), list);
+		}
 
 		initialiseScoring(filterSet);
 
@@ -1250,7 +1261,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 				criteriaFilter = filter;
 			}
 
-			if (!isHeadless)
+			if (xValues != null)
 			{
 				xValues[i] = filter.getNumericalValue();
 				yValues[i] = score;
@@ -2001,6 +2012,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		ga_fn = 0;
 		ga_resultsListToScore = ga_resultsList;
 		ga_subset = false;
+
+		if (filterSet.size() < 2)
+			return;
 
 		if (failCountRange == 0)
 		{
