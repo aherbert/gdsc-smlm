@@ -293,7 +293,6 @@ public abstract class HysteresisFilter extends Filter
 						isOk = true;
 						break;
 					}
-					ok.add(result);
 				}
 				// Add the entire trace to the OK points
 				if (isOk)
