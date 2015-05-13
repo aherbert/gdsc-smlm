@@ -58,6 +58,8 @@ public class MeanVarianceTest implements PlugIn
 	private static final String TITLE = "Mean Variance Test";
 	private static double cameraGain = 0;
 	private static double _bias = 500;
+	private static boolean showTable = true, showCharts = true;
+
 	private int exposureCounter = 0;
 	private boolean singleImage;
 
@@ -282,15 +284,24 @@ public class MeanVarianceTest implements PlugIn
 		}
 
 		boolean emMode = (arg != null && arg.contains("em"));
+
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Set the output options:");
+		gd.addCheckbox("Show_table", showTable);
+		gd.addCheckbox("Show_charts", showCharts);
 		if (emMode)
 		{
 			// Ask the user for the camera gain ...
-			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Estimating the EM-gain requires the camera gain without EM readout enabled");
 			gd.addNumericField("Camera_gain (ADU/e-)", cameraGain, 4);
-			gd.showDialog();
-			if (gd.wasCanceled())
-				return;
+		}
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		showTable = gd.getNextBoolean();
+		showCharts = gd.getNextBoolean();
+		if (emMode)
+		{
 			cameraGain = gd.getNextNumber();
 		}
 
@@ -304,7 +315,6 @@ public class MeanVarianceTest implements PlugIn
 		IJ.showProgress(1);
 
 		IJ.showStatus("Computing results");
-		TextWindow results = createResultsWindow();
 
 		// Allow user to input multiple bias images
 		int start = 0;
@@ -339,6 +349,20 @@ public class MeanVarianceTest implements PlugIn
 		int total = 0;
 		for (int i = start; i < images.size(); i++)
 			total += images.get(i).samples.size();
+		
+		if (showTable && total > 200)
+		{
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Table output requires "+total+" entries.\n \nYou may want to disable the table.");
+			gd.addCheckbox("Show_table", showTable);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return;
+			showTable = gd.getNextBoolean();
+		}
+
+		TextWindow results = (showTable) ? createResultsWindow() : null;
+		
 		double[] mean = new double[total];
 		double[] variance = new double[mean.length];
 		Statistics gainStats = (singleImage) ? new StoredDataStatistics(total) : new Statistics();
@@ -362,17 +386,20 @@ public class MeanVarianceTest implements PlugIn
 					gain /= (2 * cameraGain);
 				}
 
-				StringBuilder sb = new StringBuilder();
-				sb.append(sample.title).append("\t");
-				sb.append(sample.exposure).append("\t");
-				sb.append(pair.slice1).append("\t");
-				sb.append(pair.slice2).append("\t");
-				sb.append(IJ.d2s(pair.mean1, 2)).append("\t");
-				sb.append(IJ.d2s(pair.mean2, 2)).append("\t");
-				sb.append(IJ.d2s(mean[j], 2)).append("\t");
-				sb.append(IJ.d2s(variance[j], 2)).append("\t");
-				sb.append(Utils.rounded(gain, 4));
-				results.append(sb.toString());
+				if (showTable)
+				{
+					StringBuilder sb = new StringBuilder();
+					sb.append(sample.title).append("\t");
+					sb.append(sample.exposure).append("\t");
+					sb.append(pair.slice1).append("\t");
+					sb.append(pair.slice2).append("\t");
+					sb.append(IJ.d2s(pair.mean1, 2)).append("\t");
+					sb.append(IJ.d2s(pair.mean2, 2)).append("\t");
+					sb.append(IJ.d2s(mean[j], 2)).append("\t");
+					sb.append(IJ.d2s(variance[j], 2)).append("\t");
+					sb.append(Utils.rounded(gain, 4));
+					results.append(sb.toString());
+				}
 				j++;
 			}
 		}
@@ -389,21 +416,25 @@ public class MeanVarianceTest implements PlugIn
 				stats = new StoredDataStatistics(values);
 			}
 
-			// Plot the gain over time
-			String title = TITLE + " Gain vs Frame";
-			Plot2 plot = new Plot2(title, "Slice", "Gain", Utils.newArray(gainStats.getN(), 1, 1.0), stats.getValues());
-			PlotWindow pw = Utils.display(title, plot);
-
-			// Show a histogram
-			String label = String.format("Mean = %s, Median = %s", Utils.rounded(stats.getMean()),
-					Utils.rounded(stats.getMedian()));
-			int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
-			if (Utils.isNewWindow())
+			if (showCharts)
 			{
-				Point point = pw.getLocation();
-				point.x = pw.getLocation().x;
-				point.y += pw.getHeight();
-				WindowManager.getImage(id).getWindow().setLocation(point);
+				// Plot the gain over time
+				String title = TITLE + " Gain vs Frame";
+				Plot2 plot = new Plot2(title, "Slice", "Gain", Utils.newArray(gainStats.getN(), 1, 1.0),
+						stats.getValues());
+				PlotWindow pw = Utils.display(title, plot);
+
+				// Show a histogram
+				String label = String.format("Mean = %s, Median = %s", Utils.rounded(stats.getMean()),
+						Utils.rounded(stats.getMedian()));
+				int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
+				if (Utils.isNewWindow())
+				{
+					Point point = pw.getLocation();
+					point.x = pw.getLocation().x;
+					point.y += pw.getHeight();
+					WindowManager.getImage(id).getWindow().setLocation(point);
+				}
 			}
 
 			Utils.log("Single-image mode: %s camera", (emMode) ? "EM-CCD" : "Standard");
@@ -439,24 +470,27 @@ public class MeanVarianceTest implements PlugIn
 			// Construct the polynomial that best fits the data.
 			final PolynomialFunction fitted = new PolynomialFunction(best);
 
-			// Plot mean verses variance. Gradient is gain in ADU/e.
-			String title = TITLE + " results";
-			Plot2 plot = new Plot2(title, "Mean", "Variance");
-			double[] xlimits = Maths.limits(mean);
-			double[] ylimits = Maths.limits(variance);
-			double xrange = (xlimits[1] - xlimits[0]) * 0.05;
-			if (xrange == 0)
-				xrange = 0.05;
-			double yrange = (ylimits[1] - ylimits[0]) * 0.05;
-			if (yrange == 0)
-				yrange = 0.05;
-			plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
-			plot.setColor(Color.blue);
-			plot.addPoints(mean, variance, Plot2.CROSS);
-			plot.setColor(Color.red);
-			plot.addPoints(new double[] { mean[0], mean[mean.length - 1] }, new double[] { fitted.value(mean[0]),
-					fitted.value(mean[mean.length - 1]) }, Plot2.LINE);
-			Utils.display(title, plot);
+			if (showCharts)
+			{
+				// Plot mean verses variance. Gradient is gain in ADU/e.
+				String title = TITLE + " results";
+				Plot2 plot = new Plot2(title, "Mean", "Variance");
+				double[] xlimits = Maths.limits(mean);
+				double[] ylimits = Maths.limits(variance);
+				double xrange = (xlimits[1] - xlimits[0]) * 0.05;
+				if (xrange == 0)
+					xrange = 0.05;
+				double yrange = (ylimits[1] - ylimits[0]) * 0.05;
+				if (yrange == 0)
+					yrange = 0.05;
+				plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
+				plot.setColor(Color.blue);
+				plot.addPoints(mean, variance, Plot2.CROSS);
+				plot.setColor(Color.red);
+				plot.addPoints(new double[] { mean[0], mean[mean.length - 1] }, new double[] { fitted.value(mean[0]),
+						fitted.value(mean[mean.length - 1]) }, Plot2.LINE);
+				Utils.display(title, plot);
+			}
 
 			final double avBiasNoise = Math.sqrt(noiseStats.getMean());
 
