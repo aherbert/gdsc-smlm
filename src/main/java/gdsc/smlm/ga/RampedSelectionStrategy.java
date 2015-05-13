@@ -67,7 +67,7 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			size = 2;
 		
 		if (tracker!= null)
-			tracker.progress(0, size);
+			tracker.progress(0);
 		
 		// Sort the list
 		ChromosomeComparator.sort(sorted);

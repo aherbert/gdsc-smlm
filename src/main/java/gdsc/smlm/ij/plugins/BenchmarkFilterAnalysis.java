@@ -35,6 +35,7 @@ import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.TrackProgress;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.XStreamWrapper;
@@ -82,7 +83,7 @@ import org.apache.commons.math3.random.Well44497b;
  * Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table,
  * e.g. precision, Jaccard, F-score.
  */
-public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
+public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackProgress
 {
 	private static final String TITLE = "Filter Analysis";
 	private static TextWindow resultsWindow = null;
@@ -1191,11 +1192,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 				ga_population = new Population(filterSet.getFilters());
 				ga_population.setPopulationSize(populationSize);
 				ga_population.setFailureLimit(failureLimit);
+				selectionStrategy.setTracker(this);
 
 				// Evolve
 				ga_statusPrefix = "Evolving [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
-				updateGAStatus();
+				ga_population.setTracker(this);
 				best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
 				// Now update the filter set for final assessment
@@ -1976,7 +1978,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	private List<MemoryPeakResults> ga_resultsListToScore = null;
 	private double ga_tn, ga_fn;
 	private boolean ga_subset;
-	private int ga_count, ga_total, ga_iteration;
+	private int ga_iteration;
 
 	/*
 	 * (non-Javadoc)
@@ -1986,10 +1988,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	@Override
 	public void initialise(List<? extends Chromosome> individuals)
 	{
-		ga_count = 0;
-		ga_total = individuals.size();
 		ga_iteration++;
-		updateGAStatus();
+		//updateGAStatus();
 		initialiseScoring(new FilterSet(populationToFilters(individuals)));
 	}
 
@@ -2054,11 +2054,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 	@Override
 	public double fitness(Chromosome chromosome)
 	{
-		if (ga_count++ % 16 == 0)
-		{
-			IJ.showProgress(ga_count, ga_total);
-		}
-
 		Filter filter = (Filter) chromosome;
 		FractionClassificationResult r;
 		if (ga_subset)
@@ -2109,8 +2104,49 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction
 		gaWindow.append(text + "\t" + ga_iteration);
 	}
 
-	private void updateGAStatus()
+	double limit = 0;
+	
+	@Override
+	public void progress(double fraction)
 	{
-		IJ.showStatus(ga_statusPrefix + ga_iteration);
+		if (fraction == 1)
+		{
+			// Reset
+			limit = 0;
+			IJ.showProgress(fraction);
+			return;
+		}
+		
+		// Show only 2% changes
+		if (fraction < limit)
+			return;
+		
+		limit = fraction + 0.02;		
+		IJ.showProgress(fraction);
+	}
+
+	@Override
+	public void progress(long position, long total)
+	{
+		progress((double) position / total);
+	}
+
+	@Override
+	public void log(String format, Object... args)
+	{
+		// Ignore		
+	}
+
+	@Override
+	public void status(String format, Object... args)
+	{
+		IJ.showStatus(ga_statusPrefix + String.format(format, args));
+	}
+
+	@Override
+	public boolean isEnded()
+	{
+		// Ignore		
+		return false;
 	}
 }

@@ -113,8 +113,7 @@ public class Population
 	private void grow(SelectionStrategy selectionStrategy, Mutator mutator, Recombiner recombiner)
 	{
 		iteration++;
-		if (tracker != null)
-			tracker.status("Grow [%d]", iteration);
+		start("Grow");
 
 		if (individuals.size() >= populationSize)
 			return;
@@ -154,8 +153,7 @@ public class Population
 
 			if (individuals.size() < 2)
 			{
-				if (tracker != null)
-					tracker.progress(1);
+				end();
 				return; // Failed to mutate anything to achieve a breeding population
 			}
 		}
@@ -203,6 +201,8 @@ public class Population
 		// Combine the lists
 		newIndividuals.addAll(individuals);
 		individuals = newIndividuals;
+		
+		end();
 	}
 
 	/**
@@ -252,8 +252,7 @@ public class Population
 	 */
 	private Chromosome evaluateFitness(FitnessFunction fitnessFunction)
 	{
-		if (tracker != null)
-			tracker.status("Score [%d]", iteration);
+		start("Score");
 
 		Chromosome best = null;
 		double max = Double.NEGATIVE_INFINITY;
@@ -295,6 +294,8 @@ public class Population
 		}
 		fitnessFunction.shutdown();
 
+		end();
+		
 		return best;
 	}
 
@@ -306,13 +307,10 @@ public class Population
 	 */
 	private void select(SelectionStrategy selection)
 	{
-		if (tracker != null)
-		{
-			tracker.status("Select [%d]", iteration);
-			//selection.setTracker(tracker);
-		}
+		start("Select");
 		individuals = selection.select(individuals);
 		checkSize(individuals.size());
+		end();
 	}
 
 	/**
@@ -386,5 +384,20 @@ public class Population
 	public int getIteration()
 	{
 		return iteration;
+	}
+
+	private void start(String stage)
+	{
+		if (tracker != null)
+		{
+			tracker.status(stage + " [%d]", iteration);
+			tracker.progress(0);
+		}
+	}
+
+	private void end()
+	{
+		if (tracker != null)
+			tracker.progress(1);
 	}
 }
