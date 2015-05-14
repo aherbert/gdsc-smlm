@@ -336,7 +336,7 @@ public class MaskDistribution implements SpatialDistribution
 				//float[] pixels = new float[mask.length];
 				//for (int j = 0; j < mask.length; j++)
 				//	pixels[j] = (binaryMask[j]) ? 0 : mask[j];
-				//Utils.display("Particle", new FloatProcessor(maxx, maxy, pixels));
+				//gdsc.smlm.ij.utils.Utils.display("Particle", new ij.process.FloatProcessor(maxx, maxy, pixels));
 			}
 		}
 
