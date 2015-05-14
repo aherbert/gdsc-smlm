@@ -2037,14 +2037,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					totalPhotonsRendered *= totalGain;
 
 					// Add to memory. 0.5 is the centre of the pixel so just round down.
-					// int origX = (int) Math.round(localisation.getX());
-					// int origY = (int) Math.round(localisation.getY());
 					int origX = (int) localisation.getX();
 					int origY = (int) localisation.getY();
 					float[] params = new float[7];
-					// Background and noise should be calculated using only the
-					// region covered by the PSF
-					double[] localStats = getStatistics(spots, spotCount, imageCache, imageReadNoise);
+					// Background and noise should be calculated using the
+					// region covered by the PSF.
+					double[] localStats = getStatistics(imageCache, imageReadNoise, origX, origY);
 					params[Gaussian2DFunction.BACKGROUND] = (float) (localStats[0] * totalGain + settings.bias);
 					params[Gaussian2DFunction.X_POSITION] = (float) localisation.getX();
 					params[Gaussian2DFunction.Y_POSITION] = (float) localisation.getY();
@@ -2223,32 +2221,42 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		/**
-		 * Compute the mean and variance for image 1 and image 2 for the region where all the spots have been inserted.
-		 * The region is defined by the min/max values of all the spots.
+		 * Compute the mean and variance for image 1 and image 2 for the region where the spot was inserted.
+		 * The region is defined by an area around the origin.
 		 * 
-		 * @param spots
-		 * @param spotCount
-		 *            The number of spots
 		 * @param image1
 		 * @param image2
+		 * @param origY
+		 * @param origX
 		 * @return [mean1, variance1, mean2, variance2]
 		 */
-		private double[] getStatistics(Spot[] spots, int spotCount, float[] image1, float[] image2)
+		private double[] getStatistics(float[] image1, float[] image2, int origX, int origY)
 		{
-			int x0min = spots[0].x0min;
-			int x1min = spots[0].x1min;
-			int x0max = spots[0].x0max;
-			int x1max = spots[0].x1max;
-			for (int i = 1; i < spotCount; i++)
+			// When the random sample of the PSF is small the min and max sample positions
+			// may not represent the spot region. Ensure we use an area around the origin.
+			final int n = 3;
+			final int width = FastMath.min(settings.size, 2 * n + 1);
+			int x0min = limit(origX - n);
+			int x0max = limit(origX + n);
+			int x1min = limit(origY - n);
+			int x1max = limit(origY + n);
+
+			// Check we have enough pixels, i.e. in case the origin is outside the image
+			int x0range = x0max - x0min + 1;
+			while (x0range < width)
 			{
-				x0min = FastMath.min(x0min, spots[i].x0min);
-				x1min = FastMath.min(x1min, spots[i].x1min);
-				x0max = FastMath.max(x0max, spots[i].x0max);
-				x1max = FastMath.max(x1max, spots[i].x1max);
+				x0min = limit(x0min - 1);
+				x0max = limit(x0max + 1);
+				x0range = x0max - x0min + 1;
+			}
+			int x1range = x1max - x1min + 1;
+			while (x1range < width)
+			{
+				x1min = limit(x1min - 1);
+				x1max = limit(x1max + 1);
+				x1range = x1max - x1min + 1;
 			}
 
-			final int x0range = x0max - x0min;
-			final int x1range = x1max - x1min;
 			Statistics sum = new Statistics();
 			Statistics sum2 = new Statistics();
 			for (int y = 0; y < x1range; y++)
@@ -2264,6 +2272,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			return new double[] { sum.getMean(), sum.getVariance(), sum2.getMean(), sum2.getVariance() };
 		}
+	}
+
+	private int limit(int coord)
+	{
+		if (coord < 0)
+			return 0;
+		if (coord >= settings.size)
+			return settings.size - 1;
+		return coord;
 	}
 
 	/**
@@ -2569,14 +2586,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		for (LocalisationModel l : localisations)
 		{
 			if (l.getData() == null)
-				System.out.println("oops");
+				System.out.println("No localisation data. This should not happen!");
 			final double noise = (l.getData() != null) ? l.getData()[1] : 1;
 			final double intensity = (l.getData() != null) ? l.getData()[4] : l.getIntensity();
 			final double intensityInPhotons = intensity / settings.getTotalGain();
+			// Q. What if the noise is zero, i.e. no background photon / read noise?
+			// Just ignore it at current.
 			final double snr = intensity / noise;
 			stats[SIGNAL].add(intensityInPhotons);
 			stats[NOISE].add(noise / settings.getTotalGain());
-			stats[SNR].add(snr);
+			if (noise != 0)
+				stats[SNR].add(snr);
 			// Average intensity only from continuous spots.
 			// The continuous flag is for spots that have all the simulation steps continuously on.
 			// Try using the neighbour pointers instead to get the 'sampled' continuous spots.
@@ -2584,7 +2604,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (l.getNext() != null && l.getPrevious() != null)
 			{
 				stats[SIGNAL_CONTINUOUS].add(intensityInPhotons);
-				stats[SNR_CONTINUOUS].add(snr);
+				if (noise != 0)
+					stats[SNR_CONTINUOUS].add(snr);
 			}
 
 			int id = l.getId();
