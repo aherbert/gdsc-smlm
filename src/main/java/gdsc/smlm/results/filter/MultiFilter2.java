@@ -80,7 +80,7 @@ public class MultiFilter2 extends Filter
 	@Override
 	protected String generateName()
 	{
-		return String.format("Multi: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, Precision=%.1f", signal, snr,
+		return String.format("Multi2: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, Precision=%.1f", signal, snr,
 				minWidth, maxWidth, shift, precision);
 	}
 
