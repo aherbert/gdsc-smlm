@@ -24,6 +24,8 @@ public class SimpleMutator extends Randomiser implements Mutator
 
 	private boolean override = false;
 	private double[] stepSize, lower, upper;
+	private int[] positions;
+	private int positionsCount;
 
 	/**
 	 * @param random
@@ -40,21 +42,48 @@ public class SimpleMutator extends Randomiser implements Mutator
 	 * Override the mutation parameters that are obtained from the Chromosome interface.
 	 * The arrays must match the fixed size of the Chromosome sequences to be mutated.
 	 * <p>
-	 * All settings are overriden even if null arrays are passed for some arguments.
+	 * All settings are overridden even if null arrays are passed for some arguments.
 	 * 
 	 * @param stepSize
-	 *            The mutation step size
+	 *            The mutation step size (must not be null)
 	 * @param lower
-	 *            The lower limit for the sequence positions
+	 *            The lower limit for the sequence positions (can be null)
 	 * @param upper
-	 *            The upper limit for the sequence positions
+	 *            The upper limit for the sequence positions (can be null)
+	 * @throws IllegalArgumentException
+	 *             if the input limit arrays are of different lengths to the step size
 	 */
 	public void overrideChromosomeSettings(double[] stepSize, double[] lower, double[] upper)
 	{
+		if (stepSize == null)
+			throw new IllegalArgumentException("Step size must not be null");
+		if (lower != null && lower.length != stepSize.length)
+			throw new IllegalArgumentException("Lower limit must be the same length as the step size");
+		if (upper != null && upper.length != stepSize.length)
+			throw new IllegalArgumentException("Upper limit must be the same length as the step size");
+
 		this.stepSize = stepSize;
 		this.lower = lower;
 		this.upper = upper;
+		getStepPositions(stepSize);
 		override = true; // (stepSize != null || lower != null || upper != null);
+	}
+
+	/**
+	 * Determine the positions that have a step size greater than zero, i.e. can be mutated
+	 * 
+	 * @param step
+	 *            The step sizes for each sequence position
+	 */
+	private void getStepPositions(double[] step)
+	{
+		positions = new int[step.length];
+		positionsCount = 0;
+		for (int i = 0; i < step.length; i++)
+		{
+			if (step[i] > 0)
+				positions[positionsCount++] = i;
+		}
 	}
 
 	/**
@@ -63,7 +92,7 @@ public class SimpleMutator extends Randomiser implements Mutator
 	 * The number of positions are chosen from a Poisson distribution with an average using a fraction of the total
 	 * positions. The positions are then chosen randomly. Note that the same position may be chosen multiple times. The
 	 * random shifts for each mutation are taken from a Gaussian using the chromosome mutation step range as the
-	 * standard deviation.
+	 * standard deviation. Set step size to zero for no mutation at a position.
 	 * 
 	 * @see gdsc.smlm.ga.Mutator#mutate(gdsc.smlm.ga.Chromosome)
 	 */
@@ -76,7 +105,8 @@ public class SimpleMutator extends Randomiser implements Mutator
 		{
 			int count = (int) random.nextPoisson(mean);
 			final double[] step, min, max;
-			if (override)
+			// Only override if the length is correct
+			if (override && stepSize.length == chromosome.length())
 			{
 				step = stepSize;
 				min = lower;
@@ -87,17 +117,18 @@ public class SimpleMutator extends Randomiser implements Mutator
 				step = chromosome.mutationStepRange();
 				min = chromosome.lowerLimit();
 				max = chromosome.upperLimit();
+				getStepPositions(step);
 			}
-			// Override individually
-			//final double[] step = (stepSize == null) ? chromosome.mutationStepRange() : stepSize;
-			//final double[] min = (lower == null) ? chromosome.lowerLimit() : lower;
-			//final double[] max = (upper == null) ? chromosome.upperLimit() : upper;
+			
+			if (positionsCount == 0)
+				return chromosome.newChromosome(sequence);
 
 			// Bounds are inclusive so subtract 1
-			final int upper = chromosome.length() - 1;
+			final int upper = positionsCount - 1;
 			while (count-- > 0)
 			{
-				int i = random.nextInt(0, upper);
+				final int i = positions[random.nextInt(0, upper)];
+
 				sequence[i] = random.nextGaussian(sequence[i], step[i]);
 				// Check limits
 				if (min != null)
