@@ -71,7 +71,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static int analysisBorder = 0;
 	private static double distance = 1.5;
+	private static boolean distanceInPixels = false;
 	private double matchDistance;
+	private float pixelOffset;
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
 	private static boolean showFailuresPlot = true;
@@ -89,6 +91,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static int lastId = -1;
+	private static boolean lastDistanceInPixels = false;
 
 	// Used by the Benchmark Spot Fit plugin
 	static int simulationId = 0;
@@ -314,8 +317,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			public SpotCoordinate(int id, Spot spot)
 			{
-				// Add 0.5 offset to centre in the pixel
-				super(spot.x + 0.5f, spot.y + 0.5f);
+				super(spot.x + pixelOffset, spot.y + pixelOffset);
 				this.id = id;
 				this.spot = spot;
 			}
@@ -380,7 +382,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, analysisBorder);
-		gd.addSlider("Match_distance (SD)", 1, 3, distance);
+		gd.addSlider("Match_distance", 1, 3, distance);
+		gd.addCheckbox("Distance_in_pixels", distanceInPixels);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
 		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
@@ -397,7 +400,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		config.setSearch((int) gd.getNextNumber());
 		config.setBorder((int) gd.getNextNumber());
 		analysisBorder = Math.abs((int) gd.getNextNumber());
-		distance = Math.abs(gd.getNextNumber());
+		matchDistance = distance = Math.abs(gd.getNextNumber());
+		distanceInPixels = gd.getNextBoolean();
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
 		showFailuresPlot = gd.getNextBoolean();
@@ -412,7 +416,13 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (!PeakFit.configureDataFilter(settings, null, false))
 			return false;
 		
-		matchDistance = distance * simulationParameters.s / simulationParameters.a;
+		if (!distanceInPixels)
+		{
+			// Convert distance to PSF standard deviation units
+			matchDistance *= simulationParameters.s / simulationParameters.a;
+			// Add 0.5 offset to centre the spot in the pixel
+			pixelOffset = 0.5f;
+		}
 
 		return true;
 	}
@@ -422,10 +432,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		spotFilter = config.createSpotFilter(false);
 
 		// Extract all the results in memory into a list per frame. This can be cached
-		if (lastId != simulationParameters.id)
+		if (lastId != simulationParameters.id || lastDistanceInPixels != distanceInPixels)
 		{
-			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), false);
+			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), distanceInPixels);
 			lastId = simulationParameters.id;
+			lastDistanceInPixels = distanceInPixels;
 		}
 
 		final ImageStack stack = imp.getImageStack();
