@@ -97,7 +97,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double fractionPositives = 100;
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
-	private static double distance = 100;
+	private static double distance = 1;
 
 	private boolean extraOptions = false;
 
@@ -426,7 +426,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
-		gd.addSlider("Match_distance (nm)", 20, 150, distance);
+		gd.addSlider("Match_distance (SD)", 0.2, 1.5, distance);
 
 		// Collect options for fitting
 		gd.addNumericField("Initial_StdDev0", getSa() / simulationParameters.a, 3);
@@ -453,7 +453,7 @@ public class BenchmarkSpotFit implements PlugIn
 		fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
-		distanceInPixels = distance / simulationParameters.a;
+		distanceInPixels = distance * simulationParameters.s / simulationParameters.a;
 
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
