@@ -156,7 +156,6 @@ public class ANRFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
-	@Override
 	public int length()
 	{
 		return 1;
@@ -167,7 +166,6 @@ public class ANRFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
-	@Override
 	public double[] sequence()
 	{
 		return new double[] { anr };
@@ -178,7 +176,6 @@ public class ANRFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
-	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { SNRFilter.DEFAULT_RANGE };

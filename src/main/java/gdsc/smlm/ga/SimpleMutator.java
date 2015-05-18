@@ -67,7 +67,6 @@ public class SimpleMutator extends Randomiser implements Mutator
 	 * 
 	 * @see gdsc.smlm.ga.Mutator#mutate(gdsc.smlm.ga.Chromosome)
 	 */
-	@Override
 	public Chromosome mutate(Chromosome chromosome)
 	{
 		final double[] sequence = chromosome.sequence().clone();

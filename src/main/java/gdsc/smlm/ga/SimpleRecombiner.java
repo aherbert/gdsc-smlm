@@ -53,7 +53,6 @@ public class SimpleRecombiner extends Randomiser implements Recombiner
 	 * 
 	 * @see gdsc.smlm.ga.Recombiner#cross(gdsc.smlm.ga.Chromosome, gdsc.smlm.ga.Chromosome)
 	 */
-	@Override
 	public Chromosome[] cross(Chromosome chromosome1, Chromosome chromosome2)
 	{
 		int nChildren = 1;

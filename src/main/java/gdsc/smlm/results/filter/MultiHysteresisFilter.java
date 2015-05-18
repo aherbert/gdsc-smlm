@@ -436,7 +436,6 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
-	@Override
 	public int length()
 	{
 		return 14;
@@ -466,7 +465,6 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
-	@Override
 	public double[] sequence()
 	{
 		// Ignore the mode parameters
@@ -480,7 +478,6 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
-	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] {

@@ -200,7 +200,6 @@ public class TraceFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
-	@Override
 	public int length()
 	{
 		return 2;
@@ -211,7 +210,6 @@ public class TraceFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
-	@Override
 	public double[] sequence()
 	{
 		// Ignore the mode parameters
@@ -223,7 +221,6 @@ public class TraceFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
-	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_DISTANCE_RANGE, DEFAULT_TIME_RANGE };

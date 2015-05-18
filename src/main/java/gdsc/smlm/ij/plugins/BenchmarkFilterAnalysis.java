@@ -1985,7 +1985,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
 	 */
-	@Override
 	public void initialise(List<? extends Chromosome> individuals)
 	{
 		ga_iteration++;
@@ -2051,7 +2050,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#fitness(gdsc.smlm.ga.Chromosome)
 	 */
-	@Override
 	public double fitness(Chromosome chromosome)
 	{
 		Filter filter = (Filter) chromosome;
@@ -2085,7 +2083,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#shutdown()
 	 */
-	@Override
 	public void shutdown()
 	{
 		// Report the score for the best filter
@@ -2106,7 +2103,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	double limit = 0;
 
-	@Override
 	public void progress(double fraction)
 	{
 		if (fraction == 1)
@@ -2125,25 +2121,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		IJ.showProgress(fraction);
 	}
 
-	@Override
 	public void progress(long position, long total)
 	{
 		progress((double) position / total);
 	}
 
-	@Override
 	public void log(String format, Object... args)
 	{
 		// Ignore		
 	}
 
-	@Override
 	public void status(String format, Object... args)
 	{
 		IJ.showStatus(ga_statusPrefix + String.format(format, args));
 	}
 
-	@Override
 	public boolean isEnded()
 	{
 		// Ignore		

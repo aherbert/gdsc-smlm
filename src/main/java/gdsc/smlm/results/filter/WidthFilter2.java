@@ -201,7 +201,6 @@ public class WidthFilter2 extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
-	@Override
 	public int length()
 	{
 		return 2;
@@ -223,7 +222,6 @@ public class WidthFilter2 extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
-	@Override
 	public double[] sequence()
 	{
 		return new double[] { minWidth, maxWidth };
@@ -234,7 +232,6 @@ public class WidthFilter2 extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
-	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE };

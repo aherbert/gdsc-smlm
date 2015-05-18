@@ -1001,7 +1001,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#newChromosome(double[])
 	 */
-	@Override
 	public Chromosome newChromosome(double[] sequence)
 	{
 		return create(sequence);
@@ -1012,7 +1011,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#lowerLimit()
 	 */
-	@Override
 	public double[] lowerLimit()
 	{
 		// Set zero as the lower limit
@@ -1024,7 +1022,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#upperLimit()
 	 */
-	@Override
 	public double[] upperLimit()
 	{
 		// No need for upper limits on filters
@@ -1036,7 +1033,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#setFitness(double)
 	 */
-	@Override
 	public void setFitness(double fitness)
 	{
 		this.fitness = fitness;
@@ -1047,7 +1043,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#getFitness()
 	 */
-	@Override
 	public double getFitness()
 	{
 		return fitness;
@@ -1059,7 +1054,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#distance(gdsc.smlm.ga.Chromosome)
 	 */
-	@Override
 	public double distance(Chromosome other)
 	{
 		// NOTE: If the distance is required for a certain type of analysis then this could be done
@@ -1079,7 +1073,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#equals(gdsc.smlm.ga.Chromosome)
 	 */
-	@Override
 	public boolean equals(Chromosome other)
 	{
 		if (length() != other.length())

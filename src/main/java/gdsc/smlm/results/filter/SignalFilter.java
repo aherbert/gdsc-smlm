@@ -158,7 +158,6 @@ public class SignalFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
-	@Override
 	public int length()
 	{
 		return 1;
@@ -169,7 +168,6 @@ public class SignalFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
-	@Override
 	public double[] sequence()
 	{
 		return new double[] { signal };
@@ -180,7 +178,6 @@ public class SignalFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
-	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };

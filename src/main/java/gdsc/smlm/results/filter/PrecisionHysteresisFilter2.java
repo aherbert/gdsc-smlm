@@ -249,7 +249,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
-	@Override
 	public int length()
 	{
 		return 4;
@@ -272,7 +271,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
-	@Override
 	public double[] sequence()
 	{
 		// Ignore the mode parameters
@@ -284,7 +282,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
-	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { getDefaultSearchRange(), getDefaultTimeRange(), PrecisionFilter.DEFAULT_RANGE,

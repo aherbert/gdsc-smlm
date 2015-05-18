@@ -27,7 +27,6 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
-	@Override
 	public int compare(Chromosome chromosome1, Chromosome chromosome2)
 	{
 		if (chromosome1.getFitness() > chromosome2.getFitness())

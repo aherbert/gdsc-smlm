@@ -203,7 +203,6 @@ public abstract class CombinedFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
-	@Override
 	public int length()
 	{
 		return filter1.length() + filter2.length();
@@ -264,7 +263,6 @@ public abstract class CombinedFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
-	@Override
 	public double[] sequence()
 	{
 		return combine(filter1.sequence(), filter2.sequence());
@@ -275,7 +273,6 @@ public abstract class CombinedFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
-	@Override
 	public double[] mutationStepRange()
 	{
 		return combine(filter1.mutationStepRange(), filter2.mutationStepRange());

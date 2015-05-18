@@ -51,7 +51,6 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * @return the subset
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
 	 */
-	@Override
 	public List<? extends Chromosome> select(List<? extends Chromosome> individuals)
 	{
 		if (individuals == null || individuals.size() < 2)
@@ -79,7 +78,6 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
 	 */
-	@Override
 	public void initialiseBreeding(List<? extends Chromosome> individuals)
 	{
 		if (individuals != null && individuals.size() < 2)
@@ -92,7 +90,6 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#next()
 	 */
-	@Override
 	public ChromosomePair next()
 	{
 		if (individuals == null)
@@ -121,7 +118,6 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#finishBreeding()
 	 */
-	@Override
 	public void finishBreeding()
 	{
 		// Free memory

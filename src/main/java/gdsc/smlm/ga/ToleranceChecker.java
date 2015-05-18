@@ -132,7 +132,6 @@ public class ToleranceChecker implements ConvergenceChecker
 		return true;
 	}
 
-	@Override
 	public boolean converged(Chromosome previous, Chromosome current)
 	{
 		iterations++;
