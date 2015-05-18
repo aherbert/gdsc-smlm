@@ -127,6 +127,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double selectionFraction = 0.2;
 	private static boolean rampedSelection = true;
 	private static boolean strictFitness = true;
+	private static boolean saveOption = false;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2;
@@ -1150,6 +1151,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			gd.addSlider(prefix + "Selection_fraction", 0.05, 0.5, selectionFraction);
 			gd.addCheckbox(prefix + "Ramped_selection", rampedSelection);
 			gd.addCheckbox(prefix + "Strict_fitness", strictFitness);
+			gd.addCheckbox(prefix + "Save_option", saveOption);
 
 			gd.addMessage("Configure the step size for each parameter");
 			int[] indices = filter.getChromosomeParameters();
@@ -1173,6 +1175,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				meanChildren = Math.abs(gd.getNextNumber());
 				selectionFraction = Math.abs(gd.getNextNumber());
 				rampedSelection = gd.getNextBoolean();
+				strictFitness = gd.getNextBoolean();
+				saveOption = gd.getNextBoolean();
 
 				for (int j = 0; j < indices.length; j++)
 					stepSize[j] = Math.abs(gd.getNextNumber());
@@ -1204,7 +1208,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
 
 				// Option to save the filters
-				saveFilterSet(filterSet, setNumber);
+				if (saveOption)
+					saveFilterSet(filterSet, setNumber);
 			}
 		}
 
