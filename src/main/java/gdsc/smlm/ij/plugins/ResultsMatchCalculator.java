@@ -415,8 +415,17 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			// Add the results to the lists
 			for (PeakResult p : results)
 			{
-				final float x = (integerCoordinates) ? (int) p.getXPosition() : p.getXPosition();
-				final float y = (integerCoordinates) ? (int) p.getYPosition() : p.getYPosition();
+				final float x, y;
+				if (integerCoordinates)
+				{
+					x = (int) p.getXPosition();
+					y = (int) p.getYPosition();
+				}
+				else
+				{
+					x = p.getXPosition();
+					y = p.getYPosition();
+				}
 				for (int t = p.peak - minT, i = p.getEndFrame() - p.peak + 1; i-- > 0; t++)
 					tmpCoords.get(t).add(instance.new PeakResultPoint(t + minT, x, y, p));
 			}
