@@ -71,6 +71,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static int analysisBorder = 0;
 	private static double distance = 1.5;
+	private double matchDistance;
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
 	private static boolean showFailuresPlot = true;
@@ -250,7 +251,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				TP.clear();
 				FP.clear();
 
-				result = MatchCalculator.analyseResults2D(actual, predicted, distance, TP, FP, null, null);
+				result = MatchCalculator.analyseResults2D(actual, predicted, matchDistance, TP, FP, null, null);
 
 				// Store the true and false positives. Maintain the original ranked order.
 				for (Coordinate c : TP)
@@ -313,7 +314,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			public SpotCoordinate(int id, Spot spot)
 			{
-				super(spot.x, spot.y);
+				// Add 0.5 offset to centre in the pixel
+				super(spot.x + 0.5f, spot.y + 0.5f);
 				this.id = id;
 				this.spot = spot;
 			}
@@ -378,7 +380,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, analysisBorder);
-		gd.addSlider("Match_distance", 1, 3, distance);
+		gd.addSlider("Match_distance (SD)", 1, 3, distance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
 		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
@@ -409,6 +411,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		settings.setFitEngineConfiguration(config);
 		if (!PeakFit.configureDataFilter(settings, null, false))
 			return false;
+		
+		matchDistance = distance * simulationParameters.s / simulationParameters.a;
 
 		return true;
 	}
@@ -420,7 +424,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Extract all the results in memory into a list per frame. This can be cached
 		if (lastId != simulationParameters.id)
 		{
-			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), true);
+			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), false);
 			lastId = simulationParameters.id;
 		}
 
