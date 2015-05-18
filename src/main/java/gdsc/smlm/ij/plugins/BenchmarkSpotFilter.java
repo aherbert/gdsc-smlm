@@ -69,9 +69,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		config.setSearch(1);
 	}
 
-	private static int analysisBorder = 0;
+	private static double sAnalysisBorder = 0;
+	private int analysisBorder;
 	private static double distance = 1.5;
-	private static boolean distanceInPixels = false;
+	private static boolean relativeDistances = true;
 	private double matchDistance;
 	private float pixelOffset;
 	private static double recallFraction = 100;
@@ -91,7 +92,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static int lastId = -1;
-	private static boolean lastDistanceInPixels = false;
+	private static boolean lastRelativeDistances = false;
 
 	// Used by the Benchmark Spot Fit plugin
 	static int simulationId = 0;
@@ -376,14 +377,16 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		
+		gd.addCheckbox("Relative_distances", relativeDistances);
+		
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 1, 4, config.getSearch());
 		gd.addSlider("Border", 0, 5, config.getBorder());
 
 		gd.addMessage("Scoring options:");
-		gd.addSlider("Analysis_border", 0, 5, analysisBorder);
+		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
 		gd.addSlider("Match_distance", 1, 3, distance);
-		gd.addCheckbox("Distance_in_pixels", distanceInPixels);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
 		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
@@ -397,11 +400,11 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
-		config.setSearch((int) gd.getNextNumber());
-		config.setBorder((int) gd.getNextNumber());
-		analysisBorder = Math.abs((int) gd.getNextNumber());
-		matchDistance = distance = Math.abs(gd.getNextNumber());
-		distanceInPixels = gd.getNextBoolean();
+		relativeDistances = gd.getNextBoolean();
+		config.setSearch(gd.getNextNumber());
+		config.setBorder(gd.getNextNumber());
+		sAnalysisBorder = Math.abs(gd.getNextNumber());
+		distance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
 		showFailuresPlot = gd.getNextBoolean();
@@ -416,12 +419,21 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (!PeakFit.configureDataFilter(settings, null, false))
 			return false;
 		
-		if (!distanceInPixels)
+		if (relativeDistances)
 		{
 			// Convert distance to PSF standard deviation units
-			matchDistance *= simulationParameters.s / simulationParameters.a;
+			final double sd = simulationParameters.s / simulationParameters.a;
+			matchDistance = distance * sd;
+			analysisBorder = (int) (analysisBorder * sd);
 			// Add 0.5 offset to centre the spot in the pixel
 			pixelOffset = 0.5f;
+		}
+		else
+		{
+			matchDistance = distance;			
+			analysisBorder = (int) (analysisBorder);
+			// Absolute distances in pixels will use integer coordinates so no offset
+			pixelOffset = 0;
 		}
 
 		return true;
@@ -429,14 +441,15 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private void run()
 	{
-		spotFilter = config.createSpotFilter(false);
+		spotFilter = config.createSpotFilter(relativeDistances);
 
 		// Extract all the results in memory into a list per frame. This can be cached
-		if (lastId != simulationParameters.id || lastDistanceInPixels != distanceInPixels)
+		if (lastId != simulationParameters.id || lastRelativeDistances != relativeDistances)
 		{
-			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), distanceInPixels);
+			// When using pixel distances then get the coordinates in integers
+			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), !relativeDistances);
 			lastId = simulationParameters.id;
-			lastDistanceInPixels = distanceInPixels;
+			lastRelativeDistances = relativeDistances;
 		}
 
 		final ImageStack stack = imp.getImageStack();
@@ -669,7 +682,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
 		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
-		sb.append(Utils.rounded(distance)).append("\t");
+		sb.append(Utils.rounded(matchDistance)).append("\t");
 
 		// Add the results
 
@@ -739,7 +752,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
 		final double auc = auc(p, r);
 		// Compute the AUC using the adjusted precision curve
-		// which used the maximum precision for recall >= r
+		// which uses the maximum precision for recall >= r
 		final double[] maxp = new double[p.length];
 		double max = 0;
 		for (int k = maxp.length; k-- > 0;)
