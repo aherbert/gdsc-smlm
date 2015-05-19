@@ -97,9 +97,8 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double fractionPositives = 100;
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
-	private static double distance = 1;
+	private static double distance = 1.5;
 	private static double matchSignal = 2;
-	private double signalFactor;
 
 	private boolean extraOptions = false;
 
@@ -123,6 +122,7 @@ public class BenchmarkSpotFit implements PlugIn
 	static int fitResultsId = 0;
 	static HashMap<Integer, FilterCandidates> fitResults;
 	static double distanceInPixels;
+	static double signalFactor;
 
 	public static String tablePrefix, resultPrefix;
 
@@ -147,6 +147,11 @@ public class BenchmarkSpotFit implements PlugIn
 		 * the fitMatch array.
 		 */
 		double[] zMatch;
+		/**
+		 * Store the signal factor between the predicted and actual signal for spots that were matched by a candidate. 
+		 * Size equals the number of trues in the fitMatch array.
+		 */
+		double[] fMatch;
 
 		public FilterCandidates(int p, int n, ScoredSpot[] spots)
 		{
@@ -275,6 +280,7 @@ public class BenchmarkSpotFit implements PlugIn
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			final double[] zPosition = new double[actual.length];
 			double[] zMatch = new double[spots.length];
+			double[] fMatch = new double[spots.length];
 			int matchCount = 0;
 			if (actual.length > 0)
 			{
@@ -317,13 +323,13 @@ public class BenchmarkSpotFit implements PlugIn
 						final int i = (int) p2.getZ();
 						final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
 
+						final double a = p1.peakResult.getSignal();
+						final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
+						final double factor = (p > a) ? p / a : a / p;
+						
 						// Check the fitted signal is approximately correct
 						if (signalFactor != 0)
 						{
-							final double a = p1.peakResult.getSignal();
-							final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
-							final double factor = (p > a) ? p / a : a / p;
-
 							// Debug: depth actual_signal fitted_signal
 							//System.out.printf("%f %f %f\n", p1.peakResult.error, a, p);
 							if (factor > signalFactor)
@@ -334,12 +340,16 @@ public class BenchmarkSpotFit implements PlugIn
 						dMatch[matchCount] = pair.getXYDistance();
 
 						// Store the depth of the spot that matches
-						zMatch[matchCount++] = p1.peakResult.error;
+						zMatch[matchCount] = p1.peakResult.error;
+						// Store the signal factor
+						fMatch[matchCount] = factor;
+						matchCount++;
 					}
 				}
 			}
 			dMatch = Arrays.copyOf(dMatch, matchCount);
 			zMatch = Arrays.copyOf(zMatch, matchCount);
+			fMatch = Arrays.copyOf(fMatch, matchCount);
 
 			// Mark the results 
 			for (int i = 0; i < candidates.spots.length; i++)
@@ -375,6 +385,7 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.fitMatch = fitMatch;
 			candidates.dMatch = dMatch;
 			candidates.zMatch = zMatch;
+			candidates.fMatch = fMatch;
 			candidates.zPosition = zPosition;
 			// Noise should be the same for all results
 			if (!job.getResults().isEmpty())

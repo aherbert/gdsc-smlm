@@ -113,7 +113,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int scoreIndex;
 	private boolean invertScore = false;
 	private static double upperMatchDistance = 100;
-	private static double partialMatchDistance = 100;
+	private static double partialMatchDistance = 33;
+	private static double upperSignalFactor = 100;
+	private static double partialSignalFactor = 50;
 	private static boolean depthRecallAnalysis = true;
 	private static boolean evolve = false;
 
@@ -144,6 +146,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int lastId = 0;
 	private static boolean lastRank = false;
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
+	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
 	private static List<MemoryPeakResults> resultsList = null;
 	private static StoredDataStatistics depthStats, depthFitStats;
 
@@ -164,12 +167,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		showColumns[2] = true; // FP
 		showColumns[3] = true; // TN
 		showColumns[4] = true; // FN
+		showColumns[COLUMNS.length - 7] = true; // MCC
 		showColumns[COLUMNS.length - 4] = true; // Recall
 		showColumns[COLUMNS.length - 3] = true; // Precision
 		showColumns[COLUMNS.length - 1] = true; // Jaccard
 
+		// Use the precision as criteria to ensure a set confidence on results labelled as true  
 		criteriaIndex = COLUMNS.length - 3;
-		scoreIndex = COLUMNS.length - 1;
+		scoreIndex = COLUMNS.length - 7;
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
@@ -481,25 +486,30 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private List<MemoryPeakResults> readResults()
 	{
 		if (resultsList == null || lastId != BenchmarkSpotFit.fitResultsId || lastRank != rerankBySignal ||
-				lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance)
+				lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance ||
+				lastPartialSignalFactor != partialSignalFactor || lastUpperSignalFactor != upperSignalFactor)
 		{
 			lastId = BenchmarkSpotFit.fitResultsId;
 			lastRank = rerankBySignal;
 			lastUpperMatchDistance = upperMatchDistance;
 			lastPartialMatchDistance = partialMatchDistance;
+			lastUpperSignalFactor = upperSignalFactor;
+			lastPartialSignalFactor = partialSignalFactor;
 			resultsList = new LinkedList<MemoryPeakResults>();
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
 
-			final double fuzzyMax = BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
-			final double fuzzyMin = BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0;
-			final double fuzzyRange = fuzzyMax - fuzzyMin;
-			resultsPrefix3 = "\t" + Utils.rounded(fuzzyMin * simulationParameters.a) + "\t" +
-					Utils.rounded(fuzzyMax * simulationParameters.a);
+			final double fuzzyDistanceMax = BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
+			final double fuzzyDistanceMin = BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0;
+			final double fuzzyDistanceRange = fuzzyDistanceMax - fuzzyDistanceMin;
+			// If signal factor scoring was disabled then BenchmarkSpotFit.signalFactor will be zero
+			final double fuzzyFactorMax = BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0;
+			final double fuzzyFactorMin = BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0;
+			final double fuzzyFactorRange = fuzzyFactorMax - fuzzyFactorMin;
 
-			// Normalise the matches so the fuzzy weighting sums to the original true positive count 
-			//int tp = 0;
-			//double sum = 0;
+			resultsPrefix3 = "\t" + Utils.rounded(fuzzyDistanceMin * simulationParameters.a) + "\t" +
+					Utils.rounded(fuzzyDistanceMax * simulationParameters.a) + "\t" + Utils.rounded(fuzzyFactorMin) +
+					"\t" + Utils.rounded(fuzzyFactorMax);
 
 			MemoryPeakResults r = new MemoryPeakResults();
 			Calibration cal = new Calibration(simulationParameters.a, simulationParameters.gain, 100);
@@ -565,16 +575,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						double depth = 0;
 						if (result.fitMatch[index])
 						{
-							int position = getPosition(positionIndex, index);
-							double distance = result.dMatch[position];
+							final int position = getPosition(positionIndex, index);
+							final double distance = result.dMatch[position];
+							final double factor = result.fMatch[position];
 
 							// Store depth of matches for later analysis
 							depth = result.zMatch[position];
 
-							if (distance <= fuzzyMax)
+							if (distance <= fuzzyDistanceMax)
 							{
-								depthFitStats.add(depth);
-								if (distance <= fuzzyMin)
+								if (distance <= fuzzyDistanceMin)
 								{
 									score = 1;
 								}
@@ -585,10 +595,36 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 									//score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
 									// Cosine
 									score = (float) (0.5 * (1 + Math
-											.cos(((distance - fuzzyMin) / fuzzyRange) * Math.PI)));
+											.cos(((distance - fuzzyDistanceMin) / fuzzyDistanceRange) * Math.PI)));
 								}
-								//tp++;
-								//sum += score;
+							}
+
+							// Apply the weighting for the signal factor if enabled 
+							if (fuzzyFactorMax != 0)
+							{
+								double score2 = 0;
+								if (factor <= fuzzyFactorMax)
+								{
+									if (factor <= fuzzyFactorMin)
+									{
+										score2 = 1;
+									}
+									else
+									{
+										// Interpolate from the minimum to the maximum match f:
+										// Linear 
+										//score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
+										// Cosine
+										score2 = (float) (0.5 * (1 + Math
+												.cos(((factor - fuzzyFactorMin) / fuzzyFactorRange) * Math.PI)));
+									}
+								}
+								score *= score2;
+							}
+
+							if (score > 0)
+							{
+								depthFitStats.add(depth);
 							}
 						}
 
@@ -653,10 +689,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
 		gd.addNumericField("Criteria_limit", criteriaLimit, 4);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
-		gd.addMessage("Fitting results match distance = " +
-				Utils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.a) + " nm");
+		gd.addMessage(String.format("Fitting match distance = %s nm; signal factor = %s",
+				Utils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.a),
+				Utils.rounded(BenchmarkSpotFit.signalFactor)));
 		gd.addSlider("Upper_match_distance (%)", 0, 100, upperMatchDistance);
 		gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
+		gd.addSlider("Upper_signal_factor (%)", 0, 100, upperSignalFactor);
+		gd.addSlider("Partial_signal_factor (%)", 0, 100, partialSignalFactor);
 		if (!simulationParameters.fixedDepth)
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
 		gd.addCheckbox("Evolve", evolve);
@@ -686,7 +725,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// We may have to read the results again if the ranking option has changed
 		if (lastRank != rerankBySignal || lastPartialMatchDistance != partialMatchDistance ||
-				lastUpperMatchDistance != upperMatchDistance)
+				lastUpperMatchDistance != upperMatchDistance || lastPartialSignalFactor != partialSignalFactor ||
+				lastUpperSignalFactor != upperSignalFactor)
 			readResults();
 
 		return true;
@@ -711,6 +751,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		scoreIndex = gd.getNextChoiceIndex();
 		upperMatchDistance = Math.abs(gd.getNextNumber());
 		partialMatchDistance = Math.abs(gd.getNextNumber());
+		upperSignalFactor = Math.abs(gd.getNextNumber());
+		partialSignalFactor = Math.abs(gd.getNextNumber());
 		if (!simulationParameters.fixedDepth)
 			depthRecallAnalysis = gd.getNextBoolean();
 		evolve = gd.getNextBoolean();
@@ -734,6 +776,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			Parameters.isAboveZero("Delta", delta);
 			Parameters.isBelow("Delta", delta, 1);
 			Parameters.isEqualOrBelow("Partial match distance", partialMatchDistance, upperMatchDistance);
+			Parameters.isEqualOrBelow("Partial signal factor", partialSignalFactor, upperSignalFactor);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1069,7 +1112,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String createResultsHeader(boolean depthSummary)
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
-		sb.append("\tTitle\tName\tFail\tLower (nm)\tUpper (nm)");
+		sb.append("\tTitle\tName\tFail\tLower D (nm)\tUpper D (nm)\tLower factor\tUpper factor");
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
