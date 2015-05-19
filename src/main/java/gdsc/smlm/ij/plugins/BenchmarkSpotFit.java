@@ -98,6 +98,8 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
 	private static double distance = 1;
+	private static double matchSignal = 2;
+	private double signalFactor;
 
 	private boolean extraOptions = false;
 
@@ -313,11 +315,25 @@ public class BenchmarkSpotFit implements PlugIn
 					{
 						final BasePoint p2 = (BasePoint) pair.getPoint2();
 						final int i = (int) p2.getZ();
+						final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
+
+						// Check the fitted signal is approximately correct
+						if (signalFactor != 0)
+						{
+							final double a = p1.peakResult.getSignal();
+							final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
+							final double factor = (p > a) ? p / a : a / p;
+
+							// Debug: depth actual_signal fitted_signal
+							//System.out.printf("%f %f %f\n", p1.peakResult.error, a, p);
+							if (factor > signalFactor)
+								continue;
+						}
+						
 						fitMatch[i] = true;
 						dMatch[matchCount] = pair.getXYDistance();
 
 						// Store the depth of the spot that matches
-						final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
 						zMatch[matchCount++] = p1.peakResult.error;
 					}
 				}
@@ -427,6 +443,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
 		gd.addSlider("Match_distance (SD)", 0.2, 1.5, distance);
+		gd.addSlider("Match_signal", 1, 4.5, matchSignal);
 
 		// Collect options for fitting
 		gd.addNumericField("Initial_StdDev0", getSa() / simulationParameters.a, 3);
@@ -453,6 +470,10 @@ public class BenchmarkSpotFit implements PlugIn
 		fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
+		signalFactor = matchSignal = Math.abs(gd.getNextNumber());
+		if (signalFactor <= 1)
+			signalFactor = 0;
+
 		distanceInPixels = distance * simulationParameters.s / simulationParameters.a;
 
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
