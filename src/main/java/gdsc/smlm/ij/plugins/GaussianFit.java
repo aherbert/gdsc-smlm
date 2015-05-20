@@ -580,8 +580,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			{
 				if (isLogProgress())
 				{
-					IJ.log("Failed to fit peak" + ((maxIndices.length > 1) ? "s" : "") +
-							((fitResult != null) ? getReason(fitResult.getStatus()) : ""));
+					IJ.log("Failed to fit " + Utils.pleural(maxIndices.length, "peak") + getReason(fitResult));
 				}
 				imp.setOverlay(null);
 			}
@@ -642,7 +641,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				{
 					if (isLogProgress())
 					{
-						IJ.log("Failed to fit peak " + (n + 1) + getReason(fitResult.getStatus()));
+						IJ.log("Failed to fit peak " + (n + 1) + getReason(fitResult));
 					}
 				}
 			}
@@ -660,8 +659,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			IJ.log("Time = " + (ellapsed / 1000000.0) + "ms");
 	}
 
-	private String getReason(FitStatus status)
+	private String getReason(FitResult fitResult)
 	{
+		if (fitResult == null || fitResult.getStatus() == null)
+			return "";
+		final FitStatus status = fitResult.getStatus(); 
 		switch (status)
 		{
 			case SINGULAR_NON_LINEAR_MODEL:
@@ -669,7 +671,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			case FAILED_TO_CONVERGE:
 				return ": Failed to converge";
 			default:
-				return ": " + status.toString().toLowerCase().replace("_", " ");
+				return status.toString().toLowerCase().replace("_", " ");
 		}
 	}
 
