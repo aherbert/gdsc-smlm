@@ -1226,12 +1226,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				ga_population.setTracker(this);
 				best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
-				// Now update the filter set for final assessment
-				filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
+				if (ga_population.getPopulationSize() > 0)
+				{
+					// Now update the filter set for final assessment
+					filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
 
-				// Option to save the filters
-				if (saveOption)
-					saveFilterSet(filterSet, setNumber);
+					// Option to save the filters
+					if (saveOption)
+						saveFilterSet(filterSet, setNumber);
+				}
 			}
 		}
 
