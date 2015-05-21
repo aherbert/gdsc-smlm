@@ -111,7 +111,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static HashMap<Integer, FilterCandidates> filterCandidates;
-	private static int nP, nN;
+	private static double nP, nN;
 
 	static int lastId = -1, lastFilterId = -1;
 	private static double lastFractionPositives = -1;
@@ -148,7 +148,7 @@ public class BenchmarkSpotFit implements PlugIn
 		 */
 		double[] zMatch;
 		/**
-		 * Store the signal factor between the predicted and actual signal for spots that were matched by a candidate. 
+		 * Store the signal factor between the predicted and actual signal for spots that were matched by a candidate.
 		 * Size equals the number of trues in the fitMatch array.
 		 */
 		double[] fMatch;
@@ -326,7 +326,7 @@ public class BenchmarkSpotFit implements PlugIn
 						final double a = p1.peakResult.getSignal();
 						final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
 						final double factor = (p > a) ? p / a : a / p;
-						
+
 						// Check the fitted signal is approximately correct
 						if (signalFactor != 0)
 						{
@@ -335,7 +335,7 @@ public class BenchmarkSpotFit implements PlugIn
 							if (factor > signalFactor)
 								continue;
 						}
-						
+
 						fitMatch[i] = true;
 						dMatch[matchCount] = pair.getXYDistance();
 
@@ -647,9 +647,9 @@ public class BenchmarkSpotFit implements PlugIn
 			FilterResult r = result.getValue();
 
 			// Determine the number of positives to find
-			nP += r.result.getTruePositives();
-			nN += r.result.getFalsePositives();
-			final int targetP = (int) Math.round(r.result.getTruePositives() * f1);
+			nP += r.result.getTP();
+			nN += r.result.getFP();
+			final int targetP = (int) Math.round(r.result.getTP() * f1);
 			// Count the number of positive & negatives
 			int p = 0, n = 0;
 			boolean reachedTarget = false;
@@ -802,9 +802,9 @@ public class BenchmarkSpotFit implements PlugIn
 
 		sb.append(spotFilter.getDescription());
 
-		add(sb, nP + nN);
-		add(sb, nP);
-		add(sb, nN);
+		addCount(sb, nP + nN);
+		addCount(sb, nP);
+		addCount(sb, nN);
 		add(sb, PeakFit.getSolverName(config.getFitConfiguration()));
 		add(sb, config.getFitting());
 
@@ -912,6 +912,23 @@ public class BenchmarkSpotFit implements PlugIn
 	private static void add(StringBuilder sb, double value)
 	{
 		add(sb, Utils.rounded(value));
+	}
+
+	private static void addCount(StringBuilder sb, double value)
+	{
+		// Check if the double holds an integer count
+		if ((int) value == value)
+		{
+			sb.append("\t").append((int) value);
+		}
+		else
+		{
+			// Otherwise add the counts using at least 2 dp
+			if (value > 100)
+				sb.append("\t").append(IJ.d2s(value));
+			else
+				add(sb, Utils.rounded(value));
+		}
 	}
 
 	private void createTable()

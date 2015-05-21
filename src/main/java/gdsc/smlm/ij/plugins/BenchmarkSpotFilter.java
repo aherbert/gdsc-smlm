@@ -26,9 +26,11 @@ import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.match.BasePoint;
 import gdsc.smlm.results.match.Coordinate;
+import gdsc.smlm.results.match.FractionClassificationResult;
 import gdsc.smlm.results.match.MatchCalculator;
-import gdsc.smlm.results.match.MatchResult;
+import gdsc.smlm.results.match.PointPair;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.RampedScore;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
@@ -72,8 +74,10 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static double sAnalysisBorder = 0;
 	private int analysisBorder;
 	private static double distance = 1.5;
+	private static double lowerDistance = 1.5;
 	private static boolean relativeDistances = true;
 	private double matchDistance;
+	private double lowerMatchDistance;
 	private float pixelOffset;
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
@@ -106,21 +110,62 @@ public class BenchmarkSpotFilter implements PlugIn
 	public class ScoredSpot implements Comparable<ScoredSpot>
 	{
 		final boolean match;
+		final double[] data;
 		final Spot spot;
 		int fails;
 
-		public ScoredSpot(boolean match, Spot spot, int fails)
+		public ScoredSpot(boolean match, double d, double score, Spot spot)
 		{
 			this.match = match;
+			data = new double[] { d, score };
 			this.spot = spot;
-			this.fails = fails;
+			this.fails = 0;
 		}
 
 		public ScoredSpot(boolean match, Spot spot)
 		{
 			this.match = match;
+			data = null;
 			this.spot = spot;
 			this.fails = 0;
+		}
+
+		public ScoredSpot(boolean match, Spot spot, int fails)
+		{
+			this.match = match;
+			data = null;
+			this.spot = spot;
+			this.fails = fails;
+		}
+
+		public double getDistance()
+		{
+			return (data != null) ? data[0] : 0;
+		}
+
+		public double getScore()
+		{
+			return (data != null) ? data[1] : 0;
+		}
+
+		/**
+		 * Get the first element of the data array without checking for null
+		 * 
+		 * @return The first element of the data array
+		 */
+		double quickDistance()
+		{
+			return data[0];
+		}
+
+		/**
+		 * Get the second element of the data array without checking for null.
+		 * 
+		 * @return The second element of the data array
+		 */
+		double quickScore()
+		{
+			return data[1];
 		}
 
 		/*
@@ -140,10 +185,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	public class FilterResult
 	{
-		final MatchResult result;
+		final FractionClassificationResult result;
 		final ScoredSpot[] spots;
 
-		public FilterResult(MatchResult result, ScoredSpot[] spots)
+		public FilterResult(FractionClassificationResult result, ScoredSpot[] spots)
 		{
 			this.result = result;
 			this.spots = spots;
@@ -163,6 +208,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		List<Coordinate> TP = new ArrayList<Coordinate>();
 		List<Coordinate> FP = new ArrayList<Coordinate>();
 		final HashMap<Integer, FilterResult> results;
+		List<PointPair> matches = new ArrayList<PointPair>();
 
 		float[] data = null;
 		long time = 0;
@@ -244,10 +290,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
-			MatchResult result;
+			FractionClassificationResult result;
 
 			// Store the count of false positives since the last true positive
 			int fails = 0;
+
+			// Use the distance to the true location to score the candidate
+			matches.clear();
+			RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
 
 			if (actual.length > 0)
 			{
@@ -255,19 +305,28 @@ public class BenchmarkSpotFilter implements PlugIn
 				TP.clear();
 				FP.clear();
 
-				result = MatchCalculator.analyseResults2D(actual, predicted, matchDistance, TP, FP, null, null);
+				MatchCalculator.analyseResults2D(actual, predicted, matchDistance, TP, FP, null, matches);
 
 				// Store the true and false positives. Maintain the original ranked order.
-				for (Coordinate c : TP)
+				double tp = 0;
+				double fp = FP.size();
+				for (PointPair pair : matches)
 				{
-					SpotCoordinate sc = (SpotCoordinate) c;
-					scoredSpots[sc.id] = new ScoredSpot(true, sc.spot);
+					SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
+					final double d = pair.getXYDistance();
+					final double s = RampedScore.flatten(score.score(d), 256);
+					scoredSpots[sc.id] = new ScoredSpot(true, d, s, sc.spot);
+					// Score partial matches as part true-positive and part false-positive
+					tp += s;
+					fp += (1 - s);
 				}
 				for (Coordinate c : FP)
 				{
 					SpotCoordinate sc = (SpotCoordinate) c;
 					scoredSpots[sc.id] = new ScoredSpot(false, sc.spot);
 				}
+
+				result = new FractionClassificationResult(tp, fp, 0, actual.length - tp);
 
 				// Store the number of fails (negatives) before each positive 
 				for (int i = 0; i < spots.length; i++)
@@ -285,7 +344,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			else
 			{
 				// All spots are false positives
-				result = new MatchResult(0, spots.length, 0, 0);
+				result = new FractionClassificationResult(0, spots.length, 0, 0);
 
 				for (int i = 0; i < spots.length; i++)
 				{
@@ -295,9 +354,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			if (debug)
 			{
-				System.out.printf("Frame %d : N = %d, TP = %d, FP = %d, R = %.2f, P = %.2f\n", frame,
-						result.getNumberActual(), result.getTruePositives(), result.getFalsePositives(),
-						result.getRecall(), result.getPrecision());
+				System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame,
+						actual.length, result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
 			}
 
 			results.put(frame, new FilterResult(result, scoredSpots));
@@ -366,20 +424,21 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
-		sb.append("PSF width = ").append(Utils.rounded(simulationParameters.s / simulationParameters.a)).append(" px\n");
+		sb.append("PSF width = ").append(Utils.rounded(simulationParameters.s / simulationParameters.a))
+				.append(" px\n");
 		sb.append("Simulation depth = ").append(Utils.rounded(simulationParameters.depth)).append(" nm");
 		if (simulationParameters.fixedDepth)
-			sb.append( " (fixed)");
+			sb.append(" (fixed)");
 		sb.append("\n \nConfigure the spot filter:");
 		gd.addMessage(sb.toString());
-		
+
 		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
 		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
-		
+
 		gd.addCheckbox("Relative_distances", relativeDistances);
-		
+
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 1, 4, config.getSearch());
 		gd.addSlider("Border", 0, 5, config.getBorder());
@@ -387,6 +446,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
 		gd.addSlider("Match_distance", 1, 3, distance);
+		gd.addSlider("Lower_distance", 1, 3, lowerDistance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
 		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
@@ -405,6 +465,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		config.setBorder(gd.getNextNumber());
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
+		lowerDistance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
 		showFailuresPlot = gd.getNextBoolean();
@@ -414,23 +475,28 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (gd.invalidNumber())
 			return false;
 
+		if (lowerDistance > distance)
+			lowerDistance = distance;
+
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
 		if (!PeakFit.configureDataFilter(settings, null, false))
 			return false;
-		
+
 		if (relativeDistances)
 		{
 			// Convert distance to PSF standard deviation units
 			final double sd = simulationParameters.s / simulationParameters.a;
 			matchDistance = distance * sd;
+			lowerMatchDistance = lowerDistance * sd;
 			analysisBorder = (int) (analysisBorder * sd);
 			// Add 0.5 offset to centre the spot in the pixel
 			pixelOffset = 0.5f;
 		}
 		else
 		{
-			matchDistance = distance;			
+			matchDistance = distance;
+			lowerMatchDistance = lowerDistance;
 			analysisBorder = (int) (analysisBorder);
 			// Absolute distances in pixels will use integer coordinates so no offset
 			pixelOffset = 0;
@@ -453,7 +519,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		final ImageStack stack = imp.getImageStack();
-		
+
 		// Clear old results to free memory
 		if (filterResults != null)
 			filterResults.clear();
@@ -623,17 +689,18 @@ public class BenchmarkSpotFilter implements PlugIn
 		createTable();
 
 		// Create the overall match score
-		int tp = 0, fp = 0, fn = 0;
+		double tp = 0, fp = 0, fn = 0;
 		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
 		for (FilterResult result : filterResults.values())
 		{
-			tp += result.result.getTruePositives();
-			fp += result.result.getFalsePositives();
-			fn += result.result.getFalseNegatives();
+			tp += result.result.getTP();
+			fp += result.result.getFP();
+			fn += result.result.getFN();
 			allSpots.addAll(Arrays.asList(result.spots));
 		}
-		MatchResult allResult = new MatchResult(tp, fp, fn, 0);
-		final int n = allResult.getNumberActual();
+		FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
+		// The number of actual results
+		final int n = (int) (tp + fn);
 
 		StringBuilder sb = new StringBuilder();
 
@@ -682,6 +749,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
 		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
+		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
 		sb.append(Utils.rounded(matchDistance)).append("\t");
 
 		// Add the results
@@ -695,11 +763,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[] r = new double[allSpots.size() + 1];
 		double[] p = new double[r.length];
 		double[] j = new double[r.length];
-		int[] truePositives = new int[r.length];
-		int[] falsePositives = new int[r.length];
+		double[] truePositives = new double[r.length];
+		double[] falsePositives = new double[r.length];
 		double[] rank = new double[r.length];
 		// Note: fn = n - tp
-		fn = n;
 		tp = fp = 0;
 		int i = 1;
 		p[0] = 1;
@@ -707,14 +774,16 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (s.match)
 			{
-				tp++;
-				fn--;
+				final double score = s.quickScore();
+				// Score partial matches as part true-positive and part false-positive
+				tp += score;
+				fp += (1 - score);
 			}
 			else
 				fp++;
 			r[i] = (double) tp / n;
 			p[i] = (double) tp / (tp + fp);
-			j[i] = (double) tp / (fp + n);
+			j[i] = (double) tp / (fp + n); // (tp+fp+fn) == (fp+n) since tp+fn=n;
 			truePositives[i] = tp;
 			falsePositives[i] = fp;
 			rank[i] = i;
@@ -732,10 +801,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		if (fractionIndex == r.length)
 			fractionIndex--;
-		addResult(
-				sb,
-				new MatchResult(truePositives[fractionIndex], falsePositives[fractionIndex], allResult
-						.getNumberActual() - truePositives[fractionIndex], 0));
+		addResult(sb, new FractionClassificationResult(truePositives[fractionIndex], falsePositives[fractionIndex], 0,
+				n - truePositives[fractionIndex]));
 
 		// Output the match results at the maximum jaccard score
 		int maxIndex = 0;
@@ -744,8 +811,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (j[maxIndex] < j[ii])
 				maxIndex = ii;
 		}
-		addResult(sb, new MatchResult(truePositives[maxIndex], falsePositives[maxIndex], allResult.getNumberActual() -
-				truePositives[maxIndex], 0));
+		addResult(sb, new FractionClassificationResult(truePositives[maxIndex], falsePositives[maxIndex], 0, n -
+				truePositives[maxIndex]));
 
 		sb.append(Utils.rounded(time / 1e6));
 
@@ -800,7 +867,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.setLimits(0, 1, 0, 1.05);
 			plot.setColor(Color.red);
 			plot.addPoints(r, p, Plot2.LINE);
-			//plot.addPoints(r, maxp, Plot2.DOT);
+			//plot.setColor(Color.magenta);
+			//plot.addPoints(r, maxp, Plot2.LINE);
 			plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
@@ -821,13 +889,31 @@ public class BenchmarkSpotFilter implements PlugIn
 		return i;
 	}
 
-	private void addResult(StringBuilder sb, MatchResult matchResult)
+	private void addResult(StringBuilder sb, FractionClassificationResult matchResult)
 	{
-		sb.append(matchResult.getTruePositives()).append("\t");
-		sb.append(matchResult.getFalsePositives()).append("\t");
+		addCount(sb, matchResult.getTP());
+		addCount(sb, matchResult.getFP());
 		sb.append(Utils.rounded(matchResult.getRecall())).append("\t");
 		sb.append(Utils.rounded(matchResult.getPrecision())).append("\t");
 		sb.append(Utils.rounded(matchResult.getJaccard())).append("\t");
+	}
+
+	private static void addCount(StringBuilder sb, double value)
+	{
+		// Check if the double holds an integer count
+		if ((int) value == value)
+		{
+			sb.append((int) value);
+		}
+		else
+		{
+			// Otherwise add the counts using at least 2 dp
+			if (value > 100)
+				sb.append(IJ.d2s(value));
+			else
+				sb.append(Utils.rounded(value));
+		}
+		sb.append("\t");
 	}
 
 	private void createTable()
@@ -843,7 +929,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\td\t");
+		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tlower d\td\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
