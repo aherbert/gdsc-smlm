@@ -98,7 +98,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
 	private static double distance = 1.5;
-	private static double matchSignal = 2;
+	private static double matchSignal = 3;
 
 	private boolean extraOptions = false;
 
