@@ -89,6 +89,10 @@ public class Population
 	public Chromosome evolve(Mutator mutator, Recombiner recombiner, FitnessFunction fitnessFunction,
 			SelectionStrategy selectionStrategy, ConvergenceChecker checker)
 	{
+		// Reset the fitness
+		for (Chromosome c : individuals)
+			c.setFitness(0);
+		
 		// Find the best individual
 		grow(selectionStrategy, mutator, recombiner);
 		Chromosome current = evaluateFitness(fitnessFunction);
@@ -201,7 +205,7 @@ public class Population
 		// Combine the lists
 		newIndividuals.addAll(individuals);
 		individuals = newIndividuals;
-		
+
 		end();
 	}
 
@@ -295,7 +299,7 @@ public class Population
 		fitnessFunction.shutdown();
 
 		end();
-		
+
 		return best;
 	}
 
