@@ -41,6 +41,7 @@ import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.results.match.FractionClassificationResult;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.RampedScore;
 import gdsc.smlm.utils.Sort;
 import gdsc.smlm.utils.StoredDataStatistics;
 import gdsc.smlm.utils.UnicodeReader;
@@ -499,17 +500,25 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
 
-			final double fuzzyDistanceMax = BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
-			final double fuzzyDistanceMin = BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0;
-			final double fuzzyDistanceRange = fuzzyDistanceMax - fuzzyDistanceMin;
-			// If signal factor scoring was disabled then BenchmarkSpotFit.signalFactor will be zero
-			final double fuzzyFactorMax = BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0;
-			final double fuzzyFactorMin = BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0;
-			final double fuzzyFactorRange = fuzzyFactorMax - fuzzyFactorMin;
+			final RampedScore distanceScore = new RampedScore(BenchmarkSpotFit.distanceInPixels * partialMatchDistance /
+					100.0, BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
 
-			resultsPrefix3 = "\t" + Utils.rounded(fuzzyDistanceMin * simulationParameters.a) + "\t" +
-					Utils.rounded(fuzzyDistanceMax * simulationParameters.a) + "\t" + Utils.rounded(fuzzyFactorMin) +
-					"\t" + Utils.rounded(fuzzyFactorMax);
+			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
+					Utils.rounded(distanceScore.upper * simulationParameters.a);
+
+			// If signal factor must be greater than 1
+			final RampedScore signalScore;
+			if (BenchmarkSpotFit.signalFactor > 1)
+			{
+				signalScore = new RampedScore(BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0,
+						BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0);
+				resultsPrefix3 += "\t" + Utils.rounded(signalScore.lower) + "\t" + Utils.rounded(signalScore.upper);
+			}
+			else
+			{
+				signalScore = null;
+				resultsPrefix3 += "\t0\t0";
+			}
 
 			MemoryPeakResults r = new MemoryPeakResults();
 			Calibration cal = new Calibration(simulationParameters.a, simulationParameters.gain, 100);
@@ -571,7 +580,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 						// Binary classification uses a score of 1 (match) or 0 (no match)
 						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
-						float score = 0;
+						double score = 0;
 						double depth = 0;
 						if (result.fitMatch[index])
 						{
@@ -582,44 +591,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							// Store depth of matches for later analysis
 							depth = result.zMatch[position];
 
-							if (distance <= fuzzyDistanceMax)
-							{
-								if (distance <= fuzzyDistanceMin)
-								{
-									score = 1;
-								}
-								else
-								{
-									// Interpolate from the minimum to the maximum match distance:
-									// Linear 
-									//score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
-									// Cosine
-									score = (float) (0.5 * (1 + Math
-											.cos(((distance - fuzzyDistanceMin) / fuzzyDistanceRange) * Math.PI)));
-								}
-							}
+							score = distanceScore.score(distance);
 
-							// Apply the weighting for the signal factor if enabled 
-							if (fuzzyFactorMax != 0)
+							// Apply the weighting for the signal factor if enabled
+							if (signalScore != null)
 							{
-								double score2 = 0;
-								if (factor <= fuzzyFactorMax)
-								{
-									if (factor <= fuzzyFactorMin)
-									{
-										score2 = 1;
-									}
-									else
-									{
-										// Interpolate from the minimum to the maximum match f:
-										// Linear 
-										//score = (float) ((fuzzyMax - result.d[index]) / fuzzyRange);
-										// Cosine
-										score2 = (float) (0.5 * (1 + Math
-												.cos(((factor - fuzzyFactorMin) / fuzzyFactorRange) * Math.PI)));
-									}
-								}
-								score *= score2;
+								score *= signalScore.score(factor);
 							}
 
 							if (score > 0)
@@ -628,8 +605,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							}
 						}
 
+						float score2 = RampedScore.flatten((float) score, 256);
+
 						// Use a custom peak result so that the depth can be stored.
-						r.add(new DepthPeakResult(peak, origX, origY, score, fitResult.getError(), result.noise,
+						r.add(new DepthPeakResult(peak, origX, origY, score2, fitResult.getError(), result.noise,
 								params, depth));
 					}
 				}
