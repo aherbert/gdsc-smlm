@@ -2139,11 +2139,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		Filter filter = (Filter) individuals.get(0);
 
-		FractionClassificationResult r;
-		if (ga_subset)
-			r = filter.fractionScoreSubset(ga_resultsListToScore, failCount, ga_tn, ga_fn);
-		else
-			r = scoreFilter(filter, ga_resultsListToScore);
+		// This filter may not have been part of the scored subset so use the entire results set for reporting
+		FractionClassificationResult r = scoreFilter(filter, ga_resultsList);
 
 		String text = createResult(filter, r);
 		gaWindow.append(text + "\t" + ga_iteration);
