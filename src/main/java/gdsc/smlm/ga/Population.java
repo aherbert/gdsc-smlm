@@ -92,7 +92,7 @@ public class Population
 		// Reset the fitness
 		for (Chromosome c : individuals)
 			c.setFitness(0);
-		
+
 		// Find the best individual
 		grow(selectionStrategy, mutator, recombiner);
 		Chromosome current = evaluateFitness(fitnessFunction);
@@ -103,7 +103,11 @@ public class Population
 		{
 			previous = current;
 			// Select the best individuals and expand the population
-			select(selectionStrategy);
+			if (!select(selectionStrategy))
+			{
+				current = null;
+				break;
+			}
 			grow(selectionStrategy, mutator, recombiner);
 			// Evaluate the fitness and check convergence
 			current = evaluateFitness(fitnessFunction);
@@ -308,13 +312,14 @@ public class Population
 	 * 
 	 * @param selection
 	 *            The selection strategy
+	 * @return True if a valid population was selected (size>=1)
 	 */
-	private void select(SelectionStrategy selection)
+	private boolean select(SelectionStrategy selection)
 	{
 		start("Select");
 		individuals = selection.select(individuals);
-		checkSize(individuals.size());
 		end();
+		return !individuals.isEmpty();
 	}
 
 	/**
