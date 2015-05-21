@@ -154,8 +154,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private boolean isHeadless;
 	private long totalTime = 0, currentTime;
 
-	private static String[] COLUMNS = { "nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR",
-			"ACC", "MCC", "Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard" };
+	private static String[] COLUMNS = {
+			// Scores against the fit results that did not fail		
+			"nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC", "MCC",
+			"Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard",
+			// Scores against the original localisations. Calculated using the number of localisations 
+			"oFN", "oRecall", "oF1", "oJaccard", };
 
 	private static boolean[] showColumns;
 	static
@@ -168,14 +172,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		showColumns[2] = true; // FP
 		showColumns[3] = true; // TN
 		showColumns[4] = true; // FN
-		showColumns[COLUMNS.length - 7] = true; // MCC
-		showColumns[COLUMNS.length - 4] = true; // Recall
-		showColumns[COLUMNS.length - 3] = true; // Precision
-		showColumns[COLUMNS.length - 1] = true; // Jaccard
+		showColumns[COLUMNS.length - 11] = true; // MCC
+		showColumns[COLUMNS.length - 8] = true; // Recall
+		showColumns[COLUMNS.length - 7] = true; // Precision
+		showColumns[COLUMNS.length - 5] = true; // Jaccard
+		showColumns[COLUMNS.length - 4] = true; // oFN
+		showColumns[COLUMNS.length - 3] = true; // oRecall
+		showColumns[COLUMNS.length - 1] = true; // oJaccard
 
-		// Use the precision as criteria to ensure a set confidence on results labelled as true  
-		criteriaIndex = COLUMNS.length - 3;
-		scoreIndex = COLUMNS.length - 7;
+		// Use the precision as criteria to ensure a set confidence on results labelled as true
+		criteriaIndex = COLUMNS.length - 7;
+		// Score against the original data so we can compare across filters and fit solvers
+		scoreIndex = COLUMNS.length - 1;
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
@@ -506,7 +514,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
 
-			// If signal factor must be greater than 1
+			// Signal factor must be greater than 1
 			final RampedScore signalScore;
 			if (BenchmarkSpotFit.signalFactor > 1)
 			{
@@ -1096,12 +1104,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
 				sb.append("\t").append(COLUMNS[i]);
-
-		// Always show the results compared to the original simulation
-		sb.append("\toRecall");
-		sb.append("\toPrecision");
-		sb.append("\toF1");
-		sb.append("\toJaccard");
+		
 		if (depthSummary)
 			sb.append("\tDepth Recall");
 		return sb.toString();
@@ -1476,6 +1479,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				return s.getF1Score();
 			case 19:
 				return s.getJaccard();
+			case 20:
+				return getOriginalScore(s).getFN();
+			case 21:
+				return getOriginalScore(s).getRecall();
+			case 22:
+				return getOriginalScore(s).getF1Score();
+			case 23:
+				return getOriginalScore(s).getJaccard();
 		}
 		return 0;
 	}
@@ -1612,19 +1623,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		add(sb, r.getJaccard(), i++);
 
 		// Score relative to the original simulated number of spots
-		// Score the fitting results:
+		FractionClassificationResult m = getOriginalScore(r);
+		addCount(sb, m.getFN(), i++);
+		add(sb, m.getRecall(), i++);
+		add(sb, m.getF1Score(), i++);
+		add(sb, m.getJaccard(), i++);
+		return sb.toString();
+	}
+	
+	private FractionClassificationResult getOriginalScore(FractionClassificationResult r)
+	{
+		// Score the fitting results against the original simulated data:
 		// TP are all fit results that can be matched to a spot
 		// FP are all fit results that cannot be matched to a spot
-		// FN = The number of missed spots
-		final double tp = r.getTP();
-		final double fp = r.getFP();
-		FractionClassificationResult m = new FractionClassificationResult(tp, fp, 0, simulationParameters.molecules -
-				tp);
-		add(sb, m.getRecall());
-		add(sb, m.getPrecision());
-		add(sb, m.getF1Score());
-		add(sb, m.getJaccard());
-		return sb.toString();
+		// FN are the number of missed spots
+		// Note: We cannot calculate TN since this is the number of fit candidates that are 
+		// filtered after fitting that do not match a spot or were not fitted. 
+		final double fn = simulationParameters.molecules - r.getTP();
+		return new FractionClassificationResult(r.getTP(), r.getFP(), 0, fn);
 	}
 
 	private static void add(StringBuilder sb, String value)
@@ -1663,11 +1679,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		if (showColumns[i])
 			add(sb, Utils.rounded(value));
-	}
-
-	private static void add(StringBuilder sb, double value)
-	{
-		add(sb, Utils.rounded(value));
 	}
 
 	private void saveFilter(Filter filter)
