@@ -313,7 +313,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.maxSignal = maxSignal;
 			this.signalPerFrame = signalPerFrame;
 			this.depth = depth;
-			this.fixedDepth = fixedDepth;
+			// We must have a fixed depth if the depth is zero
+			this.fixedDepth = (depth > 0) ? fixedDepth : true;
 			this.bias = bias;
 			this.emCCD = emCCD;
 			this.gain = gain;
