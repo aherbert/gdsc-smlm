@@ -144,6 +144,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static String oldFilename = "";
 	private static long lastModified = 0;
 	private static List<FilterSet> filterList = null;
+	private static boolean[][] wasNotExpanded;
 	private static int lastId = 0;
 	private static boolean lastRank = false;
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
@@ -320,12 +321,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return null;
 	}
 
+	private static boolean wasNotExpanded(int setNumber, int parameterNumber)
+	{
+		setNumber--;
+		if (wasNotExpanded[setNumber] == null)
+			return true;
+		return wasNotExpanded[setNumber][parameterNumber];
+	}
+
 	/**
 	 * If filters have been provided in FiltersSets of 3 then expand the filters into a set assuming the three represent
 	 * min:max:increment.
 	 */
 	private void expandFilters()
 	{
+		wasNotExpanded = new boolean[filterList.size()][];
 		long[] expanded = new long[filterList.size()];
 		String[] name = new String[expanded.length];
 		int c = 0;
@@ -340,11 +350,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				Filter f2 = filterSet.getFilters().get(1);
 				Filter f3 = filterSet.getFilters().get(2);
 				int n = f1.getNumberOfParameters();
+				wasNotExpanded[c] = new boolean[n];
 				long combinations = 1;
 				for (int i = 0; i < n; i++)
 				{
+					wasNotExpanded[c][i] = true;
 					if (f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0)
 					{
+						wasNotExpanded[c][i] = false;
 						// This can be expanded ... Count the combinations
 						BigDecimal min = new BigDecimal(f1.getParameterValue(i));
 						BigDecimal max = new BigDecimal(f2.getParameterValue(i));
@@ -1104,7 +1117,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
 				sb.append("\t").append(COLUMNS[i]);
-		
+
 		if (depthSummary)
 			sb.append("\tDepth Recall");
 		return sb.toString();
@@ -1181,7 +1194,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			gd.addMessage("Configure the step size for each parameter");
 			int[] indices = filter.getChromosomeParameters();
 			for (int j = 0; j < indices.length; j++)
-				gd.addNumericField(getDialogName(prefix, filter.getParameterName(indices[j])), stepSize[j] * delta, 2);
+			{
+				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
+				final double step = (wasNotExpanded(setNumber, j)) ? 0 : stepSize[j] * delta;
+				gd.addNumericField(getDialogName(prefix, filter.getParameterName(indices[j])), step, 2);
+			}
 
 			gd.showDialog();
 
@@ -1630,7 +1647,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		add(sb, m.getJaccard(), i++);
 		return sb.toString();
 	}
-	
+
 	private FractionClassificationResult getOriginalScore(FractionClassificationResult r)
 	{
 		// Score the fitting results against the original simulated data:
