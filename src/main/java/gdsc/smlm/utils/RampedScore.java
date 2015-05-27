@@ -67,6 +67,20 @@ public class RampedScore
 	}
 
 	/**
+	 * Provide a score between 0 and 1 for the value. Return 1 if below the lower limit, 0 if above the upper limit,
+	 * otherwise ramp smoothly from 1 to 0. Flatten the score to a new score that will have a maximum number of steps
+	 * between 0 and 1.
+	 * 
+	 * @param value
+	 * @param steps
+	 * @return the score
+	 */
+	public double scoreAndFlatten(double value, int steps)
+	{
+		return flatten(score(value), steps);
+	}
+
+	/**
 	 * Flatten the score to a new score that will have a maximum number of steps between 0 and 1.
 	 * 
 	 * @param score
