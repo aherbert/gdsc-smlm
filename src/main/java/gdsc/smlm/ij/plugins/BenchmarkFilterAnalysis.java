@@ -675,7 +675,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 			}
 
-			checkTotals(r);
+			checkTotals(r, c_tn, c_fn);
 
 			if (r.size() > 0)
 			{
@@ -689,8 +689,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * Check the current scoring totals sum to the number of spot candidates
 	 * 
 	 * @param r
+	 * @param tn 
+	 * @param fn 
 	 */
-	private void checkTotals(MemoryPeakResults r)
+	private void checkTotals(MemoryPeakResults r, double tn, double fn)
 	{
 		double tp = 0, fp = 0;
 		for (PeakResult peak : r.getResults())
@@ -698,7 +700,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			tp += peak.getTruePositiveScore();
 			fp += peak.getFalsePositiveScore();
 		}
-		checkTotals(tp, fp, c_fn, c_tn);
+		checkTotals(tp, fp, tn, fn);
 	}
 
 	/**
@@ -2197,7 +2199,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				ga_tn += score[2];
 				ga_fn += score[3];
 
-				checkTotals(ga_resultsListToScore.get(0));
+				checkTotals(ga_resultsListToScore.get(0), ga_tn, ga_fn);
 			}
 		}
 	}
