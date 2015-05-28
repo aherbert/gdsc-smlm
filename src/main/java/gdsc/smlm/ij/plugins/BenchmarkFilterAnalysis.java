@@ -714,7 +714,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final int t = (int) (tp + fp + tn + fn);
 		if (candidates != t)
 		{
-			System.out.printf("n = %d != %d, TP %f, FP %f, TN %f, FN %f\n", candidates, t, tp, fp, tn, fn);
+			System.out.printf("Scoring error: n = %d != %d, TP %f, FP %f, TN %f, FN %f\n", candidates, t, tp, fp, tn, fn);
 		}
 	}
 
