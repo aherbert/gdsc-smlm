@@ -605,7 +605,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							SpotMatch match = getMatch(result.match, index);
 
 							// Store depth of matches for later analysis
-							depth = match.d;
+							depth = match.z;
 
 							final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
 							matchScore = dScore;
