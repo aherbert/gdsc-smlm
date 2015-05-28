@@ -716,4 +716,44 @@ public class PeakResult implements Comparable<PeakResult>
 	{
 		return 0;
 	}
+
+	/**
+	 * Return the true positive score for use in classification analysis
+	 * 
+	 * @return The true positive score
+	 */
+	public double getTruePositiveScore()
+	{
+		return (origValue != 0) ? 1 : 0;
+	}
+
+	/**
+	 * Return the false positive score for use in classification analysis
+	 * 
+	 * @return The false positive score
+	 */
+	public double getFalsePositiveScore()
+	{
+		return 1 - getTruePositiveScore();
+	}
+
+	/**
+	 * Return the true negative score for use in classification analysis
+	 * 
+	 * @return The true negative score
+	 */
+	public double getTrueNegativeScore()
+	{
+		return (origValue != 0) ? 0 : 1;
+	}
+
+	/**
+	 * Return the false negative score for use in classification analysis
+	 * 
+	 * @return The false negative score
+	 */
+	public double getFalseNegativeScore()
+	{
+		return 1 - getTrueNegativeScore();
+	}
 }

@@ -28,6 +28,7 @@ import gdsc.smlm.ga.SimpleRecombiner;
 import gdsc.smlm.ga.SimpleSelectionStrategy;
 import gdsc.smlm.ga.ToleranceChecker;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
+import gdsc.smlm.ij.plugins.BenchmarkSpotFit.SpotMatch;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -150,6 +151,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
 	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
 	private static List<MemoryPeakResults> resultsList = null;
+	private static int candidates;
+	private static double c_tn, c_fn;
 	private static StoredDataStatistics depthStats, depthFitStats;
 
 	private boolean isHeadless;
@@ -520,6 +523,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			resultsList = new LinkedList<MemoryPeakResults>();
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
+			candidates = 0;
+			c_tn = c_fn = 0;
 
 			final RampedScore distanceScore = new RampedScore(BenchmarkSpotFit.distanceInPixels * partialMatchDistance /
 					100.0, BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
@@ -555,6 +560,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				final int peak = entry.getKey().intValue();
 				final FilterCandidates result = entry.getValue();
 				depthStats.add(result.zPosition);
+				candidates += result.spots.length;
 
 				// Results are in order of candidate ranking.
 				int[] indices = Utils.newArray(result.fitResult.length, 0, 1);
@@ -571,16 +577,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						}
 					}
 					Sort.sort(indices, score);
-				}
-
-				// Data about the match is stored in small arrays of size equal to the number of matches.
-				// Create an array holding the full index position corresponding to each match.
-				int[] positionIndex = new int[result.dMatch.length];
-				int count = 0;
-				for (int i = 0; i < result.fitMatch.length; i++)
-				{
-					if (result.fitMatch[i])
-						positionIndex[count++] = i;
 				}
 
 				for (int i = 0; i < result.fitResult.length; i++)
@@ -601,61 +597,133 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 						// Binary classification uses a score of 1 (match) or 0 (no match)
 						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
-						double score = 0;
+						double matchScore = 0, noMatchScore = 1;
 						double depth = 0;
 						if (result.fitMatch[index])
 						{
-							final int position = getPosition(positionIndex, index);
-							final double distance = result.dMatch[position];
-							final double factor = result.fMatch[position];
+							// Find the result
+							SpotMatch match = getMatch(result.match, index);
 
 							// Store depth of matches for later analysis
-							depth = result.zMatch[position];
+							depth = match.d;
 
-							score = distanceScore.score(distance);
+							final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
+							matchScore = dScore;
+							noMatchScore = 1 - matchScore;
 
 							// Apply the weighting for the signal factor if enabled
 							if (signalScore != null)
 							{
-								score *= signalScore.score(factor);
+								final double fScore = signalScore.scoreAndFlatten(match.getSignalFactor(), 256);
+								matchScore = RampedScore.flatten(matchScore * fScore, 256);
+								noMatchScore = fScore - matchScore;
 							}
 
-							if (score > 0)
+							if (matchScore > 0)
 							{
 								depthFitStats.add(depth);
 							}
+
+							// Any remaining score should be accumulated as an unfitted result,
+							// i.e. since the signal fit is poor then treat this as partially unfitted.
+							final double fScore = matchScore + noMatchScore;
+							if (fScore < 1)
+							{
+								final double fraction = 1 - fScore;
+								final double fn = RampedScore.flatten(dScore * fraction, 256);
+								final double tn = fraction - fn;
+								c_fn += fn;
+								c_tn += tn;
+
+								//if (fn + tn + matchScore + noMatchScore != 1)
+								//{
+								//	System.out.printf("%f != 1, %f, %f, %f, %f\n", fn + tn + matchScore + noMatchScore,
+								//			fn, tn, matchScore, noMatchScore);
+								//}
+							}
+							//else if (matchScore + noMatchScore != 1)
+							//{
+							//	System.out.printf("%f != 1, %f, %f\n", matchScore + noMatchScore, matchScore,
+							//			noMatchScore);
+							//}
 						}
 
-						float score2 = RampedScore.flatten((float) score, 256);
+						final float score2 = RampedScore.flatten((float) matchScore, 256);
 
 						// Use a custom peak result so that the depth can be stored.
 						r.add(new DepthPeakResult(peak, origX, origY, score2, fitResult.getError(), result.noise,
-								params, depth));
+								params, depth, matchScore, noMatchScore));
 					}
+					else
+					{
+						// This was not fitted
+						c_tn++;
+					}
+				}
+
+				// Accumulate the TN and FN scores for spot candidates that were not fitted but match a result
+				for (SpotMatch match : result.match)
+				{
+					if (match.isFitResult())
+						// This has been processed above as a fitMatch
+						continue;
+					// This is an unfitted result that matches so is a negative
+					final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
+					c_fn += dScore;
+					// This should be '+= 1 - dScore' but we incremented c_tn above for all candidates that were not fitted
+					c_tn -= dScore;
 				}
 			}
 
+			checkTotals(r);
+
 			if (r.size() > 0)
 			{
-				// Normalise the fuzzy weighting
-				//final double w = tp / sum;
-				//for (PeakResult result : r.getResults())
-				//{
-				//	if (result.origValue != 0)
-				//		result.origValue *= w;
-				//}			
 				resultsList.add(r);
 			}
 		}
 		return resultsList;
 	}
 
-	private int getPosition(int[] positionIndex, int index)
+	/**
+	 * Check the current scoring totals sum to the number of spot candidates
+	 * 
+	 * @param r
+	 */
+	private void checkTotals(MemoryPeakResults r)
 	{
-		for (int c = 0; c < positionIndex.length; c++)
-			if (positionIndex[c] == index)
-				return c;
-		throw new RuntimeException("Cannot find the position for the match");
+		double tp = 0, fp = 0;
+		for (PeakResult peak : r.getResults())
+		{
+			tp += peak.getTruePositiveScore();
+			fp += peak.getFalsePositiveScore();
+		}
+		checkTotals(tp, fp, c_fn, c_tn);
+	}
+
+	/**
+	 * Check the scoring totals sum to the number of spot candidates
+	 * 
+	 * @param tp
+	 * @param fp
+	 * @param tn
+	 * @param fn
+	 */
+	private void checkTotals(double tp, double fp, double tn, double fn)
+	{
+		final int t = (int) (tp + fp + tn + fn);
+		if (candidates != t)
+		{
+			System.out.printf("n = %d != %d, TP %f, FP %f, TN %f, FN %f\n", candidates, t, tp, fp, tn, fn);
+		}
+	}
+
+	private SpotMatch getMatch(SpotMatch[] match, int index)
+	{
+		for (SpotMatch m : match)
+			if (m.i == index)
+				return m;
+		throw new RuntimeException("Cannot find the match for the position");
 	}
 
 	private boolean showDialog(List<MemoryPeakResults> resultsList)
@@ -1565,6 +1633,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 		else
 			r = scoreFilter(filter, resultsList);
+
+		//checkTotals(r.getTP(), r.getFP(), r.getTN(), r.getFN());
+
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
 
@@ -1594,9 +1665,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private FractionClassificationResult scoreFilter(Filter filter, List<MemoryPeakResults> resultsList)
 	{
-		if (failCountRange == 0)
-			return filter.fractionScore(resultsList, failCount);
-
 		double tp = 0, fp = 0, tn = 0, fn = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
@@ -1606,7 +1674,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			tn += r.getTN();
 			fn += r.getFN();
 		}
-		return new FractionClassificationResult(tp, fp, tn, fn);
+		// Normalise by the number of evaluations
+		final int n = failCountRange + 1;
+		return new FractionClassificationResult(tp / n, fp / n, c_tn + tn / n, c_fn + fn / n);
 	}
 
 	public String createResult(Filter filter, FractionClassificationResult r)
@@ -1983,13 +2053,39 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private class DepthPeakResult extends PeakResult
 	{
-		double depth;
+		final double depth, matchScore, noMatchScore;
 
 		public DepthPeakResult(int peak, int origX, int origY, float score, double error, float noise, float[] params,
-				double depth)
+				double depth, double matchScore, double noMatchScore)
 		{
 			super(peak, origX, origY, score, error, noise, params, null);
 			this.depth = depth;
+			this.matchScore = matchScore;
+			this.noMatchScore = noMatchScore;
+		}
+
+		@Override
+		public double getTruePositiveScore()
+		{
+			return matchScore;
+		}
+
+		@Override
+		public double getFalsePositiveScore()
+		{
+			return noMatchScore;
+		};
+
+		@Override
+		public double getTrueNegativeScore()
+		{
+			return noMatchScore;
+		}
+
+		@Override
+		public double getFalseNegativeScore()
+		{
+			return matchScore;
 		}
 	}
 
@@ -2065,8 +2161,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private void initialiseScoring(FilterSet filterSet)
 	{
-		ga_tn = 0;
-		ga_fn = 0;
+		// Initialise with the candidate true and false negative scores
+		ga_tn = c_tn;
+		ga_fn = c_fn;
 		ga_resultsListToScore = ga_resultsList;
 		ga_subset = false;
 
@@ -2097,8 +2194,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							score[j] += score2[j];
 					}
 				}
-				ga_tn = score[2];
-				ga_fn = score[3];
+				ga_tn += score[2];
+				ga_fn += score[3];
+
+				checkTotals(ga_resultsListToScore.get(0));
 			}
 		}
 	}

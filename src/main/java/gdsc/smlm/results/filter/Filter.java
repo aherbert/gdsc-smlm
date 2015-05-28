@@ -127,6 +127,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	/**
 	 * Filter the results
 	 * <p>
+	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
+	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
+	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
+	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 * <p>
@@ -148,8 +153,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		double tp = 0, tn = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			final boolean isTrue = peak.origValue != 0;
-
 			if (frame != peak.peak)
 			{
 				frame = peak.peak;
@@ -170,25 +173,15 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 				failCount++;
 			}
 
-			if (isTrue)
+			if (isPositive)
 			{
-				if (isPositive)
-				{
-					tp += peak.origValue; // true positive
-					fp += 1f - peak.origValue;
-				}
-				else
-				{
-					fn += peak.origValue; // false negative
-					tn += 1f - peak.origValue;
-				}
+				tp += peak.getTruePositiveScore();
+				fp += peak.getFalsePositiveScore();
 			}
 			else
 			{
-				if (isPositive)
-					fp++; // false positive
-				else
-					tn++; // true negative
+				fn += peak.getFalseNegativeScore();
+				tn += peak.getTrueNegativeScore();
 			}
 		}
 		end();
@@ -206,6 +199,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 
 	/**
 	 * Filter the results
+	 * <p>
+	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
+	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
+	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
+	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
@@ -230,8 +228,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		double tp = 0, tn = 0;
 		for (PeakResult peak : results.getResults())
 		{
-			final boolean isTrue = peak.origValue != 0;
-
 			if (frame != peak.peak)
 			{
 				frame = peak.peak;
@@ -261,25 +257,15 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 				failCount++;
 			}
 
-			if (isTrue)
+			if (isPositive)
 			{
-				if (isPositive)
-				{
-					tp += peak.origValue; // true positive
-					fp += 1f - peak.origValue;
-				}
-				else
-				{
-					fn += peak.origValue; // false negative
-					tn += 1f - peak.origValue;
-				}
+				tp += peak.getTruePositiveScore();
+				fp += peak.getFalsePositiveScore();
 			}
 			else
 			{
-				if (isPositive)
-					fp++; // false positive
-				else
-					tn++; // true negative
+				fn += peak.getFalseNegativeScore();
+				tn += peak.getTrueNegativeScore();
 			}
 		}
 		end();
@@ -549,9 +535,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
 	 * true or false.
 	 * <p>
-	 * Any input PeakResult with an original value that is not zero will be treated as a true result with a weighting
-	 * equal to the score (instead of the classic weighting of one), all other results are false. The filter is run and
-	 * the results are marked as true positive, false negative and false positive.
+	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
+	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
+	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
+	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
@@ -574,8 +561,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 			int failCount = 0;
 			for (PeakResult peak : peakResults.getResults())
 			{
-				final boolean isTrue = peak.origValue != 0;
-
 				// Reset fail count for new frames
 				if (frame != peak.peak)
 				{
@@ -604,25 +589,15 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 					failCount++;
 				}
 
-				if (isTrue)
+				if (isPositive)
 				{
-					if (isPositive)
-					{
-						tp += peak.origValue; // true positive
-						fp += 1f - peak.origValue;
-					}
-					else
-					{
-						fn += peak.origValue; // false negative
-						tn += 1f - peak.origValue;
-					}
+					tp += peak.getTruePositiveScore();
+					fp += peak.getFalsePositiveScore();
 				}
 				else
 				{
-					if (isPositive)
-						fp++; // false positive
-					else
-						tn++; // true negative
+					fn += peak.getFalseNegativeScore();
+					tn += peak.getTrueNegativeScore();
 				}
 			}
 			end();
@@ -634,9 +609,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
 	 * true or false.
 	 * <p>
-	 * Any input PeakResult with an original value that is not zero will be treated as a true result with a weighting
-	 * equal to the score (instead of the classic weighting of one), all other results are false. The filter is run and
-	 * the results are marked as true positive, false negative and false positive.
+	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
+	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
+	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
+	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
@@ -669,8 +645,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 			int failCount = 0;
 			for (PeakResult peak : peakResults.getResults())
 			{
-				final boolean isTrue = peak.origValue != 0;
-
 				// Reset fail count for new frames
 				if (frame != peak.peak)
 				{
@@ -701,25 +675,15 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 					failCount++;
 				}
 
-				if (isTrue)
+				if (isPositive)
 				{
-					if (isPositive)
-					{
-						tp += peak.origValue; // true positive
-						fp += 1f - peak.origValue;
-					}
-					else
-					{
-						fn += peak.origValue; // false negative
-						tn += 1f - peak.origValue;
-					}
+					tp += peak.getTruePositiveScore();
+					fp += peak.getFalsePositiveScore();
 				}
 				else
 				{
-					if (isPositive)
-						fp++; // false positive
-					else
-						tn++; // true negative
+					fn += peak.getFalseNegativeScore();
+					tn += peak.getTrueNegativeScore();
 				}
 			}
 			end();

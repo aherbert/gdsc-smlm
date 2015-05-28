@@ -37,12 +37,12 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.match.BasePoint;
-import gdsc.smlm.results.match.ClassificationResult;
 import gdsc.smlm.results.match.Coordinate;
+import gdsc.smlm.results.match.FractionClassificationResult;
 import gdsc.smlm.results.match.MatchCalculator;
-import gdsc.smlm.results.match.MatchResult;
 import gdsc.smlm.results.match.PointPair;
 import gdsc.smlm.utils.NoiseEstimator.Method;
+import gdsc.smlm.utils.RampedScore;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
@@ -98,6 +98,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
 	private static double distance = 1.5;
+	private static double lowerDistance = 1.5;
 	private static double matchSignal = 3;
 
 	private boolean extraOptions = false;
@@ -122,36 +123,114 @@ public class BenchmarkSpotFit implements PlugIn
 	static int fitResultsId = 0;
 	static HashMap<Integer, FilterCandidates> fitResults;
 	static double distanceInPixels;
+	static double lowerDistanceInPixels;
 	static double signalFactor;
+	static double candidateTN, candidateFN;
 
 	public static String tablePrefix, resultPrefix;
+
+	/**
+	 * Store details of spot candidates that match actual spots
+	 */
+	public abstract class SpotMatch
+	{
+		/**
+		 * The index for the spot candidate
+		 */
+		final int i;
+		/**
+		 * The distance to the spot
+		 */
+		final double d;
+		/**
+		 * The depth of the actual spot
+		 */
+		final double z;
+
+		public SpotMatch(int i, double d, double z)
+		{
+			this.i = i;
+			this.d = d;
+			this.z = z;
+		}
+
+		/**
+		 * @return True if the spot candidate was successfully fitted
+		 */
+		public abstract boolean isFitResult();
+
+		/**
+		 * @return The factor difference between the successfully fitted signal and the actual signal
+		 */
+		public abstract double getSignalFactor();
+	}
+
+	/**
+	 * Store details of a fitted spot candidate that matches an actual spot
+	 */
+	public class FitMatch extends SpotMatch
+	{
+		final double f;
+
+		public FitMatch(int i, double d, double z, double f)
+		{
+			super(i, d, z);
+			this.f = f;
+		}
+
+		@Override
+		public boolean isFitResult()
+		{
+			return true;
+		}
+
+		@Override
+		public double getSignalFactor()
+		{
+			return f;
+		}
+	}
+
+	/**
+	 * Store details of a spot candidate that matches an actual spot
+	 */
+	public class CandidateMatch extends SpotMatch
+	{
+		public CandidateMatch(int i, double d, double z)
+		{
+			super(i, d, z);
+		}
+
+		@Override
+		public boolean isFitResult()
+		{
+			return false;
+		}
+
+		@Override
+		public double getSignalFactor()
+		{
+			return 0;
+		}
+	}
 
 	public class FilterCandidates implements Cloneable
 	{
 		final int p, n;
 		final ScoredSpot[] spots;
-		int tp, fp, tn, fn;
+		double tp, fp, tn, fn;
 		FitResult[] fitResult;
-		// Store if the candidates match a position
-		boolean[] fitMatch;
-		/**
-		 * Store the distance to the actual spots that were matched by a candidate. Size equals the number of trues in
-		 * the fitMatch array.
-		 */
-		double[] dMatch;
 		float noise;
+
+		/** Store if the candidates can be fitted and match a position. Size is the number of scored spots */
+		boolean[] fitMatch;
 		/** Store the z-position of the actual spots for later analysis. Size is the number of actual spots */
 		double[] zPosition;
+
 		/**
-		 * Store the z-position of the actual spots that were matched by a candidate. Size equals the number of trues in
-		 * the fitMatch array.
+		 * Store details about the actual spots that were matched by spot candidates or fitted spot candidates
 		 */
-		double[] zMatch;
-		/**
-		 * Store the signal factor between the predicted and actual signal for spots that were matched by a candidate.
-		 * Size equals the number of trues in the fitMatch array.
-		 */
-		double[] fMatch;
+		SpotMatch[] match;
 
 		public FilterCandidates(int p, int n, ScoredSpot[] spots)
 		{
@@ -253,7 +332,6 @@ public class BenchmarkSpotFit implements PlugIn
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
 			FilterCandidates candidates = filterCandidates.get(frame);
-			int tp = 0, fp = 0, tn = 0, fn = 0;
 			FitResult[] fitResult = new FitResult[candidates.spots.length];
 
 			// Fit the candidates and store the results
@@ -269,18 +347,20 @@ public class BenchmarkSpotFit implements PlugIn
 			ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
 			fitWorker.run(job); // Results will be stored in the fit job 
 
+			@SuppressWarnings("unused")
+			int fittedSpots = 0;
 			for (int i = 0; i < spots.length; i++)
 			{
 				fitResult[i] = job.getFitResult(i);
+				if (fitResult[i].getStatus() == FitStatus.OK)
+					fittedSpots++;
 			}
 
 			// Compute the matches of the fitted spots to the simulated positions
-			final boolean[] fitMatch = new boolean[spots.length];
-			double[] dMatch = new double[spots.length];
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			final double[] zPosition = new double[actual.length];
-			double[] zMatch = new double[spots.length];
-			double[] fMatch = new double[spots.length];
+			final boolean[] fitMatch = new boolean[spots.length];
+			SpotMatch[] match = new SpotMatch[spots.length];
 			int matchCount = 0;
 			if (actual.length > 0)
 			{
@@ -303,11 +383,11 @@ public class BenchmarkSpotFit implements PlugIn
 						predicted[count++] = new BasePoint((float) params[Gaussian2DFunction.X_POSITION],
 								(float) params[Gaussian2DFunction.Y_POSITION], i);
 					}
-					//else if (candidates.spots[i].match)
-					//{
-					//	System.out.printf("[%d] %s: [%d,%d = %.1f]\n", frame, fitResult[i].getStatus().toString(),
-					//			spots[i].x, spots[i].y, spots[i].intensity);
-					//}
+					else
+					{
+						// Use the candidate position instead
+						predicted[count++] = new BasePoint(spots[i].x, spots[i].y, -1 - i);
+					}
 				}
 				// If we made any fits then score them
 				if (count > 0)
@@ -320,60 +400,79 @@ public class BenchmarkSpotFit implements PlugIn
 					for (PointPair pair : matches)
 					{
 						final BasePoint p2 = (BasePoint) pair.getPoint2();
-						final int i = (int) p2.getZ();
+						int i = (int) p2.getZ();
 						final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
 
-						final double a = p1.peakResult.getSignal();
-						final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
-						final double factor = (p > a) ? p / a : a / p;
+						final double d = pair.getXYDistance();
 
-						// Check the fitted signal is approximately correct
-						if (signalFactor != 0)
+						if (i >= 0)
 						{
-							// Debug: depth actual_signal fitted_signal
-							//System.out.printf("%f %f %f\n", p1.peakResult.error, a, p);
-							if (factor > signalFactor)
-								continue;
+							// This is a fitted candidate
+
+							final double a = p1.peakResult.getSignal();
+							final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
+							final double factor = (p > a) ? p / a : a / p;
+
+							fitMatch[i] = true;
+							match[matchCount++] = new FitMatch(i, d, p1.peakResult.error, factor);
 						}
+						else
+						{
+							// This is a candidate that could not be fitted
 
-						fitMatch[i] = true;
-						dMatch[matchCount] = pair.getXYDistance();
-
-						// Store the depth of the spot that matches
-						zMatch[matchCount] = p1.peakResult.error;
-						// Store the signal factor
-						fMatch[matchCount] = factor;
-						matchCount++;
+							// Get the index
+							i = -1 - i;
+							match[matchCount++] = new CandidateMatch(i, d, p1.peakResult.error);
+						}
 					}
 				}
 			}
-			dMatch = Arrays.copyOf(dMatch, matchCount);
-			zMatch = Arrays.copyOf(zMatch, matchCount);
-			fMatch = Arrays.copyOf(fMatch, matchCount);
+			match = Arrays.copyOf(match, matchCount);
 
 			// Mark the results 
-			for (int i = 0; i < candidates.spots.length; i++)
-			{
-				ScoredSpot spot = candidates.spots[i];
+			RampedScore score = new RampedScore(lowerDistanceInPixels, distanceInPixels);
+			double tp = 0;
+			double fp = 0;
+			double tn = 0;
+			double fn = 0;
 
-				// Score if the candidates still match after fitting
-				if (spot.match)
+			for (int i = 0; i < match.length; i++)
+			{
+				final double s = RampedScore.flatten(score.score(match[i].d), 256);
+
+				if (match[i].isFitResult())
 				{
-					// This is a positive candidate
-					if (fitMatch[i])
-						tp++;
-					else
-						fn++;
+					// This is a fitted result so is a positive
+					
+					// Check the fitted signal is approximately correct
+					if (signalFactor != 0)
+					{
+						if (match[i].getSignalFactor() > signalFactor)
+						{
+							// Treat as an unfitted result
+							fn += s;
+							tn += 1 - s;
+							continue;
+						}
+					}
+					tp += s;
+					fp += 1 - s;
 				}
 				else
 				{
-					// This is a negative candidate
-					if (fitMatch[i])
-						fp++;
-					else
-						tn++;
+					// This is an unfitted result that matches so is a negative
+					fn += s;
+					tn += 1 - s;
 				}
 			}
+
+			// Make the totals sum to the correct numbers.
+			// *** Do not do this. We only want to score the matches to allow reporting of a perfect filter.
+
+			// TP + FP = fitted spots
+			//fp = fittedSpots - tp;
+			// TN + FN = unfitted candidate spots
+			//tn = (spots.length - fittedSpots) - fn;
 
 			// Store the results using a copy of the original (to preserve the candidates for repeat analysis)
 			candidates = (FilterCandidates) candidates.clone();
@@ -383,9 +482,7 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.fn = fn;
 			candidates.fitResult = fitResult;
 			candidates.fitMatch = fitMatch;
-			candidates.dMatch = dMatch;
-			candidates.zMatch = zMatch;
-			candidates.fMatch = fMatch;
+			candidates.match = match;
 			candidates.zPosition = zPosition;
 			// Noise should be the same for all results
 			if (!job.getResults().isEmpty())
@@ -453,7 +550,8 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
-		gd.addSlider("Match_distance (SD)", 0.2, 1.5, distance);
+		gd.addSlider("Match_distance", 0.2, 3, distance);
+		gd.addSlider("Lower_distance", 0.2, 3, lowerDistance);
 		gd.addSlider("Match_signal", 1, 4.5, matchSignal);
 
 		// Collect options for fitting
@@ -481,11 +579,10 @@ public class BenchmarkSpotFit implements PlugIn
 		fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
+		lowerDistance = Math.abs(gd.getNextNumber());
 		signalFactor = matchSignal = Math.abs(gd.getNextNumber());
 		if (signalFactor <= 1)
 			signalFactor = 0;
-
-		distanceInPixels = distance * simulationParameters.s / simulationParameters.a;
 
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
@@ -502,6 +599,12 @@ public class BenchmarkSpotFit implements PlugIn
 
 		if (gd.invalidNumber())
 			return false;
+
+		if (lowerDistance > distance)
+			lowerDistance = distance;
+
+		distanceInPixels = distance * simulationParameters.s / simulationParameters.a;
+		lowerDistanceInPixels = lowerDistance * simulationParameters.s / simulationParameters.a;
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
@@ -718,17 +821,19 @@ public class BenchmarkSpotFit implements PlugIn
 		StoredDataStatistics precisionStats = new StoredDataStatistics();
 		final double nmPerPixel = simulationParameters.a;
 		final boolean mle = fitConfig.getFitSolver() == FitSolver.MLE;
-		int tp = 0, fp = 0, tn = 0, fn = 0;
+		double tp = 0, fp = 0;
 		int failP = 0, failN = 0;
+		int cP = 0, cN = 0;
 		for (FilterCandidates result : filterCandidates.values())
 		{
 			tp += result.tp;
 			fp += result.fp;
-			tn += result.tn;
-			fn += result.fn;
-			int count = 0;
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
+				if (result.spots[i].match)
+					cP++;
+				else
+					cN++;
 				if (result.fitResult[i].getStatus() != FitStatus.OK)
 				{
 					if (result.spots[i].match)
@@ -736,25 +841,26 @@ public class BenchmarkSpotFit implements PlugIn
 					else
 						failN++;
 				}
-				if (result.fitMatch[i])
-				{
-					distanceStats.add(result.dMatch[count] * nmPerPixel);
-					depthStats.add(result.zMatch[count++] * nmPerPixel);
-					final double[] p = result.fitResult[i].getParameters();
-					final double s = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
-					final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
-					final double b2 = Math.max(0, (p[Gaussian2DFunction.BACKGROUND] - simulationParameters.bias) /
-							simulationParameters.gain);
-					if (mle)
-						precisionStats
-								.add(PeakResult.getMLPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
-					else
-						precisionStats.add(PeakResult.getPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
-				}
+			}
+			for (int i = 0; i < result.match.length; i++)
+			{
+				if (!result.match[i].isFitResult())
+					// For now just ignore the candidates that matched
+					continue;
+
+				distanceStats.add(result.match[i].d * nmPerPixel);
+				depthStats.add(result.match[i].z * nmPerPixel);
+				final double[] p = result.fitResult[result.match[i].i].getParameters();
+				final double s = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
+				final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
+				final double b2 = Math.max(0, (p[Gaussian2DFunction.BACKGROUND] - simulationParameters.bias) /
+						simulationParameters.gain);
+				if (mle)
+					precisionStats.add(PeakResult.getMLPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
+				else
+					precisionStats.add(PeakResult.getPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
 			}
 		}
-
-		ClassificationResult r = new ClassificationResult(tp, fp, tn, fn);
 
 		StringBuilder sb = new StringBuilder();
 
@@ -812,49 +918,35 @@ public class BenchmarkSpotFit implements PlugIn
 
 		// Q. Should I add other fit configuration here?
 
-		add(sb, 100.0 * r.getP() / nP);
-		add(sb, 100.0 * r.getN() / nN);
-		add(sb, r.getTotal());
-		add(sb, r.getP());
-		add(sb, r.getN());
-		add(sb, failP);
-		add(sb, failN);
-		add(sb, tp);
-		add(sb, fp);
-		add(sb, tn);
-		add(sb, fn);
-
-		// These score are not useful since they assess the filtering performance and we have 
-		// done 'perfect' filtering where all matches are allowed and other fits are discarded.
-		//add(sb, r.getTPR());
-		//add(sb, r.getTNR());
-		//add(sb, r.getPPV());
-		//add(sb, r.getNPV());
-		//add(sb, r.getFPR());
-		//add(sb, r.getFDR());
-		//add(sb, r.getAccuracy());
-		//add(sb, r.getMCC());
-		//add(sb, r.getInformedness());
-		//add(sb, r.getMarkedness());
+		// The fraction of positive and negative candidates that were included
+		add(sb, (100.0 * cP) / nP);
+		add(sb, (100.0 * cN) / nN);
 
 		// Score the fitting results compared to the original simulation.
 
 		// Score the candidate selection:
+		add(sb, cP + cN);
+		add(sb, cP);
+		add(sb, cN);
 		// TP are all candidates that can be matched to a spot
 		// FP are all candidates that cannot be matched to a spot
 		// FN = The number of missed spots
-		MatchResult m = new MatchResult(r.getP(), r.getN(), simulationParameters.molecules - r.getP(), 0);
+		FractionClassificationResult m = new FractionClassificationResult(cP, cN, 0,
+				simulationParameters.molecules - cP);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
 		add(sb, m.getF1Score());
 		add(sb, m.getJaccard());
 
 		// Score the fitting results:
+		add(sb, failP);
+		add(sb, failN);
 		// TP are all fit results that can be matched to a spot
-		// FP are all fit results that cannot be matched to a spot or that failed to fit
-		// (Set FP to zero to indicate that the filtering of bad fit results is perfect) 
+		// FP are all fit results that cannot be matched to a spot
 		// FN = The number of missed spots
-		m = new MatchResult(tp, 0, simulationParameters.molecules - tp, 0);
+		add(sb, tp);
+		add(sb, fp);
+		m = new FractionClassificationResult(tp, fp, 0, simulationParameters.molecules - tp);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
 		add(sb, m.getF1Score());
@@ -959,28 +1051,16 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Total\t");
 		sb.append("P\t");
 		sb.append("N\t");
-		sb.append("Fail P\t");
-		sb.append("Fail N\t");
-		sb.append("TP\t");
-		sb.append("FP\t");
-		sb.append("TN\t");
-		sb.append("FN\t");
-
-		//sb.append("TPR\t");
-		//sb.append("TNR\t");
-		//sb.append("PPV\t");
-		//sb.append("NPV\t");
-		//sb.append("FPR\t");
-		//sb.append("FDR\t");
-		//sb.append("ACC\t");
-		//sb.append("MCC\t");
-		//sb.append("Informedness\t");
-		//sb.append("Markedness\t");
 
 		sb.append("Recall\t");
 		sb.append("Precision\t");
 		sb.append("F1\t");
 		sb.append("Jaccard\t");
+		
+		sb.append("Fail P\t");
+		sb.append("Fail N\t");
+		sb.append("TP\t");
+		sb.append("FP\t");
 		sb.append("Recall\t");
 		sb.append("Precision\t");
 		sb.append("F1\t");
