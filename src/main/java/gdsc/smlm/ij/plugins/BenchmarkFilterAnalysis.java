@@ -152,6 +152,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
 	private static List<MemoryPeakResults> resultsList = null;
 	private static int candidates;
+	private static double matches;
 	private static double c_tn, c_fn;
 	private static StoredDataStatistics depthStats, depthFitStats;
 
@@ -524,6 +525,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
 			candidates = 0;
+			matches = 0;
 			c_tn = c_fn = 0;
 
 			final RampedScore distanceScore = new RampedScore(BenchmarkSpotFit.distanceInPixels * partialMatchDistance /
@@ -608,6 +610,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							depth = match.z;
 
 							final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
+							matches += dScore;
 							matchScore = dScore;
 							noMatchScore = 1 - matchScore;
 
@@ -669,6 +672,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						continue;
 					// This is an unfitted result that matches so is a negative
 					final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
+					matches += dScore;
 					c_fn += dScore;
 					// This should be '+= 1 - dScore' but we incremented c_tn above for all candidates that were not fitted
 					c_tn -= dScore;
@@ -689,8 +693,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * Check the current scoring totals sum to the number of spot candidates
 	 * 
 	 * @param r
-	 * @param tn 
-	 * @param fn 
+	 * @param tn
+	 * @param fn
 	 */
 	private void checkTotals(MemoryPeakResults r, double tn, double fn)
 	{
@@ -714,9 +718,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private void checkTotals(double tp, double fp, double tn, double fn)
 	{
 		final int t = (int) (tp + fp + tn + fn);
-		if (candidates != t)
+		final double t2 = tp + fn;
+		if (candidates != t || t2 != matches)
 		{
-			System.out.printf("Scoring error: n = %d != %d, TP %f, FP %f, TN %f, FN %f\n", candidates, t, tp, fp, tn, fn);
+			System.out.printf("Scoring error: n = %d (%d), matches = %f (%f), TP %f, FP %f, TN %f, FN %f\n",
+					candidates, t, matches, t2, tp, fp, tn, fn);
 		}
 	}
 
