@@ -43,8 +43,7 @@ public class FitEngineConfiguration implements Cloneable
 	// a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width mismatch but
 	// the mean filter will be faster as it uses a smaller block size. The Gaussian filter has higher 
 	// recall but lower precision as it identifies more spots due to the shape of the smoothing filter.
-	// The overall AUC is very similar. The mean filter is better for a low precision fitter (e.g. LSE)
-	// and the Gaussian filter better for a high precision fitter (e.g. MLE).
+	// The overall AUC is very similar.
 	//
 	// Note: Setting the parameter at a higher level allows the filter to work on out-of-focus spots which
 	// will have a wider PSF.
