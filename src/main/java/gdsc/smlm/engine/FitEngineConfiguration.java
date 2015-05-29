@@ -39,10 +39,18 @@ public class FitEngineConfiguration implements Cloneable
 {
 	private FitConfiguration fitConfiguration;
 
-	// Analysis shows the best area-under-precision-recall curve using a mean filter with ~1.2 SD smoothing or
-	// a Gaussian filter with ~1.4 SD smoothing. The Gaussian filter is more robust to width mismatch but
-	// the mean filter will be faster as it uses a smaller block size. Setting the parameter at a higher level 
-	// allows the filter to work on out-of-focus spots which will have a wider PSF.
+	// Analysis* shows the best area-under-precision-recall curve (AUC) using a mean filter or
+	// a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width mismatch but
+	// the mean filter will be faster as it uses a smaller block size. The Gaussian filter has higher 
+	// recall but lower precision as it identifies more spots due to the shape of the smoothing filter.
+	// The overall AUC is very similar. The mean filter is better for a low precision fitter (e.g. LSE)
+	// and the Gaussian filter better for a high precision fitter (e.g. MLE).
+	//
+	// Note: Setting the parameter at a higher level allows the filter to work on out-of-focus spots which
+	// will have a wider PSF.
+	//
+	// *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at a 
+	// depth of up to 1380nm (the PSF limit).
 
 	private double search = 1;
 	private double border = 1;
@@ -53,7 +61,7 @@ public class FitEngineConfiguration implements Cloneable
 	private double residualsThreshold = 1;
 	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
 	private DataFilterType dataFilterType = DataFilterType.SINGLE;
-	private double[] smooth = new double[] { 1.3 };
+	private double[] smooth = new double[] { 1.2 };
 	private DataFilter[] dataFilter = new DataFilter[] { DataFilter.MEAN };
 
 	/**
