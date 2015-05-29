@@ -527,6 +527,50 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			candidates = 0;
 			matches = 0;
 			c_tn = c_fn = 0;
+			
+			
+			// -=-=-=-
+			// Use the following scoring scheme for all candidates:
+			// 
+			//  Candidates
+			// +----------------------------------------+  
+			// |   Actual matches                       | 
+			// |  +-----------+                TN       |
+			// |  |  FN       |                         |
+			// |  |      +----------                    |
+			// |  |      | TP |    | Fitted             |
+			// |  +-----------+    | spots              |
+			// |         |     FP  |                    |
+			// |         +---------+                    |
+			// +----------------------------------------+
+			//
+			// Candidates     = All the spot candidates
+			// Actual matches = Any spot candidate or fitted spot candidate that matches a localisation
+			// Fitted spots   = Any spot candidate that was successfully fitted
+			//
+			// TP = A spot candidate that was fitted and matches a localisation 
+			// FP = A spot candidate that was fitted but does not match a localisation 
+			// FN = A spot candidate that failed to be fitted but matches a localisation
+			// TN = A spot candidate that failed to be fitted and does not match a localisation
+			//
+			// Using a distance ramped scoring function the degree of match can be varied from 0 to 1.
+			// Using a signal-factor ramped scoring function the degree of fitted can be varied from 0 to 1.
+			//
+			// The totals TP+FP+TN+FN must equal the number of spot candidates. This allows different fitting 
+			// methods to be compared since the total number of candidates is the same.
+			//
+			// Precision = TP / (TP+FP)    : This is always valid as a minimum criteria score
+			// Recall    = TP / (TP+FN)    : This is valid between different fitting methods since a method that 
+			//                               fits more spots will have a potentially lower FN
+			// Jaccard   = TP / (TP+FN+FP) : This is valid between fitting methods
+			//
+			// -=-=-=-
+			// As an alternative scoring system, different fitting methods can be compared using the same TP and 
+			// FP values but calculating FN = localisations - TP. This creates a score against the original number
+			// of simulated molecules. This score is comparable when a different spot candidate filter has been 
+			// used and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
+			// -=-=-=-
+			
 
 			final RampedScore distanceScore = new RampedScore(BenchmarkSpotFit.distanceInPixels * partialMatchDistance /
 					100.0, BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
