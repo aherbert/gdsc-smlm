@@ -911,7 +911,10 @@ public class BenchmarkSpotFit implements PlugIn
 		addCount(sb, nP + nN);
 		addCount(sb, nP);
 		addCount(sb, nN);
-		add(sb, PeakFit.getSolverName(config.getFitConfiguration()));
+		String name = PeakFit.getSolverName(fitConfig); 
+		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
+			name += " Camera";
+		add(sb, name);
 		add(sb, config.getFitting());
 
 		resultPrefix = sb.toString();
