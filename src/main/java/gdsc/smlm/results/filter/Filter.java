@@ -139,7 +139,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * 
 	 * @param results
 	 * @param score
-	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn ]
+	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
 	 * @return the filtered results
 	 */
 	public MemoryPeakResults filterSubset(MemoryPeakResults results, double[] score)
@@ -151,6 +151,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		int failCount = 0;
 		double fp = 0, fn = 0;
 		double tp = 0, tn = 0;
+		int p = 0;
 		for (PeakResult peak : results.getResults())
 		{
 			if (frame != peak.peak)
@@ -175,6 +176,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 
 			if (isPositive)
 			{
+				p++;
 				tp += peak.getTruePositiveScore();
 				fp += peak.getFalsePositiveScore();
 			}
@@ -186,12 +188,14 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		}
 		end();
 
-		if (score != null && score.length > 3)
+		if (score != null && score.length > 5)
 		{
 			score[0] = tp;
 			score[1] = fp;
 			score[2] = tn;
 			score[3] = fn;
+			score[4] = p;
+			score[5] = results.size() - p;
 		}
 
 		return newResults;
@@ -214,7 +218,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param score
-	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn ]
+	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
 	 * @return the filtered results
 	 */
 	public MemoryPeakResults filterSubset(MemoryPeakResults results, int failures, double[] score)
@@ -270,12 +274,14 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		}
 		end();
 
-		if (score != null && score.length > 3)
+		if (score != null && score.length > 5)
 		{
 			score[0] = tp;
 			score[1] = fp;
 			score[2] = tn;
 			score[3] = fn;
+			score[4] = newResults.size();
+			score[5] = results.size() - newResults.size();
 		}
 
 		return newResults;
@@ -551,6 +557,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 */
 	public FractionClassificationResult fractionScore(List<MemoryPeakResults> resultsList, int failures)
 	{
+		int p = 0, n = 0;
 		double fp = 0, fn = 0;
 		double tp = 0, tn = 0;
 		for (MemoryPeakResults peakResults : resultsList)
@@ -591,6 +598,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 
 				if (isPositive)
 				{
+					p++;
 					tp += peak.getTruePositiveScore();
 					fp += peak.getFalsePositiveScore();
 				}
@@ -600,9 +608,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 					tn += peak.getTrueNegativeScore();
 				}
 			}
+			n += peakResults.size();
 			end();
 		}
-		return new FractionClassificationResult(tp, fp, tn, fn);
+		n -= p;
+		return new FractionClassificationResult(tp, fp, tn, fn, p, n);
 	}
 
 	/**
@@ -629,11 +639,14 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 *            The initial true negatives (used when the results have been pre-filtered)
 	 * @param fn
 	 *            The initial false negatives (used when the results have been pre-filtered)
+	 * @param n
+	 *            The initial negatives (used when the results have been pre-filtered)
 	 * @return the score
 	 */
 	public FractionClassificationResult fractionScoreSubset(List<MemoryPeakResults> resultsList, int failures,
-			double tn, double fn)
+			double tn, double fn, int n)
 	{
+		int p = 0;
 		double fp = 0;
 		double tp = 0;
 
@@ -677,6 +690,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 
 				if (isPositive)
 				{
+					p++;
 					tp += peak.getTruePositiveScore();
 					fp += peak.getFalsePositiveScore();
 				}
@@ -686,9 +700,11 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 					tn += peak.getTrueNegativeScore();
 				}
 			}
+			n += peakResults.size();
 			end();
 		}
-		return new FractionClassificationResult(tp, fp, tn, fn);
+		n -= p;
+		return new FractionClassificationResult(tp, fp, tn, fn, p, n);
 	}
 
 	/**

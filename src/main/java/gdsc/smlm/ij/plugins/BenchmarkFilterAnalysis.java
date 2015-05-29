@@ -164,7 +164,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			"nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC", "MCC",
 			"Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard",
 			// Scores against the original localisations. Calculated using the number of localisations 
-			"oFN", "oRecall", "oF1", "oJaccard", };
+			"oFP", "oFN", "oRecall", "oPrecision", "oF1", "oJaccard", };
 
 	private static boolean[] showColumns;
 	static
@@ -177,16 +177,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		showColumns[2] = true; // FP
 		showColumns[3] = true; // TN
 		showColumns[4] = true; // FN
-		showColumns[COLUMNS.length - 11] = true; // MCC
-		showColumns[COLUMNS.length - 8] = true; // Recall
-		showColumns[COLUMNS.length - 7] = true; // Precision
-		showColumns[COLUMNS.length - 5] = true; // Jaccard
-		showColumns[COLUMNS.length - 4] = true; // oFN
-		showColumns[COLUMNS.length - 3] = true; // oRecall
+		showColumns[COLUMNS.length - 13] = true; // MCC
+		showColumns[COLUMNS.length - 10] = true; // Recall
+		showColumns[COLUMNS.length - 9] = true; // Precision
+		showColumns[COLUMNS.length - 7] = true; // Jaccard
+		showColumns[COLUMNS.length - 6] = true; // oFP
+		showColumns[COLUMNS.length - 5] = true; // oFN
+		showColumns[COLUMNS.length - 4] = true; // oRecall
+		showColumns[COLUMNS.length - 3] = true; // oPrecision
 		showColumns[COLUMNS.length - 1] = true; // oJaccard
 
 		// Use the precision as criteria to ensure a set confidence on results labelled as true
-		criteriaIndex = COLUMNS.length - 7;
+		criteriaIndex = COLUMNS.length - 3;
 		// Score against the original data so we can compare across filters and fit solvers
 		scoreIndex = COLUMNS.length - 1;
 	}
@@ -527,9 +529,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			candidates = 0;
 			matches = 0;
 			c_tn = c_fn = 0;
-			
-			
+
 			// -=-=-=-
+			// The scoring is designed to find the best fitter+filter combination for the given spot candidates.
+			// The ideal combination would correctly fit+pick all the candidate positions that are close to a
+			// localisation.
+			//
 			// Use the following scoring scheme for all candidates:
 			// 
 			//  Candidates
@@ -548,13 +553,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// Actual matches = Any spot candidate or fitted spot candidate that matches a localisation
 			// Fitted spots   = Any spot candidate that was successfully fitted
 			//
-			// TP = A spot candidate that was fitted and matches a localisation 
-			// FP = A spot candidate that was fitted but does not match a localisation 
+			// TP = A spot candidate that was fitted and matches a localisation and is accepted
+			// FP = A spot candidate that was fitted but does not match a localisation and is accepted
 			// FN = A spot candidate that failed to be fitted but matches a localisation
+			//    = A spot candidate that was fitted and matches a localisation and is rejected
 			// TN = A spot candidate that failed to be fitted and does not match a localisation
+			//    = A spot candidate that was fitted and does not match a localisation and is rejected
+			//
+			// Since unfitted candidates can only be TN or FN we can accumulate these scores and cache them.
 			//
 			// Using a distance ramped scoring function the degree of match can be varied from 0 to 1.
 			// Using a signal-factor ramped scoring function the degree of fitted can be varied from 0 to 1.
+			// When using ramped scoring functions the fractional allocation of scores using the above scheme 
+			// is performed, i.e. candidates are treated as if they both match and unmatch. This results in 
+			// an equivalent to multiple analysis using different thresholds and averaging of the scores.
 			//
 			// The totals TP+FP+TN+FN must equal the number of spot candidates. This allows different fitting 
 			// methods to be compared since the total number of candidates is the same.
@@ -565,12 +577,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// Jaccard   = TP / (TP+FN+FP) : This is valid between fitting methods
 			//
 			// -=-=-=-
-			// As an alternative scoring system, different fitting methods can be compared using the same TP and 
-			// FP values but calculating FN = localisations - TP. This creates a score against the original number
-			// of simulated molecules. This score is comparable when a different spot candidate filter has been 
-			// used and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
+			// As an alternative scoring system, different fitting methods can be compared using the same TP 
+			// value but calculating FN = localisations - TP and FP as Positives - TP. This creates a score 
+			// against the original number of simulated molecules using everything that was passed through the 
+			// filter (Positives). This score is comparable when a different spot candidate filter has been used 
+			// and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
 			// -=-=-=-
-			
 
 			final RampedScore distanceScore = new RampedScore(BenchmarkSpotFit.distanceInPixels * partialMatchDistance /
 					100.0, BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
@@ -654,7 +666,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							depth = match.z;
 
 							final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
-							matches += dScore;
+							if (dScore > 0)
+								matches += dScore;
 							matchScore = dScore;
 							noMatchScore = 1 - matchScore;
 
@@ -664,35 +677,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 								final double fScore = signalScore.scoreAndFlatten(match.getSignalFactor(), 256);
 								matchScore = RampedScore.flatten(matchScore * fScore, 256);
 								noMatchScore = fScore - matchScore;
+
+								// Any remaining score should be accumulated as an unfitted result,
+								// i.e. since the signal fit is poor then treat this as partially unfitted.
+
+								// Allocate the removed match score to false-negative
+								final double fn = dScore - matchScore;
+								// The remaining score is true negative, ensure it sums to 1
+								final double tn = 1 - matchScore - noMatchScore - fn;
+								c_fn += fn;
+								c_tn += tn;
 							}
 
 							if (matchScore > 0)
 							{
 								depthFitStats.add(depth);
 							}
-
-							// Any remaining score should be accumulated as an unfitted result,
-							// i.e. since the signal fit is poor then treat this as partially unfitted.
-							final double fScore = matchScore + noMatchScore;
-							if (fScore < 1)
-							{
-								final double fraction = 1 - fScore;
-								final double fn = RampedScore.flatten(dScore * fraction, 256);
-								final double tn = fraction - fn;
-								c_fn += fn;
-								c_tn += tn;
-
-								//if (fn + tn + matchScore + noMatchScore != 1)
-								//{
-								//	System.out.printf("%f != 1, %f, %f, %f, %f\n", fn + tn + matchScore + noMatchScore,
-								//			fn, tn, matchScore, noMatchScore);
-								//}
-							}
-							//else if (matchScore + noMatchScore != 1)
-							//{
-							//	System.out.printf("%f != 1, %f, %f\n", matchScore + noMatchScore, matchScore,
-							//			noMatchScore);
-							//}
 						}
 
 						final float score2 = RampedScore.flatten((float) matchScore, 256);
@@ -761,11 +761,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private void checkTotals(double tp, double fp, double tn, double fn)
 	{
-		final int t = (int) (tp + fp + tn + fn);
+		final double t = tp + fp + tn + fn;
 		final double t2 = tp + fn;
 		if (candidates != t || t2 != matches)
 		{
-			System.out.printf("Scoring error: n = %d (%d), matches = %f (%f), TP %f, FP %f, TN %f, FN %f\n",
+			System.out.printf("Scoring error: n = %d (%f), matches = %f (%f), TP %f, FP %f, TN %f, FN %f\n",
 					candidates, t, matches, t2, tp, fp, tn, fn);
 		}
 	}
@@ -1413,7 +1413,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					return -1;
 			}
 
-			final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn);
+			final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
 			final double score = result[0];
 			final double criteria = result[1];
 
@@ -1617,12 +1617,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			case 19:
 				return s.getJaccard();
 			case 20:
-				return getOriginalScore(s).getFN();
+				return getOriginalScore(s).getFP();
 			case 21:
-				return getOriginalScore(s).getRecall();
+				return getOriginalScore(s).getFN();
 			case 22:
-				return getOriginalScore(s).getF1Score();
+				return getOriginalScore(s).getRecall();
 			case 23:
+				return getOriginalScore(s).getPrecision();
+			case 24:
+				return getOriginalScore(s).getF1Score();
+			case 25:
 				return getOriginalScore(s).getJaccard();
 		}
 		return 0;
@@ -1637,6 +1641,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			case 9: // FPR
 			case 10: // FNR
 			case 11: // FDR
+			case 20: // oFP
+			case 21: // oFN
 				return true;
 
 			default:
@@ -1665,12 +1671,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return max;
 	}
 
-	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn)
+	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn,
+			int n)
 	{
 		FractionClassificationResult r;
 		if (subset)
 		{
-			r = filter.fractionScoreSubset(resultsList, failCount, tn, fn);
+			r = filter.fractionScoreSubset(resultsList, failCount, tn, fn, n);
 
 			//// DEBUG - Test if the two methods produce the same results
 			//FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.resultsList);
@@ -1718,6 +1725,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private FractionClassificationResult scoreFilter(Filter filter, List<MemoryPeakResults> resultsList)
 	{
 		double tp = 0, fp = 0, tn = 0, fn = 0;
+		int p = 0, n = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
 			final FractionClassificationResult r = filter.fractionScore(resultsList, failCount + i);
@@ -1725,10 +1733,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			fp += r.getFP();
 			tn += r.getTN();
 			fn += r.getFN();
+			p += r.getPositives();
+			n += r.getNegatives();
 		}
+		if (failCountRange == 0)
+		{
+			return new FractionClassificationResult(tp, fp, c_tn + tn, c_fn + fn, p, n);
+		}		
 		// Normalise by the number of evaluations
-		final int n = failCountRange + 1;
-		return new FractionClassificationResult(tp / n, fp / n, c_tn + tn / n, c_fn + fn / n);
+		final int norm = failCountRange + 1;
+		p = (int) Math.round((double) p / norm);
+		n = (int) Math.round((double) n / norm);
+		return new FractionClassificationResult(tp / norm, fp / norm, c_tn + tn / norm, c_fn + fn / norm, p, n);
 	}
 
 	public String createResult(Filter filter, FractionClassificationResult r)
@@ -1763,8 +1779,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// Score relative to the original simulated number of spots
 		FractionClassificationResult m = getOriginalScore(r);
+		addCount(sb, m.getFP(), i++);
 		addCount(sb, m.getFN(), i++);
 		add(sb, m.getRecall(), i++);
+		add(sb, m.getPrecision(), i++);
 		add(sb, m.getF1Score(), i++);
 		add(sb, m.getJaccard(), i++);
 		return sb.toString();
@@ -1778,8 +1796,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// FN are the number of missed spots
 		// Note: We cannot calculate TN since this is the number of fit candidates that are 
 		// filtered after fitting that do not match a spot or were not fitted. 
+		final double fp = r.getPositives() - r.getTP();
 		final double fn = simulationParameters.molecules - r.getTP();
-		return new FractionClassificationResult(r.getTP(), r.getFP(), 0, fn);
+		return new FractionClassificationResult(r.getTP(), fp, 0, fn);
 	}
 
 	private static void add(StringBuilder sb, String value)
@@ -2183,6 +2202,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private List<MemoryPeakResults> ga_resultsList = null;
 	private List<MemoryPeakResults> ga_resultsListToScore = null;
 	private double ga_tn, ga_fn;
+	private int ga_n;
 	private boolean ga_subset;
 	private int ga_iteration;
 
@@ -2216,6 +2236,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Initialise with the candidate true and false negative scores
 		ga_tn = c_tn;
 		ga_fn = c_fn;
+		ga_n = 0;
 		ga_resultsListToScore = ga_resultsList;
 		ga_subset = false;
 
@@ -2234,7 +2255,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				final boolean withFailCount = weakest.subsetWithFailCount();
 				for (MemoryPeakResults r : ga_resultsList)
 				{
-					double[] score2 = new double[4];
+					double[] score2 = new double[6];
 					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset(r, failCount, score2) : weakest
 							.filterSubset(r, score2);
 					ga_resultsListToScore.add(r2);
@@ -2248,6 +2269,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 				ga_tn += score[2];
 				ga_fn += score[3];
+				ga_n += score[5];
 
 				checkTotals(ga_resultsListToScore.get(0), ga_tn, ga_fn);
 			}
@@ -2264,7 +2286,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		Filter filter = (Filter) chromosome;
 		FractionClassificationResult r;
 		if (ga_subset)
-			r = filter.fractionScoreSubset(ga_resultsListToScore, failCount, ga_tn, ga_fn);
+			r = filter.fractionScoreSubset(ga_resultsListToScore, failCount, ga_tn, ga_fn, ga_n);
 		else
 			r = scoreFilter(filter, ga_resultsListToScore);
 		double score = getScore(r);

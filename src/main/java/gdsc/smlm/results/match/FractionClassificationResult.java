@@ -24,6 +24,7 @@ package gdsc.smlm.results.match;
 public class FractionClassificationResult
 {
 	private final double tp, fp, tn, fn;
+	private final int p, n;
 	private final double precision;
 	private final double recall;
 	private final double jaccard;
@@ -44,6 +45,35 @@ public class FractionClassificationResult
 		this.fp = fp;
 		this.tn = tn;
 		this.fn = fn;
+		p = n = 0;
+
+		precision = divide(tp, tp + fp);
+		recall = divide(tp, tp + fn);
+		jaccard = divide(tp, tp + fp + fn);
+	}
+
+	/**
+	 * @param tp
+	 *            The number of true positives
+	 * @param fp
+	 *            The number of false positives
+	 * @param tn
+	 *            The number of true negatives
+	 * @param fn
+	 *            The number of false negatives
+	 * @param p
+	 *            The number of positives (can be used when tp+fp is not the number of items that were accepted)
+	 * @param n
+	 *            The number of negatives (can be used when tn+fn is not the number of items that were rejected)
+	 */
+	public FractionClassificationResult(double tp, double fp, double tn, double fn, int p, int n)
+	{
+		this.tp = tp;
+		this.fp = fp;
+		this.tn = tn;
+		this.fn = fn;
+		this.p = p;
+		this.n = n;
 
 		precision = divide(tp, tp + fp);
 		recall = divide(tp, tp + fn);
@@ -61,7 +91,7 @@ public class FractionClassificationResult
 	 * Return the F-Score statistic, a weighted combination of the precision and recall
 	 * 
 	 * @param precision
-	 * @param recall 
+	 * @param recall
 	 * @param beta
 	 *            The weight
 	 * @return The F-Score
@@ -95,7 +125,7 @@ public class FractionClassificationResult
 		final double f = (2 * precision * recall) / (precision + recall);
 		return (Double.isNaN(f) ? 0 : f);
 	}
-	
+
 	/**
 	 * @return the precision
 	 */
@@ -168,7 +198,7 @@ public class FractionClassificationResult
 	 */
 	public double getP()
 	{
-		return tp + fn;
+		return tp + fp;
 	}
 
 	/**
@@ -176,7 +206,7 @@ public class FractionClassificationResult
 	 */
 	public double getN()
 	{
-		return fp + tn;
+		return tn + fn;
 	}
 
 	/**
@@ -240,7 +270,7 @@ public class FractionClassificationResult
 	 */
 	public double getAccuracy()
 	{
-		return divide(tp + tn, getP() + getN());
+		return divide(tp + tn, tp + fp + tn + fn);
 	}
 
 	/**
@@ -277,5 +307,27 @@ public class FractionClassificationResult
 	public double getMarkedness()
 	{
 		return getPPV() + getNPV() - 1;
+	}
+
+	/**
+	 * Get the number of positives. Note that this may be different from tp+fp. Note this is set in the constructor,
+	 * otherwise zero
+	 * 
+	 * @return The number of positives
+	 */
+	public int getPositives()
+	{
+		return p;
+	}
+
+	/**
+	 * Get the number of negatives. Note this may be different from tn+fn. Note this is set in the constructor,
+	 * otherwise zero
+	 * 
+	 * @return The number of negatives
+	 */
+	public int getNegatives()
+	{
+		return n;
 	}
 }
