@@ -146,6 +146,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static long lastModified = 0;
 	private static List<FilterSet> filterList = null;
 	private static boolean[][] wasNotExpanded;
+	private static double[][] lowerLimit;
+	private static double[][] upperLimit;
 	private static int lastId = 0;
 	private static boolean lastRank = false;
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
@@ -342,6 +344,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private void expandFilters()
 	{
 		wasNotExpanded = new boolean[filterList.size()][];
+		lowerLimit = new double[filterList.size()][];
+		upperLimit = new double[filterList.size()][];
 		long[] expanded = new long[filterList.size()];
 		String[] name = new String[expanded.length];
 		int c = 0;
@@ -357,6 +361,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				Filter f3 = filterSet.getFilters().get(2);
 				int n = f1.getNumberOfParameters();
 				wasNotExpanded[c] = new boolean[n];
+				lowerLimit[c] = new double[n];
+				upperLimit[c] = new double[n];
 				long combinations = 1;
 				for (int i = 0; i < n; i++)
 				{
@@ -368,9 +374,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						BigDecimal min = new BigDecimal(f1.getParameterValue(i));
 						BigDecimal max = new BigDecimal(f2.getParameterValue(i));
 						BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
+						lowerLimit[c][i] = min.doubleValue();
 						long extra = 1;
 						for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
+						{
+							upperLimit[c][i] = bd.doubleValue();
 							extra++;
+						}
 						combinations *= extra;
 					}
 				}
@@ -988,6 +998,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 
 				text += "\t" + Utils.rounded((double) tp / np);
+				if (fs.atLimit)
+					text += "\tY";
 
 				if (isHeadless)
 					IJ.log(text);
@@ -1229,7 +1241,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	private String createResultsHeader(boolean depthSummary)
+	private String createResultsHeader(boolean summary)
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
 		sb.append("\tTitle\tName\tFail\tLower D (nm)\tUpper D (nm)\tLower factor\tUpper factor");
@@ -1238,8 +1250,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (showColumns[i])
 				sb.append("\t").append(COLUMNS[i]);
 
-		if (depthSummary)
-			sb.append("\tDepth Recall");
+		if (summary)
+			sb.append("\tDepth Recall\tAt limit");
 		return sb.toString();
 	}
 
@@ -1316,7 +1328,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			for (int j = 0; j < indices.length; j++)
 			{
 				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
-				final double step = (wasNotExpanded(setNumber, j)) ? 0 : stepSize[j] * delta;
+				final double step = (wasNotExpanded(setNumber, indices[j])) ? 0 : stepSize[j] * delta;
 				gd.addNumericField(getDialogName(prefix, filter.getParameterName(indices[j])), step, 2);
 			}
 
@@ -1441,6 +1453,36 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			i++;
 		}
 
+		// Check the top filter against the limits
+		boolean atLimit = false;
+		if (allSameType)
+		{
+			Filter topFilter = (maxFilter == null) ? criteriaFilter : maxFilter;
+			int[] indices = topFilter.getChromosomeParameters();
+			StringBuilder sb = new StringBuilder();
+			for (int j = 0; j < indices.length; j++)
+			{
+				final int set = setNumber - 1;
+				final int p = indices[j];
+				if (!wasNotExpanded(setNumber, p))
+				{
+					final double value = topFilter.getParameterValue(p);
+					if (value <= lowerLimit[set][p] && value > 0)
+						sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
+								.append(Utils.rounded(value)).append("] lower");
+					else if (value >= upperLimit[set][p])
+						sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
+								.append(Utils.rounded(value)).append("] upper");
+				}
+			}
+			if (sb.length() > 0)
+			{
+				atLimit = true;
+				Utils.log("Warning: Top filter (%s) at the limit of the expanded range%s", topFilter.getName(),
+						sb.toString());
+			}
+		}
+
 		// We may have no filters that pass the criteria
 		String type = filterSet.getFilters().get(0).getType();
 		if (maxFilter == null)
@@ -1470,7 +1512,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					while (bestFilter.containsKey(type + n))
 						n++;
 					type += n;
-					bestFilter.put(type, new FilterScore(maxFilter, maxScore));
+					bestFilter.put(type, new FilterScore(maxFilter, maxScore, atLimit));
 					bestFilterOrder.add(type);
 				}
 				else
@@ -1478,12 +1520,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					// Replace
 					FilterScore filterScore = bestFilter.get(type);
 					if (filterScore.score < maxScore)
-						filterScore.update(maxFilter, maxScore);
+						filterScore.update(maxFilter, maxScore, atLimit);
 				}
 			}
 			else
 			{
-				bestFilter.put(type, new FilterScore(maxFilter, maxScore));
+				bestFilter.put(type, new FilterScore(maxFilter, maxScore, atLimit));
 				bestFilterOrder.add(type);
 			}
 		}
@@ -1671,8 +1713,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return max;
 	}
 
-	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn,
-			int n)
+	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn, int n)
 	{
 		FractionClassificationResult r;
 		if (subset)
@@ -1739,7 +1780,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (failCountRange == 0)
 		{
 			return new FractionClassificationResult(tp, fp, c_tn + tn, c_fn + fn, p, n);
-		}		
+		}
 		// Normalise by the number of evaluations
 		final int norm = failCountRange + 1;
 		p = (int) Math.round((double) p / norm);
@@ -2070,16 +2111,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		Filter filter;
 		double score;
+		boolean atLimit;
 
-		public FilterScore(Filter filter, double score)
+		public FilterScore(Filter filter, double scorem, boolean atLimit)
 		{
-			update(filter, score);
+			update(filter, score, atLimit);
 		}
 
-		public void update(Filter filter, double score)
+		public void update(Filter filter, double score, boolean atLimit)
 		{
 			this.filter = filter;
 			this.score = score;
+			this.atLimit = atLimit;
 		}
 
 		public int compareTo(FilterScore that)
