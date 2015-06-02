@@ -1455,15 +1455,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 				else if (allSameType && maxScore == score)
 				{
-					// In the event of the same score between filters, use the weakest
-					double[] parameters = new double[maxFilter.getNumberOfParameters()];
-					for (int j = 0; j < parameters.length; j++)
-					{
-						parameters[j] = maxFilter.getParameterValue(j);
-					}
-					// In the event of the same score between filters, use the weakest
-					filter.weakestParameters(parameters);
-					maxFilter = filter.create(parameters);
+					maxFilter = (filter.weakest(maxFilter) < 0) ? filter : maxFilter;
 				}
 			}
 			else if (maxCriteria < criteria)
@@ -1473,15 +1465,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			else if (maxCriteria == criteria && criteria > 0)
 			{
-				// In the event of the same score between filters, use the weakest
-				double[] parameters = new double[criteriaFilter.getNumberOfParameters()];
-				for (int j = 0; j < parameters.length; j++)
-				{
-					parameters[j] = criteriaFilter.getParameterValue(j);
-				}
-				// Find the weakest
-				filter.weakestParameters(parameters);
-				criteriaFilter = filter.create(parameters);
+				criteriaFilter = (filter.weakest(criteriaFilter) < 0) ? filter : criteriaFilter;
 			}
 
 			if (xValues != null)

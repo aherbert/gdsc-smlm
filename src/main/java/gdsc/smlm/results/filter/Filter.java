@@ -812,7 +812,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 		// Use all the parameters
 		if (getNumberOfParameters() == o.getNumberOfParameters())
 		{
-			//for (int i=getNumberOfParameters(); i-- > 0; )
 			for (int i = 0; i < getNumberOfParameters(); i++)
 			{
 				final double d1 = getParameterValue(i);
@@ -822,6 +821,52 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 				if (d1 > d2)
 					return 1;
 			}
+		}
+		
+		return 0;
+	}
+
+	/**
+	 * Compare to the other filter, count the number of weakest parameters and return the count of that minus this.
+	 * If negative then this filter has more weak parameters. If the same or the number of parameters do not match then
+	 * return 0. If the other filter is null return -1.
+	 * 
+	 * @param o
+	 * @return the count difference
+	 */
+	public int weakest(Filter o)
+	{
+		// Null to end of list
+		if (o == null)
+			return -1;
+
+		// Use all the parameters
+		if (getNumberOfParameters() == o.getNumberOfParameters())
+		{
+			// Extract the parameters
+			final double[] p1 = new double[getNumberOfParameters()];
+			final double[] p2 = new double[p1.length];
+			for (int i = getNumberOfParameters(); i-- > 0;)
+			{
+				p1[i] = getParameterValue(i);
+				p2[i] = o.getParameterValue(i);
+			}
+			// Find the weakest
+			final double[] weakest = p1.clone();
+			o.weakestParameters(weakest);
+			// Count the number of weakest
+			int c1 = 0, c2 = 0;
+			for (int i = getNumberOfParameters(); i-- > 0;)
+			{
+				if (p1[i] != p2[i])
+				{
+					if (p1[i] == weakest[i])
+						c1++;
+					else
+						c2++;
+				}
+			}
+			return c2 - c1;
 		}
 
 		return 0;
