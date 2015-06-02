@@ -1505,10 +1505,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				if (sb.length() > 0)
 				{
 					atLimit = true;
-					Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
-							topFilter.getName(), Utils.rounded((invertScore) ? -maxScore : maxScore),
-							Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria), limitFailCount + limitRange,
-							sb.toString());
+					if (maxFilter != null)
+					{
+						Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
+								topFilter.getName(), Utils.rounded((invertScore) ? -maxScore : maxScore),
+								Utils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount +
+										limitRange, sb.toString());
+					}
+					else
+					{
+						Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
+								topFilter.getName(), Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria),
+								limitFailCount + limitRange, sb.toString());
+					}
 				}
 			}
 		}
