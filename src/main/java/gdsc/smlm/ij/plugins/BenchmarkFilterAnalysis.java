@@ -63,7 +63,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -371,14 +370,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					{
 						wasNotExpanded[c][i] = false;
 						// This can be expanded ... Count the combinations
-						BigDecimal min = new BigDecimal(f1.getParameterValue(i));
-						BigDecimal max = new BigDecimal(f2.getParameterValue(i));
-						BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
-						lowerLimit[c][i] = min.doubleValue();
+						final double min = f1.getParameterValue(i);
+						final double max = f2.getParameterValue(i);
+						final double inc = f3.getParameterValue(i);
+						final double max2 = max + inc;
+						lowerLimit[c][i] = min;
 						long extra = 1;
-						for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
+						// Check the current value is less than the max or (to avoid small round-off error)
+						// that the current value is closer to the max than the next value after the max.
+						for (double d = min + inc; d < max || d - max < max2 - d; d += inc)
 						{
-							upperLimit[c][i] = bd.doubleValue();
+							upperLimit[c][i] = d;
 							extra++;
 						}
 						combinations *= extra;
@@ -441,17 +443,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			list.add(f1);
 			for (int i = 0; i < n; i++)
 			{
-				// Use Big Decimal for the enumeration to preserve the precision of the input text
-				// (i.e. using doubles for an enumeration can lose precision and fail to correctly enumerate)
-				BigDecimal min = new BigDecimal(f1.getParameterValue(i));
-				BigDecimal max = new BigDecimal(f2.getParameterValue(i));
-				BigDecimal inc = new BigDecimal(f3.getParameterValue(i));
-
 				if (!(f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0))
 				{
 					// No expansion of this parameter
 					continue;
 				}
+
+				final double min = f1.getParameterValue(i);
+				final double max = f2.getParameterValue(i);
+				final double inc = f3.getParameterValue(i);
+				final double max2 = max + inc;
 
 				List<Filter> list2 = new LinkedList<Filter>();
 				for (Filter f : list)
@@ -461,9 +462,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						parameters[j] = f.getParameterValue(j);
 
 					// We always have the min value set from the first filter so start at the next increment
-					for (BigDecimal bd = min.add(inc); bd.compareTo(max) <= 0; bd = bd.add(inc))
+					for (double d = min + inc; d < max || d - max < max2 - d; d += inc)
 					{
-						parameters[i] = bd.doubleValue();
+						parameters[i] = d;
 						list2.add(f.create(parameters));
 					}
 				}
