@@ -133,8 +133,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static boolean saveOption = false;
 
 	private static String resultsTitle;
-	private String resultsPrefix, resultsPrefix2;
-	private static String resultsPrefix3;
+	private String resultsPrefix, resultsPrefix2, limitFailCount;
+	private static String resultsPrefix3, limitRange;
 
 	private HashMap<String, FilterScore> bestFilter;
 	private LinkedList<String> bestFilterOrder;
@@ -600,6 +600,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
+			limitRange = ", d=" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
+					Utils.rounded(distanceScore.upper * simulationParameters.a);
 
 			// Signal factor must be greater than 1
 			final RampedScore signalScore;
@@ -608,6 +610,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				signalScore = new RampedScore(BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0,
 						BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0);
 				resultsPrefix3 += "\t" + Utils.rounded(signalScore.lower) + "\t" + Utils.rounded(signalScore.upper);
+				limitRange += ", s=" + Utils.rounded(signalScore.lower) + "-" + Utils.rounded(signalScore.upper);
 			}
 			else
 			{
@@ -891,8 +894,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
 		resultsPrefix2 = "\t" + failCount;
+		if (!Utils.isNullOrEmpty(resultsTitle))
+			limitFailCount = resultsTitle + ", ";
+		else
+			limitFailCount = "";
+		limitFailCount += "f=" + failCount;
 		if (failCountRange > 0)
+		{
 			resultsPrefix2 += "-" + (failCount + failCountRange);
+			limitFailCount += "-" + (failCount + failCountRange);
+		}
 
 		// Check there is one output
 		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1 && !saveBestFilter)
@@ -1477,15 +1488,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 								.append("]");
 					else if (value >= upperLimit[set][p])
 						sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
-						.append(Utils.rounded(value)).append(">=").append(Utils.rounded(upperLimit[set][p]))
-						.append("]");
+								.append(Utils.rounded(value)).append(">=").append(Utils.rounded(upperLimit[set][p]))
+								.append("]");
 				}
 			}
 			if (sb.length() > 0)
 			{
 				atLimit = true;
-				Utils.log("Warning: Top filter (%s) at the limit of the expanded range%s", topFilter.getName(),
-						sb.toString());
+				Utils.log("Warning: %sTop filter (%s) [%s] at the limit of the expanded range%s", topFilter.getName(),
+						limitFailCount + limitRange, sb.toString());
 			}
 		}
 
