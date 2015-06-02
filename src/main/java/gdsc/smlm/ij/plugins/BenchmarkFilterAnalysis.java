@@ -1085,6 +1085,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				Filter filter = bestFilter.get(type).filter;
 
 				FractionClassificationResult s = scoreFilter(filter, resultsList);
+				s = getOriginalScore(s);
 
 				String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
 						Utils.rounded(s.getPrecision(), 4) + "\t\t" + Utils.rounded(s.getRecall(), 4);
@@ -1107,7 +1108,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					Filter lower = filter.adjustParameter(index, -delta);
 
 					FractionClassificationResult sHigher = scoreFilter(higher, resultsList);
+					sHigher = getOriginalScore(sHigher);
 					FractionClassificationResult sLower = scoreFilter(lower, resultsList);
+					sLower = getOriginalScore(sLower);
 
 					StringBuilder sb = new StringBuilder();
 					sb.append("\t").append(filter.getParameterName(index)).append("\t");
@@ -1470,10 +1473,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					final double value = topFilter.getParameterValue(p);
 					if (value <= lowerLimit[set][p] && value > 0)
 						sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
-								.append(Utils.rounded(value)).append("] lower");
+								.append(Utils.rounded(value)).append("<=").append(Utils.rounded(lowerLimit[set][p]))
+								.append("]");
 					else if (value >= upperLimit[set][p])
 						sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
-								.append(Utils.rounded(value)).append("] upper");
+						.append(Utils.rounded(value)).append(">=").append(Utils.rounded(upperLimit[set][p]))
+						.append("]");
 				}
 			}
 			if (sb.length() > 0)
