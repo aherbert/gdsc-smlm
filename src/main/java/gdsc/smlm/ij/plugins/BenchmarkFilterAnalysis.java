@@ -848,9 +848,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addSlider("Partial_signal_factor (%)", 0, 100, partialSignalFactor);
 		if (!simulationParameters.fixedDepth)
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
-		gd.addCheckboxGroup(2, 1, new String[] { "Evolve", "Step_search" }, new boolean[] { evolve, stepSearch });
-		//gd.addCheckbox("Evolve", evolve);
-		//gd.addCheckbox("Step_search", stepSearch);		
+		gd.addCheckbox("Evolve", evolve);
+		gd.addCheckbox("Step_search", stepSearch);		
 		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
