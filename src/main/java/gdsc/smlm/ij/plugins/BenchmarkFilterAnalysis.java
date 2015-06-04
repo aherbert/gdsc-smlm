@@ -119,6 +119,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double partialSignalFactor = 50;
 	private static boolean depthRecallAnalysis = true;
 	private static boolean evolve = false;
+	private static boolean stepSearch = false;
 
 	private static int populationSize = 500;
 	private static int failureLimit = 5;
@@ -147,6 +148,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static boolean[][] wasNotExpanded;
 	private static double[][] lowerLimit;
 	private static double[][] upperLimit;
+	private static double[][] increment;
 	private static int lastId = 0;
 	private static boolean lastRank = false;
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
@@ -336,6 +338,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return wasNotExpanded[setNumber][parameterNumber];
 	}
 
+	private static boolean wasExpanded(int setNumber)
+	{
+		setNumber--;
+		if (wasNotExpanded[setNumber] == null)
+			return false;
+		for (int i = 0; i < wasNotExpanded[setNumber].length; i++)
+			if (!wasNotExpanded[setNumber][i])
+				return true;
+		return false;
+	}
+
 	/**
 	 * If filters have been provided in FiltersSets of 3 then expand the filters into a set assuming the three represent
 	 * min:max:increment.
@@ -345,6 +358,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		wasNotExpanded = new boolean[filterList.size()][];
 		lowerLimit = new double[filterList.size()][];
 		upperLimit = new double[filterList.size()][];
+		increment = new double[filterList.size()][];
 		long[] expanded = new long[filterList.size()];
 		String[] name = new String[expanded.length];
 		int c = 0;
@@ -362,6 +376,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				wasNotExpanded[c] = new boolean[n];
 				lowerLimit[c] = new double[n];
 				upperLimit[c] = new double[n];
+				increment[c] = new double[n];
 				long combinations = 1;
 				for (int i = 0; i < n; i++)
 				{
@@ -375,6 +390,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						final double inc = f3.getParameterValue(i);
 						final double max2 = max + inc;
 						lowerLimit[c][i] = min;
+						increment[c][i] = inc;
 						long extra = 1;
 						// Check the current value is less than the max or (to avoid small round-off error)
 						// that the current value is closer to the max than the next value after the max.
@@ -832,7 +848,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addSlider("Partial_signal_factor (%)", 0, 100, partialSignalFactor);
 		if (!simulationParameters.fixedDepth)
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
-		gd.addCheckbox("Evolve", evolve);
+		gd.addCheckboxGroup(2, 1, new String[] { "Evolve", "Step_search" }, new boolean[] { evolve, stepSearch });
+		//gd.addCheckbox("Evolve", evolve);
+		//gd.addCheckbox("Step_search", stepSearch);		
 		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
@@ -890,6 +908,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (!simulationParameters.fixedDepth)
 			depthRecallAnalysis = gd.getNextBoolean();
 		evolve = gd.getNextBoolean();
+		stepSearch = gd.getNextBoolean();
 		resultsTitle = gd.getNextString();
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
@@ -1407,6 +1426,142 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
 
+		// If the filters were expanded we can do a step search from the initial optimum using the increment
+		if (!evolve && stepSearch && allSameType && wasExpanded(setNumber))
+		{
+			// Evaluate all the filters and find the best
+			initialiseScoring(filterSet);
+			Filter maxFilter = null, criteriaFilter = null;
+			double maxScore = -1;
+			double maxCriteria = 0;
+			int count2 = count;
+			for (Filter filter : filterSet.getFilters())
+			{
+				if (count2++ % 16 == 0)
+				{
+					IJ.showProgress(count2, total);
+					if (Utils.isInterrupted())
+						return -1;
+				}
+
+				final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
+				final double score = result[0];
+				final double criteria = result[1];
+
+				// Check if the criteria are achieved
+				if (criteria >= minCriteria)
+				{
+					// Check if the score is better
+					if (maxFilter == null || maxScore < score)
+					{
+						maxScore = score;
+						maxFilter = filter;
+					}
+					else if (allSameType && maxScore == score)
+					{
+						maxFilter = selectFilter(maxFilter, filter);
+					}
+				}
+				else if (maxCriteria < criteria)
+				{
+					maxCriteria = criteria;
+					criteriaFilter = filter;
+				}
+				else if (maxCriteria == criteria && criteria > 0)
+				{
+					criteriaFilter = selectFilter(criteriaFilter, filter);
+				}
+			}
+
+			// Test if the best filter is at the limit
+			final int set = setNumber - 1;
+			Filter topFilter = (maxFilter == null) ? criteriaFilter : maxFilter;
+			boolean doSearch = false;
+			if (topFilter != null)
+			{
+				for (int j = 0; j < lowerLimit[set].length; j++)
+				{
+					if (increment[set][j] > 0)
+					{
+						final double value = topFilter.getParameterValue(j);
+						if (value <= lowerLimit[set][j] || value >= upperLimit[set][j])
+						{
+							doSearch = true;
+							break;
+						}
+					}
+				}
+			}
+
+			// Iterative step search until the surrounding positions are not an improvement
+			// Limit the iterations in case of a problem.
+			int iteration = 0;
+			while (doSearch && iteration < 20)
+			{
+				iteration++;
+				//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, topFilter.getName(), maxScore, maxCriteria);
+
+				// Create a new filter set surrounding the top filter
+				ArrayList<Filter> filters = new ArrayList<Filter>();
+				filters.add(topFilter);
+				final int n = lowerLimit[set].length;
+				for (int i = 0; i < n; i++)
+				{
+					if (increment[set][i] > 0)
+					{
+						for (int k = filters.size(); k-- > 0;)
+						{
+							Filter f = filters.get(k);
+							double[] parameters = new double[n];
+							for (int j = 0; j < n; j++)
+								parameters[j] = f.getParameterValue(j);
+
+							final double d = parameters[i];
+							parameters[i] = d - increment[set][i];
+							filters.add(f.create(parameters));
+							parameters[i] = d + increment[set][i];
+							filters.add(f.create(parameters));
+						}
+					}
+				}
+				FilterSet newSet = new FilterSet(filters);
+				// Score the filters
+				initialiseScoring(newSet);
+				for (Filter filter : newSet.getFilters())
+				{
+					final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
+					final double score = result[0];
+					final double criteria = result[1];
+
+					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, filter.getName(), score, criteria);
+
+					// Check if the criteria are achieved
+					if (criteria >= minCriteria)
+					{
+						// Check if the score is better
+						if (maxFilter == null || maxScore < score)
+						{
+							maxScore = score;
+							maxFilter = filter;
+						}
+					}
+					// Check if the criteria score is better
+					else if (maxCriteria < criteria)
+					{
+						maxCriteria = criteria;
+						criteriaFilter = filter;
+					}
+				}
+				Filter oldTopFilter = topFilter;
+				topFilter = (maxFilter == null) ? criteriaFilter : maxFilter;
+				// Check if the top filter has changed to continue the search
+				doSearch = !topFilter.equals(oldTopFilter);
+			}
+
+			// Allow the re-evaluation of all the filters to be skipped
+			best = topFilter;
+		}
+
 		double[] xValues = (isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
 		double[] yValues = (xValues == null) ? null : new double[xValues.length];
 		Filter maxFilter = null, criteriaFilter = null;
@@ -1455,7 +1610,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 				else if (allSameType && maxScore == score)
 				{
-					maxFilter = (filter.weakest(maxFilter) < 0) ? filter : maxFilter;
+					maxFilter = selectFilter(maxFilter, filter);
 				}
 			}
 			else if (maxCriteria < criteria)
@@ -1465,7 +1620,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			else if (maxCriteria == criteria && criteria > 0)
 			{
-				criteriaFilter = (filter.weakest(criteriaFilter) < 0) ? filter : criteriaFilter;
+				criteriaFilter = selectFilter(criteriaFilter, filter);
 			}
 
 			if (xValues != null)
@@ -1485,9 +1640,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				int[] indices = topFilter.getChromosomeParameters();
 				StringBuilder sb = new StringBuilder();
+				final int set = setNumber - 1;
 				for (int j = 0; j < indices.length; j++)
 				{
-					final int set = setNumber - 1;
 					final int p = indices[j];
 					if (!wasNotExpanded(setNumber, p))
 					{
@@ -1629,6 +1784,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		return 0;
+	}
+
+	/**
+	 * When the two filters have equal scores, select the filter using the filter parameters
+	 * 
+	 * @param filter1
+	 * @param filter2
+	 * @return The chosen filter (the one with the strongest parameters)
+	 */
+	public Filter selectFilter(Filter filter1, Filter filter2)
+	{
+		return (filter2.weakest(filter1) < 0) ? filter1 : filter2;
 	}
 
 	private String getDialogName(String prefix, String parameterName)
