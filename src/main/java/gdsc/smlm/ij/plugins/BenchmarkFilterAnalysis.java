@@ -849,7 +849,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (!simulationParameters.fixedDepth)
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
 		gd.addCheckbox("Evolve", evolve);
-		gd.addCheckbox("Step_search", stepSearch);		
+		gd.addCheckbox("Step_search", stepSearch);
 		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
@@ -1472,7 +1472,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 			}
 
-			// Test if the best filter is at the limit
+			// Test if the best filter is at the limit of the enumeration
 			final int set = setNumber - 1;
 			Filter topFilter = (maxFilter == null) ? criteriaFilter : maxFilter;
 			boolean doSearch = false;
@@ -1483,7 +1483,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					if (increment[set][j] > 0)
 					{
 						final double value = topFilter.getParameterValue(j);
-						if (value <= lowerLimit[set][j] || value >= upperLimit[set][j])
+						if ((value <= lowerLimit[set][j] && value > 0) || value >= upperLimit[set][j])
 						{
 							doSearch = true;
 							break;
@@ -1517,7 +1517,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 							final double d = parameters[i];
 							parameters[i] = d - increment[set][i];
-							filters.add(f.create(parameters));
+							if (parameters[i] >= 0) // Avoid negative parameters
+								filters.add(f.create(parameters));
 							parameters[i] = d + increment[set][i];
 							filters.add(f.create(parameters));
 						}
@@ -1646,14 +1647,27 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					if (!wasNotExpanded(setNumber, p))
 					{
 						final double value = topFilter.getParameterValue(p);
-						if (value <= lowerLimit[set][p] && value > 0)
+						int c1 = Double.compare(value, lowerLimit[set][p]);
+						if (c1 <= 0)
+						{
 							sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
-									.append(Utils.rounded(value)).append("<=")
-									.append(Utils.rounded(lowerLimit[set][p])).append("]");
-						else if (value >= upperLimit[set][p])
-							sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
-									.append(Utils.rounded(value)).append(">=")
-									.append(Utils.rounded(upperLimit[set][p])).append("]");
+									.append(Utils.rounded(value));
+							if (c1 == -1)
+								sb.append("<").append(Utils.rounded(lowerLimit[set][p]));
+							sb.append("]");
+						}
+						else
+						{
+							int c2 = Double.compare(value, upperLimit[set][p]);
+							if (c2 >= 0)
+							{
+								sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
+										.append(Utils.rounded(value));
+								if (c2 == 1)
+									sb.append(">").append(Utils.rounded(upperLimit[set][p]));
+								sb.append("]");
+							}
+						}
 					}
 				}
 				if (sb.length() > 0)
