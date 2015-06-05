@@ -160,6 +160,11 @@ public class BenchmarkSpotFit implements PlugIn
 		public abstract boolean isFitResult();
 
 		/**
+		 * @return The successfully fitted signal divided by the actual signal
+		 */
+		public abstract double getRelativeSignalFactor();
+
+		/**
 		 * @return The factor difference between the successfully fitted signal and the actual signal
 		 */
 		public abstract double getSignalFactor();
@@ -170,12 +175,13 @@ public class BenchmarkSpotFit implements PlugIn
 	 */
 	public class FitMatch extends SpotMatch
 	{
-		final double f;
+		final double rsf, f;
 
-		public FitMatch(int i, double d, double z, double f)
+		public FitMatch(int i, double d, double z, double rsf)
 		{
 			super(i, d, z);
-			this.f = f;
+			this.rsf = rsf;
+			this.f = (rsf < 1) ? 1 / rsf : rsf;
 		}
 
 		@Override
@@ -183,6 +189,12 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			return true;
 		}
+
+		@Override
+		public double getRelativeSignalFactor()
+		{
+			return rsf;
+		};
 
 		@Override
 		public double getSignalFactor()
@@ -206,6 +218,12 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			return false;
 		}
+
+		@Override
+		public double getRelativeSignalFactor()
+		{
+			return 0;
+		};
 
 		@Override
 		public double getSignalFactor()
@@ -411,10 +429,9 @@ public class BenchmarkSpotFit implements PlugIn
 
 							final double a = p1.peakResult.getSignal();
 							final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
-							final double factor = (p > a) ? p / a : a / p;
 
 							fitMatch[i] = true;
-							match[matchCount++] = new FitMatch(i, d, p1.peakResult.error, factor);
+							match[matchCount++] = new FitMatch(i, d, p1.peakResult.error, p / a);
 						}
 						else
 						{
@@ -443,7 +460,7 @@ public class BenchmarkSpotFit implements PlugIn
 				if (match[i].isFitResult())
 				{
 					// This is a fitted result so is a positive
-					
+
 					// Check the fitted signal is approximately correct
 					if (signalFactor != 0)
 					{
@@ -911,7 +928,7 @@ public class BenchmarkSpotFit implements PlugIn
 		addCount(sb, nP + nN);
 		addCount(sb, nP);
 		addCount(sb, nN);
-		String name = PeakFit.getSolverName(fitConfig); 
+		String name = PeakFit.getSolverName(fitConfig);
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 			name += " Camera";
 		add(sb, name);
@@ -934,8 +951,8 @@ public class BenchmarkSpotFit implements PlugIn
 		// TP are all candidates that can be matched to a spot
 		// FP are all candidates that cannot be matched to a spot
 		// FN = The number of missed spots
-		FractionClassificationResult m = new FractionClassificationResult(cP, cN, 0,
-				simulationParameters.molecules - cP);
+		FractionClassificationResult m = new FractionClassificationResult(cP, cN, 0, simulationParameters.molecules -
+				cP);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
 		add(sb, m.getF1Score());
@@ -1059,7 +1076,7 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Precision\t");
 		sb.append("F1\t");
 		sb.append("Jaccard\t");
-		
+
 		sb.append("Fail P\t");
 		sb.append("Fail N\t");
 		sb.append("TP\t");
