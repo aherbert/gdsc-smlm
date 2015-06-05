@@ -175,13 +175,12 @@ public class BenchmarkSpotFit implements PlugIn
 	 */
 	public class FitMatch extends SpotMatch
 	{
-		final double rsf, f;
+		final double rsf;
 
 		public FitMatch(int i, double d, double z, double rsf)
 		{
 			super(i, d, z);
 			this.rsf = rsf;
-			this.f = (rsf < 1) ? 1 / rsf : rsf;
 		}
 
 		@Override
@@ -199,7 +198,7 @@ public class BenchmarkSpotFit implements PlugIn
 		@Override
 		public double getSignalFactor()
 		{
-			return f;
+			return (rsf < 1) ? 1 / rsf : rsf;
 		}
 	}
 
