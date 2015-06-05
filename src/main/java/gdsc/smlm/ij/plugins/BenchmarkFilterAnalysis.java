@@ -1028,6 +1028,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (showSummaryTable || saveBestFilter)
 			Collections.sort(filters);
 
+		MemoryPeakResults topFilterResults = null;
 		if (showSummaryTable)
 		{
 			createSummaryWindow();
@@ -1046,6 +1047,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				// Show the recall at the specified depth. Sum the distance and signal factor of all scored spots.
 				MemoryPeakResults results = fs.filter.filter(resultsList.get(0), failCount);
+				if (topFilterResults == null)
+					topFilterResults = results;
 				int scored = 0;
 				double tp = 0, d = 0, sf = 0;
 				for (PeakResult result : results.getResults())
@@ -1089,8 +1092,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		showPlots();
 		calculateSensitivity(resultsList);
-		MemoryPeakResults results = depthAnalysis(filters.get(0).filter);
-		scoreAnalysis(results, filters.get(0).filter);
+		topFilterResults = depthAnalysis(topFilterResults, filters.get(0).filter);
+		scoreAnalysis(topFilterResults, filters.get(0).filter);
 
 		if (idCount > 0)
 		{
@@ -2219,15 +2222,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	/**
+	 * @param results
+	 *            The results generated from running the filter (or null)
 	 * @param filter
 	 */
-	private MemoryPeakResults depthAnalysis(Filter filter)
+	private MemoryPeakResults depthAnalysis(MemoryPeakResults results, Filter filter)
 	{
 		// TODO : This analysis ignores the partial match distance.
 		// Use the score for each result to get a weighted histogram. 
 
 		if (!depthRecallAnalysis || simulationParameters.fixedDepth)
-			return null;
+			return results;
 
 		// Build a histogram of the number of spots at different depths
 		final double[] depths = depthStats.getValues();
@@ -2240,7 +2245,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// To get the number of TP at each depth will require that the filter is run 
 		// manually to get the results that pass.
-		MemoryPeakResults results = filter.filter(resultsList.get(0), failCount);
+		results = filter.filter(resultsList.get(0), failCount);
 
 		double[] depths2 = new double[results.size()];
 		int count = 0;
