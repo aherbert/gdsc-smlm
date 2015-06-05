@@ -117,7 +117,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double upperSignalFactor = 100;
 	private static double partialSignalFactor = 50;
 	private static boolean depthRecallAnalysis = true;
-	private static boolean signalAnalysis = true;
+	private static boolean scoreAnalysis = true;
 	private static boolean evolve = false;
 	private static boolean stepSearch = false;
 
@@ -157,7 +157,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int candidates;
 	private static double matches;
 	private static double c_tn, c_fn;
-	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats;
+	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
 	private long totalTime = 0, currentTime;
@@ -558,6 +558,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
 			signalFactorStats = new StoredDataStatistics();
+			distanceStats = new StoredDataStatistics();
 			candidates = 0;
 			matches = 0;
 			c_tn = c_fn = 0;
@@ -691,7 +692,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						// Binary classification uses a score of 1 (match) or 0 (no match)
 						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
 						double matchScore = 0, noMatchScore = 1;
-						double depth = 0, signalFactor = 0;
+						double depth = 0, signalFactor = 0, distance = 0;
 						if (result.fitMatch[index])
 						{
 							// Find the result
@@ -702,6 +703,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							// Store the signal factor from 0 for histogram analysis
 							signalFactor = (match.getRelativeSignalFactor() < 1) ? 1 - 1 / match
 									.getRelativeSignalFactor() : match.getRelativeSignalFactor() - 1;
+							// Store the match distance in nm
+							distance = match.d * simulationParameters.a;
 
 							final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
 							if (dScore > 0)
@@ -731,6 +734,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							{
 								depthFitStats.add(depth);
 								signalFactorStats.add(signalFactor);
+								distanceStats.add(distance);
 							}
 						}
 
@@ -738,7 +742,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 						// Use a custom peak result so that the depth can be stored.
 						r.add(new DepthPeakResult(peak, origX, origY, score2, fitResult.getError(), result.noise,
-								params, depth, signalFactor, matchScore, noMatchScore));
+								params, depth, signalFactor, distance, matchScore, noMatchScore));
 					}
 					else
 					{
@@ -857,7 +861,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addSlider("Partial_signal_factor (%)", 0, 100, partialSignalFactor);
 		if (!simulationParameters.fixedDepth)
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
-		gd.addCheckbox("Signal_analysis", signalAnalysis);
+		gd.addCheckbox("Score_analysis", scoreAnalysis);
 		gd.addCheckbox("Evolve", evolve);
 		gd.addCheckbox("Step_search", stepSearch);
 		gd.addStringField("Title", resultsTitle, 20);
@@ -916,7 +920,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		partialSignalFactor = Math.abs(gd.getNextNumber());
 		if (!simulationParameters.fixedDepth)
 			depthRecallAnalysis = gd.getNextBoolean();
-		signalAnalysis = gd.getNextBoolean();
+		scoreAnalysis = gd.getNextBoolean();
 		evolve = gd.getNextBoolean();
 		stepSearch = gd.getNextBoolean();
 		resultsTitle = gd.getNextString();
@@ -1029,21 +1033,25 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				FractionClassificationResult r = scoreFilter(fs.filter, resultsList);
 				String text = createResult(fs.filter, r);
 
-				// Show the recall at the specified depth
+				// Show the recall at the specified depth. Sum the distance and signal factor of all scored spots.
 				MemoryPeakResults results = fs.filter.filter(resultsList.get(0), failCount);
-				int tp = 0;
-				double sf = 0;
+				int scored = 0;
+				double tp = 0, d = 0, sf = 0;
 				for (PeakResult result : results.getResults())
 				{
 					if (result.origValue != 0)
 					{
-						if (Math.abs(((DepthPeakResult) result).depth) <= range)
-							tp++;
-						sf += ((DepthPeakResult) result).signalfactor;
+						final DepthPeakResult dpr = (DepthPeakResult) result;
+						if (Math.abs(dpr.depth) <= range)
+							tp += result.origValue;
+						d += dpr.distance;
+						sf += dpr.signalfactor;
+						scored++;
 					}
 				}
 
-				text += "\t" + Utils.rounded((double) tp / np) + "\t" + Utils.rounded(sf / results.size()) + "\t";
+				text += "\t" + Utils.rounded((double) tp / np) + "\t" + Utils.rounded(d / scored) + "\t" +
+						Utils.rounded(sf / scored) + "\t";
 				if (fs.atLimit)
 					text += "Y";
 
@@ -1071,7 +1079,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		showPlots();
 		calculateSensitivity(resultsList);
 		MemoryPeakResults results = depthAnalysis(filters.get(0).filter);
-		signalAnalysis(results, filters.get(0).filter);
+		scoreAnalysis(results, filters.get(0).filter);
 
 		if (idCount > 0)
 		{
@@ -1307,7 +1315,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				sb.append("\t").append(COLUMNS[i]);
 
 		if (summary)
-			sb.append("\tDepth Recall\tSignal Factor\tAt limit");
+			sb.append("\tDepth Recall\tDistance\tSignal Factor\tAt limit");
 		return sb.toString();
 	}
 
@@ -2357,18 +2365,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *            The results generated from running the filter (or null)
 	 * @param filter
 	 */
-	private void signalAnalysis(MemoryPeakResults results, Filter filter)
+	private void scoreAnalysis(MemoryPeakResults results, Filter filter)
 	{
-		if (!signalAnalysis || BenchmarkSpotFit.signalFactor <= 1)
+		if (!scoreAnalysis)
 			return;
 
-		// Build a histogram of the number of spots at different depths
+		// Build a histogram of the fitted spots that were available to be scored
 		double[] signal = signalFactorStats.getValues();
+		double[] distance = distanceStats.getValues();
 		double range = BenchmarkSpotFit.signalFactor - 1;
-		double[] limits = { -range, range };
+		double[] limits1 = { -range, range };
+		double[] limits2 = { 0, simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0 };
 
 		final int bins = Math.max(10, simulationParameters.molecules / 100);
-		double[][] h1 = Utils.calcHistogram(signal, limits[0], limits[1], bins);
+		double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
+		double[][] h2 = Utils.calcHistogram(distance, limits2[0], limits2[1], bins);
 
 		// To get the number of TP at each depth will require that the filter is run 
 		// manually to get the results that pass.
@@ -2376,88 +2387,57 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			results = filter.filter(resultsList.get(0), failCount);
 
 		double[] signal2 = new double[results.size()];
+		double[] distance2 = new double[results.size()];
 		int count = 0;
-		double sum = 0;
+		double sumSignal = 0, sumDistance = 0;
 		for (PeakResult r : results.getResults())
 		{
 			if (r.origValue != 0)
 			{
-				sum += signal2[count] = ((DepthPeakResult) r).signalfactor;
+				sumSignal += signal2[count] = ((DepthPeakResult) r).signalfactor;
+				sumDistance += distance2[count] = ((DepthPeakResult) r).distance;
 				count++;
 			}
 		}
 		signal2 = Arrays.copyOf(signal2, count);
+		distance2 = Arrays.copyOf(distance2, count);
 
 		// Build a histogram using the same limits
-		double[][] h2 = Utils.calcHistogram(signal2, limits[0], limits[1], bins);
+		double[][] h1b = Utils.calcHistogram(signal2, limits1[0], limits1[1], bins);
+		double[][] h2b = Utils.calcHistogram(distance2, limits2[0], limits2[1], bins);
 
-		// Produce a histogram of the number of spots at each depth
+		// Draw distance histogram first
+		String title2 = TITLE + " Distance Histogram";
+		Plot2 plot2 = new Plot2(title2, "Distance (nm)", "Frequency");
+		plot2.setLimits(limits2[0], limits2[1], 0, Maths.max(h2[1]));
+		plot2.setColor(Color.black);
+		plot2.addLabel(
+				0,
+				0,
+				String.format("Blue = Fitted (%s); Red = Filtered (%s)", Utils.rounded(distanceStats.getMean()),
+						Utils.rounded(sumDistance / count)));
+		plot2.setColor(Color.blue);
+		plot2.addPoints(h2[0], h2[1], Plot2.BAR);
+		plot2.setColor(Color.red);
+		plot2.addPoints(h2b[0], h2b[1], Plot2.BAR);
+		PlotWindow pw2 = Utils.display(title2, plot2);
+		if (Utils.isNewWindow())
+			idList[idCount++] = pw2.getImagePlus().getID();
+
+		// Draw signal factor histogram
 		String title1 = TITLE + " Signal Factor Histogram";
 		Plot2 plot1 = new Plot2(title1, "Signal Factor", "Frequency");
-		plot1.setLimits(limits[0], limits[1], 0, Maths.max(h1[1]));
+		plot1.setLimits(limits1[0], limits1[1], 0, Maths.max(h1[1]));
 		plot1.setColor(Color.black);
 		plot1.addLabel(0, 0, String.format("Blue = Fitted (%s); Red = Filtered (%s)",
-				Utils.rounded(signalFactorStats.getMean()), Utils.rounded(sum / count)));
+				Utils.rounded(signalFactorStats.getMean()), Utils.rounded(sumSignal / count)));
 		plot1.setColor(Color.blue);
 		plot1.addPoints(h1[0], h1[1], Plot2.BAR);
 		plot1.setColor(Color.red);
-		plot1.addPoints(h2[0], h2[1], Plot2.BAR);
+		plot1.addPoints(h1b[0], h1b[1], Plot2.BAR);
 		PlotWindow pw1 = Utils.display(title1, plot1);
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw1.getImagePlus().getID();
-
-		//// Interpolate
-		//final double halfBinWidth = (h1[0][1] - h1[0][0]) * 0.5;
-		//// Remove final value of the histogram as this is at the upper limit of the range (i.e. count zero)
-		//h1[0] = Arrays.copyOf(h1[0], h1[0].length - 1);
-		//h1[1] = Arrays.copyOf(h1[1], h1[0].length);
-		//h2[1] = Arrays.copyOf(h2[1], h1[0].length);
-		//
-		//// TODO : Fix the smoothing since LOESS sometimes does not work.
-		//// Perhaps allow configuration of the number of histogram bins and the smoothing bandwidth.
-		//
-		//// Use minimum of 3 points for smoothing
-		//// Ensure we use at least x% of data
-		//double bandwidth = Math.max(3.0 / h1[0].length, 0.15);
-		//LoessInterpolator loess = new LoessInterpolator(bandwidth, 1);
-		//PolynomialSplineFunction spline1 = loess.interpolate(h1[0], h1[1]);
-		//PolynomialSplineFunction spline2 = loess.interpolate(h1[0], h2[1]);
-		//// Use a second interpolator in case the LOESS fails
-		//LinearInterpolator lin = new LinearInterpolator();
-		//PolynomialSplineFunction spline1b = lin.interpolate(h1[0], h1[1]);
-		//PolynomialSplineFunction spline2b = lin.interpolate(h1[0], h2[1]);
-		//
-		//// Increase the number of points to show a smooth curve
-		//double[] points = new double[bins * 5];
-		//limits = Maths.limits(h1[0]);
-		//final double interval = (limits[1] - limits[0]) / (points.length - 1);
-		//double[] v1 = new double[points.length];
-		//double[] v2 = new double[points.length];
-		//for (int i = 0; i < points.length - 1; i++)
-		//{
-		//	points[i] = limits[0] + i * interval;
-		//	v1[i] = getSplineValue(spline1, spline1b, points[i]);
-		//	v2[i] = getSplineValue(spline2, spline2b, points[i]);
-		//	points[i] += halfBinWidth;
-		//}
-		//// Final point on the limit of the spline range
-		//int ii = points.length - 1;
-		//v1[ii] = getSplineValue(spline1, spline1b, limits[1]);
-		//v2[ii] = getSplineValue(spline2, spline2b, limits[1]);
-		//points[ii] = limits[1] + halfBinWidth;
-		//
-		//String title2 = TITLE + " Signal Factor Histogram (normalised)";
-		//Plot2 plot2 = new Plot2(title2, "Signal Factor", "Frequency");
-		//plot2.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0, Maths.max(v1));
-		//plot2.setColor(Color.black);
-		//plot2.addLabel(0, 0, "Blue = Fitted; Red = Filtered");
-		//plot2.setColor(Color.blue);
-		//plot2.addPoints(points, v1, Plot2.LINE);
-		//plot2.setColor(Color.red);
-		//plot2.addPoints(points, v2, Plot2.LINE);
-		//PlotWindow pw2 = Utils.display(title2, plot2);
-		//if (Utils.isNewWindow())
-		//	idList[idCount++] = pw2.getImagePlus().getID();
 	}
 
 	public class FilterScore implements Comparable<FilterScore>
@@ -2520,14 +2500,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private class DepthPeakResult extends PeakResult
 	{
-		final double depth, signalfactor, matchScore, noMatchScore;
+		final double depth, signalfactor, distance, matchScore, noMatchScore;
 
 		public DepthPeakResult(int peak, int origX, int origY, float score, double error, float noise, float[] params,
-				double depth, double signalfactor, double matchScore, double noMatchScore)
+				double depth, double signalfactor, double distance, double matchScore, double noMatchScore)
 		{
 			super(peak, origX, origY, score, error, noise, params, null);
 			this.depth = depth;
 			this.signalfactor = signalfactor;
+			this.distance = distance;
 			this.matchScore = matchScore;
 			this.noMatchScore = noMatchScore;
 		}
