@@ -841,12 +841,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			signal += simulationParameters.maxSignal;
 			signal *= 0.5;
 		}
+		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
+				simulationParameters.b2, simulationParameters.emCCD);
 		double pLSE = PeakResult.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
 		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
-		gd.addMessage(String.format("%d results, %d True-Positives\nExpected precision = %.3f (LSE), %.3f (MLE)",
-				total, tp, pLSE, pMLE));
+		gd.addMessage(String
+				.format("%d results, %d True-Positives\nExpected signal precision = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
+						total, tp, signal, pSignal, pLSE, pMLE));
 
 		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
