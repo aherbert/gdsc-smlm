@@ -627,7 +627,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			// Signal factor must be greater than 1
 			final RampedScore signalScore;
-			if (BenchmarkSpotFit.signalFactor > 1)
+			if (BenchmarkSpotFit.signalFactor > 0)
 			{
 				signalScore = new RampedScore(BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0,
 						BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0);
@@ -700,9 +700,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 							// Store depth of matches for later analysis
 							depth = match.z;
-							// Store the signal factor from 0 for histogram analysis
-							signalFactor = (match.getRelativeSignalFactor() < 1) ? 1 - 1 / match
-									.getRelativeSignalFactor() : match.getRelativeSignalFactor() - 1;
+							signalFactor = match.getSignalFactor();
 							// Store the match distance in nm
 							distance = match.d * simulationParameters.a;
 
@@ -715,7 +713,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							// Apply the weighting for the signal factor if enabled
 							if (signalScore != null)
 							{
-								final double fScore = signalScore.scoreAndFlatten(match.getSignalFactor(), 256);
+								final double fScore = signalScore.scoreAndFlatten(match.getAbsoluteSignalFactor(), 256);
 								matchScore = RampedScore.flatten(matchScore * fScore, 256);
 								noMatchScore = fScore - matchScore;
 
@@ -2373,7 +2371,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Build a histogram of the fitted spots that were available to be scored
 		double[] signal = signalFactorStats.getValues();
 		double[] distance = distanceStats.getValues();
-		double range = BenchmarkSpotFit.signalFactor - 1;
+		double range = BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0;
 		double[] limits1 = { -range, range };
 		double[] limits2 = { 0, simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0 };
 

@@ -99,7 +99,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private static int negativesAfterAllPositives = 10;
 	private static double distance = 1.5;
 	private static double lowerDistance = 1.5;
-	private static double matchSignal = 3;
+	private static double matchSignal = 2;
 
 	private boolean extraOptions = false;
 
@@ -160,14 +160,23 @@ public class BenchmarkSpotFit implements PlugIn
 		public abstract boolean isFitResult();
 
 		/**
-		 * @return The successfully fitted signal divided by the actual signal
-		 */
-		public abstract double getRelativeSignalFactor();
-
-		/**
-		 * @return The factor difference between the successfully fitted signal and the actual signal
+		 * Return a score for the difference between the fitted and actual signal. Zero is no difference. Negative is
+		 * the fitted is below the actual. Positive means the fitted is above the actual.
+		 * 
+		 * @return The factor difference between the successfully fitted signal and the actual signal.
 		 */
 		public abstract double getSignalFactor();
+
+		/**
+		 * Return a score for the difference between the fitted and actual signal. Zero is no difference.
+		 * Positive means the fitted is difference from the actual.
+		 * 
+		 * @return The factor difference between the successfully fitted signal and the actual signal.
+		 */
+		public double getAbsoluteSignalFactor()
+		{
+			return Math.abs(getSignalFactor());
+		}
 	}
 
 	/**
@@ -175,12 +184,14 @@ public class BenchmarkSpotFit implements PlugIn
 	 */
 	public class FitMatch extends SpotMatch
 	{
-		final double rsf;
+		final double sf;
 
 		public FitMatch(int i, double d, double z, double rsf)
 		{
 			super(i, d, z);
-			this.rsf = rsf;
+			// The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for above.
+			// Reset the signal factor from 0
+			this.sf = (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
 		}
 
 		@Override
@@ -190,15 +201,9 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 
 		@Override
-		public double getRelativeSignalFactor()
-		{
-			return rsf;
-		};
-
-		@Override
 		public double getSignalFactor()
 		{
-			return (rsf < 1) ? 1 / rsf : rsf;
+			return sf;
 		}
 	}
 
@@ -217,12 +222,6 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			return false;
 		}
-
-		@Override
-		public double getRelativeSignalFactor()
-		{
-			return 0;
-		};
 
 		@Override
 		public double getSignalFactor()
@@ -463,7 +462,7 @@ public class BenchmarkSpotFit implements PlugIn
 					// Check the fitted signal is approximately correct
 					if (signalFactor != 0)
 					{
-						if (match[i].getSignalFactor() > signalFactor)
+						if (match[i].getAbsoluteSignalFactor() > signalFactor)
 						{
 							// Treat as an unfitted result
 							fn += s;
@@ -568,7 +567,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
 		gd.addSlider("Match_distance", 0.2, 3, distance);
 		gd.addSlider("Lower_distance", 0.2, 3, lowerDistance);
-		gd.addSlider("Match_signal", 1, 4.5, matchSignal);
+		gd.addSlider("Match_signal", 0, 3.5, matchSignal);
 
 		// Collect options for fitting
 		gd.addNumericField("Initial_StdDev0", getSa() / simulationParameters.a, 3);
@@ -597,8 +596,6 @@ public class BenchmarkSpotFit implements PlugIn
 		distance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
 		signalFactor = matchSignal = Math.abs(gd.getNextNumber());
-		if (signalFactor <= 1)
-			signalFactor = 0;
 
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
