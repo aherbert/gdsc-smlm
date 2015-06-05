@@ -156,7 +156,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static final String[] NAMES = new String[] { "Signal/Frame", "Signal/Frame (continuous)", "Total Signal",
 			"Blinks", "t-On", "t-Off", "Sampled blinks", "Sampled t-On", "Sampled t-Off", "Noise", "SNR",
-			"SNR (continuous)", "Density", "Precision", "Width", "X", "Y", "Z" };
+			"SNR (continuous)", "Density", "Precision", "Precision (in-focus)", "Width", "X", "Y", "Z" };
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
@@ -177,10 +177,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static final int SNR_CONTINUOUS = 11;
 	private static final int DENSITY = 12;
 	private static final int PRECISION = 13;
-	private static final int WIDTH = 14;
-	private static final int X = 15;
-	private static final int Y = 16;
-	private static final int Z = 17;
+	private static final int PRECISION_IN_FOCUS = 14;
+	private static final int WIDTH = 15;
+	private static final int X = 16;
+	private static final int Y = 17;
+	private static final int Z = 18;
 
 	private static boolean[] integerDisplay;
 	static
@@ -200,6 +201,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		alwaysRemoveOutliers = new boolean[NAMES.length];
 		alwaysRemoveOutliers[PRECISION] = true;
+		alwaysRemoveOutliers[PRECISION_IN_FOCUS] = true;
 	}
 
 	private String resultsFileHeader = null;
@@ -2678,9 +2680,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			final double gain = settings.getTotalGain();
 			final boolean emCCD = (settings.getEmGain() > 1);
+			// Convert depth-of-field to pixels
+			final double depth = settings.depthOfField / settings.pixelPitch;
 			for (PeakResult r : results.getResults())
 			{
-				stats[PRECISION].add(r.getPrecision(settings.pixelPitch, gain, emCCD));
+				final double precision = r.getPrecision(settings.pixelPitch, gain, emCCD);
+				stats[PRECISION].add(precision);
+				// The error stores the z-depth in pixels
+				if (Math.abs(r.error) < depth)
+					stats[PRECISION_IN_FOCUS].add(precision);
 				stats[WIDTH].add(r.getSD());
 			}
 			// Compute density per frame. Multithread for speed
@@ -3487,6 +3495,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addCheckbox("Remove_outliers", settings.removeOutliers);
 		if (simpleMode)
 			gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.densityRadius);
+		gd.addNumericField("Depth-of-field (nm)", settings.depthOfField, 0);
 
 		// Split into two columns
 		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
@@ -3575,6 +3584,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.removeOutliers = gd.getNextBoolean();
 		if (simpleMode)
 			settings.densityRadius = (float) gd.getNextNumber();
+		settings.depthOfField = (float) Math.abs(gd.getNextNumber());
 
 		// Save before validation so that the current values are preserved.
 		SettingsManager.saveSettings(globalSettings);
@@ -3813,6 +3823,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
 		gd.addCheckbox("Remove_outliers", settings.removeOutliers);
 		gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.densityRadius);
+		gd.addNumericField("Depth-of-field (nm)", settings.depthOfField, 0);
 
 		// Split into two columns
 		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
@@ -3911,6 +3922,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.histogramBins = (int) gd.getNextNumber();
 		settings.removeOutliers = gd.getNextBoolean();
 		settings.densityRadius = (float) gd.getNextNumber();
+		settings.depthOfField = (float) Math.abs(gd.getNextNumber());
 
 		// Ensure tN threshold is more lenient
 		if (settings.minSNRt1 < settings.minSNRtN)
