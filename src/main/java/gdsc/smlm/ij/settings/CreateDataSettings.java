@@ -128,6 +128,7 @@ public class CreateDataSettings
 	public int histogramBins = 100;
 	public boolean removeOutliers = false;
 	public float densityRadius = 3;
+	public float depthOfField = 250;
 	
 	public double xPosition = 0;
 	public double yPosition = 0;
