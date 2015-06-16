@@ -19,7 +19,7 @@ import gdsc.smlm.ij.results.ResultsTable;
 /**
  * Contain the settings for the Results
  */
-public class ResultsSettings
+public class ResultsSettings implements Cloneable
 {
 	public boolean logProgress = false;
 	public boolean showDeviations = false;
@@ -91,5 +91,24 @@ public class ResultsSettings
 		{
 			setResultsTable(ResultsTable.values()[resultsTable]);
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public ResultsSettings clone()
+	{
+		ResultsSettings c;
+		try
+		{
+			c = (ResultsSettings) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
+		return c;
 	}
 }
