@@ -535,7 +535,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		else
 			results.setName(source.getName() + " (" + getSolverName() + ")");
 		results.setBounds(bounds);
-		Calibration cal = calibration.copy();
+		Calibration cal = calibration.clone();
 		// Account for the frame integration
 		// TODO - Should we change this so that if integrate frames is used then the data 
 		// are converted to ExtendedPeakResult with a start and end frame
@@ -686,6 +686,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage((maximaIdentification) ? "Identify candidate maxima" : "Fit 2D Gaussian to identified maxima");
 
+		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		gd.addChoice("Template", templates, templates[0]);
+
 		gd.addStringField("Config_file", filename, 40);
 		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
 		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
@@ -826,6 +829,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			int t = 0;
 			int b = 0;
 			int ch = 0;
+
+			Choice textTemplate = choices.get(ch++);
+			textTemplate.addItemListener(this);
 
 			textConfigFile = texts.get(t++);
 			textConfigFile.addMouseListener(this);
@@ -1245,22 +1251,69 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	public void itemStateChanged(ItemEvent e)
 	{
-		Checkbox cb = (Checkbox) e.getSource();
-		if (cb.getState())
+		if (e.getSource() instanceof Choice)
 		{
-			cb.setState(false);
-			PSFCalculator calculator = new PSFCalculator();
-			calculatorSettings.pixelPitch = calibration.nmPerPixel / 1000.0;
-			calculatorSettings.magnification = 1;
-			calculatorSettings.beamExpander = 1;
-			double sd = calculator.calculate(calculatorSettings, true);
-			if (sd > 0)
-				textInitialPeakStdDev0.setText(Double.toString(sd));
+			// Update the settings from the template
+			Choice choice = (Choice) e.getSource();
+			String templateName = choice.getSelectedItem();
+			//System.out.println("Update to " + templateName);
+
+			// Get the configuration template
+			GlobalSettings template = ConfigurationTemplate.getTemplate(templateName);
+
+			if (template != null)
+			{
+				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+				if (template.isFitEngineConfiguration())
+				{
+					FitEngineConfiguration templateConfig = template.getFitEngineConfiguration().clone();
+
+					// If this is a custom template then use all the settings.
+					// If a default template then copy the existing spot settings.
+					if (!custom)
+					{
+						FitConfiguration templateFitConfig = templateConfig.getFitConfiguration();
+						templateFitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0());
+						templateFitConfig.setInitialPeakStdDev1(fitConfig.getInitialPeakStdDev1());
+						templateFitConfig.setInitialAngle(fitConfig.getInitialAngle());
+						templateFitConfig.setFitFunction(fitConfig.getFitFunction());
+					}
+
+					refreshSettings(templateConfig);
+				}
+				if (template.isCalibration())
+				{
+					refreshSettings(template.getCalibration().clone());
+				}
+				if (template.isResultsSettings())
+				{
+					refreshSettings(template.getResultsSettings().clone());
+				}
+			}
+		}
+		else if (e.getSource() instanceof Checkbox)
+		{
+			// Run the PSF Calculator
+			Checkbox cb = (Checkbox) e.getSource();
+			if (cb.getState())
+			{
+				cb.setState(false);
+				PSFCalculator calculator = new PSFCalculator();
+				calculatorSettings.pixelPitch = calibration.nmPerPixel / 1000.0;
+				calculatorSettings.magnification = 1;
+				calculatorSettings.beamExpander = 1;
+				double sd = calculator.calculate(calculatorSettings, true);
+				if (sd > 0)
+					textInitialPeakStdDev0.setText(Double.toString(sd));
+			}
 		}
 	}
 
 	private boolean readDialog(GlobalSettings settings, GenericDialog gd, boolean isCrop)
 	{
+		// Ignore the template
+		gd.getNextChoice();
+
 		String filename = gd.getNextString();
 
 		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
@@ -2322,71 +2375,98 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		if (newFilename != null && new File(newFilename).exists())
 		{
-			YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE, "Reload settings from file");
-			d.setVisible(true);
-			if (d.yesPressed())
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.enableYesNoCancel();
+			gd.hideCancelButton();
+			gd.addMessage("Reload settings from file");
+			gd.showDialog();
+			if (gd.wasOKed())
 			{
 				// Reload the settings and update the GUI
 				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename);
 				if (settings == null)
 					return;
-				FitEngineConfiguration config = settings.getFitEngineConfiguration();
-				FitConfiguration fitConfig = config.getFitConfiguration();
-				ResultsSettings resultsSettings = settings.getResultsSettings();
 
-				textNmPerPixel.setText("" + calibration.nmPerPixel);
-				textGain.setText("" + calibration.gain);
-				textEMCCD.setState(calibration.emCCD);
-				textExposure.setText("" + calibration.exposureTime);
-				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
-				if (!maximaIdentification)
-				{
-					textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
-					textInitialAngleD.setText("" + fitConfig.getInitialAngle());
-				}
-				textDataFilterType.select(config.getDataFilterType().ordinal());
-				textDataFilter.select(config.getDataFilter(0).ordinal());
-				textSmooth.setText("" + config.getSmooth(0));
-				textSearch.setText("" + config.getSearch());
-				textBorder.setText("" + config.getBorder());
-				textFitting.setText("" + config.getFitting());
-				if (!maximaIdentification)
-				{
-					textFitSolver.select(fitConfig.getFitSolver().ordinal());
-					textFitFunction.select(fitConfig.getFitFunction().ordinal());
-					if (extraOptions)
-						textFitBackground.setState(fitConfig.isBackgroundFitting());
-					textFailuresLimit.setText("" + config.getFailuresLimit());
-					textIncludeNeighbours.setState(config.isIncludeNeighbours());
-					textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
-					textResidualsThreshold.setText("" + config.getResidualsThreshold());
-					textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
-					textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-					textSignalStrength.setText("" + fitConfig.getSignalStrength());
-					textMinPhotons.setText("" + fitConfig.getMinPhotons());
-					textWidthFactor.setText("" + fitConfig.getWidthFactor());
-					textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
-					if (extraOptions)
-					{
-						textNoise.setText("" + fitConfig.getNoise());
-						textNoiseMethod.select(config.getNoiseMethod().ordinal());
-					}
-				}
-				textLogProgress.setState(resultsSettings.logProgress);
-				if (!maximaIdentification)
-					textShowDeviations.setState(resultsSettings.showDeviations);
-				textResultsTable.select(resultsSettings.getResultsTable().ordinal());
-				textResultsImage.select(resultsSettings.getResultsImage().ordinal());
-				textWeightedImage.setState(resultsSettings.weightedImage);
-				textEqualisedImage.setState(resultsSettings.equalisedImage);
-				textPrecision.setText("" + resultsSettings.precision);
-				textImageScale.setText("" + resultsSettings.imageScale);
-				if (extraOptions)
-					textImageRollingWindow.setText("" + resultsSettings.imageRollingWindow);
-				textResultsDirectory.setText("" + resultsSettings.resultsDirectory);
-				textBinaryResults.setState(resultsSettings.binaryResults);
-				textResultsInMemory.setState(resultsSettings.resultsInMemory);
+				Calibration calibration = settings.getCalibration();
+				refreshSettings(calibration);
+
+				FitEngineConfiguration config = settings.getFitEngineConfiguration();
+				refreshSettings(config);
+
+				ResultsSettings resultsSettings = settings.getResultsSettings();
+				refreshSettings(resultsSettings);
 			}
 		}
+	}
+
+	private void refreshSettings(Calibration calibration)
+	{
+		this.calibration = calibration;
+
+		textNmPerPixel.setText("" + calibration.nmPerPixel);
+		textGain.setText("" + calibration.gain);
+		textEMCCD.setState(calibration.emCCD);
+		textExposure.setText("" + calibration.exposureTime);
+	}
+
+	private void refreshSettings(FitEngineConfiguration config)
+	{
+		// Set the configuration
+		this.config = config;
+		this.fitConfig = config.getFitConfiguration();
+
+		textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
+		if (!maximaIdentification)
+		{
+			textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
+			textInitialAngleD.setText("" + fitConfig.getInitialAngle());
+		}
+		textDataFilterType.select(config.getDataFilterType().ordinal());
+		textDataFilter.select(config.getDataFilter(0).ordinal());
+		textSmooth.setText("" + config.getSmooth(0));
+		textSearch.setText("" + config.getSearch());
+		textBorder.setText("" + config.getBorder());
+		textFitting.setText("" + config.getFitting());
+		if (!maximaIdentification)
+		{
+			textFitSolver.select(fitConfig.getFitSolver().ordinal());
+			textFitFunction.select(fitConfig.getFitFunction().ordinal());
+			if (extraOptions)
+				textFitBackground.setState(fitConfig.isBackgroundFitting());
+			textFailuresLimit.setText("" + config.getFailuresLimit());
+			textIncludeNeighbours.setState(config.isIncludeNeighbours());
+			textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
+			textResidualsThreshold.setText("" + config.getResidualsThreshold());
+			textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
+			textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+			textSignalStrength.setText("" + fitConfig.getSignalStrength());
+			textMinPhotons.setText("" + fitConfig.getMinPhotons());
+			textWidthFactor.setText("" + fitConfig.getWidthFactor());
+			textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+			if (extraOptions)
+			{
+				textNoise.setText("" + fitConfig.getNoise());
+				textNoiseMethod.select(config.getNoiseMethod().ordinal());
+			}
+		}
+	}
+
+	private void refreshSettings(ResultsSettings resultsSettings)
+	{
+		this.resultsSettings = resultsSettings;
+		textLogProgress.setState(resultsSettings.logProgress);
+		if (!maximaIdentification)
+			textShowDeviations.setState(resultsSettings.showDeviations);
+		textResultsTable.select(resultsSettings.getResultsTable().ordinal());
+		textResultsImage.select(resultsSettings.getResultsImage().ordinal());
+		textWeightedImage.setState(resultsSettings.weightedImage);
+		textEqualisedImage.setState(resultsSettings.equalisedImage);
+		textPrecision.setText("" + resultsSettings.precision);
+		textImageScale.setText("" + resultsSettings.imageScale);
+		if (extraOptions)
+			textImageRollingWindow.setText("" + resultsSettings.imageRollingWindow);
+		textResultsDirectory.setText("" + resultsSettings.resultsDirectory);
+		textBinaryResults.setState(resultsSettings.binaryResults);
+		textResultsInMemory.setState(resultsSettings.resultsInMemory);
 	}
 }
