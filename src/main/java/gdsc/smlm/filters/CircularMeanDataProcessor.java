@@ -88,11 +88,11 @@ public class CircularMeanDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public CircularMeanDataProcessor clone()
 	{
 		CircularMeanDataProcessor f = (CircularMeanDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (CircularMeanFilter) filter.clone();
+		f.filter = filter.clone();
 		return f;
 	}
 

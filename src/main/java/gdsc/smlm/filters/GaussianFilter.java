@@ -515,7 +515,7 @@ public class GaussianFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public GaussianFilter clone()
 	{
 		try
 		{

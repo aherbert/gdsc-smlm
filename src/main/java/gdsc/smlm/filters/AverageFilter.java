@@ -2676,7 +2676,7 @@ public class AverageFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public AverageFilter clone()
 	{
 		try
 		{

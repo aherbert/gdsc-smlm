@@ -89,11 +89,11 @@ public class GaussianDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public GaussianDataProcessor clone()
 	{
 		GaussianDataProcessor f = (GaussianDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (GaussianFilter) filter.clone();
+		f.filter = filter.clone();
 		return f;
 	}
 

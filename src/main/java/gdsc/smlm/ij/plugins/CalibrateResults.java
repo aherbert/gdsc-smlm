@@ -116,7 +116,7 @@ public class CalibrateResults implements PlugIn
 		// To avoid changing all datasets with the same calibration we create a copy
 		
 		if (!updateAll)
-			calibration = calibration.copy();
+			calibration = calibration.clone();
 		
 		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
 		calibration.gain = Math.abs(gd.getNextNumber());

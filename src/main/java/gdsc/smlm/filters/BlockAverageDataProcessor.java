@@ -101,11 +101,11 @@ public class BlockAverageDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public BlockAverageDataProcessor clone()
 	{
 		BlockAverageDataProcessor f = (BlockAverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (AverageFilter) filter.clone();
+		f.filter = filter.clone();
 		return f;
 	}
 

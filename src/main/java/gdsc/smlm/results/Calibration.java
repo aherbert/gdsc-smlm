@@ -70,17 +70,12 @@ public class Calibration implements Cloneable
 		this.exposureTime = exposureTime;
 	}
 
-	/**
-	 * Copy the calibration
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @return A copy
+	 * @see java.lang.Object#clone()
 	 */
-	public Calibration copy()
-	{
-		return (Calibration) clone();
-	}
-
-	public Object clone()
+	public Calibration clone()
 	{
 		Calibration c;
 		try

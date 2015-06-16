@@ -133,13 +133,13 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public JurySpotFilter clone()
 	{
 		JurySpotFilter f = (JurySpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.processors = processors.clone();
 		for (int i = 0; i < processors.length; i++)
-			f.processors[i] = (DataProcessor) processors[i].clone();
+			f.processors[i] = processors[i].clone();
 		return f;
 	}
 

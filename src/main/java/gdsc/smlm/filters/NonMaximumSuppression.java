@@ -3766,7 +3766,7 @@ public class NonMaximumSuppression implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public NonMaximumSuppression clone()
 	{
 		try
 		{

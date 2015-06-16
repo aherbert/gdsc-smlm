@@ -218,7 +218,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			this.jobs = jobs;
 			this.stack = stack;
-			this.spotFilter = (MaximaSpotFilter) spotFilter.clone();
+			this.spotFilter = spotFilter.clone();
 			this.actualCoordinates = actualCoordinates;
 			this.results = new HashMap<Integer, FilterResult>();
 		}

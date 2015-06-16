@@ -68,11 +68,11 @@ public class SingleSpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public SingleSpotFilter clone()
 	{
 		SingleSpotFilter f = (SingleSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.processor = (DataProcessor) processor.clone();
+		f.processor = processor.clone();
 		return f;
 	}
 

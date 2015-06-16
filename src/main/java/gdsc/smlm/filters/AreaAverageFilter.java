@@ -326,13 +326,13 @@ public class AreaAverageFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public AreaAverageFilter clone()
 	{
 		try
 		{
 			AreaAverageFilter o = (AreaAverageFilter) super.clone();
-			o.filter = (SumFilter) filter.clone();
-			o.avFilter = (AverageFilter) avFilter.clone();
+			o.filter = filter.clone();
+			o.avFilter = avFilter.clone();
 			return o;
 		}
 		catch (CloneNotSupportedException e)

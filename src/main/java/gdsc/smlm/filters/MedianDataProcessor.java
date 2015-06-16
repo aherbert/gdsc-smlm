@@ -114,11 +114,11 @@ public class MedianDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public MedianDataProcessor clone()
 	{
 		MedianDataProcessor f = (MedianDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.filter = (MedianFilter) filter.clone();
+		f.filter = filter.clone();
 		return f;
 	}
 

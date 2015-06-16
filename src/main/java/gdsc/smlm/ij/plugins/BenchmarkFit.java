@@ -163,7 +163,7 @@ public class BenchmarkFit implements PlugIn
 			this.jobs = jobs;
 			this.stack = stack;
 			this.region = region;
-			this.fitConfig = (FitConfiguration) fitConfig.clone();
+			this.fitConfig = fitConfig.clone();
 			this.xy = getStartPoints();
 
 			for (int i = 0; i < stats.length; i++)

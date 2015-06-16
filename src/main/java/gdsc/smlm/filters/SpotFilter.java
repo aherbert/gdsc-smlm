@@ -86,7 +86,7 @@ public abstract class SpotFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public SpotFilter clone()
 	{
 		try
 		{

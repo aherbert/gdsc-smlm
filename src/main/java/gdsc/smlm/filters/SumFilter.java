@@ -2291,7 +2291,7 @@ public class SumFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public SumFilter clone()
 	{
 		try
 		{

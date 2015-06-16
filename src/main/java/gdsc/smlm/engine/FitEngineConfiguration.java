@@ -243,13 +243,13 @@ public class FitEngineConfiguration implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public FitEngineConfiguration clone()
 	{
 		try
 		{
 			FitEngineConfiguration f = (FitEngineConfiguration) super.clone();
 			// Ensure the object is duplicated and not passed by reference.
-			f.fitConfiguration = (FitConfiguration) fitConfiguration.clone();
+			f.fitConfiguration = fitConfiguration.clone();
 			return f;
 		}
 		catch (CloneNotSupportedException e)

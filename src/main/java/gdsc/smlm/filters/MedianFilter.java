@@ -850,7 +850,7 @@ public class MedianFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public MedianFilter clone()
 	{
 		try
 		{

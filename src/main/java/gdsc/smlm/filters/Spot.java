@@ -102,7 +102,7 @@ public class Spot implements Comparable<Spot>, Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public Spot clone()
 	{
 		try
 		{

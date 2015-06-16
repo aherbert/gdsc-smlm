@@ -260,7 +260,7 @@ public class BenchmarkSpotFit implements PlugIn
 		 * 
 		 * @see java.lang.Object#clone()
 		 */
-		public Object clone()
+		public FilterCandidates clone()
 		{
 			try
 			{
@@ -296,7 +296,7 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			this.jobs = jobs;
 			this.stack = stack;
-			this.fitWorker = new FitWorker((FitEngineConfiguration) (config.clone()), new NullPeakResults(), null);
+			this.fitWorker = new FitWorker(config.clone(), new NullPeakResults(), null);
 
 			final int fitting = config.getRelativeFitting();
 			fitWorker.setSearchParameters(spotFilter, fitting);
@@ -490,7 +490,7 @@ public class BenchmarkSpotFit implements PlugIn
 			//tn = (spots.length - fittedSpots) - fn;
 
 			// Store the results using a copy of the original (to preserve the candidates for repeat analysis)
-			candidates = (FilterCandidates) candidates.clone();
+			candidates = candidates.clone();
 			candidates.tp = tp;
 			candidates.fp = fp;
 			candidates.tn = tn;

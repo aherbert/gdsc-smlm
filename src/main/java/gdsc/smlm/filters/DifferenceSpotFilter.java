@@ -84,12 +84,12 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public DifferenceSpotFilter clone()
 	{
 		DifferenceSpotFilter f = (DifferenceSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.processor1 = (DataProcessor) processor1.clone();
-		f.processor2 = (DataProcessor) processor2.clone();
+		f.processor1 = processor1.clone();
+		f.processor2 = processor2.clone();
 		return f;
 	}
 

@@ -171,14 +171,14 @@ public class AverageDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public AverageDataProcessor clone()
 	{
 		AverageDataProcessor f = (AverageDataProcessor) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		if (filter != null)
-			f.filter = (AverageFilter) filter.clone();
+			f.filter = filter.clone();
 		else
-			f.areaFilter = (AreaAverageFilter) areaFilter.clone();
+			f.areaFilter = areaFilter.clone();
 		return f;
 	}
 

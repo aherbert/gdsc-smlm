@@ -150,11 +150,11 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public MaximaSpotFilter clone()
 	{
 		MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
-		f.nms = (NonMaximumSuppression) nms.clone();
+		f.nms = nms.clone();
 		return f;
 	}
 

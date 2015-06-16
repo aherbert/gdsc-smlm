@@ -1036,7 +1036,7 @@ public class FitConfiguration implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public FitConfiguration clone()
 	{
 		try
 		{

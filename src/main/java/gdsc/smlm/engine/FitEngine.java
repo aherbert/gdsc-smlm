@@ -61,7 +61,7 @@ public class FitEngine
 	 */
 	public MaximaSpotFilter getSpotFilter()
 	{
-		return (MaximaSpotFilter) spotFilter.clone();
+		return spotFilter.clone();
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class FitEngine
 		for (int i = 0; i < threads; i++)
 		{
 			// Note - Clone the configuration and spot filter for each worker
-			FitWorker worker = new FitWorker((FitEngineConfiguration) (config.clone()), results, jobs);
+			FitWorker worker = new FitWorker(config.clone(), results, jobs);
 			worker.setSearchParameters(getSpotFilter(), fitting);
 			Thread t = new Thread(worker);
 

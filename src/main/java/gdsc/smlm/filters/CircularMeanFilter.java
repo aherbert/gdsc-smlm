@@ -271,7 +271,7 @@ public class CircularMeanFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public Object clone()
+	public CircularMeanFilter clone()
 	{
 		try
 		{
