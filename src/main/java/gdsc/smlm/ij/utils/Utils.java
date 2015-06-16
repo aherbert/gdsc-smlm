@@ -811,6 +811,25 @@ public class Utils
 	}
 
 	/**
+	 * Remove the filename extension
+	 * 
+	 * @param filename
+	 * @return the new filename
+	 */
+	public static String removeExtension(String filename)
+	{
+		if (filename != null)
+		{
+			int index = filename.lastIndexOf('.');
+			if (index > 0)
+			{
+				filename = filename.substring(0, index);
+			}
+		}
+		return filename;
+	}
+
+	/**
 	 * Check if the current window has the given headings, refreshing the headings if necessary.
 	 * Only works if the window is showing.
 	 * 
