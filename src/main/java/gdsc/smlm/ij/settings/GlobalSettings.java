@@ -28,7 +28,7 @@ public class GlobalSettings
 	private PSFCalculatorSettings psfCalculatorSettings = null;
 	private ResultsSettings resultsSettings = null;
 	private FilterSettings filterSettings = null;
-	private ClusteringSettings clusteringSettings = null; 
+	private ClusteringSettings clusteringSettings = null;
 	private CreateDataSettings createDataSettings = null;
 
 	/**
@@ -133,5 +133,93 @@ public class GlobalSettings
 	public void setCalibration(Calibration calibration)
 	{
 		this.calibration = calibration;
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isCalibration()
+	{
+		return (calibration != null);
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isFitEngineConfiguration()
+	{
+		return (fitEngineConfiguration != null);
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isPsfEstimatorSettings()
+	{
+		return (psfEstimatorSettings != null);
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isPsfCalculatorSettings()
+	{
+		return (psfCalculatorSettings != null);
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isResultsSettings()
+	{
+		return (resultsSettings != null);
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isFilterSettings()
+	{
+		return (filterSettings != null);
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isClusteringSettings()
+	{
+		return (clusteringSettings != null);
+	}
+
+	/**
+	 * Check the setting is not currently null. If the setting is null then a call to the get() method will initialise a
+	 * default object.
+	 * 
+	 * @return true if the setting is not null
+	 */
+	public boolean isCreateDataSettings()
+	{
+		return (createDataSettings != null);
 	}
 }
