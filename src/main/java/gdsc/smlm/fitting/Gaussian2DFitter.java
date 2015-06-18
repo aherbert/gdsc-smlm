@@ -181,6 +181,8 @@ public class Gaussian2DFitter
 			for (int i = size; i-- > 0;)
 				sum += data[i];
 			params[Gaussian2DFunction.SIGNAL] = sum - background * size;
+			params[Gaussian2DFunction.X_POSITION] = peaks[0] % maxx;
+			params[Gaussian2DFunction.Y_POSITION] = peaks[0] / maxx;
 			amplitudeEstimate = false;
 		}
 		else
