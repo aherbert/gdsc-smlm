@@ -51,6 +51,7 @@ public class ConfigurationTemplate implements PlugIn
 		FitEngineConfiguration config = new FitEngineConfiguration(fitConfig);
 
 		fitConfig.setPrecisionUsingBackground(true);
+		config.setFailuresLimit(1);
 
 		// LSE
 		fitConfig.setFitSolver(FitSolver.LVM);
