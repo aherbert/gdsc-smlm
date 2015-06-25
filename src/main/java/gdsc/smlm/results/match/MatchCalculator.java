@@ -669,10 +669,10 @@ public class MatchCalculator
 						Coordinate actualPoint = actualPoints[actualId];
 
 						// Calculate in steps for increased speed (allows early exit)
-						float dx = Math.abs(actualPoint.getX() - x);
+						float dx = abs(actualPoint.getX() - x);
 						if (dx > floatDThreshold)
 							continue;
-						float dy = Math.abs(actualPoint.getY() - y);
+						float dy = abs(actualPoint.getY() - y);
 						if (dy > floatDThreshold)
 							continue;
 						d2 = dx * dx + dy * dy;
@@ -783,5 +783,10 @@ public class MatchCalculator
 		if (points != null)
 			return Arrays.asList(points);
 		return new ArrayList<Pulse>(0);
+	}
+
+	private static float abs(final float f)
+	{
+		return (f < 0) ? -f : f;
 	}
 }
