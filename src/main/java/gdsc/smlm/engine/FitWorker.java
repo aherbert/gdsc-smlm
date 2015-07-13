@@ -1433,9 +1433,9 @@ public class FitWorker implements Runnable
 			//		newFitResult.getInitialParameters().length);
 
 			final double ic1 = getInformationCriterion(singleSumOfSquares, length,
-					fitResult.getInitialParameters().length);
+					fitResult.getNumberOfFittedParameters());
 			final double ic2 = getInformationCriterion(doubleSumOfSquares, length,
-					newFitResult.getInitialParameters().length);
+					newFitResult.getNumberOfFittedParameters());
 
 			if (logger != null)
 				logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,
