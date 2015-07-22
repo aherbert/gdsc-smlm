@@ -124,6 +124,7 @@ public class Utils
 		else
 		{
 			imp.setProcessor(ip);
+			imp.getWindow().toFront();		
 		}
 		return imp;
 	}
@@ -148,6 +149,7 @@ public class Utils
 		else
 		{
 			imp.setStack(slices);
+			imp.getWindow().toFront();
 		}
 		return imp;
 	}
@@ -187,6 +189,7 @@ public class Utils
 		{
 			p = (PlotWindow) plotWindow;
 			p.drawPlot(plot);
+			p.toFront();
 		}
 		return p;
 	}
