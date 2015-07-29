@@ -113,7 +113,7 @@ public class PSFCombiner implements PlugIn
 							imp.getType() == ImagePlus.GRAY32)
 					{
 						// Image must be square and a stack of a single channel
-						if (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1 && imp.getStackSize() > 1)
+						if (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1)
 						{
 							// Check if these are PSF images created by the SMLM plugins
 							if (containsPSF(imp))
