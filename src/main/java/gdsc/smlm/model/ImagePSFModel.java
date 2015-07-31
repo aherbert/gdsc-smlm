@@ -34,7 +34,8 @@ public class ImagePSFModel extends PSFModel
 	//private double[][] inputImage;
 	private double[][] sumImage;
 	private double[][] cumulativeImage;
-	private int psfWidth, xyCentre, zCentre;
+	private int psfWidth, zCentre;
+	private double xyCentre;
 	private double halfPsfWidthInPixels;
 	private double unitsPerPixel;
 	private double unitsPerSlice;
@@ -82,7 +83,7 @@ public class ImagePSFModel extends PSFModel
 		psfWidth = (int) edge;
 		//if (psfWidth % 2 != 1)
 		//	throw new IllegalArgumentException("Image edge length is not an odd number");
-		xyCentre = psfWidth / 2;
+		xyCentre = psfWidth * 0.5;
 		for (int i = 1; i < image.length; i++)
 			if (image[i].length != size)
 				throw new IllegalArgumentException("Image planes are not the same size");
@@ -387,11 +388,14 @@ public class ImagePSFModel extends PSFModel
 		//final double[] psf = inputImage[slice];
 		//int ok=0, error=0;
 
-		// Determine the insert offset
-		final int xOffset = (int) Math.round(x0 / unitsPerPixel) - xyCentre;
-		final int yOffset = (int) Math.round(x1 / unitsPerPixel) - xyCentre;
+		// Determine the insert offset - Q. Should this be rounded?
+		final int xOffset = (int) Math.round(x0 / unitsPerPixel - xyCentre);
+		final int yOffset = (int) Math.round(x1 / unitsPerPixel - xyCentre);
 
-		// Determine PSF blocks
+		// Determine PSF blocks. 
+		// Note that if the PSF pixels do not exactly fit into the image pixels, then the lookup index 
+		// will be rounded. This will cause the inserted PSF to be incorrect. The correct method would
+		// be to do linear interpolation between the pixel sums.
 		int[] u = createLookup(x0range, xOffset);
 		int[] v = createLookup(x1range, yOffset);
 
@@ -416,6 +420,8 @@ public class ImagePSFModel extends PSFModel
 				if (u[x + 1] < 0)
 					continue;
 				data[i] = sum(sumPsf, u[x], lowerV, u[x + 1], upperV);
+				
+				// TODO - Add a method here for linear interpolation
 
 				//// Check using the original input image that the sum is correct
 				//double s = 0;
@@ -460,6 +466,18 @@ public class ImagePSFModel extends PSFModel
 		for (int i = 0; i < pixel.length; i++)
 		{
 			pixel[i] = (int) Math.round(i / unitsPerPixel) - offset - 1;
+			//pixel[i] = (int) (i / unitsPerPixel) - offset - 1;
+		}
+		return pixel;
+	}
+
+	@SuppressWarnings("unused")
+	private double[] createInterpolationLookup(int range, int offset)
+	{
+		double[] pixel = new double[range + 1];
+		for (int i = 0; i < pixel.length; i++)
+		{
+			pixel[i] = i / unitsPerPixel - offset - 1;
 		}
 		return pixel;
 	}
@@ -585,10 +603,10 @@ public class ImagePSFModel extends PSFModel
 		// x = x0 + ((index % psfWidth) - (0.5*psfWidth) + 0.5) * unitsPerPixel		
 		//   = x0 + ((index % psfWidth) * unitsPerPixel) - (0.5*psfWidth) + 0.5) * unitsPerPixel
 		//   = x0 + ((index % psfWidth) * unitsPerPixel) - halfPsfWidthInPixels + 0.5 * unitsPerPixel
-		
+
 		x0 = x0 - halfPsfWidthInPixels + 0.5 * unitsPerPixel;
 		x1 = x1 - halfPsfWidthInPixels + 0.5 * unitsPerPixel;
-		
+
 		final double max = sumPsf[sumPsf.length - 1];
 		final double[] x = new double[n];
 		final double[] y = new double[n];
