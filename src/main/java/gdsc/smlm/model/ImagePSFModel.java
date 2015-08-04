@@ -420,7 +420,7 @@ public class ImagePSFModel extends PSFModel
 				if (u[x + 1] < 0)
 					continue;
 				data[i] = sum(sumPsf, u[x], lowerV, u[x + 1], upperV);
-				
+
 				// TODO - Add a method here for linear interpolation
 
 				//// Check using the original input image that the sum is correct
@@ -598,14 +598,10 @@ public class ImagePSFModel extends PSFModel
 
 		// Ensure the generated index is adjusted to the correct position
 		// The index will be generated at 0,0 of a pixel in the PSF image.
-		// We must subtract half the PSF width so that the middle is zero and then 
-		// add half a pixel so the sample is at 0.5,0.5 in the pixel:
-		// x = x0 + ((index % psfWidth) - (0.5*psfWidth) + 0.5) * unitsPerPixel		
-		//   = x0 + ((index % psfWidth) * unitsPerPixel) - (0.5*psfWidth) + 0.5) * unitsPerPixel
-		//   = x0 + ((index % psfWidth) * unitsPerPixel) - halfPsfWidthInPixels + 0.5 * unitsPerPixel
+		// We must subtract half the PSF width so that the middle coords are zero.
 
-		x0 = x0 - halfPsfWidthInPixels + 0.5 * unitsPerPixel;
-		x1 = x1 - halfPsfWidthInPixels + 0.5 * unitsPerPixel;
+		x0 -= halfPsfWidthInPixels;
+		x1 -= halfPsfWidthInPixels;
 
 		final double max = sumPsf[sumPsf.length - 1];
 		final double[] x = new double[n];
@@ -614,8 +610,11 @@ public class ImagePSFModel extends PSFModel
 		{
 			final double p = random.nextDouble() * max;
 			final int index = findIndex(sumPsf, p);
-			x[i] = x0 + ((index % psfWidth) * this.unitsPerPixel);
-			y[i] = x1 + ((index / psfWidth) * this.unitsPerPixel);
+			// Add random dither within pixel
+			final double xi = random.nextDouble() + (index % psfWidth);
+			final double yi = random.nextDouble() + (index / psfWidth);
+			x[i] = x0 + (xi * this.unitsPerPixel);
+			y[i] = x1 + (yi * this.unitsPerPixel);
 		}
 
 		return new double[][] { x, y };
@@ -623,13 +622,26 @@ public class ImagePSFModel extends PSFModel
 
 	private int findIndex(double[] sumPsf, double p)
 	{
-		// This could be optimised
-		int i = 0;
-		for (int j = psfWidth; j < sumPsf.length; j += psfWidth)
+		int i;
+
+		// Search for the index where the sum is less than, but close to, p
+		if (p < 0.5)
 		{
-			if (sumPsf[j] > p)
-				break;
-			i = j;
+			i = 0;
+			for (int j = psfWidth; j < sumPsf.length; j += psfWidth)
+			{
+				if (sumPsf[j] > p)
+					break;
+				i = j;
+			}
+		}
+		else
+		{
+			for (i = sumPsf.length - psfWidth; i > 0; i -= psfWidth)
+			{
+				if (sumPsf[i] < p)
+					break;
+			}
 		}
 
 		return findIndex(sumPsf, p, i);
