@@ -13,8 +13,6 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.utils.PDF2D;
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -35,9 +33,9 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class ImagePSFModel extends PSFModel
 {
-	private double[][] inputImage;
+	//private double[][] inputImage;
 	private double[][] sumImage;
-	private PDF2D[] pdfs;
+	private double[][] cumulativeImage;
 	private int psfWidth, zCentre;
 	private double xyCentre;
 	private double halfPsfWidthInPixels;
@@ -107,15 +105,15 @@ public class ImagePSFModel extends PSFModel
 		normalise(this.sumImage);
 
 		// Used for debugging
-		inputImage = new double[sumImage.length][];
-		for (int i = 0; i < sumImage.length; i++)
-			inputImage[i] = sumImage[i].clone();
+		//inputImage = new double[sumImage.length][];
+		//for (int i = 0; i < sumImage.length; i++)
+		//	inputImage[i] = Arrays.copyOf(sumImage[i], sumImage[i].length);
 
-		// Then create a PDF and rolling sum table
-		pdfs = new PDF2D[sumImage.length];
+		// Then create a rolling sum table and cumulative sum image
+		cumulativeImage = new double[sumImage.length][];
 		for (int i = 0; i < sumImage.length; i++)
 		{
-			pdfs[i] = new PDF2D(sumImage[i], psfWidth, psfWidth);
+			cumulativeImage[i] = calculateCumulativeImage(sumImage[i]);
 			calculateRollingSums(sumImage[i]);
 		}
 
@@ -189,6 +187,18 @@ public class ImagePSFModel extends PSFModel
 		for (double f : data)
 			sum += f;
 		return sum;
+	}
+
+	private double[] calculateCumulativeImage(double[] s)
+	{
+		double[] c = new double[s.length+1];
+		double sum = 0;
+		for (int i = 0; i < s.length; i++)
+		{
+			sum += s[i];
+			c[i+1] = sum;
+		}
+		return c;
 	}
 
 	private void calculateRollingSums(double[] s)
@@ -568,8 +578,8 @@ public class ImagePSFModel extends PSFModel
 	{
 		ImagePSFModel model = new ImagePSFModel();
 		model.sumImage = sumImage;
-		model.pdfs = pdfs;
-		model.inputImage = inputImage;
+		model.cumulativeImage = cumulativeImage;
+		//model.inputImage = inputImage;
 		model.psfWidth = psfWidth;
 		model.xyCentre = xyCentre;
 		model.zCentre = zCentre;
@@ -604,7 +614,7 @@ public class ImagePSFModel extends PSFModel
 		if (slice < 0 || slice >= sumImage.length)
 			return new double[][] { null, null };
 
-		final PDF2D pdf = pdfs[slice];
+		final double[] sumPsf = cumulativeImage[slice];
 
 		final RandomGenerator random = rand.getRandomGenerator();
 
@@ -615,10 +625,10 @@ public class ImagePSFModel extends PSFModel
 		x0 -= halfPsfWidthInPixels;
 		x1 -= halfPsfWidthInPixels;
 
+		final double max = sumPsf[sumPsf.length - 1];
 		double[] x = new double[n];
 		double[] y = new double[n];
 		int count = 0;
-		double[] point = new double[2];
 		double sx = 0;
 		double sy = 0;
 		double s = 0;
@@ -626,23 +636,26 @@ public class ImagePSFModel extends PSFModel
 		{
 			final double p = random.nextDouble();
 			// If outside the observed PSF then skip 
-			if (p > pdf.cumulative)
+			if (p > max)
 				continue;
-			if (pdf.sample(random.nextDouble(), random.nextDouble(), point))
-			{
-				int px = (int) point[0];
-				int py = (int) point[1];
-				final double v = 1; //inputImage[slice][py * psfWidth + px];
-				sx += point[0] * v;
-				sy += point[1] * v;
-				//sx += (px + 0.5) * v;
-				//sy += (py + 0.5) * v;
-				s += v;
+			final int index = findIndex(sumPsf, p);
+			if (index == -1)
+				continue;
 
-				x[count] = x0 + (point[0] * this.unitsPerPixel);
-				y[count] = x1 + (point[1] * this.unitsPerPixel);
-				count++;
-			}
+			// Interpolate xi using the fraction of the pixel
+			double xi = index % psfWidth;
+			xi += (p - sumPsf[index]) / (sumPsf[index + 1] - sumPsf[index]);
+			// Add random dither within pixel for y
+			final double yi = random.nextDouble() + (index / psfWidth);
+
+			final double v = 1; //inputImage[slice][py * psfWidth + px];
+			sx += xi * v;
+			sy += yi * v;
+			s += v;
+
+			x[count] = x0 + (xi * this.unitsPerPixel);
+			y[count] = x1 + (yi * this.unitsPerPixel);
+			count++;
 		}
 		sx = sx / s - xyCentre;
 		sy = sy / s - xyCentre;
@@ -653,5 +666,36 @@ public class ImagePSFModel extends PSFModel
 		y = Arrays.copyOf(y, count);
 
 		return new double[][] { x, y };
+	}
+
+	private int findIndex(double[] sum, double p)
+	{
+		/* perform binary search */
+
+		int upper = sum.length - 1;
+		int lower = 0;
+
+		while (upper - lower > 1)
+		{
+			final int mid = (upper + lower) / 2;
+
+			if (p >= sum[mid])
+			{
+				lower = mid;
+			}
+			else
+			{
+				upper = mid;
+			}
+		}
+
+		/* sanity check the result */
+
+		if (p < sum[lower] || p >= sum[lower + 1])
+		{
+			return -1;
+		}
+
+		return lower;
 	}
 }
