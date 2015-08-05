@@ -94,7 +94,7 @@ public class ImagePSFModel extends PSFModel
 		this.zCentre = zCentre;
 		if (unitsPerPixel <= 0 || unitsPerPixel > 1)
 			throw new IllegalArgumentException("Units per pixel must be between 0 and 1");
-		if (unitsPerSlice <= 0 || unitsPerSlice > 1)
+		if (image.length > 1 && (unitsPerSlice <= 0 || unitsPerSlice > 1))
 			throw new IllegalArgumentException("Units per slice must be between 0 and 1");
 		this.unitsPerPixel = unitsPerPixel;
 		this.unitsPerSlice = unitsPerSlice;
@@ -628,16 +628,16 @@ public class ImagePSFModel extends PSFModel
 			// If outside the observed PSF then skip 
 			if (p > pdf.cumulative)
 				continue;
-			if (pdf.sample(p, random.nextDouble(), point))
+			if (pdf.sample(random.nextDouble(), random.nextDouble(), point))
 			{
 				int px = (int) point[0];
 				int py = (int) point[1];
-				int j = py * psfWidth + px;
-				sx += point[0] * inputImage[slice][j];
-				sy += point[1] * inputImage[slice][j];
-				//sx += (px + 0.5) * inputImage[slice][j];
-				//sy += (py + 0.5) * inputImage[slice][j];
-				s += inputImage[slice][j];
+				final double v = 1; //inputImage[slice][py * psfWidth + px];
+				sx += point[0] * v;
+				sy += point[1] * v;
+				//sx += (px + 0.5) * v;
+				//sy += (py + 0.5) * v;
+				s += v;
 
 				x[count] = x0 + (point[0] * this.unitsPerPixel);
 				y[count] = x1 + (point[1] * this.unitsPerPixel);
