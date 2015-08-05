@@ -13,6 +13,8 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
@@ -114,6 +116,26 @@ public class ImagePSFModel extends PSFModel
 			cumulativeImage[i] = calculateCumulativeImage(sumImage[i]);
 			calculateRollingSums(sumImage[i]);
 		}
+
+		// Find X/Y centre using centre of mass
+		double sx = 0;
+		double sy = 0;
+		double s = 0;
+		float[] data = image[zCentre];
+		for (int y = 0, j = 0; y < psfWidth; y++)
+		{
+			for (int x = 0; x < psfWidth; x++, j++)
+			{
+				// Centre in middle of pixel
+				sx += (x + 0.5) * data[j];
+				sy += (y + 0.5) * data[j];
+				s += data[j];
+			}
+		}
+		sx = sx / s - xyCentre;
+		sy = sy / s - xyCentre;
+		System.out.printf("%dx%d centre [%f,%f] (%f,%f)\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel, sy /
+				unitsPerPixel);
 	}
 
 	private double[][] duplicate(float[][] image)
@@ -604,18 +626,28 @@ public class ImagePSFModel extends PSFModel
 		x1 -= halfPsfWidthInPixels;
 
 		final double max = sumPsf[sumPsf.length - 1];
-		final double[] x = new double[n];
-		final double[] y = new double[n];
+		double[] x = new double[n];
+		double[] y = new double[n];
+		int count = 0;
 		for (int i = 0; i < n; i++)
 		{
-			final double p = random.nextDouble() * max;
+			final double p = random.nextDouble();
+			// If outside the observed PSF then skip 
+			if (p > max)
+				continue;
 			final int index = findIndex(sumPsf, p);
-			// Add random dither within pixel
-			final double xi = random.nextDouble() + (index % psfWidth);
+			// Interpolate xi using the fraction of the pixel
+			double xi = index % psfWidth;
+			double previous = (index == 0) ? 0 : sumPsf[index - 1];
+			xi += (p - previous) / (sumPsf[index] - previous);
+			// Add random dither within pixel for y
 			final double yi = random.nextDouble() + (index / psfWidth);
-			x[i] = x0 + (xi * this.unitsPerPixel);
-			y[i] = x1 + (yi * this.unitsPerPixel);
+			x[count] = x0 + (xi * this.unitsPerPixel);
+			y[count] = x1 + (yi * this.unitsPerPixel);
+			count++;
 		}
+		x = Arrays.copyOf(x, count);
+		y = Arrays.copyOf(y, count);
 
 		return new double[][] { x, y };
 	}
