@@ -13,6 +13,8 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.utils.PDF2D;
+
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -33,9 +35,9 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class ImagePSFModel extends PSFModel
 {
-	//private double[][] inputImage;
+	private double[][] inputImage;
 	private double[][] sumImage;
-	private double[][] cumulativeImage;
+	private PDF2D[] pdfs;
 	private int psfWidth, zCentre;
 	private double xyCentre;
 	private double halfPsfWidthInPixels;
@@ -105,15 +107,15 @@ public class ImagePSFModel extends PSFModel
 		normalise(this.sumImage);
 
 		// Used for debugging
-		//inputImage = new double[sumImage.length][];
-		//for (int i = 0; i < sumImage.length; i++)
-		//	inputImage[i] = Arrays.copyOf(sumImage[i], sumImage[i].length);
+		inputImage = new double[sumImage.length][];
+		for (int i = 0; i < sumImage.length; i++)
+			inputImage[i] = sumImage[i].clone();
 
-		// Then create a rolling sum table and cumulative sum image
-		cumulativeImage = new double[sumImage.length][];
+		// Then create a PDF and rolling sum table
+		pdfs = new PDF2D[sumImage.length];
 		for (int i = 0; i < sumImage.length; i++)
 		{
-			cumulativeImage[i] = calculateCumulativeImage(sumImage[i]);
+			pdfs[i] = new PDF2D(sumImage[i], psfWidth, psfWidth);
 			calculateRollingSums(sumImage[i]);
 		}
 
@@ -134,7 +136,7 @@ public class ImagePSFModel extends PSFModel
 		}
 		sx = sx / s - xyCentre;
 		sy = sy / s - xyCentre;
-		System.out.printf("%dx%d centre [%f,%f] (%f,%f)\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel, sy /
+		System.out.printf("%dx%d centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel, sy /
 				unitsPerPixel);
 	}
 
@@ -187,18 +189,6 @@ public class ImagePSFModel extends PSFModel
 		for (double f : data)
 			sum += f;
 		return sum;
-	}
-
-	private double[] calculateCumulativeImage(double[] s)
-	{
-		double[] c = new double[s.length];
-		double sum = 0;
-		for (int i = 0; i < s.length; i++)
-		{
-			sum += s[i];
-			c[i] = sum;
-		}
-		return c;
 	}
 
 	private void calculateRollingSums(double[] s)
@@ -578,8 +568,8 @@ public class ImagePSFModel extends PSFModel
 	{
 		ImagePSFModel model = new ImagePSFModel();
 		model.sumImage = sumImage;
-		model.cumulativeImage = cumulativeImage;
-		//model.inputImage = inputImage;
+		model.pdfs = pdfs;
+		model.inputImage = inputImage;
 		model.psfWidth = psfWidth;
 		model.xyCentre = xyCentre;
 		model.zCentre = zCentre;
@@ -614,7 +604,7 @@ public class ImagePSFModel extends PSFModel
 		if (slice < 0 || slice >= sumImage.length)
 			return new double[][] { null, null };
 
-		final double[] sumPsf = cumulativeImage[slice];
+		final PDF2D pdf = pdfs[slice];
 
 		final RandomGenerator random = rand.getRandomGenerator();
 
@@ -625,67 +615,43 @@ public class ImagePSFModel extends PSFModel
 		x0 -= halfPsfWidthInPixels;
 		x1 -= halfPsfWidthInPixels;
 
-		final double max = sumPsf[sumPsf.length - 1];
 		double[] x = new double[n];
 		double[] y = new double[n];
 		int count = 0;
+		double[] point = new double[2];
+		double sx = 0;
+		double sy = 0;
+		double s = 0;
 		for (int i = 0; i < n; i++)
 		{
 			final double p = random.nextDouble();
 			// If outside the observed PSF then skip 
-			if (p > max)
+			if (p > pdf.cumulative)
 				continue;
-			final int index = findIndex(sumPsf, p);
-			// Interpolate xi using the fraction of the pixel
-			double xi = index % psfWidth;
-			double previous = (index == 0) ? 0 : sumPsf[index - 1];
-			xi += (p - previous) / (sumPsf[index] - previous);
-			// Add random dither within pixel for y
-			final double yi = random.nextDouble() + (index / psfWidth);
-			x[count] = x0 + (xi * this.unitsPerPixel);
-			y[count] = x1 + (yi * this.unitsPerPixel);
-			count++;
+			if (pdf.sample(p, random.nextDouble(), point))
+			{
+				int px = (int) point[0];
+				int py = (int) point[1];
+				int j = py * psfWidth + px;
+				sx += point[0] * inputImage[slice][j];
+				sy += point[1] * inputImage[slice][j];
+				//sx += (px + 0.5) * inputImage[slice][j];
+				//sy += (py + 0.5) * inputImage[slice][j];
+				s += inputImage[slice][j];
+
+				x[count] = x0 + (point[0] * this.unitsPerPixel);
+				y[count] = x1 + (point[1] * this.unitsPerPixel);
+				count++;
+			}
 		}
+		sx = sx / s - xyCentre;
+		sy = sy / s - xyCentre;
+		System.out.printf("%dx%d sample centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel,
+				sy / unitsPerPixel);
+
 		x = Arrays.copyOf(x, count);
 		y = Arrays.copyOf(y, count);
 
 		return new double[][] { x, y };
-	}
-
-	private int findIndex(double[] sumPsf, double p)
-	{
-		int i;
-
-		// Search for the index where the sum is less than, but close to, p
-		if (p < 0.5)
-		{
-			i = 0;
-			for (int j = psfWidth; j < sumPsf.length; j += psfWidth)
-			{
-				if (sumPsf[j] > p)
-					break;
-				i = j;
-			}
-		}
-		else
-		{
-			for (i = sumPsf.length - psfWidth; i > 0; i -= psfWidth)
-			{
-				if (sumPsf[i] < p)
-					break;
-			}
-		}
-
-		return findIndex(sumPsf, p, i);
-	}
-
-	private int findIndex(double[] sumPsf, double p, int i)
-	{
-		for (; i < sumPsf.length; i++)
-			if (sumPsf[i] > p)
-			{
-				return i;
-			}
-		return sumPsf.length - 1;
 	}
 }
