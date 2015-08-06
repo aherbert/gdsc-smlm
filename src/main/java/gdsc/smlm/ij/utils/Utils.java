@@ -28,6 +28,7 @@ import ij.gui.Plot2;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.plugin.frame.Recorder;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
@@ -124,7 +125,7 @@ public class Utils
 		else
 		{
 			imp.setProcessor(ip);
-			imp.getWindow().toFront();		
+			imp.getWindow().toFront();
 		}
 		return imp;
 	}
@@ -152,6 +153,53 @@ public class Utils
 			imp.getWindow().toFront();
 		}
 		return imp;
+	}
+
+	/**
+	 * Show the image. Replace a currently open image with the specified title or else create a new image.
+	 * 
+	 * @param title
+	 * @param data
+	 * @param w
+	 * @param h
+	 * @return the image
+	 */
+	public static ImagePlus display(String title, double[] data, int w, int h)
+	{
+		if (data == null || data.length < w * h)
+			return null;
+		float[] f = new float[w * h];
+		for (int i = 0; i < f.length; i++)
+			f[i] = (float) data[i];
+		return Utils.display(title, new FloatProcessor(w, h, f));
+	}
+
+	/**
+	 * Show the image. Replace a currently open image with the specified title or else create a new image.
+	 * 
+	 * @param title
+	 * @param data
+	 * @param w
+	 * @param h
+	 * @return the image
+	 */
+	public static ImagePlus display(String title, double[][] data, int w, int h)
+	{
+		if (data == null || data.length < 1)
+			return null;
+		final int n = w * h;
+		for (int s = 0; s < data.length; s++)
+			if (data[s] == null || data[s].length < n)
+				return null;
+		ImageStack stack = new ImageStack(w, h, data.length);
+		for (int s = 0; s < data.length; s++)
+		{
+			float[] f = new float[n];
+			for (int i = 0; i < n; i++)
+				f[i] = (float) data[s][i];
+			stack.setPixels(f, s+1);
+		}
+		return Utils.display(title, stack);
 	}
 
 	/**
