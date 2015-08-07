@@ -352,9 +352,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		private double signal;
 		/**
-		 * The x and y positions of the localisation in each frame
+		 * The x,y,z position of the localisation in each frame
 		 */
-		final double x, y;
+		final double x, y, z;
 		final double bias;
 		/**
 		 * True if EM-gain was modelled
@@ -393,8 +393,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		final double precisionN, precisionX, precisionXML;
 
-		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double bias,
-				boolean emCCD, double gain, double readNoise, double b, double b2, double precisionN,
+		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
+				double bias, boolean emCCD, double gain, double readNoise, double b, double b2, double precisionN,
 				double precisionX, double precisionXML)
 		{
 			id = nextId++;
@@ -404,6 +404,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.signal = signal;
 			this.x = x;
 			this.y = y;
+			this.z = z;
 			this.bias = bias;
 			this.emCCD = emCCD;
 			this.gain = gain;
@@ -803,7 +804,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Store read noise in ADUs
 			readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 			benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
-					settings.photonsPerSecond, xyz[0], xyz[1], settings.bias, emCCD, totalGain, readNoise,
+					settings.photonsPerSecond, xyz[0], xyz[1], xyz[2], settings.bias, emCCD, totalGain, readNoise,
 					settings.background, b2, lowerN, lowerP, lowerMLP);
 		}
 		else

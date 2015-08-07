@@ -909,6 +909,7 @@ public class BenchmarkFit implements PlugIn
 		// Report XY in nm from the pixel centre
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append("\t");
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append("\t");
+		sb.append(Utils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.gain)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append("\t");
 		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append("\t");
@@ -1050,7 +1051,7 @@ public class BenchmarkFit implements PlugIn
 
 	private String createParameterHeader()
 	{
-		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
+		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
 	}
 
 	private void runAnalysis()
