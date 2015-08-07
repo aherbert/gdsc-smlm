@@ -13,13 +13,10 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Sort;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.random.AbstractRandomGenerator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
@@ -39,6 +36,7 @@ import org.apache.commons.math3.util.FastMath;
 public class ImagePSFModel extends PSFModel
 {
 	public static final double DEFAULT_NOISE_FRACTION = 5e-2;
+	private static final boolean COM_CHECK = false;
 
 	//private double[][] inputImage;
 	private double[][] sumImage;
@@ -126,9 +124,9 @@ public class ImagePSFModel extends PSFModel
 				throw new IllegalArgumentException("Image planes are not the same size");
 		this.zCentre = zCentre;
 		if (unitsPerPixel <= 0 || unitsPerPixel > 1)
-			throw new IllegalArgumentException("Units per pixel must be between 0 and 1: "+unitsPerPixel);
+			throw new IllegalArgumentException("Units per pixel must be between 0 and 1: " + unitsPerPixel);
 		if (image.length > 1 && (unitsPerSlice <= 0 || unitsPerSlice > 1))
-			throw new IllegalArgumentException("Units per slice must be between 0 and 1: "+unitsPerSlice);
+			throw new IllegalArgumentException("Units per slice must be between 0 and 1: " + unitsPerSlice);
 		this.unitsPerPixel = unitsPerPixel;
 		this.unitsPerSlice = unitsPerSlice;
 
@@ -157,9 +155,32 @@ public class ImagePSFModel extends PSFModel
 		//Utils.display("norm", sumImage, psfWidth, psfWidth);
 
 		// Used for debugging
-		//double[][] inputImage = new double[sumImage.length][];
-		//for (int i = 0; i < sumImage.length; i++)
-		//	inputImage[i] = Arrays.copyOf(sumImage[i], sumImage[i].length);
+		if (COM_CHECK)
+		{
+			// Find X/Y centre using centre of mass
+			double sx = 0;
+			double sy = 0;
+			double s = 0;
+			double[] data = sumImage[zCentre];
+			for (int y = 0; y < psfWidth; y++)
+			{
+				if (Math.abs(y + 0.5 - xyCentre) > fwhm)
+					continue;
+				for (int x = 0, j = y * psfWidth; x < psfWidth; x++, j++)
+				{
+					if (Math.abs(x + 0.5 - xyCentre) > fwhm)
+						continue;
+					// Centre in middle of pixel
+					sx += (x + 0.5) * data[j];
+					sy += (y + 0.5) * data[j];
+					s += data[j];
+				}
+			}
+			sx = sx / s - xyCentre;
+			sy = sy / s - xyCentre;
+			System.out.printf("%dx%d centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel, sy /
+					unitsPerPixel);
+		}
 
 		// Create a cumulative sum image
 		cumulativeImage = new double[sumImage.length][];
@@ -176,30 +197,6 @@ public class ImagePSFModel extends PSFModel
 		{
 			calculateRollingSums(sumImage[i]);
 		}
-
-		//// Find X/Y centre using centre of mass
-		//double sx = 0;
-		//double sy = 0;
-		//double s = 0;
-		//double[] data = inputImage[zCentre];
-		//for (int y = 0; y < psfWidth; y++)
-		//{
-		//	if (Math.abs(y + 0.5 - xyCentre) > fwhm)
-		//		continue;
-		//	for (int x = 0, j = y * psfWidth; x < psfWidth; x++, j++)
-		//	{
-		//		if (Math.abs(x + 0.5 - xyCentre) > fwhm)
-		//			continue;
-		//		// Centre in middle of pixel
-		//		sx += (x + 0.5) * data[j];
-		//		sy += (y + 0.5) * data[j];
-		//		s += data[j];
-		//	}
-		//}
-		//sx = sx / s - xyCentre;
-		//sy = sy / s - xyCentre;
-		//System.out.printf("%dx%d centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel, sy /
-		//		unitsPerPixel);
 	}
 
 	/**
@@ -516,7 +513,7 @@ public class ImagePSFModel extends PSFModel
 			throw new IllegalArgumentException("Dimension 1 range not within data bounds");
 
 		// Shift centre to origin and draw the PSF
-		double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2);
+		double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
 
 		return insert(data, x0min, x1min, x0max, x1max, width, psf, poissonNoise);
 	}
@@ -550,7 +547,7 @@ public class ImagePSFModel extends PSFModel
 			throw new IllegalArgumentException("Dimension 1 range not within data bounds");
 
 		// Shift centre to origin and draw the PSF
-		double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2);
+		double[] psf = drawPSF(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
 
 		return insert(data, x0min, x1min, x0max, x1max, width, psf, poissonNoise);
 	}
@@ -570,9 +567,13 @@ public class ImagePSFModel extends PSFModel
 	 *            The centre in dimension 1
 	 * @param x2
 	 *            The centre in dimension 2
+	 * @param interpolate
+	 *            Compute bilinear interpolation. Not using this option can result in artifacts if the PSF and image
+	 *            pixels are similar sizes (i.e. unitsPerPixel is close to 1)
 	 * @return The data (packed in yx order, length = x0range * x1range)
+	 * @return
 	 */
-	public double[] drawPSF(int x0range, int x1range, double sum, double x0, double x1, double x2)
+	public double[] drawPSF(int x0range, int x1range, double sum, double x0, double x1, double x2, boolean interpolate)
 	{
 		double[] data = new double[x0range * x1range];
 
@@ -584,69 +585,84 @@ public class ImagePSFModel extends PSFModel
 			return data;
 		final double[] sumPsf = sumImage[slice];
 
-		// Used for debugging
-		//final double[] psf = inputImage[slice];
-		//int ok=0, error=0;
-
-		// Determine the insert offset - Q. Should this be rounded?
-		final int xOffset = (int) Math.round(x0 / unitsPerPixel - xyCentre);
-		final int yOffset = (int) Math.round(x1 / unitsPerPixel - xyCentre);
-
 		// Determine PSF blocks. 
+		// We need to map each pixel in the PSF onto the output image
+		// outX = (psfX+0.5-psfX0) * unitsPerPixel + origin
+		// =>
+		// psfX = (outX - origin) / unitsPerPixel - 0.5 + psfX0
+
 		// Note that if the PSF pixels do not exactly fit into the image pixels, then the lookup index 
-		// will be rounded. This will cause the inserted PSF to be incorrect. The correct method would
-		// be to do linear interpolation between the pixel sums.
-		int[] u = createLookup(x0range, xOffset);
-		int[] v = createLookup(x1range, yOffset);
+		// will be rounded. This will cause the inserted PSF to be incorrect. The correct method is
+		// to do linear interpolation between the pixel sums.
+
+		double[] u = createInterpolationLookup(x0range, x0);
+		double[] v = createInterpolationLookup(x1range, x1);
+
+		int[] lu = new int[u.length];
+		for (int i = 0; i < u.length; i++)
+			lu[i] = (int) u[i];
+		int[] lv = new int[v.length];
+		for (int i = 0; i < v.length; i++)
+			lv[i] = (int) v[i];
 
 		// Data will be the sum of the input pixels from (u,v) to (u+1,v+1)
 
 		// Check data can be inserted from the PSF
-		if (u[0] > psfWidth - 1 || v[0] > psfWidth - 1 || u[x0range] < 0 || v[x1range] < 0)
+		if (lu[0] > psfWidth - 1 || lv[0] > psfWidth - 1 || lu[x0range] < 0 || lv[x1range] < 0)
 			return data;
 
 		for (int y = 0; y < x1range; y++)
 		{
-			if (v[y] > psfWidth - 1)
+			if (lv[y] > psfWidth - 1)
 				break;
-			if (v[y + 1] < 0)
+			if (lv[y + 1] < 0)
 				continue;
-			final int lowerV = v[y];
-			final int upperV = FastMath.min(v[y + 1], psfWidth - 1);
+			final int lowerV = lv[y];
+			final int upperV = FastMath.min(lv[y + 1], psfWidth - 1);
 			for (int x = 0, i = y * x0range; x < x0range; x++, i++)
 			{
-				if (u[x] > psfWidth - 1)
+				if (lu[x] > psfWidth - 1)
 					break;
-				if (u[x + 1] < 0)
+				if (lu[x + 1] < 0)
 					continue;
-				data[i] = sum(sumPsf, u[x], lowerV, u[x + 1], upperV);
 
-				// TODO - Add a method here for linear interpolation
+				if (interpolate)
+				{
+					// Do linear interpolation
+					// sum = 
+					// + s(upperU,upperV) 
+					// - s(lowerU,upperV)
+					// - s(upperU,lowerV)
+					// + s(lowerU,lowerV)
+					double uUuV = interpolate(sumPsf, lu[x + 1], lv[y + 1], u[x + 1], v[y + 1]);
+					double lUuV = interpolate(sumPsf, lu[x], lv[y + 1], u[x], v[y + 1]);
+					double uUlV = interpolate(sumPsf, lu[x + 1], lv[y], u[x + 1], v[y]);
+					double lUlV = interpolate(sumPsf, lu[x], lv[y], u[x], v[y]);
+					data[i] = uUuV - lUuV - uUlV + lUlV;
+				}
+				else
+				{
+					// No interpolation
+					data[i] = sum(sumPsf, lu[x], lowerV, lu[x + 1], upperV);
 
-				//// Check using the original input image that the sum is correct
-				//double s = 0;
-				//for (int vv = lowerV + 1; vv <= upperV; vv++)
-				//{
-				//	if (vv > psfWidth-1)
-				//		break;
-				//	if (vv < 0)
-				//		continue;
-				//	for (int uu = u[x] + 1, index = vv * psfWidth + u[x] + 1; uu <= u[x + 1]; uu++, index++)
-				//	{
-				//		if (uu > psfWidth-1)
-				//			break;
-				//		if (uu < 0)
-				//			continue;
-				//		s += psf[index];
-				//	}
-				//}
-				//if (s / data[i] > 1.1 || s / data[i] < 0.9)
-				//{
-				//	error++;
-				//	System.out.printf("Mistake %f != %f\n", s, data[i]);
-				//}
-				//else
-				//	ok++;
+					//// Check using the original input image that the sum is correct
+					//double s = 0;
+					//for (int vv = lowerV + 1; vv <= upperV; vv++)
+					//{
+					//	if (vv > psfWidth-1)
+					//		break;
+					//	if (vv < 0)
+					//		continue;
+					//	for (int uu = u[x] + 1, index = vv * psfWidth + u[x] + 1; uu <= u[x + 1]; uu++, index++)
+					//	{
+					//		if (uu > psfWidth-1)
+					//			break;
+					//		if (uu < 0)
+					//			continue;
+					//		s += psf[index];
+					//	}
+					//}
+				}
 			}
 		}
 
@@ -654,30 +670,15 @@ public class ImagePSFModel extends PSFModel
 		for (int i = 0; i < data.length; i++)
 			data[i] *= sum;
 
-		//System.out.printf("%% OK = %f (Evaluated %f) : Total = %f (%f)\n", 
-		//		(100.0*ok) / (ok + error), (100.* (ok + error)) / (x0range*x1range), sum(data), sum * sum(psf));
-
 		return data;
 	}
 
-	private int[] createLookup(int range, int offset)
-	{
-		int[] pixel = new int[range + 1];
-		for (int i = 0; i < pixel.length; i++)
-		{
-			pixel[i] = (int) Math.round(i / unitsPerPixel) - offset - 1;
-			//pixel[i] = (int) (i / unitsPerPixel) - offset - 1;
-		}
-		return pixel;
-	}
-
-	@SuppressWarnings("unused")
-	private double[] createInterpolationLookup(int range, int offset)
+	private double[] createInterpolationLookup(int range, double origin)
 	{
 		double[] pixel = new double[range + 1];
 		for (int i = 0; i < pixel.length; i++)
 		{
-			pixel[i] = i / unitsPerPixel - offset - 1;
+			pixel[i] = ((i - origin) / unitsPerPixel - 0.5 + xyCentre);
 		}
 		return pixel;
 	}
@@ -725,6 +726,84 @@ public class ImagePSFModel extends PSFModel
 			}
 		}
 		return sum;
+	}
+
+	private double safeSum(double[] s, int lowerU, int lowerV, int upperU, int upperV)
+	{
+		// Compute sum from rolling sum using:
+		// sum = 
+		// + s(upperU,upperV) 
+		// - s(lowerU,upperV)
+		// - s(upperU,lowerV)
+		// + s(lowerU,lowerV)
+		// Note: 
+		// s(u,v) = 0 when either u,v < 0
+		// s(u,v) = s(umax,v) when u>umax
+		// s(u,v) = s(u,vmax) when v>vmax
+		// s(u,v) = s(umax,vmax) when u>umax,v>vmax
+
+		if (lowerU > psfWidth - 1 || lowerV > psfWidth - 1)
+			return 0;
+		if (upperU < 0 || upperV < 0)
+			return 0;
+
+		upperU = FastMath.min(upperU, psfWidth - 1);
+		upperV = FastMath.min(upperV, psfWidth - 1);
+
+		int index = upperV * psfWidth + upperU;
+		double sum = s[index];
+
+		if (lowerU >= 0)
+		{
+			index = upperV * psfWidth + lowerU;
+			sum -= s[index];
+		}
+		if (lowerV >= 0)
+		{
+			index = lowerV * psfWidth + upperU;
+			sum -= s[index];
+
+			if (lowerU >= 0)
+			{
+				// + s(u-1,v-1)
+				index = lowerV * psfWidth + lowerU;
+				sum += s[index];
+			}
+		}
+		return sum;
+	}
+
+	private double safeSum(double[] s, int upperU, int upperV)
+	{
+		if (upperU < 0 || upperV < 0)
+			return 0;
+		upperU = FastMath.min(upperU, psfWidth - 1);
+		upperV = FastMath.min(upperV, psfWidth - 1);
+
+		int index = upperV * psfWidth + upperU;
+		return s[index];
+	}
+
+	/**
+	 * Find the sum to the point x,y. x,y is assumed to be within the range x0,y0 to x0+1,y0+1.
+	 * 
+	 * @param sum
+	 * @param x0
+	 * @param y0
+	 * @param x
+	 * @param y
+	 * @return The sum
+	 */
+	private double interpolate(double[] sum, int x0, int y0, double x, double y)
+	{
+		double sum_00_x0y0 = safeSum(sum, x0, y0);
+		double sum_00_x1y0 = safeSum(sum, x0 + 1, y0);
+		double sum_00_x0y1 = safeSum(sum, x0, y0 + 1);
+		double sum_x0y0_x1y1 = safeSum(sum, x0, y0, x0 + 1, y0 + 1);
+
+		x -= x0;
+		y -= y0;
+		return x * (sum_00_x1y0 - sum_00_x0y0) + y * (sum_00_x0y1 - sum_00_x0y0) + sum_00_x0y0 + x * y * sum_x0y0_x1y1;
 	}
 
 	private int clip(int x, int max)
@@ -845,9 +924,7 @@ public class ImagePSFModel extends PSFModel
 		double[] x = new double[n];
 		double[] y = new double[n];
 		int count = 0;
-		//		double sx = 0;
-		//		double sy = 0;
-		//		double s = 0;
+		double sx = 0, sy = 0, s = 0;
 		for (int i = 0; i < n; i++)
 		{
 			final double p = randomX.nextDouble();
@@ -864,20 +941,26 @@ public class ImagePSFModel extends PSFModel
 			// Add random dither within pixel for y
 			final double yi = randomY.nextDouble() + (index / psfWidth);
 
-			//			final double v = 1; //inputImage[slice][py * psfWidth + px];
-			//			sx += xi * v;
-			//			sy += yi * v;
-			//			s += v;
+			if (COM_CHECK)
+			{
+				final double v = 1;
+				sx += xi * v;
+				sy += yi * v;
+				s += v;
+			}
 
 			x[count] = x0 + (xi * this.unitsPerPixel);
 			y[count] = x1 + (yi * this.unitsPerPixel);
 			count++;
 		}
 
-		//		sx = sx / s - xyCentre;
-		//		sy = sy / s - xyCentre;
-		//		System.out.printf("%dx%d sample centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel,
-		//				sy / unitsPerPixel);
+		if (COM_CHECK)
+		{
+			sx = sx / s - xyCentre;
+			sy = sy / s - xyCentre;
+			System.out.printf("%dx%d sample centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx /
+					unitsPerPixel, sy / unitsPerPixel);
+		}
 
 		x = Arrays.copyOf(x, count);
 		y = Arrays.copyOf(y, count);
@@ -895,13 +978,13 @@ public class ImagePSFModel extends PSFModel
 	private int findIndex(double[] sum, double p)
 	{
 		/* perform binary search */
-
 		int upper = sum.length - 1;
 		int lower = 0;
 
 		while (upper - lower > 1)
 		{
-			final int mid = (upper + lower) / 2;
+			//final int mid = (upper + lower) / 2;
+			final int mid = upper + lower >>> 1;
 
 			if (p >= sum[mid])
 			{
@@ -913,12 +996,14 @@ public class ImagePSFModel extends PSFModel
 			}
 		}
 
-		/* sanity check the result */
-
-		if (p < sum[lower] || p >= sum[lower + 1])
-		{
-			return -1;
-		}
+		///* sanity check the result */
+		// We do not need this:
+		// The lowest value for p is always 0.
+		// The check against the max has already been performed.
+		//if (p < sum[lower] || p >= sum[lower + 1])
+		//{
+		//	return -1;
+		//}
 
 		return lower;
 	}
