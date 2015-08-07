@@ -932,8 +932,6 @@ public class ImagePSFModel extends PSFModel
 			if (p > max)
 				continue;
 			final int index = findIndex(sumPsf, p);
-			if (index == -1)
-				continue;
 
 			// Interpolate xi using the fraction of the pixel
 			double xi = index % psfWidth;
