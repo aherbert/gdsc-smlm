@@ -1779,7 +1779,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			sum = signal[i];
 		}
 
-		if (normalise)
+		if (normalise && distanceThreshold > 0)
 		{
 			for (int i = 0; i < signal.length; i++)
 				signal[i] /= sum;
