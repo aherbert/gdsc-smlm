@@ -92,6 +92,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	private static int endBackgroundFrames = 5;
 	private static int magnification = 10;
 	private static double smoothing = 0.25;
+	private static boolean centreEachSlice = false;
 	private static boolean interactiveMode = false;
 	private static int interpolationMethod = ImageProcessor.BICUBIC;
 
@@ -187,6 +188,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
 		gd.addSlider("Magnification", 5, 15, magnification);
 		gd.addSlider("Smoothing", 0.25, 0.5, smoothing);
+		gd.addCheckbox("Centre_each_slice", centreEachSlice);
 		gd.addCheckbox("Interactive_mode", interactiveMode);
 		String[] methods = ImageProcessor.getInterpolationMethods();
 		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
@@ -206,6 +208,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		endBackgroundFrames = (int) gd.getNextNumber();
 		magnification = (int) gd.getNextNumber();
 		smoothing = gd.getNextNumber();
+		centreEachSlice = gd.getNextBoolean();
 		interactiveMode = gd.getNextBoolean();
 		interpolationMethod = gd.getNextChoiceIndex();
 
@@ -427,8 +430,12 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			stats.add(b);
 			subtractBackgroundAndWindow(spot, b, regionBounds.width, regionBounds.height);
 
+			// Adjust the centre using the crop
+			centre[0] -= regionBounds.x;
+			centre[1] -= regionBounds.y;
+
 			// This takes a long time so this should track progress
-			ok = addToPSF(maxz, magnification, psf, centre, spot, regionBounds, progress, increment);
+			ok = addToPSF(maxz, magnification, psf, centre, spot, regionBounds, progress, increment, centreEachSlice);
 		}
 
 		IJ.showProgress(1);
@@ -824,32 +831,18 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		}
 	}
 
-	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, double[] centre, final float[][] spot,
-			final Rectangle regionBounds, double progress, final double increment)
+	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, final double[] stackCentre,
+			final float[][] spot, final Rectangle regionBounds, double progress, final double increment,
+			final boolean centreEachSlice)
 	{
 		// Calculate insert point in enlargement
-		final int x = (int) centre[0];
-		final int y = (int) centre[1];
-		final int z = (int) centre[2];
-
-		final double insertX = getInsert(centre[0], x, magnification);
-		final double insertY = getInsert(centre[1], y, magnification);
-
+		final int z = (int) stackCentre[2];
 		int insertZ = maxz - z + 1;
-		//Utils.log("Insert point = %.2f,%.2f => %.2f,%.2f\n", centre[0] - x, centre[1] - y, insertX, insertY);
-
-		// Copy the processor using a weighted image
-		final int lowerX = (int) insertX;
-		final int lowerY = (int) insertY;
-
-		final double wx2 = insertX - lowerX;
-		final double wx1 = 1 - wx2;
-		final double wy2 = insertY - lowerY;
-		final double wy1 = 1 - wy2;
 
 		// Enlargement size
-		final int dstWidth = regionBounds.width * magnification;
-		final int dstHeight = regionBounds.height * magnification;
+		final int w = regionBounds.width, h = regionBounds.height;
+		final int dstWidth = w * magnification;
+		final int dstHeight = h * magnification;
 
 		// Multi-thread for speed
 		if (threadPool == null)
@@ -859,8 +852,9 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 		for (int i = 0; i < spot.length; i++)
 		{
+			final int slice = i + 1;
 			final ImageProcessor ip = psf.getProcessor(insertZ++);
-			final float[] spotData = spot[i];
+			final float[] originalSpotData = spot[i];
 
 			futures.add(threadPool.submit(new Runnable()
 			{
@@ -871,13 +865,88 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 					incrementProgress(increment);
 
+					float[] spotData = originalSpotData;
+
+					final double[] centre;
+					if (centreEachSlice)
+					{
+						// Find the centre of mass. Use only intense pixels to avoid noise.
+						final double threshold = Maths.max(spotData) * 5e-2;
+						double sx = 0, sy = 0, s = 0;
+						for (int y = 0, i = 0; y < h; y++)
+							for (int x = 0; x < w; x++, i++)
+							{
+								final float v = spotData[i];
+								if (v >= threshold)
+								{
+									sx += x * v;
+									sy += y * v;
+									s += v;
+								}
+							}
+
+						// Allow for centre of pixel to be at 0.5
+						centre = new double[] { 0.5 + sx / s, 0.5 + sy / s };
+
+						// Work out the pixel offset for re-centring
+						int offsetx = (int) centre[0] - (int) stackCentre[0];
+						int offsety = (int) centre[1] - (int) stackCentre[1];
+						if (offsetx != 0 || offsety != 0)
+						{
+							//							System.out.printf("%d : %f,%f vs %f,%f\n", slice, centre[0], centre[1], stackCentre[0],
+							//									stackCentre[1]);
+
+							// Move the processor using the offset
+							FloatProcessor fp = new FloatProcessor(w, h, spotData, null);
+							FloatProcessor fp2 = new FloatProcessor(w, h);
+							fp2.setInterpolationMethod(ImageProcessor.NONE);
+							fp2.insert(fp, -offsetx, -offsety);
+							spotData = (float[]) fp2.getPixels();
+							// Update the centre
+							centre[0] -= offsetx;
+							centre[1] -= offsety;
+						}
+					}
+					else
+					{
+						centre = stackCentre;
+					}
+
+					final double insertX = getInsert(centre[0], (int) centre[0], magnification);
+					final double insertY = getInsert(centre[1], (int) centre[1], magnification);
+
+					//Utils.log("Insert point = %.2f,%.2f => %.2f,%.2f\n", centre[0] - (int) centre[0], centre[1] - (int) centre[1], insertX, insertY);
+
+					// Copy the processor using a weighted image
+					final int lowerX = (int) insertX;
+					final int lowerY = (int) insertY;
+
+					final double wx2 = insertX - lowerX;
+					final double wx1 = 1 - wx2;
+					final double wy2 = insertY - lowerY;
+					final double wy1 = 1 - wy2;
+
 					// Enlarge
-					FloatProcessor fp = new FloatProcessor(regionBounds.width, regionBounds.height, spotData, null);
+					FloatProcessor fp = new FloatProcessor(w, h, spotData, null);
 					fp.setInterpolationMethod(interpolationMethod);
 					fp = (FloatProcessor) fp.resize(dstWidth, dstHeight);
 
-					// Add to the combined PSF using the correct offset
-					//psf.getProcessor(insertZ++).copyBits(fp, (int) Math.round(insertX), (int) Math.round(insertY), Blitter.ADD);
+					//					// Check CoM
+					//					spotData = (float[]) fp.getPixels();
+					//					final double threshold = Maths.max(spotData) * 5e-2;
+					//					double sx = 0, sy = 0, s = 0;
+					//					for (int y = 0, i = 0; y < dstHeight; y++)
+					//						for (int x = 0; x < dstWidth; x++, i++)
+					//						{
+					//							final float v = spotData[i];
+					//							if (v >= threshold)
+					//							{
+					//								sx += x * v;
+					//								sy += y * v;
+					//								s += v;
+					//							}
+					//						}
+					//					System.out.printf("CoM %d : %f,%f vs %f,%f\n", slice, 0.5 + sx/s, 0.5 + sy/s, centre[0], centre[1]);
 
 					// Add to the combined PSF using the correct offset
 					copyBits(ip, fp, lowerX, lowerY, wx1 * wy1);
@@ -1065,22 +1134,28 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	{
 		final int size = psf.getSize();
 		double[][] com = new double[2][size];
-		final int offset = psf.getWidth() / 2;
+		final double offset = psf.getWidth() / 2.0;
 		for (int i = 0; i < size; i++)
 		{
 			float[] data = (float[]) psf.getPixels(i + 1);
-			double sumX = 0, sumY = 0, sum = 0;
+			double sx = 0, sy = 0, s = 0;
+			final double limit = Maths.max(data) * 5e-2;
 			for (int y = 0, j = 0; y < psf.getHeight(); y++)
 			{
 				for (int x = 0; x < psf.getWidth(); x++, j++)
 				{
-					sum += data[j];
-					sumX += x * data[j];
-					sumY += y * data[j];
+					final double v = data[j];
+					if (v >= limit)
+					{
+						sx += x * v;
+						sy += y * v;
+						s += v;
+					}
 				}
 			}
-			double comX = sumX / sum - offset;
-			double comY = sumY / sum - offset;
+			// Allow for centre of pixel to be at 0.5
+			double comX = 0.5 + sx / s - offset;
+			double comY = 0.5 + sy / s - offset;
 			com[0][i] = comX;
 			com[1][i] = comY;
 			//if (!Double.isNaN(fitCom[0][i]))
