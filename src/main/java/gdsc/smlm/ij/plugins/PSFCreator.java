@@ -93,6 +93,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 	private static int magnification = 10;
 	private static double smoothing = 0.25;
 	private static boolean centreEachSlice = false;
+	private static double comCutOff = 5e-2;
 	private static boolean interactiveMode = false;
 	private static int interpolationMethod = ImageProcessor.BICUBIC;
 
@@ -189,6 +190,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		gd.addSlider("Magnification", 5, 15, magnification);
 		gd.addSlider("Smoothing", 0.25, 0.5, smoothing);
 		gd.addCheckbox("Centre_each_slice", centreEachSlice);
+		gd.addNumericField("CoM_cut_off", comCutOff, -2);
 		gd.addCheckbox("Interactive_mode", interactiveMode);
 		String[] methods = ImageProcessor.getInterpolationMethods();
 		gd.addChoice("Interpolation", methods, methods[interpolationMethod]);
@@ -209,6 +211,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		magnification = (int) gd.getNextNumber();
 		smoothing = gd.getNextNumber();
 		centreEachSlice = gd.getNextBoolean();
+		comCutOff = Maths.max(0, gd.getNextNumber());
 		interactiveMode = gd.getNextBoolean();
 		interpolationMethod = gd.getNextChoiceIndex();
 
@@ -831,12 +834,12 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		}
 	}
 
-	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, final double[] stackCentre,
+	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, final double[] centre,
 			final float[][] spot, final Rectangle regionBounds, double progress, final double increment,
 			final boolean centreEachSlice)
 	{
 		// Calculate insert point in enlargement
-		final int z = (int) stackCentre[2];
+		final int z = (int) centre[2];
 		int insertZ = maxz - z + 1;
 
 		// Enlargement size
@@ -852,7 +855,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 		for (int i = 0; i < spot.length; i++)
 		{
-			final int slice = i + 1;
+			//final int slice = i + 1;
 			final ImageProcessor ip = psf.getProcessor(insertZ++);
 			final float[] originalSpotData = spot[i];
 
@@ -865,57 +868,35 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 
 					incrementProgress(increment);
 
-					float[] spotData = originalSpotData;
+					double insertX, insertY;
 
-					final double[] centre;
+					// Enlarge
+					FloatProcessor fp = new FloatProcessor(w, h, originalSpotData, null);
+					fp.setInterpolationMethod(interpolationMethod);
+					fp = (FloatProcessor) fp.resize(dstWidth, dstHeight);
+
+					// Do all CoM calculations here since we use an interpolation
+					// when resizing and the CoM will move.
 					if (centreEachSlice)
 					{
-						// Find the centre of mass. Use only intense pixels to avoid noise.
-						final double threshold = Maths.max(spotData) * 5e-2;
-						double sx = 0, sy = 0, s = 0;
-						for (int y = 0, i = 0; y < h; y++)
-							for (int x = 0; x < w; x++, i++)
-							{
-								final float v = spotData[i];
-								if (v >= threshold)
-								{
-									sx += x * v;
-									sy += y * v;
-									s += v;
-								}
-							}
+						final double[] com = calculateCenterOfMass(fp);
+						//System.out.printf("CoM %d : %f %f vs %f %f\n", slice, com[0], com[1],
+						//		centre[0] * magnification, centre[1] * magnification);
 
-						// Allow for centre of pixel to be at 0.5
-						centre = new double[] { 0.5 + sx / s, 0.5 + sy / s };
-
-						// Work out the pixel offset for re-centring
-						int offsetx = (int) centre[0] - (int) stackCentre[0];
-						int offsety = (int) centre[1] - (int) stackCentre[1];
-						if (offsetx != 0 || offsety != 0)
-						{
-							//							System.out.printf("%d : %f,%f vs %f,%f\n", slice, centre[0], centre[1], stackCentre[0],
-							//									stackCentre[1]);
-
-							// Move the processor using the offset
-							FloatProcessor fp = new FloatProcessor(w, h, spotData, null);
-							FloatProcessor fp2 = new FloatProcessor(w, h);
-							fp2.setInterpolationMethod(ImageProcessor.NONE);
-							fp2.insert(fp, -offsetx, -offsety);
-							spotData = (float[]) fp2.getPixels();
-							// Update the centre
-							centre[0] -= offsetx;
-							centre[1] -= offsety;
-						}
+						// Get the insert position by subtracting the centre-of-mass of the enlarged image from the 
+						// image centre + allow for a border of 1 pixel * magnification
+						insertX = magnification + dstWidth * 0.5 - com[0];
+						insertY = magnification + dstHeight * 0.5 - com[1];
+						//Utils.log("Insert point = %.2f,%.2f => %.2f,%.2f\n", dstWidth * 0.5 - cx, dstHeight * 0.5 - cy,
+						//		insertX, insertY);
 					}
 					else
 					{
-						centre = stackCentre;
+						// Get the insert position from the stack centre using enlargement
+						insertX = getInsert(centre[0], (int) centre[0], magnification);
+						insertY = getInsert(centre[1], (int) centre[1], magnification);
+						//Utils.log("Insert point = %.2f,%.2f => %.2f,%.2f\n", centre[0] - (int) centre[0], centre[1] - (int) centre[1], insertX, insertY);
 					}
-
-					final double insertX = getInsert(centre[0], (int) centre[0], magnification);
-					final double insertY = getInsert(centre[1], (int) centre[1], magnification);
-
-					//Utils.log("Insert point = %.2f,%.2f => %.2f,%.2f\n", centre[0] - (int) centre[0], centre[1] - (int) centre[1], insertX, insertY);
 
 					// Copy the processor using a weighted image
 					final int lowerX = (int) insertX;
@@ -926,33 +907,22 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 					final double wy2 = insertY - lowerY;
 					final double wy1 = 1 - wy2;
 
-					// Enlarge
-					FloatProcessor fp = new FloatProcessor(w, h, spotData, null);
-					fp.setInterpolationMethod(interpolationMethod);
-					fp = (FloatProcessor) fp.resize(dstWidth, dstHeight);
-
-					//					// Check CoM
-					//					spotData = (float[]) fp.getPixels();
-					//					final double threshold = Maths.max(spotData) * 5e-2;
-					//					double sx = 0, sy = 0, s = 0;
-					//					for (int y = 0, i = 0; y < dstHeight; y++)
-					//						for (int x = 0; x < dstWidth; x++, i++)
-					//						{
-					//							final float v = spotData[i];
-					//							if (v >= threshold)
-					//							{
-					//								sx += x * v;
-					//								sy += y * v;
-					//								s += v;
-					//							}
-					//						}
-					//					System.out.printf("CoM %d : %f,%f vs %f,%f\n", slice, 0.5 + sx/s, 0.5 + sy/s, centre[0], centre[1]);
-
-					// Add to the combined PSF using the correct offset
+					// Add to the combined PSF using the correct offset and the weighting
 					copyBits(ip, fp, lowerX, lowerY, wx1 * wy1);
 					copyBits(ip, fp, lowerX + 1, lowerY, wx2 * wy1);
 					copyBits(ip, fp, lowerX, lowerY + 1, wx1 * wy2);
 					copyBits(ip, fp, lowerX + 1, lowerY + 1, wx2 * wy2);
+
+					//// Check CoM is correct. This is never perfect since the bilinear weighting 
+					//// interpolates the data and shifts the CoM.
+					//ImageProcessor ip2 = ip.createProcessor(ip.getWidth(), ip.getHeight());
+					//copyBits(ip2, fp, lowerX, lowerY, wx1 * wy1);
+					//copyBits(ip2, fp, lowerX + 1, lowerY, wx2 * wy1);
+					//copyBits(ip2, fp, lowerX, lowerY + 1, wx1 * wy2);
+					//copyBits(ip2, fp, lowerX + 1, lowerY + 1, wx2 * wy2);
+					//
+					//double[] com = getCoM((FloatProcessor) ip2);
+					//System.out.printf("Inserted CoM %d : %f %f\n", slice, com[0], com[1]);
 				}
 			}));
 
@@ -963,6 +933,28 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		Utils.waitForCompletion(futures);
 
 		return !Utils.isInterrupted();
+	}
+
+	private static double[] calculateCenterOfMass(FloatProcessor fp)
+	{
+		final int h = fp.getHeight();
+		final int w = fp.getWidth();
+		float[] data = (float[]) fp.getPixels();
+		final double threshold = Maths.max(data) * comCutOff;
+		double sx = 0, sy = 0, s = 0;
+		for (int y = 0, i = 0; y < h; y++)
+			for (int x = 0; x < w; x++, i++)
+			{
+				final float v = data[i];
+				if (v >= threshold)
+				{
+					sx += x * v;
+					sy += y * v;
+					s += v;
+				}
+			}
+		// Allow for centre of pixel to be at 0.5
+		return new double[] { 0.5 + sx / s, 0.5 + sy / s };
 	}
 
 	/**
@@ -1137,27 +1129,9 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		final double offset = psf.getWidth() / 2.0;
 		for (int i = 0; i < size; i++)
 		{
-			float[] data = (float[]) psf.getPixels(i + 1);
-			double sx = 0, sy = 0, s = 0;
-			final double limit = Maths.max(data) * 5e-2;
-			for (int y = 0, j = 0; y < psf.getHeight(); y++)
-			{
-				for (int x = 0; x < psf.getWidth(); x++, j++)
-				{
-					final double v = data[j];
-					if (v >= limit)
-					{
-						sx += x * v;
-						sy += y * v;
-						s += v;
-					}
-				}
-			}
-			// Allow for centre of pixel to be at 0.5
-			double comX = 0.5 + sx / s - offset;
-			double comY = 0.5 + sy / s - offset;
-			com[0][i] = comX;
-			com[1][i] = comY;
+			final double[] com2 = calculateCenterOfMass((FloatProcessor) psf.getProcessor(i + 1));
+			com[0][i] = com2[0] - offset;
+			com[1][i] = com2[1] - offset;
 			//if (!Double.isNaN(fitCom[0][i]))
 			//{
 			//	// Interlacing the fit centre of mass is not consistent. There appears to be a large discrepancy
@@ -1318,6 +1292,7 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		// Need to be updated after the widths have been set
 		fitConfig.setCoordinateShiftFactor(shift);
 		fitConfig.setBackgroundFitting(false);
+		fitConfig.setMinPhotons(0); // Since the PSF will be normalised
 		//fitConfig.setLog(new IJLogger());
 
 		MemoryPeakResults results = fitSpot(psf, psf.getWidth(), psf.getHeight(), x, y);
