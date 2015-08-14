@@ -1828,7 +1828,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private float[][] extractImageStack(ImagePlus imp, int start, int end)
+	public static float[][] extractImageStack(ImagePlus imp, int start, int end)
 	{
 		int size = end - start + 1;
 		ImageStack stack = imp.getImageStack();
