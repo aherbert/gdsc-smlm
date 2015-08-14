@@ -835,7 +835,7 @@ public class BenchmarkFit implements PlugIn
 	 * @param maxy
 	 * @return The background
 	 */
-	private static double getBackground(double[] data, int maxx, int maxy)
+	public static double getBackground(double[] data, int maxx, int maxy)
 	{
 		double background = 0;
 		for (int xi = 0; xi < maxx; xi++)
@@ -855,7 +855,7 @@ public class BenchmarkFit implements PlugIn
 	 *            background
 	 * @return The signal
 	 */
-	private static double getSignal(double[] data, double b)
+	public static double getSignal(double[] data, double b)
 	{
 		double s = 0;
 		for (double d : data)
@@ -873,7 +873,7 @@ public class BenchmarkFit implements PlugIn
 	 * @param com
 	 *            The centre-of-mass
 	 */
-	private static void getCentreOfMass(double[] data, int maxx, int maxy, double[] com)
+	public static void getCentreOfMass(double[] data, int maxx, int maxy, double[] com)
 	{
 		com[0] = com[1] = 0;
 		double sum = 0;

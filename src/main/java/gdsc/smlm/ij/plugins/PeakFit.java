@@ -1601,7 +1601,31 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 *            True if extra configuration options should be allowed
 	 * @return True if the configuration succeeded
 	 */
+	/**
+	 * @param settings
+	 * @param filename
+	 * @param extraOptions
+	 * @return
+	 */
 	public static boolean configureFitSolver(GlobalSettings settings, String filename, boolean extraOptions)
+	{
+		return configureFitSolver(settings, filename, extraOptions, false);
+	}
+
+	/**
+	 * Show a dialog to configure the fit solver. The updated settings are saved to the settings file. An error
+	 * message is shown if the dialog is cancelled or the configuration is invalid.
+	 * 
+	 * @param settings
+	 * @param filename
+	 * @param extraOptions
+	 *            True if extra configuration options should be allowed
+	 * @param ignoreCalibration
+	 *            True if the calibration should not be configured
+	 * @return True if the configuration succeeded
+	 */
+	public static boolean configureFitSolver(GlobalSettings settings, String filename, boolean extraOptions,
+			boolean ignoreCalibration)
 	{
 		FitConfiguration fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
@@ -1610,11 +1634,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
-			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-			gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
-			gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
-			gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
-			gd.addCheckbox("EM-CCD", calibration.emCCD);
+			if (!ignoreCalibration)
+			{
+				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
+				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
+				gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+				gd.addCheckbox("EM-CCD", calibration.emCCD);
+			}
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
 			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
 			gd.addStringField("Relative_threshold", "" + fitConfig.getRelativeThreshold());
@@ -1626,15 +1653,18 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
-			calibration.bias = Math.abs(gd.getNextNumber());
-			fitConfig.setModelCamera(gd.getNextBoolean());
-			calibration.readNoise = Math.abs(gd.getNextNumber());
-			calibration.gain = Math.abs(gd.getNextNumber());
-			calibration.emCCD = gd.getNextBoolean();
-			fitConfig.setBias(calibration.bias);
-			fitConfig.setReadNoise(calibration.readNoise);
-			fitConfig.setGain(calibration.gain);
-			fitConfig.setEmCCD(calibration.emCCD);
+			if (!ignoreCalibration)
+			{
+				calibration.bias = Math.abs(gd.getNextNumber());
+				fitConfig.setModelCamera(gd.getNextBoolean());
+				calibration.readNoise = Math.abs(gd.getNextNumber());
+				calibration.gain = Math.abs(gd.getNextNumber());
+				calibration.emCCD = gd.getNextBoolean();
+				fitConfig.setBias(calibration.bias);
+				fitConfig.setReadNoise(calibration.readNoise);
+				fitConfig.setGain(calibration.gain);
+				fitConfig.setEmCCD(calibration.emCCD);
+			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 			try
 			{
@@ -1686,7 +1716,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
 
 			// Extra parameters are needed for the weighted LVM
-			if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+			if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED && !ignoreCalibration)
 			{
 				gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
 				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
