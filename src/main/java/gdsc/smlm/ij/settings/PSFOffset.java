@@ -3,7 +3,7 @@ package gdsc.smlm.ij.settings;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2015 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -14,23 +14,17 @@ package gdsc.smlm.ij.settings;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contain the settings for the PSF Creator plugin
+ * Contain the settings for the centre offset of a PSF
  */
-public class PSFSettings
+public class PSFOffset
 {
-	public int zCentre = 1;
-	public double nmPerPixel = 100;
-	public double nmPerSlice = 20;
-	public int nImages = 1;
-	public double fwhm = 1;
-	public PSFOffset[] offset;
+	public final int slice;
+	public final double cx, cy;
 
-	public PSFSettings(int zCentre, double nmPerPixel, double nmPerSlice, int nImages, double fwhm)
+	public PSFOffset(int slice, double cx, double cy)
 	{
-		this.zCentre = zCentre;
-		this.nmPerPixel = nmPerPixel;
-		this.nmPerSlice = nmPerSlice;
-		this.nImages = nImages;
-		this.fwhm = fwhm;
+		this.slice = slice;
+		this.cx = cx;
+		this.cy = cy;
 	}
 }

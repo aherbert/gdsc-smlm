@@ -696,8 +696,8 @@ public class BenchmarkSpotFit implements PlugIn
 			put(jobs, i);
 			if (i % step == 0)
 			{
-				IJ.showProgress(i, totalFrames);
-				IJ.showStatus("Frame: " + i + " / " + totalFrames);
+				if (Utils.showStatus("Frame: " + i + " / " + totalFrames))
+					IJ.showProgress(i, totalFrames);
 			}
 		}
 		// Finish all the worker threads by passing in a null job

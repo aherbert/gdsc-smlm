@@ -1980,8 +1980,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			if (++slice % step == 0)
 			{
-				IJ.showProgress(slice, totalFrames);
-				IJ.showStatus("Slice: " + slice + " / " + totalFrames);
+				if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
+					IJ.showProgress(slice, totalFrames);
 			}
 
 			float noise = Float.NaN;
@@ -2220,8 +2220,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				}
 				if (slice % step == 0)
 				{
-					IJ.showProgress(slice, totalFrames);
-					IJ.showStatus("Slice: " + slice + " / " + totalFrames);
+					if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
+						IJ.showProgress(slice, totalFrames);
 				}
 
 				// Process results

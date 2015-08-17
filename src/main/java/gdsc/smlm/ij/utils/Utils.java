@@ -1113,4 +1113,22 @@ public class Utils
 	{
 		return string == null || string.length() == 0;
 	}
+
+	private static long lastTime = 0;
+	/**
+	 * Show a message on the status bar if enough time has passed since the last call
+	 * @param message The message
+	 * @return True if shown
+	 */
+	public static boolean showStatus(String message)
+	{
+		long time = System.currentTimeMillis();
+		if (time - lastTime > 150)
+		{
+			lastTime = time;
+			IJ.showStatus(message);
+			return true;
+		}
+		return false;
+	}
 }

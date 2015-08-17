@@ -22,6 +22,7 @@ import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.PSFOffset;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Utils;
@@ -41,6 +42,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,10 +60,14 @@ public class PSFDrift implements PlugIn
 
 	private static String title = "";
 	private static double scale = 10;
-	private static double zDepth = 500;
+	private static double zDepth = 1000;
 	private static int gridSize = 10;
 	private static double recallLimit = 0.25;
 	private static int regionSize = 5;
+	private static boolean backgroundFitting = false;
+	private static boolean offsetFitting = true;
+	private static double startOffset = 0.5;
+	private static boolean comFitting = true;
 
 	private ImagePlus imp;
 	private PSFSettings psfSettings;
@@ -182,7 +188,7 @@ public class PSFDrift implements PlugIn
 				finished = true;
 				return;
 			}
-			
+
 			double cx = centrePixel + job.cx;
 			double cy = centrePixel + job.cy;
 
@@ -197,7 +203,7 @@ public class PSFDrift implements PlugIn
 			// Fit the PSF. Do this from different start positions.
 
 			// Get the background and signal estimate
-			final double b = BenchmarkFit.getBackground(data, w, w);
+			final double b = (backgroundFitting) ? BenchmarkFit.getBackground(data, w, w) : bias;
 			final double signal = BenchmarkFit.getSignal(data, b);
 
 			if (comFitting)
@@ -240,6 +246,9 @@ public class PSFDrift implements PlugIn
 				// Subtract the fitted bias from the background
 				if (!fitConfig.isRemoveBiasBeforeFitting())
 					params[Gaussian2DFunction.BACKGROUND] -= bias;
+				// Account for 0.5 pixel offset during fitting
+				params[Gaussian2DFunction.X_POSITION] += 0.5;
+				params[Gaussian2DFunction.Y_POSITION] += 0.5;
 				if (isValid(status, params, w))
 				{
 					// XXX Decide what results are needed for analysis
@@ -305,6 +314,7 @@ public class PSFDrift implements PlugIn
 		{
 			if (status != FitStatus.OK)
 			{
+				//System.out.println("Failed to fit: " + status);
 				return false;
 			}
 
@@ -312,12 +322,16 @@ public class PSFDrift implements PlugIn
 			if (params[Gaussian2DFunction.X_POSITION] < 0 || params[Gaussian2DFunction.Y_POSITION] < 0 ||
 					params[Gaussian2DFunction.X_POSITION] > size || params[Gaussian2DFunction.Y_POSITION] > size)
 			{
+				//System.out.printf("Failed to fit position: x=%f,y=%f\n", params[Gaussian2DFunction.X_POSITION],
+				//		params[Gaussian2DFunction.Y_POSITION]);
 				return false;
 			}
 
 			// Reject fits that do not correctly estimate the signal
-			if (params[Gaussian2DFunction.SIGNAL] < signal * 0.5 || params[Gaussian2DFunction.SIGNAL] > signal * 2)
+			if (params[Gaussian2DFunction.SIGNAL] < lb[Gaussian2DFunction.SIGNAL] ||
+					params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL])
 			{
+				//System.out.printf("Failed to fit signal: %f\n", params[Gaussian2DFunction.SIGNAL]);
 				return false;
 			}
 
@@ -334,6 +348,7 @@ public class PSFDrift implements PlugIn
 				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
 						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
 				{
+					//System.out.printf("Failed to fit x-width: %f\n", params[Gaussian2DFunction.X_SD]);
 					return false;
 				}
 			}
@@ -342,6 +357,7 @@ public class PSFDrift implements PlugIn
 				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
 						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
 				{
+					//System.out.printf("Failed to fit y-width: %f\n", params[Gaussian2DFunction.Y_SD]);
 					return false;
 				}
 			}
@@ -376,6 +392,7 @@ public class PSFDrift implements PlugIn
 		gd.addSlider("Recall_limit", 0.01, 1, recallLimit);
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
+		gd.addCheckbox("Background_fitting", backgroundFitting);
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
@@ -394,6 +411,7 @@ public class PSFDrift implements PlugIn
 		gridSize = (int) gd.getNextNumber();
 		recallLimit = gd.getNextNumber();
 		regionSize = (int) Math.abs(gd.getNextNumber());
+		backgroundFitting = gd.getNextBoolean();
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 		offsetFitting = gd.getNextBoolean();
@@ -449,7 +467,7 @@ public class PSFDrift implements PlugIn
 		final double sa = PSFCalculator.squarePixelAdjustment(psfSettings.nmPerPixel *
 				(psfSettings.fwhm / PSFCalculator.SD_TO_FWHM_FACTOR), a);
 		fitConfig.setInitialPeakStdDev(sa / a);
-		fitConfig.setBackgroundFitting(true);
+		fitConfig.setBackgroundFitting(backgroundFitting);
 		fitConfig.setNotSignalFitting(false);
 		fitConfig.setComputeDeviations(false);
 		fitConfig.setFitValidation(false);
@@ -491,8 +509,8 @@ public class PSFDrift implements PlugIn
 
 		// Fit 
 		final int step = (total > 400) ? total / 200 : 2;
-		outer:
-		for (int z = minz, i = 0; z <= maxz; z++)
+		outer: for (int z = minz, i = 0; z <= maxz; z++)
+		{
 			for (int x = 0; x < gridSize; x++)
 				for (int y = 0; y < gridSize; y++, i++)
 				{
@@ -503,25 +521,26 @@ public class PSFDrift implements PlugIn
 					put(jobs, new Job(z, grid[x], grid[y], i));
 					if (i % step == 0)
 					{
-						IJ.showProgress(i, total);
-						IJ.showStatus("Fit: " + i + " / " + total);
+						if (Utils.showStatus("Fit: " + i + " / " + total))
+							IJ.showProgress(i, total);
 					}
 				}
+			//break;
+		}
 
-		
 		// If escaped pressed then do not need to stop the workers, just return
 		if (Utils.isInterrupted())
 		{
 			IJ.showProgress(1);
 			return;
 		}
-		
+
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
 		{
 			put(jobs, new Job());
 		}
-		
+
 		// Wait for all to finish
 		for (int i = 0; i < threads.size(); i++)
 		{
@@ -541,7 +560,6 @@ public class PSFDrift implements PlugIn
 
 		// Plot the average and SE for the drift curve
 		// Plot the recall
-		int c = 0;
 		double[] zPosition = new double[nZ];
 		double[] avX = new double[nZ];
 		double[] seX = new double[nZ];
@@ -566,13 +584,12 @@ public class PSFDrift implements PlugIn
 					resultPosition++;
 				}
 			}
-			zPosition[c] = z * psfSettings.nmPerSlice;
-			avX[c] = statsX.getMean();
-			seX[c] = statsX.getStandardError();
-			avY[c] = statsY.getMean();
-			seY[c] = statsY.getStandardError();
-			recall[c] = (double) statsX.getN() / (nStartPoints * gridSize2);
-			c++;
+			zPosition[i] = z * psfSettings.nmPerSlice;
+			avX[i] = statsX.getMean();
+			seX[i] = statsX.getStandardError();
+			avY[i] = statsY.getMean();
+			seY[i] = statsY.getStandardError();
+			recall[i] = (double) statsX.getN() / (nStartPoints * gridSize2);
 		}
 
 		displayPlot("Drift X", "X (nm)", zPosition, avX, seX);
@@ -584,8 +601,25 @@ public class PSFDrift implements PlugIn
 
 		// TODO - Plot drift curves across X at each Y and across Y at each X
 
-		// If they are good then store them in the image
-
+		// Ask the user if they would like to store them in the image
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.enableYesNoCancel();
+		gd.hideCancelButton();
+		gd.addMessage("Save the drift to the PSF?");
+		gd.showDialog();
+		if (gd.wasOKed())
+		{
+			ArrayList<PSFOffset> offset = new ArrayList<PSFOffset>();
+			for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
+			{
+				if (recall[i] < recallLimit)
+					continue;
+				// The offset should store the opposite of the difference to the centre in pixels
+				offset.add(new PSFOffset(slice, -avX[i] / a, -avY[i] / a));
+			}
+			psfSettings.offset = offset.toArray(new PSFOffset[offset.size()]);
+			imp.setProperty("Info", XmlUtils.toXML(psfSettings));
+		}
 	}
 
 	private void displayPlot(String title, String yLabel, double[] x, double[] y, double[] se)
@@ -620,6 +654,12 @@ public class PSFDrift implements PlugIn
 				plot.drawLine(x[i], y[i] - se[i], x[i], y[i] + se[i]);
 			}
 		}
+		else
+		{
+			// draw a line for the recall limit
+			plot.setColor(Color.magenta);
+			plot.drawLine(limitsx[0] - rangex, recallLimit, limitsx[1] + rangex, recallLimit);
+		}
 		PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw.getImagePlus().getID();
@@ -648,10 +688,6 @@ public class PSFDrift implements PlugIn
 			throw new RuntimeException("Unexpected interruption", e);
 		}
 	}
-
-	private static boolean offsetFitting = false;
-	private static double startOffset = 0.5;
-	private static boolean comFitting = true;
 
 	/**
 	 * @return The starting points for the fitting
