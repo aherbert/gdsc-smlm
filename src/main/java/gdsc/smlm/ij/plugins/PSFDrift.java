@@ -601,19 +601,46 @@ public class PSFDrift implements PlugIn
 
 		// TODO - Plot drift curves across X at each Y and across Y at each X
 
+		// Find the range from the z-centre above the recall limit 
+		int centre = 0;
+		for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
+		{
+			if (slice == psfSettings.zCentre)
+			{
+				centre = i;
+				break;
+			}
+		}
+		if (recall[centre] < recallLimit)
+			return;
+		int start = centre, end = centre;
+		for (int i = centre; i-- > 0;)
+		{
+			if (recall[i] < recallLimit)
+				break;
+			start = i;
+		}
+		for (int i = centre; ++i < recall.length;)
+		{
+			if (recall[i] < recallLimit)
+				break;
+			end = i;
+		}
+
 		// Ask the user if they would like to store them in the image
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.enableYesNoCancel();
 		gd.hideCancelButton();
-		gd.addMessage("Save the drift to the PSF?");
+		startSlice = psfSettings.zCentre - (centre - start);
+		endSlice = psfSettings.zCentre + (end - centre);
+		gd.addMessage(String.format("Save the drift to the PSF?\n \nSlices %d (%s nm) - %d (%s nm) above recall limit",
+				startSlice, Utils.rounded(zPosition[start]), endSlice, Utils.rounded(zPosition[end])));
 		gd.showDialog();
 		if (gd.wasOKed())
 		{
 			ArrayList<PSFOffset> offset = new ArrayList<PSFOffset>();
-			for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
+			for (int i = start, slice = startSlice; i <= end; slice++, i++)
 			{
-				if (recall[i] < recallLimit)
-					continue;
 				// The offset should store the opposite of the difference to the centre in pixels
 				offset.add(new PSFOffset(slice, -avX[i] / a, -avY[i] / a));
 			}
