@@ -42,7 +42,7 @@ public class ImagePSFModel extends PSFModel
 	private double[][] sumImage;
 	private double[][] cumulativeImage;
 	private int psfWidth, zCentre;
-	private double xyCentre;
+	private double[][] xyCentre;
 	private double halfPsfWidthInPixels;
 	private double unitsPerPixel;
 	private double unitsPerSlice;
@@ -118,7 +118,8 @@ public class ImagePSFModel extends PSFModel
 		psfWidth = (int) edge;
 		//if (psfWidth % 2 != 1)
 		//	throw new IllegalArgumentException("Image edge length is not an odd number");
-		xyCentre = psfWidth * 0.5;
+		xyCentre = new double[image.length][];
+		Arrays.fill(xyCentre, new double[] { psfWidth * 0.5, psfWidth * 0.5 });
 		for (int i = 1; i < image.length; i++)
 			if (image[i].length != size)
 				throw new IllegalArgumentException("Image planes are not the same size");
@@ -162,13 +163,15 @@ public class ImagePSFModel extends PSFModel
 			double sy = 0;
 			double s = 0;
 			double[] data = sumImage[zCentre];
+			double cx = xyCentre[zCentre][0];
+			double cy = xyCentre[zCentre][1];
 			for (int y = 0; y < psfWidth; y++)
 			{
-				if (Math.abs(y + 0.5 - xyCentre) > fwhm)
+				if (Math.abs(y + 0.5 - cy) > fwhm)
 					continue;
 				for (int x = 0, j = y * psfWidth; x < psfWidth; x++, j++)
 				{
-					if (Math.abs(x + 0.5 - xyCentre) > fwhm)
+					if (Math.abs(x + 0.5 - cx) > fwhm)
 						continue;
 					// Centre in middle of pixel
 					sx += (x + 0.5) * data[j];
@@ -176,8 +179,8 @@ public class ImagePSFModel extends PSFModel
 					s += data[j];
 				}
 			}
-			sx = sx / s - xyCentre;
-			sy = sy / s - xyCentre;
+			sx = sx / s - cx;
+			sy = sy / s - cy;
 			System.out.printf("%dx%d centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel, sy /
 					unitsPerPixel);
 		}
@@ -595,8 +598,8 @@ public class ImagePSFModel extends PSFModel
 		// will be rounded. This will cause the inserted PSF to be incorrect. The correct method is
 		// to do linear interpolation between the pixel sums.
 
-		double[] u = createInterpolationLookup(x0range, x0);
-		double[] v = createInterpolationLookup(x1range, x1);
+		double[] u = createInterpolationLookup(x0range, x0, xyCentre[slice][0]);
+		double[] v = createInterpolationLookup(x1range, x1, xyCentre[slice][1]);
 
 		int[] lu = new int[u.length];
 		for (int i = 0; i < u.length; i++)
@@ -673,7 +676,7 @@ public class ImagePSFModel extends PSFModel
 		return data;
 	}
 
-	private double[] createInterpolationLookup(int range, double origin)
+	private double[] createInterpolationLookup(int range, double origin, double xyCentre)
 	{
 		double[] pixel = new double[range + 1];
 		for (int i = 0; i < pixel.length; i++)
@@ -915,10 +918,12 @@ public class ImagePSFModel extends PSFModel
 
 		// Ensure the generated index is adjusted to the correct position
 		// The index will be generated at 0,0 of a pixel in the PSF image.
-		// We must subtract half the PSF width so that the middle coords are zero.
+		// We must subtract the PSF centre so that the middle coords are zero.
 
-		x0 -= halfPsfWidthInPixels;
-		x1 -= halfPsfWidthInPixels;
+		//x0 -= halfPsfWidthInPixels;
+		//x1 -= halfPsfWidthInPixels;
+		x0 -= xyCentre[slice][0] * unitsPerPixel;
+		x1 -= xyCentre[slice][1] * unitsPerPixel;
 
 		final double max = sumPsf[sumPsf.length - 1];
 		double[] x = new double[n];
@@ -954,8 +959,8 @@ public class ImagePSFModel extends PSFModel
 
 		if (COM_CHECK)
 		{
-			sx = sx / s - xyCentre;
-			sy = sy / s - xyCentre;
+			sx = sx / s - xyCentre[slice][0];
+			sy = sy / s - xyCentre[slice][1];
 			System.out.printf("%dx%d sample centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx /
 					unitsPerPixel, sy / unitsPerPixel);
 		}
@@ -1004,5 +1009,40 @@ public class ImagePSFModel extends PSFModel
 		//}
 
 		return lower;
+	}
+
+	/**
+	 * Set the PSF centre for the given slice. The centre must be with the width/size of the PSF.
+	 * 
+	 * @param slice
+	 * @param x0
+	 * @param x1
+	 * @return True if set
+	 */
+	public boolean setCentre(int slice, double x0, double x1)
+	{
+		if (slice < 0 || slice >= xyCentre.length)
+			return false;
+		if (x0 < 0 || x0 >= psfWidth)
+			return false;
+		if (x1 < 0 || x1 >= psfWidth)
+			return false;
+		xyCentre[slice] = new double[] { x0, x1 };
+		return true;
+	}
+
+	/**
+	 * Set the PSF centre for the given slice. The centre is relative to 0,0.
+	 * 
+	 * @param slice
+	 * @param x0
+	 * @param x1
+	 * @return True if set
+	 */
+	public boolean setRelativeCentre(int slice, double x0, double x1)
+	{
+		x0 += 0.5 * psfWidth;
+		x1 += 0.5 * psfWidth;
+		return setCentre(slice, x0, x1);
 	}
 }

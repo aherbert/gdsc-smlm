@@ -21,6 +21,7 @@ import gdsc.smlm.ij.settings.Atom;
 import gdsc.smlm.ij.settings.Compound;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.PSFOffset;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Utils;
@@ -1818,8 +1819,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				upper = Math.max(upper, zCentre);
 			}
 
-			return new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower, psfSettings.nmPerPixel /
-					settings.pixelPitch, unitsPerSlice, psfSettings.fwhm);
+			ImagePSFModel model = new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower,
+					psfSettings.nmPerPixel / settings.pixelPitch, unitsPerSlice, psfSettings.fwhm);
+
+			// Add the calibrated centres
+			if (psfSettings.offset != null)
+			{
+				int sliceOffset = lower + 1;
+				for (PSFOffset offset : psfSettings.offset)
+				{
+					model.setRelativeCentre(offset.slice - sliceOffset, offset.cx, offset.cy);
+				}
+			}
+
+			return model;
 		}
 		catch (Exception e)
 		{
