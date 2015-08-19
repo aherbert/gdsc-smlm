@@ -256,7 +256,7 @@ public class PSFDrift implements PlugIn
 					//results[resultPosition] = params;
 					// Store only the drift
 					results[resultPosition] = new double[] { a * (params[Gaussian2DFunction.X_POSITION] - cx),
-							a * (params[Gaussian2DFunction.Y_POSITION] - cy) };
+							a * (params[Gaussian2DFunction.Y_POSITION] - cy), job.z };
 					//System.out.printf("Fit " + job + ". %f,%f\n", results[resultPosition][0],
 					//		results[resultPosition][1]);
 				}
