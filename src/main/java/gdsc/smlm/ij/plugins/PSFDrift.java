@@ -500,7 +500,7 @@ public class PSFDrift implements PlugIn
 		}
 
 		final int nZ = maxz - minz + 1;
-		final int gridSize2 = gridSize * gridSize;
+		final int gridSize2 = grid.length * grid.length;
 		total = nZ * gridSize2;
 
 		// Store all the fitting results
@@ -511,8 +511,8 @@ public class PSFDrift implements PlugIn
 		final int step = (total > 400) ? total / 200 : 2;
 		outer: for (int z = minz, i = 0; z <= maxz; z++)
 		{
-			for (int x = 0; x < gridSize; x++)
-				for (int y = 0; y < gridSize; y++, i++)
+			for (int x = 0; x < grid.length; x++)
+				for (int y = 0; y < grid.length; y++, i++)
 				{
 					if (IJ.escapePressed())
 					{
@@ -639,10 +639,11 @@ public class PSFDrift implements PlugIn
 		if (gd.wasOKed())
 		{
 			ArrayList<PSFOffset> offset = new ArrayList<PSFOffset>();
+			final double pitch = psfSettings.nmPerPixel;
 			for (int i = start, slice = startSlice; i <= end; slice++, i++)
 			{
-				// The offset should store the opposite of the difference to the centre in pixels
-				offset.add(new PSFOffset(slice, -avX[i] / a, -avY[i] / a));
+				// The offset should store the difference to the centre in pixels
+				offset.add(new PSFOffset(slice, avX[i] / pitch, avY[i] / pitch));
 			}
 			psfSettings.offset = offset.toArray(new PSFOffset[offset.size()]);
 			imp.setProperty("Info", XmlUtils.toXML(psfSettings));

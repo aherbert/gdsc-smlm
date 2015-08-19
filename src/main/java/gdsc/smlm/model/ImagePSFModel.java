@@ -43,7 +43,6 @@ public class ImagePSFModel extends PSFModel
 	private double[][] cumulativeImage;
 	private int psfWidth, zCentre;
 	private double[][] xyCentre;
-	private double halfPsfWidthInPixels;
 	private double unitsPerPixel;
 	private double unitsPerSlice;
 	private double fwhm;
@@ -130,8 +129,6 @@ public class ImagePSFModel extends PSFModel
 			throw new IllegalArgumentException("Units per slice must be between 0 and 1: " + unitsPerSlice);
 		this.unitsPerPixel = unitsPerPixel;
 		this.unitsPerSlice = unitsPerSlice;
-
-		halfPsfWidthInPixels = 0.5 * psfWidth * unitsPerPixel;
 
 		// Duplicate and convert to double
 		this.sumImage = duplicate(image);
@@ -490,6 +487,12 @@ public class ImagePSFModel extends PSFModel
 	public double drawPSF(float[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
+		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
+		if (slice < 0 || slice >= xyCentre.length)
+		{
+			return insert(data, 0, 0, 0, 0, 0, null, false);
+		}
+		
 		// Parameter check
 		if (width < 1)
 			throw new IllegalArgumentException("Width cannot be less than 1");
@@ -500,11 +503,13 @@ public class ImagePSFModel extends PSFModel
 		else if (data.length < width * height)
 			throw new IllegalArgumentException("Data length cannot be smaller than width * height");
 
-		// Evaluate the PSF over the full range
-		final int x0min = clip((int) (x0 - halfPsfWidthInPixels), width);
-		final int x1min = clip((int) (x1 - halfPsfWidthInPixels), height);
-		final int x0max = clip((int) Math.ceil(x0 + halfPsfWidthInPixels), width);
-		final int x1max = clip((int) Math.ceil(x1 + halfPsfWidthInPixels), height);
+		// Evaluate the PSF over the full range about the PSF centre
+		final double cx = xyCentre[slice][0] * unitsPerPixel;
+		final double cy = xyCentre[slice][1] * unitsPerPixel;
+		final int x0min = clip((int) (x0 - cx), width);
+		final int x1min = clip((int) (x1 - cy), height);
+		final int x0max = clip((int) Math.ceil(x0 - cx + psfWidth * unitsPerPixel), width);
+		final int x1max = clip((int) Math.ceil(x1 - cy + psfWidth * unitsPerPixel), height);
 
 		final int x0range = x0max - x0min;
 		final int x1range = x1max - x1min;
@@ -524,6 +529,12 @@ public class ImagePSFModel extends PSFModel
 	public double drawPSF(double[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
+		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
+		if (slice < 0 || slice >= xyCentre.length)
+		{
+			return insert(data, 0, 0, 0, 0, 0, null, false);
+		}
+		
 		// Parameter check
 		if (width < 1)
 			throw new IllegalArgumentException("Width cannot be less than 1");
@@ -534,11 +545,13 @@ public class ImagePSFModel extends PSFModel
 		else if (data.length < width * height)
 			throw new IllegalArgumentException("Data length cannot be smaller than width * height");
 
-		// Evaluate the PSF over the full range
-		final int x0min = clip((int) (x0 - halfPsfWidthInPixels), width);
-		final int x1min = clip((int) (x1 - halfPsfWidthInPixels), height);
-		final int x0max = clip((int) Math.ceil(x0 + halfPsfWidthInPixels), width);
-		final int x1max = clip((int) Math.ceil(x1 + halfPsfWidthInPixels), height);
+		// Evaluate the PSF over the full range about the PSF centre
+		final double cx = xyCentre[slice][0] * unitsPerPixel;
+		final double cy = xyCentre[slice][1] * unitsPerPixel;
+		final int x0min = clip((int) (x0 - cx), width);
+		final int x1min = clip((int) (x1 - cy), height);
+		final int x0max = clip((int) Math.ceil(x0 - cx + psfWidth * unitsPerPixel), width);
+		final int x1max = clip((int) Math.ceil(x1 - cy + psfWidth * unitsPerPixel), height);
 
 		final int x0range = x0max - x0min;
 		final int x1range = x1max - x1min;
@@ -843,7 +856,6 @@ public class ImagePSFModel extends PSFModel
 		model.psfWidth = psfWidth;
 		model.xyCentre = xyCentre;
 		model.zCentre = zCentre;
-		model.halfPsfWidthInPixels = halfPsfWidthInPixels;
 		model.unitsPerPixel = unitsPerPixel;
 		model.unitsPerSlice = unitsPerSlice;
 		model.fwhm = fwhm;
@@ -920,10 +932,10 @@ public class ImagePSFModel extends PSFModel
 		// The index will be generated at 0,0 of a pixel in the PSF image.
 		// We must subtract the PSF centre so that the middle coords are zero.
 
-		//x0 -= halfPsfWidthInPixels;
-		//x1 -= halfPsfWidthInPixels;
 		x0 -= xyCentre[slice][0] * unitsPerPixel;
 		x1 -= xyCentre[slice][1] * unitsPerPixel;
+		//x0 -= 0.5 * psfWidth * unitsPerPixel;
+		//x1 -= 0.5 * psfWidth * unitsPerPixel;
 
 		final double max = sumPsf[sumPsf.length - 1];
 		double[] x = new double[n];
