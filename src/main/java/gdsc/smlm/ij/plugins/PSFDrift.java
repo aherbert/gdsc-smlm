@@ -49,6 +49,9 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.Well19937c;
+
 /**
  * Produces an drift curve for a PSF image using fitting.
  * <p>
@@ -68,6 +71,8 @@ public class PSFDrift implements PlugIn
 	private static boolean offsetFitting = true;
 	private static double startOffset = 0.5;
 	private static boolean comFitting = true;
+	private static boolean useSampling = false;
+	private static double photons = 1000;
 
 	private ImagePlus imp;
 	private PSFSettings psfSettings;
@@ -133,8 +138,7 @@ public class PSFDrift implements PlugIn
 		final double[][] xy;
 		final int w;
 		final int w2;
-
-		final double signal = 1000;
+		final RandomDataGenerator random;
 
 		private double[] lb, ub = null;
 		private double[] lc, uc = null;
@@ -149,6 +153,10 @@ public class PSFDrift implements PlugIn
 			xy = getStartPoints();
 			w = width;
 			w2 = w * w;
+			if (useSampling)
+				random = new RandomDataGenerator(new Well19937c());
+			else
+				random = null;
 
 			createBounds();
 		}
@@ -196,7 +204,13 @@ public class PSFDrift implements PlugIn
 			double[] data = new double[w2];
 			// Fitting is done when there is a bias
 			Arrays.fill(data, bias);
-			psf.create3D(data, w, w, signal, cx, cy, job.z, false);
+			if (useSampling)
+			{
+				int p = (int) random.nextPoisson(photons);
+				psf.sample3D(data, w, w, p, cx, cy, job.z);
+			}
+			else
+				psf.create3D(data, w, w, photons, cx, cy, job.z, false);
 
 			//Utils.display("Data", data, w, w);
 
@@ -282,8 +296,8 @@ public class PSFDrift implements PlugIn
 
 				// Background could be zero so always have an upper limit
 				ub[Gaussian2DFunction.BACKGROUND] = 1;
-				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
-				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
+				lb[Gaussian2DFunction.SIGNAL] = photons * 0.5;
+				ub[Gaussian2DFunction.SIGNAL] = photons * 2;
 				ub[Gaussian2DFunction.X_POSITION] = w;
 				ub[Gaussian2DFunction.Y_POSITION] = w;
 				lb[Gaussian2DFunction.ANGLE] = -Math.PI;
@@ -400,6 +414,8 @@ public class PSFDrift implements PlugIn
 		gd.addCheckbox("Offset_fit", offsetFitting);
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
+		gd.addCheckbox("Use_sampling", useSampling);
+		gd.addNumericField("Photons", photons, 0);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -417,6 +433,8 @@ public class PSFDrift implements PlugIn
 		offsetFitting = gd.getNextBoolean();
 		startOffset = Math.abs(gd.getNextNumber());
 		comFitting = gd.getNextBoolean();
+		useSampling= gd.getNextBoolean();
+		photons = Math.abs(gd.getNextNumber());
 
 		if (!comFitting && !offsetFitting)
 		{
