@@ -503,6 +503,17 @@ public class PSFDrift implements PlugIn
 		int minz = startSlice - psfSettings.zCentre;
 		int maxz = endSlice - psfSettings.zCentre;
 
+		final int nZ = maxz - minz + 1;
+		final int gridSize2 = grid.length * grid.length;
+		total = nZ * gridSize2;
+
+		// Store all the fitting results
+		int nStartPoints = getNumberOfStartPoints();
+		results = new double[total * nStartPoints][];
+
+		// TODO - Add ability to iterate this, adjusting the current offset in the PSF
+		// each iteration
+		
 		// Create a pool of workers
 		int nThreads = Prefs.getThreads();
 		BlockingQueue<Job> jobs = new ArrayBlockingQueue<Job>(nThreads * 2);
@@ -516,16 +527,9 @@ public class PSFDrift implements PlugIn
 			threads.add(t);
 			t.start();
 		}
-
-		final int nZ = maxz - minz + 1;
-		final int gridSize2 = grid.length * grid.length;
-		total = nZ * gridSize2;
-
-		// Store all the fitting results
-		int nStartPoints = getNumberOfStartPoints();
-		results = new double[total * nStartPoints][];
-
+		
 		// Fit 
+		Utils.showStatus("Fitting ...");
 		final int step = (total > 400) ? total / 200 : 2;
 		outer: for (int z = minz, i = 0; z <= maxz; z++)
 		{
@@ -539,11 +543,9 @@ public class PSFDrift implements PlugIn
 					put(jobs, new Job(z, grid[x], grid[y], i));
 					if (i % step == 0)
 					{
-						if (Utils.showStatus("Fit: " + i + " / " + total))
-							IJ.showProgress(i, total);
+						IJ.showProgress(i, total);
 					}
 				}
-			//break;
 		}
 
 		// If escaped pressed then do not need to stop the workers, just return
@@ -617,8 +619,6 @@ public class PSFDrift implements PlugIn
 		WindowOrganiser wo = new WindowOrganiser();
 		wo.tileWindows(idList);
 
-		// TODO - Plot drift curves across X at each Y and across Y at each X
-
 		// Find the range from the z-centre above the recall limit 
 		int centre = 0;
 		for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
@@ -646,6 +646,7 @@ public class PSFDrift implements PlugIn
 		}
 
 		// Ask the user if they would like to store them in the image
+		// TODO - or iterate with updated drift
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.enableYesNoCancel();
 		gd.hideCancelButton();
