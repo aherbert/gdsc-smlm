@@ -2600,18 +2600,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double centreOffset = settings.size * 0.5;
 		// Used to convert the sampled times in frames into seconds
 		final double framesPerSecond = 1000.0 / settings.exposureTime;
+		final double gain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
 		for (LocalisationModel l : localisations)
 		{
 			if (l.getData() == null)
 				System.out.println("No localisation data. This should not happen!");
 			final double noise = (l.getData() != null) ? l.getData()[1] : 1;
 			final double intensity = (l.getData() != null) ? l.getData()[4] : l.getIntensity();
-			final double intensityInPhotons = intensity / settings.getTotalGain();
+			final double intensityInPhotons = intensity / gain;
 			// Q. What if the noise is zero, i.e. no background photon / read noise?
 			// Just ignore it at current.
 			final double snr = intensity / noise;
 			stats[SIGNAL].add(intensityInPhotons);
-			stats[NOISE].add(noise / settings.getTotalGain());
+			stats[NOISE].add(noise / gain);
 			if (noise != 0)
 				stats[SNR].add(snr);
 			// Average intensity only from continuous spots.
@@ -2692,7 +2693,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (results != null)
 		{
-			final double gain = settings.getTotalGain();
 			final boolean emCCD = (settings.getEmGain() > 1);
 			// Convert depth-of-field to pixels
 			final double depth = settings.depthOfField / settings.pixelPitch;
