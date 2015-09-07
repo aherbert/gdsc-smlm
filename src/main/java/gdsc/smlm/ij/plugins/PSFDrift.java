@@ -44,6 +44,8 @@ import ij.plugin.WindowOrganiser;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -74,6 +76,7 @@ public class PSFDrift implements PlugIn
 	private static boolean comFitting = true;
 	private static boolean useSampling = false;
 	private static double photons = 1000;
+	private static int positionsToAverage = 5;
 
 	private ImagePlus imp;
 	private PSFSettings psfSettings;
@@ -151,7 +154,7 @@ public class PSFDrift implements PlugIn
 			this.fitConfig = fitConfig.clone();
 			s = fitConfig.getInitialPeakStdDev0();
 			a = psfSettings.nmPerPixel * scale;
-			xy = getStartPoints();
+			xy = PSFDrift.getStartPoints(PSFDrift.this);
 			w = width;
 			w2 = w * w;
 			if (useSampling)
@@ -649,7 +652,6 @@ public class PSFDrift implements PlugIn
 		}
 
 		// Ask the user if they would like to store them in the image
-		// TODO - or iterate with updated drift
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.enableYesNoCancel();
 		gd.hideCancelButton();
@@ -657,9 +659,12 @@ public class PSFDrift implements PlugIn
 		endSlice = psfSettings.zCentre + (end - centre);
 		gd.addMessage(String.format("Save the drift to the PSF?\n \nSlices %d (%s nm) - %d (%s nm) above recall limit",
 				startSlice, Utils.rounded(zPosition[start]), endSlice, Utils.rounded(zPosition[end])));
+		gd.addMessage("Optionally average the end points to set drift outside the limits.\n(Select zero to ignore)");
+		gd.addSlider("Number_of_points", 0, 10, positionsToAverage);
 		gd.showDialog();
 		if (gd.wasOKed())
 		{
+			positionsToAverage = Math.abs((int) gd.getNextNumber());
 			ArrayList<PSFOffset> offset = new ArrayList<PSFOffset>();
 			final double pitch = psfSettings.nmPerPixel;
 			for (int i = start, slice = startSlice; i <= end; slice++, i++)
@@ -667,17 +672,15 @@ public class PSFDrift implements PlugIn
 				// The offset should store the difference to the centre in pixels
 				double cx = avX[i] / pitch;
 				double cy = avY[i] / pitch;
-				if (useOffset)
+				PSFOffset oldOffset = findOffset(slice);
+				if (oldOffset != null)
 				{
-					PSFOffset oldOffset = findOffset(slice);
-					if (oldOffset != null)
-					{
-						cx += oldOffset.cx;
-						cy += oldOffset.cy;
-					}
+					cx += oldOffset.cx;
+					cy += oldOffset.cy;
 				}
 				offset.add(new PSFOffset(slice, cx, cy));
 			}
+			addMissingOffsets(startSlice, endSlice, nSlices, offset);
 			psfSettings.offset = offset.toArray(new PSFOffset[offset.size()]);
 			imp.setProperty("Info", XmlUtils.toXML(psfSettings));
 		}
@@ -685,12 +688,56 @@ public class PSFDrift implements PlugIn
 
 	private PSFOffset findOffset(int slice)
 	{
-		for (PSFOffset offset : psfSettings.offset)
-			if (offset.slice == slice)
-				return offset;
+		if (useOffset)
+		{
+			for (PSFOffset offset : psfSettings.offset)
+				if (offset.slice == slice)
+					return offset;
+		}
 		return null;
 	}
 
+	private void addMissingOffsets(int startSlice, int endSlice, int nSlices, ArrayList<PSFOffset> offset)
+	{
+		// Add an offset for the remaining slices 
+		if (positionsToAverage > 0)
+		{
+			double cx = 0, cy = 0;
+			int n = 0;
+			for (int i = 0; n < positionsToAverage && i < offset.size(); i++)
+			{
+				cx += offset.get(i).cx;
+				cy += offset.get(i).cy;
+				n++;
+			}
+			cx /= n;
+			cy /= n;
+			double cx2 = 0, cy2 = 0;
+			double n2 = 0;
+			for (int i = offset.size(); n2 < positionsToAverage && i-- > 0;)
+			{
+				cx2 += offset.get(i).cx;
+				cy2 += offset.get(i).cy;
+				n2++;
+			}
+			cx2 /= n2;
+			cy2 /= n2;
+
+			for (int slice = 1; slice < startSlice; slice++)
+				offset.add(new PSFOffset(slice, cx, cy));
+			for (int slice = endSlice + 1; slice <= nSlices; slice++)
+				offset.add(new PSFOffset(slice, cx2, cy2));
+			Collections.sort(offset, new Comparator<PSFOffset>()
+			{
+				@Override
+				public int compare(PSFOffset arg0, PSFOffset arg1)
+				{
+					return arg0.slice - arg1.slice;
+				}
+			});
+		}
+	}
+	
 	private void displayPlot(String title, String yLabel, double[] x, double[] y, double[] se)
 	{
 		title = TITLE + " " + title;
@@ -744,7 +791,7 @@ public class PSFDrift implements PlugIn
 		// Extract data uses index not slice number as arguments so subtract 1
 		ImagePSFModel model = new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1), zCentre -
 				lower, unitsPerPixel, unitsPerSlice, psfSettings.fwhm);
-		
+
 		// Add the calibrated centres
 		if (psfSettings.offset != null && useOffset)
 		{
@@ -876,5 +923,10 @@ public class PSFDrift implements PlugIn
 			}
 		}
 		return null;
+	}
+
+	public static double[][] getStartPoints(PSFDrift psfDrift)
+	{
+		return psfDrift.getStartPoints();
 	}
 }
