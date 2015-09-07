@@ -492,7 +492,7 @@ public class ImagePSFModel extends PSFModel
 		{
 			return insert(data, 0, 0, 0, 0, 0, null, false);
 		}
-		
+
 		// Parameter check
 		if (width < 1)
 			throw new IllegalArgumentException("Width cannot be less than 1");
@@ -534,7 +534,7 @@ public class ImagePSFModel extends PSFModel
 		{
 			return insert(data, 0, 0, 0, 0, 0, null, false);
 		}
-		
+
 		// Parameter check
 		if (width < 1)
 			throw new IllegalArgumentException("Width cannot be less than 1");
@@ -602,10 +602,11 @@ public class ImagePSFModel extends PSFModel
 		final double[] sumPsf = sumImage[slice];
 
 		// Determine PSF blocks. 
-		// We need to map each pixel in the PSF onto the output image
-		// outX = (psfX+0.5-psfX0) * unitsPerPixel + origin
+		// We need to map vertices of each pixel in the PSF onto the output image.
+		// Use (psfX+1) to describe upper bounds of pixel => mapping back describes lower bounds of PSF pixel 
+		// outX = (psfX + 1 - psfX0) * unitsPerPixel + origin
 		// =>
-		// psfX = (outX - origin) / unitsPerPixel - 0.5 + psfX0
+		// psfX = (outX - origin) / unitsPerPixel + psfX0 - 1
 
 		// Note that if the PSF pixels do not exactly fit into the image pixels, then the lookup index 
 		// will be rounded. This will cause the inserted PSF to be incorrect. The correct method is
@@ -615,11 +616,24 @@ public class ImagePSFModel extends PSFModel
 		double[] v = createInterpolationLookup(x1range, x1, xyCentre[slice][1]);
 
 		int[] lu = new int[u.length];
-		for (int i = 0; i < u.length; i++)
-			lu[i] = (int) u[i];
 		int[] lv = new int[v.length];
-		for (int i = 0; i < v.length; i++)
-			lv[i] = (int) v[i];
+
+		if (interpolate)
+		{
+			for (int i = 0; i < u.length; i++)
+				lu[i] = (int) u[i];
+			for (int i = 0; i < v.length; i++)
+				lv[i] = (int) v[i];
+		}
+		else
+		{
+			// If we are not interpolating then we use the centre of the pixel so convert 
+			// the vertices to the pixel centre using a 0.5 pixel offset.
+			for (int i = 0; i < u.length; i++)
+				lu[i] = (int) (u[i] + 0.5);
+			for (int i = 0; i < v.length; i++)
+				lv[i] = (int) (v[i] + 0.5);
+		}
 
 		// Data will be the sum of the input pixels from (u,v) to (u+1,v+1)
 
@@ -694,7 +708,7 @@ public class ImagePSFModel extends PSFModel
 		double[] pixel = new double[range + 1];
 		for (int i = 0; i < pixel.length; i++)
 		{
-			pixel[i] = ((i - origin) / unitsPerPixel - 0.5 + xyCentre);
+			pixel[i] = ((i - origin) / unitsPerPixel + xyCentre - 1);
 		}
 		return pixel;
 	}

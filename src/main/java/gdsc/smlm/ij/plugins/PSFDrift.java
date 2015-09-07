@@ -495,8 +495,8 @@ public class PSFDrift implements PlugIn
 		int startSlice = psfSettings.zCentre - depth;
 		int endSlice = psfSettings.zCentre + depth;
 		int nSlices = imp.getStackSize();
-		startSlice = (startSlice < 0) ? 0 : (startSlice >= nSlices) ? nSlices - 1 : startSlice;
-		endSlice = (endSlice < 0) ? 0 : (endSlice >= nSlices) ? nSlices - 1 : endSlice;
+		startSlice = (startSlice < 1) ? 1 : (startSlice > nSlices) ? nSlices : startSlice;
+		endSlice = (endSlice < 1) ? 1 : (endSlice > nSlices) ? nSlices : endSlice;
 
 		ImagePSFModel psf = createImagePSF(startSlice, endSlice);
 
@@ -719,7 +719,7 @@ public class PSFDrift implements PlugIn
 		final double unitsPerPixel = 1.0 / scale;
 		final double unitsPerSlice = 1; // So we can move from -depth to depth
 
-		// Extract data used index not slice number as arguments so subtract 1
+		// Extract data uses index not slice number as arguments so subtract 1
 		return new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1), zCentre - lower,
 				unitsPerPixel, unitsPerSlice, psfSettings.fwhm);
 	}
