@@ -642,6 +642,8 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		// the addition of the data
 		if (interactiveMode)
 		{
+			zCentre = cz;
+			psfWidth = csd * nmPerPixel;  
 			showPlots(z, a, z, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cz);
 
 			// Draw the region on the input image as an overlay
