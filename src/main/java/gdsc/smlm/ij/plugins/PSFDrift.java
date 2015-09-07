@@ -76,6 +76,7 @@ public class PSFDrift implements PlugIn
 	private static boolean comFitting = true;
 	private static boolean useSampling = false;
 	private static double photons = 1000;
+	private static double photonLimit = 0.25;
 	private static int positionsToAverage = 5;
 
 	private ImagePlus imp;
@@ -300,7 +301,7 @@ public class PSFDrift implements PlugIn
 
 				// Background could be zero so always have an upper limit
 				ub[Gaussian2DFunction.BACKGROUND] = 1;
-				lb[Gaussian2DFunction.SIGNAL] = photons * 0.5;
+				lb[Gaussian2DFunction.SIGNAL] = photons * photonLimit;
 				ub[Gaussian2DFunction.SIGNAL] = photons * 2;
 				ub[Gaussian2DFunction.X_POSITION] = w;
 				ub[Gaussian2DFunction.Y_POSITION] = w;
@@ -421,6 +422,7 @@ public class PSFDrift implements PlugIn
 		gd.addCheckbox("Include_CoM_fit", comFitting);
 		gd.addCheckbox("Use_sampling", useSampling);
 		gd.addNumericField("Photons", photons, 0);
+		gd.addSlider("Photon_limit", 0, 1, photonLimit);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -441,6 +443,7 @@ public class PSFDrift implements PlugIn
 		comFitting = gd.getNextBoolean();
 		useSampling = gd.getNextBoolean();
 		photons = Math.abs(gd.getNextNumber());
+		photonLimit = Math.abs(gd.getNextNumber());
 
 		if (!comFitting && !offsetFitting)
 		{
