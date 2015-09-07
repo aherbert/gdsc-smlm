@@ -1804,9 +1804,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// This logic must match the ImagePSFModel.
 			final double unitsPerSlice = psfSettings.nmPerSlice / settings.pixelPitch;
 			// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
-			// closer to the objective). Thus we invert the z-coordinate to find the appropriate slice.
-			int upper = (int) Math.round(-minZ / unitsPerSlice) + zCentre;
-			int lower = (int) Math.round(-maxZ / unitsPerSlice) + zCentre;
+			// closer to the objective). Thus higher z-coordinate are for higher slice numbers.
+			int lower = (int) Math.round(minZ / unitsPerSlice) + zCentre;
+			int upper = (int) Math.round(maxZ / unitsPerSlice) + zCentre;
 			upper = (upper < 0) ? 0 : (upper >= nSlices) ? nSlices - 1 : upper;
 			lower = (lower < 0) ? 0 : (lower >= nSlices) ? nSlices - 1 : lower;
 

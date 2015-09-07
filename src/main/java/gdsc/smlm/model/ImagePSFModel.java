@@ -29,9 +29,9 @@ import org.apache.commons.math3.util.FastMath;
  * The z-centre must be identified. Any pixels below zero will be set to zero.
  * <p>
  * The model can be used to draw a PSF for a point on an image. If the z coordinate is positive then the PSF image from
- * a negative index (below the z-centre) is used. If the z-coordinate is negative then the PSF image from a positive
- * index (above the z-centre) is used. I.e. the input stack is assumed to be imaged axially with increasing z-stage
- * position moving the stage closer to the objective.
+ * a positive index (above the z-centre) is used. If the z-coordinate is negative then the PSF image from a negative
+ * index (below the z-centre) is used. I.e. the input stack is assumed to be imaged axially with increasing z-stage
+ * position moving the stage closer to the objective. Thus higher z coordinates correspond to further into the stack.
  */
 public class ImagePSFModel extends PSFModel
 {
@@ -487,7 +487,7 @@ public class ImagePSFModel extends PSFModel
 	public double drawPSF(float[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
-		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
+		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= xyCentre.length)
 		{
 			return insert(data, 0, 0, 0, 0, 0, null, false);
@@ -529,7 +529,7 @@ public class ImagePSFModel extends PSFModel
 	public double drawPSF(double[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
-		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
+		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= xyCentre.length)
 		{
 			return insert(data, 0, 0, 0, 0, 0, null, false);
@@ -593,10 +593,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		double[] data = new double[x0range * x1range];
 
-		// Determine the slice of the PSF.
-		// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
-		// closer to the objective). Thus we invert the z-coordinate to find the appropriate slice.
-		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
+		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= sumImage.length)
 			return data;
 		final double[] sumPsf = sumImage[slice];
@@ -896,7 +893,7 @@ public class ImagePSFModel extends PSFModel
 
 	private double[][] sample(final int n, double x0, double x1, double x2)
 	{
-		final int slice = (int) Math.round(-x2 / unitsPerSlice) + zCentre;
+		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= sumImage.length)
 			return new double[][] { null, null };
 
@@ -995,6 +992,14 @@ public class ImagePSFModel extends PSFModel
 		y = Arrays.copyOf(y, count);
 
 		return new double[][] { x, y };
+	}
+
+	private int getSlice(double x2)
+	{
+		// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
+		// closer to the objective). Thus higher z-coordinate are for higher slice numbers.
+		final int slice = (int) Math.round(x2 / unitsPerSlice) + zCentre;
+		return slice;
 	}
 
 	/**

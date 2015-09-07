@@ -62,6 +62,7 @@ public class PSFDrift implements PlugIn
 	private final static String TITLE = "PSF Drift";
 
 	private static String title = "";
+	private static boolean useOffset = false;
 	private static double scale = 10;
 	private static double zDepth = 1000;
 	private static int gridSize = 10;
@@ -400,6 +401,7 @@ public class PSFDrift implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Select the input PSF image");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
+		gd.addCheckbox("Use_offset", useOffset);
 		gd.addNumericField("Scale", scale, 2);
 		gd.addNumericField("z_depth", zDepth, 2, 6, "nm");
 		gd.addNumericField("Grid_size", gridSize, 0);
@@ -422,6 +424,7 @@ public class PSFDrift implements PlugIn
 			return;
 
 		title = gd.getNextChoice();
+		useOffset = gd.getNextBoolean();
 		scale = gd.getNextNumber();
 		zDepth = gd.getNextNumber();
 		gridSize = (int) gd.getNextNumber();
@@ -433,7 +436,7 @@ public class PSFDrift implements PlugIn
 		offsetFitting = gd.getNextBoolean();
 		startOffset = Math.abs(gd.getNextNumber());
 		comFitting = gd.getNextBoolean();
-		useSampling= gd.getNextBoolean();
+		useSampling = gd.getNextBoolean();
 		photons = Math.abs(gd.getNextNumber());
 
 		if (!comFitting && !offsetFitting)
@@ -513,7 +516,7 @@ public class PSFDrift implements PlugIn
 
 		// TODO - Add ability to iterate this, adjusting the current offset in the PSF
 		// each iteration
-		
+
 		// Create a pool of workers
 		int nThreads = Prefs.getThreads();
 		BlockingQueue<Job> jobs = new ArrayBlockingQueue<Job>(nThreads * 2);
@@ -527,7 +530,7 @@ public class PSFDrift implements PlugIn
 			threads.add(t);
 			t.start();
 		}
-		
+
 		// Fit 
 		Utils.showStatus("Fitting ...");
 		final int step = (total > 400) ? total / 200 : 2;
@@ -662,11 +665,30 @@ public class PSFDrift implements PlugIn
 			for (int i = start, slice = startSlice; i <= end; slice++, i++)
 			{
 				// The offset should store the difference to the centre in pixels
-				offset.add(new PSFOffset(slice, avX[i] / pitch, avY[i] / pitch));
+				double cx = avX[i] / pitch;
+				double cy = avY[i] / pitch;
+				if (useOffset)
+				{
+					PSFOffset oldOffset = findOffset(slice);
+					if (oldOffset != null)
+					{
+						cx += oldOffset.cx;
+						cy += oldOffset.cy;
+					}
+				}
+				offset.add(new PSFOffset(slice, cx, cy));
 			}
 			psfSettings.offset = offset.toArray(new PSFOffset[offset.size()]);
 			imp.setProperty("Info", XmlUtils.toXML(psfSettings));
 		}
+	}
+
+	private PSFOffset findOffset(int slice)
+	{
+		for (PSFOffset offset : psfSettings.offset)
+			if (offset.slice == slice)
+				return offset;
+		return null;
 	}
 
 	private void displayPlot(String title, String yLabel, double[] x, double[] y, double[] se)
@@ -720,8 +742,20 @@ public class PSFDrift implements PlugIn
 		final double unitsPerSlice = 1; // So we can move from -depth to depth
 
 		// Extract data uses index not slice number as arguments so subtract 1
-		return new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1), zCentre - lower,
-				unitsPerPixel, unitsPerSlice, psfSettings.fwhm);
+		ImagePSFModel model = new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1), zCentre -
+				lower, unitsPerPixel, unitsPerSlice, psfSettings.fwhm);
+		
+		// Add the calibrated centres
+		if (psfSettings.offset != null && useOffset)
+		{
+			int sliceOffset = lower;
+			for (PSFOffset offset : psfSettings.offset)
+			{
+				model.setRelativeCentre(offset.slice - sliceOffset, offset.cx, offset.cy);
+			}
+		}
+
+		return model;
 	}
 
 	private void put(BlockingQueue<Job> jobs, Job job)
