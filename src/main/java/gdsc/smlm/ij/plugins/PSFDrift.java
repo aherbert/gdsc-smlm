@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
@@ -78,6 +79,7 @@ public class PSFDrift implements PlugIn
 	private static double photons = 1000;
 	private static double photonLimit = 0.25;
 	private static int positionsToAverage = 5;
+	private static double smoothing = 0.1;
 
 	private ImagePlus imp;
 	private PSFSettings psfSettings;
@@ -423,6 +425,7 @@ public class PSFDrift implements PlugIn
 		gd.addCheckbox("Use_sampling", useSampling);
 		gd.addNumericField("Photons", photons, 0);
 		gd.addSlider("Photon_limit", 0, 1, photonLimit);
+		gd.addSlider("Smoothing", 0, 0.5, smoothing);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -444,6 +447,7 @@ public class PSFDrift implements PlugIn
 		useSampling = gd.getNextBoolean();
 		photons = Math.abs(gd.getNextNumber());
 		photonLimit = Math.abs(gd.getNextNumber());
+		smoothing = Math.abs(gd.getNextNumber());
 
 		if (!comFitting && !offsetFitting)
 		{
@@ -646,10 +650,15 @@ public class PSFDrift implements PlugIn
 				break;
 			end = i;
 		}
-		
-		displayPlot("Drift X", "X (nm)", zPosition, avX, seX, start, end);
-		displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY, start, end);
-		displayPlot("Recall", "Recall", zPosition, recall, null, start, end);
+
+		int iterations = 1;
+		LoessInterpolator loess = null;
+		if (smoothing > 0)
+			loess = new LoessInterpolator(smoothing, iterations);
+
+		double[][] smoothx = displayPlot("Drift X", "X (nm)", zPosition, avX, seX, loess, start, end);
+		double[][] smoothy = displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY, loess, start, end);
+		displayPlot("Recall", "Recall", zPosition, recall, null, null, start, end);
 
 		WindowOrganiser wo = new WindowOrganiser();
 		wo.tileWindows(idList);
@@ -670,16 +679,23 @@ public class PSFDrift implements PlugIn
 			positionsToAverage = Math.abs((int) gd.getNextNumber());
 			ArrayList<PSFOffset> offset = new ArrayList<PSFOffset>();
 			final double pitch = psfSettings.nmPerPixel;
+			int j = 0, jj = 0;
 			for (int i = start, slice = startSlice; i <= end; slice++, i++)
 			{
-				// The offset should store the difference to the centre in pixels
-				double cx = avX[i] / pitch;
-				double cy = avY[i] / pitch;
-				PSFOffset oldOffset = findOffset(slice);
-				if (oldOffset != null)
+				j = findCentre(zPosition[i], smoothx, j);
+				if (j == -1)
 				{
-					cx += oldOffset.cx;
-					cy += oldOffset.cy;
+					Utils.log("Failed to find the offset for depth %.2f", zPosition[i]);
+					continue;
+				}
+				// The offset should store the difference to the centre in pixels so divide by the pixel pitch
+				double cx = smoothx[1][j] / pitch;
+				double cy = smoothy[1][j] / pitch;
+				jj = findOffset(slice, jj);
+				if (jj != -1)
+				{
+					cx += psfSettings.offset[jj].cx;
+					cy += psfSettings.offset[jj].cy;
 				}
 				offset.add(new PSFOffset(slice, cx, cy));
 			}
@@ -689,15 +705,29 @@ public class PSFDrift implements PlugIn
 		}
 	}
 
-	private PSFOffset findOffset(int slice)
+	private int findCentre(double d, double[][] smoothx, int i)
+	{
+		while (i < smoothx[0].length)
+		{
+			if (smoothx[0][i] == d)
+				return i;
+			i++;
+		}
+		return -1;
+	}
+
+	private int findOffset(int slice, int i)
 	{
 		if (useOffset)
 		{
-			for (PSFOffset offset : psfSettings.offset)
-				if (offset.slice == slice)
-					return offset;
+			while (i < psfSettings.offset.length)
+			{
+				if (psfSettings.offset[i].slice == slice)
+					return i;
+				i++;
+			}
 		}
-		return null;
+		return -1;
 	}
 
 	private void addMissingOffsets(int startSlice, int endSlice, int nSlices, ArrayList<PSFOffset> offset)
@@ -740,8 +770,9 @@ public class PSFDrift implements PlugIn
 			});
 		}
 	}
-	
-	private void displayPlot(String title, String yLabel, double[] x, double[] y, double[] se, int start, int end)
+
+	private double[][] displayPlot(String title, String yLabel, double[] x, double[] y, double[] se,
+			LoessInterpolator loess, int start, int end)
 	{
 		title = TITLE + " " + title;
 		Plot2 plot = new Plot2(title, "z (nm)", yLabel);
@@ -763,8 +794,34 @@ public class PSFDrift implements PlugIn
 		double rangex = Math.max(0.05 * (limitsx[1] - limitsx[0]), 0.1);
 		double rangey = Math.max(0.05 * (limitsy[1] - limitsy[0]), 0.1);
 		plot.setLimits(limitsx[0] - rangex, limitsx[1] + rangex, limitsy[0] - rangey, limitsy[1] + rangey);
-		plot.setColor(Color.blue);
-		plot.addPoints(x, y, Plot.LINE);
+		double[] newX, newY;
+		if (loess == null)
+		{
+			plot.setColor(Color.blue);
+			plot.addPoints(x, y, Plot.LINE);
+			newX = x;
+			newY = y;
+		}
+		else
+		{
+			plot.setColor(Color.blue);
+			plot.addPoints(x, y, Plot.DOT);
+			// Extract non NaN numbers
+			newX = new double[x.length];
+			newY = new double[x.length];
+			int c = 0;
+			for (int i = 0; i < x.length; i++)
+				if (!Double.isNaN(y[i]))
+				{
+					newX[c] = x[i];
+					newY[c] = y[i];
+					c++;
+				}
+			newX = Arrays.copyOf(newX, c);
+			newY = Arrays.copyOf(newY, c);
+			newY = loess.smooth(newX, newY);
+			plot.addPoints(newX, newY, Plot.LINE);
+		}
 		if (se != null)
 		{
 			plot.setColor(Color.magenta);
@@ -772,7 +829,7 @@ public class PSFDrift implements PlugIn
 			{
 				plot.drawLine(x[i], y[i] - se[i], x[i], y[i] + se[i]);
 			}
-			
+
 			// Draw the start and end lines for the valid range
 			plot.setColor(Color.green);
 			plot.drawLine(x[start], limitsy[0], x[start], limitsy[1]);
@@ -787,6 +844,8 @@ public class PSFDrift implements PlugIn
 		PlotWindow pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw.getImagePlus().getID();
+
+		return new double[][] { newX, newY };
 	}
 
 	private ImagePSFModel createImagePSF(int lower, int upper)
