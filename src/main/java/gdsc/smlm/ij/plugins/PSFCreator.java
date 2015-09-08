@@ -79,7 +79,7 @@ import org.apache.commons.math3.util.FastMath;
  * The input image must be a z-stack of diffraction limited spots for example quantum dots or fluorescent beads. Spots
  * will be used only when there are no spots within a specified distance to ensure a clean signal is extracted.
  */
-public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
+public class PSFCreator implements PlugInFilter, ItemListener
 {
 	private final static String TITLE = "PSF Creator";
 	private final static String TITLE_AMPLITUDE = "Spot Amplitude";
@@ -373,7 +373,11 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 				continue;
 			}
 
-			// Store result
+			// Store result - it may have been moved interactively
+			maximumIndex += this.slice - cz;
+			cz = (int) newZ[maximumIndex];
+			csd = smoothSd[maximumIndex];
+			ca = smoothA[maximumIndex + start];
 			Utils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f\n", n, cx, cy, cz, csd, ca);
 			centres.add(new double[] { cx, cy, cz, csd });
 		}
@@ -643,7 +647,22 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		if (interactiveMode)
 		{
 			zCentre = cz;
-			psfWidth = csd * nmPerPixel;  
+			psfWidth = csd * nmPerPixel;
+
+			// Store the data for replotting
+			this.z = z;
+			this.a = a;
+			this.smoothAz = z;
+			this.smoothA = smoothA;
+			this.xCoord = xCoord;
+			this.yCoord = yCoord;
+			this.sd = sd;
+			this.newZ = newZ;
+			this.smoothX = smoothX;
+			this.smoothY = smoothY;
+			this.smoothSd = smoothSd;
+			this.slice = cz;
+
 			showPlots(z, a, z, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cz);
 
 			// Draw the region on the input image as an overlay
@@ -656,14 +675,15 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
-			gd.addMessage(String.format("Add spot %d to the PSF?\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n", n, cx,
+			gd.addMessage(String.format("Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n", n, cx,
 					cy, cz, csd));
+			gd.addSlider("Slice", z[0], z[z.length-1], slice);
 			if (yesNoPosition != null)
 			{
 				gd.centerDialog(false);
 				gd.setLocation(yesNoPosition);
 			}
-
+			gd.addDialogListener(new SimpleInteractivePlotListener());
 			gd.showDialog();
 
 			yesNoPosition = gd.getLocation();
@@ -671,6 +691,16 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		}
 		return false;
 	}
+	
+	private class SimpleInteractivePlotListener implements DialogListener
+	{
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			slice = (int) gd.getNextNumber();
+			drawPlots(false);
+			return true;
+		}
+	}	
 
 	private void showPlots(final double[] z, final double[] a, final double[] smoothAz, final double[] smoothA,
 			final double[] xCoord, final double[] yCoord, final double[] sd, final double[] newZ,
@@ -1470,37 +1500,43 @@ public class PSFCreator implements PlugInFilter, ItemListener, DialogListener
 		final double maxDistance = (psf.getWidth() / 1.414213562) * nmPerPixel;
 		gd.addSlider("Distance", 0, maxDistance, distanceThreshold);
 		gd.addCheckbox("Normalise", normalise);
-		gd.addDialogListener(this);
+		gd.addDialogListener(new InteractivePlotListener());
 		if (!IJ.isMacro())
-			drawPlots();
+			drawPlots(true);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		drawPlots();
+		drawPlots(true);
 	}
 
-	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+	private class InteractivePlotListener implements DialogListener
 	{
-		slice = (int) gd.getNextNumber();
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			slice = (int) gd.getNextNumber();
 
-		double myDistanceThreshold = gd.getNextNumber();
-		resetScale = resetScale || (myDistanceThreshold != distanceThreshold);
-		distanceThreshold = myDistanceThreshold;
+			double myDistanceThreshold = gd.getNextNumber();
+			resetScale = resetScale || (myDistanceThreshold != distanceThreshold);
+			distanceThreshold = myDistanceThreshold;
 
-		boolean myNormalise = gd.getNextBoolean();
-		resetScale = resetScale || (myNormalise != normalise);
-		normalise = myNormalise;
+			boolean myNormalise = gd.getNextBoolean();
+			resetScale = resetScale || (myNormalise != normalise);
+			normalise = myNormalise;
 
-		drawPlots();
-		return true;
+			drawPlots(true);
+			return true;
+		}
 	}
 
-	private void drawPlots()
+	private void drawPlots(boolean doSignalPlots)
 	{
 		updateAmplitudePlot();
 		updatePSFPlot();
-		updateSignalAtSpecifiedSDPlot();
-		updateCumulativeSignalPlot();
+		if (doSignalPlots)
+		{
+			updateSignalAtSpecifiedSDPlot();
+			updateCumulativeSignalPlot();
+		}
 	}
 
 	private void updateAmplitudePlot()
