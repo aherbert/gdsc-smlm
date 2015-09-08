@@ -18,7 +18,8 @@ package gdsc.smlm.utils;
  */
 public class ImageWindow
 {
-	public enum WindowFunction {
+	public enum WindowFunction
+	{
 		HANNING, COSINE, TUKEY
 	}
 
@@ -30,10 +31,10 @@ public class ImageWindow
 	/**
 	 * Apply a window function to reduce edge artifacts.
 	 * <p>
-	 * Applied as two 1-dimensional window functions. Faster than the nonseparable form but has
-	 * direction dependent corners.
+	 * Applied as two 1-dimensional window functions. Faster than the nonseparable form but has direction dependent
+	 * corners.
 	 * <p>
-	 * Instance method allows caching the weight matrices. 
+	 * Instance method allows caching the weight matrices.
 	 * 
 	 * @param image
 	 * @param maxx
@@ -41,27 +42,25 @@ public class ImageWindow
 	 * @param windowFunction
 	 * @return
 	 */
-	public float[] applySeperable(float[] image, final int maxx,
-			final int maxy, WindowFunction windowFunction)
+	public float[] applySeperable(float[] image, final int maxx, final int maxy, WindowFunction windowFunction)
 	{
-		if (this.windowFunction != windowFunction || wx == null
-				|| wx.length != maxx || wy == null || wy.length != maxy)
+		if (this.windowFunction != windowFunction || wx == null || wx.length != maxx || wy == null || wy.length != maxy)
 		{
 			switch (windowFunction)
 			{
-			case HANNING:
-				wx = hanning(maxx);
-				wy = hanning(maxy);
-				break;
-			case COSINE:
-				wx = cosine(maxx);
-				wy = cosine(maxy);
-				break;
-			case TUKEY:
-			default:
-				wx = tukey(maxx, ALPHA);
-				wy = tukey(maxy, ALPHA);
-				break;
+				case HANNING:
+					wx = hanning(maxx);
+					wy = hanning(maxy);
+					break;
+				case COSINE:
+					wx = cosine(maxx);
+					wy = cosine(maxy);
+					break;
+				case TUKEY:
+				default:
+					wx = tukey(maxx, ALPHA);
+					wy = tukey(maxy, ALPHA);
+					break;
 			}
 		}
 
@@ -81,8 +80,8 @@ public class ImageWindow
 	/**
 	 * Apply a window function to reduce edge artifacts.
 	 * <p>
-	 * Applied as two 1-dimensional window functions. Faster than the nonseparable form but has
-	 * direction dependent corners.
+	 * Applied as two 1-dimensional window functions. Faster than the nonseparable form but has direction dependent
+	 * corners.
 	 * 
 	 * @param image
 	 * @param maxx
@@ -90,26 +89,26 @@ public class ImageWindow
 	 * @param windowFunction
 	 * @return
 	 */
-	public static float[] applyWindowSeparable(float[] image, final int maxx,
-			final int maxy, WindowFunction windowFunction)
+	public static float[] applyWindowSeparable(float[] image, final int maxx, final int maxy,
+			WindowFunction windowFunction)
 	{
 		double[] wx = null;
 		double[] wy = null;
 
 		switch (windowFunction)
 		{
-		case HANNING:
-			wx = hanning(maxx);
-			wy = hanning(maxy);
-			break;
-		case COSINE:
-			wx = cosine(maxx);
-			wy = cosine(maxy);
-			break;
-		case TUKEY:
-			wx = tukey(maxx, ALPHA);
-			wy = tukey(maxy, ALPHA);
-			break;
+			case HANNING:
+				wx = hanning(maxx);
+				wy = hanning(maxy);
+				break;
+			case COSINE:
+				wx = cosine(maxx);
+				wy = cosine(maxy);
+				break;
+			case TUKEY:
+				wx = tukey(maxx, ALPHA);
+				wy = tukey(maxy, ALPHA);
+				break;
 		}
 
 		if (wx == null)
@@ -139,20 +138,19 @@ public class ImageWindow
 	 * @param windowFunction
 	 * @return
 	 */
-	public static float[] applyWindow(float[] image, final int maxx,
-			final int maxy, WindowFunction windowFunction)
+	public static float[] applyWindow(float[] image, final int maxx, final int maxy, WindowFunction windowFunction)
 	{
 		WindowMethod wf = null;
 		switch (windowFunction)
 		{
-		case HANNING:
-			wf = instance.new Hanning();
-			break;
-		case COSINE:
-			wf = instance.new Cosine();
-			break;
-		case TUKEY:
-			wf = instance.new Tukey(ALPHA);
+			case HANNING:
+				wf = instance.new Hanning();
+				break;
+			case COSINE:
+				wf = instance.new Cosine();
+				break;
+			case TUKEY:
+				wf = instance.new Tukey(ALPHA);
 		}
 
 		if (wf == null)
@@ -166,11 +164,11 @@ public class ImageWindow
 
 		for (int y = 0, i = 0; y < maxy; y++)
 		{
+			final double dy2 = (y - cy) * (y - cy);
 			for (int x = 0; x < maxx; x++, i++)
 			{
-				double distance = Math.sqrt((x - cx) * (x - cx) + (y - cy)
-						* (y - cy));
-				double w = wf.weight(0.5 - (distance / maxDistance));
+				final double distance = Math.sqrt((x - cx) * (x - cx) + dy2);
+				final double w = wf.weight(0.5 - (distance / maxDistance));
 				data[i] = (float) (image[i] * w);
 			}
 		}
@@ -222,11 +220,9 @@ public class ImageWindow
 		public double weight(double fractionDistance)
 		{
 			if (fractionDistance < alpha / 2)
-				return 0.5 * (1 + Math.cos(Math.PI
-						* (2 * fractionDistance / alpha - 1)));
+				return 0.5 * (1 + Math.cos(Math.PI * (2 * fractionDistance / alpha - 1)));
 			if (fractionDistance > 1 - alpha / 2)
-				return 0.5 * (1 + Math.cos(Math.PI
-						* (2 * fractionDistance / alpha - 2 / alpha + 1)));
+				return 0.5 * (1 + Math.cos(Math.PI * (2 * fractionDistance / alpha - 2 / alpha + 1)));
 			return 1;
 		}
 	}

@@ -14,7 +14,6 @@ package gdsc.smlm.model;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.utils.Maths;
-import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 
 import java.util.ArrayList;
@@ -592,7 +591,7 @@ public abstract class ImageModel
 
 	private double getTotalOnTime(FluorophoreSequenceModel f)
 	{
-		return new Statistics(f.getOnTimes()).getSum();
+		return Maths.sum(f.getOnTimes());
 	}
 
 	/**
@@ -665,7 +664,7 @@ public abstract class ImageModel
 		for (int i = 0; i < nFluorophores; i++)
 		{
 			generateOnTimes(maxFrames, frameInterval, bursts.get(i), sequenceStart, onTime[i], state[i]);
-			totalOnTime[i] = new Statistics(onTime[i]).getSum();
+			totalOnTime[i] = Maths.sum(onTime[i]);
 			photonBudget[i] = photons[i + photonIndex];
 		}
 
