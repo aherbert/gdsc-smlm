@@ -89,6 +89,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private static double nmPerSlice = 20;
 	private static double radius = 10;
 	private static double amplitudeFraction = 0.2;
+	private static double globalBackgroundFraction = 0.25;
 	private static int startBackgroundFrames = 5;
 	private static int endBackgroundFrames = 5;
 	private static int magnification = 10;
@@ -139,7 +140,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	// Cumulative signal plot
 	private int[] indexLookup = null;
 	private double[] distances = null;
-	private double maxy = 1;
+	private double maxCumulativeSignal = 1;
 	private int slice = 0;
 	private double distanceThreshold = 0;
 	private boolean normalise = false;
@@ -186,6 +187,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
 		gd.addSlider("Radius", 3, 20, radius);
 		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
+		gd.addSlider("Gloabl_background_fraction", 0, 0.5, globalBackgroundFraction);
 		gd.addSlider("Start_background_frames", 1, 20, startBackgroundFrames);
 		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
 		gd.addSlider("Magnification", 5, 15, magnification);
@@ -207,6 +209,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		nmPerSlice = gd.getNextNumber();
 		radius = gd.getNextNumber();
 		amplitudeFraction = gd.getNextNumber();
+		globalBackgroundFraction = gd.getNextNumber();
 		startBackgroundFrames = (int) gd.getNextNumber();
 		endBackgroundFrames = (int) gd.getNextNumber();
 		magnification = (int) gd.getNextNumber();
@@ -223,8 +226,11 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			Parameters.isAbove("Radius", radius, 2);
 			Parameters.isAbove("Amplitude fraction", amplitudeFraction, 0.01);
 			Parameters.isBelow("Amplitude fraction", amplitudeFraction, 0.9);
-			Parameters.isPositive("Start background frames", startBackgroundFrames);
-			Parameters.isPositive("End background frames", endBackgroundFrames);
+			if (globalBackgroundFraction <= 0)
+			{
+				Parameters.isPositive("Start background frames", startBackgroundFrames);
+				Parameters.isPositive("End background frames", endBackgroundFrames);
+			}
 			Parameters.isAbove("Total background frames", startBackgroundFrames + endBackgroundFrames, 1);
 			Parameters.isAbove("Magnification", magnification, 1);
 			Parameters.isAbove("Smoothing", smoothing, 0);
@@ -414,6 +420,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		IJ.showStatus("Creating PSF image");
 
+		float b = getGlobalBackground(stack);
+
 		// Create a stack that can hold all the data.
 		ImageStack psf = createStack(stack, minz, maxz, magnification);
 
@@ -438,9 +446,14 @@ public class PSFCreator implements PlugInFilter, ItemListener
 				spot[slice - 1] = ie.crop(regionBounds);
 			}
 
-			float b = getBackground(spot);
+			int n = (int) centre[4];
+			if (globalBackgroundFraction <= 0)
+				b = getBackground(n, spot);
 			if (!subtractBackgroundAndWindow(spot, b, regionBounds.width, regionBounds.height, centre, loess))
+			{
+				Utils.log("  Spot %d was ignored", n);
 				continue;
+			}
 
 			stats.add(b);
 
@@ -451,7 +464,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			// This takes a long time so this should track progress
 			ok = addToPSF(maxz, magnification, psf, centre, spot, regionBounds, progress, increment, centreEachSlice);
 		}
-		
+
 		if (interactiveMode)
 		{
 			Utils.hide(TITLE_INTENSITY);
@@ -470,7 +483,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		final double avSd = getAverage(averageSd, averageA, 2);
 		Utils.log("  Average background = %.2f, Av. SD = %s px", stats.getMean(), Utils.rounded(avSd, 4));
 
-		normalise(psf, maxz, avSd * magnification);
+		normalise(psf, maxz, avSd * magnification, false);
 		IJ.showProgress(1);
 
 		psfImp = Utils.display("PSF", psf);
@@ -654,6 +667,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			final double[] smoothX, final double[] smoothY, double[] smoothSd, final double cx, final double cy,
 			final int cz, double csd)
 	{
+		this.slice = cz;
 		// Allow an interactive mode that shows the plots and allows the user to Yes/No
 		// the addition of the data
 		if (interactiveMode)
@@ -673,7 +687,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			this.smoothX = smoothX;
 			this.smoothY = smoothY;
 			this.smoothSd = smoothSd;
-			this.slice = cz;
 
 			showPlots(z, a, z, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cz);
 
@@ -831,7 +844,22 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		return psf;
 	}
 
-	private float getBackground(float[][] spot)
+	private float getGlobalBackground(ImageStack stack)
+	{
+		if (globalBackgroundFraction <= 0)
+			return 0;
+		double sum = 0;
+		final int length = stack.getHeight() * stack.getWidth();
+		for (int slice = 1; slice <= stack.getSize(); slice++)
+		{
+			sum += Maths.sum((float[]) stack.getPixels(slice)) / length;
+		}
+		float b = (float) (sum / stack.getSize());
+		Utils.log("Using global background = %.2f", b);
+		return b;
+	}
+
+	private float getBackground(int n, float[][] spot)
 	{
 		// Get the average value of the first and last n frames
 		Statistics first = new Statistics();
@@ -845,8 +873,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			last.add(spot[j]);
 		}
 		float av = (float) ((first.getSum() + last.getSum()) / (first.getN() + last.getN()));
-		Utils.log("First %d = %.2f, Last %d = %.2f, av = %.2f", startBackgroundFrames, first.getMean(),
-				endBackgroundFrames, last.getMean(), av);
+		Utils.log("  Spot %d Background: First %d = %.2f, Last %d = %.2f, av = %.2f", n, startBackgroundFrames,
+				first.getMean(), endBackgroundFrames, last.getMean(), av);
 		return av;
 	}
 
@@ -865,9 +893,10 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		return min;
 	}
 
-	private double[] dmap = null;
+	private boolean[] dmap = null;
 	private int lastWidth = 0;
 	private int lastHeight = 0;
+	private int minx, maxx, miny, maxy;
 
 	/**
 	 * Subtract the background from the spot, compute the intensity within half the box region distance from the centre
@@ -876,7 +905,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 * using a Tukey window function.
 	 * 
 	 * @param spot
-	 * @param min
+	 * @param background
 	 *            The minimum level, all below this is background and set to zero
 	 * @param spotWidth
 	 * @param spotHeight
@@ -886,31 +915,44 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 *            The smoothing interpolator
 	 * @return True if accepted
 	 */
-	private boolean subtractBackgroundAndWindow(float[][] spot, final float min, final int spotWidth,
+	private boolean subtractBackgroundAndWindow(float[][] spot, final float background, final int spotWidth,
 			final int spotHeight, double[] centre, LoessInterpolator loess)
 	{
 		//ImageWindow imageWindow = new ImageWindow();
 		for (int i = 0; i < spot.length; i++)
 		{
 			for (int j = 0; j < spot[i].length; j++)
-				spot[i][j] = FastMath.max(spot[i][j] - min, 0);
+				spot[i][j] = FastMath.max(spot[i][j] - background, 0);
 		}
 
 		// Create a distance map from the centre
 		if (lastWidth != spotWidth || lastHeight != spotHeight)
 		{
-			dmap = new double[spotWidth * spotHeight];
 			final double cx = spotWidth * 0.5;
 			final double cy = spotHeight * 0.5;
-			final double[] dx2 = new double[spotWidth];
-			for (int x = 0; x < spotWidth; x++)
-				dx2[x] = (x - cx) * (x - cx);
-			for (int y = 0, i = 0; y < spotHeight; y++)
+			minx = FastMath.max(0, (int) (cx - boxRadius * 0.5));
+			maxx = FastMath.min(spotWidth, (int) Math.ceil(cx + boxRadius * 0.5));
+			miny = FastMath.max(0, (int) (cy - boxRadius * 0.5));
+			maxy = FastMath.min(spotHeight, (int) Math.ceil(cy + boxRadius * 0.5));
+
+			// Precompute square distances
+			double[] dx2 = new double[maxx - minx + 1];
+			for (int x = minx, i = 0; x < maxx; x++, i++)
 			{
-				final double dy2 = y - cy;
-				for (int x = 0; x < spotWidth; x++, i++)
+				// Use pixel centres with 0.5 offset
+				final double dx = x + 0.5 - cx;
+				dx2[i] = dx * dx;
+			}
+			dmap = new boolean[dx2.length * (maxy - miny + 1)];
+			final double d2 = boxRadius * boxRadius / 4;
+			for (int y = miny, j = 0; y < maxy; y++)
+			{
+				final double dy = (y + 0.5 - cy);
+				final double dy2 = dy * dy;
+				final double limit = d2 - dy2;
+				for (int x = minx, i = 0; x < maxx; x++, i++, j++)
 				{
-					dmap[i] = dx2[x] + dy2;
+					dmap[j] = (dx2[i] < limit);
 				}
 			}
 			lastWidth = spotWidth;
@@ -918,23 +960,34 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 
 		// Calculate the intensity profile within half the box radius from the centre
-		final double d2 = boxRadius * boxRadius / 4;
 		double[] xValues = new double[spot.length];
 		double[] yValues = new double[spot.length];
 		for (int i = 0; i < spot.length; i++)
 		{
 			xValues[i] = i + 1;
 			double sum = 0;
-			for (int j = 0; j < dmap.length; j++)
-				if (dmap[j] < d2)
-					sum += spot[i][j];
+			for (int y = miny, j = 0; y < maxy; y++)
+			{
+				int index = y * spotWidth + minx;
+				for (int x = minx; x < maxx; x++, index++, j++)
+					if (dmap[j])
+						sum += spot[i][index];
+			}
 			yValues[i] = sum;
 		}
 
 		double[] newY = loess.smooth(xValues, yValues);
+		// It can happen that the LOESS creates values below zero (e.g. when the curve
+		// falls towards zero at the ends)
+		for (int i = 0; i < newY.length; i++)
+			if (newY[i] < 0)
+				newY[i] = yValues[i];
 
 		if (interactiveMode)
 		{
+			Utils.hide(TITLE_AMPLITUDE);
+			Utils.hide(TITLE_PSF_PARAMETERS);
+
 			final int n = (int) centre[4];
 
 			String title = TITLE_INTENSITY;
@@ -1020,6 +1073,15 @@ public class PSFCreator implements PlugInFilter, ItemListener
 					FloatProcessor fp = new FloatProcessor(w, h, originalSpotData, null);
 					fp.setInterpolationMethod(interpolationMethod);
 					fp = (FloatProcessor) fp.resize(dstWidth, dstHeight);
+
+					// In the case of Bicubic interpolation check for negative values
+					if (interpolationMethod == ImageProcessor.BICUBIC)
+					{
+						float[] pixels = (float[]) fp.getPixels();
+						for (int i = 0; i < pixels.length; i++)
+							if (pixels[i] < 0)
+								pixels[i] = 0;
+					}
 
 					// Do all CoM calculations here since we use an interpolation
 					// when resizing and the CoM will move.
@@ -1177,7 +1239,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	}
 
 	/**
-	 * Normalise the PSF so the height of the specified frame foreground pixels is 1.
+	 * Normalise the PSF so the sum of the specified frame foreground pixels is 1.
 	 * <p>
 	 * Assumes the PSF can be approximated by a Gaussian in the central frame. All pixels within 3 sigma of the centre
 	 * are foreground pixels.
@@ -1187,14 +1249,16 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 *            The frame number
 	 * @param sigma
 	 *            the Gaussian standard deviation (in pixels)
+	 * @param subtractBackground
+	 *            Normalise so everything below the background is zero
 	 */
-	public static void normalise(ImageStack psf, int n, double sigma)
+	public static void normalise(ImageStack psf, int n, double sigma, boolean subtractBackground)
 	{
 		if (psf == null || psf.getSize() == 0)
 			return;
 		if (!(psf.getPixels(1) instanceof float[]))
 			return;
-		double cx = psf.getWidth() * 0.5;
+		final double cx = psf.getWidth() * 0.5;
 
 		// Get the sum of the foreground pixels
 		float[] data = (float[]) psf.getPixels(n);
@@ -1207,15 +1271,17 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		final double r2 = 3 * sigma * 3 * sigma;
 		double[] d2 = new double[max - min + 1];
 		for (int x = min, i = 0; x <= max; x++, i++)
-			d2[i] = (x - cx) * (x - cx);
+			// Use pixel centres with 0.5 offset
+			d2[i] = (x + 0.5 - cx) * (x + 0.5 - cx);
 
 		for (int y = min, i = 0; y <= max; y++, i++)
 		{
 			int index = y * psf.getWidth() + min;
+			final double limit = r2 - d2[i];
 			for (int x = min, j = 0; x <= max; x++, index++, j++)
 			{
 				// Check if the pixel is within 3 sigma of the centre
-				if (d2[i] + d2[j] < r2)
+				if (d2[j] < limit)
 				{
 					foregroundSum += data[index];
 					foregroundN++;
@@ -1223,18 +1289,37 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			}
 		}
 
-		// Get the average background
-		double backgroundSum = new Statistics(data).getSum() - foregroundSum;
-		double background = backgroundSum / (data.length - foregroundN);
-
-		// Subtract the background from the foreground sum
-		foregroundSum -= background * foregroundN;
-
-		for (int i = 0; i < psf.getSize(); i++)
+		if (subtractBackground)
 		{
-			data = (float[]) psf.getPixels(i + 1);
-			for (int j = 0; j < data.length; j++)
-				data[j] = (float) ((data[j] - background) / foregroundSum);
+			// Normalise so everything below the background is zero
+
+			// Get the average background
+			final double backgroundSum = Maths.sum(data) - foregroundSum;
+			final double background = backgroundSum / (data.length - foregroundN);
+
+			// Subtract the background from the foreground sum
+			final double newForegroundSum = foregroundSum - background * foregroundN;
+
+			for (int i = 0; i < psf.getSize(); i++)
+			{
+				data = (float[]) psf.getPixels(i + 1);
+				for (int j = 0; j < data.length; j++)
+				{
+					data[j] = (float) (Math.max(0, data[j] - background) / newForegroundSum);
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < psf.getSize(); i++)
+			{
+				data = (float[]) psf.getPixels(i + 1);
+				for (int j = 0; j < data.length; j++)
+				{
+					// Normalise so the foreground is 1
+					data[j] = (float) (data[j] / foregroundSum);
+				}
+			}
 		}
 	}
 
@@ -1251,7 +1336,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			return;
 		if (!(psf.getPixels(1) instanceof float[]))
 			return;
-		double sum = new Statistics((float[]) psf.getPixels(n)).getSum();
+		double sum = Maths.sum((float[]) psf.getPixels(n));
 		for (int i = 0; i < psf.getSize(); i++)
 		{
 			float[] data = (float[]) psf.getPixels(i + 1);
@@ -1988,20 +2073,20 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 
 		if (resetScale)
-			maxy = 0;
+			maxCumulativeSignal = 0;
 
-		maxy = Maths.maxDefault(maxy, signal);
+		maxCumulativeSignal = Maths.maxDefault(maxCumulativeSignal, signal);
 
 		String title = "Cumulative Signal";
 
 		boolean alignWindows = (WindowManager.getFrame(title) == null);
 
 		Plot2 plot = new Plot2(title, "Distance (nm)", "Signal", distances, signal);
-		plot.setLimits(0, distances[distances.length - 1], 0, maxy);
+		plot.setLimits(0, distances[distances.length - 1], 0, maxCumulativeSignal);
 		plot.addLabel(0, 0, String.format("Total = %s (@ %s nm). z = %s nm", Utils.rounded(sum),
 				Utils.rounded(distanceThreshold), Utils.rounded((z - zCentre) * nmPerSlice)));
 		plot.setColor(Color.green);
-		plot.drawLine(distanceThreshold, 0, distanceThreshold, maxy);
+		plot.drawLine(distanceThreshold, 0, distanceThreshold, maxCumulativeSignal);
 		plot.setColor(Color.blue);
 		PlotWindow plotWindow = Utils.display(title, plot);
 
