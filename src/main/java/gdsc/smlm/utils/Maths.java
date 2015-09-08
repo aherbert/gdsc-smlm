@@ -437,4 +437,44 @@ public class Maths
 
 		return ic;
 	}
+
+	public static double sum(double... data)
+	{
+		if (data == null)
+			return 0;
+		double sum = 0;
+		for (double d : data)
+			sum += d;
+		return sum;
+	}
+
+	public static double sum(float... data)
+	{
+		if (data == null)
+			return 0;
+		double sum = 0;
+		for (float d : data)
+			sum += d;
+		return sum;
+	}
+
+	public static long sum(long... data)
+	{
+		if (data == null)
+			return 0;
+		long sum = 0;
+		for (long d : data)
+			sum += d;
+		return sum;
+	}
+
+	public static long sum(int... data)
+	{
+		if (data == null)
+			return 0;
+		long sum = 0;
+		for (int d : data)
+			sum += d;
+		return sum;
+	}
 }
