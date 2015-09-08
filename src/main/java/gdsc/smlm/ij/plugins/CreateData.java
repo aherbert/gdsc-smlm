@@ -1819,8 +1819,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				upper = Math.max(upper, zCentre);
 			}
 
+			double noiseFraction = 1e-3;
 			ImagePSFModel model = new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower,
-					psfSettings.nmPerPixel / settings.pixelPitch, unitsPerSlice, psfSettings.fwhm);
+					psfSettings.nmPerPixel / settings.pixelPitch, unitsPerSlice, psfSettings.fwhm, noiseFraction);
 
 			// Add the calibrated centres
 			if (psfSettings.offset != null)

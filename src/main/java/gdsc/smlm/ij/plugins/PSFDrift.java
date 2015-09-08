@@ -792,8 +792,9 @@ public class PSFDrift implements PlugIn
 		final double unitsPerSlice = 1; // So we can move from -depth to depth
 
 		// Extract data uses index not slice number as arguments so subtract 1
+		double noiseFraction = 1e-3;
 		ImagePSFModel model = new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1), zCentre -
-				lower, unitsPerPixel, unitsPerSlice, psfSettings.fwhm);
+				lower, unitsPerPixel, unitsPerSlice, psfSettings.fwhm, noiseFraction);
 
 		// Add the calibrated centres
 		if (psfSettings.offset != null && useOffset)
