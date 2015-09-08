@@ -84,6 +84,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private final static String TITLE = "PSF Creator";
 	private final static String TITLE_AMPLITUDE = "Spot Amplitude";
 	private final static String TITLE_PSF_PARAMETERS = "Spot PSF";
+	private final static String TITLE_INTENSITY = "Spot Intensity";
 
 	private static double nmPerSlice = 20;
 	private static double radius = 10;
@@ -379,13 +380,17 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			csd = smoothSd[maximumIndex];
 			ca = smoothA[maximumIndex + start];
 			Utils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f\n", n, cx, cy, cz, csd, ca);
-			centres.add(new double[] { cx, cy, cz, csd });
+			centres.add(new double[] { cx, cy, cz, csd, n });
 		}
 
 		if (interactiveMode)
 		{
 			imp.setSlice(currentSlice);
 			imp.setOverlay(null);
+
+			// Hide the amplitude and spot plots
+			Utils.hide(TITLE_AMPLITUDE);
+			Utils.hide(TITLE_PSF_PARAMETERS);
 		}
 
 		if (centres.isEmpty())
@@ -434,8 +439,10 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			}
 
 			float b = getBackground(spot);
+			if (!subtractBackgroundAndWindow(spot, b, regionBounds.width, regionBounds.height, centre, loess))
+				continue;
+
 			stats.add(b);
-			subtractBackgroundAndWindow(spot, b, regionBounds.width, regionBounds.height);
 
 			// Adjust the centre using the crop
 			centre[0] -= regionBounds.x;
@@ -443,6 +450,11 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 			// This takes a long time so this should track progress
 			ok = addToPSF(maxz, magnification, psf, centre, spot, regionBounds, progress, increment, centreEachSlice);
+		}
+		
+		if (interactiveMode)
+		{
+			Utils.hide(TITLE_INTENSITY);
 		}
 
 		IJ.showProgress(1);
@@ -452,7 +464,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			threadPool = null;
 		}
 
-		if (!ok)
+		if (!ok || stats.getN() == 0)
 			return;
 
 		final double avSd = getAverage(averageSd, averageA, 2);
@@ -498,11 +510,11 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		// Add Image properties containing the PSF details
 		final double fwhm = getFWHM(psf, maxz);
 		psfImp.setProperty("Info",
-				XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, centres.size(), fwhm)));
+				XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm)));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
 				psfImp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
-				centres.size(), Utils.rounded(fittedSd * nmPerPixel, 4), Utils.rounded(fwhm));
+				stats.getN(), Utils.rounded(fittedSd * nmPerPixel, 4), Utils.rounded(fwhm));
 
 		createInteractivePlots(psf, maxz, nmPerPixel / magnification, fittedSd * nmPerPixel);
 
@@ -675,9 +687,10 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
-			gd.addMessage(String.format("Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n", n, cx,
-					cy, cz, csd));
-			gd.addSlider("Slice", z[0], z[z.length-1], slice);
+			gd.addMessage(String
+					.format("Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n",
+							n, cx, cy, cz, csd));
+			gd.addSlider("Slice", z[0], z[z.length - 1], slice);
 			if (yesNoPosition != null)
 			{
 				gd.centerDialog(false);
@@ -691,7 +704,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 		return false;
 	}
-	
+
 	private class SimpleInteractivePlotListener implements DialogListener
 	{
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
@@ -700,7 +713,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			drawPlots(false);
 			return true;
 		}
-	}	
+	}
 
 	private void showPlots(final double[] z, final double[] a, final double[] smoothAz, final double[] smoothA,
 			final double[] xCoord, final double[] yCoord, final double[] sd, final double[] newZ,
@@ -832,8 +845,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			last.add(spot[j]);
 		}
 		float av = (float) ((first.getSum() + last.getSum()) / (first.getN() + last.getN()));
-		//Utils.log("First %d = %.2f, Last %d = %.2f, av = %.2f", backgroundFrames, first.getMean(), backgroundFrames,
-		//		last.getMean(), av);
+		Utils.log("First %d = %.2f, Last %d = %.2f, av = %.2f", startBackgroundFrames, first.getMean(),
+				endBackgroundFrames, last.getMean(), av);
 		return av;
 	}
 
@@ -852,18 +865,119 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		return min;
 	}
 
-	private void subtractBackgroundAndWindow(float[][] spot, final float min, final int spotWidth, final int spotHeight)
+	private double[] dmap = null;
+	private int lastWidth = 0;
+	private int lastHeight = 0;
+
+	/**
+	 * Subtract the background from the spot, compute the intensity within half the box region distance from the centre
+	 * and smooth the intensity profile. In interactive mode the user must choose to accept the profile or reject.
+	 * If accepted the smoothed profile is user to normalise the image and then the image is rolled off to zero
+	 * using a Tukey window function.
+	 * 
+	 * @param spot
+	 * @param min
+	 *            The minimum level, all below this is background and set to zero
+	 * @param spotWidth
+	 * @param spotHeight
+	 * @param n
+	 *            The spot number
+	 * @param loess
+	 *            The smoothing interpolator
+	 * @return True if accepted
+	 */
+	private boolean subtractBackgroundAndWindow(float[][] spot, final float min, final int spotWidth,
+			final int spotHeight, double[] centre, LoessInterpolator loess)
 	{
 		//ImageWindow imageWindow = new ImageWindow();
 		for (int i = 0; i < spot.length; i++)
 		{
 			for (int j = 0; j < spot[i].length; j++)
 				spot[i][j] = FastMath.max(spot[i][j] - min, 0);
+		}
+
+		// Create a distance map from the centre
+		if (lastWidth != spotWidth || lastHeight != spotHeight)
+		{
+			dmap = new double[spotWidth * spotHeight];
+			final double cx = spotWidth * 0.5;
+			final double cy = spotHeight * 0.5;
+			final double[] dx2 = new double[spotWidth];
+			for (int x = 0; x < spotWidth; x++)
+				dx2[x] = (x - cx) * (x - cx);
+			for (int y = 0, i = 0; y < spotHeight; y++)
+			{
+				final double dy2 = y - cy;
+				for (int x = 0; x < spotWidth; x++, i++)
+				{
+					dmap[i] = dx2[x] + dy2;
+				}
+			}
+			lastWidth = spotWidth;
+			lastHeight = spotHeight;
+		}
+
+		// Calculate the intensity profile within half the box radius from the centre
+		final double d2 = boxRadius * boxRadius / 4;
+		double[] xValues = new double[spot.length];
+		double[] yValues = new double[spot.length];
+		for (int i = 0; i < spot.length; i++)
+		{
+			xValues[i] = i + 1;
+			double sum = 0;
+			for (int j = 0; j < dmap.length; j++)
+				if (dmap[j] < d2)
+					sum += spot[i][j];
+			yValues[i] = sum;
+		}
+
+		double[] newY = loess.smooth(xValues, yValues);
+
+		if (interactiveMode)
+		{
+			final int n = (int) centre[4];
+
+			String title = TITLE_INTENSITY;
+			Plot plot = new Plot(title, "Slice", "Sum", xValues, yValues);
+			plot.setColor(Color.red);
+			plot.addPoints(xValues, newY, Plot.LINE);
+			plot.setColor(Color.green);
+			double[] limits = Maths.limits(yValues);
+			plot.drawLine(centre[2], limits[0], centre[2], limits[1]);
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, "Spot " + n);
+			Utils.display(title, plot);
+
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.enableYesNoCancel();
+			gd.hideCancelButton();
+			gd.addMessage(String.format(
+					"Add spot %d to the PSF?\n(The intensity profile is the sum within half the box region)", n));
+			if (yesNoPosition != null)
+			{
+				gd.centerDialog(false);
+				gd.setLocation(yesNoPosition);
+			}
+			gd.showDialog();
+
+			yesNoPosition = gd.getLocation();
+			if (!gd.wasOKed())
+				return false;
+		}
+
+		for (int i = 0; i < spot.length; i++)
+		{
+			// Normalise
+			final float scale = (float) (newY[i] / yValues[i]);
+			for (int j = 0; j < spot[i].length; j++)
+				spot[i][j] *= scale;
 
 			// Use a Tukey window to roll-off the image edges
 			//spot[i] = imageWindow.applySeperable(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.Tukey);
 			spot[i] = ImageWindow.applyWindow(spot[i], spotWidth, spotHeight, ImageWindow.WindowFunction.TUKEY);
 		}
+
+		return true;
 	}
 
 	private boolean addToPSF(int maxz, final int magnification, ImageStack psf, final double[] centre,
@@ -1878,7 +1992,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		maxy = Maths.maxDefault(maxy, signal);
 
-		String title = "Cumulative signal";
+		String title = "Cumulative Signal";
 
 		boolean alignWindows = (WindowManager.getFrame(title) == null);
 
