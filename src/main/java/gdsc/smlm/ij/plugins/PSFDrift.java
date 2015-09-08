@@ -621,13 +621,6 @@ public class PSFDrift implements PlugIn
 			recall[i] = (double) statsX.getN() / (nStartPoints * gridSize2);
 		}
 
-		displayPlot("Drift X", "X (nm)", zPosition, avX, seX);
-		displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY);
-		displayPlot("Recall", "Recall", zPosition, recall, null);
-
-		WindowOrganiser wo = new WindowOrganiser();
-		wo.tileWindows(idList);
-
 		// Find the range from the z-centre above the recall limit 
 		int centre = 0;
 		for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
@@ -653,6 +646,13 @@ public class PSFDrift implements PlugIn
 				break;
 			end = i;
 		}
+		
+		displayPlot("Drift X", "X (nm)", zPosition, avX, seX, start, end);
+		displayPlot("Drift Y", "Y (nm)", zPosition, avY, seY, start, end);
+		displayPlot("Recall", "Recall", zPosition, recall, null, start, end);
+
+		WindowOrganiser wo = new WindowOrganiser();
+		wo.tileWindows(idList);
 
 		// Ask the user if they would like to store them in the image
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -741,7 +741,7 @@ public class PSFDrift implements PlugIn
 		}
 	}
 	
-	private void displayPlot(String title, String yLabel, double[] x, double[] y, double[] se)
+	private void displayPlot(String title, String yLabel, double[] x, double[] y, double[] se, int start, int end)
 	{
 		title = TITLE + " " + title;
 		Plot2 plot = new Plot2(title, "z (nm)", yLabel);
@@ -772,6 +772,11 @@ public class PSFDrift implements PlugIn
 			{
 				plot.drawLine(x[i], y[i] - se[i], x[i], y[i] + se[i]);
 			}
+			
+			// Draw the start and end lines for the valid range
+			plot.setColor(Color.green);
+			plot.drawLine(x[start], limitsy[0], x[start], limitsy[1]);
+			plot.drawLine(x[end], limitsy[0], x[end], limitsy[1]);
 		}
 		else
 		{
