@@ -125,6 +125,7 @@ public class Utils
 		else
 		{
 			imp.setProcessor(ip);
+			imp.getWindow().setVisible(true);
 			imp.getWindow().toFront();
 		}
 		return imp;
@@ -150,6 +151,7 @@ public class Utils
 		else
 		{
 			imp.setStack(slices);
+			imp.getWindow().setVisible(true);
 			imp.getWindow().toFront();
 		}
 		return imp;
@@ -235,6 +237,7 @@ public class Utils
 		}
 		else
 		{
+			plotWindow.setVisible(true);
 			p = (PlotWindow) plotWindow;
 			p.drawPlot(plot);
 			p.toFront();
@@ -242,6 +245,31 @@ public class Utils
 		return p;
 	}
 
+	/**
+	 * Hide the image window.
+	 * 
+	 * @param title
+	 * @return True if a window with the title was found
+	 */
+	public static boolean hide(String title)
+	{
+		int[] wList = WindowManager.getIDList();
+		int len = wList != null ? wList.length : 0;
+		for (int i = 0; i < len; i++)
+		{
+			ImagePlus imp = WindowManager.getImage(wList[i]);
+			if (imp != null)
+			{
+				if (imp.getTitle().equals(title))
+				{
+					imp.getWindow().setVisible(false);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Close the named window
 	 * 
