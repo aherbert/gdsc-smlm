@@ -706,6 +706,8 @@ public class PSFDrift implements PlugIn
 			}
 			addMissingOffsets(startSlice, endSlice, nSlices, offset);
 			psfSettings.offset = offset.toArray(new PSFOffset[offset.size()]);
+			psfSettings.addNote(TITLE,
+					String.format("Solver=%s, Region=%d", PeakFit.getSolverName(fitConfig), regionSize));
 			imp.setProperty("Info", XmlUtils.toXML(psfSettings));
 		}
 	}

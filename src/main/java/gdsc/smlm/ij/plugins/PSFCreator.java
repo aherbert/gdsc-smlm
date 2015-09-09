@@ -46,6 +46,7 @@ import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.io.FileInfo;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
@@ -61,8 +62,10 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -163,7 +166,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			IJ.noImage();
 			return DONE;
 		}
-
+		
 		Roi roi = imp.getRoi();
 		if (roi == null || roi.getType() != Roi.POINT)
 		{
@@ -172,7 +175,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 
 		this.imp = imp;
-
+		
 		return showDialog();
 	}
 
@@ -522,8 +525,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Add Image properties containing the PSF details
 		final double fwhm = getFWHM(psf, maxz);
-		psfImp.setProperty("Info",
-				XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm)));
+		psfImp.setProperty("Info", XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats
+				.getN(), fwhm, createNote())));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
 				psfImp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
@@ -2183,5 +2186,22 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 
 		return p2 - p1;
+	}
+
+	private String createNote()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(new SimpleDateFormat("'Created:' d-MMM-yyyy HH:mm").format(new Date())).append("\n");
+		FileInfo info = imp.getOriginalFileInfo();
+		if (info != null)
+		{
+			sb.append("File: ").append(info.fileName).append("\nDir: ").append(info.directory);
+		}
+		else
+		{
+			sb.append("Title: ").append(imp.getTitle());
+		}
+		sb.append("\n");
+		return sb.toString();
 	}
 }
