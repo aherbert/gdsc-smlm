@@ -493,6 +493,11 @@ public class PSFDrift implements PlugIn
 		final int w = 2 * regionSize + 1;
 		centrePixel = w / 2;
 
+		// Check region size using the image PSF
+		double newPsfWidth = (double) imp.getWidth() / scale;
+		if (Math.ceil(newPsfWidth) > w)
+			Utils.log(TITLE + ": Region size %d is larger then the scaled PSF %.1f", w, newPsfWidth);
+
 		// Create robust PSF fitting settings
 		final double a = psfSettings.nmPerPixel * scale;
 		final double sa = PSFCalculator.squarePixelAdjustment(psfSettings.nmPerPixel *
@@ -858,7 +863,7 @@ public class PSFDrift implements PlugIn
 		// 1. All points up to and including lower
 		// 2. All points between lower and upper inclusive
 		// 3. All point from upper upwards
-		
+
 		// Plot the main curve first 
 		addPoints(plot, shape, x, y, lower, upper, Color.blue);
 		// Then plot the others
@@ -871,9 +876,9 @@ public class PSFDrift implements PlugIn
 		double[] x2 = new double[x.length];
 		double[] y2 = new double[y.length];
 		int c = 0;
-		for (int i=0; i<x.length; i++)
+		for (int i = 0; i < x.length; i++)
 		{
-			if (x[i]>=lower && x[i]<=upper)
+			if (x[i] >= lower && x[i] <= upper)
 			{
 				x2[c] = x[i];
 				y2[c] = y[i];
