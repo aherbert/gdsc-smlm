@@ -774,60 +774,62 @@ public class PSFDrift implements PlugIn
 	private double[][] displayPlot(String title, String yLabel, double[] x, double[] y, double[] se,
 			LoessInterpolator loess, int start, int end)
 	{
+		// Extract non NaN numbers
+		double[] newX = new double[x.length];
+		double[] newY = new double[x.length];
+		int c = 0;
+		for (int i = 0; i < x.length; i++)
+			if (!Double.isNaN(y[i]))
+			{
+				newX[c] = x[i];
+				newY[c] = y[i];
+				c++;
+			}
+		newX = Arrays.copyOf(newX, c);
+		newY = Arrays.copyOf(newY, c);
+
 		title = TITLE + " " + title;
 		Plot2 plot = new Plot2(title, "z (nm)", yLabel);
 		double[] limitsx = Maths.limits(x);
-		double[] limitsy;
+		double[] limitsy = new double[2];
 		if (se != null)
 		{
-			limitsy = new double[] { y[0] - se[0], y[0] + se[0] };
-			for (int i = 1; i < y.length; i++)
+			if (c > 0)
 			{
-				limitsy[0] = Maths.min(limitsy[0], y[i] - se[i]);
-				limitsy[1] = Maths.max(limitsy[1], y[i] + se[i]);
+				limitsy = new double[] { newY[0] - se[0], newY[0] + se[0] };
+				for (int i = 1; i < newY.length; i++)
+				{
+					limitsy[0] = Maths.min(limitsy[0], newY[i] - se[i]);
+					limitsy[1] = Maths.max(limitsy[1], newY[i] + se[i]);
+				}
 			}
 		}
 		else
 		{
-			limitsy = Maths.limits(y);
+			if (c > 0)
+				limitsy = Maths.limits(newY);
 		}
 		double rangex = Math.max(0.05 * (limitsx[1] - limitsx[0]), 0.1);
 		double rangey = Math.max(0.05 * (limitsy[1] - limitsy[0]), 0.1);
 		plot.setLimits(limitsx[0] - rangex, limitsx[1] + rangex, limitsy[0] - rangey, limitsy[1] + rangey);
-		double[] newX, newY;
+
 		if (loess == null)
 		{
-			plot.setColor(Color.blue);
-			plot.addPoints(x, y, Plot.LINE);
-			newX = x;
-			newY = y;
+			addPoints(plot, Plot.LINE, newX, newY, x[start], x[end]);
 		}
 		else
 		{
-			plot.setColor(Color.blue);
-			plot.addPoints(x, y, Plot.DOT);
-			// Extract non NaN numbers
-			newX = new double[x.length];
-			newY = new double[x.length];
-			int c = 0;
-			for (int i = 0; i < x.length; i++)
-				if (!Double.isNaN(y[i]))
-				{
-					newX[c] = x[i];
-					newY[c] = y[i];
-					c++;
-				}
-			newX = Arrays.copyOf(newX, c);
-			newY = Arrays.copyOf(newY, c);
+			addPoints(plot, Plot.DOT, newX, newY, x[start], x[end]);
 			newY = loess.smooth(newX, newY);
-			plot.addPoints(newX, newY, Plot.LINE);
+			addPoints(plot, Plot.LINE, newX, newY, x[start], x[end]);
 		}
 		if (se != null)
 		{
 			plot.setColor(Color.magenta);
 			for (int i = 0; i < x.length; i++)
 			{
-				plot.drawLine(x[i], y[i] - se[i], x[i], y[i] + se[i]);
+				if (!Double.isNaN(y[i]))
+					plot.drawLine(x[i], y[i] - se[i], x[i], y[i] + se[i]);
 			}
 
 			// Draw the start and end lines for the valid range
@@ -846,6 +848,44 @@ public class PSFDrift implements PlugIn
 			idList[idCount++] = pw.getImagePlus().getID();
 
 		return new double[][] { newX, newY };
+	}
+
+	private void addPoints(Plot plot, int shape, double[] x, double[] y, double lower, double upper)
+	{
+		if (x.length == 0)
+			return;
+		// Split the line into three:
+		// 1. All points up to and including lower
+		// 2. All points between lower and upper inclusive
+		// 3. All point from upper upwards
+		
+		// Plot the main curve first 
+		addPoints(plot, shape, x, y, lower, upper, Color.blue);
+		// Then plot the others
+		addPoints(plot, shape, x, y, x[0], lower, Color.red);
+		addPoints(plot, shape, x, y, upper, x[x.length - 1], Color.red);
+	}
+
+	private void addPoints(Plot plot, int shape, double[] x, double[] y, double lower, double upper, Color color)
+	{
+		double[] x2 = new double[x.length];
+		double[] y2 = new double[y.length];
+		int c = 0;
+		for (int i=0; i<x.length; i++)
+		{
+			if (x[i]>=lower && x[i]<=upper)
+			{
+				x2[c] = x[i];
+				y2[c] = y[i];
+				c++;
+			}
+		}
+		if (c == 0)
+			return;
+		x2 = Arrays.copyOf(x2, c);
+		y2 = Arrays.copyOf(y2, c);
+		plot.setColor(color);
+		plot.addPoints(x2, y2, shape);
 	}
 
 	private ImagePSFModel createImagePSF(int lower, int upper)
