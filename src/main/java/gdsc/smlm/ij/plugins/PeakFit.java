@@ -13,6 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -22,7 +23,6 @@ import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.filters.SpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitCriteria;
@@ -60,9 +60,9 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.utils.NoiseEstimator.Method;
-import gdsc.smlm.utils.logging.Logger;
 import gdsc.smlm.utils.TextUtils;
 import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.logging.Logger;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -72,7 +72,6 @@ import ij.gui.GenericDialog;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
-import ij.io.OpenDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
@@ -2338,11 +2337,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			if (e.getSource() == textConfigFile)
 			{
-				String[] path = Utils.decodePath(textConfigFile.getText());
-				OpenDialog chooser = new OpenDialog("Config_File", path[0], path[1]);
-				if (chooser.getFileName() != null)
+				String newFilename = Utils.getFilename("Config_File", textConfigFile.getText());
+				if (newFilename != null)
 				{
-					String newFilename = chooser.getDirectory() + chooser.getFileName();
 					textConfigFile.setText(newFilename);
 				}
 			}
