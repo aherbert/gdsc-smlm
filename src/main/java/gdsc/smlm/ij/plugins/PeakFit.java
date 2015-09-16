@@ -904,6 +904,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		gd.showDialog();
+		
+		// The refreshSettings method can be called by the dialog listener.
+		// This updates the Calibration, FitEngineConfiguration, and ResultsSettings so set these
+		// back in the GlobalSettings object.
+		settings.setCalibration(this.calibration);
+		settings.setFitEngineConfiguration(this.config);
+		settings.setResultsSettings(this.resultsSettings);
 
 		if (gd.wasCanceled() || !readDialog(settings, gd, isCrop))
 			return DONE;
