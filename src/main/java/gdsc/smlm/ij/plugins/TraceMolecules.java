@@ -572,6 +572,7 @@ public class TraceMolecules implements PlugIn
 		if (directory != null)
 		{
 			settings.traceDataDirectory = directory;
+			SettingsManager.saveSettings(globalSettings);
 			for (int i = 0; i < NAMES.length; i++)
 				saveTraceData((StoredDataStatistics) stats[i], NAMES[i], FILENAMES[i]);
 		}
