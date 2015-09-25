@@ -24,7 +24,8 @@ public class ExtendedPeakResult extends PeakResult
 			float[] params, float[] paramsStdDev, int endFrame, int id)
 	{
 		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
-		this.endFrame = endFrame;
+		// Ensure that the end frame is valid
+		this.endFrame = (endFrame < startFrame) ? startFrame : endFrame;
 		this.id = id;
 	}
 
@@ -38,8 +39,10 @@ public class ExtendedPeakResult extends PeakResult
 	{
 		return endFrame;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.PeakResult#getId()
 	 */
 	@Override
