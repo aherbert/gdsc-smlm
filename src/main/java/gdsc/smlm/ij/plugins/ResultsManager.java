@@ -244,7 +244,8 @@ public class ResultsManager implements PlugIn, MouseListener
 		return false;
 	}
 
-	private void addTableResults(MemoryPeakResults results, PeakResultsList resultsList, boolean showDeviations, boolean showEndFrame)
+	private void addTableResults(MemoryPeakResults results, PeakResultsList resultsList, boolean showDeviations,
+			boolean showEndFrame)
 	{
 		if (resultsSettings.getResultsTable() != ResultsTable.NONE)
 		{
@@ -457,7 +458,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		{
 			roiBounds = null;
 		}
-		
+
 		return SettingsManager.saveSettings(settings);
 	}
 
@@ -478,7 +479,8 @@ public class ResultsManager implements PlugIn, MouseListener
 	}
 
 	/**
-	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If a file input option
+	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If a file input
+	 * option
 	 * is selected then a field will be added name 'Input_file'.
 	 * <p>
 	 * If the source is a memory source then it will not be added if it is empty. If not empty then a summary of the
@@ -506,12 +508,14 @@ public class ResultsManager implements PlugIn, MouseListener
 	}
 
 	/**
-	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If the file input option
+	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If the file input
+	 * option
 	 * is true then a field will be added name 'Input_file'.
 	 * 
 	 * @param gd
 	 * @param inputName
-	 * @param inputOption The option to select by default
+	 * @param inputOption
+	 *            The option to select by default
 	 * @param source
 	 * @param fileInput
 	 */
@@ -592,15 +596,25 @@ public class ResultsManager implements PlugIn, MouseListener
 	{
 		if (memoryResults.size() > 0)
 		{
-			if (traced)
-			{
-				// All results must be an ExtendedPeakResult
-				for (PeakResult r : memoryResults.getResults())
-					if (!(r instanceof ExtendedPeakResult))
-						return;
-			}
+			if (traced && !isTraced(memoryResults))
+				return;
 			source.add(memoryResults.getName() + " [" + memoryResults.size() + "]");
 		}
+	}
+
+	/**
+	 * Checked for traced results. All results must be an ExtendedPeakResult.
+	 * 
+	 * @param memoryResults
+	 * @return True if traced
+	 */
+	public static boolean isTraced(MemoryPeakResults memoryResults)
+	{
+		// All results must be an ExtendedPeakResult
+		for (PeakResult r : memoryResults.getResults())
+			if (!(r instanceof ExtendedPeakResult))
+				return false;
+		return true;
 	}
 
 	/**
