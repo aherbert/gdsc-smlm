@@ -243,12 +243,15 @@ public class TraceMolecules implements PlugIn
 		// Results processing
 		// --=-=-=-=-=-
 
-		MemoryPeakResults tracedResults = saveResults(results, traces, outputName +
-				(outputName.endsWith("e") ? "" : "e") + "d");
+		outputName += (outputName.endsWith("e") ? "" : "e") + "d";
+		saveResults(results, traces, outputName);
+
+		outputName += " Centroids";
+		MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
 
 		// Save singles and traces separately
-		saveResults(results, getSingles(traces), outputName + " Singles");
-		saveResults(results, getTraces(traces), outputName + "s");
+		saveCentroidResults(results, getSingles(traces), outputName + " Singles");
+		saveCentroidResults(results, getTraces(traces), outputName + " Multi");
 
 		// Sort traces by time to assist the results source in extracting frames sequentially.
 		// Do this before saving to assist in debugging using the saved traces file.
@@ -339,6 +342,14 @@ public class TraceMolecules implements PlugIn
 	static MemoryPeakResults saveResults(MemoryPeakResults sourceResults, Trace[] traces, String name)
 	{
 		MemoryPeakResults tracedResults = TraceManager.convertToPeakResults(sourceResults, traces);
+		tracedResults.setName(sourceResults.getName() + " " + name);
+		MemoryPeakResults.addResults(tracedResults);
+		return tracedResults;
+	}
+
+	static MemoryPeakResults saveCentroidResults(MemoryPeakResults sourceResults, Trace[] traces, String name)
+	{
+		MemoryPeakResults tracedResults = TraceManager.convertToCentroidPeakResults(sourceResults, traces);
 		tracedResults.setName(sourceResults.getName() + " " + name);
 		MemoryPeakResults.addResults(tracedResults);
 		return tracedResults;

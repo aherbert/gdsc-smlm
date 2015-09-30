@@ -528,7 +528,7 @@ public class TraceManager
 	 * @param traces
 	 * @return the peak results
 	 */
-	public static MemoryPeakResults toPeakResults(final Trace[] traces)
+	public static MemoryPeakResults toCentroidPeakResults(final Trace[] traces)
 	{
 		int capacity = 1 + ((traces != null) ? traces.length : 0);
 		MemoryPeakResults results = new MemoryPeakResults(capacity);
@@ -564,7 +564,7 @@ public class TraceManager
 	 * @param traces
 	 * @return the peak results
 	 */
-	public static MemoryPeakResults toPeakResults(final Trace[] traces, final Calibration calibration)
+	public static MemoryPeakResults toCentroidPeakResults(final Trace[] traces, final Calibration calibration)
 	{
 		int capacity = 1 + ((traces != null) ? traces.length : 0);
 		MemoryPeakResults results = new MemoryPeakResults(capacity);
@@ -588,11 +588,10 @@ public class TraceManager
 			// Ensure all results are added as extended peak results with their trace ID.
 			for (int i = 0; i < traces.length; i++)
 			{
-				traces[i].sort();
-				PeakResult result = traces[i].getHead();
-				if (result == null)
+				if (traces[i] == null || traces[i].size() == 0)
 					continue;
-
+				
+				PeakResult result = traces[i].getHead();
 				if (traces[i].size() == 1)
 				{
 					results.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue, 0,
@@ -600,6 +599,7 @@ public class TraceManager
 					continue;
 				}
 
+				traces[i].sort();
 				traces[i].resetCentroid();
 				float sd = (float) (traces[i].getLocalisationPrecision(nmPerPixel, gain, emCCD) / nmPerPixel);
 				float[] centroid = traces[i].getCentroid();
@@ -625,9 +625,74 @@ public class TraceManager
 	}
 
 	/**
+	 * Convert a list of traces into peak results setting the trace ID into the results.
+	 * <p>
+	 * If the trace is empty it is ignored.
+	 * 
+	 * @param traces
+	 * @return the peak results
+	 */
+	public static MemoryPeakResults toPeakResults(final Trace[] traces, final Calibration calibration)
+	{
+		int capacity = 1 + ((traces != null) ? traces.length : 0);
+		MemoryPeakResults results = new MemoryPeakResults(capacity);
+		results.setCalibration(calibration);
+		if (traces != null)
+		{
+			// Ensure all results are added as extended peak results with their trace ID.
+			for (int i = 0; i < traces.length; i++)
+			{
+				if (traces[i] == null || traces[i].size() == 0)
+					continue;
+
+				for (PeakResult result : traces[i].getPoints())
+				{
+					results.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue, 0,
+							result.noise, result.params, null, 0, traces[i].getId()));
+				}
+			}
+		}
+		return results;
+	}
+	
+	/**
 	 * Convert a list of traces into peak results. The signal weighted centroid of each trace is used as the
 	 * coordinates. The weighted localisation precision is used as the width. The amplitude is the average from all
 	 * the peaks in the trace.
+	 * <p>
+	 * Uses the title and bounds from the constructor peak results. The title has the word 'Traced Centroids' appended.
+	 * 
+	 * @param traces
+	 * @return the peak results
+	 */
+	public MemoryPeakResults convertToCentroidPeakResults(final Trace[] traces)
+	{
+		return convertToCentroidPeakResults(results, traces);
+	}
+
+	/**
+	 * Convert a list of traces into peak results. The signal weighted centroid of each trace is used as the
+	 * coordinates. The weighted localisation precision is used as the width. The amplitude is the average from all
+	 * the peaks in the trace.
+	 * <p>
+	 * Uses the title and bounds from the provided peak results. The title has the word 'Traced Centroids' appended.
+	 * 
+	 * @param source
+	 * @param traces
+	 * @return the peak results
+	 */
+	public static MemoryPeakResults convertToCentroidPeakResults(MemoryPeakResults source, final Trace[] traces)
+	{
+		MemoryPeakResults results = toCentroidPeakResults(traces, source.getCalibration());
+		results.copySettings(source);
+		// Change name
+		results.setName(source.getSource() + " Traced Centroids");
+		// TODO - Add the tracing settings
+		return results;
+	}
+
+	/**
+	 * Convert a list of traces into peak results.
 	 * <p>
 	 * Uses the title and bounds from the constructor peak results. The title has the word 'Traced' appended.
 	 * 
@@ -640,9 +705,7 @@ public class TraceManager
 	}
 
 	/**
-	 * Convert a list of traces into peak results. The signal weighted centroid of each trace is used as the
-	 * coordinates. The weighted localisation precision is used as the width. The amplitude is the average from all
-	 * the peaks in the trace.
+	 * Convert a list of traces into peak results.
 	 * <p>
 	 * Uses the title and bounds from the provided peak results. The title has the word 'Traced' appended.
 	 * 
