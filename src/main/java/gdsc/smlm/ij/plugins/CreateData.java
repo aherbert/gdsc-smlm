@@ -2739,8 +2739,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				IJ.showProgress(1);
 
 				// Split results into singles (density = 0) and clustered (density > 0)
-				MemoryPeakResults singles = copyMemoryPeakResults("Singles");
-				MemoryPeakResults clustered = copyMemoryPeakResults("Clustered");
+				MemoryPeakResults singles = copyMemoryPeakResults("No Density");
+				MemoryPeakResults clustered = copyMemoryPeakResults("Density");
 
 				int i = 0;
 				for (PeakResult r : results.getResults())
@@ -3048,7 +3048,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		sortLocalisationsByIdThenTime(localisations);
 
-		MemoryPeakResults traceResults = copyMemoryPeakResults("Traced");
+		MemoryPeakResults traceResults = copyMemoryPeakResults("Pulses");
 		LocalisationModel start = null;
 		int currentId = -1;
 		int n = 0;
@@ -3109,7 +3109,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		traceResults.end();
-		MemoryPeakResults.addResults(traceResults);
 	}
 
 	private void saveFixedAndMoving(MemoryPeakResults results, String title)
@@ -3146,9 +3145,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		movingResults.end();
-		MemoryPeakResults.addResults(movingResults);
 		fixedResults.end();
-		MemoryPeakResults.addResults(fixedResults);
 
 		// Reset the input results
 		results.sort();
