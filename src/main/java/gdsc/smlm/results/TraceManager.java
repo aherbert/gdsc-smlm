@@ -845,6 +845,9 @@ public class TraceManager
 	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
 	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
 	 * closest spot.
+	 * <p>
+	 * This method respects the exclusion distance. No spot can be assigned if a the next closest spot is within the
+	 * exclusion distance.
 	 * 
 	 * @param index
 	 *            The index of the spot
@@ -996,7 +999,7 @@ public class TraceManager
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
 	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
@@ -1161,6 +1164,9 @@ public class TraceManager
 	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
 	 * closest spot.
 	 * <p>
+	 * This method respects the exclusion distance. No spot can be assigned if a the next closest spot is within the
+	 * exclusion distance.
+	 * <p>
 	 * Do not assigned to the specified trace to ignore.
 	 * 
 	 * @param index
@@ -1186,9 +1192,6 @@ public class TraceManager
 		// the exclusion distance (otherwise they could not be assigned and ignored).   
 		float nextMinD = Float.POSITIVE_INFINITY;
 		int currentT;
-
-		// TODO - When using the dExclusion2 limit we must also check the distance against those spots
-		// in the ignore array
 
 		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
 		{
