@@ -42,7 +42,8 @@ public class DrawTraces implements PlugIn
 {
 	private static final String TITLE = "Draw Traces";
 	private static final String[] sorts = new String[] { "None", "ID", "Time", "Size", "Length" };
-	private static final String[] luts = new String[] { "red-hot", "ice", "rainbow", "fire", "red-yellow" };
+	private static final String[] luts = new String[] { "Red-Hot", "Ice", "Rainbow", "Fire", "Red-Yellow", "Red",
+			"Green", "Blue" };
 
 	private static String inputOption = "";
 	private static String title = "";
@@ -99,7 +100,10 @@ public class DrawTraces implements PlugIn
 			return;
 		}
 
-		Utils.log("Traces %d / %d (%d)", count, traces.length, results.size());
+		String msg = String.format(TITLE + ": %d / %s (%s)", count, Utils.pleural(traces.length, "trace"), 
+				Utils.pleural(results.size(), "localisation"));
+		IJ.showStatus(msg);
+		//Utils.log(msg);
 
 		Rectangle bounds = results.getBounds(true);
 		ImagePlus imp = WindowManager.getImage(title);
@@ -181,7 +185,7 @@ public class DrawTraces implements PlugIn
 		}
 		imp.setOverlay(o);
 
-		IJ.showStatus("Finished " + Utils.pleural(count, "trace"));
+		IJ.showStatus(msg);
 	}
 
 	private boolean showDialog()
@@ -200,7 +204,7 @@ public class DrawTraces implements PlugIn
 			}
 
 		gd.addMessage("Draw the traces on an image");
-		ResultsManager.addInput(gd, "Results", inputOption, InputSource.MEMORY_CLUSTERED);
+		ResultsManager.addInput(gd, "Traces", inputOption, InputSource.MEMORY_CLUSTERED);
 		gd.addChoice("Image", titles.toArray(new String[0]), title);
 		gd.addSlider("Min_size", 2, 15, minSize);
 		gd.addChoice("Sort", sorts, sorts[sort]);
@@ -235,21 +239,30 @@ public class DrawTraces implements PlugIn
 		int nColors;
 		switch (lut)
 		{
-			case 4: // red-yellow
-				nColors = setColours(reds, greens, blues, Color.red, Color.yellow);
-				break;
-			case 3:
-				nColors = fire(reds, greens, blues);
-				break;
-			case 2:
-				nColors = rainbow(reds, greens, blues);
+			case 0: // red-hot
+			default:
+				nColors = setColours(reds, greens, blues, Color.red, Color.yellow, Color.WHITE);
 				break;
 			case 1:
 				nColors = ice(reds, greens, blues);
 				break;
-			case 0: // red-hot
-			default: 
-				nColors = setColours(reds, greens, blues, Color.red, Color.yellow, Color.WHITE);
+			case 2:
+				nColors = rainbow(reds, greens, blues);
+				break;
+			case 3:
+				nColors = fire(reds, greens, blues);
+				break;
+			case 4: // red-yellow
+				nColors = setColours(reds, greens, blues, Color.red, Color.yellow);
+				break;
+			case 5: // red
+				nColors = setColours(reds, greens, blues, Color.red);
+				break;
+			case 6: // green
+				nColors = setColours(reds, greens, blues, Color.green);
+				break;
+			case 7: // blue
+				nColors = setColours(reds, greens, blues, Color.blue);
 				break;
 		}
 		if (nColors < 256)
@@ -274,13 +287,23 @@ public class DrawTraces implements PlugIn
 
 	private int setColours(byte[] reds, byte[] greens, byte[] blues, Color... colours)
 	{
-		for (int i = 0; i < colours.length; i++)
+		int n = 0;
+		if (colours.length == 1)
 		{
-			reds[i] = (byte) colours[i].getRed();
-			greens[i] = (byte) colours[i].getGreen();
-			blues[i] = (byte) colours[i].getBlue();
+			reds[n] = (byte) (colours[0].getRed() / 2);
+			greens[n] = (byte) (colours[0].getGreen() / 2);
+			blues[n] = (byte) (colours[0].getBlue() / 2);
+			n++;
 		}
-		return colours.length;
+
+		for (Color colour : colours)
+		{
+			reds[n] = (byte) colour.getRed();
+			greens[n] = (byte) colour.getGreen();
+			blues[n] = (byte) colour.getBlue();
+			n++;
+		}
+		return n;
 	}
 
 	/**
