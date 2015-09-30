@@ -64,7 +64,8 @@ public class ResultsManager implements PlugIn, MouseListener
 {
 	public enum InputSource
 	{
-		FILE("File"), MEMORY("Memory"), MEMORY_TRACED("Memory (Traced)"), NONE("None");
+		FILE("File"), MEMORY("Memory"), MEMORY_MULTI_FRAME("Memory (Multi-Frame)"), MEMORY_SINGLE_FRAME(
+				"Memory (Single-Frame)"), MEMORY_CLUSTERED("Memory (Clustered)"), NONE("None");
 
 		private String name;
 
@@ -569,16 +570,12 @@ public class ResultsManager implements PlugIn, MouseListener
 				break;
 
 			case MEMORY:
+			case MEMORY_MULTI_FRAME:
+			case MEMORY_SINGLE_FRAME:
+			case MEMORY_CLUSTERED:
 				for (String name : MemoryPeakResults.getResultNames())
 				{
-					addInputSource(source, MemoryPeakResults.getResults(name), false);
-				}
-				break;
-
-			case MEMORY_TRACED:
-				for (String name : MemoryPeakResults.getResultNames())
-				{
-					addInputSource(source, MemoryPeakResults.getResults(name), true);
+					addInputSource(source, MemoryPeakResults.getResults(name), input);
 				}
 				break;
 		}
@@ -589,28 +586,70 @@ public class ResultsManager implements PlugIn, MouseListener
 	 * 
 	 * @param source
 	 * @param memoryResults
-	 * @param traced
-	 *            Select only those results with ExtendedPeakResult objects
+	 * @param input
+	 *            MEMORY_MULTI_FRAME : Select only those results with at least one result spanning frames,
+	 *            MEMORY_CLUSTERED : Select only those results with all IDs above zero
 	 */
-	public static void addInputSource(ArrayList<String> source, MemoryPeakResults memoryResults, boolean traced)
+	public static void addInputSource(ArrayList<String> source, MemoryPeakResults memoryResults, InputSource input)
 	{
 		if (memoryResults.size() > 0)
 		{
-			if (traced && !isTraced(memoryResults))
-				return;
+			switch (input)
+			{
+				case MEMORY_MULTI_FRAME:
+					if (!isMultiFrame(memoryResults))
+						return;
+					break;
+				case MEMORY_SINGLE_FRAME:
+					if (isMultiFrame(memoryResults))
+						return;
+					break;
+				case MEMORY_CLUSTERED:
+					if (!isID(memoryResults))
+						return;
+					break;
+				default:
+			}
 			source.add(memoryResults.getName() + " [" + memoryResults.size() + "]");
 		}
 	}
 
 	/**
-	 * Checked for traced results. All results must be an ExtendedPeakResult.
+	 * Check for multi-frame results.
 	 * 
 	 * @param memoryResults
-	 * @return True if traced
+	 * @return True if at least one result spanning frames
 	 */
-	public static boolean isTraced(MemoryPeakResults memoryResults)
+	public static boolean isMultiFrame(MemoryPeakResults memoryResults)
 	{
-		// All results must be an ExtendedPeakResult
+		for (PeakResult r : memoryResults.getResults())
+			if (r.peak < r.getEndFrame())
+				return true;
+		return false;
+	}
+
+	/**
+	 * Check for IDs above zero.
+	 * 
+	 * @param memoryResults
+	 * @return True if all results have IDs above zero
+	 */
+	public static boolean isID(MemoryPeakResults memoryResults)
+	{
+		for (PeakResult r : memoryResults.getResults())
+			if (r.getId() <= 0)
+				return false;
+		return true;
+	}
+
+	/**
+	 * All results must be an ExtendedPeakResult.
+	 * 
+	 * @param memoryResults
+	 * @return True if all ExtendedPeakResult
+	 */
+	public static boolean isExtended(MemoryPeakResults memoryResults)
+	{
 		for (PeakResult r : memoryResults.getResults())
 			if (!(r instanceof ExtendedPeakResult))
 				return false;

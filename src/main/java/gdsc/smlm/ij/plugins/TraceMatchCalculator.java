@@ -99,9 +99,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		GenericDialog gd = new GenericDialog(TITLE);
 
 		gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
-		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY_TRACED);
-		ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.MEMORY_TRACED);
-		ResultsManager.addInput(gd, "Results3", inputOption3, InputSource.NONE, InputSource.MEMORY_TRACED);
+		ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY_MULTI_FRAME);
+		ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.MEMORY_MULTI_FRAME);
+		ResultsManager.addInput(gd, "Results3", inputOption3, InputSource.NONE, InputSource.MEMORY_MULTI_FRAME);
 		gd.addNumericField("Distance", dThreshold, 2);
 
 		gd.addNumericField("Beta", beta, 2);

@@ -1,5 +1,7 @@
 package gdsc.smlm.results;
 
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -29,6 +31,21 @@ public class ExtendedPeakResult extends PeakResult
 		this.id = id;
 	}
 
+	/**
+	 * Simple constructor to create a result with location, width, strength, and id
+	 * 
+	 * @param x
+	 * @param y
+	 * @param sd
+	 * @param signal
+	 * @param id
+	 */
+	public ExtendedPeakResult(float x, float y, float sd, float signal, int id)
+	{
+		super(x, y, sd, signal);
+		this.id = id;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -21,8 +21,8 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJLogger;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.clustering.Cluster;
 import gdsc.smlm.results.clustering.ClusterPoint;
 import gdsc.smlm.results.clustering.ClusteringAlgorithm;
@@ -313,9 +313,10 @@ public class PCPALMClusters implements PlugIn
 		results.setCalibration(new Calibration(100, 1, PCPALMMolecules.seconds * 1000));
 		// Make the standard deviation such that the Gaussian volume will be 95% at the distance threshold
 		final float sd = (float) (distance / 1.959964);
+		int id = 0;
 		for (Cluster c : clusters)
 		{
-			results.add(new PeakResult((float) c.x, (float) c.y, sd, c.n));
+			results.add(new ExtendedPeakResult((float) c.x, (float) c.y, sd, c.n, ++id));
 		}
 		MemoryPeakResults.addResults(results);
 

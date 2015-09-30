@@ -23,7 +23,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Define a cluster of localisations
  */
-public class Cluster
+public class Cluster implements Comparable<Cluster>
 {
 	public enum CentroidMethod
 	{
@@ -32,6 +32,7 @@ public class Cluster
 
 	protected ArrayList<PeakResult> results = new ArrayList<PeakResult>(2);
 	private float[] centroid = null;
+	private int id;
 
 	public Cluster()
 	{
@@ -262,5 +263,27 @@ public class Cluster
 	public void sort()
 	{
 		Collections.sort(results);
+	}
+
+	public int getId()
+	{
+		return id;
+	}
+
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(Cluster that)
+	{
+		// Sort by ID ascending
+		return this.id - that.id;
 	}
 }

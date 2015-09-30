@@ -972,7 +972,7 @@ public class TraceDiffusion implements PlugIn
 		{
 			if (notValid(r, allResults, nmPerPixel))
 				continue;
-			ResultsManager.addInputSource(source, r, false);
+			ResultsManager.addInputSource(source, r, InputSource.MEMORY_SINGLE_FRAME);
 		}
 		if (source.isEmpty())
 			return null;

@@ -384,7 +384,33 @@ public class FilePeakResults extends AbstractPeakResults
 					0,
 					String.format("#Cluster %f %f (+/-%f) n=%d\n", centroid[0], centroid[1],
 							cluster.getStandardDeviation(), cluster.size()));
+			addAll(cluster);
+		}
+	}
+
+	private void addAll(Cluster cluster)
+	{
+		if (!showId || cluster.getId() == 0)
+		{
 			addAll(cluster.getPoints());
+		}
+		else
+		{
+			// Store the ID from the trace
+			final int id = cluster.getId();
+			ArrayList<PeakResult> results = cluster.getPoints();
+			ArrayList<PeakResult> results2 = new ArrayList<PeakResult>(results.size());
+			for (PeakResult result : results)
+			{
+				if (result.getId() == id)
+					results2.add(result);
+				else
+				{
+					results2.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue,
+							result.error, result.noise, result.params, result.paramsStdDev, result.getEndFrame(), id));
+				}
+			}
+			addAll(results2);
 		}
 	}
 
@@ -405,7 +431,7 @@ public class FilePeakResults extends AbstractPeakResults
 			writeResult(0, String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f\n", centroid[0],
 					centroid[1], trace.getStandardDeviation(), trace.size(), trace.getNBlinks(), trace.getOnTime(),
 					trace.getOffTime(), trace.getSignal()));
-			addAll(trace.getPoints());
+			addAll(trace);
 		}
 	}
 

@@ -307,6 +307,7 @@ public class TraceMolecules implements PlugIn
 		for (Cluster cluster : clusters)
 		{
 			Trace trace = new Trace();
+			trace.setId(i + 1);
 			for (ClusterPoint point = cluster.head; point != null; point = point.next)
 			{
 				// The point Id was the position in the original results array
@@ -400,7 +401,8 @@ public class TraceMolecules implements PlugIn
 			filename = Utils.replaceExtension(filename, "xls");
 
 			boolean showDeviations = (traces.length > 0 && traces[0].getHead().paramsStdDev != null);
-			FilePeakResults traceResults = new FilePeakResults(filename, showDeviations);
+			// Assume that are results are from a single frame but store the trace ID
+			FilePeakResults traceResults = new FilePeakResults(filename, showDeviations, false, true);
 			traceResults.copySettings(sourceResults);
 			traceResults.begin();
 			if (!traceResults.isActive())
