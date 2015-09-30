@@ -730,9 +730,131 @@ public class TraceManager
 	 *            The index of the earliest forerunner spot
 	 * @param currentIndex
 	 *            The index of the first spot in the same frame (i.e. end of forerunner spots)
-	 * @return
+	 * @return The assigned trace
 	 */
 	private int findForerunner(final int index, final int pastIndex, final int currentIndex)
+	{
+		if (dExclusion2 == 0)
+			return findForerunnerNoExclusion(index, pastIndex, currentIndex);
+		return findForerunnerWithExclusion(index, pastIndex, currentIndex);
+	}
+
+	/**
+	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
+	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
+	 * closest spot.
+	 * 
+	 * @param index
+	 *            The index of the spot
+	 * @param pastIndex
+	 *            The index of the earliest forerunner spot
+	 * @param currentIndex
+	 *            The index of the first spot in the same frame (i.e. end of forerunner spots)
+	 * @return
+	 */
+	private int findForerunnerNoExclusion(final int index, final int pastIndex, final int currentIndex)
+	{
+		Localisation spot = localisations[index];
+		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
+		{
+			for (int i = pastIndex; i < currentIndex; i++)
+			{
+				final float d2 = spot.distance2(endLocalisations[i]);
+				if (d2 <= dThresh2)
+				{
+					minD = d2;
+					int trace = endLocalisations[i].trace;
+
+					// Search all remaining spots that end in this time frame and pick the closest
+					int nextIndex = endIndex[endLocalisations[i].endT + 1];
+					for (int ii = i + 1; ii < nextIndex; ii++)
+					{
+						final float dd2 = spot.distance2(endLocalisations[ii]);
+						if (dd2 < minD)
+						{
+							minD = dd2;
+							trace = endLocalisations[ii].trace;
+						}
+					}
+
+					return trace;
+				}
+			}
+		}
+		else if (traceMode == TraceMode.LATEST_FORERUNNER)
+		{
+			for (int i = currentIndex; i-- > pastIndex;)
+			{
+				final float d2 = spot.distance2(endLocalisations[i]);
+				if (d2 <= dThresh2)
+				{
+					minD = d2;
+					int trace = endLocalisations[i].trace;
+
+					// Search all remaining spots in this time frame and pick the closest
+					int previousIndex = endIndex[endLocalisations[i].endT];
+					//// DEBUG
+					//int previousIndex = i;
+					//// Look for the index for the previous time-frame
+					//while (previousIndex > 0 && endLocalisations[previousIndex-1].t == endLocalisations[i].t)
+					//	previousIndex--;
+					//if (previousIndex != endIndex[endLocalisations[i].endT])
+					//{
+					//	System.out.printf("Error when tracing: %d != %d\n", previousIndex,
+					//			endIndex[endLocalisations[i].endT]);
+					//}
+					for (int ii = i; ii-- > previousIndex;)
+					{
+						final float dd2 = spot.distance2(endLocalisations[ii]);
+						if (dd2 < minD)
+						{
+							minD = dd2;
+							trace = endLocalisations[ii].trace;
+						}
+					}
+
+					return trace;
+				}
+			}
+		}
+		else
+		// traceMode == TraceMode.SINGLE_LINKAGE
+		{
+			// Find the closest spot
+			minD = dThresh2;
+			int minI = -1;
+			for (int i = pastIndex; i < currentIndex; i++)
+			{
+				final float d2 = spot.distance2(endLocalisations[i]);
+				if (d2 <= minD)
+				{
+					minD = d2;
+					minI = i;
+				}
+			}
+
+			if (minI == -1)
+				return 0;
+
+			return endLocalisations[minI].trace;
+		}
+		return 0;
+	}
+
+	/**
+	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
+	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
+	 * closest spot.
+	 * 
+	 * @param index
+	 *            The index of the spot
+	 * @param pastIndex
+	 *            The index of the earliest forerunner spot
+	 * @param currentIndex
+	 *            The index of the first spot in the same frame (i.e. end of forerunner spots)
+	 * @return
+	 */
+	private int findForerunnerWithExclusion(final int index, final int pastIndex, final int currentIndex)
 	{
 		Localisation spot = localisations[index];
 		// Check that the next farthest spot is above the exclusion distance
@@ -834,7 +956,7 @@ public class TraceManager
 			}
 		}
 		else
-		// traceMode == TraceMode.Complete
+		// traceMode == TraceMode.SINGLE_LINKAGE
 		{
 			// Find the closest spot
 			minD = dThresh2;
@@ -874,6 +996,33 @@ public class TraceManager
 		}
 		return 0;
 	}
+	
+	/**
+	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
+	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
+	 * closest spot.
+	 * <p>
+	 * Do not assigned to the specified trace to ignore.
+	 * 
+	 * @param index
+	 *            The index of the spot
+	 * @param pastIndex
+	 *            The index of the earliest forerunner spot
+	 * @param currentIndex
+	 *            The index of the first spot in the same frame (i.e. end of forerunner spots)
+	 * @param ignoreCount
+	 *            The count of traces to ignore
+	 * @param ignore
+	 *            The traces to ignore
+	 * @return The assigned trace
+	 */
+	private int findAlternativeForerunner(final int index, final int pastIndex, final int currentIndex,
+			final int ignoreCount, final int[] ignore)
+	{
+		if (dExclusion2 == 0)
+			return findAlternativeForerunnerNoExclusion(index, pastIndex, currentIndex, ignoreCount, ignore);
+		return findAlternativeForerunnerWithExclusion(index, pastIndex, currentIndex, ignoreCount, ignore);
+	}
 
 	/**
 	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
@@ -894,7 +1043,139 @@ public class TraceManager
 	 *            The traces to ignore
 	 * @return
 	 */
-	private int findAlternativeForerunner(final int index, final int pastIndex, final int currentIndex,
+	private int findAlternativeForerunnerNoExclusion(final int index, final int pastIndex, final int currentIndex,
+			final int ignoreCount, final int[] ignore)
+	{
+		Localisation spot = localisations[index];
+
+		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
+		{
+			for (int i = pastIndex; i < currentIndex; i++)
+			{
+				if (ignore(i, ignoreCount, ignore))
+					continue;
+
+				final float d2 = spot.distance2(endLocalisations[i]);
+				if (d2 <= dThresh2)
+				{
+					minD = d2;
+					int trace = endLocalisations[i].trace;
+
+					// Search all remaining spots in this time frame and pick the closest
+					int nextIndex = endIndex[endLocalisations[i].endT + 1];
+					//					int nextIndex = i;
+					//					// Look for the index for the next time-frame
+					//					for (int tt = endLocalisations[i].endT + 1; tt < endIndex.length; tt++)
+					//					{
+					//						nextIndex = endIndex[tt];
+					//						if (nextIndex != i)
+					//							break;
+					//					}
+					for (int ii = i + 1; ii < nextIndex; ii++)
+					{
+						if (ignore(ii, ignoreCount, ignore))
+							continue;
+
+						final float dd2 = spot.distance2(endLocalisations[ii]);
+						if (dd2 < minD)
+						{
+							minD = dd2;
+							trace = endLocalisations[ii].trace;
+						}
+					}
+
+					return trace;
+				}
+			}
+		}
+		else if (traceMode == TraceMode.LATEST_FORERUNNER)
+		{
+			for (int i = currentIndex; i-- > pastIndex;)
+			{
+				if (ignore(i, ignoreCount, ignore))
+					continue;
+
+				final float d2 = spot.distance2(endLocalisations[i]);
+				if (d2 <= dThresh2)
+				{
+					minD = d2;
+					int trace = endLocalisations[i].trace;
+
+					// Search all remaining spots in this time frame and pick the closest
+					int previousIndex = endIndex[endLocalisations[i].endT];
+					//int previousIndex = i;
+					//// Look for the index for the previous time-frame
+					//while (previousIndex > 0 && endLocalisations[previousIndex-1].t == endLocalisations[i].t)
+					//	previousIndex--;
+					//if (previousIndex != endIndex[endLocalisations[i].endT])
+					//{
+					//	System.out.printf("Error when tracing: %d != %d\n", previousIndex,
+					//			endIndex[endLocalisations[i].endT]);
+					//}
+					for (int ii = i; ii-- > previousIndex;)
+					{
+						if (ignore(ii, ignoreCount, ignore))
+							continue;
+
+						final float dd2 = spot.distance2(endLocalisations[ii]);
+						if (dd2 < minD)
+						{
+							minD = dd2;
+							trace = endLocalisations[ii].trace;
+						}
+					}
+
+					return trace;
+				}
+			}
+		}
+		else
+		// traceMode == TraceMode.SINGLE_LINKAGE
+		{
+			// Find the closest spot
+			minD = dThresh2;
+			int minI = -1;
+			for (int i = pastIndex; i < currentIndex; i++)
+			{
+				if (ignore(i, ignoreCount, ignore))
+					continue;
+
+				final float d2 = spot.distance2(endLocalisations[i]);
+				if (d2 <= minD)
+				{
+					minD = d2;
+					minI = i;
+				}
+			}
+
+			if (minI == -1)
+				return 0;
+
+			return endLocalisations[minI].trace;
+		}
+		return 0;
+	}
+
+	/**
+	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
+	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
+	 * closest spot.
+	 * <p>
+	 * Do not assigned to the specified trace to ignore.
+	 * 
+	 * @param index
+	 *            The index of the spot
+	 * @param pastIndex
+	 *            The index of the earliest forerunner spot
+	 * @param currentIndex
+	 *            The index of the first spot in the same frame (i.e. end of forerunner spots)
+	 * @param ignoreCount
+	 *            The count of traces to ignore
+	 * @param ignore
+	 *            The traces to ignore
+	 * @return
+	 */
+	private int findAlternativeForerunnerWithExclusion(final int index, final int pastIndex, final int currentIndex,
 			final int ignoreCount, final int[] ignore)
 	{
 		Localisation spot = localisations[index];
@@ -1025,7 +1306,7 @@ public class TraceManager
 			}
 		}
 		else
-		// traceMode == TraceMode.Complete
+		// traceMode == TraceMode.SINGLE_LINKAGE
 		{
 			// Find the closest spot
 			minD = dThresh2;
