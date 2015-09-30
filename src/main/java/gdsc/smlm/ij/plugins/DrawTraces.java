@@ -43,7 +43,7 @@ public class DrawTraces implements PlugIn
 	private static final String TITLE = "Draw Traces";
 	private static final String[] sorts = new String[] { "None", "ID", "Time", "Size", "Length" };
 	private static final String[] luts = new String[] { "Red-Hot", "Ice", "Rainbow", "Fire", "Red-Yellow", "Red",
-			"Green", "Blue" };
+			"Green", "Blue", "Cyan", "Magenta", "Yellow" };
 
 	private static String inputOption = "";
 	private static String title = "";
@@ -100,7 +100,7 @@ public class DrawTraces implements PlugIn
 			return;
 		}
 
-		String msg = String.format(TITLE + ": %d / %s (%s)", count, Utils.pleural(traces.length, "trace"), 
+		String msg = String.format(TITLE + ": %d / %s (%s)", count, Utils.pleural(traces.length, "trace"),
 				Utils.pleural(results.size(), "localisation"));
 		IJ.showStatus(msg);
 		//Utils.log(msg);
@@ -255,14 +255,23 @@ public class DrawTraces implements PlugIn
 			case 4: // red-yellow
 				nColors = setColours(reds, greens, blues, Color.red, Color.yellow);
 				break;
-			case 5: // red
+			case 5:
 				nColors = setColours(reds, greens, blues, Color.red);
 				break;
-			case 6: // green
+			case 6:
 				nColors = setColours(reds, greens, blues, Color.green);
 				break;
-			case 7: // blue
+			case 7:
 				nColors = setColours(reds, greens, blues, Color.blue);
+				break;
+			case 8:
+				nColors = setColours(reds, greens, blues, Color.cyan);
+				break;
+			case 9:
+				nColors = setColours(reds, greens, blues, Color.magenta);
+				break;
+			case 10:
+				nColors = setColours(reds, greens, blues, Color.yellow);
 				break;
 		}
 		if (nColors < 256)
