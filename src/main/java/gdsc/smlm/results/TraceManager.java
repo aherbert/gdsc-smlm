@@ -585,6 +585,7 @@ public class TraceManager
 				gain = 1;
 				emCCD = true;
 			}
+			// Ensure all results are added as extended peak results with their trace ID.
 			for (int i = 0; i < traces.length; i++)
 			{
 				traces[i].sort();
@@ -594,7 +595,8 @@ public class TraceManager
 
 				if (traces[i].size() == 1)
 				{
-					results.add(result);
+					results.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue, 0,
+							result.noise, result.params, null, 0, traces[i].getId()));
 					continue;
 				}
 
@@ -616,7 +618,7 @@ public class TraceManager
 				float[] params = new float[] { background, amplitude, 0, centroid[0], centroid[1], sd, sd };
 				int endFrame = traces[i].getTail().getEndFrame();
 				results.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue, 0,
-						(float) noise, params, null, endFrame, i + 1));
+						(float) noise, params, null, endFrame, traces[i].getId()));
 			}
 		}
 		return results;
