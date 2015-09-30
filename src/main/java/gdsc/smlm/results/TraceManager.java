@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.util.FastMath;
@@ -320,7 +321,7 @@ public class TraceManager
 					if (reSort)
 					{
 						reSort = false;
-						Arrays.sort(assigned, i, assignedToTrace - 1, new Comparator<Assignment>()
+						Arrays.sort(assigned, i, assignedToTrace, new Comparator<Assignment>()
 						{
 							public int compare(Assignment o1, Assignment o2)
 							{
@@ -346,32 +347,35 @@ public class TraceManager
 							dualAllocation[dualAllocationCount++] = j;
 					}
 
+					// This trace has been taken so ignore when finding alternatives
+					ignore[ignoreCount++] = assigned[i].traceId;
+
 					if (dualAllocationCount > 0)
 					{
-						// Add this trace to the list to ignore
-						ignore[ignoreCount++] = assigned[i].traceId;
-
 						// Re-allocate the other spots
 						for (int a = 0; a < dualAllocationCount; a++)
 						{
-							int index = assigned[dualAllocation[a]].index;
+							final int j = dualAllocation[a];
+							final int index = assigned[j].index;
 							int traceId = findAlternativeForerunner(index, pastEndIndex, currentEndIndex, ignoreCount,
 									ignore);
 							if (traceId == 0)
 							{
 								traceId = addTrace(index, traceIdToLocalisationsIndexMap, maxT);
 								// Mark to ignore
-								assigned[dualAllocation[a]].distance = -1;
+								assigned[j].distance = -1;
 							}
 							else
 							{
 								// Indicate that the distances have changed and a re-sort is needed
 								reSort = true;
-								assigned[dualAllocation[a]].distance = minD;
+								assigned[j].distance = minD;
 							}
-							assigned[dualAllocation[a]].traceId = traceId;
+							assigned[j].traceId = traceId;
 						}
 					}
+					// Ensure nothing can be sorted ahead of this trace assignment
+					assigned[i].distance = -1;
 				}
 			}
 
@@ -471,6 +475,7 @@ public class TraceManager
 			PeakResult peakResult = results.getResults().get(localisations[index].id);
 
 			Trace nextTrace = new Trace(peakResult);
+			nextTrace.setId(traceId);
 			final int tLimit = maxT[traceId];
 
 			// Check if the trace has later frames
@@ -498,7 +503,11 @@ public class TraceManager
 			//{
 			//	for (int i = 0; i < count; i++)
 			//		if (time[i] == p.peak)
-			//			System.out.println("Trace contains multiple localisations from the same frame");
+			//		{
+			//			System.out.printf("Trace %d contains multiple localisations from the same frame: %d\n", n + 1,
+			//					p.peak);
+			//			break;
+			//		}
 			//	time[count++] = p.peak;
 			//}
 
@@ -894,6 +903,9 @@ public class TraceManager
 		// the exclusion distance (otherwise they could not be assigned and ignored).   
 		float nextMinD = Float.POSITIVE_INFINITY;
 		int currentT;
+
+		// TODO - When using the dExclusion2 limit we must also check the distance against those spots
+		// in the ignore array
 
 		if (traceMode == TraceMode.EARLIEST_FORERUNNER)
 		{
@@ -1324,5 +1336,79 @@ public class TraceManager
 			tracker.progress(1.0);
 
 		return neighbours;
+	}
+
+	/**
+	 * Collect all peak results with the same ID into traces. IDs of zero are ignored.
+	 * 
+	 * @param results
+	 * @return The traces
+	 */
+	public static Trace[] convert(MemoryPeakResults results)
+	{
+		if (results == null || results.size() == 0)
+			return new Trace[0];
+
+		List<PeakResult> list = results.getResults();
+		// Find the max trace ID
+		int max = 0;
+		for (PeakResult result : list)
+			if (max < result.getId())
+				max = result.getId();
+		if (max == 0)
+			return new Trace[0];
+
+		if (max < 10000)
+		{
+			Trace[] traces = new Trace[max + 1];
+			for (PeakResult result : list)
+			{
+				final int id = result.getId();
+				if (id > 0)
+				{
+					if (traces[id] == null)
+					{
+						traces[id] = new Trace();
+						traces[id].setId(id);
+					}
+					traces[id].add(result);
+				}
+			}
+
+			// Consolidate to remove empty positions
+			int count = 0;
+			for (int i = 1; i < traces.length; i++)
+				if (traces[i] != null)
+					traces[count++] = traces[i];
+			return Arrays.copyOf(traces, count);
+		}
+		else
+		{
+			// Use a map when the size is potentially large
+			TreeMap<Integer, Trace> map = new TreeMap<Integer, Trace>();
+			for (PeakResult result : list)
+			{
+				final int id = result.getId();
+				if (id > 0)
+				{
+					Trace trace = map.get(id);
+					if (trace == null)
+					{
+						trace = new Trace();
+						trace.setId(id);
+						map.put(id, trace);
+					}
+					trace.add(result);
+				}
+			}
+
+			// Extract the traces
+			Trace[] traces = new Trace[map.size()];
+			int count = 0;
+			for (Trace trace : map.values())
+				traces[count++] = trace;
+			Arrays.sort(traces);
+			return traces;
+		}
 	}
 }
