@@ -48,9 +48,13 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private String sourceText = null;
 	private String tableTitle = "Fit Results";
 	private TextWindow resultsWindow;
+	private TextPanel tp;
 	private double gain = 1;
 	private double nmPerPixel = 1;
 	private boolean addCounter = false;
+	protected boolean tableActive = false;
+	private int nextRepaintSize = 0;
+	private double repaintInterval = 0.1;
 
 	private int indexT = -1, indexX = -1, indexY = -1;
 
@@ -81,11 +85,12 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 */
 	public void begin()
 	{
+		tableActive = false;
 		createSourceText();
 		createResultsWindow();
 		if (clearAtStart)
 		{
-			resultsWindow.getTextPanel().clear();
+			tp.clear();
 		}
 		if (showCalibratedValues)
 		{
@@ -101,6 +106,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				nmPerPixel = 1;
 			}
 		}
+		size = 0;
+		nextRepaintSize = 20; // Let some results appear before drawing
+		tableActive = true;
 	}
 
 	/**
@@ -140,6 +148,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			map.put(resultsWindow.getTextPanel(), roiPainter);
 		}
 
+		tp = resultsWindow.getTextPanel();
+
 		if (roiPainter != null && getSource() != null)
 		{
 			roiPainter.setTitle(getSource().getOriginal().getName());
@@ -148,7 +158,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			roiPainter.setCoordProvider(this);
 
 			// Get the headings for extracting the coordinates 
-			String[] headings = resultsWindow.getTextPanel().getColumnHeadings().split("\t");
+			String[] headings = tp.getColumnHeadings().split("\t");
 			for (int i = 0; i < headings.length; i++)
 			{
 				if (headings[i].equals(peakIdColumnName))
@@ -247,6 +257,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private void addPeak(int peak, int endFrame, int origX, int origY, float origValue, double error, float noise,
 			float[] params, float[] paramsDev)
 	{
+		if (!tableActive)
+			return;
+
 		float precision = 0;
 		if (this.calibration != null)
 		{
@@ -317,17 +330,54 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		for (float f : args)
 			sb.append(String.format("\t%g", f));
 
-		addResult(sb.toString());
+		append(sb.toString());
 	}
 
-	private synchronized void addResult(String result)
+	private void append(String result)
+	{
+		// Support for periodic refresh
+		synchronized (tp)
+		{
+			addResult(result);
+		}
+		updateTable();
+	}
+
+	private void addResult(String result)
 	{
 		size++;
-		resultsWindow.append(result);
+		tp.appendWithoutUpdate(result);
+	}
+
+	private void updateTable()
+	{
+		if (size < nextRepaintSize || !tableActive)
+			return;
+
+		if (!isResultsActive())
+		{
+			//System.out.println("Table has been closed");
+			tableActive = false;
+			return;
+		}
+
+		drawTable();
+	}
+
+	private void drawTable()
+	{
+		synchronized (tp)
+		{
+			//System.out.printf("Refreshing table: size = %d\n", size);
+			nextRepaintSize = (int) (size + size * repaintInterval);
+			tp.updateDisplay();
+		}
 	}
 
 	public void addAll(Collection<PeakResult> results)
 	{
+		if (!tableActive)
+			return;
 		for (PeakResult result : results)
 			addPeak(result.peak, result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
 					result.noise, result.params, result.paramsStdDev);
@@ -350,7 +400,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 */
 	public void end()
 	{
-		// Nothing to do
+		tableActive = false;
+		drawTable();
 	}
 
 	/**
@@ -377,7 +428,12 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 */
 	public boolean isActive()
 	{
-		return resultsWindow != null && resultsWindow.isShowing();
+		return tableActive;
+	}
+
+	private boolean isResultsActive()
+	{
+		return resultsWindow.isShowing();
 	}
 
 	/**
@@ -523,5 +579,29 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void setShowEndFrame(boolean showEndFrame)
 	{
 		this.showEndFrame = showEndFrame;
+	}
+
+	/**
+	 * Image will be repainted when a fraction of new results have been added.
+	 * 
+	 * @param repaintInterval
+	 *            the repaintInterval to set (range 0.001-1)
+	 */
+	public void setRepaintInterval(double repaintInterval)
+	{
+		if (repaintInterval < 0.001)
+			repaintInterval = 0.001;
+		if (repaintInterval > 1)
+			repaintInterval = 1;
+
+		this.repaintInterval = repaintInterval;
+	}
+
+	/**
+	 * @return the repaintInterval
+	 */
+	public double getRepaintInterval()
+	{
+		return repaintInterval;
 	}
 }
