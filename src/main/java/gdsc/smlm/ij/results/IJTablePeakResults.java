@@ -351,7 +351,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private void updateTable()
 	{
-		if (size < nextRepaintSize || !tableActive)
+		if (size < nextRepaintSize)
 			return;
 
 		if (!isResultsActive())

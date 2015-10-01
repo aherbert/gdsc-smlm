@@ -710,7 +710,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	protected void updateImage()
 	{
-		if (size < nextRepaintSize || !imageActive || !displayImage)
+		if (size < nextRepaintSize || !displayImage)
 			return;
 
 		if (!imp.isVisible())
