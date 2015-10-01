@@ -671,6 +671,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				addData(nPoints, indices, values);
 				nPoints = 0;
 				updateImage();
+				if (!imageActive)
+					return;
 			}
 		}
 
