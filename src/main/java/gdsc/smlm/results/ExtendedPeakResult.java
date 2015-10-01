@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -45,7 +43,7 @@ public class ExtendedPeakResult extends PeakResult
 		super(x, y, sd, signal);
 		this.id = id;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
