@@ -286,4 +286,38 @@ public class Cluster implements Comparable<Cluster>
 		// Sort by ID ascending
 		return this.id - that.id;
 	}
+
+	/**
+	 * Expand any localisations that have a different start and end frame into a series.
+	 * Note that this will increase the size of the cluster.
+	 * <p>
+	 * The results are copies save for the end frame. This makes analysis of the signal invalid as it will have been
+	 * increased n-fold for each localisation that spans n frames. The original multi-frame result is removed.
+	 */
+	public void expandToSingles()
+	{
+		ArrayList<PeakResult> extra = null;
+		ArrayList<PeakResult> remove = null;
+		for (PeakResult result : results)
+		{
+			if (result.peak != result.getEndFrame())
+			{
+				if (extra == null)
+				{
+					extra = new ArrayList<PeakResult>();
+					remove = new ArrayList<PeakResult>();
+				}
+				remove.add(result);
+				for (int peak = result.peak; peak <= result.getEndFrame(); peak++)
+					extra.add(new ExtendedPeakResult(peak, result.origX, result.origY, result.origValue, result.error,
+							result.noise, result.params, result.paramsStdDev, peak, result.getId()));
+			}
+		}
+		if (extra == null)
+			return;
+		for (PeakResult result : remove)
+			results.remove(result);
+		for (PeakResult result : extra)
+			add(result);
+	}
 }

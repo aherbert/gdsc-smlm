@@ -22,8 +22,10 @@ import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.utils.Sort;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
@@ -41,19 +43,23 @@ import java.util.ArrayList;
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.
  */
-public class DrawTraces implements PlugIn
+public class DrawClusters implements PlugIn
 {
-	private static final String TITLE = "Draw Traces";
+	private static final String TITLE = "Draw Clusters";
 	private static final String[] sorts = new String[] { "None", "ID", "Time", "Size", "Length" };
 	private static final String[] luts = new String[] { "Red-Hot", "Ice", "Rainbow", "Fire", "Red-Yellow", "Red",
 			"Green", "Blue", "Cyan", "Magenta", "Yellow" };
 
 	private static String inputOption = "";
 	private static String title = "";
+	private static int imageSize = 20;
+	private static boolean expandToSingles = false;
 	private static int minSize = 2;
+	private static int maxSize = 0;
+	private static boolean drawLines = true;
 	private static int sort = 0;
 	private static boolean splineFit = false;
-	private static boolean showTracks = false;
+	private static boolean useStackPosition = false;
 	private static int lut = 0;
 
 	/*
@@ -91,9 +97,13 @@ public class DrawTraces implements PlugIn
 		// Filter traces to a min size
 		int maxFrame = 0;
 		int count = 0;
+		final int myMaxSize = (maxSize < minSize) ? Integer.MAX_VALUE : maxSize;
+		final boolean myDrawLines = (myMaxSize < 2) ? false : drawLines;
 		for (int i = 0; i < traces.length; i++)
 		{
-			if (traces[i].size() >= minSize)
+			if (expandToSingles)
+				traces[i].expandToSingles();
+			if (traces[i].size() >= minSize && traces[i].size() <= myMaxSize)
 			{
 				traces[count++] = traces[i];
 				traces[i].sort();
@@ -104,7 +114,7 @@ public class DrawTraces implements PlugIn
 
 		if (count == 0)
 		{
-			IJ.error(TITLE, "No traces achieved the minimum size");
+			IJ.error(TITLE, "No traces achieved the size limits");
 			return;
 		}
 
@@ -115,7 +125,7 @@ public class DrawTraces implements PlugIn
 
 		Rectangle bounds = results.getBounds(true);
 		ImagePlus imp = WindowManager.getImage(title);
-		boolean canShowTracks = showTracks;
+		boolean isUseStackPosition = useStackPosition;
 		if (imp == null)
 		{
 			// Create a default image using 100 pixels as the longest edge
@@ -123,20 +133,36 @@ public class DrawTraces implements PlugIn
 			int w, h;
 			if (maxD == 0)
 			{
-				w = h = 100;
+				w = h = imageSize;
 			}
 			else
 			{
-				w = (int) (100.0 * bounds.width / maxD);
-				h = (int) (100.0 * bounds.height / maxD);
+				w = (int) (imageSize * bounds.width / maxD);
+				h = (int) (imageSize * bounds.height / maxD);
 			}
-			imp = Utils.display(TITLE, new ByteProcessor(w, h));
+			ByteProcessor bp = new ByteProcessor(w, h);
+			if (isUseStackPosition)
+			{
+				ImageStack stack = new ImageStack(w, h, maxFrame);
+				for (int i = 1; i <= maxFrame; i++)
+					stack.setPixels(bp.getPixels(), i); // Do not clone as the image is empty
+				imp = Utils.display(TITLE, stack);
+			}
+			else
+				imp = Utils.display(TITLE, bp);
+
+			// Enlarge
+			ImageWindow iw = imp.getWindow();
+			for (int i = 9; i-- > 0 && iw.getWidth() < 500 && iw.getHeight() < 500;)
+			{
+				iw.getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
+			}
 		}
 		else
 		{
 			// Check if the image has enough frames for all the traces
 			if (maxFrame > imp.getNFrames())
-				canShowTracks = false;
+				isUseStackPosition = false;
 		}
 
 		final float xScale = (float) (imp.getWidth() / bounds.getWidth());
@@ -144,7 +170,7 @@ public class DrawTraces implements PlugIn
 
 		// Create ROIs and store data to sort them
 		Roi[] rois = new Roi[count];
-		int[][] frames = (canShowTracks) ? new int[count][] : null;
+		int[][] frames = (isUseStackPosition) ? new int[count][] : null;
 		int[] indices = Utils.newArray(count, 0, 1);
 		double[] values = new double[count];
 		for (int i = 0; i < count; i++)
@@ -154,20 +180,30 @@ public class DrawTraces implements PlugIn
 			float[] xPoints = new float[nPoints];
 			float[] yPoints = new float[nPoints];
 			int j = 0;
-			if (canShowTracks)
+			if (isUseStackPosition)
 				frames[i] = new int[nPoints];
 			for (PeakResult result : trace.getPoints())
 			{
 				xPoints[j] = (result.getXPosition() - bounds.x) * xScale;
 				yPoints[j] = (result.getYPosition() - bounds.y) * yScale;
-				if (canShowTracks)
+				if (isUseStackPosition)
 					frames[i][j] = result.peak;
 				j++;
 			}
-			PolygonRoi roi = new PolygonRoi(xPoints, yPoints, nPoints, Roi.POLYLINE);
+			Roi roi;
+			if (myDrawLines)
+			{
+				roi = new PolygonRoi(xPoints, yPoints, nPoints, Roi.POLYLINE);
+				if (splineFit)
+					((PolygonRoi) roi).fitSpline();
+			}
+			else
+			{
+				roi = new PointRoi(xPoints, yPoints, nPoints);
+				((PointRoi) roi).setHideLabels(true);
+			}
+
 			rois[i] = roi;
-			if (splineFit)
-				roi.fitSpline();
 			switch (sort)
 			{
 				case 0:
@@ -195,7 +231,7 @@ public class DrawTraces implements PlugIn
 		Overlay o = new Overlay();
 		LUT lut = createLUT();
 		double scale = 256.0 / count;
-		if (canShowTracks)
+		if (isUseStackPosition)
 		{
 			// Add the tracks on the frames containing the results
 			final boolean isHyperStack = imp.isDisplayedHyperStack();
@@ -204,6 +240,7 @@ public class DrawTraces implements PlugIn
 				final int index = indices[i];
 				final Color c = new Color(lut.getRGB((int) (i * scale)));
 				final PolygonRoi roi = (PolygonRoi) rois[index];
+				roi.setFillColor(c);
 				roi.setStrokeColor(c);
 				final FloatPolygon fp = roi.getNonSplineFloatCoordinates();
 				final Rectangle2D.Double pos = roi.getFloatBounds();
@@ -212,7 +249,8 @@ public class DrawTraces implements PlugIn
 				{
 					addToOverlay(o, (Roi) roi.clone(), isHyperStack, frames[index][j]);
 					PointRoi pointRoi = new PointRoi(pos.x + fp.xpoints[j], pos.y + fp.ypoints[j]);
-					pointRoi.setStrokeColor(c);
+					pointRoi.setFillColor(c);
+					pointRoi.setStrokeColor(Color.black);
 					addToOverlay(o, pointRoi, isHyperStack, frames[index][j]);
 				}
 			}
@@ -247,13 +285,17 @@ public class DrawTraces implements PlugIn
 					titles.add(imp.getTitle());
 			}
 
-		gd.addMessage("Draw the traces on an image");
-		ResultsManager.addInput(gd, "Traces", inputOption, InputSource.MEMORY_CLUSTERED);
+		gd.addMessage("Draw the clusters on an image");
+		ResultsManager.addInput(gd, "Input", inputOption, InputSource.MEMORY_CLUSTERED);
 		gd.addChoice("Image", titles.toArray(new String[0]), title);
-		gd.addSlider("Min_size", 2, 15, minSize);
+		gd.addNumericField("Image_size", imageSize, 0);
+		gd.addCheckbox("Expand_to_singles", expandToSingles);
+		gd.addSlider("Min_size", 1, 15, minSize);
+		gd.addSlider("Max_size", 0, 20, maxSize);
+		gd.addCheckbox("Traces (draw lines)", drawLines);
 		gd.addChoice("Sort", sorts, sorts[sort]);
-		gd.addCheckbox("Spline_fit", splineFit);
-		gd.addCheckbox("Show_tracks", showTracks);
+		gd.addCheckbox("Spline_fit (traces only)", splineFit);
+		gd.addCheckbox("Use_stack_position", useStackPosition);
 		gd.addChoice("LUT", luts, luts[lut]);
 
 		gd.showDialog();
@@ -263,10 +305,16 @@ public class DrawTraces implements PlugIn
 
 		inputOption = ResultsManager.getInputSource(gd);
 		title = gd.getNextChoice();
+		imageSize = (int) Math.abs(gd.getNextNumber());
+		if (imageSize < 1)
+			imageSize = 1;
+		expandToSingles = gd.getNextBoolean();
 		minSize = (int) Math.abs(gd.getNextNumber());
+		maxSize = (int) Math.abs(gd.getNextNumber());
+		drawLines = gd.getNextBoolean();
 		sort = gd.getNextChoiceIndex();
 		splineFit = gd.getNextBoolean();
-		showTracks = gd.getNextBoolean();
+		useStackPosition = gd.getNextBoolean();
 		lut = gd.getNextChoiceIndex();
 
 		return true;
@@ -445,13 +493,13 @@ public class DrawTraces implements PlugIn
 			blues[i] = (byte) ((1.0 - fraction) * (b[i1] & 255) + fraction * (b[i2] & 255));
 		}
 	}
-	
+
 	private void addToOverlay(Overlay o, Roi roi, boolean isHyperStack, int frame)
 	{
 		if (isHyperStack)
 			roi.setPosition(0, 0, frame);
 		else
 			roi.setPosition(frame);
-		o.add(roi);		
+		o.add(roi);
 	}
 }
