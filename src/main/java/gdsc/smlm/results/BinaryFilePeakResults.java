@@ -254,6 +254,8 @@ public class BinaryFilePeakResults extends FilePeakResults
 					return;
 				}
 				writeResult(count, bytes.toByteArray());
+				if (!isActive())
+					return;
 				bytes.reset();
 				count = 0;
 			}
@@ -283,6 +285,9 @@ public class BinaryFilePeakResults extends FilePeakResults
 
 	private synchronized void writeResult(int count, byte[] bytes)
 	{
+		// In case another thread caused the output to close
+		if (out == null)
+			return;
 		size += count;
 		try
 		{

@@ -359,6 +359,8 @@ public class FilePeakResults extends AbstractPeakResults
 			if (++count >= 20)
 			{
 				writeResult(count, sb.toString());
+				if (!isActive())
+					return;
 				sb.setLength(0);
 				count = 0;
 			}
@@ -458,6 +460,9 @@ public class FilePeakResults extends AbstractPeakResults
 
 	private synchronized void writeResult(int count, String result)
 	{
+		// In case another thread caused the output to close
+		if (out == null)
+			return;
 		size += count;
 		try
 		{

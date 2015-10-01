@@ -354,7 +354,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (size < nextRepaintSize)
 			return;
 
-		if (!isResultsActive())
+		if (!resultsWindow.isShowing())
 		{
 			//System.out.println("Table has been closed");
 			tableActive = false;
@@ -378,9 +378,18 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	{
 		if (!tableActive)
 			return;
+		int n = 0;
 		for (PeakResult result : results)
+		{
 			addPeak(result.peak, result.getEndFrame(), result.origX, result.origY, result.origValue, result.error,
 					result.noise, result.params, result.paramsStdDev);
+			if (n++ > 31)
+			{
+				if (!tableActive)
+					return;
+				n = 0;
+			}
+		}
 	}
 
 	/*
@@ -429,11 +438,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public boolean isActive()
 	{
 		return tableActive;
-	}
-
-	private boolean isResultsActive()
-	{
-		return resultsWindow.isShowing();
 	}
 
 	/**

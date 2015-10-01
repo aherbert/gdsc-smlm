@@ -254,7 +254,11 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			addPeak(result.peak, result.origX, result.origY, result.origValue, result.error, result.noise,
 					result.params, result.paramsStdDev);
 			if (++i % 64 == 0)
+			{
 				updateImage();
+				if (!imageActive)
+					return;
+			}
 		}
 		updateImage();
 	}
