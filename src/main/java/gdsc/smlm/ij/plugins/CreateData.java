@@ -2229,7 +2229,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (spot.samplePositions != null)
 			{
-				psfModel.eraseSample(data, settings.size, settings.size);
+				psfModel.eraseSample(data, settings.size, settings.size, spot.samplePositions);
 			}
 			else
 			{
