@@ -92,7 +92,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private static double nmPerSlice = 20;
 	private static double radius = 10;
 	private static double amplitudeFraction = 0.2;
-	private static double globalBackgroundFraction = 0.25;
 	private static int startBackgroundFrames = 5;
 	private static int endBackgroundFrames = 5;
 	private static int magnification = 10;
@@ -166,7 +165,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			IJ.noImage();
 			return DONE;
 		}
-		
+
 		Roi roi = imp.getRoi();
 		if (roi == null || roi.getType() != Roi.POINT)
 		{
@@ -175,7 +174,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		}
 
 		this.imp = imp;
-		
+
 		return showDialog();
 	}
 
@@ -190,7 +189,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
 		gd.addSlider("Radius", 3, 20, radius);
 		gd.addSlider("Amplitude_fraction", 0.01, 0.5, amplitudeFraction);
-		gd.addSlider("Gloabl_background_fraction", 0, 0.5, globalBackgroundFraction);
 		gd.addSlider("Start_background_frames", 1, 20, startBackgroundFrames);
 		gd.addSlider("End_background_frames", 1, 20, endBackgroundFrames);
 		gd.addSlider("Magnification", 5, 15, magnification);
@@ -212,7 +210,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		nmPerSlice = gd.getNextNumber();
 		radius = gd.getNextNumber();
 		amplitudeFraction = gd.getNextNumber();
-		globalBackgroundFraction = gd.getNextNumber();
 		startBackgroundFrames = (int) gd.getNextNumber();
 		endBackgroundFrames = (int) gd.getNextNumber();
 		magnification = (int) gd.getNextNumber();
@@ -229,11 +226,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			Parameters.isAbove("Radius", radius, 2);
 			Parameters.isAbove("Amplitude fraction", amplitudeFraction, 0.01);
 			Parameters.isBelow("Amplitude fraction", amplitudeFraction, 0.9);
-			if (globalBackgroundFraction <= 0)
-			{
-				Parameters.isPositive("Start background frames", startBackgroundFrames);
-				Parameters.isPositive("End background frames", endBackgroundFrames);
-			}
+			Parameters.isPositive("Start background frames", startBackgroundFrames);
+			Parameters.isPositive("End background frames", endBackgroundFrames);
 			Parameters.isAbove("Total background frames", startBackgroundFrames + endBackgroundFrames, 1);
 			Parameters.isAbove("Magnification", magnification, 1);
 			Parameters.isAbove("Smoothing", smoothing, 0);
@@ -423,8 +417,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		IJ.showStatus("Creating PSF image");
 
-		float b = getGlobalBackground(stack);
-
 		// Create a stack that can hold all the data.
 		ImageStack psf = createStack(stack, minz, maxz, magnification);
 
@@ -450,8 +442,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			}
 
 			int n = (int) centre[4];
-			if (globalBackgroundFraction <= 0)
-				b = getBackground(n, spot);
+			final float b = getBackground(n, spot);
 			if (!subtractBackgroundAndWindow(spot, b, regionBounds.width, regionBounds.height, centre, loess))
 			{
 				Utils.log("  Spot %d was ignored", n);
@@ -845,21 +836,6 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		for (int i = 1; i <= d; i++)
 			psf.setPixels(new float[w * w], i);
 		return psf;
-	}
-
-	private float getGlobalBackground(ImageStack stack)
-	{
-		if (globalBackgroundFraction <= 0)
-			return 0;
-		double sum = 0;
-		final int length = stack.getHeight() * stack.getWidth();
-		for (int slice = 1; slice <= stack.getSize(); slice++)
-		{
-			sum += Maths.sum((float[]) stack.getPixels(slice)) / length;
-		}
-		float b = (float) (sum / stack.getSize());
-		Utils.log("Using global background = %.2f", b);
-		return b;
 	}
 
 	private float getBackground(int n, float[][] spot)
