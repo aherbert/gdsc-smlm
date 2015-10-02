@@ -280,7 +280,6 @@ public class Cluster implements Comparable<Cluster>
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	@Override
 	public int compareTo(Cluster that)
 	{
 		// Sort by ID ascending
