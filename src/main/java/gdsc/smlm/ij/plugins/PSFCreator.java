@@ -507,6 +507,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		double[] slice = Utils.newArray(psf.getSize(), 1, 1.0);
 		String title = TITLE + " CoM Drift";
 		Plot2 plot = new Plot2(title, "Slice", "Drift (nm)");
+		plot.addLabel(0, 0, "Red = X; Blue = Y");
 		double[] limitsX = getLimits(com[0]);
 		double[] limitsY = getLimits(com[1]);
 		plot.setLimits(1, psf.getSize(), Math.min(limitsX[0], limitsY[0]), Math.max(limitsX[1], limitsY[1]));
