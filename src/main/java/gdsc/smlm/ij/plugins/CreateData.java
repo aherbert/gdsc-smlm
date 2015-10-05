@@ -2074,7 +2074,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					else if (psfModel instanceof AiryPSFModel)
 					{
 						AiryPSFModel m = (AiryPSFModel) psfModel;
-						params[Gaussian2DFunction.X_SD] = (float) (m.getW1() * AiryPattern.FACTOR);
+						params[Gaussian2DFunction.X_SD] = (float) (m.getW0() * AiryPattern.FACTOR);
 						params[Gaussian2DFunction.Y_SD] = (float) (m.getW1() * AiryPattern.FACTOR);
 					}
 					else
@@ -2229,7 +2229,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (spot.samplePositions != null)
 			{
-				psfModel.eraseSample(data, settings.size, settings.size);
+				psfModel.eraseSample(data, settings.size, settings.size, spot.samplePositions);
 			}
 			else
 			{

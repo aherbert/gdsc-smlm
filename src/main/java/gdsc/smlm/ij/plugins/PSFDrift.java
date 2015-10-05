@@ -769,7 +769,6 @@ public class PSFDrift implements PlugIn
 				offset.add(new PSFOffset(slice, cx2, cy2));
 			Collections.sort(offset, new Comparator<PSFOffset>()
 			{
-				@Override
 				public int compare(PSFOffset arg0, PSFOffset arg1)
 				{
 					return arg0.slice - arg1.slice;

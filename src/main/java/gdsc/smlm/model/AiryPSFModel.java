@@ -634,7 +634,7 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
-	 * @return The width in dimension 0 for the last drawn Airy pattern
+	 * @return The width in dimension 1 for the last drawn Airy pattern
 	 */
 	public double getW1()
 	{
