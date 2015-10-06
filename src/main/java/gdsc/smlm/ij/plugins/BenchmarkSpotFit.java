@@ -69,7 +69,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public class BenchmarkSpotFit implements PlugIn
 {
-	private static final String TITLE = "Benchmark Spot Fit";
+	private static final String TITLE = "Fit Spot Data";
 
 	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
@@ -559,7 +559,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		gd.addMessage(String
-				.format("Fit candidate spots in the benchmark image created by CreateData plugin\nand identified by the Spot Filter plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
+				.format("Fit candidate spots in the benchmark image created by Create Spot Data plugin\nand identified by the "+BenchmarkSpotFilter.TITLE+" plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
 						Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
 
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);

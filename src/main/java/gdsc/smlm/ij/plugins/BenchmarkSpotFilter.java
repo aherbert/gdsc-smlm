@@ -60,7 +60,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public class BenchmarkSpotFilter implements PlugIn
 {
-	private static final String TITLE = "Benchmark Spot Filter";
+	public static final String TITLE = "Filter Spot Data";
 
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
