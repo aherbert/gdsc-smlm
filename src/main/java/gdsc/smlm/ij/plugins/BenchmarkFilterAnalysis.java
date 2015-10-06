@@ -85,7 +85,7 @@ import org.apache.commons.math3.random.Well44497b;
  */
 public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackProgress
 {
-	private static final String TITLE = "Filter Analysis";
+	private static final String TITLE = "Benchmark Filter Analysis";
 	private static TextWindow resultsWindow = null;
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
@@ -673,6 +673,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					Sort.sort(indices, score);
 				}
 
+				int failCount = 0;
 				for (int i = 0; i < result.fitResult.length; i++)
 				{
 					final int index = indices[i];
@@ -686,8 +687,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						params[Gaussian2DFunction.X_POSITION] -= initial[Gaussian2DFunction.X_POSITION];
 						params[Gaussian2DFunction.Y_POSITION] -= initial[Gaussian2DFunction.Y_POSITION];
 						// These will be incorrect due to the relative adjustment above...
-						final int origX = (int) params[Gaussian2DFunction.X_POSITION];
-						final int origY = (int) params[Gaussian2DFunction.Y_POSITION];
+						//final int origX = (int) params[Gaussian2DFunction.X_POSITION];
+						//final int origY = (int) params[Gaussian2DFunction.Y_POSITION];
 
 						// Binary classification uses a score of 1 (match) or 0 (no match)
 						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
@@ -738,14 +739,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 						final float score2 = RampedScore.flatten((float) matchScore, 256);
 
+						// Spots are processed in order. We must accumulate the number of failures
+						// before each fitted spot in order to correctly process the fail count.
+						// Store the number of failures before each correct fit in origX & origY.
+
 						// Use a custom peak result so that the depth can be stored.
-						r.add(new DepthPeakResult(peak, origX, origY, score2, fitResult.getError(), result.noise,
-								params, depth, signalFactor, distance, matchScore, noMatchScore));
+						r.add(new DepthPeakResult(peak, failCount, failCount, score2, fitResult.getError(),
+								result.noise, params, depth, signalFactor, distance, matchScore, noMatchScore));
+						failCount = 0;
 					}
 					else
 					{
 						// This was not fitted
 						c_tn++;
+						failCount++;
 					}
 				}
 
@@ -1049,7 +1056,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				String text = createResult(fs.filter, r);
 
 				// Show the recall at the specified depth. Sum the distance and signal factor of all scored spots.
-				MemoryPeakResults results = fs.filter.filter(resultsList.get(0), failCount);
+				MemoryPeakResults results = filter(fs.filter, resultsList.get(0), failCount);
 				if (topFilterResults == null)
 					topFilterResults = results;
 				int scored = 0;
@@ -1105,6 +1112,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
+	private MemoryPeakResults filter(Filter filter, MemoryPeakResults memoryPeakResults, int failures)
+	{
+		// Use the method that requires fail count in origY
+		return filter.filter2(memoryPeakResults, failures);
+	}
+	
 	private void startTimer()
 	{
 		currentTime = System.currentTimeMillis();
@@ -1985,7 +1998,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		FractionClassificationResult r;
 		if (subset)
 		{
-			r = filter.fractionScoreSubset(resultsList, failCount, tn, fn, n);
+			r = fractionScoreSubset(filter, resultsList, failCount, tn, fn, n);
 
 			//// DEBUG - Test if the two methods produce the same results
 			//FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.resultsList);
@@ -2023,6 +2036,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return new double[] { score, criteria };
 	}
 
+	private FractionClassificationResult fractionScoreSubset(Filter filter,
+			List<MemoryPeakResults> resultsList, int failures, double tn, double fn, int n)
+	{
+		// This method uses a subset that was created using the fail count in origY so no special method is necessary
+		return filter.fractionScoreSubset(resultsList, failures, tn, fn, n);
+	}
+	
 	/**
 	 * Score the filter using the results list and the configured fail count
 	 * 
@@ -2036,7 +2056,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		int p = 0, n = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
-			final FractionClassificationResult r = filter.fractionScore(resultsList, failCount + i);
+			// Use the method that requires fail count in origY
+			final FractionClassificationResult r = filter.fractionScore2(resultsList, failCount + i);
 			tp += r.getTP();
 			fp += r.getFP();
 			tn += r.getTN();
@@ -2248,7 +2269,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// To get the number of TP at each depth will require that the filter is run 
 		// manually to get the results that pass.
-		results = filter.filter(resultsList.get(0), failCount);
+		results = filter(filter, resultsList.get(0), failCount);
 
 		double[] depths2 = new double[results.size()];
 		int count = 0;
@@ -2403,7 +2424,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// To get the number of TP at each depth will require that the filter is run 
 		// manually to get the results that pass.
 		if (results == null)
-			results = filter.filter(resultsList.get(0), failCount);
+			results = filter(filter, resultsList.get(0), failCount);
 
 		double[] signal2 = new double[results.size()];
 		double[] distance2 = new double[results.size()];
@@ -2653,8 +2674,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				for (MemoryPeakResults r : ga_resultsList)
 				{
 					double[] score2 = new double[6];
-					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset(r, failCount, score2) : weakest
-							.filterSubset(r, score2);
+					// Use the method that requires fail count in origY
+					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset2(r, failCount, score2) : weakest
+							.filterSubset2(r, score2);
 					ga_resultsListToScore.add(r2);
 					if (score == null)
 						score = score2;
@@ -2683,7 +2705,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		Filter filter = (Filter) chromosome;
 		FractionClassificationResult r;
 		if (ga_subset)
-			r = filter.fractionScoreSubset(ga_resultsListToScore, failCount, ga_tn, ga_fn, ga_n);
+			r = fractionScoreSubset(filter, ga_resultsListToScore, failCount, ga_tn, ga_fn, ga_n);
 		else
 			r = scoreFilter(filter, ga_resultsListToScore);
 		double score = getScore(r);

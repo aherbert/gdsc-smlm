@@ -127,6 +127,64 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	/**
 	 * Filter the results
 	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * Note that this method is to be used to score a set of results that may have been extracted from a larger set
+	 * since the number of consecutive failures before each peak are expected to be stored in the origY property. Set
+	 * this to zero and the results should be identical to {@link #filter(MemoryPeakResults, int)}
+	 * 
+	 * @param results
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @return the filtered results
+	 */
+	public MemoryPeakResults filter2(MemoryPeakResults results, int failures)
+	{
+		MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(results);
+		setup(results);
+		int frame = -1;
+		int failCount = 0;
+		for (PeakResult peak : results.getResults())
+		{
+			if (frame != peak.peak)
+			{
+				frame = peak.peak;
+				failCount = 0;
+			}
+
+			failCount += peak.origY;
+			
+			// Reject all peaks if we have exceeded the fail count
+			final boolean isPositive;
+			if (failCount > failures)
+			{
+				isPositive = false;
+			}
+			else
+			{
+				// Otherwise assess the peak
+				isPositive = accept(peak);
+			}
+
+			if (isPositive)
+			{
+				failCount = 0;
+				newResults.add(peak);
+			}
+			else
+			{
+				failCount++;
+			}
+		}
+		end();
+		return newResults;
+	}
+
+	/**
+	 * Filter the results
+	 * <p>
 	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
 	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
 	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
@@ -212,6 +270,89 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 * <p>
+	 * Note that this method is to be used to score a set of results that may have been extracted from a larger set
+	 * since the number of consecutive failures before each peak are expected to be stored in the origY property. Set
+	 * this to zero and the results should be identical to {@link #filterSubset(MemoryPeakResults, double[])}.
+	 * <p>
+	 * The number of failures before each peak is stored in the origX property of the PeakResult.
+	 * 
+	 * @param results
+	 * @param score
+	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
+	 * @return the filtered results
+	 */
+	public MemoryPeakResults filterSubset2(MemoryPeakResults results, double[] score)
+	{
+		MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(results);
+		setup(results);
+		int frame = -1;
+		int failCount = 0;
+		double fp = 0, fn = 0;
+		double tp = 0, tn = 0;
+		int p = 0;
+		for (PeakResult peak : results.getResults())
+		{
+			if (frame != peak.peak)
+			{
+				frame = peak.peak;
+				failCount = 0;
+			}
+			
+			failCount += peak.origY;
+
+			// Reject all peaks if we have exceeded the fail count
+			final boolean isPositive = accept(peak);
+
+			if (isPositive)
+			{
+				peak.origX = failCount;
+				failCount = 0;
+				newResults.add(peak);
+			}
+			else
+			{
+				failCount++;
+			}
+
+			if (isPositive)
+			{
+				p++;
+				tp += peak.getTruePositiveScore();
+				fp += peak.getFalsePositiveScore();
+			}
+			else
+			{
+				fn += peak.getFalseNegativeScore();
+				tn += peak.getTrueNegativeScore();
+			}
+		}
+		end();
+
+		if (score != null && score.length > 5)
+		{
+			score[0] = tp;
+			score[1] = fp;
+			score[2] = tn;
+			score[3] = fn;
+			score[4] = p;
+			score[5] = results.size() - p;
+		}
+
+		return newResults;
+	}
+
+	/**
+	 * Filter the results
+	 * <p>
+	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
+	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
+	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
+	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
 	 * The number of failures before each peak is stored in the origX property of the PeakResult.
 	 * 
 	 * @param results
@@ -237,6 +378,98 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 				frame = peak.peak;
 				failCount = 0;
 			}
+
+			// Reject all peaks if we have exceeded the fail count
+			final boolean isPositive;
+			if (failCount > failures)
+			{
+				isPositive = false;
+			}
+			else
+			{
+				// Otherwise assess the peak
+				isPositive = accept(peak);
+			}
+
+			if (isPositive)
+			{
+				peak.origX = failCount;
+				failCount = 0;
+				newResults.add(peak);
+			}
+			else
+			{
+				failCount++;
+			}
+
+			if (isPositive)
+			{
+				tp += peak.getTruePositiveScore();
+				fp += peak.getFalsePositiveScore();
+			}
+			else
+			{
+				fn += peak.getFalseNegativeScore();
+				tn += peak.getTrueNegativeScore();
+			}
+		}
+		end();
+
+		if (score != null && score.length > 5)
+		{
+			score[0] = tp;
+			score[1] = fp;
+			score[2] = tn;
+			score[3] = fn;
+			score[4] = newResults.size();
+			score[5] = results.size() - newResults.size();
+		}
+
+		return newResults;
+	}
+	
+	/**
+	 * Filter the results
+	 * <p>
+	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
+	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
+	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
+	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * Note that this method is to be used to score a set of results that may have been extracted from a larger set
+	 * since the number of consecutive failures before each peak are expected to be stored in the origY property. Set
+	 * this to zero and the results should be identical to {@link #filterSubset(MemoryPeakResults, int, double[])}.
+	 * <p>
+	 * The number of failures before each peak is stored in the origX property of the PeakResult.
+	 * 
+	 * @param results
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param score
+	 *            If not null will be populated with the fraction score [ tp, fp, tn, fn, p, n ]
+	 * @return the filtered results
+	 */
+	public MemoryPeakResults filterSubset2(MemoryPeakResults results, int failures, double[] score)
+	{
+		MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(results);
+		setup(results);
+		int frame = -1;
+		int failCount = 0;
+		double fp = 0, fn = 0;
+		double tp = 0, tn = 0;
+		for (PeakResult peak : results.getResults())
+		{
+			if (frame != peak.peak)
+			{
+				frame = peak.peak;
+				failCount = 0;
+			}
+			
+			failCount += peak.origY;
 
 			// Reject all peaks if we have exceeded the fail count
 			final boolean isPositive;
@@ -627,6 +860,90 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
 	 * <p>
+	 * Note that this method is to be used to score a set of results that may have been extracted from a larger set
+	 * since the number of consecutive failures before each peak are expected to be stored in the origY property. Set
+	 * this to zero and the results should be identical to {@link #fractionScore(List, int)}.
+	 * 
+	 * @param resultsList
+	 *            a list of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @return the score
+	 */
+	public FractionClassificationResult fractionScore2(List<MemoryPeakResults> resultsList, int failures)
+	{
+		int p = 0, n = 0;
+		double fp = 0, fn = 0;
+		double tp = 0, tn = 0;
+		for (MemoryPeakResults peakResults : resultsList)
+		{
+			setup(peakResults);
+
+			int frame = -1;
+			int failCount = 0;
+			for (PeakResult peak : peakResults.getResults())
+			{
+				// Reset fail count for new frames
+				if (frame != peak.peak)
+				{
+					frame = peak.peak;
+					failCount = 0;
+				}
+				
+				failCount += peak.origY;
+
+				// Reject all peaks if we have exceeded the fail count
+				final boolean isPositive;
+				if (failCount > failures)
+				{
+					isPositive = false;
+				}
+				else
+				{
+					// Otherwise assess the peak
+					isPositive = accept(peak);
+				}
+
+				if (isPositive)
+				{
+					failCount = 0;
+				}
+				else
+				{
+					failCount++;
+				}
+
+				if (isPositive)
+				{
+					p++;
+					tp += peak.getTruePositiveScore();
+					fp += peak.getFalsePositiveScore();
+				}
+				else
+				{
+					fn += peak.getFalseNegativeScore();
+					tn += peak.getTrueNegativeScore();
+				}
+			}
+			n += peakResults.size();
+			end();
+		}
+		n -= p;
+		return new FractionClassificationResult(tp, fp, tn, fn, p, n);
+	}
+
+	/**
+	 * Filter the results and return the performance score. Allows benchmarking the filter by marking the results as
+	 * true or false.
+	 * <p>
+	 * Input PeakResults must be allocated a score for true positive, false positive, true negative and false negative
+	 * (accessed via the object property get methods). The filter is run and results that pass accumulate scores for
+	 * true positive and false positive, otherwise the scores are accumulated for true negative and false negative. The
+	 * simplest scoring scheme is to mark valid results as tp=fn=1 and fp=tn=0 and invalid results the opposite.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
 	 * Note that this method is to be used to score a subset that was generated using
 	 * {@link #filterSubset(MemoryPeakResults, int)} since the number of consecutive failures before each peak are
 	 * expected to be stored in the origX property.
@@ -822,7 +1139,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 					return 1;
 			}
 		}
-		
+
 		return 0;
 	}
 
