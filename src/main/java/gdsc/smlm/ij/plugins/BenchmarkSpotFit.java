@@ -836,8 +836,8 @@ public class BenchmarkSpotFit implements PlugIn
 		final double nmPerPixel = simulationParameters.a;
 		final boolean mle = fitConfig.getFitSolver() == FitSolver.MLE;
 		double tp = 0, fp = 0;
-		int failP = 0, failN = 0;
-		int cP = 0, cN = 0;
+		int failcTP = 0, failcFP = 0;
+		int cTP = 0, cFP = 0;
 		for (FilterCandidates result : filterCandidates.values())
 		{
 			tp += result.tp;
@@ -845,15 +845,15 @@ public class BenchmarkSpotFit implements PlugIn
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
 				if (result.spots[i].match)
-					cP++;
+					cTP++;
 				else
-					cN++;
+					cFP++;
 				if (result.fitResult[i].getStatus() != FitStatus.OK)
 				{
 					if (result.spots[i].match)
-						failP++;
+						failcTP++;
 					else
-						failN++;
+						failcFP++;
 				}
 			}
 			for (int i = 0; i < result.match.length; i++)
@@ -936,28 +936,28 @@ public class BenchmarkSpotFit implements PlugIn
 		// Q. Should I add other fit configuration here?
 
 		// The fraction of positive and negative candidates that were included
-		add(sb, (100.0 * cP) / nP);
-		add(sb, (100.0 * cN) / nN);
+		add(sb, (100.0 * cTP) / nP);
+		add(sb, (100.0 * cFP) / nN);
 
 		// Score the fitting results compared to the original simulation.
 
 		// Score the candidate selection:
-		add(sb, cP + cN);
-		add(sb, cP);
-		add(sb, cN);
+		add(sb, cTP + cFP);
+		add(sb, cTP);
+		add(sb, cFP);
 		// TP are all candidates that can be matched to a spot
 		// FP are all candidates that cannot be matched to a spot
 		// FN = The number of missed spots
-		FractionClassificationResult m = new FractionClassificationResult(cP, cN, 0, simulationParameters.molecules -
-				cP);
+		FractionClassificationResult m = new FractionClassificationResult(cTP, cFP, 0, simulationParameters.molecules -
+				cTP);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
 		add(sb, m.getF1Score());
 		add(sb, m.getJaccard());
 
 		// Score the fitting results:
-		add(sb, failP);
-		add(sb, failN);
+		add(sb, failcTP);
+		add(sb, failcFP);
 		// TP are all fit results that can be matched to a spot
 		// FP are all fit results that cannot be matched to a spot
 		// FN = The number of missed spots
@@ -1066,16 +1066,16 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("% nP\t");
 		sb.append("% nN\t");
 		sb.append("Total\t");
-		sb.append("P\t");
-		sb.append("N\t");
+		sb.append("cTP\t");
+		sb.append("cFP\t");
 
-		sb.append("Recall\t");
-		sb.append("Precision\t");
-		sb.append("F1\t");
-		sb.append("Jaccard\t");
+		sb.append("cRecall\t");
+		sb.append("cPrecision\t");
+		sb.append("cF1\t");
+		sb.append("cJaccard\t");
 
-		sb.append("Fail P\t");
-		sb.append("Fail N\t");
+		sb.append("Fail cTP\t");
+		sb.append("Fail cFP\t");
 		sb.append("TP\t");
 		sb.append("FP\t");
 		sb.append("Recall\t");
