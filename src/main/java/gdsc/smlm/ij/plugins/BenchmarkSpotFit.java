@@ -558,9 +558,10 @@ public class BenchmarkSpotFit implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage(String
-				.format("Fit candidate spots in the benchmark image created by Create Spot Data plugin\nand identified by the "+BenchmarkSpotFilter.TITLE+" plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
-						Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
+		gd.addMessage(String.format("Fit candidate spots in the benchmark image created by " + CreateData.TITLE +
+				" plugin\nand identified by the " + BenchmarkSpotFilter.TITLE +
+				" plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
+				Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
 
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
@@ -570,7 +571,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Match_signal", 0, 3.5, matchSignal);
 
 		// Collect options for fitting
-		gd.addNumericField("Initial_StdDev0", getSa() / simulationParameters.a, 3);
+		gd.addNumericField("Initial_StdDev", getSa() / simulationParameters.a, 3);
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
@@ -597,7 +598,7 @@ public class BenchmarkSpotFit implements PlugIn
 		lowerDistance = Math.abs(gd.getNextNumber());
 		signalFactor = matchSignal = Math.abs(gd.getNextNumber());
 
-		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
+		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
@@ -975,8 +976,8 @@ public class BenchmarkSpotFit implements PlugIn
 		int[] idList = new int[3];
 		int idCount = 0;
 
-		String label = String.format("Recall = %s. n = %d. Median = %s nm", Utils.rounded(m.getRecall()),
-				distanceStats.getN(), Utils.rounded(median));
+		String label = String.format("Recall = %s. n = %d. Median = %s nm. SD = %s nm", Utils.rounded(m.getRecall()),
+				distanceStats.getN(), Utils.rounded(median), Utils.rounded(distanceStats.getStandardDeviation()));
 		int id = Utils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 100, label);
 		if (Utils.isNewWindow())
 			idList[idCount++] = id;
