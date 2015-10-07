@@ -1,5 +1,7 @@
 package gdsc.smlm.ga;
 
+import gdsc.smlm.utils.Sort;
+
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -81,13 +83,13 @@ public class SimpleRecombiner extends Randomiser implements Recombiner
 		if (fraction > 0)
 			nCrossovers = Math.max(1, (int) random.nextPoisson(fraction * chromosome1.length()));
 
-		// Randomly select positions using a Fischer-Yates shuffle
+		// Randomly select positions using a partial Fischer-Yates shuffle
 		int[] positions = new int[s1.length];
 		for (int i = 0; i < positions.length; i++)
 			positions[i] = i;
 
 		RandomGenerator ran = random.getRandomGenerator();
-		for (int i = positions.length; i-- > 1;)
+		for (int i = positions.length, n = nCrossovers; i-- > 1 && n-- > 0;)
 		{
 			int j = (int) (ran.nextInt(i + 1));
 			int tmp = positions[i];
@@ -95,8 +97,10 @@ public class SimpleRecombiner extends Randomiser implements Recombiner
 			positions[j] = tmp;
 		}
 
-		// Get the positions in order
+		// Reverse the array because the end is random
+		Sort.reverse(positions);
 		positions = Arrays.copyOf(positions, nCrossovers);
+		// Get the positions in order
 		if (nCrossovers != 1)
 			Arrays.sort(positions);
 
