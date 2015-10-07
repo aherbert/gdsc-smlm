@@ -1629,7 +1629,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double maxScore = -1;
 		double maxCriteria = 0;
 
-		// Final evaluation does not need to assess all the filters if we have run the GA.
+		// Final evaluation does not need to assess all the filters if we have run optimisation.
 		// It can just assess the top 1 required for the summary.
 		if (best != null && !showResultsTable && xValues == null)
 		{
@@ -1691,6 +1691,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			i++;
 		}
+		
+		if (showResultsTable)
+			resultsWindow.getTextPanel().updateDisplay();
 
 		// Check the top filter against the limits
 		boolean atLimit = false;
@@ -1993,6 +1996,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return max;
 	}
 
+	private long nextUpdate = 0;
+	
 	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn, int n)
 	{
 		FractionClassificationResult r;
@@ -2030,7 +2035,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			else
 			{
-				resultsWindow.append(text);
+				final long time = System.currentTimeMillis();
+				if (time > nextUpdate)
+				{
+					resultsWindow.append(text);
+					// Update every few seconds
+					nextUpdate = time + 2000;
+				}
+				else
+				{
+					resultsWindow.getTextPanel().appendWithoutUpdate(text);
+				}
 			}
 		}
 		return new double[] { score, criteria };
