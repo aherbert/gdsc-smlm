@@ -119,15 +119,13 @@ public class SimpleMutator extends Randomiser implements Mutator
 				max = chromosome.upperLimit();
 				getStepPositions(step);
 			}
-			
+
 			if (positionsCount == 0)
 				return chromosome.newChromosome(sequence);
 
-			// Bounds are inclusive so subtract 1
-			final int upper = positionsCount - 1;
 			while (count-- > 0)
 			{
-				final int i = positions[random.nextInt(0, upper)];
+				final int i = positions[random.getRandomGenerator().nextInt(positionsCount)];
 
 				sequence[i] = random.nextGaussian(sequence[i], step[i]);
 				// Check limits
