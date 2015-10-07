@@ -1117,7 +1117,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Use the method that requires fail count in origY
 		return filter.filter2(memoryPeakResults, failures);
 	}
-	
+
 	private void startTimer()
 	{
 		currentTime = System.currentTimeMillis();
@@ -1623,7 +1623,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			best = topFilter;
 		}
 
-		double[] xValues = (isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
+		// Do not support plotting if we used optimisation
+		double[] xValues = (best != null || isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
 		double[] yValues = (xValues == null) ? null : new double[xValues.length];
 		Filter maxFilter = null, criteriaFilter = null;
 		double maxScore = -1;
@@ -1631,7 +1632,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// Final evaluation does not need to assess all the filters if we have run optimisation.
 		// It can just assess the top 1 required for the summary.
-		if (best != null && !showResultsTable && xValues == null)
+		if (best != null)
 		{
 			// Only assess the top 1 filter for the summary
 			List<Filter> list = new ArrayList<Filter>();
@@ -1691,7 +1692,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			i++;
 		}
-		
+
+		// Update the final results window given that we mainly use appendWidthoutUpdate(...) when adding data
 		if (showResultsTable)
 			resultsWindow.getTextPanel().updateDisplay();
 
@@ -1812,7 +1814,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (showResultsTable && filterSet.size() > 1)
 				resultsWindow.append("");
 
-			if (plotTopN > 0)
+			if (plotTopN > 0 && xValues != null)
 			{
 				// Check the xValues are unique. Since the filters have been sorted by their
 				// numeric value we only need to compare adjacent entries.
@@ -1997,7 +1999,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	private long nextUpdate = 0;
-	
+
 	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn, int n)
 	{
 		FractionClassificationResult r;
@@ -2040,7 +2042,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				{
 					resultsWindow.append(text);
 					// Update every few seconds
-					nextUpdate = time + 2000;
+					nextUpdate = System.currentTimeMillis() + 2000;
 				}
 				else
 				{
@@ -2051,13 +2053,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return new double[] { score, criteria };
 	}
 
-	private FractionClassificationResult fractionScoreSubset(Filter filter,
-			List<MemoryPeakResults> resultsList, int failures, double tn, double fn, int n)
+	private FractionClassificationResult fractionScoreSubset(Filter filter, List<MemoryPeakResults> resultsList,
+			int failures, double tn, double fn, int n)
 	{
 		// This method uses a subset that was created using the fail count in origY so no special method is necessary
 		return filter.fractionScoreSubset(resultsList, failures, tn, fn, n);
 	}
-	
+
 	/**
 	 * Score the filter using the results list and the configured fail count
 	 * 
