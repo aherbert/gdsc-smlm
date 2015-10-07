@@ -9,6 +9,7 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
 
+import java.awt.Color;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -19,7 +20,7 @@ public class Plot2 extends Plot
 {
 	/** Draw a bar plot */
 	public static final int BAR = 999;
-	
+
 	private static boolean failedOverride = false;
 
 	public Plot2(String title, String xLabel, String yLabel, float[] xValues, float[] yValues)
@@ -232,7 +233,7 @@ public class Plot2 extends Plot
 		// Override to show a PlotWindow2 object
 		if (failedOverride)
 			return super.show();
-			
+
 		try
 		{
 			Method m = Plot.class.getDeclaredMethod("draw");
@@ -281,5 +282,20 @@ public class Plot2 extends Plot
 		}
 
 		return super.show();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.gui.Plot#setColor(java.awt.Color)
+	 */
+	@Override
+	public void setColor(Color c)
+	{
+		// If the user sets a custom colour we must make sure the image processor is initialised and the plot
+		// drawn. This is getProcessor() sets the colour to black and we use getProcessor() to get 
+		// the processor in the addPoints(...) method.
+		getProcessor();
+		super.setColor(c);
 	}
 }
