@@ -1400,7 +1400,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			Filter filter = filterSet.getFilters().get(0);
 			double[] stepSize = filter.mutationStepRange().clone();
-			double[] upper = filter.upperLimit().clone();
+			double[] upper = filter.upperLimit();
 			// Ask the user for the mutation step parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
@@ -1419,10 +1419,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			gd.addMessage("Configure the step size for each parameter");
 			int[] indices = filter.getChromosomeParameters();
+			final boolean wasExpanded = wasExpanded(setNumber);
 			for (int j = 0; j < indices.length; j++)
 			{
 				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
-				final double step = (wasNotExpanded(setNumber, indices[j])) ? 0 : stepSize[j] * delta;
+				final double step = (wasExpanded && wasNotExpanded(setNumber, indices[j])) ? 0 : stepSize[j] * delta;
 				gd.addNumericField(getDialogName(prefix, filter.getParameterName(indices[j])), step, 2);
 			}
 
@@ -2438,8 +2439,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
 		double[][] h2 = Utils.calcHistogram(distance, limits2[0], limits2[1], bins);
 
-		// To get the number of TP at each depth will require that the filter is run 
-		// manually to get the results that pass.
+		// Run the filter manually to get the results that pass.
 		if (results == null)
 			results = filter(filter, resultsList.get(0), failCount);
 
