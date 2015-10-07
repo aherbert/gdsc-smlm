@@ -2391,18 +2391,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		plot2.setColor(Color.red);
 		plot2.addPoints(points, v3, Plot2.LINE);
 		plot2.setColor(Color.magenta);
-		plot2.drawLine(
-				-halfSummaryDepth,
-				0,
-				-halfSummaryDepth,
-				getSplineValue(spline3, spline3b, -halfSummaryDepth - halfBinWidth) /
-						getSplineValue(spline1, spline1b, -halfSummaryDepth - halfBinWidth));
-		plot2.drawLine(
-				halfSummaryDepth,
-				0,
-				halfSummaryDepth,
-				getSplineValue(spline3, spline3b, halfSummaryDepth - halfBinWidth) /
-						getSplineValue(spline1, spline1b, halfSummaryDepth - halfBinWidth));
+		if (-halfSummaryDepth - halfBinWidth >= limits[0])
+		{
+			plot2.drawLine(
+					-halfSummaryDepth,
+					0,
+					-halfSummaryDepth,
+					getSplineValue(spline3, spline3b, -halfSummaryDepth - halfBinWidth) /
+							getSplineValue(spline1, spline1b, -halfSummaryDepth - halfBinWidth));
+		}
+		if (halfSummaryDepth - halfBinWidth <= limits[1])
+		{
+			plot2.drawLine(
+					halfSummaryDepth,
+					0,
+					halfSummaryDepth,
+					getSplineValue(spline3, spline3b, halfSummaryDepth - halfBinWidth) /
+							getSplineValue(spline1, spline1b, halfSummaryDepth - halfBinWidth));
+		}
 		PlotWindow pw2 = Utils.display(title2, plot2);
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw2.getImagePlus().getID();
