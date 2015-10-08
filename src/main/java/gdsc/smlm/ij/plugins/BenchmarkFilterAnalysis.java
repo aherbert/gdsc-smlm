@@ -1511,7 +1511,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
 
 				// Avoid null pointer
-				if (max == null)
+				if (maxFilter == null)
 				{
 					max = result;
 					maxFilter = filter;
@@ -1725,7 +1725,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			i++;
 
 			// Avoid null pointer
-			if (max == null)
+			if (maxFilter == null)
 			{
 				max = result;
 				maxFilter = filter;
@@ -1742,6 +1742,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				int compare = Double.compare(max[SCORE], result[SCORE]);
 				if (compare < 0)
 				{
+					System.out.printf("1. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
 					max = result;
 					maxFilter = filter;
 				}
@@ -1751,12 +1752,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					compare = Double.compare(max[CRITERIA], result[CRITERIA]);
 					if (compare < 0)
 					{
+						System.out.printf("2. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
 						max = result;
 						maxFilter = filter;
 					}
 					// If equal criteria then if the same type get the filter with the strongest params
 					else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
 					{
+						System.out.printf("3. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
 						max = result;
 						maxFilter = filter;
 					}
@@ -1768,12 +1771,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
 				if (compare < 0)
 				{
+					System.out.printf("4. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
 					max = result;
 					maxFilter = filter;
 				}
 				// If equal criteria then if the same type get the filter with the strongest params
 				else if (compare == 0 && allSameType && result[CRITERIA] > 0 && maxFilter.weakest(filter) < 0)
 				{
+					System.out.printf("5. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
 					max = result;
 					maxFilter = filter;
 				}
