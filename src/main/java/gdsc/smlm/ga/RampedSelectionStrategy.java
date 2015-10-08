@@ -34,10 +34,12 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 	 * @param random
 	 * @param fraction
 	 *            The fraction of the individuals to select (set between 0 and 1)
+	 * @param max
+	 *            The maximum number of individuals to select
 	 */
-	public RampedSelectionStrategy(RandomDataGenerator random, double fraction)
+	public RampedSelectionStrategy(RandomDataGenerator random, double fraction, int max)
 	{
-		super(random, fraction);
+		super(random, fraction, max);
 	}
 
 	/**
@@ -62,13 +64,11 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 		if (sorted.size() < 3)
 			return sorted;
 
-		int size = (int) Math.round(sorted.size() * fraction);
-		if (size < 2)
-			size = 2;
-		
-		if (tracker!= null)
+		final int size = getSize(sorted.size());
+
+		if (tracker != null)
 			tracker.progress(0);
-		
+
 		// Sort the list
 		ChromosomeComparator.sort(sorted);
 
@@ -94,9 +94,9 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 		// Now pick chromosomes using the cumulative as the upper limit
 		while (subset.size() < size)
 		{
-			if (tracker!= null)
+			if (tracker != null)
 				tracker.progress(subset.size(), size);
-			
+
 			// Used to check we pick something
 			final long previous = cumulative;
 
@@ -122,8 +122,8 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			if (previous == cumulative)
 				throw new RuntimeException("Failed to select a candidate. Size = " + subset.size() + " / " + size);
 		}
-		
-		if (tracker!= null)
+
+		if (tracker != null)
 			tracker.progress(1);
 
 		return subset;

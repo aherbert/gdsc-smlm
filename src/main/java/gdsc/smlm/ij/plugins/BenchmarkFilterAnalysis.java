@@ -1458,10 +1458,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
 				Recombiner recombiner = new SimpleRecombiner(random, crossoverRate, meanChildren);
 				SelectionStrategy selectionStrategy;
+				// If the initial population is huge ensure that the first selection culls to the correct size
+				final int selectionMax = (int) (selectionFraction * populationSize);
 				if (rampedSelection)
-					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction);
+					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction, selectionMax);
 				else
-					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction);
+					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax);
 				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
 				ga_population = new Population(filterSet.getFilters());
 				ga_population.setPopulationSize(populationSize);

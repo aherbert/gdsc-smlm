@@ -26,6 +26,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 public class SimpleSelectionStrategy extends Randomiser implements SelectionStrategy
 {
 	final double fraction;
+	final int max;
 
 	private List<? extends Chromosome> individuals = null;
 	TrackProgress tracker = null;
@@ -34,13 +35,16 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * @param random
 	 * @param fraction
 	 *            The fraction of the individuals to select (set between 0 and 1)
+	 * @param max
+	 *            The maximum number of individuals to select
 	 */
-	public SimpleSelectionStrategy(RandomDataGenerator random, double fraction)
+	public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max)
 	{
 		super(random);
 		if (fraction > 1)
 			fraction = 1;
 		this.fraction = fraction;
+		this.max = max;
 	}
 
 	/**
@@ -65,12 +69,30 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 		if (tracker != null)
 			tracker.progress(0.5);
 		ChromosomeComparator.sort(subset);
-		int size = (int) Math.round(subset.size() * fraction);
-		if (size < 2)
-			size = 2;
+		final int size = getSize(subset.size());
 		if (tracker != null)
 			tracker.progress(1);
 		return subset.subList(0, size);
+	}
+
+	/**
+	 * Calculate the new size of the population after selection
+	 * 
+	 * @param size
+	 *            The current size of the population before selection
+	 * @return The new size of the population
+	 */
+	protected int getSize(int size)
+	{
+		// Get the size using the fraction
+		size = (int) Math.round(size * fraction);
+		// Check against the max number to select
+		if (max > 2 && size > max)
+			size = max;
+		// Check the size is at least 2
+		if (size < 2)
+			size = 2;
+		return size;
 	}
 
 	/*
