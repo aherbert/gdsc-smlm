@@ -496,7 +496,7 @@ public class PSFDrift implements PlugIn
 		// Check region size using the image PSF
 		double newPsfWidth = (double) imp.getWidth() / scale;
 		if (Math.ceil(newPsfWidth) > w)
-			Utils.log(TITLE + ": Region size %d is larger then the scaled PSF %.1f", w, newPsfWidth);
+			Utils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
 
 		// Create robust PSF fitting settings
 		final double a = psfSettings.nmPerPixel * scale;
