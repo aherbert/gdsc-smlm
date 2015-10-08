@@ -90,7 +90,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
 	private static TextWindow gaWindow = null;
-
+	private static final int SCORE = 0;
+	private static final int CRITERIA = 1;
 	private static int failCount = 1;
 	private static int failCountRange = 0;
 	private static boolean rerankBySignal = false;
@@ -1385,7 +1386,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		int originalSize = filterSet.size();
 
-		// Get the weakest filter and subset the results if possible
+		// Check if the filters are the same so allowing optimisation
 		final boolean allSameType = filterSet.allSameType();
 
 		this.ga_resultsList = resultsList;
@@ -1492,9 +1493,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			// Evaluate all the filters and find the best
 			initialiseScoring(filterSet);
-			Filter maxFilter = null, criteriaFilter = null;
-			double maxScore = -1;
-			double maxCriteria = 0;
+			Filter maxFilter = null;
+			double[] max = new double[] { -1, -1 };
+			boolean criteriaPassed = false;
 			int count2 = count;
 			for (Filter filter : filterSet.getFilters())
 			{
@@ -1506,45 +1507,73 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 
 				final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
-				final double score = result[0];
-				final double criteria = result[1];
+
+				// Avoid null pointer
+				if (max == null)
+				{
+					max = result;
+					maxFilter = filter;
+					criteriaPassed = (result[CRITERIA] >= minCriteria);
+					continue;
+				}
 
 				// Check if the criteria are achieved
-				if (criteria >= minCriteria)
+				if (result[CRITERIA] >= minCriteria)
 				{
+					criteriaPassed = true;
+
 					// Check if the score is better
-					if (maxFilter == null || maxScore < score)
+					int compare = Double.compare(max[SCORE], result[SCORE]);
+					if (compare < 0)
 					{
-						maxScore = score;
+						max = result;
 						maxFilter = filter;
 					}
-					else if (allSameType && maxScore == score)
+					// If the same then check the criteria
+					else if (compare == 0)
 					{
-						maxFilter = selectFilter(maxFilter, filter);
+						compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+						if (compare < 0)
+						{
+							max = result;
+							maxFilter = filter;
+						}
+						// If equal criteria then if the same type get the filter with the strongest params
+						else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
+						{
+							max = result;
+							maxFilter = filter;
+						}
 					}
 				}
-				else if (maxCriteria < criteria)
+				// If the max filter has not achieved the criteria then store the best
+				else if (!criteriaPassed)
 				{
-					maxCriteria = criteria;
-					criteriaFilter = filter;
-				}
-				else if (maxCriteria == criteria && criteria > 0)
-				{
-					criteriaFilter = selectFilter(criteriaFilter, filter);
+					int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+					if (compare < 0)
+					{
+						max = result;
+						maxFilter = filter;
+					}
+					// If equal criteria then if the same type get the filter with the strongest params
+					else if (compare == 0 && allSameType && result[CRITERIA] > 0 && maxFilter.weakest(filter) < 0)
+					{
+						max = result;
+						maxFilter = filter;
+					}
 				}
 			}
 
 			// Test if the best filter is at the limit of the enumeration
 			final int set = setNumber - 1;
-			Filter topFilter = (maxFilter == null) ? criteriaFilter : maxFilter;
 			boolean doSearch = false;
-			if (topFilter != null)
+			if (maxFilter != null)
 			{
 				for (int j = 0; j < lowerLimit[set].length; j++)
 				{
 					if (increment[set][j] > 0)
 					{
-						final double value = topFilter.getParameterValue(j);
+						final double value = maxFilter.getParameterValue(j);
 						if ((value <= lowerLimit[set][j] && value > 0) || value >= upperLimit[set][j])
 						{
 							doSearch = true;
@@ -1560,11 +1589,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			while (doSearch && iteration < 20)
 			{
 				iteration++;
-				//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, topFilter.getName(), maxScore, maxCriteria);
+				//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, topFilter.getName(), max[SCORE], max[CRITERIA]);
 
 				// Create a new filter set surrounding the top filter
+				Filter oldMaxFilter = maxFilter;
 				ArrayList<Filter> filters = new ArrayList<Filter>();
-				filters.add(topFilter);
+				filters.add(maxFilter);
 				final int n = lowerLimit[set].length;
 				for (int i = 0; i < n; i++)
 				{
@@ -1592,44 +1622,69 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				for (Filter filter : newSet.getFilters())
 				{
 					final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
-					final double score = result[0];
-					final double criteria = result[1];
 
 					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, filter.getName(), score, criteria);
 
 					// Check if the criteria are achieved
-					if (criteria >= minCriteria)
+					if (result[CRITERIA] >= minCriteria)
 					{
+						criteriaPassed = true;
+
 						// Check if the score is better
-						if (maxFilter == null || maxScore < score)
+						int compare = Double.compare(max[SCORE], result[SCORE]);
+						if (compare < 0)
 						{
-							maxScore = score;
+							max = result;
+							maxFilter = filter;
+						}
+						// If the same then check the criteria
+						else if (compare == 0)
+						{
+							compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+							if (compare < 0)
+							{
+								max = result;
+								maxFilter = filter;
+							}
+							// If equal criteria then if the same type get the filter with the strongest params
+							else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
+							{
+								max = result;
+								maxFilter = filter;
+							}
+						}
+					}
+					// If the max filter has not achieved the criteria then store the best
+					else if (!criteriaPassed)
+					{
+						int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+						if (compare < 0)
+						{
+							max = result;
+							maxFilter = filter;
+						}
+						// If equal criteria then if the same type get the filter with the strongest params
+						else if (compare == 0 && allSameType && result[CRITERIA] > 0 && maxFilter.weakest(filter) < 0)
+						{
+							max = result;
 							maxFilter = filter;
 						}
 					}
-					// Check if the criteria score is better
-					else if (maxCriteria < criteria)
-					{
-						maxCriteria = criteria;
-						criteriaFilter = filter;
-					}
 				}
-				Filter oldTopFilter = topFilter;
-				topFilter = (maxFilter == null) ? criteriaFilter : maxFilter;
 				// Check if the top filter has changed to continue the search
-				doSearch = !topFilter.equals(oldTopFilter);
+				doSearch = !maxFilter.equals(oldMaxFilter);
 			}
 
 			// Allow the re-evaluation of all the filters to be skipped
-			best = topFilter;
+			best = maxFilter;
 		}
 
 		// Do not support plotting if we used optimisation
 		double[] xValues = (best != null || isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
 		double[] yValues = (xValues == null) ? null : new double[xValues.length];
-		Filter maxFilter = null, criteriaFilter = null;
-		double maxScore = -1;
-		double maxCriteria = 0;
+		Filter maxFilter = null;
+		double[] max = new double[] { Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY };
+		boolean criteriaPassed = false;
 
 		// Final evaluation does not need to assess all the filters if we have run optimisation.
 		// It can just assess the top 1 required for the summary.
@@ -1659,39 +1714,68 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 
 			final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
-			final double score = result[0];
-			final double criteria = result[1];
-
-			// Check if the criteria are achieved
-			if (criteria >= minCriteria)
-			{
-				// Check if the score is better
-				if (maxFilter == null || maxScore < score)
-				{
-					maxScore = score;
-					maxFilter = filter;
-				}
-				else if (allSameType && maxScore == score)
-				{
-					maxFilter = selectFilter(maxFilter, filter);
-				}
-			}
-			else if (maxCriteria < criteria)
-			{
-				maxCriteria = criteria;
-				criteriaFilter = filter;
-			}
-			else if (maxCriteria == criteria && criteria > 0)
-			{
-				criteriaFilter = selectFilter(criteriaFilter, filter);
-			}
 
 			if (xValues != null)
 			{
 				xValues[i] = filter.getNumericalValue();
-				yValues[i] = score;
+				yValues[i] = result[SCORE];
 			}
 			i++;
+
+			// Avoid null pointer
+			if (max == null)
+			{
+				max = result;
+				maxFilter = filter;
+				criteriaPassed = (result[CRITERIA] >= minCriteria);
+				continue;
+			}
+
+			// Check if the criteria are achieved
+			if (result[CRITERIA] >= minCriteria)
+			{
+				criteriaPassed = true;
+
+				// Check if the score is better
+				int compare = Double.compare(max[SCORE], result[SCORE]);
+				if (compare < 0)
+				{
+					max = result;
+					maxFilter = filter;
+				}
+				// If the same then check the criteria
+				else if (compare == 0)
+				{
+					compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+					if (compare < 0)
+					{
+						max = result;
+						maxFilter = filter;
+					}
+					// If equal criteria then if the same type get the filter with the strongest params
+					else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
+					{
+						max = result;
+						maxFilter = filter;
+					}
+				}
+			}
+			// If the max filter has not achieved the criteria then store the best
+			else if (!criteriaPassed)
+			{
+				int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+				if (compare < 0)
+				{
+					max = result;
+					maxFilter = filter;
+				}
+				// If equal criteria then if the same type get the filter with the strongest params
+				else if (compare == 0 && allSameType && result[CRITERIA] > 0 && maxFilter.weakest(filter) < 0)
+				{
+					max = result;
+					maxFilter = filter;
+				}
+			}
 		}
 
 		// Update the final results window given that we mainly use appendWidthoutUpdate(...) when adding data
@@ -1702,10 +1786,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		boolean atLimit = false;
 		if (allSameType)
 		{
-			Filter topFilter = (maxFilter == null) ? criteriaFilter : maxFilter;
-			if (topFilter != null)
+			if (maxFilter != null)
 			{
-				int[] indices = topFilter.getChromosomeParameters();
+				int[] indices = maxFilter.getChromosomeParameters();
 				StringBuilder sb = new StringBuilder();
 				final int set = setNumber - 1;
 				for (int j = 0; j < indices.length; j++)
@@ -1713,11 +1796,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					final int p = indices[j];
 					if (!wasNotExpanded(setNumber, p))
 					{
-						final double value = topFilter.getParameterValue(p);
+						final double value = maxFilter.getParameterValue(p);
 						int c1 = Double.compare(value, lowerLimit[set][p]);
 						if (c1 <= 0)
 						{
-							sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
+							sb.append(" : ").append(maxFilter.getParameterName(p)).append(" [")
 									.append(Utils.rounded(value));
 							if (c1 == -1)
 								sb.append("<").append(Utils.rounded(lowerLimit[set][p]));
@@ -1728,7 +1811,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							int c2 = Double.compare(value, upperLimit[set][p]);
 							if (c2 >= 0)
 							{
-								sb.append(" : ").append(topFilter.getParameterName(p)).append(" [")
+								sb.append(" : ").append(maxFilter.getParameterName(p)).append(" [")
 										.append(Utils.rounded(value));
 								if (c2 == 1)
 									sb.append(">").append(Utils.rounded(upperLimit[set][p]));
@@ -1740,17 +1823,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				if (sb.length() > 0)
 				{
 					atLimit = true;
-					if (maxFilter != null)
+					if (criteriaPassed)
 					{
 						Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
-								topFilter.getName(), Utils.rounded((invertScore) ? -maxScore : maxScore),
+								maxFilter.getName(), Utils.rounded((invertScore) ? -max[SCORE] : max[SCORE]),
 								Utils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount +
 										limitRange, sb.toString());
 					}
 					else
 					{
 						Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
-								topFilter.getName(), Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria),
+								maxFilter.getName(), Utils.rounded((invertCriteria) ? -max[CRITERIA] : max[CRITERIA]),
 								limitFailCount + limitRange, sb.toString());
 					}
 				}
@@ -1758,51 +1841,49 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		// We may have no filters that pass the criteria
-		String type = filterSet.getFilters().get(0).getType();
-		if (maxFilter == null)
+		String type = maxFilter.getType();
+		if (!criteriaPassed)
 		{
-			if (allSameType)
-			{
-				if (criteriaFilter != null)
-					Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
-							Utils.rounded((invertCriteria) ? -maxCriteria : maxCriteria), criteriaFilter.getName());
-				else
-					Utils.log("Warning: Filter does not pass the criteria: %s", type);
-			}
+			Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
+					Utils.rounded((invertCriteria) ? -max[CRITERIA] : max[CRITERIA]), maxFilter.getName());
 			return 0;
 		}
 
 		boolean allowDuplicates = true; // This could be an option?
 
-		if (allSameType)
+		// XXX - Commented out the requirement to be the same type to store for later analysis. 
+		// This may break the code, however I think that all filter sets should be able to have a best filter
+		// irrespective of whether they were the same type or not.
+		//if (allSameType)
+		//{
+		FilterScore newFilterScore = new FilterScore(maxFilter, max[SCORE], max[CRITERIA], atLimit);
+		if (bestFilter.containsKey(type))
 		{
-			if (bestFilter.containsKey(type))
+			if (allowDuplicates)
 			{
-				if (allowDuplicates)
-				{
-					// Duplicate type: create a unique key
-					// Start at 2 to show it is the second one of the same type
-					int n = 2;
-					while (bestFilter.containsKey(type + n))
-						n++;
-					type += n;
-					bestFilter.put(type, new FilterScore(maxFilter, maxScore, atLimit));
-					bestFilterOrder.add(type);
-				}
-				else
-				{
-					// Replace
-					FilterScore filterScore = bestFilter.get(type);
-					if (filterScore.score < maxScore)
-						filterScore.update(maxFilter, maxScore, atLimit);
-				}
+				// Duplicate type: create a unique key
+				// Start at 2 to show it is the second one of the same type
+				int n = 2;
+				while (bestFilter.containsKey(type + n))
+					n++;
+				type += n;
+				bestFilter.put(type, newFilterScore);
+				bestFilterOrder.add(type);
 			}
 			else
 			{
-				bestFilter.put(type, new FilterScore(maxFilter, maxScore, atLimit));
-				bestFilterOrder.add(type);
+				// Replace
+				FilterScore filterScore = bestFilter.get(type);
+				if (newFilterScore.compareTo(filterScore) < 0)
+					filterScore.update(maxFilter, max[SCORE], max[CRITERIA], atLimit);
 			}
 		}
+		else
+		{
+			bestFilter.put(type, newFilterScore);
+			bestFilterOrder.add(type);
+		}
+		//}
 
 		// Add spacer at end of each result set
 		if (isHeadless)
@@ -2506,18 +2587,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public class FilterScore implements Comparable<FilterScore>
 	{
 		Filter filter;
-		double score;
+		double score, criteria;
 		boolean atLimit;
 
-		public FilterScore(Filter filter, double scorem, boolean atLimit)
+		public FilterScore(Filter filter, double score, double criteria, boolean atLimit)
 		{
-			update(filter, score, atLimit);
+			update(filter, score, criteria, atLimit);
 		}
 
-		public void update(Filter filter, double score, boolean atLimit)
+		public void update(Filter filter, double score, double criteria, boolean atLimit)
 		{
 			this.filter = filter;
 			this.score = score;
+			this.criteria = criteria;
 			this.atLimit = atLimit;
 		}
 
@@ -2526,6 +2608,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (this.score > that.score)
 				return -1;
 			if (this.score < that.score)
+				return 1;
+			if (this.criteria > that.criteria)
+				return -1;
+			if (this.criteria < that.criteria)
 				return 1;
 			return 0;
 		}
