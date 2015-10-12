@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.LinkedList;
 
 /**
@@ -36,6 +38,24 @@ public class About implements PlugIn
 	private static String TITLE = "GDSC SMLM ImageJ Plugins";
 	public static String HELP_URL = "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
 	private static String YEAR = "2014";
+
+	enum ConfigureOption
+	{
+		INSTALL("Install"), REMOVE("Remove"), EDIT("Edit & Install");
+
+		private String name;
+
+		private ConfigureOption(String name)
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
 
 	public void run(String arg)
 	{
@@ -55,14 +75,16 @@ public class About implements PlugIn
 		{
 			installResource("/macros/toolsets/SMLM Tools.txt", "macros",
 					"toolsets" + File.separator + "SMLM Tools.txt", "SMLM toolset",
-					"Select the toolset from the ImageJ 'More Tools' menu to load buttons on to the ImageJ menu bar.");
+					"Select the toolset from the ImageJ 'More Tools' menu to load buttons on to the ImageJ menu bar.",
+					ConfigureOption.INSTALL, ConfigureOption.REMOVE);
 			return;
 		}
 
 		if (arg.equals("config"))
 		{
 			installResource("/gdsc/smlm/plugins.config", "plugins", "smlm.config", "SMLM Tools Configuration",
-					"The configuration file is used to specify which plugins to display on the SMLM Tools window.");
+					"The configuration file is used to specify which plugins to display on the SMLM Tools window. Creating a custom file will need to be repeated when the available plugins change.",
+					ConfigureOption.INSTALL, ConfigureOption.EDIT, ConfigureOption.REMOVE);
 			return;
 		}
 
@@ -145,7 +167,7 @@ public class About implements PlugIn
 	}
 
 	private static void installResource(String resource, String ijDirectory, String destinationName,
-			String resourceTitle, String notes)
+			String resourceTitle, String notes, ConfigureOption... options)
 	{
 		Class<About> resourceClass = About.class;
 		InputStream toolsetStream = resourceClass.getResourceAsStream(resource);
@@ -156,27 +178,61 @@ public class About implements PlugIn
 		if (dir == null)
 		{
 			IJ.error("Unable to locate " + ijDirectory + " directory");
+			return;
 		}
+
+		EnumSet<ConfigureOption> opt = EnumSet.of(options[0], options);
+
 		GenericDialog gd = new GenericDialog(TITLE);
 		String filename = dir + destinationName;
 		boolean fileExists = new File(filename).exists();
 		StringBuilder sb = new StringBuilder();
-		sb.append("Install ").append(resourceTitle).append(" to:\n \n").append(filename);
+		sb.append("Configure resource '").append(resourceTitle).append("' at:\n \n").append(filename);
 		if (notes != null)
 			sb.append("\n \n").append(XmlUtils.lineWrap(notes, 80, 0, null));
-		if (fileExists)
-		{
-			sb.append("\n \n* Note this will over-write the existing file.");
-		}
+
 		gd.addMessage(sb.toString());
-		if (fileExists)
-			gd.addCheckbox("Remove existing file", false);
+
+		// Configure the options
+		String[] choices = new String[3];
+		ConfigureOption[] optChoices = new ConfigureOption[choices.length];
+		int count = 0;
+		if (opt.contains(ConfigureOption.INSTALL))
+		{
+			choices[count] = ConfigureOption.INSTALL.toString();
+			if (fileExists)
+				choices[count] += " (overwrite)";
+			optChoices[count] = ConfigureOption.INSTALL;
+			count++;
+		}
+		if (opt.contains(ConfigureOption.EDIT))
+		{
+			choices[count] = ConfigureOption.EDIT.toString();
+			if (fileExists)
+				choices[count] += " (overwrite)";
+			optChoices[count] = ConfigureOption.EDIT;
+			count++;
+		}
+		if (opt.contains(ConfigureOption.REMOVE) && fileExists)
+		{
+			choices[count] = ConfigureOption.REMOVE.toString();
+			optChoices[count] = ConfigureOption.REMOVE;
+			count++;
+		}
+
+		if (count == 0)
+			return;
+		choices = Arrays.copyOf(choices, count);
+		gd.addChoice("Option", choices, choices[0]);
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return;
+		
+		ConfigureOption choice = optChoices[gd.getNextChoiceIndex()];
 
-		if (fileExists && gd.getNextBoolean())
+		if (choice == ConfigureOption.REMOVE)
 		{
 			try
 			{
@@ -189,21 +245,52 @@ public class About implements PlugIn
 			return;
 		}
 
+		// Read the file
+		LinkedList<String> contents = new LinkedList<String>();
 		BufferedReader input = null;
-		BufferedWriter output = null;
 		try
 		{
-			// Copy the contents of the file
-
 			// Read
-			LinkedList<String> contents = new LinkedList<String>();
 			input = new BufferedReader(new UnicodeReader(toolsetStream, null));
 			String line;
 			while ((line = input.readLine()) != null)
 			{
 				contents.add(line);
 			}
-
+		}
+		catch (IOException e)
+		{
+			IJ.error("Unable to install " + resourceTitle + ".\n \n" + e.getMessage());
+			return;
+		}
+		finally
+		{
+			close(input);
+		}
+		
+		if (choice == ConfigureOption.EDIT)
+		{
+			// Allow the user to edit the file contents
+			gd = new GenericDialog(TITLE);
+			gd.addMessage("Edit the file contents before install:");
+			sb.setLength(0);
+			for (String line : contents)
+				sb.append(line).append("\n");
+			gd.addTextAreas(sb.toString(), null, 20, 80);
+			gd.showDialog();
+			if (gd.wasOKed())
+			{
+				contents.clear();
+				String text = gd.getNextText();
+				for (String line : text.split("\n"))
+					contents.add(line);
+			}			
+		}		
+		
+		// Install the file
+		BufferedWriter output = null;
+		try
+		{
 			// Write
 			FileOutputStream fos = new FileOutputStream(filename);
 			output = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
@@ -219,7 +306,6 @@ public class About implements PlugIn
 		}
 		finally
 		{
-			close(input);
 			close(output);
 		}
 	}
