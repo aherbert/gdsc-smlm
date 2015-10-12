@@ -1226,7 +1226,6 @@ public class TraceDiffusion implements PlugIn
 		}
 
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
-		// Use the deprecated API since the new one is not yet documented.
 
 		/**
 		 * @return An estimate for the linear gradient
@@ -1684,7 +1683,6 @@ public class TraceDiffusion implements PlugIn
 		}
 
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
-		// Use the deprecated API since the new one is not yet documented.
 
 		public double[] guess()
 		{
