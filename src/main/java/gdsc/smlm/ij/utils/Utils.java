@@ -22,9 +22,9 @@ import ij.Macro;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Plot;
+import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.ProgressBar;
-import ij.gui.Plot2;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.plugin.frame.Recorder;
@@ -35,8 +35,6 @@ import ij.text.TextWindow;
 import java.awt.Frame;
 import java.awt.Window;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -87,11 +85,7 @@ public class Utils
 	 */
 	public static String rounded(double d, int significantDigits)
 	{
-		if (Double.isInfinite(d) || Double.isNaN(d))
-			return "" + d;
-		BigDecimal bd = new BigDecimal(d);
-		bd = bd.round(new MathContext(significantDigits));
-		return "" + bd.doubleValue();
+		return Maths.rounded(d, significantDigits);
 	}
 
 	/**
@@ -199,7 +193,7 @@ public class Utils
 			float[] f = new float[n];
 			for (int i = 0; i < n; i++)
 				f[i] = (float) data[s][i];
-			stack.setPixels(f, s+1);
+			stack.setPixels(f, s + 1);
 		}
 		return Utils.display(title, stack);
 	}
@@ -269,7 +263,7 @@ public class Utils
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Close the named window
 	 * 
@@ -1143,9 +1137,12 @@ public class Utils
 	}
 
 	private static long lastTime = 0;
+
 	/**
 	 * Show a message on the status bar if enough time has passed since the last call
-	 * @param message The message
+	 * 
+	 * @param message
+	 *            The message
 	 * @return True if shown
 	 */
 	public static boolean showStatus(String message)

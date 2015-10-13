@@ -1,5 +1,7 @@
 package gdsc.smlm.utils;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Arrays;
 
 /*----------------------------------------------------------------------------- 
@@ -476,5 +478,32 @@ public class Maths
 		for (int d : data)
 			sum += d;
 		return sum;
+	}
+	
+	/**
+	 * Round the double to the specified significant digits
+	 * 
+	 * @param d The double
+	 * @param significantDigits The number of significan digits
+	 * @return A string containing the rounded double
+	 */
+	public static String rounded(double d, int significantDigits)
+	{
+		if (Double.isInfinite(d) || Double.isNaN(d))
+			return "" + d;
+		BigDecimal bd = new BigDecimal(d);
+		bd = bd.round(new MathContext(significantDigits));
+		return "" + bd.doubleValue();
+	}
+
+	/**
+	 * Round the double to 4 significant digits
+	 * 
+	 * @param d The double
+	 * @return A string containing the rounded double
+	 */
+	public static String rounded(double d)
+	{
+		return rounded(d, 4);
 	}
 }
