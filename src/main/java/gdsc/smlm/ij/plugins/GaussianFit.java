@@ -26,6 +26,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.IJLogger;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.PeakResults;
@@ -1318,18 +1319,5 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	public double getInitialPeakStdDev()
 	{
 		return initialPeakStdDev;
-	}
-
-	private class IJLogger implements gdsc.smlm.utils.logging.Logger
-	{
-		public void info(String message)
-		{
-			IJ.log(message);
-		}
-
-		public void info(String format, Object... args)
-		{
-			IJ.log(String.format(format, args));
-		}
 	}
 }
