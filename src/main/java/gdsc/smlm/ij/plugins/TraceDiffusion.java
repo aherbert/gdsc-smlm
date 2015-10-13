@@ -1306,7 +1306,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	@Override
 	public int getNumberOfCurvePoints()
 	{
-		return 3000;
+		return 300;
 	}
 	
 	@Override

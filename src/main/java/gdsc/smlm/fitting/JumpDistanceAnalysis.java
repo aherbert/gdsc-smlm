@@ -424,7 +424,12 @@ public class JumpDistanceAnalysis
 		return sb.toString();
 	}
 
-	private void sort(double[] d, double[] f)
+	/**
+	 * Sort the arrays by the size of the diffusion coefficient
+	 * @param d The diffusion coefficient array
+	 * @param f The fraction of the population array
+	 */
+	public static void sort(double[] d, double[] f)
 	{
 		// Sort by coefficient size
 		int[] indices = new int[f.length];
