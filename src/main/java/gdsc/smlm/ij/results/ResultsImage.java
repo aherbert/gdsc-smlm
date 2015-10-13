@@ -15,7 +15,7 @@ package gdsc.smlm.ij.results;
 
 public enum ResultsImage
 {
-	NONE("None"), LOCALISATIONS("Localisations"), SIGNAL_INTENSITY("Signal intenisty"), FRAME_NUMBER("Frame number"), PSF(
+	NONE("None"), LOCALISATIONS("Localisations"), SIGNAL_INTENSITY("Signal intensity"), FRAME_NUMBER("Frame number"), PSF(
 			"PSF"), LOCALISATIONS_PRECISION("Localisations (width=precision)"), SIGNAL_PRECISION(
 			"Signal (width=precision)"), LOCALISATIONS_AV_PRECISION("Localisations (width=av.precision)"), SIGNAL_AV_PRECISION(
 			"Signal (width=av.precision)"), ERROR("Fit error");
