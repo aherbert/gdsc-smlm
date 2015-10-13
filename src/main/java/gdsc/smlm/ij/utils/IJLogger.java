@@ -7,7 +7,22 @@ import ij.IJ;
  */
 public class IJLogger implements gdsc.smlm.utils.logging.Logger
 {
-	/* (non-Javadoc)
+	public boolean showDebug = false;
+	public boolean showError = true;
+
+	public IJLogger()
+	{
+	}
+
+	public IJLogger(boolean showDebug, boolean showError)
+	{
+		this.showDebug = showDebug;
+		this.showError = showError;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.logging.Logger#info(java.lang.String)
 	 */
 	public void info(String message)
@@ -15,11 +30,41 @@ public class IJLogger implements gdsc.smlm.utils.logging.Logger
 		IJ.log(message);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.logging.Logger#info(java.lang.String, java.lang.Object[])
 	 */
 	public void info(String format, Object... args)
 	{
 		IJ.log(String.format(format, args));
+	}
+
+	@Override
+	public void debug(String message)
+	{
+		if (showDebug)
+			info(message);
+	}
+
+	@Override
+	public void debug(String format, Object... args)
+	{
+		if (showDebug)
+			info(format, args);
+	}
+
+	@Override
+	public void error(String message)
+	{
+		if (showError)
+			info(message);
+	}
+
+	@Override
+	public void error(String format, Object... args)
+	{
+		if (showError)
+			info(format, args);
 	}
 }

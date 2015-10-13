@@ -30,4 +30,30 @@ public interface Logger
 	 * @param args
 	 */
 	void info(String format, Object... args);
+	
+	/**
+	 * Log the message
+	 * @param message
+	 */
+	void debug(String message);
+	
+	/**
+	 * Log the arguments using the given format
+	 * @param format
+	 * @param args
+	 */
+	void debug(String format, Object... args);
+	
+	/**
+	 * Log the message
+	 * @param message
+	 */
+	void error(String message);
+	
+	/**
+	 * Log the arguments using the given format
+	 * @param format
+	 * @param args
+	 */
+	void error(String format, Object... args);
 }
