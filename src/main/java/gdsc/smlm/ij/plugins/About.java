@@ -82,9 +82,19 @@ public class About implements PlugIn
 
 		if (arg.equals("config"))
 		{
-			installResource("/gdsc/smlm/plugins.config", "plugins", "smlm.config", "SMLM Tools Configuration",
+			int result = installResource(
+					"/gdsc/smlm/plugins.config",
+					"plugins",
+					"smlm.config",
+					"SMLM Tools Configuration",
 					"The configuration file is used to specify which plugins to display on the SMLM Tools window. Creating a custom file will need to be repeated when the available plugins change.",
 					ConfigureOption.INSTALL, ConfigureOption.EDIT, ConfigureOption.REMOVE);
+			// If install/remove was successful then reload the GDSC SMLM Panel if it is showing.
+			if (result != -1 && SMLMTools.isFrameVisible())
+			{
+				SMLMTools.closeFrame();
+				new SMLMTools();
+			}
 			return;
 		}
 
@@ -166,19 +176,28 @@ public class About implements PlugIn
 		gd.showDialog();
 	}
 
-	private static void installResource(String resource, String ijDirectory, String destinationName,
+	/**
+	 * @param resource
+	 * @param ijDirectory
+	 * @param destinationName
+	 * @param resourceTitle
+	 * @param notes
+	 * @param options
+	 * @return -1 on error, 0 if installed, 1 if removed
+	 */
+	private static int installResource(String resource, String ijDirectory, String destinationName,
 			String resourceTitle, String notes, ConfigureOption... options)
 	{
 		Class<About> resourceClass = About.class;
 		InputStream toolsetStream = resourceClass.getResourceAsStream(resource);
 		if (toolsetStream == null)
-			return;
+			return -1;
 
 		String dir = IJ.getDirectory(ijDirectory);
 		if (dir == null)
 		{
 			IJ.error("Unable to locate " + ijDirectory + " directory");
-			return;
+			return -1;
 		}
 
 		EnumSet<ConfigureOption> opt = EnumSet.of(options[0], options);
@@ -221,15 +240,15 @@ public class About implements PlugIn
 		}
 
 		if (count == 0)
-			return;
+			return -1;
 		choices = Arrays.copyOf(choices, count);
 		gd.addChoice("Option", choices, choices[0]);
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
-			return;
-		
+			return -1;
+
 		ConfigureOption choice = optChoices[gd.getNextChoiceIndex()];
 
 		if (choice == ConfigureOption.REMOVE)
@@ -237,12 +256,13 @@ public class About implements PlugIn
 			try
 			{
 				new File(filename).delete();
+				return 1;
 			}
 			catch (SecurityException e)
 			{
 				IJ.error("Unable to remove existing file");
 			}
-			return;
+			return -1;
 		}
 
 		// Read the file
@@ -261,13 +281,13 @@ public class About implements PlugIn
 		catch (IOException e)
 		{
 			IJ.error("Unable to install " + resourceTitle + ".\n \n" + e.getMessage());
-			return;
+			return -1;
 		}
 		finally
 		{
 			close(input);
 		}
-		
+
 		if (choice == ConfigureOption.EDIT)
 		{
 			// Allow the user to edit the file contents
@@ -284,9 +304,9 @@ public class About implements PlugIn
 				String text = gd.getNextText();
 				for (String line : text.split("\n"))
 					contents.add(line);
-			}			
-		}		
-		
+			}
+		}
+
 		// Install the file
 		BufferedWriter output = null;
 		try
@@ -308,6 +328,7 @@ public class About implements PlugIn
 		{
 			close(output);
 		}
+		return 0;
 	}
 
 	private static void close(BufferedReader input)
