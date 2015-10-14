@@ -16,6 +16,8 @@
  */
 package org.apache.commons.math3.optim.nonlinear.scalar.noderiv;
 
+import java.util.Arrays;
+
 import gdsc.smlm.utils.DoubleEquality;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -66,6 +68,37 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	private PositionChecker positionChecker = null;
 	/** Only allow convergence when using initial basis vectors */
 	private final boolean basisConvergence;
+	/** Allow custom basis search direction */
+	private double[] basis = null;
+
+	/**
+	 * The initial step is used to construct the basis vectors for the search direction. By default the identity matrix
+	 * is used for the search. The magnitude of each diagonal position can be set using this data object.
+	 */
+	public static class BasisStep implements OptimizationData
+	{
+		/** Initial step in each direction. */
+		private final double[] step;
+
+		/**
+		 * @param step
+		 *            Initial step for the bracket search.
+		 */
+		public BasisStep(double[] step)
+		{
+			this.step = step;
+		}
+
+		/**
+		 * Gets the initial step.
+		 *
+		 * @return the initial step.
+		 */
+		public double[] getStep()
+		{
+			return step;
+		}
+	}
 
 	/**
 	 * This constructor allows to specify a user-defined convergence checker,
@@ -321,9 +354,19 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	private double[][] createBasisVectors(final int n)
 	{
 		double[][] direc = new double[n][n];
+		double[] step;
+		if (basis != null && basis.length == n)
+		{
+			step = basis;
+		}
+		else
+		{
+			step = new double[n];
+			Arrays.fill(step, 1);
+		}
 		for (int i = 0; i < n; i++)
 		{
-			direc[i][i] = 1;
+			direc[i][i] = step[i];
 		}
 		return direc;
 	}
@@ -387,10 +430,11 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 * will always decide when to stop the line search.
 	 */
 	private static final double REL_TOL_UNUSED;
-	static {
+	static
+	{
 		REL_TOL_UNUSED = 2 * FastMath.ulp(1d);
 	}
-	
+
 	/**
 	 * Class for finding the minimum of the objective function along a given
 	 * direction.
@@ -485,7 +529,12 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			if (data instanceof PositionChecker)
 			{
 				positionChecker = (PositionChecker) data;
-				break;
+				continue;
+			}
+			if (data instanceof BasisStep)
+			{
+				basis = ((BasisStep) data).getStep();
+				continue;
 			}
 		}
 
@@ -495,12 +544,21 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	/**
 	 * @throws MathUnsupportedOperationException
 	 *             if bounds were passed to the {@link #optimize(OptimizationData[]) optimize} method.
+	 * @throws MathUnsupportedOperationException
+	 *             if the basis step passed to the {@link #optimize(OptimizationData[]) optimize} method is zero for any
+	 *             dimension
 	 */
 	private void checkParameters()
 	{
 		if (getLowerBound() != null || getUpperBound() != null)
 		{
 			throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
+		}
+		if (basis != null)
+		{
+			for (double d : basis)
+				if (d == 0)
+					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
 		}
 	}
 }

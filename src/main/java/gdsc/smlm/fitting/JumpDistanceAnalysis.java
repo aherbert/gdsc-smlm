@@ -38,6 +38,7 @@ import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
 import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
 import org.apache.commons.math3.optim.nonlinear.vector.Target;
@@ -51,9 +52,14 @@ import org.apache.commons.math3.util.FastMath;
  * Perform curve fitting on a cumulative histogram of the mean-squared displacement (MSD) per second to calculate the
  * diffusion coefficient of molecules (in um^2/s). The MSD is also known as the Jump Distance, i.e. how far a molecule
  * moves when being tracked.
+ * <p>
+ * Based on the paper: Weimann, L., Ganzinger, K.A., McColl, J., Irvine, K.L., Davis, S.J., Gay, N.J., Bryant, C.E.,
+ * Klenerman, D. (2013) A Quantitative Comparison of Single-Dye Tracking Analysis Tools Using Monte Carlo Simulations.
+ * PLoS One 8, Issue 5, e64287
  */
 public class JumpDistanceAnalysis
 {
+	private final boolean DEBUG_OPTIMISER = false;
 	public interface CurveLogger
 	{
 		/**
@@ -84,6 +90,7 @@ public class JumpDistanceAnalysis
 	private int fitRestarts = 3;
 	private double minFraction = 0.1;
 	private double minDifference = 2;
+	private double minD = 1e-6;
 	private int maxN = 10;
 
 	public JumpDistanceAnalysis()
@@ -106,7 +113,7 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distances using a fit to a cumulative histogram.
 	 * <p>
 	 * The histogram is fit repeatedly using a mixed population model with increasing number of different molecules.
-	 * Results are sorted by the diffusion coefficient descending. This process is stopped when: the information
+	 * Results are sorted by the diffusion coefficient ascending. This process is stopped when: the information
 	 * criterion does not improve; the fraction of one of the populations is below the min fraction; the difference
 	 * between two consecutive diffusion coefficients is below the min difference.
 	 * <p>
@@ -126,11 +133,10 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
-	 * Fit the jump distance histogram using a cumulative sum as detailed in ...
-	 * TODO - Get the reference to the Klennerman paper.
+	 * Fit the jump distance histogram using a cumulative sum.
 	 * <p>
 	 * The histogram is fit repeatedly using a mixed population model with increasing number of different molecules.
-	 * Results are sorted by the diffusion coefficient descending. This process is stopped when: the information
+	 * Results are sorted by the diffusion coefficient ascending. This process is stopped when: the information
 	 * criterion does not improve; the fraction of one of the populations is below the min fraction; the difference
 	 * between two consecutive diffusion coefficients is below the min difference.
 	 * <p>
@@ -164,7 +170,8 @@ public class JumpDistanceAnalysis
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 		try
 		{
-			final JumpDistanceFunction function = new JumpDistanceFunction(jdHistogram[0], jdHistogram[1], estimatedD);
+			final JumpDistanceCumulFunction function = new JumpDistanceCumulFunction(jdHistogram[0], jdHistogram[1],
+					estimatedD);
 			PointVectorValuePair lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 					new ModelFunctionJacobian(new MultivariateMatrixFunction()
 					{
@@ -210,7 +217,7 @@ public class JumpDistanceAnalysis
 			// An LVM fit cannot restrict the parameters so the fractions do not go below zero.
 			// Use the CMEASOptimizer which supports bounded fitting.
 
-			MixedJumpDistanceFunctionMultivariate mixedFunction = new MixedJumpDistanceFunctionMultivariate(
+			MixedJumpDistanceCumulFunctionMultivariate mixedFunction = new MixedJumpDistanceCumulFunctionMultivariate(
 					jdHistogram[0], jdHistogram[1], estimatedD, n + 1);
 
 			double[] lB = mixedFunction.getLowerBounds();
@@ -294,7 +301,7 @@ public class JumpDistanceAnalysis
 			// TODO - Try a bounded BFGS optimiser
 
 			// Try and improve using a LVM fit
-			final MixedJumpDistanceFunctionGradient mixedFunctionGradient = new MixedJumpDistanceFunctionGradient(
+			final MixedJumpDistanceCumulFunctionGradient mixedFunctionGradient = new MixedJumpDistanceCumulFunctionGradient(
 					jdHistogram[0], jdHistogram[1], estimatedD, n + 1);
 
 			PointVectorValuePair lvmSolution;
@@ -396,7 +403,203 @@ public class JumpDistanceAnalysis
 		// Add the best fit to the plot and return the parameters.
 		if (bestMulti > -1)
 		{
-			Function function = new MixedJumpDistanceFunctionMultivariate(jdHistogram[0], jdHistogram[1], 0,
+			Function function = new MixedJumpDistanceCumulFunctionMultivariate(jdHistogram[0], jdHistogram[1], 0,
+					bestMulti + 1);
+			saveFitCurve(function, fitParams[bestMulti], jdHistogram, true);
+		}
+
+		if (best > -1)
+		{
+			logger.info("Best fit achieved using %d population%s: D = %s um^2/s, Fractions = %s", best + 1,
+					(best == 0) ? "" : "s", format(coefficients[best]), format(fractions[best]));
+		}
+
+		return (best > -1) ? new double[][] { coefficients[best], fractions[best] } : null;
+	}
+
+	/**
+	 * Fit the jump distances using a maximum likelihood estimation.
+	 * <p>
+	 * The data is fit repeatedly using a mixed population model with increasing number of different molecules. Results
+	 * are sorted by the diffusion coefficient ascending. This process is stopped when: the likelihood does not improve;
+	 * the fraction of one of the populations is below the min fraction; the difference between two consecutive
+	 * diffusion coefficients is below the min difference.
+	 * <p>
+	 * The number of populations must be obtained from the size of the D/fractions arrays.
+	 * 
+	 * @param jumpDistances
+	 *            The jump distances (in um^2/s)
+	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 */
+	public double[][] fitJumpDistancesMLE(double... jumpDistances)
+	{
+		if (jumpDistances == null || jumpDistances.length == 0)
+			return null;
+		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+
+		int n = 0;
+		double[] ll = new double[maxN];
+		Arrays.fill(ll, Double.NEGATIVE_INFINITY);
+		double[][] coefficients = new double[maxN][];
+		double[][] fractions = new double[maxN][];
+		double[][] fitParams = new double[maxN][];
+		double bestLL = Double.NEGATIVE_INFINITY;
+		int best = -1;
+
+		// Guess the D
+		final double estimatedD = meanJumpDistance / 4;
+		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
+
+		// Used for saving fitted the curve 
+		double[][] jdHistogram = null;
+		if (curveLogger == null)
+			jdHistogram = cumulativeHistogram(jumpDistances);
+
+		// Fit using a single population model
+		double rel = 1e-9;
+		double abs = 1e-16;
+		double lineRel = rel;
+		double lineAbs = abs;
+		ConvergenceChecker<PointValuePair> checker = null;
+		boolean basisConvergence = false;
+		
+		//CustomPowellOptimizer optimizer = new CustomPowellOptimizer(rel, abs, lineRel, lineAbs, checker, basisConvergence);
+		CustomPowellOptimizer optimizer = new CustomPowellOptimizer(rel, abs, checker, basisConvergence);
+		try
+		{
+			final JumpDistanceFunction function = new JumpDistanceFunction(jumpDistances, estimatedD);
+			PointValuePair solution = optimizer.optimize(new MaxIter(30), new MaxEval(20000), new ObjectiveFunction(
+					function), new InitialGuess(function.guess()),
+					new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
+
+			fitParams[n] = solution.getPointRef();
+			ll[n] = solution.getValue();
+			coefficients[n] = fitParams[n];
+			fractions[n] = new double[] { 1 };
+
+			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s, MLE = %s (%d evaluations)", n + 1,
+					Maths.rounded(fitParams[n][0], 4), Maths.rounded(ll[n], 4), optimizer.getEvaluations());
+
+			bestLL = ll[n];
+			best = 0;
+
+			saveFitCurve(function, fitParams[n], jdHistogram, false);
+		}
+		catch (TooManyEvaluationsException e)
+		{
+			logger.info("Failed to fit : Too many evaluation (%d)", optimizer.getEvaluations());
+		}
+		catch (TooManyIterationsException e)
+		{
+			logger.info("Failed to fit : Too many iterations (%d)", optimizer.getIterations());
+		}
+		catch (ConvergenceException e)
+		{
+			logger.info("Failed to fit : %s", e.getMessage());
+		}
+
+		n++;
+
+		// Fit using a mixed population model. 
+		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
+		int bestMulti = -1;
+		double bestMultiLL = Double.NEGATIVE_INFINITY;
+		while (n < maxN)
+		{
+			MixedJumpDistanceFunction function = new MixedJumpDistanceFunction(jumpDistances, estimatedD, n + 1);
+
+			try
+			{
+				PointValuePair solution = optimizer.optimize(new MaxIter(30), new MaxEval(20000),
+						new ObjectiveFunction(function), new InitialGuess(function.guess()), GoalType.MAXIMIZE);
+
+				fitParams[n] = solution.getPointRef();
+				ll[n] = solution.getValue();
+				coefficients[n] = fitParams[n];
+				fractions[n] = new double[] { 1 };
+			}
+			catch (TooManyEvaluationsException e)
+			{
+				logger.info("Failed to fit : Too many evaluation (%d)", optimizer.getEvaluations());
+			}
+			catch (TooManyIterationsException e)
+			{
+				logger.info("Failed to fit : Too many iterations (%d)", optimizer.getIterations());
+			}
+			catch (ConvergenceException e)
+			{
+				logger.info("Failed to fit : %s", e.getMessage());
+			}
+
+			if (fractions[n] == null)
+			{
+				logger.info("Failed to fit N=%d", n + 1);
+				break;
+			}
+
+			double[] d = new double[n + 1];
+			double[] f = new double[n + 1];
+			double sum = 0;
+			for (int i = 0; i < d.length; i++)
+			{
+				f[i] = fitParams[n][i * 2];
+				sum += f[i];
+				d[i] = fitParams[n][i * 2 + 1];
+			}
+			for (int i = 0; i < f.length; i++)
+				f[i] /= sum;
+			// Sort by coefficient size
+			sort(d, f);
+			coefficients[n] = d;
+			fractions[n] = f;
+
+			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s (%s), MLE = %s (%d evaluations)", n + 1, format(d),
+					format(f), Maths.rounded(ll[n], 4), optimizer.getEvaluations());
+
+			boolean valid = true;
+			for (int i = 0; i < f.length; i++)
+			{
+				// Check the fit has fractions above the minimum fraction
+				if (f[i] < minFraction)
+				{
+					logger.debug("Fraction is less than the minimum fraction: %s < %s", Maths.rounded(f[i]),
+							Maths.rounded(minFraction));
+					valid = false;
+					break;
+				}
+				// Check the coefficients are different
+				if (i + 1 < f.length && d[i] / d[i + 1] < minDifference)
+				{
+					logger.debug("Coefficients are not different: %s / %s = %s < %s", Maths.rounded(d[i]),
+							Maths.rounded(d[i + 1]), Maths.rounded(d[i] / d[i + 1]), Maths.rounded(minDifference));
+					valid = false;
+					break;
+				}
+			}
+
+			if (!valid)
+				break;
+
+			// Store the best model
+			if (bestLL < ll[n])
+			{
+				bestLL = ll[n];
+				best = n;
+			}
+
+			// Store the best multi model
+			if (bestMultiLL < ll[n])
+				break;
+
+			bestMultiLL = ll[n];
+
+			n++;
+		}
+
+		// Add the best fit to the plot and return the parameters.
+		if (bestMulti > -1)
+		{
+			Function function = new MixedJumpDistanceCumulFunctionMultivariate(jdHistogram[0], jdHistogram[1], 0,
 					bestMulti + 1);
 			saveFitCurve(function, fitParams[bestMulti], jdHistogram, true);
 		}
@@ -426,8 +629,11 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * Sort the arrays by the size of the diffusion coefficient
-	 * @param d The diffusion coefficient array
-	 * @param f The fraction of the population array
+	 * 
+	 * @param d
+	 *            The diffusion coefficient array
+	 * @param f
+	 *            The fraction of the population array
 	 */
 	public static void sort(double[] d, double[] f)
 	{
@@ -481,22 +687,72 @@ public class JumpDistanceAnalysis
 		return ss;
 	}
 
+	/**
+	 * Function used for least-squares fitting of cumulative histogram of jump distances.
+	 */
 	public abstract class Function
 	{
 		double[] x, y;
 		double estimatedD;
+		int n;
 
-		public Function(double[] x, double[] y, double estimatedD)
+		public Function(double[] x, double[] y, double estimatedD, int n)
 		{
 			this.x = x;
 			this.y = y;
 			this.estimatedD = estimatedD;
+			this.n = n;
 		}
 
 		/**
 		 * @return An estimate for the parameters
 		 */
-		public abstract double[] guess();
+		public double[] guess()
+		{
+			if (n == 1)
+				return new double[] { estimatedD };
+
+			// Store the fraction and then the diffusion coefficient.
+			// Q. Should this be modified to set one fraction to always be 1? 
+			// Having an actual parameter for fitting will allow the optimisation engine to 
+			// adjust the fraction for its diffusion coefficient relative to the others.
+			double[] guess = new double[n * 2];
+			double d = estimatedD;
+			for (int i = 0; i < n; i++)
+			{
+				// Fraction are all equal
+				guess[i * 2] = 1;
+				// Diffusion coefficient gets smaller for each fraction
+				guess[i * 2 + 1] = d;
+				d *= 0.1;
+			}
+			return guess;
+		}
+
+		/**
+		 * @return An estimate for the initial search step for the parameters
+		 */
+		public double[] step()
+		{
+			if (n == 1)
+				return new double[] { estimatedD * 0.5 };
+
+			// Store the fraction and then the diffusion coefficient.
+			// Q. Should this be modified to set one fraction to always be 1? 
+			// Having an actual parameter for fitting will allow the optimisation engine to 
+			// adjust the fraction for its diffusion coefficient relative to the others.
+			double[] step = new double[n * 2];
+			double d = estimatedD;
+			for (int i = 0; i < n; i++)
+			{
+				// Fraction are all equal
+				step[i * 2] = 1;
+				// Diffusion coefficient gets smaller for each fraction
+				step[i * 2 + 1] = d * 0.5;
+				d *= 0.1;
+			}
+			return step;
+		}
 
 		public double[] getWeights()
 		{
@@ -543,19 +799,127 @@ public class JumpDistanceAnalysis
 		}
 	}
 
-	public class JumpDistanceFunction extends Function implements MultivariateVectorFunction
+	/**
+	 * Compute the probability of mean-squared distance x given a diffusion coefficient.
+	 * <p>
+	 * Function used for maximum likelihood fitting.
+	 */
+	public class JumpDistanceFunction extends Function implements MultivariateFunction
 	{
-		public JumpDistanceFunction(double[] x, double[] y, double estimatedD)
+		public JumpDistanceFunction(double[] x, double estimatedD)
 		{
-			super(x, y, estimatedD);
+			super(x, null, estimatedD, 1);
 		}
 
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 
-		public double[] guess()
+		public double evaluate(double x, double[] params)
 		{
-			return new double[] { estimatedD };
+			// Compute the probability:
+			// p = 1/4D * exp(-x/4D)
+			final double fourD = 4 * getD(params[0]);
+			return 1 / fourD * FastMath.exp(-x / fourD);
 		}
+
+		public double[] evaluateAll(double[] params)
+		{
+			// Compute the probability:
+			// p = 1/4D * exp(-x/4D)
+			double[] values = new double[x.length];
+			final double fourD = 4 * getD(params[0]);
+			for (int i = 0; i < values.length; i++)
+			{
+				values[i] = 1 / fourD * FastMath.exp(-x[i] / fourD);
+			}
+			return values;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
+		 */
+		public double value(double[] variables)
+		{
+			// Compute the log-likelihood:
+			// log(p) = log(1/4D * exp(-x/4D))
+			//        = log(1/4D) + log(exp(-x/4D))
+			//        = log(1/4D) + -x/4D
+			double l = 0;
+			final double fourD = 4 * getD(variables[0]);
+			for (int i = 0; i < x.length; i++)
+			{
+				l += -x[i] / fourD;
+			}
+			l += Math.log(1 / fourD) * x.length;
+			// Debug the call from the optimiser
+			if (DEBUG_OPTIMISER)
+			{
+				System.out.printf("[1] : [%f] = %f\n", variables[0], l);
+			}
+			return l;
+		}
+
+		// This has not been tested. It could be used for LVM fitting of the p-values. However MLE 
+		// is less sensitive to outliers of p-values.
+		//		/*
+		//		 * (non-Javadoc)
+		//		 * 
+		//		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
+		//		 */
+		//		public double[][] jacobian(double[] variables)
+		//		{
+		//			// Compute the gradients using calculus differentiation:
+		//			// y = 1/4D * exp(-x/4D)
+		//			// y = aa * a
+		//			// aa = 1/4D
+		//			// a = exp(b)
+		//			// b = -x / 4D
+		//			//
+		//			// y' = aa' * a + aa * a'
+		//			// aa' = -1/4D^2
+		//			// a' = exp(b) * b'
+		//			// b' = -1 * -x / 4D^2 = x / 4D^2
+		//			// y' = -1/4D^2 * exp(-x/4D) + 1/4D * exp(-x/4D) * x / 4D^2
+		//			//    = 1/4D * exp(-x/4D) * (-1/D + x / 4D^2)
+		//
+		//			final double d = variables[0];
+		//			final double fourD = 4 * d;
+		//			final double aa = 1 / fourD;
+		//			final double cc = aa / d;
+		//			final double c = -1 / d;
+		//			double[][] jacobian = new double[x.length][variables.length];
+		//
+		//			for (int i = 0; i < jacobian.length; ++i)
+		//			{
+		//				jacobian[i][0] = aa * FastMath.exp(-x[i] * aa) * (c + x[i] * cc);
+		//			}
+		//
+		//			//// Check numerically ...
+		//			//double[][] jacobian2 = super.jacobian(variables);
+		//			//for (int i = 0; i < jacobian.length; i++)
+		//			//{
+		//			//	System.out.printf("dD = %g : %g = %g\n", jacobian[i][0], jacobian2[i][0],
+		//			//			DoubleEquality.relativeError(jacobian[i][0], jacobian2[i][0]));
+		//			//}
+		//
+		//			return jacobian;
+		//		}
+	}
+
+	/**
+	 * Compute the probability of mean-squared distance being within x given a diffusion coefficient.
+	 * <p>
+	 * Function used for least-squares fitting of cumulative histogram of jump distances.
+	 */
+	public class JumpDistanceCumulFunction extends Function implements MultivariateVectorFunction
+	{
+		public JumpDistanceCumulFunction(double[] x, double[] y, double estimatedD)
+		{
+			super(x, y, estimatedD, 1);
+		}
+
+		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 
 		public double evaluate(double x, double[] params)
 		{
@@ -581,7 +945,7 @@ public class JumpDistanceAnalysis
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see gdsc.smlm.ij.plugins.TraceDiffusion.Function#jacobian(double[])
+		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
 		 */
 		public double[][] jacobian(double[] variables)
 		{
@@ -620,33 +984,107 @@ public class JumpDistanceAnalysis
 		}
 	}
 
-	public class MixedJumpDistanceFunction extends Function
+	/**
+	 * Compute the probability of mean-squared distance x given a mixed population with set fractions and
+	 * diffusion coefficients.
+	 * <p>
+	 * Function used for maximum likelihood fitting.
+	 */
+	public class MixedJumpDistanceFunction extends Function implements MultivariateFunction
 	{
-		int n;
-
-		public MixedJumpDistanceFunction(double[] x, double[] y, double estimatedD, int n)
+		public MixedJumpDistanceFunction(double[] x, double estimatedD, int n)
 		{
-			super(x, y, estimatedD);
-			this.n = n;
+			super(x, null, estimatedD, n);
 		}
 
-		public double[] guess()
+		public double evaluate(double x, double[] params)
 		{
-			// Store the fraction and then the diffusion coefficient.
-			// Q. Should this be modified to set one fraction to always be 1? 
-			// Having an actual parameter for fitting will allow the optimisation engine to 
-			// adjust the fraction for its diffusion coefficient relative to the others.
-			double[] guess = new double[n * 2];
-			double d = estimatedD;
+			// Compute the probability:
+			// p = sum [ Fj/4Dj * exp(-x/4Dj) ]
+			double sum = 0;
+			double total = 0;
 			for (int i = 0; i < n; i++)
 			{
-				// Fraction are all equal
-				guess[i * 2] = 1;
-				// Diffusion coefficient gets smaller for each fraction
-				guess[i * 2 + 1] = d;
-				d *= 0.1;
+				final double f = getF(params[i * 2]);
+				final double fourD = 4 * getD(params[i * 2 + 1]);
+				sum += f * 1 / fourD * FastMath.exp(-x / fourD);
+				total += f;
 			}
-			return guess;
+			return sum / total;
+		}
+
+		public double[] evaluateAll(double[] params)
+		{
+			double total = 0;
+			final double[] f_d = new double[n];
+			for (int i = 0; i < n; i++)
+			{
+				f_d[i] = getF(params[i * 2]);
+				total += f_d[i];
+			}
+
+			final double[] fourD = new double[n];
+			for (int i = 0; i < n; i++)
+			{
+				fourD[i] = 4 * getD(params[i * 2 + 1]);
+				f_d[i] = (f_d[i] / total) / fourD[i];
+			}
+
+			// Compute the probability:
+			// p = sum [ Fj/4Dj * exp(-x/4Dj) ]
+			double[] values = new double[x.length];
+			for (int i = 0; i < x.length; i++)
+			{
+				double sum = 0;
+				for (int j = 0; j < n; j++)
+				{
+					sum += f_d[j] * FastMath.exp(-x[i] / fourD[j]);
+				}
+				values[i] = sum;
+			}
+			return values;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
+		 */
+		public double value(double[] params)
+		{
+			// Compute the log-likelihood
+			double l = 0;
+			for (double p : evaluateAll(params))
+			{
+				l += Math.log(p);
+			}
+			// Debug the call from the optimiser
+			if (DEBUG_OPTIMISER)
+			{
+				double[] F = new double[n];
+				double[] D = new double[n];
+				for (int i = 0; i < n; i++)
+				{
+					F[i] = getF(params[i * 2]);
+					D[i] = getD(params[i * 2 + 1]);
+				}
+				System.out.printf("%s : %s = %f\n", Arrays.toString(F), Arrays.toString(D), l);
+			}
+			return l;
+		}
+	}
+
+	/**
+	 * Compute the probability of mean-squared distance being within x given a mixed population with set fractions and
+	 * diffusion coefficients.
+	 * <p>
+	 * Function used for least-squares fitting of cumulative histogram of jump distances.
+	 */
+	public class MixedJumpDistanceCumulFunction extends Function
+	{
+		public MixedJumpDistanceCumulFunction(double[] x, double[] y, double estimatedD, int n)
+		{
+			super(x, y, estimatedD, n);
 		}
 
 		public double[] getUpperBounds()
@@ -710,10 +1148,16 @@ public class JumpDistanceAnalysis
 		}
 	}
 
-	public class MixedJumpDistanceFunctionGradient extends MixedJumpDistanceFunction implements
+	/**
+	 * Compute the probability of mean-squared distance being within x given a mixed population with set fractions and
+	 * diffusion coefficients.
+	 * <p>
+	 * Function used for least-squares fitting of cumulative histogram of jump distances.
+	 */
+	public class MixedJumpDistanceCumulFunctionGradient extends MixedJumpDistanceCumulFunction implements
 			MultivariateVectorFunction
 	{
-		public MixedJumpDistanceFunctionGradient(double[] x, double[] y, double estimatedD, int n)
+		public MixedJumpDistanceCumulFunctionGradient(double[] x, double[] y, double estimatedD, int n)
 		{
 			super(x, y, estimatedD, n);
 		}
@@ -731,7 +1175,7 @@ public class JumpDistanceAnalysis
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see gdsc.smlm.ij.plugins.TraceDiffusion.Function#jacobian(double[])
+		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
 		 */
 		public double[][] jacobian(double[] variables)
 		{
@@ -827,10 +1271,16 @@ public class JumpDistanceAnalysis
 		}
 	}
 
-	public class MixedJumpDistanceFunctionMultivariate extends MixedJumpDistanceFunction implements
+	/**
+	 * Compute the probability of mean-squared distance being within x given a mixed population with set fractions and
+	 * diffusion coefficients.
+	 * <p>
+	 * Function used for least-squares fitting of cumulative histogram of jump distances.
+	 */
+	public class MixedJumpDistanceCumulFunctionMultivariate extends MixedJumpDistanceCumulFunction implements
 			MultivariateFunction
 	{
-		public MixedJumpDistanceFunctionMultivariate(double[] x, double[] y, double estimatedD, int n)
+		public MixedJumpDistanceCumulFunctionMultivariate(double[] x, double[] y, double estimatedD, int n)
 		{
 			super(x, y, estimatedD, n);
 		}
@@ -944,5 +1394,32 @@ public class JumpDistanceAnalysis
 	public static double[][] cumulativeHistogram(double[] values)
 	{
 		return Maths.cumulativeHistogram(values, true);
+	}
+
+	private double getD(double d)
+	{
+		return (d < minD) ? minD : d;
+	}
+
+	private double getF(double f)
+	{
+		return (f < minFraction) ? minFraction : f;
+	}
+
+	/**
+	 * @return the minimum diffusion coefficient
+	 */
+	public double getMinD()
+	{
+		return minD;
+	}
+
+	/**
+	 * @param minD
+	 *            the minimum diffusion coefficient
+	 */
+	public void setMinD(double minD)
+	{
+		this.minD = minD;
 	}
 }
