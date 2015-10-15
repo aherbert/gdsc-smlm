@@ -6,6 +6,7 @@ import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
 import gdsc.smlm.utils.logging.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -38,7 +39,9 @@ public class JumpDistanceAnalysisTest
 
 	double deltaD = 0.1;
 	double deltaF = 0.2;
-	double[] D = new double[] { 10, 2, 0.4 }; // 5-fold difference
+	// Used for testing single populations
+	// Used for testing dual populations: 15-fold, 5-fold, 3-fold difference between pairs
+	double[] D = new double[] { 0.2, 3, 1 };
 	RandomGenerator random = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 
 	@Test
@@ -126,7 +129,7 @@ public class JumpDistanceAnalysisTest
 		AssertionError error = null;
 		NEXT_D: for (double d : D)
 		{
-			for (int samples = 250; samples < 20000; samples *= 2)
+			for (int samples = 500, k=0; k<6; samples *= 2, k++)
 			{
 				try
 				{
@@ -188,7 +191,7 @@ public class JumpDistanceAnalysisTest
 		{
 			NEXT_D: for (int j = i + 1; j < D.length; j++)
 			{
-				for (int samples = 500; samples < 20000; samples *= 2)
+				for (int samples = 500, k=0; k<6; samples *= 2, k++)
 				{
 					try
 					{
@@ -213,7 +216,7 @@ public class JumpDistanceAnalysisTest
 		JumpDistanceAnalysis.sort(d, f);
 		double[] jumpsDistances = createData(samples, d, f);
 		Logger logger = null;
-		//logger = new gdsc.smlm.utils.logging.ConsoleLogger();
+		logger = new gdsc.smlm.utils.logging.ConsoleLogger();
 		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
 		jd.setFitRestarts(5);
 		jd.setMinFraction(0);
@@ -275,6 +278,132 @@ public class JumpDistanceAnalysisTest
 		return String.format("%.3f", d);
 	}
 
+	class DataSample
+	{
+		double[] d, f, s;
+		double[] data = null;
+		int[] sample = null;
+
+		DataSample(double[] d, double[] f)
+		{
+			this.d = d;
+
+			// Convert diffusion co-efficient into the standard deviation for the random move in each dimension
+			// For 1D diffusion: sigma^2 = 2D
+			//                   sigma = sqrt(2D)
+			// See: https://en.wikipedia.org/wiki/Brownian_motion#Einstein.27s_theory
+			s = new double[d.length];
+			double sum = 0;
+			for (int i = 0; i < s.length; i++)
+			{
+				s[i] = Math.sqrt(2 * d[i]);
+				sum += f[i];
+			}
+			this.f = new double[f.length];
+			for (int i = 0; i < f.length; i++)
+				this.f[i] = f[i] / sum;
+		}
+
+		public boolean equals(DataSample that)
+		{
+			if (that == null)
+				return false;
+			if (that.d.length != this.d.length)
+				return false;
+			for (int i = d.length; i-- > 0;)
+			{
+				if (that.d[i] != this.d[i])
+					return false;
+				if (that.f[i] != this.f[i])
+					return false;
+			}
+			return true;
+		}
+
+		void add(double[] data2, int[] sample2)
+		{
+			if (data == null)
+			{
+				data = data2;
+				sample = sample2;
+				return;
+			}
+			int size = data.length;
+			int newSize = size + data2.length;
+			data = Arrays.copyOf(data, newSize);
+			sample = Arrays.copyOf(sample, newSize);
+			System.arraycopy(data2, 0, data, size, data2.length);
+			System.arraycopy(sample2, 0, sample, size, sample2.length);
+		}
+
+		int getSize()
+		{
+			return (data == null) ? 0 : data.length;
+		}
+
+		double[][] getSample(int size)
+		{
+			if (size > getSize())
+			{
+				int extra = size - getSize();
+
+				// Get cumulative fraction
+				double[] c = new double[f.length];
+				double sum = 0;
+				for (int i = 0; i < f.length; i++)
+				{
+					sum += f[i];
+					c[i] = sum;
+				}
+
+				double[] data = new double[extra];
+
+				// Pick the population using the fraction.
+				// Do this before sampling since the nextGaussian function computes random variables
+				// in pairs so we want to process all the same sample together
+				int[] sample = new int[extra];
+				if (c.length > 1)
+					for (int i = 0; i < data.length; i++)
+						sample[i] = pick(c, random.nextDouble());
+				Arrays.sort(sample);
+
+				for (int i = 0; i < data.length; i++)
+				{
+					// Pick the population using the fraction
+					final int j = sample[i];
+					// Get the x/y shifts
+					final double x = random.nextGaussian() * s[j];
+					final double y = random.nextGaussian() * s[j];
+					// Get the squared jump distance
+					data[i] = x * x + y * y;
+				}
+				add(data, sample);
+			}
+
+			// Build the sample data and return the D and fractions
+			double[] data = Arrays.copyOf(this.data, size);
+			double[] d = new double[this.d.length];
+			double[] f = new double[d.length];
+			for (int i = 0; i < size; i++)
+			{
+				final int j = sample[i];
+				d[j] += data[i];
+				f[j]++;
+			}
+			for (int i = 0; i < d.length; i++)
+			{
+				// 4D = MSD
+				// D = MSD / 4
+				d[i] = (d[i] / f[i]) / 4;
+				f[i] /= size;
+			}
+
+			return new double[][] { data, d, f };
+		}
+	}
+
+	static ArrayList<DataSample> samples = new ArrayList<DataSample>();
+
 	/**
 	 * Create random jump distances
 	 * 
@@ -288,58 +417,26 @@ public class JumpDistanceAnalysisTest
 	 */
 	private double[] createData(int n, double[] d, double[] f)
 	{
-		// Convert diffusion co-efficient into the standard deviation for the random move in each dimension
-		// For 1D diffusion: sigma^2 = 2D
-		//                   sigma = sqrt(2D)
-		// See: https://en.wikipedia.org/wiki/Brownian_motion#Einstein.27s_theory
-		double[] s = new double[d.length];
-		double sum = 0;
-		for (int i = 0; i < s.length; i++)
+		// Cache the data so that if we run a second test with 
+		// the same d and f we use the same data
+		DataSample sample = new DataSample(d, f);
+		int index = samples.indexOf(sample);
+		if (index != -1)
+			sample = samples.get(index);
+		else
+			samples.add(sample);
+
+		double[][] dataSample = sample.getSample(n);
+		double[] data = dataSample[0];
+		double[] d2 = dataSample[1];
+		double[] f2 = dataSample[2];
+
+		// Update with the real values
+		for (int i = 0; i < d.length; i++)
 		{
-			// 1D simulation
-			s[i] = Math.sqrt(2 * d[i]);
-			sum += f[i];
+			d[i] = d2[i];
+			f[i] = f2[i];
 		}
-		// Normalise fractions to 1
-		for (int i = 0; i < f.length; i++)
-			f[i] /= sum;
-
-		// Get cumulative fraction
-		double[] c = new double[f.length];
-		sum = 0;
-		for (int i = 0; i < f.length; i++)
-		{
-			sum += f[i];
-			c[i] = sum;
-			// Reset to count the actual fractions
-			f[i] = 0;
-		}
-
-		double[] data = new double[n];
-
-		// Pick the population using the fraction.
-		// Do this before sampling since the nextGaussian function computes random variables
-		// in pairs so we want to process all the same sample together
-		int[] next = new int[n];
-		if (c.length > 1)
-			for (int i = 0; i < data.length; i++)
-				next[i] = pick(c, random.nextDouble());
-		Arrays.sort(next);
-
-		for (int i = 0; i < data.length; i++)
-		{
-			// Pick the population using the fraction
-			final int j = next[i];
-			f[j]++;
-
-			// Get the x/y shifts
-			final double x = random.nextGaussian() * s[j];
-			final double y = random.nextGaussian() * s[j];
-			// Get the squared jump distance
-			data[i] = x * x + y * y;
-		}
-		for (int i = 0; i < f.length; i++)
-			f[i] /= data.length;
 
 		// Debug 
 		//gdsc.smlm.utils.StoredDataStatistics stats = new gdsc.smlm.utils.StoredDataStatistics(data);

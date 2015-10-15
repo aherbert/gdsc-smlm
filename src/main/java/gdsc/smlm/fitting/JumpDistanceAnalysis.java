@@ -27,14 +27,12 @@ import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.optim.CoordinateChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.PointVectorValuePair;
-import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -463,20 +461,21 @@ public class JumpDistanceAnalysis
 		double abs = 1e-10;
 		double lineRel = rel;
 		double lineAbs = abs;
-		ConvergenceChecker<PointValuePair> checker = new PositionChecker(1e-3, 1e-10);
+		ConvergenceChecker<PointValuePair> positionChecker = null;
+		// new org.apache.commons.math3.optim.PositionChecker(1e-3, 1e-10);
 		boolean basisConvergence = false;
+		MaxEval maxEval = new MaxEval(20000);
 
 		//CustomPowellOptimizer optimizer = new CustomPowellOptimizer(rel, abs, lineRel, lineAbs, checker, basisConvergence);
-		CustomPowellOptimizer optimizer = new CustomPowellOptimizer(rel, abs, checker, basisConvergence);
+		CustomPowellOptimizer optimizer = new CustomPowellOptimizer(rel, abs, positionChecker, basisConvergence);
 		try
 		{
 			final JumpDistanceFunction function = new JumpDistanceFunction(jumpDistances, estimatedD);
 			double[] lB = function.getLowerBounds();
 			double[] uB = function.getUpperBounds();
 			SimpleBounds bounds = new SimpleBounds(lB, uB);
-			PointValuePair solution = optimizer.optimize(new MaxEval(20000), new ObjectiveFunction(function),
-					new InitialGuess(function.guess()), bounds, new CustomPowellOptimizer.BasisStep(function.step()),
-					GoalType.MAXIMIZE);
+			PointValuePair solution = optimizer.optimize(maxEval, new ObjectiveFunction(function), new InitialGuess(
+					function.guess()), bounds, new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
 
 			fitParams[n] = solution.getPointRef();
 			ll[n] = solution.getValue();
@@ -506,6 +505,8 @@ public class JumpDistanceAnalysis
 
 		n++;
 
+		final boolean doCMAES = false;
+
 		// Fit using a mixed population model. 
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
@@ -514,18 +515,18 @@ public class JumpDistanceAnalysis
 		{
 			MixedJumpDistanceFunction function = new MixedJumpDistanceFunction(jumpDistances, estimatedD, n + 1);
 			double[] lB = function.getLowerBounds();
-			double[] uB = function.getUpperBounds();
-			SimpleBounds bounds = new SimpleBounds(lB, uB);
+			// The Powell algorithm can use more general bounds: 0 - Infinity for the fractions
+			SimpleBounds bounds = new SimpleBounds(lB, function.getUpperBounds(Double.POSITIVE_INFINITY));
 
+			PointValuePair constrainedSolution = null;
+			int evaluations = 0;
 			try
 			{
-				PointValuePair solution = optimizer.optimize(new MaxEval(20000), new ObjectiveFunction(function),
-						new InitialGuess(function.guess()), bounds, GoalType.MAXIMIZE);
-
-				fitParams[n] = solution.getPointRef();
-				ll[n] = solution.getValue();
-				coefficients[n] = fitParams[n];
-				fractions[n] = new double[] { 1 };
+				constrainedSolution = optimizer.optimize(maxEval, new ObjectiveFunction(function), new InitialGuess(
+						function.guess()), bounds, GoalType.MAXIMIZE);
+				evaluations = optimizer.getEvaluations();
+				logger.debug("[] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", n + 1,
+						constrainedSolution.getValue(), optimizer.getEvaluations());
 			}
 			catch (TooManyEvaluationsException e)
 			{
@@ -540,11 +541,89 @@ public class JumpDistanceAnalysis
 				logger.info("Failed to fit : %s", e.getMessage());
 			}
 
-			if (fractions[n] == null)
+			if (doCMAES)
+			{
+				double[] uB = function.getUpperBounds();
+				bounds = new SimpleBounds(lB, uB);
+
+				// Try a bounded CMAES optimiser since the Powell optimiser appears to be 
+				// sensitive to the order of the parameters. It is not good when the fast particle
+				// is the minority fraction. Could this be due to too low an upper bound?
+				int maxIterations = 2000;
+				double stopFitness = 0; //Double.NEGATIVE_INFINITY;
+				boolean isActiveCMA = true;
+				int diagonalOnly = 20;
+				int checkFeasableCount = 1;
+				RandomGenerator random = new Well19937c();
+				boolean generateStatistics = false;
+				ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(rel, abs);
+				// The sigma determines the search range for the variables. It should be 1/3 of the initial search region.
+				double[] s = new double[lB.length];
+				for (int i = 0; i < s.length; i++)
+					s[i] = (uB[i] - lB[i]) / 3;
+				OptimizationData sigma = new CMAESOptimizer.Sigma(s);
+				OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
+						.log(function.x.length))));
+
+				// Iterate this for stability in the initial guess
+				CMAESOptimizer opt = new CMAESOptimizer(maxIterations, stopFitness, isActiveCMA, diagonalOnly,
+						checkFeasableCount, random, generateStatistics, checker);
+
+				for (int i = 0; i <= fitRestarts; i++)
+				{
+					// Try from the initial guess
+					try
+					{
+						PointValuePair solution = opt.optimize(new InitialGuess(function.guess()),
+								new ObjectiveFunction(function), GoalType.MAXIMIZE, bounds, sigma, popSize,
+								new MaxIter(maxIterations), maxEval);
+						//logger.debug("[%da] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+						//		solution.getValue(), opt.getEvaluations());
+						if (constrainedSolution == null || solution.getValue() > constrainedSolution.getValue())
+						{
+							evaluations = opt.getEvaluations();
+							constrainedSolution = solution;
+							logger.debug("[%da] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+									solution.getValue(), evaluations);
+						}
+					}
+					catch (TooManyEvaluationsException e)
+					{
+					}
+
+					if (constrainedSolution == null)
+						continue;
+
+					// Try from the current optimum
+					try
+					{
+						PointValuePair solution = opt.optimize(new InitialGuess(constrainedSolution.getPointRef()),
+								new ObjectiveFunction(function), GoalType.MAXIMIZE, bounds, sigma, popSize,
+								new MaxIter(maxIterations), maxEval);
+						//logger.debug("[%db] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+						//		solution.getValue(), opt.getEvaluations());
+						if (constrainedSolution == null || solution.getValue() > constrainedSolution.getValue())
+						{
+							evaluations = opt.getEvaluations();
+							constrainedSolution = solution;
+							logger.debug("[%db] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+									solution.getValue(), evaluations);
+						}
+					}
+					catch (TooManyEvaluationsException e)
+					{
+					}
+				}
+			}
+
+			if (constrainedSolution == null)
 			{
 				logger.info("Failed to fit N=%d", n + 1);
 				break;
 			}
+
+			fitParams[n] = constrainedSolution.getPointRef();
+			ll[n] = constrainedSolution.getValue();
 
 			double[] d = new double[n + 1];
 			double[] f = new double[n + 1];
@@ -563,7 +642,7 @@ public class JumpDistanceAnalysis
 			fractions[n] = f;
 
 			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s (%s), MLE = %s (%d evaluations)", n + 1, format(d),
-					format(f), Maths.rounded(ll[n], 4), optimizer.getEvaluations());
+					format(f), Maths.rounded(ll[n], 4), evaluations);
 
 			boolean valid = true;
 			for (int i = 0; i < f.length; i++)
@@ -765,14 +844,19 @@ public class JumpDistanceAnalysis
 
 		public double[] getUpperBounds()
 		{
+			// Fraction guess is 1 so set the upper limit as 10
+			return getUpperBounds(10);
+		}
+
+		public double[] getUpperBounds(double fractionLimit)
+		{
 			if (n == 1)
 				return new double[] { estimatedD * 10 };
-			
+
 			double[] bounds = new double[n * 2];
 			for (int i = 0; i < n; i++)
 			{
-				// Fraction guess is 1 so set the upper limit as 10
-				bounds[i * 2] = 10;
+				bounds[i * 2] = fractionLimit;
 				// Diffusion coefficient could be 10x the estimated
 				bounds[i * 2 + 1] = estimatedD * 10;
 			}
@@ -783,7 +867,7 @@ public class JumpDistanceAnalysis
 		{
 			if (n == 1)
 				return new double[1];
-			
+
 			return new double[n * 2];
 		}
 
@@ -1422,7 +1506,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * @param d
-	 * @return Return d or minD whichever is larger 
+	 * @return Return d or minD whichever is larger
 	 */
 	public double getD(double d)
 	{
@@ -1431,7 +1515,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * @param f
-	 * @return Return f or minFraction whichever is larger 
+	 * @return Return f or minFraction whichever is larger
 	 */
 	public double getF(double f)
 	{
