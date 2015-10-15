@@ -100,6 +100,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static String distancesFilename = "";
 	private static double minFraction = 0.1;
 	private static double minDifference = 2;
+	private static boolean mle = true;
 	private static boolean multipleInputs = false;
 	private static String tracesFilename = "";
 
@@ -377,16 +378,16 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// Jump Distance analysis
 			if (saveRawData)
 				saveStatistics(jumpDistances, "Jump Distance", "Distance (um^2/second)", false);
-			
+
 			// Calculate the cumulative jump-distance histogram
 			double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(jumpDistances.getValues());
-			
+
 			// Always show the jump distance histogram
 			jdTitle = TITLE + " Jump Distance";
 			jdPlot = new Plot2(jdTitle, "Distance (um^2/second)", "Cumulative Probability", jdHistogram[0],
 					jdHistogram[1]);
 			display(jdTitle, jdPlot);
-			
+
 			// Fit Jump Distance cumulative probability
 			jdParams = fitJumpDistance(jumpDistances, jdHistogram);
 		}
@@ -1055,6 +1056,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
 		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
 		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
+		gd.addCheckbox("Maximum_likelihood", mle);
 		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
 		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
@@ -1080,6 +1082,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		//settings.subSampledDistances = gd.getNextBoolean();
 		settings.fitLength = (int) Math.abs(gd.getNextNumber());
 		settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
+		mle = gd.getNextBoolean();
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
 		minFraction = Math.abs(gd.getNextNumber());
@@ -1299,7 +1302,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		jd.setN(10);
 		// Update the plot with the fit
 		jd.setCurveLogger(this);
-		double[][] fit = jd.fitJumpDistanceHistogram(jumpDistances.getMean(), jdHistogram);
+		double[][] fit;
+		if (mle)
+			fit = jd.fitJumpDistancesMLE(jumpDistances.getValues(), jdHistogram);
+		else
+			fit = jd.fitJumpDistanceHistogram(jumpDistances.getMean(), jdHistogram);
 		return fit;
 	}
 
@@ -1307,7 +1314,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	{
 		return 300;
 	}
-	
+
 	public void saveSinglePopulationCurve(double[][] curve)
 	{
 		addToJumpDistancePlot(curve[0], curve[1], Color.magenta);
