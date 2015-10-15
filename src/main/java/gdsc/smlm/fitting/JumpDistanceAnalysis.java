@@ -27,12 +27,14 @@ import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.CoordinateChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.PointVectorValuePair;
+import org.apache.commons.math3.optim.PositionChecker;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -60,6 +62,7 @@ import org.apache.commons.math3.util.FastMath;
 public class JumpDistanceAnalysis
 {
 	private final boolean DEBUG_OPTIMISER = false;
+
 	public interface CurveLogger
 	{
 		/**
@@ -456,21 +459,24 @@ public class JumpDistanceAnalysis
 			jdHistogram = cumulativeHistogram(jumpDistances);
 
 		// Fit using a single population model
-		double rel = 1e-9;
-		double abs = 1e-16;
+		double rel = 1e-8;
+		double abs = 1e-10;
 		double lineRel = rel;
 		double lineAbs = abs;
-		ConvergenceChecker<PointValuePair> checker = null;
+		ConvergenceChecker<PointValuePair> checker = new PositionChecker(1e-3, 1e-10);
 		boolean basisConvergence = false;
-		
+
 		//CustomPowellOptimizer optimizer = new CustomPowellOptimizer(rel, abs, lineRel, lineAbs, checker, basisConvergence);
 		CustomPowellOptimizer optimizer = new CustomPowellOptimizer(rel, abs, checker, basisConvergence);
 		try
 		{
 			final JumpDistanceFunction function = new JumpDistanceFunction(jumpDistances, estimatedD);
-			PointValuePair solution = optimizer.optimize(new MaxIter(30), new MaxEval(20000), new ObjectiveFunction(
-					function), new InitialGuess(function.guess()),
-					new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
+			double[] lB = function.getLowerBounds();
+			double[] uB = function.getUpperBounds();
+			SimpleBounds bounds = new SimpleBounds(lB, uB);
+			PointValuePair solution = optimizer.optimize(new MaxEval(20000), new ObjectiveFunction(function),
+					new InitialGuess(function.guess()), bounds, new CustomPowellOptimizer.BasisStep(function.step()),
+					GoalType.MAXIMIZE);
 
 			fitParams[n] = solution.getPointRef();
 			ll[n] = solution.getValue();
@@ -507,11 +513,14 @@ public class JumpDistanceAnalysis
 		while (n < maxN)
 		{
 			MixedJumpDistanceFunction function = new MixedJumpDistanceFunction(jumpDistances, estimatedD, n + 1);
+			double[] lB = function.getLowerBounds();
+			double[] uB = function.getUpperBounds();
+			SimpleBounds bounds = new SimpleBounds(lB, uB);
 
 			try
 			{
-				PointValuePair solution = optimizer.optimize(new MaxIter(30), new MaxEval(20000),
-						new ObjectiveFunction(function), new InitialGuess(function.guess()), GoalType.MAXIMIZE);
+				PointValuePair solution = optimizer.optimize(new MaxEval(20000), new ObjectiveFunction(function),
+						new InitialGuess(function.guess()), bounds, GoalType.MAXIMIZE);
 
 				fitParams[n] = solution.getPointRef();
 				ll[n] = solution.getValue();
@@ -754,6 +763,30 @@ public class JumpDistanceAnalysis
 			return step;
 		}
 
+		public double[] getUpperBounds()
+		{
+			if (n == 1)
+				return new double[] { estimatedD * 10 };
+			
+			double[] bounds = new double[n * 2];
+			for (int i = 0; i < n; i++)
+			{
+				// Fraction guess is 1 so set the upper limit as 10
+				bounds[i * 2] = 10;
+				// Diffusion coefficient could be 10x the estimated
+				bounds[i * 2 + 1] = estimatedD * 10;
+			}
+			return bounds;
+		}
+
+		public double[] getLowerBounds()
+		{
+			if (n == 1)
+				return new double[1];
+			
+			return new double[n * 2];
+		}
+
 		public double[] getWeights()
 		{
 			double[] w = new double[x.length];
@@ -817,19 +850,21 @@ public class JumpDistanceAnalysis
 		{
 			// Compute the probability:
 			// p = 1/4D * exp(-x/4D)
-			final double fourD = 4 * getD(params[0]);
-			return 1 / fourD * FastMath.exp(-x / fourD);
+			//final double fourD = 4 * getD(params[0]);
+			final double fourD = 4 * params[0];
+			return FastMath.exp(-x / fourD) / fourD;
 		}
 
 		public double[] evaluateAll(double[] params)
 		{
 			// Compute the probability:
 			// p = 1/4D * exp(-x/4D)
-			double[] values = new double[x.length];
-			final double fourD = 4 * getD(params[0]);
+			final double[] values = new double[x.length];
+			//final double one_fourD = 1 / (4 * getD(params[0]));
+			final double one_fourD = 1 / (4 * params[0]);
 			for (int i = 0; i < values.length; i++)
 			{
-				values[i] = 1 / fourD * FastMath.exp(-x[i] / fourD);
+				values[i] = one_fourD * FastMath.exp(-x[i] * one_fourD);
 			}
 			return values;
 		}
@@ -846,12 +881,13 @@ public class JumpDistanceAnalysis
 			//        = log(1/4D) + log(exp(-x/4D))
 			//        = log(1/4D) + -x/4D
 			double l = 0;
-			final double fourD = 4 * getD(variables[0]);
+			//final double one_fourD = 1 / (4 * getD(variables[0]));
+			final double one_fourD = 1 / (4 * variables[0]);
 			for (int i = 0; i < x.length; i++)
 			{
-				l += -x[i] / fourD;
+				l += -x[i] * one_fourD;
 			}
-			l += Math.log(1 / fourD) * x.length;
+			l += Math.log(one_fourD) * x.length;
 			// Debug the call from the optimiser
 			if (DEBUG_OPTIMISER)
 			{
@@ -933,7 +969,7 @@ public class JumpDistanceAnalysis
 		 */
 		public double[] value(double[] variables)
 		{
-			double[] values = new double[x.length];
+			final double[] values = new double[x.length];
 			final double fourD = 4 * variables[0];
 			for (int i = 0; i < values.length; i++)
 			{
@@ -964,7 +1000,7 @@ public class JumpDistanceAnalysis
 
 			final double d = variables[0];
 			final double fourD = 4 * d;
-			double[][] jacobian = new double[x.length][variables.length];
+			final double[][] jacobian = new double[x.length][variables.length];
 
 			for (int i = 0; i < jacobian.length; ++i)
 			{
@@ -1005,9 +1041,11 @@ public class JumpDistanceAnalysis
 			double total = 0;
 			for (int i = 0; i < n; i++)
 			{
-				final double f = getF(params[i * 2]);
-				final double fourD = 4 * getD(params[i * 2 + 1]);
-				sum += f * 1 / fourD * FastMath.exp(-x / fourD);
+				//final double f = getF(params[i * 2]);
+				//final double fourD = 4 * getD(params[i * 2 + 1]);
+				final double f = params[i * 2];
+				final double fourD = 4 * params[i * 2 + 1];
+				sum += (f / fourD) * FastMath.exp(-x / fourD);
 				total += f;
 			}
 			return sum / total;
@@ -1019,20 +1057,22 @@ public class JumpDistanceAnalysis
 			final double[] f_d = new double[n];
 			for (int i = 0; i < n; i++)
 			{
-				f_d[i] = getF(params[i * 2]);
+				//f_d[i] = getF(params[i * 2]);
+				f_d[i] = params[i * 2];
 				total += f_d[i];
 			}
 
 			final double[] fourD = new double[n];
 			for (int i = 0; i < n; i++)
 			{
-				fourD[i] = 4 * getD(params[i * 2 + 1]);
+				//fourD[i] = 4 * getD(params[i * 2 + 1]);
+				fourD[i] = 4 * params[i * 2 + 1];
 				f_d[i] = (f_d[i] / total) / fourD[i];
 			}
 
 			// Compute the probability:
 			// p = sum [ Fj/4Dj * exp(-x/4Dj) ]
-			double[] values = new double[x.length];
+			final double[] values = new double[x.length];
 			for (int i = 0; i < x.length; i++)
 			{
 				double sum = 0;
@@ -1054,7 +1094,7 @@ public class JumpDistanceAnalysis
 		{
 			// Compute the log-likelihood
 			double l = 0;
-			for (double p : evaluateAll(params))
+			for (final double p : evaluateAll(params))
 			{
 				l += Math.log(p);
 			}
@@ -1065,8 +1105,10 @@ public class JumpDistanceAnalysis
 				double[] D = new double[n];
 				for (int i = 0; i < n; i++)
 				{
-					F[i] = getF(params[i * 2]);
-					D[i] = getD(params[i * 2 + 1]);
+					//F[i] = getF(params[i * 2]);
+					//D[i] = getD(params[i * 2 + 1]);
+					F[i] = params[i * 2];
+					D[i] = params[i * 2 + 1];
 				}
 				System.out.printf("%s : %s = %f\n", Arrays.toString(F), Arrays.toString(D), l);
 			}
@@ -1085,24 +1127,6 @@ public class JumpDistanceAnalysis
 		public MixedJumpDistanceCumulFunction(double[] x, double[] y, double estimatedD, int n)
 		{
 			super(x, y, estimatedD, n);
-		}
-
-		public double[] getUpperBounds()
-		{
-			double[] bounds = new double[n * 2];
-			for (int i = 0; i < n; i++)
-			{
-				// Fraction guess is 1 so set the upper limit as 10
-				bounds[i * 2] = 10;
-				// Diffusion coefficient could be 10x the estimated
-				bounds[i * 2 + 1] = estimatedD * 10;
-			}
-			return bounds;
-		}
-
-		public double[] getLowerBounds()
-		{
-			return new double[n * 2];
 		}
 
 		public double evaluate(double x, double[] params)
@@ -1134,13 +1158,13 @@ public class JumpDistanceAnalysis
 				fourD[i] = 4 * variables[i * 2 + 1];
 			}
 
-			double[] values = new double[x.length];
+			final double[] values = new double[x.length];
 			for (int i = 0; i < values.length; i++)
 			{
 				double sum = 0;
 				for (int j = 0; j < n; j++)
 				{
-					sum += f[j] * FastMath.exp(-x[i] / (fourD[j]));
+					sum += f[j] * FastMath.exp(-x[i] / fourD[j]);
 				}
 				values[i] = 1 - sum;
 			}
@@ -1229,7 +1253,7 @@ public class JumpDistanceAnalysis
 				f_total[i] = -1 * -f[i] / (total * total);
 			}
 
-			double[][] jacobian = new double[x.length][variables.length];
+			final double[][] jacobian = new double[x.length][variables.length];
 
 			double[] b = new double[n];
 			for (int i = 0; i < x.length; ++i)
@@ -1292,13 +1316,13 @@ public class JumpDistanceAnalysis
 		 */
 		public double value(double[] parameters)
 		{
-			double[] obs = getValue(parameters);
+			final double[] obs = getValue(parameters);
 
 			// Optimise the sum of squares
 			double ss = 0;
 			for (int i = x.length; i-- > 0;)
 			{
-				double dx = y[i] - obs[i];
+				final double dx = y[i] - obs[i];
 				ss += dx * dx;
 			}
 			return ss;
@@ -1396,12 +1420,20 @@ public class JumpDistanceAnalysis
 		return Maths.cumulativeHistogram(values, true);
 	}
 
-	private double getD(double d)
+	/**
+	 * @param d
+	 * @return Return d or minD whichever is larger 
+	 */
+	public double getD(double d)
 	{
 		return (d < minD) ? minD : d;
 	}
 
-	private double getF(double f)
+	/**
+	 * @param f
+	 * @return Return f or minFraction whichever is larger 
+	 */
+	public double getF(double f)
 	{
 		return (f < minFraction) ? minFraction : f;
 	}
