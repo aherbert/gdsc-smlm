@@ -260,13 +260,13 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				}
 			}
 
-			boolean stop;
+			boolean stop = false;
 			if (positionChecker != null)
 			{
 				// Check for convergence on the position
 				stop = positionChecker.converged(x1, x);
 			}
-			else
+			if (!stop)
 			{
 				// Default convergence check on value
 				//stop = 2 * (fX - fVal) <= (relativeThreshold * (FastMath.abs(fX) + FastMath.abs(fVal)) + absoluteThreshold);
