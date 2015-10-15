@@ -95,6 +95,15 @@ and then launch ImageJ.
         ant clean
 
 
+Modifying the source
+--------------------
+
+The GDSC-SMLM code was developed using the [Eclipse IDE](https://eclipse.org/).
+
+Details of how to open the source code with Eclipse can be found in the eclipse
+folder.
+
+
 Legal
 -----
 

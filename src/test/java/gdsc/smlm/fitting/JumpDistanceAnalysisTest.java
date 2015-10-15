@@ -39,8 +39,11 @@ public class JumpDistanceAnalysisTest
 	double deltaD = 0.1;
 	double deltaF = 0.2;
 	// Used for testing single populations
-	// Used for testing dual populations: 15-fold, 5-fold, 3-fold difference between pairs
-	double[] D = new double[] { 0.2, 3, 1 };
+	// Used for testing dual populations: 
+	// 15-fold, 5-fold, 3-fold difference between pairs
+	//double[] D = new double[] { 0.2, 3, 1 };
+	// 5-fold difference between pairs
+	double[] D = new double[] { 0.2, 1 };
 	RandomGenerator random = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 
 	// Commented out as this test always passes
@@ -213,13 +216,14 @@ public class JumpDistanceAnalysisTest
 	private void fit(String title, int samples, int n, double[] d, double[] f, boolean mle)
 	{
 		// Used for testing
-		if (!mle)
-			return;
+		// @formatter:off
+		//if (!mle) return;
 		//if (mle) return;
+		// @formatter:on
 		JumpDistanceAnalysis.sort(d, f);
 		double[] jumpsDistances = createData(samples, d, f);
 		Logger logger = null;
-		logger = new gdsc.smlm.utils.logging.ConsoleLogger();
+		//logger = new gdsc.smlm.utils.logging.ConsoleLogger();
 		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
 		jd.setFitRestarts(3);
 		jd.setMinFraction(0.05);
