@@ -38,25 +38,21 @@ public class ConsoleLogger implements Logger
 		System.out.printf("\n");
 	}
 
-	@Override
 	public void debug(String message)
 	{
 		info(message);
 	}
 
-	@Override
 	public void debug(String format, Object... args)
 	{
 		info(format, args);
 	}
 
-	@Override
 	public void error(String message)
 	{
 		info(message);
 	}
 
-	@Override
 	public void error(String format, Object... args)
 	{
 		info(format, args);

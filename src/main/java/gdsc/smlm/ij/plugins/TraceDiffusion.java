@@ -1303,19 +1303,16 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return fit;
 	}
 
-	@Override
 	public int getNumberOfCurvePoints()
 	{
 		return 300;
 	}
 	
-	@Override
 	public void saveSinglePopulationCurve(double[][] curve)
 	{
 		addToJumpDistancePlot(curve[0], curve[1], Color.magenta);
 	}
 
-	@Override
 	public void saveMixedPopulationCurve(double[][] curve)
 	{
 		addToJumpDistancePlot(curve[0], curve[1], Color.yellow);
