@@ -432,7 +432,29 @@ public class JumpDistanceAnalysis
 	 *            The jump distances (in um^2/s)
 	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
 	 */
-	public double[][] fitJumpDistancesMLE(double... jumpDistances)
+	public double[][] fitJumpDistancesMLE(double[] jumpDistances)
+	{
+		return fitJumpDistancesMLE(jumpDistances, null);
+	}
+
+	/**
+	 * Fit the jump distances using a maximum likelihood estimation.
+	 * <p>
+	 * The data is fit repeatedly using a mixed population model with increasing number of different molecules. Results
+	 * are sorted by the diffusion coefficient ascending. This process is stopped when: the likelihood does not improve;
+	 * the fraction of one of the populations is below the min fraction; the difference between two consecutive
+	 * diffusion coefficients is below the min difference.
+	 * <p>
+	 * The number of populations must be obtained from the size of the D/fractions arrays.
+	 * 
+	 * @param jumpDistances
+	 *            The jump distances (in um^2/s)
+	 * @param jdHistogram
+	 *            The jump distance histogram for the given distances. If null will be computed using
+	 *            {@link #cumulativeHistogram(double[])}. Only used if the CurveLogger is not null.
+	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 */
+	public double[][] fitJumpDistancesMLE(double[] jumpDistances, double[][] jdHistogram)
 	{
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
@@ -452,15 +474,14 @@ public class JumpDistanceAnalysis
 		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
 
 		// Used for saving fitted the curve 
-		double[][] jdHistogram = null;
-		if (curveLogger == null)
+		if (curveLogger != null && jdHistogram == null)
 			jdHistogram = cumulativeHistogram(jumpDistances);
 
 		// Fit using a single population model
 		double rel = 1e-8;
 		double abs = 1e-10;
-		double lineRel = rel;
-		double lineAbs = abs;
+		//double lineRel = rel;
+		//double lineAbs = abs;
 		ConvergenceChecker<PointValuePair> positionChecker = null;
 		// new org.apache.commons.math3.optim.PositionChecker(1e-3, 1e-10);
 		boolean basisConvergence = false;
@@ -685,10 +706,9 @@ public class JumpDistanceAnalysis
 		}
 
 		// Add the best fit to the plot and return the parameters.
-		if (bestMulti > -1)
+		if (bestMulti > -1 && curveLogger != null)
 		{
-			Function function = new MixedJumpDistanceCumulFunctionMultivariate(jdHistogram[0], jdHistogram[1], 0,
-					bestMulti + 1);
+			Function function = new MixedJumpDistanceCumulFunction(null, null, 0, bestMulti + 1);
 			saveFitCurve(function, fitParams[bestMulti], jdHistogram, true);
 		}
 
