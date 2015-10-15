@@ -16,9 +16,9 @@
  */
 package org.apache.commons.math3.optim.nonlinear.scalar.noderiv;
 
-import java.util.Arrays;
-
 import gdsc.smlm.utils.DoubleEquality;
+
+import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
@@ -44,7 +44,8 @@ import org.apache.commons.math3.util.FastMath;
  * Powell's algorithm.
  * <p>
  * The class is based on the org.apache.commons.math3.optim.nonlinear.scalar.noderiv.PowellOptimizer but updated to
- * support: (a) convergence on the position; (b) convergence when using the original basis vectors.
+ * support: (a) convergence on the position; (b) convergence when using the original basis vectors; (c) support bounds
+ * checking on the current point within the optimisation space.
  */
 public class CustomPowellOptimizer extends MultivariateOptimizer
 {
@@ -70,6 +71,10 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	private final boolean basisConvergence;
 	/** Allow custom basis search direction */
 	private double[] basis = null;
+
+	/** Flags to indicate if bounds are present */
+	private boolean isLower, isUpper;
+	private double[] lower, upper;
 
 	/**
 	 * The initial step is used to construct the basis vectors for the search direction. By default the identity matrix
@@ -227,6 +232,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		//int resets = 0;
 
 		double[] x = guess;
+		// Ensure the point is within bounds
+		applyBounds(x);		
 		double fVal = computeObjectiveValue(x);
 		double[] x1 = x.clone();
 		while (true)
@@ -310,6 +317,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				d[i] = x[i] - x1[i];
 				x2[i] = x[i] + d[i];
 			}
+			applyBounds(x2);		
 
 			x1 = x.clone();
 			fX2 = computeObjectiveValue(x2);
@@ -394,6 +402,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			nD[i] = d[i] * optimum;
 			nP[i] = p[i] + nD[i];
 		}
+		applyBounds(nP);		
 
 		final double[][] result = new double[2][];
 		result[0] = nP;
@@ -421,6 +430,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		{
 			nP[i] = p[i] + d[i] * optimum;
 		}
+		applyBounds(nP);		
 		return nP;
 	}
 
@@ -491,6 +501,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 					{
 						x[i] = p[i] + alpha * d[i];
 					}
+					// Ensure the point is within bounds
+					applyBounds(x);
 					return CustomPowellOptimizer.this.computeObjectiveValue(x);
 				}
 			};
@@ -514,6 +526,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	 *            The following data will be looked for:
 	 *            <ul>
 	 *            <li>{@link PositionChecker}</li>
+	 *            <li>{@link BasisStep}</li>
 	 *            </ul>
 	 */
 	@Override
@@ -543,22 +556,68 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 
 	/**
 	 * @throws MathUnsupportedOperationException
-	 *             if bounds were passed to the {@link #optimize(OptimizationData[]) optimize} method.
+	 *             if bounds were passed to the {@link #optimize(OptimizationData[]) optimize} method and the lower is
+	 *             above the upper.
 	 * @throws MathUnsupportedOperationException
 	 *             if the basis step passed to the {@link #optimize(OptimizationData[]) optimize} method is zero for any
 	 *             dimension
 	 */
 	private void checkParameters()
 	{
-		if (getLowerBound() != null || getUpperBound() != null)
+		lower = getLowerBound();
+		upper = getUpperBound();
+		isLower = checkArray(lower, Double.NEGATIVE_INFINITY);
+		isUpper = checkArray(upper, Double.POSITIVE_INFINITY);
+		// Check that the upper bound is above the lower bound
+		if (isUpper && isLower)
 		{
-			throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
+			for (int i = 0; i < lower.length; i++)
+				if (lower[i] > upper[i])
+					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
 		}
 		if (basis != null)
 		{
 			for (double d : basis)
 				if (d == 0)
 					throw new MathUnsupportedOperationException(LocalizedFormats.CONSTRAINT);
+		}
+	}
+
+	/**
+	 * Check if the array contains anything other than value
+	 * 
+	 * @param array
+	 * @param value
+	 * @return True if the array has another value
+	 */
+	private boolean checkArray(double[] array, double value)
+	{
+		if (array == null)
+			return false;
+		for (double v : array)
+			if (v != value)
+				return true;
+		return false;
+	}
+
+	/**
+	 * Check the point falls within the configured bounds truncating if necessary
+	 * 
+	 * @param point
+	 */
+	private void applyBounds(double[] point)
+	{
+		if (isUpper)
+		{
+			for (int i = 0; i < point.length; i++)
+				if (point[i] > upper[i])
+					point[i] = upper[i];
+		}
+		if (isLower)
+		{
+			for (int i = 0; i < point.length; i++)
+				if (point[i] < lower[i])
+					point[i] = lower[i];
 		}
 	}
 }

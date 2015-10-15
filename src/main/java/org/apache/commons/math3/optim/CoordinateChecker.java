@@ -23,7 +23,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Check if the coordinates have converged
  */
-public abstract class CoordinateChecker implements OptimizationData
+public abstract class CoordinateChecker implements OptimizationData, ConvergenceChecker<PointValuePair>
 {
 	final double relative, absolute;
 
@@ -68,5 +68,15 @@ public abstract class CoordinateChecker implements OptimizationData
 			}
 		}
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.commons.math3.optim.ConvergenceChecker#converged(int, java.lang.Object, java.lang.Object)
+	 */
+	public boolean converged(int iteration, PointValuePair previous, PointValuePair current)
+	{
+		return converged(previous.getPointRef(), current.getPointRef());
 	}
 }
