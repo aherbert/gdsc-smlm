@@ -286,7 +286,7 @@ public class JumpDistanceAnalysisTest
 
 		DataSample(double[] d, double[] f)
 		{
-			this.d = d;
+			this.d = d.clone();
 
 			// Convert diffusion co-efficient into the standard deviation for the random move in each dimension
 			// For 1D diffusion: sigma^2 = 2D
@@ -304,10 +304,11 @@ public class JumpDistanceAnalysisTest
 				this.f[i] = f[i] / sum;
 		}
 
-		public boolean equals(DataSample that)
+		public boolean equals(Object obj)
 		{
-			if (that == null)
-				return false;
+			if (!(obj instanceof DataSample))
+				return super.equals(obj);
+			DataSample that = (DataSample) obj;
 			if (that.d.length != this.d.length)
 				return false;
 			for (int i = d.length; i-- > 0;)
