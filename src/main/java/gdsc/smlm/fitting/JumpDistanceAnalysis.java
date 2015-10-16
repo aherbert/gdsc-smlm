@@ -189,21 +189,21 @@ public class JumpDistanceAnalysis
 			coefficients[n] = fitParams[n];
 			fractions[n] = new double[] { 1 };
 
-			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s, SS = %f, IC = %s (%d evaluations)", n + 1,
+			logger.info("Fit Jump distance (N=1) : D = %s um^2/s, SS = %f, IC = %s (%d evaluations)",
 					Maths.rounded(fitParams[n][0], 4), SS[n], Maths.rounded(ic[n], 4), lvmOptimizer.getEvaluations());
 
 			bestIC = ic[n];
 			best = 0;
 
-			saveFitCurve(function, fitParams[n], jdHistogram, false);
+			saveFitCurve(fitParams[n], jdHistogram);
 		}
 		catch (TooManyIterationsException e)
 		{
-			logger.info("Failed to fit : Too many iterations (%d)", lvmOptimizer.getIterations());
+			logger.info("LVM optimiser failed to fit (N=1) : Too many iterations (%d)", lvmOptimizer.getIterations());
 		}
 		catch (ConvergenceException e)
 		{
-			logger.info("Failed to fit : %s", e.getMessage());
+			logger.info("LVM optimiser failed to fit (N=1) : %s", e.getMessage());
 		}
 
 		n++;
@@ -270,15 +270,17 @@ public class JumpDistanceAnalysis
 			}
 			catch (TooManyEvaluationsException e)
 			{
-				logger.info("Failed to fit : Too many evaluations (%d)", powellOptimizer.getEvaluations());
+				logger.info("Powell optimiser failed to fit (N=%d) : Too many evaluations (%d)", n + 1,
+						powellOptimizer.getEvaluations());
 			}
 			catch (TooManyIterationsException e)
 			{
-				logger.info("Failed to fit : Too many iterations (%d)", powellOptimizer.getIterations());
+				logger.info("Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n + 1,
+						powellOptimizer.getIterations());
 			}
 			catch (ConvergenceException e)
 			{
-				logger.info("Failed to fit : %s", e.getMessage());
+				logger.info("Powell optimiser failed to fit (N=%d) : %s", n + 1, e.getMessage());
 			}
 
 			if (doCMAES || constrainedSolution == null)
@@ -461,9 +463,7 @@ public class JumpDistanceAnalysis
 		// Add the best fit to the plot and return the parameters.
 		if (bestMulti > -1)
 		{
-			Function function = new MixedJumpDistanceCumulFunctionMultivariate(jdHistogram[0], jdHistogram[1], 0,
-					bestMulti + 1);
-			saveFitCurve(function, fitParams[bestMulti], jdHistogram, true);
+			saveFitCurve(fitParams[bestMulti], jdHistogram);
 		}
 
 		if (best > -1)
@@ -566,19 +566,19 @@ public class JumpDistanceAnalysis
 			bestLL = ll[n];
 			best = 0;
 
-			saveFitCurve(function, fitParams[n], jdHistogram, false);
+			saveFitCurve(fitParams[n], jdHistogram);
 		}
 		catch (TooManyEvaluationsException e)
 		{
-			logger.info("Failed to fit : Too many evaluation (%d)", optimizer.getEvaluations());
+			logger.info("Powell optimiser failed to fit (N=1) : Too many evaluation (%d)", optimizer.getEvaluations());
 		}
 		catch (TooManyIterationsException e)
 		{
-			logger.info("Failed to fit : Too many iterations (%d)", optimizer.getIterations());
+			logger.info("Powell optimiser failed to fit (N=1) : Too many iterations (%d)", optimizer.getIterations());
 		}
 		catch (ConvergenceException e)
 		{
-			logger.info("Failed to fit : %s", e.getMessage());
+			logger.info("Powell optimiser failed to fit (N=1) : %s", e.getMessage());
 		}
 
 		n++;
@@ -609,15 +609,15 @@ public class JumpDistanceAnalysis
 			}
 			catch (TooManyEvaluationsException e)
 			{
-				logger.info("Failed to fit : Too many evaluation (%d)", optimizer.getEvaluations());
+				logger.info("Powell optimiser failed to fit (N=%d) : Too many evaluation (%d)", n + 1, optimizer.getEvaluations());
 			}
 			catch (TooManyIterationsException e)
 			{
-				logger.info("Failed to fit : Too many iterations (%d)", optimizer.getIterations());
+				logger.info("Powell optimiser failed to fit (N=%d) : Too many iterations (%d)", n + 1, optimizer.getIterations());
 			}
 			catch (ConvergenceException e)
 			{
-				logger.info("Failed to fit : %s", e.getMessage());
+				logger.info("Powell optimiser failed to fit (N=%d) : %s", n + 1, e.getMessage());
 			}
 
 			if (doCMAES || constrainedSolution == null)
@@ -764,10 +764,9 @@ public class JumpDistanceAnalysis
 		}
 
 		// Add the best fit to the plot and return the parameters.
-		if (bestMulti > -1 && curveLogger != null)
+		if (bestMulti > -1)
 		{
-			Function function = new MixedJumpDistanceCumulFunction(null, null, 0, bestMulti + 1);
-			saveFitCurve(function, fitParams[bestMulti], jdHistogram, true);
+			saveFitCurve(fitParams[bestMulti], jdHistogram);
 		}
 
 		if (best > -1)
@@ -819,13 +818,19 @@ public class JumpDistanceAnalysis
 		}
 	}
 
-	private void saveFitCurve(Function function, double[] params, double[][] jdHistogram, boolean mixedPopulation)
+	private void saveFitCurve(double[] params, double[][] jdHistogram)
 	{
 		if (curveLogger == null)
 			return;
 		final int nPoints = curveLogger.getNumberOfCurvePoints();
 		if (nPoints <= 1)
 			return;
+		Function function;
+		if (params.length == 1)
+			function = new JumpDistanceCumulFunction(null, null, 0);
+		else
+			function = new MixedJumpDistanceCumulFunction(null, null, 0, params.length / 2);
+
 		final double max = jdHistogram[0][jdHistogram[0].length - 1];
 		final double interval = max / nPoints;
 		final double[] x = new double[nPoints + 1];
@@ -839,10 +844,10 @@ public class JumpDistanceAnalysis
 		x[nPoints] = max;
 		y[nPoints] = function.evaluate(max, params);
 
-		if (mixedPopulation)
-			curveLogger.saveMixedPopulationCurve(new double[][] { x, y });
-		else
+		if (params.length == 1)
 			curveLogger.saveSinglePopulationCurve(new double[][] { x, y });
+		else
+			curveLogger.saveMixedPopulationCurve(new double[][] { x, y });
 	}
 
 	private double calculateSumOfSquares(double[] obs, double[] exp)
