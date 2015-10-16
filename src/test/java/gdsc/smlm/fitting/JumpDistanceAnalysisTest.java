@@ -222,7 +222,7 @@ public class JumpDistanceAnalysisTest
 	/**
 	 * This is not actually a test but runs the fitting algorithm many times to collect benchmark data to file
 	 */
-	@Test
+	//@Test
 	public void canDoBenchmark()
 	{
 		out = null;
