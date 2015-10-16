@@ -4,8 +4,12 @@ import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
+import gdsc.smlm.utils.DoubleEquality;
 import gdsc.smlm.utils.logging.Logger;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -213,13 +217,87 @@ public class JumpDistanceAnalysisTest
 		}
 	}
 
+	private OutputStreamWriter out = null;
+
+	/**
+	 * This is not actually a test but runs the fitting algorithm many times to collect benchmark data to file
+	 */
+	@Test
+	public void canDoBenchmark()
+	{
+		out = null;
+		try
+		{
+			FileOutputStream fos = new FileOutputStream("JumpDistanceAnalysisTest.dat");
+			out = new OutputStreamWriter(fos, "UTF-8");
+
+			// Run the fitting to produce benchmark data for a mixed population of 2
+			writeHeader(2);
+			for (boolean mle : new boolean[] { true, false })
+			{
+				for (int f = 1; f <= 9; f++)
+				{
+					double fraction = f / 10.0;
+					String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
+					for (int samples = 500, k = 0; k < 6; samples *= 2, k++)
+					{
+						for (int i = 0; i < D.length; i++)
+						{
+							for (int j = i + 1; j < D.length; j++)
+							{
+								try
+								{
+									fit(title, samples, 0, new double[] { D[i], D[j] }, new double[] { fraction,
+											1 - fraction }, mle);
+								}
+								catch (AssertionError e)
+								{
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			throw new AssertionError("Failed to complete benchmark", e);
+		}
+		finally
+		{
+			closeOutput();
+		}
+	}
+
+	private void closeOutput()
+	{
+		if (out == null)
+			return;
+		try
+		{
+			out.close();
+		}
+		catch (Exception e)
+		{
+			// Ignore exception
+		}
+		finally
+		{
+			out = null;
+		}
+	}
+
 	private void fit(String title, int samples, int n, double[] d, double[] f, boolean mle)
 	{
 		// Used for testing
 		// @formatter:off
 		//if (!mle) return;
 		//if (mle) return;
+		// For easy mixed populations
+		//if (f.length == 2 && Math.min(f[0],f[1])/(f[0]+f[1]) <= 0.2) return;
+		//n = 2;
 		// @formatter:on
+
 		JumpDistanceAnalysis.sort(d, f);
 		double[] jumpsDistances = createData(samples, d, f);
 		Logger logger = null;
@@ -230,8 +308,13 @@ public class JumpDistanceAnalysisTest
 		jd.setMinDifference(2);
 		jd.setN((n > 0) ? n : 10);
 		double[][] fit = (mle) ? jd.fitJumpDistancesMLE(jumpsDistances) : jd.fitJumpDistances(jumpsDistances);
-		double[] fitD = fit[0];
-		double[] fitF = fit[1];
+		double[] fitD = (fit == null) ? new double[0] : fit[0];
+		double[] fitF = (fit == null) ? new double[0] : fit[1];
+
+		// Record results to file
+		if (out != null)
+			writeResult(title, samples, n, d, f, mle, fitD, fitF);
+
 		AssertionError error = null;
 		try
 		{
@@ -248,8 +331,8 @@ public class JumpDistanceAnalysisTest
 		}
 		finally
 		{
-			double[] e1 = getError(d, fitD);
-			double[] e2 = getError(f, fitF);
+			double[] e1 = getPercentError(d, fitD);
+			double[] e2 = getPercentError(f, fitF);
 			log("%s %s N=%d sample=%d, n<=%d : %s = %s [%s] : %s = %s [%s]\n", (error == null) ? "+++ Pass"
 					: "--- Fail", title, d.length, samples, n, toString(d), toString(fitD), toString(e1), toString(f),
 					toString(fitF), toString(e2));
@@ -258,12 +341,93 @@ public class JumpDistanceAnalysisTest
 		}
 	}
 
-	private double[] getError(double[] e, double[] o)
+	private void writeHeader(int size)
+	{
+		StringBuilder sb = new StringBuilder("title");
+		sb.append('\t').append("samples");
+		sb.append('\t').append("mle");
+		sb.append('\t').append("n");
+		sb.append('\t').append("size");
+		sb.append('\t').append("fsize");
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("d").append(i);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("fd").append(i);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("ed").append(i);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("f").append(i);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("ff").append(i);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("ef").append(i);
+		sb.append("\n");
+		try
+		{
+			out.write(sb.toString());
+		}
+		catch (IOException e)
+		{
+			throw new AssertionError("Failed to write result to file", e);
+		}
+	}
+
+	private void writeResult(String title, int samples, int n, double[] d, double[] f, boolean mle, double[] fd,
+			double[] ff)
+	{
+		int size = d.length;
+		int fsize = fd.length;
+		// Pad results if they are too small
+		if (fsize < size)
+		{
+			fd = Arrays.copyOf(fd, size);
+			ff = Arrays.copyOf(ff, size);
+		}
+		double[] ed = getRelativeError(d, fd);
+		double[] ef = getRelativeError(f, ff);
+
+		StringBuilder sb = new StringBuilder(title);
+		sb.append('\t').append(samples);
+		sb.append('\t').append(mle);
+		sb.append('\t').append(n);
+		sb.append('\t').append(size);
+		sb.append('\t').append(fsize);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(d[i]);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(fd[i]);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(ed[i]);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(f[i]);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(ff[i]);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(ef[i]);
+		sb.append("\n");
+		try
+		{
+			out.write(sb.toString());
+		}
+		catch (IOException e)
+		{
+			throw new AssertionError("Failed to write result to file", e);
+		}
+	}
+
+	private double[] getPercentError(double[] e, double[] o)
 	{
 		double[] error = new double[Math.min(e.length, o.length)];
 		for (int i = 0; i < error.length; i++)
-			//error[i] = DoubleEquality.relativeError(o[i], e[i]);
 			error[i] = 100.0 * (o[i] - e[i]) / e[i];
+		return error;
+	}
+
+	private double[] getRelativeError(double[] e, double[] o)
+	{
+		double[] error = new double[Math.min(e.length, o.length)];
+		for (int i = 0; i < error.length; i++)
+			error[i] = DoubleEquality.relativeError(o[i], e[i]);
 		return error;
 	}
 

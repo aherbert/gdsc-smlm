@@ -6,3 +6,4 @@ build.sh
 /macros
 /plugins
 *.lut
+JumpDistanceAnalysisTest.dat
