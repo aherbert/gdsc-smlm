@@ -233,25 +233,29 @@ public class JumpDistanceAnalysisTest
 
 			// Run the fitting to produce benchmark data for a mixed population of 2
 			writeHeader(2);
-			for (boolean mle : new boolean[] { true, false })
+			for (int repeat = 10; repeat-- > 0;)
 			{
-				for (int f = 1; f <= 9; f++)
+				resetData();
+				for (boolean mle : new boolean[] { true, false })
 				{
-					double fraction = f / 10.0;
-					String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
-					for (int samples = 500, k = 0; k < 6; samples *= 2, k++)
+					for (int f = 1; f <= 9; f++)
 					{
-						for (int i = 0; i < D.length; i++)
+						double fraction = f / 10.0;
+						String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
+						for (int samples = 500, k = 0; k < 6; samples *= 2, k++)
 						{
-							for (int j = i + 1; j < D.length; j++)
+							for (int i = 0; i < D.length; i++)
 							{
-								try
+								for (int j = i + 1; j < D.length; j++)
 								{
-									fit(title, samples, 0, new double[] { D[i], D[j] }, new double[] { fraction,
-											1 - fraction }, mle);
-								}
-								catch (AssertionError e)
-								{
+									try
+									{
+										fit(title, samples, 0, new double[] { D[i], D[j] }, new double[] { fraction,
+												1 - fraction }, mle);
+									}
+									catch (AssertionError e)
+									{
+									}
 								}
 							}
 						}
@@ -313,7 +317,7 @@ public class JumpDistanceAnalysisTest
 
 		// Record results to file
 		if (out != null)
-			writeResult(title, samples, n, d, f, mle, fitD, fitF);
+			writeResult(title, sample.d, sample.f, samples, n, d, f, mle, fitD, fitF);
 
 		AssertionError error = null;
 		try
@@ -344,6 +348,11 @@ public class JumpDistanceAnalysisTest
 	private void writeHeader(int size)
 	{
 		StringBuilder sb = new StringBuilder("title");
+		sb.append('\t').append("repeat");
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("D").append(i);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append("F").append(i);
 		sb.append('\t').append("samples");
 		sb.append('\t').append("mle");
 		sb.append('\t').append("n");
@@ -372,8 +381,8 @@ public class JumpDistanceAnalysisTest
 		}
 	}
 
-	private void writeResult(String title, int samples, int n, double[] d, double[] f, boolean mle, double[] fd,
-			double[] ff)
+	private void writeResult(String title, double[] actualD, double[] actualF, int samples, int n, double[] d,
+			double[] f, boolean mle, double[] fd, double[] ff)
 	{
 		int size = d.length;
 		int fsize = fd.length;
@@ -387,6 +396,11 @@ public class JumpDistanceAnalysisTest
 		double[] ef = getRelativeError(f, ff);
 
 		StringBuilder sb = new StringBuilder(title);
+		sb.append('\t').append(repeat);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(actualD[i]);
+		for (int i = 0; i < size; i++)
+			sb.append('\t').append(actualF[i]);
 		sb.append('\t').append(samples);
 		sb.append('\t').append(mle);
 		sb.append('\t').append(n);
@@ -575,6 +589,14 @@ public class JumpDistanceAnalysisTest
 	}
 
 	static ArrayList<DataSample> samples = new ArrayList<DataSample>();
+	DataSample sample = null;
+	private int repeat = 0;
+
+	private void resetData()
+	{
+		samples.clear();
+		repeat++;
+	}
 
 	/**
 	 * Create random jump distances
@@ -591,7 +613,7 @@ public class JumpDistanceAnalysisTest
 	{
 		// Cache the data so that if we run a second test with 
 		// the same d and f we use the same data
-		DataSample sample = new DataSample(d, f);
+		sample = new DataSample(d, f);
 		int index = samples.indexOf(sample);
 		if (index != -1)
 			sample = samples.get(index);
