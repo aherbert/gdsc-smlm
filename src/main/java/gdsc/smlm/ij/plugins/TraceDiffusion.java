@@ -144,6 +144,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (!showTraceDialog())
 			return;
 
+		Utils.log(TITLE + "...");
 		Trace[] traces = getTraces();
 
 		// -=-=-
@@ -259,7 +260,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					{
 						final float x = results.get(i).getXPosition();
 						final float y = results.get(i).getYPosition();
-						for (int j = i + i; j < traceLength; j++)
+						for (int j = i + 1; j < traceLength; j++)
 						{
 							final double d = distance2(x, y, results.get(j));
 							final int t = j - i;
@@ -685,8 +686,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				traces[count++] = traces[i];
 		}
 
-		Utils.log("Results %s : %d Traces filtered to %d using minimum length %d", name, traces.length, count,
-				minimumTraceLength);
+		Utils.log("Filtered results '%s' : %s filtered to %d using minimum length %d", name,
+				Utils.pleural(traces.length, "trace"), count, minimumTraceLength);
 		return Arrays.copyOf(traces, count);
 	}
 
@@ -1055,8 +1056,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addCheckbox("Internal_distances", settings.internalDistances);
 		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
 		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
-		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
 		gd.addCheckbox("Maximum_likelihood", mle);
+		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
 		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
 		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
@@ -1081,8 +1082,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.internalDistances = gd.getNextBoolean();
 		//settings.subSampledDistances = gd.getNextBoolean();
 		settings.fitLength = (int) Math.abs(gd.getNextNumber());
-		settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
 		mle = gd.getNextBoolean();
+		settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
 		minFraction = Math.abs(gd.getNextNumber());
