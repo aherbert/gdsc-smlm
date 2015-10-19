@@ -441,7 +441,12 @@ public class JumpDistanceAnalysisTest
 	{
 		double[] error = new double[Math.min(e.length, o.length)];
 		for (int i = 0; i < error.length; i++)
-			error[i] = DoubleEquality.relativeError(o[i], e[i]);
+		{
+			// As per the Weimann Plos One paper
+			error[i] = Math.abs(o[i] - e[i]) / e[i];
+			// Use the relative error from the largest value 
+			//error[i] = DoubleEquality.relativeError(o[i], e[i]);
+		}
 		return error;
 	}
 
