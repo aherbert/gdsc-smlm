@@ -13,6 +13,8 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.fitting.JumpDistanceAnalysis;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -20,19 +22,25 @@ import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.ImageModel;
 import gdsc.smlm.model.MoleculeModel;
 import gdsc.smlm.model.SphericalDistribution;
+import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
+import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
+import ij.gui.PlotWindow;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
@@ -90,6 +98,7 @@ public class DiffusionRateTest implements PlugIn
 		RandomGenerator random = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 		Statistics[] stats2D = new Statistics[totalSteps];
 		Statistics[] stats3D = new Statistics[totalSteps];
+		StoredDataStatistics jumpDistances = new StoredDataStatistics(totalSteps);
 		for (int j = 0; j < totalSteps; j++)
 		{
 			stats2D[j] = new Statistics();
@@ -97,12 +106,23 @@ public class DiffusionRateTest implements PlugIn
 		}
 		SphericalDistribution dist = new SphericalDistribution(settings.confinementRadius / settings.pixelPitch);
 		Statistics asymptote = new Statistics();
+
+		// Save results to memory
+		MemoryPeakResults results = new MemoryPeakResults(totalSteps);
+		Calibration cal = new Calibration(settings.pixelPitch, 1, 1000.0 / settings.stepsPerSecond);
+		results.setCalibration(cal);
+		results.setName(TITLE);
+		MemoryPeakResults.addResults(results);
+		int peak = 0;
+
 		for (int i = 0; i < settings.particles; i++)
 		{
 			if (i % 16 == 0)
 				IJ.showProgress(i, settings.particles);
 
-			MoleculeModel m = new MoleculeModel(i, new double[3]);
+			peak++; // Increment the frame so that tracing analysis can distinguish traces
+			final double[] origin = new double[3];
+			MoleculeModel m = new MoleculeModel(i, origin.clone());
 			if (useConfinement)
 			{
 				// Note: When using confinement the average displacement should asymptote
@@ -135,8 +155,7 @@ public class DiffusionRateTest implements PlugIn
 						}
 					}
 
-					stats2D[j].add(squared(m.getCoordinates()));
-					stats3D[j].add(distance2(m.getCoordinates()));
+					peak = record(m, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
 				}
 				asymptote.add(distance(m.getCoordinates()));
 			}
@@ -147,8 +166,7 @@ public class DiffusionRateTest implements PlugIn
 					for (int j = 0; j < totalSteps; j++)
 					{
 						m.walk(diffusionSigma, random);
-						stats2D[j].add(squared(m.getCoordinates()));
-						stats3D[j].add(distance2(m.getCoordinates()));
+						peak = record(m, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
 					}
 				}
 				else
@@ -156,8 +174,7 @@ public class DiffusionRateTest implements PlugIn
 					for (int j = 0; j < totalSteps; j++)
 					{
 						m.move(diffusionSigma, random);
-						stats2D[j].add(squared(m.getCoordinates()));
-						stats3D[j].add(distance2(m.getCoordinates()));
+						peak = record(m, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
 					}
 				}
 			}
@@ -244,7 +261,24 @@ public class DiffusionRateTest implements PlugIn
 				new double[] { fitted3D.value(xValues[0]), fitted3D.value(xValues[xValues.length - 1]) }, Plot2.LINE);
 		plot.setColor(Color.black);
 
-		Utils.display(title, plot);
+		PlotWindow pw1 = Utils.display(title, plot);
+
+		// Show the cumulative jump distance plot: Convert pixels^2/step to um^2/sec
+		final double factor = conversionFactor / settings.stepsPerSecond;
+		final double[] values = jumpDistances.getValues();
+		for (int i=0; i<values.length; i++)
+			values[i] /= factor;
+		title += " Jump Distance";
+		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
+		Plot2 jdPlot = new Plot2(title, "Distance (um^2/second)", "Cumulative Probability", jdHistogram[0],
+				jdHistogram[1]);
+		PlotWindow pw2 = Utils.display(title, jdPlot);
+		if (Utils.isNewWindow())
+		{
+			Point p = pw2.getLocation();
+			p.y += pw1.getHeight();
+			pw2.setLocation(p);
+		}
 
 		// For 2D diffusion: d^2 = 4D
 		// where: d^2 = mean-square displacement
@@ -260,6 +294,31 @@ public class DiffusionRateTest implements PlugIn
 		if (useConfinement)
 			Utils.log("3D asymptote distance = %s nm (expected %.2f)",
 					Utils.rounded(asymptote.getMean() * settings.pixelPitch, 4), 3 * settings.confinementRadius / 4);
+	}
+
+	private int record(MoleculeModel m, int peak, Statistics stats2D, Statistics stats3D,
+			StoredDataStatistics jumpDistances, double[] origin, MemoryPeakResults results)
+	{
+		final double[] xyz = m.getCoordinates();
+		final double dx = xyz[0] - origin[0];
+		final double dy = xyz[1] - origin[1];
+		jumpDistances.add(dx * dx + dy * dy);
+		for (int i = 0; i < 3; i++)
+			origin[i] = xyz[i];
+
+		stats2D.add(squared(xyz));
+		stats3D.add(distance2(xyz));
+
+		final float[] params = new float[7];
+		params[Gaussian2DFunction.X_POSITION] = (float) m.getX();
+		params[Gaussian2DFunction.Y_POSITION] = (float) m.getY();
+		params[Gaussian2DFunction.SIGNAL] = 10f;
+		params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+		final float noise = 0.1f;
+		final int id = m.getId() + 1;
+		results.add(new ExtendedPeakResult(peak, (int) params[Gaussian2DFunction.X_POSITION],
+				(int) params[Gaussian2DFunction.Y_POSITION], 10, 0, noise, params, null, peak, id));
+		return ++peak;
 	}
 
 	/**
@@ -356,7 +415,7 @@ public class DiffusionRateTest implements PlugIn
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
-		
+
 		if (settings.diffusionRate == 0)
 			IJ.error(TITLE, "Warning : Diffusion rate is zero");
 
