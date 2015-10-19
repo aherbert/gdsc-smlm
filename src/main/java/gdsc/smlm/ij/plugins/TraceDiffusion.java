@@ -101,6 +101,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static double minFraction = 0.1;
 	private static double minDifference = 2;
 	private static boolean mle = true;
+	private static boolean debugFitting = false;
 	private static boolean multipleInputs = false;
 	private static String tracesFilename = "";
 
@@ -1061,6 +1062,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
 		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
+		gd.addCheckbox("Debug_fitting", debugFitting);
 		gd.addCheckbox("Save_trace_distances", saveTraceDistances);
 		gd.addCheckbox("Save_raw_data", saveRawData);
 		gd.addCheckbox("Show_histograms", settings.showHistograms);
@@ -1087,6 +1089,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
 		minFraction = Math.abs(gd.getNextNumber());
+		debugFitting = gd.getNextBoolean();
 		saveTraceDistances = gd.getNextBoolean();
 		saveRawData = gd.getNextBoolean();
 		settings.showHistograms = gd.getNextBoolean();
@@ -1295,7 +1298,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				jumpDistances.getN(), settings.jumpDistance, Utils.rounded(settings.jumpDistance * exposureTime, 4),
 				Utils.rounded(meanDistance, 4), Utils.rounded(precision, 4), Utils.rounded(beta, 4));
 
-		IJLogger logger = new IJLogger(false, false);
+		IJLogger logger = new IJLogger(debugFitting, debugFitting);
 		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
 		jd.setFitRestarts(settings.fitRestarts);
 		jd.setMinFraction(minFraction);
