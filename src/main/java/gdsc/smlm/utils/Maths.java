@@ -412,7 +412,20 @@ public class Maths
 	{
 		final double logLikelihood = 0.5 * (-n * (Math.log(2 * Math.PI) + 1 - Math.log(n) + Math
 				.log(sumOfSquaredResiduals)));
+		return getInformationCriterionFromLL(logLikelihood, n, p);
+	}
 
+	/**
+	 * @param logLikelihood
+	 *            the log-likelihood of the fit (from Maximum likelihood estimation)
+	 * @param n
+	 *            The number of data points
+	 * @param p
+	 *            The number of fitted parameters
+	 * @return The Information Criterion
+	 */
+	public static double getInformationCriterionFromLL(double logLikelihood, int n, int p)
+	{
 		// Note: The true bias corrected AIC is derived from the 2nd, 3rd and 4th derivatives of the 
 		// negative log-likelihood function. This is complex and so is not implemented.
 		// See: 
@@ -479,12 +492,14 @@ public class Maths
 			sum += d;
 		return sum;
 	}
-	
+
 	/**
 	 * Round the double to the specified significant digits
 	 * 
-	 * @param d The double
-	 * @param significantDigits The number of significan digits
+	 * @param d
+	 *            The double
+	 * @param significantDigits
+	 *            The number of significan digits
 	 * @return A string containing the rounded double
 	 */
 	public static String rounded(double d, int significantDigits)
@@ -499,7 +514,8 @@ public class Maths
 	/**
 	 * Round the double to 4 significant digits
 	 * 
-	 * @param d The double
+	 * @param d
+	 *            The double
 	 * @return A string containing the rounded double
 	 */
 	public static String rounded(double d)

@@ -257,7 +257,7 @@ public class JumpDistanceAnalysis
 				//DEBUG_OPTIMISER = false;
 
 				evaluations = powellOptimizer.getEvaluations();
-				logger.debug("Fit Jump distance (N=%d) : SS = %f (%d evaluations)", n + 1,
+				logger.debug("Powell optimiser fit (N=%d) : SS = %f (%d evaluations)", n + 1,
 						constrainedSolution.getValue(), evaluations);
 
 				// We should update the fractions to be normalised so that the bounds of the CMAES are not violated
@@ -317,7 +317,7 @@ public class JumpDistanceAnalysis
 						{
 							evaluations = cmaesOptimizer.getEvaluations();
 							constrainedSolution = solution;
-							logger.debug("[%da] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+							logger.debug("CMAES optimiser [%da] fit (N=%d) : SS = %f (%d evaluations)", i, n + 1,
 									solution.getValue(), evaluations);
 						}
 					}
@@ -339,7 +339,7 @@ public class JumpDistanceAnalysis
 						{
 							evaluations = cmaesOptimizer.getEvaluations();
 							constrainedSolution = solution;
-							logger.debug("[%db] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+							logger.debug("CMAES optimiser [%db] fit (N=%d) : SS = %f (%d evaluations)", i, n + 1,
 									solution.getValue(), evaluations);
 						}
 					}
@@ -456,6 +456,7 @@ public class JumpDistanceAnalysis
 			}
 
 			bestMultiIC = ic[n];
+			bestMulti = n;
 
 			n++;
 		}
@@ -520,10 +521,12 @@ public class JumpDistanceAnalysis
 		int n = 0;
 		double[] ll = new double[maxN];
 		Arrays.fill(ll, Double.NEGATIVE_INFINITY);
+		double[] ic = new double[maxN];
+		Arrays.fill(ic, Double.POSITIVE_INFINITY);
 		double[][] coefficients = new double[maxN][];
 		double[][] fractions = new double[maxN][];
 		double[][] fitParams = new double[maxN][];
-		double bestLL = Double.NEGATIVE_INFINITY;
+		double bestIC = Double.POSITIVE_INFINITY;
 		int best = -1;
 
 		// Guess the D
@@ -557,13 +560,15 @@ public class JumpDistanceAnalysis
 
 			fitParams[n] = solution.getPointRef();
 			ll[n] = solution.getValue();
+			ic[n] = Maths.getInformationCriterionFromLL(ll[n], jumpDistances.length, 1);
 			coefficients[n] = fitParams[n];
 			fractions[n] = new double[] { 1 };
+			
+			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s, MLE = %s, IC = %s (%d evaluations)", n + 1,
+					Maths.rounded(fitParams[n][0], 4), Maths.rounded(ll[n], 4), Maths.rounded(ic[n], 4),  
+					optimizer.getEvaluations());
 
-			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s, MLE = %s (%d evaluations)", n + 1,
-					Maths.rounded(fitParams[n][0], 4), Maths.rounded(ll[n], 4), optimizer.getEvaluations());
-
-			bestLL = ll[n];
+			bestIC = ic[n];
 			best = 0;
 
 			saveFitCurve(fitParams[n], jdHistogram);
@@ -588,7 +593,7 @@ public class JumpDistanceAnalysis
 		// Fit using a mixed population model. 
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
-		double bestMultiLL = Double.NEGATIVE_INFINITY;
+		double bestMultiIC = Double.POSITIVE_INFINITY;
 		while (n < maxN)
 		{
 			MixedJumpDistanceFunction function = new MixedJumpDistanceFunction(jumpDistances, estimatedD, n + 1);
@@ -604,7 +609,7 @@ public class JumpDistanceAnalysis
 				constrainedSolution = optimizer.optimize(maxEval, new ObjectiveFunction(function), new InitialGuess(
 						function.guess()), bounds, GoalType.MAXIMIZE);
 				evaluations = optimizer.getEvaluations();
-				logger.debug("[] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", n + 1,
+				logger.debug("Powell optimiser fit (N=%d) : SS = %f (%d evaluations)", n + 1,
 						constrainedSolution.getValue(), optimizer.getEvaluations());
 			}
 			catch (TooManyEvaluationsException e)
@@ -656,13 +661,11 @@ public class JumpDistanceAnalysis
 						PointValuePair solution = opt.optimize(new InitialGuess(function.guess()),
 								new ObjectiveFunction(function), GoalType.MAXIMIZE, bounds, sigma, popSize,
 								new MaxIter(maxIterations), maxEval);
-						//logger.debug("[%da] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
-						//		solution.getValue(), opt.getEvaluations());
 						if (constrainedSolution == null || solution.getValue() > constrainedSolution.getValue())
 						{
 							evaluations = opt.getEvaluations();
 							constrainedSolution = solution;
-							logger.debug("[%da] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+							logger.debug("CMAES optimiser [%da] fit (N=%d) : SS = %f (%d evaluations)", i, n + 1,
 									solution.getValue(), evaluations);
 						}
 					}
@@ -679,13 +682,11 @@ public class JumpDistanceAnalysis
 						PointValuePair solution = opt.optimize(new InitialGuess(constrainedSolution.getPointRef()),
 								new ObjectiveFunction(function), GoalType.MAXIMIZE, bounds, sigma, popSize,
 								new MaxIter(maxIterations), maxEval);
-						//logger.debug("[%db] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
-						//		solution.getValue(), opt.getEvaluations());
 						if (constrainedSolution == null || solution.getValue() > constrainedSolution.getValue())
 						{
 							evaluations = opt.getEvaluations();
 							constrainedSolution = solution;
-							logger.debug("[%db] Fit Jump distance (N=%d) : SS = %f (%d evaluations)", i, n + 1,
+							logger.debug("CMAES optimiser [%db] fit (N=%d) : SS = %f (%d evaluations)", i, n + 1,
 									solution.getValue(), evaluations);
 						}
 					}
@@ -703,6 +704,8 @@ public class JumpDistanceAnalysis
 
 			fitParams[n] = constrainedSolution.getPointRef();
 			ll[n] = constrainedSolution.getValue();
+			// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
+			ic[n] = Maths.getInformationCriterionFromLL(ll[n], jumpDistances.length, fitParams[n].length - 1);
 
 			double[] d = new double[n + 1];
 			double[] f = new double[n + 1];
@@ -720,8 +723,8 @@ public class JumpDistanceAnalysis
 			coefficients[n] = d;
 			fractions[n] = f;
 
-			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s (%s), MLE = %s (%d evaluations)", n + 1, format(d),
-					format(f), Maths.rounded(ll[n], 4), evaluations);
+			logger.info("Fit Jump distance (N=%d) : D = %s um^2/s (%s), MLE = %s, IC = %s (%d evaluations)", n + 1, format(d),
+					format(f), Maths.rounded(ll[n], 4), Maths.rounded(ic[n], 4), evaluations);
 
 			boolean valid = true;
 			for (int i = 0; i < f.length; i++)
@@ -748,17 +751,20 @@ public class JumpDistanceAnalysis
 				break;
 
 			// Store the best model
-			if (bestLL < ll[n])
+			if (bestIC > ic[n])
 			{
-				bestLL = ll[n];
+				bestIC = ic[n];
 				best = n;
 			}
 
 			// Store the best multi model
-			if (bestMultiLL < ll[n])
+			if (bestMultiIC < ic[n])
+			{
 				break;
+			}
 
-			bestMultiLL = ll[n];
+			bestMultiIC = ic[n];
+			bestMulti = n;
 
 			n++;
 		}
