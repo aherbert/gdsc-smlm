@@ -13,7 +13,7 @@ Contains routines for:
 - Clustering using distance and time thresholds
 - Super-resolution image reconstruction
  
-Copyright (C) 2013 Alex Herbert
+Copyright (C) 2015 Alex Herbert
 MRC Genome Damage and Stability Centre
 University of Sussex, UK
  
