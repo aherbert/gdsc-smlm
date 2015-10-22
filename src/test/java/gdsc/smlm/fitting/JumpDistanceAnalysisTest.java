@@ -4,7 +4,6 @@ import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
-import gdsc.smlm.utils.DoubleEquality;
 import gdsc.smlm.utils.logging.Logger;
 
 import java.io.FileOutputStream;
@@ -47,7 +46,10 @@ public class JumpDistanceAnalysisTest
 	// 15-fold, 5-fold, 3-fold difference between pairs
 	//double[] D = new double[] { 0.2, 3, 1 };
 	// 5-fold difference between pairs
-	double[] D = new double[] { 0.2, 1 };
+	//double[] D = new double[] { 0.2, 1 };
+	// For proteins with mass 823 and 347 kDa the  
+	// difference using predicted diffusion coefficients is 3:1
+	double[] D = new double[] { 3, 1 };
 	RandomGenerator random = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 
 	// Commented out as this test always passes
@@ -222,7 +224,7 @@ public class JumpDistanceAnalysisTest
 	/**
 	 * This is not actually a test but runs the fitting algorithm many times to collect benchmark data to file
 	 */
-	//@Test
+	@Test
 	public void canDoBenchmark()
 	{
 		out = null;
@@ -232,7 +234,8 @@ public class JumpDistanceAnalysisTest
 			out = new OutputStreamWriter(fos, "UTF-8");
 
 			// Run the fitting to produce benchmark data for a mixed population of 2
-			writeHeader(2);
+			int n = 2;
+			writeHeader(n);
 			for (int repeat = 10; repeat-- > 0;)
 			{
 				resetData();
@@ -251,6 +254,17 @@ public class JumpDistanceAnalysisTest
 									try
 									{
 										fit(title, samples, 0, new double[] { D[i], D[j] }, new double[] { fraction,
+												1 - fraction }, mle);
+									}
+									catch (AssertionError e)
+									{
+									}
+									// If the fit had the correct N then no need to repeat
+									if (fitN == n)
+										continue;
+									try
+									{
+										fit(title + " Fixed", samples, n, new double[] { D[i], D[j] }, new double[] { fraction,
 												1 - fraction }, mle);
 									}
 									catch (AssertionError e)
@@ -291,6 +305,9 @@ public class JumpDistanceAnalysisTest
 		}
 	}
 
+	// Store the fitted N to allow repeat in the benchmark with fixed N if necessary
+	int fitN = 0;
+
 	private void fit(String title, int samples, int n, double[] d, double[] f, boolean mle)
 	{
 		// Used for testing
@@ -303,15 +320,26 @@ public class JumpDistanceAnalysisTest
 		// @formatter:on
 
 		JumpDistanceAnalysis.sort(d, f);
-		double[] jumpsDistances = createData(samples, d, f);
+		double[] jumpDistances = createData(samples, d, f);
 		Logger logger = null;
 		//logger = new gdsc.smlm.utils.logging.ConsoleLogger();
 		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
 		jd.setFitRestarts(3);
-		jd.setMinFraction(0.05);
-		jd.setMinDifference(2);
-		jd.setN((n > 0) ? n : 10);
-		double[][] fit = (mle) ? jd.fitJumpDistancesMLE(jumpsDistances) : jd.fitJumpDistances(jumpsDistances);
+		double[][] fit;
+		if (n == 0)
+		{
+			jd.setMinFraction(0.05);
+			jd.setMinDifference(2);
+			jd.setN(10);
+			fit = (mle) ? jd.fitJumpDistancesMLE(jumpDistances) : jd.fitJumpDistances(jumpDistances);
+		}
+		else
+		{
+			// No validation
+			jd.setMinFraction(0);
+			jd.setMinDifference(0);
+			fit = (mle) ? jd.fitJumpDistancesMLE(jumpDistances, n) : jd.fitJumpDistances(jumpDistances, n);
+		}
 		double[] fitD = (fit == null) ? new double[0] : fit[0];
 		double[] fitF = (fit == null) ? new double[0] : fit[1];
 
@@ -319,6 +347,7 @@ public class JumpDistanceAnalysisTest
 		if (out != null)
 			writeResult(title, sample.d, sample.f, samples, n, d, f, mle, fitD, fitF);
 
+		fitN = fitD.length;
 		AssertionError error = null;
 		try
 		{
@@ -337,7 +366,7 @@ public class JumpDistanceAnalysisTest
 		{
 			double[] e1 = getPercentError(d, fitD);
 			double[] e2 = getPercentError(f, fitF);
-			log("%s %s N=%d sample=%d, n<=%d : %s = %s [%s] : %s = %s [%s]\n", (error == null) ? "+++ Pass"
+			log("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]\n", (error == null) ? "+++ Pass"
 					: "--- Fail", title, d.length, samples, n, toString(d), toString(fitD), toString(e1), toString(f),
 					toString(fitF), toString(e2));
 			if (error != null)
@@ -445,7 +474,7 @@ public class JumpDistanceAnalysisTest
 			// As per the Weimann Plos One paper
 			error[i] = Math.abs(o[i] - e[i]) / e[i];
 			// Use the relative error from the largest value 
-			//error[i] = DoubleEquality.relativeError(o[i], e[i]);
+			//error[i] = gdsc.smlm.utils.DoubleEquality.relativeError(o[i], e[i]);
 		}
 		return error;
 	}
