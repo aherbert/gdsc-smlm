@@ -77,6 +77,8 @@ public class ImageROIPainter implements MouseListener
 			double y = position[2];
 
 			addRoi(imp, slice, new PointRoi(x, y));
+
+			Utils.adjustSourceRect(imp, 0, (int) x, (int) y);
 		}
 	}
 

@@ -20,6 +20,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Macro;
 import ij.WindowManager;
+import ij.gui.ImageCanvas;
 import ij.gui.ImageWindow;
 import ij.gui.Plot;
 import ij.gui.Plot2;
@@ -32,7 +33,9 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -1155,5 +1158,51 @@ public class Utils
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Set the current source rectangle to centre the view on the given coordinates
+	 * 
+	 * Adapted from ij.gui.ImageCanvas.adjustSourceRect(double newMag, int x, int y)
+	 * 
+	 * @param imp
+	 *            The image
+	 * @param newMag
+	 *            The new magnification (set to zero to use the current magnification)
+	 * @param x
+	 *            The x coordinate
+	 * @param y
+	 *            The y coordinate
+	 */
+	public static void adjustSourceRect(ImagePlus imp, double newMag, int x, int y)
+	{
+		ImageCanvas ic = imp.getCanvas();
+		if (ic == null)
+			return;
+		Dimension d = ic.getPreferredSize();
+		int dstWidth = d.width, dstHeight = d.height;
+		int imageWidth = imp.getWidth(), imageHeight = imp.getHeight();
+		if (newMag <= 0)
+			newMag = ic.getMagnification();
+		int w = (int) Math.round(dstWidth / newMag);
+		if (w * newMag < dstWidth)
+			w++;
+		int h = (int) Math.round(dstHeight / newMag);
+		if (h * newMag < dstHeight)
+			h++;
+		//x = ic.offScreenX(x);
+		//y = ic.offScreenY(y);
+		Rectangle r = new Rectangle(x - w / 2, y - h / 2, w, h);
+		if (r.x < 0)
+			r.x = 0;
+		if (r.y < 0)
+			r.y = 0;
+		if (r.x + w > imageWidth)
+			r.x = imageWidth - w;
+		if (r.y + h > imageHeight)
+			r.y = imageHeight - h;
+		ic.setSourceRect(r);
+		ic.setMagnification(newMag);
+		ic.repaint();
 	}
 }
