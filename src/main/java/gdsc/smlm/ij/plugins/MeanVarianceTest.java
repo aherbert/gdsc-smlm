@@ -369,7 +369,7 @@ public class MeanVarianceTest implements PlugIn
 		final CurveFitter<Parametric> fitter = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
 		for (int i = (singleImage) ? 0 : start, j = 0; i < images.size(); i++)
 		{
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = (showTable) ? new StringBuilder() : null;
 			ImageSample sample = images.get(i);
 			for (PairSample pair : sample.samples)
 			{
@@ -402,7 +402,8 @@ public class MeanVarianceTest implements PlugIn
 				}
 				j++;
 			}
-			results.append(sb.toString());
+			if (showTable)
+				results.append(sb.toString());
 		}
 		IJ.showProgress(1);
 
