@@ -350,7 +350,7 @@ public class MeanVarianceTest implements PlugIn
 		for (int i = start; i < images.size(); i++)
 			total += images.get(i).samples.size();
 		
-		if (showTable && total > 200)
+		if (showTable && total > 2000)
 		{
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("Table output requires "+total+" entries.\n \nYou may want to disable the table.");
@@ -369,11 +369,13 @@ public class MeanVarianceTest implements PlugIn
 		final CurveFitter<Parametric> fitter = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
 		for (int i = (singleImage) ? 0 : start, j = 0; i < images.size(); i++)
 		{
+			StringBuilder sb = new StringBuilder();
 			ImageSample sample = images.get(i);
 			for (PairSample pair : sample.samples)
 			{
 				if (j % 16 == 0)
 					IJ.showProgress(j, total);
+					
 				mean[j] = pair.getMean();
 				variance[j] = pair.variance;
 				// Gain is in ADU / e
@@ -388,7 +390,6 @@ public class MeanVarianceTest implements PlugIn
 
 				if (showTable)
 				{
-					StringBuilder sb = new StringBuilder();
 					sb.append(sample.title).append("\t");
 					sb.append(sample.exposure).append("\t");
 					sb.append(pair.slice1).append("\t");
@@ -397,11 +398,11 @@ public class MeanVarianceTest implements PlugIn
 					sb.append(IJ.d2s(pair.mean2, 2)).append("\t");
 					sb.append(IJ.d2s(mean[j], 2)).append("\t");
 					sb.append(IJ.d2s(variance[j], 2)).append("\t");
-					sb.append(Utils.rounded(gain, 4));
-					results.append(sb.toString());
+					sb.append(Utils.rounded(gain, 4)).append("\n");
 				}
 				j++;
 			}
+			results.append(sb.toString());
 		}
 		IJ.showProgress(1);
 
