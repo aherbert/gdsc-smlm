@@ -246,15 +246,17 @@ public class TraceMolecules implements PlugIn
 		outputName += (outputName.endsWith("e") ? "" : "e") + "d";
 		saveResults(results, traces, outputName);
 
-		// Save singles
+		// Save singles + single localisations in a trace
 		saveCentroidResults(results, getSingles(traces), outputName + " Singles");
+		Trace[] multiTraces = getTraces(traces);
+		saveResults(results, multiTraces, outputName + " Multi");
 		
 		// Save centroids
 		outputName += " Centroids";
 		MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
 
 		// Save traces separately
-		saveCentroidResults(results, getTraces(traces), outputName + " Multi");
+		saveCentroidResults(results, multiTraces, outputName + " Multi");
 
 		// Sort traces by time to assist the results source in extracting frames sequentially.
 		// Do this before saving to assist in debugging using the saved traces file.
