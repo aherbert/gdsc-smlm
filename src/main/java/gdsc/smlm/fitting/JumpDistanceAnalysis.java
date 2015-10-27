@@ -993,6 +993,7 @@ public class JumpDistanceAnalysis
 				params[i * 2] = fit[1][i];
 				params[i * 2 + 1] = fit[0][i];
 			}
+			saveFitCurve(params, jdHistogram);
 		}
 	}
 
