@@ -34,9 +34,9 @@ public class MaskDistribution implements SpatialDistribution
 	private UniformDistribution uniformDistribution;
 	private int[] mask;
 	private int[] indices;
-	private final int width, height;
-	private final double half_width, half_height;
-	private final double min, depth;
+	private final int maxx, maxy;
+	private final double halfWidth, halfHeight;
+	private final double minDepth, depth;
 	private int particle = 0;
 	private final double scaleX, scaleY;
 
@@ -202,13 +202,13 @@ public class MaskDistribution implements SpatialDistribution
 		this.randomGenerator = randomGenerator;
 		setUniformDistribution(uniformDistribution);
 		this.mask = mask;
-		this.width = width;
+		maxx = width;
+		maxy = height;
 		this.scaleX = scaleX;
 		this.scaleY = scaleY;
-		this.height = height;
-		this.half_width = width / 2.0;
-		this.half_height = height / 2.0;
-		this.min = -depth / 2;
+		halfWidth = width * 0.5;
+		halfHeight = height * 0.5;
+		minDepth = depth * -0.5;
 		this.depth = depth;
 
 		final int size = width * height;
@@ -248,13 +248,13 @@ public class MaskDistribution implements SpatialDistribution
 	public double[] next()
 	{
 		final int randomPosition = randomGenerator.nextInt(indices.length);
-		final int x = indices[randomPosition] % width;
-		final int y = indices[randomPosition] / width;
+		final int y = indices[randomPosition] / maxx;
+		final int x = indices[randomPosition] % maxx;
 		final double[] d = uniformDistribution.nextUnit();
 		// Ensure XY = 0 is the centre of the image by subtracting half the width/height
-		d[0] = (x + d[0] - half_width) * scaleX;
-		d[1] = (y + d[1] - half_height) * scaleY;
-		d[2] = min + d[2] * depth;
+		d[0] = (x + d[0] - halfWidth) * scaleX;
+		d[1] = (y + d[1] - halfHeight) * scaleY;
+		d[2] = minDepth + d[2] * depth;
 		return d;
 	}
 
@@ -267,7 +267,7 @@ public class MaskDistribution implements SpatialDistribution
 	{
 		if (!isWithinXY(xyz))
 			return false;
-		if (xyz[2] < min || xyz[2] > min + depth)
+		if (xyz[2] < minDepth || xyz[2] > minDepth + depth)
 			return false;
 		return true;
 	}
@@ -295,11 +295,11 @@ public class MaskDistribution implements SpatialDistribution
 
 	private int getIndex(double[] xyz)
 	{
-		int x = (int) (half_width + xyz[0] / scaleX);
-		int y = (int) (half_height + xyz[1] / scaleY);
-		if (x < 0 || x >= width || y < 0 || y >= height)
+		int x = (int) (halfWidth + xyz[0] / scaleX);
+		int y = (int) (halfHeight + xyz[1] / scaleY);
+		if (x < 0 || x >= maxx || y < 0 || y >= maxy)
 			return -1;
-		int index = y * width + x;
+		int index = y * maxx + x;
 		return index;
 	}
 
@@ -313,15 +313,14 @@ public class MaskDistribution implements SpatialDistribution
 		findParticles();
 
 		// Now store the particle that contains the position
-		int index = getIndex(xyz);
+		final int index = getIndex(xyz);
 		particle = (index < 0 || index >= mask.length) ? 0 : mask[index];
 	}
 
 	// Used for a particle search
 	private static final int[] DIR_X_OFFSET = new int[] { 0, 1, 1, 1, 0, -1, -1, -1 };
 	private static final int[] DIR_Y_OFFSET = new int[] { -1, -1, 0, 1, 1, 1, 0, -1 };
-	private int maxx = 0, maxy;
-	private int xlimit, ylimit;
+	private int xlimit = -1, ylimit;
 	private int[] offset = null;
 
 	/**
@@ -331,11 +330,8 @@ public class MaskDistribution implements SpatialDistribution
 	private void findParticles()
 	{
 		// Check if already initialised
-		if (maxx > 0)
+		if (xlimit != -1)
 			return;
-
-		maxx = width;
-		maxy = height;
 
 		xlimit = maxx - 1;
 		ylimit = maxy - 1;
@@ -361,12 +357,6 @@ public class MaskDistribution implements SpatialDistribution
 			if (binaryMask[i])
 			{
 				expandParticle(binaryMask, mask, pList, i, ++particles);
-
-				// Debug: Show the particles
-				//float[] pixels = new float[mask.length];
-				//for (int j = 0; j < mask.length; j++)
-				//	pixels[j] = (binaryMask[j]) ? 0 : mask[j];
-				//gdsc.smlm.ij.utils.Utils.display("Particle", new ij.process.FloatProcessor(maxx, maxy, pixels));
 			}
 		}
 
@@ -393,10 +383,10 @@ public class MaskDistribution implements SpatialDistribution
 			mask[index1] = particle;
 
 			// Search the 8-connected neighbours 
-			int x1 = index1 % maxx;
-			int y1 = index1 / maxx;
+			final int x1 = index1 % maxx;
+			final int y1 = index1 / maxx;
 
-			boolean isInnerXY = (x1 != 0 && x1 != xlimit) && (y1 != 0 && y1 != ylimit);
+			final boolean isInnerXY = (x1 != 0 && x1 != xlimit) && (y1 != 0 && y1 != ylimit);
 
 			if (isInnerXY)
 			{
@@ -415,7 +405,7 @@ public class MaskDistribution implements SpatialDistribution
 			{
 				for (int d = 8; d-- > 0;)
 				{
-					if (isInside(x1, y1, d))
+					if (isWithin(x1, y1, d))
 					{
 						int index2 = index1 + offset[d];
 						if (binaryMask[index2])
@@ -445,7 +435,7 @@ public class MaskDistribution implements SpatialDistribution
 	 *            the direction from the pixel towards the neighbour
 	 * @return true if the neighbour is within the image (provided that x, y is within)
 	 */
-	private boolean isInside(int x, int y, int direction)
+	private boolean isWithin(int x, int y, int direction)
 	{
 		switch (direction)
 		{
@@ -478,19 +468,19 @@ public class MaskDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * @return The width of the mask
+	 * @return The width of the mask in pixels
 	 */
 	public int getWidth()
 	{
-		return width;
+		return maxx;
 	}
 
 	/**
-	 * @return The height of the mask
+	 * @return The height of the mask in pixels
 	 */
 	public int getHeight()
 	{
-		return height;
+		return maxy;
 	}
 
 	/**
@@ -510,7 +500,7 @@ public class MaskDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * @return The mask
+	 * @return The mask (packed in YX order)
 	 */
 	protected int[] getMask()
 	{
