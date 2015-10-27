@@ -37,7 +37,7 @@ public class About implements PlugIn
 {
 	private static String TITLE = "GDSC SMLM ImageJ Plugins";
 	public static String HELP_URL = "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
-	private static String YEAR = "2014";
+	private static String YEAR = "2015";
 
 	enum ConfigureOption
 	{
