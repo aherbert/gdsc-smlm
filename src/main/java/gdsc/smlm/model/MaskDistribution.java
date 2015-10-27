@@ -34,7 +34,8 @@ public class MaskDistribution implements SpatialDistribution
 	private UniformDistribution uniformDistribution;
 	private int[] mask;
 	private int[] indices;
-	private final int width, height, half_width, half_height;
+	private final int width, height;
+	private final double half_width, half_height;
 	private final double min, depth;
 	private int particle = 0;
 	private final double scaleX, scaleY;
@@ -160,6 +161,35 @@ public class MaskDistribution implements SpatialDistribution
 	public MaskDistribution(int[] mask, int width, int height, double depth, double scaleX, double scaleY,
 			RandomGenerator randomGenerator, UniformDistribution uniformDistribution)
 	{
+		this(mask, width, height, depth, scaleX, scaleY, randomGenerator, uniformDistribution, false);
+	}
+
+	/**
+	 * Create a distribution from the mask image (packed in YX order)
+	 * <p>
+	 * This is a package scope constructor allowing the mask to be created with all zero pixels.
+	 * 
+	 * @param mask
+	 * @param width
+	 *            The width of the mask in pixels
+	 * @param height
+	 *            the height of the mask in pixels
+	 * @param depth
+	 *            The mask depth
+	 * @param scaleX
+	 *            Used to scale the mask X-coordinate to a new value
+	 * @param scaleY
+	 *            Used to scale the mask Y-coordinate to a new value
+	 * @param randomGenerator
+	 *            Used to pick random pixels in the mask
+	 * @param uniformDistribution
+	 *            Used for sub-pixel location and z-depth
+	 * @param allowZeroMask
+	 *            Set to true to allow a mask with no non-zero pixels
+	 */
+	MaskDistribution(int[] mask, int width, int height, double depth, double scaleX, double scaleY,
+			RandomGenerator randomGenerator, UniformDistribution uniformDistribution, boolean allowZeroMask)
+	{
 		if (width < 1 || height < 1)
 			throw new IllegalArgumentException("Dimensions must be above zero");
 		if (scaleX < 0 || scaleY < 0)
@@ -176,8 +206,8 @@ public class MaskDistribution implements SpatialDistribution
 		this.scaleX = scaleX;
 		this.scaleY = scaleY;
 		this.height = height;
-		this.half_width = width / 2;
-		this.half_height = height / 2;
+		this.half_width = width / 2.0;
+		this.half_height = height / 2.0;
 		this.min = -depth / 2;
 		this.depth = depth;
 
@@ -189,7 +219,7 @@ public class MaskDistribution implements SpatialDistribution
 				count++;
 		}
 
-		if (count == 0)
+		if (count == 0 && !allowZeroMask)
 			throw new IllegalArgumentException("Mask must have non-zero pixels");
 
 		indices = new int[count];
@@ -218,12 +248,12 @@ public class MaskDistribution implements SpatialDistribution
 	public double[] next()
 	{
 		final int randomPosition = randomGenerator.nextInt(indices.length);
-		// Ensure XY = 0 is the centre of the image
-		final int x = indices[randomPosition] % width - half_width;
-		final int y = indices[randomPosition] / width - half_height;
+		final int x = indices[randomPosition] % width;
+		final int y = indices[randomPosition] / width;
 		final double[] d = uniformDistribution.nextUnit();
-		d[0] = (x + d[0]) * scaleX;
-		d[1] = (y + d[1]) * scaleY;
+		// Ensure XY = 0 is the centre of the image by subtracting half the width/height
+		d[0] = (x + d[0] - half_width) * scaleX;
+		d[1] = (y + d[1] - half_height) * scaleY;
 		d[2] = min + d[2] * depth;
 		return d;
 	}
@@ -265,8 +295,8 @@ public class MaskDistribution implements SpatialDistribution
 
 	private int getIndex(double[] xyz)
 	{
-		int x = (int) (xyz[0] / scaleX) + half_width;
-		int y = (int) (xyz[1] / scaleY) + half_height;
+		int x = (int) (half_width + xyz[0] / scaleX);
+		int y = (int) (half_height + xyz[1] / scaleY);
 		if (x < 0 || x >= width || y < 0 || y >= height)
 			return -1;
 		int index = y * width + x;
