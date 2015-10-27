@@ -37,7 +37,7 @@ public class ActivationEnergyImageModel extends ImageModel
 	 *            Average on-state time
 	 * @param tOff
 	 *            Average off-state time for the first dark state
-	 * @param tOff
+	 * @param tOff2
 	 *            Average off-state time for the second dark state
 	 * @param nBlinks
 	 *            Average number of blinks int the first dark state (used for each burst between second dark states)

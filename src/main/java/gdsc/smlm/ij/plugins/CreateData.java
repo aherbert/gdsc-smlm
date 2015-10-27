@@ -34,6 +34,7 @@ import gdsc.smlm.model.GaussianPSFModel;
 import gdsc.smlm.model.GridDistribution;
 import gdsc.smlm.model.ImageModel;
 import gdsc.smlm.model.ImagePSFModel;
+import gdsc.smlm.model.FixedLifetimeImageModel;
 import gdsc.smlm.model.LocalisationModel;
 import gdsc.smlm.model.LocalisationModelSet;
 import gdsc.smlm.model.MaskDistribution;
@@ -226,6 +227,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean simpleMode = false;
 	private boolean benchmarkMode = false;
 	private boolean spotMode = false;
+	private boolean trackMode = false;
 	private boolean extraOptions = false;
 
 	// Hold private variables for settings that are ignored in simple/benchmark mode 
@@ -484,6 +486,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		simpleMode = (arg != null && arg.contains("simple"));
 		benchmarkMode = (arg != null && arg.contains("benchmark"));
 		spotMode = (arg != null && arg.contains("spot"));
+		trackMode = (arg != null && arg.contains("track"));
 
 		// Each localisation is a simulated emission of light from a point in space and time
 		List<LocalisationModel> localisations = null;
@@ -602,37 +605,65 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
+			// This is used for the track mode as well as the full simulation.
+
 			if (!showDialog())
 				return;
 			benchmarkParameters = null;
 			simulationParameters = null;
 
-			// ---------------
-			// FULL SIMULATION
-			// ---------------
-			// The full simulation draws n random points in space.
-			// The same molecule may appear in multiple frames, move and blink.
-			//
-			// Points are modelled as fluorophores that must be activated and then will 
-			// blink and photo-bleach. The molecules may diffuse and this can be simulated 
-			// with many steps per image frame. All steps from a frame are collected
-			// into a localisation set which can be drawn on the output image.
+			int totalSteps;
+			double correlation = 0;
+			ImageModel imageModel;
 
-			SpatialIllumination activationIllumination = createIllumination(settings.pulseRatio, settings.pulseInterval);
+			if (trackMode)
+			{
+				// ----------------
+				// TRACK SIMULATION
+				// ----------------
+				// In track mode we create fixed lifetime fluorophores that do not overlap in time.
+				// This is the simplest simulation to test moving molecules.
+				settings.seconds = (int) (settings.particles * settings.tOn / 1000);
+				totalSteps = settings.seconds * settings.stepsPerSecond + settings.particles;
 
-			// Generate additional frames so that each frame has the set number of simulation steps
-			int totalSteps = settings.seconds * settings.stepsPerSecond;
+				imageModel = new FixedLifetimeImageModel(settings.stepsPerSecond * settings.tOn / 1000.0, 1);
+			}
+			else
+			{
+				// ---------------
+				// FULL SIMULATION
+				// ---------------
+				// The full simulation draws n random points in space.
+				// The same molecule may appear in multiple frames, move and blink.
+				//
+				// Points are modelled as fluorophores that must be activated and then will 
+				// blink and photo-bleach. The molecules may diffuse and this can be simulated 
+				// with many steps per image frame. All steps from a frame are collected
+				// into a localisation set which can be drawn on the output image.
 
-			// Since we have an exponential decay of activations
-			// ensure half of the particles have activated by 30% of the frames.
-			double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
+				SpatialIllumination activationIllumination = createIllumination(settings.pulseRatio,
+						settings.pulseInterval);
 
-			// Q. Does tOn/tOff change depending on the illumination strength?
-			ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, settings.tOn *
-					settings.stepsPerSecond / 1000.0, settings.tOffShort * settings.stepsPerSecond / 1000.0,
-					settings.tOffLong * settings.stepsPerSecond / 1000.0, settings.nBlinksShort, settings.nBlinksLong);
+				// Generate additional frames so that each frame has the set number of simulation steps
+				totalSteps = settings.seconds * settings.stepsPerSecond;
+
+				// Since we have an exponential decay of activations
+				// ensure half of the particles have activated by 30% of the frames.
+				double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
+
+				// Q. Does tOn/tOff change depending on the illumination strength?
+				imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, settings.stepsPerSecond *
+						settings.tOn / 1000.0, settings.stepsPerSecond * settings.tOffShort / 1000.0,
+						settings.stepsPerSecond * settings.tOffLong / 1000.0, settings.nBlinksShort,
+						settings.nBlinksLong);
+				imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
+
+				// Only use the correlation if selected for the distribution
+				if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution))
+					correlation = settings.correlation;
+			}
+
 			imageModel.setUseGridWalk(settings.useGridWalk);
-			imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
 			imageModel.setRandomGenerator(createRandomGenerator());
 			imageModel.setPhotonBudgetPerFrame(true);
 			imageModel.setRotation2D(settings.rotate2D);
@@ -647,6 +678,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Activate fluorophores
 			IJ.showStatus("Creating fluorophores ...");
+
 			// Note: molecules list will be converted to compounds containing fluorophores
 			fluorophores = imageModel.createFluorophores(molecules, totalSteps);
 
@@ -665,9 +697,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			imageModel.setPhotonDistribution(createPhotonDistribution());
 			imageModel.setConfinementDistribution(createConfinementDistribution());
-			// Only use the correlation if selcted for the distribution
-			final double correlation = (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution)) ? settings.correlation
-					: 0;
+
 			localisations = imageModel.createImage(molecules, settings.fixedFraction, totalSteps,
 					(double) settings.photonsPerSecond / settings.stepsPerSecond, correlation,
 					settings.rotateDuringSimulation);
@@ -3330,12 +3360,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			if (!(simpleMode || benchmarkMode))
 			{
-				addHeaderLine(sb, "Seconds", settings.seconds);
+				if (!trackMode)
+					addHeaderLine(sb, "Seconds", settings.seconds);
 				addHeaderLine(sb, "Exposure_time", settings.exposureTime);
 				addHeaderLine(sb, "Steps_per_second", settings.stepsPerSecond);
-				addHeaderLine(sb, "Illumination", settings.illumination);
-				addHeaderLine(sb, "Pulse_interval", settings.pulseInterval);
-				addHeaderLine(sb, "Pulse_ratio", settings.pulseRatio);
+				if (!trackMode)
+				{
+					addHeaderLine(sb, "Illumination", settings.illumination);
+					addHeaderLine(sb, "Pulse_interval", settings.pulseInterval);
+					addHeaderLine(sb, "Pulse_ratio", settings.pulseRatio);
+				}
 				if (backgroundImages != null)
 					addHeaderLine(sb, "Background_image", settings.backgroundImage);
 			}
@@ -3422,11 +3456,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.photonDistribution))
 					addHeaderLine(sb, "Correlation", settings.correlation);
 				addHeaderLine(sb, "On_time", settings.tOn);
-				addHeaderLine(sb, "Off_time_short", settings.tOffShort);
-				addHeaderLine(sb, "Off_time_long", settings.tOffLong);
-				addHeaderLine(sb, "n_Blinks_short", settings.nBlinksShort);
-				addHeaderLine(sb, "n_Blinks_long", settings.nBlinksLong);
-				addHeaderLine(sb, "n_Blinks_Geometric", settings.nBlinksGeometricDistribution);
+				if (!trackMode)
+				{
+					addHeaderLine(sb, "Off_time_short", settings.tOffShort);
+					addHeaderLine(sb, "Off_time_long", settings.tOffLong);
+					addHeaderLine(sb, "n_Blinks_short", settings.nBlinksShort);
+					addHeaderLine(sb, "n_Blinks_long", settings.nBlinksLong);
+					addHeaderLine(sb, "n_Blinks_Geometric", settings.nBlinksGeometricDistribution);
+				}
 				addHeaderLine(sb, "Min_photons", settings.minPhotons);
 				addHeaderLine(sb, "Min_SNR_t1", settings.minSNRt1);
 				addHeaderLine(sb, "Min_SNR_tN", settings.minSNRtN);
@@ -3765,6 +3802,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private boolean showDialog()
 	{
+		// In track mode we do not need a time, illumination model or blinking model.
+		// Fixed length tracks will be drawn, non-overlapping in time. This is the simplest
+		// simulation for moving molecules
+
 		GenericDialog gd = new GenericDialog(TITLE);
 
 		globalSettings = SettingsManager.loadSettings();
@@ -3778,12 +3819,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Size (px)", settings.size, 0);
 		gd.addNumericField("Depth (nm)", settings.depth, 0);
 		gd.addCheckbox("Fixed_depth", settings.fixedDepth);
-		gd.addNumericField("Seconds", settings.seconds, 0);
+		if (!trackMode)
+			gd.addNumericField("Seconds", settings.seconds, 0);
 		gd.addNumericField("Exposure_time (ms)", settings.exposureTime, 0);
 		gd.addSlider("Steps_per_second", 1, 15, settings.stepsPerSecond);
-		gd.addChoice("Illumination", ILLUMINATION, settings.illumination);
-		gd.addNumericField("Pulse_interval", settings.pulseInterval, 0);
-		gd.addNumericField("Pulse_ratio", settings.pulseRatio, 2);
+		if (!trackMode)
+		{
+			gd.addChoice("Illumination", ILLUMINATION, settings.illumination);
+			gd.addNumericField("Pulse_interval", settings.pulseInterval, 0);
+			gd.addNumericField("Pulse_ratio", settings.pulseRatio, 2);
+		}
 		if (backgroundImages != null)
 			gd.addChoice("Background_image", backgroundImages, settings.backgroundImage);
 
@@ -3808,13 +3853,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addSlider("Fixed_fraction (%)", 0, 100, settings.fixedFraction * 100);
 		gd.addChoice("Confinement", CONFINEMENT, settings.confinement);
 		gd.addNumericField("Photons (sec^-1)", settings.photonsPerSecond, 0);
-		gd.addChoice("Photon_distribution", PHOTON_DISTRIBUTION, settings.photonDistribution);
+		// We cannot use the correlation moe with fixed life time tracks 
+		String[] dist = (trackMode) ? Arrays.copyOf(PHOTON_DISTRIBUTION, PHOTON_DISTRIBUTION.length - 1)
+				: PHOTON_DISTRIBUTION;
+		gd.addChoice("Photon_distribution", dist, settings.photonDistribution);
 		gd.addNumericField("On_time (ms)", settings.tOn, 2);
-		gd.addNumericField("Off_time_short (ms)", settings.tOffShort, 2);
-		gd.addNumericField("Off_time_long (ms)", settings.tOffLong, 2);
-		gd.addNumericField("n_Blinks_Short", settings.nBlinksShort, 2);
-		gd.addNumericField("n_Blinks_Long", settings.nBlinksLong, 2);
-		gd.addCheckbox("Use_geometric_distribution", settings.nBlinksGeometricDistribution);
+		if (!trackMode)
+		{
+			gd.addNumericField("Off_time_short (ms)", settings.tOffShort, 2);
+			gd.addNumericField("Off_time_long (ms)", settings.tOffLong, 2);
+			gd.addNumericField("n_Blinks_Short", settings.nBlinksShort, 2);
+			gd.addNumericField("n_Blinks_Long", settings.nBlinksLong, 2);
+			gd.addCheckbox("Use_geometric_distribution", settings.nBlinksGeometricDistribution);
+		}
 
 		gd.addMessage("--- Peak filtering ---");
 		gd.addSlider("Min_Photons", 0, 50, settings.minPhotons);
@@ -3882,12 +3933,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.size = Math.abs((int) gd.getNextNumber());
 		settings.depth = Math.abs(gd.getNextNumber());
 		settings.fixedDepth = gd.getNextBoolean();
-		settings.seconds = Math.abs((int) gd.getNextNumber());
+		if (!trackMode)
+			settings.seconds = Math.abs((int) gd.getNextNumber());
 		settings.exposureTime = Math.abs((int) gd.getNextNumber());
 		settings.stepsPerSecond = Math.abs((int) gd.getNextNumber());
-		settings.illumination = gd.getNextChoice();
-		settings.pulseInterval = Math.abs((int) gd.getNextNumber());
-		settings.pulseRatio = Math.abs(gd.getNextNumber());
+		if (!trackMode)
+		{
+			settings.illumination = gd.getNextChoice();
+			settings.pulseInterval = Math.abs((int) gd.getNextNumber());
+			settings.pulseRatio = Math.abs(gd.getNextNumber());
+		}
 		if (backgroundImages != null)
 			settings.backgroundImage = gd.getNextChoice();
 
@@ -3913,11 +3968,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
 		settings.photonDistribution = gd.getNextChoice();
 		settings.tOn = Math.abs(gd.getNextNumber());
-		settings.tOffShort = Math.abs(gd.getNextNumber());
-		settings.tOffLong = Math.abs(gd.getNextNumber());
-		settings.nBlinksShort = Math.abs(gd.getNextNumber());
-		settings.nBlinksLong = Math.abs(gd.getNextNumber());
-		settings.nBlinksGeometricDistribution = gd.getNextBoolean();
+		if (!trackMode)
+		{
+			settings.tOffShort = Math.abs(gd.getNextNumber());
+			settings.tOffLong = Math.abs(gd.getNextNumber());
+			settings.nBlinksShort = Math.abs(gd.getNextNumber());
+			settings.nBlinksLong = Math.abs(gd.getNextNumber());
+			settings.nBlinksGeometricDistribution = gd.getNextBoolean();
+		}
 
 		minPhotons = settings.minPhotons = gd.getNextNumber();
 		minSNRt1 = settings.minSNRt1 = gd.getNextNumber();
@@ -3954,7 +4012,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isAboveZero("Size", settings.size);
 			if (!settings.fixedDepth)
 				Parameters.isPositive("Depth", settings.depth);
-			Parameters.isAboveZero("Seconds", settings.seconds);
+			if (!trackMode)
+				Parameters.isAboveZero("Seconds", settings.seconds);
 			Parameters.isAboveZero("Exposure time", settings.exposureTime);
 			Parameters.isAboveZero("Steps per second", settings.stepsPerSecond);
 			Parameters.isPositive("Background", settings.background);
@@ -3977,10 +4036,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Pulse interval", settings.pulseInterval);
 			Parameters.isAboveZero("Pulse ratio", settings.pulseRatio);
 			Parameters.isAboveZero("tOn", settings.tOn);
-			Parameters.isAboveZero("tOff Short", settings.tOffShort);
-			Parameters.isAboveZero("tOff Long", settings.tOffLong);
-			Parameters.isPositive("n-Blinks Short", settings.nBlinksShort);
-			Parameters.isPositive("n-Blinks Long", settings.nBlinksLong);
+			if (!trackMode)
+			{
+				Parameters.isAboveZero("tOff Short", settings.tOffShort);
+				Parameters.isAboveZero("tOff Long", settings.tOffLong);
+				Parameters.isPositive("n-Blinks Short", settings.nBlinksShort);
+				Parameters.isPositive("n-Blinks Long", settings.nBlinksLong);
+			}
 			Parameters.isPositive("Min photons", settings.minPhotons);
 			Parameters.isPositive("Min SNR t1", settings.minSNRt1);
 			Parameters.isPositive("Min SNR tN", settings.minSNRtN);
