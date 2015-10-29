@@ -71,14 +71,22 @@ public class ActivationEnergyImageModel extends ImageModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.ImageModel#createFluorophore(int, double[], int)
+	 * @see gdsc.smlm.model.ImageModel#createActivationTime(double[])
 	 */
 	@Override
-	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, int frames)
+	protected double createActivationTime(double[] xyz)
 	{
-		double tAct = getActivationTime(xyz, frames);
-		if (tAct >= frames)
-			return null;
+		return getActivationTime(xyz, frameLimit);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.ImageModel#createFluorophore(int, double[], double)
+	 */
+	@Override
+	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
+	{
 		return new StandardFluorophoreSequenceModel(id, xyz, tAct, tOn, tOff, tOff2, nBlinks, nBlinks2,
 				isUseGeometricDistribution(), getRandom());
 	}

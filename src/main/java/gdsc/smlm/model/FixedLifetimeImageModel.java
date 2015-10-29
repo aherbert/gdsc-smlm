@@ -37,17 +37,25 @@ public class FixedLifetimeImageModel extends ImageModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.ImageModel#createFluorophore(int, double[], int)
+	 * @see gdsc.smlm.model.ImageModel#createActivationTime(double[])
 	 */
 	@Override
-	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, int frames)
+	protected double createActivationTime(double[] xyz)
 	{
-		// Activate randomly within the start frame
 		final double tAct = next + getRandom().getRandomGenerator().nextDouble();
-		if (tAct >= frames)
-			return null;
 		// Round up to next frame
 		next = Math.ceil(tAct + tOn + tOff);
+		return tAct;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.ImageModel#createFluorophore(int, double[])
+	 */
+	@Override
+	protected FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct)
+	{
 		return new SimpleFluorophoreSequenceModel(id, xyz, tAct, tOn);
 	}
 }

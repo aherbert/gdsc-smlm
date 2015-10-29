@@ -38,6 +38,14 @@ public abstract class ImageModel
 	protected double tOn;
 	protected double tOff, tOff2;
 	protected double nBlinks, nBlinks2;
+
+	/**
+	 * Specifies the maximum number of frames that will be simulated in {@link #createFluorophores(List, int)}. Any
+	 * activation time above this limit returned by {@link #createActivationTime(double[])} will be ignored and there
+	 * will be no call to {@link #createFluorophore(int, double[], double)}.
+	 */
+	protected int frameLimit;
+
 	private RandomGenerator random;
 	private RandomDataGenerator randomGenerator;
 	private RealDistribution photonDistribution;
@@ -217,9 +225,8 @@ public abstract class ImageModel
 	}
 
 	/**
-	 * Samples the illumination for the molecules spatial position and generates
-	 * a fluorophore when the activation energy has been reached. Only simulate
-	 * up to the given maximum number of frames.
+	 * Generates fluorophores for the molecules spatial positions. Only simulate up to the given maximum number of
+	 * frames.
 	 * <p>
 	 * Replace the CompoundMoleculeModel objects in the list with new compounds containing the generated
 	 * FluorophoreSequenceModel objects. If no fluorophores can be generated for a compound then it is removed. Since
@@ -234,6 +241,7 @@ public abstract class ImageModel
 	 */
 	public List<? extends FluorophoreSequenceModel> createFluorophores(List<CompoundMoleculeModel> molecules, int frames)
 	{
+		frameLimit = frames;
 		ArrayList<FluorophoreSequenceModel> list = new ArrayList<FluorophoreSequenceModel>(molecules.size());
 		for (int i = 0; i < molecules.size();)
 		{
@@ -242,8 +250,12 @@ public abstract class ImageModel
 			List<MoleculeModel> removed = new ArrayList<MoleculeModel>(c.getSize());
 			for (int n = c.getSize(); n-- > 0;)
 			{
-				// Molecule Id is ignored since we renumber the sorted collection at the end 
-				FluorophoreSequenceModel f = createFluorophore(0, c.getRelativeCoordinates(n), frames);
+				// Molecule Id is ignored since we renumber the sorted collection at the end
+				final double[] xyz = c.getRelativeCoordinates(n);
+				final double tAct = createActivationTime(xyz);
+				FluorophoreSequenceModel f = null;
+				if (frames == 0 || tAct < frames)
+					f = createFluorophore(0, xyz, tAct);
 				if (f != null && f.getCoordinates() != null && f.getEndTime() > f.getStartTime())
 				{
 					list.add(f);
@@ -292,14 +304,25 @@ public abstract class ImageModel
 	}
 
 	/**
-	 * Create a fluorophore within the the given number of time frames, otherwise return null.
+	 * Create a fluorophore activation time for the given position. Derived classes can check the {@link #frameLimit}
+	 * variable to determine the limit of the simulation. If non-zero only activation times below this will be used to
+	 * generate fluorophores.
+	 * 
+	 * @param xyz
+	 * @return the activation time
+	 */
+	protected abstract double createActivationTime(double[] xyz);
+
+	/**
+	 * Create a fluorophore with the given id, position and activation time
 	 * 
 	 * @param id
 	 * @param xyz
-	 * @param frames (set to zero to ignore)
-	 * @return
+	 * @param tAct
+	 *            the activation time (generated using {@link #createActivationTime(double[])})
+	 * @return a fluorophore
 	 */
-	protected abstract FluorophoreSequenceModel createFluorophore(int id, double[] xyz, int frames);
+	protected abstract FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct);
 
 	/**
 	 * Add to the list but link up the continuous pulses with previous/next pointers
