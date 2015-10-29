@@ -667,6 +667,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			imageModel.setUseGridWalk(settings.useGridWalk);
 			imageModel.setRandomGenerator(createRandomGenerator());
 			imageModel.setPhotonBudgetPerFrame(true);
+			imageModel.setDiffusion2D(settings.diffuse2D);
 			imageModel.setRotation2D(settings.rotate2D);
 
 			IJ.showStatus("Creating molecules ...");
@@ -3456,6 +3457,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				if (settings.compoundMolecules)
 				{
 					addHeaderLine(sb, "Compound_molecules", settings.compoundText.replaceAll("\n *", ""));
+					addHeaderLine(sb, "Enable_2D_diffusion", settings.diffuse2D);
 					addHeaderLine(sb, "Rotate_initial_orientation", settings.rotateInitialOrientation);
 					addHeaderLine(sb, "Rotate_during_simulation", settings.rotateDuringSimulation);
 					addHeaderLine(sb, "Enable_2D_rotation", settings.rotate2D);
@@ -4182,6 +4184,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			gd.addMessage("Specify the compound molecules");
 			gd.addTextAreas(settings.compoundText, null, 20, 80);
+			gd.addCheckbox("Enable_2D_diffusion", settings.diffuse2D);
 			gd.addCheckbox("Rotate_initial_orientation", settings.rotateInitialOrientation);
 			gd.addCheckbox("Rotate_during_simulation", settings.rotateDuringSimulation);
 			gd.addCheckbox("Enable_2D_rotation", settings.rotate2D);
@@ -4199,6 +4202,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (gd.wasCanceled())
 				return false;
 
+			settings.diffuse2D = gd.getNextBoolean();
 			settings.compoundText = gd.getNextText();
 			settings.rotateInitialOrientation = gd.getNextBoolean();
 			settings.rotateDuringSimulation = gd.getNextBoolean();

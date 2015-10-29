@@ -54,6 +54,7 @@ public abstract class ImageModel
 	private boolean useGridWalk = true;
 	private boolean useGeometricDistribution = false;
 	private boolean photonBudgetPerFrame = true;
+	private boolean diffusion2D = false;
 	private boolean rotation2D = false;
 
 	/**
@@ -214,6 +215,17 @@ public abstract class ImageModel
 			list.add(new MoleculeModel(n + 1, m.getMass(), Arrays.copyOf(m.getCoordinates(), 3)));
 		}
 		return list;
+	}
+
+	private void diffuse(CompoundMoleculeModel m, double diffusionRate)
+	{
+		final double z = m.xyz[2];
+		if (useGridWalk)
+			m.walk(diffusionRate, random);
+		else
+			m.move(diffusionRate, random);
+		if (diffusion2D)
+			m.xyz[2] = z;
 	}
 
 	private void rotate(CompoundMoleculeModel m)
@@ -754,10 +766,7 @@ public abstract class ImageModel
 					double[] originalXyz = Arrays.copyOf(xyz, 3);
 					for (int n = confinementAttempts; n-- > 0;)
 					{
-						if (useGridWalk)
-							compound.walk(diffusionRate, random);
-						else
-							compound.move(diffusionRate, random);
+						diffuse(compound, diffusionRate);
 						if (!confinementDistribution.isWithin(compound.getCoordinates()))
 						{
 							//fail++;
@@ -775,10 +784,7 @@ public abstract class ImageModel
 				}
 				else
 				{
-					if (useGridWalk)
-						compound.walk(diffusionRate, random);
-					else
-						compound.move(diffusionRate, random);
+					diffuse(compound, diffusionRate);
 				}
 			}
 
@@ -928,6 +934,27 @@ public abstract class ImageModel
 	public void setConfinementAttempts(int confinementAttempts)
 	{
 		this.confinementAttempts = confinementAttempts;
+	}
+
+	/**
+	 * Set to true if only diffusing in XY
+	 * 
+	 * @return True if only diffusing in XY
+	 */
+	public boolean isDiffusion2D()
+	{
+		return diffusion2D;
+	}
+
+	/**
+	 * Set to true to only diffuse in XY
+	 * 
+	 * @param diffusion2d
+	 *            true to only diffuse in XY
+	 */
+	public void setDiffusion2D(boolean diffusion2d)
+	{
+		diffusion2D = diffusion2d;
 	}
 
 	/**

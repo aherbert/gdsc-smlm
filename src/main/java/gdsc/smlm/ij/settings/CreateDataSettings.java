@@ -69,6 +69,7 @@ public class CreateDataSettings
 	public double diffusionRate = 0;
 	public boolean compoundMolecules = false;
 	public String compoundText = "";
+	public boolean diffuse2D = false;
 	public boolean rotateInitialOrientation = false;
 	public boolean rotateDuringSimulation = false;
 	public boolean rotate2D = false;
