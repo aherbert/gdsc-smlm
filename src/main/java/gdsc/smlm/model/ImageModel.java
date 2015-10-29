@@ -292,13 +292,11 @@ public abstract class ImageModel
 	}
 
 	/**
-	 * Create a fluorophore. Sample the illumination up to the given number of
-	 * time frames and create a fluorophore when the activation has been
-	 * achieved. Otherwise return null.
+	 * Create a fluorophore within the the given number of time frames, otherwise return null.
 	 * 
 	 * @param id
 	 * @param xyz
-	 * @param frames
+	 * @param frames (set to zero to ignore)
 	 * @return
 	 */
 	protected abstract FluorophoreSequenceModel createFluorophore(int id, double[] xyz, int frames);
