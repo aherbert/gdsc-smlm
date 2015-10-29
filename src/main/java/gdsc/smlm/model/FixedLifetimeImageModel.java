@@ -14,7 +14,7 @@ package gdsc.smlm.model;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains a model for an image of fixed lifetime fluorophores. Al fluorphores will have the same on time. The
+ * Contains a model for an image of fixed lifetime fluorophores. All fluorphores will have the same on time. The
  * activation time will be the incremented by the on-time plus the dark time between fluorophores.
  */
 public class FixedLifetimeImageModel extends ImageModel
@@ -43,8 +43,15 @@ public class FixedLifetimeImageModel extends ImageModel
 	protected double createActivationTime(double[] xyz)
 	{
 		final double tAct = next + getRandom().getRandomGenerator().nextDouble();
-		// Round up to next frame
-		next = Math.ceil(tAct + tOn + tOff);
+		// Ensure at least tOff full dark frames between lifetimes:
+		// Frames:    |      |      |      |
+		//         ------|              
+		//              end             |--------
+		//                              start
+		//                     tOff
+		final int unit = (int) Math.ceil(tOff);
+		final int endT = (int) Math.ceil((tAct + tOn) / unit);
+		next = (endT + 1) * unit;
 		return tAct;
 	}
 

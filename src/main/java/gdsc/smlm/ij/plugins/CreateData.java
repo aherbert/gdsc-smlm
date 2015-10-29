@@ -626,7 +626,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				settings.seconds = (int) Math.ceil(settings.particles * (settings.exposureTime + settings.tOn) / 1000);
 				totalSteps = 0;
 
-				imageModel = new FixedLifetimeImageModel(settings.stepsPerSecond * settings.tOn / 1000.0, 1);
+				final double simulationStepsPerFrame = (settings.stepsPerSecond * settings.exposureTime) / 1000.0;
+				imageModel = new FixedLifetimeImageModel(settings.stepsPerSecond * settings.tOn / 1000.0, simulationStepsPerFrame);
 			}
 			else
 			{
@@ -694,6 +695,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// of the ratio of trimers, dimers, monomers, etc that could be detected.
 
 			totalSteps = checkTotalSteps(totalSteps, fluorophores);
+			if (totalSteps == 0)
+				return;
 
 			imageModel.setPhotonDistribution(createPhotonDistribution());
 			imageModel.setConfinementDistribution(createConfinementDistribution());
@@ -947,12 +950,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
 			final double simulationStepsPerFrame = (settings.stepsPerSecond * settings.exposureTime) / 1000.0;
-			int totalFrames = settings.seconds * 1000 / settings.exposureTime;
 			int newFrames = 1 + (int) (max / simulationStepsPerFrame);
 
-			gd.addMessage(String.format(
-					"Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
-					newFrames - totalFrames, Utils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
+			if (totalSteps != 0)
+			{
+				int totalFrames = settings.seconds * 1000 / settings.exposureTime;
+				gd.addMessage(String
+						.format("Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
+								newFrames - totalFrames,
+								Utils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
+			}
+			else
+			{
+				gd.addMessage(String.format("Require %d frames to draw all fluorophores.\nDo you want to proceed?",
+						newFrames));
+			}
 			gd.showDialog();
 			if (gd.wasOKed())
 				totalSteps = max;
@@ -1674,7 +1686,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.end();
 
 		if (photonsRemoved.get() > 0)
-			Utils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(), settings.minPhotons);
+			Utils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(),
+					settings.minPhotons);
 		if (t1Removed.get() > 0)
 			Utils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(), settings.minSNRt1);
 		if (tNRemoved.get() > 0)
@@ -2053,7 +2066,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							spots[spotCount++] = new Spot(psfModel.getPSF(), psfModel.getX0min(), psfModel.getX0max(),
 									psfModel.getX1min(), psfModel.getX1max(), samplePositions);
 						}
-							
+
 						// Update the intensity using the gain.
 						// Use the sampled intensity and not the photons rendered. This is the intensity that should be
 						// fitted by any function irrespective of whether the photons were actually sampled on the image.
