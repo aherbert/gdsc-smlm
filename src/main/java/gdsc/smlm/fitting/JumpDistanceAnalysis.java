@@ -132,6 +132,8 @@ public class JumpDistanceAnalysis
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		if (meanJumpDistance == 0)
+			return null;
 		double[][] jdHistogram = cumulativeHistogram(jumpDistances);
 		return fitJumpDistanceHistogram(meanJumpDistance, jdHistogram);
 	}
@@ -157,6 +159,8 @@ public class JumpDistanceAnalysis
 	{
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
+		if (meanJumpDistance == 0)
+			return null;
 		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
 
 		double[] ic = new double[maxN];
@@ -241,6 +245,8 @@ public class JumpDistanceAnalysis
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		if (meanJumpDistance == 0)
+			return null;
 		double[][] jdHistogram = cumulativeHistogram(jumpDistances);
 		return fitJumpDistanceHistogram(meanJumpDistance, jdHistogram, n);
 	}
@@ -263,6 +269,8 @@ public class JumpDistanceAnalysis
 	{
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
+		if (meanJumpDistance == 0)
+			return null;
 		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
 
 		double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n);
@@ -567,6 +575,8 @@ public class JumpDistanceAnalysis
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		if (meanJumpDistance == 0)
+			return null;
 
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
@@ -677,6 +687,8 @@ public class JumpDistanceAnalysis
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
+		if (meanJumpDistance == 0)
+			return null;
 
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
