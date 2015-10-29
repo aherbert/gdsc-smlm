@@ -623,8 +623,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// ----------------
 				// In track mode we create fixed lifetime fluorophores that do not overlap in time.
 				// This is the simplest simulation to test moving molecules.
-				settings.seconds = (int) (settings.particles * settings.tOn / 1000);
-				totalSteps = settings.seconds * settings.stepsPerSecond + settings.particles;
+				settings.seconds = (int) Math.ceil(settings.particles * (settings.exposureTime + settings.tOn) / 1000);
+				totalSteps = 0;
 
 				imageModel = new FixedLifetimeImageModel(settings.stepsPerSecond * settings.tOn / 1000.0, 1);
 			}
