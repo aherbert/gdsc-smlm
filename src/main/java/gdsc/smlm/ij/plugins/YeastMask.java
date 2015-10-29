@@ -19,7 +19,7 @@ public class YeastMask implements PlugIn
 
 	private static double length = 10, radius = 2;
 	private static double nucleus = 0.9;
-	private static double nmPerPixel = 100;
+	private static double nmPerPixel = 50;
 	private static double nmPerSlice = 20;
 	private static boolean excludeNucleus = true;
 	private static boolean squareOutput = true;

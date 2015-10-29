@@ -1674,7 +1674,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.end();
 
 		if (photonsRemoved.get() > 0)
-			Utils.log("Removed %d localisations with less than %.1f photons", photonsRemoved.get(), settings.minPhotons);
+			Utils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(), settings.minPhotons);
 		if (t1Removed.get() > 0)
 			Utils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(), settings.minSNRt1);
 		if (tNRemoved.get() > 0)
@@ -2053,16 +2053,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							spots[spotCount++] = new Spot(psfModel.getPSF(), psfModel.getX0min(), psfModel.getX0max(),
 									psfModel.getX1min(), psfModel.getX1max(), samplePositions);
 						}
+							
 						// Update the intensity using the gain.
 						// Use the sampled intensity and not the photons rendered. This is the intensity that should be
 						// fitted by any function irrespective of whether the photons were actually sampled on the image.
 						localisation.setIntensity(intensity * totalGain);
 					}
 
-					// Skip if nothing has been drawn. Note that is the localisation set is skipped then the 
+					// Skip if nothing has been drawn. Note that if the localisation set is skipped then the 
 					// intensity must be set to zero to prevent the SNR checks using the eliminated neighbours.
 					if (totalPhotonsRendered == 0)
 					{
+						photonsRemoved.incrementAndGet();
 						localisationSet.setData(new double[5]);
 						continue;
 					}
