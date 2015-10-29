@@ -1662,7 +1662,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			IJ.showProgress(1);
 			return null;
 		}
-
+		
 		// Do all the frames that had no localisations
 		for (int t = 1; t <= maxT; t++)
 		{
@@ -1685,6 +1685,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		results.end();
 
+		// Clear memory
+		imagePSFModel = null;
+		threadPool = null;
+		futures.clear();
+		futures = null;
+		
 		if (photonsRemoved.get() > 0)
 			Utils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(),
 					settings.minPhotons);
@@ -1703,6 +1709,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Update with all those localisation that have been drawn
 		localisationSets.clear();
 		localisationSets.addAll(newLocalisations);
+		newLocalisations = null;
 
 		IJ.showStatus("Displaying image ...");
 
@@ -1732,6 +1739,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						pixels[k] = (short) (image[k] - min);
 					}
 					newStack.setPixels(pixels, j + 1);
+					// Free memory
+					imageArray[j] = null;
 				}
 			}
 			else
