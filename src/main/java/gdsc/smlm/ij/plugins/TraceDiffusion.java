@@ -734,6 +734,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(settings.truncate).append("\t");
 		sb.append(settings.internalDistances).append("\t");
 		sb.append(settings.fitLength).append("\t");
+		sb.append(mle).append("\t");
 		sb.append(traces.length).append("\t");
 		sb.append(Utils.rounded(D, 4)).append("\t");
 		sb.append(Utils.rounded(settings.jumpDistance * exposureTime)).append("\t");
@@ -816,7 +817,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Dataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tTruncate\tInternal\tFit Length\tTraces\tD (um^2/s)\tJump Distance (s)\tJump D (um^2/s)\tFractions");
+				"Dataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tTruncate\tInternal\tFit Length\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tJump D (um^2/s)\tFractions");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
