@@ -24,6 +24,7 @@ public class YeastMask implements PlugIn
 	private static boolean excludeNucleus = true;
 	private static boolean squareOutput = true;
 	private static int border = 3;
+	private static boolean is2D = false;
 
 	/*
 	 * (non-Javadoc)
@@ -52,6 +53,7 @@ public class YeastMask implements PlugIn
 		gd.addNumericField("Pixel_depth", nmPerSlice, 1, 6, "nm");
 		gd.addCheckbox("Square_output", squareOutput);
 		gd.addSlider("Border", 0, 10, border);
+		gd.addCheckbox("2D", is2D);
 
 		gd.showDialog();
 
@@ -66,6 +68,7 @@ public class YeastMask implements PlugIn
 		nmPerSlice = gd.getNextNumber();
 		squareOutput = gd.getNextBoolean();
 		border = (int) gd.getNextNumber();
+		is2D = gd.getNextBoolean();
 
 		if (radius < 0.5)
 			radius = 0.5;
@@ -177,7 +180,17 @@ public class YeastMask implements PlugIn
 			stack = stack2;
 		}
 
-		ImagePlus imp = Utils.display(TITLE, stack);
+		ImagePlus imp;
+		if (is2D)
+		{
+			// TODO - Remove this laziness since we should really just do a 2D image
+			int centre = stack.getSize() / 2;
+			imp = Utils.display(TITLE, stack.getProcessor(centre));
+		}
+		else
+		{
+			imp = Utils.display(TITLE, stack);
+		}
 
 		// Calibrate
 		Calibration cal = new Calibration();
