@@ -504,8 +504,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (!showSimpleDialog())
 				return;
-			benchmarkParameters = null;
-			simulationParameters = null;
+			resetMemory();
 
 			settings.exposureTime = 1000; // 1 second frames
 
@@ -609,8 +608,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			if (!showDialog())
 				return;
-			benchmarkParameters = null;
-			simulationParameters = null;
+			resetMemory();
 
 			int totalSteps;
 			double correlation = 0;
@@ -627,7 +625,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				totalSteps = 0;
 
 				final double simulationStepsPerFrame = (settings.stepsPerSecond * settings.exposureTime) / 1000.0;
-				imageModel = new FixedLifetimeImageModel(settings.stepsPerSecond * settings.tOn / 1000.0, simulationStepsPerFrame);
+				imageModel = new FixedLifetimeImageModel(settings.stepsPerSecond * settings.tOn / 1000.0,
+						simulationStepsPerFrame);
 			}
 			else
 			{
@@ -701,6 +700,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			imageModel.setPhotonDistribution(createPhotonDistribution());
 			imageModel.setConfinementDistribution(createConfinementDistribution());
+			// This should be optimised
+			imageModel.setConfinementAttempts(10);
 
 			localisations = imageModel.createImage(molecules, settings.fixedFraction, totalSteps,
 					(double) settings.photonsPerSecond / settings.stepsPerSecond, correlation,
@@ -751,6 +752,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		SettingsManager.saveSettings(globalSettings);
 
 		IJ.showStatus("Done");
+	}
+
+	private void resetMemory()
+	{
+		benchmarkParameters = null;
+		simulationParameters = null;
+		// Run the garbage collector to free memory
+		MemoryPeakResults.runGC();
 	}
 
 	/**
@@ -1663,7 +1672,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			IJ.showProgress(1);
 			return null;
 		}
-		
+
 		// Do all the frames that had no localisations
 		for (int t = 1; t <= maxT; t++)
 		{
@@ -1691,7 +1700,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		threadPool = null;
 		futures.clear();
 		futures = null;
-		
+
 		if (photonsRemoved.get() > 0)
 			Utils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(),
 					settings.minPhotons);
@@ -1742,6 +1751,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					newStack.setPixels(pixels, j + 1);
 					// Free memory
 					imageArray[j] = null;
+					if (j % 32 == 0)
+						MemoryPeakResults.runGC();
 				}
 			}
 			else
@@ -4202,8 +4213,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (gd.wasCanceled())
 				return false;
 
-			settings.diffuse2D = gd.getNextBoolean();
 			settings.compoundText = gd.getNextText();
+			settings.diffuse2D = gd.getNextBoolean();
 			settings.rotateInitialOrientation = gd.getNextBoolean();
 			settings.rotateDuringSimulation = gd.getNextBoolean();
 			settings.rotate2D = gd.getNextBoolean();

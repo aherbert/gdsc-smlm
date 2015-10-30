@@ -437,7 +437,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		return memorySize * size;
 	}
 
-	private static void runGC()
+	/**
+	 * Run the garbage collector to free memory
+	 */
+	public static void runGC()
 	{
 		// It helps to call Runtime.gc()
 		// using several method calls:
