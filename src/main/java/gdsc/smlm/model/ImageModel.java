@@ -759,12 +759,13 @@ public abstract class ImageModel
 					// TODO
 					// Confined diffusion only asks if the molecule moved into a region that is allowed.
 					// A better model would be to ask if the move went out of bounds. If yes then the molecules 
-					// should be reflected back into the allowed region using the vector of the original move.  
+					// should be reflected back into the allowed region using the vector of the original move.
 
 					// This only works because the coordinates are a reference
 					double[] xyz = compound.getCoordinates();
 					double[] originalXyz = Arrays.copyOf(xyz, 3);
-					for (int n = confinementAttempts; n-- > 0;)
+					boolean stationary = true;
+					for (int n = confinementAttempts; n-- > 0 && stationary;)
 					{
 						diffuse(compound, diffusionRate);
 						if (!confinementDistribution.isWithin(compound.getCoordinates()))
@@ -778,9 +779,11 @@ public abstract class ImageModel
 						{
 							//pass++;
 							// The move was allowed
+							stationary = false;
 							break;
 						}
 					}
+					//if (stationary)	System.out.printf("Failed to move %s\n", Arrays.toString(xyz));
 				}
 				else
 				{
