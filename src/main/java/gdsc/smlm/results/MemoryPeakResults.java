@@ -438,7 +438,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	}
 
 	/**
-	 * Run the garbage collector to free memory
+	 * Run the garbage collector multiple times to free memory
 	 */
 	public static void runGC()
 	{
@@ -453,8 +453,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		long usedMem1 = usedMemory(), usedMem2 = Long.MAX_VALUE;
 		for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++i)
 		{
-			s_runtime.runFinalization();
-			s_runtime.gc();
+			runGCOnce();
 			Thread.currentThread();
 			Thread.yield();
 
@@ -463,11 +462,28 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		}
 	}
 
-	private static long usedMemory()
+	public static void runGCOnce()
+	{
+		s_runtime.runFinalization();
+		s_runtime.gc();
+	}
+
+	public static long usedMemory()
 	{
 		return s_runtime.totalMemory() - s_runtime.freeMemory();
 	}
 
+	public static long totalMemory()
+	{
+		return s_runtime.totalMemory();
+	}
+	
+	public static long freeMemory()
+	{
+		return s_runtime.freeMemory();
+	}
+	
+	
 	/**
 	 * Get the nm-per-pixel from the calibration, or if not available, return the {@link #DEFAULT_NM_PER_PIXEL}
 	 * 

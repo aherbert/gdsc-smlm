@@ -1751,8 +1751,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					newStack.setPixels(pixels, j + 1);
 					// Free memory
 					imageArray[j] = null;
-					if (j % 32 == 0)
-						MemoryPeakResults.runGC();
+					// Attempt to stay within memory (check vs 32MB)
+					if (MemoryPeakResults.freeMemory() < 33554432L)
+						MemoryPeakResults.runGCOnce();
 				}
 			}
 			else
