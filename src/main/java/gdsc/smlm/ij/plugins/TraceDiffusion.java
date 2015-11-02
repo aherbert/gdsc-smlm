@@ -107,6 +107,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static boolean debugFitting = false;
 	private static boolean multipleInputs = false;
 	private static String tracesFilename = "";
+	private static String title = "";
 
 	private GlobalSettings globalSettings;
 	private ClusteringSettings settings;
@@ -724,8 +725,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 
 		// Add to the summary table
-		StringBuilder sb = new StringBuilder();
-		sb.append(results.getName());
+		StringBuilder sb = new StringBuilder(title);
+		sb.append('\t').append(results.getName());
 		if (additionalDatasets > 0)
 		{
 			sb.append(" + ").append(additionalDatasets).append(" others");
@@ -821,7 +822,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Dataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tTruncate\tInternal\tFit Length\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tJump D (um^2/s)\tFractions");
+				"Title\tDataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tTruncate\tInternal\tFit Length\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tJump D (um^2/s)\tFractions");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
@@ -1076,6 +1077,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addCheckbox("Save_trace_distances", saveTraceDistances);
 		gd.addCheckbox("Save_raw_data", saveRawData);
 		gd.addCheckbox("Show_histograms", settings.showHistograms);
+		gd.addStringField("Title", title);
 
 		gd.showDialog();
 
@@ -1106,6 +1108,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		saveTraceDistances = gd.getNextBoolean();
 		saveRawData = gd.getNextBoolean();
 		settings.showHistograms = gd.getNextBoolean();
+		title = gd.getNextString();
 
 		if (gd.invalidNumber())
 			return false;
@@ -1266,7 +1269,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				Utils.log(
 						"Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %f, IC = %f (%d evaluations)",
 						obs.length, Utils.rounded(gradient2, 4), Utils.rounded(intercept2, 4),
-						Utils.rounded(gradient / 4, 4), Utils.rounded(s*1000, 4), ss, ic2, optimizer.getEvaluations());
+						Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), ss, ic2, optimizer.getEvaluations());
 			}
 
 			if (lvmSolution == null || ic2 < ic)
