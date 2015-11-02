@@ -4439,7 +4439,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private List<CompoundMoleculeModel> createCompoundMolecules()
 	{
 		// Convert Diffusion rate is um^2/sec. Convert to pixels per simulation frame.
-		final double diffusionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch) /
+		final double diffusionFactor = (1000000.0 / (settings.pixelPitch * settings.pixelPitch)) /
 				settings.stepsPerSecond;
 
 		List<CompoundMoleculeModel> compounds;
