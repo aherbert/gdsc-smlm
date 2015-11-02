@@ -101,6 +101,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static String distancesFilename = "";
 	private static double minFraction = 0.1;
 	private static double minDifference = 2;
+	private static int minN = 1;
 	private static int maxN = 5;
 	private static boolean mle = true;
 	private static boolean debugFitting = false;
@@ -110,6 +111,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private GlobalSettings globalSettings;
 	private ClusteringSettings settings;
 	private MemoryPeakResults results;
+	private boolean extraOptions;
+	private int myMinN = 1;
 
 	// The number of additional datasets
 	private int additionalDatasets = 0;
@@ -132,6 +135,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	public void run(String arg)
 	{
+		extraOptions = Utils.isExtraOptions();
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -1065,6 +1069,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
 		gd.addSlider("Minimum_fraction", 0, 1, minFraction);
+		if (extraOptions)
+			gd.addSlider("Minimum_N", 1, 10, minN);
 		gd.addSlider("Maximum_N", 2, 10, maxN);
 		gd.addCheckbox("Debug_fitting", debugFitting);
 		gd.addCheckbox("Save_trace_distances", saveTraceDistances);
@@ -1093,6 +1099,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
 		minFraction = Math.abs(gd.getNextNumber());
+		if (extraOptions)
+			myMinN = minN = (int) Math.abs(gd.getNextNumber());
 		maxN = (int) Math.abs(gd.getNextNumber());
 		debugFitting = gd.getNextBoolean();
 		saveTraceDistances = gd.getNextBoolean();
@@ -1131,6 +1139,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			Parameters.isAboveZero("Histogram bins", settings.histogramBins);
 			Parameters.isAbove("Fit length", settings.fitLength, 1);
 			Parameters.isAboveZero("Jump distance", settings.jumpDistance);
+			Parameters.isEqualOrAbove("Maximum N", maxN, myMinN);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1459,7 +1468,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		jd.setFitRestarts(settings.fitRestarts);
 		jd.setMinFraction(minFraction);
 		jd.setMinDifference(minDifference);
-		jd.setN(maxN);
+		jd.setMinN(myMinN);
+		jd.setMaxN(maxN);
 		// Update the plot with the fit
 		jd.setCurveLogger(this);
 		double[][] fit;

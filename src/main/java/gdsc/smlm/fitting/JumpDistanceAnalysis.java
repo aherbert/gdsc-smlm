@@ -92,7 +92,7 @@ public class JumpDistanceAnalysis
 	private double minFraction = 0.1;
 	private double minDifference = 2;
 	private double minD = 1e-6;
-	private int maxN = 10;
+	private int minN = 1, maxN = 10;
 
 	// Set by the last call to the doFit functions
 	private double ss, ll, ic;
@@ -170,28 +170,27 @@ public class JumpDistanceAnalysis
 		double bestIC = Double.POSITIVE_INFINITY;
 		int best = -1;
 
-		int n = 0;
-
-		double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n + 1);
-		if (fit != null)
+		if (minN == 1)
 		{
-			coefficients[n] = fit[0];
-			fractions[n] = fit[1];
-			ic[n] = this.ic;
-			saveFitCurve(fit, jdHistogram);
-			bestIC = ic[n];
-			best = n;
+			double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, 1);
+			if (fit != null)
+			{
+				coefficients[0] = fit[0];
+				fractions[0] = fit[1];
+				ic[0] = this.ic;
+				saveFitCurve(fit, jdHistogram);
+				bestIC = ic[0];
+				best = 0;
+			}
 		}
-
-		n++;
 
 		// Fit using a mixed population model. 
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
 		double bestMultiIC = Double.POSITIVE_INFINITY;
-		while (n < maxN)
+		for (int n = Math.max(1, minN - 1); n < maxN; n++)
 		{
-			fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n + 1);
+			double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n + 1);
 			if (fit == null)
 				break;
 
@@ -278,7 +277,7 @@ public class JumpDistanceAnalysis
 			saveFitCurve(fit, jdHistogram);
 		return fit;
 	}
-	
+
 	/**
 	 * Fit the jump distance histogram using a cumulative sum with the given number of species.
 	 * <p>
@@ -593,28 +592,27 @@ public class JumpDistanceAnalysis
 		double bestIC = Double.POSITIVE_INFINITY;
 		int best = -1;
 
-		int n = 0;
-
-		double[][] fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, n + 1);
-		if (fit != null)
+		if (minN == 1)
 		{
-			coefficients[n] = fit[0];
-			fractions[n] = fit[1];
-			ic[n] = this.ic;
-			saveFitCurve(fit, jdHistogram);
-			bestIC = ic[n];
-			best = n;
+			double[][] fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, 1);
+			if (fit != null)
+			{
+				coefficients[0] = fit[0];
+				fractions[0] = fit[1];
+				ic[0] = this.ic;
+				saveFitCurve(fit, jdHistogram);
+				bestIC = ic[0];
+				best = 0;
+			}
 		}
-
-		n++;
 
 		// Fit using a mixed population model. 
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
 		double bestMultiIC = Double.POSITIVE_INFINITY;
-		while (n < maxN)
+		for (int n = Math.max(1, minN - 1); n < maxN; n++)
 		{
-			fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, n + 1);
+			double[][] fit = doFitJumpDistancesMLE(jumpDistances, estimatedD, n + 1);
 			if (fit == null)
 				break;
 
@@ -1768,9 +1766,28 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * @return the minimum number of different molecules to fit in a mixed population model
+	 */
+	public int getMinN()
+	{
+		return minN;
+	}
+
+	/**
+	 * @param n
+	 *            the minimum number of different molecules to fit in a mixed population model
+	 */
+	public void setMinN(int n)
+	{
+		if (n < 1)
+			n = 1;
+		minN = n;
+	}
+
+	/**
 	 * @return the maximum number of different molecules to fit in a mixed population model
 	 */
-	public int getN()
+	public int getMaxN()
 	{
 		return maxN;
 	}
@@ -1779,7 +1796,7 @@ public class JumpDistanceAnalysis
 	 * @param n
 	 *            the maximum number of different molecules to fit in a mixed population model
 	 */
-	public void setN(int n)
+	public void setMaxN(int n)
 	{
 		if (n < 1)
 			n = 1;

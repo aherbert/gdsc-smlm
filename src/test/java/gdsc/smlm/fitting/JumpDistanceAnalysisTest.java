@@ -330,7 +330,7 @@ public class JumpDistanceAnalysisTest
 		{
 			jd.setMinFraction(0.05);
 			jd.setMinDifference(2);
-			jd.setN(10);
+			jd.setMaxN(10);
 			fit = (mle) ? jd.fitJumpDistancesMLE(jumpDistances) : jd.fitJumpDistances(jumpDistances);
 		}
 		else
