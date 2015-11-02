@@ -137,9 +137,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static int UNIFORM_SOBOL = 2;
 	private static int MASK = 3;
 	private static int GRID = 4;
-	private static String[] CONFINEMENT = { "None", "Mask", "Sphere" };
+	private static String[] CONFINEMENT = { "None", "Mask", "Sphere", "Within Image" };
 	private static int CONFINEMENT_MASK = 1;
 	private static int CONFINEMENT_SPHERE = 2;
+	private static int CONFINEMENT_WITHIN_IMAGE = 3;
 	private static String[] PHOTON_DISTRIBUTION = { "Uniform", "Gamma", "Custom", "Fixed", "Correlated" };
 	private static int PHOTON_UNIFORM = 0;
 	private static int PHOTON_GAMMA = 1;
@@ -1203,6 +1204,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		else if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_SPHERE]))
 		{
 			return new SphericalDistribution(settings.confinementRadius / settings.pixelPitch);
+		}
+		else if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_WITHIN_IMAGE]))
+		{
+			return createUniformDistribution(0);
 		}
 
 		return null;
