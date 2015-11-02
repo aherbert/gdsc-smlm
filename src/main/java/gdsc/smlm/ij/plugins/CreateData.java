@@ -1207,7 +1207,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_WITHIN_IMAGE]))
 		{
-			return createUniformDistribution(0);
+			//return createUniformDistribution(0);
+			return createUniformDistributionWithPSFWidthBorder();
 		}
 
 		return null;
