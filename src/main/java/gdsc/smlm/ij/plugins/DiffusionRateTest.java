@@ -25,6 +25,7 @@ import gdsc.smlm.model.SphericalDistribution;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
@@ -65,6 +66,9 @@ public class DiffusionRateTest implements PlugIn
 	private static int fitN = 20;
 	private static boolean showDiffusionExample = false;
 	private static double magnification = 5;
+	private static int aggregateSteps = 1;
+	private int myAggregateSteps = 1;
+	private boolean extraOptions = false;
 
 	/*
 	 * (non-Javadoc)
@@ -73,6 +77,7 @@ public class DiffusionRateTest implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		extraOptions = Utils.isExtraOptions();
 		if (!showDialog())
 			return;
 
@@ -112,13 +117,16 @@ public class DiffusionRateTest implements PlugIn
 		Calibration cal = new Calibration(settings.pixelPitch, 1, 1000.0 / settings.stepsPerSecond);
 		results.setCalibration(cal);
 		results.setName(TITLE);
-		MemoryPeakResults.addResults(results);
 		int peak = 0;
 
 		for (int i = 0; i < settings.particles; i++)
 		{
 			if (i % 16 == 0)
+			{
 				IJ.showProgress(i, settings.particles);
+				if (Utils.isInterrupted())
+					return;
+			}
 
 			peak++; // Increment the frame so that tracing analysis can distinguish traces
 			final double[] origin = new double[3];
@@ -183,6 +191,15 @@ public class DiffusionRateTest implements PlugIn
 			// System.out.printf("%f %f %f\n", m.getX(), m.getY(), m.getZ());
 		}
 		final double time = (System.nanoTime() - start) / 1000000.0;
+
+		MemoryPeakResults.addResults(results);
+
+		// Convert pixels^2/step to um^2/sec
+		final double factor = conversionFactor / settings.stepsPerSecond;
+		Utils.log("Raw data N=%d, mean=%f, MSD = %s um^2/s", jumpDistances.getN(), jumpDistances.getMean(),
+				Utils.rounded(jumpDistances.getMean() / factor));
+		
+		aggregateIntoFrames(results);
 
 		IJ.showStatus("Analysing results ...");
 		IJ.showProgress(1);
@@ -263,10 +280,9 @@ public class DiffusionRateTest implements PlugIn
 
 		PlotWindow pw1 = Utils.display(title, plot);
 
-		// Show the cumulative jump distance plot: Convert pixels^2/step to um^2/sec
-		final double factor = conversionFactor / settings.stepsPerSecond;
+		// Show the cumulative jump distance plot
 		final double[] values = jumpDistances.getValues();
-		for (int i=0; i<values.length; i++)
+		for (int i = 0; i < values.length; i++)
 			values[i] /= factor;
 		title += " Jump Distance";
 		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
@@ -368,6 +384,8 @@ public class DiffusionRateTest implements PlugIn
 		gd.addNumericField("Pixel_pitch (nm)", settings.pixelPitch, 2);
 		gd.addNumericField("Seconds", settings.seconds, 0);
 		gd.addSlider("Steps_per_second", 1, 15, settings.stepsPerSecond);
+		if (extraOptions)
+			gd.addSlider("Aggregate_steps", 2, 10, aggregateSteps);
 		gd.addNumericField("Particles", settings.particles, 0);
 		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.diffusionRate, 2);
 		gd.addCheckbox("Use_grid_walk", settings.useGridWalk);
@@ -385,6 +403,8 @@ public class DiffusionRateTest implements PlugIn
 		settings.pixelPitch = Math.abs(gd.getNextNumber());
 		settings.seconds = Math.abs((int) gd.getNextNumber());
 		settings.stepsPerSecond = Math.abs((int) gd.getNextNumber());
+		if (extraOptions)
+			myAggregateSteps = aggregateSteps = Math.abs((int) gd.getNextNumber());
 		settings.particles = Math.abs((int) gd.getNextNumber());
 		settings.diffusionRate = Math.abs(gd.getNextNumber());
 		settings.useGridWalk = gd.getNextBoolean();
@@ -532,5 +552,101 @@ public class DiffusionRateTest implements PlugIn
 		limits[0] = (float) Math.floor(limits[0]);
 		limits[1] = (float) Math.ceil(limits[1]);
 		return limits;
+	}
+
+	private void aggregateIntoFrames(MemoryPeakResults separateResults)
+	{
+		if (myAggregateSteps < 1)
+			return;
+
+		MemoryPeakResults results = new MemoryPeakResults(separateResults.size() / myAggregateSteps);
+		Calibration cal = new Calibration(settings.pixelPitch, 1, myAggregateSteps * 1000.0 / settings.stepsPerSecond);
+		results.setCalibration(cal);
+		results.setName(TITLE + " Aggregated");
+		MemoryPeakResults.addResults(results);
+		int id = 0;
+		int peak = 1;
+		int n = 0;
+		double cx = 0, cy = 0;
+		// Get the mean square distance
+		double sum = 0;
+		int count = 0;
+		PeakResult last = null;
+		for (PeakResult result : separateResults.getResults())
+		{
+			final boolean newId = result.getId() != id;
+			if (n >= myAggregateSteps || newId)
+			{
+				if (n != 0)
+				{
+					final float[] params = new float[7];
+					params[Gaussian2DFunction.X_POSITION] = (float) (cx / n);
+					params[Gaussian2DFunction.Y_POSITION] = (float) (cy / n);
+					params[Gaussian2DFunction.SIGNAL] = n;
+					params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+					final float noise = 0.1f;
+					PeakResult r = new ExtendedPeakResult(peak, (int) params[Gaussian2DFunction.X_POSITION],
+							(int) params[Gaussian2DFunction.Y_POSITION], n, 0, noise, params, null, peak, id);
+					results.add(r);
+					if (last != null)
+					{
+						sum += distance2(last, r);
+						count++;
+					}
+					else if (n == 1)
+					{
+						// Special case for pseudo aggregating. The jump is from the origin
+						sum += r.getXPosition() * r.getXPosition() + r.getYPosition() * r.getYPosition();
+						count++;
+					}
+					last = r;
+					n = 0;
+					cx = cy = 0;
+					peak++;
+				}
+				if (newId)
+				{
+					peak++; // Increment the frame so that tracing analysis can distinguish traces
+					last = null;
+					id = result.getId();
+				}
+			}
+			n++;
+			cx += result.getXPosition();
+			cy += result.getYPosition();
+		}
+
+		// Final peak
+		if (n != 0)
+		{
+			final float[] params = new float[7];
+			params[Gaussian2DFunction.X_POSITION] = (float) (cx / n);
+			params[Gaussian2DFunction.Y_POSITION] = (float) (cy / n);
+			params[Gaussian2DFunction.SIGNAL] = n;
+			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+			final float noise = 0.1f;
+			PeakResult r = new ExtendedPeakResult(peak, (int) params[Gaussian2DFunction.X_POSITION],
+					(int) params[Gaussian2DFunction.Y_POSITION], n, 0, noise, params, null, peak, id);
+			results.add(r);
+			if (last != null)
+			{
+				sum += distance2(last, r);
+				count++;
+			}
+		}
+
+		// MSD in pixels^2 / frame
+		double msd = sum / count;
+		// Convert to um^2/second
+		final double conversionFactor = (1000 / results.getCalibration().exposureTime) *
+				((settings.pixelPitch * settings.pixelPitch) / 1000000.0);
+		Utils.log("Aggregated data N=%d, mean=%f, MSD = %s um^2/s", count, msd, Utils.rounded(msd * conversionFactor));
+	}
+
+	private double distance2(PeakResult r1, PeakResult r2)
+	{
+		final double dx = r1.getXPosition() - r2.getXPosition();
+		final double dy = r1.getYPosition() - r2.getYPosition();
+		return dx * dx + dy * dy;
 	}
 }
