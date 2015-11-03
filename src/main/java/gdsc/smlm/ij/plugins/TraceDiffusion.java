@@ -1459,12 +1459,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	private double[][] fitJumpDistance(StoredDataStatistics jumpDistances, double[][] jdHistogram)
 	{
-		final double meanDistance = Math.sqrt(jumpDistances.getMean()) * 1e3;
+		final double msd = jumpDistances.getMean();
+		final double meanDistance = Math.sqrt(msd) * 1e3;
 		final double beta = meanDistance / precision;
 		Utils.log(
-				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). Mean Distance = %s nm, Precision = %s nm, Beta = %s",
+				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/second, Mean Distance = %s nm, Precision = %s nm, Beta = %s",
 				jumpDistances.getN(), settings.jumpDistance, Utils.rounded(settings.jumpDistance * exposureTime, 4),
-				Utils.rounded(meanDistance, 4), Utils.rounded(precision, 4), Utils.rounded(beta, 4));
+				Utils.rounded(msd, 4), Utils.rounded(meanDistance, 4), Utils.rounded(precision, 4),
+				Utils.rounded(beta, 4));
 
 		IJLogger logger = new IJLogger(debugFitting, debugFitting);
 		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
