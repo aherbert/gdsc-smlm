@@ -211,8 +211,6 @@ public class JumpDistanceAnalysis
 
 			bestMultiIC = ic[n];
 			bestMulti = n;
-
-			n++;
 		}
 
 		// Add the best fit to the plot
@@ -633,8 +631,6 @@ public class JumpDistanceAnalysis
 
 			bestMultiIC = ic[n];
 			bestMulti = n;
-
-			n++;
 		}
 
 		// Add the best fit to the plot
