@@ -195,10 +195,15 @@ public class DiffusionRateTest implements PlugIn
 		MemoryPeakResults.addResults(results);
 
 		// Convert pixels^2/step to um^2/sec
-		final double factor = conversionFactor / settings.stepsPerSecond;
-		Utils.log("Raw data N=%d, mean=%f, MSD = %s um^2/s", jumpDistances.getN(), jumpDistances.getMean(),
-				Utils.rounded(jumpDistances.getMean() / factor));
-		
+		Utils.log(
+				"Raw data D=%s um^2/s, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
+				Utils.rounded(settings.diffusionRate),
+				jumpDistances.getN(),
+				Utils.rounded(results.getCalibration().exposureTime / 1000),
+				Utils.rounded(jumpDistances.getMean() / conversionFactor),
+				Utils.rounded((jumpDistances.getMean() / conversionFactor) /
+						(results.getCalibration().exposureTime / 1000)));
+
 		aggregateIntoFrames(results);
 
 		IJ.showStatus("Analysing results ...");
@@ -281,6 +286,7 @@ public class DiffusionRateTest implements PlugIn
 		PlotWindow pw1 = Utils.display(title, plot);
 
 		// Show the cumulative jump distance plot
+		final double factor = conversionFactor / settings.stepsPerSecond;
 		final double[] values = jumpDistances.getValues();
 		for (int i = 0; i < values.length; i++)
 			values[i] /= factor;
@@ -638,9 +644,12 @@ public class DiffusionRateTest implements PlugIn
 		// MSD in pixels^2 / frame
 		double msd = sum / count;
 		// Convert to um^2/second
-		final double conversionFactor = (1000 / results.getCalibration().exposureTime) *
-				((settings.pixelPitch * settings.pixelPitch) / 1000000.0);
-		Utils.log("Aggregated data N=%d, mean=%f, MSD = %s um^2/s", count, msd, Utils.rounded(msd * conversionFactor));
+		final double conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
+		Utils.log("Aggregated data D=%s um^2/s, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s", 
+				Utils.rounded(settings.diffusionRate),
+				count,
+				Utils.rounded(results.getCalibration().exposureTime / 1000), Utils.rounded(msd / conversionFactor),
+				Utils.rounded((msd / conversionFactor) / (results.getCalibration().exposureTime / 1000)));
 	}
 
 	private double distance2(PeakResult r1, PeakResult r2)
