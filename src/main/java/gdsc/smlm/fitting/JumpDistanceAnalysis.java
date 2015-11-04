@@ -60,6 +60,7 @@ import org.apache.commons.math3.util.FastMath;
 public class JumpDistanceAnalysis
 {
 	private final boolean DEBUG_OPTIMISER = false;
+	final static double THIRD = 1.0 / 3.0;
 
 	public interface CurveLogger
 	{
@@ -1853,5 +1854,80 @@ public class JumpDistanceAnalysis
 	public void setMinD(double minD)
 	{
 		this.minD = minD;
+	}
+
+	/**
+	 * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames into the actual MSD.
+	 * <p>
+	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
+	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
+	 * number of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a
+	 * factor:
+	 * 
+	 * <pre>
+	 * observed = actual*(n-1/3)/n
+	 * actual = observed * n / (n-1/3)
+	 * </pre>
+	 * 
+	 * @param n
+	 * @return
+	 */
+	public static double getConversionfactor(int n)
+	{
+		return (double) n / (n - THIRD);
+	}
+
+	/**
+	 * Convert an observed mean-squared distance (MSD) between n frames into the actual MSD.
+	 * <p>
+	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
+	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
+	 * number of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a
+	 * factor:
+	 * 
+	 * <pre>
+	 * observed = actual*(n-1/3)/n
+	 * actual = observed * n / (n-1/3)
+	 * </pre>
+	 * 
+	 * @param msd
+	 *            The observed MSD
+	 * @param n
+	 *            The number of frames separating the start and end points for the MSD
+	 * @return The actual MSD
+	 */
+	public static double convertObservedToActual(double msd, int n)
+	{
+		return msd * n / (n - THIRD);
+	}
+	
+	/**
+	 * Convert an actual mean-squared distance (MSD) between n frames into the observed MSD.
+	 * <p>
+	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
+	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
+	 * number of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a
+	 * factor:
+	 * 
+	 * <pre>
+	 * observed = actual*(n-1/3)/n
+	 * actual = observed * n / (n-1/3)
+	 * </pre>
+	 * 
+	 * @param msd
+	 *            The actual MSD
+	 * @param n
+	 *            The number of frames separating the start and end points for the MSD
+	 * @return The actual MSD
+	 */
+	public static double convertActualToObserved(double msd, int n)
+	{
+		return msd * (n - THIRD) / n;
 	}
 }
