@@ -331,7 +331,7 @@ public class Cluster implements Comparable<Cluster>
 		}
 		else
 		{
-			results = (ArrayList<PeakResult>) results.subList(1, size() - 1);
+			results = new ArrayList<PeakResult>(results.subList(1, size() - 1));
 		}
 		resetCentroid();
 	}
