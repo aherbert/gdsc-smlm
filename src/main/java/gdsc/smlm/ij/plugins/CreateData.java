@@ -561,7 +561,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			localisations = new ArrayList<LocalisationModel>(settings.particles);
 			localisationSets = new ArrayList<LocalisationModelSet>(settings.particles);
 
-			final int range = settings.photonsPerSecondMaximum - settings.photonsPerSecond + 1;
+			final int minPhotons = (int) settings.photonsPerSecond;
+			final int range = (int) settings.photonsPerSecondMaximum - minPhotons + 1;
 			if (range > 1)
 				random = createRandomGenerator();
 
@@ -589,7 +590,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					//	continue;
 
 					// Simulate random photons
-					final int intensity = settings.photonsPerSecond + ((random != null) ? random.nextInt(range) : 0);
+					final int intensity = minPhotons + ((random != null) ? random.nextInt(range) : 0);
 
 					LocalisationModel m = new LocalisationModel(id, t, xyz, intensity, LocalisationModel.CONTINUOUS);
 					localisations.add(m);
@@ -646,7 +647,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						settings.pulseInterval);
 
 				// Generate additional frames so that each frame has the set number of simulation steps
-				totalSteps = settings.seconds * settings.stepsPerSecond;
+				totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond);
 
 				// Since we have an exponential decay of activations
 				// ensure half of the particles have activated by 30% of the frames.
@@ -965,7 +966,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			if (totalSteps != 0)
 			{
-				int totalFrames = settings.seconds * 1000 / settings.exposureTime;
+				int totalFrames = (int) Math.ceil(settings.seconds * 1000 / settings.exposureTime);
 				gd.addMessage(String
 						.format("Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
 								newFrames - totalFrames,
@@ -3864,8 +3865,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Depth (nm)", settings.depth, 0);
 		gd.addCheckbox("Fixed_depth", settings.fixedDepth);
 		if (!trackMode)
-			gd.addNumericField("Seconds", settings.seconds, 0);
-		gd.addNumericField("Exposure_time (ms)", settings.exposureTime, 0);
+			gd.addNumericField("Seconds", settings.seconds, 1);
+		gd.addNumericField("Exposure_time (ms)", settings.exposureTime, 1);
 		gd.addSlider("Steps_per_second", 1, 15, settings.stepsPerSecond);
 		if (!trackMode)
 		{
@@ -3978,9 +3979,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.depth = Math.abs(gd.getNextNumber());
 		settings.fixedDepth = gd.getNextBoolean();
 		if (!trackMode)
-			settings.seconds = Math.abs((int) gd.getNextNumber());
-		settings.exposureTime = Math.abs((int) gd.getNextNumber());
-		settings.stepsPerSecond = Math.abs((int) gd.getNextNumber());
+			settings.seconds = Math.abs(gd.getNextNumber());
+		settings.exposureTime = Math.abs(gd.getNextNumber());
+		settings.stepsPerSecond = Math.abs(gd.getNextNumber());
 		if (!trackMode)
 		{
 			settings.illumination = gd.getNextChoice();

@@ -21,9 +21,9 @@ public class CreateDataSettings
 	public int size = 512;
 	public double depth = 3000;
 	public boolean fixedDepth = false;
-	public int seconds = 100;
-	public int exposureTime = 100;
-	public int stepsPerSecond = 10;
+	public double seconds = 100;
+	public double exposureTime = 100;
+	public double stepsPerSecond = 10;
 	public String illumination = "";
 	public String backgroundImage = "";
 	public String distribution = "";
@@ -43,13 +43,13 @@ public class CreateDataSettings
 	 * a distribution. The rate (average of the distribution) is correlated to the total on time. Observations on real
 	 * data indicate the correlation is around -0.35, i.e. shorter bursts are brighter.
 	 */
-	public int photonsPerSecond = 1000;
+	public double photonsPerSecond = 1000;
 
 	/**
 	 * For a simple localisation model the photons are randomly selected between photonsPerSecond and
 	 * photonsPerSecondMaximum
 	 */
-	public int photonsPerSecondMaximum = 2000;
+	public double photonsPerSecondMaximum = 2000;
 	/**
 	 * Define the distribution for the random photon emission. The default is to use a gamma
 	 * distribution with the defined shape parameter.
