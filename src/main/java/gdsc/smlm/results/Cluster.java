@@ -319,4 +319,20 @@ public class Cluster implements Comparable<Cluster>
 		for (PeakResult result : extra)
 			add(result);
 	}
+
+	/**
+	 * Remove the first and last result. If the size is 2 or less then the new size will be zero.
+	 */
+	public void removeEnds()
+	{
+		if (size() <= 2)
+		{
+			results.clear();
+		}
+		else
+		{
+			results = (ArrayList<PeakResult>) results.subList(1, size() - 1);
+		}
+		resetCentroid();
+	}
 }

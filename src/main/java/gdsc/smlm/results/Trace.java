@@ -155,4 +155,10 @@ public class Trace extends Cluster
 		analyse();
 		return offTimes;
 	}
+
+	public void removeEnds()
+	{
+		super.removeEnds();
+		nBlinks = -1; // Invalidate the analysis
+	}
 }
