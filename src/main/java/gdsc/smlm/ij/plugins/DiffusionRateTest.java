@@ -39,6 +39,7 @@ import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import ij.text.TextWindow;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -59,6 +60,7 @@ import org.apache.commons.math3.random.Well19937c;
 public class DiffusionRateTest implements PlugIn
 {
 	private static final String TITLE = "Diffusion Rate Test";
+	private static TextWindow msdTable = null;
 
 	private CreateDataSettings settings;
 	private static boolean useConfinement = false;
@@ -67,8 +69,11 @@ public class DiffusionRateTest implements PlugIn
 	private static boolean showDiffusionExample = false;
 	private static double magnification = 5;
 	private static int aggregateSteps = 1;
+	private static int msdAnalysisSteps = 0;
 	private int myAggregateSteps = 1;
+	private int myMsdAnalysisSteps = 0;
 	private boolean extraOptions = false;
+	private double conversionFactor;
 
 	/*
 	 * (non-Javadoc)
@@ -81,9 +86,9 @@ public class DiffusionRateTest implements PlugIn
 		if (!showDialog())
 			return;
 
-		int totalSteps = settings.seconds * settings.stepsPerSecond;
+		int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond);
 
-		final double conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
+		conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
 
 		// Diffusion rate is um^2/sec. Convert to pixels per simulation frame.
 		final double diffusionRateInPixelsPerSecond = settings.diffusionRate * conversionFactor;
@@ -195,16 +200,17 @@ public class DiffusionRateTest implements PlugIn
 		MemoryPeakResults.addResults(results);
 
 		// Convert pixels^2/step to um^2/sec
+		final double msd = (jumpDistances.getMean() / conversionFactor) /
+				(results.getCalibration().exposureTime / 1000);
 		Utils.log(
 				"Raw data D=%s um^2/s, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
 				Utils.rounded(settings.diffusionRate),
 				jumpDistances.getN(),
 				Utils.rounded(results.getCalibration().exposureTime / 1000),
 				Utils.rounded(jumpDistances.getMean() / conversionFactor),
-				Utils.rounded((jumpDistances.getMean() / conversionFactor) /
-						(results.getCalibration().exposureTime / 1000)));
+				Utils.rounded(msd));
 
-		aggregateIntoFrames(results);
+		aggregateIntoFrames(results, msd);
 
 		IJ.showStatus("Analysing results ...");
 		IJ.showProgress(1);
@@ -388,10 +394,13 @@ public class DiffusionRateTest implements PlugIn
 			settings.stepsPerSecond = 1;
 
 		gd.addNumericField("Pixel_pitch (nm)", settings.pixelPitch, 2);
-		gd.addNumericField("Seconds", settings.seconds, 0);
+		gd.addNumericField("Seconds", settings.seconds, 1);
 		gd.addSlider("Steps_per_second", 1, 15, settings.stepsPerSecond);
 		if (extraOptions)
+		{
 			gd.addSlider("Aggregate_steps", 2, 10, aggregateSteps);
+			gd.addNumericField("MSD_analysis_steps", msdAnalysisSteps, 0);
+		}
 		gd.addNumericField("Particles", settings.particles, 0);
 		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.diffusionRate, 2);
 		gd.addCheckbox("Use_grid_walk", settings.useGridWalk);
@@ -407,10 +416,13 @@ public class DiffusionRateTest implements PlugIn
 			return false;
 
 		settings.pixelPitch = Math.abs(gd.getNextNumber());
-		settings.seconds = Math.abs((int) gd.getNextNumber());
-		settings.stepsPerSecond = Math.abs((int) gd.getNextNumber());
+		settings.seconds = Math.abs(gd.getNextNumber());
+		settings.stepsPerSecond = Math.abs(gd.getNextNumber());
 		if (extraOptions)
+		{
 			myAggregateSteps = aggregateSteps = Math.abs((int) gd.getNextNumber());
+			myMsdAnalysisSteps = msdAnalysisSteps = Math.abs((int) gd.getNextNumber());
+		}
 		settings.particles = Math.abs((int) gd.getNextNumber());
 		settings.diffusionRate = Math.abs(gd.getNextNumber());
 		settings.useGridWalk = gd.getNextBoolean();
@@ -467,7 +479,7 @@ public class DiffusionRateTest implements PlugIn
 				m.move(diffusionSigma, random);
 			x[j] = (float) (m.getX());
 			y[j] = (float) (m.getY());
-			xValues[j] = (float) (j + 1) / settings.stepsPerSecond;
+			xValues[j] = (float) ((j + 1) / settings.stepsPerSecond);
 		}
 
 		// Plot x and y coords on a timeline
@@ -560,7 +572,7 @@ public class DiffusionRateTest implements PlugIn
 		return limits;
 	}
 
-	private void aggregateIntoFrames(MemoryPeakResults separateResults)
+	private void aggregateIntoFrames(MemoryPeakResults separateResults, double baseMsd)
 	{
 		if (myAggregateSteps < 1)
 			return;
@@ -596,7 +608,7 @@ public class DiffusionRateTest implements PlugIn
 					results.add(r);
 					if (last != null)
 					{
-						sum += distance2(last, r);
+						sum += last.distance2(r);
 						count++;
 					}
 					else if (n == 1)
@@ -636,7 +648,7 @@ public class DiffusionRateTest implements PlugIn
 			results.add(r);
 			if (last != null)
 			{
-				sum += distance2(last, r);
+				sum += last.distance2(r);
 				count++;
 			}
 		}
@@ -644,18 +656,81 @@ public class DiffusionRateTest implements PlugIn
 		// MSD in pixels^2 / frame
 		double msd = sum / count;
 		// Convert to um^2/second
-		final double conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
-		Utils.log("Aggregated data D=%s um^2/s, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s", 
-				Utils.rounded(settings.diffusionRate),
-				count,
+		Utils.log("Aggregated data D=%s um^2/s, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
+				Utils.rounded(settings.diffusionRate), count,
 				Utils.rounded(results.getCalibration().exposureTime / 1000), Utils.rounded(msd / conversionFactor),
 				Utils.rounded((msd / conversionFactor) / (results.getCalibration().exposureTime / 1000)));
+
+		msdAnalysis(results, baseMsd);
 	}
 
-	private double distance2(PeakResult r1, PeakResult r2)
+	/**
+	 * Tabulate the observed MSD for different jump distances
+	 * 
+	 * @param results
+	 * @param baseMsd The MSD from non-agggregated data
+	 */
+	private void msdAnalysis(MemoryPeakResults results, double baseMsd)
 	{
-		final double dx = r1.getXPosition() - r2.getXPosition();
-		final double dy = r1.getYPosition() - r2.getYPosition();
-		return dx * dx + dy * dy;
+		if (myMsdAnalysisSteps == 0)
+			return;
+		createMsdTable(baseMsd);
+		// This will only be fast if the list is an array
+		PeakResult[] list = results.getResults().toArray(new PeakResult[results.size()]);
+		for (int step = 1; step <= myMsdAnalysisSteps; step++)
+		{
+			double sum = 0;
+			int count = 0;
+			for (int i = step; i < list.length; i++)
+			{
+				PeakResult last = list[i - step];
+				PeakResult current = list[i];
+
+				if (last.getId() == current.getId())
+				{
+					sum += last.distance2(current);
+					count++;
+				}
+			}
+			addResult(step, sum, count);
+		}
+	}
+
+	private void createMsdTable(double baseMsd)
+	{
+		String header = createHeader(baseMsd);
+		if (msdTable == null || !msdTable.isVisible())
+		{
+			msdTable = new TextWindow("MSD Analysis", header, "", 800, 300);
+			msdTable.setVisible(true);
+		}
+	}
+
+	private String prefix;
+
+	private String createHeader(double baseMsd)
+	{
+		final double apparentD = baseMsd / 4;
+		StringBuilder sb = new StringBuilder();
+		sb.append(settings.diffusionRate).append('\t');
+		sb.append(Utils.rounded(apparentD)).append('\t');
+		sb.append(Utils.rounded(1.0 / settings.stepsPerSecond)).append('\t');
+		sb.append(myAggregateSteps).append('\t');
+		prefix = sb.toString();
+		return "D (um^2/s)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tN\tMSD (um^2)\tMSD (um^2/s)";
+	}
+
+	private void addResult(int step, double sum, int count)
+	{
+		final double exposureTime = myAggregateSteps / settings.stepsPerSecond;
+		final double msd = (sum / count) / conversionFactor;
+		StringBuilder sb = new StringBuilder(prefix);
+		sb.append(Utils.rounded(exposureTime)).append('\t');
+		final double t = step * exposureTime;
+		sb.append(Utils.rounded(t)).append('\t');
+		sb.append(count).append('\t');
+		sb.append(Utils.rounded(msd)).append('\t');
+		sb.append(Utils.rounded(msd / t));
+		msdTable.append(sb.toString());
 	}
 }
