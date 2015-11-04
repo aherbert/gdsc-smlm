@@ -756,4 +756,30 @@ public class PeakResult implements Comparable<PeakResult>
 	{
 		return 1 - getTrueNegativeScore();
 	}
+
+	/**
+	 * Return the squared distance to the other peak result
+	 * 
+	 * @param r
+	 *            The result
+	 * @return The squared distance
+	 */
+	public double distance2(PeakResult r)
+	{
+		final double dx = getXPosition() - r.getXPosition();
+		final double dy = getYPosition() - r.getYPosition();
+		return dx * dx + dy * dy;
+	}
+
+	/**
+	 * Return the distance to the other peak result
+	 * 
+	 * @param r
+	 *            The result
+	 * @return The distance
+	 */
+	public double distance(PeakResult r)
+	{
+		return Math.sqrt(distance2(r));
+	}
 }
