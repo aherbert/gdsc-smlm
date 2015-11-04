@@ -68,7 +68,7 @@ public class DiffusionRateTest implements PlugIn
 	private static int fitN = 20;
 	private static boolean showDiffusionExample = false;
 	private static double magnification = 5;
-	private static int aggregateSteps = 1;
+	private static int aggregateSteps = 10;
 	private static int msdAnalysisSteps = 0;
 	private int myAggregateSteps = 1;
 	private int myMsdAnalysisSteps = 0;
@@ -398,7 +398,7 @@ public class DiffusionRateTest implements PlugIn
 		gd.addSlider("Steps_per_second", 1, 15, settings.stepsPerSecond);
 		if (extraOptions)
 		{
-			gd.addSlider("Aggregate_steps", 2, 10, aggregateSteps);
+			gd.addSlider("Aggregate_steps", 2, 20, aggregateSteps);
 			gd.addNumericField("MSD_analysis_steps", msdAnalysisSteps, 0);
 		}
 		gd.addNumericField("Particles", settings.particles, 0);
