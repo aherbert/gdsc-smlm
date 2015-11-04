@@ -63,10 +63,14 @@ public class ClusteringSettings
 	public int histogramBins = 100;
 	public boolean removeOutliers = false;
 	public boolean refitOption = false;
+	// Options for tracing diffusion
 	public int minimumTraceLength = 6;
 	public boolean truncate = false;
-	public boolean internalDistances = false;
+	public boolean internalDistances = true;
 	public boolean subSampledDistances = false;
+	public boolean ignoreEnds = true;
+	public boolean msdCorrection = true;
+	public boolean mle = true;
 	public int fitLength = 6;
 	public int fitRestarts = 3;
 	public int jumpDistance = 1;

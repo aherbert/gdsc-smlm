@@ -103,7 +103,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static double minDifference = 2;
 	private static int minN = 1;
 	private static int maxN = 5;
-	private static boolean mle = true;
 	private static boolean debugFitting = false;
 	private static boolean multipleInputs = false;
 	private static String tracesFilename = "";
@@ -219,9 +218,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 						double[] msd = new double[traceLength - 1];
 						for (int j = 1; j < traceLength; j++)
 						{
-							final double d = distance2(x, y, results.get(j));
-							msd[j - 1] = px2ToUm2 * d;
 							final int t = j;
+							double d = distance2(x, y, results.get(j));
+							if (settings.msdCorrection)
+								d = JumpDistanceAnalysis.convertObservedToActual(d, t);
+							msd[j - 1] = px2ToUm2 * d;
 							if (t == 1)
 							{
 								sumD_adjacent += d;
@@ -242,8 +243,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					{
 						for (int j = 1; j < traceLength; j++)
 						{
-							final double d = distance2(x, y, results.get(j));
 							final int t = j;
+							double d = distance2(x, y, results.get(j));
+							if (settings.msdCorrection)
+								d = JumpDistanceAnalysis.convertObservedToActual(d, t);
 							if (t == 1)
 							{
 								sumD_adjacent += d;
@@ -270,8 +273,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 						final float y = results.get(i).getYPosition();
 						for (int j = i + 1; j < traceLength; j++)
 						{
-							final double d = distance2(x, y, results.get(j));
 							final int t = j - i;
+							double d = distance2(x, y, results.get(j));
+							if (settings.msdCorrection)
+								d = JumpDistanceAnalysis.convertObservedToActual(d, t);
 							if (t == 1)
 							{
 								sumD_adjacent += d;
@@ -683,19 +688,25 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * @param name
 	 * @param traces
 	 * @param minimumTraceLength
+	 * @param ignoreEnds 
 	 * @return The new traces
 	 */
-	private Trace[] filterTraces(String name, Trace[] traces, int minimumTraceLength)
+	private Trace[] filterTraces(String name, Trace[] traces, int minimumTraceLength, boolean ignoreEnds)
 	{
+		final int minLength = (ignoreEnds) ? minimumTraceLength + 2 : minimumTraceLength;
 		int count = 0;
 		for (int i = 0; i < traces.length; i++)
 		{
-			if (traces[i].size() >= minimumTraceLength)
+			if (traces[i].size() >= minLength)
+			{
+				if (ignoreEnds)
+					traces[i].removeEnds();
 				traces[count++] = traces[i];
+			}
 		}
 
-		Utils.log("Filtered results '%s' : %s filtered to %d using minimum length %d", name,
-				Utils.pleural(traces.length, "trace"), count, minimumTraceLength);
+		Utils.log("Filtered results '%s' : %s filtered to %d using minimum length %d (Ignore ends = %b)", name,
+				Utils.pleural(traces.length, "trace"), count, minimumTraceLength, ignoreEnds);
 		return Arrays.copyOf(traces, count);
 	}
 
@@ -736,10 +747,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(Utils.rounded(settings.distanceThreshold, 3)).append("\t");
 		sb.append(Utils.rounded(settings.distanceExclusion, 3)).append("\t");
 		sb.append(settings.minimumTraceLength).append("\t");
+		sb.append(settings.ignoreEnds).append("\t");
 		sb.append(settings.truncate).append("\t");
 		sb.append(settings.internalDistances).append("\t");
 		sb.append(settings.fitLength).append("\t");
-		sb.append(mle).append("\t");
+		sb.append(settings.msdCorrection).append("\t");
+		sb.append(settings.mle).append("\t");
 		sb.append(traces.length).append("\t");
 		sb.append(Utils.rounded(D, 4)).append("\t");
 		sb.append(Utils.rounded(settings.jumpDistance * exposureTime)).append("\t");
@@ -822,7 +835,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Title\tDataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tTruncate\tInternal\tFit Length\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tJump D (um^2/s)\tFractions");
+				"Title\tDataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length\tCorrection\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tJump D (um^2/s)\tFractions");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
@@ -843,6 +856,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 0);
 		gd.addNumericField("Distance_Exclusion (nm)", settings.distanceExclusion, 0);
 		gd.addSlider("Min_trace_length", 2, 20, settings.minimumTraceLength);
+		gd.addCheckbox("Ignore_ends", settings.ignoreEnds);
 		gd.addCheckbox("Save_traces", settings.saveTraces);
 		gd.addCheckbox("Multiple_inputs", multipleInputs);
 
@@ -888,6 +902,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.distanceThreshold = gd.getNextNumber();
 		settings.distanceExclusion = Math.abs(gd.getNextNumber());
 		settings.minimumTraceLength = (int) Math.abs(gd.getNextNumber());
+		settings.ignoreEnds = gd.getNextBoolean();
 		settings.saveTraces = gd.getNextBoolean();
 		multipleInputs = gd.getNextBoolean();
 
@@ -940,7 +955,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			manager.traceMolecules(settings.distanceThreshold / nmPerPixel, 1);
 			Trace[] traces = manager.getTraces();
 
-			traces = filterTraces(r.getName(), traces, settings.minimumTraceLength);
+			traces = filterTraces(r.getName(), traces, settings.minimumTraceLength, settings.ignoreEnds);
 			allTraces.addAll(Arrays.asList(traces));
 
 			//--- Save results ---
@@ -1065,7 +1080,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addCheckbox("Internal_distances", settings.internalDistances);
 		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
 		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
-		gd.addCheckbox("Maximum_likelihood", mle);
+		gd.addCheckbox("MSD_correction", settings.msdCorrection);
+		gd.addCheckbox("Maximum_likelihood", settings.mle);
 		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
 		gd.addSlider("Jump_distance", 1, 20, settings.jumpDistance);
 		gd.addSlider("Minimum_difference", 0, 10, minDifference);
@@ -1096,7 +1112,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.internalDistances = gd.getNextBoolean();
 		//settings.subSampledDistances = gd.getNextBoolean();
 		settings.fitLength = (int) Math.abs(gd.getNextNumber());
-		mle = gd.getNextBoolean();
+		settings.msdCorrection = gd.getNextBoolean();
+		settings.mle = gd.getNextBoolean();
 		settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
 		settings.jumpDistance = (int) Math.abs(gd.getNextNumber());
 		minDifference = Math.abs(gd.getNextNumber());
@@ -1478,7 +1495,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Update the plot with the fit
 		jd.setCurveLogger(this);
 		double[][] fit;
-		if (mle)
+		if (settings.mle)
 			fit = jd.fitJumpDistancesMLE(jumpDistances.getValues(), jdHistogram);
 		else
 			fit = jd.fitJumpDistanceHistogram(jumpDistances.getMean(), jdHistogram);
