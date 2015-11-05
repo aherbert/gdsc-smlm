@@ -1259,8 +1259,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			gradient = lvmSolution.getPoint()[0];
 			D = gradient / 4;
 
-			Utils.log("Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %f, IC = %f (%d evaluations)",
-					obs.length, Utils.rounded(gradient, 4), Utils.rounded(D, 4), ss, ic, optimizer.getEvaluations());
+			Utils.log("Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
+					obs.length, Utils.rounded(gradient, 4), Utils.rounded(D, 4), Double.toString(ss),
+					Double.toString(ic), optimizer.getEvaluations());
 		}
 		catch (TooManyIterationsException e)
 		{
@@ -1299,9 +1300,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			{
 				// Convert fitted precision in um to nm
 				Utils.log(
-						"Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %f, IC = %f (%d evaluations)",
+						"Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
 						obs.length, Utils.rounded(gradient2, 4), Utils.rounded(intercept2, 4),
-						Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), ss, ic2, optimizer.getEvaluations());
+						Utils.rounded(gradient2 / 4, 4), Utils.rounded(s * 1000, 4), Double.toString(ss),
+						Double.toString(ic2), optimizer.getEvaluations());
 			}
 
 			if (lvmSolution == null || ic2 < ic)
