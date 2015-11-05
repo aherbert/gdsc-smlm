@@ -159,7 +159,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static final String[] NAMES = new String[] { "Signal/Frame", "Signal/Frame (continuous)", "Total Signal",
 			"Blinks", "t-On", "t-Off", "Sampled blinks", "Sampled t-On", "Sampled t-Off", "Noise", "SNR",
-			"SNR (continuous)", "Density", "Precision", "Precision (in-focus)", "Width", "X", "Y", "Z" };
+			"SNR (continuous)", "Density", "Precision", "Precision (in-focus)", "X", "Y", "Z", "Width" };
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
@@ -181,10 +181,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static final int DENSITY = 12;
 	private static final int PRECISION = 13;
 	private static final int PRECISION_IN_FOCUS = 14;
-	private static final int WIDTH = 15;
-	private static final int X = 16;
-	private static final int Y = 17;
-	private static final int Z = 18;
+	private static final int X = 15;
+	private static final int Y = 16;
+	private static final int Z = 17;
+	private static final int WIDTH = 18;
 
 	private static boolean[] integerDisplay;
 	static
@@ -2840,7 +2840,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		s *= settings.pixelPitch;
 		final double sa = PSFCalculator.squarePixelAdjustment(s, settings.pixelPitch) / settings.pixelPitch;
 		sb.append(Utils.rounded(sa, 4)).append("\t");
-		int nStats = (imagePSF) ? stats.length - 2 : stats.length;
+		// Width not valid for the Image PSF
+		int nStats = (imagePSF) ? stats.length - 1 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i]) ? ((StoredDataStatistics) stats[i]).getStatistics()
