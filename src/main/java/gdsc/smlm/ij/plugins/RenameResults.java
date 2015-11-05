@@ -86,10 +86,10 @@ public class RenameResults implements PlugIn
 			mappedNames.put(name, name);
 		
 		// Get the new names
-		String[] lines = renameText.split("\n");
+		String[] lines = renameText.split("[;\n]");
 		for (String line : lines)
 		{
-			String[] fields = line.split("[=;]");
+			String[] fields = line.split("[=]");
 			if (fields.length == 2)
 			{
 				String oldName = fields[0].trim();
