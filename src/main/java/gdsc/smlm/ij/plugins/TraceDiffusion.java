@@ -163,6 +163,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		int count = traces.length;
 		double D = 0;
+		int n = 0;
 		double[][] jdParams = null;
 		if (count > 0)
 		{
@@ -415,10 +416,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			display(jdTitle, jdPlot);
 
 			// Fit Jump Distance cumulative probability
+			n = jumpDistances.getN();
 			jdParams = fitJumpDistance(jumpDistances, jdHistogram);
 		}
 
-		summarise(traces, D, jdParams);
+		summarise(traces, D, n, jdParams);
 	}
 
 	public StoredDataStatistics calculateTraceLengths(ArrayList<double[]> distances)
@@ -727,7 +729,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return String.format("Molecule tracing : distance-threshold = %f nm", settings.distanceThreshold);
 	}
 
-	private void summarise(Trace[] traces, double D, double[][] jdParams)
+	private void summarise(Trace[] traces, double D, int n, double[][] jdParams)
 	{
 		IJ.showStatus("Calculating summary ...");
 
@@ -768,6 +770,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(traces.length).append("\t");
 		sb.append(Utils.rounded(D, 4)).append("\t");
 		sb.append(Utils.rounded(settings.jumpDistance * exposureTime)).append("\t");
+		sb.append(n).append("\t");
 		if (jdParams == null)
 		{
 			sb.append("\t\t");
@@ -847,7 +850,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Title\tDataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length\tCorrection\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tJump D (um^2/s)\tFractions");
+				"Title\tDataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length\tCorrection\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tN\tJump D (um^2/s)\tFractions");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
