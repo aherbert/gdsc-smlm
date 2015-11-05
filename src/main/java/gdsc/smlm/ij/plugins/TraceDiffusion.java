@@ -177,7 +177,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (!settings.truncate)
 			{
 				for (Trace trace : traces)
-					length = FastMath.max(length, trace.size());
+				{
+					if (length < trace.size())
+						length = trace.size();
+				}
 			}
 
 			// Extract the mean-squared distance statistics
@@ -194,6 +197,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			StoredDataStatistics jumpDistances = new StoredDataStatistics();
 			final int jumpDistanceInterval = settings.jumpDistance;
 			final double jdPx2ToUm2PerSecond = px2ToUm2 / (jumpDistanceInterval * exposureTime);
+
+			// Pre-calculate conversion factors
+			double[] convert = null;
+			if (settings.msdCorrection)
+			{
+				convert = new double[length];
+				for (int t = 1; t < length; t++)
+					convert[t] = JumpDistanceAnalysis.getConversionfactor(t);
+			}
 
 			// Compute squared distances
 			StoredDataStatistics msdPerMoleculeAllVsAll = new StoredDataStatistics();
@@ -221,7 +233,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							final int t = j;
 							double d = distance2(x, y, results.get(j));
 							if (settings.msdCorrection)
-								d = JumpDistanceAnalysis.convertObservedToActual(d, t);
+								d *= convert[t];
 							msd[j - 1] = px2ToUm2 * d;
 							if (t == 1)
 							{
@@ -246,7 +258,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							final int t = j;
 							double d = distance2(x, y, results.get(j));
 							if (settings.msdCorrection)
-								d = JumpDistanceAnalysis.convertObservedToActual(d, t);
+								d *= convert[t];
 							if (t == 1)
 							{
 								sumD_adjacent += d;
@@ -276,7 +288,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							final int t = j - i;
 							double d = distance2(x, y, results.get(j));
 							if (settings.msdCorrection)
-								d = JumpDistanceAnalysis.convertObservedToActual(d, t);
+								d *= convert[t];
 							if (t == 1)
 							{
 								sumD_adjacent += d;
@@ -688,7 +700,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * @param name
 	 * @param traces
 	 * @param minimumTraceLength
-	 * @param ignoreEnds 
+	 * @param ignoreEnds
 	 * @return The new traces
 	 */
 	private Trace[] filterTraces(String name, Trace[] traces, int minimumTraceLength, boolean ignoreEnds)
