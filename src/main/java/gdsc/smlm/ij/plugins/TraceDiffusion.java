@@ -118,7 +118,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	// Store exposure time in seconds
 	private double exposureTime = 0;
-	private double precision;
+	private double precision, beta;
 
 	// Used to tile new plot windows
 	private int[] idList = new int[20];
@@ -765,6 +765,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(Utils.rounded(D, 4)).append("\t");
 		sb.append(Utils.rounded(settings.jumpDistance * exposureTime)).append("\t");
 		sb.append(n).append("\t");
+		sb.append(Utils.rounded(beta, 4)).append("\t");
 		if (jdParams == null)
 		{
 			sb.append("\t\t");
@@ -843,8 +844,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	private String createHeader()
 	{
-		StringBuilder sb = new StringBuilder(
-				"Title\tDataset\tExposure time (ms)\tD-threshold (nm)\tEx-threshold (nm)\tMin.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length\tt corr.\ts corr.\tMLE\tTraces\tD (um^2/s)\tJump Distance (s)\tN\tJump D (um^2/s)\tFractions");
+		StringBuilder sb = new StringBuilder("Title\tDataset\tExposure time (ms)\tD-threshold (nm)");
+		sb.append("\tEx-threshold (nm)\t");
+		sb.append("Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length");
+		sb.append("\tt corr.\ts corr.\tMLE\tTraces\tD (um^2/s)");
+		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
@@ -1491,10 +1495,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	{
 		final double msd = jumpDistances.getMean();
 		final double meanDistance = Math.sqrt(msd * settings.jumpDistance * exposureTime) * 1e3;
+		// TODO:
 		// Q. Should the beta be expressed using the mean-distance or MSD? 
 		// Q. Should it be normalised to the frame length. If not then the beta will be invariant on 
 		// jump distance length
-		final double beta = meanDistance / precision;
+		beta = meanDistance / precision;
 		Utils.log(
 				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/second, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s",
 				jumpDistances.getN(), settings.jumpDistance, Utils.rounded(settings.jumpDistance * exposureTime, 4),
@@ -1534,7 +1539,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// Note: The time-correction has already been incorporated into the MSD
 			// This would have had the equivalent effect of increasing the MSD by a factor.
 			// This increase should also be applied to the localisation error.
-			error /= JumpDistanceAnalysis.getCorrectedTime(settings.jumpDistance);
+			if (settings.tCorrection)
+				error /= JumpDistanceAnalysis.getCorrectedTime(settings.jumpDistance);
 
 			// Now find the apparent diffusion coefficients
 			for (int i = 0; i < fit[0].length; i++)
