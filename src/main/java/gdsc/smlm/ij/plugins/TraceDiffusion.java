@@ -185,20 +185,24 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				}
 			}
 
-			// Pre-calculate time interval in frames. This accounts for the fact that the distance moved 
+			// Get the localisation error (4s^2) in um^2
+			final double error = (settings.precisionCorrection) ? 4 * precision * precision / 1e6 : 0;
+			// Pre-calculate MSD correction factors. This accounts for the fact that the distance moved 
 			// in the start/end frames is reduced due to the averaging of the particle location over the 
-			// entire frame into a single point. The effect is that the time diffusing for the start/end 
-			// frame is reduced.
-			final double[] time;
-			if (settings.tCorrection)
+			// entire frame into a single point. The true MSD may be restored by applying a factor.
+			// Note: These are used for the calculation of the diffusion coefficients per molecule and 
+			// the MSD passed to the Jump Distance analysis. However the error is not included in the 
+			// jump distance analysis so will be subtracted from the fitted D coefficients later.
+			final double[] factors;
+			if (settings.msdCorrection)
 			{
-				time = new double[length];
+				factors = new double[length];
 				for (int t = 1; t < length; t++)
-					time[t] = JumpDistanceAnalysis.getCorrectedTime(t);
+					factors[t] = JumpDistanceAnalysis.getConversionfactor(t);
 			}
 			else
 			{
-				time = Utils.newArray(length, 0.0, 1.0);
+				factors = Utils.newArray(length, 0.0, 1.0);
 			}
 
 			// Extract the mean-squared distance statistics
@@ -212,7 +216,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// Store all the jump distances at the specified interval
 			StoredDataStatistics jumpDistances = new StoredDataStatistics();
 			final int jumpDistanceInterval = settings.jumpDistance;
-			final double jdPx2ToUm2PerSecond = px2ToUm2 / (time[jumpDistanceInterval] * exposureTime);
+			final double jdPx2ToUm2PerSecond = px2ToUm2 / (exposureTime / factors[jumpDistanceInterval]);
 
 			// Compute squared distances
 			StoredDataStatistics msdPerMoleculeAllVsAll = new StoredDataStatistics();
@@ -221,12 +225,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			{
 				ArrayList<PeakResult> results = trace.getPoints();
 				// Sum the MSD and the time
-				double sumD = 0, sumD_adjacent = 0;
-				double sumT = 0, sumT_adjacent = 0;
 				final int traceLength = (settings.truncate) ? settings.minimumTraceLength : trace.size();
 
 				// Get the mean for each time separation
-				double[] sum = new double[traceLength + 1];
+				double[] sumDistance = new double[traceLength + 1];
+				double[] sumTime = new double[sumDistance.length];
 
 				// Do the distances to the origin (saving if necessary)
 				{
@@ -240,19 +243,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							final int t = j;
 							final double d = distance2(x, y, results.get(j));
 							msd[j - 1] = px2ToUm2 * d;
-							if (t == 1)
-							{
-								sumD_adjacent += d;
-								sumT_adjacent += time[1];
-							}
-							else
-							{
-								sumD += d;
-								sumT += time[t];
-							}
 							if (t == jumpDistanceInterval)
 								jumpDistances.add(jdPx2ToUm2PerSecond * d);
-							sum[t] += d;
+							sumDistance[t] += d;
+							sumTime[t] += t;
 						}
 						distances.add(msd);
 					}
@@ -262,19 +256,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 						{
 							final int t = j;
 							final double d = distance2(x, y, results.get(j));
-							if (t == 1)
-							{
-								sumD_adjacent += d;
-								sumT_adjacent += time[1];
-							}
-							else
-							{
-								sumD += d;
-								sumT += time[t];
-							}
 							if (t == jumpDistanceInterval)
 								jumpDistances.add(jdPx2ToUm2PerSecond * d);
-							sum[t] += d;
+							sumDistance[t] += d;
+							sumTime[t] += t;
 						}
 					}
 				}
@@ -290,19 +275,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 						{
 							final int t = j - i;
 							final double d = distance2(x, y, results.get(j));
-							if (t == 1)
-							{
-								sumD_adjacent += d;
-								sumT_adjacent += time[1];
-							}
-							else
-							{
-								sumD += d;
-								sumT += time[t];
-							}
 							if (t == jumpDistanceInterval)
 								jumpDistances.add(jdPx2ToUm2PerSecond * d);
-							sum[t] += d;
+							sumDistance[t] += d;
+							sumTime[t] += t;
 						}
 					}
 
@@ -310,7 +286,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					for (int t = 1; t < traceLength; t++)
 					{
 						// Note: (traceLength - t) == count
-						stats[t].add(sum[t] / (traceLength - t));
+						stats[t].add(sumDistance[t] / (traceLength - t));
 					}
 				}
 				else
@@ -318,14 +294,28 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					// Add the distance per time separation to the population
 					for (int t = 1; t < traceLength; t++)
 					{
-						stats[t].add(sum[t]);
+						stats[t].add(sumDistance[t]);
 					}
+				}
+
+				// TODO - fix this for the precision and MSD adjustment.
+				// It may be necessary to:
+				// - sum the raw distances for each time interval (this is sumDistance[t])
+				// - subtract the precision error
+				// - apply correction factor for the n-frames to get actual MSD
+				// - sum the actual MSD
+
+				double sumD = 0, sumD_adjacent = Math.max(0, sumDistance[1] - error) * factors[1];
+				double sumT = 0, sumT_adjacent = sumTime[1];
+				for (int t = 1; t < traceLength; t++)
+				{
+					sumD += Math.max(0, sumDistance[t] - error) * factors[t];
+					sumT += sumTime[t];
 				}
 
 				// Calculate the average displacement for the trace (do not simply use the largest 
 				// time separation since this will miss moving molecules that end up at the origin)
-				sumD += sumD_adjacent;
-				sumT += sumT_adjacent;
+
 				msdPerMoleculeAllVsAll.add(px2ToUm2PerSecond * sumD / sumT);
 				msdPerMoleculeAdjacent.add(px2ToUm2PerSecond * sumD_adjacent / sumT_adjacent);
 			}
@@ -371,7 +361,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			double[] sd = new double[x.length];
 			for (int i = 1; i < stats.length; i++)
 			{
-				x[i] = time[i] * exposureTime;
+				x[i] = i * exposureTime;
 				y[i] = stats[i].getMean() * px2ToUm2;
 				//sd[i] = stats[i].getStandardDeviation() * px2ToUm2;
 				sd[i] = stats[i].getStandardError() * px2ToUm2;
@@ -489,10 +479,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	/**
 	 * Calculate the diffusion coefficient (D) of the molecule. This is done by using the mean-squared deviation
 	 * between frames divided by the time interval (delta) between frames. This is divided by 4 to produce the diffusion
-	 * coefficient from two-dimensional distance analysis. If precision correction is configured in the settings the
-	 * apparent
-	 * diffusion coefficient (D*) is produced by subtracting the squared localisation error also normalised by the time
-	 * delta.
+	 * coefficient from two-dimensional distance analysis.
 	 * <p>
 	 * See Uphoff, et al, 2013. Single-molecule DNA repair in live bacteria, PNAS 110, 8063-8068
 	 * 
@@ -503,21 +490,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	{
 		StoredDataStatistics dPerMolecule = new StoredDataStatistics();
 		final double diffusionCoefficientConversion = 1.0 / 4.0;
-		if (settings.precisionCorrection)
+		for (double msd : msdPerMoleculeAdjacent.getValues())
 		{
-			// convert precision to um
-			final double error = precision * precision / (1e6 * exposureTime);
-			for (double msd : msdPerMoleculeAdjacent.getValues())
-			{
-				dPerMolecule.add(FastMath.max(0, msd * diffusionCoefficientConversion - error));
-			}
-		}
-		else
-		{
-			for (double msd : msdPerMoleculeAdjacent.getValues())
-			{
-				dPerMolecule.add(msd * diffusionCoefficientConversion);
-			}
+			dPerMolecule.add(msd * diffusionCoefficientConversion);
 		}
 		return dPerMolecule;
 	}
@@ -758,7 +733,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(settings.truncate).append("\t");
 		sb.append(settings.internalDistances).append("\t");
 		sb.append(settings.fitLength).append("\t");
-		sb.append(settings.tCorrection).append("\t");
+		sb.append(settings.msdCorrection).append("\t");
 		sb.append(settings.precisionCorrection).append("\t");
 		sb.append(settings.mle).append("\t");
 		sb.append(traces.length).append("\t");
@@ -847,7 +822,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		StringBuilder sb = new StringBuilder("Title\tDataset\tExposure time (ms)\tD-threshold (nm)");
 		sb.append("\tEx-threshold (nm)\t");
 		sb.append("Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length");
-		sb.append("\tt corr.\ts corr.\tMLE\tTraces\tD (um^2/s)");
+		sb.append("\tMSD corr.\ts corr.\tMLE\tTraces\tD (um^2/s)");
 		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions");
 		for (int i = 0; i < NAMES.length; i++)
 		{
@@ -1093,7 +1068,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addCheckbox("Internal_distances", settings.internalDistances);
 		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
 		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
-		gd.addCheckbox("t_correction", settings.tCorrection);
+		gd.addCheckbox("msd_correction", settings.msdCorrection);
 		gd.addCheckbox("Precision_correction", settings.precisionCorrection);
 		gd.addCheckbox("Maximum_likelihood", settings.mle);
 		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
@@ -1126,7 +1101,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.internalDistances = gd.getNextBoolean();
 		//settings.subSampledDistances = gd.getNextBoolean();
 		settings.fitLength = (int) Math.abs(gd.getNextNumber());
-		settings.tCorrection = gd.getNextBoolean();
+		settings.msdCorrection = gd.getNextBoolean();
 		settings.precisionCorrection = gd.getNextBoolean();
 		settings.mle = gd.getNextBoolean();
 		settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
@@ -1325,6 +1300,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		catch (ConvergenceException e)
 		{
 			Utils.log("Failed to fit with intercept : %s", e.getMessage());
+		}
+
+		if (D != 0 && settings.msdCorrection)
+		{
+			//D /= JumpDistanceAnalysis.getCorrectedTime(settings.jumpDistance);
 		}
 
 		return D;
@@ -1536,11 +1516,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// Convert precision to um
 			double error = precision * precision / (1e6 * exposureTime);
 
-			// Note: The time-correction has already been incorporated into the MSD
+			// Note: The distance correction has already been incorporated into the MSD.
 			// This would have had the equivalent effect of increasing the MSD by a factor.
 			// This increase should also be applied to the localisation error.
-			if (settings.tCorrection)
-				error /= JumpDistanceAnalysis.getCorrectedTime(settings.jumpDistance);
+			if (settings.msdCorrection)
+				error *= JumpDistanceAnalysis.getConversionfactor(settings.jumpDistance);
 
 			// Now find the apparent diffusion coefficients
 			for (int i = 0; i < fit[0].length; i++)

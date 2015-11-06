@@ -70,7 +70,7 @@ public class ClusteringSettings
 	public boolean subSampledDistances = false;
 	public boolean ignoreEnds = true;
 	public boolean precisionCorrection = true;
-	public boolean tCorrection = true;
+	public boolean msdCorrection = true;
 	public boolean mle = true;
 	public int fitLength = 6;
 	public int fitRestarts = 3;
