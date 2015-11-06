@@ -1203,6 +1203,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// dt = time difference between frames
 		// s = localisation precision
 		// Thus we should fit an intercept as well.
+		
+		// TODO - change this to a non-linear fit ...
+		// MSD = 4Dt n^2 - (4Dt) n / 3 + 4 s^2
+		// From the fit D = 4Dt / (4*exposureTime)
 
 		double D = 0;
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
