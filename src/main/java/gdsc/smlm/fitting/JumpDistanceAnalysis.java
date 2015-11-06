@@ -1880,6 +1880,27 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * Get the corrected time between n frames for an observed mean-squared distance (MSD).
+	 * <p>
+	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
+	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
+	 * number of frames should be reduced by 1/3.
+	 * 
+	 * <pre>
+	 * corrected frames = n - 1/3
+	 * </pre>
+	 * 
+	 * @param n
+	 * @return
+	 */
+	public static double getCorrectedTime(int n)
+	{
+		return n - THIRD;
+	}
+	
+	/**
 	 * Convert an observed mean-squared distance (MSD) between n frames into the actual MSD.
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
