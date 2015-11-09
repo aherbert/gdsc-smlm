@@ -753,8 +753,6 @@ public class Utils
 
 		double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
 
-		double[] xValues, yValues;
-
 		if (barChart)
 		{
 			// Standard histogram
@@ -781,6 +779,7 @@ public class Utils
 		}
 
 		Plot2 plot = new Plot2(title, name, "Frequency");
+		Utils.xMin = Utils.xMax = Utils.yMin = Utils.yMax = 0;
 		if (xValues.length > 0)
 		{
 			double dx = 0;
@@ -788,7 +787,10 @@ public class Utils
 				dx = (xValues.length == 1) ? 1 : (xValues[1] - xValues[0]);
 			double xMax = xValues[xValues.length - 1] + dx;
 			double xPadding = 0.05 * (xMax - xValues[0]);
-			plot.setLimits(xValues[0] - xPadding, xMax + xPadding, 0, Maths.max(yValues) * 1.05);
+			Utils.xMin = xValues[0] - xPadding;
+			Utils.xMax = xMax + xPadding;
+			Utils.yMax = Maths.max(yValues) * 1.05;
+			plot.setLimits(xMin, xMax, Utils.yMin, Utils.yMax);
 		}
 		plot.addPoints(xValues, yValues, (barChart) ? Plot2.BAR : Plot.LINE);
 		if (label != null)
@@ -796,6 +798,10 @@ public class Utils
 		PlotWindow window = Utils.display(title, plot);
 		return window.getImagePlus().getID();
 	}
+
+	// Provide direct access to the last histogram plotted
+	public static double[] xValues, yValues;
+	public static double xMin, xMax, yMin, yMax;
 
 	/**
 	 * @return True is the last call to display created a new window
