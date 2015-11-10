@@ -45,6 +45,7 @@ import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
@@ -62,6 +63,34 @@ public class DiffusionRateTest implements PlugIn
 {
 	private static final String TITLE = "Diffusion Rate Test";
 	private static TextWindow msdTable = null;
+
+	/**
+	 * Used to aggregate points into results
+	 */
+	public class Point
+	{
+		public int id;
+		public double x, y;
+
+		/**
+		 * Create a cluster point
+		 * 
+		 * @param id
+		 * @param x
+		 * @param y
+		 */
+		public Point(int id, double x, double y)
+		{
+			this.id = id;
+			this.x = x;
+			this.y = y;
+		}
+
+		public Point(int id, double[] xyz)
+		{
+			this(id, xyz[0], xyz[1]);
+		}
+	}
 
 	private CreateDataSettings settings;
 	private static boolean useConfinement = false;
@@ -136,6 +165,8 @@ public class DiffusionRateTest implements PlugIn
 		results.setCalibration(cal);
 		results.setName(TITLE);
 		int peak = 0;
+		// Store raw coordinates
+		ArrayList<Point> points = new ArrayList<Point>(totalSteps);
 
 		for (int i = 0; i < settings.particles; i++)
 		{
@@ -184,6 +215,8 @@ public class DiffusionRateTest implements PlugIn
 						}
 					}
 
+					points.add(new Point(id, xyz));
+
 					if (addError)
 						xyz = addError(xyz, precisionInPixels, random);
 
@@ -199,6 +232,7 @@ public class DiffusionRateTest implements PlugIn
 					{
 						m.walk(diffusionSigma, random);
 						double[] xyz = m.getCoordinates();
+						points.add(new Point(id, xyz));
 						if (addError)
 							xyz = addError(xyz, precisionInPixels, random);
 						peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
@@ -210,6 +244,7 @@ public class DiffusionRateTest implements PlugIn
 					{
 						m.move(diffusionSigma, random);
 						double[] xyz = m.getCoordinates();
+						points.add(new Point(id, xyz));
 						if (addError)
 							xyz = addError(xyz, precisionInPixels, random);
 						peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
@@ -232,7 +267,7 @@ public class DiffusionRateTest implements PlugIn
 				Utils.rounded(results.getCalibration().exposureTime / 1000),
 				Utils.rounded(jumpDistances.getMean() / conversionFactor), Utils.rounded(msd));
 
-		aggregateIntoFrames(results, msd);
+		aggregateIntoFrames(points, msd, addError, precisionInPixels, random);
 
 		IJ.showStatus("Analysing results ...");
 		IJ.showProgress(1);
@@ -358,7 +393,7 @@ public class DiffusionRateTest implements PlugIn
 		int plotId = Utils.showHistogram(title, jumpDistances, "Distance (um^2)", 0, 0, values.length / 1000);
 		if (Utils.isNewWindow())
 			idList[idCount++] = plotId;
-		
+
 		// Plot the expected function
 		double max = Maths.max(values);
 		double[] x = Utils.newArray(1000, 0, max / 1000);
@@ -369,10 +404,10 @@ public class DiffusionRateTest implements PlugIn
 		JumpDistanceFunction fun = jd.new JumpDistanceFunction(x, estimatedD);
 		double[] y = fun.evaluateAll(fun.guess());
 		// Scale to have the same area
-		final double area1 = jumpDistances.getN() * (Utils.xValues[1]-Utils.xValues[0]);
-		final double area2 = Maths.sum(y) * (x[1]-x[0]);
+		final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
+		final double area2 = Maths.sum(y) * (x[1] - x[0]);
 		final double scale = area1 / area2;
-		for (int i=0; i<y.length; i++)
+		for (int i = 0; i < y.length; i++)
 			y[i] *= scale;
 		jdPlot = Utils.plot;
 		jdPlot.setColor(Color.red);
@@ -656,12 +691,13 @@ public class DiffusionRateTest implements PlugIn
 		return limits;
 	}
 
-	private void aggregateIntoFrames(MemoryPeakResults separateResults, double baseMsd)
+	private void aggregateIntoFrames(ArrayList<Point> points, double baseMsd, boolean addError,
+			double precisionInPixels, RandomGenerator random)
 	{
 		if (myAggregateSteps < 1)
 			return;
 
-		MemoryPeakResults results = new MemoryPeakResults(separateResults.size() / myAggregateSteps);
+		MemoryPeakResults results = new MemoryPeakResults(points.size() / myAggregateSteps);
 		Calibration cal = new Calibration(settings.pixelPitch, 1, myAggregateSteps * 1000.0 / settings.stepsPerSecond);
 		results.setCalibration(cal);
 		results.setName(TITLE + " Aggregated");
@@ -674,16 +710,19 @@ public class DiffusionRateTest implements PlugIn
 		double sum = 0;
 		int count = 0;
 		PeakResult last = null;
-		for (PeakResult result : separateResults.getResults())
+		for (Point result : points)
 		{
-			final boolean newId = result.getId() != id;
+			final boolean newId = result.id != id;
 			if (n >= myAggregateSteps || newId)
 			{
 				if (n != 0)
 				{
 					final float[] params = new float[7];
-					params[Gaussian2DFunction.X_POSITION] = (float) (cx / n);
-					params[Gaussian2DFunction.Y_POSITION] = (float) (cy / n);
+					double[] xyz = new double[] { cx / n, cy / n };
+					if (addError)
+						xyz = addError(xyz, precisionInPixels, random);
+					params[Gaussian2DFunction.X_POSITION] = (float) xyz[0];
+					params[Gaussian2DFunction.Y_POSITION] = (float) xyz[1];
 					params[Gaussian2DFunction.SIGNAL] = n;
 					params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
 					final float noise = 0.1f;
@@ -704,20 +743,23 @@ public class DiffusionRateTest implements PlugIn
 				{
 					peak++; // Increment the frame so that tracing analysis can distinguish traces
 					last = null;
-					id = result.getId();
+					id = result.id;
 				}
 			}
 			n++;
-			cx += result.getXPosition();
-			cy += result.getYPosition();
+			cx += result.x;
+			cy += result.y;
 		}
 
 		// Final peak
 		if (n != 0)
 		{
 			final float[] params = new float[7];
-			params[Gaussian2DFunction.X_POSITION] = (float) (cx / n);
-			params[Gaussian2DFunction.Y_POSITION] = (float) (cy / n);
+			double[] xyz = new double[] { cx / n, cy / n };
+			if (addError)
+				xyz = addError(xyz, precisionInPixels, random);
+			params[Gaussian2DFunction.X_POSITION] = (float) xyz[0];
+			params[Gaussian2DFunction.Y_POSITION] = (float) xyz[1];
 			params[Gaussian2DFunction.SIGNAL] = n;
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
 			final float noise = 0.1f;
