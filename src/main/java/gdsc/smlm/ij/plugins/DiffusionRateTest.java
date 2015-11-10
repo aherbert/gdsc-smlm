@@ -28,6 +28,7 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.Maths;
+import gdsc.smlm.utils.RollingArray;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
@@ -89,6 +90,13 @@ public class DiffusionRateTest implements PlugIn
 		public Point(int id, double[] xyz)
 		{
 			this(id, xyz[0], xyz[1]);
+		}
+
+		public double distance2(Point p)
+		{
+			final double dx = x - p.x;
+			final double dy = y - p.y;
+			return dx * dx + dy * dy;
 		}
 	}
 
@@ -267,7 +275,7 @@ public class DiffusionRateTest implements PlugIn
 				Utils.rounded(results.getCalibration().exposureTime / 1000),
 				Utils.rounded(jumpDistances.getMean() / conversionFactor), Utils.rounded(msd));
 
-		aggregateIntoFrames(points, msd, addError, precisionInPixels, random);
+		aggregateIntoFrames(points, addError, precisionInPixels, random);
 
 		IJ.showStatus("Analysing results ...");
 		IJ.showProgress(1);
@@ -691,8 +699,8 @@ public class DiffusionRateTest implements PlugIn
 		return limits;
 	}
 
-	private void aggregateIntoFrames(ArrayList<Point> points, double baseMsd, boolean addError,
-			double precisionInPixels, RandomGenerator random)
+	private void aggregateIntoFrames(ArrayList<Point> points, boolean addError, double precisionInPixels,
+			RandomGenerator random)
 	{
 		if (myAggregateSteps < 1)
 			return;
@@ -781,38 +789,84 @@ public class DiffusionRateTest implements PlugIn
 				Utils.rounded(results.getCalibration().exposureTime / 1000), Utils.rounded(msd / conversionFactor),
 				Utils.rounded((msd / conversionFactor) / (results.getCalibration().exposureTime / 1000)));
 
-		msdAnalysis(results, baseMsd);
+		msdAnalysis(points);
 	}
 
 	/**
 	 * Tabulate the observed MSD for different jump distances
 	 * 
-	 * @param results
-	 * @param baseMsd
-	 *            The MSD from non-agggregated data
+	 * @param points
 	 */
-	private void msdAnalysis(MemoryPeakResults results, double baseMsd)
+	private void msdAnalysis(ArrayList<Point> points)
 	{
 		if (myMsdAnalysisSteps == 0)
 			return;
-		createMsdTable(baseMsd);
+
 		// This will only be fast if the list is an array
-		PeakResult[] list = results.getResults().toArray(new PeakResult[results.size()]);
+		Point[] list = points.toArray(new Point[points.size()]);
+
+		// Compute the base MSD
+		Point origin = new Point(0, 0, 0);
+		double sum = origin.distance2(list[0]);
+		int count = 1;
+		for (int i = 1; i < list.length; i++)
+		{
+			Point last = list[i - 1];
+			Point current = list[i];
+
+			if (last.id == current.id)
+			{
+				sum += last.distance2(current);
+			}
+			else
+			{
+				sum += origin.distance2(current);
+			}
+			count++;
+		}
+		createMsdTable((sum / count) * settings.stepsPerSecond / conversionFactor);
+
+		// Create a new set of points that have coordinates that 
+		// are the rolling average over the number of aggregate steps
+		RollingArray x = new RollingArray(aggregateSteps);
+		RollingArray y = new RollingArray(aggregateSteps);
+
+		int id = 0;
+		int length = 0;
+		for (Point p : points)
+		{
+			if (p.id != id)
+			{
+				x.reset();
+				y.reset();
+			}
+			id = p.id;
+			x.add(p.x);
+			y.add(p.y);
+			// Only create a point if the full aggregation size is reached
+			if (x.isFull())
+			{
+				list[length++] = new Point(id, x.getAverage(), y.getAverage());
+			}
+		}
+
 		for (int step = 1; step <= myMsdAnalysisSteps; step++)
 		{
-			double sum = 0;
-			int count = 0;
-			for (int i = step; i < list.length; i++)
+			sum = 0;
+			count = 0;
+			for (int i = step; i < length; i++)
 			{
-				PeakResult last = list[i - step];
-				PeakResult current = list[i];
+				Point last = list[i - step];
+				Point current = list[i];
 
-				if (last.getId() == current.getId())
+				if (last.id == current.id)
 				{
 					sum += last.distance2(current);
 					count++;
 				}
 			}
+			if (count == 0)
+				break;
 			addResult(step, sum, count);
 		}
 	}
@@ -844,11 +898,13 @@ public class DiffusionRateTest implements PlugIn
 
 	private void addResult(int step, double sum, int count)
 	{
+		// Exposure time is the aggregated frame time 
 		final double exposureTime = myAggregateSteps / settings.stepsPerSecond;
 		final double msd = (sum / count) / conversionFactor;
+		// Jump distance separation is the number of steps
+		final double t = step / settings.stepsPerSecond;
 		StringBuilder sb = new StringBuilder(prefix);
 		sb.append(Utils.rounded(exposureTime)).append('\t');
-		final double t = step * exposureTime;
 		sb.append(Utils.rounded(t)).append('\t');
 		sb.append(count).append('\t');
 		sb.append(Utils.rounded(msd)).append('\t');
