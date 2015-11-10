@@ -778,7 +778,7 @@ public class Utils
 			yValues = Arrays.copyOf(yValues, c);
 		}
 
-		Plot2 plot = new Plot2(title, name, "Frequency");
+		plot = new Plot2(title, name, "Frequency");
 		Utils.xMin = Utils.xMax = Utils.yMin = Utils.yMax = 0;
 		if (xValues.length > 0)
 		{
@@ -802,6 +802,7 @@ public class Utils
 	// Provide direct access to the last histogram plotted
 	public static double[] xValues, yValues;
 	public static double xMin, xMax, yMin, yMax;
+	public static Plot2 plot;
 
 	/**
 	 * @return True is the last call to display created a new window

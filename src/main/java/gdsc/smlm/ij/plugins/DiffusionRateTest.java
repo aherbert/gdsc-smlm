@@ -353,12 +353,12 @@ public class DiffusionRateTest implements PlugIn
 			idList[idCount++] = pw2.getImagePlus().getID();
 
 		// Show a histogram of the distribution
-		title = TITLE + " Simulated Jump";
+		title = TITLE + " Jump";
 		jumpDistances = new StoredDataStatistics(values);
 		int plotId = Utils.showHistogram(title, jumpDistances, "Distance (um^2)", 0, 0, values.length / 1000);
 		if (Utils.isNewWindow())
 			idList[idCount++] = plotId;
-
+		
 		// Plot the expected function
 		double max = Maths.max(values);
 		double[] x = Utils.newArray(1000, 0, max / 1000);
@@ -368,13 +368,16 @@ public class DiffusionRateTest implements PlugIn
 			estimatedD += precision * precision / 1e6;
 		JumpDistanceFunction fun = jd.new JumpDistanceFunction(x, estimatedD);
 		double[] y = fun.evaluateAll(fun.guess());
-		title = TITLE + " Predicted Jump Distance (um^2)";
-		jdPlot = new Plot2(title, "Distance (um^2)", "Probability");
-		jdPlot.setLimits(Utils.xMin, Utils.xMax, Utils.yMin, 1.05 * y[0]);
+		// Scale to have the same area
+		final double area1 = jumpDistances.getN() * (Utils.xValues[1]-Utils.xValues[0]);
+		final double area2 = Maths.sum(y) * (x[1]-x[0]);
+		final double scale = area1 / area2;
+		for (int i=0; i<y.length; i++)
+			y[i] *= scale;
+		jdPlot = Utils.plot;
+		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
-		pw2 = Utils.display(title, jdPlot);
-		if (Utils.isNewWindow())
-			idList[idCount++] = pw2.getImagePlus().getID();
+		Utils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
 
 		if (idCount > 0)
 			new WindowOrganiser().tileWindows(idList);
