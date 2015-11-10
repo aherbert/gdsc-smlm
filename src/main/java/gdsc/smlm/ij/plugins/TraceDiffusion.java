@@ -216,7 +216,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			// Store all the jump distances at the specified interval
 			StoredDataStatistics jumpDistances = new StoredDataStatistics();
 			final int jumpDistanceInterval = settings.jumpDistance;
-			final double jdPx2ToUm2PerSecond = px2ToUm2 / (exposureTime / factors[jumpDistanceInterval]);
 
 			// Compute squared distances
 			StoredDataStatistics msdPerMoleculeAllVsAll = new StoredDataStatistics();
@@ -244,7 +243,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							final double d = distance2(x, y, results.get(j));
 							msd[j - 1] = px2ToUm2 * d;
 							if (t == jumpDistanceInterval)
-								jumpDistances.add(jdPx2ToUm2PerSecond * d);
+								jumpDistances.add(msd[j - 1]);
 							sumDistance[t] += d;
 							sumTime[t] += t;
 						}
@@ -257,7 +256,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							final int t = j;
 							final double d = distance2(x, y, results.get(j));
 							if (t == jumpDistanceInterval)
-								jumpDistances.add(jdPx2ToUm2PerSecond * d);
+								jumpDistances.add(px2ToUm2 * d);
 							sumDistance[t] += d;
 							sumTime[t] += t;
 						}
@@ -276,7 +275,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 							final int t = j - i;
 							final double d = distance2(x, y, results.get(j));
 							if (t == jumpDistanceInterval)
-								jumpDistances.add(jdPx2ToUm2PerSecond * d);
+								jumpDistances.add(px2ToUm2 * d);
 							sumDistance[t] += d;
 							sumTime[t] += t;
 						}
@@ -375,14 +374,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			// Jump Distance analysis
 			if (saveRawData)
-				saveStatistics(jumpDistances, "Jump Distance", "Distance (um^2/second)", false);
+				saveStatistics(jumpDistances, "Jump Distance", "Distance (um^2)", false);
 
 			// Calculate the cumulative jump-distance histogram
 			double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(jumpDistances.getValues());
 
 			// Always show the jump distance histogram
 			jdTitle = TITLE + " Jump Distance";
-			jdPlot = new Plot2(jdTitle, "Distance (um^2/second)", "Cumulative Probability", jdHistogram[0],
+			jdPlot = new Plot2(jdTitle, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
 					jdHistogram[1]);
 			display(jdTitle, jdPlot);
 
@@ -462,7 +461,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 		precision /= n;
 
-		if (precision > 100)
+		if (precision > 0)
 		{
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("The average precision of the traced results is " + Utils.rounded(precision, 4) +
@@ -1471,21 +1470,21 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * <p>
 	 * Update the plot by adding the fit line(s).
 	 * 
-	 * @param jumpDistances
+	 * @param jumpDistances (in um^2)
 	 * @param jdHistogram
 	 * @return The fitted coefficients and fractions
 	 */
 	private double[][] fitJumpDistance(StoredDataStatistics jumpDistances, double[][] jdHistogram)
 	{
 		final double msd = jumpDistances.getMean();
-		final double meanDistance = Math.sqrt(msd * settings.jumpDistance * exposureTime) * 1e3;
+		final double meanDistance = Math.sqrt(msd) * 1e3;
 		// TODO:
 		// Q. Should the beta be expressed using the mean-distance or MSD? 
 		// Q. Should it be normalised to the frame length. If not then the beta will be invariant on 
 		// jump distance length
 		beta = meanDistance / precision;
 		Utils.log(
-				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/second, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s",
+				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s",
 				jumpDistances.getN(), settings.jumpDistance, Utils.rounded(settings.jumpDistance * exposureTime, 4),
 				Utils.rounded(msd, 4), Utils.rounded(meanDistance, 4), Utils.rounded(precision, 4),
 				Utils.rounded(beta, 4));
@@ -1499,38 +1498,24 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		jd.setMaxN(maxN);
 		// Update the plot with the fit
 		jd.setCurveLogger(this);
+
+		// Set the calibration
+		jd.setN(settings.jumpDistance);
+		jd.setDeltaT(exposureTime);
+		if (settings.precisionCorrection)
+			jd.setError(precision, true);
+		jd.setMsdCorrection(settings.msdCorrection);
+		
 		double[][] fit;
 		if (settings.mle)
 			fit = jd.fitJumpDistancesMLE(jumpDistances.getValues(), jdHistogram);
 		else
 			fit = jd.fitJumpDistanceHistogram(jumpDistances.getMean(), jdHistogram);
 
-		// When outputting the estimated diffusion coefficients we must take 
-		// account of the precision of the localisations.
-		if (fit != null && settings.precisionCorrection)
+		// Get the raw fitted D and convert it to a calibrated D*
+		if (fit != null)
 		{
-			// MSD(n dt) = 4D n dt + 4s^2
-			// n = number of jumps
-			// dt = time difference between frames
-			// s = localisation precision
-
-			// D = MSD/4 - s^2/t
-			// D* = Max(0, D-s^2/t)
-
-			// Convert precision to um
-			double error = precision * precision / (1e6 * exposureTime);
-
-			// Note: The distance correction has already been incorporated into the MSD.
-			// This would have had the equivalent effect of increasing the MSD by a factor.
-			// This increase should also be applied to the localisation error.
-			if (settings.msdCorrection)
-				error *= JumpDistanceAnalysis.getConversionfactor(settings.jumpDistance);
-
-			// Now find the apparent diffusion coefficients
-			for (int i = 0; i < fit[0].length; i++)
-			{
-				fit[0][i] = Math.max(0, fit[0][i] - error);
-			}
+			fit[0] = jd.calculateApparentDiffusionCoefficient(fit[0]);
 		}
 
 		return fit;

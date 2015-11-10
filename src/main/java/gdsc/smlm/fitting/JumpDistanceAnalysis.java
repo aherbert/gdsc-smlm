@@ -61,6 +61,11 @@ public class JumpDistanceAnalysis
 {
 	private final boolean DEBUG_OPTIMISER = false;
 	final static double THIRD = 1.0 / 3.0;
+	private double s2 = 0;
+	private boolean msdCorrection = false;
+	private int n = 0;
+	private double deltaT = 0;
+	private boolean calibrated = false;
 
 	public interface CurveLogger
 	{
@@ -125,8 +130,8 @@ public class JumpDistanceAnalysis
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
 	 * @param jumpDistances
-	 *            The jump distances (in um^2/s)
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 *            The jump distances (in um^2)
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistances(double... jumpDistances)
 	{
@@ -150,11 +155,11 @@ public class JumpDistanceAnalysis
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
 	 * @param jumpDistances
-	 *            The mean jump distance (in um^2/s)
+	 *            The mean jump distance (in um^2)
 	 * @param jdHistogram
-	 *            The cumulative jump distance histogram. X-axis is um^2/s, Y-axis is cumulative probability. Must be
+	 *            The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative probability. Must be
 	 *            monototic ascending.
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistanceHistogram(double meanJumpDistance, double[][] jdHistogram)
 	{
@@ -162,7 +167,7 @@ public class JumpDistanceAnalysis
 		final double estimatedD = meanJumpDistance / 4;
 		if (meanJumpDistance == 0)
 			return null;
-		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
 
 		double[] ic = new double[maxN];
 		Arrays.fill(ic, Double.POSITIVE_INFINITY);
@@ -220,8 +225,8 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %d population%s: D = %s um^2/s, Fractions = %s", best + 1,
-					(best == 0) ? "" : "s", format(coefficients[best]), format(fractions[best]));
+			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1,
+					(best == 0) ? "" : "s", formatD(coefficients[best]), format(fractions[best]));
 		}
 
 		return (best > -1) ? new double[][] { coefficients[best], fractions[best] } : null;
@@ -233,10 +238,10 @@ public class JumpDistanceAnalysis
 	 * Results are sorted by the diffusion coefficient ascending.
 	 * 
 	 * @param jumpDistances
-	 *            The jump distances (in um^2/s)
+	 *            The jump distances (in um^2)
 	 * @param n
 	 *            The number of species in the mixed population
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistances(double[] jumpDistances, int n)
 	{
@@ -255,13 +260,13 @@ public class JumpDistanceAnalysis
 	 * Results are sorted by the diffusion coefficient ascending.
 	 * 
 	 * @param jumpDistances
-	 *            The mean jump distance (in um^2/s)
+	 *            The mean jump distance (in um^2)
 	 * @param jdHistogram
-	 *            The cumulative jump distance histogram. X-axis is um^2/s, Y-axis is cumulative probability. Must be
+	 *            The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative probability. Must be
 	 *            monototic ascending.
 	 * @param n
 	 *            The number of species in the mixed population
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistanceHistogram(double meanJumpDistance, double[][] jdHistogram, int n)
 	{
@@ -269,7 +274,7 @@ public class JumpDistanceAnalysis
 		final double estimatedD = meanJumpDistance / 4;
 		if (meanJumpDistance == 0)
 			return null;
-		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
 
 		double[][] fit = doFitJumpDistanceHistogram(jdHistogram, estimatedD, n);
 		if (fit != null)
@@ -283,16 +288,18 @@ public class JumpDistanceAnalysis
 	 * Results are sorted by the diffusion coefficient ascending.
 	 * 
 	 * @param jdHistogram
-	 *            The cumulative jump distance histogram. X-axis is um^2/s, Y-axis is cumulative probability. Must be
+	 *            The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative probability. Must be
 	 *            monototic ascending.
 	 * @param estimatedD
 	 *            The estimated diffusion coefficient
 	 * @param n
 	 *            The number of species in the mixed population
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	private double[][] doFitJumpDistanceHistogram(double[][] jdHistogram, double estimatedD, int n)
 	{
+		calibrated = isCalibrated();
+
 		if (n == 1)
 		{
 			// Fit using a single population model
@@ -317,9 +324,8 @@ public class JumpDistanceAnalysis
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
-				logger.info("Fit Jump distance (N=1) : D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
-						Maths.rounded(fitParams[0], 4), Maths.rounded(ss, 4), Maths.rounded(ic, 4),
-						lvmOptimizer.getEvaluations());
+				logger.info("Fit Jump distance (N=1) : %s, SS = %s, IC = %s (%d evaluations)", formatD(fitParams[0]),
+						Maths.rounded(ss, 4), Maths.rounded(ic, 4), lvmOptimizer.getEvaluations());
 
 				return new double[][] { coefficients, fractions };
 			}
@@ -500,8 +506,8 @@ public class JumpDistanceAnalysis
 		double[] coefficients = d;
 		double[] fractions = f;
 
-		logger.info("Fit Jump distance (N=%d) : D = %s um^2/s (%s), SS = %s, IC = %s (%d evaluations)", n, format(d),
-				format(f), Maths.rounded(ss, 4), Maths.rounded(ic, 4), evaluations);
+		logger.info("Fit Jump distance (N=%d) : %s (%s), SS = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
+				Maths.rounded(ss, 4), Maths.rounded(ic, 4), evaluations);
 
 		boolean valid = true;
 		for (int i = 0; i < f.length; i++)
@@ -543,8 +549,8 @@ public class JumpDistanceAnalysis
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
 	 * @param jumpDistances
-	 *            The jump distances (in um^2/s)
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 *            The jump distances (in um^2)
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistancesMLE(double[] jumpDistances)
 	{
@@ -562,11 +568,11 @@ public class JumpDistanceAnalysis
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
 	 * 
 	 * @param jumpDistances
-	 *            The jump distances (in um^2/s)
+	 *            The jump distances (in um^2)
 	 * @param jdHistogram
 	 *            The jump distance histogram for the given distances. If null will be computed using
 	 *            {@link #cumulativeHistogram(double[])}. Only used if the CurveLogger is not null.
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistancesMLE(double[] jumpDistances, double[][] jdHistogram)
 	{
@@ -578,7 +584,7 @@ public class JumpDistanceAnalysis
 
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
-		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
 
 		// Used for saving fitted the curve 
 		if (curveLogger != null && jdHistogram == null)
@@ -640,8 +646,8 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %d population%s: D = %s um^2/s, Fractions = %s", best + 1,
-					(best == 0) ? "" : "s", format(coefficients[best]), format(fractions[best]));
+			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1,
+					(best == 0) ? "" : "s", formatD(coefficients[best]), format(fractions[best]));
 		}
 
 		return (best > -1) ? new double[][] { coefficients[best], fractions[best] } : null;
@@ -653,10 +659,10 @@ public class JumpDistanceAnalysis
 	 * Results are sorted by the diffusion coefficient ascending.
 	 * 
 	 * @param jumpDistances
-	 *            The jump distances (in um^2/s)
+	 *            The jump distances (in um^2)
 	 * @param n
 	 *            The number of species in the mixed population
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistancesMLE(double[] jumpDistances, int n)
 	{
@@ -669,13 +675,13 @@ public class JumpDistanceAnalysis
 	 * Results are sorted by the diffusion coefficient ascending.
 	 * 
 	 * @param jumpDistances
-	 *            The jump distances (in um^2/s)
+	 *            The jump distances (in um^2)
 	 * @param jdHistogram
 	 *            The jump distance histogram for the given distances. If null will be computed using
 	 *            {@link #cumulativeHistogram(double[])}. Only used if the CurveLogger is not null.
 	 * @param n
 	 *            The number of species in the mixed population
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	public double[][] fitJumpDistancesMLE(double[] jumpDistances, double[][] jdHistogram, int n)
 	{
@@ -687,7 +693,7 @@ public class JumpDistanceAnalysis
 
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
-		logger.info("Estimated D = %s um^2/s", Maths.rounded(estimatedD, 4));
+		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
 
 		// Used for saving fitted the curve 
 		if (curveLogger != null && jdHistogram == null)
@@ -706,17 +712,18 @@ public class JumpDistanceAnalysis
 	 * Results are sorted by the diffusion coefficient ascending.
 	 * 
 	 * @param jumpDistances
-	 *            The jump distances (in um^2/s)
+	 *            The jump distances (in um^2)
 	 * @param estimatedD
 	 *            The estimated diffusion coefficient
 	 * @param n
 	 *            The number of species in the mixed population
-	 * @return Array containing: { D (um^2/s), Fractions }. Can be null if no fit was made.
+	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
 	 */
 	private double[][] doFitJumpDistancesMLE(double[] jumpDistances, double estimatedD, int n)
 	{
 		MaxEval maxEval = new MaxEval(20000);
 		CustomPowellOptimizer powellOptimizer = createCustomPowellOptimizer();
+		calibrated = isCalibrated();
 
 		if (n == 1)
 		{
@@ -736,9 +743,8 @@ public class JumpDistanceAnalysis
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
-				logger.info("Fit Jump distance (N=1) : D = %s um^2/s, MLE = %s, IC = %s (%d evaluations)",
-						Maths.rounded(fitParams[0], 4), Maths.rounded(ll, 4), Maths.rounded(ic, 4),
-						powellOptimizer.getEvaluations());
+				logger.info("Fit Jump distance (N=1) : %s, MLE = %s, IC = %s (%d evaluations)", formatD(fitParams[0]),
+						Maths.rounded(ll, 4), Maths.rounded(ic, 4), powellOptimizer.getEvaluations());
 
 				return new double[][] { coefficients, fractions };
 			}
@@ -884,8 +890,8 @@ public class JumpDistanceAnalysis
 		double[] coefficients = d;
 		double[] fractions = f;
 
-		logger.info("Fit Jump distance (N=%d) : D = %s um^2/s (%s), MLE = %s, IC = %s (%d evaluations)", n, format(d),
-				format(f), Maths.rounded(ll, 4), Maths.rounded(ic, 4), evaluations);
+		logger.info("Fit Jump distance (N=%d) : %s (%s), MLE = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
+				Maths.rounded(ll, 4), Maths.rounded(ic, 4), evaluations);
 
 		boolean valid = true;
 		for (int i = 0; i < f.length; i++)
@@ -948,16 +954,49 @@ public class JumpDistanceAnalysis
 				generateStatistics, checker);
 	}
 
-	private String format(double[] jumpD)
+	/**
+	 * Format the diffusion coefficients for reporting using the calibration if present
+	 * 
+	 * @param jumpD
+	 * @return The formatted D
+	 */
+	private String formatD(double... jumpD)
 	{
 		if (jumpD == null || jumpD.length == 0)
 			return "";
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder("D = ");
 		for (int i = 0; i < jumpD.length; i++)
 		{
 			if (i != 0)
 				sb.append(", ");
 			sb.append(Maths.rounded(jumpD[i], 4));
+		}
+		sb.append(" um^2");
+		if (calibrated)
+		{
+			jumpD = calculateApparentDiffusionCoefficient(jumpD);
+			sb.append(", D* = ");
+			for (int i = 0; i < jumpD.length; i++)
+			{
+				if (i != 0)
+					sb.append(", ");
+				sb.append(Maths.rounded(jumpD[i], 4));
+			}
+			sb.append(" um^2/s");
+		}
+		return sb.toString();
+	}
+
+	private String format(double[] data)
+	{
+		if (data == null || data.length == 0)
+			return "";
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < data.length; i++)
+		{
+			if (i != 0)
+				sb.append(", ");
+			sb.append(Maths.rounded(data[i], 4));
 		}
 		return sb.toString();
 	}
@@ -1857,7 +1896,8 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
-	 * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames into the actual MSD.
+	 * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames into the actual
+	 * MSD.
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
 	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
@@ -1899,7 +1939,7 @@ public class JumpDistanceAnalysis
 	{
 		return n - THIRD;
 	}
-	
+
 	/**
 	 * Convert an observed mean-squared distance (MSD) between n frames into the actual MSD.
 	 * <p>
@@ -1925,7 +1965,7 @@ public class JumpDistanceAnalysis
 	{
 		return msd * n / (n - THIRD);
 	}
-	
+
 	/**
 	 * Convert an actual mean-squared distance (MSD) between n frames into the observed MSD.
 	 * <p>
@@ -1950,5 +1990,123 @@ public class JumpDistanceAnalysis
 	public static double convertActualToObserved(double msd, int n)
 	{
 		return msd * (n - THIRD) / n;
+	}
+
+	/**
+	 * @return The localisation error (s) of the start and end coordinates of the jump (in um)
+	 */
+	public double getError()
+	{
+		return Math.sqrt(s2);
+	}
+
+	/**
+	 * Set the localisation error (s) of the start and end coordinates of the jump. The error is used to compute the
+	 * apparent diffusion coefficient: D* = D - s^2
+	 * 
+	 * @param error
+	 *            The error
+	 * @param nm
+	 *            True if the error is in nm (default is um)
+	 */
+	public void setError(double error, boolean nm)
+	{
+		if (nm)
+			error /= 1000;
+		this.s2 = error * error;
+	}
+
+	/**
+	 * @return True if correcting MSD between frames
+	 */
+	public boolean isMsdCorrection()
+	{
+		return msdCorrection;
+	}
+
+	/**
+	 * Set to true to correct the diffusion coefficient to the apparent diffusion coefficient by compensating for the
+	 * averaging of diffusion with a time frame into a single location.
+	 * 
+	 * @param msdCorrection
+	 *            True if correcting MSD between frames
+	 */
+	public void setMsdCorrection(boolean msdCorrection)
+	{
+		this.msdCorrection = msdCorrection;
+	}
+
+	/**
+	 * @return The number of frames between the start and end coordinates of the jump
+	 */
+	public int getN()
+	{
+		return n;
+	}
+
+	/**
+	 * Set the number of frames between the start and end coordinates of the jump
+	 * 
+	 * @param n
+	 *            The number of frames
+	 */
+	public void setN(int n)
+	{
+		this.n = n;
+	}
+
+	/**
+	 * @return The time difference between each frame
+	 */
+	public double getDeltaT()
+	{
+		return deltaT;
+	}
+
+	/**
+	 * Set the time difference between each frame. The total time is {@link #getDeltaT()} * {@link #getN()}
+	 * 
+	 * @param deltaT
+	 *            The time difference
+	 */
+	public void setDeltaT(double deltaT)
+	{
+		this.deltaT = deltaT;
+	}
+
+	/**
+	 * @return True if the number of frames and time delta have been set
+	 */
+	public boolean isCalibrated()
+	{
+		return deltaT > 0 && n > 0;
+	}
+
+	/**
+	 * Convert the diffusion coefficients (um^2/jump) into apparent diffusion coefficients (um^2/s) if the time and
+	 * frames are calibrated:
+	 * 
+	 * <pre>
+	 * D* = factor * (D - s2) / (n * deltaT)
+	 * </pre>
+	 * 
+	 * where factor is the conversion factor to increase the MSD to correct for diffusion within the frame
+	 * 
+	 * @param d
+	 *            The fitted diffusion coefficients D (in um^2)
+	 * @return The apparent diffusion coefficients D* (in um^2/s)
+	 */
+	public double[] calculateApparentDiffusionCoefficient(double... d)
+	{
+		if (isCalibrated())
+		{
+			d = d.clone();
+			final double f = ((msdCorrection) ? getConversionfactor(n) : 1) / (n * deltaT);
+			for (int i = 0; i < d.length; i++)
+			{
+				d[i] = Math.max(0, d[i] - s2) * f;
+			}
+		}
+		return d;
 	}
 }
