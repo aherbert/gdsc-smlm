@@ -893,7 +893,7 @@ public class DiffusionRateTest implements PlugIn
 		sb.append(Utils.rounded(1.0 / settings.stepsPerSecond)).append('\t');
 		sb.append(myAggregateSteps).append('\t');
 		prefix = sb.toString();
-		return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tN\tMSD (um^2)\tMSD (um^2/s)";
+		return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tN\tMSD (um^2)\tD (um^2/s)";
 	}
 
 	private void addResult(int step, double sum, int count)
@@ -908,7 +908,7 @@ public class DiffusionRateTest implements PlugIn
 		sb.append(Utils.rounded(t)).append('\t');
 		sb.append(count).append('\t');
 		sb.append(Utils.rounded(msd)).append('\t');
-		sb.append(Utils.rounded(msd / t));
+		sb.append(Utils.rounded(msd / (4 * t)));
 		msdTable.append(sb.toString());
 	}
 }
