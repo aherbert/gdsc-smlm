@@ -881,7 +881,7 @@ public class DiffusionRateTest implements PlugIn
 		}
 		else
 		{
-			msdTable.getTextPanel().clear();
+			//msdTable.getTextPanel().clear();
 		}
 	}
 
