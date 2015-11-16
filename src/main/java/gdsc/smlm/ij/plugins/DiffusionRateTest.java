@@ -155,7 +155,14 @@ public class DiffusionRateTest implements PlugIn
 		// Move the molecules and get the diffusion rate
 		IJ.showStatus("Simulating ...");
 		final long start = System.nanoTime();
-		RandomGenerator random = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		final long seed = System.currentTimeMillis() + System.identityHashCode(this);
+		RandomGenerator[] random = new RandomGenerator[3];
+		RandomGenerator[] random2 = new RandomGenerator[3];
+		for (int i = 0; i < 3; i++)
+		{
+			random[i] = new Well19937c(seed + i);
+			random2[i] = new Well19937c(seed + i + 3);
+		}
 		Statistics[] stats2D = new Statistics[totalSteps];
 		Statistics[] stats3D = new Statistics[totalSteps];
 		StoredDataStatistics jumpDistances = new StoredDataStatistics(totalSteps);
@@ -226,7 +233,7 @@ public class DiffusionRateTest implements PlugIn
 					points.add(new Point(id, xyz));
 
 					if (addError)
-						xyz = addError(xyz, precisionInPixels, random);
+						xyz = addError(xyz, precisionInPixels, random2);
 
 					peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
 				}
@@ -242,7 +249,7 @@ public class DiffusionRateTest implements PlugIn
 						double[] xyz = m.getCoordinates();
 						points.add(new Point(id, xyz));
 						if (addError)
-							xyz = addError(xyz, precisionInPixels, random);
+							xyz = addError(xyz, precisionInPixels, random2);
 						peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
 					}
 				}
@@ -254,7 +261,7 @@ public class DiffusionRateTest implements PlugIn
 						double[] xyz = m.getCoordinates();
 						points.add(new Point(id, xyz));
 						if (addError)
-							xyz = addError(xyz, precisionInPixels, random);
+							xyz = addError(xyz, precisionInPixels, random2);
 						peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances, origin, results);
 					}
 				}
@@ -264,6 +271,7 @@ public class DiffusionRateTest implements PlugIn
 			// System.out.printf("%f %f %f\n", m.getX(), m.getY(), m.getZ());
 		}
 		final double time = (System.nanoTime() - start) / 1000000.0;
+		IJ.showProgress(1);
 
 		MemoryPeakResults.addResults(results);
 
@@ -275,10 +283,9 @@ public class DiffusionRateTest implements PlugIn
 				Utils.rounded(results.getCalibration().exposureTime / 1000),
 				Utils.rounded(jumpDistances.getMean() / conversionFactor), Utils.rounded(msd));
 
-		aggregateIntoFrames(points, addError, precisionInPixels, random);
+		aggregateIntoFrames(points, addError, precisionInPixels, random2);
 
 		IJ.showStatus("Analysing results ...");
-		IJ.showProgress(1);
 
 		if (showDiffusionExample)
 		{
@@ -438,12 +445,12 @@ public class DiffusionRateTest implements PlugIn
 	 * @param random
 	 * @return The new xyz
 	 */
-	private double[] addError(double[] xyz, double precision, RandomGenerator random)
+	private double[] addError(double[] xyz, double precision, RandomGenerator[] random)
 	{
 		final double[] xy = xyz.clone();
 		for (int i = 0; i < 2; i++)
 		{
-			final double shift = random.nextGaussian() * precision;
+			final double shift = random[i].nextGaussian() * precision;
 			xy[i] += shift;
 		}
 		return xy;
@@ -592,7 +599,7 @@ public class DiffusionRateTest implements PlugIn
 		return true;
 	}
 
-	private void showExample(int totalSteps, double diffusionSigma, RandomGenerator random)
+	private void showExample(int totalSteps, double diffusionSigma, RandomGenerator[] random)
 	{
 		MoleculeModel m = new MoleculeModel(0, new double[3]);
 		float[] xValues = new float[totalSteps];
@@ -700,7 +707,7 @@ public class DiffusionRateTest implements PlugIn
 	}
 
 	private void aggregateIntoFrames(ArrayList<Point> points, boolean addError, double precisionInPixels,
-			RandomGenerator random)
+			RandomGenerator[] random)
 	{
 		if (myAggregateSteps < 1)
 			return;
@@ -802,6 +809,9 @@ public class DiffusionRateTest implements PlugIn
 		if (myMsdAnalysisSteps == 0)
 			return;
 
+		IJ.showStatus("MSD analysis ...");
+		IJ.showProgress(1, myMsdAnalysisSteps);
+
 		// This will only be fast if the list is an array
 		Point[] list = points.toArray(new Point[points.size()]);
 
@@ -852,6 +862,9 @@ public class DiffusionRateTest implements PlugIn
 
 		for (int step = 1; step <= myMsdAnalysisSteps; step++)
 		{
+			if (step % 16 == 0)
+				IJ.showProgress(step, myMsdAnalysisSteps);
+
 			sum = 0;
 			count = 0;
 			for (int i = step; i < length; i++)
@@ -869,6 +882,8 @@ public class DiffusionRateTest implements PlugIn
 				break;
 			addResult(step, sum, count);
 		}
+
+		IJ.showProgress(1);
 	}
 
 	private void createMsdTable(double baseMsd)
@@ -914,8 +929,9 @@ public class DiffusionRateTest implements PlugIn
 		sb.append(Utils.rounded(t)).append('\t');
 		sb.append(Utils.rounded(t / exposureTime)).append('\t');
 		sb.append(count).append('\t');
-		sb.append(Utils.rounded(msd)).append('\t');
-		sb.append(Utils.rounded(msd / (4 * t)));
+		// Not rounded to preserve precision 
+		sb.append(msd).append('\t');
+		sb.append(msd / (4 * t));
 		msdTable.append(sb.toString());
 	}
 }

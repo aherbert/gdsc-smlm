@@ -192,6 +192,33 @@ public class MoleculeModel
 		}
 		return xyz;
 	}
+	
+	/**
+	 * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion rate.
+	 * <p>
+	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
+	 * 
+	 * @param diffusionRate
+	 * @param random Random generator (one per dimension)
+	 * @return The new coordinates
+	 */
+	public double[] move(double diffusionRate, RandomGenerator[] random)
+	{
+		double[] xyz = getCoordinates();
+		if (diffusionRate > 0)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				final double shift = random[i].nextGaussian() * diffusionRate;
+				// Clip the movement
+				//if (shift > 5*diffusionRate)
+				//	xyz[i] += 5*diffusionRate;
+				//else
+				xyz[i] += shift;
+			}
+		}
+		return xyz;
+	}
 
 	/**
 	 * Move the molecule using a random walk with the given step size
@@ -210,6 +237,31 @@ public class MoleculeModel
 			for (int i = 0; i < 3; i++)
 			{
 				if (random.nextDouble() < 0.5)
+					xyz[i] += stepSize;
+				else
+					xyz[i] -= stepSize;
+			}
+		}
+		return xyz;
+	}
+
+	/**
+	 * Move the molecule using a random walk with the given step size
+	 * <p>
+	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
+	 * 
+	 * @param stepSize
+	 * @param random Random generator (one per dimension)
+	 * @return The new coordinates
+	 */
+	public double[] walk(double stepSize, RandomGenerator[] random)
+	{
+		double[] xyz = getCoordinates();
+		if (stepSize > 0)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				if (random[i].nextDouble() < 0.5)
 					xyz[i] += stepSize;
 				else
 					xyz[i] -= stepSize;

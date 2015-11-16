@@ -1902,14 +1902,15 @@ public class JumpDistanceAnalysis
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
 	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
-	 * number of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a
-	 * factor:
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame. The observed MSD can
+	 * be converted to the corrected MSD by applying a factor:
 	 * 
 	 * <pre>
-	 * observed = actual*(n-1/3)/n
-	 * actual = observed * n / (n-1/3)
+	 * observed = actual * (n - 1/3) / n
+	 * actual = observed * n / (n - 1/3)
 	 * </pre>
+	 * 
+	 * Note this is only valid for n>=1
 	 * 
 	 * @param n
 	 * @return
@@ -1920,17 +1921,62 @@ public class JumpDistanceAnalysis
 	}
 
 	/**
+	 * Get the conversion factor to convert an observed mean-squared distance (MSD) between n frames into the actual
+	 * MSD.
+	 * <p>
+	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
+	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
+	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * of frames should be reduced by 1/3.
+	 * <p>
+	 * In the event that n is less than 1 the two frames overlap. Consequently there is interference where some of the
+	 * same molecule positions have been used to compute the average start and end location within the frames. This must
+	 * be modelled using a different formula.
+	 * <p>
+	 * Simulations using multiple simulation steps within each frame were used to compute the MSD at different frame
+	 * separation intervals. These curves were compared to the expected MSD for the simulated diffusion coefficient to
+	 * produce a correction factor curve. This was fitted for n>=1 and n<1. The observed MSD can be converted to the
+	 * corrected MSD by applying a factor:
+	 * 
+	 * <pre>
+	 * n>=1:
+	 * observed = actual * (n - 1/3) / n
+	 * actual = observed * n / (n - 1/3)
+	 * 
+	 * n<1:
+	 * observed = actual * (n - n*n / 3)
+	 * actual = observed / (n - n*n / 3)
+	 * </pre>
+	 * 
+	 * Note this is valid for n>=0
+	 * 
+	 * @param n
+	 * @return
+	 */
+	public static double getConversionfactor(double n)
+	{
+		if (n > 1)
+			return n / (n - THIRD);
+		if (n > 0)
+			return 1 / (n - n * n / 3.0);
+		return 0;
+	}
+
+	/**
 	 * Get the corrected time between n frames for an observed mean-squared distance (MSD).
 	 * <p>
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
 	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
-	 * number of frames should be reduced by 1/3.
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * of frames should be reduced by 1/3.
 	 * 
 	 * <pre>
 	 * corrected frames = n - 1/3
 	 * </pre>
+	 * 
+	 * Note this is only valid for n>=1
 	 * 
 	 * @param n
 	 * @return
@@ -1946,14 +1992,15 @@ public class JumpDistanceAnalysis
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
 	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
-	 * number of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a
-	 * factor:
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 * 
 	 * <pre>
-	 * observed = actual*(n-1/3)/n
-	 * actual = observed * n / (n-1/3)
+	 * observed = actual * (n - 1/3) / n
+	 * actual = observed * n / (n - 1/3)
 	 * </pre>
+	 * 
+	 * Note this is only valid for n>=1
 	 * 
 	 * @param msd
 	 *            The observed MSD
@@ -1972,14 +2019,15 @@ public class JumpDistanceAnalysis
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
 	 * frame. This leads to condensation of the observed distance travelled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occured in the start and end frame by 1/6, i.e. the
-	 * number of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a
-	 * factor:
+	 * the effect of reducing the effective time that diffusion occured in the start and end frame and the total number
+	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
 	 * 
 	 * <pre>
-	 * observed = actual*(n-1/3)/n
-	 * actual = observed * n / (n-1/3)
+	 * observed = actual * (n - 1/3) / n
+	 * actual = observed * n / (n - 1/3)
 	 * </pre>
+	 * 
+	 * Note this is only valid for n>=1
 	 * 
 	 * @param msd
 	 *            The actual MSD
@@ -2048,7 +2096,7 @@ public class JumpDistanceAnalysis
 	 * Set the number of frames between the start and end coordinates of the jump
 	 * 
 	 * @param n
-	 *            The number of frames
+	 *            The number of frames (must be strictly positive)
 	 */
 	public void setN(int n)
 	{
