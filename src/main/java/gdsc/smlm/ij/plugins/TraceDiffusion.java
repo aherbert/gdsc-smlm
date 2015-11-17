@@ -381,8 +381,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			// Always show the jump distance histogram
 			jdTitle = TITLE + " Jump Distance";
-			jdPlot = new Plot2(jdTitle, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
-					jdHistogram[1]);
+			jdPlot = new Plot2(jdTitle, "Distance (um^2)", "Cumulative Probability", jdHistogram[0], jdHistogram[1]);
 			display(jdTitle, jdPlot);
 
 			// Fit Jump Distance cumulative probability
@@ -1202,16 +1201,17 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// dt = time difference between frames
 		// s = localisation precision
 		// Thus we should fit an intercept as well.
-		
-		// TODO - change this to a non-linear fit ...
-		// MSD = 4Dt n^2 - (4Dt) n / 3 + 4 s^2
-		// From the fit D = 4Dt / (4*exposureTime)
+
+		// From the fit D = gradient / (4*exposureTime)
 
 		double D = 0;
+		double intercept = 0;
+
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 		PointVectorValuePair lvmSolution;
 		double ic = 0;
-		double gradient = 0, intercept = 0;
+
+		// Fit with no intercept
 		try
 		{
 			final LinearFunction function = new LinearFunction(x, y, settings.fitLength);
@@ -1234,7 +1234,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			ic = Maths.getInformationCriterion(ss, obs.length, 1);
 
-			gradient = lvmSolution.getPoint()[0];
+			double gradient = lvmSolution.getPoint()[0];
 			D = gradient / 4;
 
 			Utils.log("Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
@@ -1250,6 +1250,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			Utils.log("Failed to fit : %s", e.getMessage());
 		}
 
+		// Fit with intercept
 		try
 		{
 			final LinearFunctionWithIntercept function = new LinearFunctionWithIntercept(x, y, settings.fitLength);
@@ -1270,7 +1271,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
 			double ic2 = Maths.getInformationCriterion(ss, obs.length, 1);
-			double gradient2 = lvmSolution.getPoint()[0];
+			double gradient = lvmSolution.getPoint()[0];
 			final double s = lvmSolution.getPoint()[1];
 			double intercept2 = 4 * s * s;
 
@@ -1279,22 +1280,16 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				// Convert fitted precision in um to nm
 				Utils.log(
 						"Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
-						obs.length, Utils.rounded(gradient2, 4), Utils.rounded(intercept2, 4),
-						Utils.rounded(gradient2 / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
+						obs.length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
+						Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
 						Utils.rounded(ic2), optimizer.getEvaluations());
 			}
 
 			if (lvmSolution == null || ic2 < ic)
 			{
-				gradient = gradient2;
 				intercept = intercept2;
 				D = gradient / 4;
 			}
-
-			// Add the fit to the plot
-			plot.setColor(Color.magenta);
-			plot.drawLine(0, intercept, x[x.length - 1], gradient * x[x.length - 1] + intercept);
-			display(title, plot);
 		}
 		catch (TooManyIterationsException e)
 		{
@@ -1305,9 +1300,78 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			Utils.log("Failed to fit with intercept : %s", e.getMessage());
 		}
 
-		if (D != 0 && settings.msdCorrection)
+		if (settings.msdCorrection)
 		{
-			//D /= JumpDistanceAnalysis.getCorrectedTime(settings.jumpDistance);
+			// Fit with intercept including the MSD correction in the intercept.
+			// For the MSD correction we fit including the correction factor (n-1/3)/n:
+			// MSD = 4Dt n * (n - 1/3)/n + 4 s^2
+			// MSD = 4Dt n - (4Dt) / 3 + 4 s^2
+			// i.e. the intercept is allowed to be a small negative.
+			try
+			{
+				// This function fits the jump distance (n) not the time (nt) so update x
+				double[] x2 = new double[x.length];
+				for (int i = 0; i < x2.length; i++)
+					x2[i] = x[i] / exposureTime;
+
+				final LinearFunctionWithMSDCorrectedIntercept function = new LinearFunctionWithMSDCorrectedIntercept(
+						x2, y, settings.fitLength);
+				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+						new ModelFunctionJacobian(new MultivariateMatrixFunction()
+						{
+							public double[][] value(double[] point) throws IllegalArgumentException
+							{
+								return function.jacobian(point);
+							}
+						}), new ModelFunction(function), new Target(function.getY()),
+						new Weight(function.getWeights()), new InitialGuess(function.guess()));
+
+				double ss = 0;
+				double[] obs = function.getY();
+				double[] exp = lvmSolution.getValue();
+				for (int i = 0; i < obs.length; i++)
+					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+
+				double ic2 = Maths.getInformationCriterion(ss, obs.length, 1);
+				double gradient = lvmSolution.getPoint()[0];
+				final double s = lvmSolution.getPoint()[1];
+				double intercept2 = 4 * s * s - gradient / 3;
+
+				// Incorporate the exposure time into the gradient to allow comparison to other fits 
+				gradient /= exposureTime;
+
+				if (ic2 < ic || debugFitting)
+				{
+					// Convert fitted precision in um to nm
+					Utils.log(
+							"Linear fit with MSD corrrected intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
+							obs.length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
+							Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
+							Utils.rounded(ic2), optimizer.getEvaluations());
+				}
+
+				if (lvmSolution == null || ic2 < ic)
+				{
+					intercept = intercept2;
+					D = gradient / 4;
+				}
+			}
+			catch (TooManyIterationsException e)
+			{
+				Utils.log("Failed to fit with intercept : Too many iterations (%d)", optimizer.getIterations());
+			}
+			catch (ConvergenceException e)
+			{
+				Utils.log("Failed to fit with intercept : %s", e.getMessage());
+			}
+		}
+
+		// Add the fit to the plot
+		if (D > 0)
+		{
+			plot.setColor(Color.magenta);
+			plot.drawLine(0, intercept, x[x.length - 1], 4 * D * x[x.length - 1] + intercept);
+			display(title, plot);
 		}
 
 		return D;
@@ -1395,8 +1459,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			this.y = Arrays.copyOfRange(y, 1, to);
 		}
 
-		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
-
 		/**
 		 * @return An estimate for the linear gradient and intercept
 		 */
@@ -1465,12 +1527,95 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 	}
 
+	public class LinearFunctionWithMSDCorrectedIntercept implements MultivariateVectorFunction
+	{
+		final double THIRD = 1 / 3.0;
+		double[] x, y;
+
+		public LinearFunctionWithMSDCorrectedIntercept(double[] x, double[] y, int length)
+		{
+			int to = FastMath.min(x.length, 1 + length);
+			this.x = Arrays.copyOfRange(x, 1, to);
+			this.y = Arrays.copyOfRange(y, 1, to);
+		}
+
+		/**
+		 * @return An estimate for the linear gradient and intercept
+		 */
+		public double[] guess()
+		{
+			if (y.length == 1)
+				return new double[] { y[0] / x[0], 0 };
+
+			double a = (y[y.length - 1] - y[0]) / (x[x.length - 1] - x[0]);
+			// y = ax - a/3 + 4c^2
+			// y = ax + intercept
+			// intercept = y - ax
+			//           = 4c^2 - a/3
+			// 4c^2 = intercept + a/3
+			double intercept = y[y.length - 1] - a * x[x.length - 1];
+			intercept += a * THIRD;
+			double c = (intercept < 0) ? 0 : Math.sqrt(intercept / 4);
+
+			return new double[] { a, c };
+		}
+
+		public double[] getWeights()
+		{
+			double[] w = new double[x.length];
+			Arrays.fill(w, 1);
+			return w;
+		}
+
+		public double[] getY()
+		{
+			return y;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
+		 */
+		public double[] value(double[] variables)
+		{
+			// y = ax - a/3 + 4c^2
+			final double[] values = new double[x.length];
+			final double a = variables[0];
+			final double intercept = 4 * variables[1] * variables[1] - a * THIRD;
+			for (int i = 0; i < values.length; i++)
+			{
+				values[i] = a * x[i] + intercept;
+			}
+			return values;
+		}
+
+		double[][] jacobian(double[] variables)
+		{
+			// Compute the gradients using calculus differentiation:
+			// y = ax - a/3 + 4c^2
+			// dy_da = x - 1/3
+			// dy_dc = 8c
+			double[][] jacobian = new double[x.length][2];
+			final double dy_dc = 8 * variables[1];
+
+			for (int i = 0; i < jacobian.length; ++i)
+			{
+				jacobian[i][0] = x[i] - THIRD;
+				jacobian[i][1] = dy_dc;
+			}
+
+			return jacobian;
+		}
+	}
+
 	/**
 	 * Fit the jump distance histogram.
 	 * <p>
 	 * Update the plot by adding the fit line(s).
 	 * 
-	 * @param jumpDistances (in um^2)
+	 * @param jumpDistances
+	 *            (in um^2)
 	 * @param jdHistogram
 	 * @return The fitted coefficients and fractions
 	 */
@@ -1505,7 +1650,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (settings.precisionCorrection)
 			jd.setError(precision, true);
 		jd.setMsdCorrection(settings.msdCorrection);
-		
+
 		double[][] fit;
 		if (settings.mle)
 			fit = jd.fitJumpDistancesMLE(jumpDistances.getValues(), jdHistogram);
