@@ -468,7 +468,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			precision /= n;
 		}
 
-		if (precision > 0)
+		if (precision > 100)
 		{
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("The average precision of the traced results is " + Utils.rounded(precision, 4) +
