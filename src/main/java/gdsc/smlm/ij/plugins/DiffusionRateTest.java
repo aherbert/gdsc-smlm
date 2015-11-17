@@ -64,6 +64,17 @@ public class DiffusionRateTest implements PlugIn
 {
 	private static final String TITLE = "Diffusion Rate Test";
 	private static TextWindow msdTable = null;
+	
+	// Used to allow other plugins to detect if a dataset is simulated
+	static double lastSimulatedPrecision = 0;
+	static String[] lastSimulatedDataset = new String[2];	
+	static boolean isSimulated(String name)
+	{
+		for (String name2 : lastSimulatedDataset)
+			if (name.equals(name2))
+				return true;
+		return false;
+	}
 
 	/**
 	 * Used to aggregate points into results
@@ -126,9 +137,13 @@ public class DiffusionRateTest implements PlugIn
 	public void run(String arg)
 	{
 		extraOptions = Utils.isExtraOptions();
+		
 		if (!showDialog())
 			return;
 
+		lastSimulatedDataset[0] = lastSimulatedDataset[1] = "";
+		lastSimulatedPrecision = 0;
+		
 		int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond);
 
 		conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
@@ -274,6 +289,8 @@ public class DiffusionRateTest implements PlugIn
 		IJ.showProgress(1);
 
 		MemoryPeakResults.addResults(results);
+		lastSimulatedDataset[0] = results.getName();
+		lastSimulatedPrecision = myPrecision;
 
 		// Convert pixels^2/step to um^2/sec
 		final double msd = (jumpDistances.getMean() / conversionFactor) /
@@ -717,6 +734,7 @@ public class DiffusionRateTest implements PlugIn
 		results.setCalibration(cal);
 		results.setName(TITLE + " Aggregated");
 		MemoryPeakResults.addResults(results);
+		lastSimulatedDataset[1] = results.getName();
 		int id = 0;
 		int peak = 1;
 		int n = 0;

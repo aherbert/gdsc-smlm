@@ -446,19 +446,27 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	private void calculatePrecision(Trace[] traces)
 	{
-		// Get the average precision of the localisations
-		precision = 0;
-		final double nmPerPixel = results.getNmPerPixel();
-		final double gain = results.getGain();
-		final boolean emCCD = results.isEMCCD();
-		int n = 0;
-		for (Trace trace : traces)
+		// Check the diffusion simulation for a precision
+		if (DiffusionRateTest.isSimulated(results.getName()) && !multipleInputs)
 		{
-			for (PeakResult r : trace.getPoints())
-				precision += r.getPrecision(nmPerPixel, gain, emCCD);
-			n += trace.size();
+			precision = DiffusionRateTest.lastSimulatedPrecision;
 		}
-		precision /= n;
+		else
+		{
+			// Get the average precision of the localisations
+			precision = 0;
+			final double nmPerPixel = results.getNmPerPixel();
+			final double gain = results.getGain();
+			final boolean emCCD = results.isEMCCD();
+			int n = 0;
+			for (Trace trace : traces)
+			{
+				for (PeakResult r : trace.getPoints())
+					precision += r.getPrecision(nmPerPixel, gain, emCCD);
+				n += trace.size();
+			}
+			precision /= n;
+		}
 
 		if (precision > 0)
 		{
