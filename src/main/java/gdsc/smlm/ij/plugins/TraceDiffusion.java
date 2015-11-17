@@ -1074,7 +1074,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addCheckbox("Internal_distances", settings.internalDistances);
 		//gd.addCheckbox("Sub-sample_distances", settings.subSampledDistances);
 		gd.addSlider("Fit_length", 2, 20, settings.fitLength);
-		gd.addCheckbox("msd_correction", settings.msdCorrection);
+		gd.addCheckbox("MSD_correction", settings.msdCorrection);
 		gd.addCheckbox("Precision_correction", settings.precisionCorrection);
 		gd.addCheckbox("Maximum_likelihood", settings.mle);
 		gd.addSlider("Fit_restarts", 0, 10, settings.fitRestarts);
@@ -1278,7 +1278,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			for (int i = 0; i < obs.length; i++)
 				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-			double ic2 = Maths.getInformationCriterion(ss, obs.length, 1);
+			double ic2 = Maths.getInformationCriterion(ss, obs.length, 2);
 			double gradient = lvmSolution.getPoint()[0];
 			final double s = lvmSolution.getPoint()[1];
 			double intercept2 = 4 * s * s;
@@ -1340,7 +1340,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				for (int i = 0; i < obs.length; i++)
 					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-				double ic2 = Maths.getInformationCriterion(ss, obs.length, 1);
+				double ic2 = Maths.getInformationCriterion(ss, obs.length, 2);
 				double gradient = lvmSolution.getPoint()[0];
 				final double s = lvmSolution.getPoint()[1];
 				double intercept2 = 4 * s * s - gradient / 3;
@@ -1352,7 +1352,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				{
 					// Convert fitted precision in um to nm
 					Utils.log(
-							"Linear fit with MSD corrrected intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
+							"Linear fit with MSD corrected intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
 							obs.length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
 							Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
 							Utils.rounded(ic2), optimizer.getEvaluations());
