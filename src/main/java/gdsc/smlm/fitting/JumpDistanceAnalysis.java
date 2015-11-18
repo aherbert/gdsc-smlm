@@ -383,6 +383,8 @@ public class JumpDistanceAnalysis
 
 		if (constrainedSolution == null)
 		{
+			logger.info("Trying CMAES optimiser with restarts ...");
+			
 			double[] uB = function.getUpperBounds();
 			SimpleBounds bounds = new SimpleBounds(lB, uB);
 
@@ -802,6 +804,8 @@ public class JumpDistanceAnalysis
 
 		if (constrainedSolution == null)
 		{
+			logger.info("Trying CMAES optimiser with restarts ...");
+			
 			double[] uB = function.getUpperBounds();
 			SimpleBounds bounds = new SimpleBounds(lB, uB);
 
