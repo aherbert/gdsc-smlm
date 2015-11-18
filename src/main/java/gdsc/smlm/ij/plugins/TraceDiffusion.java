@@ -161,7 +161,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			return;
 
 		int count = traces.length;
-		double D = 0;
+		double[] fitMSDResult = null;
 		int n = 0;
 		double[][] jdParams = null;
 		if (count > 0)
@@ -358,6 +358,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			double[] x = new double[stats.length];
 			double[] y = new double[x.length];
 			double[] sd = new double[x.length];
+			// Intercept is the 4s^2 (in um^2)
+			y[0] = 4 * precision * precision / 1e6;
 			for (int i = 1; i < stats.length; i++)
 			{
 				x[i] = i * exposureTime;
@@ -370,7 +372,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			Plot2 plot = plotMSD(x, y, sd, title);
 
 			// Fit the MSD using a linear fit
-			D = fitMSD(x, y, title, plot);
+			fitMSDResult = fitMSD(x, y, title, plot);
 
 			// Jump Distance analysis
 			if (saveRawData)
@@ -389,7 +391,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			jdParams = fitJumpDistance(jumpDistances, jdHistogram);
 		}
 
-		summarise(traces, D, n, jdParams);
+		summarise(traces, fitMSDResult, n, jdParams);
 	}
 
 	public StoredDataStatistics calculateTraceLengths(ArrayList<double[]> distances)
@@ -703,7 +705,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return String.format("Molecule tracing : distance-threshold = %f nm", settings.distanceThreshold);
 	}
 
-	private void summarise(Trace[] traces, double D, int n, double[][] jdParams)
+	private void summarise(Trace[] traces, double[] fitMSDResult, int n, double[][] jdParams)
 	{
 		IJ.showStatus("Calculating summary ...");
 
@@ -743,7 +745,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(settings.precisionCorrection).append("\t");
 		sb.append(settings.mle).append("\t");
 		sb.append(traces.length).append("\t");
+		sb.append(Utils.rounded(precision, 4)).append("\t");
+		double D = 0, s = 0;
+		if (fitMSDResult != null)
+		{
+			D = fitMSDResult[0];
+			s = fitMSDResult[1];
+		}
 		sb.append(Utils.rounded(D, 4)).append("\t");
+		sb.append(Utils.rounded(s * 1000, 4)).append("\t");
 		sb.append(Utils.rounded(settings.jumpDistance * exposureTime)).append("\t");
 		sb.append(n).append("\t");
 		sb.append(Utils.rounded(beta, 4)).append("\t");
@@ -828,7 +838,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		StringBuilder sb = new StringBuilder("Title\tDataset\tExposure time (ms)\tD-threshold (nm)");
 		sb.append("\tEx-threshold (nm)\t");
 		sb.append("Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length");
-		sb.append("\tMSD corr.\ts corr.\tMLE\tTraces\tD (um^2/s)");
+		sb.append("\tMSD corr.\ts corr.\tMLE\tTraces\ts (nm)\tD (um^2/s)\tfit s (nm)");
 		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions");
 		for (int i = 0; i < NAMES.length; i++)
 		{
@@ -1199,9 +1209,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * @param y
 	 * @param title
 	 * @param plot
-	 * @return
+	 * @return [D, precision]
 	 */
-	private double fitMSD(double[] x, double[] y, String title, Plot2 plot)
+	private double[] fitMSD(double[] x, double[] y, String title, Plot2 plot)
 	{
 		// The Weimann paper (Plos One e64287) fits:
 		// MSD(n dt) = 4D n dt + 4s^2
@@ -1214,6 +1224,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		double D = 0;
 		double intercept = 0;
+		double precision = 0;
 
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 		PointVectorValuePair lvmSolution;
@@ -1297,6 +1308,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			{
 				intercept = intercept2;
 				D = gradient / 4;
+				precision = s;
 			}
 		}
 		catch (TooManyIterationsException e)
@@ -1345,6 +1357,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				final double s = lvmSolution.getPoint()[1];
 				double intercept2 = 4 * s * s - gradient / 3;
 
+				// TODO - this method appears to over estimate the precision by two-fold.
+				// Try fixed precision fitting. Is the gradient correct?
+				// Revisit all the equations to see if they are wrong.
+				// Try adding the x[0] datapoint using the precision.
+				// Change the formula to not be linear at x[0] and to just fit the precision, i.e. the intercept2 = 4 * s * s - gradient / 3 is wrong as the 
+				// equation is not linear below n=1.
+
 				// Incorporate the exposure time into the gradient to allow comparison to other fits 
 				gradient /= exposureTime;
 
@@ -1362,6 +1381,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				{
 					intercept = intercept2;
 					D = gradient / 4;
+					precision = s;
 				}
 			}
 			catch (TooManyIterationsException e)
@@ -1380,9 +1400,32 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			plot.setColor(Color.magenta);
 			plot.drawLine(0, intercept, x[x.length - 1], 4 * D * x[x.length - 1] + intercept);
 			display(title, plot);
+
+			checkTraceDistance(D);
 		}
 
-		return D;
+		return new double[] { D, precision };
+	}
+
+	/**
+	 * Check the distance used for tracing covers enough of the cumulative mean-squared distance distribution
+	 * 
+	 * @param d
+	 */
+	private void checkTraceDistance(double d)
+	{
+		double t = exposureTime;
+		// Cumul P(r^2) = 1 - exp(-r^2 / 4dt)
+		double r = settings.distanceThreshold / 1000;
+		double msd = 4 * d * t;
+		double p = 1 - FastMath.exp(-r * r / msd);
+		String warning = "";
+		if (p < 0.95)
+		{
+			warning = " *** The tracing distance may not be large enough! ***";
+		}
+		Utils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s" + warning,
+				settings.distanceThreshold, Utils.rounded(d), Utils.rounded(p));
 	}
 
 	public class LinearFunction implements MultivariateVectorFunction
@@ -1669,6 +1712,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (fit != null)
 		{
 			fit[0] = jd.calculateApparentDiffusionCoefficient(fit[0]);
+			// Check the largest D
+			checkTraceDistance(fit[0][0]);
 		}
 
 		return fit;
