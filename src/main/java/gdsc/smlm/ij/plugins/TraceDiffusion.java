@@ -1269,10 +1269,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			Utils.log("Failed to fit : %s", e.getMessage());
 		}
 
-		// Fit with intercept
+		// Fit with intercept.
+		// Optionally include the intercept (which is the estimated precision).
+		boolean fitIntercept = true;
 		try
 		{
-			final LinearFunctionWithIntercept function = new LinearFunctionWithIntercept(x, y, settings.fitLength);
+			final LinearFunctionWithIntercept function = new LinearFunctionWithIntercept(x, y, settings.fitLength, fitIntercept);
 			lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 					new ModelFunctionJacobian(new MultivariateMatrixFunction()
 					{
@@ -1335,7 +1337,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					x2[i] = x[i] / exposureTime;
 
 				final LinearFunctionWithMSDCorrectedIntercept function = new LinearFunctionWithMSDCorrectedIntercept(
-						x2, y, settings.fitLength);
+						x2, y, settings.fitLength, fitIntercept);
 				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 						new ModelFunctionJacobian(new MultivariateMatrixFunction()
 						{
@@ -1357,7 +1359,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				final double s = lvmSolution.getPoint()[1];
 				double intercept2 = 4 * s * s - gradient / 3;
 
-				// TODO - this method appears to over estimate the precision by two-fold.
+				// Q. Is this working?
 				// Try fixed precision fitting. Is the gradient correct?
 				// Revisit all the equations to see if they are wrong.
 				// Try adding the x[0] datapoint using the precision.
@@ -1419,13 +1421,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double r = settings.distanceThreshold / 1000;
 		double msd = 4 * d * t;
 		double p = 1 - FastMath.exp(-r * r / msd);
-		String warning = "";
+		Utils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s",
+				settings.distanceThreshold, Utils.rounded(d), Utils.rounded(p));
 		if (p < 0.95)
 		{
-			warning = " *** The tracing distance may not be large enough! ***";
+			Utils.log("WARNING *** The tracing distance may not be large enough! ***");
 		}
-		Utils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s" + warning,
-				settings.distanceThreshold, Utils.rounded(d), Utils.rounded(p));
 	}
 
 	public class LinearFunction implements MultivariateVectorFunction
@@ -1501,13 +1502,17 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	public class LinearFunctionWithIntercept implements MultivariateVectorFunction
 	{
-		double[] x, y;
+		final double[] x, y;
+		final boolean fitIntercept;
 
-		public LinearFunctionWithIntercept(double[] x, double[] y, int length)
+		public LinearFunctionWithIntercept(double[] x, double[] y, int length, boolean fitIntercept)
 		{
+			this.fitIntercept = fitIntercept;
 			int to = FastMath.min(x.length, 1 + length);
-			this.x = Arrays.copyOfRange(x, 1, to);
-			this.y = Arrays.copyOfRange(y, 1, to);
+			// Optionally include the intercept
+			int from = (fitIntercept) ? 0 : 1;
+			this.x = Arrays.copyOfRange(x, from, to);
+			this.y = Arrays.copyOfRange(y, from, to);
 		}
 
 		/**
@@ -1515,10 +1520,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 */
 		public double[] guess()
 		{
-			if (y.length == 1)
-				return new double[] { y[0] / x[0], 0 };
+			int n1 = (fitIntercept) ? 1 : 0;
 
-			double a = (y[y.length - 1] - y[0]) / (x[x.length - 1] - x[0]);
+			if (y.length == n1 + 1)
+				return new double[] { y[n1] / x[n1], 0 };
+
+			double a = (y[y.length - 1] - y[n1]) / (x[x.length - 1] - x[n1]);
 			// y = ax + 4c^2
 			// y = ax + intercept
 			// intercept = y - ax
@@ -1581,13 +1588,17 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	public class LinearFunctionWithMSDCorrectedIntercept implements MultivariateVectorFunction
 	{
 		final double THIRD = 1 / 3.0;
-		double[] x, y;
+		final double[] x, y;
+		final boolean fitIntercept;
 
-		public LinearFunctionWithMSDCorrectedIntercept(double[] x, double[] y, int length)
+		public LinearFunctionWithMSDCorrectedIntercept(double[] x, double[] y, int length, boolean fitIntercept)
 		{
+			this.fitIntercept = fitIntercept;
 			int to = FastMath.min(x.length, 1 + length);
-			this.x = Arrays.copyOfRange(x, 1, to);
-			this.y = Arrays.copyOfRange(y, 1, to);
+			// Optionally include the intercept
+			int from = (fitIntercept) ? 0 : 1;
+			this.x = Arrays.copyOfRange(x, from, to);
+			this.y = Arrays.copyOfRange(y, from, to);
 		}
 
 		/**
@@ -1595,10 +1606,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 */
 		public double[] guess()
 		{
-			if (y.length == 1)
-				return new double[] { y[0] / x[0], 0 };
+			int n1 = (fitIntercept) ? 1 : 0;
 
-			double a = (y[y.length - 1] - y[0]) / (x[x.length - 1] - x[0]);
+			if (y.length == n1 + 1)
+				return new double[] { y[n1] / x[n1], 0 };
+
+			double a = (y[y.length - 1] - y[n1]) / (x[x.length - 1] - x[n1]);
 			// y = ax - a/3 + 4c^2
 			// y = ax + intercept
 			// intercept = y - ax
@@ -1630,13 +1643,21 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 */
 		public double[] value(double[] variables)
 		{
+			// When x>=1:
 			// y = ax - a/3 + 4c^2
+			// When x==0:
+			// y = 4c^2
 			final double[] values = new double[x.length];
 			final double a = variables[0];
-			final double intercept = 4 * variables[1] * variables[1] - a * THIRD;
-			for (int i = 0; i < values.length; i++)
+			final double intercept = 4 * variables[1] * variables[1];
+			final double error = intercept - a * THIRD;
+			int i = 0;
+			// Special case for fitting the intercept since the line is not linear below n=1
+			if (fitIntercept)
+				values[i++] = intercept;
+			for (; i < values.length; i++)
 			{
-				values[i] = a * x[i] + intercept;
+				values[i] = a * x[i] + error;
 			}
 			return values;
 		}
