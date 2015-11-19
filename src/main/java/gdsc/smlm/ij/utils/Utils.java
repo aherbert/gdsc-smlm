@@ -147,6 +147,7 @@ public class Utils
 		}
 		else
 		{
+			slices.setColorModel(imp.getProcessor().getColorModel());
 			imp.setStack(slices);
 			imp.getWindow().setVisible(true);
 			imp.getWindow().toFront();
