@@ -384,7 +384,7 @@ public class JumpDistanceAnalysis
 		if (constrainedSolution == null)
 		{
 			logger.info("Trying CMAES optimiser with restarts ...");
-			
+
 			double[] uB = function.getUpperBounds();
 			SimpleBounds bounds = new SimpleBounds(lB, uB);
 
@@ -427,7 +427,7 @@ public class JumpDistanceAnalysis
 					PointValuePair solution = cmaesOptimizer.optimize(
 							new InitialGuess(constrainedSolution.getPointRef()), new ObjectiveFunction(function),
 							GoalType.MINIMIZE, bounds, sigma, popSize, maxEval);
-					if (constrainedSolution == null || solution.getValue() < constrainedSolution.getValue())
+					if (solution.getValue() < constrainedSolution.getValue())
 					{
 						evaluations = cmaesOptimizer.getEvaluations();
 						constrainedSolution = solution;
@@ -437,6 +437,38 @@ public class JumpDistanceAnalysis
 				}
 				catch (TooManyEvaluationsException e)
 				{
+				}
+			}
+
+			if (constrainedSolution != null)
+			{
+				// Re-optimise with Powell?
+				PointValuePair solution = powellOptimizer.optimize(
+						maxEval,
+						new ObjectiveFunction(function),
+						new InitialGuess(constrainedSolution.getPointRef()),
+						new SimpleBounds(lB, function
+								.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
+						new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MINIMIZE);
+
+				if (solution.getValue() < constrainedSolution.getValue())
+				{
+					try
+					{
+						evaluations = cmaesOptimizer.getEvaluations();
+						constrainedSolution = solution;
+						logger.debug("Powell optimiser re-fit (N=%d) : SS = %f (%d evaluations)", n,
+								constrainedSolution.getValue(), evaluations);
+					}
+					catch (TooManyEvaluationsException e)
+					{
+					}
+					catch (TooManyIterationsException e)
+					{
+					}
+					catch (ConvergenceException e)
+					{
+					}
 				}
 			}
 		}
@@ -805,7 +837,7 @@ public class JumpDistanceAnalysis
 		if (constrainedSolution == null)
 		{
 			logger.info("Trying CMAES optimiser with restarts ...");
-			
+
 			double[] uB = function.getUpperBounds();
 			SimpleBounds bounds = new SimpleBounds(lB, uB);
 
@@ -852,7 +884,7 @@ public class JumpDistanceAnalysis
 					PointValuePair solution = cmaesOptimizer.optimize(
 							new InitialGuess(constrainedSolution.getPointRef()), new ObjectiveFunction(function),
 							GoalType.MAXIMIZE, bounds, sigma, popSize, maxEval);
-					if (constrainedSolution == null || solution.getValue() > constrainedSolution.getValue())
+					if (solution.getValue() > constrainedSolution.getValue())
 					{
 						evaluations = cmaesOptimizer.getEvaluations();
 						constrainedSolution = solution;
@@ -861,6 +893,37 @@ public class JumpDistanceAnalysis
 					}
 				}
 				catch (TooManyEvaluationsException e)
+				{
+				}
+			}
+
+			if (constrainedSolution != null)
+			{
+				try
+				{
+					// Re-optimise with Powell?
+					PointValuePair solution = powellOptimizer.optimize(
+							maxEval,
+							new ObjectiveFunction(function),
+							new InitialGuess(constrainedSolution.getPointRef()),
+							new SimpleBounds(lB, function.getUpperBounds(Double.POSITIVE_INFINITY,
+									Double.POSITIVE_INFINITY)), new CustomPowellOptimizer.BasisStep(function.step()),
+							GoalType.MAXIMIZE);
+					if (solution.getValue() > constrainedSolution.getValue())
+					{
+						evaluations = cmaesOptimizer.getEvaluations();
+						constrainedSolution = solution;
+						logger.debug("Powell optimiser re-fit (N=%d) : MLE = %f (%d evaluations)", n,
+								constrainedSolution.getValue(), powellOptimizer.getEvaluations());
+					}
+				}
+				catch (TooManyEvaluationsException e)
+				{
+				}
+				catch (TooManyIterationsException e)
+				{
+				}
+				catch (ConvergenceException e)
 				{
 				}
 			}
@@ -1112,10 +1175,6 @@ public class JumpDistanceAnalysis
 			if (n == 1)
 				return new double[] { estimatedD };
 
-			// Store the fraction and then the diffusion coefficient.
-			// Q. Should this be modified to set one fraction to always be 1? 
-			// Having an actual parameter for fitting will allow the optimisation engine to 
-			// adjust the fraction for its diffusion coefficient relative to the others.
 			double[] guess = new double[n * 2];
 			double d = estimatedD;
 			for (int i = 0; i < n; i++)
@@ -1137,16 +1196,12 @@ public class JumpDistanceAnalysis
 			if (n == 1)
 				return new double[] { estimatedD * 0.5 };
 
-			// Store the fraction and then the diffusion coefficient.
-			// Q. Should this be modified to set one fraction to always be 1? 
-			// Having an actual parameter for fitting will allow the optimisation engine to 
-			// adjust the fraction for its diffusion coefficient relative to the others.
 			double[] step = new double[n * 2];
 			double d = estimatedD;
 			for (int i = 0; i < n; i++)
 			{
 				// Fraction are all equal
-				step[i * 2] = 1;
+				step[i * 2] = 0.1;
 				// Diffusion coefficient gets smaller for each fraction
 				step[i * 2 + 1] = d * 0.5;
 				d *= 0.1;
@@ -1164,7 +1219,7 @@ public class JumpDistanceAnalysis
 		public double[] getUpperBounds(double fractionLimit, double dLimit)
 		{
 			if (n == 1)
-				return new double[] { estimatedD * 10 };
+				return new double[] { dLimit };
 
 			double[] bounds = new double[n * 2];
 			for (int i = 0; i < n; i++)
@@ -1185,9 +1240,7 @@ public class JumpDistanceAnalysis
 			// Diffusion coefficient could be 0 but this is not practical for
 			// testing a mixed population so set to a small value where the optimiser
 			// will not be successfully anyway
-			fractionLimit = Math.max(fractionLimit, 1e-3);
-			// Diffusion coefficient could be 0 but this is not practical for
-			// calculations so set to a small value
+			fractionLimit = Math.max(fractionLimit, 1e-5);
 			dLimit = Math.max(dLimit, 1e-16);
 
 			if (n == 1)
