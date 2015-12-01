@@ -443,32 +443,31 @@ public class JumpDistanceAnalysis
 			if (constrainedSolution != null)
 			{
 				// Re-optimise with Powell?
-				PointValuePair solution = powellOptimizer.optimize(
-						maxEval,
-						new ObjectiveFunction(function),
-						new InitialGuess(constrainedSolution.getPointRef()),
-						new SimpleBounds(lB, function
-								.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
-						new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MINIMIZE);
-
-				if (solution.getValue() < constrainedSolution.getValue())
+				try
 				{
-					try
+					PointValuePair solution = powellOptimizer.optimize(
+							maxEval,
+							new ObjectiveFunction(function),
+							new InitialGuess(constrainedSolution.getPointRef()),
+							new SimpleBounds(lB, function.getUpperBounds(Double.POSITIVE_INFINITY,
+									Double.POSITIVE_INFINITY)), new CustomPowellOptimizer.BasisStep(function.step()),
+							GoalType.MINIMIZE);
+					if (solution.getValue() < constrainedSolution.getValue())
 					{
 						evaluations = cmaesOptimizer.getEvaluations();
 						constrainedSolution = solution;
-						logger.debug("Powell optimiser re-fit (N=%d) : SS = %f (%d evaluations)", n,
+						logger.info("Powell optimiser re-fit (N=%d) : SS = %f (%d evaluations)", n,
 								constrainedSolution.getValue(), evaluations);
 					}
-					catch (TooManyEvaluationsException e)
-					{
-					}
-					catch (TooManyIterationsException e)
-					{
-					}
-					catch (ConvergenceException e)
-					{
-					}
+				}
+				catch (TooManyEvaluationsException e)
+				{
+				}
+				catch (TooManyIterationsException e)
+				{
+				}
+				catch (ConvergenceException e)
+				{
 				}
 			}
 		}
@@ -913,7 +912,7 @@ public class JumpDistanceAnalysis
 					{
 						evaluations = cmaesOptimizer.getEvaluations();
 						constrainedSolution = solution;
-						logger.debug("Powell optimiser re-fit (N=%d) : MLE = %f (%d evaluations)", n,
+						logger.info("Powell optimiser re-fit (N=%d) : MLE = %f (%d evaluations)", n,
 								constrainedSolution.getValue(), powellOptimizer.getEvaluations());
 					}
 				}
