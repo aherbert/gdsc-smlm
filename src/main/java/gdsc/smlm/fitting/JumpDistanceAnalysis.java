@@ -542,33 +542,45 @@ public class JumpDistanceAnalysis
 		logger.info("Fit Jump distance (N=%d) : %s (%s), SS = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
 				Maths.rounded(ss, 4), Maths.rounded(ic, 4), evaluations);
 
-		boolean valid = true;
+		if (isValid(d, f))
+		{
+			return new double[][] { coefficients, fractions };
+		}
+
+		return null;
+	}
+
+	private boolean isValid(double[] d, double[] f)
+	{
 		for (int i = 0; i < f.length; i++)
 		{
+			// Check the fractions and coefficients exist
+			if (f[i] <= 0)
+			{
+				logger.debug("Fraction is zero");
+				return false;
+			}
+			if (d[i] <= 0)
+			{
+				logger.debug("Coefficient is zero");
+				return false;
+			}
 			// Check the fit has fractions above the minimum fraction
 			if (f[i] < minFraction)
 			{
 				logger.debug("Fraction is less than the minimum fraction: %s < %s", Maths.rounded(f[i]),
 						Maths.rounded(minFraction));
-				valid = false;
-				break;
+				return false;
 			}
 			// Check the coefficients are different
 			if (i + 1 < f.length && d[i] / d[i + 1] < minDifference)
 			{
 				logger.debug("Coefficients are not different: %s / %s = %s < %s", Maths.rounded(d[i]),
 						Maths.rounded(d[i + 1]), Maths.rounded(d[i] / d[i + 1]), Maths.rounded(minDifference));
-				valid = false;
-				break;
+				return false;
 			}
 		}
-
-		if (valid)
-		{
-			return new double[][] { coefficients, fractions };
-		}
-
-		return null;
+		return true;
 	}
 
 	/**
@@ -959,28 +971,7 @@ public class JumpDistanceAnalysis
 		logger.info("Fit Jump distance (N=%d) : %s (%s), MLE = %s, IC = %s (%d evaluations)", n, formatD(d), format(f),
 				Maths.rounded(ll, 4), Maths.rounded(ic, 4), evaluations);
 
-		boolean valid = true;
-		for (int i = 0; i < f.length; i++)
-		{
-			// Check the fit has fractions above the minimum fraction
-			if (f[i] < minFraction)
-			{
-				logger.debug("Fraction is less than the minimum fraction: %s < %s", Maths.rounded(f[i]),
-						Maths.rounded(minFraction));
-				valid = false;
-				break;
-			}
-			// Check the coefficients are different
-			if (i + 1 < f.length && d[i] / d[i + 1] < minDifference)
-			{
-				logger.debug("Coefficients are not different: %s / %s = %s < %s", Maths.rounded(d[i]),
-						Maths.rounded(d[i + 1]), Maths.rounded(d[i] / d[i + 1]), Maths.rounded(minDifference));
-				valid = false;
-				break;
-			}
-		}
-
-		if (valid)
+		if (isValid(d, f))
 		{
 			return new double[][] { coefficients, fractions };
 		}
