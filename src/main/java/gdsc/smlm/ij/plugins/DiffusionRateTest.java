@@ -47,6 +47,7 @@ import ij.text.TextWindow;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
@@ -64,10 +65,11 @@ public class DiffusionRateTest implements PlugIn
 {
 	private static final String TITLE = "Diffusion Rate Test";
 	private static TextWindow msdTable = null;
-	
+
 	// Used to allow other plugins to detect if a dataset is simulated
 	static double lastSimulatedPrecision = 0;
-	static String[] lastSimulatedDataset = new String[2];	
+	static String[] lastSimulatedDataset = new String[2];
+
 	static boolean isSimulated(String name)
 	{
 		for (String name2 : lastSimulatedDataset)
@@ -137,13 +139,13 @@ public class DiffusionRateTest implements PlugIn
 	public void run(String arg)
 	{
 		extraOptions = Utils.isExtraOptions();
-		
+
 		if (!showDialog())
 			return;
 
 		lastSimulatedDataset[0] = lastSimulatedDataset[1] = "";
 		lastSimulatedPrecision = 0;
-		
+
 		int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond);
 
 		conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
@@ -409,11 +411,39 @@ public class DiffusionRateTest implements PlugIn
 
 		// Show the cumulative jump distance plot
 		final double factor = conversionFactor;
-		final double[] values = jumpDistances.getValues();
+		double[] values = jumpDistances.getValues();
 		for (int i = 0; i < values.length; i++)
 			values[i] /= factor;
 		title += " Cumulative Jump Distance";
 		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
+		if (settings.useGridWalk)
+		{
+			// In this case with a large simulation size the the jumps are all 
+			// the same distance so the histogram is a single step. Check the plot
+			// range will be handled by ImageJ otherwise pad it out a but.
+			double[] x = jdHistogram[0];
+			double[] y = jdHistogram[1];
+			if (x[x.length - 1] - x[0] < 0.01)
+			{
+				double[] x2 = new double[x.length + 3];
+				double[] y2 = new double[y.length + 3];
+				System.arraycopy(x, 0, x2, 2, x.length);
+				System.arraycopy(y, 0, y2, 2, y.length);
+				x2[0] = x[0] - 0.1;
+				x2[1] = x[0];
+				x2[x2.length - 1] = x[x.length - 1] + 0.1;
+				y2[0] = 0;
+				y2[1] = 0;
+				y2[y2.length - 1] = 1;
+				jdHistogram[0] = x2;
+				jdHistogram[1] = y2;
+				
+				// Add some artificial points to allow the plot to be drawn
+				values = Arrays.copyOf(values, values.length + 2);
+				values[values.length-2] = x[0] - 0.1;  
+				values[values.length-1] = x[x.length - 1] + 0.1;  
+			}
+		}
 		Plot2 jdPlot = new Plot2(title, "Distance (um^2)", "Cumulative Probability", jdHistogram[0], jdHistogram[1]);
 		PlotWindow pw2 = Utils.display(title, jdPlot);
 		if (Utils.isNewWindow())
@@ -436,11 +466,14 @@ public class DiffusionRateTest implements PlugIn
 		JumpDistanceFunction fun = jd.new JumpDistanceFunction(x, estimatedD);
 		double[] y = fun.evaluateAll(fun.guess());
 		// Scale to have the same area
-		final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
-		final double area2 = Maths.sum(y) * (x[1] - x[0]);
-		final double scale = area1 / area2;
-		for (int i = 0; i < y.length; i++)
-			y[i] *= scale;
+		if (Utils.xValues.length > 1)
+		{
+			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
+			final double area2 = Maths.sum(y) * (x[1] - x[0]);
+			final double scale = area1 / area2;
+			for (int i = 0; i < y.length; i++)
+				y[i] *= scale;
+		}
 		jdPlot = Utils.plot;
 		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
