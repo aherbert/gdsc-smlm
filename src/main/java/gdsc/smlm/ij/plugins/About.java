@@ -17,6 +17,9 @@ import gdsc.smlm.utils.UnicodeReader;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
+import ij.macro.ExtensionDescriptor;
+import ij.macro.Functions;
+import ij.macro.MacroExtension;
 import ij.plugin.PlugIn;
 
 import java.io.BufferedReader;
@@ -26,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -33,7 +37,7 @@ import java.util.LinkedList;
 /**
  * Contains help dialogs for the GDSC ImageJ plugins
  */
-public class About implements PlugIn
+public class About implements PlugIn, MacroExtension
 {
 	private static String TITLE = "GDSC SMLM ImageJ Plugins";
 	public static String HELP_URL = "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
@@ -95,6 +99,12 @@ public class About implements PlugIn
 				SMLMTools.closeFrame();
 				new SMLMTools();
 			}
+			return;
+		}
+
+		if (arg.equals("ext"))
+		{
+			setupExtensions();
 			return;
 		}
 
@@ -357,5 +367,60 @@ public class About implements PlugIn
 			{
 			}
 		}
+	}
+
+	private void setupExtensions()
+	{
+		Functions.registerExtensions(this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.macro.MacroExtension#handleExtension(java.lang.String, java.lang.Object[])
+	 */
+	@Override
+	public String handleExtension(String name, Object[] args)
+	{
+		if (name == null)
+			return "";
+		if (name.equals("getNumberOfSpecies"))
+		{
+			return TraceDiffusion.getNumberOfSpecies(args);
+		}
+		if (name.equals("getD"))
+		{
+			return TraceDiffusion.getD(args);
+		}
+		if (name.equals("getF"))
+		{
+			return TraceDiffusion.getF(args);
+		}
+		if (name.equals("getSpecies"))
+		{
+			return TraceDiffusion.getSpecies(args);
+		}
+		return "";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.macro.MacroExtension#getExtensionFunctions()
+	 */
+	@Override
+	public ExtensionDescriptor[] getExtensionFunctions()
+	{
+		ArrayList<ExtensionDescriptor> list = new ArrayList<ExtensionDescriptor>(3);
+		list.add(ExtensionDescriptor.newDescriptor("getNumberOfSpecies", this, MacroExtension.ARG_NUMBER +
+				MacroExtension.ARG_OUTPUT));
+		list.add(ExtensionDescriptor.newDescriptor("getD", this, MacroExtension.ARG_NUMBER, MacroExtension.ARG_NUMBER +
+				MacroExtension.ARG_OUTPUT));
+		list.add(ExtensionDescriptor.newDescriptor("getF", this, MacroExtension.ARG_NUMBER, MacroExtension.ARG_NUMBER +
+				MacroExtension.ARG_OUTPUT));
+		list.add(ExtensionDescriptor.newDescriptor("getSpecies", this, MacroExtension.ARG_NUMBER, MacroExtension.ARG_NUMBER +
+				MacroExtension.ARG_OUTPUT, MacroExtension.ARG_NUMBER +
+				MacroExtension.ARG_OUTPUT));
+		return list.toArray(new ExtensionDescriptor[list.size()]);
 	}
 }

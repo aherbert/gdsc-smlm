@@ -127,6 +127,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private String jdTitle = TITLE + " Jump Distance";
 	private Plot2 jdPlot;
 
+	// Used for the macro extensions
+	private static double[][] jumpDistanceParameters = null;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -134,6 +137,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	public void run(String arg)
 	{
+		jumpDistanceParameters = null;
+
 		extraOptions = Utils.isExtraOptions();
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
@@ -388,7 +393,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			// Fit Jump Distance cumulative probability
 			n = jumpDistances.getN();
-			jdParams = fitJumpDistance(jumpDistances, jdHistogram);
+			jumpDistanceParameters = jdParams = fitJumpDistance(jumpDistances, jdHistogram);
 		}
 
 		summarise(traces, fitMSDResult, n, jdParams);
@@ -1274,7 +1279,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		boolean fitIntercept = true;
 		try
 		{
-			final LinearFunctionWithIntercept function = new LinearFunctionWithIntercept(x, y, settings.fitLength, fitIntercept);
+			final LinearFunctionWithIntercept function = new LinearFunctionWithIntercept(x, y, settings.fitLength,
+					fitIntercept);
 			lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
 					new ModelFunctionJacobian(new MultivariateMatrixFunction()
 					{
@@ -1760,5 +1766,61 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		jdPlot.setColor(color);
 		jdPlot.addPoints(x, y, Plot2.LINE);
 		display(jdTitle, jdPlot);
+	}
+
+	public static String getNumberOfSpecies(Object[] args)
+	{
+		int n = 0;
+		if (jumpDistanceParameters != null)
+		{
+			n = jumpDistanceParameters[0].length;
+		}
+		Double[] array = (Double[]) args[0];
+		array[0] = new Double(n);
+		return "";
+	}
+
+	public static String getD(Object[] args)
+	{
+		double value = 0;
+		if (jumpDistanceParameters != null)
+		{
+			int i = ((Double) args[0]).intValue();
+			if (i >= 0 && i < jumpDistanceParameters[0].length)
+				value = jumpDistanceParameters[0][i];
+		}
+		((Double[]) args[1])[0] = new Double(value);
+		return "";
+	}
+
+	public static String getF(Object[] args)
+	{
+		double value = 0;
+		if (jumpDistanceParameters != null)
+		{
+			int i = ((Double) args[0]).intValue();
+			if (i >= 0 && i < jumpDistanceParameters[1].length)
+				value = jumpDistanceParameters[1][i];
+		}
+		((Double[]) args[1])[0] = new Double(value);
+		return "";
+	}
+
+	public static String getSpecies(Object[] args)
+	{
+		double value = 0, value2 = 0;
+		;
+		if (jumpDistanceParameters != null)
+		{
+			int i = ((Double) args[0]).intValue();
+			if (i >= 0 && i < jumpDistanceParameters[0].length)
+			{
+				value = jumpDistanceParameters[0][i];
+				value2 = jumpDistanceParameters[1][i];
+			}
+		}
+		((Double[]) args[1])[0] = new Double(value);
+		((Double[]) args[2])[0] = new Double(value2);
+		return "";
 	}
 }
