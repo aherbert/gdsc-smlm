@@ -28,7 +28,7 @@ public class Version
 	
 	static 
 	{
-		// Locate the SVN revision
+		// Locate the version file
 		Class<Version> resourceClass = Version.class;
 		InputStream propertiesStream = resourceClass.getResourceAsStream("/gdsc/smlm/Version.txt");
 
