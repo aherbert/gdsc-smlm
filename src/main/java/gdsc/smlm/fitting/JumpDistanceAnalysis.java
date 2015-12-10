@@ -102,6 +102,8 @@ public class JumpDistanceAnalysis
 
 	// Set by the last call to the doFit functions
 	private double ss, ll, ic;
+	// Set by any public fit call
+	private double lastIC;
 
 	public JumpDistanceAnalysis()
 	{
@@ -117,6 +119,12 @@ public class JumpDistanceAnalysis
 		if (logger == null)
 			logger = new NullLogger();
 		this.logger = logger;
+		resetFitResult();
+	}
+
+	private void resetFitResult()
+	{
+		lastIC = Double.NaN;
 	}
 
 	/**
@@ -135,6 +143,7 @@ public class JumpDistanceAnalysis
 	 */
 	public double[][] fitJumpDistances(double... jumpDistances)
 	{
+		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
@@ -163,6 +172,7 @@ public class JumpDistanceAnalysis
 	 */
 	public double[][] fitJumpDistanceHistogram(double meanJumpDistance, double[][] jdHistogram)
 	{
+		resetFitResult();
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
 		if (meanJumpDistance == 0)
@@ -227,9 +237,10 @@ public class JumpDistanceAnalysis
 		{
 			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1,
 					(best == 0) ? "" : "s", formatD(coefficients[best]), format(fractions[best]));
+			lastIC = bestIC;
+			return new double[][] { coefficients[best], fractions[best] };
 		}
-
-		return (best > -1) ? new double[][] { coefficients[best], fractions[best] } : null;
+		return null;
 	}
 
 	/**
@@ -245,6 +256,7 @@ public class JumpDistanceAnalysis
 	 */
 	public double[][] fitJumpDistances(double[] jumpDistances, int n)
 	{
+		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
@@ -270,6 +282,7 @@ public class JumpDistanceAnalysis
 	 */
 	public double[][] fitJumpDistanceHistogram(double meanJumpDistance, double[][] jdHistogram, int n)
 	{
+		resetFitResult();
 		// Guess the D
 		final double estimatedD = meanJumpDistance / 4;
 		if (meanJumpDistance == 0)
@@ -320,7 +333,7 @@ public class JumpDistanceAnalysis
 
 				double[] fitParams = lvmSolution.getPointRef();
 				ss = calculateSumOfSquares(function.getY(), lvmSolution.getValueRef());
-				ic = Maths.getInformationCriterion(ss, function.x.length, 1);
+				lastIC = ic = Maths.getInformationCriterion(ss, function.x.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
@@ -544,6 +557,7 @@ public class JumpDistanceAnalysis
 
 		if (isValid(d, f))
 		{
+			lastIC = ic;
 			return new double[][] { coefficients, fractions };
 		}
 
@@ -621,6 +635,7 @@ public class JumpDistanceAnalysis
 	 */
 	public double[][] fitJumpDistancesMLE(double[] jumpDistances, double[][] jdHistogram)
 	{
+		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
@@ -693,9 +708,11 @@ public class JumpDistanceAnalysis
 		{
 			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1,
 					(best == 0) ? "" : "s", formatD(coefficients[best]), format(fractions[best]));
+			lastIC = bestIC;
+			return new double[][] { coefficients[best], fractions[best] };
 		}
 
-		return (best > -1) ? new double[][] { coefficients[best], fractions[best] } : null;
+		return null;
 	}
 
 	/**
@@ -730,6 +747,7 @@ public class JumpDistanceAnalysis
 	 */
 	public double[][] fitJumpDistancesMLE(double[] jumpDistances, double[][] jdHistogram, int n)
 	{
+		resetFitResult();
 		if (jumpDistances == null || jumpDistances.length == 0)
 			return null;
 		final double meanJumpDistance = Maths.sum(jumpDistances) / jumpDistances.length;
@@ -784,7 +802,7 @@ public class JumpDistanceAnalysis
 
 				double[] fitParams = solution.getPointRef();
 				ll = solution.getValue();
-				ic = Maths.getInformationCriterionFromLL(ll, jumpDistances.length, 1);
+				lastIC = ic = Maths.getInformationCriterionFromLL(ll, jumpDistances.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
@@ -973,6 +991,7 @@ public class JumpDistanceAnalysis
 
 		if (isValid(d, f))
 		{
+			lastIC = ic;
 			return new double[][] { coefficients, fractions };
 		}
 
@@ -2203,5 +2222,13 @@ public class JumpDistanceAnalysis
 			}
 		}
 		return d;
+	}
+
+	/**
+	 * @return The information criterion from the last successful fit
+	 */
+	public double getInformationCriterion()
+	{
+		return lastIC;
 	}
 }

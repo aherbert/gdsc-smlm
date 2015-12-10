@@ -119,6 +119,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	// Store exposure time in seconds
 	private double exposureTime = 0;
 	private double precision, beta;
+	private double ic = Double.NaN;
 
 	// Used to tile new plot windows
 	private int[] idList = new int[20];
@@ -767,12 +768,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append(Utils.rounded(beta, 4)).append("\t");
 		if (jdParams == null)
 		{
-			sb.append("\t\t");
+			sb.append("\t\t\t");
 		}
 		else
 		{
 			sb.append(format(jdParams[0])).append("\t");
 			sb.append(format(jdParams[1])).append("\t");
+			sb.append(Utils.rounded(ic)).append("\t");
 		}
 
 		for (int i = 0; i < stats.length; i++)
@@ -847,7 +849,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		sb.append("\tEx-threshold (nm)\t");
 		sb.append("Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length");
 		sb.append("\tMSD corr.\ts corr.\tMLE\tTraces\ts (nm)\tD (um^2/s)\tfit s (nm)");
-		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions");
+		sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions\tIC");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
@@ -1744,6 +1746,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			fit[0] = jd.calculateApparentDiffusionCoefficient(fit[0]);
 			// Check the largest D
 			checkTraceDistance(fit[0][0]);
+			ic = jd.getInformationCriterion();
 		}
 
 		return fit;
