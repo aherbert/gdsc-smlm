@@ -335,4 +335,44 @@ public class Cluster implements Comparable<Cluster>
 		}
 		resetCentroid();
 	}
+
+	/**
+	 * @return The mean-squared displacement between adjacent localisations
+	 */
+	public double getMSD()
+	{
+		if (size() < 2)
+			return 0;
+		double msd = 0;
+		PeakResult last = null;
+		for (PeakResult result : results)
+		{
+			if (last != null)
+			{
+				msd += last.distance2(result);
+			}
+			last = result;
+		}
+		return msd / (size() - 1);
+	}
+
+	/**
+	 * @return The mean displacement between adjacent localisations
+	 */
+	public double getMeanPerFrame()
+	{
+		if (size() < 2)
+			return 0;
+		double msd = 0;
+		PeakResult last = null;
+		for (PeakResult result : results)
+		{
+			if (last != null)
+			{
+				msd += last.distance(result);
+			}
+			last = result;
+		}
+		return msd / (size() - 1);
+	}
 }

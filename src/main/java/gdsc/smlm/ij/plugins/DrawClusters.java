@@ -46,7 +46,7 @@ import java.util.ArrayList;
 public class DrawClusters implements PlugIn
 {
 	private static final String TITLE = "Draw Clusters";
-	private static final String[] sorts = new String[] { "None", "ID", "Time", "Size", "Length" };
+	private static final String[] sorts = new String[] { "None", "ID", "Time", "Size", "Length", "MSD", "Mean/Frame" };
 	private static final String[] luts = new String[] { "Red-Hot", "Ice", "Rainbow", "Fire", "Red-Yellow", "Red",
 			"Green", "Blue", "Cyan", "Magenta", "Yellow" };
 
@@ -220,6 +220,12 @@ public class DrawClusters implements PlugIn
 					break;
 				case 4: // Sort by length descending
 					values[i] = -roi.getLength();
+					break;
+				case 5: // Mean Square Displacement
+					values[i] = -traces[i].getMSD();
+					break;
+				case 6: // Mean / Frame
+					values[i] = -traces[i].getMeanPerFrame();
 					break;
 			}
 		}
