@@ -162,8 +162,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Analyse the traces
 		// -=-=-
 
-		if (!showDialog())
-			return;
+		// Only show the second dialog if we have traces. 
+		// This still allows a zero entry in the results table.
+		if (traces.length > 0)
+			if (!showDialog())
+				return;
 
 		int count = traces.length;
 		double[] fitMSDResult = null;
