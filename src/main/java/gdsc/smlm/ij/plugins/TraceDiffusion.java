@@ -22,6 +22,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJLogger;
 import gdsc.smlm.ij.utils.Utils;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -30,20 +31,40 @@ import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
+import ij.Macro;
+import ij.WindowManager;
+import ij.gui.GUI;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
+import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 
+import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.List;
+import java.awt.Panel;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -110,7 +131,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private GlobalSettings globalSettings;
 	private ClusteringSettings settings;
 	private MemoryPeakResults results;
-	private boolean extraOptions;
+	private boolean extraOptions, multiMode;
 	private int myMinN = 1;
 
 	// The number of additional datasets
@@ -131,6 +152,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	// Used for the macro extensions
 	private static double[][] jumpDistanceParameters = null;
 
+	// Used for the multiMode option 
+	private static ArrayList<String> selected = new ArrayList<String>();
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -147,17 +171,30 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			return;
 		}
 
-		// -=-=-
-		// Get the traces:
-		// - Trace a single dataset (and store in memory)
-		// - Combine trace results held in memory
-		// -=-=-
+		ArrayList<MemoryPeakResults> allResults = new ArrayList<MemoryPeakResults>();
 
-		if (!showTraceDialog())
+		// Option to pick multiple input datasets together using a list box.
+		// (Do not support running in macros. The macro options are recorded as if running 
+		// using the multiple_inputs option in the trace dialog.)
+		if ("multi".equals(arg) && Macro.getOptions() == null)
+		{
+			if (!showMultiDialog(allResults))
+				return;
+		}
+
+		// This shows the dialog for selecting trace options
+		if (!showTraceDialog(allResults))
+			return;
+
+		if (allResults.isEmpty()) // Sense check
 			return;
 
 		Utils.log(TITLE + "...");
-		Trace[] traces = getTraces();
+
+		// This optionally collects additional datasets then gets the traces:
+		// - Trace each single dataset (and store in memory)
+		// - Combine trace results held in memory
+		Trace[] traces = getTraces(allResults);
 
 		// -=-=-
 		// Analyse the traces
@@ -175,7 +212,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double[][] jdParams = null;
 		if (count > 0)
 		{
-			calculatePrecision(traces);
+			calculatePrecision(traces, allResults.size() > 1);
 
 			//--- MSD Analysis ---
 
@@ -306,7 +343,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					}
 				}
 
-				// TODO - fix this for the precision and MSD adjustment.
+				// Fix this for the precision and MSD adjustment.
 				// It may be necessary to:
 				// - sum the raw distances for each time interval (this is sumDistance[t])
 				// - subtract the precision error
@@ -454,11 +491,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * Calculate the average precision of localisation in the traces
 	 * 
 	 * @param traces
+	 * @param multi
 	 */
-	private void calculatePrecision(Trace[] traces)
+	private void calculatePrecision(Trace[] traces, boolean multi)
 	{
 		// Check the diffusion simulation for a precision
-		if (DiffusionRateTest.isSimulated(results.getName()) && !multipleInputs)
+		if (DiffusionRateTest.isSimulated(results.getName()) && !multi)
 		{
 			precision = DiffusionRateTest.lastSimulatedPrecision;
 		}
@@ -857,12 +895,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return sb.toString();
 	}
 
-	private boolean showTraceDialog()
+	private boolean showTraceDialog(ArrayList<MemoryPeakResults> allResults)
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+		if (!multiMode)
+			ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getClusteringSettings();
@@ -872,7 +911,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addSlider("Min_trace_length", 2, 20, settings.minimumTraceLength);
 		gd.addCheckbox("Ignore_ends", settings.ignoreEnds);
 		gd.addCheckbox("Save_traces", settings.saveTraces);
-		gd.addCheckbox("Multiple_inputs", multipleInputs);
+		if (!multiMode)
+			gd.addCheckbox("Multiple_inputs", multipleInputs);
 
 		gd.showDialog();
 
@@ -883,42 +923,67 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		SettingsManager.saveSettings(globalSettings);
 
 		// Load the results
-		results = ResultsManager.loadInputResults(inputOption, true);
-		if (results == null || results.size() == 0)
+		if (!multiMode)
 		{
-			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
-			return false;
-		}
-
-		// Check the results have a calibrated exposure time
-		if (results.getCalibration() == null || results.getCalibration().exposureTime <= 0)
-		{
-			gd = new GenericDialog(TITLE);
-			gd.addMessage("Uncalibrated results. Please enter the exposure time for each frame:");
-			gd.addNumericField("Exposure_time (ms)", 100, 2);
-			gd.showDialog();
-			if (gd.wasCanceled() || gd.invalidNumber())
+			MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
+			if (results == null || results.size() == 0)
+			{
+				IJ.error(TITLE, "No results could be loaded");
+				IJ.showStatus("");
 				return false;
-			exposureTime = Math.abs(gd.getNextNumber() / 1000);
-		}
-		else
-		{
-			exposureTime = results.getCalibration().exposureTime / 1000;
+			}
+
+			if (!checkCalibration(results))
+				return false;
+
+			allResults.add(results);
 		}
 
 		return true;
 	}
 
+	/**
+	 * Check the results have a calibrated exposure time and pixel pitch. If not then show a dialog to collect the
+	 * calibration.
+	 * 
+	 * @param results
+	 * @return True if calibrated
+	 */
+	private boolean checkCalibration(MemoryPeakResults results)
+	{
+		if (results.getCalibration() == null || results.getCalibration().exposureTime <= 0 ||
+				results.getCalibration().nmPerPixel <= 0)
+		{
+			Calibration cal = results.getCalibration();
+			if (cal == null)
+				cal = new Calibration();
+
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("Uncalibrated results! Please enter the calibration:");
+			gd.addNumericField("Exposure_time (ms)", cal.exposureTime, 2);
+			gd.addNumericField("Pixel_pitch (nm)", cal.nmPerPixel, 2);
+			gd.showDialog();
+			if (gd.wasCanceled() || gd.invalidNumber())
+				return false;
+			cal.exposureTime = gd.getNextNumber();
+			cal.nmPerPixel = gd.getNextNumber();
+			if (cal.exposureTime <= 0 || cal.nmPerPixel <= 0)
+				return false;
+		}
+		return true;
+	}
+
 	private boolean readTraceDialog(GenericDialog gd)
 	{
-		inputOption = ResultsManager.getInputSource(gd);
+		if (!multiMode)
+			inputOption = ResultsManager.getInputSource(gd);
 		settings.distanceThreshold = gd.getNextNumber();
 		settings.distanceExclusion = Math.abs(gd.getNextNumber());
 		settings.minimumTraceLength = (int) Math.abs(gd.getNextNumber());
 		settings.ignoreEnds = gd.getNextBoolean();
 		settings.saveTraces = gd.getNextBoolean();
-		multipleInputs = gd.getNextBoolean();
+		if (!multiMode)
+			multipleInputs = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
@@ -938,13 +1003,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return true;
 	}
 
-	private Trace[] getTraces()
+	private Trace[] getTraces(ArrayList<MemoryPeakResults> allResults)
 	{
-		ArrayList<MemoryPeakResults> allResults = new ArrayList<MemoryPeakResults>();
-		allResults.add(results);
+		this.results = allResults.get(0);
+
+		// Results should be checked for calibration by this point
+		exposureTime = results.getCalibration().exposureTime / 1000;
 
 		final double nmPerPixel = results.getCalibration().nmPerPixel;
-		if (multipleInputs)
+		if (!multiMode && multipleInputs)
 		{
 			// Get additional results sets with the same calibration
 			MemoryPeakResults r = nextInput(nmPerPixel, allResults);
@@ -1866,5 +1933,222 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		((Double[]) args[1])[0] = new Double(value);
 		((Double[]) args[2])[0] = new Double(value2);
 		return "";
+	}
+
+	private class MultiDialog extends Dialog implements ActionListener, KeyListener, WindowListener
+	{
+		private static final long serialVersionUID = -881270633231897572L;
+
+		private Button cancel, okay;
+		private boolean wasCanceled;
+		private List list;
+
+		public MultiDialog()
+		{
+			super(WindowManager.getCurrentImage() != null ? (Frame) WindowManager.getCurrentImage().getWindow() : IJ
+					.getInstance() != null ? IJ.getInstance() : new Frame(), TITLE, true);
+			addKeyListener(this);
+			addWindowListener(this);
+		}
+
+		public void showDialog()
+		{
+			add(buildPanels());
+			if (IJ.isMacintosh())
+				setResizable(false);
+			pack();
+			GUI.center(this);
+			setVisible(true);
+			IJ.wait(50); // work around for Sun/WinNT bug
+		}
+
+		protected Panel buildPanels()
+		{
+			Panel p = new Panel();
+			BorderLayout layout = new BorderLayout();
+			layout.setVgap(3);
+			p.setLayout(layout);
+			p.add(buildResultsList(), BorderLayout.NORTH, 0);
+			p.add(buildButtonPanel(), BorderLayout.CENTER, 1);
+			return p;
+		}
+
+		protected Component buildResultsList()
+		{
+			Set<String> names = MemoryPeakResults.getResultNames();
+			final int MAX_SIZE = 30;
+			int size;
+			if (names.size() < MAX_SIZE)
+			{
+				size = names.size();
+			}
+			else
+			{
+				size = MAX_SIZE;
+			}
+			list = new List(size, true);
+			int n = 0;
+			for (String name : names)
+			{
+				list.add(name);
+				// Select the same as last time
+				if (selected.contains(name))
+				{
+					list.select(n);
+				}
+				n++;
+			}
+			return (Component) list;
+		}
+
+		protected Panel buildButtonPanel()
+		{
+			Panel buttons = new Panel();
+			buttons.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+			okay = new Button("OK");
+			okay.addActionListener(this);
+			okay.addKeyListener(this);
+			buttons.add(okay);
+			cancel = new Button("Cancel");
+			cancel.addActionListener(this);
+			cancel.addKeyListener(this);
+			buttons.add(cancel);
+			return buttons;
+		}
+
+		public boolean wasCancelled()
+		{
+			return wasCanceled;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			Object source = e.getSource();
+			if (source == okay || source == cancel)
+			{
+				wasCanceled = source == cancel;
+				dispose();
+			}
+		}
+
+		@Override
+		public void keyTyped(KeyEvent paramKeyEvent)
+		{
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e)
+		{
+			int keyCode = e.getKeyCode();
+			IJ.setKeyDown(keyCode);
+			if (keyCode == KeyEvent.VK_ENTER)
+			{
+				dispose();
+			}
+			else if (keyCode == KeyEvent.VK_ESCAPE)
+			{
+				wasCanceled = true;
+				dispose();
+				IJ.resetEscape();
+			}
+			else if (keyCode == KeyEvent.VK_W &&
+					(e.getModifiers() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0)
+			{
+				wasCanceled = true;
+				dispose();
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent paramKeyEvent)
+		{
+		}
+
+		public ArrayList<String> getSelectedResults()
+		{
+			int[] listIndexes = list.getSelectedIndexes();
+			selected.clear();
+
+			// Record as if we use the multiple_inputs option in the trace dialog
+			if (Recorder.record)
+				Recorder.recordOption("Multiple_inputs");
+
+			String name = list.getItem(listIndexes[0]);
+			selected.add(name);
+			if (Recorder.record)
+				Recorder.recordOption("Input", name);
+
+			for (int n = 1; n < listIndexes.length; ++n)
+			{
+				name = list.getItem(listIndexes[n]);
+				selected.add(name);
+				if (Recorder.record)
+					Recorder.recordOption("Input"+n, name);
+			}
+			
+			return selected;
+		}
+
+		@Override
+		public void windowClosing(WindowEvent e)
+		{
+			wasCanceled = true;
+			dispose();
+		}
+
+		//@formatter:off
+	    public void windowActivated(WindowEvent e) {}
+	    public void windowOpened(WindowEvent e) {}
+	    public void windowClosed(WindowEvent e) {}
+	    public void windowIconified(WindowEvent e) {}
+	    public void windowDeiconified(WindowEvent e) {}
+	    public void windowDeactivated(WindowEvent e) {}
+		//@formatter:on
+	}
+
+	private boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults)
+	{
+		multiMode = true;
+
+		// Show a list box containing all the results. This should remember the last set of chosen items.
+		MultiDialog md = new MultiDialog();
+
+		md.showDialog();
+
+		if (md.wasCancelled())
+			return false;
+
+		for (String name : md.getSelectedResults())
+		{
+			MemoryPeakResults r = MemoryPeakResults.getResults(name);
+			if (r != null)
+				allResults.add(r);
+		}
+
+		if (allResults.isEmpty())
+			return false;
+
+		// Check calibration exists for the first set of results
+		if (!checkCalibration(allResults.get(0)))
+			return false;
+
+		// Check the calibration is the same for the rest
+		Calibration cal = allResults.get(0).getCalibration();
+		final double nmPerPixel = cal.nmPerPixel;
+		final double exposureTime = cal.exposureTime;
+		for (int i = 1; i < allResults.size(); i++)
+		{
+			MemoryPeakResults results = allResults.get(1);
+
+			if (results.getCalibration() == null || results.getCalibration().exposureTime != exposureTime ||
+					results.getNmPerPixel() != nmPerPixel)
+			{
+				IJ.error(TITLE, "The exposure time and pixel pitch must match across all the results");
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
