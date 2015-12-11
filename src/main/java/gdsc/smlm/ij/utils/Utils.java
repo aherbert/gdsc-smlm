@@ -38,6 +38,7 @@ import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -50,6 +51,15 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class Utils
 {
+	// Flags for buildImageList
+
+	public final static int SINGLE = 1; // Single plane (2D image)
+	public final static int BINARY = 2; // Binary image
+	public final static int GREY_SCALE = 4; // Greyscale image (8, 16, 32 bit)
+	public final static int GREY_8_16 = 8; // Greyscale image (8, 16 bit)
+	public final static int NO_IMAGE = 16; // Add no image option
+	public final static String NO_IMAGE_TITLE = "[None]";
+
 	private static boolean newWindow = false;
 
 	/**
@@ -1212,5 +1222,90 @@ public class Utils
 		ic.setSourceRect(r);
 		ic.setMagnification(newMag);
 		ic.repaint();
+	}
+
+	/**
+	 * Returns a list of the IDs of open images. Returns
+	 * an empty array if no windows are open.
+	 * 
+	 * @see {@link ij.WindowManager#getIDList() }
+	 * 
+	 * @return List of IDs
+	 */
+	public static int[] getIDList()
+	{
+		int[] list = WindowManager.getIDList();
+		return (list != null) ? list : new int[0];
+	}
+
+	/**
+	 * Build a list of all the image names.
+	 * 
+	 * @param flags
+	 *            Specify the types of image to collate
+	 * @return The list of images
+	 */
+	public static String[] getImageList(final int flags)
+	{
+		return getImageList(flags, null);
+	}
+
+	/**
+	 * Build a list of all the image names.
+	 * 
+	 * @param flags
+	 *            Specify the types of image to collate
+	 * @param ignoreSuffix
+	 *            A list of title suffixes to ignore
+	 * @return The list of images
+	 */
+	public static String[] getImageList(final int flags, String[] ignoreSuffix)
+	{
+		ArrayList<String> newImageList = new ArrayList<String>();
+
+		if ((flags & NO_IMAGE) == NO_IMAGE)
+			newImageList.add(NO_IMAGE_TITLE);
+
+		for (int id : getIDList())
+		{
+			ImagePlus imp = WindowManager.getImage(id);
+			if (imp == null)
+				continue;
+			// Check flags
+			if ((flags & SINGLE) == SINGLE && imp.getNDimensions() > 2)
+				continue;
+			if ((flags & BINARY) == BINARY && !imp.getProcessor().isBinary())
+				continue;
+			if ((flags & GREY_SCALE) == GREY_SCALE && imp.getBitDepth() == 24)
+				continue;
+			if ((flags & GREY_8_16) == GREY_8_16 && (imp.getBitDepth() == 24 || imp.getBitDepth() == 32))
+				continue;
+			if (ignoreImage(ignoreSuffix, imp.getTitle()))
+				continue;
+
+			newImageList.add(imp.getTitle());
+		}
+
+		return newImageList.toArray(new String[0]);
+	}
+
+	/**
+	 * Return true if the image title ends with any of the specified suffixes
+	 * 
+	 * @param ignoreSuffix
+	 *            A list of title suffixes to ignore
+	 * @param title
+	 *            The image title
+	 * @return true if the image title ends with any of the specified suffixes
+	 */
+	public static boolean ignoreImage(String[] ignoreSuffix, String title)
+	{
+		if (ignoreSuffix != null)
+		{
+			for (String suffix : ignoreSuffix)
+				if (title.endsWith(suffix))
+					return true;
+		}
+		return false;
 	}
 }
