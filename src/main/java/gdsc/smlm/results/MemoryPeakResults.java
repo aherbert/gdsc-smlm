@@ -552,4 +552,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		}
 		return null;
 	}
+
+	/**
+	 * @return True if empty
+	 */
+	public boolean isEmpty()
+	{
+		return results.isEmpty();
+	}
 }
