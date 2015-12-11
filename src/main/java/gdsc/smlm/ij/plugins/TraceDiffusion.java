@@ -54,8 +54,12 @@ import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedWriter;
@@ -1935,7 +1939,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return "";
 	}
 
-	private class MultiDialog extends Dialog implements ActionListener, KeyListener, WindowListener
+	private class MultiDialog extends Dialog implements ActionListener, KeyListener, WindowListener, MouseListener,
+			ItemListener
 	{
 		private static final long serialVersionUID = -881270633231897572L;
 
@@ -1998,6 +2003,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				}
 				n++;
 			}
+
+			list.addMouseListener(this);
+			list.addItemListener(this);
+
 			return (Component) list;
 		}
 
@@ -2084,9 +2093,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				name = list.getItem(listIndexes[n]);
 				selected.add(name);
 				if (Recorder.record)
-					Recorder.recordOption("Input"+n, name);
+					Recorder.recordOption("Input" + n, name);
 			}
-			
+
 			return selected;
 		}
 
@@ -2104,7 +2113,49 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	    public void windowIconified(WindowEvent e) {}
 	    public void windowDeiconified(WindowEvent e) {}
 	    public void windowDeactivated(WindowEvent e) {}
+		public void mousePressed(MouseEvent paramMouseEvent) {}
+		public void mouseReleased(MouseEvent paramMouseEvent) {}
+		public void mouseEntered(MouseEvent paramMouseEvent) {}
+		public void mouseExited(MouseEvent paramMouseEvent) {}
 		//@formatter:on
+
+		int lastIndex;
+		int modifiers;
+		int lastEvent = -1;
+
+		@Override
+		public void mouseClicked(MouseEvent paramMouseEvent)
+		{
+			modifiers = paramMouseEvent.getModifiers();
+		}
+
+		@Override
+		public void itemStateChanged(ItemEvent paramItemEvent)
+		{
+			int index = (int) paramItemEvent.getItem();
+			int event = paramItemEvent.getStateChange();
+			
+			// If we have the shift key down, support multiple select/deselect
+			if (event == lastEvent && (modifiers & MouseEvent.SHIFT_MASK) != 0 && 
+					(event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED))
+			{
+				if (lastIndex != index)
+				{
+					int top = Math.max(index, lastIndex);
+					int bottom = Math.min(index, lastIndex);
+					for (int i = bottom + 1; i < top; i++)
+					{
+						if (event == ItemEvent.SELECTED)
+							list.select(i);
+						else
+							list.deselect(i);
+					}
+				}
+			}
+
+			lastEvent = event; 
+			lastIndex = index;
+		}
 	}
 
 	private boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults)
