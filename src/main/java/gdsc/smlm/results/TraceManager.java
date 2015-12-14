@@ -590,7 +590,7 @@ public class TraceManager
 			{
 				if (traces[i] == null || traces[i].size() == 0)
 					continue;
-				
+
 				PeakResult result = traces[i].getHead();
 				if (traces[i].size() == 1)
 				{
@@ -630,9 +630,27 @@ public class TraceManager
 	 * If the trace is empty it is ignored.
 	 * 
 	 * @param traces
+	 * @param calibration
+	 * @param b
 	 * @return the peak results
 	 */
 	public static MemoryPeakResults toPeakResults(final Trace[] traces, final Calibration calibration)
+	{
+		return toPeakResults(traces, calibration, false);
+	}
+
+	/**
+	 * Convert a list of traces into peak results setting the trace ID into the results.
+	 * <p>
+	 * If the trace is empty it is ignored.
+	 * 
+	 * @param traces
+	 * @param calibration
+	 * @param newId
+	 *            Set to true to use a new ID for each trace
+	 * @return the peak results
+	 */
+	public static MemoryPeakResults toPeakResults(final Trace[] traces, final Calibration calibration, boolean newId)
 	{
 		int capacity = 1 + ((traces != null) ? traces.length : 0);
 		MemoryPeakResults results = new MemoryPeakResults(capacity);
@@ -640,21 +658,23 @@ public class TraceManager
 		if (traces != null)
 		{
 			// Ensure all results are added as extended peak results with their trace ID.
-			for (int i = 0; i < traces.length; i++)
+			int id = 0;
+			for (Trace trace : traces)
 			{
-				if (traces[i] == null || traces[i].size() == 0)
+				if (trace == null || trace.size() == 0)
 					continue;
-
-				for (PeakResult result : traces[i].getPoints())
+				
+				final int traceId = (newId) ? ++id : trace.getId();
+				for (PeakResult result : trace.getPoints())
 				{
 					results.add(new ExtendedPeakResult(result.peak, result.origX, result.origY, result.origValue, 0,
-							result.noise, result.params, null, 0, traces[i].getId()));
+							result.noise, result.params, null, 0, traceId));
 				}
 			}
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Convert a list of traces into peak results. The signal weighted centroid of each trace is used as the
 	 * coordinates. The weighted localisation precision is used as the width. The amplitude is the average from all

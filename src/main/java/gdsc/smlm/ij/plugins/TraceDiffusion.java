@@ -778,11 +778,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		// Add to the summary table
 		StringBuilder sb = new StringBuilder(title);
-		sb.append('\t').append(results.getName());
-		if (additionalDatasets > 0)
-		{
-			sb.append(" + ").append(additionalDatasets).append(" others");
-		}
+		sb.append('\t').append(createCombinedName());
 		sb.append("\t");
 		sb.append(Utils.rounded(exposureTime * 1000, 3)).append("\t");
 		sb.append(Utils.rounded(settings.distanceThreshold, 3)).append("\t");
@@ -1063,10 +1059,24 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 		}
 
+		Trace[] all = allTraces.toArray(new Trace[allTraces.size()]);
+
 		if (additionalDatasets > 0)
+		{
 			Utils.log("Multiple inputs provide %d traces", allTraces.size());
 
-		return allTraces.toArray(new Trace[allTraces.size()]);
+			MemoryPeakResults tracedResults = TraceManager.toPeakResults(all, results.getCalibration(), true);
+			tracedResults.copySettings(results);
+			tracedResults.setName(createCombinedName() + " Tracks");
+			MemoryPeakResults.addResults(tracedResults);
+		}
+
+		return all;
+	}
+
+	private String createCombinedName()
+	{
+		return results.getName() + " + " + Utils.pleural(additionalDatasets, "other");
 	}
 
 	private MemoryPeakResults nextInput(double nmPerPixel, ArrayList<MemoryPeakResults> allResults)
@@ -2134,9 +2144,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		{
 			int index = (int) paramItemEvent.getItem();
 			int event = paramItemEvent.getStateChange();
-			
+
 			// If we have the shift key down, support multiple select/deselect
-			if (event == lastEvent && (modifiers & MouseEvent.SHIFT_MASK) != 0 && 
+			if (event == lastEvent && (modifiers & MouseEvent.SHIFT_MASK) != 0 &&
 					(event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED))
 			{
 				if (lastIndex != index)
@@ -2153,7 +2163,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				}
 			}
 
-			lastEvent = event; 
+			lastEvent = event;
 			lastIndex = index;
 		}
 	}
