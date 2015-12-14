@@ -1954,7 +1954,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	{
 		private static final long serialVersionUID = -881270633231897572L;
 
-		private Button cancel, okay;
+		private Button cancel, okay, all, none;
 		private boolean wasCanceled;
 		private List list;
 
@@ -1969,6 +1969,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		public void showDialog()
 		{
 			add(buildPanels());
+			this.addKeyListener(this);
 			if (IJ.isMacintosh())
 				setResizable(false);
 			pack();
@@ -2016,6 +2017,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			list.addMouseListener(this);
 			list.addItemListener(this);
+			list.addKeyListener(this);
 
 			return (Component) list;
 		}
@@ -2024,6 +2026,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		{
 			Panel buttons = new Panel();
 			buttons.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+			all = new Button("All");
+			all.addActionListener(this);
+			all.addKeyListener(this);
+			buttons.add(all);
+			none = new Button("None");
+			none.addActionListener(this);
+			none.addKeyListener(this);
+			buttons.add(none);
 			okay = new Button("OK");
 			okay.addActionListener(this);
 			okay.addKeyListener(this);
@@ -2049,6 +2059,16 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				wasCanceled = source == cancel;
 				dispose();
 			}
+			else if (source == all)
+			{
+				for (int i = 0; i < list.getItemCount(); i++)
+					list.select(i);
+			}
+			else if (source == none)
+			{
+				for (int i = 0; i < list.getItemCount(); i++)
+					list.deselect(i);
+			}
 		}
 
 		@Override
@@ -2063,7 +2083,22 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			IJ.setKeyDown(keyCode);
 			if (keyCode == KeyEvent.VK_ENTER)
 			{
-				dispose();
+				Object source = e.getSource();
+				if (source == okay || source == cancel || source == list)
+				{
+					wasCanceled = source == cancel;
+					dispose();
+				}
+				else if (source == all)
+				{
+					for (int i = 0; i < list.getItemCount(); i++)
+						list.select(i);
+				}
+				else if (source == none)
+				{
+					for (int i = 0; i < list.getItemCount(); i++)
+						list.deselect(i);
+				}
 			}
 			else if (keyCode == KeyEvent.VK_ESCAPE)
 			{
@@ -2093,17 +2128,20 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (Recorder.record)
 				Recorder.recordOption("Multiple_inputs");
 
-			String name = list.getItem(listIndexes[0]);
-			selected.add(name);
-			if (Recorder.record)
-				Recorder.recordOption("Input", name);
-
-			for (int n = 1; n < listIndexes.length; ++n)
+			if (listIndexes.length > 0)
 			{
-				name = list.getItem(listIndexes[n]);
+				String name = list.getItem(listIndexes[0]);
 				selected.add(name);
 				if (Recorder.record)
-					Recorder.recordOption("Input" + n, name);
+					Recorder.recordOption("Input", name);
+
+				for (int n = 1; n < listIndexes.length; ++n)
+				{
+					name = list.getItem(listIndexes[n]);
+					selected.add(name);
+					if (Recorder.record)
+						Recorder.recordOption("Input" + n, name);
+				}
 			}
 
 			return selected;
@@ -2180,7 +2218,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (md.wasCancelled())
 			return false;
 
-		for (String name : md.getSelectedResults())
+		ArrayList<String> selectedResults = md.getSelectedResults();
+		if (selectedResults.isEmpty())
+		{
+			IJ.error(TITLE, "No results were selected");
+			return false;
+		}
+
+		for (String name : selectedResults)
 		{
 			MemoryPeakResults r = MemoryPeakResults.getResults(name);
 			if (r != null)
