@@ -15,8 +15,10 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
+import ij.Macro;
 import ij.WindowManager;
 import ij.gui.GUI;
+import ij.macro.Interpreter;
 import ij.plugin.frame.Recorder;
 
 import java.awt.BorderLayout;
@@ -40,6 +42,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 
 /**
  * Shows a list of all the results sets held in memory, allowing multiple results to be selected
@@ -50,10 +53,12 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 	private static final long serialVersionUID = -881270633231897572L;
 
 	private ArrayList<String> selected;
-	
+
 	private Button cancel, okay, all, none;
 	private boolean wasCanceled;
 	private List list;
+	private String macroOptions;
+	private boolean macro;
 
 	public MultiDialog(String title)
 	{
@@ -61,8 +66,10 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 				.getInstance() != null ? IJ.getInstance() : new Frame(), title, true);
 		addKeyListener(this);
 		addWindowListener(this);
+		macroOptions = Macro.getOptions();
+		macro = macroOptions != null;
 	}
-	
+
 	public void addSelected(ArrayList<String> selected)
 	{
 		this.selected = selected;
@@ -70,14 +77,22 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 
 	public void showDialog()
 	{
-		add(buildPanels());
-		this.addKeyListener(this);
-		if (IJ.isMacintosh())
-			setResizable(false);
-		pack();
-		GUI.center(this);
-		setVisible(true);
-		IJ.wait(50); // work around for Sun/WinNT bug
+		// Detect if running in a macro and just collect the input options
+		if (macro)
+		{
+			dispose();
+		}
+		else
+		{
+			add(buildPanels());
+			this.addKeyListener(this);
+			if (IJ.isMacintosh())
+				setResizable(false);
+			pack();
+			GUI.center(this);
+			setVisible(true);
+			IJ.wait(50); // work around for Sun/WinNT bug
+		}
 	}
 
 	protected Panel buildPanels()
@@ -224,30 +239,72 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 
 	public ArrayList<String> getSelectedResults()
 	{
-		int[] listIndexes = list.getSelectedIndexes();
-		ArrayList<String> selected = new ArrayList<String>(listIndexes.length);
+		ArrayList<String> selected;
 
-		// Record as if we use the multiple_inputs option in the trace dialog
-		if (Recorder.record)
-			Recorder.recordOption("Multiple_inputs");
-
-		if (listIndexes.length > 0)
+		// Get the selected names
+		if (macro)
 		{
-			String name = ResultsManager.removeFormatting(list.getItem(listIndexes[0]));
-			selected.add(name);
-			if (Recorder.record)
-				Recorder.recordOption("Input", name);
-
-			for (int n = 1; n < listIndexes.length; ++n)
+			selected = new ArrayList<String>();
+			String name = getValue("input");
+			while (name != null)
 			{
-				name = ResultsManager.removeFormatting(list.getItem(listIndexes[n]));
 				selected.add(name);
-				if (Recorder.record)
-					Recorder.recordOption("Input" + n, name);
+				name = getValue("input" + selected.size());
+			}
+		}
+		else
+		{
+			final int[] listIndexes = list.getSelectedIndexes();
+			selected = new ArrayList<String>(listIndexes.length);
+			if (listIndexes.length > 0)
+			{
+				for (int index : listIndexes)
+				{
+					selected.add(ResultsManager.removeFormatting(list.getItem(index)));
+				}
+			}
+		}
+
+		// Record as if we use the multiple_inputs option
+		if ((macro && Recorder.record && Recorder.recordInMacros) || Recorder.record)
+		{
+			if (!selected.isEmpty())
+			{
+				Recorder.recordOption("Input", selected.get(0));
+				if (selected.size() > 1)
+				{
+					Recorder.recordOption("Multiple_inputs");
+					for (int n = 1; n < selected.size(); ++n)
+					{
+						Recorder.recordOption("Input" + n, selected.get(n));
+					}
+				}
 			}
 		}
 
 		return selected;
+	}
+
+	/**
+	 * Get a value from the macro options. Adapted from ij.gui.GenericDialog.
+	 * 
+	 * @param label
+	 * @return The value (or null)
+	 */
+	private String getValue(String label)
+	{
+		String theText = Macro.getValue(macroOptions, label, null);
+		if (theText != null && (theText.startsWith("&") || label.toLowerCase(Locale.US).startsWith(theText)))
+		{
+			// Is the value a macro variable?
+			if (theText.startsWith("&"))
+				theText = theText.substring(1);
+			Interpreter interp = Interpreter.getInstance();
+			String s = interp != null ? interp.getVariableAsString(theText) : null;
+			if (s != null)
+				theText = s;
+		}
+		return theText;
 	}
 
 	@Override
