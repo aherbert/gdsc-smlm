@@ -31,7 +31,6 @@ import gdsc.smlm.utils.Maths;
 import gdsc.smlm.utils.Statistics;
 import gdsc.smlm.utils.StoredDataStatistics;
 import ij.IJ;
-import ij.Macro;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
@@ -105,7 +104,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static int minN = 1;
 	private static int maxN = 5;
 	private static boolean debugFitting = false;
-	private static boolean multipleInputs = false;
 	private static String tracesFilename = "";
 	private static String title = "";
 
@@ -155,9 +153,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		ArrayList<MemoryPeakResults> allResults = new ArrayList<MemoryPeakResults>();
 
 		// Option to pick multiple input datasets together using a list box.
-		// (Do not support running in macros. The macro options are recorded as if running 
-		// using the multiple_inputs option in the trace dialog.)
-		if ("multi".equals(arg) && Macro.getOptions() == null)
+		if ("multi".equals(arg))
 		{
 			if (!showMultiDialog(allResults))
 				return;
@@ -888,8 +884,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		gd.addSlider("Min_trace_length", 2, 20, settings.minimumTraceLength);
 		gd.addCheckbox("Ignore_ends", settings.ignoreEnds);
 		gd.addCheckbox("Save_traces", settings.saveTraces);
-		if (!multiMode)
-			gd.addCheckbox("Multiple_inputs", multipleInputs);
 
 		gd.showDialog();
 
@@ -959,8 +953,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		settings.minimumTraceLength = (int) Math.abs(gd.getNextNumber());
 		settings.ignoreEnds = gd.getNextBoolean();
 		settings.saveTraces = gd.getNextBoolean();
-		if (!multiMode)
-			multipleInputs = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
@@ -988,16 +980,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		exposureTime = results.getCalibration().exposureTime / 1000;
 
 		final double nmPerPixel = results.getCalibration().nmPerPixel;
-		if (!multiMode && multipleInputs)
-		{
-			// Get additional results sets with the same calibration
-			MemoryPeakResults r = nextInput(nmPerPixel, allResults);
-			while (r != null)
-			{
-				allResults.add(r);
-				r = nextInput(nmPerPixel, allResults);
-			}
-		}
 
 		ArrayList<Trace> allTraces = new ArrayList<Trace>();
 		additionalDatasets = -1;
@@ -1054,90 +1036,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private String createCombinedName()
 	{
 		return results.getName() + " + " + Utils.pleural(additionalDatasets, "other");
-	}
-
-	private MemoryPeakResults nextInput(double nmPerPixel, ArrayList<MemoryPeakResults> allResults)
-	{
-		ArrayList<String> source = new ArrayList<String>(3);
-		boolean fileInput = false;
-
-		for (MemoryPeakResults r : MemoryPeakResults.getAllResults())
-		{
-			if (notValid(r, allResults, nmPerPixel))
-				continue;
-			ResultsManager.addInputSource(source, r, InputSource.MEMORY_SINGLE_FRAME);
-		}
-		if (source.isEmpty())
-			return null;
-
-		String inputOption;
-
-		// if a macro then use the recorder to get the option
-
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Select additional inputs ...\n \nPress cancel to continue with the analysis.");
-
-		// If in macro mode then we must just use the String input field to allow the macro
-		// IJ to return the field values from the macro arguments. Using a Choice input
-		// will always return a field value.
-
-		String fieldName = "Input" + allResults.size();
-		if (IJ.isMacro())
-			// Use blank default value so bad macro parameters return nothing
-			gd.addStringField(fieldName, "");
-		else
-			ResultsManager.addInputSourceToDialog(gd, fieldName, "", source, fileInput);
-
-		gd.showDialog();
-
-		if (gd.wasCanceled())
-			return null;
-
-		if (IJ.isMacro())
-			inputOption = gd.getNextString();
-		else
-			inputOption = ResultsManager.getInputSource(gd);
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, true);
-		if (results == null || results.size() == 0)
-		{
-			return null;
-		}
-
-		// Check the results have the same calibrated exposure time and pixel size
-		if (results.getCalibration() == null || results.getCalibration().exposureTime / 1000.0 != exposureTime ||
-				results.getNmPerPixel() != nmPerPixel)
-		{
-			return null;
-		}
-
-		return results;
-	}
-
-	/**
-	 * Check if the results are valid for inclusion as additional datasets
-	 * 
-	 * @param r
-	 *            The results
-	 * @param allResults
-	 *            All the current results
-	 * @param nmPerPixel
-	 *            The calibrated pixel size of the primary results
-	 * @return True if the results are not valid to be included
-	 */
-	private boolean notValid(MemoryPeakResults r, ArrayList<MemoryPeakResults> allResults, double nmPerPixel)
-	{
-		// Check the calibration is the same
-		if (r.getNmPerPixel() != nmPerPixel)
-			return true;
-		if (r.getCalibration().exposureTime / 1000.0 != exposureTime)
-			return true;
-		// Check the results have not already been chosen
-		for (MemoryPeakResults r2 : allResults)
-		{
-			if (r2.getName().equals(r.getName()))
-				return true;
-		}
-		return false;
 	}
 
 	private boolean showDialog()
