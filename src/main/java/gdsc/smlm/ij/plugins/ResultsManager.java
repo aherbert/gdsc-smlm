@@ -119,6 +119,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		if (arg != null && arg.startsWith("clear"))
 		{
 			Collection<MemoryPeakResults> allResults;
+			boolean removeAll = false;
 			if (arg.contains("multi"))
 			{
 				MultiDialog md = new MultiDialog(TITLE);
@@ -139,6 +140,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			}
 			else
 			{
+				removeAll = true;
 				allResults = MemoryPeakResults.getAllResults();
 			}
 			if (allResults.isEmpty())
@@ -163,9 +165,14 @@ public class ResultsManager implements PlugIn, MouseListener
 			if (!gd.wasOKed())
 				return;
 
-			for (MemoryPeakResults results : allResults)
-				MemoryPeakResults.removeResults(results.getName());
-			
+			if (removeAll)
+				MemoryPeakResults.clearMemory();
+			else
+			{
+				for (MemoryPeakResults results : allResults)
+					MemoryPeakResults.removeResults(results.getName());
+			}
+
 			SummariseResults.clearSummaryTable();
 			IJ.log(String.format("Cleared %s (%s, %s)", count, sets, memory));
 			return;
