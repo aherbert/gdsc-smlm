@@ -52,6 +52,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -106,6 +107,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	private static double input_gain = Prefs.get(Constants.inputGain, 1);
 	private static double input_exposureTime = Prefs.get(Constants.inputExposureTime, 0);
 	private static float input_noise = (float) Prefs.get(Constants.inputNoise, 0);
+	private static ArrayList<String> selected;
 
 	/*
 	 * (non-Javadoc)
@@ -114,26 +116,58 @@ public class ResultsManager implements PlugIn, MouseListener
 	 */
 	public void run(String arg)
 	{
-		if (arg != null && arg.equals("clear"))
+		if (arg != null && arg.startsWith("clear"))
 		{
-			long memorySize = MemoryPeakResults.estimateMemorySize();
-			if (memorySize > 0)
+			Collection<MemoryPeakResults> allResults;
+			if (arg.contains("multi"))
 			{
-				String memory = MemoryPeakResults.memorySizeString(memorySize);
-				int size = MemoryPeakResults.countMemorySize();
-
-				GenericDialog gd = new GenericDialog(TITLE);
-				gd.addMessage(String.format("Do you want to remove all %d result%s from memory (%s)", size,
-						(size > 1) ? "s" : "", memory));
-				gd.enableYesNoCancel();
-				gd.showDialog();
-				if (!gd.wasOKed())
+				MultiDialog md = new MultiDialog(TITLE);
+				md.addSelected(selected);
+				md.showDialog();
+				if (md.wasCanceled())
 					return;
-
-				IJ.log(String.format("Cleared %d result%s (%s)", size, (size > 1) ? "s" : "", memory));
-				MemoryPeakResults.clearMemory();
-				SummariseResults.clearSummaryTable();
+				selected = md.getSelectedResults();
+				if (selected.isEmpty())
+					return;
+				allResults = new ArrayList<MemoryPeakResults>(selected.size());
+				for (String name : selected)
+				{
+					MemoryPeakResults r = MemoryPeakResults.getResults(name);
+					if (r != null)
+						allResults.add(r);
+				}
 			}
+			else
+			{
+				allResults = MemoryPeakResults.getAllResults();
+			}
+			if (allResults.isEmpty())
+				return;
+
+			long memorySize = 0;
+			int size = 0;
+			for (MemoryPeakResults results : allResults)
+			{
+				memorySize += MemoryPeakResults.estimateMemorySize(results.getResults());
+				size += results.size();
+			}
+			String memory = MemoryPeakResults.memorySizeString(memorySize);
+			String count = Utils.pleural(size, "result");
+			String sets = Utils.pleural(allResults.size(), "set");
+
+			GenericDialog gd = new GenericDialog(TITLE);
+
+			gd.addMessage(String.format("Do you want to remove %s from memory (%s, %s)?", count, sets, memory));
+			gd.enableYesNoCancel();
+			gd.showDialog();
+			if (!gd.wasOKed())
+				return;
+
+			for (MemoryPeakResults results : allResults)
+				MemoryPeakResults.removeResults(results.getName());
+			
+			SummariseResults.clearSummaryTable();
+			IJ.log(String.format("Cleared %s (%s, %s)", count, sets, memory));
 			return;
 		}
 
@@ -525,12 +559,12 @@ public class ResultsManager implements PlugIn, MouseListener
 	{
 		String[] options = source.toArray(new String[source.size()]);
 		// Find the option
-		inputOption = removeSizeSuffix(inputOption);
+		inputOption = removeFormatting(inputOption);
 
 		int optionIndex = 0;
 		for (int i = 0; i < options.length; i++)
 		{
-			String name = removeSizeSuffix(options[i]);
+			String name = removeFormatting(options[i]);
 			if (name.equals(inputOption))
 			{
 				optionIndex = i;
@@ -542,7 +576,14 @@ public class ResultsManager implements PlugIn, MouseListener
 			gd.addStringField("Input_file", inputFilename, 30);
 	}
 
-	private static String removeSizeSuffix(String name)
+	/**
+	 * Remove the extra information added to a name for use in dialogs
+	 * 
+	 * @param name
+	 *            the formatted name
+	 * @return The name
+	 */
+	public static String removeFormatting(String name)
 	{
 		int index = name.lastIndexOf('[');
 		if (index > 0)
@@ -610,8 +651,30 @@ public class ResultsManager implements PlugIn, MouseListener
 					break;
 				default:
 			}
-			source.add(memoryResults.getName() + " [" + memoryResults.size() + "]");
+			source.add(getName(memoryResults));
 		}
+	}
+
+	/**
+	 * Get the name of the results for use in dialogs
+	 * 
+	 * @param memoryResults
+	 * @return The name
+	 */
+	public static String getName(MemoryPeakResults memoryResults)
+	{
+		return memoryResults.getName() + " [" + memoryResults.size() + "]";
+	}
+
+	/**
+	 * Load results from memory using a name from a dialog
+	 * 
+	 * @param name
+	 * @return The results
+	 */
+	public static MemoryPeakResults loadMemoryResults(String name)
+	{
+		return MemoryPeakResults.getResults(removeFormatting(name));
 	}
 
 	/**
@@ -664,7 +727,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	public static String getInputSource(GenericDialog gd)
 	{
 		String source = gd.getNextChoice();
-		return removeSizeSuffix(source);
+		return removeFormatting(source);
 	}
 
 	/**
@@ -702,8 +765,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		}
 		else
 		{
-			inputOption = removeSizeSuffix(inputOption);
-			results = MemoryPeakResults.getResults(inputOption);
+			results = loadMemoryResults(inputOption);
 		}
 
 		if (results != null && results.size() > 0 && checkCalibration)
