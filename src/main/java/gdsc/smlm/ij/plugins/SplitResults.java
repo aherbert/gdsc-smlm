@@ -36,6 +36,7 @@ public class SplitResults implements PlugIn
 	private static String inputOption = "";
 	private static String objectMask = "";
 	private static boolean showObjectMask = false;
+	private static boolean nonMaskDataset = false;
 
 	/*
 	 * (non-Javadoc)
@@ -62,6 +63,7 @@ public class SplitResults implements PlugIn
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		gd.addChoice("Object_mask", items, objectMask);
 		gd.addCheckbox("Show_object_mask", showObjectMask);
+		gd.addCheckbox("Non_mask_dataset", nonMaskDataset);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -69,6 +71,7 @@ public class SplitResults implements PlugIn
 		inputOption = ResultsManager.getInputSource(gd);
 		objectMask = gd.getNextChoice();
 		showObjectMask = gd.getNextBoolean();
+		nonMaskDataset = gd.getNextBoolean();
 
 		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
 		if (results == null || results.size() == 0)
@@ -155,11 +158,11 @@ public class SplitResults implements PlugIn
 
 		// Add the new results sets to memory
 		i = 0;
-		for (MemoryPeakResults newResults : resultsSet)
+		for (int object = (nonMaskDataset) ? 0 : 1; object <= maxObject; object++)
 		{
-			if (!newResults.isEmpty())
+			if (!resultsSet[object].isEmpty())
 			{
-				MemoryPeakResults.addResults(newResults);
+				MemoryPeakResults.addResults(resultsSet[object]);
 				i++;
 			}
 		}
