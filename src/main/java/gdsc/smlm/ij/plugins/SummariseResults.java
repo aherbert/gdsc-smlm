@@ -48,10 +48,20 @@ public class SummariseResults implements PlugIn
 		}
 
 		createSummaryTable();
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		int nextFlush = 9;
 		for (MemoryPeakResults result : MemoryPeakResults.getAllResults())
 		{
-			addSummary(result);
+			addSummary(sb, result);
+			if (++i >= nextFlush)
+			{
+				summary.append(sb.toString());
+				sb.setLength(0);
+				nextFlush = Integer.MAX_VALUE;
+			}
 		}
+		summary.append(sb.toString());
 		summary.append("");
 		summary.toFront();
 	}
@@ -84,7 +94,7 @@ public class SummariseResults implements PlugIn
 		clearSummaryTable();
 	}
 
-	private void addSummary(MemoryPeakResults result)
+	private void addSummary(StringBuilder sb, MemoryPeakResults result)
 	{
 		DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
 		for (int i = 0; i < stats.length; i++)
@@ -113,7 +123,6 @@ public class SummariseResults implements PlugIn
 			}
 		}
 
-		StringBuilder sb = new StringBuilder();
 		sb.append(result.getName());
 		sb.append("\t").append(result.size());
 		int maxT = getMaxT(result);
@@ -149,8 +158,7 @@ public class SummariseResults implements PlugIn
 				sb.append("\t").append(IJ.d2s(stats[i].getMax(), 3));
 			}
 		}
-
-		summary.append(sb.toString());
+		sb.append("\n");
 	}
 
 	private int getMaxT(MemoryPeakResults result)
