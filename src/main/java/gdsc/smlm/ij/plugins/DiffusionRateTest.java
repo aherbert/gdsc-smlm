@@ -911,6 +911,7 @@ public class DiffusionRateTest implements PlugIn
 			}
 		}
 
+		StringBuilder sb = new StringBuilder();
 		for (int step = 1; step <= myMsdAnalysisSteps; step++)
 		{
 			if (step % 16 == 0)
@@ -931,8 +932,16 @@ public class DiffusionRateTest implements PlugIn
 			}
 			if (count == 0)
 				break;
-			addResult(step, sum, count);
+			addResult(sb, step, sum, count);
+			
+			// Flush to auto-space the columns
+			if (step == 9)
+			{
+				msdTable.append(sb.toString());
+				sb.setLength(0);			
+			}
 		}
+		msdTable.append(sb.toString());
 
 		IJ.showProgress(1);
 	}
@@ -970,19 +979,19 @@ public class DiffusionRateTest implements PlugIn
 		return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tn\tN\tMSD (um^2)\tD (um^2/s)";
 	}
 
-	private void addResult(int step, double sum, int count)
+	private void addResult(StringBuilder sb, int step, double sum, int count)
 	{
 		// Exposure time is the aggregated frame time 
 		final double msd = (sum / count) / conversionFactor;
 		// Jump distance separation is the number of steps
 		final double t = step / settings.stepsPerSecond;
-		StringBuilder sb = new StringBuilder(prefix);
+		sb.append(prefix);
 		sb.append(Utils.rounded(t)).append('\t');
 		sb.append(Utils.rounded(t / exposureTime)).append('\t');
 		sb.append(count).append('\t');
 		// Not rounded to preserve precision 
 		sb.append(msd).append('\t');
 		sb.append(msd / (4 * t));
-		msdTable.append(sb.toString());
+		sb.append('\n');
 	}
 }
