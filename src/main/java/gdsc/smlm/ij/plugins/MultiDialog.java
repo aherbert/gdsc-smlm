@@ -340,7 +340,7 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 	@Override
 	public void itemStateChanged(ItemEvent paramItemEvent)
 	{
-		int index = (int) paramItemEvent.getItem();
+		int index = (Integer) paramItemEvent.getItem();
 		int event = paramItemEvent.getStateChange();
 
 		// If we have the shift key down, support multiple select/deselect
