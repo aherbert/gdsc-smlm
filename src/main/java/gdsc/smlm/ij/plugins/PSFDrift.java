@@ -548,7 +548,7 @@ public class PSFDrift implements PlugIn
 
 		// Fit 
 		Utils.showStatus("Fitting ...");
-		final int step = (total > 400) ? total / 200 : 2;
+		final int step = Utils.getProgressInterval(total);
 		outer: for (int z = minz, i = 0; z <= maxz; z++)
 		{
 			for (int x = 0; x < grid.length; x++)

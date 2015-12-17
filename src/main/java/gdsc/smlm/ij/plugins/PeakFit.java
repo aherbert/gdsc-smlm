@@ -1973,7 +1973,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Use the FitEngine to allow multi-threading.
 		FitEngine engine = createFitEngine(FastMath.min(totalFrames, Prefs.getThreads()));
 
-		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
+		final int step = Utils.getProgressInterval(totalFrames);
 
 		boolean shutdown = false;
 		int slice = 0;
@@ -2208,7 +2208,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Use the FitEngine to allow multi-threading.
 		FitEngine engine = createFitEngine(FastMath.min(totalFrames, Prefs.getThreads()));
 
-		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
+		final int step = Utils.getProgressInterval(totalFrames);
 
 		boolean shutdown = false;
 		int slice = candidateMaxima.get(0).peak;

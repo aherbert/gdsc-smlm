@@ -618,7 +618,7 @@ public class BenchmarkFit implements PlugIn
 		resultsTime = new long[results.length];
 
 		// Fit the frames
-		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
+		final int step = Utils.getProgressInterval(totalFrames);
 		for (int i = 0; i < totalFrames; i++)
 		{
 			// Only fit if there were simulated photons

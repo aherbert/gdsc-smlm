@@ -111,6 +111,13 @@ public class DiffusionRateTest implements PlugIn
 			final double dy = y - p.y;
 			return dx * dx + dy * dy;
 		}
+
+		public double distance2(Point p, double error, RandomGenerator rand)
+		{
+			final double dx = (x + rand.nextGaussian() * error) - (p.x + rand.nextGaussian() * error);
+			final double dy = (y + rand.nextGaussian() * error) - (p.y + rand.nextGaussian() * error);
+			return dx * dx + dy * dy;
+		}
 	}
 
 	private CreateDataSettings settings;
@@ -122,7 +129,7 @@ public class DiffusionRateTest implements PlugIn
 	private static int aggregateSteps = 10;
 	private static int msdAnalysisSteps = 0;
 	private static double precision = 0;
-	private int myAggregateSteps = 1;
+	private int myAggregateSteps = 0;
 	private int myMsdAnalysisSteps = 0;
 	private boolean extraOptions = false;
 	private double conversionFactor;
@@ -146,7 +153,7 @@ public class DiffusionRateTest implements PlugIn
 		lastSimulatedDataset[0] = lastSimulatedDataset[1] = "";
 		lastSimulatedPrecision = 0;
 
-		int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond);
+		final int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond);
 
 		conversionFactor = 1000000.0 / (settings.pixelPitch * settings.pixelPitch);
 
@@ -437,11 +444,11 @@ public class DiffusionRateTest implements PlugIn
 				y2[y2.length - 1] = 1;
 				jdHistogram[0] = x2;
 				jdHistogram[1] = y2;
-				
+
 				// Add some artificial points to allow the plot to be drawn
 				values = Arrays.copyOf(values, values.length + 2);
-				values[values.length-2] = x[0] - 0.1;  
-				values[values.length-1] = x[x.length - 1] + 0.1;  
+				values[values.length - 2] = x[0] - 0.1;
+				values[values.length - 1] = x[x.length - 1] + 0.1;
 			}
 		}
 		Plot2 jdPlot = new Plot2(title, "Distance (um^2)", "Cumulative Probability", jdHistogram[0], jdHistogram[1]);
@@ -911,11 +918,19 @@ public class DiffusionRateTest implements PlugIn
 			}
 		}
 
+		// Q - is this useful?
+		final double p = myPrecision / settings.pixelPitch;
+		final long seed = System.currentTimeMillis() + System.identityHashCode(this);
+		RandomGenerator rand = new Well19937c(seed);
+
 		StringBuilder sb = new StringBuilder();
+		final int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond - aggregateSteps);
+		final int limit = Math.min(totalSteps, myMsdAnalysisSteps);
+		final int interval = Utils.getProgressInterval(limit);
 		for (int step = 1; step <= myMsdAnalysisSteps; step++)
 		{
-			if (step % 16 == 0)
-				IJ.showProgress(step, myMsdAnalysisSteps);
+			if (step % interval == 0)
+				IJ.showProgress(step, limit);
 
 			sum = 0;
 			count = 0;
@@ -926,19 +941,32 @@ public class DiffusionRateTest implements PlugIn
 
 				if (last.id == current.id)
 				{
-					sum += last.distance2(current);
-					count++;
+					if (p == 0)
+					{
+						sum += last.distance2(current);
+						count++;
+					}
+					else
+					{
+						// This can be varied but the effect on the output with only 1 loop 
+						// is the same if enough samples are present
+						for (int ii = 1; ii-- > 0;)
+						{
+							sum += last.distance2(current, p, rand);
+							count++;
+						}
+					}
 				}
 			}
 			if (count == 0)
 				break;
 			addResult(sb, step, sum, count);
-			
+
 			// Flush to auto-space the columns
 			if (step == 9)
 			{
 				msdTable.append(sb.toString());
-				sb.setLength(0);			
+				sb.setLength(0);
 			}
 		}
 		msdTable.append(sb.toString());

@@ -691,7 +691,7 @@ public class BenchmarkSpotFit implements PlugIn
 		final int totalFrames = stack.getSize();
 
 		// Fit the frames
-		final int step = (totalFrames > 400) ? totalFrames / 200 : 2;
+		final int step = Utils.getProgressInterval(totalFrames);
 		for (int i = 1; i <= totalFrames; i++)
 		{
 			put(jobs, i);

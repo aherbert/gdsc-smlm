@@ -1308,4 +1308,27 @@ public class Utils
 		}
 		return false;
 	}
+
+	/**
+	 * Return the interval for reporting progress to the ImageJ progress bar given the total number of steps. Code
+	 * should use the following prototype: <br/>
+	 * 
+	 * <pre>
+	 * final int interval = Utils.getProgressInterval(total);
+	 * for (int i = 1; i &lt;= total; i++)
+	 * {
+	 * 	if (i % interval == 0)
+	 * 	{
+	 * 		IJ.showProgress(i, total);
+	 * 	}
+	 * }
+	 * </pre>
+	 * 
+	 * @param total
+	 * @return The interval
+	 */
+	public static int getProgressInterval(int total)
+	{
+		return (total > 400) ? total / 200 : 2;
+	}
 }

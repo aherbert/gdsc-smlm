@@ -130,7 +130,7 @@ public class SplitResults implements PlugIn
 		// Process the results mapping them to their objects
 		int i = 0;
 		final int size = results.size();
-		final int step = (size > 400) ? size / 200 : 2;
+		final int step = Utils.getProgressInterval(size);
 		for (PeakResult result : results.getResults())
 		{
 			if (++i % step == 0)
