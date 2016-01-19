@@ -11,6 +11,7 @@ import ij.io.Opener;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -40,23 +41,96 @@ import com.thoughtworks.xstream.XStream;
  */
 public class SeriesImageSource extends ImageSource
 {
+	private class NextImage
+	{
+		Object[] imageArray = null;
+		int currentImageSize;
+		int currentImage;
+
+		public NextImage(Object[] imageArray, int currentImageSize, int currentImage)
+		{
+			this.imageArray = imageArray;
+			this.currentImageSize = currentImageSize;
+			this.currentImage = currentImage;
+		}
+	}
+
+	private class ImageWorker implements Runnable
+	{
+		boolean run = true;
+
+		@Override
+		public void run()
+		{
+			try
+			{
+				for (int currentImage=0; run && currentImage < images.size(); currentImage++)
+				{
+					// Open the image
+					Opener opener = new Opener();
+					opener.setSilentMode(true);
+					Utils.setShowProgress(false);
+					if (logProgress)
+					{
+						long time = System.currentTimeMillis();
+						if (time - lastTime > 500)
+						{
+							lastTime = time;
+							IJ.log("Opening " + images.get(currentImage));
+						}
+					}
+					ImagePlus imp = opener.openImage(images.get(currentImage));
+					Utils.setShowProgress(true);
+
+					Object[] imageArray = null;
+					int currentImageSize = 0;
+					if (imp != null)
+					{
+						imageArray = imp.getImageStack().getImageArray();
+						currentImageSize = imp.getStackSize();
+
+						// Initialise dimensions on the first valid image
+						if (width == 0)
+							setDimensions(imp.getWidth(), imp.getHeight(), currentImageSize);
+						
+						imageQueue.put(new NextImage(imageArray, currentImageSize, currentImage));
+					}
+				}
+				
+				// Signal that no more images are available
+				imageQueue.put(new NextImage(null, 0, 0));
+			}
+			catch (Exception e)
+			{
+				System.out.println(e.toString());
+				throw new RuntimeException(e);
+			}
+			finally
+			{
+			}
+		}
+	}
+
 	private ArrayList<String> images;
 
 	private int maxz;
 
 	// Used for sequential read
-	private int currentSlice;
-	private int currentImage;
 	private Object[] imageArray = null;
+	private int currentSlice;
 	private int currentImageSize;
 
 	// Used for frame-based read
-	private int lastImage;
 	private Object[] lastImageArray = null;
+	private int lastImage;
 	private int lastImageSize;
 
 	private boolean logProgress = false;
 	private long lastTime = 0;
+
+	private ArrayBlockingQueue<NextImage> imageQueue;
+	private ImageWorker worker = null;
+	private Thread thread = null;
 
 	/*
 	 * (non-Javadoc)
@@ -68,13 +142,17 @@ public class SeriesImageSource extends ImageSource
 	{
 		super.init(xs);
 		xs.omitField(SeriesImageSource.class, "maxz");
-		xs.omitField(SeriesImageSource.class, "currentSlice");
-		xs.omitField(SeriesImageSource.class, "currentImage");
-		xs.omitField(SeriesImageSource.class, "currentImageSize");
 		xs.omitField(SeriesImageSource.class, "imageArray");
-		xs.omitField(SeriesImageSource.class, "lastImage");
+		xs.omitField(SeriesImageSource.class, "currentSlice");
+		xs.omitField(SeriesImageSource.class, "currentImageSize");
 		xs.omitField(SeriesImageSource.class, "lastImageArray");
+		xs.omitField(SeriesImageSource.class, "lastImage");
+		xs.omitField(SeriesImageSource.class, "lastImageSize");
 		xs.omitField(SeriesImageSource.class, "logProgress");
+		xs.omitField(SeriesImageSource.class, "lastTime");
+		xs.omitField(SeriesImageSource.class, "worker");
+		xs.omitField(SeriesImageSource.class, "thread");
+		xs.omitField(SeriesImageSource.class, "imageQueue");
 	}
 
 	/**
@@ -137,9 +215,50 @@ public class SeriesImageSource extends ImageSource
 		if (images.isEmpty())
 			return false;
 
-		// Open the first image to initialise dimensions
-		currentImage = 0;
+		// Create the queue for loading the images
+		createQueue();
+
 		return getNextImage() != null;
+	}
+
+	/**
+	 * Creates a background thread to open the images sequentially
+	 */
+	private void createQueue()
+	{
+		imageQueue = new ArrayBlockingQueue<NextImage>(2);
+		worker = new ImageWorker();
+		thread = new Thread(worker);
+		thread.start();
+	}
+
+	/**
+	 * Close the background thread
+	 */
+	private void closeQueue()
+	{
+		if (thread != null)
+		{
+			// Signal the worker to stop
+			worker.run = false;
+			
+			// Ensure any images already waiting on a blocked queue can be added 
+			imageQueue.clear();
+
+			// Join the thread and then set all to null
+			try
+			{
+				thread.join();
+			}
+			catch (InterruptedException e)
+			{
+				// Ignore thread errors
+				//e.printStackTrace();
+			}
+			thread = null;
+			worker = null;
+			imageQueue = null;
+		}
 	}
 
 	/*
@@ -151,50 +270,33 @@ public class SeriesImageSource extends ImageSource
 	{
 		setDimensions(0, 0, 0);
 		imageArray = lastImageArray = null;
-		currentImageSize = lastImageSize = 0;
+		currentSlice = currentImageSize = lastImage = lastImageSize = 0;
+		closeQueue();
 	}
 
 	private Object[] getNextImage()
 	{
-		currentImageSize = currentSlice = 0;
-		if (currentImage >= images.size())
-			return null;
-
-		// Disable the progress bar when opening files
-		Opener opener = new Opener();
-		opener.setSilentMode(true);
-		Utils.setShowProgress(false);
-		if (logProgress)
+		imageArray = null;
+		currentSlice = currentImageSize = 0;
+		try
 		{
-			long time = System.currentTimeMillis();
-			if (time - lastTime > 500)
+			final NextImage next = imageQueue.take();
+
+			if (next != null)
 			{
-				lastTime = time;
-				IJ.log("Opening " + images.get(currentImage));
+				imageArray = next.imageArray;
+				currentImageSize = next.currentImageSize;
+
+				// Fill cache
+				lastImageArray = imageArray;
+				lastImageSize = currentImageSize;
+				lastImage = next.currentImage;
 			}
 		}
-		ImagePlus imp = opener.openImage(images.get(currentImage++));
-		Utils.setShowProgress(true);
-
-		//ImagePlus imp = IJ.openImage(images.get(currentImage++));
-
-		if (imp == null)
-			return null;
-		imageArray = imp.getImageStack().getImageArray();
-		currentImageSize = imp.getStackSize();
-
-		// Initialise on the first image
-		if (currentImage == 1)
-			setDimensions(imp.getWidth(), imp.getHeight(), currentImageSize);
-
-		// Fill cache if empty
-		if (lastImageArray == null)
+		catch (InterruptedException e)
 		{
-			lastImageArray = imageArray;
-			lastImageSize = currentImageSize;
-			lastImage = currentImage - 1;
-		}
 
+		}
 		return imageArray;
 	}
 
