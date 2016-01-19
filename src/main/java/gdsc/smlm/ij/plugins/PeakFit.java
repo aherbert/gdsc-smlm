@@ -125,7 +125,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private ImageSource source = null;
 	private PeakResultsList results;
-	private long time;
+	private long time, runTime;
 	private Calibration calibration;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig;
@@ -609,10 +609,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			results.end();
 
 			String textTime = Utils.timeToString(time / 1000000.0);
+			String textRunTime = Utils.timeToString(runTime / 1000000.0);
 
 			int size = getSize();
-			String message = String.format("%d Localisation%s. Fitting Time = %s", size, (size == 1) ? "" : "s",
-					textTime);
+			String message = String.format("%s. Fitting Time = %s. Run time = %s", Utils.pleural(size, "localisation"),
+					textTime, textRunTime);
 			if (resultsSettings.logProgress)
 				IJ.log("-=-=-=-");
 			IJ.log(message);
@@ -1975,6 +1976,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
+		runTime = System.nanoTime();
 		boolean shutdown = false;
 		int slice = 0;
 		while (!shutdown)
@@ -2014,6 +2016,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		engine.end(shutdown);
 		time = engine.getTime();
+		runTime = System.nanoTime() - runTime;
 
 		if (showProcessedFrames)
 			Utils.display("Processed frames", stack);
@@ -2210,6 +2213,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
+		runTime = System.nanoTime();
 		boolean shutdown = false;
 		int slice = candidateMaxima.get(0).peak;
 		ArrayList<PeakResult> sliceCandidates = new ArrayList<PeakResult>();
@@ -2246,6 +2250,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		engine.end(shutdown);
 		time = engine.getTime();
+		runTime = System.nanoTime() - runTime;
 
 		showResults();
 
