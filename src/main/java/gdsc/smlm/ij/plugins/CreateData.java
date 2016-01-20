@@ -1021,12 +1021,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				masks.add(extractMask(stack.getProcessor(slice)));
 			}
-			return new MaskDistribution3D(masks, w, h, sliceDepth / settings.pixelPitch, scaleX, scaleY);
+			return new MaskDistribution3D(masks, w, h, sliceDepth / settings.pixelPitch, scaleX, scaleY,
+					createRandomGenerator());
 		}
 		else
 		{
 			int[] mask = extractMask(imp.getProcessor());
-			return new MaskDistribution(mask, w, h, settings.depth / settings.pixelPitch, scaleX, scaleY);
+			return new MaskDistribution(mask, w, h, settings.depth / settings.pixelPitch, scaleX, scaleY,
+					createRandomGenerator());
 		}
 	}
 
@@ -1667,7 +1669,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				lastT = l.getTime();
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, i, lastT,
-						createPSFModel(imagePSFModel), results, stack, poissonNoise)));
+						createPSFModel(imagePSFModel), results, stack, poissonNoise, new RandomDataGenerator(
+								createRandomGenerator()))));
 			}
 			i++;
 		}
@@ -1688,7 +1691,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (stack.getPixels(t) == null)
 			{
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, maxT, t, null,
-						results, stack, poissonNoise)));
+						results, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
 			}
 		}
 
@@ -1987,10 +1990,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final MemoryPeakResults results;
 		final ImageStack stack;
 		final boolean poissonNoise;
+		final RandomDataGenerator random;
 
 		public ImageGenerator(final List<LocalisationModelSet> localisationSets,
 				List<LocalisationModelSet> newLocalisations, int startIndex, int t, PSFModel psfModel,
-				MemoryPeakResults results, ImageStack stack, boolean poissonNoise)
+				MemoryPeakResults results, ImageStack stack, boolean poissonNoise, RandomDataGenerator random)
 		{
 			this.localisations = localisationSets;
 			this.newLocalisations = newLocalisations;
@@ -2000,6 +2004,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.results = results;
 			this.stack = stack;
 			this.poissonNoise = poissonNoise;
+			this.random = random;
 		}
 
 		/*
@@ -2022,11 +2027,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Adjust XY dimensions since they are centred on zero
 			final double xoffset = settings.size * 0.5;
 
-			float[] image = createBackground(null);
+			float[] image = createBackground(random);
 			float[] imageCache = Arrays.copyOf(image, image.length);
 
 			// Create read noise now so that we can calculate the true background noise  
-			RandomDataGenerator random = new RandomDataGenerator();
 			float[] imageReadNoise = new float[image.length];
 			if (settings.readNoise > 0)
 			{
@@ -2444,7 +2448,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (settings.background > 0)
 		{
 			if (random == null)
-				random = new RandomDataGenerator();
+				random = new RandomDataGenerator(createRandomGenerator());
 			createBackgroundPixels();
 			pixels2 = Arrays.copyOf(backgroundPixels, backgroundPixels.length);
 
@@ -4507,9 +4511,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private RandomGenerator createRandomGenerator(int seedAddition)
 	{
 		return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this) + seedAddition);
-		//return new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		
+		// Note: To make the simulation reproducible we can use a fixed offset 
+		//return new Well44497b(1 + seedAddition);
 	}
 
+	// Note: To make the simulation reproducible we can use a static seed addition
+	//private static int seedAddition = 0;
 	private int seedAddition = 0;
 
 	public RandomGenerator createRandomGenerator()
