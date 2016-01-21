@@ -38,6 +38,7 @@ public class SeriesOpener
 	private int currentImage = 0;
 	private int width = -1, height = -1;
 	private boolean variableSize = false;
+	private int numberOfThreads = 0;
 
 	/**
 	 * Create an opener with the given path
@@ -56,10 +57,13 @@ public class SeriesOpener
 	 * @param path
 	 * @param showDialog
 	 *            Open a dialog and allow the user to filter the images
+	 * @param numberOfThreads
+	 *            Set the number of threads specified in the input dialog. If zero then this field is not shown.
 	 */
-	public SeriesOpener(String path, boolean showDialog)
+	public SeriesOpener(String path, boolean showDialog, int numberOfThreads)
 	{
 		this.path = path;
+		this.numberOfThreads = Math.abs(numberOfThreads);
 		buildImageList();
 
 		if (showDialog)
@@ -248,6 +252,8 @@ public class SeriesOpener
 		gd.addNumericField("Increment:", 1, 0);
 		gd.addStringField("File name contains:", "", 10);
 		gd.addStringField("or enter pattern:", "", 10);
+		if (numberOfThreads > 0)
+			gd.addNumericField("Series_number_of_threads:", numberOfThreads, 0);
 		gd.addMessage("[info...]");
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -264,6 +270,8 @@ public class SeriesOpener
 			filter = regex;
 			isRegex = true;
 		}
+		if (numberOfThreads > 0)
+			numberOfThreads = Math.abs((int) gd.getNextNumber());
 		return true;
 	}
 
@@ -276,6 +284,14 @@ public class SeriesOpener
 	public void setVariableSize(boolean variableSize)
 	{
 		this.variableSize = variableSize;
+	}
+
+	/**
+	 * @return The number of threads specified in the input dialog.
+	 */
+	public int getNumberOfThreads()
+	{
+		return numberOfThreads;
 	}
 }
 

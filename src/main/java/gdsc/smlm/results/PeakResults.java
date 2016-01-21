@@ -67,7 +67,7 @@ public interface PeakResults
 	public void end();
 
 	/**
-	 * @return True if the still accepting results using the add methods
+	 * @return True if still accepting results using the add methods
 	 */
 	public boolean isActive();
 

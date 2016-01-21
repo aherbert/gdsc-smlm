@@ -253,7 +253,7 @@ public class MeanVarianceTest implements PlugIn
 			if (inputDirectory == null)
 				return;
 
-			SeriesOpener series = new SeriesOpener(inputDirectory, false);
+			SeriesOpener series = new SeriesOpener(inputDirectory, false, 0);
 			series.setVariableSize(true);
 			if (series.getNumberOfImages() < 3)
 			{

@@ -132,6 +132,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private ResultsSettings resultsSettings;
 	private boolean silent = false;
 
+	private static int numberOfThreads = 1;
+	
 	// Flag for extra options in the dialog (shift-key down)
 	private boolean extraOptions = false;
 	private boolean maximaIdentification = false;
@@ -272,15 +274,19 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return DONE;
 
 			// Load input series ...
-			SeriesOpener series = new SeriesOpener(inputDirectory, true);
+			SeriesOpener series = new SeriesOpener(inputDirectory, true, numberOfThreads);
 			if (series.getNumberOfImages() == 0)
 			{
 				IJ.error(TITLE, "No images in the selected directory:\n" + inputDirectory);
 				return DONE;
 			}
 
-			imageSource = new SeriesImageSource(getName(series.getImageList()), series);
-			((SeriesImageSource) imageSource).setLogProgress(true);
+			numberOfThreads = series.getNumberOfThreads();
+			SeriesImageSource seriesImageSource = new SeriesImageSource(getName(series.getImageList()), series);
+			seriesImageSource.setLogProgress(true);
+			seriesImageSource.setNumberOfThreads(numberOfThreads);
+			imageSource = seriesImageSource;
+
 			plugin_flags |= NO_IMAGE_REQUIRED;
 		}
 		else
@@ -904,7 +910,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		gd.showDialog();
-		
+
 		// The refreshSettings method can be called by the dialog listener.
 		// This updates the Calibration, FitEngineConfiguration, and ResultsSettings so set these
 		// back in the GlobalSettings object.
@@ -2116,7 +2122,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	public FitEngine createFitEngine(int numberOfThreads)
 	{
 		// Use a blocking queue to enable progress tracking on the IJ progress bar.
-		return createFitEngine(numberOfThreads, FitQueue.BLOCKING);
+		// Use a large queue size to allow images read from disk to be pre-cached.
+		return createFitEngine(numberOfThreads, FitQueue.BLOCKING, numberOfThreads * 50);
 	}
 
 	/**
@@ -2124,9 +2131,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 * 
 	 * @param numberOfThreads
 	 * @param queue
+	 * @param queueSize
 	 * @return The fiting engine
 	 */
-	public FitEngine createFitEngine(int numberOfThreads, FitQueue queue)
+	public FitEngine createFitEngine(int numberOfThreads, FitQueue queue, int queueSize)
 	{
 		PeakResults r = results;
 		if (results.numberOfOutputs() == 1)
@@ -2136,7 +2144,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Update the configuration
 		updateFitConfiguration(config);
 
-		FitEngine engine = new FitEngine(config, r, numberOfThreads, queue);
+		FitEngine engine = new FitEngine(config, r, numberOfThreads, queue, queueSize);
 
 		// Write settings out to the IJ log
 		if (resultsSettings.logProgress)

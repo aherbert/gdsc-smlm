@@ -78,8 +78,30 @@ public class FitEngine
 	 */
 	public FitEngine(FitEngineConfiguration config, PeakResults results, int threads, FitQueue queueType)
 	{
+		this(config, results, threads, queueType, 3 * threads);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param config
+	 *            The fit configuration
+	 * @param results
+	 *            Output results
+	 * @param threads
+	 *            The number of threads to use (set to 1 if less than 1)
+	 * @param queueType
+	 *            Specify the queue behaviour
+	 * @param queueSize
+	 *            The size of the queue ({@link #queueType}
+	 */
+	public FitEngine(FitEngineConfiguration config, PeakResults results, int threads, FitQueue queueType, int queueSize)
+	{
 		if (threads < 1)
+		{
 			threads = 1;
+			queueSize = 3;
+		}
 
 		workers = new ArrayList<FitWorker>(threads);
 		this.threads = new ArrayList<Thread>(threads);
@@ -88,7 +110,7 @@ public class FitEngine
 		{
 			case BLOCKING:
 			default:
-				this.jobs = new ArrayBlockingQueue<FitJob>(threads * 3);
+				this.jobs = new ArrayBlockingQueue<FitJob>(queueSize);
 				break;
 			case NON_BLOCKING:
 			case IGNORE:
@@ -99,7 +121,7 @@ public class FitEngine
 
 		fitting = config.getRelativeFitting();
 		spotFilter = config.createSpotFilter(true);
-		
+
 		// Create the workers
 		for (int i = 0; i < threads; i++)
 		{
