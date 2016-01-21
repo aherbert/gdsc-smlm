@@ -1035,7 +1035,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	private String createCombinedName()
 	{
-		return results.getName() + " + " + Utils.pleural(additionalDatasets, "other");
+		if (additionalDatasets > 0)
+			return results.getName() + " + " + Utils.pleural(additionalDatasets, "other");
+		return results.getName();
 	}
 
 	private boolean showDialog()
@@ -1831,7 +1833,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Show a list box containing all the results. This should remember the last set of chosen items.
 		MultiDialog md = new MultiDialog(TITLE);
 		md.addSelected(selected);
-		
+
 		md.showDialog();
 
 		if (md.wasCanceled())
