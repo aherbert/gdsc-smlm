@@ -133,12 +133,22 @@ public class DrawClusters implements PlugIn
 			int w, h;
 			if (maxD == 0)
 			{
-				w = h = imageSize;
+				// Note that imageSize can be zero (for auto sizing)
+				w = h = (imageSize == 0) ? 20 : imageSize;
 			}
 			else
 			{
-				w = (int) (imageSize * bounds.width / maxD);
-				h = (int) (imageSize * bounds.height / maxD);
+				// Note that imageSize can be zero (for auto sizing)
+				if (imageSize == 0)
+				{
+					w = bounds.width;
+					h = bounds.height;
+				}
+				else
+				{
+					w = (int) (imageSize * bounds.width / maxD);
+					h = (int) (imageSize * bounds.height / maxD);
+				}
 			}
 			ByteProcessor bp = new ByteProcessor(w, h);
 			if (isUseStackPosition)
@@ -312,8 +322,6 @@ public class DrawClusters implements PlugIn
 		inputOption = ResultsManager.getInputSource(gd);
 		title = gd.getNextChoice();
 		imageSize = (int) Math.abs(gd.getNextNumber());
-		if (imageSize < 1)
-			imageSize = 1;
 		expandToSingles = gd.getNextBoolean();
 		minSize = (int) Math.abs(gd.getNextNumber());
 		maxSize = (int) Math.abs(gd.getNextNumber());
