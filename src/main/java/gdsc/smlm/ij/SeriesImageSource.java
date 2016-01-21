@@ -89,6 +89,8 @@ public class SeriesImageSource extends ImageSource
 					ImagePlus imp = opener.openImage(images.get(currentImage));
 					Utils.setShowProgress(true);
 
+					//System.out.println("Opened " + images.get(currentImage));
+					
 					Object[] imageArray = null;
 					int currentImageSize = 0;
 					if (imp != null)
