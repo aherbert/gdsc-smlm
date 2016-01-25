@@ -133,7 +133,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private boolean silent = false;
 
 	private static int numberOfThreads = 1;
-	
+
 	// Flag for extra options in the dialog (shift-key down)
 	private boolean extraOptions = false;
 	private boolean maximaIdentification = false;
@@ -151,6 +151,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private int dataSkip = 0;
 	private static boolean optionShowProcessedFrames = false;
 	private boolean showProcessedFrames = false;
+	// Testing has shown that we should use ~85% of the total number of cores the system has available.
+	// Extra cores then do not make a difference.
+	private static double fractionOfThreads = 0.85;
 
 	private static String inputOption = "";
 	private static boolean showTable = true;
@@ -789,6 +792,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.addMessage(" ");
 		gd.addCheckbox("Results_in_memory", resultsSettings.resultsInMemory);
 
+		if (extraOptions)
+		{
+			gd.addMessage("--- Misc ---");
+			gd.addSlider("Fraction_of_threads", 0.1, 1, fractionOfThreads);
+		}
+		
 		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
 		// to 4 columns: (label,field) x 2
 
@@ -1401,6 +1410,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		resultsSettings.binaryResults = gd.getNextBoolean();
 		resultsSettings.resultsInMemory = gd.getNextBoolean();
 
+		if (extraOptions)
+			fractionOfThreads = Math.abs(gd.getNextNumber());
+			
 		// Save to allow dialog state to be maintained even with invalid parameters
 		SettingsManager.saveSettings(settings, filename);
 
@@ -1978,7 +1990,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				.getHeight()) ? null : bounds;
 
 		// Use the FitEngine to allow multi-threading.
-		FitEngine engine = createFitEngine(FastMath.min(totalFrames, Prefs.getThreads()));
+		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
@@ -2030,6 +2042,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		showResults();
 
 		source.close();
+	}
+
+	private int getNumberOfThreads(int totalFrames)
+	{
+		final int t = Math.max(1, (int) (fractionOfThreads * Prefs.getThreads()));
+		return FastMath.min(totalFrames, t);
 	}
 
 	/**
@@ -2122,8 +2140,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	public FitEngine createFitEngine(int numberOfThreads)
 	{
 		// Use a blocking queue to enable progress tracking on the IJ progress bar.
-		// Use a large queue size to allow images read from disk to be pre-cached.
-		return createFitEngine(numberOfThreads, FitQueue.BLOCKING, numberOfThreads * 50);
+		// Use a large queue size to allow images read from disk to be pre-loaded.
+		return createFitEngine(numberOfThreads, FitQueue.BLOCKING, numberOfThreads * 10);
 	}
 
 	/**
@@ -2217,7 +2235,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		List<PeakResult> candidateMaxima = results.getResults();
 
 		// Use the FitEngine to allow multi-threading.
-		FitEngine engine = createFitEngine(FastMath.min(totalFrames, Prefs.getThreads()));
+		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
