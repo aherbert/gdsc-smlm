@@ -9,10 +9,12 @@ import ij.ImagePlus;
 import ij.io.Opener;
 
 import java.awt.Rectangle;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -31,8 +33,7 @@ import com.thoughtworks.xstream.XStream;
 
 /**
  * Represent a series of image files as a results source. Supports all greyscale images. Only processes channel 0 of
- * 32-bit
- * colour images.
+ * 32-bit colour images.
  * <p>
  * Assumes that the width,height,depth dimensions of each file are the same. The depth for the last image can be less
  * (i.e. the last of the series) but the {@link #getFrames()} method will return an incorrect value.
@@ -42,21 +43,48 @@ import com.thoughtworks.xstream.XStream;
  */
 public class SeriesImageSource extends ImageSource
 {
+	private class NextSource
+	{
+		final InputStream is;
+		final int image;
+
+		public NextSource(InputStream is, int image)
+		{
+			this.is = is;
+			this.image = image;
+		}
+
+		public NextSource()
+		{
+			this(null, -1);
+		}
+	}
+
 	private class NextImage
 	{
 		final Object[] imageArray;
 		final int imageSize;
 		final int image;
 
-		public NextImage(Object[] imageArray, int currentImageSize, int currentImage)
+		public NextImage(Object[] imageArray, int imageSize, int image)
 		{
 			this.imageArray = imageArray;
-			this.imageSize = currentImageSize;
-			this.image = currentImage;
+			this.imageSize = imageSize;
+			this.image = image;
+		}
+		
+		public NextImage()
+		{
+			this(null, 0, -1);
 		}
 	}
 
-	private class ImageWorker implements Runnable
+	/**
+	 * Add source images to the queue to be read.
+	 * <p>
+	 * If the series is all TIFF images then we can open the file and read it into memory.
+	 */
+	private class SourceWorker implements Runnable
 	{
 		volatile boolean run = true;
 
@@ -65,12 +93,86 @@ public class SeriesImageSource extends ImageSource
 		{
 			try
 			{
-				while (run && !nextQueue.isEmpty())
+				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
 				{
-					Integer i = nextQueue.poll();
-					if (i == null)
+					InputStream is = null;
+					// For a TIFF series ImageJ can open as input stream. We support this by using this
+					// thread to read the file from disk sequentially and cache into memory. The images
+					// can then be opened by multiple threads without IO contention.
+					if (isTiffSeries)
+					{
+						final String path = images.get(currentImage);
+						try
+						{
+							//System.out.println("Reading " + images.get(currentImage));
+
+							FileInputStream fis = new FileInputStream(path);
+							byte[] buf = new byte[fis.available()];
+							int read = fis.read(buf);
+							fis.close();
+							// We do not have to close the ByteArrayInputStream
+							@SuppressWarnings("resource")
+							ByteArrayInputStream bis = new ByteArrayInputStream(buf, 0, read);
+							is = bis;
+						}
+						catch (Exception e)
+						{
+							// TODO - handle appropriately
+							// At the moment if we ignore this then the ImageWorker will open the file
+							// rather than process from the memory stream.
+							System.out.println(e.toString());
+						}
+					}
+
+					sourceQueue.put(new NextSource(is, currentImage));
+				}
+			}
+			catch (InterruptedException e)
+			{
+				// This is from the queue put method, possibly an interrupt on the queue or thread? 
+				System.out.println(e.toString());
+			}
+
+			// Add jobs to shutdown all the workers
+			try
+			{
+				for (int i = 0; run && i < workers.size(); i++)
+					sourceQueue.put(new NextSource());
+			}
+			catch (InterruptedException e)
+			{
+				// This is from the queue put method, possibly an interrupt on the queue or thread? 
+				// TODO - How should this be handled?
+				System.out.println(e.toString());
+			}
+			
+			run = false;
+		}
+	}
+
+	private class ImageWorker implements Runnable
+	{
+		final int id;
+		volatile boolean run = true;
+
+		public ImageWorker(int id)
+		{
+			this.id = id;
+		}
+
+		@Override
+		public void run()
+		{
+			try
+			{
+				while (run)
+				{
+					NextSource nextSource = sourceQueue.take();
+					if (nextSource == null || !run)
 						break;
-					final int currentImage = i.intValue();
+					final int currentImage = nextSource.image;
+					if (currentImage == -1)
+						break;
 
 					// Open the image
 					Opener opener = new Opener();
@@ -85,12 +187,21 @@ public class SeriesImageSource extends ImageSource
 							IJ.log("Opening " + images.get(currentImage));
 						}
 					}
-					//System.out.println("Opening " + images.get(currentImage));
-					ImagePlus imp = opener.openImage(images.get(currentImage));
+					ImagePlus imp;
+					if (nextSource.is != null)
+					{
+						//System.out.println(id + ": Processing " + images.get(currentImage));
+						imp = opener.openTiff(nextSource.is, images.get(currentImage));
+					}
+					else
+					{
+						//System.out.println(id + ": Opening " + images.get(currentImage));
+						imp = opener.openImage(images.get(currentImage));
+					}
 					Utils.setShowProgress(true);
 
-					//System.out.println("Opened " + images.get(currentImage));
-					
+					//System.out.println(id + ": Opened " + images.get(currentImage));
+
 					Object[] imageArray = null;
 					int currentImageSize = 0;
 					if (imp != null)
@@ -108,26 +219,20 @@ public class SeriesImageSource extends ImageSource
 			catch (Exception e)
 			{
 				// TODO - handle appropriately 
-				System.out.println(e.toString());
+				System.out.println(id + ": " + e.toString());
 			}
 			finally
 			{
 				run = false;
 
 				// Signal that no more images are available
-				try
-				{
-					imageQueue.put(new NextImage(null, 0, -1));
-				}
-				catch (InterruptedException e)
-				{
-					// Ignore
-				}
+				imageQueue.offer(new NextImage());
 			}
 		}
 	}
 
 	private ArrayList<String> images;
+	public final boolean isTiffSeries;
 
 	private int maxz;
 
@@ -147,8 +252,14 @@ public class SeriesImageSource extends ImageSource
 	private long lastTime = 0;
 	private int numberOfThreads = 1;
 
-	private ConcurrentLinkedQueue<Integer> nextQueue;
+	private ArrayBlockingQueue<NextSource> sourceQueue;
 	private ArrayBlockingQueue<NextImage> imageQueue;
+
+	// Used to queue the files from disk. This is sequential so only one thread is required.
+	private SourceWorker sourceWorker = null;
+	private Thread sourceThread = null;
+
+	// Used to process the files into images
 	private ArrayList<ImageWorker> workers = null;
 	private ArrayList<Thread> threads = null;
 
@@ -171,8 +282,10 @@ public class SeriesImageSource extends ImageSource
 		xs.omitField(SeriesImageSource.class, "lastImageSize");
 		xs.omitField(SeriesImageSource.class, "logProgress");
 		xs.omitField(SeriesImageSource.class, "lastTime");
-		xs.omitField(SeriesImageSource.class, "nextQueue");
+		xs.omitField(SeriesImageSource.class, "sourceQueue");
 		xs.omitField(SeriesImageSource.class, "imageQueue");
+		xs.omitField(SeriesImageSource.class, "sourceWorker");
+		xs.omitField(SeriesImageSource.class, "sourceThread");
 		xs.omitField(SeriesImageSource.class, "workers");
 		xs.omitField(SeriesImageSource.class, "threads");
 	}
@@ -194,6 +307,7 @@ public class SeriesImageSource extends ImageSource
 				images.add(series.getPath() + imageName);
 			}
 		}
+		isTiffSeries = isTiffSeries();
 	}
 
 	/**
@@ -221,6 +335,16 @@ public class SeriesImageSource extends ImageSource
 		super(name);
 		images = new ArrayList<String>();
 		images.addAll(Arrays.asList(filenames));
+		isTiffSeries = isTiffSeries();
+	}
+
+	private boolean isTiffSeries()
+	{
+		Opener opener = new Opener();
+		for (String path : images)
+			if (opener.getFileType(path) != Opener.TIFF)
+				return false;
+		return true;
 	}
 
 	/*
@@ -249,17 +373,23 @@ public class SeriesImageSource extends ImageSource
 	private void createQueue()
 	{
 		nextImages = new NextImage[images.size()];
-		nextQueue = new ConcurrentLinkedQueue<Integer>();
-		for (int i = 0; i < images.size(); i++)
-			nextQueue.add(i);
 		final int nThreads = numberOfThreads;
+
+		// A blocking queue is used so that the threads do not read too many images in advance
+		sourceQueue = new ArrayBlockingQueue<NextSource>(nThreads);
+
+		// Start a thread to queue up the images
+		sourceWorker = new SourceWorker();
+		sourceThread = new Thread(sourceWorker);
+		sourceThread.start();
+
 		// A blocking queue is used so that the threads do not read too many images in advance
 		imageQueue = new ArrayBlockingQueue<NextImage>(nThreads + 2);
 		workers = new ArrayList<ImageWorker>(nThreads);
 		threads = new ArrayList<Thread>(nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
-			ImageWorker worker = new ImageWorker();
+			ImageWorker worker = new ImageWorker(i + 1);
 			workers.add(worker);
 			Thread thread = new Thread(worker);
 			threads.add(thread);
@@ -274,21 +404,39 @@ public class SeriesImageSource extends ImageSource
 	{
 		if (threads != null)
 		{
-			// Signal the worker to stop
+			// Signal the workers to stop
+			sourceWorker.run = false;
 			for (ImageWorker worker : workers)
 				worker.run = false;
 
-			// Prevent processing more images
-			nextQueue.clear();
-
+			// Prevent processing more source images
+			sourceQueue.clear();
+			
 			// Ensure any images already waiting on a blocked queue can be added 
 			imageQueue.clear();
+			
+			// Send shutdown signals to anything for another source to process
+			for (int i = 0; i < workers.size(); i++)
+				sourceQueue.offer(new NextSource());
 
-			// Join the thread and then set all to null
+			// Join the threads and then set all to null
+			try
+			{
+				// This thread will be waiting on sourceQueue.put() so it should be finished by now
+				sourceThread.join();
+			}
+			catch (InterruptedException e)
+			{
+				// Ignore thread errors
+				//e.printStackTrace();
+			}
+
 			for (Thread thread : threads)
 			{
 				try
 				{
+					// This thread will be waiting on imageQueue.put() (which has been cleared)
+					// or sourceQueue.take() which contains shutdown signals, it should be finished by now
 					thread.join();
 				}
 				catch (InterruptedException e)
@@ -297,12 +445,13 @@ public class SeriesImageSource extends ImageSource
 					//e.printStackTrace();
 				}
 			}
+			sourceThread = null;
 			threads.clear();
 			threads = null;
 			workers.clear();
 			workers = null;
 			imageQueue = null;
-			nextQueue = null;
+			sourceQueue = null;
 		}
 	}
 
@@ -345,7 +494,7 @@ public class SeriesImageSource extends ImageSource
 							imageArray = next.imageArray;
 							currentImageSize = next.imageSize;
 
-							//System.out.printf("Found image %d: %s\n", nextImage - 1, images.get(nextImage - 1));
+							//System.out.println("Found image: " + images.get(next.image));
 
 							// Fill cache
 							lastImageArray = imageArray;
@@ -379,7 +528,7 @@ public class SeriesImageSource extends ImageSource
 							// Valid image so store it
 							nextImages[next.image] = next;
 						}
-						
+
 						continue;
 					}
 
