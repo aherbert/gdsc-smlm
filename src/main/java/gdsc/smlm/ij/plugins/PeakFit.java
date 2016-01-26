@@ -277,17 +277,24 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return DONE;
 
 			// Load input series ...
-			SeriesOpener series = new SeriesOpener(inputDirectory, true, numberOfThreads);
+			SeriesOpener series;
+			if (extraOptions)
+				series = new SeriesOpener(inputDirectory, true, numberOfThreads);
+			else
+				series = new SeriesOpener(inputDirectory);
 			if (series.getNumberOfImages() == 0)
 			{
 				IJ.error(TITLE, "No images in the selected directory:\n" + inputDirectory);
 				return DONE;
 			}
 
-			numberOfThreads = series.getNumberOfThreads();
 			SeriesImageSource seriesImageSource = new SeriesImageSource(getName(series.getImageList()), series);
 			seriesImageSource.setLogProgress(true);
-			seriesImageSource.setNumberOfThreads(numberOfThreads);
+			if (extraOptions)
+			{
+				numberOfThreads = Math.max(1, series.getNumberOfThreads());
+				seriesImageSource.setNumberOfThreads(numberOfThreads);
+			}
 			imageSource = seriesImageSource;
 
 			plugin_flags |= NO_IMAGE_REQUIRED;
@@ -797,7 +804,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.addMessage("--- Misc ---");
 			gd.addSlider("Fraction_of_threads", 0.1, 1, fractionOfThreads);
 		}
-		
+
 		// Re-arrange the standard layout which has a GridBagLayout with 2 columns (label,field)
 		// to 4 columns: (label,field) x 2
 
@@ -1412,7 +1419,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		if (extraOptions)
 			fractionOfThreads = Math.abs(gd.getNextNumber());
-			
+
 		// Save to allow dialog state to be maintained even with invalid parameters
 		SettingsManager.saveSettings(settings, filename);
 
