@@ -73,8 +73,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
@@ -1071,17 +1073,37 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			String line = resultsWindow.getTextPanel().getLine(i);
 			Scanner s = new Scanner(line);
 			s.useDelimiter("\t");
-			int id = s.nextInt();
-			s.nextDouble(); // cx
-			s.nextDouble(); // cy
-			double signal = s.nextDouble();
+			int id = -1;
+			double signal = 0;
+			// Be careful as the text panel may not contain what we expect, i.e. empty lines, etc
+			if (s.hasNextInt())
+			{
+				id = s.nextInt();
+				try
+				{
+					s.nextDouble(); // cx
+					s.nextDouble(); // cy
+					signal = s.nextDouble();
+				}
+				catch (InputMismatchException e)
+				{
+					// Ignore
+				}
+				catch (NoSuchElementException e)
+				{
+					// Ignore
+				}
+			}
 			s.close();
 
-			Trace trace = traces.get(id);
-			if (trace != null)
+			if (id != -1)
 			{
-				results.addAll(trace.getPoints());
-				traceResults.add(new TraceResult(new Spot(id, signal), trace));
+				Trace trace = traces.get(id);
+				if (trace != null)
+				{
+					results.addAll(trace.getPoints());
+					traceResults.add(new TraceResult(new Spot(id, signal), trace));
+				}
 			}
 		}
 
