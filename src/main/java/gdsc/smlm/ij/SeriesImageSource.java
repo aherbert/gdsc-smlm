@@ -72,7 +72,7 @@ public class SeriesImageSource extends ImageSource
 			this.imageSize = imageSize;
 			this.image = image;
 		}
-		
+
 		public NextImage()
 		{
 			this(null, 0, -1);
@@ -88,7 +88,11 @@ public class SeriesImageSource extends ImageSource
 	{
 		volatile boolean run = true;
 
-		@Override
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
 		public void run()
 		{
 			try
@@ -145,7 +149,7 @@ public class SeriesImageSource extends ImageSource
 				// TODO - How should this be handled?
 				System.out.println(e.toString());
 			}
-			
+
 			run = false;
 		}
 	}
@@ -160,7 +164,11 @@ public class SeriesImageSource extends ImageSource
 			this.id = id;
 		}
 
-		@Override
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
 		public void run()
 		{
 			try
@@ -411,10 +419,10 @@ public class SeriesImageSource extends ImageSource
 
 			// Prevent processing more source images
 			sourceQueue.clear();
-			
+
 			// Ensure any images already waiting on a blocked queue can be added 
 			imageQueue.clear();
-			
+
 			// Send shutdown signals to anything for another source to process
 			for (int i = 0; i < workers.size(); i++)
 				sourceQueue.offer(new NextSource());

@@ -168,7 +168,11 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 		return wasCanceled;
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
 	public void actionPerformed(ActionEvent e)
 	{
 		Object source = e.getSource();
@@ -189,12 +193,15 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 		}
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
+	 */
 	public void keyTyped(KeyEvent paramKeyEvent)
 	{
 	}
 
-	@Override
 	public void keyPressed(KeyEvent e)
 	{
 		int keyCode = e.getKeyCode();
@@ -232,7 +239,11 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 		}
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.KeyListener#keyReleased(java.awt.event.KeyEvent)
+	 */
 	public void keyReleased(KeyEvent paramKeyEvent)
 	{
 	}
@@ -307,7 +318,11 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 		return theText;
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
+	 */
 	public void windowClosing(WindowEvent e)
 	{
 		wasCanceled = true;
@@ -315,29 +330,67 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 	}
 
 	//@formatter:off
-    public void windowActivated(WindowEvent e) {}
-    public void windowOpened(WindowEvent e) {}
-    public void windowClosed(WindowEvent e) {}
-    public void windowIconified(WindowEvent e) {}
-    public void windowDeiconified(WindowEvent e) {}
-    public void windowDeactivated(WindowEvent e) {}
-	public void mousePressed(MouseEvent paramMouseEvent) {}
-	public void mouseReleased(MouseEvent paramMouseEvent) {}
-	public void mouseEntered(MouseEvent paramMouseEvent) {}
-	public void mouseExited(MouseEvent paramMouseEvent) {}
+	public void windowActivated(WindowEvent e)
+	{
+	}
+
+	public void windowOpened(WindowEvent e)
+	{
+	}
+
+	public void windowClosed(WindowEvent e)
+	{
+	}
+
+	public void windowIconified(WindowEvent e)
+	{
+	}
+
+	public void windowDeiconified(WindowEvent e)
+	{
+	}
+
+	public void windowDeactivated(WindowEvent e)
+	{
+	}
+
+	public void mousePressed(MouseEvent paramMouseEvent)
+	{
+	}
+
+	public void mouseReleased(MouseEvent paramMouseEvent)
+	{
+	}
+
+	public void mouseEntered(MouseEvent paramMouseEvent)
+	{
+	}
+
+	public void mouseExited(MouseEvent paramMouseEvent)
+	{
+	}
+
 	//@formatter:on
 
 	int lastIndex;
 	int modifiers;
 	int lastEvent = -1;
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+	 */
 	public void mouseClicked(MouseEvent paramMouseEvent)
 	{
 		modifiers = paramMouseEvent.getModifiers();
 	}
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	 */
 	public void itemStateChanged(ItemEvent paramItemEvent)
 	{
 		int index = (Integer) paramItemEvent.getItem();

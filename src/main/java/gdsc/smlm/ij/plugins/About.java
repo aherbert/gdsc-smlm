@@ -379,7 +379,6 @@ public class About implements PlugIn, MacroExtension
 	 * 
 	 * @see ij.macro.MacroExtension#handleExtension(java.lang.String, java.lang.Object[])
 	 */
-	@Override
 	public String handleExtension(String name, Object[] args)
 	{
 		if (name == null)
@@ -408,7 +407,6 @@ public class About implements PlugIn, MacroExtension
 	 * 
 	 * @see ij.macro.MacroExtension#getExtensionFunctions()
 	 */
-	@Override
 	public ExtensionDescriptor[] getExtensionFunctions()
 	{
 		ArrayList<ExtensionDescriptor> list = new ArrayList<ExtensionDescriptor>(3);
