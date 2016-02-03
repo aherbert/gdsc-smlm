@@ -101,7 +101,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 {
 	private static final long serialVersionUID = 1L;
 
-	private static String TITLE = "Spot Analysis";
+	private static final String TITLE = "Spot Analysis";
 
 	private class Spot implements Comparable<Spot>
 	{
@@ -214,12 +214,12 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 	}
 
 	// Image titles
-	private static String rawMeanTitle = TITLE + " Raw mean";
-	private static String rawSDTitle = TITLE + " Raw SD";
-	private static String rawSpotTitle = TITLE + " Raw spot";
-	private static String blurSpotTitle = TITLE + " Blur spot";
-	private static String avgSpotTitle = TITLE + " Average spot";
-	private static String[] resultsTitles = new String[] { rawMeanTitle, rawSDTitle, rawSpotTitle, blurSpotTitle,
+	private static final String rawMeanTitle = TITLE + " Raw mean";
+	private static final String rawSDTitle = TITLE + " Raw SD";
+	private static final String rawSpotTitle = TITLE + " Raw spot";
+	private static final String blurSpotTitle = TITLE + " Blur spot";
+	private static final String avgSpotTitle = TITLE + " Average spot";
+	private static final String[] resultsTitles = new String[] { rawMeanTitle, rawSDTitle, rawSpotTitle, blurSpotTitle,
 			avgSpotTitle };
 
 	private static Frame instance;
@@ -874,13 +874,13 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
 	private void drawProfiles()
 	{
-		showProfile(rawMeanTitle, xValues, rawMean, smoothMean);
-		showProfile(rawSDTitle, xValues, rawSd, smoothSd);
+		showProfile(rawMeanTitle, "Mean", xValues, rawMean, smoothMean);
+		showProfile(rawSDTitle, "SD", xValues, rawSd, smoothSd);
 	}
 
-	private void showProfile(String title, double[] xValues, double[] yValues, double[] yValues2)
+	private void showProfile(String title, String yTitle, double[] xValues, double[] yValues, double[] yValues2)
 	{
-		Plot2 plot = new Plot2(title, "Frame", "Signal", xValues, yValues);
+		Plot2 plot = new Plot2(title, "Frame", yTitle, xValues, yValues);
 		double[] limits = Maths.limits(yValues);
 		plot.setLimits(xValues[0], xValues[xValues.length - 1], limits[0], limits[1]);
 		plot.draw();
