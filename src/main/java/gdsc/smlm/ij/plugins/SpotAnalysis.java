@@ -1074,7 +1074,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			Scanner s = new Scanner(line);
 			s.useDelimiter("\t");
 			int id = -1;
-			double signal = 0;
+			double signal = -1;
 			// Be careful as the text panel may not contain what we expect, i.e. empty lines, etc
 			if (s.hasNextInt())
 			{
@@ -1096,7 +1096,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			}
 			s.close();
 
-			if (id != -1)
+			if (id != -1 && signal != -1)
 			{
 				Trace trace = traces.get(id);
 				if (trace != null)
