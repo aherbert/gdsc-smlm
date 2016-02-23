@@ -73,7 +73,7 @@ public class ClientDataManager
 		data.setHostName(hostName);
 
 		final Dimension d = getScreenSize();
-		data.setScreenResolution(d.getWidth() + "x" + d.getHeight());
+		data.setScreenResolution(d.width + "x" + d.height);
 	}
 
 	/**
