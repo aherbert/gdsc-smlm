@@ -16,6 +16,7 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.utils.Utils;
@@ -80,6 +81,8 @@ public class SpotInspector implements PlugIn, MouseListener
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "No localisations in memory");

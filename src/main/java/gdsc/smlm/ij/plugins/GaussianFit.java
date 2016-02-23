@@ -23,6 +23,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -99,6 +100,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (imp == null)
 		{
 			IJ.noImage();

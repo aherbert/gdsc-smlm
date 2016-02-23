@@ -20,6 +20,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -281,6 +282,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (WindowManager.getImageCount() == 0)
 		{
 			IJ.showMessage(TITLE, "No images opened.");

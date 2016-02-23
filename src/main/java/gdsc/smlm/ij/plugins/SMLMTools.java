@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -137,6 +139,8 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		// Do nothing. The frame has been created and the buttons run the plugins.
 	}
 

@@ -15,6 +15,8 @@ import java.awt.Label;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.smlm.ij.ImageJTracker;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -52,6 +54,8 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (imp == null)
 		{
 			IJ.noImage();

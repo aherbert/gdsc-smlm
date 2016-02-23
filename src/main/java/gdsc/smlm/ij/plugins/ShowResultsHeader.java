@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.PeakResultsReader;
@@ -33,6 +34,8 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Show the results header\n(double-click the string field to open a file chooser)");
 		gd.addStringField("Filename", inputFilename, 30);

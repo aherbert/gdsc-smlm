@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
+
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
  * 
@@ -67,6 +69,8 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "No localisations in memory");

@@ -19,6 +19,7 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -415,6 +416,8 @@ public class BenchmarkFit implements PlugIn
 
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if ("analysis".equals(arg))
 		{
 			if (benchmarkResults.isEmpty())

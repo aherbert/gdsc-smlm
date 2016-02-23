@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.Utils;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -41,6 +42,8 @@ public class YeastMask implements PlugIn
 
 	private boolean showDialog()
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 

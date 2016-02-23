@@ -14,6 +14,7 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -72,6 +73,8 @@ public class DarkTimeAnalysis implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		// Require some fit results and selected regions
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{

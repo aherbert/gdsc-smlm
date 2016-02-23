@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -68,6 +70,8 @@ public class FreeFilterResults implements PlugIn, ItemListener
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			// Ask user if they want to show the demo filters

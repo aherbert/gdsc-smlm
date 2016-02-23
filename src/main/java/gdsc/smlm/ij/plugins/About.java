@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.Version;
+import gdsc.smlm.ij.ImageJTracker;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -65,6 +66,8 @@ public class About implements PlugIn, MacroExtension
 
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (arg.equals("about"))
 		{
 			showAbout();

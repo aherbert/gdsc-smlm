@@ -27,6 +27,7 @@ import gdsc.smlm.ga.SimpleMutator;
 import gdsc.smlm.ga.SimpleRecombiner;
 import gdsc.smlm.ga.SimpleSelectionStrategy;
 import gdsc.smlm.ga.ToleranceChecker;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.SpotMatch;
 import gdsc.smlm.ij.settings.FilterSettings;
@@ -215,6 +216,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		simulationParameters = CreateData.simulationParameters;
 		if (simulationParameters == null)
 		{

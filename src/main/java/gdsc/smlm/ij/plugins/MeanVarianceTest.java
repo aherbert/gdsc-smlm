@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -214,6 +216,8 @@ public class MeanVarianceTest implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (Utils.isExtraOptions())
 		{
 			ImagePlus imp = WindowManager.getCurrentImage();

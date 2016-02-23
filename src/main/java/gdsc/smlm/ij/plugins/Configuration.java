@@ -19,6 +19,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Utils;
@@ -90,6 +91,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		showDialog();
 	}
 

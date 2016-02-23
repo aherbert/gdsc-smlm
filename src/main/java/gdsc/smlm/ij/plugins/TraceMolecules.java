@@ -28,6 +28,7 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
@@ -83,7 +84,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class TraceMolecules implements PlugIn
 {
-	private String TITLE = "Trace/Cluster Molecules";
+	private String TITLE = "Trace or Cluster Molecules";
 	private String outputName;
 	private static double MIN_BLINKING_RATE = 1; // Should never be <= 0
 	private static String inputOption = "";
@@ -159,6 +160,8 @@ public class TraceMolecules implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "No localisations in memory");
