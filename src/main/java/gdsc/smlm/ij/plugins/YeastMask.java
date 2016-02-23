@@ -44,8 +44,6 @@ public class YeastMask implements PlugIn
 
 	private boolean showDialog()
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
-		
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
