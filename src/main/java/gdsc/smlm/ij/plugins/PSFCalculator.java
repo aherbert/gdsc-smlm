@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -37,6 +39,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class PSFCalculator implements PlugIn, DialogListener
 {
+	private static final String TITLE = "PSF Calculator";
 	/**
 	 * This is the factor (f) for scaling an Airy width to a Gaussian approximation. The Gaussian PSF
 	 * Standard Deviation = f * lambda / (2 * pi * NA).
@@ -67,6 +70,8 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		GlobalSettings globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getPsfCalculatorSettings();
 
@@ -91,7 +96,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 */
 	public double calculate(PSFCalculatorSettings settings, boolean simpleMode)
 	{
-		gd = new GenericDialog("PSF Calculator");
+		gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		this.settings = settings;

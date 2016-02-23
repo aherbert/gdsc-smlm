@@ -16,6 +16,7 @@ package gdsc.smlm.ij.plugins.pcpalm;
 import gdsc.smlm.function.SkewNormalFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.plugins.ResultsManager;
@@ -166,6 +167,8 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		// Require some fit results and selected regions
 		boolean resultsAvailable = MemoryPeakResults.countMemorySize() > 0;
 

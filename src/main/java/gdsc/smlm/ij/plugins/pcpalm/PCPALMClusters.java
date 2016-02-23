@@ -15,6 +15,7 @@ package gdsc.smlm.ij.plugins.pcpalm;
 
 import gdsc.smlm.fitting.BinomialFitter;
 import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -138,6 +139,8 @@ public class PCPALMClusters implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (!showDialog())
 			return;
 

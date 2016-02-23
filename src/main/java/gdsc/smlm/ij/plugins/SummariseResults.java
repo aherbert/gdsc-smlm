@@ -15,6 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Rectangle;
 
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -40,6 +41,8 @@ public class SummariseResults implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");

@@ -14,6 +14,7 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.frc.FRC;
 import gdsc.smlm.ij.frc.FRC.ThresholdMethod;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -85,6 +86,8 @@ public class FIRE implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		// Require some fit results and selected regions
 		int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)

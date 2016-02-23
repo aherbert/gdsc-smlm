@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.NoiseEstimator;
@@ -44,6 +45,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class Noise implements ExtendedPlugInFilter, DialogListener
 {
+	private static final String TITLE = "Noise Estimator";
 	private List<double[]> results;
 	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
 	private PlugInFilterRunner pfr;
@@ -59,6 +61,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		{
 			showResults();
 		}
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -78,7 +82,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 
 			drawPlot();
 
-			gd = new GenericDialog("Noise Estimator");
+			gd = new GenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
 			NoiseEstimator.Method[] methods = NoiseEstimator.Method.values();

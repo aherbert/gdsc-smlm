@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins.pcpalm;
 
+import gdsc.smlm.ij.ImageJTracker;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -136,6 +138,8 @@ public class PCPALMFitting implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		ImageJTracker.recordPlugin(TITLE, arg);
+		
 		//		if (PCPALMAnalysis.results.isEmpty())
 		//		{
 		//			IJ.error(TITLE, "Require a set of correlation curves for analysis.\n" +
