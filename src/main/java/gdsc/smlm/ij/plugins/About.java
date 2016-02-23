@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.Version;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
