@@ -81,7 +81,7 @@ public class Version
 	{
 		Pattern p = Pattern.compile("^\\d+");
 		Matcher m = p.matcher(version);
-		if (m.matches())
+		if (m.find())
 			return Integer.parseInt(m.group());
 		return 0;
 	}
@@ -95,7 +95,7 @@ public class Version
 	{
 		Pattern p = Pattern.compile("^\\d+\\.(\\d+)");
 		Matcher m = p.matcher(version);
-		if (m.matches())
+		if (m.find())
 			return Integer.parseInt(m.group(1));
 		return 0;
 	}
@@ -109,7 +109,7 @@ public class Version
 	{
 		Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
 		Matcher m = p.matcher(version);
-		if (m.matches())
+		if (m.find())
 			return Integer.parseInt(m.group(1));
 		return 0;
 	}
@@ -123,7 +123,7 @@ public class Version
 	{
 		Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
 		Matcher m = p.matcher(version);
-		if (m.matches())
+		if (m.find())
 			return m.group();
 		return "";
 	}
