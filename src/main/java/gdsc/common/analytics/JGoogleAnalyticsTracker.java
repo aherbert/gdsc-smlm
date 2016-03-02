@@ -356,9 +356,9 @@ public class JGoogleAnalyticsTracker
 	 * 
 	 * @param requestParameters
 	 * @throws NullPointerException
-	 *             if requestData is null or if the URL builder is null
+	 *             if requestData is null
 	 */
-	public synchronized void makeCustomRequest(RequestParameters requestParameters)
+	public void makeCustomRequest(RequestParameters requestParameters)
 	{
 		if (!enabled)
 		{

@@ -82,9 +82,10 @@ public class AnalyticsMeasurementProtocolURLBuilder implements IAnalyticsMeasure
 			sb.append("&sc=start");
 
 		// Build the client data
-		if (clientParameters.getUrl() == null)
-			buildClientURL(clientParameters);
-		sb.append(clientParameters.getUrl());
+		String url = clientParameters.getUrl(); 
+		if (url == null)
+			url = buildClientURL(clientParameters);
+		sb.append(url);
 
 		// Build the request data
 
@@ -172,7 +173,7 @@ public class AnalyticsMeasurementProtocolURLBuilder implements IAnalyticsMeasure
 		add(sb, key, value.intValue());
 	}
 
-	private void buildClientURL(ClientParameters client)
+	private String buildClientURL(ClientParameters client)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -200,7 +201,9 @@ public class AnalyticsMeasurementProtocolURLBuilder implements IAnalyticsMeasure
 
 		buildCustomDimensionsURL(sb, client.getCustomDimensions());
 
-		client.setUrl(sb.toString());
+		final String url = sb.toString();
+		client.setUrl(url);
+		return url;
 	}
 
 	private void buildCustomDimensionsURL(StringBuilder sb, List<CustomDimension> customDimensions)
