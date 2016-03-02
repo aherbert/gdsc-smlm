@@ -17,7 +17,6 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.Atom;
 import gdsc.smlm.ij.settings.Compound;
 import gdsc.smlm.ij.settings.CreateDataSettings;
@@ -484,7 +483,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		extraOptions = Utils.isExtraOptions();
 		simpleMode = (arg != null && arg.contains("simple"));

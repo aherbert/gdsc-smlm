@@ -14,7 +14,6 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -53,7 +52,7 @@ public class LoadLocalisations implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		GlobalSettings globalSettings = SettingsManager.loadSettings();
 		CreateDataSettings settings = globalSettings.getCreateDataSettings();

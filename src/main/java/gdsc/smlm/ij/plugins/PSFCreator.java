@@ -19,7 +19,6 @@ import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -161,7 +160,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (imp == null)
 		{

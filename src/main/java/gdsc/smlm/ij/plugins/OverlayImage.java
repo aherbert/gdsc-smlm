@@ -13,8 +13,6 @@ import ij.plugin.PlugIn;
 import java.awt.Rectangle;
 import java.util.Arrays;
 
-import gdsc.smlm.ij.ImageJTracker;
-
 /**
  * This plugin is extracted from ij.plugins.OverlayCommands to allow an image to be added with a transparent
  * background.
@@ -27,7 +25,7 @@ public class OverlayImage implements PlugIn
 
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin("Overlay Image", arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		addImage();
 	}

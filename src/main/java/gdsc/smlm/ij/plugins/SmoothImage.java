@@ -19,7 +19,6 @@ import gdsc.smlm.filters.DataProcessor;
 import gdsc.smlm.filters.DifferenceSpotFilter;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.SingleSpotFilter;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.ImagePlus;
@@ -71,7 +70,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 			return DONE;
 		}
 
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 
 		if (imp == null)
 		{

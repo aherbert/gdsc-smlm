@@ -16,7 +16,6 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.CurveLogger;
 import gdsc.smlm.ij.IJTrackProgress;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -142,7 +141,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		jumpDistanceParameters = null;
 

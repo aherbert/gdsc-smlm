@@ -23,7 +23,6 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFEstimatorSettings;
@@ -115,7 +114,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		extraOptions = Utils.isExtraOptions();
 		if (imp == null)

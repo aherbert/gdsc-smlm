@@ -1,7 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.ImageJTracker;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -70,7 +68,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		GlobalSettings globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getPsfCalculatorSettings();

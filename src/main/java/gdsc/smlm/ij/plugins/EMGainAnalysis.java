@@ -2,7 +2,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.function.Bessel;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Convolution;
 import gdsc.smlm.utils.DoubleEquality;
@@ -83,7 +82,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		extraOptions = Utils.isExtraOptions();
 

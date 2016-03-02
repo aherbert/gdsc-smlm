@@ -1,6 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.Utils;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -34,7 +33,7 @@ public class YeastMask implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (!showDialog())
 			return;

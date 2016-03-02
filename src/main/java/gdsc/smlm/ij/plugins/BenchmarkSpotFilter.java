@@ -19,7 +19,6 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -391,7 +390,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		extraOptions = Utils.isExtraOptions();
 

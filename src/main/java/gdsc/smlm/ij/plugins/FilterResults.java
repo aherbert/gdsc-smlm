@@ -14,7 +14,6 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -68,7 +67,7 @@ public class FilterResults implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{

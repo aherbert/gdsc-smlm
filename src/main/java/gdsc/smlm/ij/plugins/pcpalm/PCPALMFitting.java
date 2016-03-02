@@ -1,7 +1,5 @@
 package gdsc.smlm.ij.plugins.pcpalm;
 
-import gdsc.smlm.ij.ImageJTracker;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -17,6 +15,7 @@ import gdsc.smlm.ij.ImageJTracker;
 
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
+import gdsc.smlm.ij.plugins.PluginTracker;
 import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.Maths;
@@ -138,7 +137,7 @@ public class PCPALMFitting implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		//		if (PCPALMAnalysis.results.isEmpty())
 		//		{

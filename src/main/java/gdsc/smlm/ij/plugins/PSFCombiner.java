@@ -1,7 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.ImageJTracker;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -54,7 +52,7 @@ public class PSFCombiner implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		// Build a list of suitable images
 		titles = createImageList();

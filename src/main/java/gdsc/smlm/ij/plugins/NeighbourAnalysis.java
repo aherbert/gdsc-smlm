@@ -14,7 +14,6 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.IJTrackProgress;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.results.FilePeakResults;
@@ -47,7 +46,7 @@ public class NeighbourAnalysis implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{

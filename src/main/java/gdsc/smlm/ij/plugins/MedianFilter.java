@@ -1,6 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.MedianWindowDLLFloat;
@@ -59,7 +58,7 @@ public class MedianFilter implements PlugInFilter
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (imp == null)
 		{

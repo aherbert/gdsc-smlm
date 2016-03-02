@@ -1,7 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.ImageJTracker;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -139,7 +137,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		// Do nothing. The frame has been created and the buttons run the plugins.
 	}
@@ -147,7 +145,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	private boolean createFrame()
 	{
 		// Locate all the GDSC SMLM plugins using the plugins.config:
-		InputStream readmeStream = getPluginsConfig();
+		InputStream readmeStream = getToolsPluginsConfig();
 
 		ij.Menus.installPlugin("", ij.Menus.PLUGINS_MENU, "-", "", IJ.getInstance());
 
@@ -239,7 +237,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		return true;
 	}
 
-	private InputStream getPluginsConfig()
+	private static InputStream getToolsPluginsConfig()
 	{
 		// Look for smlm.config in the plugin directory
 		String pluginsDir = IJ.getDirectory("plugins");
@@ -257,11 +255,17 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		}
 
 		// Fall back to the embedded config in the jar file
+		return getPluginsConfig();
+	}
+
+	public static InputStream getPluginsConfig()
+	{
+		// Get the embedded config in the jar file
 		Class<SMLMTools> resourceClass = SMLMTools.class;
 		InputStream readmeStream = resourceClass.getResourceAsStream("/gdsc/smlm/plugins.config");
 		return readmeStream;
 	}
-
+	
 	private int addPlugin(Panel mainPanel, GridBagLayout grid, String commandName, final String command, int col,
 			int row)
 	{

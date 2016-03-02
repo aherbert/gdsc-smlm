@@ -1,7 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.ImageJTracker;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -79,7 +77,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (!showDialog())
 			return;

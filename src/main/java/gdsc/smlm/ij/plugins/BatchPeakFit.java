@@ -15,7 +15,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.BatchRun;
@@ -97,7 +96,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (!showDialog())
 			return;

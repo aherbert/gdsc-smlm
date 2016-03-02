@@ -16,7 +16,6 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -146,7 +145,7 @@ public class DiffusionRateTest implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		extraOptions = Utils.isExtraOptions();
 

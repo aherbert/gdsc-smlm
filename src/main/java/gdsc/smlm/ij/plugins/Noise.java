@@ -1,6 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.NoiseEstimator;
@@ -61,7 +60,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		{
 			showResults();
 		}
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		if (imp == null)
 		{

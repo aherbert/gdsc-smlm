@@ -31,7 +31,6 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.function.CameraNoiseModel;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.ImageJTracker;
 import gdsc.smlm.ij.SeriesImageSource;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
@@ -240,7 +239,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		ImageJTracker.recordPlugin(TITLE, arg);
+		PluginTracker.recordPlugin(this.getClass(), arg);
 		
 		plugin_flags = FLAGS;
 		extraOptions = Utils.isExtraOptions();
