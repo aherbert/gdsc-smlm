@@ -103,10 +103,27 @@ public class JGoogleAnalyticsTracker
 		SINGLE_THREAD
 	}
 
+	/**
+	 * Allow the correct instance to be put into the request queue. This means that if the logger on the instance is
+	 * changed after the request is added to the queue then the correct logger can be obtained from the instance
+	 * getLogger() method.
+	 */
+	private class RequestData
+	{
+		final String url;
+		final JGoogleAnalyticsTracker tracker;
+
+		RequestData(String url, JGoogleAnalyticsTracker tracker)
+		{
+			this.url = url;
+			this.tracker = tracker;
+		}
+	}
+
 	private static final ThreadGroup asyncThreadGroup = new ThreadGroup("Async Google Analytics Threads");
 	private static long asyncThreadsRunning = 0;
 	private static Proxy proxy = Proxy.NO_PROXY;
-	private static Queue<String> fifo = new LinkedList<String>();
+	private static Queue<RequestData> fifo = new LinkedList<RequestData>();
 	private static Thread backgroundThread = null; // the thread used in 'queued' mode.
 	private static boolean backgroundThreadMayRun = false;
 
@@ -407,7 +424,7 @@ public class JGoogleAnalyticsTracker
 			default: // in case it's null, we default to the single-thread
 				synchronized (fifo)
 				{
-					fifo.add(url);
+					fifo.add(new RequestData(url, this));
 					fifo.notify();
 				}
 				if (!backgroundThreadMayRun)
@@ -508,7 +525,7 @@ public class JGoogleAnalyticsTracker
 					{
 						try
 						{
-							String url = null;
+							RequestData data = null;
 
 							synchronized (fifo)
 							{
@@ -520,15 +537,15 @@ public class JGoogleAnalyticsTracker
 								if (!fifo.isEmpty())
 								{
 									// Get a reference to the oldest element in the FIFO, but leave it in the FIFO until it is processed.
-									url = fifo.peek();
+									data = fifo.peek();
 								}
 							}
 
-							if (url != null)
+							if (data != null)
 							{
 								try
 								{
-									dispatchRequest(url, logger);
+									dispatchRequest(data.url, data.tracker.getLogger());
 								}
 								finally
 								{
