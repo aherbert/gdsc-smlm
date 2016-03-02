@@ -16,11 +16,12 @@ import java.util.HashMap;
 
 import gdsc.common.ij.ImageJAnalyticsTracker;
 import gdsc.smlm.Version;
+import ij.plugin.PlugIn;
 
 /**
  * Provide methods to track code usage within ImageJ
  */
-public class SMLMUsageTracker
+public class SMLMUsageTracker implements PlugIn
 {
 	private static final String TITLE = "SMLM Usage Tracker";
 	private static HashMap<String, String[]> map = new HashMap<String, String[]>();
