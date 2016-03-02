@@ -65,7 +65,7 @@ public class About implements PlugIn, MacroExtension
 
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (arg.equals("about"))
 		{

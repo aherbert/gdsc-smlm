@@ -52,7 +52,7 @@ public class LoadLocalisations implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		GlobalSettings globalSettings = SettingsManager.loadSettings();
 		CreateDataSettings settings = globalSettings.getCreateDataSettings();

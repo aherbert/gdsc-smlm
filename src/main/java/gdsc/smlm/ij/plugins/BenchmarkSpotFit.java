@@ -513,7 +513,7 @@ public class BenchmarkSpotFit implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		extraOptions = Utils.isExtraOptions();
 

@@ -17,7 +17,7 @@ import gdsc.smlm.fitting.BinomialFitter;
 import gdsc.smlm.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
-import gdsc.smlm.ij.plugins.PluginTracker;
+import gdsc.smlm.ij.plugins.SMLMUsageTracker;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJLogger;
 import gdsc.smlm.ij.utils.Utils;
@@ -139,7 +139,7 @@ public class PCPALMClusters implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (!showDialog())
 			return;

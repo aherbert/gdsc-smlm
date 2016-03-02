@@ -68,7 +68,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{

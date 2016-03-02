@@ -214,7 +214,7 @@ public class MeanVarianceTest implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (Utils.isExtraOptions())
 		{

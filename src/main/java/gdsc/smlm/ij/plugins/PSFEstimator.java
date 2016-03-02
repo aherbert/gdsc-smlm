@@ -114,7 +114,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		extraOptions = Utils.isExtraOptions();
 		if (imp == null)

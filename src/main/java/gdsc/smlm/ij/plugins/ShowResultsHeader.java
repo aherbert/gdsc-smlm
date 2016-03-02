@@ -33,7 +33,7 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Show the results header\n(double-click the string field to open a file chooser)");

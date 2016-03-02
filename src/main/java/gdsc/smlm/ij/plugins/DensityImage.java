@@ -82,7 +82,7 @@ public class DensityImage implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		// Require some fit results and selected regions
 		int size = MemoryPeakResults.countMemorySize();

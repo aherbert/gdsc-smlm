@@ -69,7 +69,7 @@ public class DrawClusters implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{

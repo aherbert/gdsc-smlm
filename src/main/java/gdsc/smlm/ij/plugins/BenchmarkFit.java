@@ -415,7 +415,7 @@ public class BenchmarkFit implements PlugIn
 
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if ("analysis".equals(arg))
 		{

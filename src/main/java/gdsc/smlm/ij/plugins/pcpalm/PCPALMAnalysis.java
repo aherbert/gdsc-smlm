@@ -17,7 +17,7 @@ import edu.emory.mathcs.jtransforms.fft.DoubleFFT_2D;
 import edu.emory.mathcs.jtransforms.fft.FloatFFT_2D;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
-import gdsc.smlm.ij.plugins.PluginTracker;
+import gdsc.smlm.ij.plugins.SMLMUsageTracker;
 import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.model.MaskDistribution;
 import gdsc.smlm.utils.ImageWindow;
@@ -108,7 +108,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if ("save".equalsIgnoreCase(arg))
 			return saveResults();

@@ -281,7 +281,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (WindowManager.getImageCount() == 0)
 		{

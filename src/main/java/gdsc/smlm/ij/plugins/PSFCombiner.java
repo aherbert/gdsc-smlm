@@ -52,7 +52,7 @@ public class PSFCombiner implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		// Build a list of suitable images
 		titles = createImageList();

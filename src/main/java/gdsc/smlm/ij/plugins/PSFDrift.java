@@ -395,7 +395,7 @@ public class PSFDrift implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		// Build a list of suitable images
 		List<String> titles = createImageList();

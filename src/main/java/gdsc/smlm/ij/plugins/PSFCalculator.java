@@ -68,7 +68,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		GlobalSettings globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getPsfCalculatorSettings();

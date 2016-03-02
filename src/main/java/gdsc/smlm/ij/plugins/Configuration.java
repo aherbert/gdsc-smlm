@@ -90,7 +90,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		showDialog();
 	}

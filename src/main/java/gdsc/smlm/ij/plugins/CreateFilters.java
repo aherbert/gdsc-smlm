@@ -77,7 +77,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (!showDialog())
 			return;

@@ -137,7 +137,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		// Do nothing. The frame has been created and the buttons run the plugins.
 	}

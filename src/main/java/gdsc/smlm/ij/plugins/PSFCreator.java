@@ -160,7 +160,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (imp == null)
 		{

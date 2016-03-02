@@ -151,7 +151,7 @@ public class ConfigurationTemplate implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		// Allow the user to specify a configuration directory
 		String newDirectory = Utils.getDirectory("Template_directory", configurationDirectory);

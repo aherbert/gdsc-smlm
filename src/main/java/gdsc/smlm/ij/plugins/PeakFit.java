@@ -239,7 +239,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 */
 	public int setup(String arg, ImagePlus imp)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		plugin_flags = FLAGS;
 		extraOptions = Utils.isExtraOptions();

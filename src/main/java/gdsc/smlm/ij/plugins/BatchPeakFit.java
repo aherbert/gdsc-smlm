@@ -96,7 +96,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		if (!showDialog())
 			return;

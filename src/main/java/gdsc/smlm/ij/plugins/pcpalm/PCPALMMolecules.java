@@ -18,7 +18,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
-import gdsc.smlm.ij.plugins.PluginTracker;
+import gdsc.smlm.ij.plugins.SMLMUsageTracker;
 import gdsc.smlm.ij.plugins.ResultsManager;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.Utils;
@@ -167,7 +167,7 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	public void run(String arg)
 	{
-		PluginTracker.recordPlugin(this.getClass(), arg);
+		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
 		// Require some fit results and selected regions
 		boolean resultsAvailable = MemoryPeakResults.countMemorySize() > 0;

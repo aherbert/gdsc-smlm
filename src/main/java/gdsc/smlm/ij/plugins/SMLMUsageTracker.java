@@ -20,9 +20,9 @@ import gdsc.smlm.Version;
 /**
  * Provide methods to track code usage within ImageJ
  */
-public class PluginTracker
+public class SMLMUsageTracker
 {
-	private static final String TITLE = "Usage Tracker";
+	private static final String TITLE = "SMLM Usage Tracker";
 	private static HashMap<String, String[]> map = new HashMap<String, String[]>();
 	private static boolean trackerInitialised = false;
 	private static boolean mapInitialised = false;
@@ -85,7 +85,7 @@ public class PluginTracker
 		if (trackerInitialised)
 			return;
 
-		synchronized (PluginTracker.class)
+		synchronized (SMLMUsageTracker.class)
 		{
 			// Check again since this may be a second thread that was waiting  
 			if (trackerInitialised)
