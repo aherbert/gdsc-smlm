@@ -95,8 +95,8 @@ public class PluginTracker
 			
 			// Initialise analytics
 			ImageJAnalyticsTracker.initialise();
-			// Record the version of the GDSC plugins
-			ImageJAnalyticsTracker.addCustomDimension(6, Version.getVersion());
+			// Record the version of the GDSC SMLM plugins
+			ImageJAnalyticsTracker.addCustomDimension(7, Version.getVersion());
 			// Prompt the user to opt-in/out of analytics if the status is unknown
 			if (ImageJAnalyticsTracker.unknownStatus())
 				ImageJAnalyticsTracker.showDialog(TITLE, true);
