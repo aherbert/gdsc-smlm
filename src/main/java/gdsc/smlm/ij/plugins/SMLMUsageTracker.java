@@ -14,7 +14,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.util.HashMap;
 
-import gdsc.common.ij.ImageJAnalyticsTracker;
+import gdsc.core.ij.ImageJAnalyticsTracker;
 import gdsc.smlm.Version;
 import ij.plugin.PlugIn;
 
