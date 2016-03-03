@@ -239,8 +239,10 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 	private Label currentLabel;
 	private Label rawFittedLabel;
 	private Label blurFittedLabel;
-	private DefaultListModel<Spot> listModel;
-	private JList<Spot> onFramesList;
+	@SuppressWarnings("rawtypes")
+	private DefaultListModel listModel;
+	@SuppressWarnings("rawtypes")
+	private JList onFramesList;
 
 	//private final int fontWidth = 12;
 	//private final Font monoFont = new Font("Monospaced", 0, fontWidth);
@@ -931,6 +933,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 		Utils.display(title, plot);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void addFrame()
 	{
 		if (rawImp != null)
@@ -1209,6 +1212,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 		tracesFile.newLine();
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createFrame()
 	{
 		Panel mainPanel = new Panel();
@@ -1264,8 +1268,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
 		mainPanel.add(buttonPanel);
 
-		listModel = new DefaultListModel<Spot>();
-		onFramesList = new JList<Spot>(listModel);
+		listModel = new DefaultListModel();
+		onFramesList = new JList(listModel);
 		onFramesList.setVisibleRowCount(15);
 		onFramesList.addListSelectionListener(this);
 		//mainPanel.add(onFramesList);
