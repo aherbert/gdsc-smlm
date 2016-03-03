@@ -7,3 +7,4 @@ build.sh
 /plugins
 *.lut
 JumpDistanceAnalysisTest.dat
+/gdsc.smlm.settings.xml
