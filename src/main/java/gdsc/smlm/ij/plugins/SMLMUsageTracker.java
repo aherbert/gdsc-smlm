@@ -101,7 +101,7 @@ public class SMLMUsageTracker implements PlugIn
 			// Prompt the user to opt-in/out of analytics if the status is unknown
 			if (ImageJAnalyticsTracker.unknownStatus())
 				ImageJAnalyticsTracker.showDialog(TITLE, true);
-			ImageJAnalyticsTracker.logPreferences(false);
+			//ImageJAnalyticsTracker.logPreferences(false);
 		}
 	}
 
