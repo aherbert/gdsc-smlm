@@ -114,10 +114,7 @@ public class SeriesImageSource extends ImageSource
 							byte[] buf = new byte[fis.available()];
 							int read = fis.read(buf);
 							fis.close();
-							// We do not have to close the ByteArrayInputStream
-							@SuppressWarnings("resource")
-							ByteArrayInputStream bis = new ByteArrayInputStream(buf, 0, read);
-							is = bis;
+							is = new ByteArrayInputStream(buf, 0, read);
 						}
 						catch (Exception e)
 						{
