@@ -1,19 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.utils.UnicodeReader;
 import ij.Executer;
 import ij.IJ;
 import ij.Prefs;
@@ -38,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import gdsc.core.utils.UnicodeReader;
 
 /**
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in gdsc/smlm/plugins.config. Also add these

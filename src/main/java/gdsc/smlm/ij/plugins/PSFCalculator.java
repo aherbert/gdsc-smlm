@@ -16,7 +16,7 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.model.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;

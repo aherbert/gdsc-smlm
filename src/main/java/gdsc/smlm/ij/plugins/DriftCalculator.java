@@ -14,7 +14,7 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
@@ -23,12 +23,12 @@ import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.utils.AlignImagesFFT;
 import gdsc.smlm.ij.utils.AlignImagesFFT.SubPixelMethod;
 import gdsc.smlm.ij.utils.AlignImagesFFT.WindowMethod;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.TrackProgress;
-import gdsc.smlm.utils.Maths;
-import gdsc.smlm.utils.UnicodeReader;
+import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.UnicodeReader;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

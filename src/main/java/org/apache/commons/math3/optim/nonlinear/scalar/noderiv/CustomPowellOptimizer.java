@@ -16,8 +16,6 @@
  */
 package org.apache.commons.math3.optim.nonlinear.scalar.noderiv;
 
-import gdsc.smlm.utils.DoubleEquality;
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -39,6 +37,8 @@ import org.apache.commons.math3.optim.univariate.SimpleUnivariateValueChecker;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.utils.DoubleEquality;
 
 /**
  * Powell's algorithm.

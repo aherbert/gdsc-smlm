@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.ObjectAnalyzer;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;

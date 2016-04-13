@@ -6,7 +6,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.plugin.PlugIn;
 

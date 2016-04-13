@@ -1,8 +1,8 @@
 package gdsc.smlm.filters;
 
+import gdsc.core.utils.FloatEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.filters.AverageFilter;
-import gdsc.smlm.utils.FloatEquality;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 public class AverageFilterTest
 {
-	private gdsc.smlm.utils.Random rand;
+	private gdsc.core.utils.Random rand;
 
 	private boolean debug = false;
 	private int InternalITER3 = 500;
@@ -88,8 +88,8 @@ public class AverageFilterTest
 	{
 		FloatEquality eq = new FloatEquality(1e-5f, 1e-10f);
 		// Debug: show the images
-		//gdsc.smlm.ij.utils.Utils.display("data1", new ij.process.FloatProcessor(maxx, maxy, data1));
-		//gdsc.smlm.ij.utils.Utils.display("data2", new ij.process.FloatProcessor(maxx, maxy, data2));
+		//gdsc.core.ij.Utils.display("data1", new ij.process.FloatProcessor(maxx, maxy, data1));
+		//gdsc.core.ij.Utils.display("data2", new ij.process.FloatProcessor(maxx, maxy, data2));
 
 		// Ignore the border
 		int border = (int) Math.ceil(boxSize);
@@ -131,7 +131,7 @@ public class AverageFilterTest
 	private void averageIsCorrect(int width, int height, float boxSize, boolean internal, DataFilter filter)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.smlm.utils.Random(-30051976);
+		rand = new gdsc.core.utils.Random(-30051976);
 		float[] data1 = createData(width, height);
 		float[] data2 = data1.clone();
 
@@ -275,7 +275,7 @@ public class AverageFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -357,7 +357,7 @@ public class AverageFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

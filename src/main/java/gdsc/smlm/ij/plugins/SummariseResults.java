@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Rectangle;
 
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;

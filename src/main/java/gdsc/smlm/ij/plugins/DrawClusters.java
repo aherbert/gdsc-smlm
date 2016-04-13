@@ -14,12 +14,12 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Sort;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
-import gdsc.smlm.utils.Sort;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

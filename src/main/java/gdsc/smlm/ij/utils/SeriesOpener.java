@@ -13,18 +13,19 @@ package gdsc.smlm.ij.utils;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.GenericDialog;
-import ij.io.Opener;
-import ij.plugin.FolderOpener;
-
 import java.awt.Label;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.TextEvent;
 import java.io.File;
 import java.util.Arrays;
+
+import gdsc.core.ij.Utils;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.GenericDialog;
+import ij.io.Opener;
+import ij.plugin.FolderOpener;
 
 /**
  * Opens a series of images in a folder. The series is sorted numerically.

@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.utils.Random;
-
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +8,8 @@ import java.util.List;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.core.utils.Random;
 
 public class ImageSourceTest
 {

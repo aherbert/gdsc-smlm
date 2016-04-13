@@ -1,6 +1,6 @@
 package gdsc.smlm.ga;
 
-import gdsc.smlm.results.TrackProgress;
+import gdsc.core.logging.TrackProgress;
 
 import java.util.List;
 

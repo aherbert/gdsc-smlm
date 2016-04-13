@@ -13,9 +13,9 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.Trace;

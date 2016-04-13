@@ -1,6 +1,6 @@
 package gdsc.smlm.ga;
 
-import gdsc.smlm.results.TrackProgress;
+import gdsc.core.logging.TrackProgress;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,7 +149,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ga.SelectionStrategy#setTracker(gdsc.smlm.results.TrackProgress)
+	 * @see gdsc.smlm.ga.SelectionStrategy#setTracker(gdsc.core.logging.TrackProgress)
 	 */
 	public void setTracker(TrackProgress tracker)
 	{

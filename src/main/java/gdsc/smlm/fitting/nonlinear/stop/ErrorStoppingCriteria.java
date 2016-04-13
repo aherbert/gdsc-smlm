@@ -1,7 +1,7 @@
 package gdsc.smlm.fitting.nonlinear.stop;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
-import gdsc.smlm.utils.DoubleEquality;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

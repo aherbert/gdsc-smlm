@@ -1,6 +1,6 @@
 package gdsc.smlm.filters;
 
-import gdsc.smlm.utils.StoredDataStatistics;
+import gdsc.core.utils.StoredDataStatistics;
 
 import java.awt.Rectangle;
 

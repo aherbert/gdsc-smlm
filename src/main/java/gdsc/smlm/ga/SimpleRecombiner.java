@@ -1,11 +1,11 @@
 package gdsc.smlm.ga;
 
-import gdsc.smlm.utils.Sort;
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import gdsc.core.utils.Sort;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

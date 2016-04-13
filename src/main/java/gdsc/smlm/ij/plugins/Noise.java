@@ -1,9 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.utils.NoiseEstimator;
-import gdsc.smlm.utils.Statistics;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.NoiseEstimator;
+import gdsc.core.utils.Statistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

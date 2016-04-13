@@ -1,8 +1,8 @@
 package gdsc.smlm.ij.results;
 
+import gdsc.smlm.utils.XmlUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.XmlUtils;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;

@@ -13,7 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;

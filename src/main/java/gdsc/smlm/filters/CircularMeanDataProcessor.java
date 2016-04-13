@@ -1,6 +1,6 @@
 package gdsc.smlm.filters;
 
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 
 import java.util.Arrays;
 import java.util.List;

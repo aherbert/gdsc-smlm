@@ -1,5 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.core.utils.TextUtils;
+import gdsc.smlm.utils.XmlUtils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -40,8 +43,6 @@ import gdsc.smlm.results.filter.SignalFilter;
 import gdsc.smlm.results.filter.TraceFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
-import gdsc.smlm.utils.TextUtils;
-import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;

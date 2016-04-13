@@ -15,8 +15,8 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.ij.utils.Utils;
 import gdsc.smlm.utils.XmlUtils;
+import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

@@ -1,9 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.utils.MedianWindowDLLFloat;
-import gdsc.smlm.utils.MedianWindowFloat;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.MedianWindowDLLFloat;
+import gdsc.core.utils.MedianWindowFloat;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

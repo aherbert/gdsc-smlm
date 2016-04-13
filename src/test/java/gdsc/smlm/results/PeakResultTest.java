@@ -1,9 +1,9 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.utils.DoubleEquality;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.core.utils.DoubleEquality;
 
 public class PeakResultTest
 {

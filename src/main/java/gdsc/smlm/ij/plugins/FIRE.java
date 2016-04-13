@@ -22,7 +22,7 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;

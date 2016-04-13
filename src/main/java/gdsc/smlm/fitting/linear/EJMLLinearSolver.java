@@ -1,9 +1,10 @@
 package gdsc.smlm.fitting.linear;
 
-import gdsc.smlm.utils.DoubleEquality;
-
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+
+import gdsc.core.utils.DoubleEquality;
+
 import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
 import org.ejml.data.DenseMatrix64F;
 

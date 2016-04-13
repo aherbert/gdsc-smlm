@@ -1,10 +1,10 @@
 package gdsc.smlm.fitting;
 
+import gdsc.core.logging.Logger;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
-import gdsc.smlm.utils.logging.Logger;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -667,8 +667,8 @@ public class JumpDistanceAnalysisTest
 		}
 
 		// Debug 
-		//gdsc.smlm.utils.StoredDataStatistics stats = new gdsc.smlm.utils.StoredDataStatistics(data);
-		//gdsc.smlm.ij.utils.Utils.showHistogram(
+		//gdsc.core.utils.StoredDataStatistics stats = new gdsc.core.utils.StoredDataStatistics(data);
+		//gdsc.core.ij.Utils.showHistogram(
 		//		"MSD",
 		//		stats,
 		//		"MSD",

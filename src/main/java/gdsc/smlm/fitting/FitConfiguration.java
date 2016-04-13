@@ -26,8 +26,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.Maths;
-import gdsc.smlm.utils.logging.Logger;
+import gdsc.core.logging.Logger;
+import gdsc.core.utils.Maths;
 
 /**
  * Specifies the fitting configuration for Gaussian fitting

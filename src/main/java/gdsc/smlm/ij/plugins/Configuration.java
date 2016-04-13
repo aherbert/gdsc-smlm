@@ -21,7 +21,7 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.Calibration;
 import ij.IJ;
 import ij.gui.GenericDialog;

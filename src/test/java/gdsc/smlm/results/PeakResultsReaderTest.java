@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.utils.Random;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -12,9 +10,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
+import gdsc.core.utils.Random;
+
 public class PeakResultsReaderTest
 {
-	private gdsc.smlm.utils.Random rand = new Random();
+	private gdsc.core.utils.Random rand = new Random();
 
 	// TODO - Add tests to compare writing to a IJTablePeakResults, saving the TextPanel contents to file and then reading.
 	

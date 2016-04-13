@@ -13,17 +13,17 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
-import gdsc.smlm.results.clustering.Cluster;
-import gdsc.smlm.results.clustering.ClusteringAlgorithm;
-import gdsc.smlm.results.clustering.ClusteringEngine;
-import gdsc.smlm.utils.StoredDataStatistics;
+import gdsc.core.clustering.Cluster;
+import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;

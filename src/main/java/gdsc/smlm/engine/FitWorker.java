@@ -24,13 +24,13 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
+import gdsc.core.logging.Logger;
+import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.NoiseEstimator;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
-import gdsc.smlm.utils.ImageExtractor;
-import gdsc.smlm.utils.NoiseEstimator;
-import gdsc.smlm.utils.logging.Logger;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;

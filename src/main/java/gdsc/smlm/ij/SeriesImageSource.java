@@ -2,7 +2,7 @@ package gdsc.smlm.ij;
 
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.SeriesOpener;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;

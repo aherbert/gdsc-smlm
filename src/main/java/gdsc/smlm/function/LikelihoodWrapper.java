@@ -1,21 +1,8 @@
 package gdsc.smlm.function;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2014 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.utils.NotImplementedException;
-
 import java.util.Arrays;
+
+import gdsc.core.utils.NotImplementedException;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood
@@ -219,7 +206,7 @@ public abstract class LikelihoodWrapper
 
 	/**
 	 * Specify if the likelihood function can compute gradients. If false then the calls to the likelihood functions to
-	 * compute the gradient will throw a {@link gdsc.smlm.utils.NotImplementedException }
+	 * compute the gradient will throw a {@link gdsc.core.utils.NotImplementedException }
 	 * 
 	 * @return True if the likelihood function can compute gradients
 	 */

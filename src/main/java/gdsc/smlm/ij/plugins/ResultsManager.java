@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.IJTrackProgress;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
@@ -26,7 +26,7 @@ import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;

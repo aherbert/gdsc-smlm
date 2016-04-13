@@ -1,5 +1,7 @@
 package gdsc.smlm.results;
 
+import gdsc.smlm.utils.XmlUtils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,7 +16,6 @@ package gdsc.smlm.results;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.utils.XmlUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

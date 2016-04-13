@@ -1,5 +1,8 @@
 package gdsc.smlm.fitting;
 
+import gdsc.core.logging.Logger;
+import gdsc.core.logging.NullLogger;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -13,10 +16,8 @@ package gdsc.smlm.fitting;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.utils.Maths;
-import gdsc.smlm.utils.Sort;
-import gdsc.smlm.utils.logging.Logger;
-import gdsc.smlm.utils.logging.NullLogger;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Sort;
 
 import java.util.Arrays;
 

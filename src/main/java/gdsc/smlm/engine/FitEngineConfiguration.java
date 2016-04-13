@@ -17,6 +17,8 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.utils.NoiseEstimator;
+import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.filters.AverageDataProcessor;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.CircularMeanDataProcessor;
@@ -29,8 +31,6 @@ import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.Gaussian2DFitter;
-import gdsc.smlm.utils.NoiseEstimator;
-import gdsc.smlm.utils.NoiseEstimator.Method;
 
 /**
  * Specifies the configuration for the fit engine

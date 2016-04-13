@@ -1,11 +1,11 @@
 package gdsc.smlm.function.gaussian;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.smlm.utils.DoubleEquality;
 
 import java.util.ArrayList;
 import java.util.Random;

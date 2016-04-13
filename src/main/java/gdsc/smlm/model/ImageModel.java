@@ -13,8 +13,8 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.utils.Maths;
-import gdsc.smlm.utils.StoredDataStatistics;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.StoredDataStatistics;
 
 import java.util.ArrayList;
 import java.util.Arrays;

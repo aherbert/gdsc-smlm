@@ -1,7 +1,7 @@
 package gdsc.smlm.results;
 
+import gdsc.core.utils.Random;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.utils.Random;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class TraceManagerTest
 {
-	private gdsc.smlm.utils.Random rand = new Random();
+	private gdsc.core.utils.Random rand = new Random();
 
 	@Test
 	public void canTraceSinglePulseWithFixedCoords()

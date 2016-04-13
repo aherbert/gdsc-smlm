@@ -2,8 +2,8 @@ package gdsc.smlm.fitting.linear;
 
 import java.util.Arrays;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
-import gdsc.smlm.utils.DoubleEquality;
 
 import org.junit.Assert;
 import org.junit.Test;

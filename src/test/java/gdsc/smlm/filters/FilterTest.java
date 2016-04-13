@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class FilterTest
 {
-	private gdsc.smlm.utils.Random rand;
+	private gdsc.core.utils.Random rand;
 
 	private boolean debug = false;
 
@@ -71,7 +71,7 @@ public class FilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 		AverageFilter filter2 = new AverageFilter();
@@ -152,7 +152,7 @@ public class FilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		AverageFilter filter1 = new AverageFilter();
 		MedianFilter filter2 = new MedianFilter();
@@ -232,7 +232,7 @@ public class FilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		AverageFilter filter1 = new AverageFilter();
 		MedianFilter filter2 = new MedianFilter();
@@ -312,7 +312,7 @@ public class FilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		AverageFilter filter1 = new AverageFilter();
 		GaussianFilter filter2 = new GaussianFilter();
@@ -392,7 +392,7 @@ public class FilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		AverageFilter filter1 = new AverageFilter();
 		AreaAverageFilter filter2 = new AreaAverageFilter();
@@ -478,7 +478,7 @@ public class FilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 

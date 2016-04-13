@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class AreaAverageFilterTest
 {
-	private gdsc.smlm.utils.Random rand;
+	private gdsc.core.utils.Random rand;
 
 	private boolean debug = false;
 	private int ITER = 100;
@@ -39,7 +39,7 @@ public class AreaAverageFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 
@@ -116,7 +116,7 @@ public class AreaAverageFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();
@@ -194,7 +194,7 @@ public class AreaAverageFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new gdsc.smlm.utils.Random(-300519);
+		rand = new gdsc.core.utils.Random(-300519);
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();
@@ -280,7 +280,7 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.smlm.utils.Random(-30051976);
+		rand = new gdsc.core.utils.Random(-30051976);
 		int max = 50;
 		float[] data = createData(max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();
@@ -318,7 +318,7 @@ public class AreaAverageFilterTest
 				//// Debugging
 				//String title = "AreaAverage";
 				//ij.gui.Plot plot = new ij.gui.Plot(title, "width", "Mean", w, yy);
-				//gdsc.smlm.ij.utils.Utils.display(title, plot);
+				//gdsc.core.ij.Utils.display(title, plot);
 
 				for (int i = 0; i < n; i += 10)
 				{
@@ -345,7 +345,7 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.smlm.utils.Random(-30051976);
+		rand = new gdsc.core.utils.Random(-30051976);
 		int max = 50;
 		float[] data = createData(max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();
@@ -367,7 +367,7 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.smlm.utils.Random(-30051976);
+		rand = new gdsc.core.utils.Random(-30051976);
 		int max = 50;
 		float[] data = createData(max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();
@@ -390,7 +390,7 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.smlm.utils.Random(-30051976);
+		rand = new gdsc.core.utils.Random(-30051976);
 		int max = 50;
 		float[] data = createData(max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();

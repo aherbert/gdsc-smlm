@@ -1,5 +1,10 @@
 package gdsc.smlm.ij.utils;
 
+import java.awt.Rectangle;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -9,10 +14,6 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import ij.util.Tools;
-
-import java.awt.Rectangle;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Aligns an image stack to a reference image using XY translation to maximise the correlation. Takes in:

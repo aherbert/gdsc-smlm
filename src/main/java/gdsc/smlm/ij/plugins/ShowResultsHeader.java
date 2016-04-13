@@ -1,9 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.settings.Constants;
-import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.results.PeakResultsReader;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.results.PeakResultsReader;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;

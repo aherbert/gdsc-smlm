@@ -19,8 +19,8 @@ import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
-import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.results.DensityManager;
+import gdsc.core.ij.Utils;
+import gdsc.core.clustering.DensityManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -83,7 +83,7 @@ public class DensityImage implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Require some fit results and selected regions
 		int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
@@ -117,7 +117,7 @@ public class DensityImage implements PlugIn
 
 		boolean useAdjustment = adjustForBorder && !isWithin[0];
 
-		DensityManager dm = new DensityManager(results);
+		DensityManager dm = createDensityManager(results);
 		int[] density = null;
 		if (useSquareApproximation)
 			density = dm.calculateSquareDensity(radius, resolution, useAdjustment);
@@ -139,6 +139,23 @@ public class DensityImage implements PlugIn
 
 		double seconds = (System.currentTimeMillis() - start) / 1000.0;
 		IJ.showStatus(TITLE + " complete : " + seconds + "s");
+	}
+
+	private DensityManager createDensityManager(MemoryPeakResults results)
+	{
+		if (results == null || results.size() == 0)
+			throw new IllegalArgumentException("Results are null or empty");
+
+		final float[] xcoord = new float[results.size()];
+		final float[] ycoord = new float[xcoord.length];
+		for (int i = 0; i < xcoord.length; i++)
+		{
+			PeakResult result = results.getResults().get(i);
+			xcoord[i] = result.getXPosition();
+			ycoord[i] = result.getYPosition();
+		}
+
+		return new DensityManager(xcoord, ycoord, results.getBounds());
 	}
 
 	private ScoreCalculator createCalculator(MemoryPeakResults results)
@@ -451,7 +468,7 @@ public class DensityImage implements PlugIn
 			summary.addValue(density[i]);
 		}
 
-		DensityManager dm = new DensityManager(results);
+		DensityManager dm = createDensityManager(results);
 
 		// Compute this using the input density scores since the radius is the same.
 		final double l = (useSquareApproximation) ? dm.ripleysLFunction(radius) : dm.ripleysLFunction(density, radius);
@@ -552,7 +569,8 @@ public class DensityImage implements PlugIn
 		gd.addNumericField("Square_resolution", resolution, 0);
 		gd.addChoice("Score", ScoreMethods, ScoreMethods[scoreMethodIndex]);
 
-		gd.addMessage("Filter localisations using the L-score / Relative density.\nFiltered results will be added to memory:");
+		gd.addMessage(
+				"Filter localisations using the L-score / Relative density.\nFiltered results will be added to memory:");
 		gd.addCheckbox("Filter_localisations", filterLocalisations);
 		gd.addNumericField("Filter_threshold", filterThreshold, 2);
 
@@ -654,7 +672,7 @@ public class DensityImage implements PlugIn
 			return;
 		}
 
-		DensityManager dm = new DensityManager(results);
+		DensityManager dm = createDensityManager(results);
 		double[][] values = calculateLScores(dm);
 
 		// 99% confidence intervals

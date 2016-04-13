@@ -17,7 +17,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.plugins.pcpalm.Molecule;
 import gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;
 import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;

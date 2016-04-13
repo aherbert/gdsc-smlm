@@ -1,12 +1,12 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.utils.XmlUtils;
-
 import java.awt.Rectangle;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
+
+import gdsc.smlm.utils.XmlUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

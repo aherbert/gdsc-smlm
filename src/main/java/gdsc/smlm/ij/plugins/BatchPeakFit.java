@@ -21,7 +21,7 @@ import gdsc.smlm.ij.settings.BatchRun;
 import gdsc.smlm.ij.settings.BatchSettings;
 import gdsc.smlm.ij.settings.ParameterSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;

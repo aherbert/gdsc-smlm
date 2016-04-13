@@ -60,7 +60,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	{
 		final float[] data2 = preprocessData(data, width, height);
 
-		//gdsc.smlm.ij.utils.Utils.display("Spot Filter", new FloatProcessor(width, height, data2));
+		//gdsc.core.ij.Utils.display("Spot Filter", new FloatProcessor(width, height, data2));
 
 		final int[] maxIndices = getMaxima(data2, width, height);
 		if (maxIndices.length == 0)

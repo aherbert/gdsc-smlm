@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.CameraNoiseModel;
 import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
@@ -9,7 +10,6 @@ import gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
-import gdsc.smlm.utils.DoubleEquality;
 
 import java.util.ArrayList;
 import java.util.Random;

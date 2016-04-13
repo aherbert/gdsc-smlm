@@ -1,8 +1,8 @@
 package gdsc.smlm.ij.settings;
 
+import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.TraceManager.TraceMode;
-import gdsc.smlm.results.clustering.ClusteringAlgorithm;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

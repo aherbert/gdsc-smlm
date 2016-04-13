@@ -1,12 +1,12 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.function.NonLinearFunction;
-import gdsc.smlm.utils.DoubleEquality;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

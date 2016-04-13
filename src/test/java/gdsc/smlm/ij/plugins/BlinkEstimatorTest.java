@@ -13,9 +13,9 @@ import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.utils.DoubleEquality;
-import gdsc.smlm.utils.Statistics;
-import gdsc.smlm.utils.StoredDataStatistics;
+import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
 
 import java.util.ArrayList;
 import java.util.Arrays;

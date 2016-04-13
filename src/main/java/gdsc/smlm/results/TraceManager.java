@@ -13,8 +13,6 @@ package gdsc.smlm.results;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,6 +21,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.logging.TrackProgress;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Trace localisations through a time stack to identify single molecules

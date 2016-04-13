@@ -1,11 +1,11 @@
 package gdsc.smlm.results.filter;
 
 import gdsc.smlm.ga.Chromosome;
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
+import gdsc.core.match.ClassificationResult;
+import gdsc.core.match.FractionClassificationResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.match.ClassificationResult;
-import gdsc.smlm.results.match.FractionClassificationResult;
 
 import java.util.List;
 

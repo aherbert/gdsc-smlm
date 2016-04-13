@@ -14,10 +14,10 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.utils.SeriesOpener;
-import gdsc.smlm.ij.utils.Utils;
-import gdsc.smlm.utils.Maths;
-import gdsc.smlm.utils.Statistics;
-import gdsc.smlm.utils.StoredDataStatistics;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

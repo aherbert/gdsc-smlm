@@ -1,8 +1,8 @@
 package gdsc.smlm.fitting.nonlinear;
 
-import gdsc.smlm.utils.logging.Logger;
-
 import java.util.Arrays;
+
+import gdsc.core.logging.Logger;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

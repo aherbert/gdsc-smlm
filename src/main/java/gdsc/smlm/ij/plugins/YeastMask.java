@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.utils.Utils;
+import gdsc.core.ij.Utils;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;

@@ -13,16 +13,17 @@ package gdsc.smlm.ij.utils;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.utils.Sort;
+import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Sort;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.text.TextPanel;
-
-import java.awt.Color;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 /**
  * Attaches to a text panel and listens for mouse events. Upon double click it obtains the coordinates from a provider

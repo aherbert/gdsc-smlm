@@ -1,10 +1,10 @@
 package gdsc.smlm.filters;
 
-import gdsc.smlm.utils.MedianWindowDLLFloat;
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.utils.MedianWindowDLLFloat;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

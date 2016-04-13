@@ -13,11 +13,6 @@ package gdsc.smlm.results;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.utils.Statistics;
-import gdsc.smlm.utils.UnicodeReader;
-import gdsc.smlm.utils.XmlUtils;
-
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -32,6 +27,12 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Reads the fit results from file

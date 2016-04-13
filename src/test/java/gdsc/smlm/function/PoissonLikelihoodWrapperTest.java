@@ -1,9 +1,9 @@
 package gdsc.smlm.function;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.PoissonLikelihoodWrapper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.smlm.utils.DoubleEquality;
 
 import java.util.Arrays;
 
