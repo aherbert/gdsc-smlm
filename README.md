@@ -36,8 +36,8 @@ Install
 The SMLM plugins are distributed using an ImageJ2/Fiji update site. 
 
 To install the plugins using Fiji (an ImageJ distribution) just follow the
-instructions [How_to_follow_a_3rd_party_update_site](http://fiji.sc/How_to_follow_a_3rd_party_update_site) and add the GDSC SMLM
-update site. All the plugins will appear under the 'Plugins > GDSC SMLM' menu.
+instructions [How_to_follow_a_3rd_party_update_site](http://fiji.sc/How_to_follow_a_3rd_party_update_site)
+and add the GDSC SMLM update site. All the plugins will appear under the 'Plugins > GDSC SMLM' menu.
 
 
 Installation from source
@@ -58,7 +58,8 @@ have to install these to your local Maven repository before building:
         mvn install
         cd ..
 
-This will produce a gdsc-analytics-[VERSION].jar file in the local Maven repository. 
+	This will produce a gdsc-analytics-[VERSION].jar file in the local 
+	Maven repository. 
  
 3. Clone the GDSC Core repository
 
@@ -70,7 +71,8 @@ This will produce a gdsc-analytics-[VERSION].jar file in the local Maven reposit
         mvn install
         cd ..
 
-This will produce a gdsc-core-[VERSION].jar file in the local Maven repository. 
+	This will produce a gdsc-core-[VERSION].jar file in the local Maven 
+	repository. 
 
 5. Clone the GDSC SMLM repository
 
@@ -81,8 +83,8 @@ This will produce a gdsc-core-[VERSION].jar file in the local Maven repository.
         cd GDSC-SMLM
         mvn -P dist package -DskipTests=true
 
-This will produce a gdsc_smlm-[VERSION].jar file in the target directory. All 
-dependencies are copied into the target/dist/lib directory.
+	This will produce a gdsc_smlm-[VERSION].jar file in the target directory. 
+	All dependencies are copied into the target/dist/lib directory.
 
 7. Copy the gdsc_smlm* jar into the plugins directory of ImageJ. 
 
@@ -117,9 +119,9 @@ Running from source
 
         ant
 
-This will package all the compiled SMLM classes into a jar file within the
-plugins folder, copy ImageJ and the SMLM dependencies from the Maven repsitory,
-and then launch ImageJ.
+	This will package all the compiled SMLM classes into a jar file within the
+	plugins folder, copy ImageJ and the SMLM dependencies from the Maven 
+	repsitory, and then launch ImageJ.
 
 4. When finished you can remove all the created files using
 
