@@ -20,15 +20,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Show the version information contained in the gdsc/smlm/Version.txt file
+ * Show the version information contained in the gdsc/smlm/Version.txt file.
+ * <p>
+ * Uses Semantic Versioning.
+ * 
+ * @see http://semver.org/
  */
 public class Version
 {
-	public static final String UNKNOWN = "unknown"; 
+	public static final String UNKNOWN = "unknown";
 	private static String version = null;
 	private static String buildDate = null;
-	
-	static 
+
+	static
 	{
 		// Locate the version file
 		Class<Version> resourceClass = Version.class;
@@ -40,19 +44,19 @@ public class Version
 			Properties props = new Properties();
 			props.load(propertiesStream);
 			version = props.getProperty("version");
-			buildDate = props.getProperty("build.date"); 
+			buildDate = props.getProperty("build.date");
 		}
 		catch (IOException e)
 		{
 			// Ignore
 		}
-		
+
 		if (version == null || version.length() == 0)
 			version = UNKNOWN;
 		if (buildDate == null || buildDate.length() == 0)
 			buildDate = UNKNOWN;
 	}
-	
+
 	public static void main(String[] args)
 	{
 		StringBuilder msg = new StringBuilder();
@@ -61,12 +65,22 @@ public class Version
 		msg.append("Build Date : ").append(buildDate).append(newLine);
 		System.out.print(msg.toString());
 	}
-	
+
+	/**
+	 * Get the GDSC SMLM version
+	 * 
+	 * @return The gdsc.smlm package version
+	 */
 	public static String getVersion()
 	{
 		return version;
 	}
-	
+
+	/**
+	 * Get the GDSC SMLM package build date
+	 * 
+	 * @return The gdsc.smlm package build date
+	 */
 	public static String getBuildDate()
 	{
 		return buildDate;
@@ -101,11 +115,11 @@ public class Version
 	}
 
 	/**
-	 * Get the release version
+	 * Get the patch version
 	 * 
-	 * @return The release version (or 0 if unknown)
+	 * @return The patch version (or 0 if unknown)
 	 */
-	public static int getReleaseVersion()
+	public static int getPatchVersion()
 	{
 		Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
 		Matcher m = p.matcher(version);
@@ -113,13 +127,13 @@ public class Version
 			return Integer.parseInt(m.group(1));
 		return 0;
 	}
-	
+
 	/**
-	 * Get a string with the major, minor and release versions
+	 * Get a string with the major, minor and patch versions
 	 * 
-	 * @return Major.Minor.Release
+	 * @return Major.Minor.Patch
 	 */
-	public static String getMajorMinorRelease()
+	public static String getMajorMinorPatch()
 	{
 		Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
 		Matcher m = p.matcher(version);
