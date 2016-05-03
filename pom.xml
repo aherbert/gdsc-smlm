@@ -9,6 +9,19 @@
 
 	<name>SMLM</name>
 	<url>http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins</url>
+	
+	<licenses>
+		<license>
+			<name>GNU General Public License (GPL) version 3.0</name>
+    		<url>http://www.gnu.org/licenses/gpl.txt</url>
+			<distribution>manual</distribution>
+		</license>
+	</licenses>
+	
+	<scm>
+		<url>https://github.com/aherbert/GDSC-SMLM</url>
+	</scm>
+	
 	<developers>
 	  <developer>
 	    <id>aherbert</id>
