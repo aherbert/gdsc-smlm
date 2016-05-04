@@ -171,8 +171,8 @@ public class MoleculeModel
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param diffusionRate
-	 * @param random
+	 * @param diffusionRate Diffusion rate for each dimension
+	 * @param random Random generator
 	 * @return The new coordinates
 	 */
 	public double[] move(double diffusionRate, RandomGenerator random)
@@ -186,6 +186,8 @@ public class MoleculeModel
 				// Clip the movement
 				//if (shift > 5*diffusionRate)
 				//	xyz[i] += 5*diffusionRate;
+				//else if (shift < -5*diffusionRate)
+				//	xyz[i] -= 5*diffusionRate;
 				//else
 				xyz[i] += shift;
 			}
@@ -198,7 +200,7 @@ public class MoleculeModel
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param diffusionRate
+	 * @param diffusionRate Diffusion rate for each dimension
 	 * @param random Random generator (one per dimension)
 	 * @return The new coordinates
 	 */
@@ -213,6 +215,8 @@ public class MoleculeModel
 				// Clip the movement
 				//if (shift > 5*diffusionRate)
 				//	xyz[i] += 5*diffusionRate;
+				//else if (shift < -5*diffusionRate)
+				//	xyz[i] -= 5*diffusionRate;
 				//else
 				xyz[i] += shift;
 			}
@@ -225,8 +229,8 @@ public class MoleculeModel
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param stepSize
-	 * @param random
+	 * @param stepSize Step size for each dimension
+	 * @param random Random generator
 	 * @return The new coordinates
 	 */
 	public double[] walk(double stepSize, RandomGenerator random)
@@ -250,7 +254,7 @@ public class MoleculeModel
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param stepSize
+	 * @param stepSize Step size for each dimension
 	 * @param random Random generator (one per dimension)
 	 * @return The new coordinates
 	 */
@@ -265,6 +269,35 @@ public class MoleculeModel
 					xyz[i] += stepSize;
 				else
 					xyz[i] -= stepSize;
+			}
+		}
+		return xyz;
+	}
+	
+	/**
+	 * Slide the molecule along a unit vector using a random Gaussian shift with standard deviation of the given diffusion rate.
+	 * <p>
+	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
+	 * 
+	 * @param diffusionRate Diffusion rate for 3D diffusion
+	 * @param axis The linear axis to move along (must be a unit vector)
+	 * @param random Random number generator
+	 * @return The new coordinates
+	 */
+	public double[] slide(double diffusionRate, double[] axis, RandomGenerator random)
+	{
+		double[] xyz = getCoordinates();
+		if (diffusionRate > 0)
+		{
+			final double shift = random.nextGaussian() * diffusionRate;
+			// Clip the movement
+			//if (shift > 5*diffusionRate)
+			//	shift = 5*diffusionRate;
+			//else if (shift < -5*diffusionRate)
+			//	shift = -5*diffusionRate;
+			for (int i = 0; i < 3; i++)
+			{
+				xyz[i] += shift * axis[i];
 			}
 		}
 		return xyz;

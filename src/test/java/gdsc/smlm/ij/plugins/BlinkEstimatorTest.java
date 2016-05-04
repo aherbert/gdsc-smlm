@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.model.ActivationEnergyImageModel;
 import gdsc.smlm.model.CompoundMoleculeModel;
+import gdsc.smlm.model.DiffusionType;
 import gdsc.smlm.model.FluorophoreSequenceModel;
 import gdsc.smlm.model.ImageModel;
 import gdsc.smlm.model.LocalisationModel;
@@ -182,6 +183,7 @@ public class BlinkEstimatorTest
 		List<CompoundMoleculeModel> compounds = new ArrayList<CompoundMoleculeModel>(1);
 		CompoundMoleculeModel c = new CompoundMoleculeModel(1, 0, 0, 0, Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 		c.setDiffusionRate(diffusionRate);
+		c.setDiffusionType(DiffusionType.RANDOM_WALK);
 		compounds.add(c);
 
 		List<CompoundMoleculeModel> molecules = imageModel.createMolecules(compounds, particles, distribution, false);
@@ -191,7 +193,6 @@ public class BlinkEstimatorTest
 
 		totalSteps = checkTotalSteps(totalSteps, fluorophores);
 
-		imageModel.setUseGridWalk(false);
 		List<LocalisationModel> localisations = imageModel.createImage(molecules, fixedFraction, totalSteps, photons,
 				0.5, false);
 

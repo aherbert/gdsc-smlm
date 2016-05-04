@@ -26,12 +26,15 @@ public class Compound
 	public double fraction;
 	@XStreamAsAttribute
 	public double D;
+	@XStreamAsAttribute
+	public String diffusionType;
 	public Atom[] atoms;
 
-	public Compound(double fraction, double D, Atom... atoms)
+	public Compound(double fraction, double D, String diffusionType, Atom... atoms)
 	{
 		this.fraction = fraction;
 		this.D = D;
+		this.diffusionType = diffusionType;
 		this.atoms = atoms;
 	}
 }

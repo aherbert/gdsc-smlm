@@ -46,11 +46,15 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * population description can be serialised.
 	 */
 	private double fraction = 1;
-	
+
 	/**
 	 * The diffusion rate for the molecule
 	 */
 	private double diffusionRate = 0;
+	/**
+	 * The diffusion type for the molecule
+	 */
+	private DiffusionType diffusionType = DiffusionType.RANDOM_WALK;
 
 	/**
 	 * Create a new molecule
@@ -531,10 +535,32 @@ public class CompoundMoleculeModel extends MoleculeModel
 	}
 
 	/**
-	 * @param diffusionRate the diffusionRate to set
+	 * @param diffusionRate
+	 *            the diffusionRate to set
 	 */
 	public void setDiffusionRate(double diffusionRate)
 	{
 		this.diffusionRate = diffusionRate;
+	}
+
+	/**
+	 * Get the diffusion type
+	 * 
+	 * @return The diffusion type
+	 */
+	public DiffusionType getDiffusionType()
+	{
+		return diffusionType;
+	}
+
+	/**
+	 * Set the diffusion type
+	 * 
+	 * @param diffusionType
+	 *            The diffusion type
+	 */
+	public void setDiffusionType(DiffusionType diffusionType)
+	{
+		this.diffusionType = diffusionType;
 	}
 }

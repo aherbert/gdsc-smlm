@@ -20,6 +20,7 @@ import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.core.ij.Utils;
+import gdsc.smlm.model.DiffusionType;
 import gdsc.smlm.model.ImageModel;
 import gdsc.smlm.model.MoleculeModel;
 import gdsc.smlm.model.SphericalDistribution;
@@ -239,10 +240,12 @@ public class DiffusionRateTest implements PlugIn
 					double[] originalXyz = xyz.clone();
 					for (int n = confinementAttempts; n-- > 0;)
 					{
-						if (settings.useGridWalk)
+						// TODO - Support other diffusion types
+						if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
 							m.walk(diffusionSigma, random);
 						else
 							m.move(diffusionSigma, random);
+						
 						if (!dist.isWithin(m.getCoordinates()))
 						{
 							// Reset position
@@ -267,7 +270,8 @@ public class DiffusionRateTest implements PlugIn
 			}
 			else
 			{
-				if (settings.useGridWalk)
+				// TODO - Support other diffusion types
+				if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
 				{
 					for (int j = 0; j < totalSteps; j++)
 					{
@@ -425,11 +429,11 @@ public class DiffusionRateTest implements PlugIn
 			values[i] /= factor;
 		title += " Cumulative Jump Distance";
 		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
-		if (settings.useGridWalk)
+		if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
 		{
 			// In this case with a large simulation size the the jumps are all 
 			// the same distance so the histogram is a single step. Check the plot
-			// range will be handled by ImageJ otherwise pad it out a but.
+			// range will be handled by ImageJ otherwise pad it out a bit.
 			double[] x = jdHistogram[0];
 			double[] y = jdHistogram[1];
 			if (x[x.length - 1] - x[0] < 0.01)
@@ -594,7 +598,8 @@ public class DiffusionRateTest implements PlugIn
 		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.diffusionRate, 2);
 		if (extraOptions)
 			gd.addNumericField("Precision (nm)", precision, 2);
-		gd.addCheckbox("Use_grid_walk", settings.useGridWalk);
+		String[] diffusionTypes = SettingsManager.getNames((Object[])DiffusionType.values());
+		gd.addChoice("Diffusion_type", diffusionTypes, diffusionTypes[settings.getDiffusionType().ordinal()]);
 		gd.addCheckbox("Use_confinement", useConfinement);
 		gd.addSlider("Confinement_attempts", 1, 20, confinementAttempts);
 		gd.addSlider("Confinement_radius (nm)", 0, 3000, settings.confinementRadius);
@@ -618,7 +623,7 @@ public class DiffusionRateTest implements PlugIn
 		settings.diffusionRate = Math.abs(gd.getNextNumber());
 		if (extraOptions)
 			myPrecision = precision = Math.abs(gd.getNextNumber());
-		settings.useGridWalk = gd.getNextBoolean();
+		settings.setDiffusionType(gd.getNextChoiceIndex());
 		useConfinement = gd.getNextBoolean();
 		confinementAttempts = Math.abs((int) gd.getNextNumber());
 		settings.confinementRadius = Math.abs(gd.getNextNumber());
@@ -666,7 +671,8 @@ public class DiffusionRateTest implements PlugIn
 		float[] y = new float[totalSteps];
 		for (int j = 0; j < totalSteps; j++)
 		{
-			if (settings.useGridWalk)
+			// TODO - Support other diffusion types
+			if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
 				m.walk(diffusionSigma, random);
 			else
 				m.move(diffusionSigma, random);

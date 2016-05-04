@@ -1,79 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.settings.Atom;
-import gdsc.smlm.ij.settings.Compound;
-import gdsc.smlm.ij.settings.CreateDataSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.PSFOffset;
-import gdsc.smlm.ij.settings.PSFSettings;
-import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.model.ActivationEnergyImageModel;
-import gdsc.smlm.model.AiryPSFModel;
-import gdsc.smlm.model.AiryPattern;
-import gdsc.smlm.model.CompoundMoleculeModel;
-import gdsc.smlm.model.FluorophoreSequenceModel;
-import gdsc.smlm.model.GaussianPSFModel;
-import gdsc.smlm.model.GridDistribution;
-import gdsc.smlm.model.ImageModel;
-import gdsc.smlm.model.ImagePSFModel;
-import gdsc.smlm.model.FixedLifetimeImageModel;
-import gdsc.smlm.model.LocalisationModel;
-import gdsc.smlm.model.LocalisationModelSet;
-import gdsc.smlm.model.MaskDistribution;
-import gdsc.smlm.model.MaskDistribution3D;
-import gdsc.smlm.model.MoleculeModel;
-import gdsc.smlm.model.PSFModel;
-import gdsc.smlm.model.RadialFalloffIllumination;
-import gdsc.smlm.model.RandomGeneratorFactory;
-import gdsc.smlm.model.SpatialDistribution;
-import gdsc.smlm.model.SpatialIllumination;
-import gdsc.smlm.model.SphericalDistribution;
-import gdsc.smlm.model.UniformDistribution;
-import gdsc.smlm.model.UniformIllumination;
-import gdsc.smlm.results.Calibration;
-import gdsc.core.clustering.DensityManager;
-import gdsc.smlm.results.ExtendedPeakResult;
-import gdsc.smlm.results.FilePeakResults;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Random;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
-import gdsc.core.utils.TextUtils;
-import gdsc.core.utils.UnicodeReader;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.io.FileSaver;
-import ij.io.OpenDialog;
-import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
-import ij.process.ImageProcessor;
-import ij.text.TextWindow;
-
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
@@ -120,6 +46,82 @@ import org.apache.commons.math3.util.FastMath;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
+
+import gdsc.core.clustering.DensityManager;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Random;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.UnicodeReader;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.settings.Atom;
+import gdsc.smlm.ij.settings.Compound;
+import gdsc.smlm.ij.settings.CreateDataSettings;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.PSFOffset;
+import gdsc.smlm.ij.settings.PSFSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.model.ActivationEnergyImageModel;
+import gdsc.smlm.model.AiryPSFModel;
+import gdsc.smlm.model.AiryPattern;
+import gdsc.smlm.model.CompoundMoleculeModel;
+import gdsc.smlm.model.DiffusionType;
+import gdsc.smlm.model.FixedLifetimeImageModel;
+import gdsc.smlm.model.FluorophoreSequenceModel;
+import gdsc.smlm.model.GaussianPSFModel;
+import gdsc.smlm.model.GridDistribution;
+import gdsc.smlm.model.ImageModel;
+import gdsc.smlm.model.ImagePSFModel;
+import gdsc.smlm.model.LocalisationModel;
+import gdsc.smlm.model.LocalisationModelSet;
+import gdsc.smlm.model.MaskDistribution;
+import gdsc.smlm.model.MaskDistribution3D;
+import gdsc.smlm.model.MoleculeModel;
+import gdsc.smlm.model.PSFModel;
+import gdsc.smlm.model.RadialFalloffIllumination;
+import gdsc.smlm.model.RandomGeneratorFactory;
+import gdsc.smlm.model.SpatialDistribution;
+import gdsc.smlm.model.SpatialIllumination;
+import gdsc.smlm.model.SphericalDistribution;
+import gdsc.smlm.model.UniformDistribution;
+import gdsc.smlm.model.UniformIllumination;
+import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.utils.XmlUtils;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.io.FileSaver;
+import ij.io.OpenDialog;
+import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
+import ij.process.ImageProcessor;
+import ij.text.TextWindow;
 
 /**
  * Creates data using a simulated PSF
@@ -667,7 +669,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					correlation = settings.correlation;
 			}
 
-			imageModel.setUseGridWalk(settings.useGridWalk);
 			imageModel.setRandomGenerator(createRandomGenerator());
 			imageModel.setPhotonBudgetPerFrame(true);
 			imageModel.setDiffusion2D(settings.diffuse2D);
@@ -3478,7 +3479,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			else
 			{
 				addHeaderLine(sb, "Diffusion_rate", settings.diffusionRate);
-				addHeaderLine(sb, "Use_grid_walk", settings.useGridWalk);
+				addHeaderLine(sb, "Diffusion_type", settings.getDiffusionType());
 				addHeaderLine(sb, "Fixed_fraction", settings.fixedFraction);
 				if (settings.compoundMolecules)
 				{
@@ -3901,7 +3902,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Particles", settings.particles, 0);
 		gd.addCheckbox("Compound_molecules", settings.compoundMolecules);
 		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.diffusionRate, 2);
-		gd.addCheckbox("Use_grid_walk", settings.useGridWalk);
+		String[] diffusionTypes = SettingsManager.getNames((Object[])DiffusionType.values());
+		gd.addChoice("Diffusion_type", diffusionTypes, diffusionTypes[settings.getDiffusionType().ordinal()]);
 		gd.addSlider("Fixed_fraction (%)", 0, 100, settings.fixedFraction * 100);
 		gd.addChoice("Confinement", CONFINEMENT, settings.confinement);
 		gd.addNumericField("Photons (sec^-1)", settings.photonsPerSecond, 0);
@@ -4014,7 +4016,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.particles = Math.abs((int) gd.getNextNumber());
 		settings.compoundMolecules = gd.getNextBoolean();
 		settings.diffusionRate = Math.abs(gd.getNextNumber());
-		settings.useGridWalk = gd.getNextBoolean();
+		settings.setDiffusionType(gd.getNextChoiceIndex());
 		settings.fixedFraction = Math.abs(gd.getNextNumber() / 100.0);
 		settings.confinement = gd.getNextChoice();
 		settings.photonsPerSecond = Math.abs((int) gd.getNextNumber());
@@ -4389,8 +4391,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		Atom a1 = new Atom(10, 0, 0, 0);
 		Atom a2 = new Atom(30, 0, 0, 0);
 		Atom a3 = new Atom(20, 1000, 0, 0);
-		Compound m1 = new Compound(1, 0, a1);
-		Compound m2 = new Compound(1, 1, a2, a3);
+		Compound m1 = new Compound(1, 0, DiffusionType.RANDOM_WALK.toString(), a1);
+		Compound m2 = new Compound(1, 1, DiffusionType.GRID_WALK.toString(), a2, a3);
 
 		// Create a hexamer big enough to see with the default pixel pitch
 		Atom b1 = new Atom(1, 0, 0, 0);
@@ -4399,7 +4401,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		Atom b4 = new Atom(1, 1000, 1732, 0);
 		Atom b5 = new Atom(1, 0, 1732, 0);
 		Atom b6 = new Atom(1, -500, 866, 0);
-		Compound m3 = new Compound(1, 2, b1, b2, b3, b4, b5, b6);
+		Compound m3 = new Compound(1, 2, DiffusionType.RANDOM_WALK.toString(), b1, b2, b3, b4, b5, b6);
 
 		comment("Single compounds");
 		IJ.log("");
@@ -4447,7 +4449,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	@SuppressWarnings("unchecked")
 	private List<CompoundMoleculeModel> createCompoundMolecules()
 	{
-		// Convert Diffusion rate is um^2/sec. Convert to pixels per simulation frame.
+		// Diffusion rate is um^2/sec. Convert to pixels per simulation frame.
 		final double diffusionFactor = (1000000.0 / (settings.pixelPitch * settings.pixelPitch)) /
 				settings.stepsPerSecond;
 
@@ -4475,6 +4477,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					CompoundMoleculeModel m = new CompoundMoleculeModel(id++, 0, 0, 0, Arrays.asList(molecules));
 					m.setFraction(c.fraction);
 					m.setDiffusionRate(c.D * diffusionFactor);
+					m.setDiffusionType(DiffusionType.fromString(c.diffusionType));
 					compounds.add(m);
 				}
 
@@ -4498,11 +4501,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			CompoundMoleculeModel m = new CompoundMoleculeModel(1, 0, 0, 0,
 					Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 			m.setDiffusionRate(settings.diffusionRate * diffusionFactor);
+			m.setDiffusionType(settings.getDiffusionType());
 			compounds.add(m);
 		}
 		return compounds;
 	}
-
+	
 	/**
 	 * Get a random generator. The generators used in the simulation can be adjusted by changing this method.
 	 * 

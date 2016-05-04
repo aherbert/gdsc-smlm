@@ -51,7 +51,6 @@ public abstract class ImageModel
 	private RealDistribution photonDistribution;
 	private SpatialDistribution confinementDistribution = null;
 	private int confinementAttempts = 5;
-	private boolean useGridWalk = true;
 	private boolean useGeometricDistribution = false;
 	private boolean photonBudgetPerFrame = true;
 	private boolean diffusion2D = false;
@@ -191,6 +190,7 @@ public abstract class ImageModel
 					//count[j]++;
 					CompoundMoleculeModel m = new CompoundMoleculeModel(i, xyz, copyMolecules(c), false);
 					m.setDiffusionRate(c.getDiffusionRate());
+					m.setDiffusionType(c.getDiffusionType());
 					if (rotate)
 						rotate(m);
 					molecules.add(m);
@@ -217,13 +217,26 @@ public abstract class ImageModel
 		return list;
 	}
 
-	private void diffuse(CompoundMoleculeModel m, double diffusionRate)
+	private void diffuse(CompoundMoleculeModel m, final double diffusionRate, final double[] axis)
 	{
 		final double z = m.xyz[2];
-		if (useGridWalk)
-			m.walk(diffusionRate, random);
-		else
-			m.move(diffusionRate, random);
+		switch (m.getDiffusionType())
+		{
+			case GRID_WALK:
+				m.walk(diffusionRate, random);
+				break;
+
+			case LINEAR_WALK:
+				m.slide(diffusionRate, axis, random);
+				break;
+
+			case RANDOM_WALK:
+				m.move(diffusionRate, random);
+				break;
+
+			default:
+				throw new RuntimeException("Unsupported diffusion type: " + m.getDiffusionType());
+		}
 		if (diffusion2D)
 			m.xyz[2] = z;
 	}
@@ -251,7 +264,8 @@ public abstract class ImageModel
 	 * @param frames
 	 * @return
 	 */
-	public List<? extends FluorophoreSequenceModel> createFluorophores(List<CompoundMoleculeModel> molecules, int frames)
+	public List<? extends FluorophoreSequenceModel> createFluorophores(List<CompoundMoleculeModel> molecules,
+			int frames)
 	{
 		frameLimit = frames;
 		ArrayList<FluorophoreSequenceModel> list = new ArrayList<FluorophoreSequenceModel>(molecules.size());
@@ -292,6 +306,7 @@ public abstract class ImageModel
 				removed.addAll(fluorophores);
 				CompoundMoleculeModel newC = new CompoundMoleculeModel(c.getId(), c.getCoordinates(), removed, false);
 				newC.setDiffusionRate(c.getDiffusionRate());
+				newC.setDiffusionType(c.getDiffusionType());
 				molecules.set(i, newC);
 
 				// Debug the fluorophore position
@@ -613,8 +628,8 @@ public abstract class ImageModel
 		for (CompoundMoleculeModel c : compoundFluorophores)
 		{
 			final boolean fixed = (random.nextDouble() < fixedFraction);
-			photonIndex += createLocalisation(c, localisations, fixed, maxFrames, photons, photonIndex, !fixed &&
-					rotate);
+			photonIndex += createLocalisation(c, localisations, fixed, maxFrames, photons, photonIndex,
+					!fixed && rotate);
 		}
 
 		sortByTime(localisations);
@@ -646,8 +661,8 @@ public abstract class ImageModel
 	 *            Rotate at each step
 	 * @return The number of fluorophores that were drawn
 	 */
-	private int createLocalisation(CompoundMoleculeModel compound, List<LocalisationModel> localisations,
-			boolean fixed, int maxFrames, double[] photons, int photonIndex, boolean rotate)
+	private int createLocalisation(CompoundMoleculeModel compound, List<LocalisationModel> localisations, boolean fixed,
+			int maxFrames, double[] photons, int photonIndex, boolean rotate)
 	{
 		// -=-=-
 		// TODO: 
@@ -702,7 +717,38 @@ public abstract class ImageModel
 		}
 
 		// Convert diffusion co-efficient into the standard deviation for the random walk
-		final double diffusionRate = (fixed) ? 0 : getRandomMoveDistance(compound.getDiffusionRate());
+		final double diffusionRate;
+		double[] axis = null;
+		if (fixed)
+		{
+			diffusionRate = 0;
+		}
+		else
+		{
+			if (compound.getDiffusionType() == DiffusionType.LINEAR_WALK)
+			{
+				diffusionRate = (diffusion2D) ? getRandomMoveDistance2D(compound.getDiffusionRate())
+						: getRandomMoveDistance3D(compound.getDiffusionRate());
+				// Create a random unit vector using 2/3 Gaussian variables
+				axis = new double[3];
+				double length = 0;
+				while (length == 0) // Check the vector has a length
+				{
+					axis[0] = random.nextGaussian();
+					axis[1] = random.nextGaussian();
+					if (!diffusion2D)
+						axis[2] = random.nextGaussian();
+					length = axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2];
+				}
+				length = Math.sqrt(length);
+				for (int i = 0; i < 3; i++)
+					axis[i] /= length;
+			}
+			else
+			{
+				diffusionRate = getRandomMoveDistance(compound.getDiffusionRate());
+			}
+		}
 		//System.out.printf("N=%d, rate=%f\n", compound.getSize(), diffusionRate);
 
 		// For the duration of the sequence, move the molecule and output
@@ -767,7 +813,7 @@ public abstract class ImageModel
 					boolean stationary = true;
 					for (int n = confinementAttempts; n-- > 0 && stationary;)
 					{
-						diffuse(compound, diffusionRate);
+						diffuse(compound, diffusionRate, axis);
 						if (!confinementDistribution.isWithin(compound.getCoordinates()))
 						{
 							//fail++;
@@ -787,7 +833,7 @@ public abstract class ImageModel
 				}
 				else
 				{
-					diffuse(compound, diffusionRate);
+					diffuse(compound, diffusionRate, axis);
 				}
 			}
 
@@ -821,10 +867,10 @@ public abstract class ImageModel
 	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
 	 * per dimension.
 	 * 
-	 * @see {@link gdsc.smlm.model.MoleculeModel#move(double, RandomDataGenerator) }
+	 * @see {@link gdsc.smlm.model.MoleculeModel#move(double, RandomGenerator) }
 	 * @see {@link gdsc.smlm.model.MoleculeModel#walk(double, RandomGenerator) }
 	 * @param diffusionRateInPixelsPerStep
-	 * @return
+	 * @return The step size
 	 */
 	public static double getRandomMoveDistance(double diffusionRateInPixelsPerStep)
 	{
@@ -835,23 +881,35 @@ public abstract class ImageModel
 	}
 
 	/**
-	 * @return true if the random diffusion will use a grid walk
+	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
+	 * for a movement along a random unit vector in the XY plane, i.e. 2 dimensions together.
+	 * 
+	 * @see {@link gdsc.smlm.model.MoleculeModel#slide(double, double[], RandomGenerator) }
+	 * @param diffusionRateInPixelsPerStep
+	 * @return The step size
 	 */
-	public boolean isUseGridWalk()
+	public static double getRandomMoveDistance2D(double diffusionRateInPixelsPerStep)
 	{
-		return useGridWalk;
+		// Convert diffusion co-efficient into the standard deviation for the random move
+		// For 3D diffusion: sigma^2 = 4D
+		//                   sigma = sqrt(4D)
+		return Math.sqrt(4 * diffusionRateInPixelsPerStep);
 	}
 
 	/**
-	 * Set to true if the random diffusion will use a grid walk. The alternative is an off grid random move along a unit
-	 * vector.
+	 * Convert diffusion co-efficient (D) into the average step size required for a random diffusion. The step size is
+	 * for a movement along a random unit vector, i.e. all 3 dimensions together.
 	 * 
-	 * @param useGridWalk
-	 *            true if the random diffusion will use a grid walk
+	 * @see {@link gdsc.smlm.model.MoleculeModel#slide(double, double[], RandomGenerator) }
+	 * @param diffusionRateInPixelsPerStep
+	 * @return The step size
 	 */
-	public void setUseGridWalk(boolean useGridWalk)
+	public static double getRandomMoveDistance3D(double diffusionRateInPixelsPerStep)
 	{
-		this.useGridWalk = useGridWalk;
+		// Convert diffusion co-efficient into the standard deviation for the random move
+		// For 3D diffusion: sigma^2 = 6D
+		//                   sigma = sqrt(6D)
+		return Math.sqrt(6 * diffusionRateInPixelsPerStep);
 	}
 
 	/**

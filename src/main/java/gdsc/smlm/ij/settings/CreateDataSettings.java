@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.settings;
 
+import gdsc.smlm.model.DiffusionType;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -67,13 +69,13 @@ public class CreateDataSettings
 	public double pixelPitch = 107;
 	public double density = 1;
 	public double diffusionRate = 0;
+	private DiffusionType diffusionType = DiffusionType.RANDOM_WALK;
 	public boolean compoundMolecules = false;
 	public String compoundText = "";
 	public boolean diffuse2D = false;
 	public boolean rotateInitialOrientation = false;
 	public boolean rotateDuringSimulation = false;
 	public boolean rotate2D = false;
-	public boolean useGridWalk = true;
 	public double fixedFraction = 0;
 	public String confinement = "";
 	public String confinementMask = "";
@@ -130,7 +132,7 @@ public class CreateDataSettings
 	public boolean removeOutliers = false;
 	public float densityRadius = 3;
 	public float depthOfField = 250;
-	
+
 	public double xPosition = 0;
 	public double yPosition = 0;
 	public double zPosition = 0;
@@ -219,6 +221,8 @@ public class CreateDataSettings
 	public void initialiseState()
 	{
 		setTotalGain();
+		if (getDiffusionType() == null)
+			setDiffusionType(DiffusionType.RANDOM_WALK);
 	}
 
 	/**
@@ -235,5 +239,32 @@ public class CreateDataSettings
 		else if (emGain > 0)
 			totalGain = emGain;
 		totalGain *= quantumEfficiency;
+	}
+
+	/**
+	 * @return the diffusionType
+	 */
+	public DiffusionType getDiffusionType()
+	{
+		return diffusionType;
+	}
+
+	/**
+	 * @param diffusionType the diffusionType to set
+	 */
+	public void setDiffusionType(DiffusionType diffusionType)
+	{
+		this.diffusionType = diffusionType;
+	}
+	
+	/**
+	 * @param diffusionType the diffusionType to set
+	 */
+	public void setDiffusionType(int diffusionType)
+	{
+		if (diffusionType >= 0 && diffusionType < DiffusionType.values().length)
+		{
+			setDiffusionType(DiffusionType.values()[diffusionType]);
+		}
 	}
 }
