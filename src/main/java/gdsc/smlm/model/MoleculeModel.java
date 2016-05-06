@@ -1,5 +1,6 @@
 package gdsc.smlm.model;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /*----------------------------------------------------------------------------- 
@@ -289,7 +290,15 @@ public class MoleculeModel
 		double[] xyz = getCoordinates();
 		if (diffusionRate > 0)
 		{
-			final double shift = random.nextGaussian() * diffusionRate;
+			final double shift;
+			// Sample from a Gaussian - This may only be relevant for 1D diffusion
+			shift = random.nextGaussian() * diffusionRate;
+			
+			// Sample from the cumulative probability distribution for the MSD. 
+			// Then get a square root to find the shift and assign a direction
+			//RandomDataGenerator r = new RandomDataGenerator(random);
+			//shift = ((random.nextDouble() < 0.5) ? 1 : -1) * Math.sqrt(r.nextExponential(diffusionRate*diffusionRate));			
+			
 			// Clip the movement
 			//if (shift > 5*diffusionRate)
 			//	shift = 5*diffusionRate;
