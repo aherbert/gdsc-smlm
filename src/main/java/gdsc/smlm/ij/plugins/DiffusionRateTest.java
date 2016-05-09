@@ -188,7 +188,8 @@ public class DiffusionRateTest implements PlugIn
 
 		// Convert diffusion co-efficient into the standard deviation for the random walk
 		final double diffusionSigma = (settings.getDiffusionType() == DiffusionType.LINEAR_WALK)
-				? ImageModel.getRandomMoveDistance3D(diffusionRateInPixelsPerStep)
+				// Q. What should this be? At the moment just do 1D diffusion on a random vector
+				? ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)
 				: ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep);
 		Utils.log("Simulation step-size = %s nm", Utils.rounded(settings.pixelPitch * diffusionSigma, 4));
 
