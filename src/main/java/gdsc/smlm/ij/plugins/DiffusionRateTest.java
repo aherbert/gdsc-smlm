@@ -1,15 +1,19 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
+import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.fitting.CurveFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
 import gdsc.core.ij.Utils;
@@ -32,7 +36,6 @@ import gdsc.core.utils.StoredDataStatistics;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
-import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -150,6 +153,12 @@ public class DiffusionRateTest implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
+		if (IJ.controlKeyDown())
+		{
+			simpleTest();
+			return;
+		}
+
 		extraOptions = Utils.isExtraOptions();
 
 		if (!showDialog())
@@ -191,8 +200,8 @@ public class DiffusionRateTest implements PlugIn
 		RandomGenerator[] random2 = new RandomGenerator[3];
 		for (int i = 0; i < 3; i++)
 		{
-			random[i] = new Well19937c(seed + i*12436);
-			random2[i] = new Well19937c(seed + i*678678 + 3);
+			random[i] = new Well19937c(seed + i * 12436);
+			random2[i] = new Well19937c(seed + i * 678678 + 3);
 		}
 		Statistics[] stats2D = new Statistics[totalSteps];
 		Statistics[] stats3D = new Statistics[totalSteps];
@@ -218,7 +227,7 @@ public class DiffusionRateTest implements PlugIn
 		StoredDataStatistics totalJumpDistances1D = new StoredDataStatistics(settings.particles);
 		StoredDataStatistics totalJumpDistances2D = new StoredDataStatistics(settings.particles);
 		StoredDataStatistics totalJumpDistances3D = new StoredDataStatistics(settings.particles);
-		
+
 		for (int i = 0; i < settings.particles; i++)
 		{
 			if (i % 16 == 0)
@@ -328,9 +337,9 @@ public class DiffusionRateTest implements PlugIn
 			// System.out.printf("%f %f %f\n", m.getX(), m.getY(), m.getZ());
 			final double[] xyz = m.getCoordinates();
 			double d2 = 0;
-			totalJumpDistances1D.add(d2 = xyz[0]*xyz[0]);
-			totalJumpDistances2D.add(d2 += xyz[1]*xyz[1]);
-			totalJumpDistances3D.add(d2 += xyz[2]*xyz[2]);
+			totalJumpDistances1D.add(d2 = xyz[0] * xyz[0]);
+			totalJumpDistances2D.add(d2 += xyz[1] * xyz[1]);
+			totalJumpDistances3D.add(d2 += xyz[2] * xyz[2]);
 		}
 		final double time = (System.nanoTime() - start) / 1000000.0;
 		IJ.showProgress(1);
@@ -441,12 +450,11 @@ public class DiffusionRateTest implements PlugIn
 
 		plotJumpDistances(TITLE, jumpDistances2D, 2, 1);
 		plotJumpDistances(TITLE, jumpDistances3D, 3, 1);
-		
+
 		// Show the total jump length for debugging
-		plotJumpDistances(TITLE + " total", totalJumpDistances1D, 1, totalSteps);
-		plotJumpDistances(TITLE + " total", totalJumpDistances2D, 2, totalSteps);
-		plotJumpDistances(TITLE + " total", totalJumpDistances3D, 3, totalSteps);
-		
+		//plotJumpDistances(TITLE + " total", totalJumpDistances1D, 1, totalSteps);
+		//plotJumpDistances(TITLE + " total", totalJumpDistances2D, 2, totalSteps);
+		//plotJumpDistances(TITLE + " total", totalJumpDistances3D, 3, totalSteps);
 
 		if (idCount > 0)
 			new WindowOrganiser().tileWindows(idList);
@@ -513,6 +521,8 @@ public class DiffusionRateTest implements PlugIn
 	 */
 	private void plotJumpDistances(String title, StoredDataStatistics jumpDistances, int dimensions, int steps)
 	{
+		// Cumulative histogram
+		// --------------------
 		final double factor = conversionFactor;
 		double[] values = jumpDistances.getValues();
 		for (int i = 0; i < values.length; i++)
@@ -521,7 +531,7 @@ public class DiffusionRateTest implements PlugIn
 		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
 		if (settings.getDiffusionType() == DiffusionType.GRID_WALK)
 		{
-			// In this case with a large simulation size the the jumps are all 
+			// In this case with a large simulation size the jumps are all 
 			// the same distance so the histogram is a single step. Check the plot
 			// range will be handled by ImageJ otherwise pad it out a bit.
 			double[] x = jdHistogram[0];
@@ -552,31 +562,45 @@ public class DiffusionRateTest implements PlugIn
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw2.getImagePlus().getID();
 
-		// Show a histogram of the distribution
+		// Plot the expected function
+		// This is an Erlang distribution: a sum of k independent exponentially distributed 
+		// random variables with k = dimensions, and scale equal to the mean (4D)
+		double estimatedD = steps * settings.diffusionRate / settings.stepsPerSecond;
+		if (myPrecision > 0)
+			estimatedD += myPrecision * myPrecision / 1e6;
+		double max = Maths.max(values);
+		double[] x = Utils.newArray(1000, 0, max / 1000);
+		double k = dimensions / 2.0;
+		double mean = 4 * estimatedD;
+
+		GammaDistribution dist = new GammaDistribution(k, mean);
+
+		double[] y = new double[x.length];
+		for (int i = 0; i < x.length; i++)
+			y[i] = dist.cumulativeProbability(x[i]);
+		
+		jdPlot.setColor(Color.red);
+		jdPlot.addPoints(x, y, Plot.LINE);
+		Utils.display(title2, jdPlot);
+
+		// Histogram
+		// ---------
 		title2 = title + " Jump " + dimensions + "D";
 		jumpDistances = new StoredDataStatistics(values);
-		int plotId = Utils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0, Math.max(20, values.length / 1000));
+		int plotId = Utils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
+				Math.max(20, values.length / 1000));
 		if (Utils.isNewWindow())
 			idList[idCount++] = plotId;
 
-		// Plot the expected function
-		// TODO - Update this for the dimensions (1D,2D,3D)
-		double max = Maths.max(values);
-		double[] x = Utils.newArray(1000, 0, max / 1000);
-		JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
-		double estimatedD = steps * settings.diffusionRate / settings.stepsPerSecond;
-		// EstimateD is for 2D so scale appropriately
-		estimatedD *= dimensions / 2.0;
+		// Recompute the expected function
+		for (int i = 0; i < x.length; i++)
+			y[i] = dist.density(x[i]);
 
-		if (myPrecision > 0)
-			estimatedD += myPrecision * myPrecision / 1e6;
-		JumpDistanceFunction fun = jd.new JumpDistanceFunction(x, estimatedD);
-		double[] y = fun.evaluateAll(fun.guess());
 		// Scale to have the same area
 		if (Utils.xValues.length > 1)
 		{
 			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
-			final double area2 = Maths.sum(y) * (x[1] - x[0]);
+			final double area2 = dist.cumulativeProbability(x[x.length-1]);
 			final double scale = area1 / area2;
 			for (int i = 0; i < y.length; i++)
 				y[i] *= scale;
@@ -744,23 +768,18 @@ public class DiffusionRateTest implements PlugIn
 		return true;
 	}
 
-	private UnitSphereRandomVectorGenerator rvg = null;
 	private RandomGenerator rg = null;
 
 	private double[] nextVector()
 	{
 		if (rg == null)
-		{
 			rg = new Well19937c();
-			//rvg = new UnitSphereRandomVectorGenerator(3, rg);
-		}
-		//return rvg.nextVector();
 
 		// Allow dimensions to be changed for testing
 		double l = 0;
-		double[] v = new double[3];
-		int size = 3;
-		int dim = 3; // Normalise over a different size 
+		final double[] v = new double[3];
+		final int size = 3;
+		final int dim = 3; // Normalise over a different size 
 		while (l == 0)
 		{
 			for (int i = 0; i < size; i++)
@@ -1146,5 +1165,195 @@ public class DiffusionRateTest implements PlugIn
 		sb.append(msd).append('\t');
 		sb.append(msd / (4 * t));
 		sb.append('\n');
+	}
+
+	private static double simpleD = 0.5;
+	private static int simpleSteps = 1;
+	private static int simpleParticles = 10000;
+	private static String simpleDir = null;
+
+	/**
+	 * Perform a simple diffusion test. This can be used to understand the distributions that are generated during
+	 * 3D diffusion.
+	 */
+	private void simpleTest()
+	{
+		if (!showSimpleDialog())
+			return;
+
+		StoredDataStatistics[] stats = new StoredDataStatistics[3];
+		RandomGenerator[] random = new RandomGenerator[3];
+		final long seed = System.currentTimeMillis() + System.identityHashCode(this);
+		for (int i = 0; i < 3; i++)
+		{
+			stats[i] = new StoredDataStatistics(simpleParticles);
+			random[i] = new Well19937c(seed + i);
+		}
+
+		final double scale = Math.sqrt(2 * simpleD);
+		final int report = Math.max(1, simpleParticles / 200);
+		for (int particle = 0; particle < simpleParticles; particle++)
+		{
+			if (particle % report == 0)
+				IJ.showProgress(particle, simpleParticles);
+			double[] xyz = new double[3];
+			for (int step = 0; step < simpleSteps; step++)
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					xyz[i] += random[i].nextGaussian();
+				}
+			}
+			for (int i = 0; i < 3; i++)
+				xyz[i] *= scale;
+			double msd = 0;
+			for (int i = 0; i < 3; i++)
+			{
+				msd += xyz[i] * xyz[i];
+				stats[i].add(msd);
+			}
+		}
+		IJ.showProgress(1);
+
+		for (int i = 0; i < 3; i++)
+		{
+			plotJumpDistances(TITLE, stats[i], i + 1);
+			// Save stats to file for fitting
+			save(stats[i], i + 1);
+		}
+
+		if (idCount > 0)
+			new WindowOrganiser().tileWindows(idList);
+	}
+
+	private boolean showSimpleDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+
+		gd.addNumericField("D", simpleD, 2);
+		gd.addNumericField("Steps", simpleSteps, 0);
+		gd.addNumericField("Particles", simpleParticles, 0);
+		gd.addStringField("Directory", simpleDir, 30);
+
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+
+		simpleD = gd.getNextNumber();
+		simpleSteps = (int) gd.getNextNumber();
+		simpleParticles = (int) gd.getNextNumber();
+		simpleDir = gd.getNextString();
+		if (!new File(simpleDir).exists())
+			simpleDir = null;
+
+		return true;
+	}
+
+	/**
+	 * Plot a cumulative histogram and standard histogram of the jump distances.
+	 *
+	 * @param title
+	 *            the title
+	 * @param jumpDistances
+	 *            the jump distances
+	 * @param dimensions
+	 *            the number of dimensions for the jumps
+	 * @param steps
+	 *            the steps
+	 */
+	private void plotJumpDistances(String title, StoredDataStatistics jumpDistances, int dimensions)
+	{
+		// Cumulative histogram
+		// --------------------
+		double[] values = jumpDistances.getValues();
+		String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
+		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
+		Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0], jdHistogram[1]);
+		PlotWindow pw2 = Utils.display(title2, jdPlot);
+		if (Utils.isNewWindow())
+			idList[idCount++] = pw2.getImagePlus().getID();
+
+		// Plot the expected function
+		// This is an Erlang distribution: a sum of k independent exponentially distributed 
+		// random variables with k = dimensions, and scale equal to the mean (4D)
+		double estimatedD = simpleD * simpleSteps;
+		double max = Maths.max(values);
+		double[] x = Utils.newArray(1000, 0, max / 1000);
+		double k = dimensions / 2.0;
+		double mean = 4 * estimatedD;
+
+		GammaDistribution dist = new GammaDistribution(k, mean);
+
+		double[] y = new double[x.length];
+		for (int i = 0; i < x.length; i++)
+			y[i] = dist.cumulativeProbability(x[i]);
+		
+		jdPlot.setColor(Color.red);
+		jdPlot.addPoints(x, y, Plot.LINE);
+		Utils.display(title2, jdPlot);
+		
+		// Histogram
+		// ---------
+		title2 = title + " Jump " + dimensions + "D";
+		jumpDistances = new StoredDataStatistics(values);
+		int plotId = Utils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
+				Math.max(20, values.length / 1000));
+		if (Utils.isNewWindow())
+			idList[idCount++] = plotId;
+
+		// Recompute the expected function
+		for (int i = 0; i < x.length; i++)
+			y[i] = dist.density(x[i]);
+		
+		// Scale to have the same area
+		if (Utils.xValues.length > 1)
+		{
+			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
+			final double area2 = dist.cumulativeProbability(x[x.length-1]);
+			final double scaleFactor = area1 / area2;
+			for (int i = 0; i < y.length; i++)
+				y[i] *= scaleFactor;
+		}
+		jdPlot = Utils.plot;
+		jdPlot.setColor(Color.red);
+		jdPlot.addPoints(x, y, Plot.LINE);
+		Utils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
+	}
+
+	private void save(StoredDataStatistics storedDataStatistics, int dimensions)
+	{
+		if (simpleDir == null)
+			return;
+		File file = new File(simpleDir, "msd" + dimensions + "d.txt");
+		OutputStreamWriter out = null;
+		final String newLine = System.getProperty("line.separator");
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(file);
+			out = new OutputStreamWriter(fos, "UTF-8");
+			for (double d : storedDataStatistics.getValues())
+			{
+				out.write(Double.toString(d));
+				out.write(newLine);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace(); // Show the error
+		}
+		finally
+		{
+			if (out != null)
+			{
+				try
+				{
+					out.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
