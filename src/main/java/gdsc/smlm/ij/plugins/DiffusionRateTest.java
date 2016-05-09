@@ -563,9 +563,14 @@ public class DiffusionRateTest implements PlugIn
 		if (Utils.isNewWindow())
 			idList[idCount++] = pw2.getImagePlus().getID();
 
-		// Plot the expected function
-		// This is an Erlang distribution: a sum of k independent exponentially distributed 
-		// random variables with k = dimensions, and scale equal to the mean (4D)
+		// This is the Chi-squared distribution: The sum of the squares of k independent
+		// standard normal random variables with k = dimensions. It is a special case of
+		// the gamma distribution. If the normals have non-unit variance the distribution 
+		// is scaled.
+		// Chi       ~ Gamma(k/2, 2)      // using the scale parameterisation of the gamma
+		// s^2 * Chi ~ Gamma(k/2, 2*s^2)
+		// So if s^2 = 2D:
+		// 2D * Chi  ~ Gamma(k/2, 4D)
 		double estimatedD = steps * settings.diffusionRate / settings.stepsPerSecond;
 		if (myPrecision > 0)
 			estimatedD += myPrecision * myPrecision / 1e6;
@@ -1275,8 +1280,14 @@ public class DiffusionRateTest implements PlugIn
 			idList[idCount++] = pw2.getImagePlus().getID();
 
 		// Plot the expected function
-		// This is an Erlang distribution: a sum of k independent exponentially distributed 
-		// random variables with k = dimensions, and scale equal to the mean (4D)
+		// This is the Chi-squared distribution: The sum of the squares of k independent
+		// standard normal random variables with k = dimensions. It is a special case of
+		// the gamma distribution. If the normals have non-unit variance the distribution 
+		// is scaled.
+		// Chi       ~ Gamma(k/2, 2)      // using the scale parameterisation of the gamma
+		// s^2 * Chi ~ Gamma(k/2, 2*s^2)
+		// So if s^2 = 2D:
+		// 2D * Chi  ~ Gamma(k/2, 4D)
 		double estimatedD = simpleD * simpleSteps;
 		double max = Maths.max(values);
 		double[] x = Utils.newArray(1000, 0, max / 1000);
