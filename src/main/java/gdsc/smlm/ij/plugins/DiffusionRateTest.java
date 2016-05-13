@@ -584,7 +584,7 @@ public class DiffusionRateTest implements PlugIn
 		double[] y = new double[x.length];
 		for (int i = 0; i < x.length; i++)
 			y[i] = dist.cumulativeProbability(x[i]);
-		
+
 		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
 		Utils.display(title2, jdPlot);
@@ -606,7 +606,7 @@ public class DiffusionRateTest implements PlugIn
 		if (Utils.xValues.length > 1)
 		{
 			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
-			final double area2 = dist.cumulativeProbability(x[x.length-1]);
+			final double area2 = dist.cumulativeProbability(x[x.length - 1]);
 			final double scale = area1 / area2;
 			for (int i = 0; i < y.length; i++)
 				y[i] *= scale;
@@ -1176,6 +1176,7 @@ public class DiffusionRateTest implements PlugIn
 	private static double simpleD = 0.5;
 	private static int simpleSteps = 1;
 	private static int simpleParticles = 10000;
+	private static boolean linearDiffusion = false;
 	private static String simpleDir = null;
 
 	/**
@@ -1187,11 +1188,13 @@ public class DiffusionRateTest implements PlugIn
 		if (!showSimpleDialog())
 			return;
 
+		StoredDataStatistics[] stats2 = new StoredDataStatistics[3];
 		StoredDataStatistics[] stats = new StoredDataStatistics[3];
 		RandomGenerator[] random = new RandomGenerator[3];
 		final long seed = System.currentTimeMillis() + System.identityHashCode(this);
 		for (int i = 0; i < 3; i++)
 		{
+			stats2[i] = new StoredDataStatistics(simpleParticles);
 			stats[i] = new StoredDataStatistics(simpleParticles);
 			random[i] = new Well19937c(seed + i);
 		}
@@ -1203,11 +1206,26 @@ public class DiffusionRateTest implements PlugIn
 			if (particle % report == 0)
 				IJ.showProgress(particle, simpleParticles);
 			double[] xyz = new double[3];
-			for (int step = 0; step < simpleSteps; step++)
+			if (linearDiffusion)
 			{
-				for (int i = 0; i < 3; i++)
+				double[] dir = nextVector();
+				for (int step = 0; step < simpleSteps; step++)
 				{
-					xyz[i] += random[i].nextGaussian();
+					final double d = ((random[1].nextDouble() > 0.5) ? -1 : 1) * random[0].nextGaussian();
+					for (int i = 0; i < 3; i++)
+					{
+						xyz[i] += dir[i] * d;
+					}
+				}
+			}
+			else
+			{
+				for (int step = 0; step < simpleSteps; step++)
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						xyz[i] += random[i].nextGaussian();
+					}
 				}
 			}
 			for (int i = 0; i < 3; i++)
@@ -1216,16 +1234,19 @@ public class DiffusionRateTest implements PlugIn
 			for (int i = 0; i < 3; i++)
 			{
 				msd += xyz[i] * xyz[i];
-				stats[i].add(msd);
+				stats2[i].add(msd);
+				// Store the actual distances
+				stats[i].add(xyz[i]);
 			}
 		}
 		IJ.showProgress(1);
 
 		for (int i = 0; i < 3; i++)
 		{
-			plotJumpDistances(TITLE, stats[i], i + 1);
+			plotJumpDistances(TITLE, stats2[i], i + 1);
 			// Save stats to file for fitting
-			save(stats[i], i + 1);
+			save(stats2[i], i + 1, "msd");
+			save(stats[i], i + 1, "d");
 		}
 
 		if (idCount > 0)
@@ -1239,6 +1260,7 @@ public class DiffusionRateTest implements PlugIn
 		gd.addNumericField("D", simpleD, 2);
 		gd.addNumericField("Steps", simpleSteps, 0);
 		gd.addNumericField("Particles", simpleParticles, 0);
+		gd.addCheckbox("Linear_diffusion", linearDiffusion);
 		gd.addStringField("Directory", simpleDir, 30);
 
 		gd.showDialog();
@@ -1248,6 +1270,7 @@ public class DiffusionRateTest implements PlugIn
 		simpleD = gd.getNextNumber();
 		simpleSteps = (int) gd.getNextNumber();
 		simpleParticles = (int) gd.getNextNumber();
+		linearDiffusion = gd.getNextBoolean();
 		simpleDir = gd.getNextString();
 		if (!new File(simpleDir).exists())
 			simpleDir = null;
@@ -1299,15 +1322,14 @@ public class DiffusionRateTest implements PlugIn
 		double[] y = new double[x.length];
 		for (int i = 0; i < x.length; i++)
 			y[i] = dist.cumulativeProbability(x[i]);
-		
+
 		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
 		Utils.display(title2, jdPlot);
-		
+
 		// Histogram
 		// ---------
 		title2 = title + " Jump " + dimensions + "D";
-		jumpDistances = new StoredDataStatistics(values);
 		int plotId = Utils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
 				Math.max(20, values.length / 1000));
 		if (Utils.isNewWindow())
@@ -1316,12 +1338,12 @@ public class DiffusionRateTest implements PlugIn
 		// Recompute the expected function
 		for (int i = 0; i < x.length; i++)
 			y[i] = dist.density(x[i]);
-		
+
 		// Scale to have the same area
 		if (Utils.xValues.length > 1)
 		{
 			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
-			final double area2 = dist.cumulativeProbability(x[x.length-1]);
+			final double area2 = dist.cumulativeProbability(x[x.length - 1]);
 			final double scaleFactor = area1 / area2;
 			for (int i = 0; i < y.length; i++)
 				y[i] *= scaleFactor;
@@ -1332,11 +1354,11 @@ public class DiffusionRateTest implements PlugIn
 		Utils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
 	}
 
-	private void save(StoredDataStatistics storedDataStatistics, int dimensions)
+	private void save(StoredDataStatistics storedDataStatistics, int dimensions, String prefix)
 	{
 		if (simpleDir == null)
 			return;
-		File file = new File(simpleDir, "msd" + dimensions + "d.txt");
+		File file = new File(simpleDir, prefix + dimensions + "d.txt");
 		OutputStreamWriter out = null;
 		final String newLine = System.getProperty("line.separator");
 		try
