@@ -240,7 +240,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		plugin_flags = FLAGS;
 		extraOptions = Utils.isExtraOptions();
 
@@ -494,7 +494,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 * @param ignoreBoundsForNoise
 	 *            Set to true if the bounds should be ignored when computing the noise estimate for each frame
 	 * @return
-	 *         True if the image was valid and the initialisation was successful
+	 * 		True if the image was valid and the initialisation was successful
 	 */
 	public boolean initialiseImage(ImageSource imageSource, Rectangle bounds, boolean ignoreBoundsForNoise)
 	{
@@ -619,8 +619,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				if (r instanceof MemoryPeakResults)
 				{
 					if (((MemoryPeakResults) r).isSortAfterEnd())
-						;
-					IJ.showStatus("Sorting " + r.size() + " results ...");
+						IJ.showStatus("Sorting " + r.size() + " results ...");
 					break;
 				}
 
@@ -686,8 +685,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		fitConfig = config.getFitConfiguration();
 		resultsSettings = settings.getResultsSettings();
 
-		boolean isCrop = (bounds != null && imp != null && (bounds.width < imp.getWidth() || bounds.height < imp
-				.getHeight()));
+		boolean isCrop = (bounds != null && imp != null &&
+				(bounds.width < imp.getWidth() || bounds.height < imp.getHeight()));
 
 		if (!extraOptions)
 		{
@@ -1228,8 +1227,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private boolean getGain()
 	{
-		GenericDialog gd = newWizardDialog(
-				"Enter the total gain.",
+		GenericDialog gd = newWizardDialog("Enter the total gain.",
 				"This is usually supplied with your camera certificate. The gain indicates how many Analogue-to-Digital-Units (ADUs) are recorded at the pixel for each photon registered on the sensor.",
 				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
 				"A value of 1 means no conversion to photons will occur.");
@@ -1259,8 +1257,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private boolean getPeakWidth()
 	{
-		GenericDialog gd = newWizardDialog(
-				"Enter the expected peak width in pixels.",
+		GenericDialog gd = newWizardDialog("Enter the expected peak width in pixels.",
 				"A point source of light will not be focussed perfectly by the microscope but will appear as a spread out peak. This Point Spread Function (PSF) can be modelled using a 2D Gaussian curve.",
 				"An optimised optical system (lens and camera sensor) should have a peak standard deviation of approximately 1 pixel when in focus. This allows the fitting routine to have enough data to identify the centre of the peak without spreading the light over too many pixels (which increases noise).",
 				"The peak width can be estimated using the wavelength of light emitted by the single molecules and the parameters of the microscope. Use a PSF calculator by clicking the checkbox below:");
@@ -1476,7 +1473,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (fitConfig.getPrecisionThreshold() > 0)
 		{
 			gd = new GenericDialog(TITLE);
-			gd.addMessage("Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
+			gd.addMessage(
+					"Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
 			gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
 			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
 			gd.showDialog();
@@ -1500,11 +1498,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (interlacedData)
 		{
 			gd = new GenericDialog(TITLE);
-			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
-					+ "Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n"
-					+ "Block = The number of continuous frames containing data\n"
-					+ "Skip = The number of continuous frames to ignore before the next data\n \n"
-					+ "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n" +
+					"Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n" +
+					"Block = The number of continuous frames containing data\n" +
+					"Skip = The number of continuous frames to ignore before the next data\n \n" +
+					"E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
 			gd.addNumericField("Start", optionDataStart, 0);
 			gd.addNumericField("Block", optionDataBlock, 0);
 			gd.addNumericField("Skip", optionDataSkip, 0);
@@ -1580,9 +1578,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			int filter = i + 1;
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.enableYesNoCancel("Add", "Continue");
-			gd.addMessage(String.format(
-					"Configure the %s filter.\nClick continue to proceed with the current set of %d.", config
-							.getDataFilterType().toString(), i));
+			gd.addMessage(
+					String.format("Configure the %s filter.\nClick continue to proceed with the current set of %d.",
+							config.getDataFilterType().toString(), i));
 			String fieldName = "Spot_filter" + filter;
 			if (IJ.isMacro())
 				// Use blank default value so bad macro parameters return nothing
@@ -1773,8 +1771,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			{
 				calibration.readNoise = Math.abs(gd.getNextNumber());
 				calibration.bias = Math.abs(gd.getNextNumber());
-				fitConfig.setNoiseModel(CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias,
-						calibration.emCCD));
+				fitConfig.setNoiseModel(
+						CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias, calibration.emCCD));
 			}
 
 			if (filename != null)
@@ -1820,10 +1818,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		if (resultsSettings.getResultsImage() != ResultsImage.NONE)
 		{
-			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-					resultsSettings.getResultsImage(), resultsSettings.weightedImage, resultsSettings.equalisedImage,
-					resultsList.getName(), bounds, calibration.nmPerPixel, calibration.gain,
-					resultsSettings.imageScale, resultsSettings.precision, ResultsMode.ADD);
+			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
+					resultsSettings.weightedImage, resultsSettings.equalisedImage, resultsList.getName(), bounds,
+					calibration.nmPerPixel, calibration.gain, resultsSettings.imageScale, resultsSettings.precision,
+					ResultsMode.ADD);
 			if (extraOptions)
 				image.setRollingWindowSize(resultsSettings.imageRollingWindow);
 			resultsList.addOutput(image);
@@ -1995,8 +1993,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			stack = new ImageStack(bounds.width, bounds.height);
 
 		// Do not crop the region from the source if the bounds match the source dimensions
-		Rectangle cropBounds = (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth() && bounds.height == source
-				.getHeight()) ? null : bounds;
+		Rectangle cropBounds = (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth() &&
+				bounds.height == source.getHeight()) ? null : bounds;
 
 		// Use the FitEngine to allow multi-threading.
 		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
@@ -2030,8 +2028,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			if (showProcessedFrames)
 			{
-				stack.addSlice(
-						String.format("Frame %d - %d", source.getStartFrameNumber(), source.getEndFrameNumber()), data);
+				stack.addSlice(String.format("Frame %d - %d", source.getStartFrameNumber(), source.getEndFrameNumber()),
+						data);
 			}
 
 			// Get the frame number from the source to allow for interlaced and aggregated data
