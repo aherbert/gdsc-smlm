@@ -1296,18 +1296,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				{
 					FitEngineConfiguration templateConfig = template.getFitEngineConfiguration().clone();
 
-					// If this is a custom template then use all the settings.
-					// If a default template then copy the existing spot settings.
-					if (!custom)
-					{
-						FitConfiguration templateFitConfig = templateConfig.getFitConfiguration();
-						templateFitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0());
-						templateFitConfig.setInitialPeakStdDev1(fitConfig.getInitialPeakStdDev1());
-						templateFitConfig.setInitialAngle(fitConfig.getInitialAngle());
-						templateFitConfig.setFitFunction(fitConfig.getFitFunction());
-					}
-
-					refreshSettings(templateConfig);
+					refreshSettings(templateConfig, custom);
 				}
 				if (template.isCalibration())
 				{
@@ -2463,7 +2452,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				refreshSettings(calibration);
 
 				FitEngineConfiguration config = settings.getFitEngineConfiguration();
-				refreshSettings(config);
+				refreshSettings(config, true);
 
 				ResultsSettings resultsSettings = settings.getResultsSettings();
 				refreshSettings(resultsSettings);
@@ -2481,14 +2470,26 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		textExposure.setText("" + calibration.exposureTime);
 	}
 
-	private void refreshSettings(FitEngineConfiguration config)
+	/**
+	 * Refresh settings.
+	 * <p>
+	 * If this is a custom template then use all the settings. If a default template then leave some existing spot
+	 * settings untouched as the user may have updated them (e.g. PSF width).
+	 *
+	 * @param config
+	 *            the config
+	 * @param isCustomTemplate
+	 *            True if a custom template.
+	 */
+	private void refreshSettings(FitEngineConfiguration config, boolean isCustomTemplate)
 	{
 		// Set the configuration
 		this.config = config;
 		this.fitConfig = config.getFitConfiguration();
 
-		textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
-		if (!maximaIdentification)
+		if (isCustomTemplate)
+			textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
+		if (!maximaIdentification && isCustomTemplate)
 		{
 			textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
 			textInitialAngleD.setText("" + fitConfig.getInitialAngle());
@@ -2502,7 +2503,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (!maximaIdentification)
 		{
 			textFitSolver.select(fitConfig.getFitSolver().ordinal());
-			textFitFunction.select(fitConfig.getFitFunction().ordinal());
+			if (isCustomTemplate)
+				textFitFunction.select(fitConfig.getFitFunction().ordinal());
 			if (extraOptions)
 				textFitBackground.setState(fitConfig.isBackgroundFitting());
 			textFailuresLimit.setText("" + config.getFailuresLimit());
