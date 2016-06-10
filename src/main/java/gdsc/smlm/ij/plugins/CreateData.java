@@ -292,9 +292,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final boolean emCCD;
 		/**
-		 * Total gain
+		 * Total gain (ADUs/photon)
 		 */
 		final double gain;
+		/**
+		 * Amplification gain (ADUs/electron)
+		 */
+		final double amplification;
 		/**
 		 * Read noise in ADUs
 		 */
@@ -310,7 +314,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
 				double maxSignal, double signalPerFrame, double depth, boolean fixedDepth, double bias, boolean emCCD,
-				double gain, double readNoise, double b, double b2)
+				double gain, double amplification, double readNoise, double b, double b2)
 		{
 			id = nextId++;
 			this.molecules = molecules;
@@ -326,6 +330,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.bias = bias;
 			this.emCCD = emCCD;
 			this.gain = gain;
+			this.amplification = amplification;
 			this.readNoise = readNoise;
 			this.b = b;
 			this.b2 = b2;
@@ -459,7 +464,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		/**
 		 * @return
-		 *         The number of frames with a simulated photon count
+		 * 		The number of frames with a simulated photon count
 		 */
 		public int getMolecules()
 		{
@@ -486,7 +491,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		extraOptions = Utils.isExtraOptions();
 		simpleMode = (arg != null && arg.contains("simple"));
 		benchmarkMode = (arg != null && arg.contains("benchmark"));
@@ -658,8 +663,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
 
 				// Q. Does tOn/tOff change depending on the illumination strength?
-				imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, settings.stepsPerSecond *
-						settings.tOn / 1000.0, settings.stepsPerSecond * settings.tOffShort / 1000.0,
+				imageModel = new ActivationEnergyImageModel(eAct, activationIllumination,
+						settings.stepsPerSecond * settings.tOn / 1000.0,
+						settings.stepsPerSecond * settings.tOffShort / 1000.0,
 						settings.stepsPerSecond * settings.tOffLong / 1000.0, settings.nBlinksShort,
 						settings.nBlinksLong);
 				imageModel.setUseGeometricDistribution(settings.nBlinksGeometricDistribution);
@@ -835,12 +841,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double noiseInADUs = Math.sqrt(readVarianceInADUs + backgroundVarianceInADUs);
 		Utils.log("Pixel noise = %s photons : %s ADUs", Utils.rounded(noiseInADUs / totalGain),
 				Utils.rounded(noiseInADUs));
-		Utils.log("Expected background variance pre EM-gain (b^2) = %s photons^2 (%s ADUs^2) "
-				+ "[includes read variance converted to photons]", Utils.rounded(b2),
-				Utils.rounded(b2 * totalGain * totalGain));
-		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP),
-				Utils.rounded(upperP), Utils.rounded(lowerP / settings.pixelPitch),
-				Utils.rounded(upperP / settings.pixelPitch));
+		Utils.log(
+				"Expected background variance pre EM-gain (b^2) = %s photons^2 (%s ADUs^2) " +
+						"[includes read variance converted to photons]",
+				Utils.rounded(b2), Utils.rounded(b2 * totalGain * totalGain));
+		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP), Utils.rounded(upperP),
+				Utils.rounded(lowerP / settings.pixelPitch), Utils.rounded(upperP / settings.pixelPitch));
 		Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
 				Utils.rounded(upperMLP), Utils.rounded(lowerMLP / settings.pixelPitch),
 				Utils.rounded(upperMLP / settings.pixelPitch));
@@ -880,7 +886,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		//if (settings.getEmGain() > 1)
 		//	backgroundVariance *= 2;
 
-		// Read noise is in electrons. Convert to Photons
+		// Read noise is in electrons. Convert to Photons to get contribution to background variance
 		double readNoise = settings.readNoise / totalGain;
 		if (settings.getCameraGain() != 0)
 			readNoise *= settings.getCameraGain();
@@ -895,10 +901,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double sd = getPsfSD() * settings.pixelPitch;
 
 		// Store read noise in ADUs
+		final double amplification = totalGain /
+				((settings.getQuantumEfficiency() == 0) ? 1 : settings.getQuantumEfficiency());
+
 		readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 		simulationParameters = new SimulationParameters(particles, fullSimulation, sd, settings.pixelPitch,
 				settings.photonsPerSecond, settings.photonsPerSecondMaximum, signalPerFrame, settings.depth,
-				settings.fixedDepth, settings.bias, emCCD, totalGain, readNoise, settings.background, b2);
+				settings.fixedDepth, settings.bias, emCCD, totalGain, amplification, readNoise, settings.background,
+				b2);
 	}
 
 	/**
@@ -970,10 +980,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (totalSteps != 0)
 			{
 				int totalFrames = (int) Math.ceil(settings.seconds * 1000 / settings.exposureTime);
-				gd.addMessage(String
-						.format("Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
-								newFrames - totalFrames,
-								Utils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
+				gd.addMessage(String.format(
+						"Require %d (%s%%) additional frames to draw all fluorophores.\nDo you want to add extra frames?",
+						newFrames - totalFrames, Utils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
 			}
 			else
 			{
@@ -1100,8 +1109,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			else
 			{
-				final double sd = (settings.enterWidth) ? settings.psfSD : PSFCalculator.calculateStdDev(
-						settings.wavelength, settings.numericalAperture);
+				final double sd = (settings.enterWidth) ? settings.psfSD
+						: PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture);
 
 				hwhm = 0.5 * PSFCalculator.SD_TO_FWHM_FACTOR * sd / settings.pixelPitch;
 			}
@@ -1163,8 +1172,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private UniformDistribution createUniformDistribution(double border)
 	{
-		double depth = (settings.fixedDepth) ? settings.depth / settings.pixelPitch : settings.depth /
-				(2 * settings.pixelPitch);
+		double depth = (settings.fixedDepth) ? settings.depth / settings.pixelPitch
+				: settings.depth / (2 * settings.pixelPitch);
 
 		// Ensure the focal plane is in the middle of the zDepth
 		double[] max = new double[] { settings.size / 2 - border, settings.size / 2 - border, depth };
@@ -1609,8 +1618,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return null;
 
 		// Create a new list for all localisation that are drawn (i.e. pass the signal filters)
-		List<LocalisationModelSet> newLocalisations = Collections.synchronizedList(new ArrayList<LocalisationModelSet>(
-				localisationSets.size()));
+		List<LocalisationModelSet> newLocalisations = Collections
+				.synchronizedList(new ArrayList<LocalisationModelSet>(localisationSets.size()));
 		photonsRemoved = new AtomicInteger();
 		t1Removed = new AtomicInteger();
 		tNRemoved = new AtomicInteger();
@@ -1671,9 +1680,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (l.getTime() != lastT)
 			{
 				lastT = l.getTime();
-				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, i, lastT,
-						createPSFModel(imagePSFModel), results, stack, poissonNoise, new RandomDataGenerator(
-								createRandomGenerator()))));
+				futures.add(threadPool.submit(
+						new ImageGenerator(localisationSets, newLocalisations, i, lastT, createPSFModel(imagePSFModel),
+								results, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
 			}
 			i++;
 		}
@@ -2851,8 +2860,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		int nStats = (imagePSF) ? stats.length - 1 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
-			double centre = (alwaysRemoveOutliers[i]) ? ((StoredDataStatistics) stats[i]).getStatistics()
-					.getPercentile(50) : stats[i].getMean();
+			double centre = (alwaysRemoveOutliers[i])
+					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50) : stats[i].getMean();
 			sb.append(Utils.rounded(centre, 4)).append("\t");
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
@@ -3186,8 +3195,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			params[Gaussian2DFunction.X_SD] /= n;
 			params[Gaussian2DFunction.Y_SD] /= n;
 
-			traceResults.add(new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()), (int) Math
-					.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT, currentId));
+			traceResults.add(new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
+					(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT, currentId));
 		}
 
 		traceResults.end();
@@ -3902,7 +3911,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addNumericField("Particles", settings.particles, 0);
 		gd.addCheckbox("Compound_molecules", settings.compoundMolecules);
 		gd.addNumericField("Diffusion_rate (um^2/sec)", settings.diffusionRate, 2);
-		String[] diffusionTypes = SettingsManager.getNames((Object[])DiffusionType.values());
+		String[] diffusionTypes = SettingsManager.getNames((Object[]) DiffusionType.values());
 		gd.addChoice("Diffusion_type", diffusionTypes, diffusionTypes[settings.getDiffusionType().ordinal()]);
 		gd.addSlider("Fixed_fraction (%)", 0, 100, settings.fixedFraction * 100);
 		gd.addChoice("Confinement", CONFINEMENT, settings.confinement);
@@ -4158,8 +4167,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Parameters.isEqualOrBelow("p-binary", settings.probabilityBinary, 1);
 				Parameters.isPositive("Min binary distance", settings.minBinaryDistance);
 				Parameters.isPositive("Max binary distance", settings.maxBinaryDistance);
-				Parameters
-						.isEqualOrBelow("Min binary distance", settings.minBinaryDistance, settings.maxBinaryDistance);
+				Parameters.isEqualOrBelow("Min binary distance", settings.minBinaryDistance,
+						settings.maxBinaryDistance);
 			}
 			catch (IllegalArgumentException e)
 			{
@@ -4506,7 +4515,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		return compounds;
 	}
-	
+
 	/**
 	 * Get a random generator. The generators used in the simulation can be adjusted by changing this method.
 	 * 
@@ -4517,7 +4526,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private RandomGenerator createRandomGenerator(int seedAddition)
 	{
 		return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this) + seedAddition);
-		
+
 		// Note: To make the simulation reproducible we can use a fixed offset 
 		//return new Well44497b(1 + seedAddition);
 	}

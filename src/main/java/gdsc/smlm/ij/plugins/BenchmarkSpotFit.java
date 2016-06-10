@@ -630,6 +630,7 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			cal.nmPerPixel = simulationParameters.a;
 			cal.gain = simulationParameters.gain;
+			cal.amplification = simulationParameters.amplification;
 			cal.exposureTime = 100;
 			cal.readNoise = simulationParameters.readNoise;
 			cal.bias = simulationParameters.bias;

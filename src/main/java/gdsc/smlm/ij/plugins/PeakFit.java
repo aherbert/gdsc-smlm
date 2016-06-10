@@ -1128,12 +1128,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	}
 
 	/**
+	 * Check if additional calibration information is required
+	 * <p>
 	 * Check if the configuration file exists. If not then assume this is the first run of the plugin.
 	 * Check the calibration is valid for fitting.
 	 * 
 	 * @param settings
 	 * @param filename
-	 * @return
+	 * @return True if additional calibration information is required, false if the system is calibrated
 	 */
 	private boolean requireCalibration(GlobalSettings settings, String filename)
 	{
@@ -1660,7 +1662,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
 				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
 				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
-				gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+				gd.addNumericField("Amplification (ADU/electron)", calibration.amplification, 2);
 				gd.addCheckbox("EM-CCD", calibration.emCCD);
 			}
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
@@ -1679,11 +1681,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				calibration.bias = Math.abs(gd.getNextNumber());
 				fitConfig.setModelCamera(gd.getNextBoolean());
 				calibration.readNoise = Math.abs(gd.getNextNumber());
-				calibration.gain = Math.abs(gd.getNextNumber());
+				calibration.amplification = Math.abs(gd.getNextNumber());
 				calibration.emCCD = gd.getNextBoolean();
 				fitConfig.setBias(calibration.bias);
 				fitConfig.setReadNoise(calibration.readNoise);
-				fitConfig.setGain(calibration.gain);
+				fitConfig.setAmplification(calibration.amplification);
 				fitConfig.setEmCCD(calibration.emCCD);
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());

@@ -67,6 +67,7 @@ public class FitConfiguration implements Cloneable
 	private double duplicateDistance = 0.5f;
 	private double bias = 0;
 	private double readNoise = 0;
+	private double amplification = 0;
 	private int maxFunctionEvaluations = 1000;
 	private SearchMethod searchMethod = SearchMethod.POWELL; // Best for noisy data since gradients are unstable
 	private boolean gradientLineMinimisation = false;
@@ -1217,6 +1218,23 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * @return The amplification [ADUs/electron] (used for maximum likelihood estimation)
+	 */
+	public double getAmplification()
+	{
+		return amplification;
+	}
+
+	/**
+	 * @param amplification The amplification [ADUs/electron] (used for maximum likelihood estimation)
+	 */
+	public void setAmplification(double amplification)
+	{
+		invalidateFunctionSolver();
+		this.amplification = amplification;
+	}
+
+	/**
 	 * @return Set to true if the bias should be removed from the data before fitting, e.g. for maximum likelihood
 	 *         estimation.
 	 */
@@ -1378,7 +1396,7 @@ public class FitConfiguration implements Cloneable
 					{
 						// EMCCD = Poisson+Gamma+Gaussian
 						fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAMMA_GAUSSIAN);
-						fitter.setAlpha(1.0 / gain);
+						fitter.setAlpha(1.0 / amplification);
 						fitter.setSigma(readNoise);
 					}
 					else

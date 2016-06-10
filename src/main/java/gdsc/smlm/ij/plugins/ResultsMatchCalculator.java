@@ -1,5 +1,25 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Point;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.match.BasePoint;
+import gdsc.core.match.Coordinate;
+import gdsc.core.match.MatchCalculator;
+import gdsc.core.match.MatchResult;
+import gdsc.core.match.PointPair;
+
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
  * 
@@ -16,12 +36,6 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.BasePoint;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.MatchResult;
-import gdsc.core.match.PointPair;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -30,17 +44,6 @@ import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Compares the coordinates in two sets of results and computes the match statistics.
@@ -208,7 +211,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			fp += result.getFalsePositives();
 			fn += result.getFalseNegatives();
 			//rmsd += (result.getRMSD() * result.getRMSD()) * result.getTruePositives();
-
+			
 			allMatches.addAll(matches);
 			if (showPairs)
 			{
@@ -237,6 +240,26 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		if (fileResults != null)
 			fileResults.end();
 
+		// XXX : DEBUGGING : Output for signal correlation
+		try
+		{
+			OutputStreamWriter o = new OutputStreamWriter(new FileOutputStream("/tmp/1"));
+			for (PointPair pair : allMatches)
+			{
+				PeakResult p1 = ((PeakResultPoint) pair.getPoint1()).peakResult;
+				PeakResult p2 = ((PeakResultPoint) pair.getPoint2()).peakResult;
+				o.write(Float.toString(p1.getSignal()));
+				o.write('\t');
+				o.write(Float.toString(p2.getSignal()));
+				o.write('\n');
+			}
+			o.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		boolean doIdAnalysis1 = (idAnalysis) ? haveIds(results1) : false;
 		boolean doIdAnalysis2 = (idAnalysis) ? haveIds(results2) : false;
 		boolean doIdAnalysis = doIdAnalysis1 || doIdAnalysis2;

@@ -37,6 +37,7 @@ public class CreateDataSettings
 	private double cameraGain = 0.1557;
 	private double quantumEfficiency = 0.95;
 	private double totalGain = 0;
+	/** The read noise (electrons). */
 	public double readNoise = 46;
 	public int bias = 500;
 	public int particles = 300;
@@ -138,14 +139,26 @@ public class CreateDataSettings
 	public double zPosition = 0;
 
 	/**
-	 * Get the total gain (the EM-gain multiplied by the camera gain). If either the gain is disabled then it will be
-	 * ignored. A total gain of zero means no gain is applied.
+	 * Get the total gain (ADUs/Photon). This is equal to the EM-gain multiplied by the camera gain multiplied by the
+	 * quantum efficiency. If either gain is disabled then they will be ignored. A total gain of zero means no gain is
+	 * applied.
 	 * 
 	 * @return
 	 */
 	public double getTotalGain()
 	{
 		return totalGain;
+	}
+
+	/**
+	 * Get the amplification (ADUs/electron). This is equal to the EM-gain multiplied by the camera gain. If either
+	 * gain or QE are disabled then they will be ignored. An amplification of zero means no amplification is applied.
+	 * 
+	 * @return
+	 */
+	public double getAmplification()
+	{
+		return totalGain / ((quantumEfficiency == 0) ? 1 : quantumEfficiency);
 	}
 
 	/**
@@ -171,7 +184,7 @@ public class CreateDataSettings
 	}
 
 	/**
-	 * @return the cameraGain
+	 * @return the cameraGain (ADUs/electron)
 	 */
 	public double getCameraGain()
 	{
@@ -182,7 +195,7 @@ public class CreateDataSettings
 	 * Camera gain cannot be below 0. If so it is set to zero and disabled.
 	 * 
 	 * @param cameraGain
-	 *            the cameraGain to set
+	 *            the cameraGain to set (ADUs/electron)
 	 */
 	public void setCameraGain(double cameraGain)
 	{
@@ -250,15 +263,17 @@ public class CreateDataSettings
 	}
 
 	/**
-	 * @param diffusionType the diffusionType to set
+	 * @param diffusionType
+	 *            the diffusionType to set
 	 */
 	public void setDiffusionType(DiffusionType diffusionType)
 	{
 		this.diffusionType = diffusionType;
 	}
-	
+
 	/**
-	 * @param diffusionType the diffusionType to set
+	 * @param diffusionType
+	 *            the diffusionType to set
 	 */
 	public void setDiffusionType(int diffusionType)
 	{

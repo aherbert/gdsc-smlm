@@ -782,7 +782,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			// Check for Calibration
 			Calibration calibration = results.getCalibration();
 			final float noise = getNoise(results);
-			// Do not check for calibration readNoise, bias, emCCD			
+			// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
 			if (calibration == null || calibration.nmPerPixel <= 0 || calibration.gain <= 0 ||
 					calibration.exposureTime <= 0 || noise <= 0)
 			{

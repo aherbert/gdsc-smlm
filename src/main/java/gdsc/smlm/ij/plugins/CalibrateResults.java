@@ -95,6 +95,7 @@ public class CalibrateResults implements PlugIn
 		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
 		gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
 		gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
+		gd.addNumericField("Amplification (ADUs/electron)", calibration.amplification, 2);
 		
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -126,6 +127,7 @@ public class CalibrateResults implements PlugIn
 		calibration.exposureTime = Math.abs(gd.getNextNumber());
 		calibration.bias = Math.abs(gd.getNextNumber());
 		calibration.readNoise = Math.abs(gd.getNextNumber());
+		calibration.amplification = Math.abs(gd.getNextNumber());
 		
 		if (!updateAll)
 			results.setCalibration(calibration);

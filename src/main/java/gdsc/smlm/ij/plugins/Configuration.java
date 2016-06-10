@@ -398,6 +398,12 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			if (d.yesPressed())
 			{
 				// Reload the settings and update the GUI
+				// XXX : This does not deal with loading settings into fields that are not displayed,
+				// e.g. for configuring the Fit Solvers. This could be done by writing into
+				// a class scope settings instance (loaded in showDialog()). However the user would not 
+				// see all the changes that have been written, since the later dialogs are shown depending 
+				// on what options are initially configured. 
+				
 				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename);
 				if (settings == null)
 					return;

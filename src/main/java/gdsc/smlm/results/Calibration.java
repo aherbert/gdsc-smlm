@@ -44,6 +44,14 @@ public class Calibration implements Cloneable
 	 * True if the CCD camera was run in Electron Multiplying (EM) mode
 	 */
 	public boolean emCCD;
+	/**
+	 * The camera amplification (ADUs/e-) used when modelling a microscope camera.
+	 * <p>
+	 * Note that the camera noise model assumes that electrons are converted to ADUs by amplification that is not
+	 * perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided by the quantum
+	 * efficiency (e-/photon).
+	 */
+	public double amplification;
 
 	/**
 	 * Default constructor
