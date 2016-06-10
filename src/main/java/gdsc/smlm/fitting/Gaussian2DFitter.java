@@ -534,7 +534,17 @@ public class Gaussian2DFitter
 		double bias = 0;
 		if (fitConfiguration.isRemoveBiasBeforeFitting())
 		{
-			bias = FastMath.min(background, fitConfiguration.getBias());
+			// Some methods can fit negative data, e.g. PoissonGaussian or PoissonGammaGaussian.
+			if (background < fitConfiguration.getBias())
+				// TODO - remove this
+				System.out.printf("Background %f < Bias %f\n", background, fitConfiguration.getBias());
+			
+			// No negative data
+			//bias = FastMath.min(background, fitConfiguration.getBias());
+			
+			// Subtract the full bias. Leave it to the solver to handle negative data.
+			bias = fitConfiguration.getBias();
+			
 			params[0] -= bias;
 			for (int i = 0; i < ySize; i++)
 				y[i] -= bias;
