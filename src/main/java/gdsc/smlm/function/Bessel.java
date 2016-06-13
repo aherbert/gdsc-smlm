@@ -1,5 +1,7 @@
 package gdsc.smlm.function;
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Class for computing various Bessel functions
  * <p>
@@ -121,7 +123,7 @@ public class Bessel
 			ans = 0.2282967e-1 + y * (-0.2895312e-1 + y * (0.1787654e-1 - y * 0.420059e-2));
 			ans = 0.39894228 + y *
 					(-0.3988024e-1 + y * (-0.362018e-2 + y * (0.163801e-2 + y * (-0.1031555e-1 + y * ans))));
-			ans *= (Math.exp(ax) / Math.sqrt(ax));
+			ans *= (FastMath.exp(ax) / Math.sqrt(ax));
 		}
 		return x < 0.0 ? -ans : ans;
 	}
