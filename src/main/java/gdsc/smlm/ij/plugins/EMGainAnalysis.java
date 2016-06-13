@@ -760,12 +760,17 @@ public class EMGainAnalysis implements PlugInFilter
 		if (offset != 0)
 			expected += offset * expected / 100.0;
 		expected *= _gain;
+		//sum = 0;
+		//double sum2 = 0;
 		for (int i = 0; i < f.length; i++)
 		{
 			// Adjust the x-values to remove the dummy bias
 			x[i] -= dummyBias;
 			f[i] = fun.likelihood(x[i], expected);
+			//sum += pmf[i];
+			//sum2 += f[i];
 		}
+		//System.out.printf("Approximation sum = %f : %f\n", sum ,sum2);
 		if (showApproximation)
 			yMax = Maths.maxDefault(yMax, f);
 
