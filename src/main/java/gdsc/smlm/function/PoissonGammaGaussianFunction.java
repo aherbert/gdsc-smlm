@@ -108,6 +108,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 				// The observed count converted to photons
 				final double nij = alpha * cij;
 
+				// The current implementation of Bessel.I1(x) is Infinity at x==710
+				// The limit on eta * nij is therefore (709/2)^2 = 125670.25
 				if (eta * nij > 10000)
 				{
 					// Approximate Bessel function i1(x) when using large x:

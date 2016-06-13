@@ -1,25 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.function.Bessel;
-import gdsc.smlm.function.LikelihoodFunction;
-import gdsc.smlm.function.PoissonFunction;
-import gdsc.smlm.function.PoissonGammaGaussianFunction;
-import gdsc.smlm.function.PoissonGaussianFunction;
-import gdsc.smlm.utils.Convolution;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.StoredDataStatistics;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.GenericDialog;
-import ij.gui.Plot2;
-import ij.gui.PlotWindow;
-import ij.gui.Roi;
-import ij.plugin.filter.PlugInFilter;
-import ij.process.ImageProcessor;
-
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -40,6 +20,27 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptim
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.function.Bessel;
+import gdsc.smlm.function.LikelihoodFunction;
+import gdsc.smlm.function.PoissonFunction;
+import gdsc.smlm.function.PoissonGammaGaussianFunction;
+import gdsc.smlm.function.PoissonGaussianFunction;
+import gdsc.smlm.utils.Convolution;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.gui.Plot2;
+import ij.gui.PlotWindow;
+import ij.gui.Roi;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.ImageProcessor;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -166,6 +167,10 @@ public class EMGainAnalysis implements PlugInFilter
 	{
 		final double[] g = pdf(0, _photons, _gain, _noise, (int) _bias);
 
+		// Debug this
+		double[] x = Utils.newArray(g.length, 0, 1.0);
+		Utils.display(TITLE + " PDF", new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
+
 		// Get cumulative probability
 		double sum = 0;
 		for (int i = 0; i < g.length; i++)
@@ -174,6 +179,7 @@ public class EMGainAnalysis implements PlugInFilter
 			g[i] += sum;
 			sum += p;
 		}
+
 		for (int i = 0; i < g.length; i++)
 			g[i] /= sum;
 		g[g.length - 1] = 1; // Ensure value of 1 at the end
@@ -342,11 +348,12 @@ public class EMGainAnalysis implements PlugInFilter
 		// Perform a fit
 		CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16, 1e-6, 1e-16);
 		double[] startPoint = new double[] { photons, gain, noise, bias };
-		final int maxEval = 3000;
+		int maxEval = 3000;
 
+		String[] paramNames = { "Photons", "Gain", "Noise", "Bias" };
 		// Set bounds
 		double[] lower = new double[] { 0, 0.5 * gain, 0, bias - noise };
-		double[] upper = new double[] { (limits[1] - limits[0]) / gain, 2 * gain, gain, bias + noise };
+		double[] upper = new double[] { 2 * photons, 2 * gain, gain, bias + noise };
 
 		// Restart until converged.
 		// TODO - Maybe fix this with a better optimiser. This needs to be tested on real data.
@@ -363,11 +370,26 @@ public class EMGainAnalysis implements PlugInFilter
 						new InitialGuess((solution == null) ? startPoint : solution.getPointRef()));
 				if (solution == null || optimum.getValue() < solution.getValue())
 				{
+					double[] point = optimum.getPointRef();
+					// Check the bounds
+					for (int i = 0; i < point.length; i++)
+					{
+						if (point[i] < lower[i] || point[i] > upper[i])
+						{
+							throw new RuntimeException(
+									String.format("Fit out of of estimated range: %s %f", paramNames[i], point[i]));
+						}
+					}
 					solution = optimum;
 				}
 			}
 			catch (Exception e)
 			{
+				IJ.log("Powell error: " + e.getMessage());
+				if (e instanceof TooManyEvaluationsException)
+				{
+					maxEval = (int) (maxEval * 1.5);
+				}
 			}
 			try
 			{
@@ -387,6 +409,11 @@ public class EMGainAnalysis implements PlugInFilter
 			}
 			catch (Exception e)
 			{
+				IJ.log("Bounded Powell error: " + e.getMessage());
+				if (e instanceof TooManyEvaluationsException)
+				{
+					maxEval = (int) (maxEval * 1.5);
+				}
 			}
 		}
 
@@ -506,13 +533,78 @@ public class EMGainAnalysis implements PlugInFilter
 		stats.add(FastMath.exp(-p));
 		for (int c = 1;; c++)
 		{
-			final double g = Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
+			final double g = pEMGain(c, p, m);
 			stats.add(g);
 			final double delta = g / stats.getSum();
 			if (delta < 1e-5)
 				break;
 		}
 		return stats.getValues();
+	}
+
+	private static final double twoSqrtPi = 2 * Math.sqrt(Math.PI);
+
+	/**
+	 * Calculate the probability density function for EM-gain.
+	 * <p>
+	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * 
+	 * @param c
+	 *            The count to evaluate
+	 * @param p
+	 *            The average number of photons per pixel input to the EM-camera
+	 * @param m
+	 *            The multiplication factor (gain)
+	 * @return The PDF
+	 */
+	private double pEMGain(int c, double p, double m)
+	{
+		// The default evaluation is:
+		//return Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
+
+		// Bessel.I1(x) -> Infinity
+		// The current implementation of Bessel.I1(x) is Infinity at x==710
+
+		// This has been fixed in the PoissonGammaGaussianFunction class so copy that code.
+		final double alpha = 1 / m;
+
+		final double cij = c;
+		final double eta = p;
+
+		// Any observed count above zero
+		if (cij > 0.0)
+		{
+			// The observed count converted to photons
+			final double nij = alpha * cij;
+
+			// The current implementation of Bessel.I1(x) is Infinity at x==710
+			// The limit on eta * nij is therefore (709/2)^2 = 125670.25
+			if (eta * nij > 10000)
+			{
+				// Approximate Bessel function i1(x) when using large x:
+				// i1(x) ~ exp(x)/sqrt(2*pi*x)
+				// However the entire equation is logged (creating transform),
+				// evaluated then raised to e to prevent overflow error on 
+				// large exp(x)
+
+				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
+						Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+				return FastMath.exp(transform);
+			}
+			else
+			{
+				// Second part of equation 135
+				return Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij));
+			}
+		}
+		else if (cij == 0.0)
+		{
+			return FastMath.exp(-eta);
+		}
+		else
+		{
+			return 0;
+		}
 	}
 
 	/**
@@ -535,7 +627,11 @@ public class EMGainAnalysis implements PlugInFilter
 		double[] g = new double[max + 1];
 		g[0] = FastMath.exp(-p);
 		for (int c = 1; c <= max; c++)
-			g[c] = Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
+		{
+			g[c] = pEMGain(c, p, m);
+			if (g[c] == 0)
+				break;
+		}
 		return g;
 	}
 
@@ -559,7 +655,6 @@ public class EMGainAnalysis implements PlugInFilter
 	private double[] pdf(final int max, final double p, final double m, final double s, int c0)
 	{
 		double[] g = pdfEMGain(max, p, m);
-
 		double[] gg;
 
 		if (s > 0)
