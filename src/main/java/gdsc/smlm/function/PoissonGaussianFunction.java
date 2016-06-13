@@ -24,7 +24,7 @@ import org.apache.commons.math3.util.FastMath;
  * noise in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted from the C source code provided in the
  * appendix.
  */
-public class PoissonGaussianFunction
+public class PoissonGaussianFunction implements LikelihoodFunction
 {
 	private static final double EPSILON = 1e-4; // 1e-6
 	private static final double NORMALISATION = 1 / Math.sqrt(2 * Math.PI);
@@ -98,8 +98,8 @@ public class PoissonGaussianFunction
 	 */
 	public double probability(final double x)
 	{
-		return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisation : getProbability(x,
-				mu, sigmasquared, usePicardApproximation);
+		return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisation
+				: getProbability(x, mu, sigmasquared, usePicardApproximation);
 	}
 
 	/**
@@ -111,8 +111,8 @@ public class PoissonGaussianFunction
 	 */
 	public double logProbability(final double x)
 	{
-		return (noPoisson) ? (-0.5 * x * x / sigmasquared) + logNormalisation : getPseudoLikelihood(x, mu,
-				sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
+		return (noPoisson) ? (-0.5 * x * x / sigmasquared) + logNormalisation
+				: getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
 	}
 
 	/**
@@ -129,8 +129,8 @@ public class PoissonGaussianFunction
 	 */
 	public double pseudoLikelihood(final double x)
 	{
-		return (noPoisson) ? pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) : getPseudoLikelihood(x, mu,
-				sigmasquared, usePicardApproximation);
+		return (noPoisson) ? pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation)
+				: getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation);
 	}
 
 	/**
@@ -371,7 +371,8 @@ public class PoissonGaussianFunction
 	 * @param saddlepoint
 	 * @return The saddlepoint approximation
 	 */
-	private static double sp_approx(final double x, final double mu, final double sigmasquared, final double saddlepoint)
+	private static double sp_approx(final double x, final double mu, final double sigmasquared,
+			final double saddlepoint)
 	{
 		final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
 		final double phi2 = sigmasquared + mu_exp_minus_s;
@@ -397,5 +398,15 @@ public class PoissonGaussianFunction
 	public void setUsePicardApproximation(boolean usePicardApproximation)
 	{
 		this.usePicardApproximation = usePicardApproximation;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
+	 */
+	public double likelihood(double o, double e)
+	{
+		return probability(o, e, sigmasquared, usePicardApproximation);
 	}
 }

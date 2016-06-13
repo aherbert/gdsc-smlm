@@ -1,7 +1,10 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.function.Bessel;
+import gdsc.smlm.function.LikelihoodFunction;
+import gdsc.smlm.function.PoissonFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
+import gdsc.smlm.function.PoissonGaussianFunction;
 import gdsc.smlm.utils.Convolution;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
@@ -66,6 +69,8 @@ public class EMGainAnalysis implements PlugInFilter
 
 	private static double bias = 500, gain = 40, noise = 3;
 	private static boolean _simulate = false, showApproximation = false, relativeDelta = false;
+	private static String[] APPROXIMATION = { "PoissonGammaGaussian", "PoissonGaussian", "Poisson" };
+	private static int approximation = 0;
 	private boolean simulate = false, extraOptions = false;
 	private static double _photons = 1, _bias = 500, _gain = 40, _noise = 3;
 	private static double head = 0.01, tail = 0.025, _offset = 0;
@@ -83,7 +88,7 @@ public class EMGainAnalysis implements PlugInFilter
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		extraOptions = Utils.isExtraOptions();
 
 		if ("pmf".equals(arg))
@@ -354,8 +359,8 @@ public class EMGainAnalysis implements PlugInFilter
 			{
 				// Basic Powell optimiser
 				MultivariateFunction fun = getFunction(limits, y, max, maxEval);
-				PointValuePair optimum = o.optimize(new MaxEval(maxEval), new ObjectiveFunction(fun),
-						GoalType.MINIMIZE, new InitialGuess((solution == null) ? startPoint : solution.getPointRef()));
+				PointValuePair optimum = o.optimize(new MaxEval(maxEval), new ObjectiveFunction(fun), GoalType.MINIMIZE,
+						new InitialGuess((solution == null) ? startPoint : solution.getPointRef()));
 				if (solution == null || optimum.getValue() < solution.getValue())
 				{
 					solution = optimum;
@@ -369,12 +374,9 @@ public class EMGainAnalysis implements PlugInFilter
 				// Bounded Powell optimiser
 				MultivariateFunction fun = getFunction(limits, y, max, maxEval);
 				MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(fun, lower, upper);
-				PointValuePair optimum = o.optimize(
-						new MaxEval(maxEval),
-						new ObjectiveFunction(adapter),
-						GoalType.MINIMIZE,
-						new InitialGuess(adapter.boundedToUnbounded((solution == null) ? startPoint : solution
-								.getPointRef())));
+				PointValuePair optimum = o.optimize(new MaxEval(maxEval), new ObjectiveFunction(adapter),
+						GoalType.MINIMIZE, new InitialGuess(
+								adapter.boundedToUnbounded((solution == null) ? startPoint : solution.getPointRef())));
 				double[] point = adapter.unboundedToBounded(optimum.getPointRef());
 				optimum = new PointValuePair(point, optimum.getValue());
 
@@ -656,8 +658,8 @@ public class EMGainAnalysis implements PlugInFilter
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Analyse the white-light histogram of an image stack to determine EM-gain parameters.\n \n"
-				+ "See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321 (Supplementary Information).");
+		gd.addMessage("Analyse the white-light histogram of an image stack to determine EM-gain parameters.\n \n" +
+				"See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321 (Supplementary Information).");
 
 		if (extraOptions)
 		{
@@ -740,7 +742,20 @@ public class EMGainAnalysis implements PlugInFilter
 
 		// Get the approximation
 		double[] f = new double[x.length];
-		PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / _gain, _noise);
+		LikelihoodFunction fun;
+		switch (approximation)
+		{
+			case 2:
+				fun = new PoissonFunction();
+				break;
+			case 1:
+				// The mean does not matter so just use zero
+				fun = PoissonGaussianFunction.createWithStandardDeviation(0, _noise);
+				break;
+			case 0:
+			default:
+				fun = new PoissonGammaGaussianFunction(1.0 / _gain, _noise);
+		}
 		double expected = _photons;
 		if (offset != 0)
 			expected += offset * expected / 100.0;
@@ -814,6 +829,7 @@ public class EMGainAnalysis implements PlugInFilter
 		gd.addNumericField("Gain", _gain, 2);
 		gd.addNumericField("Noise", _noise, 2);
 		gd.addNumericField("Photons", _photons, 2);
+		gd.addChoice("Approx", APPROXIMATION, APPROXIMATION[approximation]);
 		gd.addCheckbox("Show_approximation", showApproximation);
 		if (extraOptions)
 			gd.addNumericField("Approximation_offset (%)", _offset, 2);
@@ -829,6 +845,7 @@ public class EMGainAnalysis implements PlugInFilter
 		_gain = gd.getNextNumber();
 		_noise = FastMath.abs(gd.getNextNumber());
 		_photons = FastMath.abs(gd.getNextNumber());
+		approximation = gd.getNextChoiceIndex();
 		showApproximation = gd.getNextBoolean();
 		if (extraOptions)
 			offset = _offset = gd.getNextNumber();

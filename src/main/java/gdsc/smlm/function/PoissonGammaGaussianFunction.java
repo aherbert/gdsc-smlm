@@ -40,7 +40,7 @@ import org.apache.commons.math3.util.FastMath;
  * and standard deviation of the Gaussian is fixed and set in the constructor. The mean of the Gaussian is assumed to be
  * zero.
  */
-public class PoissonGammaGaussianFunction
+public class PoissonGammaGaussianFunction implements LikelihoodFunction
 {
 	/**
 	 * The inverse scale of the Gamma distribution (e.g. the inverse of the EM-gain multiplication factor)
