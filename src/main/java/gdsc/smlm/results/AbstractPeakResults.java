@@ -42,6 +42,21 @@ public abstract class AbstractPeakResults implements PeakResults
 	public abstract void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
 			float[] params, float[] paramsStdDev);
 
+	/**
+	 * Adds the result.
+	 * <p>
+	 * Convenience method that just calls {@link #add(int, int, int, float, double, float, float[], float[])} passing
+	 * the properties from the PeakResult. Any other properties in derived classes of PeakResult will be lost.
+	 *
+	 * @param result
+	 *            the result
+	 */
+	public void add(PeakResult result)
+	{
+		add(result.peak, result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
+				result.paramsStdDev);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -159,7 +174,6 @@ public abstract class AbstractPeakResults implements PeakResults
 		return configuration;
 	}
 
-
 	/**
 	 * @return The name of the results set (or the source if empty)
 	 */
@@ -181,7 +195,7 @@ public abstract class AbstractPeakResults implements PeakResults
 		else
 			this.name = name;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
