@@ -54,8 +54,8 @@ public class Gaussian2DFitter
 		computeResiduals = fitConfiguration.isComputeResiduals();
 	}
 
-	static double half_max_position(double[] data, int index, int[] point, int[] dim, int dimension,
-			int[] cumul_region, int dirn, double background)
+	static double half_max_position(double[] data, int index, int[] point, int[] dim, int dimension, int[] cumul_region,
+			int dirn, double background)
 	{
 		int i, i_start, i_end, i_step;
 		double v = data[index];
@@ -449,7 +449,8 @@ public class Gaussian2DFitter
 				{
 					// Fail if the width cannot be estimated due to out of bounds
 					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-						return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0, null);
+						return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0,
+								null);
 
 					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
 				}
@@ -538,13 +539,13 @@ public class Gaussian2DFitter
 			if (background < fitConfiguration.getBias())
 				// TODO - remove this
 				System.out.printf("Background %f < Bias %f\n", background, fitConfiguration.getBias());
-			
+
 			// No negative data
 			//bias = FastMath.min(background, fitConfiguration.getBias());
-			
+
 			// Subtract the full bias. Leave it to the solver to handle negative data.
 			bias = fitConfiguration.getBias();
-			
+
 			params[0] -= bias;
 			for (int i = 0; i < ySize; i++)
 				y[i] -= bias;
@@ -691,14 +692,26 @@ public class Gaussian2DFitter
 		double[] lower = new double[params.length];
 		double[] upper = new double[lower.length];
 		double yMax = y[0];
+		double yMin = y[0];
 		for (int i = 1; i < ySize; i++)
+		{
 			if (yMax < y[i])
 				yMax = y[i];
+			else if (yMin > y[i])
+				yMin = y[i];
+		}
 		if (fitConfiguration.isBackgroundFitting())
-			upper[0] = yMax;
+		{
+			if (yMax > params[0])
+				upper[0] = yMax;
+			else
+				upper[0] = params[0] + (params[0] - yMax);
+			lower[0] = Math.min(yMin, 0);
+		}
 
-		final double wf = (fitConfiguration.getWidthFactor() > 1 && fitConfiguration.getWidthFactor() < maximumWidthFactor) ? fitConfiguration
-				.getWidthFactor() : maximumWidthFactor;
+		final double wf = (fitConfiguration.getWidthFactor() > 1 &&
+				fitConfiguration.getWidthFactor() < maximumWidthFactor) ? fitConfiguration.getWidthFactor()
+						: maximumWidthFactor;
 
 		// TODO - Check if the signal bounds are appropriate
 		if (npeaks == 1)
@@ -708,11 +721,11 @@ public class Gaussian2DFitter
 			for (int i = 1; i < ySize; i++)
 				sum += y[i];
 			// Increase sum by 2 to allow for error
-			upper[Gaussian2DFunction.SIGNAL] = 2 * sum - params[Gaussian2DFunction.BACKGROUND] * ySize;
+			upper[Gaussian2DFunction.SIGNAL] = 2 * sum - yMin * ySize;
 		}
 		else
 		{
-			final double height = yMax - params[Gaussian2DFunction.BACKGROUND];
+			final double height = yMax - yMin;
 			// Signal = height * 2 * pi * sd0 * sd1
 			// Allow a maximum using the width factor that defines the bounds on the width.
 			// Increase the height by 2 to allow for error.
@@ -730,8 +743,16 @@ public class Gaussian2DFitter
 		{
 			// All functions evaluate the x and y position.
 			// Lower bounds on these will be zero when the array is initialised.
-			upper[j + Gaussian2DFunction.X_POSITION] = maxx;
-			upper[j + Gaussian2DFunction.Y_POSITION] = maxy;
+			// We may have an estimate outside the bounds (if including neighbours).
+			upper[j + Gaussian2DFunction.X_POSITION] = Math.max(maxx,
+					params[j + Gaussian2DFunction.X_POSITION] + params[j + Gaussian2DFunction.X_SD]);
+			upper[j + Gaussian2DFunction.Y_POSITION] = Math.max(maxy,
+					params[j + Gaussian2DFunction.Y_POSITION] + params[j + Gaussian2DFunction.Y_SD]);
+
+			lower[j + Gaussian2DFunction.X_POSITION] = Math.min(0,
+					params[j + Gaussian2DFunction.X_POSITION] - params[j + Gaussian2DFunction.X_SD]);
+			lower[j + Gaussian2DFunction.Y_POSITION] = Math.min(0,
+					params[j + Gaussian2DFunction.Y_POSITION] - params[j + Gaussian2DFunction.Y_SD]);
 
 			if (fitConfiguration.isAngleFitting())
 			{
