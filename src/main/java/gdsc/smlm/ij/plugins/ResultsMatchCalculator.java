@@ -77,7 +77,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -211,7 +211,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			fp += result.getFalsePositives();
 			fn += result.getFalseNegatives();
 			//rmsd += (result.getRMSD() * result.getRMSD()) * result.getTruePositives();
-			
+
 			allMatches.addAll(matches);
 			if (showPairs)
 			{
@@ -240,26 +240,38 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		if (fileResults != null)
 			fileResults.end();
 
-		// XXX : DEBUGGING : Output for signal correlation
+		// XXX : DEBUGGING : Output for signal correlation and fitting analysis
+		/*
 		try
 		{
-			OutputStreamWriter o = new OutputStreamWriter(new FileOutputStream("/tmp/1"));
+			OutputStreamWriter o = new OutputStreamWriter(new FileOutputStream("/tmp/ResultsMatchCalculator.txt"));
+			FilePeakResults r1 = new FilePeakResults("/tmp/" + results1.getName() + ".txt", false);
+			FilePeakResults r2 = new FilePeakResults("/tmp/" + results2.getName() + ".txt", false);
+			r1.begin();
+			r2.begin();
+			//OutputStreamWriter o2 = new OutputStreamWriter(new FileOutputStream("/tmp/"+results1.getName()+".txt"));
+			//OutputStreamWriter o3 = new OutputStreamWriter(new FileOutputStream("/tmp/"+results2.getName()+".txt"));
 			for (PointPair pair : allMatches)
 			{
 				PeakResult p1 = ((PeakResultPoint) pair.getPoint1()).peakResult;
 				PeakResult p2 = ((PeakResultPoint) pair.getPoint2()).peakResult;
+				r1.add(p1);
+				r2.add(p2);
 				o.write(Float.toString(p1.getSignal()));
 				o.write('\t');
 				o.write(Float.toString(p2.getSignal()));
 				o.write('\n');
 			}
 			o.close();
+			r1.end();
+			r2.end();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		
+		*/
+
 		boolean doIdAnalysis1 = (idAnalysis) ? haveIds(results1) : false;
 		boolean doIdAnalysis2 = (idAnalysis) ? haveIds(results2) : false;
 		boolean doIdAnalysis = doIdAnalysis1 || doIdAnalysis2;
