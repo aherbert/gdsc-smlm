@@ -1073,10 +1073,10 @@ public class DiffusionRateTest implements PlugIn
 		final long seed = System.currentTimeMillis() + System.identityHashCode(this);
 		RandomGenerator rand = new Well19937c(seed);
 
-		StringBuilder sb = new StringBuilder();
 		final int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond - aggregateSteps);
 		final int limit = Math.min(totalSteps, myMsdAnalysisSteps);
 		final int interval = Utils.getProgressInterval(limit);
+		final ArrayList<String> results = new ArrayList<String>(totalSteps);
 		for (int step = 1; step <= myMsdAnalysisSteps; step++)
 		{
 			if (step % interval == 0)
@@ -1110,16 +1110,16 @@ public class DiffusionRateTest implements PlugIn
 			}
 			if (count == 0)
 				break;
-			addResult(sb, step, sum, count);
+			results.add(addResult(step, sum, count));
 
 			// Flush to auto-space the columns
 			if (step == 9)
 			{
-				msdTable.append(sb.toString());
-				sb.setLength(0);
+				msdTable.getTextPanel().append(results);
+				results.clear();
 			}
 		}
-		msdTable.append(sb.toString());
+		msdTable.getTextPanel().append(results);
 
 		IJ.showProgress(1);
 	}
@@ -1157,8 +1157,9 @@ public class DiffusionRateTest implements PlugIn
 		return "D (um^2/s)\tPrecision (nm)\tDsim (um^2/s)\tStep (s)\tResolution\tFrame (s)\tt (s)\tn\tN\tMSD (um^2)\tD (um^2/s)";
 	}
 
-	private void addResult(StringBuilder sb, int step, double sum, int count)
+	private String addResult(int step, double sum, int count)
 	{
+		StringBuilder sb = new StringBuilder();
 		// Exposure time is the aggregated frame time 
 		final double msd = (sum / count) / conversionFactor;
 		// Jump distance separation is the number of steps
@@ -1170,7 +1171,7 @@ public class DiffusionRateTest implements PlugIn
 		// Not rounded to preserve precision 
 		sb.append(msd).append('\t');
 		sb.append(msd / (4 * t));
-		sb.append('\n');
+		return sb.toString();
 	}
 
 	private static double simpleD = 0.5;
