@@ -380,7 +380,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		if (maximumLikelihoodFunction == null ||
 				(searchMethod.usesGradient && !maximumLikelihoodFunction.canComputeGradient()))
 		{
-			// Ensure no negative data for the Poisson likelihood method
+			// Ensure no negative data for the Poisson likelihood method.
+			// Just truncate the counts for now. These are from noise in the count estimates that we do not model.
 			final double[] y2 = new double[n];
 			for (int i = 0; i < n; i++)
 			{
