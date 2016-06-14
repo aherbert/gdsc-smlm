@@ -1461,7 +1461,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// If precision filtering then we need the camera bias
-		if (fitConfig.getPrecisionThreshold() > 0)
+		if (!maximaIdentification && fitConfig.getPrecisionThreshold() > 0)
 		{
 			gd = new GenericDialog(TITLE);
 			gd.addMessage(
