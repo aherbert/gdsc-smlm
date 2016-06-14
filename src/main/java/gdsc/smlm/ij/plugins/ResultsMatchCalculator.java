@@ -1,8 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Point;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -163,9 +161,6 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2, double dThreshold,
 			int increments, double delta)
 	{
-		int tp = 0, fp = 0, fn = 0;
-		//double rmsd = 0;
-
 		boolean requirePairs = showPairs || saveClassifications;
 
 		FilePeakResults fileResults = createFilePeakResults(results2);
@@ -188,6 +183,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
 		HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
 
+		int n1 = 0;
+		int n2 = 0;
+
 		// Process each time point
 		for (Integer t : getTimepoints(actualCoordinates, predictedCoordinates))
 		{
@@ -204,13 +202,11 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				FN = new LinkedList<Coordinate>();
 			}
 
-			MatchResult result = MatchCalculator.analyseResults2D(actual, predicted, maxDistance, TP, FP, FN, matches);
+			MatchCalculator.analyseResults2D(actual, predicted, maxDistance, TP, FP, FN, matches);
 
 			// Aggregate
-			tp += result.getTruePositives();
-			fp += result.getFalsePositives();
-			fn += result.getFalseNegatives();
-			//rmsd += (result.getRMSD() * result.getRMSD()) * result.getTruePositives();
+			n1 += actual.length;
+			n2 += predicted.length;
 
 			allMatches.addAll(matches);
 			if (showPairs)
@@ -242,35 +238,35 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 		// XXX : DEBUGGING : Output for signal correlation and fitting analysis
 		/*
-		try
-		{
-			OutputStreamWriter o = new OutputStreamWriter(new FileOutputStream("/tmp/ResultsMatchCalculator.txt"));
-			FilePeakResults r1 = new FilePeakResults("/tmp/" + results1.getName() + ".txt", false);
-			FilePeakResults r2 = new FilePeakResults("/tmp/" + results2.getName() + ".txt", false);
-			r1.begin();
-			r2.begin();
-			//OutputStreamWriter o2 = new OutputStreamWriter(new FileOutputStream("/tmp/"+results1.getName()+".txt"));
-			//OutputStreamWriter o3 = new OutputStreamWriter(new FileOutputStream("/tmp/"+results2.getName()+".txt"));
-			for (PointPair pair : allMatches)
-			{
-				PeakResult p1 = ((PeakResultPoint) pair.getPoint1()).peakResult;
-				PeakResult p2 = ((PeakResultPoint) pair.getPoint2()).peakResult;
-				r1.add(p1);
-				r2.add(p2);
-				o.write(Float.toString(p1.getSignal()));
-				o.write('\t');
-				o.write(Float.toString(p2.getSignal()));
-				o.write('\n');
-			}
-			o.close();
-			r1.end();
-			r2.end();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		*/
+		 * try
+		 * {
+		 * OutputStreamWriter o = new OutputStreamWriter(new FileOutputStream("/tmp/ResultsMatchCalculator.txt"));
+		 * FilePeakResults r1 = new FilePeakResults("/tmp/" + results1.getName() + ".txt", false);
+		 * FilePeakResults r2 = new FilePeakResults("/tmp/" + results2.getName() + ".txt", false);
+		 * r1.begin();
+		 * r2.begin();
+		 * //OutputStreamWriter o2 = new OutputStreamWriter(new FileOutputStream("/tmp/"+results1.getName()+".txt"));
+		 * //OutputStreamWriter o3 = new OutputStreamWriter(new FileOutputStream("/tmp/"+results2.getName()+".txt"));
+		 * for (PointPair pair : allMatches)
+		 * {
+		 * PeakResult p1 = ((PeakResultPoint) pair.getPoint1()).peakResult;
+		 * PeakResult p2 = ((PeakResultPoint) pair.getPoint2()).peakResult;
+		 * r1.add(p1);
+		 * r2.add(p2);
+		 * o.write(Float.toString(p1.getSignal()));
+		 * o.write('\t');
+		 * o.write(Float.toString(p2.getSignal()));
+		 * o.write('\n');
+		 * }
+		 * o.close();
+		 * r1.end();
+		 * r2.end();
+		 * }
+		 * catch (Exception e)
+		 * {
+		 * e.printStackTrace();
+		 * }
+		 */
 
 		boolean doIdAnalysis1 = (idAnalysis) ? haveIds(results1) : false;
 		boolean doIdAnalysis2 = (idAnalysis) ? haveIds(results2) : false;
@@ -304,8 +300,28 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				if (results1.getSource() != null && results1.getSource().getOriginal().getName().length() > 0)
 					title = results1.getSource().getOriginal().getName();
 				pairPainter.setTitle(title);
+				IJ.showStatus("Writing pairs table");
+				IJ.showProgress(0);
+				int c = 0;
+				final int total = pairs.size();
+				final int step = Utils.getProgressInterval(total);
+				final ArrayList<String> list = new ArrayList<String>(total);
+				boolean flush = true;
 				for (PointPair pair : pairs)
-					addPairResult(pair);
+				{
+
+					if (++c % step == 0)
+						IJ.showProgress(c, total);
+					list.add(addPairResult(pair));
+					if (flush && c == 9)
+					{
+						pairsWindow.getTextPanel().append(list);
+						list.clear();
+						flush = false;
+					}
+				}
+				pairsWindow.getTextPanel().append(list);
+				IJ.showProgress(1);
 			}
 		}
 		else
@@ -341,8 +357,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				}
 			}
 			// All non-true positives must be added to the false totals.
-			int fp2 = fp + tp - tp2;
-			int fn2 = fn + tp - tp2;
+			int fp2 = n2 - tp2;
+			int fn2 = n1 - tp2;
 
 			MatchResult result = new MatchResult(tp2, fp2, fn2, (tp2 > 0) ? Math.sqrt(rms / tp2) : 0);
 
@@ -664,7 +680,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		return null;
 	}
 
-	private void addPairResult(PointPair pair)
+	private String addPairResult(PointPair pair)
 	{
 		StringBuilder sb = new StringBuilder();
 		PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
@@ -678,7 +694,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			sb.append(Utils.rounded(d, 4)).append("\t");
 		else
 			sb.append("-\t");
-		pairsWindow.append(sb.toString());
+		return sb.toString();
 	}
 
 	private void addPoint(StringBuilder sb, PeakResultPoint p)
