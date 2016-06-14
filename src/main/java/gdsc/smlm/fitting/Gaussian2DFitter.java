@@ -537,8 +537,10 @@ public class Gaussian2DFitter
 		{
 			// Some methods can fit negative data, e.g. PoissonGaussian or PoissonGammaGaussian.
 			if (background < fitConfiguration.getBias())
-				// TODO - remove this
-				System.out.printf("Background %f < Bias %f\n", background, fitConfiguration.getBias());
+			{
+				// Debugging: remove this
+				//System.out.printf("Background %f < Bias %f\n", background, fitConfiguration.getBias());
+			}
 
 			// No negative data
 			//bias = FastMath.min(background, fitConfiguration.getBias());
@@ -706,7 +708,11 @@ public class Gaussian2DFitter
 				upper[0] = yMax;
 			else
 				upper[0] = params[0] + (params[0] - yMax);
-			lower[0] = Math.min(yMin, 0);
+
+			if (yMin < params[0])
+				lower[0] = yMin;
+			else
+				lower[0] = params[0] - (yMin - params[0]);
 		}
 
 		final double wf = (fitConfiguration.getWidthFactor() > 1 &&
@@ -774,8 +780,8 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * Sets the constraints for the fitted parameters. This functions set the lower bounds of the background and
-	 * signal to zero.
+	 * Sets the constraints for the fitted parameters. This functions set the lower bounds of the signal to zero and
+	 * background to zero (or negative if the background estimate is < 0).
 	 * 
 	 * @param maxx
 	 *            The x range of the data
@@ -800,7 +806,22 @@ public class Gaussian2DFitter
 		double[] upper = new double[lower.length];
 		Arrays.fill(lower, Float.NEGATIVE_INFINITY);
 		Arrays.fill(upper, Float.POSITIVE_INFINITY);
-		lower[Gaussian2DFunction.BACKGROUND] = 0;
+
+		// If the bias is subtracted then we may have negative data and a background estimate that is negative
+		if (params[0] < 0)
+		{
+			double yMin = 0;
+			for (int i = 0; i < ySize; i++)
+			{
+				if (yMin > y[i])
+					yMin = y[i];
+			}
+			if (yMin < params[0])
+				lower[0] = yMin;
+			else
+				lower[0] = params[0] - (yMin - params[0]);
+		}
+
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 		{
 			lower[j + Gaussian2DFunction.SIGNAL] = 0;
