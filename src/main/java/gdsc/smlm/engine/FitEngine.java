@@ -13,14 +13,17 @@ package gdsc.smlm.engine;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.filters.MaximaSpotFilter;
-import gdsc.smlm.results.PeakResults;
-
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import gdsc.core.logging.FileLogger;
+
+import gdsc.smlm.filters.MaximaSpotFilter;
+import gdsc.smlm.results.PeakResults;
 
 /**
  * Fits local maxima using a 2D Gaussian.
@@ -44,6 +47,7 @@ public class FitEngine
 	// Used by the FitWorkers 
 	private int fitting;
 	private MaximaSpotFilter spotFilter;
+	private FileLogger logger = null;
 
 	/**
 	 * Return the fitting window size calculated using the fitting parameter and the configured peak
@@ -122,12 +126,24 @@ public class FitEngine
 		fitting = config.getRelativeFitting();
 		spotFilter = config.createSpotFilter(true);
 
+		//		// Allow debugging the fit process
+		//		try
+		//		{
+		//			logger = new FileLogger(
+		//					String.format("/tmp/%s%s.log", config.getFitConfiguration().getFitSolver().getShortName(),
+		//							(config.getFitConfiguration().isModelCamera()) ? "C" : ""));
+		//		}
+		//		catch (FileNotFoundException e)
+		//		{
+		//		}
+
 		// Create the workers
 		for (int i = 0; i < threads; i++)
 		{
 			// Note - Clone the configuration and spot filter for each worker
 			FitWorker worker = new FitWorker(config.clone(), results, jobs);
 			worker.setSearchParameters(getSpotFilter(), fitting);
+			worker.setLogger2(logger);
 			Thread t = new Thread(worker);
 
 			workers.add(worker);
@@ -238,6 +254,8 @@ public class FitEngine
 			}
 		}
 
+		if (logger != null)
+			logger.close();
 		threads.clear();
 	}
 
