@@ -57,6 +57,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 
 	private boolean useApproximation = true;
 	private boolean useSimpleIntegration = true;
+	private double minimumProbability = Double.MIN_VALUE;
 
 	/**
 	 * Initialise the function.
@@ -101,6 +102,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 		if (sigma == 0)
 		{
 			// No convolution with a Gaussian. Simply evaluate for a Poisson-Gamma distribution.
+			final double p;
 
 			// Any observed count above zero
 			if (cij > 0.0)
@@ -120,23 +122,25 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 
 					final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
 							Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
-					return FastMath.exp(transform);
+					p = FastMath.exp(transform);
 				}
 				else
 				{
 					// Second part of equation 135
-					return Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) *
+					p = Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) *
 							Bessel.I1(2 * Math.sqrt(eta * nij));
 				}
 			}
 			else if (cij == 0.0)
 			{
-				return FastMath.exp(-eta);
+				p = FastMath.exp(-eta);
 			}
 			else
 			{
-				return 0;
+				p = 0;
 			}
+			
+			return (p > minimumProbability) ? p : minimumProbability;			
 		}
 		else if (useApproximation)
 		{
@@ -248,9 +252,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 			// Compute the final probability
 			//final double 
 			f1 = z / sqrt2sigma;
-			return (FastMath.exp(-vk) / (sqrt2pi * sk)) * (FastMath.exp(-(f1 * f1)) + sum);
+			final double p = (FastMath.exp(-vk) / (sqrt2pi * sk)) * (FastMath.exp(-(f1 * f1)) + sum);
+			return (p > minimumProbability) ? p : minimumProbability;			
 		}
 	}
+
+	//private static double pMinObserved = 1;
 
 	private double mortensenApproximation(final double cij, final double eta)
 	{
@@ -305,7 +312,14 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 			}
 		}
 
-		return temp;
+		// XXX : Debugging: Store the smallest likelihood we ever see. 
+		// This can be used to set a limit for the likelihood
+		//if (pMinObserved > temp && temp > 0)
+		//{
+		//	pMinObserved = temp;
+		//}
+
+		return (temp > minimumProbability) ? temp : minimumProbability;
 	}
 
 	private double eval(double sqrt2sigma, double z, double vk_g, double g, double u)
@@ -386,5 +400,28 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 	public double getSigma()
 	{
 		return sigma;
+	}
+
+	/**
+	 * Gets the minimum probability that will ever be returned. Setting this above zero allows the use of Math.log() on
+	 * the likelihood value.
+	 *
+	 * @return the minimum probability
+	 */
+	public double getMinimumProbability()
+	{
+		return minimumProbability;
+	}
+
+	/**
+	 * Sets the minimum probability that will ever be returned. Setting this above zero allows the use of Math.log() on
+	 * the likelihood value.
+	 *
+	 * @param p
+	 *            the new minimum probability
+	 */
+	public void setMinimumProbability(double p)
+	{
+		this.minimumProbability = p;
 	}
 }
