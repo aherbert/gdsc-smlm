@@ -175,9 +175,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 
 	/**
 	 * Add a result. Not synchronized.
-	 * 
-	 * @param result
+	 *
+	 * @param result the result
 	 */
+	@Override
 	public void add(PeakResult result)
 	{
 		results.add(result);
