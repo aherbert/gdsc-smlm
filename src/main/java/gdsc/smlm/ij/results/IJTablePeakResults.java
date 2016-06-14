@@ -107,7 +107,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			}
 		}
 		size = 0;
-		nextRepaintSize = 20; // Let some results appear before drawing
+		// Let some results appear before drawing.
+		// ImageJ will auto-layout columns if it has less than 10 rows
+		nextRepaintSize = 9; 
 		tableActive = true;
 	}
 
