@@ -56,11 +56,10 @@ public class SummariseResults implements PlugIn
 		for (MemoryPeakResults result : MemoryPeakResults.getAllResults())
 		{
 			addSummary(sb, result);
-			if (++i >= nextFlush)
+			if (++i == nextFlush)
 			{
 				summary.append(sb.toString());
 				sb.setLength(0);
-				nextFlush = Integer.MAX_VALUE;
 			}
 		}
 		summary.append(sb.toString());
