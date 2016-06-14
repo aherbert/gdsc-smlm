@@ -231,10 +231,18 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 
 		//int resets = 0;
 
+		//PointValuePair solution = null;
+		//PointValuePair finalSolution = null;
+		//int solutionIter = 0, solutionEval = 0;
+		//double startValue = 0;
+
+		//try
+		//{
 		double[] x = guess;
 		// Ensure the point is within bounds
-		applyBounds(x);		
+		applyBounds(x);
 		double fVal = computeObjectiveValue(x);
+		//startValue = fVal;
 		double[] x1 = x.clone();
 		while (true)
 		{
@@ -270,7 +278,21 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			{
 				// Default convergence check on value
 				//stop = 2 * (fX - fVal) <= (relativeThreshold * (FastMath.abs(fX) + FastMath.abs(fVal)) + absoluteThreshold);
-				stop = DoubleEquality.almostEqualRelativeOrAbsolute(fX, fVal, relativeThreshold, absoluteThreshold);
+
+				// Check if we have improved from an impossible position
+				if (Double.isInfinite(fX) || Double.isNaN(fX))
+				{
+					if (Double.isInfinite(fVal) || Double.isNaN(fVal))
+					{
+						// Nowhere to go 
+						stop = true;
+					}
+					// else: this is better as we now have a value, so continue
+				}
+				else
+				{
+					stop = DoubleEquality.almostEqualRelativeOrAbsolute(fX, fVal, relativeThreshold, absoluteThreshold);
+				}
 			}
 
 			final PointValuePair previous = new PointValuePair(x1, fX);
@@ -293,14 +315,26 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				else
 				{
 					//System.out.printf("Resets = %d\n", resets);
+					final PointValuePair answer;
 					if (goal == GoalType.MINIMIZE)
 					{
-						return (fVal < fX) ? current : previous;
+						answer = (fVal < fX) ? current : previous;
 					}
 					else
 					{
-						return (fVal > fX) ? current : previous;
+						answer = (fVal > fX) ? current : previous;
 					}
+					return answer;
+
+					// XXX Debugging
+					// Continue the algorithm to see how far it goes
+					//if (solution == null)
+					//{
+					//	solution = answer;
+					//	solutionIter = getIterations();
+					//	solutionEval = getEvaluations();
+					//}
+					//finalSolution = answer;
 				}
 			}
 
@@ -317,7 +351,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				d[i] = x[i] - x1[i];
 				x2[i] = x[i] + d[i];
 			}
-			applyBounds(x2);		
+			applyBounds(x2);
 
 			x1 = x.clone();
 			fX2 = computeObjectiveValue(x2);
@@ -357,6 +391,18 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 				}
 			}
 		}
+		//}
+		//catch (RuntimeException e)
+		//{
+		//	if (solution != null)
+		//	{
+		//		System.out.printf("Start %f : Initial %f (%d,%d) : Final %f (%d,%d) : %f\n", startValue,
+		//				solution.getValue(), solutionIter, solutionEval, finalSolution.getValue(), getIterations(),
+		//				getEvaluations(), DoubleEquality.relativeError(finalSolution.getValue(), solution.getValue()));
+		//		return finalSolution;
+		//	}
+		//	throw e;
+		//}
 	}
 
 	private double[][] createBasisVectors(final int n)
@@ -402,7 +448,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			nD[i] = d[i] * optimum;
 			nP[i] = p[i] + nD[i];
 		}
-		applyBounds(nP);		
+		applyBounds(nP);
 
 		final double[][] result = new double[2][];
 		result[0] = nP;
@@ -430,7 +476,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 		{
 			nP[i] = p[i] + d[i] * optimum;
 		}
-		applyBounds(nP);		
+		applyBounds(nP);
 		return nP;
 	}
 
