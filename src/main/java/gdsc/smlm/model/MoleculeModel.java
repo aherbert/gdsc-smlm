@@ -1,6 +1,5 @@
 package gdsc.smlm.model;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /*----------------------------------------------------------------------------- 

@@ -48,12 +48,12 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, double[], double[], double[], double[], double[], double)
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(int, double[], double[], double[], double[],
+	 * double[], double)
 	 */
-	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
+	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
+			double noise)
 	{
-		numberOfFittedPoints = n;
-
 		try
 		{
 			// Different convergence thresholds seem to have no effect on the resulting fit, only the number of
@@ -80,13 +80,13 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 
 			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
-			PointVectorValuePair optimum = optimizer
-					.optimize(new MaxIter(getMaxEvaluations()), new MaxEval(Integer.MAX_VALUE),
-							new ModelFunctionJacobian(new MultivariateMatrixFunctionWrapper(f, a, n)), new ModelFunction(
-									new MultivariateVectorFunctionWrapper(f, a, n)), new Target(yd), new Weight(w), new InitialGuess(
-									initialSolution));
+			PointVectorValuePair optimum = optimizer.optimize(new MaxIter(getMaxEvaluations()),
+					new MaxEval(Integer.MAX_VALUE),
+					new ModelFunctionJacobian(new MultivariateMatrixFunctionWrapper(f, a, n)),
+					new ModelFunction(new MultivariateVectorFunctionWrapper(f, a, n)), new Target(yd), new Weight(w),
+					new InitialGuess(initialSolution));
 
-			final double[] parameters = optimum.getPoint();
+			final double[] parameters = optimum.getPointRef();
 			setSolution(a, parameters);
 			iterations = optimizer.getIterations();
 			evaluations = optimizer.getEvaluations();
@@ -95,16 +95,20 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 				double[][] covar = optimizer.computeCovariances(parameters, threshold);
 				setDeviations(a_dev, covar);
 			}
-			// Compute fitted function if desired 
+			// Compute sum-of-squares
 			if (y_fit != null)
 			{
-				f.initialise(a);
-				for (int i = 0; i < n; i++)
-					y_fit[i] = f.eval(i);
+				final double[] optimumValue = optimum.getValue();
+				System.arraycopy(optimumValue, 0, y_fit, 0, n);
+				//f.initialise(a);
+				//for (int i = 0; i < n; i++)
+				//{
+				//	y_fit[i] = f.eval(i);
+				//}
 			}
 
-			residualSumOfSquares = error[0] = optimizer.getChiSquare();
-			totalSumOfSquares = getSumOfSquares(n, y);
+			value = residualSumOfSquares = optimizer.getChiSquare();
+			error[0] = getError(residualSumOfSquares, noise, n, initialSolution.length);
 		}
 		catch (TooManyEvaluationsException e)
 		{

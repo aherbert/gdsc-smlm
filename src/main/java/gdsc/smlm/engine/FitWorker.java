@@ -20,6 +20,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitResult;
+import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -27,6 +28,7 @@ import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
@@ -1142,11 +1144,11 @@ public class FitWorker implements Runnable
 		fittedNeighbourCount = 0;
 		if (!sliceResults.isEmpty())
 		{
-			float range = (float) FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
-			float xmin2 = xmin - range;
-			float xmax2 = xmax + range;
-			float ymin2 = ymin - range;
-			float ymax2 = ymax + range;
+			final float range = (float) FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+			final float xmin2 = xmin - range;
+			final float xmax2 = xmax + range;
+			final float ymin2 = ymin - range;
+			final float ymax2 = ymax + range;
 			for (int i = 0; i < sliceResults.size(); i++)
 			{
 				PeakResult result = sliceResults.get(i);
@@ -1201,7 +1203,7 @@ public class FitWorker implements Runnable
 		 * When two fluorophores emit close to each other, typically the nonlinear fit will result in a suspected
 		 * fluorophore position midway between the two fluorophores and with a high amplitude. In this case, the fit
 		 * results show a characteristic handle structure: The two true fluorophore emissions leave slightly positive
-		 * resiudes, while there are negative residues on an axis perpendicular to the one connecting the fluorophores.
+		 * residues, while there are negative residues on an axis perpendicular to the one connecting the fluorophores.
 		 * 
 		 * This condition is detected well by quadrant-differential residue analysis: The residue matrix is divided into
 		 * quadrants, with the pixels above both diagonals forming the upper quadrant, the pixels above the main and
@@ -1359,7 +1361,7 @@ public class FitWorker implements Runnable
 		if (x1 == x2 && y1 == y2)
 		{
 			//System.out.println("matching points");
-			// This can only happen when the fitted with is zero due to the round() function 
+			// This can only happen when the fitted width is zero due to the round() function 
 			// moving to the next integer. If they are the same then the value should be cx,cy
 			// and we can move along the vector.
 			x1 += vector[0];
@@ -1417,6 +1419,7 @@ public class FitWorker implements Runnable
 
 		// Store the residual sum-of-squares from the previous fit
 		final double singleSumOfSquares = gf.getFinalResidualSumOfSquares();
+		final double singleValue = gf.getValue();
 
 		// Disable checking of position movement since we guessed the 2-peak location.
 		// Increase the iterations level then reset afterwards.
@@ -1434,7 +1437,7 @@ public class FitWorker implements Runnable
 		fitConfig.setCoordinateShift(shift);
 		fitConfig.setMaxIterations(maxIterations);
 
-		// Allow bad fits since these are due to peak width divergence or low signal for all peaks.
+		// Q. Allow bad fits since these are due to peak width divergence or low signal for all peaks?
 		if (newFitResult.getStatus() == FitStatus.OK) // || newFitResult.getResult() == Result.BAD_FIT)
 		{
 			// Check if the residuals are better using the adjusted coefficient of determination.
@@ -1452,14 +1455,33 @@ public class FitWorker implements Runnable
 			//double newAdjustedR2 = getAdjustedCoefficientOfDetermination(doubleSumOfSquares, SStotal, length,
 			//		newFitResult.getInitialParameters().length);
 
-			final double ic1 = getInformationCriterion(singleSumOfSquares, length,
-					fitResult.getNumberOfFittedParameters());
-			final double ic2 = getInformationCriterion(doubleSumOfSquares, length,
-					newFitResult.getNumberOfFittedParameters());
+			final double ic1, ic2;
 
-			if (logger != null)
-				logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,
-						ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+			// Get the likelihood for the fit.
+			if (fitConfig.getFitSolver() == FitSolver.MLE)
+			{
+				// This is computed directly by the maximum likelihood estimator
+				final double doubleValue = gf.getValue();
+				ic1 = Maths.getInformationCriterionFromLL(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getInformationCriterionFromLL(doubleValue, length,
+						newFitResult.getNumberOfFittedParameters());
+				if (logger != null)
+					logger.info("Model improvement - Sum-of-squares, MLE (AIC) : %f, %f (%f) => %f, %f (%f) : %f",
+							singleSumOfSquares, singleValue, ic1, doubleSumOfSquares, doubleValue, ic2, ic1 - ic2);
+			}
+			else
+			{
+				// If using the least squares estimator then we can get the log likelihood from an approximation
+				// (TODO - we could build a likelihood function using a Poisson model. This may be better than 
+				// the approximation from the residuals)
+				ic1 = Maths.getInformationCriterion(singleSumOfSquares, length,
+						fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getInformationCriterion(doubleSumOfSquares, length,
+						newFitResult.getNumberOfFittedParameters());
+				if (logger != null)
+					logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f",
+							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+			}
 
 			// Check if the predictive power of the model is better with two peaks:
 			// AIC should be lower
@@ -1480,11 +1502,18 @@ public class FitWorker implements Runnable
 				// so add a 0.5 shift to the coordinates.
 				final double xpos = newParams[Gaussian2DFunction.X_POSITION + n * 6] + 0.5;
 				final double ypos = newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5;
-				if (xpos < 0 || xpos > regionBounds.width || ypos < 0 || ypos > regionBounds.height)
+
+				// Set the bounds using the expected HWHM
+				final double hwhm = Maths.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1(), 1) *
+						GaussianFunction.SD_TO_HWHM_FACTOR;
+
+				if (xpos < -hwhm || xpos > regionBounds.width + hwhm || ypos < -hwhm ||
+						ypos > regionBounds.height + hwhm)
 				{
 					if (logger != null)
-						logger.info("Fitted coordinates outside the fitted region (x %g <> %d || y %g <> %d)", xpos,
-								regionBounds.width, ypos, regionBounds.height);
+						logger.info("Fitted coordinates too far outside the fitted region (x %g || y %g)",
+								xpos + bounds.x + regionBounds.x, regionBounds.width, ypos + bounds.y + regionBounds.y,
+								regionBounds.height);
 					printFitResults(newFitResult, region, width, height, 2, 1, gf.getIterations(), ic1, ic2);
 					return null;
 				}
@@ -1523,13 +1552,22 @@ public class FitWorker implements Runnable
 							params[Gaussian2DFunction.Y_POSITION];
 					if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
 					{
-						if (logger != null)
-							logger.info("Bad peak %d: Fitted coordinates moved (x=%g,y=%g)", n, xShift, yShift);
+						// Allow large shifts if they are along the vector
+						final double a = getAngle(vector, new double[] { xShift, yShift });
+						// Check the domain is OK (the angle is in radians). 
+						// Allow up to a 45 degree difference to show the shift is along the vector
+						if (a > 0.785398 && a < 2.356194)
+						{
+							if (logger != null)
+							{
+								logger.info(
+										"Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
+										xShift, yShift, a * 57.29578);
+							}
+							continue;
+						}
 					}
-					else
-					{
-						position[nPeaks++] = n;
-					}
+					position[nPeaks++] = n;
 				}
 
 				printFitResults(newFitResult, region, width, height, 2, 3 + nPeaks, gf.getIterations(), ic1, ic2);
@@ -1578,55 +1616,52 @@ public class FitWorker implements Runnable
 				printFitResults(newFitResult, region, width, height, 2, 2, gf.getIterations(), ic1, ic2);
 			}
 
-			// TODO - Should a check still be made for duplicate peaks? 
-			// It could be that splitting the single into a double peak has resulted in a fit of a 
-			// previously fitted peak.  
+			// Note: When adding results we should check for duplicate peaks, but allow the 
+			// doublet to be closer than the duplicate distance.  
 
 			return newFitResult;
+		}
+		else
+		{
+			if (logger != null)
+				logger.info("Unable to fit 2-kernel model : %s", newFitResult.getStatus());
 		}
 
 		return null;
 	}
 
 	/**
-	 * @param sumOfSquaredResiduals
-	 *            the sum of squared residuals from the nonlinear least-squares fit
-	 * @param n
-	 *            The number of data points
-	 * @param p
-	 *            The number of fitted parameters
-	 * @return The Information Criterion
+	 * Gets the angle.
+	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
+	 * @return the angle (in radians)
 	 */
-	private double getInformationCriterion(double sumOfSquaredResiduals, int n, int p)
+	private double getAngle(int[] a, double[] b)
 	{
-		final double logLikelihood = 0.5 *
-				(-n * (Math.log(2 * Math.PI) + 1 - Math.log(n) + Math.log(sumOfSquaredResiduals)));
+		double d1 = a[0] * a[0] + a[1] * a[1];
+		double d2 = b[0] * b[0] + b[1] * b[1];
+		if (d1 > 0.0 && d2 > 0.0)
+		{
+			d1 = Math.sqrt(d1);
+			d2 = Math.sqrt(d2);
+			final double sum = a[0] * b[0] + a[1] * b[1];
+			final double cosang = sum / (d1 * d2);
 
-		// Note: The true bias corrected AIC is derived from the 2nd, 3rd and 4th derivatives of the 
-		// negative log-likelihood function. This is complex and so is not implemented.
-		// See: 
-		// http://www.math.sci.hiroshima-u.ac.jp/stat/TR/TR11/TR11-06.pdf
-		// http://www.sciencedirect.com/science/article/pii/S0024379512000821#
+			if (cosang > 1.0)
+			{
+				return 0;
+			}
+			else if (cosang < -1.0)
+			{
+				return Math.PI;
+			}
 
-		// This paper explains that the AIC or BIC are much better than the Adjusted coefficient of determination
-		// for model selection:
-		// http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/
-
-		//double aic = 2.0 * p - 2.0 * logLikelihood;
-
-		// The Bias Corrected Akaike Information Criterion (AICc)
-		// http://en.wikipedia.org/wiki/Akaike_information_criterion#AICc
-		// Assumes a univariate linear model. We have a multivariate model (x,y): does this matter?
-		//aic = aic + (2.0 * p * (p + 1)) / (n - p - 1);
-
-		// Optimised 
-		final double aic = 2.0 * (p - logLikelihood) + (2.0 * p * (p + 1)) / (n - p - 1);
-
-		// Bayesian Information Criterion (BIC), which gives a higher penalty on the number of parameters
-		// http://en.wikipedia.org/wiki/Bayesian_information_criterion
-		//final double bic = p * Math.log(n) - 2.0 * logLikelihood;
-
-		return aic;
+			return Math.acos(cosang);
+		}
+		return 999;
 	}
 
 	/**
@@ -1818,11 +1853,12 @@ public class FitWorker implements Runnable
 	{
 		this.updateInitialParameters = updateInitialParameters;
 	}
-	
+
 	/**
 	 * Sets the 2nd logger instance. This can be used for capturing debugging information.
 	 *
-	 * @param logger the new logger
+	 * @param logger
+	 *            the new logger
 	 */
 	public void setLogger2(Logger logger)
 	{

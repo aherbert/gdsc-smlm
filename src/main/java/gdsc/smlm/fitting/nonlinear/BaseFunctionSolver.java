@@ -31,6 +31,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	protected int numberOfFittedPoints;
 	protected int iterations;
 	protected int evaluations;
+	protected double value;
 
 	/**
 	 * Default constructor
@@ -45,7 +46,41 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, double[], double[], double[], double[], double[], double)
 	 */
-	public abstract FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
+	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
+	{
+		// Reset the results
+		residualSumOfSquares = 0;
+		numberOfFittedPoints = n;
+		iterations = 0;
+		evaluations = 0;
+		value = 0;
+		FitStatus status = computeFit(n, y, y_fit, a, a_dev, error, noise);
+		// Compute the total sum of squares if a good fit
+		if (status == FitStatus.OK)
+			totalSumOfSquares = getSumOfSquares(n, y);
+		return status;
+	}
+
+	/**
+	 * Compute fit.
+	 *
+	 * @param n
+	 *            the n
+	 * @param y
+	 *            the y
+	 * @param y_fit
+	 *            the y_fit
+	 * @param a
+	 *            the a
+	 * @param a_dev
+	 *            the a_dev
+	 * @param error
+	 *            the error
+	 * @param noise
+	 *            the noise
+	 * @return the fit status
+	 */
+	public abstract FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
 			double noise);
 
 	public double[] getInitialSolution(double[] params)
@@ -61,7 +96,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	{
 		int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
-			params[indices[i]] = (double) solution[i];
+			params[indices[i]] = solution[i];
 	}
 
 	public void setDeviations(double[] deviations, double[][] covar)
@@ -229,5 +264,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	public void setConstraints(double[] lower, double[] upper)
 	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#getValue()
+	 */
+	public double getValue()
+	{
+		return value;
 	}
 }

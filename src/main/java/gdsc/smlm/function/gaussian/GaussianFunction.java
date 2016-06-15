@@ -27,6 +27,16 @@ import gdsc.smlm.function.NonLinearFunction;
  */
 public abstract class GaussianFunction implements NonLinearFunction
 {
+	/**
+	 * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
+	 */
+	public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
+
+	/**
+	 * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM)
+	 */
+	public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
+	
 	private NoiseModel noiseModel = null;
 
 	/**

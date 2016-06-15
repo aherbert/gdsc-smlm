@@ -115,4 +115,11 @@ public interface FunctionSolver
 	 * @param upper
 	 */
 	public void setConstraints(double[] lower, double[] upper);
+
+	/**
+	 * The function value for the solution.
+	 *
+	 * @return the value
+	 */
+	public double getValue();
 }

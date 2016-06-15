@@ -109,15 +109,11 @@ public class NonLinearFit extends BaseFunctionSolver
 
 		if (initialStage)
 		{
-			numberOfFittedPoints = n;
-			residualSumOfSquares = 0;
-
 			lambda = initialLambda;
 			for (int j = a.length; j-- > 0;)
 				ap[j] = a[j];
 			sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = calculator.findLinearised(n, y, a, alpha, beta, f);
 			initialResidualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
-			totalSumOfSquares = getSumOfSquares(n, y);
 			if (calculator.isNaNGradients())
 			{
 				//System.out.println("Bad initial gradients");
@@ -230,7 +226,7 @@ public class NonLinearFit extends BaseFunctionSolver
 				y_fit[i] = f.eval(i);
 		}
 
-		residualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
+		value = residualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
 		error[0] = getError(residualSumOfSquares, noise, n, gradientIndices.length);
 
 		return FitStatus.OK;
@@ -255,14 +251,12 @@ public class NonLinearFit extends BaseFunctionSolver
 	 * @param error
 	 *            Output parameter. The Mean-Squared Error (MSE) for the fit if noise is 0. If noise is provided then
 	 *            this will be applied to create a reduced chi-square measure.
-	 * @param sc
-	 *            The stopping criteria for the function
 	 * @param noise
 	 *            Estimate of the noise in the individual measurements
 	 * @return The fit status
 	 */
-	public FitStatus fit(final int n, final double[] y, final double[] y_fit, final double[] a, final double[] a_dev,
-			final double[] error, final StoppingCriteria sc, final double noise)
+	public FitStatus computeFit(final int n, final double[] y, final double[] y_fit, final double[] a, final double[] a_dev,
+			final double[] error, final double noise)
 	{
 		final int nparams = f.gradientIndices().length;
 
@@ -344,16 +338,5 @@ public class NonLinearFit extends BaseFunctionSolver
 		if (sc == null)
 			sc = new ErrorStoppingCriteria();
 		this.sc = sc;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#fit(int, double[], double[], double[], double[], double[],
-	 * double)
-	 */
-	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
-	{
-		return fit(n, y, y_fit, a, a_dev, error, sc, noise);
 	}
 }

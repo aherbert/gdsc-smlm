@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.function.gaussian.GaussianFunction;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -43,16 +45,6 @@ public class PSFCalculator implements PlugIn, DialogListener
 	 * Standard Deviation = f * lambda / (2 * pi * NA).
 	 */
 	public static final double AIRY_TO_GAUSSIAN = 1.323;
-
-	/**
-	 * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
-	 */
-	public static final double SD_TO_FWHM_FACTOR = (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
-
-	/**
-	 * The factor for converting a Gaussian standard deviation to Half Width at Half Maxima (FWHM)
-	 */
-	public static final double SD_TO_HWHM_FACTOR = (Math.sqrt(2.0 * Math.log(2.0)));
 
 	private PSFCalculatorSettings settings;
 	private GenericDialog gd;
@@ -130,7 +122,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 				settings.wavelength, settings.numericalAperture, settings.proportionalityFactor,
 				settings.adjustForSquarePixels);
 		gd.addNumericField("StdDev (pixels)", sd, 3);
-		gd.addNumericField("HWHM (pixels)", sd * SD_TO_HWHM_FACTOR, 3);
+		gd.addNumericField("HWHM (pixels)", sd * GaussianFunction.SD_TO_HWHM_FACTOR, 3);
 
 		if (!simpleMode)
 		{
@@ -395,7 +387,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
 							numericalAperture, proportionalityFactor, adjustForSquarePixels);
 					sdPixelsText.setText(IJ.d2s(sd, 3));
-					fwhmPixelsText.setText(IJ.d2s(sd * SD_TO_HWHM_FACTOR, 3));
+					fwhmPixelsText.setText(IJ.d2s(sd * GaussianFunction.SD_TO_HWHM_FACTOR, 3));
 
 					double s = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
 							numericalAperture, 1, false);

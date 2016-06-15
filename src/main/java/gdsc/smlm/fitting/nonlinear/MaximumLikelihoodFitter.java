@@ -341,15 +341,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		this.mapGaussian = mapGaussian;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#fit(int, double[], double[], double[], double[], double[], double)
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(int, double[], double[], double[], double[], double[], double)
 	 */
-	public FitStatus fit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
+	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
 	{
-		numberOfFittedPoints = n;
-
 		LikelihoodWrapper maximumLikelihoodFunction = null;
 
 		// We can use different likelihood wrapper functions:
@@ -722,7 +718,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			}
 
 			error[0] = NonLinearFit.getError(residualSumOfSquares, noise, n, f.gradientIndices().length);
-			totalSumOfSquares = getSumOfSquares(n, y);
+			// Reverse negative log likelihood for maximum likelihood score
+			value = -optimum.getValue();
 		}
 		catch (TooManyIterationsException e)
 		{

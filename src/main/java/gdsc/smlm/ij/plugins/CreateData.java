@@ -72,6 +72,7 @@ import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.Atom;
 import gdsc.smlm.ij.settings.Compound;
@@ -1112,7 +1113,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final double sd = (settings.enterWidth) ? settings.psfSD
 						: PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture);
 
-				hwhm = 0.5 * PSFCalculator.SD_TO_FWHM_FACTOR * sd / settings.pixelPitch;
+				hwhm = 0.5 * GaussianFunction.SD_TO_FWHM_FACTOR * sd / settings.pixelPitch;
 			}
 		}
 		return hwhm;
@@ -1125,7 +1126,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private double getPsfSD()
 	{
-		return 2.0 * getHWHM() / PSFCalculator.SD_TO_FWHM_FACTOR;
+		return 2.0 * getHWHM() / GaussianFunction.SD_TO_FWHM_FACTOR;
 	}
 
 	/**

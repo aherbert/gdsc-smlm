@@ -21,6 +21,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFOffset;
 import gdsc.smlm.ij.settings.PSFSettings;
@@ -503,7 +504,7 @@ public class PSFDrift implements PlugIn
 		// Create robust PSF fitting settings
 		final double a = psfSettings.nmPerPixel * scale;
 		final double sa = PSFCalculator.squarePixelAdjustment(psfSettings.nmPerPixel *
-				(psfSettings.fwhm / PSFCalculator.SD_TO_FWHM_FACTOR), a);
+				(psfSettings.fwhm / GaussianFunction.SD_TO_FWHM_FACTOR), a);
 		fitConfig.setInitialPeakStdDev(sa / a);
 		fitConfig.setBackgroundFitting(backgroundFitting);
 		fitConfig.setNotSignalFitting(false);

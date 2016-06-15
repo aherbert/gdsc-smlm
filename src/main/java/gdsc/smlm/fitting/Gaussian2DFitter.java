@@ -1008,4 +1008,12 @@ public class Gaussian2DFitter
 		if (maximumWidthFactor > 1)
 			this.maximumWidthFactor = maximumWidthFactor;
 	}
+	
+	/**
+	 * @return the optimised function value for the last fit
+	 */
+	public double getValue()
+	{
+		return (solver != null) ? solver.getValue() : 0;
+	}
 }
