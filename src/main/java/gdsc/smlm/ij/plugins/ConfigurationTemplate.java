@@ -63,6 +63,11 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setPrecisionThreshold(45);
 		addTemplate("PALM LSE", config, false);
 
+		// Add settings for STORM ...
+		config.setResidualsThreshold(0.5);
+		addTemplate("STORM LSE", config, false);
+		config.setResidualsThreshold(1);
+		
 		// Change settings for different fit engines
 		fitConfig.setFitSolver(FitSolver.MLE);
 		config.setDataFilter(DataFilter.GAUSSIAN, 1.2, 0);
@@ -73,6 +78,11 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setPrecisionThreshold(47);
 		addTemplate("PALM MLE", config, false);
 
+		// Add settings for STORM ...
+		config.setResidualsThreshold(0.5);
+		addTemplate("STORM MLE", config, false);
+		config.setResidualsThreshold(1);
+		
 		fitConfig.setModelCamera(true);
 		fitConfig.setCoordinateShiftFactor(1.5);
 		fitConfig.setSignalStrength(30);
@@ -80,8 +90,11 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(50);
 		addTemplate("PALM MLE Camera", config, false);
-
-		// TODO: Add settings for STORM ...
+		
+		// Add settings for STORM ...
+		config.setResidualsThreshold(0.5);
+		addTemplate("STORM MLE Camera", config, false);
+		config.setResidualsThreshold(1);
 	}
 
 	private static void addTemplate(String name, FitEngineConfiguration config, boolean custom)
