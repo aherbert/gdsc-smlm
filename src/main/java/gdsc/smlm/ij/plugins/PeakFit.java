@@ -1296,9 +1296,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
 				if (template.isFitEngineConfiguration())
 				{
-					FitEngineConfiguration templateConfig = template.getFitEngineConfiguration().clone();
-
-					refreshSettings(templateConfig, custom);
+					refreshSettings(template.getFitEngineConfiguration().clone(), custom);
 				}
 				if (template.isCalibration())
 				{
