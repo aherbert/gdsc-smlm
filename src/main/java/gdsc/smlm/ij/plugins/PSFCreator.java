@@ -1,5 +1,37 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
+import java.awt.Checkbox;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.match.BasePoint;
+import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.ImageWindow;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Sort;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -23,17 +55,9 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.BasePoint;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.ImageExtractor;
-import gdsc.core.utils.ImageWindow;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Sort;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -52,29 +76,6 @@ import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-
-import java.awt.AWTEvent;
-import java.awt.Checkbox;
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Rectangle;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Produces an average PSF image using selected diffraction limited spots from a sample image.
@@ -507,10 +508,10 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		String title = TITLE + " CoM Drift";
 		Plot2 plot = new Plot2(title, "Slice", "Drift (nm)");
 		plot.addLabel(0, 0, "Red = X; Blue = Y");
-		double[] limitsX = Maths.limits(com[0]);
-		double[] limitsY = Maths.limits(com[1]);
-		//double[] limitsX = getLimits(com[0]);
-		//double[] limitsY = getLimits(com[1]);
+		//double[] limitsX = Maths.limits(com[0]);
+		//double[] limitsY = Maths.limits(com[1]);
+		double[] limitsX = getLimits(com[0]);
+		double[] limitsY = getLimits(com[1]);
 		plot.setLimits(1, psf.getSize(), Math.min(limitsX[0], limitsY[0]), Math.max(limitsX[1], limitsY[1]));
 		plot.setColor(Color.red);
 		plot.addPoints(slice, com[0], Plot.DOT);
@@ -551,7 +552,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		DescriptiveStatistics stats = new DescriptiveStatistics(data);
 		double lower = stats.getPercentile(25);
 		double upper = stats.getPercentile(75);
-		double iqr = (upper - lower) * 1.5;
+		double iqr = (upper - lower) * 2;
 		limits[0] = FastMath.max(lower - iqr, limits[0]);
 		limits[1] = FastMath.min(upper + iqr, limits[1]);
 		return limits;
