@@ -955,7 +955,7 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * @return (solver != null) ? the totalSumOfSquares for the last fit
+	 * @return the totalSumOfSquares for the last fit
 	 */
 	public double getTotalSumOfSquares()
 	{
@@ -963,7 +963,7 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * @return (solver != null) ? the finalResidualSumOfSquares for the last fit
+	 * @return the finalResidualSumOfSquares for the last fit
 	 */
 	public double getFinalResidualSumOfSquares()
 	{
@@ -971,7 +971,7 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * @return (solver != null) ? the numberOfFittedParameters for the last fit
+	 * @return the numberOfFittedParameters for the last fit
 	 */
 	public int getNumberOfFittedParameters()
 	{
@@ -979,7 +979,7 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * @return (solver != null) ? the numberOfFittedPoints for the last fit
+	 * @return the numberOfFittedPoints for the last fit
 	 */
 	public int getNumberOfFittedPoints()
 	{
