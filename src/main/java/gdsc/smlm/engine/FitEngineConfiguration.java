@@ -129,6 +129,8 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Set the failures limit. When failures exceeds the failures limit then stop fitting.
+	 * 
 	 * @return the failuresLimit
 	 */
 	public int getFailuresLimit()
@@ -137,6 +139,10 @@ public class FitEngineConfiguration implements Cloneable
 	}
 
 	/**
+	 * Set the failures limit. When failures exceeds the failures limit then stop fitting.
+	 * i.e. failures=0 will stop on the first failure, failures=1 will stop on the second consecutive failure.
+	 * If negative then this is disabled and all candidates will be processed.
+	 * 
 	 * @param failuresLimit
 	 *            the number of consecutive failures that stops the fitting process on the frame
 	 */
@@ -394,7 +400,8 @@ public class FitEngineConfiguration implements Cloneable
 	 * filters from memory. This allows the user to call {@link #setDataFilter(DataFilter, double, int)} 3 times when
 	 * then configuration has more than 3 filters already stored.
 	 * 
-	 * @param n The number of filters
+	 * @param n
+	 *            The number of filters
 	 */
 	public void setNumberOfFilters(int n)
 	{
@@ -515,11 +522,11 @@ public class FitEngineConfiguration implements Cloneable
 			default:
 				spotFilter = new SingleSpotFilter(search, border, processor0);
 		}
-		
+
 		// Note: It is possible to configure the score data processor here. However small tests 
 		// show this often reduces performance and the additional parameters make it harder to 
 		// configure. It is a subject for future work.
-		
+
 		return spotFilter;
 	}
 
