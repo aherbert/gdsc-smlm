@@ -161,7 +161,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -185,7 +185,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Produces an average PSF using selected diffraction limited spots.\nUses the current fit configuration to fit spots.");
+		gd.addMessage(
+				"Produces an average PSF using selected diffraction limited spots.\nUses the current fit configuration to fit spots.");
 
 		gd.addCheckbox("Update_Fit_Configuration", false);
 		gd.addNumericField("nm_per_slice", nmPerSlice, 0);
@@ -284,6 +285,10 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		StoredDataStatistics averageSd = new StoredDataStatistics();
 		StoredDataStatistics averageA = new StoredDataStatistics();
 		Statistics averageRange = new Statistics();
+		MemoryPeakResults allResults = new MemoryPeakResults();
+		allResults.setName(TITLE);
+		allResults.setBounds(new Rectangle(0, 0, width, height));
+		MemoryPeakResults.addResults(allResults);
 		for (int n = 1; n <= spots.length; n++)
 		{
 			BasePoint spot = spots[n - 1];
@@ -291,6 +296,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			final int y = (int) spot.getY();
 
 			MemoryPeakResults results = fitSpot(stack, width, height, x, y);
+			allResults.addAll(results.getResults());
 
 			if (results.size() < 5)
 			{
@@ -501,8 +507,10 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		String title = TITLE + " CoM Drift";
 		Plot2 plot = new Plot2(title, "Slice", "Drift (nm)");
 		plot.addLabel(0, 0, "Red = X; Blue = Y");
-		double[] limitsX = getLimits(com[0]);
-		double[] limitsY = getLimits(com[1]);
+		double[] limitsX = Maths.limits(com[0]);
+		double[] limitsY = Maths.limits(com[1]);
+		//double[] limitsX = getLimits(com[0]);
+		//double[] limitsY = getLimits(com[1]);
 		plot.setLimits(1, psf.getSize(), Math.min(limitsX[0], limitsY[0]), Math.max(limitsX[1], limitsY[1]));
 		plot.setColor(Color.red);
 		plot.addPoints(slice, com[0], Plot.DOT);
@@ -519,8 +527,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Add Image properties containing the PSF details
 		final double fwhm = getFWHM(psf, maxz);
-		psfImp.setProperty("Info", XmlUtils.toXML(new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats
-				.getN(), fwhm, createNote())));
+		psfImp.setProperty("Info", XmlUtils.toXML(
+				new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm, createNote())));
 
 		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
 				psfImp.getTitle(), maxz, Utils.rounded(nmPerPixel / magnification, 3), Utils.rounded(nmPerSlice, 3),
@@ -543,7 +551,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		DescriptiveStatistics stats = new DescriptiveStatistics(data);
 		double lower = stats.getPercentile(25);
 		double upper = stats.getPercentile(75);
-		double iqr = upper - lower;
+		double iqr = (upper - lower) * 1.5;
 		limits[0] = FastMath.max(lower - iqr, limits[0]);
 		limits[1] = FastMath.min(upper + iqr, limits[1]);
 		return limits;
@@ -659,10 +667,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		return pos;
 	}
 
-	private boolean ignoreSpot(int n, final double[] z, final double[] a, final double[] smoothA,
-			final double[] xCoord, final double[] yCoord, final double[] sd, final double[] newZ,
-			final double[] smoothX, final double[] smoothY, double[] smoothSd, final double cx, final double cy,
-			final int cz, double csd)
+	private boolean ignoreSpot(int n, final double[] z, final double[] a, final double[] smoothA, final double[] xCoord,
+			final double[] yCoord, final double[] sd, final double[] newZ, final double[] smoothX,
+			final double[] smoothY, double[] smoothSd, final double cx, final double cy, final int cz, double csd)
 	{
 		this.slice = cz;
 		// Allow an interactive mode that shows the plots and allows the user to Yes/No
@@ -697,9 +704,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
-			gd.addMessage(String
-					.format("Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n",
-							n, cx, cy, cz, csd));
+			gd.addMessage(String.format(
+					"Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \nx = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n",
+					n, cx, cy, cz, csd));
 			gd.addSlider("Slice", z[0], z[z.length - 1], slice);
 			if (yesNoPosition != null)
 			{
@@ -762,11 +769,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 					break;
 				}
 			}
-			plot.addLabel(
-					0,
-					0,
-					String.format("Amplitude = %s (%sx). z = %s nm", Utils.rounded(amplitude),
-							Utils.rounded(amplitude / maxAmplitude), Utils.rounded((slice - zCentre) * nmPerSlice)));
+			plot.addLabel(0, 0, String.format("Amplitude = %s (%sx). z = %s nm", Utils.rounded(amplitude),
+					Utils.rounded(amplitude / maxAmplitude), Utils.rounded((slice - zCentre) * nmPerSlice)));
 
 			amplitudeWindow = Utils.display(TITLE_AMPLITUDE, plot);
 		}
@@ -1526,8 +1530,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Set limits for the fit
 		final float maxWidth = (float) (FastMath.max(fitConfig.getInitialPeakStdDev0(),
-				fitConfig.getInitialPeakStdDev1()) *
-				magnification * 4);
+				fitConfig.getInitialPeakStdDev1()) * magnification * 4);
 		final float maxSignal = 2; // PSF is normalised to 1  
 
 		for (PeakResult peak : results.getResults())
@@ -1887,11 +1890,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		final double total = signal[slice - 1];
 		Plot2 plot = new Plot2(signalTitle, "z", "Signal", signalZ, signal);
-		plot.addLabel(
-				0,
-				0,
-				String.format("Total = %s. z = %s nm", Utils.rounded(total),
-						Utils.rounded((slice - zCentre) * nmPerSlice)));
+		plot.addLabel(0, 0, String.format("Total = %s. z = %s nm", Utils.rounded(total),
+				Utils.rounded((slice - zCentre) * nmPerSlice)));
 		plot.setColor(Color.green);
 		plot.drawLine(slice, signalLimits[0], slice, signalLimits[1]);
 		plot.setColor(Color.blue);
@@ -1941,7 +1941,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 							plotCumulativeSignal(mySlice, myNormalise, myResetScale, myDistanceThreshold);
 
 							// Check if the parameters have changed again
-							parametersChanged = (mySlice != slice || resetScale || myNormalise != normalise || myDistanceThreshold != distanceThreshold);
+							parametersChanged = (mySlice != slice || resetScale || myNormalise != normalise ||
+									myDistanceThreshold != distanceThreshold);
 						}
 					}
 					finally
@@ -2115,7 +2116,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Find the FWHM for each line profile.
 		// Diagonals need to be scaled to the appropriate distance.
-		return (getFWHM(p0, p1) + getFWHM(p0, p2) + Math.sqrt(2) * getFWHM(p0, p3) + Math.sqrt(2) * getFWHM(p0, p4)) / 4.0;
+		return (getFWHM(p0, p1) + getFWHM(p0, p2) + Math.sqrt(2) * getFWHM(p0, p3) + Math.sqrt(2) * getFWHM(p0, p4)) /
+				4.0;
 	}
 
 	private double getFWHM(double[] x, double[] y)
