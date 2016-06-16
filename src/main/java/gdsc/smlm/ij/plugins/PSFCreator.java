@@ -51,6 +51,7 @@ import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -1500,6 +1501,22 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	private double fitPSF(ImageStack psf, LoessInterpolator loess, int cz, double averageRange, double[][] fitCom)
 	{
 		IJ.showStatus("Fitting final PSF");
+		
+		// Note: Fitting the final PSF does not really work using MLE. This is because the noise model
+		// is not appropriate for a normalised PSF. 
+		if (fitConfig.getFitSolver() == FitSolver.MLE)
+		{
+			Utils.log("  Maximum Likelihood Estimation (MLE) is not appropriate for final PSF fitting.");
+			Utils.log("  Switching to Least Square Estimation");
+			fitConfig.setFitSolver(FitSolver.LVM);
+			if (interactiveMode)
+			{
+				GlobalSettings settings = new GlobalSettings();
+				settings.setFitEngineConfiguration(config);
+				PeakFit.configureFitSolver(settings, null, false, false);
+			}
+		}			
+		
 		// Update the box radius since this is used in the fitSpot method.
 		boxRadius = psf.getWidth() / 2;
 		int x = boxRadius, y = boxRadius;
