@@ -18,11 +18,13 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
+import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.results.Calibration;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
@@ -71,9 +73,8 @@ public class BenchmarkFit implements PlugIn
 
 	private static TextWindow summaryTable = null, analysisTable = null;
 
-	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)",
-			"dX (nm)", "dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)", "dSax (nm)",
-			"dSay (nm)" };
+	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)", "dX (nm)",
+			"dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)", "dSax (nm)", "dSay (nm)" };
 	private static final int TIME = 7;
 	private static final int ACTUAL_SIGNAL = 8;
 	private static final int ADJUSTED_X_SD = 9;
@@ -204,8 +205,8 @@ public class BenchmarkFit implements PlugIn
 		private void run(int frame)
 		{
 			// Extract the data
-			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(),
-					region, data);
+			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
+					data);
 
 			final int size = region.height;
 			final int totalFrames = benchmarkParameters.frames;
@@ -214,7 +215,7 @@ public class BenchmarkFit implements PlugIn
 			final double b = (backgroundFitting) ? getBackground(data, size, size)
 					: answer[Gaussian2DFunction.BACKGROUND] + benchmarkParameters.bias;
 			final double signal = (signalFitting) ? getSignal(data, b)
-			//: benchmarkParameters.p[frame];
+					//: benchmarkParameters.p[frame];
 					: answer[Gaussian2DFunction.SIGNAL];
 
 			// Find centre-of-mass estimate
@@ -237,12 +238,13 @@ public class BenchmarkFit implements PlugIn
 			final double bias = benchmarkParameters.bias;
 			if (fitConfig.isRemoveBiasBeforeFitting())
 			{
-				initialParams[Gaussian2DFunction.BACKGROUND] = Math.max(0,
-						initialParams[Gaussian2DFunction.BACKGROUND] - bias);
+				// MLE can handle negative data 
+				initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
 				for (int i = 0; i < data.length; i++)
 					data[i] -= bias;
 			}
 
+			double[][] bounds = null;
 			double[] error = new double[1];
 			double[][] result = new double[xy.length][];
 			long[] time = new long[xy.length];
@@ -259,7 +261,7 @@ public class BenchmarkFit implements PlugIn
 				fitConfig.initialise(1, size, params);
 				FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
-					setBounds(solver);
+					bounds = setBounds(solver, initialParams, bounds);
 				if (solver.isConstrained())
 					setConstraints(solver);
 				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
@@ -285,9 +287,60 @@ public class BenchmarkFit implements PlugIn
 			addResults(stats, answer, benchmarkParameters.p[frame], sa, time, result, c);
 		}
 
-		private void setBounds(FunctionSolver solver)
+		/**
+		 * Set background using the average value of the edge in the data
+		 * 
+		 * @param data
+		 * @param maxx
+		 * @param maxy
+		 * @return The background
+		 */
+		private double getBackground(double[] data, int maxx, int maxy)
 		{
-			solver.setBounds(lb, ub);
+			return Gaussian2DFitter.getBackground(data, maxx, maxy, 1);
+		}
+
+		private double[][] setBounds(FunctionSolver solver, double[] params, double[][] bounds)
+		{
+			if (bounds == null)
+			{
+				double[] lower = null;
+				double[] upper = null;
+				// Check the bounds 
+				if (params[Gaussian2DFunction.BACKGROUND] < lb[Gaussian2DFunction.BACKGROUND])
+				{
+					lower = lb.clone();
+					lower[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] -
+							Math.abs(lb[Gaussian2DFunction.BACKGROUND] - params[Gaussian2DFunction.BACKGROUND]);
+				}
+				if (params[Gaussian2DFunction.BACKGROUND] > ub[Gaussian2DFunction.BACKGROUND])
+				{
+					upper = ub.clone();
+					upper[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] +
+							Math.abs(ub[Gaussian2DFunction.BACKGROUND] - params[Gaussian2DFunction.BACKGROUND]);
+				}
+				if (params[Gaussian2DFunction.SIGNAL] < lb[Gaussian2DFunction.SIGNAL])
+				{
+					if (lower == null)
+						lower = lb.clone();
+					lower[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] -
+							Math.abs(lb[Gaussian2DFunction.SIGNAL] - params[Gaussian2DFunction.SIGNAL]);
+				}
+				if (params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL])
+				{
+					if (upper == null)
+						upper = ub.clone();
+					upper[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] +
+							Math.abs(ub[Gaussian2DFunction.SIGNAL] - params[Gaussian2DFunction.SIGNAL]);
+				}
+				if (lower == null)
+					lower = lb;
+				if (upper == null)
+					upper = ub;
+				bounds = new double[][] { lower, upper };
+			}
+			solver.setBounds(bounds[0], bounds[1]);
+			return bounds;
 		}
 
 		private void createBounds()
@@ -298,8 +351,13 @@ public class BenchmarkFit implements PlugIn
 				lb = new double[7];
 
 				// Background could be zero so always have an upper limit
-				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * benchmarkParameters.getBackground() *
-						benchmarkParameters.gain);
+				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0,
+						2 * benchmarkParameters.getBackground() * benchmarkParameters.gain);
+				if (!fitConfig.isRemoveBiasBeforeFitting())
+				{
+					lb[Gaussian2DFunction.BACKGROUND] += benchmarkParameters.bias;
+					ub[Gaussian2DFunction.BACKGROUND] += benchmarkParameters.bias;
+				}
 				double signal = benchmarkParameters.getSignal() * benchmarkParameters.gain;
 				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
 				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
@@ -416,17 +474,15 @@ public class BenchmarkFit implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if ("analysis".equals(arg))
 		{
 			if (benchmarkResults.isEmpty())
 			{
-				IJ.error(
-						TITLE,
-						"No benchmark results in memory.\n \n" +
-								TextUtils
-										.wrap("Run the Fit Benchmark Data plugin and results will be stored for comparison analysis.",
-												60));
+				IJ.error(TITLE,
+						"No benchmark results in memory.\n \n" + TextUtils.wrap(
+								"Run the Fit Benchmark Data plugin and results will be stored for comparison analysis.",
+								60));
 				return;
 			}
 			runAnalysis();
@@ -435,12 +491,11 @@ public class BenchmarkFit implements PlugIn
 		{
 			if (CreateData.benchmarkParameters == null)
 			{
-				IJ.error(
-						TITLE,
-						"No benchmark parameters in memory.\n \n" +
-								TextUtils.wrap("Run the " + CreateData.TITLE +
+				IJ.error(TITLE,
+						"No benchmark parameters in memory.\n \n" + TextUtils.wrap(
+								"Run the " + CreateData.TITLE +
 										" plugin in benchmark mode with a fixed number of photons per localisation.",
-										60));
+								60));
 				return;
 			}
 			benchmarkParameters = CreateData.benchmarkParameters;
@@ -464,9 +519,9 @@ public class BenchmarkFit implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		final double sa = getSa();
-		gd.addMessage(String.format(
-				"Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
-				Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa)));
+		gd.addMessage(
+				String.format("Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
+						Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa)));
 
 		// For each new benchmark width, reset the PSF width to the square pixel adjustment
 		if (lastS != benchmarkParameters.s)
@@ -597,6 +652,14 @@ public class BenchmarkFit implements PlugIn
 		fitConfig.setNotSignalFitting(!signalFitting);
 		fitConfig.setComputeDeviations(false);
 
+		// TODO - store the calibration at the class level to avoid calling this again.
+		GlobalSettings settings = SettingsManager.loadSettings(SettingsManager.getSettingsFilename());
+		Calibration calibration = settings.getCalibration();
+		fitConfig.setNmPerPixel(calibration.nmPerPixel);
+		fitConfig.setGain(calibration.gain);
+		fitConfig.setBias(calibration.bias);
+		fitConfig.setEmCCD(calibration.emCCD);
+
 		final ImageStack stack = imp.getImageStack();
 
 		// Create a pool of workers
@@ -698,13 +761,7 @@ public class BenchmarkFit implements PlugIn
 					for (int j = 0; j < tmp.length; j++)
 						tmp[j] *= convert[i];
 					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
-					idList[count++] = Utils.showHistogram(
-							TITLE,
-							tmpStats,
-							NAMES[i],
-							0,
-							0,
-							histogramBins,
+					idList[count++] = Utils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
 							String.format("%s +/- %s", Utils.rounded(tmpStats.getMean()),
 									Utils.rounded(tmpStats.getStandardDeviation())));
 					requireRetile = requireRetile || Utils.isNewWindow();
@@ -799,7 +856,8 @@ public class BenchmarkFit implements PlugIn
 		{
 			if (startOffset == 0)
 			{
-				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION], answer[Gaussian2DFunction.Y_POSITION] };
+				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION],
+						answer[Gaussian2DFunction.Y_POSITION] };
 			}
 			else
 			{
@@ -827,26 +885,6 @@ public class BenchmarkFit implements PlugIn
 		if (startOffset > 0)
 			n *= 4;
 		return (comFitting) ? n + 1 : n;
-	}
-
-	/**
-	 * Set background using the average value of the edge in the data
-	 * 
-	 * @param data
-	 * @param maxx
-	 * @param maxy
-	 * @return The background
-	 */
-	public static double getBackground(double[] data, int maxx, int maxy)
-	{
-		double background = 0;
-		for (int xi = 0; xi < maxx; xi++)
-			background += data[xi] + data[maxx * (maxy - 1) + xi];
-		for (int yi = 0; yi < maxy; yi++)
-			background += data[maxx * yi] + data[maxx * yi + (maxx - 1)];
-		background /= 2 * (maxx + maxy);
-		// Keep within the bounds
-		return Math.max(0, background);
 	}
 
 	/**
@@ -999,8 +1037,8 @@ public class BenchmarkFit implements PlugIn
 	{
 		final double[] convert = new double[NAMES.length];
 		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
-		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() && fitConfig.getFitFunction() == FitFunction.FIXED) ? 0
-				: 1 / benchmarkParameters.gain;
+		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&
+				fitConfig.getFitFunction() == FitFunction.FIXED) ? 0 : 1 / benchmarkParameters.gain;
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
