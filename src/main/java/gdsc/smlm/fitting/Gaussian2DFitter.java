@@ -1,5 +1,9 @@
 package gdsc.smlm.fitting;
 
+import java.util.Arrays;
+
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -17,10 +21,6 @@ package gdsc.smlm.fitting;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
-import java.util.Arrays;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Fits a 2-dimensional Gaussian function for the specified peak. Can optionally fit an elliptical Gaussian function.
@@ -233,24 +233,33 @@ public class Gaussian2DFitter
 
 		double background = 0;
 
+		//Utils.display("Spot", data, maxx, maxy);
+		
 		if (npeaks == 1)
 		{
 			// Set background using the average value of the edge in the data
-			for (int xi = 0; xi < maxx; xi++)
-				background += data[xi] + data[maxx * (maxy - 1) + xi];
-			for (int yi = 0; yi < maxy; yi++)
-				background += data[maxx * yi] + data[maxx * yi + (maxx - 1)];
-			background /= 2 * (maxx + maxy);
+			final int s2 = getIndex(0, maxy - 1, maxx);
+			for (int xi = 0, xi2 = s2; xi < maxx; xi++, xi2++)
+				background += data[xi] + data[xi2];
+			for (int yi = maxx, yi2 = getIndex(maxx - 1, 1, maxx); yi < s2; yi += maxx, yi2 += maxx)
+				background += data[yi] + data[yi2];
+			background /= 2 * (maxx + maxy - 2);
 		}
 		else
 		{
 			// Set background using the minimum value in the data
 			background = data[0];
 			for (int i = maxx * maxy; --i > 0;)
-				background = FastMath.min(background, data[i]);
+				if (background > data[i])
+					background = data[i];
 		}
 
 		return background;
+	}
+
+	private static int getIndex(int x, int y, int maxx)
+	{
+		return y * maxx + x;
 	}
 
 	/**
@@ -1008,7 +1017,7 @@ public class Gaussian2DFitter
 		if (maximumWidthFactor > 1)
 			this.maximumWidthFactor = maximumWidthFactor;
 	}
-	
+
 	/**
 	 * @return the optimised function value for the last fit
 	 */
