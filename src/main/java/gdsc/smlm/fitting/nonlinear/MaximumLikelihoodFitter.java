@@ -207,9 +207,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		 */
 		POWELL("Powell", false),
 		/**
-		 * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
+		 * Search using Powell's conjugate direction method using hard limits to ensure a bounded search
 		 */
 		POWELL_BOUNDED("Powell (bounded)", false),
+		/**
+		 * Search using Powell's conjugate direction method using a mapping adapter to ensure a bounded search
+		 */
+		POWELL_ADAPTER("Powell (adapter)", false),
 		/**
 		 * Search using Powell's Bound Optimization BY Quadratic Approximation (BOBYQA) algorithm.
 		 * <p>
@@ -341,10 +345,14 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		this.mapGaussian = mapGaussian;
 	}
 
-	/* (non-Javadoc)
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(int, double[], double[], double[], double[], double[], double)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(int, double[], double[], double[], double[],
+	 * double[], double)
 	 */
-	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error, double noise)
+	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
+			double noise)
 	{
 		LikelihoodWrapper maximumLikelihoodFunction = null;
 
@@ -394,7 +402,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			double[] startPoint = getInitialSolution(a);
 
 			PointValuePair optimum = null;
-			if (searchMethod == SearchMethod.POWELL || searchMethod == SearchMethod.POWELL_BOUNDED)
+			if (searchMethod == SearchMethod.POWELL || searchMethod == SearchMethod.POWELL_BOUNDED ||
+					searchMethod == SearchMethod.POWELL_ADAPTER)
 			{
 				// Non-differentiable version using Powell Optimiser
 
@@ -423,7 +432,18 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				if (getMaxIterations() > 0)
 					maxIterationData = new MaxIter(getMaxIterations());
 
-				if (searchMethod == SearchMethod.POWELL)
+				if (searchMethod == SearchMethod.POWELL_ADAPTER)
+				{
+					// Try using the mapping adapter for a bounded Powell search
+					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
+							new MultivariateLikelihood(maximumLikelihoodFunction), lower, upper);
+					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
+							new ObjectiveFunction(adapter), GoalType.MINIMIZE,
+							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
+					double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
+					optimum = new PointValuePair(solution, optimum.getValue());
+				}
+				else
 				{
 					if (powellFunction == null)
 					{
@@ -464,32 +484,26 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 					OptimizationData positionChecker = null;
 					// new org.apache.commons.math3.optim.PositionChecker(relativeThreshold, absoluteThreshold);
+					SimpleBounds simpleBounds = null;
 					if (powellFunction.isMapped())
 					{
 						MappedMultivariateLikelihood adapter = (MappedMultivariateLikelihood) powellFunction;
+						if (searchMethod == SearchMethod.POWELL_BOUNDED)
+							simpleBounds = new SimpleBounds(adapter.map(lower), adapter.map(upper));
 						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
 								new ObjectiveFunction(powellFunction), GoalType.MINIMIZE,
-								new InitialGuess(adapter.map(startPoint)), positionChecker);
+								new InitialGuess(adapter.map(startPoint)), positionChecker, simpleBounds);
 						double[] solution = adapter.unmap(optimum.getPointRef());
 						optimum = new PointValuePair(solution, optimum.getValue());
 					}
 					else
 					{
+						if (searchMethod == SearchMethod.POWELL_BOUNDED)
+							simpleBounds = new SimpleBounds(lower, upper);
 						optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
 								new ObjectiveFunction(powellFunction), GoalType.MINIMIZE, new InitialGuess(startPoint),
-								positionChecker);
+								positionChecker, simpleBounds);
 					}
-				}
-				else
-				{
-					// Try using the mapping adapter for a bounded Powell search
-					MultivariateFunctionMappingAdapter adapter = new MultivariateFunctionMappingAdapter(
-							new MultivariateLikelihood(maximumLikelihoodFunction), lower, upper);
-					optimum = o.optimize(maxIterationData, new MaxEval(getMaxEvaluations()),
-							new ObjectiveFunction(adapter), GoalType.MINIMIZE,
-							new InitialGuess(adapter.boundedToUnbounded(startPoint)));
-					double[] solution = adapter.unboundedToBounded(optimum.getPointRef());
-					optimum = new PointValuePair(solution, optimum.getValue());
 				}
 				iterations = o.getIterations();
 				evaluations = o.getEvaluations();
@@ -906,6 +920,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	{
 		switch (searchMethod)
 		{
+			case POWELL_ADAPTER:
 			case POWELL_BOUNDED:
 			case BOBYQA:
 			case CMAES:
