@@ -19,6 +19,7 @@ import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
+import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
@@ -225,7 +226,7 @@ public class PSFDrift implements PlugIn
 			// Fit the PSF. Do this from different start positions.
 
 			// Get the background and signal estimate
-			final double b = (backgroundFitting) ? BenchmarkFit.getBackground(data, w, w) : bias;
+			final double b = (backgroundFitting) ? Gaussian2DFitter.getBackground(data, w, w, 1) : bias;
 			final double signal = BenchmarkFit.getSignal(data, b);
 
 			if (comFitting)
@@ -397,7 +398,7 @@ public class PSFDrift implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Build a list of suitable images
 		List<String> titles = createImageList();
 
@@ -503,8 +504,8 @@ public class PSFDrift implements PlugIn
 
 		// Create robust PSF fitting settings
 		final double a = psfSettings.nmPerPixel * scale;
-		final double sa = PSFCalculator.squarePixelAdjustment(psfSettings.nmPerPixel *
-				(psfSettings.fwhm / GaussianFunction.SD_TO_FWHM_FACTOR), a);
+		final double sa = PSFCalculator.squarePixelAdjustment(
+				psfSettings.nmPerPixel * (psfSettings.fwhm / GaussianFunction.SD_TO_FWHM_FACTOR), a);
 		fitConfig.setInitialPeakStdDev(sa / a);
 		fitConfig.setBackgroundFitting(backgroundFitting);
 		fitConfig.setNotSignalFitting(false);
@@ -906,8 +907,8 @@ public class PSFDrift implements PlugIn
 
 		// Extract data uses index not slice number as arguments so subtract 1
 		double noiseFraction = 1e-3;
-		ImagePSFModel model = new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1), zCentre -
-				lower, unitsPerPixel, unitsPerSlice, psfSettings.fwhm, noiseFraction);
+		ImagePSFModel model = new ImagePSFModel(CreateData.extractImageStack(imp, lower - 1, upper - 1),
+				zCentre - lower, unitsPerPixel, unitsPerSlice, psfSettings.fwhm, noiseFraction);
 
 		// Add the calibrated centres
 		if (psfSettings.offset != null && useOffset)
