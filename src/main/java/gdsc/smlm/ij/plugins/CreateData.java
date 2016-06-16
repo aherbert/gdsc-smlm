@@ -1628,10 +1628,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Add drawn spots to memory
 		results = new MemoryPeakResults();
-		Calibration c = new Calibration(settings.pixelPitch, (float) settings.getTotalGain(), settings.exposureTime);
+		Calibration c = new Calibration(settings.pixelPitch, settings.getTotalGain(), settings.exposureTime);
 		c.emCCD = (settings.getEmGain() > 1);
 		c.bias = settings.bias;
 		c.readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
+		c.amplification = settings.getAmplification();
 		results.setCalibration(c);
 		results.setSortAfterEnd(true);
 		results.begin();
