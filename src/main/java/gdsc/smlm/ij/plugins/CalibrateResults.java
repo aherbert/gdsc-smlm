@@ -86,9 +86,18 @@ public class CalibrateResults implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		Calibration calibration = results.getCalibration();
+		
+		boolean newCalibration = false;
+		if (calibration == null)
+		{
+			newCalibration = true;
+			calibration = new Calibration();
+			gd.addMessage("No calibration found, using defaults");
+		}
 
 		gd.addStringField("Name", results.getName(), Math.max(Math.min(results.getName().length(), 60), 20));
-		gd.addCheckbox("Update_all_linked_results", updateAll);
+		if (!newCalibration)
+			gd.addCheckbox("Update_all_linked_results", updateAll);
 		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
 		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
 		gd.addCheckbox("EM-CCD", calibration.emCCD);
@@ -113,13 +122,18 @@ public class CalibrateResults implements PlugIn
 			}
 		}
 		
-		updateAll = gd.getNextBoolean();
-
-		// Calibration is stored as a reference. 
-		// To avoid changing all datasets with the same calibration we create a copy
-		
-		if (!updateAll)
-			calibration = calibration.clone();
+		if (!newCalibration)
+		{
+			updateAll = gd.getNextBoolean();
+			
+			// Calibration is stored as a reference. 
+			// To avoid changing all datasets with the same calibration we create a copy
+			if (!updateAll)
+			{
+				newCalibration = true;
+				calibration = calibration.clone();				
+			}
+		}
 		
 		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
 		calibration.gain = Math.abs(gd.getNextNumber());
@@ -129,7 +143,7 @@ public class CalibrateResults implements PlugIn
 		calibration.readNoise = Math.abs(gd.getNextNumber());
 		calibration.amplification = Math.abs(gd.getNextNumber());
 		
-		if (!updateAll)
+		if (newCalibration)
 			results.setCalibration(calibration);
 
 		return true;
