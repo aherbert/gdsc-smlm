@@ -2091,6 +2091,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						int[] samplePositions = null;
 						if (intensity > 0)
 						{
+							// TODO record all the positions we draw and the number of photons.
+							// This can be used later to compute the Fisher information for each spot.
 							if (poissonNoise)
 							{
 								final int samples = (int) random.nextPoisson(localisation.getIntensity());
@@ -2310,6 +2312,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					image[i] += imageReadNoise[i];
 			}
 
+			{
+				// TODO Compute the Fisher information for each spot.
+				// Iaa = sum(i) (dYi da) * (dYi da) / Yi
+				// 1. Draw each spot perfectly on a new image using psfModel.create3D
+				// 2. Apply perfect gain to get the correct scale 
+				// 3. For each spot
+				// - Combine the other spots + background photons to get the background function
+				// - Combine with the target spot and apply gain to get Yi	
+				// - Render the target spot using an offset +/- delta on X,Y,Signal (a) to get dYi da
+				// - Compute Iaa
+				
+				// The simulated image is not used?
+
+			}
+
+			// Add the bias
 			for (int i = 0; i < image.length; i++)
 				image[i] += settings.bias;
 
