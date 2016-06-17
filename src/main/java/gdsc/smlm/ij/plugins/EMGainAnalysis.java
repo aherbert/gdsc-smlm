@@ -70,7 +70,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 	private static double bias = 500, gain = 40, noise = 3;
 	private static boolean _simulate = false, showApproximation = false, relativeDelta = false;
-	private static String[] APPROXIMATION = { "PoissonGammaGaussian", "PoissonGaussian", "Poisson" };
+	private static String[] APPROXIMATION = { "PoissonGammaGaussian", "PoissonGamma", "PoissonGaussian", "Poisson" };
 	private static int approximation = 0;
 	private boolean simulate = false, extraOptions = false;
 	private static double _photons = 1, _bias = 500, _gain = 40, _noise = 3;
@@ -819,6 +819,8 @@ public class EMGainAnalysis implements PlugInFilter
 		while (sum < p && max < pmf.length)
 		{
 			sum += pmf[max];
+			if (sum > 0.5 && pmf[max] == 0)
+				break;
 			max++;
 		}
 
@@ -829,6 +831,8 @@ public class EMGainAnalysis implements PlugInFilter
 		{
 			min--;
 			sum += pmf[min];
+			if (sum > 0.5 && pmf[min] == 0)
+				break;
 		}
 
 		//int min = (int) (dummyBias - gaussWidth * _noise);
@@ -838,18 +842,23 @@ public class EMGainAnalysis implements PlugInFilter
 		// Get the approximation
 		double[] f = new double[x.length];
 		LikelihoodFunction fun;
+		double myNoise = _noise;
 		switch (approximation)
 		{
-			case 2:
+			case 3:
 				fun = new PoissonFunction();
 				break;
-			case 1:
+			case 2:
 				// The mean does not matter so just use zero
 				fun = PoissonGaussianFunction.createWithStandardDeviation(0, _noise);
 				break;
+			case 1:
+				myNoise = 0;
 			case 0:
 			default:
-				fun = new PoissonGammaGaussianFunction(1.0 / _gain, _noise);
+				PoissonGammaGaussianFunction myFun = new PoissonGammaGaussianFunction(1.0 / _gain, myNoise);
+				myFun.setMinimumProbability(0);
+				fun = myFun;				
 		}
 		double expected = _photons;
 		if (offset != 0)
@@ -865,6 +874,7 @@ public class EMGainAnalysis implements PlugInFilter
 			//sum += pmf[i];
 			//sum2 += f[i];
 		}
+		
 		//System.out.printf("Approximation sum = %f : %f\n", sum ,sum2);
 		if (showApproximation)
 			yMax = Maths.maxDefault(yMax, f);
