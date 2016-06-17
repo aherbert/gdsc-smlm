@@ -19,7 +19,7 @@ public class CropResults implements PlugIn
 	private static String inputOption = "";
 	private static double border = 0;
 	private static double x = 0, y = 0, width = 0, height = 0;
-	private static boolean selectRegion;
+	private static boolean selectRegion, overwrite;
 
 	private MemoryPeakResults results;
 
@@ -74,6 +74,7 @@ public class CropResults implements PlugIn
 		gd.addNumericField("Y", y, 2);
 		gd.addNumericField("Width", width, 2);
 		gd.addNumericField("Height", height, 2);
+		gd.addCheckbox("Overwrite", overwrite);
 
 		gd.showDialog();
 
@@ -86,6 +87,7 @@ public class CropResults implements PlugIn
 		y = gd.getNextNumber();
 		width = Math.max(0, gd.getNextNumber());
 		height = Math.max(0, gd.getNextNumber());
+		overwrite = gd.getNextBoolean();
 
 		return true;
 	}
@@ -96,15 +98,12 @@ public class CropResults implements PlugIn
 	private void cropResults()
 	{
 		MemoryPeakResults newResults = new MemoryPeakResults();
-		newResults.copySettings(results);
-		newResults.setName(results.getName() + " Cropped");
-		MemoryPeakResults.addResults(newResults);
 
 		// These bounds are integer. But this is because the results are meant to come from an image.
 		Rectangle bounds = results.getBounds(true);
 
 		// The crop bounds can be floating point...
-		
+
 		// Border
 		double xx = bounds.x + border;
 		double yy = bounds.y + border;
@@ -127,6 +126,13 @@ public class CropResults implements PlugIn
 					newResults.add(result);
 			}
 		}
+
+		newResults.copySettings(results);
+		if (!overwrite)
+		{
+			newResults.setName(results.getName() + " Cropped");
+		}
+		MemoryPeakResults.addResults(newResults);
 
 		IJ.showStatus(newResults.size() + " Cropped localisations");
 	}
