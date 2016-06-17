@@ -99,6 +99,20 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 		final double cij = o;
 		final double eta = alpha * e; // convert to photons
 
+		// This did not speed up MLE fitting so has been commented out.
+		//		// When the observed ADUs and expected ADUs are much higher than the sigma then 
+		//		// there is no point in convolving with a Gaussian
+		//
+		//		double mySigma = sigma;
+		//		final double sLimit = sigma * 10;
+		//		if (o > sLimit && e > sLimit)
+		//		{
+		//			//System.out.println("Skipping convolution");
+		//			//mySigma = sigma;
+		//		}
+		//		
+		//		if (mySigma == 0)
+
 		if (sigma == 0)
 		{
 			// No convolution with a Gaussian. Simply evaluate for a Poisson-Gamma distribution.
@@ -127,8 +141,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 				else
 				{
 					// Second part of equation 135
-					p = Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) *
-							Bessel.I1(2 * Math.sqrt(eta * nij));
+					p = Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij));
 				}
 			}
 			else if (cij == 0.0)
@@ -139,8 +152,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 			{
 				p = 0;
 			}
-			
-			return (p > minimumProbability) ? p : minimumProbability;			
+
+			return (p > minimumProbability) ? p : minimumProbability;
 		}
 		else if (useApproximation)
 		{
@@ -253,7 +266,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 			//final double 
 			f1 = z / sqrt2sigma;
 			final double p = (FastMath.exp(-vk) / (sqrt2pi * sk)) * (FastMath.exp(-(f1 * f1)) + sum);
-			return (p > minimumProbability) ? p : minimumProbability;			
+			return (p > minimumProbability) ? p : minimumProbability;
 		}
 	}
 
