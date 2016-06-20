@@ -2,8 +2,6 @@ package gdsc.smlm.function;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.util.FastMath;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -79,7 +77,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			while (k < n)
 			{
 				k++;
-				logSum += FastMath.log(k);
+				logSum += Math.log(k);
 				logFactorial[k] = logSum;
 			}
 		}
