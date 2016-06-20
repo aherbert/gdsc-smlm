@@ -120,7 +120,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	{
 		// Compute the negative log-likelihood to be minimised
 		// f(x) = l(x) - k * ln(l(x)) + log(k!)
-		double ll = sumLogFactorialK;
+		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
 			final double l = f.eval(i);
@@ -135,7 +135,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			final double k = data[i];
 			ll += l - k * Math.log(l);
 		}
-		return ll;
+		return ll + sumLogFactorialK;
 	}
 
 	/*
@@ -154,7 +154,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		// f'(x) = l'(x) - (k/l(x) * l'(x))
 		// f'(x) = l'(x) * (1 - k/l(x))
 
-		double ll = sumLogFactorialK;
+		double ll = 0;
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
 		double[] dl_da = new double[nVariables];
@@ -182,7 +182,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 				gradient[j] += dl_da[j] * factor;
 			}
 		}
-		return ll;
+		return ll + sumLogFactorialK;
 	}
 
 	/*
