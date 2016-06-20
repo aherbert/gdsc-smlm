@@ -532,7 +532,9 @@ public class BenchmarkFit implements PlugIn
 
 		String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
+
 		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
+		fitConfig.setNmPerPixel(benchmarkParameters.a);
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		gd.addNumericField("PSF_width", psfWidth, 3);
@@ -578,6 +580,16 @@ public class BenchmarkFit implements PlugIn
 		if (gd.invalidNumber())
 			return false;
 
+		// Initialise the correct calibration
+		Calibration calibration = settings.getCalibration();
+		calibration.nmPerPixel = benchmarkParameters.a;
+		calibration.gain = benchmarkParameters.gain;
+		calibration.amplification = benchmarkParameters.amplification;
+		calibration.bias = benchmarkParameters.bias;
+		calibration.emCCD = benchmarkParameters.emCCD;
+		calibration.readNoise = benchmarkParameters.readNoise;
+		calibration.exposureTime = 1000;
+		
 		if (!PeakFit.configureFitSolver(settings, filename, false))
 			return false;
 
@@ -651,14 +663,6 @@ public class BenchmarkFit implements PlugIn
 		fitConfig.setBackgroundFitting(backgroundFitting);
 		fitConfig.setNotSignalFitting(!signalFitting);
 		fitConfig.setComputeDeviations(false);
-
-		// TODO - store the calibration at the class level to avoid calling this again.
-		GlobalSettings settings = SettingsManager.loadSettings(SettingsManager.getSettingsFilename());
-		Calibration calibration = settings.getCalibration();
-		fitConfig.setNmPerPixel(calibration.nmPerPixel);
-		fitConfig.setGain(calibration.gain);
-		fitConfig.setBias(calibration.bias);
-		fitConfig.setEmCCD(calibration.emCCD);
 
 		final ImageStack stack = imp.getImageStack();
 
