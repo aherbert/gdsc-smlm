@@ -1,5 +1,11 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.engine.DataFilterType;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.filters.MaximaSpotFilter;
+import gdsc.smlm.filters.Spot;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -20,15 +26,26 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
+import gdsc.smlm.ij.plugins.CreateData.SimulationParameters;
+import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Calibration;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.core.clustering.Cluster;
+import gdsc.core.clustering.ClusterPoint;
+import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.clustering.ClusteringEngine;
 import gdsc.core.ij.Utils;
+import gdsc.core.match.BasePoint;
+import gdsc.core.match.Coordinate;
+import gdsc.core.match.MatchCalculator;
+import gdsc.core.match.PointPair;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.NoiseEstimator.Method;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -44,12 +61,16 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Fits spots created by CreateData plugin.
@@ -62,20 +83,44 @@ public class DoubletAnalysis implements PlugIn
 {
 	private static final String TITLE = "Doublet Analysis";
 
-	private static int regionSize = 3;
-	private static double psfWidth = 1;
-	private static double lastS = 0;
-	private static boolean offsetFitting = true;
-	private static double startOffset = 0.5;
-	private static boolean comFitting = false;
-	private static boolean backgroundFitting = true;
-	private static boolean signalFitting = true;
+	static FitConfiguration fitConfig;
+	private static FitEngineConfiguration config;
+	private static Calibration cal;
+	private static int lastId = 0;
+	static
+	{
+		cal = new Calibration();
+		fitConfig = new FitConfiguration();
+		config = new FitEngineConfiguration(fitConfig);
+		// Set some default fit settings here ...
+		// Ensure all candidates are fitted
+		config.setFailuresLimit(-1);
+		fitConfig.setFitValidation(true);
+		fitConfig.setMinPhotons(0); // Do not allow negative photons 
+		fitConfig.setCoordinateShiftFactor(0); // Disable
+		fitConfig.setPrecisionThreshold(0);
+		fitConfig.setWidthFactor(0);
+
+		fitConfig.setBackgroundFitting(true);
+		fitConfig.setMinIterations(0);
+		fitConfig.setNoise(0);
+		config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
+
+		fitConfig.setBackgroundFitting(true);
+		fitConfig.setNotSignalFitting(false);
+		fitConfig.setComputeDeviations(false);
+	}
+
 	private static boolean showHistograms = false;
 	private static boolean saveRawData = false;
 	private static String rawDataDirectory = "";
 	private static int histogramBins = 100;
 
 	private static TextWindow summaryTable = null, analysisTable = null;
+
+	private ImagePlus imp;
+	private MemoryPeakResults results;
+	private CreateData.SimulationParameters simulationParameters;
 
 	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)", "dX (nm)",
 			"dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)", "dSax (nm)", "dSay (nm)" };
@@ -90,61 +135,6 @@ public class DoubletAnalysis implements PlugIn
 			displayHistograms[i] = true;
 	}
 
-	private FitConfiguration fitConfig;
-	private ImagePlus imp;
-	private CreateData.BenchmarkParameters benchmarkParameters;
-	private double[] answer = new double[7];
-	private Rectangle region = null;
-	private AtomicInteger comValid = new AtomicInteger();
-
-	// Used to store all the results for cross-method comparison
-	private double[][] results;
-	private long[] resultsTime;
-
-	public class BenchmarkResult
-	{
-		/**
-		 * The parameters used to create the data
-		 */
-		final BenchmarkParameters benchmarkParameters;
-		/**
-		 * The actual parameters (with XY position adjusted for the region size)
-		 */
-		final double[] answer;
-		/**
-		 * The string description of the parameters used to create and then fit the data
-		 */
-		final String parameters;
-		/**
-		 * Results conversion factors
-		 */
-		final double[] convert;
-		/**
-		 * The results of fitting the data. Results are only stored if fitting was successful.
-		 */
-		final double[][] results;
-		/**
-		 * The time for fitting the data.
-		 */
-		final long[] resultsTime;
-
-		public BenchmarkResult(BenchmarkParameters benchmarkParameters, double[] answer, String parameters,
-				double[] convert, double[][] results, long[] resultsTime)
-		{
-			this.benchmarkParameters = benchmarkParameters;
-			this.answer = answer;
-			this.parameters = parameters;
-			this.convert = convert;
-			this.results = results;
-			this.resultsTime = resultsTime;
-		}
-	}
-
-	/**
-	 * Store all the results from fitting on the same benchmark dataset
-	 */
-	public static LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<DoubletAnalysis.BenchmarkResult>();
-
 	/**
 	 * Used to allow multi-threading of the fitting method
 	 */
@@ -154,26 +144,29 @@ public class DoubletAnalysis implements PlugIn
 		final BlockingQueue<Integer> jobs;
 		final Statistics[] stats = new Statistics[NAMES.length];
 		final ImageStack stack;
-		final Rectangle region;
-		final double[][] xy;
+		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
+		final int fitting;
 		final FitConfiguration fitConfig;
-		final double sa;
+		final MaximaSpotFilter spotFilter;
+		final double limit;
 
-		double[] data = null;
+		float[] data = null;
 		private double[] lb, ub = null;
 		private double[] lc, uc = null;
 
-		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region, FitConfiguration fitConfig)
+		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
+				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
-			this.region = region;
+			this.actualCoordinates = actualCoordinates;
+			fitting = config.getRelativeFitting();
 			this.fitConfig = fitConfig.clone();
-			this.xy = getStartPoints();
+			this.spotFilter = config.createSpotFilter(true);
+			limit = spotFilter.getSearch() * spotFilter.getSearch();
 
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms || saveRawData) ? new StoredDataStatistics() : new Statistics();
-			sa = getSa();
 
 			createBounds();
 		}
@@ -208,87 +201,169 @@ public class DoubletAnalysis implements PlugIn
 
 		private void run(int frame)
 		{
+			if (Utils.isInterrupted())
+			{
+				finished = true;
+				return;
+			}
+
+			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
+
 			// Extract the data
-			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
-					data);
+			final int width = stack.getWidth();
+			final int height = stack.getHeight();
+			data = ImageConverter.getData(stack.getPixels(frame), width, height, null, data);
 
-			final int size = region.height;
-			final int totalFrames = benchmarkParameters.frames;
+			// Smooth the image and identify spots with a filter
+			Spot[] spots = spotFilter.rank(data, width, height);
 
-			// Get the background and signal estimate
-			final double b = (backgroundFitting) ? getBackground(data, size, size)
-					: answer[Gaussian2DFunction.BACKGROUND] + benchmarkParameters.bias;
-			final double signal = (signalFitting) ? getSignal(data, b)
-					//: benchmarkParameters.p[frame];
-					: answer[Gaussian2DFunction.SIGNAL];
-
-			// Find centre-of-mass estimate
-			if (comFitting)
+			// Match the each actual result to the closest filter candidate
+			int[] matches = new int[actual.length];
+			for (int i = 0; i < actual.length; i++)
 			{
-				getCentreOfMass(data, size, size, xy[xy.length - 1]);
-
-				double dx = xy[xy.length - 1][0] - answer[Gaussian2DFunction.X_POSITION];
-				double dy = xy[xy.length - 1][1] - answer[Gaussian2DFunction.Y_POSITION];
-				if (dx * dx + dy * dy < startOffset * startOffset)
-					comValid.incrementAndGet();
-			}
-
-			double[] initialParams = new double[7];
-			initialParams[Gaussian2DFunction.BACKGROUND] = b;
-			initialParams[Gaussian2DFunction.SIGNAL] = signal;
-			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = psfWidth;
-
-			// Subtract the bias
-			final double bias = benchmarkParameters.bias;
-			if (fitConfig.isRemoveBiasBeforeFitting())
-			{
-				// MLE can handle negative data 
-				initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
-				for (int i = 0; i < data.length; i++)
-					data[i] -= bias;
-			}
-
-			double[][] bounds = null;
-			double[] error = new double[1];
-			double[][] result = new double[xy.length][];
-			long[] time = new long[xy.length];
-			int c = 0;
-			int resultPosition = frame;
-			for (double[] centre : xy)
-			{
-				long start = System.nanoTime();
-
-				// Do fitting
-				final double[] params = initialParams.clone();
-				params[Gaussian2DFunction.X_POSITION] = centre[0];
-				params[Gaussian2DFunction.Y_POSITION] = centre[1];
-				fitConfig.initialise(1, size, params);
-				FunctionSolver solver = fitConfig.getFunctionSolver();
-				if (solver.isBounded())
-					bounds = setBounds(solver, initialParams, bounds);
-				if (solver.isConstrained())
-					setConstraints(solver);
-				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
-				if (isValid(status, params, size))
+				double dmin = limit;
+				int match = -1;
+				for (int j = 0; j < spots.length; j++)
 				{
-					// Subtract the fitted bias from the background
-					if (!fitConfig.isRemoveBiasBeforeFitting())
-						params[Gaussian2DFunction.BACKGROUND] -= bias;
-					result[c] = params;
-					time[c] = System.nanoTime() - start;
-					// Store all the results for later analysis
-					results[resultPosition] = params;
-					resultsTime[resultPosition] = time[c];
-					c++;
+					double d2 = actual[i].distance2(spots[j].x, spots[j].y);
+					if (dmin > d2)
+					{
+						dmin = d2;
+						match = j;
+					}
 				}
-				else
-				{
-					//System.out.println(status);
-				}
-				resultPosition += totalFrames;
+				matches[i] = match;
 			}
 
-			addResults(stats, answer, benchmarkParameters.p[frame], sa, time, result, c);
+			// Identify single and doublets (and other)
+			int singles = 0, doublets = 0;
+			for (int i = 0; i < actual.length; i++)
+			{
+				if (matches[i] != -1)
+				{
+					// Count all matches
+					final int j = matches[i];
+					int n = 0;
+					for (int ii = i; ii < matches.length; ii++)
+					{
+						if (matches[ii] == j)
+						{
+							n++;
+							// Reset to avoid double counting
+							matches[ii] = -1;
+						}
+					}
+					if (n > 1)
+					{
+						//System.out.printf("Frame %d match %d : %d,%d \n", frame, n, spots[j].x, spots[j].y);
+						// TODO - Create an output stack with coloured ROI overlay for each n=1, n=2, n=other
+						// to check that the doublets are correctly identified.
+					}
+
+					if (n == 1)
+						singles++;
+					else if (n == 2)
+						doublets++;
+					else
+					{
+						// Fit these as well. The system should be tuned to try doublet fits when 
+						// there is more than one spot.
+					}
+
+					// Fit the candidates (as per the FitWorker logic)
+
+					// Compute residuals and fit as a doublet
+
+				}
+			}
+			System.out.printf("Frame %d, singles=%d, doublets=%d, other=%d\n", frame, singles, doublets,
+					actual.length - singles - 2 * doublets);
+
+			// Extract the data
+			//data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
+			//		data);
+
+			// Fit a single
+
+			// Fit a doublet
+
+			//			
+			//			
+			//
+			//			final int size = region.height;
+			//
+			//			// Get the background and signal estimate
+			//			final double b = getBackground(data, size, size);
+			//			final double signal = getSignal(data, b);
+			//
+			//			// Find centre-of-mass estimate
+			//			if (comFitting)
+			//			{
+			//				getCentreOfMass(data, size, size, xy[xy.length - 1]);
+			//
+			//				double dx = xy[xy.length - 1][0] - answer[Gaussian2DFunction.X_POSITION];
+			//				double dy = xy[xy.length - 1][1] - answer[Gaussian2DFunction.Y_POSITION];
+			//				if (dx * dx + dy * dy < startOffset * startOffset)
+			//					comValid.incrementAndGet();
+			//			}
+			//
+			//			double[] initialParams = new double[7];
+			//			initialParams[Gaussian2DFunction.BACKGROUND] = b;
+			//			initialParams[Gaussian2DFunction.SIGNAL] = signal;
+			//			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = psfWidth;
+			//
+			//			// Subtract the bias
+			//			final double bias = simulationParameters.bias;
+			//			if (fitConfig.isRemoveBiasBeforeFitting())
+			//			{
+			//				// MLE can handle negative data 
+			//				initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
+			//				for (int i = 0; i < data.length; i++)
+			//					data[i] -= bias;
+			//			}
+			//
+			//			double[][] bounds = null;
+			//			double[] error = new double[1];
+			//			double[][] result = new double[xy.length][];
+			//			long[] time = new long[xy.length];
+			//			int c = 0;
+			//			int resultPosition = frame;
+			//			for (double[] centre : xy)
+			//			{
+			//				long start = System.nanoTime();
+			//
+			//				// Do fitting
+			//				final double[] params = initialParams.clone();
+			//				params[Gaussian2DFunction.X_POSITION] = centre[0];
+			//				params[Gaussian2DFunction.Y_POSITION] = centre[1];
+			//				fitConfig.initialise(1, size, params);
+			//				FunctionSolver solver = fitConfig.getFunctionSolver();
+			//				if (solver.isBounded())
+			//					bounds = setBounds(solver, initialParams, bounds);
+			//				if (solver.isConstrained())
+			//					setConstraints(solver);
+			//				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
+			//				if (isValid(status, params, size))
+			//				{
+			//					// Subtract the fitted bias from the background
+			//					if (!fitConfig.isRemoveBiasBeforeFitting())
+			//						params[Gaussian2DFunction.BACKGROUND] -= bias;
+			//					result[c] = params;
+			//					time[c] = System.nanoTime() - start;
+			//					// Store all the results for later analysis
+			//					results[resultPosition] = params;
+			//					resultsTime[resultPosition] = time[c];
+			//					c++;
+			//				}
+			//				else
+			//				{
+			//					//System.out.println(status);
+			//				}
+			//				resultPosition += totalFrames;
+			//			}
+			//
+			//			addResults(stats, answer, simulationParameters.p[frame], sa, time, result, c);
+
 		}
 
 		/**
@@ -355,22 +430,22 @@ public class DoubletAnalysis implements PlugIn
 				lb = new double[7];
 
 				// Background could be zero so always have an upper limit
-				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0,
-						2 * benchmarkParameters.getBackground() * benchmarkParameters.gain);
+				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * simulationParameters.b * simulationParameters.gain);
 				if (!fitConfig.isRemoveBiasBeforeFitting())
 				{
-					lb[Gaussian2DFunction.BACKGROUND] += benchmarkParameters.bias;
-					ub[Gaussian2DFunction.BACKGROUND] += benchmarkParameters.bias;
+					lb[Gaussian2DFunction.BACKGROUND] += simulationParameters.bias;
+					ub[Gaussian2DFunction.BACKGROUND] += simulationParameters.bias;
 				}
-				double signal = benchmarkParameters.getSignal() * benchmarkParameters.gain;
-				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
-				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
-				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
-				ub[Gaussian2DFunction.Y_POSITION] = 2 * regionSize + 1;
+
+				//				double signal = simulationParameters.getSignal() * simulationParameters.gain;
+				//				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
+				//				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
+				//				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
+				//				ub[Gaussian2DFunction.Y_POSITION] = 2 * regionSize + 1;
 				lb[Gaussian2DFunction.ANGLE] = -Math.PI;
 				ub[Gaussian2DFunction.ANGLE] = Math.PI;
 				double wf = 1.5;
-				double s = benchmarkParameters.s / benchmarkParameters.a;
+				double s = simulationParameters.s / simulationParameters.a;
 				lb[Gaussian2DFunction.X_SD] = s / wf;
 				ub[Gaussian2DFunction.X_SD] = s * wf;
 				lb[Gaussian2DFunction.Y_SD] = s / wf;
@@ -481,32 +556,26 @@ public class DoubletAnalysis implements PlugIn
 
 		if ("analysis".equals(arg))
 		{
-			if (benchmarkResults.isEmpty())
-			{
-				IJ.error(TITLE,
-						"No benchmark results in memory.\n \n" + TextUtils.wrap(
-								"Run the Fit Benchmark Data plugin and results will be stored for comparison analysis.",
-								60));
-				return;
-			}
 			runAnalysis();
 		}
 		else
 		{
-			if (CreateData.benchmarkParameters == null)
+			simulationParameters = CreateData.simulationParameters;
+			if (simulationParameters == null)
 			{
-				IJ.error(TITLE,
-						"No benchmark parameters in memory.\n \n" + TextUtils.wrap(
-								"Run the " + CreateData.TITLE +
-										" plugin in benchmark mode with a fixed number of photons per localisation.",
-								60));
+				IJ.error(TITLE, "No benchmark spot parameters in memory");
 				return;
 			}
-			benchmarkParameters = CreateData.benchmarkParameters;
 			imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
-			if (imp == null || imp.getStackSize() != benchmarkParameters.frames)
+			if (imp == null)
 			{
-				IJ.error(TITLE, "No benchmark image to match the parameters in memory");
+				IJ.error(TITLE, "No benchmark image");
+				return;
+			}
+			results = MemoryPeakResults.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
+			if (results == null)
+			{
+				IJ.error(TITLE, "No benchmark results in memory");
 				return;
 			}
 
@@ -525,31 +594,30 @@ public class DoubletAnalysis implements PlugIn
 		final double sa = getSa();
 		gd.addMessage(
 				String.format("Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
-						Utils.rounded(benchmarkParameters.s / benchmarkParameters.a), Utils.rounded(sa)));
+						Utils.rounded(simulationParameters.s / simulationParameters.a), Utils.rounded(sa)));
 
 		// For each new benchmark width, reset the PSF width to the square pixel adjustment
-		if (lastS != benchmarkParameters.s)
+		if (lastId != simulationParameters.id)
 		{
-			lastS = benchmarkParameters.s;
-			psfWidth = sa;
+			double w = sa;
+			fitConfig.setInitialPeakStdDev(w);
 		}
 
-		String filename = SettingsManager.getSettingsFilename();
-		GlobalSettings settings = SettingsManager.loadSettings(filename);
-		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
-
-		gd.addSlider("Region_size", 2, 20, regionSize);
-		gd.addNumericField("PSF_width", psfWidth, 3);
+		// Collect options for fitting
+		gd.addNumericField("Initial_StdDev", fitConfig.getInitialPeakStdDev0(), 3);
+		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
+		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+		gd.addSlider("Search_width", 0.5, 2.5, config.getSearch());
+		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
+		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
-		gd.addCheckbox("Offset_fit", offsetFitting);
-		gd.addNumericField("Start_offset", startOffset, 3);
-		gd.addCheckbox("Include_CoM_fit", comFitting);
-		gd.addCheckbox("Background_fitting", backgroundFitting);
-		gd.addMessage("Signal fitting can be disabled for " + FitFunction.FIXED.toString() + " function");
-		gd.addCheckbox("Signal_fitting", signalFitting);
+
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Save_raw_data", saveRawData);
 
@@ -558,34 +626,41 @@ public class DoubletAnalysis implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		regionSize = (int) Math.abs(gd.getNextNumber());
-		psfWidth = Math.abs(gd.getNextNumber());
+		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
+		config.setDataFilterType(gd.getNextChoiceIndex());
+		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+		config.setSearch(gd.getNextNumber());
+		config.setBorder(gd.getNextNumber());
+		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
-		offsetFitting = gd.getNextBoolean();
-		startOffset = Math.abs(gd.getNextNumber());
-		comFitting = gd.getNextBoolean();
-		backgroundFitting = gd.getNextBoolean();
-		signalFitting = gd.getNextBoolean();
+
 		showHistograms = gd.getNextBoolean();
 		saveRawData = gd.getNextBoolean();
 
-		if (!comFitting && !offsetFitting)
-		{
-			IJ.error(TITLE, "No initial fitting positions");
-			return false;
-		}
-
-		if (regionSize < 1)
-			regionSize = 1;
-
 		if (gd.invalidNumber())
 			return false;
+		GlobalSettings settings = new GlobalSettings();
+		settings.setFitEngineConfiguration(config);
+		settings.setCalibration(cal);
 
-		if (!PeakFit.configureFitSolver(settings, filename, false))
+		// Copy simulation defaults if a new simulation
+		if (lastId != simulationParameters.id)
+		{
+			cal.nmPerPixel = simulationParameters.a;
+			cal.gain = simulationParameters.gain;
+			cal.amplification = simulationParameters.amplification;
+			cal.exposureTime = 100;
+			cal.readNoise = simulationParameters.readNoise;
+			cal.bias = simulationParameters.bias;
+			cal.emCCD = simulationParameters.emCCD;
+		}
+		if (!PeakFit.configureFitSolver(settings, null, false))
 			return false;
 
-		if (showHistograms)
+		lastId = simulationParameters.id;
+
+		if (true && showHistograms)
 		{
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
@@ -610,61 +685,18 @@ public class DoubletAnalysis implements PlugIn
 
 	private double getSa()
 	{
-		final double sa = PSFCalculator.squarePixelAdjustment(benchmarkParameters.s, benchmarkParameters.a) /
-				benchmarkParameters.a;
+		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a) /
+				simulationParameters.a;
 		return sa;
 	}
 
 	private void run()
 	{
-		// Initialise the answer. Convert to units of the image (ADUs and pixels)
-		answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground() * benchmarkParameters.gain;
-		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal() * benchmarkParameters.gain;
-		answer[Gaussian2DFunction.X_POSITION] = benchmarkParameters.x;
-		answer[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.y;
-		answer[Gaussian2DFunction.X_SD] = benchmarkParameters.s / benchmarkParameters.a;
-		answer[Gaussian2DFunction.Y_SD] = benchmarkParameters.s / benchmarkParameters.a;
-
-		// Set up the fit region. Always round down since 0.5 is the centre of the pixel.
-		int x = (int) benchmarkParameters.x;
-		int y = (int) benchmarkParameters.y;
-		region = new Rectangle(x - regionSize, y - regionSize, 2 * regionSize + 1, 2 * regionSize + 1);
-		if (!new Rectangle(0, 0, imp.getWidth(), imp.getHeight()).contains(region))
-		{
-			// Check if it is incorrect by only 1 pixel
-			if (region.width <= imp.getWidth() + 1 && region.height <= imp.getHeight() + 1)
-			{
-				Utils.log("Adjusting region %s to fit within image bounds (%dx%d)", region.toString(), imp.getWidth(),
-						imp.getHeight());
-				region = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
-			}
-			else
-			{
-				IJ.error(TITLE, "Fit region does not fit within the image");
-				return;
-			}
-		}
-
-		// Adjust the centre & account for 0.5 pixel offset during fitting
-		x -= region.x;
-		y -= region.y;
-		answer[Gaussian2DFunction.X_POSITION] -= (region.x + 0.5);
-		answer[Gaussian2DFunction.Y_POSITION] -= (region.y + 0.5);
-
-		// Configure for fitting
-		fitConfig.setBackgroundFitting(backgroundFitting);
-		fitConfig.setNotSignalFitting(!signalFitting);
-		fitConfig.setComputeDeviations(false);
-
-		// TODO - store the calibration at the class level to avoid calling this again.
-		GlobalSettings settings = SettingsManager.loadSettings(SettingsManager.getSettingsFilename());
-		Calibration calibration = settings.getCalibration();
-		fitConfig.setNmPerPixel(calibration.nmPerPixel);
-		fitConfig.setGain(calibration.gain);
-		fitConfig.setBias(calibration.bias);
-		fitConfig.setEmCCD(calibration.emCCD);
-
 		final ImageStack stack = imp.getImageStack();
+
+		// Get the coordinates per frame
+		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator
+				.getCoordinates(results.getResults(), false);
 
 		// Create a pool of workers
 		int nThreads = Prefs.getThreads();
@@ -673,34 +705,27 @@ public class DoubletAnalysis implements PlugIn
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, region, fitConfig);
+			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
 			t.start();
 		}
 
-		final int totalFrames = benchmarkParameters.frames;
-
-		// Store all the fitting results
-		results = new double[totalFrames * getNumberOfStartPoints()][];
-		resultsTime = new long[results.length];
-
 		// Fit the frames
+		final int totalFrames = actualCoordinates.size();
 		final int step = Utils.getProgressInterval(totalFrames);
-		for (int i = 0; i < totalFrames; i++)
+		int progress = 0;
+		for (int frame : actualCoordinates.keySet())
 		{
-			// Only fit if there were simulated photons
-			if (benchmarkParameters.p[i] > 0)
+			put(jobs, frame);
+			if (++progress % step == 0)
 			{
-				put(jobs, i);
-				if (i % step == 0)
-				{
-					if (Utils.showStatus("Frame: " + i + " / " + totalFrames))
-						IJ.showProgress(i, totalFrames);
-				}
+				if (Utils.showStatus("Frame: " + progress + " / " + totalFrames))
+					IJ.showProgress(progress, totalFrames);
 			}
 		}
+
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
 		{
@@ -721,70 +746,68 @@ public class DoubletAnalysis implements PlugIn
 		}
 		threads.clear();
 
-		if (comFitting)
-			Utils.log(TITLE + ": CoM within start offset = %d / %d (%s%%)", comValid.intValue(), totalFrames,
-					Utils.rounded((100.0 * comValid.intValue()) / totalFrames));
-
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
 
 		// Collect the results
-		Statistics[] stats = new Statistics[NAMES.length];
-		for (int i = 0; i < workers.size(); i++)
-		{
-			Statistics[] next = workers.get(i).stats;
-			for (int j = 0; j < next.length; j++)
-			{
-				if (stats[j] == null)
-					stats[j] = next[j];
-				else
-					stats[j].add(next[j]);
-			}
-		}
-		workers.clear();
 
-		// Show a table of the results
-		summariseResults(stats);
-
-		// Optionally show histograms
-		if (showHistograms)
-		{
-			IJ.showStatus("Calculating histograms ...");
-
-			int[] idList = new int[NAMES.length];
-			int count = 0;
-			double[] convert = getConversionFactors();
-
-			boolean requireRetile = false;
-			for (int i = 0; i < NAMES.length; i++)
-			{
-				if (displayHistograms[i] && convert[i] != 0)
-				{
-					// We will have to convert the values...
-					double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
-					for (int j = 0; j < tmp.length; j++)
-						tmp[j] *= convert[i];
-					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
-					idList[count++] = Utils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
-							String.format("%s +/- %s", Utils.rounded(tmpStats.getMean()),
-									Utils.rounded(tmpStats.getStandardDeviation())));
-					requireRetile = requireRetile || Utils.isNewWindow();
-				}
-			}
-
-			if (count > 0 && requireRetile)
-			{
-				idList = Arrays.copyOf(idList, count);
-				new WindowOrganiser().tileWindows(idList);
-			}
-		}
-
-		if (saveRawData)
-		{
-			String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
-			if (dir != null)
-				saveData(stats, dir);
-		}
+		//		
+		//		Statistics[] stats = new Statistics[NAMES.length];
+		//		for (int i = 0; i < workers.size(); i++)
+		//		{
+		//			Statistics[] next = workers.get(i).stats;
+		//			for (int j = 0; j < next.length; j++)
+		//			{
+		//				if (stats[j] == null)
+		//					stats[j] = next[j];
+		//				else
+		//					stats[j].add(next[j]);
+		//			}
+		//		}
+		//		workers.clear();
+		//
+		//		// Show a table of the results
+		//		summariseResults(stats);
+		//
+		//		// Optionally show histograms
+		//		if (showHistograms)
+		//		{
+		//			IJ.showStatus("Calculating histograms ...");
+		//
+		//			int[] idList = new int[NAMES.length];
+		//			int count = 0;
+		//			double[] convert = getConversionFactors();
+		//
+		//			boolean requireRetile = false;
+		//			for (int i = 0; i < NAMES.length; i++)
+		//			{
+		//				if (displayHistograms[i] && convert[i] != 0)
+		//				{
+		//					// We will have to convert the values...
+		//					double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
+		//					for (int j = 0; j < tmp.length; j++)
+		//						tmp[j] *= convert[i];
+		//					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
+		//					idList[count++] = Utils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
+		//							String.format("%s +/- %s", Utils.rounded(tmpStats.getMean()),
+		//									Utils.rounded(tmpStats.getStandardDeviation())));
+		//					requireRetile = requireRetile || Utils.isNewWindow();
+		//				}
+		//			}
+		//
+		//			if (count > 0 && requireRetile)
+		//			{
+		//				idList = Arrays.copyOf(idList, count);
+		//				new WindowOrganiser().tileWindows(idList);
+		//			}
+		//		}
+		//
+		//		if (saveRawData)
+		//		{
+		//			String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
+		//			if (dir != null)
+		//				saveData(stats, dir);
+		//		}
 
 		IJ.showStatus("");
 	}
@@ -849,49 +872,6 @@ public class DoubletAnalysis implements PlugIn
 	}
 
 	/**
-	 * @return The starting points for the fitting
-	 */
-	private double[][] getStartPoints()
-	{
-		double[][] xy = new double[getNumberOfStartPoints()][];
-		int ii = 0;
-
-		if (offsetFitting)
-		{
-			if (startOffset == 0)
-			{
-				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION],
-						answer[Gaussian2DFunction.Y_POSITION] };
-			}
-			else
-			{
-				// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at 
-				// startOffset pixels total distance 
-				final double distance = Math.sqrt(startOffset * startOffset * 0.5);
-
-				for (int x = -1; x <= 1; x += 2)
-					for (int y = -1; y <= 1; y += 2)
-					{
-						xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION] + x * distance,
-								answer[Gaussian2DFunction.Y_POSITION] + y * distance };
-					}
-			}
-		}
-		// Add space for centre-of-mass at the end of the array
-		if (comFitting)
-			xy[ii++] = new double[2];
-		return xy;
-	}
-
-	private int getNumberOfStartPoints()
-	{
-		int n = (offsetFitting) ? 1 : 0;
-		if (startOffset > 0)
-			n *= 4;
-		return (comFitting) ? n + 1 : n;
-	}
-
-	/**
 	 * Sum the intensity above background to estimate the signal
 	 * 
 	 * @param data
@@ -945,48 +925,31 @@ public class DoubletAnalysis implements PlugIn
 		StringBuilder sb = new StringBuilder();
 
 		// Create the benchmark settings and the fitting settings
-		sb.append(benchmarkParameters.getMolecules()).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.getSignal())).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.s)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.a)).append("\t");
-		sb.append(Utils.rounded(getSa() * benchmarkParameters.a)).append("\t");
-		// Report XY in nm from the pixel centre
-		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append("\t");
-		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.gain)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.b2)).append("\t");
+		int molecules = 0;
+		sb.append(molecules).append("\t");
+		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
+		sb.append(Utils.rounded(getSa() * simulationParameters.a)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
 
 		// Compute the noise
-		double noise = benchmarkParameters.b2;
-		if (benchmarkParameters.emCCD)
+		double noise = simulationParameters.b2;
+		if (simulationParameters.emCCD)
 		{
 			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
 			//final double b2 = backgroundVariance + readVariance
-			//                = benchmarkParameters.getBackground() + readVariance
+			//                = simulationParameters.getBackground() + readVariance
 			// This should be applied only to the background variance.
-			final double readVariance = noise - benchmarkParameters.getBackground();
-			noise = benchmarkParameters.getBackground() * 2 + readVariance;
+			final double readVariance = noise - simulationParameters.b2;
+			noise = simulationParameters.b2 * 2 + readVariance;
 		}
 
-		sb.append(Utils.rounded(benchmarkParameters.getSignal() / Math.sqrt(noise))).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.precisionN)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.precisionX)).append("\t");
-		sb.append(Utils.rounded(benchmarkParameters.precisionXML)).append("\t");
-		sb.append(region.width).append("x");
-		sb.append(region.height).append("\t");
-		sb.append(Utils.rounded(psfWidth * benchmarkParameters.a)).append("\t");
+		sb.append(Utils.rounded(fitConfig.getInitialPeakStdDev0() * simulationParameters.a)).append("\t");
+		sb.append(config.getRelativeFitting()).append("\t");
 		sb.append(fitConfig.getFitFunction().toString());
-		if (fitConfig.getFitFunction() == FitFunction.FIXED)
-		{
-			// Only fixed fitting can ignore the signal
-			if (!signalFitting)
-				sb.append("NS");
-		}
-		if (!backgroundFitting)
-			sb.append("NB");
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 		{
@@ -1000,34 +963,9 @@ public class DoubletAnalysis implements PlugIn
 		else
 			sb.append("\t");
 
-		// Convert to units of the image (ADUs and pixels)		
-		double[] convert = getConversionFactors();
-
-		// Store the results for fitting on this benchmark dataset
-		BenchmarkResult benchmarkResult = new BenchmarkResult(benchmarkParameters, answer, sb.toString(), convert,
-				this.results, this.resultsTime);
-		if (!benchmarkResults.isEmpty())
-		{
-			// Clear the results if the benchmark has changed
-			if (benchmarkResults.getFirst().benchmarkParameters.id != benchmarkParameters.id)
-				benchmarkResults.clear();
-		}
-		benchmarkResults.add(benchmarkResult);
-
 		// Now output the actual results ...		
 		sb.append("\t");
-		final double recall = (stats[0].getN() / (double) getNumberOfStartPoints()) /
-				benchmarkParameters.getMolecules();
-		sb.append(Utils.rounded(recall));
 
-		for (int i = 0; i < stats.length; i++)
-		{
-			if (convert[i] != 0)
-				sb.append("\t").append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append("\t")
-						.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
-			else
-				sb.append("\t0\t0");
-		}
 		summaryTable.append(sb.toString());
 	}
 
@@ -1040,14 +978,14 @@ public class DoubletAnalysis implements PlugIn
 	private double[] getConversionFactors()
 	{
 		final double[] convert = new double[NAMES.length];
-		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / benchmarkParameters.gain : 0;
+		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / simulationParameters.gain : 0;
 		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&
-				fitConfig.getFitFunction() == FitFunction.FIXED) ? 0 : 1 / benchmarkParameters.gain;
+				fitConfig.getFitFunction() == FitFunction.FIXED) ? 0 : 1 / simulationParameters.gain;
 		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
-		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
-		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
-		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? benchmarkParameters.a : 0;
-		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? benchmarkParameters.a : 0;
+		convert[Gaussian2DFunction.X_POSITION] = simulationParameters.a;
+		convert[Gaussian2DFunction.Y_POSITION] = simulationParameters.a;
+		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? simulationParameters.a : 0;
+		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? simulationParameters.a : 0;
 		convert[TIME] = 1e-6;
 		convert[ACTUAL_SIGNAL] = convert[Gaussian2DFunction.SIGNAL];
 		convert[ADJUSTED_X_SD] = convert[Gaussian2DFunction.X_SD];
@@ -1060,7 +998,7 @@ public class DoubletAnalysis implements PlugIn
 		x -= 0.5;
 		final int i = (int) Math.round(x);
 		x = x - i;
-		return x * benchmarkParameters.a;
+		return x * simulationParameters.a;
 	}
 
 	private void createTable()
@@ -1100,97 +1038,5 @@ public class DoubletAnalysis implements PlugIn
 
 	private void runAnalysis()
 	{
-		benchmarkParameters = benchmarkResults.getFirst().benchmarkParameters;
-		final double sa = getSa();
-
-		// The fitting could have used centre-of-mass or not making the number of points different.
-		// Find the shortest array (this will be the one where the centre-of-mass was not used)
-		int length = Integer.MAX_VALUE;
-		for (BenchmarkResult benchmarkResult : benchmarkResults)
-			if (length > benchmarkResult.results.length)
-				length = benchmarkResult.results.length;
-
-		// Build a list of all the frames which have results
-		int[] valid = new int[length];
-		int j = 0;
-		int[] count = new int[benchmarkResults.size()];
-		for (BenchmarkResult benchmarkResult : benchmarkResults)
-		{
-			int c = 0;
-			for (int i = 0; i < valid.length; i++)
-				if (benchmarkResult.results[i] != null)
-				{
-					c++;
-					valid[i]++;
-				}
-			count[j++] = c;
-		}
-
-		final int target = benchmarkResults.size();
-
-		// Check that we have data
-		if (!validData(valid, target))
-		{
-			IJ.error(TITLE, "No frames have fitting results from all methods");
-			return;
-		}
-
-		// Get the number of start points valid for all the results 
-		final int totalFrames = benchmarkParameters.frames;
-		final double numberOfStartPoints = (double) (length / totalFrames);
-
-		createAnalysisTable();
-
-		// Create the results using only frames where all the fitting methods were successful
-		j = 0;
-		for (BenchmarkResult benchmarkResult : benchmarkResults)
-		{
-			final double[] answer = benchmarkResult.answer;
-
-			Statistics[] stats = new Statistics[NAMES.length];
-			for (int i = 0; i < stats.length; i++)
-				stats[i] = new Statistics();
-
-			for (int i = 0; i < valid.length; i++)
-			{
-				if (valid[i] < target)
-					continue;
-
-				addResult(stats, answer, benchmarkParameters.p[i % totalFrames], sa, benchmarkResult.results[i],
-						benchmarkResult.resultsTime[i]);
-			}
-
-			StringBuilder sb = new StringBuilder(benchmarkResult.parameters);
-
-			// Now output the actual results ...		
-			sb.append("\t");
-			final double recall = (stats[0].getN() / numberOfStartPoints) / benchmarkParameters.getMolecules();
-			sb.append(Utils.rounded(recall));
-			// Add the original recall
-			sb.append("\t");
-			final double recall2 = (count[j++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
-			sb.append(Utils.rounded(recall2));
-
-			// Convert to units of the image (ADUs and pixels)		
-			final double[] convert = benchmarkResult.convert;
-
-			for (int i = 0; i < stats.length; i++)
-			{
-				if (convert[i] != 0)
-					sb.append("\t").append(Utils.rounded(stats[i].getMean() * convert[i], 6)).append("\t")
-							.append(Utils.rounded(stats[i].getStandardDeviation() * convert[i]));
-				else
-					sb.append("\t0\t0");
-			}
-			analysisTable.append(sb.toString());
-		}
-	}
-
-	private boolean validData(int[] valid, int target)
-	{
-		for (int i = 0; i < valid.length; i++)
-			if (valid[i] == target)
-				return true;
-		return false;
 	}
 }
