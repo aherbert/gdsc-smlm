@@ -28,7 +28,6 @@ import java.util.Arrays;
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 {
 	private static double[] logFactorial;
-	private final double[] logFactorialK;
 	private final double sumLogFactorialK;
 
 	/** All long-representable factorials */
@@ -43,7 +42,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			logFactorial[k] = Math.log(FACTORIALS[k]);
 	}
 
-	private static double[] initialiseFactorial(double[] data)
+	private static void initialiseFactorial(double[] data)
 	{
 		int max = 0;
 		for (double d : data)
@@ -57,13 +56,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 		if (logFactorial.length <= max)
 			populate(max);
-
-		final double[] f = new double[data.length];
-		for (int i = 0; i < data.length; i++)
-		{
-			f[i] = logFactorial[(int) data[i]];
-		}
-		return f;
 	}
 
 	private static synchronized void populate(int n)
@@ -103,11 +95,12 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	public PoissonLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n)
 	{
 		super(f, a, k, n);
-		// Initialise the factorial table
-		logFactorialK = initialiseFactorial(k);
+		// Initialise the factorial table to the correct size
+		initialiseFactorial(k);
+		// Pre-compute the sum over the data
 		double sum = 0;
-		for (double d : logFactorialK)
-			sum += d;
+		for (double d : k)
+			sum += logFactorial[(int) d];
 		sumLogFactorialK = sum;
 	}
 
@@ -202,7 +195,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 
 		final double k = data[i];
-		return l - k * Math.log(l) + logFactorialK[i];
+		return l - k * Math.log(l) + logFactorial[(int) k];
 	}
 
 	/*
@@ -232,7 +225,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			//gradient[j] = dl_da[j] * (1 - k / l);
 			gradient[j] = dl_da[j] * factor;
 		}
-		return l - k * Math.log(l) + logFactorialK[i];
+		return l - k * Math.log(l) + logFactorial[(int) k];
 	}
 
 	/*
