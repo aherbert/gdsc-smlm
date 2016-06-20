@@ -377,6 +377,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double gain;
 		/**
+		 * Amplification gain (ADUs/electron)
+		 */
+		final double amplification;
+		/**
 		 * Read noise in ADUs
 		 */
 		final double readNoise;
@@ -406,8 +410,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double precisionN, precisionX, precisionXML;
 
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
-				double bias, boolean emCCD, double gain, double readNoise, double b, double b2, double precisionN,
-				double precisionX, double precisionXML)
+				double bias, boolean emCCD, double gain, double amplification, double readNoise, double b, double b2,
+				double precisionN, double precisionX, double precisionXML)
 		{
 			id = nextId++;
 			this.frames = frames;
@@ -420,6 +424,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.bias = bias;
 			this.emCCD = emCCD;
 			this.gain = gain;
+			this.amplification = amplification;
 			this.readNoise = readNoise;
 			this.b = b;
 			this.b2 = b2;
@@ -857,11 +862,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store the benchmark settings when not using variable photons
 		if (settings.photonsPerSecond == settings.photonsPerSecondMaximum)
 		{
+			final double amplification = totalGain /
+					((settings.getQuantumEfficiency() == 0) ? 1 : settings.getQuantumEfficiency());
 			// Store read noise in ADUs
 			readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 			benchmarkParameters = new BenchmarkParameters(settings.particles, sd, settings.pixelPitch,
-					settings.photonsPerSecond, xyz[0], xyz[1], xyz[2], settings.bias, emCCD, totalGain, readNoise,
-					settings.background, b2, lowerN, lowerP, lowerMLP);
+					settings.photonsPerSecond, xyz[0], xyz[1], xyz[2], settings.bias, emCCD, totalGain, amplification,
+					readNoise, settings.background, b2, lowerN, lowerP, lowerMLP);
 		}
 		else
 		{
@@ -901,10 +908,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		boolean emCCD = settings.getEmGain() > 1;
 		double sd = getPsfSD() * settings.pixelPitch;
 
-		// Store read noise in ADUs
 		final double amplification = totalGain /
 				((settings.getQuantumEfficiency() == 0) ? 1 : settings.getQuantumEfficiency());
 
+		// Store read noise in ADUs
 		readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
 		simulationParameters = new SimulationParameters(particles, fullSimulation, sd, settings.pixelPitch,
 				settings.photonsPerSecond, settings.photonsPerSecondMaximum, signalPerFrame, settings.depth,
@@ -2322,7 +2329,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// - Combine with the target spot and apply gain to get Yi	
 				// - Render the target spot using an offset +/- delta on X,Y,Signal (a) to get dYi da
 				// - Compute Iaa
-				
+
 				// The simulated image is not used?
 
 			}
