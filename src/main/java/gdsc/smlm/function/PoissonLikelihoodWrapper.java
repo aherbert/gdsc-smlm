@@ -19,7 +19,7 @@ import org.apache.commons.math3.util.FastMath;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson distribution:<br/>
- * f(x) = l(x) - k * ln(l(x))<br/>
+ * f(x) = l(x) - k * ln(l(x)) + log(k!)<br/>
  * Where:<br/>
  * l(x) is the function (expected) value<br/>
  * k is the observed value
