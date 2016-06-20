@@ -1,5 +1,9 @@
 package gdsc.smlm.function;
 
+import java.util.Arrays;
+
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -25,6 +29,62 @@ package gdsc.smlm.function;
  */
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 {
+	private static double[] logFactorial;
+	private final double[] logFactorialK;
+	private final double sumLogFactorialK;
+
+	/** All long-representable factorials */
+	static final long[] FACTORIALS = new long[] { 1l, 1l, 2l, 6l, 24l, 120l, 720l, 5040l, 40320l, 362880l, 3628800l,
+			39916800l, 479001600l, 6227020800l, 87178291200l, 1307674368000l, 20922789888000l, 355687428096000l,
+			6402373705728000l, 121645100408832000l, 2432902008176640000l };
+
+	static
+	{
+		logFactorial = new double[FACTORIALS.length];
+		for (int k = 0; k < FACTORIALS.length; k++)
+			logFactorial[k] = Math.log(FACTORIALS[k]);
+	}
+
+	private static double[] initialiseFactorial(double[] data)
+	{
+		int max = 0;
+		for (double d : data)
+		{
+			final int i = (int) d;
+			if (i != d)
+				throw new IllegalArgumentException("Input observed values must be integers: " + d);
+			if (max < i)
+				max = i;
+		}
+
+		if (logFactorial.length <= max)
+			populate(max);
+
+		final double[] f = new double[data.length];
+		for (int i = 0; i < data.length; i++)
+		{
+			f[i] = logFactorial[(int) data[i]];
+		}
+		return f;
+	}
+
+	private static synchronized void populate(int n)
+	{
+		if (logFactorial.length <= n)
+		{
+			int k = logFactorial.length - 1;
+			double logSum = logFactorial[k];
+
+			logFactorial = Arrays.copyOf(logFactorial, n + 1);
+			while (k < n)
+			{
+				k++;
+				logSum += FastMath.log(k);
+				logFactorial[k] = logSum;
+			}
+		}
+	}
+
 	/**
 	 * Initialise the function.
 	 * <p>
@@ -39,10 +99,18 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 *            The observed values
 	 * @param n
 	 *            The number of observed values
+	 * @throws IllegalArgumentException
+	 *             if the input observed values are not integers
 	 */
 	public PoissonLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n)
 	{
 		super(f, a, k, n);
+		// Initialise the factorial table
+		logFactorialK = initialiseFactorial(k);
+		double sum = 0;
+		for (double d : logFactorialK)
+			sum += d;
+		sumLogFactorialK = sum;
 	}
 
 	/*
@@ -53,7 +121,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	public double computeLikelihood()
 	{
 		// Compute the negative log-likelihood to be minimised
-		double ll = 0;
+		// f(x) = l(x) - k * ln(l(x)) + log(k!)
+		double ll = sumLogFactorialK;
 		for (int i = 0; i < n; i++)
 		{
 			final double l = f.eval(i);
@@ -79,7 +148,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	public double computeLikelihood(double[] gradient)
 	{
 		// Compute the negative log-likelihood to be minimised
-		// f(x) = l(x) - k * ln(l(x))
+		// f(x) = l(x) - k * ln(l(x)) + log(k!)
 		// 
 		// Since (k * ln(l(x)))' = (k * ln(l(x))') * l'(x)
 		//                       = (k / l(x)) * l'(x)
@@ -87,7 +156,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		// f'(x) = l'(x) - (k/l(x) * l'(x))
 		// f'(x) = l'(x) * (1 - k/l(x))
 
-		double ll = 0;
+		double ll = sumLogFactorialK;
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
 		double[] dl_da = new double[nVariables];
@@ -135,7 +204,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 
 		final double k = data[i];
-		return l - k * Math.log(l);
+		return l - k * Math.log(l) + logFactorialK[i];
 	}
 
 	/*
@@ -165,7 +234,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			//gradient[j] = dl_da[j] * (1 - k / l);
 			gradient[j] = dl_da[j] * factor;
 		}
-		return l - k * Math.log(l);
+		return l - k * Math.log(l) + logFactorialK[i];
 	}
 
 	/*
