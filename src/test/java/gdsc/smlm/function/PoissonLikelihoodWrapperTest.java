@@ -1,17 +1,22 @@
 package gdsc.smlm.function;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.smlm.function.PoissonLikelihoodWrapper;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-
 import java.util.Arrays;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.utils.DoubleEquality;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+
 public class PoissonLikelihoodWrapperTest
 {
+	double[] photons = { 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
+	// Set this at the range output from cumulativeProbabilityIsOneWithIntegerData
+	int[] maxRange = { 6, 7, 10, 13, 17, 29, 149, 1141 };
+
 	DoubleEquality eqPerDatum = new DoubleEquality(2, 0.01);
 	DoubleEquality eq = new DoubleEquality(3, 0.001);
 
@@ -221,8 +226,8 @@ public class PoissonLikelihoodWrapperTest
 									}
 							}
 		double p = (100.0 * count) / total;
-		logf("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
-				total, p);
+		logf("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
+				p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
 	}
 
@@ -400,8 +405,8 @@ public class PoissonLikelihoodWrapperTest
 								//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
 								//		dyda[gradientIndex]);
 								if (!ok)
-									Assert.assertTrue(NAME[targetParameter] + ": " + gradient + " != " +
-											dyda[gradientIndex], ok);
+									Assert.assertTrue(
+											NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex], ok);
 								ok = eq.almostEqualComplement(gradient, dyda[gradientIndex]);
 								if (ok)
 									count++;
@@ -449,5 +454,82 @@ public class PoissonLikelihoodWrapperTest
 	void logf(String format, Object... args)
 	{
 		System.out.printf(format, args);
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithIntegerData()
+	{
+		// Initialise for large observed count
+		PoissonLikelihoodWrapper.likelihood(1, photons[photons.length - 1] * 2);
+
+		for (double p : photons)
+			cumulativeProbabilityIsOneWithIntegerData(p);
+	}
+
+	private void cumulativeProbabilityIsOneWithIntegerData(final double mu)
+	{
+		double p = 0;
+		int max = 0;
+
+		// Evaluate an initial range. 
+		// Poisson will have mean mu with a variance mu. 
+		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
+		if (mu > 0)
+		{
+			max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
+			for (int x = 0; x <= max; x++)
+			{
+				final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
+				System.out.printf("x=%d, p=%f\n", x, pp);
+				p += pp;
+			}
+			if (p > 1.01)
+				Assert.fail("P > 1: " + p);
+		}
+
+		// We have most of the probability density. 
+		// Now keep evaluating up until no difference
+		final double changeTolerance = 1e-6;
+		for (;;)
+		{
+			max++;
+			final double pp = PoissonLikelihoodWrapper.likelihood(mu, max);
+			System.out.printf("x=%d, p=%f\n", max, pp);
+			p += pp;
+			if (pp / p < changeTolerance)
+				break;
+		}
+		System.out.printf("mu=%f, p=%f, max=%d\n", mu, p, max);
+		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithReadDataForPhotonsAbove4()
+	{
+		// Initialise for large observed count
+		PoissonLikelihoodWrapper.likelihood(1, photons[photons.length - 1] * 2);
+
+		//for (int i = photons.length; i-- > 0;)
+		for (int i = 0; i < photons.length; i++)
+			if (photons[i] >= 4)
+				cumulativeProbabilityIsOneWithRealData(photons[i], maxRange[i] + 1);
+	}
+
+	private void cumulativeProbabilityIsOneWithRealData(final double mu, int max)
+	{
+		double p = 0;
+
+		SimpsonIntegrator in = new SimpsonIntegrator();
+
+		p = in.integrate(20000, new UnivariateFunction()
+		{
+			public double value(double x)
+			{
+				return PoissonLikelihoodWrapper.likelihood(mu, x);
+			}
+		}, 0, max);
+
+		System.out.printf("mu=%f, p=%f\n", mu, p);
+		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
 	}
 }

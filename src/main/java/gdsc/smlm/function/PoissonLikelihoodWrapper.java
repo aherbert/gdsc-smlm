@@ -3,6 +3,7 @@ package gdsc.smlm.function;
 import java.util.Arrays;
 
 import org.apache.commons.math3.special.Gamma;
+import org.apache.commons.math3.util.FastMath;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -26,6 +27,19 @@ import org.apache.commons.math3.special.Gamma;
  * <p>
  * The negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or for a chosen
  * observed value.
+ * <p>
+ * The class can handle non-integer observed data. In this case the PMF is approximated as:
+ * 
+ * <pre>
+ * PMF(l,k) = C * e^-l * l^x / gamma(k+1)
+ * with:
+ * l = the function (expected) value
+ * gamma = the gamma function
+ * C = a normalising constant.
+ * </pre>
+ * 
+ * The normalising constant is used to ensure the PMF sums to 1. However it is omitted in this implementation for speed.
+ * The PMF sums to approximately 1 for l>=4.
  */
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 {
@@ -111,7 +125,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		else
 		{
 			for (double d : k)
-				sum += Gamma.logGamma(d + 1);
+				sum += logFactorial(d);
 		}
 		sumLogFactorialK = sum;
 	}
@@ -207,7 +221,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 
 		final double k = data[i];
-		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : Gamma.logGamma(k + 1));
+		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k));
 	}
 
 	/*
@@ -237,7 +251,49 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			//gradient[j] = dl_da[j] * (1 - k / l);
 			gradient[j] = dl_da[j] * factor;
 		}
-		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : Gamma.logGamma(k + 1));
+		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k));
+	}
+
+	private static double logFactorial(double k)
+	{
+		if (k <= 1)
+			return 0;
+		return Gamma.logGamma(k + 1);
+	}
+
+	/**
+	 * Compute the negative log likelihood.
+	 *
+	 * @param l
+	 *            the mean of the Poisson distribution (lambda)
+	 * @param k
+	 *            the observed count
+	 * @return the negative log likelihood
+	 */
+	public static double negativeLogLikelihood(double l, double k)
+	{
+		final boolean integerData = (int) k == k;
+		if (integerData)
+		{
+			if (logFactorial.length <= k)
+				populate((int) k);
+		}
+		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k));
+	}
+
+	/**
+	 * Compute the negative log likelihood.
+	 *
+	 * @param l
+	 *            the mean of the Poisson distribution (lambda)
+	 * @param k
+	 *            the observed count
+	 * @return the likelihood
+	 */
+	public static double likelihood(double l, double k)
+	{
+		final double nll = negativeLogLikelihood(l, k);
+		return FastMath.exp(-nll);
 	}
 
 	/*
