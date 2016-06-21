@@ -111,16 +111,16 @@ public class FitEngine
 		fitting = config.getRelativeFitting();
 		spotFilter = config.createSpotFilter(true);
 
-		//		// Allow debugging the fit process
-		//		try
-		//		{
-		//			logger = new FileLogger(
-		//					String.format("/tmp/%s%s.log", config.getFitConfiguration().getFitSolver().getShortName(),
-		//							(config.getFitConfiguration().isModelCamera()) ? "C" : ""));
-		//		}
-		//		catch (FileNotFoundException e)
-		//		{
-		//		}
+		//// Allow debugging the fit process
+		//try
+		//{
+		//	logger = new FileLogger(
+		//			String.format("/tmp/%s%s.log", config.getFitConfiguration().getFitSolver().getShortName(),
+		//					(config.getFitConfiguration().isModelCamera()) ? "C" : ""));
+		//}
+		//catch (java.io.FileNotFoundException e)
+		//{
+		//}
 
 		// Create the workers
 		for (int i = 0; i < threads; i++)
