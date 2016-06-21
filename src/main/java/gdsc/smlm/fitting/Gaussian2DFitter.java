@@ -234,7 +234,7 @@ public class Gaussian2DFitter
 		double background = 0;
 
 		//Utils.display("Spot", data, maxx, maxy);
-		
+
 		if (npeaks == 1)
 		{
 			// Set background using the average value of the edge in the data
@@ -756,6 +756,13 @@ public class Gaussian2DFitter
 
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 		{
+			if (params[j + Gaussian2DFunction.SIGNAL] < lower[j + Gaussian2DFunction.SIGNAL])
+				lower[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] -
+						(lower[j + Gaussian2DFunction.SIGNAL] - params[j + Gaussian2DFunction.SIGNAL]);
+			if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL])
+				upper[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] +
+						(params[j + Gaussian2DFunction.SIGNAL] - upper[j + Gaussian2DFunction.SIGNAL]);
+
 			// All functions evaluate the x and y position.
 			// Lower bounds on these will be zero when the array is initialised.
 			// We may have an estimate outside the bounds (if including neighbours).
@@ -785,6 +792,23 @@ public class Gaussian2DFitter
 				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * wf;
 			}
 		}
+
+		// TODO - Comment this out
+		// Debug check
+		for (int i = 0; i < params.length; i++)
+		{
+			if (params[i] < lower[i])
+			{
+				System.out.printf("Param %d too low %f < %f\n", i, params[i], lower[i]);
+				lower[i] = params[i] - (lower[i] - params[i]);
+			}
+			if (params[i] > upper[i])
+			{
+				System.out.printf("Param %d too high %f > %f\n", i, params[i], upper[i]);
+				upper[i] = params[i] + (params[i] - upper[i]);
+			}
+		}
+
 		solver.setBounds(lower, upper);
 	}
 
