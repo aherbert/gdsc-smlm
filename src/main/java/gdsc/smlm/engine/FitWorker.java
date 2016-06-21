@@ -111,6 +111,9 @@ public class FitWorker implements Runnable
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
 		gf = new Gaussian2DFitter(fitConfig);
+		final int max = (fitConfig.getWidthFactor() > 1) ? (int) Math.ceil(fitConfig.getWidthFactor())
+				: Integer.MAX_VALUE;
+		gf.setMaximumWidthFactor(max);
 		duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		calculateNoise = config.getFitConfiguration().getNoise() <= 0;
 		if (!calculateNoise)
@@ -1144,7 +1147,8 @@ public class FitWorker implements Runnable
 		fittedNeighbourCount = 0;
 		if (!sliceResults.isEmpty())
 		{
-			final float range = (float) FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+			final float range = (float) FastMath.max(fitConfig.getInitialPeakStdDev0(),
+					fitConfig.getInitialPeakStdDev1());
 			final float xmin2 = xmin - range;
 			final float xmax2 = xmax + range;
 			final float ymin2 = ymin - range;
