@@ -730,7 +730,6 @@ public class Gaussian2DFitter
 				fitConfiguration.getWidthFactor() < maximumWidthFactor) ? fitConfiguration.getWidthFactor()
 						: maximumWidthFactor;
 
-		// TODO - Check if the signal bounds are appropriate
 		if (npeaks == 1)
 		{
 			// Allow the signal to explain all the data. This assumes the data window entirely covers the spot. 
@@ -758,6 +757,7 @@ public class Gaussian2DFitter
 
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 		{
+			// Check if the signal bounds are appropriate
 			if (params[j + Gaussian2DFunction.SIGNAL] < lower[j + Gaussian2DFunction.SIGNAL])
 				lower[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] -
 						(lower[j + Gaussian2DFunction.SIGNAL] - params[j + Gaussian2DFunction.SIGNAL]);
@@ -795,21 +795,20 @@ public class Gaussian2DFitter
 			}
 		}
 
-		// TODO - Comment this out
-		// Debug check
-		for (int i = 0; i < params.length; i++)
-		{
-			if (params[i] < lower[i])
-			{
-				System.out.printf("Param %d too low %f < %f\n", i, params[i], lower[i]);
-				lower[i] = params[i] - (lower[i] - params[i]);
-			}
-			if (params[i] > upper[i])
-			{
-				System.out.printf("Param %d too high %f > %f\n", i, params[i], upper[i]);
-				upper[i] = params[i] + (params[i] - upper[i]);
-			}
-		}
+		//// Debug check
+		//for (int i = 0; i < params.length; i++)
+		//{
+		//	if (params[i] < lower[i])
+		//	{
+		//		System.out.printf("Param %d too low %f < %f\n", i, params[i], lower[i]);
+		//		lower[i] = params[i] - (lower[i] - params[i]);
+		//	}
+		//	if (params[i] > upper[i])
+		//	{
+		//		System.out.printf("Param %d too high %f > %f\n", i, params[i], upper[i]);
+		//		upper[i] = params[i] + (params[i] - upper[i]);
+		//	}
+		//}
 
 		solver.setBounds(lower, upper);
 	}
