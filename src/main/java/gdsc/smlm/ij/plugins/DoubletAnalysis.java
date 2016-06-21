@@ -42,6 +42,7 @@ import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.PointPair;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
@@ -52,6 +53,8 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot2;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -149,13 +152,14 @@ public class DoubletAnalysis implements PlugIn
 		final FitConfiguration fitConfig;
 		final MaximaSpotFilter spotFilter;
 		final double limit;
+		final int[] spotHistogram, resultHistogram;
 
 		float[] data = null;
 		private double[] lb, ub = null;
 		private double[] lc, uc = null;
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig)
+				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, int maxCount)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
@@ -164,6 +168,8 @@ public class DoubletAnalysis implements PlugIn
 			this.fitConfig = fitConfig.clone();
 			this.spotFilter = config.createSpotFilter(true);
 			limit = spotFilter.getSearch() * spotFilter.getSearch();
+			spotHistogram = new int[maxCount + 1];
+			resultHistogram = new int[spotHistogram.length];
 
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms || saveRawData) ? new StoredDataStatistics() : new Statistics();
@@ -236,14 +242,14 @@ public class DoubletAnalysis implements PlugIn
 			}
 
 			// Identify single and doublets (and other)
-			int singles = 0, doublets = 0;
+			int singles = 0, doublets = 0, multiples = 0, total = 0;
 			for (int i = 0; i < actual.length; i++)
 			{
 				if (matches[i] != -1)
 				{
 					// Count all matches
-					final int j = matches[i];
 					int n = 0;
+					final int j = matches[i];
 					for (int ii = i; ii < matches.length; ii++)
 					{
 						if (matches[ii] == j)
@@ -253,6 +259,20 @@ public class DoubletAnalysis implements PlugIn
 							matches[ii] = -1;
 						}
 					}
+					switch (n)
+					{
+						//@formatter:off
+						case 1: singles++; break;
+						case 2: doublets++; break;
+						default: multiples++;
+						//@formatter:on
+					}
+					// Store the number of actual results that match to a spot
+					spotHistogram[n]++;
+					// Store the number of results that match to a spot with n results
+					resultHistogram[n] += n;
+					total += n;
+
 					if (n > 1)
 					{
 						//System.out.printf("Frame %d match %d : %d,%d \n", frame, n, spots[j].x, spots[j].y);
@@ -260,24 +280,15 @@ public class DoubletAnalysis implements PlugIn
 						// to check that the doublets are correctly identified.
 					}
 
-					if (n == 1)
-						singles++;
-					else if (n == 2)
-						doublets++;
-					else
-					{
-						// Fit these as well. The system should be tuned to try doublet fits when 
-						// there is more than one spot.
-					}
-
 					// Fit the candidates (as per the FitWorker logic)
+					// (Fit even multiple since this is what the FitWorker will do) 
 
 					// Compute residuals and fit as a doublet
 
 				}
 			}
-			System.out.printf("Frame %d, singles=%d, doublets=%d, other=%d\n", frame, singles, doublets,
-					actual.length - singles - 2 * doublets);
+			System.out.printf("Frame %d, singles=%d, doublets=%d, multi=%d\n", frame, singles, doublets, multiples);
+			resultHistogram[0] += actual.length - total;
 
 			// Extract the data
 			//data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
@@ -698,6 +709,11 @@ public class DoubletAnalysis implements PlugIn
 		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator
 				.getCoordinates(results.getResults(), false);
 
+		int maxCount = 0;
+		for (ArrayList<Coordinate> list : actualCoordinates.values())
+			if (maxCount < list.size())
+				maxCount = list.size();
+
 		// Create a pool of workers
 		int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
@@ -705,7 +721,7 @@ public class DoubletAnalysis implements PlugIn
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig);
+			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, maxCount);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -751,6 +767,42 @@ public class DoubletAnalysis implements PlugIn
 
 		// Collect the results
 
+		double[] spotHistogram = new double[maxCount];
+		double[] resultHistogram  = new double[maxCount];
+		for (int i = 0; i < workers.size(); i++)
+		{
+			final int[] h1 = workers.get(i).spotHistogram;
+			final int[] h2 = workers.get(i).resultHistogram;
+			for (int j = 0; j < spotHistogram.length; j++)
+			{
+				spotHistogram[j] += h1[j];
+				resultHistogram[j] += h2[j];
+			}
+		}
+		workers.clear();
+
+		WindowOrganiser o = new WindowOrganiser();
+		
+		String title = TITLE + " Candidate Histogram";
+		Plot2 plot = new Plot2(title, "N results in candidate", "Count");
+		double max = Maths.max(spotHistogram);
+		plot.setLimits(0, spotHistogram.length, 0, max * 1.05);
+		plot.addPoints(Utils.newArray(spotHistogram.length, 0, 1.0), spotHistogram, Plot2.BAR);
+		PlotWindow pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			o.add(pw.getImagePlus().getID());
+
+		title = TITLE + " Assigned Result Histogram";
+		plot = new Plot2(title, "N results in assigned spot", "Count");
+		max = Maths.max(resultHistogram);
+		plot.setLimits(0, resultHistogram.length, 0, max * 1.05);
+		plot.addPoints(Utils.newArray(resultHistogram.length, 0, 1.0), resultHistogram, Plot2.BAR);
+		pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			o.add(pw.getImagePlus().getID());
+		
+		o.tile();
+		
 		//		
 		//		Statistics[] stats = new Statistics[NAMES.length];
 		//		for (int i = 0; i < workers.size(); i++)
