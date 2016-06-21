@@ -354,7 +354,7 @@ public class Gaussian2DFitter
 		final int[] position = new int[2];
 
 		// Fitting variables
-		final double[] y = data; // Value at index
+		double[] y = data; // Value at index
 		y_fit = (computeResiduals) ? new double[cumul_region[2]] : null; // Predicted points
 		solver = null;
 		double[] params_dev = null; // standard deviations for parameters for the fitting function
@@ -557,6 +557,8 @@ public class Gaussian2DFitter
 			// Subtract the full bias. Leave it to the solver to handle negative data.
 			bias = fitConfiguration.getBias();
 
+			// Ensure the original input data is unchanged
+			y = Arrays.copyOf(y, y.length);
 			params[0] -= bias;
 			for (int i = 0; i < ySize; i++)
 				y[i] -= bias;
