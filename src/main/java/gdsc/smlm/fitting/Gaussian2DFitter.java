@@ -778,8 +778,8 @@ public class Gaussian2DFitter
 
 			if (fitConfiguration.isAngleFitting())
 			{
-				lower[j + Gaussian2DFunction.ANGLE] = (double) -Math.PI;
-				upper[j + Gaussian2DFunction.ANGLE] = (double) Math.PI;
+				lower[j + Gaussian2DFunction.ANGLE] = -Math.PI;
+				upper[j + Gaussian2DFunction.ANGLE] = Math.PI;
 			}
 			if (fitConfiguration.isWidth0Fitting())
 			{
