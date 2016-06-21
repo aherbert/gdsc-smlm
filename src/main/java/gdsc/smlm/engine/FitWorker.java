@@ -1487,6 +1487,26 @@ public class FitWorker implements Runnable
 							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
 			}
 
+			if (logger2 != null)
+			{
+				double[] peakParams = newFitResult.getParameters();
+				if (peakParams != null)
+				{
+					peakParams = Arrays.copyOf(peakParams, peakParams.length);
+					int npeaks = peakParams.length / 6;
+					for (int i = 0; i < npeaks; i++)
+					{
+						peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+						peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+					}
+				}
+				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] AIC [%f -> %f] = %s\n", slice,
+						cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y, newFitResult.getStatus(),
+						newFitResult.getStatusData(), singleValue, gf.getValue(), singleSumOfSquares,
+						doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
+				logger2.debug(msg);
+			}
+
 			// Check if the predictive power of the model is better with two peaks:
 			// AIC should be lower
 			// Adjusted R2 should be higher
@@ -1629,6 +1649,26 @@ public class FitWorker implements Runnable
 		{
 			if (logger != null)
 				logger.info("Unable to fit 2-kernel model : %s", newFitResult.getStatus());
+
+			if (logger2 != null)
+			{
+				double[] peakParams = newFitResult.getParameters();
+				if (peakParams != null)
+				{
+					peakParams = Arrays.copyOf(peakParams, peakParams.length);
+					int npeaks = peakParams.length / 6;
+					for (int i = 0; i < npeaks; i++)
+					{
+						peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+						peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+					}
+				}
+				String msg = String.format("Doublet %d [%d,%d] %s (%s) = %s\n", slice, cx + bounds.x + regionBounds.x,
+						cy + bounds.y + regionBounds.y, newFitResult.getStatus(), newFitResult.getStatusData(),
+						Arrays.toString(peakParams));
+				logger2.debug(msg);
+			}
+
 		}
 
 		return null;
