@@ -2,6 +2,8 @@ package gdsc.smlm.function;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.special.Gamma;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -28,6 +30,7 @@ import java.util.Arrays;
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 {
 	private static double[] logFactorial;
+	private final boolean integerData;
 	private final double sumLogFactorialK;
 
 	/** All long-representable factorials */
@@ -42,20 +45,21 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			logFactorial[k] = Math.log(FACTORIALS[k]);
 	}
 
-	private static void initialiseFactorial(double[] data)
+	private static boolean initialiseFactorial(double[] data)
 	{
 		int max = 0;
 		for (double d : data)
 		{
 			final int i = (int) d;
 			if (i != d)
-				throw new IllegalArgumentException("Input observed values must be integers: " + d);
+				return false;
 			if (max < i)
 				max = i;
 		}
 
 		if (logFactorial.length <= max)
 			populate(max);
+		return true;
 	}
 
 	private static synchronized void populate(int n)
@@ -96,11 +100,19 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	{
 		super(f, a, k, n);
 		// Initialise the factorial table to the correct size
-		initialiseFactorial(k);
+		integerData = initialiseFactorial(k);
 		// Pre-compute the sum over the data
 		double sum = 0;
-		for (double d : k)
-			sum += logFactorial[(int) d];
+		if (integerData)
+		{
+			for (double d : k)
+				sum += logFactorial[(int) d];
+		}
+		else
+		{
+			for (double d : k)
+				sum += Gamma.logGamma(d + 1);
+		}
 		sumLogFactorialK = sum;
 	}
 
@@ -195,7 +207,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 
 		final double k = data[i];
-		return l - k * Math.log(l) + logFactorial[(int) k];
+		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : Gamma.logGamma(k + 1));
 	}
 
 	/*
@@ -225,7 +237,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			//gradient[j] = dl_da[j] * (1 - k / l);
 			gradient[j] = dl_da[j] * factor;
 		}
-		return l - k * Math.log(l) + logFactorial[(int) k];
+		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : Gamma.logGamma(k + 1));
 	}
 
 	/*
