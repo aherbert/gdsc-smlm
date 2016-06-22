@@ -64,7 +64,7 @@ public class ConfigurationTemplate implements PlugIn
 		addTemplate("PALM LSE", config, false);
 
 		// Add settings for STORM ...
-		config.setResidualsThreshold(0.5);
+		config.setResidualsThreshold(0.4);
 		addTemplate("STORM LSE", config, false);
 		config.setResidualsThreshold(1);
 		
@@ -79,7 +79,7 @@ public class ConfigurationTemplate implements PlugIn
 		addTemplate("PALM MLE", config, false);
 
 		// Add settings for STORM ...
-		config.setResidualsThreshold(0.5);
+		config.setResidualsThreshold(0.4);
 		addTemplate("STORM MLE", config, false);
 		config.setResidualsThreshold(1);
 		
@@ -92,7 +92,7 @@ public class ConfigurationTemplate implements PlugIn
 		addTemplate("PALM MLE Camera", config, false);
 		
 		// Add settings for STORM ...
-		config.setResidualsThreshold(0.5);
+		config.setResidualsThreshold(0.4);
 		addTemplate("STORM MLE Camera", config, false);
 		config.setResidualsThreshold(1);
 	}
