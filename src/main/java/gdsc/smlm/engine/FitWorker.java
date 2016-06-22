@@ -60,7 +60,7 @@ public class FitWorker implements Runnable
 	 * An additional doubling of iterations were used when the fit of the doublet resulted in one peak being eliminated
 	 * for moving.
 	 */
-	private static final int ITERATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
+	public static final int ITERATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
 	private Logger logger = null, logger2 = null;
 	private long time = 0;
