@@ -53,12 +53,15 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
+import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -114,6 +117,7 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setComputeDeviations(false);
 	}
 
+	private static boolean showOverlay = false;
 	private static boolean showHistograms = false;
 	private static boolean saveRawData = false;
 	private static String rawDataDirectory = "";
@@ -153,23 +157,27 @@ public class DoubletAnalysis implements PlugIn
 		final MaximaSpotFilter spotFilter;
 		final double limit;
 		final int[] spotHistogram, resultHistogram;
+		final Overlay o;
 
 		float[] data = null;
 		private double[] lb, ub = null;
 		private double[] lc, uc = null;
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, int maxCount)
+				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, int maxCount,
+				Overlay o)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
 			this.actualCoordinates = actualCoordinates;
-			fitting = config.getRelativeFitting();
 			this.fitConfig = fitConfig.clone();
 			this.spotFilter = config.createSpotFilter(true);
-			limit = spotFilter.getSearch() * spotFilter.getSearch();
+			fitting = config.getRelativeFitting();
+			// Fit window is 2*fitting+1. The distance limit is thus 0.5 pixel higher than fitting. 
+			limit = fitting + 0.5;
 			spotHistogram = new int[maxCount + 1];
 			resultHistogram = new int[spotHistogram.length];
+			this.o = o;
 
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms || saveRawData) ? new StoredDataStatistics() : new Statistics();
@@ -223,19 +231,29 @@ public class DoubletAnalysis implements PlugIn
 			// Smooth the image and identify spots with a filter
 			Spot[] spots = spotFilter.rank(data, width, height);
 
-			// Match the each actual result to the closest filter candidate
+			// Match the each actual result to the closest filter candidate.
+			// The match must be within the fit window used during fitting, i.e. could the actual
+			// result be fit using this candidate.
 			int[] matches = new int[actual.length];
 			for (int i = 0; i < actual.length; i++)
 			{
-				double dmin = limit;
+				double dmin = Double.POSITIVE_INFINITY;
 				int match = -1;
+				// Get the coordinates, offset to allow for 0.5 to be the centre of the pixel
+				double x = actual[i].getX() - 0.5;
+				double y = actual[i].getY() - 0.5;
 				for (int j = 0; j < spots.length; j++)
 				{
-					double d2 = actual[i].distance2(spots[j].x, spots[j].y);
-					if (dmin > d2)
+					double dx = Math.abs(x - spots[j].x);
+					double dy = Math.abs(y - spots[j].y);
+					if (dx < limit && dy < limit)
 					{
-						dmin = d2;
-						match = j;
+						final double d2 = dx * dx + dy * dy;
+						if (dmin > d2)
+						{
+							dmin = d2;
+							match = j;
+						}
 					}
 				}
 				matches[i] = match;
@@ -243,6 +261,7 @@ public class DoubletAnalysis implements PlugIn
 
 			// Identify single and doublets (and other)
 			int singles = 0, doublets = 0, multiples = 0, total = 0;
+			int[] spotMatchCount = new int[spots.length];
 			for (int i = 0; i < actual.length; i++)
 			{
 				if (matches[i] != -1)
@@ -272,13 +291,11 @@ public class DoubletAnalysis implements PlugIn
 					// Store the number of results that match to a spot with n results
 					resultHistogram[n] += n;
 					total += n;
+					spotMatchCount[j] = n;
 
-					if (n > 1)
-					{
-						//System.out.printf("Frame %d match %d : %d,%d \n", frame, n, spots[j].x, spots[j].y);
-						// TODO - Create an output stack with coloured ROI overlay for each n=1, n=2, n=other
-						// to check that the doublets are correctly identified.
-					}
+					// Count the number of candidates within the fitting window
+					// that are potential neighbours,
+					// i.e. will fit neighbours be used? 
 
 					// Fit the candidates (as per the FitWorker logic)
 					// (Fit even multiple since this is what the FitWorker will do) 
@@ -289,6 +306,8 @@ public class DoubletAnalysis implements PlugIn
 			}
 			System.out.printf("Frame %d, singles=%d, doublets=%d, multi=%d\n", frame, singles, doublets, multiples);
 			resultHistogram[0] += actual.length - total;
+
+			addToOverlay(frame, spots, singles, doublets, multiples, spotMatchCount);
 
 			// Extract the data
 			//data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
@@ -375,6 +394,44 @@ public class DoubletAnalysis implements PlugIn
 			//
 			//			addResults(stats, answer, simulationParameters.p[frame], sa, time, result, c);
 
+		}
+
+		private void addToOverlay(int frame, Spot[] spots, int singles, int doublets, int multiples,
+				int[] spotMatchCount)
+		{
+			if (o != null)
+			{
+				// Create an output stack with coloured ROI overlay for each n=1, n=2, n=other
+				// to check that the doublets are correctly identified.
+				final int[] sx = new int[singles];
+				final int[] sy = new int[singles];
+				final int[] dx = new int[doublets];
+				final int[] dy = new int[doublets];
+				final int[] mx = new int[multiples];
+				final int[] my = new int[multiples];
+				final int[] count = new int[3];
+				final int[][] coords = new int[][] { sx, dx, mx, sy, dy, my };
+				final Color[] color = new Color[] { Color.red, Color.green, Color.blue };
+				for (int j = 0; j < spotMatchCount.length; j++)
+				{
+					int c = spotMatchCount[j] - 1;
+					if (c < 0)
+						continue;
+					coords[c][count[c]] = spots[j].x;
+					coords[c + 3][count[c]] = spots[j].y;
+					count[c]++;
+				}
+				for (int c = 0; c < 3; c++)
+				{
+					final PointRoi roi = new PointRoi(coords[c], coords[c + 3], count[c]);
+					roi.setPosition(frame);
+					roi.setHideLabels(true);
+					roi.setFillColor(color[c]);
+					roi.setStrokeColor(color[c]);
+					// Overlay uses a vector which is synchronized already
+					o.add(roi);
+				}
+			}
 		}
 
 		/**
@@ -629,6 +686,7 @@ public class DoubletAnalysis implements PlugIn
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 
+		gd.addCheckbox("Show_overlay", showOverlay);
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Save_raw_data", saveRawData);
 
@@ -646,6 +704,7 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 
+		showOverlay = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
 		saveRawData = gd.getNextBoolean();
 
@@ -719,9 +778,10 @@ public class DoubletAnalysis implements PlugIn
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 		List<Worker> workers = new LinkedList<Worker>();
 		List<Thread> threads = new LinkedList<Thread>();
+		Overlay overlay = (showOverlay) ? new Overlay() : null;
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, maxCount);
+			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, maxCount, overlay);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -768,7 +828,7 @@ public class DoubletAnalysis implements PlugIn
 		// Collect the results
 
 		double[] spotHistogram = new double[maxCount];
-		double[] resultHistogram  = new double[maxCount];
+		double[] resultHistogram = new double[maxCount];
 		for (int i = 0; i < workers.size(); i++)
 		{
 			final int[] h1 = workers.get(i).spotHistogram;
@@ -782,7 +842,7 @@ public class DoubletAnalysis implements PlugIn
 		workers.clear();
 
 		WindowOrganiser o = new WindowOrganiser();
-		
+
 		String title = TITLE + " Candidate Histogram";
 		Plot2 plot = new Plot2(title, "N results in candidate", "Count");
 		double max = Maths.max(spotHistogram);
@@ -800,9 +860,12 @@ public class DoubletAnalysis implements PlugIn
 		pw = Utils.display(title, plot);
 		if (Utils.isNewWindow())
 			o.add(pw.getImagePlus().getID());
-		
+
 		o.tile();
-		
+
+		if (overlay != null)
+			imp.setOverlay(overlay);
+
 		//		
 		//		Statistics[] stats = new Statistics[NAMES.length];
 		//		for (int i = 0; i < workers.size(); i++)
