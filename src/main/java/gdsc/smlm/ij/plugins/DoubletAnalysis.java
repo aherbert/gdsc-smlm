@@ -1,15 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.DataFilterType;
-import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.filters.MaximaSpotFilter;
-import gdsc.smlm.filters.Spot;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2014 Alex Herbert
+ * Copyright (C) 2016 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -19,34 +13,44 @@ import gdsc.smlm.filters.Spot;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.match.Coordinate;
+import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.smlm.engine.DataFilter;
+import gdsc.smlm.engine.DataFilterType;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitWorker;
+import gdsc.smlm.engine.QuadrantAnalysis;
+import gdsc.smlm.filters.MaximaSpotFilter;
+import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.plugins.CreateData.SimulationParameters;
-import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.core.clustering.Cluster;
-import gdsc.core.clustering.ClusterPoint;
-import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.core.clustering.ClusteringEngine;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.BasePoint;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.PointPair;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
-import gdsc.core.utils.TextUtils;
-import gdsc.core.utils.NoiseEstimator.Method;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -61,29 +65,12 @@ import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Fits spots created by CreateData plugin.
  * <p>
- * Performs clustering to determine if spots are either single or doublets. Larger clusters are ignored. Outputs a table
- * of the single and double fit for each spot with metrics. This can be used to determine the best settings for optimum
- * doublet fitting and filtering.
+ * Assigns results to filter candidates to determine if spots are either single or doublets or larger clusters. Outputs
+ * a table of the single and double fit for each spot with metrics. This can be used to determine the best settings for
+ * optimum doublet fitting and filtering.
  */
 public class DoubletAnalysis implements PlugIn
 {
@@ -115,31 +102,68 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setBackgroundFitting(true);
 		fitConfig.setNotSignalFitting(false);
 		fitConfig.setComputeDeviations(false);
+		fitConfig.setComputeResiduals(true);
 	}
 
 	private static boolean showOverlay = false;
 	private static boolean showHistograms = false;
-	private static boolean saveRawData = false;
-	private static String rawDataDirectory = "";
-	private static int histogramBins = 100;
+	private static boolean showResults = true;
 
-	private static TextWindow summaryTable = null, analysisTable = null;
+	private static TextWindow summaryTable = null, resultsTable = null;
 
 	private ImagePlus imp;
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 
-	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)", "dX (nm)",
-			"dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)", "dSax (nm)", "dSay (nm)" };
-	private static final int TIME = 7;
-	private static final int ACTUAL_SIGNAL = 8;
-	private static final int ADJUSTED_X_SD = 9;
-	private static final int ADJUSTED_Y_SD = 10;
+	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
+			"Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
+			"Multiples:Neighbours" };
+
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
 		for (int i = 0; i < displayHistograms.length; i++)
 			displayHistograms[i] = true;
+	}
+
+	private WindowOrganiser windowOrganiser = new WindowOrganiser();
+
+	/**
+	 * Stores results from single and doublet fitting.
+	 */
+	public class DoubletResult implements Comparable<DoubletResult>
+	{
+		final int frame;
+		final Spot spot;
+		final int n, neighbours;
+		FitResult fitResult1 = null;
+		FitResult fitResult2 = null;
+		double sumOfSquares1, sumOfSquares2;
+		double value1, value2;
+		double score1, score2;
+		double mlic1, mlic2;
+		double ic1, ic2;
+		double[] a = new double[2];
+
+		public DoubletResult(int frame, Spot spot, int n, int neighbours)
+		{
+			this.frame = frame;
+			this.spot = spot;
+			this.n = n;
+			this.neighbours = neighbours;
+		}
+
+		public int compareTo(DoubletResult that)
+		{
+			int r = this.frame - that.frame;
+			if (r != 0)
+				return r;
+			if (this.spot.intensity > that.spot.intensity)
+				return -1;
+			if (this.spot.intensity < that.spot.intensity)
+				return 1;
+			return 0;
+		}
 	}
 
 	/**
@@ -149,19 +173,22 @@ public class DoubletAnalysis implements PlugIn
 	{
 		volatile boolean finished = false;
 		final BlockingQueue<Integer> jobs;
-		final Statistics[] stats = new Statistics[NAMES.length];
 		final ImageStack stack;
 		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
 		final int fitting;
 		final FitConfiguration fitConfig;
 		final MaximaSpotFilter spotFilter;
+		final Gaussian2DFitter gf;
+
+		final boolean relativeIntensity;
 		final double limit;
 		final int[] spotHistogram, resultHistogram;
+		final int[][] neighbourHistogram;
 		final Overlay o;
 
+		double[] region = null;
 		float[] data = null;
-		private double[] lb, ub = null;
-		private double[] lc, uc = null;
+		ArrayList<DoubletResult> results = new ArrayList<DoubletResult>();
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
 				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, int maxCount,
@@ -171,18 +198,18 @@ public class DoubletAnalysis implements PlugIn
 			this.stack = stack;
 			this.actualCoordinates = actualCoordinates;
 			this.fitConfig = fitConfig.clone();
+			this.gf = new Gaussian2DFitter(this.fitConfig);
+			gf.setMaximumWidthFactor(20);
 			this.spotFilter = config.createSpotFilter(true);
+			this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
+
 			fitting = config.getRelativeFitting();
 			// Fit window is 2*fitting+1. The distance limit is thus 0.5 pixel higher than fitting. 
 			limit = fitting + 0.5;
 			spotHistogram = new int[maxCount + 1];
 			resultHistogram = new int[spotHistogram.length];
+			neighbourHistogram = new int[3][spotHistogram.length];
 			this.o = o;
-
-			for (int i = 0; i < stats.length; i++)
-				stats[i] = (showHistograms || saveRawData) ? new StoredDataStatistics() : new Statistics();
-
-			createBounds();
 		}
 
 		/*
@@ -205,7 +232,7 @@ public class DoubletAnalysis implements PlugIn
 			catch (InterruptedException e)
 			{
 				System.out.println(e.toString());
-				throw new RuntimeException(e);
+				//throw new RuntimeException(e);
 			}
 			finally
 			{
@@ -221,15 +248,17 @@ public class DoubletAnalysis implements PlugIn
 				return;
 			}
 
+			showProgress();
+
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 
 			// Extract the data
-			final int width = stack.getWidth();
-			final int height = stack.getHeight();
-			data = ImageConverter.getData(stack.getPixels(frame), width, height, null, data);
+			final int maxx = stack.getWidth();
+			final int maxy = stack.getHeight();
+			data = ImageConverter.getData(stack.getPixels(frame), maxx, maxy, null, data);
 
 			// Smooth the image and identify spots with a filter
-			Spot[] spots = spotFilter.rank(data, width, height);
+			Spot[] spots = spotFilter.rank(data, maxx, maxy);
 
 			// Match the each actual result to the closest filter candidate.
 			// The match must be within the fit window used during fitting, i.e. could the actual
@@ -259,9 +288,13 @@ public class DoubletAnalysis implements PlugIn
 				matches[i] = match;
 			}
 
+			ImageExtractor ie = null;
+			float estimatedBackground = 0;
+
 			// Identify single and doublets (and other)
 			int singles = 0, doublets = 0, multiples = 0, total = 0;
 			int[] spotMatchCount = new int[spots.length];
+			int[] neighbourIndices = new int[spots.length];
 			for (int i = 0; i < actual.length; i++)
 			{
 				if (matches[i] != -1)
@@ -293,107 +326,211 @@ public class DoubletAnalysis implements PlugIn
 					total += n;
 					spotMatchCount[j] = n;
 
+					// Initialise for fitting on first match 
+					if (ie == null)
+					{
+						ie = new ImageExtractor(data, maxx, maxy);
+						estimatedBackground = estimateBackground(maxx, maxy);
+					}
+
+					final Spot spot = spots[j];
+					final Rectangle regionBounds = ie.getBoxRegionBounds(spot.x, spot.y, fitting);
+
 					// Count the number of candidates within the fitting window
 					// that are potential neighbours,
 					// i.e. will fit neighbours be used? 
+					// It does not matter if the neighbours have a match to a result
+					// or not, just that they are present for multiple peak fitting
+
+					final int xmin = regionBounds.x;
+					final int xmax = xmin + regionBounds.width - 1;
+					final int ymin = regionBounds.y;
+					final int ymax = ymin + regionBounds.height - 1;
+
+					final float heightThreshold;
+					float background = estimatedBackground;
+
+					if (spot.intensity < background)
+						heightThreshold = spot.intensity;
+					else
+						heightThreshold = (float) ((spot.intensity - background) *
+								config.getNeighbourHeightThreshold() + background);
+
+					int neighbourCount = 0;
+					for (int jj = 0; jj < spots.length; jj++)
+					{
+						if (j == jj)
+							continue;
+						if (spots[jj].x < xmin || spots[jj].x > xmax || spots[jj].y < ymin || spots[jj].y > ymax ||
+								spots[jj].intensity < heightThreshold)
+							continue;
+						neighbourIndices[neighbourCount++] = jj;
+					}
+					final int c = DoubletAnalysis.getClass(spotMatchCount[j]);
+					neighbourHistogram[c][neighbourCount]++;
+
+					// TODO - Fit with neighbours?
+
+					// Currently this will only explore how to benchmark the fitting of medium
+					// density data with singles and a few doublets with no neighbours. This
+					// is fine for low density PALM data but not for high density STORM data.
 
 					// Fit the candidates (as per the FitWorker logic)
 					// (Fit even multiple since this is what the FitWorker will do) 
+					region = ie.crop(regionBounds, region);
 
-					// Compute residuals and fit as a doublet
+					boolean amplitudeEstimate = false;
+					float signal = 0;
+					double sum = 0;
+					final int width = regionBounds.width;
+					final int height = regionBounds.height;
+					final int size = width * height;
+					for (int k = size; k-- > 0;)
+						sum += region[k];
+					signal = (float) (sum - background * size);
+					if (signal <= 0)
+					{
+						amplitudeEstimate = true;
+						signal = spot.intensity - ((relativeIntensity) ? 0 : background);
+						if (signal < 0)
+						{
+							signal += background;
+							background = 0;
+						}
+					}
 
+					final double[] params = new double[] { background, signal, 0, spot.x - regionBounds.x,
+							spot.y - regionBounds.y, 0, 0 };
+
+					final DoubletResult result = new DoubletResult(frame, spot, n, neighbourCount);
+					result.fitResult1 = gf.fit(region, width, height, 1, params, amplitudeEstimate);
+					result.sumOfSquares1 = gf.getFinalResidualSumOfSquares();
+					result.value1 = gf.getValue();
+
+					if (canPerformQuadrantAnalysis(result.fitResult1, width, height))
+					{
+						// Compute residuals and fit as a doublet
+						final double[] fitParams = result.fitResult1.getParameters();
+						final int cx = (int) Math.round(fitParams[Gaussian2DFunction.X_POSITION]);
+						final int cy = (int) Math.round(fitParams[Gaussian2DFunction.Y_POSITION]);
+						final double[] residuals = gf.getResiduals();
+
+						QuadrantAnalysis qa = new QuadrantAnalysis();
+
+						// TODO - Also perform quadrant analysis on a new region centred around 
+						// the fit centre...
+
+						if (qa.quadrantAnalysis(residuals, width, height, cx, cy) && qa.computeDoubletCentres(width,
+								height, cx, cy, fitParams[Gaussian2DFunction.X_SD], fitParams[Gaussian2DFunction.Y_SD]))
+						{
+							result.score1 = qa.score1;
+							result.score2 = qa.score2;
+							final int x1 = qa.x1;
+							final int x2 = qa.x2;
+							final int y1 = qa.y1;
+							final int y2 = qa.y2;
+
+							// -+-+-
+							// Estimate params using the single fitted peak
+							// -+-+-
+							final double[] doubletParams = new double[1 + 2 * 6];
+
+							doubletParams[Gaussian2DFunction.BACKGROUND] = fitParams[Gaussian2DFunction.BACKGROUND];
+							doubletParams[Gaussian2DFunction.SIGNAL] = fitParams[Gaussian2DFunction.SIGNAL] * 0.5;
+							doubletParams[Gaussian2DFunction.X_POSITION] = x1;
+							doubletParams[Gaussian2DFunction.Y_POSITION] = y1;
+							doubletParams[6 + Gaussian2DFunction.SIGNAL] = fitParams[Gaussian2DFunction.SIGNAL] * 0.5;
+							doubletParams[6 + Gaussian2DFunction.X_POSITION] = x2;
+							doubletParams[6 + Gaussian2DFunction.Y_POSITION] = y2;
+							// -+-+-
+
+							// Increase the iterations level then reset afterwards.
+							final int maxIterations = fitConfig.getMaxIterations();
+							fitConfig.setMaxIterations(maxIterations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
+							gf.setComputeResiduals(false);
+							result.fitResult2 = gf.fit(region, width, height, 2, doubletParams, false);
+							gf.setComputeResiduals(true);
+							fitConfig.setMaxIterations(maxIterations);
+
+							if (result.fitResult2.getStatus() == FitStatus.OK)
+							{
+								result.sumOfSquares2 = gf.getFinalResidualSumOfSquares();
+								result.value2 = gf.getValue();
+								final int length = width * height;
+								if (fitConfig.getFitSolver() == FitSolver.MLE)
+								{
+									result.mlic1 = Maths.getInformationCriterionFromLL(result.value1, length,
+											result.fitResult1.getNumberOfFittedParameters());
+									result.mlic2 = Maths.getInformationCriterionFromLL(result.value2, length,
+											result.fitResult2.getNumberOfFittedParameters());
+								}
+								result.ic1 = Maths.getInformationCriterion(result.sumOfSquares1, length,
+										result.fitResult1.getNumberOfFittedParameters());
+								result.ic2 = Maths.getInformationCriterion(result.sumOfSquares2, length,
+										result.fitResult2.getNumberOfFittedParameters());
+
+								final double[] newParams = result.fitResult2.getParameters();
+								for (int p = 0; p < 2; p++)
+								{
+									final double xShift = newParams[Gaussian2DFunction.X_POSITION + p * 6] -
+											params[Gaussian2DFunction.X_POSITION];
+									final double yShift = newParams[Gaussian2DFunction.Y_POSITION + p * 6] -
+											params[Gaussian2DFunction.Y_POSITION];
+									result.a[p] = 57.29577951 *
+											QuadrantAnalysis.getAngle(qa.vector, new double[] { xShift, yShift });
+								}
+							}
+						}
+					}
+
+					results.add(result);
 				}
 			}
-			System.out.printf("Frame %d, singles=%d, doublets=%d, multi=%d\n", frame, singles, doublets, multiples);
+			//System.out.printf("Frame %d, singles=%d, doublets=%d, multi=%d\n", frame, singles, doublets, multiples);
 			resultHistogram[0] += actual.length - total;
 
 			addToOverlay(frame, spots, singles, doublets, multiples, spotMatchCount);
+		}
 
-			// Extract the data
-			//data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
-			//		data);
+		private boolean canPerformQuadrantAnalysis(FitResult fitResult, final int width, final int height)
+		{
+			if (fitResult == null)
+				return false;
+			final double[] params = fitResult.getParameters();
+			if (params == null)
+				return false;
 
-			// Fit a single
+			// Check if centre is within the region
+			final double border = FastMath.min(width, height) / 4.0;
+			if ((params[Gaussian2DFunction.X_POSITION] < border ||
+					params[Gaussian2DFunction.X_POSITION] > width - border) ||
+					(params[Gaussian2DFunction.Y_POSITION] < border &&
+							params[Gaussian2DFunction.Y_POSITION] > height - border))
+				return false;
 
-			// Fit a doublet
+			// Check the width is reasonable
+			final double regionSize = FastMath.max(width, height) * 0.5;
+			if ((params[Gaussian2DFunction.X_SD] > 0 && params[Gaussian2DFunction.X_SD] < regionSize) ||
+					(params[Gaussian2DFunction.Y_SD] > 0 && params[Gaussian2DFunction.Y_SD] < regionSize))
+				return true;
 
-			//			
-			//			
-			//
-			//			final int size = region.height;
-			//
-			//			// Get the background and signal estimate
-			//			final double b = getBackground(data, size, size);
-			//			final double signal = getSignal(data, b);
-			//
-			//			// Find centre-of-mass estimate
-			//			if (comFitting)
-			//			{
-			//				getCentreOfMass(data, size, size, xy[xy.length - 1]);
-			//
-			//				double dx = xy[xy.length - 1][0] - answer[Gaussian2DFunction.X_POSITION];
-			//				double dy = xy[xy.length - 1][1] - answer[Gaussian2DFunction.Y_POSITION];
-			//				if (dx * dx + dy * dy < startOffset * startOffset)
-			//					comValid.incrementAndGet();
-			//			}
-			//
-			//			double[] initialParams = new double[7];
-			//			initialParams[Gaussian2DFunction.BACKGROUND] = b;
-			//			initialParams[Gaussian2DFunction.SIGNAL] = signal;
-			//			initialParams[Gaussian2DFunction.X_SD] = initialParams[Gaussian2DFunction.Y_SD] = psfWidth;
-			//
-			//			// Subtract the bias
-			//			final double bias = simulationParameters.bias;
-			//			if (fitConfig.isRemoveBiasBeforeFitting())
-			//			{
-			//				// MLE can handle negative data 
-			//				initialParams[Gaussian2DFunction.BACKGROUND] -= bias;
-			//				for (int i = 0; i < data.length; i++)
-			//					data[i] -= bias;
-			//			}
-			//
-			//			double[][] bounds = null;
-			//			double[] error = new double[1];
-			//			double[][] result = new double[xy.length][];
-			//			long[] time = new long[xy.length];
-			//			int c = 0;
-			//			int resultPosition = frame;
-			//			for (double[] centre : xy)
-			//			{
-			//				long start = System.nanoTime();
-			//
-			//				// Do fitting
-			//				final double[] params = initialParams.clone();
-			//				params[Gaussian2DFunction.X_POSITION] = centre[0];
-			//				params[Gaussian2DFunction.Y_POSITION] = centre[1];
-			//				fitConfig.initialise(1, size, params);
-			//				FunctionSolver solver = fitConfig.getFunctionSolver();
-			//				if (solver.isBounded())
-			//					bounds = setBounds(solver, initialParams, bounds);
-			//				if (solver.isConstrained())
-			//					setConstraints(solver);
-			//				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
-			//				if (isValid(status, params, size))
-			//				{
-			//					// Subtract the fitted bias from the background
-			//					if (!fitConfig.isRemoveBiasBeforeFitting())
-			//						params[Gaussian2DFunction.BACKGROUND] -= bias;
-			//					result[c] = params;
-			//					time[c] = System.nanoTime() - start;
-			//					// Store all the results for later analysis
-			//					results[resultPosition] = params;
-			//					resultsTime[resultPosition] = time[c];
-			//					c++;
-			//				}
-			//				else
-			//				{
-			//					//System.out.println(status);
-			//				}
-			//				resultPosition += totalFrames;
-			//			}
-			//
-			//			addResults(stats, answer, simulationParameters.p[frame], sa, time, result, c);
+			return false;
+		}
 
+		/**
+		 * Get an estimate of the background level using the mean of image.
+		 * 
+		 * @param width
+		 * @param height
+		 * @return
+		 */
+		private float estimateBackground(int width, int height)
+		{
+			// Compute average of the entire image
+			double sum = 0;
+			for (int i = width * height; i-- > 0;)
+				sum += data[i];
+			return (float) sum / (width * height);
 		}
 
 		private void addToOverlay(int frame, Spot[] spots, int singles, int doublets, int multiples,
@@ -414,7 +551,7 @@ public class DoubletAnalysis implements PlugIn
 				final Color[] color = new Color[] { Color.red, Color.green, Color.blue };
 				for (int j = 0; j < spotMatchCount.length; j++)
 				{
-					int c = spotMatchCount[j] - 1;
+					final int c = DoubletAnalysis.getClass(spotMatchCount[j]);
 					if (c < 0)
 						continue;
 					coords[c][count[c]] = spots[j].x;
@@ -433,189 +570,24 @@ public class DoubletAnalysis implements PlugIn
 				}
 			}
 		}
-
-		/**
-		 * Set background using the average value of the edge in the data
-		 * 
-		 * @param data
-		 * @param maxx
-		 * @param maxy
-		 * @return The background
-		 */
-		private double getBackground(double[] data, int maxx, int maxy)
-		{
-			return Gaussian2DFitter.getBackground(data, maxx, maxy, 1);
-		}
-
-		private double[][] setBounds(FunctionSolver solver, double[] params, double[][] bounds)
-		{
-			if (bounds == null)
-			{
-				double[] lower = null;
-				double[] upper = null;
-				// Check the bounds 
-				if (params[Gaussian2DFunction.BACKGROUND] < lb[Gaussian2DFunction.BACKGROUND])
-				{
-					lower = lb.clone();
-					lower[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] -
-							Math.abs(lb[Gaussian2DFunction.BACKGROUND] - params[Gaussian2DFunction.BACKGROUND]);
-				}
-				if (params[Gaussian2DFunction.BACKGROUND] > ub[Gaussian2DFunction.BACKGROUND])
-				{
-					upper = ub.clone();
-					upper[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] +
-							Math.abs(ub[Gaussian2DFunction.BACKGROUND] - params[Gaussian2DFunction.BACKGROUND]);
-				}
-				if (params[Gaussian2DFunction.SIGNAL] < lb[Gaussian2DFunction.SIGNAL])
-				{
-					if (lower == null)
-						lower = lb.clone();
-					lower[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] -
-							Math.abs(lb[Gaussian2DFunction.SIGNAL] - params[Gaussian2DFunction.SIGNAL]);
-				}
-				if (params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL])
-				{
-					if (upper == null)
-						upper = ub.clone();
-					upper[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] +
-							Math.abs(ub[Gaussian2DFunction.SIGNAL] - params[Gaussian2DFunction.SIGNAL]);
-				}
-				if (lower == null)
-					lower = lb;
-				if (upper == null)
-					upper = ub;
-				bounds = new double[][] { lower, upper };
-			}
-			solver.setBounds(bounds[0], bounds[1]);
-			return bounds;
-		}
-
-		private void createBounds()
-		{
-			if (ub == null)
-			{
-				ub = new double[7];
-				lb = new double[7];
-
-				// Background could be zero so always have an upper limit
-				ub[Gaussian2DFunction.BACKGROUND] = Math.max(0, 2 * simulationParameters.b * simulationParameters.gain);
-				if (!fitConfig.isRemoveBiasBeforeFitting())
-				{
-					lb[Gaussian2DFunction.BACKGROUND] += simulationParameters.bias;
-					ub[Gaussian2DFunction.BACKGROUND] += simulationParameters.bias;
-				}
-
-				//				double signal = simulationParameters.getSignal() * simulationParameters.gain;
-				//				lb[Gaussian2DFunction.SIGNAL] = signal * 0.5;
-				//				ub[Gaussian2DFunction.SIGNAL] = signal * 2;
-				//				ub[Gaussian2DFunction.X_POSITION] = 2 * regionSize + 1;
-				//				ub[Gaussian2DFunction.Y_POSITION] = 2 * regionSize + 1;
-				lb[Gaussian2DFunction.ANGLE] = -Math.PI;
-				ub[Gaussian2DFunction.ANGLE] = Math.PI;
-				double wf = 1.5;
-				double s = simulationParameters.s / simulationParameters.a;
-				lb[Gaussian2DFunction.X_SD] = s / wf;
-				ub[Gaussian2DFunction.X_SD] = s * wf;
-				lb[Gaussian2DFunction.Y_SD] = s / wf;
-				ub[Gaussian2DFunction.Y_SD] = s * wf;
-			}
-		}
-
-		private void setConstraints(FunctionSolver solver)
-		{
-			if (uc == null)
-			{
-				lc = new double[7];
-				uc = new double[7];
-				Arrays.fill(lc, Float.NEGATIVE_INFINITY);
-				Arrays.fill(uc, Float.POSITIVE_INFINITY);
-				lc[Gaussian2DFunction.BACKGROUND] = 0;
-				lc[Gaussian2DFunction.SIGNAL] = 0;
-			}
-			solver.setConstraints(lc, uc);
-		}
-
-		private boolean isValid(FitStatus status, double[] params, int size)
-		{
-			if (status != FitStatus.OK)
-			{
-				return false;
-			}
-
-			// Reject fits that are outside the bounds of the data
-			if (params[Gaussian2DFunction.SIGNAL] < 0 || params[Gaussian2DFunction.X_POSITION] < 0 ||
-					params[Gaussian2DFunction.Y_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > size ||
-					params[Gaussian2DFunction.Y_POSITION] > size)
-			{
-				return false;
-			}
-
-			// Q. Should we do width bounds checking?
-			if (fitConfig.isWidth0Fitting())
-			{
-				if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD] ||
-						params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])
-				{
-					return false;
-				}
-			}
-			if (fitConfig.isWidth1Fitting())
-			{
-				if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD] ||
-						params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD])
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
 	}
 
 	/**
-	 * Add the results to the statistics
-	 * 
-	 * @param stats
-	 * @param answer
-	 * @param photons
-	 * @param sa
-	 * @param time
-	 * @param result
-	 * @param c
-	 *            Count of the number of results
+	 * Gets the class.
+	 *
+	 * @param n
+	 *            the number of results that match to the spot
+	 * @return the class (none = -1, single = 0, double = 1, multiple = 2)
 	 */
-	private static void addResults(Statistics[] stats, double[] answer, double photons, double sa, long[] time,
-			double[][] result, int c)
+	private static int getClass(int n)
 	{
-		// Store the results from each run
-		for (int i = 0; i < c; i++)
-		{
-			addResult(stats, answer, photons, sa, result[i], time[i]);
-		}
-	}
-
-	/**
-	 * Add the given results to the statistics
-	 * 
-	 * @param stats
-	 * @param answer
-	 * @param photons
-	 * @param sa
-	 * @param result
-	 * @param time
-	 */
-	private static void addResult(Statistics[] stats, double[] answer, double photons, double sa, double[] result,
-			long time)
-	{
-		for (int j = 0; j < result.length; j++)
-		{
-			stats[j].add(result[j] - answer[j]);
-		}
-		stats[7].add(time);
-		stats[8].add(result[Gaussian2DFunction.SIGNAL] - photons);
-		stats[9].add(result[Gaussian2DFunction.X_SD] - sa);
-		stats[10].add(result[Gaussian2DFunction.Y_SD] - sa);
+		if (n == 0)
+			return -1;
+		if (n == 1)
+			return 0;
+		if (n == 2)
+			return 1;
+		return 2;
 	}
 
 	public void run(String arg)
@@ -688,7 +660,7 @@ public class DoubletAnalysis implements PlugIn
 
 		gd.addCheckbox("Show_overlay", showOverlay);
 		gd.addCheckbox("Show_histograms", showHistograms);
-		gd.addCheckbox("Save_raw_data", saveRawData);
+		gd.addCheckbox("Show_results", showResults);
 
 		gd.showDialog();
 
@@ -706,7 +678,7 @@ public class DoubletAnalysis implements PlugIn
 
 		showOverlay = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
-		saveRawData = gd.getNextBoolean();
+		showResults = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
@@ -730,24 +702,18 @@ public class DoubletAnalysis implements PlugIn
 
 		lastId = simulationParameters.id;
 
-		if (true && showHistograms)
+		if (showHistograms)
 		{
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
-			gd.addNumericField("Histogram_bins", histogramBins, 0);
-
-			double[] convert = getConversionFactors();
 
 			for (int i = 0; i < displayHistograms.length; i++)
-				if (convert[i] != 0)
-					gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
+				gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
-			histogramBins = (int) Math.abs(gd.getNextNumber());
 			for (int i = 0; i < displayHistograms.length; i++)
-				if (convert[i] != 0)
-					displayHistograms[i] = gd.getNextBoolean();
+				displayHistograms[i] = gd.getNextBoolean();
 		}
 
 		return true;
@@ -758,6 +724,17 @@ public class DoubletAnalysis implements PlugIn
 		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a) /
 				simulationParameters.a;
 		return sa;
+	}
+
+	int progress, stepProgress, totalProgress;
+
+	private synchronized void showProgress()
+	{
+		if (++progress % stepProgress == 0)
+		{
+			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+				IJ.showProgress(progress, totalProgress);
+		}
 	}
 
 	private void run()
@@ -774,7 +751,7 @@ public class DoubletAnalysis implements PlugIn
 				maxCount = list.size();
 
 		// Create a pool of workers
-		int nThreads = Prefs.getThreads();
+		final int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 		List<Worker> workers = new LinkedList<Worker>();
 		List<Thread> threads = new LinkedList<Thread>();
@@ -789,17 +766,12 @@ public class DoubletAnalysis implements PlugIn
 		}
 
 		// Fit the frames
-		final int totalFrames = actualCoordinates.size();
-		final int step = Utils.getProgressInterval(totalFrames);
-		int progress = 0;
+		totalProgress = actualCoordinates.size();
+		stepProgress = Utils.getProgressInterval(totalProgress);
+		progress = 0;
 		for (int frame : actualCoordinates.keySet())
 		{
 			put(jobs, frame);
-			if (++progress % step == 0)
-			{
-				if (Utils.showStatus("Frame: " + progress + " / " + totalFrames))
-					IJ.showProgress(progress, totalFrames);
-			}
 		}
 
 		// Finish all the worker threads by passing in a null job
@@ -826,152 +798,64 @@ public class DoubletAnalysis implements PlugIn
 		IJ.showStatus("Collecting results ...");
 
 		// Collect the results
-
-		double[] spotHistogram = new double[maxCount];
-		double[] resultHistogram = new double[maxCount];
-		for (int i = 0; i < workers.size(); i++)
+		ArrayList<DoubletResult> results = null;
+		for (Worker worker : workers)
 		{
-			final int[] h1 = workers.get(i).spotHistogram;
-			final int[] h2 = workers.get(i).resultHistogram;
-			for (int j = 0; j < spotHistogram.length; j++)
+			if (results == null)
+				results = worker.results;
+			else
+				results.addAll(worker.results);
+		}
+		if (showHistograms)
+		{
+			double[] spotHistogram = new double[maxCount];
+			double[] resultHistogram = new double[maxCount];
+			double[][] neighbourHistogram = new double[3][maxCount];
+			for (Worker worker : workers)
 			{
-				spotHistogram[j] += h1[j];
-				resultHistogram[j] += h2[j];
+				final int[] h1 = worker.spotHistogram;
+				final int[] h2 = worker.resultHistogram;
+				final int[][] h3 = worker.neighbourHistogram;
+				for (int j = 0; j < spotHistogram.length; j++)
+				{
+					spotHistogram[j] += h1[j];
+					resultHistogram[j] += h2[j];
+					for (int k = 0; k < 3; k++)
+						neighbourHistogram[k][j] += h3[k][j];
+				}
 			}
+
+			showHistogram(0, spotHistogram);
+			showHistogram(1, resultHistogram);
+			showHistogram(2, neighbourHistogram[0]);
+			showHistogram(3, neighbourHistogram[1]);
+			showHistogram(4, neighbourHistogram[2]);
 		}
 		workers.clear();
-
-		WindowOrganiser o = new WindowOrganiser();
-
-		String title = TITLE + " Candidate Histogram";
-		Plot2 plot = new Plot2(title, "N results in candidate", "Count");
-		double max = Maths.max(spotHistogram);
-		plot.setLimits(0, spotHistogram.length, 0, max * 1.05);
-		plot.addPoints(Utils.newArray(spotHistogram.length, 0, 1.0), spotHistogram, Plot2.BAR);
-		PlotWindow pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
-			o.add(pw.getImagePlus().getID());
-
-		title = TITLE + " Assigned Result Histogram";
-		plot = new Plot2(title, "N results in assigned spot", "Count");
-		max = Maths.max(resultHistogram);
-		plot.setLimits(0, resultHistogram.length, 0, max * 1.05);
-		plot.addPoints(Utils.newArray(resultHistogram.length, 0, 1.0), resultHistogram, Plot2.BAR);
-		pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
-			o.add(pw.getImagePlus().getID());
-
-		o.tile();
 
 		if (overlay != null)
 			imp.setOverlay(overlay);
 
-		//		
-		//		Statistics[] stats = new Statistics[NAMES.length];
-		//		for (int i = 0; i < workers.size(); i++)
-		//		{
-		//			Statistics[] next = workers.get(i).stats;
-		//			for (int j = 0; j < next.length; j++)
-		//			{
-		//				if (stats[j] == null)
-		//					stats[j] = next[j];
-		//				else
-		//					stats[j].add(next[j]);
-		//			}
-		//		}
-		//		workers.clear();
-		//
-		//		// Show a table of the results
-		//		summariseResults(stats);
-		//
-		//		// Optionally show histograms
-		//		if (showHistograms)
-		//		{
-		//			IJ.showStatus("Calculating histograms ...");
-		//
-		//			int[] idList = new int[NAMES.length];
-		//			int count = 0;
-		//			double[] convert = getConversionFactors();
-		//
-		//			boolean requireRetile = false;
-		//			for (int i = 0; i < NAMES.length; i++)
-		//			{
-		//				if (displayHistograms[i] && convert[i] != 0)
-		//				{
-		//					// We will have to convert the values...
-		//					double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
-		//					for (int j = 0; j < tmp.length; j++)
-		//						tmp[j] *= convert[i];
-		//					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
-		//					idList[count++] = Utils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
-		//							String.format("%s +/- %s", Utils.rounded(tmpStats.getMean()),
-		//									Utils.rounded(tmpStats.getStandardDeviation())));
-		//					requireRetile = requireRetile || Utils.isNewWindow();
-		//				}
-		//			}
-		//
-		//			if (count > 0 && requireRetile)
-		//			{
-		//				idList = Arrays.copyOf(idList, count);
-		//				new WindowOrganiser().tileWindows(idList);
-		//			}
-		//		}
-		//
-		//		if (saveRawData)
-		//		{
-		//			String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
-		//			if (dir != null)
-		//				saveData(stats, dir);
-		//		}
+		Collections.sort(results);
+		summariseResults(results);
+
+		windowOrganiser.tile();
 
 		IJ.showStatus("");
 	}
 
-	private void saveData(Statistics[] stats, String dir)
+	private void showHistogram(int i, double[] spotHistogram)
 	{
-		rawDataDirectory = dir;
-		for (int i = 0; i < NAMES.length; i++)
-		{
-			saveStatistics((StoredDataStatistics) stats[i], NAMES[i]);
-		}
-	}
-
-	private void saveStatistics(StoredDataStatistics stats, String title)
-	{
-		String filename = rawDataDirectory + title.replace(" ", "_") + ".txt";
-
-		BufferedWriter out = null;
-		try
-		{
-			FileOutputStream fos = new FileOutputStream(filename);
-			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
-			//out.write(title);
-			//out.newLine();
-			double[] data = stats.getValues();
-			Arrays.sort(data);
-			for (double d : data)
-			{
-				//out.write(Utils.rounded(d, 4)); // rounded
-				out.write(Double.toString(d));
-				out.newLine();
-			}
-		}
-		catch (Exception e)
-		{
-		}
-		finally
-		{
-			if (out != null)
-			{
-				try
-				{
-					out.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
-		}
+		if (!displayHistograms[i])
+			return;
+		String[] labels = NAMES[i].split(":");
+		Plot2 plot = new Plot2(labels[0], labels[1], "Count");
+		double max = Maths.max(spotHistogram);
+		plot.setLimits(0, spotHistogram.length, 0, max * 1.05);
+		plot.addPoints(Utils.newArray(spotHistogram.length, 0, 1.0), spotHistogram, Plot2.BAR);
+		PlotWindow pw = Utils.display(labels[0], plot);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(pw.getImagePlus().getID());
 	}
 
 	private void put(BlockingQueue<Integer> jobs, int i)
@@ -986,83 +870,32 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
-	/**
-	 * Sum the intensity above background to estimate the signal
-	 * 
-	 * @param data
-	 * @param b
-	 *            background
-	 * @return The signal
-	 */
-	public static double getSignal(double[] data, double b)
+	private void summariseResults(ArrayList<DoubletResult> results)
 	{
-		double s = 0;
-		for (double d : data)
-			s += d;
-		// Subtract the background per pixel and ensure at least 1 photon in the signal
-		return Math.max(1, s - b * data.length);
-	}
+		showResults(results);
 
-	/**
-	 * Get the centre of mass of the data
-	 * 
-	 * @param data
-	 * @param maxx
-	 * @param maxy
-	 * @param com
-	 *            The centre-of-mass
-	 */
-	public static void getCentreOfMass(double[] data, int maxx, int maxy, double[] com)
-	{
-		com[0] = com[1] = 0;
-		double sum = 0;
-		for (int y = 0, index = 0; y < maxy; y++)
-		{
-			for (int x = 0; x < maxx; x++, index++)
-			{
-				final double value = data[index];
-				sum += value;
-				com[0] += x * value;
-				com[1] += y * value;
-			}
-		}
-
-		for (int i = 2; i-- > 0;)
-		{
-			com[i] /= sum;
-		}
-	}
-
-	private void summariseResults(Statistics[] stats)
-	{
-		createTable();
+		createSummaryTable();
 
 		StringBuilder sb = new StringBuilder();
 
 		// Create the benchmark settings and the fitting settings
-		int molecules = 0;
-		sb.append(molecules).append("\t");
+		sb.append(this.results.size()).append("\t");
+		sb.append(Utils.rounded(simulationParameters.minSignal)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.maxSignal)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.signalPerFrame)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.a)).append("\t");
 		sb.append(Utils.rounded(getSa() * simulationParameters.a)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.gain)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.readNoise)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.b)).append("\t");
-		sb.append(Utils.rounded(simulationParameters.b2)).append("\t");
 
 		// Compute the noise
-		double noise = simulationParameters.b2;
-		if (simulationParameters.emCCD)
-		{
-			// The b2 parameter was computed without application of the EM-CCD noise factor of 2.
-			//final double b2 = backgroundVariance + readVariance
-			//                = simulationParameters.getBackground() + readVariance
-			// This should be applied only to the background variance.
-			final double readVariance = noise - simulationParameters.b2;
-			noise = simulationParameters.b2 * 2 + readVariance;
-		}
-
-		sb.append(Utils.rounded(fitConfig.getInitialPeakStdDev0() * simulationParameters.a)).append("\t");
+		double noise = Math
+				.sqrt((simulationParameters.b * ((simulationParameters.emCCD) ? 2 : 1)) / simulationParameters.gain +
+						simulationParameters.readNoise * simulationParameters.readNoise);
+		sb.append(Utils.rounded(noise)).append("\t");
+		sb.append(Utils.rounded(simulationParameters.signalPerFrame / noise)).append("\t");
 		sb.append(config.getRelativeFitting()).append("\t");
 		sb.append(fitConfig.getFitFunction().toString());
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
@@ -1072,83 +905,212 @@ public class DoubletAnalysis implements PlugIn
 
 			// Add details of the noise model for the MLE
 			sb.append("EM=").append(fitConfig.isEmCCD());
-			sb.append(":G=").append(fitConfig.getGain());
+			sb.append(":A=").append(fitConfig.getAmplification());
 			sb.append(":N=").append(fitConfig.getReadNoise());
 		}
 		else
 			sb.append("\t");
 
-		// Now output the actual results ...		
 		sb.append("\t");
+
+		// TODO - Now output the actual results ...
+
+		// True single = single with no neighbours
+		// True doublet = doublet with no neighbours
+
+		// - Number of singles, doublets, multiples with/without neighbours
+		// - Number of singles fit OK
+		// - Number of doublets fit OK
+		// - Number of doublets fit OK with no neighbours
+		// - Number of doublets fit OK with no neighbours with a better SS, AIC (plot this verses residuals score)
+		// - Number of singles fit OK with no neighbours with a worse SS, AIC (plot this verses residuals score)
+		// - Histogram of residuals score for true singles 
+		// - Histogram of residuals score for true doublets
+
+		
+		// TODO - add the adjusted r squared
+		
+		final String[] names = { "Score", "SS", "Value", "IC", "MLIC" };
+		StoredDataStatistics[] stats = new StoredDataStatistics[3 * names.length];
+		for (int i = 0; i < stats.length; i++)
+			stats[i] = new StoredDataStatistics();
+		for (DoubletResult result : results)
+		{
+			int c = getClass(result.n);
+
+			// True results, i.e. where there was a choice between single or doublet
+			if (result.neighbours == 0 && result.fitResult1 != null && result.fitResult1.getStatus() == FitStatus.OK &&
+					result.fitResult2 != null && result.fitResult2.getStatus() == FitStatus.OK)
+			{
+				double score = Math.max(result.score1, result.score2);
+				// We want SS2 to be lower
+				double ss = result.sumOfSquares1 - result.sumOfSquares2;
+				double v = result.value1 - result.value2;
+				// We want IC2 to be lower
+				double ic = result.ic1 - result.ic2;
+				double mlic = result.mlic1 - result.mlic2;
+				stats[c].add(score);
+				stats[c + 1 * 3].add(ss);
+				stats[c + 2 * 3].add(v);
+				stats[c + 3 * 3].add(ic);
+				stats[c + 4 * 3].add(mlic);
+			}
+		}
+
+		// Summarise score for true results
+		for (int c = 0; c < 3; c++)
+		{
+			sb.append(Utils.rounded(stats[c].getMean())).append("+/-")
+					.append(Utils.rounded(stats[c].getStandardDeviation())).append(" (").append(stats[c].getN())
+					.append(')').append('\t');
+			final int n = c + 1;
+
+			// TODO - add option to the Utils to use auto bin size calculation using the methods shown here:
+			// http://uk.mathworks.com/help/matlab/ref/histogram.html - BinMethod
+
+			// Histogram of scores
+			showHistogram(TITLE + " n=" + n, stats[c + 0 * 3], names[0], 0, 1, 100);
+
+			// Histogram of difference of scores			
+			showHistogram(TITLE + " n=" + n, stats[c + 1 * 3], names[1], 0, 1, 100);
+			showHistogram(TITLE + " n=" + n, stats[c + 2 * 3], names[2], 0, 1, 100);
+			showHistogram(TITLE + " n=" + n, stats[c + 3 * 3], names[3], 0, 1, 100);
+			showHistogram(TITLE + " n=" + n, stats[c + 4 * 3], names[4], 0, 1, 100);
+		}
+
+		// Scatter plot of IC verses residuals
 
 		summaryTable.append(sb.toString());
 	}
 
 	/**
-	 * Get the factors to convert the ADUs/pixel units in the statistics array into calibrated photons and nm units. Set
-	 * the conversion to zero if the function does not fit the specified statistic.
+	 * Show a histogram of the data
 	 * 
-	 * @return The conversion factors
+	 * @param title
+	 *            The title to prepend to the plot name
+	 * @param stats
+	 * @param name
+	 *            The name of plotted statistic
+	 * @param minWidth
+	 *            The minimum bin width to use (e.g. set to 1 for integer values)
+	 * @param removeOutliers
+	 *            Remove outliers. 1 - 1.5x IQR. 2 - remove top 2%.
+	 * @param bins
+	 *            The number of bins to use
+	 * @return The histogram window ID
 	 */
-	private double[] getConversionFactors()
+	public int showHistogram(String title, StoredDataStatistics stats, String name, double minWidth, int removeOutliers,
+			int bins)
 	{
-		final double[] convert = new double[NAMES.length];
-		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 / simulationParameters.gain : 0;
-		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() &&
-				fitConfig.getFitFunction() == FitFunction.FIXED) ? 0 : 1 / simulationParameters.gain;
-		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
-		convert[Gaussian2DFunction.X_POSITION] = simulationParameters.a;
-		convert[Gaussian2DFunction.Y_POSITION] = simulationParameters.a;
-		convert[Gaussian2DFunction.X_SD] = (fitConfig.isWidth0Fitting()) ? simulationParameters.a : 0;
-		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isWidth1Fitting()) ? simulationParameters.a : 0;
-		convert[TIME] = 1e-6;
-		convert[ACTUAL_SIGNAL] = convert[Gaussian2DFunction.SIGNAL];
-		convert[ADJUSTED_X_SD] = convert[Gaussian2DFunction.X_SD];
-		convert[ADJUSTED_Y_SD] = convert[Gaussian2DFunction.Y_SD];
-		return convert;
+		int id = Utils.showHistogram(title, stats, name, minWidth, removeOutliers, bins, true, null);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(id);
+		return id;
 	}
 
-	private double distanceFromCentre(double x)
-	{
-		x -= 0.5;
-		final int i = (int) Math.round(x);
-		x = x - i;
-		return x * simulationParameters.a;
-	}
-
-	private void createTable()
+	private void createSummaryTable()
 	{
 		if (summaryTable == null || !summaryTable.isVisible())
 		{
-			summaryTable = new TextWindow(TITLE, createHeader(false), "", 1000, 300);
+			summaryTable = new TextWindow(TITLE + " Summary", createSummaryHeader(), "", 1000, 300);
 			summaryTable.setVisible(true);
 		}
 	}
 
-	private void createAnalysisTable()
+	private String createSummaryHeader()
 	{
-		if (analysisTable == null || !analysisTable.isVisible())
-		{
-			analysisTable = new TextWindow(TITLE + " Combined Analysis", createHeader(true), "", 1000, 300);
-			analysisTable.setVisible(true);
-		}
-	}
+		StringBuilder sb = new StringBuilder(createParameterHeader());
 
-	private String createHeader(boolean extraRecall)
-	{
-		StringBuilder sb = new StringBuilder(createParameterHeader() + "\tRecall");
-		if (extraRecall)
-			sb.append("\tOrigRecall");
-		for (int i = 0; i < NAMES.length; i++)
-		{
-			sb.append("\t").append(NAMES[i]).append("\t+/-");
-		}
 		return sb.toString();
 	}
 
 	private String createParameterHeader()
 	{
-		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
+		return "Molecules\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\tscore_n1\tscore_n2\tscore_nN";
+	}
+
+	private void showResults(ArrayList<DoubletResult> results)
+	{
+		if (!showResults)
+			return;
+
+		createResultsTable();
+
+		ArrayList<String> list = new ArrayList<String>(results.size());
+		int flush = 9;
+		StringBuilder sb = new StringBuilder();
+		for (DoubletResult result : results)
+		{
+			sb.append(result.frame).append('\t');
+			sb.append(result.spot.x).append('\t');
+			sb.append(result.spot.y).append('\t');
+			sb.append(result.spot.intensity).append('\t');
+			sb.append(result.n).append('\t');
+			sb.append(result.neighbours).append('\t');
+			add(sb, result.fitResult1, result.sumOfSquares1, result.value1);
+			sb.append(Utils.rounded(result.score1)).append('\t');
+			sb.append(Utils.rounded(result.score2)).append('\t');
+			add(sb, result.fitResult2, result.sumOfSquares2, result.value2);
+			sb.append(Utils.rounded(result.ic1)).append('\t');
+			sb.append(Utils.rounded(result.ic2)).append('\t');
+			sb.append(Utils.rounded(result.mlic2)).append('\t');
+			sb.append(Utils.rounded(result.mlic2)).append('\t');
+			sb.append(Utils.rounded(result.a[0])).append('\t');
+			sb.append(Utils.rounded(result.a[1])).append('\t');
+			add(sb, result.fitResult1);
+			add(sb, result.fitResult2);
+
+			list.add(sb.toString());
+			sb.setLength(0);
+			// Flush below 10 lines so ImageJ will layout the columns
+			if (--flush == 0)
+			{
+				resultsTable.getTextPanel().append(list);
+				list.clear();
+			}
+		}
+
+		resultsTable.getTextPanel().append(list);
+	}
+
+	private void add(StringBuilder sb, FitResult fitResult, double sumOfSquares, double value)
+	{
+		if (fitResult != null)
+		{
+			sb.append(fitResult.getStatus()).append("\t");
+			sb.append(sumOfSquares).append("\t");
+			sb.append(value).append("\t");
+		}
+		else
+		{
+			sb.append("\t\t\t");
+		}
+	}
+
+	private void add(StringBuilder sb, FitResult fitResult)
+	{
+		if (fitResult != null)
+		{
+			sb.append(Arrays.toString(fitResult.getParameters())).append("\t");
+		}
+		else
+		{
+			sb.append("\t");
+		}
+	}
+
+	private void createResultsTable()
+	{
+		if (resultsTable == null || !resultsTable.isVisible())
+		{
+			resultsTable = new TextWindow(TITLE + " Results", createResultsHeader(), "", 1000, 300);
+			resultsTable.setVisible(true);
+		}
+	}
+
+	private String createResultsHeader()
+	{
+		return "Frame\tx\ty\tI\tn\tneighbours\tR1\tss1\tv1\tscore1\tscore2\tR2\tss2\tv2\tic1\tic2\tmlic1\tmlic2\ta1\ta2\tparams1\tparams2";
 	}
 
 	private void runAnalysis()

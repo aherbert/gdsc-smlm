@@ -18,26 +18,28 @@ package gdsc.smlm.engine;
  */
 public class QuadrantAnalysis
 {
-	double ABCD = 0;
-	double A = 0, B = 0, C = 0, D = 0;
-	double ABCD2 = 0;
-	double A2 = 0, B2 = 0, C2 = 0, D2 = 0;
+	// Make these public for simplicity
 
-	double AC = A + C;
-	double BD = B + D;
-	double score1;
+	public double ABCD;
+	public double A, B, C, D;
+	public double ABCD2;
+	public double A2, B2, C2, D2;
 
-	double AC2;
-	double BD2;
-	double score2;
+	public double AC;
+	public double BD;
+	public double score1;
 
-	int[] vector;
-	double score;
+	public double AC2;
+	public double BD2;
+	public double score2;
 
-	int x1;
-	int y1;
-	int x2;
-	int y2;
+	public int[] vector;
+	public double score;
+
+	public int x1;
+	public int y1;
+	public int x2;
+	public int y2;
 
 	/**
 	 * Perform quadrant analysis as per rapidSTORM
@@ -73,6 +75,8 @@ public class QuadrantAnalysis
 	public boolean quadrantAnalysis(final double[] residuals, final int width, final int height, final int cx,
 			final int cy)
 	{
+		vector = null;
+
 		if (cx < 0 || cx >= width || cy < 0 || cy >= height) // out of bounds
 			return false;
 
@@ -189,7 +193,9 @@ public class QuadrantAnalysis
 	}
 
 	/**
-	 * Locate the 2 new centres by moving out into the quadrant defined by the vector
+	 * Locate the 2 new centres by moving out into the quadrant defined by the computed vector by the defined shift
+	 * <p>
+	 * Requires a valid call to {@link #quadrantAnalysis(double[], int, int, int, int)} to create the vector
 	 *
 	 * @param width
 	 *            the width
