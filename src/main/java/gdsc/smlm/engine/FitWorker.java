@@ -1205,13 +1205,20 @@ public class FitWorker implements Runnable
 		return false;
 	}
 
+	// TODO - fix this so it is the same.
 	private FitResult quadrantAnalysis(FitResult fitResult, double[] region, Rectangle regionBounds)
+	{
+		return quadrantAnalysisNew(fitResult, region, regionBounds);
+	}
+
+	private FitResult quadrantAnalysisNew(FitResult fitResult, double[] region, Rectangle regionBounds)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
 
 		final int width = regionBounds.width;
 		final int height = regionBounds.height;
 		final double[] params = fitResult.getParameters();
+		// Use rounding since the fit coords are not yet offset by 0.5 pixel to centre them
 		final int cx = (int) Math.round(params[Gaussian2DFunction.X_POSITION]);
 		final int cy = (int) Math.round(params[Gaussian2DFunction.Y_POSITION]);
 		final double[] residuals = gf.getResiduals();
@@ -1230,43 +1237,28 @@ public class FitWorker implements Runnable
 		if (logger != null)
 			logger.info("Computing 2-kernel model");
 
-		if (qa.computeDoubletCentres(width, height, cx, cy, params[Gaussian2DFunction.X_SD],
+		if (!qa.computeDoubletCentres(width, height, cx, cy, params[Gaussian2DFunction.X_SD],
 				params[Gaussian2DFunction.Y_SD]))
 			return null;
 
 		// TODO - Locate the 2 new centres by moving out into the quadrant defined by the vector
 		// and finding the maxima on the original image data.
 
-		final int x1 = qa.x1;
-		final int x2 = qa.x2;
-		final int y1 = qa.y1;
-		final int y2 = qa.y2;
-
-		// -*-*-
-		// Allow the routine to estimate the background
-		// -*-*-
-
-		//int index1 = y1 * width + x1;
-		//int originalIndex1 = (y1 + regionBounds.y) * bounds.width + x1 + regionBounds.x;
-		//int index2 = y2 * width + x2;
-		//int originalIndex2 = (y2 + regionBounds.y) * bounds.width + x2 + regionBounds.x;
-
-		//int[] peaks = new int[] { index1, index2 };
-		//float[] heights = new float[] { smoothData[originalIndex1], smoothData[originalIndex2] };
-		// -*-*-
-
 		// -+-+-
 		// Estimate params using the single fitted peak
 		// -+-+-
 		final double[] doubletParams = new double[1 + 2 * 6];
 
+		// Note: Quadrant analysis sets the positions using 0.5,0.5 as the centre of the pixel.
+		// The fitting does not, so subtract 0.5.
+
 		doubletParams[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
 		doubletParams[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
-		doubletParams[Gaussian2DFunction.X_POSITION] = x1;
-		doubletParams[Gaussian2DFunction.Y_POSITION] = y1;
+		doubletParams[Gaussian2DFunction.X_POSITION] = (float) (qa.x1 - 0.5);
+		doubletParams[Gaussian2DFunction.Y_POSITION] = (float) (qa.y1 - 0.5);
 		doubletParams[6 + Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
-		doubletParams[6 + Gaussian2DFunction.X_POSITION] = x2;
-		doubletParams[6 + Gaussian2DFunction.Y_POSITION] = y2;
+		doubletParams[6 + Gaussian2DFunction.X_POSITION] = (float) (qa.x2 - 0.5);
+		doubletParams[6 + Gaussian2DFunction.Y_POSITION] = (float) (qa.y2 - 0.5);
 		// -+-+-
 
 		// Store the residual sum-of-squares from the previous fit
@@ -1522,6 +1514,516 @@ public class FitWorker implements Runnable
 		}
 
 		return null;
+	}
+
+	private FitResult quadrantAnalysisOld(FitResult fitResult, double[] region, Rectangle regionBounds)
+	{
+		// Perform quadrant analysis as per rapidSTORM:
+		/*
+		 * When two fluorophores emit close to each other, typically the nonlinear fit will result in a suspected
+		 * fluorophore position midway between the two fluorophores and with a high amplitude. In this case, the fit
+		 * results show a characteristic handle structure: The two true fluorophore emissions leave slightly positive
+		 * residues, while there are negative residues on an axis perpendicular to the one connecting the fluorophores.
+		 * 
+		 * This condition is detected well by quadrant-differential residue analysis: The residue matrix is divided into
+		 * quadrants, with the pixels above both diagonals forming the upper quadrant, the pixels above the main and
+		 * below the off diagonal forming the right quadrants and so on. Pixels right on the diagonals are ignored.
+		 * Then, the opposing quadrants are summed, and these sums substracted from another, resulting in two quadrant
+		 * differences: upper and lower minus right and left and right and left minus upper and lower. This process is
+		 * repeated for the quadrants defined by the central row and the central column.
+		 * 
+		 * The maximum sum obtained in this way divided by the sum of the absolute quadrant contributions is an
+		 * observable correlating highly with the true presence of double emitters. Also, the quadrants containing the
+		 * positive contribution in the highest sum indicate along which axis the double emission happened.
+		 */
+
+		final int width = regionBounds.width;
+		final int height = regionBounds.height;
+		final double[] params = fitResult.getParameters();
+		final int cx = (int) Math.round(params[Gaussian2DFunction.X_POSITION]);
+		final int cy = (int) Math.round(params[Gaussian2DFunction.Y_POSITION]);
+		if (cx < 0 || cx >= width || cy < 0 || cy >= height) // Bad fits may be out of bounds
+			return null;
+
+		final double[] residuals = gf.getResiduals();
+
+		// Compute quadrants
+
+		// X quadrant:
+		// .AAA.   
+		// D.A.B   
+		// DD.BB
+		// D.C.B
+		// .CCC.
+		double ABCD = 0;
+		double A = 0, B = 0, C = 0, D = 0;
+		for (int y = cy, x1 = cx, x2 = cx; y < height; y++, x1--, x2++)
+		{
+			for (int x = 0, index = y * width; x < width; x++, index++)
+			{
+				ABCD += Math.abs(residuals[index]);
+				if (x < x1)
+					D += residuals[index];
+				else if (x < x2 && x > x1)
+					C += residuals[index];
+				else if (x > x2)
+					B += residuals[index];
+				else
+					ABCD -= Math.abs(residuals[index]);
+			}
+		}
+		for (int y = cy - 1, x1 = cx - 1, x2 = cx + 1; y >= 0; y--, x1--, x2++)
+		{
+			for (int x = 0, index = y * width; x < width; x++, index++)
+			{
+				ABCD += Math.abs(residuals[index]);
+				if (x < x1)
+					D += residuals[index];
+				else if (x < x2 && x > x1)
+					A += residuals[index];
+				else if (x > x2)
+					B += residuals[index];
+				else
+					ABCD -= Math.abs(residuals[index]);
+			}
+		}
+
+		// Similar for + quadrants:
+		// AA.BB
+		// AA.BB
+		// .....
+		// DD.CC
+		// DD.CC
+		double ABCD2 = 0;
+		double A2 = 0, B2 = 0, C2 = 0, D2 = 0;
+		for (int y = cy + 1; y < height; y++)
+		{
+			for (int x = 0, index = y * width; x < width; x++, index++)
+			{
+				ABCD2 += Math.abs(residuals[index]);
+				if (x < cx)
+					D2 += residuals[index];
+				else if (x > cx)
+					C2 += residuals[index];
+			}
+		}
+		for (int y = cy - 1; y >= 0; y--)
+		{
+			for (int x = 0, index = y * width; x < width; x++, index++)
+			{
+				ABCD2 += Math.abs(residuals[index]);
+				if (x < cx)
+					A2 += residuals[index];
+				else if (x > cx)
+					B2 += residuals[index];
+			}
+		}
+
+		final double AC = A + C;
+		final double BD = B + D;
+		final double score1 = Math.abs(AC - BD) / ABCD;
+
+		final double AC2 = A2 + C2;
+		final double BD2 = B2 + D2;
+		final double score2 = Math.abs(AC2 - BD2) / ABCD2;
+
+		final int[] vector;
+		if (score1 > score2)
+		{
+			vector = (AC > BD) ? new int[] { 0, 1 } : new int[] { 1, 0 };
+		}
+		else
+		{
+			vector = (AC2 > BD2) ? new int[] { 1, 1 } : new int[] { 1, -1 };
+		}
+		final double score = FastMath.max(score1, score2);
+
+		if (logger != null)
+			logger.info("Residue analysis = %f (%d,%d)", score, vector[0], vector[1]);
+
+		// If differential residue analysis indicates a doublet then re-fit as two spots.
+		if (score < config.getResidualsThreshold())
+			return null;
+
+		if (logger != null)
+			logger.info("Computing 2-kernel model");
+
+		// TODO - Locate the 2 new centres by moving out into the quadrant defined by the vector
+		// and finding the maxima on the original image data.
+
+		// Guess maxima using the fitted width as a single peak		
+		int x1 = (int) Math.round(cx + vector[0] * params[Gaussian2DFunction.X_SD]);
+		int y1 = (int) Math.round(cy + vector[1] * params[Gaussian2DFunction.Y_SD]);
+		int x2 = (int) Math.round(cx - vector[0] * params[Gaussian2DFunction.X_SD]);
+		int y2 = (int) Math.round(cy - vector[1] * params[Gaussian2DFunction.Y_SD]);
+
+		// Check bounds
+		if (x1 < 0)
+			x1 = 0;
+		else if (x1 >= regionBounds.width)
+			x1 = regionBounds.width - 1;
+		if (y1 < 0)
+			y1 = 0;
+		else if (y1 >= regionBounds.height)
+			y1 = regionBounds.height - 1;
+
+		// Check regionBounds
+		if (x2 < 0)
+			x2 = 0;
+		else if (x2 >= regionBounds.width)
+			x2 = regionBounds.width - 1;
+		if (y2 < 0)
+			y2 = 0;
+		else if (y2 >= regionBounds.height)
+			y2 = regionBounds.height - 1;
+
+		// Check the two points are not the same. 
+		if (x1 == x2 && y1 == y2)
+		{
+			//System.out.println("matching points");
+			// This can only happen when the fitted width is zero due to the round() function 
+			// moving to the next integer. If they are the same then the value should be cx,cy
+			// and we can move along the vector.
+			x1 += vector[0];
+			y1 += vector[1];
+			x2 -= vector[0];
+			y2 -= vector[1];
+
+			// Check regionBounds
+			if (x1 < 0)
+				x1 = 0;
+			else if (x1 >= regionBounds.width)
+				x1 = regionBounds.width - 1;
+			if (y1 < 0)
+				y1 = 0;
+			else if (y1 >= regionBounds.height)
+				y1 = regionBounds.height - 1;
+
+			// Check regionBounds
+			if (x2 < 0)
+				x2 = 0;
+			else if (x2 >= regionBounds.width)
+				x2 = regionBounds.width - 1;
+			if (y2 < 0)
+				y2 = 0;
+			else if (y2 >= regionBounds.height)
+				y2 = regionBounds.height - 1;
+		}
+
+		// -*-*-
+		// Allow the routine to estimate the background
+		// -*-*-
+
+		//int index1 = y1 * width + x1;
+		//int originalIndex1 = (y1 + regionBounds.y) * bounds.width + x1 + regionBounds.x;
+		//int index2 = y2 * width + x2;
+		//int originalIndex2 = (y2 + regionBounds.y) * bounds.width + x2 + regionBounds.x;
+
+		//int[] peaks = new int[] { index1, index2 };
+		//float[] heights = new float[] { smoothData[originalIndex1], smoothData[originalIndex2] };
+		// -*-*-
+
+		// -+-+-
+		// Estimate params using the single fitted peak
+		// -+-+-
+		final double[] doubletParams = new double[1 + 2 * 6];
+
+		doubletParams[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
+		doubletParams[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
+		doubletParams[Gaussian2DFunction.X_POSITION] = x1;
+		doubletParams[Gaussian2DFunction.Y_POSITION] = y1;
+		doubletParams[6 + Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] * 0.5;
+		doubletParams[6 + Gaussian2DFunction.X_POSITION] = x2;
+		doubletParams[6 + Gaussian2DFunction.Y_POSITION] = y2;
+		// -+-+-
+
+		// Store the residual sum-of-squares from the previous fit
+		final double singleSumOfSquares = gf.getFinalResidualSumOfSquares();
+		final double singleValue = gf.getValue();
+
+		// Disable checking of position movement since we guessed the 2-peak location.
+		// Increase the iterations level then reset afterwards.
+
+		// TODO - Should width and signal validation be disabled too?
+		double shift = fitConfig.getCoordinateShift();
+		final int maxIterations = fitConfig.getMaxIterations();
+
+		fitConfig.setCoordinateShift(FastMath.min(width, height));
+		fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
+
+		//FitResult newFitResult = gf.fit(region, width, height, peaks, heights);
+		gf.setComputeResiduals(false);
+		final FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams, false);
+		gf.setComputeResiduals(true);
+
+		fitConfig.setCoordinateShift(shift);
+		fitConfig.setMaxIterations(maxIterations);
+
+		// Q. Allow bad fits since these are due to peak width divergence or low signal for all peaks?
+		if (newFitResult.getStatus() == FitStatus.OK) // || newFitResult.getResult() == Result.BAD_FIT)
+		{
+			// Check if the residuals are better using the adjusted coefficient of determination.
+			// See http://www.mathworks.co.uk/help/matlab/data_analysis/linear-regression.html
+			// Adjusted Coefficient of determination is not good for non-linear models. Use the 
+			// bias corrected Akaike Information Criterion (AICc):
+			// http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/
+
+			final double doubleSumOfSquares = gf.getFinalResidualSumOfSquares();
+
+			final int length = width * height;
+			//double SStotal = gf.getTotalSumOfSquares();
+			//double adjustedR2 = getAdjustedCoefficientOfDetermination(singleSumOfSquares, SStotal, length,
+			//		fitResult.getInitialParameters().length);
+			//double newAdjustedR2 = getAdjustedCoefficientOfDetermination(doubleSumOfSquares, SStotal, length,
+			//		newFitResult.getInitialParameters().length);
+
+			final double ic1, ic2;
+
+			// Get the likelihood for the fit.
+			if (fitConfig.getFitSolver() == FitSolver.MLE)
+			{
+				// This is computed directly by the maximum likelihood estimator
+				final double doubleValue = gf.getValue();
+				ic1 = Maths.getInformationCriterionFromLL(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getInformationCriterionFromLL(doubleValue, length,
+						newFitResult.getNumberOfFittedParameters());
+				if (logger != null)
+					logger.info("Model improvement - Sum-of-squares, MLE (AIC) : %f, %f (%f) => %f, %f (%f) : %f",
+							singleSumOfSquares, singleValue, ic1, doubleSumOfSquares, doubleValue, ic2, ic1 - ic2);
+			}
+			else
+			{
+				// If using the least squares estimator then we can get the log likelihood from an approximation
+				// (TODO - we could build a likelihood function using a Poisson model. This may be better than 
+				// the approximation from the residuals)
+				ic1 = Maths.getInformationCriterion(singleSumOfSquares, length,
+						fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getInformationCriterion(doubleSumOfSquares, length,
+						newFitResult.getNumberOfFittedParameters());
+				if (logger != null)
+					logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f",
+							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+			}
+
+			if (logger2 != null)
+			{
+				double[] peakParams = newFitResult.getParameters();
+				if (peakParams != null)
+				{
+					peakParams = Arrays.copyOf(peakParams, peakParams.length);
+					int npeaks = peakParams.length / 6;
+					for (int i = 0; i < npeaks; i++)
+					{
+						peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+						peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+					}
+				}
+				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] AIC [%f -> %f] = %s\n",
+						slice, cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y, newFitResult.getStatus(),
+						newFitResult.getStatusData(), singleValue, gf.getValue(), singleSumOfSquares,
+						doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
+				logger2.debug(msg);
+			}
+
+			// Check if the predictive power of the model is better with two peaks:
+			// AIC should be lower
+			// Adjusted R2 should be higher
+			if (ic2 > ic1)
+			//if (newAdjustedR2 < adjustedR2)
+			{
+				printFitResults(newFitResult, region, width, height, 2, 1, gf.getIterations(), ic1, ic2);
+				return null;
+			}
+
+			// Check if either coordinate is outside the fitted region.
+			final double[] newParams = newFitResult.getParameters();
+			for (int n = 0; n < 2; n++)
+			{
+				// Note that during processing the data is assumed to refer to the top-left
+				// corner of the pixel. The coordinates should be represented in the middle of the pixel 
+				// so add a 0.5 shift to the coordinates.
+				final double xpos = newParams[Gaussian2DFunction.X_POSITION + n * 6] + 0.5;
+				final double ypos = newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5;
+
+				// Set the bounds using the expected HWHM
+				final double hwhm = Maths.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1(), 1) *
+						GaussianFunction.SD_TO_HWHM_FACTOR;
+
+				if (xpos < -hwhm || xpos > regionBounds.width + hwhm || ypos < -hwhm ||
+						ypos > regionBounds.height + hwhm)
+				{
+					if (logger != null)
+						logger.info("Fitted coordinates too far outside the fitted region (x %g || y %g)",
+								xpos + bounds.x + regionBounds.x, regionBounds.width, ypos + bounds.y + regionBounds.y,
+								regionBounds.height);
+					printFitResults(newFitResult, region, width, height, 2, 1, gf.getIterations(), ic1, ic2);
+					return null;
+				}
+			}
+
+			// Check the distance of the peaks to the centre of the region. It is possible that a second peak
+			// at the edge of the region has been fitted (note that no coordinate shift check was performed).
+			if (shift != 0)
+			{
+				// Allow extra large shifts since this is a doublet and the centre will be in the middle of the pair
+				if (fitConfig.isWidth0Fitting())
+				{
+					// Add the fitted standard deviation to the allowed shift
+					shift += FastMath.max(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]);
+				}
+				else
+				{
+					// Quadrant analysis only happens when there are no neighbours or the neighbour fit failed.
+					if (config.isIncludeNeighbours())
+						// Assume that neighbours are insignificant and allow the shift to span half of the 
+						// fitted window.
+						shift = 0.5 * FastMath.max(regionBounds.width, regionBounds.height);
+					else
+						// Expand the allowed shift by the configured SD fit to allow close by peaks to be
+						// included. Duplicate filtering will eliminate fits onto close by neighbours.
+						shift += 2 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+				}
+
+				int[] position = new int[2];
+				int nPeaks = 0;
+				for (int n = 0; n < 2; n++)
+				{
+					final double xShift = newParams[Gaussian2DFunction.X_POSITION + n * 6] -
+							params[Gaussian2DFunction.X_POSITION];
+					final double yShift = newParams[Gaussian2DFunction.Y_POSITION + n * 6] -
+							params[Gaussian2DFunction.Y_POSITION];
+					if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
+					{
+						// Allow large shifts if they are along the vector
+						final double a = getAngle(vector, new double[] { xShift, yShift });
+						// Check the domain is OK (the angle is in radians). 
+						// Allow up to a 45 degree difference to show the shift is along the vector
+						if (a > 0.785398 && a < 2.356194)
+						{
+							if (logger != null)
+							{
+								logger.info(
+										"Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
+										xShift, yShift, a * 57.29578);
+							}
+							continue;
+						}
+					}
+					position[nPeaks++] = n;
+				}
+
+				printFitResults(newFitResult, region, width, height, 2, 3 + nPeaks, gf.getIterations(), ic1, ic2);
+				if (nPeaks == 0)
+				{
+					return null;
+				}
+
+				// Copy the OK peaks into a new result
+				final double[] newInitialParams = newFitResult.getInitialParameters();
+				final double[] newParamStdDev = newFitResult.getParameterStdDev();
+
+				final double[] okInitialParams = new double[1 + nPeaks * 6];
+				final double[] okParams = new double[1 + nPeaks * 6];
+				final double[] okParamStdDev = new double[1 + nPeaks * 6];
+
+				okInitialParams[0] = newInitialParams[0];
+				okParams[0] = params[0];
+				if (newParamStdDev != null)
+					okParamStdDev[0] = newParamStdDev[0];
+
+				int destPos = 1;
+				for (int i = 0; i < nPeaks; i++)
+				{
+					int srcPos = position[i] * 6 + 1;
+					System.arraycopy(newInitialParams, srcPos, okInitialParams, destPos, 6);
+					System.arraycopy(newParams, srcPos, okParams, destPos, 6);
+					if (newParamStdDev != null)
+						System.arraycopy(newParamStdDev, srcPos, okParamStdDev, destPos, 6);
+					destPos += 6;
+				}
+
+				final int nFittedParameters = newFitResult.getNumberOfFittedParameters() % 6 +
+						nPeaks * newFitResult.getNumberOfFittedParameters() / 2;
+
+				double error = newFitResult.getError();
+				final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
+				error = r2;
+
+				return new FitResult(newFitResult.getStatus(), newFitResult.getDegreesOfFreedom(), error,
+						okInitialParams, okParams, okParamStdDev, nPeaks, nFittedParameters,
+						newFitResult.getStatusData());
+			}
+			else
+			{
+				printFitResults(newFitResult, region, width, height, 2, 2, gf.getIterations(), ic1, ic2);
+			}
+
+			// Note: When adding results we should check for duplicate peaks, but allow the 
+			// doublet to be closer than the duplicate distance.  
+
+			return newFitResult;
+		}
+		else
+		{
+			if (logger != null)
+				logger.info("Unable to fit 2-kernel model : %s", newFitResult.getStatus());
+
+			if (logger2 != null)
+			{
+				double[] peakParams = newFitResult.getParameters();
+				if (peakParams != null)
+				{
+					peakParams = Arrays.copyOf(peakParams, peakParams.length);
+					int npeaks = peakParams.length / 6;
+					for (int i = 0; i < npeaks; i++)
+					{
+						peakParams[i * 6 + Gaussian2DFunction.X_POSITION] += 0.5 + regionBounds.x;
+						peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
+					}
+				}
+				String msg = String.format("Doublet %d [%d,%d] %s (%s) = %s\n", slice, cx + bounds.x + regionBounds.x,
+						cy + bounds.y + regionBounds.y, newFitResult.getStatus(), newFitResult.getStatusData(),
+						Arrays.toString(peakParams));
+				logger2.debug(msg);
+			}
+
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets the angle.
+	 *
+	 * @param a
+	 *            the a
+	 * @param b
+	 *            the b
+	 * @return the angle (in radians)
+	 */
+	private double getAngle(int[] a, double[] b)
+	{
+		double d1 = a[0] * a[0] + a[1] * a[1];
+		double d2 = b[0] * b[0] + b[1] * b[1];
+		if (d1 > 0.0 && d2 > 0.0)
+		{
+			d1 = Math.sqrt(d1);
+			d2 = Math.sqrt(d2);
+			final double sum = a[0] * b[0] + a[1] * b[1];
+			final double cosang = sum / (d1 * d2);
+
+			if (cosang > 1.0)
+			{
+				return 0;
+			}
+			else if (cosang < -1.0)
+			{
+				return Math.PI;
+			}
+
+			return Math.acos(cosang);
+		}
+		return 999;
 	}
 
 	/**
