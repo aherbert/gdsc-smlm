@@ -982,7 +982,7 @@ public class FitWorker implements Runnable
 			if (//neighbours == 0 && 
 			canPerformQuadrantAnalysis(fitResult, width, height))
 			{
-				FitResult newFitResult = quadrantAnalysis(fitResult, region, regionBounds);
+				FitResult newFitResult = quadrantAnalysis(spots, n, fitResult, region, regionBounds);
 				if (newFitResult != null)
 					fitResult = newFitResult;
 			}
@@ -1205,13 +1205,14 @@ public class FitWorker implements Runnable
 		return false;
 	}
 
-	// TODO - fix this so it is the same.
-	private FitResult quadrantAnalysis(FitResult fitResult, double[] region, Rectangle regionBounds)
+	private FitResult quadrantAnalysis(Spot[] spots, int candidate, FitResult fitResult, double[] region,
+			Rectangle regionBounds)
 	{
-		return quadrantAnalysisNew(fitResult, region, regionBounds);
+		return quadrantAnalysisNew(spots, candidate, fitResult, region, regionBounds);
 	}
-
-	private FitResult quadrantAnalysisNew(FitResult fitResult, double[] region, Rectangle regionBounds)
+	
+	private FitResult quadrantAnalysisNew(Spot[] spots, int candidate, FitResult fitResult, double[] region,
+			Rectangle regionBounds)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
 
@@ -1271,9 +1272,11 @@ public class FitWorker implements Runnable
 		// TODO - Should width and signal validation be disabled too?
 		double shift = fitConfig.getCoordinateShift();
 		final int maxIterations = fitConfig.getMaxIterations();
+		final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 
 		fitConfig.setCoordinateShift(FastMath.min(width, height));
 		fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
+		fitConfig.setMaxFunctionEvaluations(maxEvaluations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
 
 		//FitResult newFitResult = gf.fit(region, width, height, peaks, heights);
 		gf.setComputeResiduals(false);
@@ -1282,6 +1285,7 @@ public class FitWorker implements Runnable
 
 		fitConfig.setCoordinateShift(shift);
 		fitConfig.setMaxIterations(maxIterations);
+		fitConfig.setMaxFunctionEvaluations(maxEvaluations);
 
 		// Q. Allow bad fits since these are due to peak width divergence or low signal for all peaks?
 		if (newFitResult.getStatus() == FitStatus.OK) // || newFitResult.getResult() == Result.BAD_FIT)
@@ -1359,6 +1363,11 @@ public class FitWorker implements Runnable
 				return null;
 			}
 
+			// TODO - get the distance of each new centre from the original centre
+			// If the shift is too far (e.g. half the distance to the edge), the centre must be in the correct
+			// quadrant. Then check if there is an unfit candidate spot closer than the current candidate.
+			// This represents drift out to fit another spot that will be fit later.
+
 			// Check if either coordinate is outside the fitted region.
 			final double[] newParams = newFitResult.getParameters();
 			for (int n = 0; n < 2; n++)
@@ -1387,105 +1396,137 @@ public class FitWorker implements Runnable
 
 			// Check the distance of the peaks to the centre of the region. It is possible that a second peak
 			// at the edge of the region has been fitted (note that no coordinate shift check was performed).
-			if (shift != 0)
-			{
-				// Allow extra large shifts since this is a doublet and the centre will be in the middle of the pair
-				if (fitConfig.isWidth0Fitting())
-				{
-					// Add the fitted standard deviation to the allowed shift
-					shift += FastMath.max(params[Gaussian2DFunction.X_SD], params[Gaussian2DFunction.Y_SD]);
-				}
-				else
-				{
-					// Quadrant analysis only happens when there are no neighbours or the neighbour fit failed.
-					if (config.isIncludeNeighbours())
-						// Assume that neighbours are insignificant and allow the shift to span half of the 
-						// fitted window.
-						shift = 0.5 * FastMath.max(regionBounds.width, regionBounds.height);
-					else
-						// Expand the allowed shift by the configured SD fit to allow close by peaks to be
-						// included. Duplicate filtering will eliminate fits onto close by neighbours.
-						shift += 2 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
-				}
 
-				int[] position = new int[2];
-				int nPeaks = 0;
-				for (int n = 0; n < 2; n++)
+			if (shift == 0)
+			{
+				// Allow the shift to span half of the fitted window.
+				shift = 0.5 * FastMath.min(regionBounds.width, regionBounds.height);
+			}
+
+			// Set an upper limit on the shift that is not too far outside the fit window
+			final double maxShiftX, maxShiftY;
+			final double factor = Gaussian2DFunction.SD_TO_HWHM_FACTOR;
+			if (fitConfig.isWidth0Fitting())
+			{
+				// Add the fitted standard deviation to the allowed shift
+				maxShiftX = regionBounds.width * 0.5 + factor * params[Gaussian2DFunction.X_SD];
+				maxShiftY = regionBounds.height * 0.5 + factor * params[Gaussian2DFunction.Y_SD];
+			}
+			else
+			{
+				// Add the configured standard deviation to the allowed shift
+				maxShiftX = regionBounds.width * 0.5 + factor * fitConfig.getInitialPeakStdDev0();
+				maxShiftY = regionBounds.height * 0.5 + factor * fitConfig.getInitialPeakStdDev1();
+			}
+
+			int[] position = new int[2];
+			int nPeaks = 0;
+			NEXT_PEAK: for (int n = 0; n < 2; n++)
+			{
+				final double xShift = newParams[Gaussian2DFunction.X_POSITION + n * 6] -
+						params[Gaussian2DFunction.X_POSITION];
+				final double yShift = newParams[Gaussian2DFunction.Y_POSITION + n * 6] -
+						params[Gaussian2DFunction.Y_POSITION];
+				if (Math.abs(xShift) > maxShiftX || Math.abs(yShift) > maxShiftY)
 				{
-					final double xShift = newParams[Gaussian2DFunction.X_POSITION + n * 6] -
-							params[Gaussian2DFunction.X_POSITION];
-					final double yShift = newParams[Gaussian2DFunction.Y_POSITION + n * 6] -
-							params[Gaussian2DFunction.Y_POSITION];
-					if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
+					if (logger != null)
 					{
-						// Allow large shifts if they are along the vector
-						final double a = QuadrantAnalysis.getAngle(qa.vector, new double[] { xShift, yShift });
-						// Check the domain is OK (the angle is in radians). 
-						// Allow up to a 45 degree difference to show the shift is along the vector
-						if (a > 0.785398 && a < 2.356194)
+						logger.info("Bad peak %d: Fitted coordinates moved outside fit region (x=%g,y=%g,a=%f)", n,
+								xShift, yShift);
+					}
+					continue;
+				}
+				if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
+				{
+					// Allow large shifts if they are along the vector
+					final double a = QuadrantAnalysis.getAngle(qa.vector, new double[] { xShift, yShift });
+					// Check the domain is OK (the angle is in radians). 
+					// Allow up to a 45 degree difference to show the shift is along the vector
+					if (a > 0.785398 && a < 2.356194)
+					{
+						if (logger != null)
+						{
+							logger.info("Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
+									xShift, yShift, a * 57.29578);
+						}
+						continue;
+					}
+
+					// Check if there are any candidates closer than the current candidate with a 
+					// fit window that contains this spot.
+					// This represents drift out to fit another spot that will be fit later.
+					// Note: We can ignore already fitted spots as they will be detected by the duplicate distance.
+					// TODO: Also check existing spots if the duplicate distance is not set...
+					int cx2 = regionBounds.x + bounds.x + (int) Math.round(newParams[Gaussian2DFunction.X_POSITION + n * 6]);
+					int cy2 = regionBounds.y + bounds.y +(int) Math.round(newParams[Gaussian2DFunction.Y_POSITION + n * 6]);
+					final int xmin = cx2 - fitting;
+					final int xmax = cx2 + fitting;
+					final int ymin = cy2 - fitting;
+					final int ymax = cy2 + fitting;
+					// Distance to current candidate
+					final double d2 = distance2(cx2, cy2, spots[candidate]);
+					for (int i = candidate + 1; i < spots.length; i++)
+					{
+						if (spots[i].x < xmin || spots[i].x > xmax || spots[i].y < ymin || spots[i].y > ymax)
+							continue;
+						if (d2 > distance2(cx2, cy2, spots[i]))
 						{
 							if (logger != null)
 							{
 								logger.info(
-										"Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
-										xShift, yShift, a * 57.29578);
+										"Bad peak %d: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
+										n, spots[candidate].x, spots[candidate].y,
+										regionBounds.x + bounds.x + newParams[Gaussian2DFunction.X_POSITION + n * 6] + 0.5,
+										regionBounds.y + bounds.y + newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5, spots[i].x, spots[i].y);
 							}
-							continue;
+							// There is another candidate to be fit later that is closer
+							continue NEXT_PEAK;
 						}
 					}
-					position[nPeaks++] = n;
+
 				}
-
-				printFitResults(newFitResult, region, width, height, 2, 3 + nPeaks, gf.getIterations(), ic1, ic2);
-				if (nPeaks == 0)
-				{
-					return null;
-				}
-
-				// Copy the OK peaks into a new result
-				final double[] newInitialParams = newFitResult.getInitialParameters();
-				final double[] newParamStdDev = newFitResult.getParameterStdDev();
-
-				final double[] okInitialParams = new double[1 + nPeaks * 6];
-				final double[] okParams = new double[1 + nPeaks * 6];
-				final double[] okParamStdDev = new double[1 + nPeaks * 6];
-
-				okInitialParams[0] = newInitialParams[0];
-				okParams[0] = params[0];
-				if (newParamStdDev != null)
-					okParamStdDev[0] = newParamStdDev[0];
-
-				int destPos = 1;
-				for (int i = 0; i < nPeaks; i++)
-				{
-					int srcPos = position[i] * 6 + 1;
-					System.arraycopy(newInitialParams, srcPos, okInitialParams, destPos, 6);
-					System.arraycopy(newParams, srcPos, okParams, destPos, 6);
-					if (newParamStdDev != null)
-						System.arraycopy(newParamStdDev, srcPos, okParamStdDev, destPos, 6);
-					destPos += 6;
-				}
-
-				final int nFittedParameters = newFitResult.getNumberOfFittedParameters() % 6 +
-						nPeaks * newFitResult.getNumberOfFittedParameters() / 2;
-
-				double error = newFitResult.getError();
-				final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
-				error = r2;
-
-				return new FitResult(newFitResult.getStatus(), newFitResult.getDegreesOfFreedom(), error,
-						okInitialParams, okParams, okParamStdDev, nPeaks, nFittedParameters,
-						newFitResult.getStatusData());
+				position[nPeaks++] = n;
 			}
-			else
+
+			printFitResults(newFitResult, region, width, height, 2, 3 + nPeaks, gf.getIterations(), ic1, ic2);
+			if (nPeaks == 0)
 			{
-				printFitResults(newFitResult, region, width, height, 2, 2, gf.getIterations(), ic1, ic2);
+				return null;
 			}
 
-			// Note: When adding results we should check for duplicate peaks, but allow the 
-			// doublet to be closer than the duplicate distance.  
+			// Copy the OK peaks into a new result
+			final double[] newInitialParams = newFitResult.getInitialParameters();
+			final double[] newParamStdDev = newFitResult.getParameterStdDev();
 
-			return newFitResult;
+			final double[] okInitialParams = new double[1 + nPeaks * 6];
+			final double[] okParams = new double[1 + nPeaks * 6];
+			final double[] okParamStdDev = new double[1 + nPeaks * 6];
+
+			okInitialParams[0] = newInitialParams[0];
+			okParams[0] = params[0];
+			if (newParamStdDev != null)
+				okParamStdDev[0] = newParamStdDev[0];
+
+			int destPos = 1;
+			for (int i = 0; i < nPeaks; i++)
+			{
+				int srcPos = position[i] * 6 + 1;
+				System.arraycopy(newInitialParams, srcPos, okInitialParams, destPos, 6);
+				System.arraycopy(newParams, srcPos, okParams, destPos, 6);
+				if (newParamStdDev != null)
+					System.arraycopy(newParamStdDev, srcPos, okParamStdDev, destPos, 6);
+				destPos += 6;
+			}
+
+			final int nFittedParameters = newFitResult.getNumberOfFittedParameters() % 6 +
+					nPeaks * newFitResult.getNumberOfFittedParameters() / 2;
+
+			double error = newFitResult.getError();
+			final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
+			error = r2;
+
+			return new FitResult(newFitResult.getStatus(), newFitResult.getDegreesOfFreedom(), error, okInitialParams,
+					okParams, okParamStdDev, nPeaks, nFittedParameters, newFitResult.getStatusData());
 		}
 		else
 		{
@@ -1516,7 +1557,14 @@ public class FitWorker implements Runnable
 		return null;
 	}
 
-	private FitResult quadrantAnalysisOld(FitResult fitResult, double[] region, Rectangle regionBounds)
+	private double distance2(int cx, int cy, Spot spot)
+	{
+		final int dx = cx - spot.x;
+		final int dy = cy - spot.y;
+		return dx * dx + dy * dy;
+	}
+
+	private FitResult quadrantAnalysisOld(Spot[] spots, int candidate, FitResult fitResult, double[] region, Rectangle regionBounds)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
 		/*
