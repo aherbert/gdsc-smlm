@@ -739,13 +739,13 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		{
 			//System.out.printf("Too many iterations = %d\n", e.getMax());
 			//e.printStackTrace();
-			return FitStatus.FAILED_TO_CONVERGE;
+			return FitStatus.TOO_MANY_ITERATIONS;
 		}
 		catch (TooManyEvaluationsException e)
 		{
 			//System.out.printf("Too many evaluations = %d\n", e.getMax());
 			//e.printStackTrace();
-			return FitStatus.FAILED_TO_CONVERGE;
+			return FitStatus.TOO_MANY_EVALUATIONS;
 		}
 		catch (ConvergenceException e)
 		{

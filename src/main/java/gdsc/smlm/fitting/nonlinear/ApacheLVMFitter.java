@@ -7,6 +7,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
@@ -112,7 +113,11 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 		}
 		catch (TooManyEvaluationsException e)
 		{
-			return FitStatus.FAILED_TO_CONVERGE;
+			return FitStatus.TOO_MANY_EVALUATIONS;
+		}
+		catch (TooManyIterationsException e)
+		{
+			return FitStatus.TOO_MANY_ITERATIONS;
 		}
 		catch (ConvergenceException e)
 		{

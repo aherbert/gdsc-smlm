@@ -204,7 +204,11 @@ public class NonLinearFit extends BaseFunctionSolver
 		}
 
 		if (!sc.areAchieved())
+		{
+			if (sc.getIteration() >= sc.getMaximumIterations())
+				return FitStatus.TOO_MANY_ITERATIONS;
 			return FitStatus.FAILED_TO_CONVERGE;
+		}
 
 		if (a_dev != null)
 		{

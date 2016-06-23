@@ -41,6 +41,14 @@ public enum FitStatus
 	/**
 	 * 
 	 */
+	TOO_MANY_ITERATIONS("Too many iterations"),
+	/**
+	 * 
+	 */
+	TOO_MANY_EVALUATIONS("Too many evaluations"),
+	/**
+	 * 
+	 */
 	BAD_PARAMETERS("Bad parameters"),
 	/**
 	 * 
