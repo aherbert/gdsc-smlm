@@ -17,6 +17,7 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.optim.BaseOptimizer;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
@@ -397,6 +398,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			maximumLikelihoodFunction = new PoissonLikelihoodWrapper(f, a, y2, n);
 		}
 
+		@SuppressWarnings("rawtypes")
+		BaseOptimizer baseOptimiser = null;
+
 		try
 		{
 			double[] startPoint = getInitialSolution(a);
@@ -427,6 +431,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 
 				CustomPowellOptimizer o = new CustomPowellOptimizer(relativeThreshold, absoluteThreshold, lineRel,
 						lineAbs, null, basisConvergence);
+				baseOptimiser = o;
 
 				OptimizationData maxIterationData = null;
 				if (getMaxIterations() > 0)
@@ -505,8 +510,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 								positionChecker, simpleBounds);
 					}
 				}
-				iterations = o.getIterations();
-				evaluations = o.getEvaluations();
 			}
 			else if (searchMethod == SearchMethod.BOBYQA)
 			{
@@ -515,11 +518,10 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				int numberOfInterpolationPoints = this.getNumberOfFittedParameters() + 2;
 
 				BOBYQAOptimizer o = new BOBYQAOptimizer(numberOfInterpolationPoints);
+				baseOptimiser = o;
 				optimum = o.optimize(new MaxEval(getMaxEvaluations()),
 						new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)), GoalType.MINIMIZE,
 						new InitialGuess(startPoint), new SimpleBounds(lower, upper));
-				iterations = o.getIterations();
-				evaluations = o.getEvaluations();
 			}
 			else if (searchMethod == SearchMethod.CMAES)
 			{
@@ -565,6 +567,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 					CMAESOptimizer o = new CMAESOptimizer(getMaxIterations(), stopFitness, isActiveCMA, diagonalOnly,
 							checkFeasableCount, random, generateStatistics,
 							new SimpleValueChecker(relativeThreshold, absoluteThreshold));
+					baseOptimiser = o;
 					PointValuePair result = o.optimize(data);
 					iterations += o.getIterations();
 					evaluations += o.getEvaluations();
@@ -575,6 +578,8 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						optimum = result;
 					}
 				}
+				// Prevent incrementing the iterations again
+				baseOptimiser = null;
 			}
 			else if (searchMethod == SearchMethod.BFGS)
 			{
@@ -586,6 +591,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				// point coordinate and gradient
 				//BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs));
 				BFGSOptimizer o = new BFGSOptimizer();
+				baseOptimiser = o;
 
 				// Configure maximum step length for each dimension using the bounds
 				double[] stepLength = new double[lower.length];
@@ -605,8 +611,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						new InitialGuess(startPoint), new SimpleBounds(lowerConstraint, upperConstraint),
 						new BFGSOptimizer.GradientTolerance(relativeThreshold), positionChecker,
 						new BFGSOptimizer.StepLength(stepLength));
-				iterations = o.getIterations();
-				evaluations = o.getEvaluations();
 			}
 			else
 			{
@@ -620,6 +624,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						(searchMethod == SearchMethod.CONJUGATE_GRADIENT_FR) ? Formula.FLETCHER_REEVES
 								: Formula.POLAK_RIBIERE,
 						new SimpleValueChecker(relativeThreshold, absoluteThreshold));
+				baseOptimiser = o;
 
 				// Note: The gradients may become unstable at the edge of the bounds. Or they will not change 
 				// direction if the true solution is on the bounds since the gradient will always continue 
@@ -692,8 +697,6 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 						new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)), GoalType.MINIMIZE,
 						new InitialGuess(startPoint), new SimpleBounds(lowerConstraint, upperConstraint),
 						new BoundedNonLinearConjugateGradientOptimizer.BracketingStep(bracketingStep));
-				iterations = o.getIterations();
-				evaluations = o.getEvaluations();
 
 				//maximumLikelihoodFunction.value(solution, gradient);
 				//System.out.printf("Iter = %d, %g @ %s : %s\n", iterations, ll, Arrays.toString(solution),
@@ -764,6 +767,14 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			//System.out.printf("Unknown error = %s\n", e.getMessage());
 			e.printStackTrace();
 			return FitStatus.UNKNOWN;
+		}
+		finally
+		{
+			if (baseOptimiser != null)
+			{
+				iterations += baseOptimiser.getIterations();
+				evaluations += baseOptimiser.getEvaluations();
+			}
 		}
 
 		return FitStatus.OK;
