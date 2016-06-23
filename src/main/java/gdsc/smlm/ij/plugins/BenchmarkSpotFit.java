@@ -526,7 +526,7 @@ public class BenchmarkSpotFit implements PlugIn
 		// This is required to initialise the FitWorker
 		spotFilter = BenchmarkSpotFilter.spotFilter;
 
-		imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
+		imp = CreateData.getImage();
 		if (imp == null)
 		{
 			IJ.error(TITLE, "No benchmark image");

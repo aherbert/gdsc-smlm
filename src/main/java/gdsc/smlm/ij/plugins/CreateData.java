@@ -4567,4 +4567,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Increment the seed to ensure that new generators are created at the same system time point
 		return createRandomGenerator(seedAddition++);
 	}
+
+	public static ImagePlus getImage()
+	{
+		ImagePlus imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
+		if (imp != null)
+			return imp;
+		// In case the user has saved the image and ImageJ appended the TIFF file type to the title
+		imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE + ".tif");
+		return imp;
+	}
 }

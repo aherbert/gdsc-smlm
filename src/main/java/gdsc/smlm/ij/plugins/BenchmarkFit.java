@@ -499,7 +499,7 @@ public class BenchmarkFit implements PlugIn
 				return;
 			}
 			benchmarkParameters = CreateData.benchmarkParameters;
-			imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
+			imp = CreateData.getImage();
 			if (imp == null || imp.getStackSize() != benchmarkParameters.frames)
 			{
 				IJ.error(TITLE, "No benchmark image to match the parameters in memory");

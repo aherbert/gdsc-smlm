@@ -400,7 +400,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			IJ.error(TITLE, "No benchmark spot parameters in memory");
 			return;
 		}
-		imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
+		imp = CreateData.getImage();
 		if (imp == null)
 		{
 			IJ.error(TITLE, "No benchmark image");
