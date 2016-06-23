@@ -989,6 +989,14 @@ public class Gaussian2DFitter
 	}
 
 	/**
+	 * @return The number of evaluations used in the last fit
+	 */
+	public int getEvaluations()
+	{
+		return (solver != null) ? solver.getEvaluations() : 0;
+	}
+
+	/**
 	 * @return the totalSumOfSquares for the last fit
 	 */
 	public double getTotalSumOfSquares()
