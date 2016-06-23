@@ -395,7 +395,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				else
 					y2[i] = y[i];
 			}
-			maximumLikelihoodFunction = new PoissonLikelihoodWrapper(f, a, y2, n);
+			PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n);
+			// This will allow Powell searches. The effect on the gradient search algorithms may be weird so leave alone.
+			if (!searchMethod.usesGradient)
+				function.setAllowNegativeExpectedValues(true);
+			maximumLikelihoodFunction = function;
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -776,7 +780,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				evaluations += baseOptimiser.getEvaluations();
 			}
 		}
-
+		
+		// Check this as likelihood functions can go wrong
+		if (Double.isInfinite(value) || Double.isNaN(value))
+			return FitStatus.INVALID_LIKELIHOOD;
+		
 		return FitStatus.OK;
 	}
 

@@ -28,6 +28,9 @@ import org.apache.commons.math3.util.FastMath;
  * The negative log-likelihood (and gradient) can be evaluated over the entire set of observed values or for a chosen
  * observed value.
  * <p>
+ * To allow a likelihood to be computed when the function predicts negative count data, the function prediction is set
+ * to Double.MIN_VALUE. This can be disabled. 
+ * <p>
  * The class can handle non-integer observed data. In this case the PMF is approximated as:
  * 
  * <pre>
@@ -46,6 +49,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	private static double[] logFactorial;
 	private final boolean integerData;
 	private final double sumLogFactorialK;
+	
+	private boolean allowNegativExpectedValues = true;
 
 	/** All long-representable factorials */
 	static final long[] FACTORIALS = new long[] { 1l, 1l, 2l, 6l, 24l, 120l, 720l, 5040l, 40320l, 362880l, 3628800l,
@@ -65,7 +70,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		for (double d : data)
 		{
 			final int i = (int) d;
-			if (i != d)
+			if (i != d || d < 0)
 				return false;
 			if (max < i)
 				max = i;
@@ -142,13 +147,16 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			final double l = f.eval(i);
+			double l = f.eval(i);
 
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
 			{
-				// Since ln(0) -> -Infinity
-				return Double.POSITIVE_INFINITY;
+				if (allowNegativExpectedValues)
+					l = Double.MIN_VALUE;
+				else
+					// Since ln(0) -> -Infinity
+					return Double.POSITIVE_INFINITY;
 			}
 
 			final double k = data[i];
@@ -179,15 +187,18 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		double[] dl_da = new double[nVariables];
 		for (int i = 0; i < n; i++)
 		{
-			final double l = f.eval(i, dl_da);
+			double l = f.eval(i, dl_da);
 
 			final double k = data[i];
 
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
 			{
-				// Since ln(0) -> -Infinity
-				return Double.POSITIVE_INFINITY;
+				if (allowNegativExpectedValues)
+					l = Double.MIN_VALUE;
+				else
+					// Since ln(0) -> -Infinity
+					return Double.POSITIVE_INFINITY;
 			}
 			ll += l - k * Math.log(l);
 
@@ -211,13 +222,16 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public double computeLikelihood(int i)
 	{
-		final double l = f.eval(i);
+		double l = f.eval(i);
 
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
 		{
-			// Since ln(0) -> -Infinity
-			return Double.POSITIVE_INFINITY;
+			if (allowNegativExpectedValues)
+				l = Double.MIN_VALUE;
+			else
+				// Since ln(0) -> -Infinity
+				return Double.POSITIVE_INFINITY;
 		}
 
 		final double k = data[i];
@@ -234,13 +248,16 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
 		double[] dl_da = new double[nVariables];
-		final double l = f.eval(i, dl_da);
+		double l = f.eval(i, dl_da);
 
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
 		{
-			// Since ln(0) -> -Infinity
-			return Double.POSITIVE_INFINITY;
+			if (allowNegativExpectedValues)
+				l = Double.MIN_VALUE;
+			else
+				// Since ln(0) -> -Infinity
+				return Double.POSITIVE_INFINITY;
 		}
 
 		final double k = data[i];
@@ -305,5 +322,25 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	public boolean canComputeGradient()
 	{
 		return true;
+	}
+
+	/**
+	 * Set to true if negative expected values are allowed. In this case the expected value is set to Double.MIN_VALUE and the effect on the gradient is undefined.
+	 *
+	 * @return true, if negative expected values are allowed
+	 */
+	public boolean isAllowNegativeExpectedValues()
+	{
+		return allowNegativExpectedValues;
+	}
+
+	/**
+	 * Set to true if negative expected values are allowed. In this case the expected value is set to Double.MIN_VALUE and the effect on the gradient is undefined.
+	 *
+	 * @param allowNegativeExpectedValues true, if negative expected values are allowed
+	 */
+	public void setAllowNegativeExpectedValues(boolean allowNegativeExpectedValues)
+	{
+		this.allowNegativExpectedValues = allowNegativeExpectedValues;
 	}
 }

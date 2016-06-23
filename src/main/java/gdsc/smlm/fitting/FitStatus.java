@@ -49,6 +49,10 @@ public enum FitStatus
 	/**
 	 * 
 	 */
+	INVALID_LIKELIHOOD("Invalid likelihood"),
+	/**
+	 * 
+	 */
 	BAD_PARAMETERS("Bad parameters"),
 	/**
 	 * 
