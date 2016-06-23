@@ -1564,6 +1564,8 @@ public class FitWorker implements Runnable
 		return dx * dx + dy * dy;
 	}
 
+	// This is left for testing purposes
+	@SuppressWarnings("unused")
 	private FitResult quadrantAnalysisOld(Spot[] spots, int candidate, FitResult fitResult, double[] region, Rectangle regionBounds)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
