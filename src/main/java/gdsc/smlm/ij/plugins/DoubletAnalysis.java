@@ -115,7 +115,9 @@ public class DoubletAnalysis implements PlugIn
 
 	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
 			"Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
-			"Multiples:Neighbours" };
+			"Multiples:Neighbours", "Singles:Almost", "Doublets:Almost", "Multiples:Almost"
+
+	};
 
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
@@ -133,7 +135,7 @@ public class DoubletAnalysis implements PlugIn
 	{
 		final int frame;
 		final Spot spot;
-		final int n, c, neighbours;
+		final int n, c, neighbours, almostNeighbours;
 		FitResult fitResult1 = null;
 		FitResult fitResult2 = null;
 		double sumOfSquares1, sumOfSquares2;
@@ -145,15 +147,16 @@ public class DoubletAnalysis implements PlugIn
 		double[] yshift = new double[2];
 		double[] a = new double[2];
 		int iter1, iter2, eval1, eval2;
-		boolean good1, good2, valid;
+		boolean good1, good2, valid, valid2;
 
-		public DoubletResult(int frame, Spot spot, int n, int neighbours)
+		public DoubletResult(int frame, Spot spot, int n, int neighbours, int almostNeighbours)
 		{
 			this.frame = frame;
 			this.spot = spot;
 			this.n = n;
 			this.c = DoubletAnalysis.getClass(n);
 			this.neighbours = neighbours;
+			this.almostNeighbours = almostNeighbours;
 		}
 
 		public int compareTo(DoubletResult that)
@@ -187,6 +190,7 @@ public class DoubletAnalysis implements PlugIn
 		final double limit;
 		final int[] spotHistogram, resultHistogram;
 		final int[][] neighbourHistogram;
+		final int[][] almostNeighbourHistogram;
 		final Overlay o;
 
 		double[] region = null;
@@ -212,6 +216,7 @@ public class DoubletAnalysis implements PlugIn
 			spotHistogram = new int[maxCount + 1];
 			resultHistogram = new int[spotHistogram.length];
 			neighbourHistogram = new int[3][spotHistogram.length];
+			almostNeighbourHistogram = new int[3][spotHistogram.length];
 			this.o = o;
 		}
 
@@ -349,6 +354,10 @@ public class DoubletAnalysis implements PlugIn
 					final int xmax = xmin + regionBounds.width - 1;
 					final int ymin = regionBounds.y;
 					final int ymax = ymin + regionBounds.height - 1;
+					final int xmin2 = xmin - fitting;
+					final int xmax2 = xmax + fitting;
+					final int ymin2 = ymin - fitting;
+					final int ymax2 = ymax + fitting;
 
 					final float heightThreshold;
 					float background = estimatedBackground;
@@ -360,17 +369,26 @@ public class DoubletAnalysis implements PlugIn
 								config.getNeighbourHeightThreshold() + background);
 
 					int neighbourCount = 0;
+					int almostNeighbourCount = 0;
 					for (int jj = 0; jj < spots.length; jj++)
 					{
 						if (j == jj)
 							continue;
+						if (spots[jj].x < xmin2 || spots[jj].x > xmax2 || spots[jj].y < ymin2 || spots[jj].y > ymax2)
+							continue;
 						if (spots[jj].x < xmin || spots[jj].x > xmax || spots[jj].y < ymin || spots[jj].y > ymax ||
 								spots[jj].intensity < heightThreshold)
-							continue;
-						neighbourIndices[neighbourCount++] = jj;
+						{
+							almostNeighbourCount++;
+						}
+						else
+						{
+							neighbourIndices[neighbourCount++] = jj;
+						}
 					}
 					final int c = DoubletAnalysis.getClass(spotMatchCount[j]);
 					neighbourHistogram[c][neighbourCount]++;
+					almostNeighbourHistogram[c][almostNeighbourCount]++;
 
 					// TODO - Fit with neighbours?
 
@@ -405,7 +423,8 @@ public class DoubletAnalysis implements PlugIn
 					final double[] params = new double[] { background, signal, 0, spot.x - regionBounds.x,
 							spot.y - regionBounds.y, 0, 0 };
 
-					final DoubletResult result = new DoubletResult(frame, spot, n, neighbourCount);
+					final DoubletResult result = new DoubletResult(frame, spot, n, neighbourCount,
+							almostNeighbourCount);
 					result.fitResult1 = gf.fit(region, width, height, 1, params, amplitudeEstimate);
 					result.iter1 = gf.getIterations();
 					result.eval1 = gf.getEvaluations();
@@ -451,7 +470,8 @@ public class DoubletAnalysis implements PlugIn
 							final int maxIterations = fitConfig.getMaxIterations();
 							final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 							fitConfig.setMaxIterations(maxIterations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
-							fitConfig.setMaxFunctionEvaluations(maxEvaluations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
+							fitConfig.setMaxFunctionEvaluations(
+									maxEvaluations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
 							gf.setComputeResiduals(false);
 							result.fitResult2 = gf.fit(region, width, height, 2, doubletParams, false);
 							gf.setComputeResiduals(true);
@@ -473,11 +493,16 @@ public class DoubletAnalysis implements PlugIn
 											result.fitResult1.getNumberOfFittedParameters());
 									result.mlic2 = Maths.getInformationCriterionFromLL(result.value2, length,
 											result.fitResult2.getNumberOfFittedParameters());
+									if (Double.isInfinite(result.mlic1)|| Double.isInfinite(result.mlic2))
+										System.out.printf("oops\n",result.mlic1, result.mlic2);
 								}
 								result.ic1 = Maths.getInformationCriterion(result.sumOfSquares1, length,
 										result.fitResult1.getNumberOfFittedParameters());
 								result.ic2 = Maths.getInformationCriterion(result.sumOfSquares2, length,
 										result.fitResult2.getNumberOfFittedParameters());
+								
+								if (Double.isInfinite(result.ic1)|| Double.isInfinite(result.ic2))
+									System.out.printf("oops\n",result.ic1, result.ic2);
 
 								final double[] newParams = result.fitResult2.getParameters();
 								for (int p = 0; p < 2; p++)
@@ -496,8 +521,15 @@ public class DoubletAnalysis implements PlugIn
 					}
 
 					// True results, i.e. where there was a choice between selecting fit results of single or doublet
-					if (result.neighbours == 0 && result.good1 && result.good2)
-						result.valid = true;
+					if (result.good1 && result.good2)
+					{
+						if (result.neighbours == 0)
+						{
+							result.valid = true;
+							if (result.almostNeighbours == 0)
+								result.valid2 = true;
+						}
+					}
 
 					results.add(result);
 				}
@@ -863,6 +895,7 @@ public class DoubletAnalysis implements PlugIn
 			}
 		}
 		threads.clear();
+		threads= null;
 
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
@@ -881,17 +914,22 @@ public class DoubletAnalysis implements PlugIn
 			double[] spotHistogram = new double[maxCount];
 			double[] resultHistogram = new double[maxCount];
 			double[][] neighbourHistogram = new double[3][maxCount];
+			double[][] almostNeighbourHistogram = new double[3][maxCount];
 			for (Worker worker : workers)
 			{
 				final int[] h1 = worker.spotHistogram;
 				final int[] h2 = worker.resultHistogram;
 				final int[][] h3 = worker.neighbourHistogram;
+				final int[][] h4 = worker.almostNeighbourHistogram;
 				for (int j = 0; j < spotHistogram.length; j++)
 				{
 					spotHistogram[j] += h1[j];
 					resultHistogram[j] += h2[j];
 					for (int k = 0; k < 3; k++)
+					{
 						neighbourHistogram[k][j] += h3[k][j];
+						almostNeighbourHistogram[k][j] += h4[k][j];
+					}
 				}
 			}
 
@@ -900,12 +938,18 @@ public class DoubletAnalysis implements PlugIn
 			showHistogram(2, neighbourHistogram[0]);
 			showHistogram(3, neighbourHistogram[1]);
 			showHistogram(4, neighbourHistogram[2]);
+			showHistogram(5, almostNeighbourHistogram[0]);
+			showHistogram(6, almostNeighbourHistogram[1]);
+			showHistogram(7, almostNeighbourHistogram[2]);
 		}
 		workers.clear();
+		workers = null;
 
 		if (overlay != null)
 			imp.setOverlay(overlay);
 
+		MemoryPeakResults.freeMemory();
+		
 		Collections.sort(results);
 		summariseResults(results);
 
@@ -942,6 +986,9 @@ public class DoubletAnalysis implements PlugIn
 
 	private void summariseResults(ArrayList<DoubletResult> results)
 	{
+		// TODO - store results in memory
+		// Run this command with a separate plugin call since fitting is what takes a long time.
+		
 		showResults(results);
 
 		createSummaryTable();
@@ -998,11 +1045,21 @@ public class DoubletAnalysis implements PlugIn
 		// - Histogram of residuals score for true doublets
 
 		// TODO - add the adjusted r squared
+		
+		// TODO - Need better control of what is plotted
+		
+		// - plot cumulative iterations for single/double fits on same graph with 99% percentile levels
 
 		final String[] names = { "Score", "SS", "Value", "IC", "MLIC", "Iter1", "Eval1", "Iter2", "Eval2" };
 		StoredDataStatistics[] stats = new StoredDataStatistics[3 * names.length];
 		for (int i = 0; i < stats.length; i++)
 			stats[i] = new StoredDataStatistics();
+
+		final String[] names2 = { "IFactor", "EFactor" };
+		StoredDataStatistics[] stats2 = new StoredDataStatistics[2];
+		for (int i = 0; i < stats2.length; i++)
+			stats2[i] = new StoredDataStatistics();
+
 		for (DoubletResult result : results)
 		{
 			final int c = result.c;
@@ -1011,21 +1068,27 @@ public class DoubletAnalysis implements PlugIn
 			if (result.valid)
 			{
 				double score = Math.max(result.score1, result.score2);
-				// We want SS2 to be lower
-				double ss = result.sumOfSquares1 - result.sumOfSquares2;
-				double v = result.value1 - result.value2;
-				// We want IC2 to be lower
-				double ic = result.ic1 - result.ic2;
-				double mlic = result.mlic1 - result.mlic2;
 				stats[c].add(score);
-				stats[c + 1 * 3].add(ss);
-				stats[c + 2 * 3].add(v);
-				stats[c + 3 * 3].add(ic);
-				stats[c + 4 * 3].add(mlic);
+				// We want SS2 to be lower
+				stats[c + 1 * 3].add(result.sumOfSquares1 - result.sumOfSquares2);
+				//stats[c + 2 * 3].add(result.value1 - result.value2);
+				// We want IC2 to be lower
+				stats[c + 3 * 3].add(result.ic1 - result.ic2);
+				stats[c + 4 * 3].add(result.mlic1 - result.mlic2);
 				stats[c + 5 * 3].add(result.iter1);
 				stats[c + 6 * 3].add(result.eval1);
 				stats[c + 7 * 3].add(result.iter2);
 				stats[c + 8 * 3].add(result.eval2);
+			}
+
+			// Of those where the IC improved, summarise the iter and eval increase
+			if (result.good1 && result.good2)
+			{
+				if (c == 0)
+				{
+					stats2[0].add((double) result.iter2 / result.iter1);
+					stats2[1].add((double) result.eval2 / result.eval1);
+				}
 			}
 		}
 
@@ -1035,12 +1098,16 @@ public class DoubletAnalysis implements PlugIn
 			sb.append(Utils.rounded(stats[c].getMean())).append("+/-")
 					.append(Utils.rounded(stats[c].getStandardDeviation())).append(" (").append(stats[c].getN())
 					.append(')').append('\t');
+		}
+		
+		for (int c = 0; c < 2; c++)
+		{
 			final int n = c + 1;
 
 			// Histograms
 			showHistogram(TITLE + " n=" + n, stats[c + 0 * 3], names[0], 0, 1);
 			showHistogram(TITLE + " n=" + n, stats[c + 1 * 3], names[1], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 2 * 3], names[2], 0, 1);
+//			showHistogram(TITLE + " n=" + n, stats[c + 2 * 3], names[2], 0, 1);
 			showHistogram(TITLE + " n=" + n, stats[c + 3 * 3], names[3], 0, 1);
 			showHistogram(TITLE + " n=" + n, stats[c + 4 * 3], names[4], 0, 1);
 			showHistogram(TITLE + " n=" + n, stats[c + 5 * 3], names[5], 0, 1);
@@ -1049,7 +1116,13 @@ public class DoubletAnalysis implements PlugIn
 			showHistogram(TITLE + " n=" + n, stats[c + 8 * 3], names[8], 0, 1);
 		}
 
-		// Scatter plot of IC verses residuals
+		for (int c = 0; c < stats2.length; c++)
+		{
+			sb.append(Utils.rounded(stats2[c].getMean())).append("+/-")
+					.append(Utils.rounded(stats2[c].getStandardDeviation())).append(" (").append(stats2[c].getN())
+					.append(')').append('\t');
+			showHistogram(TITLE, stats2[c], names2[c], 0, 1);
+		}
 
 		summaryTable.append(sb.toString());
 	}
@@ -1089,7 +1162,7 @@ public class DoubletAnalysis implements PlugIn
 
 	private String createSummaryHeader()
 	{
-		return "Molecules\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\tscore_n1\tscore_n2\tscore_nN";
+		return "Molecules\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\tscore_n1\tscore_n2\tscore_nN\tIfactor\tEfactor";
 	}
 
 	private void showResults(ArrayList<DoubletResult> results)
@@ -1110,6 +1183,7 @@ public class DoubletAnalysis implements PlugIn
 			sb.append(IJ.d2s(result.spot.intensity, 1)).append('\t');
 			sb.append(result.n).append('\t');
 			sb.append(result.neighbours).append('\t');
+			sb.append(result.almostNeighbours).append('\t');
 			sb.append(Utils.rounded(result.score1)).append('\t');
 			sb.append(Utils.rounded(result.score2)).append('\t');
 			add(sb, result.fitResult1);
@@ -1183,7 +1257,7 @@ public class DoubletAnalysis implements PlugIn
 
 	private String createResultsHeader()
 	{
-		return "Frame\tx\ty\tI\tn\tneighbours\tscore1\tscore2\tR1\tR2\tss1\tss2\tv1\tv2\tic1\tic2\tmlic1\tmlic2\ta1\ta2\tx1\ty1\tx2\ty2\ti1\ti2\te1\te2\tparams1\tparams2";
+		return "Frame\tx\ty\tI\tn\tneighbours\talmost\tscore1\tscore2\tR1\tR2\tss1\tss2\tv1\tv2\tic1\tic2\tmlic1\tmlic2\ta1\ta2\tx1\ty1\tx2\ty2\ti1\ti2\te1\te2\tparams1\tparams2";
 	}
 
 	private void runAnalysis()
