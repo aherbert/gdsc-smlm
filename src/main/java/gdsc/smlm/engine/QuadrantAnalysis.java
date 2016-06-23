@@ -36,10 +36,15 @@ public class QuadrantAnalysis
 	public int[] vector;
 	public double score;
 
-	public int x1;
-	public int y1;
-	public int x2;
-	public int y2;
+	public double x1;
+	public double y1;
+	public double x2;
+	public double y2;
+
+	public int xi1;
+	public int yi1;
+	public int xi2;
+	public int yi2;
 
 	/**
 	 * Perform quadrant analysis as per rapidSTORM
@@ -219,59 +224,71 @@ public class QuadrantAnalysis
 		if (cx < 0 || cx >= width || cy < 0 || cy >= height) // out of bounds
 			return false;
 
-		x1 = (int) Math.round(cx + vector[0] * shiftx);
-		y1 = (int) Math.round(cy + vector[1] * shifty);
-		x2 = (int) Math.round(cx - vector[0] * shiftx);
-		y2 = (int) Math.round(cy - vector[1] * shifty);
+		// Pick double coords. The input centres must be shifted to the centre of the pixel by 0.5.
+		x1 = cx + 0.5 + vector[0] * shiftx;
+		y1 = cy + 0.5 + vector[1] * shifty;
+		x2 = cx + 0.5 - vector[0] * shiftx;
+		y2 = cy + 0.5 - vector[1] * shifty;
 
 		// Check bounds
 		if (x1 < 0)
 			x1 = 0;
 		else if (x1 >= width)
-			x1 = width - 1;
+			x1 = width - 0.01;
 		if (y1 < 0)
 			y1 = 0;
 		else if (y1 >= height)
-			y1 = height - 1;
+			y1 = height - 0.01;
 		if (x2 < 0)
 			x2 = 0;
 		else if (x2 >= width)
-			x2 = width - 1;
+			x2 = width - 0.01;
 		if (y2 < 0)
 			y2 = 0;
 		else if (y2 >= height)
-			y2 = height - 1;
+			y2 = height - 0.01;
 
-		// Check the two points are not the same. 
-		if (x1 == x2 && y1 == y2)
+		xi1 = (int) (x1);
+		yi1 = (int) (y1);
+		xi2 = (int) (x2);
+		yi2 = (int) (y2);
+
+		// Check the two points are not the same pixel.
+		// This is an edge case where the shift is small.
+		if (xi1 == xi2 && yi1 == yi2)
 		{
-			// This can only happen when the shift is zero due to the round() function 
-			// moving to the next integer. If they are the same then the value should be cx,cy
+			// This can only happen when the shift is zero after rounding. 
+			// If they are the same then the value (xi1,yi1) should be cx,cy
 			// and we can move along the vector.
-			x1 += vector[0];
-			y1 += vector[1];
-			x2 -= vector[0];
-			y2 -= vector[1];
+			x1 = cx + 0.5 + vector[0];
+			y1 = cy + 0.5 + vector[1];
+			x2 = cx + 0.5 - vector[0];
+			y2 = cy + 0.5 - vector[1];
 
-			// Check bounds
+			// Check bounds again
 			if (x1 < 0)
 				x1 = 0;
 			else if (x1 >= width)
-				x1 = width - 1;
+				x1 = width - 0.01;
 			if (y1 < 0)
 				y1 = 0;
 			else if (y1 >= height)
-				y1 = height - 1;
+				y1 = height - 0.01;
 			if (x2 < 0)
 				x2 = 0;
 			else if (x2 >= width)
-				x2 = width - 1;
+				x2 = width - 0.01;
 			if (y2 < 0)
 				y2 = 0;
 			else if (y2 >= height)
-				y2 = height - 1;
-
-			return (x1 != x2 || y1 != y2);
+				y2 = height - 0.01;
+			
+			xi1 = (int) (x1);
+			yi1 = (int) (y1);
+			xi2 = (int) (x2);
+			yi2 = (int) (y2);
+			
+			return (xi1 != xi2 || yi1 != yi2);
 		}
 
 		return true;
