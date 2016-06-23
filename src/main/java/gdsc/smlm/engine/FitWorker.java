@@ -49,18 +49,28 @@ import org.apache.commons.math3.util.FastMath;
 public class FitWorker implements Runnable
 {
 	/**
+	 * The number of additional iterations to use for multiple peaks
+	 * <p>
 	 * Testings on a idealised dataset of simulated data show that multiple peaks increases the iterations
 	 * but the increase asymptotes. Initial rate is 2-fold for 7x7 region, decreasing to 1.5-fold for 17x17 region.
 	 * Best solution is to add a set of iterations for each additional peak.
 	 */
-	private static final int ITERATION_INCREASE_FOR_MULTIPLE_PEAKS = 1; // 0 for no effect
+	public static final int ITERATION_INCREASE_FOR_MULTIPLE_PEAKS = 1; // 0 for no effect
 	/**
+	 * The number of additional iterations to use for doublets
+	 * <p>
 	 * Testings on a idealised dataset of simulated data show that fitting the doublets increases the iterations by
 	 * approx 3.5-fold for 7x7 region, decreasing to 2.5-fold for 17x17 region.
 	 * An additional doubling of iterations were used when the fit of the doublet resulted in one peak being eliminated
 	 * for moving.
 	 */
 	public static final int ITERATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
+
+	/** The number of additional evaluations to use for multiple peaks */
+	public static final int EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS = 1; // 0 for no effect
+	
+	/** The number of additional evaluations to use for doublets */
+	public static final int EVALUATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
 	private Logger logger = null, logger2 = null;
 	private long time = 0;
@@ -886,14 +896,18 @@ public class FitWorker implements Runnable
 
 			// Increase the iterations for a multiple fit.
 			final int maxIterations = fitConfig.getMaxIterations();
+			final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 			fitConfig.setMaxIterations(
 					maxIterations + maxIterations * (npeaks - 1) * ITERATION_INCREASE_FOR_MULTIPLE_PEAKS);
+			fitConfig.setMaxIterations(
+					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
 			fitResult = gf.fit(region, width, height, npeaks, params, true);
 
 			printFitResults(fitResult, region, width, height, npeaks, 0, gf.getIterations());
 
 			fitConfig.setMaxIterations(maxIterations);
+			fitConfig.setMaxFunctionEvaluations(maxEvaluations);
 
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
@@ -1210,7 +1224,7 @@ public class FitWorker implements Runnable
 	{
 		return quadrantAnalysisNew(spots, candidate, fitResult, region, regionBounds);
 	}
-	
+
 	private FitResult quadrantAnalysisNew(Spot[] spots, int candidate, FitResult fitResult, double[] region,
 			Rectangle regionBounds)
 	{
@@ -1276,7 +1290,7 @@ public class FitWorker implements Runnable
 
 		fitConfig.setCoordinateShift(FastMath.min(width, height));
 		fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
-		fitConfig.setMaxFunctionEvaluations(maxEvaluations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
+		fitConfig.setMaxFunctionEvaluations(maxEvaluations * FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS);
 
 		//FitResult newFitResult = gf.fit(region, width, height, peaks, heights);
 		gf.setComputeResiduals(false);
@@ -1457,8 +1471,10 @@ public class FitWorker implements Runnable
 					// This represents drift out to fit another spot that will be fit later.
 					// Note: We can ignore already fitted spots as they will be detected by the duplicate distance.
 					// TODO: Also check existing spots if the duplicate distance is not set...
-					int cx2 = regionBounds.x + bounds.x + (int) Math.round(newParams[Gaussian2DFunction.X_POSITION + n * 6]);
-					int cy2 = regionBounds.y + bounds.y +(int) Math.round(newParams[Gaussian2DFunction.Y_POSITION + n * 6]);
+					int cx2 = regionBounds.x + bounds.x +
+							(int) Math.round(newParams[Gaussian2DFunction.X_POSITION + n * 6]);
+					int cy2 = regionBounds.y + bounds.y +
+							(int) Math.round(newParams[Gaussian2DFunction.Y_POSITION + n * 6]);
 					final int xmin = cx2 - fitting;
 					final int xmax = cx2 + fitting;
 					final int ymin = cy2 - fitting;
@@ -1476,8 +1492,11 @@ public class FitWorker implements Runnable
 								logger.info(
 										"Bad peak %d: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
 										n, spots[candidate].x, spots[candidate].y,
-										regionBounds.x + bounds.x + newParams[Gaussian2DFunction.X_POSITION + n * 6] + 0.5,
-										regionBounds.y + bounds.y + newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5, spots[i].x, spots[i].y);
+										regionBounds.x + bounds.x + newParams[Gaussian2DFunction.X_POSITION + n * 6] +
+												0.5,
+										regionBounds.y + bounds.y + newParams[Gaussian2DFunction.Y_POSITION + n * 6] +
+												0.5,
+										spots[i].x, spots[i].y);
 							}
 							// There is another candidate to be fit later that is closer
 							continue NEXT_PEAK;
@@ -1566,7 +1585,8 @@ public class FitWorker implements Runnable
 
 	// This is left for testing purposes
 	@SuppressWarnings("unused")
-	private FitResult quadrantAnalysisOld(Spot[] spots, int candidate, FitResult fitResult, double[] region, Rectangle regionBounds)
+	private FitResult quadrantAnalysisOld(Spot[] spots, int candidate, FitResult fitResult, double[] region,
+			Rectangle regionBounds)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
 		/*
