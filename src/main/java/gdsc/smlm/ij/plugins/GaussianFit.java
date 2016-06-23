@@ -667,15 +667,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (fitResult == null || fitResult.getStatus() == null)
 			return "";
 		final FitStatus status = fitResult.getStatus(); 
-		switch (status)
-		{
-			case SINGULAR_NON_LINEAR_MODEL:
-				return ": Singular model";
-			case FAILED_TO_CONVERGE:
-				return ": Failed to converge";
-			default:
-				return status.toString().toLowerCase().replace("_", " ");
-		}
+		return status.toString().toLowerCase().replace("_", " ");
 	}
 
 	private static double[] extractParams(double[] params, int i)
