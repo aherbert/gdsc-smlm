@@ -138,7 +138,7 @@ public class PCPALMFitting implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		//		if (PCPALMAnalysis.results.isEmpty())
 		//		{
 		//			IJ.error(TITLE, "Require a set of correlation curves for analysis.\n" +
@@ -916,8 +916,8 @@ public class PCPALMFitting implements PlugIn
 		PointVectorValuePair optimum;
 		try
 		{
-			optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE), new ModelFunctionJacobian(
-					new MultivariateMatrixFunction()
+			optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
+					new ModelFunctionJacobian(new MultivariateMatrixFunction()
 					{
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
@@ -948,7 +948,7 @@ public class PCPALMFitting implements PlugIn
 		double[] exp = optimum.getValue();
 		for (int i = 0; i < obs.length; i++)
 			ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-		ic1 = Maths.getInformationCriterion(ss, randomModel.size(), parameters.length);
+		ic1 = Maths.getAkaikeInformationCriterionFromResiduals(ss, randomModel.size(), parameters.length);
 
 		final double fitSigmaS = parameters[0];
 		final double fitProteinDensity = parameters[1];
@@ -1106,9 +1106,9 @@ public class PCPALMFitting implements PlugIn
 					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 				if (ss < constrainedSolution.getValue())
 				{
-					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", clusteredModel.getName(), Utils.rounded(
-							constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(100 *
-							(constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
+					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", clusteredModel.getName(),
+							Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(
+									100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
 					parameters = lvmSolution.getPoint();
 				}
 			}
@@ -1134,7 +1134,7 @@ public class PCPALMFitting implements PlugIn
 		double[] exp = clusteredModel.value(parameters);
 		for (int i = 0; i < obs.length; i++)
 			ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-		ic2 = Maths.getInformationCriterion(ss, clusteredModel.size(), parameters.length);
+		ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, clusteredModel.size(), parameters.length);
 
 		final double fitSigmaS = parameters[0];
 		final double fitProteinDensity = parameters[1];
@@ -1199,8 +1199,8 @@ public class PCPALMFitting implements PlugIn
 	{
 		// Create the functions to optimise
 		ObjectiveFunction objective = new ObjectiveFunction(new SumOfSquaresMultivariateFunction(function));
-		ObjectiveFunctionGradient gradient = new ObjectiveFunctionGradient(new SumOfSquaresMultivariateVectorFunction(
-				function));
+		ObjectiveFunctionGradient gradient = new ObjectiveFunctionGradient(
+				new SumOfSquaresMultivariateVectorFunction(function));
 
 		final boolean debug = false;
 
@@ -1222,9 +1222,10 @@ public class PCPALMFitting implements PlugIn
 					stepLength[i] = (uB[i] - lB[i]) * 0.3333333;
 
 				// The GoalType is always minimise so no need to pass this in
-				optimum = opt.optimize(maxEvaluations, gradient, objective, new InitialGuess(
-						(optimum == null) ? initialSolution : optimum.getPointRef()), new SimpleBounds(lB, uB),
-						new BFGSOptimizer.GradientTolerance(relativeThreshold), new BFGSOptimizer.StepLength(stepLength));
+				optimum = opt.optimize(maxEvaluations, gradient, objective,
+						new InitialGuess((optimum == null) ? initialSolution : optimum.getPointRef()),
+						new SimpleBounds(lB, uB), new BFGSOptimizer.GradientTolerance(relativeThreshold),
+						new BFGSOptimizer.StepLength(stepLength));
 				if (debug)
 					System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(), opt.getEvaluations());
 			}
@@ -1259,8 +1260,8 @@ public class PCPALMFitting implements PlugIn
 		for (int i = 0; i < lB.length; i++)
 			range[i] = (uB[i] - lB[i]) / 3;
 		OptimizationData sigma = new CMAESOptimizer.Sigma(range);
-		OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
-				.log(initialSolution.length))));
+		OptimizationData popSize = new CMAESOptimizer.PopulationSize(
+				(int) (4 + Math.floor(3 * Math.log(initialSolution.length))));
 		SimpleBounds bounds = new SimpleBounds(lB, uB);
 
 		opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
@@ -1411,15 +1412,16 @@ public class PCPALMFitting implements PlugIn
 					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 				if (ss < constrainedSolution.getValue())
 				{
-					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", emulsionModel.getName(), Utils.rounded(
-							constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(100 *
-							(constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
+					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", emulsionModel.getName(),
+							Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(
+									100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
 					parameters = lvmSolution.getPoint();
 				}
 			}
 			catch (TooManyIterationsException e)
 			{
-				log("Failed to re-fit %s: Too many iterations (%d)", emulsionModel.getName(), optimizer.getIterations());
+				log("Failed to re-fit %s: Too many iterations (%d)", emulsionModel.getName(),
+						optimizer.getIterations());
 			}
 			catch (ConvergenceException e)
 			{
@@ -1438,7 +1440,7 @@ public class PCPALMFitting implements PlugIn
 		double[] exp = emulsionModel.value(parameters);
 		for (int i = 0; i < obs.length; i++)
 			ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
-		ic3 = Maths.getInformationCriterion(ss, emulsionModel.size(), parameters.length);
+		ic3 = Maths.getAkaikeInformationCriterionFromResiduals(ss, emulsionModel.size(), parameters.length);
 
 		final double fitSigmaS = parameters[0];
 		final double fitProteinDensity = parameters[1];
@@ -1810,8 +1812,8 @@ public class PCPALMFitting implements PlugIn
 				final double value = lastValue[i] = evaluate(r, sigma, density, range, amplitude);
 				for (int j = 0; j < variables.length; j++)
 				{
-					final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j], amplitude +
-							d[3][j]);
+					final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j],
+							amplitude + d[3][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
 			}
@@ -2139,8 +2141,8 @@ public class PCPALMFitting implements PlugIn
 				final double value = lastValue[i] = evaluate(r, sigma, density, range, amplitude, alpha);
 				for (int j = 0; j < variables.length; j++)
 				{
-					final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j], amplitude +
-							d[3][j], alpha + d[4][j]);
+					final double value2 = evaluate(r, sigma + d[0][j], density + d[1][j], range + d[2][j],
+							amplitude + d[3][j], alpha + d[4][j]);
 					jacobian[i][j] = (value2 - value) / d[j][j];
 				}
 			}

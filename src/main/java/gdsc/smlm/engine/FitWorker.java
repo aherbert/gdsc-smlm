@@ -1326,8 +1326,8 @@ public class FitWorker implements Runnable
 			{
 				// This is computed directly by the maximum likelihood estimator
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getInformationCriterionFromLL(singleValue, length, fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getInformationCriterionFromLL(doubleValue, length,
+				ic1 = Maths.getAkaikeInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getAkaikeInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares, MLE (AIC) : %f, %f (%f) => %f, %f (%f) : %f",
@@ -1338,9 +1338,9 @@ public class FitWorker implements Runnable
 				// If using the least squares estimator then we can get the log likelihood from an approximation
 				// (TODO - we could build a likelihood function using a Poisson model. This may be better than 
 				// the approximation from the residuals)
-				ic1 = Maths.getInformationCriterion(singleSumOfSquares, length,
+				ic1 = Maths.getAkaikeInformationCriterionFromResiduals(singleSumOfSquares, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getInformationCriterion(doubleSumOfSquares, length,
+				ic2 = Maths.getAkaikeInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f",
@@ -1854,8 +1854,8 @@ public class FitWorker implements Runnable
 			{
 				// This is computed directly by the maximum likelihood estimator
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getInformationCriterionFromLL(singleValue, length, fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getInformationCriterionFromLL(doubleValue, length,
+				ic1 = Maths.getAkaikeInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getAkaikeInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares, MLE (AIC) : %f, %f (%f) => %f, %f (%f) : %f",
@@ -1866,9 +1866,9 @@ public class FitWorker implements Runnable
 				// If using the least squares estimator then we can get the log likelihood from an approximation
 				// (TODO - we could build a likelihood function using a Poisson model. This may be better than 
 				// the approximation from the residuals)
-				ic1 = Maths.getInformationCriterion(singleSumOfSquares, length,
+				ic1 = Maths.getAkaikeInformationCriterionFromResiduals(singleSumOfSquares, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getInformationCriterion(doubleSumOfSquares, length,
+				ic2 = Maths.getAkaikeInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
 					logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f",

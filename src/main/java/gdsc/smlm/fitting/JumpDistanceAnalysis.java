@@ -334,7 +334,7 @@ public class JumpDistanceAnalysis
 
 				double[] fitParams = lvmSolution.getPointRef();
 				ss = calculateSumOfSquares(function.getY(), lvmSolution.getValueRef());
-				lastIC = ic = Maths.getInformationCriterion(ss, function.x.length, 1);
+				lastIC = ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
@@ -535,7 +535,7 @@ public class JumpDistanceAnalysis
 		}
 
 		// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-		ic = Maths.getInformationCriterion(ss, function.x.length, fitParams.length - 1);
+		ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, fitParams.length - 1);
 
 		double[] d = new double[n];
 		double[] f = new double[n];
@@ -803,7 +803,7 @@ public class JumpDistanceAnalysis
 
 				double[] fitParams = solution.getPointRef();
 				ll = solution.getValue();
-				lastIC = ic = Maths.getInformationCriterionFromLL(ll, jumpDistances.length, 1);
+				lastIC = ic = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
@@ -969,7 +969,7 @@ public class JumpDistanceAnalysis
 		ll = constrainedSolution.getValue();
 
 		// Since the fractions must sum to one we subtract 1 degree of freedom from the number of parameters
-		ic = Maths.getInformationCriterionFromLL(ll, jumpDistances.length, fitParams.length - 1);
+		ic = Maths.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
 
 		double[] d = new double[n];
 		double[] f = new double[n];

@@ -1221,7 +1221,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			for (int i = 0; i < obs.length; i++)
 				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-			ic = Maths.getInformationCriterion(ss, obs.length, 1);
+			ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, obs.length, 1);
 
 			double gradient = lvmSolution.getPoint()[0];
 			D = gradient / 4;
@@ -1262,7 +1262,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			for (int i = 0; i < obs.length; i++)
 				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-			double ic2 = Maths.getInformationCriterion(ss, obs.length, 2);
+			double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, obs.length, 2);
 			double gradient = lvmSolution.getPoint()[0];
 			final double s = lvmSolution.getPoint()[1];
 			double intercept2 = 4 * s * s;
@@ -1325,7 +1325,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				for (int i = 0; i < obs.length; i++)
 					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-				double ic2 = Maths.getInformationCriterion(ss, obs.length, 2);
+				double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, obs.length, 2);
 				double gradient = lvmSolution.getPoint()[0];
 				final double s = lvmSolution.getPoint()[1];
 				double intercept2 = 4 * s * s - gradient / 3;
