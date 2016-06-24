@@ -65,7 +65,6 @@ import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
-// TODO: Auto-generated Javadoc
 /**
  * Fits spots created by CreateData plugin.
  * <p>
@@ -75,20 +74,10 @@ import ij.text.TextWindow;
  */
 public class DoubletAnalysis implements PlugIn
 {
-
-	/** The Constant TITLE. */
 	private static final String TITLE = "Doublet Analysis";
-
-	/** The fit config. */
 	static FitConfiguration fitConfig;
-
-	/** The config. */
 	private static FitEngineConfiguration config;
-
-	/** The cal. */
 	private static Calibration cal;
-
-	/** The last id. */
 	private static int lastId = 0;
 	static
 	{
@@ -115,42 +104,26 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setComputeResiduals(true);
 	}
 
-	/** The show overlay. */
 	private static boolean showOverlay = false;
-
-	/** The show histograms. */
 	private static boolean showHistograms = false;
-
-	/** The show results. */
 	private static boolean showResults = true;
+	private static boolean analysisShowResults = false;
+	private static boolean showJaccardPlot = true;
 
-	/** The results table. */
-	private static TextWindow summaryTable = null, resultsTable = null;
-
-	/** The doublet results. */
+	private static TextWindow summaryTable = null, resultsTable = null, analysisTable = null;
 	private static ArrayList<DoubletResult> doubletResults;
-
-	/** The imp. */
 	private ImagePlus imp;
-
-	/** The results. */
 	private MemoryPeakResults results;
-
-	/** The simulation parameters. */
 	private CreateData.SimulationParameters simulationParameters;
 
-	/** The Constant NAMES. */
 	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
 			"Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
 			"Multiples:Neighbours", "Singles:Almost", "Doublets:Almost", "Multiples:Almost"
 
 	};
-
-	/** The Constant NAMES2. */
 	private static final String[] NAMES2 = { "Score n=1", "Score n=2", "Score n=N", "Iter n=1", "Eval n=1", "Iter n>1",
 			"Eval n>1" };
 
-	/** The display histograms. */
 	private static boolean[] displayHistograms = new boolean[NAMES.length + NAMES2.length];
 	static
 	{
@@ -158,7 +131,6 @@ public class DoubletAnalysis implements PlugIn
 			displayHistograms[i] = true;
 	}
 
-	/** The window organiser. */
 	private WindowOrganiser windowOrganiser = new WindowOrganiser();
 
 	/**
@@ -935,19 +907,19 @@ public class DoubletAnalysis implements PlugIn
 			simulationParameters = CreateData.simulationParameters;
 			if (simulationParameters == null)
 			{
-				IJ.error(TITLE, "No benchmark spot parameters in memory");
+				IJ.error(TITLE, "No simulation parameters in memory");
 				return;
 			}
 			imp = CreateData.getImage();
 			if (imp == null)
 			{
-				IJ.error(TITLE, "No benchmark image");
+				IJ.error(TITLE, "No simulation image");
 				return;
 			}
 			results = MemoryPeakResults.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
 			if (results == null)
 			{
-				IJ.error(TITLE, "No benchmark results in memory");
+				IJ.error(TITLE, "No simulation results in memory");
 				return;
 			}
 
@@ -998,6 +970,7 @@ public class DoubletAnalysis implements PlugIn
 		gd.addCheckbox("Show_overlay", showOverlay);
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Show_results", showResults);
+		gd.addCheckbox("Show_Jaccard_Plot", showJaccardPlot);
 
 		gd.showDialog();
 
@@ -1016,6 +989,7 @@ public class DoubletAnalysis implements PlugIn
 		showOverlay = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
 		showResults = gd.getNextBoolean();
+		showJaccardPlot = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
@@ -1090,6 +1064,8 @@ public class DoubletAnalysis implements PlugIn
 	 */
 	private void run()
 	{
+		doubletResults = null;
+
 		final ImageStack stack = imp.getImageStack();
 
 		// Get the coordinates per frame
@@ -1260,14 +1236,16 @@ public class DoubletAnalysis implements PlugIn
 		// Store results in memory for later analysis
 		doubletResults = results;
 
-		showResults(results);
+		showResults(results, showResults);
 
 		createSummaryTable();
 
 		StringBuilder sb = new StringBuilder();
 
+		final int n = countN(results);
+
 		// Create the benchmark settings and the fitting settings
-		final int n = this.results.size();
+		sb.append(this.results.size()).append("\t");
 		sb.append(n).append("\t");
 		sb.append(Utils.rounded(simulationParameters.minSignal)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.maxSignal)).append("\t");
@@ -1313,7 +1291,7 @@ public class DoubletAnalysis implements PlugIn
 			stats[i] = new StoredDataStatistics();
 
 		// For Jaccard scoring we need to count the single fits that worked, but failed as a doublet fit
-		double tp = 0;
+		int tp = 0;
 		for (DoubletResult result : results)
 		{
 			final int c = result.c;
@@ -1330,11 +1308,13 @@ public class DoubletAnalysis implements PlugIn
 				tp++;
 			}
 
-			// Of those where the IC improved, summarise the iter and eval increase
+			// Of those where the fit was good, summarise the iterations and evalulations
 			if (result.good1)
 			{
 				stats[3].add(result.iter1);
 				stats[4].add(result.eval1);
+				// Summarise only those which are a valid doublet. We do not really care
+				// about the iteration increase for singles that are not doublets.
 				if (c != 0 && result.good2)
 				{
 					stats[5].add(result.iter2);
@@ -1354,7 +1334,7 @@ public class DoubletAnalysis implements PlugIn
 					.append(Utils.rounded(stats[c].getStandardDeviation())).append(" (").append(stats[c].getN())
 					.append(") ").append(Utils.rounded(p.evaluate(values))).append('\t');
 
-			if (displayHistograms[c + NAMES.length])
+			if (showHistograms && displayHistograms[c + NAMES.length])
 				showHistogram(values, NAMES2[c]);
 		}
 
@@ -1368,17 +1348,57 @@ public class DoubletAnalysis implements PlugIn
 			data.add(new DoubletBonus(r, 1, 0));
 		for (double r : stats[2].getValues())
 			data.add(new DoubletBonus(r, 1, 0));
+
+		// Initialise the score for residuals 0
+		tp += stats[0].getN() + (stats[1].getN() + stats[2].getN()) * 2;
+		int fp = stats[0].getN();
+
+		double[] j = computeJaccard(data, tp, fp, n, showJaccardPlot);
+
+		sb.append(Utils.rounded(j[0])).append('\t').append(Utils.rounded(j[1]));
+		summaryTable.append(sb.toString());
+	}
+
+	/**
+	 * Compute the total number of true results that all the candidates could have fit, including singles, doublets and
+	 * multiples.
+	 * 
+	 * @param results
+	 *            the doublet fitting results
+	 * @return the total localisation results we could have fit
+	 */
+	private int countN(ArrayList<DoubletResult> results)
+	{
+		int n = 0;
+		for (DoubletResult r : results)
+			n += r.n;
+		return n;
+	}
+
+	/**
+	 * Compute maximum jaccard for all the residuals thresholds.
+	 *
+	 * @param data
+	 *            the data
+	 * @param tp
+	 *            the true positives at residuals = 0
+	 * @param fp
+	 *            the false positives at residuals = 0
+	 * @param n
+	 *            the number of true positives at residuals = 0
+	 * @param showPlot
+	 *            the show plot
+	 * @return the double[]
+	 */
+	private double[] computeJaccard(ArrayList<DoubletBonus> data, double tp, int fp, int n, boolean showPlot)
+	{
 		// Add data at ends to complete the residuals scale from 0 to 1
 		data.add(new DoubletBonus(0, 0, 0));
 		data.add(new DoubletBonus(1, 0, 0));
 		Collections.sort(data);
 
-		double[] x = new double[data.size() + 2];
-		double[] jaccard = new double[x.length];
-
-		// Initialise the score for residuals 0
-		tp += stats[0].getN() + (stats[1].getN() + stats[2].getN()) * 2;
-		int fp = stats[0].getN();
+		double[] residuals = new double[data.size() + 2];
+		double[] jaccard = new double[residuals.length];
 
 		int count = 0;
 		double last = 0;
@@ -1387,7 +1407,7 @@ public class DoubletAnalysis implements PlugIn
 		{
 			if (last != b.r)
 			{
-				x[count] = last;
+				residuals[count] = last;
 				jaccard[count] = tp / (n + fp);
 				if (jaccard[maxi] < jaccard[count])
 					maxi = count;
@@ -1397,21 +1417,24 @@ public class DoubletAnalysis implements PlugIn
 			fp -= b.fp;
 			last = b.r;
 		}
-		x[count] = last;
+		residuals[count] = last;
 		jaccard[count] = tp / (n + fp);
 		if (jaccard[maxi] < jaccard[count])
 			maxi = count;
 		count++;
-		x = Arrays.copyOf(x, count);
-		jaccard = Arrays.copyOf(jaccard, count);
 
-		String title = TITLE + " Jaccard";
-		Plot plot = new Plot(title, "Score", "Jaccard", x, jaccard);
-		plot.setLimits(0, 1, 0, Maths.maxDefault(0.01, jaccard) * 1.05);
-		display(title, plot);
-		
-		sb.append(Utils.rounded(jaccard[maxi])).append('\t').append(Utils.rounded(x[maxi]));
-		summaryTable.append(sb.toString());
+		if (showPlot)
+		{
+			residuals = Arrays.copyOf(residuals, count);
+			jaccard = Arrays.copyOf(jaccard, count);
+
+			String title = TITLE + " Jaccard";
+			Plot plot = new Plot(title, "Score", "Jaccard", residuals, jaccard);
+			plot.setLimits(0, 1, 0, Maths.maxDefault(0.01, jaccard) * 1.05);
+			display(title, plot);
+		}
+
+		return new double[] { jaccard[maxi], residuals[maxi] };
 	}
 
 	/**
@@ -1464,7 +1487,7 @@ public class DoubletAnalysis implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(
-				"Molecules\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
+				"Molecules\tMatched\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
 		sb.append("\tMax J\t@score");
@@ -1477,9 +1500,9 @@ public class DoubletAnalysis implements PlugIn
 	 * @param results
 	 *            the results
 	 */
-	private void showResults(ArrayList<DoubletResult> results)
+	private void showResults(ArrayList<DoubletResult> results, boolean show)
 	{
-		if (!showResults)
+		if (!show)
 			return;
 
 		createResultsTable();
@@ -1603,5 +1626,100 @@ public class DoubletAnalysis implements PlugIn
 	 */
 	private void runAnalysis()
 	{
+		if (doubletResults == null)
+		{
+			IJ.error(TITLE, "No doublet results in memory");
+			return;
+		}
+
+		// Ask the user to set filters
+		if (!showAnalysisDialog())
+			return;
+
+		showResults(doubletResults, analysisShowResults);
+
+		// Store the effect of fitting as a doublet
+		ArrayList<DoubletBonus> data = new ArrayList<DoubletBonus>(doubletResults.size());
+		// True positive and False positives at residuals = 0
+		int tp = 0;
+		int fp = 0;
+		int n = 0;
+
+		// Process all the results
+		for (DoubletResult r : doubletResults)
+		{
+			n += r.n;
+
+			// Filter the singles that would be accepted
+
+			// Filter the doublets that would be accepted
+
+			// Store this as a doublet bonus
+		}
+
+		// Compute the max Jaccard
+		double[] j = computeJaccard(data, tp, fp, n, showJaccardPlot);
+
+		createAnalysisTable();
+		
+		StringBuilder sb = new StringBuilder("Filter settings\t");
+		sb.append(Utils.rounded(j[0])).append('\t').append(Utils.rounded(j[1]));
+		analysisTable.append(sb.toString());
+	}
+
+	/**
+	 * Show dialog.
+	 *
+	 * @return true, if successful
+	 */
+	private boolean showAnalysisDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		gd.addMessage("Filters the doublet fits and reports the performance increase");
+
+		// Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
+
+		// Collect options for filtering
+
+		// Collect display options
+		gd.addCheckbox("Show_results", analysisShowResults);
+		gd.addCheckbox("Show_Jaccard_Plot", showJaccardPlot);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		analysisShowResults = gd.getNextBoolean();
+		showJaccardPlot = gd.getNextBoolean();
+
+		if (gd.invalidNumber())
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * Creates the analysis table.
+	 */
+	private void createAnalysisTable()
+	{
+		if (analysisTable == null || !analysisTable.isVisible())
+		{
+			analysisTable = new TextWindow(TITLE + " Analysis", createAnalysisHeader(), "", 1000, 300);
+			analysisTable.setVisible(true);
+		}
+	}
+
+	/**
+	 * Creates the analysis header.
+	 *
+	 * @return the string
+	 */
+	private String createAnalysisHeader()
+	{
+		return "Filters ...\tMax J\t@score";
 	}
 }
