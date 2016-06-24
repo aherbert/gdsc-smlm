@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.analysis.integration.TrapezoidIntegrator;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
 
@@ -1287,7 +1291,7 @@ public class DoubletAnalysis implements PlugIn
 		// Store results in memory for later analysis
 		doubletResults = results;
 		numberOfMolecules = this.results.size();
-		
+
 		// Store details we want in the analysis table
 		StringBuilder sb = new StringBuilder();
 		sb.append(Utils.rounded(getSa() * simulationParameters.a)).append("\t");
@@ -1307,9 +1311,9 @@ public class DoubletAnalysis implements PlugIn
 		else
 			sb.append("\t\t");
 		analysisPrefix = sb.toString();
-		
+
 		// -=-=-=-=-
-		
+
 		showResults(results, showResults);
 
 		createSummaryTable();
@@ -1390,7 +1394,7 @@ public class DoubletAnalysis implements PlugIn
 					fp += result.fp1;
 				}
 			}
-			
+
 			// Build statistics
 			final int c = result.c;
 
@@ -1399,7 +1403,7 @@ public class DoubletAnalysis implements PlugIn
 			{
 				stats[c].add(score);
 			}
-			
+
 			// Of those where the fit was good, summarise the iterations and evalulations
 			if (result.good1)
 			{
@@ -1444,8 +1448,8 @@ public class DoubletAnalysis implements PlugIn
 		if (showJaccardPlot)
 			plotJaccard(residuals, jaccard, maxJaccardIndex, null, null, 0);
 
-		sb.append(Utils.rounded(jaccard[maxJaccardIndex])).append('\t')
-				.append(Utils.rounded(residuals[maxJaccardIndex]));
+		addJaccardScores(sb);
+
 		summaryTable.append(sb.toString());
 	}
 
@@ -1588,7 +1592,7 @@ public class DoubletAnalysis implements PlugIn
 				"Molecules\tMatched\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("\tMax J\t@score");
+		sb.append("\tMax J\t@score\tArea 0.15\tArea 0.3\tArea");
 		return sb.toString();
 	}
 
@@ -1748,8 +1752,7 @@ public class DoubletAnalysis implements PlugIn
 		int fp = 0;
 
 		// TODO - Get filters for the single and double fits
-		
-		
+
 		// Process all the results
 		for (DoubletResult result : doubletResults)
 		{
@@ -1759,7 +1762,7 @@ public class DoubletAnalysis implements PlugIn
 			if (result.good1)
 			{
 				// Filter the doublets that would be accepted
-				if (result.good2 && result.bic2 < result.bic1)
+				if (result.good2 && result.mbic2 < result.mbic1)
 				{
 					tp += result.tp2;
 					fp += result.fp2;
@@ -1785,9 +1788,60 @@ public class DoubletAnalysis implements PlugIn
 
 		StringBuilder sb = new StringBuilder(analysisPrefix);
 		sb.append("Filter settings\t");
+
+		addJaccardScores(sb);
+
+		analysisTable.append(sb.toString());
+	}
+
+	private void addJaccardScores(StringBuilder sb)
+	{
 		sb.append(Utils.rounded(jaccard[maxJaccardIndex])).append('\t')
 				.append(Utils.rounded(residuals[maxJaccardIndex]));
-		analysisTable.append(sb.toString());
+		sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.15)));
+		sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.3)));
+		sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 1)));
+	}
+
+	private double getArea(double[] residuals, double[] jaccard, int maxJaccardIndex, double window)
+	{
+		double lower = Math.max(0, residuals[maxJaccardIndex] - window);
+		double upper = Math.min(1, residuals[maxJaccardIndex] + window);
+		LinearInterpolator li = new LinearInterpolator();
+		PolynomialSplineFunction fun = li.interpolate(residuals, jaccard);
+		TrapezoidIntegrator in = new TrapezoidIntegrator();
+		double sum = 0;
+
+		try
+		{
+			sum = in.integrate(1000, fun, lower, upper);
+		}
+		catch (TooManyEvaluationsException e)
+		{
+			int j = maxJaccardIndex;
+			for (int i = j; i-- > 0;)
+			{
+				if (residuals[i] < lower)
+				{
+					lower = residuals[j];
+					break;
+				}
+				sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[j] - residuals[i]);
+				j = i;
+			}
+			j = maxJaccardIndex;
+			for (int i = j; ++i < jaccard.length;)
+			{
+				if (residuals[i] > upper)
+				{
+					upper = residuals[j];
+					break;
+				}
+				sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[i] - residuals[j]);
+				j = i;
+			}
+		}
+		return sum / (upper - lower);
 	}
 
 	/**
@@ -1843,6 +1897,6 @@ public class DoubletAnalysis implements PlugIn
 	 */
 	private String createAnalysisHeader()
 	{
-		return "s\tWidth\tMethod\tOptions\tFilters...\tMax J\t@score";
+		return "s\tWidth\tMethod\tOptions\tFilters...\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
 	}
 }
