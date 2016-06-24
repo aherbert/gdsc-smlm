@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
@@ -56,6 +57,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Overlay;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.PointRoi;
@@ -63,6 +65,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
 
+// TODO: Auto-generated Javadoc
 /**
  * Fits spots created by CreateData plugin.
  * <p>
@@ -72,11 +75,20 @@ import ij.text.TextWindow;
  */
 public class DoubletAnalysis implements PlugIn
 {
+
+	/** The Constant TITLE. */
 	private static final String TITLE = "Doublet Analysis";
 
+	/** The fit config. */
 	static FitConfiguration fitConfig;
+
+	/** The config. */
 	private static FitEngineConfiguration config;
+
+	/** The cal. */
 	private static Calibration cal;
+
+	/** The last id. */
 	private static int lastId = 0;
 	static
 	{
@@ -103,52 +115,160 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setComputeResiduals(true);
 	}
 
+	/** The show overlay. */
 	private static boolean showOverlay = false;
+
+	/** The show histograms. */
 	private static boolean showHistograms = false;
+
+	/** The show results. */
 	private static boolean showResults = true;
 
+	/** The results table. */
 	private static TextWindow summaryTable = null, resultsTable = null;
 
+	/** The doublet results. */
+	private static ArrayList<DoubletResult> doubletResults;
+
+	/** The imp. */
 	private ImagePlus imp;
+
+	/** The results. */
 	private MemoryPeakResults results;
+
+	/** The simulation parameters. */
 	private CreateData.SimulationParameters simulationParameters;
 
+	/** The Constant NAMES. */
 	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
 			"Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
 			"Multiples:Neighbours", "Singles:Almost", "Doublets:Almost", "Multiples:Almost"
 
 	};
 
-	private static boolean[] displayHistograms = new boolean[NAMES.length];
+	/** The Constant NAMES2. */
+	private static final String[] NAMES2 = { "Score n=1", "Score n=2", "Score n=N", "Iter n=1", "Eval n=1", "Iter n>1",
+			"Eval n>1" };
+
+	/** The display histograms. */
+	private static boolean[] displayHistograms = new boolean[NAMES.length + NAMES2.length];
 	static
 	{
 		for (int i = 0; i < displayHistograms.length; i++)
 			displayHistograms[i] = true;
 	}
 
+	/** The window organiser. */
 	private WindowOrganiser windowOrganiser = new WindowOrganiser();
+
+	/**
+	 * Allows plotting the bonus from fitting all spots at a given residuals threshold
+	 */
+	public class DoubletBonus implements Comparable<DoubletBonus>
+	{
+		final double r;
+		final int tp, fp;
+
+		/**
+		 * Instantiates a new doublet bonus.
+		 *
+		 * @param r
+		 *            the r
+		 * @param tp
+		 *            the additional true positives if this was accepted as a doublet
+		 * @param fp
+		 *            the additional false positives if this was accepted as a doublet
+		 */
+		public DoubletBonus(double r, int tp, int fp)
+		{
+			this.r = r;
+			this.tp = tp;
+			this.fp = fp;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		public int compareTo(DoubletBonus that)
+		{
+			if (this.r < that.r)
+				return -1;
+			if (this.r > that.r)
+				return 1;
+			return 0;
+		}
+	}
 
 	/**
 	 * Stores results from single and doublet fitting.
 	 */
 	public class DoubletResult implements Comparable<DoubletResult>
 	{
+
+		/** The frame. */
 		final int frame;
+
+		/** The spot. */
 		final Spot spot;
+
+		/** The almost neighbours. */
 		final int n, c, neighbours, almostNeighbours;
+
+		/** The fit result1. */
 		FitResult fitResult1 = null;
+
+		/** The fit result2. */
 		FitResult fitResult2 = null;
+
+		/** The sum of squares2. */
 		double sumOfSquares1, sumOfSquares2;
+
+		/** The r2. */
+		double r1, r2;
+
+		/** The value2. */
 		double value1, value2;
+
+		/** The score2. */
 		double score1, score2;
+
+		/** The mlic2. */
 		double mlic1, mlic2;
+
+		/** The ic2. */
 		double ic1, ic2;
+
+		/** The xshift. */
 		double[] xshift = new double[2];
+
+		/** The yshift. */
 		double[] yshift = new double[2];
+
+		/** The a. */
 		double[] a = new double[2];
+
+		/** The eval2. */
 		int iter1, iter2, eval1, eval2;
+
+		/** The valid2. */
 		boolean good1, good2, valid, valid2;
 
+		/**
+		 * Instantiates a new doublet result.
+		 *
+		 * @param frame
+		 *            the frame
+		 * @param spot
+		 *            the spot
+		 * @param n
+		 *            the n
+		 * @param neighbours
+		 *            the neighbours
+		 * @param almostNeighbours
+		 *            the almost neighbours
+		 */
 		public DoubletResult(int frame, Spot spot, int n, int neighbours, int almostNeighbours)
 		{
 			this.frame = frame;
@@ -159,6 +279,11 @@ public class DoubletAnalysis implements PlugIn
 			this.almostNeighbours = almostNeighbours;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
 		public int compareTo(DoubletResult that)
 		{
 			int r = this.frame - that.frame;
@@ -173,30 +298,78 @@ public class DoubletAnalysis implements PlugIn
 	}
 
 	/**
-	 * Used to allow multi-threading of the fitting method
+	 * Used to allow multi-threading of the fitting method.
 	 */
 	private class Worker implements Runnable
 	{
+
+		/** The finished. */
 		volatile boolean finished = false;
+
+		/** The jobs. */
 		final BlockingQueue<Integer> jobs;
+
+		/** The stack. */
 		final ImageStack stack;
+
+		/** The actual coordinates. */
 		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
+
+		/** The fitting. */
 		final int fitting;
+
+		/** The fit config. */
 		final FitConfiguration fitConfig;
+
+		/** The spot filter. */
 		final MaximaSpotFilter spotFilter;
+
+		/** The gf. */
 		final Gaussian2DFitter gf;
 
+		/** The relative intensity. */
 		final boolean relativeIntensity;
+
+		/** The limit. */
 		final double limit;
+
+		/** The result histogram. */
 		final int[] spotHistogram, resultHistogram;
+
+		/** The neighbour histogram. */
 		final int[][] neighbourHistogram;
+
+		/** The almost neighbour histogram. */
 		final int[][] almostNeighbourHistogram;
+
+		/** The o. */
 		final Overlay o;
 
+		/** The region. */
 		double[] region = null;
+
+		/** The data. */
 		float[] data = null;
+
+		/** The results. */
 		ArrayList<DoubletResult> results = new ArrayList<DoubletResult>();
 
+		/**
+		 * Instantiates a new worker.
+		 *
+		 * @param jobs
+		 *            the jobs
+		 * @param stack
+		 *            the stack
+		 * @param actualCoordinates
+		 *            the actual coordinates
+		 * @param fitConfig
+		 *            the fit config
+		 * @param maxCount
+		 *            the max count
+		 * @param o
+		 *            the o
+		 */
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
 				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, int maxCount,
 				Overlay o)
@@ -248,6 +421,12 @@ public class DoubletAnalysis implements PlugIn
 			}
 		}
 
+		/**
+		 * Run.
+		 *
+		 * @param frame
+		 *            the frame
+		 */
 		private void run(int frame)
 		{
 			if (Utils.isInterrupted())
@@ -469,9 +648,9 @@ public class DoubletAnalysis implements PlugIn
 							// Increase the iterations level then reset afterwards.
 							final int maxIterations = fitConfig.getMaxIterations();
 							final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
-							fitConfig.setMaxIterations(maxIterations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
+							fitConfig.setMaxIterations(maxIterations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS * 2);
 							fitConfig.setMaxFunctionEvaluations(
-									maxEvaluations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS);
+									maxEvaluations * FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS * 2);
 							gf.setComputeResiduals(false);
 							result.fitResult2 = gf.fit(region, width, height, 2, doubletParams, false);
 							gf.setComputeResiduals(true);
@@ -493,16 +672,22 @@ public class DoubletAnalysis implements PlugIn
 											result.fitResult1.getNumberOfFittedParameters());
 									result.mlic2 = Maths.getInformationCriterionFromLL(result.value2, length,
 											result.fitResult2.getNumberOfFittedParameters());
-									if (Double.isInfinite(result.mlic1)|| Double.isInfinite(result.mlic2))
-										System.out.printf("oops\n",result.mlic1, result.mlic2);
+									if (Double.isInfinite(result.mlic1) || Double.isInfinite(result.mlic2))
+										System.out.printf("oops\n", result.mlic1, result.mlic2);
 								}
 								result.ic1 = Maths.getInformationCriterion(result.sumOfSquares1, length,
 										result.fitResult1.getNumberOfFittedParameters());
 								result.ic2 = Maths.getInformationCriterion(result.sumOfSquares2, length,
 										result.fitResult2.getNumberOfFittedParameters());
-								
-								if (Double.isInfinite(result.ic1)|| Double.isInfinite(result.ic2))
-									System.out.printf("oops\n",result.ic1, result.ic2);
+								result.r1 = Maths.getAdjustedCoefficientOfDetermination(result.sumOfSquares1,
+										gf.getTotalSumOfSquares(), length,
+										result.fitResult1.getNumberOfFittedParameters());
+								result.r2 = Maths.getAdjustedCoefficientOfDetermination(result.sumOfSquares2,
+										gf.getTotalSumOfSquares(), length,
+										result.fitResult2.getNumberOfFittedParameters());
+
+								if (Double.isInfinite(result.ic1) || Double.isInfinite(result.ic2))
+									System.out.printf("oops\n", result.ic1, result.ic2);
 
 								final double[] newParams = result.fitResult2.getParameters();
 								for (int p = 0; p < 2; p++)
@@ -540,6 +725,17 @@ public class DoubletAnalysis implements PlugIn
 			addToOverlay(frame, spots, singles, doublets, multiples, spotMatchCount);
 		}
 
+		/**
+		 * Good fit.
+		 *
+		 * @param fitResult
+		 *            the fit result
+		 * @param width
+		 *            the width
+		 * @param height
+		 *            the height
+		 * @return true, if successful
+		 */
 		private boolean goodFit(FitResult fitResult, final int width, final int height)
 		{
 			if (fitResult == null)
@@ -577,6 +773,17 @@ public class DoubletAnalysis implements PlugIn
 			return true;
 		}
 
+		/**
+		 * Good fit2.
+		 *
+		 * @param fitResult
+		 *            the fit result
+		 * @param width
+		 *            the width
+		 * @param height
+		 *            the height
+		 * @return true, if successful
+		 */
 		private boolean goodFit2(FitResult fitResult, final int width, final int height)
 		{
 			if (fitResult == null)
@@ -621,10 +828,12 @@ public class DoubletAnalysis implements PlugIn
 
 		/**
 		 * Get an estimate of the background level using the mean of image.
-		 * 
+		 *
 		 * @param width
+		 *            the width
 		 * @param height
-		 * @return
+		 *            the height
+		 * @return the float
 		 */
 		private float estimateBackground(int width, int height)
 		{
@@ -635,6 +844,22 @@ public class DoubletAnalysis implements PlugIn
 			return (float) sum / (width * height);
 		}
 
+		/**
+		 * Adds the to overlay.
+		 *
+		 * @param frame
+		 *            the frame
+		 * @param spots
+		 *            the spots
+		 * @param singles
+		 *            the singles
+		 * @param doublets
+		 *            the doublets
+		 * @param multiples
+		 *            the multiples
+		 * @param spotMatchCount
+		 *            the spot match count
+		 */
 		private void addToOverlay(int frame, Spot[] spots, int singles, int doublets, int multiples,
 				int[] spotMatchCount)
 		{
@@ -692,6 +917,11 @@ public class DoubletAnalysis implements PlugIn
 		return 2;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ij.plugin.PlugIn#run(java.lang.String)
+	 */
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -728,6 +958,11 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * Show dialog.
+	 *
+	 * @return true, if successful
+	 */
 	private boolean showDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -809,8 +1044,10 @@ public class DoubletAnalysis implements PlugIn
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("Select the histograms to display");
 
-			for (int i = 0; i < displayHistograms.length; i++)
+			for (int i = 0; i < NAMES.length; i++)
 				gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
+			for (int i = 0; i < NAMES2.length; i++)
+				gd.addCheckbox(NAMES2[i].replace(' ', '_'), displayHistograms[i + NAMES.length]);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -821,6 +1058,11 @@ public class DoubletAnalysis implements PlugIn
 		return true;
 	}
 
+	/**
+	 * Gets the sa.
+	 *
+	 * @return the sa
+	 */
 	private double getSa()
 	{
 		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a) /
@@ -828,8 +1070,12 @@ public class DoubletAnalysis implements PlugIn
 		return sa;
 	}
 
+	/** The total progress. */
 	int progress, stepProgress, totalProgress;
 
+	/**
+	 * Show progress.
+	 */
 	private synchronized void showProgress()
 	{
 		if (++progress % stepProgress == 0)
@@ -839,6 +1085,9 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * Run.
+	 */
 	private void run()
 	{
 		final ImageStack stack = imp.getImageStack();
@@ -895,7 +1144,7 @@ public class DoubletAnalysis implements PlugIn
 			}
 		}
 		threads.clear();
-		threads= null;
+		threads = null;
 
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
@@ -949,7 +1198,7 @@ public class DoubletAnalysis implements PlugIn
 			imp.setOverlay(overlay);
 
 		MemoryPeakResults.freeMemory();
-		
+
 		Collections.sort(results);
 		summariseResults(results);
 
@@ -958,6 +1207,14 @@ public class DoubletAnalysis implements PlugIn
 		IJ.showStatus("");
 	}
 
+	/**
+	 * Show histogram.
+	 *
+	 * @param i
+	 *            the i
+	 * @param spotHistogram
+	 *            the spot histogram
+	 */
 	private void showHistogram(int i, double[] spotHistogram)
 	{
 		if (!displayHistograms[i])
@@ -972,6 +1229,14 @@ public class DoubletAnalysis implements PlugIn
 			windowOrganiser.add(pw.getImagePlus().getID());
 	}
 
+	/**
+	 * Put.
+	 *
+	 * @param jobs
+	 *            the jobs
+	 * @param i
+	 *            the i
+	 */
 	private void put(BlockingQueue<Integer> jobs, int i)
 	{
 		try
@@ -984,11 +1249,17 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * Summarise results.
+	 *
+	 * @param results
+	 *            the results
+	 */
 	private void summariseResults(ArrayList<DoubletResult> results)
 	{
-		// TODO - store results in memory
-		// Run this command with a separate plugin call since fitting is what takes a long time.
-		
+		// Store results in memory for later analysis
+		doubletResults = results;
+
 		showResults(results);
 
 		createSummaryTable();
@@ -996,7 +1267,8 @@ public class DoubletAnalysis implements PlugIn
 		StringBuilder sb = new StringBuilder();
 
 		// Create the benchmark settings and the fitting settings
-		sb.append(this.results.size()).append("\t");
+		final int n = this.results.size();
+		sb.append(n).append("\t");
 		sb.append(Utils.rounded(simulationParameters.minSignal)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.maxSignal)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.signalPerFrame)).append("\t");
@@ -1022,44 +1294,26 @@ public class DoubletAnalysis implements PlugIn
 
 			// Add details of the noise model for the MLE
 			sb.append("EM=").append(fitConfig.isEmCCD());
-			sb.append(":A=").append(fitConfig.getAmplification());
-			sb.append(":N=").append(fitConfig.getReadNoise());
+			sb.append(":A=").append(Utils.rounded(fitConfig.getAmplification()));
+			sb.append(":N=").append(Utils.rounded(fitConfig.getReadNoise()));
 		}
 		else
 			sb.append("\t");
 
 		sb.append("\t");
 
-		// TODO - Now output the actual results ...
+		// Now output the actual results ...
 
-		// True single = single with no neighbours
-		// True doublet = doublet with no neighbours
+		// Show histograms as cumulative to avoid problems with bin width
+		// Residuals scores 
+		// Iterations and evaluations where fit was OK
 
-		// - Number of singles, doublets, multiples with/without neighbours
-		// - Number of singles fit OK
-		// - Number of doublets fit OK
-		// - Number of doublets fit OK with no neighbours
-		// - Number of doublets fit OK with no neighbours with a better SS, AIC (plot this verses residuals score)
-		// - Number of singles fit OK with no neighbours with a worse SS, AIC (plot this verses residuals score)
-		// - Histogram of residuals score for true singles 
-		// - Histogram of residuals score for true doublets
-
-		// TODO - add the adjusted r squared
-		
-		// TODO - Need better control of what is plotted
-		
-		// - plot cumulative iterations for single/double fits on same graph with 99% percentile levels
-
-		final String[] names = { "Score", "SS", "Value", "IC", "MLIC", "Iter1", "Eval1", "Iter2", "Eval2" };
-		StoredDataStatistics[] stats = new StoredDataStatistics[3 * names.length];
+		StoredDataStatistics[] stats = new StoredDataStatistics[NAMES2.length];
 		for (int i = 0; i < stats.length; i++)
 			stats[i] = new StoredDataStatistics();
 
-		final String[] names2 = { "IFactor", "EFactor" };
-		StoredDataStatistics[] stats2 = new StoredDataStatistics[2];
-		for (int i = 0; i < stats2.length; i++)
-			stats2[i] = new StoredDataStatistics();
-
+		// For Jaccard scoring we need to count the single fits that worked, but failed as a doublet fit
+		double tp = 0;
 		for (DoubletResult result : results)
 		{
 			final int c = result.c;
@@ -1069,88 +1323,129 @@ public class DoubletAnalysis implements PlugIn
 			{
 				double score = Math.max(result.score1, result.score2);
 				stats[c].add(score);
-				// We want SS2 to be lower
-				stats[c + 1 * 3].add(result.sumOfSquares1 - result.sumOfSquares2);
-				//stats[c + 2 * 3].add(result.value1 - result.value2);
-				// We want IC2 to be lower
-				stats[c + 3 * 3].add(result.ic1 - result.ic2);
-				stats[c + 4 * 3].add(result.mlic1 - result.mlic2);
-				stats[c + 5 * 3].add(result.iter1);
-				stats[c + 6 * 3].add(result.eval1);
-				stats[c + 7 * 3].add(result.iter2);
-				stats[c + 8 * 3].add(result.eval2);
+			}
+			else if (result.good1)
+			{
+				// Good single fit but no doublet fit
+				tp++;
 			}
 
 			// Of those where the IC improved, summarise the iter and eval increase
-			if (result.good1 && result.good2)
+			if (result.good1)
 			{
-				if (c == 0)
+				stats[3].add(result.iter1);
+				stats[4].add(result.eval1);
+				if (c != 0 && result.good2)
 				{
-					stats2[0].add((double) result.iter2 / result.iter1);
-					stats2[1].add((double) result.eval2 / result.eval1);
+					stats[5].add(result.iter2);
+					stats[6].add(result.eval2);
 				}
 			}
 		}
 
 		// Summarise score for true results
-		for (int c = 0; c < 3; c++)
+		Percentile p = new Percentile(99);
+		for (int c = 0; c < stats.length; c++)
 		{
+			double[] values = stats[c].getValues();
+			// Sorting is need for the percentile and the cumulative histogram so do it once 
+			Arrays.sort(values);
 			sb.append(Utils.rounded(stats[c].getMean())).append("+/-")
 					.append(Utils.rounded(stats[c].getStandardDeviation())).append(" (").append(stats[c].getN())
-					.append(')').append('\t');
+					.append(") ").append(Utils.rounded(p.evaluate(values))).append('\t');
+
+			if (displayHistograms[c + NAMES.length])
+				showHistogram(values, NAMES2[c]);
 		}
+
+		// Plot a graph of the additional results we would fit at all score thresholds.
+		// This assumes we just pick the the doublet if we fit it (NO FILTERING at all!)
+		ArrayList<DoubletBonus> data = new ArrayList<DoubletAnalysis.DoubletBonus>(
+				stats[0].getN() + stats[1].getN() + stats[2].getN() + 2);
+		for (double r : stats[0].getValues())
+			data.add(new DoubletBonus(r, 0, 1));
+		for (double r : stats[1].getValues())
+			data.add(new DoubletBonus(r, 1, 0));
+		for (double r : stats[2].getValues())
+			data.add(new DoubletBonus(r, 1, 0));
+		// Add data at ends to complete the residuals scale from 0 to 1
+		data.add(new DoubletBonus(0, 0, 0));
+		data.add(new DoubletBonus(1, 0, 0));
+		Collections.sort(data);
+
+		double[] x = new double[data.size() + 2];
+		double[] jaccard = new double[x.length];
+
+		// Initialise the score for residuals 0
+		tp += stats[0].getN() + (stats[1].getN() + stats[2].getN()) * 2;
+		int fp = stats[0].getN();
+
+		int count = 0;
+		double last = 0;
+		int maxi = 0;
+		for (DoubletBonus b : data)
+		{
+			if (last != b.r)
+			{
+				x[count] = last;
+				jaccard[count] = tp / (n + fp);
+				if (jaccard[maxi] < jaccard[count])
+					maxi = count;
+				count++;
+			}
+			tp -= b.tp;
+			fp -= b.fp;
+			last = b.r;
+		}
+		x[count] = last;
+		jaccard[count] = tp / (n + fp);
+		if (jaccard[maxi] < jaccard[count])
+			maxi = count;
+		count++;
+		x = Arrays.copyOf(x, count);
+		jaccard = Arrays.copyOf(jaccard, count);
+
+		String title = TITLE + " Jaccard";
+		Plot plot = new Plot(title, "Score", "Jaccard", x, jaccard);
+		plot.setLimits(0, 1, 0, Maths.maxDefault(0.01, jaccard) * 1.05);
+		display(title, plot);
 		
-		for (int c = 0; c < 2; c++)
-		{
-			final int n = c + 1;
-
-			// Histograms
-			showHistogram(TITLE + " n=" + n, stats[c + 0 * 3], names[0], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 1 * 3], names[1], 0, 1);
-//			showHistogram(TITLE + " n=" + n, stats[c + 2 * 3], names[2], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 3 * 3], names[3], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 4 * 3], names[4], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 5 * 3], names[5], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 6 * 3], names[6], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 7 * 3], names[7], 0, 1);
-			showHistogram(TITLE + " n=" + n, stats[c + 8 * 3], names[8], 0, 1);
-		}
-
-		for (int c = 0; c < stats2.length; c++)
-		{
-			sb.append(Utils.rounded(stats2[c].getMean())).append("+/-")
-					.append(Utils.rounded(stats2[c].getStandardDeviation())).append(" (").append(stats2[c].getN())
-					.append(')').append('\t');
-			showHistogram(TITLE, stats2[c], names2[c], 0, 1);
-		}
-
+		sb.append(Utils.rounded(jaccard[maxi])).append('\t').append(Utils.rounded(x[maxi]));
 		summaryTable.append(sb.toString());
 	}
 
 	/**
-	 * Show a histogram of the data.
+	 * Show a cumulative histogram of the data.
 	 *
-	 * @param title
-	 *            The title to prepend to the plot name
-	 * @param stats
-	 *            the stats
-	 * @param name
+	 * @param values
+	 *            the values
+	 * @param xTitle
 	 *            The name of plotted statistic
-	 * @param minWidth
-	 *            The minimum bin width to use (e.g. set to 1 for integer values)
-	 * @param removeOutliers
-	 *            Remove outliers. 1 - 1.5x IQR. 2 - remove top 2%.
-	 * @return The histogram window ID
 	 */
-	public int showHistogram(String title, StoredDataStatistics stats, String name, double minWidth, int removeOutliers)
+	public void showHistogram(double[] values, String xTitle)
 	{
-		int bins = 0;
-		int id = Utils.showHistogram(title, stats, name, minWidth, removeOutliers, bins, true, null);
-		if (Utils.isNewWindow())
-			windowOrganiser.add(id);
-		return id;
+		double[][] h = Maths.cumulativeHistogram(values, false);
+
+		String title = TITLE + " " + xTitle + " Cumulative";
+		Plot2 plot = new Plot2(title, xTitle, "Frequency");
+		double xMax = h[0][h[0].length - 1];
+		double yMax = h[1][h[1].length - 1];
+		plot.setLimits(0, xMax, 0, 1.05 * yMax);
+		plot.setColor(Color.blue);
+		plot.addPoints(h[0], h[1], Plot2.BAR);
+		display(title, plot);
 	}
 
+	private void display(String title, Plot plot)
+	{
+		PlotWindow pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(pw.getImagePlus().getID());
+	}
+
+	/**
+	 * Creates the summary table.
+	 */
 	private void createSummaryTable()
 	{
 		if (summaryTable == null || !summaryTable.isVisible())
@@ -1160,11 +1455,28 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * Creates the summary header.
+	 *
+	 * @return the string
+	 */
 	private String createSummaryHeader()
 	{
-		return "Molecules\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\tscore_n1\tscore_n2\tscore_nN\tIfactor\tEfactor";
+		StringBuilder sb = new StringBuilder();
+		sb.append(
+				"Molecules\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
+		for (String name : NAMES2)
+			sb.append(name).append('\t');
+		sb.append("\tMax J\t@score");
+		return sb.toString();
 	}
 
+	/**
+	 * Show results.
+	 *
+	 * @param results
+	 *            the results
+	 */
 	private void showResults(ArrayList<DoubletResult> results)
 	{
 		if (!showResults)
@@ -1192,6 +1504,8 @@ public class DoubletAnalysis implements PlugIn
 			sb.append(IJ.d2s(result.sumOfSquares2, 1)).append("\t");
 			sb.append(IJ.d2s(result.value1, 1)).append("\t");
 			sb.append(IJ.d2s(result.value2, 1)).append("\t");
+			sb.append(IJ.d2s(result.r1, 1)).append("\t");
+			sb.append(IJ.d2s(result.r2, 1)).append("\t");
 			sb.append(Utils.rounded(result.ic1)).append('\t');
 			sb.append(Utils.rounded(result.ic2)).append('\t');
 			sb.append(Utils.rounded(result.mlic1)).append('\t');
@@ -1222,6 +1536,14 @@ public class DoubletAnalysis implements PlugIn
 		resultsTable.getTextPanel().append(list);
 	}
 
+	/**
+	 * Adds the.
+	 *
+	 * @param sb
+	 *            the sb
+	 * @param fitResult
+	 *            the fit result
+	 */
 	private void add(StringBuilder sb, FitResult fitResult)
 	{
 		if (fitResult != null)
@@ -1234,6 +1556,14 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * Adds the params.
+	 *
+	 * @param sb
+	 *            the sb
+	 * @param fitResult
+	 *            the fit result
+	 */
 	private void addParams(StringBuilder sb, FitResult fitResult)
 	{
 		if (fitResult != null)
@@ -1246,6 +1576,9 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * Creates the results table.
+	 */
 	private void createResultsTable()
 	{
 		if (resultsTable == null || !resultsTable.isVisible())
@@ -1255,11 +1588,19 @@ public class DoubletAnalysis implements PlugIn
 		}
 	}
 
+	/**
+	 * Creates the results header.
+	 *
+	 * @return the string
+	 */
 	private String createResultsHeader()
 	{
-		return "Frame\tx\ty\tI\tn\tneighbours\talmost\tscore1\tscore2\tR1\tR2\tss1\tss2\tv1\tv2\tic1\tic2\tmlic1\tmlic2\ta1\ta2\tx1\ty1\tx2\ty2\ti1\ti2\te1\te2\tparams1\tparams2";
+		return "Frame\tx\ty\tI\tn\tneighbours\talmost\tscore1\tscore2\tR1\tR2\tss1\tss2\tv1\tv2\tr1\tr2\tic1\tic2\tmlic1\tmlic2\ta1\ta2\tx1\ty1\tx2\ty2\ti1\ti2\te1\te2\tparams1\tparams2";
 	}
 
+	/**
+	 * Run analysis.
+	 */
 	private void runAnalysis()
 	{
 	}
