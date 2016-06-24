@@ -68,7 +68,7 @@ public class FitWorker implements Runnable
 
 	/** The number of additional evaluations to use for multiple peaks */
 	public static final int EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS = 1; // 0 for no effect
-	
+
 	/** The number of additional evaluations to use for doublets */
 	public static final int EVALUATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
@@ -931,7 +931,7 @@ public class FitWorker implements Runnable
 				// TODO - Should we attempt to fit additional peaks, i.e. doublets, even when there
 				// were neighbours?
 				// i.e. continue fitting with a bigger and bigger number of candidates in the spot
-				// until the AICc fails to improve.
+				// until the IC fails to improve.
 			}
 			else
 			{
@@ -1080,7 +1080,7 @@ public class FitWorker implements Runnable
 	}
 
 	private void printFitResults(FitResult fitResult, double[] region, int width, int height, int npeaks, int doublet,
-			int iterations, double AICc1, double AICc2)
+			int iterations, double ICc1, double ICc2)
 	{
 		// **********
 		// Comment out for production code
@@ -1091,7 +1091,7 @@ public class FitWorker implements Runnable
 		//
 		//		System.out.printf("[%dx%d] p %d i %d d %d : SS %f : %f : %f (%s). %f -> %f\n", width, height, npeaks,
 		//				iterations, doublet, gf.getTotalSumOfSquares(), gf.getInitialResdiualSumOfSquares(),
-		//				gf.getFinalResdiualSumOfSquares(), fitResult.getStatus().toString(), AICc1, AICc2);
+		//				gf.getFinalResdiualSumOfSquares(), fitResult.getStatus().toString(), ICc1, ICc2);
 	}
 
 	/**
@@ -1304,11 +1304,8 @@ public class FitWorker implements Runnable
 		// Q. Allow bad fits since these are due to peak width divergence or low signal for all peaks?
 		if (newFitResult.getStatus() == FitStatus.OK) // || newFitResult.getResult() == Result.BAD_FIT)
 		{
-			// Check if the residuals are better using the adjusted coefficient of determination.
-			// See http://www.mathworks.co.uk/help/matlab/data_analysis/linear-regression.html
 			// Adjusted Coefficient of determination is not good for non-linear models. Use the 
-			// bias corrected Akaike Information Criterion (AICc):
-			// http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/
+			// Bayesian Information Criterion (BIC):
 
 			final double doubleSumOfSquares = gf.getFinalResidualSumOfSquares();
 
@@ -1322,28 +1319,28 @@ public class FitWorker implements Runnable
 			final double ic1, ic2;
 
 			// Get the likelihood for the fit.
-			if (fitConfig.getFitSolver() == FitSolver.MLE)
+			if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 			{
-				// This is computed directly by the maximum likelihood estimator
+				// This is computed directly by the maximum likelihood estimator. 
+				// The MLE is only good if we are modelling the camera noise. 
+				// The MLE put out by the Poisson model is not better than using the IC from the fit residuals.
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getAkaikeInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getAkaikeInformationCriterion(doubleValue, length,
+				ic1 = Maths.getBayesianInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares, MLE (AIC) : %f, %f (%f) => %f, %f (%f) : %f",
+					logger.info("Model improvement - Sum-of-squares, MLE (IC) : %f, %f (%f) => %f, %f (%f) : %f",
 							singleSumOfSquares, singleValue, ic1, doubleSumOfSquares, doubleValue, ic2, ic1 - ic2);
 			}
 			else
 			{
 				// If using the least squares estimator then we can get the log likelihood from an approximation
-				// (TODO - we could build a likelihood function using a Poisson model. This may be better than 
-				// the approximation from the residuals)
-				ic1 = Maths.getAkaikeInformationCriterionFromResiduals(singleSumOfSquares, length,
+				ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleSumOfSquares, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getAkaikeInformationCriterionFromResiduals(doubleSumOfSquares, length,
+				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f",
+					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
 							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
 			}
 
@@ -1360,7 +1357,7 @@ public class FitWorker implements Runnable
 						peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
 					}
 				}
-				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] AIC [%f -> %f] = %s\n",
+				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] IC [%f -> %f] = %s\n",
 						slice, cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y, newFitResult.getStatus(),
 						newFitResult.getStatusData(), singleValue, gf.getValue(), singleSumOfSquares,
 						doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
@@ -1368,7 +1365,7 @@ public class FitWorker implements Runnable
 			}
 
 			// Check if the predictive power of the model is better with two peaks:
-			// AIC should be lower
+			// IC should be lower
 			// Adjusted R2 should be higher
 			if (ic2 > ic1)
 			//if (newAdjustedR2 < adjustedR2)
@@ -1832,11 +1829,8 @@ public class FitWorker implements Runnable
 		// Q. Allow bad fits since these are due to peak width divergence or low signal for all peaks?
 		if (newFitResult.getStatus() == FitStatus.OK) // || newFitResult.getResult() == Result.BAD_FIT)
 		{
-			// Check if the residuals are better using the adjusted coefficient of determination.
-			// See http://www.mathworks.co.uk/help/matlab/data_analysis/linear-regression.html
 			// Adjusted Coefficient of determination is not good for non-linear models. Use the 
-			// bias corrected Akaike Information Criterion (AICc):
-			// http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2892436/
+			// Bayesian Information Criterion (BIC):
 
 			final double doubleSumOfSquares = gf.getFinalResidualSumOfSquares();
 
@@ -1854,11 +1848,11 @@ public class FitWorker implements Runnable
 			{
 				// This is computed directly by the maximum likelihood estimator
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getAkaikeInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getAkaikeInformationCriterion(doubleValue, length,
+				ic1 = Maths.getBayesianInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares, MLE (AIC) : %f, %f (%f) => %f, %f (%f) : %f",
+					logger.info("Model improvement - Sum-of-squares, MLE (IC) : %f, %f (%f) => %f, %f (%f) : %f",
 							singleSumOfSquares, singleValue, ic1, doubleSumOfSquares, doubleValue, ic2, ic1 - ic2);
 			}
 			else
@@ -1866,12 +1860,12 @@ public class FitWorker implements Runnable
 				// If using the least squares estimator then we can get the log likelihood from an approximation
 				// (TODO - we could build a likelihood function using a Poisson model. This may be better than 
 				// the approximation from the residuals)
-				ic1 = Maths.getAkaikeInformationCriterionFromResiduals(singleSumOfSquares, length,
+				ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleSumOfSquares, length,
 						fitResult.getNumberOfFittedParameters());
-				ic2 = Maths.getAkaikeInformationCriterionFromResiduals(doubleSumOfSquares, length,
+				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares (AIC) : %f (%f) => %f (%f) : %f",
+					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
 							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
 			}
 
@@ -1888,7 +1882,7 @@ public class FitWorker implements Runnable
 						peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
 					}
 				}
-				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] AIC [%f -> %f] = %s\n",
+				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] IC [%f -> %f] = %s\n",
 						slice, cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y, newFitResult.getStatus(),
 						newFitResult.getStatusData(), singleValue, gf.getValue(), singleSumOfSquares,
 						doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
@@ -1896,7 +1890,7 @@ public class FitWorker implements Runnable
 			}
 
 			// Check if the predictive power of the model is better with two peaks:
-			// AIC should be lower
+			// IC should be lower
 			// Adjusted R2 should be higher
 			if (ic2 > ic1)
 			//if (newAdjustedR2 < adjustedR2)
