@@ -1,5 +1,25 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.match.BasePoint;
+import gdsc.core.match.Coordinate;
+import gdsc.core.match.FractionClassificationResult;
+import gdsc.core.match.MatchCalculator;
+import gdsc.core.match.PointPair;
+import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.StoredDataStatistics;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -31,38 +51,18 @@ import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.BasePoint;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.PointPair;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.core.utils.RampedScore;
-import gdsc.core.utils.StoredDataStatistics;
-import gdsc.core.utils.NoiseEstimator.Method;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
-import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
-
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Fits all the candidate spots identified by the benchmark spot filter plugin.

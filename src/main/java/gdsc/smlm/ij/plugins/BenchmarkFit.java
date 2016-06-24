@@ -1,5 +1,22 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Rectangle;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.TextUtils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -25,31 +42,14 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Calibration;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
-import gdsc.core.utils.TextUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
-import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
-
-import java.awt.Rectangle;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Fits the benchmark image created by CreateData plugin.
