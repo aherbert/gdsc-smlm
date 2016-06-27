@@ -27,7 +27,9 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.Utils;
+import gdsc.core.logging.Logger;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.MatchCalculator;
@@ -48,6 +50,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
+import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -79,7 +82,7 @@ import ij.text.TextWindow;
 public class DoubletAnalysis implements PlugIn
 {
 	private static final String TITLE = "Doublet Analysis";
-	static FitConfiguration fitConfig;
+	private static FitConfiguration fitConfig, filterFitConfig;
 	private static FitEngineConfiguration config;
 	private static Calibration cal;
 	private static int lastId = 0;
@@ -97,7 +100,6 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setPrecisionThreshold(0);
 		fitConfig.setWidthFactor(0);
 
-		fitConfig.setBackgroundFitting(true);
 		fitConfig.setMinIterations(0);
 		fitConfig.setNoise(0);
 		config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
@@ -106,6 +108,14 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setNotSignalFitting(false);
 		fitConfig.setComputeDeviations(false);
 		fitConfig.setComputeResiduals(true);
+
+		//
+		filterFitConfig = new FitConfiguration();
+		filterFitConfig.setFitValidation(true);
+		filterFitConfig.setMinPhotons(0);
+		filterFitConfig.setCoordinateShiftFactor(0);
+		filterFitConfig.setPrecisionThreshold(0);
+		filterFitConfig.setWidthFactor(0);
 	}
 
 	private static boolean showOverlay = false;
@@ -116,7 +126,10 @@ public class DoubletAnalysis implements PlugIn
 	private static double lowerDistance = 1;
 	private static double matchDistance = 1;
 
+	private static double analysisDriftAngle = 45;
+	private static double minGap = 0;
 	private static boolean analysisShowResults = false;
+	private static boolean analysisLogging = false;
 
 	private static String[] SELECTION_CRITERIA = { "R2", "AIC", "BIC", "ML AIC", "ML BIC" };
 	private static int selectionCriteria = 4;
@@ -218,12 +231,14 @@ public class DoubletAnalysis implements PlugIn
 	private class ResultCoordinate extends BasePoint
 	{
 		final DoubletResult result;
+		final int id;
 
-		public ResultCoordinate(DoubletResult result, double x, double y)
+		public ResultCoordinate(DoubletResult result, int id, double x, double y)
 		{
 			// Add the 0.5 pixel offset
 			super((float) (x + 0.5), (float) (y + 0.5));
 			this.result = result;
+			this.id = id;
 		}
 	}
 
@@ -233,6 +248,7 @@ public class DoubletAnalysis implements PlugIn
 	public class DoubletResult implements Comparable<DoubletResult>
 	{
 		final int frame;
+		final float noise;
 		final Spot spot;
 		final int n, c, neighbours, almostNeighbours;
 		FitResult fitResult1 = null;
@@ -249,11 +265,12 @@ public class DoubletAnalysis implements PlugIn
 		double gap;
 		int iter1, iter2, eval1, eval2;
 		boolean good1, good2, valid, valid2;
-		double tp1, fp1, tp2, fp2;
+		double tp1, fp1, tp2a, fp2a, tp2b, fp2b;
 
-		public DoubletResult(int frame, Spot spot, int n, int neighbours, int almostNeighbours)
+		public DoubletResult(int frame, float noise, Spot spot, int n, int neighbours, int almostNeighbours)
 		{
 			this.frame = frame;
+			this.noise = noise;
 			this.spot = spot;
 			this.n = n;
 			this.c = DoubletAnalysis.getClass(n);
@@ -261,8 +278,10 @@ public class DoubletAnalysis implements PlugIn
 			this.almostNeighbours = almostNeighbours;
 			this.tp1 = 0;
 			this.fp1 = 1;
-			this.tp2 = 0;
-			this.fp2 = 2;
+			this.tp2a = 0;
+			this.fp2a = 1;
+			this.tp2b = 0;
+			this.fp2b = 1;
 		}
 
 		public void addTP1(double score)
@@ -275,12 +294,20 @@ public class DoubletAnalysis implements PlugIn
 			fp1 -= score;
 		}
 
-		public void addTP2(double score)
+		public void addTP2(double score, int id)
 		{
 			//if (score > 1)
 			//	System.out.printf("Bad score %f\n", score);
-			tp2 += score;
-			fp2 -= score;
+			if (id == 0)
+			{
+				tp2a += score;
+				fp2a -= score;
+			}
+			else
+			{
+				tp2b += score;
+				fp2b -= score;
+			}
 		}
 
 		public double getMaxScore()
@@ -460,6 +487,7 @@ public class DoubletAnalysis implements PlugIn
 
 			ImageExtractor ie = null;
 			float estimatedBackground = 0;
+			float noise = 0;
 
 			// Identify single and doublets (and other)
 			int singles = 0, doublets = 0, multiples = 0, total = 0;
@@ -501,6 +529,7 @@ public class DoubletAnalysis implements PlugIn
 					{
 						ie = new ImageExtractor(data, maxx, maxy);
 						estimatedBackground = estimateBackground(maxx, maxy);
+						noise = FitWorker.estimateNoise(data, maxx, maxy, config.getNoiseMethod());
 					}
 
 					final Spot spot = spots[j];
@@ -585,7 +614,7 @@ public class DoubletAnalysis implements PlugIn
 					final double[] params = new double[] { background, signal, 0, spot.x - regionBounds.x,
 							spot.y - regionBounds.y, 0, 0 };
 
-					final DoubletResult result = new DoubletResult(frame, spot, n, neighbourCount,
+					final DoubletResult result = new DoubletResult(frame, noise, spot, n, neighbourCount,
 							almostNeighbourCount);
 					result.fitResult1 = gf.fit(region, width, height, 1, params, amplitudeEstimate);
 					result.iter1 = gf.getIterations();
@@ -773,15 +802,15 @@ public class DoubletAnalysis implements PlugIn
 					final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
 					double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
 					double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
-					f1.add(new ResultCoordinate(result, x, y));
+					f1.add(new ResultCoordinate(result, 0, x, y));
 					if (result.good2)
 					{
 						x = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
 						y = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
-						f2.add(new ResultCoordinate(result, x, y));
+						f2.add(new ResultCoordinate(result, 0, x, y));
 						x = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] + regionBounds.x;
 						y = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] + regionBounds.y;
-						f2.add(new ResultCoordinate(result, x, y));
+						f2.add(new ResultCoordinate(result, 1, x, y));
 					}
 				}
 			}
@@ -798,16 +827,7 @@ public class DoubletAnalysis implements PlugIn
 			for (PointPair pair : pairs)
 			{
 				ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
-				coord.result.addTP2(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256));
-			}
-
-			for (Coordinate c : f2)
-			{
-				ResultCoordinate coord = (ResultCoordinate) c;
-				if (coord.result.tp2 < 0 || coord.result.tp2 > 2)
-				{
-					System.out.printf("Bad matching 2: %f\n", coord.result.tp2);
-				}
+				coord.result.addTP2(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256), coord.id);
 			}
 		}
 
@@ -1354,7 +1374,7 @@ public class DoubletAnalysis implements PlugIn
 
 		// Store details we want in the analysis table
 		StringBuilder sb = new StringBuilder();
-		sb.append(Utils.rounded(getSa() * simulationParameters.a)).append("\t");
+		sb.append(Utils.rounded(getSa())).append("\t");
 		sb.append(config.getRelativeFitting()).append("\t");
 		sb.append(fitConfig.getFitFunction().toString());
 		sb.append(":").append(PeakFit.getSolverName(fitConfig));
@@ -1431,6 +1451,9 @@ public class DoubletAnalysis implements PlugIn
 		// i.e. Accumulate the score accepting all doublets that were fit 
 		double tp = 0;
 		double fp = 0;
+
+		double bestTp = 0, bestFp = 0;
+
 		ArrayList<DoubletBonus> data = new ArrayList<DoubletBonus>(results.size());
 		for (DoubletResult result : results)
 		{
@@ -1442,23 +1465,35 @@ public class DoubletAnalysis implements PlugIn
 				// Filter the doublets that would be accepted
 				if (result.good2)
 				{
-					if (result.tp2 < 0 || result.tp2 > 2)
+					final double tp2 = result.tp2a + result.tp2b;
+					final double fp2 = result.fp2a + result.fp2b;
+					tp += tp2;
+					fp += fp2;
+
+					if (result.tp2a > 0.5)
 					{
-						System.out.printf("Bad result: TP2=%f\n", result.tp2);
+						bestTp += result.tp2a;
+						bestFp += result.fp2a;
+					}
+					if (result.tp2b > 0.5)
+					{
+						bestTp += result.tp2b;
+						bestFp += result.fp2b;
 					}
 
-					tp += result.tp2;
-					fp += result.fp2;
-
 					// Store this as a doublet bonus
-					data.add(new DoubletBonus(score, result.getAvScore(), result.tp2 - result.tp1,
-							result.fp2 - result.fp1));
+					data.add(new DoubletBonus(score, result.getAvScore(), tp2 - result.tp1, fp2 - result.fp1));
 				}
 				else
 				{
 					// No doublet fit so this will always be the single fit result
 					tp += result.tp1;
 					fp += result.fp1;
+					if (result.tp1 > 0.5)
+					{
+						bestTp += result.tp1;
+						bestFp += result.fp1;
+					}
 				}
 			}
 
@@ -1538,6 +1573,10 @@ public class DoubletAnalysis implements PlugIn
 		if (showJaccardPlot)
 			plotJaccard(residualsScore, null);
 
+		String bestJaccard = Utils.rounded(bestTp / (bestFp + numberOfMolecules)) + '\t';
+		analysisPrefix += bestJaccard;
+
+		sb.append(bestJaccard);
 		addJaccardScores(sb);
 
 		summaryTable.append(sb.toString());
@@ -1748,7 +1787,7 @@ public class DoubletAnalysis implements PlugIn
 				"Molecules\tMatched\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("\tMax J\t@score\tArea 0.15\tArea 0.3\tArea");
+		sb.append("Best J\tMax J\t@score\tArea 0.15\tArea 0.3\tArea");
 		return sb.toString();
 	}
 
@@ -1907,7 +1946,18 @@ public class DoubletAnalysis implements PlugIn
 		double tp = 0;
 		double fp = 0;
 
-		// TODO - Get filters for the single and double fits
+		Logger logger = (analysisLogging) ? new IJLogger() : null;
+
+		// Get filters for the single and double fits
+
+		// No coordinate shift for the doublet. We have already done simple checking of the 
+		// coordinates to get the good=2 flag
+		FitConfiguration filterFitConfig2 = filterFitConfig.clone();
+		filterFitConfig2.setCoordinateShift(Integer.MAX_VALUE);
+
+		final int size = 2 * config.getRelativeFitting() + 1;
+		Rectangle regionBounds = new Rectangle(0, 0, size, size);
+		final double otherDriftAngle = 180 - analysisDriftAngle;
 
 		// Process all the results
 		for (DoubletResult result : doubletResults)
@@ -1915,20 +1965,163 @@ public class DoubletAnalysis implements PlugIn
 			// Filter the singles that would be accepted
 			if (result.good1)
 			{
-				// Filter the doublets that would be accepted
-				if (result.good2 && selectFit(result))
+				filterFitConfig.setNoise(result.noise);
+				FitStatus fitStatus0 = filterFitConfig.validatePeak(0, result.fitResult1.getInitialParameters(),
+						result.fitResult1.getParameters());
+
+				double tp1 = 0, fp1 = 0;
+				if (fitStatus0 == FitStatus.OK)
 				{
-					tp += result.tp2;
-					fp += result.fp2;
-					// Store this as a doublet bonus
-					data.add(new DoubletBonus(result.getMaxScore(), result.getAvScore(), result.tp2 - result.tp1,
-							result.fp2 - result.fp1));
+					tp1 = result.tp1;
+					fp1 = result.fp1;
+				}
+				else if (analysisLogging)
+					logFailure(logger, 0, result, fitStatus0);
+
+				// Filter the doublets that would be accepted
+				// We have already done simple checking to get the good1 = true flag. So accept
+				// width diverged spots as OK for a doublet fit
+				if ((fitStatus0 == FitStatus.OK || fitStatus0 == FitStatus.WIDTH_DIVERGED) && selectFit(result) &&
+						result.good2)
+				{
+					double tp2 = 0, fp2 = 0;
+
+					// Basic spot criteria (SNR, Photons, width)
+					filterFitConfig2.setNoise(result.noise);
+					FitStatus fitStatus1 = filterFitConfig2.validatePeak(0, result.fitResult2.getInitialParameters(),
+							result.fitResult2.getParameters());
+					FitStatus fitStatus2 = filterFitConfig2.validatePeak(1, result.fitResult2.getInitialParameters(),
+							result.fitResult2.getParameters());
+
+					// Log basic failures
+					boolean[] accept = new boolean[2];
+					if (fitStatus1 == FitStatus.OK)
+					{
+						accept[0] = true;
+					}
+					else if (analysisLogging)
+						logFailure(logger, 1, result, fitStatus1);
+
+					if (fitStatus2 == FitStatus.OK)
+					{
+						accept[1] = true;
+					}
+					else if (analysisLogging)
+						logFailure(logger, 2, result, fitStatus2);
+
+					// If the basic filters are OK, do some analysis of the doublet.
+					// We can filter each spot with criteria such as shift and the angle to the quadrant.
+					if (accept[0] || accept[1])
+					{
+						if (result.gap < minGap)
+						{
+							accept[0] = accept[1] = false;
+							if (analysisLogging)
+								logger.info("Reject Doublet (%.2f): Fitted coordinates below min gap (%g<%g)\n",
+										result.getMaxScore(), result.gap, minGap);
+						}
+					}
+
+					if (accept[0] || accept[1])
+					{
+						// The logic in here will be copied to the FitWorker.quadrantAnalysis routine.
+						double[] params = result.fitResult1.getParameters();
+						double[] newParams = result.fitResult2.getParameters();
+
+						// Set up for shift filtering
+						double shift = filterFitConfig.getCoordinateShift();
+						if (shift == 0 || shift == Double.POSITIVE_INFINITY)
+						{
+							// Allow the shift to span half of the fitted window.
+							shift = 0.5 * FastMath.min(regionBounds.width, regionBounds.height);
+						}
+
+						// Set an upper limit on the shift that is not too far outside the fit window
+						final double maxShiftX, maxShiftY;
+						final double factor = Gaussian2DFunction.SD_TO_HWHM_FACTOR;
+						if (fitConfig.isWidth0Fitting())
+						{
+							// Add the fitted standard deviation to the allowed shift
+							maxShiftX = regionBounds.width * 0.5 + factor * params[Gaussian2DFunction.X_SD];
+							maxShiftY = regionBounds.height * 0.5 + factor * params[Gaussian2DFunction.Y_SD];
+						}
+						else
+						{
+							// Add the configured standard deviation to the allowed shift
+							maxShiftX = regionBounds.width * 0.5 + factor * fitConfig.getInitialPeakStdDev0();
+							maxShiftY = regionBounds.height * 0.5 + factor * fitConfig.getInitialPeakStdDev1();
+						}
+
+						for (int n = 0; n < 2; n++)
+						{
+							if (!accept[n])
+								continue;
+							accept[n] = false; // Reset
+
+							final double xShift = newParams[Gaussian2DFunction.X_POSITION + n * 6] -
+									params[Gaussian2DFunction.X_POSITION];
+							final double yShift = newParams[Gaussian2DFunction.Y_POSITION + n * 6] -
+									params[Gaussian2DFunction.Y_POSITION];
+							if (Math.abs(xShift) > maxShiftX || Math.abs(yShift) > maxShiftY)
+							{
+								if (analysisLogging)
+									logger.info(
+											"Reject P%d (%.2f): Fitted coordinates moved outside fit region (x=%g,y=%g)\n",
+											n + 1, result.getMaxScore(), xShift, yShift);
+								continue;
+							}
+							if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
+							{
+								// Check the domain is OK (the angle is in radians). 
+								// Allow up to a 45 degree difference to show the shift is along the vector
+								if (result.a[n] > analysisDriftAngle && result.a[n] < otherDriftAngle)
+								{
+									if (analysisLogging)
+										logger.info(
+												"Reject P%d (%.2f): Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)",
+												n + 1, result.getMaxScore(), xShift, yShift, result.a[n]);
+									continue;
+								}
+
+								// Note: The FitWorker also checks for drift to another candidate.
+							}
+							
+							// This is OK
+							accept[n] = true;
+						}
+					}
+
+					if (accept[0])
+					{
+						tp2 += result.tp2a;
+						fp2 += result.fp2a;
+					}
+					if (accept[1])
+					{
+						tp2 += result.tp2b;
+						fp2 += result.fp2b;
+					}
+
+					if (accept[0] || accept[1])
+					{
+						tp += tp2;
+						fp += fp2;
+
+						// Store this as a doublet bonus
+						data.add(new DoubletBonus(result.getMaxScore(), result.getAvScore(), tp2 - tp1, fp2 - fp1));
+					}
+					else
+					{
+						// No doublet fit so this will always be the single fit result
+						tp += tp1;
+						fp += fp1;
+					}
 				}
 				else
 				{
 					// No doublet fit so this will always be the single fit result
-					tp += result.tp1;
-					fp += result.fp1;
+					tp += tp1;
+					fp += fp1;
 				}
 			}
 		}
@@ -1944,11 +2137,22 @@ public class DoubletAnalysis implements PlugIn
 		StringBuilder sb = new StringBuilder(analysisPrefix);
 		sb.append((useMaxResiduals) ? "Max" : "Average").append('\t');
 		sb.append(SELECTION_CRITERIA[selectionCriteria]).append('\t');
-		sb.append("Filter settings\t");
+		sb.append(filterFitConfig.getCoordinateShiftFactor()).append('\t');
+		sb.append(filterFitConfig.getSignalStrength()).append('\t');
+		sb.append(filterFitConfig.getMinPhotons()).append('\t');
+		sb.append(filterFitConfig.getWidthFactor()).append('\t');
+		sb.append(filterFitConfig.getPrecisionThreshold()).append('\t');
+		sb.append(analysisDriftAngle).append('\t');
+		sb.append(minGap).append('\t');
 
 		addJaccardScores(sb);
 
 		analysisTable.append(sb.toString());
+	}
+
+	private void logFailure(Logger logger, int i, DoubletResult result, FitStatus fitStatus)
+	{
+		logger.info("Reject P%d (%.2f): %s\n", i, result.getMaxScore(), fitStatus.toString());
 	}
 
 	private boolean selectFit(DoubletResult result)
@@ -2043,23 +2247,53 @@ public class DoubletAnalysis implements PlugIn
 		// Collect options for filtering
 		gd.addChoice("Selection_Criteria", SELECTION_CRITERIA, SELECTION_CRITERIA[selectionCriteria]);
 
+		// Copy the settings used when fitting
+		filterFitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0());
+		filterFitConfig.setInitialPeakStdDev1(fitConfig.getInitialPeakStdDev1());
+		filterFitConfig.setModelCamera(fitConfig.isModelCamera());
+		filterFitConfig.setNmPerPixel(cal.nmPerPixel);
+		filterFitConfig.setGain(cal.gain);
+		filterFitConfig.setBias(cal.bias);
+		filterFitConfig.setReadNoise(cal.readNoise);
+		filterFitConfig.setAmplification(cal.amplification);
+		filterFitConfig.setEmCCD(cal.emCCD);
+		filterFitConfig.setFitSolver(fitConfig.getFitSolver());
+
+		gd.addSlider("Shift_factor", 0.01, 2, filterFitConfig.getCoordinateShiftFactor());
+		gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
+		gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
+		gd.addSlider("Width_factor", 0.01, 5, filterFitConfig.getWidthFactor());
+		gd.addNumericField("Precision", filterFitConfig.getPrecisionThreshold(), 2);
+
+		gd.addNumericField("Drift_angle", analysisDriftAngle, 2);
+		gd.addNumericField("Min_gap", minGap, 2);
+
 		// Collect display options
 		gd.addCheckbox("Show_results", analysisShowResults);
 		gd.addCheckbox("Show_Jaccard_Plot", showJaccardPlot);
 		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
+		gd.addCheckbox("Logging", analysisLogging);
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
+		if (gd.invalidNumber())
+			return false;
 
 		selectionCriteria = gd.getNextChoiceIndex();
+		filterFitConfig.setCoordinateShiftFactor(gd.getNextNumber());
+		filterFitConfig.setSignalStrength(gd.getNextNumber());
+		filterFitConfig.setMinPhotons(gd.getNextNumber());
+		filterFitConfig.setWidthFactor(gd.getNextNumber());
+		filterFitConfig.setPrecisionThreshold(gd.getNextNumber());
+		analysisDriftAngle = gd.getNextNumber();
+		minGap = gd.getNextNumber();
+
 		analysisShowResults = gd.getNextBoolean();
 		showJaccardPlot = gd.getNextBoolean();
 		useMaxResiduals = gd.getNextBoolean();
-
-		if (gd.invalidNumber())
-			return false;
+		analysisLogging = gd.getNextBoolean();
 
 		return true;
 	}
@@ -2083,6 +2317,6 @@ public class DoubletAnalysis implements PlugIn
 	 */
 	private String createAnalysisHeader()
 	{
-		return "s\tWidth\tMethod\tOptions\tResiduals\tSelection\tFilters...\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
+		return "s\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
 	}
 }
