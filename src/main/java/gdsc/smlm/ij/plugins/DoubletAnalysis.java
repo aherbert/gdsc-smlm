@@ -24,10 +24,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.commons.math3.analysis.integration.TrapezoidIntegrator;
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
 
@@ -39,6 +35,7 @@ import gdsc.core.match.PointPair;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.DataFilterType;
@@ -114,14 +111,22 @@ public class DoubletAnalysis implements PlugIn
 	private static boolean showOverlay = false;
 	private static boolean showHistograms = false;
 	private static boolean showResults = true;
-	private static boolean analysisShowResults = false;
 	private static boolean showJaccardPlot = true;
-	private static double dThreshold = 1;
+	private static boolean useMaxResiduals = true;
+	private static double lowerDistance = 1;
+	private static double matchDistance = 1;
+
+	private static boolean analysisShowResults = false;
+
+	private static String[] SELECTION_CRITERIA = { "R2", "AIC", "BIC", "ML AIC", "ML BIC" };
+	private static int selectionCriteria = 4;
 
 	private static TextWindow summaryTable = null, resultsTable = null, analysisTable = null;
 	private static ArrayList<DoubletResult> doubletResults;
-	private static double[] _residuals, _jaccard;
-	private static int _maxJaccardIndex, numberOfMolecules;
+	private ResidualsScore residualsScore;
+	private static ResidualsScore _residualsScoreMax;
+	private static ResidualsScore _residualsScoreAv;
+	private static int numberOfMolecules;
 	private static String analysisPrefix;
 	private ImagePlus imp;
 	private MemoryPeakResults results;
@@ -144,27 +149,48 @@ public class DoubletAnalysis implements PlugIn
 
 	private WindowOrganiser windowOrganiser = new WindowOrganiser();
 
+	private class ResidualsScore
+	{
+		final double[] residuals, jaccard, recall, precision;
+		final int maxJaccardIndex;
+
+		public ResidualsScore(double[] residuals, double[] jaccard, double[] recall, double[] precision,
+				int maxJaccardIndex)
+		{
+			this.residuals = residuals;
+			this.jaccard = jaccard;
+			this.recall = recall;
+			this.precision = precision;
+			this.maxJaccardIndex = maxJaccardIndex;
+		}
+	}
+
 	/**
 	 * Allows plotting the bonus from fitting all spots at a given residuals threshold
 	 */
 	public class DoubletBonus implements Comparable<DoubletBonus>
 	{
-		final double r;
-		final int tp, fp;
+		final double rMax, rAv;
+		final double tp, fp;
+		public double residuals;
 
 		/**
 		 * Instantiates a new doublet bonus.
 		 *
-		 * @param r
-		 *            the r
+		 * @param rMax
+		 *            the maximum residuals score
+		 * @param rAv
+		 *            the average residuals score
 		 * @param tp
 		 *            the additional true positives if this was accepted as a doublet
 		 * @param fp
 		 *            the additional false positives if this was accepted as a doublet
 		 */
-		public DoubletBonus(double r, int tp, int fp)
+		public DoubletBonus(double rMax, double rAv, double tp, double fp)
 		{
-			this.r = r;
+			this.rMax = rMax;
+			this.rAv = rAv;
+			this.residuals = rMax;
 			this.tp = tp;
 			this.fp = fp;
 		}
@@ -176,11 +202,16 @@ public class DoubletAnalysis implements PlugIn
 		 */
 		public int compareTo(DoubletBonus that)
 		{
-			if (this.r < that.r)
+			if (this.residuals < that.residuals)
 				return -1;
-			if (this.r > that.r)
+			if (this.residuals > that.residuals)
 				return 1;
 			return 0;
+		}
+
+		public void setScore(boolean useMax)
+		{
+			this.residuals = (useMax) ? rMax : rAv;
 		}
 	}
 
@@ -218,7 +249,7 @@ public class DoubletAnalysis implements PlugIn
 		double gap;
 		int iter1, iter2, eval1, eval2;
 		boolean good1, good2, valid, valid2;
-		int tp1, fp1, tp2, fp2;
+		double tp1, fp1, tp2, fp2;
 
 		public DoubletResult(int frame, Spot spot, int n, int neighbours, int almostNeighbours)
 		{
@@ -234,16 +265,22 @@ public class DoubletAnalysis implements PlugIn
 			this.fp2 = 2;
 		}
 
-		public void addTP1()
+		public void addTP1(double score)
 		{
-			tp1++;
-			fp1--;
+			//if (score > 1)
+			//	System.out.printf("Bad score %f\n", score);
+			if (tp1 != 0)
+				System.out.printf("Double counting: %f\n", score);
+			tp1 += score;
+			fp1 -= score;
 		}
 
-		public void addTP2()
+		public void addTP2(double score)
 		{
-			tp2++;
-			fp2--;
+			//if (score > 1)
+			//	System.out.printf("Bad score %f\n", score);
+			tp2 += score;
+			fp2 -= score;
 		}
 
 		public double getMaxScore()
@@ -302,6 +339,7 @@ public class DoubletAnalysis implements PlugIn
 		float[] data = null;
 		ArrayList<DoubletResult> results = new ArrayList<DoubletResult>();
 		int daic = 0, dbic = 0, cic = 0;
+		RampedScore rampedScore;
 
 		/**
 		 * Instantiates a new worker.
@@ -340,6 +378,7 @@ public class DoubletAnalysis implements PlugIn
 			neighbourHistogram = new int[3][spotHistogram.length];
 			almostNeighbourHistogram = new int[3][spotHistogram.length];
 			this.o = o;
+			rampedScore = new RampedScore(lowerDistance, matchDistance);
 		}
 
 		/*
@@ -381,6 +420,7 @@ public class DoubletAnalysis implements PlugIn
 			showProgress();
 
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
+			ArrayList<DoubletResult> frameResults = new ArrayList<DoubletResult>(actual.length);
 
 			// Extract the data
 			final int maxx = stack.getWidth();
@@ -713,7 +753,7 @@ public class DoubletAnalysis implements PlugIn
 						}
 					}
 
-					results.add(result);
+					frameResults.add(result);
 				}
 			}
 			//System.out.printf("Frame %d, singles=%d, doublets=%d, multi=%d\n", frame, singles, doublets, multiples);
@@ -721,10 +761,12 @@ public class DoubletAnalysis implements PlugIn
 
 			addToOverlay(frame, spots, singles, doublets, multiples, spotMatchCount);
 
+			results.addAll(frameResults);
+
 			// At the end of all the fitting, assign results as true or false positive.
 			ArrayList<Coordinate> f1 = new ArrayList<Coordinate>();
 			ArrayList<Coordinate> f2 = new ArrayList<Coordinate>();
-			for (DoubletResult result : results)
+			for (DoubletResult result : frameResults)
 			{
 				if (result.good1)
 				{
@@ -744,19 +786,28 @@ public class DoubletAnalysis implements PlugIn
 				}
 			}
 			List<PointPair> pairs = new ArrayList<PointPair>();
-			MatchCalculator.analyseResults2D(actual, f1.toArray(new Coordinate[f1.size()]), dThreshold, null, null,
+			MatchCalculator.analyseResults2D(actual, f1.toArray(new Coordinate[f1.size()]), matchDistance, null, null,
 					null, pairs);
 			for (PointPair pair : pairs)
 			{
 				ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
-				coord.result.addTP1();
+				coord.result.addTP1(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256));
 			}
-			MatchCalculator.analyseResults2D(actual, f2.toArray(new Coordinate[f2.size()]), dThreshold, null, null,
+			MatchCalculator.analyseResults2D(actual, f2.toArray(new Coordinate[f2.size()]), matchDistance, null, null,
 					null, pairs);
 			for (PointPair pair : pairs)
 			{
 				ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
-				coord.result.addTP2();
+				coord.result.addTP2(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256));
+			}
+
+			for (Coordinate c : f2)
+			{
+				ResultCoordinate coord = (ResultCoordinate) c;
+				if (coord.result.tp2 < 0 || coord.result.tp2 > 2)
+				{
+					System.out.printf("Bad matching 2: %f\n", coord.result.tp2);
+				}
 			}
 		}
 
@@ -995,7 +1046,8 @@ public class DoubletAnalysis implements PlugIn
 		if (lastId != simulationParameters.id)
 		{
 			double w = sa;
-			dThreshold = w * Gaussian2DFunction.SD_TO_HWHM_FACTOR;
+			matchDistance = w * Gaussian2DFunction.SD_TO_HWHM_FACTOR;
+			lowerDistance = 0.5 * matchDistance;
 			fitConfig.setInitialPeakStdDev(w);
 		}
 
@@ -1018,7 +1070,9 @@ public class DoubletAnalysis implements PlugIn
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Show_results", showResults);
 		gd.addCheckbox("Show_Jaccard_Plot", showJaccardPlot);
-		gd.addNumericField("Match_distance", dThreshold, 2);
+		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
+		gd.addNumericField("Match_distance", matchDistance, 2);
+		gd.addNumericField("Lower_distance", lowerDistance, 2);
 
 		gd.showDialog();
 
@@ -1038,10 +1092,16 @@ public class DoubletAnalysis implements PlugIn
 		showHistograms = gd.getNextBoolean();
 		showResults = gd.getNextBoolean();
 		showJaccardPlot = gd.getNextBoolean();
-		dThreshold = gd.getNextNumber();
+		useMaxResiduals = gd.getNextBoolean();
+		matchDistance = Math.abs(gd.getNextNumber());
+		lowerDistance = Math.abs(gd.getNextNumber());
 
 		if (gd.invalidNumber())
 			return false;
+
+		if (lowerDistance > matchDistance)
+			lowerDistance = matchDistance;
+
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
 		settings.setCalibration(cal);
@@ -1369,8 +1429,8 @@ public class DoubletAnalysis implements PlugIn
 
 		// For Jaccard scoring we need to count the score with no residuals threshold,
 		// i.e. Accumulate the score accepting all doublets that were fit 
-		int tp = 0;
-		int fp = 0;
+		double tp = 0;
+		double fp = 0;
 		ArrayList<DoubletBonus> data = new ArrayList<DoubletBonus>(results.size());
 		for (DoubletResult result : results)
 		{
@@ -1382,10 +1442,17 @@ public class DoubletAnalysis implements PlugIn
 				// Filter the doublets that would be accepted
 				if (result.good2)
 				{
+					if (result.tp2 < 0 || result.tp2 > 2)
+					{
+						System.out.printf("Bad result: TP2=%f\n", result.tp2);
+					}
+
 					tp += result.tp2;
 					fp += result.fp2;
+
 					// Store this as a doublet bonus
-					data.add(new DoubletBonus(score, result.tp2 - result.tp1, result.fp2 - result.fp1));
+					data.add(new DoubletBonus(score, result.getAvScore(), result.tp2 - result.tp1,
+							result.fp2 - result.fp1));
 				}
 				else
 				{
@@ -1419,6 +1486,29 @@ public class DoubletAnalysis implements PlugIn
 			}
 		}
 
+		// Debug the counts
+		//		double tpSingle = 0;
+		//		double fpSingle = 0;
+		//		double tpDoublet = 0;
+		//		double fpDoublet = 0;
+		//		int nSingle = 0, nDoublet = 0;
+		//		for (DoubletResult result : results)
+		//		{
+		//			if (result.good1)
+		//			{
+		//				if (result.good2)
+		//				{
+		//					tpDoublet += result.tp2;
+		//					fpDoublet += result.fp2;
+		//					nDoublet++;
+		//				}
+		//				tpSingle += result.tp1;
+		//				fpSingle += result.fp1;
+		//				nSingle++;
+		//			}
+		//		}
+		//		System.out.printf("Single %.1f,%.1f (%d) : Doublet %.1f,%.1f (%d)\n", tpSingle, fpSingle, nSingle, tpDoublet, fpDoublet, nDoublet*2);
+
 		// Summarise score for true results
 		Percentile p = new Percentile(99);
 		for (int c = 0; c < stats.length; c++)
@@ -1438,15 +1528,15 @@ public class DoubletAnalysis implements PlugIn
 		// This assumes we just pick the the doublet if we fit it (NO FILTERING at all!)
 
 		// Initialise the score for residuals 0
-		computeJaccard(data, tp, fp, numberOfMolecules);
-
 		// Store this as it serves as a baseline for the filtering analysis
-		_jaccard = jaccard;
-		_residuals = residuals;
-		_maxJaccardIndex = maxJaccardIndex;
+		computeScores(data, tp, fp, numberOfMolecules, true);
+		_residualsScoreMax = this.residualsScore;
+		computeScores(data, tp, fp, numberOfMolecules, false);
+		_residualsScoreAv = this.residualsScore;
 
+		residualsScore = (useMaxResiduals) ? _residualsScoreMax : _residualsScoreAv;
 		if (showJaccardPlot)
-			plotJaccard(residuals, jaccard, maxJaccardIndex, null, null, 0);
+			plotJaccard(residualsScore, null);
 
 		addJaccardScores(sb);
 
@@ -1469,9 +1559,6 @@ public class DoubletAnalysis implements PlugIn
 		return n;
 	}
 
-	private double[] residuals, jaccard;
-	private int maxJaccardIndex;
-
 	/**
 	 * Compute maximum jaccard for all the residuals thresholds.
 	 *
@@ -1483,60 +1570,129 @@ public class DoubletAnalysis implements PlugIn
 	 *            the false positives at residuals = 0
 	 * @param n
 	 *            the number of true positives at residuals = 0
-	 * @return the double[]
+	 * @param useMax
+	 *            Use the max residuals
 	 */
-	private void computeJaccard(ArrayList<DoubletBonus> data, double tp, int fp, int n)
+	private void computeScores(ArrayList<DoubletBonus> data, double tp, double fp, int n, boolean useMax)
 	{
 		// Add data at ends to complete the residuals scale from 0 to 1
-		data.add(new DoubletBonus(0, 0, 0));
-		data.add(new DoubletBonus(1, 0, 0));
+		data.add(new DoubletBonus(0, 0, 0, 0));
+		data.add(new DoubletBonus(1, 1, 0, 0));
+
+		for (DoubletBonus b : data)
+			b.setScore(useMax);
 		Collections.sort(data);
 
-		residuals = new double[data.size() + 2];
-		jaccard = new double[residuals.length];
-		maxJaccardIndex = 0;
+		double[] residuals = new double[data.size() + 2];
+		double[] jaccard = new double[residuals.length];
+		double[] recall = new double[residuals.length];
+		double[] precision = new double[residuals.length];
+		int maxJaccardIndex = 0;
 
 		int count = 0;
 		double last = 0;
 		for (DoubletBonus b : data)
 		{
-			if (last != b.r)
+			if (last != b.residuals)
 			{
 				residuals[count] = last;
 				jaccard[count] = tp / (n + fp);
+				if (tp + fp != 0)
+					precision[count] = tp / (tp + fp);
+				recall[count] = tp / n;
 				if (jaccard[maxJaccardIndex] < jaccard[count])
 					maxJaccardIndex = count;
 				count++;
 			}
 			tp -= b.tp;
 			fp -= b.fp;
-			last = b.r;
+			last = b.residuals;
 		}
 		residuals[count] = last;
 		jaccard[count] = tp / (n + fp);
 		if (jaccard[maxJaccardIndex] < jaccard[count])
 			maxJaccardIndex = count;
+		if (tp + fp != 0)
+			precision[count] = tp / (tp + fp);
+		recall[count] = tp / n;
 		count++;
 		residuals = Arrays.copyOf(residuals, count);
 		jaccard = Arrays.copyOf(jaccard, count);
+		precision = Arrays.copyOf(precision, count);
+		recall = Arrays.copyOf(recall, count);
+		this.residualsScore = new ResidualsScore(residuals, jaccard, recall, precision, maxJaccardIndex);
 	}
 
-	private void plotJaccard(double[] residuals, double[] jaccard, int maxJaccardIndex, double[] residuals2,
-			double[] jaccard2, int maxJaccardIndex2)
+	private void plotJaccard(ResidualsScore residualsScore, ResidualsScore residualsScoreReference)
 	{
-		String title = TITLE + " Jaccard";
-		Plot plot = new Plot(title, "Score", "Jaccard");
-		double max = Math.max(0.01, jaccard[maxJaccardIndex]);
-		if (jaccard2 != null)
-			max = Math.max(max, jaccard2[maxJaccardIndex2]);
-		plot.setLimits(0, 1, 0, max * 1.05);
-		plot.addPoints(residuals, jaccard, Plot.LINE);
-		if (jaccard2 != null)
+		String title = TITLE + " Score";
+		Plot plot = new Plot(title, "Residuals", "Score");
+		double max = getMax(0.01, residualsScore);
+		if (residualsScoreReference != null)
 		{
-			plot.setColor(Color.red);
-			plot.addPoints(residuals2, jaccard2, Plot.LINE);
+			max = getMax(max, residualsScore);
 		}
+		plot.setLimits(0, 1, 0, max * 1.05);
+		addLines(plot, residualsScore, 1);
+		if (residualsScoreReference != null)
+		{
+			addLines(plot, residualsScoreReference, 0.5);
+		}
+		plot.setColor(Color.black);
+		plot.addLabel(0, 0,
+				String.format("Residuals %s; Jaccard %s (Black); Precision %s (Blue); Recall %s (Red)",
+						Utils.rounded(residualsScore.residuals[residualsScore.maxJaccardIndex]),
+						Utils.rounded(residualsScore.jaccard[residualsScore.maxJaccardIndex]),
+						Utils.rounded(residualsScore.precision[residualsScore.maxJaccardIndex]),
+						Utils.rounded(residualsScore.recall[residualsScore.maxJaccardIndex])));
 		display(title, plot);
+	}
+
+	private double getMax(double max, ResidualsScore residualsScore)
+	{
+		max = Math.max(max, residualsScore.jaccard[residualsScore.maxJaccardIndex]);
+		max = Maths.maxDefault(max, residualsScore.precision);
+		max = Maths.maxDefault(max, residualsScore.recall);
+		return max;
+	}
+
+	private void addLines(Plot plot, ResidualsScore residualsScore, double saturation)
+	{
+		if (saturation == 1)
+		{
+			// Colours are the same as the BenchmarkSpotFilter
+
+			plot.setColor(Color.black);
+			plot.addPoints(residualsScore.residuals, residualsScore.jaccard, Plot.LINE);
+			plot.setColor(Color.blue);
+			plot.addPoints(residualsScore.residuals, residualsScore.precision, Plot.LINE);
+			plot.setColor(Color.red);
+			plot.addPoints(residualsScore.residuals, residualsScore.recall, Plot.LINE);
+		}
+		else
+		{
+			plot.setColor(getColor(Color.black, saturation));
+			plot.addPoints(residualsScore.residuals, residualsScore.jaccard, Plot.LINE);
+			plot.setColor(getColor(Color.blue, saturation));
+			plot.addPoints(residualsScore.residuals, residualsScore.precision, Plot.LINE);
+			plot.setColor(getColor(Color.red, saturation));
+			plot.addPoints(residualsScore.residuals, residualsScore.recall, Plot.LINE);
+		}
+	}
+
+	private Color getColor(Color color, double saturation)
+	{
+		int r = color.getRed();
+		int g = color.getGreen();
+		int b = color.getBlue();
+		if (r == 0 && g == 0 && b == 0)
+		{
+			// Black so make a grey
+			return Color.gray;
+		}
+		float[] hsbvals = Color.RGBtoHSB(r, g, b, null);
+		hsbvals[1] *= saturation;
+		return Color.getHSBColor(hsbvals[0], hsbvals[1], hsbvals[2]);
 	}
 
 	/**
@@ -1748,26 +1904,25 @@ public class DoubletAnalysis implements PlugIn
 		// Store the effect of fitting as a doublet
 		ArrayList<DoubletBonus> data = new ArrayList<DoubletBonus>(doubletResults.size());
 		// True positive and False positives at residuals = 0
-		int tp = 0;
-		int fp = 0;
+		double tp = 0;
+		double fp = 0;
 
 		// TODO - Get filters for the single and double fits
 
 		// Process all the results
 		for (DoubletResult result : doubletResults)
 		{
-			final double score = result.getMaxScore();
-
 			// Filter the singles that would be accepted
 			if (result.good1)
 			{
 				// Filter the doublets that would be accepted
-				if (result.good2 && result.mbic2 < result.mbic1)
+				if (result.good2 && selectFit(result))
 				{
 					tp += result.tp2;
 					fp += result.fp2;
 					// Store this as a doublet bonus
-					data.add(new DoubletBonus(score, result.tp2 - result.tp1, result.fp2 - result.fp1));
+					data.add(new DoubletBonus(result.getMaxScore(), result.getAvScore(), result.tp2 - result.tp1,
+							result.fp2 - result.fp1));
 				}
 				else
 				{
@@ -1779,14 +1934,15 @@ public class DoubletAnalysis implements PlugIn
 		}
 
 		// Compute the max Jaccard
-		computeJaccard(data, tp, fp, numberOfMolecules);
+		computeScores(data, tp, fp, numberOfMolecules, useMaxResiduals);
 
 		if (showJaccardPlot)
-			plotJaccard(_residuals, _jaccard, _maxJaccardIndex, residuals, jaccard, maxJaccardIndex);
+			plotJaccard(residualsScore, (useMaxResiduals) ? _residualsScoreMax : _residualsScoreAv);
 
 		createAnalysisTable();
 
 		StringBuilder sb = new StringBuilder(analysisPrefix);
+		sb.append(SELECTION_CRITERIA[selectionCriteria]).append('\t');
 		sb.append("Filter settings\t");
 
 		addJaccardScores(sb);
@@ -1794,8 +1950,26 @@ public class DoubletAnalysis implements PlugIn
 		analysisTable.append(sb.toString());
 	}
 
+	private boolean selectFit(DoubletResult result)
+	{
+		switch (selectionCriteria)
+		{
+			//@formatter:off
+			case 0:	return result.r2    > result.r1;
+			case 1:	return result.aic2  < result.aic1;
+			case 2:	return result.bic2  < result.bic1;
+			case 3:	return result.maic2 < result.maic1;
+			case 4:	return result.mbic2 < result.mbic1;
+			//@formatter:on
+		}
+		return false;
+	}
+
 	private void addJaccardScores(StringBuilder sb)
 	{
+		double[] residuals = residualsScore.residuals;
+		double[] jaccard = residualsScore.jaccard;
+		int maxJaccardIndex = residualsScore.maxJaccardIndex;
 		sb.append(Utils.rounded(jaccard[maxJaccardIndex])).append('\t')
 				.append(Utils.rounded(residuals[maxJaccardIndex]));
 		sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.15)));
@@ -1805,42 +1979,44 @@ public class DoubletAnalysis implements PlugIn
 
 	private double getArea(double[] residuals, double[] jaccard, int maxJaccardIndex, double window)
 	{
+		double sum = 0;
 		double lower = Math.max(0, residuals[maxJaccardIndex] - window);
 		double upper = Math.min(1, residuals[maxJaccardIndex] + window);
-		LinearInterpolator li = new LinearInterpolator();
-		PolynomialSplineFunction fun = li.interpolate(residuals, jaccard);
-		TrapezoidIntegrator in = new TrapezoidIntegrator();
-		double sum = 0;
-
-		try
+		//		LinearInterpolator li = new LinearInterpolator();
+		//		PolynomialSplineFunction fun = li.interpolate(residuals, jaccard);
+		//		//TrapezoidIntegrator in = new TrapezoidIntegrator();
+		//		SimpsonIntegrator in = new SimpsonIntegrator();
+		//
+		//		try
+		//		{
+		//			sum = in.integrate(1000, fun, lower, upper);
+		//		}
+		//		catch (TooManyEvaluationsException e)
+		//		{
+		//			System.out.println("Failed to calculate the area: " + e.getMessage());
+		int j = maxJaccardIndex;
+		for (int i = j; i-- > 0;)
 		{
-			sum = in.integrate(1000, fun, lower, upper);
+			if (residuals[i] < lower)
+			{
+				lower = residuals[j];
+				break;
+			}
+			sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[j] - residuals[i]);
+			j = i;
 		}
-		catch (TooManyEvaluationsException e)
+		j = maxJaccardIndex;
+		for (int i = j; ++i < jaccard.length;)
 		{
-			int j = maxJaccardIndex;
-			for (int i = j; i-- > 0;)
+			if (residuals[i] > upper)
 			{
-				if (residuals[i] < lower)
-				{
-					lower = residuals[j];
-					break;
-				}
-				sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[j] - residuals[i]);
-				j = i;
+				upper = residuals[j];
+				break;
 			}
-			j = maxJaccardIndex;
-			for (int i = j; ++i < jaccard.length;)
-			{
-				if (residuals[i] > upper)
-				{
-					upper = residuals[j];
-					break;
-				}
-				sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[i] - residuals[j]);
-				j = i;
-			}
+			sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[i] - residuals[j]);
+			j = i;
 		}
+		//		}
 		return sum / (upper - lower);
 	}
 
@@ -1859,18 +2035,22 @@ public class DoubletAnalysis implements PlugIn
 		// Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
 
 		// Collect options for filtering
+		gd.addChoice("Selection_Criteria", SELECTION_CRITERIA, SELECTION_CRITERIA[selectionCriteria]);
 
 		// Collect display options
 		gd.addCheckbox("Show_results", analysisShowResults);
 		gd.addCheckbox("Show_Jaccard_Plot", showJaccardPlot);
+		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
+		selectionCriteria = gd.getNextChoiceIndex();
 		analysisShowResults = gd.getNextBoolean();
 		showJaccardPlot = gd.getNextBoolean();
+		useMaxResiduals = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;
@@ -1897,6 +2077,6 @@ public class DoubletAnalysis implements PlugIn
 	 */
 	private String createAnalysisHeader()
 	{
-		return "s\tWidth\tMethod\tOptions\tFilters...\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
+		return "s\tWidth\tMethod\tOptions\tSelection\tFilters...\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
 	}
 }
