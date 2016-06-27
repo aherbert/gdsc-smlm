@@ -1942,6 +1942,7 @@ public class DoubletAnalysis implements PlugIn
 		createAnalysisTable();
 
 		StringBuilder sb = new StringBuilder(analysisPrefix);
+		sb.append((useMaxResiduals) ? "Max" : "Average").append('\t');
 		sb.append(SELECTION_CRITERIA[selectionCriteria]).append('\t');
 		sb.append("Filter settings\t");
 
@@ -2030,9 +2031,14 @@ public class DoubletAnalysis implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Filters the doublet fits and reports the performance increase");
+		StringBuilder sb = new StringBuilder("Filters the doublet fits and reports the performance increase\n");
 
 		// Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
+		sb.append("SD0 = ").append(Utils.rounded(fitConfig.getInitialPeakStdDev0())).append("\n");
+		sb.append("SD1 = ").append(Utils.rounded(fitConfig.getInitialPeakStdDev1())).append("\n");
+		sb.append("Fit Width = ").append(config.getRelativeFitting()).append("\n");
+
+		gd.addMessage(sb.toString());
 
 		// Collect options for filtering
 		gd.addChoice("Selection_Criteria", SELECTION_CRITERIA, SELECTION_CRITERIA[selectionCriteria]);
@@ -2077,6 +2083,6 @@ public class DoubletAnalysis implements PlugIn
 	 */
 	private String createAnalysisHeader()
 	{
-		return "s\tWidth\tMethod\tOptions\tSelection\tFilters...\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
+		return "s\tWidth\tMethod\tOptions\tResiduals\tSelection\tFilters...\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
 	}
 }
