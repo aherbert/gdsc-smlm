@@ -1442,7 +1442,7 @@ public class FitWorker implements Runnable
 				{
 					if (logger != null)
 					{
-						logger.info("Bad peak %d: Fitted coordinates moved outside fit region (x=%g,y=%g,a=%f)", n,
+						logger.info("Bad peak %d: Fitted coordinates moved outside fit region (x=%g,y=%g)", n,
 								xShift, yShift);
 					}
 					continue;
