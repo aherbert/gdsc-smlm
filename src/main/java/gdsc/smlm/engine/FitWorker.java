@@ -1408,7 +1408,7 @@ public class FitWorker implements Runnable
 			// Check the distance of the peaks to the centre of the region. It is possible that a second peak
 			// at the edge of the region has been fitted (note that no coordinate shift check was performed).
 
-			if (shift == 0)
+			if (shift == 0 || shift == Double.POSITIVE_INFINITY)
 			{
 				// Allow the shift to span half of the fitted window.
 				shift = 0.5 * FastMath.min(regionBounds.width, regionBounds.height);

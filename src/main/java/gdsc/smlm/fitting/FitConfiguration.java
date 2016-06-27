@@ -607,6 +607,8 @@ public class FitConfiguration implements Cloneable
 	 */
 	public double getCoordinateShiftFactor()
 	{
+		if (coordinateShift == Double.POSITIVE_INFINITY)
+			return 0;
 		final double widthMax = Maths.max(initialSD0, initialSD1);
 		return coordinateShift / widthMax;
 	}
@@ -734,7 +736,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	public double getWidthFactor()
 	{
-		return widthFactor;
+		return (widthFactor == Double.POSITIVE_INFINITY) ? 0 : widthFactor;
 	}
 
 	/**
