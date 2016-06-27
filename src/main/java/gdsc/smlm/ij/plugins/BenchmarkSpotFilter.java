@@ -73,7 +73,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static double sAnalysisBorder = 0;
 	private int analysisBorder;
-	private static double distance = 1.5;
+	private static double upperDistance = 1.5;
 	private static double lowerDistance = 1.5;
 	private static boolean relativeDistances = true;
 	private double matchDistance;
@@ -447,7 +447,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
-		gd.addSlider("Match_distance", 1, 3, distance);
+		gd.addSlider("Match_distance", 1, 3, upperDistance);
 		gd.addSlider("Lower_distance", 1, 3, lowerDistance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
@@ -466,7 +466,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
-		distance = Math.abs(gd.getNextNumber());
+		upperDistance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
@@ -477,8 +477,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (gd.invalidNumber())
 			return false;
 
-		if (lowerDistance > distance)
-			lowerDistance = distance;
+		if (lowerDistance > upperDistance)
+			lowerDistance = upperDistance;
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
@@ -489,7 +489,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			// Convert distance to PSF standard deviation units
 			final double sd = simulationParameters.s / simulationParameters.a;
-			matchDistance = distance * sd;
+			matchDistance = upperDistance * sd;
 			lowerMatchDistance = lowerDistance * sd;
 			analysisBorder = (int) (analysisBorder * sd);
 			// Add 0.5 offset to centre the spot in the pixel
@@ -497,7 +497,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		else
 		{
-			matchDistance = distance;
+			matchDistance = upperDistance;
 			lowerMatchDistance = lowerDistance;
 			analysisBorder = (int) (analysisBorder);
 			// Absolute distances in pixels will use integer coordinates so no offset
