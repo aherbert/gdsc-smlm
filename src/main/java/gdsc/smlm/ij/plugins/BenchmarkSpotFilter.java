@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
@@ -185,6 +187,36 @@ public class BenchmarkSpotFilter implements PlugIn
 			return score;
 		}
 
+		/**
+		 * Get the opposite of the score.
+		 *
+		 * @return the anti-score
+		 */
+		public double antiScore()
+		{
+			// XXX - I am not sure what result I would like here.
+			// One method allows the anti-score to be restricted to the range 0-1.
+			// i.e. a spot not matching anything should get a penalty of 1.
+			// The other method says that a spot not matching anything can have a 
+			// penalty above 1, if it is further away from multiple actual results
+			// than the mid point between the lower and upper match distance.
+			
+			// The use of partial scoring mimicks using multiple distance 
+			// thresholds and taking an average of scores. 
+			// For a single experiment at a single distance threshold a spot can 
+			// match 0, 1 or more actual results. This would be:
+			// 0  = TP=0 ,FP=1
+			// 1  = TP=1 ,FP=0
+			// 2+ = TP=2+,FP=0 (because it doesn't 'not match' anything)
+			// So for now I will use FP (anti-score) in the range 0-1.
+			
+			// Ensure score + anti-score add up to number number of scores
+			//return (distances == null) ? 1 : distances.length - score;
+			
+			// Only ever allow an anti-score in the range 0-1
+			return FastMath.max(0, 1 - score);
+		}
+		
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -380,7 +412,6 @@ public class BenchmarkSpotFilter implements PlugIn
 								ss.add(d, s);
 							}
 							tp += s;
-							fp += (1 - s);
 						}
 					}
 					for (int j = 0; j < spots.length; j++)
@@ -389,6 +420,10 @@ public class BenchmarkSpotFilter implements PlugIn
 						{
 							scoredSpots[j] = new ScoredSpot(false, spots[j]);
 							fp++;
+						}
+						else
+						{
+							fp += scoredSpots[j].antiScore();
 						}
 					}
 				}
@@ -821,6 +856,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
 		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
+		sb.append(multipleMatches).append("\t");
 		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
 		sb.append(Utils.rounded(matchDistance)).append("\t");
 
@@ -846,10 +882,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (s.match)
 			{
-				final double score = s.getScore();
-				// Score partial matches as part true-positive and part false-positive
-				tp += score;
-				fp += (1 - score);
+				// Score partial matches as part true-positive and part false-positive.
+				// TP can be above 1 if we are allowing multiple matches.
+				tp += s.getScore();
+				fp += s.antiScore();
 			}
 			else
 				fp++;
@@ -1001,7 +1037,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tlower d\td\t");
+		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tlower d\td\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
