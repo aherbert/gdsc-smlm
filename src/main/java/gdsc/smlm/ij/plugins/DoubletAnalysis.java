@@ -23,6 +23,7 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -132,6 +133,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static boolean useMaxResiduals = true;
 	private static double lowerDistance = 1;
 	private static double matchDistance = 1;
+	private static String[] MATCHING = { "Simple", "By residuals", "By candidate" };
+	private static int matching = 0;
 
 	private static double analysisDriftAngle = 45;
 	private static double minGap = 0;
@@ -241,7 +244,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		}
 	}
 
-	private class ResultCoordinate extends BasePoint
+	private class ResultCoordinate extends BasePoint implements Comparable<ResultCoordinate>
 	{
 		final DoubletResult result;
 		final int id;
@@ -253,6 +256,21 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			this.result = result;
 			this.id = id;
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		public int compareTo(ResultCoordinate that)
+		{
+			//if (this.result.spot.intensity > that.result.spot.intensity)
+			//	return -1;
+			//if (this.result.spot.intensity < that.result.spot.intensity)
+			//	return 1;
+			//return 0;
+			return this.result.spotIndex - that.result.spotIndex;
+		}
 	}
 
 	/**
@@ -263,7 +281,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final int frame;
 		final float noise;
 		final Spot spot;
-		final int n, c, neighbours, almostNeighbours;
+		final int n, c, neighbours, almostNeighbours, spotIndex;
 		FitResult fitResult1 = null;
 		FitResult fitResult2 = null;
 		double sumOfSquares1, sumOfSquares2;
@@ -280,7 +298,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		boolean good1, good2, valid, valid2;
 		double tp1, fp1, tp2a, fp2a, tp2b, fp2b;
 
-		public DoubletResult(int frame, float noise, Spot spot, int n, int neighbours, int almostNeighbours)
+		public DoubletResult(int frame, float noise, Spot spot, int n, int neighbours, int almostNeighbours,
+				int spotIndex)
 		{
 			this.frame = frame;
 			this.noise = noise;
@@ -289,6 +308,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			this.c = DoubletAnalysis.getClass(n);
 			this.neighbours = neighbours;
 			this.almostNeighbours = almostNeighbours;
+			this.spotIndex = spotIndex;
 			this.tp1 = 0;
 			this.fp1 = 1;
 			this.tp2a = 0;
@@ -628,7 +648,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							spot.y - regionBounds.y, 0, 0 };
 
 					final DoubletResult result = new DoubletResult(frame, noise, spot, n, neighbourCount,
-							almostNeighbourCount);
+							almostNeighbourCount, j);
 					result.fitResult1 = gf.fit(region, width, height, 1, params, amplitudeEstimate);
 					result.iter1 = gf.getIterations();
 					result.eval1 = gf.getEvaluations();
@@ -807,42 +827,373 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			results.addAll(frameResults);
 
 			// At the end of all the fitting, assign results as true or false positive.
-			ArrayList<Coordinate> f1 = new ArrayList<Coordinate>();
-			ArrayList<Coordinate> f2 = new ArrayList<Coordinate>();
-			for (DoubletResult result : frameResults)
+			
+			if (matching == 0)
 			{
-				if (result.good1)
+				// Simple matching based on closest distance.
+				// This is valid for comparing the score between residuals=1 (all single) and
+				// residuals=0 (all doublets), when all spot candidates are fit.
+				
+				ArrayList<ResultCoordinate> f1 = new ArrayList<ResultCoordinate>();
+				ArrayList<ResultCoordinate> f2 = new ArrayList<ResultCoordinate>();
+				for (DoubletResult result : frameResults)
 				{
-					final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
-					double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
-					double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
-					f1.add(new ResultCoordinate(result, 0, x, y));
-					if (result.good2)
+					if (result.good1)
 					{
-						x = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
-						y = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
-						f2.add(new ResultCoordinate(result, 0, x, y));
-						x = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] + regionBounds.x;
-						y = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] + regionBounds.y;
-						f2.add(new ResultCoordinate(result, 1, x, y));
+						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
+						double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
+						double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
+						f1.add(new ResultCoordinate(result, 0, x, y));
+						if (result.good2)
+						{
+							double x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] +
+									regionBounds.x;
+							double y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
+									regionBounds.y;
+							f2.add(new ResultCoordinate(result, 0, x2, y2));
+							x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] + regionBounds.x;
+							y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] + regionBounds.y;
+							f2.add(new ResultCoordinate(result, 1, x2, y2));
+						}
+					}
+				}
+
+				if (f1.isEmpty())
+					return;
+
+				List<PointPair> pairs = new ArrayList<PointPair>();
+				MatchCalculator.analyseResults2D(actual, f1.toArray(new ResultCoordinate[f1.size()]), matchDistance,
+						null, null, null, pairs);
+				for (PointPair pair : pairs)
+				{
+					ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
+					coord.result.addTP1(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256));
+				}
+
+				if (f2.isEmpty())
+					return;
+
+				// Note: Computing the closest match to all doublets
+				// results in a simple analysis since we are comparing all doublets against all singles.
+				// There may be a case where a actual coordinate is matched by a bad doublet but also by a 
+				// good doublet at a higher distance. However when we filter the results to remove bad doublets 
+				// (low residuals, etc) this result is not scored even though it would also match the better doublet.
+
+				// This may not matter unless the density is high.
+
+				MatchCalculator.analyseResults2D(actual, f2.toArray(new Coordinate[f2.size()]), matchDistance, null,
+						null, null, pairs);
+				for (PointPair pair : pairs)
+				{
+					ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
+					coord.result.addTP2(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256), coord.id);
+				}
+			}
+			else if (matching == 1)
+			{
+				// Rank doublets by the residuals score.
+				// This is valid for comparing the score between residuals=1 (all singles) 
+				// and the effect of altering the residuals threshold to allow more doublets.
+				// It is not a true effect as doublets with a higher residuals score may not be 
+				// first spot candidates that are fit.
+
+				// Rank singles by the Candidate spot
+				Collections.sort(frameResults, new Comparator<DoubletResult>()
+				{
+					public int compare(DoubletResult o1, DoubletResult o2)
+					{
+						return o1.spotIndex - o2.spotIndex;
+					}
+				});
+
+				final double threshold = matchDistance * matchDistance;
+				final boolean[] assigned = new boolean[actual.length];
+
+				int count = 0;
+				int[] matched = new int[frameResults.size()];
+				OUTER: for (int j = 0; j < frameResults.size(); j++)
+				{
+					DoubletResult result = frameResults.get(j);
+					if (result.good1)
+					{
+						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
+						float x = (float) (result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] +
+								regionBounds.x);
+						float y = (float) (result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] +
+								regionBounds.y);
+
+						for (int i = 0; i < actual.length; i++)
+						{
+							if (assigned[i])
+								continue;
+							final double d2 = actual[i].distance2(x, y);
+							if (d2 <= threshold)
+							{
+								assigned[i] = true;
+								matched[j] = i + 1;
+								result.addTP1(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256));
+								if (++count == actual.length)
+									break OUTER;
+								break;
+							}
+						}
+					}
+				}
+
+				// Rank the doublets by residuals threshold instead. 1 from the doublet 
+				// must match the spot that it matched as a single (if still available). 
+				// The other can match anything else...
+				Collections.sort(frameResults, new Comparator<DoubletResult>()
+				{
+					public int compare(DoubletResult o1, DoubletResult o2)
+					{
+						if (o1.getMaxScore() > o2.getMaxScore())
+							return -1;
+						if (o1.getMaxScore() < o2.getMaxScore())
+							return -1;
+						return 0;
+					}
+				});
+
+				count = 0;
+				Arrays.fill(assigned, false);
+				OUTER: for (int j = 0; j < frameResults.size(); j++)
+				{
+					DoubletResult result = frameResults.get(j);
+					if (result.good1)
+					{
+						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
+
+						if (result.good2)
+						{
+							float x1 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] +
+									regionBounds.x);
+							float y1 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
+									regionBounds.y);
+							float x2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] +
+									regionBounds.x);
+							float y2 = (float) (result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] +
+									regionBounds.y);
+
+							ResultCoordinate ra = new ResultCoordinate(result, 0, x1, y1);
+							ResultCoordinate rb = new ResultCoordinate(result, 1, x2, y2);
+							
+							// Q. what did the single match?
+							int i = matched[j] - 1;
+							if (i != -1 && !assigned[i])
+							{
+								// One of the doublet pair must match this
+								final double d2a = ra.distanceXY2(actual[i]);
+								final double d2b = rb.distanceXY2(actual[i]);
+								if (d2a < d2b)
+								{
+									if (d2a <= threshold)
+									{
+										ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2a), 256), ra.id);
+										if (++count == actual.length)
+											break OUTER;
+										assigned[i] = true;
+										ra = null;
+									}
+								}
+								else
+								{
+									if (d2b <= threshold)
+									{
+										rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2b), 256), rb.id);
+										if (++count == actual.length)
+											break OUTER;
+										assigned[i] = true;
+										rb = null;
+									}
+								}
+							}
+							
+							// Process the rest of the results
+							for (i = 0; i < actual.length; i++)
+							{
+								if (assigned[i])
+									continue;
+								if (ra == null)
+								{
+									final double d2 = rb.distanceXY2(actual[i]);
+									if (d2 <= threshold)
+									{
+										rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), rb.id);
+										if (++count == actual.length)
+											break OUTER;
+										assigned[i] = true;
+										break;
+									}
+								}
+								else if (rb == null)
+								{
+									final double d2 = ra.distanceXY2(actual[i]);
+									if (d2 <= threshold)
+									{
+										ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), ra.id);
+										if (++count == actual.length)
+											break OUTER;
+										assigned[i] = true;
+										break;
+									}
+								}
+								else
+								{
+									final double d2a = ra.distanceXY2(actual[i]);
+									final double d2b = rb.distanceXY2(actual[i]);
+									if (d2a < d2b)
+									{
+										if (d2a <= threshold)
+										{
+											ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2a), 256), ra.id);
+											if (++count == actual.length)
+												break OUTER;
+											assigned[i] = true;
+											ra = null;
+										}
+									}
+									else
+									{
+										if (d2b <= threshold)
+										{
+											rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2b), 256), rb.id);
+											if (++count == actual.length)
+												break OUTER;
+											assigned[i] = true;
+											rb = null;
+										}
+									}
+								}
+							}							
+						}
 					}
 				}
 			}
-			List<PointPair> pairs = new ArrayList<PointPair>();
-			MatchCalculator.analyseResults2D(actual, f1.toArray(new Coordinate[f1.size()]), matchDistance, null, null,
-					null, pairs);
-			for (PointPair pair : pairs)
+			else
 			{
-				ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
-				coord.result.addTP1(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256));
+				// Matching based on spot ranking
+				ArrayList<ResultCoordinate> f1 = new ArrayList<ResultCoordinate>();
+				ArrayList<ResultCoordinate> f2 = new ArrayList<ResultCoordinate>();
+				for (DoubletResult result : frameResults)
+				{
+					if (result.good1)
+					{
+						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
+						double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
+						double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
+						f1.add(new ResultCoordinate(result, 0, x, y));
+						if (result.good2)
+						{
+							double x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] +
+									regionBounds.x;
+							double y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION] +
+									regionBounds.y;
+							f2.add(new ResultCoordinate(result, 0, x2, y2));
+							x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION + 6] + regionBounds.x;
+							y2 = result.fitResult2.getParameters()[Gaussian2DFunction.Y_POSITION + 6] + regionBounds.y;
+							f2.add(new ResultCoordinate(result, 1, x2, y2));
+						}
+					}
+				}
+
+				if (f1.isEmpty())
+					return;
+				
+				Collections.sort(f1);
+				Collections.sort(f2);
+
+				// Match the singles to actual coords, rank by the Candidate spot (not distance)
+				final double threshold = matchDistance * matchDistance;
+				int count = 0;
+				boolean[] assigned = new boolean[actual.length];
+				OUTER: for (ResultCoordinate r : f1)
+				{
+					for (int i = 0; i < actual.length; i++)
+					{
+						if (assigned[i])
+							continue;
+						final double d2 = r.distanceXY2(actual[i]);
+						if (d2 <= threshold)
+						{
+							r.result.addTP1(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256));
+							if (++count == actual.length)
+								break OUTER;
+							assigned[i] = true;
+							break;
+						}
+					}
+				}
+
+				// Match the doublets to actual coords, rank by the Candidate spot (not distance)
+				// Process in pairs
+				count = 0;
+				Arrays.fill(assigned, false);
+				OUTER: for (int j = 0; j < f2.size(); j += 2)
+				{
+					ResultCoordinate ra = f2.get(j);
+					ResultCoordinate rb = f2.get(j + 1);
+
+					for (int i = 0; i < actual.length; i++)
+					{
+						if (assigned[i])
+							continue;
+						if (ra == null)
+						{
+							final double d2 = rb.distanceXY2(actual[i]);
+							if (d2 <= threshold)
+							{
+								rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), rb.id);
+								if (++count == actual.length)
+									break OUTER;
+								assigned[i] = true;
+								break;
+							}
+						}
+						else if (rb == null)
+						{
+							final double d2 = ra.distanceXY2(actual[i]);
+							if (d2 <= threshold)
+							{
+								ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), ra.id);
+								if (++count == actual.length)
+									break OUTER;
+								assigned[i] = true;
+								break;
+							}
+						}
+						else
+						{
+							final double d2a = ra.distanceXY2(actual[i]);
+							final double d2b = rb.distanceXY2(actual[i]);
+							if (d2a < d2b)
+							{
+								if (d2a <= threshold)
+								{
+									ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2a), 256), ra.id);
+									if (++count == actual.length)
+										break OUTER;
+									assigned[i] = true;
+									ra = null;
+								}
+							}
+							else
+							{
+								if (d2b <= threshold)
+								{
+									rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2b), 256), rb.id);
+									if (++count == actual.length)
+										break OUTER;
+									assigned[i] = true;
+									rb = null;
+								}
+							}
+						}
+					}
+				}
+
 			}
-			MatchCalculator.analyseResults2D(actual, f2.toArray(new Coordinate[f2.size()]), matchDistance, null, null,
-					null, pairs);
-			for (PointPair pair : pairs)
-			{
-				ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
-				coord.result.addTP2(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256), coord.id);
-			}
+
 		}
 
 		private int goodFit(FitResult fitResult, final int width, final int height)
@@ -1000,6 +1351,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				}
 			}
 		}
+
 	}
 
 	/**
@@ -1108,6 +1460,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
 		gd.addNumericField("Match_distance", matchDistance, 2);
 		gd.addNumericField("Lower_distance", lowerDistance, 2);
+		gd.addChoice("Matching", MATCHING, MATCHING[matching]);
 
 		gd.showDialog();
 
@@ -1131,6 +1484,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		useMaxResiduals = gd.getNextBoolean();
 		matchDistance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
+		matching = gd.getNextChoiceIndex();
 
 		if (gd.invalidNumber())
 			return false;
@@ -1584,6 +1938,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				showHistogram(values, NAMES2[c]);
 		}
 
+		sb.append(MATCHING[matching]).append('\t');
+
 		// Plot a graph of the additional results we would fit at all score thresholds.
 		// This assumes we just pick the the doublet if we fit it (NO FILTERING at all!)
 
@@ -1812,7 +2168,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				"Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("Best J\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%");
+		sb.append("Simple\tBest J\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%");
 		return sb.toString();
 	}
 
