@@ -1803,7 +1803,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				"Molecules\tMatched\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("Best J\tMax J\t@score\tArea 0.15\tArea 0.3\tArea");
+		sb.append("Best J\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%");
 		return sb.toString();
 	}
 
@@ -2193,9 +2193,49 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		int maxJaccardIndex = residualsScore.maxJaccardIndex;
 		sb.append(Utils.rounded(jaccard[maxJaccardIndex])).append('\t')
 				.append(Utils.rounded(residuals[maxJaccardIndex]));
+
 		sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.15)));
-		sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.3)));
-		sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 1)));
+		//sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.3)));
+		//sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 1)));
+
+		// Find the range that has a Jaccard within a % of the max
+		addRange(sb, residuals, jaccard, maxJaccardIndex, 0.98);
+	}
+
+	private void addRange(StringBuilder sb, double[] residuals, double[] jaccard, int maxJaccardIndex, double fraction)
+	{
+		double sum = 0;
+		double limit = jaccard[maxJaccardIndex] * fraction;
+		double lower = residuals[maxJaccardIndex];
+		double upper = residuals[maxJaccardIndex];
+		int j = maxJaccardIndex;
+		for (int i = j; i-- > 0;)
+		{
+			if (jaccard[i] < limit)
+			{
+				break;
+			}
+			sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[j] - residuals[i]);
+			j = i;
+			lower = residuals[j];
+		}
+		j = maxJaccardIndex;
+		for (int i = j; ++i < jaccard.length;)
+		{
+			if (jaccard[i] < limit)
+			{
+				break;
+			}
+			sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[i] - residuals[j]);
+			j = i;
+			upper = residuals[j];
+		}
+		if (sum != 0)
+			sum /= (upper - lower);
+		else
+			sum = jaccard[maxJaccardIndex];
+		sb.append('\t').append(Utils.rounded(sum)).append('\t').append(Utils.rounded(lower)).append('\t')
+				.append(Utils.rounded(upper)).append('\t').append(Utils.rounded(upper - lower));
 	}
 
 	private double getArea(double[] residuals, double[] jaccard, int maxJaccardIndex, double window)
@@ -2339,7 +2379,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	{
 		if (analysisTable == null || !analysisTable.isVisible())
 		{
-			analysisTable = new TextWindow(TITLE + " Analysis", createAnalysisHeader(), "", 1000, 300);
+			analysisTable = new TextWindow(TITLE + " Analysis", createAnalysisHeader(), "", 1200, 300);
 			analysisTable.setVisible(true);
 		}
 	}
@@ -2351,7 +2391,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "s\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
+		return "s\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
 	}
 
 	/*
