@@ -72,6 +72,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	private static double sAnalysisBorder = 0;
+	private static boolean multipleMatches = true;
 	private int analysisBorder;
 	private static double upperDistance = 1.5;
 	private static double lowerDistance = 1.5;
@@ -110,22 +111,22 @@ public class BenchmarkSpotFilter implements PlugIn
 	public class ScoredSpot implements Comparable<ScoredSpot>
 	{
 		final boolean match;
-		final double[] data;
+		double[] distances, scores;
+		double score;
 		final Spot spot;
 		int fails;
 
 		public ScoredSpot(boolean match, double d, double score, Spot spot)
 		{
 			this.match = match;
-			data = new double[] { d, score };
 			this.spot = spot;
 			this.fails = 0;
+			add(d, score);
 		}
 
 		public ScoredSpot(boolean match, Spot spot)
 		{
 			this.match = match;
-			data = null;
 			this.spot = spot;
 			this.fails = 0;
 		}
@@ -133,39 +134,55 @@ public class BenchmarkSpotFilter implements PlugIn
 		public ScoredSpot(boolean match, Spot spot, int fails)
 		{
 			this.match = match;
-			data = null;
 			this.spot = spot;
 			this.fails = fails;
 		}
 
-		public double getDistance()
+		/**
+		 * Adds the result to the scored spot
+		 *
+		 * @param d
+		 *            the d
+		 * @param score
+		 *            the score
+		 */
+		void add(double d, double score)
 		{
-			return (data != null) ? data[0] : 0;
+			if (distances == null)
+			{
+				distances = new double[] { d };
+				scores = new double[] { score };
+				this.score = score;
+			}
+			else
+			{
+				final int size = distances.length;
+				distances = Arrays.copyOf(distances, size + 1);
+				scores = Arrays.copyOf(scores, size + 1);
+				distances[size] = d;
+				scores[size] = score;
+				this.score += score;
+			}
 		}
 
-		public double getScore()
+		public double getDistance(int i)
 		{
-			return (data != null) ? data[1] : 0;
+			return (distances != null && i < distances.length) ? distances[i] : 0;
+		}
+
+		public double getScore(int i)
+		{
+			return (scores != null && i < scores.length) ? scores[i] : 0;
 		}
 
 		/**
-		 * Get the first element of the data array without checking for null
+		 * Get the score
 		 * 
-		 * @return The first element of the data array
+		 * @return The score
 		 */
-		double quickDistance()
+		double getScore()
 		{
-			return data[0];
-		}
-
-		/**
-		 * Get the second element of the data array without checking for null.
-		 * 
-		 * @return The second element of the data array
-		 */
-		double quickScore()
-		{
-			return data[1];
+			return score;
 		}
 
 		/*
@@ -205,7 +222,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		final ImageStack stack;
 		final MaximaSpotFilter spotFilter;
 		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
-		List<Coordinate> TP = new ArrayList<Coordinate>();
 		List<Coordinate> FP = new ArrayList<Coordinate>();
 		final HashMap<Integer, FilterResult> results;
 		List<PointPair> matches = new ArrayList<PointPair>();
@@ -302,28 +318,79 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (actual.length > 0)
 			{
 				Coordinate[] predicted = getCoordinates(spots);
-				TP.clear();
-				FP.clear();
 
-				MatchCalculator.analyseResults2D(actual, predicted, matchDistance, TP, FP, null, matches);
+				double tp = 0, fp = 0;
 
-				// Store the true and false positives. Maintain the original ranked order.
-				double tp = 0;
-				double fp = FP.size();
-				for (PointPair pair : matches)
+				if (!multipleMatches)
 				{
-					SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
-					final double d = pair.getXYDistance();
-					final double s = RampedScore.flatten(score.score(d), 256);
-					scoredSpots[sc.id] = new ScoredSpot(true, d, s, sc.spot);
-					// Score partial matches as part true-positive and part false-positive
-					tp += s;
-					fp += (1 - s);
+					MatchCalculator.analyseResults2D(actual, predicted, matchDistance, null, FP, null, matches);
+
+					// Store the true and false positives. Maintain the original ranked order.
+					fp = FP.size();
+					for (PointPair pair : matches)
+					{
+						SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
+						final double d = pair.getXYDistance();
+						final double s = RampedScore.flatten(score.score(d), 256);
+						scoredSpots[sc.id] = new ScoredSpot(true, d, s, sc.spot);
+						// Score partial matches as part true-positive and part false-positive
+						tp += s;
+						fp += (1 - s);
+					}
+					for (Coordinate c : FP)
+					{
+						SpotCoordinate sc = (SpotCoordinate) c;
+						scoredSpots[sc.id] = new ScoredSpot(false, sc.spot);
+					}
 				}
-				for (Coordinate c : FP)
+				else
 				{
-					SpotCoordinate sc = (SpotCoordinate) c;
-					scoredSpots[sc.id] = new ScoredSpot(false, sc.spot);
+					// Assign each actual result to the closest spot. 
+					// This allows a spot to have more than one match (i.e. a doublet) 
+					for (int i = 0; i < actual.length; i++)
+					{
+						double dmin = matchDistance * matchDistance;
+						int match = -1;
+						final double x = actual[i].getX();
+						final double y = actual[i].getY();
+						for (int j = 0; j < predicted.length; j++)
+						{
+							final double dx = (x - predicted[j].getX());
+							final double dy = (y - predicted[j].getY());
+							final double d2 = dx * dx + dy * dy;
+							if (d2 <= dmin)
+							{
+								dmin = d2;
+								match = j;
+							}
+						}
+
+						if (match != -1)
+						{
+							final double d = Math.sqrt(dmin);
+							final double s = RampedScore.flatten(score.score(d), 256);
+							final ScoredSpot ss = scoredSpots[match];
+							if (ss == null)
+							{
+								scoredSpots[match] = new ScoredSpot(true, d, s, spots[match]);
+							}
+							else
+							{
+								// This is a second match to the same spot
+								ss.add(d, s);
+							}
+							tp += s;
+							fp += (1 - s);
+						}
+					}
+					for (int j = 0; j < spots.length; j++)
+					{
+						if (scoredSpots[j] == null)
+						{
+							scoredSpots[j] = new ScoredSpot(false, spots[j]);
+							fp++;
+						}
+					}
 				}
 
 				result = new FractionClassificationResult(tp, fp, 0, actual.length - tp);
@@ -354,8 +421,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			if (debug)
 			{
-				System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame,
-						actual.length, result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
+				System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame, actual.length,
+						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
 			}
 
 			results.put(frame, new FilterResult(result, scoredSpots));
@@ -391,7 +458,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		extraOptions = Utils.isExtraOptions();
 
 		simulationParameters = CreateData.simulationParameters;
@@ -447,6 +514,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
+		gd.addCheckbox("Multiple_matches", multipleMatches);
 		gd.addSlider("Match_distance", 1, 3, upperDistance);
 		gd.addSlider("Lower_distance", 1, 3, lowerDistance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
@@ -466,6 +534,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
+		multipleMatches = gd.getNextBoolean();
 		upperDistance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
@@ -514,7 +583,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Extract all the results in memory into a list per frame. This can be cached
 		if (lastId != simulationParameters.id || lastRelativeDistances != relativeDistances)
 		{
-			// When using pixel distances then get the coordinates in integers
+			// When using pixel distances then get the coordinates in integers.
+			// The Worker adds a pixel offset if appropriate.
 			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), !relativeDistances);
 			lastId = simulationParameters.id;
 			lastRelativeDistances = relativeDistances;
@@ -776,7 +846,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (s.match)
 			{
-				final double score = s.quickScore();
+				final double score = s.getScore();
 				// Score partial matches as part true-positive and part false-positive
 				tp += score;
 				fp += (1 - score);
@@ -813,8 +883,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (j[maxIndex] < j[ii])
 				maxIndex = ii;
 		}
-		addResult(sb, new FractionClassificationResult(truePositives[maxIndex], falsePositives[maxIndex], 0, n -
-				truePositives[maxIndex]));
+		addResult(sb, new FractionClassificationResult(truePositives[maxIndex], falsePositives[maxIndex], 0,
+				n - truePositives[maxIndex]));
 
 		sb.append(Utils.rounded(time / 1e6));
 
