@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Choice;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,12 +17,16 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -79,7 +85,7 @@ import ij.text.TextWindow;
  * a table of the single and double fit for each spot with metrics. This can be used to determine the best settings for
  * optimum doublet fitting and filtering.
  */
-public class DoubletAnalysis implements PlugIn
+public class DoubletAnalysis implements PlugIn, ItemListener
 {
 	private static final String TITLE = "Doublet Analysis";
 	private static FitConfiguration fitConfig, filterFitConfig;
@@ -118,6 +124,7 @@ public class DoubletAnalysis implements PlugIn
 		filterFitConfig.setWidthFactor(0);
 	}
 
+	private static double iterationIncrease = 1;
 	private static boolean showOverlay = false;
 	private static boolean showHistograms = false;
 	private static boolean showResults = true;
@@ -144,6 +151,12 @@ public class DoubletAnalysis implements PlugIn
 	private ImagePlus imp;
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
+
+	private TextField textCoordinateShiftFactor;
+	private TextField textSignalStrength;
+	private TextField textMinPhotons;
+	private TextField textPrecisionThreshold;
+	private TextField textWidthFactor;
 
 	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
 			"Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
@@ -662,9 +675,10 @@ public class DoubletAnalysis implements PlugIn
 							// Increase the iterations level then reset afterwards.
 							final int maxIterations = fitConfig.getMaxIterations();
 							final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
-							fitConfig.setMaxIterations(maxIterations * FitWorker.ITERATION_INCREASE_FOR_DOUBLETS * 2);
-							fitConfig.setMaxFunctionEvaluations(
-									maxEvaluations * FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS * 2);
+							fitConfig.setMaxIterations((int) (maxIterations *
+									FitWorker.ITERATION_INCREASE_FOR_DOUBLETS * iterationIncrease));
+							fitConfig.setMaxFunctionEvaluations((int) (maxEvaluations *
+									FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS * iterationIncrease));
 							gf.setComputeResiduals(false);
 							result.fitResult2 = gf.fit(region, width, height, 2, doubletParams, false);
 							gf.setComputeResiduals(true);
@@ -1086,6 +1100,7 @@ public class DoubletAnalysis implements PlugIn
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 
+		gd.addSlider("Iteration_increase", 1, 4.5, iterationIncrease);
 		gd.addCheckbox("Show_overlay", showOverlay);
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Show_results", showResults);
@@ -1108,6 +1123,7 @@ public class DoubletAnalysis implements PlugIn
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 
+		iterationIncrease = gd.getNextNumber();
 		showOverlay = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
 		showResults = gd.getNextBoolean();
@@ -2085,7 +2101,7 @@ public class DoubletAnalysis implements PlugIn
 
 								// Note: The FitWorker also checks for drift to another candidate.
 							}
-							
+
 							// This is OK
 							accept[n] = true;
 						}
@@ -2230,6 +2246,7 @@ public class DoubletAnalysis implements PlugIn
 	 *
 	 * @return true, if successful
 	 */
+	@SuppressWarnings("unchecked")
 	private boolean showAnalysisDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -2259,6 +2276,8 @@ public class DoubletAnalysis implements PlugIn
 		filterFitConfig.setEmCCD(cal.emCCD);
 		filterFitConfig.setFitSolver(fitConfig.getFitSolver());
 
+		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		gd.addChoice("Template", templates, templates[0]);
 		gd.addSlider("Shift_factor", 0.01, 2, filterFitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
@@ -2273,6 +2292,21 @@ public class DoubletAnalysis implements PlugIn
 		gd.addCheckbox("Show_Jaccard_Plot", showJaccardPlot);
 		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
 		gd.addCheckbox("Logging", analysisLogging);
+
+		// Add a mouse listener to the config file field
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		{
+			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
+			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+			int n = 0;
+			Choice textTemplate = choices.get(1);
+			textTemplate.addItemListener(this);
+			textCoordinateShiftFactor = numerics.get(n++);
+			textSignalStrength = numerics.get(n++);
+			textMinPhotons = numerics.get(n++);
+			textWidthFactor = numerics.get(n++);
+			textPrecisionThreshold = numerics.get(n++);
+		}
 
 		gd.showDialog();
 
@@ -2318,5 +2352,45 @@ public class DoubletAnalysis implements PlugIn
 	private String createAnalysisHeader()
 	{
 		return "s\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\t@score\tArea 0.15\tArea 0.3\tArea";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	 */
+	public void itemStateChanged(ItemEvent e)
+	{
+		if (e.getSource() instanceof Choice)
+		{
+			// Update the settings from the template
+			Choice choice = (Choice) e.getSource();
+			String templateName = choice.getSelectedItem();
+
+			// Get the configuration template
+			GlobalSettings template = ConfigurationTemplate.getTemplate(templateName);
+
+			if (template != null)
+			{
+				if (template.isFitEngineConfiguration())
+				{
+					FitConfiguration fitConfig = template.getFitEngineConfiguration().getFitConfiguration();
+					textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+					textSignalStrength.setText("" + fitConfig.getSignalStrength());
+					textMinPhotons.setText("" + fitConfig.getMinPhotons());
+					textWidthFactor.setText("" + fitConfig.getWidthFactor());
+					textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+				}
+			}
+			else
+			{
+				// Reset 
+				textCoordinateShiftFactor.setText("0");
+				textSignalStrength.setText("0");
+				textMinPhotons.setText("0");
+				textWidthFactor.setText("0");
+				textPrecisionThreshold.setText("0");
+			}
+		}
 	}
 }
