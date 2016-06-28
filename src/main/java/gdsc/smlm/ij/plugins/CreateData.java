@@ -193,8 +193,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	static
 	{
 		integerDisplay = new boolean[NAMES.length];
-		integerDisplay[SIGNAL] = true;
-		integerDisplay[SIGNAL_CONTINUOUS] = true;
+		// Signal is an integer but there will be a large range
+		integerDisplay[SIGNAL] = false;
+		integerDisplay[SIGNAL_CONTINUOUS] = false;
 		integerDisplay[TOTAL_SIGNAL] = false;
 		integerDisplay[BLINKS] = true;
 		integerDisplay[SAMPLED_BLINKS] = true;
@@ -3718,7 +3719,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		settings.showHistograms = gd.getNextBoolean();
 		settings.chooseHistograms = gd.getNextBoolean();
-		settings.histogramBins = (int) gd.getNextNumber();
+		settings.histogramBins = (int) Math.abs(gd.getNextNumber());
 		settings.removeOutliers = gd.getNextBoolean();
 		if (simpleMode)
 			settings.densityRadius = (float) gd.getNextNumber();
@@ -3756,7 +3757,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Parameters.isAboveZero("NA", settings.numericalAperture);
 				Parameters.isBelow("NA", settings.numericalAperture, 2);
 			}
-			Parameters.isAbove("Histogram bins", settings.histogramBins, 1);
+			Parameters.isPositive("Histogram bins", settings.histogramBins);
 			if (simpleMode)
 				Parameters.isPositive("Density radius", settings.densityRadius);
 		}
