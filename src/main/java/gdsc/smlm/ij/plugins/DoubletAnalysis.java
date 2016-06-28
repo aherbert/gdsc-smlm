@@ -127,7 +127,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static double iterationIncrease = 1;
 	private static boolean showOverlay = false;
 	private static boolean showHistograms = false;
-	private static boolean showResults = true;
+	private static boolean showResults = false;
 	private static boolean showJaccardPlot = true;
 	private static boolean useMaxResiduals = true;
 	private static double lowerDistance = 1;
@@ -1218,9 +1218,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				.getCoordinates(results.getResults(), false);
 
 		int maxCount = 0;
+		long sumCount = 0;
 		for (ArrayList<Coordinate> list : actualCoordinates.values())
+		{
+			sumCount += list.size();
 			if (maxCount < list.size())
 				maxCount = list.size();
+		}
+		final double density = 1e6 * sumCount / (simulationParameters.a * simulationParameters.a *
+				results.getBounds().getWidth() * results.getBounds().getHeight() * actualCoordinates.size());
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
@@ -1327,7 +1333,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		MemoryPeakResults.freeMemory();
 
 		Collections.sort(results);
-		summariseResults(results);
+		summariseResults(results, density);
 
 		windowOrganiser.tile();
 
@@ -1381,8 +1387,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @param results
 	 *            the results
+	 * @param density2
 	 */
-	private void summariseResults(ArrayList<DoubletResult> results)
+	private void summariseResults(ArrayList<DoubletResult> results, double density)
 	{
 		// Store results in memory for later analysis
 		doubletResults = results;
@@ -1390,6 +1397,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Store details we want in the analysis table
 		StringBuilder sb = new StringBuilder();
+		sb.append(Utils.rounded(density)).append("\t");
 		sb.append(Utils.rounded(getSa())).append("\t");
 		sb.append(config.getRelativeFitting()).append("\t");
 		sb.append(fitConfig.getFitFunction().toString());
@@ -1421,6 +1429,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Create the benchmark settings and the fitting settings
 		sb.append(numberOfMolecules).append("\t");
 		sb.append(n).append("\t");
+		sb.append(Utils.rounded(density)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.minSignal)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.maxSignal)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.signalPerFrame)).append("\t");
@@ -1800,7 +1809,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(
-				"Molecules\tMatched\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
+				"Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
 		sb.append("Best J\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%");
@@ -2391,7 +2400,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "s\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
 	}
 
 	/*
