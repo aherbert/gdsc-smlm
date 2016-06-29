@@ -942,6 +942,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("\t").append(Utils.rounded(auc2));
 
 		// Output the number of fit failures that must be processed to capture fractions of the true positives
+		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.80)));
+		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.90)));
 		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.95)));
 		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.99)));
 		sb.append("\t").append(Utils.rounded(cumul[0][cumul[0].length - 1]));
@@ -1043,7 +1045,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
 		sb.append("Time (ms)\t");
 		sb.append("AUC\tAUC2\t");
-		sb.append("Fail95\tFail99\tFail100");
+		sb.append("Fail80\tFail90\tFail95\tFail99\tFail100");
 		return sb.toString();
 	}
 
