@@ -537,7 +537,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
-		final double sa = getSa();
+		final double sa = getSa() / simulationParameters.a;
 		sb.append("PSF width = ").append(Utils.rounded(simulationParameters.s / simulationParameters.a))
 				.append(" px (sa = ").append(Utils.rounded(sa)).append(" px). HWHM = ")
 				.append(Utils.rounded(sa * Gaussian2DFunction.SD_TO_HWHM_FACTOR)).append(" px\n");
@@ -970,11 +970,16 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("\t").append(Utils.rounded(auc2));
 
 		// Output the number of fit failures that must be processed to capture fractions of the true positives
-		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.80)));
-		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.90)));
-		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.95)));
-		sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.99)));
-		sb.append("\t").append(Utils.rounded(cumul[0][cumul[0].length - 1]));
+		if (cumul[0].length != 0)
+		{
+			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.80)));
+			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.90)));
+			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.95)));
+			sb.append("\t").append(Utils.rounded(getFailures(cumul, 0.99)));
+			sb.append("\t").append(Utils.rounded(cumul[0][cumul[0].length - 1]));
+		}
+		else
+			sb.append("\t\t\t\t\t");
 
 		if (showPlot)
 		{
