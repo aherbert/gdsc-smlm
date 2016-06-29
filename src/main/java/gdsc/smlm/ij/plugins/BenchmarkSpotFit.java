@@ -638,6 +638,12 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 		if (!PeakFit.configureFitSolver(settings, null, extraOptions))
 			return false;
+		
+		// This is needed to configure the fit solver
+		fitConfig.setNmPerPixel(cal.nmPerPixel);
+		fitConfig.setGain(cal.gain);
+		fitConfig.setBias(cal.bias);
+		fitConfig.setEmCCD(cal.emCCD);
 
 		return true;
 	}
@@ -981,7 +987,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 		String label = String.format("Recall = %s. n = %d. Median = %s nm. SD = %s nm", Utils.rounded(m.getRecall()),
 				distanceStats.getN(), Utils.rounded(median), Utils.rounded(distanceStats.getStandardDeviation()));
-		int id = Utils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 100, label);
+		int id = Utils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 0, label);
 		if (Utils.isNewWindow())
 			idList[idCount++] = id;
 
@@ -989,7 +995,7 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, median);
 
 		label = String.format("n = %d. Median = %s nm", depthStats.getN(), Utils.rounded(median));
-		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 100, label);
+		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 0, label);
 		if (Utils.isNewWindow())
 			idList[idCount++] = id;
 
@@ -997,7 +1003,7 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, median);
 
 		label = String.format("n = %d. Median = %s nm", precisionStats.getN(), Utils.rounded(median));
-		id = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 100, label);
+		id = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 0, label);
 		if (Utils.isNewWindow())
 			idList[idCount++] = id;
 
