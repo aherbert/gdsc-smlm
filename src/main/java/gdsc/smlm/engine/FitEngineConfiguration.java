@@ -30,7 +30,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.Gaussian2DFitter;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Specifies the configuration for the fit engine
@@ -475,8 +475,8 @@ public class FitEngineConfiguration implements Cloneable
 				widthMax = FastMath.max(initialPeakStdDev1, widthMax);
 
 			// Get the half-width at half maximim
-			hwhmMin = Gaussian2DFitter.sd2fwhm(widthMin) / 2;
-			hwhmMax = Gaussian2DFitter.sd2fwhm(widthMax) / 2;
+			hwhmMin = Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMin;
+			hwhmMax = Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMax;
 		}
 		else
 		{
