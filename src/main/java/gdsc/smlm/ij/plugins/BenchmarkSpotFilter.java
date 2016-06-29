@@ -759,7 +759,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		if (showFailuresPlot)
 		{
-			final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 100);
+			final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 0);
 			if (Utils.isNewWindow())
 				idList[idCount++] = id;
 
@@ -767,7 +767,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			Plot2 plot = new Plot2(title, xTitle, "Frequency");
 			double xMax = h[0][h[0].length - 1] + 1;
 			double xPadding = 0.05 * (xMax - h[0][0]);
-			plot.setLimits(h[0][0] - xPadding, xMax + xPadding, 0, 1.05);
+			plot.setLimits(h[0][0] - xPadding, xMax, 0, 1.05);
 			plot.setColor(Color.blue);
 			plot.addPoints(h[0], h[1], Plot2.BAR);
 			PlotWindow pw = Utils.display(title, plot);
