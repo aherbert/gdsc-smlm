@@ -301,6 +301,14 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		private void run(int frame)
 		{
+			if (Utils.isInterrupted())
+			{
+				finished = true;
+				return;
+			}
+
+			showProgress();
+			
 			// Extract the data
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
@@ -611,6 +619,21 @@ public class BenchmarkSpotFilter implements PlugIn
 		return true;
 	}
 
+	/** The total progress. */
+	int progress, stepProgress, totalProgress;
+
+	/**
+	 * Show progress.
+	 */
+	private synchronized void showProgress()
+	{
+		if (++progress % stepProgress == 0)
+		{
+			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+				IJ.showProgress(progress, totalProgress);
+		}
+	}
+
 	private void run()
 	{
 		spotFilter = config.createSpotFilter(relativeDistances);
@@ -646,20 +669,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			t.start();
 		}
 
-		final int totalFrames = stack.getSize();
-
 		// Fit the frames
-		final int step = Utils.getProgressInterval(totalFrames);
-		for (int i = 1; i <= totalFrames; i++)
+		totalProgress = stack.getSize();
+		stepProgress = Utils.getProgressInterval(totalProgress);
+		progress = 0;
+		for (int i = 1; i <= totalProgress; i++)
 		{
 			// TODO : Should we only process the frame if there were simulated spots?
-
 			put(jobs, i);
-			if (i % step == 0)
-			{
-				if (Utils.showStatus("Frame: " + i + " / " + totalFrames))
-					IJ.showProgress(i, totalFrames);
-			}
 		}
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)

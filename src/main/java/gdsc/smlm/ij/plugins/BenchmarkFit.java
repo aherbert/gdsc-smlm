@@ -204,6 +204,14 @@ public class BenchmarkFit implements PlugIn
 
 		private void run(int frame)
 		{
+			if (Utils.isInterrupted())
+			{
+				finished = true;
+				return;
+			}
+
+			showProgress();
+			
 			// Extract the data
 			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
 					data);
@@ -623,6 +631,21 @@ public class BenchmarkFit implements PlugIn
 		return sa;
 	}
 
+	/** The total progress. */
+	int progress, stepProgress, totalProgress;
+
+	/**
+	 * Show progress.
+	 */
+	private synchronized void showProgress()
+	{
+		if (++progress % stepProgress == 0)
+		{
+			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+				IJ.showProgress(progress, totalProgress);
+		}
+	}
+	
 	private void run()
 	{
 		// Initialise the answer. Convert to units of the image (ADUs and pixels)
@@ -687,18 +710,15 @@ public class BenchmarkFit implements PlugIn
 		resultsTime = new long[results.length];
 
 		// Fit the frames
-		final int step = Utils.getProgressInterval(totalFrames);
+		totalProgress = totalFrames;
+		stepProgress = Utils.getProgressInterval(totalProgress);
+		progress = 0;
 		for (int i = 0; i < totalFrames; i++)
 		{
 			// Only fit if there were simulated photons
 			if (benchmarkParameters.p[i] > 0)
 			{
 				put(jobs, i);
-				if (i % step == 0)
-				{
-					if (Utils.showStatus("Frame: " + i + " / " + totalFrames))
-						IJ.showProgress(i, totalFrames);
-				}
 			}
 		}
 		// Finish all the worker threads by passing in a null job
