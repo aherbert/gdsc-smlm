@@ -42,6 +42,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -200,7 +201,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// The other method says that a spot not matching anything can have a 
 			// penalty above 1, if it is further away from multiple actual results
 			// than the mid point between the lower and upper match distance.
-			
+
 			// The use of partial scoring mimicks using multiple distance 
 			// thresholds and taking an average of scores. 
 			// For a single experiment at a single distance threshold a spot can 
@@ -209,14 +210,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			// 1  = TP=1 ,FP=0
 			// 2+ = TP=2+,FP=0 (because it doesn't 'not match' anything)
 			// So for now I will use FP (anti-score) in the range 0-1.
-			
+
 			// Ensure score + anti-score add up to number number of scores
 			//return (distances == null) ? 1 : distances.length - score;
-			
+
 			// Only ever allow an anti-score in the range 0-1
 			return FastMath.max(0, 1 - score);
 		}
-		
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -308,7 +309,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 
 			showProgress();
-			
+
 			// Extract the data
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
@@ -536,8 +537,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("Finds spots in the benchmark image created by CreateData plugin.\n");
+		final double sa = getSa();
 		sb.append("PSF width = ").append(Utils.rounded(simulationParameters.s / simulationParameters.a))
-				.append(" px\n");
+				.append(" px (sa = ").append(Utils.rounded(sa)).append(" px). HWHM = ")
+				.append(Utils.rounded(sa * Gaussian2DFunction.SD_TO_HWHM_FACTOR)).append(" px\n");
 		sb.append("Simulation depth = ").append(Utils.rounded(simulationParameters.depth)).append(" nm");
 		if (simulationParameters.fixedDepth)
 			sb.append(" (fixed)");
@@ -549,7 +552,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
 
-		gd.addCheckbox("Relative_distances", relativeDistances);
+		gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
 
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 1, 4, config.getSearch());
@@ -570,6 +573,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		if (gd.wasCanceled())
 			return false;
+
+		fitConfig.setInitialPeakStdDev(sa);
 
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
@@ -617,6 +622,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		return true;
+	}
+
+	private double getSa()
+	{
+		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a);
+		return sa;
 	}
 
 	/** The total progress. */
