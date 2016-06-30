@@ -1325,7 +1325,8 @@ public class FitWorker implements Runnable
 				// The MLE is only good if we are modelling the camera noise. 
 				// The MLE put out by the Poisson model is not better than using the IC from the fit residuals.
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getBayesianInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic1 = Maths.getBayesianInformationCriterion(singleValue, length,
+						fitResult.getNumberOfFittedParameters());
 				ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
@@ -1340,8 +1341,8 @@ public class FitWorker implements Runnable
 				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
-							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,
+							ic1, doubleSumOfSquares, ic2, ic1 - ic2);
 			}
 
 			if (logger2 != null)
@@ -1442,8 +1443,8 @@ public class FitWorker implements Runnable
 				{
 					if (logger != null)
 					{
-						logger.info("Bad peak %d: Fitted coordinates moved outside fit region (x=%g,y=%g)", n,
-								xShift, yShift);
+						logger.info("Bad peak %d: Fitted coordinates moved outside fit region (x=%g,y=%g)", n, xShift,
+								yShift);
 					}
 					continue;
 				}
@@ -1466,12 +1467,13 @@ public class FitWorker implements Runnable
 					// Check if there are any candidates closer than the current candidate with a 
 					// fit window that contains this spot.
 					// This represents drift out to fit another spot that will be fit later.
-					// Note: We can ignore already fitted spots as they will be detected by the duplicate distance.
 					// TODO: Also check existing spots if the duplicate distance is not set...
-					int cx2 = regionBounds.x + bounds.x +
-							(int) Math.round(newParams[Gaussian2DFunction.X_POSITION + n * 6]);
-					int cy2 = regionBounds.y + bounds.y +
-							(int) Math.round(newParams[Gaussian2DFunction.Y_POSITION + n * 6]);
+					float fcx2 = (float) (regionBounds.x + bounds.x + newParams[Gaussian2DFunction.X_POSITION + n * 6] +
+							0.5);
+					float fcy2 = (float) (regionBounds.y + bounds.y + newParams[Gaussian2DFunction.Y_POSITION + n * 6] +
+							0.5);
+					int cx2 = (int) fcx2;
+					int cy2 = (int) fcy2;
 					final int xmin = cx2 - fitting;
 					final int xmax = cx2 + fitting;
 					final int ymin = cy2 - fitting;
@@ -1480,7 +1482,8 @@ public class FitWorker implements Runnable
 					final double d2 = distance2(cx2, cy2, spots[candidate]);
 					for (int i = candidate + 1; i < spots.length; i++)
 					{
-						if (spots[i].x < xmin || spots[i].x > xmax || spots[i].y < ymin || spots[i].y > ymax)
+						if (i == candidate || spots[i].x < xmin || spots[i].x > xmax || spots[i].y < ymin ||
+								spots[i].y > ymax)
 							continue;
 						if (d2 > distance2(cx2, cy2, spots[i]))
 						{
@@ -1488,12 +1491,38 @@ public class FitWorker implements Runnable
 							{
 								logger.info(
 										"Bad peak %d: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
-										n, spots[candidate].x, spots[candidate].y,
-										regionBounds.x + bounds.x + newParams[Gaussian2DFunction.X_POSITION + n * 6] +
-												0.5,
-										regionBounds.y + bounds.y + newParams[Gaussian2DFunction.Y_POSITION + n * 6] +
-												0.5,
-										spots[i].x, spots[i].y);
+										n, spots[candidate].x, spots[candidate].y, fcx2, fcy2, spots[i].x, spots[i].y);
+							}
+							// There is another candidate to be fit later that is closer
+							continue NEXT_PEAK;
+						}
+					}
+
+					// Note: We cannot ignore already fitted spots as they may be on the edge of the fit window and 
+					// so the result does not quite enter the duplicate distance.
+					final float fxmin = fcx2 - fitting;
+					final float fxmax = fcx2 + fitting;
+					final float fymin = fcy2 - fitting;
+					final float fymax = fcy2 + fitting;
+					final float[] params2 = new float[7];
+					params2[Gaussian2DFunction.X_POSITION] = fcx2;
+					params2[Gaussian2DFunction.Y_POSITION] = fcy2;
+					// Distance to current candidate
+					final double dx = fcx2 - (spots[candidate].x + 0.5);
+					final double dy = fcy2 - (spots[candidate].y + 0.5);
+					final double fd2 = dx * dx + dy * dy;
+					for (PeakResult result : sliceResults)
+					{
+						if (result.getXPosition() < fxmin || result.getXPosition() > fxmax ||
+								result.getYPosition() < fymin || result.getYPosition() > fymax)
+							continue;
+						if (fd2 > distance2(params2, result.params))
+						{
+							if (logger != null)
+							{
+								logger.info(
+										"Bad peak %d: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
+										n, spots[candidate].x, spots[candidate].y, fcx2, fcy2, result.getXPosition(), result.getYPosition());
 							}
 							// There is another candidate to be fit later that is closer
 							continue NEXT_PEAK;
@@ -1848,7 +1877,8 @@ public class FitWorker implements Runnable
 			{
 				// This is computed directly by the maximum likelihood estimator
 				final double doubleValue = gf.getValue();
-				ic1 = Maths.getBayesianInformationCriterion(singleValue, length, fitResult.getNumberOfFittedParameters());
+				ic1 = Maths.getBayesianInformationCriterion(singleValue, length,
+						fitResult.getNumberOfFittedParameters());
 				ic2 = Maths.getBayesianInformationCriterion(doubleValue, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
@@ -1865,8 +1895,8 @@ public class FitWorker implements Runnable
 				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
-							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,
+							ic1, doubleSumOfSquares, ic2, ic1 - ic2);
 			}
 
 			if (logger2 != null)
