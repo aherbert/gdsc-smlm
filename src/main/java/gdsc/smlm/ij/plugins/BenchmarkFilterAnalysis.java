@@ -461,6 +461,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			Filter f2 = filterSet.getFilters().get(1);
 			Filter f3 = filterSet.getFilters().get(2);
 			final int n = f1.getNumberOfParameters();
+			
+			// Check if parameters are disabled
+			double[] parameters = new double[n];
+			for (int i = 0; i < n; i++)
+			{
+				parameters[i] = f1.getParameterValue(i);
+				if (f3.getParameterValue(i) < 0)
+				{
+					// This is disabled
+					parameters[i] = 0;
+				}
+			}
+			f1 = f1.create(parameters);
 
 			// Initialise with a filter set at the minimum for each parameter
 			list.add(f1);
@@ -480,7 +493,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				List<Filter> list2 = new LinkedList<Filter>();
 				for (Filter f : list)
 				{
-					double[] parameters = new double[n];
+					parameters = new double[n];
 					for (int j = 0; j < n; j++)
 						parameters[j] = f.getParameterValue(j);
 
