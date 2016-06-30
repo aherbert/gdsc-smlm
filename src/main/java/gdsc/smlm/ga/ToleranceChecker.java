@@ -121,10 +121,10 @@ public class ToleranceChecker implements ConvergenceChecker
 	 *            Current
 	 * @return True if converged
 	 */
-	private boolean converged(final double pi, final double ci)
+	private boolean converged(final double p, final double c)
 	{
-		final double difference = Math.abs(pi - ci);
-		final double size = FastMath.max(Math.abs(pi), Math.abs(ci));
+		final double difference = Math.abs(p - c);
+		final double size = FastMath.max(Math.abs(p), Math.abs(c));
 		if (difference > size * relative && difference > absolute)
 		{
 			return false;
