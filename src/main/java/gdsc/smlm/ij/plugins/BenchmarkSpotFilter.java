@@ -372,7 +372,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					{
 						SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
 						final double d = pair.getXYDistance();
-						final double s = RampedScore.flatten(score.score(d), 256);
+						final double s = score.scoreAndFlatten(d, 256);
 						scoredSpots[sc.id] = new ScoredSpot(true, d, s, sc.spot);
 						// Score partial matches as part true-positive and part false-positive
 						tp += s;
