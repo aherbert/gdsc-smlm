@@ -38,6 +38,8 @@ public class MultiFilter extends Filter
 	@XStreamAsAttribute
 	final double shift;
 	@XStreamAsAttribute
+	final double eshift;
+	@XStreamAsAttribute
 	final double precision;
 
 	@XStreamOmitField
@@ -49,6 +51,8 @@ public class MultiFilter extends Filter
 	@XStreamOmitField
 	float offset;
 	@XStreamOmitField
+	float eoffset;
+	@XStreamOmitField
 	double variance;
 	@XStreamOmitField
 	double nmPerPixel = 100;
@@ -57,27 +61,29 @@ public class MultiFilter extends Filter
 	@XStreamOmitField
 	double gain = 1;
 
-	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double precision)
+	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
+			double precision)
 	{
 		this.signal = Math.max(0, signal);
 		this.snr = Math.max(0, snr);
 		if (maxWidth < minWidth)
 		{
-			double f = maxWidth;
+			final double f = maxWidth;
 			maxWidth = minWidth;
 			minWidth = f;
 		}
 		this.minWidth = Math.max(0, minWidth);
 		this.maxWidth = Math.max(0, maxWidth);
 		this.shift = Math.max(0, shift);
+		this.eshift = Math.max(0, eshift);
 		this.precision = Math.max(0, precision);
 	}
 
 	@Override
 	protected String generateName()
 	{
-		return String.format("Multi: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, Precision=%.1f", signal, snr,
-				minWidth, maxWidth, shift, precision);
+		return String.format("Multi: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f",
+				signal, snr, minWidth, maxWidth, shift, eshift, precision);
 	}
 
 	@Override
@@ -97,18 +103,21 @@ public class MultiFilter extends Filter
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
 		// Set the shift limit
 		offset = Float.POSITIVE_INFINITY;
+		eoffset = Float.POSITIVE_INFINITY;
 		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
 			double s = Double.parseDouble(match.group(1));
 			lowerSigmaThreshold = (float) (s * minWidth);
-			upperSigmaThreshold = (float) (s * maxWidth);
-			offset = (float) (s * shift);
+			upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
+			offset = Filter.getUpperLimit(s * shift);
+			// Convert to squared distance
+			eoffset = Filter.getUpperSquaredLimit(s * eshift);
 		}
 
 		// Configure the precision limit
-		variance = PrecisionFilter.getVarianceLimit(precision);
+		variance = Filter.getDUpperSquaredLimit(precision);
 		nmPerPixel = peakResults.getNmPerPixel();
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
@@ -125,6 +134,10 @@ public class MultiFilter extends Filter
 		if (sd < lowerSigmaThreshold || sd > upperSigmaThreshold)
 			return false;
 		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
+			return false;
+		final float dx = peak.getXPosition();
+		final float dy = peak.getYPosition();
+		if (dx * dx + dy * dy > eoffset)
 			return false;
 		// Use the background noise to estimate precision
 		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
@@ -150,7 +163,7 @@ public class MultiFilter extends Filter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using an multiple thresholds: Signal, SNR, width, shift and precision";
+		return "Filter results using an multiple thresholds: Signal, SNR, width, shift, Euclidian shift and precision";
 	}
 
 	/*
@@ -161,7 +174,7 @@ public class MultiFilter extends Filter
 	@Override
 	public int getNumberOfParameters()
 	{
-		return 6;
+		return 7;
 	}
 
 	/*
@@ -185,6 +198,8 @@ public class MultiFilter extends Filter
 				return maxWidth;
 			case 4:
 				return shift;
+			case 5:
+				return eshift;
 			default:
 				return precision;
 		}
@@ -211,20 +226,17 @@ public class MultiFilter extends Filter
 				return "Max width";
 			case 4:
 				return "Shift";
+			case 5:
+				return "EShift";
 			default:
 				return "Precision";
 		}
 	}
 
-	static double[] defaultRange = new double[]{
-		SignalFilter.DEFAULT_RANGE,
-		SNRFilter.DEFAULT_RANGE,
-		WidthFilter2.DEFAULT_MIN_RANGE,
-		WidthFilter.DEFAULT_RANGE,
-		ShiftFilter.DEFAULT_RANGE,
-		PrecisionFilter.DEFAULT_RANGE		
-	};
-	
+	static double[] defaultRange = new double[] { SignalFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE,
+			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
+			EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE };
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -234,9 +246,9 @@ public class MultiFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, precision };
+		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
 		params[index] = updateParameter(params[index], delta, defaultRange[index]);
-		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5]);
+		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6]);
 	}
 
 	/*
@@ -248,7 +260,7 @@ public class MultiFilter extends Filter
 	public Filter create(double... parameters)
 	{
 		return new MultiFilter(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
-				parameters[5]);
+				parameters[5], parameters[6]);
 	}
 
 	/*
@@ -264,7 +276,8 @@ public class MultiFilter extends Filter
 		setMin(parameters, 2, minWidth);
 		setMax(parameters, 3, maxWidth);
 		setMax(parameters, 4, shift);
-		setMax(parameters, 5, precision);
+		setMax(parameters, 5, eshift);
+		setMax(parameters, 6, precision);
 	}
 
 	/*
@@ -286,9 +299,10 @@ public class MultiFilter extends Filter
 	public double[] upperLimit()
 	{
 		return new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, WidthFilter.UPPER_LIMIT,
-				WidthFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT };
+				WidthFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT, EShiftFilter.UPPER_LIMIT,
+				PrecisionFilter.UPPER_LIMIT };
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -296,7 +310,7 @@ public class MultiFilter extends Filter
 	 */
 	public double[] sequence()
 	{
-		return new double[] { signal, snr, minWidth, maxWidth, shift, precision };
+		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
 	}
 
 	/*

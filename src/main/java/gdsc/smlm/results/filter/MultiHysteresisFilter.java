@@ -168,17 +168,17 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		{
 			double s = Double.parseDouble(match.group(1));
 			strictMinSigmaThreshold = (float) (s * strictMinWidth);
-			strictMaxSigmaThreshold = (float) (s * strictMaxWidth);
+			strictMaxSigmaThreshold = Filter.getUpperLimit(s * strictMaxWidth);
 			weakMinSigmaThreshold = (float) (s * (strictMinWidth - rangeMinWidth));
-			weakMaxSigmaThreshold = (float) (s * (strictMaxWidth + rangeMaxWidth));
+			weakMaxSigmaThreshold = Filter.getUpperLimit(s * (strictMaxWidth + rangeMaxWidth));
 
-			strictOffset = (float) (s * strictShift);
-			weakOffset = (float) (s * (strictShift + rangeShift));
+			strictOffset = Filter.getUpperLimit(s * strictShift);
+			weakOffset = Filter.getUpperLimit(s * (strictShift + rangeShift));
 		}
 
 		// Configure the precision limit
-		strictVariance = PrecisionFilter.getVarianceLimit(strictPrecision);
-		weakVariance = PrecisionFilter.getVarianceLimit(strictPrecision + rangePrecision);
+		strictVariance = Filter.getDUpperSquaredLimit(strictPrecision);
+		weakVariance = Filter.getDUpperSquaredLimit(strictPrecision + rangePrecision);
 
 		super.setup(peakResults);
 	}

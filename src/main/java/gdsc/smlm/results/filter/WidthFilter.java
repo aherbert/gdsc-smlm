@@ -28,7 +28,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class WidthFilter extends Filter
 {
 	static double DEFAULT_RANGE = 1;
-	static double UPPER_LIMIT = 3;
+	static double UPPER_LIMIT = 5;
 
 	@XStreamAsAttribute
 	final double width;
@@ -61,10 +61,10 @@ public class WidthFilter extends Filter
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			sigmaThreshold = (float) (Double.parseDouble(match.group(1)) * width);
+			sigmaThreshold = Filter.getUpperLimit(Double.parseDouble(match.group(1)) * width);
 		}
 	}
-
+	
 	@Override
 	public boolean accept(PeakResult peak)
 	{

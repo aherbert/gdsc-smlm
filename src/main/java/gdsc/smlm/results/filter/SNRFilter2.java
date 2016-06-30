@@ -75,7 +75,7 @@ public class SNRFilter2 extends Filter
 		{
 			double s = Double.parseDouble(match.group(1));
 			lowerSigmaThreshold = (float) (s * minWidth);
-			upperSigmaThreshold = (float) (s * maxWidth);
+			upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
 		}
 	}
 

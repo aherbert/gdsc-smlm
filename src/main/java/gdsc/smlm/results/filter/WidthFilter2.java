@@ -72,9 +72,9 @@ public class WidthFilter2 extends Filter
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			double s = Double.parseDouble(match.group(1));
+			final double s = Double.parseDouble(match.group(1));
 			lowerSigmaThreshold = (float) (s * minWidth);
-			upperSigmaThreshold = (float) (s * maxWidth);
+			upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
 		}
 	}
 

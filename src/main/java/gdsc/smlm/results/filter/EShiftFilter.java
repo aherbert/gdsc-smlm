@@ -16,71 +16,75 @@ package gdsc.smlm.results.filter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Filter results using a precision threshold
+ * Filter results using a X/Y coordinate shift as a Euclidian distance. This filter requires that the result X and Y
+ * coordinates are reported relative to their initial positions.
  */
-public class PrecisionFilter extends Filter
+public class EShiftFilter extends Filter
 {
 	static double DEFAULT_RANGE = 10;
-	static double UPPER_LIMIT = 70;
-	
-	@XStreamAsAttribute
-	final double precision;
-	@XStreamOmitField
-	double variance;
-	@XStreamOmitField
-	double nmPerPixel = 100;
-	@XStreamOmitField
-	boolean emCCD = true;
-	@XStreamOmitField
-	double gain = 1;
+	static double UPPER_LIMIT = 4;
 
-	public PrecisionFilter(double precision)
+	@XStreamAsAttribute
+	final double eshift;
+	@XStreamOmitField
+	float eoffset;
+
+	public EShiftFilter(double eshift)
 	{
-		this.precision = Math.max(0, precision);
+		this.eshift = Math.max(0, eshift);
 	}
 
 	@Override
 	protected String generateName()
 	{
-		return "Precision " + precision;
+		return "EShift " + eshift;
 	}
 
 	@Override
 	protected String generateType()
 	{
-		return "Precision";
+		return "EShift";
 	}
 
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		variance = Filter.getDUpperSquaredLimit(precision);
-		nmPerPixel = peakResults.getNmPerPixel();
-		gain = peakResults.getGain();
-		emCCD = peakResults.isEMCCD();
+		// Set the shift limit
+		eoffset = Float.POSITIVE_INFINITY;
+		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
+		Matcher match = pattern.matcher(peakResults.getConfiguration());
+		if (match.find())
+		{
+			// Convert to squared distance
+			eoffset = Filter.getUpperSquaredLimit(Double.parseDouble(match.group(1)) * eshift);
+		}
 	}
-	
+
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		// Use the background noise to estimate precision 
-		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
+		final float dx = peak.getXPosition();
+		final float dy = peak.getYPosition();
+		return dx * dx + dy * dy <= eoffset;
 	}
 
 	@Override
 	public double getNumericalValue()
 	{
-		return precision;
+		return eshift;
 	}
 
 	@Override
 	public String getNumericalValueName()
 	{
-		return "Precision";
+		return "EShift";
 	}
 
 	/*
@@ -91,7 +95,7 @@ public class PrecisionFilter extends Filter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using an upper precision threshold.";
+		return "Filter results using a Euclidian shift factor. (Euclidian shift is relative to initial peak width.)";
 	}
 
 	/*
@@ -114,7 +118,7 @@ public class PrecisionFilter extends Filter
 	public double getParameterValue(int index)
 	{
 		checkIndex(index);
-		return precision;
+		return eshift;
 	}
 
 	/*
@@ -126,7 +130,7 @@ public class PrecisionFilter extends Filter
 	public String getParameterName(int index)
 	{
 		checkIndex(index);
-		return "Precision";
+		return "Shift";
 	}
 
 	/*
@@ -138,7 +142,7 @@ public class PrecisionFilter extends Filter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new PrecisionFilter(updateParameter(precision, delta, DEFAULT_RANGE));
+		return new EShiftFilter(updateParameter(eshift, delta, DEFAULT_RANGE));
 	}
 
 	/*
@@ -149,7 +153,7 @@ public class PrecisionFilter extends Filter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new PrecisionFilter(parameters[0]);
+		return new EShiftFilter(parameters[0]);
 	}
 
 	/*
@@ -160,7 +164,7 @@ public class PrecisionFilter extends Filter
 	@Override
 	public void weakestParameters(double[] parameters)
 	{
-		setMax(parameters, 0, precision);
+		setMax(parameters, 0, eshift);
 	}
 
 	/*
@@ -183,7 +187,7 @@ public class PrecisionFilter extends Filter
 	{
 		return new double[] { UPPER_LIMIT };
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -191,7 +195,7 @@ public class PrecisionFilter extends Filter
 	 */
 	public double[] sequence()
 	{
-		return new double[] { precision };
+		return new double[] { eshift };
 	}
 
 	/*

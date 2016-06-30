@@ -155,7 +155,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 			}
 
 			failCount += peak.origY;
-			
+
 			// Reject all peaks if we have exceeded the fail count
 			final boolean isPositive;
 			if (failCount > failures)
@@ -298,7 +298,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 				frame = peak.peak;
 				failCount = 0;
 			}
-			
+
 			failCount += peak.origY;
 
 			// Reject all peaks if we have exceeded the fail count
@@ -427,7 +427,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 
 		return newResults;
 	}
-	
+
 	/**
 	 * Filter the results
 	 * <p>
@@ -468,7 +468,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 				frame = peak.peak;
 				failCount = 0;
 			}
-			
+
 			failCount += peak.origY;
 
 			// Reject all peaks if we have exceeded the fail count
@@ -889,7 +889,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 					frame = peak.peak;
 					failCount = 0;
 				}
-				
+
 				failCount += peak.origY;
 
 				// Reject all peaks if we have exceeded the fail count
@@ -1438,5 +1438,61 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	{
 		// Assume all the parameters are included in the Chromosome
 		return Utils.newArray(getNumberOfParameters(), 0, 1);
+	}
+
+	/**
+	 * Return the value or Float.POSITIVE_INFINITY if value is not positive
+	 * 
+	 * @param value
+	 * @return The limit
+	 */
+	public static float getUpperLimit(double value)
+	{
+		if (value > 0)
+			return (float) value;
+		else
+			return Float.POSITIVE_INFINITY;
+	}
+
+	/**
+	 * Return the value squared or Float.POSITIVE_INFINITY if value is not positive
+	 * 
+	 * @param value
+	 * @return The squared limit
+	 */
+	public static float getUpperSquaredLimit(double value)
+	{
+		if (value > 0)
+			return (float) (value * value);
+		else
+			return Float.POSITIVE_INFINITY;
+	}
+
+	/**
+	 * Return the value or Double.POSITIVE_INFINITY if value is not positive
+	 * 
+	 * @param value
+	 * @return The limit
+	 */
+	public static double getDUpperLimit(double value)
+	{
+		if (value > 0)
+			return value;
+		else
+			return Double.POSITIVE_INFINITY;
+	}
+
+	/**
+	 * Return the value squared or Double.POSITIVE_INFINITY if value is not positive
+	 * 
+	 * @param value
+	 * @return The squared limit
+	 */
+	public static double getDUpperSquaredLimit(double value)
+	{
+		if (value > 0)
+			return value * value;
+		else
+			return Double.POSITIVE_INFINITY;
 	}
 }

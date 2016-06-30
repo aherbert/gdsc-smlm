@@ -29,7 +29,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 public class ShiftFilter extends Filter
 {
 	static double DEFAULT_RANGE = 10;
-	static double UPPER_LIMIT = 2;
+	static double UPPER_LIMIT = 4;
 
 	@XStreamAsAttribute
 	final double shift;
@@ -62,7 +62,7 @@ public class ShiftFilter extends Filter
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			offset = (float) (Double.parseDouble(match.group(1)) * shift);
+			offset = Filter.getUpperLimit(Double.parseDouble(match.group(1)) * shift);
 		}
 	}
 
