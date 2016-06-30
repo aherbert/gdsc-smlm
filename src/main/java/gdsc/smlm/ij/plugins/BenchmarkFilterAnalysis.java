@@ -169,8 +169,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private static String[] COLUMNS = {
 			// Scores against the fit results that did not fail		
-			"nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC", "MCC",
-			"Informedness", "Markedness", "Recall", "Precision", "F1", "Jaccard",
+			"nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC", "MCC", "Informedness",
+			"Markedness", "Recall", "Precision", "F1", "Jaccard",
 			// Scores against the original localisations. Calculated using the number of localisations 
 			"oFP", "oFN", "oRecall", "oPrecision", "oF1", "oJaccard", };
 
@@ -216,7 +216,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		simulationParameters = CreateData.simulationParameters;
 		if (simulationParameters == null)
 		{
@@ -388,7 +388,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				for (int i = 0; i < n; i++)
 				{
 					wasNotExpanded[c][i] = true;
-					if (f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0)
+					if (f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0 &&
+							!Double.isInfinite(f3.getParameterValue(i)))
 					{
 						wasNotExpanded[c][i] = false;
 						// This can be expanded ... Count the combinations
@@ -461,16 +462,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			Filter f2 = filterSet.getFilters().get(1);
 			Filter f3 = filterSet.getFilters().get(2);
 			final int n = f1.getNumberOfParameters();
-			
+
 			// Check if parameters are disabled
 			double[] parameters = new double[n];
 			for (int i = 0; i < n; i++)
 			{
 				parameters[i] = f1.getParameterValue(i);
-				if (f3.getParameterValue(i) < 0)
+				if (Double.isInfinite(f3.getParameterValue(i)) || f3.getParameterValue(i) < 0)
 				{
 					// This is disabled
 					parameters[i] = 0;
+					lowerLimit[c][i] = 0;
+					upperLimit[c][i] = 0;
 				}
 			}
 			f1 = f1.create(parameters);
@@ -633,8 +636,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
 			// -=-=-=-
 
-			final RampedScore distanceScore = new RampedScore(BenchmarkSpotFit.distanceInPixels * partialMatchDistance /
-					100.0, BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
+			final RampedScore distanceScore = new RampedScore(
+					BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0,
+					BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
@@ -829,8 +833,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final double t2 = tp + fn;
 		if (candidates != t || t2 != matches)
 		{
-			System.out.printf("Scoring error: n = %d (%f), matches = %f (%f), TP %f, FP %f, TN %f, FN %f\n",
-					candidates, t, matches, t2, tp, fp, tn, fn);
+			System.out.printf("Scoring error: n = %d (%f), matches = %f (%f), TP %f, FP %f, TN %f, FN %f\n", candidates,
+					t, matches, t2, tp, fp, tn, fn);
 		}
 	}
 
@@ -870,9 +874,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				simulationParameters.b2, simulationParameters.emCCD);
 		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
-		gd.addMessage(String
-				.format("%d results, %d True-Positives\nExpected signal precision = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-						total, tp, signal, pSignal, pLSE, pMLE));
+		gd.addMessage(String.format(
+				"%d results, %d True-Positives\nExpected signal precision = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
+				total, tp, signal, pSignal, pLSE, pMLE));
 
 		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
@@ -1757,7 +1761,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				int compare = Double.compare(max[SCORE], result[SCORE]);
 				if (compare < 0)
 				{
-					System.out.printf("1. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
+					System.out.printf("1. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
+							result[CRITERIA]);
 					max = result;
 					maxFilter = filter;
 				}
@@ -1767,14 +1772,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					compare = Double.compare(max[CRITERIA], result[CRITERIA]);
 					if (compare < 0)
 					{
-						System.out.printf("2. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
+						System.out.printf("2. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
+								result[CRITERIA]);
 						max = result;
 						maxFilter = filter;
 					}
 					// If equal criteria then if the same type get the filter with the strongest params
 					else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
 					{
-						System.out.printf("3. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
+						System.out.printf("3. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
+								result[CRITERIA]);
 						max = result;
 						maxFilter = filter;
 					}
@@ -1786,14 +1793,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
 				if (compare < 0)
 				{
-					System.out.printf("4. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
+					System.out.printf("4. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
+							result[CRITERIA]);
 					max = result;
 					maxFilter = filter;
 				}
 				// If equal criteria then if the same type get the filter with the strongest params
 				else if (compare == 0 && allSameType && result[CRITERIA] > 0 && maxFilter.weakest(filter) < 0)
 				{
-					System.out.printf("5. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE], result[CRITERIA]);
+					System.out.printf("5. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
+							result[CRITERIA]);
 					max = result;
 					maxFilter = filter;
 				}
@@ -1849,8 +1858,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					{
 						Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
 								maxFilter.getName(), Utils.rounded((invertScore) ? -max[SCORE] : max[SCORE]),
-								Utils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount +
-										limitRange, sb.toString());
+								Utils.rounded((invertCriteria) ? -minCriteria : minCriteria),
+								limitFailCount + limitRange, sb.toString());
 					}
 					else
 					{
@@ -2104,7 +2113,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private long nextUpdate = 0;
 
-	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn, int n)
+	private double[] run(Filter filter, List<MemoryPeakResults> resultsList, boolean subset, double tn, double fn,
+			int n)
 	{
 		FractionClassificationResult r;
 		if (subset)
@@ -2496,19 +2506,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		plot2.setColor(Color.magenta);
 		if (-halfSummaryDepth - halfBinWidth >= limits[0])
 		{
-			plot2.drawLine(
-					-halfSummaryDepth,
-					0,
-					-halfSummaryDepth,
+			plot2.drawLine(-halfSummaryDepth, 0, -halfSummaryDepth,
 					getSplineValue(spline3, spline3b, -halfSummaryDepth - halfBinWidth) /
 							getSplineValue(spline1, spline1b, -halfSummaryDepth - halfBinWidth));
 		}
 		if (halfSummaryDepth - halfBinWidth <= limits[1])
 		{
-			plot2.drawLine(
-					halfSummaryDepth,
-					0,
-					halfSummaryDepth,
+			plot2.drawLine(halfSummaryDepth, 0, halfSummaryDepth,
 					getSplineValue(spline3, spline3b, halfSummaryDepth - halfBinWidth) /
 							getSplineValue(spline1, spline1b, halfSummaryDepth - halfBinWidth));
 		}
@@ -2542,7 +2546,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double[] distance = distanceStats.getValues();
 		double range = BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0;
 		double[] limits1 = { -range, range };
-		double[] limits2 = { 0, simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0 };
+		double[] limits2 = { 0,
+				simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0 };
 
 		final int bins = Math.max(10, simulationParameters.molecules / 100);
 		double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
@@ -2577,11 +2582,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		Plot2 plot2 = new Plot2(title2, "Distance (nm)", "Frequency");
 		plot2.setLimits(limits2[0], limits2[1], 0, Maths.max(h2[1]));
 		plot2.setColor(Color.black);
-		plot2.addLabel(
-				0,
-				0,
-				String.format("Blue = Fitted (%s); Red = Filtered (%s)", Utils.rounded(distanceStats.getMean()),
-						Utils.rounded(sumDistance / count)));
+		plot2.addLabel(0, 0, String.format("Blue = Fitted (%s); Red = Filtered (%s)",
+				Utils.rounded(distanceStats.getMean()), Utils.rounded(sumDistance / count)));
 		plot2.setColor(Color.blue);
 		plot2.addPoints(h2[0], h2[1], Plot2.BAR);
 		plot2.setColor(Color.red);
@@ -2806,8 +2808,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				{
 					double[] score2 = new double[6];
 					// Use the method that requires fail count in origY
-					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset2(r, failCount, score2) : weakest
-							.filterSubset2(r, score2);
+					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset2(r, failCount, score2)
+							: weakest.filterSubset2(r, score2);
 					ga_resultsListToScore.add(r2);
 					if (score == null)
 						score = score2;

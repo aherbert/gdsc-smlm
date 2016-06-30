@@ -1205,13 +1205,13 @@ public class BenchmarkSpotFit implements PlugIn
 			filters.add(f2);
 			// Get the range
 			filters.add(new MultiFilter2(
-					-1, // Do not bother with the signal. The SNR should take care of this 
+					Double.POSITIVE_INFINITY, // Do not bother with the signal. The SNR should take care of this 
 					(float)(f2.getParameterValue(1) - f1.getParameterValue(1))/10, 
-					(float)(f2.getParameterValue(2) - f1.getParameterValue(2))/10, 
-					(float)(f2.getParameterValue(3) - f1.getParameterValue(3))/10, 
-					(float)(f2.getParameterValue(4) - f1.getParameterValue(4))/10, 
-					-1, // Disable EShift as it is similar to Shift 
-					(float)(f2.getParameterValue(6) - f1.getParameterValue(6))/10
+					(f2.getParameterValue(2) - f1.getParameterValue(2))/10, 
+					(f2.getParameterValue(3) - f1.getParameterValue(3))/10, 
+					(f2.getParameterValue(4) - f1.getParameterValue(4))/10, 
+					Double.POSITIVE_INFINITY, // Disable EShift as it is similar to Shift 
+					(f2.getParameterValue(6) - f1.getParameterValue(6))/10
 					));
 			//@formatter:on
 
