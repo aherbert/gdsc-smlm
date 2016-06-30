@@ -68,8 +68,8 @@ public class FitConfiguration implements Cloneable
 	private double bias = 0;
 	private double readNoise = 0;
 	private double amplification = 0;
-	private int maxFunctionEvaluations = 1000;
-	private SearchMethod searchMethod = SearchMethod.POWELL; // Best for noisy data since gradients are unstable
+	private int maxFunctionEvaluations = 2000;
+	private SearchMethod searchMethod = SearchMethod.POWELL_BOUNDED; // Best for noisy data since gradients are unstable
 	private boolean gradientLineMinimisation = false;
 	private double relativeThreshold = 1e-6;
 	private double absoluteThreshold = 1e-16;
