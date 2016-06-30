@@ -2,6 +2,8 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,6 +64,10 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.results.filter.FilterSet;
+import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.smlm.results.filter.XStreamWrapper;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -81,6 +87,24 @@ import ij.text.TextWindow;
 public class BenchmarkSpotFit implements PlugIn
 {
 	private static final String TITLE = "Fit Spot Data";
+
+	// Used to try and guess the range for filtering the results
+	private enum LowerLimit
+	{
+		ZERO, ONE_PERCENT
+	}
+
+	private enum UpperLimit
+	{
+		MAX_POSITIVE_CUMUL_DELTA, NINETY_NINE_PERCENT
+	}
+
+	private String[] NAMES = { "Signal", "SNR", "Width", "Shift", "EShift", "Precision" };
+	private LowerLimit[] LOWER = { LowerLimit.ONE_PERCENT, LowerLimit.ONE_PERCENT, LowerLimit.ONE_PERCENT,
+			LowerLimit.ONE_PERCENT, LowerLimit.ZERO, LowerLimit.ZERO };
+	private UpperLimit[] UPPER = { UpperLimit.MAX_POSITIVE_CUMUL_DELTA, UpperLimit.MAX_POSITIVE_CUMUL_DELTA,
+			UpperLimit.NINETY_NINE_PERCENT, UpperLimit.NINETY_NINE_PERCENT, UpperLimit.NINETY_NINE_PERCENT,
+			UpperLimit.NINETY_NINE_PERCENT };
 
 	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
@@ -111,6 +135,10 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double distance = 1.5;
 	private static double lowerDistance = 1.5;
 	private static double matchSignal = 2;
+
+	private static boolean showFilterScoreHistograms = false;
+	private static boolean saveFilterRange = false;
+	private static String filterRangeFile = "";
 
 	private boolean extraOptions = false;
 
@@ -609,6 +637,8 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
+		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
+		gd.addCheckbox("Save_filter_range", saveFilterRange);
 
 		if (extraOptions)
 		{
@@ -634,6 +664,8 @@ public class BenchmarkSpotFit implements PlugIn
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
 		fitConfig.setDuplicateDistance(gd.getNextNumber());
+		showFilterScoreHistograms = gd.getNextBoolean();
+		saveFilterRange = gd.getNextBoolean();
 
 		// Avoid stupidness, i.e. things that move outside the fit window
 		fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
@@ -903,7 +935,6 @@ public class BenchmarkSpotFit implements PlugIn
 
 		// Get stats for all fitted results and those that match 
 		// Signal, SNR, Width, xShift, yShift, Precision
-		String[] NAMES = { "Signal", "SNR", "Width", "Shift", "EShift", "Precision" };
 		StoredDataStatistics[][] stats = new StoredDataStatistics[3][NAMES.length];
 		for (int i = 0; i < stats.length; i++)
 			for (int j = 0; j < stats[i].length; j++)
@@ -1128,71 +1159,154 @@ public class BenchmarkSpotFit implements PlugIn
 			wo.add(id);
 
 		// Plot histograms of the stats on the same window
+		double[] lower = new double[NAMES.length];
+		double[] upper = new double[NAMES.length];
 		for (int i = 0; i < stats[0].length; i++)
 		{
-			showDoubleHistogram(stats, i, NAMES[i], wo);
+			double[] limits = showDoubleHistogram(stats, i, NAMES[i], wo, LOWER[i], UPPER[i]);
+			sb.append("\t").append(Utils.rounded(limits[0])).append('-').append(Utils.rounded(limits[1]));
+			lower[i] = limits[0];
+			upper[i] = limits[1];
 		}
 
 		wo.tile();
 
 		summaryTable.append(sb.toString());
+
+		if (saveFilterRange)
+		{
+			String filename = Utils.getFilename("Filter_range_file", filterRangeFile);
+			if (filename == null)
+				return;
+			filterRangeFile = filename;
+			// Create a filter set using the ranges
+			ArrayList<Filter> filters = new ArrayList<Filter>(3);
+			double upperMinWidth = 1 - (1 - lower[2]) / 4; // (assuming lower is less than 1)
+			double lowerMaxWidth = 1 + (upper[2] - 1) / 4; // (assuming upper is more than 1)
+			double shift = Math.max(Math.abs(lower[3]), Math.abs(upper[3]));
+			//@formatter:off
+			Filter f1 = new MultiFilter2(
+					lower[0], 
+					(float) lower[1], 
+					lower[2], 
+					lowerMaxWidth, 
+					shift / 2, 
+					upper[4] / 2, 
+					lower[5]);
+			Filter f2 = new MultiFilter2(
+					upper[0], 
+					(float) upper[1], 
+					upperMinWidth, 
+					upper[2], 
+					shift, 
+					upper[4], 
+					upper[5]);
+			filters.add(f1);
+			filters.add(f2);
+			// Get the range
+			filters.add(new MultiFilter2(
+					-1, // Do not bother with the signal. The SNR should take care of this 
+					(float)(f2.getParameterValue(1) - f1.getParameterValue(1))/10, 
+					(float)(f2.getParameterValue(2) - f1.getParameterValue(2))/10, 
+					(float)(f2.getParameterValue(3) - f1.getParameterValue(3))/10, 
+					(float)(f2.getParameterValue(4) - f1.getParameterValue(4))/10, 
+					-1, // Disable EShift as it is similar to Shift 
+					(float)(f2.getParameterValue(6) - f1.getParameterValue(6))/10
+					));
+			//@formatter:on
+
+			ArrayList<FilterSet> filterList = new ArrayList<FilterSet>(1);
+			filterList.add(new FilterSet("Multi2", filters));
+			FileOutputStream fos = null;
+			try
+			{
+				fos = new FileOutputStream(filename);
+				XStreamWrapper.getInstance().toXML(filterList, fos);
+			}
+			catch (Exception e)
+			{
+				IJ.log("Unable to save the filter set to file: " + e.getMessage());
+			}
+			finally
+			{
+				if (fos != null)
+				{
+					try
+					{
+						fos.close();
+					}
+					catch (IOException e)
+					{
+						// Ignore
+					}
+				}
+			}
+		}
 	}
 
-	private void showDoubleHistogram(StoredDataStatistics[][] stats, int i, String xLabel, WindowOrganiser wo)
+	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, int i, String xLabel, WindowOrganiser wo,
+			LowerLimit lower, UpperLimit upper)
 	{
 		// [0] is all
 		// [1] is matches
 		// [2] is no match
-
 		StoredDataStatistics s1 = stats[0][i];
 		StoredDataStatistics s2 = stats[1][i];
 		StoredDataStatistics s3 = stats[2][i];
+
 		DescriptiveStatistics d = s1.getStatistics();
-		double median = d.getPercentile(50);
-		String label = String.format("n = %d. Median = %s nm", s1.getN(), Utils.rounded(median));
-		int id = Utils.showHistogram(TITLE, s1, xLabel, 0, 1, 0, label);
-		if (id == 0)
+		double median = 0;
+		Plot2 plot = null;
+		String title = null;
+
+		if (showFilterScoreHistograms)
 		{
-			IJ.log("Failed to show the histogram: " + xLabel);
-			return;
-		}
-
-		if (Utils.isNewWindow())
-			wo.add(id);
-
-		// Reverse engineer the histogram settings
-		Plot2 plot = Utils.plot;
-		double[] xValues = Utils.xValues;
-		int bins = xValues.length;
-		double yMin = xValues[0];
-		double binSize = xValues[1] - xValues[0];
-		double yMax = xValues[0] + (bins - 1) * binSize;
-
-		if (s2.getN() > 0)
-		{
-			double[] values = s2.getValues();
-			double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
-
-			if (hist[0].length > 0)
+			median = d.getPercentile(50);
+			String label = String.format("n = %d. Median = %s nm", s1.getN(), Utils.rounded(median));
+			int id = Utils.showHistogram(TITLE, s1, xLabel, 0, 1, 0, label);
+			if (id == 0)
 			{
-				plot.setColor(Color.red);
-				plot.addPoints(hist[0], hist[1], Plot2.BAR);
-				String title = WindowManager.getImage(id).getTitle();
-				Utils.display(title, plot);
+				IJ.log("Failed to show the histogram: " + xLabel);
+				return new double[2];
 			}
-		}
 
-		if (s3.getN() > 0)
-		{
-			double[] values = s3.getValues();
-			double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+			if (Utils.isNewWindow())
+				wo.add(id);
 
-			if (hist[0].length > 0)
+			title = WindowManager.getImage(id).getTitle();
+
+			// Reverse engineer the histogram settings
+			plot = Utils.plot;
+			double[] xValues = Utils.xValues;
+			int bins = xValues.length;
+			double yMin = xValues[0];
+			double binSize = xValues[1] - xValues[0];
+			double yMax = xValues[0] + (bins - 1) * binSize;
+
+			if (s2.getN() > 0)
 			{
-				plot.setColor(Color.blue);
-				plot.addPoints(hist[0], hist[1], Plot2.BAR);
-				String title = WindowManager.getImage(id).getTitle();
-				Utils.display(title, plot);
+				double[] values = s2.getValues();
+				double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+
+				if (hist[0].length > 0)
+				{
+					plot.setColor(Color.red);
+					plot.addPoints(hist[0], hist[1], Plot2.BAR);
+					Utils.display(title, plot);
+				}
+			}
+
+			if (s3.getN() > 0)
+			{
+				double[] values = s3.getValues();
+				double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+
+				if (hist[0].length > 0)
+				{
+					plot.setColor(Color.blue);
+					plot.addPoints(hist[0], hist[1], Plot2.BAR);
+					Utils.display(title, plot);
+				}
 			}
 		}
 
@@ -1201,76 +1315,108 @@ public class BenchmarkSpotFit implements PlugIn
 		double[][] h2 = Maths.cumulativeHistogram(s2.getValues(), true);
 		double[][] h3 = Maths.cumulativeHistogram(s3.getValues(), true);
 
-		String title = TITLE + " Cumul " + xLabel;
-		plot = new Plot2(title, xLabel, "Frequency");
-		// Find limits
-		double[] xlimit = Maths.limits(h1[0]);
-		xlimit = Maths.limits(xlimit, h2[0]);
-		xlimit = Maths.limits(xlimit, h3[0]);
-		// Restrict using the interquartile range 
-		double q1 = d.getPercentile(25);
-		double q2 = d.getPercentile(75);
-		double iqr = (q2 - q1) * 2.5;
-		xlimit[0] = Maths.max(xlimit[0], median - iqr);
-		xlimit[1] = Maths.min(xlimit[1], median + iqr);
-		plot.setLimits(xlimit[0], xlimit[1], 0, 1.05);
-		plot.addPoints(h1[0], h1[1], Plot.LINE);
-		plot.setColor(Color.red);
-		plot.addPoints(h2[0], h2[1], Plot.LINE);
-		plot.setColor(Color.blue);
-		plot.addPoints(h3[0], h3[1], Plot.LINE);
+		if (showFilterScoreHistograms)
+		{
+			title = TITLE + " Cumul " + xLabel;
+			plot = new Plot2(title, xLabel, "Frequency");
+			// Find limits
+			double[] xlimit = Maths.limits(h1[0]);
+			xlimit = Maths.limits(xlimit, h2[0]);
+			xlimit = Maths.limits(xlimit, h3[0]);
+			// Restrict using the inter-quartile range 
+			double q1 = d.getPercentile(25);
+			double q2 = d.getPercentile(75);
+			double iqr = (q2 - q1) * 2.5;
+			xlimit[0] = Maths.max(xlimit[0], median - iqr);
+			xlimit[1] = Maths.min(xlimit[1], median + iqr);
+			plot.setLimits(xlimit[0], xlimit[1], 0, 1.05);
+			plot.addPoints(h1[0], h1[1], Plot.LINE);
+			plot.setColor(Color.red);
+			plot.addPoints(h2[0], h2[1], Plot.LINE);
+			plot.setColor(Color.blue);
+			plot.addPoints(h3[0], h3[1], Plot.LINE);
+		}
 
 		// Determine the maximum difference between the TP and FP
-		LinearInterpolator li = new LinearInterpolator();
-		PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
-		PolynomialSplineFunction f2 = li.interpolate(h3[0], h3[1]);
 		double maxx1 = 0;
 		double maxx2 = 0;
 		double max1 = 0;
 		double max2 = 0;
-		for (double x : h1[0])
+
+		if (showFilterScoreHistograms || upper == UpperLimit.MAX_POSITIVE_CUMUL_DELTA)
 		{
-			if (x < h2[0][0] || x < h3[0][0])
-				continue;
-			try
+			LinearInterpolator li = new LinearInterpolator();
+			PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
+			PolynomialSplineFunction f2 = li.interpolate(h3[0], h3[1]);
+			for (double x : h1[0])
 			{
-				double v1 = f1.value(x);
-				double v2 = f2.value(x);
-				double diff = v2 - v1;
-				if (diff > 0)
+				if (x < h2[0][0] || x < h3[0][0])
+					continue;
+				try
 				{
-					if (max1 < diff)
+					double v1 = f1.value(x);
+					double v2 = f2.value(x);
+					double diff = v2 - v1;
+					if (diff > 0)
 					{
-						max1 = diff;
-						maxx1 = x;
+						if (max1 < diff)
+						{
+							max1 = diff;
+							maxx1 = x;
+						}
+					}
+					else
+					{
+						if (max2 > diff)
+						{
+							max2 = diff;
+							maxx2 = x;
+						}
 					}
 				}
-				else
+				catch (OutOfRangeException e)
 				{
-					if (max2 > diff)
-					{
-						max2 = diff;
-						maxx2 = x;
-					}
+					// Because we reached the end
+					break;
 				}
 			}
-			catch (OutOfRangeException e)
-			{
-				// Because we reached the end
-				break;
-			}
+
+			//			System.out.printf("Bounds %s : %s, pos %s, neg %s, %s\n", xLabel, Utils.rounded(getPercentile(h2, 0.01)),
+			//					Utils.rounded(maxx1), Utils.rounded(maxx2), Utils.rounded(getPercentile(h1, 0.99)));
 		}
 
-		System.out.printf("Bounds %s : %s, pos %s, neg %s, %s\n", xLabel, Utils.rounded(getPercentile(h2, 0.01)),
-				Utils.rounded(maxx1), Utils.rounded(maxx2), Utils.rounded(getPercentile(h1, 0.99)));
+		if (showFilterScoreHistograms)
+		{
+			String label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
+					Utils.rounded(max2), Utils.rounded(maxx2));
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, label);
+			PlotWindow pw = Utils.display(title, plot);
+			if (Utils.isNewWindow())
+				wo.add(pw.getImagePlus().getID());
+		}
 
-		label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
-				Utils.rounded(max2), Utils.rounded(maxx2));
-		plot.setColor(Color.black);
-		plot.addLabel(0, 0, label);
-		PlotWindow pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
-			wo.add(pw.getImagePlus().getID());
+		// Now compute the bounds using the desired limit
+		double l, u;
+		switch (lower)
+		{
+			case ONE_PERCENT:
+				l = getPercentile(h2, 0.01);
+				break;
+			case ZERO:
+			default:
+				l = 0;
+		}
+		switch (upper)
+		{
+			case MAX_POSITIVE_CUMUL_DELTA:
+				u = maxx1;
+				break;
+			case NINETY_NINE_PERCENT:
+			default:
+				u = getPercentile(h2, 0.99);
+		}
+		return new double[] { l, u };
 	}
 
 	/**
@@ -1382,6 +1528,9 @@ public class BenchmarkSpotFit implements PlugIn
 
 		sb.append("Med.Distance (nm)\t");
 		sb.append("Med.Depth (nm)\t");
+
+		for (String name : NAMES)
+			sb.append(name).append('\t');
 
 		return sb.toString();
 	}
