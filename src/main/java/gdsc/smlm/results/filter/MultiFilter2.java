@@ -288,6 +288,7 @@ public class MultiFilter2 extends Filter
 		setMin(parameters, 1, snr);
 		setMin(parameters, 2, minWidth);
 		setMax(parameters, 3, maxWidth);
+		setMax(parameters, 4, shift);
 		setMax(parameters, 5, eshift);
 		setMax(parameters, 6, precision);
 	}
