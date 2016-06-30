@@ -448,6 +448,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		List<FilterSet> filterList2 = new LinkedList<FilterSet>();
 		c = 0;
+		final double DISABLED = 0;
 		for (FilterSet filterSet : filterList)
 		{
 			if (expanded[c] == 0)
@@ -463,17 +464,33 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			Filter f3 = filterSet.getFilters().get(2);
 			final int n = f1.getNumberOfParameters();
 
+			// Get the parameters for the two filters in the range
+
 			// Check if parameters are disabled
 			double[] parameters = new double[n];
+			double[] parameters2 = new double[n];
 			for (int i = 0; i < n; i++)
 			{
 				parameters[i] = f1.getParameterValue(i);
-				if (Double.isInfinite(f3.getParameterValue(i)) || f3.getParameterValue(i) < 0)
+				parameters2[i] = f2.getParameterValue(i);
+				if (wasNotExpanded[c][i])
 				{
-					// This is disabled
-					parameters[i] = 0;
-					lowerLimit[c][i] = 0;
-					upperLimit[c][i] = 0;
+					if (Double.isInfinite(f3.getParameterValue(i)) || f3.getParameterValue(i) < 0)
+					{
+						// This is disabled
+						parameters[i] = DISABLED;
+						lowerLimit[c][i] = DISABLED;
+						upperLimit[c][i] = DISABLED;
+					}
+				}
+			}
+			// Get the weakest parameters for those not expanded
+			f1.weakestParameters(parameters2);
+			for (int i = 0; i < n; i++)
+			{
+				if (wasNotExpanded[c][i] && parameters[i] != DISABLED)
+				{
+					parameters[i] = parameters2[i];
 				}
 			}
 			f1 = f1.create(parameters);
@@ -1754,7 +1771,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			// XXX - Debug print statements 
 			final boolean debugFilterChanges = false;
-			
+
 			// Check if the criteria are achieved
 			if (result[CRITERIA] >= minCriteria)
 			{
