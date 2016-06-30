@@ -265,6 +265,17 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return DONE;
 			}
 
+			// Check for single frame
+			singleFrame = results.getResults().get(0).peak;
+			for (PeakResult result : results.getResults())
+			{
+				if (singleFrame != result.peak)
+				{
+					singleFrame = 0;
+					break;
+				}
+			}
+
 			imageSource = results.getSource();
 			plugin_flags |= NO_IMAGE_REQUIRED;
 		}
@@ -1897,14 +1908,25 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			// All setup is already done so simply run
 			run();
-
-			addSingleFrameOverlay();
 		}
+		
+		addSingleFrameOverlay();
 	}
 
 	private void addSingleFrameOverlay()
 	{
 		// If a single frame was processed add the peaks as an overlay if they are in memory
+		ImagePlus imp = this.imp;
+
+		if (fitMaxima && singleFrame > 0)
+		{
+			if (source instanceof IJImageSource)
+			{
+				String title = source.getName();
+				imp = WindowManager.getImage(title);
+			}
+		}
+
 		if (singleFrame > 0 && imp != null)
 		{
 			MemoryPeakResults results = null;
