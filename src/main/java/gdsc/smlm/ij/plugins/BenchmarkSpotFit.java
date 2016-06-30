@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,12 +11,18 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.exception.OutOfRangeException;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.PointPair;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
@@ -59,7 +66,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.gui.Plot2;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -84,7 +95,7 @@ public class BenchmarkSpotFit implements PlugIn
 		config.setFailuresLimit(-1);
 		fitConfig.setFitValidation(true);
 		fitConfig.setMinPhotons(0); // Do not allow negative photons 
-		fitConfig.setCoordinateShiftFactor(0); // Disable
+		fitConfig.setCoordinateShiftFactor(0);
 		fitConfig.setPrecisionThreshold(0);
 		fitConfig.setWidthFactor(0);
 
@@ -112,7 +123,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static HashMap<Integer, FilterCandidates> filterCandidates;
-	private static double nP, nN;
+	private static double fP, fN;
+	private static int nP, nN;
 
 	static int lastId = -1, lastFilterId = -1;
 	private static double lastFractionPositives = -1;
@@ -146,6 +158,10 @@ public class BenchmarkSpotFit implements PlugIn
 		 * The depth of the actual spot
 		 */
 		final double z;
+		/**
+		 * The score
+		 */
+		double score;
 
 		public SpotMatch(int i, double d, double z)
 		{
@@ -232,7 +248,10 @@ public class BenchmarkSpotFit implements PlugIn
 
 	public class FilterCandidates implements Cloneable
 	{
+		// Integer counts of positives (matches) and negatives
 		final int p, n;
+		// Double sums of the fractions match score and antiscore 
+		final double np, nn;
 		final ScoredSpot[] spots;
 		double tp, fp, tn, fn;
 		FitResult[] fitResult;
@@ -248,10 +267,12 @@ public class BenchmarkSpotFit implements PlugIn
 		 */
 		SpotMatch[] match;
 
-		public FilterCandidates(int p, int n, ScoredSpot[] spots)
+		public FilterCandidates(int p, int n, double np, double nn, ScoredSpot[] spots)
 		{
 			this.p = p;
 			this.n = n;
+			this.np = np;
+			this.nn = nn;
 			this.spots = spots;
 		}
 
@@ -345,7 +366,7 @@ public class BenchmarkSpotFit implements PlugIn
 			}
 
 			showProgress();
-			
+
 			// Extract the data
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
@@ -397,6 +418,7 @@ public class BenchmarkSpotFit implements PlugIn
 				{
 					if (fitResult[i].getStatus() == FitStatus.OK)
 					{
+						// The XY positions should be offset by +0.5 already
 						final double[] params = job.getFitResult(i).getParameters();
 						predicted[count++] = new BasePoint((float) params[Gaussian2DFunction.X_POSITION],
 								(float) params[Gaussian2DFunction.Y_POSITION], i);
@@ -404,7 +426,7 @@ public class BenchmarkSpotFit implements PlugIn
 					else
 					{
 						// Use the candidate position instead
-						predicted[count++] = new BasePoint(spots[i].x, spots[i].y, -1 - i);
+						predicted[count++] = new BasePoint(spots[i].x + 0.5f, spots[i].y + 0.5f, -1 - i);
 					}
 				}
 				// If we made any fits then score them
@@ -455,7 +477,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 			for (int i = 0; i < match.length; i++)
 			{
-				final double s = RampedScore.flatten(score.score(match[i].d), 256);
+				final double s = score.scoreAndFlatten(match[i].d, 256);
+				match[i].score = s;
 
 				if (match[i].isFitResult())
 				{
@@ -516,7 +539,7 @@ public class BenchmarkSpotFit implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		extraOptions = Utils.isExtraOptions();
 
 		simulationParameters = CreateData.simulationParameters;
@@ -562,9 +585,10 @@ public class BenchmarkSpotFit implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage(String.format("Fit candidate spots in the benchmark image created by " + CreateData.TITLE +
-				" plugin\nand identified by the " + BenchmarkSpotFilter.TITLE +
-				" plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
+		gd.addMessage(String.format(
+				"Fit candidate spots in the benchmark image created by " + CreateData.TITLE +
+						" plugin\nand identified by the " + BenchmarkSpotFilter.TITLE +
+						" plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \nConfigure the fitting:",
 				Utils.rounded(simulationParameters.s), Utils.rounded(getSa())));
 
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
@@ -611,6 +635,10 @@ public class BenchmarkSpotFit implements PlugIn
 		config.setResidualsThreshold(gd.getNextNumber());
 		fitConfig.setDuplicateDistance(gd.getNextNumber());
 
+		// Avoid stupidness, i.e. things that move outside the fit window
+		fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
+		fitConfig.setWidthFactor(5);
+
 		if (extraOptions)
 		{
 		}
@@ -640,7 +668,7 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 		if (!PeakFit.configureFitSolver(settings, null, extraOptions))
 			return false;
-		
+
 		// This is needed to configure the fit solver
 		fitConfig.setNmPerPixel(cal.nmPerPixel);
 		fitConfig.setGain(cal.gain);
@@ -664,7 +692,7 @@ public class BenchmarkSpotFit implements PlugIn
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
-	
+
 	private void run()
 	{
 		// Extract all the results in memory into a list per frame. This can be cached
@@ -779,29 +807,48 @@ public class BenchmarkSpotFit implements PlugIn
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
 		HashMap<Integer, FilterCandidates> subset = new HashMap<Integer, FilterCandidates>();
+		fP = fN = 0;
 		nP = nN = 0;
 		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
 		{
 			FilterResult r = result.getValue();
 
-			// Determine the number of positives to find
-			nP += r.result.getTP();
-			nN += r.result.getFP();
-			final int targetP = (int) Math.round(r.result.getTP() * f1);
+			// Determine the number of positives to find. This score may be fractional.
+			fP += r.result.getTP();
+			fN += r.result.getFP();
+
+			// Q. Is r.result.getTP() not the same as the total of r.spots[i].match
+			// A. Not if we used fractional scoring.
+
+			for (ScoredSpot spot : r.spots)
+			{
+				if (spot.match)
+					nP++;
+				else
+					nN++;
+			}
+
+			// Make the target use the fractional score
+			final double targetP = r.result.getTP() * f1;
+
 			// Count the number of positive & negatives
 			int p = 0, n = 0;
+			double np = 0, nn = 0;
+
 			boolean reachedTarget = false;
 			int nAfter = 0;
 
 			int count = 0;
 			for (ScoredSpot spot : r.spots)
 			{
+				nn += spot.antiScore();
 				if (spot.match)
 				{
+					np += spot.getScore();
 					p++;
 					if (!reachedTarget)
 					{
-						reachedTarget = p >= targetP;
+						reachedTarget = np >= targetP;
 					}
 				}
 				else
@@ -828,7 +875,7 @@ public class BenchmarkSpotFit implements PlugIn
 			//		r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(), p, n,
 			//		nAfter, (double) n / (n + p));
 
-			subset.put(result.getKey(), new FilterCandidates(p, n, Arrays.copyOf(r.spots, count)));
+			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
 		}
 		return subset;
 	}
@@ -853,7 +900,15 @@ public class BenchmarkSpotFit implements PlugIn
 		// Optimal match statistics if filtering is perfect (since fitting is not perfect).
 		StoredDataStatistics distanceStats = new StoredDataStatistics();
 		StoredDataStatistics depthStats = new StoredDataStatistics();
-		StoredDataStatistics precisionStats = new StoredDataStatistics();
+
+		// Get stats for all fitted results and those that match 
+		// Signal, SNR, Width, xShift, yShift, Precision
+		String[] NAMES = { "Signal", "SNR", "Width", "Shift", "EShift", "Precision" };
+		StoredDataStatistics[][] stats = new StoredDataStatistics[3][NAMES.length];
+		for (int i = 0; i < stats.length; i++)
+			for (int j = 0; j < stats[i].length; j++)
+				stats[i][j] = new StoredDataStatistics();
+
 		final double nmPerPixel = simulationParameters.a;
 		final boolean mle = fitConfig.getFitSolver() == FitSolver.MLE;
 		double tp = 0, fp = 0;
@@ -861,8 +916,10 @@ public class BenchmarkSpotFit implements PlugIn
 		int cTP = 0, cFP = 0;
 		for (FilterCandidates result : filterCandidates.values())
 		{
+			// Count the number of fit results that matched (tp) and did not match (fp)
 			tp += result.tp;
 			fp += result.fp;
+
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
 				if (result.spots[i].match)
@@ -871,10 +928,68 @@ public class BenchmarkSpotFit implements PlugIn
 					cFP++;
 				if (result.fitResult[i].getStatus() != FitStatus.OK)
 				{
+					// XXX Debug why the MLE does not fit as many candidates as the LSE
+					//System.out.println(result.fitResult[i].getStatus());
+
 					if (result.spots[i].match)
 						failcTP++;
 					else
 						failcFP++;
+				}
+				else
+				{
+					// This was fit - Get statistics
+					FitResult fitResult = result.fitResult[i];
+					final double[] p = fitResult.getParameters();
+					final double[] initialParams = fitResult.getInitialParameters();
+					final double s0 = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5;
+					final double s = s0 * nmPerPixel;
+					final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
+					final double b2 = Math.max(0,
+							(p[Gaussian2DFunction.BACKGROUND] - simulationParameters.bias) / simulationParameters.gain);
+					double precision;
+					if (mle)
+						precision = PeakResult.getMLPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD);
+					else
+						precision = PeakResult.getPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD);
+
+					final double width = s0 / fitConfig.getInitialPeakStdDev0();
+					final double xShift = (p[Gaussian2DFunction.X_POSITION] -
+							initialParams[Gaussian2DFunction.X_POSITION]) / fitConfig.getInitialPeakStdDev0();
+					final double yShift = (p[Gaussian2DFunction.Y_POSITION] -
+							initialParams[Gaussian2DFunction.Y_POSITION]) / fitConfig.getInitialPeakStdDev0();
+					// Since these two are combined and the max is what matters.
+					// Note that this is not as sensible as computing the shift in Euclidian space.
+					final double shift = (Math.abs(xShift) > Math.abs(yShift)) ? xShift : yShift;
+					final double eshift = Math.sqrt(xShift * xShift + yShift * yShift);
+
+					stats[0][0].add(p[Gaussian2DFunction.SIGNAL]);
+					stats[0][1].add(p[Gaussian2DFunction.SIGNAL] / result.noise);
+					stats[0][2].add(width);
+					stats[0][3].add(shift);
+					stats[0][4].add(eshift);
+					stats[0][5].add(precision);
+
+					if (result.fitMatch[i])
+					{
+						// Note these matches do not take into account the signal factor, only the match distance
+
+						stats[1][0].add(p[Gaussian2DFunction.SIGNAL]);
+						stats[1][1].add(p[Gaussian2DFunction.SIGNAL] / result.noise);
+						stats[1][2].add(width);
+						stats[1][3].add(shift);
+						stats[1][4].add(eshift);
+						stats[1][5].add(precision);
+					}
+					else
+					{
+						stats[2][0].add(p[Gaussian2DFunction.SIGNAL]);
+						stats[2][1].add(p[Gaussian2DFunction.SIGNAL] / result.noise);
+						stats[2][2].add(width);
+						stats[2][3].add(shift);
+						stats[2][4].add(eshift);
+						stats[2][5].add(precision);
+					}
 				}
 			}
 			for (int i = 0; i < result.match.length; i++)
@@ -885,15 +1000,6 @@ public class BenchmarkSpotFit implements PlugIn
 
 				distanceStats.add(result.match[i].d * nmPerPixel);
 				depthStats.add(result.match[i].z * nmPerPixel);
-				final double[] p = result.fitResult[result.match[i].i].getParameters();
-				final double s = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5 * nmPerPixel;
-				final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
-				final double b2 = Math.max(0, (p[Gaussian2DFunction.BACKGROUND] - simulationParameters.bias) /
-						simulationParameters.gain);
-				if (mle)
-					precisionStats.add(PeakResult.getMLPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
-				else
-					precisionStats.add(PeakResult.getPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD));
 			}
 		}
 
@@ -943,9 +1049,12 @@ public class BenchmarkSpotFit implements PlugIn
 
 		sb.append(spotFilter.getDescription());
 
+		// nP and nN is the fractional score of the spot candidates 
 		addCount(sb, nP + nN);
 		addCount(sb, nP);
 		addCount(sb, nN);
+		addCount(sb, fP);
+		addCount(sb, fN);
 		String name = PeakFit.getSolverName(fitConfig);
 		if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 			name += " Camera";
@@ -969,8 +1078,8 @@ public class BenchmarkSpotFit implements PlugIn
 		// TP are all candidates that can be matched to a spot
 		// FP are all candidates that cannot be matched to a spot
 		// FN = The number of missed spots
-		FractionClassificationResult m = new FractionClassificationResult(cTP, cFP, 0, simulationParameters.molecules -
-				cTP);
+		FractionClassificationResult m = new FractionClassificationResult(cTP, cFP, 0,
+				simulationParameters.molecules - cTP);
 		add(sb, m.getRecall());
 		add(sb, m.getPrecision());
 		add(sb, m.getF1Score());
@@ -979,6 +1088,7 @@ public class BenchmarkSpotFit implements PlugIn
 		// Score the fitting results:
 		add(sb, failcTP);
 		add(sb, failcFP);
+
 		// TP are all fit results that can be matched to a spot
 		// FP are all fit results that cannot be matched to a spot
 		// FN = The number of missed spots
@@ -990,18 +1100,24 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, m.getF1Score());
 		add(sb, m.getJaccard());
 
+		// Do it again but pretend we can perfectly filter all the false positives
+		add(sb, tp);
+		m = new FractionClassificationResult(tp, 0, 0, simulationParameters.molecules - tp);
+		add(sb, m.getRecall());
+		add(sb, m.getF1Score());
+		add(sb, m.getJaccard());
+
 		// The mean may be subject to extreme outliers so use the median
 		double median = distanceStats.getMedian();
 		add(sb, median);
 
-		int[] idList = new int[3];
-		int idCount = 0;
+		WindowOrganiser wo = new WindowOrganiser();
 
 		String label = String.format("Recall = %s. n = %d. Median = %s nm. SD = %s nm", Utils.rounded(m.getRecall()),
 				distanceStats.getN(), Utils.rounded(median), Utils.rounded(distanceStats.getStandardDeviation()));
 		int id = Utils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 0, label);
 		if (Utils.isNewWindow())
-			idList[idCount++] = id;
+			wo.add(id);
 
 		median = depthStats.getMedian();
 		add(sb, median);
@@ -1009,24 +1125,177 @@ public class BenchmarkSpotFit implements PlugIn
 		label = String.format("n = %d. Median = %s nm", depthStats.getN(), Utils.rounded(median));
 		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 0, label);
 		if (Utils.isNewWindow())
-			idList[idCount++] = id;
+			wo.add(id);
 
-		median = precisionStats.getMedian();
-		add(sb, median);
-
-		label = String.format("n = %d. Median = %s nm", precisionStats.getN(), Utils.rounded(median));
-		id = Utils.showHistogram(TITLE, precisionStats, "Precision (nm)", 0, 1, 0, label);
-		if (Utils.isNewWindow())
-			idList[idCount++] = id;
-
-		if (idCount != 0)
+		// Plot histograms of the stats on the same window
+		for (int i = 0; i < stats[0].length; i++)
 		{
-			idList = Arrays.copyOf(idList, idCount);
-			WindowOrganiser wo = new WindowOrganiser();
-			wo.tileWindows(idList);
+			showDoubleHistogram(stats, i, NAMES[i], wo);
 		}
 
+		wo.tile();
+
 		summaryTable.append(sb.toString());
+	}
+
+	private void showDoubleHistogram(StoredDataStatistics[][] stats, int i, String xLabel, WindowOrganiser wo)
+	{
+		// [0] is all
+		// [1] is matches
+		// [2] is no match
+
+		StoredDataStatistics s1 = stats[0][i];
+		StoredDataStatistics s2 = stats[1][i];
+		StoredDataStatistics s3 = stats[2][i];
+		DescriptiveStatistics d = s1.getStatistics();
+		double median = d.getPercentile(50);
+		String label = String.format("n = %d. Median = %s nm", s1.getN(), Utils.rounded(median));
+		int id = Utils.showHistogram(TITLE, s1, xLabel, 0, 1, 0, label);
+		if (id == 0)
+		{
+			IJ.log("Failed to show the histogram: " + xLabel);
+			return;
+		}
+
+		if (Utils.isNewWindow())
+			wo.add(id);
+
+		// Reverse engineer the histogram settings
+		Plot2 plot = Utils.plot;
+		double[] xValues = Utils.xValues;
+		int bins = xValues.length;
+		double yMin = xValues[0];
+		double binSize = xValues[1] - xValues[0];
+		double yMax = xValues[0] + (bins - 1) * binSize;
+
+		if (s2.getN() > 0)
+		{
+			double[] values = s2.getValues();
+			double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+
+			if (hist[0].length > 0)
+			{
+				plot.setColor(Color.red);
+				plot.addPoints(hist[0], hist[1], Plot2.BAR);
+				String title = WindowManager.getImage(id).getTitle();
+				Utils.display(title, plot);
+			}
+		}
+
+		if (s3.getN() > 0)
+		{
+			double[] values = s3.getValues();
+			double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+
+			if (hist[0].length > 0)
+			{
+				plot.setColor(Color.blue);
+				plot.addPoints(hist[0], hist[1], Plot2.BAR);
+				String title = WindowManager.getImage(id).getTitle();
+				Utils.display(title, plot);
+			}
+		}
+
+		// Do cumulative histogram
+		double[][] h1 = Maths.cumulativeHistogram(s1.getValues(), true);
+		double[][] h2 = Maths.cumulativeHistogram(s2.getValues(), true);
+		double[][] h3 = Maths.cumulativeHistogram(s3.getValues(), true);
+
+		String title = TITLE + " Cumul " + xLabel;
+		plot = new Plot2(title, xLabel, "Frequency");
+		// Find limits
+		double[] xlimit = Maths.limits(h1[0]);
+		xlimit = Maths.limits(xlimit, h2[0]);
+		xlimit = Maths.limits(xlimit, h3[0]);
+		// Restrict using the interquartile range 
+		double q1 = d.getPercentile(25);
+		double q2 = d.getPercentile(75);
+		double iqr = (q2 - q1) * 2.5;
+		xlimit[0] = Maths.max(xlimit[0], median - iqr);
+		xlimit[1] = Maths.min(xlimit[1], median + iqr);
+		plot.setLimits(xlimit[0], xlimit[1], 0, 1.05);
+		plot.addPoints(h1[0], h1[1], Plot.LINE);
+		plot.setColor(Color.red);
+		plot.addPoints(h2[0], h2[1], Plot.LINE);
+		plot.setColor(Color.blue);
+		plot.addPoints(h3[0], h3[1], Plot.LINE);
+
+		// Determine the maximum difference between the TP and FP
+		LinearInterpolator li = new LinearInterpolator();
+		PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
+		PolynomialSplineFunction f2 = li.interpolate(h3[0], h3[1]);
+		double maxx1 = 0;
+		double maxx2 = 0;
+		double max1 = 0;
+		double max2 = 0;
+		for (double x : h1[0])
+		{
+			if (x < h2[0][0] || x < h3[0][0])
+				continue;
+			try
+			{
+				double v1 = f1.value(x);
+				double v2 = f2.value(x);
+				double diff = v2 - v1;
+				if (diff > 0)
+				{
+					if (max1 < diff)
+					{
+						max1 = diff;
+						maxx1 = x;
+					}
+				}
+				else
+				{
+					if (max2 > diff)
+					{
+						max2 = diff;
+						maxx2 = x;
+					}
+				}
+			}
+			catch (OutOfRangeException e)
+			{
+				// Because we reached the end
+				break;
+			}
+		}
+
+		System.out.printf("Bounds %s : %s, pos %s, neg %s, %s\n", xLabel, Utils.rounded(getPercentile(h2, 0.01)),
+				Utils.rounded(maxx1), Utils.rounded(maxx2), Utils.rounded(getPercentile(h1, 0.99)));
+
+		label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
+				Utils.rounded(max2), Utils.rounded(maxx2));
+		plot.setColor(Color.black);
+		plot.addLabel(0, 0, label);
+		PlotWindow pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			wo.add(pw.getImagePlus().getID());
+	}
+
+	/**
+	 * @param h
+	 *            The cumulative histogram
+	 * @param p
+	 *            The fraction
+	 * @return The value for the given fraction
+	 */
+	private double getPercentile(double[][] h, double p)
+	{
+		double[] x = h[0];
+		double[] y = h[1];
+		for (int i = 0; i < x.length; i++)
+		{
+			if (y[i] > p)
+			{
+				if (i == 0)
+					return x[i];
+				// Interpolation
+				double delta = (p - y[i - 1]) / (y[i] - y[i - 1]);
+				return x[i - 1] + delta * (x[i] - x[i - 1]);
+			}
+		}
+		return x[x.length - 1];
 	}
 
 	private static void add(StringBuilder sb, String value)
@@ -1078,6 +1347,8 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Spots\t");
 		sb.append("nP\t");
 		sb.append("nN\t");
+		sb.append("fP\t");
+		sb.append("fN\t");
 		sb.append("Solver\t");
 		sb.append("Fitting");
 
@@ -1103,9 +1374,14 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Precision\t");
 		sb.append("F1\t");
 		sb.append("Jaccard\t");
+
+		sb.append("perfectTP\t");
+		sb.append("Recall\t");
+		sb.append("F1\t");
+		sb.append("Jaccard\t");
+
 		sb.append("Med.Distance (nm)\t");
 		sb.append("Med.Depth (nm)\t");
-		sb.append("Med.Precision (nm)\t");
 
 		return sb.toString();
 	}
