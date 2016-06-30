@@ -901,6 +901,11 @@ public class FitWorker implements Runnable
 					maxIterations + maxIterations * (npeaks - 1) * ITERATION_INCREASE_FOR_MULTIPLE_PEAKS);
 			fitConfig.setMaxIterations(
 					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
+			
+			// TODO - Add per peak shift factors ... 
+			// If the neighbour was a candidate then allow it to move further.
+			// If the neighbour was already a fit result then maybe we should be stricter...
+			//fitConfig.setCoordinateShiftFactor(shiftFactor);
 
 			fitResult = gf.fit(region, width, height, npeaks, params, true);
 
@@ -1203,7 +1208,9 @@ public class FitWorker implements Runnable
 		{
 			if (fitResult.getStatus() == FitStatus.OK)
 				return true;
-			// Check why it was a bad fit. If it due to width divergence then 
+			// Check why it was a bad fit. 
+			
+			// If it due to width divergence then 
 			// check the width is reasonable given the size of the fitted region.
 			if (fitResult.getStatus() == FitStatus.WIDTH_DIVERGED)
 			{
@@ -1215,6 +1222,12 @@ public class FitWorker implements Runnable
 						(params[Gaussian2DFunction.Y_SD] > 0 && params[Gaussian2DFunction.Y_SD] < regionSize))
 					return true;
 			}
+			
+			// If moved then it could be a close neighbour ...
+			if (fitResult.getStatus() == FitStatus.COORDINATES_MOVED)
+			{
+				
+			}			
 		}
 		return false;
 	}
@@ -1521,7 +1534,7 @@ public class FitWorker implements Runnable
 							if (logger != null)
 							{
 								logger.info(
-										"Bad peak %d: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
+										"Bad peak %d: Fitted coordinates moved closer to another result (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
 										n, spots[candidate].x, spots[candidate].y, fcx2, fcy2, result.getXPosition(), result.getYPosition());
 							}
 							// There is another candidate to be fit later that is closer
