@@ -56,6 +56,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
+import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -197,7 +198,6 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private static boolean showFilterScoreHistograms = false;
 	private static boolean saveFilterRange = true;
-	private static String filterRangeFile = "";
 
 	private boolean extraOptions = false;
 
@@ -1261,11 +1261,14 @@ public class BenchmarkSpotFit implements PlugIn
 
 		if (saveFilterRange)
 		{
-			String filename = Utils.getFilename("Filter_range_file", filterRangeFile);
+			GlobalSettings gs = SettingsManager.loadSettings();
+			FilterSettings filterSettings = gs.getFilterSettings();
+			
+			String filename = Utils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
 			if (filename == null)
 				return;
 			filename = Utils.replaceExtension(filename, ".xml");
-			filterRangeFile = filename;
+			filterSettings.filterSetFilename = filename;
 			// Create a filter set using the ranges
 			ArrayList<Filter> filters = new ArrayList<Filter>(3);
 			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
@@ -1279,6 +1282,7 @@ public class BenchmarkSpotFit implements PlugIn
 			{
 				fos = new FileOutputStream(filename);
 				XStreamWrapper.getInstance().toXML(filterList, fos);
+				SettingsManager.saveSettings(gs);
 			}
 			catch (Exception e)
 			{
