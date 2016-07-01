@@ -37,8 +37,6 @@ public class Gaussian2DFitter
 	// Allow calculation of residuals to be turned off (overwrite constructor fit configuration)
 	private boolean computeResiduals = true;
 
-	private int maximumWidthFactor = 2;
-
 	/**
 	 * Constructor
 	 * 
@@ -726,9 +724,13 @@ public class Gaussian2DFitter
 				lower[0] = params[0] - (yMin - params[0]);
 		}
 
-		final double wf = (fitConfiguration.getWidthFactor() > 1 &&
-				fitConfiguration.getWidthFactor() < maximumWidthFactor) ? fitConfiguration.getWidthFactor()
-						: maximumWidthFactor;
+		// Configure the bounds for the width.
+		// The factors are less strict than the fit configuration to allow some search space when fitting close to the limits.
+		final double min_wf = getMinWidthFactor();
+		final double max_wf = getMaxWidthFactor();
+		// Get the upper bounds for the width factor. This is just used to estimate the upper bounds for the signal
+		// So it does not matter if it is too wrong.
+		final double wf = (max_wf < Double.MAX_VALUE) ? fitConfiguration.getWidthFactor() : 3;
 
 		if (npeaks == 1)
 		{
@@ -785,13 +787,13 @@ public class Gaussian2DFitter
 			}
 			if (fitConfiguration.isWidth0Fitting())
 			{
-				lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] / wf;
-				upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * wf;
+				lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
+				upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
 			}
 			if (fitConfiguration.isWidth1Fitting())
 			{
-				lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] / wf;
-				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * wf;
+				lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
+				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * max_wf;
 			}
 		}
 
@@ -813,6 +815,38 @@ public class Gaussian2DFitter
 		solver.setBounds(lower, upper);
 	}
 
+	/**
+	 * Gets the min width factor for the lower bounds
+	 *
+	 * @return the min width factor
+	 */
+	private double getMinWidthFactor()
+	{
+		if (fitConfiguration.getMinWidthFactor() < 1 && fitConfiguration.getMinWidthFactor() >= 0)
+		{
+			// Add some buffer to allow fitting to go past then come back to the limit
+			// This also allows fitting to fail if the spot is definitely smaller than the configured limits.  
+			return fitConfiguration.getMinWidthFactor() * 0.7;
+		}
+		return 0;
+	}
+
+	/**
+	 * Gets the max width factor for the upper bounds
+	 *
+	 * @return the max width factor
+	 */
+	private double getMaxWidthFactor()
+	{
+		if (fitConfiguration.getWidthFactor() > 1)
+		{
+			// Add some buffer to allow fitting to go past then come back to the limit.
+			// This also allows fitting to fail if the spot is definitely bigger than the configured limits.  
+			return fitConfiguration.getWidthFactor() * 1.5;
+		}
+		return Double.MAX_VALUE;
+	}
+	
 	/**
 	 * Sets the constraints for the fitted parameters. This functions set the lower bounds of the signal to zero and
 	 * background to zero (or negative if the background estimate is < 0).
@@ -1029,26 +1063,28 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * @return the maximum width factor to use to set the bounds for width parameter fitting
-	 */
-	public int getMaximumWidthFactor()
-	{
-		return maximumWidthFactor;
-	}
-
-	/**
 	 * Set the maximum width factor to use to set the bounds for width parameter fitting. If the fit configuration has a
 	 * smaller width factor then that will be used instead.
 	 * <p>
-	 * The bounds are set using the initial estimate w in the range w/f to w*f.
-	 * 
+	 * The bounds are set using the initial estimate w in the range w*min to w*max.
+	 *
+	 * @param minimumWidthFactor
+	 *            the minimum width factor to use to set the bounds for width parameter fitting (must be 0-1)
 	 * @param maximumWidthFactor
 	 *            the maximum width factor to use to set the bounds for width parameter fitting (must be above 1)
+	 * @throws IllegalArgumentException
+	 *             if the arguments are outside the valid ranges
 	 */
-	public void setMaximumWidthFactor(int maximumWidthFactor)
+	public void setWidthFactor(
+			//double minimumWidthFactor, 
+			double maximumWidthFactor)
 	{
-		if (maximumWidthFactor > 1)
-			this.maximumWidthFactor = maximumWidthFactor;
+//		if (minimumWidthFactor < 0 || minimumWidthFactor > 1)
+//			throw new IllegalArgumentException("MinWidth factor must be in the range 0-1: " + minimumWidthFactor);
+		if (maximumWidthFactor < 1)
+			throw new IllegalArgumentException("MaxWidth factor must be 1 or above: " + maximumWidthFactor);
+//		this.minimumWidthFactor = minimumWidthFactor;
+//		this.maximumWidthFactor = maximumWidthFactor;
 	}
 
 	/**

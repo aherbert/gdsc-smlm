@@ -155,6 +155,7 @@ public class BenchmarkSpotFit implements PlugIn
 		fitConfig.setMinPhotons(0); // Do not allow negative photons 
 		fitConfig.setCoordinateShiftFactor(0);
 		fitConfig.setPrecisionThreshold(0);
+		fitConfig.setMinWidthFactor(0);
 		fitConfig.setWidthFactor(0);
 
 		fitConfig.setBackgroundFitting(true);
@@ -703,8 +704,9 @@ public class BenchmarkSpotFit implements PlugIn
 		showFilterScoreHistograms = gd.getNextBoolean();
 		saveFilterRange = gd.getNextBoolean();
 
-		// Avoid stupidness, i.e. things that move outside the fit window
+		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
 		fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
+		fitConfig.setMinWidthFactor(1.0 / 5);
 		fitConfig.setWidthFactor(5);
 
 		if (extraOptions)
@@ -1210,7 +1212,7 @@ public class BenchmarkSpotFit implements PlugIn
 		double factor = 0.25;
 		upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming lower is less than 1)
 		lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1)); // (assuming upper is more than 1)
-		
+
 		// Create a range increment
 		double[] increment = new double[lower.length];
 		for (int i = 0; i < increment.length; i++)

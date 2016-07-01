@@ -98,7 +98,7 @@ public class PSFDrift implements PlugIn
 		fitConfig.setGain(1);
 		fitConfig.setReadNoise(0);
 		fitConfig.setModelCamera(false);
-		fitConfig.setSearchMethod(SearchMethod.POWELL);
+		fitConfig.setSearchMethod(SearchMethod.POWELL_BOUNDED);
 	}
 
 	private int centrePixel;
@@ -423,6 +423,9 @@ public class PSFDrift implements PlugIn
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+		// We need these to set bounds for any bounded fitters
+		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
+		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());		
 		gd.addCheckbox("Offset_fit", offsetFitting);
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
@@ -445,6 +448,8 @@ public class PSFDrift implements PlugIn
 		backgroundFitting = gd.getNextBoolean();
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
+		fitConfig.setMinWidthFactor(gd.getNextNumber());
+		fitConfig.setWidthFactor(gd.getNextNumber());
 		offsetFitting = gd.getNextBoolean();
 		startOffset = Math.abs(gd.getNextNumber());
 		comFitting = gd.getNextBoolean();

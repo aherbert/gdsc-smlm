@@ -105,6 +105,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		fitConfig.setMinPhotons(0); // Do not allow negative photons 
 		fitConfig.setCoordinateShiftFactor(0); // Disable
 		fitConfig.setPrecisionThreshold(0);
+		fitConfig.setMinWidthFactor(0);
 		fitConfig.setWidthFactor(0);
 
 		fitConfig.setMinIterations(0);
@@ -122,6 +123,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setMinPhotons(0);
 		filterFitConfig.setCoordinateShiftFactor(0);
 		filterFitConfig.setPrecisionThreshold(0);
+		filterFitConfig.setMinWidthFactor(0);
 		filterFitConfig.setWidthFactor(0);
 	}
 
@@ -159,6 +161,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
 	private TextField textPrecisionThreshold;
+	private TextField textMinWidthFactor;
 	private TextField textWidthFactor;
 
 	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
@@ -426,7 +429,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			this.actualCoordinates = actualCoordinates;
 			this.fitConfig = fitConfig.clone();
 			this.gf = new Gaussian2DFitter(this.fitConfig);
-			gf.setMaximumWidthFactor(20);
 			this.spotFilter = config.createSpotFilter(true);
 			this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
 
@@ -1476,6 +1478,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 
+		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
+		fitConfig.setCoordinateShiftFactor(2 * config.getFitting() / fitConfig.getInitialPeakStdDev0());
+		fitConfig.setMinWidthFactor(1.0 / 10);
+		fitConfig.setWidthFactor(10);
+		
 		iterationIncrease = gd.getNextNumber();
 		showOverlay = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
@@ -2686,7 +2693,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addSlider("Shift_factor", 0.01, 2, filterFitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
-		gd.addSlider("Width_factor", 0.01, 5, filterFitConfig.getWidthFactor());
+		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
+		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
 		gd.addNumericField("Precision", filterFitConfig.getPrecisionThreshold(), 2);
 
 		gd.addNumericField("Drift_angle", analysisDriftAngle, 2);
@@ -2709,6 +2717,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
 			textMinPhotons = numerics.get(n++);
+			textMinWidthFactor = numerics.get(n++);
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
 		}
@@ -2724,6 +2733,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		filterFitConfig.setSignalStrength(gd.getNextNumber());
 		filterFitConfig.setMinPhotons(gd.getNextNumber());
+		filterFitConfig.setMinWidthFactor(gd.getNextNumber());
 		filterFitConfig.setWidthFactor(gd.getNextNumber());
 		filterFitConfig.setPrecisionThreshold(gd.getNextNumber());
 		analysisDriftAngle = gd.getNextNumber();
@@ -2783,6 +2793,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 					textSignalStrength.setText("" + fitConfig.getSignalStrength());
 					textMinPhotons.setText("" + fitConfig.getMinPhotons());
+					textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
 					textWidthFactor.setText("" + fitConfig.getWidthFactor());
 					textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 				}
@@ -2793,6 +2804,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textCoordinateShiftFactor.setText("0");
 				textSignalStrength.setText("0");
 				textMinPhotons.setText("0");
+				textMinWidthFactor.setText("0");
 				textWidthFactor.setText("0");
 				textPrecisionThreshold.setText("0");
 			}

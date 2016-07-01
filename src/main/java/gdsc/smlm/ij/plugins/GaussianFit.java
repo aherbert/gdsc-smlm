@@ -914,6 +914,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		double halfMk = 0.5f * Mk;
 		config.setCoordinateShift(halfMk);
 		config.setSignalStrength(0);
+		config.setMinWidthFactor(0.5);
 		config.setWidthFactor(3);
 		if (logProgress)
 			config.setLog(new IJLogger());

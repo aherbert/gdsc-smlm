@@ -121,9 +121,6 @@ public class FitWorker implements Runnable
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
 		gf = new Gaussian2DFitter(fitConfig);
-		final int max = (fitConfig.getWidthFactor() > 1) ? (int) Math.ceil(fitConfig.getWidthFactor())
-				: Integer.MAX_VALUE;
-		gf.setMaximumWidthFactor(max);
 		duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		calculateNoise = config.getFitConfiguration().getNoise() <= 0;
 		if (!calculateNoise)

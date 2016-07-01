@@ -191,6 +191,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textPrecisionThreshold;
 	private TextField textNoise;
 	private Choice textNoiseMethod;
+	private TextField textMinWidthFactor;
 	private TextField textWidthFactor;
 	private Checkbox textLogProgress;
 	private Checkbox textShowDeviations;
@@ -781,7 +782,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				String[] noiseMethodNames = SettingsManager.getNames((Object[]) Method.values());
 				gd.addChoice("Noise_method", noiseMethodNames, noiseMethodNames[config.getNoiseMethod().ordinal()]);
 			}
-			gd.addSlider("Width_factor", 0.01, 5, fitConfig.getWidthFactor());
+			gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
+			gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
 			gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
 		}
 
@@ -908,6 +910,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textCoordinateShiftFactor = numerics.get(n++);
 				textSignalStrength = numerics.get(n++);
 				textMinPhotons = numerics.get(n++);
+				textMinWidthFactor = numerics.get(n++);
 				textWidthFactor = numerics.get(n++);
 				textPrecisionThreshold = numerics.get(n++);
 				if (extraOptions)
@@ -1102,6 +1105,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		config = new FitEngineConfiguration(new FitConfiguration());
 		fitConfig = config.getFitConfiguration();
 		fitConfig.setInitialPeakStdDev(sd);
+		// Allow to move 1 SD
 		fitConfig.setCoordinateShiftFactor(1);
 		resultsSettings = new ResultsSettings();
 
@@ -1393,6 +1397,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				fitConfig.setNoise(gd.getNextNumber());
 				config.setNoiseMethod(gd.getNextChoiceIndex());
 			}
+			fitConfig.setMinWidthFactor(gd.getNextNumber());
 			fitConfig.setWidthFactor(gd.getNextNumber());
 			fitConfig.setPrecisionThreshold(gd.getNextNumber());
 		}
@@ -1451,6 +1456,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
 				if (extraOptions)
 					Parameters.isPositive("Noise", fitConfig.getNoise());
+				Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
 				Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
 				Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
 			}
@@ -1909,7 +1915,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			// All setup is already done so simply run
 			run();
 		}
-		
+
 		addSingleFrameOverlay();
 	}
 
@@ -2537,6 +2543,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 			textSignalStrength.setText("" + fitConfig.getSignalStrength());
 			textMinPhotons.setText("" + fitConfig.getMinPhotons());
+			textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
 			textWidthFactor.setText("" + fitConfig.getWidthFactor());
 			textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 			if (extraOptions)

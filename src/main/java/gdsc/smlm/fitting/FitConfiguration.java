@@ -60,6 +60,7 @@ public class FitConfiguration implements Cloneable
 	private boolean emCCD = true;
 	private boolean modelCamera = false;
 	private double noise = 0;
+	private double minWidthFactor = 0.5;
 	private double widthFactor = 2;
 	private boolean fitValidation = true;
 	private double lambda = 10;
@@ -732,11 +733,35 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @return the widthFactor
+	 * @return the widthFactor (or zero if not configured)
 	 */
 	public double getWidthFactor()
 	{
 		return (widthFactor == Double.POSITIVE_INFINITY) ? 0 : widthFactor;
+	}
+
+	/**
+	 * @param minWidthFactor
+	 *            The minimum factor difference allowed between widths for a good fit
+	 */
+	public void setMinWidthFactor(double minWidthFactor)
+	{
+		if (minWidthFactor < 1 && minWidthFactor > 0)
+		{
+			this.minWidthFactor = minWidthFactor;
+		}
+		else
+		{
+			this.minWidthFactor = 0;
+		}
+	}
+
+	/**
+	 * @return the minWidthFactor
+	 */
+	public double getMinWidthFactor()
+	{
+		return minWidthFactor;
 	}
 
 	/**
@@ -869,37 +894,48 @@ public class FitConfiguration implements Cloneable
 		{
 			if (log != null)
 			{
-				log.info("Bad peak %d: Insufficient signal %g (SNR=%g)\n", n, signal / ((gain > 0) ? gain : 1), signal /
-						noise);
+				log.info("Bad peak %d: Insufficient signal %g (SNR=%g)\n", n, signal / ((gain > 0) ? gain : 1),
+						signal / noise);
 			}
 			//System.out.printf("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
 			return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
 		}
 
 		// Check widths
-		final double xFactor = getFactor(params[Gaussian2DFunction.X_SD + offset],
-				initialParams[Gaussian2DFunction.X_SD + offset]);
-		final double yFactor = getFactor(params[Gaussian2DFunction.Y_SD + offset],
-				initialParams[Gaussian2DFunction.Y_SD + offset]);
-		if (xFactor > widthFactor || yFactor > widthFactor)
+		if (isWidth0Fitting())
 		{
-			if (log != null)
+			boolean badWidth = false;
+			double xFactor = 0, yFactor = 0;
+
+			xFactor = params[Gaussian2DFunction.X_SD + offset] / initialParams[Gaussian2DFunction.X_SD + offset];
+			badWidth = (xFactor > widthFactor || xFactor < minWidthFactor);
+
+			// Always do this (even if badWidth=true) since we need the factor for the return value
+			if (isWidth1Fitting())
 			{
-				log.info(
-						"Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n",
-						n,
-						(params[Gaussian2DFunction.X_SD + offset] > initialParams[Gaussian2DFunction.X_SD + offset]) ? xFactor
-								: -xFactor,
-						(params[Gaussian2DFunction.Y_SD + offset] > initialParams[Gaussian2DFunction.Y_SD + offset]) ? yFactor
-								: -yFactor);
+				yFactor = params[Gaussian2DFunction.Y_SD + offset] / initialParams[Gaussian2DFunction.Y_SD + offset];
+				badWidth = (yFactor > widthFactor || yFactor < minWidthFactor);
 			}
-			return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] { xFactor, yFactor });
+			else
+			{
+				yFactor = xFactor;
+			}
+
+			if (badWidth)
+			{
+				if (log != null)
+				{
+					log.info("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n, xFactor, yFactor);
+				}
+				return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] { xFactor, yFactor });
+			}
 		}
 
 		// Check precision
 		if (precisionThreshold > 0 && nmPerPixel > 0 && gain > 0)
 		{
-			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) * 0.5;
+			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
+					0.5;
 
 			double variance = 0;
 			// We can calculate the precision using the estimated noise for the image or using the expected number
@@ -966,20 +1002,6 @@ public class FitConfiguration implements Cloneable
 		}
 
 		return setValidationResult(FitStatus.OK, null);
-	}
-
-	/**
-	 * Get the relative change factor between f and g
-	 * 
-	 * @param f
-	 * @param g
-	 * @return
-	 */
-	private static double getFactor(double f, double g)
-	{
-		if (f > g)
-			return f / g;
-		return g / f;
 	}
 
 	/**
@@ -1228,7 +1250,8 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @param amplification The amplification [ADUs/electron] (used for maximum likelihood estimation)
+	 * @param amplification
+	 *            The amplification [ADUs/electron] (used for maximum likelihood estimation)
 	 */
 	public void setAmplification(double amplification)
 	{
@@ -1378,9 +1401,9 @@ public class FitConfiguration implements Cloneable
 				if (searchMethod.usesGradients() && modelCamera)
 				{
 					throw new IllegalArgumentException(String.format(
-							"The derivative based search method '%s' can only be used with the "
-									+ "'%s' likelihood function, i.e. no model camera noise", searchMethod,
-							MaximumLikelihoodFitter.LikelihoodFunction.POISSON));
+							"The derivative based search method '%s' can only be used with the " +
+									"'%s' likelihood function, i.e. no model camera noise",
+							searchMethod, MaximumLikelihoodFitter.LikelihoodFunction.POISSON));
 				}
 
 				MaximumLikelihoodFitter fitter = new MaximumLikelihoodFitter(gaussianFunction);
