@@ -196,7 +196,7 @@ public class BenchmarkSpotFit implements PlugIn
 	private static double matchSignal = 2;
 
 	private static boolean showFilterScoreHistograms = false;
-	private static boolean saveFilterRange = false;
+	private static boolean saveFilterRange = true;
 	private static String filterRangeFile = "";
 
 	private boolean extraOptions = false;
