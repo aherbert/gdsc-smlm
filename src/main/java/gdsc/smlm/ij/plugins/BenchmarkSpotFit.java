@@ -90,12 +90,36 @@ public class BenchmarkSpotFit implements PlugIn
 	// Used to try and guess the range for filtering the results
 	private enum LowerLimit
 	{
-		ZERO, ONE_PERCENT, MAX_NEGATIVE_CUMUL_DELTA
+		ZERO(false), ONE_PERCENT(false), MAX_NEGATIVE_CUMUL_DELTA(true);
+
+		final boolean requiresDelta;
+
+		LowerLimit(boolean requiresDelta)
+		{
+			this.requiresDelta = requiresDelta;
+		}
+
+		public boolean requiresDeltaHistogram()
+		{
+			return requiresDelta;
+		}
 	}
 
 	private enum UpperLimit
 	{
-		ZERO, MAX_POSITIVE_CUMUL_DELTA, NINETY_NINE_PERCENT
+		ZERO(false), MAX_POSITIVE_CUMUL_DELTA(true), NINETY_NINE_PERCENT(false);
+
+		final boolean requiresDelta;
+
+		UpperLimit(boolean requiresDelta)
+		{
+			this.requiresDelta = requiresDelta;
+		}
+
+		public boolean requiresDeltaHistogram()
+		{
+			return requiresDelta;
+		}
 	}
 
 	private class FilterCriteria
@@ -1378,7 +1402,7 @@ public class BenchmarkSpotFit implements PlugIn
 		double max1 = 0;
 		double max2 = 0;
 
-		if (showFilterScoreHistograms || upper == UpperLimit.MAX_POSITIVE_CUMUL_DELTA)
+		if (showFilterScoreHistograms || upper.requiresDeltaHistogram() || lower.requiresDeltaHistogram())
 		{
 			LinearInterpolator li = new LinearInterpolator();
 			PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
