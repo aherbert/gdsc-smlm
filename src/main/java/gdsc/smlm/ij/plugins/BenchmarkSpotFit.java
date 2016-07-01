@@ -1,5 +1,18 @@
 package gdsc.smlm.ij.plugins;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2014 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.FileOutputStream;
@@ -28,20 +41,6 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2014 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitWorker;
@@ -91,20 +90,55 @@ public class BenchmarkSpotFit implements PlugIn
 	// Used to try and guess the range for filtering the results
 	private enum LowerLimit
 	{
-		ZERO, ONE_PERCENT
+		ZERO, ONE_PERCENT, MAX_NEGATIVE_CUMUL_DELTA
 	}
 
 	private enum UpperLimit
 	{
-		MAX_POSITIVE_CUMUL_DELTA, NINETY_NINE_PERCENT
+		ZERO, MAX_POSITIVE_CUMUL_DELTA, NINETY_NINE_PERCENT
 	}
 
-	private String[] NAMES = { "Signal", "SNR", "Width", "Shift", "EShift", "Precision" };
-	private LowerLimit[] LOWER = { LowerLimit.ONE_PERCENT, LowerLimit.ONE_PERCENT, LowerLimit.ONE_PERCENT,
-			LowerLimit.ONE_PERCENT, LowerLimit.ZERO, LowerLimit.ZERO };
-	private UpperLimit[] UPPER = { UpperLimit.MAX_POSITIVE_CUMUL_DELTA, UpperLimit.MAX_POSITIVE_CUMUL_DELTA,
-			UpperLimit.NINETY_NINE_PERCENT, UpperLimit.NINETY_NINE_PERCENT, UpperLimit.NINETY_NINE_PERCENT,
-			UpperLimit.NINETY_NINE_PERCENT };
+	private class FilterCriteria
+	{
+		final String name;
+		final LowerLimit lower;
+		final UpperLimit upper;
+
+		public FilterCriteria(String name, LowerLimit lower, UpperLimit upper)
+		{
+			this.name = name;
+			this.lower = lower;
+			this.upper = upper;
+		}
+	}
+
+	private static FilterCriteria[] filterCriteria = null;
+	private static final int FILTER_SIGNAL = 0;
+	private static final int FILTER_SNR = 1;
+	private static final int FILTER_MIN_WIDTH = 2;
+	private static final int FILTER_MAX_WIDTH = 3;
+	private static final int FILTER_SHIFT = 4;
+	private static final int FILTER_ESHIFT = 5;
+	private static final int FILTER_PRECISION = 6;
+
+	private FilterCriteria[] createFilterCriteria()
+	{
+		if (filterCriteria == null)
+		{
+			filterCriteria = new FilterCriteria[7];
+			int i = 0;
+			//@formatter:off
+			filterCriteria[i++] = new FilterCriteria("Signal",    LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+			filterCriteria[i++] = new FilterCriteria("SNR",       LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+			filterCriteria[i++] = new FilterCriteria("MinWidth",  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
+			filterCriteria[i++] = new FilterCriteria("MaxWidth",  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria("Shift",     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria("EShift",    LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria("Precision", LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			//@formatter:on
+		}
+		return filterCriteria;
+	}
 
 	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
@@ -446,6 +480,8 @@ public class BenchmarkSpotFit implements PlugIn
 				{
 					if (fitResult[i].getStatus() == FitStatus.OK)
 					{
+						// XXX - Note that we can configure a residuals threshold. So how do we deal with doublets?
+
 						// The XY positions should be offset by +0.5 already
 						final double[] params = job.getFitResult(i).getParameters();
 						predicted[count++] = new BasePoint((float) params[Gaussian2DFunction.X_POSITION],
@@ -469,7 +505,7 @@ public class BenchmarkSpotFit implements PlugIn
 					{
 						final BasePoint p2 = (BasePoint) pair.getPoint2();
 						int i = (int) p2.getZ();
-						final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
+						final PeakResultPoint p3 = (PeakResultPoint) pair.getPoint1();
 
 						final double d = pair.getXYDistance();
 
@@ -477,11 +513,11 @@ public class BenchmarkSpotFit implements PlugIn
 						{
 							// This is a fitted candidate
 
-							final double a = p1.peakResult.getSignal();
+							final double a = p3.peakResult.getSignal();
 							final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
 
 							fitMatch[i] = true;
-							match[matchCount++] = new FitMatch(i, d, p1.peakResult.error, p / a);
+							match[matchCount++] = new FitMatch(i, d, p3.peakResult.error, p / a);
 						}
 						else
 						{
@@ -489,7 +525,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 							// Get the index
 							i = -1 - i;
-							match[matchCount++] = new CandidateMatch(i, d, p1.peakResult.error);
+							match[matchCount++] = new CandidateMatch(i, d, p3.peakResult.error);
 						}
 					}
 				}
@@ -935,7 +971,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 		// Get stats for all fitted results and those that match 
 		// Signal, SNR, Width, xShift, yShift, Precision
-		StoredDataStatistics[][] stats = new StoredDataStatistics[3][NAMES.length];
+		createFilterCriteria();
+		StoredDataStatistics[][] stats = new StoredDataStatistics[3][filterCriteria.length];
 		for (int i = 0; i < stats.length; i++)
 			for (int j = 0; j < stats[i].length; j++)
 				stats[i][j] = new StoredDataStatistics();
@@ -984,43 +1021,41 @@ public class BenchmarkSpotFit implements PlugIn
 					else
 						precision = PeakResult.getPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD);
 
+					final double signal = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
+					final double snr = p[Gaussian2DFunction.SIGNAL] / result.noise;
 					final double width = s0 / fitConfig.getInitialPeakStdDev0();
-					final double xShift = (p[Gaussian2DFunction.X_POSITION] -
-							initialParams[Gaussian2DFunction.X_POSITION]) / fitConfig.getInitialPeakStdDev0();
-					final double yShift = (p[Gaussian2DFunction.Y_POSITION] -
-							initialParams[Gaussian2DFunction.Y_POSITION]) / fitConfig.getInitialPeakStdDev0();
-					// Since these two are combined and the max is what matters.
-					// Note that this is not as sensible as computing the shift in Euclidian space.
-					final double shift = (Math.abs(xShift) > Math.abs(yShift)) ? xShift : yShift;
+					final double xShift = p[Gaussian2DFunction.X_POSITION] -
+							initialParams[Gaussian2DFunction.X_POSITION];
+					final double yShift = p[Gaussian2DFunction.Y_POSITION] -
+							initialParams[Gaussian2DFunction.Y_POSITION];
+					// Since these two are combined for filtering and the max is what matters.
+					double shift = ((Math.abs(xShift) > Math.abs(yShift)) ? xShift : yShift) /
+							fitConfig.getInitialPeakStdDev0();
+					// Comment this out to allow plotting the absolute shift which should be centred around 0
+					shift = Math.abs(shift);
 					final double eshift = Math.sqrt(xShift * xShift + yShift * yShift);
 
-					stats[0][0].add(p[Gaussian2DFunction.SIGNAL]);
-					stats[0][1].add(p[Gaussian2DFunction.SIGNAL] / result.noise);
-					stats[0][2].add(width);
-					stats[0][3].add(shift);
-					stats[0][4].add(eshift);
-					stats[0][5].add(precision);
-
-					if (result.fitMatch[i])
-					{
-						// Note these matches do not take into account the signal factor, only the match distance
-
-						stats[1][0].add(p[Gaussian2DFunction.SIGNAL]);
-						stats[1][1].add(p[Gaussian2DFunction.SIGNAL] / result.noise);
-						stats[1][2].add(width);
-						stats[1][3].add(shift);
-						stats[1][4].add(eshift);
-						stats[1][5].add(precision);
-					}
+					stats[0][FILTER_SIGNAL].add(signal);
+					stats[0][FILTER_SNR].add(snr);
+					if (width < 1)
+						stats[0][FILTER_MIN_WIDTH].add(width);
 					else
-					{
-						stats[2][0].add(p[Gaussian2DFunction.SIGNAL]);
-						stats[2][1].add(p[Gaussian2DFunction.SIGNAL] / result.noise);
-						stats[2][2].add(width);
-						stats[2][3].add(shift);
-						stats[2][4].add(eshift);
-						stats[2][5].add(precision);
-					}
+						stats[0][FILTER_MAX_WIDTH].add(width);
+					stats[0][FILTER_SHIFT].add(shift);
+					stats[0][FILTER_ESHIFT].add(eshift);
+					stats[0][FILTER_PRECISION].add(precision);
+
+					// Add to the TP or FP stats 
+					final int index = (result.fitMatch[i]) ? 1 : 2;
+					stats[index][FILTER_SIGNAL].add(signal);
+					stats[index][FILTER_SNR].add(snr);
+					if (width < 1)
+						stats[index][FILTER_MIN_WIDTH].add(width);
+					else
+						stats[index][FILTER_MAX_WIDTH].add(width);
+					stats[index][FILTER_SHIFT].add(shift);
+					stats[index][FILTER_ESHIFT].add(eshift);
+					stats[index][FILTER_PRECISION].add(precision);
 				}
 			}
 			for (int i = 0; i < result.match.length; i++)
@@ -1159,14 +1194,39 @@ public class BenchmarkSpotFit implements PlugIn
 			wo.add(id);
 
 		// Plot histograms of the stats on the same window
-		double[] lower = new double[NAMES.length];
-		double[] upper = new double[NAMES.length];
+		double[] lower = new double[filterCriteria.length];
+		double[] upper = new double[lower.length];
 		for (int i = 0; i < stats[0].length; i++)
 		{
-			double[] limits = showDoubleHistogram(stats, i, NAMES[i], wo, LOWER[i], UPPER[i]);
-			sb.append("\t").append(Utils.rounded(limits[0])).append('-').append(Utils.rounded(limits[1]));
+			double[] limits = showDoubleHistogram(stats, i, wo);
 			lower[i] = limits[0];
 			upper[i] = limits[1];
+		}
+
+		// Reconfigure some of the range limits
+		upper[FILTER_SIGNAL] *= 2; // Make this a bit bigger
+		upper[FILTER_SNR] *= 2; // Make this a bit bigger
+		lower[FILTER_PRECISION] *= 0.5; // Make this a bit smaller
+		double factor = 0.25;
+		upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming lower is less than 1)
+		lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1)); // (assuming upper is more than 1)
+		
+		// Create a range increment
+		double[] increment = new double[lower.length];
+		for (int i = 0; i < increment.length; i++)
+			increment[i] = (upper[i] - lower[i]) / 10;
+
+		// Disable some filters
+		increment[FILTER_SIGNAL] = Double.POSITIVE_INFINITY;
+		//increment[FILTER_SHIFT] = Double.POSITIVE_INFINITY;
+		increment[FILTER_ESHIFT] = Double.POSITIVE_INFINITY;
+
+		for (int i = 0; i < stats[0].length; i++)
+		{
+			lower[i] = Maths.round(lower[i]);
+			upper[i] = Maths.round(upper[i]);
+			increment[i] = Maths.round(increment[i]);
+			sb.append("\t").append(lower[i]).append('-').append(upper[i]);
 		}
 
 		wo.tile();
@@ -1178,43 +1238,14 @@ public class BenchmarkSpotFit implements PlugIn
 			String filename = Utils.getFilename("Filter_range_file", filterRangeFile);
 			if (filename == null)
 				return;
+			filename = Utils.replaceExtension(filename, ".xml");
 			filterRangeFile = filename;
 			// Create a filter set using the ranges
 			ArrayList<Filter> filters = new ArrayList<Filter>(3);
-			double upperMinWidth = 1 - (1 - lower[2]) / 4; // (assuming lower is less than 1)
-			double lowerMaxWidth = 1 + (upper[2] - 1) / 4; // (assuming upper is more than 1)
-			double shift = Math.max(Math.abs(lower[3]), Math.abs(upper[3]));
-			//@formatter:off
-			Filter f1 = new MultiFilter2(
-					lower[0], 
-					(float) lower[1], 
-					lower[2], 
-					lowerMaxWidth, 
-					shift / 2, 
-					upper[4] / 2, 
-					lower[5]);
-			Filter f2 = new MultiFilter2(
-					upper[0], 
-					(float) upper[1], 
-					upperMinWidth, 
-					upper[2], 
-					shift, 
-					upper[4], 
-					upper[5]);
-			filters.add(f1);
-			filters.add(f2);
-			// Get the range
-			filters.add(new MultiFilter2(
-					Double.POSITIVE_INFINITY, // Do not bother with the signal. The SNR should take care of this 
-					(float)(f2.getParameterValue(1) - f1.getParameterValue(1))/10, 
-					(f2.getParameterValue(2) - f1.getParameterValue(2))/10, 
-					(f2.getParameterValue(3) - f1.getParameterValue(3))/10, 
-					(f2.getParameterValue(4) - f1.getParameterValue(4))/10, 
-					Double.POSITIVE_INFINITY, // Disable EShift as it is similar to Shift 
-					(f2.getParameterValue(6) - f1.getParameterValue(6))/10
-					));
-			//@formatter:on
-
+			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
+			filters.add(new MultiFilter2(upper[0], (float) upper[1], upper[2], upper[3], upper[4], upper[5], upper[6]));
+			filters.add(new MultiFilter2(increment[0], (float) increment[1], increment[2], increment[3], increment[4],
+					increment[5], increment[6]));
 			ArrayList<FilterSet> filterList = new ArrayList<FilterSet>(1);
 			filterList.add(new FilterSet("Multi2", filters));
 			FileOutputStream fos = null;
@@ -1244,9 +1275,11 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 	}
 
-	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, int i, String xLabel, WindowOrganiser wo,
-			LowerLimit lower, UpperLimit upper)
+	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, int i, WindowOrganiser wo)
 	{
+		String xLabel = filterCriteria[i].name;
+		LowerLimit lower = filterCriteria[i].lower;
+		UpperLimit upper = filterCriteria[i].upper;
 		// [0] is all
 		// [1] is matches
 		// [2] is no match
@@ -1403,6 +1436,9 @@ public class BenchmarkSpotFit implements PlugIn
 			case ONE_PERCENT:
 				l = getPercentile(h2, 0.01);
 				break;
+			case MAX_NEGATIVE_CUMUL_DELTA:
+				l = maxx2;
+				break;
 			case ZERO:
 			default:
 				l = 0;
@@ -1529,8 +1565,9 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Med.Distance (nm)\t");
 		sb.append("Med.Depth (nm)\t");
 
-		for (String name : NAMES)
-			sb.append(name).append('\t');
+		createFilterCriteria();
+		for (FilterCriteria f : filterCriteria)
+			sb.append(f.name).append('\t');
 
 		return sb.toString();
 	}
