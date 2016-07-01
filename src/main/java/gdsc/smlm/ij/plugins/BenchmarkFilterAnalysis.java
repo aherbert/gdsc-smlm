@@ -921,7 +921,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
 		gd.addCheckbox("Score_analysis", scoreAnalysis);
 		gd.addCheckbox("Evolve", evolve);
-		gd.addSlider("Step_search", 0, 10, stepSearch);
+		gd.addSlider("Step_search", 0, 4, stepSearch);
 		gd.addStringField("Title", resultsTitle, 20);
 
 		gd.showDialog();
@@ -1539,7 +1539,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				if (count2++ % 16 == 0)
 				{
-					IJ.showProgress(count2, total);
+					progress(count2, total);
 					if (Utils.isInterrupted())
 						return -1;
 				}
@@ -1631,7 +1631,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				while (doSearch && iteration < 20)
 				{
 					iteration++;
-					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, topFilter.getName(), max[SCORE], max[CRITERIA]);
+					System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, maxFilter.getName(), max[SCORE],
+							max[CRITERIA]);
+
+					IJ.showStatus("Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
 
 					// Create a new filter set surrounding the top filter
 					Filter oldMaxFilter = maxFilter;
@@ -1660,11 +1663,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					FilterSet newSet = new FilterSet(filters);
 					// Score the filters
 					initialiseScoring(newSet);
+					limit = 0;
+					int stepCount = 0;
+					final int stepTotal = newSet.size();
+					
 					for (Filter filter : newSet.getFilters())
 					{
+						if (stepCount++ % 16 == 0)
+						{
+							progress(stepCount, stepTotal);
+							if (Utils.isInterrupted())
+								return -1;
+						}
+						
 						final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
-
-						//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, filter.getName(), score, criteria);
 
 						// Check if the criteria are achieved
 						if (result[CRITERIA] >= minCriteria)
@@ -1713,6 +1725,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							}
 						}
 					}
+					progress(1);
+					
 					// Check if the top filter has changed to continue the search
 					doSearch = !maxFilter.equals(oldMaxFilter);
 				}
