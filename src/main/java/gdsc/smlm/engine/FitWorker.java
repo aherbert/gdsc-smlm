@@ -902,12 +902,12 @@ public class FitWorker implements Runnable
 			// TODO - see if peak shift factors, off-grid centres makes a difference
 			
 			// Add per peak shift factors ... 
-			// If the neighbour was a candidate then allow it to move further.
 			// Allow unfitted neighbours to shift more (due to bad estimates)
 			double[] peakShiftFactors = new double[neighbourCount + 1];
-			Arrays.fill(peakShiftFactors, 1.5);
+			Arrays.fill(peakShiftFactors, 2);
 			// The target peak must use strict shift filtering
 			peakShiftFactors[0] = 1;
+			// Any fitted peaks
 			fitConfig.setPeakShiftFactors(peakShiftFactors);
 
 			// Note that if the input XY positions are on the integer grid then the fitter will estimate
