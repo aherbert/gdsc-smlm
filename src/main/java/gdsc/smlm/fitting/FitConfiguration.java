@@ -80,6 +80,45 @@ public class FitConfiguration implements Cloneable
 	private NoiseModel noiseModel = null;
 	private FunctionSolver functionSolver = null;
 
+	private double[] peakShiftFactors = null;
+
+	/**
+	 * Sets the peak shift factors. This is used to adjust the coordinate shift limit for individual peaks in the
+	 * {@link #validatePeak(int, double[], double[])} function. For example if fitting multiple peaks and the validation
+	 * of each position should be adjusted based on the uncertainty of the estimated parameters.
+	 *
+	 * @param peakShiftFactors
+	 *            the new peak shift factors
+	 */
+	public void setPeakShiftFactors(double[] peakShiftFactors)
+	{
+		this.peakShiftFactors = peakShiftFactors;
+	}
+
+	/**
+	 * Gets the peak shift factors
+	 *
+	 * @return a clone copy of the peak shift factors
+	 */
+	public double[] getPeakShiftFactors()
+	{
+		return (this.peakShiftFactors == null) ? null : peakShiftFactors.clone();
+	}
+
+	/**
+	 * Gets the peak shift factor for the specified peak.
+	 *
+	 * @param peak
+	 *            the peak
+	 * @return the peak shift factor (1 if not explicitly set using {@link #setPeakShiftFactors(double[])}
+	 */
+	public double getPeakShiftFactor(int peak)
+	{
+		if (peakShiftFactors == null || peakShiftFactors.length <= peak)
+			return 1;
+		return peakShiftFactors[peak];
+	}
+
 	/**
 	 * Default constructor
 	 */
@@ -878,11 +917,12 @@ public class FitConfiguration implements Cloneable
 				initialParams[Gaussian2DFunction.X_POSITION + offset];
 		final double yShift = params[Gaussian2DFunction.Y_POSITION + offset] -
 				initialParams[Gaussian2DFunction.Y_POSITION + offset];
-		if (Math.abs(xShift) > coordinateShift || Math.abs(yShift) > coordinateShift)
+		final double maxShift = coordinateShift * getPeakShiftFactor(n);
+		if (Math.abs(xShift) > maxShift || Math.abs(yShift) > maxShift)
 		{
 			if (log != null)
 			{
-				log.info("Bad peak %d: Fitted coordinates moved (x=%g,y=%g)", n, xShift, yShift);
+				log.info("Bad peak %d: Fitted coordinates moved (x=%g,y=%g) > %g", n, xShift, yShift, maxShift);
 			}
 			return setValidationResult(FitStatus.COORDINATES_MOVED, new double[] { xShift, yShift });
 		}
