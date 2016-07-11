@@ -11,22 +11,21 @@ import org.junit.Test;
 public class PoissonGammaGaussianFunctionTest
 {
 	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
-	//double[] photons = { 100, 1000 };
-	double[] noise = { 1.1, 2.3, 4.5, 8.7 };
-	//double[] noise = { 7 };
-	double[] gain = { 39.1 };
+	double[] noise = { 30, 45, 76 }; // in electrons
+	double[] cameraGain = { 6.5, 45 }; // ADU/e
+	double emGain = 250;
 
-	// Realistic parmeters for speed test
+	// Realistic parameters for speed test
 	double s = 7.16;
 	double g = 39.1;
-	
+
 	@Test
 	public void cumulativeProbabilityIsOneWithApproximation()
 	{
 		for (double p : photons)
-			for (double s : noise)
-				for (double g : gain)
-					cumulativeProbabilityIsOne(p, s, g, true, false);
+			for (double rn : noise)
+				for (double cg : cameraGain)
+					cumulativeProbabilityIsOne(p, rn, cg, true, false);
 	}
 
 	@Test
@@ -34,7 +33,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : photons)
 			for (double s : noise)
-				for (double g : gain)
+				for (double g : cameraGain)
 					cumulativeProbabilityIsOne(p, s, g, false, false);
 	}
 
@@ -43,7 +42,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : photons)
 			for (double s : noise)
-				for (double g : gain)
+				for (double g : cameraGain)
 					cumulativeProbabilityIsOne(p, s, g, false, true);
 	}
 
@@ -57,16 +56,13 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void simpleIntegrationCloselyMatchesFullIntegration()
 	{
-		double e = closelyMatchesFullIntegration(1e-5, false, true);
+		double e = closelyMatchesFullIntegration(1e-3, false, true);
 		System.out.println("Simple integration max error = " + e);
 	}
 
 	@Test
 	public void approximationFasterThanFullIntegration()
 	{
-		double g = 39.1;
-		double s = 7.16;
-
 		PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
 		f1.setUseApproximation(false);
 		f1.setUseSimpleIntegration(false);
@@ -106,9 +102,13 @@ public class PoissonGammaGaussianFunctionTest
 		fasterThan(f1, f2);
 	}
 
-	private void cumulativeProbabilityIsOne(final double mu, final double s, final double g, boolean useApproximation,
+	private void cumulativeProbabilityIsOne(final double mu, final double rn, final double cg, boolean useApproximation,
 			boolean useSimpleIntegration)
 	{
+		// Read noise should be in proportion to the camera gain
+		double s = rn / cg;
+		double g = emGain / cg;
+
 		PoissonGammaGaussianFunction f = new PoissonGammaGaussianFunction(1 / g, s);
 
 		f.setUseApproximation(useApproximation);
@@ -124,7 +124,7 @@ public class PoissonGammaGaussianFunctionTest
 		if (mu > 0)
 		{
 			min = (int) -Math.ceil(3 * s);
-			max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
+			max = (int) Math.ceil(mu + 3 * (Math.max(s, Math.sqrt(mu))));
 			for (int x = min; x <= max; x++)
 			{
 				final double pp = f.likelihood(x, mu);
@@ -154,17 +154,20 @@ public class PoissonGammaGaussianFunctionTest
 			if (pp / p < changeTolerance)
 				break;
 		}
-		System.out.printf("mu=%f, s=%f, p=%f\n", mu, s, p);
-		Assert.assertEquals(String.format("mu=%f, s=%f", mu, s), 1, p, 0.02);
+		System.out.printf("%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%f\n", getName(f), mu, rn, cg, s, g, p);
+		Assert.assertEquals(String.format("mu=%f, rn=%f, cg=%f, s=%f, g=%f", mu, rn, cg, s, g), 1, p, 0.02);
 	}
 
 	private double closelyMatchesFullIntegration(double error, boolean useApproximation, boolean useSimpleIntegration)
 	{
 		//DoubleEquality eq = new DoubleEquality(error, 1e-7);
 		double maxError = 0;
-		for (double s : noise)
-			for (double g : gain)
+		for (double rn : noise)
+			for (double cg : cameraGain)
 			{
+				// Read noise should be in proportion to the camera gain
+				double s = rn / cg;
+				double g = emGain / cg;
 				PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
 				f1.setUseApproximation(false);
 				f1.setUseSimpleIntegration(false);
@@ -184,8 +187,8 @@ public class PoissonGammaGaussianFunctionTest
 						boolean equal = relativeError <= error; //eq.almostEqualRelativeOrAbsolute(p1, p2);
 						if (!equal)
 						{
-							Assert.assertTrue(String.format("s=%f, g=%f, p=%f, x=%f: %f != %f (%f)", s, g, p, x, p1,
-									p2, relativeError), equal);
+							Assert.assertTrue(String.format("rn=%f, cg=%f, s=%f, g=%f, p=%f, x=%f: %f != %f (%f)", rn,
+									cg, s, g, p, x, p1, p2, relativeError), equal);
 						}
 						if (maxError < relativeError)
 							maxError = relativeError;
