@@ -111,6 +111,23 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 */
 	public double probability(double x)
 	{
+		return probability(x, mu);
+	}
+
+	/**
+	 * Get the probability of observation x
+	 * <p>
+	 * Note the normalisation will be based on the mu used in the constructor of the function. So it may be wrong if the
+	 * mu was below zero on construction and is above zero now, or vice-versa.
+	 * 
+	 * @param x
+	 *            The observation value
+	 * @param mu
+	 *            The mean of the Poisson distribution
+	 * @return The probability
+	 */
+	public double probability(double x, double mu)
+	{
 		// convert to photons
 		x *= alpha;
 
@@ -126,6 +143,23 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @return The log of the probability
 	 */
 	public double logProbability(double x)
+	{
+		return logProbability(x, mu);
+	}
+
+	/**
+	 * Get the log(p) of observation x
+	 * <p>
+	 * Note the normalisation will be based on the mu used in the constructor of the function. So it may be wrong if the
+	 * mu was below zero on construction and is above zero now, or vice-versa.
+	 * 
+	 * @param x
+	 *            The observation value
+	 * @param mu
+	 *            The mean of the Poisson distribution
+	 * @return The log of the probability
+	 */
+	public double logProbability(double x, double mu)
 	{
 		// convert to photons
 		x *= alpha;
