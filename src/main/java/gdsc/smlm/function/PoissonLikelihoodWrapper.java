@@ -29,7 +29,7 @@ import org.apache.commons.math3.util.FastMath;
  * observed value.
  * <p>
  * To allow a likelihood to be computed when the function predicts negative count data, the function prediction is set
- * to Double.MIN_VALUE. This can be disabled. 
+ * to Double.MIN_VALUE. This can be disabled.
  * <p>
  * The class can handle non-integer observed data. In this case the PMF is approximated as:
  * 
@@ -49,7 +49,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	private static double[] logFactorial;
 	private final boolean integerData;
 	private final double sumLogFactorialK;
-	
+	private final double alpha;
+
 	private boolean allowNegativExpectedValues = true;
 
 	/** All long-representable factorials */
@@ -112,14 +113,18 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 *            The observed values
 	 * @param n
 	 *            The number of observed values
+	 * @param alpha
+	 *            Inverse gain of the EMCCD chip
 	 * @throws IllegalArgumentException
 	 *             if the input observed values are not integers
 	 */
-	public PoissonLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n)
+	public PoissonLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n, double alpha)
 	{
 		super(f, a, k, n);
+		this.alpha = Math.abs(alpha);
+
 		// Initialise the factorial table to the correct size
-		integerData = initialiseFactorial(k);
+		integerData = (alpha != 1) || initialiseFactorial(k);
 		// Pre-compute the sum over the data
 		double sum = 0;
 		if (integerData)
@@ -129,8 +134,15 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 		else
 		{
-			for (double d : k)
-				sum += logFactorial(d);
+			// Pre-apply gain
+			for (int i = 0; i < n; i++)
+			{
+				k[i] *= this.alpha;
+				sum += logFactorial(k[i]);
+			}
+			
+			
+			sum -= n * Math.log(alpha);
 		}
 		sumLogFactorialK = sum;
 	}
@@ -147,7 +159,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			double l = f.eval(i);
+			double l = f.eval(i) * alpha;
 
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
@@ -187,7 +199,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		double[] dl_da = new double[nVariables];
 		for (int i = 0; i < n; i++)
 		{
-			double l = f.eval(i, dl_da);
+			double l = f.eval(i, dl_da) * alpha;
 
 			final double k = data[i];
 
@@ -204,7 +216,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 
 			// Continue to work out the gradient since this does not involve logs.
 			// Note: if l==0 then we get divide by zero and a NaN value
-			final double factor = 1 - k / l;
+			final double factor = alpha * (1 - k / l);
 			for (int j = 0; j < gradient.length; j++)
 			{
 				//gradient[j] += dl_da[j] - (dl_da[j] * k / l);
@@ -222,7 +234,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public double computeLikelihood(int i)
 	{
-		double l = f.eval(i);
+		double l = f.eval(i) * alpha;
 
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
@@ -248,7 +260,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		for (int j = 0; j < nVariables; j++)
 			gradient[j] = 0;
 		double[] dl_da = new double[nVariables];
-		double l = f.eval(i, dl_da);
+		double l = f.eval(i, dl_da) * alpha;
 
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
@@ -261,7 +273,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 
 		final double k = data[i];
-		final double factor = 1 - k / l;
+		final double factor = alpha * (1 - k / l);
 		for (int j = 0; j < gradient.length; j++)
 		{
 			//gradient[j] = dl_da[j] - (dl_da[j] * k / l);
@@ -325,7 +337,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	}
 
 	/**
-	 * Set to true if negative expected values are allowed. In this case the expected value is set to Double.MIN_VALUE and the effect on the gradient is undefined.
+	 * Set to true if negative expected values are allowed. In this case the expected value is set to Double.MIN_VALUE
+	 * and the effect on the gradient is undefined.
 	 *
 	 * @return true, if negative expected values are allowed
 	 */
@@ -335,9 +348,11 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	}
 
 	/**
-	 * Set to true if negative expected values are allowed. In this case the expected value is set to Double.MIN_VALUE and the effect on the gradient is undefined.
+	 * Set to true if negative expected values are allowed. In this case the expected value is set to Double.MIN_VALUE
+	 * and the effect on the gradient is undefined.
 	 *
-	 * @param allowNegativeExpectedValues true, if negative expected values are allowed
+	 * @param allowNegativeExpectedValues
+	 *            true, if negative expected values are allowed
 	 */
 	public void setAllowNegativeExpectedValues(boolean allowNegativeExpectedValues)
 	{
