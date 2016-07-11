@@ -850,7 +850,7 @@ public class EMGainAnalysis implements PlugInFilter
 				break;
 			case 2:
 				// The mean does not matter so just use zero
-				fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, 0, _noise);
+				fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / _gain, 0, _noise);
 				break;
 			case 1:
 				myNoise = 0;
