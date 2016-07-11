@@ -26,6 +26,11 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class PoissonGaussianFunction implements LikelihoodFunction
 {
+	/**
+	 * The inverse of the EM-gain multiplication factor
+	 */
+	final double alpha;
+
 	private static final double EPSILON = 1e-4; // 1e-6
 	private static final double NORMALISATION = 1 / Math.sqrt(2 * Math.PI);
 	private static final double LOG_NORMALISATION = Math.log(NORMALISATION);
@@ -44,26 +49,31 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	private final double logNormalisation;
 
 	/**
+	 * @param alpha
+	 *            The inverse of the EM-gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param sigmasquared
 	 *            The variance of the Gaussian distribution (must be positive)
 	 */
-	private PoissonGaussianFunction(final double mu, final double sigmasquared)
+	private PoissonGaussianFunction(final double alpha, final double mu, final double sigmasquared)
 	{
+		this.alpha = Math.abs(alpha);
 		noPoisson = (mu <= 0);
 		//if (mu <= 0)
 		//	throw new IllegalArgumentException("Poisson mean must be strictly positive");
 		if (sigmasquared <= 0)
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
-		this.mu = mu;
+		this.mu = mu * alpha;
 		this.sigmasquared = sigmasquared;
 
-		probabilityNormalisation = getProbabilityNormalisation(sigmasquared);
-		logNormalisation = getLogNormalisation(sigmasquared);
+		probabilityNormalisation = ((noPoisson) ? getProbabilityNormalisation(sigmasquared) : 1) * alpha;
+		logNormalisation = ((noPoisson) ? getLogNormalisation(sigmasquared) : LOG_NORMALISATION) + Math.log(alpha);
 	}
 
 	/**
+	 * @param alpha
+	 *            The inverse of the EM-gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param s
@@ -71,12 +81,15 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @throws IllegalArgumentException
 	 *             if the mean or variance is zero or below
 	 */
-	public static PoissonGaussianFunction createWithStandardDeviation(final double mu, final double s)
+	public static PoissonGaussianFunction createWithStandardDeviation(final double alpha, final double mu,
+			final double s)
 	{
-		return new PoissonGaussianFunction(mu, s * s);
+		return new PoissonGaussianFunction(alpha, mu, s * s);
 	}
 
 	/**
+	 * @param alpha
+	 *            The inverse of the EM-gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param var
@@ -84,9 +97,9 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @throws IllegalArgumentException
 	 *             if the mean or variance is zero or below
 	 */
-	public static PoissonGaussianFunction createWithVariance(final double mu, final double var)
+	public static PoissonGaussianFunction createWithVariance(final double alpha, final double mu, final double var)
 	{
-		return new PoissonGaussianFunction(mu, var);
+		return new PoissonGaussianFunction(alpha, mu, var);
 	}
 
 	/**
@@ -96,10 +109,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 *            The observation value
 	 * @return The probability
 	 */
-	public double probability(final double x)
+	public double probability(double x)
 	{
+		// convert to photons
+		x *= alpha;
+
 		return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisation
-				: getProbability(x, mu, sigmasquared, usePicardApproximation);
+				: getProbability(x, mu, sigmasquared, usePicardApproximation) * alpha;
 	}
 
 	/**
@@ -109,28 +125,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 *            The observation value
 	 * @return The log of the probability
 	 */
-	public double logProbability(final double x)
+	public double logProbability(double x)
 	{
-		return (noPoisson) ? (-0.5 * x * x / sigmasquared) + logNormalisation
-				: getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
-	}
+		// convert to photons
+		x *= alpha;
 
-	/**
-	 * Get a pseudo-likelihood of observation x.
-	 * <p>
-	 * This is equivalent to the {@link #logProbability(double)} without the normalisation of the probability density
-	 * function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for use as the
-	 * likelihood function in maximum likelihood estimation since all values will differ by the same constant but will
-	 * evaluate faster.
-	 * 
-	 * @param x
-	 *            The observation value
-	 * @return The pseudo log-likelihood of the probability
-	 */
-	public double pseudoLikelihood(final double x)
-	{
-		return (noPoisson) ? pseudoLikelihood(x, mu, sigmasquared, usePicardApproximation)
-				: getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation);
+		return (noPoisson) ? (-0.5 * x * x / sigmasquared) + logNormalisation
+				: getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + logNormalisation;
 	}
 
 	/**

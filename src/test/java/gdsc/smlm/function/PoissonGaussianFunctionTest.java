@@ -7,34 +7,38 @@ import org.junit.Test;
 
 public class PoissonGaussianFunctionTest
 {
+	double[] gain = { 1, 2, 4, 8, 16 };
 	double[] photons = { -1, 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 	double[] noise = { 1, 2, 4, 8 };
 
 	@Test
 	public void cumulativeProbabilityIsOneWithPicard()
 	{
-		for (double p : photons)
-			for (double s : noise)
-				cumulativeProbabilityIsOne(p, s, true);
+		for (double g : gain)
+			for (double p : photons)
+				for (double s : noise)
+					cumulativeProbabilityIsOne(g, p, s, true);
 	}
 
 	@Test
 	public void cumulativeProbabilityIsOneWithPade()
 	{
-		for (double p : photons)
-			for (double s : noise)
-				cumulativeProbabilityIsOne(p, s, true);
+		for (double g : gain)
+			for (double p : photons)
+				for (double s : noise)
+					cumulativeProbabilityIsOne(g, p, s, true);
 	}
 
 	@Test
 	public void probabilityMatchesLogProbability()
 	{
-		for (double p : photons)
-			for (double s : noise)
-			{
-				probabilityMatchesLogProbability(p, s, true);
-				probabilityMatchesLogProbability(p, s, false);
-			}
+		for (double g : gain)
+			for (double p : photons)
+				for (double s : noise)
+				{
+					probabilityMatchesLogProbability(g, p, s, true);
+					probabilityMatchesLogProbability(g, p, s, false);
+				}
 	}
 
 	@Test
@@ -61,18 +65,18 @@ public class PoissonGaussianFunctionTest
 		System.out.printf("Picard %d : Pade %d (%fx)\n", t1, t2, t1 / (double) t2);
 		Assert.assertTrue(String.format("Picard %d > Pade %d", t1, t2), t2 < t1);
 	}
-	
+
 	@Test
 	public void staticMethodsMatchInstanceMethods()
 	{
-		for (double p : photons)
-			for (double s : noise)
-			{
-				staticMethodsMatchInstanceMethods(p, s, true);
-				staticMethodsMatchInstanceMethods(p, s, false);
-			}
+		for (double g : gain)
+			for (double p : photons)
+				for (double s : noise)
+				{
+					staticMethodsMatchInstanceMethods(g, p, s, true);
+					staticMethodsMatchInstanceMethods(g, p, s, false);
+				}
 	}
-	
 
 	private long getTime(double[] noise2, int N, double[][] x, final boolean usePicard)
 	{
@@ -106,9 +110,9 @@ public class PoissonGaussianFunctionTest
 		return t1;
 	}
 
-	private void cumulativeProbabilityIsOne(final double mu, final double s, final boolean usePicard)
+	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, final boolean usePicard)
 	{
-		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(mu, s);
+		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s);
 		f.setUsePicardApproximation(usePicard);
 		double p = 0;
 		int min = 1;
@@ -151,12 +155,13 @@ public class PoissonGaussianFunctionTest
 			if (pp / p < changeTolerance)
 				break;
 		}
-		Assert.assertEquals(String.format("mu=%f, s=%f", mu, s), 1, p, 0.02);
+		Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), 1, p, 0.02);
 	}
 
-	private void probabilityMatchesLogProbability(final double mu, final double s, final boolean usePicard)
+	private void probabilityMatchesLogProbability(final double gain, final double mu, final double s,
+			final boolean usePicard)
 	{
-		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(mu, s);
+		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s);
 		f.setUsePicardApproximation(usePicard);
 
 		// Evaluate an initial range. 
@@ -171,13 +176,14 @@ public class PoissonGaussianFunctionTest
 			if (p == 0)
 				continue;
 			final double logP = f.logProbability(x);
-			Assert.assertEquals(Math.log(p), logP, 1e-3 * Math.abs(logP));
+			Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), Math.log(p), logP, 1e-3 * Math.abs(logP));
 		}
 	}
-	
-	private void staticMethodsMatchInstanceMethods(final double mu, final double s, final boolean usePicard)
+
+	private void staticMethodsMatchInstanceMethods(final double gain, final double mu, final double s,
+			final boolean usePicard)
 	{
-		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(mu, s);
+		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s);
 		f.setUsePicardApproximation(usePicard);
 
 		// Evaluate an initial range. 
@@ -186,20 +192,17 @@ public class PoissonGaussianFunctionTest
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		int min = (int) -Math.ceil(3 * s);
 		int max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
-		final double s2 = s*s;
+		final double logGain = Math.log(gain);
+		final double s2 = s * s;
 		for (int x = min; x <= max; x++)
 		{
 			double p = f.probability(x);
-			double pp = PoissonGaussianFunction.probability(x, mu, s2, usePicard);
-			Assert.assertEquals(p, pp, 1e-10);
-			
+			double pp = PoissonGaussianFunction.probability(x / gain, mu / gain, s2, usePicard) / gain;
+			Assert.assertEquals(String.format("probability g=%f, mu=%f, s=%f", gain, mu, s), p, pp, 1e-10);
+
 			p = f.logProbability(x);
-			pp = PoissonGaussianFunction.logProbability(x, mu, s2, usePicard);
-			Assert.assertEquals(p, pp, 1e-10);
-			
-			p = f.pseudoLikelihood(x);
-			pp = PoissonGaussianFunction.pseudoLikelihood(x, mu, s2, usePicard);
-			Assert.assertEquals(p, pp, 1e-10);
+			pp = PoissonGaussianFunction.logProbability(x / gain, mu / gain, s2, usePicard) - logGain;
+			Assert.assertEquals(String.format("logProbability g=%f, mu=%f, s=%f", gain, mu, s), p, pp, 1e-10);
 		}
 	}
 }
