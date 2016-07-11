@@ -408,6 +408,9 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 */
 	public double likelihood(double o, double e)
 	{
-		return probability(o, e, sigmasquared, usePicardApproximation);
+		// convert to photons
+		o *= alpha;
+		e *= alpha;
+		return probability(o, e, sigmasquared, usePicardApproximation) * alpha;
 	}
 }
