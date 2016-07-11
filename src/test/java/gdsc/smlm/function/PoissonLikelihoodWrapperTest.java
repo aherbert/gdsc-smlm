@@ -13,6 +13,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 public class PoissonLikelihoodWrapperTest
 {
+	double alpha = 1 / 40.0;
 	double[] photons = { 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 	// Set this at the range output from cumulativeProbabilityIsOneWithIntegerData
 	int[] maxRange = { 6, 7, 10, 13, 17, 29, 149, 1141 };
@@ -185,7 +186,7 @@ public class PoissonLikelihoodWrapperTest
 								for (int i = 0; i < n; i++)
 									data[i] = f1.eval(i);
 
-								ff1 = new PoissonLikelihoodWrapper(f1, a, data, n);
+								ff1 = new PoissonLikelihoodWrapper(f1, a, data, n, alpha);
 
 								// Numerically solve gradient. 
 								// Calculate the step size h to be an exact numerical representation
@@ -353,7 +354,6 @@ public class PoissonLikelihoodWrapperTest
 		int[] indices = f1.gradientIndices();
 		int gradientIndex = findGradientIndex(f1, targetParameter);
 		double[] dyda = new double[indices.length];
-		double[] dyda2 = new double[indices.length];
 		double[] a;
 
 		PoissonLikelihoodWrapper ff1;
@@ -378,7 +378,7 @@ public class PoissonLikelihoodWrapperTest
 								for (int i = 0; i < n; i++)
 									data[i] = f1.eval(i);
 
-								ff1 = new PoissonLikelihoodWrapper(f1, a, data, n);
+								ff1 = new PoissonLikelihoodWrapper(f1, a, data, n, alpha);
 
 								// Numerically solve gradient. 
 								// Calculate the step size h to be an exact numerical representation
@@ -394,10 +394,10 @@ public class PoissonLikelihoodWrapperTest
 
 								// Evaluate at (x+h) and (x-h)
 								a[targetParameter] = xx + h;
-								double value2 = ff1.likelihood(getVariables(indices, a), dyda2);
+								double value2 = ff1.likelihood(getVariables(indices, a));
 
 								a[targetParameter] = xx - h;
-								double value3 = ff1.likelihood(getVariables(indices, a), dyda2);
+								double value3 = ff1.likelihood(getVariables(indices, a));
 
 								double gradient = (value2 - value3) / (2 * h);
 								boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex]) ||
@@ -503,7 +503,7 @@ public class PoissonLikelihoodWrapperTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithReadDataForPhotonsAbove4()
+	public void cumulativeProbabilityIsOneWithReadDataForCountAbove4()
 	{
 		// Initialise for large observed count
 		PoissonLikelihoodWrapper.likelihood(1, photons[photons.length - 1] * 2);

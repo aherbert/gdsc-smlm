@@ -124,7 +124,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		this.alpha = Math.abs(alpha);
 
 		// Initialise the factorial table to the correct size
-		integerData = (alpha != 1) || initialiseFactorial(k);
+		integerData = (alpha == 1) && initialiseFactorial(k);
 		// Pre-compute the sum over the data
 		double sum = 0;
 		if (integerData)
