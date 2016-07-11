@@ -900,7 +900,7 @@ public class FitWorker implements Runnable
 					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
 			// TODO - see if peak shift factors, off-grid centres makes a difference
-			
+
 			// Add per peak shift factors ... 
 			// Allow unfitted neighbours to shift more (due to bad estimates)
 			double[] peakShiftFactors = new double[neighbourCount + 1];
@@ -1427,9 +1427,8 @@ public class FitWorker implements Runnable
 						ypos > regionBounds.height + hwhm)
 				{
 					if (logger != null)
-						logger.info("Fitted coordinates too far outside the fitted region (x %g || y %g)",
-								xpos + bounds.x + regionBounds.x, regionBounds.width, ypos + bounds.y + regionBounds.y,
-								regionBounds.height);
+						logger.info("Fitted coordinates too far outside the fitted region (x %g || y %g) in %dx%d",
+								xpos, ypos, regionBounds.width, regionBounds.height);
 					printFitResults(newFitResult, region, width, height, 2, 1, gf.getIterations(), ic1, ic2);
 					return null;
 				}
