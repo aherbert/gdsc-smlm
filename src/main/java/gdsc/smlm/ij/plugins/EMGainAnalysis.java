@@ -846,11 +846,11 @@ public class EMGainAnalysis implements PlugInFilter
 		switch (approximation)
 		{
 			case 3:
-				fun = new PoissonFunction();
+				fun = new PoissonFunction(1.0 / _gain, true);
 				break;
 			case 2:
 				// The mean does not matter so just use zero
-				fun = PoissonGaussianFunction.createWithStandardDeviation(0, _noise);
+				fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, 0, _noise);
 				break;
 			case 1:
 				myNoise = 0;
@@ -858,7 +858,7 @@ public class EMGainAnalysis implements PlugInFilter
 			default:
 				PoissonGammaGaussianFunction myFun = new PoissonGammaGaussianFunction(1.0 / _gain, myNoise);
 				myFun.setMinimumProbability(0);
-				fun = myFun;				
+				fun = myFun;
 		}
 		double expected = _photons;
 		if (offset != 0)
@@ -874,7 +874,7 @@ public class EMGainAnalysis implements PlugInFilter
 			//sum += pmf[i];
 			//sum2 += f[i];
 		}
-		
+
 		//System.out.printf("Approximation sum = %f : %f\n", sum ,sum2);
 		if (showApproximation)
 			yMax = Maths.maxDefault(yMax, f);

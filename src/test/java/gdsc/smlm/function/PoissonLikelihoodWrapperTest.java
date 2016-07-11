@@ -469,15 +469,15 @@ public class PoissonLikelihoodWrapperTest
 	private void cumulativeProbabilityIsOneWithIntegerData(final double mu)
 	{
 		double p = 0;
-		int max = 0;
+		int x = 0;
 
 		// Evaluate an initial range. 
 		// Poisson will have mean mu with a variance mu. 
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
-			max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
-			for (int x = 0; x <= max; x++)
+			int max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
+			for (; x <= max; x++)
 			{
 				final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
 				System.out.printf("x=%d, p=%f\n", x, pp);
@@ -490,16 +490,15 @@ public class PoissonLikelihoodWrapperTest
 		// We have most of the probability density. 
 		// Now keep evaluating up until no difference
 		final double changeTolerance = 1e-6;
-		for (;;)
+		for (;; x++)
 		{
-			max++;
-			final double pp = PoissonLikelihoodWrapper.likelihood(mu, max);
-			System.out.printf("x=%d, p=%f\n", max, pp);
+			final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
+			System.out.printf("x=%d, p=%f\n", x, pp);
 			p += pp;
 			if (pp / p < changeTolerance)
 				break;
 		}
-		System.out.printf("mu=%f, p=%f, max=%d\n", mu, p, max);
+		System.out.printf("mu=%f, p=%f, max=%d\n", mu, p, x);
 		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
 	}
 

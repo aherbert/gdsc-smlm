@@ -14,6 +14,8 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.special.Gamma;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Implements the probability density function for a Poisson distribution.
@@ -22,6 +24,28 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
  */
 public class PoissonFunction implements LikelihoodFunction
 {
+	/**
+	 * The inverse of the EM-gain multiplication factor
+	 */
+	final double alpha;
+
+	/**
+	 * Allow non-integer observed values
+	 */
+	final boolean nonInteger;
+
+	/**
+	 * @param alpha
+	 *            The inverse of the EM-gain multiplication factor
+	 * @param nonInteger
+	 *            Allow non-integer observed values
+	 */
+	public PoissonFunction(double alpha, boolean nonInteger)
+	{
+		this.alpha = Math.abs(alpha);
+		this.nonInteger = nonInteger;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -29,7 +53,51 @@ public class PoissonFunction implements LikelihoodFunction
 	 */
 	public double likelihood(double o, double e)
 	{
+		if (o < 0 || e <= 0)
+			return 0;
 
-		return new PoissonDistribution(e).probability((int) Math.round(o));
+		// convert to photons
+		e *= alpha;
+		o *= alpha;
+
+		// Allow non-integer observed value using the gamma function to provide a factorial for non-integer values
+		// PMF(l,k) = C * e^-l * l^k / gamma(k+1)
+		// log(PMF) = -l + k * log(l) - logGamma(k+1)
+		if (nonInteger)
+		{
+			//return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
+			
+			final double ll = -e + o * Math.log(e) - logFactorial(o);
+			return FastMath.exp(ll) * alpha;
+		}
+
+		//return new PoissonDistribution(e).probability((int) Math.round(o)) * alpha;
+		return new PoissonDistribution(e).probability((int) o) * alpha;
+	}
+
+	/**
+	 * Return the log of the factorial for the given real number, using the gamma function
+	 * 
+	 * @param k
+	 * @return the log factorial
+	 */
+	public static double logFactorial(double k)
+	{
+		if (k <= 1)
+			return 0;
+		return Gamma.logGamma(k + 1);
+	}
+
+	/**
+	 * Return the factorial for the given real number, using the gamma function
+	 * 
+	 * @param k
+	 * @return the factorial
+	 */
+	public static double factorial(double k)
+	{
+		if (k <= 1)
+			return 1;
+		return Gamma.gamma(k + 1);
 	}
 }
