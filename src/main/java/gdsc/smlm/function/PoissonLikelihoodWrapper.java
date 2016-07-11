@@ -49,7 +49,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	private static double[] logFactorial;
 	private final boolean integerData;
 	private final double sumLogFactorialK;
-	private final double alpha;
+	private final double alpha, logAlpha;
 
 	private boolean allowNegativExpectedValues = true;
 
@@ -122,6 +122,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	{
 		super(f, a, k, n);
 		this.alpha = Math.abs(alpha);
+		logAlpha = Math.log(alpha);
 
 		// Initialise the factorial table to the correct size
 		integerData = (alpha == 1) && initialiseFactorial(k);
@@ -141,8 +142,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 				sum += logFactorial(k[i]);
 			}
 			
-			
-			sum -= n * Math.log(alpha);
+			// We subtract this as we are computing the negative log likelihood
+			sum -= n * logAlpha;
 		}
 		sumLogFactorialK = sum;
 	}
@@ -247,7 +248,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		}
 
 		final double k = data[i];
-		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k));
+		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k)) - logAlpha;
 	}
 
 	/*
@@ -280,7 +281,11 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			//gradient[j] = dl_da[j] * (1 - k / l);
 			gradient[j] = dl_da[j] * factor;
 		}
-		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k));
+		
+		// The probability = p * alpha
+		// Log(probability) = log(p) + log(alpha)
+		
+		return l - k * Math.log(l) + ((integerData) ? logFactorial[(int) k] : logFactorial(k)) - logAlpha;
 	}
 
 	private static double logFactorial(double k)

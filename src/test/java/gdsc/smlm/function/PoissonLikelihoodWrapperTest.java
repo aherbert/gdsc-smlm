@@ -4,9 +4,12 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
+import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -503,11 +506,8 @@ public class PoissonLikelihoodWrapperTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithReadDataForCountAbove4()
+	public void cumulativeProbabilityIsOneWithRealDataForCountAbove4()
 	{
-		// Initialise for large observed count
-		PoissonLikelihoodWrapper.likelihood(1, photons[photons.length - 1] * 2);
-
 		//for (int i = photons.length; i-- > 0;)
 		for (int i = 0; i < photons.length; i++)
 			if (photons[i] >= 4)
@@ -530,5 +530,90 @@ public class PoissonLikelihoodWrapperTest
 
 		System.out.printf("mu=%f, p=%f\n", mu, p);
 		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneFromLikelihoodForCountAbove4()
+	{
+		for (int i = 0; i < photons.length; i++)
+			if (photons[i] >= 4)
+				cumulativeProbabilityIsOneFromLikelihood(photons[i]);
+	}
+
+	private void cumulativeProbabilityIsOneFromLikelihood(final double mu)
+	{
+		// Determine upper limit for a Poisson
+		int limit = new PoissonDistribution(mu).inverseCumulativeProbability(0.999);
+
+		// Expand to allow for the gain
+		int n = (int) Math.ceil(limit / alpha);
+
+		// Evaluate all values from zero to large n
+		double[] k = Utils.newArray(n, 0, 1.0);
+		double[] a = new double[0];
+		double[] g = new double[0];
+
+		NonLinearFunction nlf = new NonLinearFunction()
+		{
+			public void initialise(double[] a)
+			{
+			}
+
+			public int[] gradientIndices()
+			{
+				return new int[0];
+			}
+
+			public double eval(int x, double[] dyda, double[] w)
+			{
+				return 0;
+			}
+
+			public double eval(int x)
+			{
+				return mu / alpha;
+			}
+
+			public double eval(int x, double[] dyda)
+			{
+				return mu / alpha;
+			}
+
+			public boolean canComputeWeights()
+			{
+				return false;
+			}
+		};
+		PoissonLikelihoodWrapper f = new PoissonLikelihoodWrapper(nlf, a, Arrays.copyOf(k, n), n, alpha);
+
+		// Keep evaluating up until no difference
+		final double changeTolerance = 1e-6;
+		double total = 0;
+		double p = 0;
+		int i = 0;
+		while (i < n)
+		{
+			double nll = f.computeLikelihood(i);
+			double nll2 = f.computeLikelihood(g, i);
+			i++;
+			Assert.assertEquals("computeLikelihood(i)", nll, nll2, 1e-10);
+			total += nll;
+			double pp = FastMath.exp(-nll);
+			//System.out.printf("mu=%f, o=%f, i=%d, pp=%f\n", mu, mu / alpha, i, pp);
+			p += pp;
+			if (p > 0.5 && pp / p < changeTolerance)
+				break;
+		}
+
+		System.out.printf("mu=%f, limit=%d, p=%f\n", mu, limit, p);
+		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
+
+		// Check the function can compute the same total
+		f = new PoissonLikelihoodWrapper(nlf, a, k, i, alpha);
+		double sum = f.computeLikelihood();
+		double sum2 = f.computeLikelihood(g);
+		double delta = total * 1e-10;
+		Assert.assertEquals("computeLikelihood", total, sum, delta);
+		Assert.assertEquals("computeLikelihood with gradient", total, sum2, delta);
 	}
 }
