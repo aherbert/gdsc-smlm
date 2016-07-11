@@ -1454,21 +1454,21 @@ public class FitConfiguration implements Cloneable
 				fitter.setSearchMethod(searchMethod);
 				fitter.setGradientLineMinimisation(gradientLineMinimisation);
 
+				// Specify the likelihood function to use
 				if (modelCamera)
 				{
-					// Specify the likelihood function to use
+					// Set the camera read noise
+					fitter.setSigma(readNoise);
+					
 					if (emCCD)
 					{
 						// EMCCD = Poisson+Gamma+Gaussian
 						fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAMMA_GAUSSIAN);
-						fitter.setAlpha(1.0 / amplification);
-						fitter.setSigma(readNoise);
 					}
 					else
 					{
 						// CCD = Poisson+Gaussian
 						fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON_GAUSSIAN);
-						fitter.setSigma(readNoise);
 					}
 				}
 				else
@@ -1476,6 +1476,9 @@ public class FitConfiguration implements Cloneable
 					fitter.setLikelihoodFunction(MaximumLikelihoodFitter.LikelihoodFunction.POISSON);
 				}
 
+				// All models use the amplification gain (i.e. how many ADUs/electron)
+				fitter.setAlpha(1.0 / amplification);
+				
 				// TODO - Configure stopping criteria ...
 
 				return fitter;
