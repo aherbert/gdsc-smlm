@@ -299,7 +299,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the negative log likelihood.
+	 * Compute the likelihood.
 	 *
 	 * @param l
 	 *            the mean of the Poisson distribution (lambda)
