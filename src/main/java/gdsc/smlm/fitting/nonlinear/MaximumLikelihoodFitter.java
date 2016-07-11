@@ -357,22 +357,22 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	{
 		LikelihoodWrapper maximumLikelihoodFunction = null;
 
+		final double myAlpha = (this.alpha > 0) ? this.alpha : 1;
+
 		// We can use different likelihood wrapper functions:
 		switch (likelihoodFunction)
 		{
 			case POISSON_GAMMA_GAUSSIAN:
 				// Poisson-Gamma-Gaussian - EM-CCD data
-				if (alpha > 0 && sigma > 0)
-				{
-					maximumLikelihoodFunction = new PoissonGammaGaussianLikelihoodWrapper(f, a, y, n, alpha, sigma);
-					break;
-				}
+				maximumLikelihoodFunction = new PoissonGammaGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
+				break;
 
 			case POISSON_GAUSSIAN:
 				// Poisson-Gaussian - CCD data
+				// Sigma must be positive, otherwise fall back to a Poisson likelihood function
 				if (sigma > 0)
 				{
-					maximumLikelihoodFunction = new PoissonGaussianLikelihoodWrapper(f, a, y, n, sigma);
+					maximumLikelihoodFunction = new PoissonGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
 					break;
 				}
 
@@ -395,7 +395,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				else
 					y2[i] = y[i];
 			}
-			PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n);
+			PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n, myAlpha);
 			// This will allow Powell searches. The effect on the gradient search algorithms may be weird so leave alone.
 			if (!searchMethod.usesGradient)
 				function.setAllowNegativeExpectedValues(true);
@@ -780,11 +780,11 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				evaluations += baseOptimiser.getEvaluations();
 			}
 		}
-		
+
 		// Check this as likelihood functions can go wrong
 		if (Double.isInfinite(value) || Double.isNaN(value))
 			return FitStatus.INVALID_LIKELIHOOD;
-		
+
 		return FitStatus.OK;
 	}
 
