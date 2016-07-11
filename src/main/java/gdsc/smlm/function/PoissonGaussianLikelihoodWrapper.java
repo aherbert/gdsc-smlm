@@ -52,7 +52,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 	public PoissonGaussianLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n, double alpha, double s)
 	{
 		super(f, a, k, n);
-		// We have two functions: One for no poisson counts and one for poisson counts
+		// We have two functions: One for no poisson counts and one for poisson counts.
 		// They differ in their normalisation.
 		p0 = PoissonGaussianFunction.createWithStandardDeviation(alpha, 0, s);
 		p0.setUsePicardApproximation(usePicard);
@@ -73,6 +73,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 		{
 			final double e = f.eval(i);
 			if (e <= 0)
+				// Use the function with the non-Poisson normalisation
 				ll -= p0.logProbability(data[i], e);
 			else
 				ll -= p1.logProbability(data[i], e);
