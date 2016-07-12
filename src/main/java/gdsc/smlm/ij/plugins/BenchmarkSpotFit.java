@@ -177,7 +177,7 @@ public class BenchmarkSpotFit implements PlugIn
 		// Ensure all candidates are fitted
 		config.setFailuresLimit(-1);
 		fitConfig.setFitValidation(true);
-		fitConfig.setMinPhotons(0); // Do not allow negative photons 
+		fitConfig.setMinPhotons(1); // Do not allow negative photons 
 		fitConfig.setCoordinateShiftFactor(0);
 		fitConfig.setPrecisionThreshold(0);
 		fitConfig.setMinWidthFactor(0);
@@ -729,6 +729,7 @@ public class BenchmarkSpotFit implements PlugIn
 		saveFilterRange = gd.getNextBoolean();
 
 		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
+		fitConfig.setMinPhotons(15); // Realistically we cannot fit lower than this
 		fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
 		fitConfig.setMinWidthFactor(1.0 / 5);
 		fitConfig.setWidthFactor(5);

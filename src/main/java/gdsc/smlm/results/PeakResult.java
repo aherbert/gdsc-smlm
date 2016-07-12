@@ -420,6 +420,9 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static double getVarianceX(final double a, final double s, final double N, final double b2, final double F)
 	{
+		if (N <= 0)
+			return Double.POSITIVE_INFINITY;
+		
 		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background. 
 		// If the background is X then the variance of a Poisson distribution will be X 
 		// and the standard deviation at each pixel will be sqrt(X). Thus the Mortensen formula
@@ -529,6 +532,9 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD, int integrationPoints)
 	{
+		if (N <= 0)
+			return Double.POSITIVE_INFINITY;
+
 		// EM-CCD noise factor
 		final double F = (emCCD) ? 2 : 1;
 		final double a2 = a * a;
@@ -658,7 +664,8 @@ public class PeakResult implements Comparable<PeakResult>
 	 */
 	public static float getAmplitude(float[] params)
 	{
-		return (float) (params[Gaussian2DFunction.SIGNAL] / (2 * Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
+		return (float) (params[Gaussian2DFunction.SIGNAL] /
+				(2 * Math.PI * params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
 	}
 
 	/**
