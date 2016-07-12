@@ -1631,8 +1631,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				while (doSearch && iteration < 20)
 				{
 					iteration++;
-					System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, maxFilter.getName(), max[SCORE],
-							max[CRITERIA]);
+					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, maxFilter.getName(), max[SCORE],
+					//		max[CRITERIA]);
 
 					IJ.showStatus("Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
 
