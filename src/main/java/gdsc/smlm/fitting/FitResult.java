@@ -27,6 +27,7 @@ public class FitResult
 	private int nPeaks;
 	private int nFittedParameters;
 	private Object data;
+	private int iterations, evaluations;
 
 	/**
 	 * Constructor
@@ -42,7 +43,8 @@ public class FitResult
 	 * @param data
 	 */
 	public FitResult(FitStatus status, int degreesOfFreedom, double error, double[] initialParameters,
-			double[] parameters, double[] parametersDev, int nPeaks, int nFittedParameters, Object data)
+			double[] parameters, double[] parametersDev, int nPeaks, int nFittedParameters, Object data, int iterations,
+			int evaluations)
 	{
 		this.status = status;
 		this.degreesOfFreedom = degreesOfFreedom;
@@ -53,6 +55,8 @@ public class FitResult
 		this.nPeaks = nPeaks;
 		this.nFittedParameters = nFittedParameters;
 		this.data = data;
+		this.iterations = iterations;
+		this.evaluations = evaluations;
 	}
 
 	/**
@@ -161,5 +165,21 @@ public class FitResult
 	public Object getStatusData()
 	{
 		return data;
+	}
+
+	/**
+	 * @return the iterations
+	 */
+	public int getIterations()
+	{
+		return iterations;
+	}
+
+	/**
+	 * @return the evaluations
+	 */
+	public int getEvaluations()
+	{
+		return evaluations;
 	}
 }

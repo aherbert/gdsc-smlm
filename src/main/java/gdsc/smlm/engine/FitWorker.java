@@ -947,7 +947,8 @@ public class FitWorker implements Runnable
 				error = r2;
 
 				fitResult = new FitResult(FitStatus.OK, degreesOfFreedom, error, initialParameters, parameters,
-						parametersDev, nPeaks, nFittedParameters, null);
+						parametersDev, nPeaks, nFittedParameters, null, fitResult.getIterations(),
+						fitResult.getEvaluations());
 
 				// TODO - Should we attempt to fit additional peaks, i.e. doublets, even when there
 				// were neighbours?
@@ -1008,7 +1009,8 @@ public class FitWorker implements Runnable
 			error = r2;
 
 			fitResult = new FitResult(fitResult.getStatus(), degreesOfFreedom, error, initialParameters, parameters,
-					parametersDev, nPeaks, nFittedParameters, fitResult.getStatusData());
+					parametersDev, nPeaks, nFittedParameters, fitResult.getStatusData(), fitResult.getIterations(),
+					fitResult.getEvaluations());
 
 			// Only compute quadrant improvement if fitted as a single peak. If fitting multiple peaks
 			// then we would expect the quadrant to be skewed by the neighbours.
@@ -1600,7 +1602,8 @@ public class FitWorker implements Runnable
 			error = r2;
 
 			return new FitResult(newFitResult.getStatus(), newFitResult.getDegreesOfFreedom(), error, okInitialParams,
-					okParams, okParamStdDev, nPeaks, nFittedParameters, newFitResult.getStatusData());
+					okParams, okParamStdDev, nPeaks, nFittedParameters, newFitResult.getStatusData(),
+					fitResult.getIterations(), fitResult.getEvaluations());
 		}
 		else
 		{
@@ -2074,7 +2077,7 @@ public class FitWorker implements Runnable
 
 				return new FitResult(newFitResult.getStatus(), newFitResult.getDegreesOfFreedom(), error,
 						okInitialParams, okParams, okParamStdDev, nPeaks, nFittedParameters,
-						newFitResult.getStatusData());
+						newFitResult.getStatusData(), fitResult.getIterations(), fitResult.getEvaluations());
 			}
 			else
 			{

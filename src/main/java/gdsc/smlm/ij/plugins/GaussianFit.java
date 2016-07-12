@@ -100,7 +100,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -471,8 +471,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				IJ.log(message);
 				for (int index : maxIndices)
 				{
-					IJ.log(String.format("  %.2f @ [%d,%d]", data[index], bounds.x + index % width, bounds.y + index /
-							width));
+					IJ.log(String.format("  %.2f @ [%d,%d]", data[index], bounds.x + index % width,
+							bounds.y + index / width));
 				}
 			}
 
@@ -551,7 +551,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					double[] peakParams = extractParams(params, i);
 					double[] peakParamsDev = extractParams(paramsDev, i);
 
-					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, nMaxima, x, y, data[maxIndices[n]]);
+					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, nMaxima, x, y,
+							data[maxIndices[n]]);
 
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
 					double xf = peakParams[3];
@@ -666,7 +667,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	{
 		if (fitResult == null || fitResult.getStatus() == null)
 			return "";
-		final FitStatus status = fitResult.getStatus(); 
+		final FitStatus status = fitResult.getStatus();
 		return status.toString().toLowerCase().replace("_", " ");
 	}
 
@@ -859,7 +860,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				fitResult = new FitResult(FitStatus.OUTSIDE_FIT_REGION, fitResult.getDegreesOfFreedom(),
 						fitResult.getError(), fitResult.getInitialParameters(), fitResult.getParameters(),
 						fitResult.getParameterStdDev(), fitResult.getNumberOfPeaks(),
-						fitResult.getNumberOfFittedParameters(), fitResult.getStatusData());
+						fitResult.getNumberOfFittedParameters(), fitResult.getStatusData(), fitResult.getIterations(),
+						fitResult.getEvaluations());
 				return null;
 			}
 			return params;

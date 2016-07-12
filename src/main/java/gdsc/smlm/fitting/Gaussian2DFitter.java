@@ -407,7 +407,7 @@ public class Gaussian2DFitter
 
 		// Check there are peaks to fit
 		if (zeroHeight == npeaks)
-			return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0, null);
+			return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0, null, 0, 0);
 
 		// Set all zero height peaks to a fraction of the maximum to allow fitting
 		if (zeroHeight > 0)
@@ -456,8 +456,8 @@ public class Gaussian2DFitter
 				{
 					// Fail if the width cannot be estimated due to out of bounds
 					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-						return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0,
-								null);
+						return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0, null,
+								0, 0);
 
 					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
 				}
@@ -476,7 +476,7 @@ public class Gaussian2DFitter
 						// Fail if the width cannot be estimated
 						if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
 							return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0,
-									null);
+									null, 0, 0);
 
 						sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
 					}
@@ -626,13 +626,14 @@ public class Gaussian2DFitter
 			}
 
 			fitResult = new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0), error[0],
-					initialParams, params, params_dev, npeaks, solver.getNumberOfFittedParameters(), statusData);
+					initialParams, params, params_dev, npeaks, solver.getNumberOfFittedParameters(), statusData,
+					getIterations(), getEvaluations());
 		}
 		else
 		{
 			y_fit = null;
 			fitResult = new FitResult(result, 0, 0, initialParams, null, null, npeaks,
-					solver.getNumberOfFittedParameters(), null);
+					solver.getNumberOfFittedParameters(), null, getIterations(), getEvaluations());
 		}
 
 		return fitResult;
@@ -846,7 +847,7 @@ public class Gaussian2DFitter
 		}
 		return Double.MAX_VALUE;
 	}
-	
+
 	/**
 	 * Sets the constraints for the fitted parameters. This functions set the lower bounds of the signal to zero and
 	 * background to zero (or negative if the background estimate is < 0).
@@ -1079,12 +1080,12 @@ public class Gaussian2DFitter
 			//double minimumWidthFactor, 
 			double maximumWidthFactor)
 	{
-//		if (minimumWidthFactor < 0 || minimumWidthFactor > 1)
-//			throw new IllegalArgumentException("MinWidth factor must be in the range 0-1: " + minimumWidthFactor);
+		//		if (minimumWidthFactor < 0 || minimumWidthFactor > 1)
+		//			throw new IllegalArgumentException("MinWidth factor must be in the range 0-1: " + minimumWidthFactor);
 		if (maximumWidthFactor < 1)
 			throw new IllegalArgumentException("MaxWidth factor must be 1 or above: " + maximumWidthFactor);
-//		this.minimumWidthFactor = minimumWidthFactor;
-//		this.maximumWidthFactor = maximumWidthFactor;
+		//		this.minimumWidthFactor = minimumWidthFactor;
+		//		this.maximumWidthFactor = maximumWidthFactor;
 	}
 
 	/**
