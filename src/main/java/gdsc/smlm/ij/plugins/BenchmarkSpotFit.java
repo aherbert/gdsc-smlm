@@ -108,7 +108,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private enum UpperLimit
 	{
-		ZERO(false), MAX_POSITIVE_CUMUL_DELTA(true), NINETY_NINE_PERCENT(false);
+		ZERO(false), MAX_POSITIVE_CUMUL_DELTA(true), NINETY_NINE_PERCENT(false), NINETY_NINE_NINE_PERCENT(false);
 
 		final boolean requiresDelta;
 
@@ -128,12 +128,24 @@ public class BenchmarkSpotFit implements PlugIn
 		final String name;
 		final LowerLimit lower;
 		final UpperLimit upper;
+		final int minBinWidth;
+		final boolean restrictRange;
+		final boolean requireLabel;
 
 		public FilterCriteria(String name, LowerLimit lower, UpperLimit upper)
+		{
+			this(name, lower, upper, 0, true, true);
+		}
+
+		public FilterCriteria(String name, LowerLimit lower, UpperLimit upper, int minBinWidth, boolean restrictRange,
+				boolean requireLabel)
 		{
 			this.name = name;
 			this.lower = lower;
 			this.upper = upper;
+			this.minBinWidth = minBinWidth;
+			this.restrictRange = restrictRange;
+			this.requireLabel = requireLabel;
 		}
 	}
 
@@ -145,21 +157,26 @@ public class BenchmarkSpotFit implements PlugIn
 	private static final int FILTER_SHIFT = 4;
 	private static final int FILTER_ESHIFT = 5;
 	private static final int FILTER_PRECISION = 6;
+	private static final int FILTER_ITERATIONS = 7;
+	private static final int FILTER_EVALUATIONS = 8;
 
 	private FilterCriteria[] createFilterCriteria()
 	{
 		if (filterCriteria == null)
 		{
-			filterCriteria = new FilterCriteria[7];
+			filterCriteria = new FilterCriteria[9];
 			int i = 0;
 			//@formatter:off
-			filterCriteria[i++] = new FilterCriteria("Signal",    LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-			filterCriteria[i++] = new FilterCriteria("SNR",       LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-			filterCriteria[i++] = new FilterCriteria("MinWidth",  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
-			filterCriteria[i++] = new FilterCriteria("MaxWidth",  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
-			filterCriteria[i++] = new FilterCriteria("Shift",     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-			filterCriteria[i++] = new FilterCriteria("EShift",    LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-			filterCriteria[i++] = new FilterCriteria("Precision", LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria("Signal",     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+			filterCriteria[i++] = new FilterCriteria("SNR",        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+			filterCriteria[i++] = new FilterCriteria("MinWidth",   LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
+			filterCriteria[i++] = new FilterCriteria("MaxWidth",   LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria("Shift",      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria("EShift",     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria("Precision",  LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			// These are not filters but are used for stats analysis
+			filterCriteria[i++] = new FilterCriteria("Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+			filterCriteria[i++] = new FilterCriteria("Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
 			//@formatter:on
 		}
 		return filterCriteria;
@@ -1012,6 +1029,8 @@ public class BenchmarkSpotFit implements PlugIn
 		double tp = 0, fp = 0;
 		int failcTP = 0, failcFP = 0;
 		int cTP = 0, cFP = 0;
+		int[] status = null;
+		status = new int[FitStatus.values().length];
 		for (FilterCandidates result : filterCandidates.values())
 		{
 			// Count the number of fit results that matched (tp) and did not match (fp)
@@ -1024,20 +1043,30 @@ public class BenchmarkSpotFit implements PlugIn
 					cTP++;
 				else
 					cFP++;
-				if (result.fitResult[i].getStatus() != FitStatus.OK)
+				final FitResult fitResult = result.fitResult[i];
+				if (fitResult.getStatus() != FitStatus.OK)
 				{
-					// XXX Debug why the MLE does not fit as many candidates as the LSE
-					//System.out.println(result.fitResult[i].getStatus());
+					// Debug why the MLE does not fit as many candidates as the LSE
+					if (status != null)
+						status[result.fitResult[i].getStatus().ordinal()]++;
 
 					if (result.spots[i].match)
 						failcTP++;
 					else
 						failcFP++;
+
+					// Add the evaluations for spots that were not OK
+					stats[0][FILTER_ITERATIONS].add(fitResult.getIterations());
+					stats[0][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
+
+					// Q. Should we add to the TP/FP stats
+					//final int index = (result.spots[i].match) ? 1 : 2;
+					//stats[index][FILTER_ITERATIONS].add(fitResult.getIterations());
+					//stats[index][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
 				}
 				else
 				{
 					// This was fit - Get statistics
-					FitResult fitResult = result.fitResult[i];
 					final double[] p = fitResult.getParameters();
 					final double[] initialParams = fitResult.getInitialParameters();
 					final double s0 = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5;
@@ -1074,9 +1103,11 @@ public class BenchmarkSpotFit implements PlugIn
 					stats[0][FILTER_SHIFT].add(shift);
 					stats[0][FILTER_ESHIFT].add(eshift);
 					stats[0][FILTER_PRECISION].add(precision);
+					stats[0][FILTER_ITERATIONS].add(fitResult.getIterations());
+					stats[0][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
 
 					// Add to the TP or FP stats 
-					final int index = 2; //(result.fitMatch[i]) ? 1 : 2;
+					final int index = (result.fitMatch[i]) ? 1 : 2;
 					stats[index][FILTER_SIGNAL].add(signal);
 					stats[index][FILTER_SNR].add(snr);
 					if (width < 1)
@@ -1086,6 +1117,8 @@ public class BenchmarkSpotFit implements PlugIn
 					stats[index][FILTER_SHIFT].add(shift);
 					stats[index][FILTER_ESHIFT].add(eshift);
 					stats[index][FILTER_PRECISION].add(precision);
+					stats[index][FILTER_ITERATIONS].add(fitResult.getIterations());
+					stats[index][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
 				}
 			}
 			for (int i = 0; i < result.match.length; i++)
@@ -1096,6 +1129,16 @@ public class BenchmarkSpotFit implements PlugIn
 
 				distanceStats.add(result.match[i].d * nmPerPixel);
 				depthStats.add(result.match[i].z * nmPerPixel);
+			}
+		}
+
+		// Debug the reasons the fit failed
+		if (status != null)
+		{
+			for (int i = 0; i < status.length; i++)
+			{
+				if (status[i] != 0)
+					System.out.printf("%s = %d\n", FitStatus.values()[i].toString(), status[i]);
 			}
 		}
 
@@ -1335,7 +1378,8 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			median = d.getPercentile(50);
 			String label = String.format("n = %d. Median = %s nm", s1.getN(), Utils.rounded(median));
-			int id = Utils.showHistogram(TITLE, s1, xLabel, 0, 1, 0, label);
+			int id = Utils.showHistogram(TITLE, s1, xLabel, filterCriteria[i].minBinWidth,
+					(filterCriteria[i].restrictRange) ? 1 : 0, 0, label);
 			if (id == 0)
 			{
 				IJ.log("Failed to show the histogram: " + xLabel);
@@ -1396,11 +1440,14 @@ public class BenchmarkSpotFit implements PlugIn
 			xlimit = Maths.limits(xlimit, h2[0]);
 			xlimit = Maths.limits(xlimit, h3[0]);
 			// Restrict using the inter-quartile range 
-			double q1 = d.getPercentile(25);
-			double q2 = d.getPercentile(75);
-			double iqr = (q2 - q1) * 2.5;
-			xlimit[0] = Maths.max(xlimit[0], median - iqr);
-			xlimit[1] = Maths.min(xlimit[1], median + iqr);
+			if (filterCriteria[i].restrictRange)
+			{
+				double q1 = d.getPercentile(25);
+				double q2 = d.getPercentile(75);
+				double iqr = (q2 - q1) * 2.5;
+				xlimit[0] = Maths.max(xlimit[0], median - iqr);
+				xlimit[1] = Maths.min(xlimit[1], median + iqr);
+			}
 			plot.setLimits(xlimit[0], xlimit[1], 0, 1.05);
 			plot.addPoints(h1[0], h1[1], Plot.LINE);
 			plot.setColor(Color.red);
@@ -1421,8 +1468,9 @@ public class BenchmarkSpotFit implements PlugIn
 			upper = UpperLimit.ZERO;
 			lower = LowerLimit.ZERO;
 		}
-		
-		if (showFilterScoreHistograms || upper.requiresDeltaHistogram() || lower.requiresDeltaHistogram())
+
+		final boolean requireLabel = (showFilterScoreHistograms && filterCriteria[i].requireLabel);
+		if (requireLabel || upper.requiresDeltaHistogram() || lower.requiresDeltaHistogram())
 		{
 			if (s2.getN() != 0 && s3.getN() != 0)
 			{
@@ -1477,10 +1525,14 @@ public class BenchmarkSpotFit implements PlugIn
 
 		if (showFilterScoreHistograms)
 		{
-			String label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
-					Utils.rounded(max2), Utils.rounded(maxx2));
-			plot.setColor(Color.black);
-			plot.addLabel(0, 0, label);
+			// We use bins=1 on charts where we do not need a label
+			if (requireLabel)
+			{
+				String label = String.format("Max+ %s @ %s, Max- %s @ %s", Utils.rounded(max1), Utils.rounded(maxx1),
+						Utils.rounded(max2), Utils.rounded(maxx2));
+				plot.setColor(Color.black);
+				plot.addLabel(0, 0, label);
+			}
 			PlotWindow pw = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				wo.add(pw.getImagePlus().getID());
@@ -1509,6 +1561,9 @@ public class BenchmarkSpotFit implements PlugIn
 				break;
 			case NINETY_NINE_PERCENT:
 				u = getPercentile(h2, 0.99);
+				break;
+			case NINETY_NINE_NINE_PERCENT:
+				u = getPercentile(h2, 0.999);
 				break;
 			case ZERO:
 				u = 0;
