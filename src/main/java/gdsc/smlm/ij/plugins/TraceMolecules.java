@@ -1883,6 +1883,7 @@ public class TraceMolecules implements PlugIn
 										names.get(status), snr, noise[0]));
 								break;
 							case COORDINATES_MOVED:
+							case OUTSIDE_FIT_REGION:
 							case WIDTH_DIVERGED:
 								float[] shift = (float[]) fitResult.getStatusData();
 								IJ.log(String.format("Trace %d (n=%d) : %s = %.3f,%.3f", id, trace.size(),

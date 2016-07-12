@@ -50,6 +50,8 @@ public class FitConfiguration implements Cloneable
 	private boolean backgroundFitting = true;
 	private boolean notSignalFitting = false;
 	private double coordinateShift = 1;
+	private int fitRegion = 0;
+	private double coordinateOffset = 0.5;
 	private double signalThreshold = 0;
 	private double signalStrength = 0;
 	private double minPhotons = 30;
@@ -654,6 +656,46 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * @return the size of the fit region used for validation
+	 */
+	public int getFitRegion()
+	{
+		return fitRegion;
+	}
+
+	/**
+	 * Set the size of the fit region (N). Any coordinate outside the region will fail fit validation (see
+	 * {@link #validatePeak(int, double[], double[])}). Set to zero to disable.
+	 * <p>
+	 * Note: it is assumed that the coordinates of the peak are relative to the fit region of size NxN. Coordinates are
+	 * offset by the amount defined by {@link #setCoordinateOffset(double)}.
+	 * 
+	 * @param fitRegion
+	 *            the size of the fit region
+	 */
+	public void setFitRegion(int fitRegion)
+	{
+		this.fitRegion = Math.max(0, fitRegion);
+	}
+
+	/**
+	 * @return the coordinate offset when validating the coordinates are within the fit window
+	 */
+	public double getCoordinateOffset()
+	{
+		return coordinateOffset;
+	}
+
+	/**
+	 * @param coordinateOffset
+	 *            the coordinate offset when validating the coordinates are within the fit window
+	 */
+	public void setCoordinateOffset(double coordinateOffset)
+	{
+		this.coordinateOffset = coordinateOffset;
+	}
+
+	/**
 	 * @param signalStrength
 	 *            The signal strength. Used to determine the signal strength for a good fit (signalThreshold =
 	 *            max(gain x minPhotons, noise x signalStrength).
@@ -925,6 +967,23 @@ public class FitConfiguration implements Cloneable
 				log.info("Bad peak %d: Fitted coordinates moved (x=%g,y=%g) > %g", n, xShift, yShift, maxShift);
 			}
 			return setValidationResult(FitStatus.COORDINATES_MOVED, new double[] { xShift, yShift });
+		}
+
+		// Check if outside the fit window.
+		// TODO - Make this configurable per peak. At the moment we only use this in BenchmarkSpotFit where 
+		// additional peaks will be neighbours. In the future we may want to control this better.
+		if (fitRegion != 0 && n == 0)
+		{
+			final double x = params[Gaussian2DFunction.X_POSITION + offset] + coordinateOffset;
+			final double y = params[Gaussian2DFunction.Y_POSITION + offset] + coordinateOffset;
+			if (x <= 0 || x >= fitRegion || y <= 0 || y >= fitRegion)
+			{
+				if (log != null)
+				{
+					log.info("Bad peak %d: Coordinates outside fit region (x=%g,y=%g) <> %d", n, x, y, fitRegion);
+				}
+				return setValidationResult(FitStatus.OUTSIDE_FIT_REGION, new double[] { x, y, fitRegion });
+			}
 		}
 
 		// Check signal threshold
@@ -1459,7 +1518,7 @@ public class FitConfiguration implements Cloneable
 				{
 					// Set the camera read noise
 					fitter.setSigma(readNoise);
-					
+
 					if (emCCD)
 					{
 						// EMCCD = Poisson+Gamma+Gaussian
@@ -1478,7 +1537,7 @@ public class FitConfiguration implements Cloneable
 
 				// All models use the amplification gain (i.e. how many ADUs/electron)
 				fitter.setAlpha(1.0 / amplification);
-				
+
 				// TODO - Configure stopping criteria ...
 
 				return fitter;

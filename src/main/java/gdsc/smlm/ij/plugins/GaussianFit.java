@@ -856,7 +856,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			if (params[Gaussian2DFunction.X_POSITION] < 0 || params[Gaussian2DFunction.X_POSITION] > width ||
 					params[Gaussian2DFunction.Y_POSITION] < 0 || params[Gaussian2DFunction.Y_POSITION] > height)
 			{
-				fitResult = new FitResult(FitStatus.COORDINATES_MOVED, fitResult.getDegreesOfFreedom(),
+				fitResult = new FitResult(FitStatus.OUTSIDE_FIT_REGION, fitResult.getDegreesOfFreedom(),
 						fitResult.getError(), fitResult.getInitialParameters(), fitResult.getParameters(),
 						fitResult.getParameterStdDev(), fitResult.getNumberOfPeaks(),
 						fitResult.getNumberOfFittedParameters(), fitResult.getStatusData());

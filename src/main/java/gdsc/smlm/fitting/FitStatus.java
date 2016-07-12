@@ -61,6 +61,10 @@ public enum FitStatus
 	/**
 	 * 
 	 */
+	OUTSIDE_FIT_REGION("Outside fit region"),
+	/**
+	 * 
+	 */
 	INSUFFICIENT_SIGNAL("Insufficient signal"),
 	/**
 	 * 

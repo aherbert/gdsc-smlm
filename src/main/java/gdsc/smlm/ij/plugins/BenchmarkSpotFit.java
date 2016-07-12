@@ -521,6 +521,7 @@ public class BenchmarkSpotFit implements PlugIn
 				// If we made any fits then score them
 				if (count > 0)
 				{
+					// Match fit results/candidates with their closest actual spot
 					predicted = Arrays.copyOf(predicted, count);
 					// Pass in a list to get the point pairs so we have access to the distance
 					MatchCalculator.analyseResults2D(actual, predicted, distanceInPixels, null, null, null, matches);
@@ -696,7 +697,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
-		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
+		//gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
 		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
 		gd.addCheckbox("Save_filter_range", saveFilterRange);
@@ -723,7 +724,7 @@ public class BenchmarkSpotFit implements PlugIn
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
-		config.setResidualsThreshold(gd.getNextNumber());
+		//config.setResidualsThreshold(gd.getNextNumber());
 		fitConfig.setDuplicateDistance(gd.getNextNumber());
 		showFilterScoreHistograms = gd.getNextBoolean();
 		saveFilterRange = gd.getNextBoolean();
@@ -731,6 +732,8 @@ public class BenchmarkSpotFit implements PlugIn
 		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
 		fitConfig.setMinPhotons(15); // Realistically we cannot fit lower than this
 		fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
+		fitConfig.setFitRegion(2 * config.getRelativeFitting() + 1);
+		fitConfig.setCoordinateOffset(0.5);
 		fitConfig.setMinWidthFactor(1.0 / 5);
 		fitConfig.setWidthFactor(5);
 
@@ -1073,7 +1076,7 @@ public class BenchmarkSpotFit implements PlugIn
 					stats[0][FILTER_PRECISION].add(precision);
 
 					// Add to the TP or FP stats 
-					final int index = (result.fitMatch[i]) ? 1 : 2;
+					final int index = 2; //(result.fitMatch[i]) ? 1 : 2;
 					stats[index][FILTER_SIGNAL].add(signal);
 					stats[index][FILTER_SNR].add(snr);
 					if (width < 1)
@@ -1235,8 +1238,10 @@ public class BenchmarkSpotFit implements PlugIn
 		upper[FILTER_SNR] *= 2; // Make this a bit bigger
 		lower[FILTER_PRECISION] *= 0.5; // Make this a bit smaller
 		double factor = 0.25;
-		upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming lower is less than 1)
-		lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1)); // (assuming upper is more than 1)
+		if (lower[FILTER_MIN_WIDTH] != 0)
+			upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming lower is less than 1)
+		if (upper[FILTER_MIN_WIDTH] != 0)
+			lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1)); // (assuming upper is more than 1)
 
 		// Create a range increment
 		double[] increment = new double[lower.length];
@@ -1264,7 +1269,7 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			GlobalSettings gs = SettingsManager.loadSettings();
 			FilterSettings filterSettings = gs.getFilterSettings();
-			
+
 			String filename = Utils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
 			if (filename == null)
 				return;
@@ -1317,6 +1322,9 @@ public class BenchmarkSpotFit implements PlugIn
 		StoredDataStatistics s1 = stats[0][i];
 		StoredDataStatistics s2 = stats[1][i];
 		StoredDataStatistics s3 = stats[2][i];
+
+		if (s1.getN() == 0)
+			return new double[2];
 
 		DescriptiveStatistics d = s1.getStatistics();
 		double median = 0;
@@ -1407,42 +1415,60 @@ public class BenchmarkSpotFit implements PlugIn
 		double max1 = 0;
 		double max2 = 0;
 
+		// We cannot compute the delta histogram, or use percentiles
+		if (s2.getN() == 0)
+		{
+			upper = UpperLimit.ZERO;
+			lower = LowerLimit.ZERO;
+		}
+		
 		if (showFilterScoreHistograms || upper.requiresDeltaHistogram() || lower.requiresDeltaHistogram())
 		{
-			LinearInterpolator li = new LinearInterpolator();
-			PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
-			PolynomialSplineFunction f2 = li.interpolate(h3[0], h3[1]);
-			for (double x : h1[0])
+			if (s2.getN() != 0 && s3.getN() != 0)
 			{
-				if (x < h2[0][0] || x < h3[0][0])
-					continue;
-				try
+				LinearInterpolator li = new LinearInterpolator();
+				PolynomialSplineFunction f1 = li.interpolate(h2[0], h2[1]);
+				PolynomialSplineFunction f2 = li.interpolate(h3[0], h3[1]);
+				for (double x : h1[0])
 				{
-					double v1 = f1.value(x);
-					double v2 = f2.value(x);
-					double diff = v2 - v1;
-					if (diff > 0)
+					if (x < h2[0][0] || x < h3[0][0])
+						continue;
+					try
 					{
-						if (max1 < diff)
+						double v1 = f1.value(x);
+						double v2 = f2.value(x);
+						double diff = v2 - v1;
+						if (diff > 0)
 						{
-							max1 = diff;
-							maxx1 = x;
+							if (max1 < diff)
+							{
+								max1 = diff;
+								maxx1 = x;
+							}
+						}
+						else
+						{
+							if (max2 > diff)
+							{
+								max2 = diff;
+								maxx2 = x;
+							}
 						}
 					}
-					else
+					catch (OutOfRangeException e)
 					{
-						if (max2 > diff)
-						{
-							max2 = diff;
-							maxx2 = x;
-						}
+						// Because we reached the end
+						break;
 					}
 				}
-				catch (OutOfRangeException e)
-				{
-					// Because we reached the end
-					break;
-				}
+			}
+			else
+			{
+				// Switch to percentiles if we have no delta histogram
+				if (upper.requiresDeltaHistogram())
+					upper = UpperLimit.NINETY_NINE_PERCENT;
+				if (lower.requiresDeltaHistogram())
+					lower = LowerLimit.ONE_PERCENT;
 			}
 
 			//			System.out.printf("Bounds %s : %s, pos %s, neg %s, %s\n", xLabel, Utils.rounded(getPercentile(h2, 0.01)),
@@ -1471,8 +1497,10 @@ public class BenchmarkSpotFit implements PlugIn
 				l = maxx2;
 				break;
 			case ZERO:
-			default:
 				l = 0;
+				break;
+			default:
+				throw new RuntimeException("Missing lower limit method");
 		}
 		switch (upper)
 		{
@@ -1480,8 +1508,13 @@ public class BenchmarkSpotFit implements PlugIn
 				u = maxx1;
 				break;
 			case NINETY_NINE_PERCENT:
-			default:
 				u = getPercentile(h2, 0.99);
+				break;
+			case ZERO:
+				u = 0;
+				break;
+			default:
+				throw new RuntimeException("Missing upper limit method");
 		}
 		return new double[] { l, u };
 	}

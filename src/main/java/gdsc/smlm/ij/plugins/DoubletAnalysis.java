@@ -102,7 +102,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Ensure all candidates are fitted
 		config.setFailuresLimit(-1);
 		fitConfig.setFitValidation(true);
-		fitConfig.setMinPhotons(0); // Do not allow negative photons 
+		fitConfig.setMinPhotons(1); // Do not allow negative photons 
 		fitConfig.setCoordinateShiftFactor(0); // Disable
 		fitConfig.setPrecisionThreshold(0);
 		fitConfig.setMinWidthFactor(0);
@@ -829,13 +829,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			results.addAll(frameResults);
 
 			// At the end of all the fitting, assign results as true or false positive.
-			
+
 			if (matching == 0)
 			{
 				// Simple matching based on closest distance.
 				// This is valid for comparing the score between residuals=1 (all single) and
 				// residuals=0 (all doublets), when all spot candidates are fit.
-				
+
 				ArrayList<ResultCoordinate> f1 = new ArrayList<ResultCoordinate>();
 				ArrayList<ResultCoordinate> f2 = new ArrayList<ResultCoordinate>();
 				for (DoubletResult result : frameResults)
@@ -979,7 +979,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 							ResultCoordinate ra = new ResultCoordinate(result, 0, x1, y1);
 							ResultCoordinate rb = new ResultCoordinate(result, 1, x2, y2);
-							
+
 							// Q. what did the single match?
 							int i = matched[j] - 1;
 							if (i != -1 && !assigned[i])
@@ -1010,7 +1010,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									}
 								}
 							}
-							
+
 							// Process the rest of the results
 							for (i = 0; i < actual.length; i++)
 							{
@@ -1067,7 +1067,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 										}
 									}
 								}
-							}							
+							}
 						}
 					}
 				}
@@ -1101,7 +1101,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 				if (f1.isEmpty())
 					return;
-				
+
 				Collections.sort(f1);
 				Collections.sort(f2);
 
@@ -1208,16 +1208,22 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			switch (fitResult.getStatus())
 			{
 				case OK:
-					// The following happen when we are doing validation, which we are not
-				case WIDTH_DIVERGED:
+					break;
+
+				// The following happen when we are doing validation
 				case INSUFFICIENT_SIGNAL:
+					return 1; // Failed validation
+
+				case WIDTH_DIVERGED:
 				case INSUFFICIENT_PRECISION:
 				case COORDINATES_MOVED:
-					break;
+					break; // Ignore these and check again
 
 				default:
 					return 0;
 			}
+
+			// Do some simple validation 
 
 			// Check if centre is within the region
 			final double border = FastMath.min(width, height) / 4.0;
@@ -1245,16 +1251,22 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			switch (fitResult.getStatus())
 			{
 				case OK:
-					// The following happen when we are doing validation, which we are not
-				case WIDTH_DIVERGED:
+					break;
+
+				// The following happen when we are doing validation
 				case INSUFFICIENT_SIGNAL:
+					return 1; // Failed validation
+
+				case WIDTH_DIVERGED:
 				case INSUFFICIENT_PRECISION:
 				case COORDINATES_MOVED:
-					break;
+					break; // Ignore these and check again
 
 				default:
 					return 0;
 			}
+
+			// Do some simple validation 
 
 			final double regionSize = FastMath.max(width, height) * 0.5;
 			for (int n = 0; n < 2; n++)
@@ -1478,11 +1490,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 
-		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
-		fitConfig.setCoordinateShiftFactor(2 * config.getFitting() / fitConfig.getInitialPeakStdDev0());
+		// Avoid stupidness. Note: We are mostly ignoring the validation result and 
+		// checking the results for the doublets manually.
+		fitConfig.setMinPhotons(15); // Realistically we cannot fit lower than this
+		// Set the width factors to help establish bounds for bounded fitters
 		fitConfig.setMinWidthFactor(1.0 / 10);
 		fitConfig.setWidthFactor(10);
-		
+
 		iterationIncrease = gd.getNextNumber();
 		showOverlay = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
