@@ -2521,8 +2521,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		addField(sb, "Filter Analysis Summary Fields", header);
 		addField(sb, "Filter Analysis Summary Values", topFilterSummary);
 		// Now pick out key values...
-		addKeyFields(sb, header, topFilterSummary, new String[]{"Density", "SNR", "s (nm)", "a (nm)", "Upper D", "Lower factor"});
-		
+		addKeyFields(sb, header, topFilterSummary, new String[] { "Molecules", "Density", "SNR", "s (nm)", "a (nm)",
+				"Lower D", "Upper D", "Lower factor", "Upper factor" });
+
 		// Add any other settings that may be useful in the template
 		addField(sb, "Created", getCurrentTimeStamp());
 		return sb.toString();
