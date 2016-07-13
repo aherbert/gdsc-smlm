@@ -157,6 +157,17 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 
+	private Choice textTemplate;
+	private Choice analysisTextTemplate;
+	private TextField textInitialPeakStdDev0;
+	private Choice textDataFilterType;
+	private Choice textDataFilter;
+	private TextField textSmooth;
+	private TextField textSearch;
+	private TextField textBorder;
+	private TextField textFitting;
+	private Choice textFitSolver;
+	private Choice textFitFunction;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
@@ -1432,6 +1443,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @return true, if successful
 	 */
+	@SuppressWarnings("unchecked")
 	private boolean showDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -1449,7 +1461,24 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			matchDistance = w * Gaussian2DFunction.SD_TO_HWHM_FACTOR;
 			lowerDistance = 0.5 * matchDistance;
 			fitConfig.setInitialPeakStdDev(w);
+
+			cal.nmPerPixel = simulationParameters.a;
+			cal.gain = simulationParameters.gain;
+			cal.amplification = simulationParameters.amplification;
+			cal.exposureTime = 100;
+			cal.readNoise = simulationParameters.readNoise;
+			cal.bias = simulationParameters.bias;
+			cal.emCCD = simulationParameters.emCCD;
+			
+			fitConfig.setGain(cal.gain);
+			fitConfig.setBias(cal.bias);
+			fitConfig.setReadNoise(cal.readNoise);
+			fitConfig.setAmplification(cal.amplification);
 		}
+
+		// Support for using templates
+		String[] templates = ConfigurationTemplate.getTemplateNames(true);
+		gd.addChoice("Template", templates, templates[0]);
 
 		// Collect options for fitting
 		gd.addNumericField("Initial_StdDev", fitConfig.getInitialPeakStdDev0(), 3);
@@ -1476,11 +1505,35 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addNumericField("Lower_distance", lowerDistance, 2);
 		gd.addChoice("Matching", MATCHING, MATCHING[matching]);
 
+		// Add a mouse listener to the config file field
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		{
+			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
+			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+			int n = 0;
+			int ch = 0;
+
+			textTemplate = choices.get(ch++);
+			textTemplate.addItemListener(this);
+			textInitialPeakStdDev0 = numerics.get(n++);
+			textDataFilterType = choices.get(ch++);
+			textDataFilter = choices.get(ch++);
+			textSmooth = numerics.get(n++);
+			textSearch = numerics.get(n++);
+			textBorder = numerics.get(n++);
+			textFitting = numerics.get(n++);
+			textFitSolver = choices.get(ch++);
+			textFitFunction = choices.get(ch++);
+		}
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
+		// Ignore the template
+		gd.getNextChoice();
+		
 		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
@@ -1517,17 +1570,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		settings.setFitEngineConfiguration(config);
 		settings.setCalibration(cal);
 
-		// Copy simulation defaults if a new simulation
-		if (lastId != simulationParameters.id)
-		{
-			cal.nmPerPixel = simulationParameters.a;
-			cal.gain = simulationParameters.gain;
-			cal.amplification = simulationParameters.amplification;
-			cal.exposureTime = 100;
-			cal.readNoise = simulationParameters.readNoise;
-			cal.bias = simulationParameters.bias;
-			cal.emCCD = simulationParameters.emCCD;
-		}
 		if (!PeakFit.configureFitSolver(settings, null, false))
 			return false;
 
@@ -2189,7 +2231,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				"Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("Simple\tBest J\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%");
+		sb.append("Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%");
 		return sb.toString();
 	}
 
@@ -2720,14 +2762,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
 		gd.addCheckbox("Logging", analysisLogging);
 
+		// TODO - Add support for updating a template with a residuals threshold, e.g. from the BenchmarkFilterAnalysis plugin
+
 		// Add a mouse listener to the config file field
 		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 		{
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
 			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
 			int n = 0;
-			Choice textTemplate = choices.get(1);
-			textTemplate.addItemListener(this);
+			analysisTextTemplate = choices.get(1);
+			analysisTextTemplate.addItemListener(this);
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
 			textMinPhotons = numerics.get(n++);
@@ -2780,7 +2824,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\t@score\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\tResdiuals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
 	}
 
 	/*
@@ -2799,28 +2843,74 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Get the configuration template
 			GlobalSettings template = ConfigurationTemplate.getTemplate(templateName);
 
-			if (template != null)
+			if (choice == analysisTextTemplate)
 			{
-				if (template.isFitEngineConfiguration())
+				if (template != null)
 				{
-					FitConfiguration fitConfig = template.getFitEngineConfiguration().getFitConfiguration();
-					textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-					textSignalStrength.setText("" + fitConfig.getSignalStrength());
-					textMinPhotons.setText("" + fitConfig.getMinPhotons());
-					textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
-					textWidthFactor.setText("" + fitConfig.getWidthFactor());
-					textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+					if (template.isFitEngineConfiguration())
+					{
+						FitConfiguration fitConfig = template.getFitEngineConfiguration().getFitConfiguration();
+						textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+						textSignalStrength.setText("" + fitConfig.getSignalStrength());
+						textMinPhotons.setText("" + fitConfig.getMinPhotons());
+						textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
+						textWidthFactor.setText("" + fitConfig.getWidthFactor());
+						textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+					}
+				}
+				else
+				{
+					// Reset 
+					textCoordinateShiftFactor.setText("0");
+					textSignalStrength.setText("0");
+					textMinPhotons.setText("0");
+					textMinWidthFactor.setText("0");
+					textWidthFactor.setText("0");
+					textPrecisionThreshold.setText("0");
 				}
 			}
-			else
+			else if (choice == textTemplate)
 			{
-				// Reset 
-				textCoordinateShiftFactor.setText("0");
-				textSignalStrength.setText("0");
-				textMinPhotons.setText("0");
-				textMinWidthFactor.setText("0");
-				textWidthFactor.setText("0");
-				textPrecisionThreshold.setText("0");
+				if (template != null)
+				{
+					if (template.isFitEngineConfiguration())
+					{
+						boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+						FitEngineConfiguration config2 = template.getFitEngineConfiguration();
+						FitConfiguration fitConfig2 = config2.getFitConfiguration();
+						if (custom && fitConfig2.getInitialPeakStdDev0() > 0)
+							textInitialPeakStdDev0.setText("" + fitConfig2.getInitialPeakStdDev0());
+						textDataFilterType.select(config2.getDataFilterType().ordinal());
+						textDataFilter.select(config2.getDataFilter(0).ordinal());
+						textSmooth.setText("" + config2.getSmooth(0));
+						textSearch.setText("" + config2.getSearch());
+						textBorder.setText("" + config2.getBorder());
+						textFitting.setText("" + config2.getFitting());
+						textFitSolver.select(fitConfig2.getFitSolver().ordinal());
+						textFitFunction.select(fitConfig2.getFitFunction().ordinal());
+						
+						// Copy settings not in the dialog for the fit solver
+						fitConfig.setMaxIterations(fitConfig2.getMaxIterations());
+						fitConfig.setMaxFunctionEvaluations(fitConfig2.getMaxFunctionEvaluations());
+						
+						// MLE settings
+						fitConfig.setModelCamera(fitConfig2.isModelCamera());
+						fitConfig.setSearchMethod(fitConfig2.getSearchMethod());
+						fitConfig.setRelativeThreshold(fitConfig2.getRelativeThreshold());
+						fitConfig.setAbsoluteThreshold(fitConfig2.getAbsoluteThreshold());
+						fitConfig.setGradientLineMinimisation(fitConfig2.isGradientLineMinimisation());
+						
+						// LSE settings
+						fitConfig.setFitCriteria(fitConfig2.getFitCriteria());
+						fitConfig.setSignificantDigits(fitConfig2.getSignificantDigits());
+						fitConfig.setDelta(fitConfig2.getDelta());
+						fitConfig.setLambda(fitConfig2.getLambda());		
+					}
+				}
+				else
+				{
+					// Ignore
+				}
 			}
 		}
 	}
