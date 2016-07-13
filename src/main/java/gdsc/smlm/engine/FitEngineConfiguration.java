@@ -529,6 +529,34 @@ public class FitEngineConfiguration implements Cloneable
 
 		return spotFilter;
 	}
+	
+	/**
+	 * Gets the number of filters for the configured filter type.
+	 *
+	 * @return the number of filters
+	 */
+	public int getNumberOfFilters()
+	{
+		final int nFilters = Math.min(dataFilter.length, smooth.length);
+		switch (dataFilterType)
+		{
+			case JURY:
+				if (nFilters > 1)
+				{
+					return nFilters;
+				}
+
+			case DIFFERENCE:
+				if (nFilters > 1)
+				{
+					return 2;
+				}
+
+			case SINGLE:
+			default:
+				return 1;
+		}
+	}
 
 	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)
 	{
