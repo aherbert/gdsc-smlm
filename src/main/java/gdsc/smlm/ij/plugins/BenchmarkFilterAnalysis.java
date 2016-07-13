@@ -2388,7 +2388,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			list.add(filterSet);
 			FileOutputStream fos = new FileOutputStream(filename);
 			out = new OutputStreamWriter(fos, "UTF-8");
-			out.write(XmlUtils.prettyPrintXml(XmlUtils.toXML(list)));
+			// Use the instance so we can catch the exception
+			out.write(XmlUtils.prettyPrintXml(XStreamWrapper.getInstance().toXML(list)));
 		}
 		catch (Exception e)
 		{

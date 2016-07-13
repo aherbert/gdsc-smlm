@@ -1330,6 +1330,7 @@ public class BenchmarkSpotFit implements PlugIn
 			try
 			{
 				fos = new FileOutputStream(filename);
+				// Use the instance (not .toXML() method) to allow the exception to be caught
 				XStreamWrapper.getInstance().toXML(filterList, fos);
 				SettingsManager.saveSettings(gs);
 			}
