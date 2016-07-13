@@ -22,7 +22,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a signal threshold
  */
-public class SignalFilter extends Filter
+public class SignalFilter extends Filter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 30;
 	
@@ -181,5 +181,45 @@ public class SignalFilter extends Filter
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };
+	}
+	
+	public double getSignal()
+	{
+		return signal;
+	}
+
+	public double getSNR()
+	{
+		return 0;
+	}
+
+	public double getMinWidth()
+	{
+		return 0;
+	}
+
+	public double getMaxWidth()
+	{
+		return 0;
+	}
+
+	public double getShift()
+	{
+		return 0;
+	}
+
+	public double getEShift()
+	{
+		return 0;
+	}
+
+	public double getPrecision()
+	{
+		return 0;
+	}
+
+	public boolean isPrecisionUsesLocalBackground()
+	{
+		return false;
 	}
 }

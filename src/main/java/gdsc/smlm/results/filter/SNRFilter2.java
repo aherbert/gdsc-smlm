@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a signal-to-noise ratio (SNR) threshold and width range
  */
-public class SNRFilter2 extends Filter
+public class SNRFilter2 extends Filter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final float snr;
@@ -247,5 +247,45 @@ public class SNRFilter2 extends Filter
 	public double[] mutationStepRange()
 	{
 		return new double[] { SNRFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE };
+	}
+	
+	public double getSignal()
+	{
+		return 0;
+	}
+
+	public double getSNR()
+	{
+		return snr;
+	}
+
+	public double getMinWidth()
+	{
+		return minWidth;
+	}
+
+	public double getMaxWidth()
+	{
+		return maxWidth;
+	}
+
+	public double getShift()
+	{
+		return 0;
+	}
+
+	public double getEShift()
+	{
+		return 0;
+	}
+
+	public double getPrecision()
+	{
+		return 0;
+	}
+
+	public boolean isPrecisionUsesLocalBackground()
+	{
+		return false;
 	}
 }

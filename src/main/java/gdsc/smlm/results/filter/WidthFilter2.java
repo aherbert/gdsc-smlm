@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a width range
  */
-public class WidthFilter2 extends Filter
+public class WidthFilter2 extends Filter implements IMultiFilter
 {
 	static double DEFAULT_MIN_RANGE = 1;
 
@@ -235,5 +235,45 @@ public class WidthFilter2 extends Filter
 	public double[] mutationStepRange()
 	{
 		return new double[] { WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE };
+	}
+	
+	public double getSignal()
+	{
+		return 0;
+	}
+
+	public double getSNR()
+	{
+		return 0;
+	}
+
+	public double getMinWidth()
+	{
+		return minWidth;
+	}
+
+	public double getMaxWidth()
+	{
+		return maxWidth;
+	}
+
+	public double getShift()
+	{
+		return 0;
+	}
+
+	public double getEShift()
+	{
+		return 0;
+	}
+
+	public double getPrecision()
+	{
+		return 0;
+	}
+
+	public boolean isPrecisionUsesLocalBackground()
+	{
+		return false;
 	}
 }

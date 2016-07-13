@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using an upper width factor
  */
-public class WidthFilter extends Filter
+public class WidthFilter extends Filter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 1;
 	static double UPPER_LIMIT = 5;
@@ -202,5 +202,45 @@ public class WidthFilter extends Filter
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };
+	}
+	
+	public double getSignal()
+	{
+		return 0;
+	}
+
+	public double getSNR()
+	{
+		return 0;
+	}
+
+	public double getMinWidth()
+	{
+		return 0;
+	}
+
+	public double getMaxWidth()
+	{
+		return width;
+	}
+
+	public double getShift()
+	{
+		return 0;
+	}
+
+	public double getEShift()
+	{
+		return 0;
+	}
+
+	public double getPrecision()
+	{
+		return 0;
+	}
+
+	public boolean isPrecisionUsesLocalBackground()
+	{
+		return false;
 	}
 }

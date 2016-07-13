@@ -26,7 +26,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using a X/Y coordinate shift as a Euclidian distance. This filter requires that the result X and Y
  * coordinates are reported relative to their initial positions.
  */
-public class EShiftFilter extends Filter
+public class EShiftFilter extends Filter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 10;
 	static double UPPER_LIMIT = 4;
@@ -206,5 +206,45 @@ public class EShiftFilter extends Filter
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };
+	}
+	
+	public double getSignal()
+	{
+		return 0;
+	}
+
+	public double getSNR()
+	{
+		return 0;
+	}
+
+	public double getMinWidth()
+	{
+		return 0;
+	}
+
+	public double getMaxWidth()
+	{
+		return 0;
+	}
+
+	public double getShift()
+	{
+		return 0;
+	}
+
+	public double getEShift()
+	{
+		return eshift;
+	}
+
+	public double getPrecision()
+	{
+		return 0;
+	}
+
+	public boolean isPrecisionUsesLocalBackground()
+	{
+		return false;
 	}
 }

@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision
  */
-public class MultiFilter extends Filter
+public class MultiFilter extends Filter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final double signal;
@@ -321,5 +321,45 @@ public class MultiFilter extends Filter
 	public double[] mutationStepRange()
 	{
 		return defaultRange;
+	}
+
+	public double getSignal()
+	{
+		return signal;
+	}
+
+	public double getSNR()
+	{
+		return snr;
+	}
+
+	public double getMinWidth()
+	{
+		return minWidth;
+	}
+
+	public double getMaxWidth()
+	{
+		return maxWidth;
+	}
+
+	public double getShift()
+	{
+		return shift;
+	}
+
+	public double getEShift()
+	{
+		return eshift;
+	}
+
+	public double getPrecision()
+	{
+		return precision;
+	}
+
+	public boolean isPrecisionUsesLocalBackground()
+	{
+		return false;
 	}
 }

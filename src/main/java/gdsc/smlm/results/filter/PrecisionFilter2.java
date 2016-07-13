@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using a precision threshold. Calculates the precision using the true fitted background if a bias is
  * provided.
  */
-public class PrecisionFilter2 extends Filter
+public class PrecisionFilter2 extends Filter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final double precision;
@@ -216,5 +216,45 @@ public class PrecisionFilter2 extends Filter
 	public double[] mutationStepRange()
 	{
 		return new double[] { PrecisionFilter.DEFAULT_RANGE };
+	}
+	
+	public double getSignal()
+	{
+		return 0;
+	}
+
+	public double getSNR()
+	{
+		return 0;
+	}
+
+	public double getMinWidth()
+	{
+		return 0;
+	}
+
+	public double getMaxWidth()
+	{
+		return 0;
+	}
+
+	public double getShift()
+	{
+		return 0;
+	}
+
+	public double getEShift()
+	{
+		return 0;
+	}
+
+	public double getPrecision()
+	{
+		return precision;
+	}
+
+	public boolean isPrecisionUsesLocalBackground()
+	{
+		return true;
 	}
 }
