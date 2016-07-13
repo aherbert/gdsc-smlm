@@ -59,7 +59,7 @@
 						<archive>
 							<manifest>
 								<addClasspath>true</addClasspath>
-								<mainClass>gdsc.smlm.ij.plugins.Version</mainClass>
+								<mainClass>gdsc.smlm.Version</mainClass>
 							</manifest>
 						</archive>
 					</configuration>
