@@ -1095,13 +1095,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			Collections.sort(filters);
 
 		MemoryPeakResults topFilterResults = null;
-		if (showSummaryTable)
+		String topFilterSummary = null;
+		if (showSummaryTable || saveTemplate)
 		{
 			createSummaryWindow();
 			int n = 0;
 			final double range = summaryDepth / simulationParameters.a / 2;
 			int np = 0;
-			for (double depth : depthStats.getValues())
+			for (double depth : depthStats)
 			{
 				if (Math.abs(depth) < range)
 					np++;
@@ -1109,7 +1110,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			for (FilterScore fs : filters)
 			{
 				FractionClassificationResult r = scoreFilter(fs.filter, resultsList);
-				String text = createResult(fs.filter, r);
+				StringBuilder sb = createResult(fs.filter, r);
 
 				// Show the recall at the specified depth. Sum the distance and signal factor of all scored spots.
 				MemoryPeakResults results = filter(fs.filter, resultsList.get(0), failCount);
@@ -1130,10 +1131,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					}
 				}
 
-				text += "\t" + Utils.rounded((double) tp / np) + "\t" + Utils.rounded(d / scored) + "\t" +
-						Utils.rounded(sf / scored) + "\t";
+				sb.append('\t').append(Utils.rounded((double) tp / np)).append('\t').append(Utils.rounded(d / scored))
+						.append('\t').append(Utils.rounded(sf / scored)).append('\t');
 				if (fs.atLimit)
-					text += "Y";
+					sb.append('Y');
+
+				final String text = sb.toString();
+				if (topFilterSummary == null)
+				{
+					topFilterSummary = text;
+					if (!showSummaryTable)
+						break;
+				}
 
 				if (isHeadless)
 					IJ.log(text);
@@ -1144,7 +1153,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					break;
 			}
 			// Add a spacer to the summary table if we have multiple results
-			if (n > 1)
+			if (n > 1 && showSummaryTable)
 			{
 				if (isHeadless)
 					IJ.log("");
@@ -1158,7 +1167,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			saveFilter(_bestFilter);
 
 		if (saveTemplate)
-			saveTemplate();
+			saveTemplate(topFilterSummary);
 
 		showPlots();
 		calculateSensitivity(resultsList);
@@ -2221,7 +2230,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Show the result if it achieves the criteria limit 
 		if (showResultsTable && criteria >= minCriteria)
 		{
-			String text = createResult(filter, r);
+			String text = createResult(filter, r).toString();
 
 			if (isHeadless)
 			{
@@ -2285,7 +2294,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return new FractionClassificationResult(tp / norm, fp / norm, c_tn + tn / norm, c_fn + fn / norm, p, n);
 	}
 
-	public String createResult(Filter filter, FractionClassificationResult r)
+	public StringBuilder createResult(Filter filter, FractionClassificationResult r)
 	{
 		StringBuilder sb = new StringBuilder(resultsPrefix);
 		sb.append(filter.getName()).append(resultsPrefix2).append(resultsPrefix3);
@@ -2323,7 +2332,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		add(sb, m.getPrecision(), i++);
 		add(sb, m.getF1Score(), i++);
 		add(sb, m.getJaccard(), i++);
-		return sb.toString();
+		return sb;
 	}
 
 	private FractionClassificationResult getOriginalScore(FractionClassificationResult r)
@@ -2339,16 +2348,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return new FractionClassificationResult(r.getTP(), fp, 0, fn);
 	}
 
+	private static void add(StringBuilder sb, int value)
+	{
+		sb.append('\t').append(value);
+	}
+
 	private static void add(StringBuilder sb, String value)
 	{
-		sb.append("\t").append(value);
+		sb.append('\t').append(value);
 	}
 
 	@SuppressWarnings("unused")
 	private static void add(StringBuilder sb, int value, int i)
 	{
 		if (showColumns[i])
-			sb.append("\t").append(value);
+			add(sb, value);
 	}
 
 	private static void addCount(StringBuilder sb, double value, int i)
@@ -2358,13 +2372,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// Check if the double holds an integer count
 			if ((int) value == value)
 			{
-				sb.append("\t").append((int) value);
+				sb.append('\t').append((int) value);
 			}
 			else
 			{
 				// Otherwise add the counts using at least 2 dp
 				if (value > 100)
-					sb.append("\t").append(IJ.d2s(value));
+					sb.append('\t').append(IJ.d2s(value));
 				else
 					add(sb, Utils.rounded(value));
 			}
@@ -2457,8 +2471,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	/**
 	 * Save PeakFit configuration template using the current benchmark settings.
+	 * 
+	 * @param topFilterSummary
 	 */
-	private void saveTemplate()
+	private void saveTemplate(String topFilterSummary)
 	{
 		FitEngineConfiguration config = new FitEngineConfiguration(new FitConfiguration());
 		if (!updateConfig(config))
@@ -2466,7 +2482,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			IJ.log("Unable to create the template configuration");
 			return;
 		}
-		
+
 		// Remove the PSF width to make the template generic
 		config.getFitConfiguration().setInitialPeakStdDev(0);
 
@@ -2475,7 +2491,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			templateFilename = filename;
 			GlobalSettings settings = new GlobalSettings();
-			settings.setNotes(getNotes());
+			settings.setNotes(getNotes(topFilterSummary));
 			settings.setFitEngineConfiguration(config);
 			if (!SettingsManager.saveSettings(settings, filename))
 				IJ.log("Unable to save the template configuration");
@@ -2493,13 +2509,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return true;
 	}
 
-	private String getNotes()
+	private String getNotes(String topFilterSummary)
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("Benchmark template\n");
 		if (!Utils.isNullOrEmpty(resultsTitle))
 			addField(sb, "Filter Analysis Title", resultsTitle);
-		// TODO - Add create data settings
+		// Add create data settings.
+		// Just add the columns and the data from the summary window
+		final String header = createResultsHeader(true);
+		addField(sb, "Filter Analysis Summary Fields", header);
+		addField(sb, "Filter Analysis Summary Values", topFilterSummary);
+		// Now pick out key values...
+		addKeyFields(sb, header, topFilterSummary, new String[]{"Density", "SNR", "s (nm)", "a (nm)", "Upper D", "Lower factor"});
+		
 		// Add any other settings that may be useful in the template
 		addField(sb, "Created", getCurrentTimeStamp());
 		return sb.toString();
@@ -2508,6 +2531,23 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private void addField(StringBuilder sb, String field, String value)
 	{
 		sb.append(field).append(": ").append(value).append('\n');
+	}
+
+	private void addKeyFields(StringBuilder sb, String header, String summary, String[] fields)
+	{
+		String[] labels = header.split("\t");
+		String[] values = summary.split("\t");
+		for (String field : fields)
+		{
+			for (int i = 0; i < labels.length; i++)
+			{
+				if (labels[i].startsWith(field))
+				{
+					addField(sb, labels[i], values[i]);
+					break;
+				}
+			}
+		}
 	}
 
 	public static String getCurrentTimeStamp()
@@ -3019,8 +3059,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// This filter may not have been part of the scored subset so use the entire results set for reporting
 		FractionClassificationResult r = scoreFilter(filter, ga_resultsList);
 
-		String text = createResult(filter, r);
-		gaWindow.append(text + "\t" + ga_iteration);
+		final StringBuilder text = createResult(filter, r);
+		add(text, ga_iteration);
+		gaWindow.append(text.toString());
 	}
 
 	double limit = 0;
