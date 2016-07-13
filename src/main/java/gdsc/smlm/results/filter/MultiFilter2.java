@@ -373,6 +373,6 @@ public class MultiFilter2 extends Filter implements IMultiFilter
 
 	public boolean isPrecisionUsesLocalBackground()
 	{
-		return false;
+		return true;
 	}
 }
