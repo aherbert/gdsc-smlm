@@ -22,6 +22,7 @@ import gdsc.smlm.results.Calibration;
  */
 public class GlobalSettings
 {
+	private String notes = null;
 	private Calibration calibration = null;
 	private FitEngineConfiguration fitEngineConfiguration = null;
 	private PSFEstimatorSettings psfEstimatorSettings = null;
@@ -30,6 +31,22 @@ public class GlobalSettings
 	private FilterSettings filterSettings = null;
 	private ClusteringSettings clusteringSettings = null;
 	private CreateDataSettings createDataSettings = null;
+
+	/**
+	 * @return the notes
+	 */
+	public String getNotes()
+	{
+		return notes;
+	}
+
+	/**
+	 * @param notes the notes to set
+	 */
+	public void setNotes(String notes)
+	{
+		this.notes = notes;
+	}
 
 	/**
 	 * @return the calibration

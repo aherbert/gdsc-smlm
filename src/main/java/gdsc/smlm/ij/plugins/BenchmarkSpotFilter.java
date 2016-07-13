@@ -1184,4 +1184,37 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		return area;
 	}
+
+	/**
+	 * Updates the given configuration using the latest settings used in benchmarking.
+	 *
+	 * @param pConfig
+	 *            the configuration
+	 * @return true, if successful
+	 */
+	public static boolean updateConfiguration(FitEngineConfiguration pConfig)
+	{
+		if (spotFilter == null)
+			return false;
+
+		double scaleSearch = 1;
+		double scaleSmooth = 1;
+		if (!relativeDistances)
+		{
+			// Distance were absolute. Convert using the HWHM so they are relative.
+			scaleSearch = 1 / pConfig.getHWHMMax();
+			scaleSmooth = 1 / pConfig.getHWHMMin();
+		}
+
+		pConfig.setDataFilterType(config.getDataFilterType());
+		final int nFilters = config.getNumberOfFilters();
+		for (int n = 0; n < nFilters; n++)
+		{
+			pConfig.setDataFilter(config.getDataFilter(n), config.getSmooth(n) * scaleSmooth, n);
+		}
+		pConfig.setSearch(config.getSearch() * scaleSearch);
+		pConfig.setBorder(config.getBorder() * scaleSearch);
+
+		return true;
+	}
 }

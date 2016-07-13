@@ -1,5 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.fitting.FitConfiguration;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -40,6 +43,7 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
+import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.utils.XmlUtils;
 import gdsc.core.utils.Maths;
@@ -62,9 +66,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,10 +106,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static boolean clearTables = false;
 	private static String filterFilename = "";
 	private static String filterSetFilename = "";
+	private static String templateFilename = "";
 	private static int summaryTopN = 0;
 	private static double summaryDepth = 500;
 	private static int plotTopN = 0;
 	private static boolean saveBestFilter = false;
+	private static boolean saveTemplate = false;
 	private ArrayList<NamedPlot> plots;
 	private static boolean calculateSensitivity = false;
 	private static double delta = 0.1;
@@ -167,6 +175,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private int[] idList = new int[4];
 	private int idCount = 0;
 
+	private static Filter _bestFilter = null;
+
 	private static String[] COLUMNS = {
 			// Scores against the fit results that did not fail		
 			"nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC", "MCC", "Informedness",
@@ -199,6 +209,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		criteriaIndex = COLUMNS.length - 3;
 		// Score against the original data so we can compare across filters and fit solvers
 		scoreIndex = COLUMNS.length - 1;
+
+		String currentUsersHomeDir = System.getProperty("user.home");
+		templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
@@ -286,7 +299,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				if (!gd.wasCanceled())
 				{
 					if ((reUseFilters = gd.getNextBoolean()))
+					{
+						SettingsManager.saveSettings(gs);
 						return filterList;
+					}
 				}
 			}
 
@@ -905,6 +921,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addNumericField("Summary_depth (nm)", summaryDepth, 0);
 		gd.addSlider("Plot_top_n", 0, 20, plotTopN);
 		gd.addCheckbox("Save_best_filter", saveBestFilter);
+		gd.addCheckbox("Save_template", saveTemplate);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
 		gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
@@ -967,6 +984,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		summaryDepth = Math.abs(gd.getNextNumber());
 		plotTopN = (int) Math.abs(gd.getNextNumber());
 		saveBestFilter = gd.getNextBoolean();
+		saveTemplate = gd.getNextBoolean();
 		calculateSensitivity = gd.getNextBoolean();
 		delta = gd.getNextNumber();
 		criteriaIndex = gd.getNextChoiceIndex();
@@ -1041,6 +1059,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
+		_bestFilter = null;
 		createResultsWindow();
 		plots = new ArrayList<NamedPlot>(plotTopN);
 		bestFilter = new HashMap<String, FilterScore>();
@@ -1134,8 +1153,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 		}
 
+		_bestFilter = filters.get(0).filter;
 		if (saveBestFilter)
-			saveFilter(filters.get(0).filter);
+			saveFilter(_bestFilter);
+
+		if (saveTemplate)
+			saveTemplate();
 
 		showPlots();
 		calculateSensitivity(resultsList);
@@ -1634,7 +1657,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, maxFilter.getName(), max[SCORE],
 					//		max[CRITERIA]);
 
-					IJ.showStatus("Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
+					IJ.showStatus(
+							"Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
 
 					// Create a new filter set surrounding the top filter
 					Filter oldMaxFilter = maxFilter;
@@ -1666,7 +1690,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					limit = 0;
 					int stepCount = 0;
 					final int stepTotal = newSet.size();
-					
+
 					for (Filter filter : newSet.getFilters())
 					{
 						if (stepCount++ % 16 == 0)
@@ -1675,7 +1699,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							if (Utils.isInterrupted())
 								return -1;
 						}
-						
+
 						final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
 
 						// Check if the criteria are achieved
@@ -1726,7 +1750,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						}
 					}
 					progress(1);
-					
+
 					// Check if the top filter has changed to continue the search
 					doSearch = !maxFilter.equals(oldMaxFilter);
 				}
@@ -2432,6 +2456,69 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	/**
+	 * Save PeakFit configuration template using the current benchmark settings.
+	 */
+	private void saveTemplate()
+	{
+		FitEngineConfiguration config = new FitEngineConfiguration(new FitConfiguration());
+		if (!updateConfig(config))
+		{
+			IJ.log("Unable to create the template configuration");
+			return;
+		}
+		
+		// Remove the PSF width to make the template generic
+		config.getFitConfiguration().setInitialPeakStdDev(0);
+
+		String filename = getFilename("Template_File", templateFilename);
+		if (filename != null)
+		{
+			templateFilename = filename;
+			GlobalSettings settings = new GlobalSettings();
+			settings.setNotes(getNotes());
+			settings.setFitEngineConfiguration(config);
+			if (!SettingsManager.saveSettings(settings, filename))
+				IJ.log("Unable to save the template configuration");
+		}
+	}
+
+	private boolean updateConfig(FitEngineConfiguration config)
+	{
+		if (!BenchmarkSpotFilter.updateConfiguration(config))
+			return false;
+		if (!BenchmarkSpotFit.updateConfiguration(config))
+			return false;
+		if (!updateConfiguration(config))
+			return false;
+		return true;
+	}
+
+	private String getNotes()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Benchmark template\n");
+		if (!Utils.isNullOrEmpty(resultsTitle))
+			addField(sb, "Filter Analysis Title", resultsTitle);
+		// TODO - Add create data settings
+		// Add any other settings that may be useful in the template
+		addField(sb, "Created", getCurrentTimeStamp());
+		return sb.toString();
+	}
+
+	private void addField(StringBuilder sb, String field, String value)
+	{
+		sb.append(field).append(": ").append(value).append('\n');
+	}
+
+	public static String getCurrentTimeStamp()
+	{
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date now = new Date();
+		String strDate = sdfDate.format(now);
+		return strDate;
+	}
+
+	/**
 	 * @param results
 	 *            The results generated from running the filter (or null)
 	 * @param filter
@@ -2975,5 +3062,34 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		// Ignore		
 		return false;
+	}
+
+	/**
+	 * Updates the given configuration using the latest settings used in benchmarking.
+	 *
+	 * @param config
+	 *            the configuration
+	 * @return true, if successful
+	 */
+	public static boolean updateConfiguration(FitEngineConfiguration config)
+	{
+		if (_bestFilter == null || !(_bestFilter instanceof IMultiFilter))
+			return false;
+
+		IMultiFilter filter = (IMultiFilter) _bestFilter;
+
+		final FitConfiguration fitConfig = config.getFitConfiguration();
+
+		fitConfig.setCoordinateShiftFactor(filter.getShift());
+		fitConfig.setSignalStrength(filter.getSNR());
+		fitConfig.setMinPhotons(filter.getSignal());
+		fitConfig.setMinWidthFactor(filter.getMinWidth());
+		fitConfig.setWidthFactor(filter.getMaxWidth());
+		fitConfig.setPrecisionThreshold(filter.getPrecision());
+		fitConfig.setPrecisionUsingBackground(filter.isPrecisionUsesLocalBackground());
+
+		config.setFailuresLimit(failCount);
+
+		return true;
 	}
 }

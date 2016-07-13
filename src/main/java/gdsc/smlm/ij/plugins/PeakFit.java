@@ -1308,6 +1308,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			if (template != null)
 			{
+				String notes = template.getNotes();
+				IJ.log("Applying template: " + templateName);
+				if (!Utils.isNullOrEmpty(notes))
+					IJ.log(notes);
+
 				boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
 				if (template.isFitEngineConfiguration())
 				{
@@ -2492,10 +2497,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		this.calibration = calibration;
 
-		textNmPerPixel.setText("" + calibration.nmPerPixel);
-		textGain.setText("" + calibration.gain);
+		if (calibration.nmPerPixel > 0)
+			textNmPerPixel.setText("" + calibration.nmPerPixel);
+		if (calibration.gain > 0)
+			textGain.setText("" + calibration.gain);
 		textEMCCD.setState(calibration.emCCD);
-		textExposure.setText("" + calibration.exposureTime);
+		if (calibration.exposureTime > 0)
+			textExposure.setText("" + calibration.exposureTime);
 	}
 
 	/**
@@ -2515,11 +2523,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		this.config = config;
 		this.fitConfig = config.getFitConfiguration();
 
-		if (isCustomTemplate)
+		if (isCustomTemplate && fitConfig.getInitialPeakStdDev0() > 0)
 			textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
 		if (!maximaIdentification && isCustomTemplate)
 		{
-			textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
+			if (fitConfig.getInitialPeakStdDev1() > 0)
+				textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
 			textInitialAngleD.setText("" + fitConfig.getInitialAngle());
 		}
 		textDataFilterType.select(config.getDataFilterType().ordinal());

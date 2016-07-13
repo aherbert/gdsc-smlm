@@ -1697,4 +1697,46 @@ public class BenchmarkSpotFit implements PlugIn
 		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a);
 		return sa;
 	}
+	
+	/**
+	 * Updates the given configuration using the latest settings used in benchmarking.
+	 *
+	 * @param pConfig
+	 *            the configuration
+	 * @return true, if successful
+	 */
+	public static boolean updateConfiguration(FitEngineConfiguration pConfig)
+	{
+		final FitConfiguration pFitConfig = pConfig.getFitConfiguration();
+		
+		pFitConfig.setInitialPeakStdDev(fitConfig.getInitialPeakStdDev0());
+		pConfig.setFitting(config.getFitting());
+		pFitConfig.setFitSolver(fitConfig.getFitSolver());
+		pFitConfig.setFitFunction(fitConfig.getFitFunction());
+		pConfig.setIncludeNeighbours(config.isIncludeNeighbours());
+		pConfig.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
+		pFitConfig.setDuplicateDistance(fitConfig.getDuplicateDistance());
+
+		pFitConfig.setMaxIterations(fitConfig.getMaxIterations());
+		pFitConfig.setMaxFunctionEvaluations(fitConfig.getMaxFunctionEvaluations());
+		
+		// MLE settings
+		pFitConfig.setModelCamera(fitConfig.isModelCamera());
+		pFitConfig.setBias(0);
+		pFitConfig.setReadNoise(0);
+		pFitConfig.setAmplification(0);
+		pFitConfig.setEmCCD(fitConfig.isEmCCD());
+		pFitConfig.setSearchMethod(fitConfig.getSearchMethod());
+		pFitConfig.setRelativeThreshold(fitConfig.getRelativeThreshold());
+		pFitConfig.setAbsoluteThreshold(fitConfig.getAbsoluteThreshold());
+		pFitConfig.setGradientLineMinimisation(fitConfig.isGradientLineMinimisation());
+		
+		// LSE settings
+		pFitConfig.setFitCriteria(fitConfig.getFitCriteria());
+		pFitConfig.setSignificantDigits(fitConfig.getSignificantDigits());
+		pFitConfig.setDelta(fitConfig.getDelta());
+		pFitConfig.setLambda(fitConfig.getLambda());		
+
+		return true;
+	}
 }
