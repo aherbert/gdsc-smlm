@@ -461,22 +461,9 @@ public class FitEngineConfiguration implements Cloneable
 
 		if (relative)
 		{
-			// Use smallest width for smoothing and largest for the border and fitting region
-			FitConfiguration fitConfiguration = getFitConfiguration();
-			final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
-			final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
-
-			// Use 1 if zero to get at least a single pixel width
-			double widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
-			if (initialPeakStdDev1 > 0)
-				widthMin = FastMath.min(initialPeakStdDev1, widthMin);
-			double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
-			if (initialPeakStdDev1 > 0)
-				widthMax = FastMath.max(initialPeakStdDev1, widthMax);
-
 			// Get the half-width at half maximim
-			hwhmMin = Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMin;
-			hwhmMax = Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMax;
+			hwhmMin = getHWHMMin();
+			hwhmMax = getHWHMMin();
 		}
 		else
 		{
@@ -529,7 +516,47 @@ public class FitEngineConfiguration implements Cloneable
 
 		return spotFilter;
 	}
-	
+
+	/**
+	 * Gets the minimum HWHM using the initial standard deviations
+	 *
+	 * @return the HWHM min
+	 */
+	public double getHWHMMin()
+	{
+		final FitConfiguration fitConfiguration = getFitConfiguration();
+		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
+		final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+
+		// Use 1 if zero to get at least a single pixel width
+		double widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
+		if (initialPeakStdDev1 > 0)
+			widthMin = FastMath.min(initialPeakStdDev1, widthMin);
+
+		// Get the half-width at half maximim
+		return Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMin;
+	}
+
+	/**
+	 * Gets the maximum HWHM using the initial standard deviations
+	 *
+	 * @return the HWHM max
+	 */
+	public double getHWHMMax()
+	{
+		final FitConfiguration fitConfiguration = getFitConfiguration();
+		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
+		final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+
+		// Use 1 if zero to get at least a single pixel width
+		double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
+		if (initialPeakStdDev1 > 0)
+			widthMax = FastMath.max(initialPeakStdDev1, widthMax);
+
+		// Get the half-width at half maximim
+		return Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMax;
+	}
+
 	/**
 	 * Gets the number of filters for the configured filter type.
 	 *
