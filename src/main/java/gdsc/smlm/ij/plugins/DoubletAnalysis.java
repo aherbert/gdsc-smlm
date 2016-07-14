@@ -636,7 +636,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					}
 
 					// Optionally ignore results with neighbours
-					if (ignoreWithNeighbours)
+					if (ignoreWithNeighbours && neighbourCount != 0)
 					{
 						// TODO - Should we now remove these actual results from the actual[] array.
 						// This removes them from any scoring of fit results.
