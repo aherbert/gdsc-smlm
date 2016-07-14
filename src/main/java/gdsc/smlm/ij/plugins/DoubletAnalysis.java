@@ -61,6 +61,7 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -139,6 +140,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static boolean useMaxResiduals = true;
 	private static double lowerDistance = 1;
 	private static double matchDistance = 1;
+	private static double signalFactor = 2;
+	private static double lowerSignalFactor = 1;
 	private static String[] MATCHING = { "Simple", "By residuals", "By candidate" };
 	private static int matching = 0;
 
@@ -173,6 +176,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private Choice textFitFunction;
 	private TextField textMatchDistance;
 	private TextField textLowerDistance;
+	private TextField textSignalFactor;
+	private TextField textLowerFactor;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
@@ -419,7 +424,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		float[] data = null;
 		ArrayList<DoubletResult> results = new ArrayList<DoubletResult>();
 		int daic = 0, dbic = 0, cic = 0;
-		RampedScore rampedScore;
+		RampedScore rampedScore, signalScore = null;
 
 		/**
 		 * Instantiates a new worker.
@@ -458,6 +463,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			almostNeighbourHistogram = new int[3][spotHistogram.length];
 			this.o = o;
 			rampedScore = new RampedScore(lowerDistance, matchDistance);
+			if (BenchmarkSpotFit.signalFactor > 0)
+				signalScore = new RampedScore(lowerSignalFactor, signalFactor);
 		}
 
 		/*
@@ -862,7 +869,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
 						double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
 						double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
-						f1.add(new ResultCoordinate(result, 0, x, y));
+						f1.add(new ResultCoordinate(result, -1, x, y));
 						if (result.good2)
 						{
 							double x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] +
@@ -886,7 +893,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				for (PointPair pair : pairs)
 				{
 					ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
-					coord.result.addTP1(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256));
+					coord.result.addTP1(getScore(pair.getXYDistance2(), coord, pair.getPoint1()));
 				}
 
 				if (f2.isEmpty())
@@ -905,7 +912,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				for (PointPair pair : pairs)
 				{
 					ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
-					coord.result.addTP2(rampedScore.scoreAndFlatten(pair.getXYDistance(), 256), coord.id);
+					coord.result.addTP2(getScore(pair.getXYDistance2(), coord, pair.getPoint1()), coord.id);
 				}
 			}
 			else if (matching == 1)
@@ -950,7 +957,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							{
 								assigned[i] = true;
 								matched[j] = i + 1;
-								result.addTP1(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256));
+								result.addTP1(getScore(d2, result, -1, actual[i]));
 								if (++count == actual.length)
 									break OUTER;
 								break;
@@ -1008,7 +1015,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 								{
 									if (d2a <= threshold)
 									{
-										ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2a), 256), ra.id);
+										ra.result.addTP2(getScore(d2a, ra, actual[i]), ra.id);
 										if (++count == actual.length)
 											break OUTER;
 										assigned[i] = true;
@@ -1019,7 +1026,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 								{
 									if (d2b <= threshold)
 									{
-										rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2b), 256), rb.id);
+										rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
 										if (++count == actual.length)
 											break OUTER;
 										assigned[i] = true;
@@ -1038,7 +1045,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									final double d2 = rb.distanceXY2(actual[i]);
 									if (d2 <= threshold)
 									{
-										rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), rb.id);
+										rb.result.addTP2(getScore(d2, rb, actual[i]), rb.id);
 										if (++count == actual.length)
 											break OUTER;
 										assigned[i] = true;
@@ -1050,7 +1057,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									final double d2 = ra.distanceXY2(actual[i]);
 									if (d2 <= threshold)
 									{
-										ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), ra.id);
+										ra.result.addTP2(getScore(d2, ra, actual[i]), ra.id);
 										if (++count == actual.length)
 											break OUTER;
 										assigned[i] = true;
@@ -1065,7 +1072,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									{
 										if (d2a <= threshold)
 										{
-											ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2a), 256), ra.id);
+											ra.result.addTP2(getScore(d2a, ra, actual[i]), ra.id);
 											if (++count == actual.length)
 												break OUTER;
 											assigned[i] = true;
@@ -1076,7 +1083,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									{
 										if (d2b <= threshold)
 										{
-											rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2b), 256), rb.id);
+											rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
 											if (++count == actual.length)
 												break OUTER;
 											assigned[i] = true;
@@ -1101,7 +1108,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						final Rectangle regionBounds = ie.getBoxRegionBounds(result.spot.x, result.spot.y, fitting);
 						double x = result.fitResult1.getParameters()[Gaussian2DFunction.X_POSITION] + regionBounds.x;
 						double y = result.fitResult1.getParameters()[Gaussian2DFunction.Y_POSITION] + regionBounds.y;
-						f1.add(new ResultCoordinate(result, 0, x, y));
+						f1.add(new ResultCoordinate(result, -1, x, y));
 						if (result.good2)
 						{
 							double x2 = result.fitResult2.getParameters()[Gaussian2DFunction.X_POSITION] +
@@ -1135,7 +1142,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						final double d2 = r.distanceXY2(actual[i]);
 						if (d2 <= threshold)
 						{
-							r.result.addTP1(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256));
+							r.result.addTP1(getScore(d2, r, actual[i]));
 							if (++count == actual.length)
 								break OUTER;
 							assigned[i] = true;
@@ -1162,7 +1169,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							final double d2 = rb.distanceXY2(actual[i]);
 							if (d2 <= threshold)
 							{
-								rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), rb.id);
+								rb.result.addTP2(getScore(d2, rb, actual[i]), rb.id);
 								if (++count == actual.length)
 									break OUTER;
 								assigned[i] = true;
@@ -1174,7 +1181,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							final double d2 = ra.distanceXY2(actual[i]);
 							if (d2 <= threshold)
 							{
-								ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2), 256), ra.id);
+								ra.result.addTP2(getScore(d2, ra, actual[i]), ra.id);
 								if (++count == actual.length)
 									break OUTER;
 								assigned[i] = true;
@@ -1189,7 +1196,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							{
 								if (d2a <= threshold)
 								{
-									ra.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2a), 256), ra.id);
+									ra.result.addTP2(getScore(d2a, ra, actual[i]), ra.id);
 									if (++count == actual.length)
 										break OUTER;
 									assigned[i] = true;
@@ -1200,7 +1207,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							{
 								if (d2b <= threshold)
 								{
-									rb.result.addTP2(rampedScore.scoreAndFlatten(Math.sqrt(d2b), 256), rb.id);
+									rb.result.addTP2(getScore(d2b, rb, actual[i]), rb.id);
 									if (++count == actual.length)
 										break OUTER;
 									assigned[i] = true;
@@ -1213,6 +1220,41 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 			}
 
+		}
+
+		private double getScore(double d2, ResultCoordinate resultCoord, Coordinate coord)
+		{
+			return getScore(d2, resultCoord.result, resultCoord.id, coord);
+		}
+
+		private double getScore(double d2, DoubletResult result, int id, Coordinate coord)
+		{
+			double matchScore = rampedScore.scoreAndFlatten(d2, 256);
+			if (signalScore != null)
+			{
+				PeakResultPoint p = (PeakResultPoint) coord;
+				double s1 = p.peakResult.getSignal();
+				double s2;
+				switch (id)
+				{
+					case -1:
+						s2 = result.fitResult1.getParameters()[Gaussian2DFunction.SIGNAL];
+						break;
+
+					case 1:
+						s2 = result.fitResult2.getParameters()[Gaussian2DFunction.SIGNAL + 6];
+						break;
+
+					case 0:
+					default:
+						s2 = result.fitResult2.getParameters()[Gaussian2DFunction.SIGNAL];
+				}
+				double rsf = s1 / s2;
+				double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
+				final double fScore = signalScore.scoreAndFlatten(sf, 256);
+				matchScore = RampedScore.flatten(matchScore * fScore, 256);
+			}
+			return matchScore;
 		}
 
 		private int goodFit(FitResult fitResult, final int width, final int height)
@@ -1512,6 +1554,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
 		gd.addNumericField("Match_distance", matchDistance, 2);
 		gd.addNumericField("Lower_distance", lowerDistance, 2);
+		gd.addNumericField("Signal_factor", signalFactor, 2);
+		gd.addNumericField("Lower_factor", lowerSignalFactor, 2);
 		gd.addChoice("Matching", MATCHING, MATCHING[matching]);
 
 		// Add a mouse listener to the config file field
@@ -1537,6 +1581,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			n++; // Iteration increase
 			textMatchDistance = numerics.get(n++);
 			textLowerDistance = numerics.get(n++);
+			textSignalFactor = numerics.get(n++);
+			textLowerFactor = numerics.get(n++);
 		}
 
 		gd.showDialog();
@@ -1571,6 +1617,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		useMaxResiduals = gd.getNextBoolean();
 		matchDistance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
+		signalFactor = Math.abs(gd.getNextNumber());
+		lowerSignalFactor = Math.abs(gd.getNextNumber());
 		matching = gd.getNextChoiceIndex();
 
 		if (gd.invalidNumber())
@@ -1655,12 +1703,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		{
 			matchDistance = BenchmarkFilterAnalysis.distanceInPixels;
 			lowerDistance = BenchmarkFilterAnalysis.lowerDistanceInPixels;
+			signalFactor = BenchmarkFilterAnalysis.signalFactor;
+			lowerSignalFactor = BenchmarkFilterAnalysis.lowerSignalFactor;
 		}
 		else
 		{
 			// Use the fit analysis distance if no filter analysis has been run 
 			matchDistance = BenchmarkSpotFit.distanceInPixels;
 			lowerDistance = BenchmarkSpotFit.lowerDistanceInPixels;
+			signalFactor = lowerSignalFactor = BenchmarkSpotFit.signalFactor;
 		}
 
 		return true;
@@ -3053,6 +3104,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textFitFunction.select(fitConfig.getFitFunction().ordinal());
 				textMatchDistance.setText("" + matchDistance);
 				textLowerDistance.setText("" + lowerDistance);
+				textSignalFactor.setText("" + signalFactor);
+				textLowerFactor.setText("" + lowerSignalFactor);
 			}
 		}
 	}
