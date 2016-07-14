@@ -1616,14 +1616,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	private boolean updateFitConfiguration(FitEngineConfiguration config)
 	{
-		if (!BenchmarkSpotFilter.updateConfiguration(config))
-		{
-			IJ.error(TITLE, "Unable to use the benchmark spot filter configuration");
-			return false;
-		}
+		// Do this first as it sets the initial SD
 		if (!BenchmarkSpotFit.updateConfiguration(config))
 		{
 			IJ.error(TITLE, "Unable to use the benchmark spot fit configuration");
+			return false;
+		}
+		if (!BenchmarkSpotFilter.updateConfiguration(config))
+		{
+			IJ.error(TITLE, "Unable to use the benchmark spot filter configuration");
 			return false;
 		}
 		// Make sure all spots are fit

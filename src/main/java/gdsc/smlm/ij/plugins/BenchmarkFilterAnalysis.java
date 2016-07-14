@@ -3105,9 +3105,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	public static boolean updateAllConfiguration(FitEngineConfiguration config)
 	{
-		if (!BenchmarkSpotFilter.updateConfiguration(config))
-			return false;
+		// Do this first as it sets the initial SD
 		if (!BenchmarkSpotFit.updateConfiguration(config))
+			return false;
+		if (!BenchmarkSpotFilter.updateConfiguration(config))
 			return false;
 		if (!updateConfiguration(config))
 			return false;
