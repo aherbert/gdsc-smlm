@@ -706,7 +706,8 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Match_signal", 0, 3.5, matchSignal);
 
 		// Collect options for fitting
-		gd.addNumericField("Initial_StdDev", getSa() / simulationParameters.a, 3);
+		final double sa = getSa();
+		gd.addNumericField("Initial_StdDev", sa / simulationParameters.a, 3);
 		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
 		String[] solverNames = SettingsManager.getNames((Object[]) FitSolver.values());
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
@@ -764,8 +765,9 @@ public class BenchmarkSpotFit implements PlugIn
 		if (lowerDistance > distance)
 			lowerDistance = distance;
 
-		distanceInPixels = distance * simulationParameters.s / simulationParameters.a;
-		lowerDistanceInPixels = lowerDistance * simulationParameters.s / simulationParameters.a;
+		// Distances relative to sa (not s) as this is the same as the BenchmarkSpotFilter plugin 
+		distanceInPixels = distance * sa / simulationParameters.a;
+		lowerDistanceInPixels = lowerDistance * sa / simulationParameters.a;
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
