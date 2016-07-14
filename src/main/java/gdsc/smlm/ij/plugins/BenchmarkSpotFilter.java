@@ -552,7 +552,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
 
-		gd.addCheckbox("Relative_distances (to sa/HWHM)", relativeDistances);
+		gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
 
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 1, 4, config.getSearch());
@@ -605,9 +605,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (relativeDistances)
 		{
 			// Convert distance to PSF standard deviation units
-			matchDistance = upperDistance * sa;
-			lowerMatchDistance = lowerDistance * sa;
-			analysisBorder = (int) Math.ceil(analysisBorder * sa);
+			final double sd = simulationParameters.s / simulationParameters.a;
+			matchDistance = upperDistance * sd;
+			lowerMatchDistance = lowerDistance * sd;
+			analysisBorder = (int) (analysisBorder * sd);
 			// Add 0.5 offset to centre the spot in the pixel
 			pixelOffset = 0.5f;
 		}
@@ -615,7 +616,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			matchDistance = upperDistance;
 			lowerMatchDistance = lowerDistance;
-			analysisBorder = (int) Math.ceil(analysisBorder);
+			analysisBorder = (int) (analysisBorder);
 			// Absolute distances in pixels will use integer coordinates so no offset
 			pixelOffset = 0;
 		}

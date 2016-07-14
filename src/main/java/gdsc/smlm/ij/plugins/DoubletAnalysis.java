@@ -69,6 +69,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Macro;
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Overlay;
@@ -1582,15 +1583,19 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		{
 			if (!updateFitConfiguration(config))
 				return false;
-			matchDistance = BenchmarkSpotFit.distanceInPixels;
-			lowerDistance = BenchmarkSpotFit.lowerDistanceInPixels;
 		}
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
 		settings.setCalibration(cal);
 
-		if (!PeakFit.configureFitSolver(settings, null, false))
+		boolean configure = true;
+		if (useBenchmarkSettings)
+		{
+			// Only configure the fit solver if not in a macro
+			configure = Macro.getOptions() == null;
+		}
+		if (configure && !PeakFit.configureFitSolver(settings, null, false))
 			return false;
 
 		lastId = simulationParameters.id;
@@ -1622,6 +1627,20 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			IJ.error(TITLE, "Unable to use the benchmark spot fit configuration");
 			return false;
 		}
+
+		cal.nmPerPixel = simulationParameters.a;
+		cal.gain = simulationParameters.gain;
+		cal.amplification = simulationParameters.amplification;
+		cal.exposureTime = 100;
+		cal.readNoise = simulationParameters.readNoise;
+		cal.bias = simulationParameters.bias;
+		cal.emCCD = simulationParameters.emCCD;
+
+		fitConfig.setGain(cal.gain);
+		fitConfig.setBias(cal.bias);
+		fitConfig.setReadNoise(cal.readNoise);
+		fitConfig.setAmplification(cal.amplification);
+
 		if (!BenchmarkSpotFilter.updateConfiguration(config))
 		{
 			IJ.error(TITLE, "Unable to use the benchmark spot filter configuration");
@@ -1629,6 +1648,21 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		}
 		// Make sure all spots are fit
 		config.setFailuresLimit(-1);
+
+		// Get the distance from the filter analysis. This ensures that we compute scores the 
+		// same as the filter analysis
+		if (BenchmarkFilterAnalysis.distanceInPixels > 0)
+		{
+			matchDistance = BenchmarkFilterAnalysis.distanceInPixels;
+			lowerDistance = BenchmarkFilterAnalysis.lowerDistanceInPixels;
+		}
+		else
+		{
+			// Use the fit analysis distance if no filter analysis has been run 
+			matchDistance = BenchmarkSpotFit.distanceInPixels;
+			lowerDistance = BenchmarkSpotFit.lowerDistanceInPixels;
+		}
+
 		return true;
 	}
 
@@ -3017,8 +3051,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textFitting.setText("" + config.getFitting());
 				textFitSolver.select(fitConfig.getFitSolver().ordinal());
 				textFitFunction.select(fitConfig.getFitFunction().ordinal());
-				textMatchDistance.setText("" + BenchmarkSpotFit.distanceInPixels);
-				textLowerDistance.setText("" + BenchmarkSpotFit.lowerDistanceInPixels);
+				textMatchDistance.setText("" + matchDistance);
+				textLowerDistance.setText("" + lowerDistance);
 			}
 		}
 	}

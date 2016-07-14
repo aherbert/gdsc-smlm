@@ -123,6 +123,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private boolean invertScore = false;
 	private static double upperMatchDistance = 100;
 	private static double partialMatchDistance = 33;
+	static double distanceInPixels;
+	static double lowerDistanceInPixels;
 	private static double upperSignalFactor = 100;
 	private static double partialSignalFactor = 50;
 	private static boolean depthRecallAnalysis = true;
@@ -669,9 +671,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
 			// -=-=-=-
 
-			final RampedScore distanceScore = new RampedScore(
-					BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0,
-					BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
+			lowerDistanceInPixels = BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0;
+			distanceInPixels = BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
+
+			final RampedScore distanceScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
@@ -3114,7 +3117,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return false;
 		return true;
 	}
-	
+
 	/**
 	 * Updates the given configuration using the latest settings used in benchmarking filtering.
 	 *
