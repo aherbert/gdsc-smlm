@@ -552,7 +552,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
 
-		gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
+		gd.addCheckbox("Relative_distances (to sa/HWHM)", relativeDistances);
 
 		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		gd.addSlider("Search_width", 1, 4, config.getSearch());
