@@ -2477,7 +2477,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private void saveTemplate(String topFilterSummary)
 	{
 		FitEngineConfiguration config = new FitEngineConfiguration(new FitConfiguration());
-		if (!updateConfig(config))
+		if (!updateAllConfiguration(config))
 		{
 			IJ.log("Unable to create the template configuration");
 			return;
@@ -2496,17 +2496,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (!SettingsManager.saveSettings(settings, filename))
 				IJ.log("Unable to save the template configuration");
 		}
-	}
-
-	private boolean updateConfig(FitEngineConfiguration config)
-	{
-		if (!BenchmarkSpotFilter.updateConfiguration(config))
-			return false;
-		if (!BenchmarkSpotFit.updateConfiguration(config))
-			return false;
-		if (!updateConfiguration(config))
-			return false;
-		return true;
 	}
 
 	private String getNotes(String topFilterSummary)
@@ -3107,7 +3096,26 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	/**
-	 * Updates the given configuration using the latest settings used in benchmarking.
+	 * Updates the given configuration using the latest settings used in benchmarking spot filters, fitting and
+	 * filtering.
+	 *
+	 * @param config
+	 *            the configuration
+	 * @return true, if successful
+	 */
+	public static boolean updateAllConfiguration(FitEngineConfiguration config)
+	{
+		if (!BenchmarkSpotFilter.updateConfiguration(config))
+			return false;
+		if (!BenchmarkSpotFit.updateConfiguration(config))
+			return false;
+		if (!updateConfiguration(config))
+			return false;
+		return true;
+	}
+	
+	/**
+	 * Updates the given configuration using the latest settings used in benchmarking filtering.
 	 *
 	 * @param config
 	 *            the configuration

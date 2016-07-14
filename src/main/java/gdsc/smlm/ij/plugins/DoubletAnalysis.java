@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Checkbox;
 import java.awt.Choice;
 
 /*----------------------------------------------------------------------------- 
@@ -125,8 +126,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setPrecisionThreshold(0);
 		filterFitConfig.setMinWidthFactor(0);
 		filterFitConfig.setWidthFactor(0);
+		filterFitConfig.setPrecisionUsingBackground(false);
 	}
 
+	private static boolean useBenchmarkSettings = false;
 	private static double iterationIncrease = 1;
 	private static boolean showOverlay = false;
 	private static boolean showHistograms = false;
@@ -138,6 +141,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static String[] MATCHING = { "Simple", "By residuals", "By candidate" };
 	private static int matching = 0;
 
+	private static boolean analysisUseBenchmarkSettings = false;
 	private static double analysisDriftAngle = 45;
 	private static double minGap = 0;
 	private static boolean analysisShowResults = false;
@@ -157,8 +161,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 
-	private Choice textTemplate;
-	private Choice analysisTextTemplate;
 	private TextField textInitialPeakStdDev0;
 	private Choice textDataFilterType;
 	private Choice textDataFilter;
@@ -168,10 +170,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private TextField textFitting;
 	private Choice textFitSolver;
 	private Choice textFitFunction;
+	private TextField textMatchDistance;
+	private TextField textLowerDistance;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
 	private TextField textPrecisionThreshold;
+	private Checkbox cbLocalBackground;
 	private TextField textMinWidthFactor;
 	private TextField textWidthFactor;
 
@@ -1469,7 +1474,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			cal.readNoise = simulationParameters.readNoise;
 			cal.bias = simulationParameters.bias;
 			cal.emCCD = simulationParameters.emCCD;
-			
+
 			fitConfig.setGain(cal.gain);
 			fitConfig.setBias(cal.bias);
 			fitConfig.setReadNoise(cal.readNoise);
@@ -1479,6 +1484,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Support for using templates
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
+
+		// Allow the settings from the benchmark analysis to be used
+		gd.addCheckbox("Benchmark_settings", useBenchmarkSettings);
 
 		// Collect options for fitting
 		gd.addNumericField("Initial_StdDev", fitConfig.getInitialPeakStdDev0(), 3);
@@ -1513,8 +1521,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			int n = 0;
 			int ch = 0;
 
-			textTemplate = choices.get(ch++);
-			textTemplate.addItemListener(this);
+			choices.get(ch++).addItemListener(this);
+			Checkbox b = (Checkbox) gd.getCheckboxes().get(0);
+			b.addItemListener(this);
 			textInitialPeakStdDev0 = numerics.get(n++);
 			textDataFilterType = choices.get(ch++);
 			textDataFilter = choices.get(ch++);
@@ -1524,6 +1533,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
 			textFitFunction = choices.get(ch++);
+			n++; // Iteration increase
+			textMatchDistance = numerics.get(n++);
+			textLowerDistance = numerics.get(n++);
 		}
 
 		gd.showDialog();
@@ -1533,7 +1545,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Ignore the template
 		gd.getNextChoice();
-		
+		useBenchmarkSettings = gd.getNextBoolean();
 		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
@@ -1566,6 +1578,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		if (lowerDistance > matchDistance)
 			lowerDistance = matchDistance;
 
+		if (useBenchmarkSettings)
+		{
+			if (!updateFitConfiguration(config))
+				return false;
+			matchDistance = BenchmarkSpotFit.distanceInPixels;
+			lowerDistance = BenchmarkSpotFit.lowerDistanceInPixels;
+		}
+
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
 		settings.setCalibration(cal);
@@ -1591,6 +1611,23 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				displayHistograms[i] = gd.getNextBoolean();
 		}
 
+		return true;
+	}
+
+	private boolean updateFitConfiguration(FitEngineConfiguration config)
+	{
+		if (!BenchmarkSpotFilter.updateConfiguration(config))
+		{
+			IJ.error(TITLE, "Unable to use the benchmark spot filter configuration");
+			return false;
+		}
+		if (!BenchmarkSpotFit.updateConfiguration(config))
+		{
+			IJ.error(TITLE, "Unable to use the benchmark spot fit configuration");
+			return false;
+		}
+		// Make sure all spots are fit
+		config.setFailuresLimit(-1);
 		return true;
 	}
 
@@ -2584,8 +2621,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(filterFitConfig.getCoordinateShiftFactor()).append('\t');
 		sb.append(filterFitConfig.getSignalStrength()).append('\t');
 		sb.append(filterFitConfig.getMinPhotons()).append('\t');
+		sb.append(filterFitConfig.getMinWidthFactor()).append('\t');
 		sb.append(filterFitConfig.getWidthFactor()).append('\t');
 		sb.append(filterFitConfig.getPrecisionThreshold()).append('\t');
+		sb.append(filterFitConfig.isPrecisionUsingBackground()).append('\t');
 		sb.append(analysisDriftAngle).append('\t');
 		sb.append(minGap).append('\t');
 
@@ -2746,12 +2785,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
+		// Allow the settings from the benchmark analysis to be used
+		gd.addCheckbox("Benchmark_settings", analysisUseBenchmarkSettings);
 		gd.addSlider("Shift_factor", 0.01, 2, filterFitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
-		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
+		gd.addSlider("Min_width_factor", 0, 0.99, filterFitConfig.getMinWidthFactor());
+		gd.addSlider("Width_factor", 1.01, 5, filterFitConfig.getWidthFactor());
 		gd.addNumericField("Precision", filterFitConfig.getPrecisionThreshold(), 2);
+		gd.addCheckbox("Local_background", filterFitConfig.isPrecisionUsingBackground());
 
 		gd.addNumericField("Drift_angle", analysisDriftAngle, 2);
 		gd.addNumericField("Min_gap", minGap, 2);
@@ -2768,16 +2810,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
 		{
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
+			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
 			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
 			int n = 0;
-			analysisTextTemplate = choices.get(1);
-			analysisTextTemplate.addItemListener(this);
+			choices.get(1).addItemListener(this);
+			checkboxes.get(0).addItemListener(this);
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
 			textMinPhotons = numerics.get(n++);
 			textMinWidthFactor = numerics.get(n++);
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
+			cbLocalBackground = checkboxes.get(1);
 		}
 
 		gd.showDialog();
@@ -2788,12 +2832,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			return false;
 
 		selectionCriteria = gd.getNextChoiceIndex();
+		// Ignore the template
+		gd.getNextChoice();
+		analysisUseBenchmarkSettings = gd.getNextBoolean();
 		filterFitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		filterFitConfig.setSignalStrength(gd.getNextNumber());
 		filterFitConfig.setMinPhotons(gd.getNextNumber());
 		filterFitConfig.setMinWidthFactor(gd.getNextNumber());
 		filterFitConfig.setWidthFactor(gd.getNextNumber());
 		filterFitConfig.setPrecisionThreshold(gd.getNextNumber());
+		filterFitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
 		analysisDriftAngle = gd.getNextNumber();
 		minGap = gd.getNextNumber();
 
@@ -2802,6 +2850,26 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		useMaxResiduals = gd.getNextBoolean();
 		analysisLogging = gd.getNextBoolean();
 
+		if (gd.invalidNumber())
+			return false;
+
+		if (analysisUseBenchmarkSettings)
+		{
+			if (!updateFilterConfiguration(filterFitConfig))
+				return false;
+		}
+
+		return true;
+	}
+
+	private boolean updateFilterConfiguration(FitConfiguration filterFitConfig)
+	{
+		FitEngineConfiguration c = new FitEngineConfiguration(filterFitConfig);
+		if (!BenchmarkFilterAnalysis.updateConfiguration(c))
+		{
+			IJ.error(TITLE, "Unable to use the benchmark filter analysis configuration");
+			return false;
+		}
 		return true;
 	}
 
@@ -2824,7 +2892,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tWidth\tPrecision\tAngle\tGap\tMax J\tResdiuals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResdiuals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
 	}
 
 	/*
@@ -2843,7 +2911,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Get the configuration template
 			GlobalSettings template = ConfigurationTemplate.getTemplate(templateName);
 
-			if (choice == analysisTextTemplate)
+			if (textCoordinateShiftFactor != null)
 			{
 				if (template != null)
 				{
@@ -2856,6 +2924,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
 						textWidthFactor.setText("" + fitConfig.getWidthFactor());
 						textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+						cbLocalBackground.setState(fitConfig.isPrecisionUsingBackground());
 					}
 				}
 				else
@@ -2867,9 +2936,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					textMinWidthFactor.setText("0");
 					textWidthFactor.setText("0");
 					textPrecisionThreshold.setText("0");
+					cbLocalBackground.setState(false);
 				}
 			}
-			else if (choice == textTemplate)
+			else
 			{
 				if (template != null)
 				{
@@ -2888,29 +2958,66 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						textFitting.setText("" + config2.getFitting());
 						textFitSolver.select(fitConfig2.getFitSolver().ordinal());
 						textFitFunction.select(fitConfig2.getFitFunction().ordinal());
-						
+
 						// Copy settings not in the dialog for the fit solver
 						fitConfig.setMaxIterations(fitConfig2.getMaxIterations());
 						fitConfig.setMaxFunctionEvaluations(fitConfig2.getMaxFunctionEvaluations());
-						
+
 						// MLE settings
 						fitConfig.setModelCamera(fitConfig2.isModelCamera());
 						fitConfig.setSearchMethod(fitConfig2.getSearchMethod());
 						fitConfig.setRelativeThreshold(fitConfig2.getRelativeThreshold());
 						fitConfig.setAbsoluteThreshold(fitConfig2.getAbsoluteThreshold());
 						fitConfig.setGradientLineMinimisation(fitConfig2.isGradientLineMinimisation());
-						
+
 						// LSE settings
 						fitConfig.setFitCriteria(fitConfig2.getFitCriteria());
 						fitConfig.setSignificantDigits(fitConfig2.getSignificantDigits());
 						fitConfig.setDelta(fitConfig2.getDelta());
-						fitConfig.setLambda(fitConfig2.getLambda());		
+						fitConfig.setLambda(fitConfig2.getLambda());
 					}
 				}
 				else
 				{
 					// Ignore
 				}
+			}
+		}
+		else if (e.getSource() instanceof Checkbox)
+		{
+			Checkbox checkbox = (Checkbox) e.getSource();
+			if (!checkbox.getState())
+				return;
+
+			if (textCoordinateShiftFactor != null)
+			{
+				if (!updateFilterConfiguration(filterFitConfig))
+					return;
+
+				textCoordinateShiftFactor.setText("" + filterFitConfig.getCoordinateShiftFactor());
+				textSignalStrength.setText("" + filterFitConfig.getSignalStrength());
+				textMinPhotons.setText("" + filterFitConfig.getMinPhotons());
+				textMinWidthFactor.setText("" + filterFitConfig.getMinWidthFactor());
+				textWidthFactor.setText("" + filterFitConfig.getWidthFactor());
+				textPrecisionThreshold.setText("" + filterFitConfig.getPrecisionThreshold());
+				cbLocalBackground.setState(filterFitConfig.isPrecisionUsingBackground());
+			}
+			else
+			{
+				if (!updateFitConfiguration(config))
+					return;
+
+				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
+				textDataFilterType.select(config.getDataFilterType().ordinal());
+				textDataFilter.select(config.getDataFilter(0).ordinal());
+				textSmooth.setText("" + config.getSmooth(0));
+				textSearch.setText("" + config.getSearch());
+				textBorder.setText("" + config.getBorder());
+				textFitting.setText("" + config.getFitting());
+				textFitSolver.select(fitConfig.getFitSolver().ordinal());
+				textFitFunction.select(fitConfig.getFitFunction().ordinal());
+				textMatchDistance.setText("" + BenchmarkSpotFit.distanceInPixels);
+				textLowerDistance.setText("" + BenchmarkSpotFit.lowerDistanceInPixels);
 			}
 		}
 	}
