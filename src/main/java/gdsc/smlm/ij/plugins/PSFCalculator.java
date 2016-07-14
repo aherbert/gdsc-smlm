@@ -48,6 +48,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 	private PSFCalculatorSettings settings;
 	private GenericDialog gd;
+	private Label abbeLimitLabel;
 	private Label pixelPitchLabel;
 	private TextField widthNmText;
 	private TextField widthPixelsText;
@@ -96,13 +97,16 @@ public class PSFCalculator implements PlugIn, DialogListener
 			gd.addNumericField("Pixel_pitch (um)", settings.pixelPitch, 2);
 			gd.addNumericField("Magnification", settings.magnification, 0);
 			gd.addNumericField("Beam_Expander", settings.beamExpander, 2);
-			gd.addMessage(getPixelPitchLabel(settings.pixelPitch * 1000.0));
+			gd.addMessage(getPixelPitchLabel());
 			pixelPitchLabel = (Label) gd.getMessage();
-			pixelPitchLabel.setText(getPixelPitchLabel());
+			//pixelPitchLabel.setText(getPixelPitchLabel());
 		}
 
 		gd.addSlider("Wavelength (nm)", 400, 750, settings.wavelength);
 		gd.addSlider("Numerical_Aperture (NA)", 1, 1.5, settings.numericalAperture);
+		gd.addMessage(getAbbeLimitLabel());
+		abbeLimitLabel = (Label) gd.getMessage();
+		//abbe.setText(getAbbeLimitLabel());
 		gd.addMessage("*** Account for optical aberations and focus error ***");
 		gd.addSlider("Proportionality_factor", 1, 2.5, settings.proportionalityFactor);
 		gd.addCheckbox("Adjust_for_square_pixels", settings.adjustForSquarePixels);
@@ -346,7 +350,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		if (e == null)
 			return true;
 		Object o = e.getSource();
-		if (o == sdNmText || o == sdPixelsText || o == fwhmPixelsText)
+		if (o == sdNmText || o == sdPixelsText || o == fwhmPixelsText || o == abbeLimitLabel)
 			return true;
 		if (widthNmText != null)
 		{
@@ -383,6 +387,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 								calculateAiryWidth(pixelPitch, magnification * beamExpander, wavelength,
 										numericalAperture), 3));
 					}
+					abbeLimitLabel.setText(getAbbeLimitLabel());
 					sdNmText.setText(IJ.d2s(calculateStdDev(wavelength, numericalAperture, proportionalityFactor), 3));
 					double sd = calculateStdDev(pixelPitch, magnification * beamExpander, wavelength,
 							numericalAperture, proportionalityFactor, adjustForSquarePixels);
@@ -473,5 +478,20 @@ public class PSFCalculator implements PlugIn, DialogListener
 	private double getPixelPitch()
 	{
 		return settings.pixelPitch * 1000 / (settings.magnification * settings.beamExpander);
+	}
+	
+	private String getAbbeLimitLabel(double abbeLimit)
+	{
+		return "Abbe limit (nm) = " + IJ.d2s(abbeLimit, 3);
+	}
+
+	private String getAbbeLimitLabel()
+	{
+		return getAbbeLimitLabel(getAbbeLimit());
+	}
+
+	private double getAbbeLimit()
+	{
+		return settings.wavelength / (2 * settings.numericalAperture);
 	}
 }
