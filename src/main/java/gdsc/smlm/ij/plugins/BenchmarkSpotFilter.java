@@ -605,10 +605,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (relativeDistances)
 		{
 			// Convert distance to PSF standard deviation units
-			final double sd = simulationParameters.s / simulationParameters.a;
-			matchDistance = upperDistance * sd;
-			lowerMatchDistance = lowerDistance * sd;
-			analysisBorder = (int) (analysisBorder * sd);
+			matchDistance = upperDistance * sa;
+			lowerMatchDistance = lowerDistance * sa;
+			analysisBorder = (int) Math.ceil(analysisBorder * sa);
 			// Add 0.5 offset to centre the spot in the pixel
 			pixelOffset = 0.5f;
 		}
@@ -616,7 +615,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			matchDistance = upperDistance;
 			lowerMatchDistance = lowerDistance;
-			analysisBorder = (int) (analysisBorder);
+			analysisBorder = (int) Math.ceil(analysisBorder);
 			// Absolute distances in pixels will use integer coordinates so no offset
 			pixelOffset = 0;
 		}
