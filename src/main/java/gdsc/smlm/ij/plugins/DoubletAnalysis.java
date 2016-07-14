@@ -463,7 +463,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			almostNeighbourHistogram = new int[3][spotHistogram.length];
 			this.o = o;
 			rampedScore = new RampedScore(lowerDistance, matchDistance);
-			if (BenchmarkSpotFit.signalFactor > 0)
+			if (signalFactor > 0)
 				signalScore = new RampedScore(lowerSignalFactor, signalFactor);
 		}
 
@@ -1626,6 +1626,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		if (lowerDistance > matchDistance)
 			lowerDistance = matchDistance;
+		if (lowerSignalFactor > signalFactor)
+			lowerSignalFactor = signalFactor;
 
 		if (useBenchmarkSettings)
 		{
