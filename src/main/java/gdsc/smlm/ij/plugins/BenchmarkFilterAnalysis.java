@@ -127,6 +127,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	static double lowerDistanceInPixels;
 	private static double upperSignalFactor = 100;
 	private static double partialSignalFactor = 50;
+	static double signalFactor;
+	static double lowerSignalFactor;
 	private static boolean depthRecallAnalysis = true;
 	private static boolean scoreAnalysis = true;
 	private static boolean evolve = false;
@@ -671,10 +673,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering
 			// -=-=-=-
 
-			lowerDistanceInPixels = BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0;
-			distanceInPixels = BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
-
-			final RampedScore distanceScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
+			final RampedScore distanceScore = new RampedScore(
+					BenchmarkSpotFit.distanceInPixels * partialMatchDistance / 100.0,
+					BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
+			lowerDistanceInPixels = distanceScore.lower;
+			distanceInPixels = distanceScore.upper;
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
@@ -685,8 +688,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			final RampedScore signalScore;
 			if (BenchmarkSpotFit.signalFactor > 0)
 			{
-				signalScore = new RampedScore(BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0,
-						BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0);
+				signalScore = new RampedScore(BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0,
+						BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0);
+				lowerSignalFactor = signalScore.lower;
+				signalFactor = signalScore.upper;
 				resultsPrefix3 += "\t" + Utils.rounded(signalScore.lower) + "\t" + Utils.rounded(signalScore.upper);
 				limitRange += ", s=" + Utils.rounded(signalScore.lower) + "-" + Utils.rounded(signalScore.upper);
 			}
@@ -694,6 +699,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				signalScore = null;
 				resultsPrefix3 += "\t0\t0";
+				lowerSignalFactor = signalFactor = 0;
 			}
 
 			MemoryPeakResults r = new MemoryPeakResults();
