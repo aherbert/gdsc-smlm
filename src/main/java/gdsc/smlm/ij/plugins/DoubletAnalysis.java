@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
@@ -133,6 +134,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	private static boolean useBenchmarkSettings = false;
 	private static double iterationIncrease = 1;
+	private static boolean ignoreWithNeighbours = false;
 	private static boolean showOverlay = false;
 	private static boolean showHistograms = false;
 	private static boolean showResults = false;
@@ -185,6 +187,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private Checkbox cbLocalBackground;
 	private TextField textMinWidthFactor;
 	private TextField textWidthFactor;
+
+	private AtomicInteger ignored = new AtomicInteger(0);
 
 	private static final String[] NAMES = new String[] { "Candidate:N results in candidate",
 			"Assigned Result:N results in assigned spot", "Singles:Neighbours", "Doublets:Neighbours",
@@ -549,7 +553,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			float noise = 0;
 
 			// Identify single and doublets (and other)
-			int singles = 0, doublets = 0, multiples = 0, total = 0;
+			int singles = 0, doublets = 0, multiples = 0, total = 0, ignored = 0;
 			int[] spotMatchCount = new int[spots.length];
 			int[] neighbourIndices = new int[spots.length];
 			for (int i = 0; i < actual.length; i++)
@@ -576,12 +580,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						default: multiples++;
 						//@formatter:on
 					}
-					// Store the number of actual results that match to a spot
-					spotHistogram[n]++;
-					// Store the number of results that match to a spot with n results
-					resultHistogram[n] += n;
-					total += n;
-					spotMatchCount[j] = n;
 
 					// Initialise for fitting on first match 
 					if (ie == null)
@@ -636,11 +634,30 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							neighbourIndices[neighbourCount++] = jj;
 						}
 					}
+
+					// Optionally ignore results with neighbours
+					if (ignoreWithNeighbours)
+					{
+						// TODO - Should we now remove these actual results from the actual[] array.
+						// This removes them from any scoring of fit results.
+						// For now leave them in as all spot candidates around them are going to be ignored
+						// so there should not be any fit results close by.					
+						ignored += n;
+						continue;
+					}
+
+					// Store the number of actual results that match to a spot
+					spotHistogram[n]++;
+					// Store the number of results that match to a spot with n results
+					resultHistogram[n] += n;
+					total += n;
+					spotMatchCount[j] = n;
+
 					final int c = DoubletAnalysis.getClass(spotMatchCount[j]);
 					neighbourHistogram[c][neighbourCount]++;
 					almostNeighbourHistogram[c][almostNeighbourCount]++;
 
-					// TODO - Fit with neighbours?
+					// TODO - Fit singles with neighbours?
 
 					// Currently this will only explore how to benchmark the fitting of medium
 					// density data with singles and a few doublets with no neighbours. This
@@ -845,8 +862,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					frameResults.add(result);
 				}
 			}
+
+			DoubletAnalysis.this.ignored.addAndGet(ignored);
+
 			//System.out.printf("Frame %d, singles=%d, doublets=%d, multi=%d\n", frame, singles, doublets, multiples);
-			resultHistogram[0] += actual.length - total;
+			resultHistogram[0] += actual.length - total - ignored;
 
 			addToOverlay(frame, spots, singles, doublets, multiples, spotMatchCount);
 
@@ -1217,7 +1237,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						}
 					}
 				}
-
 			}
 
 		}
@@ -1547,6 +1566,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 
 		gd.addSlider("Iteration_increase", 1, 4.5, iterationIncrease);
+		gd.addCheckbox("Ignore_with_neighbours", ignoreWithNeighbours);
 		gd.addCheckbox("Show_overlay", showOverlay);
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Show_results", showResults);
@@ -1610,6 +1630,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		fitConfig.setWidthFactor(10);
 
 		iterationIncrease = gd.getNextNumber();
+		ignoreWithNeighbours = gd.getNextBoolean();
 		showOverlay = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
 		showResults = gd.getNextBoolean();
@@ -1935,7 +1956,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	{
 		// Store results in memory for later analysis
 		doubletResults = results;
-		numberOfMolecules = this.results.size();
+
+		// If we are only assessing results with no neighbour candidates
+		// TODO - Count the number of actual results that have no neighbours
+
+		numberOfMolecules = this.results.size() - ignored.get();
 
 		// Store details we want in the analysis table
 		StringBuilder sb = new StringBuilder();
@@ -2073,7 +2098,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				stats[c].add(score);
 			}
 
-			// Of those where the fit was good, summarise the iterations and evalulations
+			// Of those where the fit was good, summarise the iterations and evaluations
 			if (result.good1)
 			{
 				stats[3].add(result.iter1);
