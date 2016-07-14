@@ -2792,7 +2792,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, filterFitConfig.getMinWidthFactor());
-		gd.addSlider("Width_factor", 1.01, 5, filterFitConfig.getWidthFactor());
+		gd.addSlider("Max_width_factor", 1.01, 5, filterFitConfig.getWidthFactor());
 		gd.addNumericField("Precision", filterFitConfig.getPrecisionThreshold(), 2);
 		gd.addCheckbox("Local_background", filterFitConfig.isPrecisionUsingBackground());
 
