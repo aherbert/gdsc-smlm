@@ -266,7 +266,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		final MaximaSpotFilter spotFilter;
 		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
 		final float background;
-		List<Coordinate> FP = new ArrayList<Coordinate>();
 		final HashMap<Integer, FilterResult> results;
 		List<PointPair> matches = new ArrayList<PointPair>();
 
@@ -372,19 +371,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Use the distance to the true location to score the candidate
 			RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
-			final RampedScore signalScore;
-			if (upperSignalFactor > 0)
-			{
-				signalScore = new RampedScore(lowerSignalFactor, upperSignalFactor);
-			}
-			else
-				signalScore = null;
 
 			if (actual.length > 0)
 			{
 				Coordinate[] predicted = getCoordinates(spots);
-
-				double tp = 0, fp = 0;
 
 				if (rankedMatches)
 				{
@@ -425,9 +415,8 @@ public class BenchmarkSpotFilter implements PlugIn
 							final PeakResultPoint p = (PeakResultPoint) actual[match];
 							final double d = Math.sqrt(dmin);
 							final double intensity = getIntensity(p);
-							final double s = getScore(score, d, signalScore, intensity, spots[j]);
+							final double s = score.scoreAndFlatten(d, 256);
 							scoredSpots[j] = new ScoredSpot(true, d, s, intensity, spots[j]);
-							tp += s;
 						}
 					}
 
@@ -463,7 +452,7 @@ public class BenchmarkSpotFilter implements PlugIn
 								final ScoredSpot ss = scoredSpots[match];
 								final double d = Math.sqrt(dmin);
 								final double intensity = getIntensity(p);
-								final double s = getScore(score, d, signalScore, intensity, spots[match]);
+								final double s = score.scoreAndFlatten(d, 256);
 								if (ss == null)
 								{
 									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
@@ -473,21 +462,7 @@ public class BenchmarkSpotFilter implements PlugIn
 									// This is a second match to a spot candidate
 									ss.add(d, s, intensity);
 								}
-								tp += s;
 							}
-						}
-					}
-					// Fill in all the spots that do not match
-					for (int j = 0; j < spots.length; j++)
-					{
-						if (scoredSpots[j] == null)
-						{
-							scoredSpots[j] = new ScoredSpot(false, spots[j]);
-							fp++;
-						}
-						else
-						{
-							fp += scoredSpots[j].antiScore();
 						}
 					}
 				}
@@ -495,27 +470,17 @@ public class BenchmarkSpotFilter implements PlugIn
 				{
 					if (!multipleMatches)
 					{
-						MatchCalculator.analyseResults2D(actual, predicted, matchDistance, null, FP, null, matches);
+						MatchCalculator.analyseResults2D(actual, predicted, matchDistance, null, null, null, matches);
 
-						// Store the true and false positives. Maintain the original ranked order.
-						fp = FP.size();
+						// Store the true positives
 						for (PointPair pair : matches)
 						{
 							final PeakResultPoint p = (PeakResultPoint) pair.getPoint1();
 							final SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
 							final double d = pair.getXYDistance();
 							final double intensity = getIntensity(p);
-							final double s = getScore(score, d, signalScore, intensity, sc.spot);
+							final double s = score.scoreAndFlatten(d, 256);
 							scoredSpots[sc.id] = new ScoredSpot(true, d, s, intensity, sc.spot);
-							// Score partial matches as part true-positive and part false-positive
-							tp += s;
-							fp += (1 - s);
-						}
-						// Fill in all the spots that do not match
-						for (Coordinate c : FP)
-						{
-							SpotCoordinate sc = (SpotCoordinate) c;
-							scoredSpots[sc.id] = new ScoredSpot(false, sc.spot);
 						}
 					}
 					else
@@ -546,7 +511,7 @@ public class BenchmarkSpotFilter implements PlugIn
 								final ScoredSpot ss = scoredSpots[match];
 								final double d = Math.sqrt(dmin);
 								final double intensity = getIntensity(p);
-								final double s = getScore(score, d, signalScore, intensity, spots[match]);
+								final double s = score.scoreAndFlatten(d, 256);
 								if (ss == null)
 								{
 									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
@@ -556,22 +521,38 @@ public class BenchmarkSpotFilter implements PlugIn
 									// This is a second match to the same spot candidate
 									ss.add(d, s, intensity);
 								}
-								tp += s;
 							}
 						}
-						// Fill in all the spots that do not match
-						for (int j = 0; j < spots.length; j++)
+					}
+				}
+
+				// Compute scores
+				// Do this at the end so the total signal factor can be computed for multiple matches
+				double tp = 0, fp = 0;
+				final RampedScore signalScore = (upperSignalFactor > 0)
+						? new RampedScore(lowerSignalFactor, upperSignalFactor) : null;
+
+				for (int j = 0; j < spots.length; j++)
+				{
+					if (scoredSpots[j] == null)
+					{
+						scoredSpots[j] = new ScoredSpot(false, spots[j]);
+						fp++;
+					}
+					else
+					{
+						if (signalScore != null)
 						{
-							if (scoredSpots[j] == null)
-							{
-								scoredSpots[j] = new ScoredSpot(false, spots[j]);
-								fp++;
-							}
-							else
-							{
-								fp += scoredSpots[j].antiScore();
-							}
+							final double matchScore = scoredSpots[j].getScore();
+							final double rsf = scoredSpots[j].spot.intensity / scoredSpots[j].intensity;
+							// Normalise so perfect is zero
+							final double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
+							final double fScore = signalScore.scoreAndFlatten(sf, 256);
+							scoredSpots[j].score = RampedScore.flatten(matchScore * fScore, 256);
 						}
+
+						tp += scoredSpots[j].getScore();
+						fp += scoredSpots[j].antiScore();
 					}
 				}
 
@@ -608,21 +589,6 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 
 			results.put(frame, new FilterResult(result, scoredSpots));
-		}
-
-		private double getScore(RampedScore score, double d, RampedScore signalScore, double intensity, Spot spot)
-		{
-			double matchScore = score.scoreAndFlatten(d, 256);
-			if (signalScore != null)
-			{
-				// Get relative signal factor
-				double rsf = spot.intensity / intensity;
-				// Normalise so perfect is zero
-				double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
-				final double fScore = signalScore.scoreAndFlatten(sf, 256);
-				matchScore = RampedScore.flatten(matchScore * fScore, 256);
-			}
-			return matchScore;
 		}
 
 		private double getIntensity(final PeakResultPoint p)
@@ -847,7 +813,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				sum += r.getBackground();
 			background = (float) (sum / results.size());
 		}
-		
+
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
