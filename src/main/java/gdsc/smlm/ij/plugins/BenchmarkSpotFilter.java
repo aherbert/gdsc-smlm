@@ -78,6 +78,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static double sAnalysisBorder = 0;
 	private static boolean multipleMatches = true;
+	private static boolean rankedMatches = true;
 	private int analysisBorder;
 	private static double upperDistance = 1.5;
 	private static double lowerDistance = 1.5;
@@ -358,7 +359,6 @@ public class BenchmarkSpotFilter implements PlugIn
 			int fails = 0;
 
 			// Use the distance to the true location to score the candidate
-			matches.clear();
 			RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
 
 			if (actual.length > 0)
@@ -367,71 +367,98 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				double tp = 0, fp = 0;
 
-				if (!multipleMatches)
+				if (rankedMatches)
 				{
-					MatchCalculator.analyseResults2D(actual, predicted, matchDistance, null, FP, null, matches);
+					// Assign each actual result to the closest spot.
+					// Process spots in order to simulate how they are ranked for use in fitting.
 
-					// Store the true and false positives. Maintain the original ranked order.
-					fp = FP.size();
-					for (PointPair pair : matches)
-					{
-						final PeakResultPoint p = (PeakResultPoint) pair.getPoint1();
-						final SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
-						final double d = pair.getXYDistance();
-						final double s = score.scoreAndFlatten(d, 256);
-						final double intensity = getIntensity(p);
-						scoredSpots[sc.id] = new ScoredSpot(true, d, s, intensity, sc.spot);
-						// Score partial matches as part true-positive and part false-positive
-						tp += s;
-						fp += (1 - s);
-					}
-					for (Coordinate c : FP)
-					{
-						SpotCoordinate sc = (SpotCoordinate) c;
-						scoredSpots[sc.id] = new ScoredSpot(false, sc.spot);
-					}
-				}
-				else
-				{
-					// Assign each actual result to the closest spot. 
-					// This allows a spot to have more than one match (i.e. a doublet) 
-					for (int i = 0; i < actual.length; i++)
+					// Q. Should the actual be sorted too?
+
+					// This allows a spot to have more than one match (i.e. a doublet)
+					final boolean[] assigned = new boolean[actual.length];
+
+					// For each spot candidate
+					for (int j = 0; j < predicted.length; j++)
 					{
 						double dmin = matchDistance * matchDistance;
 						int match = -1;
-						final double x = actual[i].getX();
-						final double y = actual[i].getY();
-						for (int j = 0; j < predicted.length; j++)
+						final double x = predicted[j].getX();
+						final double y = predicted[j].getY();
+						// Find the closest unassigned spot
+						for (int i = 0; i < actual.length; i++)
 						{
-							final double dx = (x - predicted[j].getX());
-							final double dy = (y - predicted[j].getY());
+							if (assigned[i])
+								continue;
+							final double dx = (x - actual[i].getX());
+							final double dy = (y - actual[i].getY());
 							final double d2 = dx * dx + dy * dy;
 							if (d2 <= dmin)
 							{
 								dmin = d2;
-								match = j;
+								match = i;
 							}
 						}
 
 						if (match != -1)
 						{
-							final PeakResultPoint p = (PeakResultPoint) actual[i];
-							final ScoredSpot ss = scoredSpots[match];
+							assigned[match] = true;
+
+							final PeakResultPoint p = (PeakResultPoint) actual[match];
 							final double d = Math.sqrt(dmin);
 							final double s = RampedScore.flatten(score.score(d), 256);
 							final double intensity = getIntensity(p);
-							if (ss == null)
-							{
-								scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
-							}
-							else
-							{
-								// This is a second match to the same spot candidate
-								ss.add(d, s, intensity);
-							}
+							scoredSpots[j] = new ScoredSpot(true, d, s, intensity, spots[j]);
 							tp += s;
 						}
 					}
+
+					if (multipleMatches)
+					{
+						// For each unassigned spot
+						for (int i = 0; i < actual.length; i++)
+						{
+							if (assigned[i])
+								continue;
+							double dmin = matchDistance * matchDistance;
+							int match = -1;
+							final double x = actual[i].getX();
+							final double y = actual[i].getY();
+							// Assign to the closest spot
+							for (int j = 0; j < predicted.length; j++)
+							{
+								final double dx = (x - predicted[j].getX());
+								final double dy = (y - predicted[j].getY());
+								final double d2 = dx * dx + dy * dy;
+								if (d2 <= dmin)
+								{
+									dmin = d2;
+									match = j;
+									// Q. should we break here? That would make it assign to the highest ranking spot 
+									// that is within range
+								}
+							}
+
+							if (match != -1)
+							{
+								final PeakResultPoint p = (PeakResultPoint) actual[i];
+								final ScoredSpot ss = scoredSpots[match];
+								final double d = Math.sqrt(dmin);
+								final double s = RampedScore.flatten(score.score(d), 256);
+								final double intensity = getIntensity(p);
+								if (ss == null)
+								{
+									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
+								}
+								else
+								{
+									// This is a second match to a spot candidate
+									ss.add(d, s, intensity);
+								}
+								tp += s;
+							}
+						}
+					}					
+					// Fill in all the spots that do not match
 					for (int j = 0; j < spots.length; j++)
 					{
 						if (scoredSpots[j] == null)
@@ -442,6 +469,89 @@ public class BenchmarkSpotFilter implements PlugIn
 						else
 						{
 							fp += scoredSpots[j].antiScore();
+						}
+					}					
+				}
+				else
+				{
+					if (!multipleMatches)
+					{
+						MatchCalculator.analyseResults2D(actual, predicted, matchDistance, null, FP, null, matches);
+
+						// Store the true and false positives. Maintain the original ranked order.
+						fp = FP.size();
+						for (PointPair pair : matches)
+						{
+							final PeakResultPoint p = (PeakResultPoint) pair.getPoint1();
+							final SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
+							final double d = pair.getXYDistance();
+							final double s = score.scoreAndFlatten(d, 256);
+							final double intensity = getIntensity(p);
+							scoredSpots[sc.id] = new ScoredSpot(true, d, s, intensity, sc.spot);
+							// Score partial matches as part true-positive and part false-positive
+							tp += s;
+							fp += (1 - s);
+						}
+						// Fill in all the spots that do not match
+						for (Coordinate c : FP)
+						{
+							SpotCoordinate sc = (SpotCoordinate) c;
+							scoredSpots[sc.id] = new ScoredSpot(false, sc.spot);
+						}
+					}
+					else
+					{
+						// Assign each actual result to the closest spot. 
+						// This allows a spot to have more than one match (i.e. a doublet) 
+						for (int i = 0; i < actual.length; i++)
+						{
+							double dmin = matchDistance * matchDistance;
+							int match = -1;
+							final double x = actual[i].getX();
+							final double y = actual[i].getY();
+							for (int j = 0; j < predicted.length; j++)
+							{
+								final double dx = (x - predicted[j].getX());
+								final double dy = (y - predicted[j].getY());
+								final double d2 = dx * dx + dy * dy;
+								if (d2 <= dmin)
+								{
+									dmin = d2;
+									match = j;
+								}
+							}
+
+							if (match != -1)
+							{
+								final PeakResultPoint p = (PeakResultPoint) actual[i];
+								final ScoredSpot ss = scoredSpots[match];
+								final double d = Math.sqrt(dmin);
+								final double s = RampedScore.flatten(score.score(d), 256);
+								final double intensity = getIntensity(p);
+								if (ss == null)
+								{
+									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
+								}
+								else
+								{
+									// This is a second match to the same spot candidate
+									ss.add(d, s, intensity);
+								}
+								tp += s;
+							}
+						}
+						// Fill in all the spots that do not match
+						for (int j = 0; j < spots.length; j++)
+						{
+							if (scoredSpots[j] == null)
+							{
+								scoredSpots[j] = new ScoredSpot(false, spots[j]);
+								fp++;
+							}
+							else
+							{
+								fp += scoredSpots[j].antiScore();
+							}
 						}
 					}
 				}
@@ -577,6 +687,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
 		gd.addCheckbox("Multiple_matches", multipleMatches);
+		gd.addCheckbox("Ranked_matches", rankedMatches);
 		gd.addSlider("Match_distance", 1, 3, upperDistance);
 		gd.addSlider("Lower_distance", 1, 3, lowerDistance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
@@ -599,6 +710,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		config.setBorder(gd.getNextNumber());
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
 		multipleMatches = gd.getNextBoolean();
+		rankedMatches = gd.getNextBoolean();
 		upperDistance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
@@ -805,8 +917,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			String title = TITLE + " " + xTitle + " Cumulative";
 			Plot2 plot = new Plot2(title, xTitle, "Frequency");
-			double xMin = (stats.getN()==0) ? 1 : h[0][0];
-			double xMax = (stats.getN()==0) ? 1 : h[0][h[0].length - 1] + 1;
+			double xMin = (stats.getN() == 0) ? 1 : h[0][0];
+			double xMax = (stats.getN() == 0) ? 1 : h[0][h[0].length - 1] + 1;
 			double xPadding = 0.05 * (xMax - xMin);
 			plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
 			plot.setColor(Color.blue);
@@ -898,6 +1010,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
 		sb.append(multipleMatches).append("\t");
+		sb.append(rankedMatches).append("\t");
 		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
 		sb.append(Utils.rounded(matchDistance)).append("\t");
 
@@ -1100,7 +1213,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tlower d\td\t");
+		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tRanked\tlower d\td\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
