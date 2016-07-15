@@ -408,6 +408,12 @@ public class PSFDrift implements PlugIn
 			return;
 		}
 
+		if ("hwhm".equals(arg))
+		{
+			showHWHM(titles);
+			return;
+		}
+		
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Select the input PSF image");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
@@ -1051,5 +1057,56 @@ public class PSFDrift implements PlugIn
 	public static double[][] getStartPoints(PSFDrift psfDrift)
 	{
 		return psfDrift.getStartPoints();
+	}
+
+	private void showHWHM(List<String> titles)
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Select the input PSF image");
+		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
+		gd.addCheckbox("Use_offset", useOffset);
+		gd.addNumericField("Scale", scale, 2);
+
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+
+		title = gd.getNextChoice();
+		useOffset = gd.getNextBoolean();
+		scale = gd.getNextNumber();
+
+		imp = WindowManager.getImage(title);
+		if (imp == null)
+		{
+			IJ.error(TITLE, "No PSF image for image: " + title);
+			return;
+		}
+		psfSettings = getPSFSettings(imp);
+		if (psfSettings == null)
+		{
+			IJ.error(TITLE, "No PSF settings for image: " + title);
+			return;
+		}
+		
+		int size = imp.getStackSize();
+		ImagePSFModel psf = createImagePSF(1, size);
+		
+		double[] w0 = psf.getAllHWHM0();
+		double[] w1 = psf.getAllHWHM1();
+		double[] slice = Utils.newArray(w0.length, 1, 1.0);
+		
+		// Widths are in pixels
+		String title = TITLE + " HWHM";
+		Plot plot = new Plot(title, "Slice", "HWHM (px)");
+		double[] limits = Maths.limits(w0);
+		limits = Maths.limits(limits, w1);
+		plot.setLimits(1, size, 0, limits[1] * 1.05);
+		plot.setColor(Color.red);
+		plot.addPoints(slice, w0, Plot.LINE);
+		plot.setColor(Color.blue);
+		plot.addPoints(slice, w1, Plot.LINE);
+		plot.setColor(Color.black);
+		plot.addLabel(0, 0, "X=red; Y=blue");
+		Utils.display(title, plot);
 	}
 }

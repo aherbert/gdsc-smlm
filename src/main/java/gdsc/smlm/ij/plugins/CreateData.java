@@ -1916,20 +1916,23 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				upper = Math.max(upper, zCentre);
 			}
 
-			double noiseFraction = 1e-3;
-			ImagePSFModel model = new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower,
+			final double noiseFraction = 1e-3;
+			final ImagePSFModel model = new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower,
 					psfSettings.nmPerPixel / settings.pixelPitch, unitsPerSlice, psfSettings.fwhm, noiseFraction);
-
+			
 			// Add the calibrated centres
 			if (psfSettings.offset != null)
 			{
-				int sliceOffset = lower + 1;
+				final int sliceOffset = lower + 1;
 				for (PSFOffset offset : psfSettings.offset)
 				{
 					model.setRelativeCentre(offset.slice - sliceOffset, offset.cx, offset.cy);
 				}
 			}
 
+			// Initialise the HWHM table so that it can be cloned
+			model.initialiseHWHM();
+			
 			return model;
 		}
 		catch (Exception e)

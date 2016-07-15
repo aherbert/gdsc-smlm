@@ -1127,9 +1127,7 @@ public class ImagePSFModel extends PSFModel
 		// This may not be true for an image. To approximate this we assume that
 		// the peak is Gaussian and find the sum which equals the integral of 
 		// a Gaussian at HWHM = SD * 1.17741 (i.e. Gaussian2DFunction.SD_TO_FWHM_FACTOR)
-		final double lower = 0.5 * (1 + Erf.erf(-Gaussian2DFunction.SD_TO_FWHM_FACTOR / Math.sqrt(2)));
-		final double upper = 0.5 * (1 + Erf.erf(Gaussian2DFunction.SD_TO_FWHM_FACTOR / Math.sqrt(2)));
-		final double integral = upper - lower;
+		final double integral = Erf.erf(Gaussian2DFunction.SD_TO_HWHM_FACTOR / Math.sqrt(2));
 
 		if (integral < 0 || integral > 1)
 			throw new RuntimeException("Target integral for HWHM calculation is not valid");
@@ -1161,7 +1159,7 @@ public class ImagePSFModel extends PSFModel
 			lowerV = 0;
 			upperV = psfWidth - 1;
 			lastS = s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
-			while (s > target)
+			while (s < target)
 			{
 				lastS = s;
 				lowerU--;
@@ -1171,7 +1169,7 @@ public class ImagePSFModel extends PSFModel
 
 			// Interpolate to half-width
 			fraction = (target - s) / (lastS - s);
-			hwhm0[slice] = (upperU - lowerU) / 2 - fraction;
+			hwhm0[slice] = unitsPerPixel * ((upperU - lowerU) / 2 - fraction);
 
 			// x0 direction
 			lowerU = 0;
@@ -1179,7 +1177,7 @@ public class ImagePSFModel extends PSFModel
 			lowerV = cy;
 			upperV = cy + 1;
 			lastS = s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
-			while (s > target)
+			while (s < target)
 			{
 				lastS = s;
 				lowerV--;
@@ -1189,7 +1187,7 @@ public class ImagePSFModel extends PSFModel
 
 			// Interpolate
 			fraction = (target - s) / (lastS - s);
-			hwhm1[slice] = (upperV - lowerV) / 2 - fraction;
+			hwhm1[slice] = unitsPerPixel * ((upperV - lowerV) / 2 - fraction);
 		}
 	}
 }
