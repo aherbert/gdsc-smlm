@@ -247,7 +247,7 @@ public class DrawClusters implements PlugIn
 		// Draw the traces as ROIs on an overlay
 		Overlay o = new Overlay();
 		LUT lut = LUTHelper.createLUT(DrawClusters.lut);
-		double scale = 256.0 / count;
+		final double scale = 256.0 / count;
 		if (isUseStackPosition)
 		{
 			// Add the tracks on the frames containing the results
@@ -255,7 +255,7 @@ public class DrawClusters implements PlugIn
 			for (int i = 0; i < count; i++)
 			{
 				final int index = indices[i];
-				final Color c = new Color(lut.getRGB((int) (i * scale)));
+				final Color c = LUTHelper.getColour(lut, (int) (i * scale));
 				final PolygonRoi roi = (PolygonRoi) rois[index];
 				roi.setFillColor(c);
 				roi.setStrokeColor(c);
