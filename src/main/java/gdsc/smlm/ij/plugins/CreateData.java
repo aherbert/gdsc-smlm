@@ -2167,6 +2167,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					params[Gaussian2DFunction.X_POSITION] = (float) localisation.getX();
 					params[Gaussian2DFunction.Y_POSITION] = (float) localisation.getY();
 
+					// Note: The width estimate does not account for diffusion
 					if (psfModel instanceof GaussianPSFModel)
 					{
 						GaussianPSFModel m = (GaussianPSFModel) psfModel;
@@ -2178,6 +2179,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						AiryPSFModel m = (AiryPSFModel) psfModel;
 						params[Gaussian2DFunction.X_SD] = (float) (m.getW0() * AiryPattern.FACTOR);
 						params[Gaussian2DFunction.Y_SD] = (float) (m.getW1() * AiryPattern.FACTOR);
+					}
+					else if (psfModel instanceof ImagePSFModel)
+					{
+						ImagePSFModel m = (ImagePSFModel) psfModel;
+						params[Gaussian2DFunction.X_SD] = (float) (m.getHWHM0() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
+						params[Gaussian2DFunction.Y_SD] = (float) (m.getHWHM1() / Gaussian2DFunction.SD_TO_HWHM_FACTOR);
 					}
 					else
 					{

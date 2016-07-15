@@ -4,9 +4,11 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Sort;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Generates a Point Spread Function using an image constructed from diffraction limited spots imaged axially through
@@ -33,6 +35,8 @@ public class ImagePSFModel extends PSFModel
 	private double unitsPerPixel;
 	private double unitsPerSlice;
 	private double fwhm;
+	private double[] hwhm0, hwhm1;
+	private int lastSlice;
 
 	/**
 	 * Construct the ImagePSF.
@@ -165,8 +169,8 @@ public class ImagePSFModel extends PSFModel
 			}
 			sx = sx / s - cx;
 			sy = sy / s - cy;
-			System.out.printf("%dx%d centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel, sy /
-					unitsPerPixel);
+			System.out.printf("%dx%d centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx / unitsPerPixel,
+					sy / unitsPerPixel);
 		}
 
 		// Create a cumulative sum image
@@ -850,6 +854,8 @@ public class ImagePSFModel extends PSFModel
 		ImagePSFModel model = new ImagePSFModel();
 		model.sumImage = sumImage;
 		model.cumulativeImage = cumulativeImage;
+		model.hwhm0 = hwhm0;
+		model.hwhm1 = hwhm1;
 		//model.inputImage = inputImage;
 		model.psfWidth = psfWidth;
 		model.xyCentre = xyCentre;
@@ -971,8 +977,8 @@ public class ImagePSFModel extends PSFModel
 		{
 			sx = sx / s - xyCentre[slice][0];
 			sy = sy / s - xyCentre[slice][1];
-			System.out.printf("%dx%d sample centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy, sx /
-					unitsPerPixel, sy / unitsPerPixel);
+			System.out.printf("%dx%d sample centre [ %f %f ] ( %f %f )\n", psfWidth, psfWidth, sx, sy,
+					sx / unitsPerPixel, sy / unitsPerPixel);
 		}
 
 		x = Arrays.copyOf(x, count);
@@ -986,6 +992,7 @@ public class ImagePSFModel extends PSFModel
 		// We assume the PSF was imaged axially with increasing z-stage position (moving the stage 
 		// closer to the objective). Thus higher z-coordinate are for higher slice numbers.
 		final int slice = (int) Math.round(x2 / unitsPerSlice) + zCentre;
+		lastSlice = slice;
 		return slice;
 	}
 
@@ -1030,7 +1037,7 @@ public class ImagePSFModel extends PSFModel
 	}
 
 	/**
-	 * Set the PSF centre for the given slice. The centre must be with the width/size of the PSF.
+	 * Set the PSF centre for the given slice. The centre must be within the width/size of the PSF.
 	 * 
 	 * @param slice
 	 * @param x0
@@ -1062,5 +1069,127 @@ public class ImagePSFModel extends PSFModel
 		x0 += 0.5 * psfWidth;
 		x1 += 0.5 * psfWidth;
 		return setCentre(slice, x0, x1);
+	}
+
+	/**
+	 * @return The half-width at half-maximum (HWHM) in dimension 0 for the last drawn image
+	 */
+	public double getHWHM0()
+	{
+		if (lastSlice < 0 || lastSlice >= sumImage.length)
+			return 0;
+		initialiseHWHM();
+		return hwhm0[lastSlice];
+	}
+
+	/**
+	 * @return The half-width at half-maximum (HWHM) in dimension 1 for the last drawn image
+	 */
+	public double getHWHM1()
+	{
+		if (lastSlice < 0 || lastSlice >= sumImage.length)
+			return 0;
+		initialiseHWHM();
+		return hwhm1[lastSlice];
+	}
+	
+	/**
+	 * @return The HWHM table for dimension 0 for all the slices
+	 */
+	public double[] getAllHWHM0()
+	{
+		initialiseHWHM();
+		return hwhm0;
+	}
+	
+	/**
+	 * @return The HWHM table for dimension 1 for all the slices
+	 */
+	public double[] getAllHWHM1()
+	{
+		initialiseHWHM();
+		return hwhm1;
+	}
+
+	/**
+	 * Initialise the HWHM look-up table
+	 */
+	public void initialiseHWHM()
+	{
+		if (hwhm0 != null)
+			return;
+		computeHWHM();
+	}
+
+	private synchronized void computeHWHM()
+	{
+		// The concept of HWHM only applies to a PSF that is a peaked maxima.
+		// This may not be true for an image. To approximate this we assume that
+		// the peak is Gaussian and find the sum which equals the integral of 
+		// a Gaussian at HWHM = SD * 1.17741 (i.e. Gaussian2DFunction.SD_TO_FWHM_FACTOR)
+		final double lower = 0.5 * (1 + Erf.erf(-Gaussian2DFunction.SD_TO_FWHM_FACTOR / Math.sqrt(2)));
+		final double upper = 0.5 * (1 + Erf.erf(Gaussian2DFunction.SD_TO_FWHM_FACTOR / Math.sqrt(2)));
+		final double integral = upper - lower;
+
+		if (integral < 0 || integral > 1)
+			throw new RuntimeException("Target integral for HWHM calculation is not valid");
+
+		// This is a simple version which deals with X & Y the same.
+		hwhm0 = new double[sumImage.length];
+		hwhm1 = new double[sumImage.length];
+
+		final int end = cumulativeImage[0].length - 1;
+		for (int slice = 0; slice < hwhm0.length; slice++)
+		{
+			// Identify the centre
+			int cx = (int) xyCentre[slice][0];
+			int cy = (int) xyCentre[slice][1];
+
+			// Identify the total sum
+			final double total = cumulativeImage[slice][end];
+			final double target = total * integral;
+
+			// Compute the sum around the centre until we reach half
+			final double[] sumPsf = sumImage[slice];
+
+			int lowerU, upperU, lowerV, upperV;
+			double s, lastS, fraction;
+
+			// x0 direction
+			lowerU = cx;
+			upperU = cx + 1;
+			lowerV = 0;
+			upperV = psfWidth - 1;
+			lastS = s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+			while (s > target)
+			{
+				lastS = s;
+				lowerU--;
+				upperU++;
+				s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+			}
+
+			// Interpolate to half-width
+			fraction = (target - s) / (lastS - s);
+			hwhm0[slice] = (upperU - lowerU) / 2 - fraction;
+
+			// x0 direction
+			lowerU = 0;
+			upperU = psfWidth - 1;
+			lowerV = cy;
+			upperV = cy + 1;
+			lastS = s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+			while (s > target)
+			{
+				lastS = s;
+				lowerV--;
+				upperV++;
+				s = safeSum(sumPsf, lowerU, lowerV, upperU, upperV);
+			}
+
+			// Interpolate
+			fraction = (target - s) / (lastS - s);
+			hwhm1[slice] = (upperV - lowerV) / 2 - fraction;
+		}
 	}
 }
