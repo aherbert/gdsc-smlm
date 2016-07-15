@@ -805,9 +805,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			String title = TITLE + " " + xTitle + " Cumulative";
 			Plot2 plot = new Plot2(title, xTitle, "Frequency");
-			double xMax = h[0][h[0].length - 1] + 1;
-			double xPadding = 0.05 * (xMax - h[0][0]);
-			plot.setLimits(h[0][0] - xPadding, xMax, 0, 1.05);
+			double xMin = (stats.getN()==0) ? 1 : h[0][0];
+			double xMax = (stats.getN()==0) ? 1 : h[0][h[0].length - 1] + 1;
+			double xPadding = 0.05 * (xMax - xMin);
+			plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
 			plot.setColor(Color.blue);
 			plot.addPoints(h[0], h[1], Plot2.BAR);
 			PlotWindow pw = Utils.display(title, plot);
@@ -901,11 +902,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(matchDistance)).append("\t");
 
 		// Add the results
-
-		// TODO handle no results
-		if (n == 0)
-		{
-		}
 
 		// Rank the scored spots by intensity
 		Collections.sort(allSpots);
