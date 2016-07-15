@@ -88,6 +88,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private float pixelOffset;
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
+	private static boolean rankByIntensity = false;
 	private static boolean showFailuresPlot = true;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
@@ -457,7 +458,7 @@ public class BenchmarkSpotFilter implements PlugIn
 								tp += s;
 							}
 						}
-					}					
+					}
 					// Fill in all the spots that do not match
 					for (int j = 0; j < spots.length; j++)
 					{
@@ -470,7 +471,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						{
 							fp += scoredSpots[j].antiScore();
 						}
-					}					
+					}
 				}
 				else
 				{
@@ -692,6 +693,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addSlider("Lower_distance", 1, 3, lowerDistance);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
+		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
 		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
@@ -715,6 +717,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		lowerDistance = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
+		rankByIntensity = gd.getNextBoolean();
 		showFailuresPlot = gd.getNextBoolean();
 		if (extraOptions)
 			debug = sDebug = gd.getNextBoolean();
@@ -1034,6 +1037,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		FastCorrelator corr = new FastCorrelator();
 		double lastC = 0;
 		final double gain = simulationParameters.gain;
+		final double topIntensity = (allSpots.isEmpty()) ? 0 : allSpots.get(0).spot.intensity;
 		for (ScoredSpot s : allSpots)
 		{
 			if (s.match)
@@ -1056,7 +1060,10 @@ public class BenchmarkSpotFilter implements PlugIn
 			c[i] = lastC;
 			truePositives[i] = tp;
 			falsePositives[i] = fp;
-			rank[i] = i;
+			if (rankByIntensity)
+				rank[i] = topIntensity - s.spot.intensity;
+			else
+				rank[i] = i;
 			i++;
 		}
 
@@ -1120,8 +1127,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (showPlot)
 		{
 			String title = TITLE + " Performance";
-			Plot2 plot = new Plot2(title, "Spot Rank", "");
-			plot.setLimits(0, rank.length, 0, 1.05);
+			Plot2 plot = new Plot2(title, (rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
+			double[] limits = Maths.limits(rank);
+			plot.setLimits(limits[0], limits[1], 0, 1.05);
 			plot.setColor(Color.blue);
 			plot.addPoints(rank, p, Plot2.LINE);
 			//plot.addPoints(rank, maxp, Plot2.DOT);
@@ -1139,7 +1147,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.drawLine(rank[maxIndex], 0, rank[maxIndex],
 					Maths.max(p[maxIndex], r[maxIndex], j[maxIndex], c[maxIndex]));
 			plot.setColor(Color.black);
-			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black");
+			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, Correlation=Yellow");
 
 			PlotWindow pw = Utils.display(title, plot);
 			if (Utils.isNewWindow())
