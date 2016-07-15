@@ -1028,7 +1028,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
 			plot.setColor(Color.pink);
 			plot.drawLine(rank[maxIndex], 0, rank[maxIndex],
-					Maths.max(p[maxIndex], r[maxIndex], j[maxIndex], c[fractionIndex]));
+					Maths.max(p[maxIndex], r[maxIndex], j[maxIndex], c[maxIndex]));
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black");
 
