@@ -55,6 +55,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
@@ -1053,8 +1054,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		p[0] = 1;
 		FastCorrelator corr = new FastCorrelator();
 		double lastC = 0;
-		final double gain = simulationParameters.gain;
 		final double topIntensity = (allSpots.isEmpty()) ? 0 : allSpots.get(0).spot.intensity;
+		double[] i1 = new double[r.length];
+		double[] i2 = new double[r.length];
+		int ci = 0;
 		for (ScoredSpot s : allSpots)
 		{
 			if (s.match)
@@ -1065,7 +1068,10 @@ public class BenchmarkSpotFilter implements PlugIn
 				fp += s.antiScore();
 				// Just use a rounded intensity for now
 				final long v1 = (long) Math.round((double) s.spot.intensity);
-				final long v2 = (long) Math.round(s.intensity / gain);
+				final long v2 = (long) Math.round(s.intensity);
+				i1[ci] = (double) s.spot.intensity;
+				i2[ci] = (double) s.intensity;
+				ci++;
 				corr.add(v1, v2);
 				lastC = corr.getCorrelation();
 			}
@@ -1183,6 +1189,20 @@ public class BenchmarkSpotFilter implements PlugIn
 			PlotWindow pw2 = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				windowOrganiser.add(pw2);
+			
+			title = TITLE + " Intensity";
+			i1 = Arrays.copyOf(i1, ci);
+			i2 = Arrays.copyOf(i2, ci);
+			plot = new Plot2(title, "Candidate", "Spot");
+			double[] limits1 = Maths.limits(i1);
+			double[] limits2 = Maths.limits(i2);
+			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
+			plot.addLabel(0, 0, "Correlation = " + Utils.rounded(c[c.length - 1]));
+			plot.setColor(Color.red);
+			plot.addPoints(i1, i2, Plot.DOT);
+			PlotWindow pw3 = Utils.display(title, plot);
+			if (Utils.isNewWindow())
+				windowOrganiser.add(pw3);
 		}
 
 		summaryTable.append(sb.toString());
