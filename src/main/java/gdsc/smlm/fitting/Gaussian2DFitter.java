@@ -507,7 +507,7 @@ public class Gaussian2DFitter
 				// Estimate using centre of mass around peak index 
 				// Use 2 * SD estimate to calculate the range around the index that should be considered.
 				// SD = (sx+sy)/2 => Range = sx+sy
-				final int range = (int) Math.ceil(sx + sy + 0.5);
+				final int range = Math.max(1, (int) Math.ceil(sx + sy));
 				final double[] com = findCentreOfMass(y, dim, range, position);
 				xpos = (double) com[0];
 				ypos = (double) com[1];
