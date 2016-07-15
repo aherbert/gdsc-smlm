@@ -1,5 +1,38 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.JFileChooser;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.IJLogger;
+import gdsc.core.ij.Utils;
+import gdsc.core.logging.Logger;
+import gdsc.core.utils.NoiseEstimator.Method;
+import gdsc.core.utils.TextUtils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -44,14 +77,7 @@ import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.ij.utils.SeriesOpener;
-import gdsc.core.ij.IJLogger;
-import gdsc.core.ij.Utils;
-import gdsc.core.logging.Logger;
-import gdsc.core.utils.TextUtils;
-import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
@@ -63,44 +89,22 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
+import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Rectangle;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.JFileChooser;
-
-import org.apache.commons.math3.util.FastMath;
+import ij.process.LUT;
+import ij.process.LUTHelper;
+import ij.process.LUTHelper.LutColour;
 
 //import ij.io.OpenDialog;
 
@@ -1958,16 +1962,21 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (!gd.wasOKed())
 				return;
 
-			float[] ox = new float[results.size()];
-			float[] oy = new float[results.size()];
-			int points = 0;
-			for (PeakResult r : results.getResults())
+			LUT lut = LUTHelper.createLUT(LutColour.RED_YELLOW);
+			Overlay o = new Overlay();
+			for (int i = 0; i < results.size(); i++)
 			{
-				ox[points] = r.getXPosition();
-				oy[points++] = r.getYPosition();
+				PeakResult r = results.getResults().get(i);
+				PointRoi roi = new PointRoi(r.getXPosition(), r.getYPosition());
+				Color c = LUTHelper.getColour(lut, i, results.size());
+				roi.setStrokeColor(c);
+				roi.setFillColor(c);
+				if (imp.getStackSize() > 1)
+					roi.setPosition(singleFrame);
+				o.add(roi);
 			}
-
-			ImageROIPainter.addRoi(imp, singleFrame, new PointRoi(ox, oy, points));
+			imp.setOverlay(o);
+			imp.getWindow().toFront();
 		}
 	}
 
