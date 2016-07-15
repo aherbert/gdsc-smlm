@@ -49,6 +49,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -82,6 +83,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private int analysisBorder;
 	private static double upperDistance = 1.5;
 	private static double lowerDistance = 1.5;
+	private static double upperSignalFactor = 0;
+	private static double lowerSignalFactor = 0;
 	private static boolean relativeDistances = true;
 	private double matchDistance;
 	private double lowerMatchDistance;
@@ -262,6 +265,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		final ImageStack stack;
 		final MaximaSpotFilter spotFilter;
 		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
+		final float background;
 		List<Coordinate> FP = new ArrayList<Coordinate>();
 		final HashMap<Integer, FilterResult> results;
 		List<PointPair> matches = new ArrayList<PointPair>();
@@ -270,13 +274,14 @@ public class BenchmarkSpotFilter implements PlugIn
 		long time = 0;
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, MaximaSpotFilter spotFilter,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates)
+				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, float background)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
 			this.spotFilter = spotFilter.clone();
 			this.actualCoordinates = actualCoordinates;
 			this.results = new HashMap<Integer, FilterResult>();
+			this.background = background;
 		}
 
 		/*
@@ -320,6 +325,12 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Extract the data
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
+			if (background != 0)
+			{
+				for (int i = stack.getWidth() * stack.getHeight(); i-- > 0;)
+					data[i] -= background;
+			}
+
 			long start = System.nanoTime();
 			Spot[] spots = spotFilter.rank(data, stack.getWidth(), stack.getHeight());
 			time += System.nanoTime() - start;
@@ -361,6 +372,13 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Use the distance to the true location to score the candidate
 			RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
+			final RampedScore signalScore;
+			if (upperSignalFactor > 0)
+			{
+				signalScore = new RampedScore(lowerSignalFactor, upperSignalFactor);
+			}
+			else
+				signalScore = null;
 
 			if (actual.length > 0)
 			{
@@ -406,8 +424,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 							final PeakResultPoint p = (PeakResultPoint) actual[match];
 							final double d = Math.sqrt(dmin);
-							final double s = RampedScore.flatten(score.score(d), 256);
 							final double intensity = getIntensity(p);
+							final double s = getScore(score, d, signalScore, intensity, spots[j]);
 							scoredSpots[j] = new ScoredSpot(true, d, s, intensity, spots[j]);
 							tp += s;
 						}
@@ -444,8 +462,8 @@ public class BenchmarkSpotFilter implements PlugIn
 								final PeakResultPoint p = (PeakResultPoint) actual[i];
 								final ScoredSpot ss = scoredSpots[match];
 								final double d = Math.sqrt(dmin);
-								final double s = RampedScore.flatten(score.score(d), 256);
 								final double intensity = getIntensity(p);
+								final double s = getScore(score, d, signalScore, intensity, spots[match]);
 								if (ss == null)
 								{
 									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
@@ -486,8 +504,8 @@ public class BenchmarkSpotFilter implements PlugIn
 							final PeakResultPoint p = (PeakResultPoint) pair.getPoint1();
 							final SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
 							final double d = pair.getXYDistance();
-							final double s = score.scoreAndFlatten(d, 256);
 							final double intensity = getIntensity(p);
+							final double s = getScore(score, d, signalScore, intensity, sc.spot);
 							scoredSpots[sc.id] = new ScoredSpot(true, d, s, intensity, sc.spot);
 							// Score partial matches as part true-positive and part false-positive
 							tp += s;
@@ -527,8 +545,8 @@ public class BenchmarkSpotFilter implements PlugIn
 								final PeakResultPoint p = (PeakResultPoint) actual[i];
 								final ScoredSpot ss = scoredSpots[match];
 								final double d = Math.sqrt(dmin);
-								final double s = RampedScore.flatten(score.score(d), 256);
 								final double intensity = getIntensity(p);
+								final double s = getScore(score, d, signalScore, intensity, spots[match]);
 								if (ss == null)
 								{
 									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
@@ -590,6 +608,21 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 
 			results.put(frame, new FilterResult(result, scoredSpots));
+		}
+
+		private double getScore(RampedScore score, double d, RampedScore signalScore, double intensity, Spot spot)
+		{
+			double matchScore = score.scoreAndFlatten(d, 256);
+			if (signalScore != null)
+			{
+				// Get relative signal factor
+				double rsf = spot.intensity / intensity;
+				// Normalise so perfect is zero
+				double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
+				final double fScore = signalScore.scoreAndFlatten(sf, 256);
+				matchScore = RampedScore.flatten(matchScore * fScore, 256);
+			}
+			return matchScore;
 		}
 
 		private double getIntensity(final PeakResultPoint p)
@@ -691,6 +724,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addCheckbox("Ranked_matches", rankedMatches);
 		gd.addSlider("Match_distance", 1, 3, upperDistance);
 		gd.addSlider("Lower_distance", 1, 3, lowerDistance);
+		gd.addSlider("Signal_factor", 1, 3, upperSignalFactor);
+		gd.addSlider("Lower_factor", 1, 3, lowerSignalFactor);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
 		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
@@ -715,6 +750,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		rankedMatches = gd.getNextBoolean();
 		upperDistance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
+		upperSignalFactor = Math.abs(gd.getNextNumber());
+		lowerSignalFactor = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
 		showPlot = gd.getNextBoolean();
 		rankByIntensity = gd.getNextBoolean();
@@ -727,6 +764,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		if (lowerDistance > upperDistance)
 			lowerDistance = upperDistance;
+		if (lowerSignalFactor > upperSignalFactor)
+			lowerSignalFactor = upperSignalFactor;
 
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
@@ -797,6 +836,18 @@ public class BenchmarkSpotFilter implements PlugIn
 			filterResults.clear();
 		filterResults = null;
 
+		float background = 0;
+		if (spotFilter.isAbsoluteIntensity())
+		{
+			// To allow the signal factor to be computed we need to lower the image by the background so 
+			// that the intensities correspond to the results amplitude.
+			// Just assume the background is uniform.
+			double sum = 0;
+			for (PeakResult r : results.getResults())
+				sum += r.getBackground();
+			background = (float) (sum / results.size());
+		}
+		
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
 		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
@@ -804,7 +855,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, spotFilter, actualCoordinates);
+			Worker worker = new Worker(jobs, stack, spotFilter, actualCoordinates, background);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
