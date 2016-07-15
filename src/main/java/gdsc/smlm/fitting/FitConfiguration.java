@@ -1553,7 +1553,9 @@ public class FitConfiguration implements Cloneable
 				// else fall through to default fitter
 
 			case LVM_WEIGHTED:
-				gaussianFunction.setNoiseModel(getNoiseModel());
+				// Do not set the noise model on the quasi-newton fall-through case
+				if (fitSolver != FitSolver.LVM_QUASI_NEWTON)
+					gaussianFunction.setNoiseModel(getNoiseModel());
 
 			case LVM:
 			default:
