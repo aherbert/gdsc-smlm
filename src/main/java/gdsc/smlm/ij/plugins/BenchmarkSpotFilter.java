@@ -379,7 +379,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						final SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
 						final double d = pair.getXYDistance();
 						final double s = score.scoreAndFlatten(d, 256);
-						final double intensity = p.peakResult.getSignal();
+						final double intensity = getIntensity(p);
 						scoredSpots[sc.id] = new ScoredSpot(true, d, s, intensity, sc.spot);
 						// Score partial matches as part true-positive and part false-positive
 						tp += s;
@@ -419,7 +419,7 @@ public class BenchmarkSpotFilter implements PlugIn
 							final ScoredSpot ss = scoredSpots[match];
 							final double d = Math.sqrt(dmin);
 							final double s = RampedScore.flatten(score.score(d), 256);
-							final double intensity = p.peakResult.getSignal();
+							final double intensity = getIntensity(p);
 							if (ss == null)
 							{
 								scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
@@ -479,6 +479,13 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 
 			results.put(frame, new FilterResult(result, scoredSpots));
+		}
+
+		private double getIntensity(final PeakResultPoint p)
+		{
+			// Use the amplitude as all spot filters currently estimate the height, not the total signal
+			final double intensity = p.peakResult.getAmplitude();
+			return intensity;
 		}
 
 		private Coordinate[] getCoordinates(Spot[] spots)
