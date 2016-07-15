@@ -19,6 +19,7 @@ import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.PointPair;
+import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
@@ -43,6 +44,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
@@ -108,23 +110,22 @@ public class BenchmarkSpotFilter implements PlugIn
 	static HashMap<Integer, FilterResult> filterResults = null;
 	static MaximaSpotFilter spotFilter = null;
 
-	private int idCount = 0;
-	private int[] idList = new int[4];
+	private WindowOrganiser windowOrganiser = new WindowOrganiser();
 
 	public class ScoredSpot implements Comparable<ScoredSpot>
 	{
 		final boolean match;
 		double[] distances, scores;
-		double score;
+		double score, intensity;
 		final Spot spot;
 		int fails;
 
-		public ScoredSpot(boolean match, double d, double score, Spot spot)
+		public ScoredSpot(boolean match, double d, double score, double intensity, Spot spot)
 		{
 			this.match = match;
 			this.spot = spot;
 			this.fails = 0;
-			add(d, score);
+			add(d, score, intensity);
 		}
 
 		public ScoredSpot(boolean match, Spot spot)
@@ -148,14 +149,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		 *            the d
 		 * @param score
 		 *            the score
+		 * @param intensity
+		 *            the intensity
 		 */
-		void add(double d, double score)
+		void add(double d, double score, double intensity)
 		{
 			if (distances == null)
 			{
 				distances = new double[] { d };
 				scores = new double[] { score };
 				this.score = score;
+				this.intensity = intensity;
 			}
 			else
 			{
@@ -165,6 +169,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				distances[size] = d;
 				scores[size] = score;
 				this.score += score;
+				this.intensity += intensity;
 			}
 		}
 
@@ -370,10 +375,12 @@ public class BenchmarkSpotFilter implements PlugIn
 					fp = FP.size();
 					for (PointPair pair : matches)
 					{
-						SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
+						final PeakResultPoint p = (PeakResultPoint) pair.getPoint1();
+						final SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
 						final double d = pair.getXYDistance();
 						final double s = score.scoreAndFlatten(d, 256);
-						scoredSpots[sc.id] = new ScoredSpot(true, d, s, sc.spot);
+						final double intensity = p.peakResult.getSignal();
+						scoredSpots[sc.id] = new ScoredSpot(true, d, s, intensity, sc.spot);
 						// Score partial matches as part true-positive and part false-positive
 						tp += s;
 						fp += (1 - s);
@@ -408,17 +415,19 @@ public class BenchmarkSpotFilter implements PlugIn
 
 						if (match != -1)
 						{
+							final PeakResultPoint p = (PeakResultPoint) actual[i];
+							final ScoredSpot ss = scoredSpots[match];
 							final double d = Math.sqrt(dmin);
 							final double s = RampedScore.flatten(score.score(d), 256);
-							final ScoredSpot ss = scoredSpots[match];
+							final double intensity = p.peakResult.getSignal();
 							if (ss == null)
 							{
-								scoredSpots[match] = new ScoredSpot(true, d, s, spots[match]);
+								scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
 							}
 							else
 							{
-								// This is a second match to the same spot
-								ss.add(d, s);
+								// This is a second match to the same spot candidate
+								ss.add(d, s, intensity);
 							}
 							tp += s;
 						}
@@ -726,11 +735,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Show a table of the results
 		summariseResults(filterResults, spotFilter, h);
 
-		if (idCount > 0)
-		{
-			idList = Arrays.copyOf(idList, idCount);
-			new WindowOrganiser().tileWindows(idList);
-		}
+		windowOrganiser.tile();
 
 		// Debugging the matches
 		if (debug)
@@ -789,7 +794,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 0);
 			if (Utils.isNewWindow())
-				idList[idCount++] = id;
+				windowOrganiser.add(id);
 
 			String title = TITLE + " " + xTitle + " Cumulative";
 			Plot2 plot = new Plot2(title, xTitle, "Frequency");
@@ -800,7 +805,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.addPoints(h[0], h[1], Plot2.BAR);
 			PlotWindow pw = Utils.display(title, plot);
 			if (Utils.isNewWindow())
-				idList[idCount++] = pw.getImagePlus().getID();
+				windowOrganiser.add(pw);
 		}
 
 		return h;
@@ -890,7 +895,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Add the results
 
-		addResult(sb, allResult);
+		// TODO handle no results
+		if (n == 0)
+		{
+		}
 
 		// Rank the scored spots by intensity
 		Collections.sort(allSpots);
@@ -899,6 +907,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[] r = new double[allSpots.size() + 1];
 		double[] p = new double[r.length];
 		double[] j = new double[r.length];
+		double[] c = new double[r.length];
 		double[] truePositives = new double[r.length];
 		double[] falsePositives = new double[r.length];
 		double[] rank = new double[r.length];
@@ -906,6 +915,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		tp = fp = 0;
 		int i = 1;
 		p[0] = 1;
+		FastCorrelator corr = new FastCorrelator();
+		double lastC = 0;
+		final double gain = simulationParameters.gain;
 		for (ScoredSpot s : allSpots)
 		{
 			if (s.match)
@@ -914,17 +926,25 @@ public class BenchmarkSpotFilter implements PlugIn
 				// TP can be above 1 if we are allowing multiple matches.
 				tp += s.getScore();
 				fp += s.antiScore();
+				// Just use a rounded intensity for now
+				final long v1 = (long) Math.round((double) s.spot.intensity);
+				final long v2 = (long) Math.round(s.intensity / gain);
+				corr.add(v1, v2);
+				lastC = corr.getCorrelation();
 			}
 			else
 				fp++;
 			r[i] = (double) tp / n;
 			p[i] = (double) tp / (tp + fp);
 			j[i] = (double) tp / (fp + n); // (tp+fp+fn) == (fp+n) since tp+fn=n;
+			c[i] = lastC;
 			truePositives[i] = tp;
 			falsePositives[i] = fp;
 			rank[i] = i;
 			i++;
 		}
+
+		addResult(sb, allResult, c[c.length - 1]);
 
 		// Output the match results when the recall achieves the fraction of the maximum.
 		double target = r[r.length - 1];
@@ -938,7 +958,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (fractionIndex == r.length)
 			fractionIndex--;
 		addResult(sb, new FractionClassificationResult(truePositives[fractionIndex], falsePositives[fractionIndex], 0,
-				n - truePositives[fractionIndex]));
+				n - truePositives[fractionIndex]), c[fractionIndex]);
 
 		// Output the match results at the maximum jaccard score
 		int maxIndex = 0;
@@ -948,7 +968,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				maxIndex = ii;
 		}
 		addResult(sb, new FractionClassificationResult(truePositives[maxIndex], falsePositives[maxIndex], 0,
-				n - truePositives[maxIndex]));
+				n - truePositives[maxIndex]), c[maxIndex]);
 
 		sb.append(Utils.rounded(time / 1e6));
 
@@ -993,17 +1013,21 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.addPoints(rank, r, Plot2.LINE);
 			plot.setColor(Color.black);
 			plot.addPoints(rank, j, Plot2.LINE);
+			// Plot correlation - update the scale to be 0-1?
+			plot.setColor(Color.yellow);
+			plot.addPoints(rank, c, Plot2.LINE);
 			plot.setColor(Color.magenta);
 			plot.drawLine(rank[fractionIndex], 0, rank[fractionIndex],
-					Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex]));
+					Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
 			plot.setColor(Color.pink);
-			plot.drawLine(rank[maxIndex], 0, rank[maxIndex], Maths.max(p[maxIndex], r[maxIndex], j[maxIndex]));
+			plot.drawLine(rank[maxIndex], 0, rank[maxIndex],
+					Maths.max(p[maxIndex], r[maxIndex], j[maxIndex], c[fractionIndex]));
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black");
 
 			PlotWindow pw = Utils.display(title, plot);
 			if (Utils.isNewWindow())
-				idList[idCount++] = pw.getImagePlus().getID();
+				windowOrganiser.add(pw);
 
 			title = TITLE + " Precision-Recall";
 			plot = new Plot2(title, "Recall", "Precision");
@@ -1017,7 +1041,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
 			PlotWindow pw2 = Utils.display(title, plot);
 			if (Utils.isNewWindow())
-				idList[idCount++] = pw2.getImagePlus().getID();
+				windowOrganiser.add(pw2);
 		}
 
 		summaryTable.append(sb.toString());
@@ -1032,13 +1056,14 @@ public class BenchmarkSpotFilter implements PlugIn
 		return i;
 	}
 
-	private void addResult(StringBuilder sb, FractionClassificationResult matchResult)
+	private void addResult(StringBuilder sb, FractionClassificationResult matchResult, double c)
 	{
 		addCount(sb, matchResult.getTP());
 		addCount(sb, matchResult.getFP());
 		sb.append(Utils.rounded(matchResult.getRecall())).append("\t");
 		sb.append(Utils.rounded(matchResult.getPrecision())).append("\t");
 		sb.append(Utils.rounded(matchResult.getJaccard())).append("\t");
+		sb.append(Utils.rounded(c)).append("\t");
 	}
 
 	private static void addCount(StringBuilder sb, double value)
@@ -1073,9 +1098,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
 		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tlower d\td\t");
-		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
-		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
-		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\t");
+		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
+		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
+		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("Time (ms)\t");
 		sb.append("AUC\tAUC2\t");
 		sb.append("Fail80\tFail90\tFail95\tFail99\tFail100");
