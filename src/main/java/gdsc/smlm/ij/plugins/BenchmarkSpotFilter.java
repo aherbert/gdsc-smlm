@@ -1034,8 +1034,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(rankedMatches).append("\t");
 		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
 		sb.append(Utils.rounded(matchDistance)).append("\t");
-		sb.append(Utils.rounded(upperSignalFactor)).append("\t");
 		sb.append(Utils.rounded(lowerSignalFactor)).append("\t");
+		sb.append(Utils.rounded(upperSignalFactor)).append("\t");
 
 		// Add the results
 
