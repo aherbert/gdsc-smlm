@@ -447,8 +447,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 *            the o
 		 */
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, int maxCount,
-				Overlay o)
+				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, Overlay o)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
@@ -461,7 +460,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			fitting = config.getRelativeFitting();
 			// Fit window is 2*fitting+1. The distance limit is thus 0.5 pixel higher than fitting. 
 			limit = fitting + 0.5;
-			spotHistogram = new int[maxCount + 1];
+			spotHistogram = new int[20];
 			resultHistogram = new int[spotHistogram.length];
 			neighbourHistogram = new int[3][spotHistogram.length];
 			almostNeighbourHistogram = new int[3][spotHistogram.length];
@@ -647,15 +646,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					}
 
 					// Store the number of actual results that match to a spot
-					spotHistogram[n]++;
+					addToHistogram(spotHistogram, n, 1);
 					// Store the number of results that match to a spot with n results
-					resultHistogram[n] += n;
+					addToHistogram(resultHistogram, n, n);
 					total += n;
 					spotMatchCount[j] = n;
 
 					final int c = DoubletAnalysis.getClass(spotMatchCount[j]);
-					neighbourHistogram[c][neighbourCount]++;
-					almostNeighbourHistogram[c][almostNeighbourCount]++;
+					addToHistogram(neighbourHistogram[c], neighbourCount, 1);
+					addToHistogram(almostNeighbourHistogram[c], almostNeighbourCount, 1);
 
 					// TODO - Fit singles with neighbours?
 
@@ -1241,6 +1240,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		}
 
+		private void addToHistogram(int[] h, int i, int n)
+		{
+			if (h.length <= i)
+			{
+				final int newLength = (int) Math.ceil(i * 1.5);
+				h = Arrays.copyOf(h, newLength);
+			}
+			h[i] += n;
+		}
+
 		private double getScore(double d2, ResultCoordinate resultCoord, Coordinate coord)
 		{
 			return getScore(d2, resultCoord.result, resultCoord.id, coord);
@@ -1780,13 +1789,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator
 				.getCoordinates(results.getResults(), false);
 
-		int maxCount = 0;
 		long sumCount = 0;
 		for (ArrayList<Coordinate> list : actualCoordinates.values())
 		{
 			sumCount += list.size();
-			if (maxCount < list.size())
-				maxCount = list.size();
 		}
 		final double density = 1e6 * sumCount / (simulationParameters.a * simulationParameters.a *
 				results.getBounds().getWidth() * results.getBounds().getHeight() * actualCoordinates.size());
@@ -1799,7 +1805,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		Overlay overlay = (showOverlay) ? new Overlay() : null;
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, maxCount, overlay);
+			Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, overlay);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -1842,6 +1848,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Collect the results
 		int cic = 0, daic = 0, dbic = 0;
 		ArrayList<DoubletResult> results = null;
+		int maxH = 0, maxH2 = 0, maxH3 = 0;
 		for (Worker worker : workers)
 		{
 			if (results == null)
@@ -1851,30 +1858,38 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			cic += worker.cic;
 			daic += worker.daic;
 			dbic += worker.dbic;
+			maxH = Maths.max(maxH, worker.spotHistogram.length);
+			for (int k = 0; k < 3; k++)
+			{
+				maxH2 = Maths.max(maxH2, worker.neighbourHistogram[k].length);
+				maxH3 = Maths.max(maxH3, worker.almostNeighbourHistogram[k].length);
+			}
 		}
 		if (cic > 0)
 			System.out.printf("Difference AIC %d, BIC %d, Total %d\n", daic, dbic, cic);
 		if (showHistograms)
 		{
-			double[] spotHistogram = new double[maxCount];
-			double[] resultHistogram = new double[maxCount];
-			double[][] neighbourHistogram = new double[3][maxCount];
-			double[][] almostNeighbourHistogram = new double[3][maxCount];
+			double[] spotHistogram = new double[maxH];
+			double[] resultHistogram = new double[maxH];
+			double[][] neighbourHistogram = new double[3][maxH2];
+			double[][] almostNeighbourHistogram = new double[3][maxH3];
 			for (Worker worker : workers)
 			{
-				final int[] h1 = worker.spotHistogram;
-				final int[] h2 = worker.resultHistogram;
-				final int[][] h3 = worker.neighbourHistogram;
-				final int[][] h4 = worker.almostNeighbourHistogram;
-				for (int j = 0; j < spotHistogram.length; j++)
+				final int[] h1a = worker.spotHistogram;
+				final int[] h1b = worker.resultHistogram;
+				for (int j = 0; j < h1a.length; j++)
 				{
-					spotHistogram[j] += h1[j];
-					resultHistogram[j] += h2[j];
-					for (int k = 0; k < 3; k++)
-					{
-						neighbourHistogram[k][j] += h3[k][j];
-						almostNeighbourHistogram[k][j] += h4[k][j];
-					}
+					spotHistogram[j] += h1a[j];
+					resultHistogram[j] += h1b[j];
+				}
+				final int[][] h2 = worker.neighbourHistogram;
+				final int[][] h3 = worker.almostNeighbourHistogram;
+				for (int k = 0; k < 3; k++)
+				{
+					for (int j = 0; j < h2[k].length; j++)
+						neighbourHistogram[k][j] += h2[k][j];
+					for (int j = 0; j < h3[k].length; j++)
+						almostNeighbourHistogram[k][j] += h3[k][j];
 				}
 			}
 
@@ -1908,18 +1923,25 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @param i
 	 *            the i
-	 * @param spotHistogram
+	 * @param histogram
 	 *            the spot histogram
 	 */
-	private void showHistogram(int i, double[] spotHistogram)
+	private void showHistogram(int i, double[] histogram)
 	{
 		if (!displayHistograms[i])
 			return;
+		// Truncate to correct size
+		for (int j = histogram.length; j-- > 0;)
+			if (histogram[j] != 0)
+			{
+				histogram = Arrays.copyOf(histogram, j + 1);
+				break;
+			}
 		String[] labels = NAMES[i].split(":");
 		Plot2 plot = new Plot2(labels[0], labels[1], "Count");
-		double max = Maths.max(spotHistogram);
-		plot.setLimits(0, spotHistogram.length, 0, max * 1.05);
-		plot.addPoints(Utils.newArray(spotHistogram.length, 0, 1.0), spotHistogram, Plot2.BAR);
+		double max = Maths.max(histogram);
+		plot.setLimits(0, histogram.length, 0, max * 1.05);
+		plot.addPoints(Utils.newArray(histogram.length, 0, 1.0), histogram, Plot2.BAR);
 		PlotWindow pw = Utils.display(labels[0], plot);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw.getImagePlus().getID());
