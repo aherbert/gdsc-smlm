@@ -1962,7 +1962,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (!gd.wasOKed())
 				return;
 
-			LUT lut = LUTHelper.createLUT(LutColour.RED_YELLOW);
+			LUT lut = LUTHelper.createLUT(LutColour.RED_CYAN);
 			Overlay o = new Overlay();
 			for (int i = 0; i < results.size(); i++)
 			{
