@@ -152,6 +152,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static double minGap = 0;
 	private static boolean analysisShowResults = false;
 	private static boolean analysisLogging = false;
+	private static String analysisTitle = "";
 
 	private static String[] SELECTION_CRITERIA = { "R2", "AIC", "BIC", "ML AIC", "ML BIC" };
 	private static int selectionCriteria = 4;
@@ -2403,7 +2404,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				"Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%");
+		sb.append("Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%");
 		return sb.toString();
 	}
 
@@ -2751,6 +2752,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		createAnalysisTable();
 
 		StringBuilder sb = new StringBuilder(analysisPrefix);
+		sb.append(analysisTitle).append('\t');
 		sb.append((useMaxResiduals) ? "Max" : "Average").append('\t');
 		sb.append(SELECTION_CRITERIA[selectionCriteria]).append('\t');
 		sb.append(filterFitConfig.getCoordinateShiftFactor()).append('\t');
@@ -2801,13 +2803,15 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		//sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 1)));
 
 		// Find the range that has a Jaccard within a % of the max
-		addRange(sb, residuals, jaccard, maxJaccardIndex, 0.98);
+		addRange(sb, residuals, jaccard, maxJaccardIndex, jaccard[maxJaccardIndex] * 0.98);
+		// Do the same within a fraction of the performance improvement over no residuals
+		addRange(sb, residuals, jaccard, maxJaccardIndex,
+				jaccard[jaccard.length - 1] + (jaccard[maxJaccardIndex] - jaccard[jaccard.length - 1]) * 0.9);
 	}
 
-	private void addRange(StringBuilder sb, double[] residuals, double[] jaccard, int maxJaccardIndex, double fraction)
+	private void addRange(StringBuilder sb, double[] residuals, double[] jaccard, int maxJaccardIndex, double limit)
 	{
 		double sum = 0;
-		double limit = jaccard[maxJaccardIndex] * fraction;
 		double lower = residuals[maxJaccardIndex];
 		double upper = residuals[maxJaccardIndex];
 		int j = maxJaccardIndex;
@@ -2825,7 +2829,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sum += area;
 			j = i;
 			lower = residuals[j];
-			final double avResiduals = (residuals[j] + residuals[i]) * 0.5; 
+			final double avResiduals = (residuals[j] + residuals[i]) * 0.5;
 			sumR += area * avResiduals;
 		}
 		j = maxJaccardIndex;
@@ -2841,7 +2845,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sum += area;
 			j = i;
 			upper = residuals[j];
-			final double avResiduals = (residuals[j] + residuals[i]) * 0.5; 
+			final double avResiduals = (residuals[j] + residuals[i]) * 0.5;
 			sumR += area * avResiduals;
 		}
 		final double weightedMean;
@@ -2957,6 +2961,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addCheckbox("Show_Jaccard_Plot", showJaccardPlot);
 		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
 		gd.addCheckbox("Logging", analysisLogging);
+		gd.addStringField("Title", analysisTitle);
 
 		// TODO - Add support for updating a template with a residuals threshold, e.g. from the BenchmarkFilterAnalysis plugin
 
@@ -3003,6 +3008,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		showJaccardPlot = gd.getNextBoolean();
 		useMaxResiduals = gd.getNextBoolean();
 		analysisLogging = gd.getNextBoolean();
+		analysisTitle = gd.getNextString();
 
 		if (gd.invalidNumber())
 			return false;
@@ -3046,7 +3052,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResdiuals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tResiduals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
 	}
 
 	/*
