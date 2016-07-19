@@ -31,6 +31,7 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.match.Assignment;
@@ -598,7 +599,7 @@ public class BenchmarkSpotFit implements PlugIn
 							{
 								// Get the score
 								double score = d2;
-								
+
 								if (isFit[jj])
 								{
 									// Use the signal and ramped distance scoring
@@ -612,11 +613,11 @@ public class BenchmarkSpotFit implements PlugIn
 												job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL],
 												p3.peakResult.getSignal());
 										score *= signalScore.score(Math.abs(sf));
-										
+
 										if (score == 0)
 											// This doesn't match
 											continue;
-										
+
 										// Invert for the ranking (i.e. low is best)
 										score = 1 - score;
 									}
@@ -873,11 +874,11 @@ public class BenchmarkSpotFit implements PlugIn
 			lowerDistance = distance;
 		if (lowerSignalFactor > signalFactor)
 			lowerSignalFactor = signalFactor;
-		
+
 		// Distances relative to sa (not s) as this is the same as the BenchmarkSpotFilter plugin 
 		distanceInPixels = distance * sa / simulationParameters.a;
 		lowerDistanceInPixels = lowerDistance * sa / simulationParameters.a;
-		
+
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
 		settings.setCalibration(cal);
@@ -1426,6 +1427,13 @@ public class BenchmarkSpotFit implements PlugIn
 		final double pearsonCorr = fastCorrelator.getCorrelation();
 		final double rankedCorr = Correlator.correlation(rank(pc1), rank(pc2));
 
+		// Get the regression
+		SimpleRegression regression = new SimpleRegression(false);
+		for (int i = 0; i < pc1.size(); i++)
+			regression.addData(pc1.get(i).value, pc2.get(i).value);
+		//final double intercept = regression.getIntercept();
+		final double slope = regression.getSlope();
+
 		if (showCorrelation)
 		{
 			String title = TITLE + " Intensity";
@@ -1433,7 +1441,8 @@ public class BenchmarkSpotFit implements PlugIn
 			double[] limits1 = Maths.limits(i1);
 			double[] limits2 = Maths.limits(i2);
 			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
-			label = "Correlation = " + Utils.rounded(pearsonCorr) + "; Ranked = " + Utils.rounded(rankedCorr);
+			label = String.format("Correlation=%s; Ranked=%s; Slope=%s", Utils.rounded(pearsonCorr),
+					Utils.rounded(rankedCorr), Utils.rounded(slope));
 			plot.addLabel(0, 0, label);
 			plot.setColor(Color.red);
 			plot.addPoints(i1, i2, Plot.DOT);
@@ -1460,6 +1469,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 		add(sb, pearsonCorr);
 		add(sb, rankedCorr);
+		add(sb, slope);
 
 		label = String.format("n = %d. Median = %s nm", depthStats.getN(), Utils.rounded(median));
 		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 0, label);
@@ -1898,6 +1908,7 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("Med.Depth (nm)\t");
 		sb.append("Correlation\t");
 		sb.append("Ranked\t");
+		sb.append("Slope\t");
 
 		createFilterCriteria();
 		for (FilterCriteria f : filterCriteria)
