@@ -153,6 +153,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static boolean analysisShowResults = false;
 	private static boolean analysisLogging = false;
 	private static String analysisTitle = "";
+	private static boolean saveTemplate = false;
+	private static String templateFilename = "";
 
 	private static String[] SELECTION_CRITERIA = { "R2", "AIC", "BIC", "ML AIC", "ML BIC" };
 	private static int selectionCriteria = 4;
@@ -2768,6 +2770,106 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		addJaccardScores(sb);
 
 		analysisTable.append(sb.toString());
+		
+		saveTemplate(sb.toString());
+	}
+	
+	/**
+	 * Save PeakFit configuration template using the current benchmark settings.
+	 * 
+	 * @param summary
+	 */
+	private void saveTemplate(String summary)
+	{
+		if (saveTemplate)
+			return;
+
+		// Start with a clone of the filter settings
+		FitConfiguration fitConfig = filterFitConfig.clone();
+		FitEngineConfiguration config = new FitEngineConfiguration(fitConfig);
+		
+		// Copy settings used during fitting
+		updateConfiguration(config);
+		
+		// Remove the PSF width to make the template generic
+		fitConfig.setInitialPeakStdDev(0);
+
+		String filename = BenchmarkFilterAnalysis.getFilename("Template_File", templateFilename);
+		if (filename != null)
+		{
+			templateFilename = filename;
+			GlobalSettings settings = new GlobalSettings();
+			settings.setNotes(getNotes(summary));
+			settings.setFitEngineConfiguration(config);
+			if (!SettingsManager.saveSettings(settings, filename))
+				IJ.log("Unable to save the template configuration");
+		}
+	}
+	
+	/**
+	 * Updates the given configuration using the latest fitting settings used in benchmarking.
+	 *
+	 * @param pConfig
+	 *            the configuration
+	 * @return true, if successful
+	 */
+	public static boolean updateConfiguration(FitEngineConfiguration pConfig)
+	{
+		final FitConfiguration pFitConfig = pConfig.getFitConfiguration();
+		
+		pFitConfig.setInitialPeakStdDev(fitConfig.getInitialPeakStdDev0());
+		pConfig.copyDataFilter(config);
+		pConfig.setSearch(config.getSearch());
+		pConfig.setBorder(config.getBorder());
+		pConfig.setFitting(config.getFitting());
+		pFitConfig.setFitSolver(fitConfig.getFitSolver());
+		pFitConfig.setFitFunction(fitConfig.getFitFunction());
+		pConfig.setIncludeNeighbours(config.isIncludeNeighbours());
+		pConfig.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
+		pFitConfig.setDuplicateDistance(fitConfig.getDuplicateDistance());
+
+		pFitConfig.setMaxIterations(fitConfig.getMaxIterations());
+		pFitConfig.setMaxFunctionEvaluations(fitConfig.getMaxFunctionEvaluations());
+		
+		// MLE settings
+		pFitConfig.setModelCamera(fitConfig.isModelCamera());
+		pFitConfig.setBias(0);
+		pFitConfig.setReadNoise(0);
+		pFitConfig.setAmplification(0);
+		pFitConfig.setEmCCD(fitConfig.isEmCCD());
+		pFitConfig.setSearchMethod(fitConfig.getSearchMethod());
+		pFitConfig.setRelativeThreshold(fitConfig.getRelativeThreshold());
+		pFitConfig.setAbsoluteThreshold(fitConfig.getAbsoluteThreshold());
+		pFitConfig.setGradientLineMinimisation(fitConfig.isGradientLineMinimisation());
+		
+		// LSE settings
+		pFitConfig.setFitCriteria(fitConfig.getFitCriteria());
+		pFitConfig.setSignificantDigits(fitConfig.getSignificantDigits());
+		pFitConfig.setDelta(fitConfig.getDelta());
+		pFitConfig.setLambda(fitConfig.getLambda());		
+
+		return true;
+	}
+	
+	
+	private String getNotes(String summary)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Benchmark template\n");
+		if (!Utils.isNullOrEmpty(analysisTitle))
+			BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Title", analysisTitle);
+		// Add create data settings.
+		// Just add the columns and the data from the summary window
+		final String header = createAnalysisHeader();
+		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Fields", header);
+		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Values", summary);
+		// Now pick out key values...
+		BenchmarkFilterAnalysis.addKeyFields(sb, header, summary, new String[] { "Molecules", "Density", "SNR", "s (nm)", "a (nm)",
+				"Lower D", "Upper D", "Lower factor", "Upper factor" });
+
+		// Add any other settings that may be useful in the template
+		BenchmarkFilterAnalysis.addField(sb, "Created", BenchmarkFilterAnalysis.getCurrentTimeStamp());
+		return sb.toString();
 	}
 
 	private void logFailure(Logger logger, int i, DoubletResult result, FitStatus fitStatus)
@@ -2962,6 +3064,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addCheckbox("Use_max_residuals", useMaxResiduals);
 		gd.addCheckbox("Logging", analysisLogging);
 		gd.addStringField("Title", analysisTitle);
+		gd.addCheckbox("Save_template", saveTemplate);
 
 		// TODO - Add support for updating a template with a residuals threshold, e.g. from the BenchmarkFilterAnalysis plugin
 
@@ -3009,6 +3112,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		useMaxResiduals = gd.getNextBoolean();
 		analysisLogging = gd.getNextBoolean();
 		analysisTitle = gd.getNextString();
+		saveTemplate = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
 			return false;

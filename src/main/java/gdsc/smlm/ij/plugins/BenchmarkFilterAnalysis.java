@@ -2417,7 +2417,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	private static String getFilename(String title, String filename)
+	static String getFilename(String title, String filename)
 	{
 		filename = Utils.getFilename(title, filename);
 		// Use XML extension
@@ -2527,12 +2527,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return sb.toString();
 	}
 
-	private void addField(StringBuilder sb, String field, String value)
+	static void addField(StringBuilder sb, String field, String value)
 	{
 		sb.append(field).append(": ").append(value).append('\n');
 	}
 
-	private void addKeyFields(StringBuilder sb, String header, String summary, String[] fields)
+	static void addKeyFields(StringBuilder sb, String header, String summary, String[] fields)
 	{
 		String[] labels = header.split("\t");
 		String[] values = summary.split("\t");
@@ -2549,7 +2549,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	public static String getCurrentTimeStamp()
+	static String getCurrentTimeStamp()
 	{
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date now = new Date();

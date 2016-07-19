@@ -629,4 +629,14 @@ public class FitEngineConfiguration implements Cloneable
 				throw new RuntimeException("Not yet implemented: " + dataFilter.toString());
 		}
 	}
+
+	public void copyDataFilter(FitEngineConfiguration config)
+	{
+		setDataFilterType(config.getDataFilterType());
+		final int nFilters = config.getNumberOfFilters();
+		for (int n = 0; n < nFilters; n++)
+		{
+			setDataFilter(config.getDataFilter(n), config.getSmooth(n), n);
+		}
+	}
 }
