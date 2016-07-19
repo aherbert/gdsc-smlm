@@ -1,19 +1,19 @@
 package gdsc.smlm.ij.plugins;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import gdsc.core.ij.Utils;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.plugin.PlugIn;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * This plugin loads configuration templates for the localisation fitting settings
@@ -22,14 +22,50 @@ public class ConfigurationTemplate implements PlugIn
 {
 	private class Template
 	{
-		final GlobalSettings settings;
+		GlobalSettings settings;
 		final boolean custom;
+		final File file;
+		long timestamp;
 
-		public Template(GlobalSettings settings, boolean custom)
+		public Template(GlobalSettings settings, boolean custom, File file)
 		{
 			this.settings = settings;
 			this.custom = custom;
+			this.file = file;
+			timestamp = (file != null) ? file.lastModified() : 0;
+		}
 
+		public void update()
+		{
+			// Check if we can update from the file
+			if (file != null)
+			{
+				if (file.lastModified() != timestamp)
+				{
+					GlobalSettings settings = SettingsManager.unsafeLoadSettings(file.getPath());
+					if (settings != null)
+					{
+						this.settings = settings;
+						timestamp = file.lastModified();
+					}
+				}
+			}
+		}
+
+		/**
+		 * Save the settings to file
+		 * @param file 
+		 *
+		 * @return true, if successful, False if failed (or no file to save to)
+		 */
+		public boolean save(File file)
+		{
+			boolean result = false;
+			if (file != null)
+			{
+				result = SettingsManager.saveSettings(settings, file.getPath());
+			}
+			return result;
 		}
 	}
 
@@ -68,7 +104,7 @@ public class ConfigurationTemplate implements PlugIn
 		config.setResidualsThreshold(0.4);
 		addTemplate("STORM LSE", config, false);
 		config.setResidualsThreshold(1);
-		
+
 		// Change settings for different fit engines
 		fitConfig.setFitSolver(FitSolver.MLE);
 		config.setDataFilter(DataFilter.GAUSSIAN, 1.2, 0);
@@ -84,7 +120,7 @@ public class ConfigurationTemplate implements PlugIn
 		config.setResidualsThreshold(0.4);
 		addTemplate("STORM MLE", config, false);
 		config.setResidualsThreshold(1);
-		
+
 		fitConfig.setModelCamera(true);
 		fitConfig.setCoordinateShiftFactor(1.5);
 		fitConfig.setSignalStrength(30);
@@ -93,7 +129,7 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(50);
 		addTemplate("PALM MLE Camera", config, false);
-		
+
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
 		addTemplate("STORM MLE Camera", config, false);
@@ -104,15 +140,15 @@ public class ConfigurationTemplate implements PlugIn
 	{
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config.clone());
-		addTemplate(name, settings, custom);
+		addTemplate(name, settings, custom, null);
 	}
 
-	private static void addTemplate(String name, GlobalSettings settings, boolean custom)
+	private static void addTemplate(String name, GlobalSettings settings, boolean custom, File file)
 	{
 		// Maintain the names in the order they are added
 		if (!map.containsKey(name))
 			names.add(name);
-		map.put(name, new ConfigurationTemplate().new Template(settings, custom));
+		map.put(name, new ConfigurationTemplate().new Template(settings, custom, file));
 	}
 
 	/**
@@ -125,7 +161,40 @@ public class ConfigurationTemplate implements PlugIn
 	public static GlobalSettings getTemplate(String name)
 	{
 		Template template = map.get(name);
-		return (template == null) ? null : template.settings;
+		if (template == null)
+			return null;
+
+		template.update();
+
+		return template.settings;
+	}
+
+	/**
+	 * Save template configuration. If an existing template exists with the same name it will be over-written. If an
+	 * existing template was loaded from file it will be saved back to the same file, or optionally a different file.
+	 *
+	 * @param name
+	 *            The name of the template
+	 * @param settings
+	 *            The template settings
+	 * @param file
+	 *            The file to save the template (over-riding the file the template was loaded from)
+	 * @return true, if successful
+	 */
+	public static boolean saveTemplate(String name, GlobalSettings settings, File file)
+	{
+		Template template = map.get(name);
+		if (template == null)
+		{
+			addTemplate(name, settings, true, file);
+			return true;
+		}
+		template.settings = settings;
+		if (file != null)
+			return template.save(file);
+		if (template.file != null)
+			return template.save(template.file);
+		return true;
 	}
 
 	/**
@@ -168,7 +237,7 @@ public class ConfigurationTemplate implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Allow the user to specify a configuration directory
 		String newDirectory = Utils.getDirectory("Template_directory", configurationDirectory);
 
@@ -198,7 +267,7 @@ public class ConfigurationTemplate implements PlugIn
 				{
 					count++;
 					String name = Utils.removeExtension(file.getName());
-					addTemplate(name, settings, true);
+					addTemplate(name, settings, true, file);
 				}
 			}
 		}
