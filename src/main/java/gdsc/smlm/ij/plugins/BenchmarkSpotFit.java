@@ -1446,6 +1446,11 @@ public class BenchmarkSpotFit implements PlugIn
 			plot.addLabel(0, 0, label);
 			plot.setColor(Color.red);
 			plot.addPoints(i1, i2, Plot.DOT);
+			if (slope > 1)
+				plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
+			else
+				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope,
+						limits2[1]);
 			PlotWindow pw = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				wo.add(pw);

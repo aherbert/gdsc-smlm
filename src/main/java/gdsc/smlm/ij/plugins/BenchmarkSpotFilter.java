@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
@@ -1060,6 +1061,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[] i1 = new double[r.length];
 		double[] i2 = new double[r.length];
 		int ci = 0;
+		SimpleRegression regression = new SimpleRegression(false);
 		for (ScoredSpot s : allSpots)
 		{
 			if (s.match)
@@ -1071,6 +1073,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Just use a rounded intensity for now
 				final long v1 = (long) Math.round((double) s.spot.intensity);
 				final long v2 = (long) Math.round(s.intensity);
+				regression.addData(s.spot.intensity, s.intensity);
 				i1[ci] = (double) s.spot.intensity;
 				i2[ci] = (double) s.intensity;
 				ci++;
@@ -1092,6 +1095,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			i++;
 		}
 
+		final double slope = regression.getSlope();
+		sb.append(Utils.rounded(slope)).append("\t");
 		addResult(sb, allResult, c[c.length - 1]);
 
 		// Output the match results when the recall achieves the fraction of the maximum.
@@ -1191,7 +1196,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			PlotWindow pw2 = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				windowOrganiser.add(pw2);
-			
+
 			title = TITLE + " Intensity";
 			i1 = Arrays.copyOf(i1, ci);
 			i2 = Arrays.copyOf(i2, ci);
@@ -1199,9 +1204,15 @@ public class BenchmarkSpotFilter implements PlugIn
 			double[] limits1 = Maths.limits(i1);
 			double[] limits2 = Maths.limits(i2);
 			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
-			plot.addLabel(0, 0, "Correlation = " + Utils.rounded(c[c.length - 1]));
+			plot.addLabel(0, 0, String.format("Correlation=%s; Slope=%s", Utils.rounded(c[c.length - 1]),
+					Utils.rounded(slope)));
 			plot.setColor(Color.red);
 			plot.addPoints(i1, i2, Plot.DOT);
+			if (slope > 1)
+				plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
+			else
+				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope,
+						limits2[1]);
 			PlotWindow pw3 = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				windowOrganiser.add(pw3);
@@ -1260,7 +1271,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tRanked\tlower d\td\tlower sf\tsf\t");
+		sb.append(
+				"Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tRanked\tlower d\td\tlower sf\tsf\tSlope\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
