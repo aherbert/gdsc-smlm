@@ -21,6 +21,7 @@ import java.awt.Rectangle;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -156,6 +157,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private static boolean saveTemplate = false;
 	private static String templateFilename = "";
 
+	static
+	{
+		String currentUsersHomeDir = System.getProperty("user.home");
+		templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
+	}
+
 	private static String[] SELECTION_CRITERIA = { "R2", "AIC", "BIC", "ML AIC", "ML BIC" };
 	private static int selectionCriteria = 4;
 
@@ -214,6 +221,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	{
 		final double[] residuals, jaccard, recall, precision;
 		final int maxJaccardIndex;
+		double[] bestResiduals = new double[3];
 
 		public ResidualsScore(double[] residuals, double[] jaccard, double[] recall, double[] precision,
 				int maxJaccardIndex)
@@ -2406,7 +2414,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				"Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%");
+		sb.append(
+				"Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%");
 		return sb.toString();
 	}
 
@@ -2770,10 +2779,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		addJaccardScores(sb);
 
 		analysisTable.append(sb.toString());
-		
+
 		saveTemplate(sb.toString());
 	}
-	
+
 	/**
 	 * Save PeakFit configuration template using the current benchmark settings.
 	 * 
@@ -2781,18 +2790,34 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private void saveTemplate(String summary)
 	{
-		if (saveTemplate)
+		if (!saveTemplate)
 			return;
 
 		// Start with a clone of the filter settings
 		FitConfiguration fitConfig = filterFitConfig.clone();
 		FitEngineConfiguration config = new FitEngineConfiguration(fitConfig);
-		
+
 		// Copy settings used during fitting
 		updateConfiguration(config);
-		
+
 		// Remove the PSF width to make the template generic
 		fitConfig.setInitialPeakStdDev(0);
+		fitConfig.setNmPerPixel(0);
+		fitConfig.setGain(0);
+		fitConfig.setNoise(0);
+		// This was done fitting all the results
+		config.setFailuresLimit(-1);
+		if (useBenchmarkSettings)
+		{
+			FitEngineConfiguration pConfig = new FitEngineConfiguration(new FitConfiguration());
+			if (BenchmarkFilterAnalysis.updateConfiguration(pConfig))
+				config.setFailuresLimit(pConfig.getFailuresLimit());
+		}
+
+		// Set the residuals
+		fitConfig.setComputeResiduals(true);
+		// TODO - make the choice of the best residuals configurable
+		config.setResidualsThreshold(residualsScore.bestResiduals[2]);
 
 		String filename = BenchmarkFilterAnalysis.getFilename("Template_File", templateFilename);
 		if (filename != null)
@@ -2805,7 +2830,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				IJ.log("Unable to save the template configuration");
 		}
 	}
-	
+
 	/**
 	 * Updates the given configuration using the latest fitting settings used in benchmarking.
 	 *
@@ -2816,7 +2841,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	public static boolean updateConfiguration(FitEngineConfiguration pConfig)
 	{
 		final FitConfiguration pFitConfig = pConfig.getFitConfiguration();
-		
+
 		pFitConfig.setInitialPeakStdDev(fitConfig.getInitialPeakStdDev0());
 		pConfig.copyDataFilter(config);
 		pConfig.setSearch(config.getSearch());
@@ -2830,7 +2855,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		pFitConfig.setMaxIterations(fitConfig.getMaxIterations());
 		pFitConfig.setMaxFunctionEvaluations(fitConfig.getMaxFunctionEvaluations());
-		
+
 		// MLE settings
 		pFitConfig.setModelCamera(fitConfig.isModelCamera());
 		pFitConfig.setBias(0);
@@ -2841,17 +2866,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		pFitConfig.setRelativeThreshold(fitConfig.getRelativeThreshold());
 		pFitConfig.setAbsoluteThreshold(fitConfig.getAbsoluteThreshold());
 		pFitConfig.setGradientLineMinimisation(fitConfig.isGradientLineMinimisation());
-		
+
 		// LSE settings
 		pFitConfig.setFitCriteria(fitConfig.getFitCriteria());
 		pFitConfig.setSignificantDigits(fitConfig.getSignificantDigits());
 		pFitConfig.setDelta(fitConfig.getDelta());
-		pFitConfig.setLambda(fitConfig.getLambda());		
+		pFitConfig.setLambda(fitConfig.getLambda());
 
 		return true;
 	}
-	
-	
+
 	private String getNotes(String summary)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -2864,8 +2888,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Fields", header);
 		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Values", summary);
 		// Now pick out key values...
-		BenchmarkFilterAnalysis.addKeyFields(sb, header, summary, new String[] { "Molecules", "Density", "SNR", "s (nm)", "a (nm)",
-				"Lower D", "Upper D", "Lower factor", "Upper factor" });
+		BenchmarkFilterAnalysis.addKeyFields(sb, header, summary, new String[] { "Molecules", "Density", "SNR",
+				"s (nm)", "a (nm)", "Lower D", "Upper D", "Lower factor", "Upper factor" });
 
 		// Add any other settings that may be useful in the template
 		BenchmarkFilterAnalysis.addField(sb, "Created", BenchmarkFilterAnalysis.getCurrentTimeStamp());
@@ -2904,14 +2928,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		//sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 0.3)));
 		//sb.append('\t').append(Utils.rounded(getArea(residuals, jaccard, maxJaccardIndex, 1)));
 
+		residualsScore.bestResiduals[0] = residuals[maxJaccardIndex];
 		// Find the range that has a Jaccard within a % of the max
-		addRange(sb, residuals, jaccard, maxJaccardIndex, jaccard[maxJaccardIndex] * 0.98);
+		residualsScore.bestResiduals[1] = addRange(sb, residuals, jaccard, maxJaccardIndex,
+				jaccard[maxJaccardIndex] * 0.98);
 		// Do the same within a fraction of the performance improvement over no residuals
-		addRange(sb, residuals, jaccard, maxJaccardIndex,
+		residualsScore.bestResiduals[2] = addRange(sb, residuals, jaccard, maxJaccardIndex,
 				jaccard[jaccard.length - 1] + (jaccard[maxJaccardIndex] - jaccard[jaccard.length - 1]) * 0.9);
 	}
 
-	private void addRange(StringBuilder sb, double[] residuals, double[] jaccard, int maxJaccardIndex, double limit)
+	private double addRange(StringBuilder sb, double[] residuals, double[] jaccard, int maxJaccardIndex, double limit)
 	{
 		double sum = 0;
 		double lower = residuals[maxJaccardIndex];
@@ -2963,6 +2989,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append('\t').append(Utils.rounded(sum)).append('\t').append(Utils.rounded(lower)).append('\t')
 				.append(Utils.rounded(upper)).append('\t').append(Utils.rounded(upper - lower)).append('\t')
 				.append(Utils.rounded(weightedMean));
+		return weightedMean;
 	}
 
 	private double getArea(double[] residuals, double[] jaccard, int maxJaccardIndex, double window)
