@@ -612,10 +612,14 @@ public class BenchmarkSpotFit implements PlugIn
 												job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL],
 												p3.peakResult.getSignal());
 										score *= signalScore.score(Math.abs(sf));
-										// Invert for the ranking
+										
+										if (score == 0)
+											// This doesn't match
+											continue;
+										
+										// Invert for the ranking (i.e. low is best)
 										score = 1 - score;
 									}
-									assignments.add(new Assignment(ii, jj, score));
 								}
 								else
 								{
@@ -623,6 +627,7 @@ public class BenchmarkSpotFit implements PlugIn
 									// after any fit results.
 									score += matchDistance + 1;
 								}
+								assignments.add(new Assignment(ii, jj, score));
 							}
 						}
 					}
