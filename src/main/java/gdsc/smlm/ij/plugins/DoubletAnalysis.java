@@ -2403,7 +2403,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				"Molecules\tMatched\tDensity\tminN\tmaxN\tN\ts (nm)\ta (nm)\tsa (nm)\tGain\tReadNoise (ADUs)\tB (photons)\t\tnoise (ADUs)\tSNR\tWidth\tMethod\tOptions\t");
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
-		sb.append("Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%");
+		sb.append("Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%");
 		return sb.toString();
 	}
 
@@ -2811,15 +2811,22 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		double lower = residuals[maxJaccardIndex];
 		double upper = residuals[maxJaccardIndex];
 		int j = maxJaccardIndex;
+		// For weighted mean
+		double sumR = 0;
 		for (int i = j; i-- > 0;)
 		{
 			if (jaccard[i] < limit)
 			{
 				break;
 			}
-			sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[j] - residuals[i]);
+			final double height = (jaccard[j] + jaccard[i]) * 0.5;
+			final double width = (residuals[j] - residuals[i]);
+			final double area = height * width;
+			sum += area;
 			j = i;
 			lower = residuals[j];
+			final double avResiduals = (residuals[j] + residuals[i]) * 0.5; 
+			sumR += area * avResiduals;
 		}
 		j = maxJaccardIndex;
 		for (int i = j; ++i < jaccard.length;)
@@ -2828,16 +2835,28 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			{
 				break;
 			}
-			sum += (jaccard[j] + jaccard[i]) * 0.5 * (residuals[i] - residuals[j]);
+			final double height = (jaccard[j] + jaccard[i]) * 0.5;
+			final double width = (residuals[i] - residuals[j]);
+			final double area = height * width;
+			sum += area;
 			j = i;
 			upper = residuals[j];
+			final double avResiduals = (residuals[j] + residuals[i]) * 0.5; 
+			sumR += area * avResiduals;
 		}
+		final double weightedMean;
 		if (sum != 0)
+		{
+			weightedMean = sumR / sum;
 			sum /= (upper - lower);
+		}
 		else
-			sum = jaccard[maxJaccardIndex];
+		{
+			weightedMean = sum = jaccard[maxJaccardIndex];
+		}
 		sb.append('\t').append(Utils.rounded(sum)).append('\t').append(Utils.rounded(lower)).append('\t')
-				.append(Utils.rounded(upper)).append('\t').append(Utils.rounded(upper - lower));
+				.append(Utils.rounded(upper)).append('\t').append(Utils.rounded(upper - lower)).append('\t')
+				.append(Utils.rounded(weightedMean));
 	}
 
 	private double getArea(double[] residuals, double[] jaccard, int maxJaccardIndex, double window)
@@ -3027,7 +3046,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResdiuals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tResiduals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResdiuals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%";
 	}
 
 	/*
