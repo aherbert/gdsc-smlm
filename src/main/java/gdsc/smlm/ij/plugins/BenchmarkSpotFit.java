@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,9 +38,12 @@ import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.PointPair;
+import gdsc.core.utils.Correlator;
+import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
@@ -215,6 +219,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private static boolean showFilterScoreHistograms = false;
 	private static boolean saveFilterRange = true;
+	private static boolean showCorrelation = false;
+	private static boolean rankByIntensity = false;
 
 	private boolean extraOptions = false;
 
@@ -304,11 +310,15 @@ public class BenchmarkSpotFit implements PlugIn
 	 */
 	public class FitMatch extends SpotMatch
 	{
+		final double predictedSignal, actualSignal;
 		final double sf;
 
-		public FitMatch(int i, double d, double z, double rsf)
+		public FitMatch(int i, double d, double z, double predictedSignal, double actualSignal)
 		{
 			super(i, d, z);
+			this.predictedSignal = predictedSignal;
+			this.actualSignal = actualSignal;
+			final double rsf = predictedSignal / actualSignal;
 			// The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for above.
 			// Reset the signal factor from 0
 			this.sf = (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
@@ -395,6 +405,23 @@ public class BenchmarkSpotFit implements PlugIn
 			{
 				return null;
 			}
+		}
+	}
+
+	private class Ranking implements Comparable<Ranking>
+	{
+		final double value;
+		final int index;
+
+		Ranking(double value, int index)
+		{
+			this.value = value;
+			this.index = index;
+		}
+
+		public int compareTo(Ranking that)
+		{
+			return Double.compare(this.value, that.value);
 		}
 	}
 
@@ -540,6 +567,10 @@ public class BenchmarkSpotFit implements PlugIn
 				{
 					// Match fit results/candidates with their closest actual spot
 					predicted = Arrays.copyOf(predicted, count);
+
+					// TODO - Is using the closest match the best way to do this for high density data?
+					// Perhaps we should pair up the closest matches using the signal factor as well.
+
 					// Pass in a list to get the point pairs so we have access to the distance
 					MatchCalculator.analyseResults2D(actual, predicted, distanceInPixels, null, null, null, matches);
 
@@ -560,7 +591,7 @@ public class BenchmarkSpotFit implements PlugIn
 							final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
 
 							fitMatch[i] = true;
-							match[matchCount++] = new FitMatch(i, d, p3.peakResult.error, p / a);
+							match[matchCount++] = new FitMatch(i, d, p3.peakResult.error, p, a);
 						}
 						else
 						{
@@ -718,6 +749,8 @@ public class BenchmarkSpotFit implements PlugIn
 		//gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
 		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
+		gd.addCheckbox("Show_correlation", showCorrelation);
+		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
 		gd.addCheckbox("Save_filter_range", saveFilterRange);
 
 		if (extraOptions)
@@ -745,6 +778,8 @@ public class BenchmarkSpotFit implements PlugIn
 		//config.setResidualsThreshold(gd.getNextNumber());
 		fitConfig.setDuplicateDistance(gd.getNextNumber());
 		showFilterScoreHistograms = gd.getNextBoolean();
+		showCorrelation = gd.getNextBoolean();
+		rankByIntensity = gd.getNextBoolean();
 		saveFilterRange = gd.getNextBoolean();
 
 		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
@@ -1129,8 +1164,31 @@ public class BenchmarkSpotFit implements PlugIn
 					// For now just ignore the candidates that matched
 					continue;
 
-				distanceStats.add(result.match[i].d * nmPerPixel);
-				depthStats.add(result.match[i].z * nmPerPixel);
+				FitMatch fitMatch = (FitMatch) result.match[i];
+				distanceStats.add(fitMatch.d * nmPerPixel);
+				depthStats.add(fitMatch.z * nmPerPixel);
+			}
+		}
+
+		// Store data for computing correlation
+		double[] i1 = new double[depthStats.getN()];
+		double[] i2 = new double[i1.length];
+		double[] is = new double[i1.length];
+		int ci = 0;
+		for (FilterCandidates result : filterCandidates.values())
+		{
+			for (int i = 0; i < result.match.length; i++)
+			{
+				if (!result.match[i].isFitResult())
+					// For now just ignore the candidates that matched
+					continue;
+
+				FitMatch fitMatch = (FitMatch) result.match[i];
+				ScoredSpot spot = result.spots[i];
+				i1[ci] = fitMatch.predictedSignal;
+				i2[ci] = fitMatch.actualSignal;
+				is[ci] = spot.intensity;
+				ci++;
 			}
 		}
 
@@ -1263,6 +1321,72 @@ public class BenchmarkSpotFit implements PlugIn
 		median = depthStats.getMedian();
 		add(sb, median);
 
+		// Sort by spot intensity and produce correlation
+		int[] indices = Utils.newArray(i1.length, 0, 1);
+		if (showCorrelation)
+			Sort.sort(indices, is, rankByIntensity);
+		double[] r = (showCorrelation) ? new double[i1.length] : null;
+		double[] sr = (showCorrelation) ? new double[i1.length] : null;
+		double[] rank = (showCorrelation) ? new double[i1.length] : null;
+		ci = 0;
+		FastCorrelator fastCorrelator = new FastCorrelator();
+		ArrayList<Ranking> pc1 = new ArrayList<Ranking>();
+		ArrayList<Ranking> pc2 = new ArrayList<Ranking>();
+		for (int ci2 : indices)
+		{
+			fastCorrelator.add((long) Math.round(i1[ci2]), (long) Math.round(i2[ci2]));
+			pc1.add(new Ranking(i1[ci2], ci));
+			pc2.add(new Ranking(i2[ci2], ci));
+			if (showCorrelation)
+			{
+				r[ci] = fastCorrelator.getCorrelation();
+				sr[ci] = Correlator.correlation(rank(pc1), rank(pc2));
+				if (rankByIntensity)
+					rank[ci] = is[0] - is[ci];
+				else
+					rank[ci] = ci;
+				ci++;
+			}
+		}
+
+		final double pearsonCorr = fastCorrelator.getCorrelation();
+		final double rankedCorr = Correlator.correlation(rank(pc1), rank(pc2));
+
+		if (showCorrelation)
+		{
+			String title = TITLE + " Intensity";
+			Plot plot = new Plot(title, "Candidate", "Spot");
+			double[] limits1 = Maths.limits(i1);
+			double[] limits2 = Maths.limits(i2);
+			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
+			label = "Correlation = " + Utils.rounded(pearsonCorr) + "; Ranked = " + Utils.rounded(rankedCorr);
+			plot.addLabel(0, 0, label);
+			plot.setColor(Color.red);
+			plot.addPoints(i1, i2, Plot.DOT);
+			PlotWindow pw = Utils.display(title, plot);
+			if (Utils.isNewWindow())
+				wo.add(pw);
+
+			title = TITLE + " Correlation";
+			plot = new Plot(title, "Spot Rank", "Correlation");
+			double[] xlimits = Maths.limits(rank);
+			double[] ylimits = Maths.limits(r);
+			ylimits = Maths.limits(ylimits, sr);
+			plot.setLimits(xlimits[0], xlimits[1], ylimits[0], ylimits[1]);
+			plot.setColor(Color.red);
+			plot.addPoints(rank, r, Plot.LINE);
+			plot.setColor(Color.blue);
+			plot.addPoints(rank, sr, Plot.LINE);
+			plot.setColor(Color.black);
+			plot.addLabel(0, 0, label);
+			pw = Utils.display(title, plot);
+			if (Utils.isNewWindow())
+				wo.add(pw);
+		}
+
+		add(sb, pearsonCorr);
+		add(sb, rankedCorr);
+
 		label = String.format("n = %d. Median = %s nm", depthStats.getN(), Utils.rounded(median));
 		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 0, label);
 		if (Utils.isNewWindow())
@@ -1355,6 +1479,18 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 			}
 		}
+	}
+
+	private int[] rank(ArrayList<Ranking> pc)
+	{
+		Collections.sort(pc);
+		int[] ranking = new int[pc.size()];
+		int rank = 1;
+		for (Ranking r : pc)
+		{
+			ranking[r.index] = rank++;
+		}
+		return ranking;
 	}
 
 	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, int i, WindowOrganiser wo)
@@ -1686,6 +1822,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 		sb.append("Med.Distance (nm)\t");
 		sb.append("Med.Depth (nm)\t");
+		sb.append("Correlation\t");
+		sb.append("Ranked\t");
 
 		createFilterCriteria();
 		for (FilterCriteria f : filterCriteria)
@@ -1699,7 +1837,7 @@ public class BenchmarkSpotFit implements PlugIn
 		final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.s, simulationParameters.a);
 		return sa;
 	}
-	
+
 	/**
 	 * Updates the given configuration using the latest settings used in benchmarking.
 	 *
@@ -1710,7 +1848,7 @@ public class BenchmarkSpotFit implements PlugIn
 	public static boolean updateConfiguration(FitEngineConfiguration pConfig)
 	{
 		final FitConfiguration pFitConfig = pConfig.getFitConfiguration();
-		
+
 		pFitConfig.setInitialPeakStdDev(fitConfig.getInitialPeakStdDev0());
 		pConfig.setFitting(config.getFitting());
 		pFitConfig.setFitSolver(fitConfig.getFitSolver());
@@ -1721,7 +1859,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 		pFitConfig.setMaxIterations(fitConfig.getMaxIterations());
 		pFitConfig.setMaxFunctionEvaluations(fitConfig.getMaxFunctionEvaluations());
-		
+
 		// MLE settings
 		pFitConfig.setModelCamera(fitConfig.isModelCamera());
 		pFitConfig.setBias(0);
@@ -1732,12 +1870,12 @@ public class BenchmarkSpotFit implements PlugIn
 		pFitConfig.setRelativeThreshold(fitConfig.getRelativeThreshold());
 		pFitConfig.setAbsoluteThreshold(fitConfig.getAbsoluteThreshold());
 		pFitConfig.setGradientLineMinimisation(fitConfig.isGradientLineMinimisation());
-		
+
 		// LSE settings
 		pFitConfig.setFitCriteria(fitConfig.getFitCriteria());
 		pFitConfig.setSignificantDigits(fitConfig.getSignificantDigits());
 		pFitConfig.setDelta(fitConfig.getDelta());
-		pFitConfig.setLambda(fitConfig.getLambda());		
+		pFitConfig.setLambda(fitConfig.getLambda());
 
 		return true;
 	}
