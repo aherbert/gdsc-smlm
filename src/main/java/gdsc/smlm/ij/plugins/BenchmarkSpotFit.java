@@ -33,10 +33,10 @@ import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.match.Assignment;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.PointPair;
 import gdsc.core.utils.Correlator;
 import gdsc.core.utils.FastCorrelator;
@@ -215,7 +215,9 @@ public class BenchmarkSpotFit implements PlugIn
 	private static int negativesAfterAllPositives = 10;
 	private static double distance = 1.5;
 	private static double lowerDistance = 1.5;
-	private static double matchSignal = 2;
+	// Allow other plugins to access these
+	static double signalFactor = 2;
+	static double lowerSignalFactor = 1;
 
 	private static boolean showFilterScoreHistograms = false;
 	private static boolean saveFilterRange = true;
@@ -246,7 +248,6 @@ public class BenchmarkSpotFit implements PlugIn
 	static HashMap<Integer, FilterCandidates> fitResults;
 	static double distanceInPixels;
 	static double lowerDistanceInPixels;
-	static double signalFactor;
 	static double candidateTN, candidateFN;
 
 	public static String tablePrefix, resultPrefix;
@@ -318,10 +319,7 @@ public class BenchmarkSpotFit implements PlugIn
 			super(i, d, z);
 			this.predictedSignal = predictedSignal;
 			this.actualSignal = actualSignal;
-			final double rsf = predictedSignal / actualSignal;
-			// The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for above.
-			// Reset the signal factor from 0
-			this.sf = (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
+			this.sf = BenchmarkSpotFit.getSignalFactor(predictedSignal, actualSignal);
 		}
 
 		@Override
@@ -335,6 +333,15 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			return sf;
 		}
+	}
+
+	static double getSignalFactor(double predictedSignal, double actualSignal)
+	{
+		final double rsf = predictedSignal / actualSignal;
+		// The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for above.
+		// Reset the signal factor from 0
+		double sf = (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
+		return sf;
 	}
 
 	/**
@@ -532,6 +539,8 @@ public class BenchmarkSpotFit implements PlugIn
 			final boolean[] fitMatch = new boolean[spots.length];
 			SpotMatch[] match = new SpotMatch[spots.length];
 			int matchCount = 0;
+			RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
+			RampedScore signalScore = (signalFactor > 0) ? new RampedScore(lowerSignalFactor, signalFactor) : null;
 			if (actual.length > 0)
 			{
 				// Build a list of the coordinates z-depth using the PeakResultPoint
@@ -542,6 +551,7 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 
 				BasePoint[] predicted = new BasePoint[spots.length];
+				boolean[] isFit = new boolean[predicted.length];
 				matches.clear();
 
 				int count = 0;
@@ -553,6 +563,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 						// The XY positions should be offset by +0.5 already
 						final double[] params = job.getFitResult(i).getParameters();
+						isFit[count] = true;
 						predicted[count++] = new BasePoint((float) params[Gaussian2DFunction.X_POSITION],
 								(float) params[Gaussian2DFunction.Y_POSITION], i);
 					}
@@ -571,35 +582,90 @@ public class BenchmarkSpotFit implements PlugIn
 					// TODO - Is using the closest match the best way to do this for high density data?
 					// Perhaps we should pair up the closest matches using the signal factor as well.
 
-					// Pass in a list to get the point pairs so we have access to the distance
-					MatchCalculator.analyseResults2D(actual, predicted, distanceInPixels, null, null, null, matches);
+					final double matchDistance = distanceInPixels * distanceInPixels;
+					ArrayList<Assignment> assignments = new ArrayList<Assignment>();
 
-					// Store the fits that match and get the squared distance
-					for (PointPair pair : matches)
+					// Match all the fit results to spots. We want to match all fit results to actual spots.
+					// All remaining candidate spots can then be matched to any remaining actual spots.
+					for (int ii = 0; ii < actual.length; ii++)
 					{
-						final BasePoint p2 = (BasePoint) pair.getPoint2();
-						int i = (int) p2.getZ();
-						final PeakResultPoint p3 = (PeakResultPoint) pair.getPoint1();
-
-						final double d = pair.getXYDistance();
-
-						if (i >= 0)
+						final float x = actual[ii].getX();
+						final float y = actual[ii].getY();
+						for (int jj = 0; jj < predicted.length; jj++)
 						{
-							// This is a fitted candidate
-
-							final double a = p3.peakResult.getSignal();
-							final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
-
-							fitMatch[i] = true;
-							match[matchCount++] = new FitMatch(i, d, p3.peakResult.error, p, a);
+							final double d2 = predicted[jj].distance2(x, y);
+							if (d2 <= matchDistance)
+							{
+								// Get the score
+								double score = d2;
+								
+								if (isFit[jj])
+								{
+									// Use the signal and ramped distance scoring
+									if (signalScore != null)
+									{
+										score = rampedScore.score(Math.sqrt(d2));
+										final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
+										final BasePoint p2 = (BasePoint) predicted[jj];
+										int i = (int) p2.getZ();
+										double sf = getSignalFactor(
+												job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL],
+												p3.peakResult.getSignal());
+										score *= signalScore.score(Math.abs(sf));
+										// Invert for the ranking
+										score = 1 - score;
+									}
+									assignments.add(new Assignment(ii, jj, score));
+								}
+								else
+								{
+									// This is not a fit. Ensure that remaining candidate spots are assigned
+									// after any fit results.
+									score += matchDistance + 1;
+								}
+							}
 						}
-						else
-						{
-							// This is a candidate that could not be fitted
+					}
 
-							// Get the index
-							i = -1 - i;
-							match[matchCount++] = new CandidateMatch(i, d, p3.peakResult.error);
+					Collections.sort(assignments);
+
+					final boolean[] actualAssignment = new boolean[actual.length];
+					final boolean[] predictedAssignment = new boolean[predicted.length];
+
+					for (Assignment assignment : assignments)
+					{
+						if (!actualAssignment[assignment.getTargetId()])
+						{
+							if (!predictedAssignment[assignment.getPredictedId()])
+							{
+								actualAssignment[assignment.getTargetId()] = true;
+								predictedAssignment[assignment.getPredictedId()] = true;
+
+								final PeakResultPoint p3 = (PeakResultPoint) actual[assignment.getTargetId()];
+								final BasePoint p2 = (BasePoint) predicted[assignment.getPredictedId()];
+								int i = (int) p2.getZ();
+
+								final double d = p2.distanceXY(p3);
+
+								if (i >= 0)
+								{
+									// This is a fitted candidate
+
+									final double a = p3.peakResult.getSignal();
+									final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
+
+									fitMatch[i] = true;
+									match[matchCount++] = new FitMatch(i, d, p3.peakResult.error, p, a);
+								}
+								else
+								{
+									// This is a candidate that could not be fitted
+
+									// Get the index
+									i = -1 - i;
+									match[matchCount++] = new CandidateMatch(i, d, p3.peakResult.error);
+								}
+							}
 						}
 					}
 				}
@@ -607,7 +673,6 @@ public class BenchmarkSpotFit implements PlugIn
 			match = Arrays.copyOf(match, matchCount);
 
 			// Mark the results 
-			RampedScore score = new RampedScore(lowerDistanceInPixels, distanceInPixels);
 			double tp = 0;
 			double fp = 0;
 			double tn = 0;
@@ -615,7 +680,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 			for (int i = 0; i < match.length; i++)
 			{
-				final double s = score.scoreAndFlatten(match[i].d, 256);
+				final double s = rampedScore.scoreAndFlatten(match[i].d, 256);
 				match[i].score = s;
 
 				if (match[i].isFitResult())
@@ -734,7 +799,8 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
 		gd.addSlider("Match_distance", 0.2, 3, distance);
 		gd.addSlider("Lower_distance", 0.2, 3, lowerDistance);
-		gd.addSlider("Match_signal", 0, 3.5, matchSignal);
+		gd.addSlider("Match_signal", 0, 3.5, signalFactor);
+		gd.addSlider("Lower_signal", 0, 3.5, lowerSignalFactor);
 
 		// Collect options for fitting
 		final double sa = getSa();
@@ -767,7 +833,8 @@ public class BenchmarkSpotFit implements PlugIn
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		distance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
-		signalFactor = matchSignal = Math.abs(gd.getNextNumber());
+		signalFactor = Math.abs(gd.getNextNumber());
+		lowerSignalFactor = Math.abs(gd.getNextNumber());
 
 		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
@@ -799,11 +866,13 @@ public class BenchmarkSpotFit implements PlugIn
 
 		if (lowerDistance > distance)
 			lowerDistance = distance;
-
+		if (lowerSignalFactor > signalFactor)
+			lowerSignalFactor = signalFactor;
+		
 		// Distances relative to sa (not s) as this is the same as the BenchmarkSpotFilter plugin 
 		distanceInPixels = distance * sa / simulationParameters.a;
 		lowerDistanceInPixels = lowerDistance * sa / simulationParameters.a;
-
+		
 		GlobalSettings settings = new GlobalSettings();
 		settings.setFitEngineConfiguration(config);
 		settings.setCalibration(cal);
