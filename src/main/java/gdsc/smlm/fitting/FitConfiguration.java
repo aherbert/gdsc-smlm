@@ -1173,6 +1173,7 @@ public class FitConfiguration implements Cloneable
 			f.gaussianFunction = null;
 			f.noiseModel = null;
 			f.functionSolver = null;
+			f.setValidationResult(null, null);
 			return f;
 		}
 		catch (CloneNotSupportedException e)
