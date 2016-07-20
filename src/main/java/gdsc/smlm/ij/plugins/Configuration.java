@@ -163,7 +163,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		gd.addNumericField("Precision_threshold", fitConfig.getPrecisionThreshold(), 2);
 
 		// Add a mouse listener to the config file field
-		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		if (Utils.isShowGenericDialog())
 		{
 			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();

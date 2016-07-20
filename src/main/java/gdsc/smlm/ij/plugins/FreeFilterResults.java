@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.utils.XmlUtils;
 
@@ -137,7 +138,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		gd.addTextAreas(text, null, 20, 80);
 		gd.addCheckbox("Show_demo_filters", false);
 
-		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		if (Utils.isShowGenericDialog())
 		{
 			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
 			cb.addItemListener(this);

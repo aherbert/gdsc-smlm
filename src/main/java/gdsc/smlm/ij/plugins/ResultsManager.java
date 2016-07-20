@@ -424,7 +424,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		gd.addCheckbox("Results_in_memory (file input only)", resultsSettings.resultsInMemory);
 
 		// Dialog to allow double click to select files using a file chooser
-		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		if (Utils.isShowGenericDialog())
 		{
 			text1 = (TextField) gd.getStringFields().get(0);
 			text2 = (TextField) gd.getStringFields().get(1);

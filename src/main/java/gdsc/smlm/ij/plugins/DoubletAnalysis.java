@@ -1599,7 +1599,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addChoice("Matching", MATCHING, MATCHING[matching]);
 
 		// Add a mouse listener to the config file field
-		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		if (Utils.isShowGenericDialog())
 		{
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
 			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
@@ -3096,7 +3096,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// TODO - Add support for updating a template with a residuals threshold, e.g. from the BenchmarkFilterAnalysis plugin
 
 		// Add a mouse listener to the config file field
-		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		if (Utils.isShowGenericDialog())
 		{
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
 			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
