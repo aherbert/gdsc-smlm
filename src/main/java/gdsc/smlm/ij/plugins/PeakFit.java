@@ -93,6 +93,7 @@ import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Macro;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
@@ -858,7 +859,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// Add a mouse listener to the config file field
-		if (!(java.awt.GraphicsEnvironment.isHeadless() || IJ.isMacro()))
+		if (!(java.awt.GraphicsEnvironment.isHeadless() || Macro.getOptions() != null))
 		{
 			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
