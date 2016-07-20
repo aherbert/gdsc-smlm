@@ -14,6 +14,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.plugin.PlugIn;
+import ij.util.StringSorter;
 
 /**
  * This plugin loads configuration templates for the localisation fitting settings
@@ -54,7 +55,8 @@ public class ConfigurationTemplate implements PlugIn
 
 		/**
 		 * Save the settings to file
-		 * @param file 
+		 * 
+		 * @param file
 		 *
 		 * @return true, if successful, False if failed (or no file to save to)
 		 */
@@ -257,18 +259,28 @@ public class ConfigurationTemplate implements PlugIn
 		if (fileList == null)
 			return;
 
-		int count = 0;
+		// Sort partially numerically
+		String[] list = new String[fileList.length];
+		int n = 0;
 		for (File file : fileList)
 		{
 			if (file.isFile())
 			{
-				GlobalSettings settings = SettingsManager.unsafeLoadSettings(file.getPath());
-				if (settings != null)
-				{
-					count++;
-					String name = Utils.removeExtension(file.getName());
-					addTemplate(name, settings, true, file);
-				}
+				list[n++] = file.getPath();
+			}
+		}
+		list = StringSorter.sortNumerically(list);
+
+		int count = 0;
+		for (String path : list)
+		{
+			GlobalSettings settings = SettingsManager.unsafeLoadSettings(path);
+			if (settings != null)
+			{
+				count++;
+				File file = new File(path);
+				String name = Utils.removeExtension(file.getName());
+				addTemplate(name, settings, true, file);
 			}
 		}
 		IJ.showMessage("Loaded " + Utils.pleural(count, "result"));
