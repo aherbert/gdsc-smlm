@@ -3183,7 +3183,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tResiduals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
 	}
 
 	/*
