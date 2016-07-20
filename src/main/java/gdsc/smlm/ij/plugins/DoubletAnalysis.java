@@ -2888,8 +2888,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Fields", header);
 		BenchmarkFilterAnalysis.addField(sb, "Doublet Analysis Summary Values", summary);
 		// Now pick out key values...
-		BenchmarkFilterAnalysis.addKeyFields(sb, header, summary, new String[] { "Molecules", "Density", "SNR",
-				"s (nm)", "a (nm)", "Lower D", "Upper D", "Lower factor", "Upper factor" });
+		BenchmarkFilterAnalysis.addKeyFields(sb, header, summary, new String[] { "Density", "s", "Selection", "Max J",
+				"Residuals", "Area >90", "Range >90", "wMean >90" });
 
 		// Add any other settings that may be useful in the template
 		BenchmarkFilterAnalysis.addField(sb, "Created", BenchmarkFilterAnalysis.getCurrentTimeStamp());
