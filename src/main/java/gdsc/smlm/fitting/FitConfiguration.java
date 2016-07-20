@@ -50,6 +50,7 @@ public class FitConfiguration implements Cloneable
 	private boolean backgroundFitting = true;
 	private boolean notSignalFitting = false;
 	private double coordinateShift = 1;
+	private double shiftFactor = 1;
 	private int fitRegion = 0;
 	private double coordinateOffset = 0.5;
 	private double signalThreshold = 0;
@@ -348,12 +349,17 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * Set an estimate for the peak standard deviation used to initialise the fit for dimension 0
+	 * <p>
+	 * Setting this will update the value in {@link #getCoordinateShift()}
+	 * 
 	 * @param initialPeakStdDev0
 	 *            An estimate for the peak standard deviation used to initialise the fit for dimension 0
 	 */
 	public void setInitialPeakStdDev0(double initialPeakStdDev0)
 	{
 		this.initialSD0 = initialPeakStdDev0;
+		updateCoordinateShift();
 	}
 
 	/**
@@ -365,12 +371,17 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * Set an estimate for the peak standard deviation used to initialise the fit for dimension 1
+	 * <p>
+	 * Setting this will update the value in {@link #getCoordinateShift()}
+	 * 
 	 * @param initialPeakStdDev1
 	 *            An estimate for the peak standard deviation used to initialise the fit for dimension 1
 	 */
 	public void setInitialPeakStdDev1(double initialPeakStdDev1)
 	{
 		this.initialSD1 = initialPeakStdDev1;
+		updateCoordinateShift();
 	}
 
 	/**
@@ -611,6 +622,10 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * Set the maximum absolute coordinate shift for a good fit. This is also set when calling
+	 * {@link #setCoordinateShiftFactor(double)} or any of the standard deviations, e.g.
+	 * {@link #setInitialPeakStdDev(double)}. If these are set then the coordinate shift will change.
+	 * 
 	 * @param coordinateShift
 	 *            The maximum absolute coordinate shift for a good fit
 	 */
@@ -620,7 +635,7 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * @return the coordinateShift
+	 * @return The maximum absolute coordinate shift for a good fit
 	 */
 	public double getCoordinateShift()
 	{
@@ -628,20 +643,34 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
+	 * Set the maximum absolute coordinate shift for a good fit, relative to the largest peak width.
+	 * Set to zero to disable.
+	 * <p>
+	 * Setting this will update the value in {@link #getCoordinateShift()}
+	 * 
 	 * @param shiftFactor
 	 *            The maximum absolute coordinate shift for a good fit, relative to the largest peak width
 	 */
 	public void setCoordinateShiftFactor(double shiftFactor)
 	{
+		this.shiftFactor = (shiftFactor > 0) ? shiftFactor : 0;
+		// Reset to zero for disabled values 
+		this.shiftFactor = getCoordinateShiftFactor();
+		updateCoordinateShift();
+	}
+
+	private void updateCoordinateShift()
+	{
 		if (shiftFactor > 0)
 		{
 			final double widthMax = Maths.max(initialSD0, initialSD1);
-			setCoordinateShift(shiftFactor * widthMax);
+			if (widthMax > 0)
+			{
+				setCoordinateShift(shiftFactor * widthMax);
+				return;
+			}
 		}
-		else
-		{
-			setCoordinateShift(Double.POSITIVE_INFINITY);
-		}
+		setCoordinateShift(Double.POSITIVE_INFINITY);
 	}
 
 	/**
@@ -649,10 +678,23 @@ public class FitConfiguration implements Cloneable
 	 */
 	public double getCoordinateShiftFactor()
 	{
-		if (coordinateShift == Double.POSITIVE_INFINITY)
+		if (shiftFactor == Double.POSITIVE_INFINITY)
 			return 0;
-		final double widthMax = Maths.max(initialSD0, initialSD1);
-		return coordinateShift / widthMax;
+		return shiftFactor;
+	}
+
+	/**
+	 * Gets the maximum distance a peak will be allowed to shift for the specified peak.
+	 * <p>
+	 * This is constructed using the coordinate shift factor
+	 *
+	 * @param peak
+	 *            the peak
+	 * @return the peak shift
+	 */
+	public double getMaxShift(int peak)
+	{
+		return coordinateShift * getPeakShiftFactor(peak);
 	}
 
 	/**
@@ -959,7 +1001,7 @@ public class FitConfiguration implements Cloneable
 				initialParams[Gaussian2DFunction.X_POSITION + offset];
 		final double yShift = params[Gaussian2DFunction.Y_POSITION + offset] -
 				initialParams[Gaussian2DFunction.Y_POSITION + offset];
-		final double maxShift = coordinateShift * getPeakShiftFactor(n);
+		final double maxShift = getMaxShift(n);
 		if (Math.abs(xShift) > maxShift || Math.abs(yShift) > maxShift)
 		{
 			if (log != null)
@@ -1203,6 +1245,8 @@ public class FitConfiguration implements Cloneable
 			initialSD0 = 1;
 		if (initialSD1 == 0)
 			initialSD1 = 1;
+		if (shiftFactor == 0)
+			setCoordinateShiftFactor(1);
 		setNoise(noise);
 		setFitFunction(fitFunction);
 		invalidateFunctionSolver();
