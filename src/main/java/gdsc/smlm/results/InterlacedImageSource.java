@@ -2,7 +2,7 @@ package gdsc.smlm.results;
 
 import java.awt.Rectangle;
 
-import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -26,21 +26,8 @@ public class InterlacedImageSource extends ImageSource
 	private final ImageSource imageSource;
 
 	// Record the number of frames returned from the current block
+	@XStreamOmitField
 	private int counter;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.ResultsSource#init(com.thoughtworks.xstream.XStream)
-	 */
-	@Override
-	public void init(XStream xs)
-	{
-		super.init(xs);
-		if (imageSource != null)
-			imageSource.init(xs);
-		xs.omitField(InterlacedImageSource.class, "counter");
-	}
 
 	/**
 	 * Create a new interlaced image source using the given image source

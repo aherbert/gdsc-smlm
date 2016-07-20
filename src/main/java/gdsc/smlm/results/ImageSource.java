@@ -4,9 +4,8 @@ import java.awt.Rectangle;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-
-import gdsc.smlm.utils.XmlUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -27,8 +26,13 @@ import gdsc.smlm.utils.XmlUtils;
 public abstract class ImageSource
 {
 	private String name;
-	private int startFrame, endFrame;
-	protected int width, height, frames;
+	@XStreamOmitField
+	private int startFrame;
+	@XStreamOmitField
+	private int endFrame;
+	protected int width;
+	protected int height;
+	protected int frames;
 
 	/**
 	 * Create the image source
@@ -59,7 +63,7 @@ public abstract class ImageSource
 	 * Closes the source
 	 */
 	public abstract void close();
-	
+
 	/**
 	 * Get the width of the results. The frame returned by {@link #next()} will be equal to width * height.
 	 * 
@@ -301,7 +305,7 @@ public abstract class ImageSource
 		XStream xs = new XStream(new DomDriver());
 		try
 		{
-			init(xs);
+			xs.autodetectAnnotations(true);
 			return xs.toXML(this);
 		}
 		catch (XStreamException ex)
@@ -313,19 +317,17 @@ public abstract class ImageSource
 
 	public static ImageSource fromXML(String xml)
 	{
-		return (ImageSource) XmlUtils.fromXML(xml);
-	}
-
-	/**
-	 * Initialise the XStream class to be used for XML conversion. Provides the opportunity for a
-	 * class to omit fields from the XStream serialisation.
-	 * 
-	 * @param xs
-	 */
-	public void init(XStream xs)
-	{
-		xs.omitField(ImageSource.class, "startFrame");
-		xs.omitField(ImageSource.class, "endFrame");
+		XStream xs = new XStream(new DomDriver());
+		try
+		{
+			xs.autodetectAnnotations(true);
+			return (ImageSource) xs.fromXML(xml);
+		}
+		catch (XStreamException ex)
+		{
+			//ex.printStackTrace();
+		}
+		return null;
 	}
 
 	/**

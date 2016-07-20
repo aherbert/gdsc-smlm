@@ -3,7 +3,7 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.util.Arrays;
 
-import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -27,34 +27,14 @@ public class AggregatedImageSource extends ImageSource
 	private final ImageSource imageSource;
 
 	// Used for frame-based read
-	private int lastFrame, lastStartFrame, lastEndFrame;
+	@XStreamOmitField
+	private int lastFrame;
+	@XStreamOmitField
+	private int lastStartFrame;
+	@XStreamOmitField
+	private int lastEndFrame;
+	@XStreamOmitField
 	private float[] lastImage = null;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.ResultsSource#init(com.thoughtworks.xstream.XStream)
-	 */
-	@Override
-	public void init(XStream xs)
-	{
-		super.init(xs);
-		if (imageSource != null)
-			imageSource.init(xs);
-		//---
-		// TODO - This does not work as the fields are defined in the super class ImageSource.
-		// using ImageSource.class to omit the fields would mean they are also omitted from the 
-		// imageSource variable. So for now we get an output that has the width,height,frames fields
-		// twice in the XML, once for each class (AggregatedImageSource and the ImageSource field).
-		//xs.omitField(getClass(), "width");
-		//xs.omitField(getClass(), "height");
-		//xs.omitField(getClass(), "frames");
-		//---
-		xs.omitField(AggregatedImageSource.class, "lastFrame");
-		xs.omitField(AggregatedImageSource.class, "lastStartFrame");
-		xs.omitField(AggregatedImageSource.class, "lastEndFrame");
-		xs.omitField(AggregatedImageSource.class, "lastImage");
-	}
 
 	/**
 	 * Create a new aggregated image source using the given image source
@@ -141,7 +121,7 @@ public class AggregatedImageSource extends ImageSource
 	{
 		return imageSource.openSource();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

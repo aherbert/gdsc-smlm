@@ -1,13 +1,5 @@
 package gdsc.smlm.ij;
 
-import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.ij.utils.SeriesOpener;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.results.ImageSource;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.io.Opener;
-
 import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -16,7 +8,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.core.ij.Utils;
+import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.SeriesOpener;
+import gdsc.smlm.results.ImageSource;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.io.Opener;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -239,61 +239,51 @@ public class SeriesImageSource extends ImageSource
 	private ArrayList<String> images;
 	public final boolean isTiffSeries;
 
+	@XStreamOmitField
 	private int maxz;
 
 	// Used for sequential read
+	@XStreamOmitField
 	private Object[] imageArray = null;
+	@XStreamOmitField
 	private int nextImage;
+	@XStreamOmitField
 	private NextImage[] nextImages;
+	@XStreamOmitField
 	private int currentSlice;
+	@XStreamOmitField
 	private int currentImageSize;
 
 	// Used for frame-based read
+	@XStreamOmitField
 	private Object[] lastImageArray = null;
+	@XStreamOmitField
 	private int lastImage;
+	@XStreamOmitField
 	private int lastImageSize;
 
+	@XStreamOmitField
 	private boolean logProgress = false;
+	@XStreamOmitField
 	private long lastTime = 0;
 	private int numberOfThreads = 1;
 
+	@XStreamOmitField
 	private ArrayBlockingQueue<NextSource> sourceQueue;
+	@XStreamOmitField
 	private ArrayBlockingQueue<NextImage> imageQueue;
 
 	// Used to queue the files from disk. This is sequential so only one thread is required.
+	@XStreamOmitField
 	private SourceWorker sourceWorker = null;
+	@XStreamOmitField
 	private Thread sourceThread = null;
 
 	// Used to process the files into images
+	@XStreamOmitField
 	private ArrayList<ImageWorker> workers = null;
+	@XStreamOmitField
 	private ArrayList<Thread> threads = null;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.ResultsSource#init(com.thoughtworks.xstream.XStream)
-	 */
-	@Override
-	public void init(XStream xs)
-	{
-		super.init(xs);
-		xs.omitField(SeriesImageSource.class, "maxz");
-		xs.omitField(SeriesImageSource.class, "imageArray");
-		xs.omitField(SeriesImageSource.class, "nextImage");
-		xs.omitField(SeriesImageSource.class, "nextImages");
-		xs.omitField(SeriesImageSource.class, "currentImageSize");
-		xs.omitField(SeriesImageSource.class, "lastImageArray");
-		xs.omitField(SeriesImageSource.class, "lastImage");
-		xs.omitField(SeriesImageSource.class, "lastImageSize");
-		xs.omitField(SeriesImageSource.class, "logProgress");
-		xs.omitField(SeriesImageSource.class, "lastTime");
-		xs.omitField(SeriesImageSource.class, "sourceQueue");
-		xs.omitField(SeriesImageSource.class, "imageQueue");
-		xs.omitField(SeriesImageSource.class, "sourceWorker");
-		xs.omitField(SeriesImageSource.class, "sourceThread");
-		xs.omitField(SeriesImageSource.class, "workers");
-		xs.omitField(SeriesImageSource.class, "threads");
-	}
 
 	/**
 	 * Create a new image source using the given image series

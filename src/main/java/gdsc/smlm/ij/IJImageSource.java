@@ -1,5 +1,11 @@
 package gdsc.smlm.ij;
 
+import java.awt.Rectangle;
+
+import org.apache.commons.math3.util.FastMath;
+
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
@@ -8,12 +14,6 @@ import ij.ImageStack;
 import ij.WindowManager;
 import ij.io.FileInfo;
 import ij.process.ImageProcessor;
-
-import java.awt.Rectangle;
-
-import org.apache.commons.math3.util.FastMath;
-
-import com.thoughtworks.xstream.XStream;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -34,10 +34,13 @@ import com.thoughtworks.xstream.XStream;
  */
 public class IJImageSource extends ImageSource
 {
+	@XStreamOmitField
 	private int slice;
 	private int singleFrame = 0;
 	private int extraFrames = 0;
+	@XStreamOmitField
 	private Object[] imageArray;
+	@XStreamOmitField
 	private ImageStack imageStack;
 	private String path;
 
@@ -248,23 +251,6 @@ public class IJImageSource extends ImageSource
 			}
 		}
 		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.ResultsSource#init(com.thoughtworks.xstream.XStream)
-	 */
-	@Override
-	public void init(XStream xs)
-	{
-		super.init(xs);
-		xs.omitField(IJImageSource.class, "slice");
-		// Q. Should this be omitted? It may be useful when reloading results to restore the 
-		// single frame read property of the next() function
-		//xs.omitField(IJImageSource.class, "singleFrame");
-		xs.omitField(IJImageSource.class, "imageArray");
-		xs.omitField(IJImageSource.class, "imageStack");
 	}
 
 	@Override
