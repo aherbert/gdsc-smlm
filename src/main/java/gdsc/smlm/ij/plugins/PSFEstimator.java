@@ -344,7 +344,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			return false;
 		}
 
-		String filename = SettingsManager.getSettingsFilename();
+		final String filename = SettingsManager.getSettingsFilename();
 		SettingsManager.saveSettings(globalSettings, filename);
 
 		if (!PeakFit.configureDataFilter(globalSettings, filename, false))

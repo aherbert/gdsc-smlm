@@ -309,6 +309,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			return;
 
 		configurationChanged = SettingsManager.saveSettings(settings, filename);
+		if (configurationChanged)
+			SettingsManager.saveSettingsFilename(filename);
 		
 		PeakFit.configureDataFilter(settings, filename, false);		
 		PeakFit.configureFitSolver(settings, filename, false);		

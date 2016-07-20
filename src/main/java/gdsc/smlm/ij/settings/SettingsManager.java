@@ -46,6 +46,16 @@ public class SettingsManager
 	}
 
 	/**
+	 * Save settings filename.
+	 *
+	 * @param filename the filename
+	 */
+	public static void saveSettingsFilename(String filename)
+	{
+		Prefs.set(Constants.settingsFilename, filename);
+	}
+
+	/**
 	 * Convert a list of objects into names (e.g. pass in (Object[])enum.getValues()). The first letter is capitalised.
 	 * The rest of the name is converted to lowercase if it is all uppercase. Remaining mixed case names are left
 	 * unchanged.
@@ -225,7 +235,6 @@ public class SettingsManager
 		{
 			fs = new FileOutputStream(filename);
 			xs.toXML(settings, fs);
-			Prefs.set(Constants.settingsFilename, filename);
 			return true;
 		}
 		catch (FileNotFoundException ex)

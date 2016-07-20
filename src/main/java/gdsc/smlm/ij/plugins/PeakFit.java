@@ -688,7 +688,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		// Executing as an ImageJ plugin.
 		// Override the defaults with those in the configuration file
-		String filename = SettingsManager.getSettingsFilename();
+		final String filename = SettingsManager.getSettingsFilename();
 
 		if (simpleFit)
 		{
@@ -1065,7 +1065,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			Utils.log(format, args);
 	}
 
-	private int showSimpleDialog(String filename)
+	private int showSimpleDialog(final String filename)
 	{
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
 		// Initialise the fit config so that it can be used in the calibration wizard 
@@ -1434,7 +1434,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			fractionOfThreads = Math.abs(gd.getNextNumber());
 
 		// Save to allow dialog state to be maintained even with invalid parameters
-		SettingsManager.saveSettings(settings, filename);
+		if (SettingsManager.saveSettings(settings, filename))
+			SettingsManager.saveSettingsFilename(filename);
 
 		if (gd.invalidNumber())
 			return false;

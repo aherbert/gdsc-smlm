@@ -1382,7 +1382,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 	private void loadConfiguration()
 	{
-		String filename = SettingsManager.getSettingsFilename();
+		final String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
 		nmPerPixel = settings.getCalibration().nmPerPixel;
 		config = settings.getFitEngineConfiguration();
