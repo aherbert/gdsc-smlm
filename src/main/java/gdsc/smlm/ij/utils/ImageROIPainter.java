@@ -169,8 +169,8 @@ public class ImageROIPainter implements MouseListener
 		float[] y2 = new float[p];
 		for (int j = start, ii = 0; j < end; j++, ii++)
 		{
-			x2[ii] = x[indices[start]];
-			y2[ii] = y[indices[start]];
+			x2[ii] = x[indices[j]];
+			y2[ii] = y[indices[j]];
 		}
 		PointRoi roi = new PointRoi(x2, y2, p);
 		roi.setPosition(slice[indices[start]]);
