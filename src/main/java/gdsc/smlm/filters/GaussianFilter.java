@@ -110,6 +110,29 @@ public class GaussianFilter implements Cloneable
 	}
 
 	/**
+	 * Compute the Gaussian convolution.
+	 * <p>
+	 * Note: the input data is destructively modified
+	 * 
+	 * @param data
+	 *            The input/output data (packed in YX order)
+	 * @param maxx
+	 *            The width of the data
+	 * @param maxy
+	 *            The height of the data
+	 * @param sigmaX
+	 *            The Gaussian standard deviation in X
+	 * @param sigmaY
+	 *            The Gaussian standard deviation in Y
+	 */
+	public void convolve(float[] data, final int maxx, final int maxy, final double sigmaX, final double sigmaY)
+	{
+		Rectangle roi = new Rectangle(maxx, maxy);
+		blur1Direction(data, roi, maxx, maxy, sigmaX, true, 0);
+		blur1Direction(data, roi, maxx, maxy, sigmaY, false, 0);
+	}
+
+	/**
 	 * Blur an image in one direction (x or y) by a Gaussian.
 	 * 
 	 * @param data
