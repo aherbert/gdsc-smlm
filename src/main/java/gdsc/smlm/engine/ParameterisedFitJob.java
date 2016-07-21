@@ -28,7 +28,7 @@ public class ParameterisedFitJob extends FitJob
 	private List<PeakResult> peakResults;
 	private int[] indices = new int[0];
 	private FitResult[] fitResults = new FitResult[0];
-	private FitResult[] fitResultsWithNeighbours = new FitResult[0];
+	private FitResult[] fitResultsWithNeighbours = null;
 
 	/**
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
@@ -109,6 +109,7 @@ public class ParameterisedFitJob extends FitJob
 	@Override
 	public void setFitResultWithNeighbours(int n, FitResult fitResult)
 	{
+		// Dynamically initialise as we may not fit neighbours
 		if (fitResultsWithNeighbours == null)
 			fitResultsWithNeighbours = new FitResult[indices.length]; 
 		if (n < fitResultsWithNeighbours.length)
@@ -141,8 +142,10 @@ public class ParameterisedFitJob extends FitJob
 	 * @param n
 	 * @return
 	 */
-	public FitResult getFitResultWithNeighbours(int i)
+	public FitResult getFitResultWithNeighbours(int n)
 	{
-		return fitResultsWithNeighbours[i];
+		if (fitResultsWithNeighbours != null && n < fitResultsWithNeighbours.length)
+			return fitResultsWithNeighbours[n];
+		return null;
 	}
 }

@@ -1167,7 +1167,8 @@ public class BenchmarkSpotFit implements PlugIn
 					if (status != null)
 					{
 						status[result.fitResult[i].getStatus().ordinal()]++;
-						status2[result.fitResultWithNeighbours[i].getStatus().ordinal()]++;
+						if (result.fitResultWithNeighbours[i]!= null)
+							status2[result.fitResultWithNeighbours[i].getStatus().ordinal()]++;
 					}
 
 					if (result.spots[i].match)
