@@ -2810,7 +2810,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		if (useBenchmarkSettings)
 		{
 			FitEngineConfiguration pConfig = new FitEngineConfiguration(new FitConfiguration());
-			if (BenchmarkFilterAnalysis.updateConfiguration(pConfig))
+			if (BenchmarkFilterAnalysis.updateConfiguration(pConfig, false))
 				config.setFailuresLimit(pConfig.getFailuresLimit());
 		}
 
@@ -3156,7 +3156,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private boolean updateFilterConfiguration(FitConfiguration filterFitConfig)
 	{
 		FitEngineConfiguration c = new FitEngineConfiguration(filterFitConfig);
-		if (!BenchmarkFilterAnalysis.updateConfiguration(c))
+		if (!BenchmarkFilterAnalysis.updateConfiguration(c, false))
 		{
 			IJ.error(TITLE, "Unable to use the benchmark filter analysis configuration");
 			return false;
