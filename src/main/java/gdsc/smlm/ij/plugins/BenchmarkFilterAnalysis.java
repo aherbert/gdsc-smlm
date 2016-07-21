@@ -100,6 +100,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static final int CRITERIA = 1;
 	private static int failCount = 1;
 	private static int failCountRange = 0;
+	private static boolean reset = true;
 	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
@@ -178,7 +179,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	// Used to tile plot windows
 	private WindowOrganiser wo = new WindowOrganiser();
 
-	private static Filter _bestFilter = null;
+	// Store the best filter scores
+	private class FilterResult
+	{
+		final Filter filter;
+		final double score;
+		final int failCount;
+		final int failCountRange;
+
+		public FilterResult(Filter filter, double score, int failCount, int failCountRange)
+		{
+			this.filter = filter;
+			this.score = score;
+			this.failCount = failCount;
+			this.failCountRange = failCountRange;
+		}
+	}
+
+	private static ArrayList<FilterResult> scores = new ArrayList<FilterResult>();
 
 	private static String[] COLUMNS = {
 			// Scores against the fit results that did not fail		
@@ -915,12 +933,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				simulationParameters.b2, simulationParameters.emCCD);
 		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
-		gd.addMessage(String.format(
+		String msg = String.format(
 				"%d results, %d True-Positives\nExpected signal precision = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-				total, tp, signal, pSignal, pLSE, pMLE));
+				total, tp, signal, pSignal, pLSE, pMLE);
+		FilterResult best = getBestResult();
+		if (best != null)
+		{
+			msg += String.format("\nCurrent Best=%s, FailCount=%d, Range=%d", Utils.rounded(best.score),
+					best.failCount, best.failCountRange);
+		}
+		gd.addMessage(msg);
 
 		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
+		gd.addCheckbox("Reset", reset);
 		gd.addCheckbox("Rank_by_signal", rerankBySignal);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
@@ -984,6 +1010,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		failCount = (int) Math.abs(gd.getNextNumber());
 		failCountRange = (int) Math.abs(gd.getNextNumber());
+		reset = gd.getNextBoolean();
 		rerankBySignal = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
@@ -1067,7 +1094,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
-		_bestFilter = null;
+		if (reset)
+			scores.clear();
+
 		createResultsWindow();
 		plots = new ArrayList<NamedPlot>(plotTopN);
 		bestFilter = new HashMap<String, FilterScore>();
@@ -1102,6 +1131,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (showSummaryTable || saveBestFilter)
 			Collections.sort(filters);
 
+		FractionClassificationResult topFilterCalssificationResult = null;
 		MemoryPeakResults topFilterResults = null;
 		String topFilterSummary = null;
 		if (showSummaryTable || saveTemplate)
@@ -1123,7 +1153,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				// Show the recall at the specified depth. Sum the distance and signal factor of all scored spots.
 				MemoryPeakResults results = filter(fs.filter, resultsList.get(0), failCount);
 				if (topFilterResults == null)
+				{
 					topFilterResults = results;
+					topFilterCalssificationResult = r;
+				}
 				int scored = 0;
 				double tp = 0, d = 0, sf = 0;
 				for (PeakResult result : results.getResults())
@@ -1170,9 +1203,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 		}
 
-		_bestFilter = filters.get(0).filter;
+		Filter bestFilter = filters.get(0).filter;
 		if (saveBestFilter)
-			saveFilter(_bestFilter);
+			saveFilter(bestFilter);
+
+		if (topFilterCalssificationResult == null)
+			topFilterCalssificationResult = scoreFilter(bestFilter, resultsList);
+		scores.add(new FilterResult(bestFilter, getScore(topFilterCalssificationResult), failCount, failCountRange));
 
 		if (saveTemplate)
 			saveTemplate(topFilterSummary);
@@ -2481,7 +2518,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private void saveTemplate(String topFilterSummary)
 	{
 		FitEngineConfiguration config = new FitEngineConfiguration(new FitConfiguration());
-		if (!updateAllConfiguration(config))
+		if (!updateAllConfiguration(config, true))
 		{
 			IJ.log("Unable to create the template configuration");
 			return;
@@ -3105,16 +3142,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *
 	 * @param config
 	 *            the configuration
+	 * @param useLatest
+	 *            Use the latest best filter. Otherwise use the highest scoring.
 	 * @return true, if successful
 	 */
-	public static boolean updateAllConfiguration(FitEngineConfiguration config)
+	public static boolean updateAllConfiguration(FitEngineConfiguration config, boolean useLatest)
 	{
 		// Do this first as it sets the initial SD
 		if (!BenchmarkSpotFit.updateConfiguration(config))
 			return false;
 		if (!BenchmarkSpotFilter.updateConfiguration(config))
 			return false;
-		if (!updateConfiguration(config))
+		if (!updateConfiguration(config, useLatest))
 			return false;
 		return true;
 	}
@@ -3124,14 +3163,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *
 	 * @param config
 	 *            the configuration
+	 * @param useLatest
+	 *            Use the latest best filter. Otherwise use the highest scoring.
 	 * @return true, if successful
 	 */
-	public static boolean updateConfiguration(FitEngineConfiguration config)
+	public static boolean updateConfiguration(FitEngineConfiguration config, boolean useLatest)
 	{
-		if (_bestFilter == null || !(_bestFilter instanceof IMultiFilter))
+		if (scores.isEmpty())
 			return false;
 
-		IMultiFilter filter = (IMultiFilter) _bestFilter;
+		FilterResult best;
+		if (useLatest)
+		{
+			best = scores.get(scores.size() - 1);
+		}
+		else
+		{
+			best = getBestResult();
+		}
+
+		if (!(best.filter instanceof IMultiFilter))
+			return false;
+
+		IMultiFilter filter = (IMultiFilter) (best.filter);
 
 		final FitConfiguration fitConfig = config.getFitConfiguration();
 
@@ -3143,8 +3197,25 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		fitConfig.setPrecisionThreshold(filter.getPrecision());
 		fitConfig.setPrecisionUsingBackground(filter.isPrecisionUsesLocalBackground());
 
-		config.setFailuresLimit(failCount);
+		// We could set the fail count range dynamically using a window around the best filter 
+		
+		config.setFailuresLimit((best.failCount + best.failCountRange / 2));
 
 		return true;
+	}
+
+	private static FilterResult getBestResult()
+	{
+		if (!scores.isEmpty())
+		{
+			int maxi = 0;
+			for (int i = 0; i < scores.size(); i++)
+			{
+				if (scores.get(maxi).score < scores.get(i).score)
+					maxi = i;
+			}
+			return scores.get(maxi);
+		}
+		return null;
 	}
 }
