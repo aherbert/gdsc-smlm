@@ -70,6 +70,7 @@ import gdsc.core.utils.UnicodeReader;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
@@ -121,7 +122,9 @@ import ij.io.FileSaver;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 import ij.text.TextWindow;
 
 /**
@@ -577,6 +580,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				if (settings.samplePerFrame)
 				{
 					final double mean = areaInUm * settings.density;
+					System.out.printf("Mean samples = %f\n", mean);
+					if (mean < 0.5)
+					{
+						GenericDialog gd = new GenericDialog(TITLE);
+						gd.addMessage("The mean samples per frame is low: " + Utils.rounded(mean) + "\n \nContinue?");
+						gd.enableYesNoCancel();
+						gd.hideCancelButton();
+						gd.showDialog();
+						if (!gd.wasOKed())
+							return;
+					}
 					PoissonDistribution poisson = new PoissonDistribution(mean);
 					StoredDataStatistics samples = new StoredDataStatistics(settings.particles);
 					while (samples.getSum() < settings.particles)
@@ -1065,7 +1079,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			int[] maxMask = new int[w * h];
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
-				int[] mask = extractMask(imp.getProcessor());
+				int[] mask = extractMask(stack.getProcessor(slice));
 				if (updateArea)
 				{
 					for (int i = 0; i < mask.length; i++)
@@ -1075,7 +1089,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				masks.add(mask);
 			}
 			if (updateArea)
-				updateArea(maxMask);
+				updateArea(maxMask, w, h);
+
+			if (sliceDepth == 0)
+				// Auto configure to the full depth of the simulation
+				sliceDepth = settings.depth / masks.size();
+
 			return new MaskDistribution3D(masks, w, h, sliceDepth / settings.pixelPitch, scaleX, scaleY,
 					createRandomGenerator());
 		}
@@ -1083,22 +1102,207 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			int[] mask = extractMask(imp.getProcessor());
 			if (updateArea)
-				updateArea(mask);
+				updateArea(mask, w, h);
 			return new MaskDistribution(mask, w, h, settings.depth / settings.pixelPitch, scaleX, scaleY,
 					createRandomGenerator());
 		}
 	}
 
-	private void updateArea(int[] mask)
+	private void updateArea(int[] mask, int w, int h)
 	{
-		// Count pixels in mask
+		// Note: The apparent area will be bigger due to the PSF width blurring the edges.
+		// Assume the entire max intensity mask is in focus and the PSF is Gaussian in the focal plane.
+		// Blur the mask
+		float[] pixels = new float[mask.length];
+		for (int i = 0; i < pixels.length; i++)
+			pixels[i] = mask[i];
+
+		GaussianFilter blur = new GaussianFilter();
+		final double scaleX = (double) settings.size / w;
+		final double scaleY = (double) settings.size / h;
+		double extra = 1; // Allow extra?
+		double sd = getPsfSD() * extra;
+		blur.convolve(pixels, w, h, sd / scaleX, sd / scaleY);
+
+		// Count pixels in blurred mask. Ignore those that are very faint (at the edge of the region)
 		int c = 0;
-		for (int i : mask)
-			if (i != 0)
+
+		//		// By fraction of max value
+		//		float limit = 0.1f;
+		//		//float min = (float) (Maths.max(pixels) * limit);
+		//		float min = limit;
+		//		for (float f : pixels)
+		//			if (f > min)
+		//				c++;
+
+		//		// Rank in order and get fraction of sum
+		//		Arrays.sort(pixels);
+		//		double sum = 0;
+		//		double stop = Maths.sum(pixels) * 0.95;
+		//		float after = Maths.max(pixels) + 1;
+		//		for (float f : pixels)
+		//		{
+		//			sum += f;
+		//			if (sum > stop)
+		//			{
+		//				break;
+		//				//after = f;
+		//				//stop = Float.POSITIVE_INFINITY;
+		//			}
+		//			if (f > after)
+		//				break;
+		//			c++;
+		//		}
+
+		// Threshold to a mask
+		FloatProcessor fp = new FloatProcessor(w, h, pixels);
+		ShortProcessor sp = (ShortProcessor) fp.convertToShort(true);
+		// TODO - abstract this to another class. Maybe move the 
+		// Auto_Thresholder methods from GDSC IJ package to GDSC Core
+		int t = getThreshold(sp.getHistogram());
+		//Utils.display("Blurred", fp);
+		for (int i = 0; i < mask.length; i++)
+			if (sp.get(i) >= t)
 				c++;
+
 		// Convert 
 		final double scale = ((double) c) / mask.length;
+		//System.out.printf("Scale = %f\n", scale);
 		areaInUm = scale * settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
+	}
+
+	public static int getThreshold(int[] data)
+	{
+		int threshold = -1;
+
+		// bracket the histogram to the range that holds data to make it quicker
+		int minbin = 0;
+		int maxbin = 0;
+		for (int i = 0; i < data.length; i++)
+		{
+			if (data[i] > 0)
+				maxbin = i;
+		}
+		for (int i = data.length - 1; i >= 0; i--)
+		{
+			if (data[i] > 0)
+				minbin = i;
+		}
+		//IJ.log (""+minbin+" "+maxbin);
+		int[] data2 = new int[(maxbin - minbin) + 1];
+		for (int i = minbin; i <= maxbin; i++)
+		{
+			data2[i - minbin] = data[i];
+		}
+
+		threshold = Otsu(data2);
+
+		// Check if any thresholding was performed
+		if (threshold < 0)
+			return 0;
+
+		threshold += minbin; // add the offset of the histogram		
+
+		return threshold;
+	}
+
+	public static int Otsu(int[] data)
+	{
+		// Otsu's threshold algorithm
+		// C++ code by Jordan Bevik <Jordan.Bevic@qtiworld.com>
+		// ported to ImageJ plugin by G.Landini
+		int k, kStar; // k = the current threshold; kStar = optimal threshold
+		int N1, N; // N1 = # points with intensity <=k; N = total number of points
+		double BCV, BCVmax; // The current Between Class Variance and maximum BCV
+		double num, denom; // temporary bookeeping
+		int Sk; // The total intensity for all histogram points <=k
+		int S, L = data.length; // The total intensity of the image
+
+		// Initialize values:
+		S = N = 0;
+		double ssx = 0;
+		for (k = 0; k < L; k++)
+		{
+			ssx += k * k * data[k];
+			S += k * data[k]; // Total histogram intensity
+			N += data[k]; // Total number of data points
+		}
+
+		Sk = 0;
+		N1 = data[0]; // The entry for zero intensity
+		BCV = 0;
+		BCVmax = 0;
+		kStar = 0;
+		int kStar_count = 0;
+
+		// Look at each possible threshold value,
+		// calculate the between-class variance, and decide if it's a max
+		for (k = 1; k < L - 1; k++)
+		{ // No need to check endpoints k = 0 or k = L-1
+			Sk += k * data[k];
+			N1 += data[k];
+
+			// The float casting here is to avoid compiler warning about loss of precision and
+			// will prevent overflow in the case of large saturated images
+			denom = (double) (N1) * (N - N1); // Maximum value of denom is (N^2)/4 =  approx. 3E10
+
+			if (denom != 0)
+			{
+				// Float here is to avoid loss of precision when dividing
+				num = ((double) N1 / N) * S - Sk; // Maximum value of num =  255*N = approx 8E7
+				BCV = (num * num) / denom;
+
+			}
+			else
+				BCV = 0;
+
+			//			if (BCV >= BCVmax)
+			//			{ // Assign the best threshold found so far
+			//				BCVmax = BCV;
+			//				kStar = k;
+			//			}
+			// Added for debugging.
+			// Gonzalex & Woods, Digital Image Processing, 3rd Ed. pp 746:
+			// "If a maximum exists for more than one threshold it is customary to average them"
+			if (BCV > BCVmax)
+			{ // Assign the best threshold found so far
+				BCVmax = BCV;
+				kStar = k;
+				kStar_count = 1;
+			}
+			else if (BCV == BCVmax)
+			{
+				// Total the thresholds for averaging
+				kStar += k;
+				kStar_count++;
+			}
+		}
+
+		if (kStar_count > 1)
+		{
+			if (IJ.debugMode)
+				IJ.log("Otsu method has multiple optimal thresholds");
+			kStar /= kStar_count;
+		}
+
+		// Output the measure of separability. Requires BCVmax / BCVglobal
+		if (IJ.debugMode && N > 0)
+		{
+			// Calculate global variance
+			double sx = S;
+			ssx = 0;
+			for (k = 1; k < L; k++)
+				ssx += k * k * data[k];
+			BCV = (ssx - sx * sx / N) / N;
+
+			// Removed use of minbin to allow thread safe execution
+			//IJ.log(String.format("Otsu separability @ %d: %f", kStar + minbin, (BCVmax / BCV)));			
+			IJ.log(String.format("Otsu separability @ %d: %f", kStar, (BCVmax / BCV)));
+		}
+
+		// kStar += 1;	// Use QTI convention that intensity -> 1 if intensity >= k
+		// (the algorithm was developed for I-> 1 if I <= k.)
+		return kStar;
 	}
 
 	private int[] extractMask(ImageProcessor ip)
