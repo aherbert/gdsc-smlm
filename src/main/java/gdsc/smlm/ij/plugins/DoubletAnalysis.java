@@ -1985,7 +1985,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @param results
 	 *            the results
-	 * @param runTime 
+	 * @param runTime
 	 * @param density2
 	 */
 	private void summariseResults(ArrayList<DoubletResult> results, double density, long runTime)
@@ -2210,7 +2210,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		addJaccardScores(sb);
 
 		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
-		
+
 		summaryTable.append(sb.toString());
 	}
 
@@ -2420,7 +2420,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
 		sb.append(
-				"Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
+				"Simple\tBest J\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
 		return sb.toString();
 	}
 
@@ -2927,6 +2927,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		double[] residuals = residualsScore.residuals;
 		double[] jaccard = residualsScore.jaccard;
 		int maxJaccardIndex = residualsScore.maxJaccardIndex;
+		sb.append(Utils.rounded(jaccard[jaccard.length - 1])).append('\t');
 		sb.append(Utils.rounded(jaccard[maxJaccardIndex])).append('\t')
 				.append(Utils.rounded(residuals[maxJaccardIndex]));
 
@@ -3190,7 +3191,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
 	}
 
 	/*
