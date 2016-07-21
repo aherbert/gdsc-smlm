@@ -176,8 +176,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private long totalTime = 0, currentTime;
 
 	// Used to tile plot windows
-	private int[] idList = new int[4];
-	private int idCount = 0;
+	private WindowOrganiser wo = new WindowOrganiser();
 
 	private static Filter _bestFilter = null;
 
@@ -1183,11 +1182,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		topFilterResults = depthAnalysis(topFilterResults, filters.get(0).filter);
 		scoreAnalysis(topFilterResults, filters.get(0).filter);
 
-		if (idCount > 0)
-		{
-			WindowOrganiser o = new WindowOrganiser();
-			o.tileWindows(Arrays.copyOf(idList, idCount));
-		}
+		wo.tile();
 	}
 
 	private MemoryPeakResults filter(Filter filter, MemoryPeakResults memoryPeakResults, int failures)
@@ -2618,7 +2613,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		plot1.setColor(Color.magenta);
 		PlotWindow pw1 = Utils.display(title1, plot1);
 		if (Utils.isNewWindow())
-			idList[idCount++] = pw1.getImagePlus().getID();
+			wo.add(pw1);
 
 		// Interpolate
 		final double halfBinWidth = (h1[0][1] - h1[0][0]) * 0.5;
@@ -2699,7 +2694,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 		PlotWindow pw2 = Utils.display(title2, plot2);
 		if (Utils.isNewWindow())
-			idList[idCount++] = pw2.getImagePlus().getID();
+			wo.add(pw2);
 
 		return results;
 	}
@@ -2771,7 +2766,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		plot2.addPoints(h2b[0], h2b[1], Plot2.BAR);
 		PlotWindow pw2 = Utils.display(title2, plot2);
 		if (Utils.isNewWindow())
-			idList[idCount++] = pw2.getImagePlus().getID();
+			wo.add(pw2);
 
 		// Draw signal factor histogram
 		String title1 = TITLE + " Signal Factor Histogram";
@@ -2786,7 +2781,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		plot1.addPoints(h1b[0], h1b[1], Plot2.BAR);
 		PlotWindow pw1 = Utils.display(title1, plot1);
 		if (Utils.isNewWindow())
-			idList[idCount++] = pw1.getImagePlus().getID();
+			wo.add(pw1);
 	}
 
 	public class FilterScore implements Comparable<FilterScore>
