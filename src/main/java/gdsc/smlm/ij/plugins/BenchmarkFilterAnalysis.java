@@ -294,7 +294,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		analyse(resultsList, filterSets);
 
-		IJ.showStatus("Finished : " + Utils.timeToString(totalTime));
+		String timeString = Utils.timeToString(totalTime);
+		// TODO - Decide where to write this.
+		IJ.log("Filter analysis time : " + timeString);
+		IJ.showStatus("Finished : " + timeString);
 	}
 
 	@SuppressWarnings("unchecked")

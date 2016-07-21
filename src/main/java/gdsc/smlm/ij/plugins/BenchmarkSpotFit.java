@@ -974,6 +974,7 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 
 		// Fit the frames
+		long runTime = System.nanoTime();
 		totalProgress = stack.getSize();
 		stepProgress = Utils.getProgressInterval(totalProgress);
 		progress = 0;
@@ -1002,6 +1003,7 @@ public class BenchmarkSpotFit implements PlugIn
 		threads.clear();
 
 		IJ.showProgress(1);
+		runTime = System.nanoTime() - runTime;
 
 		if (Utils.isInterrupted())
 		{
@@ -1018,7 +1020,7 @@ public class BenchmarkSpotFit implements PlugIn
 			fitResults.putAll(w.results);
 		}
 
-		summariseResults(fitResults);
+		summariseResults(fitResults, runTime);
 
 		IJ.showStatus("");
 	}
@@ -1122,7 +1124,7 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 	}
 
-	private void summariseResults(HashMap<Integer, FilterCandidates> filterCandidates)
+	private void summariseResults(HashMap<Integer, FilterCandidates> filterCandidates, long runTime)
 	{
 		createTable();
 
@@ -1550,6 +1552,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 		wo.tile();
 
+		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
+		
 		summaryTable.append(sb.toString());
 
 		if (saveFilterRange)
@@ -1948,6 +1952,7 @@ public class BenchmarkSpotFit implements PlugIn
 		for (FilterCriteria f : filterCriteria)
 			sb.append(f.name).append('\t');
 
+		sb.append("Run time");
 		return sb.toString();
 	}
 

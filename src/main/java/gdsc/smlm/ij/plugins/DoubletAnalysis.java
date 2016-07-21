@@ -1824,6 +1824,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		}
 
 		// Fit the frames
+		long runTime = System.nanoTime();
 		totalProgress = actualCoordinates.size();
 		stepProgress = Utils.getProgressInterval(totalProgress);
 		progress = 0;
@@ -1855,6 +1856,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
+		runTime = System.nanoTime() - runTime;
 
 		// Collect the results
 		int cic = 0, daic = 0, dbic = 0;
@@ -1922,7 +1924,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		MemoryPeakResults.freeMemory();
 
 		Collections.sort(results);
-		summariseResults(results, density);
+		summariseResults(results, density, runTime);
 
 		windowOrganiser.tile();
 
@@ -1983,9 +1985,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 *
 	 * @param results
 	 *            the results
+	 * @param runTime 
 	 * @param density2
 	 */
-	private void summariseResults(ArrayList<DoubletResult> results, double density)
+	private void summariseResults(ArrayList<DoubletResult> results, double density, long runTime)
 	{
 		// Store results in memory for later analysis
 		doubletResults = results;
@@ -2206,6 +2209,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(bestJaccard);
 		addJaccardScores(sb);
 
+		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
+		
 		summaryTable.append(sb.toString());
 	}
 
@@ -2415,7 +2420,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
 		sb.append(
-				"Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%");
+				"Simple\tBest J\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
 		return sb.toString();
 	}
 
