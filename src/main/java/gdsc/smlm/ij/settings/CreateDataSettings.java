@@ -41,6 +41,7 @@ public class CreateDataSettings
 	public double readNoise = 46;
 	public int bias = 500;
 	public int particles = 300;
+	public boolean samplePerFrame = true;
 	/**
 	 * Photons are modelled using an emission rate (photon emission is constant when the fluorophore is on) sampled from
 	 * a distribution. The rate (average of the distribution) is correlated to the total on time. Observations on real

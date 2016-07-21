@@ -155,44 +155,47 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
+	private static double areaInUm = 0;
 	private static String header = null;
 
 	private GlobalSettings globalSettings;
 	private CreateDataSettings settings;
 
-	private static final String[] NAMES = new String[] { "Signal/Frame", "Signal/Frame (continuous)", "Total Signal",
-			"Blinks", "t-On", "t-Off", "Sampled blinks", "Sampled t-On", "Sampled t-Off", "Noise", "SNR",
-			"SNR (continuous)", "Density", "Precision", "Precision (in-focus)", "X", "Y", "Z", "Width" };
+	private static final String[] NAMES = new String[] { "Samples/Frame", "Signal/Frame", "Signal/Frame (continuous)",
+			"Total Signal", "Blinks", "t-On", "t-Off", "Sampled blinks", "Sampled t-On", "Sampled t-Off", "Noise",
+			"SNR", "SNR (continuous)", "Density", "Precision", "Precision (in-focus)", "X", "Y", "Z", "Width" };
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
 		for (int i = 0; i < displayHistograms.length; i++)
 			displayHistograms[i] = true;
 	}
-	private static final int SIGNAL = 0;
-	private static final int SIGNAL_CONTINUOUS = 1;
-	private static final int TOTAL_SIGNAL = 2;
-	private static final int BLINKS = 3;
-	private static final int T_ON = 4;
-	private static final int T_OFF = 5;
-	private static final int SAMPLED_BLINKS = 6;
-	private static final int SAMPLED_T_ON = 7;
-	private static final int SAMPLED_T_OFF = 8;
-	private static final int NOISE = 9;
-	private static final int SNR = 10;
-	private static final int SNR_CONTINUOUS = 11;
-	private static final int DENSITY = 12;
-	private static final int PRECISION = 13;
-	private static final int PRECISION_IN_FOCUS = 14;
-	private static final int X = 15;
-	private static final int Y = 16;
-	private static final int Z = 17;
-	private static final int WIDTH = 18;
+	private static final int SAMPLES = 0;
+	private static final int SIGNAL = 1;
+	private static final int SIGNAL_CONTINUOUS = 2;
+	private static final int TOTAL_SIGNAL = 3;
+	private static final int BLINKS = 4;
+	private static final int T_ON = 5;
+	private static final int T_OFF = 6;
+	private static final int SAMPLED_BLINKS = 7;
+	private static final int SAMPLED_T_ON = 8;
+	private static final int SAMPLED_T_OFF = 9;
+	private static final int NOISE = 10;
+	private static final int SNR = 11;
+	private static final int SNR_CONTINUOUS = 12;
+	private static final int DENSITY = 13;
+	private static final int PRECISION = 14;
+	private static final int PRECISION_IN_FOCUS = 15;
+	private static final int X = 16;
+	private static final int Y = 17;
+	private static final int Z = 18;
+	private static final int WIDTH = 19;
 
 	private static boolean[] integerDisplay;
 	static
 	{
 		integerDisplay = new boolean[NAMES.length];
+		integerDisplay[SAMPLES] = true;
 		// Signal is an integer but there will be a large range
 		integerDisplay[SIGNAL] = false;
 		integerDisplay[SIGNAL_CONTINUOUS] = false;
@@ -524,6 +527,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			resetMemory();
 
 			settings.exposureTime = 1000; // 1 second frames
+			areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
 
 			// Number of spots per frame
 			int n = 0;
@@ -566,10 +570,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// No points will appear in multiple frames.
 				// Each point has a random number of photons sampled from a range.
 
-				// Use the density to get the number per frame
-				final double areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
-				n = (int) FastMath.max(1, Math.round(areaInUm * settings.density));
-				dist = createUniformDistributionWithPSFWidthBorder();
+				// We can optionally use a mask. Create his first as it updates the areaInUm
+				dist = createDistribution();
+
+				// Randomly sample (i.e. not uniform density in all frames)
+				if (settings.samplePerFrame)
+				{
+					final double mean = areaInUm * settings.density;
+					PoissonDistribution poisson = new PoissonDistribution(mean);
+					StoredDataStatistics samples = new StoredDataStatistics(settings.particles);
+					while (samples.getSum() < settings.particles)
+					{
+						samples.add(poisson.sample());
+					}
+					nextN = new int[samples.getN()];
+					for (int i = 0; i < nextN.length; i++)
+						nextN[i] = (int) samples.getValue(i);
+				}
+				else
+				{
+					// Use the density to get the number per frame
+					n = (int) FastMath.max(1, Math.round(areaInUm * settings.density));
+				}
 			}
 
 			RandomGenerator random = null;
@@ -627,6 +649,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (!showDialog())
 				return;
 			resetMemory();
+
+			areaInUm = settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
 
 			int totalSteps;
 			double correlation = 0;
@@ -1012,7 +1036,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			ImagePlus imp = WindowManager.getImage(settings.distributionMask);
 			if (imp != null)
 			{
-				return createMaskDistribution(imp, settings.distributionMaskSliceDepth);
+				return createMaskDistribution(imp, settings.distributionMaskSliceDepth, true);
 			}
 		}
 		else if (settings.distribution.equals(DISTRIBUTION[GRID]))
@@ -1025,7 +1049,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return createUniformDistributionWithPSFWidthBorder();
 	}
 
-	private SpatialDistribution createMaskDistribution(ImagePlus imp, double sliceDepth)
+	private SpatialDistribution createMaskDistribution(ImagePlus imp, double sliceDepth, boolean updateArea)
 	{
 		// Calculate the scale of the mask
 		final int w = imp.getWidth();
@@ -1038,19 +1062,43 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			ImageStack stack = imp.getImageStack();
 			List<int[]> masks = new ArrayList<int[]>(stack.getSize());
+			int[] maxMask = new int[w * h];
 			for (int slice = 1; slice <= stack.getSize(); slice++)
 			{
-				masks.add(extractMask(stack.getProcessor(slice)));
+				int[] mask = extractMask(imp.getProcessor());
+				if (updateArea)
+				{
+					for (int i = 0; i < mask.length; i++)
+						if (mask[i] != 0)
+							maxMask[i] = 1;
+				}
+				masks.add(mask);
 			}
+			if (updateArea)
+				updateArea(maxMask);
 			return new MaskDistribution3D(masks, w, h, sliceDepth / settings.pixelPitch, scaleX, scaleY,
 					createRandomGenerator());
 		}
 		else
 		{
 			int[] mask = extractMask(imp.getProcessor());
+			if (updateArea)
+				updateArea(mask);
 			return new MaskDistribution(mask, w, h, settings.depth / settings.pixelPitch, scaleX, scaleY,
 					createRandomGenerator());
 		}
+	}
+
+	private void updateArea(int[] mask)
+	{
+		// Count pixels in mask
+		int c = 0;
+		for (int i : mask)
+			if (i != 0)
+				c++;
+		// Convert 
+		final double scale = ((double) c) / mask.length;
+		areaInUm = scale * settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
 	}
 
 	private int[] extractMask(ImageProcessor ip)
@@ -1222,7 +1270,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			ImagePlus imp = WindowManager.getImage(settings.confinementMask);
 			if (imp != null)
 			{
-				return createMaskDistribution(imp, settings.confinementMaskSliceDepth);
+				return createMaskDistribution(imp, settings.confinementMaskSliceDepth, false);
 			}
 		}
 		else if (settings.confinement.equals(CONFINEMENT[CONFINEMENT_SPHERE]))
@@ -1919,7 +1967,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			final double noiseFraction = 1e-3;
 			final ImagePSFModel model = new ImagePSFModel(extractImageStack(imp, lower, upper), zCentre - lower,
 					psfSettings.nmPerPixel / settings.pixelPitch, unitsPerSlice, psfSettings.fwhm, noiseFraction);
-			
+
 			// Add the calibrated centres
 			if (psfSettings.offset != null)
 			{
@@ -1932,7 +1980,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Initialise the HWHM table so that it can be cloned
 			model.initialiseHWHM();
-			
+
 			return model;
 		}
 		catch (Exception e)
@@ -2716,6 +2764,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					: new Statistics();
 		}
 
+		// Find the largest timepoint
+		ImagePlus outputImp = WindowManager.getImage(CREATE_DATA_IMAGE_TITLE);
+		int nFrames;
+		if (outputImp == null)
+		{
+			sortLocalisationsByTime(localisations);
+			nFrames = localisations.get(localisations.size() - 1).getTime();
+		}
+		else
+		{
+			nFrames = outputImp.getStackSize();
+		}
+		int[] countHistogram = new int[nFrames + 1];
+
 		// Use the localisations that were drawn to create the sampled on/off times
 		rebuildNeighbours(localisations);
 
@@ -2789,6 +2851,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 			lastT = l.getTime();
+			countHistogram[lastT]++;
 
 			stats[X].add((l.getX() - centreOffset) * settings.pixelPitch);
 			stats[Y].add((l.getY() - centreOffset) * settings.pixelPitch);
@@ -2798,6 +2861,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		stats[SAMPLED_BLINKS].add(blinks);
 		stats[SAMPLED_T_ON].add(currentT / framesPerSecond);
 		stats[TOTAL_SIGNAL].add(signal);
+
+		// Samples per frame
+		for (int t = 1; t < countHistogram.length; t++)
+			stats[SAMPLES].add(countHistogram[t]);
 
 		if (fluorophores != null)
 		{
@@ -2888,6 +2955,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		sb.append((fluorophores == null) ? localisations.size() : fluorophores.size()).append("\t");
 		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append("\t");
 		sb.append(localisations.size()).append("\t");
+		sb.append(nFrames).append("\t");
+		sb.append(Utils.rounded(areaInUm)).append("\t");
+		sb.append(Utils.rounded(localisations.size() / (areaInUm * nFrames), 4)).append("\t");
 		sb.append(Utils.rounded(getHWHM(), 4)).append("\t");
 		double s = getPsfSD();
 		sb.append(Utils.rounded(s, 4)).append("\t");
@@ -2918,26 +2988,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			IJ.showStatus("Calculating histograms ...");
 			boolean[] chosenHistograms = getChoosenHistograms();
 
-			int[] idList = new int[NAMES.length];
-			int count = 0;
+			WindowOrganiser wo = new WindowOrganiser();
 
 			boolean requireRetile = false;
 			for (int i = 0; i < NAMES.length; i++)
 			{
 				if (chosenHistograms[i])
 				{
-					idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
+					wo.add(Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
 							(integerDisplay[i]) ? 1 : 0, (settings.removeOutliers || alwaysRemoveOutliers[i]) ? 2 : 0,
-							settings.histogramBins * ((integerDisplay[i]) ? 100 : 1));
+							settings.histogramBins * ((integerDisplay[i]) ? 100 : 1)));
 					requireRetile = requireRetile || Utils.isNewWindow();
 				}
 			}
 
-			if (count > 0 && requireRetile)
-			{
-				idList = Arrays.copyOf(idList, count);
-				new WindowOrganiser().tileWindows(idList);
-			}
+			wo.tile();
 		}
 		IJ.showStatus("");
 		return stats[SIGNAL].getMean();
@@ -3106,7 +3171,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private String createHeader()
 	{
-		StringBuilder sb = new StringBuilder("Dataset\tMolecules\tPulses\tLocalisations\tHWHM\tS\tSa");
+		StringBuilder sb = new StringBuilder(
+				"Dataset\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append("\t").append(NAMES[i]);
@@ -3618,7 +3684,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		Component splitLabel = gd.getMessage();
 		// Do not allow grid or mask distribution
 		if (simpleMode)
-			gd.addChoice("Distribution", Arrays.copyOf(DISTRIBUTION, DISTRIBUTION.length - 2), settings.distribution);
+		{
+			// Allow mask but not the grid
+			gd.addChoice("Distribution", Arrays.copyOf(DISTRIBUTION, DISTRIBUTION.length - 1), settings.distribution);
+			gd.addCheckbox("Sample_per_frame", settings.samplePerFrame);
+		}
 		gd.addNumericField("Particles", settings.particles, 0);
 		if (simpleMode)
 			gd.addNumericField("Density (um^-2)", settings.density, 2);
@@ -3709,7 +3779,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return false;
 
 		if (simpleMode)
+		{
 			settings.distribution = gd.getNextChoice();
+			settings.samplePerFrame = gd.getNextBoolean();
+		}
 		settings.particles = Math.abs((int) gd.getNextNumber());
 		if (simpleMode)
 			settings.density = Math.abs(gd.getNextNumber());
@@ -3775,6 +3848,27 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
+		}
+
+		if (settings.distribution.equals(DISTRIBUTION[MASK]))
+		{
+			String[] maskImages = createDistributionImageList();
+			if (maskImages != null)
+			{
+				gd = new GenericDialog(TITLE);
+				gd.addMessage("Select the mask image for the distribution");
+				gd.addChoice("Distribution_mask", maskImages, settings.distributionMask);
+				if (maskListContainsStacks)
+					gd.addNumericField("Distribution_slice_depth (nm)", settings.distributionMaskSliceDepth, 0);
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return false;
+				settings.distributionMask = gd.getNextChoice();
+				if (maskListContainsStacks)
+					settings.distributionMaskSliceDepth = Math.abs(gd.getNextNumber());
+			}
+
+			SettingsManager.saveSettings(globalSettings);
 		}
 
 		return getHistogramOptions();
