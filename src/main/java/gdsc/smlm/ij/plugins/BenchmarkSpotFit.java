@@ -1278,7 +1278,10 @@ public class BenchmarkSpotFit implements PlugIn
 		// Debug the reasons the fit failed
 		if (status != null)
 		{
-			System.out.printf("Failure counts\n");
+			String name = PeakFit.getSolverName(fitConfig);
+			if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
+				name += " Camera";
+			System.out.println("Failure counts: " + name);
 			for (int i = 0; i < status.length; i++)
 			{
 				if (status[i] != 0)
