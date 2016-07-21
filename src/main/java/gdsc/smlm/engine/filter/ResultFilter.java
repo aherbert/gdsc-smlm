@@ -28,7 +28,7 @@ public abstract class ResultFilter
 	protected int nMaxima;
 
 	protected int filteredCount = 0;
-	protected FitResult[] filteredFitResults;
+	protected FitResult[] filteredFitResults, filteredFitResultsWithNeighbours;
 	protected int[] filteredIndices;
 	protected List<PeakResult> peakResults;
 
@@ -56,22 +56,27 @@ public abstract class ResultFilter
 
 	/**
 	 * Pass in a list of fitted peaks to be filtered. Called when fitting was successful
-	 * 
+	 *
 	 * @param fitResult
 	 *            The output from the fitting routine
+	 * @param fitResultWidthNeighbours
+	 *            the fit result width neighbours
 	 * @param maxIndex
 	 *            The source index that was fitted
 	 * @param results
 	 *            The fitted peaks
 	 */
-	public abstract void filter(FitResult fitResult, int maxIndex, PeakResult... results);
+	public abstract void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex,
+			PeakResult... results);
 
 	/**
 	 * Pass in a starting coordinate to be filtered. Called when fitting was unsuccessful but the starting point can
 	 * still be filtered.
-	 * 
+	 *
 	 * @param fitResult
 	 *            The output from the fitting routine
+	 * @param fitResultWidthNeighbours
+	 *            the fit result width neighbours
 	 * @param maxIndex
 	 *            The source index that was fitted
 	 * @param x
@@ -79,7 +84,8 @@ public abstract class ResultFilter
 	 * @param y
 	 *            The y position of the source index
 	 */
-	public abstract void filter(FitResult fitResult, int maxIndex, float x, float y);
+	public abstract void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, float x,
+			float y);
 
 	/**
 	 * Called when all results have been input and the final filtered results are required.

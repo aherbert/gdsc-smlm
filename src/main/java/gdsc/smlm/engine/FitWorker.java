@@ -286,6 +286,7 @@ public class FitWorker implements Runnable
 
 				FitResult fitResult = fit(gf, region, regionBounds, spots, n);
 				job.setFitResult(n, fitResult);
+				job.setFitResultWithNeighbours(n, fitResultWithNeighbours);
 
 				// Debugging
 				if (logger2 != null)
@@ -334,7 +335,7 @@ public class FitWorker implements Runnable
 						{
 							results[npeaks] = sliceResults.get(--i);
 						}
-						filter.filter(fitResult, index, results);
+						filter.filter(fitResult, fitResultWithNeighbours, index, results);
 					}
 
 					// Q. Should this be a failure if the npeaks == 0 (i.e. outside the border; was a duplicate)
@@ -349,7 +350,7 @@ public class FitWorker implements Runnable
 					if (filter != null)
 					{
 						// Check the start position for the distance to the filter positions
-						filter.filter(fitResult, index, x + 0.5f, y + 0.5f);
+						filter.filter(fitResult, fitResultWithNeighbours, index, x + 0.5f, y + 0.5f);
 					}
 
 					// Add the failed jobs to a list.
@@ -396,7 +397,11 @@ public class FitWorker implements Runnable
 			job.setIndices(filter.getMaxIndices());
 
 			for (int i = 0; i < filter.getFilteredCount(); i++)
+			{
 				job.setFitResult(i, filter.getFitResults()[i]);
+				// We do not support this yet
+				job.setFitResultWithNeighbours(i, null);
+			}
 
 			this.results.addAll(filter.getResults());
 		}
@@ -719,6 +724,12 @@ public class FitWorker implements Runnable
 		return params;
 	}
 
+	
+	/**
+	 * Store the last fit result with neighbours
+	 */
+	private FitResult fitResultWithNeighbours = null;
+	
 	/**
 	 * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
 	 * <p>
@@ -743,6 +754,8 @@ public class FitWorker implements Runnable
 	 */
 	private FitResult fit(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, Spot[] spots, int n)
 	{
+		fitResultWithNeighbours = null;
+		
 		int width = regionBounds.width;
 		int height = regionBounds.height;
 		int x = spots[n].x;
@@ -922,7 +935,7 @@ public class FitWorker implements Runnable
 					params[i * parametersPerPeak + Gaussian2DFunction.Y_POSITION] += 0.001;
 			}
 
-			fitResult = gf.fit(region, width, height, npeaks, params, true);
+			fitResultWithNeighbours = fitResult = gf.fit(region, width, height, npeaks, params, true);			
 
 			printFitResults(fitResult, region, width, height, npeaks, 0, gf.getIterations());
 

@@ -225,4 +225,17 @@ public class FitJob
 	public void setResults(List<PeakResult> results)
 	{
 	}
+
+	/**
+	 * Set the fitting result for the specified fitted index if the fit was attempted with neighbour peaks
+	 * <p>
+	 * This method is not implemented within this class but can be overridden if necessary to allow access to the
+	 * results from the {@link FitWorker}.
+	 * 
+	 * @param n
+	 * @param fitResult
+	 */
+	public void setFitResultWithNeighbours(int n, FitResult fitResult)
+	{
+	}
 }

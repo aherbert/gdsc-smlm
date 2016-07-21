@@ -377,6 +377,7 @@ public class BenchmarkSpotFit implements PlugIn
 		final ScoredSpot[] spots;
 		double tp, fp, tn, fn;
 		FitResult[] fitResult;
+		FitResult[] fitResultWithNeighbours;
 		float noise;
 
 		/** Store if the candidates can be fitted and match a position. Size is the number of scored spots */
@@ -511,6 +512,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 			FilterCandidates candidates = filterCandidates.get(frame);
 			FitResult[] fitResult = new FitResult[candidates.spots.length];
+			FitResult[] fitResultWithNeighbours = new FitResult[candidates.spots.length];
 
 			// Fit the candidates and store the results
 			FitParameters parameters = new FitParameters();
@@ -530,6 +532,7 @@ public class BenchmarkSpotFit implements PlugIn
 			for (int i = 0; i < spots.length; i++)
 			{
 				fitResult[i] = job.getFitResult(i);
+				fitResultWithNeighbours[i] = job.getFitResultWithNeighbours(i);
 				if (fitResult[i].getStatus() == FitStatus.OK)
 					fittedSpots++;
 			}
@@ -730,6 +733,7 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.tn = tn;
 			candidates.fn = fn;
 			candidates.fitResult = fitResult;
+			candidates.fitResultWithNeighbours = fitResultWithNeighbours;
 			candidates.fitMatch = fitMatch;
 			candidates.match = match;
 			candidates.zPosition = zPosition;
@@ -1141,8 +1145,9 @@ public class BenchmarkSpotFit implements PlugIn
 		double tp = 0, fp = 0;
 		int failcTP = 0, failcFP = 0;
 		int cTP = 0, cFP = 0;
-		int[] status = null;
+		int[] status = null, status2 = null;
 		status = new int[FitStatus.values().length];
+		status2 = new int[status.length];
 		for (FilterCandidates result : filterCandidates.values())
 		{
 			// Count the number of fit results that matched (tp) and did not match (fp)
@@ -1160,7 +1165,10 @@ public class BenchmarkSpotFit implements PlugIn
 				{
 					// Debug why the MLE does not fit as many candidates as the LSE
 					if (status != null)
+					{
 						status[result.fitResult[i].getStatus().ordinal()]++;
+						status2[result.fitResultWithNeighbours[i].getStatus().ordinal()]++;
+					}
 
 					if (result.spots[i].match)
 						failcTP++;
@@ -1274,6 +1282,11 @@ public class BenchmarkSpotFit implements PlugIn
 			{
 				if (status[i] != 0)
 					System.out.printf("%s = %d\n", FitStatus.values()[i].toString(), status[i]);
+			}
+			for (int i = 0; i < status2.length; i++)
+			{
+				if (status2[i] != 0)
+					System.out.printf("%s = %d\n", FitStatus.values()[i].toString(), status2[i]);
 			}
 		}
 

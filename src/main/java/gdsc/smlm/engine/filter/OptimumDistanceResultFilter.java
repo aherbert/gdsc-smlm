@@ -29,7 +29,7 @@ import java.util.TreeSet;
  */
 public class OptimumDistanceResultFilter extends ResultFilter
 {
-	private FitResult[] bestFitResults;
+	private FitResult[] bestFitResults, bestFitResultsWithNeighbours;
 	private int[] bestIndices;
 	private float[] bestD2;
 	private float[] bestSignal;
@@ -39,6 +39,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	{
 		super(filter, d, nMaxima);
 		bestFitResults = new FitResult[filter.size()];
+		bestFitResultsWithNeighbours = new FitResult[filter.size()];
 		bestIndices = new int[filter.size()];
 		bestD2 = new float[filter.size()];
 		Arrays.fill(bestD2, d2);
@@ -53,7 +54,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	 * gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
-	public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
+	public void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, PeakResult... results)
 	{
 		for (PeakResult r : results)
 		{
@@ -72,6 +73,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 					if (s < bestSignal[i])
 						continue;
 					bestFitResults[i] = fitResult;
+					bestFitResultsWithNeighbours[i] = fitResultWidthNeighbours;
 					bestIndices[i] = maxIndex;
 					bestSignal[i] = s;
 					bestPeakResults[i] = r;
@@ -86,7 +88,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int, float, float)
 	 */
 	@Override
-	public void filter(FitResult fitResult, int maxIndex, float x, float y)
+	public void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, float x, float y)
 	{
 		for (int i = 0; i < filter.size(); i++)
 		{
@@ -101,6 +103,8 @@ public class OptimumDistanceResultFilter extends ResultFilter
 			if (dd < bestD2[i])
 			{
 				bestFitResults[i] = fitResult;
+				bestFitResultsWithNeighbours[i] = fitResultWidthNeighbours;
+				
 				bestIndices[i] = maxIndex;
 				bestD2[i] = dd;
 			}
@@ -139,10 +143,12 @@ public class OptimumDistanceResultFilter extends ResultFilter
 		// The fit results and the indices must match so preserve the same order
 		filteredCount = unique;
 		filteredFitResults = new FitResult[unique];
+		filteredFitResultsWithNeighbours = new FitResult[unique];
 		filteredIndices = new int[unique];
 		for (int i = 0; i < unique; i++)
 		{
 			filteredFitResults[i] = bestFitResults[uniqueIndices[i]];
+			filteredFitResultsWithNeighbours[i] = bestFitResultsWithNeighbours[uniqueIndices[i]];
 			filteredIndices[i] = bestIndices[uniqueIndices[i]];
 		}
 
