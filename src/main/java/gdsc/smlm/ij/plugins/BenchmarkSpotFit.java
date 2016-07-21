@@ -1278,6 +1278,7 @@ public class BenchmarkSpotFit implements PlugIn
 		// Debug the reasons the fit failed
 		if (status != null)
 		{
+			System.out.printf("Failure counts\n");
 			for (int i = 0; i < status.length; i++)
 			{
 				if (status[i] != 0)
@@ -1286,7 +1287,7 @@ public class BenchmarkSpotFit implements PlugIn
 			for (int i = 0; i < status2.length; i++)
 			{
 				if (status2[i] != 0)
-					System.out.printf("%s = %d\n", FitStatus.values()[i].toString(), status2[i]);
+					System.out.printf("Neighbours %s = %d\n", FitStatus.values()[i].toString(), status2[i]);
 			}
 		}
 
