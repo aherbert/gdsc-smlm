@@ -1102,8 +1102,8 @@ public class BenchmarkSpotFit implements PlugIn
 			}
 
 			// Debug
-			//System.out.printf("Frame %d : %d / (%d + %d). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
-			//		r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(), p, n,
+			//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
+			//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
 			//		nAfter, (double) n / (n + p));
 
 			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
