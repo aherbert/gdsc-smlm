@@ -1005,7 +1005,6 @@ public class BenchmarkSpotFit implements PlugIn
 
 		if (Utils.isInterrupted())
 		{
-			IJ.showProgress(1);
 			IJ.showStatus("Aborted");
 			return;
 		}
@@ -1161,14 +1160,18 @@ public class BenchmarkSpotFit implements PlugIn
 				else
 					cFP++;
 				final FitResult fitResult = result.fitResult[i];
+				if (status2 != null)
+				{
+					final FitResult fitResultWithNeighbours = result.fitResultWithNeighbours[i];
+					if (fitResultWithNeighbours != null && fitResultWithNeighbours.getStatus() != FitStatus.OK)
+						status2[fitResultWithNeighbours.getStatus().ordinal()]++;
+				}
 				if (fitResult.getStatus() != FitStatus.OK)
 				{
 					// Debug why the MLE does not fit as many candidates as the LSE
 					if (status != null)
 					{
 						status[result.fitResult[i].getStatus().ordinal()]++;
-						if (result.fitResultWithNeighbours[i]!= null)
-							status2[result.fitResultWithNeighbours[i].getStatus().ordinal()]++;
 					}
 
 					if (result.spots[i].match)
@@ -1283,16 +1286,25 @@ public class BenchmarkSpotFit implements PlugIn
 			if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 				name += " Camera";
 			System.out.println("Failure counts: " + name);
+			int total = 0;
 			for (int i = 0; i < status.length; i++)
 			{
 				if (status[i] != 0)
+				{
 					System.out.printf("%s = %d\n", FitStatus.values()[i].toString(), status[i]);
+					total += status[i]; 
+				}
 			}
+			int total2 = 0;
 			for (int i = 0; i < status2.length; i++)
 			{
 				if (status2[i] != 0)
+				{
 					System.out.printf("Neighbours %s = %d\n", FitStatus.values()[i].toString(), status2[i]);
+					total2 += status2[i]; 
+				}
 			}
+			System.out.printf("Total Failures: %d. Neighbour failures = %d\n", total, total2);
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -1467,8 +1479,7 @@ public class BenchmarkSpotFit implements PlugIn
 			if (slope > 1)
 				plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
 			else
-				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope,
-						limits2[1]);
+				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope, limits2[1]);
 			PlotWindow pw = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				wo.add(pw);
