@@ -692,6 +692,29 @@ public class ImageSourceTest
 		Assert.assertFalse(source.isValid(data.length + 1));
 	}
 
+	@Test
+	public void canSerialiseMemoryImageSource()
+	{
+		int w = 5;
+		int h = 3;
+		int n = 15;
+		String name = "canSerialiseMemoryImageSource";
+		
+		MemoryImageSource source = new MemoryImageSource(w, h, createData(w, h, n));
+		source.setName(name);
+		source.setFreeMemoryOnClose(true);
+		
+		String xml = source.toXML();
+		
+		source = (MemoryImageSource) ImageSource.fromXML(xml);
+		
+		Assert.assertEquals(w, source.getWidth());
+		Assert.assertEquals(h, source.getHeight());
+		Assert.assertEquals(n, source.getFrames());
+		Assert.assertEquals(name, source.getName());
+		Assert.assertEquals(true, source.isFreeMemoryOnClose());
+	}
+	
 	/**
 	 * Create data using the specified dimensions and the number of frames. Each frame will have a different base
 	 * number and each index will be unique in the frame.
