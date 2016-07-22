@@ -3230,14 +3230,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			double max = 0;
 			for (int i = 0; i < scores2.size(); i++)
 			{
+				double score = scores2.get(i).score;
+				if (max >= score)
+					continue;
+
 				// Round this so that small differences are ignored.
 				// This should favour filters with lower fail count.
-				double score = Maths.round(scores2.get(i).score, 3);
-				if (max < score)
-				{
-					max = score;
-					maxi = i;
-				}
+				double diff = Maths.round(score - max, 3);
+				if (diff <= 0)
+					continue;
+				
+				max = score;
+				maxi = i;
 			}
 			return scores2.get(maxi);
 		}
