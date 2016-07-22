@@ -921,14 +921,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textCoordinateShiftFactor = numerics.get(n++);
 				textSignalStrength = numerics.get(n++);
 				textMinPhotons = numerics.get(n++);
-				textMinWidthFactor = numerics.get(n++);
-				textWidthFactor = numerics.get(n++);
-				textPrecisionThreshold = numerics.get(n++);
 				if (extraOptions)
 				{
 					textNoise = numerics.get(n++);
 					textNoiseMethod = choices.get(ch++);
 				}
+				textMinWidthFactor = numerics.get(n++);
+				textWidthFactor = numerics.get(n++);
+				textPrecisionThreshold = numerics.get(n++);
 			}
 			textLogProgress = checkboxes.get(b++);
 			if (!maximaIdentification)
