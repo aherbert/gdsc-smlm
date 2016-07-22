@@ -70,6 +70,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -942,8 +943,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
-			msg += String.format("\nCurrent Best=%s, FailCount=%d, Range=%d", Utils.rounded(best.score),
-					best.failCount, best.failCountRange);
+			msg += String.format("\nCurrent Best=%s, FailCount=%d, Range=%d", Utils.rounded(best.score), best.failCount,
+					best.failCountRange);
 		}
 		gd.addMessage(msg);
 
@@ -3201,7 +3202,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		fitConfig.setPrecisionUsingBackground(filter.isPrecisionUsesLocalBackground());
 
 		// We could set the fail count range dynamically using a window around the best filter 
-		
+
 		config.setFailuresLimit((best.failCount + best.failCountRange / 2));
 
 		return true;
@@ -3211,13 +3212,34 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		if (!scores.isEmpty())
 		{
-			int maxi = 0;
-			for (int i = 0; i < scores.size(); i++)
+			// Clone so we can sort the list by fail count
+			@SuppressWarnings("unchecked")
+			ArrayList<FilterResult> scores2 = (ArrayList<FilterResult>) scores.clone();
+			Collections.sort(scores2, new Comparator<FilterResult>()
 			{
-				if (scores.get(maxi).score < scores.get(i).score)
+				public int compare(FilterResult o1, FilterResult o2)
+				{
+					int result = o1.failCount - o2.failCount;
+					if (result != 0)
+						return result;
+					return o1.failCountRange - o2.failCountRange;
+				}
+			});
+
+			int maxi = 0;
+			double max = 0;
+			for (int i = 0; i < scores2.size(); i++)
+			{
+				// Round this so that small differences are ignored.
+				// This should favour filters with lower fail count.
+				double score = Maths.round(scores2.get(i).score, 3);
+				if (max < score)
+				{
+					max = score;
 					maxi = i;
+				}
 			}
-			return scores.get(maxi);
+			return scores2.get(maxi);
 		}
 		return null;
 	}
