@@ -706,13 +706,20 @@ public class ImageSourceTest
 		
 		String xml = source.toXML();
 		
-		source = (MemoryImageSource) ImageSource.fromXML(xml);
+		MemoryImageSource source2 = (MemoryImageSource) ImageSource.fromXML(xml);
 		
-		Assert.assertEquals(w, source.getWidth());
-		Assert.assertEquals(h, source.getHeight());
-		Assert.assertEquals(n, source.getFrames());
-		Assert.assertEquals(name, source.getName());
-		Assert.assertEquals(true, source.isFreeMemoryOnClose());
+		Assert.assertEquals(w, source2.getWidth());
+		Assert.assertEquals(h, source2.getHeight());
+		Assert.assertEquals(n, source2.getFrames());
+		Assert.assertEquals(name, source2.getName());
+		Assert.assertEquals(true, source2.isFreeMemoryOnClose());
+		
+		float[] data;
+		while ((data = source.next()) != null) 
+		{
+			float[] data2 = source2.next();
+			Assert.assertArrayEquals(data, data2, 1e-6f);
+		}
 	}
 	
 	/**
