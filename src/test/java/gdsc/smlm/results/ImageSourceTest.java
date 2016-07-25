@@ -705,6 +705,7 @@ public class ImageSourceTest
 		source.setFreeMemoryOnClose(true);
 		
 		String xml = source.toXML();
+		//System.out.println(xml);
 		
 		MemoryImageSource source2 = (MemoryImageSource) ImageSource.fromXML(xml);
 		
@@ -721,7 +722,7 @@ public class ImageSourceTest
 			Assert.assertArrayEquals(data, data2, 1e-6f);
 		}
 	}
-	
+
 	/**
 	 * Create data using the specified dimensions and the number of frames. Each frame will have a different base
 	 * number and each index will be unique in the frame.
