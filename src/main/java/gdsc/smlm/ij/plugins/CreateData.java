@@ -49,6 +49,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.ij.Utils;
+import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.Statistics;
@@ -1157,9 +1158,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Threshold to a mask
 		FloatProcessor fp = new FloatProcessor(w, h, pixels);
 		ShortProcessor sp = (ShortProcessor) fp.convertToShort(true);
-		// TODO - abstract this to another class. Maybe move the 
-		// Auto_Thresholder methods from GDSC IJ package to GDSC Core
-		int t = getThreshold(sp.getHistogram());
+		final int t = AutoThreshold.getThreshold(AutoThreshold.Method.OTSU, sp.getHistogram());
 		//Utils.display("Blurred", fp);
 		for (int i = 0; i < mask.length; i++)
 			if (sp.get(i) >= t)
@@ -1169,140 +1168,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double scale = ((double) c) / mask.length;
 		//System.out.printf("Scale = %f\n", scale);
 		areaInUm = scale * settings.size * settings.pixelPitch * settings.size * settings.pixelPitch / 1e6;
-	}
-
-	public static int getThreshold(int[] data)
-	{
-		int threshold = -1;
-
-		// bracket the histogram to the range that holds data to make it quicker
-		int minbin = 0;
-		int maxbin = 0;
-		for (int i = 0; i < data.length; i++)
-		{
-			if (data[i] > 0)
-				maxbin = i;
-		}
-		for (int i = data.length - 1; i >= 0; i--)
-		{
-			if (data[i] > 0)
-				minbin = i;
-		}
-		//IJ.log (""+minbin+" "+maxbin);
-		int[] data2 = new int[(maxbin - minbin) + 1];
-		for (int i = minbin; i <= maxbin; i++)
-		{
-			data2[i - minbin] = data[i];
-		}
-
-		threshold = Otsu(data2);
-
-		// Check if any thresholding was performed
-		if (threshold < 0)
-			return 0;
-
-		threshold += minbin; // add the offset of the histogram		
-
-		return threshold;
-	}
-
-	public static int Otsu(int[] data)
-	{
-		// Otsu's threshold algorithm
-		// C++ code by Jordan Bevik <Jordan.Bevic@qtiworld.com>
-		// ported to ImageJ plugin by G.Landini
-		int k, kStar; // k = the current threshold; kStar = optimal threshold
-		int N1, N; // N1 = # points with intensity <=k; N = total number of points
-		double BCV, BCVmax; // The current Between Class Variance and maximum BCV
-		double num, denom; // temporary bookeeping
-		int Sk; // The total intensity for all histogram points <=k
-		int S, L = data.length; // The total intensity of the image
-
-		// Initialize values:
-		S = N = 0;
-		double ssx = 0;
-		for (k = 0; k < L; k++)
-		{
-			ssx += k * k * data[k];
-			S += k * data[k]; // Total histogram intensity
-			N += data[k]; // Total number of data points
-		}
-
-		Sk = 0;
-		N1 = data[0]; // The entry for zero intensity
-		BCV = 0;
-		BCVmax = 0;
-		kStar = 0;
-		int kStar_count = 0;
-
-		// Look at each possible threshold value,
-		// calculate the between-class variance, and decide if it's a max
-		for (k = 1; k < L - 1; k++)
-		{ // No need to check endpoints k = 0 or k = L-1
-			Sk += k * data[k];
-			N1 += data[k];
-
-			// The float casting here is to avoid compiler warning about loss of precision and
-			// will prevent overflow in the case of large saturated images
-			denom = (double) (N1) * (N - N1); // Maximum value of denom is (N^2)/4 =  approx. 3E10
-
-			if (denom != 0)
-			{
-				// Float here is to avoid loss of precision when dividing
-				num = ((double) N1 / N) * S - Sk; // Maximum value of num =  255*N = approx 8E7
-				BCV = (num * num) / denom;
-
-			}
-			else
-				BCV = 0;
-
-			//			if (BCV >= BCVmax)
-			//			{ // Assign the best threshold found so far
-			//				BCVmax = BCV;
-			//				kStar = k;
-			//			}
-			// Added for debugging.
-			// Gonzalex & Woods, Digital Image Processing, 3rd Ed. pp 746:
-			// "If a maximum exists for more than one threshold it is customary to average them"
-			if (BCV > BCVmax)
-			{ // Assign the best threshold found so far
-				BCVmax = BCV;
-				kStar = k;
-				kStar_count = 1;
-			}
-			else if (BCV == BCVmax)
-			{
-				// Total the thresholds for averaging
-				kStar += k;
-				kStar_count++;
-			}
-		}
-
-		if (kStar_count > 1)
-		{
-			if (IJ.debugMode)
-				IJ.log("Otsu method has multiple optimal thresholds");
-			kStar /= kStar_count;
-		}
-
-		// Output the measure of separability. Requires BCVmax / BCVglobal
-		if (IJ.debugMode && N > 0)
-		{
-			// Calculate global variance
-			double sx = S;
-			ssx = 0;
-			for (k = 1; k < L; k++)
-				ssx += k * k * data[k];
-			BCV = (ssx - sx * sx / N) / N;
-
-			// Removed use of minbin to allow thread safe execution
-			//IJ.log(String.format("Otsu separability @ %d: %f", kStar + minbin, (BCVmax / BCV)));			
-			IJ.log(String.format("Otsu separability @ %d: %f", kStar, (BCVmax / BCV)));
-		}
-
-		// kStar += 1;	// Use QTI convention that intensity -> 1 if intensity >= k
-		// (the algorithm was developed for I-> 1 if I <= k.)
-		return kStar;
 	}
 
 	private int[] extractMask(ImageProcessor ip)
