@@ -1970,13 +1970,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (!gd.wasOKed())
 				return;
 
-			LUT lut = LUTHelper.createLUT(LutColour.RED_CYAN);
+			LUT lut = LUTHelper.createLUT(LutColour.ICE);
 			Overlay o = new Overlay();
-			for (int i = 0; i < results.size(); i++)
+			for (int i = 0, j=results.size()-1; i < results.size(); i++, j--)
 			{
 				PeakResult r = results.getResults().get(i);
 				PointRoi roi = new PointRoi(r.getXPosition(), r.getYPosition());
-				Color c = LUTHelper.getColour(lut, i, results.size());
+				Color c = LUTHelper.getColour(lut, j, results.size());
 				roi.setStrokeColor(c);
 				roi.setFillColor(c);
 				if (imp.getStackSize() > 1)
