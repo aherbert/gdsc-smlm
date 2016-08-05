@@ -1407,9 +1407,10 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, m.getJaccard());
 
 		// Do it again but pretend we can perfectly filter all the false positives
-		add(sb, tp);
+		//add(sb, tp);
 		m = new FractionClassificationResult(tp, 0, 0, simulationParameters.molecules - tp);
-		add(sb, m.getRecall());
+		// Recall is unchanged
+		// Precision will be 100%
 		add(sb, m.getF1Score());
 		add(sb, m.getJaccard());
 
@@ -1937,10 +1938,8 @@ public class BenchmarkSpotFit implements PlugIn
 		sb.append("F1\t");
 		sb.append("Jaccard\t");
 
-		sb.append("perfectTP\t");
-		sb.append("Recall\t");
-		sb.append("F1\t");
-		sb.append("Jaccard\t");
+		sb.append("pF1\t");
+		sb.append("pJaccard\t");
 
 		sb.append("Med.Distance (nm)\t");
 		sb.append("Med.Depth (nm)\t");
