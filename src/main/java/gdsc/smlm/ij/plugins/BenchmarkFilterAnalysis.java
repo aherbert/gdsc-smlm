@@ -625,6 +625,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance ||
 				lastPartialSignalFactor != partialSignalFactor || lastUpperSignalFactor != upperSignalFactor)
 		{
+			// Only cache results for the same analysis settings.
+			// This functionality is for choosing the optimum fail limit.
+			scores.clear();
+			
 			lastId = BenchmarkSpotFit.fitResultsId;
 			lastRank = rerankBySignal;
 			lastUpperMatchDistance = upperMatchDistance;
@@ -938,7 +942,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
 		String msg = String.format(
-				"%d results, %d True-Positives\nExpected signal precision = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
+				"%d results, %d True-Positives\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
 				total, tp, signal, pSignal, pLSE, pMLE);
 		FilterResult best = getBestResult();
 		if (best != null)
