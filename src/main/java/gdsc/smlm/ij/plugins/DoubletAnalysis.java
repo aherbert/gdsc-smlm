@@ -2420,7 +2420,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		for (String name : NAMES2)
 			sb.append(name).append('\t');
 		sb.append(
-				"Simple\tBest J\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
+				"Matching\tBest J\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%\tRun time");
 		return sb.toString();
 	}
 
