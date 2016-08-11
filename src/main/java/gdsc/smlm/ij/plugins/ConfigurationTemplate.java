@@ -97,15 +97,17 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setCoordinateShiftFactor(1.2);
 		fitConfig.setSignalStrength(35);
 		fitConfig.setMinPhotons(30);
-		fitConfig.setMinWidthFactor(fitConfig.getMinWidthFactor()); // TODO
+		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(45);
 		addTemplate("PALM LSE", config, false);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
+		config.setFailuresLimit(3);
 		addTemplate("STORM LSE", config, false);
 		config.setResidualsThreshold(1);
+		config.setFailuresLimit(1);
 
 		// Change settings for different fit engines
 		fitConfig.setFitSolver(FitSolver.MLE);
@@ -113,29 +115,31 @@ public class ConfigurationTemplate implements PlugIn
 		fitConfig.setCoordinateShiftFactor(1.2);
 		fitConfig.setSignalStrength(32);
 		fitConfig.setMinPhotons(30);
-		fitConfig.setMinWidthFactor(fitConfig.getMinWidthFactor()); // TODO
+		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(47);
 		addTemplate("PALM MLE", config, false);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
+		config.setFailuresLimit(3);
 		addTemplate("STORM MLE", config, false);
 		config.setResidualsThreshold(1);
+		config.setFailuresLimit(1);
 
 		fitConfig.setModelCamera(true);
 		fitConfig.setCoordinateShiftFactor(1.5);
 		fitConfig.setSignalStrength(30);
 		fitConfig.setMinPhotons(30);
-		fitConfig.setMinWidthFactor(fitConfig.getMinWidthFactor()); // TODO
+		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
 		fitConfig.setPrecisionThreshold(50);
 		addTemplate("PALM MLE Camera", config, false);
 
 		// Add settings for STORM ...
 		config.setResidualsThreshold(0.4);
+		config.setFailuresLimit(3);
 		addTemplate("STORM MLE Camera", config, false);
-		config.setResidualsThreshold(1);
 	}
 
 	private static void addTemplate(String name, FitEngineConfiguration config, boolean custom)
