@@ -1073,6 +1073,7 @@ public class BenchmarkSpotFit implements PlugIn
 			int count = 0;
 			for (ScoredSpot spot : r.spots)
 			{
+				count++;
 				nn += spot.antiScore();
 				if (spot.match)
 				{
@@ -1098,8 +1099,6 @@ public class BenchmarkSpotFit implements PlugIn
 					if (nAfter >= negativesAfterAllPositives && (double) n / (n + p) >= f2)
 						break;
 				}
-
-				count++;
 			}
 
 			// Debug
