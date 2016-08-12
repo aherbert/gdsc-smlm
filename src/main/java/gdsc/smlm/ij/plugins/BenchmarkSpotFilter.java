@@ -119,6 +119,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private WindowOrganiser windowOrganiser = new WindowOrganiser();
 
+	public static String tablePrefix, resultPrefix;
+	
 	public class ScoredSpot implements Comparable<ScoredSpot>
 	{
 		final boolean match;
@@ -1036,9 +1038,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
 		sb.append(Utils.rounded(matchDistance)).append("\t");
 		sb.append(Utils.rounded(lowerSignalFactor)).append("\t");
-		sb.append(Utils.rounded(upperSignalFactor)).append("\t");
+		sb.append(Utils.rounded(upperSignalFactor));
 
+		resultPrefix = sb.toString();
+		
 		// Add the results
+		sb.append("\t");
 
 		// Rank the scored spots by intensity
 		Collections.sort(allSpots);
@@ -1272,7 +1277,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
 		sb.append(
-				"Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tRanked\tlower d\td\tlower sf\tsf\tSlope\t");
+				"Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tRanked\tlower d\td\tlower sf\tsf");
+		tablePrefix = sb.toString();
+		sb.append("\tSlope\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
