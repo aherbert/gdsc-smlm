@@ -71,17 +71,22 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		for (int i = 0; i < thresholdMethods.length; i++)
 		{
 			thresholdMethodNames[i] = thresholdMethods[i].name;
+			thresholdMethodOptions[i] = true;
 		}
-		// Default to some
-		thresholdMethodOptions[AutoThreshold.Method.NONE.ordinal()] = true;
-		thresholdMethodOptions[AutoThreshold.Method.OTSU.ordinal()] = true;
+		// Turn some off
+		// These often fail to converge
+		thresholdMethodOptions[AutoThreshold.Method.INTERMODES.ordinal()] = false;
+		thresholdMethodOptions[AutoThreshold.Method.MINIMUM.ordinal()] = false;
+		// These are slow
+		thresholdMethodOptions[AutoThreshold.Method.SHANBHAG.ordinal()] = false;
+		thresholdMethodOptions[AutoThreshold.Method.RENYI_ENTROPY.ordinal()] = false;
 	}
 	private AutoThreshold.Method[] methods = null;
 
 	private static double fractionPositives = 100;
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
-	private static boolean selectMethods = false;
+	private static boolean selectMethods = true;
 
 	private boolean extraOptions = false;
 
@@ -137,15 +142,17 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		 */
 		@SuppressWarnings("unused")
 		final boolean[] good;
+		final long time;
 
 		public RankResult(AutoThreshold.Method m, float t, FractionClassificationResult f, ClassificationResult c,
-				boolean[] good)
+				boolean[] good, long time)
 		{
 			this.m = m;
 			this.t = t;
 			this.f = f;
 			this.c = c;
 			this.good = good;
+			this.time = time;
 		}
 	}
 
@@ -246,14 +253,18 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			RankResults results = new RankResults(spots, zPosition);
 			this.results.put(frame, results);
 
+			long t1 = System.nanoTime();
 			FloatHistogram histogram = FloatHistogram.buildHistogram(intensity, true);
 			// Only compact once
 			final int bins = 4096;
 			Histogram histogram2 = histogram.compact(bins);
+			t1 = System.nanoTime() - t1;
 
 			for (AutoThreshold.Method m : methods)
 			{
+				long t2 = System.nanoTime();
 				final float t = histogram2.getAutoThreshold(m);
+				t2 = System.nanoTime() - t2;
 
 				// Score
 				final boolean[] good = new boolean[spots.length];
@@ -290,7 +301,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 				// Store the results using a copy of the original (to preserve the candidates for repeat analysis)
 				results.results.add(new RankResult(m, t, new FractionClassificationResult(tp, fp, tn, fn),
-						new ClassificationResult(itp, ifp, itn, ifn), good));
+						new ClassificationResult(itp, ifp, itn, ifn), good, t1 + t2));
 			}
 		}
 	}
@@ -702,11 +713,20 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		add(sb, fp);
 
 		String resultPrefix = sb.toString();
-		FractionClassificationResult m;
-		
+
 		// TODO
+
 		// Pre-compute the results and have optional sort
+
 		// Add more scoring metrics
+
+		// Add good label to spot candidates and have the benchmark spot filter respect this before applying the fail count limit.
+		// This may just involve setting the fail count to zero in all the results that are good, given that spots are in order
+		// and we are just thresholding by intensity
+
+		// Allow using the fitted results from benchmark spot fit. Will it make a difference if we fit the candidates (some will fail
+		// if weak).
+		// Can this be done by allowing the user to select the input (spot candidates or fitted positions)?
 
 		for (int i = 0; i < methods.length; i++)
 		{
@@ -717,11 +737,13 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			int ifp = 0;
 			int itn = 0;
 			Statistics s = new Statistics();
+			long time = 0;
 
 			for (RankResults rr : rankResults.values())
 			{
 				RankResult r = rr.results.get(i);
 				s.add(r.t);
+				time += r.time;
 				tp += r.f.getTP();
 				fp += r.f.getFP();
 				tn += r.f.getTN();
@@ -735,6 +757,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			add(sb, methods[i].name);
 			sb.append('\t').append(Utils.rounded(s.getMean())).append(" +/- ")
 					.append(Utils.rounded(s.getStandardDeviation()));
+			add(sb, Utils.timeToString(time / 1e6));
 
 			// TP are all accepted candidates that can be matched to a spot
 			// FP are all accepted candidates that cannot be matched to a spot
@@ -742,28 +765,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			// FN = The number of missed spots
 
 			// Raw counts of match or no-match
-			add(sb, itp);
-			add(sb, ifp);
-			add(sb, itn);
-			add(sb, simulationParameters.molecules - itp);
-			m = new FractionClassificationResult(itp, ifp, itn, simulationParameters.molecules - itp);
-			add(sb, m.getRecall());
-			add(sb, m.getPrecision());
-			add(sb, m.getF1Score());
-			add(sb, m.getJaccard());
+			addScores(sb, new FractionClassificationResult(itp, ifp, itn, simulationParameters.molecules - itp));
 
 			// Fractional scoring
-			add(sb, tp);
-			add(sb, fp);
-			add(sb, tn);
-			add(sb, simulationParameters.molecules - tp);
-			m = new FractionClassificationResult(tp, fp, tn, simulationParameters.molecules - tp);
-			add(sb, m.getRecall());
-			add(sb, m.getPrecision());
-			add(sb, m.getF1Score());
-			add(sb, m.getJaccard());
-
-			// TODO - we can add a lot more scores here now we have the tn & fn
+			addScores(sb, new FractionClassificationResult(tp, fp, tn, simulationParameters.molecules - tp));
 
 			summaryTable.append(sb.toString());
 		}
@@ -833,30 +838,50 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		sb.append("Method\t");
 		sb.append("Threshold\t");
+		sb.append("Time\t");
 
-		sb.append("tp\t");
-		sb.append("fp\t");
-		sb.append("tn\t");
-		sb.append("fn\t");
-
-		sb.append("Recall\t");
-		sb.append("Precision\t");
-		sb.append("F1\t");
-		sb.append("Jaccard\t");
-
-		sb.append("f tp\t");
-		sb.append("f fp\t");
-		sb.append("f tn\t");
-		sb.append("f fn\t");
-
-		sb.append("f Recall\t");
-		sb.append("f Precision\t");
-		sb.append("f F1\t");
-		sb.append("f Jaccard\t");
-
-		// TODO - add other scores
+		addScoreColumns(sb, null);
+		addScoreColumns(sb, "f ");
 
 		return sb.toString();
+	}
+
+	private void addScoreColumns(StringBuilder sb, String prefix)
+	{
+		addScoreColumn(sb, prefix, "tp");
+		addScoreColumn(sb, prefix, "fp");
+		addScoreColumn(sb, prefix, "tn");
+		addScoreColumn(sb, prefix, "fn");
+		addScoreColumn(sb, prefix, "Recall");
+		addScoreColumn(sb, prefix, "Precision");
+		addScoreColumn(sb, prefix, "F1");
+		addScoreColumn(sb, prefix, "Jaccard");
+		addScoreColumn(sb, prefix, "MCC");
+
+		// TODO - add other scores
+	}
+
+	private void addScores(StringBuilder sb, FractionClassificationResult m)
+	{
+		add(sb, m.getTP());
+		add(sb, m.getFP());
+		add(sb, m.getTN());
+		add(sb, m.getFN());
+		add(sb, m.getRecall());
+		add(sb, m.getPrecision());
+		add(sb, m.getF1Score());
+		add(sb, m.getJaccard());
+		add(sb, m.getMCC());
+
+		// TODO - add other scores
+	}
+
+	private void addScoreColumn(StringBuilder sb, String prefix, String name)
+	{
+		if (prefix != null)
+			sb.append(prefix);
+		sb.append(name);
+		sb.append("\t");
 	}
 
 	private double getSa()
