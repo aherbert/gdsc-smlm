@@ -87,6 +87,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
 	private static boolean selectMethods = true;
+	private static int compactBins = 4096;
 
 	private boolean extraOptions = false;
 
@@ -256,8 +257,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			long t1 = System.nanoTime();
 			FloatHistogram histogram = FloatHistogram.buildHistogram(intensity, true);
 			// Only compact once
-			final int bins = 4096;
-			Histogram histogram2 = histogram.compact(bins);
+			Histogram histogram2 = histogram.compact(compactBins);
 			t1 = System.nanoTime() - t1;
 
 			for (AutoThreshold.Method m : methods)
@@ -362,6 +362,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
 		gd.addCheckbox("Select_methods", selectMethods);
+		gd.addNumericField("Compact_bins", compactBins, 0);
 
 		// Collect options for fitting that may effect ranking
 		final double sa = getSa();
@@ -391,6 +392,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		selectMethods = gd.getNextBoolean();
+		compactBins = (int) Math.abs(gd.getNextNumber());
 
 		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
 		config.setFitting(gd.getNextNumber());
