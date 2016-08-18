@@ -757,8 +757,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			sb.setLength(0);
 			sb.append(resultPrefix);
 			add(sb, methods[i].name);
-			sb.append('\t').append(Utils.rounded(s.getMean())).append(" +/- ")
-					.append(Utils.rounded(s.getStandardDeviation()));
+			add(sb, compactBins);
+			add(sb, s.getMean());
+			add(sb, s.getStandardDeviation());
 			add(sb, Utils.timeToString(time / 1e6));
 
 			// TP are all accepted candidates that can be matched to a spot
@@ -839,7 +840,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		sb.append("cfFP\t");
 
 		sb.append("Method\t");
-		sb.append("Threshold\t");
+		sb.append("Bins\t");
+		sb.append("Threshold Av\t");
+		sb.append("Threshold SD\t");
 		sb.append("Time\t");
 
 		addScoreColumns(sb, null);
