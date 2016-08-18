@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,8 +26,11 @@ import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
+import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
@@ -87,7 +91,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	private static double fractionNegativesAfterAllPositives = 50;
 	private static int negativesAfterAllPositives = 10;
 	private static boolean selectMethods = true;
-	private static int compactBins = 4096;
+	private static int compactBins = 1024;
+	private static String[] SORT = new String[] { "(None)", "tp", "fp", "tn", "fn", "Precision", "Recall", "F0.5", "F1",
+			"F2", "Jaccard", "MCC" };
+	private static int sortIndex = SORT.length - 2; // Jaccard
+	private static boolean useFractionScores = true;
+	private static boolean showOverlay = true;
 
 	private boolean extraOptions = false;
 
@@ -141,7 +150,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		/**
 		 * Store details about the spots that were accepted
 		 */
-		@SuppressWarnings("unused")
 		final boolean[] good;
 		final long time;
 
@@ -159,7 +167,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 	private class RankResults
 	{
-		@SuppressWarnings("unused")
 		final ScoredSpot[] spots;
 		/** Store the z-position of the actual spots for later analysis. Size is the number of actual spots */
 		@SuppressWarnings("unused")
@@ -363,18 +370,18 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
 		gd.addCheckbox("Select_methods", selectMethods);
 		gd.addNumericField("Compact_bins", compactBins, 0);
+		gd.addChoice("Sort", SORT, SORT[sortIndex]);
+		gd.addCheckbox("Use_fraction_scores", useFractionScores);
 
 		// Collect options for fitting that may effect ranking
-		final double sa = getSa();
-		gd.addNumericField("Initial_StdDev", sa / simulationParameters.a, 3);
-		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
-		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
-		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
-
-		// TODO - add options for spot ranking here, e.g. the threshold methods
+		//		final double sa = getSa();
+		//		gd.addNumericField("Initial_StdDev", sa / simulationParameters.a, 3);
+		//		gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
+		//		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
+		//		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 
 		// Output options
-		//		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
+		gd.addCheckbox("Show_overlay", showOverlay);
 		//		gd.addCheckbox("Show_correlation", showCorrelation);
 		//		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
 		//		gd.addCheckbox("Save_filter_range", saveFilterRange);
@@ -393,13 +400,16 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
 		selectMethods = gd.getNextBoolean();
 		compactBins = (int) Math.abs(gd.getNextNumber());
+		sortIndex = gd.getNextChoiceIndex();
+		useFractionScores = gd.getNextBoolean();
 
-		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
-		config.setFitting(gd.getNextNumber());
-		config.setIncludeNeighbours(gd.getNextBoolean());
-		config.setNeighbourHeightThreshold(gd.getNextNumber());
+		// Collect options for fitting that may effect ranking
+		//		fitConfig.setInitialPeakStdDev(gd.getNextNumber());
+		//		config.setFitting(gd.getNextNumber());
+		//		config.setIncludeNeighbours(gd.getNextBoolean());
+		//		config.setNeighbourHeightThreshold(gd.getNextNumber());
 
-		//		showFilterScoreHistograms = gd.getNextBoolean();
+		showOverlay = gd.getNextBoolean();
 		//		showCorrelation = gd.getNextBoolean();
 		//		rankByIntensity = gd.getNextBoolean();
 		//		saveFilterRange = gd.getNextBoolean();
@@ -656,6 +666,29 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		}
 	}
 
+	private class ScoredResult implements Comparable<ScoredResult>
+	{
+		int i;
+		double score;
+		String result;
+
+		public ScoredResult(int i, double score, String result)
+		{
+			this.i = i;
+			this.score = score;
+			this.result = result;
+		}
+
+		public int compareTo(ScoredResult o)
+		{
+			if (score < o.score)
+				return 1;
+			if (score > o.score)
+				return -1;
+			return 0;
+		}
+	}
+
 	private void summariseResults(HashMap<Integer, RankResults> rankResults)
 	{
 		createTable();
@@ -716,9 +749,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		String resultPrefix = sb.toString();
 
+		// ---
 		// TODO
-
-		// Pre-compute the results and have optional sort
 
 		// Add more scoring metrics
 
@@ -729,6 +761,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		// Allow using the fitted results from benchmark spot fit. Will it make a difference if we fit the candidates (some will fail
 		// if weak).
 		// Can this be done by allowing the user to select the input (spot candidates or fitted positions)?
+
+		// ---
+
+		// Pre-compute the results and have optional sort
+		ArrayList<ScoredResult> list = new ArrayList<ScoredResult>(methods.length);
 
 		for (int i = 0; i < methods.length; i++)
 		{
@@ -768,12 +805,62 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			// FN = The number of missed spots
 
 			// Raw counts of match or no-match
-			addScores(sb, new FractionClassificationResult(itp, ifp, itn, simulationParameters.molecules - itp));
+			FractionClassificationResult f1 = new FractionClassificationResult(itp, ifp, itn,
+					simulationParameters.molecules - itp);
+			double s1 = addScores(sb, f1);
 
 			// Fractional scoring
-			addScores(sb, new FractionClassificationResult(tp, fp, tn, simulationParameters.molecules - tp));
+			FractionClassificationResult f2 = new FractionClassificationResult(tp, fp, tn,
+					simulationParameters.molecules - tp);
+			double s2 = addScores(sb, f2);
 
-			summaryTable.append(sb.toString());
+			// Store for sorting
+			list.add(new ScoredResult(i, (useFractionScores) ? s2 : s1, sb.toString()));
+		}
+
+		if (list.isEmpty())
+			return;
+
+		Collections.sort(list);
+
+		for (ScoredResult r : list)
+			summaryTable.append(r.result);
+
+		if (showOverlay)
+		{
+			ImagePlus imp = CreateData.getImage();
+			if (imp == null)
+			{
+				IJ.error(TITLE, "No benchmark image for overlay");
+				return;
+			}
+
+			int bestMethod = list.get(0).i;
+			Overlay o = new Overlay();
+			for (Entry<Integer, RankResults> entry : rankResults.entrySet())
+			{
+				int frame = entry.getKey();
+				//FilterCandidates candidates = filterCandidates.get(frame);
+				RankResults rr = entry.getValue();
+				RankResult r = rr.results.get(bestMethod);
+				int[] x = new int[r.good.length];
+				int[] y = new int[r.good.length];
+				int c = 0;
+				for (int i = 0; i < x.length; i++)
+				{
+					if (r.good[i])
+					{
+						x[c] = rr.spots[i].spot.x;
+						y[c] = rr.spots[i].spot.y;
+						c++;
+					}
+				}
+				PointRoi roi = new PointRoi(x, y, c);
+				roi.setPosition(frame);
+				o.add(roi);
+			}
+
+			imp.setOverlay(o);
 		}
 	}
 
@@ -853,32 +940,30 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 	private void addScoreColumns(StringBuilder sb, String prefix)
 	{
-		addScoreColumn(sb, prefix, "tp");
-		addScoreColumn(sb, prefix, "fp");
-		addScoreColumn(sb, prefix, "tn");
-		addScoreColumn(sb, prefix, "fn");
-		addScoreColumn(sb, prefix, "Recall");
-		addScoreColumn(sb, prefix, "Precision");
-		addScoreColumn(sb, prefix, "F1");
-		addScoreColumn(sb, prefix, "Jaccard");
-		addScoreColumn(sb, prefix, "MCC");
-
-		// TODO - add other scores
+		SORT = new String[] { "(None)", "tp", "fp", "tn", "fn", "Precision", "Recall", "F0.5", "F1", "F2", "Jaccard",
+				"MCC" };
+		for (int i = 1; i < SORT.length; i++)
+			addScoreColumn(sb, prefix, SORT[i]);
 	}
 
-	private void addScores(StringBuilder sb, FractionClassificationResult m)
+	private double addScores(StringBuilder sb, FractionClassificationResult m)
 	{
-		add(sb, m.getTP());
-		add(sb, m.getFP());
-		add(sb, m.getTN());
-		add(sb, m.getFN());
-		add(sb, m.getRecall());
-		add(sb, m.getPrecision());
-		add(sb, m.getF1Score());
-		add(sb, m.getJaccard());
-		add(sb, m.getMCC());
-
-		// TODO - add other scores
+		double[] scores = new double[SORT.length-1];
+		int i = 0;
+		scores[i++] = m.getTP();
+		scores[i++] = m.getFP();
+		scores[i++] = m.getTN();
+		scores[i++] = m.getFN();
+		scores[i++] = m.getPrecision();
+		scores[i++] = m.getRecall();
+		scores[i++] = m.getFScore(0.5);
+		scores[i++] = m.getF1Score();
+		scores[i++] = m.getFScore(2);
+		scores[i++] = m.getJaccard();
+		scores[i++] = m.getMCC();
+		for (double s : scores)
+			add(sb, s);
+		return (sortIndex != 0) ? scores[sortIndex - 1] : 0;
 	}
 
 	private void addScoreColumn(StringBuilder sb, String prefix, String name)
