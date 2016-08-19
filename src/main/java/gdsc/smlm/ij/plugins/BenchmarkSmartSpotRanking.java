@@ -184,7 +184,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	{
 		final ScoredSpot[] spots;
 		/** Store the z-position of the actual spots for later analysis. Size is the number of actual spots */
-		@SuppressWarnings("unused")
 		final double[] zPosition;
 
 		ArrayList<RankResult> results = new ArrayList<RankResult>();
@@ -276,6 +275,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				intensity[i] = spot.intensity;
 			}
 
+			final boolean simpleBackground = true;
+
 			// Estimate SNR
 			double[] snr = null;
 			long tSnr = 0;
@@ -299,8 +300,43 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 					final int size = width * height;
 					for (int k = size; k-- > 0;)
 						sum += region[k];
-					// TODO - The number of peaks could use the other candidates in the fit region
-					final double b = Gaussian2DFitter.getBackground(region, width, height, 1);
+
+					final double b;
+					if (simpleBackground)
+					{
+						// TODO - The number of peaks could use the other candidates in the fit region
+						b = Gaussian2DFitter.getBackground(region, width, height, 1);
+					}
+					else
+					{
+						// Use a very wide region to find the local background with the lowest % of the smoothed data
+						final Rectangle regionBounds2 = ie.getBoxRegionBounds(spot.x, spot.y, fitting * 2);
+						region = ie.crop(regionBounds2, region);
+						final int width2 = regionBounds2.width;
+						final int height2 = regionBounds2.height;
+						int size2 = 0;
+						for (int y = 0; y < height2; y++)
+						{
+							// If width is not even we can use adjacent positions due to image wrapping
+							for (int x = 0, index = y * width2; x < width2; x += 2)
+							{
+								// Assume neighbour pixels should have equal noise and average them
+								region[size2++] = region[index] + region[index + 1];
+							}
+						}
+						Arrays.sort(region, 0, size2);
+						double sumB = 0;
+						int c = 0;
+						for (int k = (int) Math.ceil(size2 * 0.2); k-- > 0;)
+						{
+							sumB += region[k];
+							c++;
+						}
+						b = sumB / (c * 2);// Account for averaging
+					}
+
+					//System.out.printf("%d (%d,%d)   %f  %f\n", frame, spot.x, spot.y, b);
+
 					final double signal = sum - b * size;
 					snr[i] = signal / noise;
 				}
@@ -340,6 +376,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				//		}
 				//}
 				t2 = System.nanoTime() - t2;
+
+				final long time = (m == AutoThreshold.Method.NONE) ? 0 : t1 + t2;
 
 				// Score
 				final byte[] category = new byte[spots.length];
@@ -387,7 +425,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 				// Store the results using a copy of the original (to preserve the candidates for repeat analysis)
 				results.results.add(new RankResult(t, new FractionClassificationResult(tp, fp, tn, fn),
-						new ClassificationResult(itp, ifp, itn, ifn), category, t1 + t2));
+						new ClassificationResult(itp, ifp, itn, ifn), category, time));
 			}
 
 			for (double l : levels)
@@ -907,6 +945,19 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		add(sb, tp);
 		add(sb, fp);
 
+		// Summarise actual and candidate spots per frame
+		Statistics actual = new Statistics();
+		Statistics candidates = new Statistics();
+		for (RankResults rr : rankResults.values())
+		{
+			actual.add(rr.zPosition.length);
+			candidates.add(rr.spots.length);
+		}
+		add(sb, actual.getMean());
+		add(sb, actual.getStandardDeviation());
+		add(sb, candidates.getMean());
+		add(sb, candidates.getStandardDeviation());
+
 		String resultPrefix = sb.toString();
 
 		// ---
@@ -914,6 +965,19 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		// Add good label to spot candidates and have the benchmark spot filter respect this before applying the fail count limit.
 
 		// Correlation between intensity and SNR ...
+
+		// SNR is very good at low density
+		// SNR fails at high density. The SNR estimate is probably wrong for high intensity spots.
+
+		// Triangle is very good when there are a large number of good spots in a region of the image (e.g. a mask is used).
+		// Triangle is poor when there are few good spots in an image.
+
+		// Perhaps we can estimate the density of the spots and choose the correct thresholding method?
+
+		// ---
+
+		// Do a full benchmark through different Spot SNR, image sizes, densities and mask structures and see if there are patterns
+		// for a good threshold method.		
 
 		// --- 
 
@@ -1129,10 +1193,15 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		sb.append("cfTP\t");
 		sb.append("cfFP\t");
 
+		sb.append("Spot Av\t");
+		sb.append("Spot SD\t");
+		sb.append("Candidate Av\t");
+		sb.append("Candidate SD\t");
+
 		sb.append("Method\t");
 		sb.append("Bins\t");
-		sb.append("Threshold Av\t");
-		sb.append("Threshold SD\t");
+		sb.append("T Av\t");
+		sb.append("T SD\t");
 		sb.append("Time\t");
 
 		addScoreColumns(sb, null);
