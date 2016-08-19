@@ -84,9 +84,9 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static boolean rankedMatches = true;
 	private int analysisBorder;
 	private static double upperDistance = 1.5;
-	private static double lowerDistance = 1.5;
-	private static double upperSignalFactor = 0;
-	private static double lowerSignalFactor = 0;
+	private static double lowerDistance = 0.5;
+	private static double upperSignalFactor = 2;
+	private static double lowerSignalFactor = 1;
 	private static boolean relativeDistances = true;
 	private double matchDistance;
 	private double lowerMatchDistance;
