@@ -19,8 +19,8 @@ import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.threshold.FloatHistogram;
 import gdsc.core.threshold.Histogram;
-import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.Statistics;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitWorker;
@@ -79,8 +79,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		for (i = 0; i < thresholdMethods.length; i++)
 		{
 			thresholdMethodNames[i] = thresholdMethods[i].name;
-			// Thresholding does not work. The level is too high
-			//thresholdMethodOptions[i] = true;
+			thresholdMethodOptions[i] = true;
 		}
 		for (int j = 0; i < thresholdMethodNames.length; i++, j++)
 		{
@@ -320,7 +319,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			this.results.put(frame, results);
 
 			long t1 = System.nanoTime();
-			FloatHistogram histogram = FloatHistogram.buildHistogram(intensity, true);
+			FloatHistogram histogram = FloatHistogram.buildHistogram(intensity.clone(), true);
 			// Only compact once
 			Histogram histogram2 = histogram.compact(compactBins);
 			t1 = System.nanoTime() - t1;
@@ -446,6 +445,17 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				results.results.add(new RankResult((float) t, new FractionClassificationResult(tp, fp, tn, fn),
 						new ClassificationResult(itp, ifp, itn, ifn), category, tSnr));
 			}
+
+			//// Testing: Correlation between intensity and SNR
+			//FastCorrelator c = new FastCorrelator();
+			//double[] i2 = new double[spots.length];
+			//for (int i = 0; i < spots.length; i++)
+			//{
+			//	i2[i] = intensity[i];
+			//	c.add(Math.round(intensity[i]), Math.round(snr[i]));
+			//}
+			//System.out.printf("%d = %.2f (%d)\n", frame, c.getCorrelation(), c.getN());
+			////Utils.display("I vs SNR", new Plot("I vs SNR", "Intensity", "SNR", i2, snr));
 		}
 	}
 
@@ -901,12 +911,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		// ---
 		// TODO
-
-		// Add more scoring metrics
-
 		// Add good label to spot candidates and have the benchmark spot filter respect this before applying the fail count limit.
-		// This may just involve setting the fail count to zero in all the results that are good, given that spots are in order
-		// and we are just thresholding by intensity
+
+		// Correlation between intensity and SNR ...
 
 		// --- 
 
@@ -914,16 +921,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		// if weak).
 		// Can this be done by allowing the user to select the input (spot candidates or fitted positions)?
 
-		// XXX - This appears to be very important as the overlay shows a lot of very faint spots can be matched by some filters.
-		// This calls into question the filter analysis scoring as it may be rewarding matching spots that are out of focus and 
-		// so not really fit candidates.
-
-		// This may be because we need to include the signal threshold in the spot filter ranking. This was not done previously.
-		// It is also because the thresholding will always finda threshold, even if there are no good spots. This is OK for 
-		// STORM which has many spots but not for PALM. Instead we need to estimate candidate SNR.
-
 		// Perhaps I need to produce a precision estimate for all simulated spots and then only use those that achieve a certain 
-		// precision, i.e. are reasonably in focus. Can this be done, does the image PSF have a width estimate for the entire stack?
+		// precision, i.e. are reasonably in focus. Can this be done? Does the image PSF have a width estimate for the entire stack?
 
 		// Perhaps I should filter, fit and then filter all spots using no fail count. These then become the spots to work with
 		// for creating a smart fail count filter. 
