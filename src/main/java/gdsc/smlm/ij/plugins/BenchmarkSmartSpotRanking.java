@@ -993,6 +993,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		Collections.sort(list);
 
+		if (summaryTable.getTextPanel().getLineCount() > 0)
+			summaryTable.append("");
 		for (ScoredResult r : list)
 			summaryTable.append(r.result);
 
