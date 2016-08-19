@@ -75,6 +75,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		thresholdMethods = AutoThreshold.Method.values();
 		thresholdMethodOptions = new boolean[thresholdMethods.length + snrLevels.length];
 		thresholdMethodNames = new String[thresholdMethodOptions.length];
+		thresholdMethodOptions[AutoThreshold.Method.NONE.ordinal()] = true;
 		for (i = 0; i < thresholdMethods.length; i++)
 		{
 			thresholdMethodNames[i] = thresholdMethods[i].name;
