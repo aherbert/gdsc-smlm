@@ -364,17 +364,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			{
 				long t2 = System.nanoTime();
 				float t = histogram2.getAutoThreshold(m);
-				//// Lower to the next bin down to compensate for histogram compaction
-				//if (histogram2 instanceof FloatHistogram)
-				//{
-				//	FloatHistogram h = (FloatHistogram) histogram2;
-				//	for (int i = h.maxBin; i-- > 0;)
-				//		if (h.value[i] < t)
-				//		{
-				//			t = h.value[i];
-				//			break;
-				//		}
-				//}
 				t2 = System.nanoTime() - t2;
 
 				final long time = (m == AutoThreshold.Method.NONE) ? 0 : t1 + t2;
