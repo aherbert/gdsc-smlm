@@ -223,7 +223,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			this.filterCandidates = filterCandidates;
 			this.results = new HashMap<Integer, RankResults>();
 			fitting = config.getRelativeFitting();
-			requireSNR = true;
+			requireSNR = (levels.length > 0);
 		}
 
 		/*
