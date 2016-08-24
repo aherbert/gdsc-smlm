@@ -519,6 +519,9 @@ public class FitEngineConfiguration implements Cloneable
 
 	/**
 	 * Gets the minimum HWHM using the initial standard deviations
+	 * <p>
+	 * Note: This uses initial peak SD0 and optionally initial peak SD1 if width fitting is enabled for the second
+	 * dimension.
 	 *
 	 * @return the HWHM min
 	 */
@@ -526,12 +529,16 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		final FitConfiguration fitConfiguration = getFitConfiguration();
 		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
-		final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
-
 		// Use 1 if zero to get at least a single pixel width
 		double widthMin = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
-		if (initialPeakStdDev1 > 0)
-			widthMin = FastMath.min(initialPeakStdDev1, widthMin);
+
+		// Only use the second width if this is part of the function
+		if (fitConfiguration.isWidth1Fitting())
+		{
+			final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+			if (initialPeakStdDev1 > 0)
+				widthMin = FastMath.min(initialPeakStdDev1, widthMin);
+		}
 
 		// Get the half-width at half maximim
 		return Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMin;
@@ -539,6 +546,9 @@ public class FitEngineConfiguration implements Cloneable
 
 	/**
 	 * Gets the maximum HWHM using the initial standard deviations
+	 * <p>
+	 * Note: This uses initial peak SD0 and optionally initial peak SD1 if width fitting is enabled for the second
+	 * dimension.
 	 *
 	 * @return the HWHM max
 	 */
@@ -546,12 +556,16 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		final FitConfiguration fitConfiguration = getFitConfiguration();
 		final double initialPeakStdDev0 = fitConfiguration.getInitialPeakStdDev0();
-		final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
-
 		// Use 1 if zero to get at least a single pixel width
 		double widthMax = (initialPeakStdDev0 > 0) ? initialPeakStdDev0 : 1;
-		if (initialPeakStdDev1 > 0)
-			widthMax = FastMath.max(initialPeakStdDev1, widthMax);
+
+		// Only use the second width if this is part of the function
+		if (fitConfiguration.isWidth1Fitting())
+		{
+			final double initialPeakStdDev1 = fitConfiguration.getInitialPeakStdDev1();
+			if (initialPeakStdDev1 > 0)
+				widthMax = FastMath.max(initialPeakStdDev1, widthMax);
+		}
 
 		// Get the half-width at half maximim
 		return Gaussian2DFunction.SD_TO_HWHM_FACTOR * widthMax;
