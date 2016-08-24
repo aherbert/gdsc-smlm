@@ -1116,7 +1116,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		roi.setFillColor(color);
 		roi.setStrokeColor(color);
 		roi.setPosition(frame);
-		roi.setHideLabels(true);
+		roi.setShowLabels(false);
 		o.add(roi);
 	}
 

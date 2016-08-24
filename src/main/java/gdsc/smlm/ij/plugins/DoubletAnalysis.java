@@ -1455,7 +1455,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				{
 					final PointRoi roi = new PointRoi(coords[c], coords[c + 3], count[c]);
 					roi.setPosition(frame);
-					roi.setHideLabels(true);
+					roi.setShowLabels(false);
 					roi.setFillColor(color[c]);
 					roi.setStrokeColor(color[c]);
 					// Overlay uses a vector which is synchronized already

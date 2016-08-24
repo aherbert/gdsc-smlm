@@ -425,7 +425,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		roi.setStrokeColor(strokeColor);
 		roi.setFillColor(fillColor);
-		roi.setHideLabels(true);
+		roi.setShowLabels(false);
 
 		imp.setOverlay(roi, strokeColor, 2, fillColor);
 	}

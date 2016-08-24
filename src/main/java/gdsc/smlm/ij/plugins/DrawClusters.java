@@ -211,7 +211,7 @@ public class DrawClusters implements PlugIn
 			else
 			{
 				roi = new PointRoi(xPoints, yPoints, nPoints);
-				((PointRoi) roi).setHideLabels(true);
+				((PointRoi) roi).setShowLabels(false);
 			}
 
 			rois[i] = roi;
@@ -259,7 +259,7 @@ public class DrawClusters implements PlugIn
 				final PolygonRoi roi = (PolygonRoi) rois[index];
 				roi.setFillColor(c);
 				roi.setStrokeColor(c);
-				final FloatPolygon fp = roi.getNonSplineFloatCoordinates();
+				final FloatPolygon fp = roi.getNonSplineFloatPolygon();
 				final Rectangle2D.Double pos = roi.getFloatBounds();
 				// For each frame in the track, add the ROI track and a point ROI for the current position
 				for (int j = 0; j < frames[index].length; j++)
