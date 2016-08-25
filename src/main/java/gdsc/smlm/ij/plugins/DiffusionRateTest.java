@@ -9,12 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
 import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.fitting.CurveFitter;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
@@ -378,10 +376,10 @@ public class DiffusionRateTest implements PlugIn
 		double[] lower2D = new double[stats2D.length];
 		double[] upper3D = new double[stats3D.length];
 		double[] lower3D = new double[stats3D.length];
-		final CurveFitter<Parametric> fitter2D = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
-		final CurveFitter<Parametric> fitter3D = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
-		Statistics gradient2D = new Statistics();
-		Statistics gradient3D = new Statistics();
+
+		SimpleRegression r2D = new SimpleRegression(false);
+		SimpleRegression r3D = new SimpleRegression(false);
+		
 		final int firstN = (useConfinement) ? fitN : totalSteps;
 		for (int j = 0; j < totalSteps; j++)
 		{
@@ -402,10 +400,8 @@ public class DiffusionRateTest implements PlugIn
 
 			if (j < firstN)
 			{
-				fitter2D.addObservedPoint(xValues[j], yValues2D[j]);
-				gradient2D.add(yValues2D[j] / xValues[j]);
-				fitter3D.addObservedPoint(xValues[j], yValues3D[j]);
-				gradient3D.add(yValues3D[j] / xValues[j]);
+				r2D.addData(xValues[j], yValues2D[j]);
+				r3D.addData(xValues[j], yValues3D[j]);
 			}
 		}
 
@@ -417,15 +413,14 @@ public class DiffusionRateTest implements PlugIn
 		// t = time
 
 		final PolynomialFunction fitted2D, fitted3D;
-		if (gradient2D.getMean() > 0)
+		if (r2D.getN() > 0)
 		{
 			// Do linear regression to get diffusion rate
-			final double[] init2D = { 0, 1 / gradient2D.getMean() }; // a - b x
-			final double[] best2D = fitter2D.fit(new PolynomialFunction.Parametric(), init2D);
+
+			final double[] best2D = new double[]{ r2D.getIntercept(), r2D.getSlope() };
 			fitted2D = new PolynomialFunction(best2D);
 
-			final double[] init3D = { 0, 1 / gradient3D.getMean() }; // a - b x
-			final double[] best3D = fitter3D.fit(new PolynomialFunction.Parametric(), init3D);
+			final double[] best3D = new double[]{ r3D.getIntercept(), r3D.getSlope() };
 			fitted3D = new PolynomialFunction(best3D);
 
 			// For 2D diffusion: d^2 = 4D
