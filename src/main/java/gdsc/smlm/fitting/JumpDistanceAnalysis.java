@@ -1,5 +1,33 @@
 package gdsc.smlm.fitting;
 
+import java.util.Arrays;
+
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.OptimizationData;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.SimpleValueChecker;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.core.logging.Logger;
 import gdsc.core.logging.NullLogger;
 
@@ -18,36 +46,6 @@ import gdsc.core.logging.NullLogger;
 
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Sort;
-
-import java.util.Arrays;
-
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.OptimizationData;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.PointVectorValuePair;
-import org.apache.commons.math3.optim.SimpleBounds;
-import org.apache.commons.math3.optim.SimpleValueChecker;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
-import org.apache.commons.math3.optim.nonlinear.vector.Target;
-import org.apache.commons.math3.optim.nonlinear.vector.Weight;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Perform curve fitting on a cumulative histogram of the mean-squared displacement (MSD) per second to calculate the
@@ -236,8 +234,8 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1,
-					(best == 0) ? "" : "s", formatD(coefficients[best]), format(fractions[best]));
+			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1, (best == 0) ? "" : "s",
+					formatD(coefficients[best]), format(fractions[best]));
 			lastIC = bestIC;
 			return new double[][] { coefficients[best], fractions[best] };
 		}
@@ -320,33 +318,42 @@ public class JumpDistanceAnalysis
 			LevenbergMarquardtOptimizer lvmOptimizer = new LevenbergMarquardtOptimizer();
 			try
 			{
-				final JumpDistanceCumulFunction function = new JumpDistanceCumulFunction(jdHistogram[0],
-						jdHistogram[1], estimatedD);
-				PointVectorValuePair lvmSolution = lvmOptimizer.optimize(new MaxIter(3000), new MaxEval(
-						Integer.MAX_VALUE), new ModelFunctionJacobian(new MultivariateMatrixFunction()
-				{
-					public double[][] value(double[] point) throws IllegalArgumentException
-					{
-						return function.jacobian(point);
-					}
-				}), new ModelFunction(function), new Target(function.getY()), new Weight(function.getWeights()),
-						new InitialGuess(function.guess()));
+				final JumpDistanceCumulFunction function = new JumpDistanceCumulFunction(jdHistogram[0], jdHistogram[1],
+						estimatedD);
 
-				double[] fitParams = lvmSolution.getPointRef();
-				ss = calculateSumOfSquares(function.getY(), lvmSolution.getValueRef());
+				//@formatter:off
+				LeastSquaresProblem problem = new LeastSquaresBuilder()
+						.maxEvaluations(Integer.MAX_VALUE)
+						.maxIterations(3000)
+						.start(function.guess())
+						.target(function.getY())
+						.weight(new DiagonalMatrix(function.getWeights()))
+						.model(function, new MultivariateMatrixFunction() {
+							public double[][] value(double[] point) throws IllegalArgumentException
+							{
+								return function.jacobian(point);
+							}} )
+						.build();
+				//@formatter:on
+
+				Optimum lvmSolution = lvmOptimizer.optimize(problem);
+
+				double[] fitParams = lvmSolution.getPoint().toArray();
+				// True for an unweighted fit
+				ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+				//ss = calculateSumOfSquares(function.getY(), function.value(fitParams));
 				lastIC = ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.x.length, 1);
 				double[] coefficients = fitParams;
 				double[] fractions = new double[] { 1 };
 
 				logger.info("Fit Jump distance (N=1) : %s, SS = %s, IC = %s (%d evaluations)", formatD(fitParams[0]),
-						Maths.rounded(ss, 4), Maths.rounded(ic, 4), lvmOptimizer.getEvaluations());
+						Maths.rounded(ss, 4), Maths.rounded(ic, 4), lvmSolution.getEvaluations());
 
 				return new double[][] { coefficients, fractions };
 			}
 			catch (TooManyIterationsException e)
 			{
-				logger.info("LVM optimiser failed to fit (N=1) : Too many iterations (%d)",
-						lvmOptimizer.getIterations());
+				logger.info("LVM optimiser failed to fit (N=1) : Too many iterations : %s", e.getMessage());
 			}
 			catch (ConvergenceException e)
 			{
@@ -371,8 +378,8 @@ public class JumpDistanceAnalysis
 		try
 		{
 			// The Powell algorithm can use more general bounds: 0 - Infinity
-			constrainedSolution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function), new InitialGuess(
-					function.guess()),
+			constrainedSolution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function),
+					new InitialGuess(function.guess()),
 					new SimpleBounds(lB, function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
 					new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MINIMIZE);
 
@@ -407,8 +414,8 @@ public class JumpDistanceAnalysis
 			for (int i = 0; i < s.length; i++)
 				s[i] = (uB[i] - lB[i]) / 3;
 			OptimizationData sigma = new CMAESOptimizer.Sigma(s);
-			OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
-					.log(function.x.length))));
+			OptimizationData popSize = new CMAESOptimizer.PopulationSize(
+					(int) (4 + Math.floor(3 * Math.log(function.x.length))));
 
 			// Iterate this for stability in the initial guess
 			CMAESOptimizer cmaesOptimizer = createCMAESOptimizer();
@@ -459,13 +466,11 @@ public class JumpDistanceAnalysis
 				// Re-optimise with Powell?
 				try
 				{
-					PointValuePair solution = powellOptimizer.optimize(
-							maxEval,
-							new ObjectiveFunction(function),
+					PointValuePair solution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function),
 							new InitialGuess(constrainedSolution.getPointRef()),
-							new SimpleBounds(lB, function.getUpperBounds(Double.POSITIVE_INFINITY,
-									Double.POSITIVE_INFINITY)), new CustomPowellOptimizer.BasisStep(function.step()),
-							GoalType.MINIMIZE);
+							new SimpleBounds(lB,
+									function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
+							new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MINIMIZE);
 					if (solution.getValue() < constrainedSolution.getValue())
 					{
 						evaluations = cmaesOptimizer.getEvaluations();
@@ -501,33 +506,44 @@ public class JumpDistanceAnalysis
 		final MixedJumpDistanceCumulFunctionGradient functionGradient = new MixedJumpDistanceCumulFunctionGradient(
 				jdHistogram[0], jdHistogram[1], estimatedD, n);
 
-		PointVectorValuePair lvmSolution;
+		Optimum lvmSolution;
 		LevenbergMarquardtOptimizer lvmOptimizer = new LevenbergMarquardtOptimizer();
 		try
 		{
-			lvmSolution = lvmOptimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-					new ModelFunctionJacobian(new MultivariateMatrixFunction()
-					{
+			//@formatter:off
+			LeastSquaresProblem problem = new LeastSquaresBuilder()
+					.maxEvaluations(Integer.MAX_VALUE)
+					.maxIterations(3000)
+					.start(fitParams)
+					.target(functionGradient.getY())
+					.weight(new DiagonalMatrix(functionGradient.getWeights()))
+					.model(functionGradient, new MultivariateMatrixFunction() {
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return functionGradient.jacobian(point);
-						}
-					}), new ModelFunction(functionGradient), new Target(functionGradient.getY()), new Weight(
-							functionGradient.getWeights()), new InitialGuess(fitParams));
-			double ss = calculateSumOfSquares(functionGradient.getY(), lvmSolution.getValue());
+						}} )
+					.build();
+			//@formatter:on
+
+			lvmSolution = lvmOptimizer.optimize(problem);
+
+			// True for an unweighted fit
+			double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+			//double ss = calculateSumOfSquares(functionGradient.getY(), functionGradient.value(lvmSolution.getPoint().toArray()));
+
 			// All fitted parameters must be above zero
-			if (ss < this.ss && Maths.min(lvmSolution.getPointRef()) > 0)
+			if (ss < this.ss && Maths.min(lvmSolution.getPoint().toArray()) > 0)
 			{
 				logger.info("  Re-fitting improved the SS from %s to %s (-%s%%)", Maths.rounded(this.ss, 4),
 						Maths.rounded(ss, 4), Maths.rounded(100 * (this.ss - ss) / this.ss, 4));
-				fitParams = lvmSolution.getPointRef();
+				fitParams = lvmSolution.getPoint().toArray();
 				this.ss = ss;
-				evaluations += lvmOptimizer.getEvaluations();
+				evaluations += lvmSolution.getEvaluations();
 			}
 		}
 		catch (TooManyIterationsException e)
 		{
-			logger.error("Failed to re-fit : Too many evaluations (%d)", lvmOptimizer.getEvaluations());
+			logger.error("Failed to re-fit : Too many iterations : %s", e.getMessage());
 		}
 		catch (ConvergenceException e)
 		{
@@ -707,8 +723,8 @@ public class JumpDistanceAnalysis
 
 		if (best > -1)
 		{
-			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1,
-					(best == 0) ? "" : "s", formatD(coefficients[best]), format(fractions[best]));
+			logger.info("Best fit achieved using %d population%s: %s, Fractions = %s", best + 1, (best == 0) ? "" : "s",
+					formatD(coefficients[best]), format(fractions[best]));
 			lastIC = bestIC;
 			return new double[][] { coefficients[best], fractions[best] };
 		}
@@ -795,8 +811,8 @@ public class JumpDistanceAnalysis
 			{
 				final JumpDistanceFunction function = new JumpDistanceFunction(jumpDistances, estimatedD);
 				// The Powell algorithm can use more general bounds: 0 - Infinity
-				SimpleBounds bounds = new SimpleBounds(function.getLowerBounds(), function.getUpperBounds(
-						Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
+				SimpleBounds bounds = new SimpleBounds(function.getLowerBounds(),
+						function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
 				PointValuePair solution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function),
 						new InitialGuess(function.guess()), bounds,
 						new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
@@ -840,8 +856,8 @@ public class JumpDistanceAnalysis
 		try
 		{
 			// The Powell algorithm can use more general bounds: 0 - Infinity
-			constrainedSolution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function), new InitialGuess(
-					function.guess()),
+			constrainedSolution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function),
+					new InitialGuess(function.guess()),
 					new SimpleBounds(lB, function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
 					new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
 
@@ -880,8 +896,8 @@ public class JumpDistanceAnalysis
 			for (int i = 0; i < s.length; i++)
 				s[i] = (uB[i] - lB[i]) / 3;
 			OptimizationData sigma = new CMAESOptimizer.Sigma(s);
-			OptimizationData popSize = new CMAESOptimizer.PopulationSize((int) (4 + Math.floor(3 * Math
-					.log(function.x.length))));
+			OptimizationData popSize = new CMAESOptimizer.PopulationSize(
+					(int) (4 + Math.floor(3 * Math.log(function.x.length))));
 
 			// Iterate this for stability in the initial guess
 			CMAESOptimizer cmaesOptimizer = createCMAESOptimizer();
@@ -932,13 +948,11 @@ public class JumpDistanceAnalysis
 				try
 				{
 					// Re-optimise with Powell?
-					PointValuePair solution = powellOptimizer.optimize(
-							maxEval,
-							new ObjectiveFunction(function),
+					PointValuePair solution = powellOptimizer.optimize(maxEval, new ObjectiveFunction(function),
 							new InitialGuess(constrainedSolution.getPointRef()),
-							new SimpleBounds(lB, function.getUpperBounds(Double.POSITIVE_INFINITY,
-									Double.POSITIVE_INFINITY)), new CustomPowellOptimizer.BasisStep(function.step()),
-							GoalType.MAXIMIZE);
+							new SimpleBounds(lB,
+									function.getUpperBounds(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)),
+							new CustomPowellOptimizer.BasisStep(function.step()), GoalType.MAXIMIZE);
 					if (solution.getValue() > constrainedSolution.getValue())
 					{
 						evaluations = cmaesOptimizer.getEvaluations();
@@ -1152,6 +1166,7 @@ public class JumpDistanceAnalysis
 			curveLogger.saveMixedPopulationCurve(new double[][] { x, y });
 	}
 
+	@SuppressWarnings("unused")
 	private double calculateSumOfSquares(double[] obs, double[] exp)
 	{
 		double ss = 0;
@@ -1654,8 +1669,8 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for least-squares fitting of cumulative histogram of jump distances.
 	 */
-	public class MixedJumpDistanceCumulFunctionGradient extends MixedJumpDistanceCumulFunction implements
-			MultivariateVectorFunction
+	public class MixedJumpDistanceCumulFunctionGradient extends MixedJumpDistanceCumulFunction
+			implements MultivariateVectorFunction
 	{
 		public MixedJumpDistanceCumulFunctionGradient(double[] x, double[] y, double estimatedD, int n)
 		{
@@ -1777,8 +1792,8 @@ public class JumpDistanceAnalysis
 	 * <p>
 	 * Function used for least-squares fitting of cumulative histogram of jump distances.
 	 */
-	public class MixedJumpDistanceCumulFunctionMultivariate extends MixedJumpDistanceCumulFunction implements
-			MultivariateFunction
+	public class MixedJumpDistanceCumulFunctionMultivariate extends MixedJumpDistanceCumulFunction
+			implements MultivariateFunction
 	{
 		public MixedJumpDistanceCumulFunctionMultivariate(double[] x, double[] y, double estimatedD, int n)
 		{

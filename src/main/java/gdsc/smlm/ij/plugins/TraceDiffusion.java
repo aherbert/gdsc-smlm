@@ -1,5 +1,31 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.IJLogger;
+import gdsc.core.ij.IJTrackProgress;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,21 +41,15 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.CurveLogger;
-import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.IJLogger;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
@@ -37,29 +57,6 @@ import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
-
-import java.awt.Color;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.PointVectorValuePair;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
-import org.apache.commons.math3.optim.nonlinear.vector.Target;
-import org.apache.commons.math3.optim.nonlinear.vector.Weight;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
@@ -142,7 +139,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		jumpDistanceParameters = null;
 
 		extraOptions = Utils.isExtraOptions();
@@ -235,8 +232,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = new Statistics();
 
-			ArrayList<double[]> distances = (saveTraceDistances || displayTraceLength) ? new ArrayList<double[]>(
-					traces.length) : null;
+			ArrayList<double[]> distances = (saveTraceDistances || displayTraceLength)
+					? new ArrayList<double[]>(traces.length) : null;
 
 			// Store all the jump distances at the specified interval
 			StoredDataStatistics jumpDistances = new StoredDataStatistics();
@@ -552,9 +549,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				out.write(String.format("#%d traces : Precision = %s nm : Exposure time = %s s", nTraces,
 						Utils.rounded(precision, 4), Utils.rounded(exposureTime, 4)));
 				out.newLine();
-				out.write(String
-						.format("#TraceId\tMSD all-vs-all (um^2/s)\tMSD adjacent (um^2/s)\tD all-vs-all(um^2/s)\tD adjacent(um^2/s)\tDistances (um^2) per %ss ... ",
-								Utils.rounded(exposureTime, 4)));
+				out.write(String.format(
+						"#TraceId\tMSD all-vs-all (um^2/s)\tMSD adjacent (um^2/s)\tD all-vs-all(um^2/s)\tD adjacent(um^2/s)\tDistances (um^2) per %ss ... ",
+						Utils.rounded(exposureTime, 4)));
 				out.newLine();
 				for (int i = 0; i < msd.length; i++)
 				{
@@ -1197,7 +1194,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double precision = 0;
 
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-		PointVectorValuePair lvmSolution;
+		Optimum lvmSolution;
 		double ic = 0;
 
 		// Fit with no intercept
@@ -1205,34 +1202,43 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		{
 			final LinearFunction function = new LinearFunction(x, y, settings.fitLength);
 			double[] parameters = new double[] { function.guess() };
-			lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-					new ModelFunctionJacobian(new MultivariateMatrixFunction()
-					{
+
+			//@formatter:off
+			LeastSquaresProblem problem = new LeastSquaresBuilder()
+					.maxEvaluations(Integer.MAX_VALUE)
+					.maxIterations(3000)
+					.start(parameters)
+					.target(function.getY())
+					.weight(new DiagonalMatrix(function.getWeights()))
+					.model(function, new MultivariateMatrixFunction() {
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return function.jacobian(point);
-						}
-					}), new ModelFunction(function), new Target(function.getY()), new Weight(function.getWeights()),
-					new InitialGuess(parameters));
+						}} )
+					.build();
+			//@formatter:on
 
-			double ss = 0;
-			double[] obs = function.getY();
-			double[] exp = lvmSolution.getValue();
-			for (int i = 0; i < obs.length; i++)
-				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+			lvmSolution = optimizer.optimize(problem);
 
-			ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, obs.length, 1);
+			double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+			//double ss = 0;
+			//double[] obs = function.getY();
+			//double[] exp = lvmSolution.getValue();
+			//for (int i = 0; i < obs.length; i++)
+			//	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-			double gradient = lvmSolution.getPoint()[0];
+			ic = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 1);
+
+			double gradient = lvmSolution.getPoint().getEntry(0);
 			D = gradient / 4;
 
 			Utils.log("Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
-					obs.length, Utils.rounded(gradient, 4), Utils.rounded(D, 4), Utils.rounded(ss), Utils.rounded(ic),
-					optimizer.getEvaluations());
+					function.getY().length, Utils.rounded(gradient, 4), Utils.rounded(D, 4), Utils.rounded(ss),
+					Utils.rounded(ic), lvmSolution.getEvaluations());
 		}
 		catch (TooManyIterationsException e)
 		{
-			Utils.log("Failed to fit : Too many iterations (%d)", optimizer.getIterations());
+			Utils.log("Failed to fit : Too many iterations (%s)", e.getMessage());
 		}
 		catch (ConvergenceException e)
 		{
@@ -1246,25 +1252,34 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		{
 			final LinearFunctionWithIntercept function = new LinearFunctionWithIntercept(x, y, settings.fitLength,
 					fitIntercept);
-			lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-					new ModelFunctionJacobian(new MultivariateMatrixFunction()
-					{
+
+			//@formatter:off
+			LeastSquaresProblem problem = new LeastSquaresBuilder()
+					.maxEvaluations(Integer.MAX_VALUE)
+					.maxIterations(3000)
+					.start(function.guess())
+					.target(function.getY())
+					.weight(new DiagonalMatrix(function.getWeights()))
+					.model(function, new MultivariateMatrixFunction() {
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return function.jacobian(point);
-						}
-					}), new ModelFunction(function), new Target(function.getY()), new Weight(function.getWeights()),
-					new InitialGuess(function.guess()));
+						}} )
+					.build();
+			//@formatter:on
 
-			double ss = 0;
-			double[] obs = function.getY();
-			double[] exp = lvmSolution.getValue();
-			for (int i = 0; i < obs.length; i++)
-				ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+			lvmSolution = optimizer.optimize(problem);
 
-			double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, obs.length, 2);
-			double gradient = lvmSolution.getPoint()[0];
-			final double s = lvmSolution.getPoint()[1];
+			double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+			//double ss = 0;
+			//double[] obs = function.getY();
+			//double[] exp = lvmSolution.getValue();
+			//for (int i = 0; i < obs.length; i++)
+			//	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+
+			double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
+			double gradient = lvmSolution.getPoint().getEntry(0);
+			final double s = lvmSolution.getPoint().getEntry(1);
 			double intercept2 = 4 * s * s;
 
 			if (ic2 < ic || debugFitting)
@@ -1272,9 +1287,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				// Convert fitted precision in um to nm
 				Utils.log(
 						"Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
-						obs.length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
+						function.getY().length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
 						Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
-						Utils.rounded(ic2), optimizer.getEvaluations());
+						Utils.rounded(ic2), lvmSolution.getEvaluations());
 			}
 
 			if (lvmSolution == null || ic2 < ic)
@@ -1286,7 +1301,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 		catch (TooManyIterationsException e)
 		{
-			Utils.log("Failed to fit with intercept : Too many iterations (%d)", optimizer.getIterations());
+			Utils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
 		}
 		catch (ConvergenceException e)
 		{
@@ -1307,27 +1322,36 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				for (int i = 0; i < x2.length; i++)
 					x2[i] = x[i] / exposureTime;
 
-				final LinearFunctionWithMSDCorrectedIntercept function = new LinearFunctionWithMSDCorrectedIntercept(
-						x2, y, settings.fitLength, fitIntercept);
-				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-						new ModelFunctionJacobian(new MultivariateMatrixFunction()
-						{
+				final LinearFunctionWithMSDCorrectedIntercept function = new LinearFunctionWithMSDCorrectedIntercept(x2,
+						y, settings.fitLength, fitIntercept);
+
+				//@formatter:off
+				LeastSquaresProblem problem = new LeastSquaresBuilder()
+						.maxEvaluations(Integer.MAX_VALUE)
+						.maxIterations(3000)
+						.start(function.guess())
+						.target(function.getY())
+						.weight(new DiagonalMatrix(function.getWeights()))
+						.model(function, new MultivariateMatrixFunction() {
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
 								return function.jacobian(point);
-							}
-						}), new ModelFunction(function), new Target(function.getY()),
-						new Weight(function.getWeights()), new InitialGuess(function.guess()));
+							}} )
+						.build();
+				//@formatter:on
 
-				double ss = 0;
-				double[] obs = function.getY();
-				double[] exp = lvmSolution.getValue();
-				for (int i = 0; i < obs.length; i++)
-					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+				lvmSolution = optimizer.optimize(problem);
 
-				double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, obs.length, 2);
-				double gradient = lvmSolution.getPoint()[0];
-				final double s = lvmSolution.getPoint()[1];
+				double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+				//double ss = 0;
+				//double[] obs = function.getY();
+				//double[] exp = lvmSolution.getValue();
+				//for (int i = 0; i < obs.length; i++)
+				//	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+
+				double ic2 = Maths.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
+				double gradient = lvmSolution.getPoint().getEntry(0);
+				final double s = lvmSolution.getPoint().getEntry(1);
 				double intercept2 = 4 * s * s - gradient / 3;
 
 				// Q. Is this working?
@@ -1345,9 +1369,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					// Convert fitted precision in um to nm
 					Utils.log(
 							"Linear fit with MSD corrected intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
-							obs.length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
+							function.getY().length, Utils.rounded(gradient, 4), Utils.rounded(intercept2, 4),
 							Utils.rounded(gradient / 4, 4), Utils.rounded(s * 1000, 4), Utils.rounded(ss),
-							Utils.rounded(ic2), optimizer.getEvaluations());
+							Utils.rounded(ic2), lvmSolution.getEvaluations());
 				}
 
 				if (lvmSolution == null || ic2 < ic)
@@ -1359,7 +1383,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 			catch (TooManyIterationsException e)
 			{
-				Utils.log("Failed to fit with intercept : Too many iterations (%d)", optimizer.getIterations());
+				Utils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
 			}
 			catch (ConvergenceException e)
 			{

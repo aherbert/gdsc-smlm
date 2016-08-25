@@ -1,5 +1,22 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
+import java.util.ArrayList;
+
+import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Precision;
+
+import gdsc.core.ij.Utils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -17,32 +34,12 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.plugins.pcpalm.Molecule;
 import gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;
 import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
-
-import java.awt.Color;
-import java.util.ArrayList;
-
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.PointVectorValuePair;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
-import org.apache.commons.math3.optim.nonlinear.vector.Target;
-import org.apache.commons.math3.optim.nonlinear.vector.Weight;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.Precision;
 
 /**
  * Estimates the flourophore blinking rate from a set of localisations.
@@ -88,7 +85,7 @@ public class BlinkEstimator implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Require some fit results and selected regions
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
@@ -125,7 +122,8 @@ public class BlinkEstimator implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Compute the blinking rate by fitting counts to dark-time.\nSee Annibale et al (2011) PLos ONE 6, e22678.");
+		gd.addMessage(
+				"Compute the blinking rate by fitting counts to dark-time.\nSee Annibale et al (2011) PLos ONE 6, e22678.");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
 		gd.addNumericField("Max_dark_time (frames)", s_maxDarkTime, 0);
@@ -279,7 +277,8 @@ public class BlinkEstimator implements PlugIn
 			if (verbose)
 			{
 				Utils.log("  *** Warning ***");
-				Utils.log("  Fitted curve does not asymptote above real curve. Increase the number of fitted points to sample more of the overcounting regime");
+				Utils.log(
+						"  Fitted curve does not asymptote above real curve. Increase the number of fitted points to sample more of the overcounting regime");
 				Utils.log("  ***************");
 			}
 			increaseNFittedPoints = true;
@@ -434,27 +433,35 @@ public class BlinkEstimator implements PlugIn
 		double parRelativeTolerance = 1e-6;
 		double orthoTolerance = 1e-6;
 		double threshold = Precision.SAFE_MIN;
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
+		LevenbergMarquardtOptimizer optimiser = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 				costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
 		try
 		{
 			double[] obs = blinkingModel.getY();
 
-			PointVectorValuePair optimum = optimizer.optimize(new MaxIter(1000), new MaxEval(Integer.MAX_VALUE),
-					new ModelFunctionJacobian(new MultivariateMatrixFunction()
-					{
+			//@formatter:off
+			LeastSquaresProblem problem = new LeastSquaresBuilder()
+					.maxEvaluations(Integer.MAX_VALUE)
+					.maxIterations(1000)
+					.start(new double[] { ntd[0], 0.1, td[1] })
+					.target(obs)
+					.weight(new DiagonalMatrix(blinkingModel.getWeights()))
+					.model(blinkingModel, new MultivariateMatrixFunction() {
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return blinkingModel.jacobian(point);
-						}
-					}), new ModelFunction(blinkingModel), new Target(obs), new Weight(blinkingModel.getWeights()),
-					new InitialGuess(new double[] { ntd[0], 0.1, td[1] }));
+						}} )
+					//.checkerPair(checker)
+					.build();
+			//@formatter:on
 
 			blinkingModel.setLogging(false);
 
-			double[] parameters = optimum.getPoint();
+			Optimum optimum = optimiser.optimize(problem);
 
-			double[] exp = optimum.getValue();
+			double[] parameters = optimum.getPoint().toArray();
+
+			//double[] exp = blinkingModel.value(parameters);
 			double mean = 0;
 			for (double d : obs)
 				mean += d;
@@ -462,9 +469,11 @@ public class BlinkEstimator implements PlugIn
 			double ssResiduals = 0, ssTotal = 0;
 			for (int i = 0; i < obs.length; i++)
 			{
-				ssResiduals += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+				//ssResiduals += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 				ssTotal += (obs[i] - mean) * (obs[i] - mean);
 			}
+			// This is true if the weights are 1
+			ssResiduals = optimum.getResiduals().dotProduct(optimum.getResiduals());
 
 			r2 = 1 - ssResiduals / ssTotal;
 			adjustedR2 = getAdjustedCoefficientOfDetermination(ssResiduals, ssTotal, obs.length, parameters.length);
@@ -483,8 +492,7 @@ public class BlinkEstimator implements PlugIn
 		catch (TooManyIterationsException e)
 		{
 			if (log)
-				Utils.log("  Failed to fit %d points: Too many iterations (%d)", blinkingModel.size(),
-						optimizer.getIterations());
+				Utils.log("  Failed to fit %d points: Too many iterations: (%s)", blinkingModel.size(), e.getMessage());
 			return null;
 		}
 		catch (ConvergenceException e)

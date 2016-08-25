@@ -1,23 +1,19 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.util.Precision;
+
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.MultivariateMatrixFunctionWrapper;
 import gdsc.smlm.function.MultivariateVectorFunctionWrapper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.PointVectorValuePair;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
-import org.apache.commons.math3.optim.nonlinear.vector.Target;
-import org.apache.commons.math3.optim.nonlinear.vector.Weight;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.util.Precision;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -81,34 +77,50 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 
 			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
 					costRelativeTolerance, parRelativeTolerance, orthoTolerance, threshold);
-			PointVectorValuePair optimum = optimizer.optimize(new MaxIter(getMaxEvaluations()),
-					new MaxEval(Integer.MAX_VALUE),
-					new ModelFunctionJacobian(new MultivariateMatrixFunctionWrapper(f, a, n)),
-					new ModelFunction(new MultivariateVectorFunctionWrapper(f, a, n)), new Target(yd), new Weight(w),
-					new InitialGuess(initialSolution));
 
-			final double[] parameters = optimum.getPointRef();
+			//@formatter:off
+			LeastSquaresProblem problem = new LeastSquaresBuilder()
+					.maxEvaluations(Integer.MAX_VALUE)
+					.maxIterations(getMaxEvaluations())
+					.start(initialSolution)
+					.target(yd)
+					.weight(new DiagonalMatrix(w))
+					.model(
+						new MultivariateVectorFunctionWrapper(f, a, n), 
+						new MultivariateMatrixFunctionWrapper(f, a, n))
+					.build();
+			//@formatter:on
+
+			Optimum optimum = optimizer.optimize(problem);
+
+			final double[] parameters = optimum.getPoint().toArray();
 			setSolution(a, parameters);
-			iterations = optimizer.getIterations();
-			evaluations = optimizer.getEvaluations();
+			iterations = optimum.getIterations();
+			evaluations = optimum.getEvaluations();
 			if (a_dev != null)
 			{
-				double[][] covar = optimizer.computeCovariances(parameters, threshold);
+				double[][] covar = optimum.getCovariances(threshold).getData();
 				setDeviations(a_dev, covar);
 			}
 			// Compute sum-of-squares
 			if (y_fit != null)
 			{
-				final double[] optimumValue = optimum.getValue();
-				System.arraycopy(optimumValue, 0, y_fit, 0, n);
-				//f.initialise(a);
-				//for (int i = 0; i < n; i++)
-				//{
-				//	y_fit[i] = f.eval(i);
-				//}
+				residualSumOfSquares = 0;
+				f.initialise(a);
+				for (int i = 0; i < n; i++)
+				{
+					y_fit[i] = f.eval(i);
+					final double dy = y[i] - y_fit[i];
+					residualSumOfSquares += dy * dy;
+				}
+			}
+			else
+			{
+				// As this is unweighted then we can do this
+				residualSumOfSquares = optimum.getResiduals().dotProduct(optimum.getResiduals());
 			}
 
-			value = residualSumOfSquares = optimizer.getChiSquare();
+			value = residualSumOfSquares;
 			error[0] = getError(residualSumOfSquares, noise, n, initialSolution.length);
 		}
 		catch (TooManyEvaluationsException e)

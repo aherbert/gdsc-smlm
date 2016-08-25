@@ -1,33 +1,5 @@
 package gdsc.smlm.ij.plugins.pcpalm;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.ij.plugins.About;
-import gdsc.smlm.ij.plugins.Parameters;
-import gdsc.smlm.ij.plugins.SMLMUsageTracker;
-import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.UnicodeReader;
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-import ij.process.ImageProcessor;
-import ij.text.TextWindow;
-
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -48,13 +20,16 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.PointVectorValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -63,14 +38,38 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.gradient.BFGSOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
-import org.apache.commons.math3.optim.nonlinear.vector.Target;
-import org.apache.commons.math3.optim.nonlinear.vector.Weight;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.UnicodeReader;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.ij.plugins.About;
+import gdsc.smlm.ij.plugins.Parameters;
+import gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import gdsc.smlm.ij.utils.LoggingOptimiserFunction;
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import ij.process.ImageProcessor;
+import ij.text.TextWindow;
 
 /**
  * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.
@@ -897,8 +896,8 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private double[] fitRandomModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
-		final RandomModelFunction myFunction = new RandomModelFunction();
-		randomModel = myFunction;
+		final RandomModelFunction function = new RandomModelFunction();
+		randomModel = function;
 
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", randomModel.getName(),
 				sigmaS, proteinDensity * 1e6);
@@ -913,22 +912,29 @@ public class PCPALMFitting implements PlugIn
 		}
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 
-		PointVectorValuePair optimum;
+		Optimum optimum;
 		try
 		{
-			optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-					new ModelFunctionJacobian(new MultivariateMatrixFunction()
-					{
+			//@formatter:off
+			LeastSquaresProblem problem = new LeastSquaresBuilder()
+					.maxEvaluations(Integer.MAX_VALUE)
+					.maxIterations(3000)
+					.start(new double[] { sigmaS, proteinDensity })
+					.target(function.getY())
+					.weight(new DiagonalMatrix(function.getWeights()))
+					.model(function, new MultivariateMatrixFunction() {
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
-							return myFunction.jacobian(point);
-						}
-					}), new ModelFunction(myFunction), new Target(myFunction.getY()),
-					new Weight(myFunction.getWeights()), new InitialGuess(new double[] { sigmaS, proteinDensity }));
+							return function.jacobian(point);
+						}} )
+					.build();
+			//@formatter:on
+
+			optimum = optimizer.optimize(problem);
 		}
 		catch (TooManyIterationsException e)
 		{
-			log("Failed to fit %s: Too many iterations (%d)", randomModel.getName(), optimizer.getIterations());
+			log("Failed to fit %s: Too many iterations (%s)", randomModel.getName(), e.getMessage());
 			return null;
 		}
 		catch (ConvergenceException e)
@@ -939,15 +945,11 @@ public class PCPALMFitting implements PlugIn
 
 		randomModel.setLogging(false);
 
-		double[] parameters = optimum.getPoint();
+		double[] parameters = optimum.getPoint().toArray();
 		// Ensure the width is positive
 		parameters[0] = Math.abs(parameters[0]);
 
-		double ss = 0;
-		double[] obs = randomModel.getY();
-		double[] exp = optimum.getValue();
-		for (int i = 0; i < obs.length; i++)
-			ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+		double ss = optimum.getResiduals().dotProduct(optimum.getResiduals());
 		ic1 = Maths.getAkaikeInformationCriterionFromResiduals(ss, randomModel.size(), parameters.length);
 
 		final double fitSigmaS = parameters[0];
@@ -957,7 +959,7 @@ public class PCPALMFitting implements PlugIn
 		double e1 = parameterDrift(sigmaS, fitSigmaS);
 		double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
-		log("  %s fit: SS = %f. cAIC = %f. %d evaluations", randomModel.getName(), ss, ic1, optimizer.getEvaluations());
+		log("  %s fit: SS = %f. cAIC = %f. %d evaluations", randomModel.getName(), ss, ic1, optimum.getEvaluations());
 		log("  %s parameters:", randomModel.getName());
 		log("    Average precision = %s nm (%s%%)", Utils.rounded(fitSigmaS, 4), Utils.rounded(e1, 4));
 		log("    Average protein density = %s um^-2 (%s%%)", Utils.rounded(fitProteinDensity * 1e6, 4),
@@ -1039,8 +1041,8 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private double[] fitClusteredModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
-		final ClusteredModelFunctionGradient myFunction = new ClusteredModelFunctionGradient();
-		clusteredModel = myFunction;
+		final ClusteredModelFunctionGradient function = new ClusteredModelFunctionGradient();
+		clusteredModel = function;
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", clusteredModel.getName(),
 				sigmaS, proteinDensity * 1e6);
 
@@ -1085,37 +1087,39 @@ public class PCPALMFitting implements PlugIn
 		{
 			log("Re-fitting %s using a gradient optimisation", clusteredModel.getName());
 			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-			PointVectorValuePair lvmSolution;
+			Optimum lvmSolution;
 			try
 			{
-				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-						new ModelFunctionJacobian(new MultivariateMatrixFunction()
-						{
+				//@formatter:off
+				LeastSquaresProblem problem = new LeastSquaresBuilder()
+						.maxEvaluations(Integer.MAX_VALUE)
+						.maxIterations(3000)
+						.start(parameters)
+						.target(function.getY())
+						.weight(new DiagonalMatrix(function.getWeights()))
+						.model(function, new MultivariateMatrixFunction() {
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
-								return myFunction.jacobian(point);
-							}
-						}), new ModelFunction(myFunction), new Target(myFunction.getY()),
-						new Weight(myFunction.getWeights()), new InitialGuess(parameters));
-				evaluations += optimizer.getEvaluations();
+								return function.jacobian(point);
+							}} )
+						.build();
+				//@formatter:on
 
-				double ss = 0;
-				double[] obs = clusteredModel.getY();
-				double[] exp = lvmSolution.getValue();
-				for (int i = 0; i < obs.length; i++)
-					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+				lvmSolution = optimizer.optimize(problem);
+				evaluations += lvmSolution.getEvaluations();
+
+				double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 				if (ss < constrainedSolution.getValue())
 				{
 					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", clusteredModel.getName(),
 							Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(
 									100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
-					parameters = lvmSolution.getPoint();
+					parameters = lvmSolution.getPoint().toArray();
 				}
 			}
 			catch (TooManyIterationsException e)
 			{
-				log("Failed to re-fit %s: Too many iterations (%d)", clusteredModel.getName(),
-						optimizer.getIterations());
+				log("Failed to re-fit %s: Too many iterations (%s)", clusteredModel.getName(), e.getMessage());
 			}
 			catch (ConvergenceException e)
 			{
@@ -1335,8 +1339,8 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private double[] fitEmulsionModel(double[][] gr, double sigmaS, double proteinDensity, String resultColour)
 	{
-		final EmulsionModelFunctionGradient myFunction = new EmulsionModelFunctionGradient();
-		emulsionModel = myFunction;
+		final EmulsionModelFunctionGradient function = new EmulsionModelFunctionGradient();
+		emulsionModel = function;
 		log("Fitting %s: Estimated precision = %f nm, estimated protein density = %g um^-2", emulsionModel.getName(),
 				sigmaS, proteinDensity * 1e6);
 
@@ -1391,37 +1395,39 @@ public class PCPALMFitting implements PlugIn
 		{
 			log("Re-fitting %s using a gradient optimisation", emulsionModel.getName());
 			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-			PointVectorValuePair lvmSolution;
+			Optimum lvmSolution;
 			try
 			{
-				lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-						new ModelFunctionJacobian(new MultivariateMatrixFunction()
-						{
+				//@formatter:off
+				LeastSquaresProblem problem = new LeastSquaresBuilder()
+						.maxEvaluations(Integer.MAX_VALUE)
+						.maxIterations(3000)
+						.start(parameters)
+						.target(function.getY())
+						.weight(new DiagonalMatrix(function.getWeights()))
+						.model(function, new MultivariateMatrixFunction() {
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
-								return myFunction.jacobian(point);
-							}
-						}), new ModelFunction(myFunction), new Target(myFunction.getY()),
-						new Weight(myFunction.getWeights()), new InitialGuess(parameters));
-				evaluations += optimizer.getEvaluations();
+								return function.jacobian(point);
+							}} )
+						.build();
+				//@formatter:on
 
-				double ss = 0;
-				double[] obs = emulsionModel.getY();
-				double[] exp = lvmSolution.getValue();
-				for (int i = 0; i < obs.length; i++)
-					ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+				lvmSolution = optimizer.optimize(problem);
+				evaluations += lvmSolution.getEvaluations();
+
+				double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
 				if (ss < constrainedSolution.getValue())
 				{
 					log("Re-fitting %s improved the SS from %s to %s (-%s%%)", emulsionModel.getName(),
 							Utils.rounded(constrainedSolution.getValue(), 4), Utils.rounded(ss, 4), Utils.rounded(
 									100 * (constrainedSolution.getValue() - ss) / constrainedSolution.getValue(), 4));
-					parameters = lvmSolution.getPoint();
+					parameters = lvmSolution.getPoint().toArray();
 				}
 			}
 			catch (TooManyIterationsException e)
 			{
-				log("Failed to re-fit %s: Too many iterations (%d)", emulsionModel.getName(),
-						optimizer.getIterations());
+				log("Failed to re-fit %s: Too many iterations (%s)", emulsionModel.getName(), e.getMessage());
 			}
 			catch (ConvergenceException e)
 			{

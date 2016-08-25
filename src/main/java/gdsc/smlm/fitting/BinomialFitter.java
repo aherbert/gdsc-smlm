@@ -440,11 +440,13 @@ public class BinomialFitter
 					double p = lvmSolution.getPoint().getEntry(0);
 					if (p <= 1 && p >= 0)
 					{
-						double ss = 0;
-						double[] obs = gradientFunction.p;
-						double[] exp = gradientFunction.value(lvmSolution.getPoint().toArray());
-						for (int i = 0; i < obs.length; i++)
-							ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+						// True if the weights are 1
+						double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+						//double ss = 0;
+						//double[] obs = gradientFunction.p;
+						//double[] exp = gradientFunction.value(lvmSolution.getPoint().toArray());
+						//for (int i = 0; i < obs.length; i++)
+						//	ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 						if (ss < solution.getValue())
 						{
 							//log("Re-fitting improved the SS from %s to %s (-%s%%)",

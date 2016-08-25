@@ -17,45 +17,46 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.analysis.function.Gaussian;
-import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.fitting.GaussianFitter;
+import org.apache.commons.math3.fitting.GaussianCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoint;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.PointVectorValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
-import org.apache.commons.math3.optim.nonlinear.vector.MultivariateVectorOptimizer;
-import org.apache.commons.math3.optim.nonlinear.vector.Target;
-import org.apache.commons.math3.optim.nonlinear.vector.Weight;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.clustering.Cluster;
+import gdsc.core.clustering.ClusterPoint;
+import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
-
 import gdsc.smlm.function.SkewNormalFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.plugins.ResultsManager;
@@ -69,10 +70,6 @@ import gdsc.smlm.results.NullSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
-import gdsc.core.clustering.Cluster;
-import gdsc.core.clustering.ClusterPoint;
-import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.core.clustering.ClusteringEngine;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -169,7 +166,7 @@ public class PCPALMMolecules implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Require some fit results and selected regions
 		boolean resultsAvailable = MemoryPeakResults.countMemorySize() > 0;
 
@@ -309,7 +306,8 @@ public class PCPALMMolecules implements PlugIn
 		}
 		else
 		{
-			gd.addMessage("Prepare molecules for cluster analysis.\nComputes a binary image from raw localisation data");
+			gd.addMessage(
+					"Prepare molecules for cluster analysis.\nComputes a binary image from raw localisation data");
 			ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 			if (!titles.isEmpty())
 				gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
@@ -505,7 +503,8 @@ public class PCPALMMolecules implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Estimate the average localisation precision by fitting histograms.\nUse the precision to trace localisations into molecule pulses.");
+		gd.addMessage(
+				"Estimate the average localisation precision by fitting histograms.\nUse the precision to trace localisations into molecule pulses.");
 
 		gd.addNumericField("Histogram_bins", histogramBins, 0);
 		gd.addChoice("Singles_mode", singlesMode, singlesMode[singlesModeIndex]);
@@ -561,8 +560,8 @@ public class PCPALMMolecules implements PlugIn
 			double p = r.getPrecision(nmPerPixel, gain, emCCD);
 			// Remove EMCCD adjustment
 			//p /= Math.sqrt(PeakResult.F);
-			molecules.add(new Molecule(r.getXPosition() * nmPerPixel, r.getYPosition() * nmPerPixel, p, r.getSignal() /
-					gain));
+			molecules.add(new Molecule(r.getXPosition() * nmPerPixel, r.getYPosition() * nmPerPixel, p,
+					r.getSignal() / gain));
 		}
 		return molecules;
 	}
@@ -627,8 +626,8 @@ public class PCPALMMolecules implements PlugIn
 				yMax = FastMath.min(upper + iqr, stats.getMax());
 
 				if (logFitParameters)
-					Utils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(),
-							yMin, yMax);
+					Utils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
+							yMax);
 			}
 		}
 
@@ -752,35 +751,37 @@ public class PCPALMMolecules implements PlugIn
 
 	private double[] fitGaussian(float[] x, float[] y)
 	{
-		MyGaussianFitter fitter = new MyGaussianFitter(
-				new org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer(), 2000);
+		WeightedObservedPoints obs = new WeightedObservedPoints();
 		for (int i = 0; i < x.length; i++)
-			fitter.addObservedPoint(x[i], y[i]);
+			obs.add(x[i], y[i]);
 
-		double[] parameters;
+		Collection<WeightedObservedPoint> observations = obs.toList();
+		GaussianCurveFitter fitter = GaussianCurveFitter.create().withMaxIterations(2000);
+		GaussianCurveFitter.ParameterGuesser guess = new GaussianCurveFitter.ParameterGuesser(observations);
+		double[] initialGuess = null;
 		try
 		{
-			parameters = fitter.fit();
+			initialGuess = guess.guess();
+			return fitter.withStartPoint(initialGuess).fit(observations);
 		}
 		catch (TooManyEvaluationsException e)
 		{
 			// Use the initial estimate
-			parameters = fitter.guess;
+			return initialGuess;
 		}
 		catch (Exception e)
 		{
 			// Just in case there is another exception type, or the initial estimate failed
 			return null;
 		}
-		return parameters;
 	}
 
 	private double[] fitSkewGaussian(float[] x, float[] y, double[] initialSolution)
 	{
 		try
 		{
-			double[] skewParameters = (simplexFitting) ? optimiseSimplex(x, y, initialSolution) : optimiseLeastSquares(
-					x, y, initialSolution);
+			double[] skewParameters = (simplexFitting) ? optimiseSimplex(x, y, initialSolution)
+					: optimiseLeastSquares(x, y, initialSolution);
 			return skewParameters;
 		}
 		catch (TooManyEvaluationsException e)
@@ -792,21 +793,29 @@ public class PCPALMMolecules implements PlugIn
 	private double[] optimiseLeastSquares(float[] x, float[] y, double[] initialSolution)
 	{
 		// Least-squares optimisation using numerical gradients
-		final SkewNormalDifferentiableFunction myFunction = new SkewNormalDifferentiableFunction(initialSolution);
-		myFunction.addData(x, y);
+		final SkewNormalDifferentiableFunction function = new SkewNormalDifferentiableFunction(initialSolution);
+		function.addData(x, y);
+
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 
-		PointVectorValuePair optimum = optimizer.optimize(new MaxIter(3000), new MaxEval(Integer.MAX_VALUE),
-				new ModelFunctionJacobian(new MultivariateMatrixFunction()
-				{
+		//@formatter:off
+		LeastSquaresProblem problem = new LeastSquaresBuilder()
+				.maxEvaluations(Integer.MAX_VALUE)
+				.maxIterations(3000)
+				.start(initialSolution)
+				.target(function.calculateTarget())
+				.weight(new DiagonalMatrix(function.calculateWeights()))
+				.model(function, new MultivariateMatrixFunction() {
 					public double[][] value(double[] point) throws IllegalArgumentException
 					{
-						return myFunction.jacobian(point);
-					}
-				}), new ModelFunction(myFunction), new Target(myFunction.calculateTarget()),
-				new Weight(myFunction.calculateWeights()), new InitialGuess(initialSolution));
+						return function.jacobian(point);
+					}} )
+				.build();
+		//@formatter:on
 
-		double[] skewParameters = optimum.getPoint();
+		Optimum optimum = optimizer.optimize(problem);
+
+		double[] skewParameters = optimum.getPoint().toArray();
 		return skewParameters;
 	}
 
@@ -854,7 +863,8 @@ public class PCPALMMolecules implements PlugIn
 	 *            a list of the singles (not grouped into molecules)
 	 * @return a list of molecules
 	 */
-	private ArrayList<Molecule> extractMolecules(MemoryPeakResults results, double sigmaRaw, ArrayList<Molecule> singles)
+	private ArrayList<Molecule> extractMolecules(MemoryPeakResults results, double sigmaRaw,
+			ArrayList<Molecule> singles)
 	{
 		return traceMolecules(results, sigmaRaw * 2.5, 1, singles);
 	}
@@ -1200,8 +1210,8 @@ public class PCPALMMolecules implements PlugIn
 						}
 						if (clusters[cluster].length <= clusterSize[cluster])
 						{
-							clusters[cluster] = Arrays
-									.copyOf(clusters[cluster], (int) (clusters[cluster].length * 1.5));
+							clusters[cluster] = Arrays.copyOf(clusters[cluster],
+									(int) (clusters[cluster].length * 1.5));
 						}
 						clusters[cluster][clusterSize[cluster]++] = i;
 					}
@@ -1255,8 +1265,8 @@ public class PCPALMMolecules implements PlugIn
 			{
 				for (double[] clusterCentre : clusterCentres)
 				{
-					int clusterN = (int) Math.round((clusterNumberSD > 0) ? dataGenerator.nextGaussian(clusterNumber,
-							clusterNumberSD) : clusterNumber);
+					int clusterN = (int) Math.round((clusterNumberSD > 0)
+							? dataGenerator.nextGaussian(clusterNumber, clusterNumberSD) : clusterNumber);
 					if (clusterN < 1)
 						continue;
 					//double[] clusterCentre = dist.next();
@@ -2043,8 +2053,8 @@ public class PCPALMMolecules implements PlugIn
 	/**
 	 * Allow optimisation using Apache Commons Math 3 Gradient Optimiser
 	 */
-	public class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction implements
-			MultivariateVectorFunction
+	public class SkewNormalDifferentiableFunction extends SkewNormalOptimiserFunction
+			implements MultivariateVectorFunction
 	{
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
@@ -2116,77 +2126,6 @@ public class PCPALMMolecules implements PlugIn
 				ss += dx * dx;
 			}
 			return ss;
-		}
-	}
-
-	/**
-	 * Apache GaussianFitter extended to allow maxEvaluations to be set
-	 * 
-	 */
-	public class MyGaussianFitter extends GaussianFitter
-	{
-		public int maxEvaluations = 1000;
-		public double[] guess = null;
-
-		public MyGaussianFitter(MultivariateVectorOptimizer optimizer, int maxEvaluations)
-		{
-			super(optimizer);
-			this.maxEvaluations = maxEvaluations;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.apache.commons.math3.fitting.GaussianFitter#fit(double[])
-		 */
-		public double[] fit(double[] initialGuess)
-		{
-			final Gaussian.Parametric f = new Gaussian.Parametric()
-			{
-				@Override
-				public double value(double x, double... p)
-				{
-					double v = Double.POSITIVE_INFINITY;
-					try
-					{
-						v = super.value(x, p);
-					}
-					catch (NotStrictlyPositiveException e)
-					{ // NOPMD
-					  // Do nothing.
-					}
-					return v;
-				}
-
-				@Override
-				public double[] gradient(double x, double... p)
-				{
-					double[] v = { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY };
-					try
-					{
-						v = super.gradient(x, p);
-					}
-					catch (NotStrictlyPositiveException e)
-					{ // NOPMD
-					  // Do nothing.
-					}
-					return v;
-				}
-			};
-
-			return fit(maxEvaluations, f, initialGuess);
-		}
-
-		/**
-		 * Fits a Gaussian function to the observed points.
-		 * 
-		 * @return the parameters of the Gaussian function that best fits the
-		 *         observed points (in the same order as above).
-		 */
-		public double[] fit()
-		{
-			guess = (new ParameterGuesser(getObservations())).guess();
-			return fit(guess);
 		}
 	}
 

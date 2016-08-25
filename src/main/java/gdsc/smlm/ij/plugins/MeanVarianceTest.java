@@ -1,5 +1,24 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math3.fitting.PolynomialCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.util.MathArrays;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,10 +33,6 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.utils.SeriesOpener;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -27,21 +42,6 @@ import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction.Parametric;
-import org.apache.commons.math3.fitting.CurveFitter;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.util.MathArrays;
 
 /**
  * Opens a folder of images and computes a Mean-Variance Test.
@@ -368,7 +368,7 @@ public class MeanVarianceTest implements PlugIn
 		double[] mean = new double[total];
 		double[] variance = new double[mean.length];
 		Statistics gainStats = (singleImage) ? new StoredDataStatistics(total) : new Statistics();
-		final CurveFitter<Parametric> fitter = new CurveFitter<Parametric>(new LevenbergMarquardtOptimizer());
+		final WeightedObservedPoints obs = new WeightedObservedPoints();
 		for (int i = (singleImage) ? 0 : start, j = 0; i < images.size(); i++)
 		{
 			StringBuilder sb = (showTable) ? new StringBuilder() : null;
@@ -383,7 +383,7 @@ public class MeanVarianceTest implements PlugIn
 				// Gain is in ADU / e
 				double gain = variance[j] / (mean[j] - bias);
 				gainStats.add(gain);
-				fitter.addObservedPoint(mean[j], variance[j]);
+				obs.add(mean[j], variance[j]);
 
 				if (emMode)
 				{
@@ -469,7 +469,8 @@ public class MeanVarianceTest implements PlugIn
 
 			// Compute optimal coefficients.
 			final double[] init = { 0, 1 / gainStats.getMean() }; // a - b x
-			final double[] best = fitter.fit(new PolynomialFunction.Parametric(), init);
+			final PolynomialCurveFitter fitter = PolynomialCurveFitter.create(2).withStartPoint(init);
+			final double[] best = fitter.fit(obs.toList());
 
 			// Construct the polynomial that best fits the data.
 			final PolynomialFunction fitted = new PolynomialFunction(best);
