@@ -807,8 +807,8 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
 		gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
 		gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
-		gd.addSlider("Match_distance", 0.2, 3, distance);
-		gd.addSlider("Lower_distance", 0.2, 3, lowerDistance);
+		gd.addSlider("Match_distance", 0.5, 3.5, distance);
+		gd.addSlider("Lower_distance", 0, 3.5, lowerDistance);
 		gd.addSlider("Match_signal", 0, 3.5, signalFactor);
 		gd.addSlider("Lower_signal", 0, 3.5, lowerSignalFactor);
 

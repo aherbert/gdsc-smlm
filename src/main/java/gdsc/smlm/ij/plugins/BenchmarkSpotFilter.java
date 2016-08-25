@@ -692,10 +692,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
 		gd.addCheckbox("Multiple_matches", multipleMatches);
 		gd.addCheckbox("Ranked_matches", rankedMatches);
-		gd.addSlider("Match_distance", 1, 3, upperDistance);
-		gd.addSlider("Lower_distance", 1, 3, lowerDistance);
-		gd.addSlider("Signal_factor", 1, 3, upperSignalFactor);
-		gd.addSlider("Lower_factor", 1, 3, lowerSignalFactor);
+		gd.addSlider("Match_distance", 0.5, 3.5, upperDistance);
+		gd.addSlider("Lower_distance", 0, 3.5, lowerDistance);
+		gd.addSlider("Signal_factor", 0, 3.5, upperSignalFactor);
+		gd.addSlider("Lower_factor", 0, 3.5, lowerSignalFactor);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
 		gd.addCheckbox("Show_plots", showPlot);
 		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
