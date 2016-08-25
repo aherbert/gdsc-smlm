@@ -39,6 +39,9 @@ public class AiryPattern
 	{
 		if (x == 0)
 			return 1;
+		// I(x) = I0 * ( 2*J1(x) / x )^2
+		// I0 is the maximum intensity of the pattern at the centre
+		// Assuming I0 = 1:
 		final double y = Bessel.J1(x) / x;
 		return 4.0 * y * y;
 	}
