@@ -3,35 +3,35 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>gdsc</groupId>
-    <artifactId>gdsc_smlm</artifactId>
+	<artifactId>gdsc_smlm</artifactId>
 	<version>0.7.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>SMLM</name>
 	<url>http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins</url>
-	
+
 	<licenses>
 		<license>
 			<name>GNU General Public License (GPL) version 3.0</name>
-    		<url>http://www.gnu.org/licenses/gpl.txt</url>
+			<url>http://www.gnu.org/licenses/gpl.txt</url>
 			<distribution>manual</distribution>
 		</license>
 	</licenses>
-	
+
 	<scm>
 		<url>https://github.com/aherbert/GDSC-SMLM</url>
 	</scm>
-	
+
 	<developers>
-	  <developer>
-	    <id>aherbert</id>
-	    <name>Alex Herbert</name>
-	    <email>a.herbert@sussex.ac.uk</email>
-	    <roles>
-	      <role>architect</role>
-	      <role>developer</role>
-	    </roles>
-	  </developer>
+		<developer>
+			<id>aherbert</id>
+			<name>Alex Herbert</name>
+			<email>a.herbert@sussex.ac.uk</email>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+		</developer>
 	</developers>
 
 	<properties>
@@ -60,6 +60,8 @@
 							<manifest>
 								<addClasspath>true</addClasspath>
 								<mainClass>gdsc.smlm.Version</mainClass>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              					<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							</manifest>
 						</archive>
 					</configuration>
@@ -117,7 +119,7 @@
 		<dependency>
 			<groupId>gdsc</groupId>
 			<artifactId>gdsc-core</artifactId>
-			<version>1.1.0</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -142,7 +144,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
-			<version>3.2</version>
+			<version>3.4.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.rwl</groupId>
