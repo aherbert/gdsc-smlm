@@ -1,5 +1,35 @@
 package gdsc.smlm.fitting;
 
+import java.util.Arrays;
+
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.distribution.BinomialDistribution;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.MaxIter;
+import org.apache.commons.math3.optim.OptimizationData;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.SimpleValueChecker;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,37 +46,6 @@ package gdsc.smlm.fitting;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.Maths;
-
-import java.util.Arrays;
-
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.OptimizationData;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.PointVectorValuePair;
-import org.apache.commons.math3.optim.SimpleBounds;
-import org.apache.commons.math3.optim.SimpleValueChecker;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunction;
-import org.apache.commons.math3.optim.nonlinear.vector.ModelFunctionJacobian;
-import org.apache.commons.math3.optim.nonlinear.vector.Target;
-import org.apache.commons.math3.optim.nonlinear.vector.Weight;
-import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
-import org.apache.commons.math3.util.ArithmeticUtils;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Fit a binomial distribution to a histogram
@@ -354,9 +353,9 @@ public class BinomialFitter
 					try
 					{
 						// Start from the initial solution
-						PointValuePair result = opt.optimize(new InitialGuess(initialSolution), new ObjectiveFunction(
-								function), goalType, bounds, sigma, popSize, new MaxIter(maxIterations), new MaxEval(
-								maxIterations * 2));
+						PointValuePair result = opt.optimize(new InitialGuess(initialSolution),
+								new ObjectiveFunction(function), goalType, bounds, sigma, popSize,
+								new MaxIter(maxIterations), new MaxEval(maxIterations * 2));
 						//System.out.printf("CMAES Iter %d initial = %g (%d)\n", iteration, result.getValue(),
 						//		opt.getEvaluations());
 						if (solution == null || result.getValue() < solution.getValue())
@@ -376,8 +375,8 @@ public class BinomialFitter
 					{
 						// Also restart from the current optimum
 						PointValuePair result = opt.optimize(new InitialGuess(solution.getPointRef()),
-								new ObjectiveFunction(function), goalType, bounds, sigma, popSize, new MaxIter(
-										maxIterations), new MaxEval(maxIterations * 2));
+								new ObjectiveFunction(function), goalType, bounds, sigma, popSize,
+								new MaxIter(maxIterations), new MaxEval(maxIterations * 2));
 						//System.out.printf("CMAES Iter %d restart = %g (%d)\n", iteration, result.getValue(),
 						//		opt.getEvaluations());
 						if (result.getValue() < solution.getValue())
@@ -413,38 +412,51 @@ public class BinomialFitter
 			{
 				// Improve SS fit with a gradient based LVM optimizer
 				LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+
 				try
 				{
 					final BinomialModelFunctionGradient gradientFunction = new BinomialModelFunctionGradient(histogram,
 							n, zeroTruncated);
-					PointVectorValuePair lvmSolution = optimizer.optimize(new MaxIter(3000), new MaxEval(
-							Integer.MAX_VALUE), new ModelFunctionJacobian(new MultivariateMatrixFunction()
-					{
-						public double[][] value(double[] point) throws IllegalArgumentException
-						{
-							return gradientFunction.jacobian(point);
-						}
-					}), new ModelFunction(gradientFunction), new Target(gradientFunction.p), new Weight(
-							gradientFunction.getWeights()), new InitialGuess(solution.getPointRef()));
 
-					double ss = 0;
-					double[] obs = gradientFunction.p;
-					double[] exp = lvmSolution.getValue();
-					for (int i = 0; i < obs.length; i++)
-						ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+					//@formatter:off
+					LeastSquaresProblem problem = new LeastSquaresBuilder()
+							.maxEvaluations(Integer.MAX_VALUE)
+							.maxIterations(3000)
+							.start(solution.getPointRef())
+							.target(gradientFunction.p)
+							.weight(new DiagonalMatrix(gradientFunction.getWeights()))
+							.model(gradientFunction, new MultivariateMatrixFunction() {
+								public double[][] value(double[] point) throws IllegalArgumentException
+								{
+									return gradientFunction.jacobian(point);
+								}} )
+							//.checker (checker)
+							.build();
+					//@formatter:on
+
+					Optimum lvmSolution = optimizer.optimize(problem);
+
 					// Check the pValue is valid since the LVM is not bounded.
-					double p = lvmSolution.getPointRef()[0];
-					if (ss < solution.getValue() && p <= 1 && p >= 0)
+					double p = lvmSolution.getPoint().getEntry(0);
+					if (p <= 1 && p >= 0)
 					{
-						//log("Re-fitting improved the SS from %s to %s (-%s%%)",
-						//		Utils.rounded(solution.getValue(), 4), Utils.rounded(ss, 4),
-						//		Utils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
-						return new PointValuePair(lvmSolution.getPoint(), ss);
+						double ss = 0;
+						double[] obs = gradientFunction.p;
+						double[] exp = gradientFunction.value(lvmSolution.getPoint().toArray());
+						for (int i = 0; i < obs.length; i++)
+							ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
+						if (ss < solution.getValue())
+						{
+							//log("Re-fitting improved the SS from %s to %s (-%s%%)",
+							//		Utils.rounded(solution.getValue(), 4), Utils.rounded(ss, 4),
+							//		Utils.rounded(100 * (solution.getValue() - ss) / solution.getValue(), 4));
+							return new PointValuePair(lvmSolution.getPoint().toArray(), ss);
+						}
 					}
 				}
 				catch (TooManyIterationsException e)
 				{
-					log("Failed to re-fit: Too many iterations (%d)", optimizer.getIterations());
+					log("Failed to re-fit: Too many iterations: %s", e.getMessage());
 				}
 				catch (ConvergenceException e)
 				{
@@ -611,7 +623,7 @@ public class BinomialFitter
 			nC = new long[n + 1];
 			for (int k = 0; k <= n; k++)
 			{
-				nC[k] = ArithmeticUtils.binomialCoefficient(n, k);
+				nC[k] = CombinatoricsUtils.binomialCoefficient(n, k);
 			}
 		}
 
@@ -658,9 +670,8 @@ public class BinomialFitter
 					//		nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1;
 
 					// Optimise
-					jacobian[k][0] = nC[k] *
-							(k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) - Math.pow(p, k) * (n - k) *
-									Math.pow(1 - p, n - k - 1));
+					jacobian[k][0] = nC[k] * (k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) -
+							Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1));
 				}
 			}
 			else
