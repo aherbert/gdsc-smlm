@@ -373,6 +373,7 @@ public class FitWorker implements Runnable
 				logger.info("Slice %d: %d / %d", slice, success, spots.length);
 		}
 
+		// Add the ROI bounds to the fitted peaks
 		float offsetx = bounds.x;
 		float offsety = bounds.y;
 
@@ -382,7 +383,6 @@ public class FitWorker implements Runnable
 			offsety += params.getOffset()[1];
 		}
 
-		// Add the ROI bounds to the fitted peaks
 		for (PeakResult result : sliceResults)
 		{
 			result.params[Gaussian2DFunction.X_POSITION] += offsetx;
@@ -724,12 +724,11 @@ public class FitWorker implements Runnable
 		return params;
 	}
 
-	
 	/**
 	 * Store the last fit result with neighbours
 	 */
 	private FitResult fitResultWithNeighbours = null;
-	
+
 	/**
 	 * Fits a 2D Gaussian to the given data. Fits all the specified peaks.
 	 * <p>
@@ -755,7 +754,7 @@ public class FitWorker implements Runnable
 	private FitResult fit(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, Spot[] spots, int n)
 	{
 		fitResultWithNeighbours = null;
-		
+
 		int width = regionBounds.width;
 		int height = regionBounds.height;
 		int x = spots[n].x;
@@ -790,14 +789,45 @@ public class FitWorker implements Runnable
 		FitResult fitResult = null;
 		if (neighbours > 0)
 		{
-			boolean subtractFittedPeaks = false;
+			int subtractFittedPeaks = 0;
+			boolean[] subtract = null;
+
+			// Determine if any fitted neighbours are outside the region
+			// TODO - Test if this is better. Examples show that fitting spots with a centre 
+			// outside the region can result in large drift.
+			if (fittedNeighbourCount > 0)
+			{
+				subtract = new boolean[fittedNeighbourCount];
+				// The fitted result will be relative to (0,0) in the fit data and already 
+				// have an offset applied so that 0.5 is the centre of a pixel. We can test 
+				// the coordinates exactly against the fit frame.
+				final float xmin = regionBounds.x;
+				final float xmax = xmin + regionBounds.width;
+				final float ymin = regionBounds.y;
+				final float ymax = ymin + regionBounds.height;
+
+				for (int i = 0; i < fittedNeighbourCount; i++)
+				{
+					PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
+
+					// Subtract peaks from the data if they are outside the fit region
+					if (result.params[Gaussian2DFunction.X_POSITION] < xmin ||
+							result.params[Gaussian2DFunction.X_POSITION] > xmax ||
+							result.params[Gaussian2DFunction.Y_POSITION] < ymin ||
+							result.params[Gaussian2DFunction.Y_POSITION] > ymax)
+					{
+						subtract[i] = true;
+						subtractFittedPeaks++;
+					}
+				}
+			}
 
 			// Multiple-fit ...
 			if (logger != null)
-				logger.info("Slice %d: Multiple-fit (%d peaks : neighbours [%d + %d])", slice, neighbours + 1,
-						neighbourCount, fittedNeighbourCount);
+				logger.info("Slice %d: Multiple-fit (%d peaks : neighbours [%d + %d - %d])", slice, neighbours + 1,
+						neighbourCount, fittedNeighbourCount, subtractFittedPeaks);
 
-			neighbours = (subtractFittedPeaks) ? neighbourCount : neighbourCount + fittedNeighbourCount;
+			neighbours = neighbourCount + fittedNeighbourCount - subtractFittedPeaks;
 
 			// Create the parameters for the fit
 			final int parametersPerPeak = 6;
@@ -846,15 +876,18 @@ public class FitWorker implements Runnable
 				final double xOffset = regionBounds.x + 0.5;
 				final double yOffset = regionBounds.y + 0.5;
 
-				if (subtractFittedPeaks)
+				if (subtractFittedPeaks > 0)
 				{
 					// Subtract the already fitted peaks from the data. 
 					// This will speed up evaluation of the fitting function.
 					region = Arrays.copyOf(region, width * height);
+					//Utils.display("Region", region, width, height);
 
-					final double[] funcParams = new double[1 + parametersPerPeak * fittedNeighbourCount];
-					for (int i = 0, j = 0; i < fittedNeighbourCount; i++, j += parametersPerPeak)
+					final double[] funcParams = new double[1 + parametersPerPeak * subtractFittedPeaks];
+					for (int i = 0, j = 0; i < fittedNeighbourCount; i++)
 					{
+						if (!subtract[i])
+							continue;
 						PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
 						// Copy Amplitude,Angle,Xpos,Ypos,Xwidth,Ywidth
 						for (int k = 1; k <= 6; k++)
@@ -862,9 +895,10 @@ public class FitWorker implements Runnable
 						// Adjust position relative to extracted region
 						funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 						funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
+						j += parametersPerPeak;
 					}
 
-					GaussianFunction func = fitConfig.createGaussianFunction(fittedNeighbourCount, regionBounds.width,
+					GaussianFunction func = fitConfig.createGaussianFunction(subtractFittedPeaks, regionBounds.width,
 							funcParams);
 					func.initialise(funcParams);
 
@@ -873,26 +907,29 @@ public class FitWorker implements Runnable
 					{
 						region[i] -= func.eval(i);
 					}
-				}
-				else
-				{
-					// Add the details of the already fitted peaks
-					for (int i = 0, j = (1 + neighbourCount) *
-							parametersPerPeak; i < fittedNeighbourCount; i++, j += parametersPerPeak)
-					{
-						PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
-						// Get the Amplitude (since the params array stores the signal)
-						params[j + Gaussian2DFunction.SIGNAL] = result.getAmplitude();
-						// Copy Angle,Xpos,Ypos,Xwidth,Ywidth
-						for (int k = 2; k <= parametersPerPeak; k++)
-							params[j + k] = result.params[k];
 
-						// Add background to amplitude (required since the background will be re-estimated)
-						params[j + Gaussian2DFunction.SIGNAL] += result.params[Gaussian2DFunction.BACKGROUND];
-						// Adjust position relative to extracted region
-						params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
-						params[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
-					}
+					//Utils.display("Region2", region, width, height);
+				}
+
+				// Add the details of the already fitted peaks
+				for (int i = 0, j = (1 + neighbourCount) * parametersPerPeak; i < fittedNeighbourCount; i++)
+				{
+					if (subtract[i])
+						continue;
+					PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
+
+					// Get the Amplitude (since the params array stores the signal)
+					params[j + Gaussian2DFunction.SIGNAL] = result.getAmplitude();
+					// Copy Angle,Xpos,Ypos,Xwidth,Ywidth
+					for (int k = 2; k <= parametersPerPeak; k++)
+						params[j + k] = result.params[k];
+
+					// Add background to amplitude (required since the background will be re-estimated)
+					params[j + Gaussian2DFunction.SIGNAL] += result.params[Gaussian2DFunction.BACKGROUND];
+					// Adjust position relative to extracted region
+					params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
+					params[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
+					j += parametersPerPeak;
 				}
 			}
 
@@ -935,7 +972,7 @@ public class FitWorker implements Runnable
 					params[i * parametersPerPeak + Gaussian2DFunction.Y_POSITION] += 0.001;
 			}
 
-			fitResultWithNeighbours = fitResult = gf.fit(region, width, height, npeaks, params, true);			
+			fitResultWithNeighbours = fitResult = gf.fit(region, width, height, npeaks, params, true);
 
 			printFitResults(fitResult, region, width, height, npeaks, 0, gf.getIterations());
 
@@ -1204,10 +1241,10 @@ public class FitWorker implements Runnable
 		{
 			final float range = (float) FastMath.max(fitConfig.getInitialPeakStdDev0(),
 					fitConfig.getInitialPeakStdDev1());
-			final float xmin2 = xmin - range;
-			final float xmax2 = xmax + range;
-			final float ymin2 = ymin - range;
-			final float ymax2 = ymax + range;
+			final float xmin2 = regionBounds.x - range;
+			final float xmax2 = regionBounds.x + regionBounds.width + range;
+			final float ymin2 = regionBounds.y - range;
+			final float ymax2 = regionBounds.y + regionBounds.height + range;
 			for (int i = 0; i < sliceResults.size(); i++)
 			{
 				PeakResult result = sliceResults.get(i);
