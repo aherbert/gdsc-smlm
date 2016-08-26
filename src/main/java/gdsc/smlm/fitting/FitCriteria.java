@@ -30,7 +30,7 @@ public enum FitCriteria
 	/**
 	 * Stop fitting when the XY coordinates do not change significantly
 	 */
-	COORDINATES("Co-ordinates"),
+	COORDINATES("Coordinates"),
 	/**
 	 * Stop fitting when the parameters do not change significantly
 	 */
