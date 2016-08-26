@@ -57,7 +57,7 @@ public enum FitStatus
 	/**
 	 * 
 	 */
-	COORDINATES_MOVED("Co-ordinates moved"),
+	COORDINATES_MOVED("Coordinates moved"),
 	/**
 	 * 
 	 */
