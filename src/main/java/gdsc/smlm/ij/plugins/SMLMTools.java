@@ -98,7 +98,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	}
 
 	/**
-	 * @return True if the instance of the SMLM Tools Frame is visible 
+	 * @return True if the instance of the SMLM Tools Frame is visible
 	 */
 	public static boolean isFrameVisible()
 	{
@@ -126,7 +126,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Do nothing. The frame has been created and the buttons run the plugins.
 	}
 
@@ -153,7 +153,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 				if (tokens.length == 3)
 				{
 					// Only copy the entries from the Plugins menu
-					if (tokens[0].startsWith("Plugins"))
+					if (!ignore(tokens))
 					{
 						if (!plugins.isEmpty())
 						{
@@ -225,6 +225,26 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		return true;
 	}
 
+	/**
+	 * Selectively ignore certain plugins
+	 * 
+	 * @param tokens
+	 *            The tokens from the plugins.config file
+	 * @return true if the plugin should be ignored
+	 */
+	private boolean ignore(String[] tokens)
+	{
+		// Only copy the entries from the Plugins menu
+		if (!tokens[0].startsWith("Plugins"))
+			return true;
+
+		// This plugin cannot be run unless in a macro
+		if (tokens[1].contains("SMLM Macro Extensions"))
+			return true;
+
+		return false;
+	}
+
 	private static InputStream getToolsPluginsConfig()
 	{
 		// Look for smlm.config in the plugin directory
@@ -253,7 +273,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		InputStream readmeStream = resourceClass.getResourceAsStream("/gdsc/smlm/plugins.config");
 		return readmeStream;
 	}
-	
+
 	private int addPlugin(Panel mainPanel, GridBagLayout grid, String commandName, final String command, int col,
 			int row)
 	{
