@@ -51,18 +51,17 @@ public class FitWorker implements Runnable
 	/**
 	 * The number of additional iterations to use for multiple peaks
 	 * <p>
-	 * Testings on a idealised dataset of simulated data show that multiple peaks increases the iterations
-	 * but the increase asymptotes. Initial rate is 2-fold for 7x7 region, decreasing to 1.5-fold for 17x17 region.
-	 * Best solution is to add a set of iterations for each additional peak.
+	 * Testings on a idealised dataset of simulated data show that multiple peaks increases the iterations but the
+	 * increase asymptotes. Initial rate is 2-fold for 7x7 region, decreasing to 1.5-fold for 17x17 region. Best
+	 * solution is to add a set of iterations for each additional peak.
 	 */
 	public static final int ITERATION_INCREASE_FOR_MULTIPLE_PEAKS = 1; // 0 for no effect
 	/**
 	 * The number of additional iterations to use for doublets
 	 * <p>
 	 * Testings on a idealised dataset of simulated data show that fitting the doublets increases the iterations by
-	 * approx 3.5-fold for 7x7 region, decreasing to 2.5-fold for 17x17 region.
-	 * An additional doubling of iterations were used when the fit of the doublet resulted in one peak being eliminated
-	 * for moving.
+	 * approx 3.5-fold for 7x7 region, decreasing to 2.5-fold for 17x17 region. An additional doubling of iterations
+	 * were used when the fit of the doublet resulted in one peak being eliminated for moving.
 	 */
 	public static final int ITERATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
@@ -73,6 +72,7 @@ public class FitWorker implements Runnable
 	public static final int EVALUATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
 	private Logger logger = null, logger2 = null;
+	private FitTypeCounter counter = null;
 	private long time = 0;
 
 	private MaximaSpotFilter spotFilter = null;
@@ -302,8 +302,9 @@ public class FitWorker implements Runnable
 							peakParams[i * 6 + Gaussian2DFunction.Y_POSITION] += 0.5 + regionBounds.y;
 						}
 					}
-					String msg = String.format("%d:%d [%d,%d] %s (%s) = %s\n", slice, n + 1, x + bounds.x, y + bounds.y,
-							fitResult.getStatus(), fitResult.getStatusData(), Arrays.toString(peakParams));
+					String msg = String
+							.format("%d:%d [%d,%d] %s (%s) = %s\n", slice, n + 1, x + bounds.x, y + bounds.y,
+									fitResult.getStatus(), fitResult.getStatusData(), Arrays.toString(peakParams));
 					logger2.debug(msg);
 				}
 
@@ -503,8 +504,8 @@ public class FitWorker implements Runnable
 	{
 		neighbourIndices = allocateArray(neighbourIndices, length);
 		// Allocate enough room for all fits to be doublets 
-		fittedNeighbourIndices = allocateArray(fittedNeighbourIndices,
-				length * ((config.getResidualsThreshold() < 1) ? 2 : 1));
+		fittedNeighbourIndices = allocateArray(fittedNeighbourIndices, length *
+				((config.getResidualsThreshold() < 1) ? 2 : 1));
 	}
 
 	private int[] allocateArray(int[] array, int length)
@@ -754,11 +755,12 @@ public class FitWorker implements Runnable
 	private FitResult fit(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, Spot[] spots, int n)
 	{
 		fitResultWithNeighbours = null;
+		final FitType fitType = new FitType();
 
-		int width = regionBounds.width;
-		int height = regionBounds.height;
-		int x = spots[n].x;
-		int y = spots[n].y;
+		final int width = regionBounds.width;
+		final int height = regionBounds.height;
+		final int x = spots[n].x;
+		final int y = spots[n].y;
 
 		// Analyse neighbours and include them in the fit if they are within a set height of this peak.
 		int neighbours = (config.isIncludeNeighbours()) ? findNeighbours(regionBounds, n, x, y, spots) : 0;
@@ -789,6 +791,24 @@ public class FitWorker implements Runnable
 		FitResult fitResult = null;
 		if (neighbours > 0)
 		{
+			// TODO
+			// We should try a single fit before any multiple fits. This is because they 
+			// are computationally less expensive.
+			
+			// If no fitted neighbours:
+			// do a fit and validate for a result inside the
+			// fit region (no drift). This shows the region has at least one good spot.
+			// This can be saved and used as the fit result for a single fit if we need it later.
+			
+			// If we have fitted neighbours:
+			// subtract them from the region and then try a single fit. It should work if
+			// something is there. This can be an initial estimate for one of the peaks in 
+			// the multiple fit (i.e. the closest one)
+			
+			// If the fits fails then we can guess that the region has no good peaks and 
+			// it is not worth doing a multiple fit.			
+			
+			fitType.setNeighbours(true);
 			int subtractFittedPeaks = 0;
 			boolean[] subtract = null;
 
@@ -944,10 +964,10 @@ public class FitWorker implements Runnable
 			// Increase the iterations for a multiple fit.
 			final int maxIterations = fitConfig.getMaxIterations();
 			final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
-			fitConfig.setMaxIterations(
-					maxIterations + maxIterations * (npeaks - 1) * ITERATION_INCREASE_FOR_MULTIPLE_PEAKS);
-			fitConfig.setMaxIterations(
-					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
+			fitConfig.setMaxIterations(maxIterations + maxIterations * (npeaks - 1) *
+					ITERATION_INCREASE_FOR_MULTIPLE_PEAKS);
+			fitConfig.setMaxIterations(maxEvaluations + maxEvaluations * (npeaks - 1) *
+					EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
 			// TODO - see if peak shift factors, off-grid centres makes a difference
 
@@ -982,13 +1002,15 @@ public class FitWorker implements Runnable
 
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
+				fitType.setNeighboursOK(true);
+
 				// Extract the first fitted peak
 				final int degreesOfFreedom = fitResult.getDegreesOfFreedom();
 				double error = fitResult.getError();
 				final double[] initialParameters = truncate(fitResult.getInitialParameters());
 				final double[] parameters = truncate(fitResult.getParameters());
-				final double[] parametersDev = (fitResult.getParameterStdDev() != null)
-						? truncate(fitResult.getParameterStdDev()) : null;
+				final double[] parametersDev = (fitResult.getParameterStdDev() != null) ? truncate(fitResult
+						.getParameterStdDev()) : null;
 				final int nPeaks = 1;
 				final int nFittedParameters = fitResult.getNumberOfFittedParameters() % 6 +
 						fitResult.getNumberOfFittedParameters() / npeaks;
@@ -1042,8 +1064,7 @@ public class FitWorker implements Runnable
 					background = 0;
 				}
 			}
-			final double[] params = new double[] { background, signal, 0, x - regionBounds.x, y - regionBounds.y, 0,
-					0 };
+			final double[] params = new double[] { background, signal, 0, x - regionBounds.x, y - regionBounds.y, 0, 0 };
 			fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate);
 			printFitResults(fitResult, region, width, height, 1, -neighbours, gf.getIterations());
 
@@ -1069,9 +1090,14 @@ public class FitWorker implements Runnable
 			if (//neighbours == 0 && 
 			canPerformQuadrantAnalysis(fitResult, width, height))
 			{
+				fitType.setDoublet(true);
 				FitResult newFitResult = quadrantAnalysis(spots, n, fitResult, region, regionBounds);
 				if (newFitResult != null)
+				{
+					if (newFitResult.getStatus() == FitStatus.OK)
+						fitType.setDoubletOK(true);
 					fitResult = newFitResult;
+				}
 			}
 		}
 
@@ -1080,21 +1106,25 @@ public class FitWorker implements Runnable
 			switch (fitResult.getStatus())
 			{
 				case OK:
+					fitType.setOK(true);
+
 					// Show the shift, signal and width spread
 					final double[] initialParams = fitResult.getInitialParameters();
 					final double[] params = fitResult.getParameters();
 					for (int i = 0, j = 0; i < fitResult.getNumberOfPeaks(); i++, j += 6)
 					{
-						logger.info("Fit OK [%d]. Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f", i,
+						logger.info(
+								"Fit OK [%d]. Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f",
+								i,
 								params[j + Gaussian2DFunction.X_POSITION] -
 										initialParams[j + Gaussian2DFunction.X_POSITION],
 								params[j + Gaussian2DFunction.Y_POSITION] -
 										initialParams[j + Gaussian2DFunction.Y_POSITION],
 								params[j + Gaussian2DFunction.SIGNAL] / noise,
-								getFactor(params[j + Gaussian2DFunction.X_SD],
-										initialParams[j + Gaussian2DFunction.X_SD]),
-								getFactor(params[j + Gaussian2DFunction.Y_SD],
-										initialParams[j + Gaussian2DFunction.Y_SD]));
+								getFactor(params[j + Gaussian2DFunction.X_SD], initialParams[j +
+										Gaussian2DFunction.X_SD]),
+								getFactor(params[j + Gaussian2DFunction.Y_SD], initialParams[j +
+										Gaussian2DFunction.Y_SD]));
 					}
 					break;
 
@@ -1109,6 +1139,9 @@ public class FitWorker implements Runnable
 			}
 		}
 
+		if (fitResult.getStatus() == FitStatus.OK)
+			fitType.setOK(true);
+		add(fitType);
 		return fitResult;
 	}
 
@@ -1217,8 +1250,7 @@ public class FitWorker implements Runnable
 			if (spots[n].intensity < background)
 				heightThreshold = spots[n].intensity;
 			else
-				heightThreshold = (float) ((spots[n].intensity - background) * config.getNeighbourHeightThreshold() +
-						background);
+				heightThreshold = (float) ((spots[n].intensity - background) * config.getNeighbourHeightThreshold() + background);
 		}
 
 		// TODO - Speed this up by storing the maxima in a grid and only compare the neighbouring grid cells
@@ -1422,8 +1454,8 @@ public class FitWorker implements Runnable
 				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,
-							ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
+							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
 			}
 
 			if (logger2 != null)
@@ -1440,9 +1472,9 @@ public class FitWorker implements Runnable
 					}
 				}
 				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] IC [%f -> %f] = %s\n",
-						slice, cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y, newFitResult.getStatus(),
-						newFitResult.getStatusData(), singleValue, gf.getValue(), singleSumOfSquares,
-						doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
+						slice, cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y,
+						newFitResult.getStatus(), newFitResult.getStatusData(), singleValue, gf.getValue(),
+						singleSumOfSquares, doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
 				logger2.debug(msg);
 			}
 
@@ -1538,8 +1570,8 @@ public class FitWorker implements Runnable
 					{
 						if (logger != null)
 						{
-							logger.info("Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
-									xShift, yShift, a * 57.29578);
+							logger.info("Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)",
+									n, xShift, yShift, a * 57.29578);
 						}
 						continue;
 					}
@@ -1548,10 +1580,8 @@ public class FitWorker implements Runnable
 					// fit window that contains this spot.
 					// This represents drift out to fit another spot that will be fit later.
 					// TODO: Also check existing spots if the duplicate distance is not set...
-					float fcx2 = (float) (regionBounds.x + bounds.x + newParams[Gaussian2DFunction.X_POSITION + n * 6] +
-							0.5);
-					float fcy2 = (float) (regionBounds.y + bounds.y + newParams[Gaussian2DFunction.Y_POSITION + n * 6] +
-							0.5);
+					float fcx2 = (float) (regionBounds.x + bounds.x + newParams[Gaussian2DFunction.X_POSITION + n * 6] + 0.5);
+					float fcy2 = (float) (regionBounds.y + bounds.y + newParams[Gaussian2DFunction.Y_POSITION + n * 6] + 0.5);
 					int cx2 = (int) fcx2;
 					int cy2 = (int) fcy2;
 					final int xmin = cx2 - fitting;
@@ -1644,8 +1674,8 @@ public class FitWorker implements Runnable
 				destPos += 6;
 			}
 
-			final int nFittedParameters = newFitResult.getNumberOfFittedParameters() % 6 +
-					nPeaks * newFitResult.getNumberOfFittedParameters() / 2;
+			final int nFittedParameters = newFitResult.getNumberOfFittedParameters() % 6 + nPeaks *
+					newFitResult.getNumberOfFittedParameters() / 2;
 
 			double error = newFitResult.getError();
 			final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
@@ -1977,8 +2007,8 @@ public class FitWorker implements Runnable
 				ic2 = Maths.getBayesianInformationCriterionFromResiduals(doubleSumOfSquares, length,
 						newFitResult.getNumberOfFittedParameters());
 				if (logger != null)
-					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f", singleSumOfSquares,
-							ic1, doubleSumOfSquares, ic2, ic1 - ic2);
+					logger.info("Model improvement - Sum-of-squares (IC) : %f (%f) => %f (%f) : %f",
+							singleSumOfSquares, ic1, doubleSumOfSquares, ic2, ic1 - ic2);
 			}
 
 			if (logger2 != null)
@@ -1995,9 +2025,9 @@ public class FitWorker implements Runnable
 					}
 				}
 				String msg = String.format("Doublet %d [%d,%d] %s (%s) [%f -> %f] SS [%f -> %f] IC [%f -> %f] = %s\n",
-						slice, cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y, newFitResult.getStatus(),
-						newFitResult.getStatusData(), singleValue, gf.getValue(), singleSumOfSquares,
-						doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
+						slice, cx + bounds.x + regionBounds.x, cy + bounds.y + regionBounds.y,
+						newFitResult.getStatus(), newFitResult.getStatusData(), singleValue, gf.getValue(),
+						singleSumOfSquares, doubleSumOfSquares, ic1, ic2, Arrays.toString(peakParams));
 				logger2.debug(msg);
 			}
 
@@ -2029,8 +2059,8 @@ public class FitWorker implements Runnable
 						ypos > regionBounds.height + hwhm)
 				{
 					if (logger != null)
-						logger.info("Fitted coordinates too far outside the fitted region (x %g || y %g)",
-								xpos + bounds.x + regionBounds.x, regionBounds.width, ypos + bounds.y + regionBounds.y,
+						logger.info("Fitted coordinates too far outside the fitted region (x %g || y %g)", xpos +
+								bounds.x + regionBounds.x, regionBounds.width, ypos + bounds.y + regionBounds.y,
 								regionBounds.height);
 					printFitResults(newFitResult, region, width, height, 2, 1, gf.getIterations(), ic1, ic2);
 					return null;
@@ -2079,8 +2109,8 @@ public class FitWorker implements Runnable
 							if (logger != null)
 							{
 								logger.info(
-										"Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
-										xShift, yShift, a * 57.29578);
+										"Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)",
+										n, xShift, yShift, a * 57.29578);
 							}
 							continue;
 						}
@@ -2118,8 +2148,8 @@ public class FitWorker implements Runnable
 					destPos += 6;
 				}
 
-				final int nFittedParameters = newFitResult.getNumberOfFittedParameters() % 6 +
-						nPeaks * newFitResult.getNumberOfFittedParameters() / 2;
+				final int nFittedParameters = newFitResult.getNumberOfFittedParameters() % 6 + nPeaks *
+						newFitResult.getNumberOfFittedParameters() / 2;
 
 				double error = newFitResult.getError();
 				final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
@@ -2401,5 +2431,22 @@ public class FitWorker implements Runnable
 	public void setLogger2(Logger logger)
 	{
 		this.logger2 = logger;
+	}
+
+	/**
+	 * Set the counter. This can be used to count the type of fitting process that was performed.
+	 * 
+	 * @param counter
+	 *            The counter
+	 */
+	public void setCounter(FitTypeCounter counter)
+	{
+		this.counter = counter;
+	}
+
+	private void add(FitType fitType)
+	{
+		if (counter != null)
+			counter.add(fitType);
 	}
 }

@@ -33,6 +33,7 @@ public class FitEngine
 	private int fitting;
 	private MaximaSpotFilter spotFilter;
 	private FileLogger logger = null;
+	private FitTypeCounter counter = null;
 
 	/**
 	 * Return the fitting window size calculated using the fitting parameter and the configured peak
@@ -122,6 +123,9 @@ public class FitEngine
 		//{
 		//}
 
+		// Allow debugging the type of fit
+		//counter = new FitTypeCounter();
+
 		// Create the workers
 		for (int i = 0; i < threads; i++)
 		{
@@ -129,6 +133,7 @@ public class FitEngine
 			FitWorker worker = new FitWorker(config.clone(), results, jobs);
 			worker.setSearchParameters(getSpotFilter(), fitting);
 			worker.setLogger2(logger);
+			worker.setCounter(counter);
 			Thread t = new Thread(worker);
 
 			workers.add(worker);
@@ -241,7 +246,50 @@ public class FitEngine
 
 		if (logger != null)
 			logger.close();
+
+		// TODO: Output this to the log or other reporting mechanism
+		if (counter != null)
+		{
+			//			for (int i = 0; i < counter.size(); i++)
+			//			{
+			//				System.out.printf("%s = %d\n", new FitType(i).toString(), counter.get(i));
+			//			}
+			// TODO - get the stats we want for the presentation...
+			System.out.println(results.getName());
+			int total = counter.getTotal();
+			report("Single", counter.getUnset(FitType.NEIGHBOURS), total);
+			report("SingleOK", counter.get(FitType.OK, FitType.NEIGHBOURS), counter.getUnset(FitType.NEIGHBOURS));
+
+			report("Single-SingleOK", counter.get(FitType.OK, FitType.NEIGHBOURS | FitType.DOUBLET_OK),
+					counter.getUnset(FitType.NEIGHBOURS));
+			report("Single-DoubletOK", counter.get(FitType.DOUBLET_OK, FitType.NEIGHBOURS),
+					counter.getUnset(FitType.NEIGHBOURS));
+
+			report("Neighbours", counter.getSet(FitType.NEIGHBOURS), total);
+			report("MultiOK", counter.getSet(FitType.NEIGHBOURS_OK), counter.getSet(FitType.NEIGHBOURS));
+
+			report("Multi-SingleOK", counter.get(FitType.NEIGHBOURS | FitType.OK, FitType.DOUBLET_OK),
+					counter.get(FitType.NEIGHBOURS, FitType.NEIGHBOURS_OK));
+			report("Multi-DoubletOK", counter.getSet(FitType.NEIGHBOURS | FitType.DOUBLET_OK),
+					counter.get(FitType.NEIGHBOURS, FitType.NEIGHBOURS_OK));
+
+			int ok = counter.getSet(FitType.OK);
+			report("FitSingle", counter.get(FitType.OK, FitType.NEIGHBOURS), ok);
+			report("FitSingleSingle", counter.get(FitType.OK, FitType.NEIGHBOURS | FitType.DOUBLET_OK), ok);
+			report("FitSingleDoublet", counter.get(FitType.DOUBLET_OK, FitType.NEIGHBOURS), ok);
+			report("FitMulti", counter.getSet(FitType.NEIGHBOURS_OK), ok);
+			report("FitMultiSingle",
+					counter.get(FitType.OK | FitType.NEIGHBOURS, FitType.NEIGHBOURS_OK | FitType.DOUBLET_OK), ok);
+			report("FitMultiDoublet",
+					counter.get(FitType.OK | FitType.NEIGHBOURS | FitType.DOUBLET_OK, FitType.NEIGHBOURS_OK), ok);
+		}
+
 		threads.clear();
+	}
+
+	private static void report(String name, int count, int total)
+	{
+		System.out.printf("%s %d / %d = %.2f\n", name, count, total, (100.00 * count) / total);
 	}
 
 	/**
