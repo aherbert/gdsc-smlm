@@ -789,25 +789,26 @@ public class FitWorker implements Runnable
 		}
 
 		FitResult fitResult = null;
+		boolean neighbourInfluence = false;
 		if (neighbours > 0)
 		{
 			// TODO
 			// We should try a single fit before any multiple fits. This is because they 
 			// are computationally less expensive.
-			
+
 			// If no fitted neighbours:
 			// do a fit and validate for a result inside the
 			// fit region (no drift). This shows the region has at least one good spot.
 			// This can be saved and used as the fit result for a single fit if we need it later.
-			
+
 			// If we have fitted neighbours:
 			// subtract them from the region and then try a single fit. It should work if
 			// something is there. This can be an initial estimate for one of the peaks in 
 			// the multiple fit (i.e. the closest one)
-			
+
 			// If the fits fails then we can guess that the region has no good peaks and 
 			// it is not worth doing a multiple fit.			
-			
+
 			fitType.setNeighbours(true);
 			int subtractFittedPeaks = 0;
 			boolean[] subtract = null;
@@ -849,6 +850,9 @@ public class FitWorker implements Runnable
 
 			neighbours = neighbourCount + fittedNeighbourCount - subtractFittedPeaks;
 
+			if (fittedNeighbourCount - subtractFittedPeaks != 0)
+				neighbourInfluence = true;
+
 			// Create the parameters for the fit
 			final int parametersPerPeak = 6;
 			int npeaks = 1 + neighbours;
@@ -869,6 +873,10 @@ public class FitWorker implements Runnable
 				params[j + Gaussian2DFunction.SIGNAL] = spots[n2].intensity + ((relativeIntensity) ? background : 0);
 				params[j + Gaussian2DFunction.X_POSITION] = spots[n2].x - regionBounds.x;
 				params[j + Gaussian2DFunction.Y_POSITION] = spots[n2].y - regionBounds.y;
+				// Flag if this neighbour will influence the estimate of the centre-of-mass
+				// when fitting as a single
+				if (params[j + Gaussian2DFunction.SIGNAL] > params[Gaussian2DFunction.SIGNAL])
+					neighbourInfluence = true;
 			}
 
 			if (!relativeIntensity)
@@ -979,6 +987,84 @@ public class FitWorker implements Runnable
 			peakShiftFactors[0] = 1;
 			// Any fitted peaks
 			fitConfig.setPeakShiftFactors(peakShiftFactors);
+			
+			
+			// TODO - some of the unfitted neighbours may be bad candidates.
+			// Perhaps they should not be validated since it will make the entire fit fail.
+			// Only validate the fitted neighbours and the current candidate?
+			
+			// Instead we should try a different method where the multi-fit is iterated
+			// fitting with the fitted neighbours plus the unfitted ones added sequentially
+			// in order of strength. Or try a DAO-STORM approach where all peaks are estimated
+			// but then only one is fit at a time in a loop until convergence.
+			// The final output should be a set of fits for all neighbours. The fits can be 
+			// stored to use the next time the candidate is encountered as the initial estimate.
+			
+			// Need to refactor the Gaussian2DFitter so that it can be used to estimate initial 
+			// parameters separately from fitting.
+			
+			// The fitting of multiples should be refactored to a new set of methods that can be
+			// enabled with a flag so it can be tested against the current 'dumb' version.
+			
+			// Neighbour analysis should be done before the fit method is called and then 
+			// it can be called for HD or LD mode.
+			// LD mode just does single fitting with optional doublet analysis
+			// HD mode expands the region for the immediate neighbours and does DAO-STORM style 
+			// fitting. Q. What if the expansion includes more neighbours?
+			// Perhaps just estimate all neighbours in the region and subtract all fitted neighbours
+			// that are just outside the region. Then try to converge the fits for each estimate
+			// in the region.
+			
+			// New workflow:
+			// Analyse if candidates are singles or have neighbours.
+			// Neighbours can be quickly counted using a grid binning system to reduce computation.
+			// (I may have a grid density object for this already...)
+			// Process all singles until no more can be fit.
+			// The collect the neighbours into sets of connected neighbours.
+			// Then round robin process the set candidates with neighbours:
+			// Initial estimate on all candidates.	
+			// Subtract estimates from the image and fit candidates in turn
+			// in height order.
+			// Fit with a bounded LVM (position/width) for initial estimate.
+			// Relax bounds with each iteration.
+			// If below SNR, then remove/flag as failed.
+			// Continue until converged on params.
+			// When converged or a spot is removed then update the set candidates with neighbours.
+		
+			// -=-=-=-
+			
+			// Simpler workflow more in keeping with current PeakFit.
+			// (Better HD method should be in a total rewrite of the system)
+			// Fit Singles (due to high success and simplicity).
+			// Fit multiples in a second step, processing in candidate height order.
+			// Optionally subtract already fitted peaks (if present), for speed?
+            //			 If no other candidates have a fit estimate (from previous neighbour analysis) then
+            //			 fit region as single (if fit outside bounds or fails peak criteria then stop).
+            //			 This is a test step to determine if good peaks are present. This may fail
+            //			 max width criteria but allow this as it is just a test (???). This step may only 
+            //			 be necessary if previous multiple fits failed (i.e. we are at the end of 
+            //			 good candidates).
+			// Estimate (re-use old estimates) all peaks in the fit region and fit.
+			// Validate peaks individually. If candidate passes then accept.
+			// Q. If we fit an existing result then should this be updated? (No
+			// since the original fit should have it centered in the fit region.)
+			// If others pass then store the results as an estimate. This can replace 
+			// the previous estimate if one was available 
+			// (on what criteria, distance from edge of fit region?). If others fail then
+			// do not care as they will be attempted again later. What matters is that we have
+			// added one more good spot.
+
+			// When multi-fit fails then ensure that a single fit is attempted on the
+			// neighbour-fit subtracted data + residuals analysis.
+			
+			// This makes the system a greedy single-pass algorithm that should still 
+			// work well on low density data and can gracefully fail HD data.
+
+			// See how this method performs relative to the old method.
+			// Fit worker will need two versions of the main fitting loop.
+			
+			// -=-=-=-
+			
 
 			// Note that if the input XY positions are on the integer grid then the fitter will estimate
 			// the position using a CoM estimate. To avoid this adjust the centres to be off-grid.
@@ -1065,6 +1151,13 @@ public class FitWorker implements Runnable
 				}
 			}
 			final double[] params = new double[] { background, signal, 0, x - regionBounds.x, y - regionBounds.y, 0, 0 };
+			// If there were neighbours then use off grid pixels to prevent re-estimate of CoM
+			// since the CoM estimate will be skewed by the neighbours
+			if (neighbourInfluence)
+			{
+				params[Gaussian2DFunction.X_POSITION] += 0.001;
+				params[Gaussian2DFunction.Y_POSITION] += 0.001;
+			}
 			fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate);
 			printFitResults(fitResult, region, width, height, 1, -neighbours, gf.getIterations());
 
