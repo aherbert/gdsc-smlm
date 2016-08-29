@@ -17,4 +17,4 @@ Copyright (C) 2015 Alex Herbert
 MRC Genome Damage and Stability Centre
 University of Sussex, UK
  
-http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/superres
+http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins

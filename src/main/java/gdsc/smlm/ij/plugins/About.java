@@ -29,7 +29,7 @@ public class About implements PlugIn, MacroExtension
 {
 	private static String TITLE = "GDSC SMLM ImageJ Plugins";
 	public static String HELP_URL = "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
-	private static String YEAR = "2015";
+	private static String YEAR = "2016";
 
 	enum ConfigureOption
 	{
