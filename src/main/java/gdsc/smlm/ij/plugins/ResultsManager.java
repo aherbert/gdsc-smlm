@@ -117,7 +117,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (arg != null && arg.startsWith("clear"))
 		{
 			Collection<MemoryPeakResults> allResults;
@@ -779,77 +779,105 @@ public class ResultsManager implements PlugIn, MouseListener
 
 		if (results != null && results.size() > 0 && checkCalibration)
 		{
-			// Check for Calibration
-			Calibration calibration = results.getCalibration();
-			final float noise = getNoise(results);
-			// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
-			if (calibration == null || calibration.nmPerPixel <= 0 || calibration.gain <= 0 ||
-					calibration.exposureTime <= 0 || noise <= 0)
+			if (!checkCalibration(results, reader))
+				return null;
+		}
+		return results;
+	}
+
+	/**
+	 * Check the calibration of the results exists, if not then prompt for it with a dialog
+	 * 
+	 * @param results
+	 *            The results
+	 * @return True if OK; false if calibration dialog cancelled
+	 */
+	public static boolean checkCalibration(MemoryPeakResults results)
+	{
+		return checkCalibration(results, null);
+	}
+
+	/**
+	 * Check the calibration of the results exists, if not then prompt for it with a dialog
+	 * 
+	 * @param results
+	 *            The results
+	 * @param reader
+	 *            Used to determine the file type
+	 * @return True if OK; false if calibration dialog cancelled
+	 */
+	private static boolean checkCalibration(MemoryPeakResults results, PeakResultsReader reader)
+	{
+		// Check for Calibration
+		Calibration calibration = results.getCalibration();
+		final float noise = getNoise(results);
+		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
+		if (calibration == null || calibration.nmPerPixel <= 0 || calibration.gain <= 0 ||
+				calibration.exposureTime <= 0 || noise <= 0)
+		{
+			String msg = "partially calibrated";
+			boolean convert = false;
+			if (calibration == null)
 			{
-				String msg = "partially calibrated";
-				boolean convert = false;
-				if (calibration == null)
+				// Make sure the user knows all the values have not been set
+				calibration = new Calibration(0, 0, 0);
+				msg = "uncalibrated";
+			}
+
+			if (calibration.nmPerPixel <= 0)
+				calibration.nmPerPixel = input_nmPerPixel;
+			if (calibration.gain <= 0)
+				calibration.gain = input_gain;
+			if (calibration.exposureTime <= 0)
+				calibration.exposureTime = input_exposureTime;
+
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("Results are " + msg);
+			gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
+			gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+			gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
+			if (noise <= 0)
+				gd.addNumericField("Noise (ADU)", input_noise, 2);
+			gd.addCheckbox("Convert_nm_to_pixels", convert);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return false;
+			input_nmPerPixel = Math.abs(gd.getNextNumber());
+			input_gain = Math.abs(gd.getNextNumber());
+			input_exposureTime = Math.abs(gd.getNextNumber());
+			if (noise == 0)
+				input_noise = Math.abs((float) gd.getNextNumber());
+			convert = gd.getNextBoolean();
+
+			Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
+			Prefs.set(Constants.inputGain, input_gain);
+			Prefs.set(Constants.inputExposureTime, input_exposureTime);
+			Prefs.set(Constants.inputNoise, input_noise);
+
+			results.setCalibration(new Calibration(input_nmPerPixel, input_gain, input_exposureTime));
+
+			if (convert && input_nmPerPixel > 0)
+			{
+				// Note: NSTORM stores 2xSD
+				final double widthConversion = (reader != null && reader.getFormat() == FileFormat.NSTORM) ? 1.0 / (2 * input_nmPerPixel)
+						: 1.0 / input_nmPerPixel;
+				for (PeakResult p : results.getResults())
 				{
-					// Make sure the user knows all the values have not been set
-					calibration = new Calibration(0, 0, 0);
-					msg = "uncalibrated";
+					p.params[Gaussian2DFunction.X_POSITION] /= input_nmPerPixel;
+					p.params[Gaussian2DFunction.Y_POSITION] /= input_nmPerPixel;
+					p.params[Gaussian2DFunction.X_SD] *= widthConversion;
+					p.params[Gaussian2DFunction.Y_SD] *= widthConversion;
 				}
-
-				if (calibration.nmPerPixel <= 0)
-					calibration.nmPerPixel = input_nmPerPixel;
-				if (calibration.gain <= 0)
-					calibration.gain = input_gain;
-				if (calibration.exposureTime <= 0)
-					calibration.exposureTime = input_exposureTime;
-
-				GenericDialog gd = new GenericDialog(TITLE);
-				gd.addMessage("Results are " + msg);
-				gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
-				gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
-				gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
-				if (noise <= 0)
-					gd.addNumericField("Noise (ADU)", input_noise, 2);
-				gd.addCheckbox("Convert_nm_to_pixels", convert);
-				gd.showDialog();
-				if (gd.wasCanceled())
-					return null;
-				input_nmPerPixel = Math.abs(gd.getNextNumber());
-				input_gain = Math.abs(gd.getNextNumber());
-				input_exposureTime = Math.abs(gd.getNextNumber());
-				if (noise == 0)
-					input_noise = Math.abs((float) gd.getNextNumber());
-				convert = gd.getNextBoolean();
-
-				Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
-				Prefs.set(Constants.inputGain, input_gain);
-				Prefs.set(Constants.inputExposureTime, input_exposureTime);
-				Prefs.set(Constants.inputNoise, input_noise);
-
-				results.setCalibration(new Calibration(input_nmPerPixel, input_gain, input_exposureTime));
-
-				if (convert && input_nmPerPixel > 0)
+			}
+			if (noise == 0)
+			{
+				for (PeakResult p : results.getResults())
 				{
-					// Note: NSTORM stores 2xSD
-					final double widthConversion = (reader != null && reader.getFormat() == FileFormat.NSTORM) ? 1.0 / (2 * input_nmPerPixel)
-							: 1.0 / input_nmPerPixel;
-					for (PeakResult p : results.getResults())
-					{
-						p.params[Gaussian2DFunction.X_POSITION] /= input_nmPerPixel;
-						p.params[Gaussian2DFunction.Y_POSITION] /= input_nmPerPixel;
-						p.params[Gaussian2DFunction.X_SD] *= widthConversion;
-						p.params[Gaussian2DFunction.Y_SD] *= widthConversion;
-					}
-				}
-				if (noise == 0)
-				{
-					for (PeakResult p : results.getResults())
-					{
-						p.noise = input_noise;
-					}
+					p.noise = input_noise;
 				}
 			}
 		}
-		return results;
+		return true;
 	}
 
 	/**
