@@ -333,6 +333,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		IJ.log("");
 		comment("Filters are described using XML");
 		comment("Filter attibutes that take the form 'min:max:increment' will be enumerated");
+		comment("Note: This example is a subset. All filters are described in the user manual");
 		IJ.log("");
 
 		comment("Single filters");

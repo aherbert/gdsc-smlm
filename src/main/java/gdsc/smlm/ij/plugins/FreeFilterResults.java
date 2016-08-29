@@ -2,22 +2,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
-import gdsc.smlm.utils.XmlUtils;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -33,8 +17,8 @@ import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiHysteresisFilter;
 import gdsc.smlm.results.filter.MultiHysteresisFilter2;
 import gdsc.smlm.results.filter.OrFilter;
-import gdsc.smlm.results.filter.PrecisionFilter2;
 import gdsc.smlm.results.filter.PrecisionFilter;
+import gdsc.smlm.results.filter.PrecisionFilter2;
 import gdsc.smlm.results.filter.PrecisionHysteresisFilter;
 import gdsc.smlm.results.filter.SBRFilter;
 import gdsc.smlm.results.filter.SNRFilter;
@@ -45,6 +29,7 @@ import gdsc.smlm.results.filter.SignalFilter;
 import gdsc.smlm.results.filter.TraceFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
+import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -52,6 +37,19 @@ import ij.plugin.PlugIn;
 import java.awt.Checkbox;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 
 /**
  * Filters PeakFit results that are stored in memory using the configured filters.
@@ -72,7 +70,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			// Ask user if they want to show the demo filters
@@ -82,7 +80,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 			gd.addMessage("No results in memory. Show the demo filters?");
 			gd.showDialog();
 			if (gd.wasOKed())
-				logDemoFilters();
+				logDemoFilters(TITLE);
 			return;
 		}
 
@@ -154,7 +152,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 
 		if (demoFilters)
 		{
-			logDemoFilters();
+			logDemoFilters(TITLE);
 			return false;
 		}
 
@@ -170,13 +168,13 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		{
 			cb.setState(false);
 
-			logDemoFilters();
+			logDemoFilters(TITLE);
 		}
 	}
 
-	private void logDemoFilters()
+	public static void logDemoFilters(String title)
 	{
-		comment(TITLE + " example filters");
+		comment(title + " example filters");
 		IJ.log("");
 		comment("Filters are described using XML");
 		comment("Multiple filters can be combined using AND/OR filters");
@@ -212,14 +210,14 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new OrFilter(new AndFilter(new SNRFilter(10), new PrecisionFilter(30)), new TraceFilter(0.5, 1)));
 	}
 
-	private void demo(Filter filter)
+	private static void demo(Filter filter)
 	{
 		comment(filter.getClass().getSimpleName() + ": " + filter.getDescription());
 		IJ.log(filter.toXML());
 		IJ.log("");
 	}
 
-	private void comment(String text)
+	private static void comment(String text)
 	{
 		IJ.log(TextUtils.wrap("<!-- " + text + " -->", 80));
 	}
