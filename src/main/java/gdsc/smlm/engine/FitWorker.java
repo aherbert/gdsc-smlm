@@ -1053,12 +1053,21 @@ public class FitWorker implements Runnable
 			// (on what criteria, distance from edge of fit region?). If others fail then
 			// do not care as they will be attempted again later. What matters is that we have
 			// added one more good spot.
-
-			// When multi-fit fails then ensure that a single fit is attempted on the
-			// neighbour-fit subtracted data + residuals analysis.
 			
-			// This makes the system a greedy single-pass algorithm that should still 
-			// work well on low density data and can gracefully fail HD data.
+			// Validate the candidate.
+			// Check neighbours. If valid without drift then store as estimate.
+			// If valid but has drifted then check for location within the image. 
+			// Align all drifted spots with the neighbours (as they may swap), and
+			// revalidate. If OK then store as estimate.
+
+			// When multi-fit fails (of the candidate) then ensure that a single fit is attempted on the
+			// neighbour-fit subtracted data + residuals analysis. This is done since
+			// fitting multiple initial start points may be prone to error in estimates.
+			
+			// This makes the system a greedy single-pass algorithm that should 
+			// fit an addition spot each time, or accumulate the fail count.
+			
+			// It should still work well on low density data and can gracefully fail HD data.
 
 			// See how this method performs relative to the old method.
 			// Fit worker will need two versions of the main fitting loop.
