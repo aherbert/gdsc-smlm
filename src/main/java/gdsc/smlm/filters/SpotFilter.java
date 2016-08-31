@@ -35,6 +35,13 @@ public abstract class SpotFilter implements Cloneable
 	protected abstract Spot[] find(final float[] data, final int width, final int height);
 
 	/**
+	 * Get the pre-processed data produced by the find method
+	 * 
+	 * @return The pre-processed data produced by the {@link #rank(float[], int, int)} method
+	 */
+	public abstract float[] getPreprocessedData();
+
+	/**
 	 * List the candidate spots in the data. The list will be in the order the candidates are found.
 	 * 
 	 * @param data

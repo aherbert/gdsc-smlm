@@ -27,6 +27,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	private final int border;
 	private NonMaximumSuppression nms;
 	private DataProcessor scoreDataProcessor = null;
+	private float[] data2 = null;
 
 	/**
 	 * Create the spot filter
@@ -58,7 +59,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	 */
 	protected Spot[] find(final float[] data, final int width, final int height)
 	{
-		final float[] data2 = preprocessData(data, width, height);
+		data2 = preprocessData(data, width, height);
 
 		//gdsc.core.ij.Utils.display("Spot Filter", new FloatProcessor(width, height, data2));
 
@@ -88,6 +89,17 @@ public abstract class MaximaSpotFilter extends SpotFilter
 			spots[n] = new Spot(x, y, intensity, score);
 		}
 		return spots;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.SpotFilter#getPreprocessedData()
+	 */
+	@Override
+	public float[] getPreprocessedData()
+	{
+		return data2;
 	}
 
 	/**
