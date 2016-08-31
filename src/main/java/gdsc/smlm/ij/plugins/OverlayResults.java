@@ -123,6 +123,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 					break;
 				}
 			}
+			clearOldOverlay();
 		}
 
 		private void clearOldOverlay()
@@ -179,6 +180,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				points++;
 			}
 			PointRoi roi = new PointRoi(ox, oy, points);
+			imp.getWindow().toFront();
 			imp.setOverlay(new Overlay(roi));
 		}
 	}
