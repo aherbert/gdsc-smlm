@@ -96,6 +96,10 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 */
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
+		// Note: We cannot use a NonBlockinnericDialog as scrolling through the image
+		// throws away the snap shot. The pixel data for the previous slice is then fixed
+		// with the preview. So we can only support a single slice.
+		
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
