@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.core.ij.Utils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -26,6 +28,7 @@ import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 
 import java.awt.Choice;
+import java.awt.Label;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
@@ -40,6 +43,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 	private String[] names;
 	private int[] ids;
 	private Choice choice;
+	private Label label;
 
 	private int currentIndex = 0;
 	private int currentSlice = -1;
@@ -88,6 +92,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 	private class Worker implements Runnable
 	{
 		private boolean running = true;
+		private boolean[] error = new boolean[ids.length];
 
 		public void run()
 		{
@@ -138,17 +143,23 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			currentIndex = 0;
 		}
 
+		/**
+		 * Draw the overlay.
+		 * <p>
+		 * This is only called when index > 0.
+		 */
 		private void drawOverlay()
 		{
 			ImagePlus imp = WindowManager.getImage(ids[currentIndex]);
 			String name = names[currentIndex];
 
 			if (imp == null)
+			{
 				// Image has been closed.
-				// TODO - How to handle this? We cannot update the dialog so maybe
-				// log an error once per currentIndex to reopen the plugin
+				logError("Image not available", name);
 				return;
-			
+			}
+
 			// Check slice
 			int newSlice = imp.getCurrentSlice();
 			if (currentSlice == newSlice)
@@ -158,10 +169,12 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 
 			MemoryPeakResults results = MemoryPeakResults.getResults(name);
 			if (results == null)
+			{
 				// Results have been cleared from memory (or renamed).
-				// TODO - How to handle this? We cannot update the dialog so maybe
-				// log an error once per currentIndex to reopen the plugin
+				logError("Results not available", name);
 				return;
+			}
+			clearError();
 
 			float[] ox = new float[100];
 			float[] oy = new float[100];
@@ -182,6 +195,23 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			PointRoi roi = new PointRoi(ox, oy, points);
 			imp.getWindow().toFront();
 			imp.setOverlay(new Overlay(roi));
+		}
+
+		private void logError(String msg, String name)
+		{
+			if (!error[currentIndex])
+			{
+				Utils.log("%s Error: %s for results '%s'", TITLE, msg, name);
+				label.setText("Error: " + msg + ". Restart this plugin to refresh.");
+			}
+			error[currentIndex] = true;
+		}
+
+		private void clearError()
+		{
+			error[currentIndex] = false;
+			if (!Utils.isNullOrEmpty(label.getText()))
+				label.setText("");
 		}
 	}
 
@@ -229,6 +259,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addMessage("Overlay results on current image frame");
 		gd.addChoice("Results", names, name);
+		gd.addMessage("");
 		gd.addHelp(About.HELP_URL);
 		gd.hideCancelButton();
 		gd.setOKLabel("Close");
@@ -236,6 +267,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		{
 			choice = (Choice) gd.getChoices().get(0);
 			choice.addItemListener(this);
+			label = (Label) gd.getMessage();
 
 			// Listen for changes to an image
 			ImagePlus.addImageListener(this);
