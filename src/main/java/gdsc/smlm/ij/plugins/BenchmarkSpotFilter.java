@@ -15,11 +15,12 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.match.AUCCalculator;
+import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.PointPair;
+import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
@@ -45,6 +46,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.SingleNSNBFixedGaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -81,7 +83,6 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static double sAnalysisBorder = 0;
 	private static boolean multipleMatches = true;
-	private static boolean rankedMatches = true;
 	private int analysisBorder;
 	private static double upperDistance = 1.5;
 	private static double lowerDistance = 0.5;
@@ -107,7 +108,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 
-	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
+	private static HashMap<Integer, PSFSpot[]> actualCoordinates = null;
 	private static int lastId = -1;
 	private static boolean lastRelativeDistances = false;
 
@@ -120,21 +121,23 @@ public class BenchmarkSpotFilter implements PlugIn
 	private WindowOrganiser windowOrganiser = new WindowOrganiser();
 
 	public static String tablePrefix, resultPrefix;
-	
+
 	public class ScoredSpot implements Comparable<ScoredSpot>
 	{
 		final boolean match;
-		double[] distances, scores;
-		double score, intensity;
+		double[] scores;
+		double score;
+		// Total intensity of spots we matched
+		private double intensity;
 		final Spot spot;
 		int fails;
 
-		public ScoredSpot(boolean match, double d, double score, double intensity, Spot spot)
+		public ScoredSpot(boolean match, double score, double intensity, Spot spot)
 		{
 			this.match = match;
 			this.spot = spot;
 			this.fails = 0;
-			add(d, score, intensity);
+			add(score, intensity);
 		}
 
 		public ScoredSpot(boolean match, Spot spot)
@@ -161,30 +164,22 @@ public class BenchmarkSpotFilter implements PlugIn
 		 * @param intensity
 		 *            the intensity
 		 */
-		void add(double d, double score, double intensity)
+		void add(double score, double intensity)
 		{
-			if (distances == null)
+			if (scores == null)
 			{
-				distances = new double[] { d };
 				scores = new double[] { score };
 				this.score = score;
 				this.intensity = intensity;
 			}
 			else
 			{
-				final int size = distances.length;
-				distances = Arrays.copyOf(distances, size + 1);
+				final int size = scores.length;
 				scores = Arrays.copyOf(scores, size + 1);
-				distances[size] = d;
 				scores[size] = score;
 				this.score += score;
 				this.intensity += intensity;
 			}
-		}
-
-		public double getDistance(int i)
-		{
-			return (distances != null && i < distances.length) ? distances[i] : 0;
 		}
 
 		public double getScore(int i)
@@ -249,13 +244,163 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	public class FilterResult
 	{
+		final RankedScoreCalculator calc;
 		final FractionClassificationResult result;
 		final ScoredSpot[] spots;
 
-		public FilterResult(FractionClassificationResult result, ScoredSpot[] spots)
+		public FilterResult(RankedScoreCalculator calc, FractionClassificationResult result, ScoredSpot[] spots)
 		{
+			this.calc = calc;
 			this.result = result;
 			this.spots = spots;
+		}
+	}
+
+	/**
+	 * Used to allow multi-threading of the PSF overlap computation.
+	 */
+	private class OverlapWorker implements Runnable
+	{
+		volatile boolean finished = false;
+		final BlockingQueue<Integer> jobs;
+		final HashMap<Integer, ArrayList<Coordinate>> originalCoordinates;
+		final HashMap<Integer, PSFSpot[]> coordinates;
+
+		public OverlapWorker(BlockingQueue<Integer> jobs, HashMap<Integer, ArrayList<Coordinate>> originalCoordinates)
+		{
+			this.jobs = jobs;
+			this.originalCoordinates = originalCoordinates;
+			this.coordinates = new HashMap<Integer, PSFSpot[]>();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			try
+			{
+				while (!finished)
+				{
+					Integer job = jobs.take();
+					if (job == null || job.intValue() < 0 || finished)
+						break;
+					run(job.intValue());
+				}
+			}
+			catch (InterruptedException e)
+			{
+				System.out.println(e.toString());
+				throw new RuntimeException(e);
+			}
+			finally
+			{
+				finished = true;
+			}
+		}
+
+		private void run(int frame)
+		{
+			if (Utils.isInterrupted())
+			{
+				finished = true;
+				return;
+			}
+
+			showProgress();
+
+			// Extract the data
+			PSFSpot[] actual = getCoordinates(originalCoordinates, frame);
+			coordinates.put(frame, actual);
+
+			if (actual.length == 0)
+				return;
+
+			// Here we approximate the PSF as a Gaussian adjusted for square pixels.			
+
+			// Determine spots (1) that have an overlap with other spots (2).
+			// In practice this will be any spot within 2SD1 + 2SD2.
+
+			// Pre-compute the adjusted pixel widths for each PSF
+			double[] sa = new double[actual.length];
+			double[] sa2 = new double[actual.length];
+			for (int i = 0; i < actual.length; i++)
+			{
+				sa[i] = Math.sqrt(PSFCalculator.squarePixelAdjustment(
+						actual[i].peakResult.getSD() * simulationParameters.a, simulationParameters.a));
+				sa2[i] = 2 * sa[i];
+			}
+
+			double[] params = new double[7];
+			for (int i = 0; i < actual.length; i++)
+			{
+				// Bounding rectangle for the spot. This serves as the reference frame 0,0
+				final float cx = actual[i].getX();
+				final float cy = actual[i].getX();
+				final int x1 = (int) (cx - sa2[i]);
+				final int x2 = (int) (cx + sa2[i]);
+				final int y1 = (int) (cy - sa2[i]);
+				final int y2 = (int) (cy + sa2[i]);
+				final int maxx = x2 - x1 + 1;
+				final int maxy = y2 - y1 + 1;
+				final int size = maxx * maxy;
+
+				// Check for overlap
+				for (int j = 0; j < actual.length; j++)
+				{
+					if (i == j)
+						continue;
+					final double dx = (cx - actual[j].getX());
+					final double dy = (cy - actual[j].getY());
+					final double d2 = dx * dx + dy * dy;
+					final double threshold = sa2[i] + sa2[j];
+					if (d2 <= threshold * threshold)
+					{
+						// These overlap.
+						// Build a Gaussian2D function for j
+						SingleNSNBFixedGaussian2DFunction f = new SingleNSNBFixedGaussian2DFunction(maxx);
+						params[Gaussian2DFunction.SIGNAL] = actual[j].peakResult.getSignal();
+						params[Gaussian2DFunction.X_POSITION] = actual[j].getX() - x1;
+						params[Gaussian2DFunction.Y_POSITION] = actual[j].getY() - y1;
+						params[Gaussian2DFunction.X_SD] = sa[j];
+						f.initialise(params);
+						double sum = 0;
+						for (int k = 0; k < size; k++)
+							sum += f.eval(k);
+						actual[i].intensityOffset += sum;
+						actual[i].backgroundOffset += sum / size;
+					}
+				}
+			}
+		}
+
+		/**
+		 * Return an array of PSF spots for the given time point. Returns an empty array if there are no coordinates.
+		 * 
+		 * @param coords
+		 * @param t
+		 * @return The array list
+		 */
+		public PSFSpot[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
+		{
+			if (coords.containsKey(t))
+			{
+				ArrayList<Coordinate> list1 = coords.get(t);
+				PSFSpot[] list2 = new PSFSpot[coords.size()];
+				int i = 0;
+				for (Coordinate c : list1)
+				{
+					PeakResultPoint p = (PeakResultPoint) c;
+					list2[i++] = new PSFSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
+				}
+				return list2;
+			}
+			else
+			{
+				return new PSFSpot[0];
+			}
 		}
 	}
 
@@ -268,21 +413,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		final BlockingQueue<Integer> jobs;
 		final ImageStack stack;
 		final MaximaSpotFilter spotFilter;
-		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
 		final float background;
 		final HashMap<Integer, FilterResult> results;
-		List<PointPair> matches = new ArrayList<PointPair>();
 
 		float[] data = null;
 		long time = 0;
 
-		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, MaximaSpotFilter spotFilter,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, float background)
+		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, MaximaSpotFilter spotFilter, float background)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
 			this.spotFilter = spotFilter.clone();
-			this.actualCoordinates = actualCoordinates;
 			this.results = new HashMap<Integer, FilterResult>();
 			this.background = background;
 		}
@@ -339,16 +480,16 @@ public class BenchmarkSpotFilter implements PlugIn
 			time += System.nanoTime() - start;
 
 			// Score the spots that are matches
-			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
+			PSFSpot[] actual = actualCoordinates.get(frame);
 
 			// Remove spots at the border from analysis
 			if (analysisBorder > 0)
 			{
 				final int xlimit = stack.getWidth() - analysisBorder;
 				final int ylimit = stack.getHeight() - analysisBorder;
-				Coordinate[] actual2 = new Coordinate[actual.length];
+				PSFSpot[] actual2 = new PSFSpot[actual.length];
 				int count = 0;
-				for (Coordinate c : actual)
+				for (PSFSpot c : actual)
 				{
 					if (c.getX() < analysisBorder || c.getX() > xlimit || c.getY() < analysisBorder ||
 							c.getY() > ylimit)
@@ -369,195 +510,135 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
 			FractionClassificationResult result;
+			RankedScoreCalculator calc = null;
 
 			// Store the count of false positives since the last true positive
 			int fails = 0;
 
-			// Use the distance to the true location to score the candidate
-			RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
-
 			if (actual.length > 0)
 			{
-				Coordinate[] predicted = getCoordinates(spots);
+				SpotCoordinate[] predicted = getCoordinates(spots);
 
-				if (rankedMatches)
+				// Use the distance to the true location to score the candidate
+				final RampedScore score = new RampedScore(lowerMatchDistance, matchDistance);
+				final RampedScore signalScore = (upperSignalFactor > 0)
+						? new RampedScore(lowerSignalFactor, upperSignalFactor) : null;
+
+				// Candidates may be close to many localisations. In order to compute the signal
+				// factor correctly we have computed the signal offset for each spot with overlapping PSFs.
+				// This is used to raise the spot intensity when computing the signal factor.
+
+				// Compute assignments
+				ArrayList<FractionalAssignment> fractionalAssignments = new ArrayList<FractionalAssignment>(
+						predicted.length * 3);
+				int[] match = new int[predicted.length];
+
+				final double dmin = matchDistance * matchDistance;
+				final int nPredicted = predicted.length;
+				final int nActual = actual.length;
+				for (int j = 0; j < nPredicted; j++)
 				{
-					// Assign each actual result to the closest spot.
-					// Process spots in order to simulate how they are ranked for use in fitting.
-
-					// Q. Should the actual be sorted too?
-
-					// This allows a spot to have more than one match (i.e. a doublet)
-					final boolean[] assigned = new boolean[actual.length];
-
-					// For each spot candidate
-					for (int j = 0; j < predicted.length; j++)
+					final float x = predicted[j].getX();
+					final float y = predicted[j].getY();
+					// Any spots that match 
+					for (int i = 0; i < nActual; i++)
 					{
-						double dmin = matchDistance * matchDistance;
-						int match = -1;
-						final double x = predicted[j].getX();
-						final double y = predicted[j].getY();
-						// Find the closest unassigned spot
-						for (int i = 0; i < actual.length; i++)
+						final double dx = (x - actual[i].getX());
+						final double dy = (y - actual[i].getY());
+						final double d2 = dx * dx + dy * dy;
+						if (d2 <= dmin)
 						{
-							if (assigned[i])
-								continue;
-							final double dx = (x - actual[i].getX());
-							final double dy = (y - actual[i].getY());
-							final double d2 = dx * dx + dy * dy;
-							if (d2 <= dmin)
+							final double d = Math.sqrt(d2);
+							double s = score.score(d);
+							final double intensity = getIntensity(actual[i]);
+							if (signalScore != null)
 							{
-								dmin = d2;
-								match = i;
+								// Adjust intensity using the surrounding PSF contributions
+								final double rsf = (actual[i].backgroundOffset + intensity) /
+										predicted[j].spot.intensity;
+								// Normalise so perfect is zero
+								final double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
+								s *= signalScore.score(sf);
 							}
+							s = RampedScore.flatten(s, 256);
+
+							// Store the match
+							fractionalAssignments.add(FractionalAssignment.create(i, j, s, true));
+							match[j]++;
 						}
+					}
+				}
 
-						if (match != -1)
+				FractionalAssignment[] assignments = fractionalAssignments
+						.toArray(new FractionalAssignment[fractionalAssignments.size()]);
+				calc = new RankedScoreCalculator(assignments, nActual);
+
+				// Assign matches
+				double tp = 0;
+				double fp;
+				if (multipleMatches)
+				{
+					final boolean[] actualAssignment = new boolean[nActual];
+					final double[] predictedAssignment = new double[nPredicted];
+
+					int nA = nActual;
+
+					for (FractionalAssignment a : assignments)
+					{
+						if (!actualAssignment[a.targetId])
 						{
-							assigned[match] = true;
-
-							final PeakResultPoint p = (PeakResultPoint) actual[match];
-							final double d = Math.sqrt(dmin);
-							final double intensity = getIntensity(p);
-							final double s = score.scoreAndFlatten(d, 256);
-							scoredSpots[j] = new ScoredSpot(true, d, s, intensity, spots[j]);
+							actualAssignment[a.targetId] = true;
+							double intensity = getIntensity(actual[a.targetId]);
+							if (scoredSpots[a.predictedId] == null)
+								scoredSpots[a.predictedId] = new ScoredSpot(true, a.score, intensity,
+										spots[a.predictedId]);
+							else
+								scoredSpots[a.predictedId].add(a.score, intensity);
+							tp += a.score;
+							predictedAssignment[a.predictedId] += a.score;
+							if (nA == 0)
+								break;
 						}
 					}
 
-					if (multipleMatches)
+					// Compute the FP. 
+					// Although a predicted point can accumulate more than 1 for TP matches (due 
+					// to multiple matching), no predicted point can score less than 1.
+					fp = nPredicted;
+					for (int i = 0; i < predictedAssignment[i]; i++)
 					{
-						// For each unassigned spot
-						for (int i = 0; i < actual.length; i++)
-						{
-							if (assigned[i])
-								continue;
-							double dmin = matchDistance * matchDistance;
-							int match = -1;
-							final double x = actual[i].getX();
-							final double y = actual[i].getY();
-							// Assign to the closest spot
-							for (int j = 0; j < predicted.length; j++)
-							{
-								final double dx = (x - predicted[j].getX());
-								final double dy = (y - predicted[j].getY());
-								final double d2 = dx * dx + dy * dy;
-								if (d2 <= dmin)
-								{
-									dmin = d2;
-									match = j;
-									// Q. should we break here? That would make it assign to the highest ranking spot 
-									// that is within range
-								}
-							}
-
-							if (match != -1)
-							{
-								final PeakResultPoint p = (PeakResultPoint) actual[i];
-								final ScoredSpot ss = scoredSpots[match];
-								final double d = Math.sqrt(dmin);
-								final double intensity = getIntensity(p);
-								final double s = score.scoreAndFlatten(d, 256);
-								if (ss == null)
-								{
-									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
-								}
-								else
-								{
-									// This is a second match to a spot candidate
-									ss.add(d, s, intensity);
-								}
-							}
-						}
+						if (predictedAssignment[i] > 1)
+							predictedAssignment[i] = 1;
+						fp -= predictedAssignment[i];
 					}
 				}
 				else
 				{
-					if (!multipleMatches)
-					{
-						MatchCalculator.analyseResults2D(actual, predicted, matchDistance, null, null, null, matches);
+					final boolean[] actualAssignment = new boolean[nActual];
+					final boolean[] predictedAssignment = new boolean[nPredicted];
 
-						// Store the true positives
-						for (PointPair pair : matches)
-						{
-							final PeakResultPoint p = (PeakResultPoint) pair.getPoint1();
-							final SpotCoordinate sc = (SpotCoordinate) pair.getPoint2();
-							final double d = pair.getXYDistance();
-							final double intensity = getIntensity(p);
-							final double s = score.scoreAndFlatten(d, 256);
-							scoredSpots[sc.id] = new ScoredSpot(true, d, s, intensity, sc.spot);
-						}
-					}
-					else
-					{
-						// Assign each actual result to the closest spot. 
-						// This allows a spot to have more than one match (i.e. a doublet) 
-						for (int i = 0; i < actual.length; i++)
-						{
-							double dmin = matchDistance * matchDistance;
-							int match = -1;
-							final double x = actual[i].getX();
-							final double y = actual[i].getY();
-							for (int j = 0; j < predicted.length; j++)
-							{
-								final double dx = (x - predicted[j].getX());
-								final double dy = (y - predicted[j].getY());
-								final double d2 = dx * dx + dy * dy;
-								if (d2 <= dmin)
-								{
-									dmin = d2;
-									match = j;
-								}
-							}
+					int nP = nPredicted;
+					int nA = nActual;
 
-							if (match != -1)
+					for (FractionalAssignment a : assignments)
+					{
+						if (!actualAssignment[a.targetId])
+						{
+							if (!predictedAssignment[a.predictedId])
 							{
-								final PeakResultPoint p = (PeakResultPoint) actual[i];
-								final ScoredSpot ss = scoredSpots[match];
-								final double d = Math.sqrt(dmin);
-								final double intensity = getIntensity(p);
-								final double s = score.scoreAndFlatten(d, 256);
-								if (ss == null)
-								{
-									scoredSpots[match] = new ScoredSpot(true, d, s, intensity, spots[match]);
-								}
-								else
-								{
-									// This is a second match to the same spot candidate
-									ss.add(d, s, intensity);
-								}
+								actualAssignment[a.targetId] = true;
+								predictedAssignment[a.predictedId] = true;
+								scoredSpots[a.predictedId] = new ScoredSpot(true, a.score,
+										getIntensity(actual[a.targetId]), spots[a.predictedId]);
+								tp += a.score;
+								nP--;
+								nA--;
+								if (nP == 0 || nA == 0)
+									break;
 							}
 						}
 					}
-				}
-
-				// Compute scores
-				// Do this at the end so the total signal factor can be computed for multiple matches
-				double tp = 0, fp = 0;
-				final RampedScore signalScore = (upperSignalFactor > 0)
-						? new RampedScore(lowerSignalFactor, upperSignalFactor) : null;
-
-				for (int j = 0; j < spots.length; j++)
-				{
-					if (scoredSpots[j] == null)
-					{
-						scoredSpots[j] = new ScoredSpot(false, spots[j]);
-						fp++;
-					}
-					else
-					{
-						if (signalScore != null)
-						{
-							final double matchScore = scoredSpots[j].getScore();
-							final double rsf = scoredSpots[j].spot.intensity / scoredSpots[j].intensity;
-							// Normalise so perfect is zero
-							final double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
-							final double fScore = signalScore.scoreAndFlatten(sf, 256);
-							scoredSpots[j].score = RampedScore.flatten(matchScore * fScore, 256);
-						}
-
-						tp += scoredSpots[j].getScore();
-						fp += scoredSpots[j].antiScore();
-					}
+					fp = nPredicted - tp;
 				}
 
 				result = new FractionClassificationResult(tp, fp, 0, actual.length - tp);
@@ -565,13 +646,20 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Store the number of fails (negatives) before each positive 
 				for (int i = 0; i < spots.length; i++)
 				{
-					scoredSpots[i].fails = fails++;
-					if (scoredSpots[i].match)
+					if (scoredSpots[i] == null)
 					{
-						//if (fails > 60)
-						//	System.out.printf("%d @ %d : %d,%d\n", fails, frame, scoredSpots[i].spot.x,
-						//		scoredSpots[i].spot.y);
-						fails = 0;
+						scoredSpots[i] = new ScoredSpot(false, spots[i], fails++);
+					}
+					else
+					{
+						scoredSpots[i].fails = fails++;
+						if (scoredSpots[i].match)
+						{
+							//if (fails > 60)
+							//	System.out.printf("%d @ %d : %d,%d\n", fails, frame, scoredSpots[i].spot.x,
+							//		scoredSpots[i].spot.y);
+							fails = 0;
+						}
 					}
 				}
 			}
@@ -579,7 +667,6 @@ public class BenchmarkSpotFilter implements PlugIn
 			{
 				// All spots are false positives
 				result = new FractionClassificationResult(0, spots.length, 0, 0);
-
 				for (int i = 0; i < spots.length; i++)
 				{
 					scoredSpots[i] = new ScoredSpot(false, spots[i], fails++);
@@ -592,19 +679,19 @@ public class BenchmarkSpotFilter implements PlugIn
 						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
 			}
 
-			results.put(frame, new FilterResult(result, scoredSpots));
+			results.put(frame, new FilterResult(calc, result, scoredSpots));
 		}
 
-		private double getIntensity(final PeakResultPoint p)
+		private double getIntensity(final PSFSpot p)
 		{
 			// Use the amplitude as all spot filters currently estimate the height, not the total signal
 			final double intensity = p.peakResult.getAmplitude();
 			return intensity;
 		}
 
-		private Coordinate[] getCoordinates(Spot[] spots)
+		private SpotCoordinate[] getCoordinates(Spot[] spots)
 		{
-			Coordinate[] coords = new Coordinate[spots.length];
+			SpotCoordinate[] coords = new SpotCoordinate[spots.length];
 			for (int i = 0; i < spots.length; i++)
 				coords[i] = new SpotCoordinate(i, spots[i]);
 			return coords;
@@ -612,16 +699,15 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		private class SpotCoordinate extends BasePoint
 		{
-			int id;
 			Spot spot;
 
 			public SpotCoordinate(int id, Spot spot)
 			{
 				super(spot.x + pixelOffset, spot.y + pixelOffset);
-				this.id = id;
 				this.spot = spot;
 			}
 		}
+
 	}
 
 	/*
@@ -691,7 +777,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
 		gd.addCheckbox("Multiple_matches", multipleMatches);
-		gd.addCheckbox("Ranked_matches", rankedMatches);
 		gd.addSlider("Match_distance", 0.5, 3.5, upperDistance);
 		gd.addSlider("Lower_distance", 0, 3.5, lowerDistance);
 		gd.addSlider("Signal_factor", 0, 3.5, upperSignalFactor);
@@ -717,7 +802,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		config.setBorder(gd.getNextNumber());
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
 		multipleMatches = gd.getNextBoolean();
-		rankedMatches = gd.getNextBoolean();
 		upperDistance = Math.abs(gd.getNextNumber());
 		lowerDistance = Math.abs(gd.getNextNumber());
 		upperSignalFactor = Math.abs(gd.getNextNumber());
@@ -794,11 +878,62 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			// When using pixel distances then get the coordinates in integers.
 			// The Worker adds a pixel offset if appropriate.
-			actualCoordinates = ResultsMatchCalculator.getCoordinates(results.getResults(), !relativeDistances);
+			HashMap<Integer, ArrayList<Coordinate>> coordinates = ResultsMatchCalculator
+					.getCoordinates(results.getResults(), !relativeDistances);
+			actualCoordinates = new HashMap<Integer, PSFSpot[]>();
 			lastId = simulationParameters.id;
 			lastRelativeDistances = relativeDistances;
+
+			// Spot PSFs may overlap so we must determine the amount of signal overlap and amplitude effect 
+			// for each spot...
+			IJ.showStatus("Computing PSF overlap ...");
+
+			final int nThreads = Prefs.getThreads();
+			BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
+			List<OverlapWorker> workers = new LinkedList<OverlapWorker>();
+			List<Thread> threads = new LinkedList<Thread>();
+			for (int i = 0; i < nThreads; i++)
+			{
+				OverlapWorker worker = new OverlapWorker(jobs, coordinates);
+				Thread t = new Thread(worker);
+				workers.add(worker);
+				threads.add(t);
+				t.start();
+			}
+
+			// Process the frames
+			totalProgress = coordinates.size();
+			stepProgress = Utils.getProgressInterval(totalProgress);
+			progress = 0;
+			for (int frame : coordinates.keySet())
+			{
+				put(jobs, frame);
+			}
+			// Finish all the worker threads by passing in a null job
+			for (int i = 0; i < threads.size(); i++)
+			{
+				put(jobs, -1);
+			}
+
+			// Wait for all to finish
+			for (int i = 0; i < threads.size(); i++)
+			{
+				try
+				{
+					threads.get(i).join();
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+				actualCoordinates.putAll(workers.get(i).coordinates);
+			}
+			threads.clear();
+
+			IJ.showProgress(1);
 		}
 
+		IJ.showStatus("Computing results ...");
 		final ImageStack stack = imp.getImageStack();
 
 		// Clear old results to free memory
@@ -825,7 +960,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, spotFilter, actualCoordinates, background);
+			Worker worker = new Worker(jobs, stack, spotFilter, background);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -972,6 +1107,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		createTable();
 
+		// TODO - Sort this so that the AUCCalculator is used		
+		
 		// Create the overall match score
 		double tp = 0, fp = 0, fn = 0;
 		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
@@ -1034,14 +1171,13 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
 		sb.append(multipleMatches).append("\t");
-		sb.append(rankedMatches).append("\t");
 		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
 		sb.append(Utils.rounded(matchDistance)).append("\t");
 		sb.append(Utils.rounded(lowerSignalFactor)).append("\t");
 		sb.append(Utils.rounded(upperSignalFactor));
 
 		resultPrefix = sb.toString();
-		
+
 		// Add the results
 		sb.append("\t");
 
@@ -1131,7 +1267,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(Utils.rounded(time / 1e6));
 
 		// Calculate AUC (Average precision == Area Under Precision-Recall curve)
-		final double auc = auc(p, r);
+		final double auc = AUCCalculator.auc(p, r);
 		// Compute the AUC using the adjusted precision curve
 		// which uses the maximum precision for recall >= r
 		final double[] maxp = new double[p.length];
@@ -1142,7 +1278,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				max = p[k];
 			maxp[k] = max;
 		}
-		final double auc2 = auc(maxp, r);
+		final double auc2 = AUCCalculator.auc(maxp, r);
 
 		sb.append("\t").append(Utils.rounded(auc));
 		sb.append("\t").append(Utils.rounded(auc2));
@@ -1209,15 +1345,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			double[] limits1 = Maths.limits(i1);
 			double[] limits2 = Maths.limits(i2);
 			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
-			plot.addLabel(0, 0, String.format("Correlation=%s; Slope=%s", Utils.rounded(c[c.length - 1]),
-					Utils.rounded(slope)));
+			plot.addLabel(0, 0,
+					String.format("Correlation=%s; Slope=%s", Utils.rounded(c[c.length - 1]), Utils.rounded(slope)));
 			plot.setColor(Color.red);
 			plot.addPoints(i1, i2, Plot.DOT);
 			if (slope > 1)
 				plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
 			else
-				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope,
-						limits2[1]);
+				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope, limits2[1]);
 			PlotWindow pw3 = Utils.display(title, plot);
 			if (Utils.isNewWindow())
 				windowOrganiser.add(pw3);
@@ -1276,8 +1411,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
-		sb.append(
-				"Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tRanked\tlower d\td\tlower sf\tsf");
+		sb.append("Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMulti\tlower d\td\tlower sf\tsf");
 		tablePrefix = sb.toString();
 		sb.append("\tSlope\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
@@ -1287,109 +1421,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("AUC\tAUC2\t");
 		sb.append("Fail80\tFail90\tFail95\tFail99\tFail100");
 		return sb.toString();
-	}
-
-	/**
-	 * Calculates an estimate of the area under the precision-recall curve.
-	 * <p>
-	 * The estimate is computed using integration above the recall limit. Below the limit a simple linear interpolation
-	 * is used from the given point to precision 1 at recall 0. This avoids noise in the lower recall section of the
-	 * curve.
-	 * <p>
-	 * If no recall values are above the limit then the full integration is performed.
-	 *
-	 * @param precision
-	 * @param recall
-	 * @param recallLimit
-	 *            Set to 0 to compute the full area.
-	 * @return Area under the PR curve
-	 */
-	public static double auc(double[] precision, double[] recall, double recallLimit)
-	{
-		if (precision == null || recall == null)
-			return 0;
-
-		double area = 0.0;
-		int k;
-
-		if (recallLimit > 0)
-		{
-			// Move from high to low recall and find the first point below the limit
-			k = recall.length - 1;
-			while (k > 0 && recall[k] > recallLimit)
-				k--;
-
-			if (k > 0)
-			{
-				// Find the first point where precision was not 1
-				int kk = 0;
-				while (precision[kk + 1] == 1)
-					kk++;
-
-				// Full precision of 1 up to point kk
-				area += (recall[kk] - recall[0]);
-
-				// Interpolate from precision at kk to k
-				area += (precision[k] + precision[kk]) * 0.5 * (recall[k] - recall[kk]);
-
-				// Increment to start the remaining integral
-				k++;
-			}
-		}
-		else
-		{
-			// Complete integration from start
-			k = 0;
-		}
-
-		// Integrate the rest
-		double prevR = 0;
-		double prevP = 1;
-		if (recall[0] == 0)
-			k++;
-
-		for (; k < precision.length; k++)
-		{
-			final double delta = recall[k] - prevR;
-			if (precision[k] == prevP)
-				area += prevP * delta;
-			else
-				// Interpolate
-				area += (precision[k] + prevP) * 0.5 * delta;
-			prevR = recall[k];
-			prevP = precision[k];
-		}
-		return area;
-	}
-
-	/**
-	 * Calculates an estimate of the area under the precision-recall curve.
-	 * <p>
-	 * Assumes the first values in the two arrays are precision 1 at recall 0.
-	 *
-	 * @param precision
-	 * @param recall
-	 * @return Area under the PR curve
-	 */
-	private static double auc(double[] precision, double[] recall)
-	{
-		double area = 0.0;
-
-		double prevR = 0;
-		double prevP = 1;
-
-		for (int k = 1; k < precision.length; k++)
-		{
-			final double delta = recall[k] - prevR;
-			if (precision[k] == prevP)
-				area += prevP * delta;
-			else
-				// Interpolate
-				area += (precision[k] + prevP) * 0.5 * delta;
-			prevR = recall[k];
-			prevP = precision[k];
-		}
-		return area;
 	}
 
 	/**

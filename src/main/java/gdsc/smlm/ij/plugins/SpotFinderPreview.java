@@ -243,6 +243,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 					Utils.rounded(result.getRecall()), Utils.rounded(result.getJaccard())));
 
 			// TODO: Create Rois for TP and FP
+			
 
 		}
 		else

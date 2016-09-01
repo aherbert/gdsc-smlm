@@ -1275,7 +1275,7 @@ public class BenchmarkSpotFit implements PlugIn
 				ScoredSpot spot = result.spots[i];
 				i1[ci] = fitMatch.predictedSignal;
 				i2[ci] = fitMatch.actualSignal;
-				is[ci] = spot.intensity;
+				is[ci] = spot.spot.intensity;
 				ci++;
 			}
 		}
