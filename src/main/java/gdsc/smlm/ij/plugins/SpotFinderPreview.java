@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.awt.Label;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -61,10 +62,14 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private int flags = DOES_16 | DOES_8G | DOES_32;
 	private FitEngineConfiguration config = null;
 	private FitConfiguration fitConfig = null;
+	private Overlay o = null;
 	private ImagePlus imp = null;
+	private boolean preview = false;
 	private Label label = null;
 	private HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
 	private static double distance = 1.5;
+	private static boolean showTP = true;
+	private static boolean showFP = true;
 
 	/*
 	 * (non-Javadoc)
@@ -99,7 +104,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 */
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
-		Overlay o = imp.getOverlay();
+		this.o = imp.getOverlay();
 		this.imp = imp;
 		String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
@@ -132,6 +137,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			if (results != null)
 			{
 				gd.addSlider("Match_distance", 0, 2.5, distance);
+				gd.addCheckbox("Show TP", showTP);
+				gd.addCheckbox("Show FP", showFP);
 				gd.addMessage("");
 				label = (Label) gd.getMessage();
 				// Integer coords
@@ -139,9 +146,20 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			}
 		}
 
+		if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless()))
+		{
+			// Listen for changes to an image
+			ImagePlus.addImageListener(this);
+		}
+
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
+		gd.hideCancelButton();
+		gd.setOKLabel("Close");
 		gd.showDialog();
+
+		if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless()))
+			ImagePlus.removeImageListener(this);
 
 		if (!gd.wasCanceled())
 		{
@@ -176,10 +194,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		if (label != null)
 		{
 			distance = gd.getNextNumber();
+			showTP = gd.getNextBoolean();
+			showFP = gd.getNextBoolean();
 		}
-		boolean preview = gd.getNextBoolean();
+		preview = gd.getNextBoolean();
 		if (!preview)
+		{
 			setLabel("");
+			this.imp.setOverlay(o);
+		}
 		return !gd.invalidNumber();
 	}
 
@@ -231,20 +254,50 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				predicted[i] = new BasePoint(spots[i].x + bounds.x, spots[i].y + bounds.y);
 			}
 
-			// Compute matches
 			// Q. Should this use partial scoring with multi-matches allowed.
 			// If so then this needs to be refactored out of the BenchmarkSpotFilter class.
+			
+			// TODO - compute AUC and max jaccard and plot			
+			
+			// Compute matches
 			List<PointPair> matches = new ArrayList<PointPair>(Math.min(actual.length, predicted.length));
+			List<Coordinate> FP = new ArrayList<Coordinate>(predicted.length);
 			MatchResult result = MatchCalculator.analyseResults2D(actual, predicted,
-					distance * fitConfig.getInitialPeakStdDev0(), null, null, null, matches);
+					distance * fitConfig.getInitialPeakStdDev0(), null, FP, null, matches);
 
 			// Show scores
 			setLabel(String.format("P=%s, R=%s, J=%s", Utils.rounded(result.getPrecision()),
 					Utils.rounded(result.getRecall()), Utils.rounded(result.getJaccard())));
 
-			// TODO: Create Rois for TP and FP
-			
-
+			// Create Rois for TP and FP
+			if (showTP)
+			{
+				float[] x = new float[matches.size()];
+				float[] y = new float[x.length];
+				int n = 0;
+				for (PointPair pair : matches)
+				{
+					BasePoint p = (BasePoint) pair.getPoint2();
+					x[n] = p.getX() + 0.5f;
+					y[n] = p.getY() + 0.5f;
+					n++;
+				}
+				addRoi(o, x, y, n, Color.green);
+			}
+			if (showFP)
+			{
+				float[] x = new float[predicted.length - matches.size()];
+				float[] y = new float[x.length];
+				int n = 0;
+				for (Coordinate c : FP)
+				{
+					BasePoint p = (BasePoint) c;
+					x[n] = p.getX() + 0.5f;
+					y[n] = p.getY() + 0.5f;
+					n++;
+				}
+				addRoi(o, x, y, n, Color.red);
+			}
 		}
 		else
 		{
@@ -260,6 +313,14 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			o.add(roi);
 		}
 		imp.setOverlay(o);
+	}
+
+	private void addRoi(Overlay o, float[] x, float[] y, int n, Color colour)
+	{
+		PointRoi roi = new PointRoi(x, y, n);
+		roi.setFillColor(colour);
+		roi.setStrokeColor(colour);
+		o.add(roi);
 	}
 
 	/*
@@ -283,7 +344,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	public void imageUpdated(ImagePlus imp)
 	{
-		if (this.imp.getID() == imp.getID())
+		if (this.imp.getID() == imp.getID() && preview)
+		{
 			run(imp.getProcessor());
+		}
 	}
 }
