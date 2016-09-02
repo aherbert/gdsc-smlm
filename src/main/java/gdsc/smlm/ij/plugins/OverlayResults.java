@@ -279,6 +279,8 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			t.start();
 		}
 		gd.showDialog();
+		if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless()))
+			ImagePlus.removeImageListener(this);
 		if (!gd.wasCanceled())
 		{
 			name = gd.getNextChoice();
