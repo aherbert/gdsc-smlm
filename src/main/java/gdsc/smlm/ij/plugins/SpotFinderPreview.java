@@ -282,7 +282,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 					y[n] = p.getY() + 0.5f;
 					n++;
 				}
-				addRoi(o, x, y, n, Color.green);
+				addRoi(0, o, x, y, n, Color.green);
 			}
 			if (showFP)
 			{
@@ -296,7 +296,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 					y[n] = p.getY() + 0.5f;
 					n++;
 				}
-				addRoi(o, x, y, n, Color.red);
+				addRoi(0, o, x, y, n, Color.red);
 			}
 		}
 		else
@@ -315,11 +315,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		imp.setOverlay(o);
 	}
 
-	private void addRoi(Overlay o, float[] x, float[] y, int n, Color colour)
+	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour)
 	{
 		PointRoi roi = new PointRoi(x, y, n);
 		roi.setFillColor(colour);
 		roi.setStrokeColor(colour);
+		if (frame!=0)
+			roi.setPosition(frame);
 		o.add(roi);
 	}
 
