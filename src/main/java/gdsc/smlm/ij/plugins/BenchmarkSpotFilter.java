@@ -105,7 +105,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static boolean showFailuresPlot = true;
 	private static boolean showTP = true;
 	private static boolean showFP = true;
-	private static boolean showFN = true;
+	private static boolean showFN = false;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
 	private long time = 0;
