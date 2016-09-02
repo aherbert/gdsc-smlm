@@ -105,6 +105,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static boolean showFailuresPlot = true;
 	private static boolean showTP = true;
 	private static boolean showFP = true;
+	private static boolean showFN = true;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
 	private long time = 0;
@@ -274,14 +275,18 @@ public class BenchmarkSpotFilter implements PlugIn
 		final RankedScoreCalculator calc;
 		final FractionClassificationResult result;
 		final ScoredSpot[] spots;
+		final PSFSpot[] actual;
+		final boolean[] actualAssignment;
 
 		public FilterResult(int frame, RankedScoreCalculator calc, FractionClassificationResult result,
-				ScoredSpot[] spots)
+				ScoredSpot[] spots, PSFSpot[] actual, boolean[] actualAssignment)
 		{
 			this.frame = frame;
 			this.calc = calc;
 			this.result = result;
 			this.spots = spots;
+			this.actual = actual;
+			this.actualAssignment = actualAssignment;
 		}
 	}
 
@@ -614,6 +619,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Store the count of false positives since the last true positive
 			int fails = 0;
 
+			final int nActual = actual.length;
+			final boolean[] actualAssignment = new boolean[nActual];
 			if (actual.length > 0)
 			{
 				SpotCoordinate[] predicted = getCoordinates(spots);
@@ -634,7 +641,6 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				final double dmin = matchDistance * matchDistance;
 				final int nPredicted = predicted.length;
-				final int nActual = actual.length;
 				for (int j = 0; j < nPredicted; j++)
 				{
 					final float x = predicted[j].getX();
@@ -680,7 +686,6 @@ public class BenchmarkSpotFilter implements PlugIn
 				{
 					// Spots can match as many actual results as they can, first match wins
 
-					final boolean[] actualAssignment = new boolean[nActual];
 					final double[] predictedScore = new double[nPredicted];
 
 					int nA = nActual;
@@ -719,7 +724,6 @@ public class BenchmarkSpotFilter implements PlugIn
 					// Spots can match as many actual results as they can. Matching is iterative
 					// so only the best match is computed for each spot per round.
 
-					final boolean[] actualAssignment = new boolean[nActual];
 					final double[] predictedScore = new double[nPredicted];
 
 					int nA = nActual;
@@ -770,7 +774,6 @@ public class BenchmarkSpotFilter implements PlugIn
 					// matchingMethod == METHOD_SINGLE
 					// Spots can match only on actual result
 
-					final boolean[] actualAssignment = new boolean[nActual];
 					final boolean[] predictedAssignment = new boolean[nPredicted];
 
 					int nP = nPredicted;
@@ -833,7 +836,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
 			}
 
-			results.put(frame, new FilterResult(frame, calc, result, scoredSpots));
+			results.put(frame, new FilterResult(frame, calc, result, scoredSpots, actual, actualAssignment));
 		}
 
 		@SuppressWarnings("unused")
@@ -930,6 +933,8 @@ public class BenchmarkSpotFilter implements PlugIn
 				showFailuresPlot(filterResult);
 			if (showPlot)
 				showPlot(filterResult);
+			if (isShowOverlay())
+				showOverlay(imp, filterResult);
 		}
 	}
 
@@ -974,6 +979,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
 		gd.addCheckbox("Show_TP", showTP);
 		gd.addCheckbox("Show_FP", showFP);
+		gd.addCheckbox("Show_FN", showFN);
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
@@ -1001,6 +1007,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		showFailuresPlot = gd.getNextBoolean();
 		showTP = gd.getNextBoolean();
 		showFP = gd.getNextBoolean();
+		showFN = gd.getNextBoolean();
 		if (extraOptions)
 			debug = sDebug = gd.getNextBoolean();
 
@@ -1319,46 +1326,16 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Create the overall match score
 		double tp = 0, fp = 0, fn = 0;
 		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
-		Overlay o = (showTP || showFP) ? new Overlay() : null;
 		for (FilterResult result : filterResults.values())
 		{
 			tp += result.result.getTP();
 			fp += result.result.getFP();
 			fn += result.result.getFN();
 			allSpots.addAll(Arrays.asList(result.spots));
-			// Create an Overlay ROI on the image of all the matches
-			if (o != null)
-			{
-				float[] tx = new float[result.spots.length];
-				float[] ty = new float[tx.length];
-				int t = 0;
-				float[] fx = new float[tx.length];
-				float[] fy = new float[tx.length];
-				int f = 0;
-				for (ScoredSpot s : result.spots)
-				{
-					if (s.match)
-					{
-						tx[t] = s.spot.x + 0.5f;
-						ty[t++] = s.spot.y + 0.5f;
-					}
-					else
-					{
-						fx[f] = s.spot.x + 0.5f;
-						fy[f++] = s.spot.y + 0.5f;
-					}
-				}
-				if (showTP)
-					SpotFinderPreview.addRoi(result.frame, o, tx, ty, t, Color.green);
-				if (showFP)
-					SpotFinderPreview.addRoi(result.frame, o, fx, fy, f, Color.red);
-			}
 		}
 		FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
 		// The number of actual results
 		final int n = (int) (tp + fn);
-		if (o != null)
-			imp.setOverlay(o);
 
 		StringBuilder sb = new StringBuilder();
 
@@ -1547,6 +1524,75 @@ public class BenchmarkSpotFilter implements PlugIn
 		filterResult.i2 = i2;
 		filterResult.intensity = intensity;
 		return filterResult;
+	}
+
+	private boolean isShowOverlay()
+	{
+		return (showTP || showFP || showFN);
+	}
+
+	private void showOverlay(ImagePlus imp, BenchmarkFilterResult filterResult)
+	{
+		Overlay o = new Overlay();
+		for (FilterResult result : filterResult.filterResults.values())
+		{
+			final int size = result.spots.length;
+
+			float[] tx = null, ty = null, fx = null, fy = null;
+			if (showTP)
+			{
+				tx = new float[size];
+				ty = new float[size];
+			}
+			if (showFP)
+			{
+				fx = new float[size];
+				fy = new float[size];
+			}
+			int t = 0, f = 0;
+			for (ScoredSpot s : result.spots)
+			{
+				if (s.match)
+				{
+					if (showTP)
+					{
+						tx[t] = s.spot.x + 0.5f;
+						ty[t++] = s.spot.y + 0.5f;
+					}
+				}
+				else
+				{
+					if (showFP)
+					{
+						fx[f] = s.spot.x + 0.5f;
+						fy[f++] = s.spot.y + 0.5f;
+					}
+				}
+			}
+			if (showTP)
+				SpotFinderPreview.addRoi(result.frame, o, tx, ty, t, Color.green);
+			if (showFP)
+				SpotFinderPreview.addRoi(result.frame, o, fx, fy, f, Color.red);
+			if (showFN)
+			{
+				// We need the FN ...
+				final PSFSpot[] actual = result.actual;
+				final boolean[] actualAssignment = result.actualAssignment;
+				final float[] nx = new float[actual.length];
+				final float[] ny = new float[actual.length];
+				int n = 0;
+				for (int i = 0; i < actual.length; i++)
+				{
+					if (!actualAssignment[i])
+					{
+						nx[n] = actual[i].getX();
+						ny[n++] = actual[i].getY();
+					}
+				}
+				SpotFinderPreview.addRoi(result.frame, o, nx, ny, n, Color.yellow);
+			}
+		}
+		imp.setOverlay(o);
 	}
 
 	private void showPlot(BenchmarkFilterResult filterResult)
