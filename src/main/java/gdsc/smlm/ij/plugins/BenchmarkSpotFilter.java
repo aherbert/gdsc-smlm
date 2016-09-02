@@ -58,6 +58,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
@@ -102,6 +103,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static boolean showPlot = true;
 	private static boolean rankByIntensity = false;
 	private static boolean showFailuresPlot = true;
+	private static boolean showTP = true;
+	private static boolean showFP = true;
 	private static boolean sDebug = false;
 	private boolean extraOptions, debug = false;
 	private long time = 0;
@@ -240,12 +243,15 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	public class FilterResult
 	{
+		final int frame;
 		final RankedScoreCalculator calc;
 		final FractionClassificationResult result;
 		final ScoredSpot[] spots;
 
-		public FilterResult(RankedScoreCalculator calc, FractionClassificationResult result, ScoredSpot[] spots)
+		public FilterResult(int frame, RankedScoreCalculator calc, FractionClassificationResult result,
+				ScoredSpot[] spots)
 		{
+			this.frame = frame;
 			this.calc = calc;
 			this.result = result;
 			this.spots = spots;
@@ -800,7 +806,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
 			}
 
-			results.put(frame, new FilterResult(calc, result, scoredSpots));
+			results.put(frame, new FilterResult(frame, calc, result, scoredSpots));
 		}
 
 		@SuppressWarnings("unused")
@@ -914,6 +920,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addCheckbox("Show_plots", showPlot);
 		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
 		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
+		gd.addCheckbox("Show_TP", showTP);
+		gd.addCheckbox("Show_FP", showFP);
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
@@ -939,6 +947,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		showPlot = gd.getNextBoolean();
 		rankByIntensity = gd.getNextBoolean();
 		showFailuresPlot = gd.getNextBoolean();
+		showTP = gd.getNextBoolean();
+		showFP = gd.getNextBoolean();
 		if (extraOptions)
 			debug = sDebug = gd.getNextBoolean();
 
@@ -1256,16 +1266,46 @@ public class BenchmarkSpotFilter implements PlugIn
 		// Create the overall match score
 		double tp = 0, fp = 0, fn = 0;
 		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
+		Overlay o = (showTP || showFP) ? new Overlay() : null;
 		for (FilterResult result : filterResults.values())
 		{
 			tp += result.result.getTP();
 			fp += result.result.getFP();
 			fn += result.result.getFN();
 			allSpots.addAll(Arrays.asList(result.spots));
+			// Create an Overlay ROI on the image of all the matches
+			if (o != null)
+			{
+				float[] tx = new float[result.spots.length];
+				float[] ty = new float[tx.length];
+				int t = 0;
+				float[] fx = new float[tx.length];
+				float[] fy = new float[tx.length];
+				int f = 0;
+				for (ScoredSpot s : result.spots)
+				{
+					if (s.match)
+					{
+						tx[t] = s.spot.x + 0.5f;
+						ty[t++] = s.spot.y + 0.5f;
+					}
+					else
+					{
+						fx[f] = s.spot.x + 0.5f;
+						fy[f++] = s.spot.y + 0.5f;
+					}
+				}
+				if (showTP)
+					SpotFinderPreview.addRoi(result.frame, o, tx, ty, t, Color.green);
+				if (showFP)
+					SpotFinderPreview.addRoi(result.frame, o, fx, fy, f, Color.red);
+			}
 		}
 		FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
 		// The number of actual results
 		final int n = (int) (tp + fn);
+		if (o != null)
+			imp.setOverlay(o);
 
 		StringBuilder sb = new StringBuilder();
 
