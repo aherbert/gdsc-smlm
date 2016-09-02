@@ -256,9 +256,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 			// Q. Should this use partial scoring with multi-matches allowed.
 			// If so then this needs to be refactored out of the BenchmarkSpotFilter class.
-			
+
 			// TODO - compute AUC and max jaccard and plot			
-			
+
 			// Compute matches
 			List<PointPair> matches = new ArrayList<PointPair>(Math.min(actual.length, predicted.length));
 			List<Coordinate> FP = new ArrayList<Coordinate>(predicted.length);
@@ -317,10 +317,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour)
 	{
+		if (n == 0)
+			return;
 		PointRoi roi = new PointRoi(x, y, n);
 		roi.setFillColor(colour);
 		roi.setStrokeColor(colour);
-		if (frame!=0)
+		if (frame != 0)
 			roi.setPosition(frame);
 		o.add(roi);
 	}
