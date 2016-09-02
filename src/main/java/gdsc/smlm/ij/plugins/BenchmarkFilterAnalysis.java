@@ -268,7 +268,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			IJ.error(TITLE, "Update the benchmark spot fitting for the latest simulation");
 			return;
 		}
-		if (BenchmarkSpotFit.lastFilterId != BenchmarkSpotFilter.filterResultsId)
+		if (BenchmarkSpotFit.lastFilterId != BenchmarkSpotFilter.filterResult.id)
 		{
 			IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
 			return;

@@ -121,15 +121,42 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static int lastId = -1;
 	private static boolean lastRelativeDistances = false;
 
-	// Used by the Benchmark Spot Fit plugin
-	static int simulationId = 0;
-	static int filterResultsId = 0;
-	static HashMap<Integer, FilterResult> filterResults = null;
-	static MaximaSpotFilter spotFilter = null;
-
-	private WindowOrganiser windowOrganiser = new WindowOrganiser();
+	private WindowOrganiser windowOrganiser;
 
 	public static String tablePrefix, resultPrefix;
+
+	// Used by the Benchmark Spot Fit plugin
+	private static int filterResultsId = 0;
+	static BenchmarkFilterResult filterResult = null;
+
+	public class BenchmarkFilterResult
+	{
+		public final int simulationId;
+		public final int id = ++filterResultsId;
+		public HashMap<Integer, FilterResult> filterResults;
+		public FitEngineConfiguration config;
+		public MaximaSpotFilter spotFilter;
+		public double auc;
+		double[] r, p, j, c;
+		int maxIndex;
+		int fractionIndex;
+		public double[][] cumul;
+		public StoredDataStatistics stats;
+		public double auc2;
+		public double slope;
+		public double[] i1;
+		public double[] i2;
+		public double[] intensity;
+
+		public BenchmarkFilterResult(HashMap<Integer, FilterResult> filterResults, FitEngineConfiguration config,
+				MaximaSpotFilter spotFilter)
+		{
+			this.simulationId = simulationParameters.id;
+			this.filterResults = filterResults;
+			this.config = config;
+			this.spotFilter = spotFilter;
+		}
+	}
 
 	public class ScoredSpot implements Comparable<ScoredSpot>
 	{
@@ -878,7 +905,32 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (!showDialog())
 			return;
 
-		run();
+		// TODO - Add batch mode to test enumeration of filters
+
+		// For graphs
+		windowOrganiser = new WindowOrganiser();
+
+		{
+			// Single filter mode
+
+			// Clear old results to free memory
+			if (filterResult != null)
+			{
+				filterResult.filterResults.clear();
+				filterResult.filterResults = null;
+				filterResult = null;
+			}
+
+			filterResult = run(config);
+			// Debugging the matches
+			if (debug)
+				addSpotsToMemory(filterResult.filterResults);
+
+			if (showFailuresPlot)
+				showFailuresPlot(filterResult);
+			if (showPlot)
+				showPlot(filterResult);
+		}
 	}
 
 	private boolean showDialog()
@@ -1008,9 +1060,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
-	private void run()
+	private BenchmarkFilterResult run(FitEngineConfiguration config)
 	{
-		spotFilter = config.createSpotFilter(relativeDistances);
+		MaximaSpotFilter spotFilter = config.createSpotFilter(relativeDistances);
 
 		// Extract all the results in memory into a list per frame. This can be cached
 		if (lastId != simulationParameters.id || lastRelativeDistances != relativeDistances)
@@ -1075,11 +1127,6 @@ public class BenchmarkSpotFilter implements PlugIn
 		IJ.showStatus("Computing results ...");
 		final ImageStack stack = imp.getImageStack();
 
-		// Clear old results to free memory
-		if (filterResults != null)
-			filterResults.clear();
-		filterResults = null;
-
 		float background = 0;
 		if (spotFilter.isAbsoluteIntensity())
 		{
@@ -1137,27 +1184,21 @@ public class BenchmarkSpotFilter implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("Collecting results ...");
 
-		filterResultsId++;
-		simulationId = simulationParameters.id;
-		filterResults = new HashMap<Integer, FilterResult>();
+		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, FilterResult>();
 		for (Worker w : workers)
 		{
 			time += w.time;
 			filterResults.putAll(w.results);
 		}
 
-		double[][] h = histogramFailures(filterResults);
-
 		// Show a table of the results
-		summariseResults(filterResults, spotFilter, h);
+		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter);
 
 		windowOrganiser.tile();
 
-		// Debugging the matches
-		if (debug)
-			addSpotsToMemory(filterResults);
-
 		IJ.showStatus("");
+
+		return filterResult;
 	}
 
 	/**
@@ -1185,14 +1226,16 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	/**
-	 * Histogram the number of negatives preceeding each positive
-	 * 
-	 * @param filterResults
+	 * Histogram the number of negatives preceeding each positive.
+	 *
+	 * @param filterResult
+	 *            the filter result
+	 * @return
 	 */
-	private double[][] histogramFailures(HashMap<Integer, FilterResult> filterResults)
+	private double[][] histogramFailures(BenchmarkFilterResult filterResult)
 	{
 		StoredDataStatistics stats = new StoredDataStatistics();
-		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
+		for (Entry<Integer, FilterResult> result : filterResult.filterResults.entrySet())
 		{
 			for (ScoredSpot spot : result.getValue().spots)
 			{
@@ -1202,30 +1245,36 @@ public class BenchmarkSpotFilter implements PlugIn
 				}
 			}
 		}
-		String xTitle = "Failures";
 
 		double[][] h = Maths.cumulativeHistogram(stats.getValues(), true);
 
-		if (showFailuresPlot)
-		{
-			final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 0);
-			if (Utils.isNewWindow())
-				windowOrganiser.add(id);
-
-			String title = TITLE + " " + xTitle + " Cumulative";
-			Plot2 plot = new Plot2(title, xTitle, "Frequency");
-			double xMin = (stats.getN() == 0) ? 1 : h[0][0];
-			double xMax = (stats.getN() == 0) ? 1 : h[0][h[0].length - 1] + 1;
-			double xPadding = 0.05 * (xMax - xMin);
-			plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
-			plot.setColor(Color.blue);
-			plot.addPoints(h[0], h[1], Plot2.BAR);
-			PlotWindow pw = Utils.display(title, plot);
-			if (Utils.isNewWindow())
-				windowOrganiser.add(pw);
-		}
+		filterResult.cumul = h;
+		filterResult.stats = stats;
 
 		return h;
+	}
+
+	private void showFailuresPlot(BenchmarkFilterResult filterResult)
+	{
+		double[][] h = filterResult.cumul;
+		StoredDataStatistics stats = filterResult.stats;
+
+		String xTitle = "Failures";
+		final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 0);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(id);
+
+		String title = TITLE + " " + xTitle + " Cumulative";
+		Plot2 plot = new Plot2(title, xTitle, "Frequency");
+		double xMin = (stats.getN() == 0) ? 1 : h[0][0];
+		double xMax = (stats.getN() == 0) ? 1 : h[0][h[0].length - 1] + 1;
+		double xPadding = 0.05 * (xMax - xMin);
+		plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
+		plot.setColor(Color.blue);
+		plot.addPoints(h[0], h[1], Plot2.BAR);
+		PlotWindow pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(pw);
 	}
 
 	private void put(BlockingQueue<Integer> jobs, int i)
@@ -1240,9 +1289,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
-	private void summariseResults(HashMap<Integer, FilterResult> filterResults, MaximaSpotFilter spotFilter,
-			double[][] cumul)
+	private BenchmarkFilterResult summariseResults(HashMap<Integer, FilterResult> filterResults,
+			FitEngineConfiguration config, MaximaSpotFilter spotFilter)
 	{
+		BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
+
 		createTable();
 
 		// Note: 
@@ -1262,6 +1313,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		// TODO We could add some smart filtering of candidates before ranking. This would
 		// allow assessment of the candidate set handed to PeakFit. E.g. Threshold the image
 		// and only use candidates that are in the foreground region.
+
+		double[][] cumul = histogramFailures(filterResult);
 
 		// Create the overall match score
 		double tp = 0, fp = 0, fn = 0;
@@ -1375,14 +1428,13 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[] c = new double[r.length];
 		double[] truePositives = new double[r.length];
 		double[] falsePositives = new double[r.length];
-		double[] rank = new double[r.length];
+		double[] intensity = new double[r.length];
 		// Note: fn = n - tp
 		tp = fp = 0;
 		int i = 1;
 		p[0] = 1;
 		FastCorrelator corr = new FastCorrelator();
 		double lastC = 0;
-		final double topIntensity = (allSpots.isEmpty()) ? 0 : allSpots.get(0).spot.intensity;
 		double[] i1 = new double[r.length];
 		double[] i2 = new double[r.length];
 		int ci = 0;
@@ -1413,12 +1465,11 @@ public class BenchmarkSpotFilter implements PlugIn
 			c[i] = lastC;
 			truePositives[i] = tp;
 			falsePositives[i] = fp;
-			if (rankByIntensity)
-				rank[i] = topIntensity - s.spot.intensity;
-			else
-				rank[i] = i;
+			intensity[i] = s.spot.intensity;
 			i++;
 		}
+		i1 = Arrays.copyOf(i1, ci);
+		i2 = Arrays.copyOf(i2, ci);
 
 		final double slope = regression.getSlope();
 		sb.append(Utils.rounded(slope)).append("\t");
@@ -1479,70 +1530,106 @@ public class BenchmarkSpotFilter implements PlugIn
 		else
 			sb.append("\t\t\t\t\t");
 
-		if (showPlot)
+		summaryTable.append(sb.toString());
+
+		// Store results
+		filterResult.auc = auc;
+		filterResult.auc2 = auc2;
+		filterResult.r = r;
+		filterResult.p = p;
+		filterResult.j = j;
+		filterResult.c = c;
+		filterResult.maxIndex = maxIndex;
+		filterResult.fractionIndex = fractionIndex;
+		filterResult.cumul = cumul;
+		filterResult.slope = slope;
+		filterResult.i1 = i1;
+		filterResult.i2 = i2;
+		filterResult.intensity = intensity;
+		return filterResult;
+	}
+
+	private void showPlot(BenchmarkFilterResult filterResult)
+	{
+		double[] r = filterResult.r;
+		double[] p = filterResult.p;
+		double[] j = filterResult.j;
+		double[] c = filterResult.c;
+		int fractionIndex = filterResult.fractionIndex;
+		int maxIndex = filterResult.maxIndex;
+		double auc = filterResult.auc;
+		double auc2 = filterResult.auc2;
+		double slope = filterResult.slope;
+		double[] i1 = filterResult.i1;
+		double[] i2 = filterResult.i2;
+		double[] intensity = filterResult.intensity;
+
+		double[] rank = new double[intensity.length];
+		final double topIntensity = (intensity.length == 1) ? 0 : intensity[1];
+		for (int i = 1; i < rank.length; i++)
 		{
-			String title = TITLE + " Performance";
-			Plot2 plot = new Plot2(title, (rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
-			double[] limits = Maths.limits(rank);
-			plot.setLimits(limits[0], limits[1], 0, 1.05);
-			plot.setColor(Color.blue);
-			plot.addPoints(rank, p, Plot2.LINE);
-			//plot.addPoints(rank, maxp, Plot2.DOT);
-			plot.setColor(Color.red);
-			plot.addPoints(rank, r, Plot2.LINE);
-			plot.setColor(Color.black);
-			plot.addPoints(rank, j, Plot2.LINE);
-			// Plot correlation - update the scale to be 0-1?
-			plot.setColor(Color.yellow);
-			plot.addPoints(rank, c, Plot2.LINE);
-			plot.setColor(Color.magenta);
-			plot.drawLine(rank[fractionIndex], 0, rank[fractionIndex],
-					Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
-			plot.setColor(Color.pink);
-			plot.drawLine(rank[maxIndex], 0, rank[maxIndex],
-					Maths.max(p[maxIndex], r[maxIndex], j[maxIndex], c[maxIndex]));
-			plot.setColor(Color.black);
-			plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, Correlation=Yellow");
-
-			PlotWindow pw = Utils.display(title, plot);
-			if (Utils.isNewWindow())
-				windowOrganiser.add(pw);
-
-			title = TITLE + " Precision-Recall";
-			plot = new Plot2(title, "Recall", "Precision");
-			plot.setLimits(0, 1, 0, 1.05);
-			plot.setColor(Color.red);
-			plot.addPoints(r, p, Plot2.LINE);
-			//plot.setColor(Color.magenta);
-			//plot.addPoints(r, maxp, Plot2.LINE);
-			plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
-			plot.setColor(Color.black);
-			plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
-			PlotWindow pw2 = Utils.display(title, plot);
-			if (Utils.isNewWindow())
-				windowOrganiser.add(pw2);
-
-			title = TITLE + " Intensity";
-			i1 = Arrays.copyOf(i1, ci);
-			i2 = Arrays.copyOf(i2, ci);
-			plot = new Plot2(title, "Candidate", "Spot");
-			double[] limits1 = Maths.limits(i1);
-			double[] limits2 = Maths.limits(i2);
-			plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
-			plot.addLabel(0, 0,
-					String.format("Correlation=%s; Slope=%s", Utils.rounded(c[c.length - 1]), Utils.rounded(slope)));
-			plot.setColor(Color.red);
-			plot.addPoints(i1, i2, Plot.DOT);
-			if (slope > 1)
-				plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
+			if (rankByIntensity)
+				rank[i] = topIntensity - intensity[i];
 			else
-				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope, limits2[1]);
-			PlotWindow pw3 = Utils.display(title, plot);
-			if (Utils.isNewWindow())
-				windowOrganiser.add(pw3);
+				rank[i] = i;
 		}
 
-		summaryTable.append(sb.toString());
+		String title = TITLE + " Performance";
+		Plot2 plot = new Plot2(title, (rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
+		double[] limits = Maths.limits(rank);
+		plot.setLimits(limits[0], limits[1], 0, 1.05);
+		plot.setColor(Color.blue);
+		plot.addPoints(rank, p, Plot2.LINE);
+		//plot.addPoints(rank, maxp, Plot2.DOT);
+		plot.setColor(Color.red);
+		plot.addPoints(rank, r, Plot2.LINE);
+		plot.setColor(Color.black);
+		plot.addPoints(rank, j, Plot2.LINE);
+		// Plot correlation - update the scale to be 0-1?
+		plot.setColor(Color.yellow);
+		plot.addPoints(rank, c, Plot2.LINE);
+		plot.setColor(Color.magenta);
+		plot.drawLine(rank[fractionIndex], 0, rank[fractionIndex],
+				Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
+		plot.setColor(Color.pink);
+		plot.drawLine(rank[maxIndex], 0, rank[maxIndex], Maths.max(p[maxIndex], r[maxIndex], j[maxIndex], c[maxIndex]));
+		plot.setColor(Color.black);
+		plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, Correlation=Yellow");
+
+		PlotWindow pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(pw);
+
+		title = TITLE + " Precision-Recall";
+		plot = new Plot2(title, "Recall", "Precision");
+		plot.setLimits(0, 1, 0, 1.05);
+		plot.setColor(Color.red);
+		plot.addPoints(r, p, Plot2.LINE);
+		//plot.setColor(Color.magenta);
+		//plot.addPoints(r, maxp, Plot2.LINE);
+		plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
+		plot.setColor(Color.black);
+		plot.addLabel(0, 0, "AUC = " + Utils.rounded(auc) + ", AUC2 = " + Utils.rounded(auc2));
+		PlotWindow pw2 = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(pw2);
+
+		title = TITLE + " Intensity";
+		plot = new Plot2(title, "Candidate", "Spot");
+		double[] limits1 = Maths.limits(i1);
+		double[] limits2 = Maths.limits(i2);
+		plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);
+		plot.addLabel(0, 0,
+				String.format("Correlation=%s; Slope=%s", Utils.rounded(c[c.length - 1]), Utils.rounded(slope)));
+		plot.setColor(Color.red);
+		plot.addPoints(i1, i2, Plot.DOT);
+		if (slope > 1)
+			plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
+		else
+			plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope, limits2[1]);
+		PlotWindow pw3 = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(pw3);
 	}
 
 	private double getFailures(double[][] cumul, double fraction)
@@ -1617,7 +1704,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	 */
 	public static boolean updateConfiguration(FitEngineConfiguration pConfig)
 	{
-		if (spotFilter == null)
+		if (filterResult == null)
 			return false;
 
 		double scaleSearch = 1;

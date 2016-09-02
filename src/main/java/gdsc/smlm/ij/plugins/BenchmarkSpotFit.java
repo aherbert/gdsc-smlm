@@ -761,9 +761,6 @@ public class BenchmarkSpotFit implements PlugIn
 			IJ.error(TITLE, "No benchmark spot parameters in memory");
 			return;
 		}
-		// This is required to initialise the FitWorker
-		spotFilter = BenchmarkSpotFilter.spotFilter;
-
 		imp = CreateData.getImage();
 		if (imp == null)
 		{
@@ -776,16 +773,18 @@ public class BenchmarkSpotFit implements PlugIn
 			IJ.error(TITLE, "No benchmark results in memory");
 			return;
 		}
-		if (BenchmarkSpotFilter.filterResults == null)
+		if (BenchmarkSpotFilter.filterResult == null)
 		{
 			IJ.error(TITLE, "No benchmark spot candidates in memory");
 			return;
 		}
-		if (BenchmarkSpotFilter.simulationId != simulationParameters.id)
+		if (BenchmarkSpotFilter.filterResult.simulationId != simulationParameters.id)
 		{
 			IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
 			return;
 		}
+		// This is required to initialise the FitWorker
+		spotFilter = BenchmarkSpotFilter.filterResult.spotFilter;
 
 		if (!showDialog())
 			return;
@@ -939,14 +938,14 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 
 		// Extract all the candidates into a list per frame. This can be cached if the settings have not changed
-		if (refresh || lastFilterId != BenchmarkSpotFilter.filterResultsId ||
+		if (refresh || lastFilterId != BenchmarkSpotFilter.filterResult.id ||
 				lastFractionPositives != fractionPositives ||
 				lastFractionNegativesAfterAllPositives != fractionNegativesAfterAllPositives ||
 				lastNegativesAfterAllPositives != negativesAfterAllPositives)
 		{
-			filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResults);
+			filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults);
 
-			lastFilterId = BenchmarkSpotFilter.filterResultsId;
+			lastFilterId = BenchmarkSpotFilter.filterResult.id;
 			lastFractionPositives = fractionPositives;
 			lastFractionNegativesAfterAllPositives = fractionNegativesAfterAllPositives;
 			lastNegativesAfterAllPositives = negativesAfterAllPositives;
