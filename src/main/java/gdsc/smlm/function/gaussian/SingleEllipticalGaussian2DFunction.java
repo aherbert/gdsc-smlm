@@ -25,7 +25,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class SingleEllipticalGaussian2DFunction extends Gaussian2DFunction
 {
-	private static int[] gradientIndices;
+	private static final int[] gradientIndices;
 	static
 	{
 		gradientIndices = createGradientIndices(1, new SingleEllipticalGaussian2DFunction(1));

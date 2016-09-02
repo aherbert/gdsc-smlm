@@ -25,7 +25,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class SingleNBFreeCircularGaussian2DFunction extends SingleFreeCircularGaussian2DFunction
 {
-	private static int[] gradientIndices;
+	private static final int[] gradientIndices;
 	static
 	{
 		gradientIndices = createGradientIndices(1, new SingleNBFreeCircularGaussian2DFunction(1));

@@ -27,7 +27,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 6;
 
-	protected double[][] peakFactors;
+	protected final double[][] peakFactors;
 	protected double[] a;
 
 	/**
@@ -41,6 +41,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	public EllipticalGaussian2DFunction(int npeaks, int maxx)
 	{
 		super(npeaks, maxx);
+		peakFactors = new double[npeaks][16];
 	}
 
 	protected static final int N = 0;
@@ -69,7 +70,6 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new double[npeaks][16];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double theta = a[j * 6 + ANGLE];

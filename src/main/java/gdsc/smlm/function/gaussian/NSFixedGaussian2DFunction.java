@@ -27,7 +27,7 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 2;
 
-	protected double[][] peakFactors;
+	protected final double[][] peakFactors;
 	protected double[] a;
 
 	/**
@@ -41,6 +41,7 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	public NSFixedGaussian2DFunction(int npeaks, int maxx)
 	{
 		super(npeaks, maxx);
+		peakFactors = new double[npeaks][4];
 	}
 
 	protected static final int N = 0;
@@ -57,7 +58,6 @@ public class NSFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new double[npeaks][4];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double sx = a[j * 6 + X_SD];

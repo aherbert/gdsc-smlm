@@ -24,8 +24,8 @@ package gdsc.smlm.function.gaussian;
  */
 public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction 
 {
-	protected int npeaks;
-	protected int[] gradientIndices;
+	protected final int npeaks;
+	protected final int[] gradientIndices;
 	
 	/**
 	 * @param npeaks The number of peaks

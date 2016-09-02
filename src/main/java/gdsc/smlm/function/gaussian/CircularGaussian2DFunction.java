@@ -27,7 +27,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 {
 	protected static final int PARAMETERS_PER_PEAK = 4;
 
-	protected double[][] peakFactors;
+	protected final double[][] peakFactors;
 	protected double[] a;
 
 	/**
@@ -41,6 +41,7 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	public CircularGaussian2DFunction(int npeaks, int maxx)
 	{
 		super(npeaks, maxx);
+		peakFactors = new double[npeaks][5];
 	}
 
 	protected static final int N = 0;
@@ -58,7 +59,6 @@ public class CircularGaussian2DFunction extends MultiPeakGaussian2DFunction
 	{
 		this.a = a;
 		// Precalculate multiplication factors
-		peakFactors = new double[npeaks][5];
 		for (int j = 0; j < npeaks; j++)
 		{
 			final double sx = a[j * 6 + X_SD];
