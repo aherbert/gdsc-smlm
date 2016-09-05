@@ -1114,8 +1114,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.addLegend(null);
 		if (name.contains("Time"))
 			plot.setAxisYLog(true);
-		plot.setLimitsToFit(true);
 		PlotWindow pw = Utils.display(title, plot);
+		plot.setLimitsToFit(true); // Seems to only work after drawing
 		if (Utils.isNewWindow())
 			windowOrganiser.add(pw);
 	}
