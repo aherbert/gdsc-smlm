@@ -134,7 +134,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static int id = 1;
 
-	private static TextWindow summaryTable = null;
+	private static TextWindow summaryTable = null, batchSummaryTable = null;
 
 	private ImagePlus imp;
 	private MemoryPeakResults results;
@@ -1206,7 +1206,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Run the filter using relative distances
 			config.setDataFilter(dataFilter, param, 0);
-			return run(config, true);
+			return run(config, true, true);
 		}
 
 		return null;
@@ -1455,6 +1455,11 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean relativeDistances)
 	{
+		return run(config, relativeDistances, false);
+	}
+
+	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean relativeDistances, boolean batchSummary)
+	{
 		if (Utils.isInterrupted())
 			return null;
 
@@ -1600,7 +1605,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		// Show a table of the results
-		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, relativeDistances);
+		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, relativeDistances,
+				batchSummary);
 
 		if (!batchMode)
 			IJ.showStatus("");
@@ -1697,11 +1703,9 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	private BenchmarkFilterResult summariseResults(HashMap<Integer, FilterResult> filterResults,
-			FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean relativeDistances)
+			FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean relativeDistances, boolean batchSummary)
 	{
 		BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
-
-		createTable();
 
 		// Note: 
 		// Although we can compute the TP/FP score as each additional spot is added
@@ -1918,7 +1922,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		else
 			sb.append("\t\t\t\t\t");
 
-		summaryTable.append(sb.toString());
+		TextWindow resultsTable = createTable(batchSummary);
+		resultsTable.append(sb.toString());
 
 		// Store results
 		filterResult.auc = auc;
@@ -2128,16 +2133,29 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("\t");
 	}
 
-	private void createTable()
+	private TextWindow createTable(boolean batchSummary)
 	{
-		if (summaryTable == null || !summaryTable.isVisible())
+		if (batchSummary)
 		{
-			summaryTable = new TextWindow(TITLE, createHeader(false), "", 1000, 300);
-			summaryTable.setVisible(true);
+			if (batchSummaryTable == null || !batchSummaryTable.isVisible())
+			{
+				batchSummaryTable = new TextWindow(TITLE + " Batch", createHeader(), "", 1000, 300);
+				batchSummaryTable.setVisible(true);
+			}
+			return batchSummaryTable;
+		}
+		else
+		{
+			if (summaryTable == null || !summaryTable.isVisible())
+			{
+				summaryTable = new TextWindow(TITLE, createHeader(), "", 1000, 300);
+				summaryTable.setVisible(true);
+			}
+			return summaryTable;
 		}
 	}
 
-	private String createHeader(boolean extraRecall)
+	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
