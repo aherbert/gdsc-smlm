@@ -107,7 +107,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static double lowerDistance = 0.5;
 	private static double upperSignalFactor = 2;
 	private static double lowerSignalFactor = 1;
-	private static boolean relativeDistances = true;
+	private static boolean filterRelativeDistances = true;
+	private static boolean scoreRelativeDistances = true;
 	private double matchDistance;
 	private double lowerMatchDistance;
 	private static double recallFraction = 100;
@@ -126,6 +127,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private boolean extraOptions, debug = false, batchMode = false;
 	private long time = 0;
+
+	// Cache batch results
+	private static BatchSettings batchSettings = null;
+	private static BatchResult[] mBatch, gBatch, cBatch, medBatch;
 
 	private static int id = 1;
 
@@ -146,6 +151,26 @@ public class BenchmarkSpotFilter implements PlugIn
 	// Used by the Benchmark Spot Fit plugin
 	private static int filterResultsId = 0;
 	static BenchmarkFilterResult filterResult = null;
+
+	private class BatchSettings
+	{
+		final double[] p;
+
+		public BatchSettings(double... p)
+		{
+			this.p = p;
+		}
+
+		boolean isEqual(BatchSettings other)
+		{
+			if (other == null)
+				return false;
+			for (int i = 0; i < p.length; i++)
+				if (p[i] != other.p[i])
+					return false;
+			return true;
+		}
+	}
 
 	public class BenchmarkFilterResult
 	{
@@ -1002,25 +1027,30 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Continuous parameters
 			double[] pEmpty = new double[0];
-			double[] mParam = (batchMean) ? getRange(limit, 0.05) : pEmpty;
-			double[] gParam = (batchGaussian) ? getRange(limit, 0.05) : pEmpty;
+			double[] mParam = (batchMean && mBatch == null) ? getRange(limit, 0.05) : pEmpty;
+			double[] gParam = (batchGaussian && gBatch == null) ? getRange(limit, 0.05) : pEmpty;
 
 			// Less continuous parameters
-			double[] cParam = (batchCircular) ? getRange(limit, 0.5) : pEmpty;
+			double[] cParam = (batchCircular && cBatch == null) ? getRange(limit, 0.5) : pEmpty;
 
 			// Discrete parameters
-			double[] medParam = (batchMedian) ? getRange(limit, 1) : pEmpty;
+			double[] medParam = (batchMedian && medBatch == null) ? getRange(limit, 1) : pEmpty;
 
 			setupProgress(imp.getImageStackSize() * (mParam.length + gParam.length + cParam.length + medParam.length),
 					"Frame");
 
-			// Run all, store the results for plotting
+			// Run all, store the results for plotting.
+			// Allow re-use of these if they are cached to allow quick reanalysis of results.
 			config.setDataFilterType(DataFilterType.SINGLE);
 			BatchResult[] rEmpty = new BatchResult[0];
-			BatchResult[] mBatch = (batchMean) ? run(DataFilter.MEAN, mParam) : rEmpty;
-			BatchResult[] gBatch = (batchGaussian) ? run(DataFilter.GAUSSIAN, gParam) : rEmpty;
-			BatchResult[] cBatch = (batchCircular) ? run(DataFilter.CIRCULAR_MEAN, cParam) : rEmpty;
-			BatchResult[] medBatch = (batchMean) ? run(DataFilter.MEDIAN, medParam) : rEmpty;
+			if (mBatch == null)
+				mBatch = (batchMean) ? run(DataFilter.MEAN, mParam) : rEmpty;
+			if (gBatch == null)
+				gBatch = (batchGaussian) ? run(DataFilter.GAUSSIAN, gParam) : rEmpty;
+			if (cBatch == null)
+				cBatch = (batchCircular) ? run(DataFilter.CIRCULAR_MEAN, cParam) : rEmpty;
+			if (medBatch == null)
+				medBatch = (batchMean) ? run(DataFilter.MEDIAN, medParam) : rEmpty;
 
 			IJ.showProgress(1);
 			IJ.showStatus("");
@@ -1067,7 +1097,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Single filter mode
 			setupProgress(imp.getImageStackSize(), "Frame");
 
-			filterResult = run(config, relativeDistances);
+			filterResult = run(config, filterRelativeDistances);
 			IJ.showProgress(1);
 			IJ.showStatus("");
 		}
@@ -1160,7 +1190,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Convert the absolute distance to be relative to the PSF width
 			param /= config.getHWHMMin();
 
-			if (relativeDistances)
+			if (filterRelativeDistances)
 			{
 				// If relative distances were specified then we can use the input values
 				config.setSearch(search);
@@ -1173,6 +1203,8 @@ public class BenchmarkSpotFilter implements PlugIn
 				config.setSearch(search / hwhmMax);
 				config.setBorder(border / hwhmMax);
 			}
+
+			// Run the filter using relative distances
 			config.setDataFilter(dataFilter, param, 0);
 			return run(config, true);
 		}
@@ -1242,7 +1274,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			gd.addCheckbox("Gaussian", batchGaussian);
 			gd.addCheckbox("Circular", batchCircular);
 			gd.addCheckbox("Median", batchMedian);
-			gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
+			gd.addCheckbox("Filter_relative_distances (to HWHM)", filterRelativeDistances);
 		}
 		else
 		{
@@ -1251,13 +1283,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
 			gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
 
-			gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
+			gd.addCheckbox("Filter_relative_distances (to HWHM)", filterRelativeDistances);
 			gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
 		}
 		gd.addSlider("Search_width", 1, 4, search);
 		gd.addSlider("Border", 0, 5, border);
 
 		gd.addMessage("Scoring options:");
+		gd.addCheckbox("Score_relative_distances (to HWHM)", scoreRelativeDistances);
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
 		gd.addChoice("Matching_method", MATCHING_METHOD, MATCHING_METHOD[matchingMethod]);
 		gd.addSlider("Match_distance", 0.5, 3.5, upperDistance);
@@ -1290,7 +1323,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			batchGaussian = gd.getNextBoolean();
 			batchCircular = gd.getNextBoolean();
 			batchMedian = gd.getNextBoolean();
-			relativeDistances = gd.getNextBoolean();
+			filterRelativeDistances = gd.getNextBoolean();
 
 			if (!(batchMean || batchGaussian || batchCircular || batchMedian))
 				return false;
@@ -1299,10 +1332,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			config.setDataFilterType(gd.getNextChoiceIndex());
 			config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
-			relativeDistances = gd.getNextBoolean();
+			filterRelativeDistances = gd.getNextBoolean();
 		}
 		search = gd.getNextNumber();
 		border = gd.getNextNumber();
+		scoreRelativeDistances = gd.getNextBoolean();
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
 		matchingMethod = gd.getNextChoiceIndex();
 		upperDistance = Math.abs(gd.getNextNumber());
@@ -1332,10 +1366,20 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		if (batchMode)
 		{
-			// Analysis with the SpotFilter will always be done with absolute distances 
-			// during batch mode. However we must ensure the search/border distance is 
+			// Clear the cached results if the setting changed
+			BatchSettings settings = new BatchSettings(simulationParameters.id, (filterRelativeDistances) ? 1 : 0,
+					search, border, (scoreRelativeDistances) ? 1 : 0, sAnalysisBorder, matchingMethod, upperDistance,
+					lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
+			if (!settings.isEqual(batchSettings))
+			{
+				mBatch = gBatch = cBatch = medBatch = null;
+			}
+			batchSettings = settings;
+
+			// Analysis during batch mode will always be done with absolute distances. 
+			// However we must ensure the search/border distance is 
 			// relative (if requested) so that the results are consistent with single-filter mode.
-			if (relativeDistances)
+			if (filterRelativeDistances)
 			{
 				final double hwhmMax = config.getHWHMMax();
 				config.setSearch(search * hwhmMax);
@@ -1360,13 +1404,13 @@ public class BenchmarkSpotFilter implements PlugIn
 				return false;
 		}
 
-		if (relativeDistances)
+		if (scoreRelativeDistances)
 		{
 			// Convert distance to PSF standard deviation units
-			final double sd = simulationParameters.s / simulationParameters.a;
-			matchDistance = upperDistance * sd;
-			lowerMatchDistance = lowerDistance * sd;
-			analysisBorder = (int) (sAnalysisBorder * sd);
+			final double hwhmMax = config.getHWHMMax();
+			matchDistance = upperDistance * hwhmMax;
+			lowerMatchDistance = lowerDistance * hwhmMax;
+			analysisBorder = (int) (sAnalysisBorder * hwhmMax);
 		}
 		else
 		{
@@ -2126,7 +2170,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		double scaleSmooth = 1;
 		if (!filterResult.relativeDistances)
 		{
-			// Distance were absolute. Convert using the HWHM so they are relative.
+			// Distance were absolute. Convert using the HWHM so they are relative
+			// to the configured fitting width.
 			scaleSearch = 1 / pConfig.getHWHMMax();
 			scaleSmooth = 1 / pConfig.getHWHMMin();
 		}
