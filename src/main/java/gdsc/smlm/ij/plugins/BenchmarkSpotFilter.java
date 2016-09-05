@@ -14,6 +14,7 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.AUCCalculator;
 import gdsc.core.match.BasePoint;
@@ -134,7 +135,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static int id = 1;
 
-	private static TextWindow summaryTable = null, batchSummaryTable = null;
+	private static BufferedTextWindow summaryTable = null, batchSummaryTable = null;
 
 	private ImagePlus imp;
 	private MemoryPeakResults results;
@@ -1098,9 +1099,12 @@ public class BenchmarkSpotFilter implements PlugIn
 			setupProgress(imp.getImageStackSize(), "Frame");
 
 			filterResult = run(config, filterRelativeDistances);
+
 			IJ.showProgress(1);
 			IJ.showStatus("");
 		}
+
+		getTable(false).flush();
 
 		if (filterResult == null)
 			return;
@@ -1206,7 +1210,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Run the filter using relative distances
 			config.setDataFilter(dataFilter, param, 0);
-			return run(config, true, true);
+			BenchmarkFilterResult result = run(config, true, true);
+			getTable(true).flush();
+			return result;
 		}
 
 		return null;
@@ -1922,7 +1928,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		else
 			sb.append("\t\t\t\t\t");
 
-		TextWindow resultsTable = createTable(batchSummary);
+		BufferedTextWindow resultsTable = getTable(batchSummary);
 		resultsTable.append(sb.toString());
 
 		// Store results
@@ -2133,14 +2139,15 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("\t");
 	}
 
-	private TextWindow createTable(boolean batchSummary)
+	private BufferedTextWindow getTable(boolean batchSummary)
 	{
 		if (batchSummary)
 		{
 			if (batchSummaryTable == null || !batchSummaryTable.isVisible())
 			{
-				batchSummaryTable = new TextWindow(TITLE + " Batch", createHeader(), "", 1000, 300);
-				batchSummaryTable.setVisible(true);
+				TextWindow table = new TextWindow(TITLE + " Batch", createHeader(), "", 1000, 300);
+				table.setVisible(true);
+				batchSummaryTable = new BufferedTextWindow(table);
 			}
 			return batchSummaryTable;
 		}
@@ -2148,8 +2155,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (summaryTable == null || !summaryTable.isVisible())
 			{
-				summaryTable = new TextWindow(TITLE, createHeader(), "", 1000, 300);
-				summaryTable.setVisible(true);
+				TextWindow table = new TextWindow(TITLE, createHeader(), "", 1000, 300);
+				table.setVisible(true);
+				summaryTable = new BufferedTextWindow(table);
 			}
 			return summaryTable;
 		}
