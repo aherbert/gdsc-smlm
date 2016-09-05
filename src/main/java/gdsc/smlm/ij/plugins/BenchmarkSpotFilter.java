@@ -75,11 +75,23 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
+	private static double search = 1;
+	private static double border = 0;
+	private static boolean[] batchPlot;
+	private static String[] batchPlotNames;
+	private static String[] SELECTION;
+	private static int selection = 0;
 	static
 	{
 		fitConfig = new FitConfiguration();
 		config = new FitEngineConfiguration(fitConfig);
-		config.setSearch(1);
+		batchPlot = new boolean[BatchResult.getNumberOfScores()];
+		batchPlotNames = new String[batchPlot.length];
+		for (int i = 0; i < batchPlot.length; i++)
+			batchPlotNames[i] = BatchResult.getScoreName(i);
+		SELECTION = new String[2];
+		SELECTION[0] = BatchResult.getScoreName(0);
+		SELECTION[1] = BatchResult.getScoreName(1);
 	}
 
 	private static final String[] MATCHING_METHOD = { "Single", "Multi", "Greedy" };
@@ -98,7 +110,6 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static boolean relativeDistances = true;
 	private double matchDistance;
 	private double lowerMatchDistance;
-	private float pixelOffset;
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
 	private static boolean rankByIntensity = false;
@@ -107,7 +118,13 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static boolean showFP = true;
 	private static boolean showFN = false;
 	private static boolean sDebug = false;
-	private boolean extraOptions, debug = false;
+
+	private static boolean batchMean = true;
+	private static boolean batchGaussian = true;
+	private static boolean batchCircular = false;
+	private static boolean batchMedian = false;
+
+	private boolean extraOptions, debug = false, batchMode = false;
 	private long time = 0;
 
 	private static int id = 1;
@@ -120,7 +137,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private static HashMap<Integer, PSFSpot[]> actualCoordinates = null;
 	private static int lastId = -1;
-	private static boolean lastRelativeDistances = false;
+	//private static boolean lastRelativeDistances = false;
 
 	private WindowOrganiser windowOrganiser;
 
@@ -148,6 +165,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		public double[] i1;
 		public double[] i2;
 		public double[] intensity;
+		public boolean relativeDistances;
+		public long time;
 
 		public BenchmarkFilterResult(HashMap<Integer, FilterResult> filterResults, FitEngineConfiguration config,
 				MaximaSpotFilter spotFilter)
@@ -156,6 +175,60 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.filterResults = filterResults;
 			this.config = config;
 			this.spotFilter = spotFilter;
+		}
+	}
+
+	private static class BatchResult
+	{
+		public double auc, j, p, r;
+		public long time;
+		public DataFilter dataFilter;
+		public double param;
+
+		public BatchResult(BenchmarkFilterResult filterResult, DataFilter dataFilter, double param)
+		{
+			this.auc = filterResult.auc;
+			this.j = filterResult.j[filterResult.maxIndex];
+			this.p = filterResult.p[filterResult.maxIndex];
+			this.r = filterResult.r[filterResult.maxIndex];
+			this.time = filterResult.time;
+			this.dataFilter = dataFilter;
+			this.param = param;
+		}
+
+		public double getScore(int i)
+		{
+			if (i == 0)
+				return auc;
+			if (i == 1)
+				return j;
+			if (i == 2)
+				return p;
+			if (i == 3)
+				return r;
+			if (i == 4)
+				return time / 1e6;
+			return 0;
+		}
+
+		public static String getScoreName(int i)
+		{
+			if (i == 0)
+				return "AUC";
+			if (i == 1)
+				return "Max Jaccard";
+			if (i == 2)
+				return "Precision (at Max Jaccard)";
+			if (i == 3)
+				return "Recall (at Max Jaccard)";
+			if (i == 4)
+				return "Time (ms)";
+			return "";
+		}
+
+		public static int getNumberOfScores()
+		{
+			return 5;
 		}
 	}
 
@@ -868,7 +941,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			public SpotCoordinate(int id, Spot spot)
 			{
-				super(spot.x + pixelOffset, spot.y + pixelOffset);
+				// Centre ion the middle of the pixel
+				super(spot.x + 0.5f, spot.y + 0.5f);
 				this.spot = spot;
 			}
 		}
@@ -885,6 +959,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		extraOptions = Utils.isExtraOptions();
+		batchMode = "batch".equals(arg);
 
 		simulationParameters = CreateData.simulationParameters;
 		if (simulationParameters == null)
@@ -908,34 +983,239 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (!showDialog())
 			return;
 
-		// TODO - Add batch mode to test enumeration of filters
+		// Clear old results to free memory
+		if (filterResult != null)
+		{
+			filterResult.filterResults.clear();
+			filterResult.filterResults = null;
+			filterResult = null;
+		}
 
 		// For graphs
 		windowOrganiser = new WindowOrganiser();
 
+		if (batchMode)
+		{
+			// Batch mode to test enumeration of filters
+			final double sd = simulationParameters.s / simulationParameters.a;
+			final int limit = (int) Math.floor(3 * sd);
+
+			// Continuous parameters
+			double[] pEmpty = new double[0];
+			double[] mParam = (batchMean) ? getRange(limit, 0.05) : pEmpty;
+			double[] gParam = (batchGaussian) ? getRange(limit, 0.05) : pEmpty;
+
+			// Less continuous parameters
+			double[] cParam = (batchCircular) ? getRange(limit, 0.5) : pEmpty;
+
+			// Discrete parameters
+			double[] medParam = (batchMedian) ? getRange(limit, 1) : pEmpty;
+
+			setupProgress(imp.getImageStackSize() * (mParam.length + gParam.length + cParam.length + medParam.length),
+					"Frame");
+
+			// Run all, store the results for plotting
+			config.setDataFilterType(DataFilterType.SINGLE);
+			BatchResult[] rEmpty = new BatchResult[0];
+			BatchResult[] mBatch = (batchMean) ? run(DataFilter.MEAN, mParam) : rEmpty;
+			BatchResult[] gBatch = (batchGaussian) ? run(DataFilter.GAUSSIAN, gParam) : rEmpty;
+			BatchResult[] cBatch = (batchCircular) ? run(DataFilter.CIRCULAR_MEAN, cParam) : rEmpty;
+			BatchResult[] medBatch = (batchMean) ? run(DataFilter.MEDIAN, medParam) : rEmpty;
+
+			IJ.showProgress(1);
+			IJ.showStatus("");
+			if (Utils.isInterrupted())
+				return;
+
+			// Analysis options
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("Choose performance plots:");
+			for (int i = 0; i < batchPlot.length; i++)
+				gd.addCheckbox(batchPlotNames[i], batchPlot[i]);
+
+			gd.addChoice("Selection", SELECTION, SELECTION[selection]);
+			gd.addCheckbox("Show_plots", showPlot);
+			gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
+			gd.addCheckbox("Show_failures_plots", showFailuresPlot);
+			gd.addCheckbox("Show_TP", showTP);
+			gd.addCheckbox("Show_FP", showFP);
+			gd.addCheckbox("Show_FN", showFN);
+
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return;
+
+			for (int i = 0; i < batchPlot.length; i++)
+				batchPlot[i] = gd.getNextBoolean();
+			selection = gd.getNextChoiceIndex();
+			showPlot = gd.getNextBoolean();
+			rankByIntensity = gd.getNextBoolean();
+			showFailuresPlot = gd.getNextBoolean();
+			showTP = gd.getNextBoolean();
+			showFP = gd.getNextBoolean();
+			showFN = gd.getNextBoolean();
+
+			// Plot charts			
+			for (int i = 0; i < batchPlot.length; i++)
+				plot(i, mBatch, gBatch, cBatch, medBatch);
+
+			// Store in global singleton
+			filterResult = analyse(mBatch, gBatch, cBatch, medBatch);
+		}
+		else
 		{
 			// Single filter mode
+			setupProgress(imp.getImageStackSize(), "Frame");
 
-			// Clear old results to free memory
-			if (filterResult != null)
-			{
-				filterResult.filterResults.clear();
-				filterResult.filterResults = null;
-				filterResult = null;
-			}
-
-			filterResult = run(config);
-			// Debugging the matches
-			if (debug)
-				addSpotsToMemory(filterResult.filterResults);
-
-			if (showFailuresPlot)
-				showFailuresPlot(filterResult);
-			if (showPlot)
-				showPlot(filterResult);
-			if (isShowOverlay())
-				showOverlay(imp, filterResult);
+			filterResult = run(config, relativeDistances);
+			IJ.showProgress(1);
+			IJ.showStatus("");
 		}
+
+		if (filterResult == null)
+			return;
+
+		// Debugging the matches
+		if (debug)
+			addSpotsToMemory(filterResult.filterResults);
+
+		if (showFailuresPlot)
+			showFailuresPlot(filterResult);
+		if (showPlot)
+			showPlot(filterResult);
+		if (isShowOverlay())
+			showOverlay(imp, filterResult);
+
+		windowOrganiser.tile();
+	}
+
+	private void plot(int i, BatchResult[]... batchResults)
+	{
+		if (!batchPlot[i])
+			return;
+
+		Color[] colors = new Color[] { Color.red, Color.green, Color.blue, Color.magenta };
+
+		String name = batchPlotNames[i];
+		String title = TITLE + " Performance " + name;
+		Plot plot = new Plot(title, "Relative width", name);
+		final double scale = 1.0 / config.getHWHMMin();
+		int j = 0;
+		for (BatchResult[] batchResult : batchResults)
+		{
+			if (batchResult == null || batchResult.length == 0)
+				continue;
+			float[][] data = extractData(batchResult, i, scale);
+			plot.setColor(colors[j++]);
+			plot.addPoints(data[0], data[1], null, (batchResult.length > 1) ? Plot.LINE : Plot.CIRCLE,
+					batchResult[0].dataFilter.toString());
+		}
+		plot.setColor(Color.black);
+		plot.addLegend(null);
+		if (name.contains("Time"))
+			plot.setAxisYLog(true);
+		plot.setLimitsToFit(true);
+		PlotWindow pw = Utils.display(title, plot);
+		if (Utils.isNewWindow())
+			windowOrganiser.add(pw);
+	}
+
+	private float[][] extractData(BatchResult[] batchResult, int index, double scale)
+	{
+		float[][] data = new float[2][batchResult.length];
+		for (int i = 0; i < batchResult.length; i++)
+		{
+			data[0][i] = (float) (batchResult[i].param * scale);
+			data[1][i] = (float) batchResult[i].getScore(index);
+		}
+		return data;
+	}
+
+	private BenchmarkFilterResult analyse(BatchResult[]... batchResults)
+	{
+		double max = 0;
+		DataFilter dataFilter = null;
+		double param = 0;
+		for (BatchResult[] batchResult : batchResults)
+		{
+			if (batchResult == null || batchResult.length == 0)
+				continue;
+			double[][] data = extractData(batchResult, selection);
+			int maxi = 0;
+			for (int i = 0; i < batchResult.length; i++)
+			{
+				if (data[1][maxi] < data[1][i])
+					maxi = i;
+			}
+			if (max < data[1][maxi])
+			{
+				max = data[1][maxi];
+				dataFilter = batchResult[0].dataFilter;
+				param = data[0][maxi];
+			}
+		}
+
+		if (dataFilter != null)
+		{
+			// Convert the absolute distance to be relative to the PSF width
+			param /= config.getHWHMMin();
+
+			if (relativeDistances)
+			{
+				// If relative distances were specified then we can use the input values
+				config.setSearch(search);
+				config.setBorder(border);
+			}
+			else
+			{
+				// Otherwise we must adjust the input values to convert the absolute values to relative
+				final double hwhmMax = config.getHWHMMax();
+				config.setSearch(search / hwhmMax);
+				config.setBorder(border / hwhmMax);
+			}
+			config.setDataFilter(dataFilter, param, 0);
+			return run(config, true);
+		}
+
+		return null;
+	}
+
+	private double[][] extractData(BatchResult[] batchResult, int index)
+	{
+		double[][] data = new double[2][batchResult.length];
+		for (int i = 0; i < batchResult.length; i++)
+		{
+			data[0][i] = batchResult[i].param;
+			data[1][i] = batchResult[i].getScore(index);
+		}
+		return data;
+	}
+
+	private double[] getRange(final int limit, final double interval)
+	{
+		double[] param;
+		int c = (int) (limit / interval);
+		param = new double[c];
+		for (int i = 1; i <= c; i++)
+		{
+			param[i - 1] = i * interval;
+		}
+		return param;
+	}
+
+	private BatchResult[] run(DataFilter dataFilter, double[] param)
+	{
+		progressPrefix = dataFilter.toString();
+		BatchResult[] result = new BatchResult[param.length];
+		for (int i = 0; i < param.length; i++)
+		{
+			config.setDataFilter(dataFilter, param[i], 0);
+			BenchmarkFilterResult filterResult = run(config, false);
+			if (filterResult == null)
+				return null;
+			result[i] = new BatchResult(filterResult, dataFilter, param[i]);
+		}
+		return result;
 	}
 
 	private boolean showDialog()
@@ -955,16 +1235,27 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append("\n \nConfigure the spot filter:");
 		gd.addMessage(sb.toString());
 
-		String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
-		gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
-		String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
-		gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
+		if (batchMode)
+		{
+			// Support enumeration of single spot filters
+			gd.addCheckbox("Mean", batchMean);
+			gd.addCheckbox("Gaussian", batchGaussian);
+			gd.addCheckbox("Circular", batchCircular);
+			gd.addCheckbox("Median", batchMedian);
+			gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
+		}
+		else
+		{
+			String[] filterTypes = SettingsManager.getNames((Object[]) DataFilterType.values());
+			gd.addChoice("Spot_filter_type", filterTypes, filterTypes[config.getDataFilterType().ordinal()]);
+			String[] filterNames = SettingsManager.getNames((Object[]) DataFilter.values());
+			gd.addChoice("Spot_filter", filterNames, filterNames[config.getDataFilter(0).ordinal()]);
 
-		gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
-
-		gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
-		gd.addSlider("Search_width", 1, 4, config.getSearch());
-		gd.addSlider("Border", 0, 5, config.getBorder());
+			gd.addCheckbox("Relative_distances (to HWHM)", relativeDistances);
+			gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+		}
+		gd.addSlider("Search_width", 1, 4, search);
+		gd.addSlider("Border", 0, 5, border);
 
 		gd.addMessage("Scoring options:");
 		gd.addSlider("Analysis_border", 0, 5, sAnalysisBorder);
@@ -974,12 +1265,15 @@ public class BenchmarkSpotFilter implements PlugIn
 		gd.addSlider("Signal_factor", 0, 3.5, upperSignalFactor);
 		gd.addSlider("Lower_factor", 0, 3.5, lowerSignalFactor);
 		gd.addSlider("Recall_fraction", 50, 100, recallFraction);
-		gd.addCheckbox("Show_plots", showPlot);
-		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
-		gd.addCheckbox("Show_failures_plots", showFailuresPlot);
-		gd.addCheckbox("Show_TP", showTP);
-		gd.addCheckbox("Show_FP", showFP);
-		gd.addCheckbox("Show_FN", showFN);
+		if (!batchMode)
+		{
+			gd.addCheckbox("Show_plots", showPlot);
+			gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
+			gd.addCheckbox("Show_failures_plots", showFailuresPlot);
+			gd.addCheckbox("Show_TP", showTP);
+			gd.addCheckbox("Show_FP", showFP);
+			gd.addCheckbox("Show_FN", showFN);
+		}
 		if (extraOptions)
 			gd.addCheckbox("Debug", sDebug);
 
@@ -990,11 +1284,25 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		fitConfig.setInitialPeakStdDev(sa);
 
-		config.setDataFilterType(gd.getNextChoiceIndex());
-		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
-		relativeDistances = gd.getNextBoolean();
-		config.setSearch(gd.getNextNumber());
-		config.setBorder(gd.getNextNumber());
+		if (batchMode)
+		{
+			batchMean = gd.getNextBoolean();
+			batchGaussian = gd.getNextBoolean();
+			batchCircular = gd.getNextBoolean();
+			batchMedian = gd.getNextBoolean();
+			relativeDistances = gd.getNextBoolean();
+
+			if (!(batchMean || batchGaussian || batchCircular || batchMedian))
+				return false;
+		}
+		else
+		{
+			config.setDataFilterType(gd.getNextChoiceIndex());
+			config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+			relativeDistances = gd.getNextBoolean();
+		}
+		search = gd.getNextNumber();
+		border = gd.getNextNumber();
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
 		matchingMethod = gd.getNextChoiceIndex();
 		upperDistance = Math.abs(gd.getNextNumber());
@@ -1002,12 +1310,15 @@ public class BenchmarkSpotFilter implements PlugIn
 		upperSignalFactor = Math.abs(gd.getNextNumber());
 		lowerSignalFactor = Math.abs(gd.getNextNumber());
 		recallFraction = Math.abs(gd.getNextNumber());
-		showPlot = gd.getNextBoolean();
-		rankByIntensity = gd.getNextBoolean();
-		showFailuresPlot = gd.getNextBoolean();
-		showTP = gd.getNextBoolean();
-		showFP = gd.getNextBoolean();
-		showFN = gd.getNextBoolean();
+		if (!batchMode)
+		{
+			showPlot = gd.getNextBoolean();
+			rankByIntensity = gd.getNextBoolean();
+			showFailuresPlot = gd.getNextBoolean();
+			showTP = gd.getNextBoolean();
+			showFP = gd.getNextBoolean();
+			showFN = gd.getNextBoolean();
+		}
 		if (extraOptions)
 			debug = sDebug = gd.getNextBoolean();
 
@@ -1019,10 +1330,35 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (lowerSignalFactor > upperSignalFactor)
 			lowerSignalFactor = upperSignalFactor;
 
-		GlobalSettings settings = new GlobalSettings();
-		settings.setFitEngineConfiguration(config);
-		if (!PeakFit.configureDataFilter(settings, null, false))
-			return false;
+		if (batchMode)
+		{
+			// Analysis with the SpotFilter will always be done with absolute distances 
+			// during batch mode. However we must ensure the search/border distance is 
+			// relative (if requested) so that the results are consistent with single-filter mode.
+			if (relativeDistances)
+			{
+				final double hwhmMax = config.getHWHMMax();
+				config.setSearch(search * hwhmMax);
+				config.setBorder(border * hwhmMax);
+			}
+			else
+			{
+				config.setSearch(search);
+				config.setBorder(border);
+			}
+		}
+		else
+		{
+			config.setSearch(search);
+			config.setBorder(border);
+
+			// Single filter ...
+			// Allow more complicated filters to be configured
+			GlobalSettings settings = new GlobalSettings();
+			settings.setFitEngineConfiguration(config);
+			if (!PeakFit.configureDataFilter(settings, null, false))
+				return false;
+		}
 
 		if (relativeDistances)
 		{
@@ -1030,17 +1366,13 @@ public class BenchmarkSpotFilter implements PlugIn
 			final double sd = simulationParameters.s / simulationParameters.a;
 			matchDistance = upperDistance * sd;
 			lowerMatchDistance = lowerDistance * sd;
-			analysisBorder = (int) (analysisBorder * sd);
-			// Add 0.5 offset to centre the spot in the pixel
-			pixelOffset = 0.5f;
+			analysisBorder = (int) (sAnalysisBorder * sd);
 		}
 		else
 		{
 			matchDistance = upperDistance;
 			lowerMatchDistance = lowerDistance;
-			analysisBorder = (int) (analysisBorder);
-			// Absolute distances in pixels will use integer coordinates so no offset
-			pixelOffset = 0;
+			analysisBorder = (int) (sAnalysisBorder);
 		}
 
 		return true;
@@ -1053,7 +1385,16 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	/** The total progress. */
-	int progress, stepProgress, totalProgress;
+	private int progress, stepProgress, totalProgress;
+	private String progressPrefix;
+
+	private void setupProgress(int total, String prefix)
+	{
+		totalProgress = total;
+		stepProgress = Utils.getProgressInterval(totalProgress);
+		progressPrefix = prefix;
+		progress = 0;
+	}
 
 	/**
 	 * Show progress.
@@ -1062,25 +1403,33 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		if (++progress % stepProgress == 0)
 		{
-			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+			//if (Utils.showStatus(String.format("%s: %d / %d", progressPrefix, progress, totalProgress)))
+			if (Utils.showStatus(progressPrefix))
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
 
-	private BenchmarkFilterResult run(FitEngineConfiguration config)
+	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean relativeDistances)
 	{
+		if (Utils.isInterrupted())
+			return null;
+
 		MaximaSpotFilter spotFilter = config.createSpotFilter(relativeDistances);
 
 		// Extract all the results in memory into a list per frame. This can be cached
-		if (lastId != simulationParameters.id || lastRelativeDistances != relativeDistances)
+		if (lastId != simulationParameters.id) // || lastRelativeDistances != relativeDistances)
 		{
-			// When using pixel distances then get the coordinates in integers.
-			// The Worker adds a pixel offset if appropriate.
+			// Always use float coordinates.
+			// The Worker adds a pixel offset for the spot coordinates.
 			HashMap<Integer, ArrayList<Coordinate>> coordinates = ResultsMatchCalculator
-					.getCoordinates(results.getResults(), !relativeDistances);
+					.getCoordinates(results.getResults(), false);
 			actualCoordinates = new HashMap<Integer, PSFSpot[]>();
 			lastId = simulationParameters.id;
-			lastRelativeDistances = relativeDistances;
+			//lastRelativeDistances = relativeDistances;
+
+			// Store these so we can reset them
+			final int total = totalProgress;
+			final String prefix = progressPrefix;
 
 			// Spot PSFs may overlap so we must determine the amount of signal overlap and amplitude effect 
 			// for each spot...
@@ -1129,9 +1478,13 @@ public class BenchmarkSpotFilter implements PlugIn
 			threads.clear();
 
 			IJ.showProgress(1);
+			IJ.showStatus("");
+
+			setupProgress(total, prefix);
 		}
 
-		IJ.showStatus("Computing results ...");
+		if (!batchMode)
+			IJ.showStatus("Computing results ...");
 		final ImageStack stack = imp.getImageStack();
 
 		float background = 0;
@@ -1161,10 +1514,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		// Fit the frames
-		totalProgress = stack.getSize();
-		stepProgress = Utils.getProgressInterval(totalProgress);
-		progress = 0;
-		for (int i = 1; i <= totalProgress; i++)
+		for (int i = 1; i <= stack.getSize(); i++)
 		{
 			put(jobs, i);
 		}
@@ -1188,10 +1538,17 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		threads.clear();
 
-		IJ.showProgress(1);
-		IJ.showStatus("Collecting results ...");
+		if (Utils.isInterrupted())
+			return null;
+
+		if (!batchMode)
+		{
+			IJ.showProgress(1);
+			IJ.showStatus("Collecting results ...");
+		}
 
 		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, FilterResult>();
+		time = 0;
 		for (Worker w : workers)
 		{
 			time += w.time;
@@ -1199,11 +1556,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		// Show a table of the results
-		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter);
+		BenchmarkFilterResult filterResult = summariseResults(filterResults, config, spotFilter, relativeDistances);
 
-		windowOrganiser.tile();
-
-		IJ.showStatus("");
+		if (!batchMode)
+			IJ.showStatus("");
 
 		return filterResult;
 	}
@@ -1297,7 +1653,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	}
 
 	private BenchmarkFilterResult summariseResults(HashMap<Integer, FilterResult> filterResults,
-			FitEngineConfiguration config, MaximaSpotFilter spotFilter)
+			FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean relativeDistances)
 	{
 		BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
 
@@ -1381,7 +1737,18 @@ public class BenchmarkSpotFilter implements PlugIn
 		sb.append(spotFilter.getBorder()).append("\t");
 		sb.append(Utils.rounded(spotFilter.getSpread())).append("\t");
 		sb.append(config.getDataFilter(0)).append("\t");
-		sb.append(Utils.rounded(config.getSmooth(0))).append("\t");
+		final double param = config.getSmooth(0);
+		final double hwhmMin = config.getHWHMMin();
+		if (relativeDistances)
+		{
+			sb.append(Utils.rounded(param * hwhmMin)).append("\t");
+			sb.append(Utils.rounded(param)).append("\t");
+		}
+		else
+		{
+			sb.append(Utils.rounded(param)).append("\t");
+			sb.append(Utils.rounded(param / hwhmMin)).append("\t");
+		}
 		sb.append(spotFilter.getDescription()).append("\t");
 		sb.append(analysisBorder).append("\t");
 		sb.append(MATCHING_METHOD[matchingMethod]).append("\t");
@@ -1523,6 +1890,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		filterResult.i1 = i1;
 		filterResult.i2 = i2;
 		filterResult.intensity = intensity;
+		filterResult.relativeDistances = relativeDistances;
+		filterResult.time = time;
 		return filterResult;
 	}
 
@@ -1729,7 +2098,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		StringBuilder sb = new StringBuilder(
 				"Frames\tW\tH\tMolecules\tDensity (um^-2)\tN\ts (nm)\ta (nm)\tDepth (nm)\tFixed\tGain\tReadNoise (ADUs)\tB (photons)\tb2 (photons)\tSNR\ts (px)\t");
 		sb.append(
-				"Type\tSearch\tBorder\tWidth\tFilter\tParam\tDescription\tA.Border\tMatching\tlower d\td\tlower sf\tsf");
+				"Type\tSearch\tBorder\tWidth\tFilter\tAbs.Param\tRel.Param\tDescription\tA.Border\tMatching\tlower d\td\tlower sf\tsf");
 		tablePrefix = sb.toString();
 		sb.append("\tSlope\t");
 		sb.append("TP\tFP\tRecall\tPrecision\tJaccard\tR\t");
@@ -1755,7 +2124,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		double scaleSearch = 1;
 		double scaleSmooth = 1;
-		if (!relativeDistances)
+		if (!filterResult.relativeDistances)
 		{
 			// Distance were absolute. Convert using the HWHM so they are relative.
 			scaleSearch = 1 / pConfig.getHWHMMax();
