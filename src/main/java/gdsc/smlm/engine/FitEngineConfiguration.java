@@ -463,7 +463,7 @@ public class FitEngineConfiguration implements Cloneable
 		{
 			// Get the half-width at half maximim
 			hwhmMin = getHWHMMin();
-			hwhmMax = getHWHMMin();
+			hwhmMax = getHWHMMax();
 		}
 		else
 		{
