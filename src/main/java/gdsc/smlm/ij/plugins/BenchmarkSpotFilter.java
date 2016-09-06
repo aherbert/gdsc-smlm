@@ -1068,11 +1068,11 @@ public class BenchmarkSpotFilter implements PlugIn
 			setupProgress(imp.getImageStackSize(), "Frame");
 
 			filterResult = run(config, filterRelativeDistances);
-
-			IJ.showProgress(-1);
-			IJ.showStatus("");
 		}
 
+		IJ.showProgress(-1);
+		IJ.showStatus("");
+		
 		getTable(false).flush();
 
 		if (filterResult == null)
