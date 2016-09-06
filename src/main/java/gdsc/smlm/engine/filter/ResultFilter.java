@@ -59,14 +59,14 @@ public abstract class ResultFilter
 	 *
 	 * @param fitResult
 	 *            The output from the fitting routine
-	 * @param fitResultWidthNeighbours
+	 * @param fitResultWithNeighbours
 	 *            the fit result width neighbours
 	 * @param maxIndex
 	 *            The source index that was fitted
 	 * @param results
 	 *            The fitted peaks
 	 */
-	public abstract void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex,
+	public abstract void filter(FitResult fitResult, FitResult fitResultWithNeighbours, int maxIndex,
 			PeakResult... results);
 
 	/**
@@ -75,7 +75,7 @@ public abstract class ResultFilter
 	 *
 	 * @param fitResult
 	 *            The output from the fitting routine
-	 * @param fitResultWidthNeighbours
+	 * @param fitResultWithNeighbours
 	 *            the fit result width neighbours
 	 * @param maxIndex
 	 *            The source index that was fitted
@@ -84,7 +84,7 @@ public abstract class ResultFilter
 	 * @param y
 	 *            The y position of the source index
 	 */
-	public abstract void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, float x,
+	public abstract void filter(FitResult fitResult, FitResult fitResultWithNeighbours, int maxIndex, float x,
 			float y);
 
 	/**

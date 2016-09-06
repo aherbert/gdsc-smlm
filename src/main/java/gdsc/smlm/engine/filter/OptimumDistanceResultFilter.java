@@ -54,7 +54,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	 * gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
-	public void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, PeakResult... results)
+	public void filter(FitResult fitResult, FitResult fitResultWithNeighbours, int maxIndex, PeakResult... results)
 	{
 		for (PeakResult r : results)
 		{
@@ -73,7 +73,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 					if (s < bestSignal[i])
 						continue;
 					bestFitResults[i] = fitResult;
-					bestFitResultsWithNeighbours[i] = fitResultWidthNeighbours;
+					bestFitResultsWithNeighbours[i] = fitResultWithNeighbours;
 					bestIndices[i] = maxIndex;
 					bestSignal[i] = s;
 					bestPeakResults[i] = r;
@@ -88,7 +88,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int, float, float)
 	 */
 	@Override
-	public void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, float x, float y)
+	public void filter(FitResult fitResult, FitResult fitResultWithNeighbours, int maxIndex, float x, float y)
 	{
 		for (int i = 0; i < filter.size(); i++)
 		{
@@ -103,7 +103,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 			if (dd < bestD2[i])
 			{
 				bestFitResults[i] = fitResult;
-				bestFitResultsWithNeighbours[i] = fitResultWidthNeighbours;
+				bestFitResultsWithNeighbours[i] = fitResultWithNeighbours;
 				
 				bestIndices[i] = maxIndex;
 				bestD2[i] = dd;

@@ -39,7 +39,7 @@ public class DistanceResultFilter extends ResultFilter
 	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int, gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
-	public void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, PeakResult... results)
+	public void filter(FitResult fitResult, FitResult fitResultWithNeighbours, int maxIndex, PeakResult... results)
 	{
 		boolean found = false;
 		for (PeakResult r : results)
@@ -71,7 +71,7 @@ public class DistanceResultFilter extends ResultFilter
 	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int, float, float)
 	 */
 	@Override
-	public void filter(FitResult fitResult, FitResult fitResultWidthNeighbours, int maxIndex, float x, float y)
+	public void filter(FitResult fitResult, FitResult fitResultWithNeighbours, int maxIndex, float x, float y)
 	{
 		boolean found = false;
 		for (float[] coord : filter)
@@ -88,7 +88,7 @@ public class DistanceResultFilter extends ResultFilter
 		{
 			// Add the result and the fitted index to the filtered results
 			filteredFitResults[filteredCount] = fitResult;
-			filteredFitResultsWithNeighbours[filteredCount] = fitResultWidthNeighbours;
+			filteredFitResultsWithNeighbours[filteredCount] = fitResultWithNeighbours;
 			filteredIndices[filteredCount] = maxIndex;
 			filteredCount++;
 		}
