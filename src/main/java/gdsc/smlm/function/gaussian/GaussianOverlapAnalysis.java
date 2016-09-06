@@ -1,7 +1,5 @@
 package gdsc.smlm.function.gaussian;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import gdsc.core.utils.Sort;
@@ -84,6 +82,26 @@ public class GaussianOverlapAnalysis
 	 */
 	public void add(int flags, double[] params)
 	{
+		add(flags, params, false);
+	}
+
+	/**
+	 * Add the Gaussian function data to the overlap region. This is the region that contains the input function within
+	 * the range defined in the constructor.
+	 * <p>
+	 * The square region is masked using the expected sum of the function within the range. The overlap of other
+	 * functions within this masked region can be computed, or within the square region.
+	 *
+	 * @param flags
+	 *            The flags describing the Gaussian2DFunction function (see GaussianFunctionFactory)
+	 * @param params
+	 *            The parameters for the Gaussian (can be multiple peaks)
+	 * @param withinMask
+	 *            Set to true to only compute the overlap within the mask. This effects the computation of the weighted
+	 *            background (see {@link #getWeightedbackground()}.
+	 */
+	public void add(int flags, double[] params, boolean withinMask)
+	{
 		// Note: When computing the overlap no adjustment is made for sampling on a pixel grid.
 		// This is OK since the method will be used to evaluate the overlap between Gaussians that have
 		// been fit using the functions.
@@ -119,6 +137,7 @@ public class GaussianOverlapAnalysis
 			Sort.sort(indices, data);
 			double sum = 0, last = 0;
 			boolean useMask = false;
+			mask = new boolean[data.length];
 			for (int i = 0; i < data.length; i++)
 			{
 				final double v = data[indices[i]];
@@ -149,11 +168,11 @@ public class GaussianOverlapAnalysis
 			params[n * 6 + Gaussian2DFunction.Y_POSITION] += centrey - params0[Gaussian2DFunction.Y_POSITION];
 		}
 		f.initialise(params);
-		if (mask == null)
+		if (mask == null || !withinMask)
 		{
 			for (int k = 0; k < size; k++)
 			{
-				overlap[k] = f.eval(k);
+				overlap[k] += f.eval(k);
 			}
 		}
 		else
@@ -162,20 +181,20 @@ public class GaussianOverlapAnalysis
 			{
 				if (mask[k])
 				{
-					overlap[k] = f.eval(k);
+					overlap[k] += f.eval(k);
 				}
 			}
 		}
 
-		// Debug
-		double[] combined = data.clone();
-		for (int k = 0; k < size; k++)
-			combined[k] += overlap[k];
-		gdsc.core.ij.Utils.display("Spot i", data, maxx, maxx);
-		gdsc.core.ij.Utils.display("Overlap", overlap, maxx, maxx);
-		gdsc.core.ij.Utils.display("Combined", combined, maxx, maxx);
-		System.out.printf("Signal %.2f, sd %.2f, overlap = %s\n", params0[Gaussian2DFunction.SIGNAL],
-				params0[Gaussian2DFunction.X_SD], Arrays.toString(params));
+		//		// Debug
+		//		double[] combined = data.clone();
+		//		for (int k = 0; k < size; k++)
+		//			combined[k] += overlap[k];
+		//		gdsc.core.ij.Utils.display("Spot i", data, maxx, maxx);
+		//		gdsc.core.ij.Utils.display("Overlap", overlap, maxx, maxx);
+		//		gdsc.core.ij.Utils.display("Combined", combined, maxx, maxx);
+		//		System.out.printf("Signal %.2f, sd %.2f, overlap = %s\n", params0[Gaussian2DFunction.SIGNAL],
+		//				params0[Gaussian2DFunction.X_SD], Arrays.toString(params));
 	}
 
 	/**
@@ -216,6 +235,38 @@ public class GaussianOverlapAnalysis
 			result[1] = sumO;
 		}
 		return result;
+	}
+
+	/**
+	 * Get the weighted background
+	 * <p>
+	 * Computes the convolution of the central function and the overlap for the central pixel of the region. This is an
+	 * estimate of the background contributed to the region by overlapping functions.
+	 * <p>
+	 * The result of this function is effected by how the overlap was computed, either within the mask or within the
+	 * entire square region (see {@link #add(int, double[], boolean)})
+	 * 
+	 * @return The weighted background
+	 */
+	public double getWeightedbackground()
+	{
+		if (overlap != null)
+		{
+			double sum = 0;
+			double sumw = 0;
+			final double norm = 1.0 / params0[Gaussian2DFunction.SIGNAL];
+			//double[] combined = new double[size];
+			for (int k = 0; k < size; k++)
+			{
+				final double v = data[k] * norm;
+				sum += overlap[k] * v;
+				sumw += v;
+			}
+			//gdsc.core.ij.Utils.display("O Spot i", data, maxx, maxx);
+			//gdsc.core.ij.Utils.display("O Spot overlap", overlap, maxx, maxx);
+			return sum / sumw;
+		}
+		return 0;
 	}
 
 	/**
