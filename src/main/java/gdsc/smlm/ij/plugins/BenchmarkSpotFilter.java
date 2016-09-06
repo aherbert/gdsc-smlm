@@ -120,9 +120,9 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static double recallFraction = 100;
 	private static boolean showPlot = true;
 	private static boolean rankByIntensity = false;
-	private static boolean showFailuresPlot = true;
-	private static boolean showTP = true;
-	private static boolean showFP = true;
+	private static boolean showFailuresPlot = false;
+	private static boolean showTP = false;
+	private static boolean showFP = false;
 	private static boolean showFN = false;
 	private static boolean sDebug = false;
 
