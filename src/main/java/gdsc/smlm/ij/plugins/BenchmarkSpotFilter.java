@@ -79,6 +79,8 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
 	private static double search = 1;
+	private static double minSearch = 1;
+	private static double maxSearch = 1;
 	private static double border = 1;
 	private static boolean[] batchPlot;
 	private static String[] batchPlotNames;
@@ -134,7 +136,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	// Cache batch results
 	private static BatchSettings batchSettings = null;
-	private static BatchResult[] mBatch, gBatch, cBatch, medBatch;
+	private static ArrayList<BatchResult[]> cachedBatchResults = new ArrayList<BatchResult[]>();
 
 	private static int id = 1;
 
@@ -213,16 +215,21 @@ public class BenchmarkSpotFilter implements PlugIn
 		public long time;
 		public DataFilter dataFilter;
 		public double param;
+		public double search;
 
-		public BatchResult(BenchmarkFilterResult filterResult, DataFilter dataFilter, double param)
+		public BatchResult(BenchmarkFilterResult filterResult, DataFilter dataFilter, double param, double search)
 		{
-			this.auc = filterResult.auc;
-			this.j = filterResult.j[filterResult.maxIndex];
-			this.p = filterResult.p[filterResult.maxIndex];
-			this.r = filterResult.r[filterResult.maxIndex];
-			this.time = filterResult.time;
+			if (filterResult != null)
+			{
+				this.auc = filterResult.auc;
+				this.j = filterResult.j[filterResult.maxIndex];
+				this.p = filterResult.p[filterResult.maxIndex];
+				this.r = filterResult.r[filterResult.maxIndex];
+				this.time = filterResult.time;
+			}
 			this.dataFilter = dataFilter;
 			this.param = param;
+			this.search = search;
 		}
 
 		public double getScore(int i)
@@ -258,6 +265,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		public static int getNumberOfScores()
 		{
 			return 5;
+		}
+
+		public String getName()
+		{
+			return String.format("%s:%s", dataFilter.toString(), Utils.rounded(search));
 		}
 	}
 
@@ -977,34 +989,40 @@ public class BenchmarkSpotFilter implements PlugIn
 			final double sd = simulationParameters.s / simulationParameters.a;
 			final int limit = (int) Math.floor(3 * sd);
 
+			double[] searchParam = getRange(minSearch, maxSearch, 1);
+
 			// Continuous parameters
 			double[] pEmpty = new double[0];
-			double[] mParam = (batchMean && mBatch == null) ? getRange(limit, 0.05) : pEmpty;
-			double[] gParam = (batchGaussian && gBatch == null) ? getRange(limit, 0.05) : pEmpty;
+			double[] mParam = (batchMean) ? getRange(limit, 0.05) : pEmpty;
+			double[] gParam = (batchGaussian) ? getRange(limit, 0.05) : pEmpty;
 
 			// Less continuous parameters
-			double[] cParam = (batchCircular && cBatch == null) ? getRange(limit, 0.5) : pEmpty;
+			double[] cParam = (batchCircular) ? getRange(limit, 0.5) : pEmpty;
 
 			// Discrete parameters
-			double[] medParam = (batchMedian && medBatch == null) ? getRange(limit, 1) : pEmpty;
+			double[] medParam = (batchMedian) ? getRange(limit, 1) : pEmpty;
 
-			setupProgress(imp.getImageStackSize() * (mParam.length + gParam.length + cParam.length + medParam.length),
-					"Frame");
+			setupProgress(imp.getImageStackSize() * searchParam.length *
+					(mParam.length + gParam.length + cParam.length + medParam.length), "Frame");
 
-			// Run all, store the results for plotting.
-			// Allow re-use of these if they are cached to allow quick reanalysis of results.
+			ArrayList<BatchResult[]> batchResults = new ArrayList<BatchResult[]>(cachedBatchResults.size());
 			config.setDataFilterType(DataFilterType.SINGLE);
-			BatchResult[] rEmpty = new BatchResult[0];
-			if (mBatch == null)
-				mBatch = (batchMean) ? run(DataFilter.MEAN, mParam) : rEmpty;
-			if (gBatch == null)
-				gBatch = (batchGaussian) ? run(DataFilter.GAUSSIAN, gParam) : rEmpty;
-			if (cBatch == null)
-				cBatch = (batchCircular) ? run(DataFilter.CIRCULAR_MEAN, cParam) : rEmpty;
-			if (medBatch == null)
-				medBatch = (batchMean) ? run(DataFilter.MEDIAN, medParam) : rEmpty;
+			for (double search : searchParam)
+			{
+				// Run all, store the results for plotting.
+				// Allow re-use of these if they are cached to allow quick reanalysis of results.
+				config.setSearch(search);
+				if (batchMean)
+					batchResults.add(addToCache(DataFilter.MEAN, mParam, search));
+				if (batchGaussian)
+					batchResults.add(addToCache(DataFilter.GAUSSIAN, gParam, search));
+				if (batchCircular)
+					batchResults.add(addToCache(DataFilter.CIRCULAR_MEAN, cParam, search));
+				if (batchMean)
+					batchResults.add(addToCache(DataFilter.MEDIAN, medParam, search));
+			}
 
-			IJ.showProgress(1);
+			IJ.showProgress(-1);
 			IJ.showStatus("");
 			if (Utils.isInterrupted())
 				return;
@@ -1039,10 +1057,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Plot charts			
 			for (int i = 0; i < batchPlot.length; i++)
-				plot(i, mBatch, gBatch, cBatch, medBatch);
+				plot(i, batchResults);
 
 			// Store in global singleton
-			filterResult = analyse(mBatch, gBatch, cBatch, medBatch);
+			filterResult = analyse(batchResults);
 		}
 		else
 		{
@@ -1051,7 +1069,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			filterResult = run(config, filterRelativeDistances);
 
-			IJ.showProgress(1);
+			IJ.showProgress(-1);
 			IJ.showStatus("");
 		}
 
@@ -1074,26 +1092,41 @@ public class BenchmarkSpotFilter implements PlugIn
 		windowOrganiser.tile();
 	}
 
-	private void plot(int i, BatchResult[]... batchResults)
+	private BatchResult[] addToCache(DataFilter dataFilter, double[] param, double search)
+	{
+		for (BatchResult[] batchResult : cachedBatchResults)
+		{
+			if (batchResult == null || batchResult.length == 0)
+				continue;
+			if (batchResult[0].dataFilter == dataFilter && batchResult[0].search == search)
+				return batchResult;
+		}
+		BatchResult[] batchResult = run(dataFilter, param, search);
+		cachedBatchResults.add(batchResult);
+		return batchResult;
+	}
+
+	private void plot(int i, ArrayList<BatchResult[]> batchResults)
 	{
 		if (!batchPlot[i])
 			return;
 
-		Color[] colors = new Color[] { Color.red, Color.green, Color.blue, Color.magenta };
+		Color[] colors = new Color[] { Color.red, Color.gray, Color.green, Color.blue, Color.magenta };
 
 		String name = batchPlotNames[i];
 		String title = TITLE + " Performance " + name;
 		Plot plot = new Plot(title, "Relative width", name);
 		final double scale = 1.0 / config.getHWHMMin();
-		int j = 0;
 		for (BatchResult[] batchResult : batchResults)
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
 			float[][] data = extractData(batchResult, i, scale);
-			plot.setColor(colors[j++]);
+			int colorIndex = batchResult[0].dataFilter.ordinal();
+			plot.setColor(colors[colorIndex]);
+			colors[colorIndex] = colors[colorIndex].darker();
 			plot.addPoints(data[0], data[1], null, (batchResult.length > 1) ? Plot.LINE : Plot.CIRCLE,
-					batchResult[0].dataFilter.toString());
+					batchResult[0].getName());
 		}
 		plot.setColor(Color.black);
 		plot.addLegend(null);
@@ -1116,7 +1149,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		return data;
 	}
 
-	private BenchmarkFilterResult analyse(BatchResult[]... batchResults)
+	private BenchmarkFilterResult analyse(ArrayList<BatchResult[]> batchResults)
 	{
 		// Support z-score of AUC and Max. Jaccard combined.
 		// For this wee need the statistics of the population of scores. 
@@ -1124,6 +1157,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		double max = 0;
 		DataFilter dataFilter = null;
+		double search = 0;
 		double param = 0;
 		for (BatchResult[] batchResult : batchResults)
 		{
@@ -1140,6 +1174,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			{
 				max = data[1][maxi];
 				dataFilter = batchResult[0].dataFilter;
+				search = batchResult[0].search;
 				param = data[0][maxi];
 			}
 		}
@@ -1149,17 +1184,18 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Convert the absolute distance to be relative to the PSF width
 			param /= config.getHWHMMin();
 
+			final double hwhmMax = config.getHWHMMax();
+			// Convert absolute search distance to relative
+			config.setSearch(search / hwhmMax);
+
 			if (filterRelativeDistances)
 			{
 				// If relative distances were specified then we can use the input values
-				config.setSearch(search);
 				config.setBorder(border);
 			}
 			else
 			{
 				// Otherwise we must adjust the input values to convert the absolute values to relative
-				final double hwhmMax = config.getHWHMMax();
-				config.setSearch(search / hwhmMax);
 				config.setBorder(border / hwhmMax);
 			}
 
@@ -1173,7 +1209,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		return null;
 	}
 
-	private double[][] getStats(BatchResult[][] batchResults)
+	private double[][] getStats(ArrayList<BatchResult[]> batchResults)
 	{
 		if (selection < 2)
 			return null;
@@ -1219,6 +1255,20 @@ public class BenchmarkSpotFilter implements PlugIn
 		return z;
 	}
 
+	private double[] getRange(final double min, final double max, final double interval)
+	{
+		double[] param;
+		int c = (int) ((max - min) / interval) + 2;
+		param = new double[c];
+		param[0] = min;
+		int i = 0;
+		while (param[i++] < max)
+		{
+			param[i] = min + i * interval;
+		}
+		return (i < c) ? Arrays.copyOf(param, i) : param;
+	}
+
 	private double[] getRange(final int limit, final double interval)
 	{
 		double[] param;
@@ -1231,17 +1281,20 @@ public class BenchmarkSpotFilter implements PlugIn
 		return param;
 	}
 
-	private BatchResult[] run(DataFilter dataFilter, double[] param)
+	private BatchResult[] run(DataFilter dataFilter, double[] param, double search)
 	{
-		progressPrefix = dataFilter.toString();
+		progressPrefix = new BatchResult(null, dataFilter, 0, search).getName();
 		BatchResult[] result = new BatchResult[param.length];
+
+		config.setSearch(search);
+
 		for (int i = 0; i < param.length; i++)
 		{
 			config.setDataFilter(dataFilter, param[i], 0);
 			BenchmarkFilterResult filterResult = run(config, false);
 			if (filterResult == null)
 				return null;
-			result[i] = new BatchResult(filterResult, dataFilter, param[i]);
+			result[i] = new BatchResult(filterResult, dataFilter, param[i], search);
 		}
 		return result;
 	}
@@ -1270,6 +1323,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			gd.addCheckbox("Gaussian", batchGaussian);
 			gd.addCheckbox("Circular", batchCircular);
 			gd.addCheckbox("Median", batchMedian);
+			gd.addSlider("Min_search_width", 1, 4, minSearch);
+			gd.addSlider("Max_search_width", 1, 4, maxSearch);
 			gd.addCheckbox("Filter_relative_distances (to HWHM)", filterRelativeDistances);
 		}
 		else
@@ -1281,8 +1336,8 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			gd.addCheckbox("Filter_relative_distances (to HWHM)", filterRelativeDistances);
 			gd.addSlider("Smoothing", 0, 2.5, config.getSmooth(0));
+			gd.addSlider("Search_width", 1, 4, search);
 		}
-		gd.addSlider("Search_width", 1, 4, search);
 		gd.addSlider("Border", 0, 5, border);
 
 		gd.addMessage("Scoring options:");
@@ -1319,18 +1374,21 @@ public class BenchmarkSpotFilter implements PlugIn
 			batchGaussian = gd.getNextBoolean();
 			batchCircular = gd.getNextBoolean();
 			batchMedian = gd.getNextBoolean();
-			filterRelativeDistances = gd.getNextBoolean();
 
 			if (!(batchMean || batchGaussian || batchCircular || batchMedian))
 				return false;
+
+			minSearch = gd.getNextNumber();
+			maxSearch = gd.getNextNumber();
+			filterRelativeDistances = gd.getNextBoolean();
 		}
 		else
 		{
 			config.setDataFilterType(gd.getNextChoiceIndex());
 			config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
 			filterRelativeDistances = gd.getNextBoolean();
+			search = gd.getNextNumber();
 		}
-		search = gd.getNextNumber();
 		border = gd.getNextNumber();
 		scoreRelativeDistances = gd.getNextBoolean();
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
@@ -1364,26 +1422,25 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			// Clear the cached results if the setting changed
 			BatchSettings settings = new BatchSettings(simulationParameters.id, (filterRelativeDistances) ? 1 : 0,
-					search, border, (scoreRelativeDistances) ? 1 : 0, sAnalysisBorder, matchingMethod, upperDistance,
+					//search, maxSearch, // Ignore search distance for smart caching 
+					border, (scoreRelativeDistances) ? 1 : 0, sAnalysisBorder, matchingMethod, upperDistance,
 					lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
 			if (!settings.isEqual(batchSettings))
 			{
-				mBatch = gBatch = cBatch = medBatch = null;
+				cachedBatchResults.clear();
 			}
 			batchSettings = settings;
 
 			// Analysis during batch mode will always be done with absolute distances. 
-			// However we must ensure the search/border distance is 
+			// However we must ensure the border distance is 
 			// relative (if requested) so that the results are consistent with single-filter mode.
 			if (filterRelativeDistances)
 			{
 				final double hwhmMax = config.getHWHMMax();
-				config.setSearch(search * hwhmMax);
 				config.setBorder(border * hwhmMax);
 			}
 			else
 			{
-				config.setSearch(search);
 				config.setBorder(border);
 			}
 		}
@@ -1522,7 +1579,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 			threads.clear();
 
-			IJ.showProgress(1);
+			IJ.showProgress(-1);
 			IJ.showStatus("");
 
 			setupProgress(total, prefix);
@@ -1588,7 +1645,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		if (!batchMode)
 		{
-			IJ.showProgress(1);
+			IJ.showProgress(-1);
 			IJ.showStatus("Collecting results ...");
 		}
 
