@@ -25,6 +25,7 @@ import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 
 /*----------------------------------------------------------------------------- 
@@ -47,7 +48,8 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.SingleSimpleGaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -77,11 +79,11 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
 	private static double search = 1;
-	private static double border = 0;
+	private static double border = 1;
 	private static boolean[] batchPlot;
 	private static String[] batchPlotNames;
 	private static String[] SELECTION;
-	private static int selection = 0;
+	private static int selection = 2;
 	static
 	{
 		fitConfig = new FitConfiguration();
@@ -90,9 +92,10 @@ public class BenchmarkSpotFilter implements PlugIn
 		batchPlotNames = new String[batchPlot.length];
 		for (int i = 0; i < batchPlot.length; i++)
 			batchPlotNames[i] = BatchResult.getScoreName(i);
-		SELECTION = new String[2];
+		SELECTION = new String[3];
 		SELECTION[0] = BatchResult.getScoreName(0);
 		SELECTION[1] = BatchResult.getScoreName(1);
+		SELECTION[2] = BatchResult.getScoreName(0) + "+" + BatchResult.getScoreName(1);
 	}
 
 	private static final String[] MATCHING_METHOD = { "Single", "Multi", "Greedy" };
@@ -101,7 +104,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static final int METHOD_MULTI = 1;
 	private static final int METHOD_GREEDY = 2;
 
-	private static double sAnalysisBorder = 0;
+	private static double sAnalysisBorder = 2;
 	private static int matchingMethod = METHOD_MULTI;
 	private int analysisBorder;
 	private static double upperDistance = 1.5;
@@ -466,26 +469,18 @@ public class BenchmarkSpotFilter implements PlugIn
 				sa2[i] = 2 * sa[i];
 			}
 
-			double[] params = new double[7];
+			double[] allParams = new double[1 + 6 * actual.length];
+			final int flags = GaussianFunctionFactory.FIT_NS_NB_FIXED;
 			for (int i = 0; i < actual.length; i++)
 			{
 				// Bounding rectangle for the spot. This serves as the reference frame 0,0
 				final float cx = actual[i].getX();
 				final float cy = actual[i].getY();
-				//final float signali = actual[i].peakResult.getSignal();
-				// Create a square bounds of odd size dimensions
-				final int n = (int) Math.ceil(sa2[i]);
-				final int maxx = 2 * n + 1;
-				final int size = maxx * maxx;
-				// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss 
-				// on pixel x,y we need to adjust each centre 
-				final float centre = maxx * 0.5f - 0.5f;
 
-				// Function for i
-				double[] datai = null;
-				double[] overlap = null;
+				GaussianOverlapAnalysis overlapAnalysis = null;
 
 				// Check for overlap
+				int offset = 0;
 				for (int j = 0; j < actual.length; j++)
 				{
 					if (i == j)
@@ -498,81 +493,37 @@ public class BenchmarkSpotFilter implements PlugIn
 					{
 						// These overlap.
 
-						// Build a Gaussian2D function for i
-						if (datai == null)
+						// Initialise a Gaussian2D function for i
+						if (overlapAnalysis == null)
 						{
-							datai = new double[size];
-							overlap = new double[size];
-							SingleSimpleGaussian2DFunction f = new SingleSimpleGaussian2DFunction(maxx);
-							params[Gaussian2DFunction.SIGNAL] = 1;
-							// Note that the position should be relative to spot i which is in the middle of the region
-							params[Gaussian2DFunction.X_POSITION] = centre;
-							params[Gaussian2DFunction.Y_POSITION] = centre;
-							params[Gaussian2DFunction.X_SD] = sa[i];
-							f.initialise(params);
-							for (int k = 0; k < size; k++)
-							{
-								final double v = f.eval(k);
-								datai[k] = v;
-							}
-							//Utils.display("Spot", datai, maxx, maxx);
+							double[] params = new double[7];
+							params[Gaussian2DFunction.SIGNAL] = actual[i].peakResult.getSignal();
+							params[Gaussian2DFunction.X_POSITION] = cx;
+							params[Gaussian2DFunction.Y_POSITION] = cy;
+							params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sa[i];
+							overlapAnalysis = new GaussianOverlapAnalysis(flags, params, 2);
 						}
 
-						// Build a Gaussian2D function for j
-						SingleSimpleGaussian2DFunction f = new SingleSimpleGaussian2DFunction(maxx);
-						params[Gaussian2DFunction.SIGNAL] = actual[j].peakResult.getSignal();
-						// Note that the position should be relative to spot i which is in the middle of the region
-						params[Gaussian2DFunction.X_POSITION] = dx + centre;
-						params[Gaussian2DFunction.Y_POSITION] = dy + centre;
-						params[Gaussian2DFunction.X_SD] = sa[j];
-						f.initialise(params);
-						//double[] dataj = new double[size];
-						for (int k = 0; k < size; k++)
-						{
-							final double v = f.eval(k);
-							//dataj[k] = v;
-							overlap[k] += v;
-						}
-						//						if (actual[j].getX() < maxx && actual[j].getX() > 0 && actual[j].getY() < maxx &&
-						//								actual[j].getY() > 0)
-						//						{
-						//							//Utils.display("Spot i", datai, maxx, maxx);
-						//							//Utils.display("Spot j", dataj, maxx, maxx);
-						//							//Utils.display("Overlap", datao, maxx, maxx);
-						//						}
+						// Accumulate the function for j
+						allParams[offset + Gaussian2DFunction.SIGNAL] = actual[j].peakResult.getSignal();
+						allParams[offset + Gaussian2DFunction.X_POSITION] = actual[j].peakResult.getXPosition();
+						allParams[offset + Gaussian2DFunction.Y_POSITION] = actual[j].peakResult.getYPosition();
+						allParams[offset +
+								Gaussian2DFunction.X_SD] = allParams[offset + Gaussian2DFunction.Y_SD] = sa[j];
+						offset += 6;
 					}
 				}
 
-				// Using the overlapping spots, compute an offset for scoring
-				if (overlap != null)
+				if (offset != 0)
 				{
-					double sum = 0;
-					double sumw = 0;
-					//double[] combined = new double[size];
-					for (int k = 0; k < size; k++)
-					{
-						sum += overlap[k] * datai[k];
-						sumw += datai[k];
-						//datai[k] *= signali;
-						//combined[k] = datai[k] + overlap[k];
-					}
-					// This is effectively a convolution of the overlap with the central pixel of the spot
-					// to produce a weighted average for the background within the Gaussian spot
-					actual[i].backgroundOffset = (float) (sum / sumw);
-
-					//					// Debug what this looks like
-					//					System.out.printf("Signal %.2f, sd %.2f, Amplitude %.2f, Change %.2f, estimate %.2f (%.2f)\n",
-					//							signali, actual[i].peakResult.getSD(), actual[i].peakResult.getAmplitude(),
-					//							overlap[size / 2], actual[i].backgroundOffset, gdsc.core.utils.DoubleEquality
-					//									.relativeError(overlap[size / 2], actual[i].backgroundOffset));
-					//					Utils.display("Spot i", datai, maxx, maxx);
-					//					Utils.display("Overlap", overlap, maxx, maxx);
-					//					Utils.display("Combined", combined, maxx, maxx);
+					final double[] overlapParams = Arrays.copyOf(allParams, 1 + offset);
+					overlapAnalysis.add(flags, overlapParams, false);
+					actual[i].backgroundOffset = (float) overlapAnalysis.getWeightedbackground();
 
 					// This is not currently used.
 					// Computation of this would depend on how a filter is estimating the signal. 
 					// The offset should be computed with the same method to create a 'fair' signal offset.
-					actual[i].intensityOffset = (float) (sum);
+					//actual[i].intensityOffset = ?
 				}
 			}
 		}
@@ -1167,6 +1118,10 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private BenchmarkFilterResult analyse(BatchResult[]... batchResults)
 	{
+		// Support z-score of AUC and Max. Jaccard combined.
+		// For this wee need the statistics of the population of scores. 
+		double[][] stats = getStats(batchResults);
+
 		double max = 0;
 		DataFilter dataFilter = null;
 		double param = 0;
@@ -1174,7 +1129,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (batchResult == null || batchResult.length == 0)
 				continue;
-			double[][] data = extractData(batchResult, selection);
+			double[][] data = extractData(batchResult, selection, stats);
 			int maxi = 0;
 			for (int i = 0; i < batchResult.length; i++)
 			{
@@ -1218,15 +1173,50 @@ public class BenchmarkSpotFilter implements PlugIn
 		return null;
 	}
 
-	private double[][] extractData(BatchResult[] batchResult, int index)
+	private double[][] getStats(BatchResult[][] batchResults)
+	{
+		if (selection < 2)
+			return null;
+
+		double[][] stats = new double[2][2];
+		for (int index = 0; index < stats.length; index++)
+		{
+			Statistics s = new Statistics();
+			for (BatchResult[] batchResult : batchResults)
+			{
+				if (batchResult == null || batchResult.length == 0)
+					continue;
+				for (int i = 0; i < batchResult.length; i++)
+				{
+					s.add(batchResult[i].getScore(index));
+				}
+			}
+			stats[index][0] = s.getMean();
+			stats[index][1] = s.getStandardDeviation();
+		}
+		return stats;
+	}
+
+	private double[][] extractData(BatchResult[] batchResult, int index, double[][] stats)
 	{
 		double[][] data = new double[2][batchResult.length];
 		for (int i = 0; i < batchResult.length; i++)
 		{
 			data[0][i] = batchResult[i].param;
-			data[1][i] = batchResult[i].getScore(index);
+			data[1][i] = getScore(batchResult[i], index, stats);
 		}
 		return data;
+	}
+
+	private double getScore(BatchResult batchResult, int index, double[][] stats)
+	{
+		if (stats == null)
+			return batchResult.getScore(index);
+		// Z-score of all metrics combined
+		double z = 0;
+		for (int i = 0; i < stats.length; i++)
+			z += (batchResult.getScore(i) - stats[i][0]) / stats[i][1];
+		return z;
 	}
 
 	private double[] getRange(final int limit, final double interval)
