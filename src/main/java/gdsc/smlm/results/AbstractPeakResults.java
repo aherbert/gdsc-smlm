@@ -21,6 +21,10 @@ import java.util.Collection;
  */
 public abstract class AbstractPeakResults implements PeakResults
 {
+	public static final double DEFAULT_NM_PER_PIXEL = 100;
+	public static final double DEFAULT_GAIN = 1;
+	public static final boolean DEFAULT_EMCCD = true;
+	
 	protected ImageSource source = null;
 	protected Rectangle bounds = null;
 	protected Calibration calibration = null;
@@ -196,6 +200,37 @@ public abstract class AbstractPeakResults implements PeakResults
 			this.name = name;
 	}
 
+	
+	/**
+	 * Get the nm-per-pixel from the calibration, or if not available, return the {@link #DEFAULT_NM_PER_PIXEL}
+	 * 
+	 * @return the nmPerPixel
+	 */
+	public double getNmPerPixel()
+	{
+		return (calibration != null) ? calibration.nmPerPixel : DEFAULT_NM_PER_PIXEL;
+	}
+
+	/**
+	 * Get the gain from the calibration, or if not available, return the {@link #DEFAULT_GAIN}
+	 * 
+	 * @return the gain
+	 */
+	public double getGain()
+	{
+		return (calibration != null) ? calibration.gain : DEFAULT_GAIN;
+	}
+
+	/**
+	 * Get the EMCCD flag from the calibration, or if not available, return the {@link #DEFAULT_EMCCD}
+	 * 
+	 * @return the gain
+	 */
+	public boolean isEMCCD()
+	{
+		return (calibration != null) ? calibration.emCCD : DEFAULT_EMCCD;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
