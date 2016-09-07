@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -56,7 +56,7 @@ public class SignalFilter extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
 		return peak.getSignal() >= signalThreshold;
 	}

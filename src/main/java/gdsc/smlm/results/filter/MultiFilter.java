@@ -15,6 +15,7 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -124,7 +125,7 @@ public class MultiFilter extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
 		if (peak.getSignal() < signalThreshold)
 			return false;
@@ -139,8 +140,10 @@ public class MultiFilter extends Filter implements IMultiFilter
 		final float dy = peak.getYPosition();
 		if (dx * dx + dy * dy > eoffset)
 			return false;
-		// Use the background noise to estimate precision
-		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
+		final double s = nmPerPixel * sd;
+		final double N = peak.getSignal();
+		// Use the background noise to estimate precision 
+		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
 	}
 
 	@Override

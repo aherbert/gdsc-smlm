@@ -13,7 +13,7 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 /**
  * Filter results using the combination of two filters. Results must pass both filters
@@ -37,7 +37,7 @@ public class AndFilter extends CombinedFilter
 	 * @see gdsc.smlm.results.filter.Filter#accept(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
 		if (!filter1.accept(peak))
 			return false;

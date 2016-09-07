@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
@@ -51,14 +51,14 @@ public class SNRFilter extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
 		return getSNR(peak) >= this.snr;
 	}
 
-	static float getSNR(PeakResult peak)
+	static float getSNR(ClassifiedPeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Float.POSITIVE_INFINITY;
+		return (peak.getNoise() > 0) ? peak.getSignal() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
 
 	@Override

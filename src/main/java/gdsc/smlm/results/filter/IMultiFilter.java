@@ -1,6 +1,5 @@
 package gdsc.smlm.results.filter;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 

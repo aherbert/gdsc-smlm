@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,9 +67,9 @@ public class ShiftFilter extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
-		return Math.abs(peak.getXPosition()) <= offset && Math.abs(peak.getYPosition()) <= offset;
+		return Math.abs(peak.getXShift()) <= offset && Math.abs(peak.getYShift()) <= offset;
 	}
 
 	@Override

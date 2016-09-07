@@ -16,9 +16,9 @@ package gdsc.smlm.results.filter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -132,7 +132,7 @@ public class MultiFilter2 extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
 		if (peak.getSignal() < signalThreshold)
 			return false;
@@ -147,17 +147,17 @@ public class MultiFilter2 extends Filter implements IMultiFilter
 		final float dy = peak.getYPosition();
 		if (dx * dx + dy * dy > eoffset)
 			return false;
+		final double s = nmPerPixel * sd;
+		final double N = peak.getSignal();
 		// Use the background directly
 		if (bias != -1)
 		{
 			// Use the estimated background for the peak
-			final double s = nmPerPixel * peak.getSD();
-			final double N = peak.getSignal();
 			return PeakResult.getVarianceX(nmPerPixel, s, N / gain,
 					Math.max(0, peak.getBackground() - bias) / gain, emCCD) <= variance;
 		}
-		// Use the background noise to estimate precision
-		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
+		// Use the background noise to estimate precision 
+		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
 	}
 
 	@Override

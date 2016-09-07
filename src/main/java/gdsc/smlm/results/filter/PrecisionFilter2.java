@@ -13,7 +13,7 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.results.ClassifiedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -71,18 +71,18 @@ public class PrecisionFilter2 extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
+		final double s = nmPerPixel * peak.getSD();
+		final double N = peak.getSignal();
 		if (bias != -1)
 		{
 			// Use the estimated background for the peak
-			final double s = nmPerPixel * peak.getSD();
-			final double N = peak.getSignal();
 			return PeakResult.getVarianceX(nmPerPixel, s, N / gain,
-					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= variance;
+					Math.max(0, peak.getBackground() - bias) / gain, emCCD) <= variance;
 		}
 		// Use the background noise to estimate precision 
-		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
+		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
 	}
 
 	@Override

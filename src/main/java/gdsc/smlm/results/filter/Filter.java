@@ -4,7 +4,10 @@ import gdsc.smlm.ga.Chromosome;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.FractionClassificationResult;
+import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.results.ClassifiedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.MultiPathPeakResults;
 import gdsc.smlm.results.PeakResult;
 
 import java.util.List;
@@ -1032,12 +1035,25 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	public abstract void setup(MemoryPeakResults peakResults);
 
 	/**
+	 * Called before the accept method is called for each peak in the multi-path results. Allows pre-processing of the results.
+	 * <p>
+	 * Note: It is up to sub-classes to decide if this is possible. Some complex filters cannot handle multi-path results. 
+	 * 
+	 * @param peakResults
+	 * @throws gdsc.core.utils.NotImplementedException If the sub-class has not implemented this method
+	 */
+	public void setup(MultiPathPeakResults peakResults)
+	{
+		throw new NotImplementedException();
+	}
+	
+	/**
 	 * Called for each peak in the results that are filtered.
 	 * 
 	 * @param peak
 	 * @return true if the peak should be accepted, otherwise false to reject.
 	 */
-	public abstract boolean accept(PeakResult peak);
+	public abstract boolean accept(ClassifiedPeakResult peak);
 
 	/**
 	 * Called after the accept method has been called for each peak in the results. Allows memory clean-up of the

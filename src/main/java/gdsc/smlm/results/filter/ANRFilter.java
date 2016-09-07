@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -13,10 +15,8 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
+import gdsc.smlm.results.ClassifiedPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold
@@ -49,14 +49,14 @@ public class ANRFilter extends Filter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
 		return getANR(peak) >= this.anr;
 	}
 
-	static float getANR(PeakResult peak)
+	static float getANR(ClassifiedPeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getAmplitude() / peak.noise : Float.POSITIVE_INFINITY;
+		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
 
 	@Override

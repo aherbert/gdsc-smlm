@@ -15,6 +15,7 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -65,10 +66,12 @@ public class PrecisionFilter extends Filter implements IMultiFilter
 	}
 	
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
+		final double s = nmPerPixel * peak.getSD();
+		final double N = peak.getSignal();
 		// Use the background noise to estimate precision 
-		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;
+		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
 	}
 
 	@Override

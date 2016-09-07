@@ -1,5 +1,13 @@
 package gdsc.smlm.results.filter;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.results.ClassifiedPeakResult;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,13 +22,6 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold and width range
@@ -80,14 +81,14 @@ public class ANRFilter2 extends Filter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
 		return getANR(peak) >= this.anr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
 	}
 
-	static float getANR(PeakResult peak)
+	static float getANR(ClassifiedPeakResult peak)
 	{
-		return (peak.noise > 0) ? peak.getAmplitude() / peak.noise : Float.POSITIVE_INFINITY;
+		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
 
 	@Override
@@ -192,7 +193,7 @@ public class ANRFilter2 extends Filter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new ANRFilter2((float)parameters[0], parameters[1], parameters[2]);
+		return new ANRFilter2((float) parameters[0], parameters[1], parameters[2]);
 	}
 
 	/*

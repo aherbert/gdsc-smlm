@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package gdsc.smlm.results;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -23,7 +26,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 /**
  * Specifies a peak fitting result
  */
-public class PeakResult implements Comparable<PeakResult>
+public class PeakResult implements Comparable<PeakResult>, ClassifiedPeakResult
 {
 	public int peak;
 	public int origX;
@@ -422,7 +425,7 @@ public class PeakResult implements Comparable<PeakResult>
 	{
 		if (N <= 0)
 			return Double.POSITIVE_INFINITY;
-		
+
 		// Note that we input b^2 directly to this equation. This is the expected value of the pixel background. 
 		// If the background is X then the variance of a Poisson distribution will be X 
 		// and the standard deviation at each pixel will be sqrt(X). Thus the Mortensen formula
@@ -788,5 +791,37 @@ public class PeakResult implements Comparable<PeakResult>
 	public double distance(PeakResult r)
 	{
 		return Math.sqrt(distance2(r));
+	}
+
+	/**
+	 * This methods return the x-position. To allow filters to use the actual shift requires either off-setting the
+	 * position with the initial fit position, or extending this class so the shift can be stored.
+	 * 
+	 * @see gdsc.smlm.results.ClassifiedPeakResult#getXShift()
+	 */
+	public float getXShift()
+	{
+		return getXPosition();
+	}
+
+	/**
+	 * This methods return the y-position. To allow filters to use the actual shift requires either off-setting the
+	 * position with the initial fit position, or extending this class so the shift can be stored.
+	 * 
+	 * @see gdsc.smlm.results.ClassifiedPeakResult#getYShift()
+	 */
+	public float getYShift()
+	{
+		return getYPosition();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ClassifiedPeakResult#getNoise()
+	 */
+	public float getNoise()
+	{
+		return noise;
 	}
 }

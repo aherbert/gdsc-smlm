@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,14 +80,9 @@ public class SNRFilter2 extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PeakResult peak)
+	public boolean accept(ClassifiedPeakResult peak)
 	{
-		return getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
-	}
-
-	static float getSNR(PeakResult peak)
-	{
-		return (peak.noise > 0) ? peak.getSignal() / peak.noise : Float.POSITIVE_INFINITY;
+		return SNRFilter.getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
 	}
 
 	@Override

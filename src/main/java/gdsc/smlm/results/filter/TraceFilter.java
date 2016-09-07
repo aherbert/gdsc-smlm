@@ -15,6 +15,7 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.ClassifiedPeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 
@@ -84,7 +85,7 @@ public class TraceFilter extends Filter
 	 * @see gdsc.smlm.results.filter.Filter#accept(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
-	public boolean accept(PeakResult peak) throws NullPointerException
+	public boolean accept(ClassifiedPeakResult peak) throws NullPointerException
 	{
 		return ok.contains(peak);
 	}
