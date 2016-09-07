@@ -52,7 +52,7 @@ public class SignalFilter extends Filter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the signal limit using the gain
-		signalThreshold = (float) (signal * peakResults.getCalibration().gain);
+		signalThreshold = (float) (signal * peakResults.getGain());
 	}
 
 	@Override

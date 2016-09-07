@@ -100,7 +100,8 @@ public class MultiFilter2 extends Filter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the signal limit using the gain
-		signalThreshold = (float) (signal * peakResults.getCalibration().gain);
+		gain = peakResults.getGain();
+		signalThreshold = (float) (signal * gain);
 
 		// Set the width limit
 		lowerSigmaThreshold = 0;
@@ -122,7 +123,6 @@ public class MultiFilter2 extends Filter implements IMultiFilter
 		// Configure the precision limit
 		variance = Filter.getDUpperSquaredLimit(precision);
 		nmPerPixel = peakResults.getNmPerPixel();
-		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
 		bias = -1;
 		if (peakResults.getCalibration() != null)
@@ -154,7 +154,7 @@ public class MultiFilter2 extends Filter implements IMultiFilter
 			final double s = nmPerPixel * peak.getSD();
 			final double N = peak.getSignal();
 			return PeakResult.getVarianceX(nmPerPixel, s, N / gain,
-					Math.max(0, peak.params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD) <= variance;
+					Math.max(0, peak.getBackground() - bias) / gain, emCCD) <= variance;
 		}
 		// Use the background noise to estimate precision
 		return peak.getVariance(nmPerPixel, gain, emCCD) <= variance;

@@ -96,7 +96,8 @@ public class MultiFilter extends Filter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the signal limit using the gain
-		signalThreshold = (float) (signal * peakResults.getCalibration().gain);
+		gain = peakResults.getGain();
+		signalThreshold = (float) (signal * gain);
 
 		// Set the width limit
 		lowerSigmaThreshold = 0;
@@ -119,7 +120,6 @@ public class MultiFilter extends Filter implements IMultiFilter
 		// Configure the precision limit
 		variance = Filter.getDUpperSquaredLimit(precision);
 		nmPerPixel = peakResults.getNmPerPixel();
-		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
 	}
 
