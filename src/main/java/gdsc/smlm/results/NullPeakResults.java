@@ -16,7 +16,7 @@ import java.util.Collection;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stores peak results in memory. The PeakResults interface add methods are thread safe.
+ * Does nothing for any of the inherited abstract methods
  */
 public class NullPeakResults extends AbstractPeakResults
 {
