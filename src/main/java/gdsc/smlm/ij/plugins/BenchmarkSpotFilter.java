@@ -739,7 +739,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				FractionalAssignment[] assignments = fractionalAssignments
 						.toArray(new FractionalAssignment[fractionalAssignments.size()]);
-				calc = new RankedScoreCalculator(assignments, nActual);
+				calc = new RankedScoreCalculator(assignments);
 
 				// Assign matches
 				double tp = 0;
