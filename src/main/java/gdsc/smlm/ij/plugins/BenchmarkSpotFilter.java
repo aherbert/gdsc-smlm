@@ -730,8 +730,18 @@ public class BenchmarkSpotFilter implements PlugIn
 							}
 							s = RampedScore.flatten(s, 256);
 
+							double distance = 1 - s;
+							if (distance == 0)
+							{
+								// In the case of a match below the distance and signal factor thresholds
+								// the distance will be 0. To distinguish between candidates all below 
+								// the thresholds just take the closest.
+								// We know d2 is below dmin so we subtract the delta.
+								distance -= (dmin - d2);
+							}
+
 							// Store the match
-							fractionalAssignments.add(FractionalAssignment.create(i, j, s, true));
+							fractionalAssignments.add(new FractionalAssignment(i, j, distance, s));
 							match[j]++;
 						}
 					}
@@ -1072,7 +1082,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		IJ.showProgress(-1);
 		IJ.showStatus("");
-		
+
 		getTable(false).flush();
 
 		if (filterResult == null)
