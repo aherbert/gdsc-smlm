@@ -1000,7 +1000,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			{
 				RankResult r = rr.results.get(i);
 				// Some results will not have a threshold
-				if (Float.isFinite(r.t))
+				if (!Float.isInfinite(r.t))
 					s.add(r.t);
 				time += r.time;
 				tp += r.f.getTP();
