@@ -21,6 +21,7 @@ import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
+import gdsc.core.match.ImmutableFractionalAssignment;
 import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
@@ -741,7 +742,7 @@ public class BenchmarkSpotFilter implements PlugIn
 							}
 
 							// Store the match
-							fractionalAssignments.add(new FractionalAssignment(i, j, distance, s));
+							fractionalAssignments.add(new ImmutableFractionalAssignment(i, j, distance, s));
 							match[j]++;
 						}
 					}
@@ -764,17 +765,17 @@ public class BenchmarkSpotFilter implements PlugIn
 
 					for (FractionalAssignment a : assignments)
 					{
-						if (!actualAssignment[a.targetId])
+						if (!actualAssignment[a.getTargetId()])
 						{
-							actualAssignment[a.targetId] = true;
-							final double intensity = getIntensity(actual[a.targetId]);
-							if (scoredSpots[a.predictedId] == null)
-								scoredSpots[a.predictedId] = new ScoredSpot(true, a.score, intensity,
-										spots[a.predictedId]);
+							actualAssignment[a.getTargetId()] = true;
+							final double intensity = getIntensity(actual[a.getTargetId()]);
+							if (scoredSpots[a.getPredictedId()] == null)
+								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
+										spots[a.getPredictedId()]);
 							else
-								scoredSpots[a.predictedId].add(a.score, intensity);
-							tp += a.score;
-							predictedScore[a.predictedId] += a.score;
+								scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
+							tp += a.getScore();
+							predictedScore[a.getPredictedId()] += a.getScore();
 							if (--nA == 0)
 								break;
 						}
@@ -808,21 +809,21 @@ public class BenchmarkSpotFilter implements PlugIn
 						final boolean[] predictedAssignment = new boolean[nPredicted];
 						for (FractionalAssignment a : assignments)
 						{
-							if (!actualAssignment[a.targetId])
+							if (!actualAssignment[a.getTargetId()])
 							{
-								if (!predictedAssignment[a.predictedId])
+								if (!predictedAssignment[a.getPredictedId()])
 								{
-									actualAssignment[a.targetId] = true;
-									predictedAssignment[a.predictedId] = true;
+									actualAssignment[a.getTargetId()] = true;
+									predictedAssignment[a.getPredictedId()] = true;
 									processAgain = true;
-									final double intensity = getIntensity(actual[a.targetId]);
-									if (scoredSpots[a.predictedId] == null)
-										scoredSpots[a.predictedId] = new ScoredSpot(true, a.score, intensity,
-												spots[a.predictedId]);
+									final double intensity = getIntensity(actual[a.getTargetId()]);
+									if (scoredSpots[a.getPredictedId()] == null)
+										scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
+												spots[a.getPredictedId()]);
 									else
-										scoredSpots[a.predictedId].add(a.score, intensity);
-									tp += a.score;
-									predictedScore[a.predictedId] += a.score;
+										scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
+									tp += a.getScore();
+									predictedScore[a.getPredictedId()] += a.getScore();
 									if (--nA == 0)
 										break OUTER;
 								}
@@ -853,15 +854,15 @@ public class BenchmarkSpotFilter implements PlugIn
 
 					for (FractionalAssignment a : assignments)
 					{
-						if (!actualAssignment[a.targetId])
+						if (!actualAssignment[a.getTargetId()])
 						{
-							if (!predictedAssignment[a.predictedId])
+							if (!predictedAssignment[a.getPredictedId()])
 							{
-								actualAssignment[a.targetId] = true;
-								predictedAssignment[a.predictedId] = true;
-								scoredSpots[a.predictedId] = new ScoredSpot(true, a.score,
-										getIntensity(actual[a.targetId]), spots[a.predictedId]);
-								tp += a.score;
+								actualAssignment[a.getTargetId()] = true;
+								predictedAssignment[a.getPredictedId()] = true;
+								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(),
+										getIntensity(actual[a.getTargetId()]), spots[a.getPredictedId()]);
+								tp += a.getScore();
 								if (--nA == 0 || --nP == 0)
 									break;
 							}

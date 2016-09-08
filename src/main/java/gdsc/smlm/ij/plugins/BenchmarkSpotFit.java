@@ -35,9 +35,11 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.match.Assignment;
+import gdsc.core.match.AssignmentComparator;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
+import gdsc.core.match.ImmutableAssignment;
 import gdsc.core.match.PointPair;
 import gdsc.core.utils.Correlator;
 import gdsc.core.utils.FastCorrelator;
@@ -631,12 +633,12 @@ public class BenchmarkSpotFit implements PlugIn
 									// after any fit results.
 									score += matchDistance + 1;
 								}
-								assignments.add(new Assignment(ii, jj, score));
+								assignments.add(new ImmutableAssignment(ii, jj, score));
 							}
 						}
 					}
 
-					Collections.sort(assignments);
+					AssignmentComparator.sort(assignments);
 
 					final boolean[] actualAssignment = new boolean[actual.length];
 					final boolean[] predictedAssignment = new boolean[predicted.length];
