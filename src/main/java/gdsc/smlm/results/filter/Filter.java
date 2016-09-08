@@ -1038,12 +1038,18 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * Called before the accept method is called for each peak in the multi-path results. Allows pre-processing of the results.
 	 * <p>
 	 * Note: It is up to sub-classes to decide if this is possible. Some complex filters cannot handle multi-path results. 
+	 * <p>
+	 * The actual processing of multi-path results is performed in a sub-class.
 	 * 
 	 * @param peakResults
 	 * @throws gdsc.core.utils.NotImplementedException If the sub-class has not implemented this method
 	 */
 	public void setup(MultiPathPeakResults peakResults)
 	{
+		// TODO - Create a MultiPathFilter sub-class that has dedicated methods for doing this.
+		// filtering. Other filters can decide to inherit from this or from the MultiPathFilter class,
+		// e.g. hysteresis filters will not.
+		// This method is 
 		throw new NotImplementedException();
 	}
 	

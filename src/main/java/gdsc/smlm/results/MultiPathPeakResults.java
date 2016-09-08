@@ -25,7 +25,9 @@ import gdsc.core.utils.NotImplementedException;
  */
 public class MultiPathPeakResults extends AbstractPeakResults
 {
-	// TODO
+	// TODO - Store the results of fitting multiple pathways.
+	// Then build a MultiPathFilter that can score them. 
+	// This can be passed in to the FitWorker when computing the benchmark fit results.
 	
 	
 	/**
