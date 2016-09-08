@@ -21,18 +21,14 @@ import gdsc.core.match.FractionalAssignment;
 public interface ClassifiedPeakResult extends PreprocessedPeakResult
 {
 	/**
-	 * Get the identifier
-	 * 
-	 * @return The identifier
-	 */
-	int getID();
-
-	/**
 	 * Get the assignments between this result and the true data.
 	 * <p>
-	 * The assignments should all have the same predicted id as the value returned from {@link #getID()}
+	 * The assignments should all have the same predicted Id. The actual Id should be a value starting from 0 and
+	 * incrementing for each actual result in the frame that is scored.
 	 * 
+	 * @param predictedId
+	 *            The predicted Id
 	 * @return The assignments
 	 */
-	FractionalAssignment[] getAssignments();
+	FractionalAssignment[] getAssignments(int predictedId);
 }

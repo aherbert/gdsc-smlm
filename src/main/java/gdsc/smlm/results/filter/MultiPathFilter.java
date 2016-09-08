@@ -134,8 +134,7 @@ public abstract class MultiPathFilter extends Filter
 					{
 						if (result[i] instanceof ClassifiedPeakResult)
 						{
-							nPredicted++;
-							final FractionalAssignment[] a = ((ClassifiedPeakResult) result[i]).getAssignments();
+							final FractionalAssignment[] a = ((ClassifiedPeakResult) result[i]).getAssignments(nPredicted++);
 							if (a != null && a.length > 0)
 							{
 								//list.addAll(Arrays.asList(a));
@@ -146,7 +145,7 @@ public abstract class MultiPathFilter extends Filter
 				}
 				if (size != nPredicted)
 				{
-					// More results were accepted
+					// More results were accepted so reset the fail count
 					failCount = 0;
 					continue;
 				}
