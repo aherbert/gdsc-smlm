@@ -26,7 +26,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 /**
  * Specifies a peak fitting result
  */
-public class PeakResult implements Comparable<PeakResult>, ClassifiedPeakResult
+public class PeakResult implements Comparable<PeakResult>
 {
 	public int peak;
 	public int origX;
