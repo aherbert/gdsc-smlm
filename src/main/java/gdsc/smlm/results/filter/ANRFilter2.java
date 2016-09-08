@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -26,7 +26,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold and width range
  */
-public class ANRFilter2 extends Filter
+public class ANRFilter2 extends MultiPathFilter
 {
 	@XStreamAsAttribute
 	final float anr;
@@ -81,14 +81,16 @@ public class ANRFilter2 extends Filter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
-		return getANR(peak) >= this.anr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
+		return ANRFilter.getANR(peak) >= this.anr && peak.getSD() <= upperSigmaThreshold &&
+				peak.getSD() >= lowerSigmaThreshold;
 	}
 
-	static float getANR(ClassifiedPeakResult peak)
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
 	{
-		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
+		return ANRFilter.getANR(peak) >= this.anr && peak.getXSDFactor() >= maxWidth && peak.getXSDFactor() >= minWidth;
 	}
 
 	@Override

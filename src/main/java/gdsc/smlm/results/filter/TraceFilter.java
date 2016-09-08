@@ -1,5 +1,11 @@
 package gdsc.smlm.results.filter;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,15 +21,8 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.ClassifiedPeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results that can be traced over time frames.
@@ -85,7 +84,7 @@ public class TraceFilter extends Filter
 	 * @see gdsc.smlm.results.filter.Filter#accept(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
-	public boolean accept(ClassifiedPeakResult peak) throws NullPointerException
+	public boolean accept(PeakResult peak) throws NullPointerException
 	{
 		return ok.contains(peak);
 	}

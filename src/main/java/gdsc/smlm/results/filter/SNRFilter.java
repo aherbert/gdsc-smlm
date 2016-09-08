@@ -14,14 +14,14 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
  * Filter results using a signal-to-noise ratio (SNR) threshold
  */
-public class SNRFilter extends Filter implements IMultiFilter
+public class SNRFilter extends MultiPathFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 10;
 
@@ -51,12 +51,18 @@ public class SNRFilter extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		return getSNR(peak) >= this.snr;
 	}
 
-	static float getSNR(ClassifiedPeakResult peak)
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getSNR() >= this.snr;
+	}
+	
+	static float getSNR(PeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getSignal() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}

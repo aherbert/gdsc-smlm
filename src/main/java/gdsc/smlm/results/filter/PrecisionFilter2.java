@@ -1,5 +1,10 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.results.MemoryPeakResults;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -13,18 +18,13 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.results.ClassifiedPeakResult;
-import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using a precision threshold. Calculates the precision using the true fitted background if a bias is
  * provided.
  */
-public class PrecisionFilter2 extends Filter implements IMultiFilter
+public class PrecisionFilter2 extends MultiPathFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final double precision;
@@ -71,7 +71,7 @@ public class PrecisionFilter2 extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		final double s = nmPerPixel * peak.getSD();
 		final double N = peak.getSignal();
@@ -83,6 +83,14 @@ public class PrecisionFilter2 extends Filter implements IMultiFilter
 		}
 		// Use the background noise to estimate precision 
 		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
+	}
+
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		// Note: There is currently no distinction between estimating variance 
+		// using the local background or the background noise since the variance is precomputed
+		return peak.getLocationVariance() <= variance;
 	}
 
 	@Override

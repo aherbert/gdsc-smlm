@@ -15,13 +15,13 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold
  */
-public class ANRFilter extends Filter
+public class ANRFilter extends MultiPathFilter
 {
 	@XStreamAsAttribute
 	final float anr;
@@ -49,12 +49,23 @@ public class ANRFilter extends Filter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		return getANR(peak) >= this.anr;
 	}
-
-	static float getANR(ClassifiedPeakResult peak)
+	
+	static float getANR(PeakResult peak)
+	{
+		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
+	}
+	
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return getANR(peak) >= this.anr;
+	}
+	
+	static float getANR(PreprocessedPeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}

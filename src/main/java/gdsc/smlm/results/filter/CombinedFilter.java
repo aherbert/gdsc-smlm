@@ -16,18 +16,27 @@ package gdsc.smlm.results.filter;
 import java.util.Arrays;
 
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using the combination of two filters
+ * Filter results using the combination of two filters.
+ * <p>
+ * Note that is the filter is not a MultiPathFilter then the result of filtering a PreprocessedPeakResult is always true
+ * using that filter.
  */
-public abstract class CombinedFilter extends Filter
+public abstract class CombinedFilter extends MultiPathFilter
 {
 	protected Filter filter1, filter2;
+	protected MultiPathFilter mfilter1, mfilter2;
 
 	public CombinedFilter(Filter filter1, Filter filter2)
 	{
 		this.filter1 = filter1;
 		this.filter2 = filter2;
+		if (filter1 instanceof MultiPathFilter)
+			mfilter1 = (MultiPathFilter) filter1;
+		if (filter2 instanceof MultiPathFilter)
+			mfilter2 = (MultiPathFilter) filter2;
 	}
 
 	@Override
@@ -66,6 +75,58 @@ public abstract class CombinedFilter extends Filter
 	 */
 	protected abstract String getOperator();
 
+	/**
+	 * Filter the result using filter1
+	 * 
+	 * @param peak
+	 *            The result
+	 * @return The filter result
+	 */
+	public boolean accept1(PeakResult peak)
+	{
+		return mfilter1.accept(peak);
+	}
+
+	/**
+	 * Filter the result using filter2
+	 * 
+	 * @param peak
+	 *            The result
+	 * @return The filter result
+	 */
+	public boolean accept2(PeakResult peak)
+	{
+		return mfilter2.accept(peak);
+	}
+
+	/**
+	 * Filter the result using filter1 if it is a MultiPathFilter, otherwise return true
+	 * 
+	 * @param peak
+	 *            The result
+	 * @return The filter result, or true
+	 */
+	public boolean accept1(PreprocessedPeakResult peak)
+	{
+		if (mfilter1 != null)
+			return mfilter1.accept(peak);
+		return true;
+	}
+
+	/**
+	 * Filter the result using filter2 if it is a MultiPathFilter, otherwise return true
+	 * 
+	 * @param peak
+	 *            The result
+	 * @return The filter result, or true
+	 */
+	public boolean accept2(PreprocessedPeakResult peak)
+	{
+		if (mfilter2 != null)
+			return mfilter2.accept(peak);
+		return true;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -76,6 +137,15 @@ public abstract class CombinedFilter extends Filter
 	{
 		filter1.setup(peakResults);
 		filter2.setup(peakResults);
+	}
+
+	@Override
+	public void setup()
+	{
+		if (mfilter1 != null)
+			mfilter1.setup();
+		if (mfilter2 != null)
+			mfilter2.setup();
 	}
 
 	/*

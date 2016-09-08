@@ -1,5 +1,14 @@
 package gdsc.smlm.results.filter;
 
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
+
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,19 +25,9 @@ package gdsc.smlm.results.filter;
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.ClassifiedPeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.TraceManager.TraceMode;
-
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using a precision threshold. Any results below the lower
@@ -337,7 +336,7 @@ public abstract class HysteresisFilter extends Filter
 	 * @see gdsc.smlm.results.filter.Filter#accept(gdsc.smlm.results.PeakResult)
 	 */
 	@Override
-	public boolean accept(ClassifiedPeakResult peak) throws NullPointerException
+	public boolean accept(PeakResult peak) throws NullPointerException
 	{
 		return ok.contains(peak);
 	}

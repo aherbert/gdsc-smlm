@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +26,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using a X/Y coordinate shift as a Euclidian distance. This filter requires that the result X and Y
  * coordinates are reported relative to their initial positions.
  */
-public class EShiftFilter extends Filter implements IMultiFilter
+public class EShiftFilter extends MultiPathFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 10;
 	static double UPPER_LIMIT = 4;
@@ -35,6 +35,8 @@ public class EShiftFilter extends Filter implements IMultiFilter
 	final double eshift;
 	@XStreamOmitField
 	float eoffset;
+	@XStreamOmitField
+	float eshift2;
 
 	public EShiftFilter(double eshift)
 	{
@@ -63,16 +65,28 @@ public class EShiftFilter extends Filter implements IMultiFilter
 		if (match.find())
 		{
 			// Convert to squared distance
-			eoffset = Filter.getUpperSquaredLimit(Double.parseDouble(match.group(1)) * eshift);
+			eoffset = getUpperSquaredLimit(Double.parseDouble(match.group(1)) * eshift);
 		}
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public void setup()
+	{
+		eshift2 = getUpperSquaredLimit(eshift);
+	}
+
+	@Override
+	public boolean accept(PeakResult peak)
 	{
 		final float dx = peak.getXPosition();
 		final float dy = peak.getYPosition();
 		return dx * dx + dy * dy <= eoffset;
+	}
+
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getXRelativeShift2() + peak.getYRelativeShift2() <= eshift2;
 	}
 
 	@Override
@@ -207,7 +221,7 @@ public class EShiftFilter extends Filter implements IMultiFilter
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;

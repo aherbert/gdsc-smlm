@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -22,7 +22,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a signal threshold
  */
-public class SignalFilter extends Filter implements IMultiFilter
+public class SignalFilter extends MultiPathFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 30;
 	
@@ -56,11 +56,17 @@ public class SignalFilter extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		return peak.getSignal() >= signalThreshold;
 	}
 
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getPhotons() >= signal;
+	}
+	
 	@Override
 	public double getNumericalValue()
 	{

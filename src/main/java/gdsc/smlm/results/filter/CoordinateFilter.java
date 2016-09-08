@@ -14,14 +14,14 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
  * Filter results using a coordinate range
  */
-public class CoordinateFilter extends Filter
+public class CoordinateFilter extends MultiPathFilter
 {
 	static double DEFAULT_RANGE = 1;
 
@@ -72,10 +72,17 @@ public class CoordinateFilter extends Filter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		return peak.getXPosition() >= minX && peak.getXPosition() <= maxX && peak.getYPosition() >= minY &&
 				peak.getYPosition() <= maxY;
+	}
+
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getX() >= minX && peak.getX() <= maxX && peak.getY() >= minY &&
+				peak.getY() <= maxY;
 	}
 
 	@Override

@@ -1,5 +1,11 @@
 package gdsc.smlm.results.filter;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,18 +21,11 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.ClassifiedPeakResult;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision
  */
-public class MultiFilter extends Filter implements IMultiFilter
+public class MultiFilter extends MultiPathFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final double signal;
@@ -61,6 +60,10 @@ public class MultiFilter extends Filter implements IMultiFilter
 	boolean emCCD = true;
 	@XStreamOmitField
 	double gain = 1;
+	@XStreamOmitField
+	float shift2;
+	@XStreamOmitField
+	float eshift2;
 
 	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision)
@@ -125,14 +128,23 @@ public class MultiFilter extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public void setup()
 	{
+		shift2 = getUpperSquaredLimit(shift);
+		eshift2 = getUpperSquaredLimit(eshift);
+	}
+	
+	@Override
+	public boolean accept(PeakResult peak)
+	{
+		// TODO - reorder these in precedence of the most powerful single filter
+		
 		if (peak.getSignal() < signalThreshold)
 			return false;
 		if (SNRFilter.getSNR(peak) < this.snr)
 			return false;
 		final float sd = peak.getSD();
-		if (sd < lowerSigmaThreshold || sd > upperSigmaThreshold)
+		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
 			return false;
 		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
 			return false;
@@ -143,7 +155,29 @@ public class MultiFilter extends Filter implements IMultiFilter
 		final double s = nmPerPixel * sd;
 		final double N = peak.getSignal();
 		// Use the background noise to estimate precision 
-		return PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) <= variance;
+		if (PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) > variance)
+			return false;
+		return true;
+	}
+
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		// TODO - reorder these in precedence of the most powerful single filter
+		
+		if (peak.getPhotons() < signal)
+			return false;
+		if (peak.getSNR() < snr)
+			return false;
+		if (peak.getXSDFactor() > maxWidth || peak.getXSDFactor() < minWidth)
+			return false;
+		if (peak.getXRelativeShift2() > shift2 || peak.getYRelativeShift2() > shift2)
+			return false;
+		if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eshift2)
+			return false;
+		if (peak.getLocationVariance() > variance)
+			return false;
+		return true;
 	}
 
 	@Override

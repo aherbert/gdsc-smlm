@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a width range
  */
-public class WidthFilter2 extends Filter implements IMultiFilter
+public class WidthFilter2 extends MultiPathFilter implements IMultiFilter
 {
 	static double DEFAULT_MIN_RANGE = 1;
 
@@ -79,10 +79,16 @@ public class WidthFilter2 extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		final float sd = peak.getSD();
-		return sd >= lowerSigmaThreshold && sd <= upperSigmaThreshold;
+		return sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
+	}
+
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getXSDFactor() <= maxWidth && peak.getXSDFactor() >= minWidth;
 	}
 
 	@Override
@@ -236,7 +242,7 @@ public class WidthFilter2 extends Filter implements IMultiFilter
 	{
 		return new double[] { WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;

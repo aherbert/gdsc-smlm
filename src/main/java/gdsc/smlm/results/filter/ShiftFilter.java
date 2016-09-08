@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +26,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using a X/Y coordinate shift. This filter requires that the result X and Y coordinates are reported
  * relative to their initial positions.
  */
-public class ShiftFilter extends Filter implements IMultiFilter
+public class ShiftFilter extends MultiPathFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 10;
 	static double UPPER_LIMIT = 4;
@@ -35,6 +35,8 @@ public class ShiftFilter extends Filter implements IMultiFilter
 	final double shift;
 	@XStreamOmitField
 	float offset;
+	@XStreamOmitField
+	float shift2;
 
 	public ShiftFilter(double shift)
 	{
@@ -62,14 +64,26 @@ public class ShiftFilter extends Filter implements IMultiFilter
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			offset = Filter.getUpperLimit(Double.parseDouble(match.group(1)) * shift);
+			offset = getUpperLimit(Double.parseDouble(match.group(1)) * shift);
 		}
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public void setup()
+	{
+		shift2 = getUpperSquaredLimit(shift);
+	}
+
+	@Override
+	public boolean accept(PeakResult peak)
 	{
 		return Math.abs(peak.getXShift()) <= offset && Math.abs(peak.getYShift()) <= offset;
+	}
+
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getXRelativeShift2() <= shift2 && peak.getYRelativeShift2() <= shift2;
 	}
 
 	@Override
@@ -204,7 +218,7 @@ public class ShiftFilter extends Filter implements IMultiFilter
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;

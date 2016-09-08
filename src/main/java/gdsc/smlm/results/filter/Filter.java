@@ -4,11 +4,8 @@ import gdsc.smlm.ga.Chromosome;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.utils.NotImplementedException;
-import gdsc.smlm.results.ClassifiedPeakResult;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.MultiPathPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.MemoryPeakResults;
 
 import java.util.List;
 
@@ -1033,25 +1030,6 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * @param peakResults
 	 */
 	public abstract void setup(MemoryPeakResults peakResults);
-
-	/**
-	 * Called before the accept method is called for each peak in the multi-path results. Allows pre-processing of the results.
-	 * <p>
-	 * Note: It is up to sub-classes to decide if this is possible. Some complex filters cannot handle multi-path results. 
-	 * <p>
-	 * The actual processing of multi-path results is performed in a sub-class.
-	 * 
-	 * @param peakResults
-	 * @throws gdsc.core.utils.NotImplementedException If the sub-class has not implemented this method
-	 */
-	public void setup(MultiPathPeakResults peakResults)
-	{
-		// TODO - Create a MultiPathFilter sub-class that has dedicated methods for doing this.
-		// filtering. Other filters can decide to inherit from this or from the MultiPathFilter class,
-		// e.g. hysteresis filters will not.
-		// This method is 
-		throw new NotImplementedException();
-	}
 	
 	/**
 	 * Called for each peak in the results that are filtered.
@@ -1059,7 +1037,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * @param peak
 	 * @return true if the peak should be accepted, otherwise false to reject.
 	 */
-	public abstract boolean accept(ClassifiedPeakResult peak);
+	public abstract boolean accept(PeakResult peak);
 
 	/**
 	 * Called after the accept method has been called for each peak in the results. Allows memory clean-up of the
@@ -1268,8 +1246,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	protected double updateParameter(double value, double delta, double defaultRange)
 	{
 		if (value != 0)
-			return (float) (value + value * delta);
-		return (float) (value + defaultRange * delta);
+			return (value + value * delta);
+		return (value + defaultRange * delta);
 	}
 
 	/**

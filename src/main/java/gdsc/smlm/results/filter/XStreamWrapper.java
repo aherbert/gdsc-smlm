@@ -65,8 +65,8 @@ public abstract class XStreamWrapper
 
 			// Removed dependency on reflections since this has other jar dependencies
 			//Reflections reflections = new Reflections("gdsc.smlm.results.filter");
-			//Set<Class<? extends Filter>> subTypes = reflections.getSubTypesOf(Filter.class);
-			//for (Class<? extends Filter> type : subTypes)
+			//Set<Class<? extends MultiPathFilter>> subTypes = reflections.getSubTypesOf(Filter.class);
+			//for (Class<? extends MultiPathFilter> type : subTypes)
 			//	addAlias(type);
 		}
 	}

@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a signal-to-noise ratio (SNR) threshold and width range
  */
-public class SNRFilter2 extends Filter implements IMultiFilter
+public class SNRFilter2 extends MultiPathFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final float snr;
@@ -80,9 +80,16 @@ public class SNRFilter2 extends Filter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
-		return SNRFilter.getSNR(peak) >= this.snr && peak.getSD() >= lowerSigmaThreshold && peak.getSD() <= upperSigmaThreshold;
+		return SNRFilter.getSNR(peak) >= this.snr && peak.getSD() <= upperSigmaThreshold &&
+				peak.getSD() >= lowerSigmaThreshold;
+	}
+
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getSNR() >= this.snr && peak.getXSDFactor() <= maxWidth && peak.getXSDFactor() >= minWidth;
 	}
 
 	@Override
@@ -223,7 +230,7 @@ public class SNRFilter2 extends Filter implements IMultiFilter
 	{
 		return new double[] { Double.POSITIVE_INFINITY, WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT };
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -243,7 +250,7 @@ public class SNRFilter2 extends Filter implements IMultiFilter
 	{
 		return new double[] { SNRFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;

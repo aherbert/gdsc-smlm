@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using an upper width factor
  */
-public class WidthFilter extends Filter implements IMultiFilter
+public class WidthFilter extends MultiPathFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 1;
 	static double UPPER_LIMIT = 5;
@@ -66,9 +66,15 @@ public class WidthFilter extends Filter implements IMultiFilter
 	}
 	
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		return peak.getSD() <= sigmaThreshold;
+	}
+	
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return peak.getXSDFactor() <= width;
 	}
 
 	@Override

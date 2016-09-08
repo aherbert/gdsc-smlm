@@ -14,7 +14,7 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.ClassifiedPeakResult;
+import gdsc.smlm.results.PeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -27,7 +27,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * assumed to be the variance of the photon shot noise and the noise is taken at the square root of the background
  * level.
  */
-public class SBRFilter extends Filter
+public class SBRFilter extends MultiPathFilter
 {
 	@XStreamAsAttribute
 	final float sbr;
@@ -63,7 +63,7 @@ public class SBRFilter extends Filter
 	}
 
 	@Override
-	public boolean accept(ClassifiedPeakResult peak)
+	public boolean accept(PeakResult peak)
 	{
 		if (bias != -1)
 		{
@@ -72,6 +72,19 @@ public class SBRFilter extends Filter
 				return peak.getSignal() / Math.sqrt(background) >= this.sbr;
 		}
 		return SNRFilter.getSNR(peak) >= this.sbr;
+	}
+	
+	@Override
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		if (bias != -1)
+		{
+			// This is not preprocessed
+			final double background = peak.getBackground() - bias;
+			if (background > 0)
+				return peak.getSignal() / Math.sqrt(background) >= this.sbr;
+		}
+		return peak.getSNR() >= this.sbr;
 	}
 
 	@Override
