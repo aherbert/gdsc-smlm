@@ -132,9 +132,9 @@ public abstract class MultiPathFilter extends Filter
 					// and store the classifications
 					for (int i = 0; i < result.length; i++)
 					{
-						if (result[i] instanceof ClassifiedPeakResult)
+						if (result[i].isClassified())
 						{
-							final FractionalAssignment[] a = ((ClassifiedPeakResult) result[i]).getAssignments(nPredicted++);
+							final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
 							if (a != null && a.length > 0)
 							{
 								//list.addAll(Arrays.asList(a));

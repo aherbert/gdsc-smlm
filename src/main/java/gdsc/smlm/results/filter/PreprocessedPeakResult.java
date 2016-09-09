@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import gdsc.core.match.FractionalAssignment;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -135,4 +137,24 @@ public interface PreprocessedPeakResult
 	 * @return The y-dimension width factor
 	 */
 	float getYSDFactor();
+
+	/**
+	 * Return true if this result has been classified for use in scoring analysis. The {@link #getAssignments(int)}
+	 * method can then be called to return the assignments.
+	 * 
+	 * @return True if this result has been classified for use in scoring analysis
+	 */
+	boolean isClassified();
+
+	/**
+	 * Get the assignments between this result and the true data.
+	 * <p>
+	 * The assignments should all have the same predicted Id. The actual Id should be a value starting from 0 and
+	 * incrementing for each actual result in the frame that is scored.
+	 * 
+	 * @param predictedId
+	 *            The predicted Id
+	 * @return The assignments
+	 */
+	FractionalAssignment[] getAssignments(int predictedId);
 }
