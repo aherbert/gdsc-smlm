@@ -24,7 +24,7 @@ import gdsc.smlm.results.PeakResult;
  * Filter results using a precision threshold. Calculates the precision using the true fitted background if a bias is
  * provided.
  */
-public class PrecisionFilter2 extends MultiPathFilter implements IMultiFilter
+public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final double precision;

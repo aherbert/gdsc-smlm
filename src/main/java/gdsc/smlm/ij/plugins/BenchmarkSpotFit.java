@@ -379,7 +379,6 @@ public class BenchmarkSpotFit implements PlugIn
 		final ScoredSpot[] spots;
 		double tp, fp, tn, fn;
 		FitResult[] fitResult;
-		FitResult[] fitResultWithNeighbours;
 		float noise;
 
 		/** Store if the candidates can be fitted and match a position. Size is the number of scored spots */
@@ -463,7 +462,6 @@ public class BenchmarkSpotFit implements PlugIn
 
 			final int fitting = config.getRelativeFitting();
 			fitWorker.setSearchParameters(spotFilter, fitting);
-			fitWorker.setUpdateInitialParameters(true);
 
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
@@ -514,7 +512,6 @@ public class BenchmarkSpotFit implements PlugIn
 
 			FilterCandidates candidates = filterCandidates.get(frame);
 			FitResult[] fitResult = new FitResult[candidates.spots.length];
-			FitResult[] fitResultWithNeighbours = new FitResult[candidates.spots.length];
 
 			// Fit the candidates and store the results
 			FitParameters parameters = new FitParameters();
@@ -534,7 +531,6 @@ public class BenchmarkSpotFit implements PlugIn
 			for (int i = 0; i < spots.length; i++)
 			{
 				fitResult[i] = job.getFitResult(i);
-				fitResultWithNeighbours[i] = job.getFitResultWithNeighbours(i);
 				if (fitResult[i].getStatus() == FitStatus.OK)
 					fittedSpots++;
 			}
@@ -735,7 +731,6 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.tn = tn;
 			candidates.fn = fn;
 			candidates.fitResult = fitResult;
-			candidates.fitResultWithNeighbours = fitResultWithNeighbours;
 			candidates.fitMatch = fitMatch;
 			candidates.match = match;
 			candidates.zPosition = zPosition;
@@ -1164,9 +1159,10 @@ public class BenchmarkSpotFit implements PlugIn
 				final FitResult fitResult = result.fitResult[i];
 				if (status2 != null)
 				{
-					final FitResult fitResultWithNeighbours = result.fitResultWithNeighbours[i];
-					if (fitResultWithNeighbours != null && fitResultWithNeighbours.getStatus() != FitStatus.OK)
-						status2[fitResultWithNeighbours.getStatus().ordinal()]++;
+					// TODO - This can use the FitStatus in the MultiPathFitResult
+//					final FitResult fitResultWithNeighbours = result.fitResultWithNeighbours[i];
+//					if (fitResultWithNeighbours != null && fitResultWithNeighbours.getStatus() != FitStatus.OK)
+//						status2[fitResultWithNeighbours.getStatus().ordinal()]++;
 				}
 				if (fitResult.getStatus() != FitStatus.OK)
 				{

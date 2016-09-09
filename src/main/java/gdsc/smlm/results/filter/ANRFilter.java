@@ -21,7 +21,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold
  */
-public class ANRFilter extends MultiPathFilter
+public class ANRFilter extends DirectFilter
 {
 	@XStreamAsAttribute
 	final float anr;
@@ -59,7 +59,6 @@ public class ANRFilter extends MultiPathFilter
 		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
 	
-	@Override
 	public boolean accept(PreprocessedPeakResult peak)
 	{
 		return getANR(peak) >= this.anr;

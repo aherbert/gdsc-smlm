@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import gdsc.core.match.FractionalAssignment;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,24 +16,16 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Specifies a the result of fitting a position using different fitting methods.
- * <p>
- * The multi-path result can be evaluated by the MultiPathFilter to determine which result from the different paths
- * should be accepted.
- * <p>
- * This class is used for benchmarking the fitting path options in the PeakFit algorithm.
+ * Specifies a peak fitting result for use in filtering. Any result implementing this interface can be directly filtered
+ * without requiring the filter to be initialised with calibration data. This result can be assigned matches to actual data.
  */
-public class MultiPathPeakResult
+public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
 {
 	/**
-	 * The number of failed results before this result
+	 * Set the assignments between this result and the true data.
+	 * 
+	 * @param assignments
+	 *            The assignments
 	 */
-	public int failCount;
-	
-	/**
-	 * The frame containing the result
-	 */
-	public int frame;
-	
-	// TODO - add multi-fit result, single fit result, doublet fit result
+	void setAssignments(FractionalAssignment[] assignments);
 }

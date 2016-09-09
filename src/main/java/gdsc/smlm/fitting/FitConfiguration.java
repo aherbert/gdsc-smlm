@@ -226,6 +226,20 @@ public class FitConfiguration implements Cloneable
 	 */
 	public GaussianFunction createGaussianFunction(int npeaks, int maxx, double[] params)
 	{
+		final int flags = getFunctionFlags();
+
+		GaussianFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, flags);
+		//f.initialise(params);
+		return f;
+	}
+
+	/**
+	 * Gets the function flags used for the GaussianFunctionFactory.
+	 *
+	 * @return the function flags
+	 */
+	public int getFunctionFlags()
+	{
 		int flags = this.flags;
 
 		if (isBackgroundFitting())
@@ -233,10 +247,7 @@ public class FitConfiguration implements Cloneable
 		if (isNotSignalFitting())
 			// Remove signal fitting (on by default)
 			flags &= ~GaussianFunctionFactory.FIT_SIGNAL;
-
-		GaussianFunction f = GaussianFunctionFactory.create2D(npeaks, maxx, flags);
-		//f.initialise(params);
-		return f;
+		return flags;
 	}
 
 	/**
@@ -1077,59 +1088,7 @@ public class FitConfiguration implements Cloneable
 		{
 			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
 					0.5;
-
-			double variance = 0;
-			// We can calculate the precision using the estimated noise for the image or using the expected number
-			// of background photons at the location.
-			if (precisionUsingBackground)
-			{
-				// Check using the formula which uses the estimated background.
-				// This allows for better filtering when the background is variable, e.g. when imaging cells.
-				if (fitSolver == FitSolver.MLE)
-				{
-					try
-					{
-						// This may be slow due to the integration required within the formula.
-						variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-								Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
-					}
-					catch (Exception e)
-					{
-						// Catch all exceptions. They are likely to be a TooManyIterationsException and other
-						// problems with the integration
-						variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-								Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
-					}
-				}
-				else
-				{
-					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-							Math.max(0, params[Gaussian2DFunction.BACKGROUND] - bias) / gain, emCCD);
-				}
-			}
-			else
-			{
-				if (fitSolver == FitSolver.MLE)
-				{
-					try
-					{
-						// This may be slow due to the integration required within the formula.
-						variance = PeakResult.getMLVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain,
-								emCCD);
-					}
-					catch (Exception e)
-					{
-						// Catch all exceptions. They are likely to be a TooManyIterationsException and other
-						// problems with the integration
-						variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain,
-								emCCD);
-					}
-				}
-				else
-				{
-					variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
-				}
-			}
+			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND], signal, sd);
 
 			if (variance > precisionThreshold)
 			{
@@ -1143,6 +1102,74 @@ public class FitConfiguration implements Cloneable
 		}
 
 		return setValidationResult(FitStatus.OK, null);
+	}
+
+	/**
+	 * Get the localisation variance for fitting a spot with the specified parameters given the configuration (fit
+	 * solver, precision using background, gain, nm per pixel)
+	 * 
+	 * @param background
+	 *            The background
+	 * @param signal
+	 *            The signal (in ADUs)
+	 * @param sd
+	 *            The spot standard deviation
+	 * @return The localisation variance
+	 */
+	public double getVariance(double background, final double signal, final double sd)
+	{
+		double variance = 0;
+		// We can calculate the precision using the estimated noise for the image or using the expected number
+		// of background photons at the location.
+		if (precisionUsingBackground)
+		{
+			// Check using the formula which uses the estimated background.
+			// This allows for better filtering when the background is variable, e.g. when imaging cells.
+			if (fitSolver == FitSolver.MLE)
+			{
+				try
+				{
+					// This may be slow due to the integration required within the formula.
+					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
+							Math.max(0, background - bias) / gain, emCCD);
+				}
+				catch (Exception e)
+				{
+					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
+					// problems with the integration
+					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
+							Math.max(0, background - bias) / gain, emCCD);
+				}
+			}
+			else
+			{
+				variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
+						Math.max(0, background - bias) / gain, emCCD);
+			}
+		}
+		else
+		{
+			if (fitSolver == FitSolver.MLE)
+			{
+				try
+				{
+					// This may be slow due to the integration required within the formula.
+					variance = PeakResult.getMLVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain,
+							emCCD);
+				}
+				catch (Exception e)
+				{
+					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
+					// problems with the integration
+					variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
+				}
+			}
+			else
+			{
+				variance = PeakResult.getVariance(nmPerPixel, nmPerPixel * sd, signal / gain, noise / gain, emCCD);
+			}
+		}
+		return variance;
 	}
 
 	/**

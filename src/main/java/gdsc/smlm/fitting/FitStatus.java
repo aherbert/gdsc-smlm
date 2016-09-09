@@ -77,6 +77,10 @@ public enum FitStatus
 	/**
 	 * 
 	 */
+	NEIGHBOUR_OVERLAP("Neighbour overlap"),
+	/**
+	 * 
+	 */
 	UNKNOWN("Unknown");
 
 	private String name;
@@ -91,5 +95,4 @@ public enum FitStatus
 	{
 		return name;
 	}
-
 }

@@ -19,15 +19,15 @@ package gdsc.smlm.fitting;
 public class FitResult
 {
 	private FitStatus status;
-	private int degreesOfFreedom;
+	private final int degreesOfFreedom;
 	private double error;
-	private double[] initialParameters;
-	private double[] parameters;
-	private double[] parametersDev;
-	private int nPeaks;
-	private int nFittedParameters;
+	private final double[] initialParameters;
+	private final double[] parameters;
+	private final double[] parametersDev;
+	private final int nPeaks;
+	private final int nFittedParameters;
 	private Object data;
-	private int iterations, evaluations;
+	private final int iterations, evaluations;
 
 	/**
 	 * Constructor
@@ -73,7 +73,10 @@ public class FitResult
 		this.parameters = null;
 		this.parametersDev = null;
 		this.nPeaks = 0;
+		this.nFittedParameters = 0;
 		this.data = null;
+		this.iterations = 0;
+		this.evaluations = 0;
 	}
 
 	/**
@@ -98,6 +101,16 @@ public class FitResult
 	public double getError()
 	{
 		return error;
+	}
+	
+	/**
+	 * Sets the error. This can be used to update the error using a different metric.
+	 *
+	 * @param error the new error
+	 */
+	public void setError(double error)
+	{
+		this.error = error;
 	}
 
 	/**
@@ -157,7 +170,7 @@ public class FitResult
 	}
 
 	/**
-	 * Returns an object containing data about the fit status. This is used to pass additional information depening on
+	 * Returns an object containing data about the fit status. This is used to pass additional information depending on
 	 * the fitting status.
 	 * 
 	 * @return the data
@@ -181,5 +194,17 @@ public class FitResult
 	public int getEvaluations()
 	{
 		return evaluations;
+	}
+	
+	/**
+	 * Sets the status.
+	 *
+	 * @param fitStatus the fit status
+	 * @param data the data
+	 */
+	public void setStatus(FitStatus fitStatus, Object data)
+	{
+		this.status = fitStatus;
+		this.data = data;
 	}
 }

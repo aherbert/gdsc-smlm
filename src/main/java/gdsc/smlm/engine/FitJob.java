@@ -2,6 +2,7 @@ package gdsc.smlm.engine;
 
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.filter.MultiPathFitResult;
 
 import java.awt.Rectangle;
 import java.util.List;
@@ -227,15 +228,16 @@ public class FitJob
 	}
 
 	/**
-	 * Set the fitting result for the specified fitted index if the fit was attempted with neighbour peaks
+	 * Set the multi-path fitting result for the specified fitted index
 	 * <p>
 	 * This method is not implemented within this class but can be overridden if necessary to allow access to the
-	 * results from the {@link FitWorker}.
+	 * benchmarking results from the {@link FitWorker}.
 	 * 
 	 * @param n
 	 * @param fitResult
 	 */
-	public void setFitResultWithNeighbours(int n, FitResult fitResult)
+	public void setMultiPathFitResult(int n, MultiPathFitResult fitResult)
 	{
+
 	}
 }

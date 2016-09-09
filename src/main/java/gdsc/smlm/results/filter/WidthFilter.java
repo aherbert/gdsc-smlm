@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using an upper width factor
  */
-public class WidthFilter extends MultiPathFilter implements IMultiFilter
+public class WidthFilter extends DirectFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 1;
 	static double UPPER_LIMIT = 5;
@@ -33,7 +33,9 @@ public class WidthFilter extends MultiPathFilter implements IMultiFilter
 	@XStreamAsAttribute
 	final double width;
 	@XStreamOmitField
-	float sigmaThreshold;
+	float upperSigmaThreshold;
+	@XStreamOmitField
+	boolean widthEnabled;
 
 	public WidthFilter(double width)
 	{
@@ -56,25 +58,49 @@ public class WidthFilter extends MultiPathFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the width limit
-		sigmaThreshold = Float.POSITIVE_INFINITY;
+		upperSigmaThreshold = Float.POSITIVE_INFINITY;
 		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
 		Matcher match = pattern.matcher(peakResults.getConfiguration());
 		if (match.find())
 		{
-			sigmaThreshold = Filter.getUpperLimit(Double.parseDouble(match.group(1)) * width);
+			upperSigmaThreshold = Filter.getUpperLimit(Double.parseDouble(match.group(1)) * width);
 		}
 	}
-	
+
+	@Override
+	public void setup()
+	{
+		setup(true);
+	}
+
+	@Override
+	public void setup(int flags)
+	{
+		setup(!areSet(flags, DirectFilter.NO_WIDTH));
+	}
+
+	private void setup(final boolean widthEnabled)
+	{
+		this.widthEnabled = widthEnabled;
+		if (widthEnabled)
+		{
+			upperSigmaThreshold = Filter.getUpperLimit(width);
+		}
+	}
+
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return peak.getSD() <= sigmaThreshold;
+		return peak.getSD() <= upperSigmaThreshold;
 	}
-	
+
 	@Override
 	public boolean accept(PreprocessedPeakResult peak)
 	{
-		return peak.getXSDFactor() <= width;
+		if (widthEnabled)
+			return peak.getXSDFactor() <= upperSigmaThreshold;
+		else
+			return true;
 	}
 
 	@Override
@@ -189,7 +215,7 @@ public class WidthFilter extends MultiPathFilter implements IMultiFilter
 	{
 		return new double[] { UPPER_LIMIT };
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -209,7 +235,7 @@ public class WidthFilter extends MultiPathFilter implements IMultiFilter
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;

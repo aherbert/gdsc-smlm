@@ -26,7 +26,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold and width range
  */
-public class ANRFilter2 extends MultiPathFilter
+public class ANRFilter2 extends DirectFilter
 {
 	@XStreamAsAttribute
 	final float anr;
@@ -38,6 +38,8 @@ public class ANRFilter2 extends MultiPathFilter
 	float lowerSigmaThreshold;
 	@XStreamOmitField
 	float upperSigmaThreshold;
+	@XStreamOmitField
+	boolean widthEnabled;
 
 	public ANRFilter2(float anr, double minWidth, double maxWidth)
 	{
@@ -81,6 +83,28 @@ public class ANRFilter2 extends MultiPathFilter
 	}
 
 	@Override
+	public void setup()
+	{
+		setup(true);
+	}
+
+	@Override
+	public void setup(int flags)
+	{
+		setup(!areSet(flags, DirectFilter.NO_WIDTH));
+	}
+
+	private void setup(final boolean widthEnabled)
+	{
+		this.widthEnabled = widthEnabled;
+		if (widthEnabled)
+		{
+			lowerSigmaThreshold = (float) minWidth;
+			upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+		}
+	}
+
+	@Override
 	public boolean accept(PeakResult peak)
 	{
 		return ANRFilter.getANR(peak) >= this.anr && peak.getSD() <= upperSigmaThreshold &&
@@ -90,7 +114,12 @@ public class ANRFilter2 extends MultiPathFilter
 	@Override
 	public boolean accept(PreprocessedPeakResult peak)
 	{
-		return ANRFilter.getANR(peak) >= this.anr && peak.getXSDFactor() >= maxWidth && peak.getXSDFactor() >= minWidth;
+		if (widthEnabled)
+			return ANRFilter.getANR(peak) >= this.anr && peak.getXSDFactor() <= upperSigmaThreshold &&
+					peak.getXSDFactor() >= lowerSigmaThreshold;
+		else
+			return ANRFilter.getANR(peak) >= this.anr;
+
 	}
 
 	@Override

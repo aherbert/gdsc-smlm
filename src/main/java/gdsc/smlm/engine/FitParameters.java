@@ -1,6 +1,8 @@
 package gdsc.smlm.engine;
 
 import gdsc.smlm.filters.Spot;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.results.filter.MultiPathFilter;
 
 import java.util.List;
 
@@ -24,8 +26,7 @@ public class FitParameters
 {
 	public enum FitTask
 	{
-		PSF_FITTING("PSF Fitting"),
-		MAXIMA_IDENITIFICATION("Maxima Identification");
+		PSF_FITTING("PSF Fitting"), MAXIMA_IDENITIFICATION("Maxima Identification"), BENCHMARKING("Benchmarking");
 
 		private String name;
 
@@ -39,8 +40,8 @@ public class FitParameters
 		{
 			return name;
 		}
-	}	
-	
+	}
+
 	private float[] offset = null;
 
 	/**
@@ -64,7 +65,7 @@ public class FitParameters
 	 */
 	public List<float[]> filter = null;
 	/**
-	 * The distance threshold to use when checking if fitted peaks match the desired results. 
+	 * The distance threshold to use when checking if fitted peaks match the desired results.
 	 */
 	public float distanceThreshold = 1;
 	/**
@@ -72,9 +73,25 @@ public class FitParameters
 	 */
 	public FitTask fitTask = FitTask.PSF_FITTING;
 	/**
-	 * The frame acquisition end time for the input data. Used when data represents multiple frames.  
+	 * The frame acquisition end time for the input data. Used when data represents multiple frames.
 	 */
 	public int endT = -1;
+
+	/**
+	 * The filter used to pick the fitting path when benchmarking.
+	 * <p>
+	 * Note that during benchmarking all fitting paths will be computed. The current set of results is then built by
+	 * validating the results with this filter (in addition to the fit configuration used to construct the
+	 * FitWorker).
+	 */
+	public MultiPathFilter benchmarkFilter = null;
+
+	/**
+	 * The distance to an existing result to be declared a duplicate
+	 * 
+	 * @return The duplicate distance
+	 */
+	public double duplicateDistance = 0;
 
 	/**
 	 * The offset to apply to all fitted results
@@ -95,6 +112,8 @@ public class FitParameters
 		{
 			if (offset.length != 2)
 				offset = null;
+			else
+				offset = offset.clone();
 		}
 		this.offset = offset;
 	}

@@ -26,7 +26,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using a X/Y coordinate shift. This filter requires that the result X and Y coordinates are reported
  * relative to their initial positions.
  */
-public class ShiftFilter extends MultiPathFilter implements IMultiFilter
+public class ShiftFilter extends DirectFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 10;
 	static double UPPER_LIMIT = 4;

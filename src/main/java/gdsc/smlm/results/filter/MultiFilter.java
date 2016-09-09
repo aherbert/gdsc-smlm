@@ -25,7 +25,7 @@ import gdsc.smlm.results.PeakResult;
 /**
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision
  */
-public class MultiFilter extends MultiPathFilter implements IMultiFilter
+public class MultiFilter extends DirectFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final double signal;
@@ -61,9 +61,7 @@ public class MultiFilter extends MultiPathFilter implements IMultiFilter
 	@XStreamOmitField
 	double gain = 1;
 	@XStreamOmitField
-	float shift2;
-	@XStreamOmitField
-	float eshift2;
+	boolean widthEnabled;
 
 	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision)
@@ -130,15 +128,33 @@ public class MultiFilter extends MultiPathFilter implements IMultiFilter
 	@Override
 	public void setup()
 	{
-		shift2 = getUpperSquaredLimit(shift);
-		eshift2 = getUpperSquaredLimit(eshift);
+		setup(true);
 	}
-	
+
+	@Override
+	public void setup(int flags)
+	{
+		setup(!areSet(flags, DirectFilter.NO_WIDTH));
+	}
+
+	private void setup(final boolean widthEnabled)
+	{
+		this.widthEnabled = widthEnabled;
+		if (widthEnabled)
+		{
+			lowerSigmaThreshold = (float) minWidth;
+			upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+		}
+		offset = Filter.getUpperSquaredLimit(shift);
+		eoffset = Filter.getUpperSquaredLimit(eshift);
+		variance = Filter.getDUpperSquaredLimit(precision);
+	}
+
 	@Override
 	public boolean accept(PeakResult peak)
 	{
 		// TODO - reorder these in precedence of the most powerful single filter
-		
+
 		if (peak.getSignal() < signalThreshold)
 			return false;
 		if (SNRFilter.getSNR(peak) < this.snr)
@@ -164,16 +180,17 @@ public class MultiFilter extends MultiPathFilter implements IMultiFilter
 	public boolean accept(PreprocessedPeakResult peak)
 	{
 		// TODO - reorder these in precedence of the most powerful single filter
-		
+
 		if (peak.getPhotons() < signal)
 			return false;
 		if (peak.getSNR() < snr)
 			return false;
-		if (peak.getXSDFactor() > maxWidth || peak.getXSDFactor() < minWidth)
+		if (widthEnabled)
+			if (peak.getXSDFactor() > upperSigmaThreshold || peak.getXSDFactor() < lowerSigmaThreshold)
+				return false;
+		if (peak.getXRelativeShift2() > offset || peak.getYRelativeShift2() > offset)
 			return false;
-		if (peak.getXRelativeShift2() > shift2 || peak.getYRelativeShift2() > shift2)
-			return false;
-		if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eshift2)
+		if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset)
 			return false;
 		if (peak.getLocationVariance() > variance)
 			return false;

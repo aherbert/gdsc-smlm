@@ -2,6 +2,7 @@ package gdsc.smlm.engine;
 
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.filter.MultiPathFitResult;
 
 import java.awt.Rectangle;
 import java.util.List;
@@ -27,8 +28,8 @@ public class ParameterisedFitJob extends FitJob
 	private FitParameters parameters;
 	private List<PeakResult> peakResults;
 	private int[] indices = new int[0];
-	private FitResult[] fitResults = new FitResult[0];
-	private FitResult[] fitResultsWithNeighbours = null;
+	private FitResult[] fitResults = null;
+	private MultiPathFitResult[] multiPathResults = null;
 
 	/**
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
@@ -96,26 +97,26 @@ public class ParameterisedFitJob extends FitJob
 	public void setIndices(int[] indices)
 	{
 		this.indices = indices;
-		fitResults = new FitResult[indices.length];
 	}
 
 	@Override
 	public void setFitResult(int n, FitResult fitResult)
 	{
-		if (n < fitResults.length)
+		if (fitResults == null)
+			fitResults = new FitResult[indices.length];
+		if (n < indices.length)
 			fitResults[n] = fitResult;
 	}
 
 	@Override
-	public void setFitResultWithNeighbours(int n, FitResult fitResult)
+	public void setMultiPathFitResult(int n, MultiPathFitResult fitResult)
 	{
-		// Dynamically initialise as we may not fit neighbours
-		if (fitResultsWithNeighbours == null)
-			fitResultsWithNeighbours = new FitResult[indices.length]; 
-		if (n < fitResultsWithNeighbours.length)
-			fitResultsWithNeighbours[n] = fitResult;
+		if (multiPathResults == null)
+			multiPathResults = new MultiPathFitResult[indices.length];
+		if (n < indices.length)
+			multiPathResults[n] = fitResult;
 	}
-	
+
 	/**
 	 * @return The indices of the data that were fitted
 	 */
@@ -136,16 +137,13 @@ public class ParameterisedFitJob extends FitJob
 	}
 
 	/**
-	 * The fit result of the specified index in the array of fitted indices. This is only set if the fit was attempted
-	 * with neighbours.
+	 * The fit result of the specified index in the array of fitted indices
 	 * 
 	 * @param n
 	 * @return
 	 */
-	public FitResult getFitResultWithNeighbours(int n)
+	public MultiPathFitResult getMultiPathFitResult(int n)
 	{
-		if (fitResultsWithNeighbours != null && n < fitResultsWithNeighbours.length)
-			return fitResultsWithNeighbours[n];
-		return null;
+		return multiPathResults[n];
 	}
 }

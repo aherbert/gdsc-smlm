@@ -22,7 +22,7 @@ import gdsc.smlm.results.PeakResult;
 /**
  * Filter results using a precision threshold
  */
-public class PrecisionFilter extends MultiPathFilter implements IMultiFilter
+public class PrecisionFilter extends DirectFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 10;
 	static double UPPER_LIMIT = 70;

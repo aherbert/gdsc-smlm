@@ -19,7 +19,9 @@ import gdsc.smlm.results.PeakResult;
 import java.util.List;
 
 /**
- * Provides a system for filtering the fitted results using distance to a set of target coordinates
+ * Provides a system for filtering the fitted results using distance to a set of target coordinates.
+ * <p>
+ * Note that the target coordinates should be relative to the fitting region bounds, not the bounds of the data frame.
  */
 public abstract class ResultFilter
 {
@@ -34,7 +36,7 @@ public abstract class ResultFilter
 
 	/**
 	 * @param filter
-	 *            The list of target coordinates
+	 *            The list of target coordinates (relative to the fitting region bounds)
 	 * @param d
 	 *            The distance
 	 * @param nMaxima

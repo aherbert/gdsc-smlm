@@ -21,7 +21,7 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 /**
  * Filter results using a coordinate range
  */
-public class CoordinateFilter extends MultiPathFilter
+public class CoordinateFilter extends DirectFilter
 {
 	static double DEFAULT_RANGE = 1;
 

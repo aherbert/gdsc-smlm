@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a width range
  */
-public class WidthFilter2 extends MultiPathFilter implements IMultiFilter
+public class WidthFilter2 extends DirectFilter implements IMultiFilter
 {
 	static double DEFAULT_MIN_RANGE = 1;
 
@@ -37,6 +37,8 @@ public class WidthFilter2 extends MultiPathFilter implements IMultiFilter
 	float lowerSigmaThreshold;
 	@XStreamOmitField
 	float upperSigmaThreshold;
+	@XStreamOmitField
+	boolean widthEnabled;
 
 	public WidthFilter2(double minWidth, double maxWidth)
 	{
@@ -79,6 +81,28 @@ public class WidthFilter2 extends MultiPathFilter implements IMultiFilter
 	}
 
 	@Override
+	public void setup()
+	{
+		setup(true);
+	}
+
+	@Override
+	public void setup(int flags)
+	{
+		setup(!areSet(flags, DirectFilter.NO_WIDTH));
+	}
+
+	private void setup(final boolean widthEnabled)
+	{
+		this.widthEnabled = widthEnabled;
+		if (widthEnabled)
+		{
+			lowerSigmaThreshold = (float) minWidth;
+			upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+		}
+	}
+
+	@Override
 	public boolean accept(PeakResult peak)
 	{
 		final float sd = peak.getSD();
@@ -88,7 +112,10 @@ public class WidthFilter2 extends MultiPathFilter implements IMultiFilter
 	@Override
 	public boolean accept(PreprocessedPeakResult peak)
 	{
-		return peak.getXSDFactor() <= maxWidth && peak.getXSDFactor() >= minWidth;
+		if (widthEnabled)
+			return peak.getXSDFactor() <= upperSigmaThreshold && peak.getXSDFactor() >= lowerSigmaThreshold;
+		else
+			return true;
 	}
 
 	@Override

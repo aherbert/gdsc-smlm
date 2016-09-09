@@ -48,6 +48,7 @@ public abstract class XStreamWrapper
 			addAlias(MultiFilter2.class);
 			addAlias(MultiHysteresisFilter.class);
 			addAlias(MultiHysteresisFilter2.class);
+			addAlias(MultiPathFilter.class);
 			addAlias(OrFilter.class);
 			addAlias(PrecisionFilter.class);
 			addAlias(PrecisionFilter2.class);
@@ -65,8 +66,8 @@ public abstract class XStreamWrapper
 
 			// Removed dependency on reflections since this has other jar dependencies
 			//Reflections reflections = new Reflections("gdsc.smlm.results.filter");
-			//Set<Class<? extends MultiPathFilter>> subTypes = reflections.getSubTypesOf(Filter.class);
-			//for (Class<? extends MultiPathFilter> type : subTypes)
+			//Set<Class<? extends DirectFilter>> subTypes = reflections.getSubTypesOf(Filter.class);
+			//for (Class<? extends DirectFilter> type : subTypes)
 			//	addAlias(type);
 		}
 	}

@@ -22,7 +22,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter results using a signal threshold
  */
-public class SignalFilter extends MultiPathFilter implements IMultiFilter
+public class SignalFilter extends DirectFilter implements IMultiFilter
 {
 	static double DEFAULT_RANGE = 30;
 	

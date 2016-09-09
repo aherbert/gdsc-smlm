@@ -37,7 +37,6 @@ public class AndFilter extends CombinedFilter
 		return accept1(peak) && accept2(peak);
 	}
 
-	@Override
 	public boolean accept(PreprocessedPeakResult peak)
 	{
 		return accept1(peak) && accept2(peak);

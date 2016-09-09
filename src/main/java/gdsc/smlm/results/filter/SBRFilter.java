@@ -27,7 +27,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * assumed to be the variance of the photon shot noise and the noise is taken at the square root of the background
  * level.
  */
-public class SBRFilter extends MultiPathFilter
+public class SBRFilter extends DirectFilter
 {
 	@XStreamAsAttribute
 	final float sbr;

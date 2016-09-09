@@ -17,7 +17,7 @@ import gdsc.core.match.FractionalAssignment;
 
 /**
  * Specifies a peak fitting result for use in filtering. Any result implementing this interface can be directly filtered
- * without the requiring the filter to be initialised with calibration data.
+ * without requiring the filter to be initialised with calibration data.
  */
 public interface PreprocessedPeakResult
 {
@@ -139,12 +139,19 @@ public interface PreprocessedPeakResult
 	float getYSDFactor();
 
 	/**
-	 * Return true if this result has been classified for use in scoring analysis. The {@link #getAssignments(int)}
-	 * method can then be called to return the assignments.
+	 * Return true if this is a result that has previously been fitted.
 	 * 
-	 * @return True if this result has been classified for use in scoring analysis
+	 * @return True if this result is an existing fit result
 	 */
-	boolean isClassified();
+	boolean isExistingResult();
+	
+	/**
+	 * Return true if this is a new result. It is expected that this can then be classified for use in
+	 * scoring analysis. The {@link #getAssignments(int)} method can then be called to return the assignments.
+	 * 
+	 * @return True if this result is a new fit result
+	 */
+	boolean isNewResult();
 
 	/**
 	 * Get the assignments between this result and the true data.
