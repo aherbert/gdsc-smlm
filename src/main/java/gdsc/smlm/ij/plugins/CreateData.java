@@ -1238,7 +1238,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final double sd = (settings.enterWidth) ? settings.psfSD
 						: PSFCalculator.calculateStdDev(settings.wavelength, settings.numericalAperture);
 
-				hwhm = 0.5 * GaussianFunction.SD_TO_FWHM_FACTOR * sd / settings.pixelPitch;
+				hwhm = GaussianFunction.SD_TO_HWHM_FACTOR * sd / settings.pixelPitch;
 			}
 		}
 		return hwhm;
@@ -1251,7 +1251,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private double getPsfSD()
 	{
-		return 2.0 * getHWHM() / GaussianFunction.SD_TO_FWHM_FACTOR;
+		return getHWHM() / GaussianFunction.SD_TO_HWHM_FACTOR;
 	}
 
 	/**
