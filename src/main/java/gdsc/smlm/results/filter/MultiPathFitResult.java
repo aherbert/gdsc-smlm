@@ -25,6 +25,35 @@ import gdsc.smlm.fitting.FitStatus;
  */
 public class MultiPathFitResult
 {
+	public static class FitResult
+	{
+		/**
+		 * Fitting status of the fit
+		 */
+		final public FitStatus status;
+
+		/**
+		 * The number of iterations used for fitting
+		 */
+		public int iterations;
+
+		/**
+		 * The number of evaluations used for fitting
+		 */
+		public int evaluations;
+
+		/**
+		 * The results from the fit. It is expected that one or more results will be true for isNewResult() and zero or
+		 * more could be true for isExistingResult().
+		 */
+		public PreprocessedPeakResult[] results;
+
+		public FitResult(FitStatus status)
+		{
+			this.status = status;
+		}
+	}
+
 	/**
 	 * The number of failed results before this result
 	 */
@@ -55,31 +84,16 @@ public class MultiPathFitResult
 	 * The results from the multi-fit. It is expected that one result will be true for isNewResult() and zero or more
 	 * could be true for isExistingResult().
 	 */
-	public PreprocessedPeakResult[] multiFitResult;
-
-	/**
-	 * Fitting status of the multi-fit
-	 */
-	public FitStatus multiFitResultStatus;
+	public FitResult multiFitResult;
 
 	/**
 	 * The results from the single-fit. It is expected that this should be one result that is true for isNewResult().
 	 */
-	public PreprocessedPeakResult[] singleFitResult;
+	public FitResult singleFitResult;
 
-	/**
-	 * Fitting status of the single-fit
-	 */
-	public FitStatus singleFitResultStatus;
-	
 	/**
 	 * The results from the doublet-fit. It is expected that this should be one or two results that are true for
 	 * isNewResult().
 	 */
-	public PreprocessedPeakResult[] doubletFitResult;
-	
-	/**
-	 * Fitting status of the doublet-fit
-	 */
-	public FitStatus doubletFitResultStatus;
+	public FitResult doubletFitResult;
 }

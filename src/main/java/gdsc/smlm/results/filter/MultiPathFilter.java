@@ -11,6 +11,7 @@ import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.RankedScoreCalculator;
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -123,7 +124,7 @@ public class MultiPathFilter
 			// and is suitable for a doublet fit.
 
 			// Check there is a result for the single spot
-			if (multiPathResult.singleFitResultStatus != FitStatus.OK)
+			if (multiPathResult.singleFitResult.status != FitStatus.OK)
 				return null;
 
 			// Check if the residuals score is below the configured threshold
@@ -131,7 +132,7 @@ public class MultiPathFilter
 				return null;
 
 			// Get the single spot
-			final PreprocessedPeakResult singleResult = extractNew(multiPathResult.singleFitResult);
+			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.singleFitResult.results);
 			if (singleResult == null)
 				return null;
 
@@ -182,14 +183,15 @@ public class MultiPathFilter
 	/**
 	 * Check all new and all existing results are valid. Returns the new results
 	 * 
-	 * @param results
+	 * @param fitResult
 	 *            the results
 	 * @return The new results that pass the filter
 	 */
-	private PreprocessedPeakResult[] acceptAll(final PreprocessedPeakResult[] results)
+	private PreprocessedPeakResult[] acceptAll(final FitResult fitResult)
 	{
-		if (results == null)
+		if (fitResult == null || fitResult.results == null)
 			return null;
+		final PreprocessedPeakResult[] results = fitResult.results;
 
 		// All new and existing results should be valid
 		int count = 0;
@@ -227,14 +229,15 @@ public class MultiPathFilter
 	/**
 	 * Check any new and all existing results are valid. Returns the new results
 	 * 
-	 * @param results
+	 * @param fitResult
 	 *            the results
 	 * @return The new results that pass the filter
 	 */
-	private PreprocessedPeakResult[] acceptAny(final PreprocessedPeakResult[] results)
+	private PreprocessedPeakResult[] acceptAny(final FitResult fitResult)
 	{
-		if (results == null)
+		if (fitResult == null || fitResult.results == null)
 			return null;
+		final PreprocessedPeakResult[] results = fitResult.results;
 
 		// Any new and all existing results should be valid
 		int count = 0;
@@ -267,7 +270,7 @@ public class MultiPathFilter
 		return filtered;
 	}
 
-	private PreprocessedPeakResult extractNew(PreprocessedPeakResult[] results)
+	private PreprocessedPeakResult extractFirstNew(PreprocessedPeakResult[] results)
 	{
 		if (results == null)
 			return null;
