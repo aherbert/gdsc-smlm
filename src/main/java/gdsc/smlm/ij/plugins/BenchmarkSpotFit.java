@@ -3,7 +3,7 @@ package gdsc.smlm.ij.plugins;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2014 Alex Herbert
+ * Copyright (C) 2016 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -40,6 +40,7 @@ import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.ImmutableAssignment;
+import gdsc.core.match.ImmutableFractionalAssignment;
 import gdsc.core.match.PointPair;
 import gdsc.core.utils.Correlator;
 import gdsc.core.utils.FastCorrelator;
@@ -50,6 +51,7 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
+import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.MaximaSpotFilter;
@@ -74,6 +76,8 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.smlm.results.filter.MultiPathFitResult;
+import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import ij.IJ;
 import ij.ImagePlus;
@@ -255,6 +259,35 @@ public class BenchmarkSpotFit implements PlugIn
 
 	public static String tablePrefix, resultPrefix;
 
+	public class MultiPathPoint extends BasePoint
+	{
+		final static int SPOT = 0;
+		final static int MULTI = 1;
+		final static int SINGLE = 2;
+		final static int DOUBLET = 3;
+
+		final PreprocessedPeakResult result;
+		final int id, type, i;
+
+		public MultiPathPoint(PreprocessedPeakResult result, int id, int type, int i)
+		{
+			super(result.getX(), result.getY());
+			this.result = result;
+			this.id = id;
+			this.type = type;
+			this.i = i;
+		}
+
+		public MultiPathPoint(float x, float y, int id, int type, int i)
+		{
+			super(x, y);
+			this.result = null;
+			this.id = id;
+			this.type = type;
+			this.i = i;
+		}
+	}
+
 	/**
 	 * Store details of spot candidates that match actual spots
 	 */
@@ -378,7 +411,7 @@ public class BenchmarkSpotFit implements PlugIn
 		final double np, nn;
 		final ScoredSpot[] spots;
 		double tp, fp, tn, fn;
-		FitResult[] fitResult;
+		MultiPathFitResult[] fitResult;
 		float noise;
 
 		/** Store if the candidates can be fitted and match a position. Size is the number of scored spots */
@@ -511,38 +544,37 @@ public class BenchmarkSpotFit implements PlugIn
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
 			FilterCandidates candidates = filterCandidates.get(frame);
-			FitResult[] fitResult = new FitResult[candidates.spots.length];
+			final MultiPathFitResult[] fitResult = new MultiPathFitResult[candidates.spots.length];
 
 			// Fit the candidates and store the results
-			FitParameters parameters = new FitParameters();
-			Spot[] spots = new Spot[candidates.spots.length];
+			final FitParameters parameters = new FitParameters();
+			final Spot[] spots = new Spot[candidates.spots.length];
 			for (int i = 0; i < spots.length; i++)
 			{
 				spots[i] = candidates.spots[i].spot;
 				//System.out.printf("Fit %d [%d,%d = %.1f]\n", i+1, spots[i].x, spots[i].y, spots[i].intensity);
 			}
 			parameters.spots = spots;
+			parameters.fitTask = FitTask.BENCHMARKING;
 
-			ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
+			final ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
 			fitWorker.run(job); // Results will be stored in the fit job 
 
-			@SuppressWarnings("unused")
-			int fittedSpots = 0;
 			for (int i = 0; i < spots.length; i++)
 			{
-				fitResult[i] = job.getFitResult(i);
-				if (fitResult[i].getStatus() == FitStatus.OK)
-					fittedSpots++;
+				fitResult[i] = job.getMultiPathFitResult(i);
 			}
 
-			// Compute the matches of the fitted spots to the simulated positions
-			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
+			// Compute the matches of the fitted spots to the simulated positions.
+			// We will match all fitting results so providing the upper limit for the match score after filtering.
+			final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			final double[] zPosition = new double[actual.length];
 			final boolean[] fitMatch = new boolean[spots.length];
 			SpotMatch[] match = new SpotMatch[spots.length];
 			int matchCount = 0;
-			RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
-			RampedScore signalScore = (signalFactor > 0) ? new RampedScore(lowerSignalFactor, signalFactor) : null;
+			final RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
+			final RampedScore signalScore = (signalFactor > 0) ? new RampedScore(lowerSignalFactor, signalFactor)
+					: null;
 			if (actual.length > 0)
 			{
 				// Build a list of the coordinates z-depth using the PeakResultPoint
@@ -552,34 +584,47 @@ public class BenchmarkSpotFit implements PlugIn
 					zPosition[i] = p.peakResult.error;
 				}
 
-				BasePoint[] predicted = new BasePoint[spots.length];
-				boolean[] isFit = new boolean[predicted.length];
+				// Allow for doublets the predicted array
+				final ArrayList<MultiPathPoint> predicted = new ArrayList<MultiPathPoint>(spots.length * 2);
 				matches.clear();
 
-				int count = 0;
+				int id = 0;
 				for (int i = 0; i < spots.length; i++)
 				{
-					if (fitResult[i].getStatus() == FitStatus.OK)
-					{
-						// XXX - Note that we can configure a residuals threshold. So how do we deal with doublets?
+					// Use all the results. Doublets can provide two Ids. 
+					// Otherwise store all results with the same Id. The best match for these results will be chosen.
+					final int size = predicted.size();
 
-						// The XY positions should be offset by +0.5 already
-						final double[] params = job.getFitResult(i).getParameters();
-						isFit[count] = true;
-						predicted[count++] = new BasePoint((float) params[Gaussian2DFunction.X_POSITION],
-								(float) params[Gaussian2DFunction.Y_POSITION], i);
+					if (fitResult[i].singleFitResultStatus == FitStatus.OK)
+					{
+						predicted
+								.add(new MultiPathPoint(fitResult[i].singleFitResult[0], id, MultiPathPoint.SINGLE, i));
 					}
-					else
+					if (fitResult[i].multiFitResultStatus == FitStatus.OK)
+					{
+						predicted.add(new MultiPathPoint(fitResult[i].multiFitResult[0], id, MultiPathPoint.MULTI, i));
+					}
+					int increment = 1;
+					if (fitResult[i].doubletFitResultStatus == FitStatus.OK &&
+							fitResult[i].doubletFitResult.length != 0)
+					{
+						increment = fitResult[i].doubletFitResult.length;
+						for (int j = 0; j < increment; j++)
+							predicted.add(new MultiPathPoint(fitResult[i].doubletFitResult[j], id + j,
+									MultiPathPoint.MULTI, i));
+					}
+					if (size == predicted.size())
 					{
 						// Use the candidate position instead
-						predicted[count++] = new BasePoint(spots[i].x + 0.5f, spots[i].y + 0.5f, -1 - i);
+						predicted.add(
+								new MultiPathPoint(spots[i].x + 0.5f, spots[i].y + 0.5f, id, MultiPathPoint.SPOT, i));
 					}
+					id += increment;
 				}
 				// If we made any fits then score them
-				if (count > 0)
+				if (!predicted.isEmpty())
 				{
 					// Match fit results/candidates with their closest actual spot
-					predicted = Arrays.copyOf(predicted, count);
 
 					// TODO - Is using the closest match the best way to do this for high density data?
 					// Perhaps we should pair up the closest matches using the signal factor as well.
@@ -593,43 +638,46 @@ public class BenchmarkSpotFit implements PlugIn
 					{
 						final float x = actual[ii].getX();
 						final float y = actual[ii].getY();
-						for (int jj = 0; jj < predicted.length; jj++)
+						for (int jj = 0; jj < predicted.size(); jj++)
 						{
-							final double d2 = predicted[jj].distance2(x, y);
+							final double d2 = predicted.get(jj).distance2(x, y);
 							if (d2 <= matchDistance)
 							{
 								// Get the score
-								double score = d2;
+								double distance = d2;
 
-								if (isFit[jj])
+								if (predicted.get(jj).type != MultiPathPoint.SPOT)
 								{
 									// Use the signal and ramped distance scoring
 									if (signalScore != null)
 									{
-										score = rampedScore.score(Math.sqrt(d2));
+										distance = rampedScore.score(Math.sqrt(d2));
 										final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
-										final BasePoint p2 = (BasePoint) predicted[jj];
-										int i = (int) p2.getZ();
-										double sf = getSignalFactor(
-												job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL],
+										double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
 												p3.peakResult.getSignal());
-										score *= signalScore.score(Math.abs(sf));
+										distance *= signalScore.score(Math.abs(sf));
 
-										if (score == 0)
+										if (distance == 0)
 											// This doesn't match
 											continue;
 
 										// Invert for the ranking (i.e. low is best)
-										score = 1 - score;
+										distance = 1 - distance;
+
+										// Ensure a perfect match can still be ranked ... closest first
+										if (distance == 0)
+											distance -= (matchDistance - d2);
 									}
 								}
 								else
 								{
 									// This is not a fit. Ensure that remaining candidate spots are assigned
 									// after any fit results.
-									score += matchDistance + 1;
+									distance += matchDistance + 1;
 								}
-								assignments.add(new ImmutableAssignment(ii, jj, score));
+								// Store the index of the predicted point in the score
+								assignments
+										.add(new ImmutableFractionalAssignment(ii, predicted.get(jj).id, distance, jj));
 							}
 						}
 					}
@@ -637,7 +685,7 @@ public class BenchmarkSpotFit implements PlugIn
 					AssignmentComparator.sort(assignments);
 
 					final boolean[] actualAssignment = new boolean[actual.length];
-					final boolean[] predictedAssignment = new boolean[predicted.length];
+					final boolean[] predictedAssignment = new boolean[id];
 
 					for (Assignment assignment : assignments)
 					{
@@ -649,28 +697,25 @@ public class BenchmarkSpotFit implements PlugIn
 								predictedAssignment[assignment.getPredictedId()] = true;
 
 								final PeakResultPoint p3 = (PeakResultPoint) actual[assignment.getTargetId()];
-								final BasePoint p2 = (BasePoint) predicted[assignment.getPredictedId()];
-								int i = (int) p2.getZ();
+								int jj = (int) ((ImmutableFractionalAssignment) assignment).getScore();
+								final MultiPathPoint point = predicted.get(jj);
 
-								final double d = p2.distanceXY(p3);
+								final double d = point.distanceXY(p3);
 
-								if (i >= 0)
+								if (point.type != MultiPathPoint.SPOT)
 								{
 									// This is a fitted candidate
 
 									final double a = p3.peakResult.getSignal();
-									final double p = job.getFitResult(i).getParameters()[Gaussian2DFunction.SIGNAL];
+									final double p = point.result.getSignal();
 
-									fitMatch[i] = true;
-									match[matchCount++] = new FitMatch(i, d, p3.peakResult.error, p, a);
+									fitMatch[point.i] = true;
+									match[matchCount++] = new FitMatch(point.i, d, p3.peakResult.error, p, a);
 								}
 								else
 								{
 									// This is a candidate that could not be fitted
-
-									// Get the index
-									i = -1 - i;
-									match[matchCount++] = new CandidateMatch(i, d, p3.peakResult.error);
+									match[matchCount++] = new CandidateMatch(point.i, d, p3.peakResult.error);
 								}
 							}
 						}
@@ -687,24 +732,14 @@ public class BenchmarkSpotFit implements PlugIn
 
 			for (int i = 0; i < match.length; i++)
 			{
+				// Score using just the distance.
+				// The signal has been used only to compute the best match when two spots are close. 
 				final double s = rampedScore.scoreAndFlatten(match[i].d, 256);
 				match[i].score = s;
 
 				if (match[i].isFitResult())
 				{
 					// This is a fitted result so is a positive
-
-					// Check the fitted signal is approximately correct
-					if (signalFactor != 0)
-					{
-						if (match[i].getAbsoluteSignalFactor() > signalFactor)
-						{
-							// Treat as an unfitted result
-							fn += s;
-							tn += 1 - s;
-							continue;
-						}
-					}
 					tp += s;
 					fp += 1 - s;
 				}
@@ -716,14 +751,6 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 			}
 
-			// Make the totals sum to the correct numbers.
-			// *** Do not do this. We only want to score the matches to allow reporting of a perfect filter.
-
-			// TP + FP = fitted spots
-			//fp = fittedSpots - tp;
-			// TN + FN = unfitted candidate spots
-			//tn = (spots.length - fittedSpots) - fn;
-
 			// Store the results using a copy of the original (to preserve the candidates for repeat analysis)
 			candidates = candidates.clone();
 			candidates.tp = tp;
@@ -734,9 +761,20 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.fitMatch = fitMatch;
 			candidates.match = match;
 			candidates.zPosition = zPosition;
-			// Noise should be the same for all results
-			if (!job.getResults().isEmpty())
-				candidates.noise = job.getResults().get(0).noise;
+			// Noise should be the same for all results, find the first
+			for (int i = 0; i < fitResult.length; i++)
+			{
+				if (fitResult[i].multiFitResult != null)
+				{
+					candidates.noise = fitResult[i].multiFitResult[0].getNoise();
+					break;
+				}
+				if (fitResult[i].singleFitResult != null)
+				{
+					candidates.noise = fitResult[i].singleFitResult[0].getNoise();
+					break;
+				}
+			}
 			results.put(frame, candidates);
 		}
 	}
@@ -1160,9 +1198,9 @@ public class BenchmarkSpotFit implements PlugIn
 				if (status2 != null)
 				{
 					// TODO - This can use the FitStatus in the MultiPathFitResult
-//					final FitResult fitResultWithNeighbours = result.fitResultWithNeighbours[i];
-//					if (fitResultWithNeighbours != null && fitResultWithNeighbours.getStatus() != FitStatus.OK)
-//						status2[fitResultWithNeighbours.getStatus().ordinal()]++;
+					final FitResult fitResultWithNeighbours = result.fitResultWithNeighbours[i];
+					if (fitResultWithNeighbours != null && fitResultWithNeighbours.getStatus() != FitStatus.OK)
+						status2[fitResultWithNeighbours.getStatus().ordinal()]++;
 				}
 				if (fitResult.getStatus() != FitStatus.OK)
 				{
@@ -1290,7 +1328,7 @@ public class BenchmarkSpotFit implements PlugIn
 				if (status[i] != 0)
 				{
 					System.out.printf("%s = %d\n", FitStatus.values()[i].toString(), status[i]);
-					total += status[i]; 
+					total += status[i];
 				}
 			}
 			int total2 = 0;
@@ -1299,7 +1337,7 @@ public class BenchmarkSpotFit implements PlugIn
 				if (status2[i] != 0)
 				{
 					System.out.printf("Neighbours %s = %d\n", FitStatus.values()[i].toString(), status2[i]);
-					total2 += status2[i]; 
+					total2 += status2[i];
 				}
 			}
 			System.out.printf("Total Failures: %d. Neighbour failures = %d\n", total, total2);
@@ -1550,7 +1588,7 @@ public class BenchmarkSpotFit implements PlugIn
 		wo.tile();
 
 		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
-		
+
 		summaryTable.append(sb.toString());
 
 		if (saveFilterRange)
