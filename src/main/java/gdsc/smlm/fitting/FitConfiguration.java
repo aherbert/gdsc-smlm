@@ -26,7 +26,9 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.core.logging.Logger;
+import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
 
 /**
@@ -84,6 +86,7 @@ public class FitConfiguration implements Cloneable
 	private FunctionSolver functionSolver = null;
 
 	private double[] peakShiftFactors = null;
+	private DynamicPeakResult dynamicPeakResult = new DynamicPeakResult();
 
 	/**
 	 * Sets the peak shift factors. This is used to adjust the coordinate shift limit for individual peaks in the
@@ -1170,6 +1173,163 @@ public class FitConfiguration implements Cloneable
 			}
 		}
 		return variance;
+	}
+
+	/**
+	 * An object that can return the results in a formatted state for the multi-path filter
+	 */
+	private class DynamicPeakResult implements PreprocessedPeakResult
+	{
+		int offset;
+		double[] initialParams;
+		double[] params;
+
+		/**
+		 * @param n
+		 *            The peak number
+		 * @param initialParams
+		 *            The initial peak parameters
+		 * @param params
+		 *            The fitted peak parameters
+		 */
+		void setParameters(int n, double[] initialParams, double[] params)
+		{
+			offset = n * 6;
+
+		}
+
+		public int getFrame()
+		{
+			// Not implemented
+			return 0;
+		}
+
+		public float getSignal()
+		{
+			return (float) params[Gaussian2DFunction.SIGNAL + offset];
+		}
+
+		public float getPhotons()
+		{
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / FitConfiguration.this.gain);
+		}
+
+		public float getSNR()
+		{
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / FitConfiguration.this.noise);
+		}
+
+		public float getNoise()
+		{
+			return (float) FitConfiguration.this.noise;
+		}
+
+		public double getLocationVariance()
+		{
+			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
+					0.5;
+			return FitConfiguration.this.getVariance(params[Gaussian2DFunction.BACKGROUND],
+					params[Gaussian2DFunction.SIGNAL + offset], sd);
+		}
+
+		public float getSD()
+		{
+			return (float) ((params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
+					0.5);
+		}
+
+		public float getBackground()
+		{
+			return (float) params[Gaussian2DFunction.BACKGROUND];
+		}
+
+		public float getAmplitude()
+		{
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] /
+					(2 * Math.PI * params[Gaussian2DFunction.X_SD + offset] +
+							params[Gaussian2DFunction.Y_SD + offset]));
+		}
+
+		public float getAngle()
+		{
+			return (float) params[Gaussian2DFunction.ANGLE + offset];
+		}
+
+		public float getX()
+		{
+			return (float) params[Gaussian2DFunction.X_POSITION + offset];
+		}
+
+		public float getY()
+		{
+			return (float) params[Gaussian2DFunction.Y_POSITION + offset];
+		}
+
+		public float getXRelativeShift2()
+		{
+			final double d = (params[Gaussian2DFunction.X_POSITION + offset] -
+					initialParams[Gaussian2DFunction.X_POSITION + offset]) / initialParams[Gaussian2DFunction.X_SD + offset];
+			return (float) (d * d);
+		}
+
+		public float getYRelativeShift2()
+		{
+			final double d = (params[Gaussian2DFunction.Y_POSITION + offset] -
+					initialParams[Gaussian2DFunction.Y_POSITION + offset]) / initialParams[Gaussian2DFunction.Y_SD + offset];
+			return (float) (d * d);
+		}
+
+		public float getXSD()
+		{
+			return (float) params[Gaussian2DFunction.X_SD + offset];
+		}
+
+		public float getYSD()
+		{
+			return (float) params[Gaussian2DFunction.Y_SD + offset];
+		}
+
+		public float getXSDFactor()
+		{
+			return (float) (params[Gaussian2DFunction.X_SD + offset] / initialParams[Gaussian2DFunction.X_SD + offset]);
+		}
+
+		public float getYSDFactor()
+		{
+			return (float) (params[Gaussian2DFunction.Y_SD + offset] / initialParams[Gaussian2DFunction.Y_SD + offset]);
+		}
+
+		public boolean isExistingResult()
+		{
+			return false;
+		}
+
+		public boolean isNewResult()
+		{
+			return false;
+		}
+
+		public FractionalAssignment[] getAssignments(int predictedId)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * Create an object that can return the results in a formatted state for the multi-path filter
+	 * 
+	 * @param n
+	 *            The peak number
+	 * @param initialParams
+	 *            The initial peak parameters
+	 * @param params
+	 *            The fitted peak parameters
+	 * @return A preprocessed peak result
+	 */
+	public PreprocessedPeakResult createPreprocessedPeakResult(int n, double[] initialParams, double[] params)
+	{
+		dynamicPeakResult.setParameters(n, initialParams, params);
+		return dynamicPeakResult;
 	}
 
 	/**

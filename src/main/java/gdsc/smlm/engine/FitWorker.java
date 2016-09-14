@@ -1,9 +1,23 @@
 package gdsc.smlm.engine;
 
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
+
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.logging.Logger;
+import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.NoiseEstimator;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2016 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -26,29 +40,14 @@ import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
-import gdsc.core.ij.Utils;
-import gdsc.core.logging.Logger;
-import gdsc.core.utils.ImageExtractor;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.NoiseEstimator;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
-import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.MultiFilter;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
-
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Fits local maxima using a 2D Gaussian.
@@ -293,7 +292,7 @@ public class FitWorker implements Runnable
 				filter = new MultiPathFilter(
 						new MultiFilter(tmp.getMinPhotons(), (float) tmp.getSignalStrength(), tmp.getMinWidthFactor(),
 								tmp.getWidthFactor(), tmp.getCoordinateShiftFactor(), 0, tmp.getPrecisionThreshold()),
-						(tmp.isComputeResiduals()) ?  fec.getResidualsThreshold() : 1);
+						(tmp.isComputeResiduals()) ? fec.getResidualsThreshold() : 1);
 			}
 
 			filter.setup();
@@ -807,6 +806,7 @@ public class FitWorker implements Runnable
 			y = spots[n].y;
 
 			// Analyse neighbours and include them in the fit if they are within a set height of this peak.
+			resetNeighbours();
 			neighbours = (config.isIncludeNeighbours()) ? findNeighbours(regionBounds, n, x, y, spots) : 0;
 		}
 
@@ -1290,7 +1290,7 @@ public class FitWorker implements Runnable
 			return resultSingle;
 		}
 
-		public FitResult getResultDoublet(boolean force)
+		public FitResult getResultDoublet(boolean force, MultiPathFilter filter)
 		{
 			if (computedDoublet)
 				return resultDoublet;
@@ -1307,7 +1307,7 @@ public class FitWorker implements Runnable
 			if (force || canPerformQuadrantAnalysis(resultSingle, width, height))
 			{
 				computedDoubletQA = true;
-				resultDoublet = quadrantAnalysis(spots, n, resultSingle, region, regionBounds);
+				resultDoublet = quadrantAnalysis(spots, n, resultSingle, region, regionBounds, filter);
 				if (resultDoublet != null)
 				{
 					updateError(resultDoublet);
@@ -1433,7 +1433,7 @@ public class FitWorker implements Runnable
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
 				// Attempt doublet fit if settings allow
-				FitResult newFitResult = spotFitter.getResultDoublet(false);
+				FitResult newFitResult = spotFitter.getResultDoublet(false, null);
 				if (spotFitter.computedDoubletQA)
 				{
 					fitType.setDoublet(true);
@@ -1590,7 +1590,7 @@ public class FitWorker implements Runnable
 			// use the residuals QA score in its decision path.
 			if (config.getResidualsThreshold() < 1)
 			{
-				fitResult = spotFitter.getResultDoublet(true);
+				fitResult = spotFitter.getResultDoublet(true, filter);
 
 				// Store residuals analysis data
 				result.singleQAScore = lastQAscore;
@@ -1753,6 +1753,12 @@ public class FitWorker implements Runnable
 		return newArray;
 	}
 
+	private void resetNeighbours()
+	{
+		neighbourCount = 0;
+		fittedNeighbourCount = 0;
+	}
+
 	/**
 	 * Search for any peak within a set height of the specified peak that is within the search region bounds
 	 * 
@@ -1899,7 +1905,7 @@ public class FitWorker implements Runnable
 	private double lastQAscore;
 
 	private FitResult quadrantAnalysis(Spot[] spots, int candidate, FitResult fitResult, double[] region,
-			Rectangle regionBounds)
+			Rectangle regionBounds, MultiPathFilter filter)
 	{
 		// Perform quadrant analysis as per rapidSTORM:
 
@@ -2179,6 +2185,17 @@ public class FitWorker implements Runnable
 									n, spots[candidate].x, spots[candidate].y, fcx2 + 0.5f, fcy2 + 0.5f, spots[i].x,
 									spots[i].y);
 						}
+
+						// Store the estimate. This has passed filtering in the FitConfig object.
+						// It must optionally pass an additional filter 
+						if (filter != null)
+						{
+							if (filter.accept(fitConfig.createPreprocessedPeakResult(n, newFitResult.getInitialParameters(), newParams)));
+								storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
+						}
+						else
+							storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
+						
 						// There is another candidate to be fit later that is closer
 						continue NEXT_PEAK;
 					}
