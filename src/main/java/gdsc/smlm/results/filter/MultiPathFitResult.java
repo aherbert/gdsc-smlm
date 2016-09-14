@@ -52,6 +52,21 @@ public class MultiPathFitResult
 		{
 			this.status = status;
 		}
+
+		public FitStatus getStatus()
+		{
+			return status;
+		}
+
+		public int getIterations()
+		{
+			return iterations;
+		}
+
+		public int getEvaluations()
+		{
+			return evaluations;
+		}
 	}
 
 	/**
