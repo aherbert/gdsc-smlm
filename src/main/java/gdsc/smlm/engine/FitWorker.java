@@ -1492,14 +1492,14 @@ public class FitWorker implements Runnable
 		FitResult fitResult = spotFitter.getResultMulti();
 		if (fitResult != null)
 		{
-			result.multiFitResultStatus = fitResult.getStatus();
+			result.multiFitResult = createFitResult(fitResult);
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
 				// Extract the peaks
 				convertParameters(fitResult.getParameters());
 				BasePreprocessedPeakResult[] multiFitResult = new BasePreprocessedPeakResult[fitResult
 						.getNumberOfPeaks()];
-				result.multiFitResult = multiFitResult;
+				result.multiFitResult.results = multiFitResult;
 
 				// Assume the first fitted peak is the new result
 				multiFitResult[0] = createNewPreprocessedPeakResult(0, fitResult.getParameters(),
@@ -1543,13 +1543,13 @@ public class FitWorker implements Runnable
 
 		// Do a single fit
 		fitResult = spotFitter.getResultSingle();
-		result.singleFitResultStatus = fitResult.getStatus();
+		result.singleFitResult = createFitResult(fitResult);
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
 			// Extract the peaks
 			convertParameters(fitResult.getParameters());
-			result.singleFitResult = new BasePreprocessedPeakResult[1];
-			result.singleFitResult[0] = createNewPreprocessedPeakResult(0, fitResult.getParameters(),
+			result.singleFitResult.results = new BasePreprocessedPeakResult[1];
+			result.singleFitResult.results[0] = createNewPreprocessedPeakResult(0, fitResult.getParameters(),
 					fitResult.getInitialParameters(), offsetx, offsety);
 
 			// Doublet fit
@@ -1565,16 +1565,16 @@ public class FitWorker implements Runnable
 				// The doublet result is null if nothing was valid
 				if (fitResult != null)
 				{
-					result.doubletFitResultStatus = fitResult.getStatus();
+					result.doubletFitResult = createFitResult(fitResult);
 					if (fitResult.getStatus() == FitStatus.OK)
 
 					{
 						// Extract the peaks
 						convertParameters(fitResult.getParameters());
-						result.doubletFitResult = new BasePreprocessedPeakResult[fitResult.getNumberOfPeaks()];
-						for (int i = 0; i < result.doubletFitResult.length; i++)
-							result.doubletFitResult[i] = createNewPreprocessedPeakResult(i, fitResult.getParameters(),
-									fitResult.getInitialParameters(), offsetx, offsety);
+						result.doubletFitResult.results = new BasePreprocessedPeakResult[fitResult.getNumberOfPeaks()];
+						for (int i = 0; i < result.doubletFitResult.results.length; i++)
+							result.doubletFitResult.results[i] = createNewPreprocessedPeakResult(i,
+									fitResult.getParameters(), fitResult.getInitialParameters(), offsetx, offsety);
 					}
 				}
 			}
@@ -1599,6 +1599,14 @@ public class FitWorker implements Runnable
 		}
 
 		return result;
+	}
+
+	private MultiPathFitResult.FitResult createFitResult(FitResult fitResult)
+	{
+		MultiPathFitResult.FitResult multiPathFitResult = new MultiPathFitResult.FitResult(fitResult.getStatus());
+		multiPathFitResult.iterations = fitResult.getIterations();
+		multiPathFitResult.evaluations = fitResult.getEvaluations();
+		return multiPathFitResult;
 	}
 
 	private BasePreprocessedPeakResult createNewPreprocessedPeakResult(int i, double[] parameters,
