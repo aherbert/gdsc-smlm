@@ -39,7 +39,6 @@ import gdsc.core.match.AssignmentComparator;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.match.ImmutableAssignment;
 import gdsc.core.match.ImmutableFractionalAssignment;
 import gdsc.core.match.PointPair;
 import gdsc.core.utils.Correlator;
@@ -58,10 +57,8 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
@@ -72,7 +69,6 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
-import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.MultiFilter2;
@@ -261,10 +257,11 @@ public class BenchmarkSpotFit implements PlugIn
 
 	public class MultiPathPoint extends BasePoint
 	{
-		final static int SPOT = 0;
+		final static int SPOT = -1;
+		final static int SINGLE = 0;
 		final static int MULTI = 1;
-		final static int SINGLE = 2;
-		final static int DOUBLET = 3;
+		final static int DOUBLET1 = 2;
+		final static int DOUBLET2 = 3;
 
 		final PreprocessedPeakResult result;
 		final int id, type, i;
@@ -347,12 +344,14 @@ public class BenchmarkSpotFit implements PlugIn
 	 */
 	public class FitMatch extends SpotMatch
 	{
+		final MultiPathPoint point;
 		final double predictedSignal, actualSignal;
 		final double sf;
 
-		public FitMatch(int i, double d, double z, double predictedSignal, double actualSignal)
+		public FitMatch(MultiPathPoint point, double d, double z, double predictedSignal, double actualSignal)
 		{
-			super(i, d, z);
+			super(point.i, d, z);
+			this.point = point;
 			this.predictedSignal = predictedSignal;
 			this.actualSignal = actualSignal;
 			this.sf = BenchmarkSpotFit.getSignalFactor(predictedSignal, actualSignal);
@@ -414,8 +413,12 @@ public class BenchmarkSpotFit implements PlugIn
 		MultiPathFitResult[] fitResult;
 		float noise;
 
-		/** Store if the candidates can be fitted and match a position. Size is the number of scored spots */
-		boolean[] fitMatch;
+		/**
+		 * Store if the candidates can be fitted and match a position. Size is the number of scored spots. Each entry
+		 * has data for fitting: [0] a single; [1] multi; [2] first doublet; [3] second doublet
+		 */
+		boolean[][] fitMatch;
+
 		/** Store the z-position of the actual spots for later analysis. Size is the number of actual spots */
 		double[] zPosition;
 
@@ -569,7 +572,7 @@ public class BenchmarkSpotFit implements PlugIn
 			// We will match all fitting results so providing the upper limit for the match score after filtering.
 			final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			final double[] zPosition = new double[actual.length];
-			final boolean[] fitMatch = new boolean[spots.length];
+			final boolean[][] fitMatch = new boolean[spots.length][4];
 			SpotMatch[] match = new SpotMatch[spots.length];
 			int matchCount = 0;
 			final RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
@@ -595,23 +598,26 @@ public class BenchmarkSpotFit implements PlugIn
 					// Otherwise store all results with the same Id. The best match for these results will be chosen.
 					final int size = predicted.size();
 
-					if (fitResult[i].singleFitResultStatus == FitStatus.OK)
+					if (fitResult[i].singleFitResult.status == FitStatus.OK)
 					{
-						predicted
-								.add(new MultiPathPoint(fitResult[i].singleFitResult[0], id, MultiPathPoint.SINGLE, i));
+						predicted.add(new MultiPathPoint(fitResult[i].singleFitResult.results[0], id,
+								MultiPathPoint.SINGLE, i));
 					}
-					if (fitResult[i].multiFitResultStatus == FitStatus.OK)
+					if (fitResult[i].multiFitResult.status == FitStatus.OK)
 					{
-						predicted.add(new MultiPathPoint(fitResult[i].multiFitResult[0], id, MultiPathPoint.MULTI, i));
+						predicted.add(new MultiPathPoint(fitResult[i].multiFitResult.results[0], id,
+								MultiPathPoint.MULTI, i));
 					}
 					int increment = 1;
-					if (fitResult[i].doubletFitResultStatus == FitStatus.OK &&
-							fitResult[i].doubletFitResult.length != 0)
+					if (fitResult[i].doubletFitResult.status == FitStatus.OK &&
+							fitResult[i].doubletFitResult.results.length != 0)
 					{
-						increment = fitResult[i].doubletFitResult.length;
-						for (int j = 0; j < increment; j++)
-							predicted.add(new MultiPathPoint(fitResult[i].doubletFitResult[j], id + j,
-									MultiPathPoint.MULTI, i));
+						increment = fitResult[i].doubletFitResult.results.length;
+						predicted.add(new MultiPathPoint(fitResult[i].doubletFitResult.results[0], id,
+								MultiPathPoint.DOUBLET1, i));
+						if (increment == 2)
+							predicted.add(new MultiPathPoint(fitResult[i].doubletFitResult.results[1], id + 1,
+									MultiPathPoint.DOUBLET2, i));
 					}
 					if (size == predicted.size())
 					{
@@ -661,6 +667,8 @@ public class BenchmarkSpotFit implements PlugIn
 											// This doesn't match
 											continue;
 
+										fitMatch[predicted.get(jj).i][predicted.get(jj).type] = true;
+
 										// Invert for the ranking (i.e. low is best)
 										distance = 1 - distance;
 
@@ -709,8 +717,7 @@ public class BenchmarkSpotFit implements PlugIn
 									final double a = p3.peakResult.getSignal();
 									final double p = point.result.getSignal();
 
-									fitMatch[point.i] = true;
-									match[matchCount++] = new FitMatch(point.i, d, p3.peakResult.error, p, a);
+									match[matchCount++] = new FitMatch(point, d, p3.peakResult.error, p, a);
 								}
 								else
 								{
@@ -766,12 +773,12 @@ public class BenchmarkSpotFit implements PlugIn
 			{
 				if (fitResult[i].multiFitResult != null)
 				{
-					candidates.noise = fitResult[i].multiFitResult[0].getNoise();
+					candidates.noise = fitResult[i].multiFitResult.results[0].getNoise();
 					break;
 				}
 				if (fitResult[i].singleFitResult != null)
 				{
-					candidates.noise = fitResult[i].singleFitResult[0].getNoise();
+					candidates.noise = fitResult[i].singleFitResult.results[0].getNoise();
 					break;
 				}
 			}
@@ -1175,13 +1182,13 @@ public class BenchmarkSpotFit implements PlugIn
 				stats[i][j] = new StoredDataStatistics();
 
 		final double nmPerPixel = simulationParameters.a;
-		final boolean mle = fitConfig.getFitSolver() == FitSolver.MLE;
 		double tp = 0, fp = 0;
 		int failcTP = 0, failcFP = 0;
 		int cTP = 0, cFP = 0;
-		int[] status = null, status2 = null;
-		status = new int[FitStatus.values().length];
-		status2 = new int[status.length];
+		int[] singleStatus = null, multiStatus = null, doubletStatus = null;
+		singleStatus = new int[FitStatus.values().length];
+		multiStatus = new int[singleStatus.length];
+		doubletStatus = new int[singleStatus.length];
 		for (FilterCandidates result : filterCandidates.values())
 		{
 			// Count the number of fit results that matched (tp) and did not match (fp)
@@ -1194,93 +1201,43 @@ public class BenchmarkSpotFit implements PlugIn
 					cTP++;
 				else
 					cFP++;
-				final FitResult fitResult = result.fitResult[i];
-				if (status2 != null)
-				{
-					// TODO - This can use the FitStatus in the MultiPathFitResult
-					final FitResult fitResultWithNeighbours = result.fitResultWithNeighbours[i];
-					if (fitResultWithNeighbours != null && fitResultWithNeighbours.getStatus() != FitStatus.OK)
-						status2[fitResultWithNeighbours.getStatus().ordinal()]++;
-				}
-				if (fitResult.getStatus() != FitStatus.OK)
-				{
-					// Debug why the MLE does not fit as many candidates as the LSE
-					if (status != null)
-					{
-						status[result.fitResult[i].getStatus().ordinal()]++;
-					}
+				final MultiPathFitResult fitResult = result.fitResult[i];
 
+				if (singleStatus != null)
+				{
+					// Debugging reasons for fit failure
+					if (fitResult.singleFitResult.status != FitStatus.OK)
+						singleStatus[fitResult.singleFitResult.status.ordinal()]++;
+					if (fitResult.multiFitResult.status != FitStatus.OK)
+						multiStatus[fitResult.multiFitResult.status.ordinal()]++;
+					if (fitResult.doubletFitResult.status != FitStatus.OK)
+						doubletStatus[fitResult.doubletFitResult.status.ordinal()]++;
+				}
+
+				if (noMatch(result.fitMatch[i]))
+				{
 					if (result.spots[i].match)
 						failcTP++;
 					else
 						failcFP++;
-
-					// Add the evaluations for spots that were not OK
-					stats[0][FILTER_ITERATIONS].add(fitResult.getIterations());
-					stats[0][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
-
-					// Q. Should we add to the TP/FP stats
-					//final int index = (result.spots[i].match) ? 1 : 2;
-					//stats[index][FILTER_ITERATIONS].add(fitResult.getIterations());
-					//stats[index][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
 				}
-				else
-				{
-					// This was fit - Get statistics
-					final double[] p = fitResult.getParameters();
-					final double[] initialParams = fitResult.getInitialParameters();
-					final double s0 = (p[Gaussian2DFunction.X_SD] + p[Gaussian2DFunction.Y_SD]) * 0.5;
-					final double s = s0 * nmPerPixel;
-					final double N = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
-					final double b2 = Math.max(0,
-							(p[Gaussian2DFunction.BACKGROUND] - simulationParameters.bias) / simulationParameters.gain);
-					double precision;
-					if (mle)
-						precision = PeakResult.getMLPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD);
-					else
-						precision = PeakResult.getPrecisionX(nmPerPixel, s, N, b2, simulationParameters.emCCD);
 
-					final double signal = p[Gaussian2DFunction.SIGNAL] / simulationParameters.gain;
-					final double snr = p[Gaussian2DFunction.SIGNAL] / result.noise;
-					final double width = s0 / fitConfig.getInitialPeakStdDev0();
-					final double xShift = p[Gaussian2DFunction.X_POSITION] -
-							initialParams[Gaussian2DFunction.X_POSITION];
-					final double yShift = p[Gaussian2DFunction.Y_POSITION] -
-							initialParams[Gaussian2DFunction.Y_POSITION];
-					// Since these two are combined for filtering and the max is what matters.
-					double shift = ((Math.abs(xShift) > Math.abs(yShift)) ? xShift : yShift) /
-							fitConfig.getInitialPeakStdDev0();
-					// Comment this out to allow plotting the absolute shift which should be centred around 0
-					shift = Math.abs(shift);
-					final double eshift = Math.sqrt(xShift * xShift + yShift * yShift);
+				// We have multi-path results.
+				// We want statistics for:
+				// [0] all fitted spots
+				// [1] fitted spots that match a result
+				// [2] fitted spots that do not match a result
+				// Note that matching was done by picking the very best matches from all the results.
+				// So for these statistics we need to know if the fit result matched something (TP) 
+				// or not (FP). This is stored in the result.fitMatch[] array for each fit type
 
-					stats[0][FILTER_SIGNAL].add(signal);
-					stats[0][FILTER_SNR].add(snr);
-					if (width < 1)
-						stats[0][FILTER_MIN_WIDTH].add(width);
-					else
-						stats[0][FILTER_MAX_WIDTH].add(width);
-					stats[0][FILTER_SHIFT].add(shift);
-					stats[0][FILTER_ESHIFT].add(eshift);
-					stats[0][FILTER_PRECISION].add(precision);
-					stats[0][FILTER_ITERATIONS].add(fitResult.getIterations());
-					stats[0][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
-
-					// Add to the TP or FP stats 
-					final int index = (result.fitMatch[i]) ? 1 : 2;
-					stats[index][FILTER_SIGNAL].add(signal);
-					stats[index][FILTER_SNR].add(snr);
-					if (width < 1)
-						stats[index][FILTER_MIN_WIDTH].add(width);
-					else
-						stats[index][FILTER_MAX_WIDTH].add(width);
-					stats[index][FILTER_SHIFT].add(shift);
-					stats[index][FILTER_ESHIFT].add(eshift);
-					stats[index][FILTER_PRECISION].add(precision);
-					stats[index][FILTER_ITERATIONS].add(fitResult.getIterations());
-					stats[index][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
-				}
+				addToStats(fitResult.singleFitResult, 0, result.fitMatch[i][MultiPathPoint.SINGLE], stats);
+				addToStats(fitResult.multiFitResult, 0, result.fitMatch[i][MultiPathPoint.MULTI], stats);
+				addToStats(fitResult.doubletFitResult, 0, result.fitMatch[i][MultiPathPoint.DOUBLET1], stats);
+				addToStats(fitResult.doubletFitResult, 1, result.fitMatch[i][MultiPathPoint.DOUBLET2], stats);
 			}
+
+			// Statistics on spots that fit an actual result
 			for (int i = 0; i < result.match.length; i++)
 			{
 				if (!result.match[i].isFitResult())
@@ -1307,7 +1264,7 @@ public class BenchmarkSpotFit implements PlugIn
 					continue;
 
 				FitMatch fitMatch = (FitMatch) result.match[i];
-				ScoredSpot spot = result.spots[i];
+				ScoredSpot spot = result.spots[fitMatch.i];
 				i1[ci] = fitMatch.predictedSignal;
 				i2[ci] = fitMatch.actualSignal;
 				is[ci] = spot.spot.intensity;
@@ -1316,31 +1273,41 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 
 		// Debug the reasons the fit failed
-		if (status != null)
+		if (singleStatus != null)
 		{
 			String name = PeakFit.getSolverName(fitConfig);
 			if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 				name += " Camera";
 			System.out.println("Failure counts: " + name);
 			int total = 0;
-			for (int i = 0; i < status.length; i++)
+			for (int i = 0; i < singleStatus.length; i++)
 			{
-				if (status[i] != 0)
+				if (singleStatus[i] != 0)
 				{
-					System.out.printf("%s = %d\n", FitStatus.values()[i].toString(), status[i]);
-					total += status[i];
+					System.out.printf("Single %s = %d\n", FitStatus.values()[i].toString(), singleStatus[i]);
+					total += singleStatus[i];
 				}
 			}
 			int total2 = 0;
-			for (int i = 0; i < status2.length; i++)
+			for (int i = 0; i < multiStatus.length; i++)
 			{
-				if (status2[i] != 0)
+				if (multiStatus[i] != 0)
 				{
-					System.out.printf("Neighbours %s = %d\n", FitStatus.values()[i].toString(), status2[i]);
-					total2 += status2[i];
+					System.out.printf("Multi %s = %d\n", FitStatus.values()[i].toString(), multiStatus[i]);
+					total2 += multiStatus[i];
 				}
 			}
-			System.out.printf("Total Failures: %d. Neighbour failures = %d\n", total, total2);
+			int total3 = 0;
+			for (int i = 0; i < doubletStatus.length; i++)
+			{
+				if (doubletStatus[i] != 0)
+				{
+					System.out.printf("Doublet %s = %d\n", FitStatus.values()[i].toString(), doubletStatus[i]);
+					total3 += doubletStatus[i];
+				}
+			}
+			System.out.printf("Single Failures = %d. Multi failures = %d. Doublet failures = %d\n", total, total2,
+					total3);
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -1636,6 +1603,78 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 			}
 		}
+	}
+
+	private void addToStats(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int resultIndex,
+			boolean isTP, StoredDataStatistics[][] stats)
+	{
+		if (fitResult.status != FitStatus.OK)
+		{
+			// Add the evaluations for spots that were not OK
+			if (resultIndex == 0)
+			{
+				stats[0][FILTER_ITERATIONS].add(fitResult.iterations);
+				stats[0][FILTER_EVALUATIONS].add(fitResult.evaluations);
+			}
+			return;
+		}
+
+		if (fitResult.results == null || fitResult.results.length <= resultIndex)
+			return;
+
+		PreprocessedPeakResult result = fitResult.results[resultIndex];
+
+		// This was fit - Get statistics
+		final double precision = Math.sqrt(result.getLocationVariance());
+
+		final double signal = result.getSignal();
+		final double snr = result.getSNR();
+		final double width = result.getXSDFactor();
+		final double xShift = result.getXRelativeShift2();
+		final double yShift = result.getYRelativeShift2();
+		// Since these two are combined for filtering and the max is what matters.
+		final double shift = (xShift > yShift) ? Math.sqrt(xShift) : Math.sqrt(yShift);
+		final double eshift = Math.sqrt(xShift + yShift);
+
+		stats[0][FILTER_SIGNAL].add(signal);
+		stats[0][FILTER_SNR].add(snr);
+		if (width < 1)
+			stats[0][FILTER_MIN_WIDTH].add(width);
+		else
+			stats[0][FILTER_MAX_WIDTH].add(width);
+		stats[0][FILTER_SHIFT].add(shift);
+		stats[0][FILTER_ESHIFT].add(eshift);
+		stats[0][FILTER_PRECISION].add(precision);
+		if (resultIndex == 0)
+		{
+			stats[0][FILTER_ITERATIONS].add(fitResult.getIterations());
+			stats[0][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
+		}
+
+		// Add to the TP or FP stats 
+		final int index = (isTP) ? 1 : 2;
+		stats[index][FILTER_SIGNAL].add(signal);
+		stats[index][FILTER_SNR].add(snr);
+		if (width < 1)
+			stats[index][FILTER_MIN_WIDTH].add(width);
+		else
+			stats[index][FILTER_MAX_WIDTH].add(width);
+		stats[index][FILTER_SHIFT].add(shift);
+		stats[index][FILTER_ESHIFT].add(eshift);
+		stats[index][FILTER_PRECISION].add(precision);
+		if (resultIndex == 0)
+		{
+			stats[index][FILTER_ITERATIONS].add(fitResult.getIterations());
+			stats[index][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
+		}
+	}
+
+	private boolean noMatch(boolean[] match)
+	{
+		for (int i = 0; i < match.length; i++)
+			if (match[i])
+				return false;
+		return true;
 	}
 
 	private int[] rank(ArrayList<Ranking> pc)
