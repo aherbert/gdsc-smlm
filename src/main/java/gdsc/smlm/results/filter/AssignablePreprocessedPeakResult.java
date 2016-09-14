@@ -1,7 +1,5 @@
 package gdsc.smlm.results.filter;
 
-import gdsc.core.match.FractionalAssignment;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -27,5 +25,5 @@ public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
 	 * @param assignments
 	 *            The assignments
 	 */
-	void setAssignments(FractionalAssignment[] assignments);
+	void setAssignments(ResultAssignment[] assignments);
 }

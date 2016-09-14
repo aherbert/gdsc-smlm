@@ -47,7 +47,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final boolean existingResult;
 	private final boolean newResult;
 
-	private FractionalAssignment[] assignments;
+	private ResultAssignment[] assignments;
 
 	//@formatter:off
 	/**
@@ -216,12 +216,24 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		return newResult;
 	}
 
-	public FractionalAssignment[] getAssignments(int predictedId)
+	/**
+	 * Returns a new array and so is thread-safe (unless another thread updates the assignments concurrently). It should
+	 * be thread safe for use in scoring of the result using a multi-path filter.
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
+	 */
+	public FractionalAssignment[] getAssignments(final int predictedId)
 	{
-		return assignments;
+		if (assignments == null || assignments.length == 0)
+			return null;
+		// Create a new set of assignments. Since this will be new and all other members are final the class is thread-safe.  
+		final FractionalAssignment[] out = new FractionalAssignment[assignments.length];
+		for (int i = 0; i < out.length; i++)
+			out[i] = assignments[i].toFractionalAssignment(predictedId);
+		return out;
 	}
 
-	public void setAssignments(FractionalAssignment[] assignments)
+	public void setAssignments(ResultAssignment[] assignments)
 	{
 		this.assignments = assignments;
 	}
