@@ -3,6 +3,7 @@ package gdsc.smlm.engine;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
@@ -105,6 +106,9 @@ public class FitWorker implements Runnable
 	private float noise, background;
 	private final boolean calculateNoise;
 	private boolean estimateSignal;
+	private ResultGridManager gridManager = null;
+	private Spot[] spotNeighbours = null;
+	private PeakResult[] peakNeighbours = null;
 	// Contains the index in the list of maxima for any neighbours
 	private int neighbourCount = 0;
 	private int[] neighbourIndices = null;
@@ -193,8 +197,8 @@ public class FitWorker implements Runnable
 
 		// Crop to the ROI
 		bounds = job.bounds;
-		int width = bounds.width;
-		int height = bounds.height;
+		final int width = bounds.width;
+		final int height = bounds.height;
 		borderLimitX = width - border;
 		borderLimitY = height - border;
 		data = job.data;
@@ -211,8 +215,6 @@ public class FitWorker implements Runnable
 		}
 
 		fittedBackground = 0;
-
-		allocateArrays(spots.length);
 
 		// Always get the noise and store it with the results.
 		if (params != null && !Float.isNaN(params.noise))
@@ -271,7 +273,7 @@ public class FitWorker implements Runnable
 		}
 		else if (params != null && params.fitTask == FitTask.BENCHMARKING)
 		{
-			clearEstimates(spots.length);
+			initialiseFitting(spots);
 
 			// Fit all spot candidates using all fitting pathways
 
@@ -313,7 +315,7 @@ public class FitWorker implements Runnable
 		}
 		else
 		{
-			clearEstimates(spots.length);
+			initialiseFitting(spots);
 
 			// Perform the Gaussian fit
 			int success = 0;
@@ -542,12 +544,22 @@ public class FitWorker implements Runnable
 		job.finished();
 	}
 
-	private void allocateArrays(int length)
+	private void initialiseFitting(Spot[] spots)
 	{
-		neighbourIndices = allocateArray(neighbourIndices, length);
+		neighbourIndices = allocateArray(neighbourIndices, spots.length);
 		// Allocate enough room for all fits to be doublets 
 		fittedNeighbourIndices = allocateArray(fittedNeighbourIndices,
-				length * ((config.getResidualsThreshold() < 1) ? 2 : 1));
+				spots.length * ((config.getResidualsThreshold() < 1) ? 2 : 1));
+
+		clearEstimates(spots.length);
+
+		gridManager = new ResultGridManager(bounds.width, bounds.height, 2 * fitting + 1);
+		for (int i = 0; i < spots.length; i++)
+		{
+			// Store ID in the score field
+			spots[i].setScore(i);
+			gridManager.addToGrid(spots[i]);
+		}
 	}
 
 	private int[] allocateArray(int[] array, int length)
@@ -573,12 +585,15 @@ public class FitWorker implements Runnable
 	private int addResults(int x, int y, Rectangle bounds, Rectangle regionBounds, double[] peakParams,
 			double[] peakParamsDev, float value, double error, float noise)
 	{
+		// Neighbours to check for duplicates
+		final PeakResult[] neighbours = (duplicateDistance2 > 0) ? gridManager.getPeakResultNeighbours(x, y) : null;
+
 		x += bounds.x;
 		y += bounds.y;
 
 		// Note the bounds will be added to the params at the end of processing
 
-		int npeaks = peakParams.length / 6;
+		final int npeaks = peakParams.length / 6;
 		int count = 0;
 
 		// Note that during processing the data is assumed to refer to the top-left
@@ -595,15 +610,15 @@ public class FitWorker implements Runnable
 
 		if (npeaks == 1)
 		{
-			if (addSingleResult(x, y, Utils.toFloat(peakParams), Utils.toFloat(peakParamsDev), value, error, noise))
+			if (addSingleResult(neighbours, x, y, Utils.toFloat(peakParams), Utils.toFloat(peakParamsDev), value, error,
+					noise))
 				count++;
 		}
 		else
 		{
-			final int currentResultsSize = sliceResults.size();
 			for (int i = 0; i < npeaks; i++)
 			{
-				float[] params = new float[] { (float) peakParams[0], (float) peakParams[i * 6 + 1],
+				final float[] params = new float[] { (float) peakParams[0], (float) peakParams[i * 6 + 1],
 						(float) peakParams[i * 6 + 2], (float) peakParams[i * 6 + 3], (float) peakParams[i * 6 + 4],
 						(float) peakParams[i * 6 + 5], (float) peakParams[i * 6 + 6] };
 				float[] paramsStdDev = null;
@@ -614,57 +629,11 @@ public class FitWorker implements Runnable
 							(float) peakParamsDev[i * 6 + 4], (float) peakParamsDev[i * 6 + 5],
 							(float) peakParamsDev[i * 6 + 6] };
 				}
-				if (addSingleResult(currentResultsSize, x, y, params, paramsStdDev, value, error, noise))
+				if (addSingleResult(neighbours, x, y, params, paramsStdDev, value, error, noise))
 					count++;
 			}
 		}
 		return count;
-	}
-
-	/**
-	 * Add the result to the list
-	 * 
-	 * @param peakResults
-	 * @param x
-	 * @param y
-	 * @param peakParams
-	 * @param peakParamsDev
-	 * @param value
-	 * @param error
-	 * @param noise
-	 * @return
-	 */
-	private boolean addSingleResult(int x, int y, float[] peakParams, float[] peakParamsDev, float value, double error,
-			float noise)
-	{
-		// Check if the position is inside the border
-		if (insideBorder(peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION]))
-		{
-			// Check for duplicates
-			if (duplicateDistance2 > 0)
-			{
-				for (PeakResult result : sliceResults)
-				{
-					if (distance2(result.params, peakParams) < duplicateDistance2)
-					{
-						//System.out.printf("Duplicate  [%d] %.2f,%.2f\n", slice,
-						//		peakParams[Gaussian2DFunction.X_POSITION],
-						//		peakParams[Gaussian2DFunction.Y_POSITION]);
-						return false;
-					}
-				}
-			}
-
-			sliceResults.add(createResult(x, y, value, error, noise, peakParams, peakParamsDev));
-			fittedBackground += peakParams[Gaussian2DFunction.BACKGROUND];
-			return true;
-		}
-		else if (logger != null)
-		{
-			logger.info("Ignoring peak within image border @ %.2f,%.2f", peakParams[Gaussian2DFunction.X_POSITION],
-					peakParams[Gaussian2DFunction.Y_POSITION]);
-		}
-		return false;
 	}
 
 	/**
@@ -682,22 +651,18 @@ public class FitWorker implements Runnable
 	 * @param noise
 	 * @return
 	 */
-	private boolean addSingleResult(final int currentResultsSize, int x, int y, float[] peakParams,
+	private boolean addSingleResult(final PeakResult[] neighbours, int x, int y, float[] peakParams,
 			float[] peakParamsDev, float value, double error, float noise)
 	{
 		// Check if the position is inside the border
 		if (insideBorder(peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION]))
 		{
 			// Check for duplicates
-			if (duplicateDistance2 > 0)
+			if (neighbours != null)
 			{
-				int i = 0;
-				for (PeakResult result : sliceResults)
+				for (int i = 0; i < neighbours.length; i++)
 				{
-					// Only check up to the current results size
-					if (i++ == currentResultsSize)
-						break;
-					if (distance2(result.params, peakParams) < duplicateDistance2)
+					if (distance2(neighbours[i].params, peakParams) < duplicateDistance2)
 					{
 						//System.out.printf("Duplicate  [%d] %.2f,%.2f\n", slice,
 						//		peakParams[Gaussian2DFunction.X_POSITION],
@@ -707,7 +672,9 @@ public class FitWorker implements Runnable
 				}
 			}
 
-			sliceResults.add(createResult(x, y, value, error, noise, peakParams, peakParamsDev));
+			final PeakResult peakResult = createResult(x, y, value, error, noise, peakParams, peakParamsDev);
+			gridManager.addToGrid(peakResult);
+			sliceResults.add(peakResult);
 			fittedBackground += peakParams[Gaussian2DFunction.BACKGROUND];
 			return true;
 		}
@@ -1757,6 +1724,31 @@ public class FitWorker implements Runnable
 	{
 		neighbourCount = 0;
 		fittedNeighbourCount = 0;
+		spotNeighbours = null;
+		peakNeighbours = null;
+	}
+
+	private Spot[] findSpotNeighbours(Spot[] spots, int n)
+	{
+		if (spotNeighbours == null)
+		{
+			// Using the neighbour grid 
+			spotNeighbours = gridManager.getSpotNeighbours(spots[n].x, spots[n].y, n + 1);
+			// Ensure they are sorted in ID order
+			Arrays.sort(spotNeighbours);
+			Collections.reverse(Arrays.asList(spotNeighbours));
+		}
+		return spotNeighbours;
+	}
+
+	private PeakResult[] findPeakNeighbours(Spot[] spots, int n)
+	{
+		if (peakNeighbours == null)
+		{
+			// Using the neighbour grid 
+			peakNeighbours = gridManager.getPeakResultNeighbours(spots[n].x, spots[n].y);
+		}
+		return peakNeighbours;
 	}
 
 	/**
@@ -1791,15 +1783,29 @@ public class FitWorker implements Runnable
 						background);
 		}
 
-		// TODO - Speed this up by storing the maxima in a grid and only compare the neighbouring grid cells
-
 		// Check all maxima that are lower than this
 		neighbourCount = 0;
+
+		// Using the neighbour grid 
+		final Spot[] spotNeighbours = findSpotNeighbours(spots, n);
+		for (int i = 0; i < spotNeighbours.length; i++)
+		{
+			final int id = (int) spotNeighbours[i].getScore();
+			if (canIgnore(spots[id].x, spots[id].y, xmin, xmax, ymin, ymax, spots[id].intensity, heightThreshold))
+				continue;
+			neighbourIndices[neighbourCount++] = id;
+		}
+
+		// Processing all lower spots.
+		// XXX - This is the old code and is here as a check. Remove this.
+		int c = 0;
 		for (int i = n + 1; i < spots.length; i++)
 		{
 			if (canIgnore(spots[i].x, spots[i].y, xmin, xmax, ymin, ymax, spots[i].intensity, heightThreshold))
 				continue;
-			neighbourIndices[neighbourCount++] = i;
+			//neighbourIndices[c++] = i;
+			if (neighbourIndices[c++] != i)
+				throw new RuntimeException("invalid grid neighbours");
 		}
 
 		// Check all existing maxima. 
@@ -1831,9 +1837,11 @@ public class FitWorker implements Runnable
 			final double x0max = regionBounds.x + regionBounds.width;
 			final double y0max = regionBounds.y + regionBounds.height;
 
-			for (int i = 0; i < sliceResults.size(); i++)
+			final PeakResult[] peakNeighbours = findPeakNeighbours(spots, n);
+
+			for (int i = 0; i < peakNeighbours.length; i++)
 			{
-				final PeakResult result = sliceResults.get(i);
+				final PeakResult result = peakNeighbours[i];
 				// No height threshold check as this is a validated peak
 				final double xw = 2 * result.getXSD();
 				final double yw = 2 * result.getYSD();
@@ -2171,10 +2179,15 @@ public class FitWorker implements Runnable
 				final int xmax = cx2 + fitting;
 				final int ymin = cy2 - fitting;
 				final int ymax = cy2 + fitting;
-				for (int i = candidate + 1; i < spots.length; i++)
+				final Spot[] spotNeighbours = findSpotNeighbours(spots, candidate);
+				for (int j = 0; j < spotNeighbours.length; j++)
 				{
-					if (i == candidate || spots[i].x < xmin || spots[i].x > xmax || spots[i].y < ymin ||
-							spots[i].y > ymax)
+					final int i = (int) spotNeighbours[j].getScore();
+					//for (int i = candidate + 1; i < spots.length; i++)
+					//{
+					if (
+					//i == candidate || 
+					spots[i].x < xmin || spots[i].x > xmax || spots[i].y < ymin || spots[i].y > ymax)
 						continue;
 					if (d2 > distance2(fcx2, fcy2, spots[i]))
 					{
@@ -2190,12 +2203,14 @@ public class FitWorker implements Runnable
 						// It must optionally pass an additional filter 
 						if (filter != null)
 						{
-							if (filter.accept(fitConfig.createPreprocessedPeakResult(n, newFitResult.getInitialParameters(), newParams)));
-								storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
+							if (filter.accept(fitConfig.createPreprocessedPeakResult(n,
+									newFitResult.getInitialParameters(), newParams)))
+								;
+							storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
 						}
 						else
 							storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
-						
+
 						// There is another candidate to be fit later that is closer
 						continue NEXT_PEAK;
 					}
@@ -2209,7 +2224,8 @@ public class FitWorker implements Runnable
 				final float fxmax = fcx2 + fitting;
 				final float fymin = fcy2 - fitting;
 				final float fymax = fcy2 + fitting;
-				for (PeakResult result : sliceResults)
+				final PeakResult[] peakNeighbours = findPeakNeighbours(spots, candidate);
+				for (PeakResult result : peakNeighbours) //sliceResults)
 				{
 					if (result.getXPosition() < fxmin || result.getXPosition() > fxmax ||
 							result.getYPosition() < fymin || result.getYPosition() > fymax)
