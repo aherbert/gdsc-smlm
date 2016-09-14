@@ -635,16 +635,29 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
-	 * Calculate the combined peak standard deviation. this is equal to the square root of the product of the width in X
+	 * Calculate the combined peak standard deviation. This is equal to the square root of the product of the width in X
 	 * and Y.
 	 * 
 	 * @return The combined peak standard deviation in the X and Y dimension
 	 */
 	public float getSD()
 	{
-		if (params[Gaussian2DFunction.X_SD] == params[Gaussian2DFunction.Y_SD])
-			return params[Gaussian2DFunction.X_SD];
-		return (float) Math.sqrt(Math.abs(params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD]));
+		return getSD(params[Gaussian2DFunction.X_SD],  params[Gaussian2DFunction.Y_SD]);
+	}
+
+	/**
+	 * Calculate the combined peak standard deviation. This is equal to the square root of the product of the width in X
+	 * and Y.
+	 * 
+	 * @param xsd
+	 * @param ysd
+	 * @return The combined peak standard deviation in the X and Y dimension
+	 */
+	public static float getSD(float xsd, float ysd)
+	{
+		if (xsd == ysd)
+			return xsd;
+		return (float) Math.sqrt(Math.abs(xsd * ysd));
 	}
 
 	/**
