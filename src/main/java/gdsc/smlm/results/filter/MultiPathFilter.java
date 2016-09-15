@@ -68,7 +68,7 @@ public class MultiPathFilter
 	 */
 	public void setup()
 	{
-		filter.setup();		
+		filter.setup();
 	}
 
 	/**
@@ -103,8 +103,7 @@ public class MultiPathFilter
 	 * Filter a multi-path set of peak results into a set that are accepted.
 	 * <p>
 	 * Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other
-	 * results are
-	 * assumed to be candidates that were fitted but will not be validated.
+	 * results are assumed to be candidates that were fitted but will not be validated.
 	 * 
 	 * @param multiPathResult
 	 * @return The new peak results that are accepted (or null)
@@ -317,10 +316,10 @@ public class MultiPathFilter
 	 *            The number of actual results
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScore(final MultiPathFitResult[] results, final int failures,
+	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
 			final int n)
 	{
-		return fractionScore(results, failures, n, true);
+		return fractionScore(results, failures, n, false);
 	}
 
 	/**
@@ -337,41 +336,45 @@ public class MultiPathFilter
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @return the filtered results
 	 */
-	public MultiPathFitResult[] filterSubset(final MultiPathFitResult[] results, final int failures)
+	public MultiPathFitResults[] filterSubset(final MultiPathFitResults[] results, final int failures)
 	{
-		final MultiPathFitResult[] newResults = new MultiPathFitResult[results.length];
+		final MultiPathFitResults[] newResults = new MultiPathFitResults[results.length];
 		int size = 0;
 
 		setup();
-		int frame = -1;
-		int failCount = 0;
-		for (MultiPathFitResult multiPathResult : results)
+		for (MultiPathFitResults multiPathResults : results)
 		{
 			// Reset fail count for new frames
-			if (frame != multiPathResult.frame)
+			int failCount = 0;
+			int size2 = 0;
+			final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.multiPathFitResults.length];
+			for (MultiPathFitResult multiPathResult : multiPathResults.multiPathFitResults)
 			{
-				frame = multiPathResult.frame;
-				failCount = 0;
+				if (failCount <= failures)
+				{
+					// Assess the result if we are below the fail limit
+					final PreprocessedPeakResult[] result = accept(multiPathResult);
+					if (result != null)
+					{
+						// This has valid results so add to the output subset 
+						newMultiPathResults[size2++] = multiPathResult;
+						// Store the number of failures before this result
+						multiPathResult.failCount = failCount;
+						// Reset fail count
+						failCount = 0;
+					}
+					else
+					{
+						// This was rejected, increment fail count
+						failCount++;
+					}
+				}
 			}
 
-			if (failCount <= failures)
+			if (size2 != 0)
 			{
-				// Assess the result if we are below the fail limit
-				final PreprocessedPeakResult[] result = accept(multiPathResult);
-				if (result != null)
-				{
-					// This has valid result so add to the output subset 
-					newResults[size++] = multiPathResult;
-					// Store the number of failures before this result
-					multiPathResult.failCount = failCount;
-					// Reset fail count
-					failCount = 0;
-				}
-				else
-				{
-					// This was rejected, increment fail count
-					failCount++;
-				}
+				newResults[size++] = new MultiPathFitResults(multiPathResults.frame,
+						Arrays.copyOf(newMultiPathResults, size2), multiPathResults.totalCandidates);
 			}
 		}
 
@@ -399,7 +402,7 @@ public class MultiPathFilter
 	 *            The number of actual results
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResult[] results, final int failures,
+	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
 			final int n)
 	{
 		return fractionScore(results, failures, n, true);
@@ -428,68 +431,62 @@ public class MultiPathFilter
 	 *            True if a subset
 	 * @return the score
 	 */
-	private FractionClassificationResult fractionScore(final MultiPathFitResult[] results, final int failures,
+	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
 			final int n, final boolean subset)
 	{
 		final double[] score = new double[4];
 		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
 
 		setup();
-		int frame = -1;
-		int failCount = 0;
-		int nPredicted = 0;
-		for (MultiPathFitResult multiPathResult : results)
+		for (MultiPathFitResults multiPathResults : results)
 		{
 			// Reset fail count for new frames
-			if (frame != multiPathResult.frame)
+			int failCount = 0;
+			int nPredicted = 0;
+			for (MultiPathFitResult multiPathResult : multiPathResults.multiPathFitResults)
 			{
-				score(assignments, score, nPredicted);
-				frame = multiPathResult.frame;
-				failCount = 0;
-				nPredicted = 0;
-			}
+				// Include the number of failures before this result from the larger set
+				if (subset)
+					failCount += multiPathResult.failCount;
 
-			// Include the number of failures before this result from the larger set
-			if (subset)
-				failCount += multiPathResult.failCount;
-
-			if (failCount <= failures)
-			{
-				// Assess the result if we are below the fail limit
-				final PreprocessedPeakResult[] result = accept(multiPathResult);
-				final int size = nPredicted;
-				if (result != null)
+				if (failCount <= failures)
 				{
-					// For all the results that were returned, check if any are classified results
-					// and store the classifications
-					for (int i = 0; i < result.length; i++)
+					// Assess the result if we are below the fail limit
+					final PreprocessedPeakResult[] result = accept(multiPathResult);
+					final int size = nPredicted;
+					if (result != null)
 					{
-						if (result[i].isNewResult())
+						// For all the results that were returned, check if any are classified results
+						// and store the classifications
+						for (int i = 0; i < result.length; i++)
 						{
-							final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
-							if (a != null && a.length > 0)
+							if (result[i].isNewResult())
 							{
-								//list.addAll(Arrays.asList(a));
-								assignments.addAll(new DummyCollection(a));
+								final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
+								if (a != null && a.length > 0)
+								{
+									//list.addAll(Arrays.asList(a));
+									assignments.addAll(new DummyCollection(a));
+								}
 							}
 						}
 					}
-				}
-				if (size != nPredicted)
-				{
-					// More results were accepted so reset the fail count
-					failCount = 0;
-				}
-				else
-				{
-					// Nothing was accepted, increment fail count
-					failCount++;
+					if (size != nPredicted)
+					{
+						// More results were accepted so reset the fail count
+						failCount = 0;
+					}
+					else
+					{
+						// Nothing was accepted, increment fail count
+						failCount++;
+					}
 				}
 			}
+			
+			score(assignments, score, nPredicted);
 		}
 
-		// Score final frame
-		score(assignments, score, nPredicted);
 
 		// Note: We are using the integer positives and negatives fields to actually store integer TP and FP
 		return new FractionClassificationResult(score[0], score[1], 0, n - score[0], (int) score[2], (int) score[3]);
