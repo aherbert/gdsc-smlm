@@ -171,4 +171,11 @@ public interface PreprocessedPeakResult
 	 * @return The assignments
 	 */
 	FractionalAssignment[] getAssignments(int predictedId);
+
+	/**
+	 * Convert this to the parameters for a Gaussian2DFunction
+	 * 
+	 * @return the parameters
+	 */
+	public double[] toGaussian2DParameters();
 }
