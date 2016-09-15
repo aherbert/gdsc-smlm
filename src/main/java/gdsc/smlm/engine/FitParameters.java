@@ -1,7 +1,6 @@
 package gdsc.smlm.engine;
 
 import gdsc.smlm.filters.Spot;
-import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.results.filter.MultiPathFilter;
 
 import java.util.List;
