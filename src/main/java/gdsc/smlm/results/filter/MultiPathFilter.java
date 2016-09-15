@@ -345,13 +345,20 @@ public class MultiPathFilter
 
 					if (count != 0)
 					{
-						// This has valid results so add to the output subset only those that are new 
-						final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[count];
-						for (int i = 0; i < count; i++)
+						// This has valid results so add to the output subset only those that are new
+						if (count == ok.length)
 						{
-							filtered[i] = result.results[ok[i]];
+							store.add(result);
 						}
-						store.add(new SelectedResult(filtered, result.fitResult));
+						else
+						{
+							final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[count];
+							for (int i = 0; i < count; i++)
+							{
+								filtered[i] = result.results[ok[i]];
+							}
+							store.add(new SelectedResult(filtered, result.fitResult));
+						}
 
 						// More results were accepted so reset the fail count
 						failCount = 0;
