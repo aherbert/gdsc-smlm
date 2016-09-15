@@ -144,7 +144,7 @@ public interface PreprocessedPeakResult
 	 * @return True if this result is an existing fit result
 	 */
 	boolean isExistingResult();
-	
+
 	/**
 	 * Return true if this is a new result. It is expected that this can then be classified for use in
 	 * scoring analysis. The {@link #getAssignments(int)} method can then be called to return the assignments.
@@ -164,4 +164,11 @@ public interface PreprocessedPeakResult
 	 * @return The assignments
 	 */
 	FractionalAssignment[] getAssignments(int predictedId);
+
+	/**
+	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
+	 * 
+	 * @return the candidate Id (-1 for no candidate)
+	 */
+	int getCandidateId();
 }

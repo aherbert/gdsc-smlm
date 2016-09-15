@@ -47,12 +47,14 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final double variance;
 	private final boolean existingResult;
 	private final boolean newResult;
+	private final int candidateId;
 
 	private ResultAssignment[] assignments;
 
 	//@formatter:off
 	/**
-	 * Create a new BasePreprocessedPeakResult
+	 * Create a new BasePreprocessedPeakResult.
+	 *
 	 * @param frame The frame
 	 * @param signal The signal
 	 * @param photons The signal calibrated as photons
@@ -61,7 +63,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * @param angle The angle of the fit
 	 * @param x The x-position
 	 * @param y The y-position
-	 * @param x0 The initial x-position 
+	 * @param x0 The initial x-position
 	 * @param y0 The initial y-position
 	 * @param xsd The x standard deviation
 	 * @param ysd The y standard deviation
@@ -69,6 +71,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * @param ysd0 The initial y standard deviation
 	 * @param variance The estimate of the localisation variance
 	 * @param resultType The type of result
+	 * @param candidateId the candidate id
 	 */
 	public BasePreprocessedPeakResult(
 			int frame,
@@ -86,7 +89,8 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			float xsd0,
 			float ysd0,
 			double variance,
-			ResultType resultType
+			ResultType resultType,
+			int candidateId
 			)
 	{
 		//@formatter:on
@@ -110,6 +114,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.variance = variance;
 		this.existingResult = resultType == ResultType.EXISTING;
 		this.newResult = resultType == ResultType.NEW;
+		this.candidateId = candidateId;
 	}
 
 	private static float squared(float f)
@@ -215,6 +220,11 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public boolean isNewResult()
 	{
 		return newResult;
+	}
+
+	public int getCandidateId()
+	{
+		return candidateId;
 	}
 
 	/**

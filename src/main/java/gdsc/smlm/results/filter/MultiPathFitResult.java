@@ -88,6 +88,11 @@ public class MultiPathFitResult
 	 * The height of the fit region
 	 */
 	public int height;
+	
+	/**
+	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
+	 */
+	public int candidateId;
 
 	/**
 	 * The score from residuals analysis on the residuals of the single fit. This can be used to choose if the doublet

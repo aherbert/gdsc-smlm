@@ -103,21 +103,24 @@ public class MultiPathFilter
 	 * Filter a multi-path set of peak results into a set that are accepted.
 	 * <p>
 	 * Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other
-	 * results are assumed to be candidates that were fitted but will not be validated.
-	 * 
+	 * results are assumed to be candidates that were fitted but will not be validated unless required.
+	 *
 	 * @param multiPathResult
-	 * @return The new peak results that are accepted (or null)
+	 *            the multi path result
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @return The new peak results that are accepted (and any valid candidates if found); or null
 	 */
-	final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult)
+	final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates)
 	{
 		PreprocessedPeakResult[] results = null;
 
 		// Filter multi-fit
-		if ((results = acceptAll(multiPathResult.multiFitResult)) != null)
+		if ((results = acceptAll(multiPathResult.multiFitResult, validateCandidates)) != null)
 			return results;
 
 		// Filter single-fit
-		if ((results = acceptAll(multiPathResult.singleFitResult)) == null)
+		if ((results = acceptAll(multiPathResult.singleFitResult, false)) == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
@@ -172,7 +175,7 @@ public class MultiPathFilter
 		// We reached here with a single fit that is eligible for doublet fitting
 
 		// Filter doublet fit
-		final PreprocessedPeakResult[] doubletResults = acceptAny(multiPathResult.doubletFitResult);
+		final PreprocessedPeakResult[] doubletResults = acceptAny(multiPathResult.doubletFitResult, validateCandidates);
 		if (doubletResults != null)
 			return doubletResults;
 
@@ -184,9 +187,11 @@ public class MultiPathFilter
 	 * 
 	 * @param fitResult
 	 *            the results
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
 	 * @return The new results that pass the filter
 	 */
-	private PreprocessedPeakResult[] acceptAll(final FitResult fitResult)
+	private PreprocessedPeakResult[] acceptAll(final FitResult fitResult, boolean validateCandidates)
 	{
 		if (fitResult == null || fitResult.results == null)
 			return null;
@@ -194,6 +199,7 @@ public class MultiPathFilter
 
 		// All new and existing results should be valid
 		int count = 0;
+		final int[] ok = new int[results.length]; 
 		for (int i = 0; i < results.length; i++)
 		{
 			if (results[i].isNewResult())
@@ -201,13 +207,19 @@ public class MultiPathFilter
 				// All new results must pass
 				if (!accept(results[i]))
 					return null;
-				count++;
+				ok[count++] = i;
 			}
 			else if (results[i].isExistingResult())
 			{
 				// All existing results must pass
 				if (!accept(results[i]))
 					return null;
+			}
+			else if (validateCandidates)
+			{
+				// Optionally candidates must pass
+				if (accept(results[i]))
+					ok[count++] = i;
 			}
 		}
 
@@ -216,11 +228,9 @@ public class MultiPathFilter
 
 		// Return the new results
 		final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[count];
-		count = 0;
-		for (int i = 0; i < results.length; i++)
+		for (int i = 0; i < count; i++)
 		{
-			if (results[i].isNewResult())
-				filtered[count++] = results[i];
+			filtered[i] = results[ok[i]];
 		}
 		return filtered;
 	}
@@ -230,9 +240,11 @@ public class MultiPathFilter
 	 * 
 	 * @param fitResult
 	 *            the results
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
 	 * @return The new results that pass the filter
 	 */
-	private PreprocessedPeakResult[] acceptAny(final FitResult fitResult)
+	private PreprocessedPeakResult[] acceptAny(final FitResult fitResult, boolean validateCandidates)
 	{
 		if (fitResult == null || fitResult.results == null)
 			return null;
@@ -254,6 +266,12 @@ public class MultiPathFilter
 				// All existing results must pass
 				if (!accept(results[i]))
 					return null;
+			}
+			else if (validateCandidates)
+			{
+				// Optionally candidates must pass
+				if (accept(results[i]))
+					ok[count++] = i;
 			}
 		}
 
@@ -291,7 +309,7 @@ public class MultiPathFilter
 		ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
 		for (MultiPathFitResult multiPathResult : results)
 		{
-			PreprocessedPeakResult[] result = accept(multiPathResult);
+			PreprocessedPeakResult[] result = accept(multiPathResult, false);
 			if (result != null)
 				list.addAll(Arrays.asList(result));
 		}
@@ -348,20 +366,44 @@ public class MultiPathFilter
 			int failCount = 0;
 			int size2 = 0;
 			final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.multiPathFitResults.length];
-			for (MultiPathFitResult multiPathResult : multiPathResults.multiPathFitResults)
+			final boolean[] estimate = new boolean[multiPathResults.totalCandidates];
+			for (int c = 0; c < newMultiPathResults.length; c++)
 			{
-				if (failCount <= failures)
+				final MultiPathFitResult multiPathResult = multiPathResults.multiPathFitResults[c];
+
+				if (failCount <= failures || estimate[multiPathResult.candidateId])
 				{
-					// Assess the result if we are below the fail limit
-					final PreprocessedPeakResult[] result = accept(multiPathResult);
+					// Assess the result if we are below the fail limit or have an estimate
+					final PreprocessedPeakResult[] result = accept(multiPathResult, true);
 					if (result != null)
 					{
+						boolean isNew = false;
+						for (int i = 0; i < result.length; i++)
+						{
+							if (result[i].isNewResult())
+								isNew = true;
+							// This is something that passed validation and can be used as an estimate
+							estimate[result[i].getCandidateId()] = true;
+						}
+
+						// Note: Even if the actual result failed, the candidate may have passed and so 
+						// the entire multi-path result should be retained.
+
 						// This has valid results so add to the output subset 
 						newMultiPathResults[size2++] = multiPathResult;
 						// Store the number of failures before this result
 						multiPathResult.failCount = failCount;
-						// Reset fail count
-						failCount = 0;
+
+						if (isNew)
+						{
+							// More results were accepted so reset the fail count
+							failCount = 0;
+						}
+						else
+						{
+							// Nothing was accepted, increment fail count
+							failCount++;
+						}
 					}
 					else
 					{
@@ -443,16 +485,19 @@ public class MultiPathFilter
 			// Reset fail count for new frames
 			int failCount = 0;
 			int nPredicted = 0;
-			for (MultiPathFitResult multiPathResult : multiPathResults.multiPathFitResults)
+			final boolean[] estimate = new boolean[multiPathResults.totalCandidates];
+			for (int c = 0; c < multiPathResults.multiPathFitResults.length; c++)
 			{
+				final MultiPathFitResult multiPathResult = multiPathResults.multiPathFitResults[c];
+
 				// Include the number of failures before this result from the larger set
 				if (subset)
 					failCount += multiPathResult.failCount;
 
-				if (failCount <= failures)
+				if (failCount <= failures || estimate[multiPathResult.candidateId])
 				{
-					// Assess the result if we are below the fail limit
-					final PreprocessedPeakResult[] result = accept(multiPathResult);
+					// Assess the result if we are below the fail limit or have an estimate
+					final PreprocessedPeakResult[] result = accept(multiPathResult, true);
 					final int size = nPredicted;
 					if (result != null)
 					{
@@ -469,6 +514,8 @@ public class MultiPathFilter
 									assignments.addAll(new DummyCollection(a));
 								}
 							}
+							// This is something that passed validation and can be used as an estimate
+							estimate[result[i].getCandidateId()] = true;
 						}
 					}
 					if (size != nPredicted)
@@ -483,10 +530,9 @@ public class MultiPathFilter
 					}
 				}
 			}
-			
+
 			score(assignments, score, nPredicted);
 		}
-
 
 		// Note: We are using the integer positives and negatives fields to actually store integer TP and FP
 		return new FractionClassificationResult(score[0], score[1], 0, n - score[0], (int) score[2], (int) score[3]);
