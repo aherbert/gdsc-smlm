@@ -10,7 +10,6 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.RankedScoreCalculator;
-import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
 /*----------------------------------------------------------------------------- 
@@ -142,7 +141,7 @@ public class MultiPathFilter
 			// and is suitable for a doublet fit.
 
 			// Check there is a result for the single spot
-			if (multiPathResult.singleFitResult.status != FitStatus.OK)
+			if (multiPathResult.singleFitResult.status != 0)
 				return null;
 
 			// Check if the residuals score is below the configured threshold
@@ -225,7 +224,7 @@ public class MultiPathFilter
 			// and is suitable for a doublet fit.
 
 			// Check there is a result for the single spot
-			if (multiPathResult.singleFitResult.status != FitStatus.OK)
+			if (multiPathResult.singleFitResult.status != 0)
 				return null;
 
 			// Check if the residuals score is below the configured threshold

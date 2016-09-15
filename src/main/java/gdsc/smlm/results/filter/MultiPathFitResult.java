@@ -1,7 +1,5 @@
 package gdsc.smlm.results.filter;
 
-import gdsc.smlm.fitting.FitStatus;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -28,9 +26,9 @@ public class MultiPathFitResult
 	public static class FitResult
 	{
 		/**
-		 * Fitting status of the fit
+		 * Fitting status of the fit. Zero for OK.
 		 */
-		final public FitStatus status;
+		final public int status;
 
 		/**
 		 * The results from the fit. It is expected that one or more results will be true for isNewResult() and zero or
@@ -43,18 +41,18 @@ public class MultiPathFitResult
 		 */
 		final public Object data;
 
-		public FitResult(FitStatus status)
+		public FitResult(int status)
 		{
 			this(status, null);
 		}
 
-		public FitResult(FitStatus status, Object data)
+		public FitResult(int status, Object data)
 		{
 			this.status = status;
 			this.data = data;
 		}
 
-		public FitStatus getStatus()
+		public int getStatus()
 		{
 			return status;
 		}
