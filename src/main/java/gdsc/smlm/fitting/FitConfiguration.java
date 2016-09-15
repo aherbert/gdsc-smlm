@@ -1182,7 +1182,7 @@ public class FitConfiguration implements Cloneable
 	 */
 	private class DynamicPeakResult implements PreprocessedPeakResult
 	{
-		int candidateId;
+		int id, candidateId;
 		int offset;
 		double[] initialParams;
 		double[] params;
@@ -1214,6 +1214,7 @@ public class FitConfiguration implements Cloneable
 		 */
 		void setParameters(int candidateId, int n, double[] initialParams, double[] params, ResultType resultType)
 		{
+			this.id = n;
 			this.candidateId = candidateId;
 			offset = n * 6;
 			this.initialParams = initialParams;
@@ -1226,6 +1227,11 @@ public class FitConfiguration implements Cloneable
 		{
 			// Not implemented
 			return 0;
+		}
+
+		public int getId()
+		{
+			return id;
 		}
 
 		public int getCandidateId()
@@ -1396,6 +1402,8 @@ public class FitConfiguration implements Cloneable
 	 *
 	 * @param frame
 	 *            the frame
+	 * @param id
+	 *            the id
 	 * @param candidateId
 	 *            the candidate id
 	 * @param n
@@ -1430,7 +1438,7 @@ public class FitConfiguration implements Cloneable
 		final float xsd0 = (float) initialParameters[offset + Gaussian2DFunction.X_SD];
 		final float ysd0 = (float) initialParameters[offset + Gaussian2DFunction.Y_SD];
 		final double variance = getVariance(b, signal, PeakResult.getSD(xsd, ysd));
-		return new BasePreprocessedPeakResult(frame, candidateId, signal, photons, (float) noise, b, angle, x, y, x0,
+		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, (float) noise, b, angle, x, y, x0,
 				y0, xsd, ysd, xsd0, ysd0, variance, resultType);
 	}
 
