@@ -36,8 +36,8 @@ public class MultiPathFilter
 	 */
 	public class SelectedResult
 	{
-		final PreprocessedPeakResult[] results;
-		final FitResult fitResult;
+		final public PreprocessedPeakResult[] results;
+		final public FitResult fitResult;
 
 		public SelectedResult(PreprocessedPeakResult[] results, FitResult fitResult)
 		{
