@@ -47,6 +47,19 @@ public class MultiPathFilter
 	}
 
 	/**
+	 * Allows storage of results that have been selected
+	 */
+	public interface SelectedResultStore
+	{
+		/**
+		 * Add a selected result to the store
+		 * 
+		 * @param selectedResult
+		 */
+		void add(SelectedResult selectedResult);
+	}
+
+	/**
 	 * The direct filter to apply to the results
 	 */
 	@XStreamAsAttribute
@@ -284,12 +297,12 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Filter a set of peak results into a set that are accepted.
+	 * Select a set of peak results.
 	 * <p>
 	 * The number of consecutive rejections are counted. When the configured number of failures is reached all
 	 * remaining results are rejected.
 	 * <p>
-	 * A selected result will be return for each MultiPathFitResult that is assessed, even if the fitting failed. In
+	 * A selected result will be stored for each MultiPathFitResult that is assessed, even if the fitting failed. In
 	 * this case the list of accepted results will be null.
 	 *
 	 * @param multiPathResults
@@ -298,15 +311,17 @@ public class MultiPathFilter
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param setup
 	 *            Set to true to run the {@link #setup()} method
+	 * @param store
+	 *            the store
 	 * @return the results
 	 */
-	public SelectedResult[] select(final IMultiPathFitResults multiPathResults, final int failures, boolean setup)
+	public void select(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
+			SelectedResultStore store)
 	{
 		if (setup)
 			setup();
 
 		int failCount = 0;
-		int size = 0;
 		final SelectedResult[] selectedResults = new SelectedResult[multiPathResults.getNumberOfResults()];
 		for (int c = 0; c < selectedResults.length; c++)
 		{
@@ -336,14 +351,14 @@ public class MultiPathFilter
 						{
 							filtered[i] = result.results[ok[i]];
 						}
-						selectedResults[size++] = new SelectedResult(filtered, result.fitResult);
+						store.add(new SelectedResult(filtered, result.fitResult));
 
 						// More results were accepted so reset the fail count
 						failCount = 0;
 					}
 					else
 					{
-						selectedResults[size++] = new SelectedResult(null, result.fitResult);
+						store.add(new SelectedResult(null, result.fitResult));
 
 						// Nothing was accepted, increment fail count
 						failCount++;
@@ -352,18 +367,13 @@ public class MultiPathFilter
 				else
 				{
 					// This failed. Just return the single result
-					selectedResults[size++] = new SelectedResult(null, multiPathResult.singleFitResult);
-					
+					store.add(new SelectedResult(null, multiPathResult.singleFitResult));
+
 					// This was rejected, increment fail count
 					failCount++;
 				}
 			}
 		}
-
-		if (size != 0)
-			return Arrays.copyOf(selectedResults, size);
-
-		return null;
 	}
 
 	/**
