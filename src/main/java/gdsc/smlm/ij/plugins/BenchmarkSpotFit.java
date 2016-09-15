@@ -599,18 +599,18 @@ public class BenchmarkSpotFit implements PlugIn
 					// Otherwise store all results with the same Id. The best match for these results will be chosen.
 					final int size = predicted.size();
 
-					if (fitResult[i].singleFitResult.status == FitStatus.OK)
+					if (fitResult[i].singleFitResult.status == 0)
 					{
 						predicted.add(new MultiPathPoint(fitResult[i].singleFitResult.results[0], id,
 								MultiPathPoint.SINGLE, i));
 					}
-					if (fitResult[i].multiFitResult.status == FitStatus.OK)
+					if (fitResult[i].multiFitResult.status == 0)
 					{
 						predicted.add(new MultiPathPoint(fitResult[i].multiFitResult.results[0], id,
 								MultiPathPoint.MULTI, i));
 					}
 					int increment = 1;
-					if (fitResult[i].doubletFitResult.status == FitStatus.OK &&
+					if (fitResult[i].doubletFitResult.status == 0 &&
 							fitResult[i].doubletFitResult.results.length != 0)
 					{
 						increment = fitResult[i].doubletFitResult.results.length;
@@ -1207,12 +1207,12 @@ public class BenchmarkSpotFit implements PlugIn
 				if (singleStatus != null)
 				{
 					// Debugging reasons for fit failure
-					if (fitResult.singleFitResult.status != FitStatus.OK)
-						singleStatus[fitResult.singleFitResult.status.ordinal()]++;
-					if (fitResult.multiFitResult.status != FitStatus.OK)
-						multiStatus[fitResult.multiFitResult.status.ordinal()]++;
-					if (fitResult.doubletFitResult.status != FitStatus.OK)
-						doubletStatus[fitResult.doubletFitResult.status.ordinal()]++;
+					if (fitResult.singleFitResult.status != 0)
+						singleStatus[fitResult.singleFitResult.status]++;
+					if (fitResult.multiFitResult.status != 0)
+						multiStatus[fitResult.multiFitResult.status]++;
+					if (fitResult.doubletFitResult.status != 0)
+						doubletStatus[fitResult.doubletFitResult.status]++;
 				}
 
 				if (noMatch(result.fitMatch[i]))
@@ -1281,7 +1281,7 @@ public class BenchmarkSpotFit implements PlugIn
 				name += " Camera";
 			System.out.println("Failure counts: " + name);
 			int total = 0;
-			for (int i = 0; i < singleStatus.length; i++)
+			for (int i = 1; i < singleStatus.length; i++)
 			{
 				if (singleStatus[i] != 0)
 				{
@@ -1290,7 +1290,7 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 			}
 			int total2 = 0;
-			for (int i = 0; i < multiStatus.length; i++)
+			for (int i = 1; i < multiStatus.length; i++)
 			{
 				if (multiStatus[i] != 0)
 				{
@@ -1299,7 +1299,7 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 			}
 			int total3 = 0;
-			for (int i = 0; i < doubletStatus.length; i++)
+			for (int i = 1; i < doubletStatus.length; i++)
 			{
 				if (doubletStatus[i] != 0)
 				{
@@ -1611,7 +1611,7 @@ public class BenchmarkSpotFit implements PlugIn
 	{
 		final FitResult actualFitResult = (FitResult) fitResult.getData();
 
-		if (fitResult.status != FitStatus.OK)
+		if (fitResult.status != 0)
 		{
 			// Add the evaluations for spots that were not OK
 			if (resultIndex == 0)
