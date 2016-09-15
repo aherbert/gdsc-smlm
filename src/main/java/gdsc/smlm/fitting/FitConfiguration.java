@@ -26,7 +26,9 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
+import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.core.logging.Logger;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
@@ -1180,28 +1182,55 @@ public class FitConfiguration implements Cloneable
 	 */
 	private class DynamicPeakResult implements PreprocessedPeakResult
 	{
+		int candidateId;
 		int offset;
 		double[] initialParams;
 		double[] params;
+		boolean existingResult;
+		boolean newResult;
+
+		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, ResultType resultType)
+		{
+			setParameters(candidateId, n, initialParams, params, resultType);
+		}
+
+		DynamicPeakResult()
+		{
+		}
 
 		/**
+		 * Sets the parameters.
+		 *
+		 * @param candidateId
+		 *            the candidate id
 		 * @param n
 		 *            The peak number
 		 * @param initialParams
 		 *            The initial peak parameters
 		 * @param params
 		 *            The fitted peak parameters
+		 * @param resultType
+		 *            the result type
 		 */
-		void setParameters(int n, double[] initialParams, double[] params)
+		void setParameters(int candidateId, int n, double[] initialParams, double[] params, ResultType resultType)
 		{
+			this.candidateId = candidateId;
 			offset = n * 6;
-
+			this.initialParams = initialParams;
+			this.params = params;
+			this.existingResult = resultType == ResultType.EXISTING;
+			this.newResult = resultType == ResultType.NEW;
 		}
 
 		public int getFrame()
 		{
 			// Not implemented
 			return 0;
+		}
+
+		public int getCandidateId()
+		{
+			return candidateId;
 		}
 
 		public float getSignal()
@@ -1226,16 +1255,14 @@ public class FitConfiguration implements Cloneable
 
 		public double getLocationVariance()
 		{
-			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
-					0.5;
 			return FitConfiguration.this.getVariance(params[Gaussian2DFunction.BACKGROUND],
-					params[Gaussian2DFunction.SIGNAL + offset], sd);
+					params[Gaussian2DFunction.SIGNAL + offset], getSD());
 		}
 
 		public float getSD()
 		{
-			return (float) ((params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
-					0.5);
+			return (float) PeakResult.getSD(params[Gaussian2DFunction.X_SD + offset],
+					params[Gaussian2DFunction.Y_SD + offset]);
 		}
 
 		public float getBackground()
@@ -1268,14 +1295,16 @@ public class FitConfiguration implements Cloneable
 		public float getXRelativeShift2()
 		{
 			final double d = (params[Gaussian2DFunction.X_POSITION + offset] -
-					initialParams[Gaussian2DFunction.X_POSITION + offset]) / initialParams[Gaussian2DFunction.X_SD + offset];
+					initialParams[Gaussian2DFunction.X_POSITION + offset]) /
+					initialParams[Gaussian2DFunction.X_SD + offset];
 			return (float) (d * d);
 		}
 
 		public float getYRelativeShift2()
 		{
 			final double d = (params[Gaussian2DFunction.Y_POSITION + offset] -
-					initialParams[Gaussian2DFunction.Y_POSITION + offset]) / initialParams[Gaussian2DFunction.Y_SD + offset];
+					initialParams[Gaussian2DFunction.Y_POSITION + offset]) /
+					initialParams[Gaussian2DFunction.Y_SD + offset];
 			return (float) (d * d);
 		}
 
@@ -1301,35 +1330,108 @@ public class FitConfiguration implements Cloneable
 
 		public boolean isExistingResult()
 		{
-			return false;
+			return existingResult;
 		}
 
 		public boolean isNewResult()
 		{
-			return false;
+			return newResult;
 		}
 
 		public FractionalAssignment[] getAssignments(int predictedId)
 		{
 			return null;
 		}
+
+		public double[] toGaussian2DParameters()
+		{
+			final double[] p = new double[7];
+			p[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
+			System.arraycopy(params, offset, p, 0, 6);
+			return p;
+		}
 	}
 
 	/**
-	 * Create an object that can return the results in a formatted state for the multi-path filter
-	 * 
+	 * Create a dynamic object that can return the results in a formatted state for the multi-path filter.
+	 * <p>
+	 * The result is dynamic in that it computes the values just-in-time using the input array data.
+	 * <p>
+	 * The result can be a recycled object that is associated with this fit configuration, or a new object. If using the
+	 * recycled object then a second call to this method will replace the array data on all references to the object. If
+	 * using a new object then this method can be called again with new data and the old reference is still valid.
+	 * <p>
+	 * Note: All returned objects will be linked with this fit configuration. Thus changing properties such as the gain,
+	 * noise or settings for computing the variance will result in changes to the values returned by the
+	 * PreprocessedPeakResult.
+	 *
+	 * @param candidateId
+	 *            the candidate id
 	 * @param n
 	 *            The peak number
 	 * @param initialParams
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
+	 * @param resultType
+	 *            the result type
+	 * @param newObject
+	 *            Set to true to create a new object, the default uses the object associated with this fit configuration
 	 * @return A preprocessed peak result
 	 */
-	public PreprocessedPeakResult createPreprocessedPeakResult(int n, double[] initialParams, double[] params)
+	public PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+			double[] params, ResultType resultType, boolean newObject)
 	{
-		dynamicPeakResult.setParameters(n, initialParams, params);
+		if (newObject)
+			return new DynamicPeakResult(candidateId, n, initialParams, params, resultType);
+
+		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, resultType);
 		return dynamicPeakResult;
+	}
+
+	/**
+	 * Create an object that can return the results in a formatted state for the multi-path filter.
+	 * <p>
+	 * The result is fixed in that it computes the values on construction using the input array data.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param candidateId
+	 *            the candidate id
+	 * @param n
+	 *            The peak number
+	 * @param initialParameters
+	 *            the initial parameters
+	 * @param parameters
+	 *            the parameters
+	 * @param resultType
+	 *            the result type
+	 * @param offsetx
+	 *            the offsetx to adjust the x-position
+	 * @param offsety
+	 *            the offsety to adjust the y-position
+	 * @return A preprocessed peak result
+	 */
+	public BasePreprocessedPeakResult createPreprocessedPeakResult(int frame, int candidateId, int n,
+			double[] initialParameters, double[] parameters, BasePreprocessedPeakResult.ResultType resultType,
+			float offsetx, float offsety)
+	{
+		final int offset = n * 6;
+		final float signal = (float) parameters[offset + Gaussian2DFunction.SIGNAL];
+		final float photons = (float) (parameters[offset + Gaussian2DFunction.SIGNAL] / getGain());
+		final float b = (float) parameters[Gaussian2DFunction.BACKGROUND];
+		final float angle = (float) parameters[offset + Gaussian2DFunction.ANGLE];
+		final float x = (float) parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
+		final float y = (float) parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
+		final float x0 = (float) initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
+		final float y0 = (float) initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
+		final float xsd = (float) parameters[offset + Gaussian2DFunction.X_SD];
+		final float ysd = (float) parameters[offset + Gaussian2DFunction.Y_SD];
+		final float xsd0 = (float) initialParameters[offset + Gaussian2DFunction.X_SD];
+		final float ysd0 = (float) initialParameters[offset + Gaussian2DFunction.Y_SD];
+		final double variance = getVariance(b, signal, PeakResult.getSD(xsd, ysd));
+		return new BasePreprocessedPeakResult(frame, candidateId, signal, photons, (float) noise, b, angle, x, y, x0,
+				y0, xsd, ysd, xsd0, ysd0, variance, resultType);
 	}
 
 	/**
