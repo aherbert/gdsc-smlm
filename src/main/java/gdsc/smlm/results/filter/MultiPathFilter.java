@@ -288,6 +288,9 @@ public class MultiPathFilter
 	 * <p>
 	 * The number of consecutive rejections are counted. When the configured number of failures is reached all
 	 * remaining results are rejected.
+	 * <p>
+	 * A selected result will be return for each MultiPathFitResult that is assessed, even if the fitting failed. In
+	 * this case the list of accepted results will be null.
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
@@ -340,12 +343,17 @@ public class MultiPathFilter
 					}
 					else
 					{
+						selectedResults[size++] = new SelectedResult(null, result.fitResult);
+
 						// Nothing was accepted, increment fail count
 						failCount++;
 					}
 				}
 				else
 				{
+					// This failed. Just return the single result
+					selectedResults[size++] = new SelectedResult(null, multiPathResult.singleFitResult);
+					
 					// This was rejected, increment fail count
 					failCount++;
 				}
