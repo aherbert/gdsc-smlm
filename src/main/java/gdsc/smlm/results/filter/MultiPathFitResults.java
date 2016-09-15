@@ -21,7 +21,7 @@ package gdsc.smlm.results.filter;
  * <p>
  * This class is used for benchmarking the fitting path options in the PeakFit algorithm.
  */
-public class MultiPathFitResults
+public class MultiPathFitResults implements IMultiPathFitResults
 {
 	/**
 	 * The frame containing the results
@@ -39,6 +39,8 @@ public class MultiPathFitResults
 	 */
 	final public int totalCandidates;
 
+	private boolean[] estimate = null;
+
 	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults)
 	{
 		this(frame, multiPathFitResults, (multiPathFitResults == null) ? 0 : multiPathFitResults.length);
@@ -49,5 +51,39 @@ public class MultiPathFitResults
 		this.frame = frame;
 		this.multiPathFitResults = multiPathFitResults;
 		this.totalCandidates = totalCandidates;
+	}
+
+	public int getFrame()
+	{
+		return frame;
+	}
+
+	public int getNumberOfResults()
+	{
+		return multiPathFitResults.length;
+	}
+
+	public MultiPathFitResult getResult(int index)
+	{
+		return multiPathFitResults[index];
+	}
+
+	public int getTotalCandidates()
+	{
+		return totalCandidates;
+	}
+
+	public boolean isValid(int candidateId)
+	{
+		if (estimate == null)
+			return false;
+		return estimate[candidateId];
+	}
+
+	public void setValid(PreprocessedPeakResult preprocessedPeakResult)
+	{
+		if (estimate == null)
+			estimate = new boolean[totalCandidates];
+		estimate[preprocessedPeakResult.getCandidateId()] = true;
 	}
 }

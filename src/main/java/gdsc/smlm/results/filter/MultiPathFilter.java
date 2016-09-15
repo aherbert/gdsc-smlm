@@ -454,65 +454,108 @@ public class MultiPathFilter
 		setup();
 		for (MultiPathFitResults multiPathResults : results)
 		{
-			// Reset fail count for new frames
-			int failCount = 0;
-			int size2 = 0;
-			final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.multiPathFitResults.length];
-			final boolean[] estimate = new boolean[multiPathResults.totalCandidates];
-			for (int c = 0; c < newMultiPathResults.length; c++)
-			{
-				final MultiPathFitResult multiPathResult = multiPathResults.multiPathFitResults[c];
-
-				if (failCount <= failures || estimate[multiPathResult.candidateId])
-				{
-					// Assess the result if we are below the fail limit or have an estimate
-					final PreprocessedPeakResult[] result = accept(multiPathResult, true);
-					if (result != null)
-					{
-						boolean isNew = false;
-						for (int i = 0; i < result.length; i++)
-						{
-							if (result[i].isNewResult())
-								isNew = true;
-							// This is something that passed validation and can be used as an estimate
-							estimate[result[i].getCandidateId()] = true;
-						}
-
-						// Note: Even if the actual result failed, the candidate may have passed and so 
-						// the entire multi-path result should be retained.
-
-						// This has valid results so add to the output subset 
-						newMultiPathResults[size2++] = multiPathResult;
-						// Store the number of failures before this result
-						multiPathResult.failCount = failCount;
-
-						if (isNew)
-						{
-							// More results were accepted so reset the fail count
-							failCount = 0;
-						}
-						else
-						{
-							// Nothing was accepted, increment fail count
-							failCount++;
-						}
-					}
-					else
-					{
-						// This was rejected, increment fail count
-						failCount++;
-					}
-				}
-			}
-
-			if (size2 != 0)
-			{
-				newResults[size++] = new MultiPathFitResults(multiPathResults.frame,
-						Arrays.copyOf(newMultiPathResults, size2), multiPathResults.totalCandidates);
-			}
+			final MultiPathFitResult[] newMultiPathResults = filter(multiPathResults, failures, false);
+			if (newMultiPathResults != null)
+				newResults[size++] = new MultiPathFitResults(multiPathResults.frame, newMultiPathResults,
+						multiPathResults.totalCandidates);
 		}
 
 		return Arrays.copyOf(newResults, size);
+	}
+
+	/**
+	 * Create a subset of multi-path results, i.e. all those that pass the filter.
+	 * <p>
+	 * The number of consecutive rejections are counted. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected.
+	 * <p>
+	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult.
+	 * 
+	 * @param results
+	 *            a set of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @return the filtered results
+	 */
+	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures)
+	{
+		return filter(multiPathResults, failures, true);
+	}
+
+	/**
+	 * Create a subset of multi-path results, i.e. all those that pass the filter.
+	 * <p>
+	 * The number of consecutive rejections are counted. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected.
+	 * <p>
+	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult.
+	 *
+	 * @param multiPathResults
+	 *            the multi path results
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param setup
+	 *            Set to true to run the {@link #setup()} method
+	 * @return the filtered results
+	 */
+	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean setup)
+	{
+		if (setup)
+			setup();
+
+		int failCount = 0;
+		int size = 0;
+		final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.getNumberOfResults()];
+		for (int c = 0; c < newMultiPathResults.length; c++)
+		{
+			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
+
+			if (failCount <= failures || multiPathResults.isValid(multiPathResult.candidateId))
+			{
+				// Assess the result if we are below the fail limit or have an estimate
+				final PreprocessedPeakResult[] result = accept(multiPathResult, true);
+				if (result != null)
+				{
+					boolean isNew = false;
+					for (int i = 0; i < result.length; i++)
+					{
+						if (result[i].isNewResult())
+							isNew = true;
+						// This is something that passed validation and can be used as an estimate
+						multiPathResults.setValid(result[i]);
+					}
+
+					// Note: Even if the actual result failed, the candidate may have passed and so 
+					// the entire multi-path result should be retained.
+
+					// This has valid results so add to the output subset 
+					newMultiPathResults[size++] = multiPathResult;
+					// Store the number of failures before this result
+					multiPathResult.failCount = failCount;
+
+					if (isNew)
+					{
+						// More results were accepted so reset the fail count
+						failCount = 0;
+					}
+					else
+					{
+						// Nothing was accepted, increment fail count
+						failCount++;
+					}
+				}
+				else
+				{
+					// This was rejected, increment fail count
+					failCount++;
+				}
+			}
+		}
+
+		if (size != 0)
+			return Arrays.copyOf(newMultiPathResults, size);
+
+		return null;
 	}
 
 	/**
