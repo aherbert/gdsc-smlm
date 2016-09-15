@@ -56,6 +56,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * Create a new BasePreprocessedPeakResult.
 	 *
 	 * @param frame The frame
+	 * @param candidateId the candidate id
 	 * @param signal The signal
 	 * @param photons The signal calibrated as photons
 	 * @param noise the noise estimate
@@ -71,10 +72,10 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * @param ysd0 The initial y standard deviation
 	 * @param variance The estimate of the localisation variance
 	 * @param resultType The type of result
-	 * @param candidateId the candidate id
 	 */
 	public BasePreprocessedPeakResult(
 			int frame,
+			int candidateId,
 			float signal,
 			float photons,
 			float noise,
@@ -89,12 +90,12 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			float xsd0,
 			float ysd0,
 			double variance,
-			ResultType resultType,
-			int candidateId
+			ResultType resultType			
 			)
 	{
 		//@formatter:on
 		this.frame = frame;
+		this.candidateId = candidateId;
 		this.signal = signal;
 		this.photons = photons;
 		this.snr = signal / noise;
@@ -114,7 +115,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.variance = variance;
 		this.existingResult = resultType == ResultType.EXISTING;
 		this.newResult = resultType == ResultType.NEW;
-		this.candidateId = candidateId;
 	}
 
 	private static float squared(float f)
@@ -125,6 +125,11 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public int getFrame()
 	{
 		return frame;
+	}
+
+	public int getCandidateId()
+	{
+		return candidateId;
 	}
 
 	public float getSignal()
@@ -220,11 +225,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public boolean isNewResult()
 	{
 		return newResult;
-	}
-
-	public int getCandidateId()
-	{
-		return candidateId;
 	}
 
 	/**

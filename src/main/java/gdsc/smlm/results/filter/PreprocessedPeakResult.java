@@ -29,6 +29,13 @@ public interface PreprocessedPeakResult
 	int getFrame();
 
 	/**
+	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
+	 * 
+	 * @return the candidate Id (-1 for no candidate)
+	 */
+	int getCandidateId();
+
+	/**
 	 * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
 	 * 
 	 * @return The signal (non calibrated)
@@ -164,11 +171,4 @@ public interface PreprocessedPeakResult
 	 * @return The assignments
 	 */
 	FractionalAssignment[] getAssignments(int predictedId);
-
-	/**
-	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
-	 * 
-	 * @return the candidate Id (-1 for no candidate)
-	 */
-	int getCandidateId();
 }
