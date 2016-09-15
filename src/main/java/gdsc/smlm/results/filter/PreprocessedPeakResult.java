@@ -29,6 +29,13 @@ public interface PreprocessedPeakResult
 	int getFrame();
 
 	/**
+	 * Gets the id.
+	 *
+	 * @return the id
+	 */
+	int getId();	
+	
+	/**
 	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
 	 * 
 	 * @return the candidate Id (-1 for no candidate)

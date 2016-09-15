@@ -28,6 +28,8 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	}
 
 	private final int frame;
+	private final int id;
+	private final int candidateId;
 	private final float signal;
 	private final float photons;
 	private final float snr;
@@ -47,7 +49,6 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final double variance;
 	private final boolean existingResult;
 	private final boolean newResult;
-	private final int candidateId;
 
 	private ResultAssignment[] assignments;
 
@@ -59,6 +60,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * However if neighbour spots were present then the candidate Id should be that of the neighbour.
 	 *
 	 * @param frame The frame
+	 * @param id the id
 	 * @param candidateId the candidate id
 	 * @param signal The signal
 	 * @param photons The signal calibrated as photons
@@ -78,6 +80,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 */
 	public BasePreprocessedPeakResult(
 			int frame,
+			int id,
 			int candidateId,
 			float signal,
 			float photons,
@@ -98,6 +101,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	{
 		//@formatter:on
 		this.frame = frame;
+		this.id = id;
 		this.candidateId = candidateId;
 		this.signal = signal;
 		this.photons = photons;
@@ -128,6 +132,11 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public int getFrame()
 	{
 		return frame;
+	}
+
+	public int getId()
+	{
+		return id;
 	}
 
 	public int getCandidateId()
