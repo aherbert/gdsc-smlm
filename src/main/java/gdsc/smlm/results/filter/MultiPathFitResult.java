@@ -33,24 +33,25 @@ public class MultiPathFitResult
 		final public FitStatus status;
 
 		/**
-		 * The number of iterations used for fitting
-		 */
-		public int iterations;
-
-		/**
-		 * The number of evaluations used for fitting
-		 */
-		public int evaluations;
-
-		/**
 		 * The results from the fit. It is expected that one or more results will be true for isNewResult() and zero or
 		 * more could be true for isExistingResult().
 		 */
 		public PreprocessedPeakResult[] results;
 
+		/**
+		 * Allows storing any data associated with the fit result
+		 */
+		final public Object data;
+
 		public FitResult(FitStatus status)
 		{
+			this(status, null);
+		}
+
+		public FitResult(FitStatus status, Object data)
+		{
 			this.status = status;
+			this.data = data;
 		}
 
 		public FitStatus getStatus()
@@ -58,14 +59,14 @@ public class MultiPathFitResult
 			return status;
 		}
 
-		public int getIterations()
+		public PreprocessedPeakResult[] getResults()
 		{
-			return iterations;
+			return results;
 		}
 
-		public int getEvaluations()
+		public Object getData()
 		{
-			return evaluations;
+			return data;
 		}
 	}
 
@@ -88,7 +89,7 @@ public class MultiPathFitResult
 	 * The height of the fit region
 	 */
 	public int height;
-	
+
 	/**
 	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
 	 */

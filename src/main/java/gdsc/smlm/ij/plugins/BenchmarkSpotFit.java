@@ -57,6 +57,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
@@ -1608,13 +1609,15 @@ public class BenchmarkSpotFit implements PlugIn
 	private void addToStats(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int resultIndex,
 			boolean isTP, StoredDataStatistics[][] stats)
 	{
+		final FitResult actualFitResult = (FitResult) fitResult.getData();
+
 		if (fitResult.status != FitStatus.OK)
 		{
 			// Add the evaluations for spots that were not OK
 			if (resultIndex == 0)
 			{
-				stats[0][FILTER_ITERATIONS].add(fitResult.iterations);
-				stats[0][FILTER_EVALUATIONS].add(fitResult.evaluations);
+				stats[0][FILTER_ITERATIONS].add(actualFitResult.getIterations());
+				stats[0][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
 			}
 			return;
 		}
@@ -1647,8 +1650,8 @@ public class BenchmarkSpotFit implements PlugIn
 		stats[0][FILTER_PRECISION].add(precision);
 		if (resultIndex == 0)
 		{
-			stats[0][FILTER_ITERATIONS].add(fitResult.getIterations());
-			stats[0][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
+			stats[0][FILTER_ITERATIONS].add(actualFitResult.getIterations());
+			stats[0][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
 		}
 
 		// Add to the TP or FP stats 
@@ -1664,8 +1667,8 @@ public class BenchmarkSpotFit implements PlugIn
 		stats[index][FILTER_PRECISION].add(precision);
 		if (resultIndex == 0)
 		{
-			stats[index][FILTER_ITERATIONS].add(fitResult.getIterations());
-			stats[index][FILTER_EVALUATIONS].add(fitResult.getEvaluations());
+			stats[index][FILTER_ITERATIONS].add(actualFitResult.getIterations());
+			stats[index][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
 		}
 	}
 

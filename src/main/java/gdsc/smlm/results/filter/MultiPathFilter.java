@@ -32,6 +32,22 @@ import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 public class MultiPathFilter
 {
 	/**
+	 * Stores the results that were accepted when filtering a multi-path result. Also stores the fit result that was
+	 * used to select the results.
+	 */
+	public class SelectedResult
+	{
+		final PreprocessedPeakResult[] results;
+		final FitResult fitResult;
+
+		public SelectedResult(PreprocessedPeakResult[] results, FitResult fitResult)
+		{
+			this.results = results;
+			this.fitResult = fitResult;
+		}
+	}
+
+	/**
 	 * The direct filter to apply to the results
 	 */
 	@XStreamAsAttribute
@@ -183,6 +199,89 @@ public class MultiPathFilter
 	}
 
 	/**
+	 * Filter a multi-path set of peak results into a set that are accepted.
+	 * <p>
+	 * Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other
+	 * results are assumed to be candidates that were fitted but will not be validated unless required.
+	 *
+	 * @param multiPathResult
+	 *            the multi path result
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @return The results that are accepted; or null
+	 */
+	final public SelectedResult accept2(final MultiPathFitResult multiPathResult, boolean validateCandidates)
+	{
+		PreprocessedPeakResult[] results = null;
+
+		// Filter multi-fit
+		if ((results = acceptAll(multiPathResult.multiFitResult, validateCandidates)) != null)
+			return new SelectedResult(results, multiPathResult.multiFitResult);
+
+		// Filter single-fit
+		if ((results = acceptAll(multiPathResult.singleFitResult, false)) == null)
+		{
+			// The fit was not accepted. However it may have been rejected for being too wide
+			// and is suitable for a doublet fit.
+
+			// Check there is a result for the single spot
+			if (multiPathResult.singleFitResult.status != FitStatus.OK)
+				return null;
+
+			// Check if the residuals score is below the configured threshold
+			if (multiPathResult.singleQAScore < residualsThreshold)
+				return null;
+
+			// Get the single spot
+			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.singleFitResult.results);
+			if (singleResult == null)
+				return null;
+
+			// Check the width is reasonable given the size of the fitted region.
+			//@formatter:off
+			if (
+					singleResult.getXSDFactor() < 1 || // Not a wide spot
+					singleResult.getXSD() > multiPathResult.width * 0.5f || // width covers more than the region
+					singleResult.getYSDFactor() < 1 || // Not a wide spot
+					singleResult.getYSD() > multiPathResult.height * 0.5f // width covers more than the region
+				)
+				return null;
+			//@formatter:on
+
+			// We must validate the spot without width filtering
+			setup(DirectFilter.NO_WIDTH);
+
+			try
+			{
+				if (!accept(singleResult))
+					// This is still a bad single result, without width filtering
+					return null;
+			}
+			finally
+			{
+				// reset
+				setup();
+			}
+		}
+		else
+		{
+			// The single fit is OK.
+			// If not eligible for a doublet fit then return.
+			if (multiPathResult.singleQAScore < residualsThreshold)
+				return new SelectedResult(results, multiPathResult.singleFitResult);
+		}
+
+		// We reached here with a single fit that is eligible for doublet fitting
+
+		// Filter doublet fit
+		final PreprocessedPeakResult[] doubletResults = acceptAny(multiPathResult.doubletFitResult, validateCandidates);
+		if (doubletResults != null)
+			return new SelectedResult(doubletResults, multiPathResult.doubletFitResult);
+
+		return new SelectedResult(results, multiPathResult.singleFitResult);
+	}
+
+	/**
 	 * Check all new and all existing results are valid. Returns the new results
 	 * 
 	 * @param fitResult
@@ -199,7 +298,7 @@ public class MultiPathFilter
 
 		// All new and existing results should be valid
 		int count = 0;
-		final int[] ok = new int[results.length]; 
+		final int[] ok = new int[results.length];
 		for (int i = 0; i < results.length; i++)
 		{
 			if (results[i].isNewResult())
@@ -266,12 +365,6 @@ public class MultiPathFilter
 				// All existing results must pass
 				if (!accept(results[i]))
 					return null;
-			}
-			else if (validateCandidates)
-			{
-				// Optionally candidates must pass
-				if (accept(results[i]))
-					ok[count++] = i;
 			}
 		}
 
