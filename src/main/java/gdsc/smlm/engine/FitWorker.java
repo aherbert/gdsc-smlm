@@ -45,15 +45,20 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
+import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
+import gdsc.smlm.results.filter.DirectFilter;
+import gdsc.smlm.results.filter.IMultiPathFitResults;
 import gdsc.smlm.results.filter.MultiFilter;
 import gdsc.smlm.results.filter.MultiPathFilter;
+import gdsc.smlm.results.filter.MultiPathFilter.SelectedResult;
+import gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 
 /**
  * Fits local maxima using a 2D Gaussian.
  */
-public class FitWorker implements Runnable
+public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResultStore
 {
 	/**
 	 * The number of additional iterations to use for multiple peaks
@@ -294,7 +299,7 @@ public class FitWorker implements Runnable
 				filter = new MultiPathFilter(
 						new MultiFilter(tmp.getMinPhotons(), (float) tmp.getSignalStrength(), tmp.getMinWidthFactor(),
 								tmp.getWidthFactor(), tmp.getCoordinateShiftFactor(), 0, tmp.getPrecisionThreshold()),
-						(tmp.isComputeResiduals()) ? fec.getResidualsThreshold() : 1);
+						fec.getResidualsThreshold());
 			}
 
 			filter.setup();
@@ -327,6 +332,29 @@ public class FitWorker implements Runnable
 				resultFilter = new DistanceResultFilter(params.filter, params.distanceThreshold, spots.length);
 				//filter = new OptimumDistanceResultFilter(params.filter, params.distanceThreshold, maxIndices.length);
 			}
+
+			// TODO: This could be changed so that the SpotFitter is used to create a dynamic MultiPathFitResult object.
+			// This is then passed to a multi-path filter. Thus the same fitting decision process is used when
+			// benchmarking and when running on actual data. The reasons for not doing this are:
+			// 1. that filtering using the fit configuration is faster as it has optimisations
+			// 2. the FitResult object stores more information than currently captured in the filter architecture
+			// 3. The SpotFitter stores estimates on-the-fly
+			// 4. Changing would mean the SpotFitter returns PreprocessedPeakResult objects which can be filtered but it 
+			// must also store the other data. This could be done by adding an Object to MultiPathFitResult.FitResult
+			// and making the MultiPathFilter.accept() method return an object contain this
+
+			// Q. How do we make this work?
+			// The SpotFitter labels each PreprocessedFitResult using the offset in the FitResult object
+			// The initial params and deviations can then be extracted for the results that pass the filter.
+			// Q. how to support the result filter. We must add results to it as we go
+
+			// Make this work
+			DirectFilter df = null;
+			df.setup();
+			MultiPathFilter filter = new MultiPathFilter(df, config.getResidualsThreshold());
+			IMultiPathFitResults multiPathResults = this;
+			SelectedResultStore store = this;
+			filter.select(multiPathResults, config.getFailuresLimit(), false, store);
 
 			// Extract each peak and fit individually until N consecutive failures
 			for (int n = 0, failures = 0; n < spots.length && !finished; n++)
@@ -963,8 +991,8 @@ public class FitWorker implements Runnable
 						j += parametersPerPeak;
 					}
 
-					GaussianFunction func = fitConfig.createGaussianFunction(subtractFittedPeaks, regionBounds.width,
-							funcParams);
+					final GaussianFunction func = fitConfig.createGaussianFunction(subtractFittedPeaks,
+							regionBounds.width, funcParams);
 					func.initialise(funcParams);
 
 					// Subtract fitted peaks
@@ -981,7 +1009,7 @@ public class FitWorker implements Runnable
 				{
 					if (subtract[i])
 						continue;
-					PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
+					final PeakResult result = sliceResults.get(fittedNeighbourIndices[i]);
 
 					// Get the Amplitude (since the params array stores the signal)
 					params[j + Gaussian2DFunction.SIGNAL] = result.getAmplitude();
@@ -1067,7 +1095,7 @@ public class FitWorker implements Runnable
 				{
 					if (fitConfig.validatePeak(n, initialParams, fittedParams) != FitStatus.OK)
 					{
-						// Current this is a fail.
+						// Currently this is a fail.
 						// TODO - repeat fitting but subtract all the fitted peaks
 						resultMulti.setStatus(fitConfig.getValidationResult(), fitConfig.getValidationData());
 						return resultMulti;
@@ -1502,7 +1530,7 @@ public class FitWorker implements Runnable
 				result.multiFitResult.results = multiFitResult;
 
 				// Assume the first fitted peak is the new result
-				multiFitResult[0] = createNewPreprocessedPeakResult(0, fitResult.getParameters(),
+				multiFitResult[0] = createNewPreprocessedPeakResult(n, 0, fitResult.getParameters(),
 						fitResult.getInitialParameters(), offsetx, offsety);
 				// Validate to check if we can use the candidates as estimates  
 				boolean ok = filter.accept(multiFitResult[0]);
@@ -1510,7 +1538,9 @@ public class FitWorker implements Runnable
 				// Add the existing results
 				for (int i = neighbourCount + 1; i < multiFitResult.length; i++)
 				{
-					multiFitResult[i] = createExistingPreprocessedPeakResult(i, fitResult.getParameters(),
+					// Set the candidate Id as n. We do not care if this is wrong, just that it is not 
+					// a later candidate
+					multiFitResult[i] = createExistingPreprocessedPeakResult(n, i, fitResult.getParameters(),
 							fitResult.getInitialParameters(), offsetx, offsety);
 					ok = ok && filter.accept(multiFitResult[i]);
 				}
@@ -1522,15 +1552,15 @@ public class FitWorker implements Runnable
 				final float correctiony = regionBounds.y - offsety;
 				for (int i = 1; i <= neighbourCount; i++)
 				{
-					multiFitResult[i] = createCandidatePreprocessedPeakResult(i, fitResult.getParameters(),
+					final int candidateId = neighbourIndices[i - 1];
+					multiFitResult[i] = createCandidatePreprocessedPeakResult(candidateId, i, fitResult.getParameters(),
 							fitResult.getInitialParameters(), offsetx, offsety);
 					if (ok && filter.accept(multiFitResult[i]))
 					{
 						// If the multi-fit results are good then we can store the estimates using 
 						// candidate results that pass the filter.
-						final int ii = neighbourIndices[i - 1];
-						storeEstimate(spots[ii], ii, multiFitResult[i].toGaussian2DParameters(), correctionx,
-								correctiony);
+						storeEstimate(spots[candidateId], candidateId, multiFitResult[i].toGaussian2DParameters(),
+								correctionx, correctiony);
 					}
 				}
 
@@ -1549,7 +1579,7 @@ public class FitWorker implements Runnable
 			// Extract the peaks
 			convertParameters(fitResult.getParameters());
 			result.singleFitResult.results = new BasePreprocessedPeakResult[1];
-			result.singleFitResult.results[0] = createNewPreprocessedPeakResult(0, fitResult.getParameters(),
+			result.singleFitResult.results[0] = createNewPreprocessedPeakResult(n, 0, fitResult.getParameters(),
 					fitResult.getInitialParameters(), offsetx, offsety);
 
 			// Doublet fit
@@ -1573,7 +1603,7 @@ public class FitWorker implements Runnable
 						convertParameters(fitResult.getParameters());
 						result.doubletFitResult.results = new BasePreprocessedPeakResult[fitResult.getNumberOfPeaks()];
 						for (int i = 0; i < result.doubletFitResult.results.length; i++)
-							result.doubletFitResult.results[i] = createNewPreprocessedPeakResult(i,
+							result.doubletFitResult.results[i] = createNewPreprocessedPeakResult(n, i,
 									fitResult.getParameters(), fitResult.getInitialParameters(), offsetx, offsety);
 					}
 				}
@@ -1581,7 +1611,11 @@ public class FitWorker implements Runnable
 		}
 
 		// Pick the best result
-		final PreprocessedPeakResult[] results = filter.accept(result);
+		// Note: We have already validated candidates in multi-fit and doublet fit and 
+		// set the estimates using the results that pass. So here we just want the best results
+		// to store as the fit results.
+
+		final PreprocessedPeakResult[] results = filter.accept(result, false);
 		if (results != null)
 		{
 			// Add to the current slice results. Note that the PreprocessedPeakResult will have the bounds added already.
@@ -1603,53 +1637,36 @@ public class FitWorker implements Runnable
 
 	private MultiPathFitResult.FitResult createFitResult(FitResult fitResult)
 	{
-		MultiPathFitResult.FitResult multiPathFitResult = new MultiPathFitResult.FitResult(fitResult.getStatus());
-		multiPathFitResult.iterations = fitResult.getIterations();
-		multiPathFitResult.evaluations = fitResult.getEvaluations();
-		return multiPathFitResult;
+		// status=OK should be zero. This is true for the FitStatus enum.
+		return new MultiPathFitResult.FitResult(fitResult.getStatus().ordinal(), fitResult);
 	}
 
-	private BasePreprocessedPeakResult createNewPreprocessedPeakResult(int i, double[] parameters,
+	private BasePreprocessedPeakResult createNewPreprocessedPeakResult(int candidateId, int i, double[] parameters,
 			double[] initialParameters, float offsetx, float offsety)
 	{
-		return createPreprocessedPeakResult(i, parameters, initialParameters, BasePreprocessedPeakResult.ResultType.NEW,
-				offsetx, offsety);
+		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters,
+				BasePreprocessedPeakResult.ResultType.NEW, offsetx, offsety);
 	}
 
-	private BasePreprocessedPeakResult createCandidatePreprocessedPeakResult(int i, double[] parameters,
-			double[] initialParameters, float offsetx, float offsety)
+	private BasePreprocessedPeakResult createCandidatePreprocessedPeakResult(int candidateId, int i,
+			double[] parameters, double[] initialParameters, float offsetx, float offsety)
 	{
-		return createPreprocessedPeakResult(i, parameters, initialParameters,
+		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters,
 				BasePreprocessedPeakResult.ResultType.CANDIDATE, offsetx, offsety);
 	}
 
-	private BasePreprocessedPeakResult createExistingPreprocessedPeakResult(int i, double[] parameters,
+	private BasePreprocessedPeakResult createExistingPreprocessedPeakResult(int candidateId, int i, double[] parameters,
 			double[] initialParameters, float offsetx, float offsety)
 	{
-		return createPreprocessedPeakResult(i, parameters, initialParameters,
+		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters,
 				BasePreprocessedPeakResult.ResultType.EXISTING, offsetx, offsety);
 	}
 
-	private BasePreprocessedPeakResult createPreprocessedPeakResult(int i, double[] parameters,
+	private BasePreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int i, double[] parameters,
 			double[] initialParameters, BasePreprocessedPeakResult.ResultType resultType, float offsetx, float offsety)
 	{
-		final int offset = i * 6;
-		int frame = slice;
-		float signal = (float) parameters[offset + Gaussian2DFunction.SIGNAL];
-		float photons = (float) (parameters[offset + Gaussian2DFunction.SIGNAL] / fitConfig.getGain());
-		float b = (float) parameters[Gaussian2DFunction.BACKGROUND];
-		float angle = (float) parameters[offset + Gaussian2DFunction.ANGLE];
-		float x = (float) parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
-		float y = (float) parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
-		float x0 = (float) initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
-		float y0 = (float) initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
-		float xsd = (float) parameters[offset + Gaussian2DFunction.X_SD];
-		float ysd = (float) parameters[offset + Gaussian2DFunction.Y_SD];
-		float xsd0 = (float) initialParameters[offset + Gaussian2DFunction.X_SD];
-		float ysd0 = (float) initialParameters[offset + Gaussian2DFunction.Y_SD];
-		double variance = fitConfig.getVariance(b, signal, (xsd + ysd) * 0.5);
-		return new BasePreprocessedPeakResult(frame, signal, photons, i, b, angle, x, y, x0, y0, xsd, ysd, xsd0, ysd0,
-				variance, resultType);
+		return fitConfig.createPreprocessedPeakResult(slice, candidateId, i, initialParameters, initialParameters,
+				resultType, offsetx, offsety);
 	}
 
 	/**
@@ -1894,19 +1911,34 @@ public class FitWorker implements Runnable
 		{
 			if (fitResult.getStatus() == FitStatus.OK)
 				return true;
+
 			// Check why it was a bad fit. 
 
 			// If it due to width divergence then 
 			// check the width is reasonable given the size of the fitted region.
 			if (fitResult.getStatus() == FitStatus.WIDTH_DIVERGED)
 			{
+				// Disable width validation and check the peak is OK for everything else
+				final double wf = fitConfig.getWidthFactor();
+				fitConfig.setWidthFactor(0);
+
 				final double[] params = fitResult.getParameters();
-				final double regionSize = FastMath.max(width, height) * 0.5;
-				//int tmpSmooth = (int) FastMath.max(smooth, 1);
-				//float regionSize = 2 * tmpSmooth + 1;
-				if ((params[Gaussian2DFunction.X_SD] > 0 && params[Gaussian2DFunction.X_SD] < regionSize) ||
-						(params[Gaussian2DFunction.Y_SD] > 0 && params[Gaussian2DFunction.Y_SD] < regionSize))
-					return true;
+				try
+				{
+					if (fitConfig.validatePeak(0, fitResult.getInitialParameters(), params) == FitStatus.OK)
+					{
+						final double regionSize = FastMath.max(width, height) * 0.5;
+						//int tmpSmooth = (int) FastMath.max(smooth, 1);
+						//float regionSize = 2 * tmpSmooth + 1;
+						if (params[Gaussian2DFunction.X_SD] < regionSize ||
+								params[Gaussian2DFunction.Y_SD] < regionSize)
+							return true;
+					}
+				}
+				finally
+				{
+					fitConfig.setCoordinateShift(wf);
+				}
 			}
 
 			// If moved then it could be a close neighbour ...
@@ -2211,8 +2243,8 @@ public class FitWorker implements Runnable
 						// It must optionally pass an additional filter 
 						if (filter != null)
 						{
-							if (filter.accept(fitConfig.createPreprocessedPeakResult(n,
-									newFitResult.getInitialParameters(), newParams)))
+							if (filter.accept(fitConfig.createPreprocessedPeakResult(i, n,
+									newFitResult.getInitialParameters(), newParams, ResultType.CANDIDATE, false)))
 								;
 							storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
 						}
@@ -2547,5 +2579,91 @@ public class FitWorker implements Runnable
 	{
 		if (counter != null)
 			counter.add(fitType);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
+	 */
+	public int getFrame()
+	{
+		return slice;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
+	 */
+	public int getNumberOfResults()
+	{
+		return getTotalCandidates();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
+	 */
+	public MultiPathFitResult getResult(int index)
+	{
+		// TODO Auto-generated method stub
+		// Make this work by using a SpotFitter to auto configure and then dynamically return fitting results.
+		
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
+	 */
+	public int getTotalCandidates()
+	{
+		// TODO make this work
+		return 0; //spots.length;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#isValid(int)
+	 */
+	public boolean isValid(int candidateId)
+	{
+		return (estimates[candidateId] == null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#setValid(gdsc.smlm.results.filter.PreprocessedPeakResult)
+	 */
+	public void setValid(PreprocessedPeakResult preprocessedPeakResult)
+	{
+		final int i = preprocessedPeakResult.getCandidateId();
+		final Spot spot = null; // spots[i]; make this work
+		final double dx = spot.x - preprocessedPeakResult.getX();
+		final double dy = spot.y - preprocessedPeakResult.getY();
+		final double d2 = dx * dx + dy * dy;
+		if (estimates[i] == null || d2 < estimates[i].d2)
+			estimates[i] = new Estimate(d2, preprocessedPeakResult.toGaussian2DParameters());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
+	 * SelectedResult)
+	 */
+	public void add(SelectedResult selectedResult)
+	{
+		// TODO Auto-generated method stub
+
+		// Add to the slice results.
+		
+		// Pass through the filter if present
+		
 	}
 }
