@@ -518,15 +518,19 @@ public class MultiPathFilter
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected.
 	 * <p>
-	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult.
+	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult. If the
+	 * subset flag is set to true the current value of the failCount property is used to accumulate the fail count (as
+	 * the current set is already a subset).
 	 * 
 	 * @param results
 	 *            a set of results to analyse
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param subset
+	 *            True if a subset
 	 * @return the filtered results
 	 */
-	public MultiPathFitResults[] filterSubset(final MultiPathFitResults[] results, final int failures)
+	public MultiPathFitResults[] filterSubset(final MultiPathFitResults[] results, final int failures, boolean subset)
 	{
 		final MultiPathFitResults[] newResults = new MultiPathFitResults[results.length];
 		int size = 0;
@@ -534,7 +538,7 @@ public class MultiPathFilter
 		setup();
 		for (int i = 0; i < results.length; i++)
 		{
-			final MultiPathFitResult[] newMultiPathResults = filter(results[i], failures, false);
+			final MultiPathFitResult[] newMultiPathResults = filter(results[i], failures, false, subset);
 			if (newMultiPathResults != null)
 				newResults[size++] = new MultiPathFitResults(results[i].frame, newMultiPathResults,
 						results[i].totalCandidates);
@@ -549,17 +553,21 @@ public class MultiPathFilter
 	 * The number of consecutive rejections are counted. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected.
 	 * <p>
-	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult.
+	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult. If the
+	 * subset flag is set to true the current value of the failCount property is used to accumulate the fail count (as
+	 * the current set is already a subset).
 	 * 
 	 * @param results
 	 *            a set of results to analyse
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param subset
+	 *            True if a subset
 	 * @return the filtered results
 	 */
-	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures)
+	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean subset)
 	{
-		return filter(multiPathResults, failures, true);
+		return filter(multiPathResults, failures, true, subset);
 	}
 
 	/**
@@ -576,9 +584,12 @@ public class MultiPathFilter
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param setup
 	 *            Set to true to run the {@link #setup()} method
+	 * @param subset
+	 *            True if a subset
 	 * @return the filtered results
 	 */
-	private MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean setup)
+	private MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
+			boolean subset)
 	{
 		if (setup)
 			setup();
@@ -590,6 +601,10 @@ public class MultiPathFilter
 		for (int c = 0; c < newMultiPathResults.length; c++)
 		{
 			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
+
+			// Include the number of failures before this result from the larger set
+			if (subset)
+				failCount += multiPathResult.failCount;
 
 			if (failCount <= failures || isValid[multiPathResult.candidateId])
 			{
@@ -829,7 +844,7 @@ public class MultiPathFilter
 			}
 
 			final FractionalAssignment[] tmp = score(assignments, score, nPredicted);
-			if (allAssignments!= null)
+			if (allAssignments != null)
 				allAssignments.add(tmp);
 		}
 
@@ -862,8 +877,8 @@ public class MultiPathFilter
 		score[3] += result[3];
 		assignments.clear();
 		return tmp;
-	}	
-	
+	}
+
 	/**
 	 * Create a dummy collection that implements toArray() without cloning for the addAll() method in ArrayList
 	 */
