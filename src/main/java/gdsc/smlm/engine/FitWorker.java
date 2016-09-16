@@ -586,7 +586,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			// Store ID in the score field
 			spots[i].setScore(i);
-			gridManager.addToGrid(spots[i]);
+			gridManager.putOnGrid(spots[i]);
 		}
 	}
 

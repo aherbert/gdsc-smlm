@@ -15,6 +15,7 @@ package gdsc.smlm.engine;
 
 import java.util.Arrays;
 
+import gdsc.core.utils.Maths;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.results.PeakResult;
 
@@ -58,6 +59,31 @@ public class ResultGridManager
 	private PeakList[][] peakGrid;
 	private final int resolution, xBlocks, yBlocks;
 
+	private PeakResult[] peakCache = null;
+	private int peakCacheX = -1, peakCacheY = -1;
+	private Spot[] spotCache = null;
+	private int spotCacheX = -1, spotCacheY = -1;
+
+	/**
+	 * Clear the cache. This should be called when more data has been added to the grid.
+	 */
+	public void clearCache()
+	{
+		peakCache = null;
+		peakCacheX = -1;
+		peakCacheY = -1;
+		spotCache = null;
+		spotCacheX = -1;
+		spotCacheY = -1;
+	}
+
+	/**
+	 * Create a grid for spots or peak results
+	 * 
+	 * @param maxx
+	 * @param maxy
+	 * @param resolution
+	 */
 	public ResultGridManager(int maxx, int maxy, int resolution)
 	{
 		this.resolution = resolution;
@@ -66,6 +92,31 @@ public class ResultGridManager
 
 		spotGrid = new SpotList[xBlocks][yBlocks];
 		peakGrid = new PeakList[xBlocks][yBlocks];
+	}
+
+	/**
+	 * Create a grid only of peak results. No spots can be added to the grid.
+	 * 
+	 * @param results
+	 * @param resolution
+	 */
+	public ResultGridManager(PeakResult[] results, double resolution)
+	{
+		this.resolution = Maths.max(1, (int) Math.ceil(resolution));
+		double maxx = 0, maxy = 0;
+		for (PeakResult p : results)
+		{
+			if (maxx < p.getXPosition())
+				maxx = p.getXPosition();
+			if (maxy < p.getYPosition())
+				maxy = p.getYPosition();
+		}
+		xBlocks = getBlock((int) maxx) + 1;
+		yBlocks = getBlock((int) maxy) + 1;
+
+		peakGrid = new PeakList[xBlocks][yBlocks];
+		for (PeakResult p : results)
+			putOnGrid(p);
 	}
 
 	private int getBlock(final int x)
@@ -83,6 +134,21 @@ public class ResultGridManager
 		final int xBlock = getBlock((int) peak.getXPosition());
 		final int yBlock = getBlock((int) peak.getYPosition());
 		peakGrid[xBlock][yBlock].add(peak);
+		clearCache();
+	}
+	
+	/**
+	 * Add a peak to the grid. Assumes that the coordinates are within the size of the grid.
+	 * <p>
+	 * This method does not clear the cache and should be called only when initialising the grid.
+	 *
+	 * @param peak the peak
+	 */
+	public void putOnGrid(PeakResult peak)
+	{
+		final int xBlock = getBlock((int) peak.getXPosition());
+		final int yBlock = getBlock((int) peak.getYPosition());
+		peakGrid[xBlock][yBlock].add(peak);
 	}
 
 	/**
@@ -95,8 +161,23 @@ public class ResultGridManager
 		final int xBlock = getBlock(spot.x);
 		final int yBlock = getBlock(spot.y);
 		spotGrid[xBlock][yBlock].add(spot);
+		clearCache();
 	}
 
+	/**
+	 * Add a spot to the grid. Assumes that the coordinates are within the size of the grid.
+	 * <p>
+	 * This method does not clear the cache and should be called only when initialising the grid.
+	 *
+	 * @param spot the spot
+	 */
+	public void putOnGrid(Spot spot)
+	{
+		final int xBlock = getBlock(spot.x);
+		final int yBlock = getBlock(spot.y);
+		spotGrid[xBlock][yBlock].add(spot);
+	}
+	
 	/**
 	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
@@ -109,6 +190,9 @@ public class ResultGridManager
 	{
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
+
+		if (peakCache != null && peakCacheX == xBlock && peakCacheY == yBlock)
+			return peakCache;
 
 		int size = 0;
 		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
@@ -136,6 +220,10 @@ public class ResultGridManager
 				size += peakGrid[xx][yy].c;
 			}
 		}
+
+		peakCache = list;
+		peakCacheX = xBlock;
+		peakCacheY = yBlock;
 
 		return list;
 	}
@@ -200,6 +288,9 @@ public class ResultGridManager
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
 
+		if (spotCache != null && spotCacheX == xBlock && spotCacheY == yBlock)
+			return spotCache;
+
 		int size = 0;
 		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
 		{
@@ -226,6 +317,10 @@ public class ResultGridManager
 				size += spotGrid[xx][yy].c;
 			}
 		}
+
+		spotCache = list;
+		spotCacheX = xBlock;
+		spotCacheY = yBlock;
 
 		return list;
 	}
