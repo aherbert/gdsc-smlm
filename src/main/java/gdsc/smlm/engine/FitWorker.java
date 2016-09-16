@@ -348,13 +348,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// The initial params and deviations can then be extracted for the results that pass the filter.
 			// Q. how to support the result filter. We must add results to it as we go
 
-			// Make this work
-			DirectFilter df = null;
-			df.setup();
-			MultiPathFilter filter = new MultiPathFilter(df, config.getResidualsThreshold());
-			IMultiPathFitResults multiPathResults = this;
-			SelectedResultStore store = this;
-			filter.select(multiPathResults, config.getFailuresLimit(), false, store);
+			//			// Make this work
+			//			DirectFilter df = null;
+			//			df.setup();
+			//			MultiPathFilter filter = new MultiPathFilter(df, config.getResidualsThreshold());
+			//			IMultiPathFitResults multiPathResults = this;
+			//			SelectedResultStore store = this;
+			//			filter.select(multiPathResults, config.getFailuresLimit(), false, store);
 
 			// Extract each peak and fit individually until N consecutive failures
 			for (int n = 0, failures = 0; n < spots.length && !finished; n++)
@@ -2610,7 +2610,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		// TODO Auto-generated method stub
 		// Make this work by using a SpotFitter to auto configure and then dynamically return fitting results.
-		
+
 		return null;
 	}
 
@@ -2662,8 +2662,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// TODO Auto-generated method stub
 
 		// Add to the slice results.
-		
+
 		// Pass through the filter if present
-		
+
 	}
 }
