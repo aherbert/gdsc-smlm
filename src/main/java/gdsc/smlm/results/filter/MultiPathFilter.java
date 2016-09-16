@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.sun.tools.javac.util.List;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import gdsc.core.match.FractionClassificationResult;
@@ -512,30 +513,6 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Score a set of multi-path results. Filter each multi-path result. Any output results that are
-	 * new results are assumed to be positives and their assignments used to score the results per frame.
-	 * <p>
-	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
-	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
-	 * <p>
-	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
-	 * and negatives fields of the result.
-	 * 
-	 * @param results
-	 *            a set of results to analyse
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
-	 * @param n
-	 *            The number of actual results
-	 * @return the score
-	 */
-	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n)
-	{
-		return fractionScore(results, failures, n, false);
-	}
-
-	/**
 	 * Create a subset of multi-path results, i.e. all those that pass the filter.
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
@@ -663,6 +640,30 @@ public class MultiPathFilter
 	}
 
 	/**
+	 * Score a set of multi-path results. Filter each multi-path result. Any output results that are
+	 * new results are assumed to be positives and their assignments used to score the results per frame.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
+	 * and negatives fields of the result.
+	 * 
+	 * @param results
+	 *            a set of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param n
+	 *            The number of actual results
+	 * @return the score
+	 */
+	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
+			final int n)
+	{
+		return fractionScore(results, failures, n, false, null);
+	}
+
+	/**
 	 * Score a subset of multi-path results. The subset should be created with
 	 * {@link #filterSubset(MultiPathFitResult[], int)}.
 	 * <p>
@@ -686,7 +687,62 @@ public class MultiPathFilter
 	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
 			final int n)
 	{
-		return fractionScore(results, failures, n, true);
+		return fractionScore(results, failures, n, true, null);
+	}
+
+	/**
+	 * Score a set of multi-path results. Filter each multi-path result. Any output results that are
+	 * new results are assumed to be positives and their assignments used to score the results per frame.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
+	 * and negatives fields of the result.
+	 *
+	 * @param results
+	 *            a set of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param n
+	 *            The number of actual results
+	 * @param assignments
+	 *            the assignments
+	 * @return the score
+	 */
+	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
+			final int n, List<FractionalAssignment[]> assignments)
+	{
+		return fractionScore(results, failures, n, false, assignments);
+	}
+
+	/**
+	 * Score a subset of multi-path results. The subset should be created with
+	 * {@link #filterSubset(MultiPathFitResult[], int)}.
+	 * <p>
+	 * Filter each multi-path result. Any output results that are new results are assumed to be positives and
+	 * their assignments used to score the results per frame.
+	 * <p>
+	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
+	 * remaining results for the frame are rejected. This assumes the results are ordered by the frame.
+	 * <p>
+	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
+	 * and negatives fields of the result.
+	 *
+	 * @param results
+	 *            a set of results to analyse
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param n
+	 *            The number of actual results
+	 * @param assignments
+	 *            the assignments
+	 * @return the score
+	 */
+	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
+			final int n, List<FractionalAssignment[]> assignments)
+	{
+		return fractionScore(results, failures, n, true, assignments);
 	}
 
 	/**
@@ -701,7 +757,7 @@ public class MultiPathFilter
 	 * <p>
 	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
 	 * and negatives fields of the result.
-	 * 
+	 *
 	 * @param results
 	 *            a set of results to analyse
 	 * @param failures
@@ -710,10 +766,12 @@ public class MultiPathFilter
 	 *            The number of actual results
 	 * @param subset
 	 *            True if a subset
+	 * @param assignments
+	 *            the assignments
 	 * @return the score
 	 */
 	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n, final boolean subset)
+			final int n, final boolean subset, List<FractionalAssignment[]> allAssignments)
 	{
 		final double[] score = new double[4];
 		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
@@ -770,7 +828,9 @@ public class MultiPathFilter
 				}
 			}
 
-			score(assignments, score, nPredicted);
+			final FractionalAssignment[] tmp = score(assignments, score, nPredicted);
+			if (allAssignments!= null)
+				allAssignments.add(tmp);
 		}
 
 		// Note: We are using the integer positives and negatives fields to actually store integer TP and FP
@@ -778,29 +838,32 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Score the assignments (TP/FP) and then clear the list
-	 * 
+	 * Score the assignments (TP/FP) and then clear the list.
+	 *
 	 * @param assignments
 	 *            The assignments
 	 * @param score
-	 *            Scores array to accumilate TP/FP scores
+	 *            Scores array to accumulate TP/FP scores
 	 * @param nPredicted
 	 *            The number of predictions
+	 * @return the fractional assignments
 	 */
-	private void score(final ArrayList<FractionalAssignment> assignments, final double[] score, final int nPredicted)
+	private FractionalAssignment[] score(final ArrayList<FractionalAssignment> assignments, final double[] score,
+			final int nPredicted)
 	{
 		if (assignments.isEmpty())
-			return;
-		final RankedScoreCalculator calc = new RankedScoreCalculator(
-				assignments.toArray(new FractionalAssignment[assignments.size()]));
+			return null;
+		final FractionalAssignment[] tmp = new FractionalAssignment[assignments.size()];
+		final RankedScoreCalculator calc = new RankedScoreCalculator(assignments.toArray(tmp));
 		final double[] result = calc.score(nPredicted, false);
 		score[0] += result[0];
 		score[1] += result[1];
 		score[2] += result[2];
 		score[3] += result[3];
 		assignments.clear();
-	}
-
+		return tmp;
+	}	
+	
 	/**
 	 * Create a dummy collection that implements toArray() without cloning for the addAll() method in ArrayList
 	 */
