@@ -827,6 +827,34 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Return the squared distance to the other coordinate
+	 * 
+	 * @param r
+	 *            The result
+	 * @return The squared distance
+	 */
+	public double distance2(final double x, final double y)
+	{
+		final double dx = getXPosition() - x;
+		final double dy = getYPosition() - y;
+		return dx * dx + dy * dy;
+	}
+
+	/**
+	 * Return the distance to the other coordinate.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return The distance
+	 */
+	public double distance(final double x, final double y)
+	{
+		return Math.sqrt(distance2(x, y));
+	}
+
+	/**
 	 * This methods return the x-position. To allow filters to use the actual shift requires either off-setting the
 	 * position with the initial fit position, or extending this class so the shift can be stored.
 	 * 
