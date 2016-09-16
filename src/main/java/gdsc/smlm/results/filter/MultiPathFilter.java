@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
-import com.sun.tools.javac.util.List;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import gdsc.core.match.FractionClassificationResult;
