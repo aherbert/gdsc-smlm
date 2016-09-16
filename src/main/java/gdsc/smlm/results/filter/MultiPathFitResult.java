@@ -71,7 +71,7 @@ public class MultiPathFitResult
 	/**
 	 * The original value for the number of failed results before this result
 	 */
-	private int originalFailCount;
+	public int originalFailCount;
 
 	/**
 	 * The number of failed results before this result
