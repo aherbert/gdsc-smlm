@@ -1,18 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.engine.FitParameters;
-import gdsc.smlm.engine.FitWorker;
-import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.engine.ResultGridManager;
-import gdsc.smlm.engine.FitParameters.FitTask;
-import gdsc.smlm.filters.Spot;
-import gdsc.smlm.fitting.FitConfiguration;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2016 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -22,74 +13,7 @@ import gdsc.smlm.fitting.FitConfiguration;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ga.Chromosome;
-import gdsc.smlm.ga.ChromosomeComparator;
-import gdsc.smlm.ga.FitnessFunction;
-import gdsc.smlm.ga.Population;
-import gdsc.smlm.ga.RampedSelectionStrategy;
-import gdsc.smlm.ga.Recombiner;
-import gdsc.smlm.ga.SelectionStrategy;
-import gdsc.smlm.ga.SimpleMutator;
-import gdsc.smlm.ga.SimpleRecombiner;
-import gdsc.smlm.ga.SimpleSelectionStrategy;
-import gdsc.smlm.ga.ToleranceChecker;
-import gdsc.smlm.ij.plugins.BenchmarkSpotFit.CandidateMatch;
-import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
-import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FitMatch;
-import gdsc.smlm.ij.plugins.BenchmarkSpotFit.MultiPathPoint;
-import gdsc.smlm.ij.plugins.BenchmarkSpotFit.SpotMatch;
-import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
-import gdsc.smlm.ij.settings.FilterSettings;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.results.Calibration;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.NullPeakResults;
-import gdsc.smlm.results.PeakResult;
-import gdsc.core.logging.TrackProgress;
-import gdsc.core.match.Assignment;
-import gdsc.core.match.AssignmentComparator;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.FractionClassificationResult;
-import gdsc.core.match.FractionalAssignment;
-import gdsc.core.match.ImmutableFractionalAssignment;
-import gdsc.core.match.PointPair;
-import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
-import gdsc.smlm.results.filter.DirectFilter;
-import gdsc.smlm.results.filter.Filter;
-import gdsc.smlm.results.filter.FilterSet;
-import gdsc.smlm.results.filter.FilterType;
-import gdsc.smlm.results.filter.IMultiFilter;
-import gdsc.smlm.results.filter.MultiPathFilter;
-import gdsc.smlm.results.filter.MultiPathFitResult;
-import gdsc.smlm.results.filter.MultiPathFitResults;
-import gdsc.smlm.results.filter.PreprocessedPeakResult;
-import gdsc.smlm.results.filter.ResultAssignment;
-import gdsc.smlm.results.filter.XStreamWrapper;
-import gdsc.smlm.utils.XmlUtils;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.RampedScore;
-import gdsc.core.utils.Sort;
-import gdsc.core.utils.StoredDataStatistics;
-import gdsc.core.utils.UnicodeReader;
-import ij.IJ;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.gui.GenericDialog;
-import ij.gui.Plot2;
-import ij.gui.PlotWindow;
-import ij.measure.ResultsTable;
-import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
-import ij.text.TextWindow;
-
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -114,6 +38,56 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well44497b;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.logging.TrackProgress;
+import gdsc.core.match.FractionClassificationResult;
+import gdsc.core.match.FractionalAssignment;
+import gdsc.core.match.ImmutableFractionalAssignment;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.ResultGridManager;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.ga.Chromosome;
+import gdsc.smlm.ga.ChromosomeComparator;
+import gdsc.smlm.ga.FitnessFunction;
+import gdsc.smlm.ga.Population;
+import gdsc.smlm.ga.RampedSelectionStrategy;
+import gdsc.smlm.ga.Recombiner;
+import gdsc.smlm.ga.SelectionStrategy;
+import gdsc.smlm.ga.SimpleMutator;
+import gdsc.smlm.ga.SimpleRecombiner;
+import gdsc.smlm.ga.SimpleSelectionStrategy;
+import gdsc.smlm.ga.ToleranceChecker;
+import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
+import gdsc.smlm.ij.settings.FilterSettings;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
+import gdsc.smlm.results.filter.DirectFilter;
+import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.results.filter.FilterSet;
+import gdsc.smlm.results.filter.FilterType;
+import gdsc.smlm.results.filter.IMultiFilter;
+import gdsc.smlm.results.filter.MultiPathFilter;
+import gdsc.smlm.results.filter.MultiPathFitResult;
+import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.ResultAssignment;
+import gdsc.smlm.results.filter.XStreamWrapper;
+import gdsc.smlm.utils.XmlUtils;
+import ij.IJ;
+import ij.Prefs;
+import ij.gui.GenericDialog;
+import ij.gui.Plot2;
+import ij.gui.PlotWindow;
+import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
+import ij.text.TextWindow;
 
 /**
  * Run different filtering methods on a set of benchmark fitting results outputting performance statistics on the
@@ -1389,7 +1363,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				final ArrayList<FractionalAssignment[]> list = new ArrayList<FractionalAssignment[]>(
 						resultsList.length);
-				final FractionClassificationResult r = scoreFilter(fs.filter, list);
+				final FractionClassificationResult r = scoreFilter(fs.filter, resultsList, list);
 				final StringBuilder sb = createResult(fs.filter, r);
 
 				if (topFilterResults == null)
@@ -1454,7 +1428,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (topFilterClassificationResult == null)
 		{
 			topFilterResults = new ArrayList<FractionalAssignment[]>(resultsList.length);
-			topFilterClassificationResult = scoreFilter(bestFilter, topFilterResults);
+			topFilterClassificationResult = scoreFilter(bestFilter, resultsList, topFilterResults);
 		}
 		scores.add(new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount, failCountRange));
 
@@ -1545,8 +1519,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				for (int index = 0; index < parameters; index++)
 				{
 					// For each parameter compute as upward + downward delta and get the average gradient
-					Filter higher = filter.adjustParameter(index, delta);
-					Filter lower = filter.adjustParameter(index, -delta);
+					DirectFilter higher = (DirectFilter) filter.adjustParameter(index, delta);
+					DirectFilter lower = (DirectFilter) filter.adjustParameter(index, -delta);
 
 					FractionClassificationResult sHigher = scoreFilter(higher, resultsList);
 					sHigher = getOriginalScore(sHigher);
@@ -1748,7 +1722,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			createGAWindow();
 
-			DirectFilter filter = filterSet.getFilters().get(0);
+			final Filter filter = filterSet.getFilters().get(0);
 			double[] stepSize = filter.mutationStepRange().clone();
 			double[] upper = filter.upperLimit();
 			// Ask the user for the mutation step parameters.
@@ -1848,8 +1822,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			double[] max = new double[] { -1, -1 };
 			boolean criteriaPassed = false;
 			int count2 = count;
-			for (DirectFilter filter : filterSet.getFilters())
+			for (Filter sfilter : filterSet.getFilters())
 			{
+				final DirectFilter filter = (DirectFilter) sfilter;
 				if (count2++ % 16 == 0)
 				{
 					progress(count2, total);
@@ -1857,7 +1832,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						return -1;
 				}
 
-				final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
+				final double[] result = run(filter, ga_resultsListToScore, ga_subset);
 
 				// Avoid null pointer
 				if (maxFilter == null)
@@ -1982,8 +1957,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					final int stepTotal = newSet.size();
 					int stepProgress = Utils.getProgressInterval(stepTotal);
 
-					for (DirectFilter filter : newSet.getFilters())
+					for (Filter sfilter : newSet.getFilters())
 					{
+						final DirectFilter filter = (DirectFilter) sfilter;
 						if (stepCount++ % stepProgress == 0)
 						{
 							progress(stepCount, stepTotal);
@@ -1991,7 +1967,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 								return -1;
 						}
 
-						final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
+						final double[] result = run(filter, ga_resultsListToScore, ga_subset);
 
 						// Check if the criteria are achieved
 						if (result[CRITERIA] >= minCriteria)
@@ -2076,8 +2052,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double totalProgress = (double) count / total;
 		double stepSize = ((double) originalSize / total) / filterSet.size();
 		int i = 0;
-		for (DirectFilter filter : filterSet.getFilters())
+		for (Filter sfilter : filterSet.getFilters())
 		{
+			DirectFilter filter = (DirectFilter) sfilter;
 			if (i % 16 == 0)
 			{
 				IJ.showProgress(totalProgress + i * stepSize);
@@ -2085,7 +2062,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					return -1;
 			}
 
-			final double[] result = run(filter, ga_resultsListToScore, ga_subset, ga_tn, ga_fn, ga_n);
+			final double[] result = run(filter, ga_resultsListToScore, ga_subset);
 
 			if (xValues != null)
 			{
@@ -2482,23 +2459,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private long nextUpdate = 0;
 
-	private double[] run(DirectFilter filter, boolean subset, double tn, double fn, int n)
+	private double[] run(DirectFilter filter, MultiPathFitResults[] resultsList, boolean subset)
 	{
 		FractionClassificationResult r;
 		if (subset)
 		{
-			r = fractionScoreSubset(filter, resultsList, failCount, tn, fn, n);
+			r = scoreFilterSubset(filter, resultsList);
 
-			//// DEBUG - Test if the two methods produce the same results
-			//FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.resultsList);
-			//if (!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
-			//		!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
-			//		!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTN(), r2.getTN(), 1e-6, 1e-10) ||
-			//		!gdsc.smlm.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
-			//{
-			//	System.out.printf("TP %f != %f, FP %f != %f, TN %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(),
-			//			r.getFP(), r2.getFP(), r.getTN(), r2.getTN(), r.getFN(), r2.getFN());
-			//}
+			// DEBUG - Test if the two methods produce the same results
+			FractionClassificationResult r2 = scoreFilter(filter, resultsList);
+			if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
+					!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
+					!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
+			{
+				System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(), r.getFP(),
+						r2.getFP(), r.getFN(), r2.getFN());
+			}
+			else
+				System.out.println("Matched scores");
 		}
 		else
 			r = scoreFilter(filter, resultsList);
@@ -2535,11 +2513,45 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return new double[] { score, criteria };
 	}
 
-	private FractionClassificationResult fractionScoreSubset(DirectFilter filter, int failures, double tn, double fn,
-			int n)
+	private FractionClassificationResult scoreFilterSubset(DirectFilter filter, MultiPathFitResults[] resultsList)
 	{
-		// This method uses a subset that was created using the fail count in origY so no special method is necessary
-		return filter.fractionScoreSubset(resultsList, failures, tn, fn, n);
+		final MultiPathFilter multiPathFilter = createMPF(filter);
+
+		if (failCountRange == 0)
+			return multiPathFilter.fractionScoreSubset(resultsList, failCount, simulationParameters.molecules);
+
+		double tp = 0, fp = 0, fn = 0;
+		int p = 0, n = 0;
+		for (int i = 0; i <= failCountRange; i++)
+		{
+			// Use the method that requires fail count in origY
+			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(resultsList, failCount + i,
+					simulationParameters.molecules);
+			tp += r.getTP();
+			fp += r.getFP();
+			fn += r.getFN();
+			p += r.getPositives();
+			n += r.getNegatives();
+		}
+		// Normalise by the number of evaluations
+		final int norm = failCountRange + 1;
+		p = (int) Math.round((double) p / norm);
+		n = (int) Math.round((double) n / norm);
+		return new FractionClassificationResult(tp / norm, fp / norm, 0, fn / norm, p, n);
+	}
+
+	/**
+	 * Score the filter using the results list and the configured fail count.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @param resultsList
+	 *            the results list
+	 * @return The score
+	 */
+	private FractionClassificationResult scoreFilter(DirectFilter filter, MultiPathFitResults[] resultsList)
+	{
+		return scoreFilter(filter, resultsList, null);
 	}
 
 	/**
@@ -2553,7 +2565,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *            all the assignments
 	 * @return The score
 	 */
-	private FractionClassificationResult scoreFilter(DirectFilter filter, List<FractionalAssignment[]> allAssignments)
+	private FractionClassificationResult scoreFilter(DirectFilter filter, MultiPathFitResults[] resultsList,
+			List<FractionalAssignment[]> allAssignments)
 	{
 		final MultiPathFilter multiPathFilter = createMPF(filter);
 
@@ -3180,46 +3193,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	private class DepthPeakResult extends PeakResult
-	{
-		final double depth, signalfactor, distance, matchScore, noMatchScore;
-
-		public DepthPeakResult(int peak, int origX, int origY, float score, double error, float noise, float[] params,
-				double depth, double signalfactor, double distance, double matchScore, double noMatchScore)
-		{
-			super(peak, origX, origY, score, error, noise, params, null);
-			this.depth = depth;
-			this.signalfactor = signalfactor;
-			this.distance = distance;
-			this.matchScore = matchScore;
-			this.noMatchScore = noMatchScore;
-		}
-
-		@Override
-		public double getTruePositiveScore()
-		{
-			return matchScore;
-		}
-
-		@Override
-		public double getFalsePositiveScore()
-		{
-			return noMatchScore;
-		};
-
-		@Override
-		public double getTrueNegativeScore()
-		{
-			return noMatchScore;
-		}
-
-		@Override
-		public double getFalseNegativeScore()
-		{
-			return matchScore;
-		}
-	}
-
 	/**
 	 * Allow the genetic algorithm to be stopped using the escape key
 	 */
@@ -3259,10 +3232,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private Population ga_population;
 
 	// Used for the scoring of filter sets
-	private List<MemoryPeakResults> ga_resultsList = null;
-	private List<MemoryPeakResults> ga_resultsListToScore = null;
-	private double ga_tn, ga_fn;
-	private int ga_n;
+	private MultiPathFitResults[] ga_resultsList = null;
+	private MultiPathFitResults[] ga_resultsListToScore = null;
 	private boolean ga_subset;
 	private int ga_iteration;
 
@@ -3294,9 +3265,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private void initialiseScoring(FilterSet filterSet)
 	{
 		// Initialise with the candidate true and false negative scores
-		ga_tn = c_tn;
-		ga_fn = c_fn;
-		ga_n = 0;
 		ga_resultsListToScore = ga_resultsList;
 		ga_subset = false;
 
@@ -3309,30 +3277,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (weakest != null)
 			{
 				ga_subset = true;
-				ga_resultsListToScore = new ArrayList<MemoryPeakResults>(ga_resultsList.size());
-				double[] score = null;
-				// Some filters may require all the data, e.g. Hysteresis filters
-				final boolean withFailCount = weakest.subsetWithFailCount();
-				for (MemoryPeakResults r : ga_resultsList)
-				{
-					double[] score2 = new double[6];
-					// Use the method that requires fail count in origY
-					MemoryPeakResults r2 = (withFailCount) ? weakest.filterSubset2(r, failCount, score2)
-							: weakest.filterSubset2(r, score2);
-					ga_resultsListToScore.add(r2);
-					if (score == null)
-						score = score2;
-					else
-					{
-						for (int j = 0; j < score.length; j++)
-							score[j] += score2[j];
-					}
-				}
-				ga_tn += score[2];
-				ga_fn += score[3];
-				ga_n += score[5];
-
-				checkTotals(ga_resultsListToScore.get(0), ga_tn, ga_fn);
+				ga_resultsListToScore = createMPF((DirectFilter) weakest).filterSubset(ga_resultsList,
+						failCount + failCountRange);
 			}
 		}
 	}
@@ -3347,7 +3293,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		DirectFilter filter = (DirectFilter) chromosome;
 		FractionClassificationResult r;
 		if (ga_subset)
-			r = fractionScoreSubset(filter, ga_resultsListToScore, failCount, ga_tn, ga_fn, ga_n);
+			r = scoreFilterSubset(filter, ga_resultsListToScore);
 		else
 			r = scoreFilter(filter, ga_resultsListToScore);
 		double score = getScore(r);
