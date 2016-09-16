@@ -550,9 +550,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		 */
 		public PSFSpot[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
 		{
-			if (coords.containsKey(t))
+			ArrayList<Coordinate> list1 = coords.get(t);
+			if (list1 != null)
 			{
-				ArrayList<Coordinate> list1 = coords.get(t);
 				PSFSpot[] list2 = new PSFSpot[list1.size()];
 				int i = 0;
 				for (Coordinate c : list1)

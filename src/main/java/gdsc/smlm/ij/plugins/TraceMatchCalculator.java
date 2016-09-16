@@ -247,9 +247,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 					{
 						Pulse p = (Pulse) pair.getPoint1();
 						Pulse pp = (Pulse) pair.getPoint2();
-						if (map.containsKey(p))
+						Triple t = map.get(p);
+						if (t != null)
 						{
-							Triple t = map.get(p);
 							t.p3 = pp;
 						}
 						else

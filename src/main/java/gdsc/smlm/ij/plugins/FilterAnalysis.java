@@ -864,9 +864,9 @@ public class FilterAnalysis implements PlugIn
 
 		if (allSameType && calculateSensitivity)
 		{
-			if (bestFilter.containsKey(type))
+			FilterScore filterScore = bestFilter.get(type);
+			if (filterScore != null)
 			{
-				FilterScore filterScore = bestFilter.get(type);
 				if (filterScore.score < maxScore)
 					filterScore.update(maxFilter, maxScore);
 			}
