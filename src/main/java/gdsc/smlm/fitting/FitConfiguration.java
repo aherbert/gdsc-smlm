@@ -1425,21 +1425,21 @@ public class FitConfiguration implements Cloneable
 			float offsetx, float offsety)
 	{
 		final int offset = n * 6;
-		final float signal = (float) parameters[offset + Gaussian2DFunction.SIGNAL];
-		final float photons = (float) (parameters[offset + Gaussian2DFunction.SIGNAL] / getGain());
-		final float b = (float) parameters[Gaussian2DFunction.BACKGROUND];
-		final float angle = (float) parameters[offset + Gaussian2DFunction.ANGLE];
-		final float x = (float) parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
-		final float y = (float) parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
-		final float x0 = (float) initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
-		final float y0 = (float) initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
-		final float xsd = (float) parameters[offset + Gaussian2DFunction.X_SD];
-		final float ysd = (float) parameters[offset + Gaussian2DFunction.Y_SD];
-		final float xsd0 = (float) initialParameters[offset + Gaussian2DFunction.X_SD];
-		final float ysd0 = (float) initialParameters[offset + Gaussian2DFunction.Y_SD];
+		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL];
+		final double photons = (parameters[offset + Gaussian2DFunction.SIGNAL] / getGain());
+		final double b = parameters[Gaussian2DFunction.BACKGROUND];
+		final double angle = parameters[offset + Gaussian2DFunction.ANGLE];
+		final double x = parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
+		final double y = parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
+		final double x0 = initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
+		final double y0 = initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
+		final double xsd = parameters[offset + Gaussian2DFunction.X_SD];
+		final double ysd = parameters[offset + Gaussian2DFunction.Y_SD];
+		final double xsd0 = initialParameters[offset + Gaussian2DFunction.X_SD];
+		final double ysd0 = initialParameters[offset + Gaussian2DFunction.Y_SD];
 		final double variance = getVariance(b, signal, PeakResult.getSD(xsd, ysd));
-		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, (float) noise, b, angle, x, y, x0,
-				y0, xsd, ysd, xsd0, ysd0, variance, resultType);
+		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, x0, y0,
+				xsd, ysd, xsd0, ysd0, variance, resultType);
 	}
 
 	/**
