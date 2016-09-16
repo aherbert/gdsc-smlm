@@ -1497,13 +1497,10 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	}
 
 	/**
-	 * Method to indicate that this filter is a direct filter. This avoids the use of instanceof to determine if the
-	 * filter can be cast to DirectFilter.
-	 * 
-	 * @return True if can be cast to DirectFilter
+	 * @return The filter type
 	 */
-	public boolean isDirectFilter()
+	public FilterType getFilterType()
 	{
-		return false;
+		return FilterType.STANDARD;
 	}
 }

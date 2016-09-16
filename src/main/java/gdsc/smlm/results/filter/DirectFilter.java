@@ -73,8 +73,8 @@ public abstract class DirectFilter extends Filter
 	public abstract boolean accept(final PreprocessedPeakResult peak);
 	
 	@Override
-	public boolean isDirectFilter()
+	public FilterType getFilterType()
 	{
-		return true;
+		return FilterType.DIRECT;
 	}
 }
