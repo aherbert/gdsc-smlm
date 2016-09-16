@@ -69,9 +69,26 @@ public class MultiPathFitResult
 	}
 
 	/**
+	 * The original value for the number of failed results before this result
+	 */
+	private int originalFailCount;
+
+	/**
 	 * The number of failed results before this result
 	 */
 	public int failCount;
+
+	/**
+	 * Reset the fail count to the original value.
+	 * <p>
+	 * Note that the MultiPathFilter will update the fail count when creating a subset. Multiple rounds of subsetting
+	 * will continually update the fail count. This method can be used to reset the fail count after the subset has been
+	 * processed.b
+	 */
+	public void resetFailCount()
+	{
+		this.failCount = this.originalFailCount;
+	}
 
 	/**
 	 * The frame containing the result
