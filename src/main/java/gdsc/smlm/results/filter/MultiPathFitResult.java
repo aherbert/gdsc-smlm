@@ -21,7 +21,7 @@ package gdsc.smlm.results.filter;
  * <p>
  * This class is used for benchmarking the fitting path options in the PeakFit algorithm.
  */
-public class MultiPathFitResult
+public class MultiPathFitResult implements Cloneable
 {
 	public static class FitResult
 	{
@@ -132,4 +132,17 @@ public class MultiPathFitResult
 	 * isNewResult().
 	 */
 	public FitResult doubletFitResult;
+
+	@Override
+	public MultiPathFitResult clone()
+	{
+		try
+		{
+			return (MultiPathFitResult) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
+	}
 }
