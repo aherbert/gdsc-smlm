@@ -41,6 +41,7 @@ import org.apache.commons.math3.random.Well44497b;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.ImmutableFractionalAssignment;
@@ -175,7 +176,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
 	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
 	private static MultiPathFitResults[] resultsList = null;
-	private static int candidates, matches;
+	private static MultiPathFitResults[] clonedResultsList = null;
+	private static int candidates; // This may be in the results prefix already... 
+	private static int matches;
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
@@ -331,7 +334,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				if (fitted)
 				{
-					fitResult.failCount = failCount;
+					fitResult.originalFailCount = failCount;
 					multiPathFitResults[size++] = fitResult;
 					failCount = 0;
 				}
@@ -372,36 +375,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static ArrayList<FilterResult> scores = new ArrayList<FilterResult>();
 
 	private static String[] COLUMNS = {
-			// Scores against the fit results that did not fail		
-			"nP", "TP", "FP", "TN", "FN", "TPR", "TNR", "PPV", "NPV", "FPR", "FNR", "FDR", "ACC", "MCC", "Informedness",
-			"Markedness", "Recall", "Precision", "F1", "Jaccard",
-			// Scores against the original localisations. Calculated using the number of localisations 
-			"oFP", "oFN", "oRecall", "oPrecision", "oF1", "oJaccard", };
+			// Scores using integer scoring		
+			"TP", "FP", "FN", "Precision", "Recall", "F1", "Jaccard",
+			// Scores using fractional scoring 
+			"fTP", "fFP", "fFN", "fPrecision", "fRecall", "fF1", "fJaccard", };
 
 	private static boolean[] showColumns;
+	private boolean requireIntegerResults;
 	static
 	{
 		showColumns = new boolean[COLUMNS.length];
-		//Arrays.fill(showColumns, true);
+		Arrays.fill(showColumns, true);
 		//showColumns[0] = false; // nP
 
-		showColumns[1] = true; // TP
-		showColumns[2] = true; // FP
-		showColumns[3] = true; // TN
-		showColumns[4] = true; // FN
-		showColumns[COLUMNS.length - 13] = true; // MCC
-		showColumns[COLUMNS.length - 10] = true; // Recall
-		showColumns[COLUMNS.length - 9] = true; // Precision
-		showColumns[COLUMNS.length - 7] = true; // Jaccard
-		showColumns[COLUMNS.length - 6] = true; // oFP
-		showColumns[COLUMNS.length - 5] = true; // oFN
-		showColumns[COLUMNS.length - 4] = true; // oRecall
-		showColumns[COLUMNS.length - 3] = true; // oPrecision
-		showColumns[COLUMNS.length - 1] = true; // oJaccard
-
 		// Use the precision as criteria to ensure a set confidence on results labelled as true
-		criteriaIndex = COLUMNS.length - 3;
-		// Score against the original data so we can compare across filters and fit solvers
+		criteriaIndex = COLUMNS.length - 4;
+		// Score using Jaccard
 		scoreIndex = COLUMNS.length - 1;
 
 		String currentUsersHomeDir = System.getProperty("user.home");
@@ -986,6 +975,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			resultsList = results.toArray(new MultiPathFitResults[results.size()]);
 		}
 
+		// In case a previous run was interrupted
+		if (resultsList != null)
+		{
+			resetFailCount(resultsList);
+
+			// XXX Clone this for us in debugging
+			clonedResultsList = new MultiPathFitResults[resultsList.length];
+			for (int i=0; i<clonedResultsList.length; i++)
+				clonedResultsList[i] = resultsList[i].clone();
+		}
+
 		return resultsList;
 	}
 
@@ -1210,6 +1210,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			for (int i = 0; i < COLUMNS.length; i++)
 				showColumns[i] = gd.getNextBoolean();
+
+			requireIntegerResults = false;
+			for (int i = 0; i < 7; i++)
+			{
+				if (showColumns[i])
+				{
+					requireIntegerResults = true;
+					break;
+				}
+			}
 		}
 
 		// We may have to read the results again if the ranking option has changed
@@ -1822,6 +1832,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			double[] max = new double[] { -1, -1 };
 			boolean criteriaPassed = false;
 			int count2 = count;
+
+			// TODO - multi-thread this by pre-computing all the results from the run method.
 			for (Filter sfilter : filterSet.getFilters())
 			{
 				final DirectFilter filter = (DirectFilter) sfilter;
@@ -1889,6 +1901,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					}
 				}
 			}
+			finishScoring();
 
 			if (maxFilter != null)
 			{
@@ -1957,6 +1970,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					final int stepTotal = newSet.size();
 					int stepProgress = Utils.getProgressInterval(stepTotal);
 
+					// TODO - multi-thread this by pre-computing all the results from the run method.
 					for (Filter sfilter : newSet.getFilters())
 					{
 						final DirectFilter filter = (DirectFilter) sfilter;
@@ -2016,6 +2030,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							}
 						}
 					}
+					finishScoring();
 					progress(1);
 
 					// Check if the top filter has changed to continue the search
@@ -2052,6 +2067,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double totalProgress = (double) count / total;
 		double stepSize = ((double) originalSize / total) / filterSet.size();
 		int i = 0;
+
+		// TODO - multi-thread this by pre-computing all the results from the run method.
 		for (Filter sfilter : filterSet.getFilters())
 		{
 			DirectFilter filter = (DirectFilter) sfilter;
@@ -2144,6 +2161,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 			}
 		}
+
+		finishScoring();
 
 		// Update the final results window given that we mainly use appendWidthoutUpdate(...) when adding data
 		if (showResultsTable)
@@ -2357,63 +2376,39 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return (invert) ? -score : score;
 	}
 
-	private double getScore(FractionClassificationResult s, final int index)
+	private double getScore(FractionClassificationResult r, final int index)
 	{
 		// This order must match the COLUMNS order 
 		switch (index)
 		{
 			case 0:
-				return s.getTP() + s.getFP();
+				return r.getPositives();
 			case 1:
-				return s.getTP();
+				return r.getNegatives();
 			case 2:
-				return s.getFP();
+				return simulationParameters.molecules - r.getPositives();
 			case 3:
-				return s.getTN();
+				return createIntegerResult(r).getPrecision();
 			case 4:
-				return s.getFN();
+				return createIntegerResult(r).getRecall();
 			case 5:
-				return s.getTPR();
+				return createIntegerResult(r).getF1Score();
 			case 6:
-				return s.getTNR();
+				return createIntegerResult(r).getJaccard();
 			case 7:
-				return s.getPPV();
+				return r.getTP();
 			case 8:
-				return s.getNPV();
+				return r.getFP();
 			case 9:
-				return s.getFPR();
+				return r.getFN();
 			case 10:
-				return s.getFNR();
+				return r.getPrecision();
 			case 11:
-				return s.getFDR();
+				return r.getRecall();
 			case 12:
-				return s.getAccuracy();
+				return r.getF1Score();
 			case 13:
-				return s.getMCC();
-			case 14:
-				return s.getInformedness();
-			case 15:
-				return s.getMarkedness();
-			case 16:
-				return s.getRecall();
-			case 17:
-				return s.getPrecision();
-			case 18:
-				return s.getF1Score();
-			case 19:
-				return s.getJaccard();
-			case 20:
-				return getOriginalScore(s).getFP();
-			case 21:
-				return getOriginalScore(s).getFN();
-			case 22:
-				return getOriginalScore(s).getRecall();
-			case 23:
-				return getOriginalScore(s).getPrecision();
-			case 24:
-				return getOriginalScore(s).getF1Score();
-			case 25:
-				return getOriginalScore(s).getJaccard();
+				return r.getJaccard();
 		}
 		return 0;
 	}
@@ -2422,13 +2417,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		switch (index)
 		{
-			case 2: // FP
-			case 4: // FN
-			case 9: // FPR
-			case 10: // FNR
-			case 11: // FDR
-			case 20: // oFP
-			case 21: // oFN
+			case 1: // FP
+			case 2: // FN
+			case 8: // fFP
+			case 9: // fFN
 				return true;
 
 			default:
@@ -2461,27 +2453,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private double[] run(DirectFilter filter, MultiPathFitResults[] resultsList, boolean subset)
 	{
-		FractionClassificationResult r;
-		if (subset)
-		{
-			r = scoreFilterSubset(filter, resultsList);
+		final FractionClassificationResult r = scoreFilter(filter, resultsList);
 
-			// DEBUG - Test if the two methods produce the same results
-			FractionClassificationResult r2 = scoreFilter(filter, resultsList);
-			if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
-					!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
-					!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
-			{
-				System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(), r.getFP(),
-						r2.getFP(), r.getFN(), r2.getFN());
-			}
-			else
-				System.out.println("Matched scores");
+		// DEBUG - Test if the two methods produce the same results
+		FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.clonedResultsList);
+		if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
+				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
+				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
+		{
+			System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(), r.getFP(), r2.getFP(),
+					r.getFN(), r2.getFN());
 		}
 		else
-			r = scoreFilter(filter, resultsList);
-
-		//checkTotals(r.getTP(), r.getFP(), r.getTN(), r.getFN());
+			System.out.println("Matched scores");
 
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
@@ -2511,33 +2495,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 		}
 		return new double[] { score, criteria };
-	}
-
-	private FractionClassificationResult scoreFilterSubset(DirectFilter filter, MultiPathFitResults[] resultsList)
-	{
-		final MultiPathFilter multiPathFilter = createMPF(filter);
-
-		if (failCountRange == 0)
-			return multiPathFilter.fractionScoreSubset(resultsList, failCount, simulationParameters.molecules);
-
-		double tp = 0, fp = 0, fn = 0;
-		int p = 0, n = 0;
-		for (int i = 0; i <= failCountRange; i++)
-		{
-			// Use the method that requires fail count in origY
-			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(resultsList, failCount + i,
-					simulationParameters.molecules);
-			tp += r.getTP();
-			fp += r.getFP();
-			fn += r.getFN();
-			p += r.getPositives();
-			n += r.getNegatives();
-		}
-		// Normalise by the number of evaluations
-		final int norm = failCountRange + 1;
-		p = (int) Math.round((double) p / norm);
-		n = (int) Math.round((double) n / norm);
-		return new FractionClassificationResult(tp / norm, fp / norm, 0, fn / norm, p, n);
 	}
 
 	/**
@@ -2570,16 +2527,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		final MultiPathFilter multiPathFilter = createMPF(filter);
 
+		// Note: We always use the subset method since fail counts have been accumulated when we read in the results.
+
 		if (failCountRange == 0)
-			return multiPathFilter.fractionScore(resultsList, failCount, simulationParameters.molecules,
+			return multiPathFilter.fractionScoreSubset(resultsList, failCount, simulationParameters.molecules,
 					allAssignments);
 
 		double tp = 0, fp = 0, fn = 0;
 		int p = 0, n = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
-			// Use the method that requires fail count in origY
-			final FractionClassificationResult r = multiPathFilter.fractionScore(resultsList, failCount + i,
+			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(resultsList, failCount + i,
 					simulationParameters.molecules, (i == failCountRange) ? allAssignments : null);
 			tp += r.getTP();
 			fp += r.getFP();
@@ -2631,42 +2589,35 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// We could set:
 		// TN as any candidate that does not match a true result.
 		// FN as any candidate that does match a true result (that is not matched by any fit result)
-
 		// To do this properly would require that we store all the matches of candidates to the data.
 		// These can then be totalled up given the candidates that have not been used to create a positive. 
 
-		addCount(sb, r.getTP() + r.getFP(), i++);
+		// Integer results
+		final ClassificationResult r2 = (requireIntegerResults) ? createIntegerResult(r) : null;
+
+		add(sb, r2.getTP(), i++);
+		add(sb, r2.getFP(), i++);
+		add(sb, r2.getFN(), i++);
+		add(sb, r2.getPrecision(), i++);
+		add(sb, r2.getRecall(), i++);
+		add(sb, r2.getF1Score(), i++);
+		add(sb, r2.getJaccard(), i++);
+
 		addCount(sb, r.getTP(), i++);
 		addCount(sb, r.getFP(), i++);
-		addCount(sb, r.getTN(), i++);
 		addCount(sb, r.getFN(), i++);
-
-		add(sb, r.getTPR(), i++);
-		add(sb, r.getTNR(), i++);
-		add(sb, r.getPPV(), i++);
-		add(sb, r.getNPV(), i++);
-		add(sb, r.getFPR(), i++);
-		add(sb, r.getFNR(), i++);
-		add(sb, r.getFDR(), i++);
-		add(sb, r.getAccuracy(), i++);
-		add(sb, r.getMCC(), i++);
-		add(sb, r.getInformedness(), i++);
-		add(sb, r.getMarkedness(), i++);
-
-		add(sb, r.getRecall(), i++);
 		add(sb, r.getPrecision(), i++);
+		add(sb, r.getRecall(), i++);
 		add(sb, r.getF1Score(), i++);
 		add(sb, r.getJaccard(), i++);
 
-		// Score relative to the original simulated number of spots
-		FractionClassificationResult m = getOriginalScore(r);
-		addCount(sb, m.getFP(), i++);
-		addCount(sb, m.getFN(), i++);
-		add(sb, m.getRecall(), i++);
-		add(sb, m.getPrecision(), i++);
-		add(sb, m.getF1Score(), i++);
-		add(sb, m.getJaccard(), i++);
 		return sb;
+	}
+
+	private ClassificationResult createIntegerResult(FractionClassificationResult r)
+	{
+		return new ClassificationResult(r.getPositives(), r.getNegatives(), 0,
+				simulationParameters.molecules - r.getPositives());
 	}
 
 	private FractionClassificationResult getOriginalScore(FractionClassificationResult r)
@@ -2694,7 +2645,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		sb.append('\t').append(value);
 	}
 
-	@SuppressWarnings("unused")
 	private static void add(StringBuilder sb, int value, int i)
 	{
 		if (showColumns[i])
@@ -2907,7 +2857,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final double range = simulationParameters.depth / simulationParameters.a / 2;
 		double[] limits = { -range, range };
 
-		final int bins = Math.max(10, simulationParameters.molecules / 100);
+		//final int bins = Math.max(10, simulationParameters.molecules / 100);
+		//final int bins = Utils.getBinsSturges(depths.length);
+		final int bins = Utils.getBinsSqrt(depths.length);
 		double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
 		double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
 
@@ -3259,8 +3211,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	/**
 	 * Initialise the results list used for scoring the filters. This is shared with the genetic algorithm.
-	 * 
+	 *
 	 * @param filterSet
+	 *            the filter set
 	 */
 	private void initialiseScoring(FilterSet filterSet)
 	{
@@ -3278,7 +3231,32 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				ga_subset = true;
 				ga_resultsListToScore = createMPF((DirectFilter) weakest).filterSubset(ga_resultsList,
-						failCount + failCountRange);
+						failCount + failCountRange, true);
+			}
+		}
+	}
+
+	/**
+	 * Finish scoring and reset the subset
+	 *
+	 * @param filterSet
+	 *            the filter set
+	 */
+	private void finishScoring()
+	{
+		if (ga_subset)
+		{
+			resetFailCount(ga_resultsListToScore);
+		}
+	}
+
+	private void resetFailCount(MultiPathFitResults[] list)
+	{
+		for (int i = 0; i < list.length; i++)
+		{
+			for (int j = 0; j < list[i].multiPathFitResults.length; j++)
+			{
+				list[i].multiPathFitResults[j].resetFailCount();
 			}
 		}
 	}
@@ -3290,12 +3268,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	public double fitness(Chromosome chromosome)
 	{
-		DirectFilter filter = (DirectFilter) chromosome;
-		FractionClassificationResult r;
-		if (ga_subset)
-			r = scoreFilterSubset(filter, ga_resultsListToScore);
-		else
-			r = scoreFilter(filter, ga_resultsListToScore);
+		final DirectFilter filter = (DirectFilter) chromosome;
+		final FractionClassificationResult r = scoreFilter(filter, ga_resultsListToScore);
 		double score = getScore(r);
 		final double criteria = getCriteria(r);
 
@@ -3323,6 +3297,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	public void shutdown()
 	{
+		finishScoring();
+
 		// Report the score for the best filter
 		List<? extends Chromosome> individuals = ga_population.getIndividuals();
 		ChromosomeComparator.sort(individuals);
