@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.fitting.FitConfiguration;
 
 /*----------------------------------------------------------------------------- 
@@ -32,6 +33,7 @@ import gdsc.smlm.ga.SimpleSelectionStrategy;
 import gdsc.smlm.ga.ToleranceChecker;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.SpotMatch;
+import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -40,10 +42,19 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.match.Assignment;
+import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
+import gdsc.core.match.FractionalAssignment;
+import gdsc.core.match.ImmutableFractionalAssignment;
+import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.IMultiFilter;
+import gdsc.smlm.results.filter.MultiPathFitResult;
+import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.PreprocessedPeakResult;
+import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.utils.XmlUtils;
 import gdsc.core.utils.Maths;
@@ -55,6 +66,7 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
+import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -102,7 +114,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int failCount = 1;
 	private static int failCountRange = 0;
 	private static boolean reset = true;
-	private static boolean rerankBySignal = false;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
 	private static boolean clearTables = false;
@@ -165,13 +176,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double[][] upperLimit;
 	private static double[][] increment;
 	private static int lastId = 0;
-	private static boolean lastRank = false;
+	private static HashMap<Integer, IdPeakResult[]> actualCoordinates = null;
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
 	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
-	private static List<MemoryPeakResults> resultsList = null;
+	private static MultiPathFitResults[] resultsList = null;
 	private static int candidates;
-	private static double matches;
-	private static double c_tn, c_fn;
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
@@ -179,6 +188,51 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	// Used to tile plot windows
 	private WindowOrganiser wo = new WindowOrganiser();
+
+	public class CustomFractionalAssignment extends ImmutableFractionalAssignment
+	{
+		public final double sf;
+		public final PeakResult peak;
+
+		public CustomFractionalAssignment(int targetId, int predictedId, double distance, double score, double sf,
+				PeakResult peak)
+		{
+			super(targetId, predictedId, distance, score);
+			this.sf = sf;
+			this.peak = peak;
+		}
+	}
+
+	public class CustomResultAssignment extends ResultAssignment
+	{
+		public final double sf;
+		public final PeakResult peak;
+
+		public CustomResultAssignment(int targetId, double distance, double score, double sf, PeakResult peak)
+		{
+			super(targetId, distance, score);
+			this.sf = sf;
+			this.peak = peak;
+		}
+
+		@Override
+		public FractionalAssignment toFractionalAssignment(int predictedId)
+		{
+			return new CustomFractionalAssignment(targetId, predictedId, distance, score, sf, peak);
+		}
+	}
+
+	private class IdPeakResult extends PeakResult
+	{
+		final int id;
+
+		public IdPeakResult(int id, PeakResult result)
+		{
+			super(result.peak, result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
+					null);
+			this.id = id;
+		}
+	}
 
 	// Store the best filter scores
 	private class FilterResult
@@ -237,6 +291,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
+	private MemoryPeakResults results;
 
 	public BenchmarkFilterAnalysis()
 	{
@@ -258,6 +313,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			IJ.error(TITLE, "No benchmark spot parameters in memory");
 			return;
 		}
+		results = MemoryPeakResults.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
+		if (results == null)
+		{
+			IJ.error(TITLE, "No benchmark results in memory");
+			return;
+		}
 		if (BenchmarkSpotFit.fitResults == null)
 		{
 			IJ.error(TITLE, "No benchmark fitting results in memory");
@@ -275,7 +336,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		resultsList = readResults();
-		if (resultsList.isEmpty())
+		if (resultsList == null)
 		{
 			IJ.error(TITLE, "No results could be loaded");
 			return;
@@ -295,7 +356,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		analyse(resultsList, filterSets);
 
-		String timeString = Utils.timeToString(totalTime);
+		final String timeString = Utils.timeToString(totalTime);
 		// TODO - Decide where to write this.
 		IJ.log("Filter analysis time : " + timeString);
 		IJ.showStatus("Finished : " + timeString);
@@ -619,30 +680,33 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	private List<MemoryPeakResults> readResults()
+	private MultiPathFitResults[] readResults()
 	{
-		if (resultsList == null || lastId != BenchmarkSpotFit.fitResultsId || lastRank != rerankBySignal ||
-				lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance ||
-				lastPartialSignalFactor != partialSignalFactor || lastUpperSignalFactor != upperSignalFactor)
+		boolean update = false;
+		if (lastId != BenchmarkSpotFit.fitResultsId)
+		{
+			lastId = BenchmarkSpotFit.fitResultsId;
+			update = true;
+			actualCoordinates = getCoordinates(this.results.getResults());
+		}
+
+		if (resultsList == null || update || lastPartialMatchDistance != partialMatchDistance ||
+				lastUpperMatchDistance != upperMatchDistance || lastPartialSignalFactor != partialSignalFactor ||
+				lastUpperSignalFactor != upperSignalFactor)
 		{
 			// Only cache results for the same analysis settings.
 			// This functionality is for choosing the optimum fail limit.
 			scores.clear();
-			
-			lastId = BenchmarkSpotFit.fitResultsId;
-			lastRank = rerankBySignal;
+
 			lastUpperMatchDistance = upperMatchDistance;
 			lastPartialMatchDistance = partialMatchDistance;
 			lastUpperSignalFactor = upperSignalFactor;
 			lastPartialSignalFactor = partialSignalFactor;
-			resultsList = new LinkedList<MemoryPeakResults>();
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
 			signalFactorStats = new StoredDataStatistics();
 			distanceStats = new StoredDataStatistics();
 			candidates = 0;
-			matches = 0;
-			c_tn = c_fn = 0;
 
 			// -=-=-=-
 			// The scoring is designed to find the best fitter+filter combination for the given spot candidates.
@@ -674,7 +738,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// TN = A spot candidate that failed to be fitted and does not match a localisation
 			//    = A spot candidate that was fitted and does not match a localisation and is rejected
 			//
-			// Since unfitted candidates can only be TN or FN we can accumulate these scores and cache them.
+			// When fitting only produces one result it is possible to compute the TN score.
+			// Since unfitted candidates can only be TN or FN we could accumulate these scores and cache them.
+			// This was the old method of benchmarking single spot fitting and allowed more scores to be 
+			// computed.
+			//
+			// When fitting produces multiple results then we have to score each fit result against all possible
+			// actual results and keep a record of the scores. These can then be assessed when the specific 
+			// results have been chosen by result filtering.
 			//
 			// Using a distance ramped scoring function the degree of match can be varied from 0 to 1.
 			// Using a signal-factor ramped scoring function the degree of fitted can be varied from 0 to 1.
@@ -703,6 +774,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0);
 			lowerDistanceInPixels = distanceScore.lower;
 			distanceInPixels = distanceScore.upper;
+			final double matchDistance = distanceInPixels * distanceInPixels;
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
@@ -727,145 +799,191 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				lowerSignalFactor = signalFactor = 0;
 			}
 
-			MemoryPeakResults r = new MemoryPeakResults();
-			Calibration cal = new Calibration(simulationParameters.a, simulationParameters.gain, 100);
-			cal.bias = simulationParameters.bias;
-			cal.emCCD = simulationParameters.emCCD;
-			cal.readNoise = simulationParameters.readNoise;
-			r.setCalibration(cal);
-			// Set the configuration used for fitting
-			r.setConfiguration(XmlUtils.toXML(BenchmarkSpotFit.fitConfig));
+			// Store all the results
+			final ArrayList<MultiPathFitResults> results = new ArrayList<MultiPathFitResults>(
+					BenchmarkSpotFit.fitResults.size());
+
+			// TODO - This could be multi-threaded ...
 
 			for (Entry<Integer, FilterCandidates> entry : BenchmarkSpotFit.fitResults.entrySet())
 			{
-				final int peak = entry.getKey().intValue();
+				final int frame = entry.getKey().intValue();
 				final FilterCandidates result = entry.getValue();
 				depthStats.add(result.zPosition);
 				candidates += result.spots.length;
 
+				final PeakResult[] actual = getCoordinates(actualCoordinates, frame);
+				final boolean[] matched = new boolean[actual.length];
+				final ResultGridManager resultGrid = new ResultGridManager(actual, 2 * distanceInPixels);
+
+				final MultiPathFitResult[] multiPathFitResults = new MultiPathFitResult[result.fitResult.length];
+				int size = 0;
+
 				// Results are in order of candidate ranking.
-				int[] indices = Utils.newArray(result.fitResult.length, 0, 1);
-				if (rerankBySignal)
-				{
-					// Change to signal intensity.
-					double[] score = new double[result.fitResult.length];
-					for (int i = 0; i < result.fitResult.length; i++)
-					{
-						final FitResult fitResult = result.fitResult[i];
-						if (fitResult.getStatus() == FitStatus.OK)
-						{
-							score[i] = fitResult.getParameters()[Gaussian2DFunction.SIGNAL];
-						}
-					}
-					Sort.sort(indices, score);
-				}
-
 				int failCount = 0;
-				for (int i = 0; i < result.fitResult.length; i++)
+				for (int index = 0; index < multiPathFitResults.length; index++)
 				{
-					final int index = indices[i];
-					final FitResult fitResult = result.fitResult[index];
-					if (fitResult.getStatus() == FitStatus.OK)
+					final MultiPathFitResult fitResult = result.fitResult[index];
+
+					// Score the results. Do in order of those likely to be in the same position
+					// thus the grid manager can cache the neighbours
+					boolean fitted = score(fitResult.singleFitResult, resultGrid, matchDistance, distanceScore,
+							signalScore, matched);
+					fitted |= score(fitResult.doubletFitResult, resultGrid, matchDistance, distanceScore, signalScore,
+							matched);
+					fitted |= score(fitResult.multiFitResult, resultGrid, matchDistance, distanceScore, signalScore,
+							matched);
+
+					if (fitted)
 					{
-						// Assume we are not fitting doublets and the fit result will have 1 peak
-						final float[] params = Utils.toFloat(fitResult.getParameters());
-						// To allow the shift filter to function the X/Y position coordinates must be relative
-						final double[] initial = fitResult.getInitialParameters();
-						params[Gaussian2DFunction.X_POSITION] -= initial[Gaussian2DFunction.X_POSITION];
-						params[Gaussian2DFunction.Y_POSITION] -= initial[Gaussian2DFunction.Y_POSITION];
-						// These will be incorrect due to the relative adjustment above...
-						//final int origX = (int) params[Gaussian2DFunction.X_POSITION];
-						//final int origY = (int) params[Gaussian2DFunction.Y_POSITION];
-
-						// Binary classification uses a score of 1 (match) or 0 (no match)
-						// Fuzzy classification uses a score of 1 (match) or 0 (no match), or >0 <1 (partial match)
-						double matchScore = 0, noMatchScore = 1;
-						double depth = 0, signalFactor = 0, distance = 0;
-						if (result.fitMatch[index])
-						{
-							// Find the result
-							SpotMatch match = getMatch(result.match, index);
-
-							// Store depth of matches for later analysis
-							depth = match.z;
-							signalFactor = match.getSignalFactor();
-							// Store the match distance in nm
-							distance = match.d * simulationParameters.a;
-
-							final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
-							if (dScore > 0)
-								matches += dScore;
-							matchScore = dScore;
-							noMatchScore = 1 - matchScore;
-
-							// Apply the weighting for the signal factor if enabled
-							if (signalScore != null)
-							{
-								final double fScore = signalScore.scoreAndFlatten(match.getAbsoluteSignalFactor(), 256);
-								matchScore = RampedScore.flatten(matchScore * fScore, 256);
-								noMatchScore = fScore - matchScore;
-
-								// Any remaining score should be accumulated as an unfitted result,
-								// i.e. since the signal fit is poor then treat this as partially unfitted.
-
-								// Allocate the removed match score to false-negative
-								final double fn = dScore - matchScore;
-								// The remaining score is true negative, ensure it sums to 1
-								final double tn = 1 - matchScore - noMatchScore - fn;
-								c_fn += fn;
-								c_tn += tn;
-							}
-
-							if (matchScore > 0)
-							{
-								depthFitStats.add(depth);
-								signalFactorStats.add(signalFactor);
-								distanceStats.add(distance);
-							}
-						}
-
-						final float score2 = RampedScore.flatten((float) matchScore, 256);
-
-						// Spots are processed in order. We must accumulate the number of failures
-						// before each fitted spot in order to correctly process the fail count.
-						// Store the number of failures before each correct fit in origX & origY.
-
-						// Use a custom peak result so that the depth can be stored.
-						r.add(new DepthPeakResult(peak, failCount, failCount, score2, fitResult.getError(),
-								result.noise, params, depth, signalFactor, distance, matchScore, noMatchScore));
+						fitResult.failCount = failCount;
+						multiPathFitResults[size++] = fitResult;
 						failCount = 0;
 					}
 					else
 					{
 						// This was not fitted
-						c_tn++;
 						failCount++;
 					}
 				}
 
-				// Accumulate the TN and FN scores for spot candidates that were not fitted but match a result
-				for (SpotMatch match : result.match)
-				{
-					if (match.isFitResult())
-						// This has been processed above as a fitMatch
-						continue;
-					// This is an unfitted result that matches so is a negative
-					final double dScore = distanceScore.scoreAndFlatten(match.d, 256);
-					matches += dScore;
-					c_fn += dScore;
-					// This should be '+= 1 - dScore' but we incremented c_tn above for all candidates that were not fitted
-					c_tn -= dScore;
-				}
-			}
-
-			checkTotals(r, c_tn, c_fn);
-
-			if (r.size() > 0)
-			{
-				resultsList.add(r);
+				results.add(
+						new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length));
 			}
 		}
+
 		return resultsList;
+	}
+
+	private HashMap<Integer, IdPeakResult[]> getCoordinates(List<PeakResult> list)
+	{
+		HashMap<Integer, IdPeakResult[]> coords = new HashMap<Integer, IdPeakResult[]>();
+		if (list.size() > 0)
+		{
+			// Do not use HashMap directly to build the coords object since there 
+			// will be many calls to getEntry(). Instead sort the results and use 
+			// a new list for each time point
+			Collections.sort(list);
+
+			int last = -1;
+			int id = 0;
+			ArrayList<PeakResult> tmp = new ArrayList<PeakResult>();
+			// Add the results to the lists
+			for (PeakResult p : list)
+			{
+				if (last != p.peak)
+				{
+					if (!tmp.isEmpty())
+					{
+						coords.put(last, tmp.toArray(new IdPeakResult[tmp.size()]));
+					}
+					id = 0;
+				}
+				last = p.peak;
+				tmp.add(new IdPeakResult(id++, p));
+			}
+
+			if (!tmp.isEmpty())
+			{
+				coords.put(last, tmp.toArray(new IdPeakResult[tmp.size()]));
+			}
+		}
+		return coords;
+	}
+
+	private static IdPeakResult[] EMPTY = new IdPeakResult[0];
+
+	private static IdPeakResult[] getCoordinates(HashMap<Integer, IdPeakResult[]> coords, Integer t)
+	{
+		IdPeakResult[] tmp = coords.get(t);
+		if (tmp == null)
+		{
+			tmp = EMPTY;
+		}
+		return tmp;
+	}
+
+	/**
+	 * Score the new results in the fit result
+	 *
+	 * @param fitResult
+	 *            the fit result
+	 * @param resultGrid
+	 *            the result grid
+	 * @param matchDistance
+	 *            the match distance
+	 * @param distanceScore
+	 *            the distance score
+	 * @param signalScore
+	 *            the signal score
+	 * @param matched
+	 *            array of actual results that have been matched
+	 * @return true, if the fit status was ok
+	 */
+	private boolean score(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, ResultGridManager resultGrid,
+			double matchDistance, RampedScore distanceScore, RampedScore signalScore, boolean[] matched)
+	{
+		if (fitResult.status == 0)
+		{
+			// Get the new results
+			for (int i = 0; i < fitResult.results.length; i++)
+			{
+				final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
+				peak.setAssignments(null);
+				if (!peak.isNewResult())
+					continue;
+
+				// Compare to actual results
+				// We do this using the ResultGridManager to generate a sublist to score against
+				final PeakResult[] actual = resultGrid.getPeakResultNeighbours((int) peak.getX(), (int) peak.getY());
+				if (actual.length == 0)
+					continue;
+
+				final ArrayList<ResultAssignment> assignments = new ArrayList<ResultAssignment>();
+				for (int j = 0; j < actual.length; j++)
+				{
+					final double d2 = actual[j].distance2(peak.getX(), peak.getY());
+					if (d2 <= matchDistance)
+					{
+						final double distance = Math.sqrt(d2);
+						final double signalFactor = BenchmarkSpotFit.getSignalFactor(peak.getSignal(),
+								actual[j].getSignal());
+
+						// Score ...
+						double score = distanceScore.score(distance);
+						if (signalScore != null)
+						{
+							score *= signalScore.score(signalFactor);
+						}
+						if (score != 0)
+						{
+							final int id = ((IdPeakResult) actual[j]).id;
+							assignments.add(new CustomResultAssignment(id, distance, score, signalFactor, actual[j]));
+
+							// Accumulate for each actual result
+							if (!matched[id])
+							{
+								matched[id] = true;
+								// Depth is stored in the error field
+								depthFitStats.add(actual[j].error);
+							}
+
+							// Accumulate for all possible matches						
+							signalFactorStats.add(signalFactor);
+							// Store the match distance in nm
+							distanceStats.add(distance * simulationParameters.a);
+						}
+					}
+				}
+
+				// Save 
+				if (!assignments.isEmpty())
+					peak.setAssignments(assignments.toArray(new ResultAssignment[assignments.size()]));
+			}
+
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -955,7 +1073,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
 		gd.addCheckbox("Reset", reset);
-		gd.addCheckbox("Rank_by_signal", rerankBySignal);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
 		gd.addCheckbox("Clear_tables", clearTables);
@@ -1006,9 +1123,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		// We may have to read the results again if the ranking option has changed
-		if (lastRank != rerankBySignal || lastPartialMatchDistance != partialMatchDistance ||
-				lastUpperMatchDistance != upperMatchDistance || lastPartialSignalFactor != partialSignalFactor ||
-				lastUpperSignalFactor != upperSignalFactor)
+		if (lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance ||
+				lastPartialSignalFactor != partialSignalFactor || lastUpperSignalFactor != upperSignalFactor)
 			readResults();
 
 		return true;
@@ -1019,7 +1135,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		failCount = (int) Math.abs(gd.getNextNumber());
 		failCountRange = (int) Math.abs(gd.getNextNumber());
 		reset = gd.getNextBoolean();
-		rerankBySignal = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
 		clearTables = gd.getNextBoolean();
@@ -2014,7 +2129,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		//if (allSameType)
 		//{
 		FilterScore newFilterScore = new FilterScore(maxFilter, max[SCORE], max[CRITERIA], atLimit);
-		if (bestFilter.containsKey(type))
+		FilterScore filterScore = bestFilter.get(type);
+		if (filterScore != null)
 		{
 			if (allowDuplicates)
 			{
@@ -2030,7 +2146,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			else
 			{
 				// Replace
-				FilterScore filterScore = bestFilter.get(type);
 				if (newFilterScore.compareTo(filterScore) < 0)
 					filterScore.update(maxFilter, max[SCORE], max[CRITERIA], atLimit);
 			}
@@ -3243,7 +3358,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				double diff = Maths.round(score - max, 3);
 				if (diff <= 0)
 					continue;
-				
+
 				max = score;
 				maxi = i;
 			}
