@@ -71,4 +71,10 @@ public abstract class DirectFilter extends Filter
 	 * @return true if the peak should be accepted, otherwise false to reject.
 	 */
 	public abstract boolean accept(final PreprocessedPeakResult peak);
+	
+	@Override
+	public boolean isDirectFilter()
+	{
+		return true;
+	}
 }

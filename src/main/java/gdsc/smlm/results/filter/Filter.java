@@ -1030,7 +1030,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	 * @param peakResults
 	 */
 	public abstract void setup(MemoryPeakResults peakResults);
-	
+
 	/**
 	 * Called for each peak in the results that are filtered.
 	 * 
@@ -1494,5 +1494,16 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 			return value * value;
 		else
 			return Double.POSITIVE_INFINITY;
+	}
+
+	/**
+	 * Method to indicate that this filter is a direct filter. This avoids the use of instanceof to determine if the
+	 * filter can be cast to DirectFilter.
+	 * 
+	 * @return True if can be cast to DirectFilter
+	 */
+	public boolean isDirectFilter()
+	{
+		return false;
 	}
 }
