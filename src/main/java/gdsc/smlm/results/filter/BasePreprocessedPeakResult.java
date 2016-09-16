@@ -82,19 +82,19 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			int frame,
 			int id,
 			int candidateId,
-			float signal,
-			float photons,
-			float noise,
-			float b,
-			float angle,
-			float x,
-			float y,
-			float x0,
-			float y0,
-			float xsd,
-			float ysd,
-			float xsd0,
-			float ysd0,
+			double signal,
+			double photons,
+			double noise,
+			double b,
+			double angle,
+			double x,
+			double y,
+			double x0,
+			double y0,
+			double xsd,
+			double ysd,
+			double xsd0,
+			double ysd0,
 			double variance,
 			ResultType resultType			
 			)
@@ -103,30 +103,30 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.frame = frame;
 		this.id = id;
 		this.candidateId = candidateId;
-		this.signal = signal;
-		this.photons = photons;
-		this.snr = signal / noise;
-		this.noise = noise;
-		this.sd = PeakResult.getSD(xsd, ysd);
-		this.b = b;
+		this.signal = (float) (signal);
+		this.photons = (float) (photons);
+		this.snr = (float) (signal / noise);
+		this.noise = (float) (noise);
+		this.sd = (float) (PeakResult.getSD(xsd, ysd));
+		this.b = (float) (b);
 		this.amp = (float) (signal / (2 * Math.PI * xsd * ysd));
-		this.angle = angle;
-		this.x = x;
-		this.y = y;
+		this.angle = (float) (angle);
+		this.x = (float) (x);
+		this.y = (float) (y);
 		this.xshift2 = squared((x - x0) / xsd0);
 		this.yshift2 = squared((y - y0) / ysd0);
-		this.xsd = xsd;
-		this.ysd = ysd;
-		this.xwf = xsd / xsd0;
-		this.ywf = ysd / ysd0;
+		this.xsd = (float) (xsd);
+		this.ysd = (float) (ysd);
+		this.xwf = (float) (xsd / xsd0);
+		this.ywf = (float) (ysd / ysd0);
 		this.variance = variance;
 		this.existingResult = resultType == ResultType.EXISTING;
 		this.newResult = resultType == ResultType.NEW;
 	}
 
-	private static float squared(float f)
+	private static float squared(double f)
 	{
-		return f * f;
+		return (float) (f * f);
 	}
 
 	public int getFrame()
