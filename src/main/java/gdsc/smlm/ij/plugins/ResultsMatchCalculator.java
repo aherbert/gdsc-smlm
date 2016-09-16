@@ -526,9 +526,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 */
 	public static Coordinate[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
 	{
-		if (coords.containsKey(t))
+		ArrayList<Coordinate> tmp = coords.get(t); 
+		if (tmp != null)
 		{
-			return coords.get(t).toArray(new Coordinate[0]);
+			return tmp.toArray(new Coordinate[tmp.size()]);
 		}
 		else
 		{
