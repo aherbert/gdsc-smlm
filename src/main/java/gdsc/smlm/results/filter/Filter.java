@@ -29,7 +29,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter a set of peak results into accepted/rejected.
  */
-public abstract class Filter implements Comparable<Filter>, Chromosome
+public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneable
 {
 	@XStreamOmitField
 	private String name;
@@ -1502,5 +1502,18 @@ public abstract class Filter implements Comparable<Filter>, Chromosome
 	public FilterType getFilterType()
 	{
 		return FilterType.STANDARD;
+	}
+
+	@Override
+	public Filter clone()
+	{
+		try
+		{
+			return (Filter) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
 	}
 }
