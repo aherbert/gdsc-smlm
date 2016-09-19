@@ -88,9 +88,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public boolean accept(PreprocessedPeakResult peak)
 	{
-		// Note: There is currently no distinction between estimating variance 
-		// using the local background or the background noise since the variance is precomputed
-		return peak.getLocationVariance() <= variance;
+		return peak.getLocationVariance2() <= variance;
 	}
 
 	@Override

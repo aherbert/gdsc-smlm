@@ -72,11 +72,18 @@ public interface PreprocessedPeakResult
 	float getNoise();
 
 	/**
-	 * The localisation variance
+	 * The localisation variance using the noise estimate for the data to approximate the local noise
 	 * 
 	 * @return The location variance in nm
 	 */
 	double getLocationVariance();
+
+	/**
+	 * The localisation variance using the local background estimate for the local noise
+	 * 
+	 * @return The location variance in nm
+	 */
+	double getLocationVariance2();
 
 	/**
 	 * @return The average peak standard deviation in the X and Y dimension

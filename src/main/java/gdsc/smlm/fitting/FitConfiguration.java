@@ -1093,7 +1093,8 @@ public class FitConfiguration implements Cloneable
 		{
 			final double sd = (params[Gaussian2DFunction.X_SD + offset] + params[Gaussian2DFunction.Y_SD + offset]) *
 					0.5;
-			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND], signal, sd);
+			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND], signal, sd,
+					this.precisionUsingBackground);
 
 			if (variance > precisionThreshold)
 			{
@@ -1111,21 +1112,25 @@ public class FitConfiguration implements Cloneable
 
 	/**
 	 * Get the localisation variance for fitting a spot with the specified parameters given the configuration (fit
-	 * solver, precision using background, gain, nm per pixel)
-	 * 
-	 * @param background
+	 * solver, precision using background, gain, nm per pixel).
+	 * <p>
+	 * We can calculate the precision using the estimated noise for the image or using the expected number
+	 * of background photons at the location.
+	 *
+	 * @param localBackground
 	 *            The background
 	 * @param signal
 	 *            The signal (in ADUs)
 	 * @param sd
 	 *            The spot standard deviation
+	 * @param precisionUsingBackground
+	 *            calculate the precision using expected number of background photons at the location
 	 * @return The localisation variance
 	 */
-	public double getVariance(double background, final double signal, final double sd)
+	public double getVariance(double localBackground, final double signal, final double sd,
+			boolean precisionUsingBackground)
 	{
 		double variance = 0;
-		// We can calculate the precision using the estimated noise for the image or using the expected number
-		// of background photons at the location.
 		if (precisionUsingBackground)
 		{
 			// Check using the formula which uses the estimated background.
@@ -1136,20 +1141,20 @@ public class FitConfiguration implements Cloneable
 				{
 					// This may be slow due to the integration required within the formula.
 					variance = PeakResult.getMLVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-							Math.max(0, background - bias) / gain, emCCD);
+							Math.max(0, localBackground - bias) / gain, emCCD);
 				}
 				catch (Exception e)
 				{
 					// Catch all exceptions. They are likely to be a TooManyIterationsException and other
 					// problems with the integration
 					variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-							Math.max(0, background - bias) / gain, emCCD);
+							Math.max(0, localBackground - bias) / gain, emCCD);
 				}
 			}
 			else
 			{
 				variance = PeakResult.getVarianceX(nmPerPixel, nmPerPixel * sd, signal / gain,
-						Math.max(0, background - bias) / gain, emCCD);
+						Math.max(0, localBackground - bias) / gain, emCCD);
 			}
 		}
 		else
@@ -1186,12 +1191,14 @@ public class FitConfiguration implements Cloneable
 		int offset;
 		double[] initialParams;
 		double[] params;
+		double localBackground;
 		boolean existingResult;
 		boolean newResult;
 
-		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, ResultType resultType)
+		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, double localBackground,
+				ResultType resultType)
 		{
-			setParameters(candidateId, n, initialParams, params, resultType);
+			setParameters(candidateId, n, initialParams, params, localBackground, resultType);
 		}
 
 		DynamicPeakResult()
@@ -1209,16 +1216,20 @@ public class FitConfiguration implements Cloneable
 		 *            The initial peak parameters
 		 * @param params
 		 *            The fitted peak parameters
+		 * @param localBackground
+		 *            the local background
 		 * @param resultType
 		 *            the result type
 		 */
-		void setParameters(int candidateId, int n, double[] initialParams, double[] params, ResultType resultType)
+		void setParameters(int candidateId, int n, double[] initialParams, double[] params, double localBackground,
+				ResultType resultType)
 		{
 			this.id = n;
 			this.candidateId = candidateId;
 			offset = n * 6;
 			this.initialParams = initialParams;
 			this.params = params;
+			this.localBackground = localBackground;
 			this.existingResult = resultType == ResultType.EXISTING;
 			this.newResult = resultType == ResultType.NEW;
 		}
@@ -1251,18 +1262,31 @@ public class FitConfiguration implements Cloneable
 
 		public float getSNR()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / FitConfiguration.this.noise);
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / getNoise());
 		}
 
 		public float getNoise()
 		{
-			return (float) FitConfiguration.this.noise;
+			return (float) ((localBackground > bias)
+					? PeakResult.localBackgroundToNoise(localBackground - bias, gain, emCCD)
+					: FitConfiguration.this.noise);
+		}
+
+		private double getLocalBackground()
+		{
+			return (localBackground > 0) ? localBackground : params[Gaussian2DFunction.BACKGROUND];
 		}
 
 		public double getLocationVariance()
 		{
-			return FitConfiguration.this.getVariance(params[Gaussian2DFunction.BACKGROUND],
-					params[Gaussian2DFunction.SIGNAL + offset], getSD());
+			// We do not use the local background to set as zero
+			return FitConfiguration.this.getVariance(0, params[Gaussian2DFunction.SIGNAL + offset], getSD(), false);
+		}
+
+		public double getLocationVariance2()
+		{
+			return FitConfiguration.this.getVariance(getLocalBackground(), params[Gaussian2DFunction.SIGNAL + offset],
+					getSD(), true);
 		}
 
 		public float getSD()
@@ -1370,6 +1394,9 @@ public class FitConfiguration implements Cloneable
 	 * Note: All returned objects will be linked with this fit configuration. Thus changing properties such as the gain,
 	 * noise or settings for computing the variance will result in changes to the values returned by the
 	 * PreprocessedPeakResult.
+	 * <p>
+	 * Note: XY position may be wrong if the input parameters have not been updated with an offset from fitting a
+	 * sub-region.
 	 *
 	 * @param candidateId
 	 *            the candidate id
@@ -1379,6 +1406,8 @@ public class FitConfiguration implements Cloneable
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
+	 * @param localBackground
+	 *            the local background
 	 * @param resultType
 	 *            the result type
 	 * @param newObject
@@ -1386,12 +1415,12 @@ public class FitConfiguration implements Cloneable
 	 * @return A preprocessed peak result
 	 */
 	public PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, ResultType resultType, boolean newObject)
+			double[] params, double localBackground, ResultType resultType, boolean newObject)
 	{
 		if (newObject)
-			return new DynamicPeakResult(candidateId, n, initialParams, params, resultType);
+			return new DynamicPeakResult(candidateId, n, initialParams, params, localBackground, resultType);
 
-		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, resultType);
+		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, localBackground, resultType);
 		return dynamicPeakResult;
 	}
 
@@ -1399,11 +1428,17 @@ public class FitConfiguration implements Cloneable
 	 * Create an object that can return the results in a formatted state for the multi-path filter.
 	 * <p>
 	 * The result is fixed in that it computes the values on construction using the input array data.
+	 * <p>
+	 * If a local background is provided then it is used instead of the fitted background. The local background can be
+	 * computed if a multi-peak fit has been performed since the background will be the global background, The local
+	 * background for a peak will be the global background plus the contribution of all the other peaks in the local
+	 * region around the peak of interest.
+	 * <p>
+	 * The local background will be used to estimate the noise in the local region (as photon shot noise) if it is above
+	 * the bias.
 	 *
 	 * @param frame
 	 *            the frame
-	 * @param id
-	 *            the id
 	 * @param candidateId
 	 *            the candidate id
 	 * @param n
@@ -1412,6 +1447,8 @@ public class FitConfiguration implements Cloneable
 	 *            the initial parameters
 	 * @param parameters
 	 *            the parameters
+	 * @param localBackground
+	 *            the local background (set to negative to use the fitted background instead)
 	 * @param resultType
 	 *            the result type
 	 * @param offsetx
@@ -1421,13 +1458,13 @@ public class FitConfiguration implements Cloneable
 	 * @return A preprocessed peak result
 	 */
 	public BasePreprocessedPeakResult createPreprocessedPeakResult(int frame, int candidateId, int n,
-			double[] initialParameters, double[] parameters, BasePreprocessedPeakResult.ResultType resultType,
-			float offsetx, float offsety)
+			double[] initialParameters, double[] parameters, double localBackground,
+			BasePreprocessedPeakResult.ResultType resultType, float offsetx, float offsety)
 	{
 		final int offset = n * 6;
 		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL];
 		final double photons = (parameters[offset + Gaussian2DFunction.SIGNAL] / getGain());
-		final double b = parameters[Gaussian2DFunction.BACKGROUND];
+		final double b = (localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND];
 		final double angle = parameters[offset + Gaussian2DFunction.ANGLE];
 		final double x = parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y = parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
@@ -1437,9 +1474,13 @@ public class FitConfiguration implements Cloneable
 		final double ysd = parameters[offset + Gaussian2DFunction.Y_SD];
 		final double xsd0 = initialParameters[offset + Gaussian2DFunction.X_SD];
 		final double ysd0 = initialParameters[offset + Gaussian2DFunction.Y_SD];
-		final double variance = getVariance(b, signal, PeakResult.getSD(xsd, ysd));
+		final double variance = getVariance(0, signal, PeakResult.getSD(xsd, ysd), false);
+		final double variance2 = getVariance(b, signal, PeakResult.getSD(xsd, ysd), true);
+		// Note: Should noise be the local background of the estimate from the whole image?
+		final double noise = (localBackground > bias)
+				? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
 		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, x0, y0,
-				xsd, ysd, xsd0, ysd0, variance, resultType);
+				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
 	}
 
 	/**

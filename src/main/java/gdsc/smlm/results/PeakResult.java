@@ -181,6 +181,33 @@ public class PeakResult implements Comparable<PeakResult>
 	}
 
 	/**
+	 * Convert the local background to an estimate of noise.
+	 * <p>
+	 * This assumes the local background is photon shot noise. The background is first converted to photons using the
+	 * gain. The shot noise is taken assuming a Poisson distribution (thus the variance equals the number of photons).
+	 * This is amplified by 2 if the data was taken on an EM-CCD camera. The square root is the noise in photons. This
+	 * is converted back to ADUs using the gain. E.G.
+	 * 
+	 * <pre>
+	 * return Math.sqrt((background / gain) * ((emCCD) ? 2 : 1)) * gain;
+	 * </pre>
+	 *
+	 * @param background
+	 *            the background
+	 * @param gain
+	 *            the gain
+	 * @param emCCD
+	 *            True if an emCCD camera
+	 * @return the noise estimate
+	 */
+	public static double localBackgroundToNoise(double background, double gain, boolean emCCD)
+	{
+		if (background <= 0)
+			return 0;
+		return Math.sqrt((background / gain) * ((emCCD) ? 2 : 1)) * gain;
+	}
+
+	/**
 	 * Calculate the localisation precision. Uses the Mortensen formula for an EMCCD camera
 	 * (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 6.
 	 * <p>

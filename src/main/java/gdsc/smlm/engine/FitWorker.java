@@ -1529,9 +1529,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						.getNumberOfPeaks()];
 				result.multiFitResult.results = multiFitResult;
 
+				// TODO - compute local background for each peak.
+				double localBackground = 0;
+
 				// Assume the first fitted peak is the new result
 				multiFitResult[0] = createNewPreprocessedPeakResult(n, 0, fitResult.getParameters(),
-						fitResult.getInitialParameters(), offsetx, offsety);
+						fitResult.getInitialParameters(), localBackground, offsetx, offsety);
 				// Validate to check if we can use the candidates as estimates  
 				boolean ok = filter.accept(multiFitResult[0]);
 
@@ -1541,7 +1544,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Set the candidate Id as n. We do not care if this is wrong, just that it is not 
 					// a later candidate
 					multiFitResult[i] = createExistingPreprocessedPeakResult(n, i, fitResult.getParameters(),
-							fitResult.getInitialParameters(), offsetx, offsety);
+							fitResult.getInitialParameters(), localBackground, offsetx, offsety);
 					ok = ok && filter.accept(multiFitResult[i]);
 				}
 
@@ -1554,7 +1557,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					final int candidateId = neighbourIndices[i - 1];
 					multiFitResult[i] = createCandidatePreprocessedPeakResult(candidateId, i, fitResult.getParameters(),
-							fitResult.getInitialParameters(), offsetx, offsety);
+							fitResult.getInitialParameters(), localBackground, offsetx, offsety);
 					if (ok && filter.accept(multiFitResult[i]))
 					{
 						// If the multi-fit results are good then we can store the estimates using 
@@ -1580,7 +1583,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			convertParameters(fitResult.getParameters());
 			result.singleFitResult.results = new BasePreprocessedPeakResult[1];
 			result.singleFitResult.results[0] = createNewPreprocessedPeakResult(n, 0, fitResult.getParameters(),
-					fitResult.getInitialParameters(), offsetx, offsety);
+					fitResult.getInitialParameters(), 0, offsetx, offsety);
 
 			// Doublet fit
 			// Force this if the residuals threshold is configured. The MultiPathFilter can
@@ -1604,7 +1607,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						result.doubletFitResult.results = new BasePreprocessedPeakResult[fitResult.getNumberOfPeaks()];
 						for (int i = 0; i < result.doubletFitResult.results.length; i++)
 							result.doubletFitResult.results[i] = createNewPreprocessedPeakResult(n, i,
-									fitResult.getParameters(), fitResult.getInitialParameters(), offsetx, offsety);
+									fitResult.getParameters(), fitResult.getInitialParameters(), 0, offsetx, offsety);
 					}
 				}
 			}
@@ -1642,31 +1645,32 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	private BasePreprocessedPeakResult createNewPreprocessedPeakResult(int candidateId, int i, double[] parameters,
-			double[] initialParameters, float offsetx, float offsety)
+			double[] initialParameters, double localBackground, float offsetx, float offsety)
 	{
-		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters,
+		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters, localBackground,
 				BasePreprocessedPeakResult.ResultType.NEW, offsetx, offsety);
 	}
 
 	private BasePreprocessedPeakResult createCandidatePreprocessedPeakResult(int candidateId, int i,
-			double[] parameters, double[] initialParameters, float offsetx, float offsety)
+			double[] parameters, double[] initialParameters, double localBackground, float offsetx, float offsety)
 	{
-		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters,
+		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters, localBackground,
 				BasePreprocessedPeakResult.ResultType.CANDIDATE, offsetx, offsety);
 	}
 
 	private BasePreprocessedPeakResult createExistingPreprocessedPeakResult(int candidateId, int i, double[] parameters,
-			double[] initialParameters, float offsetx, float offsety)
+			double[] initialParameters, double localBackground, float offsetx, float offsety)
 	{
-		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters,
+		return createPreprocessedPeakResult(candidateId, i, parameters, initialParameters, localBackground,
 				BasePreprocessedPeakResult.ResultType.EXISTING, offsetx, offsety);
 	}
 
 	private BasePreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int i, double[] parameters,
-			double[] initialParameters, BasePreprocessedPeakResult.ResultType resultType, float offsetx, float offsety)
+			double[] initialParameters, double localBackground, BasePreprocessedPeakResult.ResultType resultType,
+			float offsetx, float offsety)
 	{
 		return fitConfig.createPreprocessedPeakResult(slice, candidateId, i, initialParameters, initialParameters,
-				resultType, offsetx, offsety);
+				localBackground, resultType, offsetx, offsety);
 	}
 
 	/**
@@ -2243,8 +2247,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						// It must optionally pass an additional filter 
 						if (filter != null)
 						{
+							// No local background estimate for the doublet. Just use the global background.
 							if (filter.accept(fitConfig.createPreprocessedPeakResult(i, n,
-									newFitResult.getInitialParameters(), newParams, ResultType.CANDIDATE, false)))
+									newFitResult.getInitialParameters(), newParams, -1, ResultType.CANDIDATE, false)))
 								;
 							storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
 						}

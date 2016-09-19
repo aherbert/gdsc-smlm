@@ -210,7 +210,7 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 			return false;
 		if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset)
 			return false;
-		if (peak.getLocationVariance() > variance)
+		if (peak.getLocationVariance2() > variance)
 			return false;
 		return true;
 	}

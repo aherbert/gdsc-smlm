@@ -47,6 +47,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final float xwf;
 	private final float ywf;
 	private final double variance;
+	private final double variance2;
 	private final boolean existingResult;
 	private final boolean newResult;
 
@@ -75,7 +76,8 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * @param ysd The y standard deviation
 	 * @param xsd0 The initial x standard deviation
 	 * @param ysd0 The initial y standard deviation
-	 * @param variance The estimate of the localisation variance
+	 * @param variance The estimate of the localisation variance using the noise 
+	 * @param variance2 The estimate of the localisation variance using the local background
 	 * @param resultType The type of result
 	 */
 	public BasePreprocessedPeakResult(
@@ -96,6 +98,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			double xsd0,
 			double ysd0,
 			double variance,
+			double variance2,
 			ResultType resultType			
 			)
 	{
@@ -120,6 +123,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.xwf = (float) (xsd / xsd0);
 		this.ywf = (float) (ysd / ysd0);
 		this.variance = variance;
+		this.variance2 = variance2;
 		this.existingResult = resultType == ResultType.EXISTING;
 		this.newResult = resultType == ResultType.NEW;
 	}
@@ -167,6 +171,11 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public double getLocationVariance()
 	{
 		return variance;
+	}
+
+	public double getLocationVariance2()
+	{
+		return variance2;
 	}
 
 	public float getSD()
