@@ -1154,11 +1154,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		double localBackground;
 		boolean existingResult;
 		boolean newResult;
+		float offsetx;
+		float offsety;
 
 		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, double localBackground,
-				ResultType resultType)
+				ResultType resultType, float offsetx, float offsety)
 		{
-			setParameters(candidateId, n, initialParams, params, localBackground, resultType);
+			setParameters(candidateId, n, initialParams, params, localBackground, resultType, offsetx, offsety);
 		}
 
 		DynamicPeakResult()
@@ -1180,9 +1182,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		 *            the local background
 		 * @param resultType
 		 *            the result type
+		 * @param offsetx
+		 *            the offsetx
+		 * @param offsety
+		 *            the offsety
 		 */
 		void setParameters(int candidateId, int n, double[] initialParams, double[] params, double localBackground,
-				ResultType resultType)
+				ResultType resultType, float offsetx, float offsety)
 		{
 			this.id = n;
 			this.candidateId = candidateId;
@@ -1192,6 +1198,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			this.localBackground = localBackground;
 			this.existingResult = resultType == ResultType.EXISTING;
 			this.newResult = resultType == ResultType.NEW;
+			this.offsetx = offsetx;
+			this.offsety = offsety;
 		}
 
 		public int getFrame()
@@ -1274,12 +1282,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getX()
 		{
-			return (float) params[Gaussian2DFunction.X_POSITION + offset];
+			return (float) params[Gaussian2DFunction.X_POSITION + offset] + offsetx;
 		}
 
 		public float getY()
 		{
-			return (float) params[Gaussian2DFunction.Y_POSITION + offset];
+			return (float) params[Gaussian2DFunction.Y_POSITION + offset] + offsety;
 		}
 
 		public float getXRelativeShift2()
@@ -1337,7 +1345,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			final double[] p = new double[7];
 			p[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
-			System.arraycopy(params, offset, p, 0, 6);
+			System.arraycopy(params, offset, p, 1, 6);
 			return p;
 		}
 	}
@@ -1375,12 +1383,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 * @return A preprocessed peak result
 	 */
 	public PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double localBackground, ResultType resultType, boolean newObject)
+			double[] params, double localBackground, ResultType resultType, float offsetx, float offsety, boolean newObject)
 	{
 		if (newObject)
-			return new DynamicPeakResult(candidateId, n, initialParams, params, localBackground, resultType);
+			return new DynamicPeakResult(candidateId, n, initialParams, params, localBackground, resultType, offsetx, offsety);
 
-		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, localBackground, resultType);
+		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, localBackground, resultType, offsetx, offsety);
 		return dynamicPeakResult;
 	}
 

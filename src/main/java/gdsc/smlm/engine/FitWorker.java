@@ -760,11 +760,68 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	/**
+	 * Provide the ability to convert raw fitted results into PreprocessedPeakResult for validation
+	 */
+	private abstract class ResultFactory
+	{
+		float offsetx, offsety;
+
+		ResultFactory(float offsetx, float offsety)
+		{
+			this.offsetx = offsetx;
+			this.offsety = offsety;
+		}
+
+		abstract PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+				double[] params, double localBackground, ResultType resultType);
+	}
+
+	/**
+	 * Provide dynamic PreprocessedPeakResult. This is basically a wrapper around the result arrays that provides
+	 * properties on-the-fly.
+	 */
+	private class DynamicResultFactory extends ResultFactory
+	{
+		DynamicResultFactory(float offsetx, float offsety)
+		{
+			super(offsetx, offsety);
+		}
+
+		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+				double[] params, double localBackground, ResultType resultType)
+		{
+			// XXX : I am not sure if we can reuse the same object for each validation
+			final boolean newObject = false;
+			return fitConfig.createPreprocessedPeakResult(candidateId, n, initialParams, params, localBackground,
+					resultType, offsetx, offsety, newObject);
+		}
+	}
+
+	/**
+	 * Provide a materialised PreprocessedPeakResult as a new object with all properties computed.
+	 */
+	private class FixedResultFactory extends ResultFactory
+	{
+		FixedResultFactory(float offsetx, float offsety)
+		{
+			super(offsetx, offsety);
+		}
+
+		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+				double[] params, double localBackground, ResultType resultType)
+		{
+			return fitConfig.createPreprocessedPeakResult(slice, candidateId, n, initialParams, params, localBackground,
+					resultType, offsetx, offsety);
+		}
+	}
+
+	/**
 	 * Provide functionality to fit spots in a region using different methods
 	 */
 	private class SpotFitter
 	{
 		final Gaussian2DFitter gf;
+		final ResultFactory resultsFactory;
 		final double[] region;
 		final Rectangle regionBounds;
 		final Spot[] spots;
@@ -786,9 +843,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean computedDoubletQA = false;
 		boolean storeEstimates = true;
 
-		public SpotFitter(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, Spot[] spots, int n)
+		public SpotFitter(Gaussian2DFitter gf, ResultFactory resultsFactory, double[] region, Rectangle regionBounds,
+				Spot[] spots, int n)
 		{
 			this.gf = gf;
+			this.resultsFactory = resultsFactory;
 			this.region = region;
 			this.regionBounds = regionBounds;
 			this.spots = spots;
@@ -1380,7 +1439,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// This is used to track the decision tree
 		final FitType fitType = new FitType();
 
-		SpotFitter spotFitter = new SpotFitter(gf, region, regionBounds, spots, n);
+		// Offsets to convert fit coordinates to the data frame
+		final float offsetx = bounds.x + regionBounds.x + 0.5f;
+		final float offsety = bounds.y + regionBounds.y + 0.5f;
+
+		SpotFitter spotFitter = new SpotFitter(gf, new DynamicResultFactory(offsetx, offsety), region, regionBounds,
+				spots, n);
 
 		// Attempt multi-fit if settings allow
 		FitResult fitResult = spotFitter.getResultMulti();
@@ -1502,7 +1566,19 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private MultiPathFitResult benchmarkFit(Gaussian2DFitter gf, double[] region, Rectangle regionBounds, Spot[] spots,
 			int n, MultiPathFilter filter)
 	{
-		final SpotFitter spotFitter = new SpotFitter(gf, region, regionBounds, spots, n);
+		// TODO
+		// Update this to perform fitting with no validation, i.e. just see if it converged.
+		// Then convert all results to PreprocessedPeakResult and validate those.
+		// The SpotFitter may require a PreprocessedPeakResult factory. This can build either
+		// a DynamicPreprocessedPeakResult or a materialised BasePreprocessedPeakResult depending
+		// on what made we are running.
+
+		// Offsets to convert fit coordinates to the data frame
+		final float offsetx = bounds.x + regionBounds.x + 0.5f;
+		final float offsety = bounds.y + regionBounds.y + 0.5f;
+
+		final SpotFitter spotFitter = new SpotFitter(gf, new FixedResultFactory(offsetx, offsety), region, regionBounds,
+				spots, n);
 		// Disable estimate within the multi-fit as the filtering of peaks is probably disabled. 
 		// We will do the estimates using the input filter.
 		spotFitter.storeEstimates = false;
@@ -1511,10 +1587,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		result.frame = slice;
 		result.width = regionBounds.width;
 		result.height = regionBounds.height;
-
-		// Offsets to convert fit coordinates to the data frame
-		final float offsetx = bounds.x + regionBounds.x + 0.5f;
-		final float offsety = bounds.y + regionBounds.y + 0.5f;
 
 		// Attempt multi-fit if settings allow
 		FitResult fitResult = spotFitter.getResultMulti();
@@ -2248,10 +2320,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						if (filter != null)
 						{
 							// No local background estimate for the doublet. Just use the global background.
-							if (filter.accept(fitConfig.createPreprocessedPeakResult(i, n,
-									newFitResult.getInitialParameters(), newParams, -1, ResultType.CANDIDATE, false)))
-								;
-							storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
+							// XXX - this has no offset at the moment
+							if (filter.accept(
+									fitConfig.createPreprocessedPeakResult(i, n, newFitResult.getInitialParameters(),
+											newParams, -1, ResultType.CANDIDATE, 0, 0, false)))
+								storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
 						}
 						else
 							storeEstimate(spots[i], i, extractParams(newParams, n), regionBounds.x, regionBounds.x);
