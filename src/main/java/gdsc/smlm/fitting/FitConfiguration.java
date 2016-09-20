@@ -1,5 +1,9 @@
 package gdsc.smlm.fitting;
 
+import gdsc.core.logging.Logger;
+import gdsc.core.match.FractionalAssignment;
+import gdsc.core.utils.Maths;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -27,16 +31,16 @@ import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
-import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
-import gdsc.core.logging.Logger;
-import gdsc.core.match.FractionalAssignment;
-import gdsc.core.utils.Maths;
+import gdsc.smlm.results.filter.DirectFilter;
+import gdsc.smlm.results.filter.FilterType;
+import gdsc.smlm.results.filter.IDirectFilter;
+import gdsc.smlm.results.filter.PreprocessedPeakResult;
 
 /**
  * Specifies the fitting configuration for Gaussian fitting
  */
-public class FitConfiguration implements Cloneable
+public class FitConfiguration implements Cloneable, IDirectFilter
 {
 	private FitCriteria fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
 	private Logger log = null;
@@ -87,45 +91,15 @@ public class FitConfiguration implements Cloneable
 	private NoiseModel noiseModel = null;
 	private FunctionSolver functionSolver = null;
 
-	private double[] peakShiftFactors = null;
 	private DynamicPeakResult dynamicPeakResult = new DynamicPeakResult();
 
-	/**
-	 * Sets the peak shift factors. This is used to adjust the coordinate shift limit for individual peaks in the
-	 * {@link #validatePeak(int, double[], double[])} function. For example if fitting multiple peaks and the validation
-	 * of each position should be adjusted based on the uncertainty of the estimated parameters.
-	 *
-	 * @param peakShiftFactors
-	 *            the new peak shift factors
-	 */
-	public void setPeakShiftFactors(double[] peakShiftFactors)
-	{
-		this.peakShiftFactors = peakShiftFactors;
-	}
-
-	/**
-	 * Gets the peak shift factors
-	 *
-	 * @return a clone copy of the peak shift factors
-	 */
-	public double[] getPeakShiftFactors()
-	{
-		return (this.peakShiftFactors == null) ? null : peakShiftFactors.clone();
-	}
-
-	/**
-	 * Gets the peak shift factor for the specified peak.
-	 *
-	 * @param peak
-	 *            the peak
-	 * @return the peak shift factor (1 if not explicitly set using {@link #setPeakShiftFactors(double[])}
-	 */
-	public double getPeakShiftFactor(int peak)
-	{
-		if (peakShiftFactors == null || peakShiftFactors.length <= peak)
-			return 1;
-		return peakShiftFactors[peak];
-	}
+	// Support using a smart filter
+	private boolean smartFilter = false;
+	private String smartFilterXML = "";
+	private DirectFilter directFilter = null;
+	private int filterResult = 0;
+	private boolean widthEnabled;
+	private float offset;
 
 	/**
 	 * Default constructor
@@ -700,20 +674,6 @@ public class FitConfiguration implements Cloneable
 	}
 
 	/**
-	 * Gets the maximum distance a peak will be allowed to shift for the specified peak.
-	 * <p>
-	 * This is constructed using the coordinate shift factor
-	 *
-	 * @param peak
-	 *            the peak
-	 * @return the peak shift
-	 */
-	public double getMaxShift(int peak)
-	{
-		return coordinateShift * getPeakShiftFactor(peak);
-	}
-
-	/**
 	 * @return the size of the fit region used for validation
 	 */
 	public int getFitRegion()
@@ -1017,7 +977,7 @@ public class FitConfiguration implements Cloneable
 				initialParams[Gaussian2DFunction.X_POSITION + offset];
 		final double yShift = params[Gaussian2DFunction.Y_POSITION + offset] -
 				initialParams[Gaussian2DFunction.Y_POSITION + offset];
-		final double maxShift = getMaxShift(n);
+		final double maxShift = coordinateShift;
 		if (Math.abs(xShift) > maxShift || Math.abs(yShift) > maxShift)
 		{
 			if (log != null)
@@ -1946,5 +1906,119 @@ public class FitConfiguration implements Cloneable
 				nlinfit.setInitialLambda(getLambda());
 				return nlinfit;
 		}
+	}
+
+	/**
+	 * @return True if filtering should use the configured smart filter
+	 */
+	public boolean isSmartFilter()
+	{
+		return smartFilter;
+	}
+
+	/**
+	 * @param smartFilter
+	 *            True if filtering should use the configured smart filter
+	 */
+	public void setSmartFilter(boolean smartFilter)
+	{
+		this.smartFilter = smartFilter;
+	}
+
+	/**
+	 * @return the smart filter XML
+	 */
+	public String getSmartFilterXML()
+	{
+		return smartFilterXML;
+	}
+
+	/**
+	 * @param smartFilterXML
+	 *            the smart filter XML to set
+	 */
+	public void setSmartFilterXML(String smartFilterXML)
+	{
+		this.smartFilterXML = smartFilterXML;
+	}
+
+	/**
+	 * Sets the direct filter. This changes the smart filter flag to true and updates the smart filter XML.
+	 *
+	 * @param directFilter
+	 *            the new direct filter
+	 */
+	public void setDirectFilter(DirectFilter directFilter)
+	{
+		this.directFilter = directFilter;
+		this.smartFilter = directFilter != null;
+		if (smartFilter)
+		{
+			smartFilterXML = directFilter.toXML();
+		}
+		else
+		{
+			smartFilterXML = "";
+		}
+	}
+
+	public void setup()
+	{
+		setup(0);
+	}
+
+	public void setup(int flags)
+	{
+		if (directFilter != null)
+		{
+			directFilter.setup(flags);
+		}
+		else
+		{
+			widthEnabled = ((flags & IDirectFilter.NO_WIDTH) == 0);
+			offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
+		}
+	}
+
+	public boolean accept(PreprocessedPeakResult peak)
+	{
+		return (filterResult = validate(peak)) == 0;
+	}
+
+	public int validate(PreprocessedPeakResult peak)
+	{
+		if (directFilter != null)
+			return directFilter.validate(peak);
+
+		// Do filtering 
+		if (peak.getPhotons() < minPhotons)
+			return V_PHOTONS;
+		if (peak.getSNR() < this.signalStrength)
+			return V_SNR;
+		if (widthEnabled)
+		{
+			if (peak.getXSDFactor() > widthFactor || peak.getXSDFactor() < minWidthFactor)
+				return V_X_SD_FACTOR;
+		}
+		if (peak.getXRelativeShift2() > offset)
+			return V_X_RELATIVE_SHIFT;
+		if (peak.getYRelativeShift2() > offset)
+			return V_Y_RELATIVE_SHIFT;
+		// Do not support Euclidian shift
+		//if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
+		//	return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+		if (peak.getLocationVariance() > precisionThreshold)
+			return V_LOCATION_VARIANCE;
+		return 0;
+	}
+
+	public FilterType getFilterType()
+	{
+		return FilterType.DIRECT;
+	}
+
+	public int getResult()
+	{
+		return filterResult;
 	}
 }

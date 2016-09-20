@@ -158,6 +158,11 @@ public class SettingsManager
 			//xs.omitField(FitConfiguration.class, "noise");
 			xs.omitField(FitConfiguration.class, "enableValidation");
 			xs.omitField(FitConfiguration.class, "computeResiduals");
+			
+			// Smart filter settings
+			xs.omitField(FitConfiguration.class, "directFilter");
+			xs.omitField(FitConfiguration.class, "filterResult");
+			xs.omitField(FitConfiguration.class, "widthEnabled");
 		}
 
 		return xs;

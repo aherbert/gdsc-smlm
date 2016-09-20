@@ -19,120 +19,23 @@ package gdsc.smlm.results.filter;
  * The decision to support for filtering as both a DirectFilter and Filter at the same time is left to the implementing
  * class. It is not a requirement.
  */
-public abstract class DirectFilter extends Filter
+public abstract class DirectFilter extends Filter implements IDirectFilter
 {
-	/**
-	 * Validation flag for the signal in photons
-	 */
-	final static int V_PHOTONS = 1;
-
-	/**
-	 * Validation flag for the SNR
-	 */
-	final static int V_SNR = 2;
-
-	/**
-	 * Validation flag for the noise
-	 */
-	final static int V_NOISE = 4;
-
-	/**
-	 * Validation flag for the location variance
-	 */
-	final static int V_LOCATION_VARIANCE = 8;
-
-	/**
-	 * Validation flag for the location variance using the local background
-	 */
-	final static int V_LOCATION_VARIANCE2 = 16;
-
-	/**
-	 * Validation flag for the average peak standard deviation in the X and Y dimension
-	 */
-	final static int V_SD = 32;
-
-	/**
-	 * Validation flag for the background
-	 */
-	final static int V_BACKGROUND = 64;
-
-	/**
-	 * Validation flag for the amplitude
-	 */
-	final static int V_AMPLITUDE = 128;
-
-	/**
-	 * Validation flag for the angle (for an elliptical Gaussian peak)
-	 */
-	final static int V_ANGLE = 256;
-
-	/**
-	 * Validation flag for the x position
-	 */
-	final static int V_X = 512;
-
-	/**
-	 * Validation flag for the y position
-	 */
-	final static int V_Y = 1024;
-
-	/**
-	 * Validation flag for the relative x position shift squared
-	 */
-	final static int V_X_RELATIVE_SHIFT = 2048;
-
-	/**
-	 * Validation flag for the relative y position shift squared
-	 */
-	final static int V_Y_RELATIVE_SHIFT = 4096;
-
-	/**
-	 * Validation flag for the x-dimension standard deviation
-	 */
-	final static int V_X_SD = 8192;
-
-	/**
-	 * Validation flag for the y-dimension standard deviation
-	 */
-	final static int V_Y_SD = 16384;
-
-	/**
-	 * Validation flag for the x-dimension width factor
-	 */
-	final static int V_X_SD_FACTOR = 32768;
-
-	/**
-	 * Validation flag for the y-dimension width factor
-	 */
-	final static int V_Y_SD_FACTOR = 65536;
-
-	/**
-	 * Disable filtering using the width of the result
-	 */
-	public static final int NO_WIDTH = 1;
-
 	private int result = 0;
 
-	/**
-	 * Called before the accept method is called for PreprocessedPeakResult
-	 * <p>
-	 * This should be called once to initialise the filter before processing a batch of results.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @see #validate(PreprocessedPeakResult)
+	 * @see gdsc.smlm.results.filter.IDirectFilter#setup()
 	 */
 	public void setup()
 	{
 	}
 
-	/**
-	 * Called before the accept method is called for PreprocessedPeakResult. the flags can control the type of filtering
-	 * requested. Filters are asked to respect the flags defined in this class.
-	 * <p>
-	 * This should be called once to initialise the filter before processing a batch of results.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param flags
-	 *            Flags used to control the filter
-	 * @see #validate(PreprocessedPeakResult)
+	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int)
 	 */
 	public void setup(final int flags)
 	{
@@ -150,40 +53,37 @@ public abstract class DirectFilter extends Filter
 		return (flags & bits) == bits;
 	}
 
-	/**
-	 * Filter the peak result.
-	 * <p>
-	 * Calls {@link #validate(PreprocessedPeakResult)} and stores the result. This can be obtained using
-	 * {@link #getResult()}.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param peak
-	 *            The peak result
-	 * @return true if the peak should be accepted
+	 * @see gdsc.smlm.results.filter.IDirectFilter#accept(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	final public boolean accept(final PreprocessedPeakResult peak)
 	{
 		return (result = validate(peak)) == 0;
 	}
 
-	/**
-	 * Filter the peak result.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param peak
-	 *            The peak result
-	 * @return zero if the peak should be accepted, otherwise set to flags indicating the field that failed validation.
+	 * @see gdsc.smlm.results.filter.IDirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	public abstract int validate(final PreprocessedPeakResult peak);
 
-	@Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getFilterType()
+	 */
 	public FilterType getFilterType()
 	{
 		return FilterType.DIRECT;
 	}
 
-	/**
-	 * Return the result flag generated during the last call to {@link #accept(PreprocessedPeakResult)}.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @return the validation result from the last call to {@link #accept(PreprocessedPeakResult)}
+	 * @see gdsc.smlm.results.filter.IDirectFilter#getResult()
 	 */
 	public int getResult()
 	{
