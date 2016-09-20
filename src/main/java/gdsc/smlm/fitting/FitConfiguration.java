@@ -1962,11 +1962,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#setup()
+	 */
 	public void setup()
 	{
 		setup(0);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int)
+	 */
 	public void setup(int flags)
 	{
 		if (directFilter != null)
@@ -1980,12 +1990,38 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#accept(gdsc.smlm.results.filter.PreprocessedPeakResult)
+	 */
 	public boolean accept(PreprocessedPeakResult peak)
 	{
 		return (filterResult = validate(peak)) == 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
+	 */
 	public int validate(PreprocessedPeakResult peak)
+	{
+		final int flags = doValidate(peak);
+		if (flags == 0 || log == null)
+			return 0;
+		// Log the error
+		log.info("Bad peak %d [%d]: %s", peak.getCandidateId(), peak.getId(),
+				DirectFilter.getStatusMessage(peak, flags));
+		return flags;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
+	 */
+	public int doValidate(PreprocessedPeakResult peak)
 	{
 		if (directFilter != null)
 			return directFilter.validate(peak);
@@ -2007,16 +2043,27 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		// Do not support Euclidian shift
 		//if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
 		//	return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
-		if (peak.getLocationVariance() > precisionThreshold)
+		final double p = (precisionUsingBackground) ? peak.getLocationVariance2() : peak.getLocationVariance();
+		if (p > precisionThreshold)
 			return V_LOCATION_VARIANCE;
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterType()
+	 */
 	public FilterType getFilterType()
 	{
 		return FilterType.DIRECT;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#getResult()
+	 */
 	public int getResult()
 	{
 		return filterResult;
