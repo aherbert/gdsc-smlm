@@ -77,6 +77,10 @@ public interface Chromosome
 
 	/**
 	 * Get the fitness
+	 * <p>
+	 * This should be zero for an uninitialised score. It should be higher than zero to indicate that the chromosome has
+	 * some fitness. It can be left at zero or set to a negative value if the chromosome has no fitness. Using a
+	 * negative value will ensure that it is not scored again.
 	 * 
 	 * @return The fitness of the sequence
 	 */
@@ -84,14 +88,18 @@ public interface Chromosome
 
 	/**
 	 * Calculate the distance to another chromosome
-	 * @param other the other chromosome
+	 * 
+	 * @param other
+	 *            the other chromosome
 	 * @return the distance (zero is a match)
 	 */
 	double distance(Chromosome other);
 
 	/**
 	 * Calculate if equal to another chromosome
-	 * @param other the other chromosome
+	 * 
+	 * @param other
+	 *            the other chromosome
 	 * @return true if the same
 	 */
 	boolean equals(Chromosome other);
