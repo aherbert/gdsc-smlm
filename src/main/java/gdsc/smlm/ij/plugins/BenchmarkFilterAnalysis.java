@@ -39,6 +39,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well44497b;
 
+import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.match.ClassificationResult;
@@ -104,8 +105,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
 	private static TextWindow gaWindow = null;
-	private static final int SCORE = 0;
-	private static final int CRITERIA = 1;
 	private static int failCount = 1;
 	private static int failCountRange = 0;
 	private static double residualsThreshold = 0.3;
@@ -243,7 +242,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	/**
-	 * Used to allow multi-threading of the fitting method
+	 * Used to allow multi-threading of the scoring the fit results
 	 */
 	private class Worker implements Runnable
 	{
@@ -300,6 +299,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				finished = true;
 				return;
 			}
+
+			showProgress();
 
 			final int frame = job.entry.getKey();
 			final FilterCandidates result = job.entry.getValue();
@@ -516,6 +517,31 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						IJ.log("Filter sets must contain 'Direct' filters");
 						return null;
 					}
+
+					// Check they are not empty lists
+					List<FilterSet> filterSets2 = new LinkedList<FilterSet>();
+					for (FilterSet filterSet : filterSets)
+					{
+						if (filterSet.size() != 0)
+						{
+							filterSets2.add(filterSet);
+						}
+						else
+						{
+							IJ.log("Filter set empty: " + filterSet.getName());
+						}
+					}
+
+					if (filterSets2.isEmpty())
+					{
+						IJ.log("All Filter sets are empty");
+						return null;
+					}
+
+					// Maintain the same list type
+					filterSets.clear();
+					filterSets.addAll(filterSets2);
+
 					filterList = filterSets;
 
 					// Option to enumerate filters
@@ -523,7 +549,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 					// Sort so that the filters are in a nice order
 					for (FilterSet filterSet : filterList)
+					{
 						filterSet.sort();
+					}
 
 					setLastFile(filename);
 					return filterList;
@@ -822,6 +850,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				lastUpperMatchDistance != upperMatchDistance || lastPartialSignalFactor != partialSignalFactor ||
 				lastUpperSignalFactor != upperSignalFactor)
 		{
+			IJ.showStatus("Reading results ...");
+
 			// Only cache results for the same analysis settings.
 			// This functionality is for choosing the optimum fail limit.
 			scores.clear();
@@ -934,7 +964,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			final List<MultiPathFitResults> syncResults = Collections.synchronizedList(results);
 
 			// This could be multi-threaded ...
-			final int nThreads = Prefs.getThreads();
+			final int nThreads = getThreads(BenchmarkSpotFit.fitResults.size());
 			final BlockingQueue<Job> jobs = new ArrayBlockingQueue<Job>(nThreads * 2);
 			final List<Worker> workers = new LinkedList<Worker>();
 			final List<Thread> threads = new LinkedList<Thread>();
@@ -947,6 +977,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				t.start();
 			}
 
+			totalProgress = BenchmarkSpotFit.fitResults.size();
+			stepProgress = Utils.getProgressInterval(totalProgress);
+			progress = 0;
 			for (Entry<Integer, FilterCandidates> entry : BenchmarkSpotFit.fitResults.entrySet())
 			{
 				put(jobs, entry);
@@ -971,6 +1004,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 			}
 			threads.clear();
+			IJ.showProgress(1);
+			IJ.showStatus("");
 
 			resultsList = results.toArray(new MultiPathFitResults[results.size()]);
 		}
@@ -980,9 +1015,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			resetFailCount(resultsList);
 
-			// XXX Clone this for us in debugging
+			// XXX Clone this for use in debugging
 			clonedResultsList = new MultiPathFitResults[resultsList.length];
-			for (int i=0; i<clonedResultsList.length; i++)
+			for (int i = 0; i < clonedResultsList.length; i++)
 				clonedResultsList[i] = resultsList[i].clone();
 		}
 
@@ -1328,15 +1363,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		startTimer();
 		IJ.showStatus("Analysing filters ...");
-		int total = countFilters(filterSets);
-		int count = 0;
 		int setNumber = 0;
 		for (FilterSet filterSet : filterSets)
 		{
 			setNumber++;
-			if (run(filterSet, setNumber, count, total) < 0)
+			if (run(filterSet, setNumber) < 0)
 				break;
-			count += filterSet.size();
 		}
 		stopTimer();
 		IJ.showProgress(1);
@@ -1715,10 +1747,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return sb.toString();
 	}
 
-	private int run(FilterSet filterSet, int setNumber, final int count, final int total)
+	private int run(FilterSet filterSet, int setNumber)
 	{
-		int originalSize = filterSet.size();
-
 		// Check if the filters are the same so allowing optimisation
 		final boolean allSameType = filterSet.allSameType();
 
@@ -1823,87 +1853,80 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
 
+		final BufferedTextWindow tw = (showResultsTable && resultsWindow != null)
+				? new BufferedTextWindow(resultsWindow) : null;
+		if (tw != null)
+			tw.setIncrement(Integer.MAX_VALUE);
+
 		// If the filters were expanded we can do a step search from the initial optimum using the increment
 		if (!evolve && stepSearch != 0 && allSameType && wasExpanded(setNumber))
 		{
 			// Evaluate all the filters and find the best
-			initialiseScoring(filterSet);
-			Filter maxFilter = null;
-			double[] max = new double[] { -1, -1 };
+			ScoreResult max = null;
 			boolean criteriaPassed = false;
-			int count2 = count;
 
-			// TODO - multi-thread this by pre-computing all the results from the run method.
-			for (Filter sfilter : filterSet.getFilters())
+			ScoreResult[] scoreResults = scoreFilters(filterSet, showResultsTable);
+			if (scoreResults == null)
+				return -1;
+
+			for (int index = 0; index < scoreResults.length; index++)
 			{
-				final DirectFilter filter = (DirectFilter) sfilter;
-				if (count2++ % 16 == 0)
-				{
-					progress(count2, total);
-					if (Utils.isInterrupted())
-						return -1;
-				}
+				final ScoreResult result = scoreResults[index];
 
-				final double[] result = run(filter, ga_resultsListToScore, ga_subset);
+				addToResultsWindow(tw, result);
 
 				// Avoid null pointer
-				if (maxFilter == null)
+				if (max == null)
 				{
 					max = result;
-					maxFilter = filter;
-					criteriaPassed = (result[CRITERIA] >= minCriteria);
+					criteriaPassed = (result.criteria >= minCriteria);
 					continue;
 				}
 
 				// Check if the criteria are achieved
-				if (result[CRITERIA] >= minCriteria)
+				if (result.criteria >= minCriteria)
 				{
 					criteriaPassed = true;
 
 					// Check if the score is better
-					int compare = Double.compare(max[SCORE], result[SCORE]);
+					int compare = Double.compare(max.score, result.score);
 					if (compare < 0)
 					{
 						max = result;
-						maxFilter = filter;
 					}
 					// If the same then check the criteria
 					else if (compare == 0)
 					{
-						compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+						compare = Double.compare(max.criteria, result.criteria);
 						if (compare < 0)
 						{
 							max = result;
-							maxFilter = filter;
 						}
 						// If equal criteria then if the same type get the filter with the strongest params
-						else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
+						else if (compare == 0 && allSameType && max.filter.weakest(result.filter) < 0)
 						{
 							max = result;
-							maxFilter = filter;
 						}
 					}
 				}
 				// If the max filter has not achieved the criteria then store the best
 				else if (!criteriaPassed)
 				{
-					int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+					int compare = Double.compare(max.criteria, result.criteria);
 					if (compare < 0)
 					{
 						max = result;
-						maxFilter = filter;
 					}
 					// If equal criteria then if the same type get the filter with the strongest params
-					else if (compare == 0 && allSameType && result[CRITERIA] > 0 && maxFilter.weakest(filter) < 0)
+					else if (compare == 0 && allSameType && result.criteria > 0 &&
+							max.filter.weakest(result.filter) < 0)
 					{
 						max = result;
-						maxFilter = filter;
 					}
 				}
 			}
-			finishScoring();
 
-			if (maxFilter != null)
+			if (max != null)
 			{
 				final int set = setNumber - 1;
 				// Force this if we are using smaller steps. 
@@ -1916,7 +1939,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					{
 						if (increment[set][j] > 0)
 						{
-							final double value = maxFilter.getParameterValue(j);
+							final double value = max.filter.getParameterValue(j);
 							if ((value <= lowerLimit[set][j] && value > 0) || value >= upperLimit[set][j])
 							{
 								doSearch = true;
@@ -1932,16 +1955,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				while (doSearch && iteration < 20)
 				{
 					iteration++;
-					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, maxFilter.getName(), max[SCORE],
-					//		max[CRITERIA]);
+					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, max.filter.getName(), max.score,
+					//		max.criteria);
 
 					IJ.showStatus(
 							"Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
 
 					// Create a new filter set surrounding the top filter
-					Filter oldMaxFilter = maxFilter;
+					final DirectFilter oldMaxFilter = max.filter;
 					ArrayList<Filter> filters = new ArrayList<Filter>();
-					filters.add(maxFilter);
+					filters.add(max.filter);
 					final int n = lowerLimit[set].length;
 					for (int i = 0; i < n; i++)
 					{
@@ -1963,90 +1986,74 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						}
 					}
 					FilterSet newSet = new FilterSet(filters);
+
 					// Score the filters
-					initialiseScoring(newSet);
-					limit = 0;
-					int stepCount = 0;
-					final int stepTotal = newSet.size();
-					int stepProgress = Utils.getProgressInterval(stepTotal);
+					scoreResults = scoreFilters(newSet, showResultsTable);
+					if (scoreResults == null)
+						return -1;
 
-					// TODO - multi-thread this by pre-computing all the results from the run method.
-					for (Filter sfilter : newSet.getFilters())
+					for (int index = 0; index < scoreResults.length; index++)
 					{
-						final DirectFilter filter = (DirectFilter) sfilter;
-						if (stepCount++ % stepProgress == 0)
-						{
-							progress(stepCount, stepTotal);
-							if (Utils.isInterrupted())
-								return -1;
-						}
+						final ScoreResult result = scoreResults[index];
 
-						final double[] result = run(filter, ga_resultsListToScore, ga_subset);
+						addToResultsWindow(tw, result);
 
 						// Check if the criteria are achieved
-						if (result[CRITERIA] >= minCriteria)
+						if (result.criteria >= minCriteria)
 						{
 							criteriaPassed = true;
 
 							// Check if the score is better
-							int compare = Double.compare(max[SCORE], result[SCORE]);
+							int compare = Double.compare(max.score, result.score);
 							if (compare < 0)
 							{
 								max = result;
-								maxFilter = filter;
 							}
 							// If the same then check the criteria
 							else if (compare == 0)
 							{
-								compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+								compare = Double.compare(max.criteria, result.criteria);
 								if (compare < 0)
 								{
 									max = result;
-									maxFilter = filter;
 								}
 								// If equal criteria then if the same type get the filter with the strongest params
-								else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
+								else if (compare == 0 && allSameType && max.filter.weakest(result.filter) < 0)
 								{
 									max = result;
-									maxFilter = filter;
 								}
 							}
 						}
 						// If the max filter has not achieved the criteria then store the best
 						else if (!criteriaPassed)
 						{
-							int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+							int compare = Double.compare(max.criteria, result.criteria);
 							if (compare < 0)
 							{
 								max = result;
-								maxFilter = filter;
 							}
 							// If equal criteria then if the same type get the filter with the strongest params
-							else if (compare == 0 && allSameType && result[CRITERIA] > 0 &&
-									maxFilter.weakest(filter) < 0)
+							else if (compare == 0 && allSameType && result.criteria > 0 &&
+									max.filter.weakest(result.filter) < 0)
 							{
 								max = result;
-								maxFilter = filter;
 							}
 						}
 					}
-					finishScoring();
-					progress(1);
 
 					// Check if the top filter has changed to continue the search
-					doSearch = !maxFilter.equals(oldMaxFilter);
+					doSearch = !max.filter.equals(oldMaxFilter);
 				}
 			}
 
 			// Allow the re-evaluation of all the filters to be skipped
-			best = maxFilter;
+			best = max.filter;
 		}
 
 		// Do not support plotting if we used optimisation
 		double[] xValues = (best != null || isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
 		double[] yValues = (xValues == null) ? null : new double[xValues.length];
-		DirectFilter maxFilter = null;
-		double[] max = new double[] { Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY };
+		ScoreResult max = null;
 		boolean criteriaPassed = false;
 
 		// Final evaluation does not need to assess all the filters if we have run optimisation.
@@ -2059,41 +2066,31 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			filterSet = new FilterSet(filterSet.getName(), list);
 		}
 
-		initialiseScoring(filterSet);
-
 		// Score the filters and report the results if configured.
 		// Note that count and total may have changed after running the genetic algorithm
 		// so use fractional progress.
-		double totalProgress = (double) count / total;
-		double stepSize = ((double) originalSize / total) / filterSet.size();
-		int i = 0;
 
-		// TODO - multi-thread this by pre-computing all the results from the run method.
-		for (Filter sfilter : filterSet.getFilters())
+		ScoreResult[] scoreResults = scoreFilters(filterSet, showResultsTable);
+		if (scoreResults == null)
+			return -1;
+
+		for (int index = 0; index < scoreResults.length; index++)
 		{
-			DirectFilter filter = (DirectFilter) sfilter;
-			if (i % 16 == 0)
-			{
-				IJ.showProgress(totalProgress + i * stepSize);
-				if (Utils.isInterrupted())
-					return -1;
-			}
+			final ScoreResult result = scoreResults[index];
 
-			final double[] result = run(filter, ga_resultsListToScore, ga_subset);
+			addToResultsWindow(tw, result);
 
 			if (xValues != null)
 			{
-				xValues[i] = filter.getNumericalValue();
-				yValues[i] = result[SCORE];
+				xValues[index] = result.filter.getNumericalValue();
+				yValues[index] = result.score;
 			}
-			i++;
 
 			// Avoid null pointer
-			if (maxFilter == null)
+			if (max == null)
 			{
 				max = result;
-				maxFilter = filter;
-				criteriaPassed = (result[CRITERIA] >= minCriteria);
+				criteriaPassed = (result.criteria >= minCriteria);
 				continue;
 			}
 
@@ -2101,68 +2098,61 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			final boolean debugFilterChanges = false;
 
 			// Check if the criteria are achieved
-			if (result[CRITERIA] >= minCriteria)
+			if (result.criteria >= minCriteria)
 			{
 				criteriaPassed = true;
 
 				// Check if the score is better
-				int compare = Double.compare(max[SCORE], result[SCORE]);
+				int compare = Double.compare(max.score, result.score);
 				if (compare < 0)
 				{
 					if (debugFilterChanges)
-						System.out.printf("1. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
-								result[CRITERIA]);
+						System.out.printf("1. %f|%f => %f|%f\n", max.score, max.criteria, result.score,
+								result.criteria);
 					max = result;
-					maxFilter = filter;
 				}
 				// If the same then check the criteria
 				else if (compare == 0)
 				{
-					compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+					compare = Double.compare(max.criteria, result.criteria);
 					if (compare < 0)
 					{
 						if (debugFilterChanges)
-							System.out.printf("2. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
-									result[CRITERIA]);
+							System.out.printf("2. %f|%f => %f|%f\n", max.score, max.criteria, result.score,
+									result.criteria);
 						max = result;
-						maxFilter = filter;
 					}
 					// If equal criteria then if the same type get the filter with the strongest params
-					else if (compare == 0 && allSameType && maxFilter.weakest(filter) < 0)
+					else if (compare == 0 && allSameType && max.filter.weakest(result.filter) < 0)
 					{
 						if (debugFilterChanges)
-							System.out.printf("3. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
-									result[CRITERIA]);
+							System.out.printf("3. %f|%f => %f|%f\n", max.score, max.criteria, result.score,
+									result.criteria);
 						max = result;
-						maxFilter = filter;
 					}
 				}
 			}
 			// If the max filter has not achieved the criteria then store the best
 			else if (!criteriaPassed)
 			{
-				int compare = Double.compare(max[CRITERIA], result[CRITERIA]);
+				int compare = Double.compare(max.criteria, result.criteria);
 				if (compare < 0)
 				{
 					if (debugFilterChanges)
-						System.out.printf("4. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
-								result[CRITERIA]);
+						System.out.printf("4. %f|%f => %f|%f\n", max.score, max.criteria, result.score,
+								result.criteria);
 					max = result;
-					maxFilter = filter;
 				}
 				// If equal criteria then if the same type get the filter with the strongest params
-				else if (compare == 0 && allSameType && result[CRITERIA] > 0 && maxFilter.weakest(filter) < 0)
+				else if (compare == 0 && allSameType && result.criteria > 0 && max.filter.weakest(result.filter) < 0)
 				{
 					if (debugFilterChanges)
-						System.out.printf("5. %f|%f => %f|%f\n", max[SCORE], max[CRITERIA], result[SCORE],
-								result[CRITERIA]);
+						System.out.printf("5. %f|%f => %f|%f\n", max.score, max.criteria, result.score,
+								result.criteria);
 					max = result;
-					maxFilter = filter;
 				}
 			}
 		}
-
-		finishScoring();
 
 		// Update the final results window given that we mainly use appendWidthoutUpdate(...) when adding data
 		if (showResultsTable)
@@ -2172,9 +2162,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		boolean atLimit = false;
 		if (allSameType)
 		{
-			if (maxFilter != null)
+			if (max != null)
 			{
-				int[] indices = maxFilter.getChromosomeParameters();
+				int[] indices = max.filter.getChromosomeParameters();
 				StringBuilder sb = new StringBuilder();
 				final int set = setNumber - 1;
 				for (int j = 0; j < indices.length; j++)
@@ -2182,11 +2172,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					final int p = indices[j];
 					if (!wasNotExpanded(setNumber, p))
 					{
-						final double value = maxFilter.getParameterValue(p);
+						final double value = max.filter.getParameterValue(p);
 						int c1 = Double.compare(value, lowerLimit[set][p]);
 						if (c1 <= 0)
 						{
-							sb.append(" : ").append(maxFilter.getParameterName(p)).append(" [")
+							sb.append(" : ").append(max.filter.getParameterName(p)).append(" [")
 									.append(Utils.rounded(value));
 							if (c1 == -1)
 								sb.append("<").append(Utils.rounded(lowerLimit[set][p]));
@@ -2197,7 +2187,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							int c2 = Double.compare(value, upperLimit[set][p]);
 							if (c2 >= 0)
 							{
-								sb.append(" : ").append(maxFilter.getParameterName(p)).append(" [")
+								sb.append(" : ").append(max.filter.getParameterName(p)).append(" [")
 										.append(Utils.rounded(value));
 								if (c2 == 1)
 									sb.append(">").append(Utils.rounded(upperLimit[set][p]));
@@ -2212,26 +2202,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					if (criteriaPassed)
 					{
 						Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
-								maxFilter.getName(), Utils.rounded((invertScore) ? -max[SCORE] : max[SCORE]),
+								max.filter.getName(), Utils.rounded((invertScore) ? -max.score : max.score),
 								Utils.rounded((invertCriteria) ? -minCriteria : minCriteria),
 								limitFailCount + limitRange, sb.toString());
 					}
 					else
 					{
 						Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
-								maxFilter.getName(), Utils.rounded((invertCriteria) ? -max[CRITERIA] : max[CRITERIA]),
+								max.filter.getName(), Utils.rounded((invertCriteria) ? -max.criteria : max.criteria),
 								limitFailCount + limitRange, sb.toString());
 					}
 				}
 			}
 		}
 
+		// Note that max should never be null since this method is not run with an empty filter set
+
 		// We may have no filters that pass the criteria
-		String type = maxFilter.getType();
+		String type = max.filter.getType();
 		if (!criteriaPassed)
 		{
 			Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
-					Utils.rounded((invertCriteria) ? -max[CRITERIA] : max[CRITERIA]), maxFilter.getName());
+					Utils.rounded((invertCriteria) ? -max.criteria : max.criteria), max.filter.getName());
 			return 0;
 		}
 
@@ -2242,7 +2234,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// irrespective of whether they were the same type or not.
 		//if (allSameType)
 		//{
-		FilterScore newFilterScore = new FilterScore(maxFilter, max[SCORE], max[CRITERIA], atLimit);
+		FilterScore newFilterScore = new FilterScore(max.filter, max.score, max.criteria, atLimit);
 		FilterScore filterScore = bestFilter.get(type);
 		if (filterScore != null)
 		{
@@ -2261,7 +2253,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				// Replace
 				if (newFilterScore.compareTo(filterScore) < 0)
-					filterScore.update(maxFilter, max[SCORE], max[CRITERIA], atLimit);
+					filterScore.update(max.filter, max.score, max.criteria, atLimit);
 			}
 		}
 		else
@@ -2296,13 +2288,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					}
 				}
 				String xAxisName = filterSet.getValueName();
-				// Check the values all refer to the same property
-				for (Filter filter : filterSet.getFilters())
+				if (unique)
 				{
-					if (!xAxisName.equals(filter.getNumericalValueName()))
+					// Check the values all refer to the same property
+					for (Filter filter : filterSet.getFilters())
 					{
-						unique = false;
-						break;
+						if (!xAxisName.equals(filter.getNumericalValueName()))
+						{
+							unique = false;
+							break;
+						}
 					}
 				}
 				if (!unique)
@@ -2331,6 +2326,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		return 0;
+	}
+
+	private void addToResultsWindow(BufferedTextWindow tw, final ScoreResult result)
+	{
+		if (showResultsTable && result.text != null)
+		{
+			if (isHeadless)
+			{
+				IJ.log(result.text);
+			}
+			else
+			{
+				tw.append(result.text);
+			}
+		}
 	}
 
 	private void addFilters(ArrayList<Filter> filters, Filter f, double[] parameters, double value, int index,
@@ -2447,54 +2457,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 		}
 		return max;
-	}
-
-	private long nextUpdate = 0;
-
-	private double[] run(DirectFilter filter, MultiPathFitResults[] resultsList, boolean subset)
-	{
-		final FractionClassificationResult r = scoreFilter(filter, resultsList);
-
-		// DEBUG - Test if the two methods produce the same results
-		FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.clonedResultsList);
-		if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
-				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
-				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
-		{
-			System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(), r.getFP(), r2.getFP(),
-					r.getFN(), r2.getFN());
-		}
-		else
-			System.out.println("Matched scores");
-
-		final double score = getScore(r);
-		final double criteria = getCriteria(r);
-
-		// Show the result if it achieves the criteria limit 
-		if (showResultsTable && criteria >= minCriteria)
-		{
-			String text = createResult(filter, r).toString();
-
-			if (isHeadless)
-			{
-				IJ.log(text);
-			}
-			else
-			{
-				final long time = System.currentTimeMillis();
-				if (time > nextUpdate)
-				{
-					resultsWindow.append(text);
-					// Update every few seconds
-					nextUpdate = System.currentTimeMillis() + 2000;
-				}
-				else
-				{
-					resultsWindow.getTextPanel().appendWithoutUpdate(text);
-				}
-			}
-		}
-		return new double[] { score, criteria };
 	}
 
 	/**
@@ -3188,25 +3150,197 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private MultiPathFitResults[] ga_resultsListToScore = null;
 	private boolean ga_subset;
 	private int ga_iteration;
+	private ScoreResult[] ga_scoreResults = null;
+	private int ga_scoreIndex = 0;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
-	 */
-	public void initialise(List<? extends Chromosome> individuals)
+	private class ScoreResult
 	{
-		ga_iteration++;
-		//updateGAStatus();
-		initialiseScoring(new FilterSet(populationToFilters(individuals)));
+		final double score, criteria;
+		//final FractionClassificationResult r;
+		final DirectFilter filter;
+		final String text;
+
+		public ScoreResult(double score, double criteria, 
+				//FractionClassificationResult r, 
+				DirectFilter filter, String text)
+		{
+			this.score = score;
+			this.criteria = criteria;
+			//this.r = r;
+			this.filter = filter;
+			this.text = text;
+		}
 	}
 
-	public ArrayList<Filter> populationToFilters(List<? extends Chromosome> individuals)
+	private class ScoreJob
 	{
-		ArrayList<Filter> filters = new ArrayList<Filter>(individuals.size());
-		for (Chromosome c : individuals)
-			filters.add((DirectFilter) c);
-		return filters;
+		final DirectFilter filter;
+		final int index;
+
+		ScoreJob(DirectFilter filter, int index)
+		{
+			this.filter = filter;
+			this.index = index;
+		}
+	}
+
+	/**
+	 * Used to allow multi-threading of the scoring the filters
+	 */
+	private class ScoreWorker implements Runnable
+	{
+		volatile boolean finished = false;
+		final BlockingQueue<ScoreJob> jobs;
+		final ScoreResult[] scoreResults;
+		final boolean createTextResult;
+
+		public ScoreWorker(BlockingQueue<ScoreJob> jobs, ScoreResult[] scoreResults, boolean createTextResult)
+		{
+			this.jobs = jobs;
+			this.scoreResults = scoreResults;
+			this.createTextResult = createTextResult;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			try
+			{
+				while (!finished)
+				{
+					ScoreJob job = jobs.take();
+					if (job == null || job.index == -1 || finished)
+						break;
+					run(job);
+				}
+			}
+			catch (InterruptedException e)
+			{
+				System.out.println(e.toString());
+				throw new RuntimeException(e);
+			}
+			finally
+			{
+				finished = true;
+			}
+		}
+
+		private void run(ScoreJob job)
+		{
+			if (Utils.isInterrupted())
+			{
+				finished = true;
+				return;
+			}
+			showProgress();
+			// Directly write to the result array, this is thread safe
+			scoreResults[job.index] = scoreFilter(job.filter, createTextResult);
+		}
+	}
+
+	/** The total progress. */
+	int progress, stepProgress, totalProgress;
+
+	/**
+	 * Show progress.
+	 */
+	private synchronized void showProgress()
+	{
+		if (++progress % stepProgress == 0)
+		{
+			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+				IJ.showProgress(progress, totalProgress);
+		}
+	}
+
+	private ScoreResult[] scoreFilters(FilterSet filterSet, boolean createTextResult)
+	{
+		if (filterSet.size() == 0)
+			return null;
+
+		initialiseScoring(filterSet);
+
+		ScoreResult[] scoreResults = new ScoreResult[filterSet.size()];
+
+		if (scoreResults.length == 1)
+		{
+			// No need to multi-thread this			
+			scoreResults[0] = scoreFilter((DirectFilter) filterSet.getFilters().get(0), createTextResult);
+		}
+		else
+		{
+			// Multi-thread score all the result
+			final int nThreads = getThreads(scoreResults.length);
+			final BlockingQueue<ScoreJob> jobs = new ArrayBlockingQueue<ScoreJob>(nThreads * 2);
+			final List<ScoreWorker> workers = new LinkedList<ScoreWorker>();
+			final List<Thread> threads = new LinkedList<Thread>();
+			for (int i = 0; i < nThreads; i++)
+			{
+				final ScoreWorker worker = new ScoreWorker(jobs, scoreResults, createTextResult);
+				final Thread t = new Thread(worker);
+				workers.add(worker);
+				threads.add(t);
+				t.start();
+			}
+
+			int index = 0;
+			totalProgress = scoreResults.length;
+			stepProgress = Utils.getProgressInterval(totalProgress);
+			progress = 0;
+			for (Filter filter : filterSet.getFilters())
+			{
+				put(jobs, new ScoreJob((DirectFilter) filter, index++));
+			}
+			// Finish all the worker threads by passing in a null job
+			for (int i = 0; i < threads.size(); i++)
+			{
+				put(jobs, new ScoreJob(null, -1));
+			}
+
+			// Wait for all to finish
+			for (int i = 0; i < threads.size(); i++)
+			{
+				try
+				{
+					threads.get(i).join();
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}
+			threads.clear();
+			IJ.showProgress(1);
+
+			// In case the threads were interrupted
+			if (Utils.isInterrupted())
+				scoreResults = null;
+		}
+
+		finishScoring();
+
+		return scoreResults;
+	}
+
+	private static int getThreads(int length)
+	{
+		return Math.max(1, Math.min(Prefs.getThreads(), length));
+	}
+
+	private void put(BlockingQueue<ScoreJob> jobs, ScoreJob job)
+	{
+		try
+		{
+			jobs.put(job);
+		}
+		catch (InterruptedException e)
+		{
+			throw new RuntimeException("Unexpected interruption", e);
+		}
 	}
 
 	/**
@@ -3224,16 +3358,38 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (filterSet.size() < 2)
 			return;
 
-		if (failCountRange == 0)
+		Filter weakest = filterSet.createWeakestFilter();
+		if (weakest != null)
 		{
-			Filter weakest = filterSet.createWeakestFilter();
-			if (weakest != null)
-			{
-				ga_subset = true;
-				ga_resultsListToScore = createMPF((DirectFilter) weakest).filterSubset(ga_resultsList,
-						failCount + failCountRange, true);
-			}
+			ga_subset = true;
+			ga_resultsListToScore = createMPF((DirectFilter) weakest).filterSubset(ga_resultsList,
+					failCount + failCountRange, true);
 		}
+	}
+
+	private ScoreResult scoreFilter(DirectFilter filter, boolean createTextResult)
+	{
+		final FractionClassificationResult r = scoreFilter(filter, ga_resultsListToScore);
+
+		// DEBUG - Test if the two methods produce the same results
+		FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.clonedResultsList);
+		if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
+				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
+				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
+		{
+			System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(), r.getFP(), r2.getFP(),
+					r.getFN(), r2.getFN());
+		}
+		else
+			System.out.println("Matched scores");
+
+		final double score = getScore(r);
+		final double criteria = getCriteria(r);
+
+		// Show the result if it achieves the criteria limit 
+		final String text = (createTextResult && criteria >= minCriteria) ? createResult(filter, r).toString() : null;
+
+		return new ScoreResult(score, criteria, filter, text);
 	}
 
 	/**
@@ -3264,20 +3420,46 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
+	 */
+	public void initialise(List<? extends Chromosome> individuals)
+	{
+		ga_iteration++;
+		ga_scoreIndex = 0;
+		ga_scoreResults = scoreFilters(new FilterSet(populationToFilters(individuals)), false);
+	}
+
+	private ArrayList<Filter> populationToFilters(List<? extends Chromosome> individuals)
+	{
+		ArrayList<Filter> filters = new ArrayList<Filter>(individuals.size());
+		for (Chromosome c : individuals)
+			filters.add((DirectFilter) c);
+		return filters;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#fitness(gdsc.smlm.ga.Chromosome)
 	 */
 	public double fitness(Chromosome chromosome)
 	{
-		final DirectFilter filter = (DirectFilter) chromosome;
-		final FractionClassificationResult r = scoreFilter(filter, ga_resultsListToScore);
-		double score = getScore(r);
-		final double criteria = getCriteria(r);
+		// In case the user aborted with Escape
+		if (ga_scoreResults == null)
+			return 0;
+
+		// Assume that fitness will be called in the order of the individuals passed to the initialise function.
+		final ScoreResult scoreResult = ga_scoreResults[ga_scoreIndex++];
+
+		double score = scoreResult.score;
+		final double criteria = scoreResult.criteria;
 
 		if (strictFitness)
 		{
 			// No fitness for those below the criteria 
 			if (criteria < minCriteria)
-				score = 0;
+				// To flag that it has been scored, but is invalid.
+				score = -1;
 		}
 		else
 		{
@@ -3297,8 +3479,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	public void shutdown()
 	{
-		finishScoring();
-
 		// Report the score for the best filter
 		List<? extends Chromosome> individuals = ga_population.getIndividuals();
 		ChromosomeComparator.sort(individuals);
@@ -3313,8 +3493,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gaWindow.append(text.toString());
 	}
 
-	double limit = 0;
+	private double limit = 0;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#progress(double)
+	 */
 	public void progress(double fraction)
 	{
 		if (fraction == 1)
@@ -3333,21 +3518,41 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		IJ.showProgress(fraction);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#progress(long, long)
+	 */
 	public void progress(long position, long total)
 	{
 		progress((double) position / total);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#log(java.lang.String, java.lang.Object[])
+	 */
 	public void log(String format, Object... args)
 	{
 		// Ignore		
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#status(java.lang.String, java.lang.Object[])
+	 */
 	public void status(String format, Object... args)
 	{
 		IJ.showStatus(ga_statusPrefix + String.format(format, args));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#isEnded()
+	 */
 	public boolean isEnded()
 	{
 		// Ignore		
