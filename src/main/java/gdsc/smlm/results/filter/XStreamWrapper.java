@@ -41,6 +41,7 @@ public abstract class XStreamWrapper
 			addAlias(ANRFilter2.class);
 			addAlias(CombinedFilter.class);
 			addAlias(CoordinateFilter.class);
+			addAlias(DirectFilter.class);
 			addAlias(EShiftFilter.class);
 			addAlias(Filter.class);
 			addAlias(HysteresisFilter.class);
