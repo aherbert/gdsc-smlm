@@ -63,8 +63,7 @@ public class MultiPathFilter
 	/**
 	 * The direct filter to apply to the results
 	 */
-	@XStreamAsAttribute
-	final DirectFilter filter;
+	final IDirectFilter filter;
 
 	/**
 	 * The residuals threshold to consider the residuals Quadrant Analysis (QA) score of a single for doublet fitting.
@@ -81,7 +80,7 @@ public class MultiPathFilter
 	 * @param residualsThreshold
 	 *            The residuals threshold to consider a single fit for doublet fitting
 	 */
-	public MultiPathFilter(DirectFilter filter, double residualsThreshold)
+	public MultiPathFilter(IDirectFilter filter, double residualsThreshold)
 	{
 		this.filter = filter;
 		this.residualsThreshold = residualsThreshold;
