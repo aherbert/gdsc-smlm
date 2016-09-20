@@ -81,6 +81,10 @@ public enum FitStatus
 	/**
 	 * 
 	 */
+	FAILED_SMART_FILTER("Failed smart filter"),
+	/**
+	 * 
+	 */
 	UNKNOWN("Unknown");
 
 	private String name;

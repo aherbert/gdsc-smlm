@@ -971,6 +971,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public FitStatus validatePeak(int n, double[] initialParams, double[] params)
 	{
+		if (smartFilter && directFilter != null)
+		{
+			// Always specify a new result and we have no local background or offset
+			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, 0, ResultType.NEW,
+					0, 0, false);
+			if (directFilter.accept(peak))
+				return setValidationResult(FitStatus.OK, null);
+			if (log != null)
+			{
+				log.info("Bad peak %d: %s", peak.getId(), DirectFilter.getStatusMessage(peak, flags));
+			}
+			// At the moment we do not get any validation data
+			return setValidationResult(FitStatus.FAILED_SMART_FILTER, null);
+		}
+
 		final int offset = n * 6;
 		// Check spot movement
 		final double xShift = params[Gaussian2DFunction.X_POSITION + offset] -
@@ -1383,12 +1398,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 * @return A preprocessed peak result
 	 */
 	public PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double localBackground, ResultType resultType, float offsetx, float offsety, boolean newObject)
+			double[] params, double localBackground, ResultType resultType, float offsetx, float offsety,
+			boolean newObject)
 	{
 		if (newObject)
-			return new DynamicPeakResult(candidateId, n, initialParams, params, localBackground, resultType, offsetx, offsety);
+			return new DynamicPeakResult(candidateId, n, initialParams, params, localBackground, resultType, offsetx,
+					offsety);
 
-		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, localBackground, resultType, offsetx, offsety);
+		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, localBackground, resultType, offsetx,
+				offsety);
 		return dynamicPeakResult;
 	}
 
