@@ -37,9 +37,12 @@ public class AndFilter extends CombinedFilter
 		return accept1(peak) && accept2(peak);
 	}
 
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
-		return accept1(peak) && accept2(peak);
+		if (accept1(peak) && accept2(peak))
+			return 0;
+		// We get here if filter 1 failed; or filter 1 passed but filter 2 failed.
+		return (result1 == 0) ? result2 : result1;
 	}
 
 	@Override

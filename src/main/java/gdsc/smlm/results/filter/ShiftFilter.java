@@ -81,9 +81,13 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
-		return peak.getXRelativeShift2() <= shift2 && peak.getYRelativeShift2() <= shift2;
+		if (peak.getXRelativeShift2() > shift2)
+			return V_X_RELATIVE_SHIFT;
+		if (peak.getYRelativeShift2() > shift2)
+			return V_Y_RELATIVE_SHIFT;
+		return 0;
 	}
 
 	@Override

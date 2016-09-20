@@ -111,12 +111,16 @@ public class SNRFilter2 extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
+		if (peak.getSNR() < this.snr)
+			return V_SNR;
 		if (widthEnabled)
-			return peak.getSNR() >= this.snr && peak.getXSDFactor() <= upperSigmaThreshold && peak.getXSDFactor() >= lowerSigmaThreshold;
-		else
-			return peak.getSNR() >= this.snr;
+		{
+			if (peak.getXSDFactor() > upperSigmaThreshold || peak.getXSDFactor() < lowerSigmaThreshold)
+				return V_X_SD_FACTOR;
+		}
+		return 0;
 	}
 
 	@Override

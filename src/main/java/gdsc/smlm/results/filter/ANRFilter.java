@@ -53,17 +53,19 @@ public class ANRFilter extends DirectFilter
 	{
 		return getANR(peak) >= this.anr;
 	}
-	
+
 	static float getANR(PeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
-	
-	public boolean accept(PreprocessedPeakResult peak)
+
+	public int validate(final PreprocessedPeakResult peak)
 	{
-		return getANR(peak) >= this.anr;
+		if (getANR(peak) < this.anr)
+			return V_AMPLITUDE | V_NOISE;
+		return 0;
 	}
-	
+
 	static float getANR(PreprocessedPeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;

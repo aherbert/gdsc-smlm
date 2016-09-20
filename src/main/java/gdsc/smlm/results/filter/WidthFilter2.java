@@ -110,12 +110,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (widthEnabled)
-			return peak.getXSDFactor() <= upperSigmaThreshold && peak.getXSDFactor() >= lowerSigmaThreshold;
-		else
-			return true;
+		{
+			if (peak.getXSDFactor() > upperSigmaThreshold || peak.getXSDFactor() < lowerSigmaThreshold)
+				return V_X_SD_FACTOR;
+		}
+		return 0;
 	}
 
 	@Override

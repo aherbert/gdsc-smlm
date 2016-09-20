@@ -38,9 +38,12 @@ public class OrFilter extends CombinedFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
-		return accept1(peak) || accept2(peak);
+		if (accept1(peak) || accept2(peak))
+			return 0;
+		// We only get here when both filters failed so we can just combine the results
+		return result1 | result2;
 	}
 	
 	@Override

@@ -75,16 +75,22 @@ public class SBRFilter extends DirectFilter
 	}
 	
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (bias != -1)
 		{
 			// This is not preprocessed
 			final double background = peak.getBackground() - bias;
 			if (background > 0)
-				return peak.getSignal() / Math.sqrt(background) >= this.sbr;
+			{
+				if (peak.getSignal() / Math.sqrt(background) < this.sbr)
+					return V_PHOTONS | V_BACKGROUND;
+				return 0;
+			}
 		}
-		return peak.getSNR() >= this.sbr;
+		if (peak.getSNR() < this.sbr)
+			return V_SNR;
+		return 0;
 	}
 
 	@Override

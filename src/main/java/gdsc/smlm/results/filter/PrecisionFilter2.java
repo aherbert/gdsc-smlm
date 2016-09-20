@@ -86,9 +86,11 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
-		return peak.getLocationVariance2() <= variance;
+		if (peak.getLocationVariance2() > variance)
+			return V_LOCATION_VARIANCE2;
+		return 0;
 	}
 
 	@Override

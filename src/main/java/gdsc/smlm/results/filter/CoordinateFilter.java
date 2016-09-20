@@ -79,10 +79,13 @@ public class CoordinateFilter extends DirectFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
-		return peak.getX() >= minX && peak.getX() <= maxX && peak.getY() >= minY &&
-				peak.getY() <= maxY;
+		if (peak.getX() < minX || peak.getX() > maxX)
+			return V_X;
+		if (peak.getY() < minY || peak.getY() > maxY)
+			return V_Y;
+		return 0;
 	}
 
 	@Override

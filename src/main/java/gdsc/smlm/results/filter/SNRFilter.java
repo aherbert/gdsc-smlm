@@ -57,9 +57,11 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
-		return peak.getSNR() >= this.snr;
+		if (peak.getSNR() < this.snr)
+			return V_SNR;
+		return 0;
 	}
 	
 	static float getSNR(PeakResult peak)

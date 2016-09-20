@@ -112,14 +112,16 @@ public class ANRFilter2 extends DirectFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
+		if (ANRFilter.getANR(peak) < this.anr)
+			return V_AMPLITUDE | V_NOISE;
 		if (widthEnabled)
-			return ANRFilter.getANR(peak) >= this.anr && peak.getXSDFactor() <= upperSigmaThreshold &&
-					peak.getXSDFactor() >= lowerSigmaThreshold;
-		else
-			return ANRFilter.getANR(peak) >= this.anr;
-
+		{
+			if (peak.getXSDFactor() > upperSigmaThreshold && peak.getXSDFactor() < lowerSigmaThreshold)
+				return V_X_SD_FACTOR;
+		}
+		return 0;
 	}
 
 	@Override

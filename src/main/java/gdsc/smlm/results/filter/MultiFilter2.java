@@ -195,24 +195,28 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	public boolean accept(PreprocessedPeakResult peak)
+	public int validate(final PreprocessedPeakResult peak)
 	{
 		// TODO - reorder these in precedence of the most powerful single filter
 
 		if (peak.getPhotons() < signal)
-			return false;
-		if (peak.getSNR() < snr)
-			return false;
+			return V_PHOTONS;
+		if (peak.getSNR() < this.snr)
+			return V_SNR;
 		if (widthEnabled)
+		{
 			if (peak.getXSDFactor() > upperSigmaThreshold || peak.getXSDFactor() < lowerSigmaThreshold)
-				return false;
-		if (peak.getXRelativeShift2() > offset || peak.getYRelativeShift2() > offset)
-			return false;
+				return V_X_SD_FACTOR;
+		}
+		if (peak.getXRelativeShift2() > offset)
+			return V_X_RELATIVE_SHIFT;
+		if (peak.getYRelativeShift2() > offset)
+			return V_Y_RELATIVE_SHIFT;
 		if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset)
-			return false;
+			return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
 		if (peak.getLocationVariance2() > variance)
-			return false;
-		return true;
+			return V_LOCATION_VARIANCE2;
+		return 0;
 	}
 
 	@Override

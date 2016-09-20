@@ -15,6 +15,8 @@ package gdsc.smlm.results.filter;
 
 import java.util.Arrays;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -28,6 +30,11 @@ public abstract class CombinedFilter extends DirectFilter
 {
 	protected Filter filter1, filter2;
 	protected DirectFilter dfilter1, dfilter2;
+	
+	@XStreamOmitField
+	protected int result1;
+	@XStreamOmitField
+	protected int result2;
 
 	public CombinedFilter(Filter filter1, Filter filter2)
 	{
@@ -108,9 +115,8 @@ public abstract class CombinedFilter extends DirectFilter
 	 */
 	public boolean accept1(PreprocessedPeakResult peak)
 	{
-		if (dfilter1 != null)
-			return dfilter1.accept(peak);
-		return true;
+		result1 = (dfilter1 != null) ? dfilter1.validate(peak) : 0;
+		return result1 == 0;
 	}
 
 	/**
@@ -122,9 +128,8 @@ public abstract class CombinedFilter extends DirectFilter
 	 */
 	public boolean accept2(PreprocessedPeakResult peak)
 	{
-		if (dfilter2 != null)
-			return dfilter2.accept(peak);
-		return true;
+		result2 = (dfilter2 != null) ? dfilter2.validate(peak) : 0;
+		return result2 == 0;
 	}
 
 	/*
