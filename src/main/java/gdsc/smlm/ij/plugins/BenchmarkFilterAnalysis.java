@@ -178,6 +178,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static MultiPathFitResults[] clonedResultsList = null;
 	private static int candidates; // This may be in the results prefix already... 
 	private static int matches;
+	private static int totalResults;
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
@@ -244,7 +245,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	/**
 	 * Used to allow multi-threading of the scoring the fit results
 	 */
-	private class Worker implements Runnable
+	private class FitResultsWorker implements Runnable
 	{
 		volatile boolean finished = false;
 		final BlockingQueue<Job> jobs;
@@ -253,8 +254,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final RampedScore distanceScore;
 		final RampedScore signalScore;
 		int matches = 0;
+		int total = 0;
 
-		public Worker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
+		public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
 				RampedScore distanceScore, RampedScore signalScore)
 		{
 			this.jobs = jobs;
@@ -318,7 +320,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			final MultiPathFitResult[] multiPathFitResults = new MultiPathFitResult[result.fitResult.length];
 			int size = 0;
 
-			// Results are in order of candidate ranking.
+			// TODO - support a multi-pass filter.
+			// The results are in order they were fit.
+			// For a single pass fitter this will be in order of candidate ranking.
+			// For a multi pass fitter this will be in order of candidate ranking, then repeat.
 			int failCount = 0;
 			for (int index = 0; index < multiPathFitResults.length; index++)
 			{
@@ -341,18 +346,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 				else
 				{
-					// This was not fitted
+					// This was not fitted by any method so will always be a fail
 					failCount++;
 				}
 			}
 
-			// Count number result that had a match
+			// Count number of results that had a match
 			for (int i = 0; i < matched.length; i++)
 				if (matched[i])
 					matches++;
+			total += size;
 
 			results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length));
-
 		}
 	}
 
@@ -866,6 +871,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			distanceStats = new StoredDataStatistics();
 			candidates = 0;
 			matches = 0;
+			totalResults = 0;
 
 			// -=-=-=-
 			// The scoring is designed to find the best fitter+filter combination for the given spot candidates.
@@ -966,11 +972,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// This could be multi-threaded ...
 			final int nThreads = getThreads(BenchmarkSpotFit.fitResults.size());
 			final BlockingQueue<Job> jobs = new ArrayBlockingQueue<Job>(nThreads * 2);
-			final List<Worker> workers = new LinkedList<Worker>();
+			final List<FitResultsWorker> workers = new LinkedList<FitResultsWorker>();
 			final List<Thread> threads = new LinkedList<Thread>();
 			for (int i = 0; i < nThreads; i++)
 			{
-				final Worker worker = new Worker(jobs, syncResults, matchDistance, distanceScore, signalScore);
+				final FitResultsWorker worker = new FitResultsWorker(jobs, syncResults, matchDistance, distanceScore,
+						signalScore);
 				final Thread t = new Thread(worker);
 				workers.add(worker);
 				threads.add(t);
@@ -997,6 +1004,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				{
 					threads.get(i).join();
 					matches += workers.get(i).matches;
+					totalResults += workers.get(i).total;
 				}
 				catch (InterruptedException e)
 				{
@@ -1168,9 +1176,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		final int total = resultsList.length;
-		final int tp = matches; // This is approximate due to multi-path results
-
 		double signal = simulationParameters.minSignal;
 		if (simulationParameters.maxSignal > signal)
 		{
@@ -1185,7 +1190,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				simulationParameters.b2, simulationParameters.emCCD);
 		String msg = String.format(
 				"%d results, %d True-Positives\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-				total, tp, signal, pSignal, pLSE, pMLE);
+				totalResults, matches, signal, pSignal, pLSE, pMLE);
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
@@ -3160,7 +3165,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final DirectFilter filter;
 		final String text;
 
-		public ScoreResult(double score, double criteria, 
+		public ScoreResult(double score, double criteria,
 				//FractionClassificationResult r, 
 				DirectFilter filter, String text)
 		{
