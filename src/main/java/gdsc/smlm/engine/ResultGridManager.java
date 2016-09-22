@@ -124,7 +124,7 @@ public class ResultGridManager
 		}
 	}
 
-	private CandidateList[][] spotGrid;
+	private CandidateList[][] candidateGrid;
 	private PeakList[][] peakGrid;
 	private final int resolution, xBlocks, yBlocks;
 
@@ -151,7 +151,7 @@ public class ResultGridManager
 	}
 
 	/**
-	 * Create a grid for spots or peak results
+	 * Create a grid for candidates or peak results
 	 * 
 	 * @param maxx
 	 * @param maxy
@@ -163,12 +163,12 @@ public class ResultGridManager
 		xBlocks = getBlock(maxx) + 1;
 		yBlocks = getBlock(maxy) + 1;
 
-		spotGrid = new CandidateList[xBlocks][yBlocks];
+		candidateGrid = new CandidateList[xBlocks][yBlocks];
 		peakGrid = new PeakList[xBlocks][yBlocks];
 	}
 
 	/**
-	 * Create a grid only of peak results. No spots can be added to the grid.
+	 * Create a grid only of peak results. No candidates can be added to the grid.
 	 * 
 	 * @param results
 	 * @param resolution
@@ -226,31 +226,31 @@ public class ResultGridManager
 	}
 
 	/**
-	 * Add a spot to the grid. Assumes that the coordinates are within the size of the grid.
+	 * Add a candidate to the grid. Assumes that the coordinates are within the size of the grid.
 	 * 
-	 * @param spot
+	 * @param candidate
 	 */
-	public void addToGrid(Candidate spot)
+	public void addToGrid(Candidate candidate)
 	{
-		final int xBlock = getBlock(spot.x);
-		final int yBlock = getBlock(spot.y);
-		spotGrid[xBlock][yBlock].add(spot);
+		final int xBlock = getBlock(candidate.x);
+		final int yBlock = getBlock(candidate.y);
+		candidateGrid[xBlock][yBlock].add(candidate);
 		clearCache();
 	}
 
 	/**
-	 * Add a spot to the grid. Assumes that the coordinates are within the size of the grid.
+	 * Add a candidate to the grid. Assumes that the coordinates are within the size of the grid.
 	 * <p>
 	 * This method does not clear the cache and should be called only when initialising the grid.
 	 *
-	 * @param spot
-	 *            the spot
+	 * @param candidate
+	 *            the candidate
 	 */
-	public void putOnGrid(Candidate spot)
+	public void putOnGrid(Candidate candidate)
 	{
-		final int xBlock = getBlock(spot.x);
-		final int yBlock = getBlock(spot.y);
-		spotGrid[xBlock][yBlock].add(spot);
+		final int xBlock = getBlock(candidate.x);
+		final int yBlock = getBlock(candidate.y);
+		candidateGrid[xBlock][yBlock].add(candidate);
 	}
 
 	/**
@@ -377,7 +377,7 @@ public class ResultGridManager
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				size += spotGrid[xx][yy].size;
+				size += candidateGrid[xx][yy].size;
 			}
 		}
 		final Candidate[] list = new Candidate[size];
@@ -390,8 +390,8 @@ public class ResultGridManager
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				System.arraycopy(spotGrid[xx][yy].list, 0, list, size, spotGrid[xx][yy].size);
-				size += spotGrid[xx][yy].size;
+				System.arraycopy(candidateGrid[xx][yy].list, 0, list, size, candidateGrid[xx][yy].size);
+				size += candidateGrid[xx][yy].size;
 			}
 		}
 
