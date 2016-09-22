@@ -14,6 +14,7 @@ package gdsc.smlm.engine;
  *---------------------------------------------------------------------------*/
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 import gdsc.core.utils.Maths;
 import gdsc.smlm.results.PeakResult;
@@ -39,24 +40,87 @@ public class ResultGridManager
 		}
 	}
 
+	private class CandidateComparator implements Comparator<Candidate>
+	{
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		public int compare(Candidate o1, Candidate o2)
+		{
+			return o1.index - o2.index;
+		}
+	}
+
+	private final static CandidateComparator comp;
+	static
+	{
+		comp = new ResultGridManager().new CandidateComparator();
+	}
+
 	public class CandidateList
 	{
 		int size = 0;
 		Candidate[] list = null;
 
+		/**
+		 * Instantiates a new candidate list.
+		 *
+		 * @param size
+		 *            the size
+		 * @param list
+		 *            the list
+		 */
 		private CandidateList(int size, Candidate[] list)
 		{
 			this.size = size;
 			this.list = list;
 		}
 
-		public void add(Candidate spot)
+		/**
+		 * Add a candidate
+		 * 
+		 * @param candidate
+		 */
+		public void add(Candidate candidate)
 		{
 			if (list == null)
 				list = new Candidate[5];
 			else if (list.length == size)
 				list = Arrays.copyOf(list, (int) (size * 1.5));
-			list[size++] = spot;
+			list[size++] = candidate;
+		}
+
+		/**
+		 * Sort in ascending order of Id
+		 */
+		public void sort()
+		{
+			if (size != 0)
+				Arrays.sort(list, 0, size, comp);
+		}
+
+		/**
+		 * Gets the size.
+		 *
+		 * @return the size
+		 */
+		public int getSize()
+		{
+			return size;
+		}
+
+		/**
+		 * Gets the candidate
+		 *
+		 * @param index
+		 *            the index
+		 * @return the candidate
+		 */
+		public Candidate get(int index)
+		{
+			return list[index];
 		}
 	}
 
@@ -79,6 +143,11 @@ public class ResultGridManager
 		peakCacheY = -1;
 		neighbourCache = null;
 		neighbourCacheCandidate = null;
+	}
+
+	private ResultGridManager()
+	{
+		resolution = xBlocks = yBlocks = 0;
 	}
 
 	/**
@@ -185,7 +254,8 @@ public class ResultGridManager
 	}
 
 	/**
-	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the resolution
+	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
+	 * resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
 	 * 
 	 * @param x
@@ -235,7 +305,8 @@ public class ResultGridManager
 	}
 
 	/**
-	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the resolution
+	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
+	 * resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
 	 *
 	 * @param candidate
@@ -284,7 +355,8 @@ public class ResultGridManager
 	}
 
 	/**
-	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the resolution
+	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
+	 * resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
 	 * 
 	 * @param x
