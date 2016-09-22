@@ -1393,11 +1393,56 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 *            the local background
 	 * @param resultType
 	 *            the result type
+	 * @param offsetx
+	 *            the offsetx to adjust the x-position
+	 * @param offsety
+	 *            the offsety to adjust the y-position
+	 * @return A preprocessed peak result
+	 */
+	public PreprocessedPeakResult createDynamicPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+			double[] params, double localBackground, ResultType resultType, float offsetx, float offsety)
+	{
+		return createPreprocessedPeakResult(candidateId, n, initialParams, params, localBackground, resultType, offsetx,
+				offsety, true);
+	}
+
+	/**
+	 * Create a dynamic object that can return the results in a formatted state for the multi-path filter.
+	 * <p>
+	 * The result is dynamic in that it computes the values just-in-time using the input array data.
+	 * <p>
+	 * The result can be a recycled object that is associated with this fit configuration, or a new object. If using the
+	 * recycled object then a second call to this method will replace the array data on all references to the object. If
+	 * using a new object then this method can be called again with new data and the old reference is still valid.
+	 * <p>
+	 * Note: All returned objects will be linked with this fit configuration. Thus changing properties such as the gain,
+	 * noise or settings for computing the variance will result in changes to the values returned by the
+	 * PreprocessedPeakResult.
+	 * <p>
+	 * Note: XY position may be wrong if the input parameters have not been updated with an offset from fitting a
+	 * sub-region.
+	 *
+	 * @param candidateId
+	 *            the candidate id
+	 * @param n
+	 *            The peak number
+	 * @param initialParams
+	 *            The initial peak parameters
+	 * @param params
+	 *            The fitted peak parameters
+	 * @param localBackground
+	 *            the local background
+	 * @param resultType
+	 *            the result type
+	 * @param offsetx
+	 *            the offsetx to adjust the x-position
+	 * @param offsety
+	 *            the offsety to adjust the y-position
 	 * @param newObject
 	 *            Set to true to create a new object, the default uses the object associated with this fit configuration
 	 * @return A preprocessed peak result
 	 */
-	public PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+	private PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
 			double[] params, double localBackground, ResultType resultType, float offsetx, float offsety,
 			boolean newObject)
 	{
@@ -1444,8 +1489,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 * @return A preprocessed peak result
 	 */
 	public BasePreprocessedPeakResult createPreprocessedPeakResult(int frame, int candidateId, int n,
-			double[] initialParameters, double[] parameters, double localBackground,
-			BasePreprocessedPeakResult.ResultType resultType, float offsetx, float offsety)
+			double[] initialParameters, double[] parameters, double localBackground, ResultType resultType,
+			float offsetx, float offsety)
 	{
 		final int offset = n * 6;
 		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL];
