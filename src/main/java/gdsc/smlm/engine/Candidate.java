@@ -57,7 +57,7 @@ public class Candidate extends Spot
 	 */
 	public Candidate(Spot spot, int index)
 	{
-		super(spot.x, spot.y, spot.intensity, spot.score);
+		super(spot.x, spot.y, spot.intensity, spot.getScore());
 		this.index = index;
 	}
 }
