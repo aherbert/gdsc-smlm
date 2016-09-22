@@ -70,7 +70,7 @@ public class MultiPathFilter
 	 * The score should range from 0 to 1. A score of 1 will ignore doublet fitting
 	 */
 	@XStreamAsAttribute
-	final double residualsThreshold;
+	final public double residualsThreshold;
 
 	/**
 	 * Create a new MultiPathFilter
