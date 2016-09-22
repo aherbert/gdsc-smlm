@@ -16,7 +16,6 @@ package gdsc.smlm.engine;
 import java.util.Arrays;
 
 import gdsc.core.utils.Maths;
-import gdsc.smlm.filters.Spot;
 import gdsc.smlm.results.PeakResult;
 
 /**
@@ -27,42 +26,48 @@ public class ResultGridManager
 {
 	private class PeakList
 	{
-		int c = 0;
+		int size = 0;
 		PeakResult[] list = null;
 
 		void add(PeakResult peak)
 		{
 			if (list == null)
 				list = new PeakResult[5];
-			else if (list.length == c)
-				list = Arrays.copyOf(list, (int) (c * 1.5));
-			list[c++] = peak;
+			else if (list.length == size)
+				list = Arrays.copyOf(list, (int) (size * 1.5));
+			list[size++] = peak;
 		}
 	}
 
-	private class SpotList
+	public class CandidateList
 	{
-		int c = 0;
-		Spot[] list = null;
+		int size = 0;
+		Candidate[] list = null;
 
-		void add(Spot spot)
+		private CandidateList(int size, Candidate[] list)
+		{
+			this.size = size;
+			this.list = list;
+		}
+
+		public void add(Candidate spot)
 		{
 			if (list == null)
-				list = new Spot[5];
-			else if (list.length == c)
-				list = Arrays.copyOf(list, (int) (c * 1.5));
-			list[c++] = spot;
+				list = new Candidate[5];
+			else if (list.length == size)
+				list = Arrays.copyOf(list, (int) (size * 1.5));
+			list[size++] = spot;
 		}
 	}
 
-	private SpotList[][] spotGrid;
+	private CandidateList[][] spotGrid;
 	private PeakList[][] peakGrid;
 	private final int resolution, xBlocks, yBlocks;
 
 	private PeakResult[] peakCache = null;
 	private int peakCacheX = -1, peakCacheY = -1;
-	private Spot[] spotCache = null;
-	private int spotCacheX = -1, spotCacheY = -1;
+	private CandidateList neighbourCache = null;
+	private Candidate neighbourCacheCandidate = null;
 
 	/**
 	 * Clear the cache. This should be called when more data has been added to the grid.
@@ -72,9 +77,8 @@ public class ResultGridManager
 		peakCache = null;
 		peakCacheX = -1;
 		peakCacheY = -1;
-		spotCache = null;
-		spotCacheX = -1;
-		spotCacheY = -1;
+		neighbourCache = null;
+		neighbourCacheCandidate = null;
 	}
 
 	/**
@@ -90,7 +94,7 @@ public class ResultGridManager
 		xBlocks = getBlock(maxx) + 1;
 		yBlocks = getBlock(maxy) + 1;
 
-		spotGrid = new SpotList[xBlocks][yBlocks];
+		spotGrid = new CandidateList[xBlocks][yBlocks];
 		peakGrid = new PeakList[xBlocks][yBlocks];
 	}
 
@@ -136,13 +140,14 @@ public class ResultGridManager
 		peakGrid[xBlock][yBlock].add(peak);
 		clearCache();
 	}
-	
+
 	/**
 	 * Add a peak to the grid. Assumes that the coordinates are within the size of the grid.
 	 * <p>
 	 * This method does not clear the cache and should be called only when initialising the grid.
 	 *
-	 * @param peak the peak
+	 * @param peak
+	 *            the peak
 	 */
 	public void putOnGrid(PeakResult peak)
 	{
@@ -156,7 +161,7 @@ public class ResultGridManager
 	 * 
 	 * @param spot
 	 */
-	public void addToGrid(Spot spot)
+	public void addToGrid(Candidate spot)
 	{
 		final int xBlock = getBlock(spot.x);
 		final int yBlock = getBlock(spot.y);
@@ -169,15 +174,16 @@ public class ResultGridManager
 	 * <p>
 	 * This method does not clear the cache and should be called only when initialising the grid.
 	 *
-	 * @param spot the spot
+	 * @param spot
+	 *            the spot
 	 */
-	public void putOnGrid(Spot spot)
+	public void putOnGrid(Candidate spot)
 	{
 		final int xBlock = getBlock(spot.x);
 		final int yBlock = getBlock(spot.y);
 		spotGrid[xBlock][yBlock].add(spot);
 	}
-	
+
 	/**
 	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
@@ -203,7 +209,7 @@ public class ResultGridManager
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				size += peakGrid[xx][yy].c;
+				size += peakGrid[xx][yy].size;
 			}
 		}
 		final PeakResult[] list = new PeakResult[size];
@@ -216,8 +222,8 @@ public class ResultGridManager
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].c);
-				size += peakGrid[xx][yy].c;
+				System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].size);
+				size += peakGrid[xx][yy].size;
 			}
 		}
 
@@ -231,48 +237,50 @@ public class ResultGridManager
 	/**
 	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
-	 * 
-	 * @param x
-	 * @param y
-	 * @param minScore
-	 *            The minimum score that the the spot must have
+	 *
+	 * @param candidate
+	 *            the candidate
 	 * @return the neighbours
 	 */
-	public Spot[] getSpotNeighbours(final int x, final int y, float minScore)
+	public CandidateList getNeighbours(final Candidate candidate)
 	{
-		final int xBlock = getBlock(x);
-		final int yBlock = getBlock(y);
+		if (neighbourCache != null && neighbourCacheCandidate != null &&
+				neighbourCacheCandidate.index == candidate.index)
+			return neighbourCache;
 
-		int size = 0;
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+		// Get all
+		final Candidate[] list = getCandidates(candidate.x, candidate.y);
+
+		// Remove the candidate. 
+
+		//		// Assumes non-unique candidates
+		//		int size = 0;
+		//		for (int i = 0; i < list.length; i++)
+		//		{
+		//			if (list[i].index == c.index)
+		//				continue;
+		//			list[size++] = list[i];
+		//		}
+		//		list = (size < list.length) ? Arrays.copyOf(list, size) : list;
+
+		int size = list.length;
+		for (int i = 0; i < size; i++)
 		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+			if (list[i].index == candidate.index)
 			{
-				if (yy < 0 || yy >= yBlocks)
-					continue;
-				size += spotGrid[xx][yy].c;
+				int remaining = list.length - i - 1;
+				if (remaining != 0)
+					System.arraycopy(list, i + 1, list, i, remaining);
+				size--;
+				// Assume a unique candidate index
+				break;
 			}
 		}
-		final Spot[] list = new Spot[size];
-		size = 0;
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
-		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
-			{
-				if (yy < 0 || yy >= yBlocks)
-					continue;
-				final SpotList spotList = spotGrid[xx][yy];
-				for (int i = 0; i < spotList.c; i++)
-					if (spotList.list[i].getScore() >= minScore)
-						list[size++] = spotList.list[i];
-			}
-		}
 
-		return (size < list.length) ? Arrays.copyOf(list, size) : list;
+		neighbourCache = new CandidateList(size, list);
+		neighbourCacheCandidate = candidate;
+
+		return neighbourCache;
 	}
 
 	/**
@@ -283,13 +291,10 @@ public class ResultGridManager
 	 * @param y
 	 * @return the neighbours
 	 */
-	public Spot[] getSpotNeighbours(final int x, final int y)
+	private Candidate[] getCandidates(final int x, final int y)
 	{
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
-
-		if (spotCache != null && spotCacheX == xBlock && spotCacheY == yBlock)
-			return spotCache;
 
 		int size = 0;
 		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
@@ -300,10 +305,10 @@ public class ResultGridManager
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				size += spotGrid[xx][yy].c;
+				size += spotGrid[xx][yy].size;
 			}
 		}
-		final Spot[] list = new Spot[size];
+		final Candidate[] list = new Candidate[size];
 		size = 0;
 		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
 		{
@@ -313,14 +318,10 @@ public class ResultGridManager
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				System.arraycopy(spotGrid[xx][yy].list, 0, list, size, spotGrid[xx][yy].c);
-				size += spotGrid[xx][yy].c;
+				System.arraycopy(spotGrid[xx][yy].list, 0, list, size, spotGrid[xx][yy].size);
+				size += spotGrid[xx][yy].size;
 			}
 		}
-
-		spotCache = list;
-		spotCacheX = xBlock;
-		spotCacheY = yBlock;
 
 		return list;
 	}
