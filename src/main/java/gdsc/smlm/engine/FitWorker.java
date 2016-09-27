@@ -46,6 +46,7 @@ import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.IMultiPathFitResults;
+import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.SelectedResult;
 import gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore;
@@ -164,6 +165,21 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private Candidate[] candidates = null;
 	private CandidateList neighbours = null;
 
+	/**
+	 * Instantiates a new fit worker.
+	 * <p>
+	 * Note that if the fit configuration has fit validation enabled then the initial fit results will be validated using
+	 * only the basic filtering setting of the fit configuration. The use of the smart filter will be disabled. Once all
+	 * results have passed the basic validation the results are then filtered again using the IDirectFilter implementation 
+	 * of the fit configuration. This will use a configured smart filter if present.
+	 *
+	 * @param config
+	 *            the configuration
+	 * @param results
+	 *            the results
+	 * @param jobs
+	 *            the jobs
+	 */
 	public FitWorker(FitEngineConfiguration config, PeakResults results, BlockingQueue<FitJob> jobs)
 	{
 		this.config = config;
@@ -178,6 +194,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			noise = (float) config.getFitConfiguration().getNoise();
 		}
+
+		// Disable the use of the direct filter within the FitConfiguration validate method. 
+		// This allows validate() to be used for basic filtering of all fit results (e.g. using the fit region bounds).
+		// The validation of each result will be performed by the FitConfiguration implementation
+		// of the IDirectFilter interface. This may involve the DirectFilter object.
+		fitConfig.setSmartFilter(false);
 
 		workerId = WORKER_ID++;
 	}
@@ -317,8 +339,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Note the current fit configuration for benchmarking may have minimal filtering settings
 				// so we do not use that object.
 				final FitConfiguration tmp = new FitConfiguration();
-				final FitEngineConfiguration fec = new FitEngineConfiguration(tmp);
-				filter = new MultiPathFilter(tmp, fec.getResidualsThreshold());
+				final double residualsThreshold = 0.4;
+				filter = new MultiPathFilter(tmp, createMinimalFilter(), residualsThreshold);
 			}
 
 			filter.setup();
@@ -353,7 +375,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Note: The SpotFitter labels each PreprocessedFitResult using the offset in the FitResult object.
 			// The initial params and deviations can then be extracted for the results that pass the filter.
 
-			MultiPathFilter filter = new MultiPathFilter(fitConfig, config.getResidualsThreshold());
+			MultiPathFilter filter = new MultiPathFilter(fitConfig, createMinimalFilter(),
+					config.getResidualsThreshold());
 			IMultiPathFitResults multiPathResults = this;
 			SelectedResultStore store = this;
 			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, true);
@@ -2231,13 +2254,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		/** The constant for no Quadrant Analysis score */
 		private static final double NO_QA_SCORE = 2;
-		
+
 		final ImageExtractor ie;
 		boolean dynamic;
 		Rectangle regionBounds;
 		double[] region;
 		SpotFitter spotFitter;
-		FitType fitType;		
+		FitType fitType;
 
 		public DynamicMultiPathFitResult(ImageExtractor ie, boolean dynamic)
 		{
@@ -2564,5 +2587,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		// This is a candidate that passed validation. Store the estimate as passing the minimal filter.
 		storeEstimate(result.getCandidateId(), result, FILTER_RANK_MINIMAL);
+	}
+
+	/**
+	 * Create a minimum filter to use for storing estimates
+	 * 
+	 * @return The minimal filter
+	 */
+	public static MultiFilter2 createMinimalFilter()
+	{
+		double signal = 30;
+		float snr = 20;
+		double minWidth = 0.5;
+		double maxWidth = 4;
+		double shift = 2;
+		double eshift = 0;
+		double precision = 60;
+		return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
 	}
 }
