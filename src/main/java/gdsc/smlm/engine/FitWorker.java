@@ -80,9 +80,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	/** The number of additional evaluations to use for doublets */
 	public static final int EVALUATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
-	/** The constant for no Quadrant Analysis score */
-	private static final double NO_QA_SCORE = 2;
-
 	private Logger logger = null, logger2 = null;
 	private FitTypeCounter counter = null;
 	private long time = 0;
@@ -776,7 +773,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		MultiPathFitResult.FitResult resultDoublet = null;
 		boolean computedDoublet = false;
 		QuadrantAnalysis singleQA = null;
-		public double singleQAScore = NO_QA_SCORE;
 
 		public SpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, Rectangle regionBounds,
 				int n)
@@ -2233,12 +2229,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private class DynamicMultiPathFitResult extends MultiPathFitResult
 	{
+		/** The constant for no Quadrant Analysis score */
+		private static final double NO_QA_SCORE = 2;
+		
 		final ImageExtractor ie;
 		boolean dynamic;
 		Rectangle regionBounds;
 		double[] region;
 		SpotFitter spotFitter;
-		FitType fitType;
+		FitType fitType;		
 
 		public DynamicMultiPathFitResult(ImageExtractor ie, boolean dynamic)
 		{
@@ -2255,7 +2254,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			fitType = new FitType();
 
 			// Reset results
-			this.setSingleQAScore(2);
+			this.setSingleQAScore(NO_QA_SCORE);
 			this.setMultiFitResult(null);
 			this.setSingleFitResult(null);
 			this.setDoubletFitResult(null);
@@ -2294,6 +2293,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		public FitResult getSuperMultiFitResult()
 		{
+			// Pass through the reference to the result
 			return super.getMultiFitResult();
 		}
 
@@ -2313,7 +2313,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		public double getSingleQAScore()
 		{
 			double score = super.getSingleQAScore();
-			if (score == 2)
+			if (score == NO_QA_SCORE)
 			{
 				score = spotFitter.getSingleQAScore();
 				this.setSingleQAScore(score);
@@ -2328,17 +2328,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (result == null)
 			{
 				result = spotFitter.getResultSingleDoublet(config.getResidualsThreshold());
-				// TODO - this should be computed before the fit.
-				this.setSingleQAScore(spotFitter.singleQAScore);
 				setDoubletFitResult(result);
 				fitType.setDoublet(true);
-				;
 			}
 			return result;
 		}
 
 		public FitResult getSuperDoubletFitResult()
 		{
+			// Pass through the reference to the result
 			return super.getDoubletFitResult();
 		}
 	}
@@ -2385,7 +2383,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return;
 
 		final int currrentSize = sliceResults.size();
-		final int n = dynamicMultiPathFitResult.candidateId;
+		final int candidateId = dynamicMultiPathFitResult.candidateId;
 
 		final FitResult fitResult = (FitResult) selectedResult.fitResult.data;
 
@@ -2432,7 +2430,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 		}
 
-		job.setFitResult(n, fitResult);
+		job.setFitResult(candidateId, fitResult);
 
 		// Reporting
 		if (this.counter != null)
@@ -2497,9 +2495,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					peakParams[i * 6 + Gaussian2DFunction.ANGLE] *= 180.0 / Math.PI;
 				}
 			}
-			final int x = candidates[n].x;
-			final int y = candidates[n].y;
-			logger2.debug("%d:%d [%d,%d] %s (%s) = %s\n", slice, n, x + dataBounds.x, y + dataBounds.y,
+			final int x = candidates[candidateId].x;
+			final int y = candidates[candidateId].y;
+			logger2.debug("%d:%d [%d,%d] %s (%s) = %s\n", slice, candidateId, x + dataBounds.x, y + dataBounds.y,
 					fitResult.getStatus(), fitResult.getStatusData(), Arrays.toString(peakParams));
 		}
 
@@ -2518,7 +2516,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					peakResults[npeaks] = sliceResults.get(--i);
 				}
-				resultFilter.filter(fitResult, n, peakResults);
+				resultFilter.filter(fitResult, candidateId, peakResults);
 			}
 		}
 	}
