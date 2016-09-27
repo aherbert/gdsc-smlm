@@ -114,7 +114,7 @@ public class MultiPathFitResult implements Cloneable
 	 * The score from residuals analysis on the residuals of the single fit. This can be used to choose if the doublet
 	 * fit should be considered.
 	 */
-	private double singleQAScore = 2;
+	private double singleQAScore = -1;
 
 	/**
 	 * The results from the multi-fit. It is expected that one result will be true for isNewResult() and zero or more

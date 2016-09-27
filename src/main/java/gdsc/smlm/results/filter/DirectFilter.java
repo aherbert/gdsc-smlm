@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -21,6 +23,7 @@ package gdsc.smlm.results.filter;
  */
 public abstract class DirectFilter extends Filter implements IDirectFilter
 {
+	@XStreamOmitField
 	private int result = 0;
 
 	/*

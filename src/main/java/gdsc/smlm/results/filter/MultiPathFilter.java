@@ -190,7 +190,7 @@ public class MultiPathFilter
 		}
 	}
 
-	private NullSelectedResultStore nullStore = new NullSelectedResultStore();
+	private static NullSelectedResultStore nullStore = new NullSelectedResultStore();
 
 	/**
 	 * The direct filter to apply to the results
@@ -413,8 +413,9 @@ public class MultiPathFilter
 	 * FitResult that the data originated from.
 	 * <p>
 	 * The SelectedResultStore will be passed any result that passes the configured filters. It will not be passed the
-	 * returned SelectedResult as the results may contain validated candidates. The returned results must thus be
-	 * filtered for new results (e.g. not existing or candidate results).
+	 * returned SelectedResult as the results will be duplicates of those passed to the store individually. They
+	 * may also contain validated candidates. The returned results must thus be filtered for new results (e.g. not
+	 * existing or candidate results).
 	 *
 	 * @param multiPathResult
 	 *            the multi path result
@@ -1275,5 +1276,32 @@ public class MultiPathFilter
 		{
 			throw new NotImplementedException();
 		}
+	}
+
+	/**
+	 * @return An XML representation of this object
+	 */
+	public String toXML()
+	{
+		return XStreamWrapper.toXML(this);
+	}
+
+	/**
+	 * Create the filter from the XML representation
+	 * 
+	 * @param xml
+	 * @return the filter
+	 */
+	public static MultiPathFilter fromXML(String xml)
+	{
+		try
+		{
+			return (MultiPathFilter) XStreamWrapper.fromXML(xml);
+		}
+		catch (ClassCastException ex)
+		{
+			//ex.printStackTrace();
+		}
+		return null;
 	}
 }
