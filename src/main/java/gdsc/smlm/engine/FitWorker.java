@@ -360,6 +360,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			IMultiPathFitResults multiPathResults = this;
 			SelectedResultStore store = this;
 			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, true);
+
 			filter.select(multiPathResults, config.getFailuresLimit(), true, store);
 
 			if (logger != null)
@@ -392,8 +393,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			offsety += params.getOffset()[1];
 		}
 
-		for (PeakResult result : sliceResults)
+		for (int i = 0; i < sliceResults.size(); i++)
 		{
+			final PeakResult result = sliceResults.get(i);
 			result.params[Gaussian2DFunction.X_POSITION] += offsetx;
 			result.params[Gaussian2DFunction.Y_POSITION] += offsety;
 		}
