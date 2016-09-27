@@ -1171,6 +1171,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		boolean newResult;
 		float offsetx;
 		float offsety;
+		double var, var2;
 
 		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, double localBackground,
 				ResultType resultType, float offsetx, float offsety)
@@ -1180,6 +1181,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		DynamicPeakResult()
 		{
+			var = var2 = -1;
 		}
 
 		/**
@@ -1215,6 +1217,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			this.newResult = resultType == ResultType.NEW;
 			this.offsetx = offsetx;
 			this.offsety = offsety;
+			var = var2 = -1;
 		}
 
 		public int getFrame()
@@ -1263,13 +1266,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		public double getLocationVariance()
 		{
 			// We do not use the local background to set as zero
-			return FitConfiguration.this.getVariance(0, params[Gaussian2DFunction.SIGNAL + offset], getSD(), false);
+			if (var == -1)
+				var = FitConfiguration.this.getVariance(0, params[Gaussian2DFunction.SIGNAL + offset], getSD(), false);
+			return var;
 		}
 
 		public double getLocationVariance2()
 		{
-			return FitConfiguration.this.getVariance(getLocalBackground(), params[Gaussian2DFunction.SIGNAL + offset],
-					getSD(), true);
+			if (var2 == -1)
+				var2 = FitConfiguration.this.getVariance(getLocalBackground(),
+						params[Gaussian2DFunction.SIGNAL + offset], getSD(), true);
+			return var2;
 		}
 
 		public float getSD()
