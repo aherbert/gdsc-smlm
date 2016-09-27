@@ -73,6 +73,7 @@ import gdsc.smlm.results.NullPeakResults;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.XStreamWrapper;
@@ -193,6 +194,7 @@ public class BenchmarkSpotFit implements PlugIn
 	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
 	private static Calibration cal;
+	private static MultiPathFilter multiFilter;
 	static
 	{
 		cal = new Calibration();
@@ -212,6 +214,25 @@ public class BenchmarkSpotFit implements PlugIn
 		fitConfig.setMinIterations(0);
 		fitConfig.setNoise(0);
 		config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
+
+		// Add a filter to use for storing the slice results:
+		// Use the standard configuration to ensure sensible fits are stored as the current slice results.
+		FitConfiguration tmp = new FitConfiguration();
+		double signal = tmp.getMinPhotons();
+		float snr = (float) tmp.getSignalStrength();
+		double minWidth = tmp.getMinWidthFactor();
+		double maxWidth = tmp.getWidthFactor();
+		double shift = tmp.getCoordinateShiftFactor();
+		double eshift = 0;
+		double precision = tmp.getPrecisionThreshold();
+		final MultiFilter2 primaryFilter = new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+
+		// Add a minimum filter to use for storing estimates
+		final MultiFilter2 minimalFilter = FitWorker.createMinimalFilter();
+
+		// We might as well use the doublet fits given we will compute them.
+		double residualsThreshold = 0.4;
+		multiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
 	}
 
 	private static double fractionPositives = 100;
@@ -560,6 +581,7 @@ public class BenchmarkSpotFit implements PlugIn
 			}
 			parameters.spots = spots;
 			parameters.fitTask = FitTask.BENCHMARKING;
+			parameters.benchmarkFilter = multiFilter;
 
 			final ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
 			fitWorker.run(job); // Results will be stored in the fit job 
@@ -862,6 +884,10 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addChoice("Fit_solver", solverNames, solverNames[fitConfig.getFitSolver().ordinal()]);
 		String[] functionNames = SettingsManager.getNames((Object[]) FitFunction.values());
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
+
+		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
+		gd.addTextAreas(multiFilter.toXML(), null, 6, 60);
+
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		//gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
@@ -892,6 +918,19 @@ public class BenchmarkSpotFit implements PlugIn
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
+		
+		multiFilter = MultiPathFilter.fromXML(gd.getNextText());
+		if (multiFilter == null)
+		{
+			gd  = new GenericDialog(TITLE);
+			gd.addMessage("The multi-path filter was invalid.\n \nContinue with a default filter?");
+			gd.enableYesNoCancel();
+			gd.hideCancelButton();
+			gd.showDialog();
+			if (!gd.wasOKed())
+				return false;
+		}
+		
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		//config.setResidualsThreshold(gd.getNextNumber());
@@ -908,6 +947,8 @@ public class BenchmarkSpotFit implements PlugIn
 		fitConfig.setCoordinateOffset(0.5);
 		fitConfig.setMinWidthFactor(1.0 / 5);
 		fitConfig.setWidthFactor(5);
+		// Disable the direct filter
+		fitConfig.setDirectFilter(null);
 
 		if (extraOptions)
 		{
