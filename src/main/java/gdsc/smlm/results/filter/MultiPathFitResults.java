@@ -1,5 +1,6 @@
 package gdsc.smlm.results.filter;
 
+// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -23,14 +24,10 @@ package gdsc.smlm.results.filter;
  */
 public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 {
-	/**
-	 * The frame containing the results
-	 */
+	/** The frame containing the results. */
 	final public int frame;
 
-	/**
-	 * The multi-path results
-	 */
+	/** The multi-path results. */
 	final public MultiPathFitResult[] multiPathFitResults;
 
 	/**
@@ -39,13 +36,29 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 */
 	final public int totalCandidates;
 
-	private boolean[] estimate = null;
-
+	/**
+	 * Instantiates a new multi path fit results.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param multiPathFitResults
+	 *            the multi path fit results
+	 */
 	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults)
 	{
 		this(frame, multiPathFitResults, (multiPathFitResults == null) ? 0 : multiPathFitResults.length);
 	}
 
+	/**
+	 * Instantiates a new multi path fit results.
+	 *
+	 * @param frame
+	 *            the frame
+	 * @param multiPathFitResults
+	 *            the multi path fit results
+	 * @param totalCandidates
+	 *            the total candidates
+	 */
 	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults, int totalCandidates)
 	{
 		this.frame = frame;
@@ -53,45 +66,56 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 		this.totalCandidates = totalCandidates;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
+	 */
 	public int getFrame()
 	{
 		return frame;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
+	 */
 	public int getNumberOfResults()
 	{
 		return multiPathFitResults.length;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
+	 */
 	public MultiPathFitResult getResult(int index)
 	{
 		return multiPathFitResults[index];
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
+	 */
 	public int getTotalCandidates()
 	{
 		return totalCandidates;
 	}
 
-	public boolean isValid(int candidateId)
-	{
-		if (estimate == null)
-			return false;
-		return estimate[candidateId];
-	}
-
-	public void setValid(PreprocessedPeakResult preprocessedPeakResult)
-	{
-		if (estimate == null)
-			estimate = new boolean[totalCandidates];
-		estimate[preprocessedPeakResult.getCandidateId()] = true;
-	}
-	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
 	@Override
 	public MultiPathFitResults clone()
 	{
 		MultiPathFitResult[] list = new MultiPathFitResult[multiPathFitResults.length];
-		for (int i=0; i<list.length; i++)
+		for (int i = 0; i < list.length; i++)
 			list[i] = multiPathFitResults[i].clone();
 		return new MultiPathFitResults(frame, list, totalCandidates);
 	}

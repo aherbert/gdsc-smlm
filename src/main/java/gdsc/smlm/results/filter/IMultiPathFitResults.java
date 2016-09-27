@@ -26,22 +26,23 @@ public interface IMultiPathFitResults
 	 */
 	int getFrame();
 
-	
 	/**
+	 * Get the number of results. The {@link #getResult(int)} method should support being called with any index up to
+	 * the number of results (exclusive).
+	 * 
 	 * @return The number of results
 	 */
 	int getNumberOfResults();
-	
-	
+
 	/**
 	 * Gets the result.
 	 *
-	 * @param index the index
+	 * @param index
+	 *            the index
 	 * @return the result
 	 */
 	MultiPathFitResult getResult(int index);
 
-	
 	/**
 	 * The total number of candidates. This may be greater than the size of the {@link #getNumberOfResults()} if
 	 * this is a subset of the results, i.e. has been prefiltered.
@@ -50,24 +51,18 @@ public interface IMultiPathFitResults
 	 */
 	int getTotalCandidates();
 
-
-	/**
-	 * Checks if is valid.
-	 * <p>
-	 * Return true if this candidate should definitely be filtered.
-	 *
-	 * @param candidateId the candidate id
-	 * @return true, if is valid
-	 */
-	boolean isValid(int candidateId);
-
-
-	/**
-	 * Sets result as valid.
-	 * <p>
-	 * Should be called when the result passed validation and should be marked as valid.
-	 *
-	 * @param preprocessedPeakResult the result
-	 */
-	void setValid(PreprocessedPeakResult preprocessedPeakResult);
+	// Possible support for iteration
+	//	/**
+	//	 * Begin. Called before a pass through the results using {@link #getResult(int)}.
+	//	 *
+	//	 * @return true, if a pass through the results is possible
+	//	 */
+	//	boolean begin();
+	//
+	//	/**
+	//	 * Called after a pass through the results. Returns a boolean indicating a repeat is possible.
+	//	 * 
+	//	 * @return true, if another pass through the results is possible
+	//	 */
+	//	boolean end();
 }

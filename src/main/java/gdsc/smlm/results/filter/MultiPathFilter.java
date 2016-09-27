@@ -11,6 +11,7 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.RankedScoreCalculator;
+import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
 /*----------------------------------------------------------------------------- 
@@ -48,7 +49,7 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Allows storage of results that have been selected
+	 * Allows storage of results that have been selected during multi-path filtering.
 	 */
 	public interface SelectedResultStore
 	{
@@ -58,12 +59,151 @@ public class MultiPathFilter
 		 * @param selectedResult
 		 */
 		void add(SelectedResult selectedResult);
+
+		/**
+		 * Checks if is fit. Any candidate that has already been fit will not be stored.
+		 *
+		 * @param candidateId
+		 *            the candidate id
+		 * @return True if the candidate has been fit
+		 */
+		boolean isFit(int candidateId);
+
+		/**
+		 * Checks if is valid.
+		 * <p>
+		 * Return true if this candidate should definitely be filtered.
+		 *
+		 * @param candidateId
+		 *            the candidate id
+		 * @return true, if is valid
+		 */
+		boolean isValid(int candidateId);
+
+		/**
+		 * A result that passed the primary filter
+		 * 
+		 * @param result
+		 */
+		void pass(PreprocessedPeakResult result);
+
+		/**
+		 * A result that passed the minimal filter
+		 * 
+		 * @param result
+		 */
+		void passMin(PreprocessedPeakResult result);
 	}
 
+	/**
+	 * Allow tracking of candidates that have been fit
+	 */
+	private class SimpleSelectedResultStore implements SelectedResultStore
+	{
+		boolean[] isFit;
+		boolean[] isValid;
+
+		SimpleSelectedResultStore()
+		{
+			isFit = new boolean[0];
+			isValid = new boolean[0];
+		}
+
+		SimpleSelectedResultStore(int totalCandidates)
+		{
+			isFit = new boolean[totalCandidates];
+			isValid = new boolean[totalCandidates];
+		}
+
+		public void add(SelectedResult selectedResult)
+		{
+		}
+
+		public boolean isFit(int candidateId)
+		{
+			return isFit[candidateId];
+		}
+
+		public boolean isValid(int candidateId)
+		{
+			return isValid[candidateId];
+		}
+
+		public void pass(PreprocessedPeakResult result)
+		{
+			if (result.isNewResult())
+				isFit[result.getCandidateId()] = true;
+			// This an existing result or candidate. Mark as valid so candidates will be processed
+			isValid[result.getCandidateId()] = true;
+		}
+
+		public void passMin(PreprocessedPeakResult result)
+		{
+			// Passing the minimal filter does not mean it is valid. This would be used to store
+			// a fit estimate during processing for this candidate.
+		}
+
+		public void resize(int totalCandidates)
+		{
+			if (isFit.length < totalCandidates)
+			{
+				isFit = new boolean[totalCandidates];
+				isValid = new boolean[totalCandidates];
+			}
+			else
+			{
+				Arrays.fill(isFit, 0, totalCandidates, false);
+				Arrays.fill(isValid, 0, totalCandidates, false);
+			}
+		}
+	}
+
+	/**
+	 * Used to return default behaviour for acceptAny/acceptAll
+	 */
+	private static class NullSelectedResultStore implements SelectedResultStore
+	{
+		public void add(SelectedResult selectedResult)
+		{
+			
+		}
+
+		public boolean isFit(int candidateId)
+		{
+			// Make sure non-candidate fits are ignored.
+			return true;
+		}
+
+		public boolean isValid(int candidateId)
+		{
+			return false;
+		}
+
+		public void pass(PreprocessedPeakResult result)
+		{
+			
+		}
+
+		public void passMin(PreprocessedPeakResult result)
+		{
+			
+		}
+	}
+	
+	private NullSelectedResultStore nullStore = new NullSelectedResultStore(); 
+	
 	/**
 	 * The direct filter to apply to the results
 	 */
 	final IDirectFilter filter;
+
+	/**
+	 * The minimal direct filter to apply to the results.
+	 * <p>
+	 * This is applied if the result fails the primary filter. It is used to indicate that the result achieves a minimum
+	 * set of criteria.
+	 */
+	final IDirectFilter minFilter;
 
 	/**
 	 * The residuals threshold to consider the residuals Quadrant Analysis (QA) score of a single for doublet fitting.
@@ -73,8 +213,8 @@ public class MultiPathFilter
 	final public double residualsThreshold;
 
 	/**
-	 * Create a new MultiPathFilter
-	 * 
+	 * Create a new MultiPathFilter.
+	 *
 	 * @param filter
 	 *            the direct filter for filtering the results
 	 * @param residualsThreshold
@@ -82,7 +222,23 @@ public class MultiPathFilter
 	 */
 	public MultiPathFilter(IDirectFilter filter, double residualsThreshold)
 	{
+		this(filter, null, residualsThreshold);
+	}
+
+	/**
+	 * Create a new MultiPathFilter.
+	 *
+	 * @param filter
+	 *            the direct filter for filtering the results
+	 * @param minFilter
+	 *            the minimal direct filter for filtering the results
+	 * @param residualsThreshold
+	 *            The residuals threshold to consider a single fit for doublet fitting
+	 */
+	public MultiPathFilter(IDirectFilter filter, IDirectFilter minFilter, double residualsThreshold)
+	{
 		this.filter = filter;
+		this.minFilter = minFilter;
 		this.residualsThreshold = residualsThreshold;
 	}
 
@@ -97,6 +253,8 @@ public class MultiPathFilter
 	public void setup()
 	{
 		filter.setup();
+		if (minFilter != null)
+			minFilter.setup();
 	}
 
 	/**
@@ -113,6 +271,8 @@ public class MultiPathFilter
 	public void setup(final int flags)
 	{
 		filter.setup(flags);
+		if (minFilter != null)
+			minFilter.setup(flags);
 	}
 
 	/**
@@ -128,10 +288,27 @@ public class MultiPathFilter
 	}
 
 	/**
+	 * Filter the peak result. This calls the accept() method in the minimal DirectFilter.
+	 * 
+	 * @param peak
+	 *            The peak result
+	 * @return true if the peak should be accepted, otherwise false to reject.
+	 */
+	private boolean minAccept(final PreprocessedPeakResult peak)
+	{
+		return minFilter.accept(peak);
+	}
+
+	/**
 	 * Filter a multi-path set of peak results into a set that are accepted.
 	 * <p>
 	 * Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other
 	 * results are assumed to be candidates that were fitted but will not be validated unless required.
+	 * <p>
+	 * Note that new results may not be for the candidate identified by the MultiPathFitResult. This can
+	 * happen when multi-fitting has fit another candidate that previously did not have a result. The
+	 * SelectedResultStore is used to determine if that result has been fit already. If not it is added
+	 * to the output list.
 	 *
 	 * @param multiPathResult
 	 *            the multi path result
@@ -139,16 +316,22 @@ public class MultiPathFilter
 	 *            Set to true to validate the candidates
 	 * @return The new peak results that are accepted (and any valid candidates if found); or null
 	 */
-	final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates)
+	final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates,
+			SelectedResultStore store)
 	{
 		PreprocessedPeakResult[] results = null;
+		final int candidateId = multiPathResult.candidateId;
+
+		// Ensure we don't have to check the store in acceptALl/acceptAny
+		if (store == null)
+			store = nullStore;
 
 		// Filter multi-fit
-		if ((results = acceptAll(multiPathResult.multiFitResult, validateCandidates)) != null)
+		if ((results = acceptAll(candidateId, multiPathResult.multiFitResult, validateCandidates, store)) != null)
 			return results;
 
 		// Filter single-fit
-		if ((results = acceptAll(multiPathResult.singleFitResult, false)) == null)
+		if ((results = acceptAll(candidateId, multiPathResult.singleFitResult, false, null)) == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
@@ -203,7 +386,8 @@ public class MultiPathFilter
 		// We reached here with a single fit that is eligible for doublet fitting
 
 		// Filter doublet fit
-		final PreprocessedPeakResult[] doubletResults = acceptAny(multiPathResult.doubletFitResult, validateCandidates);
+		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.doubletFitResult,
+				validateCandidates, store);
 		if (doubletResults != null)
 			return doubletResults;
 
@@ -216,25 +400,40 @@ public class MultiPathFilter
 	 * Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other
 	 * results are assumed to be candidates that were fitted but will not be validated unless required.
 	 * <p>
+	 * Note that new results may not be for the candidate identified by the MultiPathFitResult. This can
+	 * happen when multi-fitting has fit another candidate that previously did not have a result. The
+	 * SelectedResultStore is used to determine if that result has been fit already. If not it is added
+	 * to the output list.
+	 * <p>
 	 * The method returns the the same results as {@link #accept(MultiPathFitResult, boolean)} but includes the
 	 * FitResult that the data originated from.
+	 * <p>
+	 * The SelectedResultStore will be passed any result that passes the configured filters.
 	 *
 	 * @param multiPathResult
 	 *            the multi path result
 	 * @param validateCandidates
 	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
 	 * @return The results that are accepted; or null
 	 */
-	final public SelectedResult select(final MultiPathFitResult multiPathResult, boolean validateCandidates)
+	final public SelectedResult select(final MultiPathFitResult multiPathResult, boolean validateCandidates,
+			SelectedResultStore store)
 	{
 		PreprocessedPeakResult[] results = null;
+		final int candidateId = multiPathResult.candidateId;
+
+		// Ensure we don't have to check the store in acceptALl/acceptAny
+		if (store == null)
+			store = nullStore;
 
 		// Filter multi-fit
-		if ((results = acceptAll(multiPathResult.multiFitResult, validateCandidates)) != null)
+		if ((results = acceptAll(candidateId, multiPathResult.multiFitResult, validateCandidates, store)) != null)
 			return new SelectedResult(results, multiPathResult.multiFitResult);
 
 		// Filter single-fit
-		if ((results = acceptAll(multiPathResult.singleFitResult, false)) == null)
+		if ((results = acceptAll(candidateId, multiPathResult.singleFitResult, false, store)) == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
@@ -289,7 +488,8 @@ public class MultiPathFilter
 		// We reached here with a single fit that is eligible for doublet fitting
 
 		// Filter doublet fit
-		final PreprocessedPeakResult[] doubletResults = acceptAny(multiPathResult.doubletFitResult, validateCandidates);
+		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.doubletFitResult,
+				validateCandidates, store);
 		if (doubletResults != null)
 			return new SelectedResult(doubletResults, multiPathResult.doubletFitResult);
 
@@ -304,6 +504,10 @@ public class MultiPathFilter
 	 * <p>
 	 * A selected result will be stored for each MultiPathFitResult that is assessed, even if the fitting failed. In
 	 * this case the list of accepted results will be null.
+	 * <p>
+	 * The SelectedResultStore can be used to track results that pass validation. If this is null then the default
+	 * behaviour is to track fitted candidates that pass validation. These will be processed even if the fail count has
+	 * been reached.
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
@@ -312,7 +516,7 @@ public class MultiPathFilter
 	 * @param setup
 	 *            Set to true to run the {@link #setup()} method
 	 * @param store
-	 *            the store
+	 *            the store (can be used to track results that pass validation)
 	 * @return the results
 	 */
 	public void select(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
@@ -321,16 +525,28 @@ public class MultiPathFilter
 		if (setup)
 			setup();
 
+		if (store == null)
+			store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
+
+		// TODO - this could be made iterative. Any pass through the data may store estimates 
+		// using the SelectedResultStore and used to determine if 
+
 		int failCount = 0;
-		final SelectedResult[] selectedResults = new SelectedResult[multiPathResults.getNumberOfResults()];
-		for (int c = 0; c < selectedResults.length; c++)
+		final int total = multiPathResults.getNumberOfResults();
+		//while (multiPathResults.begin())
+		//{
+		for (int c = 0; c < total; c++)
 		{
 			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
 
-			if (failCount <= failures || multiPathResults.isValid(multiPathResult.candidateId))
+			if (multiPathResult == null)
+				// Ignore this but do not count it as a failure
+				continue;
+
+			if (failCount <= failures || store.isValid(multiPathResult.candidateId))
 			{
 				// Assess the result if we are below the fail limit or have an estimate
-				final SelectedResult result = select(multiPathResult, true);
+				final SelectedResult result = select(multiPathResult, true, store);
 				if (result != null)
 				{
 					final int[] ok = new int[result.results.length];
@@ -339,8 +555,6 @@ public class MultiPathFilter
 					{
 						if (result.results[i].isNewResult())
 							ok[count++] = i;
-						// This is something that passed validation and can be used as an estimate
-						multiPathResults.setValid(result.results[i]);
 					}
 
 					if (count != 0)
@@ -381,18 +595,29 @@ public class MultiPathFilter
 				}
 			}
 		}
+		//	multiPathResults.end();
+		//}
 	}
 
 	/**
-	 * Check all new and all existing results are valid. Returns the new results
+	 * Check all new and all existing results are valid. Returns the new results.
+	 * <p>
+	 * New results and validated candidates that file the primary filter can be filtered using the minimal filter and
+	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
+	 * already.
 	 * 
+	 * @param candidateId
+	 *
 	 * @param fitResult
 	 *            the results
 	 * @param validateCandidates
 	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
 	 * @return The new results that pass the filter
 	 */
-	private PreprocessedPeakResult[] acceptAll(final FitResult fitResult, boolean validateCandidates)
+	private PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult, boolean validateCandidates,
+			SelectedResultStore store)
 	{
 		if (fitResult == null || fitResult.results == null)
 			return null;
@@ -401,14 +626,140 @@ public class MultiPathFilter
 		// All new and existing results should be valid
 		int count = 0;
 		final int[] ok = new int[results.length];
+
+		// Support for testing using the minimal filter.
+		// Note: We do not check the store is not null. This is private method 
+		// and we send in a null store if necessary.
+		final boolean minimalFilter = minFilter != null;
+
 		for (int i = 0; i < results.length; i++)
 		{
 			if (results[i].isNewResult())
 			{
+				if (results[i].getCandidateId() != candidateId)
+				{
+					// This is new result for a different candidate.
+					// If a fit has already been accepted (or we don't know)
+					// then it should be ignored.
+					if (store.isFit(results[i].getCandidateId()))
+						continue;
+				}
+
 				// All new results must pass
+				if (accept(results[i]))
+				{
+					ok[count++] = i;
+				}
+				else
+				{
+					if (minimalFilter)
+					{
+						if (minAccept(results[i]))
+							store.passMin(results[i]);
+					}
+					else
+						return null;
+				}
+			}
+			else if (results[i].isExistingResult())
+			{
+				// All existing results must pass
 				if (!accept(results[i]))
+				{
 					return null;
-				ok[count++] = i;
+				}
+			}
+			else if (validateCandidates)
+			{
+				// Optionally candidates must pass
+				if (accept(results[i]))
+				{
+					ok[count++] = i;
+				}
+				else
+				{
+					if (minimalFilter)
+					{
+						if (minAccept(results[i]))
+							store.passMin(results[i]);
+					}
+				}
+			}
+		}
+
+		if (count == 0)
+			return null;
+
+		// Return the new results
+		final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[count];
+		for (int i = 0; i < count; i++)
+		{
+			filtered[i] = results[ok[i]];
+			store.pass(filtered[i]);
+		}
+		
+		return filtered;
+	}
+
+	/**
+	 * Check any new and all existing results are valid. Returns the new results
+	 * <p>
+	 * New results and validated candidates that file the primary filter can be filtered using the minimal filter and
+	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
+	 * already.
+	 * 
+	 * @param candidateId
+	 *
+	 * @param fitResult
+	 *            the results
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
+	 * @return The new results that pass the filter
+	 */
+	private PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult, boolean validateCandidates,
+			SelectedResultStore store)
+	{
+		if (fitResult == null || fitResult.results == null)
+			return null;
+		final PreprocessedPeakResult[] results = fitResult.results;
+
+		// Any new and all existing results should be valid
+		int count = 0;
+		final int[] ok = new int[results.length];
+
+		// Support for testing using the minimal filter 
+		// Note: We do not check the store is not null. This is private method 
+		// and we send in a null store if necessary.
+		final boolean minimalFilter = minFilter != null;
+
+		for (int i = 0; i < results.length; i++)
+		{
+			if (results[i].isNewResult())
+			{
+				if (results[i].getCandidateId() != candidateId)
+				{
+					// This is new result for a different candidate.
+					// If a fit has already been accepted (or we don't know)
+					// then it should be ignored.
+					if (store.isFit(results[i].getCandidateId()))
+						continue;
+				}
+
+				// Any new result that pass are OK
+				if (accept(results[i]))
+				{
+					ok[count++] = i;
+				}
+				else
+				{
+					if (minimalFilter)
+					{
+						if (minAccept(results[i]))
+							store.passMin(results[i]);
+					}
+				}
 			}
 			else if (results[i].isExistingResult())
 			{
@@ -420,7 +771,17 @@ public class MultiPathFilter
 			{
 				// Optionally candidates must pass
 				if (accept(results[i]))
+				{
 					ok[count++] = i;
+				}
+				else
+				{
+					if (minimalFilter)
+					{
+						if (minAccept(results[i]))
+							store.passMin(results[i]);
+					}
+				}
 			}
 		}
 
@@ -432,53 +793,9 @@ public class MultiPathFilter
 		for (int i = 0; i < count; i++)
 		{
 			filtered[i] = results[ok[i]];
-		}
-		return filtered;
-	}
-
-	/**
-	 * Check any new and all existing results are valid. Returns the new results
-	 * 
-	 * @param fitResult
-	 *            the results
-	 * @param validateCandidates
-	 *            Set to true to validate the candidates
-	 * @return The new results that pass the filter
-	 */
-	private PreprocessedPeakResult[] acceptAny(final FitResult fitResult, boolean validateCandidates)
-	{
-		if (fitResult == null || fitResult.results == null)
-			return null;
-		final PreprocessedPeakResult[] results = fitResult.results;
-
-		// Any new and all existing results should be valid
-		int count = 0;
-		final int[] ok = new int[results.length];
-		for (int i = 0; i < results.length; i++)
-		{
-			if (results[i].isNewResult())
-			{
-				// Any new result that pass are OK
-				if (accept(results[i]))
-					ok[count++] = i;
-			}
-			else if (results[i].isExistingResult())
-			{
-				// All existing results must pass
-				if (!accept(results[i]))
-					return null;
-			}
+			store.pass(filtered[i]);
 		}
 
-		if (count == 0)
-			return null;
-
-		// Return the new results
-		final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[count];
-		for (int i = 0; i < count; i++)
-		{
-			filtered[i] = results[ok[i]];
-		}
 		return filtered;
 	}
 
@@ -504,7 +821,7 @@ public class MultiPathFilter
 		final ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
 		for (int i = 0; i < results.length; i++)
 		{
-			final PreprocessedPeakResult[] result = accept(results[i], false);
+			final PreprocessedPeakResult[] result = accept(results[i], false, null);
 			if (result != null)
 				list.addAll(Arrays.asList(result));
 		}
@@ -596,7 +913,7 @@ public class MultiPathFilter
 		int failCount = 0;
 		int size = 0;
 		final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.getNumberOfResults()];
-		final boolean[] isValid = new boolean[multiPathResults.getTotalCandidates()];
+		final SimpleSelectedResultStore store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
 		for (int c = 0; c < newMultiPathResults.length; c++)
 		{
 			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
@@ -605,10 +922,10 @@ public class MultiPathFilter
 			if (subset)
 				failCount += multiPathResult.failCount;
 
-			if (failCount <= failures || isValid[multiPathResult.candidateId])
+			if (failCount <= failures || store.isValid(multiPathResult.candidateId))
 			{
 				// Assess the result if we are below the fail limit or have an estimate
-				final PreprocessedPeakResult[] result = accept(multiPathResult, true);
+				final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
 				if (result != null)
 				{
 					boolean isNew = false;
@@ -616,8 +933,6 @@ public class MultiPathFilter
 					{
 						if (result[i].isNewResult())
 							isNew = true;
-						// This is something that passed validation and can be used as an estimate
-						isValid[result[i].getCandidateId()] = true;
 					}
 
 					// Note: Even if the actual result failed, the candidate may have passed and so 
@@ -790,13 +1105,15 @@ public class MultiPathFilter
 		final double[] score = new double[4];
 		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
 
+		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
+
 		setup();
 		for (MultiPathFitResults multiPathResults : results)
 		{
 			// Reset fail count for new frames
 			int failCount = 0;
 			int nPredicted = 0;
-			final boolean[] estimate = new boolean[multiPathResults.totalCandidates];
+			store.resize(multiPathResults.totalCandidates);
 			for (int c = 0; c < multiPathResults.multiPathFitResults.length; c++)
 			{
 				final MultiPathFitResult multiPathResult = multiPathResults.multiPathFitResults[c];
@@ -805,10 +1122,10 @@ public class MultiPathFilter
 				if (subset)
 					failCount += multiPathResult.failCount;
 
-				if (failCount <= failures || estimate[multiPathResult.candidateId])
+				if (failCount <= failures || store.isValid(multiPathResult.candidateId))
 				{
 					// Assess the result if we are below the fail limit or have an estimate
-					final PreprocessedPeakResult[] result = accept(multiPathResult, true);
+					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
 					final int size = nPredicted;
 					if (result != null)
 					{
@@ -825,8 +1142,6 @@ public class MultiPathFilter
 									assignments.addAll(new DummyCollection(a));
 								}
 							}
-							// This is something that passed validation and can be used as an estimate
-							estimate[result[i].getCandidateId()] = true;
 						}
 					}
 					if (size != nPredicted)
@@ -897,17 +1212,17 @@ public class MultiPathFilter
 
 		public boolean isEmpty()
 		{
-			return false;
+			return size() == 0;
 		}
 
 		public boolean contains(Object o)
 		{
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public Iterator<FractionalAssignment> iterator()
 		{
-			return null;
+			throw new NotImplementedException();
 		}
 
 		public Object[] toArray()
@@ -917,41 +1232,42 @@ public class MultiPathFilter
 
 		public <T> T[] toArray(T[] a)
 		{
-			return null;
+			return a;
 		}
 
 		public boolean add(FractionalAssignment e)
 		{
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public boolean remove(Object o)
 		{
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public boolean containsAll(Collection<?> c)
 		{
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public boolean addAll(Collection<? extends FractionalAssignment> c)
 		{
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public boolean removeAll(Collection<?> c)
 		{
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public boolean retainAll(Collection<?> c)
 		{
-			return false;
+			throw new NotImplementedException();
 		}
 
 		public void clear()
 		{
+			throw new NotImplementedException();
 		}
 	}
 }
