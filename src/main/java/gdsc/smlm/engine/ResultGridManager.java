@@ -283,17 +283,20 @@ public class ResultGridManager
 			}
 		}
 		final PeakResult[] list = new PeakResult[size];
-		size = 0;
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+		if (size != 0)
 		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+			size = 0;
+			for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
 			{
-				if (yy < 0 || yy >= yBlocks)
+				if (xx < 0 || xx >= xBlocks)
 					continue;
-				System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].size);
-				size += peakGrid[xx][yy].size;
+				for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+				{
+					if (yy < 0 || yy >= yBlocks)
+						continue;
+					System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].size);
+					size += peakGrid[xx][yy].size;
+				}
 			}
 		}
 
@@ -306,14 +309,30 @@ public class ResultGridManager
 
 	/**
 	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
-	 * resolution
-	 * distance will be returned, plus there may be others and so distances should be checked.
+	 * resolution distance will be returned, plus there may be others and so distances should be checked.
+	 * <p>
+	 * Note: Assumes candidate indices are unique.
 	 *
 	 * @param candidate
 	 *            the candidate
 	 * @return the neighbours
 	 */
 	public CandidateList getNeighbours(final Candidate candidate)
+	{
+		return getNeighbours(candidate, false);
+	}
+
+	/**
+	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
+	 * resolution distance will be returned, plus there may be others and so distances should be checked.
+	 *
+	 * @param candidate
+	 *            the candidate
+	 * @param nonUnique
+	 *            True if candidate indices are not unique unique
+	 * @return the neighbours
+	 */
+	public CandidateList getNeighbours(final Candidate candidate, boolean nonUnique)
 	{
 		if (neighbourCache != null && neighbourCacheCandidate != null &&
 				neighbourCacheCandidate.index == candidate.index)
@@ -322,29 +341,33 @@ public class ResultGridManager
 		// Get all
 		final Candidate[] list = getCandidates(candidate.x, candidate.y);
 
-		// Remove the candidate. 
-
-		//		// Assumes non-unique candidates
-		//		int size = 0;
-		//		for (int i = 0; i < list.length; i++)
-		//		{
-		//			if (list[i].index == c.index)
-		//				continue;
-		//			list[size++] = list[i];
-		//		}
-		//		list = (size < list.length) ? Arrays.copyOf(list, size) : list;
-
-		int size = list.length;
-		for (int i = 0; i < size; i++)
+		// Remove the candidate.
+		int size;
+		if (nonUnique)
 		{
-			if (list[i].index == candidate.index)
+			// Assumes non-unique candidates
+			size = 0;
+			for (int i = 0; i < list.length; i++)
 			{
-				int remaining = list.length - i - 1;
-				if (remaining != 0)
-					System.arraycopy(list, i + 1, list, i, remaining);
-				size--;
-				// Assume a unique candidate index
-				break;
+				if (list[i].index == candidate.index)
+					continue;
+				list[size++] = list[i];
+			}
+		}
+		else
+		{
+			size = list.length;
+			for (int i = 0; i < size; i++)
+			{
+				if (list[i].index == candidate.index)
+				{
+					int remaining = list.length - i - 1;
+					if (remaining != 0)
+						System.arraycopy(list, i + 1, list, i, remaining);
+					size--;
+					// Assume a unique candidate index
+					break;
+				}
 			}
 		}
 
@@ -381,17 +404,20 @@ public class ResultGridManager
 			}
 		}
 		final Candidate[] list = new Candidate[size];
-		size = 0;
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+		if (size != 0)
 		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+			size = 0;
+			for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
 			{
-				if (yy < 0 || yy >= yBlocks)
+				if (xx < 0 || xx >= xBlocks)
 					continue;
-				System.arraycopy(candidateGrid[xx][yy].list, 0, list, size, candidateGrid[xx][yy].size);
-				size += candidateGrid[xx][yy].size;
+				for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+				{
+					if (yy < 0 || yy >= yBlocks)
+						continue;
+					System.arraycopy(candidateGrid[xx][yy].list, 0, list, size, candidateGrid[xx][yy].size);
+					size += candidateGrid[xx][yy].size;
+				}
 			}
 		}
 
