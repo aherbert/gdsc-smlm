@@ -165,7 +165,7 @@ public class MultiPathFilter
 	{
 		public void add(SelectedResult selectedResult)
 		{
-			
+
 		}
 
 		public boolean isFit(int candidateId)
@@ -181,17 +181,17 @@ public class MultiPathFilter
 
 		public void pass(PreprocessedPeakResult result)
 		{
-			
+
 		}
 
 		public void passMin(PreprocessedPeakResult result)
 		{
-			
+
 		}
 	}
-	
-	private NullSelectedResultStore nullStore = new NullSelectedResultStore(); 
-	
+
+	private NullSelectedResultStore nullStore = new NullSelectedResultStore();
+
 	/**
 	 * The direct filter to apply to the results
 	 */
@@ -207,7 +207,7 @@ public class MultiPathFilter
 
 	/**
 	 * The residuals threshold to consider the residuals Quadrant Analysis (QA) score of a single for doublet fitting.
-	 * The score should range from 0 to 1. A score of 1 will ignore doublet fitting
+	 * The score should range from 0 to 1. A score equal or above 1 will ignore doublet fitting.
 	 */
 	@XStreamAsAttribute
 	final public double residualsThreshold;
@@ -309,11 +309,15 @@ public class MultiPathFilter
 	 * happen when multi-fitting has fit another candidate that previously did not have a result. The
 	 * SelectedResultStore is used to determine if that result has been fit already. If not it is added
 	 * to the output list.
+	 * <p>
+	 * The SelectedResultStore will be passed any result that passes the configured filters.
 	 *
 	 * @param multiPathResult
 	 *            the multi path result
 	 * @param validateCandidates
 	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
 	 * @return The new peak results that are accepted (and any valid candidates if found); or null
 	 */
 	final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates,
@@ -327,25 +331,25 @@ public class MultiPathFilter
 			store = nullStore;
 
 		// Filter multi-fit
-		if ((results = acceptAll(candidateId, multiPathResult.multiFitResult, validateCandidates, store)) != null)
+		if ((results = acceptAll(candidateId, multiPathResult.getMultiFitResult(), validateCandidates, store)) != null)
 			return results;
 
 		// Filter single-fit
-		if ((results = acceptAll(candidateId, multiPathResult.singleFitResult, false, null)) == null)
+		if ((results = acceptAll(candidateId, multiPathResult.getSingleFitResult(), false, null)) == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
 
 			// Check there is a result for the single spot
-			if (multiPathResult.singleFitResult.status != 0)
+			if (multiPathResult.getSingleFitResult().status != 0)
 				return null;
 
 			// Check if the residuals score is below the configured threshold
-			if (multiPathResult.singleQAScore < residualsThreshold)
+			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
 				return null;
 
 			// Get the single spot
-			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.singleFitResult.results);
+			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.getSingleFitResult().results);
 			if (singleResult == null)
 				return null;
 
@@ -379,14 +383,14 @@ public class MultiPathFilter
 		{
 			// The single fit is OK.
 			// If not eligible for a doublet fit then return.
-			if (multiPathResult.singleQAScore < residualsThreshold)
+			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
 				return results;
 		}
 
 		// We reached here with a single fit that is eligible for doublet fitting
 
 		// Filter doublet fit
-		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.doubletFitResult,
+		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(),
 				validateCandidates, store);
 		if (doubletResults != null)
 			return doubletResults;
@@ -408,7 +412,9 @@ public class MultiPathFilter
 	 * The method returns the the same results as {@link #accept(MultiPathFitResult, boolean)} but includes the
 	 * FitResult that the data originated from.
 	 * <p>
-	 * The SelectedResultStore will be passed any result that passes the configured filters.
+	 * The SelectedResultStore will be passed any result that passes the configured filters. It will not be passed the
+	 * returned SelectedResult as the results may contain validated candidates. The returned results must thus be
+	 * filtered for new results (e.g. not existing or candidate results).
 	 *
 	 * @param multiPathResult
 	 *            the multi path result
@@ -429,25 +435,25 @@ public class MultiPathFilter
 			store = nullStore;
 
 		// Filter multi-fit
-		if ((results = acceptAll(candidateId, multiPathResult.multiFitResult, validateCandidates, store)) != null)
-			return new SelectedResult(results, multiPathResult.multiFitResult);
+		if ((results = acceptAll(candidateId, multiPathResult.getMultiFitResult(), validateCandidates, store)) != null)
+			return new SelectedResult(results, multiPathResult.getMultiFitResult());
 
 		// Filter single-fit
-		if ((results = acceptAll(candidateId, multiPathResult.singleFitResult, false, store)) == null)
+		if ((results = acceptAll(candidateId, multiPathResult.getSingleFitResult(), false, store)) == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
 
 			// Check there is a result for the single spot
-			if (multiPathResult.singleFitResult.status != 0)
+			if (multiPathResult.getSingleFitResult().status != 0)
 				return null;
 
 			// Check if the residuals score is below the configured threshold
-			if (multiPathResult.singleQAScore < residualsThreshold)
+			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
 				return null;
 
 			// Get the single spot
-			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.singleFitResult.results);
+			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.getSingleFitResult().results);
 			if (singleResult == null)
 				return null;
 
@@ -481,19 +487,19 @@ public class MultiPathFilter
 		{
 			// The single fit is OK.
 			// If not eligible for a doublet fit then return.
-			if (multiPathResult.singleQAScore < residualsThreshold)
-				return new SelectedResult(results, multiPathResult.singleFitResult);
+			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
+				return new SelectedResult(results, multiPathResult.getSingleFitResult());
 		}
 
 		// We reached here with a single fit that is eligible for doublet fitting
 
 		// Filter doublet fit
-		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.doubletFitResult,
+		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(),
 				validateCandidates, store);
 		if (doubletResults != null)
-			return new SelectedResult(doubletResults, multiPathResult.doubletFitResult);
+			return new SelectedResult(doubletResults, multiPathResult.getDoubletFitResult());
 
-		return new SelectedResult(results, multiPathResult.singleFitResult);
+		return new SelectedResult(results, multiPathResult.getSingleFitResult());
 	}
 
 	/**
@@ -588,7 +594,7 @@ public class MultiPathFilter
 				else
 				{
 					// This failed. Just return the single result
-					store.add(new SelectedResult(null, multiPathResult.singleFitResult));
+					store.add(new SelectedResult(null, multiPathResult.getSingleFitResult()));
 
 					// This was rejected, increment fail count
 					failCount++;
@@ -697,7 +703,7 @@ public class MultiPathFilter
 			filtered[i] = results[ok[i]];
 			store.pass(filtered[i]);
 		}
-		
+
 		return filtered;
 	}
 

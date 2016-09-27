@@ -315,7 +315,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			final PeakResult[] actual = getCoordinates(actualCoordinates, frame);
 			final boolean[] matched = new boolean[actual.length];
-			final ResultGridManager resultGrid = new ResultGridManager(actual, 2 * distanceInPixels);
+			// We could use distanceInPixels for the resolution. Using a bigger size may allow the 
+			// different fit locations to be inthe same cell and so the grid manager can use it's cache.
+			final double resolution = 2 * distanceInPixels;
+			final ResultGridManager resultGrid = new ResultGridManager(actual, resolution);
 
 			final MultiPathFitResult[] multiPathFitResults = new MultiPathFitResult[result.fitResult.length];
 			int size = 0;
@@ -331,11 +334,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				// Score the results. Do in order of those likely to be in the same position
 				// thus the grid manager can cache the neighbours
-				boolean fitted = score(fitResult.singleFitResult, resultGrid, matchDistance, distanceScore, signalScore,
+				boolean fitted = score(fitResult.getSingleFitResult(), resultGrid, matchDistance, distanceScore,
+						signalScore, matched);
+				fitted |= score(fitResult.getDoubletFitResult(), resultGrid, matchDistance, distanceScore, signalScore,
 						matched);
-				fitted |= score(fitResult.doubletFitResult, resultGrid, matchDistance, distanceScore, signalScore,
-						matched);
-				fitted |= score(fitResult.multiFitResult, resultGrid, matchDistance, distanceScore, signalScore,
+				fitted |= score(fitResult.getMultiFitResult(), resultGrid, matchDistance, distanceScore, signalScore,
 						matched);
 
 				if (fitted)

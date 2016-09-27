@@ -599,25 +599,25 @@ public class BenchmarkSpotFit implements PlugIn
 					// Otherwise store all results with the same Id. The best match for these results will be chosen.
 					final int size = predicted.size();
 
-					if (fitResult[i].singleFitResult.status == 0)
+					if (fitResult[i].getSingleFitResult().status == 0)
 					{
-						predicted.add(new MultiPathPoint(fitResult[i].singleFitResult.results[0], id,
+						predicted.add(new MultiPathPoint(fitResult[i].getSingleFitResult().results[0], id,
 								MultiPathPoint.SINGLE, i));
 					}
-					if (fitResult[i].multiFitResult.status == 0)
+					if (fitResult[i].getMultiFitResult().status == 0)
 					{
-						predicted.add(new MultiPathPoint(fitResult[i].multiFitResult.results[0], id,
+						predicted.add(new MultiPathPoint(fitResult[i].getMultiFitResult().results[0], id,
 								MultiPathPoint.MULTI, i));
 					}
 					int increment = 1;
-					if (fitResult[i].doubletFitResult.status == 0 &&
-							fitResult[i].doubletFitResult.results.length != 0)
+					if (fitResult[i].getDoubletFitResult().status == 0 &&
+							fitResult[i].getDoubletFitResult().results.length != 0)
 					{
-						increment = fitResult[i].doubletFitResult.results.length;
-						predicted.add(new MultiPathPoint(fitResult[i].doubletFitResult.results[0], id,
+						increment = fitResult[i].getDoubletFitResult().results.length;
+						predicted.add(new MultiPathPoint(fitResult[i].getDoubletFitResult().results[0], id,
 								MultiPathPoint.DOUBLET1, i));
 						if (increment == 2)
-							predicted.add(new MultiPathPoint(fitResult[i].doubletFitResult.results[1], id + 1,
+							predicted.add(new MultiPathPoint(fitResult[i].getDoubletFitResult().results[1], id + 1,
 									MultiPathPoint.DOUBLET2, i));
 					}
 					if (size == predicted.size())
@@ -772,14 +772,14 @@ public class BenchmarkSpotFit implements PlugIn
 			// Noise should be the same for all results, find the first
 			for (int i = 0; i < fitResult.length; i++)
 			{
-				if (fitResult[i].multiFitResult != null)
+				if (fitResult[i].getMultiFitResult() != null)
 				{
-					candidates.noise = fitResult[i].multiFitResult.results[0].getNoise();
+					candidates.noise = fitResult[i].getMultiFitResult().results[0].getNoise();
 					break;
 				}
-				if (fitResult[i].singleFitResult != null)
+				if (fitResult[i].getSingleFitResult() != null)
 				{
-					candidates.noise = fitResult[i].singleFitResult.results[0].getNoise();
+					candidates.noise = fitResult[i].getSingleFitResult().results[0].getNoise();
 					break;
 				}
 			}
@@ -1207,12 +1207,12 @@ public class BenchmarkSpotFit implements PlugIn
 				if (singleStatus != null)
 				{
 					// Debugging reasons for fit failure
-					if (fitResult.singleFitResult.status != 0)
-						singleStatus[fitResult.singleFitResult.status]++;
-					if (fitResult.multiFitResult.status != 0)
-						multiStatus[fitResult.multiFitResult.status]++;
-					if (fitResult.doubletFitResult.status != 0)
-						doubletStatus[fitResult.doubletFitResult.status]++;
+					if (fitResult.getSingleFitResult().status != 0)
+						singleStatus[fitResult.getSingleFitResult().status]++;
+					if (fitResult.getMultiFitResult().status != 0)
+						multiStatus[fitResult.getMultiFitResult().status]++;
+					if (fitResult.getDoubletFitResult().status != 0)
+						doubletStatus[fitResult.getDoubletFitResult().status]++;
 				}
 
 				if (noMatch(result.fitMatch[i]))
@@ -1232,10 +1232,10 @@ public class BenchmarkSpotFit implements PlugIn
 				// So for these statistics we need to know if the fit result matched something (TP) 
 				// or not (FP). This is stored in the result.fitMatch[] array for each fit type
 
-				addToStats(fitResult.singleFitResult, 0, result.fitMatch[i][MultiPathPoint.SINGLE], stats);
-				addToStats(fitResult.multiFitResult, 0, result.fitMatch[i][MultiPathPoint.MULTI], stats);
-				addToStats(fitResult.doubletFitResult, 0, result.fitMatch[i][MultiPathPoint.DOUBLET1], stats);
-				addToStats(fitResult.doubletFitResult, 1, result.fitMatch[i][MultiPathPoint.DOUBLET2], stats);
+				addToStats(fitResult.getSingleFitResult(), 0, result.fitMatch[i][MultiPathPoint.SINGLE], stats);
+				addToStats(fitResult.getMultiFitResult(), 0, result.fitMatch[i][MultiPathPoint.MULTI], stats);
+				addToStats(fitResult.getDoubletFitResult(), 0, result.fitMatch[i][MultiPathPoint.DOUBLET1], stats);
+				addToStats(fitResult.getDoubletFitResult(), 1, result.fitMatch[i][MultiPathPoint.DOUBLET2], stats);
 			}
 
 			// Statistics on spots that fit an actual result

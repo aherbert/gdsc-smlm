@@ -114,24 +114,24 @@ public class MultiPathFitResult implements Cloneable
 	 * The score from residuals analysis on the residuals of the single fit. This can be used to choose if the doublet
 	 * fit should be considered.
 	 */
-	public double singleQAScore = 2;
+	private double singleQAScore = 2;
 
 	/**
 	 * The results from the multi-fit. It is expected that one result will be true for isNewResult() and zero or more
 	 * could be true for isExistingResult().
 	 */
-	public FitResult multiFitResult;
+	private FitResult multiFitResult;
 
 	/**
 	 * The results from the single-fit. It is expected that this should be one result that is true for isNewResult().
 	 */
-	public FitResult singleFitResult;
+	private FitResult singleFitResult;
 
 	/**
 	 * The results from the doublet-fit. It is expected that this should be one or two results that are true for
 	 * isNewResult().
 	 */
-	public FitResult doubletFitResult;
+	private FitResult doubletFitResult;
 
 	@Override
 	public MultiPathFitResult clone()
@@ -144,5 +144,96 @@ public class MultiPathFitResult implements Cloneable
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * Copy the class level field values into a new object. Ignores the fail count fields.
+	 * <p>
+	 * To copy sub-class fields use {@link #clone()}.
+	 * 
+	 * @return A copy
+	 */
+	public MultiPathFitResult copy()
+	{
+		final MultiPathFitResult r = new MultiPathFitResult();
+		r.candidateId = candidateId;
+		r.frame = frame;
+		r.width = width;
+		r.height = height;
+		r.candidateId = candidateId;
+		r.singleQAScore = singleQAScore;
+		r.multiFitResult = multiFitResult;
+		r.singleFitResult = singleFitResult;
+		r.doubletFitResult = doubletFitResult;
+		return r;
+	}
+
+	/**
+	 * @return the multiFitResult
+	 */
+	public FitResult getMultiFitResult()
+	{
+		return multiFitResult;
+	}
+
+	/**
+	 * @param multiFitResult
+	 *            the multiFitResult to set
+	 */
+	protected void setMultiFitResult(FitResult multiFitResult)
+	{
+		this.multiFitResult = multiFitResult;
+	}
+
+	/**
+	 * @return the singleFitResult
+	 */
+	public FitResult getSingleFitResult()
+	{
+		return singleFitResult;
+	}
+
+	/**
+	 * @param singleFitResult
+	 *            the singleFitResult to set
+	 */
+	protected void setSingleFitResult(FitResult singleFitResult)
+	{
+		this.singleFitResult = singleFitResult;
+	}
+
+	/**
+	 * @param residualsThreshold 
+	 * @return the singleQAScore
+	 */
+	public double getSingleQAScore()
+	{
+		return singleQAScore;
+	}
+
+	/**
+	 * @param singleQAScore
+	 *            the singleQAScore to set
+	 */
+	protected void setSingleQAScore(double singleQAScore)
+	{
+		this.singleQAScore = singleQAScore;
+	}
+
+	/**
+	 * @return the doubletFitResult
+	 */
+	public FitResult getDoubletFitResult()
+	{
+		return doubletFitResult;
+	}
+
+	/**
+	 * @param doubletFitResult
+	 *            the doubletFitResult to set
+	 */
+	protected void setDoubletFitResult(FitResult doubletFitResult)
+	{
+		this.doubletFitResult = doubletFitResult;
 	}
 }
