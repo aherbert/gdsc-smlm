@@ -640,8 +640,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 	{
 		if (array == null)
 			return false;
-		for (double v : array)
-			if (v != value)
+		for (int i = 0; i < array.length; i++)
+			if (value != array[i])
 				return true;
 		return false;
 	}
