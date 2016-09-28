@@ -929,8 +929,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		this.absoluteThreshold = absoluteThreshold;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Note that certain search methods require bounds to function. A null pointer exception will be thrown by
+	 * fitter if the bounds are not set for these methods.
 	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isBounded()
 	 */
@@ -950,8 +951,9 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Note that certain search methods require constraints to function. A null pointer exception will be thrown by
+	 * fitter if the constraints are not set for these methods.
 	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isConstrained()
 	 */
