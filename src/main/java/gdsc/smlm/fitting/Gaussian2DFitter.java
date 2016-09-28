@@ -567,7 +567,7 @@ public class Gaussian2DFitter
 		{
 			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		}
-		if (solver.isConstrained())
+		else if (solver.isConstrained())
 		{
 			setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		}
