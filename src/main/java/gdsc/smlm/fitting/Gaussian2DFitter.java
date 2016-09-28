@@ -36,6 +36,7 @@ public class Gaussian2DFitter
 	private double[] y_fit = null;
 	// Allow calculation of residuals to be turned off (overwrite constructor fit configuration)
 	private boolean computeResiduals = true;
+	private double[] lower, upper;
 
 	/**
 	 * Constructor
@@ -1094,5 +1095,22 @@ public class Gaussian2DFitter
 	public double getValue()
 	{
 		return (solver != null) ? solver.getValue() : 0;
+	}
+
+	/**
+	 * Sets the bounds on the parameter array in the next call to the fit() method.
+	 * <p>
+	 * Bounds must be the same length as the parameter array otherwise they are ignored. Bounds should be cleared when
+	 * finished by passing in null.
+	 *
+	 * @param lower
+	 *            the lower bounds
+	 * @param upper
+	 *            the upper bounds
+	 */
+	public void setBounds(double[] lower, double[] upper)
+	{
+		this.lower = lower;
+		this.upper = upper;
 	}
 }

@@ -168,9 +168,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	/**
 	 * Instantiates a new fit worker.
 	 * <p>
-	 * Note that if the fit configuration has fit validation enabled then the initial fit results will be validated using
+	 * Note that if the fit configuration has fit validation enabled then the initial fit results will be validated
+	 * using
 	 * only the basic filtering setting of the fit configuration. The use of the smart filter will be disabled. Once all
-	 * results have passed the basic validation the results are then filtered again using the IDirectFilter implementation 
+	 * results have passed the basic validation the results are then filtered again using the IDirectFilter
+	 * implementation
 	 * of the fit configuration. This will use a configured smart filter if present.
 	 *
 	 * @param config
@@ -917,6 +919,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			int npeaks = 1 + neighbours;
 			double[] params = new double[1 + npeaks * parametersPerPeak];
 
+			// Support bounds on the known fitted peaks
+			double[] lower = new double[params.length];
+			double[] upper = new double[params.length];
+			for (int i = 0; i < lower.length; i++)
+			{
+				lower[i] = Double.NEGATIVE_INFINITY;
+				upper[i] = Double.POSITIVE_INFINITY;
+			}
+
 			// Note: If difference-of-smoothing is performed the heights have background subtracted so 
 			// it must be added back 
 
@@ -937,9 +948,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Convert signal into amplitude
 					params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL] / (2 * Math.PI *
 							estimatedParams[Gaussian2DFunction.X_SD] * estimatedParams[Gaussian2DFunction.Y_SD]);
-					params[j + Gaussian2DFunction.X_POSITION] = estimatedParams[Gaussian2DFunction.X_SD] -
+					params[j + Gaussian2DFunction.X_POSITION] = estimatedParams[Gaussian2DFunction.X_POSITION] -
 							regionBounds.x;
-					params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_SD] -
+					params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
 							regionBounds.y;
 					params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
 					params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
@@ -952,6 +963,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					params[j + Gaussian2DFunction.X_POSITION] = candidates[n2].x - regionBounds.x;
 					params[j + Gaussian2DFunction.Y_POSITION] = candidates[n2].y - regionBounds.y;
 				}
+				
+				// Constrain the location.
+				lower[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] - 1;
+				upper[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] + 1;
+				lower[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] - 1;
+				upper[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] + 1;
 			}
 
 			if (!relativeIntensity)
@@ -1033,6 +1050,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Adjust position relative to extracted region
 					params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 					params[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
+					
+					// Add support for constraining the known fit results using bounded coordinates.
+					// Currently we just constrain the location.
+					lower[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] - 1;
+					upper[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] + 1;
+					lower[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] - 1;
+					upper[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] + 1;					
+					
 					j += parametersPerPeak;
 				}
 			}
@@ -1075,7 +1100,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			fitConfig.setMaxIterations(
 					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
+			gf.setBounds(lower, upper);
 			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, true);
+			gf.setBounds(null, null);			
 
 			// Restore
 			fitConfig.setFitValidation(fitValidation);
