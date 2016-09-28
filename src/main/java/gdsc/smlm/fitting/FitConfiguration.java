@@ -18,6 +18,7 @@ import gdsc.core.utils.Maths;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.nonlinear.ApacheLVMFitter;
+import gdsc.smlm.fitting.nonlinear.BoundedNonLinearFit;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
 import gdsc.smlm.fitting.nonlinear.NonLinearFit;
@@ -1914,6 +1915,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 	private FunctionSolver createFunctionSolver()
 	{
+		// Remove noise model
+		if (gaussianFunction!= null)
+			gaussianFunction.setNoiseModel(null);
+		
 		switch (fitSolver)
 		{
 			case MLE:
@@ -1963,6 +1968,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 				return fitter;
 
+			case BOUNDED_LVM_WEIGHTED:
+				gaussianFunction.setNoiseModel(getNoiseModel());
+			case BOUNDED_LVM:
+				BoundedNonLinearFit bnlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
+				bnlinfit.setInitialLambda(getLambda());
+				return bnlinfit;
+				
 			case LVM_QUASI_NEWTON:
 				if (gaussianFunction instanceof Gaussian2DFunction)
 				{
@@ -1974,12 +1986,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				// else fall through to default fitter
 
 			case LVM_WEIGHTED:
-				// Do not set the noise model on the quasi-newton fall-through case
-				if (fitSolver != FitSolver.LVM_QUASI_NEWTON)
-					gaussianFunction.setNoiseModel(getNoiseModel());
-
 			case LVM:
 			default:
+				// Only set the weighting function if necessary
+				if (fitSolver == FitSolver.LVM_WEIGHTED)
+					gaussianFunction.setNoiseModel(getNoiseModel());
 				NonLinearFit nlinfit = new NonLinearFit(gaussianFunction, getStoppingCriteria());
 				nlinfit.setInitialLambda(getLambda());
 				return nlinfit;
