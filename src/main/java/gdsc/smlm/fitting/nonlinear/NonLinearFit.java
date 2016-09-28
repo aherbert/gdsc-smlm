@@ -51,6 +51,8 @@ public class NonLinearFit extends BaseFunctionSolver
 
 	protected double initialResidualSumOfSquares;
 
+	private boolean mle = false;
+
 	/**
 	 * Default constructor
 	 * 
@@ -248,16 +250,47 @@ public class NonLinearFit extends BaseFunctionSolver
 			setDeviations(a_dev, covar);
 		}
 
+		value = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
+
+		// Compute fitted data points
 		if (y_fit != null)
 		{
 			for (int i = 0; i < n; i++)
 				y_fit[i] = f.eval(i);
 		}
 
-		value = residualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
+		// Weighted SS is not the correct sum-of-squares.
+		// The MLE did not calculate the sum-of-squares.
+		residualSumOfSquares = (mle || f.canComputeWeights()) ? computeSS(y, y_fit, n) : value;
+		
 		error[0] = getError(residualSumOfSquares, noise, n, gradientIndices.length);
 
 		return FitStatus.OK;
+	}
+
+	private double computeSS(double[] y, double[] y_fit, int n)
+	{
+		double ss = 0;
+		if (y_fit != null)
+		{
+			// Compute using the output fit data
+			for (int i = 0; i < n; i++)
+			{
+				final double residual = y[i] - y_fit[i];
+				ss += residual * residual;
+			}
+		}
+		else
+		{
+			// Compute again using the function. Not very expensive as we do not need the gradients.
+			// Note: We could change fitting to always store the current fit data. 
+			for (int i = 0; i < n; i++)
+			{
+				final double residual = y[i] - f.eval(i);
+				ss += residual * residual;
+			}
+		}
+		return ss;
 	}
 
 	/**
@@ -289,7 +322,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		final int nparams = f.gradientIndices().length;
 
 		// Create dynamically for the parameter sizes
-		calculator = GradientCalculatorFactory.newCalculator(nparams);
+		calculator = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		// Initialise storage. 
 		// Note that covar and da are passed to EJMLLinerSolver and so must be the correct size. 
@@ -367,5 +400,29 @@ public class NonLinearFit extends BaseFunctionSolver
 		if (sc == null)
 			sc = new ErrorStoppingCriteria();
 		this.sc = sc;
+	}
+
+	/**
+	 * Checks if set to perform Maximum Likelihood Estimation assuming Poisson model.
+	 *
+	 * @return true if is set to perform MLE
+	 */
+	public boolean isMLE()
+	{
+		return mle;
+	}
+
+	/**
+	 * Sets to true to perform Maximum Likelihood Estimation assuming Poisson model.
+	 * <p>
+	 * This modifies the standard LVM as described in Laurence & Chromy (2010) Efficient maximum likelihood estimator.
+	 * Nature Methods 7, 338-339. The input data must be Poisson distributed for this to be relevant.
+	 *
+	 * @param mle
+	 *            true to perform Maximum Likelihood Estimation
+	 */
+	public void setMLE(boolean mle)
+	{
+		this.mle = mle;
 	}
 }

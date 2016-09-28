@@ -27,33 +27,54 @@ public class GradientCalculatorFactory
 	 */
 	public static GradientCalculator newCalculator(int nparams)
 	{
-		switch (nparams)
+		return newCalculator(nparams, false);
+	}
+
+	/**
+	 * Create a new gradient calculator.
+	 *
+	 * @param nparams
+	 *            the number of gradient parameters
+	 * @param mle
+	 *            true to compute for Maximum Likelihood Estimation
+	 * @return the calculator
+	 */
+	public static GradientCalculator newCalculator(int nparams, boolean mle)
+	{
+		if (mle)
 		{
-			case 4:
-				// fixed width single Gaussian
-				// circular single Gaussian, no background
-				return new GradientCalculator4();
+			return new MLEGradientCalculator(nparams);
+		}
+		else
+		{
+			switch (nparams)
+			{
+				case 4:
+					// fixed width single Gaussian
+					// circular single Gaussian, no background
+					return new GradientCalculator4();
 
-			case 5:
-				// circular single Gaussian
-				// free circular single Gaussian, no background
-				return new GradientCalculator5();
+				case 5:
+					// circular single Gaussian
+					// free circular single Gaussian, no background
+					return new GradientCalculator5();
 
-			case 6:
-				// free circular single Gaussian
-				// elliptical single Gaussian, no background
-				return new GradientCalculator6();
+				case 6:
+					// free circular single Gaussian
+					// elliptical single Gaussian, no background
+					return new GradientCalculator6();
 
-			case 7:
-				// elliptical single Gaussian
-				return new GradientCalculator7();
+				case 7:
+					// elliptical single Gaussian
+					return new GradientCalculator7();
 
-			case 3:
-				// fixed width single Gaussian, no background
-				return new GradientCalculator3();
+				case 3:
+					// fixed width single Gaussian, no background
+					return new GradientCalculator3();
 
-			default:
-				return new GradientCalculator(nparams);
+				default:
+					return new GradientCalculator(nparams);
+			}
 		}
 	}
 }
