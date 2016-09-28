@@ -1,5 +1,10 @@
 syntax = "proto2";
 
+// The original TSF description is available here:
+// https://github.com/nicost/TSFProto/blob/master/src/TSFProto.proto
+// The format has been extended to add support for fields in the GDSC SMLM
+// software.
+
 // ProtoBuffer description file for tagged spots
 // Objects that are smaller than the difraction limit of a microscope
 // result in indistinguishable spot images.  The location of the original
@@ -8,18 +13,9 @@ syntax = "proto2";
 // such spots and the results and methodolgy of fitting
 // Authors: Nico Stuurman (nico.stuurman at ucsf.edu), 2011-2013 
 //          Steve Wolter (swolter at sdf.org), 2014
-//          Steve Wolter (swolter at sdf.org), 2014
 // Contributions by Nico Stuurman are copyright Regents of the University of
 //                   California
 // License: BSD 2-Clause License
-
-
-// The orignal TSF description is available here:
-// https://valelab4.ucsf.edu/svn/valelabtools/TSFProto/src/TSFProto.proto
-// The format has been extended to add support for fields in the GDSC SMLM
-// software.
-
-
 package TSF;
 
 option java_package = "gdsc.smlm.tsf";
@@ -80,8 +76,8 @@ message SpotList {
    optional FitMode fit_mode = 24;
    optional bool is_track = 25 [default = false]; // flag indicating whether this is a sequence of spot data in consecutive time frames thought to originate from the same entity
 
-   //repeated Spot spot = 8;
-
+   // These ids can be used in your own .proto derived from this one
+   extensions 1500 to 2047;
       
 }
    
@@ -173,4 +169,3 @@ message Spot {
    extensions 1500 to 2047;
 
 }
-
