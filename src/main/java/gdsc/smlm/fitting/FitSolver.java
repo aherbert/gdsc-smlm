@@ -25,12 +25,29 @@ public enum FitSolver
 	 */
 	LVM("Least Squares Estimator", "LSE"),
 	/**
+	 * Custom Levenberg-Marquardt least-squares fitting.
+	 * <p>
+	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
+	 * <p>
+	 * Parameters can be bounded using a hard-stop limit.
+	 */
+	BOUNDED_LVM("Bounded Least Squares Estimator", "BLSE"),
+	/**
 	 * Custom Levenberg-Marquardt least-squares fitting with weights. The weights require a function that provides the
 	 * expected variance for each data point. Without weights the results match the LVM method.
 	 * <p>
 	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
 	 */
 	LVM_WEIGHTED("Weighted Least Squares Estimator", "WLSE"),
+	/**
+	 * Custom Levenberg-Marquardt least-squares fitting with weights. The weights require a function that provides the
+	 * expected variance for each data point. Without weights the results match the LVM method.
+	 * <p>
+	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
+	 * <p>
+	 * Parameters can be bounded using a hard-stop limit.
+	 */
+	BOUNDED_LVM_WEIGHTED("Bounded Weighted Least Squares Estimator", "BWLSE"),
 	/**
 	 * Apache Commons Math Levenberg-Marquardt least-squares fitting.
 	 * <p>
