@@ -342,7 +342,7 @@ public class Gaussian2DFitter
 	 *            default is signal.
 	 * @return The fit result
 	 */
-	public FitResult fit(final double[] data, final int maxx, final int maxy, final int npeaks, final double[] params,
+	public FitResult fit(final double[] data, final int maxx, final int maxy, final int npeaks, double[] params,
 			final boolean amplitudeEstimate, final boolean zeroBackground)
 	{
 		FitResult fitResult = null;
@@ -527,20 +527,13 @@ public class Gaussian2DFitter
 			params[parameter++] = sy;
 		}
 
-		// Re-copy the parameters now they have all been set
-		initialParams = Arrays.copyOf(params, params.length);
-
-		// -----------------------
-		// Use alternative fitters
-		// -----------------------
-
-		fitConfiguration.initialise(npeaks, maxx, initialParams);
-		solver = fitConfiguration.getFunctionSolver();
-		if (fitConfiguration.isComputeDeviations())
-			params_dev = new double[params.length];
+		// Input configured bounds
+		double[] lower = this.lower;
+		double[] upper = this.upper;
 
 		// Subtract the bias
 		double bias = 0;
+		boolean doClone = true;
 		if (fitConfiguration.isRemoveBiasBeforeFitting())
 		{
 			// Some methods can fit negative data, e.g. PoissonGaussian or PoissonGammaGaussian.
@@ -558,15 +551,55 @@ public class Gaussian2DFitter
 
 			// Ensure the original input data is unchanged
 			y = Arrays.copyOf(y, y.length);
-			params[0] -= bias;
 			for (int i = 0; i < ySize; i++)
 				y[i] -= bias;
+
+			// Update parameters
+			doClone = false;
+			params = params.clone();
+			params[0] -= bias;
+			if (lower != null)
+			{
+				lower = lower.clone();
+				lower[0] -= bias;
+			}
+			if (upper != null)
+			{
+				upper = upper.clone();
+				upper[0] -= bias;
+			}
 		}
+
+		if (fitConfiguration.isApplyGainBeforeFitting())
+		{
+			final double gain = 1.0 / fitConfiguration.getGain();
+			for (int i = 0; i < ySize; i++)
+			{
+				y[i] *= gain;
+			}
+
+			// Update all the parameters affected by gain
+			params = applyGain(params, gain, doClone);
+			lower = applyGain(lower, gain, doClone);
+			upper = applyGain(upper, gain, doClone);
+		}
+
+		// Re-copy the parameters now they have all been set
+		initialParams = params.clone();
+
+		// -----------------------
+		// Use alternative fitters
+		// -----------------------
+
+		fitConfiguration.initialise(npeaks, maxx, initialParams);
+		solver = fitConfiguration.getFunctionSolver();
+		if (fitConfiguration.isComputeDeviations())
+			params_dev = new double[params.length];
 
 		// Bounds are more restrictive than constraints
 		if (solver.isBounded())
 		{
-			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
+			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, lower, upper);
 		}
 		else if (solver.isConstrained())
 		{
@@ -580,8 +613,18 @@ public class Gaussian2DFitter
 
 		if (result == FitStatus.OK)
 		{
+			if (fitConfiguration.isApplyGainBeforeFitting())
+			{
+				// Update all the output parameters
+				final double gain = fitConfiguration.getGain();
+				applyGain(initialParams, gain);
+				applyGain(params, gain);
+				applyGain(params_dev, gain);
+			}
+
 			// Add the bias back to the background
 			params[0] += bias;
+			initialParams[0] += bias;
 
 			// Re-assemble all the parameters
 			if (!fitConfiguration.isWidth1Fitting() && fitConfiguration.isWidth0Fitting())
@@ -632,12 +675,45 @@ public class Gaussian2DFitter
 		}
 		else
 		{
+			if (fitConfiguration.isApplyGainBeforeFitting())
+			{
+				// Update all the output parameters
+				final double gain = fitConfiguration.getGain();
+				applyGain(initialParams, gain);
+			}
+
+			// Add the bias back to the background
+			initialParams[0] += bias;
+
 			y_fit = null;
 			fitResult = new FitResult(result, 0, 0, initialParams, null, null, npeaks,
 					solver.getNumberOfFittedParameters(), null, getIterations(), getEvaluations());
 		}
 
 		return fitResult;
+	}
+
+	private static double[] applyGain(double[] params, double gain, boolean doClone)
+	{
+		if (params != null)
+		{
+			if (doClone)
+				params = params.clone();
+			params[Gaussian2DFunction.BACKGROUND] *= gain;
+			for (int i = 0; i < params.length; i += 6)
+				params[Gaussian2DFunction.SIGNAL] *= gain;
+		}
+		return params;
+	}
+
+	private static void applyGain(double[] params, double gain)
+	{
+		if (params != null)
+		{
+			params[Gaussian2DFunction.BACKGROUND] *= gain;
+			for (int i = 0; i < params.length; i += 6)
+				params[Gaussian2DFunction.SIGNAL] *= gain;
+		}
 	}
 
 	/**
@@ -681,8 +757,8 @@ public class Gaussian2DFitter
 	}
 
 	/**
-	 * Sets the bounds for the fitted parameters
-	 * 
+	 * Sets the bounds for the fitted parameters.
+	 *
 	 * @param maxx
 	 *            The x range of the data
 	 * @param maxy
@@ -697,9 +773,13 @@ public class Gaussian2DFitter
 	 *            The size of the data
 	 * @param paramsPerPeak
 	 *            The number of parameters per peak
+	 * @param lower2
+	 *            the input lower bounds
+	 * @param upper2
+	 *            the input upper bounds
 	 */
 	private void setBounds(final int maxx, final int maxy, final int npeaks, final double[] params, final double[] y,
-			final int ySize, final int paramsPerPeak)
+			final int ySize, final int paramsPerPeak, double[] lower2, double[] upper2)
 	{
 		// Create appropriate bounds for the parameters
 		double[] lower = new double[params.length];
@@ -813,6 +893,24 @@ public class Gaussian2DFitter
 		//		upper[i] = params[i] + (params[i] - upper[i]);
 		//	}
 		//}
+		
+		// Check against the configured bounds
+		if (lower2 != null)
+		{
+			for (int i = Math.max(lower.length, lower2.length); i-- > 0;)
+			{
+				if (lower[i] < lower2[i])
+					lower[i] = lower2[i];
+			}
+		}
+		if (upper2 != null)
+		{
+			for (int i = Math.max(upper.length, upper2.length); i-- > 0;)
+			{
+				if (upper[i] > upper2[i])
+					upper[i] = upper2[i];
+			}
+		}
 
 		solver.setBounds(lower, upper);
 	}
@@ -877,6 +975,7 @@ public class Gaussian2DFitter
 		Arrays.fill(lower, Float.NEGATIVE_INFINITY);
 		Arrays.fill(upper, Float.POSITIVE_INFINITY);
 
+		lower[0] = 0;
 		// If the bias is subtracted then we may have negative data and a background estimate that is negative
 		if (params[0] < 0)
 		{

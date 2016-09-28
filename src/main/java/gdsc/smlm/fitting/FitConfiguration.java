@@ -1786,7 +1786,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isRemoveBiasBeforeFitting()
 	{
-		return fitSolver == FitSolver.MLE;
+		return fitSolver == FitSolver.MLE || isApplyGainBeforeFitting();
+	}
+
+	/**
+	 * @return Set to true if the gain should be removed from the data and parameter estimate before fiting, e.g. for
+	 *         the LVM implementation of maximum likelihood estimation of Poisson data.
+	 */
+	public boolean isApplyGainBeforeFitting()
+	{
+		return fitSolver == FitSolver.BOUNDED_LVM_MLE || fitSolver == FitSolver.LVM_MLE;
 	}
 
 	/**
@@ -1916,9 +1925,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private FunctionSolver createFunctionSolver()
 	{
 		// Remove noise model
-		if (gaussianFunction!= null)
+		if (gaussianFunction != null)
 			gaussianFunction.setNoiseModel(null);
-		
+
+		NonLinearFit nlinfit;
+
 		switch (fitSolver)
 		{
 			case MLE:
@@ -1971,11 +1982,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			case BOUNDED_LVM_WEIGHTED:
 				gaussianFunction.setNoiseModel(getNoiseModel());
 			case BOUNDED_LVM:
-				BoundedNonLinearFit bnlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
-				bnlinfit.setInitialLambda(getLambda());
-				return bnlinfit;
-				
+			case BOUNDED_LVM_MLE:
+				nlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
+				break;
+
 			case LVM_QUASI_NEWTON:
+				// This only works with a Gaussian2DFunction
 				if (gaussianFunction instanceof Gaussian2DFunction)
 				{
 					ApacheLVMFitter apacheNLinFit = new ApacheLVMFitter((Gaussian2DFunction) gaussianFunction);
@@ -1983,18 +1995,24 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 					// TODO - Configure stopping criteria ...
 					return apacheNLinFit;
 				}
-				// else fall through to default fitter
+				// else fall through to default LVM fitter
 
 			case LVM_WEIGHTED:
 			case LVM:
+			case LVM_MLE:
 			default:
 				// Only set the weighting function if necessary
 				if (fitSolver == FitSolver.LVM_WEIGHTED)
 					gaussianFunction.setNoiseModel(getNoiseModel());
-				NonLinearFit nlinfit = new NonLinearFit(gaussianFunction, getStoppingCriteria());
-				nlinfit.setInitialLambda(getLambda());
-				return nlinfit;
+				nlinfit = new NonLinearFit(gaussianFunction, getStoppingCriteria());
 		}
+
+		nlinfit.setInitialLambda(getLambda());
+		if (fitSolver == FitSolver.BOUNDED_LVM_MLE || fitSolver == FitSolver.LVM_MLE)
+		{
+			nlinfit.setMLE(true);
+		}
+		return nlinfit;
 	}
 
 	/**
