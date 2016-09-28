@@ -82,7 +82,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	{
 		for (int j = m; j-- > 0;)
 			ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
-		return applyBounds(ap);
+		return applyBounds(ap, gradientIndices);
 	}
 
 	/*
@@ -118,12 +118,29 @@ public class BoundedNonLinearFit extends NonLinearFit
 		// Extract the bounds for the parameters we are fitting
 		int[] indices = f.gradientIndices();
 
-		lower = new double[indices.length];
-		upper = new double[indices.length];
-		for (int i = 0; i < indices.length; i++)
+		if (lowerB == null)
 		{
-			lower[i] = lowerB[indices[i]];
-			upper[i] = upperB[indices[i]];
+			lower = null;
+		}
+		else
+		{
+			lower = new double[indices.length];
+			for (int i = 0; i < indices.length; i++)
+			{
+				lower[i] = lowerB[indices[i]];
+			}
+		}
+		if (upperB == null)
+		{
+			upper = null;
+		}
+		else
+		{
+			upper = new double[indices.length];
+			for (int i = 0; i < indices.length; i++)
+			{
+				upper[i] = upperB[indices[i]];
+			}
 		}
 		isLower = checkArray(lower, Double.NEGATIVE_INFINITY);
 		isUpper = checkArray(upper, Double.POSITIVE_INFINITY);
@@ -163,24 +180,24 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 *            the point
 	 * @return true if truncated
 	 */
-	private boolean applyBounds(double[] point)
+	private boolean applyBounds(double[] point, int[] gradientIndices)
 	{
 		boolean truncated = false;
 		if (isUpper)
 		{
-			for (int i = 0; i < point.length; i++)
-				if (point[i] > upper[i])
+			for (int i = 0; i < gradientIndices.length; i++)
+				if (point[gradientIndices[i]] > upper[i])
 				{
-					point[i] = upper[i];
+					point[gradientIndices[i]] = upper[i];
 					truncated = true;
 				}
 		}
 		if (isLower)
 		{
-			for (int i = 0; i < point.length; i++)
-				if (point[i] < lower[i])
+			for (int i = 0; i < gradientIndices.length; i++)
+				if (point[gradientIndices[i]] < lower[i])
 				{
-					point[i] = lower[i];
+					point[gradientIndices[i]] = lower[i];
 					truncated = true;
 				}
 		}
