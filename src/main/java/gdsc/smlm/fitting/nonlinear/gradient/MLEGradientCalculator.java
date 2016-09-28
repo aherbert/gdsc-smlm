@@ -87,10 +87,12 @@ public class MLEGradientCalculator extends GradientCalculator
 
 				for (int k = 0; k <= j; k++)
 					// This is the non-optimised version:
-					//alpha[j][k] += 2 * dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
+					//alpha[j][k] += dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
 					alpha[j][k] += y_ymod * wt * dy_da[k];
 
-				beta[j] += wt * dy;
+				// This is the non-optimised version:
+				//beta[j] -= (1 - y[i] / ymod) * dy_da[j];
+				beta[j] -= (1 - y_ymod) * dy_da[j];
 			}
 
 			if (y[i] == 0)
@@ -144,7 +146,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			{
 				dy = y[i] - ymod;
 			}
-			final double sig2i = 2.0 / ymod;
+			final double sig2i = 1.0 / ymod;
 			final double y_ymod = y[i] / ymod;
 
 			// Compute:
@@ -158,10 +160,12 @@ public class MLEGradientCalculator extends GradientCalculator
 
 				for (int k = 0; k <= j; k++)
 					// This is the non-optimised version:
-					//alpha[j][k] += 2 * dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
+					//alpha[j][k] += dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
 					alpha[j][k] += y_ymod * wt * dy_da[k];
 
-				beta[j] += wt * dy;
+				// This is the non-optimised version:
+				//beta[j] -= (1 - y[i] / ymod) * dy_da[j];
+				beta[j] -= (1 - y_ymod) * dy_da[j];
 			}
 
 			if (y[i] == 0)
