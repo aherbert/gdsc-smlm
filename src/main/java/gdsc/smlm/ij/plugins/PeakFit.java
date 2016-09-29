@@ -1685,6 +1685,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		FitConfiguration fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
 
+		boolean isBoundedLVM = fitConfig.getFitSolver() == FitSolver.LVM_MLE || fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM ||
+				fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM_WEIGHTED; 
+		
 		if (fitConfig.getFitSolver() == FitSolver.MLE)
 		{
 			GenericDialog gd = new GenericDialog(TITLE);
@@ -1756,8 +1759,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return false;
 			}
 		}
-		else if (fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+		else if (isBoundedLVM || fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
 		{
+			boolean isWeightedLVM = fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED || fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM_WEIGHTED;
+			boolean requireGain = fitConfig.getFitSolver() == FitSolver.LVM_MLE;
+			boolean requireBias = isWeightedLVM || requireGain;
+			
 			// Collect options for LVM fitting
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("LVM requires additional parameters");
@@ -1771,12 +1778,32 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
 
 			// Extra parameters are needed for the weighted LVM
-			if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED && !ignoreCalibration)
+			if (isWeightedLVM && !ignoreCalibration)
 			{
 				gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
 				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
-				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
 			}
+			if (requireBias)
+				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			if (requireGain)
+				gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+			
+			if (isBoundedLVM)
+			{
+				gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
+				gd.addCheckbox("Dynamic_clamping", fitConfig.isUseDynamicClamping());
+				if (extraOptions)
+				{
+					gd.addNumericField("Clamp_background", fitConfig.getClampBackground(), 2);
+					gd.addNumericField("Clamp_signal", fitConfig.getClampSignal(), 2);
+					gd.addNumericField("Clamp_angle", fitConfig.getClampAngle(), 2);
+					gd.addNumericField("Clamp_x", fitConfig.getClampX(), 2);
+					gd.addNumericField("Clamp_y", fitConfig.getClampY(), 2);
+					gd.addNumericField("Clamp_sd0", fitConfig.getClampXSD(), 2);
+					gd.addNumericField("Clamp_sd1", fitConfig.getClampYSD(), 2);
+				}
+			}
+			
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -1790,10 +1817,39 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				fitConfig.setMinIterations((int) gd.getNextNumber());
 			fitConfig.setMaxIterations((int) gd.getNextNumber());
 
-			if (fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+			if (isWeightedLVM && !ignoreCalibration)
 			{
 				calibration.readNoise = Math.abs(gd.getNextNumber());
+			}
+			if (requireBias)
+			{
 				calibration.bias = Math.abs(gd.getNextNumber());
+				fitConfig.setBias(calibration.bias);
+			}
+			if (requireGain)
+			{
+				calibration.gain = Math.abs(gd.getNextNumber());
+				fitConfig.setGain(calibration.gain);
+			}
+			
+			if (isBoundedLVM)
+			{
+				fitConfig.setUseClamping(gd.getNextBoolean());
+				fitConfig.setUseDynamicClamping(gd.getNextBoolean());
+				if (extraOptions)
+				{
+					fitConfig.setClampBackground(Math.abs(gd.getNextNumber()));;
+					fitConfig.setClampSignal(Math.abs(gd.getNextNumber()));;
+					fitConfig.setClampAngle(Math.abs(gd.getNextNumber()));;
+					fitConfig.setClampX(Math.abs(gd.getNextNumber()));;
+					fitConfig.setClampY(Math.abs(gd.getNextNumber()));;
+					fitConfig.setClampXSD(Math.abs(gd.getNextNumber()));;
+					fitConfig.setClampYSD(Math.abs(gd.getNextNumber()));;
+				}
+			}
+			
+			if (isWeightedLVM && !ignoreCalibration)
+			{
 				fitConfig.setNoiseModel(
 						CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias, calibration.emCCD));
 			}
@@ -1807,6 +1863,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				Parameters.isAboveZero("Delta", fitConfig.getDelta());
 				Parameters.isAboveZero("Lambda", fitConfig.getLambda());
 				Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+				fitConfig.getFunctionSolver();
 			}
 			catch (IllegalArgumentException e)
 			{
@@ -1820,6 +1877,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (filename != null)
 				SettingsManager.saveSettings(settings, filename);
 		}
+		
 		return true;
 	}
 
@@ -1972,7 +2030,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			LUT lut = LUTHelper.createLUT(LutColour.ICE);
 			Overlay o = new Overlay();
-			for (int i = 0, j=results.size()-1; i < results.size(); i++, j--)
+			for (int i = 0, j = results.size() - 1; i < results.size(); i++, j--)
 			{
 				PeakResult r = results.getResults().get(i);
 				PointRoi roi = new PointRoi(r.getXPosition(), r.getYPosition());

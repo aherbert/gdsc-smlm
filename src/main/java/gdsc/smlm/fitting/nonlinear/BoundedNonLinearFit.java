@@ -24,11 +24,17 @@ import gdsc.smlm.function.NonLinearFunction;
  * set of data points (x, y).
  * <p>
  * Support bounded parameters using a hard-stop limit.
+ * <p>
+ * Support parameter clamping to prevent large parameter shifts.
  */
 public class BoundedNonLinearFit extends NonLinearFit
 {
-	private boolean isLower, isUpper;
+	private boolean isLower = false, isUpper = false;
 	private double[] lower, upper;
+	private boolean isClamped = false;
+	private double[] clamp;
+	private int[] dir;
+	private boolean dynamicClamp = false;
 
 	/**
 	 * Default constructor
@@ -80,9 +86,70 @@ public class BoundedNonLinearFit extends NonLinearFit
 	@Override
 	protected boolean updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da, double[] ap)
 	{
-		for (int j = m; j-- > 0;)
-			ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
-		return applyBounds(ap, gradientIndices);
+		boolean truncated = false;
+		if (isClamped)
+		{
+			for (int j = m; j-- > 0;)
+			{
+				if (clamp[j] == 0)
+				{
+					// Use the update parameter directly
+					ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
+				}
+				else
+				{
+					// This parameter is clamped
+					ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j] / clamp(da[j], j);
+					truncated = true;
+				}
+			}
+		}
+		else
+		{
+			for (int j = m; j-- > 0;)
+			{
+				// Use the update parameter directly
+				ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
+			}
+		}
+		truncated |= applyBounds(ap, gradientIndices);
+		return truncated;
+	}
+
+	/**
+	 * Produce the clamping value.
+	 * <p>
+	 * See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ Astrom Soc Pac
+	 * 99:191-222. pp207-208
+	 *
+	 * @param u
+	 *            the update parameter
+	 * @param k
+	 *            the parameter index
+	 * @return the clamping value
+	 */
+	private double clamp(double u, int k)
+	{
+		if (u == 0)
+			// Nothing to clamp
+			return 1;
+
+		if (dynamicClamp)
+		{
+			// If the sign has changed then reduce the clamp factor
+			final int sign = (u > 0) ? 1 : -1;
+
+			// This addition overcomes the issue when the direction vector is new (i.e. zero filled)
+			if (sign + dir[k] == 0)
+			{
+				// Note: By reducing the size of the clamping factor we are restricting the movement
+				clamp[k] *= 0.5;
+			}
+			dir[k] = sign;
+		}
+
+		// Original clamping function
+		return 1 + (Math.abs(u) / clamp[k]);
 	}
 
 	/*
@@ -202,5 +269,59 @@ public class BoundedNonLinearFit extends NonLinearFit
 				}
 		}
 		return truncated;
+	}
+
+	/**
+	 * Sets the parameter specific clamp values. This is maximum permissible update to the parameter.
+	 * <p>
+	 * See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ Astrom Soc Pac
+	 * 99:191-222.
+	 *
+	 * @param clampValues
+	 *            the new clamp values
+	 */
+	public void setClampValues(double[] clampValues)
+	{
+		// Extract the bounds for the parameters we are fitting
+		int[] indices = f.gradientIndices();
+
+		if (clampValues == null)
+		{
+			clamp = null;
+		}
+		else
+		{
+			clamp = new double[indices.length];
+			for (int i = 0; i < indices.length; i++)
+			{
+				final double v = clampValues[indices[i]];
+				if (Double.isNaN(v) || Double.isInfinite(v))
+					continue;
+				clamp[i] = Math.abs(v);
+			}
+		}
+		isClamped = checkArray(clamp, 0);
+		dir = (isClamped) ? new int[clamp.length] : null;
+	}
+
+	/**
+	 * Checks if is dynamic clamping. The clamping factor will be reduced by a factor of 2 when the direction changes.
+	 *
+	 * @return true, if is dynamic clamping
+	 */
+	public boolean isDynamicClamp()
+	{
+		return dynamicClamp;
+	}
+
+	/**
+	 * Set to true to reduce the clamp factor by a factor of when the direction changes.
+	 *
+	 * @param dynamicClamp
+	 *            the new dynamic clamp
+	 */
+	public void setDynamicClamp(boolean dynamicClamp)
+	{
+		this.dynamicClamp = dynamicClamp;
 	}
 }

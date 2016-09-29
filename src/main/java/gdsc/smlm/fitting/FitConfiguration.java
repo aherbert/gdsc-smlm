@@ -87,6 +87,30 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private double relativeThreshold = 1e-6;
 	private double absoluteThreshold = 1e-16;
 
+	// Options for the bounded LVM
+	private boolean useClamping = true;
+	private boolean useDynamicClamping = false;
+	private double[] clampValues;
+
+	private static double[] defaultClampValues;
+	static
+	{
+		defaultClampValues = new double[7];
+		// Taken from the 3D-DAO-STORM paper:
+		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
+		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
+		// DOI: 10.1186/2192-2853-1-6
+		// Page 3
+		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
+		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
+		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
+		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
+		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
+		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
+	}
+
 	private StoppingCriteria stoppingCriteria = null;
 	private GaussianFunction gaussianFunction = null;
 	private NoiseModel noiseModel = null;
@@ -1662,7 +1686,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setGain(double gain)
 	{
 		invalidateFunctionSolver();
-		this.gain = gain;
+		this.gain = Math.abs(gain);
 		setSignalThreshold();
 	}
 
@@ -1798,7 +1822,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		return fitSolver == FitSolver.LVM_MLE;
 	}
 
-
 	/**
 	 * Checks if is maximum likelihood fitting.
 	 *
@@ -1808,7 +1831,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	{
 		return isRemoveBiasBeforeFitting();
 	}
-	
+
 	/**
 	 * @return the maximum number of function evaluations for the Maximum Likelihood Estimator
 	 */
@@ -1984,9 +2007,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				}
 
 				// All models use the amplification gain (i.e. how many ADUs/electron)
+				if (amplification <= 0)
+				{
+					throw new IllegalArgumentException("The amplification is required for the " + fitSolver.getName());
+				}
+
 				fitter.setAlpha(1.0 / amplification);
 
-				// TODO - Configure stopping criteria ...
+				// TODO - Configure better stopping criteria ...
 
 				return fitter;
 
@@ -1994,7 +2022,42 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				gaussianFunction.setNoiseModel(getNoiseModel());
 			case BOUNDED_LVM:
 			case LVM_MLE:
-				nlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
+
+				if (fitSolver == FitSolver.LVM_MLE && gain <= 0)
+				{
+					throw new IllegalArgumentException("The gain is required for the " + fitSolver.getName());
+				}
+
+				BoundedNonLinearFit bnlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
+
+				if (useClamping)
+				{
+					double[] clamp = getClampValues();
+					// The units are photons. This is OK for the LVM MLE but not for the LVM.
+					if (fitSolver != FitSolver.LVM_MLE)
+					{
+						if (gain <= 0)
+						{
+							throw new IllegalArgumentException("When using clamping the gain is required for the " + fitSolver.getName());
+						}
+						
+						clamp = clamp.clone();
+						clamp[Gaussian2DFunction.BACKGROUND] *= gain;
+						clamp[Gaussian2DFunction.SIGNAL] *= gain;
+					}
+					final int npeaks = gaussianFunction.getNPeaks();
+					double[] clampValues = new double[1 + 6 * npeaks];
+					clampValues[Gaussian2DFunction.BACKGROUND] = clamp[Gaussian2DFunction.BACKGROUND];
+					for (int i = 0; i < npeaks; i++)
+					{
+						for (int j = 1; j <= 6; j++)
+							clampValues[i + j] = clamp[j];
+					}
+					bnlinfit.setClampValues(clampValues);
+					bnlinfit.setDynamicClamp(useDynamicClamping);
+				}
+				nlinfit = bnlinfit;
+
 				break;
 
 			case LVM_QUASI_NEWTON:
@@ -2184,5 +2247,186 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public int getResult()
 	{
 		return filterResult;
+	}
+
+	/**
+	 * @return Set to true to clamp the parameter update to a maximum value
+	 */
+	public boolean isUseClamping()
+	{
+		return useClamping;
+	}
+
+	/**
+	 * Set to true to clamp the parameter update to a maximum value
+	 * 
+	 * @param useClamping
+	 *            Set to true to clamp the parameter update to a maximum value
+	 */
+	public void setUseClamping(boolean useClamping)
+	{
+		this.useClamping = useClamping;
+	}
+
+	/**
+	 * @return Set to true to update the clamp values when the parameter update direction changes
+	 */
+	public boolean isUseDynamicClamping()
+	{
+		return useDynamicClamping;
+	}
+
+	/**
+	 * Set to true to update the clamp values when the parameter update direction changes
+	 * 
+	 * @param useDynamicClamping
+	 *            Set to true to update the clamp values when the parameter update direction changes
+	 */
+	public void setUseDynamicClamping(boolean useDynamicClamping)
+	{
+		this.useDynamicClamping = useDynamicClamping;
+	}
+
+	/**
+	 * @return the clampValues
+	 */
+	private double[] getClampValues()
+	{
+		if (clampValues == null)
+			clampValues = defaultClampValues.clone();
+		return clampValues;
+	}
+
+	/**
+	 * @return The clamp value for the background
+	 */
+	public double getClampBackground()
+	{
+		return getClampValues()[Gaussian2DFunction.BACKGROUND];
+	}
+
+	/**
+	 * Sets the clamp value for the background
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampBackground(double value)
+	{
+		getClampValues()[Gaussian2DFunction.BACKGROUND] = value;
+	}
+
+	/**
+	 * @return The clamp value for the signal
+	 */
+	public double getClampSignal()
+	{
+		return getClampValues()[Gaussian2DFunction.SIGNAL];
+	}
+
+	/**
+	 * Sets the clamp value for the signal
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampSignal(double value)
+	{
+		getClampValues()[Gaussian2DFunction.SIGNAL] = value;
+	}
+
+	/**
+	 * @return The clamp value for the angle
+	 */
+	public double getClampAngle()
+	{
+		return getClampValues()[Gaussian2DFunction.ANGLE];
+	}
+
+	/**
+	 * Sets the clamp value for the angle
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampAngle(double value)
+	{
+		getClampValues()[Gaussian2DFunction.ANGLE] = value;
+	}
+
+	/**
+	 * @return The clamp value for the x position
+	 */
+	public double getClampX()
+	{
+		return getClampValues()[Gaussian2DFunction.X_POSITION];
+	}
+
+	/**
+	 * Sets the clamp value for the x position
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampX(double value)
+	{
+		getClampValues()[Gaussian2DFunction.X_POSITION] = value;
+	}
+
+	/**
+	 * @return The clamp value for the y position
+	 */
+	public double getClampY()
+	{
+		return getClampValues()[Gaussian2DFunction.Y_POSITION];
+	}
+
+	/**
+	 * Sets the clamp value for the y position
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampY(double value)
+	{
+		getClampValues()[Gaussian2DFunction.Y_POSITION] = value;
+	}
+
+	/**
+	 * @return The clamp value for the x sd
+	 */
+	public double getClampXSD()
+	{
+		return getClampValues()[Gaussian2DFunction.X_SD];
+	}
+
+	/**
+	 * Sets the clamp value for the x sd
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampXSD(double value)
+	{
+		getClampValues()[Gaussian2DFunction.X_SD] = value;
+	}
+
+	/**
+	 * @return The clamp value for the y sd
+	 */
+	public double getClampYSD()
+	{
+		return getClampValues()[Gaussian2DFunction.Y_SD];
+	}
+
+	/**
+	 * Sets the clamp value for the y sd
+	 *
+	 * @param value
+	 *            the new clamp value
+	 */
+	public void setClampYSD(double value)
+	{
+		getClampValues()[Gaussian2DFunction.Y_SD] = value;
 	}
 }
