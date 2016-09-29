@@ -40,101 +40,87 @@ public class BoundedFunctionSolverTest
 		params[Gaussian2DFunction.X_SD] = 1.4;
 	}
 
-	// TODO - test the LVM MLE fitter
+	// TODO - test the Clamping of the LVM fitter
+	
+	
+	
 	@Test
-	public void nonLinearFitCanFitSingleGaussian()
+	public void canFitSingleGaussianLVM()
+	{
+		fitSingleGaussianBetterLVM(false, false, false);
+	}
+
+	@Test
+	public void canFitSingleGaussianBLVMNoBounds()
+	{
+		fitSingleGaussianBetterLVM(true, false, false);
+	}
+
+	@Test
+	public void canFitSingleGaussianBLVM()
+	{
+		fitSingleGaussianBetterLVM(true, true, false);
+	}
+
+	@Test
+	public void canFitSingleGaussianLVMMLE()
+	{
+		fitSingleGaussianBetterLVM(false, false, true);
+	}
+
+	@Test
+	public void canFitSingleGaussianBLVMMLENoBounds()
+	{
+		fitSingleGaussianBetterLVM(true, false, true);
+	}
+
+	@Test
+	public void canFitSingleGaussianBLVMMLE()
+	{
+		fitSingleGaussianBetterLVM(true, true, true);
+	}
+
+	private void fitSingleGaussianBetterLVM(boolean bounded, boolean applyBounds, boolean mle)
 	{
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
 		StoppingCriteria sc = new ErrorStoppingCriteria();
 		sc.setMaximumIterations(100);
-		NonLinearFit solver = new NonLinearFit(f, sc);
-		canFitSingleGaussian(solver, false, true);
+		NonLinearFit solver = (bounded) ? new BoundedNonLinearFit(f, sc) : new NonLinearFit(f, sc);
+		solver.setMLE(mle);
+		canFitSingleGaussian(solver, applyBounds, !mle);
 	}
-
-	@Test
-	public void bLVMCanFitSingleGaussian()
-	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
-		StoppingCriteria sc = new ErrorStoppingCriteria();
-		sc.setMaximumIterations(100);
-		BoundedNonLinearFit solver = new BoundedNonLinearFit(f, sc);
-		canFitSingleGaussian(solver, false, true);
-	}
-
-	@Test
-	public void bLVMCanFitSingleGaussianWithBounds()
-	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
-		StoppingCriteria sc = new ErrorStoppingCriteria();
-		sc.setMaximumIterations(100);
-		BoundedNonLinearFit solver = new BoundedNonLinearFit(f, sc);
-		canFitSingleGaussian(solver, true, true);
-	}
-
-	@Test
-	public void nonLinearMLEFitCanFitSingleGaussian()
-	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
-		StoppingCriteria sc = new ErrorStoppingCriteria();
-		sc.setMaximumIterations(100);
-		NonLinearFit solver = new NonLinearFit(f, sc);
-		solver.setMLE(true);
-		canFitSingleGaussian(solver, false, false);
-	}
-
-	@Test
-	public void bLVMMLECanFitSingleGaussian()
-	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
-		StoppingCriteria sc = new ErrorStoppingCriteria();
-		sc.setMaximumIterations(100);
-		BoundedNonLinearFit solver = new BoundedNonLinearFit(f, sc);
-		solver.setMLE(true);
-		canFitSingleGaussian(solver, false, false);
-	}
-
-	@Test
-	public void bLVMMLECanFitSingleGaussianWithBounds()
-	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
-		StoppingCriteria sc = new ErrorStoppingCriteria();
-		sc.setMaximumIterations(100);
-		BoundedNonLinearFit solver = new BoundedNonLinearFit(f, sc);
-		solver.setMLE(true);
-		canFitSingleGaussian(solver, true, false);
-	}
-
+	
 	@Test
 	public void fitSingleGaussianBLVMBetterThanLVM()
 	{
-		canLVMFitSingleGaussianBetter(true, false, false, false);
+		fitSingleGaussianBetterLVM(true, false, false, false);
 	}
 
 	@Test
 	public void fitSingleGaussianLVMMLEBetterThanLVM()
 	{
-		canLVMFitSingleGaussianBetter(false, true, false, false);
+		fitSingleGaussianBetterLVM(false, true, false, false);
 	}
 
 	@Test
 	public void fitSingleGaussianBLVMMLEBetterThanLVM()
 	{
-		canLVMFitSingleGaussianBetter(true, true, false, false);
+		fitSingleGaussianBetterLVM(true, true, false, false);
 	}
 
 	@Test
 	public void fitSingleGaussianBLVMMLEBetterThanLVMMLE()
 	{
-		canLVMFitSingleGaussianBetter(true, true, false, true);
+		fitSingleGaussianBetterLVM(true, true, false, true);
 	}
 
 	@Test
 	public void fitSingleGaussianBLVMMLEBetterThanBLVM()
 	{
-		canLVMFitSingleGaussianBetter(true, true, true, false);
+		fitSingleGaussianBetterLVM(true, true, true, false);
 	}
 
-	private void canLVMFitSingleGaussianBetter(boolean bounded2, boolean mle2, boolean bounded, boolean mle)
+	private void fitSingleGaussianBetterLVM(boolean bounded2, boolean mle2, boolean bounded, boolean mle)
 	{
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
 		StoppingCriteria sc = new ErrorStoppingCriteria();
