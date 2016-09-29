@@ -804,6 +804,13 @@ public class Gaussian2DFitter
 				lower[0] = yMin;
 			else
 				lower[0] = params[0] - (yMin - params[0]);
+			
+			if (lower[0] < 0)
+			{
+				// This is a problem for MLE fitting
+				if (fitConfiguration.isMaximumLikelihoodFitting())
+					lower[0] = 0;
+			}
 		}
 
 		// Configure the bounds for the width.
@@ -845,6 +852,12 @@ public class Gaussian2DFitter
 			if (params[j + Gaussian2DFunction.SIGNAL] < lower[j + Gaussian2DFunction.SIGNAL])
 				lower[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] -
 						(lower[j + Gaussian2DFunction.SIGNAL] - params[j + Gaussian2DFunction.SIGNAL]);
+			if (lower[j + Gaussian2DFunction.SIGNAL] < 0)
+			{
+				// This is a problem for MLE fitting
+				if (fitConfiguration.isMaximumLikelihoodFitting())
+					lower[j + Gaussian2DFunction.SIGNAL] = 0;
+			}
 			if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL])
 				upper[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL] +
 						(params[j + Gaussian2DFunction.SIGNAL] - upper[j + Gaussian2DFunction.SIGNAL]);

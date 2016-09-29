@@ -1798,6 +1798,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		return fitSolver == FitSolver.LVM_MLE;
 	}
 
+
+	/**
+	 * Checks if is maximum likelihood fitting.
+	 *
+	 * @return true, if is maximum likelihood fitting
+	 */
+	public boolean isMaximumLikelihoodFitting()
+	{
+		return isRemoveBiasBeforeFitting();
+	}
+	
 	/**
 	 * @return the maximum number of function evaluations for the Maximum Likelihood Estimator
 	 */
