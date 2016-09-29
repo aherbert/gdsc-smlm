@@ -34,17 +34,22 @@ public class GradientCalculator3 extends GradientCalculator
 	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
 	 * gdsc.fitting.function.NonLinearFunction)
 	 */
-	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
+	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
+			NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[3];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
 
 		func.initialise(a);
 
@@ -83,9 +88,6 @@ public class GradientCalculator3 extends GradientCalculator
 				alpha[2][1] += dy_da[2] * dy_da[1];
 				alpha[2][2] += dy_da[2] * dy_da[2];
 
-				//    		for (int j = beta.length; j-- > 0; )
-				//    			beta[j] += dy_da[j] * dy;
-
 				beta[0] += dy_da[0] * dy;
 				beta[1] += dy_da[1] * dy;
 				beta[2] += dy_da[2] * dy;
@@ -95,13 +97,9 @@ public class GradientCalculator3 extends GradientCalculator
 		}
 
 		// Generate symmetric matrix
-		for (int i = 0; i < beta.length - 1; i++)
-			for (int j = i + 1; j < beta.length; j++)
-				alpha[i][j] = alpha[j][i];
-
-		//        alpha[0][1] = alpha[1][0];
-		//        alpha[0][2] = alpha[2][0];
-		//        alpha[1][2] = alpha[2][1];
+		alpha[0][1] = alpha[1][0];
+		alpha[0][2] = alpha[2][0];
+		alpha[1][2] = alpha[2][1];
 
 		return checkGradients(alpha, beta, nparams, ssx);
 	}
@@ -115,14 +113,18 @@ public class GradientCalculator3 extends GradientCalculator
 	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[3];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
 
 		func.initialise(a);
 
@@ -161,9 +163,6 @@ public class GradientCalculator3 extends GradientCalculator
 				alpha[2][1] += dy_da[2] * dy_da[1];
 				alpha[2][2] += dy_da[2] * dy_da[2];
 
-				//    		for (int j = beta.length; j-- > 0; )
-				//    			beta[j] += dy_da[j] * dy;
-
 				beta[0] += dy_da[0] * dy;
 				beta[1] += dy_da[1] * dy;
 				beta[2] += dy_da[2] * dy;
@@ -173,13 +172,9 @@ public class GradientCalculator3 extends GradientCalculator
 		}
 
 		// Generate symmetric matrix
-		for (int i = 0; i < beta.length - 1; i++)
-			for (int j = i + 1; j < beta.length; j++)
-				alpha[i][j] = alpha[j][i];
-
-		//        alpha[0][1] = alpha[1][0];
-		//        alpha[0][2] = alpha[2][0];
-		//        alpha[1][2] = alpha[2][1];
+		alpha[0][1] = alpha[1][0];
+		alpha[0][2] = alpha[2][0];
+		alpha[1][2] = alpha[2][1];
 
 		return checkGradients(alpha, beta, nparams, ssx);
 	}

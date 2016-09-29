@@ -37,6 +37,8 @@ public class MLEGradientCalculator extends GradientCalculator
 	}
 
 	/**
+	 * Note: if the function returns a negative value then it is set to zero
+	 * 
 	 * @param y
 	 *            Data to fit (must be strictly positive Poisson data)
 	 * @return The MLE chi-squared value
@@ -48,63 +50,34 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double[] beta, final NonLinearFunction func)
 	{
 		double chisq = 0;
-		final double[] dy_da = new double[a.length];
+		final double[] dfi_da = new double[nparams];
 
-		for (int i = 0; i < nparams; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
+		zero(alpha, beta);
 
 		func.initialise(a);
 
 		for (int i = 0; i < x.length; i++)
 		{
-			// Function must produce a positive output
-			double ymod = func.eval(x[i], dy_da);
-			final double dy;
-			if (ymod <= 0)
-			{
-				ymod = Double.MIN_VALUE;
-				dy = y[i];
-			}
+			// Function must produce a positive output.
+			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+			// effectively ignores the any function value below zero. This could lead to a 
+			// situation where the best chisq value can be achieved by setting the output
+			// function to produce 0 for all evaluations. To cope with this the input 
+			// function should be bounded to always produce a positive number. For now
+			// we just set it to Double.MIN_VALUE
+			final double fi = Math.max(func.eval(x[i], dfi_da), Double.MIN_VALUE);
+			final double xi = y[i];
+
+			// We assume y[i] is positive
+			if (xi == 0)
+				chisq += 2 * fi;
 			else
-			{
-				dy = y[i] - ymod;
-			}
-			final double sig2i = 1.0 / ymod;
-			final double y_ymod = y[i] / ymod;
+				chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
 
-			// Compute:
-			// - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
-			//   that is, it describes the local curvature of a function of many variables.)
-			// - the gradient vector of the function's partial first derivatives with respect to the parameters
-
-			for (int j = 0; j < nparams; j++)
-			{
-				final double wt = dy_da[j] * sig2i;
-
-				for (int k = 0; k <= j; k++)
-					// This is the non-optimised version:
-					//alpha[j][k] += dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
-					alpha[j][k] += y_ymod * wt * dy_da[k];
-
-				// This is the non-optimised version:
-				//beta[j] -= (1 - y[i] / ymod) * dy_da[j];
-				beta[j] -= (1 - y_ymod) * dy_da[j];
-			}
-
-			if (y[i] == 0)
-				chisq += 2 * dy;
-			else
-				chisq += 2 * (dy - y[i] * Math.log(ymod / y[i]));
+			compute(alpha, beta, dfi_da, fi, xi);
 		}
 
-		// Generate symmetric matrix
-		for (int i = 0; i < nparams - 1; i++)
-			for (int j = i + 1; j < nparams; j++)
-				alpha[i][j] = alpha[j][i];
+		symmetric(alpha);
 
 		return checkGradients(alpha, beta, nparams, chisq);
 	}
@@ -121,64 +94,108 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double[] beta, final NonLinearFunction func)
 	{
 		double chisq = 0;
-		final double[] dy_da = new double[a.length];
+		final double[] dfi_da = new double[nparams];
 
+		zero(alpha, beta);
+
+		func.initialise(a);
+
+		for (int i = 0; i < n; i++)
+		{
+			// Function must produce a positive output.
+			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+			// effectively ignores the any function value below zero. This could lead to a 
+			// situation where the best chisq value can be achieved by setting the output
+			// function to produce 0 for all evaluations. To cope with this the input 
+			// function should be bounded to always produce a positive number. For now
+			// we just set it to Double.MIN_VALUE
+			final double fi = Math.max(func.eval(i, dfi_da), Double.MIN_VALUE);
+			final double xi = y[i];
+
+			// We assume y[i] is positive
+			if (xi == 0)
+				chisq += 2 * fi;
+			else
+				chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+
+			compute(alpha, beta, dfi_da, fi, xi);
+		}
+
+		symmetric(alpha);
+
+		return checkGradients(alpha, beta, nparams, chisq);
+	}
+
+	/**
+	 * Zero the working region of the input matrix alpha and vector beta
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param beta
+	 *            the beta
+	 */
+	protected void zero(final double[][] alpha, final double[] beta)
+	{
 		for (int i = 0; i < nparams; i++)
 		{
 			beta[i] = 0;
 			for (int j = 0; j <= i; j++)
 				alpha[i][j] = 0;
 		}
+	}
 
-		func.initialise(a);
+	/**
+	 * Compute the matrix alpha and vector beta
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param beta
+	 *            the beta
+	 * @param dfi_da
+	 *            the gradient of the function with respect to each parameter a
+	 * @param fi
+	 *            the function value at index i
+	 * @param xi
+	 *            the data value at index i
+	 */
+	protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
+			final double xi)
+	{
+		final double xi_fi = xi / fi;
+		final double xi_fi2 = xi_fi / fi;
+		final double e = 1 - (xi_fi);
 
-		for (int i = 0; i < n; i++)
+		// Compute:
+		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+		//         that is, it describes the local curvature of a function of many variables.)
+		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+		for (int k = 0; k < nparams; k++)
 		{
-			// Function must produce a positive output
-			double ymod = func.eval(i, dy_da);
-			final double dy;
-			if (ymod <= 0)
-			{
-				ymod = Double.MIN_VALUE;
-				dy = y[i];
-			}
-			else
-			{
-				dy = y[i] - ymod;
-			}
-			final double sig2i = 1.0 / ymod;
-			final double y_ymod = y[i] / ymod;
+			final double w = dfi_da[k] * xi_fi2;
 
-			// Compute:
-			// - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
-			//   that is, it describes the local curvature of a function of many variables.)
-			// - the gradient vector of the function's partial first derivatives with respect to the parameters
-
-			for (int j = 0; j < nparams; j++)
-			{
-				final double wt = dy_da[j] * sig2i;
-
-				for (int k = 0; k <= j; k++)
-					// This is the non-optimised version:
-					//alpha[j][k] += dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
-					alpha[j][k] += y_ymod * wt * dy_da[k];
-
+			for (int l = 0; l <= k; l++)
 				// This is the non-optimised version:
-				//beta[j] -= (1 - y[i] / ymod) * dy_da[j];
-				beta[j] -= (1 - y_ymod) * dy_da[j];
-			}
+				//alpha[j][k] += dfi_da[k] * dfi_da[l] * xi / (fi * fi);
+				alpha[k][l] += w * dfi_da[l];
 
-			if (y[i] == 0)
-				chisq += 2 * dy;
-			else
-				chisq += 2 * (dy - y[i] * Math.log(ymod / y[i]));
+			// This is the non-optimised version:
+			//beta[j] -= (1 - xi / fi) * dfi_da[k];
+			beta[k] -= e * dfi_da[k];
 		}
+	}
 
-		// Generate symmetric matrix
+	/**
+	 * Generate a symmetric matrix alpha
+	 *
+	 * @param alpha
+	 *            the alpha
+	 */
+	protected void symmetric(final double[][] alpha)
+	{
 		for (int i = 0; i < nparams - 1; i++)
 			for (int j = i + 1; j < nparams; j++)
 				alpha[i][j] = alpha[j][i];
-
-		return checkGradients(alpha, beta, nparams, chisq);
 	}
 }

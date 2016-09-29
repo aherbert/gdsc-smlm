@@ -37,14 +37,23 @@ public class GradientCalculator4 extends GradientCalculator
 	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[4];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+		alpha[3][0] = 0;
+		alpha[3][1] = 0;
+		alpha[3][2] = 0;
+		alpha[3][3] = 0;
+		
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
 
 		func.initialise(a);
 
@@ -102,10 +111,6 @@ public class GradientCalculator4 extends GradientCalculator
 		}
 
 		// Generate symmetric matrix
-		//		for (int i = 0; i < m - 1; i++)
-		//			for (int j = i + 1; j < m; j++)
-		//				alpha[i][j] = alpha[j][i];
-
 		alpha[0][1] = alpha[1][0];
 		alpha[0][2] = alpha[2][0];
 		alpha[0][3] = alpha[3][0];
@@ -125,14 +130,23 @@ public class GradientCalculator4 extends GradientCalculator
 	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[4];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+		alpha[3][0] = 0;
+		alpha[3][1] = 0;
+		alpha[3][2] = 0;
+		alpha[3][3] = 0;
+		
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
 
 		func.initialise(a);
 
@@ -190,10 +204,6 @@ public class GradientCalculator4 extends GradientCalculator
 		}
 
 		// Generate symmetric matrix
-		//		for (int i = 0; i < m - 1; i++)
-		//			for (int j = i + 1; j < m; j++)
-		//				alpha[i][j] = alpha[j][i];
-
 		alpha[0][1] = alpha[1][0];
 		alpha[0][2] = alpha[2][0];
 		alpha[0][3] = alpha[3][0];

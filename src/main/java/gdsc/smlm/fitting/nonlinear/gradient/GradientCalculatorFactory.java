@@ -43,7 +43,34 @@ public class GradientCalculatorFactory
 	{
 		if (mle)
 		{
-			return new MLEGradientCalculator(nparams);
+			switch (nparams)
+			{
+				case 4:
+					// fixed width single Gaussian
+					// circular single Gaussian, no background
+					return new MLEGradientCalculator4();
+
+				case 5:
+					// circular single Gaussian
+					// free circular single Gaussian, no background
+					return new MLEGradientCalculator5();
+
+				case 6:
+					// free circular single Gaussian
+					// elliptical single Gaussian, no background
+					return new MLEGradientCalculator6();
+
+				case 7:
+					// elliptical single Gaussian
+					return new MLEGradientCalculator7();
+
+				case 3:
+					// fixed width single Gaussian, no background
+					return new MLEGradientCalculator3();
+
+				default:
+					return new MLEGradientCalculator(nparams);
+			}
 		}
 		else
 		{

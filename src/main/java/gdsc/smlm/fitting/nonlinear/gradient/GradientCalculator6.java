@@ -37,15 +37,37 @@ public class GradientCalculator6 extends GradientCalculator
 	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[6];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
-
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+		alpha[3][0] = 0;
+		alpha[3][1] = 0;
+		alpha[3][2] = 0;
+		alpha[3][3] = 0;
+		alpha[4][0] = 0;
+		alpha[4][1] = 0;
+		alpha[4][2] = 0;
+		alpha[4][3] = 0;
+		alpha[4][4] = 0;
+		alpha[5][0] = 0;
+		alpha[5][1] = 0;
+		alpha[5][2] = 0;
+		alpha[5][3] = 0;
+		alpha[5][4] = 0;
+		alpha[5][5] = 0;
+		
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
+		beta[4] = 0;
+		beta[5] = 0;
+		
 		func.initialise(a);
 
 		if (func.canComputeWeights())
@@ -160,15 +182,37 @@ public class GradientCalculator6 extends GradientCalculator
 	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[6];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
-
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+		alpha[3][0] = 0;
+		alpha[3][1] = 0;
+		alpha[3][2] = 0;
+		alpha[3][3] = 0;
+		alpha[4][0] = 0;
+		alpha[4][1] = 0;
+		alpha[4][2] = 0;
+		alpha[4][3] = 0;
+		alpha[4][4] = 0;
+		alpha[5][0] = 0;
+		alpha[5][1] = 0;
+		alpha[5][2] = 0;
+		alpha[5][3] = 0;
+		alpha[5][4] = 0;
+		alpha[5][5] = 0;
+		
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
+		beta[4] = 0;
+		beta[5] = 0;
+		
 		func.initialise(a);
 
 		if (func.canComputeWeights())

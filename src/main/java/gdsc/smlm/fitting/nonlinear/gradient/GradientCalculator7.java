@@ -38,14 +38,44 @@ public class GradientCalculator7 extends GradientCalculator
 			NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[7];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+		alpha[3][0] = 0;
+		alpha[3][1] = 0;
+		alpha[3][2] = 0;
+		alpha[3][3] = 0;
+		alpha[4][0] = 0;
+		alpha[4][1] = 0;
+		alpha[4][2] = 0;
+		alpha[4][3] = 0;
+		alpha[4][4] = 0;
+		alpha[5][0] = 0;
+		alpha[5][1] = 0;
+		alpha[5][2] = 0;
+		alpha[5][3] = 0;
+		alpha[5][4] = 0;
+		alpha[5][5] = 0;
+		alpha[6][0] = 0;
+		alpha[6][1] = 0;
+		alpha[6][2] = 0;
+		alpha[6][3] = 0;
+		alpha[6][4] = 0;
+		alpha[6][5] = 0;
+		alpha[6][6] = 0;
+		
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
+		beta[4] = 0;
+		beta[5] = 0;
+		beta[6] = 0;
 
 		func.initialise(a);
 
@@ -183,15 +213,45 @@ public class GradientCalculator7 extends GradientCalculator
 	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;
-		double[] dy_da = new double[a.length];
+		final double[] dy_da = new double[7];
 
-		for (int i = 0; i < beta.length; i++)
-		{
-			beta[i] = 0;
-			for (int j = 0; j <= i; j++)
-				alpha[i][j] = 0;
-		}
-
+		alpha[0][0] = 0;
+		alpha[1][0] = 0;
+		alpha[1][1] = 0;
+		alpha[2][0] = 0;
+		alpha[2][1] = 0;
+		alpha[2][2] = 0;
+		alpha[3][0] = 0;
+		alpha[3][1] = 0;
+		alpha[3][2] = 0;
+		alpha[3][3] = 0;
+		alpha[4][0] = 0;
+		alpha[4][1] = 0;
+		alpha[4][2] = 0;
+		alpha[4][3] = 0;
+		alpha[4][4] = 0;
+		alpha[5][0] = 0;
+		alpha[5][1] = 0;
+		alpha[5][2] = 0;
+		alpha[5][3] = 0;
+		alpha[5][4] = 0;
+		alpha[5][5] = 0;
+		alpha[6][0] = 0;
+		alpha[6][1] = 0;
+		alpha[6][2] = 0;
+		alpha[6][3] = 0;
+		alpha[6][4] = 0;
+		alpha[6][5] = 0;
+		alpha[6][6] = 0;
+		
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
+		beta[4] = 0;
+		beta[5] = 0;
+		beta[6] = 0;
+		
 		func.initialise(a);
 
 		if (func.canComputeWeights())
@@ -319,6 +379,98 @@ public class GradientCalculator7 extends GradientCalculator
 		return checkGradients(alpha, beta, nparams, ssx);
 	}
 
+
+	/**
+	 * Zero the working region of the input matrix alpha and vector beta
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param beta
+	 *            the beta
+	 */
+	protected void zero(final double[][] alpha, final double[] beta)
+	{
+		for (int i = 0; i < nparams; i++)
+		{
+			beta[i] = 0;
+			for (int j = 0; j <= i; j++)
+				alpha[i][j] = 0;
+		}
+	}
+
+	/**
+	 * Compute the matrix alpha and vector beta
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param beta
+	 *            the beta
+	 * @param dfi_da
+	 *            the gradient of the function with respect to each parameter a
+	 * @param fi
+	 *            the function value at index i
+	 * @param xi
+	 *            the data value at index i
+	 */
+	protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
+			final double xi)
+	{
+		final double xi_fi = xi / fi;
+		final double xi_fi2 = xi_fi / fi;
+		final double e = 1 - (xi_fi);
+
+		// Compute:
+		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+		//         that is, it describes the local curvature of a function of many variables.)
+		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+		for (int k = 0; k < nparams; k++)
+		{
+			final double w = dfi_da[k] * xi_fi2;
+
+			for (int l = 0; l <= k; l++)
+				// This is the non-optimised version:
+				//alpha[j][k] += dy_da[j] * dy_da[k] * y[i] / (ymod * ymod);
+				alpha[k][l] += w * dfi_da[l];
+
+			// This is the non-optimised version:
+			//beta[j] -= (1 - y[i] / ymod) * dy_da[j];
+			beta[k] -= e * dfi_da[k];
+		}
+	}
+
+	/**
+	 * Generate a symmetric matrix alpha
+	 *
+	 * @param alpha
+	 *            the alpha
+	 */
+	protected void symmetric(final double[][] alpha)
+	{
+		alpha[0][1] = alpha[1][0];
+		alpha[0][2] = alpha[2][0];
+		alpha[0][3] = alpha[3][0];
+		alpha[0][4] = alpha[4][0];
+		alpha[0][5] = alpha[5][0];
+		alpha[0][6] = alpha[6][0];
+		alpha[1][2] = alpha[2][1];
+		alpha[1][3] = alpha[3][1];
+		alpha[1][4] = alpha[4][1];
+		alpha[1][5] = alpha[5][1];
+		alpha[1][6] = alpha[6][1];
+		alpha[2][3] = alpha[3][2];
+		alpha[2][4] = alpha[4][2];
+		alpha[2][5] = alpha[5][2];
+		alpha[2][6] = alpha[6][2];
+		alpha[3][4] = alpha[4][3];
+		alpha[3][5] = alpha[5][3];
+		alpha[3][6] = alpha[6][3];
+		alpha[4][5] = alpha[5][4];
+		alpha[4][6] = alpha[6][4];
+		alpha[5][6] = alpha[6][5];
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

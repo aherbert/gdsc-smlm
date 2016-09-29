@@ -23,6 +23,7 @@ import org.junit.Test;
  */
 public class GradientCalculatorSpeedTest
 {
+	final boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -40,82 +41,155 @@ public class GradientCalculatorSpeedTest
 	@Test
 	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
 	{
-		Assert.assertEquals(GradientCalculatorFactory.newCalculator(3).getClass(), GradientCalculator3.class);		
-		Assert.assertEquals(GradientCalculatorFactory.newCalculator(4).getClass(), GradientCalculator4.class);		
-		Assert.assertEquals(GradientCalculatorFactory.newCalculator(5).getClass(), GradientCalculator5.class);		
-		Assert.assertEquals(GradientCalculatorFactory.newCalculator(6).getClass(), GradientCalculator6.class);		
-		Assert.assertEquals(GradientCalculatorFactory.newCalculator(7).getClass(), GradientCalculator7.class);		
-		Assert.assertEquals(GradientCalculatorFactory.newCalculator(13).getClass(), GradientCalculator.class);		
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(3).getClass(), GradientCalculator3.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(4).getClass(), GradientCalculator4.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(5).getClass(), GradientCalculator5.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(6).getClass(), GradientCalculator6.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(7).getClass(), GradientCalculator7.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(13).getClass(), GradientCalculator.class);
+
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(3, true).getClass(), MLEGradientCalculator3.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(4, true).getClass(), MLEGradientCalculator4.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(5, true).getClass(), MLEGradientCalculator5.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(6, true).getClass(), MLEGradientCalculator6.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(7, true).getClass(), MLEGradientCalculator7.class);
+		Assert.assertEquals(GradientCalculatorFactory.newCalculator(13, true).getClass(), MLEGradientCalculator.class);
 	}
-	
+
+	@Test
+	public void mleGradientCalculator7ComputesSameAsGradientCalculator()
+	{
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7,
+				true);
+	}
+
+	@Test
+	public void mleGradientCalculator7IsFasterThanGradientCalculator()
+	{
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7, true);
+	}
+
+	@Test
+	public void mleGradientCalculator6ComputesSameAsGradientCalculator()
+	{
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
+				true);
+	}
+
+	@Test
+	public void mleGradientCalculator6IsFasterThanGradientCalculator()
+	{
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
+				true);
+	}
+
+	@Test
+	public void mleGradientCalculator5ComputesSameAsGradientCalculator()
+	{
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, true);
+	}
+
+	@Test
+	public void mleGradientCalculator5IsFasterThanGradientCalculator()
+	{
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, true);
+	}
+
+	@Test
+	public void mleGradientCalculator4ComputesSameAsGradientCalculator()
+	{
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, true);
+	}
+
+	@Test
+	public void mleGradientCalculator4IsFasterThanGradientCalculator()
+	{
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, true);
+	}
+
+	@Test
+	public void mleGradientCalculator3ComputesSameAsGradientCalculator()
+	{
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, true);
+	}
+
+	@Test
+	public void mleGradientCalculator3IsFasterThanGradientCalculator()
+	{
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, true);
+	}
+
 	@Test
 	public void gradientCalculator7ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7,
+				false);
 	}
 
 	@Test
 	public void gradientCalculator7IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleEllipticalGaussian2DFunction(blockWidth), 7, false);
 	}
-	
+
 	@Test
 	public void gradientCalculator6ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
+				false);
 	}
 
 	@Test
 	public void gradientCalculator6IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFreeCircularGaussian2DFunction(blockWidth), 6,
+				false);
 	}
-	
+
 	@Test
 	public void gradientCalculator5ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, false);
 	}
 
 	@Test
 	public void gradientCalculator5IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleCircularGaussian2DFunction(blockWidth), 5, false);
 	}
-	
+
 	@Test
 	public void gradientCalculator4ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, false);
 	}
 
 	@Test
 	public void gradientCalculator4IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleFixedGaussian2DFunction(blockWidth), 4, false);
 	}
-	
+
 	@Test
 	public void gradientCalculator3ComputesSameAsGradientCalculator()
 	{
-		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3);
+		gradientCalculatorNComputesSameAsGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, false);
 	}
 
 	@Test
 	public void gradientCalculator3IsFasterThanGradientCalculator()
 	{
-		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3);
+		gradientCalculatorNIsFasterThanGradientCalculator(new SingleNBFixedGaussian2DFunction(blockWidth), 3, false);
 	}
 
-	private void gradientCalculatorNComputesSameAsGradientCalculator(Gaussian2DFunction func, int nparams)
+	private void gradientCalculatorNComputesSameAsGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
 	{
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
 		int iter = 100;
 		rand = new Random(30051977);
-		
+
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
 		double[][] alpha2 = new double[nparams][nparams];
@@ -126,60 +200,70 @@ public class GradientCalculatorSpeedTest
 
 		int[] x = createData(1, iter, paramsList, yList);
 
-		GradientCalculator calc = new GradientCalculator(beta.length);
-		GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams);
+		GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
+		GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
-			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+			double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
+			double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+			Assert.assertTrue("Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
 			Assert.assertTrue("Observations: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
 				Assert.assertTrue("Observations: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
 		}
-		
+
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
-			calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+			double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
+			double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+			Assert.assertTrue("n-Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
 			Assert.assertTrue("N-observations: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("N-observations: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
-		} 
-		
-		func.setNoiseModel(CameraNoiseModel.createNoiseModel(10, 0, true));
-		
-		for (int i = 0; i < paramsList.size(); i++)
-		{
-			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
-			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
-			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("Observations+Noise: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
+				Assert.assertTrue("N-observations: Not same alpha @ " + i,
+						eq.almostEqualComplement(alpha[j], alpha2[j]));
 		}
-		
-		for (int i = 0; i < paramsList.size(); i++)
+
+		if (!mle)
 		{
-			calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
-			calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
-			for (int j = 0; j < beta.length; j++)
-				Assert.assertTrue("Observations+Noise: Not same alpha @ " + i, eq.almostEqualComplement(alpha[j], alpha2[j]));
+			func.setNoiseModel(CameraNoiseModel.createNoiseModel(10, 0, true));
+
+			for (int i = 0; i < paramsList.size(); i++)
+			{
+				double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
+				double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+				Assert.assertTrue("Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
+				Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+				for (int j = 0; j < beta.length; j++)
+					Assert.assertTrue("Observations+Noise: Not same alpha @ " + i,
+							eq.almostEqualComplement(alpha[j], alpha2[j]));
+			}
+
+			for (int i = 0; i < paramsList.size(); i++)
+			{
+				double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
+				double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
+				Assert.assertTrue("N-Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
+				Assert.assertTrue("N-Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
+				for (int j = 0; j < beta.length; j++)
+					Assert.assertTrue("N-Observations+Noise: Not same alpha @ " + i,
+							eq.almostEqualComplement(alpha[j], alpha2[j]));
+			}
 		}
-		
+
 		// Only the diagonal Fisher Information has been unrolled into the other calculators
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			beta = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
 			beta2 = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
 			Assert.assertTrue("Not same diagonal @ " + i, eq.almostEqualComplement(beta, beta2));
-		} 
+		}
 	}
-	
-	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams)
+
+	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
-		
+		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
@@ -193,8 +277,8 @@ public class GradientCalculatorSpeedTest
 
 		int[] x = createData(1, iter, paramsList, yList);
 
-		GradientCalculator calc = new GradientCalculator(beta.length);
-		GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams);
+		GradientCalculator calc = (mle) ? new MLEGradientCalculator(beta.length) : new GradientCalculator(beta.length);
+		GradientCalculator calc2 = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -212,10 +296,11 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		log("Linearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", start1, nparams, start2, (1.0 * start1) / start2);
+		log("%sLinearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "", start1,
+				nparams, start2, (1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(start2 < start1);
-		
+
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
 
@@ -232,15 +317,16 @@ public class GradientCalculatorSpeedTest
 			calc2.fisherInformationDiagonal(x.length, paramsList.get(i), func);
 		start2 = System.nanoTime() - start2;
 
-		log("Fisher Diagonal GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", start1, nparams, start2, (1.0 * start1) / start2);
+		log("%sFisher Diagonal GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "",
+				start1, nparams, start2, (1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(start2 < start1);
 	}
-	
+
 	@Test
 	public void gradientCalculatorAssumedXIsFasterThanGradientCalculator()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
 		int iter = 10000;
 		rand = new Random(30051977);
@@ -273,7 +359,8 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		log("GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx\n", start1, start2, (1.0 * start1) / start2);
+		log("GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx\n", start1, start2,
+				(1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(start2 < start1);
 	}

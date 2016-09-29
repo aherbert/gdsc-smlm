@@ -40,6 +40,9 @@ public class BoundedFunctionSolverTest
 		params[Gaussian2DFunction.X_SD] = 1.4;
 	}
 
+	// TODO - test the LVM MLE fitter
+	
+	
 	@Test
 	public void nonLinearFitCanFitSingleGaussian()
 	{
