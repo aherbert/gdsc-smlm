@@ -262,7 +262,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		// Weighted SS is not the correct sum-of-squares.
 		// The MLE did not calculate the sum-of-squares.
 		residualSumOfSquares = (mle || f.canComputeWeights()) ? computeSS(y, y_fit, n) : value;
-		
+
 		error[0] = getError(residualSumOfSquares, noise, n, gradientIndices.length);
 
 		return FitStatus.OK;
@@ -316,8 +316,8 @@ public class NonLinearFit extends BaseFunctionSolver
 	 *            Estimate of the noise in the individual measurements
 	 * @return The fit status
 	 */
-	public FitStatus computeFit(final int n, final double[] y, final double[] y_fit, final double[] a,
-			final double[] a_dev, final double[] error, final double noise)
+	public FitStatus computeFit(final int n, double[] y, final double[] y_fit, final double[] a, final double[] a_dev,
+			final double[] error, final double noise)
 	{
 		final int nparams = f.gradientIndices().length;
 
@@ -335,10 +335,36 @@ public class NonLinearFit extends BaseFunctionSolver
 		// Store the { best, previous, new } sum-of-squares values 
 		sumOfSquaresWorking = new double[3];
 
+		if (mle)
+			// We must have positive data
+			y = ensurePositive(n, y);
+
 		final FitStatus result = doFit(n, y, y_fit, a, a_dev, error, sc, noise);
 		this.evaluations = this.iterations = sc.getIteration();
 
 		return result;
+	}
+
+	private static double[] ensurePositive(int n, double[] y)
+	{
+		if (hasNegatives(n, y))
+		{
+			final double[] copy = new double[n];
+			System.arraycopy(y, 0, copy, 0, n);
+			y = copy;
+			for (int i = n; i-- > 0;)
+				if (y[i] < 0)
+					y[i] = 0;
+		}
+		return y;
+	}
+
+	private static boolean hasNegatives(int n, final double[] y)
+	{
+		for (int i = n; i-- > 0;)
+			if (y[i] < 0)
+				return true;
+		return false;
 	}
 
 	/**
