@@ -8,4 +8,4 @@ build.sh
 *.lut
 JumpDistanceAnalysisTest.dat
 /gdsc.smlm.settings.xml
-/luts/
+/luts
