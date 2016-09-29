@@ -36,16 +36,10 @@ public enum FitSolver
 	 * Custom Levenberg-Marquardt least-squares fitting for Poisson data using the method of Laurence & Chromy (2010) Nature Methods 7, 338-339.
 	 * <p>
 	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
-	 */
-	LVM_MLE("LVM Maximum Likelihood Estimator", "LVM MLE"),
-	/**
-	 * Custom Levenberg-Marquardt least-squares fitting for Poisson data using the method of Laurence & Chromy (2010) Nature Methods 7, 338-339.
 	 * <p>
-	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
-	 * <p>
-	 * Parameters can be bounded using a hard-stop limit.
+	 * Parameters are bounded using a hard-stop limit to prevent negative function values being produced.
 	 */
-	BOUNDED_LVM_MLE("Bounded LVM Maximum Likelihood Estimator", "LVM MLE"),
+	LVM_MLE("Bounded LVM Maximum Likelihood Estimator", "LVM MLE"),
 	/**
 	 * Custom Levenberg-Marquardt least-squares fitting with weights. The weights require a function that provides the
 	 * expected variance for each data point. Without weights the results match the LVM method.

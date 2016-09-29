@@ -5,7 +5,7 @@ import gdsc.smlm.function.NonLinearFunction;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2016 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -27,6 +27,8 @@ import gdsc.smlm.function.NonLinearFunction;
  */
 public class MLEGradientCalculator extends GradientCalculator
 {
+	private static double LOG_FOR_MIN = Math.log(Double.MIN_VALUE);
+
 	/**
 	 * @param nparams
 	 *            The number of gradient parameters
@@ -59,22 +61,36 @@ public class MLEGradientCalculator extends GradientCalculator
 		for (int i = 0; i < x.length; i++)
 		{
 			// Function must produce a positive output.
+			final double xi = y[i];
+
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
 			// effectively ignores the any function value below zero. This could lead to a 
 			// situation where the best chisq value can be achieved by setting the output
-			// function to produce 0 for all evaluations. To cope with this the input 
-			// function should be bounded to always produce a positive number. For now
-			// we just set it to Double.MIN_VALUE
-			final double fi = Math.max(func.eval(x[i], dfi_da), Double.MIN_VALUE);
-			final double xi = y[i];
+			// function to produce 0 for all evaluations. To cope with this we heavily 
+			// penalise the chisq value. 
+			// Optimally the function should be bounded to always produce a positive number.
+			final double fi = func.eval(i, dfi_da);
 
-			// We assume y[i] is positive
-			if (xi == 0)
-				chisq += 2 * fi;
+			if (fi <= 0)
+			{
+				// We assume xi is positive
+				if (xi != 0)
+					// Penalise the chi-squared value by assuming fi is a very small positive value
+					chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+
+				// We ignore this contribution to the gradient for stability
+				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
+			}
 			else
-				chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+			{
+				// We assume y[i] is positive
+				if (xi == 0)
+					chisq += 2 * fi;
+				else
+					chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
 
-			compute(alpha, beta, dfi_da, fi, xi);
+				compute(alpha, beta, dfi_da, fi, xi);
+			}
 		}
 
 		symmetric(alpha);
@@ -103,22 +119,44 @@ public class MLEGradientCalculator extends GradientCalculator
 		for (int i = 0; i < n; i++)
 		{
 			// Function must produce a positive output.
+			final double xi = y[i];
+
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
 			// effectively ignores the any function value below zero. This could lead to a 
 			// situation where the best chisq value can be achieved by setting the output
-			// function to produce 0 for all evaluations. To cope with this the input 
-			// function should be bounded to always produce a positive number. For now
-			// we just set it to Double.MIN_VALUE
-			final double fi = Math.max(func.eval(i, dfi_da), Double.MIN_VALUE);
-			final double xi = y[i];
+			// function to produce 0 for all evaluations. To cope with this we heavily 
+			// penalise the chisq value. 
+			// Optimally the function should be bounded to always produce a positive number.
+			final double fi = func.eval(i, dfi_da);
 
-			// We assume y[i] is positive
-			if (xi == 0)
-				chisq += 2 * fi;
+			if (fi <= 0)
+			{
+				// We assume xi is positive
+				if (xi != 0)
+					// Penalise the chi-squared value by assuming fi is a very small positive value
+					chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+
+				// We ignore this contribution to the gradient for stability
+				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
+			}
 			else
-				chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+			{
+				// We assume y[i] is positive
+				if (xi == 0)
+					chisq += 2 * fi;
+				else
+					chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
 
-			compute(alpha, beta, dfi_da, fi, xi);
+				compute(alpha, beta, dfi_da, fi, xi);
+			}
+
+			//checkGradients(alpha, beta, nparams, 0);
+			//if (isNaNGradients())
+			//{
+			//	System.out.printf("Bad gradients generated: %s / %f : %s\n", Double.toString(fi), xi,
+			//			Arrays.toString(dfi_da));
+			//	return 0;
+			//}
 		}
 
 		symmetric(alpha);

@@ -1795,7 +1795,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public boolean isApplyGainBeforeFitting()
 	{
-		return fitSolver == FitSolver.BOUNDED_LVM_MLE || fitSolver == FitSolver.LVM_MLE;
+		return fitSolver == FitSolver.LVM_MLE;
 	}
 
 	/**
@@ -1982,7 +1982,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			case BOUNDED_LVM_WEIGHTED:
 				gaussianFunction.setNoiseModel(getNoiseModel());
 			case BOUNDED_LVM:
-			case BOUNDED_LVM_MLE:
+			case LVM_MLE:
 				nlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
 				break;
 
@@ -1999,7 +1999,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 			case LVM_WEIGHTED:
 			case LVM:
-			case LVM_MLE:
 			default:
 				// Only set the weighting function if necessary
 				if (fitSolver == FitSolver.LVM_WEIGHTED)
@@ -2008,7 +2007,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 
 		nlinfit.setInitialLambda(getLambda());
-		if (fitSolver == FitSolver.BOUNDED_LVM_MLE || fitSolver == FitSolver.LVM_MLE)
+		if (fitSolver == FitSolver.LVM_MLE)
 		{
 			nlinfit.setMLE(true);
 		}
