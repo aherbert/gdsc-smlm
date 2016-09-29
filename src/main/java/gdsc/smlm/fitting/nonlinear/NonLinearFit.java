@@ -349,12 +349,15 @@ public class NonLinearFit extends BaseFunctionSolver
 	{
 		if (hasNegatives(n, y))
 		{
-			final double[] copy = new double[n];
-			System.arraycopy(y, 0, copy, 0, n);
-			y = copy;
+			final double[] y2 = new double[n];
 			for (int i = n; i-- > 0;)
+			{
 				if (y[i] < 0)
-					y[i] = 0;
+					y2[i] = 0;
+				else
+					y2[i] = y[i];
+			}
+			y = y2;
 		}
 		return y;
 	}
