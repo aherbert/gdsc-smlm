@@ -92,6 +92,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private boolean useClamping = true;
 	private boolean useDynamicClamping = false;
 	private double[] clampValues;
+	private int nClampPeaks;
 
 	private static double[] defaultClampValues;
 	static
@@ -151,8 +152,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		if (gaussianFunction != null &&
 				(gaussianFunction.getNPeaks() != npeaks || gaussianFunction.getDimensions()[0] != maxx))
 		{
-			// The gaussian function cannot be reused 
-			invalidateGaussianFunction();
+			// The gaussian function cannot be reused. 
+			// Do not call invalidate as it also invalidates the solver and we can re-use that.
+			//invalidateGaussianFunction();
+			gaussianFunction = null; 
 		}
 		if (gaussianFunction == null)
 		{
@@ -923,6 +926,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private void invalidateGaussianFunction()
 	{
 		gaussianFunction = null;
+		invalidateFunctionSolver();
 	}
 
 	/**
@@ -1752,7 +1756,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setNoiseModel(NoiseModel noiseModel)
 	{
-		invalidateFunctionSolver();
+		invalidateGaussianFunction();
 		this.noiseModel = noiseModel;
 	}
 
@@ -1956,53 +1960,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 		else
 		{
-			BaseFunctionSolver fs = (BaseFunctionSolver) functionSolver;
-			final int[] gradientIndices = fs.getNonLinearFunction().gradientIndices();
+			// Update with the solver with the latest function.
+			((BaseFunctionSolver) functionSolver).setNonLinearFunction(gaussianFunction);
 
-			// Update with the latest function
-			fs.setNonLinearFunction(gaussianFunction);
-
-			// Update anything that depends on the function
-			if (fs instanceof BoundedNonLinearFit)
+			// Note: We must carefully update anything that depends on the function.
+			if (useClamping && functionSolver instanceof BoundedNonLinearFit)
 			{
 				// We have to update the clamping.
 				// Note this code is only executed if the clamp settings have not changed
 				// (since changes to those settings invalidate the solver).
-				// All that is different is the function and the indices it evaluates. 
-				if (useClamping)
-					updateClampValues((BoundedNonLinearFit) fs, gradientIndices);
+				// All that is different is the number of peaks in the function. 
+				if (gaussianFunction.getNPeaks() > nClampPeaks)
+					setClampValues((BoundedNonLinearFit) functionSolver);
 			}
 		}
 		return functionSolver;
-	}
-
-	/**
-	 * If the gradient indices have changed we need to update the clamping values to match
-	 * 
-	 * @param bnlinfit
-	 *            The fit solver
-	 * @param gradientIndices
-	 *            The old gradient indices
-	 */
-	private void updateClampValues(BoundedNonLinearFit bnlinfit, int[] gradientIndices)
-	{
-		final int[] newGradientIndices = gaussianFunction.gradientIndices();
-		if (newGradientIndices.length > gradientIndices.length)
-		{
-			// The new function has more indices so it has changed
-			setClampValues(bnlinfit);
-			return;
-		}
-		// Check for changes
-		for (int i = 0; i < newGradientIndices.length; i++)
-		{
-			if (newGradientIndices[i] != gradientIndices[i])
-			{
-				setClampValues(bnlinfit);
-				return;
-			}
-		}
-		// None of the indices have changed so we can keep the current clamp values
 	}
 
 	/**
@@ -2142,10 +2114,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			clamp[Gaussian2DFunction.BACKGROUND] *= gain;
 			clamp[Gaussian2DFunction.SIGNAL] *= gain;
 		}
-		final int npeaks = gaussianFunction.getNPeaks();
-		double[] clampValues = new double[1 + 6 * npeaks];
+		nClampPeaks = gaussianFunction.getNPeaks();
+		double[] clampValues = new double[1 + 6 * nClampPeaks];
 		clampValues[Gaussian2DFunction.BACKGROUND] = clamp[Gaussian2DFunction.BACKGROUND];
-		for (int i = 0; i < npeaks; i++)
+		for (int i = 0; i < nClampPeaks; i++)
 		{
 			for (int j = 1; j <= 6; j++)
 				clampValues[i + j] = clamp[j];
