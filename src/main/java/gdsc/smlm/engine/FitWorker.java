@@ -136,7 +136,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		final double[] params;
 		final byte filterRank;
-		@SuppressWarnings("unused")
 		final double d2;
 		final double precision;
 
@@ -152,10 +151,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			if (this.filterRank < filterRank)
 				return true;
+			// The spot must be close to the estimate.
+			// Note that if fitting uses a bounded fitter the estimates
+			// should always be within 2 (1 pixel max in each dimension).
+			// This check ensure that unbounded fitters store close estimates.
+			if (d2 > 2)
+			{
+				// This is not very close so make sure the closest estimate is stored
+				return (this.d2 > d2);
+			}
+			// If it is close enough then we use to fit precision.			
 			if (this.precision > precision)
 				return true;
-			//if (this.d2 > d2)
-			//	return true;
 			return false;
 		}
 	}
@@ -941,6 +948,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			for (int i = 0, j = parametersPerPeak; i < neighbourCount; i++, j += parametersPerPeak)
 			{
 				final int n2 = neighbourIndices[i];
+				final double candidateX = candidates[n2].x - regionBounds.x;
+				final double candidateY = candidates[n2].y - regionBounds.y;
+				
 				final double[] estimatedParams = getEstimate(n2);
 				if (estimatedParams != null)
 				{
@@ -960,15 +970,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					params[j + Gaussian2DFunction.SIGNAL] = candidates[n2].intensity +
 							((relativeIntensity) ? background : 0);
-					params[j + Gaussian2DFunction.X_POSITION] = candidates[n2].x - regionBounds.x;
-					params[j + Gaussian2DFunction.Y_POSITION] = candidates[n2].y - regionBounds.y;
+					params[j + Gaussian2DFunction.X_POSITION] = candidateX;
+					params[j + Gaussian2DFunction.Y_POSITION] = candidateY;
 				}
 				
-				// Constrain the location.
-				lower[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] - 1;
-				upper[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] + 1;
-				lower[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] - 1;
-				upper[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] + 1;
+				// Constrain the location using the candidate position.
+				// Do not use the current estimate as this will create drift over time if the estimate is updated.
+				lower[j + Gaussian2DFunction.X_POSITION] = candidateX - 1;
+				upper[j + Gaussian2DFunction.X_POSITION] = candidateX + 1;
+				lower[j + Gaussian2DFunction.Y_POSITION] = candidateY - 1;
+				upper[j + Gaussian2DFunction.Y_POSITION] = candidateY + 1;
 			}
 
 			if (!relativeIntensity)
