@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import java.util.Arrays;
+
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.NonLinearFunction;
 
@@ -130,6 +132,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	{
 		boolean truncated = false;
 		nonLocalSearch = false;
+
 		if (isClamped)
 		{
 			for (int j = m; j-- > 0;)
@@ -142,20 +145,16 @@ public class BoundedNonLinearFit extends NonLinearFit
 				else
 				{
 					// This parameter is clamped
-
-					// If using clamping should we can optionally only update lambda if we 
-					// are close to the correct solution.
-
-					final double update = da[j] / clamp(da[j], j);
-
-					// Test if the update is reasonable
-					if (localSearch * Math.abs(update) > clampInitial[j])
-						nonLocalSearch = true;
-
-					ap[gradientIndices[j]] = a[gradientIndices[j]] + update;
+					ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j] / clamp(da[j], j);
 					truncated = true;
 				}
 			}
+			truncated |= applyBounds(ap, gradientIndices);
+
+			// If using clamping should we can optionally only update lambda if we 
+			// are close to the correct solution.
+			if (localSearch != 0)
+				nonLocalSearch = checkForNonLocalSearch(a, gradientIndices, m, ap);
 		}
 		else
 		{
@@ -164,8 +163,8 @@ public class BoundedNonLinearFit extends NonLinearFit
 				// Use the update parameter directly
 				ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
 			}
+			truncated |= applyBounds(ap, gradientIndices);
 		}
-		truncated |= applyBounds(ap, gradientIndices);
 		return truncated;
 	}
 
@@ -184,7 +183,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	private double clamp(double u, int k)
 	{
 		if (u == 0)
-			// Nothing to clamp
+			// Nothing to clamp. Returning here means the direction sign is not changed.
 			return 1;
 
 		if (dynamicClamp)
@@ -203,6 +202,32 @@ public class BoundedNonLinearFit extends NonLinearFit
 
 		// Denominator for clamping function
 		return 1 + (Math.abs(u) / clamp[k]);
+	}
+
+	/**
+	 * Check the parameter updates are within the local search parameter relative to the initial clamp values
+	 * 
+	 * @param a
+	 *            the current fit parameters
+	 * @param gradientIndices
+	 *            the gradient indices (maps the fit parameter index to the parameter array)
+	 * @param m
+	 *            the number of fit parameters
+	 * @param da
+	 *            the parameter shift
+	 * @param ap
+	 *            the new fit parameters
+	 * @return True if the search is non-local
+	 */
+	private boolean checkForNonLocalSearch(double[] a, int[] gradientIndices, int m, double[] ap)
+	{
+		// Check each update
+		for (int j = m; j-- > 0;)
+		{
+			if (localSearch * Math.abs(ap[gradientIndices[j]] - a[gradientIndices[j]]) > clampInitial[j])
+				return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -302,7 +327,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 		}
 		// Create an array to store the indices that were at the bounds
 		atBoundsCount = 0;
-		if ((isUpper || isLower) && atBounds == null)
+		if ((isUpper || isLower) && (atBounds == null || atBounds.length < indices.length))
 			atBounds = new boolean[indices.length];
 	}
 
@@ -352,7 +377,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 						point[gradientIndices[i]] = lower[i];
 					}
 			}
-			return countAtBounds() != 0;
+			return countAtBounds(gradientIndices.length) != 0;
 		}
 		else if (isLower)
 		{
@@ -362,15 +387,15 @@ public class BoundedNonLinearFit extends NonLinearFit
 					atBounds[i] = true;
 					point[gradientIndices[i]] = lower[i];
 				}
-			return countAtBounds() != 0;
+			return countAtBounds(gradientIndices.length) != 0;
 		}
 		return false;
 	}
 
-	private int countAtBounds()
+	private int countAtBounds(final int m)
 	{
 		atBoundsCount = 0;
-		for (int i = 0; i < atBounds.length; i++)
+		for (int i = m; i-- > 0;)
 			if (atBounds[i])
 				atBoundsCount++;
 		return atBoundsCount;
@@ -406,7 +431,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 			}
 		}
 		isClamped = checkArray(clampInitial, 0);
-		if (isClamped && dir == null)
+		if (isClamped && (dir == null || dir.length < clampInitial.length))
 			dir = new int[clampInitial.length];
 	}
 
