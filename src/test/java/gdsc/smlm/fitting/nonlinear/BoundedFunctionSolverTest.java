@@ -66,6 +66,8 @@ public class BoundedFunctionSolverTest
 		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
 	}
 
+	// TODO - Test if local search param if useful when using clamping
+	
 	// Standard LVM
 	@Test
 	public void canFitSingleGaussianLVM()
