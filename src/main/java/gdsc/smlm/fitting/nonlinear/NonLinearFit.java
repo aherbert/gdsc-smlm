@@ -106,8 +106,8 @@ public class NonLinearFit extends BaseFunctionSolver
 		// The NonLinearFunction evaluates a function with parameters a but only computes the gradient
 		// for m <= a.length parameters. The parameters can be accessed using the gradientIndices() method.  
 
-		int[] gradientIndices = f.gradientIndices();
-		int m = gradientIndices.length;
+		final int[] gradientIndices = f.gradientIndices();
+		final int m = gradientIndices.length;
 
 		if (initialStage)
 		{
@@ -126,24 +126,11 @@ public class NonLinearFit extends BaseFunctionSolver
 		// Set previous using the current best fit result we have
 		sumOfSquaresWorking[SUM_OF_SQUARES_OLD] = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
 
-		for (int i = m; i-- > 0;)
-		{
-			// If the gradient vector is very small set to zero so that this is ignored
-			// TODO - At what level should gradients be ignored (i.e. the parameter has no effect?)
-			// Note that analysis on a test dataset showed no difference in results. Those that are caught 
-			// for bad gradients must therefore go on to fail on peak filtering criteria. At least this
-			// gives the option of not filtering.
-			da[i] = (Math.abs(beta[i]) < 1e-16) ? 0 : beta[i];
-			for (int j = m; j-- > 0;)
-				covar[i][j] = alpha[i][j];
-			covar[i][i] *= (1 + lambda);
-		}
-
 		// Solve the gradient equation A x = b:
-		// A = Hessian matrix (covar)
+		// A = Hessian matrix (alpha)
 		// x = Parameter shift (output da) 
-		// b = Gradient vector (beta : input as da)
-		if (!solver.solveWithZeros(covar, da))
+		// b = Gradient vector (beta)
+		if (!solve(m))
 			return false;
 
 		// Update the parameters. Ensure to use the gradient indices to update the correct parameters
@@ -182,6 +169,61 @@ public class NonLinearFit extends BaseFunctionSolver
 		}
 
 		return true;
+	}
+
+	/**
+	 * Solve the gradient equation A x = b: *
+	 * 
+	 * <pre>
+	 * A = Hessian matrix (alpha)
+	 * x = Parameter shift (output da)
+	 * b = Gradient vector (beta)
+	 * </pre>
+	 * 
+	 * The Hessian and gradient parameter from the current best scoring parameter set are assumed to be in alpha and
+	 * beta. The lambda parameter is used to weight the diagonal of the Hessian.
+	 *
+	 * @return true, if successful
+	 */
+	protected boolean solve(final int m)
+	{
+		for (int i = m; i-- > 0;)
+		{
+			da[i] = beta[i];
+			for (int j = m; j-- > 0;)
+				covar[i][j] = alpha[i][j];
+			covar[i][i] *= (1 + lambda);
+		}
+		return solve(covar, da);
+	}
+
+	/**
+	 * Solves (one) linear equation, a x = b
+	 * <p>
+	 * On input have a[n][n], b[n]. On output b replaced by x[n].
+	 * <p>
+	 * Note: Any zero elements in b are not solved.
+	 * 
+	 * @return False if the equation is singular (no solution)
+	 */
+	protected boolean solve(double[][] a, double[] b)
+	{
+		// If the gradient vector is very small set to zero so that this is ignored.
+
+		// TODO - At what level should gradients be ignored (i.e. the parameter has no effect?).
+		// Note that analysis on a test dataset showed no difference in results. Those that are caught 
+		// for bad gradients must therefore go on to fail on peak filtering criteria. At least this
+		// gives the option of not filtering.
+		for (int i = b.length; i-- > 0;)
+			if (Math.abs(b[i]) < 1e-16)
+				b[i] = 0;
+
+		// TODO
+		// Q. Do we need a better qr decomposition that uses the largest Eigen column first. 
+		// There is a version from Apache commons math.
+		// We could assess the magnitude of each value in the gradient vector and rearrange.
+
+		return solver.solveWithZeros(a, b);
 	}
 
 	/**
@@ -238,16 +280,15 @@ public class NonLinearFit extends BaseFunctionSolver
 
 		if (a_dev != null)
 		{
-			// This is used to calculate the parameter covariance matrix.
-			// Solve the gradient matrix corresponding to the best Chi-squared 
-			// stored in alpha and beta. 
-			if (!solver.solveWithZeros(alpha, beta))
-				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
-
-			if (!solver.invert(covar))
-				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
-
-			setDeviations(a_dev, covar);
+			if (!computeDeviations(a_dev))
+			{
+				// Matrix inversion failed. In order to return a solution assume 
+				// the fit achieves the Cramer Roa lower bounds and so the covariance can 
+				// be obtained from the Fisher Information Matrix. 
+				final double[] I = calculator.fisherInformationDiagonal(n, a, f);
+				for (int i = gradientIndices.length; i-- > 0;)
+					a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i]);
+			}
 		}
 
 		value = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
@@ -266,6 +307,24 @@ public class NonLinearFit extends BaseFunctionSolver
 		error[0] = getError(residualSumOfSquares, noise, n, gradientIndices.length);
 
 		return FitStatus.OK;
+	}
+
+	private boolean computeDeviations(double[] a_dev)
+	{
+		// This is used to calculate the parameter covariance matrix.
+		// Solve the gradient matrix corresponding to the best Chi-squared 
+		// stored in alpha and beta. 
+		// Do not use the solve() method as this sets beta to zero for small values
+		// thus preventing inversion.
+		if (!solver.solveWithZeros(alpha, beta))
+			return false;
+
+		if (!solver.invert(covar))
+			return false;
+
+		setDeviations(a_dev, covar);
+
+		return true;
 	}
 
 	private double computeSS(double[] y, double[] y_fit, int n)

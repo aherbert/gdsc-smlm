@@ -734,7 +734,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 				final int nparams = gradientIndices.length;
 				GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
 				final double[] I = calculator.fisherInformationDiagonal(n, a, f);
-				for (int i = 0; i < gradientIndices.length; i++)
+				for (int i = nparams; i-- > 0;)
 					a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i]);
 			}
 

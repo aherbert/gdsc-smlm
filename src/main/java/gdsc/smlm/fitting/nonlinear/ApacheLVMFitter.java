@@ -8,9 +8,12 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optim
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.util.Precision;
 
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.MultivariateMatrixFunctionWrapper;
 import gdsc.smlm.function.MultivariateVectorFunctionWrapper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -99,8 +102,23 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 			evaluations = optimum.getEvaluations();
 			if (a_dev != null)
 			{
-				double[][] covar = optimum.getCovariances(threshold).getData();
-				setDeviations(a_dev, covar);
+				try
+				{
+					double[][] covar = optimum.getCovariances(threshold).getData();
+					setDeviations(a_dev, covar);
+				}
+				catch (SingularMatrixException e)
+				{
+					// Matrix inversion failed. In order to return a solution assume 
+					// the fit achieves the Cramer Roa lower bounds and so the covariance can 
+					// be obtained from the Fisher Information Matrix. 
+					final int[] gradientIndices = f.gradientIndices();
+					final int nparams = gradientIndices.length;
+					GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
+					final double[] I = calculator.fisherInformationDiagonal(n, a, f);
+					for (int i = nparams; i-- > 0;)
+						a_dev[gradientIndices[i]] = 1.0 / Math.sqrt(I[i]);
+				}
 			}
 			// Compute sum-of-squares
 			if (y_fit != null)
