@@ -54,7 +54,10 @@ public class BoundedFunctionSolverTest
 		// DOI: 10.1186/2192-2853-1-6
 		// Page 3
 		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
+		
+		// This seems big for background in photons
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
+		//defaultClampValues[Gaussian2DFunction.BACKGROUND] = 20;
 		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
 		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
 		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
