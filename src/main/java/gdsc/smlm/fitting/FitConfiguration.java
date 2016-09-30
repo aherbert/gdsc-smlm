@@ -1949,17 +1949,60 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public FunctionSolver getFunctionSolver()
 	{
-		if (functionSolver == null)
+		if (functionSolver == null || gaussianFunction == null)
 		{
 			// The function solver was invalidated so create a new one
 			functionSolver = createFunctionSolver();
 		}
 		else
 		{
+			BaseFunctionSolver fs = (BaseFunctionSolver) functionSolver;
+			final int[] gradientIndices = fs.getNonLinearFunction().gradientIndices();
+
 			// Update with the latest function
-			((BaseFunctionSolver) functionSolver).updateFunction(gaussianFunction);
+			fs.setNonLinearFunction(gaussianFunction);
+
+			// Update anything that depends on the function
+			if (fs instanceof BoundedNonLinearFit)
+			{
+				// We have to update the clamping.
+				// Note this code is only executed if the clamp settings have not changed
+				// (since changes to those settings invalidate the solver).
+				// All that is different is the function and the indices it evaluates. 
+				if (useClamping)
+					updateClampValues((BoundedNonLinearFit) fs, gradientIndices);
+			}
 		}
 		return functionSolver;
+	}
+
+	/**
+	 * If the gradient indices have changed we need to update the clamping values to match
+	 * 
+	 * @param bnlinfit
+	 *            The fit solver
+	 * @param gradientIndices
+	 *            The old gradient indices
+	 */
+	private void updateClampValues(BoundedNonLinearFit bnlinfit, int[] gradientIndices)
+	{
+		final int[] newGradientIndices = gaussianFunction.gradientIndices();
+		if (newGradientIndices.length > gradientIndices.length)
+		{
+			// The new function has more indices so it has changed
+			setClampValues(bnlinfit);
+			return;
+		}
+		// Check for changes
+		for (int i = 0; i < newGradientIndices.length; i++)
+		{
+			if (newGradientIndices[i] != gradientIndices[i])
+			{
+				setClampValues(bnlinfit);
+				return;
+			}
+		}
+		// None of the indices have changed so we can keep the current clamp values
 	}
 
 	/**
@@ -2049,34 +2092,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				}
 
 				BoundedNonLinearFit bnlinfit = new BoundedNonLinearFit(gaussianFunction, getStoppingCriteria());
-
 				if (useClamping)
-				{
-					double[] clamp = getClampValues();
-					// The units are photons. This is OK for the LVM MLE but not for the LVM.
-					if (fitSolver != FitSolver.LVM_MLE)
-					{
-						if (gain <= 0)
-						{
-							throw new IllegalArgumentException(
-									"When using clamping the gain is required for the " + fitSolver.getName());
-						}
-
-						clamp = clamp.clone();
-						clamp[Gaussian2DFunction.BACKGROUND] *= gain;
-						clamp[Gaussian2DFunction.SIGNAL] *= gain;
-					}
-					final int npeaks = gaussianFunction.getNPeaks();
-					double[] clampValues = new double[1 + 6 * npeaks];
-					clampValues[Gaussian2DFunction.BACKGROUND] = clamp[Gaussian2DFunction.BACKGROUND];
-					for (int i = 0; i < npeaks; i++)
-					{
-						for (int j = 1; j <= 6; j++)
-							clampValues[i + j] = clamp[j];
-					}
-					bnlinfit.setClampValues(clampValues);
-					bnlinfit.setDynamicClamp(useDynamicClamping);
-				}
+					setClampValues(bnlinfit);
 				nlinfit = bnlinfit;
 
 				break;
@@ -2107,6 +2124,34 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			nlinfit.setMLE(true);
 		}
 		return nlinfit;
+	}
+
+	private void setClampValues(BoundedNonLinearFit bnlinfit)
+	{
+		double[] clamp = getClampValues();
+		// The units are photons. This is OK for the LVM MLE but not for the LVM.
+		if (fitSolver != FitSolver.LVM_MLE)
+		{
+			if (gain <= 0)
+			{
+				throw new IllegalArgumentException(
+						"When using clamping the gain is required for the " + fitSolver.getName());
+			}
+
+			clamp = clamp.clone();
+			clamp[Gaussian2DFunction.BACKGROUND] *= gain;
+			clamp[Gaussian2DFunction.SIGNAL] *= gain;
+		}
+		final int npeaks = gaussianFunction.getNPeaks();
+		double[] clampValues = new double[1 + 6 * npeaks];
+		clampValues[Gaussian2DFunction.BACKGROUND] = clamp[Gaussian2DFunction.BACKGROUND];
+		for (int i = 0; i < npeaks; i++)
+		{
+			for (int j = 1; j <= 6; j++)
+				clampValues[i + j] = clamp[j];
+		}
+		bnlinfit.setClampValues(clampValues);
+		bnlinfit.setDynamicClamp(useDynamicClamping);
 	}
 
 	/**
@@ -2286,6 +2331,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setUseClamping(boolean useClamping)
 	{
+		invalidateFunctionSolver();
 		this.useClamping = useClamping;
 	}
 
@@ -2305,6 +2351,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setUseDynamicClamping(boolean useDynamicClamping)
 	{
+		invalidateFunctionSolver();
 		this.useDynamicClamping = useDynamicClamping;
 	}
 
@@ -2334,7 +2381,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampBackground(double value)
 	{
-		getClampValues()[Gaussian2DFunction.BACKGROUND] = value;
+		updateClampValue(Gaussian2DFunction.BACKGROUND, value);
 	}
 
 	/**
@@ -2353,7 +2400,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampSignal(double value)
 	{
-		getClampValues()[Gaussian2DFunction.SIGNAL] = value;
+		updateClampValue(Gaussian2DFunction.SIGNAL, value);
 	}
 
 	/**
@@ -2372,7 +2419,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampAngle(double value)
 	{
-		getClampValues()[Gaussian2DFunction.ANGLE] = value;
+		updateClampValue(Gaussian2DFunction.ANGLE, value);
 	}
 
 	/**
@@ -2391,7 +2438,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampX(double value)
 	{
-		getClampValues()[Gaussian2DFunction.X_POSITION] = value;
+		updateClampValue(Gaussian2DFunction.X_POSITION, value);
 	}
 
 	/**
@@ -2410,7 +2457,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampY(double value)
 	{
-		getClampValues()[Gaussian2DFunction.Y_POSITION] = value;
+		updateClampValue(Gaussian2DFunction.Y_POSITION, value);
 	}
 
 	/**
@@ -2429,7 +2476,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampXSD(double value)
 	{
-		getClampValues()[Gaussian2DFunction.X_SD] = value;
+		updateClampValue(Gaussian2DFunction.X_SD, value);
 	}
 
 	/**
@@ -2448,6 +2495,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setClampYSD(double value)
 	{
-		getClampValues()[Gaussian2DFunction.Y_SD] = value;
+		updateClampValue(Gaussian2DFunction.Y_SD, value);
+	}
+
+	private void updateClampValue(int index, double value)
+	{
+		invalidateFunctionSolver();
+		getClampValues()[index] = value;
 	}
 }

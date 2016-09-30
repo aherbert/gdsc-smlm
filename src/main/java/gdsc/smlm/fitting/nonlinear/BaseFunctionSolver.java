@@ -35,10 +35,13 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/**
 	 * Default constructor
+	 * 
+	 * @throws NullPointerException
+	 *             if the function is null
 	 */
 	public BaseFunctionSolver(NonLinearFunction f)
 	{
-		this.f = f;
+		setNonLinearFunction(f);
 	}
 
 	/*
@@ -279,10 +282,23 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	/**
 	 * Update the function.
 	 *
-	 * @param f the new function
+	 * @param f
+	 *            the new function
+	 * @throws NullPointerException
+	 *             if the function is null
 	 */
-	public void updateFunction(NonLinearFunction f)
+	public void setNonLinearFunction(NonLinearFunction f)
 	{
+		if (f == null)
+			throw new NullPointerException("Function must not be null");
 		this.f = f;
+	}
+
+	/**
+	 * @return The function
+	 */
+	public NonLinearFunction getNonLinearFunction()
+	{
+		return f;
 	}
 }

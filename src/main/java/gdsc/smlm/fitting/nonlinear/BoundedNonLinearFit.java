@@ -254,7 +254,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 		// Initialise for clamping
 		if (isClamped)
 			// Prevent the clamping value being destroyed by dynamic updates
-			clamp = (dynamicClamp) ? clampInitial.clone() : clampInitial;
+			clamp = (dynamicClamp) ? Arrays.copyOf(clampInitial, f.gradientIndices().length) : clampInitial;
 		return super.computeFit(n, y, y_fit, a, a_dev, error, noise);
 	}
 
@@ -402,10 +402,13 @@ public class BoundedNonLinearFit extends NonLinearFit
 	}
 
 	/**
-	 * Sets the parameter specific clamp values. This is maximum permissible update to the parameter.
+	 * Sets the parameter specific clamp values. This is the maximum permissible update to the parameter.
 	 * <p>
 	 * See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ Astrom Soc Pac
 	 * 99:191-222.
+	 * <p>
+	 * Warning: If the function is changed then the clamp values may require updating. However setting a new function
+	 * does not set the clamp values to null to allow caching when the clamp values are unchanged.
 	 *
 	 * @param clampValues
 	 *            the new clamp values
@@ -476,5 +479,27 @@ public class BoundedNonLinearFit extends NonLinearFit
 	public void setLocalSearch(double localSearch)
 	{
 		this.localSearch = localSearch;
+	}
+
+	/**
+	 * Warning: If the function is changed then the clamp values may require updating. However setting a new function
+	 * does not set the clamp values to null to allow caching when the clamp values are unchanged, e.g. evaluation of a
+	 * different function in the same parameter space.
+	 * <p>
+	 * Setting a new function removes the current bounds.
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#setNonLinearFunction(gdsc.smlm.function.NonLinearFunction)
+	 */
+	@Override
+	public void setNonLinearFunction(NonLinearFunction func)
+	{
+		// Do not do this to allow caching
+		//setClampValues(null);
+
+		setBounds(null, null);
+
+		super.setNonLinearFunction(func);
 	}
 }
