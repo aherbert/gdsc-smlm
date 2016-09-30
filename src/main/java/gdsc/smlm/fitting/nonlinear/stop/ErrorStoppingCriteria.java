@@ -35,11 +35,22 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	private static final int CONSECUTIVE_INSIGNIFICANT_IMPROVEMENT_LIMIT = 3;
 
 	/**
-	 * Default constructor
+	 * Instantiates a new error stopping criteria.
 	 */
 	public ErrorStoppingCriteria()
 	{
-		setSignificantDigits(5);
+		this(5);
+	}
+
+	/**
+	 * Instantiates a new error stopping criteria.
+	 *
+	 * @param significantDigits
+	 *            the significant digits for a negligible change in error
+	 */
+	public ErrorStoppingCriteria(int significantDigits)
+	{
+		setSignificantDigits(significantDigits);
 	}
 
 	/*
@@ -172,8 +183,10 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 		if (log != null)
 		{
 			log.info("iter = %d, error = %f -> %f : %s : Continue = %b", getIteration(), oldError, newError,
-					(result == 1) ? "worse" : "Delta = " + DoubleEquality.relativeError(oldError, newError) +
-							((result == 0) ? " (negligible)" : ""), notSatisfied);
+					(result == 1) ? "worse"
+							: "Delta = " + DoubleEquality.relativeError(oldError, newError) +
+									((result == 0) ? " (negligible)" : ""),
+					notSatisfied);
 		}
 	}
 
