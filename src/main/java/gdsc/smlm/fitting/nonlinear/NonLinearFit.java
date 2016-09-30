@@ -309,6 +309,12 @@ public class NonLinearFit extends BaseFunctionSolver
 		return FitStatus.OK;
 	}
 
+	/**
+	 * Compute the parameter deviations using the covariance matrix  of the solution
+	 *
+	 * @param a_dev the a dev
+	 * @return true, if successful
+	 */
 	private boolean computeDeviations(double[] a_dev)
 	{
 		// This is used to calculate the parameter covariance matrix.
