@@ -211,7 +211,7 @@ public class BenchmarkFit implements PlugIn
 			}
 
 			showProgress();
-			
+
 			// Extract the data
 			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
 					data);
@@ -251,6 +251,16 @@ public class BenchmarkFit implements PlugIn
 				for (int i = 0; i < data.length; i++)
 					data[i] -= bias;
 			}
+			if (fitConfig.isApplyGainBeforeFitting())
+			{
+				final double gain = 1.0 / fitConfig.getGain();
+				for (int i = 0; i < data.length; i++)
+					data[i] *= gain;
+
+				// Update all the parameters affected by gain
+				initialParams[Gaussian2DFunction.BACKGROUND] *= gain;
+				initialParams[Gaussian2DFunction.SIGNAL] *= gain;
+			}
 
 			double[][] bounds = null;
 			double[] error = new double[1];
@@ -270,14 +280,22 @@ public class BenchmarkFit implements PlugIn
 				FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
 					bounds = setBounds(solver, initialParams, bounds);
-				if (solver.isConstrained())
+				else if (solver.isConstrained())
 					setConstraints(solver);
+
 				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
 				if (isValid(status, params, size))
 				{
 					// Subtract the fitted bias from the background
 					if (!fitConfig.isRemoveBiasBeforeFitting())
 						params[Gaussian2DFunction.BACKGROUND] -= bias;
+					if (fitConfig.isApplyGainBeforeFitting())
+					{
+						final double gain = fitConfig.getGain();
+						// Update all the parameters affected by gain
+						params[Gaussian2DFunction.BACKGROUND] *= gain;
+						params[Gaussian2DFunction.SIGNAL] *= gain;
+					}
 					result[c] = params;
 					time[c] = System.nanoTime() - start;
 					// Store all the results for later analysis
@@ -320,6 +338,8 @@ public class BenchmarkFit implements PlugIn
 					lower = lb.clone();
 					lower[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND] -
 							Math.abs(lb[Gaussian2DFunction.BACKGROUND] - params[Gaussian2DFunction.BACKGROUND]);
+					if (fitConfig.isMaximumLikelihoodFitting() && lower[Gaussian2DFunction.BACKGROUND] < 0)
+						lower[Gaussian2DFunction.BACKGROUND] = 0;
 				}
 				if (params[Gaussian2DFunction.BACKGROUND] > ub[Gaussian2DFunction.BACKGROUND])
 				{
@@ -333,6 +353,8 @@ public class BenchmarkFit implements PlugIn
 						lower = lb.clone();
 					lower[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.SIGNAL] -
 							Math.abs(lb[Gaussian2DFunction.SIGNAL] - params[Gaussian2DFunction.SIGNAL]);
+					if (fitConfig.isMaximumLikelihoodFitting() && lower[Gaussian2DFunction.SIGNAL] < 0)
+						lower[Gaussian2DFunction.SIGNAL] = 0;
 				}
 				if (params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL])
 				{
@@ -379,6 +401,15 @@ public class BenchmarkFit implements PlugIn
 				ub[Gaussian2DFunction.X_SD] = s * wf;
 				lb[Gaussian2DFunction.Y_SD] = s / wf;
 				ub[Gaussian2DFunction.Y_SD] = s * wf;
+				if (fitConfig.isApplyGainBeforeFitting())
+				{
+					final double gain = 1.0 / fitConfig.getGain();
+					// Update all the parameters affected by gain
+					lb[Gaussian2DFunction.BACKGROUND] *= gain;
+					lb[Gaussian2DFunction.SIGNAL] *= gain;
+					ub[Gaussian2DFunction.BACKGROUND] *= gain;
+					ub[Gaussian2DFunction.SIGNAL] *= gain;
+				}
 			}
 		}
 
@@ -597,7 +628,7 @@ public class BenchmarkFit implements PlugIn
 		calibration.emCCD = benchmarkParameters.emCCD;
 		calibration.readNoise = benchmarkParameters.readNoise;
 		calibration.exposureTime = 1000;
-		
+
 		if (!PeakFit.configureFitSolver(settings, filename, false))
 			return false;
 
@@ -645,7 +676,7 @@ public class BenchmarkFit implements PlugIn
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
-	
+
 	private void run()
 	{
 		// Initialise the answer. Convert to units of the image (ADUs and pixels)

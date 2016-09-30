@@ -263,7 +263,7 @@ public class PSFDrift implements PlugIn
 				FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
 					setBounds(solver);
-				if (solver.isConstrained())
+				else if (solver.isConstrained())
 					setConstraints(solver);
 				final FitStatus status = solver.fit(data.length, data, null, params, null, error, 0);
 				// Subtract the fitted bias from the background
