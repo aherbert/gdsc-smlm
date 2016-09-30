@@ -131,6 +131,108 @@ public class GradientCalculator
 
 	/**
 	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
+	 * <p>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * <p>
+	 * Allows disabling the use of gradients. The output alpha and beta will be reduced in size by the number of indices
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param y
+	 *            Data to fit
+	 * @param a
+	 *            Set of m coefficients
+	 * @param alpha
+	 *            the Hessian curvature matrix (size m*m)
+	 * @param beta
+	 *            the gradient vector of the function's partial first derivatives with respect to the parameters (size
+	 *            m)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @param ignore
+	 *            An array of size beta.length. Set the index to true to ignore the gradients.
+	 * @return The sum-of-squares value for the fit
+	 */
+	public double findLinearised(final int[] x, final double[] y, final double[] a, final double[][] alpha,
+			final double[] beta, final NonLinearFunction func, boolean[] ignore)
+	{
+		double ssx = 0;
+		final double[] dy_da = new double[a.length];
+
+		for (int i = 0; i < nparams; i++)
+		{
+			beta[i] = 0;
+			for (int j = 0; j <= i; j++)
+				alpha[i][j] = 0;
+		}
+
+		func.initialise(a);
+
+		if (func.canComputeWeights())
+		{
+			final double[] w = new double[1];
+			for (int i = 0; i < x.length; i++)
+			{
+				final double dy = y[i] - func.eval(x[i], dy_da, w);
+				final double weight = getWeight(w[0]);
+
+				// Compute:
+				// - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				//   that is, it describes the local curvature of a function of many variables.)
+				// - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+				for (int j = 0, jj = 0; j < nparams; j++)
+				{
+					if (ignore[j])
+						continue;
+					final double wgt = dy_da[j] * weight;
+
+					for (int k = 0; k <= jj; k++)
+						alpha[jj][k] += wgt * dy_da[k];
+
+					beta[jj++] += wgt * dy;
+				}
+
+				ssx += dy * dy * weight;
+			}
+		}
+		else
+		{
+			for (int i = 0; i < x.length; i++)
+			{
+				final double dy = y[i] - func.eval(x[i], dy_da);
+
+				// Compute:
+				// - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				//   that is, it describes the local curvature of a function of many variables.)
+				// - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+				for (int j = 0, jj = 0; j < nparams; j++)
+				{
+					if (ignore[j])
+						continue;
+					final double wgt = dy_da[j];
+
+					for (int k = 0; k <= jj; k++)
+						alpha[jj][k] += wgt * dy_da[k];
+
+					beta[jj++] += wgt * dy;
+				}
+
+				ssx += dy * dy;
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nparams - 1; i++)
+			for (int j = i + 1; j < nparams; j++)
+				alpha[i][j] = alpha[j][i];
+
+		return checkGradients(alpha, beta, nparams, ssx);
+	}
+
+	/**
+	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
 	 * Assumes the n observations (x) are sequential integers from 0.
 	 * <p>
 	 * If the function supports weights then these will be used to compute the SS and curvature matrix.
@@ -215,6 +317,115 @@ public class GradientCalculator
 						alpha[j][k] += wgt * dy_da[k];
 
 					beta[j] += wgt * dy;
+				}
+
+				ssx += dy * dy;
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nparams - 1; i++)
+			for (int j = i + 1; j < nparams; j++)
+				alpha[i][j] = alpha[j][i];
+
+		return checkGradients(alpha, beta, nparams, ssx);
+	}
+
+	/**
+	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
+	 * Assumes the n observations (x) are sequential integers from 0.
+	 * <p>
+	 * If the function supports weights then these will be used to compute the SS and curvature matrix.
+	 * <p>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * <p>
+	 * Allows disabling the use of gradients. The output alpha and beta will be reduced in size by the number of indices
+	 * that were disabled. The remaining positions will be zero filled.
+	 *
+	 * @param n
+	 *            The number of data points
+	 * @param y
+	 *            Data to fit
+	 * @param a
+	 *            Set of m coefficients
+	 * @param alpha
+	 *            the Hessian curvature matrix (size m*m)
+	 * @param beta
+	 *            the gradient vector of the function's partial first derivatives with respect to the parameters (size
+	 *            m)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @param ignore
+	 *            An array of size beta.length. Set the index to true to ignore the gradients.
+	 * @return The sum-of-squares value for the fit.
+	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[])},
+	 * @see {@link gdsc.smlm.function.NonLinearFunction#eval(int, double[], double[])},
+	 * @see {@link gdsc.smlm.function.NonLinearFunction#canComputeWeights()}
+	 */
+	public double findLinearised(final int n, final double[] y, final double[] a, final double[][] alpha,
+			final double[] beta, final NonLinearFunction func, boolean[] ignore)
+	{
+		double ssx = 0;
+		final double[] dy_da = new double[a.length];
+
+		for (int i = 0; i < nparams; i++)
+		{
+			beta[i] = 0;
+			for (int j = 0; j <= i; j++)
+				alpha[i][j] = 0;
+		}
+
+		func.initialise(a);
+
+		if (func.canComputeWeights())
+		{
+			final double[] w = new double[1];
+			for (int i = 0; i < n; i++)
+			{
+				final double dy = y[i] - func.eval(i, dy_da, w);
+				final double weight = getWeight(w[0]);
+
+				// Compute:
+				// - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				//   that is, it describes the local curvature of a function of many variables.)
+				// - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+				for (int j = 0, jj = 0; j < nparams; j++)
+				{
+					if (ignore[j])
+						continue;
+					final double wgt = dy_da[j] * weight;
+
+					for (int k = 0; k <= jj; k++)
+						alpha[jj][k] += wgt * dy_da[k];
+
+					beta[jj++] += wgt * dy;
+				}
+
+				ssx += dy * dy * weight;
+			}
+		}
+		else
+		{
+			for (int i = 0; i < n; i++)
+			{
+				final double dy = y[i] - func.eval(i, dy_da);
+
+				// Compute:
+				// - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				//   that is, it describes the local curvature of a function of many variables.)
+				// - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+				for (int j = 0, jj = 0; j < nparams; j++)
+				{
+					if (ignore[j])
+						continue;
+					final double wgt = dy_da[j];
+
+					for (int k = 0; k <= jj; k++)
+						alpha[jj][k] += wgt * dy_da[k];
+
+					beta[jj++] += wgt * dy;
 				}
 
 				ssx += dy * dy;
