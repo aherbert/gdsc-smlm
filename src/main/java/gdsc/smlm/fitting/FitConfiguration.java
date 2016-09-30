@@ -1968,7 +1968,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			{
 				// We have to update the clamping.
 				// Note this code is only executed if the clamp settings have not changed
-				// (since changes to those settings invalidate the solver).
+				// (since changes to those settings invalidate the solver) and the 
+				// function settings have not changed (since that invalidates the function
+				// and the solver).
 				// All that is different is the number of peaks in the function. 
 				if (gaussianFunction.getNPeaks() > nClampPeaks)
 					setClampValues((BoundedNonLinearFit) functionSolver);
