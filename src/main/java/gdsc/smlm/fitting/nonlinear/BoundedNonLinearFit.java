@@ -35,6 +35,8 @@ public class BoundedNonLinearFit extends NonLinearFit
 	private boolean[] atBounds;
 	private int atBoundsCount;
 	private boolean isClamped = false;
+	private boolean nonLocalSearch = false;
+	private double localSearch = 0;
 	private double[] clampInitial, clamp;
 	private int[] dir;
 	private boolean dynamicClamp = false;
@@ -127,6 +129,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	protected boolean updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da, double[] ap)
 	{
 		boolean truncated = false;
+		nonLocalSearch = false;
 		if (isClamped)
 		{
 			for (int j = m; j-- > 0;)
@@ -139,7 +142,17 @@ public class BoundedNonLinearFit extends NonLinearFit
 				else
 				{
 					// This parameter is clamped
-					ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j] / clamp(da[j], j);
+
+					// If using clamping should we can optionally only update lambda if we 
+					// are close to the correct solution.
+
+					final double update = da[j] / clamp(da[j], j);
+
+					// Test if the update is reasonable
+					if (localSearch * Math.abs(update) > clampInitial[j])
+						nonLocalSearch = true;
+
+					ap[gradientIndices[j]] = a[gradientIndices[j]] + update;
 					truncated = true;
 				}
 			}
@@ -154,23 +167,6 @@ public class BoundedNonLinearFit extends NonLinearFit
 		}
 		truncated |= applyBounds(ap, gradientIndices);
 		return truncated;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(int, double[], double[], double[], double[], double[],
-	 * double)
-	 */
-	@Override
-	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
-			double noise)
-	{
-		// Initialise for clamping
-		if (isClamped)
-			// Prevent the clamping value being destroyed by dynamic updates
-			clamp = (dynamicClamp) ? clampInitial.clone() : clampInitial;
-		return super.computeFit(n, y, y_fit, a, a_dev, error, noise);
 	}
 
 	/**
@@ -205,8 +201,36 @@ public class BoundedNonLinearFit extends NonLinearFit
 			dir[k] = sign;
 		}
 
-		// Original clamping function
+		// Denominator for clamping function
 		return 1 + (Math.abs(u) / clamp[k]);
+	}
+
+	@Override
+	protected void reduceLambda()
+	{
+		if (nonLocalSearch)
+		{
+			// Ignore... ?
+			return;
+		}
+		super.reduceLambda();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(int, double[], double[], double[], double[], double[],
+	 * double)
+	 */
+	@Override
+	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
+			double noise)
+	{
+		// Initialise for clamping
+		if (isClamped)
+			// Prevent the clamping value being destroyed by dynamic updates
+			clamp = (dynamicClamp) ? clampInitial.clone() : clampInitial;
+		return super.computeFit(n, y, y_fit, a, a_dev, error, noise);
 	}
 
 	/*
@@ -405,5 +429,27 @@ public class BoundedNonLinearFit extends NonLinearFit
 	public void setDynamicClamp(boolean dynamicClamp)
 	{
 		this.dynamicClamp = dynamicClamp;
+	}
+
+	/**
+	 * @return the local search parameter
+	 */
+	public double getLocalSearch()
+	{
+		return localSearch;
+	}
+
+	/**
+	 * When using clamping, if [update * local search parameter] > [initial clamp value] then the search is deemed to be
+	 * non-local and lambda is not updated. This preserves the steepest descent search from the previous step.
+	 * <p>
+	 * Set to zero to disable.
+	 * 
+	 * @param localSearch
+	 *            the local search parameter
+	 */
+	public void setLocalSearch(double localSearch)
+	{
+		this.localSearch = localSearch;
 	}
 }

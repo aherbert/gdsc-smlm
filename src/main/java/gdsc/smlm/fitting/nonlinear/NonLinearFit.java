@@ -146,7 +146,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		}
 		else if (sumOfSquaresWorking[SUM_OF_SQUARES_NEW] < sumOfSquaresWorking[SUM_OF_SQUARES_OLD])
 		{
-			lambda *= 0.1;
+			reduceLambda();
 
 			for (int i = 0; i < m; i++)
 				for (int j = m; j-- > 0;)
@@ -169,6 +169,14 @@ public class NonLinearFit extends BaseFunctionSolver
 		}
 
 		return true;
+	}
+
+	/**
+	 * Reduce lambda upon a successfull improvement of the fit
+	 */
+	protected void reduceLambda()
+	{
+		lambda *= 0.1;
 	}
 
 	/**
