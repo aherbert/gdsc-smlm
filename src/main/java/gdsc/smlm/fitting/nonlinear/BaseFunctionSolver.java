@@ -3,6 +3,7 @@ package gdsc.smlm.fitting.nonlinear;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.function.NonLinearFunction;
+import gdsc.smlm.function.gaussian.GaussianFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -85,8 +86,8 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	public double[] getInitialSolution(double[] params)
 	{
-		int[] indices = f.gradientIndices();
-		double[] initialSolution = new double[indices.length];
+		final int[] indices = f.gradientIndices();
+		final double[] initialSolution = new double[indices.length];
 		for (int i = 0; i < indices.length; i++)
 			initialSolution[i] = params[indices[i]];
 		return initialSolution;
@@ -94,14 +95,14 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	public void setSolution(double[] params, double[] solution)
 	{
-		int[] indices = f.gradientIndices();
+		final int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
 			params[indices[i]] = solution[i];
 	}
 
 	public void setDeviations(double[] deviations, double[][] covar)
 	{
-		int[] indices = f.gradientIndices();
+		final int[] indices = f.gradientIndices();
 		for (int i = 0; i < indices.length; i++)
 			deviations[indices[i]] = Math.sqrt(covar[i][i]);
 	}
@@ -274,5 +275,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	public double getValue()
 	{
 		return value;
+	}
+
+	/**
+	 * Update the function.
+	 *
+	 * @param f the new function
+	 */
+	public void updateFunction(NonLinearFunction f)
+	{
+		this.f = f;
 	}
 }

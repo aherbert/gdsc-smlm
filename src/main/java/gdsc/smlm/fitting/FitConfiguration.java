@@ -18,6 +18,7 @@ import gdsc.core.utils.Maths;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.fitting.nonlinear.ApacheLVMFitter;
+import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.BoundedNonLinearFit;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod;
@@ -150,15 +151,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		if (gaussianFunction != null &&
 				(gaussianFunction.getNPeaks() != npeaks || gaussianFunction.getDimensions()[0] != maxx))
 		{
+			// The gaussian function cannot be reused 
 			invalidateGaussianFunction();
 		}
 		if (gaussianFunction == null)
 		{
-			invalidateFunctionSolver();
+			// TODO : See if this works ...
+			// We can update the function solver with the new function so do not invalidate the solver
+			//invalidateFunctionSolver();
 			gaussianFunction = createGaussianFunction(npeaks, maxx, params);
 		}
 		if (stoppingCriteria == null)
 		{
+			// Requires a new function solver
 			invalidateFunctionSolver();
 			stoppingCriteria = createStoppingCriteria(gaussianFunction, params);
 		}
@@ -1706,6 +1711,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void setEmCCD(boolean emCCD)
 	{
+		invalidateFunctionSolver();
 		this.emCCD = emCCD;
 	}
 
@@ -1944,7 +1950,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public FunctionSolver getFunctionSolver()
 	{
 		if (functionSolver == null)
+		{
+			// The function solver was invalidated so create a new one
 			functionSolver = createFunctionSolver();
+		}
+		else
+		{
+			// Update with the latest function
+			((BaseFunctionSolver) functionSolver).updateFunction(gaussianFunction);
+		}
 		return functionSolver;
 	}
 
@@ -1958,9 +1972,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 	private FunctionSolver createFunctionSolver()
 	{
+		if (gaussianFunction == null)
+		{
+			// Other code may want to call getFunctionSolver() to see if exceptions are thrown
+			// so create a dummy function so we can return a function solver.
+			gaussianFunction = createGaussianFunction(1, 10, null);
+		}
+
 		// Remove noise model
-		if (gaussianFunction != null)
-			gaussianFunction.setNoiseModel(null);
+		gaussianFunction.setNoiseModel(null);
 
 		NonLinearFit nlinfit;
 
@@ -2038,9 +2058,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 					{
 						if (gain <= 0)
 						{
-							throw new IllegalArgumentException("When using clamping the gain is required for the " + fitSolver.getName());
+							throw new IllegalArgumentException(
+									"When using clamping the gain is required for the " + fitSolver.getName());
 						}
-						
+
 						clamp = clamp.clone();
 						clamp[Gaussian2DFunction.BACKGROUND] *= gain;
 						clamp[Gaussian2DFunction.SIGNAL] *= gain;
