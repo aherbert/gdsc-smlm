@@ -3,7 +3,6 @@ package gdsc.smlm.fitting.nonlinear;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.function.NonLinearFunction;
-import gdsc.smlm.function.gaussian.GaussianFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
