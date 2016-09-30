@@ -23,7 +23,7 @@ import org.junit.Test;
  */
 public class GradientCalculatorSpeedTest
 {
-	final boolean speedTests = true;
+	boolean speedTests = false;
 	DoubleEquality eq = new DoubleEquality(6, 1e-16);
 
 	int MAX_ITER = 20000;
