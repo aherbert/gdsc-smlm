@@ -156,10 +156,17 @@ public class BoundedNonLinearFit extends NonLinearFit
 		return truncated;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(int, double[], double[], double[], double[], double[],
+	 * double)
+	 */
 	@Override
 	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
 			double noise)
 	{
+		// Initialise for clamping
 		if (isClamped)
 			// Prevent the clamping value being destroyed by dynamic updates
 			clamp = (dynamicClamp) ? clampInitial.clone() : clampInitial;

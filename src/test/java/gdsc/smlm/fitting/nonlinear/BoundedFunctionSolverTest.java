@@ -34,108 +34,228 @@ public class BoundedFunctionSolverTest
 	static int size = 15;
 	static
 	{
-		params[Gaussian2DFunction.BACKGROUND] = 1;
+		params[Gaussian2DFunction.BACKGROUND] = 5;
 		params[Gaussian2DFunction.X_POSITION] = size / 2;
 		params[Gaussian2DFunction.Y_POSITION] = size / 2;
 		params[Gaussian2DFunction.X_SD] = 1.4;
 	}
+	private static double[] defaultClampValues;
+	static
+	{
+		defaultClampValues = new double[7];
+		// Taken from the 3D-DAO-STORM paper:
+		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
+		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
+		// DOI: 10.1186/2192-2853-1-6
+		// Page 3
+		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
+		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
+		defaultClampValues[Gaussian2DFunction.SIGNAL] = 1000;
+		defaultClampValues[Gaussian2DFunction.ANGLE] = Math.PI;
+		defaultClampValues[Gaussian2DFunction.X_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.Y_POSITION] = 1;
+		defaultClampValues[Gaussian2DFunction.X_SD] = 3;
+		defaultClampValues[Gaussian2DFunction.Y_SD] = 3;
+	}
 
-	// TODO - test the Clamping of the LVM fitter
-	
-	
-	
+	// Standard LVM
 	@Test
 	public void canFitSingleGaussianLVM()
 	{
-		fitSingleGaussianBetterLVM(false, false, false);
+		fitSingleGaussianLVM(0, 0, false);
 	}
+
+	// Bounded/Clamped LVM
 
 	@Test
 	public void canFitSingleGaussianBLVMNoBounds()
 	{
-		fitSingleGaussianBetterLVM(true, false, false);
+		fitSingleGaussianLVM(1, 0, false);
 	}
 
 	@Test
 	public void canFitSingleGaussianBLVM()
 	{
-		fitSingleGaussianBetterLVM(true, true, false);
+		fitSingleGaussianLVM(2, 0, false);
 	}
+
+	@Test
+	public void canFitSingleGaussianCLVM()
+	{
+		fitSingleGaussianLVM(0, 1, false);
+	}
+
+	@Test
+	public void canFitSingleGaussianDCLVM()
+	{
+		fitSingleGaussianLVM(0, 2, false);
+	}
+
+	@Test
+	public void canFitSingleGaussianBCLVM()
+	{
+		fitSingleGaussianLVM(2, 1, false);
+	}
+
+	@Test
+	public void canFitSingleGaussianBDCLVM()
+	{
+		fitSingleGaussianLVM(2, 2, false);
+	}
+
+	// MLE LVM
 
 	@Test
 	public void canFitSingleGaussianLVMMLE()
 	{
-		fitSingleGaussianBetterLVM(false, false, true);
+		fitSingleGaussianLVM(0, 0, true);
 	}
 
 	@Test
 	public void canFitSingleGaussianBLVMMLENoBounds()
 	{
-		fitSingleGaussianBetterLVM(true, false, true);
+		fitSingleGaussianLVM(1, 0, true);
 	}
 
 	@Test
 	public void canFitSingleGaussianBLVMMLE()
 	{
-		fitSingleGaussianBetterLVM(true, true, true);
+		fitSingleGaussianLVM(2, 0, true);
 	}
 
-	private void fitSingleGaussianBetterLVM(boolean bounded, boolean applyBounds, boolean mle)
+	private void fitSingleGaussianLVM(int bounded, int clamping, boolean mle)
 	{
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
-		StoppingCriteria sc = new ErrorStoppingCriteria();
-		sc.setMaximumIterations(100);
-		NonLinearFit solver = (bounded) ? new BoundedNonLinearFit(f, sc) : new NonLinearFit(f, sc);
-		solver.setMLE(mle);
-		canFitSingleGaussian(solver, applyBounds, !mle);
+		canFitSingleGaussian(getLVM(bounded, clamping, mle), bounded == 2, !mle);
 	}
-	
+
+	// Is Bounded/Clamped LVM better?
+
 	@Test
 	public void fitSingleGaussianBLVMBetterThanLVM()
 	{
-		fitSingleGaussianBetterLVM(true, false, false, false);
+		fitSingleGaussianBetterLVM(true, 0, false, false, 0, false);
+	}
+
+	@Test
+	public void fitSingleGaussianCLVMBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(false, 1, false, false, 0, false);
+	}
+
+	@Test
+	public void fitSingleGaussianBCLVMBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(true, 1, false, false, 0, false);
+	}
+
+	@Test
+	public void fitSingleGaussianDCLVMBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(false, 2, false, false, 0, false);
+	}
+
+	@Test
+	public void fitSingleGaussianBDCLVMBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(true, 2, false, false, 0, false);
 	}
 
 	@Test
 	public void fitSingleGaussianLVMMLEBetterThanLVM()
 	{
-		fitSingleGaussianBetterLVM(false, true, false, false);
+		fitSingleGaussianBetterLVM(false, 0, true, false, 0, false);
 	}
 
 	@Test
 	public void fitSingleGaussianBLVMMLEBetterThanLVM()
 	{
-		fitSingleGaussianBetterLVM(true, true, false, false);
+		fitSingleGaussianBetterLVM(true, 0, true, false, 0, false);
+	}
+
+	@Test
+	public void fitSingleGaussianCLVMMLEBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(false, 1, true, false, 0, false);
+	}
+
+	@Test
+	public void fitSingleGaussianDCLVMMLEBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(false, 2, true, false, 0, false);
 	}
 
 	@Test
 	public void fitSingleGaussianBLVMMLEBetterThanLVMMLE()
 	{
-		fitSingleGaussianBetterLVM(true, true, false, true);
+		fitSingleGaussianBetterLVM(true, 0, true, false, 0, true);
+	}
+
+	@Test
+	public void fitSingleGaussianCLVMMLEBetterThanLVMMLE()
+	{
+		fitSingleGaussianBetterLVM(false, 1, true, false, 0, true);
+	}
+
+	@Test
+	public void fitSingleGaussianDCLVMMLEBetterThanLVMMLE()
+	{
+		fitSingleGaussianBetterLVM(false, 2, true, false, 0, true);
+	}
+
+	@Test
+	public void fitSingleGaussianBDCLVMMLEBetterThanLVMMLE()
+	{
+		fitSingleGaussianBetterLVM(true, 2, true, false, 0, true);
 	}
 
 	@Test
 	public void fitSingleGaussianBLVMMLEBetterThanBLVM()
 	{
-		fitSingleGaussianBetterLVM(true, true, true, false);
+		fitSingleGaussianBetterLVM(true, 0, true, true, 0, false);
 	}
 
-	private void fitSingleGaussianBetterLVM(boolean bounded2, boolean mle2, boolean bounded, boolean mle)
+	@Test
+	public void fitSingleGaussianBCLVMMLEBetterThanBCLVM()
+	{
+		fitSingleGaussianBetterLVM(true, 1, true, true, 1, false);
+	}
+
+	@Test
+	public void fitSingleGaussianBDCLVMMLEBetterThanBDCLVM()
+	{
+		fitSingleGaussianBetterLVM(true, 2, true, true, 2, false);
+	}
+
+	private void fitSingleGaussianBetterLVM(boolean bounded2, int clamping2, boolean mle2, boolean bounded,
+			int clamping, boolean mle)
+	{
+		NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
+		NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
+		canFitSingleGaussianBetter(solver, bounded, !mle, solver2, bounded2, !mle2, getLVMName(bounded, clamping, mle),
+				getLVMName(bounded2, clamping2, mle2));
+	}
+
+	private NonLinearFit getLVM(int bounded, int clamping, boolean mle)
 	{
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, GaussianFunctionFactory.FIT_CIRCLE);
 		StoppingCriteria sc = new ErrorStoppingCriteria();
 		sc.setMaximumIterations(100);
-		BoundedNonLinearFit solver = new BoundedNonLinearFit(f, sc);
+		NonLinearFit solver = (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc)
+				: new NonLinearFit(f, sc);
+		if (clamping != 0)
+		{
+			BoundedNonLinearFit bsolver = (BoundedNonLinearFit) solver;
+			bsolver.setClampValues(defaultClampValues);
+			bsolver.setDynamicClamp(clamping == 2);
+		}
 		solver.setMLE(mle);
-		BoundedNonLinearFit solver2 = new BoundedNonLinearFit(f, sc);
-		solver2.setMLE(mle2);
-		canFitSingleGaussianBetter(solver, bounded, !mle, solver2, bounded2, !mle2, getLVMName(bounded, mle),
-				getLVMName(bounded2, mle2));
+		return solver;
 	}
 
-	private String getLVMName(boolean bounded, boolean mle)
+	private String getLVMName(boolean bounded, int clamping, boolean mle)
 	{
-		return ((bounded) ? "B" : "") + "LVM" + ((mle) ? " MLE" : "");
+		return ((bounded) ? "B" : "") + ((clamping == 0) ? "" : ((clamping == 1) ? "C" : "DC")) + "LVM" +
+				((mle) ? " MLE" : "");
 	}
 
 	private void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, boolean withBias)
@@ -176,12 +296,14 @@ public class BoundedFunctionSolverTest
 		}
 	}
 
+	int count, better;
+
 	private void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, boolean withBias,
 			FunctionSolver solver2, boolean applyBounds2, boolean withBias2, String name, String name2)
 	{
 		randomGenerator.setSeed(seed);
-		int count = 0;
-		int better = 0;
+		count = 0;
+		better = 0;
 		double bias2 = (withBias != withBias2) ? (withBias) ? -bias : bias : 0;
 		for (double s : signal)
 		{
@@ -219,22 +341,36 @@ public class BoundedFunctionSolverTest
 								if (applyBounds2)
 									solver2.setBounds(null, null);
 
-								for (int i = 0; i < upper.length; i++)
-								{ // Ignore parameters we are not fitting
-									if (upper[i] == 0)
-										continue;
-									double d1 = Math.abs(fp[i] - expected[i]);
-									double d2 = Math.abs(fp2[i] - expected2[i]);
-									count++;
-									if (d2 <= d1)
-										better++;
-								}
+								// All params
+								/*
+								 * for (int i = 0; i < upper.length; i++)
+								 * {
+								 * // Ignore parameters we are not fitting
+								 * if (upper[i] == 0)
+								 * continue;
+								 * compare(fp[i], expected[i], fp2[i], expected2[i]);
+								 * }
+								 */
+
+								// Location
+								compare(fp[3], expected[3], fp2[3], expected2[3]);
+								compare(fp[4], expected[4], fp2[4], expected2[4]);
 							}
 			}
 		}
-		String msg = String.format("%s vs %s : Better %d / %d", name2, name, better, count);
+		String msg = String.format("%s vs %s : Better %d / %d  (%.2f)", name2, name, better, count,
+				100.0 * better / count);
 		System.out.println(msg);
 		Assert.assertTrue(msg, better > count / 2);
+	}
+
+	private void compare(double o1, double e1, double o2, double e2)
+	{
+		double d1 = Math.abs(o1 - e1);
+		double d2 = Math.abs(o2 - e2);
+		count++;
+		if (d2 <= d1)
+			better++;
 	}
 
 	private double[] createParams(double db, double signal, double dx, double dy, double dsx, boolean withBias)
