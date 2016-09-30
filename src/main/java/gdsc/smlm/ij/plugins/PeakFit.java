@@ -1682,7 +1682,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	public static boolean configureFitSolver(GlobalSettings settings, String filename, boolean extraOptions,
 			boolean ignoreCalibration)
 	{
-		FitConfiguration fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();
+		FitEngineConfiguration config = settings.getFitEngineConfiguration();
+		FitConfiguration fitConfig = config.getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
 
 		boolean isBoundedLVM = fitConfig.getFitSolver() == FitSolver.LVM_MLE || fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM ||
@@ -1876,6 +1877,15 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			// No options yet for Apache LVM fitting. Save options for consistency
 			if (filename != null)
 				SettingsManager.saveSettings(settings, filename);
+		}
+
+		if (config.isIncludeNeighbours())
+		{
+			if (!fitConfig.getFunctionSolver().isBounded())
+			{
+				IJ.error(TITLE, "Including neighbours requires a bounded fit solver");
+				return false;
+			}
 		}
 		
 		return true;
