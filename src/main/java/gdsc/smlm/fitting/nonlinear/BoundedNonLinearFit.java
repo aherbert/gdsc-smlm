@@ -31,6 +31,8 @@ public class BoundedNonLinearFit extends NonLinearFit
 {
 	private boolean isLower = false, isUpper = false;
 	private double[] lower, upper;
+	private boolean[] atBounds;
+	private int atBoundsCount;
 	private boolean isClamped = false;
 	private double[] clamp;
 	private int[] dir;
@@ -76,6 +78,43 @@ public class BoundedNonLinearFit extends NonLinearFit
 			double maxAbsoluteError)
 	{
 		super(func, sc, significantDigits, maxAbsoluteError);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#solve(int)
+	 */
+	protected boolean solve(final int m)
+	{
+		if (!super.solve(m))
+		{
+			// If using a bounded LVM is there a chance that the gradient against the bounds will 
+			// be very large and effect the linear decomposition of the matrix? Keep a record each 
+			// iteration of what values are set to the bounds. If decomposition fails try again but set 
+			// the bounded params to zero (these are ignored by the solver), thus skipping these params for 
+			// this iteration.
+
+			if (atBoundsCount != 0)
+			{
+				// Extract the data we require
+				for (int i = m; i-- > 0;)
+				{
+					da[i] = (atBounds[i]) ? 0 : beta[i];
+					for (int j = m; j-- > 0;)
+						covar[i][j] = alpha[i][j];
+					covar[i][i] *= (1 + lambda);
+				}
+
+				// This handles the case when the entire set of params have been excluded
+				return solve(covar, da);
+			}
+			else
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/*
@@ -219,6 +258,10 @@ public class BoundedNonLinearFit extends NonLinearFit
 					throw new IllegalArgumentException(
 							"Lower bound is above upper bound: " + lower[i] + " > " + upper[i]);
 		}
+		// Create an array to store the indices that were at the bounds
+		atBoundsCount = 0;
+		if ((isUpper || isLower) && atBounds == null)
+			atBounds = new boolean[indices.length];
 	}
 
 	/**
@@ -249,26 +292,46 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 */
 	private boolean applyBounds(double[] point, int[] gradientIndices)
 	{
-		boolean truncated = false;
 		if (isUpper)
 		{
 			for (int i = 0; i < gradientIndices.length; i++)
 				if (point[gradientIndices[i]] > upper[i])
 				{
+					atBounds[i] = true;
 					point[gradientIndices[i]] = upper[i];
-					truncated = true;
 				}
+
+			if (isLower)
+			{
+				for (int i = 0; i < gradientIndices.length; i++)
+					if (point[gradientIndices[i]] < lower[i])
+					{
+						atBounds[i] = true;
+						point[gradientIndices[i]] = lower[i];
+					}
+			}
+			return countAtBounds() != 0;
 		}
-		if (isLower)
+		else if (isLower)
 		{
 			for (int i = 0; i < gradientIndices.length; i++)
 				if (point[gradientIndices[i]] < lower[i])
 				{
+					atBounds[i] = true;
 					point[gradientIndices[i]] = lower[i];
-					truncated = true;
 				}
+			return countAtBounds() != 0;
 		}
-		return truncated;
+		return false;
+	}
+
+	private int countAtBounds()
+	{
+		atBoundsCount = 0;
+		for (int i = 0; i < atBounds.length; i++)
+			if (atBounds[i])
+				atBoundsCount++;
+		return atBoundsCount;
 	}
 
 	/**
