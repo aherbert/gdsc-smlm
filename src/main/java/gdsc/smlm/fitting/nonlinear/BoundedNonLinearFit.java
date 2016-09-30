@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear;
 
+import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.NonLinearFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -34,7 +35,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	private boolean[] atBounds;
 	private int atBoundsCount;
 	private boolean isClamped = false;
-	private double[] clamp;
+	private double[] clampInitial, clamp;
 	private int[] dir;
 	private boolean dynamicClamp = false;
 
@@ -155,6 +156,16 @@ public class BoundedNonLinearFit extends NonLinearFit
 		return truncated;
 	}
 
+	@Override
+	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
+			double noise)
+	{
+		if (isClamped)
+			// Prevent the clamping value being destroyed by dynamic updates
+			clamp = (dynamicClamp) ? clampInitial.clone() : clampInitial;
+		return super.computeFit(n, y, y_fit, a, a_dev, error, noise);
+	}
+
 	/**
 	 * Produce the clamping value.
 	 * <p>
@@ -222,7 +233,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	public void setBounds(double[] lowerB, double[] upperB)
 	{
 		// Extract the bounds for the parameters we are fitting
-		int[] indices = f.gradientIndices();
+		final int[] indices = f.gradientIndices();
 
 		if (lowerB == null)
 		{
@@ -346,25 +357,26 @@ public class BoundedNonLinearFit extends NonLinearFit
 	public void setClampValues(double[] clampValues)
 	{
 		// Extract the bounds for the parameters we are fitting
-		int[] indices = f.gradientIndices();
+		final int[] indices = f.gradientIndices();
 
 		if (clampValues == null)
 		{
-			clamp = null;
+			clampInitial = null;
 		}
 		else
 		{
-			clamp = new double[indices.length];
+			clampInitial = new double[indices.length];
 			for (int i = 0; i < indices.length; i++)
 			{
 				final double v = clampValues[indices[i]];
 				if (Double.isNaN(v) || Double.isInfinite(v))
 					continue;
-				clamp[i] = Math.abs(v);
+				clampInitial[i] = Math.abs(v);
 			}
 		}
-		isClamped = checkArray(clamp, 0);
-		dir = (isClamped) ? new int[clamp.length] : null;
+		isClamped = checkArray(clampInitial, 0);
+		if (isClamped && dir == null)
+			dir = new int[clampInitial.length];
 	}
 
 	/**
