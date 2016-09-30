@@ -9,8 +9,6 @@ import org.apache.commons.math3.stat.inference.TTest;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.sun.tools.javadoc.ToolOption;
-
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
@@ -19,15 +17,14 @@ import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import sun.rmi.rmic.iiop.StaticStringsHash;
 
 /**
  * Test that a bounded fitter can return the same results with and without bounds.
  */
 public class BoundedFunctionSolverTest
 {
-	//long seed = 30051977; //System.currentTimeMillis() + System.identityHashCode(this);
-	long seed = System.currentTimeMillis() + System.identityHashCode(this);
+	long seed = 30051977; //System.currentTimeMillis() + System.identityHashCode(this);
+	//long seed = System.currentTimeMillis() + System.identityHashCode(this);
 	RandomGenerator randomGenerator = new Well19937c(seed);
 	RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
 
