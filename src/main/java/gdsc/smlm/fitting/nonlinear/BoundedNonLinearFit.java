@@ -263,9 +263,9 @@ public class BoundedNonLinearFit extends NonLinearFit
 			}
 
 		}
-		
+
 		super.accepted(a, ap, m);
-		
+
 		if (nonLocalSearch)
 		{
 			// do not update the lambda parameter so set it back
@@ -546,14 +546,14 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 * When using clamping, if [update * local search parameter] > [initial clamp value] then the search is deemed to be
 	 * non-local and lambda is not updated. This preserves the steepest descent search from the previous step.
 	 * <p>
-	 * Set to zero to disable.
+	 * A value less than 1 is invalid and disables this feature..
 	 * 
 	 * @param localSearch
 	 *            the local search parameter
 	 */
 	public void setLocalSearch(double localSearch)
 	{
-		this.localSearch = localSearch;
+		this.localSearch = (localSearch > 1) ? localSearch : 0;
 	}
 
 	/**
