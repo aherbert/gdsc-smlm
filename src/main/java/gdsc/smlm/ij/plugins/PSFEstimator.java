@@ -115,14 +115,14 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		extraOptions = Utils.isExtraOptions();
 		if (imp == null)
 		{
 			IJ.noImage();
 			return DONE;
 		}
-		
+
 		globalSettings = SettingsManager.loadSettings();
 		settings = globalSettings.getPsfEstimatorSettings();
 		// Reset
@@ -219,11 +219,13 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
+		gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
+		gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
 
 		if (gd.getLayout() != null)
 		{
@@ -298,11 +300,13 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
 
+		fitConfig.setSmartFilter(gd.getNextBoolean());
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		fitConfig.setSignalStrength(gd.getNextNumber());
 		fitConfig.setMinPhotons(gd.getNextNumber());
 		fitConfig.setMinWidthFactor(gd.getNextNumber());
 		fitConfig.setWidthFactor(gd.getNextNumber());
+		fitConfig.setPrecisionThreshold(gd.getNextNumber());
 
 		if (gd.invalidNumber())
 			return false;
@@ -347,6 +351,8 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		final String filename = SettingsManager.getSettingsFilename();
 		SettingsManager.saveSettings(globalSettings, filename);
 
+		if (!PeakFit.configureSmartFilter(globalSettings, filename))
+			return false;
 		if (!PeakFit.configureDataFilter(globalSettings, filename, false))
 			return false;
 		if (!PeakFit.configureFitSolver(globalSettings, filename, false))
@@ -356,11 +362,11 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		if (interlacedData)
 		{
 			gd = new GenericDialog(TITLE);
-			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
-					+ "Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n"
-					+ "Block = The number of continuous frames containing data\n"
-					+ "Skip = The number of continuous frames to ignore before the next data\n \n"
-					+ "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
+			gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n" +
+					"Describe the regular repeat of the data:\n \n" + "Start = The first frame that contains data\n" +
+					"Block = The number of continuous frames containing data\n" +
+					"Skip = The number of continuous frames to ignore before the next data\n \n" +
+					"E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore, then repeat.");
 			gd.addNumericField("Start", optionDataStart, 0);
 			gd.addNumericField("Block", optionDataBlock, 0);
 			gd.addNumericField("Skip", optionDataSkip, 0);
@@ -724,8 +730,9 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 				if (sampleNew[ii].getN() == 0)
 					continue;
 				StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
-				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins, "Mean = " +
-						Utils.rounded(stats.getMean()) + ". Median = " + Utils.rounded(sampleNew[ii].getPercentile(50)));
+				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins,
+						"Mean = " + Utils.rounded(stats.getMean()) + ". Median = " +
+								Utils.rounded(sampleNew[ii].getPercentile(50)));
 				requireRetile = requireRetile || Utils.isNewWindow();
 			}
 			if (requireRetile && count > 0)
@@ -766,7 +773,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		resultsSettings.logProgress = false;
 		resultsSettings.setResultsImage(0);
 		resultsSettings.resultsDirectory = null;
-		PeakFit fitter = new PeakFit(config, resultsSettings);
+		PeakFit fitter = new PeakFit(config, resultsSettings, globalSettings.getCalibration());
 		return fitter;
 	}
 

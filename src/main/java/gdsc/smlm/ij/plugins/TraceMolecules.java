@@ -1617,6 +1617,7 @@ public class TraceMolecules implements PlugIn
 
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
+		gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
@@ -1655,6 +1656,7 @@ public class TraceMolecules implements PlugIn
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
 
+		fitConfig.setSmartFilter(gd.getNextBoolean());
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		fitConfig.setSignalStrength(gd.getNextNumber());
 		fitConfig.setMinPhotons(gd.getNextNumber());
@@ -1692,6 +1694,8 @@ public class TraceMolecules implements PlugIn
 
 		debugFailures = gd.getNextBoolean();
 
+		if (!PeakFit.configureSmartFilter(globalSettings, filename))
+			return;
 		if (!PeakFit.configureDataFilter(globalSettings, filename, false))
 			return;
 		if (!PeakFit.configureFitSolver(globalSettings, filename, false))

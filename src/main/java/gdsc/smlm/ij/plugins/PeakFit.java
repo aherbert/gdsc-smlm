@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -89,6 +90,8 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
+import gdsc.smlm.results.filter.DirectFilter;
+import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -193,6 +196,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
 	private TextField textPrecisionThreshold;
+	private Checkbox textSmartFilter;
 	private TextField textNoise;
 	private Choice textNoiseMethod;
 	private TextField textMinWidthFactor;
@@ -783,6 +787,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 			discardLabel = gd.getMessage();
+			gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 
 			gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 			gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
@@ -918,6 +923,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textNeighbourHeightThreshold = numerics.get(n++);
 				textResidualsThreshold = numerics.get(n++);
 				textDuplicateDistance = numerics.get(n++);
+				textSmartFilter = checkboxes.get(b++);
 				textCoordinateShiftFactor = numerics.get(n++);
 				textSignalStrength = numerics.get(n++);
 				textMinPhotons = numerics.get(n++);
@@ -929,6 +935,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textMinWidthFactor = numerics.get(n++);
 				textWidthFactor = numerics.get(n++);
 				textPrecisionThreshold = numerics.get(n++);
+
+				updateFilterInput();
+				textSmartFilter.addItemListener(this);
 			}
 			textLogProgress = checkboxes.get(b++);
 			if (!maximaIdentification)
@@ -1341,20 +1350,61 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 		else if (e.getSource() instanceof Checkbox)
 		{
-			// Run the PSF Calculator
-			Checkbox cb = (Checkbox) e.getSource();
-			if (cb.getState())
+			if (e.getSource() == textSmartFilter)
 			{
-				cb.setState(false);
-				PSFCalculator calculator = new PSFCalculator();
-				calculatorSettings.pixelPitch = calibration.nmPerPixel / 1000.0;
-				calculatorSettings.magnification = 1;
-				calculatorSettings.beamExpander = 1;
-				double sd = calculator.calculate(calculatorSettings, true);
-				if (sd > 0)
-					textInitialPeakStdDev0.setText(Double.toString(sd));
+				updateFilterInput();
+			}
+			else
+			{
+				// Run the PSF Calculator
+				Checkbox cb = (Checkbox) e.getSource();
+				if (cb.getState())
+				{
+					cb.setState(false);
+					PSFCalculator calculator = new PSFCalculator();
+					calculatorSettings.pixelPitch = calibration.nmPerPixel / 1000.0;
+					calculatorSettings.magnification = 1;
+					calculatorSettings.beamExpander = 1;
+					double sd = calculator.calculate(calculatorSettings, true);
+					if (sd > 0)
+						textInitialPeakStdDev0.setText(Double.toString(sd));
+				}
 			}
 		}
+	}
+
+	private void updateFilterInput()
+	{
+		if (textSmartFilter.getState())
+		{
+			disableEditing(textCoordinateShiftFactor);
+			disableEditing(textSignalStrength);
+			disableEditing(textMinPhotons);
+			disableEditing(textMinWidthFactor);
+			disableEditing(textWidthFactor);
+			disableEditing(textPrecisionThreshold);
+		}
+		else
+		{
+			enableEditing(textCoordinateShiftFactor);
+			enableEditing(textSignalStrength);
+			enableEditing(textMinPhotons);
+			enableEditing(textMinWidthFactor);
+			enableEditing(textWidthFactor);
+			enableEditing(textPrecisionThreshold);
+		}
+	}
+
+	private void disableEditing(TextField textField)
+	{
+		textField.setEditable(false);
+		textField.setBackground(SystemColor.control);
+	}
+
+	private void enableEditing(TextField textField)
+	{
+		textField.setEditable(true);
+		textField.setBackground(SystemColor.white);
 	}
 
 	private boolean readDialog(GlobalSettings settings, GenericDialog gd, boolean isCrop)
@@ -1405,6 +1455,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			fitConfig.setDuplicateDistance(gd.getNextNumber());
 
+			fitConfig.setSmartFilter(gd.getNextBoolean());
 			fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 			fitConfig.setSignalStrength(gd.getNextNumber());
 			fitConfig.setMinPhotons(gd.getNextNumber());
@@ -1468,14 +1519,21 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 				Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 				Parameters.isPositive("Duplicate distance", fitConfig.getDuplicateDistance());
-				Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
-				Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
-				Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
+
+				if (!fitConfig.isSmartFilter())
+				{
+					Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
+					Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+					Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
+				}
 				if (extraOptions)
 					Parameters.isPositive("Noise", fitConfig.getNoise());
-				Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-				Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
-				Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+				if (!fitConfig.isSmartFilter())
+				{
+					Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
+					Parameters.isPositive("Width factor", fitConfig.getWidthFactor());
+					Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+				}
 			}
 			if (resultsSettings.getResultsImage() == ResultsImage.SIGNAL_AV_PRECISION ||
 					resultsSettings.getResultsImage() == ResultsImage.LOCALISATIONS_AV_PRECISION)
@@ -1493,18 +1551,24 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// If precision filtering then we need the camera bias
-		if (!maximaIdentification && fitConfig.getPrecisionThreshold() > 0)
+		if (!maximaIdentification)
 		{
-			gd = new GenericDialog(TITLE);
-			gd.addMessage(
-					"Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
-			gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
-			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-			gd.showDialog();
-			if (gd.wasCanceled())
+			if (!configureSmartFilter(settings, filename))
 				return false;
-			fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
-			calibration.bias = Math.abs(gd.getNextNumber());
+
+			if (!fitConfig.isSmartFilter() && fitConfig.getPrecisionThreshold() > 0)
+			{
+				gd = new GenericDialog(TITLE);
+				gd.addMessage(
+						"Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
+				gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
+				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return false;
+				fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
+				calibration.bias = Math.abs(gd.getNextNumber());
+			}
 		}
 
 		if (!configureDataFilter(settings, filename, extraOptions))
@@ -1561,6 +1625,57 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			IJ.error(TITLE, "Failed to save settings to file " + filename);
 		}
 		return result;
+	}
+
+	/**
+	 * Show a dialog to configure the smart filter. The updated settings are saved to the settings file.
+	 * <p>
+	 * If the fit configuration isSmartFilter is not enabled then this method returns true. If it is enabled then a
+	 * dialog is shown to input the configuration for a smart filter. If no valid filter can be created from the input
+	 * then the method returns false.
+	 *
+	 * @param settings
+	 *            the settings
+	 * @param filename
+	 *            the filename
+	 * @return true, if successful
+	 */
+	public static boolean configureSmartFilter(GlobalSettings settings, String filename)
+	{
+		FitEngineConfiguration config = settings.getFitEngineConfiguration();
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		Calibration calibration = settings.getCalibration();
+		if (!fitConfig.isSmartFilter())
+			return true;
+
+		GenericDialog gd = new GenericDialog(TITLE);
+
+		String xml = fitConfig.getSmartFilterXML();
+		if (Utils.isNullOrEmpty(xml))
+			xml = fitConfig.getDefaultSmartFilterXML();
+
+		gd.addMessage("Smart filter (used to pick optimum results during fitting)");
+		gd.addTextAreas(xml, null, 8, 60);
+		// Currently we just collect it here even if not needed
+		gd.addMessage(
+				"Smart filters using precision filtering may require a local background level.\n \nLocal background requires the camera bias:");
+		gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+
+		xml = gd.getNextText();
+		Filter f = DirectFilter.fromXML(xml);
+		if (f == null || !(f instanceof DirectFilter))
+			return false;
+		fitConfig.setDirectFilter((DirectFilter) f);
+
+		calibration.bias = Math.abs(gd.getNextNumber());
+
+		if (filename != null)
+			SettingsManager.saveSettings(settings, filename);
+		return true;
 	}
 
 	/**
@@ -1686,9 +1801,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		Calibration calibration = settings.getCalibration();
 
-		boolean isBoundedLVM = fitConfig.getFitSolver() == FitSolver.LVM_MLE || fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM ||
-				fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM_WEIGHTED; 
-		
+		boolean isBoundedLVM = fitConfig.getFitSolver() == FitSolver.LVM_MLE ||
+				fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM ||
+				fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM_WEIGHTED;
+
 		if (fitConfig.getFitSolver() == FitSolver.MLE)
 		{
 			GenericDialog gd = new GenericDialog(TITLE);
@@ -1760,12 +1876,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return false;
 			}
 		}
-		else if (isBoundedLVM || fitConfig.getFitSolver() == FitSolver.LVM || fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
+		else if (isBoundedLVM || fitConfig.getFitSolver() == FitSolver.LVM ||
+				fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED)
 		{
-			boolean isWeightedLVM = fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED || fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM_WEIGHTED;
+			boolean isWeightedLVM = fitConfig.getFitSolver() == FitSolver.LVM_WEIGHTED ||
+					fitConfig.getFitSolver() == FitSolver.BOUNDED_LVM_WEIGHTED;
 			boolean requireGain = fitConfig.getFitSolver() == FitSolver.LVM_MLE;
 			boolean requireBias = isWeightedLVM || requireGain;
-			
+
 			// Collect options for LVM fitting
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("LVM requires additional parameters");
@@ -1788,7 +1906,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
 			if (requireGain)
 				gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
-			
+
 			if (isBoundedLVM)
 			{
 				gd.addCheckbox("Use_clamping", fitConfig.isUseClamping());
@@ -1804,7 +1922,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 					gd.addNumericField("Clamp_sd1", fitConfig.getClampYSD(), 2);
 				}
 			}
-			
+
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -1832,23 +1950,30 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				calibration.gain = Math.abs(gd.getNextNumber());
 				fitConfig.setGain(calibration.gain);
 			}
-			
+
 			if (isBoundedLVM)
 			{
 				fitConfig.setUseClamping(gd.getNextBoolean());
 				fitConfig.setUseDynamicClamping(gd.getNextBoolean());
 				if (extraOptions)
 				{
-					fitConfig.setClampBackground(Math.abs(gd.getNextNumber()));;
-					fitConfig.setClampSignal(Math.abs(gd.getNextNumber()));;
-					fitConfig.setClampAngle(Math.abs(gd.getNextNumber()));;
-					fitConfig.setClampX(Math.abs(gd.getNextNumber()));;
-					fitConfig.setClampY(Math.abs(gd.getNextNumber()));;
-					fitConfig.setClampXSD(Math.abs(gd.getNextNumber()));;
-					fitConfig.setClampYSD(Math.abs(gd.getNextNumber()));;
+					fitConfig.setClampBackground(Math.abs(gd.getNextNumber()));
+					;
+					fitConfig.setClampSignal(Math.abs(gd.getNextNumber()));
+					;
+					fitConfig.setClampAngle(Math.abs(gd.getNextNumber()));
+					;
+					fitConfig.setClampX(Math.abs(gd.getNextNumber()));
+					;
+					fitConfig.setClampY(Math.abs(gd.getNextNumber()));
+					;
+					fitConfig.setClampXSD(Math.abs(gd.getNextNumber()));
+					;
+					fitConfig.setClampYSD(Math.abs(gd.getNextNumber()));
+					;
 				}
 			}
-			
+
 			if (isWeightedLVM && !ignoreCalibration)
 			{
 				fitConfig.setNoiseModel(
@@ -1887,7 +2012,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 

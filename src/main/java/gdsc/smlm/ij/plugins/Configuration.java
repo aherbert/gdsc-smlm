@@ -35,7 +35,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.SystemColor;
 import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.TextEvent;
@@ -47,7 +50,7 @@ import java.util.Vector;
  * Adjust the configuration used for fitting.
  */
 // TODO - This could be incorporated into the PeakFit plugin as another run mode.
-public class Configuration implements PlugIn, MouseListener, TextListener
+public class Configuration implements PlugIn, MouseListener, TextListener, ItemListener
 {
 	private static final String TITLE = "Fit Configuration";
 
@@ -77,6 +80,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	private TextField textNeighbourHeightThreshold;
 	private TextField textResidualsThreshold;
 	private TextField textDuplicateDistance;
+	private Checkbox textSmartFilter;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
@@ -92,7 +96,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		showDialog();
 	}
 
@@ -150,11 +154,12 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
-		
+
 		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
 
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
+		gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
@@ -201,12 +206,16 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 			textNeighbourHeightThreshold = numerics.get(n++);
 			textResidualsThreshold = numerics.get(n++);
 			textDuplicateDistance = numerics.get(n++);
+			textSmartFilter = checkboxes.get(b++);
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
 			textMinPhotons = numerics.get(n++);
 			textMinWidthFactor = numerics.get(n++);
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
+
+			updateFilterInput();
+			textSmartFilter.addItemListener(this);
 		}
 
 		if (gd.getLayout() != null)
@@ -270,6 +279,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 
 		fitConfig.setDuplicateDistance(gd.getNextNumber());
 
+		fitConfig.setSmartFilter(gd.getNextBoolean());
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		fitConfig.setSignalStrength(gd.getNextNumber());
 		fitConfig.setMinPhotons(gd.getNextNumber());
@@ -311,9 +321,12 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		configurationChanged = SettingsManager.saveSettings(settings, filename);
 		if (configurationChanged)
 			SettingsManager.saveSettingsFilename(filename);
-		
-		PeakFit.configureDataFilter(settings, filename, false);		
-		PeakFit.configureFitSolver(settings, filename, false);		
+
+		if (!PeakFit.configureSmartFilter(settings, filename))
+			return;
+		if (!PeakFit.configureDataFilter(settings, filename, false))
+			return;
+		PeakFit.configureFitSolver(settings, filename, false);
 	}
 
 	public boolean isConfigurationChanged()
@@ -410,7 +423,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				// a class scope settings instance (loaded in showDialog()). However the user would not 
 				// see all the changes that have been written, since the later dialogs are shown depending 
 				// on what options are initially configured. 
-				
+
 				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename);
 				if (settings == null)
 					return;
@@ -446,5 +459,50 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 			}
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+	 */
+	public void itemStateChanged(ItemEvent e)
+	{
+		if (e.getSource() instanceof Checkbox)
+			updateFilterInput();
+	}
+
+	private void updateFilterInput()
+	{
+		if (textSmartFilter.getState())
+		{
+			disableEditing(textCoordinateShiftFactor);
+			disableEditing(textSignalStrength);
+			disableEditing(textMinPhotons);
+			disableEditing(textMinWidthFactor);
+			disableEditing(textWidthFactor);
+			disableEditing(textPrecisionThreshold);
+		}
+		else
+		{
+			enableEditing(textCoordinateShiftFactor);
+			enableEditing(textSignalStrength);
+			enableEditing(textMinPhotons);
+			enableEditing(textMinWidthFactor);
+			enableEditing(textWidthFactor);
+			enableEditing(textPrecisionThreshold);
+		}
+	}
+
+	private void disableEditing(TextField textField)
+	{
+		textField.setEditable(false);
+		textField.setBackground(SystemColor.control);
+	}
+
+	private void enableEditing(TextField textField)
+	{
+		textField.setEditable(true);
+		textField.setBackground(SystemColor.white);
 	}
 }

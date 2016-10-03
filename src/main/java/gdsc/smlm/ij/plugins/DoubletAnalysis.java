@@ -3081,6 +3081,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addChoice("Template", templates, templates[0]);
 		// Allow the settings from the benchmark analysis to be used
 		gd.addCheckbox("Benchmark_settings", analysisUseBenchmarkSettings);
+		gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 		gd.addSlider("Shift_factor", 0.01, 2, filterFitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
@@ -3131,6 +3132,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Ignore the template
 		gd.getNextChoice();
 		analysisUseBenchmarkSettings = gd.getNextBoolean();
+		fitConfig.setSmartFilter(gd.getNextBoolean());
 		filterFitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		filterFitConfig.setSignalStrength(gd.getNextNumber());
 		filterFitConfig.setMinPhotons(gd.getNextNumber());
