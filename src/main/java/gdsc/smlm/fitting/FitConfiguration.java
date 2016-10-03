@@ -37,6 +37,8 @@ import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
+import gdsc.smlm.results.filter.MultiFilter;
+import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 
 /**
@@ -155,7 +157,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			// The gaussian function cannot be reused. 
 			// Do not call invalidate as it also invalidates the solver and we can re-use that.
 			//invalidateGaussianFunction();
-			gaussianFunction = null; 
+			gaussianFunction = null;
 		}
 		if (gaussianFunction == null)
 		{
@@ -2151,6 +2153,39 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public String getSmartFilterXML()
 	{
 		return smartFilterXML;
+	}
+
+	/**
+	 * This returns the representation of this object as a smart filter. This ignores any current smart filter and
+	 * only uses the standard filtering settings.
+	 * 
+	 * @return the smart filter if using this object as a smart filter.
+	 */
+	public DirectFilter getDefaultSmartFilter()
+	{
+		double signal = getMinPhotons();
+		float snr = (float) getSignalStrength();
+		double minWidth = getMinWidthFactor();
+		double maxWidth = getWidthFactor();
+		double shift = getCoordinateShiftFactor();
+		double eshift = 0;
+		double precision = getPrecisionThreshold();
+
+		DirectFilter f = (isPrecisionUsingBackground())
+				? new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision)
+				: new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+		return f;
+	}
+
+	/**
+	 * This returns the XML representation of this object as a smart fitler. This ignores any current smart filter and
+	 * only uses the standard filtering settings.
+	 * 
+	 * @return the smart filter XML if using this object as a smart filter.
+	 */
+	public String getDefaultSmartFilterXML()
+	{
+		return getDefaultSmartFilter().toXML();
 	}
 
 	/**
