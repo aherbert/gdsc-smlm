@@ -54,7 +54,7 @@ public class BoundedFunctionSolverTest
 		// DOI: 10.1186/2192-2853-1-6
 		// Page 3
 		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
-		
+
 		// This seems big for background in photons
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
 		//defaultClampValues[Gaussian2DFunction.BACKGROUND] = 20;
@@ -67,7 +67,7 @@ public class BoundedFunctionSolverTest
 	}
 
 	// TODO - Test if local search param if useful when using clamping
-	
+
 	// Standard LVM
 	@Test
 	public void canFitSingleGaussianLVM()
@@ -189,9 +189,21 @@ public class BoundedFunctionSolverTest
 	}
 
 	@Test
+	public void fitSingleGaussianBCLVMMLEBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(true, 1, true, false, 0, false);
+	}
+
+	@Test
 	public void fitSingleGaussianDCLVMMLEBetterThanLVM()
 	{
 		fitSingleGaussianBetterLVM(false, 2, true, false, 0, false);
+	}
+
+	@Test
+	public void fitSingleGaussianBDCLVMMLEBetterThanLVM()
+	{
+		fitSingleGaussianBetterLVM(true, 2, true, false, 0, false);
 	}
 
 	@Test
@@ -257,8 +269,13 @@ public class BoundedFunctionSolverTest
 			BoundedNonLinearFit bsolver = (BoundedNonLinearFit) solver;
 			bsolver.setClampValues(defaultClampValues);
 			bsolver.setDynamicClamp(clamping == 2);
+			// Local search anecdotally only works with clamped LVM fitters that are not bounded.
+			// It must act like a soft-bounding search. For now this is not a used feature and
+			// will not be formally tested 
+			//bsolver.setLocalSearch(3);
 		}
 		solver.setMLE(mle);
+		solver.setInitialLambda(1);
 		return solver;
 	}
 
@@ -319,15 +336,24 @@ public class BoundedFunctionSolverTest
 		int[] betterAccuracy = new int[3];
 		int[] totalAccuracy = new int[3];
 
+		int i1 = 0, i2 = 0;
 		for (double s : signal)
 		{
 			double[] expected = createParams(1, s, 0, 0, 1, withBias);
-			double[] lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8, withBias);
-			double[] upper = createParams(3, s * 2, 0.2, 0.2, 1.2, withBias);
+			if (applyBounds)
+			{
+				double[] lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8, withBias);
+				double[] upper = createParams(3, s * 2, 0.2, 0.2, 1.2, withBias);
+				solver.setBounds(lower, upper);
+			}
 
 			double[] expected2 = createParams(1, s, 0, 0, 1, withBias2);
-			double[] lower2 = createParams(0, s * 0.5, -0.2, -0.2, 0.8, withBias2);
-			double[] upper2 = createParams(3, s * 2, 0.2, 0.2, 1.2, withBias2);
+			if (applyBounds2)
+			{
+				double[] lower2 = createParams(0, s * 0.5, -0.2, -0.2, 0.8, withBias2);
+				double[] upper2 = createParams(3, s * 2, 0.2, 0.2, 1.2, withBias2);
+				solver2.setBounds(lower2, upper2);
+			}
 
 			for (double n : noise)
 			{
@@ -345,23 +371,16 @@ public class BoundedFunctionSolverTest
 							for (double dsx : factor)
 							{
 								double[] p = createParams(db, s, dx, dy, dsx, withBias);
-								if (applyBounds)
-									solver.setBounds(lower, upper);
 								double[] fp = fitGaussian(solver, data, p, expected);
-								if (applyBounds)
-									solver.setBounds(null, null);
+								i1 += solver.getEvaluations();
 
 								double[] p2 = createParams(db, s, dx, dy, dsx, withBias2);
-								if (applyBounds2)
-									solver2.setBounds(lower2, upper2);
 								double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
-								if (applyBounds2)
-									solver2.setBounds(null, null);
+								i2 += solver2.getEvaluations();
 
 								// Get the mean and sd (the fit precision)
 								compare(fp, expected, fp2, expected2, Gaussian2DFunction.SIGNAL, stats[0], stats[1]);
 
-								// Combine XY to a single set
 								compare(fp, expected, fp2, expected2, Gaussian2DFunction.X_POSITION, stats[2],
 										stats[3]);
 								compare(fp, expected, fp2, expected2, Gaussian2DFunction.Y_POSITION, stats[4],
@@ -447,7 +466,7 @@ public class BoundedFunctionSolverTest
 					printBetterDetails);
 			test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index], printBetterDetails);
 		}
-		test(name2, name, "All", better, total, true);
+		test(name2, name, String.format("All [%d] [%d] : ", i2, i1), better, total, true);
 	}
 
 	private void test(String name2, String name, String statName, int better, int total, boolean print)
