@@ -28,14 +28,16 @@ import gdsc.smlm.function.NonLinearFunction;
  * <p>
  * Support bounded parameters using a hard-stop limit.
  * <p>
- * Support parameter clamping to prevent large parameter shifts.
+ * Support parameter clamping to prevent large parameter shifts. Optionally update the clamping when the search
+ * direction changes.
+ * <p>
+ * Support ignoring an update to the LVM lambda parameter when the accepted step was not local (relative to the initial
+ * parameter clamp values)
  */
 public class BoundedNonLinearFit extends NonLinearFit
 {
 	private boolean isLower = false, isUpper = false;
 	private double[] lower, upper;
-	private boolean[] atBounds;
-	private int atBoundsCount;
 	private boolean isClamped = false;
 	private boolean nonLocalSearch = false;
 	private double localSearch = 0;
@@ -88,38 +90,39 @@ public class BoundedNonLinearFit extends NonLinearFit
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#solve(int)
+	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#solve(double[], int)
 	 */
-	protected boolean solve(final int m)
+	protected boolean solve(double[] a, final int m)
 	{
-		if (!super.solve(m))
+		if (super.solve(a, m))
+			return true;
+
+		// If using a bounded LVM is there a chance that the gradient against the bounds will 
+		// be very large and effect the linear decomposition of the matrix? 
+		// If decomposition fails try again but set the bounded params to zero (these are 
+		// ignored by the solver), thus skipping these params for this iteration.
+
+		if (atBounds(a))
 		{
-			// If using a bounded LVM is there a chance that the gradient against the bounds will 
-			// be very large and effect the linear decomposition of the matrix? Keep a record each 
-			// iteration of what values are set to the bounds. If decomposition fails try again but set 
-			// the bounded params to zero (these are ignored by the solver), thus skipping these params for 
-			// this iteration.
+			//System.out.printf("Failed when point was at the bounds\n");
+			createLinearProblem(m);
+			ignoreAtBounds(a);
 
-			if (atBoundsCount != 0)
+			// This handles the case when the entire set of params have been excluded
+			if (solve(covar, da))
 			{
-				// Extract the data we require
-				for (int i = m; i-- > 0;)
-				{
-					da[i] = (atBounds[i]) ? 0 : beta[i];
-					for (int j = m; j-- > 0;)
-						covar[i][j] = alpha[i][j];
-					covar[i][i] *= (1 + lambda);
-				}
-
-				// This handles the case when the entire set of params have been excluded
-				return solve(covar, da);
-			}
-			else
-			{
-				return false;
+				// TODO
+				// See if this ever helps. It may just add overhead.
+				// Add counters for:
+				// - how often this occurs, 
+				// - how often it allows a solution, and 
+				// - how often the solution was accepted.
+				System.out.printf("Ignoring parameters at the bounds allowed a solution to be found\n");
+				return true;
 			}
 		}
-		return true;
+
+		return false;
 	}
 
 	/*
@@ -128,9 +131,8 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#updateFitParameters(double[], int[], int, double[], double[])
 	 */
 	@Override
-	protected boolean updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da, double[] ap)
+	protected void updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da, double[] ap)
 	{
-		boolean truncated = false;
 		nonLocalSearch = false;
 
 		if (isClamped)
@@ -146,10 +148,9 @@ public class BoundedNonLinearFit extends NonLinearFit
 				{
 					// This parameter is clamped
 					ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j] / clamp(da[j], j);
-					truncated = true;
 				}
 			}
-			truncated |= applyBounds(ap, gradientIndices);
+			applyBounds(ap, gradientIndices);
 
 			// If using clamping should we can optionally only update lambda if we 
 			// are close to the correct solution.
@@ -163,9 +164,8 @@ public class BoundedNonLinearFit extends NonLinearFit
 				// Use the update parameter directly
 				ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
 			}
-			truncated |= applyBounds(ap, gradientIndices);
+			applyBounds(ap, gradientIndices);
 		}
-		return truncated;
 	}
 
 	/**
@@ -183,25 +183,27 @@ public class BoundedNonLinearFit extends NonLinearFit
 	private double clamp(double u, int k)
 	{
 		if (u == 0)
-			// Nothing to clamp. Returning here means the direction sign is not changed.
+			// Nothing to clamp
 			return 1;
 
+		double ck = clamp[k];
 		if (dynamicClamp)
 		{
 			// If the sign has changed then reduce the clamp factor
-			final int sign = (u > 0) ? 1 : -1;
+			final int newDir = (u > 0) ? 1 : -1;
 
 			// This addition overcomes the issue when the direction vector is new (i.e. zero filled)
-			if (sign + dir[k] == 0)
+			if (newDir + dir[k] == 0)
 			{
 				// Note: By reducing the size of the clamping factor we are restricting the movement
-				clamp[k] *= 0.5;
+				ck *= 0.5;
 			}
-			dir[k] = sign;
+
+			// Note: We do not update the clamp[k] array yet as the move may be rejected. 
 		}
 
 		// Denominator for clamping function
-		return 1 + (Math.abs(u) / clamp[k]);
+		return 1 + (Math.abs(u) / ck);
 	}
 
 	/**
@@ -230,15 +232,43 @@ public class BoundedNonLinearFit extends NonLinearFit
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#accepted(double[], double[], int)
+	 */
 	@Override
-	protected void reduceLambda()
+	protected void accepted(double[] a, double[] ap, int m)
 	{
+		if (isClamped && dynamicClamp)
+		{
+			// Get the direction and update the clamp parameter if the direction has changed
+			final int[] gradientIndices = f.gradientIndices();
+			for (int k = m; k-- > 0;)
+			{
+				if (clamp[k] != 0)
+				{
+					final double u = ap[gradientIndices[k]] - a[gradientIndices[k]];
+					if (u == 0)
+						continue;
+					final int newDir = (u > 0) ? 1 : -1;
+					// This addition overcomes the issue when the direction vector is new (i.e. zero filled)
+					if (newDir + dir[k] == 0)
+					{
+						// Note: By reducing the size of the clamping factor we are restricting the movement
+						clamp[k] *= 0.5;
+					}
+					dir[k] = newDir;
+				}
+			}
+
+		}
 		if (nonLocalSearch)
 		{
-			// Ignore... ?
+			// do not update the lambda parameter
 			return;
 		}
-		super.reduceLambda();
+		super.accepted(a, ap, m);
 	}
 
 	/*
@@ -253,8 +283,20 @@ public class BoundedNonLinearFit extends NonLinearFit
 	{
 		// Initialise for clamping
 		if (isClamped)
+		{
 			// Prevent the clamping value being destroyed by dynamic updates
-			clamp = (dynamicClamp) ? Arrays.copyOf(clampInitial, f.gradientIndices().length) : clampInitial;
+			if (dynamicClamp)
+			{
+				final int m = f.gradientIndices().length;
+				clamp = Arrays.copyOf(clampInitial, m);
+				for (int i = m; i-- > 0;)
+					dir[i] = 0;
+			}
+			else
+			{
+				clamp = clampInitial;
+			}
+		}
 		return super.computeFit(n, y, y_fit, a, a_dev, error, noise);
 	}
 
@@ -289,14 +331,13 @@ public class BoundedNonLinearFit extends NonLinearFit
 	public void setBounds(double[] lowerB, double[] upperB)
 	{
 		// Extract the bounds for the parameters we are fitting
-		final int[] indices = f.gradientIndices();
-
 		if (lowerB == null)
 		{
 			lower = null;
 		}
 		else
 		{
+			final int[] indices = f.gradientIndices();
 			lower = new double[indices.length];
 			for (int i = 0; i < indices.length; i++)
 			{
@@ -309,6 +350,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 		}
 		else
 		{
+			final int[] indices = f.gradientIndices();
 			upper = new double[indices.length];
 			for (int i = 0; i < indices.length; i++)
 			{
@@ -325,10 +367,6 @@ public class BoundedNonLinearFit extends NonLinearFit
 					throw new IllegalArgumentException(
 							"Lower bound is above upper bound: " + lower[i] + " > " + upper[i]);
 		}
-		// Create an array to store the indices that were at the bounds
-		atBoundsCount = 0;
-		if ((isUpper || isLower) && (atBounds == null || atBounds.length < indices.length))
-			atBounds = new boolean[indices.length];
 	}
 
 	/**
@@ -355,50 +393,85 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 *
 	 * @param point
 	 *            the point
-	 * @return true if truncated
 	 */
-	private boolean applyBounds(double[] point, int[] gradientIndices)
+	private void applyBounds(double[] point, int[] gradientIndices)
 	{
 		if (isUpper)
 		{
 			for (int i = 0; i < gradientIndices.length; i++)
 				if (point[gradientIndices[i]] > upper[i])
 				{
-					atBounds[i] = true;
 					point[gradientIndices[i]] = upper[i];
 				}
-
-			if (isLower)
-			{
-				for (int i = 0; i < gradientIndices.length; i++)
-					if (point[gradientIndices[i]] < lower[i])
-					{
-						atBounds[i] = true;
-						point[gradientIndices[i]] = lower[i];
-					}
-			}
-			return countAtBounds(gradientIndices.length) != 0;
 		}
-		else if (isLower)
+		if (isLower)
 		{
 			for (int i = 0; i < gradientIndices.length; i++)
 				if (point[gradientIndices[i]] < lower[i])
 				{
-					atBounds[i] = true;
 					point[gradientIndices[i]] = lower[i];
 				}
-			return countAtBounds(gradientIndices.length) != 0;
+		}
+	}
+
+	/**
+	 * Determine if the current solution (a) is at the the bounds
+	 *
+	 * @param a
+	 *            the current parameters
+	 * @return true, if the point is at the bounds
+	 */
+	private boolean atBounds(double[] a)
+	{
+		if (isUpper)
+		{
+			final int[] gradientIndices = f.gradientIndices();
+			for (int i = 0; i < gradientIndices.length; i++)
+				if (a[gradientIndices[i]] == upper[i])
+				{
+					return true;
+				}
+		}
+		if (isLower)
+		{
+			final int[] gradientIndices = f.gradientIndices();
+			for (int i = 0; i < gradientIndices.length; i++)
+				if (a[gradientIndices[i]] == lower[i])
+				{
+					return true;
+				}
 		}
 		return false;
 	}
 
-	private int countAtBounds(final int m)
+	/**
+	 * If the current solution (a) is at the the bounds then set the gradient parameter to be solved (da) to zero. It
+	 * will
+	 * then be ignored.
+	 *
+	 * @param a
+	 *            the current parameters
+	 */
+	private void ignoreAtBounds(double[] a)
 	{
-		atBoundsCount = 0;
-		for (int i = m; i-- > 0;)
-			if (atBounds[i])
-				atBoundsCount++;
-		return atBoundsCount;
+		if (isUpper)
+		{
+			final int[] gradientIndices = f.gradientIndices();
+			for (int i = 0; i < gradientIndices.length; i++)
+				if (a[gradientIndices[i]] == upper[i])
+				{
+					da[i] = 0;
+				}
+		}
+		if (isLower)
+		{
+			final int[] gradientIndices = f.gradientIndices();
+			for (int i = 0; i < gradientIndices.length; i++)
+				if (a[gradientIndices[i]] == lower[i])
+				{
+					da[i] = 0;
+				}
+		}
 	}
 
 	/**

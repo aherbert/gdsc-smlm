@@ -130,7 +130,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		// A = Hessian matrix (alpha)
 		// x = Parameter shift (output da) 
 		// b = Gradient vector (beta)
-		if (!solve(m))
+		if (!solve(a, m))
 			return false;
 
 		// Update the parameters. Ensure to use the gradient indices to update the correct parameters
@@ -146,22 +146,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		}
 		else if (sumOfSquaresWorking[SUM_OF_SQUARES_NEW] < sumOfSquaresWorking[SUM_OF_SQUARES_OLD])
 		{
-			reduceLambda();
-
-			for (int i = 0; i < m; i++)
-				for (int j = m; j-- > 0;)
-					alpha[i][j] = covar[i][j];
-
-			for (int j = m; j-- > 0;)
-			{
-				beta[j] = da[j];
-			}
-			for (int j = a.length; j-- > 0;)
-			{
-				a[j] = ap[j];
-			}
-
-			sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = sumOfSquaresWorking[SUM_OF_SQUARES_NEW];
+			accepted(a, ap, m);
 		}
 		else
 		{
@@ -172,11 +157,32 @@ public class NonLinearFit extends BaseFunctionSolver
 	}
 
 	/**
-	 * Reduce lambda upon a successfull improvement of the fit
+	 * Called when there was a successful improvement of the fit. The lambda parameter should be reduced.
+	 *
+	 * @param a
+	 *            The old fit parameters
+	 * @param ap
+	 *            The new fit parameters
+	 * @param m
+	 *            the number of fitted parameters (matches gradient indicies length)
 	 */
-	protected void reduceLambda()
+	protected void accepted(double[] a, double[] ap, int m)
 	{
 		lambda *= 0.1;
+
+		for (int i = 0; i < m; i++)
+			for (int j = m; j-- > 0;)
+				alpha[i][j] = covar[i][j];
+
+		for (int j = m; j-- > 0;)
+		{
+			beta[j] = da[j];
+		}
+		for (int j = a.length; j-- > 0;)
+		{
+			a[j] = ap[j];
+		}
+		sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = sumOfSquaresWorking[SUM_OF_SQUARES_NEW];
 	}
 
 	/**
@@ -191,9 +197,29 @@ public class NonLinearFit extends BaseFunctionSolver
 	 * The Hessian and gradient parameter from the current best scoring parameter set are assumed to be in alpha and
 	 * beta. The lambda parameter is used to weight the diagonal of the Hessian.
 	 *
+	 * @param a
+	 *            the current fit parameters
+	 * @param m
+	 *            the number of fit parameters
 	 * @return true, if successful
 	 */
-	protected boolean solve(final int m)
+	protected boolean solve(double[] a, final int m)
+	{
+		createLinearProblem(m);
+		return solve(covar, da);
+	}
+
+	/**
+	 * Creates the linear problem.
+	 * <p>
+	 * The Hessian and gradient parameter from the current best scoring parameter set are assumed to be in alpha and
+	 * beta. These are copied into the working variables covar and da. The lambda parameter is used to weight the
+	 * diagonal of the Hessian.
+	 *
+	 * @param m
+	 *            the number of fit parameters
+	 */
+	protected void createLinearProblem(final int m)
 	{
 		for (int i = m; i-- > 0;)
 		{
@@ -202,7 +228,6 @@ public class NonLinearFit extends BaseFunctionSolver
 				covar[i][j] = alpha[i][j];
 			covar[i][i] *= (1 + lambda);
 		}
-		return solve(covar, da);
 	}
 
 	/**
@@ -250,13 +275,11 @@ public class NonLinearFit extends BaseFunctionSolver
 	 *            the parameter shift
 	 * @param ap
 	 *            the new fit parameters
-	 * @return true if updated using the full step
 	 */
-	protected boolean updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da, double[] ap)
+	protected void updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da, double[] ap)
 	{
 		for (int j = m; j-- > 0;)
 			ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
-		return true;
 	}
 
 	private FitStatus doFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
@@ -318,9 +341,10 @@ public class NonLinearFit extends BaseFunctionSolver
 	}
 
 	/**
-	 * Compute the parameter deviations using the covariance matrix  of the solution
+	 * Compute the parameter deviations using the covariance matrix of the solution
 	 *
-	 * @param a_dev the a dev
+	 * @param a_dev
+	 *            the a dev
 	 * @return true, if successful
 	 */
 	private boolean computeDeviations(double[] a_dev)
