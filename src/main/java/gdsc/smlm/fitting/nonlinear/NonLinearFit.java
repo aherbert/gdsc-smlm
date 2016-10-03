@@ -150,7 +150,7 @@ public class NonLinearFit extends BaseFunctionSolver
 		}
 		else
 		{
-			lambda *= 10.0;
+			increaseLambda();
 		}
 
 		return true;
@@ -168,7 +168,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	 */
 	protected void accepted(double[] a, double[] ap, int m)
 	{
-		lambda *= 0.1;
+		decreaseLambda();
 
 		for (int i = 0; i < m; i++)
 			for (int j = m; j-- > 0;)
@@ -185,6 +185,16 @@ public class NonLinearFit extends BaseFunctionSolver
 		sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = sumOfSquaresWorking[SUM_OF_SQUARES_NEW];
 	}
 
+	protected void decreaseLambda()
+	{
+		lambda *= 0.1;
+	}
+
+	protected void increaseLambda()
+	{
+		lambda *= 10.0;
+	}
+	
 	/**
 	 * Solve the gradient equation A x = b: *
 	 * 

@@ -263,12 +263,14 @@ public class BoundedNonLinearFit extends NonLinearFit
 			}
 
 		}
+		
+		super.accepted(a, ap, m);
+		
 		if (nonLocalSearch)
 		{
-			// do not update the lambda parameter
-			return;
+			// do not update the lambda parameter so set it back
+			increaseLambda();
 		}
-		super.accepted(a, ap, m);
 	}
 
 	/*
