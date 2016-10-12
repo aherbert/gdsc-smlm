@@ -33,9 +33,9 @@ public class ResultGridManager
 		void add(PeakResult peak)
 		{
 			if (list == null)
-				list = new PeakResult[5];
+				list = new PeakResult[4];
 			else if (list.length == size)
-				list = Arrays.copyOf(list, (int) (size * 1.5));
+				list = Arrays.copyOf(list, size * 2);
 			list[size++] = peak;
 		}
 	}
@@ -93,9 +93,9 @@ public class ResultGridManager
 		public void add(Candidate candidate)
 		{
 			if (list == null)
-				list = new Candidate[5];
+				list = new Candidate[4];
 			else if (list.length == size)
-				list = Arrays.copyOf(list, (int) (size * 1.5));
+				list = Arrays.copyOf(list, size * 2);
 			list[size++] = candidate;
 		}
 
@@ -325,7 +325,7 @@ public class ResultGridManager
 					continue;
 				for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
 				{
-					if (yy < 0 || yy >= yBlocks)
+					if (yy < 0 || yy >= yBlocks || peakGrid[xx][yy].size == 0)
 						continue;
 					System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].size);
 					size += peakGrid[xx][yy].size;
@@ -446,7 +446,7 @@ public class ResultGridManager
 					continue;
 				for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
 				{
-					if (yy < 0 || yy >= yBlocks)
+					if (yy < 0 || yy >= yBlocks || candidateGrid[xx][yy].size == 0)
 						continue;
 					System.arraycopy(candidateGrid[xx][yy].list, 0, list, size, candidateGrid[xx][yy].size);
 					size += candidateGrid[xx][yy].size;
