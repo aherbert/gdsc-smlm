@@ -1812,7 +1812,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			System.arraycopy(params, 1, newParams, 1, n * 6);
 		}
-		final int left = nPeaks - n + 1;
+		final int left = nPeaks - (n + 1);
 		if (left > 0)
 		{
 			System.arraycopy(params, (n + 1) * 6 + 1, newParams, n * 6 + 1, left * 6);
