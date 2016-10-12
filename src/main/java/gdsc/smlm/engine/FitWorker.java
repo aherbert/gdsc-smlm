@@ -1106,7 +1106,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 			fitConfig.setMaxIterations(
 					maxIterations + maxIterations * (npeaks - 1) * ITERATION_INCREASE_FOR_MULTIPLE_PEAKS);
-			fitConfig.setMaxIterations(
+			fitConfig.setMaxFunctionEvaluations(
 					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
 			gf.setBounds(lower, upper);
@@ -1973,21 +1973,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			neighbourIndices[neighbourCount++] = id;
 		}
 
-		int c = 0;
-		// Processing all lower spots.
-		//for (int i = n + 1; i < candidates.length; i++)
-		// Processing all spots.
-		for (int i = 0; i < this.candidates.length; i++)
-		{
-			if (i == n || isFit(i))
-				continue;
-			if (canIgnore(this.candidates[i].x, this.candidates[i].y, xmin, xmax, ymin, ymax,
-					this.candidates[i].intensity, heightThreshold))
-				continue;
-			//neighbourIndices[c++] = i;
-			if (neighbourIndices[c++] != i)
-				throw new RuntimeException("invalid grid neighbours");
-		}
+		// XXX Debugging
+		//		int c = 0;
+		//		// Processing all lower spots.
+		//		//for (int i = n + 1; i < candidates.length; i++)
+		//		// Processing all spots.
+		//		for (int i = 0; i < this.candidates.length; i++)
+		//		{
+		//			if (i == n || isFit(i))
+		//				continue;
+		//			if (canIgnore(this.candidates[i].x, this.candidates[i].y, xmin, xmax, ymin, ymax,
+		//					this.candidates[i].intensity, heightThreshold))
+		//				continue;
+		//			//neighbourIndices[c++] = i;
+		//			if (neighbourIndices[c++] != i)
+		//				throw new RuntimeException("invalid grid neighbours");
+		//		}
 
 		// Check all existing maxima. 
 
