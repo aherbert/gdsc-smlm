@@ -644,8 +644,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 *            the peak params dev
 	 * @param error
 	 *            the error
-	 * @param noise
-	 *            the noise
 	 * @return true, if successful
 	 */
 	private boolean addSingleResult(int candidateId, float[] peakParams, float[] peakParamsDev, double error)
@@ -950,7 +948,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				final int n2 = neighbourIndices[i];
 				final double candidateX = candidates[n2].x - regionBounds.x;
 				final double candidateY = candidates[n2].y - regionBounds.y;
-				
+
 				final double[] estimatedParams = getEstimate(n2);
 				if (estimatedParams != null)
 				{
@@ -973,7 +971,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					params[j + Gaussian2DFunction.X_POSITION] = candidateX;
 					params[j + Gaussian2DFunction.Y_POSITION] = candidateY;
 				}
-				
+
 				// Constrain the location using the candidate position.
 				// Do not use the current estimate as this will create drift over time if the estimate is updated.
 				lower[j + Gaussian2DFunction.X_POSITION] = candidateX - 1;
@@ -1061,14 +1059,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Adjust position relative to extracted region
 					params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 					params[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
-					
+
 					// Add support for constraining the known fit results using bounded coordinates.
 					// Currently we just constrain the location.
 					lower[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] - 1;
 					upper[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] + 1;
 					lower[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] - 1;
-					upper[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] + 1;					
-					
+					upper[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] + 1;
+
 					j += parametersPerPeak;
 				}
 			}
@@ -1113,7 +1111,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			gf.setBounds(lower, upper);
 			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, true);
-			gf.setBounds(null, null);			
+			gf.setBounds(null, null);
 
 			// Restore
 			fitConfig.setFitValidation(fitValidation);
@@ -1979,12 +1977,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Processing all lower spots.
 		//for (int i = n + 1; i < candidates.length; i++)
 		// Processing all spots.
-		for (int i = 0; i < candidates.length; i++)
+		for (int i = 0; i < this.candidates.length; i++)
 		{
 			if (i == n || isFit(i))
 				continue;
-			if (canIgnore(candidates[i].x, candidates[i].y, xmin, xmax, ymin, ymax, candidates[i].intensity,
-					heightThreshold))
+			if (canIgnore(this.candidates[i].x, this.candidates[i].y, xmin, xmax, ymin, ymax,
+					this.candidates[i].intensity, heightThreshold))
 				continue;
 			//neighbourIndices[c++] = i;
 			if (neighbourIndices[c++] != i)
@@ -2642,5 +2640,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		double eshift = 0;
 		double precision = 60;
 		return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+	}
+
+	/**
+	 * Gets the noise estimate for the last processed job.
+	 *
+	 * @return the noise estimate
+	 */
+	public float getNoise()
+	{
+		return noise;
 	}
 }

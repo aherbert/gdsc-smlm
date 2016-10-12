@@ -70,6 +70,7 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
+import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.MultiFilter2;
@@ -215,23 +216,20 @@ public class BenchmarkSpotFit implements PlugIn
 		fitConfig.setNoise(0);
 		config.setNoiseMethod(Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
 
+		// Use bounded so that we can fit the neighbours
+		config.setIncludeNeighbours(true);
+		fitConfig.setFitSolver(FitSolver.BOUNDED_LVM);
+
 		// Add a filter to use for storing the slice results:
 		// Use the standard configuration to ensure sensible fits are stored as the current slice results.
 		FitConfiguration tmp = new FitConfiguration();
-		double signal = tmp.getMinPhotons();
-		float snr = (float) tmp.getSignalStrength();
-		double minWidth = tmp.getMinWidthFactor();
-		double maxWidth = tmp.getWidthFactor();
-		double shift = tmp.getCoordinateShiftFactor();
-		double eshift = 0;
-		double precision = tmp.getPrecisionThreshold();
-		final MultiFilter2 primaryFilter = new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+		final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
 
 		// Add a minimum filter to use for storing estimates
 		final MultiFilter2 minimalFilter = FitWorker.createMinimalFilter();
 
 		// We might as well use the doublet fits given we will compute them.
-		double residualsThreshold = 0.4;
+		final double residualsThreshold = 0.4;
 		multiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
 	}
 
@@ -621,18 +619,18 @@ public class BenchmarkSpotFit implements PlugIn
 					// Otherwise store all results with the same Id. The best match for these results will be chosen.
 					final int size = predicted.size();
 
-					if (fitResult[i].getSingleFitResult().status == 0)
+					if (isOK(fitResult[i].getSingleFitResult()))
 					{
 						predicted.add(new MultiPathPoint(fitResult[i].getSingleFitResult().results[0], id,
 								MultiPathPoint.SINGLE, i));
 					}
-					if (fitResult[i].getMultiFitResult().status == 0)
+					if (isOK(fitResult[i].getMultiFitResult()))
 					{
 						predicted.add(new MultiPathPoint(fitResult[i].getMultiFitResult().results[0], id,
 								MultiPathPoint.MULTI, i));
 					}
 					int increment = 1;
-					if (fitResult[i].getDoubletFitResult().status == 0 &&
+					if (isOK(fitResult[i].getDoubletFitResult()) &&
 							fitResult[i].getDoubletFitResult().results.length != 0)
 					{
 						increment = fitResult[i].getDoubletFitResult().results.length;
@@ -791,21 +789,13 @@ public class BenchmarkSpotFit implements PlugIn
 			candidates.fitMatch = fitMatch;
 			candidates.match = match;
 			candidates.zPosition = zPosition;
-			// Noise should be the same for all results, find the first
-			for (int i = 0; i < fitResult.length; i++)
-			{
-				if (fitResult[i].getMultiFitResult() != null)
-				{
-					candidates.noise = fitResult[i].getMultiFitResult().results[0].getNoise();
-					break;
-				}
-				if (fitResult[i].getSingleFitResult() != null)
-				{
-					candidates.noise = fitResult[i].getSingleFitResult().results[0].getNoise();
-					break;
-				}
-			}
+			candidates.noise = fitWorker.getNoise();
 			results.put(frame, candidates);
+		}
+
+		private boolean isOK(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
+		{
+			return fitResult != null && fitResult.status == 0;
 		}
 	}
 
@@ -918,11 +908,11 @@ public class BenchmarkSpotFit implements PlugIn
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
-		
+
 		multiFilter = MultiPathFilter.fromXML(gd.getNextText());
 		if (multiFilter == null)
 		{
-			gd  = new GenericDialog(TITLE);
+			gd = new GenericDialog(TITLE);
 			gd.addMessage("The multi-path filter was invalid.\n \nContinue with a default filter?");
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
@@ -930,7 +920,7 @@ public class BenchmarkSpotFit implements PlugIn
 			if (!gd.wasOKed())
 				return false;
 		}
-		
+
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		//config.setResidualsThreshold(gd.getNextNumber());
@@ -979,15 +969,17 @@ public class BenchmarkSpotFit implements PlugIn
 			cal.readNoise = simulationParameters.readNoise;
 			cal.bias = simulationParameters.bias;
 			cal.emCCD = simulationParameters.emCCD;
+
+			// This is needed to configure the fit solver
+			fitConfig.setNmPerPixel(cal.nmPerPixel);
+			fitConfig.setGain(cal.gain);
+			fitConfig.setBias(cal.bias);
+			fitConfig.setReadNoise(cal.readNoise);
+			fitConfig.setAmplification(cal.amplification);
+			fitConfig.setEmCCD(cal.emCCD);
 		}
 		if (!PeakFit.configureFitSolver(settings, null, extraOptions))
 			return false;
-
-		// This is needed to configure the fit solver
-		fitConfig.setNmPerPixel(cal.nmPerPixel);
-		fitConfig.setGain(cal.gain);
-		fitConfig.setBias(cal.bias);
-		fitConfig.setEmCCD(cal.emCCD);
 
 		return true;
 	}
@@ -1248,12 +1240,9 @@ public class BenchmarkSpotFit implements PlugIn
 				if (singleStatus != null)
 				{
 					// Debugging reasons for fit failure
-					if (fitResult.getSingleFitResult().status != 0)
-						singleStatus[fitResult.getSingleFitResult().status]++;
-					if (fitResult.getMultiFitResult().status != 0)
-						multiStatus[fitResult.getMultiFitResult().status]++;
-					if (fitResult.getDoubletFitResult().status != 0)
-						doubletStatus[fitResult.getDoubletFitResult().status]++;
+					addStatus(singleStatus, fitResult.getSingleFitResult());
+					addStatus(multiStatus, fitResult.getMultiFitResult());
+					addStatus(doubletStatus, fitResult.getDoubletFitResult());
 				}
 
 				if (noMatch(result.fitMatch[i]))
@@ -1647,9 +1636,18 @@ public class BenchmarkSpotFit implements PlugIn
 		}
 	}
 
+	private void addStatus(int[] status, gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
+	{
+		if (fitResult != null && fitResult.status != 0)
+			status[fitResult.status]++;
+	}
+
 	private void addToStats(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int resultIndex,
 			boolean isTP, StoredDataStatistics[][] stats)
 	{
+		if (fitResult == null)
+			return;
+
 		final FitResult actualFitResult = (FitResult) fitResult.getData();
 
 		if (fitResult.status != 0)

@@ -1289,6 +1289,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getNoise()
 		{
+			// Comment this out to use the configured local background.
+			// If uncommented then the background will be either the local background or the fitted background.
+			final double localBackground = getLocalBackground();
+			
 			return (float) ((localBackground > bias)
 					? PeakResult.localBackgroundToNoise(localBackground - bias, gain, emCCD)
 					: FitConfiguration.this.noise);
@@ -1550,9 +1554,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		final double ysd0 = initialParameters[offset + Gaussian2DFunction.Y_SD];
 		final double variance = getVariance(0, signal, PeakResult.getSD(xsd, ysd), false);
 		final double variance2 = getVariance(b, signal, PeakResult.getSD(xsd, ysd), true);
-		// Note: Should noise be the local background of the estimate from the whole image?
-		final double noise = (localBackground > bias)
-				? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
+		// Q. Should noise be the local background or the estimate from the whole image?
+		
+		// This uses the local background if specified or the estimate from the whole image 
+		//final double noise = (localBackground > bias)
+		//		? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
+		
+		// This uses the local fitted background to estimate the noise
+		final double noise = (b > bias) ? PeakResult.localBackgroundToNoise(b - bias, this.gain, this.emCCD)
+				: this.noise;
 		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, photons, noise, b, angle, x, y, x0, y0,
 				xsd, ysd, xsd0, ysd0, variance, variance2, resultType);
 	}
