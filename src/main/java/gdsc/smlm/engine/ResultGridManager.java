@@ -66,6 +66,13 @@ public class ResultGridManager
 
 		/**
 		 * Instantiates a new candidate list.
+		 */
+		private CandidateList()
+		{
+		}
+
+		/**
+		 * Instantiates a new candidate list.
 		 *
 		 * @param size
 		 *            the size
@@ -163,8 +170,34 @@ public class ResultGridManager
 		xBlocks = getBlock(maxx) + 1;
 		yBlocks = getBlock(maxy) + 1;
 
-		candidateGrid = new CandidateList[xBlocks][yBlocks];
+		createCandidateGrid();
+		createPeakGrid();
+	}
+
+	private void createPeakGrid()
+	{
 		peakGrid = new PeakList[xBlocks][yBlocks];
+		for (int x = 0; x < xBlocks; x++)
+		{
+			final PeakList[] list = peakGrid[x];
+			for (int y = 0; y < yBlocks; y++)
+			{
+				list[y] = new PeakList();
+			}
+		}
+	}
+
+	private void createCandidateGrid()
+	{
+		candidateGrid = new CandidateList[xBlocks][yBlocks];
+		for (int x = 0; x < xBlocks; x++)
+		{
+			final CandidateList[] list = candidateGrid[x];
+			for (int y = 0; y < yBlocks; y++)
+			{
+				list[y] = new CandidateList();
+			}
+		}
 	}
 
 	/**
@@ -187,7 +220,7 @@ public class ResultGridManager
 		xBlocks = getBlock((int) maxx) + 1;
 		yBlocks = getBlock((int) maxy) + 1;
 
-		peakGrid = new PeakList[xBlocks][yBlocks];
+		createPeakGrid();
 		for (PeakResult p : results)
 			putOnGrid(p);
 	}
