@@ -339,6 +339,10 @@ public class MultiPathFilter
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
+			
+			
+			// TODO - What if the single fit drifts to another spot?
+			
 
 			// Check there is a result for the single spot
 			if (multiPathResult.getSingleFitResult().status != 0)
@@ -609,7 +613,7 @@ public class MultiPathFilter
 	/**
 	 * Check all new and all existing results are valid. Returns the new results.
 	 * <p>
-	 * New results and validated candidates that file the primary filter can be filtered using the minimal filter and
+	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
 	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
 	 * already.
 	 * 
@@ -711,7 +715,7 @@ public class MultiPathFilter
 	/**
 	 * Check any new and all existing results are valid. Returns the new results
 	 * <p>
-	 * New results and validated candidates that file the primary filter can be filtered using the minimal filter and
+	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
 	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
 	 * already.
 	 * 

@@ -85,6 +85,18 @@ public enum FitStatus
 	/**
 	 * 
 	 */
+	DRIFT_TO_ANOTHER_RESULT("Drift to another result"),
+	/**
+	 * 
+	 */
+	FAILED_VALIDATION("Failed validation"),
+	/**
+	 * 
+	 */
+	NO_MODEL_IMPROVEMENT("No model improvment"),
+	/**
+	 * 
+	 */
 	UNKNOWN("Unknown");
 
 	private String name;

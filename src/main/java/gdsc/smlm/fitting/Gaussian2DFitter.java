@@ -667,6 +667,13 @@ public class Gaussian2DFitter
 			{
 				for (int i = 0; i < y_fit.length; i++)
 					y_fit[i] = y[i] - y_fit[i];
+				if (fitConfiguration.isApplyGainBeforeFitting())
+				{
+					// The data (y) and the predicted data (y_fit) will be without gain 
+					final double gain = fitConfiguration.getGain();
+					for (int i = 0; i < y_fit.length; i++)
+						y_fit[i] *= gain;
+				}
 			}
 
 			fitResult = new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0), error[0],
@@ -700,8 +707,8 @@ public class Gaussian2DFitter
 			if (doClone)
 				params = params.clone();
 			params[Gaussian2DFunction.BACKGROUND] *= gain;
-			for (int i = 0; i < params.length; i += 6)
-				params[Gaussian2DFunction.SIGNAL] *= gain;
+			for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
+				params[i] *= gain;
 		}
 		return params;
 	}
@@ -711,8 +718,8 @@ public class Gaussian2DFitter
 		if (params != null)
 		{
 			params[Gaussian2DFunction.BACKGROUND] *= gain;
-			for (int i = 0; i < params.length; i += 6)
-				params[Gaussian2DFunction.SIGNAL] *= gain;
+			for (int i = Gaussian2DFunction.SIGNAL; i < params.length; i += 6)
+				params[i] *= gain;
 		}
 	}
 
@@ -880,33 +887,12 @@ public class Gaussian2DFitter
 				lower[j + Gaussian2DFunction.ANGLE] = -Math.PI;
 				upper[j + Gaussian2DFunction.ANGLE] = Math.PI;
 			}
-			if (fitConfiguration.isWidth0Fitting())
-			{
-				lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
-				upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
-			}
-			if (fitConfiguration.isWidth1Fitting())
-			{
-				lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
-				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * max_wf;
-			}
+			lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
+			upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
+			lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
+			upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * max_wf;
 		}
 
-		//// Debug check
-		//for (int i = 0; i < params.length; i++)
-		//{
-		//	if (params[i] < lower[i])
-		//	{
-		//		System.out.printf("Param %d too low %f < %f\n", i, params[i], lower[i]);
-		//		lower[i] = params[i] - (lower[i] - params[i]);
-		//	}
-		//	if (params[i] > upper[i])
-		//	{
-		//		System.out.printf("Param %d too high %f > %f\n", i, params[i], upper[i]);
-		//		upper[i] = params[i] + (params[i] - upper[i]);
-		//	}
-		//}
-		
 		// Check against the configured bounds
 		if (lower2 != null)
 		{
@@ -925,6 +911,21 @@ public class Gaussian2DFitter
 			}
 		}
 
+		// Debug check
+		for (int i = 0; i < params.length; i++)
+		{
+			if (params[i] < lower[i])
+			{
+				System.out.printf("Param %d (%s) too low %f < %f\n", i, Gaussian2DFunction.getName(i), params[i], lower[i]);
+				lower[i] = params[i] - (lower[i] - params[i]);
+			}
+			if (params[i] > upper[i])
+			{
+				System.out.printf("Param %d (%s) too high %f > %f\n", i, Gaussian2DFunction.getName(i), params[i], upper[i]);
+				upper[i] = params[i] + (params[i] - upper[i]);
+			}
+		}
+		
 		solver.setBounds(lower, upper);
 	}
 

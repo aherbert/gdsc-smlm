@@ -1111,7 +1111,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private boolean score(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, ResultGridManager resultGrid,
 			double matchDistance, RampedScore distanceScore, RampedScore signalScore, boolean[] matched)
 	{
-		if (fitResult.status == 0)
+		if (fitResult != null && fitResult.status == 0)
 		{
 			// Get the new results
 			for (int i = 0; i < fitResult.results.length; i++)

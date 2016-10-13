@@ -41,6 +41,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
@@ -169,7 +170,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 	}
 
-	private Estimate[] estimates = null;
+	private Estimate[] estimates = null, estimates2 = null;
 
 	private Candidate[] candidates = null;
 	private CandidateList neighbours = null;
@@ -325,8 +326,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				final float signal = (float) (amplitude * 2.0 * Math.PI * sd0 * sd1);
 				final float[] peakParams = new float[] { b, signal, 0, x + 0.5f, y + 0.5f, sd0, sd1 };
 				final int index = y * width + x;
-				sliceResults
-						.add(createResult(dataBounds.x + x, dataBounds.y + y, data[index], 0, noise, peakParams, null));
+				sliceResults.add(
+						createResult(dataBounds.x + x, dataBounds.y + y, data[index], 0, noise, peakParams, null, n));
 			}
 		}
 		else if (params != null && params.fitTask == FitTask.BENCHMARKING)
@@ -588,11 +589,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		if (estimates == null || estimates.length < length)
 		{
 			estimates = new Estimate[length];
+			estimates2 = new Estimate[length];
 		}
 		else
 		{
 			for (int i = 0; i < length; i++)
+			{
 				estimates[i] = null;
+				estimates2[i] = null;
+			}
 		}
 	}
 
@@ -685,7 +690,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		y += dataBounds.y;
 
 		// This was fit OK so add it to the grid of results (so we do not fit it again)
-		final PeakResult peakResult = createResult(x, y, value, error, noise, peakParams, peakParamsDev);
+		final PeakResult peakResult = createResult(x, y, value, error, noise, peakParams, peakParamsDev, candidateId);
 		queueToGrid(peakResult);
 		candidates[candidateId].fit = true;
 
@@ -704,13 +709,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	private PeakResult createResult(int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
+			float[] paramsStdDev, int id)
 	{
 		if (endT >= 0 && slice != endT)
 		{
-			return new ExtendedPeakResult(slice, origX, origY, origValue, error, noise, params, paramsStdDev, endT, 0);
+			return new ExtendedPeakResult(slice, origX, origY, origValue, error, noise, params, paramsStdDev, endT, id);
 		}
-		return new PeakResult(slice, origX, origY, origValue, error, noise, params, paramsStdDev);
+		return new IdPeakResult(slice, origX, origY, origValue, error, noise, params, paramsStdDev, id);
 	}
 
 	/**
@@ -940,6 +945,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						candidateNeighbourCount, fittedNeighbourCount, subtractFittedPeaks);
 
 			double[] params = new double[1 + npeaks * parametersPerPeak];
+			params[Gaussian2DFunction.BACKGROUND] = background;
 
 			// Support bounds on the known fitted peaks
 			double[] lower = new double[params.length];
@@ -953,44 +959,19 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Note: If difference-of-smoothing is performed the heights have background subtracted so 
 			// it must be added back 
 
-			// The main peak
-			params[Gaussian2DFunction.SIGNAL] = candidates[candidateId].intensity +
-					((relativeIntensity) ? background : 0);
-			params[Gaussian2DFunction.X_POSITION] = candidates[candidateId].x - regionBounds.x;
-			params[Gaussian2DFunction.Y_POSITION] = candidates[candidateId].y - regionBounds.y;
+			// The main peak. We use a close estimate if we have one.
+			getEstimate(candidates[candidateId], params, 0, true, false);
 
 			// The neighbours
 			for (int i = 0, j = parametersPerPeak; i < candidateNeighbourCount; i++, j += parametersPerPeak)
 			{
 				final Candidate candidateNeighbour = candidateNeighbours[i];
-				final double candidateX = candidateNeighbour.x - regionBounds.x;
-				final double candidateY = candidateNeighbour.y - regionBounds.y;
-
-				final double[] estimatedParams = getEstimate(candidateNeighbour.index);
-				if (estimatedParams != null)
-				{
-					// Re-use previous good multi-fit results to estimate the peak params...
-					// Convert signal into amplitude
-					params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL] / (2 * Math.PI *
-							estimatedParams[Gaussian2DFunction.X_SD] * estimatedParams[Gaussian2DFunction.Y_SD]);
-					params[j + Gaussian2DFunction.X_POSITION] = estimatedParams[Gaussian2DFunction.X_POSITION] -
-							regionBounds.x;
-					params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
-							regionBounds.y;
-					params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
-					params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
-					params[j + Gaussian2DFunction.Y_SD] = estimatedParams[Gaussian2DFunction.Y_SD];
-				}
-				else
-				{
-					params[j + Gaussian2DFunction.SIGNAL] = candidateNeighbour.intensity +
-							((relativeIntensity) ? background : 0);
-					params[j + Gaussian2DFunction.X_POSITION] = candidateX;
-					params[j + Gaussian2DFunction.Y_POSITION] = candidateY;
-				}
+				getEstimate(candidateNeighbour, params, j, true, false);
 
 				// Constrain the location using the candidate position.
 				// Do not use the current estimate as this will create drift over time if the estimate is updated.
+				final double candidateX = candidateNeighbour.x - regionBounds.x;
+				final double candidateY = candidateNeighbour.y - regionBounds.y;
 				lower[j + Gaussian2DFunction.X_POSITION] = candidateX - 1;
 				upper[j + Gaussian2DFunction.X_POSITION] = candidateX + 1;
 				lower[j + Gaussian2DFunction.Y_POSITION] = candidateY - 1;
@@ -1104,14 +1085,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Note that if the input XY positions are on the integer grid then the fitter will estimate
 			// the position using a CoM estimate. To avoid this adjust the centres to be off-grid.
-			for (int i = 0; i < npeaks; i++)
+			for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += parametersPerPeak)
 			{
-				if ((int) params[i * parametersPerPeak + Gaussian2DFunction.X_POSITION] == params[i *
-						parametersPerPeak + Gaussian2DFunction.X_POSITION])
-					params[i * parametersPerPeak + Gaussian2DFunction.X_POSITION] += 0.001;
-				if ((int) params[i * parametersPerPeak + Gaussian2DFunction.Y_POSITION] == params[i *
-						parametersPerPeak + Gaussian2DFunction.Y_POSITION])
-					params[i * parametersPerPeak + Gaussian2DFunction.Y_POSITION] += 0.001;
+				for (int j = 0; j < 2; j++)
+					if ((int) params[i + j] == params[i + j])
+						// If at the limit then decrement instead
+						params[i + j] += (params[i + j] == upper[i + j]) ? -0.001 : 0.001;
 			}
 
 			// -=-=-=-
@@ -1155,12 +1134,122 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			updateError(fitResult);
 
+			// Ensure the initial parameters are at the candidate position since we may have used an estimate.
+			// This will ensure that drift is computed correctly.
+			final double[] initialParams = fitResult.getInitialParameters();
+			initialParams[Gaussian2DFunction.X_POSITION] = candidates[candidateId].x - regionBounds.x;
+			initialParams[Gaussian2DFunction.Y_POSITION] = candidates[candidateId].y - regionBounds.y;
+
 			// Create the results
 			PreprocessedPeakResult[] results = null;
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
+				// The primary candidate is not bounded. Check it has not drifted close to 
+				// a neighbour. 
+
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				//    fitting a doublet so is ignored.
+				// 4. Check if there is an unfit candidate spot closer than the current candidate.
+				//    This represents drift out to fit another spot that will be fit later.
+
 				final double[] fitParams = fitResult.getParameters();
-				final double[] initialParams = fitResult.getInitialParameters();
+
+				int otherId = candidateId;
+				ResultType resultType = ResultType.NEW;
+
+				final double xShift = fitParams[Gaussian2DFunction.X_POSITION] -
+						initialParams[Gaussian2DFunction.X_POSITION];
+				final double yShift = fitParams[Gaussian2DFunction.Y_POSITION] -
+						initialParams[Gaussian2DFunction.Y_POSITION];
+
+				// We must be closer to the current candidate than any other spots.
+				// This is true for candidates we have yet to fit or already fitted candidates.
+
+				// Distance to current candidate fitted as a single
+				final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
+
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				//    fitting a doublet so is ignored..
+
+				final PeakResult[] peakNeighbours = findPeakNeighbours(candidates[candidateId]);
+				if (peakNeighbours.length != 0)
+				{
+					// Coords for comparison to the real positions
+					final float fcx2 = (float) (regionBounds.x + fitParams[Gaussian2DFunction.X_POSITION] + 0.5);
+					final float fcy2 = (float) (regionBounds.y + fitParams[Gaussian2DFunction.Y_POSITION] + 0.5);
+					final float d2 = (float) distanceToSingleFit2;
+					for (int i = 0; i < peakNeighbours.length; i++)
+					{
+						if (d2 > distance2(fcx2, fcy2, peakNeighbours[i].params))
+						{
+							// There is another fitted result that is closer.
+							// Note: The fit region is not centred on the other spot so this fit will probably
+							// be worse and is discarded (not compared to the existing fit to get the best one). 
+
+							otherId = peakNeighbours[i].getId();
+						}
+						if (otherId != candidateId)
+						{
+							if (logger != null)
+							{
+								logger.info(
+										"Bad peak: Fitted coordinates moved closer to another result (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
+										candidates[candidateId].x, candidates[candidateId].y, fcx2, fcy2,
+										peakNeighbours[i].getXPosition(), peakNeighbours[i].getYPosition());
+							}
+							System.out.printf("Multi drift to another result: [%d,%d] %d\n", slice, candidateId,
+									otherId);
+							resultType = ResultType.EXISTING;
+						}
+					}
+				}
+
+				// 4. Check if there is an unfit candidate spot closer than the current candidate.
+				//    This represents drift out to fit another unfitted spot.
+
+				if (otherId != candidateId)
+				{
+					final CandidateList neighbours = findNeighbours(candidates[candidateId]);
+					if (neighbours.size != 0)
+					{
+						// Position - do not add 0.5 pixel offset to allow distance comparison to integer candidate positions.
+						float fcx2 = (float) (regionBounds.x + fitParams[Gaussian2DFunction.X_POSITION]);
+						float fcy2 = (float) (regionBounds.y + fitParams[Gaussian2DFunction.Y_POSITION]);
+						double mind2 = distanceToSingleFit2;
+						for (int j = 0; j < neighbours.size; j++)
+						{
+							final int id = neighbours.list[j].index;
+							if (isFit(id))
+								// This will be in the already fitted results instead so ignore...
+								continue;
+							final double d2 = distance2(fcx2, fcy2, candidates[id]);
+							if (mind2 > d2)
+							{
+								mind2 = d2;
+								otherId = id;
+							}
+						}
+						if (otherId != candidateId)
+						{
+							if (logger != null)
+							{
+								logger.info(
+										"Bad peak: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
+										candidates[candidateId].x, candidates[candidateId].y, fcx2 + 0.5f, fcy2 + 0.5f,
+										candidates[otherId].x, candidates[otherId].y);
+							}
+							System.out.printf("Multi drift to another candidate: [%d,%d] %d\n", slice, candidateId,
+									otherId);
+
+							// There is another candidate to be fit later that is closer.
+							// This may be used as an estimate so we return it as such (i.e we do not ignore it)
+							//otherId = candidateId;
+							if (otherId > candidateId)
+								resultType = ResultType.CANDIDATE;
+						}
+					}
+				}
+
 				convertParameters(fitParams);
 
 				results = new PreprocessedPeakResult[npeaks];
@@ -1168,8 +1257,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// We must compute a local background for all the spots
 				final int flags = fitConfig.getFunctionFlags();
 
-				results[0] = resultFactory.createPreprocessedPeakResult(this.candidateId, 0, initialParams, fitParams,
-						getLocalBackground(0, npeaks, fitParams, flags), ResultType.NEW);
+				// Note: This could be the current candidate or drift to another candidate
+				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
+						getLocalBackground(0, npeaks, fitParams, flags), resultType);
 
 				// Already fitted peaks
 				for (int n = candidateNeighbourCount + 1; n < npeaks; n++)
@@ -1197,9 +1287,55 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return overlapData[1] + params[0];
 		}
 
-		private double[] getEstimate(int i)
+		private boolean getEstimate(Candidate candidate, double[] params, int j, boolean close, boolean signalEstimate)
 		{
-			return (estimates[i] == null) ? null : estimates[i].params;
+			final double[] estimatedParams = getEstimate(candidate.index, close);
+			if (estimatedParams != null)
+			{
+				// Re-use previous good multi-fit results to estimate the peak params...
+				if (signalEstimate)
+					params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL];
+				else
+					// Convert signal into amplitude
+					params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL] / (2 * Math.PI *
+							estimatedParams[Gaussian2DFunction.X_SD] * estimatedParams[Gaussian2DFunction.Y_SD]);
+				params[j + Gaussian2DFunction.X_POSITION] = estimatedParams[Gaussian2DFunction.X_POSITION] -
+						regionBounds.x;
+				params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
+						regionBounds.y;
+				params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
+				params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
+				params[j + Gaussian2DFunction.Y_SD] = estimatedParams[Gaussian2DFunction.Y_SD];
+				return true;
+			}
+			else
+			{
+				params[j + Gaussian2DFunction.SIGNAL] = candidate.intensity +
+						((relativeIntensity) ? params[Gaussian2DFunction.BACKGROUND] : 0);
+				params[j + Gaussian2DFunction.X_POSITION] = candidate.x - regionBounds.x;
+				params[j + Gaussian2DFunction.Y_POSITION] = candidate.y - regionBounds.y;
+				return false;
+			}
+		}
+
+		/**
+		 * Gets the estimate. Note estimates are classed as close (within 1 pixel) of the candidate position, or not. A
+		 * candidate may have either or both types of estimate. The close estimate is used in preference to the other.
+		 *
+		 * @param i
+		 *            the candidate index
+		 * @param close
+		 *            True if only considering the close estimate
+		 * @return the estimate
+		 */
+		private double[] getEstimate(int i, boolean close)
+		{
+			// Check the close estimate
+			if (estimates[i] != null)
+				return estimates[i].params;
+
+			// Only return the second estimate if we do not require the close estimate
+			return (close || estimates2[i] == null) ? null : estimates2[i].params;
 		}
 
 		/**
@@ -1273,54 +1409,186 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Store this as it is used in doublet fitting
 			this.singleRegion = region;
 
-			// TODO - See if this changes fitting accuracy/speed
-			// Estimate the signal here instead of using the amplitude.
-			// Do this when the fitting window covers enough of the Gaussian (e.g. 2.5xSD).
+			final double[] params = new double[] { background, 0, 0, 0, 0, 0, 0 };
+
 			boolean amplitudeEstimate = false;
-			float signal = 0;
-			if (estimateSignal)
+
+			// Re-use an estimate if we have it. Note that this may be quite far from the candidate.
+			boolean usingEstimate = getEstimate(candidates[candidateId], params, 0, false, true);
+			if (!usingEstimate)
 			{
-				double sum = 0;
-				final int size = width * height;
-				for (int i = size; i-- > 0;)
-					sum += region[i];
-				signal = (float) (sum - background * size);
-			}
-			if (signal <= 0)
-			{
-				amplitudeEstimate = true;
-				signal = candidates[candidateId].intensity - ((relativeIntensity) ? 0 : background);
-				if (signal < 0)
+				// If we have no estimate the the default will be an amplitude estimate.
+				// We can estimate the signal here instead of using the amplitude.
+				// Do this when the fitting window covers enough of the Gaussian (e.g. 2.5xSD).
+				float signal = 0;
+				if (estimateSignal)
 				{
-					signal += background;
-					background = 0;
+					double sum = 0;
+					final int size = width * height;
+					for (int i = size; i-- > 0;)
+						sum += region[i];
+					signal = (float) (sum - background * size);
+				}
+				if (signal > 0)
+				{
+					params[Gaussian2DFunction.SIGNAL] = signal;
+				}
+				else
+				{
+					// Resort to default amplitude estimate
+					amplitudeEstimate = true;
+
+					if (params[Gaussian2DFunction.SIGNAL] < background)
+					{
+						// Reset to the minimum value in the data.
+						// This is what is done in the in the fitter if the background is zero.
+						params[Gaussian2DFunction.BACKGROUND] = Gaussian2DFitter.getBackground(region, width, height,
+								2);
+
+						// Subtract the background from the estimated peak amplitudes.
+						params[Gaussian2DFunction.SIGNAL] -= params[Gaussian2DFunction.BACKGROUND];
+					}
 				}
 			}
-			final double[] params = new double[] { background, signal, 0, candidates[candidateId].x - regionBounds.x,
-					candidates[candidateId].y - regionBounds.y, 0, 0 };
 
-			// If there were unfitted neighbours then use off grid pixels to prevent re-estimate of CoM
-			// since the CoM estimate will be skewed by the neighbours
-			if (candidateNeighbourCount != 0)
+			// If there were unfitted neighbours or we have an estimate 
+			// then use off grid pixels to prevent re-estimate of CoM
+			// (since the CoM estimate will be skewed by the neighbours, or is not needed)
+			if (candidateNeighbourCount != 0 || usingEstimate)
 			{
-				params[Gaussian2DFunction.X_POSITION] += 0.001;
-				params[Gaussian2DFunction.Y_POSITION] += 0.001;
+				if ((int) params[Gaussian2DFunction.X_POSITION] == params[Gaussian2DFunction.X_POSITION])
+					params[Gaussian2DFunction.X_POSITION] += 0.001;
+				if ((int) params[Gaussian2DFunction.Y_POSITION] == params[Gaussian2DFunction.Y_POSITION])
+					params[Gaussian2DFunction.Y_POSITION] += 0.001;
 			}
 
 			final FitResult fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate);
 
 			updateError(fitResult);
 
+			// Ensure the initial parameters are at the candidate position since we may have used an estimate.
+			// This will ensure that drift is computed correctly.
+			final double[] initialParams = fitResult.getInitialParameters();
+			initialParams[Gaussian2DFunction.X_POSITION] = candidates[candidateId].x - regionBounds.x;
+			initialParams[Gaussian2DFunction.Y_POSITION] = candidates[candidateId].y - regionBounds.y;
+
 			// Create the results
 			PreprocessedPeakResult[] results = null;
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
-				results = new PreprocessedPeakResult[1];
+				// The primary candidate is not bounded. Check it has not drifted close to 
+				// a neighbour. 
+
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				//    fitting a doublet so is ignored.
+				// 4. Check if there is an unfit candidate spot closer than the current candidate.
+				//    This represents drift out to fit another spot that will be fit later.
+
 				final double[] fitParams = fitResult.getParameters();
-				final double[] initialParams = fitResult.getInitialParameters();
+
+				int otherId = candidateId;
+				ResultType resultType = ResultType.NEW;
+
+				final double xShift = fitParams[Gaussian2DFunction.X_POSITION] -
+						initialParams[Gaussian2DFunction.X_POSITION];
+				final double yShift = fitParams[Gaussian2DFunction.Y_POSITION] -
+						initialParams[Gaussian2DFunction.Y_POSITION];
+
+				// We must be closer to the current candidate than any other spots.
+				// This is true for candidates we have yet to fit or already fitted candidates.
+
+				// Distance to current candidate fitted as a single
+				final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
+
+				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
+				//    fitting a doublet so is ignored..
+
+				final PeakResult[] peakNeighbours = findPeakNeighbours(candidates[candidateId]);
+				if (peakNeighbours.length != 0)
+				{
+					// Coords for comparison to the real positions
+					final float fcx2 = (float) (regionBounds.x + fitParams[Gaussian2DFunction.X_POSITION] + 0.5);
+					final float fcy2 = (float) (regionBounds.y + fitParams[Gaussian2DFunction.Y_POSITION] + 0.5);
+					final float d2 = (float) distanceToSingleFit2;
+					for (int i = 0; i < peakNeighbours.length; i++)
+					{
+						if (d2 > distance2(fcx2, fcy2, peakNeighbours[i].params))
+						{
+							// There is another fitted result that is closer.
+							// Note: The fit region is not centred on the other spot so this fit will probably
+							// be worse and is discarded (not compared to the existing fit to get the best one). 
+
+							otherId = peakNeighbours[i].getId();
+						}
+						if (otherId != candidateId)
+						{
+							if (logger != null)
+							{
+								logger.info(
+										"Bad peak: Fitted coordinates moved closer to another result (%d,%d : x=%.1f,y=%.1f : %.1f,%.1f)",
+										candidates[candidateId].x, candidates[candidateId].y, fcx2, fcy2,
+										peakNeighbours[i].getXPosition(), peakNeighbours[i].getYPosition());
+							}
+							System.out.printf("Single drift to another result: [%d,%d] %d\n", slice, candidateId,
+									otherId);
+							resultType = ResultType.EXISTING;
+						}
+
+					}
+				}
+
+				// 4. Check if there is an unfit candidate spot closer than the current candidate.
+				//    This represents drift out to fit another unfitted spot.
+
+				if (otherId != candidateId)
+				{
+					final CandidateList neighbours = findNeighbours(candidates[candidateId]);
+					if (neighbours.size != 0)
+					{
+						// Position - do not add 0.5 pixel offset to allow distance comparison to integer candidate positions.
+						float fcx2 = (float) (regionBounds.x + fitParams[Gaussian2DFunction.X_POSITION]);
+						float fcy2 = (float) (regionBounds.y + fitParams[Gaussian2DFunction.Y_POSITION]);
+						double mind2 = distanceToSingleFit2;
+						for (int j = 0; j < neighbours.size; j++)
+						{
+							final int id = neighbours.list[j].index;
+							if (isFit(id))
+								// This will be in the already fitted results instead so ignore...
+								continue;
+							final double d2 = distance2(fcx2, fcy2, candidates[id]);
+							if (mind2 > d2)
+							{
+								mind2 = d2;
+								otherId = id;
+							}
+						}
+						if (otherId != candidateId)
+						{
+							if (logger != null)
+							{
+								logger.info(
+										"Bad peak: Fitted coordinates moved closer to another candidate (%d,%d : x=%.1f,y=%.1f : %d,%d)",
+										candidates[candidateId].x, candidates[candidateId].y, fcx2 + 0.5f, fcy2 + 0.5f,
+										candidates[otherId].x, candidates[otherId].y);
+							}
+							System.out.printf("Single drift to another candidate: [%d,%d] %d\n", slice, candidateId,
+									otherId);
+
+							// There is another candidate to be fit later that is closer.
+							// This may be used as an estimate so we return it as such (i.e we do not ignore it)
+							//otherId = candidateId;
+							if (otherId > candidateId)
+								resultType = ResultType.CANDIDATE;
+						}
+					}
+				}
+
 				convertParameters(fitParams);
-				results[0] = resultFactory.createPreprocessedPeakResult(this.candidateId, 0, initialParams, fitParams,
-						0, ResultType.NEW);
+
+				results = new PreprocessedPeakResult[1];
+
+				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams, 0,
+						resultType);
 			}
 
 			resultSingle = createResult(fitResult, results);
@@ -1343,8 +1611,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		private MultiPathFitResult.FitResult createResult(FitResult fitResult, PreprocessedPeakResult[] results)
 		{
-			MultiPathFitResult.FitResult mfitResult = new MultiPathFitResult.FitResult(fitResult.getStatus().ordinal(),
-					fitResult);
+			return createResult(fitResult, results, fitResult.getStatus());
+		}
+
+		private MultiPathFitResult.FitResult createResult(FitResult fitResult, PreprocessedPeakResult[] results,
+				FitStatus fitStatus)
+		{
+			MultiPathFitResult.FitResult mfitResult = new MultiPathFitResult.FitResult(fitStatus.ordinal(), fitResult);
 			mfitResult.results = results;
 			return mfitResult;
 		}
@@ -1513,6 +1786,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			fitConfig.setMaxIterations(maxIterations);
 			fitConfig.setMaxFunctionEvaluations(maxEvaluations);
 
+			updateError(newFitResult);
+
 			if (newFitResult.getStatus() == FitStatus.OK)
 			{
 				// Adjusted Coefficient of determination is not good for non-linear models. Use the 
@@ -1575,7 +1850,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// IC should be lower
 				if (ic2 > ic1)
 				{
-					return null;
+					return createResult(newFitResult, null, FitStatus.NO_MODEL_IMPROVEMENT);
 				}
 
 				// Validation of fit. For each spot:
@@ -1584,7 +1859,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				//    If the shift is too far (e.g. half the distance to the edge), the centre 
 				//    must be in the correct quadrant. 
 				// 3. Check we are not closer to a fitted spot. This has already had a chance at 
-				//    fitting a doublet so is ignored..
+				//    fitting a doublet so is ignored.
 				// 4. Check if there is an unfit candidate spot closer than the current candidate.
 				//    This represents drift out to fit another spot that will be fit later.
 
@@ -1720,7 +1995,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				if (nPeaks == 0)
 				{
-					return null;
+					return createResult(newFitResult, null, FitStatus.FAILED_VALIDATION);
 				}
 
 				// Return results for validation
@@ -1765,9 +2040,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					logger2.debug(msg);
 				}
 
+				return createResult(newFitResult, null);
+				//return null;
 			}
-
-			return null;
 		}
 
 		private float distance2(float cx, float cy, Spot spot)
@@ -1804,7 +2079,32 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Compute distance to spot
 		final double dx = candidates[i].x - params[Gaussian2DFunction.X_POSITION];
 		final double dy = candidates[i].y - params[Gaussian2DFunction.Y_POSITION];
+
 		final double d2 = dx * dx + dy * dy;
+
+		final Estimate[] estimates;
+
+		// dx and dy should be <=1 pixel when a candidate is being fit since we use bounds.
+		// They can be larger if we drifted close to another candidate (e.g. during doublet fitting)
+		// or if this is the result of fitting the current candidate (which is not bounded).		
+		if (dx < -1 || dx > 1 || dy < -1 || dy > 1)
+		{
+			//if (dynamicMultiPathFitResult.candidateId != i)
+			//	System.out.printf("Drift error: [%d,%d]  %d  %.1f %.1f\n", slice, dynamicMultiPathFitResult.candidateId,
+			//			i, dx, dy);
+
+			// Ignore this as it is not a good estimate
+			if (d2 > 2)
+				return;
+
+			// Store as a non-local estimate
+			estimates = this.estimates2;
+		}
+		else
+		{
+			// Store as a close estimate
+			estimates = this.estimates;
+		}
 
 		if (estimates[i] == null || estimates[i].isWeaker(filterRank, d2, precision))
 			estimates[i] = new Estimate(params, filterRank, d2, precision);
@@ -2362,8 +2662,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Note that the PreprocessedPeakResult will have corrected coordinates so
 			// we subtract them and make relative to the fit region bounds when storing 
 			// estimates.
-			estimateOffsetx = regionBounds.x - offsetx; // == -bounds.x - 0.5f
-			estimateOffsety = regionBounds.y - offsety; // == -bounds.y - 0.5f
+			estimateOffsetx = regionBounds.x - offsetx; // == -dataBounds.x - 0.5f
+			estimateOffsety = regionBounds.y - offsety; // == -dataBounds.y - 0.5f
 
 			final ResultFactory factory = (dynamic) ? new DynamicResultFactory(offsetx, offsety)
 					: new FixedResultFactory(offsetx, offsety);
@@ -2632,7 +2932,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	public boolean isValid(int candidateId)
 	{
 		// If we have an estimate then this is a valid candidate for fitting
-		return estimates[candidateId] != null;
+		return estimates[candidateId] != null || estimates2[candidateId] != null;
 	}
 
 	/*

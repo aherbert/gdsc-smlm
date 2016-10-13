@@ -139,7 +139,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 		{
 			for (int j = m; j-- > 0;)
 			{
-				if (clamp[j] == 0)
+				if (clampInitial[j] == 0)
 				{
 					// Use the update parameter directly
 					ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
@@ -265,6 +265,26 @@ public class BoundedNonLinearFit extends NonLinearFit
 		}
 
 		super.accepted(a, ap, m);
+
+		//		// Check we are within the bounds
+		//		if (isUpper)
+		//		{
+		//			final int[] gradientIndices = f.gradientIndices();
+		//			for (int i = 0; i < gradientIndices.length; i++)
+		//				if (a[gradientIndices[i]] > upper[i])
+		//				{
+		//					System.out.println("upper bounds error");
+		//				}
+		//		}
+		//		if (isLower)
+		//		{
+		//			final int[] gradientIndices = f.gradientIndices();
+		//			for (int i = 0; i < gradientIndices.length; i++)
+		//				if (a[gradientIndices[i]] < lower[i])
+		//				{
+		//					System.out.println("lower bounds error");
+		//				}
+		//		}
 
 		if (nonLocalSearch)
 		{

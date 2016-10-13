@@ -1251,7 +1251,7 @@ public class BenchmarkSpotFit implements PlugIn
 					cFP++;
 				final MultiPathFitResult fitResult = result.fitResult[i];
 
-				if (singleStatus != null)
+				if (singleStatus != null && result.spots[i].match)
 				{
 					// Debugging reasons for fit failure
 					addStatus(singleStatus, fitResult.getSingleFitResult());
@@ -1333,6 +1333,7 @@ public class BenchmarkSpotFit implements PlugIn
 					total += singleStatus[i];
 				}
 			}
+			int totalb = total + singleStatus[0];
 			int total2 = 0;
 			for (int i = 1; i < multiStatus.length; i++)
 			{
@@ -1342,6 +1343,7 @@ public class BenchmarkSpotFit implements PlugIn
 					total2 += multiStatus[i];
 				}
 			}
+			int total2b = total2 + multiStatus[0];
 			int total3 = 0;
 			for (int i = 1; i < doubletStatus.length; i++)
 			{
@@ -1351,8 +1353,9 @@ public class BenchmarkSpotFit implements PlugIn
 					total3 += doubletStatus[i];
 				}
 			}
-			System.out.printf("Single Failures = %d. Multi failures = %d. Doublet failures = %d\n", total, total2,
-					total3);
+			int total3b = total3 + doubletStatus[0];
+			System.out.printf("Single Failures = %d/%d. Multi failures = %d/%d. Doublet failures = %d/%d\n", total,
+					totalb, total2, total2b, total3, total3b);
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -1652,7 +1655,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 	private void addStatus(int[] status, gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
 	{
-		if (fitResult != null && fitResult.status != 0)
+		if (fitResult != null)
 			status[fitResult.status]++;
 	}
 

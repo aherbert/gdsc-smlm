@@ -24,7 +24,7 @@ package gdsc.smlm.function.gaussian;
  */
 public abstract class Gaussian2DFunction extends GaussianFunction
 {
-	public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI; 
+	public static final double ONE_OVER_TWO_PI = 0.5 / Math.PI;
 
 	public static final int BACKGROUND = 0;
 	public static final int SIGNAL = 1;
@@ -33,14 +33,41 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 	public static final int Y_POSITION = 4;
 	public static final int X_SD = 5;
 	public static final int Y_SD = 6;
-	
+
+	/**
+	 * Gets the name of the parameter assuming a 2D Gaussian function packed as: background + n * [signal, angle,
+	 * position0,
+	 * position1, sd0, sd1].
+	 *
+	 * @param index
+	 *            the index (zero or above)
+	 * @return the name
+	 */
+	public static String getName(int index)
+	{
+		final int i = 1 + (index - 1) % 6;
+		switch (i)
+		{
+			//@formatter:off
+			case 0: return "Background";
+			case 1: return "Signal";
+			case 2: return "Angle";
+			case 3: return "X";
+			case 4: return "Y";
+			case 5: return "X SD";
+			case 6: return "Y SD";
+			default: return "Unknown: "+index;
+			//@formatter:on
+		}
+	}
+
 	protected int maxx;
-	
+
 	public Gaussian2DFunction(int maxx)
 	{
 		setMaxX(maxx);
 	}
-	
+
 	/**
 	 * @return the number of dimensions
 	 */
@@ -74,7 +101,7 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 	{
 		return maxx;
 	}
-	
+
 	/**
 	 * Build the index array that maps the gradient index back to the original parameter index so that:<br/>
 	 * a[indices[i]] += dy_da[i]
@@ -114,16 +141,17 @@ public abstract class Gaussian2DFunction extends GaussianFunction
 
 		return indices;
 	}
-	
+
 	/**
 	 * Locate the index within the gradient indices for the specified parameter
+	 * 
 	 * @param parameterIndex
 	 * @return the gradient index (or -1 if not present)
 	 */
 	public int findGradientIndex(int parameterIndex)
 	{
 		int[] gradientIndices = gradientIndices();
-		for (int i=0; i<gradientIndices.length; i++)
+		for (int i = 0; i < gradientIndices.length; i++)
 			if (gradientIndices[i] == parameterIndex)
 				return i;
 		return -1;
