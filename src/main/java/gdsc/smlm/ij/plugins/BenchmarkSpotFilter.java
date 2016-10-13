@@ -281,28 +281,32 @@ public class BenchmarkSpotFilter implements PlugIn
 		double score;
 		// Total intensity of spots we matched
 		private double intensity;
+		final float background;
 		final Spot spot;
 		int fails;
 
-		public ScoredSpot(boolean match, double score, double intensity, Spot spot)
+		public ScoredSpot(boolean match, double score, double intensity, Spot spot, float background)
 		{
 			this.match = match;
 			this.spot = spot;
+			this.background = background;
 			this.fails = 0;
 			add(score, intensity);
 		}
 
-		public ScoredSpot(boolean match, Spot spot)
+		public ScoredSpot(boolean match, Spot spot, float background)
 		{
 			this.match = match;
 			this.spot = spot;
+			this.background = background;
 			this.fails = 0;
 		}
 
-		public ScoredSpot(boolean match, Spot spot, int fails)
+		public ScoredSpot(boolean match, Spot spot, float background, int fails)
 		{
 			this.match = match;
 			this.spot = spot;
+			this.background = background;
 			this.fails = fails;
 		}
 
@@ -381,6 +385,16 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (spot.intensity < o.spot.intensity)
 				return 1;
 			return 0;
+		}
+
+		/**
+		 * Gets the intensity of the spot without the background.
+		 *
+		 * @return the intensity
+		 */
+		public float getIntensity()
+		{
+			return spot.intensity - background;
 		}
 	}
 
@@ -634,11 +648,15 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Extract the data
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
-			if (background != 0)
-			{
-				for (int i = stack.getWidth() * stack.getHeight(); i-- > 0;)
-					data[i] -= background;
-			}
+			// Use this code to subtract the background before filtering. This produces different results
+			// from using the raw data.
+			//float background = this.background;
+			//if (background != 0)
+			//{
+			//	for (int i = stack.getWidth() * stack.getHeight(); i-- > 0;)
+			//		data[i] -= background;
+			//}
+			//background = 0;
 
 			long start = System.nanoTime();
 			Spot[] spots = spotFilter.rank(data, stack.getWidth(), stack.getHeight());
@@ -722,9 +740,9 @@ public class BenchmarkSpotFilter implements PlugIn
 							if (signalScore != null)
 							{
 								// Adjust intensity using the surrounding PSF contributions
-								//final double rsf = intensity / predicted[j].spot.intensity;
+								//final double rsf = intensity / (predicted[j].spot.intensity - background);
 								final double rsf = (actual[i].backgroundOffset + intensity) /
-										predicted[j].spot.intensity;
+										(predicted[j].spot.intensity - background);
 								// Normalise so perfect is zero
 								final double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
 								s *= signalScore.score(sf);
@@ -771,7 +789,7 @@ public class BenchmarkSpotFilter implements PlugIn
 							final double intensity = getIntensity(actual[a.getTargetId()]);
 							if (scoredSpots[a.getPredictedId()] == null)
 								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
-										spots[a.getPredictedId()]);
+										spots[a.getPredictedId()], background);
 							else
 								scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
 							tp += a.getScore();
@@ -819,7 +837,7 @@ public class BenchmarkSpotFilter implements PlugIn
 									final double intensity = getIntensity(actual[a.getTargetId()]);
 									if (scoredSpots[a.getPredictedId()] == null)
 										scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
-												spots[a.getPredictedId()]);
+												spots[a.getPredictedId()], background);
 									else
 										scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
 									tp += a.getScore();
@@ -861,7 +879,7 @@ public class BenchmarkSpotFilter implements PlugIn
 								actualAssignment[a.getTargetId()] = true;
 								predictedAssignment[a.getPredictedId()] = true;
 								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(),
-										getIntensity(actual[a.getTargetId()]), spots[a.getPredictedId()]);
+										getIntensity(actual[a.getTargetId()]), spots[a.getPredictedId()], background);
 								tp += a.getScore();
 								if (--nA == 0 || --nP == 0)
 									break;
@@ -1694,8 +1712,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			{
 				if (spot.match)
 				{
-					final float[] params = new float[] { 0, spot.spot.intensity, 0, spot.spot.x, spot.spot.y, 0, 0 };
-					results.add(peak, spot.spot.x, spot.spot.y, spot.spot.intensity, 0d, 0f, params, null);
+					final float[] params = new float[] { 0, spot.getIntensity(), 0, spot.spot.x, spot.spot.y, 0, 0 };
+					results.add(peak, spot.spot.x, spot.spot.y, spot.getIntensity(), 0d, 0f, params, null);
 				}
 			}
 		}
@@ -1904,11 +1922,12 @@ public class BenchmarkSpotFilter implements PlugIn
 				tp += s.getScore();
 				fp += s.antiScore();
 				// Just use a rounded intensity for now
-				final long v1 = (long) Math.round((double) s.spot.intensity);
+				final double spotIntensity = s.getIntensity();
+				final long v1 = (long) Math.round(spotIntensity);
 				final long v2 = (long) Math.round(s.intensity);
-				regression.addData(s.spot.intensity, s.intensity);
-				i1[ci] = (double) s.spot.intensity;
-				i2[ci] = (double) s.intensity;
+				regression.addData(spotIntensity, s.intensity);
+				i1[ci] = spotIntensity;
+				i2[ci] = s.intensity;
 				ci++;
 				corr.add(v1, v2);
 				lastC = corr.getCorrelation();
@@ -1921,7 +1940,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			c[i] = lastC;
 			truePositives[i] = tp;
 			falsePositives[i] = fp;
-			intensity[i] = s.spot.intensity;
+			intensity[i] = s.getIntensity();
 			i++;
 		}
 		i1 = Arrays.copyOf(i1, ci);
