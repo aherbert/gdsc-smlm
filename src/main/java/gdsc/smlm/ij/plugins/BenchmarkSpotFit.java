@@ -242,6 +242,7 @@ public class BenchmarkSpotFit implements PlugIn
 	static double signalFactor = 2;
 	static double lowerSignalFactor = 1;
 
+	private static boolean computeDoublets = true; //config.getResidualsThreshold() < 1;
 	private static boolean showFilterScoreHistograms = false;
 	private static boolean saveFilterRange = true;
 	private static boolean showCorrelation = false;
@@ -881,6 +882,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		//gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
+		gd.addCheckbox("Compute_doublets", computeDoublets);
 		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
 		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
 		gd.addCheckbox("Show_correlation", showCorrelation);
@@ -923,7 +925,18 @@ public class BenchmarkSpotFit implements PlugIn
 
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
-		//config.setResidualsThreshold(gd.getNextNumber());
+		computeDoublets = gd.getNextBoolean();
+		if (computeDoublets)
+		{
+			//config.setComputeResiduals(true);
+			config.setResidualsThreshold(0);
+			fitConfig.setComputeResiduals(true);
+		}
+		else
+		{
+			config.setResidualsThreshold(1);
+			fitConfig.setComputeResiduals(false);
+		}
 		fitConfig.setDuplicateDistance(gd.getNextNumber());
 		showFilterScoreHistograms = gd.getNextBoolean();
 		showCorrelation = gd.getNextBoolean();
@@ -932,7 +945,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
 		fitConfig.setMinPhotons(15); // Realistically we cannot fit lower than this
-		fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
+		fitConfig.setCoordinateShiftFactor(0);
+		//fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
 		fitConfig.setFitRegion(2 * config.getRelativeFitting() + 1);
 		fitConfig.setCoordinateOffset(0.5);
 		fitConfig.setMinWidthFactor(1.0 / 5);
