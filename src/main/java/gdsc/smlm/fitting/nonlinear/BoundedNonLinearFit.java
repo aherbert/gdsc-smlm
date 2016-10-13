@@ -117,7 +117,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 				// - how often this occurs, 
 				// - how often it allows a solution, and 
 				// - how often the solution was accepted.
-				System.out.printf("Ignoring parameters at the bounds allowed a solution to be found\n");
+				//System.out.printf("Ignoring parameters at the bounds allowed a solution to be found\n");
 				return true;
 			}
 		}
