@@ -810,7 +810,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		final int parametersPerPeak = 6;
 
 		int neighbours;
-		float singleBackground = Float.NaN, multiBackground = Float.NaN;
+		double singleBackground = Double.NaN, multiBackground = Double.NaN;
 
 		MultiPathFitResult.FitResult resultMulti = null;
 		MultiPathFitResult.FitResult resultSingle = null;
@@ -837,9 +837,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			neighbours = (config.isIncludeNeighbours()) ? findNeighbours(regionBounds, n) : 0;
 		}
 
-		private float getMultiFittingBackground()
+		private double getMultiFittingBackground()
 		{
-			if (Float.isNaN(multiBackground))
+			if (Double.isNaN(multiBackground))
 			{
 				multiBackground = 0;
 				if (fittedNeighbourCount > 0)
@@ -858,15 +858,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					multiBackground = this.getSingleFittingBackground();
 				}
+				multiBackground = limitBackground(multiBackground);
 			}
 			return multiBackground;
 		}
 
-		private float getSingleFittingBackground()
+		private double getSingleFittingBackground()
 		{
-			if (Float.isNaN(singleBackground))
+			if (Double.isNaN(singleBackground))
 			{
-				singleBackground = FitWorker.this.getSingleFittingBackground();
+				singleBackground = limitBackground(FitWorker.this.getSingleFittingBackground());
 			}
 			return singleBackground;
 		}
@@ -875,7 +876,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			// Use the minimum in the data.
 			// This is what is done in the in the fitter if the background is zero.
-			double b = Gaussian2DFitter.getBackground(region, width, height, 2);
+			return limitBackground(Gaussian2DFitter.getBackground(region, width, height, 2));
+		}
+		
+		private double limitBackground(double b)
+		{
 			// Ensure we do not get a negative background
 			final double limit = (fitConfig.isRemoveBiasBeforeFitting()) ? fitConfig.getBias() : 0;
 			if (b < limit)
@@ -1076,14 +1081,32 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// In the case of a bad background estimate (e.g. uneven illumination) the peaks may 
 			// be below the background.
 			// Check the heights are positive.
+
+			// Find the min signal
+			double minSignal = Double.POSITIVE_INFINITY;
 			for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
+				if (minSignal > params[j])
+					minSignal = params[j];
+
+			if (minSignal < background)
 			{
-				if (params[j] < background)
+				// Reset to the minimum value in the data.
+				// This is what is done in the in the fitter if the background is zero.
+				background = getDefaultBackground(region, width, height);
+
+				if (minSignal < background)
 				{
-					// Reset to the minimum value in the data.
-					// This is what is done in the in the fitter if the background is zero.
-					background = getDefaultBackground(region, width, height);
-					break;
+					// This is probably extremely rare and the result of a poor candidate estimate
+
+					//// Boost all the estimates so the min signal is above the background
+					//final double boost = 10 + (background - minSignal);
+					//for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
+					//	params[j] += boost;
+
+					// Or just make the low peaks higher (the existing good estimates are left alone)
+					for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
+						if (params[j] < minSignal)
+							params[j] = background + 10;
 				}
 			}
 
@@ -1307,8 +1330,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL];
 				else
 					// Convert signal into amplitude
-					params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL] / (2 * Math.PI *
-							estimatedParams[Gaussian2DFunction.X_SD] * estimatedParams[Gaussian2DFunction.Y_SD]);
+					params[j + Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.BACKGROUND] +
+							estimatedParams[Gaussian2DFunction.SIGNAL] /
+									(2 * Math.PI * estimatedParams[Gaussian2DFunction.X_SD] *
+											estimatedParams[Gaussian2DFunction.Y_SD]);
 				params[j + Gaussian2DFunction.X_POSITION] = estimatedParams[Gaussian2DFunction.X_POSITION] -
 						regionBounds.x;
 				params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
@@ -1381,7 +1406,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (resultSingle != null)
 				return resultSingle;
 
-			float background = getMultiFittingBackground();
+			double background = getMultiFittingBackground();
 			double[] region = this.region;
 
 			// Subtract all fitted neighbours from the region
@@ -1455,7 +1480,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 						if (params[Gaussian2DFunction.SIGNAL] < params[Gaussian2DFunction.BACKGROUND])
 							// This is probably extremely rare and the result of a poor candidate estimate
-							params[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.BACKGROUND] + 10;							
+							params[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.BACKGROUND] + 10;
 					}
 
 					// Subtract the background from the estimated peak amplitudes.
@@ -1774,16 +1799,20 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final double singleSumOfSquares = gf.getFinalResidualSumOfSquares();
 			final double singleValue = gf.getValue();
 
-			// If validation is on in the fit configuration,
-			// disable checking of position movement since we guessed the 2-peak location.
-			// Also increase the iterations level then reset afterwards.
+			// If validation is on in the fit configuration:
+			// - Disable checking of position movement since we guessed the 2-peak location.
+			// - Disable checking within the fit region as we do that per peak 
+			//   (which is better than failing if either peak is outside the region)
+			// - Increase the iterations level then reset afterwards.
 
 			// TODO - Should width and signal validation be disabled too?
 			double shift = fitConfig.getCoordinateShift();
+			final int fitRegion = fitConfig.getFitRegion();
 			final int maxIterations = fitConfig.getMaxIterations();
 			final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 
 			fitConfig.setCoordinateShift(FastMath.min(width, height));
+			fitConfig.setFitRegion(0);
 			fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
 			fitConfig.setMaxFunctionEvaluations(maxEvaluations * FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS);
 
@@ -1794,6 +1823,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			gf.setComputeResiduals(isComputeResiduals);
 
 			fitConfig.setCoordinateShift(shift);
+			fitConfig.setFitRegion(fitRegion);
 			fitConfig.setMaxIterations(maxIterations);
 			fitConfig.setMaxFunctionEvaluations(maxEvaluations);
 
@@ -2231,8 +2261,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 		else
 		{
-			// Initial guess using image mean
-			background = this.background;
+			if (fitConfig.getBias() != 0 && this.noise != 0)
+			{
+				// Initial guess using the noise (assuming all noise is from Poisson background).
+				// EMCCD will have increase noise by a factor of sqrt(2)
+				background = (float) (fitConfig.getBias() + this.noise / ((fitConfig.isEmCCD()) ? 1.414213562 : 1));
+			}
+			else
+			{
+				// Initial guess using image mean
+				background = this.background;
+			}
+
 		}
 		return background;
 	}
