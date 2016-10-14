@@ -93,7 +93,7 @@ public enum FitStatus
 	/**
 	 * 
 	 */
-	NO_MODEL_IMPROVEMENT("No model improvment"),
+	NO_MODEL_IMPROVEMENT("No model improvement"),
 	/**
 	 * 
 	 */
