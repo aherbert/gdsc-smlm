@@ -945,8 +945,9 @@ public class BenchmarkSpotFit implements PlugIn
 
 		// Avoid stupidness, i.e. things that move outside the fit window and are bad widths
 		fitConfig.setMinPhotons(15); // Realistically we cannot fit lower than this
+		// Disable shift as candidates may be re-mapped to alternative candidates so the initial position is wrong.
 		fitConfig.setCoordinateShiftFactor(0);
-		//fitConfig.setCoordinateShiftFactor(config.getFitting() / fitConfig.getInitialPeakStdDev0());
+		// Instead we make sure the primary candidate is inside the fit region. The other fits will be bounded.
 		fitConfig.setFitRegion(2 * config.getRelativeFitting() + 1);
 		fitConfig.setCoordinateOffset(0.5);
 		fitConfig.setMinWidthFactor(1.0 / 5);
