@@ -811,7 +811,7 @@ public class Gaussian2DFitter
 				lower[0] = yMin;
 			else
 				lower[0] = params[0] - (yMin - params[0]);
-			
+
 			if (lower[0] < 0)
 			{
 				// This is a problem for MLE fitting
@@ -916,16 +916,18 @@ public class Gaussian2DFitter
 		{
 			if (params[i] < lower[i])
 			{
-				System.out.printf("Param %d (%s) too low %f < %f\n", i, Gaussian2DFunction.getName(i), params[i], lower[i]);
+				System.out.printf("Param %d (%s) too low %f < %f\n", i, Gaussian2DFunction.getName(i), params[i],
+						lower[i]);
 				lower[i] = params[i] - (lower[i] - params[i]);
 			}
 			if (params[i] > upper[i])
 			{
-				System.out.printf("Param %d (%s) too high %f > %f\n", i, Gaussian2DFunction.getName(i), params[i], upper[i]);
+				System.out.printf("Param %d (%s) too high %f > %f\n", i, Gaussian2DFunction.getName(i), params[i],
+						upper[i]);
 				upper[i] = params[i] + (params[i] - upper[i]);
 			}
 		}
-		
+
 		solver.setBounds(lower, upper);
 	}
 
@@ -1005,9 +1007,9 @@ public class Gaussian2DFitter
 				lower[0] = params[0] - (yMin - params[0]);
 		}
 
-		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+		for (int j = Gaussian2DFunction.SIGNAL; j < lower.length; j += paramsPerPeak)
 		{
-			lower[j + Gaussian2DFunction.SIGNAL] = 0;
+			lower[j] = 0;
 		}
 		solver.setConstraints(lower, upper);
 	}

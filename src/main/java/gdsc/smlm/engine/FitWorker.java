@@ -871,6 +871,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return singleBackground;
 		}
 
+		private double getDefaultBackground(double[] region, int width, int height)
+		{
+			// Use the minimum in the data.
+			// This is what is done in the in the fitter if the background is zero.
+			double b = Gaussian2DFitter.getBackground(region, width, height, 2);
+			// Ensure we do not get a negative background
+			final double limit = (fitConfig.isRemoveBiasBeforeFitting()) ? fitConfig.getBias() : 0;
+			if (b < limit)
+				b = limit;
+			return b;
+		}
+
 		public MultiPathFitResult.FitResult getResultMulti()
 		{
 			if (neighbours == 0)
@@ -1070,7 +1082,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					// Reset to the minimum value in the data.
 					// This is what is done in the in the fitter if the background is zero.
-					background = Gaussian2DFitter.getBackground(region, width, height, 2);
+					background = getDefaultBackground(region, width, height);
 					break;
 				}
 			}
@@ -1112,7 +1124,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
 			gf.setBounds(lower, upper);
-			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, true);
+			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, true, background == 0);
 			gf.setBounds(null, null);
 
 			//			if (fitResult.getStatus() == FitStatus.BAD_PARAMETERS)
@@ -1439,13 +1451,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					if (params[Gaussian2DFunction.SIGNAL] < background)
 					{
 						// Reset to the minimum value in the data.
-						// This is what is done in the in the fitter if the background is zero.
-						params[Gaussian2DFunction.BACKGROUND] = Gaussian2DFitter.getBackground(region, width, height,
-								2);
+						params[Gaussian2DFunction.BACKGROUND] = getDefaultBackground(region, width, height);
 
-						// Subtract the background from the estimated peak amplitudes.
-						params[Gaussian2DFunction.SIGNAL] -= params[Gaussian2DFunction.BACKGROUND];
+						if (params[Gaussian2DFunction.SIGNAL] < params[Gaussian2DFunction.BACKGROUND])
+							// This is probably extremely rare and the result of a poor candidate estimate
+							params[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.BACKGROUND] + 10;							
 					}
+
+					// Subtract the background from the estimated peak amplitudes.
+					params[Gaussian2DFunction.SIGNAL] -= params[Gaussian2DFunction.BACKGROUND];
 				}
 			}
 
@@ -1460,7 +1474,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					params[Gaussian2DFunction.Y_POSITION] += 0.001;
 			}
 
-			final FitResult fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate);
+			final FitResult fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate,
+					params[Gaussian2DFunction.BACKGROUND] == 0);
 
 			updateError(fitResult);
 
