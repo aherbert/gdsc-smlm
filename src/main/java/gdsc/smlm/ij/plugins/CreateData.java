@@ -592,7 +592,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						if (!gd.wasOKed())
 							return;
 					}
-					PoissonDistribution poisson = new PoissonDistribution(mean);
+					PoissonDistribution poisson = new PoissonDistribution(createRandomGenerator(), mean,
+							PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 					StoredDataStatistics samples = new StoredDataStatistics(settings.particles);
 					while (samples.getSum() < settings.particles)
 					{
@@ -2098,7 +2099,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private synchronized void showProgress()
 	{
-		IJ.showProgress(frame++, totalFrames + 1);
+		IJ.showProgress(frame++, totalFrames);
 	}
 
 	private class Spot
@@ -4726,10 +4727,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private RandomGenerator createRandomGenerator(int seedAddition)
 	{
-		return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this) + seedAddition);
+		//return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this) + seedAddition);
 
 		// Note: To make the simulation reproducible we can use a fixed offset 
-		//return new Well44497b(1 + seedAddition);
+		return new Well44497b(1 + seedAddition);
 	}
 
 	// Note: To make the simulation reproducible we can use a static seed addition

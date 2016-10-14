@@ -1527,12 +1527,13 @@ public class BenchmarkSpotFilter implements PlugIn
 	 */
 	private synchronized void showProgress()
 	{
-		if (++progress % stepProgress == 0)
+		if (progress % stepProgress == 0)
 		{
 			//if (Utils.showStatus(String.format("%s: %d / %d", progressPrefix, progress, totalProgress)))
 			if (Utils.showStatus(progressPrefix))
 				IJ.showProgress(progress, totalProgress);
 		}
+		progress++;
 	}
 
 	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean relativeDistances)

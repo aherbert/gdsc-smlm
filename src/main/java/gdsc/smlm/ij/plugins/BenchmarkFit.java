@@ -670,11 +670,12 @@ public class BenchmarkFit implements PlugIn
 	 */
 	private synchronized void showProgress()
 	{
-		if (++progress % stepProgress == 0)
+		if (progress % stepProgress == 0)
 		{
 			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
+		progress++;
 	}
 
 	private void run()

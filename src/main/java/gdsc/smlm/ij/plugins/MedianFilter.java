@@ -187,7 +187,7 @@ public class MedianFilter implements PlugInFilter
 
 	private synchronized void showProgressSingle()
 	{
-		IJ.showProgress(++counter, size);
+		IJ.showProgress(counter++, size);
 	}
 
 	/**

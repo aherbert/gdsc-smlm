@@ -3258,11 +3258,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private synchronized void showProgress()
 	{
-		if (++progress % stepProgress == 0)
+		if (progress % stepProgress == 0)
 		{
 			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
+		progress++;
 	}
 
 	private ScoreResult[] scoreFilters(FilterSet filterSet, boolean createTextResult)

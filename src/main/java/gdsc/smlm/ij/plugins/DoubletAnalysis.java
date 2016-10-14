@@ -1780,11 +1780,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private synchronized void showProgress()
 	{
-		if (++progress % stepProgress == 0)
+		if (progress % stepProgress == 0)
 		{
 			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
+		progress++;
 	}
 
 	/**
