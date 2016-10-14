@@ -14,6 +14,7 @@ import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
+// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -38,9 +39,21 @@ public class MultiPathFilter
 	 */
 	public class SelectedResult
 	{
+
+		/** The results. */
 		final public PreprocessedPeakResult[] results;
+
+		/** The fit result. */
 		final public FitResult fitResult;
 
+		/**
+		 * Instantiates a new selected result.
+		 *
+		 * @param results
+		 *            the results
+		 * @param fitResult
+		 *            the fit result
+		 */
 		public SelectedResult(PreprocessedPeakResult[] results, FitResult fitResult)
 		{
 			this.results = results;
@@ -53,10 +66,12 @@ public class MultiPathFilter
 	 */
 	public interface SelectedResultStore
 	{
+
 		/**
-		 * Add a selected result to the store
-		 * 
+		 * Add a selected result to the store.
+		 *
 		 * @param selectedResult
+		 *            the selected result
 		 */
 		void add(SelectedResult selectedResult);
 
@@ -81,54 +96,92 @@ public class MultiPathFilter
 		boolean isValid(int candidateId);
 
 		/**
-		 * A result that passed the primary filter
-		 * 
+		 * A result that passed the primary filter.
+		 *
 		 * @param result
+		 *            the result
 		 */
 		void pass(PreprocessedPeakResult result);
 
 		/**
-		 * A result that passed the minimal filter
-		 * 
+		 * A result that passed the minimal filter.
+		 *
 		 * @param result
+		 *            the result
 		 */
 		void passMin(PreprocessedPeakResult result);
 	}
 
 	/**
-	 * Allow tracking of candidates that have been fit
+	 * Allow tracking of candidates that have been fit.
 	 */
 	private class SimpleSelectedResultStore implements SelectedResultStore
 	{
+
+		/** The is fit. */
 		boolean[] isFit;
+
+		/** The is valid. */
 		boolean[] isValid;
 
+		/**
+		 * Instantiates a new simple selected result store.
+		 */
 		SimpleSelectedResultStore()
 		{
 			isFit = new boolean[0];
 			isValid = new boolean[0];
 		}
 
+		/**
+		 * Instantiates a new simple selected result store.
+		 *
+		 * @param totalCandidates
+		 *            the total candidates
+		 */
 		SimpleSelectedResultStore(int totalCandidates)
 		{
 			isFit = new boolean[totalCandidates];
 			isValid = new boolean[totalCandidates];
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
+		 * SelectedResult)
+		 */
 		public void add(SelectedResult selectedResult)
 		{
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
+		 */
 		public boolean isFit(int candidateId)
 		{
 			return isFit[candidateId];
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
+		 */
 		public boolean isValid(int candidateId)
 		{
 			return isValid[candidateId];
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
+		 * PreprocessedPeakResult)
+		 */
 		public void pass(PreprocessedPeakResult result)
 		{
 			if (result.isNewResult())
@@ -137,12 +190,24 @@ public class MultiPathFilter
 			isValid[result.getCandidateId()] = true;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
+		 * PreprocessedPeakResult)
+		 */
 		public void passMin(PreprocessedPeakResult result)
 		{
 			// Passing the minimal filter does not mean it is valid. This would be used to store
 			// a fit estimate during processing for this candidate.
 		}
 
+		/**
+		 * Resize.
+		 *
+		 * @param totalCandidates
+		 *            the total candidates
+		 */
 		public void resize(int totalCandidates)
 		{
 			if (isFit.length < totalCandidates)
@@ -159,42 +224,71 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Used to return default behaviour for acceptAny/acceptAll
+	 * Used to return default behaviour for acceptAny/acceptAll.
 	 */
 	private static class NullSelectedResultStore implements SelectedResultStore
 	{
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
+		 * SelectedResult)
+		 */
 		public void add(SelectedResult selectedResult)
 		{
 
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
+		 */
 		public boolean isFit(int candidateId)
 		{
 			// Make sure non-candidate fits are ignored.
 			return true;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
+		 */
 		public boolean isValid(int candidateId)
 		{
 			return false;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
+		 * PreprocessedPeakResult)
+		 */
 		public void pass(PreprocessedPeakResult result)
 		{
 
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
+		 * PreprocessedPeakResult)
+		 */
 		public void passMin(PreprocessedPeakResult result)
 		{
 
 		}
 	}
 
+	/** The null store. */
 	private static NullSelectedResultStore nullStore = new NullSelectedResultStore();
 
-	/**
-	 * The direct filter to apply to the results
-	 */
+	/** The direct filter to apply to the results. */
 	final IDirectFilter filter;
 
 	/**
@@ -323,49 +417,58 @@ public class MultiPathFilter
 	final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates,
 			SelectedResultStore store)
 	{
-		PreprocessedPeakResult[] results = null;
 		final int candidateId = multiPathResult.candidateId;
 
-		// Ensure we don't have to check the store in acceptALl/acceptAny
+		// Ensure we don't have to check the store in acceptAll/acceptAny
 		if (store == null)
 			store = nullStore;
 
+		// The aim is to obtain a new result for the current candidate Id. 
+		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
+		// So we check the candidate Id.
+
 		// Filter multi-fit
-		if ((results = acceptAll(candidateId, multiPathResult.getMultiFitResult(), validateCandidates, store)) != null)
-			return results;
+		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
+				validateCandidates, store);
+		if (multiResults != null)
+		{
+			// Check we have a new result for the candidate
+			if (contains(multiResults, candidateId))
+				return multiResults;
+		}
+
+		// a multi fit that failed or matched a different candidate, so continue
 
 		// Filter single-fit
-		if ((results = acceptAll(candidateId, multiPathResult.getSingleFitResult(), false, null)) == null)
+		final PreprocessedPeakResult[] singleResults = acceptAll(candidateId, multiPathResult.getSingleFitResult(),
+				validateCandidates, store);
+		if (singleResults == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
-			
-			
-			// TODO - What if the single fit drifts to another spot?
-			
 
 			// Check there is a result for the single spot
 			if (multiPathResult.getSingleFitResult().status != 0)
-				return null;
+				return multiResults;
 
 			// Check if the residuals score is below the configured threshold
 			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-				return null;
+				return multiResults;
 
 			// Get the single spot
 			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.getSingleFitResult().results);
 			if (singleResult == null)
-				return null;
+				return multiResults;
 
 			// Check the width is reasonable given the size of the fitted region.
 			//@formatter:off
 			if (
 					singleResult.getXSDFactor() < 1 || // Not a wide spot
-					singleResult.getXSD() > multiPathResult.width * 0.5f || // width covers more than the region
+					singleResult.getXSD() > multiPathResult.width || // width covers more than the region
 					singleResult.getYSDFactor() < 1 || // Not a wide spot
-					singleResult.getYSD() > multiPathResult.height * 0.5f // width covers more than the region
+					singleResult.getYSD() > multiPathResult.height // width covers more than the region
 				)
-				return null;
+				return multiResults;
 			//@formatter:on
 
 			// We must validate the spot without width filtering
@@ -374,8 +477,9 @@ public class MultiPathFilter
 			try
 			{
 				if (!accept(singleResult))
-					// This is still a bad single result, without width filtering
-					return null;
+					// This is still a bad single result, without width filtering.
+					// Fall-back to the multi-result (which may match another candidate)
+					return multiResults;
 			}
 			finally
 			{
@@ -388,18 +492,115 @@ public class MultiPathFilter
 			// The single fit is OK.
 			// If not eligible for a doublet fit then return.
 			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-				return results;
+			{
+				if (contains(singleResults, candidateId))
+					return singleResults;
+				// a multi fit that failed or matched a different candidate
+				// a single fit that matched a different candidate
+				// Default to the multi fit if it produced a new result.
+				return (isNewResult(multiResults)) ? multiResults : singleResults;
+			}
 		}
 
-		// We reached here with a single fit that is eligible for doublet fitting
+		// We reached here with:
+		// a multi fit that failed or matched a different candidate
+		// a single fit that is eligible for doublet fitting, it may be null (if it passed without width filtering)
 
 		// Filter doublet fit
 		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(),
 				validateCandidates, store);
 		if (doubletResults != null)
-			return doubletResults;
+		{
+			// Check we have a new result for the candidate
+			if (contains(doubletResults, candidateId))
+				return doubletResults;
+		}
 
-		return results;
+		// Check if the single result is to the correct candidate.
+		if (singleResults != null && contains(singleResults, candidateId))
+			return singleResults;
+
+		// a multi fit that failed or matched a different candidate
+		// a single fit that failed or matched a different candidate
+		// a doublet fit that failed or matched a different candidate
+		return rank(multiResults, singleResults, doubletResults);
+	}
+
+	/**
+	 * Allows results to be ranked
+	 */
+	private class ResultRank implements Comparable<ResultRank>
+	{
+		/** The results. */
+		final PreprocessedPeakResult[] results;
+
+		/** The default rank (when the count of new result is the same). */
+		final int rank;
+
+		/** The count of new results. */
+		final int count;
+
+		/**
+		 * Instantiates a new result rank.
+		 *
+		 * @param results
+		 *            the results
+		 * @param rank
+		 *            the rank
+		 */
+		public ResultRank(PreprocessedPeakResult[] results, int rank)
+		{
+			this.results = results;
+			this.rank = rank;
+			if (results == null)
+			{
+				// Negative so null results are ranked below not-null results with no new results
+				count = -1;
+			}
+			else
+			{
+				count = countNewResult(results);
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		public int compareTo(ResultRank o)
+		{
+			final int result = o.count - count;
+			if (result != 0)
+				return result;
+			return rank - o.rank;
+		}
+	}
+
+	/**
+	 * Rank the results. It is assumed that each result is either null or has results that do not match the current
+	 * candidate Id. In this case we will return the result that has the highest number of new results. In the event of
+	 * a tie we order as multi, single, doublet. Results are discounted if null.
+	 *
+	 * @param multiResults
+	 *            the multi results
+	 * @param singleResults
+	 *            the single results
+	 * @param doubletResults
+	 *            the doublet results
+	 * @return the preprocessed peak result[]
+	 */
+	private PreprocessedPeakResult[] rank(PreprocessedPeakResult[] multiResults, PreprocessedPeakResult[] singleResults,
+			PreprocessedPeakResult[] doubletResults)
+	{
+		if (multiResults == null && singleResults == null && doubletResults == null)
+			return null;
+		final ResultRank[] rank = new ResultRank[3];
+		rank[0] = new ResultRank(multiResults, 1);
+		rank[1] = new ResultRank(singleResults, 2);
+		rank[2] = new ResultRank(doubletResults, 3);
+		Arrays.sort(rank);
+		return rank[0].results;
 	}
 
 	/**
@@ -432,45 +633,61 @@ public class MultiPathFilter
 	final public SelectedResult select(final MultiPathFitResult multiPathResult, boolean validateCandidates,
 			SelectedResultStore store)
 	{
-		PreprocessedPeakResult[] results = null;
 		final int candidateId = multiPathResult.candidateId;
 
-		// Ensure we don't have to check the store in acceptALl/acceptAny
+		// Ensure we don't have to check the store in acceptAll/acceptAny
 		if (store == null)
 			store = nullStore;
 
+		// The aim is to obtain a new result for the current candidate Id. 
+		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
+		// So we check the candidate Id.
+
 		// Filter multi-fit
-		if ((results = acceptAll(candidateId, multiPathResult.getMultiFitResult(), validateCandidates, store)) != null)
-			return new SelectedResult(results, multiPathResult.getMultiFitResult());
+		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
+				validateCandidates, store);
+		SelectedResult multiSelectedResult = null;
+		if (multiResults != null)
+		{
+			multiSelectedResult = new SelectedResult(multiResults, multiPathResult.getMultiFitResult());
+			// Check we have a new result for the candidate
+			if (contains(multiResults, candidateId))
+				return multiSelectedResult;
+		}
+
+		// a multi fit that failed or matched a different candidate, so continue
 
 		// Filter single-fit
-		if ((results = acceptAll(candidateId, multiPathResult.getSingleFitResult(), false, store)) == null)
+		final PreprocessedPeakResult[] singleResults = acceptAll(candidateId, multiPathResult.getSingleFitResult(),
+				validateCandidates, store);
+		SelectedResult singleSelectedResult = null;
+		if (singleResults == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
 
 			// Check there is a result for the single spot
 			if (multiPathResult.getSingleFitResult().status != 0)
-				return null;
+				return multiSelectedResult;
 
 			// Check if the residuals score is below the configured threshold
 			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-				return null;
+				return multiSelectedResult;
 
 			// Get the single spot
 			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.getSingleFitResult().results);
 			if (singleResult == null)
-				return null;
+				return multiSelectedResult;
 
 			// Check the width is reasonable given the size of the fitted region.
 			//@formatter:off
 			if (
 					singleResult.getXSDFactor() < 1 || // Not a wide spot
-					singleResult.getXSD() > multiPathResult.width * 0.5f || // width covers more than the region
+					singleResult.getXSD() > multiPathResult.width || // width covers more than the region
 					singleResult.getYSDFactor() < 1 || // Not a wide spot
-					singleResult.getYSD() > multiPathResult.height * 0.5f // width covers more than the region
+					singleResult.getYSD() > multiPathResult.height // width covers more than the region
 				)
-				return null;
+				return multiSelectedResult;
 			//@formatter:on
 
 			// We must validate the spot without width filtering
@@ -480,7 +697,8 @@ public class MultiPathFilter
 			{
 				if (!accept(singleResult))
 					// This is still a bad single result, without width filtering
-					return null;
+					// Fall-back to the multi-result (which may match another candidate)
+					return multiSelectedResult;
 			}
 			finally
 			{
@@ -491,20 +709,48 @@ public class MultiPathFilter
 		else
 		{
 			// The single fit is OK.
+			singleSelectedResult = new SelectedResult(singleResults, multiPathResult.getSingleFitResult());
 			// If not eligible for a doublet fit then return.
 			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-				return new SelectedResult(results, multiPathResult.getSingleFitResult());
+			{
+				if (contains(singleResults, candidateId))
+					return singleSelectedResult;
+				// a multi fit that failed or matched a different candidate
+				// a single fit that matched a different candidate
+				// Default to the multi fit if it produced a new result.
+				return (isNewResult(multiResults)) ? singleSelectedResult : multiSelectedResult;
+			}
 		}
 
 		// We reached here with a single fit that is eligible for doublet fitting
+		// a multi fit that failed or matched a different candidate
+		// a single fit that is eligible for doublet fitting, it may be null (if it passed without width filtering)
 
 		// Filter doublet fit
 		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(),
 				validateCandidates, store);
+		SelectedResult doubletSelectedResult = null;
 		if (doubletResults != null)
-			return new SelectedResult(doubletResults, multiPathResult.getDoubletFitResult());
+		{
+			doubletSelectedResult = new SelectedResult(doubletResults, multiPathResult.getDoubletFitResult());
+			// Check we have a new result for the candidate
+			if (contains(doubletResults, candidateId))
+				return doubletSelectedResult;
+		}
 
-		return new SelectedResult(results, multiPathResult.getSingleFitResult());
+		// Check if the single result is to the correct candidate.
+		if (singleResults != null && contains(singleResults, candidateId))
+			return singleSelectedResult;
+
+		// a multi fit that failed or matched a different candidate
+		// a single fit that failed or matched a different candidate
+		// a doublet fit that failed or matched a different candidate
+		final PreprocessedPeakResult[] result = rank(multiResults, singleResults, doubletResults);
+		if (result == multiResults)
+			return multiSelectedResult;
+		if (result == singleResults)
+			return singleSelectedResult;
+		return doubletSelectedResult;
 	}
 
 	/**
@@ -616,9 +862,9 @@ public class MultiPathFilter
 	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
 	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
 	 * already.
-	 * 
-	 * @param candidateId
 	 *
+	 * @param candidateId
+	 *            the candidate id
 	 * @param fitResult
 	 *            the results
 	 * @param validateCandidates
@@ -718,9 +964,9 @@ public class MultiPathFilter
 	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
 	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
 	 * already.
-	 * 
-	 * @param candidateId
 	 *
+	 * @param candidateId
+	 *            the candidate id
 	 * @param fitResult
 	 *            the results
 	 * @param validateCandidates
@@ -810,6 +1056,30 @@ public class MultiPathFilter
 		return filtered;
 	}
 
+	/**
+	 * Checks if there is the given candidate in the results.
+	 *
+	 * @param results
+	 *            the results
+	 * @param candidateId
+	 *            the candidate id
+	 * @return true, if there is the given candidate
+	 */
+	private boolean contains(final PreprocessedPeakResult[] results, final int candidateId)
+	{
+		for (int i = 0; i < results.length; i++)
+			if (results[i].getCandidateId() == candidateId)
+				return true;
+		return false;
+	}
+
+	/**
+	 * Extract the first new result from the results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return the first new result
+	 */
 	private PreprocessedPeakResult extractFirstNew(PreprocessedPeakResult[] results)
 	{
 		if (results == null)
@@ -821,9 +1091,47 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Filter a set of multi-path results into a set of results
-	 * 
+	 * Checks if there is a new result in the results.
+	 *
 	 * @param results
+	 *            the results
+	 * @return true, if there is a new result
+	 */
+	private boolean isNewResult(final PreprocessedPeakResult[] results)
+	{
+		if (results != null)
+		{
+			for (int i = 0; i < results.length; i++)
+				if (results[i].isNewResult())
+					return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Counts the number of new results in the results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return The count
+	 */
+	private int countNewResult(final PreprocessedPeakResult[] results)
+	{
+		int c = 0;
+		if (results != null)
+		{
+			for (int i = 0; i < results.length; i++)
+				if (results[i].isNewResult())
+					c++;
+		}
+		return c;
+	}
+
+	/**
+	 * Filter a set of multi-path results into a set of results.
+	 *
+	 * @param results
+	 *            the results
 	 * @return the filtered results
 	 */
 	final public PreprocessedPeakResult[] filter(final MultiPathFitResult[] results)
@@ -883,9 +1191,9 @@ public class MultiPathFilter
 	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult. If the
 	 * subset flag is set to true the current value of the failCount property is used to accumulate the fail count (as
 	 * the current set is already a subset).
-	 * 
-	 * @param results
-	 *            a set of results to analyse
+	 *
+	 * @param multiPathResults
+	 *            the multi path results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param subset
@@ -1106,8 +1414,8 @@ public class MultiPathFilter
 	 *            The number of actual results
 	 * @param subset
 	 *            True if a subset
-	 * @param assignments
-	 *            the assignments
+	 * @param allAssignments
+	 *            the all assignments
 	 * @return the score
 	 */
 	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
@@ -1205,77 +1513,150 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Create a dummy collection that implements toArray() without cloning for the addAll() method in ArrayList
+	 * Create a dummy collection that implements toArray() without cloning for the addAll() method in ArrayList.
 	 */
 	private class DummyCollection implements Collection<FractionalAssignment>
 	{
+
+		/** The a. */
 		final FractionalAssignment[] a;
 
+		/**
+		 * Instantiates a new dummy collection.
+		 *
+		 * @param a
+		 *            the a
+		 */
 		DummyCollection(final FractionalAssignment[] a)
 		{
 			this.a = a;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#size()
+		 */
 		public int size()
 		{
 			return a.length;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#isEmpty()
+		 */
 		public boolean isEmpty()
 		{
 			return size() == 0;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#contains(java.lang.Object)
+		 */
 		public boolean contains(Object o)
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#iterator()
+		 */
 		public Iterator<FractionalAssignment> iterator()
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#toArray()
+		 */
 		public Object[] toArray()
 		{
 			return a;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#toArray(java.lang.Object[])
+		 */
 		public <T> T[] toArray(T[] a)
 		{
 			return a;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#add(java.lang.Object)
+		 */
 		public boolean add(FractionalAssignment e)
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#remove(java.lang.Object)
+		 */
 		public boolean remove(Object o)
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#containsAll(java.util.Collection)
+		 */
 		public boolean containsAll(Collection<?> c)
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#addAll(java.util.Collection)
+		 */
 		public boolean addAll(Collection<? extends FractionalAssignment> c)
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#removeAll(java.util.Collection)
+		 */
 		public boolean removeAll(Collection<?> c)
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#retainAll(java.util.Collection)
+		 */
 		public boolean retainAll(Collection<?> c)
 		{
 			throw new NotImplementedException();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Collection#clear()
+		 */
 		public void clear()
 		{
 			throw new NotImplementedException();
@@ -1283,6 +1664,8 @@ public class MultiPathFilter
 	}
 
 	/**
+	 * To XML.
+	 *
 	 * @return An XML representation of this object
 	 */
 	public String toXML()
@@ -1291,9 +1674,10 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Create the filter from the XML representation
-	 * 
+	 * Create the filter from the XML representation.
+	 *
 	 * @param xml
+	 *            the xml
 	 * @return the filter
 	 */
 	public static MultiPathFilter fromXML(String xml)

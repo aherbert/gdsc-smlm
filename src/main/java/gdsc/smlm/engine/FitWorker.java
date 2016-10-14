@@ -1197,8 +1197,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 										candidates[candidateId].x, candidates[candidateId].y, fcx2, fcy2,
 										peakNeighbours[i].getXPosition(), peakNeighbours[i].getYPosition());
 							}
-							System.out.printf("Multi drift to another result: [%d,%d] %d\n", slice, candidateId,
-									otherId);
+							//System.out.printf("Multi drift to another result: [%d,%d] %d\n", slice, candidateId, otherId);
 							resultType = ResultType.EXISTING;
 						}
 					}
@@ -1238,8 +1237,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 										candidates[candidateId].x, candidates[candidateId].y, fcx2 + 0.5f, fcy2 + 0.5f,
 										candidates[otherId].x, candidates[otherId].y);
 							}
-							System.out.printf("Multi drift to another candidate: [%d,%d] %d\n", slice, candidateId,
-									otherId);
+							//System.out.printf("Multi drift to another candidate: [%d,%d] %d\n", slice, candidateId, otherId);
 
 							// There is another candidate to be fit later that is closer.
 							// This may be used as an estimate so we return it as such (i.e we do not ignore it)
@@ -1529,8 +1527,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 										candidates[candidateId].x, candidates[candidateId].y, fcx2, fcy2,
 										peakNeighbours[i].getXPosition(), peakNeighbours[i].getYPosition());
 							}
-							System.out.printf("Single drift to another result: [%d,%d] %d\n", slice, candidateId,
-									otherId);
+							//System.out.printf("Single drift to another result: [%d,%d] %d\n", slice, candidateId, otherId);
 							resultType = ResultType.EXISTING;
 						}
 
@@ -1571,8 +1568,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 										candidates[candidateId].x, candidates[candidateId].y, fcx2 + 0.5f, fcy2 + 0.5f,
 										candidates[otherId].x, candidates[otherId].y);
 							}
-							System.out.printf("Single drift to another candidate: [%d,%d] %d\n", slice, candidateId,
-									otherId);
+							//System.out.printf("Single drift to another candidate: [%d,%d] %d\n", slice, candidateId, otherId);
 
 							// There is another candidate to be fit later that is closer.
 							// This may be used as an estimate so we return it as such (i.e we do not ignore it)
