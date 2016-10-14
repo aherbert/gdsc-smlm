@@ -91,7 +91,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private double absoluteThreshold = 1e-16;
 
 	// Options for the bounded LVM
-	private boolean useClamping = true;
+	private boolean useClamping = false;
 	private boolean useDynamicClamping = false;
 	private double[] clampValues;
 	private int nClampPeaks;
