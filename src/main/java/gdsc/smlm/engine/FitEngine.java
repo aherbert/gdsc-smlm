@@ -255,27 +255,31 @@ public class FitEngine
 		if (counter != null)
 		{
 			// Get the stats we want...
+			
 			//System.out.println(results.getName()); // Dataset name
 			logger.info("Fitting paths...");
 			final int total = counter.getTotal();
-			final int single = counter.getUnset(FitType.NEIGHBOURS);
+			final int single = counter.getUnset(FitType.MULTI);
 			report("Single", single, total);
-			report("Neighbours", total - single, total);
+			report("Multi", total - single, total);
 			final int ok = counter.getSet(FitType.OK);
 			report("OK", ok, total);
-			final int multi = total - ok;
-			report("Fail", multi, total);
-			report("FailSingle", counter.getUnset(FitType.OK | FitType.NEIGHBOURS), single);
-			report("FailMulti", counter.get(FitType.NEIGHBOURS, FitType.OK), multi);
+			report("Fail", total - ok, total);
+			final int multi = total - single;
+			report("FailSingle", counter.getUnset(FitType.OK | FitType.MULTI), single);
+			report("FailMulti", counter.get(FitType.MULTI, FitType.OK), multi);
 
-			report("FitSingle", counter.get(FitType.OK, FitType.NEIGHBOURS), ok);
-			report("FitSingleSingle", counter.get(FitType.OK, FitType.NEIGHBOURS | FitType.DOUBLET_OK), ok);
-			report("FitSingleDoublet", counter.get(FitType.DOUBLET_OK, FitType.NEIGHBOURS), ok);
-			report("FitMulti", counter.getSet(FitType.NEIGHBOURS_OK), ok);
-			report("FailMultiFitSingle",
-					counter.get(FitType.OK | FitType.NEIGHBOURS, FitType.NEIGHBOURS_OK | FitType.DOUBLET_OK), ok);
-			report("FailMultiFitDoublet",
-					counter.get(FitType.OK | FitType.NEIGHBOURS | FitType.DOUBLET_OK, FitType.NEIGHBOURS_OK), ok);
+			report("FitSingle", counter.get(FitType.OK, FitType.MULTI), ok);
+			report("FitSingleSingle", counter.get(FitType.OK, FitType.MULTI | FitType.DOUBLET_OK), ok);
+			report("FitSingleDoublet", counter.get(FitType.DOUBLET_OK, FitType.MULTI), ok);
+			report("FitMulti", counter.getSet(FitType.OK | FitType.MULTI), ok);
+			report("FitMultiSingle", counter.getSet(FitType.MULTI_OK), ok);
+			report("FitMultiDoublet", counter.getSet(FitType.MULTI_DOUBLET_OK), ok);
+
+			report("FailMultiFitSingle", counter.get(FitType.OK | FitType.MULTI,
+					FitType.MULTI_OK | FitType.MULTI_DOUBLET_OK | FitType.DOUBLET_OK), ok);
+			report("FailMultiFitDoublet", counter.get(FitType.OK | FitType.MULTI | FitType.DOUBLET_OK,
+					FitType.MULTI_OK | FitType.MULTI_DOUBLET_OK), ok);
 		}
 
 		threads.clear();
