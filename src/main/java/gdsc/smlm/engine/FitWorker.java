@@ -813,6 +813,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		double singleBackground = Double.NaN, multiBackground = Double.NaN;
 
 		MultiPathFitResult.FitResult resultMulti = null;
+		MultiPathFitResult.FitResult resultMultiDoublet = null;
+		boolean computedMultiDoublet = false;
+		QuadrantAnalysis multiQA = null;
+		
 		MultiPathFitResult.FitResult resultSingle = null;
 		double[] singleRegion = null;
 		MultiPathFitResult.FitResult resultDoublet = null;
@@ -1384,10 +1388,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			final double r2 = 1 - (gf.getFinalResidualSumOfSquares() / gf.getTotalSumOfSquares());
 			result.setError(r2);
+		}		
+
+		public double getMultiQAScore()
+		{
+			if (multiQA != null)
+				return multiQA.score;
+
+			// Ensure we have a multi result
+			getResultMulti();
+
+			// Note this assumes that this method will be called after a multi fit and that the 
+			// residuals were computed.
+			final double[] residuals = gf.getResiduals();
+			multiQA = computeQA((FitResult) resultMulti.data, regionBounds, residuals);
+
+			return multiQA.score;
 		}
 
-		@SuppressWarnings("unused")
-		public FitResult getResultMultiDoublet()
+		public MultiPathFitResult.FitResult getResultMultiDoublet(double residualsThreshold)
 		{
 			// TODO - Add this method
 			// Fit a multi-fit. If all peaks are valid then subtract them from the image, apart from the central candidate,
@@ -1398,7 +1417,35 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// 1. we need to compute the IC correctly given the number of fitted parameters in the multi-fit
 			// 2. the output doublet should be compared to all the results of the multi-fit (plus any fitted neighbours) 
 
-			return null;
+			if (computedMultiDoublet)
+				return resultMultiDoublet;
+
+			if (residualsThreshold >= 1 || residualsThreshold < 0)
+				return null;
+
+			if (getMultiQAScore() < residualsThreshold)
+				return null;
+
+			computedMultiDoublet = true;
+
+			// TODO - Exclude the fitted candidate neighbours from this list 
+			final CandidateList neighbours = findNeighbours(candidates[candidateId]);
+			
+			// TODO - Add the fitted candidates to this list. 
+			// TODO - Update the previously fitted results with the results from the multi fit 
+			final PeakResult[] peakNeighbours = findPeakNeighbours(candidates[candidateId]);
+
+			// TODO - Subtract all the fitted peaks except the primary candidate
+			final double[] region = null;
+
+			// TODO - build a fit result object for fitting the single candidate to the data
+			// This will be a single evaluation of the function against the data. 
+			FitResult fitResult = null;
+			
+			resultMultiDoublet = fitAsDoublet(fitResult, region, regionBounds, residualsThreshold,
+					neighbours, peakNeighbours, multiQA);
+
+			return resultMultiDoublet;
 		}
 
 		public MultiPathFitResult.FitResult getResultSingle()
@@ -2697,8 +2744,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			fitType = new FitType();
 
 			// Reset results
+			this.setMultiQAScore(NO_QA_SCORE);
 			this.setSingleQAScore(NO_QA_SCORE);
 			this.setMultiFitResult(null);
+			this.setMultiDoubletFitResult(null);
 			this.setSingleFitResult(null);
 			this.setDoubletFitResult(null);
 
@@ -2729,7 +2778,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			{
 				result = spotFitter.getResultMulti();
 				setMultiFitResult(result);
-				fitType.setNeighbours(true);
+				fitType.setMulti(true);
 			}
 			return result;
 		}
@@ -2740,6 +2789,37 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return super.getMultiFitResult();
 		}
 
+		@Override
+		public double getMultiQAScore()
+		{
+			double score = super.getMultiQAScore();
+			if (score == NO_QA_SCORE)
+			{
+				score = spotFitter.getMultiQAScore();
+				this.setMultiQAScore(score);
+			}
+			return score;
+		}
+		
+		@Override
+		public FitResult getMultiDoubletFitResult()
+		{
+			FitResult result = super.getMultiDoubletFitResult();
+			if (result == null)
+			{
+				result = spotFitter.getResultMultiDoublet(config.getResidualsThreshold());
+				setMultiDoubletFitResult(result);
+				fitType.setMultiDoublet(spotFitter.computedMultiDoublet);
+			}
+			return result;
+		}
+
+		public FitResult getSuperMultiDoubletFitResult()
+		{
+			// Pass through the reference to the result
+			return super.getMultiDoubletFitResult();
+		}
+		
 		@Override
 		public FitResult getSingleFitResult()
 		{
@@ -2883,7 +2963,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			{
 				fitType.setOK(true);
 				if (dynamicMultiPathFitResult.getSuperMultiFitResult() == selectedResult.fitResult)
-					fitType.setNeighboursOK(true);
+					fitType.setMultiOK(true);
+				else if (dynamicMultiPathFitResult.getSuperMultiDoubletFitResult() == selectedResult.fitResult)
+					fitType.setMultiDoubletOK(true);
 				else if (dynamicMultiPathFitResult.getSuperDoubletFitResult() == selectedResult.fitResult)
 					fitType.setDoubletOK(true);
 			}

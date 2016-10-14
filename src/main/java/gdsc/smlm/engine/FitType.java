@@ -18,13 +18,15 @@ package gdsc.smlm.engine;
  */
 public class FitType
 {
-	public static final int NEIGHBOURS = 1;
-	public static final int NEIGHBOURS_OK = 2;
+	public static final int MULTI = 1;
+	public static final int MULTI_OK = 2;
 	public static final int DOUBLET = 4;
 	public static final int DOUBLET_OK = 8;
-	public static final int OK = 16;
+	public static final int MULTI_DOUBLET = 16;
+	public static final int MULTI_DOUBLET_OK = 32;
+	public static final int OK = 64;
 	
-	public static final int NO_OF_FLAGS = 5;
+	public static final int NO_OF_FLAGS = 7;
 		
 	private int flags;
 
@@ -56,14 +58,24 @@ public class FitType
 		return (flags & flag) == flag;
 	}
 
-	public void setNeighbours(boolean enabled)
+	public void setMulti(boolean enabled)
 	{
-		setFlag(NEIGHBOURS, enabled);
+		setFlag(MULTI, enabled);
 	}
 
-	public void setNeighboursOK(boolean enabled)
+	public void setMultiOK(boolean enabled)
 	{
-		setFlag(NEIGHBOURS_OK, enabled);
+		setFlag(MULTI_OK, enabled);
+	}
+
+	public void setMultiDoublet(boolean enabled)
+	{
+		setFlag(MULTI_DOUBLET, enabled);
+	}
+
+	public void setMultiDoubletOK(boolean enabled)
+	{
+		setFlag(MULTI_DOUBLET_OK, enabled);
 	}
 
 	public void setDoublet(boolean enabled)
@@ -81,14 +93,24 @@ public class FitType
 		setFlag(OK, enabled);
 	}
 	
-	public boolean getNeighbours()
+	public boolean getMulti()
 	{
-		return getFlag(NEIGHBOURS);
+		return getFlag(MULTI);
 	}
 	
-	public boolean getNeighboursOK()
+	public boolean getMultiOK()
 	{
-		return getFlag(NEIGHBOURS_OK);
+		return getFlag(MULTI_OK);
+	}
+	
+	public boolean getMultiDoublet()
+	{
+		return getFlag(MULTI_DOUBLET);
+	}
+	
+	public boolean getMultiDoubletOK()
+	{
+		return getFlag(MULTI_DOUBLET_OK);
 	}
 	
 	public boolean getDoublet()
@@ -112,8 +134,10 @@ public class FitType
 		if (flags == 0)
 			return "None";
 		StringBuilder sb = new StringBuilder();
-		append(sb, getNeighbours(), "Neighbours");
-		append(sb, getNeighboursOK(), "NeighboursOK");
+		append(sb, getMulti(), "Multi");
+		append(sb, getMultiOK(), "MultiOK");
+		append(sb, getMultiDoublet(), "MultiDoublet");
+		append(sb, getMultiDoubletOK(), "MultiDoubletOK");
 		append(sb, getDoublet(), "Doublet");
 		append(sb, getDoubletOK(), "DoubletOK");
 		append(sb, getOK(), "OK");

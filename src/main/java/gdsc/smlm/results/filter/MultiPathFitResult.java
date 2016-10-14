@@ -111,6 +111,12 @@ public class MultiPathFitResult implements Cloneable
 	public int candidateId;
 
 	/**
+	 * The score from residuals analysis on the residuals of the multi fit. This can be used to choose if the doublet
+	 * fit should be considered.
+	 */
+	private double multiQAScore = -1;
+	
+	/**
 	 * The score from residuals analysis on the residuals of the single fit. This can be used to choose if the doublet
 	 * fit should be considered.
 	 */
@@ -121,6 +127,12 @@ public class MultiPathFitResult implements Cloneable
 	 * could be true for isExistingResult().
 	 */
 	private FitResult multiFitResult;
+
+	/**
+	 * The results from the doublet-fit on the multi-fit residuals. It is expected that this should be one or two
+	 * results that are true for isNewResult().
+	 */
+	private FitResult multiDoubletFitResult;
 
 	/**
 	 * The results from the single-fit. It is expected that this should be one result that is true for isNewResult().
@@ -161,8 +173,10 @@ public class MultiPathFitResult implements Cloneable
 		r.width = width;
 		r.height = height;
 		r.candidateId = candidateId;
+		r.multiQAScore = multiQAScore;
 		r.singleQAScore = singleQAScore;
 		r.multiFitResult = multiFitResult;
+		r.multiDoubletFitResult = multiDoubletFitResult;
 		r.singleFitResult = singleFitResult;
 		r.doubletFitResult = doubletFitResult;
 		return r;
@@ -186,6 +200,40 @@ public class MultiPathFitResult implements Cloneable
 	}
 
 	/**
+	 * @return the multiQAScore
+	 */
+	public double getMultiQAScore()
+	{
+		return multiQAScore;
+	}
+
+	/**
+	 * @param multiQAScore
+	 *            the multiQAScore to set
+	 */
+	protected void setMultiQAScore(double multiQAScore)
+	{
+		this.multiQAScore = multiQAScore;
+	}
+
+	/**
+	 * @return the multiDoubletFitResult
+	 */
+	public FitResult getMultiDoubletFitResult()
+	{
+		return multiDoubletFitResult;
+	}
+
+	/**
+	 * @param multiDoubletFitResult
+	 *            the multiDoubletFitResult to set
+	 */
+	protected void setMultiDoubletFitResult(FitResult multiDoubletFitResult)
+	{
+		this.multiDoubletFitResult = multiDoubletFitResult;
+	}
+
+	/**
 	 * @return the singleFitResult
 	 */
 	public FitResult getSingleFitResult()
@@ -203,7 +251,6 @@ public class MultiPathFitResult implements Cloneable
 	}
 
 	/**
-	 * @param residualsThreshold 
 	 * @return the singleQAScore
 	 */
 	public double getSingleQAScore()
