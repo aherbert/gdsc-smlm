@@ -160,7 +160,7 @@ public class TraceMolecules implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -192,8 +192,9 @@ public class TraceMolecules implements PlugIn
 				}
 			}
 
-			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(), settings.distanceThreshold /
-					results.getCalibration().nmPerPixel, timeInFrames(settings.timeThreshold));
+			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
+					settings.distanceThreshold / results.getCalibration().nmPerPixel,
+					timeInFrames(settings.timeThreshold));
 
 			if (clusters == null)
 			{
@@ -252,7 +253,7 @@ public class TraceMolecules implements PlugIn
 		saveCentroidResults(results, getSingles(traces), outputName + " Singles");
 		Trace[] multiTraces = getTraces(traces);
 		saveResults(results, multiTraces, outputName + " Multi");
-		
+
 		// Save centroids
 		outputName += " Centroids";
 		MemoryPeakResults tracedResults = saveCentroidResults(results, traces, outputName);
@@ -269,8 +270,8 @@ public class TraceMolecules implements PlugIn
 
 		summarise(traces, totalFiltered, settings.distanceThreshold, settings.timeThreshold);
 
-		IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(),
-				tracedResults.size(), totalFiltered));
+		IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(), tracedResults.size(),
+				totalFiltered));
 
 		// Provide option to refit the traces as single peaks and save to memory
 		if (settings.refitOption)
@@ -293,8 +294,8 @@ public class TraceMolecules implements PlugIn
 		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(peakResults.size());
 		int id = 0;
 		for (PeakResult p : peakResults)
-			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(),
-					p.peak, p.getEndFrame()));
+			points.add(ClusterPoint.newTimeClusterPoint(id++, p.getXPosition(), p.getYPosition(), p.getSignal(), p.peak,
+					p.getEndFrame()));
 		return points;
 	}
 
@@ -492,8 +493,8 @@ public class TraceMolecules implements PlugIn
 		// Add to the summary table
 		StringBuilder sb = new StringBuilder();
 		sb.append(results.getName()).append("\t");
-		sb.append(outputName.equals("Cluster") ? settings.getClusteringAlgorithm() : settings.getTraceMode()).append(
-				"\t");
+		sb.append(outputName.equals("Cluster") ? settings.getClusteringAlgorithm() : settings.getTraceMode())
+				.append("\t");
 		sb.append(Utils.rounded(exposureTime * 1000, 3)).append("\t");
 		sb.append(Utils.rounded(dThreshold, 3)).append("\t");
 		sb.append(Utils.rounded(tThreshold, 3));
@@ -1868,9 +1869,9 @@ public class TraceMolecules implements PlugIn
 						Rectangle bounds = new Rectangle();
 						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
 						float[] centre = trace.getCentroid();
-						float[] offset = job.getFitParameters().getOffset();
-						Utils.display(String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0] -
-								offset[0], centre[1] - offset[1]), slices);
+						Utils.display(
+								String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0], centre[1]),
+								slices);
 
 						switch (s)
 						{
@@ -1913,9 +1914,9 @@ public class TraceMolecules implements PlugIn
 						Rectangle bounds = new Rectangle();
 						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
 						float[] centre = trace.getCentroid();
-						float[] offset = job.getFitParameters().getOffset();
-						Utils.display(String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0] -
-								offset[0], centre[1] - offset[1]), slices);
+						Utils.display(
+								String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0], centre[1]),
+								slices);
 					}
 				}
 			}
