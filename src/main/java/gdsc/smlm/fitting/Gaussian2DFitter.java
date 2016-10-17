@@ -655,7 +655,6 @@ public class Gaussian2DFitter
 			// TODO - Compare the Chi-squared value for the curve against the standard deviation of 
 			// the data, i.e. how a flat plane would fit the data. If no better then mark as a bad fit.
 
-			// Filter peaks only if single peak fitting
 			Object statusData = null;
 			if (fitConfiguration.isFitValidation())
 			{
