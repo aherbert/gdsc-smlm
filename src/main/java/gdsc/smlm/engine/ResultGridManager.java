@@ -129,6 +129,16 @@ public class ResultGridManager
 		{
 			return list[index];
 		}
+
+		/**
+		 * Copy this list.
+		 *
+		 * @return the new candidate list
+		 */
+		public CandidateList copy()
+		{
+			return new CandidateList(size, Arrays.copyOf(list, size));
+		}
 	}
 
 	private CandidateList[][] candidateGrid;

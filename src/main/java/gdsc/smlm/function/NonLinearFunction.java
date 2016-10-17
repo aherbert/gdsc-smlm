@@ -79,6 +79,19 @@ public interface NonLinearFunction
 	double eval(final int x, final double[] dyda, final double[] w);
 
 	/**
+	 * The non-linear fitting function. Produce an output predicted value for a given input
+	 * predictor (x).
+	 * 
+	 * @param x
+	 *            Predictor
+	 * @param w
+	 *            The output weight. Equivalent to the expected variance of the predicted value. This should not be zero
+	 *            to avoid divide by zero error.
+	 * @return The predicted value y
+	 */
+	double evalw(final int x, final double[] w);
+	
+	/**
 	 * @return True if the {@link #eval(int, double[], double[])} can compute weights other than 1
 	 */
 	boolean canComputeWeights();

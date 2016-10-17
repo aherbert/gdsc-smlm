@@ -163,6 +163,90 @@ public class MLEGradientCalculator extends GradientCalculator
 	 *            Data to fit (must be strictly positive Poisson data)
 	 * @return The MLE chi-squared value
 	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[], double[],
+	 *      gdsc.smlm.function.NonLinearFunction)
+	 */
+	public double findLinearised(final int[] x, final double[] y, double[] y_fit, final double[] a,
+			final NonLinearFunction func)
+	{
+		double chisq = 0;
+
+		func.initialise(a);
+
+		if (y_fit == null || y_fit.length < x.length)
+		{
+			for (int i = 0; i < x.length; i++)
+			{
+				// Function must produce a positive output.
+				final double xi = y[i];
+
+				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+				// effectively ignores the any function value below zero. This could lead to a 
+				// situation where the best chisq value can be achieved by setting the output
+				// function to produce 0 for all evaluations. To cope with this we heavily 
+				// penalise the chisq value. 
+				// Optimally the function should be bounded to always produce a positive number.
+				final double fi = func.eval(i);
+
+				if (fi <= 0)
+				{
+					// We assume xi is positive
+					if (xi != 0)
+						// Penalise the chi-squared value by assuming fi is a very small positive value
+						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+				}
+				else
+				{
+					// We assume y[i] is positive
+					if (xi == 0)
+						chisq += 2 * fi;
+					else
+						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < x.length; i++)
+			{
+				// Function must produce a positive output.
+				final double xi = y[i];
+
+				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+				// effectively ignores the any function value below zero. This could lead to a 
+				// situation where the best chisq value can be achieved by setting the output
+				// function to produce 0 for all evaluations. To cope with this we heavily 
+				// penalise the chisq value. 
+				// Optimally the function should be bounded to always produce a positive number.
+				final double fi = func.eval(i);
+				y_fit[i] = fi;
+
+				if (fi <= 0)
+				{
+					// We assume xi is positive
+					if (xi != 0)
+						// Penalise the chi-squared value by assuming fi is a very small positive value
+						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+				}
+				else
+				{
+					// We assume y[i] is positive
+					if (xi == 0)
+						chisq += 2 * fi;
+					else
+						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+				}
+			}
+		}
+
+		return chisq;
+	}
+
+	/**
+	 * @param y
+	 *            Data to fit (must be strictly positive Poisson data)
+	 * @return The MLE chi-squared value
+	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[][],
 	 *      double[], gdsc.smlm.function.NonLinearFunction)
 	 */
@@ -288,6 +372,100 @@ public class MLEGradientCalculator extends GradientCalculator
 		symmetric(alpha);
 
 		return checkGradients(alpha, beta, nparams, chisq);
+	}
+
+	/**
+	 * Find linearised.
+	 *
+	 * @param n
+	 *            the n
+	 * @param y
+	 *            Data to fit (must be strictly positive Poisson data)
+	 * @param y_fit
+	 *            the y fit
+	 * @param a
+	 *            the a
+	 * @param func
+	 *            the func
+	 * @return The MLE chi-squared value
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[],
+	 *      gdsc.smlm.function.NonLinearFunction)
+	 */
+	public double findLinearised(final int n, final double[] y, double[] y_fit, final double[] a,
+			final NonLinearFunction func)
+	{
+		double chisq = 0;
+
+		func.initialise(a);
+
+		if (y_fit == null || y_fit.length < n)
+		{
+			for (int i = 0; i < n; i++)
+			{
+				// Function must produce a positive output.
+				final double xi = y[i];
+
+				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+				// effectively ignores the any function value below zero. This could lead to a 
+				// situation where the best chisq value can be achieved by setting the output
+				// function to produce 0 for all evaluations. To cope with this we heavily 
+				// penalise the chisq value. 
+				// Optimally the function should be bounded to always produce a positive number.
+				final double fi = func.eval(i);
+
+				if (fi <= 0)
+				{
+					// We assume xi is positive
+					if (xi != 0)
+						// Penalise the chi-squared value by assuming fi is a very small positive value
+						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+				}
+				else
+				{
+					// We assume y[i] is positive
+					if (xi == 0)
+						chisq += 2 * fi;
+					else
+						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < n; i++)
+			{
+				// Function must produce a positive output.
+				final double xi = y[i];
+
+				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+				// effectively ignores the any function value below zero. This could lead to a 
+				// situation where the best chisq value can be achieved by setting the output
+				// function to produce 0 for all evaluations. To cope with this we heavily 
+				// penalise the chisq value. 
+				// Optimally the function should be bounded to always produce a positive number.
+				final double fi = func.eval(i);
+				y_fit[i] = fi;
+
+				if (fi <= 0)
+				{
+					// We assume xi is positive
+					if (xi != 0)
+						// Penalise the chi-squared value by assuming fi is a very small positive value
+						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+				}
+				else
+				{
+					// We assume y[i] is positive
+					if (xi == 0)
+						chisq += 2 * fi;
+					else
+						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+				}
+			}
+		}
+
+		return chisq;
 	}
 
 	/**

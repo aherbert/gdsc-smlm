@@ -232,6 +232,76 @@ public class GradientCalculator
 	}
 
 	/**
+	 * Evaluate the function and compute the sum-of-squares
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param y
+	 *            The data
+	 * @param y_fit
+	 *            The function data
+	 * @param a
+	 *            Set of m coefficients
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return The sum-of-squares value for the fit
+	 */
+	public double findLinearised(final int[] x, final double[] y, double[] y_fit, final double[] a,
+			final NonLinearFunction func)
+	{
+		double ssx = 0;
+
+		func.initialise(a);
+
+		if (y_fit == null || y_fit.length < x.length)
+		{
+			if (func.canComputeWeights())
+			{
+				final double[] w = new double[1];
+				for (int i = 0; i < x.length; i++)
+				{
+					final double dy = y[i] - func.evalw(x[i], w);
+					final double weight = getWeight(w[0]);
+					ssx += dy * dy * weight;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < x.length; i++)
+				{
+					final double dy = y[i] - func.eval(x[i]);
+					ssx += dy * dy;
+				}
+			}
+		}
+		else
+		{
+			if (func.canComputeWeights())
+			{
+				final double[] w = new double[1];
+				for (int i = 0; i < x.length; i++)
+				{
+					y_fit[i] = func.evalw(x[i], w);
+					final double dy = y[i] - y_fit[i];
+					final double weight = getWeight(w[0]);
+					ssx += dy * dy * weight;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < x.length; i++)
+				{
+					y_fit[i] = func.eval(x[i]);
+					final double dy = y[i] - y_fit[i];
+					ssx += dy * dy;
+				}
+			}
+		}
+
+		return ssx;
+	}
+
+	/**
 	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
 	 * Assumes the n observations (x) are sequential integers from 0.
 	 * <p>
@@ -438,6 +508,76 @@ public class GradientCalculator
 				alpha[i][j] = alpha[j][i];
 
 		return checkGradients(alpha, beta, nparams, ssx);
+	}
+
+	/**
+	 * Evaluate the function and compute the sum-of-squares
+	 * 
+	 * @param n
+	 *            The number of data points
+	 * @param y
+	 *            The data
+	 * @param y_fit
+	 *            The function data
+	 * @param a
+	 *            Set of m coefficients
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return The sum-of-squares value for the fit
+	 */
+	public double findLinearised(final int n, final double[] y, double[] y_fit, final double[] a,
+			final NonLinearFunction func)
+	{
+		double ssx = 0;
+
+		func.initialise(a);
+
+		if (y_fit == null || y_fit.length < n)
+		{
+			if (func.canComputeWeights())
+			{
+				final double[] w = new double[1];
+				for (int i = 0; i < n; i++)
+				{
+					final double dy = y[i] - func.evalw(i, w);
+					final double weight = getWeight(w[0]);
+					ssx += dy * dy * weight;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < n; i++)
+				{
+					final double dy = y[i] - func.eval(i);
+					ssx += dy * dy;
+				}
+			}
+		}
+		else
+		{
+			if (func.canComputeWeights())
+			{
+				final double[] w = new double[1];
+				for (int i = 0; i < n; i++)
+				{
+					y_fit[i] = func.evalw(i, w);
+					final double dy = y[i] - y_fit[i];
+					final double weight = getWeight(w[0]);
+					ssx += dy * dy * weight;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < n; i++)
+				{
+					y_fit[i] = func.eval(i);
+					final double dy = y[i] - y_fit[i];
+					ssx += dy * dy;
+				}
+			}
+		}
+
+		return ssx;
 	}
 
 	/**

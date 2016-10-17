@@ -106,6 +106,22 @@ public abstract class GaussianFunction implements NonLinearFunction
 	}
 
 	/**
+	 * Execute the {@link #eval(int)} method and set the expected variance using the noise model
+	 * 
+	 * @throws NullPointerException
+	 *             if the noise model is null
+	 * @see gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
+	 */
+	public double evalw(int x, double[] w)
+	{
+		final double value = eval(x);
+		//w[0] = (noiseModel == null) ? 1 : noiseModel.variance(value);
+		// Just throw a null pointer exception if noiseModel is null
+		w[0] = noiseModel.variance(value);
+		return value;
+	}
+	
+	/**
 	 * @return the noise model
 	 */
 	public NoiseModel getNoiseModel()

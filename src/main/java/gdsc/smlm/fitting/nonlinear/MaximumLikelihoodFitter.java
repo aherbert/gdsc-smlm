@@ -355,52 +355,7 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 	public FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
 			double noise)
 	{
-		LikelihoodWrapper maximumLikelihoodFunction = null;
-
-		final double myAlpha = (this.alpha > 0) ? this.alpha : 1;
-
-		// We can use different likelihood wrapper functions:
-		switch (likelihoodFunction)
-		{
-			case POISSON_GAMMA_GAUSSIAN:
-				// Poisson-Gamma-Gaussian - EM-CCD data
-				maximumLikelihoodFunction = new PoissonGammaGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
-				break;
-
-			case POISSON_GAUSSIAN:
-				// Poisson-Gaussian - CCD data
-				// Sigma must be positive, otherwise fall back to a Poisson likelihood function
-				if (sigma > 0)
-				{
-					maximumLikelihoodFunction = new PoissonGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
-					break;
-				}
-
-			case POISSON:
-			default:
-				// Poisson - most counting data
-		}
-
-		// Check if the method requires the gradient but it cannot be computed
-		if (maximumLikelihoodFunction == null ||
-				(searchMethod.usesGradient && !maximumLikelihoodFunction.canComputeGradient()))
-		{
-			// Ensure no negative data for the Poisson likelihood method.
-			// Just truncate the counts for now. These are from noise in the count estimates that we do not model.
-			final double[] y2 = new double[n];
-			for (int i = 0; i < n; i++)
-			{
-				if (y[i] < 0)
-					y2[i] = 0;
-				else
-					y2[i] = y[i];
-			}
-			PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n, myAlpha);
-			// This will allow Powell searches. The effect on the gradient search algorithms may be weird so leave alone.
-			if (!searchMethod.usesGradient)
-				function.setAllowNegativeExpectedValues(true);
-			maximumLikelihoodFunction = function;
-		}
+		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(n, y, a);
 
 		@SuppressWarnings("rawtypes")
 		BaseOptimizer baseOptimiser = null;
@@ -788,6 +743,57 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 		return FitStatus.OK;
 	}
 
+	private LikelihoodWrapper createLikelihoodWrapper(int n, double[] y, double[] a)
+	{
+		LikelihoodWrapper maximumLikelihoodFunction = null;
+
+		final double myAlpha = (this.alpha > 0) ? this.alpha : 1;
+
+		// We can use different likelihood wrapper functions:
+		switch (likelihoodFunction)
+		{
+			case POISSON_GAMMA_GAUSSIAN:
+				// Poisson-Gamma-Gaussian - EM-CCD data
+				maximumLikelihoodFunction = new PoissonGammaGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
+				break;
+
+			case POISSON_GAUSSIAN:
+				// Poisson-Gaussian - CCD data
+				// Sigma must be positive, otherwise fall back to a Poisson likelihood function
+				if (sigma > 0)
+				{
+					maximumLikelihoodFunction = new PoissonGaussianLikelihoodWrapper(f, a, y, n, myAlpha, sigma);
+					break;
+				}
+
+			case POISSON:
+			default:
+				// Poisson - most counting data
+		}
+
+		// Check if the method requires the gradient but it cannot be computed
+		if (maximumLikelihoodFunction == null ||
+				(searchMethod.usesGradient && !maximumLikelihoodFunction.canComputeGradient()))
+		{
+			// Ensure no negative data for the Poisson likelihood method.
+			// Just truncate the counts for now. These are from noise in the count estimates that we do not model.
+			final double[] y2 = new double[n];
+			for (int i = 0; i < n; i++)
+			{
+				if (y[i] < 0)
+					y2[i] = 0;
+				else
+					y2[i] = y[i];
+			}
+			PoissonLikelihoodWrapper function = new PoissonLikelihoodWrapper(f, a, y2, n, myAlpha);
+			// This will allow Powell searches. The effect on the gradient search algorithms may be weird so leave alone.
+			if (!searchMethod.usesGradient)
+				function.setAllowNegativeExpectedValues(true);
+			maximumLikelihoodFunction = function;
+		}
+		return maximumLikelihoodFunction;
+	}
+
 	/**
 	 * @return the max iterations for the Powell search method
 	 */
@@ -1009,5 +1015,32 @@ public class MaximumLikelihoodFitter extends BaseFunctionSolver
 			lowerConstraint[i] = lowerB[indices[i]];
 			upperConstraint[i] = upperB[indices[i]];
 		}
+	}
+
+	@Override
+	public boolean computeValue(int n, double[] y, double[] y_fit, double[] a)
+	{
+		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(n, y, a);
+		
+		final double l = maximumLikelihoodFunction.likelihood(a);
+		if (l == Double.POSITIVE_INFINITY)
+			return false;
+		
+		// Compute residuals for the FunctionSolver interface
+		if (y_fit == null || y_fit.length < n)
+			y_fit = new double[n];
+		f.initialise(a);
+		residualSumOfSquares = 0;
+		for (int i = 0; i < n; i++)
+		{
+			y_fit[i] = f.eval(i);
+			final double residual = y[i] - y_fit[i];
+			residualSumOfSquares += residual * residual;
+		}
+
+		// Reverse negative log likelihood for maximum likelihood score
+		value = -l;
+		
+		return false;
 	}
 }

@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -354,7 +356,7 @@ public class Gaussian2DFitter
 
 		// Fitting variables
 		double[] y = data; // Value at index
-		y_fit = (computeResiduals) ? new double[cumul_region[2]] : null; // Predicted points
+		y_fit = (computeResiduals || fitConfiguration.isApplyGainBeforeFitting()) ? new double[cumul_region[2]] : null; // Predicted points
 		solver = null;
 		double[] params_dev = null; // standard deviations for parameters for the fitting function
 		double[] error = { 0 }; // The fit Chi-squared value
@@ -550,7 +552,7 @@ public class Gaussian2DFitter
 			bias = fitConfiguration.getBias();
 
 			// Ensure the original input data is unchanged
-			y = Arrays.copyOf(y, y.length);
+			y = Arrays.copyOf(y, ySize);
 			for (int i = 0; i < ySize; i++)
 				y[i] -= bias;
 
@@ -572,6 +574,9 @@ public class Gaussian2DFitter
 
 		if (fitConfiguration.isApplyGainBeforeFitting())
 		{
+			if (y == data)
+				y = Arrays.copyOf(y, ySize);
+
 			final double gain = 1.0 / fitConfiguration.getGain();
 			for (int i = 0; i < ySize; i++)
 			{
@@ -662,7 +667,7 @@ public class Gaussian2DFitter
 				statusData = fitConfiguration.getValidationData();
 			}
 
-			if (computeResiduals)
+			if (y_fit != null)
 			{
 				for (int i = 0; i < y_fit.length; i++)
 					y_fit[i] = y[i] - y_fit[i];
@@ -672,6 +677,9 @@ public class Gaussian2DFitter
 					final double gain = fitConfiguration.getGain();
 					for (int i = 0; i < y_fit.length; i++)
 						y_fit[i] *= gain;
+
+					// The sum-of-squares will be incorrect so fix this
+					((BaseFunctionSolver) solver).updateSumOfSquares(ySize, data, y_fit);
 				}
 			}
 
@@ -1226,5 +1234,116 @@ public class Gaussian2DFitter
 	{
 		this.lower = lower;
 		this.upper = upper;
+	}
+
+	/**
+	 * Evaluate the function using the configured fit solver. No fit is attempted. The input parameters are assumed to
+	 * be the initial parameters of the Gaussian.
+	 *
+	 * @param data
+	 *            The data to fit
+	 * @param maxx
+	 *            The data size in the x dimension
+	 * @param maxy
+	 *            The data size in the y dimension
+	 * @param npeaks
+	 *            The number of peaks
+	 * @param params
+	 *            The parameters of the peaks, e.g. from a previous call to fit(...)
+	 * @return True if the function was evaluated
+	 */
+	public boolean evaluate(double[] data, int maxx, int maxy, int npeaks, double[] params)
+	{
+		double[] y = data;
+		final int ySize = maxx * maxy;
+		y_fit = (computeResiduals || fitConfiguration.isApplyGainBeforeFitting()) ? new double[ySize] : null; // Predicted points
+
+		// Subtract the bias
+		double bias = 0;
+		boolean doClone = true;
+		if (fitConfiguration.isRemoveBiasBeforeFitting())
+		{
+			// Subtract the full bias. Leave it to the solver to handle negative data.
+			bias = fitConfiguration.getBias();
+
+			// Ensure the original input data is unchanged
+			y = Arrays.copyOf(y, ySize);
+			for (int i = 0; i < ySize; i++)
+				y[i] -= bias;
+
+			// Update parameters
+			doClone = false;
+			params = params.clone();
+			params[0] -= bias;
+			if (lower != null)
+			{
+				lower = lower.clone();
+				lower[0] -= bias;
+			}
+			if (upper != null)
+			{
+				upper = upper.clone();
+				upper[0] -= bias;
+			}
+		}
+
+		if (fitConfiguration.isApplyGainBeforeFitting())
+		{
+			if (y == data)
+				y = Arrays.copyOf(y, ySize);
+
+			final double gain = 1.0 / fitConfiguration.getGain();
+			for (int i = 0; i < ySize; i++)
+			{
+				y[i] *= gain;
+			}
+
+			// Update all the parameters affected by gain
+			params = applyGain(params, gain, doClone);
+			lower = applyGain(lower, gain, doClone);
+			upper = applyGain(upper, gain, doClone);
+		}
+
+		// -----------------------
+		// Use alternative fitters
+		// -----------------------
+
+		fitConfiguration.initialise(npeaks, maxx, params);
+		solver = fitConfiguration.getFunctionSolver();
+
+		// Do not apply bounds and constraints as it is assumed the input parameters are good
+
+		//// Bounds are more restrictive than constraints
+		//if (solver.isBounded())
+		//{
+		//	setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, lower, upper);
+		//}
+		//else if (solver.isConstrained())
+		//{
+		//	setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
+		//}
+
+		final boolean result = solver.evaluate(ySize, y, y_fit, params);
+
+		if (result)
+		{
+			if (y_fit != null)
+			{
+				for (int i = 0; i < y_fit.length; i++)
+					y_fit[i] = y[i] - y_fit[i];
+				if (fitConfiguration.isApplyGainBeforeFitting())
+				{
+					// The data (y) and the predicted data (y_fit) will be without gain 
+					final double gain = fitConfiguration.getGain();
+					for (int i = 0; i < y_fit.length; i++)
+						y_fit[i] *= gain;
+
+					// The sum-of-squares will be incorrect so fix this
+					((BaseFunctionSolver) solver).updateSumOfSquares(ySize, data, y_fit);
+				}
+			}
+		}
+
+		return result;
 	}
 }

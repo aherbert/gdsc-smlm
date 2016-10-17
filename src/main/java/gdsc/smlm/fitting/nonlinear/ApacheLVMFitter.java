@@ -162,4 +162,23 @@ public class ApacheLVMFitter extends BaseFunctionSolver
 
 		return FitStatus.OK;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(int, double[], double[], double[])
+	 */
+	@Override
+	public boolean computeValue(int n, double[] y, double[] y_fit, double[] a)
+	{
+		final int nparams = f.gradientIndices().length;
+
+		GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams, false);
+
+		value = calculator.findLinearised(n, y, y_fit, a, f);
+
+		residualSumOfSquares = value;
+
+		return true;
+	}
 }

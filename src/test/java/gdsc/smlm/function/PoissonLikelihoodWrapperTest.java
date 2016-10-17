@@ -583,6 +583,11 @@ public class PoissonLikelihoodWrapperTest
 			{
 				return false;
 			}
+
+			public double evalw(int x, double[] w)
+			{
+				return 0;
+			}
 		};
 		PoissonLikelihoodWrapper f = new PoissonLikelihoodWrapper(nlf, a, Arrays.copyOf(k, n), n, alpha);
 

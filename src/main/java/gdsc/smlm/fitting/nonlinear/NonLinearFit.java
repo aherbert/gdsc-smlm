@@ -194,7 +194,7 @@ public class NonLinearFit extends BaseFunctionSolver
 	{
 		lambda *= 10.0;
 	}
-	
+
 	/**
 	 * Solve the gradient equation A x = b: *
 	 * 
@@ -560,5 +560,37 @@ public class NonLinearFit extends BaseFunctionSolver
 	public void setMLE(boolean mle)
 	{
 		this.mle = mle;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(int, double[], double[], double[])
+	 */
+	@Override
+	public boolean computeValue(int n, double[] y, double[] y_fit, double[] a)
+	{
+		final int nparams = f.gradientIndices().length;
+
+		// Create dynamically for the parameter sizes
+		calculator = GradientCalculatorFactory.newCalculator(nparams, mle);
+
+		if (mle)
+			// We must have positive data
+			y = ensurePositive(n, y);
+
+		boolean requireResiduals = mle || f.canComputeWeights();
+
+		if (requireResiduals)
+			if (y_fit == null || y_fit.length < n)
+				y_fit = new double[n];
+
+		value = calculator.findLinearised(n, y, y_fit, a, f);
+
+		// Weighted SS is not the correct sum-of-squares.
+		// The MLE did not calculate the sum-of-squares.
+		residualSumOfSquares = (requireResiduals) ? computeSS(y, y_fit, n) : value;
+
+		return true;
 	}
 }

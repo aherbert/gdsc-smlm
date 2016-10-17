@@ -122,4 +122,21 @@ public interface FunctionSolver
 	 * @return the value
 	 */
 	public double getValue();
+
+	/**
+	 * Evaluate a function with coefficients (a) for a set of data points (x, y).
+	 * <p>
+	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
+	 * 
+	 * @param n
+	 *            The number of points, n <= y.length (allows input data y to be used as a buffer)
+	 * @param y
+	 *            Set of n data points (input)
+	 * @param y_fit
+	 *            The evaluated data points (output)
+	 * @param a
+	 *            Set of m coefficients (input)
+	 * @return True if evaluation was performed
+	 */
+	public boolean evaluate(final int n, final double[] y, final double[] y_fit, final double[] a);
 }

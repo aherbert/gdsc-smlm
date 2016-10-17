@@ -47,7 +47,7 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 
 	/**
 	 * Set the predictor coefficients for the function that are not fixed (i.e. those corresponding to the gradient
-	 * indices in the wrapped function). The fixed coefficients are set in the constructor. 
+	 * indices in the wrapped function). The fixed coefficients are set in the constructor.
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#initialise(double[])
 	 */
@@ -97,6 +97,16 @@ public class NonLinearFunctionWrapper implements NonLinearFunction
 	public double eval(int x, double[] dyda, double[] w)
 	{
 		return fun.eval(x, dyda, w);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
+	 */
+	public double evalw(int x, double[] w)
+	{
+		return fun.eval(x, w);
 	}
 
 	/*

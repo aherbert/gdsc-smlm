@@ -64,6 +64,26 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		return status;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(int, double[], double[], double[])
+	 */
+	public boolean evaluate(int n, double[] y, double[] y_fit, double[] a)
+	{
+		// Reset the results
+		residualSumOfSquares = 0;
+		numberOfFittedPoints = n;
+		iterations = 0;
+		evaluations = 0;
+		value = 0;
+		boolean status = computeValue(n, y, y_fit, a);
+		// Compute the total sum of squares if a good fit
+		if (status)
+			totalSumOfSquares = getSumOfSquares(n, y);
+		return status;
+	}
+
 	/**
 	 * Compute fit.
 	 *
@@ -85,6 +105,21 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	public abstract FitStatus computeFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, double[] error,
 			double noise);
+
+	/**
+	 * Evaluate the function.
+	 *
+	 * @param n
+	 *            the n
+	 * @param y
+	 *            the y
+	 * @param y_fit
+	 *            the y_fit
+	 * @param a
+	 *            the a
+	 * @return true if evaluated
+	 */
+	public abstract boolean computeValue(int n, double[] y, double[] y_fit, double[] a);
 
 	public double[] getInitialSolution(double[] params)
 	{
@@ -300,5 +335,25 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	public NonLinearFunction getNonLinearFunction()
 	{
 		return f;
+	}
+
+	/**
+	 * Update the total and residual sum-of-squares using the given data
+	 * 
+	 * @param n
+	 *            The number of data points
+	 * @param y
+	 *            The data
+	 * @param residuals
+	 *            The fit residuals
+	 */
+	public void updateSumOfSquares(int n, double[] y, double[] residuals)
+	{
+		totalSumOfSquares = getSumOfSquares(n, y);
+		residualSumOfSquares = 0;
+		for (int i = 0; i < n; i++)
+		{
+			residualSumOfSquares += residuals[i] * residuals[i];
+		}
 	}
 }
