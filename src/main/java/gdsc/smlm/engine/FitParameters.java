@@ -41,8 +41,6 @@ public class FitParameters
 		}
 	}
 
-	private float[] offset = null;
-
 	/**
 	 * The noise for the image data
 	 */
@@ -91,29 +89,4 @@ public class FitParameters
 	 * @return The duplicate distance
 	 */
 	public double duplicateDistance = 0;
-
-	/**
-	 * The offset to apply to all fitted results
-	 */
-	public float[] getOffset()
-	{
-		return offset;
-	}
-
-	/**
-	 * Set the X,Y offset. Must be an array of length 2 otherwise the offset is reset to null
-	 * 
-	 * @param offset
-	 */
-	public void setOffset(float[] offset)
-	{
-		if (offset != null)
-		{
-			if (offset.length != 2)
-				offset = null;
-			else
-				offset = offset.clone();
-		}
-		this.offset = offset;
-	}
 }
