@@ -283,6 +283,8 @@ public class BenchmarkSpotFit implements PlugIn
 		final static int MULTI = 1;
 		final static int DOUBLET1 = 2;
 		final static int DOUBLET2 = 3;
+		final static int MULTIDOUBLET1 = 4;
+		final static int MULTIDOUBLET2 = 5;
 
 		final PreprocessedPeakResult result;
 		final int id, type, i;
@@ -594,7 +596,7 @@ public class BenchmarkSpotFit implements PlugIn
 			// We will match all fitting results so providing the upper limit for the match score after filtering.
 			final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			final double[] zPosition = new double[actual.length];
-			final boolean[][] fitMatch = new boolean[spots.length][4];
+			final boolean[][] fitMatch = new boolean[spots.length][6];
 			SpotMatch[] match = new SpotMatch[spots.length];
 			int matchCount = 0;
 			final RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
@@ -640,6 +642,18 @@ public class BenchmarkSpotFit implements PlugIn
 						if (increment == 2)
 							predicted.add(new MultiPathPoint(fitResult[i].getDoubletFitResult().results[1], id + 1,
 									MultiPathPoint.DOUBLET2, i));
+					}
+					if (isOK(fitResult[i].getMultiDoubletFitResult()) &&
+							fitResult[i].getMultiDoubletFitResult().results.length != 0)
+					{
+						predicted.add(new MultiPathPoint(fitResult[i].getMultiDoubletFitResult().results[0], id,
+								MultiPathPoint.MULTIDOUBLET1, i));
+						if (fitResult[i].getMultiDoubletFitResult().results.length == 2)
+						{
+							predicted.add(new MultiPathPoint(fitResult[i].getMultiDoubletFitResult().results[1], id + 1,
+									MultiPathPoint.MULTIDOUBLET2, i));
+							increment = 2;
+						}
 					}
 					if (size == predicted.size())
 					{
@@ -1235,10 +1249,11 @@ public class BenchmarkSpotFit implements PlugIn
 		double tp = 0, fp = 0;
 		int failcTP = 0, failcFP = 0;
 		int cTP = 0, cFP = 0;
-		int[] singleStatus = null, multiStatus = null, doubletStatus = null;
+		int[] singleStatus = null, multiStatus = null, doubletStatus = null, multiDoubletStatus = null;
 		singleStatus = new int[FitStatus.values().length];
 		multiStatus = new int[singleStatus.length];
 		doubletStatus = new int[singleStatus.length];
+		multiDoubletStatus = new int[singleStatus.length];
 		for (FilterCandidates result : filterCandidates.values())
 		{
 			// Count the number of fit results that matched (tp) and did not match (fp)
@@ -1259,6 +1274,7 @@ public class BenchmarkSpotFit implements PlugIn
 					addStatus(singleStatus, fitResult.getSingleFitResult());
 					addStatus(multiStatus, fitResult.getMultiFitResult());
 					addStatus(doubletStatus, fitResult.getDoubletFitResult());
+					addStatus(multiDoubletStatus, fitResult.getMultiDoubletFitResult());
 				}
 
 				if (noMatch(result.fitMatch[i]))
@@ -1282,6 +1298,10 @@ public class BenchmarkSpotFit implements PlugIn
 				addToStats(fitResult.getMultiFitResult(), 0, result.fitMatch[i][MultiPathPoint.MULTI], stats);
 				addToStats(fitResult.getDoubletFitResult(), 0, result.fitMatch[i][MultiPathPoint.DOUBLET1], stats);
 				addToStats(fitResult.getDoubletFitResult(), 1, result.fitMatch[i][MultiPathPoint.DOUBLET2], stats);
+				addToStats(fitResult.getMultiDoubletFitResult(), 0, result.fitMatch[i][MultiPathPoint.MULTIDOUBLET1],
+						stats);
+				addToStats(fitResult.getMultiDoubletFitResult(), 1, result.fitMatch[i][MultiPathPoint.MULTIDOUBLET2],
+						stats);
 			}
 
 			// Statistics on spots that fit an actual result
@@ -1355,9 +1375,21 @@ public class BenchmarkSpotFit implements PlugIn
 					total3 += doubletStatus[i];
 				}
 			}
-			int total3b = total3 + doubletStatus[0];
-			System.out.printf("Single Failures = %d/%d. Multi failures = %d/%d. Doublet failures = %d/%d\n", total,
-					totalb, total2, total2b, total3, total3b);
+			int total3b = total3 + multiDoubletStatus[0];
+			int total4 = 0;
+			for (int i = 1; i < multiDoubletStatus.length; i++)
+			{
+				if (multiDoubletStatus[i] != 0)
+				{
+					System.out.printf("Multi Doublet %s = %d\n", FitStatus.values()[i].toString(),
+							multiDoubletStatus[i]);
+					total4 += multiDoubletStatus[i];
+				}
+			}
+			int total4b = total4 + multiDoubletStatus[0];
+			System.out.printf(
+					"Single Failures = %d/%d. Multi failures = %d/%d. Doublet failures = %d/%d. Multi Doublet failures = %d/%d\n",
+					total, totalb, total2, total2b, total3, total3b, total4, total4b);
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -1684,6 +1716,10 @@ public class BenchmarkSpotFit implements PlugIn
 			return;
 
 		PreprocessedPeakResult result = fitResult.results[resultIndex];
+
+		// Q. Only build stats on new results?
+		if (!result.isNewResult())
+			return;
 
 		// This was fit - Get statistics
 		final double precision = Math.sqrt(result.getLocationVariance());

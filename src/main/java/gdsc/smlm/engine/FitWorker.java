@@ -1213,9 +1213,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Ensure the initial parameters are at the candidate position since we may have used an estimate.
 			// This will ensure that drift is computed correctly.
+			final double[] fitParams = fitResult.getParameters();
 			final double[] initialParams = fitResult.getInitialParameters();
 			initialParams[Gaussian2DFunction.X_POSITION] = candidates[candidateId].x - regionBounds.x;
 			initialParams[Gaussian2DFunction.Y_POSITION] = candidates[candidateId].y - regionBounds.y;
+
+			// Perform validation of the candidate and existing peaks (other candidates are allowed to fail)
+			if (fitResult.getStatus() == FitStatus.OK)
+			{
+				// The candidate peak
+				if (fitConfig.validatePeak(0, initialParams, fitParams) != FitStatus.OK)
+					return resultMulti = createResult(fitResult, null, fitConfig.getValidationResult());
+
+				// Existing peaks
+				for (int n = candidateNeighbourCount + 1; n < npeaks; n++)
+				{
+					if (fitConfig.validatePeak(n, initialParams, fitParams) != FitStatus.OK)
+						return resultMulti = createResult(fitResult, null, fitConfig.getValidationResult());
+				}
+			}
 
 			// Create the results
 			PreprocessedPeakResult[] results = null;
@@ -1228,8 +1244,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				//    fitting a doublet so is ignored.
 				// 4. Check if there is an unfit candidate spot closer than the current candidate.
 				//    This represents drift out to fit another spot that will be fit later.
-
-				final double[] fitParams = fitResult.getParameters();
 
 				int otherId = candidateId;
 				ResultType resultType = ResultType.NEW;
@@ -1477,6 +1491,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			getResultMulti();
 
+			if (resultMulti.status != 0)
+				return null;
+
 			// Note this assumes that this method will be called after a multi fit and that the 
 			// residuals were computed.
 			final double[] residuals = gf.getResiduals();
@@ -1583,11 +1600,40 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Evaluate the multi fit as if fitted as a single peak. 
 			// The resulting sum-of-squares and function value are used in the doublet fit
-			if (!gf.evaluate(region, regionBounds.width, regionBounds.height, 1, parameters))
-				return null;
-			
+			try
+			{
+				gf.setComputeResiduals(false);
+				if (!gf.evaluate(region, regionBounds.width, regionBounds.height, 1, parameters))
+					return null;
+			}
+			finally
+			{
+				gf.setComputeResiduals(true);
+			}
+
+			//          // Debugging:
+			//			// The evaluate computes the residuals. These should be similar to the original residuals
+			//			double[] residuals2 = gf.getResiduals();
+			//			for (int i = 0; i < region.length; i++)
+			//				if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(residuals[i], residuals2[i], 1e-5,
+			//						1e-6))
+			//				{
+			//					System.out.printf("Residuals error [%d] %f != %f\n", i, residuals[i], residuals2[i]);
+			//					gdsc.core.ij.Utils.display("Residuals1", residuals, width, height);
+			//					gdsc.core.ij.Utils.display("Residuals2", residuals2, width, height);
+			//					gdsc.core.ij.Utils.display("Region", region, width, height);
+			//					break;
+			//				}
+
 			resultMultiDoublet = fitAsDoublet(fitResult, region, regionBounds, residualsThreshold, neighbours,
 					peakNeighbours2, multiQA);
+
+			//			if (resultMultiDoublet != null && resultMultiDoublet.status == FitStatus.BAD_PARAMETERS.ordinal())
+			//			{
+			//				System.out.println("Bad params: " + Arrays.toString(parameters));
+			//				//gdsc.core.ij.Utils.display("Region", region, width, height);
+			//				//gdsc.core.ij.Utils.display("Residuals1", residuals, width, height);
+			//			}
 
 			return resultMultiDoublet;
 		}
@@ -2004,7 +2050,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Store the residual sum-of-squares from the previous fit
 			final double singleSumOfSquares = gf.getFinalResidualSumOfSquares();
 			final double singleValue = gf.getValue();
-			
+
 			// If validation is on in the fit configuration:
 			// - Disable checking of position movement since we guessed the 2-peak location.
 			// - Disable checking within the fit region as we do that per peak 
@@ -2436,8 +2482,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			// Note that if we have neighbours it is very possible we will have doublets
 			// due to high density data. It makes sense to attempt a doublet fit here.
-
-			// TODO - Doublet analysis here if all neighbour peaks were valid using the input filter.
+			dynamicMultiPathFitResult.getMultiQAScore();
+			dynamicMultiPathFitResult.getMultiDoubletFitResult();
 		}
 
 		// Do a single fit
