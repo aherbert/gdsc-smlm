@@ -1346,50 +1346,10 @@ public class BenchmarkSpotFit implements PlugIn
 			if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera())
 				name += " Camera";
 			System.out.println("Failure counts: " + name);
-			int total = 0;
-			for (int i = 1; i < singleStatus.length; i++)
-			{
-				if (singleStatus[i] != 0)
-				{
-					System.out.printf("Single %s = %d\n", FitStatus.values()[i].toString(), singleStatus[i]);
-					total += singleStatus[i];
-				}
-			}
-			int totalb = total + singleStatus[0];
-			int total2 = 0;
-			for (int i = 1; i < multiStatus.length; i++)
-			{
-				if (multiStatus[i] != 0)
-				{
-					System.out.printf("Multi %s = %d\n", FitStatus.values()[i].toString(), multiStatus[i]);
-					total2 += multiStatus[i];
-				}
-			}
-			int total2b = total2 + multiStatus[0];
-			int total3 = 0;
-			for (int i = 1; i < doubletStatus.length; i++)
-			{
-				if (doubletStatus[i] != 0)
-				{
-					System.out.printf("Doublet %s = %d\n", FitStatus.values()[i].toString(), doubletStatus[i]);
-					total3 += doubletStatus[i];
-				}
-			}
-			int total3b = total3 + multiDoubletStatus[0];
-			int total4 = 0;
-			for (int i = 1; i < multiDoubletStatus.length; i++)
-			{
-				if (multiDoubletStatus[i] != 0)
-				{
-					System.out.printf("Multi Doublet %s = %d\n", FitStatus.values()[i].toString(),
-							multiDoubletStatus[i]);
-					total4 += multiDoubletStatus[i];
-				}
-			}
-			int total4b = total4 + multiDoubletStatus[0];
-			System.out.printf(
-					"Single Failures = %d/%d. Multi failures = %d/%d. Doublet failures = %d/%d. Multi Doublet failures = %d/%d\n",
-					total, totalb, total2, total2b, total3, total3b, total4, total4b);
+			printFailures("Single", singleStatus);
+			printFailures("Multi", multiStatus);
+			printFailures("Doublet", doubletStatus);
+			printFailures("Multi doublet", multiDoubletStatus);
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -1685,6 +1645,33 @@ public class BenchmarkSpotFit implements PlugIn
 				}
 			}
 		}
+	}
+
+	private void printFailures(String title, int[] status)
+	{
+		int total = 0;
+		// Count failures
+		for (int i = 1; i < status.length; i++)
+		{
+			if (status[i] != 0)
+			{
+				total += status[i];
+			}
+		}
+		// Print failures
+		if (total != 0)
+			for (int i = 1; i < status.length; i++)
+			{
+				if (status[i] != 0)
+				{
+					System.out.printf("%s %s = %d / %d  (%.2f)\n", title, FitStatus.values()[i].toString(), status[i],
+							total, 100.0 * status[i] / total);
+				}
+			}
+		// Print total
+		int all = total + status[0];
+		if (all != 0)
+			System.out.printf("%s %s = %d / %d  (%.2f)\n", title, "Total", total, all, 100.0 * total / all);
 	}
 
 	private void addStatus(int[] status, gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
