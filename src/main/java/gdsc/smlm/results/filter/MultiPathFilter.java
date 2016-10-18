@@ -746,21 +746,20 @@ public class MultiPathFilter
 
 	private boolean isSuitableForDoubletFit(MultiPathFitResult multiPathResult, FitResult fitResult, boolean singleQA)
 	{
-		// Check there is a result for the single spot
-		if (fitResult.status != 0)
+		// Check there is a fit result
+		if (fitResult == null || fitResult.status != 0)
 			return false;
 
 		// Check if the residuals score is below the configured threshold
 		if (residualsThreshold >= 1)
 			return false;
 
+		// Check the quadrant analysis on the fit residuals
 		if (((singleQA) ? multiPathResult.getSingleQAScore() : multiPathResult.getMultiQAScore()) < residualsThreshold)
 			return false;
 
-		// Get the single spot
-		final PreprocessedPeakResult firstResult = extractFirstNew(fitResult.results);
-		if (firstResult == null)
-			return false;
+		// Get the first spot
+		final PreprocessedPeakResult firstResult = fitResult.results[0];
 
 		// Check the width is reasonable given the size of the fitted region.
 		//@formatter:off
@@ -1109,23 +1108,6 @@ public class MultiPathFilter
 			if (results[i].getCandidateId() == candidateId)
 				return true;
 		return false;
-	}
-
-	/**
-	 * Extract the first new result from the results.
-	 *
-	 * @param results
-	 *            the results
-	 * @return the first new result
-	 */
-	private PreprocessedPeakResult extractFirstNew(PreprocessedPeakResult[] results)
-	{
-		if (results == null)
-			return null;
-		for (int i = 0; i < results.length; i++)
-			if (results[i].isNewResult())
-				return results[i];
-		return null;
 	}
 
 	/**
