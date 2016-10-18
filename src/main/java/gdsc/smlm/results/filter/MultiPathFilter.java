@@ -771,8 +771,9 @@ public class MultiPathFilter
 			return false;
 		//@formatter:on
 
-		// We must validate the spot without width filtering
-		setup(DirectFilter.NO_WIDTH);
+		// We must validate the spot without width filtering. Do not change the min filter.
+		filter.setup(DirectFilter.NO_WIDTH);
+		//setup(DirectFilter.NO_WIDTH);
 
 		try
 		{
@@ -784,7 +785,8 @@ public class MultiPathFilter
 		finally
 		{
 			// reset
-			setup();
+			filter.setup();
+			//setup();
 		}
 
 		return true;
