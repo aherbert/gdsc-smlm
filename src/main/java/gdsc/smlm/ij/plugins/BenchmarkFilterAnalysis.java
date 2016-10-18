@@ -38,6 +38,7 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well44497b;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.Utils;
@@ -51,6 +52,7 @@ import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ga.Chromosome;
@@ -76,6 +78,7 @@ import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IMultiFilter;
+import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
@@ -107,6 +110,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static TextWindow gaWindow = null;
 	private static int failCount = 1;
 	private static int failCountRange = 0;
+	// TODO - Make this configurable
+	private static MultiFilter2 minimalFilter = FitWorker.createMinimalFilter();
 	private static double residualsThreshold = 0.3;
 	private static boolean reset = true;
 	private static boolean showResultsTable = false;
@@ -176,8 +181,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
 	private static MultiPathFitResults[] resultsList = null;
 	private static MultiPathFitResults[] clonedResultsList = null;
-	private static int candidates; // This may be in the results prefix already... 
 	private static int matches;
+	private static int fittedResults;
 	private static int totalResults;
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
@@ -189,34 +194,43 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	public class CustomFractionalAssignment extends ImmutableFractionalAssignment
 	{
+		public final double d;
 		public final double sf;
+		public final BasePreprocessedPeakResult spot;
 		public final PeakResult peak;
 
-		public CustomFractionalAssignment(int targetId, int predictedId, double distance, double score, double sf,
-				PeakResult peak)
+		public CustomFractionalAssignment(int targetId, int predictedId, double distance, double score, double d,
+				double sf, BasePreprocessedPeakResult spot, PeakResult peak)
 		{
 			super(targetId, predictedId, distance, score);
+			this.d = d;
 			this.sf = sf;
+			this.spot = spot;
 			this.peak = peak;
 		}
 	}
 
 	public class CustomResultAssignment extends ResultAssignment
 	{
+		public final double d;
 		public final double sf;
+		public final BasePreprocessedPeakResult spot;
 		public final PeakResult peak;
 
-		public CustomResultAssignment(int targetId, double distance, double score, double sf, PeakResult peak)
+		public CustomResultAssignment(int targetId, double distance, double score, double d, double sf,
+				BasePreprocessedPeakResult spot, PeakResult peak)
 		{
 			super(targetId, distance, score);
+			this.d = d;
 			this.sf = sf;
+			this.spot = spot;
 			this.peak = peak;
 		}
 
 		@Override
 		public FractionalAssignment toFractionalAssignment(int predictedId)
 		{
-			return new CustomFractionalAssignment(targetId, predictedId, distance, score, sf, peak);
+			return new CustomFractionalAssignment(targetId, predictedId, distance, score, d, sf, spot, peak);
 		}
 	}
 
@@ -255,6 +269,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final RampedScore signalScore;
 		int matches = 0;
 		int total = 0;
+		int included = 0;
 		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 		public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
@@ -313,11 +328,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			final int frame = job.entry.getKey();
 			final FilterCandidates result = job.entry.getValue();
 
-			synchronized (depthStats)
-			{
-				depthStats.add(result.zPosition);
-				candidates += result.spots.length;
-			}
+			depthStats.add(result.zPosition);
 
 			final PeakResult[] actual = getCoordinates(actualCoordinates, frame);
 			final boolean[] matched = new boolean[actual.length];
@@ -346,6 +357,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						matched);
 				fitted |= score(fitResult.getMultiFitResult(), resultGrid, matchDistance, distanceScore, signalScore,
 						matched);
+				fitted |= score(fitResult.getMultiDoubletFitResult(), resultGrid, matchDistance, distanceScore,
+						signalScore, matched);
 
 				if (fitted)
 				{
@@ -364,7 +377,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			for (int i = 0; i < matched.length; i++)
 				if (matched[i])
 					matches++;
-			total += size;
+			
+			included += size;
+			total += multiPathFitResults.length;
 
 			results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length));
 		}
@@ -413,12 +428,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						final double d2 = actual[j].distance2(peak.getX(), peak.getY());
 						if (d2 <= matchDistance)
 						{
-							final double distance = Math.sqrt(d2);
+							double d = Math.sqrt(d2);
 							final double signalFactor = BenchmarkSpotFit.getSignalFactor(peak.getSignal(),
 									actual[j].getSignal());
 
 							// Score ...
-							double score = distanceScore.score(distance);
+							double score = distanceScore.score(d);
 							if (signalScore != null)
 							{
 								score *= signalScore.score(signalFactor);
@@ -426,8 +441,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							if (score != 0)
 							{
 								final int id = ((IdPeakResult) actual[j]).id;
-								assignments
-										.add(new CustomResultAssignment(id, distance, score, signalFactor, actual[j]));
+
+								// Invert for the ranking (i.e. low is best)
+								double distance = 1 - score;
+
+								// Ensure a perfect match can still be ranked ... closest first
+								if (distance == 0)
+									distance -= (matchDistance - d2);
+
+								// Store distance in nm
+								d *= simulationParameters.a;
+								assignments.add(new CustomResultAssignment(id, distance, score, d, signalFactor, peak,
+										actual[j]));
 
 								// Accumulate for each actual result
 								if (!matched[id])
@@ -439,15 +464,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 								// Accumulate for all possible matches						
 								signalFactorStats.add(signalFactor);
-								// Store the match distance in nm
-								distanceStats.add(distance * simulationParameters.a);
+								distanceStats.add(d);
 							}
 						}
 					}
 
 					// Save 
 					if (!assignments.isEmpty())
-						peak.setAssignments(assignments.toArray(new ResultAssignment[assignments.size()]));
+					{
+						final ResultAssignment[] tmp = new ResultAssignment[assignments.size()];
+						assignments.toArray(tmp);
+						// Sort here to speed up a later sort of merged assignment arrays
+						Arrays.sort(tmp);
+						peak.setAssignments(tmp);
+					}
 				}
 
 				return true;
@@ -964,8 +994,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			depthFitStats = null;
 			signalFactorStats = null;
 			distanceStats = null;
-			candidates = 0;
 			matches = 0;
+			fittedResults = 0;
 			totalResults = 0;
 
 			// -=-=-=-
@@ -1100,6 +1130,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					threads.get(i).join();
 					FitResultsWorker worker = workers.get(i);
 					matches += worker.matches;
+					fittedResults += worker.included;
 					totalResults += worker.total;
 					if (i == 0)
 					{
@@ -1177,6 +1208,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						coords.put(last, tmp.toArray(new IdPeakResult[tmp.size()]));
 					}
 					id = 0;
+					tmp.clear();
 				}
 				last = p.peak;
 				tmp.add(new IdPeakResult(id++, p));
@@ -1216,8 +1248,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
 		String msg = String.format(
-				"%d results, %d True-Positives\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-				totalResults, matches, signal, pSignal, pLSE, pMLE);
+				"Fit %d/%d results, %d True-Positives\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
+				fittedResults, totalResults, matches, signal, pSignal, pLSE, pMLE);
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
@@ -1228,6 +1260,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
+		// TODO - Make minimal filter configurable
 		gd.addSlider("Residuals_threshold", 0, 1, residualsThreshold);
 		gd.addCheckbox("Reset", reset);
 		gd.addCheckbox("Show_table", showResultsTable);
@@ -1339,6 +1372,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			resultsPrefix2 += "-" + (failCount + failCountRange);
 			limitFailCount += "-" + (failCount + failCountRange);
 		}
+		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
 
 		// Check there is one output
 		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1 && !saveBestFilter)
@@ -1437,7 +1471,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				final ArrayList<FractionalAssignment[]> list = new ArrayList<FractionalAssignment[]>(
 						resultsList.length);
-				final FractionClassificationResult r = scoreFilter(fs.filter, resultsList, list);
+				final FractionClassificationResult r = scoreFilter(fs.filter, minimalFilter, resultsList, list);
 				final StringBuilder sb = createResult(fs.filter, r);
 
 				if (topFilterResults == null)
@@ -1449,6 +1483,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				// Show the recall at the specified depth. Sum the distance and signal factor of all scored spots.
 				int scored = 0;
 				double tp = 0, d = 0, sf = 0;
+
+				SimpleRegression regression = new SimpleRegression(false);
 				for (FractionalAssignment[] assignments : list)
 				{
 					if (assignments == null)
@@ -1458,24 +1494,31 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						final CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
 						if (Math.abs(c.peak.error) <= range)
 							tp += c.getScore();
-						d += c.getDistance();
+						d += c.d;
 						sf += c.sf;
+						regression.addData(c.spot.getSignal(), c.peak.getSignal());
 					}
 					scored += assignments.length;
 				}
+				final double slope = regression.getSlope();
 
 				sb.append('\t').append(Utils.rounded((double) tp / np)).append('\t').append(Utils.rounded(d / scored))
 						.append('\t').append(Utils.rounded(sf / scored)).append('\t');
+				sb.append(Utils.rounded(slope)).append('\t');
 				if (fs.atLimit)
 					sb.append('Y');
 
-				final String text = sb.toString();
+				String text = sb.toString();
 				if (topFilterSummary == null)
 				{
 					topFilterSummary = text;
 					if (!showSummaryTable)
 						break;
 				}
+
+				sb.append('\t');
+				sb.append(Utils.timeToString(totalTime));
+				text = sb.toString();
 
 				if (isHeadless)
 					IJ.log(text);
@@ -1502,7 +1545,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (topFilterClassificationResult == null)
 		{
 			topFilterResults = new ArrayList<FractionalAssignment[]>(resultsList.length);
-			topFilterClassificationResult = scoreFilter(bestFilter, resultsList, topFilterResults);
+			topFilterClassificationResult = scoreFilter(bestFilter, minimalFilter, resultsList, topFilterResults);
 		}
 		scores.add(new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount, failCountRange));
 
@@ -1573,7 +1616,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				DirectFilter filter = bestFilter.get(type).filter;
 
-				FractionClassificationResult s = scoreFilter(filter, resultsList);
+				FractionClassificationResult s = scoreFilter(filter, minimalFilter, resultsList);
 				s = getOriginalScore(s);
 
 				String message = type + "\t\t\t" + Utils.rounded(s.getJaccard(), 4) + "\t\t" +
@@ -1596,9 +1639,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					DirectFilter higher = (DirectFilter) filter.adjustParameter(index, delta);
 					DirectFilter lower = (DirectFilter) filter.adjustParameter(index, -delta);
 
-					FractionClassificationResult sHigher = scoreFilter(higher, resultsList);
+					FractionClassificationResult sHigher = scoreFilter(higher, minimalFilter, resultsList);
 					sHigher = getOriginalScore(sHigher);
-					FractionClassificationResult sLower = scoreFilter(lower, resultsList);
+					FractionClassificationResult sLower = scoreFilter(lower, minimalFilter, resultsList);
 					sLower = getOriginalScore(sLower);
 
 					StringBuilder sb = new StringBuilder();
@@ -1737,14 +1780,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String createResultsHeader(boolean summary)
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
-		sb.append("\tTitle\tName\tFail\tLower D (nm)\tUpper D (nm)\tLower factor\tUpper factor");
+		sb.append("\tTitle\tName\tFail\tRes\tLower D (nm)\tUpper D (nm)\tLower factor\tUpper factor");
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
 				sb.append("\t").append(COLUMNS[i]);
 
 		if (summary)
-			sb.append("\tDepth Recall\tDistance\tSignal Factor\tAt limit");
+			sb.append("\tDepth Recall\tDistance\tSignal Factor\tSlope\tAt limit\tTime");
 		return sb.toString();
 	}
 
@@ -2496,13 +2539,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *
 	 * @param filter
 	 *            the filter
+	 * @param minFilter
+	 *            the min filter
 	 * @param resultsList
 	 *            the results list
 	 * @return The score
 	 */
-	private FractionClassificationResult scoreFilter(DirectFilter filter, MultiPathFitResults[] resultsList)
+	private FractionClassificationResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
+			MultiPathFitResults[] resultsList)
 	{
-		return scoreFilter(filter, resultsList, null);
+		return scoreFilter(filter, minFilter, resultsList, null);
 	}
 
 	/**
@@ -2510,16 +2556,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *
 	 * @param filter
 	 *            the filter
+	 * @param minFilter
+	 *            the min filter
 	 * @param resultsList
 	 *            the results list
 	 * @param allAssignments
 	 *            all the assignments
 	 * @return The score
 	 */
-	private FractionClassificationResult scoreFilter(DirectFilter filter, MultiPathFitResults[] resultsList,
-			List<FractionalAssignment[]> allAssignments)
+	private FractionClassificationResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
+			MultiPathFitResults[] resultsList, List<FractionalAssignment[]> allAssignments)
 	{
-		final MultiPathFilter multiPathFilter = createMPF(filter);
+		final MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
 
 		// Note: We always use the subset method since fail counts have been accumulated when we read in the results.
 
@@ -2546,9 +2594,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return new FractionClassificationResult(tp / norm, fp / norm, 0, fn / norm, p, n);
 	}
 
-	private MultiPathFilter createMPF(DirectFilter filter)
+	private MultiPathFilter createMPF(DirectFilter filter, DirectFilter minFilter)
 	{
-		return new MultiPathFilter(filter, residualsThreshold);
+		return new MultiPathFilter(filter, minFilter, residualsThreshold);
 	}
 
 	/**
@@ -2564,10 +2612,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private ArrayList<FractionalAssignment[]> getAssignments(DirectFilter filter)
 	{
-		final MultiPathFilter multiPathFilter = createMPF(filter);
+		final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
 
 		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<FractionalAssignment[]>(resultsList.length);
-		multiPathFilter.fractionScore(resultsList, failCount + failCountRange, simulationParameters.molecules,
+		multiPathFilter.fractionScoreSubset(resultsList, failCount + failCountRange, simulationParameters.molecules,
 				allAssignments);
 		return allAssignments;
 	}
@@ -3033,8 +3081,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			for (int i = 0; i < assignments.length; i++)
 			{
 				final CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
+				sumDistance += distance2[count] = c.d;
 				sumSignal += signal2[count] = c.sf;
-				sumDistance += distance2[count] = c.getDistance();
 				count++;
 			}
 		}
@@ -3045,10 +3093,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double[][] h1b = Utils.calcHistogram(signal2, limits1[0], limits1[1], bins);
 		double[][] h2b = Utils.calcHistogram(distance2, limits2[0], limits2[1], bins);
 
+		// Since the diatnce and signal factor are computed for all fits (single, multi, doublet)
+		// there will be far more of them so we normalise and just plot the histogram profile.
+		double s1 = 0, s2 = 0, s1b = 0, s2b = 0;
+		for (int i = 0; i < h1b[0].length; i++)
+		{
+			s1 += h1[1][i];
+			s2 += h2[1][i];
+			s1b += h1b[1][i];
+			s2b += h2b[1][i];
+		}
+		for (int i = 0; i < h1b[0].length; i++)
+		{
+			h1[1][i] /= s1;
+			h2[1][i] /= s2;
+			h1b[1][i] /= s1b;
+			h2b[1][i] /= s2b;
+		}
+
 		// Draw distance histogram first
 		String title2 = TITLE + " Distance Histogram";
 		Plot2 plot2 = new Plot2(title2, "Distance (nm)", "Frequency");
-		plot2.setLimits(limits2[0], limits2[1], 0, Maths.max(h2[1]));
+		plot2.setLimits(limits2[0], limits2[1], 0, Maths.maxDefault(Maths.max(h2[1]), h2b[1]));
 		plot2.setColor(Color.black);
 		plot2.addLabel(0, 0, String.format("Blue = Fitted (%s); Red = Filtered (%s)",
 				Utils.rounded(distanceStats.getMean()), Utils.rounded(sumDistance / count)));
@@ -3063,7 +3129,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Draw signal factor histogram
 		String title1 = TITLE + " Signal Factor Histogram";
 		Plot2 plot1 = new Plot2(title1, "Signal Factor", "Frequency");
-		plot1.setLimits(limits1[0], limits1[1], 0, Maths.max(h1[1]));
+		plot1.setLimits(limits1[0], limits1[1], 0, Maths.maxDefault(Maths.max(h1[1]), h1b[1]));
 		plot1.setColor(Color.black);
 		plot1.addLabel(0, 0, String.format("Blue = Fitted (%s); Red = Filtered (%s)",
 				Utils.rounded(signalFactorStats.getMean()), Utils.rounded(sumSignal / count)));
@@ -3225,12 +3291,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final BlockingQueue<ScoreJob> jobs;
 		final ScoreResult[] scoreResults;
 		final boolean createTextResult;
+		final DirectFilter minFilter;
 
 		public ScoreWorker(BlockingQueue<ScoreJob> jobs, ScoreResult[] scoreResults, boolean createTextResult)
 		{
 			this.jobs = jobs;
 			this.scoreResults = scoreResults;
 			this.createTextResult = createTextResult;
+			this.minFilter = (DirectFilter) minimalFilter.clone();
 		}
 
 		/*
@@ -3270,7 +3338,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			showProgress();
 			// Directly write to the result array, this is thread safe
-			scoreResults[job.index] = scoreFilter(job.filter, createTextResult);
+			scoreResults[job.index] = scoreFilter(job.filter, minFilter, createTextResult);
 		}
 	}
 
@@ -3302,7 +3370,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (scoreResults.length == 1)
 		{
 			// No need to multi-thread this			
-			scoreResults[0] = scoreFilter((DirectFilter) filterSet.getFilters().get(0), createTextResult);
+			scoreResults[0] = scoreFilter((DirectFilter) filterSet.getFilters().get(0), minimalFilter,
+					createTextResult);
 		}
 		else
 		{
@@ -3395,17 +3464,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (weakest != null)
 		{
 			ga_subset = true;
-			ga_resultsListToScore = createMPF((DirectFilter) weakest).filterSubset(ga_resultsList,
+			ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter).filterSubset(ga_resultsList,
 					failCount + failCountRange, true);
 		}
 	}
 
-	private ScoreResult scoreFilter(DirectFilter filter, boolean createTextResult)
+	private ScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter, boolean createTextResult)
 	{
-		final FractionClassificationResult r = scoreFilter(filter, ga_resultsListToScore);
+		final FractionClassificationResult r = scoreFilter(filter, minFilter, ga_resultsListToScore);
+
+		// TODO - Fix this so that the subset returns the same score...
 
 		// DEBUG - Test if the two methods produce the same results
-		FractionClassificationResult r2 = scoreFilter(filter, BenchmarkFilterAnalysis.clonedResultsList);
+		FractionClassificationResult r2 = scoreFilter(filter, minFilter, BenchmarkFilterAnalysis.clonedResultsList);
 		if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
 				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
 				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
@@ -3414,7 +3485,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					r.getFN(), r2.getFN());
 		}
 		else
-			System.out.println("Matched scores");
+		{
+			//System.out.println("Matched scores");
+		}
 
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
@@ -3519,7 +3592,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		DirectFilter filter = (DirectFilter) individuals.get(0);
 
 		// This filter may not have been part of the scored subset so use the entire results set for reporting
-		FractionClassificationResult r = scoreFilter(filter, ga_resultsList);
+		FractionClassificationResult r = scoreFilter(filter, minimalFilter, ga_resultsList);
 
 		final StringBuilder text = createResult(filter, r);
 		add(text, ga_iteration);
