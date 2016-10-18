@@ -1166,7 +1166,7 @@ public class MultiPathFilter
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param subset
-	 *            True if a subset
+	 *            True if a subset (the failCount property of the MultiPathFitResult objects will be respected)
 	 * @return the filtered results
 	 */
 	public MultiPathFitResults[] filterSubset(final MultiPathFitResults[] results, final int failures, boolean subset)
@@ -1201,7 +1201,7 @@ public class MultiPathFilter
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param subset
-	 *            True if a subset
+	 *            True if a subset (the failCount property of the MultiPathFitResult objects will be respected)
 	 * @return the filtered results
 	 */
 	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean subset)
@@ -1224,7 +1224,7 @@ public class MultiPathFilter
 	 * @param setup
 	 *            Set to true to run the {@link #setup()} method
 	 * @param subset
-	 *            True if a subset
+	 *            True if a subset (the failCount property of the MultiPathFitResult objects will be respected)
 	 * @return the filtered results
 	 */
 	private MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
@@ -1369,8 +1369,9 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Score a subset of multi-path results. The subset should be created with
-	 * {@link #filterSubset(MultiPathFitResult[], int)}.
+	 * Score a subset of multi-path results. The subset can be created with
+	 * {@link #filterSubset(MultiPathFitResult[], int)}. Alternatively it can be created externally and the failCount
+	 * property of the MultiPathFitResult objects updated appropriately.
 	 * <p>
 	 * Filter each multi-path result. Any output results that are new results are assumed to be positives and
 	 * their assignments used to score the results per frame.
@@ -1419,7 +1420,7 @@ public class MultiPathFilter
 	 * @param subset
 	 *            True if a subset
 	 * @param allAssignments
-	 *            the all assignments
+	 *            the assignments
 	 * @return the score
 	 */
 	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
@@ -1429,6 +1430,7 @@ public class MultiPathFilter
 		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
 
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
+		final boolean save = allAssignments != null;
 
 		setup();
 		for (MultiPathFitResults multiPathResults : results)
@@ -1480,8 +1482,8 @@ public class MultiPathFilter
 				}
 			}
 
-			final FractionalAssignment[] tmp = score(assignments, score, nPredicted);
-			if (allAssignments != null)
+			final FractionalAssignment[] tmp = score(assignments, score, nPredicted, save);
+			if (save)
 				allAssignments.add(tmp);
 		}
 
@@ -1498,22 +1500,24 @@ public class MultiPathFilter
 	 *            Scores array to accumulate TP/FP scores
 	 * @param nPredicted
 	 *            The number of predictions
+	 * @param save
+	 *            Set to true to save the scored assignments
 	 * @return the fractional assignments
 	 */
 	private FractionalAssignment[] score(final ArrayList<FractionalAssignment> assignments, final double[] score,
-			final int nPredicted)
+			final int nPredicted, boolean save)
 	{
 		if (assignments.isEmpty())
 			return null;
 		final FractionalAssignment[] tmp = new FractionalAssignment[assignments.size()];
 		final RankedScoreCalculator calc = new RankedScoreCalculator(assignments.toArray(tmp));
-		final double[] result = calc.score(nPredicted, false);
+		final double[] result = calc.score(nPredicted, false, save);
 		score[0] += result[0];
 		score[1] += result[1];
 		score[2] += result[2];
 		score[3] += result[3];
 		assignments.clear();
-		return tmp;
+		return calc.getScoredAssignments();
 	}
 
 	/**
