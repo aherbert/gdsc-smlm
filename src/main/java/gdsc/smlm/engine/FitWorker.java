@@ -935,6 +935,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			if (computedMulti)
 				return resultMulti;
+			
 			computedMulti = true;
 
 			if (neighbours == 0)
