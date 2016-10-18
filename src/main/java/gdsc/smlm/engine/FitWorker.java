@@ -851,6 +851,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		double singleBackground = Double.NaN, multiBackground = Double.NaN;
 
 		MultiPathFitResult.FitResult resultMulti = null;
+		boolean computedMulti = false;
 		MultiPathFitResult.FitResult resultMultiDoublet = null;
 		boolean computedMultiDoublet = false;
 		QuadrantAnalysis multiQA = null;
@@ -932,10 +933,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		public MultiPathFitResult.FitResult getResultMulti()
 		{
+			if (computedMulti)
+				return resultMulti;
+			computedMulti = true;
+
 			if (neighbours == 0)
 				return null;
-			if (resultMulti != null)
-				return resultMulti;
 
 			// Estimate background.
 			// Note that using the background from previous fit results leads to an 
