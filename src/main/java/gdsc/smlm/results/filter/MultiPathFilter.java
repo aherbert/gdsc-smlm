@@ -425,19 +425,53 @@ public class MultiPathFilter
 
 		// The aim is to obtain a new result for the current candidate Id. 
 		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
-		// So we check the candidate Id.
+		// So we check the candidate Id and return when we have a new result for the candidate. 
+		// We accept the doublet fit over the single fit if we are performing doublet fitting.
+		// If nothing matches then pick the result with the most new results, or use the default 
+		// order we processed the fits. 
+
+		boolean doDoublet = false;
 
 		// Filter multi-fit
 		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
 				validateCandidates, store);
-		if (multiResults != null)
+		if (multiResults == null)
 		{
-			// Check we have a new result for the candidate
-			if (contains(multiResults, candidateId))
-				return multiResults;
+			// The fit was not accepted. However it may have been rejected for being too wide
+			// and is suitable for a doublet fit.
+			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
+		}
+		else
+		{
+			doDoublet = (residualsThreshold < 1 && multiPathResult.getMultiQAScore() > residualsThreshold);
 		}
 
-		// a multi fit that failed or matched a different candidate, so continue
+		final PreprocessedPeakResult[] multiDoubletResults;
+		if (doDoublet)
+		{
+			multiDoubletResults = acceptAny(candidateId, multiPathResult.getMultiDoubletFitResult(), validateCandidates,
+					store);
+			if (multiDoubletResults != null)
+			{
+				// Check we have a new result for the candidate
+				if (contains(multiDoubletResults, candidateId))
+					return multiDoubletResults;
+			}
+		}
+		else
+		{
+			multiDoubletResults = null;
+		}
+
+		// Check if the multi result is to the correct candidate.
+		if (multiResults != null && contains(multiResults, candidateId))
+			return multiResults;
+
+		// We reached here with:
+		// a multi fit that failed or matched a different candidate
+		// a doublet multi fit that failed or matched a different candidate
+
+		doDoublet = false;
 
 		// Filter single-fit
 		final PreprocessedPeakResult[] singleResults = acceptAll(candidateId, multiPathResult.getSingleFitResult(),
@@ -446,84 +480,46 @@ public class MultiPathFilter
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
-
-			// Check there is a result for the single spot
-			if (multiPathResult.getSingleFitResult().status != 0)
-				return multiResults;
-
-			// Check if the residuals score is below the configured threshold
-			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-				return multiResults;
-
-			// Get the single spot
-			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.getSingleFitResult().results);
-			if (singleResult == null)
-				return multiResults;
-
-			// Check the width is reasonable given the size of the fitted region.
-			//@formatter:off
-			if (
-					singleResult.getXSDFactor() < 1 || // Not a wide spot
-					singleResult.getXSD() > multiPathResult.width || // width covers more than the region
-					singleResult.getYSDFactor() < 1 || // Not a wide spot
-					singleResult.getYSD() > multiPathResult.height // width covers more than the region
-				)
-				return multiResults;
-			//@formatter:on
-
-			// We must validate the spot without width filtering
-			setup(DirectFilter.NO_WIDTH);
-
-			try
-			{
-				if (!accept(singleResult))
-					// This is still a bad single result, without width filtering.
-					// Fall-back to the multi-result (which may match another candidate)
-					return multiResults;
-			}
-			finally
-			{
-				// reset
-				setup();
-			}
+			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getSingleFitResult(), true);
 		}
 		else
 		{
 			// The single fit is OK.
-			// If not eligible for a doublet fit then return.
-			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-			{
-				if (contains(singleResults, candidateId))
-					return singleResults;
-				// a multi fit that failed or matched a different candidate
-				// a single fit that matched a different candidate
-				// Default to the multi fit if it produced a new result.
-				return (isNewResult(multiResults)) ? multiResults : singleResults;
-			}
+			doDoublet = (residualsThreshold < 1 && multiPathResult.getSingleQAScore() > residualsThreshold);
 		}
 
 		// We reached here with:
 		// a multi fit that failed or matched a different candidate
+		// a doublet multi fit that failed or matched a different candidate
 		// a single fit that is eligible for doublet fitting, it may be null (if it passed without width filtering)
 
-		// Filter doublet fit
-		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(),
-				validateCandidates, store);
-		if (doubletResults != null)
+		final PreprocessedPeakResult[] singleDoubletResults;
+		if (doDoublet)
 		{
-			// Check we have a new result for the candidate
-			if (contains(doubletResults, candidateId))
-				return doubletResults;
+			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
+					store);
+			if (singleDoubletResults != null)
+			{
+				// Check we have a new result for the candidate
+				if (contains(singleDoubletResults, candidateId))
+					return singleDoubletResults;
+			}
+		}
+		else
+		{
+			singleDoubletResults = null;
 		}
 
 		// Check if the single result is to the correct candidate.
 		if (singleResults != null && contains(singleResults, candidateId))
 			return singleResults;
 
+		// We reached here with:
 		// a multi fit that failed or matched a different candidate
+		// a multi doublet fit that failed or matched a different candidate
 		// a single fit that failed or matched a different candidate
 		// a doublet fit that failed or matched a different candidate
-		return rank(multiResults, singleResults, doubletResults);
+		return rank(multiResults, multiDoubletResults, singleResults, singleDoubletResults);
 	}
 
 	/**
@@ -580,25 +576,30 @@ public class MultiPathFilter
 	/**
 	 * Rank the results. It is assumed that each result is either null or has results that do not match the current
 	 * candidate Id. In this case we will return the result that has the highest number of new results. In the event of
-	 * a tie we order as multi, single, doublet. Results are discounted if null.
+	 * a tie we order as multi, multi-doublet, single, doublet. Results are discounted if null.
 	 *
 	 * @param multiResults
 	 *            the multi results
+	 * @param multiDoubletResults
+	 *            the multi doublet results
 	 * @param singleResults
 	 *            the single results
-	 * @param doubletResults
+	 * @param singleDoubletResults
 	 *            the doublet results
 	 * @return the preprocessed peak result[]
 	 */
-	private PreprocessedPeakResult[] rank(PreprocessedPeakResult[] multiResults, PreprocessedPeakResult[] singleResults,
-			PreprocessedPeakResult[] doubletResults)
+	private PreprocessedPeakResult[] rank(PreprocessedPeakResult[] multiResults,
+			PreprocessedPeakResult[] multiDoubletResults, PreprocessedPeakResult[] singleResults,
+			PreprocessedPeakResult[] singleDoubletResults)
 	{
-		if (multiResults == null && singleResults == null && doubletResults == null)
+		if (multiResults == null && multiDoubletResults == null && singleResults == null &&
+				singleDoubletResults == null)
 			return null;
-		final ResultRank[] rank = new ResultRank[3];
+		final ResultRank[] rank = new ResultRank[4];
 		rank[0] = new ResultRank(multiResults, 1);
-		rank[1] = new ResultRank(singleResults, 2);
-		rank[2] = new ResultRank(doubletResults, 3);
+		rank[1] = new ResultRank(multiDoubletResults, 2);
+		rank[2] = new ResultRank(singleResults, 3);
+		rank[3] = new ResultRank(singleDoubletResults, 4);
 		Arrays.sort(rank);
 		return rank[0].results;
 	}
@@ -641,116 +642,153 @@ public class MultiPathFilter
 
 		// The aim is to obtain a new result for the current candidate Id. 
 		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
-		// So we check the candidate Id.
+		// So we check the candidate Id and return when we have a new result for the candidate. 
+		// We accept the doublet fit over the single fit if we are performing doublet fitting.
+		// If nothing matches then pick the result with the most new results, or use the default 
+		// order we processed the fits. 
+
+		boolean doDoublet = false;
 
 		// Filter multi-fit
 		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
 				validateCandidates, store);
-		SelectedResult multiSelectedResult = null;
-		if (multiResults != null)
-		{
-			multiSelectedResult = new SelectedResult(multiResults, multiPathResult.getMultiFitResult());
-			// Check we have a new result for the candidate
-			if (contains(multiResults, candidateId))
-				return multiSelectedResult;
-		}
-
-		// a multi fit that failed or matched a different candidate, so continue
-
-		// Filter single-fit
-		final PreprocessedPeakResult[] singleResults = acceptAll(candidateId, multiPathResult.getSingleFitResult(),
-				validateCandidates, store);
-		SelectedResult singleSelectedResult = null;
-		if (singleResults == null)
+		if (multiResults == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
 			// and is suitable for a doublet fit.
+			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
+		}
+		else
+		{
+			doDoublet = (residualsThreshold < 1 && multiPathResult.getMultiQAScore() > residualsThreshold);
+		}
 
-			// Check there is a result for the single spot
-			if (multiPathResult.getSingleFitResult().status != 0)
-				return multiSelectedResult;
-
-			// Check if the residuals score is below the configured threshold
-			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-				return multiSelectedResult;
-
-			// Get the single spot
-			final PreprocessedPeakResult singleResult = extractFirstNew(multiPathResult.getSingleFitResult().results);
-			if (singleResult == null)
-				return multiSelectedResult;
-
-			// Check the width is reasonable given the size of the fitted region.
-			//@formatter:off
-			if (
-					singleResult.getXSDFactor() < 1 || // Not a wide spot
-					singleResult.getXSD() > multiPathResult.width || // width covers more than the region
-					singleResult.getYSDFactor() < 1 || // Not a wide spot
-					singleResult.getYSD() > multiPathResult.height // width covers more than the region
-				)
-				return multiSelectedResult;
-			//@formatter:on
-
-			// We must validate the spot without width filtering
-			setup(DirectFilter.NO_WIDTH);
-
-			try
+		final PreprocessedPeakResult[] multiDoubletResults;
+		if (doDoublet)
+		{
+			multiDoubletResults = acceptAny(candidateId, multiPathResult.getMultiDoubletFitResult(), validateCandidates,
+					store);
+			if (multiDoubletResults != null)
 			{
-				if (!accept(singleResult))
-					// This is still a bad single result, without width filtering
-					// Fall-back to the multi-result (which may match another candidate)
-					return multiSelectedResult;
-			}
-			finally
-			{
-				// reset
-				setup();
+				// Check we have a new result for the candidate
+				if (contains(multiDoubletResults, candidateId))
+					return new SelectedResult(multiDoubletResults, multiPathResult.getMultiDoubletFitResult());
 			}
 		}
 		else
 		{
-			// The single fit is OK.
-			singleSelectedResult = new SelectedResult(singleResults, multiPathResult.getSingleFitResult());
-			// If not eligible for a doublet fit then return.
-			if (residualsThreshold >= 1 || multiPathResult.getSingleQAScore() < residualsThreshold)
-			{
-				if (contains(singleResults, candidateId))
-					return singleSelectedResult;
-				// a multi fit that failed or matched a different candidate
-				// a single fit that matched a different candidate
-				// Default to the multi fit if it produced a new result.
-				return (isNewResult(multiResults)) ? singleSelectedResult : multiSelectedResult;
-			}
+			multiDoubletResults = null;
 		}
 
-		// We reached here with a single fit that is eligible for doublet fitting
+		// Check if the multi result is to the correct candidate.
+		if (multiResults != null && contains(multiResults, candidateId))
+			return new SelectedResult(multiResults, multiPathResult.getMultiFitResult());
+
+		// We reached here with:
 		// a multi fit that failed or matched a different candidate
+		// a doublet multi fit that failed or matched a different candidate
+
+		doDoublet = false;
+
+		// Filter single-fit
+		final PreprocessedPeakResult[] singleResults = acceptAll(candidateId, multiPathResult.getSingleFitResult(),
+				validateCandidates, store);
+		if (singleResults == null)
+		{
+			// The fit was not accepted. However it may have been rejected for being too wide
+			// and is suitable for a doublet fit.
+			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getSingleFitResult(), true);
+		}
+		else
+		{
+			// The single fit is OK.
+			doDoublet = (residualsThreshold < 1 && multiPathResult.getSingleQAScore() > residualsThreshold);
+		}
+
+		// We reached here with:
+		// a multi fit that failed or matched a different candidate
+		// a doublet multi fit that failed or matched a different candidate
 		// a single fit that is eligible for doublet fitting, it may be null (if it passed without width filtering)
 
-		// Filter doublet fit
-		final PreprocessedPeakResult[] doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(),
-				validateCandidates, store);
-		SelectedResult doubletSelectedResult = null;
-		if (doubletResults != null)
+		final PreprocessedPeakResult[] doubletResults;
+		if (doDoublet)
 		{
-			doubletSelectedResult = new SelectedResult(doubletResults, multiPathResult.getDoubletFitResult());
-			// Check we have a new result for the candidate
-			if (contains(doubletResults, candidateId))
-				return doubletSelectedResult;
+			doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates, store);
+			if (doubletResults != null)
+			{
+				// Check we have a new result for the candidate
+				if (contains(doubletResults, candidateId))
+					return new SelectedResult(doubletResults, multiPathResult.getDoubletFitResult());
+			}
+		}
+		else
+		{
+			doubletResults = null;
 		}
 
 		// Check if the single result is to the correct candidate.
 		if (singleResults != null && contains(singleResults, candidateId))
-			return singleSelectedResult;
+			return new SelectedResult(singleResults, multiPathResult.getSingleFitResult());
 
+		// We reached here with:
 		// a multi fit that failed or matched a different candidate
+		// a multi doublet fit that failed or matched a different candidate
 		// a single fit that failed or matched a different candidate
 		// a doublet fit that failed or matched a different candidate
-		final PreprocessedPeakResult[] result = rank(multiResults, singleResults, doubletResults);
-		if (result == multiResults)
-			return multiSelectedResult;
-		if (result == singleResults)
-			return singleSelectedResult;
-		return doubletSelectedResult;
+		final PreprocessedPeakResult[] result = rank(multiResults, multiDoubletResults, singleResults, doubletResults);
+		//@formatter:off
+		if (result == multiResults)	       return new SelectedResult(multiResults,        multiPathResult.getMultiFitResult());
+		if (result == multiDoubletResults) return new SelectedResult(multiDoubletResults, multiPathResult.getMultiDoubletFitResult());
+		if (result == singleResults)	   return new SelectedResult(singleResults,       multiPathResult.getSingleFitResult());
+		                                   return new SelectedResult(doubletResults,      multiPathResult.getDoubletFitResult());
+		//@formatter:on
+	}
+
+	private boolean isSuitableForDoubletFit(MultiPathFitResult multiPathResult, FitResult fitResult, boolean singleQA)
+	{
+		// Check there is a result for the single spot
+		if (fitResult.status != 0)
+			return false;
+
+		// Check if the residuals score is below the configured threshold
+		if (residualsThreshold >= 1)
+			return false;
+
+		if (((singleQA) ? multiPathResult.getSingleQAScore() : multiPathResult.getMultiQAScore()) < residualsThreshold)
+			return false;
+
+		// Get the single spot
+		final PreprocessedPeakResult firstResult = extractFirstNew(fitResult.results);
+		if (firstResult == null)
+			return false;
+
+		// Check the width is reasonable given the size of the fitted region.
+		//@formatter:off
+		if (	firstResult.getXSDFactor() < 1 || // Not a wide spot
+				firstResult.getXSD() > multiPathResult.width || // width covers more than the region
+				firstResult.getYSDFactor() < 1 || // Not a wide spot
+				firstResult.getYSD() > multiPathResult.height // width covers more than the region
+			)
+			return false;
+		//@formatter:on
+
+		// We must validate the spot without width filtering
+		setup(DirectFilter.NO_WIDTH);
+
+		try
+		{
+			if (!accept(firstResult))
+				// This is still a bad single result, without width filtering
+				// Fall-back to the multi-result (which may match another candidate)
+				return false;
+		}
+		finally
+		{
+			// reset
+			setup();
+		}
+
+		return true;
 	}
 
 	/**
@@ -1088,24 +1126,6 @@ public class MultiPathFilter
 			if (results[i].isNewResult())
 				return results[i];
 		return null;
-	}
-
-	/**
-	 * Checks if there is a new result in the results.
-	 *
-	 * @param results
-	 *            the results
-	 * @return true, if there is a new result
-	 */
-	private boolean isNewResult(final PreprocessedPeakResult[] results)
-	{
-		if (results != null)
-		{
-			for (int i = 0; i < results.length; i++)
-				if (results[i].isNewResult())
-					return true;
-		}
-		return false;
 	}
 
 	/**
