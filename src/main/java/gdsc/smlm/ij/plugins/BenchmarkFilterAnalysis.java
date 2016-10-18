@@ -255,6 +255,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final RampedScore signalScore;
 		int matches = 0;
 		int total = 0;
+		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 		public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
 				RampedScore distanceScore, RampedScore signalScore)
@@ -264,6 +265,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			this.matchDistance = matchDistance;
 			this.distanceScore = distanceScore;
 			this.signalScore = signalScore;
+
+			depthStats = new StoredDataStatistics();
+			depthFitStats = new StoredDataStatistics();
+			signalFactorStats = new StoredDataStatistics();
+			distanceStats = new StoredDataStatistics();
 		}
 
 		/*
@@ -361,6 +367,92 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			total += size;
 
 			results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length));
+		}
+
+		/**
+		 * Score the new results in the fit result
+		 *
+		 * @param fitResult
+		 *            the fit result
+		 * @param resultGrid
+		 *            the result grid
+		 * @param matchDistance
+		 *            the match distance
+		 * @param distanceScore
+		 *            the distance score
+		 * @param signalScore
+		 *            the signal score
+		 * @param matched
+		 *            array of actual results that have been matched
+		 * @return true, if the fit status was ok
+		 */
+		private boolean score(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
+				ResultGridManager resultGrid, double matchDistance, RampedScore distanceScore, RampedScore signalScore,
+				boolean[] matched)
+		{
+			if (fitResult != null && fitResult.status == 0)
+			{
+				// Get the new results
+				for (int i = 0; i < fitResult.results.length; i++)
+				{
+					final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
+					peak.setAssignments(null);
+					if (!peak.isNewResult())
+						continue;
+
+					// Compare to actual results
+					// We do this using the ResultGridManager to generate a sublist to score against
+					final PeakResult[] actual = resultGrid.getPeakResultNeighbours((int) peak.getX(),
+							(int) peak.getY());
+					if (actual.length == 0)
+						continue;
+
+					final ArrayList<ResultAssignment> assignments = new ArrayList<ResultAssignment>();
+					for (int j = 0; j < actual.length; j++)
+					{
+						final double d2 = actual[j].distance2(peak.getX(), peak.getY());
+						if (d2 <= matchDistance)
+						{
+							final double distance = Math.sqrt(d2);
+							final double signalFactor = BenchmarkSpotFit.getSignalFactor(peak.getSignal(),
+									actual[j].getSignal());
+
+							// Score ...
+							double score = distanceScore.score(distance);
+							if (signalScore != null)
+							{
+								score *= signalScore.score(signalFactor);
+							}
+							if (score != 0)
+							{
+								final int id = ((IdPeakResult) actual[j]).id;
+								assignments
+										.add(new CustomResultAssignment(id, distance, score, signalFactor, actual[j]));
+
+								// Accumulate for each actual result
+								if (!matched[id])
+								{
+									matched[id] = true;
+									// Depth is stored in the error field
+									depthFitStats.add(actual[j].error);
+								}
+
+								// Accumulate for all possible matches						
+								signalFactorStats.add(signalFactor);
+								// Store the match distance in nm
+								distanceStats.add(distance * simulationParameters.a);
+							}
+						}
+					}
+
+					// Save 
+					if (!assignments.isEmpty())
+						peak.setAssignments(assignments.toArray(new ResultAssignment[assignments.size()]));
+				}
+
+				return true;
+			}
+			return false;
 		}
 	}
 
@@ -868,10 +960,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			lastPartialMatchDistance = partialMatchDistance;
 			lastUpperSignalFactor = upperSignalFactor;
 			lastPartialSignalFactor = partialSignalFactor;
-			depthStats = new StoredDataStatistics();
-			depthFitStats = new StoredDataStatistics();
-			signalFactorStats = new StoredDataStatistics();
-			distanceStats = new StoredDataStatistics();
+			depthStats = null;
+			depthFitStats = null;
+			signalFactorStats = null;
+			distanceStats = null;
 			candidates = 0;
 			matches = 0;
 			totalResults = 0;
@@ -1006,8 +1098,23 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				try
 				{
 					threads.get(i).join();
-					matches += workers.get(i).matches;
-					totalResults += workers.get(i).total;
+					FitResultsWorker worker = workers.get(i);
+					matches += worker.matches;
+					totalResults += worker.total;
+					if (i == 0)
+					{
+						depthStats = worker.depthStats;
+						depthFitStats = worker.depthFitStats;
+						signalFactorStats = worker.signalFactorStats;
+						distanceStats = worker.distanceStats;
+					}
+					else
+					{
+						depthStats.add(worker.depthStats);
+						depthFitStats.add(worker.depthFitStats);
+						signalFactorStats.add(worker.signalFactorStats);
+						distanceStats.add(worker.distanceStats);
+					}
 				}
 				catch (InterruptedException e)
 				{
@@ -1089,89 +1196,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		final IdPeakResult[] tmp = coords.get(t);
 		return (tmp == null) ? EMPTY : tmp;
-	}
-
-	/**
-	 * Score the new results in the fit result
-	 *
-	 * @param fitResult
-	 *            the fit result
-	 * @param resultGrid
-	 *            the result grid
-	 * @param matchDistance
-	 *            the match distance
-	 * @param distanceScore
-	 *            the distance score
-	 * @param signalScore
-	 *            the signal score
-	 * @param matched
-	 *            array of actual results that have been matched
-	 * @return true, if the fit status was ok
-	 */
-	private boolean score(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, ResultGridManager resultGrid,
-			double matchDistance, RampedScore distanceScore, RampedScore signalScore, boolean[] matched)
-	{
-		if (fitResult != null && fitResult.status == 0)
-		{
-			// Get the new results
-			for (int i = 0; i < fitResult.results.length; i++)
-			{
-				final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
-				peak.setAssignments(null);
-				if (!peak.isNewResult())
-					continue;
-
-				// Compare to actual results
-				// We do this using the ResultGridManager to generate a sublist to score against
-				final PeakResult[] actual = resultGrid.getPeakResultNeighbours((int) peak.getX(), (int) peak.getY());
-				if (actual.length == 0)
-					continue;
-
-				final ArrayList<ResultAssignment> assignments = new ArrayList<ResultAssignment>();
-				for (int j = 0; j < actual.length; j++)
-				{
-					final double d2 = actual[j].distance2(peak.getX(), peak.getY());
-					if (d2 <= matchDistance)
-					{
-						final double distance = Math.sqrt(d2);
-						final double signalFactor = BenchmarkSpotFit.getSignalFactor(peak.getSignal(),
-								actual[j].getSignal());
-
-						// Score ...
-						double score = distanceScore.score(distance);
-						if (signalScore != null)
-						{
-							score *= signalScore.score(signalFactor);
-						}
-						if (score != 0)
-						{
-							final int id = ((IdPeakResult) actual[j]).id;
-							assignments.add(new CustomResultAssignment(id, distance, score, signalFactor, actual[j]));
-
-							// Accumulate for each actual result
-							if (!matched[id])
-							{
-								matched[id] = true;
-								// Depth is stored in the error field
-								depthFitStats.add(actual[j].error);
-							}
-
-							// Accumulate for all possible matches						
-							signalFactorStats.add(signalFactor);
-							// Store the match distance in nm
-							distanceStats.add(distance * simulationParameters.a);
-						}
-					}
-				}
-
-				// Save 
-				if (!assignments.isEmpty())
-					peak.setAssignments(assignments.toArray(new ResultAssignment[assignments.size()]));
-			}
-
-			return true;
-		}
-		return false;
 	}
 
 	private boolean showDialog()
