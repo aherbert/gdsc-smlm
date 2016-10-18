@@ -22,7 +22,7 @@ import gdsc.core.match.ImmutableFractionalAssignment;
  * This class is used to store the data for a fractional assignment between a single predicted point and many actual
  * target points. It can be converted to a fractional assignment by specifying a predicted Id.
  */
-public class ResultAssignment
+public class ResultAssignment implements Comparable<ResultAssignment>
 {
 	/**
 	 * The ID of the result that this assignment matches
@@ -64,5 +64,19 @@ public class ResultAssignment
 	public FractionalAssignment toFractionalAssignment(final int predictedId)
 	{
 		return new ImmutableFractionalAssignment(targetId, predictedId, distance, score);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	public int compareTo(ResultAssignment that)
+	{
+		if (this.distance < that.distance)
+			return -1;
+		if (this.distance > that.distance)
+			return 1;
+		return 0;
 	}
 }
