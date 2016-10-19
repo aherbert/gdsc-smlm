@@ -935,7 +935,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			if (computedMulti)
 				return resultMulti;
-			
+
 			computedMulti = true;
 
 			if (neighbours == 0)
@@ -1368,18 +1368,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
 						getLocalBackground(0, npeaks, fitParams, flags), resultType);
 
-				// Already fitted peaks
-				for (int n = candidateNeighbourCount + 1; n < npeaks; n++)
+				// Neighbours
+				int n = 1;
+				for (int i = 0; i < candidateNeighbourCount; i++)
 				{
-					results[n] = resultFactory.createPreprocessedPeakResult(this.candidateId, n, initialParams,
-							fitParams, getLocalBackground(n, npeaks, fitParams, flags), ResultType.EXISTING);
+					final Candidate candidateNeighbour = candidateNeighbours[i];
+					results[n] = resultFactory.createPreprocessedPeakResult(candidateNeighbour.index, n, initialParams,
+							fitParams, getLocalBackground(n, npeaks, fitParams, flags), ResultType.CANDIDATE);
+					n++;
 				}
 
-				// Neighbours
-				for (int n = 1; n <= candidateNeighbourCount; n++)
+				// Already fitted peaks
+				for (int i = 0; i < fittedNeighbourCount; i++)
 				{
-					results[n] = resultFactory.createPreprocessedPeakResult(this.candidateId, n, initialParams,
-							fitParams, getLocalBackground(n, npeaks, fitParams, flags), ResultType.CANDIDATE);
+					if (subtract[i])
+						continue;
+					final PeakResult result = fittedNeighbours[i];
+					results[n] = resultFactory.createPreprocessedPeakResult(result.getId(), n, initialParams, fitParams,
+							getLocalBackground(n, npeaks, fitParams, flags), ResultType.EXISTING);
+					n++;
 				}
 			}
 
