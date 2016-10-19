@@ -1,6 +1,5 @@
 package gdsc.smlm.results.filter;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -35,6 +34,11 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * this is a subset of the results, i.e. has been prefiltered.
 	 */
 	final public int totalCandidates;
+	
+	/**
+	 * The number of actual results in the frame. Used during filter scoring.
+	 */
+	final public int nActual;
 
 	/**
 	 * Instantiates a new multi path fit results.
@@ -46,7 +50,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 */
 	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults)
 	{
-		this(frame, multiPathFitResults, (multiPathFitResults == null) ? 0 : multiPathFitResults.length);
+		this(frame, multiPathFitResults, (multiPathFitResults == null) ? 0 : multiPathFitResults.length, 0);
 	}
 
 	/**
@@ -58,12 +62,14 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 *            the multi path fit results
 	 * @param totalCandidates
 	 *            the total candidates
+	 * @param nActual 
 	 */
-	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults, int totalCandidates)
+	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults, int totalCandidates, int nActual)
 	{
 		this.frame = frame;
 		this.multiPathFitResults = multiPathFitResults;
 		this.totalCandidates = totalCandidates;
+		this.nActual = nActual;
 	}
 
 	/*
@@ -117,6 +123,6 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 		MultiPathFitResult[] list = new MultiPathFitResult[multiPathFitResults.length];
 		for (int i = 0; i < list.length; i++)
 			list[i] = multiPathFitResults[i].clone();
-		return new MultiPathFitResults(frame, list, totalCandidates);
+		return new MultiPathFitResults(frame, list, totalCandidates, nActual);
 	}
 }

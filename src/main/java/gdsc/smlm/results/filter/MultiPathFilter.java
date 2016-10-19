@@ -1201,7 +1201,7 @@ public class MultiPathFilter
 			final MultiPathFitResult[] newMultiPathResults = filter(results[i], failures, false, subset);
 			if (newMultiPathResults != null)
 				newResults[size++] = new MultiPathFitResults(results[i].frame, newMultiPathResults,
-						results[i].totalCandidates);
+						results[i].totalCandidates, results[i].nActual);
 		}
 
 		return Arrays.copyOf(newResults, size);
@@ -1261,8 +1261,8 @@ public class MultiPathFilter
 		int size = 0;
 		final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.getNumberOfResults()];
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
-//		if (multiPathResults.getFrame() == 12)
-//			System.out.println("Debug");
+		//		if (multiPathResults.getFrame() == 12)
+		//			System.out.println("Debug");
 		for (int c = 0; c < newMultiPathResults.length; c++)
 		{
 			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
@@ -1274,7 +1274,7 @@ public class MultiPathFilter
 				lastId = multiPathResult.candidateId;
 			}
 
-			final boolean evaluateFit = failCount <= failures;  
+			final boolean evaluateFit = failCount <= failures;
 			if (evaluateFit || store.isValid(multiPathResult.candidateId))
 			{
 				// Evaluate the result. 
@@ -1283,7 +1283,7 @@ public class MultiPathFilter
 
 				// Note: Even if the actual result failed, the candidate may have passed and so 
 				// the entire multi-path result should be retained.
-				
+
 				// Also note that depending on the filter, different results can be selected and pushed through
 				// the store to set them valid. So we must push everything through the store to ensure nothing 
 				// is removed that could be used.
@@ -1493,18 +1493,18 @@ public class MultiPathFilter
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 		final boolean save = allAssignments != null;
 
-		// Debugging the results that are scored
-		java.io.OutputStreamWriter out = null;
-		if (debugFilename != null)
-		{
-			try
-			{
-				out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
-			}
-			catch (Exception e)
-			{
-			}
-		}
+		//		// Debugging the results that are scored
+		//		java.io.OutputStreamWriter out = null;
+		//		if (debugFilename != null)
+		//		{
+		//			try
+		//			{
+		//				out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+		//			}
+		//			catch (Exception e)
+		//			{
+		//			}
+		//		}
 
 		setup();
 		for (int k = 0; k < results.length; k++)
@@ -1527,33 +1527,33 @@ public class MultiPathFilter
 					lastId = multiPathResult.candidateId;
 				}
 
-				final boolean evaluateFit = failCount <= failures;  
+				final boolean evaluateFit = failCount <= failures;
 				if (evaluateFit || store.isValid(multiPathResult.candidateId))
 				{
-					if (out != null)
-					{
-						try
-						{
-							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
-									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
-									isNewResult(accept(multiPathResult, true, null))));
-						}
-						catch (Exception e)
-						{
-							try
-							{
-								out.close();
-							}
-							catch (Exception ee)
-							{
-							}
-							finally
-							{
-								out = null;
-							}
-						}
-					}
-					
+					//					if (out != null)
+					//					{
+					//						try
+					//						{
+					//							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
+					//									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+					//									isNewResult(accept(multiPathResult, true, null))));
+					//						}
+					//						catch (Exception e)
+					//						{
+					//							try
+					//							{
+					//								out.close();
+					//							}
+					//							catch (Exception ee)
+					//							{
+					//							}
+					//							finally
+					//							{
+					//								out = null;
+					//							}
+					//						}
+					//					}
+
 					// Assess the result if we are below the fail limit or have an estimate
 					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
 					final int size = nPredicted;
@@ -1592,43 +1592,43 @@ public class MultiPathFilter
 				}
 			}
 
-			final FractionalAssignment[] tmp = score(assignments, score, nPredicted, save);
+			final FractionalAssignment[] tmp = score(assignments, score, nPredicted, save, multiPathResults.nActual);
 			if (save)
 				allAssignments.add(tmp);
 
-			if (out != null)
-			{
-				try
-				{
-					out.write(String.format("[%d] %s\n", multiPathResults.frame, Arrays.toString(score)));
-				}
-				catch (Exception e)
-				{
-					try
-					{
-						out.close();
-					}
-					catch (Exception ee)
-					{
-					}
-					finally
-					{
-						out = null;
-					}
-				}
-			}
+			//			if (out != null)
+			//			{
+			//				try
+			//				{
+			//					out.write(String.format("[%d] %s\n", multiPathResults.frame, Arrays.toString(score)));
+			//				}
+			//				catch (Exception e)
+			//				{
+			//					try
+			//					{
+			//						out.close();
+			//					}
+			//					catch (Exception ee)
+			//					{
+			//					}
+			//					finally
+			//					{
+			//						out = null;
+			//					}
+			//				}
+			//			}
 		}
 
-		if (out != null)
-		{
-			try
-			{
-				out.close();
-			}
-			catch (Exception ee)
-			{
-			}
-		}
+		//		if (out != null)
+		//		{
+		//			try
+		//			{
+		//				out.close();
+		//			}
+		//			catch (Exception ee)
+		//			{
+		//			}
+		//		}
 
 		// Note: We are using the integer positives and negatives fields to actually store integer TP and FP
 		return new FractionClassificationResult(score[0], score[1], 0, n - score[0], (int) score[2], (int) score[3]);
@@ -1645,15 +1645,17 @@ public class MultiPathFilter
 	 *            The number of predictions
 	 * @param save
 	 *            Set to true to save the scored assignments
+	 * @param nActual
+	 *            The number of actual results in the frame
 	 * @return the fractional assignments
 	 */
 	private FractionalAssignment[] score(final ArrayList<FractionalAssignment> assignments, final double[] score,
-			final int nPredicted, boolean save)
+			final int nPredicted, boolean save, int nActual)
 	{
 		if (assignments.isEmpty())
 			return null;
 		final FractionalAssignment[] tmp = new FractionalAssignment[assignments.size()];
-		final RankedScoreCalculator calc = new RankedScoreCalculator(assignments.toArray(tmp));
+		final RankedScoreCalculator calc = new RankedScoreCalculator(assignments.toArray(tmp), nActual, nPredicted);
 		final double[] result = calc.score(nPredicted, false, save);
 		score[0] += result[0];
 		score[1] += result[1];

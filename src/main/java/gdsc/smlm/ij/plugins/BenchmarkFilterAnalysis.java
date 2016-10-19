@@ -195,7 +195,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
 	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
 	private static MultiPathFitResults[] resultsList = null;
-	private static MultiPathFitResults[] clonedResultsList = null;
+	//private static MultiPathFitResults[] clonedResultsList = null;
 	private static int matches;
 	private static int fittedResults;
 	private static int totalResults;
@@ -210,34 +210,35 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public class CustomFractionalAssignment extends ImmutableFractionalAssignment
 	{
 		public final double d;
-		public final double sf;
 		public final BasePreprocessedPeakResult spot;
 		public final PeakResult peak;
 
 		public CustomFractionalAssignment(int targetId, int predictedId, double distance, double score, double d,
-				double sf, BasePreprocessedPeakResult spot, PeakResult peak)
+				BasePreprocessedPeakResult spot, PeakResult peak)
 		{
 			super(targetId, predictedId, distance, score);
 			this.d = d;
-			this.sf = sf;
 			this.spot = spot;
 			this.peak = peak;
+		}
+
+		public double getSignalFactor()
+		{
+			return BenchmarkSpotFit.getSignalFactor(spot.getSignal(), peak.getSignal());
 		}
 	}
 
 	public class CustomResultAssignment extends ResultAssignment
 	{
 		public final double d;
-		public final double sf;
 		public final BasePreprocessedPeakResult spot;
 		public final PeakResult peak;
 
-		public CustomResultAssignment(int targetId, double distance, double score, double d, double sf,
+		public CustomResultAssignment(int targetId, double distance, double score, double d,
 				BasePreprocessedPeakResult spot, PeakResult peak)
 		{
 			super(targetId, distance, score);
 			this.d = d;
-			this.sf = sf;
 			this.spot = spot;
 			this.peak = peak;
 		}
@@ -245,7 +246,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		@Override
 		public FractionalAssignment toFractionalAssignment(int predictedId)
 		{
-			return new CustomFractionalAssignment(targetId, predictedId, distance, score, d, sf, spot, peak);
+			return new CustomFractionalAssignment(targetId, predictedId, distance, score, d, spot, peak);
 		}
 	}
 
@@ -368,14 +369,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				// Score the results. Do in order of those likely to be in the same position
 				// thus the grid manager can cache the neighbours
-				boolean fitted = score(fitResult.getSingleFitResult(), resultGrid, matchDistance, distanceScore,
-						signalScore, matched);
-				fitted |= score(fitResult.getDoubletFitResult(), resultGrid, matchDistance, distanceScore, signalScore,
-						matched);
-				fitted |= score(fitResult.getMultiFitResult(), resultGrid, matchDistance, distanceScore, signalScore,
-						matched);
-				fitted |= score(fitResult.getMultiDoubletFitResult(), resultGrid, matchDistance, distanceScore,
-						signalScore, matched);
+				boolean fitted = score(fitResult.getSingleFitResult(), resultGrid, matched);
+				fitted |= score(fitResult.getDoubletFitResult(), resultGrid, matched);
+				fitted |= score(fitResult.getMultiFitResult(), resultGrid, matched);
+				fitted |= score(fitResult.getMultiDoubletFitResult(), resultGrid, matched);
 
 				if (fitted)
 					multiPathFitResults[size++] = fitResult;
@@ -389,7 +386,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			included += size;
 			total += multiPathFitResults.length;
 
-			results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length));
+			results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length,
+					actual.length));
 		}
 
 		/**
@@ -401,17 +399,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		 *            the result grid
 		 * @param matchDistance
 		 *            the match distance
-		 * @param distanceScore
-		 *            the distance score
-		 * @param signalScore
-		 *            the signal score
 		 * @param matched
 		 *            array of actual results that have been matched
 		 * @return true, if the fit status was ok and spots pass the min filter
 		 */
-		private boolean score(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
-				ResultGridManager resultGrid, double matchDistance, RampedScore distanceScore, RampedScore signalScore,
-				boolean[] matched)
+		private boolean score(final gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
+				final ResultGridManager resultGrid, final boolean[] matched)
 		{
 			if (fitResult != null && fitResult.status == 0)
 			{
@@ -444,17 +437,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						if (d2 <= matchDistance)
 						{
 							double d = Math.sqrt(d2);
-							final double signalFactor = BenchmarkSpotFit.getSignalFactor(peak.getSignal(),
-									actual[j].getSignal());
 
 							// Score ...
 							double score = distanceScore.score(d);
-							if (signalScore != null)
-							{
-								score *= signalScore.score(signalFactor);
-							}
 							if (score != 0)
 							{
+								final double signalFactor = BenchmarkSpotFit.getSignalFactor(peak.getSignal(),
+										actual[j].getSignal());
+								if (signalScore != null)
+								{
+									score *= signalScore.score(Math.abs(signalFactor));
+									if (score == 0)
+										continue;
+								}
+
 								final int id = ((IdPeakResult) actual[j]).id;
 
 								// Invert for the ranking (i.e. low is best)
@@ -462,12 +458,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 								// Ensure a perfect match can still be ranked ... closest first
 								if (distance == 0)
+								{
 									distance -= (matchDistance - d2);
+								}
 
 								// Store distance in nm
 								d *= simulationParameters.a;
-								assignments.add(new CustomResultAssignment(id, distance, score, d, signalFactor, peak,
-										actual[j]));
+								assignments.add(new CustomResultAssignment(id, distance, score, d, peak, actual[j]));
 
 								// Accumulate for each actual result
 								if (!matched[id])
@@ -1086,12 +1083,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
-			limitRange = ", d=" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
+			limitRange = ", r=" + Utils.rounded(residualsThreshold) + ", d=" +
+					Utils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
 
 			// Signal factor must be greater than 1
 			final RampedScore signalScore;
-			if (BenchmarkSpotFit.signalFactor > 0)
+			if (BenchmarkSpotFit.signalFactor > 0 && upperSignalFactor > 0)
 			{
 				signalScore = new RampedScore(BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0,
 						BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0);
@@ -1189,9 +1187,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (resultsList != null)
 		{
 			// XXX Clone this for use in debugging
-			clonedResultsList = new MultiPathFitResults[resultsList.length];
-			for (int i = 0; i < clonedResultsList.length; i++)
-				clonedResultsList[i] = resultsList[i].clone();
+			//clonedResultsList = new MultiPathFitResults[resultsList.length];
+			//for (int i = 0; i < clonedResultsList.length; i++)
+			//	clonedResultsList[i] = resultsList[i].clone();
+
+			// We do not need a clone since nothing is changed in the list
+			//clonedResultsList = resultsList;
 		}
 
 		return resultsList;
@@ -1347,9 +1348,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		// We may have to read the results again if the ranking option has changed
-		if (lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance ||
-				lastPartialSignalFactor != partialSignalFactor || lastUpperSignalFactor != upperSignalFactor)
-			readResults();
+		//		if (lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance ||
+		//				lastPartialSignalFactor != partialSignalFactor || lastUpperSignalFactor != upperSignalFactor)
+		readResults();
 
 		return true;
 	}
@@ -1410,8 +1411,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			Parameters.isAboveZero("Delta", delta);
 			Parameters.isBelow("Delta", delta, 1);
-			Parameters.isEqualOrBelow("Partial match distance", partialMatchDistance, upperMatchDistance);
-			Parameters.isEqualOrBelow("Partial signal factor", partialSignalFactor, upperSignalFactor);
+			Parameters.isAboveZero("Upper match distance", upperMatchDistance);
+			if (partialMatchDistance > upperMatchDistance)
+				partialMatchDistance = upperMatchDistance;
+			if (partialSignalFactor > upperSignalFactor)
+				partialSignalFactor = upperSignalFactor;
+			//Parameters.isEqualOrBelow("Partial match distance", partialMatchDistance, upperMatchDistance);
+			//Parameters.isEqualOrBelow("Partial signal factor", partialSignalFactor, upperSignalFactor);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1506,7 +1512,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				// Show the recall at the specified depth. Sum the distance and signal factor of all scored spots.
 				int scored = 0;
-				double tp = 0, d = 0, sf = 0;
+				double tp = 0, d = 0, sf = 0, rmsd = 0;
 
 				SimpleRegression regression = new SimpleRegression(false);
 				for (FractionalAssignment[] assignments : list)
@@ -1519,15 +1525,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						if (Math.abs(c.peak.error) <= range)
 							tp += c.getScore();
 						d += c.d;
-						sf += c.sf;
+						sf += c.getSignalFactor();
+						rmsd += c.d * c.d;
 						regression.addData(c.spot.getSignal(), c.peak.getSignal());
 					}
 					scored += assignments.length;
 				}
 				final double slope = regression.getSlope();
 
-				sb.append('\t').append(Utils.rounded((double) tp / np)).append('\t').append(Utils.rounded(d / scored))
-						.append('\t').append(Utils.rounded(sf / scored)).append('\t');
+				sb.append('\t');
+				sb.append(Utils.rounded((double) tp / np)).append('\t');
+				sb.append(Utils.rounded(d / scored)).append('\t');
+				sb.append(Utils.rounded(sf / scored)).append('\t');
+				sb.append(Utils.rounded(Math.sqrt(rmsd / scored))).append('\t');
 				sb.append(Utils.rounded(slope)).append('\t');
 				if (fs.atLimit)
 					sb.append('Y');
@@ -1811,7 +1821,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				sb.append("\t").append(COLUMNS[i]);
 
 		if (summary)
-			sb.append("\tDepth Recall\tDistance\tSignal Factor\tSlope\tAt limit\tTime");
+			sb.append("\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tTime");
 		return sb.toString();
 	}
 
@@ -3081,7 +3091,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Build a histogram of the fitted spots that were available to be scored
 		double[] signal = signalFactorStats.getValues();
 		double[] distance = distanceStats.getValues();
-		double range = BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0;
+		double range = BenchmarkSpotFit.signalFactor;
+		if (upperSignalFactor > 0)
+			range *= upperSignalFactor / 100.0;
 		double[] limits1 = { -range, range };
 		double[] limits2 = { 0,
 				simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0 };
@@ -3106,7 +3118,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				final CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
 				sumDistance += distance2[count] = c.d;
-				sumSignal += signal2[count] = c.sf;
+				sumSignal += signal2[count] = c.getSignalFactor();
 				count++;
 			}
 		}
@@ -3117,7 +3129,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double[][] h1b = Utils.calcHistogram(signal2, limits1[0], limits1[1], bins);
 		double[][] h2b = Utils.calcHistogram(distance2, limits2[0], limits2[1], bins);
 
-		// Since the diatnce and signal factor are computed for all fits (single, multi, doublet)
+		// Since the distance and signal factor are computed for all fits (single, multi, doublet)
 		// there will be far more of them so we normalise and just plot the histogram profile.
 		double s1 = 0, s2 = 0, s1b = 0, s2b = 0;
 		for (int i = 0; i < h1b[0].length; i++)
@@ -3489,42 +3501,51 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			ga_subset = true;
 
-			System.out.println("Weakest = " + weakest.getName());
-
 			ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter).filterSubset(ga_resultsList,
 					failCount + failCountRange, true);
 
 			//resetFailCount(ga_resultsList);
 			//ga_resultsListToScore = ga_resultsList;
+
+			System.out.printf("Weakest %d => %d : %s\n", count(ga_resultsList), count(ga_resultsListToScore),
+					weakest.getName());
 		}
+	}
+
+	private int count(MultiPathFitResults[] list)
+	{
+		int c = 0;
+		for (MultiPathFitResults r : list)
+			c += r.getNumberOfResults();
+		return c;
 	}
 
 	private ScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter, boolean createTextResult)
 	{
 		FractionClassificationResult r = scoreFilter(filter, minFilter, ga_resultsListToScore);
 
-				// DEBUG - Test if the two methods produce the same results
-				FractionClassificationResult r2 = scoreFilter(filter, minFilter, BenchmarkFilterAnalysis.clonedResultsList);
-				if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
-						!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
-						!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
-				{
-					System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f : %s\n", r.getTP(), r2.getTP(), r.getFP(),
-							r2.getFP(), r.getFN(), r2.getFN(), filter.getName());
-		
-					// Debug
-					MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
-					multiPathFilter.setDebugFile("/tmp/1.txt");
-					multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount, simulationParameters.molecules, null);
-					multiPathFilter = createMPF(filter, minFilter);
-					multiPathFilter.setDebugFile("/tmp/2.txt");
-					multiPathFilter.fractionScoreSubset(BenchmarkFilterAnalysis.clonedResultsList, failCount,
-							simulationParameters.molecules, null);
-				}
-				else
-				{
-					//System.out.println("Matched scores");
-				}
+		//		// DEBUG - Test if the two methods produce the same results
+		//		FractionClassificationResult r2 = scoreFilter(filter, minFilter, BenchmarkFilterAnalysis.clonedResultsList);
+		//		if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
+		//				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
+		//				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
+		//		{
+		//			System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f : %s\n", r.getTP(), r2.getTP(), r.getFP(),
+		//					r2.getFP(), r.getFN(), r2.getFN(), filter.getName());
+		//
+		//			//					// Debug
+		//			//					MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
+		//			//					multiPathFilter.setDebugFile("/tmp/1.txt");
+		//			//					multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount, simulationParameters.molecules, null);
+		//			//					multiPathFilter = createMPF(filter, minFilter);
+		//			//					multiPathFilter.setDebugFile("/tmp/2.txt");
+		//			//					multiPathFilter.fractionScoreSubset(BenchmarkFilterAnalysis.clonedResultsList, failCount,
+		//			//							simulationParameters.molecules, null);
+		//		}
+		//		else
+		//		{
+		//			//System.out.println("Matched scores");
+		//		}
 
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
