@@ -2511,7 +2511,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Results passing the primary filter as added to the current slice results.
 		// Results passing the minimal filter are used as estimates.
 
-		final MultiPathFitResult multiPathFitResult = dynamicMultiPathFitResult.copy();
+		final MultiPathFitResult multiPathFitResult = dynamicMultiPathFitResult.copy(false);
 		final SelectedResult selectedResult = filter.select(multiPathFitResult, true, this);
 
 		if (selectedResult != null)

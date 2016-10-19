@@ -52,7 +52,6 @@ import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ga.Chromosome;
@@ -110,8 +109,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static TextWindow gaWindow = null;
 	private static int failCount = 1;
 	private static int failCountRange = 0;
-	// TODO - Make this configurable
-	private static MultiFilter2 minimalFilter = FitWorker.createMinimalFilter();
+	// This can be used during filtering. 
+	// However the min filter is not used to determine if candidates are valid (that is the primary filter).
+	// It is used to store poor estimates during fitting. So we can set it to null.
+	private static final DirectFilter minimalFilter = null;
+	// Used to remove very bad spots that should fail any reasonable filter
+	// TODO - make this configurable
+	private static final DirectFilter minimalFilter2;
+	static
+	{
+		double signal = 30;
+		float snr = 15;
+		double minWidth = 0.3;
+		double maxWidth = 6;
+		double shift = 5;
+		double eshift = 0;
+		double precision = 80;
+		minimalFilter2 = new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+	}
 	private static double residualsThreshold = 0.3;
 	private static boolean reset = true;
 	private static boolean showResultsTable = false;
@@ -271,6 +286,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		int total = 0;
 		int included = 0;
 		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
+		private final DirectFilter minFilter;
 
 		public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
 				RampedScore distanceScore, RampedScore signalScore)
@@ -285,6 +301,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			depthFitStats = new StoredDataStatistics();
 			signalFactorStats = new StoredDataStatistics();
 			distanceStats = new StoredDataStatistics();
+			minFilter = (DirectFilter) minimalFilter2.clone();
+			minFilter.setup();
 		}
 
 		/*
@@ -344,10 +362,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// The results are in order they were fit.
 			// For a single pass fitter this will be in order of candidate ranking.
 			// For a multi pass fitter this will be in order of candidate ranking, then repeat.
-			int failCount = 0;
 			for (int index = 0; index < multiPathFitResults.length; index++)
 			{
-				final MultiPathFitResult fitResult = result.fitResult[index];
+				final MultiPathFitResult fitResult = result.fitResult[index].copy(true);
 
 				// Score the results. Do in order of those likely to be in the same position
 				// thus the grid manager can cache the neighbours
@@ -361,23 +378,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						signalScore, matched);
 
 				if (fitted)
-				{
-					fitResult.originalFailCount = failCount;
 					multiPathFitResults[size++] = fitResult;
-					failCount = 0;
-				}
-				else
-				{
-					// This was not fitted by any method so will always be a fail
-					failCount++;
-				}
 			}
 
 			// Count number of results that had a match
 			for (int i = 0; i < matched.length; i++)
 				if (matched[i])
 					matches++;
-			
+
 			included += size;
 			total += multiPathFitResults.length;
 
@@ -399,7 +407,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		 *            the signal score
 		 * @param matched
 		 *            array of actual results that have been matched
-		 * @return true, if the fit status was ok
+		 * @return true, if the fit status was ok and spots pass the min filter
 		 */
 		private boolean score(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
 				ResultGridManager resultGrid, double matchDistance, RampedScore distanceScore, RampedScore signalScore,
@@ -408,10 +416,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (fitResult != null && fitResult.status == 0)
 			{
 				// Get the new results
+				int size = 0;
 				for (int i = 0; i < fitResult.results.length; i++)
 				{
 					final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
 					peak.setAssignments(null);
+
+					// Remove bad fits to speed up filtering later
+					if (!minFilter.accept(peak))
+						continue;
+					fitResult.results[size++] = fitResult.results[i];
+
 					if (!peak.isNewResult())
 						continue;
 
@@ -422,7 +437,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					if (actual.length == 0)
 						continue;
 
-					final ArrayList<ResultAssignment> assignments = new ArrayList<ResultAssignment>();
+					final ArrayList<ResultAssignment> assignments = new ArrayList<ResultAssignment>(actual.length);
 					for (int j = 0; j < actual.length; j++)
 					{
 						final double d2 = actual[j].distance2(peak.getX(), peak.getY());
@@ -480,7 +495,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					}
 				}
 
-				return true;
+				if (size < fitResult.results.length)
+					fitResult.results = (size == 0) ? null : Arrays.copyOf(fitResult.results, size);
+
+				return (size != 0);
 			}
 			return false;
 		}
@@ -967,7 +985,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private MultiPathFitResults[] readResults()
 	{
-		boolean update = false;
+		boolean update = false; // XXX set to true when debugging
 		if (lastId != BenchmarkSpotFit.fitResultsId)
 		{
 			lastId = BenchmarkSpotFit.fitResultsId;
@@ -1157,13 +1175,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			IJ.showStatus("");
 
 			resultsList = results.toArray(new MultiPathFitResults[results.size()]);
+
+			Arrays.sort(resultsList, new Comparator<MultiPathFitResults>()
+			{
+				public int compare(MultiPathFitResults o1, MultiPathFitResults o2)
+				{
+					return o1.frame - o2.frame;
+				}
+			});
 		}
 
 		// In case a previous run was interrupted
 		if (resultsList != null)
 		{
-			resetFailCount(resultsList);
-
 			// XXX Clone this for use in debugging
 			clonedResultsList = new MultiPathFitResults[resultsList.length];
 			for (int i = 0; i < clonedResultsList.length; i++)
@@ -3298,7 +3322,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			this.jobs = jobs;
 			this.scoreResults = scoreResults;
 			this.createTextResult = createTextResult;
-			this.minFilter = (DirectFilter) minimalFilter.clone();
+			this.minFilter = (minimalFilter != null) ? (DirectFilter) minimalFilter.clone() : null;
 		}
 
 		/*
@@ -3464,30 +3488,43 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (weakest != null)
 		{
 			ga_subset = true;
+
+			System.out.println("Weakest = " + weakest.getName());
+
 			ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter).filterSubset(ga_resultsList,
 					failCount + failCountRange, true);
+
+			//resetFailCount(ga_resultsList);
+			//ga_resultsListToScore = ga_resultsList;
 		}
 	}
 
 	private ScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter, boolean createTextResult)
 	{
-		final FractionClassificationResult r = scoreFilter(filter, minFilter, ga_resultsListToScore);
+		FractionClassificationResult r = scoreFilter(filter, minFilter, ga_resultsListToScore);
 
-		// TODO - Fix this so that the subset returns the same score...
-
-		// DEBUG - Test if the two methods produce the same results
-		FractionClassificationResult r2 = scoreFilter(filter, minFilter, BenchmarkFilterAnalysis.clonedResultsList);
-		if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
-				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
-				!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
-		{
-			System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f\n", r.getTP(), r2.getTP(), r.getFP(), r2.getFP(),
-					r.getFN(), r2.getFN());
-		}
-		else
-		{
-			//System.out.println("Matched scores");
-		}
+				// DEBUG - Test if the two methods produce the same results
+				FractionClassificationResult r2 = scoreFilter(filter, minFilter, BenchmarkFilterAnalysis.clonedResultsList);
+				if (!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getTP(), r2.getTP(), 1e-6, 1e-10) ||
+						!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFP(), r2.getFP(), 1e-6, 1e-10) ||
+						!gdsc.core.utils.DoubleEquality.almostEqualRelativeOrAbsolute(r.getFN(), r2.getFN(), 1e-6, 1e-10))
+				{
+					System.out.printf("TP %f != %f, FP %f != %f, FN %f != %f : %s\n", r.getTP(), r2.getTP(), r.getFP(),
+							r2.getFP(), r.getFN(), r2.getFN(), filter.getName());
+		
+					// Debug
+					MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
+					multiPathFilter.setDebugFile("/tmp/1.txt");
+					multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount, simulationParameters.molecules, null);
+					multiPathFilter = createMPF(filter, minFilter);
+					multiPathFilter.setDebugFile("/tmp/2.txt");
+					multiPathFilter.fractionScoreSubset(BenchmarkFilterAnalysis.clonedResultsList, failCount,
+							simulationParameters.molecules, null);
+				}
+				else
+				{
+					//System.out.println("Matched scores");
+				}
 
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
@@ -3508,18 +3545,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		if (ga_subset)
 		{
-			resetFailCount(ga_resultsListToScore);
-		}
-	}
-
-	private void resetFailCount(MultiPathFitResults[] list)
-	{
-		for (int i = 0; i < list.length; i++)
-		{
-			for (int j = 0; j < list[i].multiPathFitResults.length; j++)
-			{
-				list[i].multiPathFitResults[j].resetFailCount();
-			}
 		}
 	}
 

@@ -23,7 +23,7 @@ package gdsc.smlm.results.filter;
  */
 public class MultiPathFitResult implements Cloneable
 {
-	public static class FitResult
+	public static class FitResult implements Cloneable
 	{
 		/**
 		 * Fitting status of the fit. Zero for OK.
@@ -66,28 +66,19 @@ public class MultiPathFitResult implements Cloneable
 		{
 			return data;
 		}
-	}
 
-	/**
-	 * The original value for the number of failed results before this result
-	 */
-	public int originalFailCount;
-
-	/**
-	 * The number of failed results before this result
-	 */
-	public int failCount;
-
-	/**
-	 * Reset the fail count to the original value.
-	 * <p>
-	 * Note that the MultiPathFilter will update the fail count when creating a subset. Multiple rounds of subsetting
-	 * will continually update the fail count. This method can be used to reset the fail count after the subset has been
-	 * processed.b
-	 */
-	public void resetFailCount()
-	{
-		this.failCount = this.originalFailCount;
+		@Override
+		public FitResult clone()
+		{
+			try
+			{
+				return (FitResult) super.clone();
+			}
+			catch (CloneNotSupportedException e)
+			{
+				return null;
+			}
+		}
 	}
 
 	/**
@@ -115,7 +106,7 @@ public class MultiPathFitResult implements Cloneable
 	 * fit should be considered.
 	 */
 	private double multiQAScore = -1;
-	
+
 	/**
 	 * The score from residuals analysis on the residuals of the single fit. This can be used to choose if the doublet
 	 * fit should be considered.
@@ -162,10 +153,12 @@ public class MultiPathFitResult implements Cloneable
 	 * Copy the class level field values into a new object. Ignores the fail count fields.
 	 * <p>
 	 * To copy sub-class fields use {@link #clone()}.
-	 * 
+	 *
+	 * @param deep
+	 *            Set to true to do a clone of the FitResult objects. Their array objects will not be copied.
 	 * @return A copy
 	 */
-	public MultiPathFitResult copy()
+	public MultiPathFitResult copy(boolean deep)
 	{
 		final MultiPathFitResult r = new MultiPathFitResult();
 		r.candidateId = candidateId;
@@ -175,11 +168,26 @@ public class MultiPathFitResult implements Cloneable
 		r.candidateId = candidateId;
 		r.multiQAScore = multiQAScore;
 		r.singleQAScore = singleQAScore;
-		r.multiFitResult = multiFitResult;
-		r.multiDoubletFitResult = multiDoubletFitResult;
-		r.singleFitResult = singleFitResult;
-		r.doubletFitResult = doubletFitResult;
+		if (deep)
+		{
+			r.multiFitResult = clone(multiFitResult);
+			r.multiDoubletFitResult = clone(multiDoubletFitResult);
+			r.singleFitResult = clone(singleFitResult);
+			r.doubletFitResult = clone(doubletFitResult);
+		}
+		else
+		{
+			r.multiFitResult = multiFitResult;
+			r.multiDoubletFitResult = multiDoubletFitResult;
+			r.singleFitResult = singleFitResult;
+			r.doubletFitResult = doubletFitResult;
+		}
 		return r;
+	}
+
+	private static FitResult clone(FitResult f)
+	{
+		return (f == null) ? null : f.clone();
 	}
 
 	/**

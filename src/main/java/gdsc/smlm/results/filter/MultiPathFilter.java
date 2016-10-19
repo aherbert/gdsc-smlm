@@ -217,8 +217,11 @@ public class MultiPathFilter
 			}
 			else
 			{
-				Arrays.fill(isFit, 0, totalCandidates, false);
-				Arrays.fill(isValid, 0, totalCandidates, false);
+				for (int i = 0; i < totalCandidates; i++)
+				{
+					isFit[i] = false;
+					isValid[i] = false;
+				}
 			}
 		}
 	}
@@ -747,7 +750,7 @@ public class MultiPathFilter
 	private boolean isSuitableForDoubletFit(MultiPathFitResult multiPathResult, FitResult fitResult, boolean singleQA)
 	{
 		// Check there is a fit result
-		if (fitResult == null || fitResult.status != 0)
+		if (fitResult == null || fitResult.status != 0 || fitResult.results == null)
 			return false;
 
 		// Check if the residuals score is below the configured threshold
@@ -1132,7 +1135,25 @@ public class MultiPathFilter
 	}
 
 	/**
-	 * Filter a set of multi-path results into a set of results.
+	 * Check if the results contain a new result
+	 *
+	 * @param results
+	 *            the results
+	 * @return True if a new result
+	 */
+	private boolean isNewResult(final PreprocessedPeakResult[] results)
+	{
+		if (results != null)
+		{
+			for (int i = 0; i < results.length; i++)
+				if (results[i].isNewResult())
+					return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Filter a set of multi-path results into a set of results. No validation of candidates is performed.
 	 *
 	 * @param results
 	 *            the results
@@ -1157,16 +1178,16 @@ public class MultiPathFilter
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected.
 	 * <p>
-	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult. If the
-	 * subset flag is set to true the current value of the failCount property is used to accumulate the fail count (as
-	 * the current set is already a subset).
+	 * If the subset flag is set to true the candidate Id will be used to determine the number of failed fits before the
+	 * current candidate, assuming candidates start at zero and increment.
 	 * 
 	 * @param results
 	 *            a set of results to analyse
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param subset
-	 *            True if a subset (the failCount property of the MultiPathFitResult objects will be respected)
+	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
+	 *            current candidate)
 	 * @return the filtered results
 	 */
 	public MultiPathFitResults[] filterSubset(final MultiPathFitResults[] results, final int failures, boolean subset)
@@ -1192,16 +1213,16 @@ public class MultiPathFilter
 	 * The number of consecutive rejections are counted. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected.
 	 * <p>
-	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult. If the
-	 * subset flag is set to true the current value of the failCount property is used to accumulate the fail count (as
-	 * the current set is already a subset).
+	 * If the subset flag is set to true the candidate Id will be used to determine the number of failed fits before the
+	 * current candidate, assuming candidates start at zero and increment.
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
 	 * @param failures
 	 *            the number of failures to allow per frame before all peaks are rejected
 	 * @param subset
-	 *            True if a subset (the failCount property of the MultiPathFitResult objects will be respected)
+	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
+	 *            current candidate)
 	 * @return the filtered results
 	 */
 	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean subset)
@@ -1215,7 +1236,8 @@ public class MultiPathFilter
 	 * The number of consecutive rejections are counted. When the configured number of failures is reached all
 	 * remaining results for the frame are rejected.
 	 * <p>
-	 * The number of failures before each result is stored in the failCount property of the MultiPathPeakResult.
+	 * If the subset flag is set to true the candidate Id will be used to determine the number of failed fits before the
+	 * current candidate, assuming candidates start at zero and increment.
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
@@ -1224,7 +1246,8 @@ public class MultiPathFilter
 	 * @param setup
 	 *            Set to true to run the {@link #setup()} method
 	 * @param subset
-	 *            True if a subset (the failCount property of the MultiPathFitResult objects will be respected)
+	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
+	 *            current candidate)
 	 * @return the filtered results
 	 */
 	private MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
@@ -1234,54 +1257,59 @@ public class MultiPathFilter
 			setup();
 
 		int failCount = 0;
+		int lastId = -1;
 		int size = 0;
 		final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.getNumberOfResults()];
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
+//		if (multiPathResults.getFrame() == 12)
+//			System.out.println("Debug");
 		for (int c = 0; c < newMultiPathResults.length; c++)
 		{
 			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
 
 			// Include the number of failures before this result from the larger set
 			if (subset)
-				failCount += multiPathResult.failCount;
-
-			if (failCount <= failures || store.isValid(multiPathResult.candidateId))
 			{
-				// Assess the result if we are below the fail limit or have an estimate
-				final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
-				if (result != null)
+				failCount += (multiPathResult.candidateId - (lastId + 1));
+				lastId = multiPathResult.candidateId;
+			}
+
+			final boolean evaluateFit = failCount <= failures;  
+			if (evaluateFit || store.isValid(multiPathResult.candidateId))
+			{
+				// Evaluate the result. 
+				// This allows storing more estimates in the store even if we are past the failures limit.
+				final PreprocessedPeakResult[] result = accept(multiPathResult, false, store);
+
+				// Note: Even if the actual result failed, the candidate may have passed and so 
+				// the entire multi-path result should be retained.
+				
+				// Also note that depending on the filter, different results can be selected and pushed through
+				// the store to set them valid. So we must push everything through the store to ensure nothing 
+				// is removed that could be used.
+				checkIsValid(multiPathResult.getSingleFitResult(), store);
+				checkIsValid(multiPathResult.getMultiFitResult(), store);
+				checkIsValid(multiPathResult.getDoubletFitResult(), store);
+				checkIsValid(multiPathResult.getMultiDoubletFitResult(), store);
+
+				// This has valid results so add to the output subset 
+				newMultiPathResults[size++] = multiPathResult;
+
+				if (evaluateFit && isNewResult(result))
 				{
-					boolean isNew = false;
-					for (int i = 0; i < result.length; i++)
-					{
-						if (result[i].isNewResult())
-							isNew = true;
-					}
-
-					// Note: Even if the actual result failed, the candidate may have passed and so 
-					// the entire multi-path result should be retained.
-
-					// This has valid results so add to the output subset 
-					newMultiPathResults[size++] = multiPathResult;
-					// Store the number of failures before this result
-					multiPathResult.failCount = failCount;
-
-					if (isNew)
-					{
-						// More results were accepted so reset the fail count
-						failCount = 0;
-					}
-					else
-					{
-						// Nothing was accepted, increment fail count
-						failCount++;
-					}
+					// More results were accepted so reset the fail count
+					failCount = 0;
 				}
 				else
 				{
-					// This was rejected, increment fail count
+					// Nothing was accepted, increment fail count
 					failCount++;
 				}
+			}
+			else
+			{
+				// This was rejected, increment fail count
+				failCount++;
 			}
 		}
 
@@ -1289,6 +1317,24 @@ public class MultiPathFilter
 			return Arrays.copyOf(newMultiPathResults, size);
 
 		return null;
+	}
+
+	private void checkIsValid(FitResult fitResult, SimpleSelectedResultStore store)
+	{
+		if (fitResult == null || fitResult.results == null)
+			return;
+		final PreprocessedPeakResult[] results = fitResult.results;
+
+		for (int i = 0; i < results.length; i++)
+		{
+			if (!store.isValid[results[i].getCandidateId()])
+			{
+				if (accept(results[i]))
+				{
+					store.isValid[results[i].getCandidateId()] = true;
+				}
+			}
+		}
 	}
 
 	/**
@@ -1370,8 +1416,7 @@ public class MultiPathFilter
 
 	/**
 	 * Score a subset of multi-path results. The subset can be created with
-	 * {@link #filterSubset(MultiPathFitResult[], int)}. Alternatively it can be created externally and the failCount
-	 * property of the MultiPathFitResult objects updated appropriately.
+	 * {@link #filterSubset(MultiPathFitResult[], int)}.
 	 * <p>
 	 * Filter each multi-path result. Any output results that are new results are assumed to be positives and
 	 * their assignments used to score the results per frame.
@@ -1398,9 +1443,24 @@ public class MultiPathFilter
 		return fractionScore(results, failures, n, true, assignments);
 	}
 
+	String debugFilename;
+
 	/**
-	 * Score a set of multi-path results. If the set is a subset then the fail count will be accumulated using the
-	 * failCount property of the MultiPathPeakResult.
+	 * Sets the debug file for scoring.
+	 *
+	 * @param filename
+	 *            the new debug file
+	 */
+	public void setDebugFile(String filename)
+	{
+		debugFilename = filename;
+	}
+
+	/**
+	 * Score a set of multi-path results.
+	 * <p>
+	 * If the subset flag is set to true the candidate Id will be used to determine the number of failed fits before the
+	 * current candidate, assuming candidates start at zero and increment.
 	 * <p>
 	 * Filter each multi-path result. Any output results that are new results are assumed to be positives and
 	 * their assignments used to score the results per frame.
@@ -1418,7 +1478,8 @@ public class MultiPathFilter
 	 * @param n
 	 *            The number of actual results
 	 * @param subset
-	 *            True if a subset
+	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
+	 *            current candidate)
 	 * @param allAssignments
 	 *            the assignments
 	 * @return the score
@@ -1432,11 +1493,27 @@ public class MultiPathFilter
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 		final boolean save = allAssignments != null;
 
-		setup();
-		for (MultiPathFitResults multiPathResults : results)
+		// Debugging the results that are scored
+		java.io.OutputStreamWriter out = null;
+		if (debugFilename != null)
 		{
+			try
+			{
+				out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+			}
+			catch (Exception e)
+			{
+			}
+		}
+
+		setup();
+		for (int k = 0; k < results.length; k++)
+		{
+			final MultiPathFitResults multiPathResults = results[k];
+
 			// Reset fail count for new frames
 			int failCount = 0;
+			int lastId = -1;
 			int nPredicted = 0;
 			store.resize(multiPathResults.totalCandidates);
 			for (int c = 0; c < multiPathResults.multiPathFitResults.length; c++)
@@ -1445,10 +1522,38 @@ public class MultiPathFilter
 
 				// Include the number of failures before this result from the larger set
 				if (subset)
-					failCount += multiPathResult.failCount;
-
-				if (failCount <= failures || store.isValid(multiPathResult.candidateId))
 				{
+					failCount += (multiPathResult.candidateId - (lastId + 1));
+					lastId = multiPathResult.candidateId;
+				}
+
+				final boolean evaluateFit = failCount <= failures;  
+				if (evaluateFit || store.isValid(multiPathResult.candidateId))
+				{
+					if (out != null)
+					{
+						try
+						{
+							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
+									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+									isNewResult(accept(multiPathResult, true, null))));
+						}
+						catch (Exception e)
+						{
+							try
+							{
+								out.close();
+							}
+							catch (Exception ee)
+							{
+							}
+							finally
+							{
+								out = null;
+							}
+						}
+					}
+					
 					// Assess the result if we are below the fail limit or have an estimate
 					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
 					final int size = nPredicted;
@@ -1469,7 +1574,7 @@ public class MultiPathFilter
 							}
 						}
 					}
-					if (size != nPredicted)
+					if (evaluateFit && size != nPredicted)
 					{
 						// More results were accepted so reset the fail count
 						failCount = 0;
@@ -1480,11 +1585,49 @@ public class MultiPathFilter
 						failCount++;
 					}
 				}
+				else
+				{
+					// This was rejected, increment fail count
+					failCount++;
+				}
 			}
 
 			final FractionalAssignment[] tmp = score(assignments, score, nPredicted, save);
 			if (save)
 				allAssignments.add(tmp);
+
+			if (out != null)
+			{
+				try
+				{
+					out.write(String.format("[%d] %s\n", multiPathResults.frame, Arrays.toString(score)));
+				}
+				catch (Exception e)
+				{
+					try
+					{
+						out.close();
+					}
+					catch (Exception ee)
+					{
+					}
+					finally
+					{
+						out = null;
+					}
+				}
+			}
+		}
+
+		if (out != null)
+		{
+			try
+			{
+				out.close();
+			}
+			catch (Exception ee)
+			{
+			}
 		}
 
 		// Note: We are using the integer positives and negatives fields to actually store integer TP and FP
