@@ -62,6 +62,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	double gain = 1;
 	@XStreamOmitField
 	boolean widthEnabled;
+	@XStreamOmitField
+	MultiFilterComponentSet components = null;
+	@XStreamOmitField
+	MultiFilterComponentSet componentsNoWidth = null;
+	@XStreamOmitField
+	MultiFilterComponentSet componentsWidth = null;
 
 	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision)
@@ -140,15 +146,56 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	private void setup(final boolean widthEnabled)
 	{
-		this.widthEnabled = widthEnabled;
-		if (widthEnabled)
+		if (componentsWidth == null)
 		{
-			lowerSigmaThreshold = (float) minWidth;
-			upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+			// Create the components we require
+			final MultiFilterComponent[] components1 = new MultiFilterComponent[6];
+			final MultiFilterComponent[] components2 = new MultiFilterComponent[6];
+			int s1 = 0, s2 = 0;
+
+			// Current order of filter power obtained from BenchmarkFilterAnalysis:
+			// Precision, Max Width, SNR, Shift, Min width
+			if (precision != 0)
+			{
+				components1[s1++] = components2[s2++] = new MultiFilterVarianceComponent(precision);
+			}
+			if (maxWidth != 0 || minWidth != 0)
+			{
+				components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
+			}
+			if (snr != 0)
+			{
+				components1[s1++] = components2[s2++] = new MultiFilterSNRComponent(snr);
+			}
+			if (shift != 0)
+			{
+				components1[s1++] = components2[s2++] = new MultiFilterShiftComponent(shift);
+			}
+			if (signal != 0)
+			{
+				components1[s1++] = components2[s2++] = new MultiFilterSignalComponent(signal);
+			}
+			if (eshift != 0)
+			{
+				components1[s1++] = components2[s2++] = new MultiFilterEShiftComponent(eshift);
+			}
+			componentsWidth = MultiFilterComponentSetFactory.create(components1, s1);
+			componentsNoWidth = MultiFilterComponentSetFactory.create(components2, s2);
 		}
-		offset = Filter.getUpperSquaredLimit(shift);
-		eoffset = Filter.getUpperSquaredLimit(eshift);
-		variance = Filter.getDUpperSquaredLimit(precision);
+
+		components = (widthEnabled) ? componentsWidth : componentsNoWidth;
+
+		//		// This is the legacy support for all components together
+		//		this.widthEnabled = widthEnabled;
+		//		signalThreshold = (float) signal;
+		//		if (widthEnabled)
+		//		{
+		//			lowerSigmaThreshold = (float) minWidth;
+		//			upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+		//		}
+		//		offset = Filter.getUpperSquaredLimit(shift);
+		//		eoffset = Filter.getUpperSquaredLimit(eshift);
+		//		variance = Filter.getDUpperSquaredLimit(precision);
 	}
 
 	@Override
@@ -191,38 +238,42 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		// Current order of filter power obtained from BenchmarkFilterAnalysis:
-		// Precision, Max Width, SNR, Shift, Min width
+		return components.validate(peak);
 
-		if (peak.getLocationVariance() > variance)
-			return V_LOCATION_VARIANCE;
-
-		if (widthEnabled)
-		{
-			final float xsdf = peak.getXSDFactor();
-			if (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold)
-				return V_X_SD_FACTOR;
-		}
-
-		if (peak.getSNR() < this.snr)
-			return V_SNR;
-
-		// Shift
-		final float xs2 = peak.getXRelativeShift2();
-		if (xs2 > offset)
-			return V_X_RELATIVE_SHIFT;
-		final float ys2 = peak.getYRelativeShift2();
-		if (ys2 > offset)
-			return V_Y_RELATIVE_SHIFT;
-
-		if (peak.getPhotons() < signal)
-			return V_PHOTONS;
-
-		// Euclidian shift
-		if (xs2 + ys2 > eoffset)
-			return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
-
-		return 0;
+		//		// This is the legacy support for all components together
+		//		
+		//		// Current order of filter power obtained from BenchmarkFilterAnalysis:
+		//		// Precision, Max Width, SNR, Shift, Min width
+		//
+		//		if (peak.getLocationVariance() > variance)
+		//			return V_LOCATION_VARIANCE;
+		//
+		//		if (widthEnabled)
+		//		{
+		//			final float xsdf = peak.getXSDFactor();
+		//			if (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold)
+		//				return V_X_SD_FACTOR;
+		//		}
+		//
+		//		if (peak.getSNR() < this.snr)
+		//			return V_SNR;
+		//
+		//		// Shift
+		//		final float xs2 = peak.getXRelativeShift2();
+		//		if (xs2 > offset)
+		//			return V_X_RELATIVE_SHIFT;
+		//		final float ys2 = peak.getYRelativeShift2();
+		//		if (ys2 > offset)
+		//			return V_Y_RELATIVE_SHIFT;
+		//
+		//		if (peak.getPhotons() < signal)
+		//			return V_PHOTONS;
+		//
+		//		// Euclidian shift
+		//		if (xs2 + ys2 > eoffset)
+		//			return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+		//
+		//		return 0;
 	}
 
 	@Override
