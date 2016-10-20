@@ -1286,7 +1286,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
 		// TODO - Make minimal filter configurable
-		gd.addSlider("Residuals_threshold", 0, 1, residualsThreshold);
+		gd.addSlider("Residuals_threshold", 0.01, 1, residualsThreshold);
 		gd.addCheckbox("Reset", reset);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
