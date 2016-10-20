@@ -1655,7 +1655,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			xml = fitConfig.getDefaultSmartFilterXML();
 
 		gd.addMessage("Smart filter (used to pick optimum results during fitting)");
-		gd.addTextAreas(xml, null, 8, 60);
+		gd.addTextAreas(XmlUtils.convertQuotes(xml), null, 8, 60);
 		// Currently we just collect it here even if not needed
 		gd.addMessage(
 				"Smart filters using precision filtering may require a local background level.\n \nLocal background requires the camera bias:");

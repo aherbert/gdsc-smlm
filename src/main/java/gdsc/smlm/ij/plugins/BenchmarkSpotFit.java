@@ -48,6 +48,7 @@ import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.XmlUtils;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitParameters.FitTask;
@@ -891,7 +892,7 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 
 		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
-		gd.addTextAreas(multiFilter.toXML(), null, 6, 60);
+		gd.addTextAreas(XmlUtils.convertQuotes(multiFilter.toXML()), null, 6, 60);
 
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
