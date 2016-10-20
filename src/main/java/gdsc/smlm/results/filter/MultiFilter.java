@@ -154,51 +154,74 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		// TODO - reorder these in precedence of the most powerful single filter
+		// Current order of filter power obtained from BenchmarkFilterAnalysis:
+		// Precision, Max Width, SNR, Shift, Min width
+
+		final float sd = peak.getSD();
+		final double s = nmPerPixel * sd;
+		final double N = peak.getSignal();
+
+		// Precision
+		if (PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) > variance)
+			return false;
+
+		// Width
+		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
+			return false;
+
+		if (SNRFilter.getSNR(peak) < this.snr)
+			return false;
+
+		// Shift
+		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
+			return false;
 
 		if (peak.getSignal() < signalThreshold)
 			return false;
-		if (SNRFilter.getSNR(peak) < this.snr)
-			return false;
-		final float sd = peak.getSD();
-		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
-			return false;
-		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
-			return false;
+
+		// Euclidian shift
 		final float dx = peak.getXPosition();
 		final float dy = peak.getYPosition();
 		if (dx * dx + dy * dy > eoffset)
 			return false;
-		final double s = nmPerPixel * sd;
-		final double N = peak.getSignal();
-		// Use the background noise to estimate precision 
-		if (PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) > variance)
-			return false;
+
 		return true;
 	}
 
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		// TODO - reorder these in precedence of the most powerful single filter
+		// Current order of filter power obtained from BenchmarkFilterAnalysis:
+		// Precision, Max Width, SNR, Shift, Min width
+
+		if (peak.getLocationVariance() > variance)
+			return V_LOCATION_VARIANCE;
+
+		if (widthEnabled)
+		{
+			final float xsdf = peak.getXSDFactor();
+			if (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold)
+				return V_X_SD_FACTOR;
+		}
+
+		if (peak.getSNR() < this.snr)
+			return V_SNR;
+
+		// Shift
+		final float xs2 = peak.getXRelativeShift2();
+		if (xs2 > offset)
+			return V_X_RELATIVE_SHIFT;
+		final float ys2 = peak.getYRelativeShift2();
+		if (ys2 > offset)
+			return V_Y_RELATIVE_SHIFT;
 
 		if (peak.getPhotons() < signal)
 			return V_PHOTONS;
-		if (peak.getSNR() < this.snr)
-			return V_SNR;
-		if (widthEnabled)
-		{
-			if (peak.getXSDFactor() > upperSigmaThreshold || peak.getXSDFactor() < lowerSigmaThreshold)
-				return V_X_SD_FACTOR;
-		}
-		if (peak.getXRelativeShift2() > offset)
-			return V_X_RELATIVE_SHIFT;
-		if (peak.getYRelativeShift2() > offset)
-			return V_Y_RELATIVE_SHIFT;
-		if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset)
+
+		// Euclidian shift
+		if (xs2 + ys2 > eoffset)
 			return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
-		if (peak.getLocationVariance() > variance)
-			return V_LOCATION_VARIANCE;
+
 		return 0;
 	}
 
