@@ -42,9 +42,10 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 
 	public WidthFilter2(double minWidth, double maxWidth)
 	{
-		if (maxWidth < minWidth)
+		// Only swap if max width is enabled
+		if (maxWidth != 0 && maxWidth < minWidth)
 		{
-			double f = maxWidth;
+			final double f = maxWidth;
 			maxWidth = minWidth;
 			minWidth = f;
 		}

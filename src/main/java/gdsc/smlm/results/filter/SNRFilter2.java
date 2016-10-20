@@ -43,7 +43,8 @@ public class SNRFilter2 extends DirectFilter implements IMultiFilter
 	public SNRFilter2(float snr, double minWidth, double maxWidth)
 	{
 		this.snr = Math.max(0, snr);
-		if (maxWidth < minWidth)
+		// Only swap if max width is enabled
+		if (maxWidth != 0 && maxWidth < minWidth)
 		{
 			double f = maxWidth;
 			maxWidth = minWidth;

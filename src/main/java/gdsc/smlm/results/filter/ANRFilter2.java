@@ -44,7 +44,8 @@ public class ANRFilter2 extends DirectFilter
 	public ANRFilter2(float anr, double minWidth, double maxWidth)
 	{
 		this.anr = Math.max(0, anr);
-		if (maxWidth < minWidth)
+		// Only swap if max width is enabled
+		if (maxWidth != 0 && maxWidth < minWidth)
 		{
 			double f = maxWidth;
 			maxWidth = minWidth;
