@@ -16,14 +16,20 @@ package gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSet0 extends MultiFilterComponentSet
+public class MultiFilterComponentSetDefault extends MultiFilterComponentSet
 {
-	public MultiFilterComponentSet0(MultiFilterComponent[] components)
+	private final MultiFilterComponent[] components;
+
+	public MultiFilterComponentSetDefault(MultiFilterComponent[] components)
 	{
+		this.components = components;
 	}
 
 	public int validate(final PreprocessedPeakResult peak)
 	{
+		for (int i = 0; i < components.length; i++)
+			if (components[i].fail(peak))
+				return components[i].getType();
 		return 0;
 	}
 }

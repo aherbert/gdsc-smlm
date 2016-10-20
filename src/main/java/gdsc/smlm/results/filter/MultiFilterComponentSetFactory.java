@@ -25,6 +25,7 @@ public class MultiFilterComponentSetFactory
 		switch (size)
 		{
 			//@formatter:off
+			case 0: return new MultiFilterComponentSet0(components); 
 			case 1: return new MultiFilterComponentSet1(components); 
 			case 2: return new MultiFilterComponentSet2(components); 
 			case 3: return new MultiFilterComponentSet3(components); 
@@ -33,6 +34,6 @@ public class MultiFilterComponentSetFactory
 			case 6: return new MultiFilterComponentSet6(components); 
 			//@formatter:on
 		}
-		return new MultiFilterComponentSet0(Arrays.copyOf(components, size));
+		return new MultiFilterComponentSetDefault(Arrays.copyOf(components, size));
 	}
 }
