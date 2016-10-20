@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import java.util.Arrays;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -31,6 +33,6 @@ public class MultiFilterComponentSetFactory
 			case 6: return new MultiFilterComponentSet6(components); 
 			//@formatter:on
 		}
-		return new MultiFilterComponentSet0(components);
+		return new MultiFilterComponentSet0(Arrays.copyOf(components, size));
 	}
 }
