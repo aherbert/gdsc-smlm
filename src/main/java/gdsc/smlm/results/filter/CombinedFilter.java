@@ -210,6 +210,15 @@ public abstract class CombinedFilter extends DirectFilter
 			return filter1.getParameterValue(index);
 		return filter2.getParameterValue(index - filter1.getNumberOfParameters());
 	}
+	
+	@Override
+	public double getDisabledParameterValue(int index)
+	{
+		checkIndex(index);
+		if (index < filter1.getNumberOfParameters())
+			return filter1.getDisabledParameterValue(index);
+		return filter2.getDisabledParameterValue(index - filter1.getNumberOfParameters());
+	}
 
 	@Override
 	public String getParameterName(int index)

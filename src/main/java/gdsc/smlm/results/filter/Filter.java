@@ -1207,6 +1207,20 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	public abstract double getParameterValue(int index);
 
 	/**
+	 * Return a value to use to disable the parameter
+	 * <p>
+	 * Override this method if zero does not disable the parameter  
+	 * 
+	 * @param index
+	 * @return The disabled value of the specified parameter
+	 */
+	public double getDisabledParameterValue(int index)
+	{
+		checkIndex(index);
+		return 0;
+	}
+
+	/**
 	 * @param index
 	 * @return The name of the specified parameter
 	 */
@@ -1315,6 +1329,24 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	 * @return A new filter
 	 */
 	public abstract Filter create(double... parameters);
+
+	/**
+	 * Creates a new filter with only the specified parameters enabled.
+	 *
+	 * @param enable
+	 *            the enabled flags
+	 * @return the filter
+	 */
+	public Filter create(boolean[] enable)
+	{
+		if (enable == null || enable.length != getNumberOfParameters())
+			throw new IllegalArgumentException(
+					"Enable array must match the number of parameters: " + getNumberOfParameters());
+		final double[] p = new double[enable.length];
+		for (int i = 0; i < p.length; i++)
+			p[i] = (enable[i]) ? getParameterValue(i) : getDisabledParameterValue(i);
+		return create(p);
+	}
 
 	/**
 	 * Update the input array if the Filter's parameters are weaker. This method can be used to find the weakest

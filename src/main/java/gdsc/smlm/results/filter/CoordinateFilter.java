@@ -147,6 +147,28 @@ public class CoordinateFilter extends DirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getDisabledParameterValue(int)
+	 */
+	@Override
+	public double getDisabledParameterValue(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return Double.NEGATIVE_INFINITY;
+			case 1:
+				return Double.POSITIVE_INFINITY;
+			case 2:
+				return Double.NEGATIVE_INFINITY;
+			default:
+				return Double.POSITIVE_INFINITY;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
 	 */
 	@Override

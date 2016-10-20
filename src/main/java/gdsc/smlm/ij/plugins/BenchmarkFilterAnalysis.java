@@ -14,6 +14,9 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -107,6 +110,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static TextWindow summaryWindow = null;
 	private static TextWindow sensitivityWindow = null;
 	private static TextWindow gaWindow = null;
+	private static TextWindow filterAnalysisWindow = null;
 	private static int failCount = 1;
 	private static int failCountRange = 0;
 	// This can be used during filtering. 
@@ -159,6 +163,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	static double lowerSignalFactor;
 	private static boolean depthRecallAnalysis = true;
 	private static boolean scoreAnalysis = true;
+	private static boolean filterAnalysis = true;
 	private static boolean evolve = false;
 	private static int stepSearch = 0;
 
@@ -1298,6 +1303,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addCheckbox("Save_template", saveTemplate);
 		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
 		gd.addSlider("Delta", 0.01, 1, delta);
+		gd.addMessage("Match scoring");
+		Component discardLabel = gd.getMessage();
 		gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
 		gd.addNumericField("Criteria_limit", criteriaLimit, 4);
 		gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
@@ -1311,9 +1318,41 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (!simulationParameters.fixedDepth)
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
 		gd.addCheckbox("Score_analysis", scoreAnalysis);
+		gd.addCheckbox("Filter_analysis", filterAnalysis);
 		gd.addCheckbox("Evolve", evolve);
 		gd.addSlider("Step_search", 0, 4, stepSearch);
 		gd.addStringField("Title", resultsTitle, 20);
+
+		if (gd.getLayout() != null)
+		{
+			GridBagLayout grid = (GridBagLayout) gd.getLayout();
+
+			int xOffset = 0, yOffset = 0;
+			int lastY = -1, rowCount = 0;
+			for (Component comp : gd.getComponents())
+			{
+				// Check if this should be the second major column
+				if (comp == discardLabel)
+				{
+					xOffset += 2;
+					yOffset -= rowCount;
+				}
+				// Reposition the field
+				GridBagConstraints c = grid.getConstraints(comp);
+				if (lastY != c.gridy)
+					rowCount++;
+				lastY = c.gridy;
+				c.gridx = c.gridx + xOffset;
+				c.gridy = c.gridy + yOffset;
+				c.insets.left = c.insets.left + 10 * xOffset;
+				c.insets.top = 0;
+				c.insets.bottom = 0;
+				grid.setConstraints(comp, c);
+			}
+
+			if (IJ.isLinux())
+				gd.setBackground(new Color(238, 238, 238));
+		}
 
 		gd.showDialog();
 
@@ -1381,6 +1420,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (!simulationParameters.fixedDepth)
 			depthRecallAnalysis = gd.getNextBoolean();
 		scoreAnalysis = gd.getNextBoolean();
+		filterAnalysis = gd.getNextBoolean();
 		evolve = gd.getNextBoolean();
 		stepSearch = (int) Math.abs(gd.getNextNumber());
 		resultsTitle = gd.getNextString();
@@ -1501,8 +1541,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				final ArrayList<FractionalAssignment[]> list = new ArrayList<FractionalAssignment[]>(
 						resultsList.length);
-				final FractionClassificationResult r = scoreFilter(fs.filter, minimalFilter, resultsList, list);
-				final StringBuilder sb = createResult(fs.filter, r);
+				final FractionClassificationResult r = scoreFilter(fs.getFilter(), minimalFilter, resultsList, list);
+				final StringBuilder sb = createResult(fs.getFilter(), r);
 
 				if (topFilterResults == null)
 				{
@@ -1572,7 +1612,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 		}
 
-		DirectFilter bestFilter = filters.get(0).filter;
+		DirectFilter bestFilter = filters.get(0).getFilter();
 		if (saveBestFilter)
 			saveFilter(bestFilter);
 
@@ -1590,6 +1630,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		calculateSensitivity();
 		topFilterResults = depthAnalysis(topFilterResults, bestFilter);
 		scoreAnalysis(topFilterResults, bestFilter);
+		filterAnalysis(topFilterClassificationResult, bestFilter);
 
 		wo.tile();
 	}
@@ -1648,7 +1689,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				IJ.showProgress(currentIndex++, bestFilter.size());
 
-				DirectFilter filter = bestFilter.get(type).filter;
+				DirectFilter filter = bestFilter.get(type).getFilter();
 
 				FractionClassificationResult s = scoreFilter(filter, minimalFilter, resultsList);
 				s = getOriginalScore(s);
@@ -1808,6 +1849,23 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			if (clearTables)
 				gaWindow.getTextPanel().clear();
+		}
+	}
+
+	private void createFilterAnalysisWindow()
+	{
+		if (isHeadless)
+		{
+			IJ.log(createResultsHeader(false));
+		}
+		else
+		{
+			if (filterAnalysisWindow == null || !filterAnalysisWindow.isShowing())
+			{
+				String header = createResultsHeader(false);
+				filterAnalysisWindow = new TextWindow(TITLE + " Filter Analysis", header, "", 900, 300);
+			}
+			filterAnalysisWindow.getTextPanel().clear();
 		}
 	}
 
@@ -2343,7 +2401,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// irrespective of whether they were the same type or not.
 		//if (allSameType)
 		//{
-		FilterScore newFilterScore = new FilterScore(max.filter, max.score, max.criteria, atLimit);
+		FilterScore newFilterScore = new FilterScore(max, atLimit);
 		FilterScore filterScore = bestFilter.get(type);
 		if (filterScore != null)
 		{
@@ -2362,7 +2420,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				// Replace
 				if (newFilterScore.compareTo(filterScore) < 0)
-					filterScore.update(max.filter, max.score, max.criteria, atLimit);
+					filterScore.update(max, atLimit);
 			}
 		}
 		else
@@ -2449,6 +2507,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				tw.append(result.text);
 			}
+		}
+	}
+
+	private void addToFilterAnalysisWindow(final ScoreResult result)
+	{
+		if (isHeadless)
+		{
+			IJ.log(result.text);
+		}
+		else
+		{
+			filterAnalysisWindow.append(result.text);
 		}
 	}
 
@@ -3178,36 +3248,121 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			wo.add(pw1);
 	}
 
+	private void filterAnalysis(FractionClassificationResult bestResult, DirectFilter bestFilter)
+	{
+		if (!filterAnalysis)
+			return;
+		createFilterAnalysisWindow();
+
+		// TODO - support breakdown of top level OR components
+		// Note this may not be necessary. We may just enable components 
+		// progressively across the entire set of parameters. This would still 
+		// show how the combined filter is built up to achive the final result.
+
+		// Assume the DirectFilter is only AND combinations of components
+		// Progressively add components until all are the same as the input bestFilter
+
+		int nParams = bestFilter.getNumberOfParameters();
+		boolean[] enable = new boolean[nParams];
+		int enabled = 0;
+		for (int n = 0; n < nParams; n++)
+		{
+			// Create a set of filters by enabling each component that is not currently enabled.
+			FilterScore[] scores = new FilterScore[nParams - enabled];
+			int j = 0;
+			for (int i = 0; i < enabled; i++)
+			{
+				if (enable[i])
+					continue;
+				enable[i] = true;
+				final DirectFilter f = (DirectFilter) bestFilter.create(enable);
+				enable[i] = false;
+
+				// Score them
+				scores[j++] = new FilterScore(scoreFilter(f), i);
+			}
+
+			// Rank them
+			Arrays.sort(scores);
+			for (int i = 0; i < scores.length; i++)
+				addToFilterAnalysisWindow(scores[i].r);
+
+			// Flag the best component added
+			enable[scores[0].index] = true;
+			enabled++;
+		}
+	}
+
 	public class FilterScore implements Comparable<FilterScore>
 	{
-		DirectFilter filter;
+		ScoreResult r;
 		double score, criteria;
-		boolean atLimit;
+		boolean atLimit, criteriaPassed;
+		final int index;
 
-		public FilterScore(DirectFilter filter, double score, double criteria, boolean atLimit)
+		private FilterScore(ScoreResult r, boolean atLimit, int index)
 		{
-			update(filter, score, criteria, atLimit);
+			this.index = index;
+			update(r, atLimit);
 		}
 
-		public void update(DirectFilter filter, double score, double criteria, boolean atLimit)
+		public FilterScore(ScoreResult r, int index)
 		{
-			this.filter = filter;
-			this.score = score;
-			this.criteria = criteria;
+			this(r, false, index);
+		}
+
+		public FilterScore(ScoreResult r, boolean atLimit)
+		{
+			this(r, atLimit, 0);
+		}
+
+		public void update(ScoreResult r, boolean atLimit)
+		{
+			this.score = r.score;
+			this.criteria = r.criteria;
 			this.atLimit = atLimit;
+			criteriaPassed = (criteria >= minCriteria);
+		}
+
+		public DirectFilter getFilter()
+		{
+			return r.filter;
 		}
 
 		public int compareTo(FilterScore that)
 		{
-			if (this.score > that.score)
+			// Must pass criteria first
+			if (this.criteriaPassed && !that.criteriaPassed)
 				return -1;
-			if (this.score < that.score)
+			if (that.criteriaPassed && !this.criteriaPassed)
 				return 1;
-			if (this.criteria > that.criteria)
-				return -1;
-			if (this.criteria < that.criteria)
-				return 1;
-			return 0;
+
+			if (this.criteriaPassed)
+			{
+				// Sort by the score
+				if (this.score > that.score)
+					return -1;
+				if (this.score < that.score)
+					return 1;
+				if (this.criteria > that.criteria)
+					return -1;
+				if (this.criteria < that.criteria)
+					return 1;
+				return 0;
+			}
+			else
+			{
+				// Sort by how close we are to passing the criteria
+				if (this.criteria > that.criteria)
+					return -1;
+				if (this.criteria < that.criteria)
+					return 1;
+				if (this.score > that.score)
+					return -1;
+				if (this.score < that.score)
+					return 1;
+				return 0;
+			}
 		}
 	}
 
@@ -3553,6 +3708,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Show the result if it achieves the criteria limit 
 		final String text = (createTextResult && criteria >= minCriteria) ? createResult(filter, r).toString() : null;
 
+		return new ScoreResult(score, criteria, filter, text);
+	}
+
+	private ScoreResult scoreFilter(DirectFilter filter)
+	{
+		final FractionClassificationResult r = scoreFilter(filter, minimalFilter, resultsList);
+		final double score = getScore(r);
+		final double criteria = getCriteria(r);
+		// Create the score output
+		final String text = createResult(filter, r).toString();
 		return new ScoreResult(score, criteria, filter, text);
 	}
 

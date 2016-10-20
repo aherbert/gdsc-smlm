@@ -9,6 +9,8 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import gdsc.core.utils.NotImplementedException;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -168,6 +170,17 @@ public abstract class HysteresisFilter extends Filter
 			default:
 				return timeThresholdMode;
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getDisabledParameterValue(int)
+	 */
+	@Override
+	public double getDisabledParameterValue(int index)
+	{
+		throw new NotImplementedException("Parameters in hysteresis filters cannot be disabled");
 	}
 
 	/*
