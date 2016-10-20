@@ -1873,12 +1873,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String createComponentAnalysisHeader()
 	{
 		String header = createResultsHeader(false);
-		header += "\tAdd\tName\tLimit\t% Criteria\t% Score";
+		header += "\tAdd\tName\tLimit\t% Criteria\t% Score\tTime";
 		return header;
 	}
 
-	private void addToComponentAnalysisWindow(final ScoreResult result, int add, int i, FilterScore bestFilterScore)
+	private void addToComponentAnalysisWindow(FilterScore filterScore, int add, FilterScore bestFilterScore)
 	{
+		final ScoreResult result = filterScore.r;
+		final int i = filterScore.index;
 		final StringBuilder sb = new StringBuilder(result.text);
 		sb.append('\t').append(add);
 		sb.append('\t').append(bestFilterScore.getFilter().getParameterName(i));
@@ -1887,6 +1889,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			sb.append('Y');
 		sb.append('\t').append(Utils.rounded(100.0 * result.criteria / bestFilterScore.criteria));
 		sb.append('\t').append(Utils.rounded(100.0 * result.score / bestFilterScore.score));
+		sb.append('\t').append(filterScore.time);
 		final String text = sb.toString();
 		if (isHeadless)
 		{
@@ -3307,14 +3310,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				enable[i] = false;
 
 				// Score them
-				scores[j++] = new FilterScore(scoreFilter(f), i);
+				long start = System.nanoTime();
+				ScoreResult r = scoreFilter(f);
+				scores[j++] = new FilterScore(r, i, System.nanoTime() - start);
 			}
 
 			// Rank them
 			Arrays.sort(scores);
 			for (int i = 0; i < scores.length; i++)
 			{
-				addToComponentAnalysisWindow(scores[i].r, enabled + 1, scores[i].index, bestFilterScore);
+				addToComponentAnalysisWindow(scores[i], enabled + 1, bestFilterScore);
 				if (componentAnalysis == 1)
 					// Only add the best result
 					break;
@@ -3332,23 +3337,25 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double score, criteria;
 		boolean criteriaPassed;
 		final int index;
+		final long time;
 		boolean[] atLimit;
 
-		private FilterScore(ScoreResult r, boolean[] atLimit, int index)
+		private FilterScore(ScoreResult r, boolean[] atLimit, int index, long time)
 		{
 			this.r = r;
 			this.index = index;
+			this.time = time;
 			update(r, atLimit);
 		}
 
-		public FilterScore(ScoreResult r, int index)
+		public FilterScore(ScoreResult r, int index, long time)
 		{
-			this(r, null, index);
+			this(r, null, index, time);
 		}
 
 		public FilterScore(ScoreResult r, boolean[] atLimit)
 		{
-			this(r, atLimit, 0);
+			this(r, atLimit, 0, 0);
 		}
 
 		public void update(ScoreResult r, boolean[] atLimit)
