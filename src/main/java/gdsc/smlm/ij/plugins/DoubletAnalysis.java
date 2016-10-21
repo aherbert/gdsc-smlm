@@ -91,17 +91,17 @@ import ij.text.TextWindow;
  * a table of the single and double fit for each spot with metrics. This can be used to determine the best settings for
  * optimum doublet fitting and filtering.
  */
-
-/*
- * Note: 21-Oct-2016
- * 
- * This plugin may be obsolete now that the BenchmarkSpotFit and BenchmarkFilterAnalysis plugins
- * can handle singles, multiples and doublets together. This means that the residuals threshold can be
- * optimised concurrently with the fail count and the filter. It is left within the codebase in case
- * it is useful in the future.
- */
 public class DoubletAnalysis implements PlugIn, ItemListener
 {
+	/*
+	 * Note: 21-Oct-2016
+	 * 
+	 * This plugin may be obsolete now that the BenchmarkSpotFit and BenchmarkFilterAnalysis plugins
+	 * can handle singles, multiples and doublets together. This means that the residuals threshold can be
+	 * optimised concurrently with the fail count and the filter. It is left within the codebase in case
+	 * it is useful in the future.
+	 */
+	
 	private static final String TITLE = "Doublet Analysis";
 	private static FitConfiguration fitConfig, filterFitConfig;
 	private static FitEngineConfiguration config;
