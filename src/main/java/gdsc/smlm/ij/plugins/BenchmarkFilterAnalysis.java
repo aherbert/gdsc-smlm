@@ -1886,7 +1886,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String createComponentAnalysisHeader()
 	{
 		String header = createResultsHeader(false);
-		header += "\tSize\tName\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J";
+		header += "\tSize\tName\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J\tNames";
 		return header;
 	}
 
@@ -1895,12 +1895,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final ScoreResult result = filterScore.r;
 		final StringBuilder sb = new StringBuilder(result.text);
 		sb.append('\t').append(filterScore.size);
-		final int i = filterScore.index;
-		if (i != -1)
+		final int index = filterScore.index;
+		if (index != -1)
 		{
-			sb.append('\t').append(names[i]);
+			sb.append('\t').append(names[index]);
 			sb.append('\t');
-			if (bestFilterScore.isAtLimit(i))
+			if (bestFilterScore.isAtLimit(index))
 				sb.append('Y');
 		}
 		else
@@ -1914,6 +1914,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		sb.append('\t').append(Utils.rounded(filterScore.r2.getPrecision()));
 		sb.append('\t').append(Utils.rounded(filterScore.r2.getRecall()));
 		sb.append('\t').append(Utils.rounded(filterScore.r2.getJaccard()));
+		sb.append('\t');
+		for (int i = 0; i < filterScore.combinations.length; i++)
+		{
+			if (i != 0)
+				sb.append(", ");
+			sb.append(names[filterScore.combinations[i]]);
+		}
 		final String text = sb.toString();
 		if (isHeadless)
 		{
@@ -3328,97 +3335,97 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final int[] uniqueIds1 = uniqueIds;
 		final int uniqueIdCount1 = uniqueIdCount;
 
-		if (componentAnalysis >= 3)
+		// Limit to 12 params == 4095 combinations (this is the max for two multi filters combined)
+		if (componentAnalysis >= 3 && nParams <= 12)
 		{
+			// Enumeration of combinations
 			long count = countCombinations(nParams);
-			if (count < 1000)
-			{
-				// Enumerate all combinations
-				FilterScore[] scores = new FilterScore[(int) count];
-				int j = 0;
 
-				for (int k = 1; k <= nParams; k++)
+			// Enumerate all combinations
+			FilterScore[] scores = new FilterScore[(int) count];
+			int j = 0;
+
+			for (int k = 1; k <= nParams; k++)
+			{
+				Iterator<int[]> it = CombinatoricsUtils.combinationsIterator(nParams, k);
+				while (it.hasNext())
 				{
-					Iterator<int[]> it = CombinatoricsUtils.combinationsIterator(nParams, k);
-					while (it.hasNext())
+					final int[] combinations = it.next();
+					final boolean[] enable2 = enable.clone();
+					for (int i = 0; i < k; i++)
 					{
-						final int[] combinations = it.next();
-						final boolean[] enable2 = enable.clone();
-						for (int i = 0; i < k; i++)
-						{
-							combinations[i] = map[combinations[i]];
-							enable2[combinations[i]] = true;
-						}
-						final DirectFilter f = (DirectFilter) bestFilter.create(enable2);
-						scores[j++] = score(f, 0, k, combinations, enable2, uniqueIds1, uniqueIdCount1);
+						combinations[i] = map[combinations[i]];
+						enable2[combinations[i]] = true;
 					}
+					final DirectFilter f = (DirectFilter) bestFilter.create(enable2);
+					scores[j++] = score(f, 0, k, combinations, enable2, uniqueIds1, uniqueIdCount1);
+				}
+			}
+
+			// Report
+			Arrays.sort(scores, new FilterScoreCompararor());
+
+			int lastSize = 0;
+			for (int i = 0; i < scores.length; i++)
+			{
+				if (componentAnalysis == 3)
+				{
+					if (lastSize == scores[i].size)
+						// Only add the best result for each size
+						continue;
+					lastSize = scores[i].size;
 				}
 
-				// Report
-				Arrays.sort(scores, new FilterScoreCompararor());
-
-				int lastSize = 0;
-				for (int i = 0; i < scores.length; i++)
+				// Find the last component that was added
+				if (scores[i].size == 1)
 				{
-					if (componentAnalysis == 3)
+					scores[i].index = scores[i].combinations[0];
+				}
+				else
+				{
+					// For each size k, find the best result with k-1 components and set the add index appropriately
+					int add = -1;
+					int target = -1;
+					for (int l = 0; l < enable.length; l++)
+						if (scores[i].enable[l])
+							target++;
+					final int size1 = scores[i].size - 1;
+					for (int ii = 0; ii < i; ii++)
 					{
-						if (lastSize == scores[i].size)
-							// Only add the best result for each size
+						if (scores[ii].size < size1)
 							continue;
-						lastSize = scores[i].size;
-					}
-
-					// Find the last component that was added
-					if (scores[i].size == 1)
-					{
-						scores[i].index = scores[i].combinations[0];
-					}
-					else
-					{
-						// For each size k, find the best result with k-1 components and set the add index appropriately
-						int add = -1;
-						int target = -1;
+						if (scores[ii].size > size1)
+							break; // Broken
+						// Count matches. It must be 1 less than the current result
+						int matches = 0;
 						for (int l = 0; l < enable.length; l++)
-							if (scores[i].enable[l])
-								target++;
-						final int size1 = scores[i].size - 1;
-						for (int ii = 0; ii < i; ii++)
 						{
-							if (scores[ii].size < size1)
-								continue;
-							if (scores[ii].size > size1)
-								break; // Broken
-							// Count matches. It must be 1 less than the current result
-							int matches = 0;
+							if (scores[i].enable[l] && scores[ii].enable[l])
+								matches++;
+						}
+						if (matches == target)
+						{
+							// Find the additional parameter added
 							for (int l = 0; l < enable.length; l++)
 							{
-								if (scores[i].enable[l] && scores[ii].enable[l])
-									matches++;
-							}
-							if (matches == target)
-							{
-								// Find the additional parameter added
-								for (int l = 0; l < enable.length; l++)
+								if (scores[i].enable[l])
 								{
-									if (scores[i].enable[l])
-									{
-										if (scores[ii].enable[l])
-											continue;
-										add = l;
-										break;
-									}
+									if (scores[ii].enable[l])
+										continue;
+									add = l;
+									break;
 								}
-								break;
 							}
+							break;
 						}
-						scores[i].index = add;
 					}
-
-					addToComponentAnalysisWindow(scores[i], bestFilterScore, names);
+					scores[i].index = add;
 				}
 
-				return;
+				addToComponentAnalysisWindow(scores[i], bestFilterScore, names);
 			}
+
+			return;
 		}
 
 		// Progressively add components until all are the same as the input bestFilter
@@ -3541,10 +3548,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private long countCombinations(int n)
 	{
-		long total = 0;
-		for (int k = 1; k <= n; k++)
-			total += CombinatoricsUtils.binomialCoefficient(n, k);
-		return total;
+		return (long) Math.pow(2, n) - 1;
+
+		// This returns the same as (2^n)-1
+		//long total = 0;
+		//for (int k = 1; k <= n; k++)
+		//	total += CombinatoricsUtils.binomialCoefficient(n, k);
+		//return total;
 	}
 
 	private int[] uniqueIds = null;
