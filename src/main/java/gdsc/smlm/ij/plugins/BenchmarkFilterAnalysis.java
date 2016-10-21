@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -43,6 +44,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.apache.commons.math3.util.CombinatoricsUtils;
 
 import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.Utils;
@@ -165,7 +167,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	static double lowerSignalFactor;
 	private static boolean depthRecallAnalysis = true;
 	private static boolean scoreAnalysis = true;
-	private final static String[] COMPONENT_ANALYSIS = { "None", "Best", "Ranked", "All" };
+	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
 	private static int componentAnalysis = 1;
 	private static boolean evolve = false;
 	private static int stepSearch = 0;
@@ -1884,21 +1886,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String createComponentAnalysisHeader()
 	{
 		String header = createResultsHeader(false);
-		header += "\tAdd\tName\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J";
+		header += "\tSize\tName\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J";
 		return header;
 	}
 
-	private void addToComponentAnalysisWindow(FilterScore filterScore, int add, FilterScore bestFilterScore,
-			String[] names)
+	private void addToComponentAnalysisWindow(FilterScore filterScore, FilterScore bestFilterScore, String[] names)
 	{
 		final ScoreResult result = filterScore.r;
-		final int i = filterScore.index;
 		final StringBuilder sb = new StringBuilder(result.text);
-		sb.append('\t').append(add);
-		sb.append('\t').append(names[i]);
-		sb.append('\t');
-		if (bestFilterScore.isAtLimit(i))
-			sb.append('Y');
+		sb.append('\t').append(filterScore.size);
+		final int i = filterScore.index;
+		if (i != -1)
+		{
+			sb.append('\t').append(names[i]);
+			sb.append('\t');
+			if (bestFilterScore.isAtLimit(i))
+				sb.append('Y');
+		}
+		else
+		{
+			// Broken
+			sb.append("\t\t");
+		}
 		sb.append('\t').append(Utils.rounded(100.0 * result.criteria / bestFilterScore.criteria));
 		sb.append('\t').append(Utils.rounded(100.0 * result.score / bestFilterScore.score));
 		sb.append('\t').append(filterScore.time);
@@ -3297,11 +3306,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final DirectFilter bestFilter = bestFilterScore.getFilter();
 		final String[] names = getNames(bestFilter);
 
-		// Score the best filter just so we have the unique Ids of the results
-		score(bestFilter, -1, null, 0);
-		final int[] uniqueIds1 = uniqueIds;
-		final int uniqueIdCount1 = uniqueIdCount;
-
 		// Skip disabled parameters
 		int nParams = bestFilter.getNumberOfParameters();
 		final boolean[] enable = new boolean[nParams];
@@ -3319,22 +3323,111 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 		}
 
-		if (componentAnalysis == 3)
+		// Score the best filter just so we have the unique Ids of the results
+		score(bestFilter, -1, nParams, null, null, null, 0);
+		final int[] uniqueIds1 = uniqueIds;
+		final int uniqueIdCount1 = uniqueIdCount;
+
+		if (componentAnalysis >= 3)
 		{
-			int count = countCombinations(nParams);
+			long count = countCombinations(nParams);
 			if (count < 1000)
 			{
-				// TODO - Enumerate all combinations
-				//return;
+				// Enumerate all combinations
+				FilterScore[] scores = new FilterScore[(int) count];
+				int j = 0;
+
+				for (int k = 1; k <= nParams; k++)
+				{
+					Iterator<int[]> it = CombinatoricsUtils.combinationsIterator(nParams, k);
+					while (it.hasNext())
+					{
+						final int[] combinations = it.next();
+						final boolean[] enable2 = enable.clone();
+						for (int i = 0; i < k; i++)
+						{
+							combinations[i] = map[combinations[i]];
+							enable2[combinations[i]] = true;
+						}
+						final DirectFilter f = (DirectFilter) bestFilter.create(enable2);
+						scores[j++] = score(f, 0, k, combinations, enable2, uniqueIds1, uniqueIdCount1);
+					}
+				}
+
+				// Report
+				Arrays.sort(scores, new FilterScoreCompararor());
+
+				int lastSize = 0;
+				for (int i = 0; i < scores.length; i++)
+				{
+					if (componentAnalysis == 3)
+					{
+						if (lastSize == scores[i].size)
+							// Only add the best result for each size
+							continue;
+						lastSize = scores[i].size;
+					}
+
+					// Find the last component that was added
+					if (scores[i].size == 1)
+					{
+						scores[i].index = scores[i].combinations[0];
+					}
+					else
+					{
+						// For each size k, find the best result with k-1 components and set the add index appropriately
+						int add = -1;
+						int target = -1;
+						for (int l = 0; l < enable.length; l++)
+							if (scores[i].enable[l])
+								target++;
+						final int size1 = scores[i].size - 1;
+						for (int ii = 0; ii < i; ii++)
+						{
+							if (scores[ii].size < size1)
+								continue;
+							if (scores[ii].size > size1)
+								break; // Broken
+							// Count matches. It must be 1 less than the current result
+							int matches = 0;
+							for (int l = 0; l < enable.length; l++)
+							{
+								if (scores[i].enable[l] && scores[ii].enable[l])
+									matches++;
+							}
+							if (matches == target)
+							{
+								// Find the additional parameter added
+								for (int l = 0; l < enable.length; l++)
+								{
+									if (scores[i].enable[l])
+									{
+										if (scores[ii].enable[l])
+											continue;
+										add = l;
+										break;
+									}
+								}
+								break;
+							}
+						}
+						scores[i].index = add;
+					}
+
+					addToComponentAnalysisWindow(scores[i], bestFilterScore, names);
+				}
+
+				return;
 			}
 		}
 
 		// Progressively add components until all are the same as the input bestFilter
 		int enabled = 0;
-		for (int k = 0; k < nParams; k++)
+		for (int ii = 0; ii < nParams; ii++)
 		{
 			// Create a set of filters by enabling each component that is not currently enabled.
 			FilterScore[] scores = new FilterScore[nParams - enabled];
+			int k = enabled + 1;
 			for (int i = 0, j = 0; i < nParams; i++)
 			{
 				int n = map[i];
@@ -3343,14 +3436,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				enable[n] = true;
 				final DirectFilter f = (DirectFilter) bestFilter.create(enable);
 				enable[n] = false;
-				scores[j++] = score(f, n, uniqueIds1, uniqueIdCount1);
+				scores[j++] = score(f, n, k, null, null, uniqueIds1, uniqueIdCount1);
 			}
 
 			// Rank them
 			Arrays.sort(scores);
 			for (int i = 0; i < scores.length; i++)
 			{
-				addToComponentAnalysisWindow(scores[i], enabled + 1, bestFilterScore, names);
+				addToComponentAnalysisWindow(scores[i], bestFilterScore, names);
 				if (componentAnalysis == 1)
 					// Only add the best result
 					break;
@@ -3362,7 +3455,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	private FilterScore score(DirectFilter f, int i, int[] uniqueIds1, int uniqueIdCount1)
+	private FilterScore score(DirectFilter f, int i, int size, int[] combinations, boolean[] enable, int[] uniqueIds1,
+			int uniqueIdCount1)
 	{
 		setupFractionScoreStore();
 
@@ -3415,7 +3509,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			r2 = new ClassificationResult(tp, fp, 0, fn);
 		}
 
-		return new FilterScore(r, i, time, r2);
+		return new FilterScore(r, i, time, r2, size, combinations, enable);
 	}
 
 	private String[] getNames(DirectFilter bestFilter)
@@ -3445,10 +3539,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return false;
 	}
 
-	private int countCombinations(int nParams)
+	private long countCombinations(int n)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		long total = 0;
+		for (int k = 1; k <= n; k++)
+			total += CombinatoricsUtils.binomialCoefficient(n, k);
+		return total;
 	}
 
 	private int[] uniqueIds = null;
@@ -3479,33 +3575,53 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			Arrays.sort(uniqueIds, 0, uniqueIdCount);
 	}
 
+	private static class FilterScoreCompararor implements Comparator<FilterScore>
+	{
+		public int compare(FilterScore o1, FilterScore o2)
+		{
+			// Sort by size, smallest first
+			final int result = o1.size - o2.size;
+			if (result != 0)
+				return result;
+			return o1.compareTo(o2);
+		}
+	}
+
 	public class FilterScore implements Comparable<FilterScore>
 	{
 		ScoreResult r;
 		double score, criteria;
 		boolean criteriaPassed;
-		final int index;
+		int index;
 		final long time;
 		final ClassificationResult r2;
+		final int size;
+		final int[] combinations;
+		final boolean[] enable;
 		boolean[] atLimit;
 
-		private FilterScore(ScoreResult r, boolean[] atLimit, int index, long time, ClassificationResult r2)
+		private FilterScore(ScoreResult r, boolean[] atLimit, int index, long time, ClassificationResult r2, int size,
+				int[] combinations, boolean[] enable)
 		{
 			this.r = r;
 			this.index = index;
 			this.time = time;
 			this.r2 = r2;
+			this.size = size;
+			this.combinations = combinations;
+			this.enable = enable;
 			update(r, atLimit);
 		}
 
-		public FilterScore(ScoreResult r, int index, long time, ClassificationResult r2)
+		public FilterScore(ScoreResult r, int index, long time, ClassificationResult r2, int size, int[] combinations,
+				boolean[] enable)
 		{
-			this(r, null, index, time, r2);
+			this(r, null, index, time, r2, size, combinations, enable);
 		}
 
 		public FilterScore(ScoreResult r, boolean[] atLimit)
 		{
-			this(r, atLimit, 0, 0, null);
+			this(r, atLimit, 0, 0, null, 0, null, null);
 		}
 
 		public void update(ScoreResult r, boolean[] atLimit)
