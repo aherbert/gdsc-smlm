@@ -1690,8 +1690,8 @@ public class MultiPathFilter
 	{
 		if (assignments.isEmpty())
 			return null;
-		final FractionalAssignment[] tmp = new FractionalAssignment[assignments.size()];
-		final RankedScoreCalculator calc = new RankedScoreCalculator(assignments.toArray(tmp), nActual, nPredicted);
+		final FractionalAssignment[] tmp = assignments.toArray(new FractionalAssignment[assignments.size()]);
+		final RankedScoreCalculator calc = new RankedScoreCalculator(tmp, nActual, nPredicted);
 		final double[] result = calc.score(nPredicted, false, save);
 		score[0] += result[0];
 		score[1] += result[1];
