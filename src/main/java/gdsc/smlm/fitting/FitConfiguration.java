@@ -3,6 +3,7 @@ package gdsc.smlm.fitting;
 import gdsc.core.logging.Logger;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.NotImplementedException;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -1262,6 +1263,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			return 0;
 		}
 
+		public int getUniqueId()
+		{
+			// In the future we may want to use this so throw an exception so we notice
+			throw new NotImplementedException("Unique Id not available");
+		}
+		
 		public int getId()
 		{
 			return id;

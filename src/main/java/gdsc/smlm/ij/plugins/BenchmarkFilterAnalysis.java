@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
@@ -86,6 +87,7 @@ import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
 import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
+import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.Prefs;
@@ -103,7 +105,7 @@ import ij.text.TextWindow;
  * Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table,
  * e.g. precision, Jaccard, F-score.
  */
-public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackProgress
+public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore
 {
 	private static final String TITLE = "Benchmark Filter Analysis";
 	private static TextWindow resultsWindow = null;
@@ -163,7 +165,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	static double lowerSignalFactor;
 	private static boolean depthRecallAnalysis = true;
 	private static boolean scoreAnalysis = true;
-	private final static String[] COMPONENT_ANALYSIS = { "None", "Best", "All" };
+	private final static String[] COMPONENT_ANALYSIS = { "None", "Best", "Ranked", "All" };
 	private static int componentAnalysis = 1;
 	private static boolean evolve = false;
 	private static int stepSearch = 0;
@@ -205,6 +207,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int matches;
 	private static int fittedResults;
 	private static int totalResults;
+	private static int maxUniqueId = 0;
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
@@ -289,6 +292,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final double matchDistance;
 		final RampedScore distanceScore;
 		final RampedScore signalScore;
+		final AtomicInteger uniqueId;
 		int matches = 0;
 		int total = 0;
 		int included = 0;
@@ -296,13 +300,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		private final DirectFilter minFilter;
 
 		public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
-				RampedScore distanceScore, RampedScore signalScore)
+				RampedScore distanceScore, RampedScore signalScore, AtomicInteger uniqueId)
 		{
 			this.jobs = jobs;
 			this.results = syncResults;
 			this.matchDistance = matchDistance;
 			this.distanceScore = distanceScore;
 			this.signalScore = signalScore;
+			this.uniqueId = uniqueId;
 
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
@@ -428,6 +433,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 					if (!peak.isNewResult())
 						continue;
+
+					peak.uniqueId = uniqueId.incrementAndGet();
 
 					// Compare to actual results
 					// We do this using the ResultGridManager to generate a sublist to score against
@@ -1018,6 +1025,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			matches = 0;
 			fittedResults = 0;
 			totalResults = 0;
+			maxUniqueId = 0;
 
 			// -=-=-=-
 			// The scoring is designed to find the best fitter+filter combination for the given spot candidates.
@@ -1121,10 +1129,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			final BlockingQueue<Job> jobs = new ArrayBlockingQueue<Job>(nThreads * 2);
 			final List<FitResultsWorker> workers = new LinkedList<FitResultsWorker>();
 			final List<Thread> threads = new LinkedList<Thread>();
+			final AtomicInteger uniqueId = new AtomicInteger();
 			for (int i = 0; i < nThreads; i++)
 			{
 				final FitResultsWorker worker = new FitResultsWorker(jobs, syncResults, matchDistance, distanceScore,
-						signalScore);
+						signalScore, uniqueId);
 				final Thread t = new Thread(worker);
 				workers.add(worker);
 				threads.add(t);
@@ -1177,6 +1186,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			threads.clear();
 			IJ.showProgress(1);
 			IJ.showStatus("");
+
+			maxUniqueId = uniqueId.get();
 
 			resultsList = results.toArray(new MultiPathFitResults[results.size()]);
 
@@ -1279,8 +1290,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
 		String msg = String.format(
-				"Fit %d/%d results, %d True-Positives\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-				fittedResults, totalResults, matches, signal, pSignal, pLSE, pMLE);
+				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
+				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE);
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
@@ -1873,23 +1884,27 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String createComponentAnalysisHeader()
 	{
 		String header = createResultsHeader(false);
-		header += "\tAdd\tName\tLimit\t% Criteria\t% Score\tTime";
+		header += "\tAdd\tName\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J";
 		return header;
 	}
 
-	private void addToComponentAnalysisWindow(FilterScore filterScore, int add, FilterScore bestFilterScore)
+	private void addToComponentAnalysisWindow(FilterScore filterScore, int add, FilterScore bestFilterScore,
+			String[] names)
 	{
 		final ScoreResult result = filterScore.r;
 		final int i = filterScore.index;
 		final StringBuilder sb = new StringBuilder(result.text);
 		sb.append('\t').append(add);
-		sb.append('\t').append(bestFilterScore.getFilter().getParameterName(i));
+		sb.append('\t').append(names[i]);
 		sb.append('\t');
 		if (bestFilterScore.isAtLimit(i))
 			sb.append('Y');
 		sb.append('\t').append(Utils.rounded(100.0 * result.criteria / bestFilterScore.criteria));
 		sb.append('\t').append(Utils.rounded(100.0 * result.score / bestFilterScore.score));
 		sb.append('\t').append(filterScore.time);
+		sb.append('\t').append(Utils.rounded(filterScore.r2.getPrecision()));
+		sb.append('\t').append(Utils.rounded(filterScore.r2.getRecall()));
+		sb.append('\t').append(Utils.rounded(filterScore.r2.getJaccard()));
 		final String text = sb.toString();
 		if (isHeadless)
 		{
@@ -2677,6 +2692,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return scoreFilter(filter, minFilter, resultsList, null);
 	}
 
+	private FractionScoreStore scoreStore = null;
+
 	/**
 	 * Score the filter using the results list and the configured fail count.
 	 *
@@ -2699,14 +2716,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		if (failCountRange == 0)
 			return multiPathFilter.fractionScoreSubset(resultsList, failCount, simulationParameters.molecules,
-					allAssignments);
+					allAssignments, scoreStore);
 
 		double tp = 0, fp = 0, fn = 0;
 		int p = 0, n = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
 			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(resultsList, failCount + i,
-					simulationParameters.molecules, (i == failCountRange) ? allAssignments : null);
+					simulationParameters.molecules, (i == failCountRange) ? allAssignments : null,
+					(i == failCountRange) ? scoreStore : null);
 			tp += r.getTP();
 			fp += r.getFP();
 			fn += r.getFN();
@@ -2742,7 +2760,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<FractionalAssignment[]>(resultsList.length);
 		multiPathFilter.fractionScoreSubset(resultsList, failCount + failCountRange, simulationParameters.molecules,
-				allAssignments);
+				allAssignments, null);
 		return allAssignments;
 	}
 
@@ -3276,50 +3294,63 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return;
 		createComponentAnalysisWindow();
 
-		// TODO - support breakdown of top level OR components
-		// Note this may not be necessary. We may just enable components 
-		// progressively across the entire set of parameters. This would still 
-		// show how the combined filter is built up to achive the final result.
-
-		// Assume the DirectFilter is only AND combinations of components
-		// Progressively add components until all are the same as the input bestFilter
-
 		final DirectFilter bestFilter = bestFilterScore.getFilter();
-		int nParams = bestFilter.getNumberOfParameters();
-		boolean[] enable = new boolean[nParams];
+		final String[] names = getNames(bestFilter);
+
+		// Score the best filter just so we have the unique Ids of the results
+		score(bestFilter, -1, null, 0);
+		final int[] uniqueIds1 = uniqueIds;
+		final int uniqueIdCount1 = uniqueIdCount;
+
 		// Skip disabled parameters
-		for (int n = 0; n < nParams; n++)
+		int nParams = bestFilter.getNumberOfParameters();
+		final boolean[] enable = new boolean[nParams];
+		int[] map = new int[nParams];
+		for (int n = 0, i = 0; n < map.length; n++)
+		{
 			if (bestFilter.getParameterValue(n) == bestFilter.getDisabledParameterValue(n))
 			{
 				enable[n] = true; // Mark to ignore
 				nParams--;
 			}
+			else
+			{
+				map[i++] = n;
+			}
+		}
 
+		if (componentAnalysis == 3)
+		{
+			int count = countCombinations(nParams);
+			if (count < 1000)
+			{
+				// TODO - Enumerate all combinations
+				//return;
+			}
+		}
+
+		// Progressively add components until all are the same as the input bestFilter
 		int enabled = 0;
-		for (int n = 0; n < nParams; n++)
+		for (int k = 0; k < nParams; k++)
 		{
 			// Create a set of filters by enabling each component that is not currently enabled.
 			FilterScore[] scores = new FilterScore[nParams - enabled];
-			int j = 0;
-			for (int i = 0; i < enable.length; i++)
+			for (int i = 0, j = 0; i < nParams; i++)
 			{
-				if (enable[i])
+				int n = map[i];
+				if (enable[n])
 					continue;
-				enable[i] = true;
+				enable[n] = true;
 				final DirectFilter f = (DirectFilter) bestFilter.create(enable);
-				enable[i] = false;
-
-				// Score them
-				long start = System.nanoTime();
-				ScoreResult r = scoreFilter(f);
-				scores[j++] = new FilterScore(r, i, System.nanoTime() - start);
+				enable[n] = false;
+				scores[j++] = score(f, n, uniqueIds1, uniqueIdCount1);
 			}
 
 			// Rank them
 			Arrays.sort(scores);
 			for (int i = 0; i < scores.length; i++)
 			{
-				addToComponentAnalysisWindow(scores[i], enabled + 1, bestFilterScore);
+				addToComponentAnalysisWindow(scores[i], enabled + 1, bestFilterScore, names);
 				if (componentAnalysis == 1)
 					// Only add the best result
 					break;
@@ -3331,6 +3362,123 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
+	private FilterScore score(DirectFilter f, int i, int[] uniqueIds1, int uniqueIdCount1)
+	{
+		setupFractionScoreStore();
+
+		// Score them
+		long time = System.nanoTime();
+		ScoreResult r = scoreFilter(f);
+		time = System.nanoTime() - time;
+
+		endFractionScoreStore();
+
+		ClassificationResult r2 = null;
+		if (uniqueIds1 != null)
+		{
+			// Build an overlap between the results created by this filter and the best filter.
+			// Note that the overlap may be very low given the number of different ways we can generate
+			// fit results (i.e. it is not as simple as just single-fitting on each candidate)
+			// To do this we assign a unique ID to each possible result.
+			// The two sets can be compared to produce a Precision, Recall, Jaccard, etc.
+
+			// PreprocessedPeakResult will need an additional mutable Id field.
+			// Sort by Id then iterate through both arrays concurrently counting the matching Ids.
+			int[] uniqueIds2 = uniqueIds;
+			int uniqueIdCount2 = uniqueIdCount;
+
+			int tp = 0, fp = 0, fn = 0;
+
+			// Compare Ids (must be sorted in ascending order)
+			int i1 = 0, i2 = 0;
+			while (i1 < uniqueIdCount1 && i2 < uniqueIdCount2)
+			{
+				final int result = uniqueIds1[i1] - uniqueIds2[i2];
+				if (result > 0)
+				{
+					i2++;
+					fp++;
+				}
+				else if (result < 0)
+				{
+					i1++;
+					fn++;
+				}
+				i1++;
+				i2++;
+				tp++;
+			}
+			// Count the remaining ids
+			fn += (uniqueIdCount1 - i1);
+			fp += (uniqueIdCount2 - i2);
+
+			r2 = new ClassificationResult(tp, fp, 0, fn);
+		}
+
+		return new FilterScore(r, i, time, r2);
+	}
+
+	private String[] getNames(DirectFilter bestFilter)
+	{
+
+		int nParams = bestFilter.getNumberOfParameters();
+		final String[] names = new String[nParams];
+
+		for (int n = 0; n < nParams; n++)
+		{
+			String name = bestFilter.getParameterName(n);
+			String uniqueName = name;
+			int i = 1;
+			// Avoid duplicates
+			while (contains(names, n, uniqueName))
+				uniqueName = name + (++i);
+			names[n] = uniqueName;
+		}
+		return names;
+	}
+
+	private boolean contains(String[] names, int n, String uniqueName)
+	{
+		for (int i = 0; i < n; i++)
+			if (names[i].equals(uniqueName))
+				return true;
+		return false;
+	}
+
+	private int countCombinations(int nParams)
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	private int[] uniqueIds = null;
+	private int uniqueIdCount = 0;
+
+	private void setupFractionScoreStore()
+	{
+		scoreStore = this;
+		uniqueIds = new int[maxUniqueId];
+		uniqueIdCount = 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore#add(int)
+	 */
+	public void add(int uniqueId)
+	{
+		// Store the Id of each result
+		uniqueIds[uniqueIdCount++] = uniqueId;
+	}
+
+	private void endFractionScoreStore()
+	{
+		scoreStore = null;
+		if (uniqueIdCount != 0)
+			Arrays.sort(uniqueIds, 0, uniqueIdCount);
+	}
+
 	public class FilterScore implements Comparable<FilterScore>
 	{
 		ScoreResult r;
@@ -3338,24 +3486,26 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		boolean criteriaPassed;
 		final int index;
 		final long time;
+		final ClassificationResult r2;
 		boolean[] atLimit;
 
-		private FilterScore(ScoreResult r, boolean[] atLimit, int index, long time)
+		private FilterScore(ScoreResult r, boolean[] atLimit, int index, long time, ClassificationResult r2)
 		{
 			this.r = r;
 			this.index = index;
 			this.time = time;
+			this.r2 = r2;
 			update(r, atLimit);
 		}
 
-		public FilterScore(ScoreResult r, int index, long time)
+		public FilterScore(ScoreResult r, int index, long time, ClassificationResult r2)
 		{
-			this(r, null, index, time);
+			this(r, null, index, time, r2);
 		}
 
 		public FilterScore(ScoreResult r, boolean[] atLimit)
 		{
-			this(r, atLimit, 0, 0);
+			this(r, atLimit, 0, 0, null);
 		}
 
 		public void update(ScoreResult r, boolean[] atLimit)

@@ -66,7 +66,6 @@ public class MultiPathFilter
 	 */
 	public interface SelectedResultStore
 	{
-
 		/**
 		 * Add a selected result to the store.
 		 *
@@ -288,8 +287,36 @@ public class MultiPathFilter
 		}
 	}
 
-	/** The null store. */
-	private static NullSelectedResultStore nullStore = new NullSelectedResultStore();
+	/** The null selected result store. */
+	private static NullSelectedResultStore nullSelectedResultStore = new NullSelectedResultStore();
+
+	/**
+	 * Allows signalling of results that have been selected during multi-path filter scoring.
+	 */
+	public interface FractionScoreStore
+	{
+
+		/**
+		 * Add the unique Id of a result that was selected
+		 *
+		 * @param uniqueId
+		 *            the unique id
+		 */
+		void add(int uniqueId);
+	}
+
+	/**
+	 * Used to return default behaviour
+	 */
+	private static class NullFractionScoreStore implements FractionScoreStore
+	{
+		public void add(int uniqueId)
+		{
+		}
+	}
+
+	/** The null fraction result store. */
+	private static NullFractionScoreStore nullFractionScoreStore = new NullFractionScoreStore();
 
 	/** The direct filter to apply to the results. */
 	final IDirectFilter filter;
@@ -424,7 +451,7 @@ public class MultiPathFilter
 
 		// Ensure we don't have to check the store in acceptAll/acceptAny
 		if (store == null)
-			store = nullStore;
+			store = nullSelectedResultStore;
 
 		// The aim is to obtain a new result for the current candidate Id. 
 		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
@@ -641,7 +668,7 @@ public class MultiPathFilter
 
 		// Ensure we don't have to check the store in acceptAll/acceptAny
 		if (store == null)
-			store = nullStore;
+			store = nullSelectedResultStore;
 
 		// The aim is to obtain a new result for the current candidate Id. 
 		// acceptAll/acceptAny will return all new results, even if they do not match the candidate.
@@ -1358,7 +1385,7 @@ public class MultiPathFilter
 	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
 			final int n)
 	{
-		return fractionScore(results, failures, n, false, null);
+		return fractionScore(results, failures, n, false, null, null);
 	}
 
 	/**
@@ -1385,7 +1412,7 @@ public class MultiPathFilter
 	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
 			final int n)
 	{
-		return fractionScore(results, failures, n, true, null);
+		return fractionScore(results, failures, n, true, null, null);
 	}
 
 	/**
@@ -1406,12 +1433,14 @@ public class MultiPathFilter
 	 *            The number of actual results
 	 * @param assignments
 	 *            the assignments
+	 * @param scoreStore
+	 *            the score store
 	 * @return the score
 	 */
 	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n, List<FractionalAssignment[]> assignments)
+			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore)
 	{
-		return fractionScore(results, failures, n, false, assignments);
+		return fractionScore(results, failures, n, false, assignments, scoreStore);
 	}
 
 	/**
@@ -1435,12 +1464,14 @@ public class MultiPathFilter
 	 *            The number of actual results
 	 * @param assignments
 	 *            the assignments
+	 * @param scoreStore
+	 *            the score store
 	 * @return the score
 	 */
 	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
-			final int n, List<FractionalAssignment[]> assignments)
+			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore)
 	{
-		return fractionScore(results, failures, n, true, assignments);
+		return fractionScore(results, failures, n, true, assignments, scoreStore);
 	}
 
 	String debugFilename;
@@ -1485,12 +1516,15 @@ public class MultiPathFilter
 	 * @return the score
 	 */
 	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n, final boolean subset, List<FractionalAssignment[]> allAssignments)
+			final int n, final boolean subset, List<FractionalAssignment[]> allAssignments,
+			FractionScoreStore scoreStore)
 	{
 		final double[] score = new double[4];
 		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
 
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
+		if (scoreStore == null)
+			scoreStore = nullFractionScoreStore;
 		final boolean save = allAssignments != null;
 
 		//		// Debugging the results that are scored
@@ -1565,6 +1599,8 @@ public class MultiPathFilter
 						{
 							if (result[i].isNewResult())
 							{
+								scoreStore.add(result[i].getUniqueId());
+
 								final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
 								if (a != null && a.length > 0)
 								{

@@ -29,6 +29,13 @@ public interface PreprocessedPeakResult
 	int getFrame();
 
 	/**
+	 * Gets the unique id. This should be unique within the entire set of results.
+	 *
+	 * @return the unique id
+	 */
+	int getUniqueId();	
+
+	/**
 	 * Gets the id.
 	 *
 	 * @return the id

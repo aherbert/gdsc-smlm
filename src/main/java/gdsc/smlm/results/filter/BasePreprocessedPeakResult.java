@@ -52,6 +52,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final boolean newResult;
 
 	private ResultAssignment[] assignments;
+	public int uniqueId;
 
 	//@formatter:off
 	/**
@@ -138,6 +139,11 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		return frame;
 	}
 
+	public int getUniqueId()
+	{
+		return uniqueId;
+	}
+	
 	public int getId()
 	{
 		return id;
