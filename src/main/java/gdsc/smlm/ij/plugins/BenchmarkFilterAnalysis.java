@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -3453,6 +3452,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return;
 		}
 
+		// Preserve the option to output the best or all results if we fell through from above
+		final int myComponentAnalysis = (componentAnalysis >= 3) ? componentAnalysis - 2 : componentAnalysis;
+
 		// Progressively add components until all are the same as the input bestFilter
 		int enabled = 0;
 		int[] previousCombinations = new int[0];
@@ -3481,7 +3483,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			for (int i = 0; i < scores.length; i++)
 			{
 				addToComponentAnalysisWindow(scores[i], bestFilterScore, names);
-				if (componentAnalysis == 1)
+				if (myComponentAnalysis == 1)
 					// Only add the best result
 					break;
 			}
