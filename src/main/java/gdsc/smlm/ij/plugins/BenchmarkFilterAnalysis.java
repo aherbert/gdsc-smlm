@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -148,7 +149,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int plotTopN = 0;
 	private static boolean saveBestFilter = false;
 	private static boolean saveTemplate = false;
-	private ArrayList<NamedPlot> plots;
 	private static boolean calculateSensitivity = false;
 	private static double delta = 0.1;
 	private static int criteriaIndex;
@@ -168,7 +168,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static boolean depthRecallAnalysis = true;
 	private static boolean scoreAnalysis = true;
 	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
-	private static int componentAnalysis = 1;
+	private static int componentAnalysis = 3;
 	private static boolean evolve = false;
 	private static int stepSearch = 0;
 
@@ -188,8 +188,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String resultsPrefix, resultsPrefix2, limitFailCount;
 	private static String resultsPrefix3, limitRange;
 
-	private HashMap<String, FilterScore> bestFilter;
-	private LinkedList<String> bestFilterOrder;
+	private static ArrayList<NamedPlot> plots;
+	private static HashMap<String, FilterScore> bestFilter;
+	private static LinkedList<String> bestFilterOrder;
+	private static long totalTime = 0, currentTime;
 
 	private static boolean reUseFilters = true;
 	private static boolean expandFilters = true;
@@ -202,8 +204,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double[][] increment;
 	private static int lastId = 0;
 	private static HashMap<Integer, IdPeakResult[]> actualCoordinates = null;
-	private static double lastUpperMatchDistance = -1, lastPartialMatchDistance = -1;
-	private static double lastUpperSignalFactor = -1, lastPartialSignalFactor = -1;
 	private static MultiPathFitResults[] resultsList = null;
 	//private static MultiPathFitResults[] clonedResultsList = null;
 	private static int matches;
@@ -213,7 +213,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
-	private long totalTime = 0, currentTime;
 
 	// Used to tile plot windows
 	private WindowOrganiser wo = new WindowOrganiser();
@@ -995,9 +994,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
+	private static ArrayList<Object> lastReadResultsSettings;
+
 	private MultiPathFitResults[] readResults()
 	{
-		boolean update = false; // XXX set to true when debugging
+		boolean update = resultsList == null; // XXX set to true when debugging
 		if (lastId != BenchmarkSpotFit.fitResultsId)
 		{
 			lastId = BenchmarkSpotFit.fitResultsId;
@@ -1006,9 +1007,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			//actualSize = results.size(); // Should be simulationParameters.molecules
 		}
 
-		if (resultsList == null || update || lastPartialMatchDistance != partialMatchDistance ||
-				lastUpperMatchDistance != upperMatchDistance || lastPartialSignalFactor != partialSignalFactor ||
-				lastUpperSignalFactor != upperSignalFactor)
+		ArrayList<Object> settings = createSettings(partialMatchDistance, upperMatchDistance, partialSignalFactor,
+				upperSignalFactor);
+
+		if (update || !settings.equals(lastReadResultsSettings))
 		{
 			IJ.showStatus("Reading results ...");
 
@@ -1016,10 +1018,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// This functionality is for choosing the optimum fail limit.
 			scores.clear();
 
-			lastUpperMatchDistance = upperMatchDistance;
-			lastPartialMatchDistance = partialMatchDistance;
-			lastUpperSignalFactor = upperSignalFactor;
-			lastPartialSignalFactor = partialSignalFactor;
+			lastReadResultsSettings = settings;
 			depthStats = null;
 			depthFitStats = null;
 			signalFactorStats = null;
@@ -1401,8 +1400,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		// We may have to read the results again if the ranking option has changed
-		//		if (lastPartialMatchDistance != partialMatchDistance || lastUpperMatchDistance != upperMatchDistance ||
-		//				lastPartialSignalFactor != partialSignalFactor || lastUpperSignalFactor != upperSignalFactor)
 		readResults();
 
 		return true;
@@ -1486,6 +1483,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return !gd.invalidNumber();
 	}
 
+	private static ArrayList<Object> lastAnalyseSettings = null;
+
 	/**
 	 * Run different filtering methods on a set of labelled peak results outputting performance statistics on the
 	 * success of
@@ -1507,25 +1506,39 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			scores.clear();
 
 		createResultsWindow();
-		plots = new ArrayList<NamedPlot>(plotTopN);
-		bestFilter = new HashMap<String, FilterScore>();
-		bestFilterOrder = new LinkedList<String>();
 
-		startTimer();
-		IJ.showStatus("Analysing filters ...");
-		int setNumber = 0;
-		for (FilterSet filterSet : filterSets)
+		// Only repeat analysis if necessary
+		boolean newResults = false;
+		ArrayList<Object> settings = createSettings(resultsList, filterSets, failCount, failCountRange,
+				residualsThreshold, plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve,
+				stepSearch);
+		if (!settings.equals(lastAnalyseSettings))
 		{
-			setNumber++;
-			if (run(filterSet, setNumber) < 0)
-				break;
-		}
-		stopTimer();
-		IJ.showProgress(1);
-		IJ.showStatus("");
+			//System.out.println("Running...");
+			newResults = true;
+			lastAnalyseSettings = settings;
 
-		if (Utils.isInterrupted())
-			return;
+			plots = new ArrayList<NamedPlot>(plotTopN);
+			bestFilter = new HashMap<String, FilterScore>();
+			bestFilterOrder = new LinkedList<String>();
+			totalTime = 0;
+
+			startTimer();
+			IJ.showStatus("Analysing filters ...");
+			int setNumber = 0;
+			for (FilterSet filterSet : filterSets)
+			{
+				setNumber++;
+				if (run(filterSet, setNumber) < 0)
+					break;
+			}
+			stopTimer();
+			IJ.showProgress(1);
+			IJ.showStatus("");
+
+			if (Utils.isInterrupted())
+				return;
+		}
 
 		if (bestFilter.isEmpty())
 		{
@@ -1634,7 +1647,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			topFilterResults = new ArrayList<FractionalAssignment[]>(resultsList.length);
 			topFilterClassificationResult = scoreFilter(bestFilter, minimalFilter, resultsList, topFilterResults);
 		}
-		scores.add(new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount, failCountRange));
+		if (newResults)
+		{
+			scores.add(
+					new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount, failCountRange));
+		}
 
 		if (saveTemplate)
 			saveTemplate(topFilterSummary);
@@ -1643,9 +1660,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		calculateSensitivity();
 		topFilterResults = depthAnalysis(topFilterResults, bestFilter);
 		scoreAnalysis(topFilterResults, bestFilter);
-		filterAnalysis(topFilterClassificationResult, filters.get(0));
+		componentAnalysis(topFilterClassificationResult, filters.get(0));
 
 		wo.tile();
+	}
+
+	private ArrayList<Object> createSettings(Object... objects)
+	{
+		final ArrayList<Object> settings = new ArrayList<Object>(objects.length);
+		for (Object o : objects)
+			settings.add(o);
+		return settings;
 	}
 
 	private void startTimer()
@@ -3304,7 +3329,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			wo.add(pw1);
 	}
 
-	private void filterAnalysis(FractionClassificationResult bestResult, FilterScore bestFilterScore)
+	private void componentAnalysis(FractionClassificationResult bestResult, FilterScore bestFilterScore)
 	{
 		if (componentAnalysis == 0)
 			return;
@@ -3430,6 +3455,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// Progressively add components until all are the same as the input bestFilter
 		int enabled = 0;
+		int[] previousCombinations = new int[0];
 		for (int ii = 0; ii < nParams; ii++)
 		{
 			// Create a set of filters by enabling each component that is not currently enabled.
@@ -3443,7 +3469,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				enable[n] = true;
 				final DirectFilter f = (DirectFilter) bestFilter.create(enable);
 				enable[n] = false;
-				scores[j++] = score(f, n, k, null, null, uniqueIds1, uniqueIdCount1);
+				final int[] combinations = new int[k];
+				System.arraycopy(previousCombinations, 0, combinations, 0, previousCombinations.length);
+				combinations[k - 1] = n;
+				Arrays.sort(combinations);
+				scores[j++] = score(f, n, k, combinations, null, uniqueIds1, uniqueIdCount1);
 			}
 
 			// Rank them
@@ -3459,6 +3489,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// Flag the best component added
 			enable[scores[0].index] = true;
 			enabled++;
+			previousCombinations = scores[0].combinations;
 		}
 	}
 
