@@ -45,7 +45,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	}
 
 	/**
-	 * Check if the given bits are set in the flags
+	 * Check if all of the given bits are set in the flags
 	 * 
 	 * @param flags
 	 * @param bits
@@ -56,6 +56,18 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		return (flags & bits) == bits;
 	}
 
+	/**
+	 * Check if any of the given bits are set in the flags
+	 * 
+	 * @param flags
+	 * @param bits
+	 * @return True if any are set
+	 */
+	public static boolean anySet(final int flags, final int bits)
+	{
+		return (flags & bits) != 0;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

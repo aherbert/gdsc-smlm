@@ -161,6 +161,7 @@ public class SettingsManager
 			
 			// Smart filter settings
 			xs.omitField(FitConfiguration.class, "directFilter");
+			xs.omitField(FitConfiguration.class, "dynamicPeakResult");
 			xs.omitField(FitConfiguration.class, "filterResult");
 			xs.omitField(FitConfiguration.class, "widthEnabled");
 			xs.omitField(FitConfiguration.class, "offset");

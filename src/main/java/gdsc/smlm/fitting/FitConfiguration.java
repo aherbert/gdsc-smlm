@@ -1017,9 +1017,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				return setValidationResult(FitStatus.OK, null);
 			if (log != null)
 			{
-				log.info("Bad peak %d: %s", peak.getId(), DirectFilter.getStatusMessage(peak, flags));
+				log.info("Bad peak %d: %s", peak.getId(), DirectFilter.getStatusMessage(peak, directFilter.getResult()));
 			}
-			// At the moment we do not get any validation data
+			if (DirectFilter.anySet(directFilter.getResult(), V_X_SD_FACTOR | V_Y_SD_FACTOR))
+			{
+				return setValidationResult(FitStatus.WIDTH_DIVERGED, null);
+			}
+			// At the moment we do not get any other validation data
 			return setValidationResult(FitStatus.FAILED_SMART_FILTER, null);
 		}
 
@@ -1676,6 +1680,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			initialSD1 = 1;
 		if (shiftFactor == 0)
 			setCoordinateShiftFactor(1);
+		if (dynamicPeakResult == null)
+			dynamicPeakResult = new DynamicPeakResult();
 		setNoise(noise);
 		setFitFunction(fitFunction);
 		invalidateFunctionSolver();
@@ -2234,6 +2240,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 	}
 
+	/**
+	 * Gets the smart filter name, if a smart filter exists
+	 *
+	 * @return the smart filter name
+	 */
+	public Object getSmartFilterName()
+	{
+		if (directFilter != null)
+		{
+			return directFilter.getName();
+		}
+		return "";
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

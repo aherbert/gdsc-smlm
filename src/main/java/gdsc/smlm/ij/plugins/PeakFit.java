@@ -2759,12 +2759,24 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
 			textResidualsThreshold.setText("" + config.getResidualsThreshold());
 			textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
-			textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-			textSignalStrength.setText("" + fitConfig.getSignalStrength());
-			textMinPhotons.setText("" + fitConfig.getMinPhotons());
-			textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
-			textWidthFactor.setText("" + fitConfig.getWidthFactor());
-			textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+
+			// Filtering
+			if (fitConfig.isSmartFilter())
+			{
+				textSmartFilter.setState(true);
+			}
+			else
+			{
+				textSmartFilter.setState(false);
+				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+				textSignalStrength.setText("" + fitConfig.getSignalStrength());
+				textMinPhotons.setText("" + fitConfig.getMinPhotons());
+				textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
+				textWidthFactor.setText("" + fitConfig.getWidthFactor());
+				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+			}
+			updateFilterInput();
+
 			if (extraOptions)
 			{
 				textNoise.setText("" + fitConfig.getNoise());

@@ -91,6 +91,15 @@ import ij.text.TextWindow;
  * a table of the single and double fit for each spot with metrics. This can be used to determine the best settings for
  * optimum doublet fitting and filtering.
  */
+
+/*
+ * Note: 21-Oct-2016
+ * 
+ * This plugin may be obsolete now that the BenchmarkSpotFit and BenchmarkFilterAnalysis plugins
+ * can handle singles, multiples and doublets together. This means that the residuals threshold can be
+ * optimised concurrently with the fail count and the filter. It is left within the codebase in case
+ * it is useful in the future.
+ */
 public class DoubletAnalysis implements PlugIn, ItemListener
 {
 	private static final String TITLE = "Doublet Analysis";
@@ -190,6 +199,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private TextField textLowerDistance;
 	private TextField textSignalFactor;
 	private TextField textLowerFactor;
+	private Checkbox cbSmartFilter;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
@@ -2772,13 +2782,21 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(analysisTitle).append('\t');
 		sb.append((useMaxResiduals) ? "Max" : "Average").append('\t');
 		sb.append(SELECTION_CRITERIA[selectionCriteria]).append('\t');
-		sb.append(filterFitConfig.getCoordinateShiftFactor()).append('\t');
-		sb.append(filterFitConfig.getSignalStrength()).append('\t');
-		sb.append(filterFitConfig.getMinPhotons()).append('\t');
-		sb.append(filterFitConfig.getMinWidthFactor()).append('\t');
-		sb.append(filterFitConfig.getWidthFactor()).append('\t');
-		sb.append(filterFitConfig.getPrecisionThreshold()).append('\t');
-		sb.append(filterFitConfig.isPrecisionUsingBackground()).append('\t');
+		if (filterFitConfig.isSmartFilter())
+		{
+			sb.append(filterFitConfig.getSmartFilterName()).append("\t\t\t\t\t\t\t\t");			
+		}
+		else
+		{
+			sb.append('\t');
+			sb.append(filterFitConfig.getCoordinateShiftFactor()).append('\t');
+			sb.append(filterFitConfig.getSignalStrength()).append('\t');
+			sb.append(filterFitConfig.getMinPhotons()).append('\t');
+			sb.append(filterFitConfig.getMinWidthFactor()).append('\t');
+			sb.append(filterFitConfig.getWidthFactor()).append('\t');
+			sb.append(filterFitConfig.getPrecisionThreshold()).append('\t');
+			sb.append(filterFitConfig.isPrecisionUsingBackground()).append('\t');
+		}
 		sb.append(analysisDriftAngle).append('\t');
 		sb.append(minGap).append('\t');
 
@@ -3113,13 +3131,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			int n = 0;
 			choices.get(1).addItemListener(this);
 			checkboxes.get(0).addItemListener(this);
+			cbSmartFilter = checkboxes.get(1);
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
 			textMinPhotons = numerics.get(n++);
 			textMinWidthFactor = numerics.get(n++);
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
-			cbLocalBackground = checkboxes.get(1);
+			cbLocalBackground = checkboxes.get(2);
 		}
 
 		gd.showDialog();
@@ -3194,7 +3213,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 */
 	private String createAnalysisHeader()
 	{
-		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
+		return "Density\ts\tWidth\tMethod\tOptions\tBest J\tTitle\tUse residuals\tSelection\tFilter\tShift\tSNR\tPhotons\tMin Width\tWidth\tPrecision\tLocal B\tAngle\tGap\tJ (r=1)\tMax J\tResiduals\tArea +/-15%\tArea 98%\tMin 98%\tMax 98%\tRange 98%\twMean 98%\tArea >90%\tMin >90%\tMax >90%\tRange >90%\twMean >90%";
 	}
 
 	/*
@@ -3220,6 +3239,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					if (template.isFitEngineConfiguration())
 					{
 						FitConfiguration fitConfig = template.getFitEngineConfiguration().getFitConfiguration();
+						cbSmartFilter.setState(fitConfig.isSmartFilter());
 						textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 						textSignalStrength.setText("" + fitConfig.getSignalStrength());
 						textMinPhotons.setText("" + fitConfig.getMinPhotons());
@@ -3232,6 +3252,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				else
 				{
 					// Reset 
+					cbSmartFilter.setState(false);
 					textCoordinateShiftFactor.setText("0");
 					textSignalStrength.setText("0");
 					textMinPhotons.setText("0");
@@ -3296,6 +3317,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				if (!updateFilterConfiguration(filterFitConfig))
 					return;
 
+				cbSmartFilter.setState(filterFitConfig.isSmartFilter());
 				textCoordinateShiftFactor.setText("" + filterFitConfig.getCoordinateShiftFactor());
 				textSignalStrength.setText("" + filterFitConfig.getSignalStrength());
 				textMinPhotons.setText("" + filterFitConfig.getMinPhotons());

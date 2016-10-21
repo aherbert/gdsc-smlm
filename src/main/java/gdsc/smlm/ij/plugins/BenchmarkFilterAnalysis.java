@@ -521,13 +521,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final double score;
 		final int failCount;
 		final int failCountRange;
+		final double residualsThreshold;
 
-		public FilterResult(DirectFilter filter, double score, int failCount, int failCountRange)
+		public FilterResult(DirectFilter filter, double score, int failCount, int failCountRange,
+				double residualsThreshold)
 		{
 			this.filter = filter;
 			this.score = score;
 			this.failCount = failCount;
 			this.failCountRange = failCountRange;
+			this.residualsThreshold = residualsThreshold;
 		}
 	}
 
@@ -1506,12 +1509,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		createResultsWindow();
 
+		boolean debugSpeed = false;
+
 		// Only repeat analysis if necessary
 		boolean newResults = false;
 		ArrayList<Object> settings = createSettings(resultsList, filterSets, failCount, failCountRange,
 				residualsThreshold, plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve,
 				stepSearch);
-		if (!settings.equals(lastAnalyseSettings))
+		if (debugSpeed || !settings.equals(lastAnalyseSettings))
 		{
 			//System.out.println("Running...");
 			newResults = true;
@@ -1534,6 +1539,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			stopTimer();
 			IJ.showProgress(1);
 			IJ.showStatus("");
+
+			if (debugSpeed)
+			{
+				System.out.println("Time = " + Utils.timeToString(totalTime));
+			}
 
 			if (Utils.isInterrupted())
 				return;
@@ -1646,10 +1656,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			topFilterResults = new ArrayList<FractionalAssignment[]>(resultsList.length);
 			topFilterClassificationResult = scoreFilter(bestFilter, minimalFilter, resultsList, topFilterResults);
 		}
-		if (newResults)
+		if (newResults || scores.isEmpty())
 		{
-			scores.add(
-					new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount, failCountRange));
+			scores.add(new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount, failCountRange,
+					residualsThreshold));
 		}
 
 		if (saveTemplate)
@@ -4290,20 +4300,26 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			best = getBestResult();
 		}
 
-		if (!(best.filter instanceof IMultiFilter))
-			return false;
-
-		IMultiFilter filter = (IMultiFilter) (best.filter);
-
+		// New smart filter support
 		final FitConfiguration fitConfig = config.getFitConfiguration();
+		fitConfig.setDirectFilter(best.filter);
+		config.setResidualsThreshold(best.residualsThreshold);
+		fitConfig.setComputeResiduals(best.residualsThreshold < 1);
 
-		fitConfig.setCoordinateShiftFactor(filter.getShift());
-		fitConfig.setSignalStrength(filter.getSNR());
-		fitConfig.setMinPhotons(filter.getSignal());
-		fitConfig.setMinWidthFactor(filter.getMinWidth());
-		fitConfig.setWidthFactor(filter.getMaxWidth());
-		fitConfig.setPrecisionThreshold(filter.getPrecision());
-		fitConfig.setPrecisionUsingBackground(filter.isPrecisionUsesLocalBackground());
+		// Old support for filtering. This may be used by some plugins that have not 
+		// updated to using smart filters (e.g. DoubletAnalysis)
+		if (best.filter instanceof IMultiFilter)
+		{
+			IMultiFilter filter = (IMultiFilter) (best.filter);
+
+			fitConfig.setCoordinateShiftFactor(filter.getShift());
+			fitConfig.setSignalStrength(filter.getSNR());
+			fitConfig.setMinPhotons(filter.getSignal());
+			fitConfig.setMinWidthFactor(filter.getMinWidth());
+			fitConfig.setWidthFactor(filter.getMaxWidth());
+			fitConfig.setPrecisionThreshold(filter.getPrecision());
+			fitConfig.setPrecisionUsingBackground(filter.isPrecisionUsesLocalBackground());
+		}
 
 		// We could set the fail count range dynamically using a window around the best filter 
 
