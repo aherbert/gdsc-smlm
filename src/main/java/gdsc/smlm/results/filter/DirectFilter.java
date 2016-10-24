@@ -150,4 +150,47 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		sb.append('=');
 		sb.append(value);
 	}
+
+	/**
+	 * Generate a message using all flags that are set
+	 * 
+	 * @param flags
+	 *            The validation flags
+	 * @return The message
+	 */
+	public static String getFlagMessage(int flags)
+	{
+		if (flags == 0)
+			return "";
+		StringBuilder sb = new StringBuilder();
+		//@formatter:off
+		if (areSet(flags, V_AMPLITUDE))	         append(sb, "Amplitude");
+		if (areSet(flags, V_PHOTONS))            append(sb, "Photon");
+		if (areSet(flags, V_SNR))                append(sb, "SNR");
+		if (areSet(flags, V_NOISE))              append(sb, "Noise");
+		if (areSet(flags, V_LOCATION_VARIANCE))  append(sb, "Precision");
+		if (areSet(flags, V_LOCATION_VARIANCE2)) append(sb, "Precision2");
+		if (areSet(flags, V_SD))                 append(sb, "SD");
+		if (areSet(flags, V_BACKGROUND))         append(sb, "Background");
+		if (areSet(flags, V_AMPLITUDE))          append(sb, "Amplitude");
+		if (areSet(flags, V_ANGLE))              append(sb, "Angle");
+		if (areSet(flags, V_X))                  append(sb, "X");
+		if (areSet(flags, V_Y))                  append(sb, "Y");
+		if (areSet(flags, V_X_RELATIVE_SHIFT))   append(sb, "X Relative Shift");
+		if (areSet(flags, V_Y_RELATIVE_SHIFT))   append(sb, "Y Relative Shift");
+		if (areSet(flags, V_X_SD))               append(sb, "X SD");
+		if (areSet(flags, V_Y_SD))               append(sb, "Y SD");
+		if (areSet(flags, V_X_SD_FACTOR))        append(sb, "X SD Factor");
+		if (areSet(flags, V_Y_SD_FACTOR))        append(sb, "Y SD Factor");
+		//@formatter:on
+		return sb.toString();
+	}
+
+	private static void append(StringBuilder sb, String name)
+	{
+		if (sb.length() != 0)
+			sb.append("; ");
+		sb.append(name);
+	}
+	
 }
