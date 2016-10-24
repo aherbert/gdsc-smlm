@@ -1737,8 +1737,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 			else
 			{
-				// Nothing to return
-				resultMultiDoublet = null;
+				// Nothing to return. Do not set to null to allow reporting of the errors
+				//resultMultiDoublet = null;
 			}
 
 			return resultMultiDoublet;
