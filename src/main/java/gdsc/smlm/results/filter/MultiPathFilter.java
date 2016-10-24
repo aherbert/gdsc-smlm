@@ -1247,21 +1247,71 @@ public class MultiPathFilter implements Cloneable
 	}
 
 	/**
-	 * Filter a set of multi-path results into a set of results. No validation of candidates is performed.
+	 * Filter a set of multi-path results into a set of results.
 	 *
 	 * @param results
 	 *            the results
+	 * @param failures
+	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param subset
+	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
+	 *            current candidate)
 	 * @return the filtered results
 	 */
-	final public PreprocessedPeakResult[] filter(final MultiPathFitResult[] results)
+	final public PreprocessedPeakResult[] filter(final MultiPathFitResults[] results, final int failures,
+			boolean subset)
 	{
 		setup();
+		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
+
 		final ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
 		for (int i = 0; i < results.length; i++)
 		{
-			final PreprocessedPeakResult[] result = accept(results[i], false, null);
-			if (result != null)
-				list.addAll(Arrays.asList(result));
+			final MultiPathFitResults multiPathResults = results[i];
+
+			int failCount = 0;
+			int lastId = -1;
+			int size = multiPathResults.getNumberOfResults();
+			store.resize(multiPathResults.getTotalCandidates());
+
+			for (int c = 0; c < size; c++)
+			{
+				final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
+
+				// Include the number of failures before this result from the larger set
+				if (subset)
+				{
+					failCount += (multiPathResult.candidateId - (lastId + 1));
+					lastId = multiPathResult.candidateId;
+				}
+
+				final boolean evaluateFit = failCount <= failures;
+				if (evaluateFit || store.isValid(multiPathResult.candidateId))
+				{
+					// Evaluate the result. 
+					// This allows storing more estimates in the store even if we are past the failures limit.
+					final PreprocessedPeakResult[] result = accept(multiPathResult, false, store);
+
+					if (result != null)
+						list.addAll(Arrays.asList(result));
+
+					if (evaluateFit && isNewResult(result))
+					{
+						// More results were accepted so reset the fail count
+						failCount = 0;
+					}
+					else
+					{
+						// Nothing was accepted, increment fail count
+						failCount++;
+					}
+				}
+				else
+				{
+					// This was rejected, increment fail count
+					failCount++;
+				}
+			}
 		}
 		return list.toArray(new PreprocessedPeakResult[list.size()]);
 	}
