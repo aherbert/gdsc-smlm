@@ -1419,7 +1419,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
 			params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-			FitResult fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, false);
+			FitResult fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, new boolean[1]);
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
 				params = fitResult.getParameters();
@@ -1448,7 +1448,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
 			params[Gaussian2DFunction.Y_POSITION] = rawImp.getHeight() / 2.0f;
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
-			fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, false);
+			fitResult = gf.fit(data, rawImp.getWidth(), rawImp.getHeight(), 1, params, new boolean[1]);
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
 				params = fitResult.getParameters();

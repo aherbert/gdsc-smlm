@@ -162,7 +162,6 @@ public class Gaussian2DFitter
 		double[] params = new double[1 + paramsPerPeak * npeaks];
 
 		// Get peak heights (if multiple peaks)
-		boolean amplitudeEstimate = true;
 		if (npeaks > 1 && (heights == null || heights.length != peaks.length))
 		{
 			heights = new double[peaks.length];
@@ -175,6 +174,7 @@ public class Gaussian2DFitter
 		// Set the initial parameters
 		params[0] = background;
 
+		final boolean[] amplitudeEstimate = new boolean[npeaks];
 		if (npeaks == 1)
 		{
 			double sum = 0;
@@ -184,7 +184,6 @@ public class Gaussian2DFitter
 			params[Gaussian2DFunction.SIGNAL] = sum - background * size;
 			params[Gaussian2DFunction.X_POSITION] = peaks[0] % maxx;
 			params[Gaussian2DFunction.Y_POSITION] = peaks[0] / maxx;
-			amplitudeEstimate = false;
 		}
 		else
 		{
@@ -194,6 +193,7 @@ public class Gaussian2DFitter
 				params[j + Gaussian2DFunction.SIGNAL] = heights[i] - background;
 				params[j + Gaussian2DFunction.X_POSITION] = index % maxx;
 				params[j + Gaussian2DFunction.Y_POSITION] = index / maxx;
+				amplitudeEstimate[i] = true;
 			}
 		}
 
@@ -294,13 +294,13 @@ public class Gaussian2DFitter
 	 *            The parameters of the peaks. Must have the Signal/Amplitude,Xpos,Ypos set. Other
 	 *            parameters that are zero will be estimated.
 	 * @param amplitudeEstimate
-	 *            Set to true if the parameters have amplitude estimated in the
+	 *            Set to true if the peak has amplitude estimated in the
 	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */
 	public FitResult fit(final double[] data, final int maxx, final int maxy, final int npeaks, final double[] params,
-			final boolean amplitudeEstimate)
+			final boolean[] amplitudeEstimate)
 	{
 		return fit(data, maxx, maxy, npeaks, params, amplitudeEstimate, false);
 	}
@@ -339,13 +339,13 @@ public class Gaussian2DFitter
 	 * @param zeroBackground
 	 *            Set to true if a zero value for the background parameter is the estimate
 	 * @param amplitudeEstimate
-	 *            Set to true if the parameters have amplitude estimated in the
+	 *            Set to true if the peak has amplitude estimated in the
 	 *            {@link gdsc.smlm.function.Gaussian2DFunction.SIGNAL} field. The
 	 *            default is signal.
 	 * @return The fit result
 	 */
 	public FitResult fit(final double[] data, final int maxx, final int maxy, final int npeaks, double[] params,
-			final boolean amplitudeEstimate, final boolean zeroBackground)
+			final boolean[] amplitudeEstimate, final boolean zeroBackground)
 	{
 		FitResult fitResult = null;
 		final int[] dim = new int[] { maxx, maxy };
@@ -370,32 +370,34 @@ public class Gaussian2DFitter
 			// Get background
 			background = getBackground(data, maxx, maxy, npeaks);
 			params[0] = background;
-			if (amplitudeEstimate)
-			{
-				// For a single peak, check the height is above background
-				if (npeaks == 1 && params[Gaussian2DFunction.SIGNAL] < background)
-				{
-					// Set the background to the min value in the data using the multiple peak option
-					background = getBackground(data, maxx, maxy, 2);
 
-					// Check if still below background
-					if (params[Gaussian2DFunction.SIGNAL] < background)
-					{
-						// Set the height to the max value in the data
-						double yMax = y[0];
-						for (int i = 1; i < ySize; i++)
-							if (yMax < y[i])
-								yMax = y[i];
-						params[Gaussian2DFunction.SIGNAL] = (float) yMax;
-					}
-				}
+			// Input estimates are either signal or amplitude, both of which are above background.
+			// The code below is appropriate if the input estimate is for absolute peak height inc. background.
 
-				// Lower heights to get amplitude
-				for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += paramsPerPeak)
-				{
-					params[j] -= background;
-				}
-			}
+			//			// For a single peak, check the height is above background
+			//			if (npeaks == 1 && amplitudeEstimate[0] && params[Gaussian2DFunction.SIGNAL] < background)
+			//			{
+			//				// Set the background to the min value in the data using the multiple peak option
+			//				background = getBackground(data, maxx, maxy, 2);
+			//
+			//				// Check if still below background
+			//				if (params[Gaussian2DFunction.SIGNAL] < background)
+			//				{
+			//					// Set the height to the max value in the data
+			//					double yMax = y[0];
+			//					for (int i = 1; i < ySize; i++)
+			//						if (yMax < y[i])
+			//							yMax = y[i];
+			//					params[Gaussian2DFunction.SIGNAL] = (float) yMax;
+			//				}
+			//			}
+			//
+			//			// Lower heights to get amplitude (if appropriate)
+			//			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
+			//			{
+			//				if (amplitudeEstimate[i])
+			//					params[j] -= background;
+			//			}
 		}
 
 		double[] initialParams = Arrays.copyOf(params, params.length);
@@ -415,16 +417,45 @@ public class Gaussian2DFitter
 		// Set all zero height peaks to a fraction of the maximum to allow fitting
 		if (zeroHeight > 0)
 		{
+			// Amplitude estimates
 			double max = 0;
-			for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += paramsPerPeak)
+			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
 			{
-				if (max < params[j])
+				if (amplitudeEstimate[i] && max < params[j])
 					max = params[j];
 			}
-			max *= 0.1; // Use fraction of the max peak
-			for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += paramsPerPeak)
+			if (max == 0)
 			{
-				if (params[j] <= 0)
+				max = data[0];
+				for (int i = maxx * maxy; --i > 0;)
+					if (max < data[i])
+						max = data[i];
+				max -= getBackground(data, maxx, maxy, 2);
+			}
+			max *= 0.1; // Use fraction of the max peak
+			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
+			{
+				if (amplitudeEstimate[i] && params[j] <= 0)
+					params[j] = max;
+			}
+
+			// Signal estimates
+			max = 0;
+			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
+			{
+				if (!amplitudeEstimate[i] && max < params[j])
+					max = params[j];
+			}
+			if (max == 0)
+			{
+				for (int i = maxx * maxy; --i > 0;)
+					max += data[i];
+				max -= ySize * getBackground(data, maxx, maxy, 2);
+			}
+			max *= 0.1; // Use fraction of the max peak
+			for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++)
+			{
+				if (!amplitudeEstimate[i] && params[j] <= 0)
 					params[j] = max;
 			}
 		}
@@ -517,7 +548,7 @@ public class Gaussian2DFitter
 			}
 
 			// Convert amplitudes to signal
-			if (amplitudeEstimate)
+			if (amplitudeEstimate[i])
 				signal *= 2 * Math.PI * sx * sy;
 
 			// Set all the parameters

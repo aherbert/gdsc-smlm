@@ -53,7 +53,6 @@ import gdsc.smlm.results.filter.MultiPathFilter.SelectedResult;
 import gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
-//import ij.process.FloatProcessor;
 
 /**
  * Fits local maxima using a 2D Gaussian.
@@ -877,7 +876,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Analyse neighbours and include them in the fit if they are within a set height of this peak.
 			resetNeighbours();
-			neighbours = (config.isIncludeNeighbours()) ? findNeighbours(regionBounds, n) : 0;
+			neighbours = findNeighbours(regionBounds, n);
 		}
 
 		private double getMultiFittingBackground()
@@ -931,6 +930,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return b;
 		}
 
+		private double getMax(double[] region, int width, int height)
+		{
+			double max = region[0];
+			for (int i = width * height; --i > 0;)
+				if (max < region[i])
+					max = region[i];
+			return max;
+		}
+
 		public MultiPathFitResult.FitResult getResultMulti()
 		{
 			if (computedMulti)
@@ -938,7 +946,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			computedMulti = true;
 
-			if (neighbours == 0)
+			// Do not do a multi-fit if the configuration is not set to include neighbours 
+			if (neighbours == 0 || !config.isIncludeNeighbours())
 				return null;
 
 			// Estimate background.
@@ -1022,14 +1031,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Note: If difference-of-smoothing is performed the heights have background subtracted so 
 			// it must be added back 
 
+			final boolean[] amplitudeEstimate = new boolean[npeaks];
+
 			// The main peak. We use a close estimate if we have one.
-			getEstimate(candidates[candidateId], params, 0, true, false);
+			amplitudeEstimate[0] = getEstimate(candidates[candidateId], params, 0, true);
 
 			// The neighbours
 			for (int i = 0, j = parametersPerPeak; i < candidateNeighbourCount; i++, j += parametersPerPeak)
 			{
 				final Candidate candidateNeighbour = candidateNeighbours[i];
-				getEstimate(candidateNeighbour, params, j, true, false);
+				amplitudeEstimate[i + 1] = getEstimate(candidateNeighbour, params, j, true);
 
 				// Constrain the location using the candidate position.
 				// Do not use the current estimate as this will create drift over time if the estimate is updated.
@@ -1097,14 +1108,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						continue;
 					final PeakResult result = fittedNeighbours[i];
 
-					// Get the Amplitude (since the params array stores the signal)
-					params[j + Gaussian2DFunction.SIGNAL] = result.getAmplitude();
-					// Copy Angle,Xpos,Ypos,Xwidth,Ywidth
-					for (int k = 2; k <= parametersPerPeak; k++)
+					// Copy Signal,Angle,Xpos,Ypos,Xwidth,Ywidth
+					for (int k = 1; k <= parametersPerPeak; k++)
 						params[j + k] = result.params[k];
 
-					// Add background to amplitude (required since the background will be re-estimated)
-					params[j + Gaussian2DFunction.SIGNAL] += result.params[Gaussian2DFunction.BACKGROUND];
 					// Adjust position relative to extracted region
 					params[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 					params[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
@@ -1128,40 +1135,37 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// be below the background.
 			// Check the heights are positive.
 
-			// Find the min signal
-			double minSignal = Double.POSITIVE_INFINITY;
-			for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
-				if (minSignal > params[j])
-					minSignal = params[j];
-
-			if (minSignal < background)
+			if (containsAmplitudeEstimates(amplitudeEstimate))
 			{
-				// Reset to the minimum value in the data.
-				// This is what is done in the in the fitter if the background is zero.
-				background = getDefaultBackground(region, width, height);
+				// Find the min amplitude
+				double minSignal = Double.POSITIVE_INFINITY;
+				for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += parametersPerPeak, i++)
+					if (amplitudeEstimate[i] && minSignal > params[j])
+						minSignal = params[j];
 
-				if (minSignal < background)
+				if (minSignal <= 0)
 				{
-					// This is probably extremely rare and the result of a poor candidate estimate
+					// Reset to the minimum value in the data.
+					// This is what is done in the in the fitter if the background is zero.
+					params[Gaussian2DFunction.BACKGROUND] = getDefaultBackground(region, width, height);
+					final double backgroundChange = background - params[Gaussian2DFunction.BACKGROUND];
 
-					//// Boost all the estimates so the min signal is above the background
-					//final double boost = 10 + (background - minSignal);
-					//for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
-					//	params[j] += boost;
+					// Make the peaks higher by the change in background
+					for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += parametersPerPeak, i++)
+						if (amplitudeEstimate[i])
+							params[j] += backgroundChange;
 
-					// Or just make the low peaks higher (the existing good estimates are left alone)
-					for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
-						if (params[j] < minSignal)
-							params[j] = background + 10;
+					if ((minSignal + backgroundChange) <= 0)
+					{
+						// This is probably extremely rare and the result of a poor candidate estimate.
+						// Set a small height based on the data range
+						final double defaultHeight = Math.max(1,
+								0.1 * (getMax(region, width, height) - params[Gaussian2DFunction.BACKGROUND]));
+						for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += parametersPerPeak, i++)
+							if (amplitudeEstimate[i] && params[j] <= 0)
+								params[j] = defaultHeight;
+					}
 				}
-			}
-
-			// Subtract the background from all estimated peak amplitudes.
-			if (background != 0)
-			{
-				params[Gaussian2DFunction.BACKGROUND] = background;
-				for (int j = Gaussian2DFunction.SIGNAL; j < params.length; j += parametersPerPeak)
-					params[j] -= background;
 			}
 
 			// Note that if the input XY positions are on the integer grid then the fitter will estimate
@@ -1193,7 +1197,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
 			gf.setBounds(lower, upper);
-			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, true, background == 0);
+			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, amplitudeEstimate,
+					background == 0);
 			gf.setBounds(null, null);
 
 			//			if (fitResult.getStatus() == FitStatus.BAD_PARAMETERS)
@@ -1393,6 +1398,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return resultMulti = createResult(fitResult, results);
 		}
 
+		private boolean containsAmplitudeEstimates(boolean[] amplitudeEstimate)
+		{
+			for (int i = 0; i < amplitudeEstimate.length; i++)
+				if (amplitudeEstimate[i])
+					return true;
+			return false;
+		}
+
 		private double getLocalBackground(int n, int npeaks, double[] params, final int flags)
 		{
 			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, extractSpotParams(params, n), 2);
@@ -1401,20 +1414,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return overlapData[1] + params[0];
 		}
 
-		private boolean getEstimate(Candidate candidate, double[] params, int j, boolean close, boolean signalEstimate)
+		private boolean getEstimate(Candidate candidate, double[] params, int j, boolean close)
 		{
 			final double[] estimatedParams = getEstimate(candidate.index, close);
 			if (estimatedParams != null)
 			{
 				// Re-use previous good multi-fit results to estimate the peak params...
-				if (signalEstimate)
-					params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL];
-				else
-					// Convert signal into amplitude
-					params[j + Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.BACKGROUND] +
-							estimatedParams[Gaussian2DFunction.SIGNAL] /
-									(2 * Math.PI * estimatedParams[Gaussian2DFunction.X_SD] *
-											estimatedParams[Gaussian2DFunction.Y_SD]);
+				params[j + Gaussian2DFunction.SIGNAL] = estimatedParams[Gaussian2DFunction.SIGNAL];
 				params[j + Gaussian2DFunction.X_POSITION] = estimatedParams[Gaussian2DFunction.X_POSITION] -
 						regionBounds.x;
 				params[j + Gaussian2DFunction.Y_POSITION] = estimatedParams[Gaussian2DFunction.Y_POSITION] -
@@ -1422,15 +1428,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				params[j + Gaussian2DFunction.ANGLE] = estimatedParams[Gaussian2DFunction.ANGLE];
 				params[j + Gaussian2DFunction.X_SD] = estimatedParams[Gaussian2DFunction.X_SD];
 				params[j + Gaussian2DFunction.Y_SD] = estimatedParams[Gaussian2DFunction.Y_SD];
-				return true;
+				return false;
 			}
 			else
 			{
-				params[j + Gaussian2DFunction.SIGNAL] = candidate.intensity +
-						((relativeIntensity) ? params[Gaussian2DFunction.BACKGROUND] : 0);
+				// Amplitude estimate
+				params[j + Gaussian2DFunction.SIGNAL] = candidate.intensity -
+						((relativeIntensity) ? 0 : params[Gaussian2DFunction.BACKGROUND]);
 				params[j + Gaussian2DFunction.X_POSITION] = candidate.x - regionBounds.x;
 				params[j + Gaussian2DFunction.Y_POSITION] = candidate.y - regionBounds.y;
-				return false;
+				return true;
 			}
 		}
 
@@ -1653,44 +1660,44 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// fitted as a doublet. However this means that validation will be repeated on the spots that have 
 				// been validated before. This is a small overhead but allows using the multi-doublet result to 
 				// return all the fit results combined.
-				
+
 				// Fitting 2 spots is better than 1 and does not clash with any of the other multi-fit results.
 				// Build a combined result with the doublet and the other multi-fit results
 				FitResult doubletFitResult = (gdsc.smlm.fitting.FitResult) resultMultiDoublet.getData();
-				
+
 				double[] initialParams1 = doubletFitResult.getInitialParameters();
 				double[] params1 = doubletFitResult.getParameters();
 				double[] paramsDev1 = doubletFitResult.getParameterStdDev();
-				
+
 				double[] initialParams2 = multiFitResult.getInitialParameters();
 				double[] params2 = multiFitResult.getParameters();
 				double[] paramsDev2 = multiFitResult.getParameterStdDev();
-				
+
 				// Create the initial parameters by adding an extra spot
 				double[] initialParams = new double[initialParams2.length + 6];
 				double[] params = new double[initialParams.length];
 				double[] paramsDev = (paramsDev2 == null) ? null : new double[initialParams.length];
-				
+
 				System.arraycopy(initialParams1, 0, initialParams, 0, initialParams1.length);
 				System.arraycopy(initialParams2, 7, initialParams, initialParams1.length, initialParams2.length - 7);
-				
+
 				System.arraycopy(params1, 0, params, 0, params1.length);
 				System.arraycopy(params2, 7, params, params1.length, params2.length - 7);
-				
+
 				if (paramsDev != null)
 				{
 					System.arraycopy(paramsDev1, 0, paramsDev, 0, paramsDev1.length);
 					System.arraycopy(paramsDev2, 7, paramsDev, paramsDev1.length, paramsDev2.length - 7);
 				}
-				
+
 				// Create all the output results
 				PreprocessedPeakResult[] results = new PreprocessedPeakResult[resultMultiDoublet.results.length +
 						resultMulti.results.length - 1];
-				
+
 				final int npeaks = multiFitResult.getNumberOfPeaks() + 1;
 				// We must compute a local background for all the spots
 				final int flags = fitConfig.getFunctionFlags();
-				
+
 				int n = 0;
 				for (int i = 0; i < resultMultiDoublet.results.length; i++)
 				{
@@ -1711,7 +1718,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 									? ResultType.EXISTING : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 					n++;
 				}
-				
+
 				final int adjust = (fitConfig.isBackgroundFitting()) ? 1 : 0;
 				nFittedParameters = npeaks *
 						((multiFitResult.getNumberOfFittedParameters() - adjust) / multiFitResult.getNumberOfPeaks()) +
@@ -1722,10 +1729,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				data = null;
 				iterations = doubletFitResult.getIterations();
 				evaluations = doubletFitResult.getEvaluations();
-				
+
 				FitResult mdoubletFitResult = new FitResult(FitStatus.OK, degreesOfFreedom, error, initialParams,
 						params, paramsDev, npeaks, nFittedParameters, data, iterations, evaluations);
-				
+
 				resultMultiDoublet = createResult(mdoubletFitResult, results);
 			}
 			else
@@ -1782,13 +1789,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			final double[] params = new double[] { background, 0, 0, 0, 0, 0, 0 };
 
-			boolean amplitudeEstimate = false;
+			final boolean[] amplitudeEstimate = new boolean[1];
 
 			// Re-use an estimate if we have it. Note that this may be quite far from the candidate.
-			boolean usingEstimate = getEstimate(candidates[candidateId], params, 0, false, true);
+			amplitudeEstimate[0] = getEstimate(candidates[candidateId], params, 0, false);
+			boolean usingEstimate = getEstimate(candidates[candidateId].index, false) != null;
 			if (!usingEstimate)
 			{
-				// If we have no estimate the the default will be an amplitude estimate.
+				// If we have no estimate the default will be an amplitude estimate.
 				// We can estimate the signal here instead of using the amplitude.
 				// Do this when the fitting window covers enough of the Gaussian (e.g. 2.5xSD).
 				float signal = 0;
@@ -1807,20 +1815,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				else
 				{
 					// Resort to default amplitude estimate
-					amplitudeEstimate = true;
+					amplitudeEstimate[0] = true;
 
-					if (params[Gaussian2DFunction.SIGNAL] < background)
+					if (params[Gaussian2DFunction.SIGNAL] <= 0)
 					{
 						// Reset to the minimum value in the data.
 						params[Gaussian2DFunction.BACKGROUND] = getDefaultBackground(region, width, height);
+						final double backgroundChange = background - params[Gaussian2DFunction.BACKGROUND];
 
-						if (params[Gaussian2DFunction.SIGNAL] < params[Gaussian2DFunction.BACKGROUND])
-							// This is probably extremely rare and the result of a poor candidate estimate
-							params[Gaussian2DFunction.SIGNAL] = params[Gaussian2DFunction.BACKGROUND] + 10;
+						params[Gaussian2DFunction.SIGNAL] += backgroundChange;
+
+						if (params[Gaussian2DFunction.SIGNAL] <= 0)
+						{
+							// This is probably extremely rare and the result of a poor candidate estimate.
+							// Set a small height based on the data range
+							final double defaultHeight = Math.max(1,
+									0.1 * (getMax(region, width, height) - params[Gaussian2DFunction.BACKGROUND]));
+							params[Gaussian2DFunction.SIGNAL] = defaultHeight;
+						}
 					}
-
-					// Subtract the background from the estimated peak amplitudes.
-					params[Gaussian2DFunction.SIGNAL] -= params[Gaussian2DFunction.BACKGROUND];
 				}
 			}
 
@@ -2170,7 +2183,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// We assume that residuals calculation is on but just in case something else turned it off we get the state.
 			final boolean isComputeResiduals = gf.isComputeResiduals();
 			gf.setComputeResiduals(false);
-			final FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams, false);
+			final boolean[] amplitudeEstimate = new boolean[2];
+			final FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams, amplitudeEstimate,
+					doubletParams[Gaussian2DFunction.BACKGROUND] == 0);
 			gf.setComputeResiduals(isComputeResiduals);
 
 			fitConfig.setCoordinateShift(shift);

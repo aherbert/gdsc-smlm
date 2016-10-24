@@ -687,7 +687,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					// (Fit even multiple since this is what the FitWorker will do) 
 					region = ie.crop(regionBounds, region);
 
-					boolean amplitudeEstimate = false;
+					boolean[] amplitudeEstimate = new boolean[1];
 					float signal = 0;
 					double sum = 0;
 					final int width = regionBounds.width;
@@ -698,7 +698,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					signal = (float) (sum - background * size);
 					if (signal <= 0)
 					{
-						amplitudeEstimate = true;
+						amplitudeEstimate[0] = true;
 						signal = spot.intensity - ((relativeIntensity) ? 0 : background);
 						if (signal < 0)
 						{
@@ -763,7 +763,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							fitConfig.setMaxFunctionEvaluations((int) (maxEvaluations *
 									FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS * iterationIncrease));
 							gf.setComputeResiduals(false);
-							result.fitResult2 = gf.fit(region, width, height, 2, doubletParams, false);
+							result.fitResult2 = gf.fit(region, width, height, 2, doubletParams, new boolean[2]);
 							gf.setComputeResiduals(true);
 							fitConfig.setMaxIterations(maxIterations);
 							fitConfig.setMaxFunctionEvaluations(maxEvaluations);
