@@ -481,18 +481,25 @@ public class MultiPathFilter implements Cloneable
 		boolean doDoublet = false;
 
 		// Filter multi-fit
-		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
+
+		// Accept all and then check if we can perform a doublet fit
+		//		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
+		//				validateCandidates, store);
+		//		if (multiResults == null)
+		//		{
+		//			// The fit was not accepted. However it may have been rejected for being too wide
+		//			// and is suitable for a doublet fit.
+		//			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
+		//		}
+		//		else
+		//		{
+		//			doDoublet = (residualsThreshold < 1 && multiPathResult.getMultiQAScore() > residualsThreshold);
+		//		}
+
+		// Accept any and then check if we can perform a doublet fit
+		final PreprocessedPeakResult[] multiResults = acceptAny(candidateId, multiPathResult.getMultiFitResult(),
 				validateCandidates, store);
-		if (multiResults == null)
-		{
-			// The fit was not accepted. However it may have been rejected for being too wide
-			// and is suitable for a doublet fit.
-			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
-		}
-		else
-		{
-			doDoublet = (residualsThreshold < 1 && multiPathResult.getMultiQAScore() > residualsThreshold);
-		}
+		doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
 
 		final PreprocessedPeakResult[] multiDoubletResults;
 		if (doDoublet)
@@ -698,18 +705,24 @@ public class MultiPathFilter implements Cloneable
 		boolean doDoublet = false;
 
 		// Filter multi-fit
-		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
+		// Accept all and then check if we can perform a doublet fit
+		//		final PreprocessedPeakResult[] multiResults = acceptAll(candidateId, multiPathResult.getMultiFitResult(),
+		//				validateCandidates, store);
+		//		if (multiResults == null)
+		//		{
+		//			// The fit was not accepted. However it may have been rejected for being too wide
+		//			// and is suitable for a doublet fit.
+		//			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
+		//		}
+		//		else
+		//		{
+		//			doDoublet = (residualsThreshold < 1 && multiPathResult.getMultiQAScore() > residualsThreshold);
+		//		}
+
+		// Accept any and then check if we can perform a doublet fit
+		final PreprocessedPeakResult[] multiResults = acceptAny(candidateId, multiPathResult.getMultiFitResult(),
 				validateCandidates, store);
-		if (multiResults == null)
-		{
-			// The fit was not accepted. However it may have been rejected for being too wide
-			// and is suitable for a doublet fit.
-			doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
-		}
-		else
-		{
-			doDoublet = (residualsThreshold < 1 && multiPathResult.getMultiQAScore() > residualsThreshold);
-		}
+		doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
 
 		final PreprocessedPeakResult[] multiDoubletResults;
 		if (doDoublet)
@@ -802,13 +815,22 @@ public class MultiPathFilter implements Cloneable
 		if (residualsThreshold >= 1)
 			return false;
 
+		// Check the other results are OK. Candidates are allowed to fail. New and existing results must pass.
+		for (int i = 1; i < validationResults.length; i++)
+			if ((fitResult.results[i].isNewResult() || fitResult.results[i].isExistingResult()) &&
+					validationResults[i] != 0)
+				return false;
+
+		if (validationResults[0] == 0)
+		{
+			// The peak was valid so check the residuals
+			return ((singleQA) ? multiPathResult.getSingleQAScore()
+					: multiPathResult.getMultiQAScore()) > residualsThreshold;
+		}
+
 		// Check if it failed due to width
 		if (!DirectFilter.anySet(validationResults[0], DirectFilter.V_X_SD_FACTOR | DirectFilter.V_X_SD_FACTOR))
 			return false;
-		// Check the other results are OK
-		for (int i = 1; i < validationResults.length; i++)
-			if (validationResults[i] != 0)
-				return false;
 
 		// Get the first spot
 		final PreprocessedPeakResult firstResult = fitResult.results[0];
