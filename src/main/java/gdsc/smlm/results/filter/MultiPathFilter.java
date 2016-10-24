@@ -829,20 +829,17 @@ public class MultiPathFilter implements Cloneable
 
 		// We must validate the spot without width filtering. Do not change the min filter.
 		filter.setup(DirectFilter.NO_WIDTH);
-		//setup(DirectFilter.NO_WIDTH);
 
 		try
 		{
-			if (!accept(firstResult))
+			if (!filter.accept(firstResult))
 				// This is still a bad single result, without width filtering
-				// Fall-back to the multi-result (which may match another candidate)
 				return false;
 		}
 		finally
 		{
 			// reset
 			filter.setup();
-			//setup();
 		}
 
 		return true;
