@@ -1111,10 +1111,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 					// Add support for constraining the known fit results using bounded coordinates.
 					// Currently we just constrain the location.
-					lower[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] - 1;
-					upper[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] + 1;
-					lower[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] - 1;
-					upper[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] + 1;
+					lower[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] - 0.5;
+					upper[j + Gaussian2DFunction.X_POSITION] = params[j + Gaussian2DFunction.X_POSITION] + 0.5;
+					lower[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] - 0.5;
+					upper[j + Gaussian2DFunction.Y_POSITION] = params[j + Gaussian2DFunction.Y_POSITION] + 0.5;
 
 					j += parametersPerPeak;
 				}
@@ -1518,7 +1518,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			PreprocessedPeakResult[] fitResults = resultMulti.results;
 
 			// Get the background for the multi-fit result
-			final double[] fittedParams = ((FitResult) resultMulti.data).getParameters();
+			final FitResult multiFitResult = (FitResult) resultMulti.data;
+			final double[] fittedParams = multiFitResult.getParameters();
 			final float background = (float) fittedParams[0];
 
 			// Get the neighbours 
@@ -1645,6 +1646,93 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//				//gdsc.core.ij.Utils.display("Region", region, width, height);
 			//				//gdsc.core.ij.Utils.display("Residuals1", residuals, width, height);
 			//			}
+
+			if (resultMultiDoublet != null && resultMultiDoublet.status == 0 && resultMultiDoublet.results != null)
+			{
+				// The code below builds a combined result for the multi-fit and the primary candidate
+				// fitted as a doublet. However this means that validation will be repeated on the spots that have 
+				// been validated before. This is a small overhead but allows using the multi-doublet result to 
+				// return all the fit results combined.
+				
+				// Fitting 2 spots is better than 1 and does not clash with any of the other multi-fit results.
+				// Build a combined result with the doublet and the other multi-fit results
+				FitResult doubletFitResult = (gdsc.smlm.fitting.FitResult) resultMultiDoublet.getData();
+				
+				double[] initialParams1 = doubletFitResult.getInitialParameters();
+				double[] params1 = doubletFitResult.getParameters();
+				double[] paramsDev1 = doubletFitResult.getParameterStdDev();
+				
+				double[] initialParams2 = multiFitResult.getInitialParameters();
+				double[] params2 = multiFitResult.getParameters();
+				double[] paramsDev2 = multiFitResult.getParameterStdDev();
+				
+				// Create the initial parameters by adding an extra spot
+				double[] initialParams = new double[initialParams2.length + 6];
+				double[] params = new double[initialParams.length];
+				double[] paramsDev = (paramsDev2 == null) ? null : new double[initialParams.length];
+				
+				System.arraycopy(initialParams1, 0, initialParams, 0, initialParams1.length);
+				System.arraycopy(initialParams2, 7, initialParams, initialParams1.length, initialParams2.length - 7);
+				
+				System.arraycopy(params1, 0, params, 0, params1.length);
+				System.arraycopy(params2, 7, params, params1.length, params2.length - 7);
+				
+				if (paramsDev != null)
+				{
+					System.arraycopy(paramsDev1, 0, paramsDev, 0, paramsDev1.length);
+					System.arraycopy(paramsDev2, 7, paramsDev, paramsDev1.length, paramsDev2.length - 7);
+				}
+				
+				// Create all the output results
+				PreprocessedPeakResult[] results = new PreprocessedPeakResult[resultMultiDoublet.results.length +
+						resultMulti.results.length - 1];
+				
+				final int npeaks = multiFitResult.getNumberOfPeaks() + 1;
+				// We must compute a local background for all the spots
+				final int flags = fitConfig.getFunctionFlags();
+				
+				int n = 0;
+				for (int i = 0; i < resultMultiDoublet.results.length; i++)
+				{
+					PreprocessedPeakResult r = resultMultiDoublet.results[i];
+					results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId(),
+							initialParams, params, getLocalBackground(n, npeaks, params, flags), (r.isExistingResult())
+									? ResultType.EXISTING : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
+					n++;
+				}
+				// Ignore the first result (this was removed and fit as the doublet)
+				for (int i = 1; i < resultMulti.results.length; i++)
+				{
+					PreprocessedPeakResult r = resultMulti.results[i];
+					// Increment the ID by one since the position in the parameters array is moved to 
+					// accommodate 2 preceding peaks and not 1 
+					results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId() + 1,
+							initialParams, params, getLocalBackground(n, npeaks, params, flags), (r.isExistingResult())
+									? ResultType.EXISTING : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
+					n++;
+				}
+				
+				final int adjust = (fitConfig.isBackgroundFitting()) ? 1 : 0;
+				nFittedParameters = npeaks *
+						((multiFitResult.getNumberOfFittedParameters() - adjust) / multiFitResult.getNumberOfPeaks()) +
+						adjust;
+				degreesOfFreedom = FastMath.max(region.length - nFittedParameters, 0);
+				// Use error from the doublet fit
+				error = doubletFitResult.getError();
+				data = null;
+				iterations = doubletFitResult.getIterations();
+				evaluations = doubletFitResult.getEvaluations();
+				
+				FitResult mdoubletFitResult = new FitResult(FitStatus.OK, degreesOfFreedom, error, initialParams,
+						params, paramsDev, npeaks, nFittedParameters, data, iterations, evaluations);
+				
+				resultMultiDoublet = createResult(mdoubletFitResult, results);
+			}
+			else
+			{
+				// Nothing to return
+				resultMultiDoublet = null;
+			}
 
 			return resultMultiDoublet;
 		}
