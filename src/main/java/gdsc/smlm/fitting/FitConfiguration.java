@@ -2246,7 +2246,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 *
 	 * @return the smart filter name
 	 */
-	public Object getSmartFilterName()
+	public String getSmartFilterName()
 	{
 		if (directFilter != null)
 		{
@@ -2255,6 +2255,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		return "";
 	}
 
+	/**
+	 * Gets the smart filter, if a smart filter exists. A clone is returned.
+	 *
+	 * @return the smart filter (or null)
+	 */
+	public DirectFilter getSmartFilter()
+	{
+		if (directFilter != null)
+		{
+			return (DirectFilter) directFilter.clone();
+		}
+		return null;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
