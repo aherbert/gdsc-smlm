@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
@@ -970,8 +971,12 @@ public class MultiPathFilter implements Cloneable
 		//}
 	}
 
+	@XStreamOmitField
 	private int[] validationResults;
-	private boolean failExisting, failNew;
+	@XStreamOmitField
+	private boolean failExisting;
+	@XStreamOmitField
+	private boolean failNew;
 
 	/**
 	 * Check all new and all existing results are valid. Returns the new results.
