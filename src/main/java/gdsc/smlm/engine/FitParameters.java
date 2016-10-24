@@ -75,7 +75,8 @@ public class FitParameters
 	public int endT = -1;
 
 	/**
-	 * The filter used to pick the fitting path when benchmarking.
+	 * The filter used to pick the fitting path when benchmarking. This should be an instance for each thread running
+	 * fit jobs.
 	 * <p>
 	 * Note that during benchmarking all fitting paths will be computed. The current set of results is then built by
 	 * validating the results with this filter (in addition to the fit configuration used to construct the

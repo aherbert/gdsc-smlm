@@ -161,18 +161,18 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 			int s1 = 0, s2 = 0;
 
 			// Current order of filter power obtained from BenchmarkFilterAnalysis:
-			// Precision, Max Width, SNR, Shift, Min width
-			if (precision != 0)
+			// SNR, Max Width, Precision, Shift, Min width
+			if (snr != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterVariance2Component(precision);
+				components1[s1++] = components2[s2++] = new MultiFilterSNRComponent(snr);
 			}
 			if (maxWidth != 0 || minWidth != 0)
 			{
 				components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
 			}
-			if (snr != 0)
+			if (precision != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterSNRComponent(snr);
+				components1[s1++] = components2[s2++] = new MultiFilterVariance2Component(precision);
 			}
 			if (shift != 0)
 			{
@@ -209,13 +209,19 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	public boolean accept(PeakResult peak)
 	{
 		// Current order of filter power obtained from BenchmarkFilterAnalysis:
-		// Precision, Max Width, SNR, Shift, Min width
+		// SNR, Max Width, Precision, Shift, Min width
 
+		if (SNRFilter.getSNR(peak) < this.snr)
+			return false;
+
+		// Width
 		final float sd = peak.getSD();
-		final double s = nmPerPixel * sd;
-		final double N = peak.getSignal();
+		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
+			return false;
 
 		// Precision
+		final double s = nmPerPixel * sd;
+		final double N = peak.getSignal();
 		// Use the background directly
 		if (bias != -1)
 		{
@@ -230,13 +236,6 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 			if (PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) > variance)
 				return false;
 		}
-
-		// Width
-		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
-			return false;
-
-		if (SNRFilter.getSNR(peak) < this.snr)
-			return false;
 
 		// Shift
 		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)

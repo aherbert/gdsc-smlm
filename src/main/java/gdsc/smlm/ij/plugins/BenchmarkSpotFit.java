@@ -508,6 +508,7 @@ public class BenchmarkSpotFit implements PlugIn
 		final HashMap<Integer, FilterCandidates> filterCandidates;
 		final HashMap<Integer, FilterCandidates> results;
 		final Rectangle bounds;
+		final MultiPathFilter multiFilter;
 
 		float[] data = null;
 		List<PointPair> matches = new ArrayList<PointPair>();
@@ -527,6 +528,8 @@ public class BenchmarkSpotFit implements PlugIn
 			this.filterCandidates = filterCandidates;
 			this.results = new HashMap<Integer, FilterCandidates>();
 			bounds = new Rectangle(0, 0, stack.getWidth(), stack.getHeight());
+			// Instance copy
+			multiFilter = BenchmarkSpotFit.multiFilter.clone();
 		}
 
 		/*

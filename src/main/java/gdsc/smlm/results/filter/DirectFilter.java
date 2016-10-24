@@ -67,7 +67,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	{
 		return (flags & bits) != 0;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -103,6 +103,16 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	public int getResult()
 	{
 		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#copy()
+	 */
+	public IDirectFilter copy()
+	{
+		return (IDirectFilter) clone();
 	}
 
 	/**
@@ -192,5 +202,4 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 			sb.append("; ");
 		sb.append(name);
 	}
-	
 }

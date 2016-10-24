@@ -31,7 +31,7 @@ import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 /**
  * Filter a multi-path set of peak results into accepted/rejected.
  */
-public class MultiPathFilter
+public class MultiPathFilter implements Cloneable
 {
 	/**
 	 * Stores the results that were accepted when filtering a multi-path result. Also stores the fit result that was
@@ -364,6 +364,24 @@ public class MultiPathFilter
 		this.filter = filter;
 		this.minFilter = minFilter;
 		this.residualsThreshold = residualsThreshold;
+	}
+
+	/**
+	 * Return a deep copy of this object with a copy of the configured filters.
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public MultiPathFilter clone()
+	{
+		return new MultiPathFilter(copy(filter), copy(minFilter), residualsThreshold);
+	}
+
+	private IDirectFilter copy(IDirectFilter f)
+	{
+		return (f == null) ? null : f.copy();
 	}
 
 	/**
@@ -784,9 +802,13 @@ public class MultiPathFilter
 		if (residualsThreshold >= 1)
 			return false;
 
-		// Check the quadrant analysis on the fit residuals
-		if (((singleQA) ? multiPathResult.getSingleQAScore() : multiPathResult.getMultiQAScore()) < residualsThreshold)
+		// Check if it failed due to width
+		if (!DirectFilter.anySet(validationResults[0], DirectFilter.V_X_SD_FACTOR | DirectFilter.V_X_SD_FACTOR))
 			return false;
+		// Check the other results are OK
+		for (int i = 1; i < validationResults.length; i++)
+			if (validationResults[i] != 0)
+				return false;
 
 		// Get the first spot
 		final PreprocessedPeakResult firstResult = fitResult.results[0];
@@ -800,6 +822,10 @@ public class MultiPathFilter
 			)
 			return false;
 		//@formatter:on
+
+		// Check the quadrant analysis on the fit residuals
+		if (((singleQA) ? multiPathResult.getSingleQAScore() : multiPathResult.getMultiQAScore()) < residualsThreshold)
+			return false;
 
 		// We must validate the spot without width filtering. Do not change the min filter.
 		filter.setup(DirectFilter.NO_WIDTH);
@@ -925,6 +951,9 @@ public class MultiPathFilter
 		//}
 	}
 
+	private int[] validationResults;
+	private boolean failExisting, failNew;
+
 	/**
 	 * Check all new and all existing results are valid. Returns the new results.
 	 * <p>
@@ -949,6 +978,13 @@ public class MultiPathFilter
 			return null;
 		final PreprocessedPeakResult[] results = fitResult.results;
 
+		// Validate the results
+		validationResults = new int[results.length];
+		for (int i = 0; i < results.length; i++)
+		{
+			validationResults[i] = filter.validate(results[i]);
+		}
+
 		// All new and existing results should be valid
 		int count = 0;
 		final int[] ok = new int[results.length];
@@ -957,6 +993,9 @@ public class MultiPathFilter
 		// Note: We do not check the store is not null. This is private method 
 		// and we send in a null store if necessary.
 		final boolean minimalFilter = minFilter != null;
+
+		failExisting = false;
+		failNew = false;
 
 		for (int i = 0; i < results.length; i++)
 		{
@@ -971,34 +1010,29 @@ public class MultiPathFilter
 						continue;
 				}
 
-				// All new results must pass
-				if (accept(results[i]))
+				if (validationResults[i] == 0)
 				{
 					ok[count++] = i;
 				}
 				else
 				{
+					failNew = true;
 					if (minimalFilter)
 					{
 						if (minAccept(results[i]))
 							store.passMin(results[i]);
 					}
-					else
-						return null;
 				}
 			}
 			else if (results[i].isExistingResult())
 			{
-				// All existing results must pass
-				if (!accept(results[i]))
-				{
-					return null;
-				}
+				if (validationResults[i] != 0)
+					failExisting = true;
 			}
 			else if (validateCandidates)
 			{
 				// Optionally candidates must pass
-				if (accept(results[i]))
+				if (validationResults[i] == 0)
 				{
 					ok[count++] = i;
 				}
@@ -1013,7 +1047,9 @@ public class MultiPathFilter
 			}
 		}
 
-		if (count == 0)
+		// All new results must pass
+		// All existing results must pass
+		if (count == 0 || failNew || failExisting)
 			return null;
 
 		// Return the new results
@@ -1051,6 +1087,13 @@ public class MultiPathFilter
 			return null;
 		final PreprocessedPeakResult[] results = fitResult.results;
 
+		// Validate the results
+		validationResults = new int[results.length];
+		for (int i = 0; i < results.length; i++)
+		{
+			validationResults[i] = filter.validate(results[i]);
+		}
+
 		// Any new and all existing results should be valid
 		int count = 0;
 		final int[] ok = new int[results.length];
@@ -1059,6 +1102,9 @@ public class MultiPathFilter
 		// Note: We do not check the store is not null. This is private method 
 		// and we send in a null store if necessary.
 		final boolean minimalFilter = minFilter != null;
+
+		failExisting = false;
+		failNew = false;
 
 		for (int i = 0; i < results.length; i++)
 		{
@@ -1074,12 +1120,13 @@ public class MultiPathFilter
 				}
 
 				// Any new result that pass are OK
-				if (accept(results[i]))
+				if (validationResults[i] == 0)
 				{
 					ok[count++] = i;
 				}
 				else
 				{
+					failNew = true;
 					if (minimalFilter)
 					{
 						if (minAccept(results[i]))
@@ -1090,13 +1137,13 @@ public class MultiPathFilter
 			else if (results[i].isExistingResult())
 			{
 				// All existing results must pass
-				if (!accept(results[i]))
-					return null;
+				if (validationResults[i] != 0)
+					failExisting = true;
 			}
 			else if (validateCandidates)
 			{
 				// Optionally candidates must pass
-				if (accept(results[i]))
+				if (validationResults[i] == 0)
 				{
 					ok[count++] = i;
 				}
@@ -1111,7 +1158,8 @@ public class MultiPathFilter
 			}
 		}
 
-		if (count == 0)
+		// All existing results must pass
+		if (count == 0 || failExisting)
 			return null;
 
 		// Return the new results

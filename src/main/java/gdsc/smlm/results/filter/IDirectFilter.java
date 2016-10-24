@@ -166,4 +166,11 @@ public interface IDirectFilter
 	 * @return the validation result from the last call to {@link #accept(PreprocessedPeakResult)}
 	 */
 	int getResult();
+	
+	/**
+	 * Copy this filter.
+	 *
+	 * @return the copy
+	 */
+	IDirectFilter copy();
 }

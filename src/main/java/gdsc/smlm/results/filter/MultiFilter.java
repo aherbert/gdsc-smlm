@@ -154,18 +154,18 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			int s1 = 0, s2 = 0;
 
 			// Current order of filter power obtained from BenchmarkFilterAnalysis:
-			// Precision, Max Width, SNR, Shift, Min width
-			if (precision != 0)
+			// SNR, Max Width, Precision, Shift, Min width
+			if (snr != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterVarianceComponent(precision);
+				components1[s1++] = components2[s2++] = new MultiFilterSNRComponent(snr);
 			}
 			if (maxWidth != 0 || minWidth != 0)
 			{
 				components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
 			}
-			if (snr != 0)
+			if (precision != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterSNRComponent(snr);
+				components1[s1++] = components2[s2++] = new MultiFilterVarianceComponent(precision);
 			}
 			if (shift != 0)
 			{
@@ -202,21 +202,20 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	public boolean accept(PeakResult peak)
 	{
 		// Current order of filter power obtained from BenchmarkFilterAnalysis:
-		// Precision, Max Width, SNR, Shift, Min width
+		// SNR, Max Width, Precision, Shift, Min width
 
-		final float sd = peak.getSD();
-		final double s = nmPerPixel * sd;
-		final double N = peak.getSignal();
-
-		// Precision
-		if (PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) > variance)
+		if (SNRFilter.getSNR(peak) < this.snr)
 			return false;
 
 		// Width
+		final float sd = peak.getSD();
 		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
 			return false;
-
-		if (SNRFilter.getSNR(peak) < this.snr)
+		
+		// Precision
+		final double s = nmPerPixel * sd;
+		final double N = peak.getSignal();
+		if (PeakResult.getVariance(nmPerPixel, s, N / gain, peak.getNoise() / gain, emCCD) > variance)
 			return false;
 
 		// Shift

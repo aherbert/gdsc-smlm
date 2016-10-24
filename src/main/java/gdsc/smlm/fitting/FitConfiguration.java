@@ -1017,7 +1017,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				return setValidationResult(FitStatus.OK, null);
 			if (log != null)
 			{
-				log.info("Bad peak %d: %s", peak.getId(), DirectFilter.getStatusMessage(peak, directFilter.getResult()));
+				log.info("Bad peak %d: %s", peak.getId(),
+						DirectFilter.getStatusMessage(peak, directFilter.getResult()));
 			}
 			if (DirectFilter.anySet(directFilter.getResult(), V_X_SD_FACTOR | V_Y_SD_FACTOR))
 			{
@@ -1272,7 +1273,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			// In the future we may want to use this so throw an exception so we notice
 			throw new NotImplementedException("Unique Id not available");
 		}
-		
+
 		public int getId()
 		{
 			return id;
@@ -1303,7 +1304,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			// Comment this out to use the configured local background.
 			// If uncommented then the background will be either the local background or the fitted background.
 			final double localBackground = getLocalBackground();
-			
+
 			return (float) ((localBackground > bias)
 					? PeakResult.localBackgroundToNoise(localBackground - bias, gain, emCCD)
 					: FitConfiguration.this.noise);
@@ -1566,11 +1567,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		final double variance = getVariance(0, signal, PeakResult.getSD(xsd, ysd), false);
 		final double variance2 = getVariance(b, signal, PeakResult.getSD(xsd, ysd), true);
 		// Q. Should noise be the local background or the estimate from the whole image?
-		
+
 		// This uses the local background if specified or the estimate from the whole image 
 		//final double noise = (localBackground > bias)
 		//		? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
-		
+
 		// This uses the local fitted background to estimate the noise
 		final double noise = (b > bias) ? PeakResult.localBackgroundToNoise(b - bias, this.gain, this.emCCD)
 				: this.noise;
@@ -2253,7 +2254,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 		return "";
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2359,6 +2360,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public int getResult()
 	{
 		return filterResult;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#copy()
+	 */
+	public IDirectFilter copy()
+	{
+		return (IDirectFilter) clone();
 	}
 
 	/**
