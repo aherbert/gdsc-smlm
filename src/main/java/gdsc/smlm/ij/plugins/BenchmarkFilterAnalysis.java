@@ -1348,7 +1348,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addCheckbox("Evolve", evolve);
 		gd.addSlider("Step_search", 0, 4, stepSearch);
 		gd.addStringField("Title", resultsTitle, 20);
-		String[] labels = { "TP", "FP", "FN" };
+		String[] labels = { "Show_TP", "Show_FP", "Show_FN" };
 		gd.addCheckboxGroup(1, 3, labels, new boolean[] { showTP, showFP, showFN });
 
 		if (gd.getLayout() != null)
