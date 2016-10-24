@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Checkbox;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,6 +17,10 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -95,7 +102,7 @@ import ij.text.TextWindow;
 /**
  * Fits all the candidate spots identified by the benchmark spot filter plugin.
  */
-public class BenchmarkSpotFit implements PlugIn
+public class BenchmarkSpotFit implements PlugIn, ItemListener
 {
 	private static final String TITLE = "Fit Spot Data";
 
@@ -197,6 +204,8 @@ public class BenchmarkSpotFit implements PlugIn
 	private static FitEngineConfiguration config;
 	private static Calibration cal;
 	private static MultiPathFilter multiFilter;
+	private static MultiFilter2 minimalFilter;;
+
 	static
 	{
 		cal = new Calibration();
@@ -227,7 +236,7 @@ public class BenchmarkSpotFit implements PlugIn
 		final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
 
 		// Add a minimum filter to use for storing estimates
-		final MultiFilter2 minimalFilter = FitWorker.createMinimalFilter();
+		minimalFilter = FitWorker.createMinimalFilter();
 
 		// We might as well use the doublet fits given we will compute them.
 		final double residualsThreshold = 0.4;
@@ -243,11 +252,17 @@ public class BenchmarkSpotFit implements PlugIn
 	static double signalFactor = 2;
 	static double lowerSignalFactor = 1;
 
+	private static boolean useBenchmarkSettings = true;
 	private static boolean computeDoublets = true; //config.getResidualsThreshold() < 1;
 	private static boolean showFilterScoreHistograms = false;
 	private static boolean saveFilterRange = true;
 	private static boolean showCorrelation = false;
 	private static boolean rankByIntensity = false;
+
+	private TextArea taFilterXml;
+	private Checkbox cbIncludeNeighbours;
+	private TextField textNeighbourHeight;
+	private Checkbox cbComputeDoublets;
 
 	private boolean extraOptions = false;
 
@@ -866,6 +881,7 @@ public class BenchmarkSpotFit implements PlugIn
 		run();
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean showDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -895,6 +911,12 @@ public class BenchmarkSpotFit implements PlugIn
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 
 		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
+
+		// Allow loading the best filter fot these results
+		boolean benchmarkSettingsCheckbox = fitResultsId == BenchmarkFilterAnalysis.lastId; 
+		if (benchmarkSettingsCheckbox)
+			gd.addCheckbox("Benchmark_settings", useBenchmarkSettings);
+
 		gd.addTextAreas(XmlUtils.convertQuotes(multiFilter.toXML()), null, 6, 60);
 
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
@@ -911,6 +933,36 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 		}
 
+		// Add a mouse listener to the config file field
+		if (benchmarkSettingsCheckbox && Utils.isShowGenericDialog())
+		{
+			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
+			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
+			taFilterXml = gd.getTextArea1();
+			
+			Checkbox b = checkboxes.get(0);
+			b.addItemListener(this);
+			cbIncludeNeighbours = checkboxes.get(1);
+			textNeighbourHeight = numerics.get(9);
+			cbComputeDoublets = checkboxes.get(2);
+			
+			if (useBenchmarkSettings)
+			{
+				FitConfiguration tmpFitConfig = new FitConfiguration();
+				FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
+				{
+					cbIncludeNeighbours.setState(tmp.isIncludeNeighbours());
+					textNeighbourHeight.setText(Utils.rounded(tmp.getNeighbourHeightThreshold()));
+					cbComputeDoublets.setState(tmpFitConfig.isComputeResiduals());
+
+					final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
+					final double residualsThreshold = tmp.getResidualsThreshold();
+					taFilterXml.setText(new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold).toXML());
+				}
+			}
+		}
+		
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -929,8 +981,42 @@ public class BenchmarkSpotFit implements PlugIn
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		fitConfig.setFitFunction(gd.getNextChoiceIndex());
 
-		multiFilter = MultiPathFilter.fromXML(gd.getNextText());
-		if (multiFilter == null)
+		boolean myUseBenchmarkSettings = false;
+		if (benchmarkSettingsCheckbox)
+			myUseBenchmarkSettings = useBenchmarkSettings = gd.getNextBoolean();
+
+		// Read dialog settings
+		String xml = gd.getNextText();
+		boolean includeNeighbours = gd.getNextBoolean();
+		double neighbourHeightThreshold = gd.getNextNumber();
+		boolean myComputeDoublets = gd.getNextBoolean();
+
+		MultiPathFilter myMultiFilter = null;
+		if (myUseBenchmarkSettings)
+		{
+			FitConfiguration tmpFitConfig = new FitConfiguration();
+			FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+			if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
+			{
+				config.setIncludeNeighbours(tmp.isIncludeNeighbours());
+				config.setNeighbourHeightThreshold(tmp.getNeighbourHeightThreshold());
+				computeDoublets = tmpFitConfig.isComputeResiduals();
+
+				final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
+				final double residualsThreshold = tmp.getResidualsThreshold();
+				myMultiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
+			}
+		}
+		else
+		{
+			myMultiFilter = MultiPathFilter.fromXML(xml);
+
+			config.setIncludeNeighbours(includeNeighbours);
+			config.setNeighbourHeightThreshold(neighbourHeightThreshold);
+			computeDoublets = myComputeDoublets;
+		}
+
+		if (myMultiFilter == null)
 		{
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("The multi-path filter was invalid.\n \nContinue with a default filter?");
@@ -940,10 +1026,11 @@ public class BenchmarkSpotFit implements PlugIn
 			if (!gd.wasOKed())
 				return false;
 		}
+		else
+		{
+			multiFilter = myMultiFilter;
+		}
 
-		config.setIncludeNeighbours(gd.getNextBoolean());
-		config.setNeighbourHeightThreshold(gd.getNextNumber());
-		computeDoublets = gd.getNextBoolean();
 		if (computeDoublets)
 		{
 			//config.setComputeResiduals(true);
@@ -2162,5 +2249,53 @@ public class BenchmarkSpotFit implements PlugIn
 		pFitConfig.setLambda(fitConfig.getLambda());
 
 		return true;
+	}
+
+	public void itemStateChanged(ItemEvent e)
+	{
+		if (e.getSource() instanceof Checkbox)
+		{
+			Checkbox checkbox = (Checkbox) e.getSource();
+
+			boolean includeNeighbours;
+			double neighbourHeightThrehsold;
+			boolean computeDoublets;
+			MultiPathFilter myMultiFilter;
+
+			if (checkbox.getState())
+			{
+				FitConfiguration tmpFitConfig = new FitConfiguration();
+				FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
+				{
+					includeNeighbours = tmp.isIncludeNeighbours();
+					neighbourHeightThrehsold = tmp.getNeighbourHeightThreshold();
+					computeDoublets = tmpFitConfig.isComputeResiduals();
+
+					final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
+					final double residualsThreshold = tmp.getResidualsThreshold();
+					myMultiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
+				}
+				else
+				{
+					IJ.log("Failed to update settings using the filter analysis");
+					checkbox.setState(false);
+					return;
+				}
+			}
+			else
+			{
+				includeNeighbours = config.isIncludeNeighbours();
+				neighbourHeightThrehsold = config.getNeighbourHeightThreshold();
+				computeDoublets = BenchmarkSpotFit.computeDoublets;
+				myMultiFilter = multiFilter;
+			}
+
+			// Update the dialog
+			taFilterXml.setText(myMultiFilter.toXML());
+			cbIncludeNeighbours.setState(includeNeighbours);
+			textNeighbourHeight.setText(Utils.rounded(neighbourHeightThrehsold));
+			cbComputeDoublets.setState(computeDoublets);
+		}
 	}
 }

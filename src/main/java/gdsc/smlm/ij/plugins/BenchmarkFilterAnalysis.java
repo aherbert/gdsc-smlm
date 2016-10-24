@@ -209,7 +209,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double[][] lowerLimit;
 	private static double[][] upperLimit;
 	private static double[][] increment;
-	private static int lastId = 0;
+	static int lastId = 0;
 	private static HashMap<Integer, IdPeakResult[]> actualCoordinates = null;
 	private static MultiPathFitResults[] resultsList = null;
 	//private static MultiPathFitResults[] clonedResultsList = null;
@@ -1952,8 +1952,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			sb.append('\t').append(names[index]);
 			sb.append('\t');
-			if (bestFilterScore.isAtLimit(index))
-				sb.append('Y');
+			sb.append(bestFilterScore.atLimit(index));
 		}
 		else
 		{
@@ -2441,17 +2440,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			resultsWindow.getTextPanel().updateDisplay();
 
 		// Check the top filter against the limits
-		boolean[] atLimit = null;
+		char[] atLimit = null;
 		if (allSameType)
 		{
 			if (max != null)
 			{
 				int[] indices = max.filter.getChromosomeParameters();
-				atLimit = new boolean[indices.length];
+				atLimit = new char[indices.length];
 				StringBuilder sb = new StringBuilder();
 				final int set = setNumber - 1;
 				for (int j = 0; j < indices.length; j++)
 				{
+					atLimit[j] = ' ';
 					final int p = indices[j];
 					if (!wasNotExpanded(setNumber, p))
 					{
@@ -2459,7 +2459,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						int c1 = Double.compare(value, lowerLimit[set][p]);
 						if (c1 <= 0)
 						{
-							atLimit[j] = true;
+							atLimit[j] = '<';
 							sb.append(" : ").append(max.filter.getParameterName(p)).append(" [")
 									.append(Utils.rounded(value));
 							if (c1 == -1)
@@ -2471,7 +2471,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							int c2 = Double.compare(value, upperLimit[set][p]);
 							if (c2 >= 0)
 							{
-								atLimit[j] = true;
+								atLimit[j] = '>';
 								sb.append(" : ").append(max.filter.getParameterName(p)).append(" [")
 										.append(Utils.rounded(value));
 								if (c2 == 1)
@@ -3673,9 +3673,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final int size;
 		final int[] combinations;
 		final boolean[] enable;
-		boolean[] atLimit;
+		char[] atLimit;
 
-		private FilterScore(ScoreResult r, boolean[] atLimit, int index, long time, ClassificationResult r2, int size,
+		private FilterScore(ScoreResult r, char[] atLimit, int index, long time, ClassificationResult r2, int size,
 				int[] combinations, boolean[] enable)
 		{
 			this.r = r;
@@ -3694,12 +3694,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			this(r, null, index, time, r2, size, combinations, enable);
 		}
 
-		public FilterScore(ScoreResult r, boolean[] atLimit)
+		public FilterScore(ScoreResult r, char[] atLimit)
 		{
 			this(r, atLimit, 0, 0, null, 0, null, null);
 		}
 
-		public void update(ScoreResult r, boolean[] atLimit)
+		public void update(ScoreResult r, char[] atLimit)
 		{
 			this.score = r.score;
 			this.criteria = r.criteria;
@@ -3714,19 +3714,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		public boolean isAtLimit()
 		{
-			if (atLimit == null)
+			if (atLimit != null)
 				for (int i = 0; i < atLimit.length; i++)
-					if (atLimit[i])
+					if (atLimit[i] != ' ')
 						return true;
 			return false;
 		}
 
-		public boolean isAtLimit(int i)
+		public char atLimit(int i)
 		{
-			if (atLimit == null && i < atLimit.length)
-				if (atLimit[i])
-					return true;
-			return false;
+			if (atLimit != null && i < atLimit.length)
+				return atLimit[i];
+			return ' ';
 		}
 
 		public int compareTo(FilterScore that)
