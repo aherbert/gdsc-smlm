@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -85,15 +87,18 @@ import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
+import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
-import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
+import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
@@ -170,6 +175,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int componentAnalysis = 3;
 	private static boolean evolve = false;
 	private static int stepSearch = 0;
+	private static boolean showTP = false;
+	private static boolean showFP = false;
+	private static boolean showFN = false;
 
 	private static int populationSize = 500;
 	private static int failureLimit = 5;
@@ -262,12 +270,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private class IdPeakResult extends PeakResult
 	{
 		final int id;
+		final int uniqueId;
 
-		public IdPeakResult(int id, PeakResult result)
+		public IdPeakResult(int id, int uniqueId, PeakResult result)
 		{
 			super(result.peak, result.origX, result.origY, result.origValue, result.error, result.noise, result.params,
 					null);
 			this.id = id;
+			this.uniqueId = uniqueId;
 		}
 	}
 
@@ -1242,6 +1252,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			int last = -1;
 			int id = 0;
+			int uniqueId = 0;
 			ArrayList<PeakResult> tmp = new ArrayList<PeakResult>();
 			// Add the results to the lists
 			for (PeakResult p : list)
@@ -1256,7 +1267,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					tmp.clear();
 				}
 				last = p.peak;
-				tmp.add(new IdPeakResult(id++, p));
+				tmp.add(new IdPeakResult(id++, uniqueId++, p));
 			}
 
 			if (!tmp.isEmpty())
@@ -1337,6 +1348,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		gd.addCheckbox("Evolve", evolve);
 		gd.addSlider("Step_search", 0, 4, stepSearch);
 		gd.addStringField("Title", resultsTitle, 20);
+		String[] labels = { "TP", "FP", "FN" };
+		gd.addCheckboxGroup(1, 3, labels, new boolean[] { showTP, showFP, showFN });
 
 		if (gd.getLayout() != null)
 		{
@@ -1437,6 +1450,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		evolve = gd.getNextBoolean();
 		stepSearch = (int) Math.abs(gd.getNextNumber());
 		resultsTitle = gd.getNextString();
+		showTP = gd.getNextBoolean();
+		showFP = gd.getNextBoolean();
+		showFN = gd.getNextBoolean();
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
 		resultsPrefix2 = "\t" + failCount;
@@ -1668,8 +1684,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		showPlots();
 		calculateSensitivity();
 		topFilterResults = depthAnalysis(topFilterResults, bestFilter);
-		scoreAnalysis(topFilterResults, bestFilter);
+		topFilterResults = scoreAnalysis(topFilterResults, bestFilter);
 		componentAnalysis(topFilterClassificationResult, filters.get(0));
+		if (isShowOverlay())
+			showOverlay(topFilterResults, bestFilter);
 
 		wo.tile();
 	}
@@ -3242,11 +3260,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *            The assignments generated from running the filter (or null)
 	 * @param filter
 	 *            the filter
+	 * @return the assignments
 	 */
-	private void scoreAnalysis(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter)
+	private ArrayList<FractionalAssignment[]> scoreAnalysis(ArrayList<FractionalAssignment[]> allAssignments,
+			DirectFilter filter)
 	{
 		if (!scoreAnalysis)
-			return;
+			return null;
 
 		// Build a histogram of the fitted spots that were available to be scored
 		double[] signal = signalFactorStats.getValues();
@@ -3336,6 +3356,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		PlotWindow pw1 = Utils.display(title1, plot1);
 		if (Utils.isNewWindow())
 			wo.add(pw1);
+
+		return allAssignments;
 	}
 
 	private void componentAnalysis(FractionClassificationResult bestResult, FilterScore bestFilterScore)
@@ -4366,5 +4388,127 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return scores2.get(maxi);
 		}
 		return null;
+	}
+
+	private boolean isShowOverlay()
+	{
+		return (showTP || showFP || showFN);
+	}
+
+	/**
+	 * Show overlay.
+	 *
+	 * @param allAssignments
+	 *            The assignments generated from running the filter (or null)
+	 * @param filter
+	 *            the filter
+	 */
+	private void showOverlay(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter)
+	{
+		ImagePlus imp = CreateData.getImage();
+		if (imp == null)
+			return;
+
+		// Run the filter manually to get the results that pass.
+		if (allAssignments == null)
+			allAssignments = getAssignments(filter);
+
+		Overlay o = new Overlay();
+
+		// Do TP
+		Set<Integer> actual = new TreeSet<Integer>();
+		Set<Integer> predicted = new TreeSet<Integer>();
+		for (FractionalAssignment[] assignments : allAssignments)
+		{
+			if (assignments == null || assignments.length == 0)
+				continue;
+			float[] tx = null, ty = null;
+			int t = 0;
+			if (showTP)
+			{
+				tx = new float[assignments.length];
+				ty = new float[assignments.length];
+			}
+			int frame = 0;
+			for (int i = 0; i < assignments.length; i++)
+			{
+				CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
+				IdPeakResult peak = (IdPeakResult) c.peak;
+				BasePreprocessedPeakResult spot = c.spot;
+				actual.add(peak.uniqueId);
+				predicted.add(spot.getUniqueId());
+				frame = spot.getFrame();
+				if (showTP)
+				{
+					tx[t] = spot.getX();
+					ty[t++] = spot.getY();
+				}
+			}
+			if (showTP)
+				SpotFinderPreview.addRoi(frame, o, tx, ty, t, Color.green);
+		}
+
+		float[] x = new float[10];
+		float[] y = new float[x.length];
+
+		// Do FP (all remaining results that are not a TP)
+		if (showFP)
+		{
+			final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+			PreprocessedPeakResult[] results = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
+
+			int frame = 0;
+			int c = 0;
+			for (int i = 0; i < results.length; i++)
+			{
+				if (frame != results[i].getFrame())
+				{
+					if (c != 0)
+						SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
+					c = 0;
+				}
+				frame = results[i].getFrame();
+				if (predicted.contains(results[i].getUniqueId()))
+					continue;
+				if (x.length == c)
+				{
+					x = Arrays.copyOf(x, c * 2);
+					y = Arrays.copyOf(y, c * 2);
+				}
+				x[c] = results[i].getX();
+				y[c++] = results[i].getY();
+			}
+			if (c != 0)
+				SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
+		}
+
+		// Do TN (all remaining peaks that have not been matched)
+		if (showFN)
+		{
+			int c = 0;
+
+			// Add the results to the lists
+			for (Entry<Integer, IdPeakResult[]> entry : actualCoordinates.entrySet())
+			{
+				IdPeakResult[] results = entry.getValue();
+				c = 0;
+				if (x.length <= results.length)
+				{
+					x = Arrays.copyOf(x, results.length);
+					y = Arrays.copyOf(y, results.length);
+				}
+				for (int i = 0; i < results.length; i++)
+				{
+					if (actual.contains(results[i].uniqueId))
+						continue;
+					x[c] = results[i].getXPosition();
+					y[c++] = results[i].getYPosition();
+				}
+				if (c != 0)
+					SpotFinderPreview.addRoi(entry.getKey(), o, x, y, c, Color.yellow);
+			}
+		}
+
+		imp.setOverlay(o);
 	}
 }
