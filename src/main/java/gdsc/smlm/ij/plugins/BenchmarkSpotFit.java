@@ -26,11 +26,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -38,6 +41,7 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import gdsc.core.ij.Utils;
@@ -46,6 +50,7 @@ import gdsc.core.match.AssignmentComparator;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
+import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.ImmutableFractionalAssignment;
 import gdsc.core.match.PointPair;
 import gdsc.core.utils.Correlator;
@@ -78,15 +83,20 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
+import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.EShiftFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
+import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
+import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PrecisionFilter;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
+import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.SNRFilter;
 import gdsc.smlm.results.filter.ShiftFilter;
 import gdsc.smlm.results.filter.SignalFilter;
@@ -116,13 +126,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	// Used to try and guess the range for filtering the results
 	private enum LowerLimit
 	{
-		ZERO(false), ONE_PERCENT(false), MAX_NEGATIVE_CUMUL_DELTA(true);
+		ZERO(false), ONE_PERCENT(false), MAX_NEGATIVE_CUMUL_DELTA(true), HALF_MAX_JACCARD_VALUE(false, true);
 
 		final boolean requiresDelta;
+		final boolean requiresJaccard;
 
 		LowerLimit(boolean requiresDelta)
 		{
+			this(requiresDelta, false);
+		}
+
+		LowerLimit(boolean requiresDelta, boolean requiresJaccard)
+		{
 			this.requiresDelta = requiresDelta;
+			this.requiresJaccard = requiresJaccard;
 		}
 
 		public boolean requiresDeltaHistogram()
@@ -133,13 +150,21 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private enum UpperLimit
 	{
-		ZERO(false), MAX_POSITIVE_CUMUL_DELTA(true), NINETY_NINE_PERCENT(false), NINETY_NINE_NINE_PERCENT(false);
+		ZERO(false), MAX_POSITIVE_CUMUL_DELTA(true), NINETY_NINE_PERCENT(false), NINETY_NINE_NINE_PERCENT(
+				false), MAX_JACCARD2(false, true);
 
 		final boolean requiresDelta;
+		final boolean requiresJaccard;
 
 		UpperLimit(boolean requiresDelta)
 		{
+			this(requiresDelta, false);
+		}
+
+		UpperLimit(boolean requiresDelta, boolean requiresJaccard)
+		{
 			this.requiresDelta = requiresDelta;
+			this.requiresJaccard = requiresJaccard;
 		}
 
 		public boolean requiresDeltaHistogram()
@@ -198,7 +223,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			filterCriteria[i++] = new FilterCriteria("MaxWidth",   LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
 			filterCriteria[i++] = new FilterCriteria("Shift",      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
 			filterCriteria[i++] = new FilterCriteria("EShift",     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-			filterCriteria[i++] = new FilterCriteria("Precision",  LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			// Precision has enough descrimination power to be able to use the jaccard score
+			filterCriteria[i++] = new FilterCriteria("Precision",  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
 			// These are not filters but are used for stats analysis
 			filterCriteria[i++] = new FilterCriteria("Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
 			filterCriteria[i++] = new FilterCriteria("Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
@@ -459,12 +485,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		MultiPathFitResult[] fitResult;
 		float noise;
 
-		/**
-		 * Store if the candidates can be fitted and match a position. Size is the number of scored spots. Each entry
-		 * has data for fitting: [0] a single; [1] multi; [2] first doublet; [3] second doublet
-		 */
-		boolean[][] fitMatch;
-
 		/** Store the z-position of the actual spots for later analysis. Size is the number of actual spots */
 		double[] zPosition;
 
@@ -622,7 +642,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// We will match all fitting results so providing the upper limit for the match score after filtering.
 			final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			final double[] zPosition = new double[actual.length];
-			final boolean[][] fitMatch = new boolean[spots.length][6];
 			SpotMatch[] match = new SpotMatch[spots.length];
 			int matchCount = 0;
 			final RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
@@ -647,6 +666,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					// Use all the results. Doublets can provide two Ids. 
 					// Otherwise store all results with the same Id. The best match for these results will be chosen.
 					final int size = predicted.size();
+
+					// TODO - fix this so that all new results are processed as multi-fit can return more than 1 new result.
+					
 
 					if (isOK(fitResult[i].getSingleFitResult()))
 					{
@@ -702,6 +724,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 					// Match all the fit results to spots. We want to match all fit results to actual spots.
 					// All remaining candidate spots can then be matched to any remaining actual spots.
+					ResultAssignment[][] resultAssignments = new ResultAssignment[predicted.size()][];
+					int[] resultAssignmentsSize = new int[resultAssignments.length];
 					for (int ii = 0; ii < actual.length; ii++)
 					{
 						final float x = actual[ii].getX();
@@ -713,31 +737,39 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 							{
 								// Get the score
 								double distance = d2;
+								double score = 0;
 
 								if (predicted.get(jj).type != MultiPathPoint.SPOT)
 								{
 									// Use the signal and ramped distance scoring
+									score = rampedScore.score(Math.sqrt(d2));
 									if (signalScore != null)
 									{
-										distance = rampedScore.score(Math.sqrt(d2));
 										final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
 										double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
 												p3.peakResult.getSignal());
-										distance *= signalScore.score(Math.abs(sf));
+										score *= signalScore.score(Math.abs(sf));
 
-										if (distance == 0)
+										if (score == 0)
 											// This doesn't match
 											continue;
-
-										fitMatch[predicted.get(jj).i][predicted.get(jj).type] = true;
-
-										// Invert for the ranking (i.e. low is best)
-										distance = 1 - distance;
-
-										// Ensure a perfect match can still be ranked ... closest first
-										if (distance == 0)
-											distance -= (matchDistance - d2);
 									}
+
+									// Invert for the ranking (i.e. low is best)
+									distance = 1 - score;
+
+									// Ensure a perfect match can still be ranked ... closest first
+									if (distance == 0)
+										distance -= (matchDistance - d2);
+
+									// Store the assignments for this result for later filter analysis
+									if (resultAssignments[jj] == null)
+										resultAssignments[jj] = new ResultAssignment[5];
+									else if (resultAssignments[jj].length == resultAssignmentsSize[jj])
+										resultAssignments[jj] = Arrays.copyOf(resultAssignments[jj],
+												resultAssignmentsSize[jj] * 2);
+									resultAssignments[jj][resultAssignmentsSize[jj]++] = new ResultAssignment(ii,
+											distance, score);
 								}
 								else
 								{
@@ -745,10 +777,23 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 									// after any fit results.
 									distance += matchDistance + 1;
 								}
+
 								// Store the index of the predicted point in the score
 								assignments
 										.add(new ImmutableFractionalAssignment(ii, predicted.get(jj).id, distance, jj));
 							}
+						}
+					}
+
+					// Set assignments
+					for (int jj = 0; jj < predicted.size(); jj++)
+					{
+						if (predicted.get(jj).type == MultiPathPoint.SPOT)
+							continue;
+						if (resultAssignmentsSize[jj] != 0)
+						{
+							BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) predicted.get(jj).result;
+							result.setAssignments(Arrays.copyOf(resultAssignments[jj], resultAssignmentsSize[jj]));
 						}
 					}
 
@@ -827,7 +872,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			candidates.tn = tn;
 			candidates.fn = fn;
 			candidates.fitResult = fitResult;
-			candidates.fitMatch = fitMatch;
 			candidates.match = match;
 			candidates.zPosition = zPosition;
 			candidates.noise = fitWorker.getNoise();
@@ -920,7 +964,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
 
 		// Allow loading the best filter fot these results
-		boolean benchmarkSettingsCheckbox = fitResultsId == BenchmarkFilterAnalysis.lastId; 
+		boolean benchmarkSettingsCheckbox = fitResultsId == BenchmarkFilterAnalysis.lastId;
 		if (benchmarkSettingsCheckbox)
 			gd.addCheckbox("Benchmark_settings", useBenchmarkSettings);
 
@@ -946,13 +990,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
 			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
 			taFilterXml = gd.getTextArea1();
-			
+
 			Checkbox b = checkboxes.get(0);
 			b.addItemListener(this);
 			cbIncludeNeighbours = checkboxes.get(1);
 			textNeighbourHeight = numerics.get(9);
 			cbComputeDoublets = checkboxes.get(2);
-			
+
 			if (useBenchmarkSettings)
 			{
 				FitConfiguration tmpFitConfig = new FitConfiguration();
@@ -969,7 +1013,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				}
 			}
 		}
-		
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -1223,9 +1267,67 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitResults.putAll(w.results);
 		}
 
-		summariseResults(fitResults, runTime);
+		// Assign a unique ID to each result
+		int count = 0;
+		for (FilterCandidates result : fitResults.values())
+		{
+			for (int i = 0; i < result.fitResult.length; i++)
+			{
+				final MultiPathFitResult fitResult = result.fitResult[i];
+				count += count(fitResult.getSingleFitResult());
+				count += count(fitResult.getMultiFitResult());
+				count += count(fitResult.getDoubletFitResult());
+				count += count(fitResult.getMultiDoubletFitResult());
+			}
+		}
+		PreprocessedPeakResult[] preprocessedPeakResults = new PreprocessedPeakResult[count];
+		count = 0;
+		for (FilterCandidates result : fitResults.values())
+		{
+			for (int i = 0; i < result.fitResult.length; i++)
+			{
+				final MultiPathFitResult fitResult = result.fitResult[i];
+				count = store(fitResult.getSingleFitResult(), count, preprocessedPeakResults);
+				count = store(fitResult.getMultiFitResult(), count, preprocessedPeakResults);
+				count = store(fitResult.getDoubletFitResult(), count, preprocessedPeakResults);
+				count = store(fitResult.getMultiDoubletFitResult(), count, preprocessedPeakResults);
+			}
+		}
+
+		summariseResults(fitResults, runTime, preprocessedPeakResults);
 
 		IJ.showStatus("");
+	}
+
+	private int count(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
+	{
+		if (fitResult == null || fitResult.results == null)
+			return 0;
+		int count = 0;
+		for (int i = 0; i < fitResult.results.length; i++)
+		{
+			PreprocessedPeakResult result = fitResult.results[i];
+			if (result.isNewResult())
+				count++;
+		}
+		return count;
+	}
+
+	private int store(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int count,
+			PreprocessedPeakResult[] preprocessedPeakResults)
+	{
+		if (fitResult == null || fitResult.results == null)
+			return count;
+		for (int i = 0; i < fitResult.results.length; i++)
+		{
+			BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[i];
+			if (result.isNewResult())
+			{
+				result.uniqueId = count++;
+				preprocessedPeakResults[result.uniqueId] = result;
+			}
+		}
+		return count;
 	}
 
 	/**
@@ -1326,7 +1428,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 	}
 
-	private void summariseResults(HashMap<Integer, FilterCandidates> filterCandidates, long runTime)
+	private void summariseResults(HashMap<Integer, FilterCandidates> filterCandidates, long runTime,
+			PreprocessedPeakResult[] preprocessedPeakResults)
 	{
 		createTable();
 
@@ -1375,7 +1478,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					addStatus(multiDoubletStatus, fitResult.getMultiDoubletFitResult());
 				}
 
-				if (noMatch(result.fitMatch[i]))
+				if (noMatch(fitResult))
 				{
 					if (result.spots[i].match)
 						failcTP++;
@@ -1388,18 +1491,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				// [0] all fitted spots
 				// [1] fitted spots that match a result
 				// [2] fitted spots that do not match a result
-				// Note that matching was done by picking the very best matches from all the results.
-				// So for these statistics we need to know if the fit result matched something (TP) 
-				// or not (FP). This is stored in the result.fitMatch[] array for each fit type
-
-				addToStats(fitResult.getSingleFitResult(), 0, result.fitMatch[i][MultiPathPoint.SINGLE], stats);
-				addToStats(fitResult.getMultiFitResult(), 0, result.fitMatch[i][MultiPathPoint.MULTI], stats);
-				addToStats(fitResult.getDoubletFitResult(), 0, result.fitMatch[i][MultiPathPoint.DOUBLET1], stats);
-				addToStats(fitResult.getDoubletFitResult(), 1, result.fitMatch[i][MultiPathPoint.DOUBLET2], stats);
-				addToStats(fitResult.getMultiDoubletFitResult(), 0, result.fitMatch[i][MultiPathPoint.MULTIDOUBLET1],
-						stats);
-				addToStats(fitResult.getMultiDoubletFitResult(), 1, result.fitMatch[i][MultiPathPoint.MULTIDOUBLET2],
-						stats);
+				addToStats(fitResult.getSingleFitResult(), stats);
+				addToStats(fitResult.getMultiFitResult(), stats);
+				addToStats(fitResult.getDoubletFitResult(), stats);
+				addToStats(fitResult.getMultiDoubletFitResult(), stats);
 			}
 
 			// Statistics on spots that fit an actual result
@@ -1435,6 +1530,97 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				is[ci] = spot.spot.intensity;
 				ci++;
 			}
+		}
+
+		// We want to compute the Jaccard against the spot metric
+
+		// Filter the results using the multi-path filter
+		ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<MultiPathFitResults>(filterCandidates.size());
+		for (Entry<Integer, FilterCandidates> entry : filterCandidates.entrySet())
+		{
+			int frame = entry.getKey();
+			MultiPathFitResult[] multiPathFitResults = entry.getValue().fitResult;
+			int totalCandidates = multiPathFitResults.length;
+			int nActual = actualCoordinates.get(frame).size();
+			multiPathResults.add(new MultiPathFitResults(frame, multiPathFitResults, totalCandidates, nActual));
+		}
+		// Score the results and count the number returned
+		List<FractionalAssignment[]> assignments = new ArrayList<FractionalAssignment[]>();
+		final Set<Integer> set = new TreeSet<Integer>();
+		FractionScoreStore scoreStore = new FractionScoreStore()
+		{
+			public void add(int uniqueId)
+			{
+				set.add(uniqueId);
+			}
+		};
+		MultiPathFitResults[] multiResults = multiPathResults.toArray(new MultiPathFitResults[multiPathResults.size()]);
+		// Filter with no filter
+		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
+		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, Integer.MAX_VALUE,
+				this.results.size(), assignments, scoreStore);
+		double nPredicted = fractionResult.getTP() + fractionResult.getFP();
+
+		double[][] matchScores = new double[set.size()][];
+		int count = 0;
+		for (int i = 0; i < assignments.size(); i++)
+		{
+			FractionalAssignment[] a = assignments.get(i);
+			if (a == null)
+				continue;
+			for (int j = 0; j < a.length; j++)
+			{
+				final PreprocessedPeakResult r = ((PeakFractionalAssignment) a[j]).peakResult;
+				set.remove(r.getUniqueId());
+
+				final double precision = Math.sqrt(r.getLocationVariance());
+				final double signal = r.getSignal();
+				final double snr = r.getSNR();
+				final double width = r.getXSDFactor();
+				final double xShift = r.getXRelativeShift2();
+				final double yShift = r.getYRelativeShift2();
+				// Since these two are combined for filtering and the max is what matters.
+				final double shift = (xShift > yShift) ? Math.sqrt(xShift) : Math.sqrt(yShift);
+				final double eshift = Math.sqrt(xShift + yShift);
+
+				final double[] score = new double[8];
+				score[FILTER_SIGNAL] = signal;
+				score[FILTER_SNR] = snr;
+				score[FILTER_MIN_WIDTH] = width;
+				score[FILTER_MAX_WIDTH] = width;
+				score[FILTER_SHIFT] = shift;
+				score[FILTER_ESHIFT] = eshift;
+				score[FILTER_PRECISION] = precision;
+				score[FILTER_PRECISION + 1] = a[j].getScore();
+				matchScores[count++] = score;
+			}
+		}
+		// Add the rest
+		for (int uniqueId : set.toArray(new Integer[0]))
+		{
+			// This should not be null or something has gone wrong
+			PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
+			if (r == null)
+				throw new RuntimeException("Missing result: " + uniqueId);
+			final double precision = Math.sqrt(r.getLocationVariance());
+			final double signal = r.getSignal();
+			final double snr = r.getSNR();
+			final double width = r.getXSDFactor();
+			final double xShift = r.getXRelativeShift2();
+			final double yShift = r.getYRelativeShift2();
+			// Since these two are combined for filtering and the max is what matters.
+			final double shift = (xShift > yShift) ? Math.sqrt(xShift) : Math.sqrt(yShift);
+			final double eshift = Math.sqrt(xShift + yShift);
+
+			final double[] score = new double[8];
+			score[FILTER_SIGNAL] = signal;
+			score[FILTER_SNR] = snr;
+			score[FILTER_MIN_WIDTH] = width;
+			score[FILTER_MAX_WIDTH] = width;
+			score[FILTER_SHIFT] = shift;
+			score[FILTER_ESHIFT] = eshift;
+			score[FILTER_PRECISION] = precision;
+			matchScores[count++] = score;
 		}
 
 		// Debug the reasons the fit failed
@@ -1659,7 +1845,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		double[] upper = new double[lower.length];
 		for (int i = 0; i < stats[0].length; i++)
 		{
-			double[] limits = showDoubleHistogram(stats, i, wo);
+			double[] limits = showDoubleHistogram(stats, i, wo, matchScores, nPredicted);
 			lower[i] = limits[0];
 			upper[i] = limits[1];
 		}
@@ -1667,32 +1853,41 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Reconfigure some of the range limits
 		upper[FILTER_SIGNAL] *= 2; // Make this a bit bigger
 		upper[FILTER_SNR] *= 2; // Make this a bit bigger
-		lower[FILTER_PRECISION] *= 0.5; // Make this a bit smaller
 		double factor = 0.25;
 		if (lower[FILTER_MIN_WIDTH] != 0)
 			upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming lower is less than 1)
 		if (upper[FILTER_MIN_WIDTH] != 0)
 			lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1)); // (assuming upper is more than 1)
-		
+
 		// Round the ranges
-		final double[] interval = new double[7];
+		final double[] interval = new double[stats[0].length];
 		interval[FILTER_SIGNAL] = SignalFilter.DEFAULT_INCREMENT;
 		interval[FILTER_SNR] = SNRFilter.DEFAULT_INCREMENT;
 		interval[FILTER_MIN_WIDTH] = WidthFilter2.DEFAULT_MIN_INCREMENT;
 		interval[FILTER_MAX_WIDTH] = WidthFilter.DEFAULT_INCREMENT;
 		interval[FILTER_SHIFT] = ShiftFilter.DEFAULT_INCREMENT;
 		interval[FILTER_ESHIFT] = EShiftFilter.DEFAULT_INCREMENT;
-		interval[FILTER_PRECISION] = PrecisionFilter.DEFAULT_INCREMENT;		
-		
+		interval[FILTER_PRECISION] = PrecisionFilter.DEFAULT_INCREMENT;
+		interval[FILTER_ITERATIONS] = 0.1;
+		interval[FILTER_EVALUATIONS] = 0.1;
+
 		// Create a range increment
 		double[] increment = new double[lower.length];
 		for (int i = 0; i < increment.length; i++)
 		{
 			lower[i] = Maths.floor(lower[i], interval[i]);
 			upper[i] = Maths.ceil(upper[i], interval[i]);
-			increment[i] = Maths.ceil((upper[i] - lower[i]) / 9, interval[i]);
+			double range = upper[i] - lower[i];
 			// Allow clipping if the range is small compared to the min increment
-			upper[i] = Math.min(upper[i], lower[i] + increment[i] * 9);
+			double multiples = range / interval[i]; 
+			if (multiples < 9)
+			{
+				multiples = Math.ceil(multiples);
+			}
+			else
+				multiples = 9;
+			increment[i] = Maths.ceil(range / multiples, interval[i]);
+			upper[i] = lower[i] + increment[i] * multiples;
 		}
 
 		// Disable some filters
@@ -1794,8 +1989,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			status[fitResult.status]++;
 	}
 
-	private void addToStats(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int resultIndex,
-			boolean isTP, StoredDataStatistics[][] stats)
+	private void addToStats(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
+			StoredDataStatistics[][] stats)
 	{
 		if (fitResult == null)
 			return;
@@ -1805,74 +2000,105 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		if (fitResult.status != 0)
 		{
 			// Add the evaluations for spots that were not OK
+			stats[0][FILTER_ITERATIONS].add(actualFitResult.getIterations());
+			stats[0][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
+			return;
+		}
+
+		if (fitResult.results == null)
+			return;
+
+		boolean isMatch = false;
+
+		for (int resultIndex = 0; resultIndex < fitResult.results.length; resultIndex++)
+		{
+			BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[resultIndex];
+
+			// Q. Only build stats on new results?
+			if (!result.isNewResult())
+				continue;
+
+			// This was fit - Get statistics
+			final double precision = Math.sqrt(result.getLocationVariance());
+
+			final double signal = result.getSignal();
+			final double snr = result.getSNR();
+			final double width = result.getXSDFactor();
+			final double xShift = result.getXRelativeShift2();
+			final double yShift = result.getYRelativeShift2();
+			// Since these two are combined for filtering and the max is what matters.
+			final double shift = (xShift > yShift) ? Math.sqrt(xShift) : Math.sqrt(yShift);
+			final double eshift = Math.sqrt(xShift + yShift);
+
+			stats[0][FILTER_SIGNAL].add(signal);
+			stats[0][FILTER_SNR].add(snr);
+			if (width < 1)
+				stats[0][FILTER_MIN_WIDTH].add(width);
+			else
+				stats[0][FILTER_MAX_WIDTH].add(width);
+			stats[0][FILTER_SHIFT].add(shift);
+			stats[0][FILTER_ESHIFT].add(eshift);
+			stats[0][FILTER_PRECISION].add(precision);
 			if (resultIndex == 0)
 			{
 				stats[0][FILTER_ITERATIONS].add(actualFitResult.getIterations());
 				stats[0][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
 			}
-			return;
+
+			// Add to the TP or FP stats 
+			// If it has assignments then it was a match to something
+			isMatch |= result.hasAssignments();
+			final int index = (result.hasAssignments()) ? 1 : 2;
+			stats[index][FILTER_SIGNAL].add(signal);
+			stats[index][FILTER_SNR].add(snr);
+			if (width < 1)
+				stats[index][FILTER_MIN_WIDTH].add(width);
+			else
+				stats[index][FILTER_MAX_WIDTH].add(width);
+			stats[index][FILTER_SHIFT].add(shift);
+			stats[index][FILTER_ESHIFT].add(eshift);
+			stats[index][FILTER_PRECISION].add(precision);
+			if (resultIndex == 0)
+			{
+			}
 		}
 
-		if (fitResult.results == null || fitResult.results.length <= resultIndex)
-			return;
-
-		PreprocessedPeakResult result = fitResult.results[resultIndex];
-
-		// Q. Only build stats on new results?
-		if (!result.isNewResult())
-			return;
-
-		// This was fit - Get statistics
-		final double precision = Math.sqrt(result.getLocationVariance());
-
-		final double signal = result.getSignal();
-		final double snr = result.getSNR();
-		final double width = result.getXSDFactor();
-		final double xShift = result.getXRelativeShift2();
-		final double yShift = result.getYRelativeShift2();
-		// Since these two are combined for filtering and the max is what matters.
-		final double shift = (xShift > yShift) ? Math.sqrt(xShift) : Math.sqrt(yShift);
-		final double eshift = Math.sqrt(xShift + yShift);
-
-		stats[0][FILTER_SIGNAL].add(signal);
-		stats[0][FILTER_SNR].add(snr);
-		if (width < 1)
-			stats[0][FILTER_MIN_WIDTH].add(width);
-		else
-			stats[0][FILTER_MAX_WIDTH].add(width);
-		stats[0][FILTER_SHIFT].add(shift);
-		stats[0][FILTER_ESHIFT].add(eshift);
-		stats[0][FILTER_PRECISION].add(precision);
-		if (resultIndex == 0)
-		{
-			stats[0][FILTER_ITERATIONS].add(actualFitResult.getIterations());
-			stats[0][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
-		}
-
-		// Add to the TP or FP stats 
-		final int index = (isTP) ? 1 : 2;
-		stats[index][FILTER_SIGNAL].add(signal);
-		stats[index][FILTER_SNR].add(snr);
-		if (width < 1)
-			stats[index][FILTER_MIN_WIDTH].add(width);
-		else
-			stats[index][FILTER_MAX_WIDTH].add(width);
-		stats[index][FILTER_SHIFT].add(shift);
-		stats[index][FILTER_ESHIFT].add(eshift);
-		stats[index][FILTER_PRECISION].add(precision);
-		if (resultIndex == 0)
-		{
-			stats[index][FILTER_ITERATIONS].add(actualFitResult.getIterations());
-			stats[index][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
-		}
+		final int index = (isMatch) ? 1 : 2;
+		stats[index][FILTER_ITERATIONS].add(actualFitResult.getIterations());
+		stats[index][FILTER_EVALUATIONS].add(actualFitResult.getEvaluations());
 	}
 
-	private boolean noMatch(boolean[] match)
+	private boolean noMatch(MultiPathFitResult fitResult)
 	{
-		for (int i = 0; i < match.length; i++)
-			if (match[i])
-				return false;
+		if (isMatch(fitResult.getSingleFitResult()))
+			return false;
+		if (isMatch(fitResult.getMultiFitResult()))
+			return false;
+		if (isMatch(fitResult.getDoubletFitResult()))
+			return false;
+		if (isMatch(fitResult.getMultiDoubletFitResult()))
+			return false;
+
 		return true;
+	}
+
+	private boolean isMatch(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
+	{
+		if (fitResult == null)
+			return false;
+		if (fitResult.status != 0)
+			return false;
+		if (fitResult.results == null)
+			return false;
+		for (int resultIndex = 0; resultIndex < fitResult.results.length; resultIndex++)
+		{
+			BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[resultIndex];
+			if (!result.isNewResult())
+				continue;
+			if (result.hasAssignments())
+				return true;
+		}
+		return false;
 	}
 
 	private int[] rank(ArrayList<Ranking> pc)
@@ -1887,11 +2113,66 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		return ranking;
 	}
 
-	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, int i, WindowOrganiser wo)
+	private double[] showDoubleHistogram(StoredDataStatistics[][] stats, final int i, WindowOrganiser wo,
+			double[][] matchScores, double nPredicted)
 	{
 		String xLabel = filterCriteria[i].name;
 		LowerLimit lower = filterCriteria[i].lower;
 		UpperLimit upper = filterCriteria[i].upper;
+
+		double[] j = null;
+		double[] metric = null;
+		double maxJ = 0;
+		if (i <= FILTER_PRECISION || upper.requiresJaccard || lower.requiresJaccard)
+		{
+			// Jaccard score verses the range of the metric
+			Arrays.sort(matchScores, new Comparator<double[]>()
+			{
+				public int compare(double[] o1, double[] o2)
+				{
+					if (o1[i] < o2[i])
+						return -1;
+					if (o1[i] > o2[i])
+						return 1;
+					return 0;
+				}
+			});
+
+			final int scoreIndex = FILTER_PRECISION + 1;
+			int n = results.size();
+			double tp = 0;
+			double fp = 0;
+			j = new double[matchScores.length + 1];
+			metric = new double[j.length];
+			for (int k = 0; k < matchScores.length; k++)
+			{
+				final double score = matchScores[k][scoreIndex];
+				tp += score;
+				fp += (1 - score);
+				j[k + 1] = tp / (fp + n);
+				metric[k + 1] = matchScores[k][i];
+			}
+			metric[0] = metric[1];
+			maxJ = Maths.max(j);
+
+			if (showFilterScoreHistograms)
+			{
+				String title = TITLE + " Jaccard " + xLabel;
+				Plot plot = new Plot(title, xLabel, "Jaccard", metric, j);
+				// Remove outliers
+				double[] limitsx = Maths.limits(metric);
+				Percentile p = new Percentile();
+				double l = p.evaluate(metric, 25);
+				double u = p.evaluate(metric, 75);
+				double iqr = 1.5 * (u - l);
+				limitsx[1] = Math.min(limitsx[1], u + iqr);
+				plot.setLimits(limitsx[0], limitsx[1], 0, Maths.max(j));
+				PlotWindow pw = Utils.display(title, plot);
+				if (Utils.isNewWindow())
+					wo.add(pw);
+			}
+		}
+
 		// [0] is all
 		// [1] is matches
 		// [2] is no match
@@ -2084,6 +2365,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			case ZERO:
 				l = 0;
 				break;
+			case HALF_MAX_JACCARD_VALUE:
+				l = getValue(metric, j, maxJ * 0.5);
+				break;
 			default:
 				throw new RuntimeException("Missing lower limit method");
 		}
@@ -2100,6 +2384,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				break;
 			case ZERO:
 				u = 0;
+				break;
+			case MAX_JACCARD2:
+				u = getValue(metric, j, maxJ) * 2;
 				break;
 			default:
 				throw new RuntimeException("Missing upper limit method");
@@ -2118,11 +2405,27 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		double[] x = h[0];
 		double[] y = h[1];
+		return getValue(x, y, p);
+	}
+
+	/**
+	 * Gets the value from x corresponding to the value p in the y values.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param p
+	 *            the p
+	 * @return the value
+	 */
+	private double getValue(double[] x, double[] y, double p)
+	{
 		for (int i = 0; i < x.length; i++)
 		{
-			if (y[i] > p)
+			if (y[i] >= p)
 			{
-				if (i == 0)
+				if (i == 0 || y[i] == p)
 					return x[i];
 				// Interpolation
 				double delta = (p - y[i - 1]) / (y[i] - y[i - 1]);

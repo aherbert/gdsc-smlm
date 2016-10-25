@@ -55,15 +55,17 @@ public class ResultAssignment implements Comparable<ResultAssignment>
 	}
 
 	/**
-	 * Create a FractionalAssignment using the specified predicted id
-	 * 
+	 * Create a FractionalAssignment using the specified predicted id and a reference the result.
+	 *
 	 * @param predictedId
 	 *            the predicted id
+	 * @param peakResult
+	 *            the peak result
 	 * @return the fractional assignment
 	 */
-	public FractionalAssignment toFractionalAssignment(final int predictedId)
+	public FractionalAssignment toFractionalAssignment(final int predictedId, final PreprocessedPeakResult peakResult)
 	{
-		return new ImmutableFractionalAssignment(targetId, predictedId, distance, score);
+		return new PeakFractionalAssignment(targetId, predictedId, distance, score, peakResult);
 	}
 
 	/*

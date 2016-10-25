@@ -143,7 +143,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	{
 		return uniqueId;
 	}
-	
+
 	public int getId()
 	{
 		return id;
@@ -267,8 +267,18 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		// Create a new set of assignments. Since this will be new and all other members are final the class is thread-safe.  
 		final FractionalAssignment[] out = new FractionalAssignment[assignments.length];
 		for (int i = 0; i < out.length; i++)
-			out[i] = assignments[i].toFractionalAssignment(predictedId);
+			out[i] = assignments[i].toFractionalAssignment(predictedId, this);
 		return out;
+	}
+
+	/**
+	 * Checks for assignments.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasAssignments()
+	{
+		return assignments != null;
 	}
 
 	public void setAssignments(ResultAssignment[] assignments)

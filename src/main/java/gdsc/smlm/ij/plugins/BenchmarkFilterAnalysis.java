@@ -54,7 +54,6 @@ import gdsc.core.logging.TrackProgress;
 import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
-import gdsc.core.match.ImmutableFractionalAssignment;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.StoredDataStatistics;
@@ -90,6 +89,7 @@ import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
@@ -224,44 +224,39 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	// Used to tile plot windows
 	private WindowOrganiser wo = new WindowOrganiser();
 
-	public class CustomFractionalAssignment extends ImmutableFractionalAssignment
+	public class CustomFractionalAssignment extends PeakFractionalAssignment
 	{
 		public final double d;
-		public final BasePreprocessedPeakResult spot;
 		public final PeakResult peak;
 
 		public CustomFractionalAssignment(int targetId, int predictedId, double distance, double score, double d,
-				BasePreprocessedPeakResult spot, PeakResult peak)
+				PreprocessedPeakResult spot, PeakResult peak)
 		{
-			super(targetId, predictedId, distance, score);
+			super(targetId, predictedId, distance, score, spot);
 			this.d = d;
-			this.spot = spot;
 			this.peak = peak;
 		}
 
 		public double getSignalFactor()
 		{
-			return BenchmarkSpotFit.getSignalFactor(spot.getSignal(), peak.getSignal());
+			return BenchmarkSpotFit.getSignalFactor(peakResult.getSignal(), peak.getSignal());
 		}
 	}
 
 	public class CustomResultAssignment extends ResultAssignment
 	{
 		public final double d;
-		public final BasePreprocessedPeakResult spot;
 		public final PeakResult peak;
 
-		public CustomResultAssignment(int targetId, double distance, double score, double d,
-				BasePreprocessedPeakResult spot, PeakResult peak)
+		public CustomResultAssignment(int targetId, double distance, double score, double d, PeakResult peak)
 		{
 			super(targetId, distance, score);
 			this.d = d;
-			this.spot = spot;
 			this.peak = peak;
 		}
 
 		@Override
-		public FractionalAssignment toFractionalAssignment(int predictedId)
+		public FractionalAssignment toFractionalAssignment(int predictedId, PreprocessedPeakResult spot)
 		{
 			return new CustomFractionalAssignment(targetId, predictedId, distance, score, d, spot, peak);
 		}
@@ -487,7 +482,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 								// Store distance in nm
 								d *= simulationParameters.a;
-								assignments.add(new CustomResultAssignment(id, distance, score, d, peak, actual[j]));
+								assignments.add(new CustomResultAssignment(id, distance, score, d, actual[j]));
 
 								// Accumulate for each actual result
 								if (!matched[id])
@@ -1618,7 +1613,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						d += c.d;
 						sf += c.getSignalFactor();
 						rmsd += c.d * c.d;
-						regression.addData(c.spot.getSignal(), c.peak.getSignal());
+						regression.addData(c.peakResult.getSignal(), c.peak.getSignal());
 					}
 					scored += assignments.length;
 				}
@@ -2233,7 +2228,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						final ScoreResult scoreResult = scoreResults[index];
 
 						addToResultsWindow(tw, scoreResult);
-						
+
 						final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType);
 						if (result.compareTo(max) < 0)
 						{
@@ -3540,7 +3535,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			if (that == null)
 				return -1;
-			
+
 			// Must pass criteria first
 			if (this.criteriaPassed && !that.criteriaPassed)
 				return -1;
@@ -3596,8 +3591,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	public class FilterScore extends SimpleFilterScore
 	{
-		double score, criteria;
-		boolean criteriaPassed;
 		int index;
 		final long time;
 		final ClassificationResult r2;
@@ -3606,8 +3599,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final boolean[] enable;
 		char[] atLimit;
 
-		private FilterScore(ScoreResult r, boolean allSameType, char[] atLimit, int index, long time, ClassificationResult r2, int size,
-				int[] combinations, boolean[] enable)
+		private FilterScore(ScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
+				ClassificationResult r2, int size, int[] combinations, boolean[] enable)
 		{
 			super(r, allSameType);
 			this.index = index;
@@ -3619,8 +3612,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			this.atLimit = atLimit;
 		}
 
-		public FilterScore(ScoreResult r, boolean allSameType, int index, long time, ClassificationResult r2, int size, int[] combinations,
-				boolean[] enable)
+		public FilterScore(ScoreResult r, boolean allSameType, int index, long time, ClassificationResult r2, int size,
+				int[] combinations, boolean[] enable)
 		{
 			this(r, allSameType, null, index, time, r2, size, combinations, enable);
 		}
@@ -4330,7 +4323,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
 				IdPeakResult peak = (IdPeakResult) c.peak;
-				BasePreprocessedPeakResult spot = c.spot;
+				BasePreprocessedPeakResult spot = (BasePreprocessedPeakResult) c.peakResult;
 				actual.add(peak.uniqueId);
 				predicted.add(spot.getUniqueId());
 				frame = spot.getFrame();
