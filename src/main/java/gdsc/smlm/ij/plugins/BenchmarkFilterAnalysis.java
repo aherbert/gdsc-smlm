@@ -4307,12 +4307,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Do TP
 		Set<Integer> actual = new TreeSet<Integer>();
 		Set<Integer> predicted = new TreeSet<Integer>();
+		//int tp = 0, fp = 0, fn = 0;
 		for (FractionalAssignment[] assignments : allAssignments)
 		{
 			if (assignments == null || assignments.length == 0)
 				continue;
 			float[] tx = null, ty = null;
 			int t = 0;
+			//tp += assignments.length;
 			if (showTP)
 			{
 				tx = new float[assignments.length];
@@ -4367,6 +4369,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				x[c] = results[i].getX();
 				y[c++] = results[i].getY();
 			}
+			//fp += c;
 			if (c != 0)
 				SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
 		}
@@ -4393,10 +4396,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					x[c] = results[i].getXPosition();
 					y[c++] = results[i].getYPosition();
 				}
+				//fn += c;
 				if (c != 0)
 					SpotFinderPreview.addRoi(entry.getKey(), o, x, y, c, Color.yellow);
 			}
 		}
+
+		//System.out.printf("TP=%d, FP=%d, FN=%d, N=%d (%d)\n", tp, fp, fn, tp + fn, results.size());
 
 		imp.setOverlay(o);
 	}

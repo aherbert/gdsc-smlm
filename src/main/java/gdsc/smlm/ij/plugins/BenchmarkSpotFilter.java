@@ -863,7 +863,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				else
 				{
 					// matchingMethod == METHOD_SINGLE
-					// Spots can match only on actual result
+					// Spots can match only one actual result
 
 					final boolean[] predictedAssignment = new boolean[nPredicted];
 
@@ -2036,6 +2036,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private void showOverlay(ImagePlus imp, BenchmarkFilterResult filterResult)
 	{
 		Overlay o = new Overlay();
+		//int tp = 0, fp = 0, fn = 0, nn = 0;
 		for (FilterResult result : filterResult.filterResults.values())
 		{
 			final int size = result.spots.length;
@@ -2071,6 +2072,8 @@ public class BenchmarkSpotFilter implements PlugIn
 					}
 				}
 			}
+			//tp += t;
+			//fp += f;
 			if (showTP)
 				SpotFinderPreview.addRoi(result.frame, o, tx, ty, t, Color.green);
 			if (showFP)
@@ -2080,6 +2083,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				// We need the FN ...
 				final PSFSpot[] actual = result.actual;
 				final boolean[] actualAssignment = result.actualAssignment;
+				//nn += actual.length;
 				final float[] nx = new float[actual.length];
 				final float[] ny = new float[actual.length];
 				int n = 0;
@@ -2091,9 +2095,13 @@ public class BenchmarkSpotFilter implements PlugIn
 						ny[n++] = actual[i].getY();
 					}
 				}
+				//fn += n;
 				SpotFinderPreview.addRoi(result.frame, o, nx, ny, n, Color.yellow);
 			}
 		}
+
+		//System.out.printf("TP=%d, FP=%d, FN=%d, N=%d (%d) %d\n", tp, fp, fn, tp + fn, results.size(), nn);
+
 		imp.setOverlay(o);
 	}
 
