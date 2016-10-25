@@ -28,8 +28,9 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class EShiftFilter extends DirectFilter implements IMultiFilter
 {
-	static double DEFAULT_RANGE = 10;
-	static double UPPER_LIMIT = 4;
+	public static final double DEFAULT_INCREMENT = 0.05;
+	public static final double DEFAULT_RANGE = 10;
+	public static final double UPPER_LIMIT = 5;
 
 	@XStreamAsAttribute
 	final double eshift;
@@ -137,6 +138,18 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 		return eshift;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		return DEFAULT_INCREMENT;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

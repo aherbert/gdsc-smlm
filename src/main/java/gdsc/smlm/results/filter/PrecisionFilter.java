@@ -24,9 +24,10 @@ import gdsc.smlm.results.PeakResult;
  */
 public class PrecisionFilter extends DirectFilter implements IMultiFilter
 {
-	static double DEFAULT_RANGE = 10;
-	static double UPPER_LIMIT = 70;
-	
+	public static final double DEFAULT_INCREMENT = 1;
+	public static final double DEFAULT_RANGE = 10;
+	public static final double UPPER_LIMIT = 70;
+
 	@XStreamAsAttribute
 	final double precision;
 	@XStreamOmitField
@@ -63,7 +64,7 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 		gain = peakResults.getGain();
 		emCCD = peakResults.isEMCCD();
 	}
-	
+
 	@Override
 	public boolean accept(PeakResult peak)
 	{
@@ -125,6 +126,18 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	{
 		checkIndex(index);
 		return precision;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		return PrecisionFilter.DEFAULT_INCREMENT;
 	}
 
 	/*
@@ -193,7 +206,7 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	{
 		return new double[] { UPPER_LIMIT };
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -213,7 +226,7 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;

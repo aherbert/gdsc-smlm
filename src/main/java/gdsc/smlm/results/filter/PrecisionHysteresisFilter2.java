@@ -176,6 +176,20 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		if (index < super.getNumberOfParameters())
+			return super.getParameterIncrement(index);
+		return PrecisionFilter.DEFAULT_INCREMENT;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
 	 */
 	@Override
@@ -213,7 +227,8 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 		else if (index == 2)
 			parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
 		else
-			parameters[index] = updateParameter(parameters[index], delta, PrecisionHysteresisFilter.defaultRange[index]);
+			parameters[index] = updateParameter(parameters[index], delta,
+					PrecisionHysteresisFilter.defaultRange[index]);
 		return create(parameters);
 	}
 

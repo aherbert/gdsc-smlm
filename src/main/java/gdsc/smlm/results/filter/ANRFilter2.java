@@ -182,6 +182,26 @@ public class ANRFilter2 extends DirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return SNRFilter.DEFAULT_INCREMENT;
+			case 1:
+				return WidthFilter2.DEFAULT_MIN_INCREMENT;
+			default:
+				return WidthFilter.DEFAULT_INCREMENT;
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
 	 */
 	@Override

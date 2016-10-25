@@ -27,8 +27,9 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class WidthFilter extends DirectFilter implements IMultiFilter
 {
-	static double DEFAULT_RANGE = 1;
-	static double UPPER_LIMIT = 5;
+	public static final double DEFAULT_INCREMENT = 0.05;
+	public static final double DEFAULT_RANGE = 1;
+	public static final double UPPER_LIMIT = 5;
 
 	@XStreamAsAttribute
 	final double width;
@@ -149,6 +150,18 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	{
 		checkIndex(index);
 		return width;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		return DEFAULT_INCREMENT;
 	}
 
 	/*

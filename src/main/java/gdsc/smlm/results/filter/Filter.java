@@ -1207,9 +1207,17 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	public abstract double getParameterValue(int index);
 
 	/**
+	 * Get the recommended minimum amount by which to increment the parameter
+	 * 
+	 * @param index
+	 * @return The increment value of the specified parameter
+	 */
+	public abstract double getParameterIncrement(int index);
+
+	/**
 	 * Return a value to use to disable the parameter
 	 * <p>
-	 * Override this method if zero does not disable the parameter  
+	 * Override this method if zero does not disable the parameter
 	 * 
 	 * @param index
 	 * @return The disabled value of the specified parameter

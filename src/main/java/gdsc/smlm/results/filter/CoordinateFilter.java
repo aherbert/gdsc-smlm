@@ -23,7 +23,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
  */
 public class CoordinateFilter extends DirectFilter
 {
-	static double DEFAULT_RANGE = 1;
+	public static final double DEFAULT_INCREMENT = 0.01;
+	public static final double DEFAULT_RANGE = 1;
 
 	@XStreamAsAttribute
 	final float minX;
@@ -142,6 +143,18 @@ public class CoordinateFilter extends DirectFilter
 			default:
 				return maxY;
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		return DEFAULT_INCREMENT;
 	}
 
 	/*

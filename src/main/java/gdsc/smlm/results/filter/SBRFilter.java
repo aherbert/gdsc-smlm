@@ -73,7 +73,7 @@ public class SBRFilter extends DirectFilter
 		}
 		return SNRFilter.getSNR(peak) >= this.sbr;
 	}
-	
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
@@ -137,6 +137,18 @@ public class SBRFilter extends DirectFilter
 	{
 		checkIndex(index);
 		return sbr;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		return SNRFilter.DEFAULT_INCREMENT;
 	}
 
 	/*

@@ -79,12 +79,19 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.NullPeakResults;
 import gdsc.smlm.results.filter.DirectFilter;
+import gdsc.smlm.results.filter.EShiftFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFitResult;
+import gdsc.smlm.results.filter.PrecisionFilter;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
+import gdsc.smlm.results.filter.SNRFilter;
+import gdsc.smlm.results.filter.ShiftFilter;
+import gdsc.smlm.results.filter.SignalFilter;
+import gdsc.smlm.results.filter.WidthFilter;
+import gdsc.smlm.results.filter.WidthFilter2;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import ij.IJ;
 import ij.ImagePlus;
@@ -1666,11 +1673,27 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			upper[FILTER_MIN_WIDTH] = 1 - Math.max(0, factor * (1 - lower[FILTER_MIN_WIDTH])); // (assuming lower is less than 1)
 		if (upper[FILTER_MIN_WIDTH] != 0)
 			lower[FILTER_MAX_WIDTH] = 1 + Math.max(0, factor * (upper[FILTER_MAX_WIDTH] - 1)); // (assuming upper is more than 1)
-
+		
+		// Round the ranges
+		final double[] interval = new double[7];
+		interval[FILTER_SIGNAL] = SignalFilter.DEFAULT_INCREMENT;
+		interval[FILTER_SNR] = SNRFilter.DEFAULT_INCREMENT;
+		interval[FILTER_MIN_WIDTH] = WidthFilter2.DEFAULT_MIN_INCREMENT;
+		interval[FILTER_MAX_WIDTH] = WidthFilter.DEFAULT_INCREMENT;
+		interval[FILTER_SHIFT] = ShiftFilter.DEFAULT_INCREMENT;
+		interval[FILTER_ESHIFT] = EShiftFilter.DEFAULT_INCREMENT;
+		interval[FILTER_PRECISION] = PrecisionFilter.DEFAULT_INCREMENT;		
+		
 		// Create a range increment
 		double[] increment = new double[lower.length];
 		for (int i = 0; i < increment.length; i++)
-			increment[i] = (upper[i] - lower[i]) / 10;
+		{
+			lower[i] = Maths.floor(lower[i], interval[i]);
+			upper[i] = Maths.ceil(upper[i], interval[i]);
+			increment[i] = Maths.ceil((upper[i] - lower[i]) / 9, interval[i]);
+			// Allow clipping if the range is small compared to the min increment
+			upper[i] = Math.min(upper[i], lower[i] + increment[i] * 9);
+		}
 
 		// Disable some filters
 		increment[FILTER_SIGNAL] = Double.POSITIVE_INFINITY;

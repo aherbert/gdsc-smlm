@@ -24,7 +24,8 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  */
 public class SignalFilter extends DirectFilter implements IMultiFilter
 {
-	static double DEFAULT_RANGE = 30;
+	public static final double DEFAULT_INCREMENT = 5;
+	public static final double DEFAULT_RANGE = 30;
 	
 	@XStreamAsAttribute
 	final double signal;
@@ -115,6 +116,18 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 		return signal;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		return SignalFilter.DEFAULT_INCREMENT;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

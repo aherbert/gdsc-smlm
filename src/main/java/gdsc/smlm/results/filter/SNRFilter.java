@@ -23,7 +23,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
  */
 public class SNRFilter extends DirectFilter implements IMultiFilter
 {
-	static double DEFAULT_RANGE = 10;
+	public static final double DEFAULT_INCREMENT = 1;
+	public static final double DEFAULT_RANGE = 10;
 
 	@XStreamAsAttribute
 	final float snr;
@@ -63,7 +64,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 			return V_SNR;
 		return 0;
 	}
-	
+
 	static float getSNR(PeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getSignal() / peak.getNoise() : Float.POSITIVE_INFINITY;
@@ -113,6 +114,18 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	{
 		checkIndex(index);
 		return snr;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		return SNRFilter.DEFAULT_INCREMENT;
 	}
 
 	/*
@@ -190,7 +203,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;

@@ -154,6 +154,20 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		if (index < super.getNumberOfParameters())
+			return super.getParameterIncrement(index);
+		return PrecisionFilter.DEFAULT_INCREMENT;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
 	 */
 	@Override

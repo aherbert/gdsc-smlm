@@ -340,6 +340,34 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return SignalFilter.DEFAULT_INCREMENT;
+			case 1:
+				return SNRFilter.DEFAULT_INCREMENT;
+			case 2:
+				return WidthFilter2.DEFAULT_MIN_INCREMENT;
+			case 3:
+				return WidthFilter.DEFAULT_INCREMENT;
+			case 4:
+				return ShiftFilter.DEFAULT_INCREMENT;
+			case 5:
+				return EShiftFilter.DEFAULT_INCREMENT;
+			default:
+				return PrecisionFilter.DEFAULT_INCREMENT;
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
 	 */
 	@Override

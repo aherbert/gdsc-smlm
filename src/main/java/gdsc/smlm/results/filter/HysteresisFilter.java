@@ -39,10 +39,14 @@ import gdsc.smlm.results.TraceManager.TraceMode;
  */
 public abstract class HysteresisFilter extends Filter
 {
-	static double DEFAULT_ABSOLUTE_DISTANCE_RANGE = 200;
-	static double DEFAULT_RELATIVE_DISTANCE_RANGE = 1;
-	static double DEFAULT_SECONDS_TIME_RANGE = 5;
-	static double DEFAULT_FRAMES_TIME_RANGE = 10;
+	public static final double DEFAULT_ABSOLUTE_DISTANCE_INCREMENT = 5;
+	public static final double DEFAULT_RELATIVE_DISTANCE_INCREMENT = 0.05;
+	public static final double DEFAULT_SECONDS_TIME_INCREMENT = 0.05;
+	public static final double DEFAULT_FRAMES_TIME_INCREMENT = 1;
+	public static final double DEFAULT_ABSOLUTE_DISTANCE_RANGE = 200;
+	public static final double DEFAULT_RELATIVE_DISTANCE_RANGE = 1;
+	public static final double DEFAULT_SECONDS_TIME_RANGE = 5;
+	public static final double DEFAULT_FRAMES_TIME_RANGE = 10;
 
 	@XStreamAsAttribute
 	final double searchDistance;
@@ -169,6 +173,28 @@ public abstract class HysteresisFilter extends Filter
 				return timeThreshold;
 			default:
 				return timeThresholdMode;
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return (searchDistanceMode == 1) ? DEFAULT_RELATIVE_DISTANCE_INCREMENT : DEFAULT_ABSOLUTE_DISTANCE_INCREMENT;
+			case 1:
+				return 1;
+			case 2:
+				return (timeThresholdMode == 1) ? DEFAULT_SECONDS_TIME_INCREMENT : DEFAULT_FRAMES_TIME_INCREMENT;
+			default:
+				return 1;
 		}
 	}
 	

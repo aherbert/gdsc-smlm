@@ -29,8 +29,10 @@ import gdsc.smlm.results.TraceManager;
  */
 public class TraceFilter extends Filter
 {
-	static double DEFAULT_DISTANCE_RANGE = 2;
-	static int DEFAULT_TIME_RANGE = 10;
+	private static final double DEFAULT_DISTANCE_INCREMENT = 0.05;
+	private static final int DEFAULT_TIME_INCREMENT = 1;
+	private static final double DEFAULT_DISTANCE_RANGE = 2;
+	private static final int DEFAULT_TIME_RANGE = 10;
 	
 	@XStreamAsAttribute
 	final double d;
@@ -133,6 +135,22 @@ public class TraceFilter extends Filter
 				return d;
 			default:
 				return t;
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
+	 */
+	@Override
+	public double getParameterIncrement(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return DEFAULT_DISTANCE_INCREMENT;
+			default:
+				return DEFAULT_TIME_INCREMENT;
 		}
 	}
 
