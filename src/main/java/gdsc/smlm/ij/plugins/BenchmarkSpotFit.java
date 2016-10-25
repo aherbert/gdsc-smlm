@@ -330,10 +330,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final static int SPOT = -1;
 		final static int SINGLE = 0;
 		final static int MULTI = 1;
-		final static int DOUBLET1 = 2;
-		final static int DOUBLET2 = 3;
-		final static int MULTIDOUBLET1 = 4;
-		final static int MULTIDOUBLET2 = 5;
+		final static int DOUBLET = 2;
+		final static int MULTIDOUBLET = 3;
 
 		final PreprocessedPeakResult result;
 		final int id, type, i;
@@ -660,56 +658,23 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				final ArrayList<MultiPathPoint> predicted = new ArrayList<MultiPathPoint>(spots.length * 2);
 				matches.clear();
 
-				int id = 0;
 				for (int i = 0; i < spots.length; i++)
 				{
-					// Use all the results. Doublets can provide two Ids. 
-					// Otherwise store all results with the same Id. The best match for these results will be chosen.
+					// Use all the results. 
+					// Store results using the candidate Id. The best match for each Id will be chosen.
 					final int size = predicted.size();
 
-					// TODO - fix this so that all new results are processed as multi-fit can return more than 1 new result.
-					
-
-					if (isOK(fitResult[i].getSingleFitResult()))
-					{
-						predicted.add(new MultiPathPoint(fitResult[i].getSingleFitResult().results[0], id,
-								MultiPathPoint.SINGLE, i));
-					}
-					if (isOK(fitResult[i].getMultiFitResult()))
-					{
-						predicted.add(new MultiPathPoint(fitResult[i].getMultiFitResult().results[0], id,
-								MultiPathPoint.MULTI, i));
-					}
-					int increment = 1;
-					if (isOK(fitResult[i].getDoubletFitResult()) &&
-							fitResult[i].getDoubletFitResult().results.length != 0)
-					{
-						increment = fitResult[i].getDoubletFitResult().results.length;
-						predicted.add(new MultiPathPoint(fitResult[i].getDoubletFitResult().results[0], id,
-								MultiPathPoint.DOUBLET1, i));
-						if (increment == 2)
-							predicted.add(new MultiPathPoint(fitResult[i].getDoubletFitResult().results[1], id + 1,
-									MultiPathPoint.DOUBLET2, i));
-					}
-					if (isOK(fitResult[i].getMultiDoubletFitResult()) &&
-							fitResult[i].getMultiDoubletFitResult().results.length != 0)
-					{
-						predicted.add(new MultiPathPoint(fitResult[i].getMultiDoubletFitResult().results[0], id,
-								MultiPathPoint.MULTIDOUBLET1, i));
-						if (fitResult[i].getMultiDoubletFitResult().results.length == 2)
-						{
-							predicted.add(new MultiPathPoint(fitResult[i].getMultiDoubletFitResult().results[1], id + 1,
-									MultiPathPoint.MULTIDOUBLET2, i));
-							increment = 2;
-						}
-					}
+					// Allow all new results to be processed as multi-fit can return more than 1 new result.
+					add(predicted, fitResult[i].getSingleFitResult(), MultiPathPoint.SINGLE, i);
+					add(predicted, fitResult[i].getMultiFitResult(), MultiPathPoint.MULTI, i);
+					add(predicted, fitResult[i].getDoubletFitResult(), MultiPathPoint.DOUBLET, i);
+					add(predicted, fitResult[i].getMultiDoubletFitResult(), MultiPathPoint.MULTI, i);
 					if (size == predicted.size())
 					{
 						// Use the candidate position instead
 						predicted.add(
-								new MultiPathPoint(spots[i].x + 0.5f, spots[i].y + 0.5f, id, MultiPathPoint.SPOT, i));
+								new MultiPathPoint(spots[i].x + 0.5f, spots[i].y + 0.5f, i, MultiPathPoint.SPOT, i));
 					}
-					id += increment;
 				}
 				// If we made any fits then score them
 				if (!predicted.isEmpty())
@@ -800,7 +765,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 					AssignmentComparator.sort(assignments);
 
 					final boolean[] actualAssignment = new boolean[actual.length];
-					final boolean[] predictedAssignment = new boolean[id];
+					// We use the candidate Id as the id
+					final boolean[] predictedAssignment = new boolean[fitResult.length];
 
 					for (Assignment assignment : assignments)
 					{
@@ -878,9 +844,18 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			results.put(frame, candidates);
 		}
 
-		private boolean isOK(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
+		private void add(ArrayList<MultiPathPoint> predicted,
+				gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int type, int spotId)
 		{
-			return fitResult != null && fitResult.status == 0;
+			if (fitResult == null || fitResult.status != 0)
+				return;
+			
+			for (int i = 0; i < fitResult.results.length; i++)
+			{
+				if (fitResult.results[i].isNewResult())
+					predicted.add(new MultiPathPoint(fitResult.results[i], fitResult.results[i].getCandidateId(), type,
+							spotId));
+			}
 		}
 	}
 
@@ -1879,7 +1854,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			upper[i] = Maths.ceil(upper[i], interval[i]);
 			double range = upper[i] - lower[i];
 			// Allow clipping if the range is small compared to the min increment
-			double multiples = range / interval[i]; 
+			double multiples = range / interval[i];
 			if (multiples < 9)
 			{
 				multiples = Math.ceil(multiples);
