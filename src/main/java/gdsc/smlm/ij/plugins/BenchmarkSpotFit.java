@@ -847,7 +847,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		private void add(ArrayList<MultiPathPoint> predicted,
 				gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int type, int spotId)
 		{
-			if (fitResult == null || fitResult.status != 0)
+			if (fitResult == null || fitResult.status != 0 || fitResult.results == null)
 				return;
 			
 			for (int i = 0; i < fitResult.results.length; i++)
