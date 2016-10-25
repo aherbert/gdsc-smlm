@@ -849,7 +849,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		{
 			if (fitResult == null || fitResult.status != 0 || fitResult.results == null)
 				return;
-			
+
 			for (int i = 0; i < fitResult.results.length; i++)
 			{
 				if (fitResult.results[i].isNewResult())
@@ -2098,7 +2098,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		double[] j = null;
 		double[] metric = null;
 		double maxJ = 0;
-		if (i <= FILTER_PRECISION || upper.requiresJaccard || lower.requiresJaccard)
+		if (i <= FILTER_PRECISION && (showFilterScoreHistograms || upper.requiresJaccard || lower.requiresJaccard))
 		{
 			// Jaccard score verses the range of the metric
 			Arrays.sort(matchScores, new Comparator<double[]>()
@@ -2362,6 +2362,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				break;
 			case MAX_JACCARD2:
 				u = getValue(metric, j, maxJ) * 2;
+				System.out.printf("MaxJ = %.4f @ %.3f\n", maxJ, u / 2);
 				break;
 			default:
 				throw new RuntimeException("Missing upper limit method");
