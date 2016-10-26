@@ -1022,7 +1022,7 @@ public class MultiPathFilter implements Cloneable
 	 *            the store
 	 * @return The new results that pass the filter
 	 */
-	private PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult, boolean validateCandidates,
+	public PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult, boolean validateCandidates,
 			SelectedResultStore store)
 	{
 		if (fitResult == null || fitResult.results == null)
@@ -1131,7 +1131,7 @@ public class MultiPathFilter implements Cloneable
 	 *            the store
 	 * @return The new results that pass the filter
 	 */
-	private PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult, boolean validateCandidates,
+	public PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult, boolean validateCandidates,
 			SelectedResultStore store)
 	{
 		if (fitResult == null || fitResult.results == null)
