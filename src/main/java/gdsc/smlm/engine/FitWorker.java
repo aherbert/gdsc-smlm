@@ -2601,48 +2601,58 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * <p>
 	 * The best result is chosen using the provided MultiPathFilter and stored in the sliceResults array.
 	 *
-	 * @param n
+	 * @param candidateId
 	 *            The candidate to fit
 	 * @param filter
 	 *            The filter for choosing the best result to add to the slice results
 	 * @return The full multi-path result
 	 */
-	private MultiPathFitResult benchmarkFit(int n, MultiPathFilter filter)
+	private MultiPathFitResult benchmarkFit(int candidateId, MultiPathFilter filter)
 	{
-		dynamicMultiPathFitResult.reset(n);
+		dynamicMultiPathFitResult.reset(candidateId);
 
 		MultiPathFitResult.FitResult result;
 
+		// Note:
+		// In order to correctly store the estimates as we progress we pass
+		// the results through the filter. Then we filter again at the end to choose the 
+		// correct result to store the fitted candidates.
+
 		result = dynamicMultiPathFitResult.getMultiFitResult();
+		filter.acceptAny(candidateId, result, true, this);
 		if (result != null && result.getStatus() == 0)
 		{
 			// Note that if we have neighbours it is very possible we will have doublets
 			// due to high density data. It makes sense to attempt a doublet fit here.
 			dynamicMultiPathFitResult.getMultiQAScore();
-			dynamicMultiPathFitResult.getMultiDoubletFitResult();
+			result = dynamicMultiPathFitResult.getMultiDoubletFitResult();
+			filter.acceptAny(candidateId, result, true, this);
 		}
 
 		// Do a single fit
 		result = dynamicMultiPathFitResult.getSingleFitResult();
+		filter.acceptAny(candidateId, result, true, this);
 		if (result != null && result.getStatus() == 0)
 		{
 			dynamicMultiPathFitResult.getSingleQAScore();
-			dynamicMultiPathFitResult.getDoubletFitResult();
+			result = dynamicMultiPathFitResult.getDoubletFitResult();
+			filter.acceptAny(candidateId, result, true, this);
 		}
 
 		// Pick the best result.
-		// Store the new results and use the passed candidates as estimates.
-		// This is done by passing this class in as the SelectedResultStore.
-		// Results passing the primary filter as added to the current slice results.
-		// Results passing the minimal filter are used as estimates.
+		// Do not validate candidates here as this is just repeating validation done above..
+		// Note we copy the dynamic result to materialise it so it can be returned and kept.
 
 		final MultiPathFitResult multiPathFitResult = dynamicMultiPathFitResult.copy(false);
-		final SelectedResult selectedResult = filter.select(multiPathFitResult, true, this);
+		SelectedResult selectedResult = filter.select(multiPathFitResult, false, this);
 
 		if (selectedResult != null)
 		{
-			add(selectedResult);
+			// This failed. Add a default so we can call add(...)
+			selectedResult = filter.new SelectedResult(null, multiPathFitResult.getSingleFitResult());
 		}
+
+		add(selectedResult);
 
 		return multiPathFitResult;
 	}
@@ -3257,6 +3267,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	public void add(SelectedResult selectedResult)
 	{
+		// TODO - Print the current state of the dynamicMultiPathFitResult to file.
+		// This will allow debugging what is different between the benchmark fit and the PeakFit.
+		// Output:
+		// slice
+		// candidate Id
+		// Initial and final params for each fit result.
+		// Details of the selected result.
+		// Then try to figure out why the benchmark fit deviates from PeakFit.
+
 		// Add to the slice results.
 		final PreprocessedPeakResult[] results = selectedResult.results;
 		if (results == null)
