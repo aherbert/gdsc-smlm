@@ -121,7 +121,7 @@ import ij.text.TextWindow;
  */
 public class BenchmarkSpotFit implements PlugIn, ItemListener
 {
-	private static final String TITLE = "Fit Spot Data";
+	static final String TITLE = "Fit Spot Data";
 
 	// Used to try and guess the range for filtering the results
 	private enum LowerLimit
@@ -236,7 +236,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static FitConfiguration fitConfig;
 	private static FitEngineConfiguration config;
 	private static Calibration cal;
-	private static MultiPathFilter multiFilter;
+	static MultiPathFilter multiFilter;
 	private static MultiFilter2 minimalFilter;;
 
 	static

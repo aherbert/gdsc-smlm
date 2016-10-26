@@ -386,6 +386,26 @@ public class MultiPathFilter implements Cloneable
 	}
 
 	/**
+	 * Gets the filter.
+	 *
+	 * @return the filter
+	 */
+	public IDirectFilter getFilter()
+	{
+		return copy(filter);
+	}
+	
+	/**
+	 * Gets the minimal filter.
+	 *
+	 * @return the minimal filter
+	 */
+	public IDirectFilter getMinimalFilter()
+	{
+		return copy(minFilter);
+	}
+	
+	/**
 	 * Called before the accept method is called for PreprocessedPeakResult. This calls the setup() method in the
 	 * DirectFilter.
 	 * <p>

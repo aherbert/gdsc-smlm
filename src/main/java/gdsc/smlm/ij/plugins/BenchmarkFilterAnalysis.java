@@ -84,6 +84,7 @@ import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
+import gdsc.smlm.results.filter.IDirectFilter;
 import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
@@ -567,6 +568,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private CreateData.SimulationParameters simulationParameters;
 	private MemoryPeakResults results;
+	private boolean extraOptions;
 
 	public BenchmarkFilterAnalysis()
 	{
@@ -610,6 +612,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return;
 		}
 
+		extraOptions = Utils.isExtraOptions();
+
 		resultsList = readResults();
 		if (resultsList == null)
 		{
@@ -640,6 +644,31 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	@SuppressWarnings("unchecked")
 	private List<FilterSet> readFilterSets()
 	{
+		if (extraOptions && BenchmarkSpotFit.multiFilter != null)
+		{
+			IDirectFilter f = BenchmarkSpotFit.multiFilter.getFilter();
+			if (f instanceof DirectFilter)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage("Use an identical filter to " + BenchmarkSpotFit.TITLE);
+				gd.enableYesNoCancel();
+				gd.hideCancelButton();
+				gd.showDialog();
+				if (gd.wasOKed())
+				{
+					setLastFile(null);
+					List<FilterSet> filterSets = new ArrayList<FilterSet>(1);
+					List<Filter> filters = new ArrayList<Filter>(1);
+					filters.add((DirectFilter)f);
+					FilterSet filterSet = new FilterSet(filters);
+					filterSets.add(filterSet);
+					residualsThreshold = BenchmarkSpotFit.multiFilter.residualsThreshold;
+					wasNotExpanded = null;
+					return filterSets;
+				}
+			}
+		}
+
 		GlobalSettings gs = SettingsManager.loadSettings();
 		FilterSettings filterSettings = gs.getFilterSettings();
 
@@ -763,6 +792,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private static boolean wasNotExpanded(int setNumber, int parameterNumber)
 	{
+		if (wasNotExpanded == null)
+			return true;
 		setNumber--;
 		if (wasNotExpanded[setNumber] == null)
 			return true;
