@@ -167,6 +167,9 @@ public abstract class MaximaSpotFilter extends SpotFilter
 		MaximaSpotFilter f = (MaximaSpotFilter) super.clone();
 		// Ensure the object is duplicated and not passed by reference.
 		f.nms = nms.clone();
+		f.data2 = null;
+		if (scoreDataProcessor != null)
+			f.scoreDataProcessor = scoreDataProcessor.clone();
 		return f;
 	}
 
