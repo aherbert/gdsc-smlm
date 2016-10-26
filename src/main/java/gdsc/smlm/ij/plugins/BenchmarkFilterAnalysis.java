@@ -659,7 +659,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					setLastFile(null);
 					List<FilterSet> filterSets = new ArrayList<FilterSet>(1);
 					List<Filter> filters = new ArrayList<Filter>(1);
-					filters.add((DirectFilter)f);
+					filters.add((DirectFilter) f);
 					FilterSet filterSet = new FilterSet(filters);
 					filterSets.add(filterSet);
 					residualsThreshold = BenchmarkSpotFit.multiFilter.residualsThreshold;
@@ -1713,9 +1713,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		topFilterResults = depthAnalysis(topFilterResults, bestFilter);
 		topFilterResults = scoreAnalysis(topFilterResults, bestFilter);
 		componentAnalysis(topFilterClassificationResult, filters.get(0));
+		PreprocessedPeakResult[] filterResults = null;
 		if (isShowOverlay())
-			topFilterResults = showOverlay(topFilterResults, bestFilter);
-		saveResults(topFilterResults, bestFilter);
+			filterResults = showOverlay(topFilterResults, bestFilter);
+		saveResults(filterResults, bestFilter);
 
 		wo.tile();
 	}
@@ -4334,14 +4335,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *            The assignments generated from running the filter (or null)
 	 * @param filter
 	 *            the filter
-	 * @return The assignments generated from running the filter (or null)
+	 * @return The results from running the filter (or null)
 	 */
-	private ArrayList<FractionalAssignment[]> showOverlay(ArrayList<FractionalAssignment[]> allAssignments,
-			DirectFilter filter)
+	private PreprocessedPeakResult[] showOverlay(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter)
 	{
 		ImagePlus imp = CreateData.getImage();
 		if (imp == null)
-			return allAssignments;
+			return null;
 
 		// Run the filter manually to get the results that pass.
 		if (allAssignments == null)
@@ -4388,31 +4388,32 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		float[] y = new float[x.length];
 
 		// Do FP (all remaining results that are not a TP)
+		PreprocessedPeakResult[] filterResults = null;
 		if (showFP)
 		{
 			final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
-			PreprocessedPeakResult[] results = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
+			filterResults = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
 
 			int frame = 0;
 			int c = 0;
-			for (int i = 0; i < results.length; i++)
+			for (int i = 0; i < filterResults.length; i++)
 			{
-				if (frame != results[i].getFrame())
+				if (frame != filterResults[i].getFrame())
 				{
 					if (c != 0)
 						SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
 					c = 0;
 				}
-				frame = results[i].getFrame();
-				if (predicted.contains(results[i].getUniqueId()))
+				frame = filterResults[i].getFrame();
+				if (predicted.contains(filterResults[i].getUniqueId()))
 					continue;
 				if (x.length == c)
 				{
 					x = Arrays.copyOf(x, c * 2);
 					y = Arrays.copyOf(y, c * 2);
 				}
-				x[c] = results[i].getX();
-				y[c++] = results[i].getY();
+				x[c] = filterResults[i].getX();
+				y[c++] = filterResults[i].getY();
 			}
 			//fp += c;
 			if (c != 0)
@@ -4451,45 +4452,40 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		imp.setOverlay(o);
 
-		return allAssignments;
+		return filterResults;
 	}
 
 	/**
-	 * Save the results to memory
+	 * Save the results to memory.
 	 *
-	 * @param allAssignments
-	 *            The assignments generated from running the filter (or null)
+	 * @param filterResults
+	 *            The results from running the filter (or null)
 	 * @param filter
 	 *            the filter
 	 */
-	private void saveResults(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter)
+	private void saveResults(PreprocessedPeakResult[] filterResults, DirectFilter filter)
 	{
-		if (allAssignments == null)
-			allAssignments = getAssignments(filter);
+		if (filterResults == null)
+		{
+			final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+			filterResults = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
+		}
 
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.copySettings(this.results);
 		results.setName(TITLE);
 		MemoryPeakResults.addResults(results);
 
-		for (FractionalAssignment[] assignments : allAssignments)
+		for (PreprocessedPeakResult spot : filterResults)
 		{
-			if (assignments == null || assignments.length == 0)
-				continue;
-			for (int i = 0; i < assignments.length; i++)
-			{
-				CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
-				BasePreprocessedPeakResult spot = (BasePreprocessedPeakResult) c.peakResult;
-
-				double[] p = spot.toGaussian2DParameters();
-				float[] params = new float[p.length];
-				for (int j = 0; j < p.length; j++)
-					params[j] = (float) p[j];
-				int frame = spot.getFrame();
-				int origX = (int) p[Gaussian2DFunction.X_POSITION];
-				int origY = (int) p[Gaussian2DFunction.Y_POSITION];
-				results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
-			}
+			double[] p = spot.toGaussian2DParameters();
+			float[] params = new float[p.length];
+			for (int j = 0; j < p.length; j++)
+				params[j] = (float) p[j];
+			int frame = spot.getFrame();
+			int origX = (int) p[Gaussian2DFunction.X_POSITION];
+			int origY = (int) p[Gaussian2DFunction.Y_POSITION];
+			results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
 		}
 	}
 }
