@@ -3300,7 +3300,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			else
 			{
 				// This is a candidate that passed validation. Store the estimate as passing the primary filter.
-				storeEstimate(results[i].getCandidateId(), results[i], FILTER_RANK_PRIMARY);
+				
+				// We now do this is the pass() method.
+				//storeEstimate(results[i].getCandidateId(), results[i], FILTER_RANK_PRIMARY);
 			}
 		}
 
@@ -3417,8 +3419,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	public boolean isValid(int candidateId)
 	{
-		// If we have an estimate then this is a valid candidate for fitting
-		return estimates[candidateId] != null || estimates2[candidateId] != null;
+		// If we have an estimate then this is a valid candidate for fitting.
+		// Q. Should we attempt fitting is we have only passed the min filter?
+		return (estimates[candidateId] != null && estimates[candidateId].filterRank == FILTER_RANK_PRIMARY) ||
+				(estimates2[candidateId] != null && estimates2[candidateId].filterRank == FILTER_RANK_PRIMARY);
 	}
 
 	/*
@@ -3429,7 +3433,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	public void pass(PreprocessedPeakResult result)
 	{
-		// Ignore results that pass the primary filter. We will deal with these in add(SelectedResult) 
+		// Do not ignore these. They may be from a fit result that is eventually not selected so we cannot 
+		// wait until the add(...) method is called with the selected result.
+		storeEstimate(result.getCandidateId(), result, FILTER_RANK_PRIMARY);
 	}
 
 	/*
