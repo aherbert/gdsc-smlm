@@ -662,6 +662,18 @@ public class BenchmarkSpotFilter implements PlugIn
 			Spot[] spots = spotFilter.rank(data, stack.getWidth(), stack.getHeight());
 			time += System.nanoTime() - start;
 
+			// Debug the candidates
+//			if (debug && frame == 5)
+//			{
+//				StringBuilder sb = new StringBuilder();
+//				sb.append(spotFilter.getDescription()).append("\n");
+//				for (int i = 0; i < spots.length; i++)
+//				{
+//					sb.append(String.format("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity));
+//				}
+//				System.out.print(sb.toString());
+//			}
+
 			// Score the spots that are matches
 			PSFSpot[] actual = actualCoordinates.get(frame);
 			if (actual == null)
@@ -1108,8 +1120,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			return;
 
 		// Store a clone of the config
-		filterResult.config = filterResult.config.clone(); 
-		
+		filterResult.config = filterResult.config.clone();
+
 		// Debugging the matches
 		if (debug)
 			addSpotsToMemory(filterResult.filterResults);
@@ -2292,7 +2304,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 
 		FitEngineConfiguration config = filterResult.config;
-		
+
 		pConfig.setDataFilterType(config.getDataFilterType());
 		final int nFilters = config.getNumberOfFilters();
 		for (int n = 0; n < nFilters; n++)
