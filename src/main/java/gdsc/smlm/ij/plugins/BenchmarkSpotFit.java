@@ -562,7 +562,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			this.fitWorker = new FitWorker(config.clone(), new NullPeakResults(), null);
 
 			final int fitting = config.getRelativeFitting();
-			fitWorker.setSearchParameters(spotFilter, fitting);
+			fitWorker.setSearchParameters(spotFilter.clone(), fitting);
 
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
@@ -622,7 +622,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			for (int i = 0; i < spots.length; i++)
 			{
 				spots[i] = candidates.spots[i].spot;
-				//System.out.printf("Fit %d [%d,%d = %.1f]\n", i+1, spots[i].x, spots[i].y, spots[i].intensity);
+				// Debug candidates...
+				//if (frame == 5)
+				//	System.out.printf("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity);
 			}
 			parameters.spots = spots;
 			parameters.fitTask = FitTask.BENCHMARKING;
@@ -2529,7 +2531,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		pConfig.setIncludeNeighbours(config.isIncludeNeighbours());
 		pConfig.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
 		pFitConfig.setDuplicateDistance(fitConfig.getDuplicateDistance());
-		
+
 		if (computeDoublets)
 		{
 			//config.setComputeResiduals(true);
