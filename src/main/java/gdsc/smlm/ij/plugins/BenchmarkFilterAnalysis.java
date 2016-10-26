@@ -61,6 +61,7 @@ import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.ga.ChromosomeComparator;
 import gdsc.smlm.ga.FitnessFunction;
@@ -1682,7 +1683,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		topFilterResults = scoreAnalysis(topFilterResults, bestFilter);
 		componentAnalysis(topFilterClassificationResult, filters.get(0));
 		if (isShowOverlay())
-			showOverlay(topFilterResults, bestFilter);
+			topFilterResults = showOverlay(topFilterResults, bestFilter);
+		saveResults(topFilterResults, bestFilter);
 
 		wo.tile();
 	}
@@ -4291,12 +4293,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 *            The assignments generated from running the filter (or null)
 	 * @param filter
 	 *            the filter
+	 * @return The assignments generated from running the filter (or null)
 	 */
-	private void showOverlay(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter)
+	private ArrayList<FractionalAssignment[]> showOverlay(ArrayList<FractionalAssignment[]> allAssignments,
+			DirectFilter filter)
 	{
 		ImagePlus imp = CreateData.getImage();
 		if (imp == null)
-			return;
+			return allAssignments;
 
 		// Run the filter manually to get the results that pass.
 		if (allAssignments == null)
@@ -4405,5 +4409,46 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		//System.out.printf("TP=%d, FP=%d, FN=%d, N=%d (%d)\n", tp, fp, fn, tp + fn, results.size());
 
 		imp.setOverlay(o);
+
+		return allAssignments;
+	}
+
+	/**
+	 * Save the results to memory
+	 *
+	 * @param allAssignments
+	 *            The assignments generated from running the filter (or null)
+	 * @param filter
+	 *            the filter
+	 */
+	private void saveResults(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter)
+	{
+		if (allAssignments == null)
+			allAssignments = getAssignments(filter);
+
+		MemoryPeakResults results = new MemoryPeakResults();
+		results.copySettings(this.results);
+		results.setName(TITLE);
+		MemoryPeakResults.addResults(results);
+		
+		for (FractionalAssignment[] assignments : allAssignments)
+		{
+			if (assignments == null || assignments.length == 0)
+				continue;
+			for (int i = 0; i < assignments.length; i++)
+			{
+				CustomFractionalAssignment c = (CustomFractionalAssignment) assignments[i];
+				BasePreprocessedPeakResult spot = (BasePreprocessedPeakResult) c.peakResult;
+
+				double[] p = spot.toGaussian2DParameters();
+				float[] params = new float[p.length];
+				for (int j = 0; j < p.length; j++)
+					params[j] = (float) p[j];
+				int frame = spot.getFrame();
+				int origX = (int) p[Gaussian2DFunction.X_POSITION];
+				int origY = (int) p[Gaussian2DFunction.Y_POSITION];
+				results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
+			}
+		}
 	}
 }
