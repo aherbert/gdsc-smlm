@@ -633,6 +633,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private PeakResult[] queue = new PeakResult[5];
 	private int queueSize = 0;
 
+	/**
+	 * Queue to grid.
+	 * <p>
+	 * Used to add results to the grid for the current fit position. This prevents filtering duplicates within the
+	 * current fit results, only with all that has been fit before.
+	 *
+	 * @param result
+	 *            the result
+	 */
 	private void queueToGrid(PeakResult result)
 	{
 		if (queueSize == queue.length)
@@ -640,14 +649,19 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		queue[queueSize++] = result;
 	}
 
+	/**
+	 * Flush the results for the current position to the grid.
+	 */
 	private void flushToGrid()
 	{
 		for (int i = 0; i < queueSize; i++)
 			gridManager.putOnGrid(queue[i]);
 		queueSize = 0;
-		clearGridCache();
 	}
 
+	/**
+	 * Clear the grid cache of the local neighbourhood.
+	 */
 	private void clearGridCache()
 	{
 		gridManager.clearCache();
@@ -2584,8 +2598,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private MultiPathFitResult benchmarkFit(int n, MultiPathFilter filter)
 	{
-		clearGridCache();
-
 		dynamicMultiPathFitResult.reset(n);
 
 		MultiPathFitResult.FitResult result;
@@ -2621,8 +2633,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			add(selectedResult);
 		}
 
-		flushToGrid();
-
 		return multiPathFitResult;
 	}
 
@@ -2657,6 +2667,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private void resetNeighbours()
 	{
+		clearGridCache();
 		candidateNeighbourCount = 0;
 		fittedNeighbourCount = 0;
 		neighbours = null;
@@ -3249,6 +3260,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		final float background = (float) fitResult.getParameters()[0];
 		final double[] dev = fitResult.getParameterStdDev();
 
+		if (queueSize != 0)
+			throw new RuntimeException("There are results queued already!");
+
 		for (int i = 0; i < results.length; i++)
 		{
 			if (results[i].isExistingResult())
@@ -3289,6 +3303,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				storeEstimate(results[i].getCandidateId(), results[i], FILTER_RANK_PRIMARY);
 			}
 		}
+
+		flushToGrid();
 
 		job.setFitResult(candidateId, fitResult);
 
