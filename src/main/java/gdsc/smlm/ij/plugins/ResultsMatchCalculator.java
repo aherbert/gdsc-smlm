@@ -144,7 +144,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("Distance threshold", dThreshold);
+			Parameters.isPositive("Distance threshold", dThreshold);
 			Parameters.isPositive("Increments", increments);
 			Parameters.isAboveZero("Delta", delta);
 			Parameters.isPositive("Beta", beta);
