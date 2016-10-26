@@ -117,7 +117,6 @@ public class MultiPathFilter implements Cloneable
 	 */
 	private class SimpleSelectedResultStore implements SelectedResultStore
 	{
-
 		/** The is fit. */
 		boolean[] isFit;
 
@@ -184,8 +183,6 @@ public class MultiPathFilter implements Cloneable
 		 */
 		public void pass(PreprocessedPeakResult result)
 		{
-			if (result.isNewResult())
-				isFit[result.getCandidateId()] = true;
 			// This an existing result or candidate. Mark as valid so candidates will be processed
 			isValid[result.getCandidateId()] = true;
 		}
@@ -394,7 +391,7 @@ public class MultiPathFilter implements Cloneable
 	{
 		return copy(filter);
 	}
-	
+
 	/**
 	 * Gets the minimal filter.
 	 *
@@ -404,7 +401,7 @@ public class MultiPathFilter implements Cloneable
 	{
 		return copy(minFilter);
 	}
-	
+
 	/**
 	 * Called before the accept method is called for PreprocessedPeakResult. This calls the setup() method in the
 	 * DirectFilter.
@@ -792,20 +789,21 @@ public class MultiPathFilter implements Cloneable
 		// a doublet multi fit that failed or matched a different candidate
 		// a single fit that is eligible for doublet fitting, it may be null (if it passed without width filtering)
 
-		final PreprocessedPeakResult[] doubletResults;
+		final PreprocessedPeakResult[] singleDoubletResults;
 		if (doDoublet)
 		{
-			doubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates, store);
-			if (doubletResults != null)
+			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
+					store);
+			if (singleDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
-				if (contains(doubletResults, candidateId))
-					return new SelectedResult(doubletResults, multiPathResult.getDoubletFitResult());
+				if (contains(singleDoubletResults, candidateId))
+					return new SelectedResult(singleDoubletResults, multiPathResult.getDoubletFitResult());
 			}
 		}
 		else
 		{
-			doubletResults = null;
+			singleDoubletResults = null;
 		}
 
 		// Check if the single result is to the correct candidate.
@@ -817,14 +815,15 @@ public class MultiPathFilter implements Cloneable
 		// a multi doublet fit that failed or matched a different candidate
 		// a single fit that failed or matched a different candidate
 		// a doublet fit that failed or matched a different candidate
-		final PreprocessedPeakResult[] result = rank(multiResults, multiDoubletResults, singleResults, doubletResults);
+		final PreprocessedPeakResult[] result = rank(multiResults, multiDoubletResults, singleResults,
+				singleDoubletResults);
 		if (result == null)
 			return null;
 		//@formatter:off
 		if (result == multiResults)	       return new SelectedResult(multiResults,        multiPathResult.getMultiFitResult());
 		if (result == multiDoubletResults) return new SelectedResult(multiDoubletResults, multiPathResult.getMultiDoubletFitResult());
 		if (result == singleResults)	   return new SelectedResult(singleResults,       multiPathResult.getSingleFitResult());
-		                                   return new SelectedResult(doubletResults,      multiPathResult.getDoubletFitResult());
+		                                   return new SelectedResult(singleDoubletResults,multiPathResult.getDoubletFitResult());
 		//@formatter:on
 	}
 
@@ -937,56 +936,62 @@ public class MultiPathFilter implements Cloneable
 				// Ignore this but do not count it as a failure
 				continue;
 
-			if (failCount <= failures || store.isValid(multiPathResult.candidateId))
+			final boolean evaluateFit = failCount <= failures;
+			if (evaluateFit || store.isValid(multiPathResult.candidateId))
 			{
 				// Assess the result if we are below the fail limit or have an estimate
 				final SelectedResult result = select(multiPathResult, true, store);
+				int size = 0;
 				if (result != null)
 				{
 					final int[] ok = new int[result.results.length];
-					int count = 0;
 					for (int i = 0; i < ok.length; i++)
 					{
 						if (result.results[i].isNewResult())
-							ok[count++] = i;
+							ok[size++] = i;
 					}
 
-					if (count != 0)
+					if (size != 0)
 					{
 						// This has valid results so add to the output subset only those that are new
-						if (count == ok.length)
+						if (size == ok.length)
 						{
 							store.add(result);
 						}
 						else
 						{
-							final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[count];
-							for (int i = 0; i < count; i++)
+							final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[size];
+							for (int i = 0; i < size; i++)
 							{
 								filtered[i] = result.results[ok[i]];
 							}
 							store.add(new SelectedResult(filtered, result.fitResult));
 						}
-
-						// More results were accepted so reset the fail count
-						failCount = 0;
-					}
-					else
-					{
-						store.add(new SelectedResult(null, result.fitResult));
-
-						// Nothing was accepted, increment fail count
-						failCount++;
 					}
 				}
-				else
+				if (size == 0)
 				{
 					// This failed. Just return the single result
 					store.add(new SelectedResult(null, multiPathResult.getSingleFitResult()));
-
-					// This was rejected, increment fail count
+				}
+				if (evaluateFit && size != 0)
+				{
+					// More results were accepted so reset the fail count
+					failCount = 0;
+				}
+				else
+				{
+					// Nothing was accepted, increment fail count
 					failCount++;
 				}
+			}
+			else
+			{
+				// This failed. Just return the single result
+				store.add(new SelectedResult(null, multiPathResult.getSingleFitResult()));
+
+				// This was rejected, increment fail count
+				failCount++;
 			}
 		}
 		//	multiPathResults.end();
@@ -1743,7 +1748,9 @@ public class MultiPathFilter implements Cloneable
 						{
 							if (result[i].isNewResult())
 							{
+								// This is a new fitted result
 								scoreStore.add(result[i].getUniqueId());
+								store.isFit[result[i].getCandidateId()] = true;
 
 								final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
 								if (a != null && a.length > 0)
