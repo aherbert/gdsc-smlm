@@ -3112,7 +3112,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			{
 				result = spotFitter.getResultMulti();
 				setMultiFitResult(result);
-				fitType.setMulti(true);
+				if (result != null)
+					fitType.setMulti(true);
 			}
 			return result;
 		}

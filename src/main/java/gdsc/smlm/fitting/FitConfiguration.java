@@ -2271,7 +2271,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		}
 		return null;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2318,11 +2318,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public int validate(PreprocessedPeakResult peak)
 	{
 		final int flags = doValidate(peak);
-		if (flags == 0 || log == null)
-			return 0;
+		if (log == null)
+			return flags;
 		// Log the error
-		log.info("Bad peak %d [%d]: %s", peak.getCandidateId(), peak.getId(),
-				DirectFilter.getStatusMessage(peak, flags));
+		if (flags != 0)
+			log.info("Bad peak %d (%.1f,%.1f) [%d]: %s", peak.getCandidateId(), peak.getX(), peak.getY(), peak.getId(),
+					DirectFilter.getStatusMessage(peak, flags));
 		return flags;
 	}
 

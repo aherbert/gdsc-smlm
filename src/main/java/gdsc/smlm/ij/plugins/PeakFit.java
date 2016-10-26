@@ -1633,6 +1633,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 * If the fit configuration isSmartFilter is not enabled then this method returns true. If it is enabled then a
 	 * dialog is shown to input the configuration for a smart filter. If no valid filter can be created from the input
 	 * then the method returns false.
+	 * <p>
+	 * Note: If the smart filter is successfully configured then the standard fit validation is disabled. 
 	 *
 	 * @param settings
 	 *            the settings
@@ -1670,6 +1672,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (f == null || !(f instanceof DirectFilter))
 			return false;
 		fitConfig.setDirectFilter((DirectFilter) f);
+		// Disable the standard validation
+		fitConfig.setFitValidation(false);
 
 		calibration.bias = Math.abs(gd.getNextNumber());
 
@@ -2442,8 +2446,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		fitConfig.setComputeDeviations(resultsSettings.showDeviations);
 
-		// Setup peak filtering
-		fitConfig.setFitValidation(true);
+		// Setup peak filtering using the simple filter or the smart filter, but not both
+		fitConfig.setFitValidation(!fitConfig.isSmartFilter());
 
 		// Add the calibration for precision filtering
 		fitConfig.setNmPerPixel(calibration.nmPerPixel);
