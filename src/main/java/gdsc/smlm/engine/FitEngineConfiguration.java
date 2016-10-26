@@ -17,6 +17,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.smlm.filters.AverageDataProcessor;
@@ -471,12 +472,12 @@ public class FitEngineConfiguration implements Cloneable
 		}
 
 		// Region for maxima finding
-		int search = (int) Math.ceil(getSearch() * hwhmMax);
+		int search = (int) Math.ceil(Maths.round(getSearch() * hwhmMax, 0.01));
 		if (search < 1)
 			search = 1;
 
 		// Border where peaks are ignored
-		int border = (int) Math.floor(getBorder() * hwhmMax);
+		int border = (int) Math.floor(Maths.round(getBorder() * hwhmMax, 0.01));
 		if (border < 0)
 			border = 0;
 
@@ -602,7 +603,7 @@ public class FitEngineConfiguration implements Cloneable
 	private double getSmoothingWindow(double smoothingParameter, double hwhmMin)
 	{
 		//return BlockAverageDataProcessor.convert(smoothingParameter * hwhmMin);
-		return smoothingParameter * hwhmMin;
+		return Maths.round(smoothingParameter * hwhmMin, 0.01);
 	}
 
 	private DataProcessor createDataProcessor(int border, int n, double hwhm)
