@@ -1107,6 +1107,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (filterResult == null)
 			return;
 
+		// Store a clone of the config
+		filterResult.config = filterResult.config.clone(); 
+		
 		// Debugging the matches
 		if (debug)
 			addSpotsToMemory(filterResult.filterResults);
@@ -2288,6 +2291,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			scaleSmooth = 1 / pConfig.getHWHMMin();
 		}
 
+		FitEngineConfiguration config = filterResult.config;
+		
 		pConfig.setDataFilterType(config.getDataFilterType());
 		final int nFilters = config.getNumberOfFilters();
 		for (int n = 0; n < nFilters; n++)

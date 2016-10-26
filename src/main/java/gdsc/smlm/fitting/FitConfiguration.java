@@ -1419,7 +1419,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			final double[] p = new double[7];
 			p[Gaussian2DFunction.BACKGROUND] = params[Gaussian2DFunction.BACKGROUND];
-			System.arraycopy(params, offset, p, 1, 6);
+			System.arraycopy(params, 1 + offset, p, 1, 6);
+			p[Gaussian2DFunction.X_POSITION] += offsetx;
+			p[Gaussian2DFunction.Y_POSITION] += offsety;
 			return p;
 		}
 	}
@@ -1650,6 +1652,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			f.noiseModel = null;
 			f.functionSolver = null;
 			f.setValidationResult(null, null);
+			f.dynamicPeakResult = new DynamicPeakResult();
 			return f;
 		}
 		catch (CloneNotSupportedException e)

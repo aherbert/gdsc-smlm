@@ -44,7 +44,6 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
-import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.IMultiPathFitResults;
 import gdsc.smlm.results.filter.MultiFilter2;
@@ -724,7 +723,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// (Note the global bounds will be added to the params at the end of processing the frame
 		// so we leave those untouched)
 		x = cc.fromDataToGlobalX(x);
-		y = cc.fromDataToGlobalX(y);
+		y = cc.fromDataToGlobalY(y);
 
 		// This was fit OK so add it to the grid of results (so we do not fit it again)
 		final PeakResult peakResult = createResult(x, y, value, error, noise, peakParams, peakParamsDev, candidateId);
@@ -3255,7 +3254,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				continue;
 			if (results[i].isNewResult())
 			{
-				final double[] p = ((BasePreprocessedPeakResult) results[i]).toGaussian2DParameters();
+				final double[] p = results[i].toGaussian2DParameters();
 
 				// Store slice results relative to the data frame (not the global bounds)
 				// Convert back so that 0,0 is the top left of the data bounds

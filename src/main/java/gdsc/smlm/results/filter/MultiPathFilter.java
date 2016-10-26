@@ -798,6 +798,8 @@ public class MultiPathFilter implements Cloneable
 		// a single fit that failed or matched a different candidate
 		// a doublet fit that failed or matched a different candidate
 		final PreprocessedPeakResult[] result = rank(multiResults, multiDoubletResults, singleResults, doubletResults);
+		if (result == null)
+			return null;
 		//@formatter:off
 		if (result == multiResults)	       return new SelectedResult(multiResults,        multiPathResult.getMultiFitResult());
 		if (result == multiDoubletResults) return new SelectedResult(multiDoubletResults, multiPathResult.getMultiDoubletFitResult());

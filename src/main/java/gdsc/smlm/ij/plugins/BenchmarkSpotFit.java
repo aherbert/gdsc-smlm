@@ -2529,6 +2529,18 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		pConfig.setIncludeNeighbours(config.isIncludeNeighbours());
 		pConfig.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
 		pFitConfig.setDuplicateDistance(fitConfig.getDuplicateDistance());
+		
+		if (computeDoublets)
+		{
+			//config.setComputeResiduals(true);
+			pConfig.setResidualsThreshold(0);
+			pFitConfig.setComputeResiduals(true);
+		}
+		else
+		{
+			pConfig.setResidualsThreshold(1);
+			pFitConfig.setComputeResiduals(false);
+		}
 
 		pFitConfig.setMaxIterations(fitConfig.getMaxIterations());
 		pFitConfig.setMaxFunctionEvaluations(fitConfig.getMaxFunctionEvaluations());

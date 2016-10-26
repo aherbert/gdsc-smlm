@@ -4190,7 +4190,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	}
 
 	/**
-	 * Updates the given configuration using the latest settings used in benchmarking filtering.
+	 * Updates the given configuration using the latest settings used in benchmarking filtering. The residuals threshold
+	 * will be copied only if the input FitConfiguration has isComputeResiduals() set to true.
 	 *
 	 * @param config
 	 *            the configuration
@@ -4216,8 +4217,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// New smart filter support
 		final FitConfiguration fitConfig = config.getFitConfiguration();
 		fitConfig.setDirectFilter(best.filter);
-		config.setResidualsThreshold(best.residualsThreshold);
-		fitConfig.setComputeResiduals(best.residualsThreshold < 1);
+
+		if (fitConfig.isComputeResiduals())
+		{
+			config.setResidualsThreshold(best.residualsThreshold);
+			fitConfig.setComputeResiduals(true);
+		}
+		else
+		{
+			config.setResidualsThreshold(1);
+			fitConfig.setComputeResiduals(false);
+		}
 
 		// Old support for filtering. This may be used by some plugins that have not 
 		// updated to using smart filters (e.g. DoubletAnalysis)
@@ -4430,7 +4440,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		results.copySettings(this.results);
 		results.setName(TITLE);
 		MemoryPeakResults.addResults(results);
-		
+
 		for (FractionalAssignment[] assignments : allAssignments)
 		{
 			if (assignments == null || assignments.length == 0)
