@@ -572,6 +572,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					maxIndices[n] = spots[n].y * width + spots[n].x;
 				}
 			}
+
+			// Debugging the candidate positions....
+			//			if (slice == 5)
+			//			{
+			//				System.out.println(spotFilter.getDescription());
+			//				for (int i = 0; i < spots.length; i++)
+			//				{
+			//					if (slice == 5)
+			//						System.out.printf("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity);
+			//				}
+			//			}
 		}
 
 		if (logger != null)
@@ -3296,11 +3307,21 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 
 				addSingleResult(results[i].getCandidateId(), params, paramsDev, fitResult.getError());
+
+				if (logger != null)
+				{
+					// Show the shift, signal and width spread
+					PreprocessedPeakResult peak = results[i];
+					logger.info("Fit OK %d (%.1f,%.1f) [%d]: Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f",
+							peak.getCandidateId(), peak.getX(), peak.getY(), peak.getId(),
+							Math.sqrt(peak.getXRelativeShift2()), Math.sqrt(peak.getYRelativeShift2()), peak.getSNR(),
+							peak.getXSDFactor(), peak.getYSDFactor());
+				}
 			}
 			else
 			{
 				// This is a candidate that passed validation. Store the estimate as passing the primary filter.
-				
+
 				// We now do this is the pass() method.
 				//storeEstimate(results[i].getCandidateId(), results[i], FILTER_RANK_PRIMARY);
 			}
@@ -3332,20 +3353,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			switch (fitResult.getStatus())
 			{
 				case OK:
-					// Show the shift, signal and width spread
-					final double[] initialParams = fitResult.getInitialParameters();
-					final double[] params = fitResult.getParameters();
-					for (int i = 0, j = 0; i < fitResult.getNumberOfPeaks(); i++, j += 6)
-					{
-						logger.info("Fit OK [%d]. Shift = %.3f,%.3f : SNR = %.2f : Width = %.2f,%.2f", i,
-								params[j + Gaussian2DFunction.X_POSITION] -
-										initialParams[j + Gaussian2DFunction.X_POSITION],
-								params[j + Gaussian2DFunction.Y_POSITION] -
-										initialParams[j + Gaussian2DFunction.Y_POSITION],
-								params[j + Gaussian2DFunction.SIGNAL] / noise,
-								params[j + Gaussian2DFunction.X_SD] / initialParams[j + Gaussian2DFunction.X_SD],
-								params[j + Gaussian2DFunction.Y_SD] / initialParams[j + Gaussian2DFunction.Y_SD]);
-					}
+					// We log good results in the loop above. 
 					break;
 
 				case BAD_PARAMETERS:
