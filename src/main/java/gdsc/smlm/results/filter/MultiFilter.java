@@ -1,5 +1,6 @@
 package gdsc.smlm.results.filter;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,9 +66,13 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	MultiFilterComponentSet components = null;
 	@XStreamOmitField
-	MultiFilterComponentSet componentsNoWidth = null;
+	MultiFilterComponentSet components_NoWidth_Shift = null;
 	@XStreamOmitField
-	MultiFilterComponentSet componentsWidth = null;
+	MultiFilterComponentSet components_Width_Shift = null;
+	@XStreamOmitField
+	MultiFilterComponentSet components_NoWidth_NoShift = null;
+	@XStreamOmitField
+	MultiFilterComponentSet components_Width_NoShift = null;
 
 	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision)
@@ -135,29 +140,28 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup()
 	{
-		setup(true);
+		setup(true, true);
 	}
 
 	@Override
 	public void setup(int flags)
 	{
-		setup(!areSet(flags, DirectFilter.NO_WIDTH));
+		setup(!areSet(flags, DirectFilter.NO_WIDTH), !areSet(flags, DirectFilter.NO_SHIFT));
 	}
 
-	private void setup(final boolean widthEnabled)
+	private void setup(final boolean widthEnabled, final boolean shiftEnabled)
 	{
-		if (componentsWidth == null)
+		if (components_Width_Shift == null)
 		{
 			// Create the components we require
 			final MultiFilterComponent[] components1 = new MultiFilterComponent[6];
-			final MultiFilterComponent[] components2 = new MultiFilterComponent[6];
-			int s1 = 0, s2 = 0;
+			int s1 = 0;
 
 			// Current order of filter power obtained from BenchmarkFilterAnalysis:
 			// SNR, Max Width, Precision, Shift, Min width
 			if (snr != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterSNRComponent(snr);
+				components1[s1++] = new MultiFilterSNRComponent(snr);
 			}
 			if (maxWidth != 0 || minWidth != 0)
 			{
@@ -165,25 +169,41 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			}
 			if (precision != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterVarianceComponent(precision);
+				components1[s1++] = new MultiFilterVarianceComponent(precision);
 			}
 			if (shift != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterShiftComponent(shift);
+				components1[s1++] = new MultiFilterShiftComponent(shift);
 			}
 			if (signal != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterSignalComponent(signal);
+				components1[s1++] = new MultiFilterSignalComponent(signal);
 			}
 			if (eshift != 0)
 			{
-				components1[s1++] = components2[s2++] = new MultiFilterEShiftComponent(eshift);
+				components1[s1++] = new MultiFilterEShiftComponent(eshift);
 			}
-			componentsWidth = MultiFilterComponentSetFactory.create(components1, s1);
-			componentsNoWidth = MultiFilterComponentSetFactory.create(components2, s2);
+
+			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1, MultiFilterWidthComponent.class);
+			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1, MultiFilterShiftComponent.class);
+
+			final MultiFilterComponent[] components4 = MultiFilter.remove(components2, components2.length,
+					MultiFilterShiftComponent.class);
+
+			components_Width_Shift = MultiFilterComponentSetFactory.create(components1, s1);
+			components_NoWidth_Shift = MultiFilterComponentSetFactory.create(components2, components2.length);
+			components_Width_NoShift = MultiFilterComponentSetFactory.create(components3, components3.length);
+			components_NoWidth_NoShift = MultiFilterComponentSetFactory.create(components4, components4.length);
 		}
 
-		components = (widthEnabled) ? componentsWidth : componentsNoWidth;
+		if (widthEnabled)
+		{
+			components = (shiftEnabled) ? components_Width_Shift : components_NoWidth_Shift;
+		}
+		else
+		{
+			components = (shiftEnabled) ? components_NoWidth_Shift : components_NoWidth_NoShift;
+		}
 
 		//		// This is the legacy support for all components together
 		//		this.widthEnabled = widthEnabled;
@@ -196,6 +216,19 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		//		offset = Filter.getUpperSquaredLimit(shift);
 		//		eoffset = Filter.getUpperSquaredLimit(eshift);
 		//		variance = Filter.getDUpperSquaredLimit(precision);
+	}
+
+	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size,
+			@SuppressWarnings("rawtypes") Class clazz)
+	{
+		MultiFilterComponent[] out = new MultiFilterComponent[size];
+		int length = 0;
+		for (int i = 0; i < size; i++)
+		{
+			if (in[i].getClass() != clazz)
+				out[length++] = in[i];
+		}
+		return Arrays.copyOf(out, length);
 	}
 
 	@Override
@@ -211,7 +244,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		final float sd = peak.getSD();
 		if (sd > upperSigmaThreshold || sd < lowerSigmaThreshold)
 			return false;
-		
+
 		// Precision
 		final double s = nmPerPixel * sd;
 		final double N = peak.getSignal();
@@ -364,7 +397,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				return PrecisionFilter.DEFAULT_INCREMENT;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
