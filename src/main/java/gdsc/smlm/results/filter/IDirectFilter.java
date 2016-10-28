@@ -112,6 +112,11 @@ public interface IDirectFilter
 	final static int NO_WIDTH = 1;
 
 	/**
+	 * Disable filtering using the shift of the result
+	 */
+	final static int NO_SHIFT = 2;
+
+	/**
 	 * Called before the accept method is called for PreprocessedPeakResult
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.

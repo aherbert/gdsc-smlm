@@ -558,8 +558,7 @@ public class MultiPathFilter implements Cloneable
 		final PreprocessedPeakResult[] multiDoubletResults;
 		if (doDoublet)
 		{
-			multiDoubletResults = acceptAny(candidateId, multiPathResult.getMultiDoubletFitResult(), validateCandidates,
-					store, precomputed);
+			multiDoubletResults = acceptAnyDoublet(multiPathResult, validateCandidates, store, candidateId);
 			if (multiDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -605,8 +604,11 @@ public class MultiPathFilter implements Cloneable
 		final PreprocessedPeakResult[] singleDoubletResults;
 		if (doDoublet)
 		{
+			// We must validate the spot without shift filtering. Doublets may drift further than single spot candidates.
+			filter.setup(DirectFilter.NO_SHIFT);
 			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
 					store, precomputed);
+			filter.setup();
 			if (singleDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -781,8 +783,7 @@ public class MultiPathFilter implements Cloneable
 		final PreprocessedPeakResult[] multiDoubletResults;
 		if (doDoublet)
 		{
-			multiDoubletResults = acceptAny(candidateId, multiPathResult.getMultiDoubletFitResult(), validateCandidates,
-					store);
+			multiDoubletResults = acceptAnyDoublet(multiPathResult, validateCandidates, store, candidateId);
 			if (multiDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -828,8 +829,11 @@ public class MultiPathFilter implements Cloneable
 		final PreprocessedPeakResult[] singleDoubletResults;
 		if (doDoublet)
 		{
+			// We must validate the spot without shift filtering. Doublets may drift further than single spot candidates.
+			filter.setup(DirectFilter.NO_SHIFT);
 			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
 					store);
+			filter.setup();
 			if (singleDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -1343,6 +1347,35 @@ public class MultiPathFilter implements Cloneable
 		// Validate the results
 		getValidationResults(precomputed, results);
 
+		return acceptAnyInternal(candidateId, fitResult, validateCandidates, store);
+	}
+
+	/**
+	 * Check any new and all existing results are valid. Returns the new results
+	 * <p>
+	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
+	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
+	 * already.
+	 *
+	 * @param candidateId
+	 *            the candidate id
+	 * @param fitResult
+	 *            the results
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
+	 * @return The new results that pass the filter
+	 */
+	private PreprocessedPeakResult[] acceptAnyInternal(int candidateId, final FitResult fitResult,
+			boolean validateCandidates, SelectedResultStore store)
+	{
+		if (fitResult == null || fitResult.results == null)
+			return null;
+		final PreprocessedPeakResult[] results = fitResult.results;
+
+		// Results are already in the validationResults array
+
 		// Any new and all existing results should be valid
 		int count = 0;
 		final int[] ok = new int[results.length];
@@ -1420,6 +1453,57 @@ public class MultiPathFilter implements Cloneable
 		}
 
 		return filtered;
+	}
+
+	/**
+	 * Check any new and all existing results within the multi-doublet fit results are valid. Returns the new results.
+	 * Coordinate shift filter is disabled for the doublet results.
+	 * <p>
+	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
+	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
+	 * already.
+	 *
+	 * @param multiPathResult
+	 *            the multi path result
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
+	 * @param candidateId
+	 *            the candidate id
+	 * @return The new results that pass the filter
+	 */
+	private PreprocessedPeakResult[] acceptAnyDoublet(final MultiPathFitResult multiPathResult,
+			boolean validateCandidates, SelectedResultStore store, final int candidateId)
+	{
+		final FitResult multiDoubletFitResult = multiPathResult.getMultiDoubletFitResult();
+		if (multiDoubletFitResult == null || multiDoubletFitResult.results == null)
+			return null;
+
+		// Doublets may drift further than single spot candidates.
+		// We must validate the doublet spot without shift filtering. 
+		// Note: Only disable shift for the doublet results. 
+		// doublets = len(multi-doublet) - len(multi) + 1
+
+		final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
+		final int nDoublets = results.length - multiPathResult.getMultiFitResult().results.length + 1;
+
+		filter.setup(DirectFilter.NO_SHIFT);
+
+		validationResults = new int[results.length];
+		for (int i = 0; i < nDoublets; i++)
+		{
+			validationResults[i] = filter.validate(results[i]);
+		}
+
+		filter.setup();
+
+		for (int i = nDoublets; i < results.length; i++)
+		{
+			validationResults[i] = filter.validate(results[i]);
+		}
+
+		return acceptAnyInternal(candidateId, multiDoubletFitResult, validateCandidates, store);
 	}
 
 	/**
@@ -1828,10 +1912,27 @@ public class MultiPathFilter implements Cloneable
 				// Also note that depending on the filter, different results can be selected and pushed through
 				// the store to set them valid. So we must push everything through the store to ensure nothing 
 				// is removed that could be used.
-				checkIsValid(lastId, multiPathResult.getSingleFitResult(), store);
-				checkIsValid(lastId, multiPathResult.getMultiFitResult(), store);
-				checkIsValid(lastId, multiPathResult.getDoubletFitResult(), store);
-				checkIsValid(lastId, multiPathResult.getMultiDoubletFitResult(), store);
+				checkIsValid(multiPathResult.getSingleFitResult(), store);
+				checkIsValid(multiPathResult.getMultiFitResult(), store);
+				filter.setup(DirectFilter.NO_SHIFT);
+				checkIsValid(multiPathResult.getDoubletFitResult(), store);
+
+				// Fix to only disable shift filtering for the doublet results...
+				final FitResult multiDoubletFitResult = multiPathResult.getMultiDoubletFitResult();
+				if (multiDoubletFitResult != null && multiDoubletFitResult.results != null)
+				{
+					// Note: Only disable shift for the doublet results. 
+					// doublets = len(multi-doublet) - len(multi) + 1
+					final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
+					final int nDoublets = results.length - multiPathResult.getMultiFitResult().results.length + 1;
+					checkIsValid(results, store, 0, nDoublets);
+					filter.setup();
+					checkIsValid(results, store, nDoublets, results.length);
+				}
+				else
+				{
+					filter.setup();
+				}
 
 				// This has valid results so add to the output subset 
 				newMultiPathResults[size++] = multiPathResult;
@@ -1865,13 +1966,27 @@ public class MultiPathFilter implements Cloneable
 		return null;
 	}
 
-	private void checkIsValid(int candidateId, FitResult fitResult, SimpleSelectedResultStore store)
+	private void checkIsValid(FitResult fitResult, SimpleSelectedResultStore store)
 	{
 		if (fitResult == null || fitResult.results == null)
 			return;
 		final PreprocessedPeakResult[] results = fitResult.results;
 
 		for (int i = 0; i < results.length; i++)
+		{
+			// Validate everything
+			final int r = filter.validate(results[i]);
+			results[i].setValidationResult(r);
+
+			// Mark as valid in the store
+			if (r == 0)
+				store.isValid[results[i].getCandidateId()] = true;
+		}
+	}
+
+	private void checkIsValid(PreprocessedPeakResult[] results, SimpleSelectedResultStore store, int lower, int upper)
+	{
+		for (int i = lower; i < upper; i++)
 		{
 			// Validate everything
 			final int r = filter.validate(results[i]);
