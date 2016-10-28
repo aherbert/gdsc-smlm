@@ -476,8 +476,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// If we are benchmarking then do not generate results dynamically since we will store all 
 			// results in the fit job
-			//dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, !benchmarking);
-			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, false);
+			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, !benchmarking);
+			//dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, false);
 
 			// Debug where the fit config may be different between benchmarking and fitting
 			if (slice == -1)
@@ -823,7 +823,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			this.offsety = offsety;
 		}
 
-		abstract PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+				double[] params, double localBackground, ResultType resultType)
+		{
+			// Update the initial params since we may have used an estimate
+			// This will ensure that the width factor is computed correctly.
+			
+			// Q. Should this be ignored for existing results? They have already passed validation. 
+			// So we do not have to be as strict on their width and could just use the drift from 
+			// the the initial estimate.
+			// For now do a full validation since multi-fit results are only accepted if existing
+			// results are still valid.
+			
+			final int offset = n * 6;
+			initialParams[Gaussian2DFunction.X_SD + offset] = fitConfig.getInitialPeakStdDev0();
+			initialParams[Gaussian2DFunction.Y_SD + offset] = fitConfig.getInitialPeakStdDev1();
+			return createResult(candidateId, n, initialParams, params, localBackground, resultType);
+		}
+		
+		abstract PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams,
 				double[] params, double localBackground, ResultType resultType);
 	}
 
@@ -838,7 +856,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			super(offsetx, offsety);
 		}
 
-		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams,
 				double[] params, double localBackground, ResultType resultType)
 		{
 			return fitConfig.createDynamicPreprocessedPeakResult(candidateId, n, initialParams, params, localBackground,
@@ -856,7 +874,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			super(offsetx, offsety);
 		}
 
-		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
+		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams,
 				double[] params, double localBackground, ResultType resultType)
 		{
 			return fitConfig.createPreprocessedPeakResult(slice, candidateId, n, initialParams, params, localBackground,
@@ -1278,8 +1296,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// This will ensure that drift is computed correctly.
 			final double[] fitParams = fitResult.getParameters();
 			final double[] initialParams = fitResult.getInitialParameters();
+			
 			initialParams[Gaussian2DFunction.X_POSITION] = candidates[candidateId].x - regionBounds.x;
 			initialParams[Gaussian2DFunction.Y_POSITION] = candidates[candidateId].y - regionBounds.y;
+			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialPeakStdDev0();
+			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialPeakStdDev1();
 
 			// Perform validation of the candidate and existing peaks (other candidates are allowed to fail)
 			if (fitResult.getStatus() == FitStatus.OK)
@@ -2335,6 +2356,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				NEXT_PEAK: for (int n = 0; n < 2; n++)
 				{
 					final int offset = n * 6;
+					
+					// Ensure the initial parameters are at the candidate position since we may have used an estimate.
+					// This will ensure that drift is computed correctly.
+					initialParams[Gaussian2DFunction.X_POSITION + offset] = candidates[candidateId].x -
+							regionBounds.x;
+					initialParams[Gaussian2DFunction.Y_POSITION + offset] = candidates[candidateId].y -
+							regionBounds.y;
+					
 					// 1. Check the spot is inside the region
 
 					// Note that during processing the data is assumed to refer to the top-left
