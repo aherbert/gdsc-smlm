@@ -188,7 +188,7 @@ public class MultiPathFilter implements Cloneable
 			//{
 			//	System.out.println("Follow this...");
 			//}
-			
+
 			// This an existing result or candidate. Mark as valid so candidates will be processed
 			isValid[result.getCandidateId()] = true;
 		}
@@ -957,18 +957,18 @@ public class MultiPathFilter implements Cloneable
 		if (store == null)
 			store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
 
-		// Debugging the results that are scored
-		java.io.OutputStreamWriter out = null;
-		if (debugFilename != null && multiPathResults.getFrame() == 46)
-		{
-			try
-			{
-				out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
-			}
-			catch (Exception e)
-			{
-			}
-		}
+		//		// Debugging the results that are scored
+		//		java.io.OutputStreamWriter out = null;
+		//		if (debugFilename != null && multiPathResults.getFrame() == 46)
+		//		{
+		//			try
+		//			{
+		//				out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+		//			}
+		//			catch (Exception e)
+		//			{
+		//			}
+		//		}
 
 		// TODO - this could be made iterative. Any pass through the data may store estimates 
 		// using the SelectedResultStore and used to determine if 
@@ -991,31 +991,31 @@ public class MultiPathFilter implements Cloneable
 			final boolean evaluateFit = failCount <= failures;
 			if (evaluateFit || store.isValid(multiPathResult.candidateId))
 			{
-				if (out != null)
-				{
-					try
-					{
-						out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.getFrame(),
-								multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
-								isNewResult(accept(multiPathResult, true, null))));
-
-						// TODO - Write out the full set of initial and fitted parameters for the results...
-					}
-					catch (Exception e)
-					{
-						try
-						{
-							out.close();
-						}
-						catch (Exception ee)
-						{
-						}
-						finally
-						{
-							out = null;
-						}
-					}
-				}
+				//				if (out != null)
+				//				{
+				//					try
+				//					{
+				//						out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.getFrame(),
+				//								multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+				//								isNewResult(accept(multiPathResult, true, null))));
+				//
+				//						// TODO - Write out the full set of initial and fitted parameters for the results...
+				//					}
+				//					catch (Exception e)
+				//					{
+				//						try
+				//						{
+				//							out.close();
+				//						}
+				//						catch (Exception ee)
+				//						{
+				//						}
+				//						finally
+				//						{
+				//							out = null;
+				//						}
+				//					}
+				//				}
 
 				// Assess the result if we are below the fail limit or have an estimate
 				final SelectedResult result = select(multiPathResult, true, store);
@@ -1027,29 +1027,29 @@ public class MultiPathFilter implements Cloneable
 					{
 						if (result.results[i].isNewResult())
 						{
-							if (out != null)
-							{
-								try
-								{
-									out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.getFrame(),
-											multiPathResult.candidateId, result.results[i].getX(),
-											result.results[i].getY()));
-								}
-								catch (Exception e)
-								{
-									try
-									{
-										out.close();
-									}
-									catch (Exception ee)
-									{
-									}
-									finally
-									{
-										out = null;
-									}
-								}
-							}
+							//							if (out != null)
+							//							{
+							//								try
+							//								{
+							//									out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.getFrame(),
+							//											multiPathResult.candidateId, result.results[i].getX(),
+							//											result.results[i].getY()));
+							//								}
+							//								catch (Exception e)
+							//								{
+							//									try
+							//									{
+							//										out.close();
+							//									}
+							//									catch (Exception ee)
+							//									{
+							//									}
+							//									finally
+							//									{
+							//										out = null;
+							//									}
+							//								}
+							//							}
 
 							ok[size++] = i;
 						}
@@ -1103,38 +1103,38 @@ public class MultiPathFilter implements Cloneable
 		//	multiPathResults.end();
 		//}
 
-		if (out != null)
-		{
-			try
-			{
-				out.write(String.format("[%d] %s\n", multiPathResults.getFrame(), "# selected = ?"));
-			}
-			catch (Exception e)
-			{
-				try
-				{
-					out.close();
-				}
-				catch (Exception ee)
-				{
-				}
-				finally
-				{
-					out = null;
-				}
-			}
-			// Close here to only do the first frame
-			if (out != null)
-			{
-				try
-				{
-					out.close();
-				}
-				catch (Exception ee)
-				{
-				}
-			}
-		}
+		//		if (out != null)
+		//		{
+		//			try
+		//			{
+		//				out.write(String.format("[%d] %s\n", multiPathResults.getFrame(), "# selected = ?"));
+		//			}
+		//			catch (Exception e)
+		//			{
+		//				try
+		//				{
+		//					out.close();
+		//				}
+		//				catch (Exception ee)
+		//				{
+		//				}
+		//				finally
+		//				{
+		//					out = null;
+		//				}
+		//			}
+		//			// Close here to only do the first frame
+		//			if (out != null)
+		//			{
+		//				try
+		//				{
+		//					out.close();
+		//				}
+		//				catch (Exception ee)
+		//				{
+		//				}
+		//			}
+		//		}
 	}
 
 	@XStreamOmitField
@@ -1500,17 +1500,17 @@ public class MultiPathFilter implements Cloneable
 			final MultiPathFitResults multiPathResults = results[k];
 
 			// Debugging the results that are scored
-			java.io.OutputStreamWriter out = null;
-			if (debugFilename != null && multiPathResults.getFrame() == 46)
-			{
-				try
-				{
-					out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
-				}
-				catch (Exception e)
-				{
-				}
-			}
+			//			java.io.OutputStreamWriter out = null;
+			//			if (debugFilename != null && multiPathResults.getFrame() == 46)
+			//			{
+			//				try
+			//				{
+			//					out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+			//				}
+			//				catch (Exception e)
+			//				{
+			//				}
+			//			}
 
 			int failCount = 0;
 			int lastId = -1;
@@ -1530,29 +1530,29 @@ public class MultiPathFilter implements Cloneable
 				final boolean evaluateFit = failCount <= failures;
 				if (evaluateFit || store.isValid(multiPathResult.candidateId))
 				{
-					if (out != null)
-					{
-						try
-						{
-							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
-									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
-									isNewResult(accept(multiPathResult, true, null))));
-						}
-						catch (Exception e)
-						{
-							try
-							{
-								out.close();
-							}
-							catch (Exception ee)
-							{
-							}
-							finally
-							{
-								out = null;
-							}
-						}
-					}
+					//					if (out != null)
+					//					{
+					//						try
+					//						{
+					//							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
+					//									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+					//									isNewResult(accept(multiPathResult, true, null))));
+					//						}
+					//						catch (Exception e)
+					//						{
+					//							try
+					//							{
+					//								out.close();
+					//							}
+					//							catch (Exception ee)
+					//							{
+					//							}
+					//							finally
+					//							{
+					//								out = null;
+					//							}
+					//						}
+					//					}
 
 					// Evaluate the result. 
 					// This allows storing more estimates in the store even if we are past the failures limit.
@@ -1564,28 +1564,28 @@ public class MultiPathFilter implements Cloneable
 						{
 							if (result[i].isNewResult())
 							{
-								if (out != null)
-								{
-									try
-									{
-										out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.frame,
-												multiPathResult.candidateId, result[i].getX(), result[i].getY()));
-									}
-									catch (Exception e)
-									{
-										try
-										{
-											out.close();
-										}
-										catch (Exception ee)
-										{
-										}
-										finally
-										{
-											out = null;
-										}
-									}
-								}
+								//								if (out != null)
+								//								{
+								//									try
+								//									{
+								//										out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.frame,
+								//												multiPathResult.candidateId, result[i].getX(), result[i].getY()));
+								//									}
+								//									catch (Exception e)
+								//									{
+								//										try
+								//										{
+								//											out.close();
+								//										}
+								//										catch (Exception ee)
+								//										{
+								//										}
+								//										finally
+								//										{
+								//											out = null;
+								//										}
+								//									}
+								//								}
 								list.add(result[i]);
 							}
 						}
@@ -1613,38 +1613,38 @@ public class MultiPathFilter implements Cloneable
 				multiPathResults.complete(c);
 			}
 
-			if (out != null)
-			{
-				try
-				{
-					out.write(String.format("[%d] %s\n", multiPathResults.getFrame(), "# selected = ?"));
-				}
-				catch (Exception e)
-				{
-					try
-					{
-						out.close();
-					}
-					catch (Exception ee)
-					{
-					}
-					finally
-					{
-						out = null;
-					}
-				}
-				// Close here to only do the first frame
-				if (out != null)
-				{
-					try
-					{
-						out.close();
-					}
-					catch (Exception ee)
-					{
-					}
-				}
-			}
+			//			if (out != null)
+			//			{
+			//				try
+			//				{
+			//					out.write(String.format("[%d] %s\n", multiPathResults.getFrame(), "# selected = ?"));
+			//				}
+			//				catch (Exception e)
+			//				{
+			//					try
+			//					{
+			//						out.close();
+			//					}
+			//					catch (Exception ee)
+			//					{
+			//					}
+			//					finally
+			//					{
+			//						out = null;
+			//					}
+			//				}
+			//				// Close here to only do the first frame
+			//				if (out != null)
+			//				{
+			//					try
+			//					{
+			//						out.close();
+			//					}
+			//					catch (Exception ee)
+			//					{
+			//					}
+			//				}
+			//			}
 		}
 		return list.toArray(new PreprocessedPeakResult[list.size()]);
 	}
@@ -2053,18 +2053,18 @@ public class MultiPathFilter implements Cloneable
 		{
 			final MultiPathFitResults multiPathResults = results[k];
 
-			// Debugging the results that are scored
-			java.io.OutputStreamWriter out = null;
-			if (debugFilename != null && multiPathResults.getFrame() == 46)
-			{
-				try
-				{
-					out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
-				}
-				catch (Exception e)
-				{
-				}
-			}
+			//			// Debugging the results that are scored
+			//			java.io.OutputStreamWriter out = null;
+			//			if (debugFilename != null && multiPathResults.getFrame() == 46)
+			//			{
+			//				try
+			//				{
+			//					out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+			//				}
+			//				catch (Exception e)
+			//				{
+			//				}
+			//			}
 
 			// Reset fail count for new frames
 			int failCount = 0;
@@ -2086,29 +2086,29 @@ public class MultiPathFilter implements Cloneable
 				final boolean evaluateFit = failCount <= failures;
 				if (evaluateFit || store.isValid(multiPathResult.candidateId))
 				{
-					if (out != null)
-					{
-						try
-						{
-							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
-									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
-									isNewResult(accept(multiPathResult, true, null, subset))));
-						}
-						catch (Exception e)
-						{
-							try
-							{
-								out.close();
-							}
-							catch (Exception ee)
-							{
-							}
-							finally
-							{
-								out = null;
-							}
-						}
-					}
+					//					if (out != null)
+					//					{
+					//						try
+					//						{
+					//							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
+					//									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+					//									isNewResult(accept(multiPathResult, true, null, subset))));
+					//						}
+					//						catch (Exception e)
+					//						{
+					//							try
+					//							{
+					//								out.close();
+					//							}
+					//							catch (Exception ee)
+					//							{
+					//							}
+					//							finally
+					//							{
+					//								out = null;
+					//							}
+					//						}
+					//					}
 
 					// Assess the result if we are below the fail limit or have an estimate
 					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store, subset);
@@ -2121,28 +2121,28 @@ public class MultiPathFilter implements Cloneable
 						{
 							if (result[i].isNewResult())
 							{
-								if (out != null)
-								{
-									try
-									{
-										out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.frame,
-												multiPathResult.candidateId, result[i].getX(), result[i].getY()));
-									}
-									catch (Exception e)
-									{
-										try
-										{
-											out.close();
-										}
-										catch (Exception ee)
-										{
-										}
-										finally
-										{
-											out = null;
-										}
-									}
-								}
+								//								if (out != null)
+								//								{
+								//									try
+								//									{
+								//										out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.frame,
+								//												multiPathResult.candidateId, result[i].getX(), result[i].getY()));
+								//									}
+								//									catch (Exception e)
+								//									{
+								//										try
+								//										{
+								//											out.close();
+								//										}
+								//										catch (Exception ee)
+								//										{
+								//										}
+								//										finally
+								//										{
+								//											out = null;
+								//										}
+								//									}
+								//								}
 
 								// This is a new fitted result
 								scoreStore.add(result[i].getUniqueId());
@@ -2182,38 +2182,38 @@ public class MultiPathFilter implements Cloneable
 			if (save)
 				allAssignments.add(tmp);
 
-			if (out != null)
-			{
-				try
-				{
-					out.write(String.format("[%d] %s\n", multiPathResults.frame, Arrays.toString(score)));
-				}
-				catch (Exception e)
-				{
-					try
-					{
-						out.close();
-					}
-					catch (Exception ee)
-					{
-					}
-					finally
-					{
-						out = null;
-					}
-				}
-				// Close here to only do the first frame
-				if (out != null)
-				{
-					try
-					{
-						out.close();
-					}
-					catch (Exception ee)
-					{
-					}
-				}
-			}
+			//			if (out != null)
+			//			{
+			//				try
+			//				{
+			//					out.write(String.format("[%d] %s\n", multiPathResults.frame, Arrays.toString(score)));
+			//				}
+			//				catch (Exception e)
+			//				{
+			//					try
+			//					{
+			//						out.close();
+			//					}
+			//					catch (Exception ee)
+			//					{
+			//					}
+			//					finally
+			//					{
+			//						out = null;
+			//					}
+			//				}
+			//				// Close here to only do the first frame
+			//				if (out != null)
+			//				{
+			//					try
+			//					{
+			//						out.close();
+			//					}
+			//					catch (Exception ee)
+			//					{
+			//					}
+			//				}
+			//			}
 		}
 
 		//		if (out != null)
