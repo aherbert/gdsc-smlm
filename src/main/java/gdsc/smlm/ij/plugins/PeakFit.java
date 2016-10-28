@@ -197,6 +197,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textMinPhotons;
 	private TextField textPrecisionThreshold;
 	private Checkbox textSmartFilter;
+	private Checkbox textDisableSimpleFilter;
 	private TextField textNoise;
 	private Choice textNoiseMethod;
 	private TextField textMinWidthFactor;
@@ -787,8 +788,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 			discardLabel = gd.getMessage();
+			
 			gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
-
+			gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
 			gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 			gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 			gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
@@ -924,6 +926,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				textResidualsThreshold = numerics.get(n++);
 				textDuplicateDistance = numerics.get(n++);
 				textSmartFilter = checkboxes.get(b++);
+				textDisableSimpleFilter = checkboxes.get(b++);
 				textCoordinateShiftFactor = numerics.get(n++);
 				textSignalStrength = numerics.get(n++);
 				textMinPhotons = numerics.get(n++);
@@ -938,6 +941,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 				updateFilterInput();
 				textSmartFilter.addItemListener(this);
+				textDisableSimpleFilter.addItemListener(this);
 			}
 			textLogProgress = checkboxes.get(b++);
 			if (!maximaIdentification)
@@ -1352,6 +1356,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			if (e.getSource() == textSmartFilter)
 			{
+				// Prevent both filters being enabled
+				textDisableSimpleFilter.setState(textSmartFilter.getState());
+				updateFilterInput();
+			}
+			else if (e.getSource() == textDisableSimpleFilter)
+			{
 				updateFilterInput();
 			}
 			else
@@ -1375,13 +1385,14 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 	private void updateFilterInput()
 	{
-		if (textSmartFilter.getState())
+		if (textDisableSimpleFilter.getState())
 		{
 			disableEditing(textCoordinateShiftFactor);
 			disableEditing(textSignalStrength);
 			disableEditing(textMinPhotons);
-			disableEditing(textMinWidthFactor);
-			disableEditing(textWidthFactor);
+			// These are used to set bounds
+			//disableEditing(textMinWidthFactor);
+			//disableEditing(textWidthFactor);
 			disableEditing(textPrecisionThreshold);
 		}
 		else
@@ -1389,8 +1400,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			enableEditing(textCoordinateShiftFactor);
 			enableEditing(textSignalStrength);
 			enableEditing(textMinPhotons);
-			enableEditing(textMinWidthFactor);
-			enableEditing(textWidthFactor);
+			//enableEditing(textMinWidthFactor);
+			//enableEditing(textWidthFactor);
 			enableEditing(textPrecisionThreshold);
 		}
 	}
@@ -1456,6 +1467,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			fitConfig.setDuplicateDistance(gd.getNextNumber());
 
 			fitConfig.setSmartFilter(gd.getNextBoolean());
+			fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
 			fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 			fitConfig.setSignalStrength(gd.getNextNumber());
 			fitConfig.setMinPhotons(gd.getNextNumber());
@@ -1634,7 +1646,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	 * dialog is shown to input the configuration for a smart filter. If no valid filter can be created from the input
 	 * then the method returns false.
 	 * <p>
-	 * Note: If the smart filter is successfully configured then the standard fit validation is disabled. 
+	 * Note: If the smart filter is successfully configured then the use may want to disable the standard fit
+	 * validation.
 	 *
 	 * @param settings
 	 *            the settings
@@ -1672,8 +1685,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (f == null || !(f instanceof DirectFilter))
 			return false;
 		fitConfig.setDirectFilter((DirectFilter) f);
-		// Disable the standard validation
-		fitConfig.setFitValidation(false);
 
 		calibration.bias = Math.abs(gd.getNextNumber());
 
@@ -2419,8 +2430,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			IJ.log("Spot Filter = " + spotFilter.getDescription());
 			int w = 2 * engine.getFitting() + 1;
 			Utils.log("Fit window = %d x %d", w, w);
+			if (!fitConfig.isDisableSimpleFilter())
+			{
 			IJ.log("Coordinate shift = " + Utils.rounded(config.getFitConfiguration().getCoordinateShift()));
 			IJ.log("Signal strength = " + Utils.rounded(fitConfig.getSignalStrength()));
+			}
+			if (fitConfig.isDirectFilter())
+				IJ.log("Smart filter = " + fitConfig.getSmartFilter().getDescription());
 			if (extraOptions)
 				IJ.log("Noise = " + Utils.rounded(fitConfig.getNoise()));
 			IJ.log("Width factor = " + Utils.rounded(fitConfig.getWidthFactor()));
@@ -2445,9 +2461,6 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		fitConfig.setLog(logger);
 
 		fitConfig.setComputeDeviations(resultsSettings.showDeviations);
-
-		// Setup peak filtering using the simple filter or the smart filter, but not both
-		fitConfig.setFitValidation(!fitConfig.isSmartFilter());
 
 		// Add the calibration for precision filtering
 		fitConfig.setNmPerPixel(calibration.nmPerPixel);
@@ -2765,20 +2778,18 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textDuplicateDistance.setText("" + fitConfig.getDuplicateDistance());
 
 			// Filtering
-			if (fitConfig.isSmartFilter())
+			textSmartFilter.setState(fitConfig.isSmartFilter());
+			textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
+			if (!fitConfig.isDisableSimpleFilter())
 			{
-				textSmartFilter.setState(true);
-			}
-			else
-			{
-				textSmartFilter.setState(false);
 				textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
 				textSignalStrength.setText("" + fitConfig.getSignalStrength());
-				textMinPhotons.setText("" + fitConfig.getMinPhotons());
-				textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
 				textWidthFactor.setText("" + fitConfig.getWidthFactor());
 				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
 			}
+			// These are used for settings the bounds so they are included
+			textMinPhotons.setText("" + fitConfig.getMinPhotons());
+			textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
 			updateFilterInput();
 
 			if (extraOptions)

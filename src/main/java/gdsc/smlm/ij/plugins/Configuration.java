@@ -81,6 +81,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 	private TextField textResidualsThreshold;
 	private TextField textDuplicateDistance;
 	private Checkbox textSmartFilter;
+	private Checkbox textDisableSimpleFilter;
 	private TextField textCoordinateShiftFactor;
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
@@ -160,6 +161,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
 		gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
+		gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
 		gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
 		gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
@@ -207,6 +209,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 			textResidualsThreshold = numerics.get(n++);
 			textDuplicateDistance = numerics.get(n++);
 			textSmartFilter = checkboxes.get(b++);
+			textSmartFilter = checkboxes.get(b++);
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
 			textMinPhotons = numerics.get(n++);
@@ -216,6 +219,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 
 			updateFilterInput();
 			textSmartFilter.addItemListener(this);
+			textDisableSimpleFilter.addItemListener(this);
 		}
 
 		if (gd.getLayout() != null)
@@ -280,6 +284,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 		fitConfig.setDuplicateDistance(gd.getNextNumber());
 
 		fitConfig.setSmartFilter(gd.getNextBoolean());
+		fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
 		fitConfig.setSignalStrength(gd.getNextNumber());
 		fitConfig.setMinPhotons(gd.getNextNumber());
@@ -469,18 +474,25 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getSource() instanceof Checkbox)
+		{
+			if (e.getSource() == textSmartFilter)
+			{
+				textDisableSimpleFilter.setState(textSmartFilter.getState());
+			}
 			updateFilterInput();
+		}
 	}
 
 	private void updateFilterInput()
 	{
-		if (textSmartFilter.getState())
+		if (textDisableSimpleFilter.getState())
 		{
 			disableEditing(textCoordinateShiftFactor);
 			disableEditing(textSignalStrength);
 			disableEditing(textMinPhotons);
-			disableEditing(textMinWidthFactor);
-			disableEditing(textWidthFactor);
+			// These are used to set bounds
+			//disableEditing(textMinWidthFactor);
+			//disableEditing(textWidthFactor);
 			disableEditing(textPrecisionThreshold);
 		}
 		else
@@ -488,8 +500,8 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 			enableEditing(textCoordinateShiftFactor);
 			enableEditing(textSignalStrength);
 			enableEditing(textMinPhotons);
-			enableEditing(textMinWidthFactor);
-			enableEditing(textWidthFactor);
+			//enableEditing(textMinWidthFactor);
+			//enableEditing(textWidthFactor);
 			enableEditing(textPrecisionThreshold);
 		}
 	}

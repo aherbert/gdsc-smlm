@@ -42,6 +42,13 @@ public interface IMultiPathFitResults
 	 * @return the result
 	 */
 	MultiPathFitResult getResult(int index);
+	
+	/**
+	 * Called when the results that would be returned by {@link #getResult(int)} are no longer required
+	 *
+	 * @param index the index
+	 */
+	void complete(int index);
 
 	/**
 	 * The total number of candidates. This may be greater than the size of the {@link #getNumberOfResults()} if

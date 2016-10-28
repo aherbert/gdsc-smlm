@@ -115,7 +115,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Set some default fit settings here ...
 		// Ensure all candidates are fitted
 		config.setFailuresLimit(-1);
-		fitConfig.setFitValidation(true);
+		fitConfig.setSmartFilter(false);
+		fitConfig.setDisableSimpleFilter(false);
 		fitConfig.setMinPhotons(1); // Do not allow negative photons 
 		fitConfig.setCoordinateShiftFactor(0); // Disable
 		fitConfig.setPrecisionThreshold(0);
@@ -133,7 +134,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		//
 		filterFitConfig = new FitConfiguration();
-		filterFitConfig.setFitValidation(true);
+		filterFitConfig.setSmartFilter(false);
+		filterFitConfig.setDisableSimpleFilter(false);
 		filterFitConfig.setMinPhotons(0);
 		filterFitConfig.setCoordinateShiftFactor(0);
 		filterFitConfig.setPrecisionThreshold(0);

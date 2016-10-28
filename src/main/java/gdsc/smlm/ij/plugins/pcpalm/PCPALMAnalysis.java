@@ -279,6 +279,11 @@ public class PCPALMAnalysis implements PlugInFilter
 				results.add(result);
 			return true;
 		}
+		catch (ClassCastException ex)
+		{
+			//ex.printStackTrace();
+			IJ.log("Failed to load correlation result from file: " + path);
+		}
 		catch (XStreamException ex)
 		{
 			//ex.printStackTrace();

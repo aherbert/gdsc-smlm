@@ -26,6 +26,7 @@ import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 
@@ -136,7 +137,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private long time = 0;
 
 	// Cache batch results
-	private static BatchSettings batchSettings = null;
+	private static Settings batchSettings = null;
 	private static ArrayList<BatchResult[]> cachedBatchResults = new ArrayList<BatchResult[]>();
 
 	private static int id = 1;
@@ -158,26 +159,6 @@ public class BenchmarkSpotFilter implements PlugIn
 	// Used by the Benchmark Spot Fit plugin
 	private static int filterResultsId = 0;
 	static BenchmarkFilterResult filterResult = null;
-
-	private class BatchSettings
-	{
-		final double[] p;
-
-		public BatchSettings(double... p)
-		{
-			this.p = p;
-		}
-
-		boolean isEqual(BatchSettings other)
-		{
-			if (other == null)
-				return false;
-			for (int i = 0; i < p.length; i++)
-				if (p[i] != other.p[i])
-					return false;
-			return true;
-		}
-	}
 
 	public class BenchmarkFilterResult
 	{
@@ -1226,11 +1207,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (dataFilter != null)
 		{
 			// Convert the absolute distance to be relative to the PSF width
-			param /= config.getHWHMMin();
+			param = Maths.round(param / config.getHWHMMin(), 0.001);
 
 			final double hwhmMax = config.getHWHMMax();
 			// Convert absolute search distance to relative
-			config.setSearch(search / hwhmMax);
+			config.setSearch(Maths.round(search / hwhmMax, 0.001));
 
 			if (filterRelativeDistances)
 			{
@@ -1240,7 +1221,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			else
 			{
 				// Otherwise we must adjust the input values to convert the absolute values to relative
-				config.setBorder(border / hwhmMax);
+				config.setBorder(Maths.round(border / hwhmMax, 0.001));
 			}
 
 			// Run the filter using relative distances
@@ -1410,7 +1391,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		fitConfig.setInitialPeakStdDev(sa);
+		fitConfig.setInitialPeakStdDev(Maths.round(sa));
 
 		if (batchMode)
 		{
@@ -1429,7 +1410,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		else
 		{
 			config.setDataFilterType(gd.getNextChoiceIndex());
-			config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
+			config.setDataFilter(gd.getNextChoiceIndex(), Maths.round(Math.abs(gd.getNextNumber()), 0.001), 0);
 			filterRelativeDistances = gd.getNextBoolean();
 			search = gd.getNextNumber();
 		}
@@ -1465,11 +1446,11 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (batchMode)
 		{
 			// Clear the cached results if the setting changed
-			BatchSettings settings = new BatchSettings(simulationParameters.id, (filterRelativeDistances) ? 1 : 0,
+			Settings settings = new Settings(simulationParameters.id, filterRelativeDistances,
 					//search, maxSearch, // Ignore search distance for smart caching 
-					border, (scoreRelativeDistances) ? 1 : 0, sAnalysisBorder, matchingMethod, upperDistance,
+					border, scoreRelativeDistances, sAnalysisBorder, matchingMethod, upperDistance,
 					lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
-			if (!settings.isEqual(batchSettings))
+			if (!settings.equals(batchSettings))
 			{
 				cachedBatchResults.clear();
 			}
@@ -1481,17 +1462,17 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (filterRelativeDistances)
 			{
 				final double hwhmMax = config.getHWHMMax();
-				config.setBorder(border * hwhmMax);
+				config.setBorder(Maths.round(border * hwhmMax, 0.001));
 			}
 			else
 			{
-				config.setBorder(border);
+				config.setBorder(Maths.round(border, 0.001));
 			}
 		}
 		else
 		{
-			config.setSearch(search);
-			config.setBorder(border);
+			config.setSearch(Maths.round(search, 0.001));
+			config.setBorder(Maths.round(border, 0.001));
 
 			// Single filter ...
 			// Allow more complicated filters to be configured

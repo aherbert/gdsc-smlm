@@ -32,7 +32,7 @@ public class ResultsSettings implements Cloneable
 	public String resultsDirectory = null;
 	public String resultsFilename = null;
 	public boolean binaryResults = false;
-	public boolean resultsInMemory = false;
+	public boolean resultsInMemory = true;
 	private ResultsTable resultsTable = ResultsTable.NONE;
 
 	/**

@@ -601,7 +601,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			// Extract each peak and fit individually
 			ImageExtractor ie = new ImageExtractor(data, width, height);
 			float[] region = null;
-			Gaussian2DFitter gf = createGaussianFitter();
+			Gaussian2DFitter gf = createGaussianFitter(filterResults);
 
 			for (int n = 0; n < maxIndices.length; n++)
 			{
@@ -779,7 +779,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (maxIndices == null || maxIndices.length == 0)
 			return null;
 
-		Gaussian2DFitter gf = createGaussianFitter();
+		Gaussian2DFitter gf = createGaussianFitter(false);
 		this.fitResult = gf.fit(Utils.toDouble(data), width, height, maxIndices, estimatedHeights);
 		if (fitResult.getStatus() == FitStatus.OK)
 		{
@@ -870,7 +870,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		return null;
 	}
 
-	private Gaussian2DFitter createGaussianFitter()
+	private Gaussian2DFitter createGaussianFitter(boolean simpleFiltering)
 	{
 		FitConfiguration config = new FitConfiguration();
 		config.setMaxIterations(getMaxIterations());
@@ -881,7 +881,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		config.setDuplicateDistance(0);
 
 		// Set-up peak filtering only for single fitting
-		config.setFitValidation(singleFit && filterResults);
+		config.setDisableSimpleFilter(!simpleFiltering);
 		setupPeakFiltering(config);
 
 		if (isLogProgress())
@@ -980,7 +980,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			return null;
 		}
 
-		Gaussian2DFitter gf = createGaussianFitter();
+		Gaussian2DFitter gf = createGaussianFitter(false);
 		FitResult fitResult = gf.fit(Utils.toDouble(data), width, height, new int[] { maxIndex });
 		if (fitResult.getStatus() == FitStatus.OK)
 		{

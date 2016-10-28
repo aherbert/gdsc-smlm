@@ -521,7 +521,7 @@ public class PSFDrift implements PlugIn
 		fitConfig.setBackgroundFitting(backgroundFitting);
 		fitConfig.setNotSignalFitting(false);
 		fitConfig.setComputeDeviations(false);
-		fitConfig.setFitValidation(false);
+		fitConfig.setDisableSimpleFilter(true);
 
 		// Create the PSF over the desired z-depth
 		int depth = (int) Math.round(zDepth / psfSettings.nmPerSlice);

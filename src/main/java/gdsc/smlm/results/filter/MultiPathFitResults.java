@@ -34,7 +34,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * this is a subset of the results, i.e. has been prefiltered.
 	 */
 	final public int totalCandidates;
-	
+
 	/**
 	 * The number of actual results in the frame. Used during filter scoring.
 	 */
@@ -62,7 +62,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 *            the multi path fit results
 	 * @param totalCandidates
 	 *            the total candidates
-	 * @param nActual 
+	 * @param nActual
 	 */
 	public MultiPathFitResults(int frame, MultiPathFitResult[] multiPathFitResults, int totalCandidates, int nActual)
 	{
@@ -100,6 +100,16 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	public MultiPathFitResult getResult(int index)
 	{
 		return multiPathFitResults[index];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
+	 */
+	public void complete(int index)
+	{
+		// Do nothing
 	}
 
 	/*

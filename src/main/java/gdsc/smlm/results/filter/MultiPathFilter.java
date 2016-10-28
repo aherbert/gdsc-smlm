@@ -183,6 +183,12 @@ public class MultiPathFilter implements Cloneable
 		 */
 		public void pass(PreprocessedPeakResult result)
 		{
+			//// If we are debugging
+			//if (result.getFrame() == 46 && result.getCandidateId() == 70)
+			//{
+			//	System.out.println("Follow this...");
+			//}
+			
 			// This an existing result or candidate. Mark as valid so candidates will be processed
 			isValid[result.getCandidateId()] = true;
 		}
@@ -478,10 +484,40 @@ public class MultiPathFilter implements Cloneable
 	 *            Set to true to validate the candidates
 	 * @param store
 	 *            the store
+	 * @param subset
 	 * @return The new peak results that are accepted (and any valid candidates if found); or null
 	 */
 	final public PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates,
 			SelectedResultStore store)
+	{
+		return accept(multiPathResult, validateCandidates, store, false);
+	}
+
+	/**
+	 * Filter a multi-path set of peak results into a set that are accepted.
+	 * <p>
+	 * Any existing or new results must pass the {@link #accept(PreprocessedPeakResult)} method. Any other
+	 * results are assumed to be candidates that were fitted but will not be validated unless required.
+	 * <p>
+	 * Note that new results may not be for the candidate identified by the MultiPathFitResult. This can
+	 * happen when multi-fitting has fit another candidate that previously did not have a result. The
+	 * SelectedResultStore is used to determine if that result has been fit already. If not it is added
+	 * to the output list.
+	 * <p>
+	 * The SelectedResultStore will be passed any result that passes the configured filters.
+	 *
+	 * @param multiPathResult
+	 *            the multi path result
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
+	 * @param precomputed
+	 *            True if this is a subset with pre-computed validation results
+	 * @return The new peak results that are accepted (and any valid candidates if found); or null
+	 */
+	final private PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult, boolean validateCandidates,
+			SelectedResultStore store, boolean precomputed)
 	{
 		final int candidateId = multiPathResult.candidateId;
 
@@ -516,14 +552,14 @@ public class MultiPathFilter implements Cloneable
 
 		// Accept any and then check if we can perform a doublet fit
 		final PreprocessedPeakResult[] multiResults = acceptAny(candidateId, multiPathResult.getMultiFitResult(),
-				validateCandidates, store);
+				validateCandidates, store, precomputed);
 		doDoublet = isSuitableForDoubletFit(multiPathResult, multiPathResult.getMultiFitResult(), false);
 
 		final PreprocessedPeakResult[] multiDoubletResults;
 		if (doDoublet)
 		{
 			multiDoubletResults = acceptAny(candidateId, multiPathResult.getMultiDoubletFitResult(), validateCandidates,
-					store);
+					store, precomputed);
 			if (multiDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -548,7 +584,7 @@ public class MultiPathFilter implements Cloneable
 
 		// Filter single-fit
 		final PreprocessedPeakResult[] singleResults = acceptAll(candidateId, multiPathResult.getSingleFitResult(),
-				validateCandidates, store);
+				validateCandidates, store, precomputed);
 		if (singleResults == null)
 		{
 			// The fit was not accepted. However it may have been rejected for being too wide
@@ -570,7 +606,7 @@ public class MultiPathFilter implements Cloneable
 		if (doDoublet)
 		{
 			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
-					store);
+					store, precomputed);
 			if (singleDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -921,6 +957,19 @@ public class MultiPathFilter implements Cloneable
 		if (store == null)
 			store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
 
+		// Debugging the results that are scored
+		java.io.OutputStreamWriter out = null;
+		if (debugFilename != null && multiPathResults.getFrame() == 46)
+		{
+			try
+			{
+				out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+			}
+			catch (Exception e)
+			{
+			}
+		}
+
 		// TODO - this could be made iterative. Any pass through the data may store estimates 
 		// using the SelectedResultStore and used to determine if 
 
@@ -932,13 +981,42 @@ public class MultiPathFilter implements Cloneable
 		{
 			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
 
-			if (multiPathResult == null)
-				// Ignore this but do not count it as a failure
-				continue;
+			//if (multiPathResult == null)
+			//{
+			//	multiPathResults.complete(c);
+			//	// Ignore this but do not count it as a failure
+			//	continue;
+			//}
 
 			final boolean evaluateFit = failCount <= failures;
 			if (evaluateFit || store.isValid(multiPathResult.candidateId))
 			{
+				if (out != null)
+				{
+					try
+					{
+						out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.getFrame(),
+								multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+								isNewResult(accept(multiPathResult, true, null))));
+
+						// TODO - Write out the full set of initial and fitted parameters for the results...
+					}
+					catch (Exception e)
+					{
+						try
+						{
+							out.close();
+						}
+						catch (Exception ee)
+						{
+						}
+						finally
+						{
+							out = null;
+						}
+					}
+				}
+
 				// Assess the result if we are below the fail limit or have an estimate
 				final SelectedResult result = select(multiPathResult, true, store);
 				int size = 0;
@@ -948,7 +1026,33 @@ public class MultiPathFilter implements Cloneable
 					for (int i = 0; i < ok.length; i++)
 					{
 						if (result.results[i].isNewResult())
+						{
+							if (out != null)
+							{
+								try
+								{
+									out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.getFrame(),
+											multiPathResult.candidateId, result.results[i].getX(),
+											result.results[i].getY()));
+								}
+								catch (Exception e)
+								{
+									try
+									{
+										out.close();
+									}
+									catch (Exception ee)
+									{
+									}
+									finally
+									{
+										out = null;
+									}
+								}
+							}
+
 							ok[size++] = i;
+						}
 					}
 
 					if (size != 0)
@@ -974,28 +1078,63 @@ public class MultiPathFilter implements Cloneable
 					// This failed. Just return the single result
 					store.add(new SelectedResult(null, multiPathResult.getSingleFitResult()));
 				}
-				if (evaluateFit && size != 0)
+				if (evaluateFit)
 				{
-					// More results were accepted so reset the fail count
-					failCount = 0;
-				}
-				else
-				{
-					// Nothing was accepted, increment fail count
-					failCount++;
+					if (size != 0)
+					{
+						// More results were accepted so reset the fail count
+						failCount = 0;
+					}
+					else
+					{
+						// Nothing was accepted, increment fail count
+						failCount++;
+					}
 				}
 			}
 			else
 			{
-				// This failed. Just return the single result
-				store.add(new SelectedResult(null, multiPathResult.getSingleFitResult()));
-
 				// This was rejected, increment fail count
 				failCount++;
 			}
+
+			multiPathResults.complete(c);
 		}
 		//	multiPathResults.end();
 		//}
+
+		if (out != null)
+		{
+			try
+			{
+				out.write(String.format("[%d] %s\n", multiPathResults.getFrame(), "# selected = ?"));
+			}
+			catch (Exception e)
+			{
+				try
+				{
+					out.close();
+				}
+				catch (Exception ee)
+				{
+				}
+				finally
+				{
+					out = null;
+				}
+			}
+			// Close here to only do the first frame
+			if (out != null)
+			{
+				try
+				{
+					out.close();
+				}
+				catch (Exception ee)
+				{
+				}
+			}
+		}
 	}
 
 	@XStreamOmitField
@@ -1025,16 +1164,36 @@ public class MultiPathFilter implements Cloneable
 	public PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult, boolean validateCandidates,
 			SelectedResultStore store)
 	{
+		return acceptAll(candidateId, fitResult, validateCandidates, store, false);
+	}
+
+	/**
+	 * Check all new and all existing results are valid. Returns the new results.
+	 * <p>
+	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
+	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
+	 * already.
+	 *
+	 * @param candidateId
+	 *            the candidate id
+	 * @param fitResult
+	 *            the results
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
+	 * @param precomputed
+	 *            True if this is a subset with pre-computed validation results
+	 * @return The new results that pass the filter
+	 */
+	public PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult, boolean validateCandidates,
+			SelectedResultStore store, boolean precomputed)
+	{
 		if (fitResult == null || fitResult.results == null)
 			return null;
 		final PreprocessedPeakResult[] results = fitResult.results;
 
-		// Validate the results
-		validationResults = new int[results.length];
-		for (int i = 0; i < results.length; i++)
-		{
-			validationResults[i] = filter.validate(results[i]);
-		}
+		getValidationResults(precomputed, results);
 
 		// All new and existing results should be valid
 		int count = 0;
@@ -1114,6 +1273,24 @@ public class MultiPathFilter implements Cloneable
 		return filtered;
 	}
 
+	private void getValidationResults(boolean precomputed, final PreprocessedPeakResult[] results)
+	{
+		validationResults = new int[results.length];
+		for (int i = 0; i < results.length; i++)
+		{
+			if (precomputed)
+			{
+				if (results[i].getValidationResult() != 0)
+				{
+					//System.out.println("Ignored");
+					validationResults[i] = results[i].getValidationResult();
+					continue;
+				}
+			}
+			validationResults[i] = filter.validate(results[i]);
+		}
+	}
+
 	/**
 	 * Check any new and all existing results are valid. Returns the new results
 	 * <p>
@@ -1134,16 +1311,37 @@ public class MultiPathFilter implements Cloneable
 	public PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult, boolean validateCandidates,
 			SelectedResultStore store)
 	{
+		return acceptAny(candidateId, fitResult, validateCandidates, store, false);
+	}
+
+	/**
+	 * Check any new and all existing results are valid. Returns the new results
+	 * <p>
+	 * New results and validated candidates that fail the primary filter can be filtered using the minimal filter and
+	 * sent to the store. The store can be used to determine if a fit for a different candidate has been performed
+	 * already.
+	 *
+	 * @param candidateId
+	 *            the candidate id
+	 * @param fitResult
+	 *            the results
+	 * @param validateCandidates
+	 *            Set to true to validate the candidates
+	 * @param store
+	 *            the store
+	 * @param precomputed
+	 *            True if this is a subset with pre-computed validation results
+	 * @return The new results that pass the filter
+	 */
+	public PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult, boolean validateCandidates,
+			SelectedResultStore store, boolean precomputed)
+	{
 		if (fitResult == null || fitResult.results == null)
 			return null;
 		final PreprocessedPeakResult[] results = fitResult.results;
 
 		// Validate the results
-		validationResults = new int[results.length];
-		for (int i = 0; i < results.length; i++)
-		{
-			validationResults[i] = filter.validate(results[i]);
-		}
+		getValidationResults(precomputed, results);
 
 		// Any new and all existing results should be valid
 		int count = 0;
@@ -1297,16 +1495,28 @@ public class MultiPathFilter implements Cloneable
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 
 		final ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
-		for (int i = 0; i < results.length; i++)
+		for (int k = 0; k < results.length; k++)
 		{
-			final MultiPathFitResults multiPathResults = results[i];
+			final MultiPathFitResults multiPathResults = results[k];
+
+			// Debugging the results that are scored
+			java.io.OutputStreamWriter out = null;
+			if (debugFilename != null && multiPathResults.getFrame() == 46)
+			{
+				try
+				{
+					out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+				}
+				catch (Exception e)
+				{
+				}
+			}
 
 			int failCount = 0;
 			int lastId = -1;
-			int size = multiPathResults.getNumberOfResults();
+			final int length = multiPathResults.getNumberOfResults();
 			store.resize(multiPathResults.getTotalCandidates());
-
-			for (int c = 0; c < size; c++)
+			for (int c = 0; c < length; c++)
 			{
 				final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
 
@@ -1320,28 +1530,119 @@ public class MultiPathFilter implements Cloneable
 				final boolean evaluateFit = failCount <= failures;
 				if (evaluateFit || store.isValid(multiPathResult.candidateId))
 				{
+					if (out != null)
+					{
+						try
+						{
+							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
+									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+									isNewResult(accept(multiPathResult, true, null))));
+						}
+						catch (Exception e)
+						{
+							try
+							{
+								out.close();
+							}
+							catch (Exception ee)
+							{
+							}
+							finally
+							{
+								out = null;
+							}
+						}
+					}
+
 					// Evaluate the result. 
 					// This allows storing more estimates in the store even if we are past the failures limit.
-					final PreprocessedPeakResult[] result = accept(multiPathResult, false, store);
-
+					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
+					final int size = list.size();
 					if (result != null)
-						list.addAll(Arrays.asList(result));
-
-					if (evaluateFit && isNewResult(result))
 					{
-						// More results were accepted so reset the fail count
-						failCount = 0;
+						for (int i = 0; i < result.length; i++)
+						{
+							if (result[i].isNewResult())
+							{
+								if (out != null)
+								{
+									try
+									{
+										out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.frame,
+												multiPathResult.candidateId, result[i].getX(), result[i].getY()));
+									}
+									catch (Exception e)
+									{
+										try
+										{
+											out.close();
+										}
+										catch (Exception ee)
+										{
+										}
+										finally
+										{
+											out = null;
+										}
+									}
+								}
+								list.add(result[i]);
+							}
+						}
 					}
-					else
+					if (evaluateFit)
 					{
-						// Nothing was accepted, increment fail count
-						failCount++;
+						if (size != list.size())
+						{
+							// More results were accepted so reset the fail count
+							failCount = 0;
+						}
+						else
+						{
+							// Nothing was accepted, increment fail count
+							failCount++;
+						}
 					}
 				}
 				else
 				{
 					// This was rejected, increment fail count
 					failCount++;
+				}
+
+				multiPathResults.complete(c);
+			}
+
+			if (out != null)
+			{
+				try
+				{
+					out.write(String.format("[%d] %s\n", multiPathResults.getFrame(), "# selected = ?"));
+				}
+				catch (Exception e)
+				{
+					try
+					{
+						out.close();
+					}
+					catch (Exception ee)
+					{
+					}
+					finally
+					{
+						out = null;
+					}
+				}
+				// Close here to only do the first frame
+				if (out != null)
+				{
+					try
+					{
+						out.close();
+					}
+					catch (Exception ee)
+					{
+					}
 				}
 			}
 		}
@@ -1356,6 +1657,10 @@ public class MultiPathFilter implements Cloneable
 	 * <p>
 	 * If the subset flag is set to true the candidate Id will be used to determine the number of failed fits before the
 	 * current candidate, assuming candidates start at zero and increment.
+	 * <p>
+	 * All results are validated with the filter and the result set in the PreprocessedPeakResult. This can be reset
+	 * using {@link #resetValidationFlag(MultiPathFitResults[])}. This result is used when scoring a subset allowing
+	 * results to be ignored from duplicate validation.
 	 * 
 	 * @param results
 	 *            a set of results to analyse
@@ -1381,6 +1686,66 @@ public class MultiPathFilter implements Cloneable
 		}
 
 		return Arrays.copyOf(newResults, size);
+	}
+
+	/**
+	 * Reset validation flag.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	public static void resetValidationFlag(final MultiPathFitResults[] results)
+	{
+		if (results == null)
+			return;
+		for (int i = 0; i < results.length; i++)
+			resetValidationFlag(results[i]);
+	}
+
+	/**
+	 * Reset validation flag.
+	 *
+	 * @param multiPathFitResults
+	 *            the multi path fit results
+	 */
+	public static void resetValidationFlag(IMultiPathFitResults multiPathFitResults)
+	{
+		if (multiPathFitResults == null)
+			return;
+		final int size = multiPathFitResults.getNumberOfResults();
+		for (int c = 0; c < size; c++)
+			resetValidationFlag(multiPathFitResults.getResult(c));
+	}
+
+	/**
+	 * Reset validation flag.
+	 *
+	 * @param multiPathResult
+	 *            the multi path result
+	 */
+	public static void resetValidationFlag(MultiPathFitResult multiPathResult)
+	{
+		if (multiPathResult == null)
+			return;
+		resetValidationFlag(multiPathResult.getSingleFitResult());
+		resetValidationFlag(multiPathResult.getMultiFitResult());
+		resetValidationFlag(multiPathResult.getDoubletFitResult());
+		resetValidationFlag(multiPathResult.getMultiDoubletFitResult());
+	}
+
+	/**
+	 * Reset validation flag.
+	 *
+	 * @param fitResult
+	 *            the fit result
+	 */
+	public static void resetValidationFlag(FitResult fitResult)
+	{
+		if (fitResult == null || fitResult.results == null)
+			return;
+		final PreprocessedPeakResult[] results = fitResult.results;
+		for (int i = 0; i < results.length; i++)
+			results[i].setValidationResult(0);
 	}
 
 	/**
@@ -1463,23 +1828,26 @@ public class MultiPathFilter implements Cloneable
 				// Also note that depending on the filter, different results can be selected and pushed through
 				// the store to set them valid. So we must push everything through the store to ensure nothing 
 				// is removed that could be used.
-				checkIsValid(multiPathResult.getSingleFitResult(), store);
-				checkIsValid(multiPathResult.getMultiFitResult(), store);
-				checkIsValid(multiPathResult.getDoubletFitResult(), store);
-				checkIsValid(multiPathResult.getMultiDoubletFitResult(), store);
+				checkIsValid(lastId, multiPathResult.getSingleFitResult(), store);
+				checkIsValid(lastId, multiPathResult.getMultiFitResult(), store);
+				checkIsValid(lastId, multiPathResult.getDoubletFitResult(), store);
+				checkIsValid(lastId, multiPathResult.getMultiDoubletFitResult(), store);
 
 				// This has valid results so add to the output subset 
 				newMultiPathResults[size++] = multiPathResult;
 
-				if (evaluateFit && isNewResult(result))
+				if (evaluateFit)
 				{
-					// More results were accepted so reset the fail count
-					failCount = 0;
-				}
-				else
-				{
-					// Nothing was accepted, increment fail count
-					failCount++;
+					if (isNewResult(result))
+					{
+						// More results were accepted so reset the fail count
+						failCount = 0;
+					}
+					else
+					{
+						// Nothing was accepted, increment fail count
+						failCount++;
+					}
 				}
 			}
 			else
@@ -1487,6 +1855,8 @@ public class MultiPathFilter implements Cloneable
 				// This was rejected, increment fail count
 				failCount++;
 			}
+
+			multiPathResults.complete(c);
 		}
 
 		if (size != 0)
@@ -1495,7 +1865,7 @@ public class MultiPathFilter implements Cloneable
 		return null;
 	}
 
-	private void checkIsValid(FitResult fitResult, SimpleSelectedResultStore store)
+	private void checkIsValid(int candidateId, FitResult fitResult, SimpleSelectedResultStore store)
 	{
 		if (fitResult == null || fitResult.results == null)
 			return;
@@ -1503,13 +1873,13 @@ public class MultiPathFilter implements Cloneable
 
 		for (int i = 0; i < results.length; i++)
 		{
-			if (!store.isValid[results[i].getCandidateId()])
-			{
-				if (accept(results[i]))
-				{
-					store.isValid[results[i].getCandidateId()] = true;
-				}
-			}
+			// Validate everything
+			final int r = filter.validate(results[i]);
+			results[i].setValidationResult(r);
+
+			// Mark as valid in the store
+			if (r == 0)
+				store.isValid[results[i].getCandidateId()] = true;
 		}
 	}
 
@@ -1640,7 +2010,9 @@ public class MultiPathFilter implements Cloneable
 	 * Score a set of multi-path results.
 	 * <p>
 	 * If the subset flag is set to true the candidate Id will be used to determine the number of failed fits before the
-	 * current candidate, assuming candidates start at zero and increment.
+	 * current candidate, assuming candidates start at zero and increment. The validationResult property of the
+	 * PreprocessedPeakResult will be used; if non-zero then the peak will not be validated and will be counted as a
+	 * fail.
 	 * <p>
 	 * Filter each multi-path result. Any output results that are new results are assumed to be positives and
 	 * their assignments used to score the results per frame.
@@ -1676,30 +2048,31 @@ public class MultiPathFilter implements Cloneable
 			scoreStore = nullFractionScoreStore;
 		final boolean save = allAssignments != null;
 
-		//		// Debugging the results that are scored
-		//		java.io.OutputStreamWriter out = null;
-		//		if (debugFilename != null)
-		//		{
-		//			try
-		//			{
-		//				out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
-		//			}
-		//			catch (Exception e)
-		//			{
-		//			}
-		//		}
-
 		setup();
 		for (int k = 0; k < results.length; k++)
 		{
 			final MultiPathFitResults multiPathResults = results[k];
 
+			// Debugging the results that are scored
+			java.io.OutputStreamWriter out = null;
+			if (debugFilename != null && multiPathResults.getFrame() == 46)
+			{
+				try
+				{
+					out = new java.io.OutputStreamWriter(new java.io.FileOutputStream(debugFilename), "UTF-8");
+				}
+				catch (Exception e)
+				{
+				}
+			}
+
 			// Reset fail count for new frames
 			int failCount = 0;
 			int lastId = -1;
+			final int length = multiPathResults.multiPathFitResults.length;
 			int nPredicted = 0;
 			store.resize(multiPathResults.totalCandidates);
-			for (int c = 0; c < multiPathResults.multiPathFitResults.length; c++)
+			for (int c = 0; c < length; c++)
 			{
 				final MultiPathFitResult multiPathResult = multiPathResults.multiPathFitResults[c];
 
@@ -1713,32 +2086,32 @@ public class MultiPathFilter implements Cloneable
 				final boolean evaluateFit = failCount <= failures;
 				if (evaluateFit || store.isValid(multiPathResult.candidateId))
 				{
-					//					if (out != null)
-					//					{
-					//						try
-					//						{
-					//							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
-					//									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
-					//									isNewResult(accept(multiPathResult, true, null))));
-					//						}
-					//						catch (Exception e)
-					//						{
-					//							try
-					//							{
-					//								out.close();
-					//							}
-					//							catch (Exception ee)
-					//							{
-					//							}
-					//							finally
-					//							{
-					//								out = null;
-					//							}
-					//						}
-					//					}
+					if (out != null)
+					{
+						try
+						{
+							out.write(String.format("[%d] %d : %d %b %b\n", multiPathResults.frame,
+									multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
+									isNewResult(accept(multiPathResult, true, null, subset))));
+						}
+						catch (Exception e)
+						{
+							try
+							{
+								out.close();
+							}
+							catch (Exception ee)
+							{
+							}
+							finally
+							{
+								out = null;
+							}
+						}
+					}
 
 					// Assess the result if we are below the fail limit or have an estimate
-					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
+					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store, subset);
 					final int size = nPredicted;
 					if (result != null)
 					{
@@ -1748,6 +2121,29 @@ public class MultiPathFilter implements Cloneable
 						{
 							if (result[i].isNewResult())
 							{
+								if (out != null)
+								{
+									try
+									{
+										out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.frame,
+												multiPathResult.candidateId, result[i].getX(), result[i].getY()));
+									}
+									catch (Exception e)
+									{
+										try
+										{
+											out.close();
+										}
+										catch (Exception ee)
+										{
+										}
+										finally
+										{
+											out = null;
+										}
+									}
+								}
+
 								// This is a new fitted result
 								scoreStore.add(result[i].getUniqueId());
 								store.isFit[result[i].getCandidateId()] = true;
@@ -1761,15 +2157,18 @@ public class MultiPathFilter implements Cloneable
 							}
 						}
 					}
-					if (evaluateFit && size != nPredicted)
+					if (evaluateFit)
 					{
-						// More results were accepted so reset the fail count
-						failCount = 0;
-					}
-					else
-					{
-						// Nothing was accepted, increment fail count
-						failCount++;
+						if (size != nPredicted)
+						{
+							// More results were accepted so reset the fail count
+							failCount = 0;
+						}
+						else
+						{
+							// Nothing was accepted, increment fail count
+							failCount++;
+						}
 					}
 				}
 				else
@@ -1783,27 +2182,38 @@ public class MultiPathFilter implements Cloneable
 			if (save)
 				allAssignments.add(tmp);
 
-			//			if (out != null)
-			//			{
-			//				try
-			//				{
-			//					out.write(String.format("[%d] %s\n", multiPathResults.frame, Arrays.toString(score)));
-			//				}
-			//				catch (Exception e)
-			//				{
-			//					try
-			//					{
-			//						out.close();
-			//					}
-			//					catch (Exception ee)
-			//					{
-			//					}
-			//					finally
-			//					{
-			//						out = null;
-			//					}
-			//				}
-			//			}
+			if (out != null)
+			{
+				try
+				{
+					out.write(String.format("[%d] %s\n", multiPathResults.frame, Arrays.toString(score)));
+				}
+				catch (Exception e)
+				{
+					try
+					{
+						out.close();
+					}
+					catch (Exception ee)
+					{
+					}
+					finally
+					{
+						out = null;
+					}
+				}
+				// Close here to only do the first frame
+				if (out != null)
+				{
+					try
+					{
+						out.close();
+					}
+					catch (Exception ee)
+					{
+					}
+				}
+			}
 		}
 
 		//		if (out != null)

@@ -199,4 +199,18 @@ public interface PreprocessedPeakResult
 	 * @return the parameters
 	 */
 	public double[] toGaussian2DParameters();
+
+	/**
+	 * Sets the validation result.
+	 *
+	 * @param result the new validation result
+	 */
+	void setValidationResult(int result);
+	
+	/**
+	 * Gets the validation result.
+	 *
+	 * @return the validation result
+	 */
+	int getValidationResult();
 }

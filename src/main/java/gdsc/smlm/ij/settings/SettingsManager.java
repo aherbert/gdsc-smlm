@@ -1,5 +1,14 @@
 package gdsc.smlm.ij.settings;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,15 +25,6 @@ package gdsc.smlm.ij.settings;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
 import ij.Prefs;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.XStreamException;
-import com.thoughtworks.xstream.io.xml.DomDriver;
 
 /**
  * Manage the settings for the gdsc.fitting package
@@ -187,6 +187,10 @@ public class SettingsManager
 			fs = new FileInputStream(filename);
 			config = (FitEngineConfiguration) xs.fromXML(fs);
 		}
+		catch (ClassCastException ex)
+		{
+			//ex.printStackTrace();
+		}
 		catch (FileNotFoundException ex)
 		{
 			//ex.printStackTrace();
@@ -296,6 +300,10 @@ public class SettingsManager
 		{
 			fs = new FileInputStream(filename);
 			config = (GlobalSettings) xs.fromXML(fs);
+		}
+		catch (ClassCastException ex)
+		{
+			//ex.printStackTrace();
 		}
 		catch (FileNotFoundException ex)
 		{

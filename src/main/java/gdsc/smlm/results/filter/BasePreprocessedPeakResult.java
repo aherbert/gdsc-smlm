@@ -53,6 +53,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	private ResultAssignment[] assignments;
 	public int uniqueId;
+	private int validationResult = 0;
 
 	//@formatter:off
 	/**
@@ -302,5 +303,25 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		p[Gaussian2DFunction.X_SD] = xsd;
 		p[Gaussian2DFunction.Y_SD] = ysd;
 		return p;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
+	 */
+	public int getValidationResult()
+	{
+		return validationResult;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
+	 */
+	public void setValidationResult(int validationResult)
+	{
+		this.validationResult = validationResult;
 	}
 }

@@ -64,7 +64,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private boolean notSignalFitting = false;
 	private double coordinateShift = 1;
 	private double shiftFactor = 1;
-	private int fitRegion = 0;
+	private int fitRegionWidth = 0, fitRegionHeight = 0;
 	private double coordinateOffset = 0.5;
 	private double signalThreshold = 0;
 	private double signalStrength = 0;
@@ -78,7 +78,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private double noise = 0;
 	private double minWidthFactor = 0.5;
 	private double widthFactor = 2;
-	private boolean fitValidation = true;
 	private double lambda = 10;
 	private boolean computeResiduals = true;
 	private double duplicateDistance = 0.5f;
@@ -123,7 +122,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 	private DynamicPeakResult dynamicPeakResult = new DynamicPeakResult();
 
-	// Support using a smart filter
+	// Flag to indicate simple filtering is enabled
+	//private boolean simpleFilter = true;
+
+	// Support using a smart filter and disabling the simple filtering
+	private boolean disableSimpleFilter = false;
 	private boolean smartFilter = false;
 	private String smartFilterXML = "";
 	private DirectFilter directFilter = null;
@@ -630,21 +633,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		return fitFunction;
 	}
 
-	/**
-	 * @param fitValidation
-	 *            True if fit should be validated with {@link #validatePeak(int, double[], double[])}
-	 */
-	public void setFitValidation(boolean fitValidation)
-	{
-		this.fitValidation = fitValidation;
-	}
+	//	/**
+	//	 * @param fitValidation
+	//	 *            True if fit should be validated with {@link #validatePeak(int, double[], double[])}
+	//	 */
+	//	public void setFitValidation(boolean fitValidation)
+	//	{
+	//	}
 
 	/**
-	 * @return the fitValidation
+	 * @return True if fit should be validated with {@link #validatePeak(int, double[], double[])}
 	 */
 	public boolean isFitValidation()
 	{
-		return fitValidation;
+		return isDirectFilter() || isRegionValidation() || !isDisableSimpleFilter();
 	}
 
 	/**
@@ -710,26 +712,45 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
-	 * @return the size of the fit region used for validation
-	 */
-	public int getFitRegion()
-	{
-		return fitRegion;
-	}
-
-	/**
-	 * Set the size of the fit region (N). Any coordinate outside the region will fail fit validation (see
+	 * Set the size of the fit region. Any coordinate outside the region will fail fit validation (see
 	 * {@link #validatePeak(int, double[], double[])}). Set to zero to disable.
 	 * <p>
 	 * Note: it is assumed that the coordinates of the peak are relative to the fit region of size NxN. Coordinates are
 	 * offset by the amount defined by {@link #setCoordinateOffset(double)}.
-	 * 
-	 * @param fitRegion
-	 *            the size of the fit region
+	 *
+	 * @param fitRegionWidth
+	 *            the fit region width
+	 * @param fitRegionHeight
+	 *            the fit region height
+	 * @param coordinateOffset
+	 *            the coordinate offset when validating the coordinates are within the fit window
 	 */
-	public void setFitRegion(int fitRegion)
+	public void setFitRegion(int fitRegionWidth, int fitRegionHeight, double coordinateOffset)
 	{
-		this.fitRegion = Math.max(0, fitRegion);
+		this.fitRegionWidth = Math.max(0, fitRegionWidth);
+		this.fitRegionHeight = Math.max(0, fitRegionHeight);
+		this.coordinateOffset = coordinateOffset;
+	}
+
+	/**
+	 * @return the width of the fit region used for validation
+	 */
+	public int getFitRegionWidth()
+	{
+		return fitRegionWidth;
+	}
+
+	private boolean isRegionValidation()
+	{
+		return fitRegionWidth != 0;
+	}
+
+	/**
+	 * @return the height of the fit region used for validation
+	 */
+	public int getFitRegionHeight()
+	{
+		return fitRegionHeight;
 	}
 
 	/**
@@ -738,15 +759,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public double getCoordinateOffset()
 	{
 		return coordinateOffset;
-	}
-
-	/**
-	 * @param coordinateOffset
-	 *            the coordinate offset when validating the coordinates are within the fit window
-	 */
-	public void setCoordinateOffset(double coordinateOffset)
-	{
-		this.coordinateOffset = coordinateOffset;
 	}
 
 	/**
@@ -1008,7 +1020,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public FitStatus validatePeak(int n, double[] initialParams, double[] params)
 	{
-		if (smartFilter && directFilter != null)
+		if (isDirectFilter())
 		{
 			// Always specify a new result and we have no local background or offset
 			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, 0, ResultType.NEW,
@@ -1028,6 +1040,29 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			return setValidationResult(FitStatus.FAILED_SMART_FILTER, null);
 		}
 
+		// Check if outside the fit window.
+		// TODO - Make this configurable per peak. At the moment we only use this in BenchmarkSpotFit where 
+		// additional peaks will be neighbours. In the future we may want to control this better.
+		if (isRegionValidation())
+		{
+			final int offset = n * 6;
+			final double x = params[Gaussian2DFunction.X_POSITION + offset] + coordinateOffset;
+			final double y = params[Gaussian2DFunction.Y_POSITION + offset] + coordinateOffset;
+			if (x <= 0 || x >= fitRegionWidth || y <= 0 || y >= fitRegionHeight)
+			{
+				if (log != null)
+				{
+					log.info("Bad peak %d: Coordinates outside fit region (x=%g,y=%g) <> %d,%d", n, x, y,
+							fitRegionWidth, fitRegionHeight);
+				}
+				return setValidationResult(FitStatus.OUTSIDE_FIT_REGION,
+						new double[] { x, y, fitRegionWidth, fitRegionHeight });
+			}
+		}
+
+		if (isDisableSimpleFilter())
+			return setValidationResult(FitStatus.OK, null);
+
 		final int offset = n * 6;
 		// Check spot movement
 		final double xShift = params[Gaussian2DFunction.X_POSITION + offset] -
@@ -1042,23 +1077,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				log.info("Bad peak %d: Fitted coordinates moved (x=%g,y=%g) > %g", n, xShift, yShift, maxShift);
 			}
 			return setValidationResult(FitStatus.COORDINATES_MOVED, new double[] { xShift, yShift });
-		}
-
-		// Check if outside the fit window.
-		// TODO - Make this configurable per peak. At the moment we only use this in BenchmarkSpotFit where 
-		// additional peaks will be neighbours. In the future we may want to control this better.
-		if (fitRegion != 0 && n == 0)
-		{
-			final double x = params[Gaussian2DFunction.X_POSITION + offset] + coordinateOffset;
-			final double y = params[Gaussian2DFunction.Y_POSITION + offset] + coordinateOffset;
-			if (x <= 0 || x >= fitRegion || y <= 0 || y >= fitRegion)
-			{
-				if (log != null)
-				{
-					log.info("Bad peak %d: Coordinates outside fit region (x=%g,y=%g) <> %d", n, x, y, fitRegion);
-				}
-				return setValidationResult(FitStatus.OUTSIDE_FIT_REGION, new double[] { x, y, fitRegion });
-			}
 		}
 
 		// Check signal threshold
@@ -1344,9 +1362,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 
 		public float getAmplitude()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset] /
-					(2 * Math.PI * params[Gaussian2DFunction.X_SD + offset] +
-							params[Gaussian2DFunction.Y_SD + offset]));
+			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / (2 * Math.PI *
+					params[Gaussian2DFunction.X_SD + offset] * params[Gaussian2DFunction.Y_SD + offset]));
 		}
 
 		public float getAngle()
@@ -1423,6 +1440,26 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			p[Gaussian2DFunction.X_POSITION] += offsetx;
 			p[Gaussian2DFunction.Y_POSITION] += offsety;
 			return p;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
+		 */
+		public void setValidationResult(int result)
+		{
+			throw new NotImplementedException("The validation result should not be set on a dynamic result");
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
+		 */
+		public int getValidationResult()
+		{
+			throw new NotImplementedException("The validation result should not be set on a dynamic result");
 		}
 	}
 
@@ -2158,6 +2195,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	}
 
 	/**
+	 * @return True if simple filtering is disabled
+	 */
+	public boolean isDisableSimpleFilter()
+	{
+		return disableSimpleFilter;
+	}
+
+	/**
+	 * @param Set
+	 *            to true to diable simple filtering during validation
+	 */
+	public void setDisableSimpleFilter(boolean disableSimpleFilter)
+	{
+		this.disableSimpleFilter = disableSimpleFilter;
+	}
+
+	/**
 	 * @return True if filtering should use the configured smart filter
 	 */
 	public boolean isSmartFilter()
@@ -2172,6 +2226,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	public void setSmartFilter(boolean smartFilter)
 	{
 		this.smartFilter = smartFilter;
+	}
+
+	/**
+	 * Checks if smart filter is enabled and a valid filter is present.
+	 *
+	 * @return true, if is direct filtering is enabled.
+	 */
+	public boolean isDirectFilter()
+	{
+		return smartFilter && directFilter != null;
 	}
 
 	/**
@@ -2291,11 +2355,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	{
 		if (directFilter != null)
 		{
+			//if (flags == 0)
+			//	directFilter.setup();
+			//else
 			directFilter.setup(flags);
 		}
 		else
 		{
-			widthEnabled = ((flags & IDirectFilter.NO_WIDTH) == 0);
+			widthEnabled = !DirectFilter.areSet(flags, DirectFilter.NO_WIDTH);
 			offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
 		}
 	}

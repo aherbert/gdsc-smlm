@@ -56,9 +56,11 @@ import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.Settings;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -85,7 +87,6 @@ import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
-import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
@@ -128,28 +129,34 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	// However the min filter is not used to determine if candidates are valid (that is the primary filter).
 	// It is used to store poor estimates during fitting. So we can set it to null.
 	private static final DirectFilter minimalFilter = null;
-	// Used to remove very bad spots that should fail any reasonable filter
+	// Used to remove very bad spots that should fail any reasonable primary filter
 	// TODO - make this configurable
 	private static final DirectFilter minimalFilter2;
 	static
 	{
-		double signal = 30;
-		float snr = 15;
-		double minWidth = 0.3;
-		double maxWidth = 6;
-		double shift = 5;
+		MultiFilter2 defaulltMinFilter = FitWorker.createMinimalFilter();
+		double signal = defaulltMinFilter.getSignal() * 0.5;
+		float snr = (float) (defaulltMinFilter.getSNR() * 0.5);
+		double minWidth = defaulltMinFilter.getMinWidth() * 0.5;
+		double maxWidth = defaulltMinFilter.getMaxWidth() * 1.5;
+		double shift = 10; // Make this big as sometimes shifts are large
 		double eshift = 0;
-		double precision = 80;
+		// Disable precision since we may or may not use the local background
+		double precision = 0;
 		minimalFilter2 = new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
 	}
-	private static double residualsThreshold = 0.3;
+	private static double sResidualsThreshold = 0.3;
+	private double residualsThreshold = 1; // Disabled
 	private static boolean reset = true;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
 	private static boolean clearTables = false;
-	private static String filterFilename = "";
-	private static String filterSetFilename = "";
-	private static String templateFilename = "";
+	private static final String KEY_FILTER_FILENAME = "gdsc.filteranalysis.filterfilename";
+	private static final String KEY_FILTERSET_FILENAME = "gdsc.filteranalysis.filtersetfilename";
+	private static final String KEY_TEMPLATE_FILENAME = "gdsc.filteranalysis.templatefilename";
+	private static String filterFilename = Prefs.get(KEY_FILTER_FILENAME, "");
+	private static String filterSetFilename = Prefs.get(KEY_FILTERSET_FILENAME, "");
+	private static String templateFilename = Prefs.get(KEY_TEMPLATE_FILENAME, "");
 	private static int summaryTopN = 0;
 	private static double summaryDepth = 500;
 	private static int plotTopN = 0;
@@ -387,11 +394,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				// Score the results. Do in order of those likely to be in the same position
 				// thus the grid manager can cache the neighbours
-				boolean fitted = score(fitResult.getSingleFitResult(), resultGrid, matched);
-				fitted |= score(fitResult.getDoubletFitResult(), resultGrid, matched);
-				fitted |= score(fitResult.getMultiFitResult(), resultGrid, matched);
-				fitted |= score(fitResult.getMultiDoubletFitResult(), resultGrid, matched);
+				boolean fitted = score(index, 1, fitResult.getSingleFitResult(), resultGrid, matched);
+				fitted |= score(index, 2, fitResult.getDoubletFitResult(), resultGrid, matched);
+				fitted |= score(index, 3, fitResult.getMultiFitResult(), resultGrid, matched);
+				fitted |= score(index, 4, fitResult.getMultiDoubletFitResult(), resultGrid, matched);
 
+				// XXX - comment out while debugging
 				if (fitted)
 					multiPathFitResults[size++] = fitResult;
 			}
@@ -409,19 +417,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		/**
-		 * Score the new results in the fit result
+		 * Score the new results in the fit result.
 		 *
+		 * @param n
+		 *            the n
+		 * @param set
+		 *            the set
 		 * @param fitResult
 		 *            the fit result
 		 * @param resultGrid
 		 *            the result grid
-		 * @param matchDistance
-		 *            the match distance
 		 * @param matched
 		 *            array of actual results that have been matched
 		 * @return true, if the fit status was ok and spots pass the min filter
 		 */
-		private boolean score(final gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
+		private boolean score(int n, int set, final gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
 				final ResultGridManager resultGrid, final boolean[] matched)
 		{
 			if (fitResult != null && fitResult.status == 0)
@@ -433,9 +443,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
 					peak.setAssignments(null);
 
-					// Remove bad fits to speed up filtering later
-					if (!minFilter.accept(peak))
-						continue;
+					// Remove bad candidate fits to speed up filtering later.
+					
+					// Note: We cannot do this as we do not know what the minimum filter will be.
+					// Instead this is done when we create a subset for scoring.
+
+					//					final boolean isCandidate = !(peak.isNewResult() || peak.isExistingResult());
+					//					if (isCandidate && i != 0 && !minFilter.accept(peak))
+					//					{
+					//						System.out.printf("%d [%d] (%d) %d (%d) %.2f %.2f %s\n", peak.getFrame(), n, set, i,
+					//								peak.getCandidateId(), peak.getX(), peak.getY(),
+					//								DirectFilter.getStatusMessage(peak, minFilter.getResult()));
+					//						continue;
+					//					}
+
 					fitResult.results[size++] = fitResult.results[i];
 
 					if (!peak.isNewResult())
@@ -562,8 +583,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Score using Jaccard
 		scoreIndex = COLUMNS.length - 1;
 
-		String currentUsersHomeDir = System.getProperty("user.home");
-		templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
+		if (Utils.isNullOrEmpty(templateFilename))
+		{
+			String currentUsersHomeDir = System.getProperty("user.home");
+			templateFilename = currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
+		}
 	}
 
 	private CreateData.SimulationParameters simulationParameters;
@@ -662,8 +686,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					filters.add((DirectFilter) f);
 					FilterSet filterSet = new FilterSet(filters);
 					filterSets.add(filterSet);
-					residualsThreshold = BenchmarkSpotFit.multiFilter.residualsThreshold;
+					failCount = BenchmarkSpotFit.config.getFailuresLimit();
+					failCountRange = 0;
+					residualsThreshold = (BenchmarkSpotFit.computeDoublets)
+							? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 					wasNotExpanded = null;
+					createResultsPrefix2();
 					return filterSets;
 				}
 			}
@@ -1033,20 +1061,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	private static ArrayList<Object> lastReadResultsSettings;
+	private static Settings lastReadResultsSettings;
 
 	private MultiPathFitResults[] readResults()
 	{
 		boolean update = resultsList == null; // XXX set to true when debugging
 		if (lastId != BenchmarkSpotFit.fitResultsId)
 		{
+			if (lastId == 0)
+			{
+				// Copy the settings from the fitter if this is the first run
+				failCount = BenchmarkSpotFit.config.getFailuresLimit();
+				failCountRange = 0;
+				sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
+						? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
+			}
 			lastId = BenchmarkSpotFit.fitResultsId;
 			update = true;
 			actualCoordinates = getCoordinates(results.getResults());
 			//actualSize = results.size(); // Should be simulationParameters.molecules
 		}
 
-		ArrayList<Object> settings = createSettings(partialMatchDistance, upperMatchDistance, partialSignalFactor,
+		Settings settings = new Settings(partialMatchDistance, upperMatchDistance, partialSignalFactor,
 				upperSignalFactor);
 
 		if (update || !settings.equals(lastReadResultsSettings))
@@ -1243,6 +1279,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// In case a previous run was interrupted
 		if (resultsList != null)
 		{
+			MultiPathFilter.resetValidationFlag(resultsList);
+			
 			// XXX Clone this for use in debugging
 			//clonedResultsList = new MultiPathFitResults[resultsList.length];
 			//for (int i = 0; i < clonedResultsList.length; i++)
@@ -1341,10 +1379,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 		gd.addMessage(msg);
 
+		// TODO - Make minimal filter configurable?
+
 		gd.addSlider("Fail_count", 0, 20, failCount);
 		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
-		// TODO - Make minimal filter configurable
-		gd.addSlider("Residuals_threshold", 0.01, 1, residualsThreshold);
+		if (BenchmarkSpotFit.computeDoublets)
+			gd.addSlider("Residuals_threshold", 0.01, 1, sResidualsThreshold);
 		gd.addCheckbox("Reset", reset);
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
@@ -1451,7 +1491,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		failCount = (int) Math.abs(gd.getNextNumber());
 		failCountRange = (int) Math.abs(gd.getNextNumber());
-		residualsThreshold = Math.abs(gd.getNextNumber());
+		if (BenchmarkSpotFit.computeDoublets)
+			residualsThreshold = sResidualsThreshold = Math.abs(gd.getNextNumber());
 		reset = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
@@ -1482,18 +1523,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		showFN = gd.getNextBoolean();
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
-		resultsPrefix2 = "\t" + failCount;
-		if (!Utils.isNullOrEmpty(resultsTitle))
-			limitFailCount = resultsTitle + ", ";
-		else
-			limitFailCount = "";
-		limitFailCount += "f=" + failCount;
-		if (failCountRange > 0)
-		{
-			resultsPrefix2 += "-" + (failCount + failCountRange);
-			limitFailCount += "-" + (failCount + failCountRange);
-		}
-		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
+		createResultsPrefix2();
 
 		// Check there is one output
 		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1 && !saveBestFilter)
@@ -1528,7 +1558,23 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return !gd.invalidNumber();
 	}
 
-	private static ArrayList<Object> lastAnalyseSettings = null;
+	private void createResultsPrefix2()
+	{
+		resultsPrefix2 = "\t" + failCount;
+		if (!Utils.isNullOrEmpty(resultsTitle))
+			limitFailCount = resultsTitle + ", ";
+		else
+			limitFailCount = "";
+		limitFailCount += "f=" + failCount;
+		if (failCountRange > 0)
+		{
+			resultsPrefix2 += "-" + (failCount + failCountRange);
+			limitFailCount += "-" + (failCount + failCountRange);
+		}
+		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
+	}
+
+	private static Settings lastAnalyseSettings = null;
 
 	/**
 	 * Run different filtering methods on a set of labelled peak results outputting performance statistics on the
@@ -1556,9 +1602,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// Only repeat analysis if necessary
 		boolean newResults = false;
-		ArrayList<Object> settings = createSettings(resultsList, filterSets, failCount, failCountRange,
-				residualsThreshold, plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve,
-				stepSearch);
+		Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
+				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve, stepSearch);
 		if (debugSpeed || !settings.equals(lastAnalyseSettings))
 		{
 			//System.out.println("Running...");
@@ -1719,14 +1764,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		saveResults(filterResults, bestFilter);
 
 		wo.tile();
-	}
-
-	private ArrayList<Object> createSettings(Object... objects)
-	{
-		final ArrayList<Object> settings = new ArrayList<Object>(objects.length);
-		for (Object o : objects)
-			settings.add(o);
-		return settings;
 	}
 
 	private void startTimer()
@@ -2667,6 +2704,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		final MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
 
+		//multiPathFilter.setDebugFile("/tmp/fractionScoreSubset.txt");
+
 		// Note: We always use the subset method since fail counts have been accumulated when we read in the results.
 
 		if (failCountRange == 0)
@@ -2825,6 +2864,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (filename != null)
 		{
 			filterFilename = filename;
+			Prefs.set(KEY_FILTER_FILENAME, filename);
 
 			List<Filter> filters = new ArrayList<Filter>(1);
 			filters.add(filter);
@@ -2890,6 +2930,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (filename != null)
 		{
 			filterSetFilename = filename;
+			Prefs.set(KEY_FILTERSET_FILENAME, filename);
 			saveFilterSet(filterSet, filename);
 		}
 
@@ -2917,6 +2958,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (filename != null)
 		{
 			templateFilename = filename;
+			Prefs.set(KEY_TEMPLATE_FILENAME, filename);
 			GlobalSettings settings = new GlobalSettings();
 			settings.setNotes(getNotes(topFilterSummary));
 			settings.setFitEngineConfiguration(config);
@@ -3982,6 +4024,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter).filterSubset(ga_resultsList,
 					failCount + failCountRange, true);
 
+			//MultiPathFilter.resetValidationFlag(ga_resultsListToScore);			
+			
 			//ga_resultsListToScore = ga_resultsList;
 
 			//System.out.printf("Weakest %d => %d : %s\n", count(ga_resultsList), count(ga_resultsListToScore),
@@ -4054,6 +4098,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		if (ga_subset)
 		{
+			// Reset the validation flag
+			MultiPathFilter.resetValidationFlag(ga_resultsListToScore);
 		}
 	}
 
@@ -4261,20 +4307,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			fitConfig.setComputeResiduals(false);
 		}
 
-		// Old support for filtering. This may be used by some plugins that have not 
-		// updated to using smart filters (e.g. DoubletAnalysis)
-		if (best.filter instanceof IMultiFilter)
-		{
-			IMultiFilter filter = (IMultiFilter) (best.filter);
-
-			fitConfig.setCoordinateShiftFactor(filter.getShift());
-			fitConfig.setSignalStrength(filter.getSNR());
-			fitConfig.setMinPhotons(filter.getSignal());
-			fitConfig.setMinWidthFactor(filter.getMinWidth());
-			fitConfig.setWidthFactor(filter.getMaxWidth());
-			fitConfig.setPrecisionThreshold(filter.getPrecision());
-			fitConfig.setPrecisionUsingBackground(filter.isPrecisionUsesLocalBackground());
-		}
+		// Note:
+		// We leave the simple filter settings alone. These may be enabled as well, e.g. by the BenchmarkSpotFit plugin
 
 		// We could set the fail count range dynamically using a window around the best filter 
 
@@ -4392,6 +4426,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (showFP)
 		{
 			final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+			//multiPathFilter.setDebugFile("/tmp/filter.txt");
 			filterResults = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
 
 			int frame = 0;
@@ -4468,6 +4503,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (filterResults == null)
 		{
 			final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+			//multiPathFilter.setDebugFile("/tmp/filter.txt");
 			filterResults = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
 		}
 

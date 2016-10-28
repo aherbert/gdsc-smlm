@@ -16,7 +16,7 @@ package gdsc.smlm.engine;
 /**
  * Define the type of fit that was performed
  */
-public class FitType
+public class FitType implements Cloneable
 {
 	public static final int MULTI = 1;
 	public static final int MULTI_OK = 2;
@@ -25,15 +25,15 @@ public class FitType
 	public static final int MULTI_DOUBLET = 16;
 	public static final int MULTI_DOUBLET_OK = 32;
 	public static final int OK = 64;
-	
+
 	public static final int NO_OF_FLAGS = 7;
-		
+
 	private int flags;
 
 	public FitType()
 	{
 	}
-	
+
 	public FitType(int flags)
 	{
 		this.flags = flags;
@@ -43,7 +43,7 @@ public class FitType
 	{
 		return flags;
 	}
-	
+
 	public void setFlag(int flag, boolean enabled)
 	{
 		if (enabled)
@@ -52,7 +52,7 @@ public class FitType
 			// TODO - check this
 			flags &= flag;
 	}
-	
+
 	public boolean getFlag(int flag)
 	{
 		return (flags & flag) == flag;
@@ -92,42 +92,42 @@ public class FitType
 	{
 		setFlag(OK, enabled);
 	}
-	
+
 	public boolean getMulti()
 	{
 		return getFlag(MULTI);
 	}
-	
+
 	public boolean getMultiOK()
 	{
 		return getFlag(MULTI_OK);
 	}
-	
+
 	public boolean getMultiDoublet()
 	{
 		return getFlag(MULTI_DOUBLET);
 	}
-	
+
 	public boolean getMultiDoubletOK()
 	{
 		return getFlag(MULTI_DOUBLET_OK);
 	}
-	
+
 	public boolean getDoublet()
 	{
 		return getFlag(DOUBLET);
 	}
-	
+
 	public boolean getDoubletOK()
 	{
 		return getFlag(DOUBLET_OK);
 	}
-	
+
 	public boolean getOK()
 	{
 		return getFlag(OK);
 	}
-	
+
 	@Override
 	public String toString()
 	{
@@ -141,8 +141,8 @@ public class FitType
 		append(sb, getDoublet(), "Doublet");
 		append(sb, getDoubletOK(), "DoubletOK");
 		append(sb, getOK(), "OK");
-	
-		if (sb.length()==0)
+
+		if (sb.length() == 0)
 			return "None";
 		return sb.toString();
 	}
@@ -151,9 +151,27 @@ public class FitType
 	{
 		if (enabled)
 		{
-			if (sb.length()!=0)
+			if (sb.length() != 0)
 				sb.append("; ");
 			sb.append(name);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public FitType clone()
+	{
+		try
+		{
+			return (FitType) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
 		}
 	}
 }

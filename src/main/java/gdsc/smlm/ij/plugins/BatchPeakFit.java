@@ -237,6 +237,10 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 			fs = new FileInputStream(configurationFilename);
 			settings = (BatchSettings) xs.fromXML(fs);
 		}
+		catch (ClassCastException ex)
+		{
+			//ex.printStackTrace();
+		}
 		catch (FileNotFoundException ex)
 		{
 			ex.printStackTrace();
