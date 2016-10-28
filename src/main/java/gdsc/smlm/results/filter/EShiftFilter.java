@@ -38,6 +38,8 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	float eoffset;
 	@XStreamOmitField
 	float eshift2;
+	@XStreamOmitField
+	boolean shiftEnabled;
 
 	public EShiftFilter(double eshift)
 	{
@@ -73,7 +75,22 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup()
 	{
-		eshift2 = getUpperSquaredLimit(eshift);
+		setup(true);
+	}
+
+	@Override
+	public void setup(int flags)
+	{
+		setup(!areSet(flags, DirectFilter.NO_SHIFT));
+	}
+
+	private void setup(final boolean shiftEnabled)
+	{
+		this.shiftEnabled = shiftEnabled;
+		if (shiftEnabled)
+		{
+			eshift2 = getUpperSquaredLimit(eshift);
+		}
 	}
 
 	@Override
@@ -87,8 +104,11 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eshift2)
-			return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+		if (shiftEnabled)
+		{
+			if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eshift2)
+				return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+		}
 		return 0;
 	}
 
@@ -149,7 +169,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 		checkIndex(index);
 		return DEFAULT_INCREMENT;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
