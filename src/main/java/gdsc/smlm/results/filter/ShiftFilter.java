@@ -38,6 +38,8 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	float offset;
 	@XStreamOmitField
 	float shift2;
+	@XStreamOmitField
+	boolean shiftEnabled;
 
 	public ShiftFilter(double shift)
 	{
@@ -72,7 +74,22 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup()
 	{
-		shift2 = getUpperSquaredLimit(shift);
+		setup(true);
+	}
+
+	@Override
+	public void setup(int flags)
+	{
+		setup(!areSet(flags, DirectFilter.NO_SHIFT));
+	}
+
+	private void setup(final boolean shiftEnabled)
+	{
+		this.shiftEnabled = shiftEnabled;
+		if (shiftEnabled)
+		{
+			shift2 = getUpperSquaredLimit(shift);
+		}
 	}
 
 	@Override
@@ -84,10 +101,13 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		if (peak.getXRelativeShift2() > shift2)
-			return V_X_RELATIVE_SHIFT;
-		if (peak.getYRelativeShift2() > shift2)
-			return V_Y_RELATIVE_SHIFT;
+		if (shiftEnabled)
+		{
+			if (peak.getXRelativeShift2() > shift2)
+				return V_X_RELATIVE_SHIFT;
+			if (peak.getYRelativeShift2() > shift2)
+				return V_Y_RELATIVE_SHIFT;
+		}
 		return 0;
 	}
 
