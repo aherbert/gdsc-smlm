@@ -1,7 +1,6 @@
 package gdsc.smlm.results.filter;
 
 import gdsc.core.match.FractionalAssignment;
-import gdsc.core.match.ImmutableFractionalAssignment;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
