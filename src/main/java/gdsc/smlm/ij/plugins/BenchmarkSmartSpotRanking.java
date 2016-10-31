@@ -509,7 +509,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			IJ.error(TITLE, "No simulation image");
 			return;
 		}
-		results = MemoryPeakResults.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
+		results = CreateData.getResults();
 		if (results == null)
 		{
 			IJ.error(TITLE, "No benchmark results in memory");

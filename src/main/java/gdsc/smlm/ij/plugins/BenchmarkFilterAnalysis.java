@@ -614,7 +614,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			IJ.error(TITLE, "No benchmark spot parameters in memory");
 			return;
 		}
-		results = MemoryPeakResults.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
+		results = CreateData.getResults();
 		if (results == null)
 		{
 			IJ.error(TITLE, "No benchmark results in memory");

@@ -130,10 +130,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		gd.addSlider("Border", 0.5, 2.5, config.getBorder());
 
 		// Find if this image was created with ground truth data
-		if (imp.getTitle() == CreateData.CREATE_DATA_IMAGE_TITLE)
+		if (imp.getID() == CreateData.getImageId())
 		{
-			MemoryPeakResults results = MemoryPeakResults
-					.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
+			MemoryPeakResults results = CreateData.getResults();
 			if (results != null)
 			{
 				gd.addSlider("Match_distance", 0, 2.5, distance);

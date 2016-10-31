@@ -1523,7 +1523,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				IJ.error(TITLE, "No simulation image");
 				return;
 			}
-			results = MemoryPeakResults.getResults(CreateData.CREATE_DATA_IMAGE_TITLE + " (Create Data)");
+			results = CreateData.getResults();
 			if (results == null)
 			{
 				IJ.error(TITLE, "No simulation results in memory");
