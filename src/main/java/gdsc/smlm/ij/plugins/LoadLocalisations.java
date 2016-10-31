@@ -1,5 +1,14 @@
 package gdsc.smlm.ij.plugins;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -19,21 +28,12 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Loads generic localisation files into memory
@@ -114,7 +114,7 @@ public class LoadLocalisations implements PlugIn
 			params[Gaussian2DFunction.Y_POSITION] = l.y;
 			params[Gaussian2DFunction.X_SD] = l.sx;
 			params[Gaussian2DFunction.Y_SD] = l.sy;
-			results.add(new ExtendedPeakResult(l.t, (int) l.x, (int) l.y, 0, l.z, 0, params, null, l.t, l.id));
+			results.add(new IdPeakResult(l.t, (int) l.x, (int) l.y, 0, l.z, 0, params, null, l.id));
 		}
 
 		if (results.size() > 0)
