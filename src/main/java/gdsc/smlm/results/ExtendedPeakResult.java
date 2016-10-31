@@ -16,17 +16,16 @@ package gdsc.smlm.results;
 /**
  * Specifies a peak fitting result that spans multiple frames
  */
-public class ExtendedPeakResult extends PeakResult
+public class ExtendedPeakResult extends IdPeakResult
 {
-	private int endFrame, id;
+	private int endFrame;
 
 	public ExtendedPeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
 			float[] params, float[] paramsStdDev, int endFrame, int id)
 	{
-		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
+		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev, id);
 		// Ensure that the end frame is valid
 		this.endFrame = (endFrame < startFrame) ? startFrame : endFrame;
-		this.id = id;
 	}
 
 	/**
@@ -40,8 +39,7 @@ public class ExtendedPeakResult extends PeakResult
 	 */
 	public ExtendedPeakResult(float x, float y, float sd, float signal, int id)
 	{
-		super(x, y, sd, signal);
-		this.id = id;
+		super(x, y, sd, signal, id);
 	}
 
 	/*
@@ -53,17 +51,6 @@ public class ExtendedPeakResult extends PeakResult
 	public int getEndFrame()
 	{
 		return endFrame;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResult#getId()
-	 */
-	@Override
-	public int getId()
-	{
-		return id;
 	}
 
 	/*
