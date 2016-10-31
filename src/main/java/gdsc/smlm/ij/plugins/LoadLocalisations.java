@@ -114,7 +114,7 @@ public class LoadLocalisations implements PlugIn
 			params[Gaussian2DFunction.Y_POSITION] = l.y;
 			params[Gaussian2DFunction.X_SD] = l.sx;
 			params[Gaussian2DFunction.Y_SD] = l.sy;
-			results.add(new ExtendedPeakResult(l.t, (int) l.x, (int) l.y, 0, 0, 0, params, null, l.t, l.id));
+			results.add(new ExtendedPeakResult(l.t, (int) l.x, (int) l.y, 0, l.z, 0, params, null, l.t, l.id));
 		}
 
 		if (results.size() > 0)
@@ -166,7 +166,7 @@ public class LoadLocalisations implements PlugIn
 		return true;
 	}
 
-	private static List<Localisation> loadLocalisations(String filename)
+	static List<Localisation> loadLocalisations(String filename)
 	{
 		List<Localisation> localisations = new ArrayList<Localisation>();
 
