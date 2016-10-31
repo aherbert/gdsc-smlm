@@ -332,7 +332,14 @@ public class PeakResultsReader
 					if (xml != null && xml.length() > 0 && xml.startsWith("<"))
 					{
 						// Convert the XML back
-						calibration = (Calibration) XmlUtils.fromXML(xml);
+						try
+						{
+							calibration = (Calibration) XmlUtils.fromXML(xml);
+						}
+						catch (ClassCastException e)
+						{
+
+						}
 					}
 				}
 			}
