@@ -6,8 +6,11 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -76,6 +79,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.plugins.LoadLocalisations.Localisation;
 import gdsc.smlm.ij.settings.Atom;
 import gdsc.smlm.ij.settings.Compound;
 import gdsc.smlm.ij.settings.CreateDataSettings;
@@ -110,8 +114,10 @@ import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -131,10 +137,10 @@ import ij.text.TextWindow;
 /**
  * Creates data using a simulated PSF
  */
-public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
+public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory, MouseListener
 {
 	public static final String TITLE = "Create Data";
-	public static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
+	private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
 
 	private static String[] ILLUMINATION = { "Uniform", "Radial" };
 	private static int RADIAL = 1;
@@ -497,6 +503,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	static BenchmarkParameters benchmarkParameters = null;
 	static SimulationParameters simulationParameters = null;
 
+	private static String benchmarkFile = "";
+	private static String benchmarkImage = "";
+	private static int benchmarkImageId = 0;
+	private static String benchmarkResultsName = "";
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -511,6 +522,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		benchmarkMode = (arg != null && arg.contains("benchmark"));
 		spotMode = (arg != null && arg.contains("spot"));
 		trackMode = (arg != null && arg.contains("track"));
+
+		if ("load".equals(arg))
+		{
+			loadBenchmarkData();
+			return;
+		}
 
 		// Each localisation is a simulated emission of light from a point in space and time
 		List<LocalisationModel> localisations = null;
@@ -816,6 +833,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		benchmarkParameters = null;
 		simulationParameters = null;
+		setBenchmarkResults(null, null);
 		// Run the garbage collector to free memory
 		MemoryPeakResults.runGC();
 	}
@@ -1947,6 +1965,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setBounds(new Rectangle(0, 0, settings.size, settings.size));
 		MemoryPeakResults.addResults(results);
 
+		setBenchmarkResults(imp, results);
+
 		if (benchmarkMode && benchmarkParameters != null)
 			benchmarkParameters.setPhotons(results);
 
@@ -2359,8 +2379,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					newLocalisations.add(localisationSet);
 					// Use extended result to store the ID.
 					// Store the z position in the error.
-					results.addSync(new ExtendedPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise,
-							params, null, t, localisationSet.getId()));
+					results.addSync(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise,
+							params, null, localisationSet.getId()));
 				}
 
 				for (int i = 0; i < image.length; i++)
@@ -2835,7 +2855,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Find the largest timepoint
-		ImagePlus outputImp = WindowManager.getImage(CREATE_DATA_IMAGE_TITLE);
+		ImagePlus outputImp = WindowManager.getImage(benchmarkImageId);
 		int nFrames;
 		if (outputImp == null)
 		{
@@ -4743,13 +4763,332 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return createRandomGenerator(seedAddition++);
 	}
 
+	private static void setBenchmarkResults(ImagePlus imp, MemoryPeakResults results)
+	{
+		if (imp != null)
+		{
+			benchmarkImageId = imp.getID();
+			benchmarkResultsName = results.getName();
+		}
+		else
+		{
+			benchmarkImageId = 0;
+			benchmarkResultsName = "";
+		}
+	}
+
+	/**
+	 * Gets the benchmark image.
+	 *
+	 * @return the image
+	 */
 	public static ImagePlus getImage()
 	{
-		ImagePlus imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE);
-		if (imp != null)
-			return imp;
-		// In case the user has saved the image and ImageJ appended the TIFF file type to the title
-		imp = WindowManager.getImage(CreateData.CREATE_DATA_IMAGE_TITLE + ".tif");
-		return imp;
+		return WindowManager.getImage(benchmarkImageId);
+	}
+
+	/**
+	 * Gets the benchmark image Id.
+	 *
+	 * @return the image Id
+	 */
+	public static int getImageId()
+	{
+		return benchmarkImageId;
+	}
+
+	/**
+	 * Gets the benchmark results.
+	 *
+	 * @return the results
+	 */
+	public static MemoryPeakResults getResults()
+	{
+		return MemoryPeakResults.getResults(benchmarkResultsName);
+	}
+
+	/**
+	 * Load benchmark data using an open image and a XYZ text file.
+	 */
+	private void loadBenchmarkData()
+	{
+		if (!showLoadDialog())
+			return;
+		resetMemory();
+
+		// Load the image
+		ImagePlus imp = WindowManager.getImage(benchmarkImage);
+		if (imp == null)
+		{
+			IJ.error(TITLE, "No benchmark image: " + benchmarkImage);
+			return;
+		}
+
+		// Load the results
+		MemoryPeakResults results = getSimulationResults(imp);
+		if (results == null)
+		{
+			IJ.error(TITLE, "No benchmark results: " + benchmarkResultsName);
+			return;
+		}
+
+		// Get the calibration
+		simulationParameters = showSimulationParametersDialog(imp, results);
+		if (simulationParameters != null)
+			setBenchmarkResults(imp, results);
+		IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
+	}
+
+	private MemoryPeakResults getSimulationResults(ImagePlus imp)
+	{
+		// Load directly from a results file. This is mainly to be used to load simulations 
+		// saved to memory then saved to file. This is because the z-depth must be in the 
+		// error field of the results.
+		PeakResultsReader r = new PeakResultsReader(benchmarkFile);
+		MemoryPeakResults results = r.getResults();
+		if (results != null)
+			return results;
+
+		// Load using a universal text file
+		List<Localisation> localisations = LoadLocalisations.loadLocalisations(benchmarkFile);
+		if (localisations.isEmpty())
+			return null;
+
+		results = new MemoryPeakResults();
+		results.setName(imp.getTitle() + " (Results)");
+
+		for (Localisation l : localisations)
+		{
+			float[] params = new float[7];
+			params[Gaussian2DFunction.SIGNAL] = l.intensity;
+			params[Gaussian2DFunction.X_POSITION] = l.x;
+			params[Gaussian2DFunction.Y_POSITION] = l.y;
+			params[Gaussian2DFunction.X_SD] = l.sx;
+			params[Gaussian2DFunction.Y_SD] = l.sy;
+			results.add(new IdPeakResult(l.t, (int) l.x, (int) l.y, 0, l.z, 0, params, null, l.id));
+		}
+
+		return results;
+	}
+
+	private SimulationParameters showSimulationParametersDialog(ImagePlus imp, MemoryPeakResults results)
+	{
+		int molecules = results.size();
+
+		// Get the missing parameters from the user
+		boolean fullSimulation = false;
+		double s = -1;
+
+		// Get these from the data
+		double[] signal = getSignal(results);
+		double[] limits = Maths.limits(signal);
+		double minSignal = limits[0];
+		double maxSignal = limits[1];
+		double signalPerFrame = Maths.sum(signal) / molecules;
+
+		double[] depths = getDepth(results);
+		limits = Maths.limits(depths);
+		double depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
+		boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
+
+		double bias = -1;
+		double gain = -1;
+		double amplification = -1;
+		boolean emCCD = false;
+		double readNoise = -1;
+		double a = -1;
+		Calibration cal = results.getCalibration();
+		if (cal != null)
+		{
+			bias = cal.bias;
+			gain = cal.gain;
+			amplification = cal.amplification;
+			emCCD = cal.emCCD;
+			readNoise = cal.readNoise;
+			a = cal.nmPerPixel;
+		}
+
+		// Get this from the user
+		double b = -1;
+
+		// Show a dialog to confirm settings
+		GenericDialog gd = new GenericDialog(TITLE);
+		StringBuilder sb = new StringBuilder();
+		sb.append("Results contain ").append(Utils.pleural(molecules, "molecule")).append('\n');
+		sb.append("Min signal = ").append(Utils.rounded(minSignal)).append(" ADU\n");
+		sb.append("Max signal = ").append(Utils.rounded(maxSignal)).append(" ADU\n");
+		sb.append("Av signal = ").append(Utils.rounded(signalPerFrame)).append(" ADU\n");
+		if (fixedDepth)
+			sb.append("Fixed depth = ").append(Utils.rounded(depth)).append('\n');
+		gd.addMessage(sb.toString());
+
+		gd.addCheckbox("Flourophore_simulation", fullSimulation);
+		gd.addNumericField("Gaussian_SD", s, 3, 8, "nm");
+		gd.addNumericField("Pixel_pitch", a, 3, 8, "nm");
+		gd.addNumericField("Background", b, 3, 8, "photon");
+		gd.addNumericField("Total_gain", gain, 3, 8, "ADU/photon");
+		gd.addNumericField("Amplification", amplification, 3, 8, "ADU/e-");
+		gd.addCheckbox("EM-CCD", emCCD);
+		gd.addNumericField("Read_noise", readNoise, 3, 8, "ADU");
+		gd.addNumericField("Bias", bias, 3, 8, "ADU");
+
+		if (!fixedDepth)
+			gd.addNumericField("Depth", depth, 3, 8, "pixel");
+
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return null;
+
+		fullSimulation = gd.getNextBoolean();
+		s = gd.getNextNumber();
+		a = gd.getNextNumber();
+		b = gd.getNextNumber();
+		gain = gd.getNextNumber();
+		amplification = gd.getNextNumber();
+		emCCD = gd.getNextBoolean();
+		readNoise = gd.getNextNumber();
+		bias = gd.getNextNumber();
+		double myDepth = depth;
+		if (!fixedDepth)
+		{
+			myDepth = gd.getNextNumber();
+			if (myDepth < depth)
+			{
+				IJ.error(TITLE, String.format("Input depth is smaller than the depth guessed from the data: %f < %f",
+						myDepth, depth));
+				return null;
+			}
+			depth = myDepth;
+		}
+
+		// Validate settings
+		try
+		{
+			Parameters.isAboveZero("Gaussian_SD", s);
+			Parameters.isAboveZero("Pixel_pitch", a);
+			Parameters.isPositive("Background", b);
+			Parameters.isAboveZero("Total_gain", gain);
+			Parameters.isAboveZero("Amplification", amplification);
+			Parameters.isPositive("Read_noise", readNoise);
+			Parameters.isPositive("Bias", bias);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return null;
+		}
+
+		// Convert ADU values to photons
+		minSignal /= gain;
+		maxSignal /= gain;
+		signalPerFrame /= gain;
+
+		// Convert +/- depth (px)  to total in nm
+		depth *= 2 * a;
+
+		// Compute total background variance in photons
+		double backgroundVariance = b;
+		// Do not add EM-CCD noise factor. The Mortensen formula also includes this factor 
+		// so this is "double-counting" the EM-CCD.  
+		//if (emCCD)
+		//	backgroundVariance *= 2;
+
+		// Read noise is in ADUs. Convert to Photons to get contribution to background variance
+		double readNoiseInPhotons = readNoise / gain;
+
+		// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
+		// is equal to the total variance at the pixel.
+		double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
+
+		return new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal, signalPerFrame, depth,
+				fixedDepth, bias, emCCD, gain, amplification, readNoise, b, b2);
+	}
+
+	private static double[] getSignal(MemoryPeakResults results)
+	{
+		double[] data = new double[results.size()];
+		int i = 0;
+		for (PeakResult p : results.getResults())
+			data[i++] = p.getSignal();
+		return data;
+	}
+
+	private static double[] getDepth(MemoryPeakResults results)
+	{
+		double[] data = new double[results.size()];
+		int i = 0;
+		for (PeakResult p : results.getResults())
+			// Results store the z-depth in the error field
+			data[i++] = p.error;
+		return data;
+	}
+
+	/**
+	 * Show a dialog allowing the parameters for a benchmark simulation to be loaded
+	 * 
+	 * @return True if the parameters were collected
+	 */
+	private boolean showLoadDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+
+		String[] images = Utils.getImageList(Utils.GREY_SCALE);
+		gd.addChoice("Image", images, benchmarkImage);
+		gd.addStringField("Results_file", benchmarkFile);
+
+		if (Utils.isShowGenericDialog())
+		{
+			// Add a listener to allow selection of the file
+			@SuppressWarnings("unchecked")
+			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
+			TextField textFile = texts.get(0);
+			textFile.addMouseListener(this);
+		}
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		benchmarkImage = gd.getNextChoice();
+		benchmarkFile = gd.getNextString();
+
+		return true;
+	}
+
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getClickCount() > 1) // Double-click
+		{
+			if (e.getSource() instanceof TextField)
+			{
+				TextField textFile = (TextField) e.getSource();
+				String newFilename = Utils.getFilename("Config_File", textFile.getText());
+				if (newFilename != null)
+				{
+					textFile.setText(newFilename);
+				}
+			}
+		}
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+
+	}
+
+	public void mouseReleased(MouseEvent e)
+	{
+
+	}
+
+	public void mouseEntered(MouseEvent e)
+	{
+
+	}
+
+	public void mouseExited(MouseEvent e)
+	{
+
 	}
 }
