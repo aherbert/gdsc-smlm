@@ -54,6 +54,7 @@ import gdsc.core.clustering.DensityManager;
 import gdsc.core.ij.Utils;
 import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
@@ -74,6 +75,7 @@ import gdsc.core.utils.UnicodeReader;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -4861,6 +4863,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		if (simulationParameters != null)
 		{
 			setBackground(results);
+			setNoise(results, imp);
 			setBenchmarkResults(imp, results);
 			IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
 		}
@@ -4890,6 +4893,44 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		final float b = (float) (simulationParameters.bias + simulationParameters.gain * simulationParameters.b);
 		for (PeakResult p : results.getResults())
 			p.params[Gaussian2DFunction.BACKGROUND] = b;
+	}
+
+	/**
+	 * Sets the noise in the results if missing.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	private void setNoise(MemoryPeakResults results, ImagePlus imp)
+	{
+		// Loaded results do not have noise
+		for (PeakResult r : results.getResults())
+			if (r.noise != 0)
+				return;
+
+		// Compute noise per frame
+		ImageStack stack = imp.getImageStack();
+		final int width = stack.getWidth();
+		final int height = stack.getHeight();
+		final IJImageSource source = new IJImageSource(imp);
+		final float[] noise = new float[source.getFrames() + 1];
+		for (int slice = 1; slice < noise.length; slice++)
+		{
+			stack.getPixels(slice);
+			float[] data = source.next();
+			// Use the trimmed method as there may be a lot of spots in the frame
+			noise[slice] = (float) FitWorker.estimateNoise(data, width, height,
+					NoiseEstimator.Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
+		}
+
+		Statistics stats = new Statistics(Arrays.copyOfRange(noise, 1, noise.length));
+		System.out.printf("Noise = %.3f +/- %.3f (%d)\n", stats.getMean(), stats.getStandardDeviation(), stats.getN());
+
+		for (PeakResult p : results.getResults())
+		{
+			if (p.peak < noise.length)
+				p.noise = noise[p.peak];
+		}
 	}
 
 	private MemoryPeakResults getSimulationResults()
