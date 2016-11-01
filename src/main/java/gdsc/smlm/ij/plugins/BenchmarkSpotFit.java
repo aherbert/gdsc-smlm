@@ -1880,7 +1880,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			else
 				multiples = 9;
 			increment[i] = Maths.ceil(range / multiples, interval[i]);
-			upper[i] = lower[i] + increment[i] * multiples;
+			
+			if (i == FILTER_MIN_WIDTH)
+				// Requires clipping based on the upper limit
+				lower[i] = upper[i] - increment[i] * multiples;
+			else
+				upper[i] = lower[i] + increment[i] * multiples;
 		}
 
 		// Disable some filters
