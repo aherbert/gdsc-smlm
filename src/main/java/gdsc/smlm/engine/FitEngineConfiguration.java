@@ -59,7 +59,7 @@ public class FitEngineConfiguration implements Cloneable
 	private boolean includeNeighbours = true;
 	private double neighbourHeightThreshold = 0.3;
 	private double residualsThreshold = 1;
-	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
+	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
 	private DataFilterType dataFilterType = DataFilterType.SINGLE;
 	private double[] smooth = new double[] { 1.2 };
 	private DataFilter[] dataFilter = new DataFilter[] { DataFilter.MEAN };
