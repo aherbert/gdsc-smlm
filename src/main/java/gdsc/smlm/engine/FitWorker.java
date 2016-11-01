@@ -110,6 +110,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private FitJob job;
 	private boolean benchmarking;
 	private float[] data;
+	private DataEstimator dataEstimator = null;
 	//private float[] filteredData;
 	private boolean relativeIntensity;
 	private float noise, background;
@@ -369,6 +370,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		fittedBackground = 0;
 
+		// TODO - Better estimate of the background and the noise. Using all the image pixels
+		// results in an estimate that is too high when there are many spots in the image.
+		// Create a method that thresholds the image and finds the mean/sd of the thresholded image.
+
+		// Note: Other code calls the static estimateNoise method.
+		// So add a private instance method to estimate the noise and background using a static helper
+		// class. This can also be called from the static estiamteNoise method.
+
 		// Always get the noise and store it with the results.
 		if (params != null && !Float.isNaN(params.noise))
 		{
@@ -377,7 +386,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 		else if (calculateNoise)
 		{
-			noise = estimateNoise(data, width, height, config.getNoiseMethod());
+			noise = estimateNoise(width, height);
 			fitConfig.setNoise(noise);
 		}
 
@@ -609,21 +618,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		return candidates;
 	}
 
-	/**
-	 * Estimate the noise in the data
-	 * 
-	 * @param data
-	 * @param width
-	 * @param height
-	 * @param method
-	 * @return The noise
-	 */
-	public static float estimateNoise(float[] data, int width, int height, NoiseEstimator.Method method)
-	{
-		NoiseEstimator ne = new NoiseEstimator(data, width, height);
-		return (float) ne.getNoise(method);
-	}
-
 	private void finish(FitJob job, final long start)
 	{
 		time += System.nanoTime() - start;
@@ -828,21 +822,21 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			// Update the initial params since we may have used an estimate
 			// This will ensure that the width factor is computed correctly.
-			
+
 			// Q. Should this be ignored for existing results? They have already passed validation. 
 			// So we do not have to be as strict on their width and could just use the drift from 
 			// the the initial estimate.
 			// For now do a full validation since multi-fit results are only accepted if existing
 			// results are still valid.
-			
+
 			final int offset = n * 6;
 			initialParams[Gaussian2DFunction.X_SD + offset] = fitConfig.getInitialPeakStdDev0();
 			initialParams[Gaussian2DFunction.Y_SD + offset] = fitConfig.getInitialPeakStdDev1();
 			return createResult(candidateId, n, initialParams, params, localBackground, resultType);
 		}
-		
-		abstract PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams,
-				double[] params, double localBackground, ResultType resultType);
+
+		abstract PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
+				double localBackground, ResultType resultType);
 	}
 
 	/**
@@ -856,8 +850,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			super(offsetx, offsety);
 		}
 
-		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams,
-				double[] params, double localBackground, ResultType resultType)
+		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
+				double localBackground, ResultType resultType)
 		{
 			return fitConfig.createDynamicPreprocessedPeakResult(candidateId, n, initialParams, params, localBackground,
 					resultType, offsetx, offsety);
@@ -874,8 +868,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			super(offsetx, offsety);
 		}
 
-		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams,
-				double[] params, double localBackground, ResultType resultType)
+		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
+				double localBackground, ResultType resultType)
 		{
 			return fitConfig.createPreprocessedPeakResult(slice, candidateId, n, initialParams, params, localBackground,
 					resultType, offsetx, offsety);
@@ -1296,7 +1290,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// This will ensure that drift is computed correctly.
 			final double[] fitParams = fitResult.getParameters();
 			final double[] initialParams = fitResult.getInitialParameters();
-			
+
 			initialParams[Gaussian2DFunction.X_POSITION] = candidates[candidateId].x - regionBounds.x;
 			initialParams[Gaussian2DFunction.Y_POSITION] = candidates[candidateId].y - regionBounds.y;
 			initialParams[Gaussian2DFunction.X_SD] = fitConfig.getInitialPeakStdDev0();
@@ -2356,14 +2350,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				NEXT_PEAK: for (int n = 0; n < 2; n++)
 				{
 					final int offset = n * 6;
-					
+
 					// Ensure the initial parameters are at the candidate position since we may have used an estimate.
 					// This will ensure that drift is computed correctly.
-					initialParams[Gaussian2DFunction.X_POSITION + offset] = candidates[candidateId].x -
-							regionBounds.x;
-					initialParams[Gaussian2DFunction.Y_POSITION + offset] = candidates[candidateId].y -
-							regionBounds.y;
-					
+					initialParams[Gaussian2DFunction.X_POSITION + offset] = candidates[candidateId].x - regionBounds.x;
+					initialParams[Gaussian2DFunction.Y_POSITION + offset] = candidates[candidateId].y - regionBounds.y;
+
 					// 1. Check the spot is inside the region
 
 					// Note that during processing the data is assumed to refer to the top-left
@@ -2672,6 +2664,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Initial guess using the noise (assuming all noise is from Poisson background).
 				// EMCCD will have increase noise by a factor of sqrt(2)
 				background = (float) (fitConfig.getBias() + this.noise / ((fitConfig.isEmCCD()) ? 1.414213562 : 1));
+
+				background = (float) (fitConfig.getBias() +
+						PeakResult.noiseToLocalBackground(noise, fitConfig.getGain(), fitConfig.isEmCCD()));
 			}
 			else
 			{
@@ -2878,11 +2873,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private float estimateBackground(int width, int height)
 	{
-		// Compute average of the entire image
-		double sum = 0;
-		for (int i = width * height; i-- > 0;)
-			sum += data[i];
-		return (float) (sum / (width * height));
+		createDataEstimator(width, height);
+		return dataEstimator.getBackground();
 	}
 
 	/**
@@ -2919,6 +2911,51 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				logger.info("Image background %f", av);
 			return av;
 		}
+	}
+
+	private float estimateNoise(int width, int height)
+	{
+		createDataEstimator(width, height);
+
+		if (dataEstimator.isBackgroundRegion())
+			return dataEstimator.getNoise();
+		return dataEstimator.getNoise(config.getNoiseMethod());
+	}
+
+	/**
+	 * Estimate the noise in the data.
+	 *
+	 * @param data
+	 *            the data
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
+	 * @param method
+	 *            the method
+	 * @return The noise
+	 */
+	public static float estimateNoise(float[] data, int width, int height, NoiseEstimator.Method method)
+	{
+		// Do the same logic as the non-static method 
+		DataEstimator dataEstimator = newDataEstimator(data, width, height);
+
+		if (dataEstimator.isBackgroundRegion())
+			return dataEstimator.getNoise();
+		return dataEstimator.getNoise(method);
+	}
+
+	private void createDataEstimator(int width, int height)
+	{
+		if (dataEstimator == null)
+			dataEstimator = newDataEstimator(data, width, height);
+	}
+
+	private static DataEstimator newDataEstimator(float[] data, int width, int height)
+	{
+		// TODO - add options to control the thresholding method and the background fraction
+
+		return new DataEstimator(data, width, height);
 	}
 
 	/**
