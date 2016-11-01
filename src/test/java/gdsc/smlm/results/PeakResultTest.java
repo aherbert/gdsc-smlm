@@ -45,8 +45,8 @@ public class PeakResultTest
 							sum[points] += error;
 							if (error > 1e-2)
 							{
-								String msg = String.format("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a,
-										s, N, b2, points, e, o, error);
+								String msg = String.format("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s,
+										N, b2, points, e, o, error);
 								Assert.assertTrue(msg, false);
 							}
 						}
@@ -109,8 +109,55 @@ public class PeakResultTest
 
 		for (int points = minPoints; points <= maxPoints; points++)
 		{
-			System.out.printf("Points = %d, Av relative time = %f, Slow down factor = %f\n", points, sum[points] /
-					count, sum2[points] / count2);
+			System.out.printf("Points = %d, Av relative time = %f, Slow down factor = %f\n", points,
+					sum[points] / count, sum2[points] / count2);
 		}
 	}
+
+	@Test
+	public void canConvertLocalBackgroundToNoise()
+	{
+		double gain = 6;
+
+		double[] photons = { 0, 1, 2, 4, 10, 50, 100 };
+
+		// CCD
+		for (double p : photons)
+		{
+			// Assuming a Poisson distribution N photons should have a noise of sqrt(N).
+			// However the input and output are in ADU counts so we apply the gain.
+			double n = PeakResult.localBackgroundToNoise(p * gain, gain, false);
+			Assert.assertEquals("CCD " + p, Math.sqrt(p) * gain, n, 0);
+		}
+
+		// EM-CCD
+		for (double p : photons)
+		{
+			// Assuming a Poisson distribution N photons should have a noise of sqrt(N * 2)
+			// (due to the EM-CCD noise factor of 2).
+			// However the input and output are in ADU counts so we apply the gain.
+			double n = PeakResult.localBackgroundToNoise(p * gain, gain, true);
+			Assert.assertEquals("EM-CCD " + p, Math.sqrt(2 * p) * gain, n, 0);
+		}
+	}
+
+	@Test
+	public void canConvertLocalBackgroundToNoiseAndBack()
+	{
+		double gain = 6;
+
+		double[] photons = { 0, 1, 2, 4, 10, 50, 100 };
+
+		for (boolean emCCD : new boolean[] { false, true })
+		{
+			for (double p : photons)
+			{
+				double b = p * gain;
+				double n = PeakResult.localBackgroundToNoise(b, gain, emCCD);
+				double b2 = PeakResult.noiseToLocalBackground(n, gain, emCCD);
+				Assert.assertEquals(emCCD + " " + p, b, b2, 1e-6);
+			}
+		}
+	}
+
 }
