@@ -796,7 +796,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					// Although a predicted point can accumulate more than 1 for TP matches (due 
 					// to multiple matching), no predicted point can score less than 1.
 					fp = nPredicted;
-					for (int i = 0; i < predictedScore[i]; i++)
+					for (int i = 0; i < predictedScore.length; i++)
 					{
 						if (predictedScore[i] > 1)
 							predictedScore[i] = 1;
@@ -846,7 +846,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					// Although a predicted point can accumulate more than 1 for TP matches (due 
 					// to multiple matching), no predicted point can score less than 1.
 					fp = nPredicted;
-					for (int i = 0; i < predictedScore[i]; i++)
+					for (int i = 0; i < predictedScore.length; i++)
 					{
 						if (predictedScore[i] > 1)
 							predictedScore[i] = 1;
