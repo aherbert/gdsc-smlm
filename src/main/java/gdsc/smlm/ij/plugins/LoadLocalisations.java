@@ -44,7 +44,7 @@ public class LoadLocalisations implements PlugIn
 	public static class Localisation
 	{
 		int t, id;
-		float x, y, z, intensity, sx = 1, sy = 1;
+		float x, y, z, intensity, sx = -1, sy = -1;
 	}
 
 	public enum DistanceUnit
@@ -90,20 +90,28 @@ public class LoadLocalisations implements PlugIn
 			results.setName(name);
 			results.setCalibration(new Calibration(pixelPitch, gain, exposureTime));
 
-			final double alpha = (intensityUnit == IntensityUnit.COUNT) ? 1 : 1 / gain;
-			final double convert = (distanceUnit == DistanceUnit.PIXEL) ? 1 : 1 / pixelPitch;
+			// Convert to ADU count and pixels
+			final double convertI = (intensityUnit == IntensityUnit.PHOTON) ? gain : 1;
+			final double convertD = (distanceUnit == DistanceUnit.NM) ? 1 / pixelPitch : 1;
 
 			for (int i = 0; i < size(); i++)
 			{
 				final Localisation l = get(i);
 				final float[] params = new float[7];
-				params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity * alpha);
-				params[Gaussian2DFunction.X_POSITION] = (float) (l.x * convert);
-				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y * convert);
-				params[Gaussian2DFunction.X_SD] = (float) (l.sx * convert);
-				params[Gaussian2DFunction.Y_SD] = (float) (l.sy * convert);
+				params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity * convertI);
+				params[Gaussian2DFunction.X_POSITION] = (float) (l.x * convertD);
+				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y * convertD);
+				// We may not have read in the widths
+				if (l.sx == -1)
+					params[Gaussian2DFunction.X_SD] = 1;
+				else
+					params[Gaussian2DFunction.X_SD] = (float) (l.sx * convertD);
+				if (l.sy == -1)
+					params[Gaussian2DFunction.Y_SD] = 1;
+				else
+					params[Gaussian2DFunction.Y_SD] = (float) (l.sy * convertD);
 				results.add(new IdPeakResult(l.t, (int) params[Gaussian2DFunction.X_POSITION],
-						(int) params[Gaussian2DFunction.Y_POSITION], 0, l.z * convert, 0, params, null, l.id));
+						(int) params[Gaussian2DFunction.Y_POSITION], 0, l.z * convertD, 0, params, null, l.id));
 			}
 			return results;
 
@@ -338,7 +346,7 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Intensity", ii, 0);
 		gd.addNumericField("Sx", isx, 0);
 		gd.addNumericField("Sy", isy, 0);
-		
+
 		String[] dUnits = SettingsManager.getNames((Object[]) DistanceUnit.values());
 		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
 		String[] iUnits = SettingsManager.getNames((Object[]) IntensityUnit.values());
@@ -351,7 +359,7 @@ public class LoadLocalisations implements PlugIn
 		gd.addStringField("Comment", comment);
 		gd.addStringField("Delimiter", delimiter);
 		gd.addStringField("Name", name);
-		
+
 		gd.showDialog();
 		if (gd.wasCanceled())
 		{
@@ -389,7 +397,7 @@ public class LoadLocalisations implements PlugIn
 		ii = columns[i++];
 		isx = columns[i++];
 		isy = columns[i++];
-		
+
 		distanceUnit = gd.getNextChoiceIndex();
 		intensityUnit = gd.getNextChoiceIndex();
 		gain = gd.getNextNumber();
@@ -400,7 +408,7 @@ public class LoadLocalisations implements PlugIn
 		comment = gd.getNextString();
 		delimiter = getNextString(gd, delimiter);
 		name = getNextString(gd, name);
-		
+
 		if (gd.invalidNumber())
 		{
 			IJ.error(TITLE, "Invalid number in input fields");
