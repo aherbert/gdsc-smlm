@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.math3.util.FastMath;
@@ -28,8 +27,10 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
@@ -40,10 +41,73 @@ import ij.plugin.PlugIn;
  */
 public class LoadLocalisations implements PlugIn
 {
-	static public class Localisation
+	public static class Localisation
 	{
 		int t, id;
 		float x, y, z, intensity, sx = 1, sy = 1;
+	}
+
+	public enum DistanceUnit
+	{
+		PIXEL, NM
+	}
+
+	public enum IntensityUnit
+	{
+		PHOTON, COUNT
+	}
+
+	public static class LocalisationList extends ArrayList<Localisation>
+	{
+		private static final long serialVersionUID = 6616011992365324247L;
+
+		public final DistanceUnit distanceUnit;
+		public final IntensityUnit intensityUnit;
+		public final double gain;
+		public final double pixelPitch;
+		public final double exposureTime;
+
+		public LocalisationList(DistanceUnit distanceUnit, IntensityUnit intensityUnit, double gain, double pixelPitch,
+				double exposureTime)
+		{
+			this.distanceUnit = distanceUnit;
+			this.intensityUnit = intensityUnit;
+			this.gain = gain;
+			this.pixelPitch = pixelPitch;
+			this.exposureTime = exposureTime;
+		}
+
+		private LocalisationList(int distanceUnit, int intensityUnit, double gain, double pixelPitch,
+				double exposureTime)
+		{
+			this(DistanceUnit.values()[distanceUnit], IntensityUnit.values()[intensityUnit], gain, pixelPitch,
+					exposureTime);
+		}
+
+		public MemoryPeakResults toPeakResults()
+		{
+			MemoryPeakResults results = new MemoryPeakResults();
+			results.setName(name);
+			results.setCalibration(new Calibration(pixelPitch, gain, exposureTime));
+
+			final double alpha = (intensityUnit == IntensityUnit.COUNT) ? 1 : 1 / gain;
+			final double convert = (distanceUnit == DistanceUnit.PIXEL) ? 1 : 1 / pixelPitch;
+
+			for (int i = 0; i < size(); i++)
+			{
+				final Localisation l = get(i);
+				final float[] params = new float[7];
+				params[Gaussian2DFunction.SIGNAL] = (float) (l.intensity * alpha);
+				params[Gaussian2DFunction.X_POSITION] = (float) (l.x * convert);
+				params[Gaussian2DFunction.Y_POSITION] = (float) (l.y * convert);
+				params[Gaussian2DFunction.X_SD] = (float) (l.sx * convert);
+				params[Gaussian2DFunction.Y_SD] = (float) (l.sy * convert);
+				results.add(new IdPeakResult(l.t, (int) params[Gaussian2DFunction.X_POSITION],
+						(int) params[Gaussian2DFunction.Y_POSITION], 0, l.z * convert, 0, params, null, l.id));
+			}
+			return results;
+
+		}
 	}
 
 	private static final String TITLE = "Load Localisations";
@@ -63,6 +127,11 @@ public class LoadLocalisations implements PlugIn
 	private static String comment = "#";
 	private static String delimiter = "\\t";
 	private static String name = "Localisations";
+	private static int distanceUnit = 0;
+	private static int intensityUnit = 0;
+	private static double gain;
+	private static double pixelPitch;
+	private static double exposureTime;
 
 	/*
 	 * (non-Javadoc)
@@ -84,7 +153,7 @@ public class LoadLocalisations implements PlugIn
 		settings.localisationsFilename = chooser.getDirectory() + chooser.getFileName();
 		SettingsManager.saveSettings(globalSettings);
 
-		List<Localisation> localisations = loadLocalisations(settings.localisationsFilename);
+		LocalisationList localisations = loadLocalisations(settings.localisationsFilename);
 
 		if (localisations.isEmpty())
 		{
@@ -92,34 +161,29 @@ public class LoadLocalisations implements PlugIn
 			return;
 		}
 
+		MemoryPeakResults results = localisations.toPeakResults();
+
 		// Ask the user what depth to use to create the in-memory results
-		if (!getZDepth(localisations))
+		if (!getZDepth(results))
 			return;
-
-		// Create the in-memory results
-		MemoryPeakResults results = new MemoryPeakResults();
-		results.setName(name);
-
-		for (Localisation l : localisations)
+		if (limitZ)
 		{
-			if (limitZ)
-			{
-				if (l.z < minz || l.z > maxz)
-					continue;
-			}
+			MemoryPeakResults results2 = new MemoryPeakResults(results.size());
+			results.setName(name);
+			results.copySettings(results);
 
-			float[] params = new float[7];
-			params[Gaussian2DFunction.SIGNAL] = l.intensity;
-			params[Gaussian2DFunction.X_POSITION] = l.x;
-			params[Gaussian2DFunction.Y_POSITION] = l.y;
-			params[Gaussian2DFunction.X_SD] = l.sx;
-			params[Gaussian2DFunction.Y_SD] = l.sy;
-			results.add(new IdPeakResult(l.t, (int) l.x, (int) l.y, 0, l.z, 0, params, null, l.id));
+			for (PeakResult peak : results.getResults())
+			{
+				if (peak.error < minz || peak.error > maxz)
+					continue;
+				results2.add(peak);
+			}
+			results = results2;
 		}
 
+		// Create the in-memory results
 		if (results.size() > 0)
 		{
-			ResultsManager.checkCalibration(results);
 			MemoryPeakResults.addResults(results);
 		}
 
@@ -130,22 +194,28 @@ public class LoadLocalisations implements PlugIn
 			Utils.log("Loaded %d localisations", results.size());
 	}
 
-	private boolean getZDepth(List<Localisation> localisations)
+	private boolean getZDepth(MemoryPeakResults results)
 	{
-		double min = localisations.get(0).z;
+		// The z-depth is stored in pixels
+		double min = results.getResults().get(0).error;
 		double max = min;
-		for (Localisation l : localisations)
+		for (PeakResult peak : results.getResults())
 		{
-			if (min > l.z)
-				min = l.z;
-			if (max < l.z)
-				max = l.z;
+			if (min > peak.error)
+				min = peak.error;
+			if (max < peak.error)
+				max = peak.error;
 		}
 
 		maxz = FastMath.min(maxz, max);
 		minz = FastMath.max(minz, min);
 
-		String msg = String.format("%d localisations with %.2f <= z <= %.2f", localisations.size(), min, max);
+		// Display in nm
+		final double pp = results.getNmPerPixel();
+		min *= pp;
+		max *= pp;
+
+		String msg = String.format("%d localisations with %.2f <= z <= %.2f", results.size(), min, max);
 
 		min = Math.floor(min);
 		max = Math.ceil(max);
@@ -153,24 +223,26 @@ public class LoadLocalisations implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage(msg);
 		gd.addCheckbox("Limit Z-depth", limitZ);
-		gd.addSlider("minZ", min, max, minz);
-		gd.addSlider("maxZ", min, max, maxz);
+		gd.addSlider("minZ", min, max, minz * pp);
+		gd.addSlider("maxZ", min, max, maxz * pp);
 		gd.showDialog();
 		if (gd.wasCanceled() || gd.invalidNumber())
 		{
 			return false;
 		}
 		limitZ = gd.getNextBoolean();
-		minz = gd.getNextNumber();
-		maxz = gd.getNextNumber();
+		minz = gd.getNextNumber() / pp;
+		maxz = gd.getNextNumber() / pp;
 		return true;
 	}
 
-	static List<Localisation> loadLocalisations(String filename)
+	static LocalisationList loadLocalisations(String filename)
 	{
-		List<Localisation> localisations = new ArrayList<Localisation>();
+		if (!getFields())
+			return null;
 
-		getFields();
+		LocalisationList localisations = new LocalisationList(distanceUnit, intensityUnit, gain, pixelPitch,
+				exposureTime);
 
 		final boolean hasComment = !Utils.isNullOrEmpty(comment);
 		int errors = 0;
@@ -266,10 +338,20 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Intensity", ii, 0);
 		gd.addNumericField("Sx", isx, 0);
 		gd.addNumericField("Sy", isy, 0);
+		
+		String[] dUnits = SettingsManager.getNames((Object[]) DistanceUnit.values());
+		gd.addChoice("Distance_unit", dUnits, dUnits[distanceUnit]);
+		String[] iUnits = SettingsManager.getNames((Object[]) IntensityUnit.values());
+		gd.addChoice("Intensity_unit", iUnits, iUnits[intensityUnit]);
+		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
+		gd.addNumericField("Pixel_pitch", pixelPitch, 3, 8, "nm");
+		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "ms");
+
 		gd.addNumericField("Header_lines", header, 0);
 		gd.addStringField("Comment", comment);
 		gd.addStringField("Delimiter", delimiter);
 		gd.addStringField("Name", name);
+		
 		gd.showDialog();
 		if (gd.wasCanceled())
 		{
@@ -307,10 +389,28 @@ public class LoadLocalisations implements PlugIn
 		ii = columns[i++];
 		isx = columns[i++];
 		isy = columns[i++];
+		
+		distanceUnit = gd.getNextChoiceIndex();
+		intensityUnit = gd.getNextChoiceIndex();
+		gain = gd.getNextNumber();
+		pixelPitch = gd.getNextNumber();
+		exposureTime = gd.getNextNumber();
+
 		header = (int) gd.getNextNumber();
 		comment = gd.getNextString();
 		delimiter = getNextString(gd, delimiter);
 		name = getNextString(gd, name);
+		
+		if (gd.invalidNumber())
+		{
+			IJ.error(TITLE, "Invalid number in input fields");
+			return false;
+		}
+		if (gain <= 0 || pixelPitch <= 0)
+		{
+			IJ.error(TITLE, "Require positive gain and pixel pitch");
+			return false;
+		}
 		if (ix < 0 || iy < 0 || ix == iy)
 		{
 			IJ.error(TITLE, "Require valid X and Y indices");
