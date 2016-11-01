@@ -79,7 +79,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.plugins.LoadLocalisations.Localisation;
+import gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
 import gdsc.smlm.ij.settings.Atom;
 import gdsc.smlm.ij.settings.Compound;
 import gdsc.smlm.ij.settings.CreateDataSettings;
@@ -327,6 +327,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		 */
 		final double b2;
 
+		private boolean loaded;
+
 		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
 				double maxSignal, double signalPerFrame, double depth, boolean fixedDepth, double bias, boolean emCCD,
 				double gain, double amplification, double readNoise, double b, double b2)
@@ -349,6 +351,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 			this.readNoise = readNoise;
 			this.b = b;
 			this.b2 = b2;
+		}
+
+		/**
+		 * Checks if is a loaded simulation.
+		 *
+		 * @return true, if is loaded
+		 */
+		public boolean isLoaded()
+		{
+			return loaded;
 		}
 	}
 
@@ -505,6 +517,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 
 	private static String benchmarkFile = "";
 	private static String benchmarkImage = "";
+	private static boolean benchmarkAuto = true;
 	private static int benchmarkImageId = 0;
 	private static String benchmarkResultsName = "";
 
@@ -4769,6 +4782,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		{
 			benchmarkImageId = imp.getID();
 			benchmarkResultsName = results.getName();
+			MemoryPeakResults.addResults(results);
 		}
 		else
 		{
@@ -4812,63 +4826,94 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 	 */
 	private void loadBenchmarkData()
 	{
+		// Note: Do not reset memory until failure. This allows the load method to use the 
+		// last simulation parameters to set settings.
+
 		if (!showLoadDialog())
+		{
+			//resetMemory();
 			return;
-		resetMemory();
+		}
 
 		// Load the image
 		ImagePlus imp = WindowManager.getImage(benchmarkImage);
 		if (imp == null)
 		{
 			IJ.error(TITLE, "No benchmark image: " + benchmarkImage);
+			//resetMemory();
 			return;
 		}
 
 		// Load the results
-		MemoryPeakResults results = getSimulationResults(imp);
+		MemoryPeakResults results = getSimulationResults();
 		if (results == null)
 		{
 			IJ.error(TITLE, "No benchmark results: " + benchmarkResultsName);
+			//resetMemory();
 			return;
 		}
+		results.setName(imp.getTitle() + " (Results)");
+		results.setBounds(new Rectangle(0, 0, imp.getWidth(), imp.getHeight()));
+		results.setSource(new IJImageSource(imp));
 
 		// Get the calibration
 		simulationParameters = showSimulationParametersDialog(imp, results);
 		if (simulationParameters != null)
+		{
+			setBackground(results);
 			setBenchmarkResults(imp, results);
-		IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
+			IJ.showStatus("Loaded " + Utils.pleural(results.size(), "result"));
+		}
+		else
+		{
+			resetMemory();
+		}
 	}
 
-	private MemoryPeakResults getSimulationResults(ImagePlus imp)
+	/**
+	 * Sets the background in the results if missing.
+	 *
+	 * @param results
+	 *            the results
+	 */
+	private void setBackground(MemoryPeakResults results)
 	{
-		// Load directly from a results file. This is mainly to be used to load simulations 
-		// saved to memory then saved to file. This is because the z-depth must be in the 
-		// error field of the results.
-		PeakResultsReader r = new PeakResultsReader(benchmarkFile);
-		MemoryPeakResults results = r.getResults();
-		if (results != null)
-			return results;
+		// Loaded results do not have a local background.
+		for (PeakResult p : results.getResults())
+			if (p.getBackground() != 0)
+				return;
+
+		// Simple fix is to use the bias plus the global photon background.
+		// TODO - Subtract the spots from the local region and compute the true local background.
+		// Note this requires knowing the PSF width. If this is a loaded ground truth dataset then 
+		// it probably will not have Gaussian widths.
+		final float b = (float) (simulationParameters.bias + simulationParameters.gain * simulationParameters.b);
+		for (PeakResult p : results.getResults())
+			p.params[Gaussian2DFunction.BACKGROUND] = b;
+	}
+
+	private MemoryPeakResults getSimulationResults()
+	{
+		if (benchmarkAuto)
+		{
+			// Load directly from a results file. This is mainly to be used to load simulations 
+			// saved to memory then saved to file. This is because the z-depth must be in the 
+			// error field of the results.
+			PeakResultsReader r = new PeakResultsReader(benchmarkFile);
+			MemoryPeakResults results = r.getResults();
+			if (results != null)
+			{
+				ResultsManager.checkCalibration(results);
+				return results;
+			}
+		}
 
 		// Load using a universal text file
-		List<Localisation> localisations = LoadLocalisations.loadLocalisations(benchmarkFile);
+		LocalisationList localisations = LoadLocalisations.loadLocalisations(benchmarkFile);
 		if (localisations.isEmpty())
 			return null;
 
-		results = new MemoryPeakResults();
-		results.setName(imp.getTitle() + " (Results)");
-
-		for (Localisation l : localisations)
-		{
-			float[] params = new float[7];
-			params[Gaussian2DFunction.SIGNAL] = l.intensity;
-			params[Gaussian2DFunction.X_POSITION] = l.x;
-			params[Gaussian2DFunction.Y_POSITION] = l.y;
-			params[Gaussian2DFunction.X_SD] = l.sx;
-			params[Gaussian2DFunction.Y_SD] = l.sy;
-			results.add(new IdPeakResult(l.t, (int) l.x, (int) l.y, 0, l.z, 0, params, null, l.id));
-		}
-
-		return results;
+		return localisations.toPeakResults();
 	}
 
 	private SimulationParameters showSimulationParametersDialog(ImagePlus imp, MemoryPeakResults results)
@@ -4897,6 +4942,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		boolean emCCD = false;
 		double readNoise = -1;
 		double a = -1;
+
+		// Get this from the user
+		double b = -1;
+
+		// Get any calibration we have
 		Calibration cal = results.getCalibration();
 		if (cal != null)
 		{
@@ -4908,8 +4958,26 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 			a = cal.nmPerPixel;
 		}
 
-		// Get this from the user
-		double b = -1;
+		// Use last simulation parameters for missing settings.
+		// This is good if we are re-running the plugin to load data.
+		if (simulationParameters != null && simulationParameters.isLoaded())
+		{
+			fullSimulation = simulationParameters.fullSimulation;
+			s = simulationParameters.s;
+			b = simulationParameters.b;
+			if (bias <= 0)
+				bias = simulationParameters.bias;
+			if (gain <= 0)
+				gain = simulationParameters.gain;
+			if (amplification <= 0)
+				amplification = simulationParameters.amplification;
+			if (readNoise <= 0)
+				readNoise = simulationParameters.readNoise;
+			if (cal == null)
+				emCCD = simulationParameters.emCCD;
+			if (a <= 0)
+				a = simulationParameters.a;
+		}
 
 		// Show a dialog to confirm settings
 		GenericDialog gd = new GenericDialog(TITLE);
@@ -4930,10 +4998,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		gd.addNumericField("Amplification", amplification, 3, 8, "ADU/e-");
 		gd.addCheckbox("EM-CCD", emCCD);
 		gd.addNumericField("Read_noise", readNoise, 3, 8, "ADU");
-		gd.addNumericField("Bias", bias, 3, 8, "ADU");
+		gd.addNumericField("Bias", bias, 3, 8, "pixel");
 
 		if (!fixedDepth)
+		{
 			gd.addNumericField("Depth", depth, 3, 8, "pixel");
+		}
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -4983,8 +5053,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		maxSignal /= gain;
 		signalPerFrame /= gain;
 
-		// Convert +/- depth (px)  to total in nm
-		depth *= 2 * a;
+		// Convert +/- depth to total depth
+		depth *= 2;
 
 		// Compute total background variance in photons
 		double backgroundVariance = b;
@@ -5000,8 +5070,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		// is equal to the total variance at the pixel.
 		double b2 = backgroundVariance + readNoiseInPhotons * readNoiseInPhotons;
 
-		return new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal, signalPerFrame, depth,
-				fixedDepth, bias, emCCD, gain, amplification, readNoise, b, b2);
+		SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal,
+				signalPerFrame, depth, fixedDepth, bias, emCCD, gain, amplification, readNoise, b, b2);
+		p.loaded = true;
+		return p;
 	}
 
 	private static double[] getSignal(MemoryPeakResults results)
@@ -5035,6 +5107,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		String[] images = Utils.getImageList(Utils.GREY_SCALE);
 		gd.addChoice("Image", images, benchmarkImage);
 		gd.addStringField("Results_file", benchmarkFile);
+		gd.addCheckbox("Auto", benchmarkAuto);
 
 		if (Utils.isShowGenericDialog())
 		{
@@ -5052,6 +5125,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 
 		benchmarkImage = gd.getNextChoice();
 		benchmarkFile = gd.getNextString();
+		benchmarkAuto = gd.getNextBoolean();
 
 		return true;
 	}
