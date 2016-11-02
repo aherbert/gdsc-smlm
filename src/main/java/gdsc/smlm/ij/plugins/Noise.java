@@ -59,6 +59,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		if (arg.equalsIgnoreCase("final"))
 		{
 			showResults();
+			return;
 		}
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
