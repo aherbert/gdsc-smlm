@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.NoiseEstimator;
@@ -59,7 +60,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		if (arg.equalsIgnoreCase("final"))
 		{
 			showResults();
-			return;
+			return DONE;
 		}
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
@@ -85,12 +86,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			gd = new GenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
-			NoiseEstimator.Method[] methods = NoiseEstimator.Method.values();
-			String[] methodNames = new String[methods.length];
-			for (int i = 0; i < methods.length; i++)
-			{
-				methodNames[i] = methods[i].toString();
-			}
+			String[] methodNames = SettingsManager.getNames((Object[]) NoiseEstimator.Method.values());
 
 			gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
 			gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);
