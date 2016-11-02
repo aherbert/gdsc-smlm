@@ -723,9 +723,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 *            the peak params dev
 	 * @param error
 	 *            the error
+	 * @param noise
+	 *            the noise
 	 * @return true, if successful
 	 */
-	private boolean addSingleResult(int candidateId, float[] peakParams, float[] peakParamsDev, double error)
+	private boolean addSingleResult(int candidateId, float[] peakParams, float[] peakParamsDev, double error,
+			float noise)
 	{
 		int x = candidates[candidateId].x;
 		int y = candidates[candidateId].y;
@@ -3395,7 +3398,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						paramsDev[j] = (float) dev[offset + j];
 				}
 
-				addSingleResult(results[i].getCandidateId(), params, paramsDev, fitResult.getError());
+				addSingleResult(results[i].getCandidateId(), params, paramsDev, fitResult.getError(), results[i].getNoise());
 
 				if (logger != null)
 				{
