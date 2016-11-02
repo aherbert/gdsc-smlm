@@ -1,5 +1,8 @@
 package gdsc.smlm.engine;
 
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.math3.stat.ranking.NaNStrategy;
+
 import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.threshold.AutoThreshold.Method;
 import gdsc.core.threshold.FloatHistogram;
@@ -180,6 +183,30 @@ public class DataEstimator
 	{
 		NoiseEstimator ne = new NoiseEstimator(data, width, height);
 		return (float) ne.getNoise(method);
+	}
+
+	/**
+	 * Get the percentile value of the data
+	 * 
+	 * @param percentile
+	 *            The percentile
+	 * @return the percentile value
+	 */
+	public float getPercentile(double percentile)
+	{
+		// Check the input
+		if (percentile <= 0)
+			percentile = Double.MIN_NORMAL;
+		if (percentile > 100)
+			percentile = 100;
+		
+		// The data should not have NaN so we ignore them for speed.
+		final Percentile p = new Percentile(percentile).withNaNStrategy(NaNStrategy.FIXED);
+		final int size = width * height;
+		final double[] values = new double[size];
+		for (int i = 0; i < size; i++)
+			values[i] = data[i];
+		return (float) p.evaluate(values);
 	}
 
 	/**
