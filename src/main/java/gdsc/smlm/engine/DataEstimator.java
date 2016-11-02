@@ -27,6 +27,12 @@ import gdsc.core.utils.Statistics;
  */
 public class DataEstimator
 {
+	private final int ESTIMATE_LARGE_ENOUGH = 0;
+	private final int ESTIMATE_BACKGROUND = 1;
+	private final int ESTIMATE_NOISE = 2;
+	private final int ESTIMATE_THRESHOLD = 3;
+	private final int ESTIMATE_BACKGROUND_SIZE = 4;
+
 	final private float[] data;
 	private Histogram h;
 	final int width, height;
@@ -74,7 +80,7 @@ public class DataEstimator
 	public boolean isBackgroundRegion()
 	{
 		getEstimate();
-		return estimate[0] == 1;
+		return estimate[ESTIMATE_LARGE_ENOUGH] == 1;
 	}
 
 	/**
@@ -85,7 +91,7 @@ public class DataEstimator
 	public float getBackground()
 	{
 		getEstimate();
-		return estimate[1];
+		return estimate[ESTIMATE_BACKGROUND];
 	}
 
 	/**
@@ -96,7 +102,7 @@ public class DataEstimator
 	public float getNoise()
 	{
 		getEstimate();
-		return estimate[2];
+		return estimate[ESTIMATE_NOISE];
 	}
 
 	/**
@@ -107,14 +113,25 @@ public class DataEstimator
 	public float getThreshold()
 	{
 		getEstimate();
-		return estimate[3];
+		return estimate[ESTIMATE_THRESHOLD];
+	}
+
+	/**
+	 * Gets the size of the background region.
+	 *
+	 * @return the size
+	 */
+	public float getBackgroundSize()
+	{
+		getEstimate();
+		return estimate[ESTIMATE_BACKGROUND_SIZE];
 	}
 
 	private void getEstimate()
 	{
 		if (estimate == null)
 		{
-			estimate = new float[4];
+			estimate = new float[5];
 
 			if (h == null)
 			{
@@ -123,7 +140,7 @@ public class DataEstimator
 			}
 
 			// Threshold the data
-			final float t = estimate[3] = h.getAutoThreshold(thresholdMethod);
+			final float t = estimate[ESTIMATE_THRESHOLD] = h.getAutoThreshold(thresholdMethod);
 
 			// Get stats below the threshold
 			Statistics stats = new Statistics();
@@ -135,10 +152,11 @@ public class DataEstimator
 			}
 
 			// Check if background region is large enough
+			estimate[ESTIMATE_BACKGROUND_SIZE] = stats.getN();
 			if (stats.getN() > fraction * data.length)
 			{
 				// Background region is large enough
-				estimate[0] = 1;
+				estimate[ESTIMATE_LARGE_ENOUGH] = 1;
 			}
 			else
 			{
@@ -146,10 +164,8 @@ public class DataEstimator
 				stats = new Statistics(data);
 			}
 
-			// Background
-			estimate[1] = (float) stats.getMean();
-			// Noise
-			estimate[2] = (float) stats.getStandardDeviation();
+			estimate[ESTIMATE_BACKGROUND] = (float) stats.getMean();
+			estimate[ESTIMATE_NOISE] = (float) stats.getStandardDeviation();
 		}
 	}
 
