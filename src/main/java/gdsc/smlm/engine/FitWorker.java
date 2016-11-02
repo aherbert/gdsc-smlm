@@ -2720,10 +2720,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private int findNeighbours(Rectangle regionBounds, int n, float background)
 	{
-		int xmin = regionBounds.x;
-		int xmax = xmin + regionBounds.width - 1;
-		int ymin = regionBounds.y;
-		int ymax = ymin + regionBounds.height - 1;
+		final int xmin = regionBounds.x;
+		final int xmax = xmin + regionBounds.width - 1;
+		final int ymin = regionBounds.y;
+		final int ymax = ymin + regionBounds.height - 1;
 
 		final Candidate spot = candidates[n];
 
