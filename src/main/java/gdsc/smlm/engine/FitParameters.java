@@ -54,8 +54,9 @@ public class FitParameters
 	 */
 	public int[] maxIndices = null;
 	/**
-	 * The background for the image data
+	 * The background for the image data. This is no longer used as the background is estimated using the local fit region.
 	 */
+	@Deprecated
 	public float background = Float.NaN;
 	/**
 	 * Only maxima within the distance threshold to these coordinates will be included in the results.

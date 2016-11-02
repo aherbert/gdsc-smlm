@@ -1755,7 +1755,6 @@ public class TraceMolecules implements PlugIn
 			// Fit the combined image
 			FitParameters params = new FitParameters();
 			params.noise = (float) combinedNoise[0];
-			params.background = 0;
 			float[] centre = trace.getCentroid();
 
 			if (fitOnlyCentroid)

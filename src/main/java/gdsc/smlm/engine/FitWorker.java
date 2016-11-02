@@ -113,7 +113,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private DataEstimator dataEstimator = null;
 	//private float[] filteredData;
 	private boolean relativeIntensity;
-	private float noise, background;
+	private float noise;
 	private final boolean calculateNoise;
 	private boolean estimateSignal;
 	private ResultGridManager gridManager = null;
@@ -390,19 +390,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			fitConfig.setNoise(noise);
 		}
 
-		// Get the background
-		if (params != null && !Float.isNaN(params.background))
-		{
-			background = params.background;
-		}
-		else
-		{
-			background = estimateBackground(width, height);
-		}
-
 		//System.out.printf("Slice %d : Noise = %g\n", slice, noise);
 		if (logger != null)
-			logger.info("Slice %d: Noise = %f : Background = %f", slice, noise, background);
+			logger.info("Slice %d: Noise = %f", slice, noise);
 
 		final ImageExtractor ie = new ImageExtractor(data, width, height);
 		double[] region = null;
@@ -930,15 +920,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// Analyse neighbours and include them in the fit if they are within a set height of this peak.
 			resetNeighbours();
-			neighbours = findNeighbours(regionBounds, n);
+			neighbours = findNeighbours(regionBounds, n, (float) getSingleFittingBackground());
 
 			if (benchmarking)
 			{
 				// When benchmarking we may compute additional results after the main filtering routine
 				// has been run. In this case we must pre-compute some values with the current results.
-
-				// Cache the background estimate
-				getSingleFittingBackground();
 			}
 		}
 
@@ -972,7 +959,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			if (Double.isNaN(singleBackground))
 			{
-				singleBackground = limitBackground(FitWorker.this.getSingleFittingBackground());
+				// Note:
+				// Looking at various images simulated with low, medium and high density spots
+				// it is clear that a global estimate is not appropriate.
+				//singleBackground = limitBackground(FitWorker.this.getSingleFittingBackground());
+
+				// Use the min in the data
+				singleBackground = getDefaultBackground(region, width, height);
 			}
 			return singleBackground;
 		}
@@ -1012,12 +1005,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Do not do a multi-fit if the configuration is not set to include neighbours 
 			if (neighbours == 0 || !config.isIncludeNeighbours())
 				return null;
-
-			// Estimate background.
-			// Note that using the background from previous fit results leads to an 
-			// inconsistency in the results when the fitting parameters are changed which may be unexpected, 
-			// e.g. altering the max iterations.
-			double background = getMultiFittingBackground();
 
 			// TODO
 
@@ -1080,7 +1067,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						candidateNeighbourCount, fittedNeighbourCount, subtractFittedPeaks);
 
 			double[] params = new double[1 + npeaks * parametersPerPeak];
-			params[Gaussian2DFunction.BACKGROUND] = background;
+
+			// Estimate background.
+			// Note: We do not need to subtract the fitted peaks from the region before background is estimated
+			// since if we had fitted neighbours they are used to estimate the background.
+			// Note that using the background from previous fit results leads to an 
+			// inconsistency in the results when the fitting parameters are changed which may be unexpected, 
+			// e.g. altering the max iterations.
+			params[Gaussian2DFunction.BACKGROUND] = getMultiFittingBackground();
 
 			// Support bounds on the known fitted peaks
 			double[] lower = new double[params.length];
@@ -1206,12 +1200,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					if (amplitudeEstimate[i] && minSignal > params[j])
 						minSignal = params[j];
 
+				// Note: Amplitude estimates are amplitude above the background so we compare to zero
 				if (minSignal <= 0)
 				{
-					// Reset to the minimum value in the data.
-					// This is what is done in the in the fitter if the background is zero.
+					// Reset to the minimum value in the data. Note that the data will have had fitted peaks 
+					// subtracted so this will be different from an earlier call to getDefaultBackground(...)
+					// through the getBackground methods.
+					final double oldBackground = params[Gaussian2DFunction.BACKGROUND];
 					params[Gaussian2DFunction.BACKGROUND] = getDefaultBackground(region, width, height);
-					final double backgroundChange = background - params[Gaussian2DFunction.BACKGROUND];
+					final double backgroundChange = oldBackground - params[Gaussian2DFunction.BACKGROUND];
 
 					// Make the peaks higher by the change in background
 					for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += parametersPerPeak, i++)
@@ -1264,7 +1261,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			gf.setBounds(lower, upper);
 			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, amplitudeEstimate,
-					background == 0);
+					params[Gaussian2DFunction.BACKGROUND] == 0);
 			multiResiduals = gf.getResiduals();
 			gf.setBounds(null, null);
 
@@ -1822,7 +1819,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (resultSingle != null)
 				return resultSingle;
 
-			double background = getMultiFittingBackground();
 			double[] region = this.region;
 
 			// Subtract all fitted neighbours from the region
@@ -1860,7 +1856,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Store this as it is used in doublet fitting
 			this.singleRegion = region;
 
-			final double[] params = new double[] { background, 0, 0, 0, 0, 0, 0 };
+			final double[] params = new double[] { getMultiFittingBackground(), 0, 0, 0, 0, 0, 0 };
 
 			final boolean[] amplitudeEstimate = new boolean[1];
 
@@ -1875,11 +1871,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				float signal = 0;
 				if (estimateSignal)
 				{
+					final double oldBackground = params[Gaussian2DFunction.BACKGROUND];
 					double sum = 0;
 					final int size = width * height;
 					for (int i = size; i-- > 0;)
 						sum += region[i];
-					signal = (float) (sum - background * size);
+					signal = (float) (sum - oldBackground * size);
 				}
 				if (signal > 0)
 				{
@@ -1893,8 +1890,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					if (params[Gaussian2DFunction.SIGNAL] <= 0)
 					{
 						// Reset to the minimum value in the data.
+						final double oldBackground = params[Gaussian2DFunction.BACKGROUND];
 						params[Gaussian2DFunction.BACKGROUND] = getDefaultBackground(region, width, height);
-						final double backgroundChange = background - params[Gaussian2DFunction.BACKGROUND];
+						final double backgroundChange = oldBackground - params[Gaussian2DFunction.BACKGROUND];
 
 						params[Gaussian2DFunction.SIGNAL] += backgroundChange;
 
@@ -2652,9 +2650,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	/**
 	 * @return The background estimate when fitting a single peak
 	 */
+	@SuppressWarnings("unused")
 	private float getSingleFittingBackground()
 	{
-		float background;
+		final float background;
 		if (useFittedBackground && !sliceResults.isEmpty())
 		{
 			// Use the average background from all results
@@ -2666,17 +2665,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			{
 				// Initial guess using the noise (assuming all noise is from Poisson background).
 				// EMCCD will have increase noise by a factor of sqrt(2)
-				background = (float) (fitConfig.getBias() + this.noise / ((fitConfig.isEmCCD()) ? 1.414213562 : 1));
-
 				background = (float) (fitConfig.getBias() +
 						PeakResult.noiseToLocalBackground(noise, fitConfig.getGain(), fitConfig.isEmCCD()));
 			}
 			else
 			{
-				// Initial guess using image mean
-				background = this.background;
+				// Initial guess using the data estimator
+				background = estimateBackground();
 			}
-
 		}
 		return background;
 	}
@@ -2718,9 +2714,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 *            the region bounds
 	 * @param n
 	 *            the candidate index
+	 * @param background
+	 *            The background in the region
 	 * @return The number of neighbours
 	 */
-	private int findNeighbours(Rectangle regionBounds, int n)
+	private int findNeighbours(Rectangle regionBounds, int n, float background)
 	{
 		int xmin = regionBounds.x;
 		int xmax = xmin + regionBounds.width - 1;
@@ -2868,16 +2866,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	}
 
 	/**
-	 * Get an estimate of the background level using the mean of image.
+	 * Get an estimate of the background level using the median of the image.
 	 * 
-	 * @param width
-	 * @param height
-	 * @return
+	 * @return The background level
 	 */
-	private float estimateBackground(int width, int height)
+	private float estimateBackground()
 	{
-		createDataEstimator(width, height);
-		return dataEstimator.getBackground();
+		createDataEstimator();
+		// Use the median
+		return dataEstimator.getPercentile(50);
 	}
 
 	/**
@@ -2918,11 +2915,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 	private float estimateNoise(int width, int height)
 	{
-		createDataEstimator(width, height);
-
-		if (dataEstimator.isBackgroundRegion())
-			return dataEstimator.getNoise();
-		return dataEstimator.getNoise(config.getNoiseMethod());
+		createDataEstimator();
+		return estimateNoise(dataEstimator, config.getNoiseMethod());
 	}
 
 	/**
@@ -2942,16 +2936,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		// Do the same logic as the non-static method 
 		DataEstimator dataEstimator = newDataEstimator(data, width, height);
+		return estimateNoise(dataEstimator, method);
+	}
 
-		if (dataEstimator.isBackgroundRegion())
-			return dataEstimator.getNoise();
+	private static float estimateNoise(DataEstimator dataEstimator, NoiseEstimator.Method method)
+	{
+		// No methods using a background region are good so we just use the global noise estimate
+		//if (dataEstimator.isBackgroundRegion())
+		//	return dataEstimator.getNoise();		
 		return dataEstimator.getNoise(method);
 	}
 
-	private void createDataEstimator(int width, int height)
+	private void createDataEstimator()
 	{
 		if (dataEstimator == null)
+		{
+			int width = job.getBounds().width;
+			int height = job.getBounds().height;
 			dataEstimator = newDataEstimator(data, width, height);
+		}
 	}
 
 	private static DataEstimator newDataEstimator(float[] data, int width, int height)
@@ -3398,7 +3401,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						paramsDev[j] = (float) dev[offset + j];
 				}
 
-				addSingleResult(results[i].getCandidateId(), params, paramsDev, fitResult.getError(), results[i].getNoise());
+				addSingleResult(results[i].getCandidateId(), params, paramsDev, fitResult.getError(),
+						results[i].getNoise());
 
 				if (logger != null)
 				{
