@@ -2,6 +2,8 @@ package gdsc.smlm.engine;
 
 import gdsc.core.threshold.AutoThreshold;
 import gdsc.core.threshold.AutoThreshold.Method;
+import gdsc.core.threshold.FloatHistogram;
+import gdsc.core.threshold.Histogram;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
 
@@ -21,18 +23,34 @@ import gdsc.core.utils.Statistics;
 /**
  * Provide methods to estimate parameters of the data. Data is partitioned into foreground and background using
  * thresholding. The background region must be a minimum fraction of the total data. If this is not achieved then the
- * estimated are made using all the data.
+ * estimates are made using all the data.
  */
 public class DataEstimator
 {
 	final private float[] data;
+	private Histogram h;
 	final int width, height;
 	private float fraction = 0.25f;
+	private int histogramSize = 2048;
 	private AutoThreshold.Method thresholdMethod = Method.DEFAULT;
 	private float[] estimate = null;
 
+	/**
+	 * Create a new DataEstimator
+	 * 
+	 * @param data
+	 *            The data
+	 * @param width
+	 *            The width of the data
+	 * @param height
+	 *            The height of the data
+	 */
 	public DataEstimator(float[] data, int width, int height)
 	{
+		if (data == null)
+			throw new IllegalArgumentException("Input data must not be null");
+		if (data.length < width * height)
+			throw new IllegalArgumentException("Input data must not be smaller than width * height");
 		this.data = data;
 		this.width = width;
 		this.height = height;
@@ -45,7 +63,7 @@ public class DataEstimator
 	 */
 	public float[] getData()
 	{
-		return (data == null) ? null : data.clone();
+		return data.clone();
 	}
 
 	/**
@@ -97,21 +115,25 @@ public class DataEstimator
 		if (estimate == null)
 		{
 			estimate = new float[4];
-			// Used to compute stats
-			Statistics stats;
 
-			// TODO ... 
+			if (h == null)
+			{
+				h = FloatHistogram.buildHistogram(data.clone(), true);
+				h = h.compact(histogramSize);
+			}
 
 			// Threshold the data
-			final float t = estimate[3] = 0;
-			int size = 0;
+			final float t = estimate[3] = h.getAutoThreshold(thresholdMethod);
 
 			// Get stats below the threshold
-			stats = new Statistics();
-			for (int i = width * height; i-- > 0;)
-				if (data[i] < t)
-					stats.add(data[i]);
-			
+			Statistics stats = new Statistics();
+			for (int i = h.minBin; i <= h.maxBin; i++)
+			{
+				if (h.getValue(i) >= t)
+					break;
+				stats.add(h.h[i], h.getValue(i));
+			}
+
 			// Check if background region is large enough
 			if (stats.getN() > fraction * data.length)
 			{
@@ -186,5 +208,28 @@ public class DataEstimator
 	{
 		this.thresholdMethod = thresholdMethod;
 		this.estimate = null;
+	}
+
+	/**
+	 * SGet the size of the histogram used to compute the threshold
+	 * 
+	 * @return the histogram size
+	 */
+	public int getHistogramSize()
+	{
+		return histogramSize;
+	}
+
+	/**
+	 * Set the size of the histogram used to compute the threshold
+	 * 
+	 * @param histogramSize
+	 *            the histogram size
+	 */
+	public void setHistogramSize(int histogramSize)
+	{
+		this.histogramSize = histogramSize;
+		this.estimate = null;
+		this.h = null;
 	}
 }
