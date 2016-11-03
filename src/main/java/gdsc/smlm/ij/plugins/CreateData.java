@@ -5094,8 +5094,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		maxSignal /= gain;
 		signalPerFrame /= gain;
 
-		// Convert +/- depth to total depth
-		depth *= 2;
+		// Convert +/- depth to total depth in nm
+		depth *= 2 * a;
 
 		// Compute total background variance in photons
 		double backgroundVariance = b;
