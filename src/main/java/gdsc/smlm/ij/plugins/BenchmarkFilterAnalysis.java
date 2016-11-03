@@ -3038,8 +3038,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// Build a histogram of the number of spots at different depths
 		final double[] depths = depthStats.getValues();
-		final double range = simulationParameters.depth / simulationParameters.a / 2;
-		double[] limits = { -range, range };
+		double[] limits = Maths.limits(depths);
 
 		//final int bins = Math.max(10, simulationParameters.molecules / 100);
 		//final int bins = Utils.getBinsSturges(depths.length);
