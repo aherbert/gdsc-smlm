@@ -687,7 +687,8 @@ public class MultiPathFilter implements Cloneable
 	/**
 	 * Rank the results. It is assumed that each result is either null or has results that do not match the current
 	 * candidate Id. In this case we will return the result that has the highest number of new results. In the event of
-	 * a tie we order as multi, multi-doublet, single, doublet. Results are discounted if null.
+	 * a tie we order as multi then single, with doublet results ahead of non-doublet results. Results are discounted if
+	 * null.
 	 *
 	 * @param multiResults
 	 *            the multi results
@@ -707,10 +708,14 @@ public class MultiPathFilter implements Cloneable
 				singleDoubletResults == null)
 			return null;
 		final ResultRank[] rank = new ResultRank[4];
-		rank[0] = new ResultRank(multiResults, 1);
-		rank[1] = new ResultRank(multiDoubletResults, 2);
-		rank[2] = new ResultRank(singleResults, 3);
-		rank[3] = new ResultRank(singleDoubletResults, 4);
+		//rank[0] = new ResultRank(multiResults, 1);
+		//rank[1] = new ResultRank(multiDoubletResults, 2);
+		//rank[2] = new ResultRank(singleResults, 3);
+		//rank[3] = new ResultRank(singleDoubletResults, 4);
+		rank[0] = new ResultRank(multiDoubletResults, 1);
+		rank[1] = new ResultRank(multiResults, 2);
+		rank[2] = new ResultRank(singleDoubletResults, 3);
+		rank[3] = new ResultRank(singleResults, 4);
 		Arrays.sort(rank);
 		return rank[0].results;
 	}
