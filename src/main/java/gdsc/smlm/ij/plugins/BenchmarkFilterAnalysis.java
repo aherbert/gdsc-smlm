@@ -444,7 +444,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					peak.setAssignments(null);
 
 					// Remove bad candidate fits to speed up filtering later.
-					
+
 					// Note: We cannot do this as we do not know what the minimum filter will be.
 					// Instead this is done when we create a subset for scoring.
 
@@ -1280,7 +1280,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (resultsList != null)
 		{
 			MultiPathFilter.resetValidationFlag(resultsList);
-			
+
 			// XXX Clone this for use in debugging
 			//clonedResultsList = new MultiPathFitResults[resultsList.length];
 			//for (int i = 0; i < clonedResultsList.length; i++)
@@ -3200,12 +3200,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Build a histogram of the fitted spots that were available to be scored
 		double[] signal = signalFactorStats.getValues();
 		double[] distance = distanceStats.getValues();
-		double range = BenchmarkSpotFit.signalFactor;
-		if (upperSignalFactor > 0)
-			range *= upperSignalFactor / 100.0;
-		double[] limits1 = { -range, range };
-		double[] limits2 = { 0,
-				simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0 };
+
+		double[] limits1;
+		if (BenchmarkSpotFit.signalFactor > 0 && upperSignalFactor > 0)
+		{
+			double range = BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0;
+			limits1 = new double[] { -range, range };
+		}
+		else
+		{
+			limits1 = Maths.limits(signal);
+		}
+
+		double[] limits2;
+		if (BenchmarkSpotFit.distanceInPixels > 0 && upperMatchDistance > 0)
+		{
+			double range = simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0;
+			limits2 = new double[] { 0, range };
+		}
+		else
+		{
+			limits2 = Maths.limits(distance);
+		}
 
 		final int bins = Math.max(10, simulationParameters.molecules / 100);
 		double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
@@ -4025,7 +4041,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					failCount + failCountRange, true);
 
 			//MultiPathFilter.resetValidationFlag(ga_resultsListToScore);			
-			
+
 			//ga_resultsListToScore = ga_resultsList;
 
 			//System.out.printf("Weakest %d => %d : %s\n", count(ga_resultsList), count(ga_resultsListToScore),
