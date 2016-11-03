@@ -2004,7 +2004,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String createComponentAnalysisHeader()
 	{
 		String header = createResultsHeader(false);
-		header += "\tSize\tName\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J\tNames";
+		header += "\tSize\tName\tValue\tLimit\t% Criteria\t% Score\tTime\tOverlap P\tOverlap R\tOverlap J\tNames";
 		return header;
 	}
 
@@ -2017,6 +2017,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (index != -1)
 		{
 			sb.append('\t').append(names[index]);
+			sb.append('\t').append(filterScore.getFilter().getParameterValue(index));
 			sb.append('\t');
 			sb.append(bestFilterScore.atLimit(index));
 		}
