@@ -31,6 +31,7 @@ import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.engine.ResultGridManager.CandidateList;
 import gdsc.smlm.engine.filter.DistanceResultFilter;
 import gdsc.smlm.engine.filter.ResultFilter;
+import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
@@ -427,6 +428,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			initialiseFitting();
 
+			// Smooth the data to provide initial background estimates
+			final BlockAverageDataProcessor processor = new BlockAverageDataProcessor(1, 1);
+			final float[] smoothedData = processor.process(data, width, height);
+			final ImageExtractor ie2 = new ImageExtractor(smoothedData, width, height);
+
 			// Perform the Gaussian fit
 
 			// Allow the results to be filtered for certain peaks
@@ -475,7 +481,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			// If we are benchmarking then do not generate results dynamically since we will store all 
 			// results in the fit job
-			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, !benchmarking);
+			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, ie2, !benchmarking);
 			//dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, false);
 
 			// Debug where the fit config may be different between benchmarking and fitting
@@ -622,7 +628,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		clearEstimates(candidates.length);
 
-		gridManager = new ResultGridManager(cc.dataBounds.width, cc.dataBounds.height, 2 * fitting + 1);
+		final int width = cc.dataBounds.width;
+		final int height = cc.dataBounds.height;
+		gridManager = new ResultGridManager(width, height, 2 * fitting + 1);
 		for (int i = 0; i < candidates.length; i++)
 		{
 			gridManager.putOnGrid(candidates[i]);
@@ -877,7 +885,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		final Gaussian2DFitter gf;
 		final ResultFactory resultFactory;
-		final double[] region;
+		final double[] region, region2;
 		final Rectangle regionBounds;
 		final int candidateId;
 		final int width;
@@ -903,12 +911,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean computedDoublet = false;
 		QuadrantAnalysis singleQA = null;
 
-		public SpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, Rectangle regionBounds,
-				int n)
+		public SpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
+				Rectangle regionBounds, int n)
 		{
 			this.gf = gf;
 			this.resultFactory = resultFactory;
 			this.region = region;
+			this.region2 = region2;
 			this.regionBounds = regionBounds;
 			this.candidateId = n;
 
@@ -929,6 +938,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 		}
 
+		@SuppressWarnings("unused")
 		private double getMultiFittingBackground()
 		{
 			if (Double.isNaN(multiBackground))
@@ -945,12 +955,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					}
 
 					multiBackground /= fittedNeighbourCount;
+					multiBackground = limitBackground(multiBackground);
 				}
 				else
 				{
 					multiBackground = this.getSingleFittingBackground();
 				}
-				multiBackground = limitBackground(multiBackground);
 			}
 			return multiBackground;
 		}
@@ -965,7 +975,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				//singleBackground = limitBackground(FitWorker.this.getSingleFittingBackground());
 
 				// Use the min in the data
-				singleBackground = getDefaultBackground(region, width, height);
+				//singleBackground = getDefaultBackground(region, width, height);
+
+				// Use the min in smoothed data. This avoids noise
+				singleBackground = getDefaultBackground(region2, width, height);
 			}
 			return singleBackground;
 		}
@@ -1016,8 +1029,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// If the fits fails then we can guess that the region has no good peaks and 
 			// it is not worth doing a multiple fit.			
 
-			int subtractFittedPeaks = 0;
 			boolean[] subtract = null;
+			int subtractFittedPeaks = 0;
+			double multiBackground = 0;
 
 			// Determine if any fitted neighbours are outside the region
 			// Examples show that fitting spots with a centre 
@@ -1046,6 +1060,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					{
 						subtract[i] = true;
 						subtractFittedPeaks++;
+						multiBackground += result.getBackground();
 					}
 				}
 			}
@@ -1069,12 +1084,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			double[] params = new double[1 + npeaks * parametersPerPeak];
 
 			// Estimate background.
-			// Note: We do not need to subtract the fitted peaks from the region before background is estimated
-			// since if we had fitted neighbours they are used to estimate the background.
-			// Note that using the background from previous fit results leads to an 
-			// inconsistency in the results when the fitting parameters are changed which may be unexpected, 
-			// e.g. altering the max iterations.
-			params[Gaussian2DFunction.BACKGROUND] = getMultiFittingBackground();
+			// Use the fitted peaks within the region or fall-back to the estimate for 
+			// a single peak (i.e. low point of the region).
+			params[Gaussian2DFunction.BACKGROUND] = (subtractFittedPeaks == 0) ? getSingleFittingBackground()
+					: multiBackground / subtractFittedPeaks;
+			// Store for debugging 
+			multiBackground = params[Gaussian2DFunction.BACKGROUND];
 
 			// Support bounds on the known fitted peaks
 			double[] lower = new double[params.length];
@@ -1315,6 +1330,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			PreprocessedPeakResult[] results = null;
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
+				//				// Debug background estimates
+				//				double base = 1; //params[0] - fitConfig.getBias();
+				//				System.out.printf("[%d] %d %.1f : %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f\n", slice,
+				//						candidateId, params[0], multiBackground, (multiBackground - params[0]) / base,
+				//						getMultiFittingBackground(), (getMultiFittingBackground() - params[0]) / base,
+				//						getSingleFittingBackground(), (getSingleFittingBackground() - params[0]) / base,
+				//						getDefaultBackground(this.region, width, height),
+				//						(getDefaultBackground(this.region, width, height) - params[0]) / base,
+				//						getDefaultBackground(region, width, height),
+				//						(getDefaultBackground(region, width, height) - params[0]) / base);
+
 				// The primary candidate is not bounded. Check it has not drifted close to 
 				// a neighbour. 
 
@@ -1821,6 +1847,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			double[] region = this.region;
 
+			// Background of fitted peaks within the region
+			int subtractFittedPeaks = 0;
+			double multiBackground = 0;
+
 			// Subtract all fitted neighbours from the region
 			if (fittedNeighbourCount != 0)
 			{
@@ -1830,6 +1860,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				region = Arrays.copyOf(region, width * height);
 				//Utils.display("Region", region, width, height);
+
+				// The fitted result will be relative to (0,0) in the fit data and already 
+				// have an offset applied so that 0.5 is the centre of a pixel. We can test 
+				// the coordinates exactly against the fit frame.
+				final float xmin = regionBounds.x;
+				final float xmax = xmin + regionBounds.width;
+				final float ymin = regionBounds.y;
+				final float ymax = ymin + regionBounds.height;
 
 				final double[] funcParams = new double[1 + parametersPerPeak * fittedNeighbourCount];
 				for (int i = 0, j = 0; i < fittedNeighbourCount; i++)
@@ -1842,6 +1880,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					funcParams[j + Gaussian2DFunction.X_POSITION] -= xOffset;
 					funcParams[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
 					j += parametersPerPeak;
+
+					// Check if within the region
+					if (result.getXPosition() < xmin || result.getXPosition() > xmax || result.getYPosition() < ymin ||
+							result.getYPosition() > ymax)
+					{
+						subtractFittedPeaks++;
+						multiBackground += result.getBackground();
+					}
 				}
 
 				GaussianFunction func = fitConfig.createGaussianFunction(fittedNeighbourCount, width, funcParams);
@@ -1856,7 +1902,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Store this as it is used in doublet fitting
 			this.singleRegion = region;
 
-			final double[] params = new double[] { getMultiFittingBackground(), 0, 0, 0, 0, 0, 0 };
+			// Use the multi-fitting background as this uses the background of fitted neighbours if available.
+			final double[] params = new double[7];
+
+			// Estimate background.
+			// Use the fitted peaks within the region or fall-back to the estimate for 
+			// a single peak (i.e. low point of the region).
+			params[Gaussian2DFunction.BACKGROUND] = (subtractFittedPeaks == 0) ? getSingleFittingBackground()
+					: multiBackground / subtractFittedPeaks;
+			// Store for debugging 
+			multiBackground = params[Gaussian2DFunction.BACKGROUND];
 
 			final boolean[] amplitudeEstimate = new boolean[1];
 
@@ -1889,20 +1944,28 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 					if (params[Gaussian2DFunction.SIGNAL] <= 0)
 					{
-						// Reset to the minimum value in the data.
-						final double oldBackground = params[Gaussian2DFunction.BACKGROUND];
-						params[Gaussian2DFunction.BACKGROUND] = getDefaultBackground(region, width, height);
-						final double backgroundChange = oldBackground - params[Gaussian2DFunction.BACKGROUND];
+						// Reset to the single fitting background
+						double oldBackground = params[Gaussian2DFunction.BACKGROUND];
+						params[Gaussian2DFunction.BACKGROUND] = getSingleFittingBackground();
+						double backgroundChange = oldBackground - params[Gaussian2DFunction.BACKGROUND];
 
 						params[Gaussian2DFunction.SIGNAL] += backgroundChange;
 
 						if (params[Gaussian2DFunction.SIGNAL] <= 0)
 						{
-							// This is probably extremely rare and the result of a poor candidate estimate.
-							// Set a small height based on the data range
-							final double defaultHeight = Math.max(1,
-									0.1 * (getMax(region, width, height) - params[Gaussian2DFunction.BACKGROUND]));
-							params[Gaussian2DFunction.SIGNAL] = defaultHeight;
+							// Reset to the minimum value in the data.
+							oldBackground = params[Gaussian2DFunction.BACKGROUND];
+							params[Gaussian2DFunction.BACKGROUND] = getDefaultBackground(region, width, height);
+							backgroundChange = oldBackground - params[Gaussian2DFunction.BACKGROUND];
+
+							if (params[Gaussian2DFunction.SIGNAL] <= 0)
+							{
+								// This is probably extremely rare and the result of a poor candidate estimate.
+								// Set a small height based on the data range
+								final double defaultHeight = Math.max(1,
+										0.1 * (getMax(region, width, height) - params[Gaussian2DFunction.BACKGROUND]));
+								params[Gaussian2DFunction.SIGNAL] = defaultHeight;
+							}
 						}
 					}
 				}
@@ -1936,6 +1999,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			PreprocessedPeakResult[] results = null;
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
+				//				// Debug background estimates
+				//				double base = params[0] - fitConfig.getBias();
+				//				System.out.printf("[%d] %d %.1f : %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f\n", slice,
+				//						candidateId, params[0], multiBackground, (multiBackground - params[0]) / base,
+				//						getMultiFittingBackground(), (getMultiFittingBackground() - params[0]) / base,
+				//						getSingleFittingBackground(), (getSingleFittingBackground() - params[0]) / base,
+				//						getDefaultBackground(this.region, width, height),
+				//						(getDefaultBackground(this.region, width, height) - params[0]) / base,
+				//						getDefaultBackground(region, width, height),
+				//						(getDefaultBackground(region, width, height) - params[0]) / base);
+
 				// The primary candidate is not bounded. Check it has not drifted close to 
 				// a neighbour. 
 
@@ -3125,19 +3199,20 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		/** The constant for no Quadrant Analysis score */
 		private static final double NO_QA_SCORE = -1;
 
-		final ImageExtractor ie;
+		final ImageExtractor ie, ie2;
 		boolean dynamic;
 		Rectangle regionBounds;
-		double[] region;
+		double[] region, region2;
 		SpotFitter spotFitter;
 		FitType fitType;
 
-		public DynamicMultiPathFitResult(ImageExtractor ie, boolean dynamic)
+		public DynamicMultiPathFitResult(ImageExtractor ie, ImageExtractor ie2, boolean dynamic)
 		{
 			this.frame = FitWorker.this.slice;
 			this.width = cc.dataBounds.width;
 			this.height = cc.dataBounds.height;
 			this.ie = ie;
+			this.ie2 = ie2;
 			this.dynamic = dynamic;
 		}
 
@@ -3157,6 +3232,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Set fitting region
 			regionBounds = ie.getBoxRegionBounds(candidates[candidateId].x, candidates[candidateId].y, fitting);
 			region = ie.crop(regionBounds, region);
+			region2 = ie2.crop(regionBounds, region2);
 
 			cc.setRegionBounds(regionBounds);
 
@@ -3173,7 +3249,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			final ResultFactory factory = (dynamic) ? new DynamicResultFactory(offsetx, offsety)
 					: new FixedResultFactory(offsetx, offsety);
-			spotFitter = new SpotFitter(gf, factory, region, regionBounds, candidateId);
+			spotFitter = new SpotFitter(gf, factory, region, region2, regionBounds, candidateId);
 		}
 
 		@Override
