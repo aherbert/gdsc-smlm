@@ -2017,7 +2017,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (index != -1)
 		{
 			sb.append('\t').append(names[index]);
-			sb.append('\t').append(filterScore.getFilter().getParameterValue(index));
+			sb.append('\t').append(Utils.rounded(filterScore.getFilter().getParameterValue(index)));
 			sb.append('\t');
 			sb.append(bestFilterScore.atLimit(index));
 		}
@@ -3210,6 +3210,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		else
 		{
 			limits1 = Maths.limits(signal);
+			// Prevent the auto-range being too big
+			final double bound = 3;
+			if (limits1[0] < -bound)
+				limits1[0] = -bound;
+			if (limits1[1] > bound)
+				limits1[1] = bound;
 		}
 
 		double[] limits2;
