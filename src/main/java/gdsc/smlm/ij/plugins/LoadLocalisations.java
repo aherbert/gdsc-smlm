@@ -352,7 +352,7 @@ public class LoadLocalisations implements PlugIn
 		String[] iUnits = SettingsManager.getNames((Object[]) IntensityUnit.values());
 		gd.addChoice("Intensity_unit", iUnits, iUnits[intensityUnit]);
 		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
-		gd.addNumericField("Pixel_pitch", pixelPitch, 3, 8, "nm");
+		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
 		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "ms");
 
 		gd.addNumericField("Header_lines", header, 0);
