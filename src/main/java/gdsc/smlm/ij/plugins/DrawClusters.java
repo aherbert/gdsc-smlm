@@ -267,6 +267,7 @@ public class DrawClusters implements PlugIn
 					addToOverlay(o, (Roi) roi.clone(), isHyperStack, frames[index][j]);
 					//PointRoi pointRoi = new PointRoi(pos.x + fp.xpoints[j], pos.y + fp.ypoints[j]);
 					PointRoi pointRoi = new PointRoi(fp.xpoints[j], fp.ypoints[j]);
+					pointRoi.setPointType(3);
 					pointRoi.setFillColor(c);
 					pointRoi.setStrokeColor(Color.black);
 					addToOverlay(o, pointRoi, isHyperStack, frames[index][j]);
