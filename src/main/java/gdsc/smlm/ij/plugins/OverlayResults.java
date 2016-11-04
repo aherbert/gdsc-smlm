@@ -193,6 +193,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 				points++;
 			}
 			PointRoi roi = new PointRoi(ox, oy, points);
+			roi.setPointType(3);
 			imp.getWindow().toFront();
 			imp.setOverlay(new Overlay(roi));
 		}

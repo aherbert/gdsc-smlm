@@ -316,9 +316,16 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour)
 	{
+		// Add as a circle
+		addRoi(frame, o, x, y, n, colour, 3);
+	}
+	
+	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour, int pointType)
+	{
 		if (n == 0)
 			return;
 		PointRoi roi = new PointRoi(x, y, n);
+		roi.setPointType(pointType);
 		roi.setFillColor(colour);
 		roi.setStrokeColor(colour);
 		if (frame != 0)
