@@ -4470,6 +4470,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		float[] x = new float[10];
 		float[] y = new float[x.length];
+		float[] x2 = new float[10];
+		float[] y2 = new float[x2.length];
 
 		// Do FP (all remaining results that are not a TP)
 		PreprocessedPeakResult[] filterResults = null;
@@ -4481,55 +4483,105 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			int frame = 0;
 			int c = 0;
+			int c2 = 0;
 			for (int i = 0; i < filterResults.length; i++)
 			{
 				if (frame != filterResults[i].getFrame())
 				{
 					if (c != 0)
 						SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
-					c = 0;
+					if (c2 != 0)
+						SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
+					c = c2 = 0;
 				}
 				frame = filterResults[i].getFrame();
 				if (predicted.contains(filterResults[i].getUniqueId()))
 					continue;
-				if (x.length == c)
+				if (filterResults[i].ignore())
 				{
-					x = Arrays.copyOf(x, c * 2);
-					y = Arrays.copyOf(y, c * 2);
+					if (x2.length == c2)
+					{
+						x2 = Arrays.copyOf(x2, c2 * 2);
+						y2 = Arrays.copyOf(y2, c2 * 2);
+					}
+					x2[c2] = filterResults[i].getX();
+					y2[c2++] = filterResults[i].getY();
 				}
-				x[c] = filterResults[i].getX();
-				y[c++] = filterResults[i].getY();
+				else
+				{
+					if (x.length == c)
+					{
+						x = Arrays.copyOf(x, c * 2);
+						y = Arrays.copyOf(y, c * 2);
+					}
+					x[c] = filterResults[i].getX();
+					y[c++] = filterResults[i].getY();
+				}
 			}
 			//fp += c;
 			if (c != 0)
 				SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
+			if (c2 != 0)
+				SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.magenta);
 		}
 
 		// Do TN (all remaining peaks that have not been matched)
 		if (showFN)
 		{
 			int c = 0;
+			int c2 = 0;
+
+			final boolean checkBorder = (BenchmarkSpotFilter.lastAnalysisBorder != null &&
+					BenchmarkSpotFilter.lastAnalysisBorder.x != 0);
+			final float border, xlimit, ylimit;
+			if (checkBorder)
+			{
+				final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
+				border = lastAnalysisBorder.x;
+				xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
+				ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
+			}
+			else
+				border = xlimit = ylimit = 0;
 
 			// Add the results to the lists
 			for (Entry<Integer, IdPeakResult[]> entry : actualCoordinates.entrySet())
 			{
-				IdPeakResult[] results = filterUsingBorder(entry.getValue());
-				c = 0;
+				IdPeakResult[] results = entry.getValue();
+				c = c2 = 0;
 				if (x.length <= results.length)
 				{
-					x = Arrays.copyOf(x, results.length);
-					y = Arrays.copyOf(y, results.length);
+					x = new float[results.length];
+					y = new float[results.length];
 				}
+				if (x2.length <= results.length)
+				{
+					x2 = new float[results.length];
+					y2 = new float[results.length];
+				}
+
 				for (int i = 0; i < results.length; i++)
 				{
+					// Ignore those that were matched by TP
 					if (actual.contains(results[i].uniqueId))
 						continue;
-					x[c] = results[i].getXPosition();
-					y[c++] = results[i].getYPosition();
+
+					if (checkBorder && outsideBorder(results[i], border, xlimit, ylimit))
+					{
+						x2[c2] = results[i].getXPosition();
+						y2[c2++] = results[i].getYPosition();
+					}
+					else
+					{
+						x[c] = results[i].getXPosition();
+						y[c++] = results[i].getYPosition();
+					}
 				}
 				//fn += c;
 				if (c != 0)
 					SpotFinderPreview.addRoi(entry.getKey(), o, x, y, c, Color.yellow);
+				if (c2 != 0)
+					SpotFinderPreview.addRoi(entry.getKey(), o, x2, y2, c2, Color.orange);
 			}
 		}
 
@@ -4565,8 +4617,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		for (int i = 0; i < results.length; i++)
 		{
 			final IdPeakResult p = results[i];
-			if (p.getXPosition() < border || p.getXPosition() > xlimit || p.getYPosition() < border ||
-					p.getYPosition() > ylimit)
+			if (outsideBorder(p, border, xlimit, ylimit))
 				continue;
 			results2[j++] = p;
 		}
@@ -4576,6 +4627,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return Arrays.copyOf(results2, j);
 		}
 		return results;
+	}
+
+	/**
+	 * Check if the result is outside border.
+	 *
+	 * @param p
+	 *            the result
+	 * @param border
+	 *            the border
+	 * @param xlimit
+	 *            the xlimit
+	 * @param ylimit
+	 *            the ylimit
+	 * @return true, if outside the border (should be ignored)
+	 */
+	private boolean outsideBorder(PeakResult p, final float border, final float xlimit, final float ylimit)
+	{
+		// Respect the border used in BenchmarkSpotFilter?
+		// Just implement a hard border
+		if (p.getXPosition() < border || p.getXPosition() > xlimit || p.getYPosition() < border ||
+				p.getYPosition() > ylimit)
+			return true;
+		return false;
 	}
 
 	/**
