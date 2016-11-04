@@ -209,7 +209,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 			textResidualsThreshold = numerics.get(n++);
 			textDuplicateDistance = numerics.get(n++);
 			textSmartFilter = checkboxes.get(b++);
-			textSmartFilter = checkboxes.get(b++);
+			textDisableSimpleFilter = checkboxes.get(b++);
 			textCoordinateShiftFactor = numerics.get(n++);
 			textSignalStrength = numerics.get(n++);
 			textMinPhotons = numerics.get(n++);
