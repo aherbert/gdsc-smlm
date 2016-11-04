@@ -33,15 +33,15 @@ public interface PreprocessedPeakResult
 	 *
 	 * @return the unique id
 	 */
-	int getUniqueId();	
+	int getUniqueId();
 
 	/**
 	 * Gets the id.
 	 *
 	 * @return the id
 	 */
-	int getId();	
-	
+	int getId();
+
 	/**
 	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
 	 * 
@@ -194,6 +194,14 @@ public interface PreprocessedPeakResult
 	FractionalAssignment[] getAssignments(int predictedId);
 
 	/**
+	 * Ignore this result during assignment scoring. It is expected that the result will return null from
+	 * {@link #getAssignments(int)}.
+	 *
+	 * @return true, if this should be ignored (i.e. not counted as a false positive)
+	 */
+	boolean ignore();
+
+	/**
 	 * Convert this to the parameters for a Gaussian2DFunction
 	 * 
 	 * @return the parameters
@@ -203,10 +211,11 @@ public interface PreprocessedPeakResult
 	/**
 	 * Sets the validation result.
 	 *
-	 * @param result the new validation result
+	 * @param result
+	 *            the new validation result
 	 */
 	void setValidationResult(int result);
-	
+
 	/**
 	 * Gets the validation result.
 	 *

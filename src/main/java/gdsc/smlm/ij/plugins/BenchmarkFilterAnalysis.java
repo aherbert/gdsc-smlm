@@ -391,8 +391,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			depthStats.add(result.zPosition);
 
-			final PeakResult[] actual = filterUsingBorder(getCoordinates(actualCoordinates, frame));
-			final boolean[] matched = new boolean[actual.length];
+			IdPeakResult[] actual = getCoordinates(actualCoordinates, frame);
+			final int nActual = actual.length;
+			final boolean[] matched = new boolean[nActual];
+			actual = filterUsingBorder(actual);
 			// We could use distanceInPixels for the resolution. Using a bigger size may allow the 
 			// different fit locations to be inthe same cell and so the grid manager can use it's cache.
 			final double resolution = 2 * distanceInPixels;
@@ -430,7 +432,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			total += multiPathFitResults.length;
 
 			results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length,
-					actual.length));
+					nActual));
 		}
 
 		/**
@@ -459,6 +461,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				{
 					final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
 					peak.setAssignments(null);
+					peak.setIgnore(false);
 
 					// Remove bad candidate fits to speed up filtering later.
 
@@ -482,7 +485,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					peak.uniqueId = uniqueId.incrementAndGet();
 
 					if (checkBorder && outsideBorder(peak, border, xlimit, ylimit))
+					{
+						// Leave the spot in as it is used when picking the results.
+						// Flag to ignore from scoring.
+						peak.setIgnore(true);
 						continue;
+					}
 
 					// Compare to actual results
 					// We do this using the ResultGridManager to generate a sublist to score against
@@ -4535,7 +4543,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	/**
 	 * Filter using border.
 	 *
-	 * @param results the results
+	 * @param results
+	 *            the results
 	 * @return the results that are inside the border
 	 */
 	private IdPeakResult[] filterUsingBorder(IdPeakResult[] results)
@@ -4544,6 +4553,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (BenchmarkSpotFilter.lastAnalysisBorder == null || BenchmarkSpotFilter.lastAnalysisBorder.x == 0)
 			return results;
 		// Just implement a hard border
+		// Note: This is mainly relevant when loading in simulated ground truth data. 
+		// The simulations performed by Create Data already use a border when doing a 
+		// random distribution.
 		final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
 		final float border = lastAnalysisBorder.x;
 		final float xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
@@ -4558,7 +4570,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				continue;
 			results2[j++] = p;
 		}
-		return Arrays.copyOf(results2, j);
+		if (j < results.length)
+		{
+			//System.out.printf("Removed %d\n", results.length - j);
+			return Arrays.copyOf(results2, j);
+		}
+		return results;
 	}
 
 	/**

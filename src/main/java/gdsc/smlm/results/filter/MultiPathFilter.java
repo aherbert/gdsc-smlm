@@ -299,7 +299,6 @@ public class MultiPathFilter implements Cloneable
 	 */
 	public interface FractionScoreStore
 	{
-
 		/**
 		 * Add the unique Id of a result that was selected
 		 *
@@ -2232,7 +2231,7 @@ public class MultiPathFilter implements Cloneable
 
 					// Assess the result if we are below the fail limit or have an estimate
 					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store, subset);
-					final int size = nPredicted;
+					boolean newResult = false;
 					if (result != null)
 					{
 						// For all the results that were returned, check if any are classified results
@@ -2265,21 +2264,29 @@ public class MultiPathFilter implements Cloneable
 								//								}
 
 								// This is a new fitted result
-								scoreStore.add(result[i].getUniqueId());
 								store.isFit[result[i].getCandidateId()] = true;
-
-								final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
-								if (a != null && a.length > 0)
+								newResult = true;
+								
+								if (result[i].ignore())
 								{
-									//list.addAll(Arrays.asList(a));
-									assignments.addAll(new DummyCollection(a));
+									// Q. should this be passed to the scoreStore?
+								}
+								else
+								{
+									scoreStore.add(result[i].getUniqueId());
+									final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
+									if (a != null && a.length > 0)
+									{
+										//list.addAll(Arrays.asList(a));
+										assignments.addAll(new DummyCollection(a));
+									}
 								}
 							}
 						}
 					}
 					if (evaluateFit)
 					{
-						if (size != nPredicted)
+						if (newResult)
 						{
 							// More results were accepted so reset the fail count
 							failCount = 0;

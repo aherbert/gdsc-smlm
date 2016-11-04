@@ -54,6 +54,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private ResultAssignment[] assignments;
 	public int uniqueId;
 	private int validationResult = 0;
+	private boolean ignore;
 
 	//@formatter:off
 	/**
@@ -282,9 +283,35 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		return assignments != null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setAssignments(gdsc.smlm.results.filter.
+	 * ResultAssignment[])
+	 */
 	public void setAssignments(ResultAssignment[] assignments)
 	{
 		this.assignments = assignments;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
+	 */
+	public boolean ignore()
+	{
+		return ignore;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setIgnore(boolean)
+	 */
+	public void setIgnore(boolean ignore)
+	{
+		this.ignore = ignore;
 	}
 
 	/**
