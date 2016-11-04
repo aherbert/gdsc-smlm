@@ -1427,6 +1427,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			return newResult;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
+		 */
 		public FractionalAssignment[] getAssignments(int predictedId)
 		{
 			return null;
@@ -1460,6 +1465,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		public int getValidationResult()
 		{
 			throw new NotImplementedException("The validation result should not be set on a dynamic result");
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
+		 */
+		public boolean ignore()
+		{
+			return false;
 		}
 	}
 
