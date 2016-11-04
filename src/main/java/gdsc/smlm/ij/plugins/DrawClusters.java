@@ -1,5 +1,12 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Sort;
+
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
  * 
@@ -14,8 +21,6 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.Sort;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -35,11 +40,6 @@ import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.LUT;
 import ij.process.LUTHelper;
-
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.
@@ -260,12 +260,13 @@ public class DrawClusters implements PlugIn
 				roi.setFillColor(c);
 				roi.setStrokeColor(c);
 				final FloatPolygon fp = roi.getNonSplineFloatPolygon();
-				final Rectangle2D.Double pos = roi.getFloatBounds();
+				//final Rectangle2D.Double pos = roi.getFloatBounds();
 				// For each frame in the track, add the ROI track and a point ROI for the current position
 				for (int j = 0; j < frames[index].length; j++)
 				{
 					addToOverlay(o, (Roi) roi.clone(), isHyperStack, frames[index][j]);
-					PointRoi pointRoi = new PointRoi(pos.x + fp.xpoints[j], pos.y + fp.ypoints[j]);
+					//PointRoi pointRoi = new PointRoi(pos.x + fp.xpoints[j], pos.y + fp.ypoints[j]);
+					PointRoi pointRoi = new PointRoi(fp.xpoints[j], fp.ypoints[j]);
 					pointRoi.setFillColor(c);
 					pointRoi.setStrokeColor(Color.black);
 					addToOverlay(o, pointRoi, isHyperStack, frames[index][j]);
