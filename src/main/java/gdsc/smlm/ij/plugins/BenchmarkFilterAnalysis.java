@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -312,6 +313,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		int included = 0;
 		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 		private final DirectFilter minFilter;
+		private final boolean checkBorder;
+		final float border;
+		final float xlimit;
+		final float ylimit;
 
 		public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
 				RampedScore distanceScore, RampedScore signalScore, AtomicInteger uniqueId)
@@ -329,6 +334,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			distanceStats = new StoredDataStatistics();
 			minFilter = (DirectFilter) minimalFilter2.clone();
 			minFilter.setup();
+
+			checkBorder = (BenchmarkSpotFilter.lastAnalysisBorder != null &&
+					BenchmarkSpotFilter.lastAnalysisBorder.x != 0);
+			if (checkBorder)
+			{
+				final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
+				border = lastAnalysisBorder.x;
+				xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
+				ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
+			}
+			else
+				border = xlimit = ylimit = 0;
 		}
 
 		/*
@@ -374,7 +391,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			depthStats.add(result.zPosition);
 
-			final PeakResult[] actual = getCoordinates(actualCoordinates, frame);
+			final PeakResult[] actual = filterUsingBorder(getCoordinates(actualCoordinates, frame));
 			final boolean[] matched = new boolean[actual.length];
 			// We could use distanceInPixels for the resolution. Using a bigger size may allow the 
 			// different fit locations to be inthe same cell and so the grid manager can use it's cache.
@@ -463,6 +480,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						continue;
 
 					peak.uniqueId = uniqueId.incrementAndGet();
+
+					if (checkBorder && outsideBorder(peak, border, xlimit, ylimit))
+						continue;
 
 					// Compare to actual results
 					// We do this using the ResultGridManager to generate a sublist to score against
@@ -4485,7 +4505,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// Add the results to the lists
 			for (Entry<Integer, IdPeakResult[]> entry : actualCoordinates.entrySet())
 			{
-				IdPeakResult[] results = entry.getValue();
+				IdPeakResult[] results = filterUsingBorder(entry.getValue());
 				c = 0;
 				if (x.length <= results.length)
 				{
@@ -4510,6 +4530,58 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		imp.setOverlay(o);
 
 		return filterResults;
+	}
+
+	/**
+	 * Filter using border.
+	 *
+	 * @param results the results
+	 * @return the results that are inside the border
+	 */
+	private IdPeakResult[] filterUsingBorder(IdPeakResult[] results)
+	{
+		// Respect the border used in BenchmarkSpotFilter?
+		if (BenchmarkSpotFilter.lastAnalysisBorder == null || BenchmarkSpotFilter.lastAnalysisBorder.x == 0)
+			return results;
+		// Just implement a hard border
+		final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
+		final float border = lastAnalysisBorder.x;
+		final float xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
+		final float ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
+		IdPeakResult[] results2 = new IdPeakResult[results.length];
+		int j = 0;
+		for (int i = 0; i < results.length; i++)
+		{
+			final IdPeakResult p = results[i];
+			if (p.getXPosition() < border || p.getXPosition() > xlimit || p.getYPosition() < border ||
+					p.getYPosition() > ylimit)
+				continue;
+			results2[j++] = p;
+		}
+		return Arrays.copyOf(results2, j);
+	}
+
+	/**
+	 * Check if the result is outside border.
+	 *
+	 * @param p
+	 *            the result
+	 * @param border
+	 *            the border
+	 * @param xlimit
+	 *            the xlimit
+	 * @param ylimit
+	 *            the ylimit
+	 * @return true, if outside the border (should be ignored)
+	 */
+	private boolean outsideBorder(BasePreprocessedPeakResult p, final float border, final float xlimit,
+			final float ylimit)
+	{
+		// Respect the border used in BenchmarkSpotFilter?
+		// Just implement a hard border
+		if (p.getX() < border || p.getX() > xlimit || p.getY() < border || p.getY() > ylimit)
+			return true;
+		return false;
 	}
 
 	/**

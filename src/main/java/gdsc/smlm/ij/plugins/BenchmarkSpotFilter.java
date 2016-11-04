@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -109,8 +110,12 @@ public class BenchmarkSpotFilter implements PlugIn
 	private static final int METHOD_GREEDY = 2;
 
 	private static double sAnalysisBorder = 2;
+	private static boolean hardBorder = true;
 	private static int matchingMethod = METHOD_MULTI;
-	private int analysisBorder;
+	/**
+	 * The last border used in analysis
+	 */
+	static Rectangle lastAnalysisBorder;
 	private static double upperDistance = 1.5;
 	private static double lowerDistance = 0.5;
 	private static double upperSignalFactor = 2;
@@ -644,46 +649,80 @@ public class BenchmarkSpotFilter implements PlugIn
 			time += System.nanoTime() - start;
 
 			// Debug the candidates
-//			if (debug && frame == 5)
-//			{
-//				StringBuilder sb = new StringBuilder();
-//				sb.append(spotFilter.getDescription()).append("\n");
-//				for (int i = 0; i < spots.length; i++)
-//				{
-//					sb.append(String.format("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity));
-//				}
-//				System.out.print(sb.toString());
-//			}
+			//			if (debug && frame == 5)
+			//			{
+			//				StringBuilder sb = new StringBuilder();
+			//				sb.append(spotFilter.getDescription()).append("\n");
+			//				for (int i = 0; i < spots.length; i++)
+			//				{
+			//					sb.append(String.format("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity));
+			//				}
+			//				System.out.print(sb.toString());
+			//			}
 
 			// Score the spots that are matches
 			PSFSpot[] actual = actualCoordinates.get(frame);
 			if (actual == null)
 				actual = new PSFSpot[0];
 
-			// Remove spots at the border from analysis
-			if (analysisBorder > 0)
+			// We do not remove results at the border from analysis.
+			// We can just mark them to contribute less to the score.
+			// TODO - Create a Tukey window weighting from the border to the edge.
+			// The type of weighting could be user configurable, e.g. Hard, Tukey, Linear, etc.
+			final double[] actualWeight = new double[actual.length];
+			final double[] spotsWeight = new double[spots.length];
+			double actualLength = actual.length;
+			double spotsLength = spots.length;
+			if (lastAnalysisBorder.x > 0)
 			{
-				final int xlimit = stack.getWidth() - analysisBorder;
-				final int ylimit = stack.getHeight() - analysisBorder;
-				PSFSpot[] actual2 = new PSFSpot[actual.length];
-				int count = 0;
-				for (PSFSpot c : actual)
+				actualLength = spotsLength = 0;
+
+				final int analysisBorder = lastAnalysisBorder.x;
+				final int xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
+				final int ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
+				for (int i = 0; i < actual.length; i++)
 				{
+					final PSFSpot c = actual[i];
+					actualWeight[i] = 1;
 					if (c.getX() < analysisBorder || c.getX() > xlimit || c.getY() < analysisBorder ||
 							c.getY() > ylimit)
-						continue;
-					actual2[count++] = c;
+						// TODO - better weighting
+						actualWeight[i] = 0;
+					actualLength += actualWeight[i];
 				}
-				actual = Arrays.copyOf(actual2, count);
-				count = 0;
-				Spot[] spots2 = new Spot[spots.length];
-				for (Spot s : spots)
+
+				for (int i = 0; i < spots.length; i++)
 				{
+					final Spot s = spots[i];
+					spotsWeight[i] = 1;
 					if (s.x < analysisBorder || s.x > xlimit || s.y < analysisBorder || s.y > ylimit)
-						continue;
-					spots2[count++] = s;
+						// TODO - better weighting
+						spotsWeight[i] = 0;
+					spotsLength += spotsWeight[i];
 				}
-				spots = Arrays.copyOf(spots2, count);
+
+				// TODO - option for hard border to match the old scoring.
+				// Create smaller arrays using only those with a weighting of 1.
+				if (hardBorder)
+				{
+					PSFSpot[] actual2 = new PSFSpot[actual.length];
+					int j = 0;
+					for (int i = 0; i < actual.length; i++)
+						if (actualWeight[i] == 1)
+							actual2[j++] = actual[i];
+					actual = Arrays.copyOf(actual2, j);
+
+					Spot[] spots2 = new Spot[spots.length];
+					j = 0;
+					for (int i = 0; i < spots.length; i++)
+						if (spotsWeight[i] == 1)
+							spots2[j++] = spots[i];
+					spots = Arrays.copyOf(spots2, j);
+
+					// Update lengths
+					actualLength = actual.length;
+					spotsLength = spots.length;
+				}
 			}
 
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
@@ -711,7 +750,6 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Compute assignments
 				ArrayList<FractionalAssignment> fractionalAssignments = new ArrayList<FractionalAssignment>(
 						predicted.length * 3);
-				int[] match = new int[predicted.length];
 
 				final double dmin = matchDistance * matchDistance;
 				final int nPredicted = predicted.length;
@@ -754,7 +792,6 @@ public class BenchmarkSpotFilter implements PlugIn
 
 							// Store the match
 							fractionalAssignments.add(new ImmutableFractionalAssignment(i, j, distance, s));
-							match[j]++;
 						}
 					}
 				}
@@ -766,50 +803,36 @@ public class BenchmarkSpotFilter implements PlugIn
 				// Assign matches
 				double tp = 0;
 				double fp;
+				final double[] predictedScore = new double[nPredicted];
 				if (matchingMethod == METHOD_GREEDY)
 				{
 					// Spots can match as many actual results as they can, first match wins
-
-					final double[] predictedScore = new double[nPredicted];
-
 					int nA = nActual;
 
 					for (FractionalAssignment a : assignments)
 					{
-						if (!actualAssignment[a.getTargetId()])
+						final int i = a.getTargetId();
+						if (!actualAssignment[i])
 						{
-							actualAssignment[a.getTargetId()] = true;
-							final double intensity = getIntensity(actual[a.getTargetId()]);
-							if (scoredSpots[a.getPredictedId()] == null)
-								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
-										spots[a.getPredictedId()], background);
+							final int j = a.getPredictedId();
+							actualAssignment[i] = true;
+							final double intensity = getIntensity(actual[i]);
+							final double tpScore = a.getScore() * actualWeight[i];
+							if (scoredSpots[j] == null)
+								scoredSpots[j] = new ScoredSpot(true, tpScore, intensity, spots[j], background);
 							else
-								scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
-							tp += a.getScore();
-							predictedScore[a.getPredictedId()] += a.getScore();
+								scoredSpots[j].add(tpScore, intensity);
+							tp += tpScore;
+							predictedScore[j] += tpScore;
 							if (--nA == 0)
 								break;
 						}
-					}
-
-					// Compute the FP. 
-					// Although a predicted point can accumulate more than 1 for TP matches (due 
-					// to multiple matching), no predicted point can score less than 1.
-					fp = nPredicted;
-					for (int i = 0; i < predictedScore.length; i++)
-					{
-						if (predictedScore[i] > 1)
-							predictedScore[i] = 1;
-						fp -= predictedScore[i];
 					}
 				}
 				else if (matchingMethod == METHOD_MULTI)
 				{
 					// Spots can match as many actual results as they can. Matching is iterative
 					// so only the best match is computed for each spot per round.
-
-					final double[] predictedScore = new double[nPredicted];
-
 					int nA = nActual;
 
 					// Flag to indicate a match was made
@@ -820,37 +843,28 @@ public class BenchmarkSpotFilter implements PlugIn
 						final boolean[] predictedAssignment = new boolean[nPredicted];
 						for (FractionalAssignment a : assignments)
 						{
-							if (!actualAssignment[a.getTargetId()])
+							final int i = a.getTargetId();
+							if (!actualAssignment[i])
 							{
-								if (!predictedAssignment[a.getPredictedId()])
+								final int j = a.getPredictedId();
+								if (!predictedAssignment[j])
 								{
-									actualAssignment[a.getTargetId()] = true;
-									predictedAssignment[a.getPredictedId()] = true;
+									actualAssignment[i] = true;
+									predictedAssignment[j] = true;
 									processAgain = true;
-									final double intensity = getIntensity(actual[a.getTargetId()]);
-									if (scoredSpots[a.getPredictedId()] == null)
-										scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(), intensity,
-												spots[a.getPredictedId()], background);
+									final double intensity = getIntensity(actual[i]);
+									final double tpScore = a.getScore() * actualWeight[i];
+									if (scoredSpots[j] == null)
+										scoredSpots[j] = new ScoredSpot(true, tpScore, intensity, spots[j], background);
 									else
-										scoredSpots[a.getPredictedId()].add(a.getScore(), intensity);
-									tp += a.getScore();
-									predictedScore[a.getPredictedId()] += a.getScore();
+										scoredSpots[j].add(tpScore, intensity);
+									tp += tpScore;
+									predictedScore[j] += tpScore;
 									if (--nA == 0)
 										break OUTER;
 								}
 							}
 						}
-					}
-
-					// Compute the FP. 
-					// Although a predicted point can accumulate more than 1 for TP matches (due 
-					// to multiple matching), no predicted point can score less than 1.
-					fp = nPredicted;
-					for (int i = 0; i < predictedScore.length; i++)
-					{
-						if (predictedScore[i] > 1)
-							predictedScore[i] = 1;
-						fp -= predictedScore[i];
 					}
 				}
 				else
@@ -865,24 +879,50 @@ public class BenchmarkSpotFilter implements PlugIn
 
 					for (FractionalAssignment a : assignments)
 					{
-						if (!actualAssignment[a.getTargetId()])
+						final int i = a.getTargetId();
+						if (!actualAssignment[i])
 						{
-							if (!predictedAssignment[a.getPredictedId()])
+							final int j = a.getPredictedId();
+							if (!predictedAssignment[j])
 							{
-								actualAssignment[a.getTargetId()] = true;
-								predictedAssignment[a.getPredictedId()] = true;
-								scoredSpots[a.getPredictedId()] = new ScoredSpot(true, a.getScore(),
-										getIntensity(actual[a.getTargetId()]), spots[a.getPredictedId()], background);
-								tp += a.getScore();
+								actualAssignment[i] = true;
+								predictedAssignment[j] = true;
+								final double tpScore = a.getScore() * actualWeight[i];
+								scoredSpots[j] = new ScoredSpot(true, tpScore, getIntensity(actual[i]), spots[j],
+										background);
+								tp += tpScore;
+								predictedScore[j] = tpScore;
 								if (--nA == 0 || --nP == 0)
 									break;
 							}
 						}
 					}
-					fp = nPredicted - tp;
 				}
 
-				result = new FractionClassificationResult(tp, fp, 0, actual.length - tp);
+				// Compute the FP. 
+				// Note: The TP score is the match score multiplied by the weight of the actual spot.
+				// Although a predicted point can accumulate more than its weight for TP matches (due 
+				// to multiple matching and the fuzzy border), no predicted point can score less than 
+				// its weight. This means: 
+				// TP + FN = nActual
+				// TP + FP >= nPredicted (due to fuzzy border)
+				//
+				// Note: This score scenario is the same as if using a hard border exclusion and 
+				// multi-matching where TP can be above 1 but FP is not.
+				//
+				// This does mean that a spot in the border that matches a result in the image
+				// can have a high TP score and very low FP score. Hopefully this has little effect
+				// in practice.				
+
+				fp = spotsLength;
+				for (int j = 0; j < predictedScore.length; j++)
+				{
+					if (predictedScore[j] > spotsWeight[j])
+						predictedScore[j] = spotsWeight[j];
+					fp -= predictedScore[j];
+				}
+
+				result = new FractionClassificationResult(tp, fp, 0, actualLength - tp);
 
 				// Store the number of fails (negatives) before each positive 
 				for (int i = 0; i < spots.length; i++)
@@ -906,8 +946,9 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 			else
 			{
+				// No results.
 				// All spots are false positives
-				result = new FractionClassificationResult(0, spots.length, 0, 0);
+				result = new FractionClassificationResult(0, spotsLength, 0, 0);
 				for (int i = 0; i < spots.length; i++)
 				{
 					scoredSpots[i] = new ScoredSpot(false, spots[i], fails++);
@@ -916,7 +957,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			if (debug)
 			{
-				System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame, actual.length,
+				System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame, actualLength,
 						result.getTP(), result.getFP(), result.getRecall(), result.getPrecision());
 			}
 
@@ -1364,6 +1405,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			gd.addSlider("Search_width", 1, 4, search);
 		}
 		gd.addSlider("Border", 0, 5, border);
+		gd.addCheckbox("Hard_border", hardBorder);
 
 		gd.addMessage("Scoring options:");
 		gd.addCheckbox("Score_relative_distances (to HWHM)", scoreRelativeDistances);
@@ -1415,6 +1457,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			search = gd.getNextNumber();
 		}
 		border = gd.getNextNumber();
+		hardBorder = gd.getNextBoolean();
 		scoreRelativeDistances = gd.getNextBoolean();
 		sAnalysisBorder = Math.abs(gd.getNextNumber());
 		matchingMethod = gd.getNextChoiceIndex();
@@ -1448,7 +1491,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// Clear the cached results if the setting changed
 			Settings settings = new Settings(simulationParameters.id, filterRelativeDistances,
 					//search, maxSearch, // Ignore search distance for smart caching 
-					border, scoreRelativeDistances, sAnalysisBorder, matchingMethod, upperDistance,
+					border, scoreRelativeDistances, sAnalysisBorder, hardBorder, matchingMethod, upperDistance,
 					lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
 			if (!settings.equals(batchSettings))
 			{
@@ -1482,6 +1525,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				return false;
 		}
 
+		int analysisBorder;
 		if (scoreRelativeDistances)
 		{
 			// Convert distance to PSF standard deviation units
@@ -1495,6 +1539,16 @@ public class BenchmarkSpotFilter implements PlugIn
 			matchDistance = upperDistance;
 			lowerMatchDistance = lowerDistance;
 			analysisBorder = (int) (sAnalysisBorder);
+		}
+
+		if (analysisBorder > 0)
+		{
+			lastAnalysisBorder = new Rectangle(analysisBorder, analysisBorder, imp.getWidth() - 2 * analysisBorder,
+					imp.getHeight() - 2 * analysisBorder);
+		}
+		else
+		{
+			lastAnalysisBorder = new Rectangle(imp.getWidth(), imp.getHeight());
 		}
 
 		return true;
@@ -1818,7 +1872,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
 		// The number of actual results
-		final int n = (int) (tp + fn);
+		final double n = (tp + fn);
 
 		StringBuilder sb = new StringBuilder();
 
@@ -1826,13 +1880,12 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Create the benchmark settings and the fitting settings
 		sb.append(imp.getStackSize()).append("\t");
-		final int w = imp.getWidth() - 2 * analysisBorder;
-		final int h = imp.getHeight() - 2 * analysisBorder;
+		final int w = lastAnalysisBorder.width;
+		final int h = lastAnalysisBorder.height;
 		sb.append(w).append("\t");
 		sb.append(h).append("\t");
-		sb.append(n).append("\t");
-		double density = ((double) n / imp.getStackSize()) / (w * h) /
-				(simulationParameters.a * simulationParameters.a / 1e6);
+		sb.append(Utils.rounded(n)).append("\t");
+		double density = (n / imp.getStackSize()) / (w * h) / (simulationParameters.a * simulationParameters.a / 1e6);
 		sb.append(Utils.rounded(density)).append("\t");
 		sb.append(Utils.rounded(signal)).append("\t");
 		sb.append(Utils.rounded(simulationParameters.s)).append("\t");
@@ -1877,7 +1930,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			sb.append(Utils.rounded(param / hwhmMin)).append("\t");
 		}
 		sb.append(spotFilter.getDescription()).append("\t");
-		sb.append(analysisBorder).append("\t");
+		sb.append(lastAnalysisBorder.x).append("\t");
 		sb.append(MATCHING_METHOD[matchingMethod]).append("\t");
 		sb.append(Utils.rounded(lowerMatchDistance)).append("\t");
 		sb.append(Utils.rounded(matchDistance)).append("\t");
