@@ -227,6 +227,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int fittedResults;
 	private static int totalResults;
 	private static int maxUniqueId = 0;
+	private static int nActual;
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
@@ -311,6 +312,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		int matches = 0;
 		int total = 0;
 		int included = 0;
+		int includedActual = 0;
 		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 		private final DirectFilter minFilter;
 		private final boolean checkBorder;
@@ -429,6 +431,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					matches++;
 
 			included += size;
+			includedActual += actual.length;
 			total += multiPathFitResults.length;
 
 			results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size), result.spots.length,
@@ -1107,7 +1110,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			lastId = BenchmarkSpotFit.fitResultsId;
 			update = true;
 			actualCoordinates = getCoordinates(results.getResults());
-			//actualSize = results.size(); // Should be simulationParameters.molecules
 		}
 
 		Settings settings = new Settings(partialMatchDistance, upperMatchDistance, partialSignalFactor,
@@ -1130,6 +1132,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			fittedResults = 0;
 			totalResults = 0;
 			maxUniqueId = 0;
+			nActual = 0;
 
 			// -=-=-=-
 			// The scoring is designed to find the best fitter+filter combination for the given spot candidates.
@@ -1267,6 +1270,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					matches += worker.matches;
 					fittedResults += worker.included;
 					totalResults += worker.total;
+					nActual += worker.includedActual;
 					if (i == 0)
 					{
 						depthStats = worker.depthStats;
@@ -2633,7 +2637,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			case 1:
 				return r.getNegatives();
 			case 2:
-				return simulationParameters.molecules - r.getPositives();
+				return nActual - r.getPositives();
 			case 3:
 				return createIntegerResult(r).getPrecision();
 			case 4:
@@ -2738,7 +2742,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Note: We always use the subset method since fail counts have been accumulated when we read in the results.
 
 		if (failCountRange == 0)
-			return multiPathFilter.fractionScoreSubset(resultsList, failCount, simulationParameters.molecules,
+			return multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual,
 					allAssignments, scoreStore);
 
 		double tp = 0, fp = 0, fn = 0;
@@ -2746,7 +2750,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		for (int i = 0; i <= failCountRange; i++)
 		{
 			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(resultsList, failCount + i,
-					simulationParameters.molecules, (i == failCountRange) ? allAssignments : null,
+					nActual, (i == failCountRange) ? allAssignments : null,
 					(i == failCountRange) ? scoreStore : null);
 			tp += r.getTP();
 			fp += r.getFP();
@@ -2782,7 +2786,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
 
 		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<FractionalAssignment[]>(resultsList.length);
-		multiPathFilter.fractionScoreSubset(resultsList, failCount + failCountRange, simulationParameters.molecules,
+		multiPathFilter.fractionScoreSubset(resultsList, failCount + failCountRange, nActual,
 				allAssignments, null);
 		return allAssignments;
 	}
@@ -2826,7 +2830,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private ClassificationResult createIntegerResult(FractionClassificationResult r)
 	{
 		return new ClassificationResult(r.getPositives(), r.getNegatives(), 0,
-				simulationParameters.molecules - r.getPositives());
+				nActual - r.getPositives());
 	}
 
 	private FractionClassificationResult getOriginalScore(FractionClassificationResult r)
@@ -2840,7 +2844,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		//		// Note: We cannot calculate TN since this is the number of fit candidates that are 
 		//		// filtered after fitting that do not match a spot or were not fitted. 
 		//		final double fp = r.getPositives() - r.getTP();
-		//		final double fn = simulationParameters.molecules - r.getTP();
+		//		final double fn = nActual - r.getTP();
 		//		return new FractionClassificationResult(r.getTP(), fp, 0, fn);
 	}
 
@@ -3068,7 +3072,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final double[] depths = depthStats.getValues();
 		double[] limits = Maths.limits(depths);
 
-		//final int bins = Math.max(10, simulationParameters.molecules / 100);
+		//final int bins = Math.max(10, nActual / 100);
 		//final int bins = Utils.getBinsSturges(depths.length);
 		final int bins = Utils.getBinsSqrt(depths.length);
 		double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
@@ -3257,7 +3261,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			limits2 = Maths.limits(distance);
 		}
 
-		final int bins = Math.max(10, simulationParameters.molecules / 100);
+		//final int bins = Math.max(10, nActual / 100);
+		//final int bins = Utils.getBinsSturges(signal.length);
+		final int bins = Utils.getBinsSqrt(signal.length);
 		double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
 		double[][] h2 = Utils.calcHistogram(distance, limits2[0], limits2[1], bins);
 
@@ -4108,11 +4114,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		//			//					// Debug
 		//			//					MultiPathFilter multiPathFilter = createMPF(filter, minFilter);
 		//			//					multiPathFilter.setDebugFile("/tmp/1.txt");
-		//			//					multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount, simulationParameters.molecules, null);
+		//			//					multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount, nActual, null);
 		//			//					multiPathFilter = createMPF(filter, minFilter);
 		//			//					multiPathFilter.setDebugFile("/tmp/2.txt");
 		//			//					multiPathFilter.fractionScoreSubset(BenchmarkFilterAnalysis.clonedResultsList, failCount,
-		//			//							simulationParameters.molecules, null);
+		//			//							nActual, null);
 		//		}
 		//		else
 		//		{
