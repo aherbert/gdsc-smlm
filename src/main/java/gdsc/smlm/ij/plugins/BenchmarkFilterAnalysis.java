@@ -183,7 +183,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static boolean scoreAnalysis = true;
 	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
 	private static int componentAnalysis = 3;
-	private static boolean evolve = false;
+	private final static String[] EVOLVE = { "None", "Gentic Algorithm", "Range Search" };
+	private static int evolve = 0;
+	private static int rangeSearchWidth = 5;
 	private static int stepSearch = 0;
 	private static boolean showTP = false;
 	private static boolean showFP = false;
@@ -1087,7 +1089,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		for (int i = 0; i < n; i++)
 		{
 			if (increment[i] == 0)
-				// Disable is Infinite increment, otherwise use the weakest parameter
+				// Disable if Infinite increment, otherwise use the weakest parameter
 				parameters[i] = parameters2[i] = (Double.isInfinite(increment2[i]))
 						? baseFilter.getDisabledParameterValue(i) : p[i];
 		}
@@ -1527,7 +1529,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
 		gd.addCheckbox("Score_analysis", scoreAnalysis);
 		gd.addChoice("Component_analysis", COMPONENT_ANALYSIS, COMPONENT_ANALYSIS[componentAnalysis]);
-		gd.addCheckbox("Evolve", evolve);
+		gd.addChoice("Evolve", EVOLVE, EVOLVE[evolve]);
 		gd.addSlider("Step_search", 0, 4, stepSearch);
 		gd.addStringField("Title", resultsTitle, 20);
 		String[] labels = { "Show_TP", "Show_FP", "Show_FN" };
@@ -1630,7 +1632,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			depthRecallAnalysis = gd.getNextBoolean();
 		scoreAnalysis = gd.getNextBoolean();
 		componentAnalysis = gd.getNextChoiceIndex();
-		evolve = gd.getNextBoolean();
+		evolve = gd.getNextChoiceIndex();
+		rangeSearchWidth = (int) Math.abs(gd.getNextNumber());
 		stepSearch = (int) Math.abs(gd.getNextNumber());
 		resultsTitle = gd.getNextString();
 		showTP = gd.getNextBoolean();
@@ -1718,7 +1721,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Only repeat analysis if necessary
 		boolean newResults = false;
 		Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
-				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve, stepSearch);
+				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve, rangeSearchWidth, stepSearch);
 		if (debugSpeed || !settings.equals(lastAnalyseSettings))
 		{
 			//System.out.println("Running...");
@@ -2217,8 +2220,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		this.ga_resultsList = resultsList;
 		Chromosome best = null;
+		boolean isOptimised = false;
 
-		if (evolve && allSameType)
+		if (evolve == 1 && allSameType)
 		{
 			// Collect parameters for the genetic algorithm
 			stopTimer();
@@ -2260,6 +2264,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 			if (!gd.wasCanceled())
 			{
+				isOptimised = true;
+				
 				populationSize = (int) Math.abs(gd.getNextNumber());
 				if (populationSize < 10)
 					populationSize = 10;
@@ -2313,6 +2319,47 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 			}
 		}
+		
+		if (evolve == 2 && allSameType && filterSet.size() == 4)
+		{			
+			// Collect parameters for the range search algorithm
+			stopTimer();
+
+			createGAWindow();
+
+			// Ask the user for the search parameters.
+			GenericDialog gd = new GenericDialog(TITLE);
+			String prefix = setNumber + "_";
+			gd.addMessage("Configure the range search algorithm for [" + setNumber + "] " + filterSet.getName());
+			gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
+			gd.addCheckbox(prefix + "Save_option", saveOption);
+
+			gd.showDialog();
+
+			startTimer();
+
+			if (!gd.wasCanceled())
+			{
+				isOptimised = true;
+
+				// Range Search
+				ga_statusPrefix = "Range Search [" + setNumber + "] " + filterSet.getName() + " ... ";
+				ga_iteration = 0;
+				
+				//ga_population.setTracker(this);
+				//best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
+
+				if (best != null)
+				{
+					// Now update the filter set for final assessment
+					filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
+
+					// Option to save the filters
+					if (saveOption)
+						saveFilterSet(filterSet, setNumber);
+				}
+			}
+		}
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
 
@@ -2322,7 +2369,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			tw.setIncrement(Integer.MAX_VALUE);
 
 		// If the filters were expanded we can do a step search from the initial optimum using the increment
-		if (!evolve && stepSearch != 0 && allSameType && wasExpanded(setNumber))
+		if (!isOptimised && stepSearch != 0 && allSameType && wasExpanded(setNumber))
 		{
 			// Evaluate all the filters and find the best
 			SimpleFilterScore max = null;
