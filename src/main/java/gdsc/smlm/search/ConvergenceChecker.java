@@ -25,5 +25,5 @@ public interface ConvergenceChecker
 	 * @param current
 	 * @return true if the point has converged
 	 */
-	boolean converged(double[] previous, double[] current);
+	boolean converged(ScoreResult<?> previous, ScoreResult<?> current);
 }

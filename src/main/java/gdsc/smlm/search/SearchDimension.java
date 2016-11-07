@@ -2,6 +2,8 @@ package gdsc.smlm.search;
 
 import java.util.Arrays;
 
+import gdsc.core.utils.Maths;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -18,7 +20,7 @@ import java.util.Arrays;
 /**
  * Specify the dimensions for a search
  */
-public class SearchDimension
+public class SearchDimension implements Cloneable
 {
 	public final double min;
 	public final double max;
@@ -28,6 +30,7 @@ public class SearchDimension
 
 	private double centre;
 	private double increment;
+	private double reduceFactor = 0.5;
 
 	/**
 	 * Instantiates a new inactive search dimension. The centre can be set to any value, the default is zero.
@@ -108,9 +111,10 @@ public class SearchDimension
 		if (lower < min || lower > max)
 			throw new IllegalArgumentException("Lower is outside min/max range");
 
-		this.min = min;
-		this.max = max;
+		// We round to the min increment so that the values returned should be identical if the centre is moved by a factor of the increment.
 		this.minIncrement = minIncrement;
+		this.min = round(min);
+		this.max = round(max);
 		this.nIncrement = nIncrement;
 
 		setCentre((upper - lower) / 2);
@@ -120,6 +124,13 @@ public class SearchDimension
 	private static boolean isInvalid(double d)
 	{
 		return Double.isNaN(d) || Double.isInfinite(d);
+	}
+
+	private double round(double d)
+	{
+		if (minIncrement != 0)
+			return Maths.round(d, minIncrement);
+		return d;
 	}
 
 	/**
@@ -132,7 +143,7 @@ public class SearchDimension
 	{
 		if (active && (centre < min || centre > max))
 			throw new IllegalArgumentException("Centre is outside min/max range");
-		this.centre = centre;
+		this.centre = round(centre);
 	}
 
 	/**
@@ -175,7 +186,7 @@ public class SearchDimension
 	{
 		if (increment < minIncrement)
 			increment = minIncrement;
-		this.increment = increment;
+		this.increment = round(increment);
 	}
 
 	/**
@@ -204,7 +215,7 @@ public class SearchDimension
 			return min;
 		if (v > max)
 			return max;
-		return v;
+		return round(v);
 	}
 
 	/**
@@ -222,19 +233,79 @@ public class SearchDimension
 		int size = 0;
 		for (int i = 1; i <= nIncrement; i++)
 		{
-			double value = centre - i * increment;
+			double value = round(centre - i * increment);
 			if (value < min)
-				continue;
+				value = min;
 			values[size++] = value;
 		}
-		values[size++] = centre;
+		values[size++] = centre; // Already rounded
 		for (int i = 1; i <= nIncrement; i++)
 		{
-			double value = centre + i * increment;
+			double value = round(centre + i * increment);
 			if (value > max)
-				continue;
+				value = max;
 			values[size++] = value;
 		}
+
+		// Check for duplicates if at the limits
+		if (values[0] == min || values[size - 1] == max)
+		{
+			double last = values[0];
+			size = 1;
+			for (int i = 1; i < values.length; i++)
+			{
+				if (last == values[i])
+					continue;
+				values[size++] = last = values[i];
+			}
+		}
+
 		return (size == values.length) ? values : Arrays.copyOf(values, size);
+	}
+
+	/**
+	 * @return the reduceFactor
+	 */
+	public double getReduceFactor()
+	{
+		return reduceFactor;
+	}
+
+	/**
+	 * @param reduceFactor
+	 *            the reduceFactor to set
+	 */
+	public void setReduceFactor(double reduceFactor)
+	{
+		if (reduceFactor <= 0 || reduceFactor >= 1)
+			throw new IllegalArgumentException("Reduce factor must be between 0 and 1 (exclusive)");
+		this.reduceFactor = reduceFactor;
+	}
+
+	/**
+	 * Reduce the size of the increment by multiplying by the reduce factor
+	 */
+	public void reduce()
+	{
+		setIncrement(increment * reduceFactor);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public SearchDimension clone()
+	{
+		try
+		{
+			return (SearchDimension) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
+
 	}
 }

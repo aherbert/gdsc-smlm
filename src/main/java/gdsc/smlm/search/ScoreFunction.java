@@ -16,14 +16,15 @@ package gdsc.smlm.search;
 /**
  * Calculate the optimum point within a search space
  */
-public interface ScoreFunction
+public interface ScoreFunction<T extends Comparable<T>>
 {
 	/**
-	 * Find the optimum point.
+	 * Find the optimum point. Return the best point from the input points with a score that can be compared to other
+	 * results.
 	 *
 	 * @param points
 	 *            the points
-	 * @return the optimum
+	 * @return the result for the optimum of the points
 	 */
-	double[] findOptimum(double[][] points);
+	ScoreResult<T> findOptimum(double[][] points);
 }
