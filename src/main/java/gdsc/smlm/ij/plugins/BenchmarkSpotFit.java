@@ -1836,11 +1836,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Plot histograms of the stats on the same window
 		double[] lower = new double[filterCriteria.length];
 		double[] upper = new double[lower.length];
+		double[] min = new double[lower.length];
+		double[] max = new double[lower.length];
 		for (int i = 0; i < stats[0].length; i++)
 		{
 			double[] limits = showDoubleHistogram(stats, i, wo, matchScores, nPredicted);
 			lower[i] = limits[0];
 			upper[i] = limits[1];
+			min[i] = limits[2];
+			max[i] = limits[3];
 		}
 
 		// Reconfigure some of the range limits
@@ -1880,7 +1884,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			else
 				multiples = 9;
 			increment[i] = Maths.ceil(range / multiples, interval[i]);
-			
+
 			if (i == FILTER_MIN_WIDTH)
 				// Requires clipping based on the upper limit
 				lower[i] = upper[i] - increment[i] * multiples;
@@ -1888,18 +1892,21 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				upper[i] = lower[i] + increment[i] * multiples;
 		}
 
-		// Disable some filters
-		increment[FILTER_SIGNAL] = Double.POSITIVE_INFINITY;
-		//increment[FILTER_SHIFT] = Double.POSITIVE_INFINITY;
-		increment[FILTER_ESHIFT] = Double.POSITIVE_INFINITY;
-
 		for (int i = 0; i < stats[0].length; i++)
 		{
 			lower[i] = Maths.round(lower[i]);
 			upper[i] = Maths.round(upper[i]);
+			min[i] = Maths.round(min[i]);
+			max[i] = Maths.round(max[i]);
 			increment[i] = Maths.round(increment[i]);
-			sb.append("\t").append(lower[i]).append('-').append(upper[i]);
+			sb.append("\t").append(min[i]).append(':').append(lower[i]).append('-').append(upper[i]).append(':')
+					.append(max[i]);
 		}
+
+		// Disable some filters
+		increment[FILTER_SIGNAL] = Double.POSITIVE_INFINITY;
+		//increment[FILTER_SHIFT] = Double.POSITIVE_INFINITY;
+		increment[FILTER_ESHIFT] = Double.POSITIVE_INFINITY;
 
 		wo.tile();
 
@@ -1915,43 +1922,80 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			String filename = Utils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
 			if (filename == null)
 				return;
-			filename = Utils.replaceExtension(filename, ".xml");
+			// Remove extension to store the filename
+			filename = Utils.removeExtension(filename);
 			filterSettings.filterSetFilename = filename;
+
 			// Create a filter set using the ranges
 			ArrayList<Filter> filters = new ArrayList<Filter>(3);
 			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
 			filters.add(new MultiFilter2(upper[0], (float) upper[1], upper[2], upper[3], upper[4], upper[5], upper[6]));
 			filters.add(new MultiFilter2(increment[0], (float) increment[1], increment[2], increment[3], increment[4],
 					increment[5], increment[6]));
-			ArrayList<FilterSet> filterList = new ArrayList<FilterSet>(1);
-			filterList.add(new FilterSet("Multi2", filters));
-			FileOutputStream fos = null;
-			try
-			{
-				fos = new FileOutputStream(filename);
-				// Use the instance (not .toXML() method) to allow the exception to be caught
-				XStreamWrapper.getInstance().toXML(filterList, fos);
+			if (saveFilters(filename + ".3.xml", filters))
 				SettingsManager.saveSettings(gs);
-			}
-			catch (Exception e)
+
+			// Create a filter set using the min/max and the initial bounds.
+			// Set sensible limits
+			min[FILTER_SIGNAL] = Math.max(min[FILTER_SIGNAL], 30);
+			max[FILTER_PRECISION] = Math.min(min[FILTER_PRECISION], 100);
+			// Use half the initial bounds (hoping this is a good starting guess for the optimum)
+			final boolean[] limitToLower = new boolean[min.length];
+			limitToLower[FILTER_SIGNAL] = true;
+			limitToLower[FILTER_SNR] = true;
+			limitToLower[FILTER_MIN_WIDTH] = true;
+			limitToLower[FILTER_MAX_WIDTH] = false;
+			limitToLower[FILTER_SHIFT] = false;
+			limitToLower[FILTER_ESHIFT] = false;
+			limitToLower[FILTER_PRECISION] = true;
+			for (int i = 0; i < limitToLower.length; i++)
 			{
-				IJ.log("Unable to save the filter set to file: " + e.getMessage());
+				final double range = (upper[i] - lower[i]) / 2;
+				if (limitToLower[i])
+					upper[i] = lower[i] + range;
+				else
+					lower[i] = upper[i] - range;
 			}
-			finally
+			filters = new ArrayList<Filter>(4);
+			filters.add(new MultiFilter2(min[0], (float) min[1], min[2], min[3], min[4], min[5], min[6]));
+			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
+			filters.add(new MultiFilter2(upper[0], (float) upper[1], upper[2], upper[3], upper[4], upper[5], upper[6]));
+			filters.add(new MultiFilter2(max[0], (float) max[1], max[2], max[3], max[4], max[5], max[6]));
+			saveFilters(filename + ".4.xml", filters);
+		}
+	}
+
+	private boolean saveFilters(String filename, ArrayList<Filter> filters)
+	{
+		ArrayList<FilterSet> filterList = new ArrayList<FilterSet>(1);
+		filterList.add(new FilterSet("Multi2", filters));
+		FileOutputStream fos = null;
+		try
+		{
+			fos = new FileOutputStream(filename);
+			// Use the instance (not .toXML() method) to allow the exception to be caught
+			XStreamWrapper.getInstance().toXML(filterList, fos);
+			return true;
+		}
+		catch (Exception e)
+		{
+			IJ.log("Unable to save the filter set to file: " + e.getMessage());
+		}
+		finally
+		{
+			if (fos != null)
 			{
-				if (fos != null)
+				try
 				{
-					try
-					{
-						fos.close();
-					}
-					catch (IOException e)
-					{
-						// Ignore
-					}
+					fos.close();
+				}
+				catch (IOException e)
+				{
+					// Ignore
 				}
 			}
 		}
+		return false;
 	}
 
 	private void printFailures(String title, int[] status)
@@ -2179,7 +2223,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		StoredDataStatistics s3 = stats[2][i];
 
 		if (s1.getN() == 0)
-			return new double[2];
+			return new double[4];
 
 		DescriptiveStatistics d = s1.getStatistics();
 		double median = 0;
@@ -2195,7 +2239,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			if (id == 0)
 			{
 				IJ.log("Failed to show the histogram: " + xLabel);
-				return new double[2];
+				return new double[4];
 			}
 
 			if (Utils.isNewWindow())
@@ -2390,7 +2434,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			default:
 				throw new RuntimeException("Missing upper limit method");
 		}
-		return new double[] { l, u };
+		double min = getPercentile(h1, 0);
+		double max = getPercentile(h1, 1);
+		return new double[] { l, u, min, max };
 	}
 
 	/**
