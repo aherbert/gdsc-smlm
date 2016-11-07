@@ -861,6 +861,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private static boolean wasExpanded(int setNumber)
 	{
+		if (wasNotExpanded == null)
+			return false;
 		setNumber--;
 		if (wasNotExpanded[setNumber] == null)
 			return false;
@@ -876,10 +878,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 */
 	private void expandFilters()
 	{
-		wasNotExpanded = new boolean[filterList.size()][];
-		lowerLimit = new double[filterList.size()][];
-		upperLimit = new double[filterList.size()][];
-		increment = new double[filterList.size()][];
+		wasNotExpanded = null;
+
 		long[] expanded = new long[filterList.size()];
 		String[] name = new String[expanded.length];
 		int c = 0;
@@ -889,41 +889,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (filterSet.size() == 3 && filterSet.allSameType())
 			{
 				name[c] = filterSet.getName();
-				// Check we have min:max:increment
+
+				// Check we have min:max:increment by counting the combinations
 				Filter f1 = filterSet.getFilters().get(0);
 				Filter f2 = filterSet.getFilters().get(1);
 				Filter f3 = filterSet.getFilters().get(2);
 				int n = f1.getNumberOfParameters();
-				wasNotExpanded[c] = new boolean[n];
-				lowerLimit[c] = new double[n];
-				upperLimit[c] = new double[n];
-				increment[c] = new double[n];
-				long combinations = 1;
+				double[] parameters = new double[n];
+				double[] parameters2 = new double[n];
+				double[] increment = new double[n];
 				for (int i = 0; i < n; i++)
 				{
-					wasNotExpanded[c][i] = true;
-					if (f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0 &&
-							!Double.isInfinite(f3.getParameterValue(i)))
-					{
-						wasNotExpanded[c][i] = false;
-						// This can be expanded ... Count the combinations
-						final double min = f1.getParameterValue(i);
-						final double max = f2.getParameterValue(i);
-						final double inc = f3.getParameterValue(i);
-						final double max2 = max + inc;
-						lowerLimit[c][i] = min;
-						increment[c][i] = inc;
-						long extra = 1;
-						// Check the current value is less than the max or (to avoid small round-off error)
-						// that the current value is closer to the max than the next value after the max.
-						for (double d = min + inc; d < max || d - max < max2 - d; d += inc)
-						{
-							upperLimit[c][i] = d;
-							extra++;
-						}
-						combinations *= extra;
-					}
+					parameters[i] = f1.getParameterValue(i);
+					parameters2[i] = f2.getParameterValue(i);
+					increment[i] = f3.getParameterValue(i);
 				}
+				long combinations = countCombinations(parameters, parameters2, increment);
 				if (combinations > 1)
 				{
 					expanded[c] = combinations;
@@ -960,8 +941,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		IJ.showStatus("Expanding filters ...");
 
+		wasNotExpanded = new boolean[filterList.size()][];
+		lowerLimit = new double[filterList.size()][];
+		upperLimit = new double[filterList.size()][];
+		increment = new double[filterList.size()][];
+
 		List<FilterSet> filterList2 = new ArrayList<FilterSet>(filterList.size());
-		final double DISABLED = 0;
 		for (FilterSet filterSet : filterList)
 		{
 			c = filterList2.size();
@@ -971,78 +956,40 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				continue;
 			}
 
-			List<Filter> list = new ArrayList<Filter>((int) expanded[c]);
-
 			Filter f1 = filterSet.getFilters().get(0);
 			Filter f2 = filterSet.getFilters().get(1);
 			Filter f3 = filterSet.getFilters().get(2);
 			final int n = f1.getNumberOfParameters();
-
-			// Get the parameters for the two filters in the range
-
-			// Check if parameters are disabled
 			double[] parameters = new double[n];
 			double[] parameters2 = new double[n];
+			double[] increment = new double[n];
 			for (int i = 0; i < n; i++)
 			{
 				parameters[i] = f1.getParameterValue(i);
 				parameters2[i] = f2.getParameterValue(i);
-				if (wasNotExpanded[c][i])
-				{
-					if (Double.isInfinite(f3.getParameterValue(i)) || f3.getParameterValue(i) < 0)
-					{
-						// This is disabled
-						parameters[i] = DISABLED;
-						lowerLimit[c][i] = DISABLED;
-						upperLimit[c][i] = DISABLED;
-					}
-				}
+				increment[i] = f3.getParameterValue(i);
 			}
-			// Get the weakest parameters for those not expanded
-			f1.weakestParameters(parameters2);
+
+			List<Filter> list = expandFilters(f1, parameters, parameters2, increment);
+
+			// Use the output to set the range
+			wasNotExpanded[c] = new boolean[n];
+			lowerLimit[c] = new double[n];
+			upperLimit[c] = new double[n];
+			BenchmarkFilterAnalysis.increment[c] = new double[n];
 			for (int i = 0; i < n; i++)
 			{
-				if (wasNotExpanded[c][i] && parameters[i] != DISABLED)
+				if (increment[i] == 0)
 				{
-					parameters[i] = parameters2[i];
+					wasNotExpanded[c][i] = true;
+				}
+				else
+				{
+					lowerLimit[c][i] = parameters[i];
+					upperLimit[c][i] = parameters2[i];
+					BenchmarkFilterAnalysis.increment[c][i] = increment[i];
 				}
 			}
-			f1 = f1.create(parameters);
-
-			// Initialise with a filter set at the minimum for each parameter
-			list.add(f1);
-			for (int i = 0; i < n; i++)
-			{
-				if (!(f1.getParameterValue(i) < f2.getParameterValue(i) && f3.getParameterValue(i) > 0))
-				{
-					// No expansion of this parameter
-					continue;
-				}
-
-				final double min = f1.getParameterValue(i);
-				final double max = f2.getParameterValue(i);
-				final double inc = f3.getParameterValue(i);
-				final double max2 = max + inc;
-
-				List<Filter> list2 = new LinkedList<Filter>();
-				for (Filter f : list)
-				{
-					parameters = new double[n];
-					for (int j = 0; j < n; j++)
-						parameters[j] = f.getParameterValue(j);
-
-					// We always have the min value set from the first filter so start at the next increment
-					for (double d = min + inc; d < max || d - max < max2 - d; d += inc)
-					{
-						parameters[i] = d;
-						list2.add(f.create(parameters));
-					}
-				}
-				list.addAll(list2);
-			}
-
-			// Sort the filters
-			Collections.sort(list);
 
 			filterList2.add(new FilterSet(filterSet.getName(), list));
 		}
@@ -1052,6 +999,142 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		filterList = filterList2;
 		Utils.log("Expanded input to %d filters in %s", countFilters(filterList),
 				Utils.pleural(filterList.size(), "set"));
+	}
+
+	/**
+	 * Count combinations. Set the increment for any parameter not expanded to zero.
+	 *
+	 * @param parameters
+	 *            the parameters
+	 * @param parameters2
+	 *            the parameters 2
+	 * @param increment
+	 *            the increment
+	 * @return the combinations
+	 */
+	private static long countCombinations(double[] parameters, double[] parameters2, double[] increment)
+	{
+		final int n = parameters.length;
+		long combinations = 1;
+		for (int i = 0; i < n; i++)
+		{
+			final double inc = increment[i];
+			increment[i] = 0;
+
+			if (Double.isNaN(inc) || Double.isInfinite(inc))
+				continue;
+			if (Double.isNaN(parameters[i]) || Double.isInfinite(parameters[i]))
+				continue;
+			if (Double.isNaN(parameters2[i]) || Double.isInfinite(parameters2[i]))
+				continue;
+			if (parameters[i] > parameters2[i])
+				continue;
+
+			increment[i] = inc;
+
+			final double min = parameters[i];
+			final double max = parameters2[i];
+			final double max2 = max + inc;
+
+			long extra = 1;
+			// Check the current value is less than the max or (to avoid small round-off error)
+			// that the current value is closer to the max than the next value after the max.
+			for (double value = min + inc; value < max || value - max < max2 - value; value += inc)
+			{
+				extra++;
+			}
+			combinations *= extra;
+		}
+		return combinations;
+	}
+
+	/**
+	 * Expand filters. Set the increment for any parameter not expanded to zero. Set the input parameters array to the
+	 * lower bounds. Set the input parameters2 array to the upper bounds.
+	 * <p>
+	 * If a parameter is not expanded since the increment is Infinity the parameter is disabled. If it was not expanded
+	 * for any other reason (increment is zero, NaN values, etc) the weakest parameter of the two input array is used
+	 * and set as the lower and upper bounds.
+	 *
+	 * @param baseFilter
+	 *            the base filter
+	 * @param parameters
+	 *            the parameters
+	 * @param parameters2
+	 *            the parameters 2
+	 * @param increment
+	 *            the increment
+	 * @return the list
+	 */
+	private static List<Filter> expandFilters(Filter baseFilter, double[] parameters, double[] parameters2,
+			double[] increment)
+	{
+		final int n = baseFilter.getNumberOfParameters();
+		if (parameters.length < n || parameters2.length < n || increment.length < n)
+			throw new IllegalArgumentException(
+					"Input arrays  must be  at least the length of the number of parameters");
+
+		double[] increment2 = increment.clone();
+		int capacity = (int) countCombinations(parameters, parameters2, increment);
+
+		ArrayList<Filter> list = new ArrayList<Filter>(capacity);
+
+		// Initialise with a filter set at the minimum for each parameter.
+		// Get the weakest parameters for those not expanded.
+		Filter f1 = baseFilter.create(parameters);
+		final double[] p = parameters2.clone();
+		f1.weakestParameters(p);
+		for (int i = 0; i < n; i++)
+		{
+			if (increment[i] == 0)
+				// Disable is Infinite increment, otherwise use the weakest parameter
+				parameters[i] = parameters2[i] = (Double.isInfinite(increment2[i]))
+						? baseFilter.getDisabledParameterValue(i) : p[i];
+		}
+		f1 = baseFilter.create(parameters);
+
+		list.add(f1);
+		for (int i = 0; i < n; i++)
+		{
+			if (increment[i] == 0)
+				continue;
+
+			final double min = parameters[i];
+			final double max = parameters2[i];
+			final double inc = increment[i];
+			final double max2 = max + inc;
+
+			// Set the upper bounds for the output and store the expansion params
+			final StoredDataStatistics stats = new StoredDataStatistics(10);
+			for (double value = min + inc; value < max || value - max < max2 - value; value += inc)
+			{
+				parameters2[i] = value;
+				stats.add(value);
+			}
+			final double[] values = stats.getValues();
+			
+			final ArrayList<Filter> list2 = new ArrayList<Filter>((values.length + 1) * list.size());
+			for (int k = 0; k < list.size(); k++)
+			{
+				final Filter f = list.get(k);
+
+				// Copy params of the filter
+				for (int j = 0; j < n; j++)
+					p[j] = f.getParameterValue(j);
+
+				for (int l = 0; l < values.length; l++)
+				{
+					p[i] = values[l];
+					list2.add(f.create(p));
+				}
+			}
+			list.addAll(list2);
+		}
+
+		// Sort the filters
+		Collections.sort(list);
+
+		return list;
 	}
 
 	public boolean isSameFile(String filename)
@@ -2742,16 +2825,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// Note: We always use the subset method since fail counts have been accumulated when we read in the results.
 
 		if (failCountRange == 0)
-			return multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual,
-					allAssignments, scoreStore);
+			return multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual, allAssignments, scoreStore);
 
 		double tp = 0, fp = 0, fn = 0;
 		int p = 0, n = 0;
 		for (int i = 0; i <= failCountRange; i++)
 		{
 			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(resultsList, failCount + i,
-					nActual, (i == failCountRange) ? allAssignments : null,
-					(i == failCountRange) ? scoreStore : null);
+					nActual, (i == failCountRange) ? allAssignments : null, (i == failCountRange) ? scoreStore : null);
 			tp += r.getTP();
 			fp += r.getFP();
 			fn += r.getFN();
@@ -2786,8 +2867,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
 
 		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<FractionalAssignment[]>(resultsList.length);
-		multiPathFilter.fractionScoreSubset(resultsList, failCount + failCountRange, nActual,
-				allAssignments, null);
+		multiPathFilter.fractionScoreSubset(resultsList, failCount + failCountRange, nActual, allAssignments, null);
 		return allAssignments;
 	}
 
@@ -2829,8 +2909,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private ClassificationResult createIntegerResult(FractionClassificationResult r)
 	{
-		return new ClassificationResult(r.getPositives(), r.getNegatives(), 0,
-				nActual - r.getPositives());
+		return new ClassificationResult(r.getPositives(), r.getNegatives(), 0, nActual - r.getPositives());
 	}
 
 	private FractionClassificationResult getOriginalScore(FractionClassificationResult r)
