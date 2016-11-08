@@ -117,7 +117,7 @@ public class SearchDimension implements Cloneable
 		this.max = round(max);
 		this.nIncrement = nIncrement;
 
-		setCentre((upper - lower) / 2);
+		setCentre((upper + lower) / 2);
 		setIncrement((upper - lower) / (2 * nIncrement));
 	}
 
@@ -196,7 +196,10 @@ public class SearchDimension implements Cloneable
 	 */
 	public double getLower()
 	{
-		return getValue(centre - nIncrement * increment);
+		final double v = centre - nIncrement * increment;
+		if (v < min)
+			return min;
+		return round(v);
 	}
 
 	/**
@@ -206,16 +209,26 @@ public class SearchDimension implements Cloneable
 	 */
 	public double getUpper()
 	{
-		return getValue(centre + nIncrement * increment);
-	}
-
-	private double getValue(double v)
-	{
-		if (v < min)
-			return min;
+		final double v = centre + nIncrement * increment;
 		if (v > max)
 			return max;
 		return round(v);
+	}
+
+	/**
+	 * Checks if the value is at the bounds of the current dimension range.
+	 *
+	 * @param v
+	 *            the value
+	 * @return true, if is at bounds
+	 */
+	public boolean isAtBounds(double v)
+	{
+		if (v == getLower())
+			return true;
+		if (v == getUpper())
+			return true;
+		return false;
 	}
 
 	/**
@@ -229,7 +242,7 @@ public class SearchDimension implements Cloneable
 		if (!active)
 			return new double[] { centre };
 
-		final double[] values = new double[2 * nIncrement + 1];
+		final double[] values = new double[getMaxLength()];
 		int size = 0;
 		for (int i = 1; i <= nIncrement; i++)
 		{
@@ -261,6 +274,16 @@ public class SearchDimension implements Cloneable
 		}
 
 		return (size == values.length) ? values : Arrays.copyOf(values, size);
+	}
+
+	/**
+	 * Gets the max length of the values array
+	 *
+	 * @return the max length
+	 */
+	public int getMaxLength()
+	{
+		return 2 * nIncrement + 1;
 	}
 
 	/**

@@ -28,7 +28,6 @@ public class SearchSpace
 	private int iteration = 0;
 	private double[][] searchSpace;
 
-	private double[][] dimensionValues;
 	private double[][] scoredSearchSpace;
 	private ArrayList<String> scoredSearchSpaceHash = new ArrayList<String>();
 	private HashSet<String> coveredSpace = new HashSet<String>();
@@ -64,7 +63,11 @@ public class SearchSpace
 	 * <p>
 	 * The process iterates until the range cannot be reduced in size, or convergence is reached. The input dimensions
 	 * are modified during the search. Use the clone(SearchDimension[]) method to create a copy.
+	 * 
+	 * the type of comparable score
 	 *
+	 * @param <T>
+	 *            the type of comparable score
 	 * @param dimensions
 	 *            the dimensions
 	 * @param scoreFunction
@@ -105,7 +108,6 @@ public class SearchSpace
 			tracker.status("Converged [%d]", iteration);
 
 		// Free memory
-		dimensionValues = null;
 		scoredSearchSpace = null;
 		scoredSearchSpaceHash.clear();
 		coveredSpace.clear();
@@ -113,10 +115,24 @@ public class SearchSpace
 		return current;
 	}
 
+	/**
+	 * Find the optimum. Create the search space using the current dimensions. Score any new point that has not
+	 * previously been scored. Compare the result with the current optimum and return the best.
+	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param scoreFunction
+	 *            the score function
+	 * @param current
+	 *            the current optimum
+	 * @return the new optimum
+	 */
 	private <T extends Comparable<T>> ScoreResult<T> findOptimum(ScoreFunction<T> scoreFunction, ScoreResult<T> current)
 	{
 		if (!createSearchSpace())
 			return null;
+
+		start("Find Optimum");
 
 		scoredSearchSpace = searchSpace;
 		scoredSearchSpaceHash.clear();
@@ -137,15 +153,16 @@ public class SearchSpace
 				}
 			}
 			if (size == 0)
+			{
+				end();
 				// We have scored everything already so return the current best
 				return current;
+			}
 
 			scoredSearchSpace = Arrays.copyOf(scoredSearchSpace, size);
 		}
 
-		start("Find Optimum");
 		ScoreResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
-		end();
 
 		if (current != null)
 		{
@@ -153,9 +170,17 @@ public class SearchSpace
 				optimum = current;
 		}
 
+		end();
 		return optimum;
 	}
 
+	/**
+	 * Generate hash string.
+	 *
+	 * @param values
+	 *            the values
+	 * @return the string
+	 */
 	private String generateHashString(double[] values)
 	{
 		for (int i = 0; i < values.length; i++)
@@ -165,26 +190,30 @@ public class SearchSpace
 		return hash;
 	}
 
+	/**
+	 * Creates the search space.
+	 *
+	 * @return true, if successful
+	 */
 	private boolean createSearchSpace()
 	{
 		start("Create Search Space");
-
-		// Get the values
-		dimensionValues = new double[dimensions.length][];
-		for (int i = 0; i < dimensions.length; i++)
-		{
-			dimensionValues[i] = dimensions[i].values();
-		}
-		searchSpace = createSearchSpace(dimensions, dimensionValues);
-
+		searchSpace = createSearchSpace(dimensions);
 		end();
 		return searchSpace != null;
 	}
 
+	/**
+	 * Creates the search space.
+	 *
+	 * @param dimensions
+	 *            the dimensions
+	 * @return the double[][]
+	 */
 	public static double[][] createSearchSpace(SearchDimension[] dimensions)
 	{
 		// Get the values
-		double[][] dimensionValues = new double[dimensions.length][];
+		final double[][] dimensionValues = new double[dimensions.length][];
 		for (int i = 0; i < dimensions.length; i++)
 		{
 			dimensionValues[i] = dimensions[i].values();
@@ -192,11 +221,20 @@ public class SearchSpace
 		return createSearchSpace(dimensions, dimensionValues);
 	}
 
+	/**
+	 * Creates the search space.
+	 *
+	 * @param dimensions
+	 *            the dimensions
+	 * @param dimensionValues
+	 *            the dimension values
+	 * @return the double[][]
+	 */
 	private static double[][] createSearchSpace(SearchDimension[] dimensions, double[][] dimensionValues)
 	{
 		// Get the values
 		int combinations = 1;
-		double[] v = new double[dimensions.length];
+		final double[] v = new double[dimensions.length];
 		for (int i = 0; i < dimensions.length; i++)
 		{
 			combinations *= dimensionValues[i].length;
@@ -205,7 +243,7 @@ public class SearchSpace
 
 		// This will be a list of points enumerating the entire range
 		// of the dimensions
-		double[][] searchSpace = new double[combinations][];
+		final double[][] searchSpace = new double[combinations][];
 
 		// Start with the min value in each dimension
 		searchSpace[0] = v;
@@ -233,7 +271,7 @@ public class SearchSpace
 					{
 						// Create a new point with an updated value for this dimension
 						final double[] v3 = v2.clone();
-						v3[k] = v1[k];
+						v3[i] = v1[k];
 						searchSpace[n++] = v3;
 					}
 				}
@@ -249,6 +287,15 @@ public class SearchSpace
 		return (n == combinations) ? searchSpace : null;
 	}
 
+	/**
+	 * Update search space. Re-centre the dimension on the current optimum. If the current optimum is at the bounds of
+	 * the dimensions then check if the bounds change when re-centring. If the bound change then the search must
+	 * continue with the current dimension ranges. If the bounds do not change then the dimension ranges can be reduced.
+	 *
+	 * @param current
+	 *            the current optimum
+	 * @return true, if successful
+	 */
 	private boolean updateSearchSpace(ScoreResult<?> current)
 	{
 		if (current == null)
@@ -262,8 +309,8 @@ public class SearchSpace
 		for (int i = 0; i < dimensions.length; i++)
 		{
 			// Check if at the bounds of the dimension values
-			final double[] values = dimensionValues[i];
-			final boolean atBounds = (p[i] == values[0] || p[i] == values[values.length - 1]);
+			final boolean atBounds = dimensions[i].isAtBounds(p[i]);
+			final double[] values = (atBounds) ? dimensions[i].values() : null;
 
 			// Move to the centre using the current optimum
 			dimensions[i].setCentre(p[i]);
@@ -291,7 +338,6 @@ public class SearchSpace
 				// Hash was already computed
 				for (int i = 0; i < scoredSearchSpaceHash.size(); i++)
 					coveredSpace.add(scoredSearchSpaceHash.get(i));
-
 				scoredSearchSpaceHash.clear();
 			}
 		}
@@ -327,6 +373,15 @@ public class SearchSpace
 		return changed;
 	}
 
+	/**
+	 * Check if the two arrays are different.
+	 *
+	 * @param v1
+	 *            the v 1
+	 * @param v2
+	 *            the v 2
+	 * @return true, if different
+	 */
 	private static boolean changed(double[] v1, double[] v2)
 	{
 		if (v1.length != v2.length)
@@ -367,6 +422,12 @@ public class SearchSpace
 		return iteration;
 	}
 
+	/**
+	 * Send a start message to the tracker
+	 * 
+	 * @param stage
+	 *            The stage that has started
+	 */
 	private void start(String stage)
 	{
 		if (tracker != null)
@@ -376,6 +437,9 @@ public class SearchSpace
 		}
 	}
 
+	/**
+	 * Send an end signal to the tracker
+	 */
 	private void end()
 	{
 		if (tracker != null)
