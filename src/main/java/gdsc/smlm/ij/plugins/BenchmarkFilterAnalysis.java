@@ -97,6 +97,12 @@ import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
+import gdsc.smlm.search.ConvergenceChecker;
+import gdsc.smlm.search.ConvergenceToleranceChecker;
+import gdsc.smlm.search.ScoreFunction;
+import gdsc.smlm.search.SearchDimension;
+import gdsc.smlm.search.SearchResult;
+import gdsc.smlm.search.SearchSpace;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -116,7 +122,8 @@ import ij.text.TextWindow;
  * Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table,
  * e.g. precision, Jaccard, F-score.
  */
-public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore
+public class BenchmarkFilterAnalysis
+		implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore, ScoreFunction<SimpleFilterScore>
 {
 	private static final String TITLE = "Benchmark Filter Analysis";
 	private static TextWindow resultsWindow = null;
@@ -167,7 +174,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double delta = 0.1;
 	private static int criteriaIndex;
 	private static double criteriaLimit = 0.95;
-	private double minCriteria = 0;
+	double minCriteria = 0;
 	private boolean invertCriteria = false;
 	private static int scoreIndex;
 	private boolean invertScore = false;
@@ -185,7 +192,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int componentAnalysis = 3;
 	private final static String[] EVOLVE = { "None", "Gentic Algorithm", "Range Search" };
 	private static int evolve = 0;
-	private static int rangeSearchWidth = 5;
+	private static int rangeSearchWidth = 2;
+	private static int maxIterations = 30;
 	private static int stepSearch = 0;
 	private static boolean showTP = false;
 	private static boolean showFP = false;
@@ -1114,7 +1122,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				stats.add(value);
 			}
 			final double[] values = stats.getValues();
-			
+
 			final ArrayList<Filter> list2 = new ArrayList<Filter>((values.length + 1) * list.size());
 			for (int k = 0; k < list.size(); k++)
 			{
@@ -2265,7 +2273,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (!gd.wasCanceled())
 			{
 				isOptimised = true;
-				
+
 				populationSize = (int) Math.abs(gd.getNextNumber());
 				if (populationSize < 10)
 					populationSize = 10;
@@ -2319,9 +2327,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				}
 			}
 		}
-		
+
 		if (evolve == 2 && allSameType && filterSet.size() == 4)
-		{			
+		{
 			// Collect parameters for the range search algorithm
 			stopTimer();
 
@@ -2333,6 +2341,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			gd.addMessage("Configure the range search algorithm for [" + setNumber + "] " + filterSet.getName());
 			gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
 			gd.addCheckbox(prefix + "Save_option", saveOption);
+			gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
+
+			// Add choice of fields to optimise
+			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
+			int n = ss_filter.getNumberOfParameters();
+			for (int i = 0; i < n; i++)
+				gd.addCheckbox(prefix + ss_filter.getParameterName(i), true);
 
 			gd.showDialog();
 
@@ -2342,17 +2357,48 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				isOptimised = true;
 
+				rangeSearchWidth = (int) gd.getNextNumber();
+				saveOption = gd.getNextBoolean();
+				maxIterations = (int) gd.getNextNumber();
+
+				final Filter filter1 = ss_filter;
+				final Filter filter2 = filterSet.getFilters().get(1);
+				final Filter filter3 = filterSet.getFilters().get(2);
+				final Filter filter4 = filterSet.getFilters().get(3);
+
+				SearchDimension[] dimensions = new SearchDimension[n];
+				for (int i = 0; i < n; i++)
+				{
+					if (gd.getNextBoolean())
+					{
+						double min = filter1.getParameterValue(i);
+						double lower = filter2.getParameterValue(i);
+						double upper = filter3.getParameterValue(i);
+						double max = filter4.getParameterValue(i);
+						double minIncrement = filter1.getParameterIncrement(i);
+						dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
+					}
+					else
+					{
+						dimensions[i] = new SearchDimension(filter1.getDisabledParameterValue(i));
+					}
+				}
+
 				// Range Search
 				ga_statusPrefix = "Range Search [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
-				
-				//ga_population.setTracker(this);
-				//best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
-				if (best != null)
+				SearchSpace ss = new SearchSpace();
+				ss.setTracker(this);
+				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
+				gdsc.smlm.search.SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
+
+				if (optimum != null)
 				{
+					best = optimum.score.r.filter;
+					
 					// Now update the filter set for final assessment
-					filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
+					filterSet = new FilterSet(filterSet.getName(), searchSpaceToFilters(ss.getSearchSpace()));
 
 					// Option to save the filters
 					if (saveOption)
@@ -2384,7 +2430,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				addToResultsWindow(tw, scoreResult);
 
-				final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType);
+				final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
+						scoreResult.criteria >= minCriteria);
 				if (result.compareTo(max) < 0)
 				{
 					max = result;
@@ -2438,9 +2485,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							for (int k = filters.size(); k-- > 0;)
 							{
 								Filter f = filters.get(k);
-								double[] parameters = new double[n];
-								for (int j = 0; j < n; j++)
-									parameters[j] = f.getParameterValue(j);
+								double[] parameters = f.getParameters();
 
 								final double d = parameters[i];
 								for (int step = 1; step <= stepSearch; step++)
@@ -2463,7 +2508,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 						addToResultsWindow(tw, scoreResult);
 
-						final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType);
+						final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
+								scoreResult.criteria >= minCriteria);
 						if (result.compareTo(max) < 0)
 						{
 							max = result;
@@ -2514,7 +2560,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				yValues[index] = scoreResult.score;
 			}
 
-			final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType);
+			final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
+					scoreResult.criteria >= minCriteria);
 			if (result.compareTo(max) < 0)
 			{
 				max = result;
@@ -3774,79 +3821,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	public class SimpleFilterScore implements Comparable<SimpleFilterScore>
-	{
-		ScoreResult r;
-		double score, criteria;
-		boolean criteriaPassed;
-		boolean allSameType;
-
-		public SimpleFilterScore(ScoreResult r, boolean allSameType)
-		{
-			this.r = r;
-			this.score = r.score;
-			this.criteria = r.criteria;
-			criteriaPassed = (criteria >= minCriteria);
-		}
-
-		public int compareTo(SimpleFilterScore that)
-		{
-			if (that == null)
-				return -1;
-
-			// Must pass criteria first
-			if (this.criteriaPassed && !that.criteriaPassed)
-				return -1;
-			if (that.criteriaPassed && !this.criteriaPassed)
-				return 1;
-
-			if (this.criteriaPassed)
-			{
-				// Sort by the score
-				if (this.score > that.score)
-					return -1;
-				if (this.score < that.score)
-					return 1;
-				if (this.criteria > that.criteria)
-					return -1;
-				if (this.criteria < that.criteria)
-					return 1;
-				if (allSameType)
-				{
-					// If equal criteria then if the same type get the filter with the strongest params
-					return this.r.filter.weakest(that.r.filter);
-				}
-				else if (this.r.filter.getType().equals(that.r.filter.getType()))
-				{
-					return this.r.filter.weakest(that.r.filter);
-				}
-				return 0;
-			}
-			else
-			{
-				// Sort by how close we are to passing the criteria
-				if (this.criteria > that.criteria)
-					return -1;
-				if (this.criteria < that.criteria)
-					return 1;
-				if (this.score > that.score)
-					return -1;
-				if (this.score < that.score)
-					return 1;
-				if (allSameType)
-				{
-					// If equal criteria then if the same type get the filter with the strongest params
-					return this.r.filter.weakest(that.r.filter);
-				}
-				else if (this.r.filter.getType().equals(that.r.filter.getType()))
-				{
-					return this.r.filter.weakest(that.r.filter);
-				}
-				return 0;
-			}
-		}
-	}
-
 	public class FilterScore extends SimpleFilterScore
 	{
 		int index;
@@ -3860,7 +3834,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		private FilterScore(ScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
 				ClassificationResult r2, int size, int[] combinations, boolean[] enable)
 		{
-			super(r, allSameType);
+			super(r, allSameType, r.criteria >= minCriteria);
 			this.index = index;
 			this.time = time;
 			this.r2 = r2;
@@ -3977,6 +3951,41 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
+	/**
+	 * Allow the range search to be stopped using the escape key
+	 */
+	private class InterruptConvergenceChecker extends ConvergenceToleranceChecker<SimpleFilterScore>
+	{
+		public InterruptConvergenceChecker(double relative, double absolute, int maxIterations)
+		{
+			super(relative, absolute, false, false, maxIterations);
+		}
+
+		@Override
+		protected void noConvergenceCriteria()
+		{
+			// Ignore this as we can stop using interrupt
+		}
+
+		@Override
+		public boolean converged(gdsc.smlm.search.SearchResult<SimpleFilterScore> previous,
+				gdsc.smlm.search.SearchResult<SimpleFilterScore> current)
+		{
+			// This checks the iterations
+			if (super.converged(previous, current))
+				return true;
+
+			// Stop if interrupted
+			if (IJ.escapePressed())
+			{
+				Utils.log("STOPPED " + ga_statusPrefix);
+				IJ.resetEscape(); // Allow the plugin to continue processing
+				return true;
+			}
+			return false;
+		}
+	}
+
 	// Used to implement the FitnessFunction interface 
 	private String ga_statusPrefix;
 	private Population ga_population;
@@ -3986,27 +3995,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private MultiPathFitResults[] ga_resultsListToScore = null;
 	private boolean ga_subset;
 	private int ga_iteration;
+	private DirectFilter ss_filter;
 	private ScoreResult[] ga_scoreResults = null;
 	private int ga_scoreIndex = 0;
-
-	private class ScoreResult
-	{
-		final double score, criteria;
-		//final FractionClassificationResult r;
-		final DirectFilter filter;
-		final String text;
-
-		public ScoreResult(double score, double criteria,
-				//FractionClassificationResult r, 
-				DirectFilter filter, String text)
-		{
-			this.score = score;
-			this.criteria = criteria;
-			//this.r = r;
-			this.filter = filter;
-			this.text = text;
-		}
-	}
 
 	private class ScoreJob
 	{
@@ -4305,6 +4296,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return filters;
 	}
 
+	private List<Filter> searchSpaceToFilters(double[][] searchSpace)
+	{
+		ArrayList<Filter> filters = new ArrayList<Filter>(searchSpace.length);
+		for (int i = 0; i < searchSpace.length; i++)
+			filters.add((DirectFilter) ss_filter.create(searchSpace[i]));
+		return filters;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -4359,6 +4358,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final StringBuilder text = createResult(filter, r);
 		add(text, ga_iteration);
 		gaWindow.append(text.toString());
+	}
+
+	public SearchResult<SimpleFilterScore> findOptimum(double[][] points)
+	{
+		ga_iteration++;
+		final ScoreResult[] scoreResults = scoreFilters(new FilterSet(searchSpaceToFilters(points)), false);
+		SimpleFilterScore max = null;
+
+		if (scoreResults == null)
+			return null;
+
+		for (int index = 0; index < scoreResults.length; index++)
+		{
+			final ScoreResult scoreResult = scoreResults[index];
+
+			final SimpleFilterScore result = new SimpleFilterScore(scoreResult, true,
+					scoreResult.criteria >= minCriteria);
+			if (result.compareTo(max) < 0)
+			{
+				max = result;
+			}
+		}
+		return new SearchResult<SimpleFilterScore>(max.r.filter.getParameters(), max);
 	}
 
 	private double limit = 0;
