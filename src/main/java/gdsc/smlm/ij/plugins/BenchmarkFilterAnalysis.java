@@ -195,6 +195,8 @@ public class BenchmarkFilterAnalysis
 	private static int rangeSearchWidth = 2;
 	private static int maxIterations = 30;
 	private static int stepSearch = 0;
+	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
+
 	private static boolean showTP = false;
 	private static boolean showFP = false;
 	private static boolean showFN = false;
@@ -889,6 +891,7 @@ public class BenchmarkFilterAnalysis
 	private void expandFilters()
 	{
 		wasNotExpanded = null;
+		searchRangeMap.clear();
 
 		long[] expanded = new long[filterList.size()];
 		String[] name = new String[expanded.length];
@@ -1641,7 +1644,6 @@ public class BenchmarkFilterAnalysis
 		scoreAnalysis = gd.getNextBoolean();
 		componentAnalysis = gd.getNextChoiceIndex();
 		evolve = gd.getNextChoiceIndex();
-		rangeSearchWidth = (int) Math.abs(gd.getNextNumber());
 		stepSearch = (int) Math.abs(gd.getNextNumber());
 		resultsTitle = gd.getNextString();
 		showTP = gd.getNextBoolean();
@@ -2268,9 +2270,11 @@ public class BenchmarkFilterAnalysis
 
 			gd.showDialog();
 
-			startTimer();
-
-			if (!gd.wasCanceled())
+			if (gd.wasCanceled())
+			{
+				startTimer();
+			}
+			else
 			{
 				isOptimised = true;
 
@@ -2314,6 +2318,9 @@ public class BenchmarkFilterAnalysis
 				ga_statusPrefix = "Evolving [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 				ga_population.setTracker(this);
+
+				startTimer();
+
 				best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
 				if (best != null)
@@ -2333,8 +2340,6 @@ public class BenchmarkFilterAnalysis
 			// Collect parameters for the range search algorithm
 			stopTimer();
 
-			createGAWindow();
-
 			// Ask the user for the search parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
@@ -2346,17 +2351,24 @@ public class BenchmarkFilterAnalysis
 			// Add choice of fields to optimise
 			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
 			int n = ss_filter.getNumberOfParameters();
+
+			boolean[] enabled = searchRangeMap.get(setNumber);
+			if (enabled == null || enabled.length != n)
+			{
+				enabled = new boolean[n];
+				Arrays.fill(enabled, true);
+			}
 			for (int i = 0; i < n; i++)
-				gd.addCheckbox(prefix + ss_filter.getParameterName(i), true);
+				gd.addCheckbox(prefix + ss_filter.getParameterName(i), enabled[i]);
 
 			gd.showDialog();
 
-			startTimer();
-
-			if (!gd.wasCanceled())
+			if (gd.wasCanceled())
 			{
-				isOptimised = true;
-
+				startTimer();
+			}
+			else
+			{
 				rangeSearchWidth = (int) gd.getNextNumber();
 				saveOption = gd.getNextBoolean();
 				maxIterations = (int) gd.getNextNumber();
@@ -2369,34 +2381,51 @@ public class BenchmarkFilterAnalysis
 				SearchDimension[] dimensions = new SearchDimension[n];
 				for (int i = 0; i < n; i++)
 				{
-					if (gd.getNextBoolean())
+					enabled[i] = gd.getNextBoolean();
+					if (enabled[i])
 					{
 						double min = filter1.getParameterValue(i);
 						double lower = filter2.getParameterValue(i);
 						double upper = filter3.getParameterValue(i);
 						double max = filter4.getParameterValue(i);
 						double minIncrement = filter1.getParameterIncrement(i);
-						dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
+						try
+						{
+							dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
+						}
+						catch (IllegalArgumentException e)
+						{
+							IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+									filter1.getParameterName(i)));
+							return -1;
+						}
 					}
 					else
 					{
 						dimensions[i] = new SearchDimension(filter1.getDisabledParameterValue(i));
 					}
 				}
+				searchRangeMap.put(setNumber, enabled);
+
+				createGAWindow();
 
 				// Range Search
+				isOptimised = true;
 				ga_statusPrefix = "Range Search [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
-				gdsc.smlm.search.SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
+
+				startTimer();
+
+				SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
 
 				if (optimum != null)
 				{
 					best = optimum.score.r.filter;
-					
+
 					// Now update the filter set for final assessment
 					filterSet = new FilterSet(filterSet.getName(), searchSpaceToFilters(ss.getSearchSpace()));
 
@@ -3968,8 +3997,7 @@ public class BenchmarkFilterAnalysis
 		}
 
 		@Override
-		public boolean converged(gdsc.smlm.search.SearchResult<SimpleFilterScore> previous,
-				gdsc.smlm.search.SearchResult<SimpleFilterScore> current)
+		public boolean converged(SearchResult<SimpleFilterScore> previous, SearchResult<SimpleFilterScore> current)
 		{
 			// This checks the iterations
 			if (super.converged(previous, current))
@@ -4380,7 +4408,17 @@ public class BenchmarkFilterAnalysis
 				max = result;
 			}
 		}
-		return new SearchResult<SimpleFilterScore>(max.r.filter.getParameters(), max);
+
+		// Add the best filter to the table
+		// This filter may not have been part of the scored subset so use the entire results set for reporting
+		DirectFilter filter = max.r.filter;
+		FractionClassificationResult r = scoreFilter(filter, minimalFilter, ga_resultsList);
+
+		final StringBuilder text = createResult(filter, r);
+		add(text, ga_iteration);
+		gaWindow.append(text.toString());
+
+		return new SearchResult<SimpleFilterScore>(filter.getParameters(), max);
 	}
 
 	private double limit = 0;
