@@ -16,12 +16,12 @@ package gdsc.smlm.search;
 /**
  * Store the result of scoring a point within a search space. Allows the scores to be compared.
  */
-public class ScoreResult<T extends Comparable<T>> implements Comparable<ScoreResult<T>>
+public class SearchResult<T extends Comparable<T>> implements Comparable<SearchResult<T>>
 {
 	public final double[] point;
 	public final T score;
 
-	public ScoreResult(double[] point, T score)
+	public SearchResult(double[] point, T score)
 	{
 		if (point == null)
 			throw new IllegalArgumentException("Point is null");
@@ -36,7 +36,7 @@ public class ScoreResult<T extends Comparable<T>> implements Comparable<ScoreRes
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	public int compareTo(ScoreResult<T> o)
+	public int compareTo(SearchResult<T> o)
 	{
 		return score.compareTo(o.score);
 	}

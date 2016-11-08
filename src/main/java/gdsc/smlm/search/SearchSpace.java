@@ -76,8 +76,8 @@ public class SearchSpace
 	 *            the checker
 	 * @return The optimum (or null)
 	 */
-	public <T extends Comparable<T>> ScoreResult<T> search(SearchDimension[] dimensions, ScoreFunction<T> scoreFunction,
-			ConvergenceChecker checker)
+	public <T extends Comparable<T>> SearchResult<T> search(SearchDimension[] dimensions, ScoreFunction<T> scoreFunction,
+			ConvergenceChecker<T> checker)
 	{
 		if (dimensions == null || dimensions.length == 0)
 			throw new IllegalArgumentException("Dimensions must not be empty");
@@ -86,8 +86,8 @@ public class SearchSpace
 		this.dimensions = dimensions;
 
 		// Find the best individual
-		ScoreResult<T> current = findOptimum(scoreFunction, null);
-		ScoreResult<T> previous = null;
+		SearchResult<T> current = findOptimum(scoreFunction, null);
+		SearchResult<T> previous = null;
 
 		boolean converged = false;
 		while (!converged)
@@ -127,7 +127,7 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return the new optimum
 	 */
-	private <T extends Comparable<T>> ScoreResult<T> findOptimum(ScoreFunction<T> scoreFunction, ScoreResult<T> current)
+	private <T extends Comparable<T>> SearchResult<T> findOptimum(ScoreFunction<T> scoreFunction, SearchResult<T> current)
 	{
 		if (!createSearchSpace())
 			return null;
@@ -162,7 +162,7 @@ public class SearchSpace
 			scoredSearchSpace = Arrays.copyOf(scoredSearchSpace, size);
 		}
 
-		ScoreResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
+		SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
 
 		if (current != null)
 		{
@@ -296,7 +296,7 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return true, if successful
 	 */
-	private boolean updateSearchSpace(ScoreResult<?> current)
+	private boolean updateSearchSpace(SearchResult<?> current)
 	{
 		if (current == null)
 			return false;
