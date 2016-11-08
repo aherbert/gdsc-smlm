@@ -31,6 +31,8 @@ public class SearchDimension implements Cloneable
 	private double centre;
 	private double increment;
 	private double reduceFactor = 0.5;
+	private double[] values;
+	private boolean pad = false;
 
 	/**
 	 * Instantiates a new inactive search dimension. The centre can be set to any value, the default is zero.
@@ -48,7 +50,7 @@ public class SearchDimension implements Cloneable
 	 */
 	public SearchDimension(double centre)
 	{
-		this(0, 0, 0, 0);
+		this(0, 0, 0, 1);
 		setCentre(centre);
 	}
 
@@ -196,10 +198,7 @@ public class SearchDimension implements Cloneable
 	 */
 	public double getLower()
 	{
-		final double v = centre - nIncrement * increment;
-		if (v < min)
-			return min;
-		return round(v);
+		return values()[0];
 	}
 
 	/**
@@ -209,10 +208,7 @@ public class SearchDimension implements Cloneable
 	 */
 	public double getUpper()
 	{
-		final double v = centre + nIncrement * increment;
-		if (v > max)
-			return max;
-		return round(v);
+		return values()[0];
 	}
 
 	/**
@@ -224,39 +220,68 @@ public class SearchDimension implements Cloneable
 	 */
 	public boolean isAtBounds(double v)
 	{
-		if (v == getLower())
+		values();
+		if (v == values[0])
 			return true;
-		if (v == getUpper())
+		if (v == values[values.length - 1])
 			return true;
 		return false;
 	}
 
 	/**
 	 * Get the values of the dimension around the current centre using the configured increments.
-	 * Note: If the values are outside the min/max range then the number of values may be reduced.
+	 * Note: If the values are outside the min/max range then by default the number of values may be reduced.
+	 * <p>
+	 * If the pad setting is enabled then the number of values should remain constant as the values are padded in the
+	 * opposite direction.
 	 *
 	 * @return the values
 	 */
 	public double[] values()
 	{
-		if (!active)
-			return new double[] { centre };
+		if (values != null)
+			return values;
 
-		final double[] values = new double[getMaxLength()];
+		if (!active)
+			return values = new double[] { centre };
+
+		values = new double[getMaxLength()];
 		int size = 0;
-		for (int i = nIncrement; i >= 1; i--)
+
+		double value = round(centre - nIncrement * increment);
+		if (value < min)
 		{
-			double value = round(centre - i * increment);
-			if (value < min)
-				value = min;
-			values[size++] = value;
+			values[size++] = min;
+
+			// Avoid further values below the min
+			for (int i = nIncrement - 1; i >= 1; i--)
+			{
+				value = round(centre - i * increment);
+				if (value < min)
+					continue;
+				values[size++] = value;
+			}
 		}
-		values[size++] = centre; // Already rounded
+		else
+		{
+			// Not at the limit
+			for (int i = nIncrement; i >= 1; i--)
+			{
+				values[size++] = round(centre - i * increment);
+			}
+		}
+		
+		values[size++] = centre; // Already rounded and within range
+		
 		for (int i = 1; i <= nIncrement; i++)
 		{
-			double value = round(centre + i * increment);
+			value = round(centre + i * increment);
 			if (value > max)
-				value = max;
+			{
+				values[size++] = max;
+				// Avoid further values outside the range
+				break;
+			}
 			values[size++] = value;
 		}
 
@@ -267,19 +292,58 @@ public class SearchDimension implements Cloneable
 		//				throw new RuntimeException("Not sorted");
 
 		// Check for duplicates if at the limits
-		if (values[0] == min || values[size - 1] == max)
+		if (size != values.length)
 		{
-			double last = values[0];
-			size = 1;
-			for (int i = 1; i < values.length; i++)
+			// Option to pad in the opposite direction
+			if (pad)
 			{
-				if (last == values[i])
-					continue;
-				values[size++] = last = values[i];
+				if (values[0] == min)
+				{
+					if (values[size - 1] != max)
+					{
+						// Pad up
+						for (int i = nIncrement + 1; size < values.length; i++)
+						{
+							value = round(centre + i * increment);
+							if (value > max)
+							{
+								values[size++] = max;
+								break;
+							}
+							values[size++] = value;
+						}
+					}
+				}
+				else
+				{
+					// Pad down
+					for (int i = nIncrement + 1; size < values.length; i++)
+					{
+						value = round(centre - i * increment);
+						if (value < min)
+						{
+							values[size++] = min;
+							break;
+						}
+						values[size++] = value;
+					}
+					// Simple option is to sort.
+					// A better option is to copy the values to the correct place.
+					Arrays.sort(values, 0, size);
+				}
+
+				// In case we could not pad enough
+				if (size != values.length)
+					values = Arrays.copyOf(values, size);
+			}
+			else
+			{
+				// No padding so truncate 
+				values = Arrays.copyOf(values, size);
 			}
 		}
 
-		return (size == values.length) ? values : Arrays.copyOf(values, size);
+		return values;
 	}
 
 	/**
@@ -336,5 +400,26 @@ public class SearchDimension implements Cloneable
 			return null;
 		}
 
+	}
+
+	/**
+	 * Checks if padding the values in the opposite direction when the range overlaps the min/max.
+	 *
+	 * @return true, if padding the values
+	 */
+	public boolean isPad()
+	{
+		return pad;
+	}
+
+	/**
+	 * Set to true if padding the values in the opposite direction when the range overlaps the min/max
+	 *
+	 * @param pad
+	 *            true, if padding the values in the opposite direction when the range overlaps the min/max
+	 */
+	public void setPad(boolean pad)
+	{
+		this.pad = pad;
 	}
 }
