@@ -16,14 +16,16 @@ package gdsc.smlm.search;
 /**
  * Defines convergence of a point in space
  */
-public interface ConvergenceChecker
+public interface ConvergenceChecker<T extends Comparable<T>>
 {
 	/**
-	 * Check if the point has converged
-	 * 
+	 * Check if the point has converged.
+	 *
 	 * @param previous
+	 *            the previous
 	 * @param current
+	 *            the current
 	 * @return true if the point has converged
 	 */
-	boolean converged(ScoreResult<?> previous, ScoreResult<?> current);
+	boolean converged(SearchResult<T> previous, SearchResult<T> current);
 }
