@@ -244,7 +244,7 @@ public class SearchDimension implements Cloneable
 
 		final double[] values = new double[getMaxLength()];
 		int size = 0;
-		for (int i = 1; i <= nIncrement; i++)
+		for (int i = nIncrement; i >= 1; i--)
 		{
 			double value = round(centre - i * increment);
 			if (value < min)
@@ -259,6 +259,12 @@ public class SearchDimension implements Cloneable
 				value = max;
 			values[size++] = value;
 		}
+
+		//		double[] check = values.clone();
+		//		Arrays.sort(check);
+		//		for (int i=0; i<check.length; i++)
+		//			if (check[i] != values[i])
+		//				throw new RuntimeException("Not sorted");
 
 		// Check for duplicates if at the limits
 		if (values[0] == min || values[size - 1] == max)
