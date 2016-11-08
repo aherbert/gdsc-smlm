@@ -62,6 +62,41 @@ public class SearchSpaceTest
 			Assert.assertEquals(v1[i] * d1.getReduceFactor(), v2[i], 0);
 	}
 
+	@Test
+	public void canPadRange()
+	{
+		SearchDimension d1 = new SearchDimension(0, 10, 0, 1, 2.5, 7.5);
+		d1.setPad(false);
+		
+		double[] v1 = d1.values();
+		Assert.assertFalse(d1.isAtBounds(0));
+		
+		d1.setCentre(0);
+		Assert.assertTrue(d1.isAtBounds(0));
+		
+		double[] v2 = d1.values();
+		System.out.println(java.util.Arrays.toString(v1));
+		System.out.println(java.util.Arrays.toString(v2));
+		Assert.assertTrue(v1.length > v2.length);
+
+		d1.setCentre(10);
+		v2 = d1.values();
+		System.out.println(java.util.Arrays.toString(v2));
+		Assert.assertTrue(v1.length > v2.length);
+		
+		d1.setPad(true);
+		
+		double[] v3 = d1.values();
+		System.out.println(java.util.Arrays.toString(v3));
+		Assert.assertTrue(v1.length == v3.length);
+		
+		d1.setCentre(0);
+		
+		v3 = d1.values();
+		System.out.println(java.util.Arrays.toString(v3));
+		Assert.assertTrue(v1.length == v3.length);
+	}
+	
 	private static SearchDimension[] createDimensions(SearchDimension... d)
 	{
 		return d;

@@ -146,6 +146,7 @@ public class SearchDimension implements Cloneable
 		if (active && (centre < min || centre > max))
 			throw new IllegalArgumentException("Centre is outside min/max range");
 		this.centre = round(centre);
+		values = null;
 	}
 
 	/**
@@ -189,6 +190,7 @@ public class SearchDimension implements Cloneable
 		if (increment < minIncrement)
 			increment = minIncrement;
 		this.increment = round(increment);
+		values = null;
 	}
 
 	/**
@@ -261,6 +263,9 @@ public class SearchDimension implements Cloneable
 					continue;
 				values[size++] = value;
 			}
+
+			if (centre != min)
+				values[size++] = centre;
 		}
 		else
 		{
@@ -269,16 +274,17 @@ public class SearchDimension implements Cloneable
 			{
 				values[size++] = round(centre - i * increment);
 			}
+			
+			values[size++] = centre; // Already rounded and within range
 		}
-		
-		values[size++] = centre; // Already rounded and within range
 		
 		for (int i = 1; i <= nIncrement; i++)
 		{
 			value = round(centre + i * increment);
 			if (value > max)
 			{
-				values[size++] = max;
+				if (centre != max)
+					values[size++] = max;
 				// Avoid further values outside the range
 				break;
 			}
@@ -421,5 +427,6 @@ public class SearchDimension implements Cloneable
 	public void setPad(boolean pad)
 	{
 		this.pad = pad;
+		values = null;
 	}
 }
