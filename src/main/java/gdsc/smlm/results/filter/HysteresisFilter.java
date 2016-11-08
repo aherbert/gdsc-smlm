@@ -157,12 +157,11 @@ public abstract class HysteresisFilter extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
-	public double getParameterValue(int index)
+	protected double getParameterValueInternal(int index)
 	{
-		checkIndex(index);
 		switch (index)
 		{
 			case 0:
@@ -175,7 +174,7 @@ public abstract class HysteresisFilter extends Filter
 				return timeThresholdMode;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -188,7 +187,8 @@ public abstract class HysteresisFilter extends Filter
 		switch (index)
 		{
 			case 0:
-				return (searchDistanceMode == 1) ? DEFAULT_RELATIVE_DISTANCE_INCREMENT : DEFAULT_ABSOLUTE_DISTANCE_INCREMENT;
+				return (searchDistanceMode == 1) ? DEFAULT_RELATIVE_DISTANCE_INCREMENT
+						: DEFAULT_ABSOLUTE_DISTANCE_INCREMENT;
 			case 1:
 				return 1;
 			case 2:
@@ -197,7 +197,7 @@ public abstract class HysteresisFilter extends Filter
 				return 1;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -400,9 +400,9 @@ public abstract class HysteresisFilter extends Filter
 	@Override
 	public String getDescription()
 	{
-		return "Any results between the limits (candidates) are included only if they can be traced "
-				+ "through time, potentially via other candidates, to a valid result. The distance used for "
-				+ "tracing is the search distance multiplied by the average precision of the candidates.";
+		return "Any results between the limits (candidates) are included only if they can be traced " +
+				"through time, potentially via other candidates, to a valid result. The distance used for " +
+				"tracing is the search distance multiplied by the average precision of the candidates.";
 	}
 
 	/*

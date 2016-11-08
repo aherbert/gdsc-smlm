@@ -1127,12 +1127,13 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 			return 1;
 
 		// Use all the parameters
-		if (getNumberOfParameters() == o.getNumberOfParameters())
+		final int size = getNumberOfParameters();
+		if (size == o.getNumberOfParameters())
 		{
-			for (int i = 0; i < getNumberOfParameters(); i++)
+			for (int i = 0; i < size; i++)
 			{
-				final double d1 = getParameterValue(i);
-				final double d2 = o.getParameterValue(i);
+				final double d1 = getParameterValueInternal(i);
+				final double d2 = o.getParameterValueInternal(i);
 				if (d1 < d2)
 					return -1;
 				if (d1 > d2)
@@ -1144,11 +1145,12 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	}
 
 	/**
-	 * Compare to the other filter, count the number of weakest parameters and return the count of that minus this.
-	 * If negative then this filter has more weak parameters. If the same or the number of parameters do not match then
-	 * return 0. If the other filter is null return -1.
+	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
+	 * parameters. If positive then this filter has less weak parameters. If the same or the number of parameters do not
+	 * match then return 0. If the other filter is null return -1.
 	 * 
 	 * @param o
+	 *            The other filter
 	 * @return the count difference
 	 */
 	public int weakest(Filter o)
@@ -1158,32 +1160,30 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 			return -1;
 
 		// Use all the parameters
-		if (getNumberOfParameters() == o.getNumberOfParameters())
+		int i = getNumberOfParameters();
+		if (i == o.getNumberOfParameters())
 		{
 			// Extract the parameters
-			final double[] p1 = new double[getNumberOfParameters()];
-			final double[] p2 = new double[p1.length];
-			for (int i = getNumberOfParameters(); i-- > 0;)
-			{
-				p1[i] = getParameterValue(i);
-				p2[i] = o.getParameterValue(i);
-			}
+			final double[] p1 = getParameters();
+			final double[] p2 = o.getParameters();
+
 			// Find the weakest
+
 			final double[] weakest = p1.clone();
 			o.weakestParameters(weakest);
 			// Count the number of weakest
-			int c1 = 0, c2 = 0;
-			for (int i = getNumberOfParameters(); i-- > 0;)
+			int c = 0;
+			while (i-- > 0)
 			{
 				if (p1[i] != p2[i])
 				{
 					if (p1[i] == weakest[i])
-						c1++;
+						--c;
 					else
-						c2++;
+						++c;
 				}
 			}
-			return c2 - c1;
+			return c;
 		}
 
 		return 0;
@@ -1201,10 +1201,38 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	}
 
 	/**
+	 * Get the parameter value.
+	 * 
 	 * @param index
 	 * @return The value of the specified parameter
 	 */
-	public abstract double getParameterValue(int index);
+	public double getParameterValue(int index)
+	{
+		checkIndex(index);
+		return getParameterValueInternal(index);
+	}
+
+	/**
+	 * Get the parameter value. The index should always be between 0 and {@link #getNumberOfParameters()}
+	 * 
+	 * @param index
+	 * @return The value of the specified parameter
+	 */
+	protected abstract double getParameterValueInternal(int index);
+
+	/**
+	 * Gets the parameters as an array.
+	 *
+	 * @return the parameters
+	 */
+	public double[] getParameters()
+	{
+		final int n = getNumberOfParameters();
+		final double[] p = new double[n];
+		for (int i = 0; i < n; i++)
+			p[i] = getParameterValueInternal(i);
+		return p;
+	}
 
 	/**
 	 * Get the recommended minimum amount by which to increment the parameter
@@ -1352,7 +1380,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 					"Enable array must match the number of parameters: " + getNumberOfParameters());
 		final double[] p = new double[enable.length];
 		for (int i = 0; i < p.length; i++)
-			p[i] = (enable[i]) ? getParameterValue(i) : getDisabledParameterValue(i);
+			p[i] = (enable[i]) ? getParameterValueInternal(i) : getDisabledParameterValue(i);
 		return create(p);
 	}
 
@@ -1365,6 +1393,42 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	 *            The parameters
 	 */
 	public abstract void weakestParameters(double[] parameters);
+
+	/**
+	 * Compare the two values and return a sort result for the minimum of the two
+	 *
+	 * @param value1
+	 *            the value 1
+	 * @param value2
+	 *            the value 2
+	 * @return the result (-1 is value1 is lower, 0 is equal, 1 is value2 is lower)
+	 */
+	public static int compareMin(double value1, double value2)
+	{
+		if (value1 < value2)
+			return -1;
+		if (value1 > value2)
+			return 1;
+		return 0;
+	}
+
+	/**
+	 * Compare the two values and return a sort result for the maximum of the two
+	 *
+	 * @param value1
+	 *            the value 1
+	 * @param value2
+	 *            the value 2
+	 * @return the result (-1 is value1 is higher, 0 is equal, 1 is value2 is higher)
+	 */
+	public static int compareMax(double value1, double value2)
+	{
+		if (value1 < value2)
+			return 1;
+		if (value1 > value2)
+			return -1;
+		return 0;
+	}
 
 	/**
 	 * Some filters requires all the data in a subset for scoring analysis. Others can create a subset using the fail

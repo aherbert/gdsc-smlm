@@ -148,12 +148,11 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
-	public double getParameterValue(int index)
+	protected double getParameterValueInternal(int index)
 	{
-		checkIndex(index);
 		return shift;
 	}
 

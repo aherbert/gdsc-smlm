@@ -144,11 +144,7 @@ public class FilterSet
 
 		// Initialise the parameters
 		final Filter f1 = filters.get(0);
-		double[] parameters = new double[f1.getNumberOfParameters()];
-		for (int i = 0; i < parameters.length; i++)
-		{
-			parameters[i] = f1.getParameterValue(i);
-		}
+		final double[] parameters = f1.getParameters();
 
 		// Find the weakest
 		for (Filter f : filters)

@@ -348,12 +348,11 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
-	public double getParameterValue(int index)
+	protected double getParameterValueInternal(int index)
 	{
-		checkIndex(index);
 		switch (index)
 		{
 			case 0:
@@ -373,6 +372,12 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		}
 	}
 
+	@Override
+	public double[] getParameters()
+	{
+		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision	};
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -472,6 +477,33 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		setMax(parameters, 6, precision);
 	}
 
+	/**
+	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
+	 * parameters. If positive then this filter has less weak parameters. If the same or the number of parameters do not
+	 * match then return 0. If the other filter is null return -1.
+	 * 
+	 * @param o
+	 *            The other filter
+	 * @return the count difference
+	 */
+	public int weakest(MultiFilter o)
+	{
+		if (o == null)
+			return -1;
+
+		// Count the number of weakest
+		//@formatter:off
+		return 
+			compareMin(signal, o.signal) +
+    		compareMin(snr, o.snr) +
+    		compareMin(minWidth, o.minWidth) +
+    		compareMax(maxWidth, o.maxWidth) +
+    		compareMax(shift, o.shift) +
+    		compareMax(eshift, o.eshift) + 
+    		compareMax(precision, o.precision);
+		//@formatter:on
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

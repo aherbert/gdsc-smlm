@@ -30,7 +30,7 @@ public abstract class CombinedFilter extends DirectFilter
 {
 	protected Filter filter1, filter2;
 	protected DirectFilter dfilter1, dfilter2;
-	
+
 	@XStreamOmitField
 	protected int result1;
 	@XStreamOmitField
@@ -203,14 +203,13 @@ public abstract class CombinedFilter extends DirectFilter
 	}
 
 	@Override
-	public double getParameterValue(int index)
+	protected double getParameterValueInternal(int index)
 	{
-		checkIndex(index);
 		if (index < filter1.getNumberOfParameters())
-			return filter1.getParameterValue(index);
-		return filter2.getParameterValue(index - filter1.getNumberOfParameters());
+			return filter1.getParameterValueInternal(index);
+		return filter2.getParameterValueInternal(index - filter1.getNumberOfParameters());
 	}
-	
+
 	@Override
 	public double getParameterIncrement(int index)
 	{
@@ -219,7 +218,7 @@ public abstract class CombinedFilter extends DirectFilter
 			return filter1.getParameterIncrement(index);
 		return filter2.getParameterIncrement(index - filter1.getNumberOfParameters());
 	}
-	
+
 	@Override
 	public double getDisabledParameterValue(int index)
 	{

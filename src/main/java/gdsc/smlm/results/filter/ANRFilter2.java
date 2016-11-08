@@ -162,12 +162,11 @@ public class ANRFilter2 extends DirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
-	public double getParameterValue(int index)
+	protected double getParameterValueInternal(int index)
 	{
-		checkIndex(index);
 		switch (index)
 		{
 			case 0:

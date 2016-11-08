@@ -155,14 +155,13 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
-	public double getParameterValue(int index)
+	protected double getParameterValueInternal(int index)
 	{
-		checkIndex(index);
 		if (index < super.getNumberOfParameters())
-			return super.getParameterValue(index);
+			return super.getParameterValueInternal(index);
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{

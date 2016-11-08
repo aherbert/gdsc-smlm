@@ -184,8 +184,10 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				components1[s1++] = new MultiFilterEShiftComponent(eshift);
 			}
 
-			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1, MultiFilterWidthComponent.class);
-			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1, MultiFilterShiftComponent.class);
+			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1,
+					MultiFilterWidthComponent.class);
+			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1,
+					MultiFilterShiftComponent.class);
 
 			final MultiFilterComponent[] components4 = MultiFilter.remove(components2, components2.length,
 					MultiFilterShiftComponent.class);
@@ -218,8 +220,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		//		variance = Filter.getDUpperSquaredLimit(precision);
 	}
 
-	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size,
-			@SuppressWarnings("rawtypes") Class clazz)
+	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size, @SuppressWarnings("rawtypes") Class clazz)
 	{
 		MultiFilterComponent[] out = new MultiFilterComponent[size];
 		int length = 0;
@@ -345,12 +346,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterValue(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
-	public double getParameterValue(int index)
+	protected double getParameterValueInternal(int index)
 	{
-		checkIndex(index);
 		switch (index)
 		{
 			case 0:
@@ -368,6 +368,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			default:
 				return precision;
 		}
+	}
+
+	@Override
+	public double[] getParameters()
+	{
+		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
 	}
 
 	/*
@@ -471,6 +477,33 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		setMax(parameters, 4, shift);
 		setMax(parameters, 5, eshift);
 		setMax(parameters, 6, precision);
+	}
+
+	/**
+	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
+	 * parameters. If positive then this filter has less weak parameters. If the same or the number of parameters do not
+	 * match then return 0. If the other filter is null return -1.
+	 * 
+	 * @param o
+	 *            The other filter
+	 * @return the count difference
+	 */
+	public int weakest(MultiFilter o)
+	{
+		if (o == null)
+			return -1;
+
+		// Count the number of weakest
+		//@formatter:off
+		return 
+			compareMin(signal, o.signal) +
+    		compareMin(snr, o.snr) +
+    		compareMin(minWidth, o.minWidth) +
+    		compareMax(maxWidth, o.maxWidth) +
+    		compareMax(shift, o.shift) +
+    		compareMax(eshift, o.eshift) + 
+    		compareMax(precision, o.precision);
+		//@formatter:on
 	}
 
 	/*
