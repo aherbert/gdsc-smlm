@@ -76,8 +76,8 @@ public class SearchSpace
 	 *            the checker
 	 * @return The optimum (or null)
 	 */
-	public <T extends Comparable<T>> SearchResult<T> search(SearchDimension[] dimensions, ScoreFunction<T> scoreFunction,
-			ConvergenceChecker<T> checker)
+	public <T extends Comparable<T>> SearchResult<T> search(SearchDimension[] dimensions,
+			ScoreFunction<T> scoreFunction, ConvergenceChecker<T> checker)
 	{
 		if (dimensions == null || dimensions.length == 0)
 			throw new IllegalArgumentException("Dimensions must not be empty");
@@ -127,7 +127,8 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return the new optimum
 	 */
-	private <T extends Comparable<T>> SearchResult<T> findOptimum(ScoreFunction<T> scoreFunction, SearchResult<T> current)
+	private <T extends Comparable<T>> SearchResult<T> findOptimum(ScoreFunction<T> scoreFunction,
+			SearchResult<T> current)
 	{
 		if (!createSearchSpace())
 			return null;
@@ -159,19 +160,23 @@ public class SearchSpace
 				return current;
 			}
 
+			//System.out.printf("Scoring %d / %d\n", size, searchSpace.length);
 			scoredSearchSpace = Arrays.copyOf(scoredSearchSpace, size);
 		}
 
 		SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
-
-		if (current != null)
+		if (optimum != null)
 		{
-			if (current.compareTo(optimum) < 0)
-				optimum = current;
+			//System.out.printf("Optimum = %s\n", optimum.score);
+			//if (current != null)
+			//	System.out.printf("Current = %s\n", current.score);
+			// Replace if better
+			if (optimum.compareTo(current) < 0)
+				current = optimum;
 		}
 
 		end();
-		return optimum;
+		return current;
 	}
 
 	/**
@@ -217,7 +222,9 @@ public class SearchSpace
 		for (int i = 0; i < dimensions.length; i++)
 		{
 			dimensionValues[i] = dimensions[i].values();
+			//System.out.printf(" [%d] %.3f-%.3f", i, dimensions[i].getLower(), dimensions[i].getUpper());
 		}
+		//System.out.println();
 		return createSearchSpace(dimensions, dimensionValues);
 	}
 
@@ -322,6 +329,9 @@ public class SearchSpace
 					changed = true;
 			}
 		}
+		
+		// Q. Always reduce the range ... ?
+		//changed = false;
 
 		if (changed)
 		{
