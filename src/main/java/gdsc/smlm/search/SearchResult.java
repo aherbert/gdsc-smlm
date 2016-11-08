@@ -38,6 +38,8 @@ public class SearchResult<T extends Comparable<T>> implements Comparable<SearchR
 	 */
 	public int compareTo(SearchResult<T> o)
 	{
+		if (o == null)
+			return -1;
 		return score.compareTo(o.score);
 	}
 }
