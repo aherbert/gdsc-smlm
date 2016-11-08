@@ -94,4 +94,11 @@ public class SimpleFilterScore implements Comparable<SimpleFilterScore>
 			return 0;
 		}
 	}
+	
+	@Override
+	public String toString()
+	{
+		// Add the score
+		return String.format("%s : %.3f (%.3f)", r.filter.getName(), score, criteria);
+	}
 }
