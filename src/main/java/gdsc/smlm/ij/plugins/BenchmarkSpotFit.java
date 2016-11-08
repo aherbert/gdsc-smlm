@@ -1938,7 +1938,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// Create a filter set using the min/max and the initial bounds.
 			// Set sensible limits
 			min[FILTER_SIGNAL] = Math.max(min[FILTER_SIGNAL], 30);
-			max[FILTER_PRECISION] = Math.min(min[FILTER_PRECISION], 100);
+			max[FILTER_PRECISION] = Math.min(max[FILTER_PRECISION], 100);
 			// Use half the initial bounds (hoping this is a good starting guess for the optimum)
 			final boolean[] limitToLower = new boolean[min.length];
 			limitToLower[FILTER_SIGNAL] = true;
