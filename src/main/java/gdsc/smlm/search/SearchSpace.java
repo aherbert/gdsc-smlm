@@ -91,6 +91,7 @@ public class SearchSpace
 		if (scoreFunction == null)
 			throw new IllegalArgumentException("Score function is null");
 		this.dimensions = dimensions;
+		reset();
 
 		// Start with enumeration of the space
 		searchMode = ENUMERATE;
@@ -102,6 +103,7 @@ public class SearchSpace
 		boolean converged = false;
 		while (!converged)
 		{
+			iteration++;
 			previous = current;
 
 			if (!updateSearchSpace(current))
@@ -121,6 +123,46 @@ public class SearchSpace
 		scoredSearchSpace = null;
 		scoredSearchSpaceHash.clear();
 		coveredSpace.clear();
+
+		return current;
+	}
+
+	private void reset()
+	{
+		iteration = 0;
+		sb.setLength(0);
+		searchSpace = null;
+		scoredSearchSpace = null;
+		scoredSearchSpaceHash.clear();
+		coveredSpace.clear();
+	}
+
+	/**
+	 * Find the optimum in the configured search space.
+	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param dimensions
+	 *            the dimensions
+	 * @param scoreFunction
+	 *            the score function
+	 * @return The optimum (or null)
+	 */
+	public <T extends Comparable<T>> SearchResult<T> findOptimum(SearchDimension[] dimensions,
+			ScoreFunction<T> scoreFunction)
+	{
+		if (dimensions == null || dimensions.length == 0)
+			throw new IllegalArgumentException("Dimensions must not be empty");
+		if (scoreFunction == null)
+			throw new IllegalArgumentException("Score function is null");
+		this.dimensions = dimensions;
+		reset();
+
+		// Start with enumeration of the space
+		searchMode = ENUMERATE;
+
+		// Find the best individual
+		SearchResult<T> current = findOptimum(scoreFunction, null);
 
 		return current;
 	}
@@ -628,7 +670,7 @@ public class SearchSpace
 	 * <p>
 	 * At each iteration the search will randomly sample points in the configured search space and score them. The top
 	 * fraction of the results is used to redefine the search space (with padding). Note: The range cannot fall below
-	 * the the settings defined by the min increment and nIntervals for each of the input dimensions.
+	 * the settings defined by the min increment and nIntervals for each of the input dimensions.
 	 * <p>
 	 * The process iterates until convergence is reached. The input dimensions are used to define the min/max and the
 	 * current lower/upper bounds of the range. The dimensions are not modified.
@@ -664,9 +706,13 @@ public class SearchSpace
 		if (padding < 0)
 			throw new IllegalArgumentException("Padding must be positive");
 		this.dimensions = dimensions;
+		reset();
 
+		// Keep the same generator throughout
+		final HaltonSequenceGenerator[] generator = new HaltonSequenceGenerator[1];
+		
 		// Find the best individual
-		SearchResult<T>[] scores = score(scoreFunction, samples, fraction);
+		SearchResult<T>[] scores = score(scoreFunction, samples, fraction, generator);
 		if (scores == null)
 			return null;
 
@@ -676,13 +722,14 @@ public class SearchSpace
 		boolean converged = false;
 		while (!converged)
 		{
+			iteration++;
 			previous = current;
 
 			if (!updateSearchSpace(current, scores, padding))
 				break;
 
 			// Find the optimum and check convergence
-			scores = score(scoreFunction, samples, fraction);
+			scores = score(scoreFunction, samples, fraction, generator);
 			if (scores == null)
 				break;
 
@@ -712,7 +759,7 @@ public class SearchSpace
 	 * @return the score results
 	 */
 	private <T extends Comparable<T>> SearchResult<T>[] score(FullScoreFunction<T> scoreFunction, int samples,
-			double fraction)
+			double fraction, HaltonSequenceGenerator[] generator)
 	{
 		// Count the number of active dimensions
 		final int[] indices = new int[dimensions.length];
@@ -732,19 +779,21 @@ public class SearchSpace
 		}
 
 		// Generate random points
-		final HaltonSequenceGenerator g = new HaltonSequenceGenerator(size);
-		final double[][] points = new double[samples][];
+		HaltonSequenceGenerator g = generator[0];
+		if (g == null)
+			generator[0] = g = new HaltonSequenceGenerator(size);
+		searchSpace = new double[samples][];
 		for (int i = 0; i < samples; i++)
 		{
 			final double[] r = g.nextVector();
 			final double[] p = centre.clone();
 			for (int j = 0; j < size; j++)
 				p[indices[j]] = lower[j] + r[j] * range[j];
-			points[i] = p;
+			searchSpace[i] = p;
 		}
 
 		// Score
-		SearchResult<T>[] scores = scoreFunction.score(points);
+		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
 
 		// Get the top fraction
 		// TODO - get a partial sort
@@ -801,6 +850,6 @@ public class SearchSpace
 			dimensions[j] = dimensions[j].create(lower[j], upper[j]);
 		}
 
-		return false;
+		return true;
 	}
 }

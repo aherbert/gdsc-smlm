@@ -99,7 +99,7 @@ import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.search.ConvergenceChecker;
 import gdsc.smlm.search.ConvergenceToleranceChecker;
-import gdsc.smlm.search.ScoreFunction;
+import gdsc.smlm.search.FullScoreFunction;
 import gdsc.smlm.search.SearchDimension;
 import gdsc.smlm.search.SearchResult;
 import gdsc.smlm.search.SearchSpace;
@@ -123,7 +123,7 @@ import ij.text.TextWindow;
  * e.g. precision, Jaccard, F-score.
  */
 public class BenchmarkFilterAnalysis
-		implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore, ScoreFunction<SimpleFilterScore>
+		implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore, FullScoreFunction<SimpleFilterScore>
 {
 	private static final String TITLE = "Benchmark Filter Analysis";
 	private static TextWindow resultsWindow = null;
@@ -190,10 +190,13 @@ public class BenchmarkFilterAnalysis
 	private static boolean scoreAnalysis = true;
 	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
 	private static int componentAnalysis = 3;
-	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search" };
+	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search" };
 	private static int evolve = 0;
 	private static int rangeSearchWidth = 2;
 	private static int maxIterations = 30;
+	private static int enrichmentSamples = 10000;
+	private static double enrichmentFraction = 0.3;
+	private static double enrichmentPadding = 0.1;
 	private static int stepSearch = 0;
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
 
@@ -2361,12 +2364,7 @@ public class BenchmarkFilterAnalysis
 
 						SearchSpace ss = new SearchSpace();
 						ss.setTracker(this);
-						ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, 1); // 1 iteration
-
-						createGAWindow();
-						startTimer();
-
-						SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
+						SearchResult<SimpleFilterScore> optimum = ss.findOptimum(dimensions, this);
 
 						if (optimum != null)
 						{
@@ -2476,7 +2474,150 @@ public class BenchmarkFilterAnalysis
 					best = optimum.score.r.filter;
 
 					// Now update the filter set for final assessment
-					filterSet = new FilterSet(filterSet.getName(), searchSpaceToFilters(ss.getSearchSpace()));
+					filterSet = new FilterSet(filterSet.getName(),
+							searchSpaceToFilters(optimum.score.r.filter, ss.getSearchSpace()));
+
+					// Option to save the filters
+					if (saveOption)
+						saveFilterSet(filterSet, setNumber);
+				}
+			}
+		}
+
+		if (evolve == 3 && allSameType && filterSet.size() == 4)
+		{
+			// Collect parameters for the enrichment search algorithm
+			stopTimer();
+
+			// Ask the user for the search parameters.
+			GenericDialog gd = new GenericDialog(TITLE);
+			String prefix = setNumber + "_";
+			gd.addMessage("Configure the enrichment search algorithm for [" + setNumber + "] " + filterSet.getName());
+			gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
+			gd.addCheckbox(prefix + "Save_option", saveOption);
+			gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
+			gd.addNumericField(prefix + "Samples", enrichmentSamples, 0);
+			gd.addSlider(prefix + "Fraction", 0.01, 0.99, enrichmentFraction);
+			gd.addSlider(prefix + "Padding", 0, 0.99, enrichmentPadding);
+
+			// Add choice of fields to optimise
+			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
+			int n = ss_filter.getNumberOfParameters();
+
+			boolean[] enabled = searchRangeMap.get(setNumber);
+			if (enabled == null || enabled.length != n)
+			{
+				enabled = new boolean[n];
+				Arrays.fill(enabled, true);
+			}
+			for (int i = 0; i < n; i++)
+				gd.addCheckbox(prefix + ss_filter.getParameterName(i), enabled[i]);
+
+			gd.showDialog();
+
+			if (gd.wasCanceled())
+			{
+				startTimer();
+			}
+			else
+			{
+				rangeSearchWidth = (int) gd.getNextNumber();
+				saveOption = gd.getNextBoolean();
+				maxIterations = (int) gd.getNextNumber();
+				enrichmentSamples = (int) gd.getNextNumber();
+				enrichmentFraction = gd.getNextNumber();
+				enrichmentPadding = gd.getNextNumber();
+
+				final Filter filter1 = ss_filter;
+				final Filter filter2 = filterSet.getFilters().get(1);
+				final Filter filter3 = filterSet.getFilters().get(2);
+				final Filter filter4 = filterSet.getFilters().get(3);
+
+				SearchDimension[] dimensions = new SearchDimension[n];
+				for (int i = 0; i < n; i++)
+				{
+					enabled[i] = gd.getNextBoolean();
+					if (enabled[i])
+					{
+						double min = filter1.getParameterValue(i);
+						double lower = filter2.getParameterValue(i);
+						double upper = filter3.getParameterValue(i);
+						double max = filter4.getParameterValue(i);
+						double minIncrement = filter1.getParameterIncrement(i);
+						try
+						{
+							dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
+							dimensions[i].setPad(true);
+						}
+						catch (IllegalArgumentException e)
+						{
+							IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+									filter1.getParameterName(i)));
+							return -1;
+						}
+					}
+					else
+					{
+						dimensions[i] = new SearchDimension(filter1.getDisabledParameterValue(i));
+					}
+				}
+				searchRangeMap.put(setNumber, enabled);
+
+				// Range Search
+				isOptimised = true;
+				ga_statusPrefix = "Enrichment Search [" + setNumber + "] " + filterSet.getName() + " ... ";
+				ga_iteration = 0;
+				es_optimum = null;
+
+				SearchSpace ss = new SearchSpace();
+				ss.setTracker(this);
+				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
+
+				createGAWindow();
+				startTimer();
+
+				SearchResult<SimpleFilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker,
+						enrichmentSamples, enrichmentFraction, enrichmentPadding);
+
+				if (optimum != null)
+				{
+					best = optimum.score.r.filter;
+
+					// Enumerate on the min interval to produce the final filter
+					ss_filter = (DirectFilter) best;
+					for (int j = 0; j < n; j++)
+					{
+						if (enabled[j])
+						{
+							double minIncrement = ss_filter.getParameterIncrement(j);
+							try
+							{
+								dimensions[j] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
+								dimensions[j].setCentre(ss_filter.getParameterValue(j));
+								dimensions[j].setIncrement(minIncrement);
+							}
+							catch (IllegalArgumentException e)
+							{
+								IJ.error(TITLE,
+										String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), j,
+												ss_filter.getParameterName(j)));
+								dimensions = null;
+								break;
+							}
+						}
+					}
+					if (dimensions != null)
+					{
+						optimum = ss.findOptimum(dimensions, this);
+						if (optimum != null)
+						{
+							best = optimum.score.r.filter;
+						}
+					}
+					
+					// Now update the filter set for final assessment
+					filterSet = new FilterSet(filterSet.getName(),
+							searchSpaceToFilters(optimum.score.r.filter, ss.getSearchSpace()));
 
 					// Option to save the filters
 					if (saveOption)
@@ -4375,7 +4516,15 @@ public class BenchmarkFilterAnalysis
 
 	private List<Filter> searchSpaceToFilters(double[][] searchSpace)
 	{
-		ArrayList<Filter> filters = new ArrayList<Filter>(searchSpace.length);
+		return searchSpaceToFilters(null, searchSpace);
+	}
+
+	private List<Filter> searchSpaceToFilters(DirectFilter f, double[][] searchSpace)
+	{
+		final int size = searchSpace.length + ((f == null) ? 0 : 1);
+		ArrayList<Filter> filters = new ArrayList<Filter>(size);
+		if (f != null)
+			filters.add(f);
 		for (int i = 0; i < searchSpace.length; i++)
 			filters.add((DirectFilter) ss_filter.create(searchSpace[i]));
 		return filters;
@@ -4449,7 +4598,6 @@ public class BenchmarkFilterAnalysis
 		for (int index = 0; index < scoreResults.length; index++)
 		{
 			final ScoreResult scoreResult = scoreResults[index];
-
 			final SimpleFilterScore result = new SimpleFilterScore(scoreResult, true,
 					scoreResult.criteria >= minCriteria);
 			if (result.compareTo(max) < 0)
@@ -4468,6 +4616,45 @@ public class BenchmarkFilterAnalysis
 		gaWindow.append(text.toString());
 
 		return new SearchResult<SimpleFilterScore>(filter.getParameters(), max);
+	}
+
+	private SimpleFilterScore es_optimum = null;
+
+	public SearchResult<SimpleFilterScore>[] score(double[][] points)
+	{
+		ga_iteration++;
+		final ScoreResult[] scoreResults = scoreFilters(new FilterSet(searchSpaceToFilters(points)), false);
+		SimpleFilterScore max = es_optimum;
+
+		if (scoreResults == null)
+			return null;
+
+		@SuppressWarnings("unchecked")
+		SearchResult<SimpleFilterScore>[] scores = new SearchResult[scoreResults.length];
+		for (int index = 0; index < scoreResults.length; index++)
+		{
+			final ScoreResult scoreResult = scoreResults[index];
+			final SimpleFilterScore result = new SimpleFilterScore(scoreResult, true,
+					scoreResult.criteria >= minCriteria);
+			if (result.compareTo(max) < 0)
+			{
+				max = result;
+			}
+			scores[index] = new SearchResult<SimpleFilterScore>(result.r.filter.getParameters(), result);
+		}
+		
+		es_optimum = max;
+
+		// Add the best filter to the table
+		// This filter may not have been part of the scored subset so use the entire results set for reporting
+		DirectFilter filter = max.r.filter;
+		FractionClassificationResult r = scoreFilter(filter, minimalFilter, ga_resultsList);
+
+		final StringBuilder text = createResult(filter, r);
+		add(text, ga_iteration);
+		gaWindow.append(text.toString());
+
+		return scores;
 	}
 
 	private double limit = 0;
