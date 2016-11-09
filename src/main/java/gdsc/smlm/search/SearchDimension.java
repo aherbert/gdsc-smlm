@@ -235,7 +235,8 @@ public class SearchDimension implements Cloneable
 	 */
 	public double getUpper()
 	{
-		return values()[0];
+		values();
+		return values[values.length - 1];
 	}
 
 	/**
