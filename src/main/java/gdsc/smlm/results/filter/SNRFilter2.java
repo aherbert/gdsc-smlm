@@ -264,32 +264,12 @@ public class SNRFilter2 extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 3;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override
 	public double[] upperLimit()
 	{
 		return new double[] { Double.POSITIVE_INFINITY, WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		return new double[] { snr, minWidth, maxWidth };
 	}
 
 	/*

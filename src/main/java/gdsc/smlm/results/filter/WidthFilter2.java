@@ -253,32 +253,12 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 2;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override
 	public double[] upperLimit()
 	{
 		return new double[] { WidthFilter.UPPER_LIMIT, WidthFilter.UPPER_LIMIT };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		return new double[] { minWidth, maxWidth };
 	}
 
 	/*

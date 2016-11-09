@@ -261,16 +261,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 4;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override
@@ -278,17 +268,6 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	{
 		return new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, PrecisionFilter.UPPER_LIMIT,
 				PrecisionFilter.UPPER_LIMIT };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		// Ignore the mode parameters
-		return new double[] { searchDistance, timeThreshold, strictPrecision, range };
 	}
 
 	/*

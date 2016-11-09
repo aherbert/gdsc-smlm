@@ -433,16 +433,6 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 				sequence[7], sequence[8], sequence[9], sequence[10], sequence[11], sequence[12],
 				sequence[13]);
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 14;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -461,19 +451,6 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 				ShiftFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT,
 				PrecisionFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT 
 				};
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		// Ignore the mode parameters
-		return new double[] { searchDistance, timeThreshold, strictSignal, rangeSignal, strictSnr, rangeSnr,
-				strictMinWidth, rangeMinWidth, strictMaxWidth, rangeMaxWidth, strictShift, rangeShift, strictPrecision,
-				rangePrecision };
 	}
 
 	/*

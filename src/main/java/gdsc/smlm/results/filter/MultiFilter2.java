@@ -507,16 +507,6 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 6;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override
@@ -525,16 +515,6 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		return new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, WidthFilter.UPPER_LIMIT,
 				WidthFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT, EShiftFilter.UPPER_LIMIT,
 				PrecisionFilter.UPPER_LIMIT };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
 	}
 
 	/*

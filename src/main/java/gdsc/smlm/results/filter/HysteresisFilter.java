@@ -451,4 +451,30 @@ public abstract class HysteresisFilter extends Filter
 			indices[i] = i + 2;
 		return indices;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#length()
+	 */
+	@Override
+	public int length()
+	{
+		// Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
+		return getNumberOfParameters() - 2;
+	}
+
+	@Override
+	public double[] sequence()
+	{
+		// Remind derived classes to implement this.
+		//throw new NotImplementedException();
+		// Implement a default version using the results of getChromosomeParameters() and getParameters().
+		double[] sequence = new double[length()];
+		double[] params = getParameters();
+		int[] indices = getChromosomeParameters();
+		for (int i = 0; i < indices.length; i++)
+			sequence[i] = params[indices[i]];
+		return sequence;
+	}
 }

@@ -215,27 +215,6 @@ public class TraceFilter extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 2;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		// Ignore the mode parameters
-		return new double[] { d, t };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
 	public double[] mutationStepRange()

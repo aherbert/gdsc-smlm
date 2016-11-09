@@ -1445,6 +1445,28 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	public int length()
+	{
+		// Assume all the parameters are included in the Chromosome
+		return getNumberOfParameters();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	public double[] sequence()
+	{
+		// Assume all the parameters are included in the Chromosome
+		return getParameters();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ga.Chromosome#newChromosome(double[])
 	 */
 	public Chromosome newChromosome(double[] sequence)

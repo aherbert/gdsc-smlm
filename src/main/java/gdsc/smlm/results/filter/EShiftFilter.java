@@ -214,16 +214,6 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	{
 		setMax(parameters, 0, eshift);
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 1;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -234,16 +224,6 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	public double[] upperLimit()
 	{
 		return new double[] { UPPER_LIMIT };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		return new double[] { eshift };
 	}
 
 	/*

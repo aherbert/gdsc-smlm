@@ -203,27 +203,6 @@ public class SNRHysteresisFilter extends HysteresisFilter
 		setMin(parameters, 4, strictSnr);
 		parameters[5] = 0;
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#length()
-	 */
-	public int length()
-	{
-		return 4;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ga.Chromosome#sequence()
-	 */
-	public double[] sequence()
-	{
-		// Ignore the mode parameters
-		return new double[] { searchDistance, timeThreshold, strictSnr, range };
-	}
 
 	/*
 	 * (non-Javadoc)

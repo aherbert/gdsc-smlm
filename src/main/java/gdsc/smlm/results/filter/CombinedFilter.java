@@ -329,7 +329,7 @@ public abstract class CombinedFilter extends DirectFilter
 		if (lower == null)
 		{
 			// Default to zero on the lower so no need to fill
-			lower = new double[filter.length()];
+			lower = new double[filter.getNumberOfParameters()];
 		}
 		return lower;
 	}
@@ -353,7 +353,7 @@ public abstract class CombinedFilter extends DirectFilter
 	{
 		if (upper == null)
 		{
-			upper = new double[filter.length()];
+			upper = new double[filter.getNumberOfParameters()];
 			Arrays.fill(upper, Double.POSITIVE_INFINITY);
 		}
 		return upper;
