@@ -33,8 +33,15 @@ public class SearchSpace
 	private HashSet<String> coveredSpace = new HashSet<String>();
 	private StringBuilder sb = new StringBuilder();
 
+	private static final byte ENUMERATE = (byte) 0;
+	private static final byte REFINE = (byte) 1;
+	// The current search mode
+	private byte searchMode = ENUMERATE;
+
 	// This introduces a dependency on another gdsc.smlm package
 	private TrackProgress tracker = null;
+
+	private boolean refinement = true;
 
 	/**
 	 * Clone the search dimensions
@@ -57,15 +64,13 @@ public class SearchSpace
 	 * Search the configured search space until convergence of the optimum.
 	 * <p>
 	 * At each iteration the search will enumerate all points in the configured search space and find the optimum. If at
-	 * the bounds or the range in any dimension then the range is re-centred and the process repeated. During repeats
+	 * the bounds of the range in any dimension then the range is re-centred and the process repeated. During repeats
 	 * only those points that have not yet been evaluated will be passed to the score function. If not at the bounds
 	 * then the range is re-centred and the width of the range reduced.
 	 * <p>
 	 * The process iterates until the range cannot be reduced in size, or convergence is reached. The input dimensions
 	 * are modified during the search. Use the clone(SearchDimension[]) method to create a copy.
 	 * 
-	 * the type of comparable score
-	 *
 	 * @param <T>
 	 *            the type of comparable score
 	 * @param dimensions
@@ -84,6 +89,9 @@ public class SearchSpace
 		if (scoreFunction == null)
 			throw new IllegalArgumentException("Score function is null");
 		this.dimensions = dimensions;
+
+		// Start with enumeration of the space
+		searchMode = ENUMERATE;
 
 		// Find the best individual
 		SearchResult<T> current = findOptimum(scoreFunction, null);
@@ -130,7 +138,7 @@ public class SearchSpace
 	private <T extends Comparable<T>> SearchResult<T> findOptimum(ScoreFunction<T> scoreFunction,
 			SearchResult<T> current)
 	{
-		if (!createSearchSpace())
+		if (!createSearchSpace(current))
 			return null;
 
 		start("Find Optimum");
@@ -172,7 +180,11 @@ public class SearchSpace
 			//	System.out.printf("Current = %s\n", current.score);
 			// Replace if better
 			if (optimum.compareTo(current) < 0)
+			{
 				current = optimum;
+				//if (searchMode == REFINE)
+				//	System.out.printf("Refine improved = %s\n", current.score);
+			}
 		}
 
 		end();
@@ -198,14 +210,91 @@ public class SearchSpace
 	/**
 	 * Creates the search space.
 	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param current
+	 *            the current
 	 * @return true, if successful
 	 */
-	private boolean createSearchSpace()
+	private <T extends Comparable<T>> boolean createSearchSpace(SearchResult<T> current)
 	{
 		start("Create Search Space");
-		searchSpace = createSearchSpace(dimensions);
+		if (searchMode == REFINE && current != null)
+			searchSpace = createRefineSpace(dimensions, current.point);
+		else
+			// Enumerate
+			searchSpace = createSearchSpace(dimensions);
 		end();
 		return searchSpace != null;
+	}
+
+	public static double[][] createRefineSpace(SearchDimension[] dimensions, double[] point)
+	{
+		final double[][] dimensionValues = new double[dimensions.length][];
+		for (int i = 0; i < dimensions.length; i++)
+		{
+			double[] values = dimensions[i].values();
+			// Find the range values either side of the point value
+			double v = point[i];
+			double min = v;
+			double max = v;
+			for (int j = 0; j < values.length; j++)
+			{
+				if (values[j] < v)
+					min = values[j];
+				else if (values[j] > v)
+				{
+					max = values[j];
+					break;
+				}
+			}
+			// Create a sequence from min to max.
+			// Add option to configure the number of steps?
+			dimensionValues[i] = dimensions[i].enumerate(min, max, 100);
+		}
+		return createRefineSpace(dimensionValues, point);
+	}
+
+	/**
+	 * Creates the refine space.
+	 *
+	 * @param dimensionValues
+	 *            the dimension values
+	 * @param point
+	 *            the point
+	 * @return the double[][]
+	 */
+	private static double[][] createRefineSpace(double[][] dimensionValues, double[] point)
+	{
+		// Get the values
+		int combinations = 0;
+		for (int i = 0; i < dimensionValues.length; i++)
+		{
+			combinations += dimensionValues[i].length;
+		}
+
+		// This will be a list of points enumerating the entire range
+		// of the dimensions
+		final double[][] searchSpace = new double[combinations][];
+
+		// Start with the min value in each dimension
+		int n = 0;
+		// Enumerate each dimension
+		for (int i = 0; i < dimensionValues.length; i++)
+		{
+			// Values to iterate over for this dimension
+			final double[] v1 = dimensionValues[i];
+
+			for (int k = 0; k < v1.length; k++)
+			{
+				// Create a new point with an updated value for this dimension
+				final double[] v3 = point.clone();
+				v3[i] = v1[k];
+				searchSpace[n++] = v3;
+			}
+		}
+
+		return searchSpace;
 	}
 
 	/**
@@ -225,24 +314,22 @@ public class SearchSpace
 			//System.out.printf(" [%d] %.3f-%.3f", i, dimensions[i].getLower(), dimensions[i].getUpper());
 		}
 		//System.out.println();
-		return createSearchSpace(dimensions, dimensionValues);
+		return createSearchSpace(dimensionValues);
 	}
 
 	/**
 	 * Creates the search space.
 	 *
-	 * @param dimensions
-	 *            the dimensions
 	 * @param dimensionValues
 	 *            the dimension values
 	 * @return the double[][]
 	 */
-	private static double[][] createSearchSpace(SearchDimension[] dimensions, double[][] dimensionValues)
+	private static double[][] createSearchSpace(double[][] dimensionValues)
 	{
 		// Get the values
 		int combinations = 1;
-		final double[] v = new double[dimensions.length];
-		for (int i = 0; i < dimensions.length; i++)
+		final double[] v = new double[dimensionValues.length];
+		for (int i = 0; i < dimensionValues.length; i++)
 		{
 			combinations *= dimensionValues[i].length;
 			v[i] = dimensionValues[i][0];
@@ -258,7 +345,7 @@ public class SearchSpace
 		try
 		{
 			// Enumerate each dimension
-			for (int i = 0; i < dimensions.length; i++)
+			for (int i = 0; i < dimensionValues.length; i++)
 			{
 				// The number of current points
 				final int size = n;
@@ -309,78 +396,125 @@ public class SearchSpace
 			return false;
 
 		start("Update search space");
-
-		// Process each dimension
-		final double[] p = current.point;
 		boolean changed = false;
-		for (int i = 0; i < dimensions.length; i++)
+
+		if (searchMode == REFINE)
 		{
-			// Check if at the bounds of the dimension values
-			final boolean atBounds = dimensions[i].isAtBounds(p[i]);
-			final double[] values = (atBounds) ? dimensions[i].values() : null;
+			// During refinement we will not repeat the same point if the optimum moves
+			coveredSpace.clear();
 
 			// Move to the centre using the current optimum
-			dimensions[i].setCentre(p[i]);
-
-			// If at bounds then check if the bounds have changed due to the move
-			if (atBounds)
+			final double[] p = current.point;
+			for (int i = 0; i < dimensions.length; i++)
 			{
-				if (changed(values, dimensions[i].values()))
+				if (p[i] != dimensions[i].getCentre())
+				{
 					changed = true;
+					dimensions[i].setCentre(p[i]);
+				}
 			}
-		}
-		
-		// Q. Always reduce the range ... ?
-		//changed = false;
 
-		if (changed)
-		{
-			// If changed then we stick to the current range.
-			// Store all the scored search space so we do not recompute it.
-			if (scoredSearchSpaceHash.isEmpty())
+			if (!changed)
 			{
-				// Compute the hash for each item scored
-				for (int i = 0; i < scoredSearchSpace.length; i++)
-					coveredSpace.add(generateHashString(scoredSearchSpace[i]));
-			}
-			else
-			{
-				// Hash was already computed
-				for (int i = 0; i < scoredSearchSpaceHash.size(); i++)
-					coveredSpace.add(scoredSearchSpaceHash.get(i));
-				scoredSearchSpaceHash.clear();
+				// Switch back to enumeration of a smaller range
+				searchMode = ENUMERATE;
+				changed = reduceRange();
 			}
 		}
 		else
 		{
-			// If not changed then reduce the range.
+			// searchMode == ENUMERATION
 
-			// Clear the memory of the space that has been searched 
-			// (as the range increment will be updated so the values may not overlap).
-			coveredSpace.clear();
-
-			// First check if the range can be reduced. 
-			// If not then return false as nothing can be changed.
-			changed = false;
+			// Process each dimension
+			final double[] p = current.point;
 			for (int i = 0; i < dimensions.length; i++)
 			{
-				if (!dimensions[i].isAtMinIncrement())
+				// Check if at the bounds of the dimension values
+				final boolean atBounds = dimensions[i].isAtBounds(p[i]);
+				final double[] values = (atBounds) ? dimensions[i].values() : null;
+
+				// Move to the centre using the current optimum
+				dimensions[i].setCentre(p[i]);
+
+				// If at bounds then check if the bounds have changed due to the move
+				if (atBounds)
 				{
-					changed = true;
-					break;
+					if (changed(values, dimensions[i].values()))
+						changed = true;
 				}
 			}
+
+			// Q. Always reduce the range ... ?
+			//changed = false;
+
 			if (changed)
 			{
-				// Reduce the range
-				for (int i = 0; i < dimensions.length; i++)
-					dimensions[i].reduce();
+				// If changed then we stick to the current range.
+				// Store all the scored search space so we do not recompute it.
+				if (scoredSearchSpaceHash.isEmpty())
+				{
+					// Compute the hash for each item scored
+					for (int i = 0; i < scoredSearchSpace.length; i++)
+						coveredSpace.add(generateHashString(scoredSearchSpace[i]));
+				}
+				else
+				{
+					// Hash was already computed
+					for (int i = 0; i < scoredSearchSpaceHash.size(); i++)
+						coveredSpace.add(scoredSearchSpaceHash.get(i));
+					scoredSearchSpaceHash.clear();
+				}
+			}
+			else
+			{
+				// Clear the memory of the space that has been searched 
+				// (as the search space is about to be altered so the values may not overlap).
+				coveredSpace.clear();
+
+				// Optionally switch to refinement
+				if (refinement)
+				{
+					searchMode = REFINE;
+					changed = true;
+				}
+				else
+				{
+
+					changed = reduceRange();
+				}
 			}
 		}
 
 		end();
 
 		return changed;
+	}
+
+	/**
+	 * Reduce range.
+	 *
+	 * @return true, if successful
+	 */
+	private boolean reduceRange()
+	{
+		// First check if the range can be reduced. 
+		// If not then return false as nothing can be changed.
+		boolean reduced = false;
+		for (int i = 0; i < dimensions.length; i++)
+		{
+			if (!dimensions[i].isAtMinIncrement())
+			{
+				reduced = true;
+				break;
+			}
+		}
+		if (reduced)
+		{
+			// Reduce the range
+			for (int i = 0; i < dimensions.length; i++)
+				dimensions[i].reduce();
+		}
+		return reduced;
 	}
 
 	/**
@@ -464,5 +598,26 @@ public class SearchSpace
 	public double[][] getSearchSpace()
 	{
 		return searchSpace;
+	}
+
+	/**
+	 * Checks if refinement within the search space is enabled.
+	 *
+	 * @return true, if is refinement
+	 */
+	public boolean isRefinement()
+	{
+		return refinement;
+	}
+
+	/**
+	 * Set to true to allow refinement within the current search space.
+	 *
+	 * @param refinement
+	 *            the new refinement value
+	 */
+	public void setRefinement(boolean refinement)
+	{
+		this.refinement = refinement;
 	}
 }

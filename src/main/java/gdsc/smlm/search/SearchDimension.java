@@ -118,7 +118,7 @@ public class SearchDimension implements Cloneable
 		this.min = round(min);
 		this.max = round(max);
 		this.nIncrement = nIncrement;
-		
+
 		// Rounding changes the range so bring the upper and lower back within
 		lower = Math.min(this.max, Math.max(lower, this.min));
 		upper = Math.min(this.max, Math.max(upper, this.min));
@@ -278,10 +278,10 @@ public class SearchDimension implements Cloneable
 			{
 				values[size++] = round(centre - i * increment);
 			}
-			
+
 			values[size++] = centre; // Already rounded and within range
 		}
-		
+
 		for (int i = 1; i <= nIncrement; i++)
 		{
 			value = round(centre + i * increment);
@@ -432,5 +432,55 @@ public class SearchDimension implements Cloneable
 	{
 		this.pad = pad;
 		values = null;
+	}
+
+	/**
+	 * Enumerate from the lower to the upper value using the number of steps.
+	 * <p>
+	 * No range check is performed against the current min/max so the returned values can be outside the allowed range.
+	 * The min increment setting is respected so the number of actual steps may be smaller.
+	 *
+	 * @param lower
+	 *            the lower
+	 * @param upper
+	 *            the upper
+	 * @param steps
+	 *            the steps
+	 * @return the double[]
+	 */
+	public double[] enumerate(double lower, double upper, int steps)
+	{
+		if (upper <= lower || steps < 2)
+			return new double[] { round(lower) };
+
+		lower = round(lower);
+		upper = round(upper);
+
+		double inc = (upper - lower) / (steps - 1);
+		if (inc < minIncrement)
+		{
+			inc = minIncrement;
+		}
+		steps = 1 + (int) Math.ceil((upper - lower) / inc);
+
+		final double[] values = new double[steps];
+		int size = 0;
+		for (int i = 0; i < values.length; i++)
+		{
+			final double v = round(lower + i * inc);
+			if (v >= upper)
+			{
+				values[size++] = upper;
+				break;
+			}
+			values[size++] = v;
+		}
+
+		// Check
+		if (values[size - 1] != upper)
+			throw new RuntimeException("enumeration is invalid");
+
+		return (size != values.length) ? Arrays.copyOf(values, size) : values;
+
 	}
 }

@@ -1730,8 +1730,11 @@ public class BenchmarkFilterAnalysis
 
 		// Only repeat analysis if necessary
 		boolean newResults = false;
+		// Force a repeat if using filter evolution
+		final long evolveSetting = (evolve != 0) ? System.currentTimeMillis() : 0;
 		Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
-				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve, rangeSearchWidth, stepSearch);
+				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting, rangeSearchWidth,
+				stepSearch);
 		if (debugSpeed || !settings.equals(lastAnalyseSettings))
 		{
 			//System.out.println("Running...");
