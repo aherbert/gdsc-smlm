@@ -56,14 +56,14 @@ public class SimpleFilterScore implements Comparable<SimpleFilterScore>
 				return -1;
 			if (this.criteria < that.criteria)
 				return 1;
+			// If the same type then compare the parameters 
 			if (allSameType)
 			{
-				// If equal criteria then if the same type get the filter with the strongest params
-				return this.r.filter.weakest(that.r.filter);
+				return compareParameters(that);
 			}
 			else if (this.r.filter.getType().equals(that.r.filter.getType()))
 			{
-				return this.r.filter.weakest(that.r.filter);
+				return compareParameters(that);
 			}
 			return 0;
 		}
@@ -82,17 +82,26 @@ public class SimpleFilterScore implements Comparable<SimpleFilterScore>
 				return -1;
 			if (this.score < that.score)
 				return 1;
+			// If the same type then compare the parameters 
 			if (allSameType)
 			{
-				// If equal criteria then if the same type get the filter with the strongest params
-				return this.r.filter.weakest(that.r.filter);
+				return compareParameters(that);
 			}
 			else if (this.r.filter.getType().equals(that.r.filter.getType()))
 			{
-				return this.r.filter.weakest(that.r.filter);
+				return compareParameters(that);
 			}
 			return 0;
 		}
+	}
+
+	private int compareParameters(SimpleFilterScore that)
+	{
+		// Get the filter with the weakest params
+		//return this.r.filter.weakest(that.r.filter);
+		
+		// Get the filter with the strongest params
+		return that.r.filter.weakest(this.r.filter);
 	}
 	
 	@Override
