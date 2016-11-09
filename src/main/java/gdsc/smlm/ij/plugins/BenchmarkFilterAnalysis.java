@@ -190,7 +190,7 @@ public class BenchmarkFilterAnalysis
 	private static boolean scoreAnalysis = true;
 	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
 	private static int componentAnalysis = 3;
-	private final static String[] EVOLVE = { "None", "Gentic Algorithm", "Range Search" };
+	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search" };
 	private static int evolve = 0;
 	private static int rangeSearchWidth = 2;
 	private static int maxIterations = 30;
@@ -2237,9 +2237,7 @@ public class BenchmarkFilterAnalysis
 			// Collect parameters for the genetic algorithm
 			stopTimer();
 
-			createGAWindow();
-
-			final Filter filter = filterSet.getFilters().get(0);
+			Filter filter = filterSet.getFilters().get(0);
 			double[] stepSize = filter.mutationStepRange().clone();
 			double[] upper = filter.upperLimit();
 			// Ask the user for the mutation step parameters.
@@ -2319,12 +2317,60 @@ public class BenchmarkFilterAnalysis
 				ga_iteration = 0;
 				ga_population.setTracker(this);
 
+				createGAWindow();
 				startTimer();
 
 				best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
 				if (best != null)
 				{
+					// Enumerate on the min interval to produce the final filter
+					ss_filter = (DirectFilter) best;
+					SearchDimension[] dimensions = new SearchDimension[ss_filter.getNumberOfParameters()];
+					for (int i = 0; i < indices.length; i++)
+					{
+						int j = indices[i];
+						if (stepSize[j] != 0)
+						{
+							double minIncrement = ss_filter.getParameterIncrement(j);
+							try
+							{
+								dimensions[i] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
+								dimensions[i].setCentre(ss_filter.getParameterValue(j));
+								dimensions[i].setIncrement(minIncrement);
+							}
+							catch (IllegalArgumentException e)
+							{
+								IJ.error(TITLE,
+										String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), j,
+												ss_filter.getParameterName(j)));
+								dimensions = null;
+								break;
+							}
+						}
+					}
+					if (dimensions != null)
+					{
+						// Add dimensions that have been missed
+						for (int i = 0; i < dimensions.length; i++)
+							if (dimensions[i] == null)
+								dimensions[i] = new SearchDimension(ss_filter.getParameterValue(i));
+
+						SearchSpace ss = new SearchSpace();
+						ss.setTracker(this);
+						ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, 1); // 1 iteration
+
+						createGAWindow();
+						startTimer();
+
+						SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
+
+						if (optimum != null)
+						{
+							best = optimum.score.r.filter;
+						}
+					}
+
 					// Now update the filter set for final assessment
 					filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
 
@@ -2408,8 +2454,6 @@ public class BenchmarkFilterAnalysis
 				}
 				searchRangeMap.put(setNumber, enabled);
 
-				createGAWindow();
-
 				// Range Search
 				isOptimised = true;
 				ga_statusPrefix = "Range Search [" + setNumber + "] " + filterSet.getName() + " ... ";
@@ -2419,6 +2463,7 @@ public class BenchmarkFilterAnalysis
 				ss.setTracker(this);
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
+				createGAWindow();
 				startTimer();
 
 				SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
@@ -4110,7 +4155,7 @@ public class BenchmarkFilterAnalysis
 	{
 		if (progress % stepProgress == 0)
 		{
-			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+			if (Utils.showStatus("Scoring Filter: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
 		progress++;
