@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
+
 import gdsc.core.logging.TrackProgress;
 
 /*----------------------------------------------------------------------------- 
@@ -619,5 +621,186 @@ public class SearchSpace
 	public void setRefinement(boolean refinement)
 	{
 		this.refinement = refinement;
+	}
+
+	/**
+	 * Search the configured search space until convergence of the optimum.
+	 * <p>
+	 * At each iteration the search will randomly sample points in the configured search space and score them. The top
+	 * fraction of the results is used to redefine the search space (with padding). Note: The range cannot fall below
+	 * the the settings defined by the min increment and nIntervals for each of the input dimensions.
+	 * <p>
+	 * The process iterates until convergence is reached. The input dimensions are used to define the min/max and the
+	 * current lower/upper bounds of the range. The dimensions are not modified.
+	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param dimensions
+	 *            the dimensions
+	 * @param scoreFunction
+	 *            the score function
+	 * @param checker
+	 *            the checker
+	 * @param samples
+	 *            the samples
+	 * @param fraction
+	 *            the fraction
+	 * @param padding
+	 *            the padding
+	 * @return The optimum (or null)
+	 */
+	public <T extends Comparable<T>> SearchResult<T> enrichmentSearch(SearchDimension[] dimensions,
+			FullScoreFunction<T> scoreFunction, ConvergenceChecker<T> checker, int samples, double fraction,
+			double padding)
+	{
+		if (dimensions == null || dimensions.length == 0)
+			throw new IllegalArgumentException("Dimensions must not be empty");
+		if (scoreFunction == null)
+			throw new IllegalArgumentException("Score function is null");
+		if (fraction <= 0 || fraction >= 1)
+			throw new IllegalArgumentException("Fraction must be between 0 and 1");
+		if (samples < 1)
+			throw new IllegalArgumentException("Samples must be strictly positive");
+		if (padding < 0)
+			throw new IllegalArgumentException("Padding must be positive");
+		this.dimensions = dimensions;
+
+		// Find the best individual
+		SearchResult<T>[] scores = score(scoreFunction, samples, fraction);
+		if (scores == null)
+			return null;
+
+		SearchResult<T> current = scores[0];
+		SearchResult<T> previous = null;
+
+		boolean converged = false;
+		while (!converged)
+		{
+			previous = current;
+
+			if (!updateSearchSpace(current, scores, padding))
+				break;
+
+			// Find the optimum and check convergence
+			scores = score(scoreFunction, samples, fraction);
+			if (scores == null)
+				break;
+
+			SearchResult<T> optimum = scores[0];
+			if (optimum.compareTo(current) < 0)
+				current = optimum;
+			if (checker != null)
+				converged = checker.converged(previous, current);
+		}
+		if (tracker != null)
+			tracker.status("Converged [%d]", iteration);
+
+		return current;
+	}
+
+	/**
+	 * Score random samples from the search space and return the top fraction
+	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param scoreFunction
+	 *            the score function
+	 * @param samples
+	 *            the samples
+	 * @param fraction
+	 *            the fraction
+	 * @return the score results
+	 */
+	private <T extends Comparable<T>> SearchResult<T>[] score(FullScoreFunction<T> scoreFunction, int samples,
+			double fraction)
+	{
+		// Count the number of active dimensions
+		final int[] indices = new int[dimensions.length];
+		int size = 0;
+		final double[] centre = new double[dimensions.length];
+		final double[] lower = new double[dimensions.length];
+		final double[] range = new double[dimensions.length];
+		for (int i = 0; i < dimensions.length; i++)
+		{
+			centre[i] = dimensions[i].getCentre();
+			if (dimensions[i].active)
+			{
+				lower[size] = dimensions[i].getLower();
+				range[size] = (dimensions[i].getUpper() - lower[size]);
+				indices[size++] = i;
+			}
+		}
+
+		// Generate random points
+		final HaltonSequenceGenerator g = new HaltonSequenceGenerator(size);
+		final double[][] points = new double[samples][];
+		for (int i = 0; i < samples; i++)
+		{
+			final double[] r = g.nextVector();
+			final double[] p = centre.clone();
+			for (int j = 0; j < size; j++)
+				p[indices[j]] = lower[j] + r[j] * range[j];
+			points[i] = p;
+		}
+
+		// Score
+		SearchResult<T>[] scores = scoreFunction.score(points);
+
+		// Get the top fraction
+		// TODO - get a partial sort
+		Arrays.sort(scores);
+		size = (int) Math.ceil(scores.length * fraction);
+		return Arrays.copyOf(scores, size);
+	}
+
+	/**
+	 * Update search space.
+	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param current
+	 *            the current
+	 * @param scores
+	 *            the scores
+	 * @param padding
+	 *            the padding
+	 * @return true, if successful
+	 */
+	private <T extends Comparable<T>> boolean updateSearchSpace(SearchResult<T> current, SearchResult<T>[] scores,
+			double padding)
+	{
+		// Find the limits in the current scores
+		final double[] lower = current.point.clone();
+		final double[] upper = current.point.clone();
+		for (int i = 0; i < scores.length; i++)
+		{
+			final double[] point = scores[i].point;
+			for (int j = 0; j < lower.length; j++)
+			{
+				if (lower[j] > point[j])
+					lower[j] = point[j];
+				if (upper[j] < point[j])
+					upper[j] = point[j];
+			}
+		}
+
+		// Pad the range
+		if (padding > 0)
+		{
+			for (int j = 0; j < lower.length; j++)
+			{
+				final double range = padding * (upper[j] - lower[j]);
+				lower[j] -= range;
+				upper[j] += range;
+			}
+		}
+
+		// Create new dimensions
+		for (int j = 0; j < lower.length; j++)
+		{
+			dimensions[j] = dimensions[j].create(lower[j], upper[j]);
+		}
+
+		return false;
 	}
 }

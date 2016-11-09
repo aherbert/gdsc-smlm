@@ -127,6 +127,27 @@ public class SearchDimension implements Cloneable
 		setIncrement((upper - lower) / (2 * nIncrement));
 	}
 
+	/**
+	 * Creates a new search dimension, respecting the current min/max and the increment settings. If the current search
+	 * dimension is not active then an inactive dimension is returned centred between the lower and upper bounds.
+	 *
+	 * @param lower
+	 *            the current lower bound of the range
+	 * @param upper
+	 *            the current upper bound of the range
+	 * @return the search dimension
+	 */
+	public SearchDimension create(double lower, double upper)
+	{
+		if (!active)
+			return new SearchDimension((upper + lower) / 2);
+		if (lower < min)
+			lower = min;
+		if (upper > max)
+			upper = max;
+		return new SearchDimension(min, max, minIncrement, nIncrement, lower, upper);
+	}
+
 	private static boolean isInvalid(double d)
 	{
 		return Double.isNaN(d) || Double.isInfinite(d);
