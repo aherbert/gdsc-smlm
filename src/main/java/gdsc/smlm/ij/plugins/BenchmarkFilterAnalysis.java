@@ -2392,6 +2392,7 @@ public class BenchmarkFilterAnalysis
 						try
 						{
 							dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
+							dimensions[i].setPad(true);
 						}
 						catch (IllegalArgumentException e)
 						{
