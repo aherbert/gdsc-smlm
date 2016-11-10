@@ -209,6 +209,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static final int FILTER_PRECISION = 6;
 	private static final int FILTER_ITERATIONS = 7;
 	private static final int FILTER_EVALUATIONS = 8;
+	private static String[] names;
 
 	private FilterCriteria[] createFilterCriteria()
 	{
@@ -229,8 +230,50 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			filterCriteria[i++] = new FilterCriteria("Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
 			filterCriteria[i++] = new FilterCriteria("Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
 			//@formatter:on
+
+			names = new String[7];
+			for (int j = 0; j < names.length; j++)
+				names[j] = filterCriteria[j].name;
 		}
 		return filterCriteria;
+	}
+
+	private static double[] min;
+	private static double[] max;
+
+	/**
+	 * Gets the min value of the most recent fit data for the given parameter name.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the min
+	 */
+	public static double getMin(String name)
+	{
+		return getValue(name, min, 0);
+	}
+
+	/**
+	 * Gets the max value of the most recent fit data for the given parameter name.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the max
+	 */
+	public static double getMax(String name)
+	{
+		return getValue(name, max, Double.MAX_VALUE);
+	}
+
+	private static double getValue(String name, double[] array, double defaultValue)
+	{
+		if (Utils.isNullOrEmpty(name) || array == null)
+			return defaultValue;
+		name = name.replace(" ", "");
+		for (int j = 0; j < names.length; j++)
+			if (names[j].equalsIgnoreCase(name))
+				return array[j];
+		return defaultValue;
 	}
 
 	static FitConfiguration fitConfig;
@@ -1836,8 +1879,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Plot histograms of the stats on the same window
 		double[] lower = new double[filterCriteria.length];
 		double[] upper = new double[lower.length];
-		double[] min = new double[lower.length];
-		double[] max = new double[lower.length];
+		min = new double[lower.length];
+		max = new double[lower.length];
 		for (int i = 0; i < stats[0].length; i++)
 		{
 			double[] limits = showDoubleHistogram(stats, i, wo, matchScores, nPredicted);
