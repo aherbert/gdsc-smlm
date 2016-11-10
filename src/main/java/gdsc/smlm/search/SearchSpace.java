@@ -35,15 +35,34 @@ public class SearchSpace
 	private HashSet<String> coveredSpace = new HashSet<String>();
 	private StringBuilder sb = new StringBuilder();
 
-	private static final byte ENUMERATE = (byte) 0;
-	private static final byte REFINE = (byte) 1;
-	// The current search mode
-	private byte searchMode = ENUMERATE;
-
 	// This introduces a dependency on another gdsc.smlm package
 	private TrackProgress tracker = null;
 
-	private boolean refinement = true;
+	/**
+	 * The refinement mode for the range search.
+	 * <p>
+	 * At each stage the refinement search enumerates a range for each dimension using the current interval. The optimum
+	 * from this search space can be refined before the dimension range is reduced.
+	 */
+	public enum RefinementMode
+	{
+		/**
+		 * No refinement before reducing the range
+		 */
+		NONE,
+		/**
+		 * Enumerate each dimension in turn up to the next increment in either direction. This is iterated until the
+		 * optimum converges and then the range is reduced.
+		 */
+		SINGLE_DIMENSION,
+		/**
+		 * Enumerate all dimensions torgther up to the next increment in either direction. This is performed once and
+		 * then the range is reduced.
+		 */
+		MULTI_DIMENSION
+	}
+
+	private RefinementMode searchMode = RefinementMode.SINGLE_DIMENSION;
 
 	/**
 	 * Clone the search dimensions
@@ -72,7 +91,7 @@ public class SearchSpace
 	 * <p>
 	 * The process iterates until the range cannot be reduced in size, or convergence is reached. The input dimensions
 	 * are modified during the search. Use the clone(SearchDimension[]) method to create a copy.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of comparable score
 	 * @param dimensions
@@ -81,10 +100,12 @@ public class SearchSpace
 	 *            the score function
 	 * @param checker
 	 *            the checker
+	 * @param refinementMode
+	 *            The refinement mode for the range search.
 	 * @return The optimum (or null)
 	 */
 	public <T extends Comparable<T>> SearchResult<T> search(SearchDimension[] dimensions,
-			ScoreFunction<T> scoreFunction, ConvergenceChecker<T> checker)
+			ScoreFunction<T> scoreFunction, ConvergenceChecker<T> checker, RefinementMode refinementMode)
 	{
 		if (dimensions == null || dimensions.length == 0)
 			throw new IllegalArgumentException("Dimensions must not be empty");
@@ -92,9 +113,6 @@ public class SearchSpace
 			throw new IllegalArgumentException("Score function is null");
 		this.dimensions = dimensions;
 		reset();
-
-		// Start with enumeration of the space
-		searchMode = ENUMERATE;
 
 		// Find the best individual
 		SearchResult<T> current = findOptimum(scoreFunction, null);
@@ -106,7 +124,7 @@ public class SearchSpace
 			iteration++;
 			previous = current;
 
-			if (!updateSearchSpace(current))
+			if (!updateSearchSpace(current, refinementMode))
 				break;
 
 			// Find the optimum and check convergence
@@ -135,6 +153,7 @@ public class SearchSpace
 		scoredSearchSpace = null;
 		scoredSearchSpaceHash.clear();
 		coveredSpace.clear();
+		searchMode = RefinementMode.NONE;
 	}
 
 	/**
@@ -157,9 +176,6 @@ public class SearchSpace
 			throw new IllegalArgumentException("Score function is null");
 		this.dimensions = dimensions;
 		reset();
-
-		// Start with enumeration of the space
-		searchMode = ENUMERATE;
 
 		// Find the best individual
 		SearchResult<T> current = findOptimum(scoreFunction, null);
@@ -263,8 +279,10 @@ public class SearchSpace
 	private <T extends Comparable<T>> boolean createSearchSpace(SearchResult<T> current)
 	{
 		start("Create Search Space");
-		if (searchMode == REFINE && current != null)
+		if (searchMode == RefinementMode.SINGLE_DIMENSION && current != null)
 			searchSpace = createRefineSpace(dimensions, current.point);
+		if (searchMode == RefinementMode.MULTI_DIMENSION && current != null)
+			searchSpace = createBoundedSearchSpace(dimensions, current.point);
 		else
 			// Enumerate
 			searchSpace = createSearchSpace(dimensions);
@@ -272,6 +290,15 @@ public class SearchSpace
 		return searchSpace != null;
 	}
 
+	/**
+	 * Creates the refine space.
+	 *
+	 * @param dimensions
+	 *            the dimensions
+	 * @param point
+	 *            the point
+	 * @return the double[][]
+	 */
 	public static double[][] createRefineSpace(SearchDimension[] dimensions, double[] point)
 	{
 		final double[][] dimensionValues = new double[dimensions.length][];
@@ -339,6 +366,41 @@ public class SearchSpace
 		}
 
 		return searchSpace;
+	}
+
+	/**
+	 * Creates the bounded search space.
+	 *
+	 * @param dimensions
+	 *            the dimensions
+	 * @param point
+	 *            the point
+	 * @return the double[][]
+	 */
+	public static double[][] createBoundedSearchSpace(SearchDimension[] dimensions, double[] point)
+	{
+		final double[][] dimensionValues = new double[dimensions.length][];
+		for (int i = 0; i < dimensions.length; i++)
+		{
+			double[] values = dimensions[i].values();
+			// Find the range values either side of the point value
+			double v = point[i];
+			double min = v;
+			double max = v;
+			for (int j = 0; j < values.length; j++)
+			{
+				if (values[j] < v)
+					min = values[j];
+				else if (values[j] > v)
+				{
+					max = values[j];
+					break;
+				}
+			}
+			// Create a sequence from min to max
+			dimensionValues[i] = dimensions[i].enumerate(min, max);
+		}
+		return createSearchSpace(dimensionValues);
 	}
 
 	/**
@@ -434,7 +496,7 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return true, if successful
 	 */
-	private boolean updateSearchSpace(SearchResult<?> current)
+	private boolean updateSearchSpace(SearchResult<?> current, RefinementMode refinementMode)
 	{
 		if (current == null)
 			return false;
@@ -442,7 +504,7 @@ public class SearchSpace
 		start("Update search space");
 		boolean changed = false;
 
-		if (searchMode == REFINE)
+		if (searchMode != RefinementMode.NONE)
 		{
 			// During refinement we will not repeat the same point if the optimum moves
 			coveredSpace.clear();
@@ -458,10 +520,21 @@ public class SearchSpace
 				}
 			}
 
-			if (!changed)
+			if (searchMode == RefinementMode.SINGLE_DIMENSION)
 			{
-				// Switch back to enumeration of a smaller range
-				searchMode = ENUMERATE;
+				if (!changed)
+				{
+					// Switch back to enumeration of a smaller range if 
+					// the refinement has not changed the centre
+					searchMode = RefinementMode.NONE;
+					changed = reduceRange();
+				}
+			}
+			else if (searchMode == RefinementMode.MULTI_DIMENSION)
+			{
+				// We enumerated all the points around the optimum so 
+				// just switch back to enumeration of a smaller range
+				searchMode = RefinementMode.NONE;
 				changed = reduceRange();
 			}
 		}
@@ -516,9 +589,9 @@ public class SearchSpace
 				coveredSpace.clear();
 
 				// Optionally switch to refinement
-				if (refinement)
+				if (refinementMode != RefinementMode.NONE)
 				{
-					searchMode = REFINE;
+					searchMode = refinementMode;
 					changed = true;
 				}
 				else
@@ -546,7 +619,7 @@ public class SearchSpace
 		boolean reduced = false;
 		for (int i = 0; i < dimensions.length; i++)
 		{
-			if (!dimensions[i].isAtMinIncrement())
+			if (!dimensions[i].canReduce())
 			{
 				reduced = true;
 				break;
@@ -645,27 +718,6 @@ public class SearchSpace
 	}
 
 	/**
-	 * Checks if refinement within the search space is enabled.
-	 *
-	 * @return true, if is refinement
-	 */
-	public boolean isRefinement()
-	{
-		return refinement;
-	}
-
-	/**
-	 * Set to true to allow refinement within the current search space.
-	 *
-	 * @param refinement
-	 *            the new refinement value
-	 */
-	public void setRefinement(boolean refinement)
-	{
-		this.refinement = refinement;
-	}
-
-	/**
 	 * Search the configured search space until convergence of the optimum.
 	 * <p>
 	 * At each iteration the search will randomly sample points in the configured search space and score them. The top
@@ -710,7 +762,7 @@ public class SearchSpace
 
 		// Keep the same generator throughout
 		final HaltonSequenceGenerator[] generator = new HaltonSequenceGenerator[1];
-		
+
 		// Find the best individual
 		SearchResult<T>[] scores = score(scoreFunction, samples, fraction, generator);
 		if (scores == null)
@@ -797,7 +849,7 @@ public class SearchSpace
 
 		// Get the top fraction
 		size = (int) Math.ceil(scores.length * fraction);
-		
+
 		return scoreFunction.cut(scores, size);
 	}
 

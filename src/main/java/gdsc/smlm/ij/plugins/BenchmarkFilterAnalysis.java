@@ -193,10 +193,12 @@ public class BenchmarkFilterAnalysis
 	private static boolean scoreAnalysis = true;
 	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
 	private static int componentAnalysis = 3;
-	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search" };
+	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search",
+			"Step Search" };
 	private static int evolve = 0;
 	private static int rangeSearchWidth = 2;
 	private static int maxIterations = 30;
+	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 10000;
 	private static double enrichmentFraction = 0.3;
 	private static double enrichmentPadding = 0.1;
@@ -2231,8 +2233,29 @@ public class BenchmarkFilterAnalysis
 
 		this.ga_resultsList = resultsList;
 		Chromosome best = null;
-		boolean isOptimised = false;
 		String algorithm = "";
+
+		// TODO - Remove need for the expanded array 
+
+		// All the search algorithms use search dimensions.
+		// Create search dimensions if needed (these are used for testing if the optimum is at the limit).
+		if (allSameType)
+		{
+			if (filterSet.getFilters().size() == 4)
+			{
+				// Build the search dimensions
+			}
+			else
+			{
+				// Allow inputting a filter set (e.g. saved from previous optimisation)
+
+				// Get the search dimensions from the data.
+				// Min/max must be set using values from BenchmarkSpotFit.
+
+				// TODO - allow the SearchSpace algorithms to be seeded with an initial population for the first evaluation of the optimum
+			}
+		}
+
 		filterSetStopWatch = StopWatch.createStarted();
 
 		if (evolve == 1 && allSameType)
@@ -2277,8 +2300,6 @@ public class BenchmarkFilterAnalysis
 			}
 			else
 			{
-				isOptimised = true;
-
 				populationSize = (int) Math.abs(gd.getNextNumber());
 				if (populationSize < 10)
 					populationSize = 10;
@@ -2316,11 +2337,11 @@ public class BenchmarkFilterAnalysis
 				selectionStrategy.setTracker(this);
 
 				// Evolve
-				ga_statusPrefix = "Evolving [" + setNumber + "] " + filterSet.getName() + " ... ";
+				algorithm = EVOLVE[evolve];
+				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 				ga_population.setTracker(this);
 
-				algorithm = EVOLVE[evolve];
 				createGAWindow();
 				resumeTimer();
 
@@ -2380,18 +2401,29 @@ public class BenchmarkFilterAnalysis
 			}
 		}
 
-		if (evolve == 2 && allSameType && filterSet.size() == 4)
+		if ((evolve == 2 || evolve == 4) && allSameType && filterSet.size() == 4)
 		{
 			// Collect parameters for the range search algorithm
 			pauseTimer();
 
+			boolean isStepSearch = evolve == 4;
+
+			// The step search should use a multi-dimension refinement and no range reduction
+			SearchSpace.RefinementMode myRefinementMode = SearchSpace.RefinementMode.MULTI_DIMENSION;
+
 			// Ask the user for the search parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
-			gd.addMessage("Configure the range search algorithm for [" + setNumber + "] " + filterSet.getName());
+			gd.addMessage(
+					"Configure the " + EVOLVE[evolve] + " algorithm for [" + setNumber + "] " + filterSet.getName());
 			gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
-			gd.addCheckbox(prefix + "Save_option", saveOption);
-			gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
+			if (!isStepSearch)
+			{
+				gd.addCheckbox(prefix + "Save_option", saveOption);
+				gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
+				String[] modes = SettingsManager.getNames((Object[]) SearchSpace.RefinementMode.values());
+				gd.addChoice("Refinement", modes, modes[refinementMode]);
+			}
 
 			// Add choice of fields to optimise
 			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
@@ -2415,8 +2447,13 @@ public class BenchmarkFilterAnalysis
 			else
 			{
 				rangeSearchWidth = (int) gd.getNextNumber();
-				saveOption = gd.getNextBoolean();
-				maxIterations = (int) gd.getNextNumber();
+				if (!isStepSearch)
+				{
+					saveOption = gd.getNextBoolean();
+					maxIterations = (int) gd.getNextNumber();
+					refinementMode = gd.getNextChoiceIndex();
+					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
+				}
 
 				final Filter filter1 = ss_filter;
 				final Filter filter2 = filterSet.getFilters().get(1);
@@ -2438,6 +2475,8 @@ public class BenchmarkFilterAnalysis
 						{
 							dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
 							dimensions[i].setPad(true);
+							if (isStepSearch)
+								dimensions[i].setReduceFactor(1);
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -2453,20 +2492,18 @@ public class BenchmarkFilterAnalysis
 				}
 				searchRangeMap.put(setNumber, enabled);
 
-				// Range Search
-				isOptimised = true;
-				ga_statusPrefix = "Range Search [" + setNumber + "] " + filterSet.getName() + " ... ";
+				algorithm = EVOLVE[evolve];
+				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
-				algorithm = EVOLVE[evolve];
 				createGAWindow();
 				resumeTimer();
 
-				SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
+				SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker, myRefinementMode);
 
 				if (optimum != null)
 				{
@@ -2564,9 +2601,8 @@ public class BenchmarkFilterAnalysis
 				}
 				searchRangeMap.put(setNumber, enabled);
 
-				// Range Search
-				isOptimised = true;
-				ga_statusPrefix = "Enrichment Search [" + setNumber + "] " + filterSet.getName() + " ... ";
+				algorithm = EVOLVE[evolve];
+				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 				es_optimum = null;
 
@@ -2575,7 +2611,6 @@ public class BenchmarkFilterAnalysis
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations,
 						convergedCount);
 
-				algorithm = EVOLVE[evolve];
 				createGAWindow();
 				resumeTimer();
 
@@ -2636,122 +2671,124 @@ public class BenchmarkFilterAnalysis
 		if (tw != null)
 			tw.setIncrement(Integer.MAX_VALUE);
 
-		// If the filters were expanded we can do a step search from the initial optimum using the increment
-		if (!isOptimised && stepSearch != 0 && allSameType && wasExpanded(setNumber))
-		{
-			algorithm = "Step Search " + stepSearch;
+		// TODO - Remove - this is now obsolete ...
 
-			// Evaluate all the filters and find the best
-			SimpleFilterScore max = null;
-
-			ScoreResult[] scoreResults = scoreFilters(filterSet, showResultsTable);
-			if (scoreResults == null)
-				return -1;
-
-			pauseTimer();
-			for (int index = 0; index < scoreResults.length; index++)
-			{
-				final ScoreResult scoreResult = scoreResults[index];
-
-				addToResultsWindow(tw, scoreResult);
-
-				final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
-						scoreResult.criteria >= minCriteria);
-				if (result.compareTo(max) < 0)
-				{
-					max = result;
-				}
-			}
-			resumeTimer();
-
-			if (max != null)
-			{
-				final int set = setNumber - 1;
-				// Force this if we are using smaller steps. 
-				boolean doSearch = (stepSearch > 1);
-				if (!doSearch)
-				{
-					// Test if the best filter is at the limit of the enumeration
-					// Otherwise we will walk around the space we have already covered with a step size of 1.
-					for (int j = 0; j < lowerLimit[set].length; j++)
-					{
-						if (increment[set][j] > 0)
-						{
-							final double value = max.r.filter.getParameterValue(j);
-							if ((value <= lowerLimit[set][j] && value > 0) || value >= upperLimit[set][j])
-							{
-								doSearch = true;
-								break;
-							}
-						}
-					}
-				}
-
-				// Iterative step search until the surrounding positions are not an improvement
-				// Limit the iterations in case of a problem.
-				int iteration = 0;
-				while (doSearch && iteration < 20)
-				{
-					iteration++;
-					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, max.filter.getName(), max.score,
-					//		max.criteria);
-
-					IJ.showStatus(
-							"Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
-
-					// Create a new filter set surrounding the top filter
-					final DirectFilter oldMaxFilter = max.r.filter;
-					ArrayList<Filter> filters = new ArrayList<Filter>();
-					filters.add(max.r.filter);
-					final int n = lowerLimit[set].length;
-					for (int i = 0; i < n; i++)
-					{
-						if (increment[set][i] > 0)
-						{
-							for (int k = filters.size(); k-- > 0;)
-							{
-								Filter f = filters.get(k);
-								double[] parameters = f.getParameters();
-
-								final double d = parameters[i];
-								for (int step = 1; step <= stepSearch; step++)
-								{
-									addFilters(filters, f, parameters, d, i, step * increment[set][i] / stepSearch);
-								}
-							}
-						}
-					}
-					FilterSet newSet = new FilterSet(filters);
-
-					// Score the filters
-					scoreResults = scoreFilters(newSet, showResultsTable);
-					if (scoreResults == null)
-						return -1;
-
-					pauseTimer();
-					for (int index = 0; index < scoreResults.length; index++)
-					{
-						final ScoreResult scoreResult = scoreResults[index];
-
-						addToResultsWindow(tw, scoreResult);
-
-						final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
-								scoreResult.criteria >= minCriteria);
-						if (result.compareTo(max) < 0)
-						{
-							max = result;
-						}
-					}
-					resumeTimer();
-
-					// Check if the top filter has changed to continue the search
-					doSearch = !max.r.filter.equals(oldMaxFilter);
-				}
-			}
-
-			// Allow the re-evaluation of all the filters to be skipped
-			best = max.r.filter;
-		}
+		//		// If the filters were expanded we can do a step search from the initial optimum using the increment
+		//		if (!isOptimised && stepSearch != 0 && allSameType && wasExpanded(setNumber))
+		//		{
+		//			algorithm = "Step Search " + stepSearch;
+		//
+		//			// Evaluate all the filters and find the best
+		//			SimpleFilterScore max = null;
+		//
+		//			ScoreResult[] scoreResults = scoreFilters(filterSet, showResultsTable);
+		//			if (scoreResults == null)
+		//				return -1;
+		//
+		//			pauseTimer();
+		//			for (int index = 0; index < scoreResults.length; index++)
+		//			{
+		//				final ScoreResult scoreResult = scoreResults[index];
+		//
+		//				addToResultsWindow(tw, scoreResult);
+		//
+		//				final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
+		//						scoreResult.criteria >= minCriteria);
+		//				if (result.compareTo(max) < 0)
+		//				{
+		//					max = result;
+		//				}
+		//			}
+		//			resumeTimer();
+		//
+		//			if (max != null)
+		//			{
+		//				final int set = setNumber - 1;
+		//				// Force this if we are using smaller steps. 
+		//				boolean doSearch = (stepSearch > 1);
+		//				if (!doSearch)
+		//				{
+		//					// Test if the best filter is at the limit of the enumeration
+		//					// Otherwise we will walk around the space we have already covered with a step size of 1.
+		//					for (int j = 0; j < lowerLimit[set].length; j++)
+		//					{
+		//						if (increment[set][j] > 0)
+		//						{
+		//							final double value = max.r.filter.getParameterValue(j);
+		//							if ((value <= lowerLimit[set][j] && value > 0) || value >= upperLimit[set][j])
+		//							{
+		//								doSearch = true;
+		//								break;
+		//							}
+		//						}
+		//					}
+		//				}
+		//
+		//				// Iterative step search until the surrounding positions are not an improvement
+		//				// Limit the iterations in case of a problem.
+		//				int iteration = 0;
+		//				while (doSearch && iteration < 20)
+		//				{
+		//					iteration++;
+		//					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, max.filter.getName(), max.score,
+		//					//		max.criteria);
+		//
+		//					IJ.showStatus(
+		//							"Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
+		//
+		//					// Create a new filter set surrounding the top filter
+		//					final DirectFilter oldMaxFilter = max.r.filter;
+		//					ArrayList<Filter> filters = new ArrayList<Filter>();
+		//					filters.add(max.r.filter);
+		//					final int n = lowerLimit[set].length;
+		//					for (int i = 0; i < n; i++)
+		//					{
+		//						if (increment[set][i] > 0)
+		//						{
+		//							for (int k = filters.size(); k-- > 0;)
+		//							{
+		//								Filter f = filters.get(k);
+		//								double[] parameters = f.getParameters();
+		//
+		//								final double d = parameters[i];
+		//								for (int step = 1; step <= stepSearch; step++)
+		//								{
+		//									addFilters(filters, f, parameters, d, i, step * increment[set][i] / stepSearch);
+		//								}
+		//							}
+		//						}
+		//					}
+		//					FilterSet newSet = new FilterSet(filters);
+		//
+		//					// Score the filters
+		//					scoreResults = scoreFilters(newSet, showResultsTable);
+		//					if (scoreResults == null)
+		//						return -1;
+		//
+		//					pauseTimer();
+		//					for (int index = 0; index < scoreResults.length; index++)
+		//					{
+		//						final ScoreResult scoreResult = scoreResults[index];
+		//
+		//						addToResultsWindow(tw, scoreResult);
+		//
+		//						final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
+		//								scoreResult.criteria >= minCriteria);
+		//						if (result.compareTo(max) < 0)
+		//						{
+		//							max = result;
+		//						}
+		//					}
+		//					resumeTimer();
+		//
+		//					// Check if the top filter has changed to continue the search
+		//					doSearch = !max.r.filter.equals(oldMaxFilter);
+		//				}
+		//			}
+		//
+		//			// Allow the re-evaluation of all the filters to be skipped
+		//			best = max.r.filter;
+		//		}
 
 		// Do not support plotting if we used optimisation
 		double[] xValues = (best != null || isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
@@ -3003,16 +3040,6 @@ public class BenchmarkFilterAnalysis
 				tw.append(result.text);
 			}
 		}
-	}
-
-	private void addFilters(ArrayList<Filter> filters, Filter f, double[] parameters, double value, int index,
-			double step)
-	{
-		parameters[index] = value - step;
-		if (parameters[index] >= 0) // Avoid negative parameters
-			filters.add(f.create(parameters));
-		parameters[index] = value + step;
-		filters.add(f.create(parameters));
 	}
 
 	/**
@@ -4762,9 +4789,9 @@ public class BenchmarkFilterAnalysis
 			if (passList[i].compareTo(passList[best]) < 0)
 				best = i;
 		}
-		SearchResult<SimpleFilterScore> tmp = passList[best];
+		final SearchResult<SimpleFilterScore> tmp = passList[best];
 		passList[best] = passList[0];
-		passList[0] = tmp;		
+		passList[0] = tmp;
 
 		// Combine the lists
 		System.arraycopy(failList, 0, passList, pass, size - pass);

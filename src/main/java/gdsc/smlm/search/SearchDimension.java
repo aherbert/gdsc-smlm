@@ -195,16 +195,6 @@ public class SearchDimension implements Cloneable
 	}
 
 	/**
-	 * Checks if is at min increment.
-	 *
-	 * @return true, if is at min increment
-	 */
-	public boolean isAtMinIncrement()
-	{
-		return !active || increment == minIncrement;
-	}
-
-	/**
 	 * Sets the increment.
 	 *
 	 * @param increment
@@ -397,13 +387,15 @@ public class SearchDimension implements Cloneable
 	}
 
 	/**
+	 * Set the reduce factor. A value of 1 will prevent the range being reduced by the {@link #reduce()} method.
+	 * 
 	 * @param reduceFactor
-	 *            the reduceFactor to set
+	 *            the reduce factor (must be between 0 (exclusive) and 1 (inclusive))
 	 */
 	public void setReduceFactor(double reduceFactor)
 	{
-		if (reduceFactor <= 0 || reduceFactor >= 1)
-			throw new IllegalArgumentException("Reduce factor must be between 0 and 1 (exclusive)");
+		if (reduceFactor <= 0 || reduceFactor > 1)
+			throw new IllegalArgumentException("Reduce factor must be between 0 and 1 (inclusive)");
 		this.reduceFactor = reduceFactor;
 	}
 
@@ -413,6 +405,16 @@ public class SearchDimension implements Cloneable
 	public void reduce()
 	{
 		setIncrement(increment * reduceFactor);
+	}
+
+	/**
+	 * Checks if the {@link #reduce()} method will result in a change to the range returned by {@link #values()}
+	 *
+	 * @return true, if the range can be reduced
+	 */
+	public boolean canReduce()
+	{
+		return active && increment != minIncrement && reduceFactor < 1;
 	}
 
 	/*
@@ -454,6 +456,24 @@ public class SearchDimension implements Cloneable
 	{
 		this.pad = pad;
 		values = null;
+	}
+
+	/**
+	 * Enumerate from the lower to the upper value using the configured nIncrement (n) to define the number of steps
+	 * (2*n+1).
+	 * <p>
+	 * No range check is performed against the current min/max so the returned values can be outside the allowed range.
+	 * The min increment setting is respected so the number of actual steps may be smaller.
+	 *
+	 * @param lower
+	 *            the lower
+	 * @param upper
+	 *            the upper
+	 * @return the double[]
+	 */
+	public double[] enumerate(double lower, double upper)
+	{
+		return enumerate(lower, upper, 2 * nIncrement + 1);
 	}
 
 	/**
