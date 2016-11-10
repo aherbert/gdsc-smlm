@@ -1,5 +1,7 @@
 package gdsc.smlm.search;
 
+import java.util.Arrays;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,20 +18,14 @@ package gdsc.smlm.search;
 /**
  * Calculate the score of points within a search space
  */
-public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunction<T>
+public class ScoreFunctionHelper<T extends Comparable<T>>
 {
-	/**
-	 * Return the score of the input points.
-	 *
-	 * @param points
-	 *            the points
-	 * @return the scores
-	 */
-	SearchResult<T>[] score(double[][] points);
-
 	/**
 	 * Cut the list of scores down to the given size by selecting only the best results. The input list may not be
 	 * sorted. The results should contain the best result at position 0 in the output array.
+	 * <p>
+	 * Helper implementation of the FullScoreFunction.cut(...) method. Uses a full sort then truncation to the given
+	 * size.
 	 * 
 	 * @param scores
 	 *            The scores
@@ -37,5 +33,11 @@ public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunctio
 	 *            The size
 	 * @return The reduced list
 	 */
-	SearchResult<T>[] cut(SearchResult<T>[] scores, int size);
+	public static <T extends Comparable<T>> SearchResult<T>[] cut(SearchResult<T>[] scores, int size)
+	{
+		if (scores == null || scores.length == 1)
+			return scores;
+		Arrays.sort(scores);
+		return (size < scores.length) ? Arrays.copyOf(scores, size) : scores;
+	}
 }

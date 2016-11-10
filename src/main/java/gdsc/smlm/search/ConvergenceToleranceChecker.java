@@ -25,9 +25,9 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class ConvergenceToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T>
 {
-	final double relative, absolute;
-	final boolean checkScore, checkSequence;
-	final int maxIterations;
+	final public double relative, absolute;
+	final public boolean checkScore, checkSequence;
+	final public int maxIterations;
 
 	private int iterations = 0;
 
@@ -90,7 +90,14 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 		this.checkSequence = checkSequence;
 		this.maxIterations = maxIterations;
 	}
-	
+
+	/**
+	 * Called by the constructor if there are no convergence criteria. Sub-classes that provide additional convergence
+	 * checks must override this to avoid error.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if there are no convergence criteria in the constructor
+	 */
 	protected void noConvergenceCriteria()
 	{
 		throw new IllegalArgumentException("No valid convergence criteria");

@@ -796,10 +796,9 @@ public class SearchSpace
 		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
 
 		// Get the top fraction
-		// TODO - get a partial sort
-		Arrays.sort(scores);
 		size = (int) Math.ceil(scores.length * fraction);
-		return Arrays.copyOf(scores, size);
+		
+		return scoreFunction.cut(scores, size);
 	}
 
 	/**

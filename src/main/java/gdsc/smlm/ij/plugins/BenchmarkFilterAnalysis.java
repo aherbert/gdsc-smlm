@@ -102,6 +102,7 @@ import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.search.ConvergenceChecker;
 import gdsc.smlm.search.ConvergenceToleranceChecker;
 import gdsc.smlm.search.FullScoreFunction;
+import gdsc.smlm.search.ScoreFunctionHelper;
 import gdsc.smlm.search.SearchDimension;
 import gdsc.smlm.search.SearchResult;
 import gdsc.smlm.search.SearchSpace;
@@ -225,7 +226,7 @@ public class BenchmarkFilterAnalysis
 	private static ArrayList<NamedPlot> plots;
 	private static HashMap<String, FilterScore> bestFilter;
 	private static LinkedList<String> bestFilterOrder;
-	private static StopWatch sw;
+	private static StopWatch analysisStopWatch;
 
 	private static boolean reUseFilters = true;
 	private static boolean expandFilters = true;
@@ -707,7 +708,7 @@ public class BenchmarkFilterAnalysis
 
 		analyse(filterSets);
 
-		final String timeString = sw.toString();
+		final String timeString = analysisStopWatch.toString();
 		// TODO - Decide where to write this.
 		IJ.log("Filter analysis time : " + timeString);
 		IJ.showStatus("Finished : " + timeString);
@@ -1750,7 +1751,7 @@ public class BenchmarkFilterAnalysis
 			bestFilter = new HashMap<String, FilterScore>();
 			bestFilterOrder = new LinkedList<String>();
 
-			sw = StopWatch.createStarted();
+			analysisStopWatch = StopWatch.createStarted();
 			IJ.showStatus("Analysing filters ...");
 			int setNumber = 0;
 			for (FilterSet filterSet : filterSets)
@@ -1759,13 +1760,13 @@ public class BenchmarkFilterAnalysis
 				if (run(filterSet, setNumber) < 0)
 					break;
 			}
-			sw.stop();
+			analysisStopWatch.stop();
 			IJ.showProgress(1);
 			IJ.showStatus("");
 
 			if (debugSpeed)
 			{
-				System.out.println("Time = " + sw.toString());
+				System.out.println("Time = " + analysisStopWatch.toString());
 			}
 
 			if (Utils.isInterrupted())
@@ -2232,7 +2233,7 @@ public class BenchmarkFilterAnalysis
 		Chromosome best = null;
 		boolean isOptimised = false;
 		String algorithm = "";
-		sw2 = StopWatch.createStarted();
+		filterSetStopWatch = StopWatch.createStarted();
 
 		if (evolve == 1 && allSameType)
 		{
@@ -2494,6 +2495,7 @@ public class BenchmarkFilterAnalysis
 			gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
 			gd.addCheckbox(prefix + "Save_option", saveOption);
 			gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
+			gd.addNumericField(prefix + "Converged_count", convergedCount, 0);
 			gd.addNumericField(prefix + "Samples", enrichmentSamples, 0);
 			gd.addSlider(prefix + "Fraction", 0.01, 0.99, enrichmentFraction);
 			gd.addSlider(prefix + "Padding", 0, 0.99, enrichmentPadding);
@@ -2522,6 +2524,7 @@ public class BenchmarkFilterAnalysis
 				rangeSearchWidth = (int) gd.getNextNumber();
 				saveOption = gd.getNextBoolean();
 				maxIterations = (int) gd.getNextNumber();
+				convergedCount = (int) gd.getNextNumber();
 				enrichmentSamples = (int) gd.getNextNumber();
 				enrichmentFraction = gd.getNextNumber();
 				enrichmentPadding = gd.getNextNumber();
@@ -2569,7 +2572,8 @@ public class BenchmarkFilterAnalysis
 
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
-				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
+				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations,
+						convergedCount);
 
 				algorithm = EVOLVE[evolve];
 				createGAWindow();
@@ -2772,7 +2776,7 @@ public class BenchmarkFilterAnalysis
 		if (scoreResults == null)
 			return -1;
 
-		sw.stop();
+		filterSetStopWatch.stop();
 
 		for (int index = 0; index < scoreResults.length; index++)
 		{
@@ -2878,7 +2882,7 @@ public class BenchmarkFilterAnalysis
 		// irrespective of whether they were the same type or not.
 		//if (allSameType)
 		//{
-		FilterScore newFilterScore = new FilterScore(max.r, atLimit, algorithm, sw.getTime());
+		FilterScore newFilterScore = new FilterScore(max.r, atLimit, algorithm, analysisStopWatch.getTime());
 		FilterScore filterScore = bestFilter.get(type);
 		if (filterScore != null)
 		{
@@ -2897,7 +2901,7 @@ public class BenchmarkFilterAnalysis
 			{
 				// Replace
 				if (newFilterScore.compareTo(filterScore) < 0)
-					filterScore.update(max.r, atLimit, algorithm, sw.getTime());
+					filterScore.update(max.r, atLimit, algorithm, analysisStopWatch.getTime());
 			}
 		}
 		else
@@ -2972,18 +2976,18 @@ public class BenchmarkFilterAnalysis
 		return 0;
 	}
 
-	private StopWatch sw2;
+	private StopWatch filterSetStopWatch;
 
 	private void pauseTimer()
 	{
-		sw.suspend();
-		sw2.suspend();
+		analysisStopWatch.suspend();
+		filterSetStopWatch.suspend();
 	}
 
 	private void resumeTimer()
 	{
-		sw.resume();
-		sw2.resume();
+		analysisStopWatch.resume();
+		filterSetStopWatch.resume();
 	}
 
 	private void addToResultsWindow(BufferedTextWindow tw, final ScoreResult result)
@@ -4200,9 +4204,35 @@ public class BenchmarkFilterAnalysis
 	 */
 	private class InterruptConvergenceChecker extends ConvergenceToleranceChecker<SimpleFilterScore>
 	{
+		/**
+		 * The number of times it must have already converged before convergence is achieved.
+		 */
+		final int convergedCount;
+		int count = 0;
+
 		public InterruptConvergenceChecker(double relative, double absolute, int maxIterations)
 		{
 			super(relative, absolute, false, false, maxIterations);
+			this.convergedCount = 0;
+		}
+
+		/**
+		 * Instantiates a new interrupt convergence checker.
+		 *
+		 * @param relative
+		 *            the relative
+		 * @param absolute
+		 *            the absolute
+		 * @param maxIterations
+		 *            the max iterations
+		 * @param convergedCount
+		 *            The number of times it must have already converged before convergence is achieved. Set to negative
+		 *            to disable point coordinate comparison.
+		 */
+		public InterruptConvergenceChecker(double relative, double absolute, int maxIterations, int convergedCount)
+		{
+			super(relative, absolute, false, convergedCount >= 0, maxIterations);
+			this.convergedCount = Math.max(0, convergedCount);
 		}
 
 		@Override
@@ -4214,10 +4244,22 @@ public class BenchmarkFilterAnalysis
 		@Override
 		public boolean converged(SearchResult<SimpleFilterScore> previous, SearchResult<SimpleFilterScore> current)
 		{
-			// This checks the iterations
 			if (super.converged(previous, current))
-				return true;
+			{
+				// Max iterations is a hard limit even if we have a converged count configured
+				if (maxIterations != 0 && getIterations() >= maxIterations)
+					return true;
 
+				count++;
+			}
+			else
+				count = 0;
+
+			// Note: if the converged count was negative then no convergence can be achieved 
+			// using the point coordinates as this is disabled. So the code only reaches here with
+			// a count of zero, effectively skipping this as it is always false.
+			if (count > convergedCount)
+				return true;
 			// Stop if interrupted
 			if (IJ.escapePressed())
 			{
@@ -4680,6 +4722,54 @@ public class BenchmarkFilterAnalysis
 		gaWindow.append(text.toString());
 
 		return scores;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.search.FullScoreFunction#cut(gdsc.smlm.search.SearchResult[], int)
+	 */
+	@SuppressWarnings("unchecked")
+	public SearchResult<SimpleFilterScore>[] cut(SearchResult<SimpleFilterScore>[] scores, int size)
+	{
+		// Do a full sort and truncation
+		//return ScoreFunctionHelper.cut(scores, size);
+
+		// Split the list into those that pass the criteria and those that do not
+		SearchResult<SimpleFilterScore>[] passList = new SearchResult[scores.length];
+		SearchResult<SimpleFilterScore>[] failList = new SearchResult[scores.length];
+		int pass = 0;
+		int fail = 0;
+		for (int i = 0; i < scores.length; i++)
+		{
+			if (scores[i].score.criteriaPassed)
+				passList[pass++] = scores[i];
+			else
+				failList[fail++] = scores[i];
+		}
+
+		// If those that pass are bigger than size then sort that list and return.
+		if (pass >= size)
+			return ScoreFunctionHelper.cut(Arrays.copyOf(passList, pass), size);
+
+		// Sort the fail list
+		Arrays.sort(failList, 0, fail);
+
+		// Find the top score and put it first.
+		int best = 0;
+		for (int i = 1; i < pass; i++)
+		{
+			if (passList[i].compareTo(passList[best]) < 0)
+				best = i;
+		}
+		SearchResult<SimpleFilterScore> tmp = passList[best];
+		passList[best] = passList[0];
+		passList[0] = tmp;		
+
+		// Combine the lists
+		System.arraycopy(failList, 0, passList, pass, size - pass);
+
+		return Arrays.copyOf(passList, size);
 	}
 
 	private double limit = 0;
