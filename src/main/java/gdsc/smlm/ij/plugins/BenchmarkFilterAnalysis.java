@@ -41,6 +41,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -223,7 +225,7 @@ public class BenchmarkFilterAnalysis
 	private static ArrayList<NamedPlot> plots;
 	private static HashMap<String, FilterScore> bestFilter;
 	private static LinkedList<String> bestFilterOrder;
-	private static long totalTime = 0, currentTime;
+	private static StopWatch sw;
 
 	private static boolean reUseFilters = true;
 	private static boolean expandFilters = true;
@@ -705,7 +707,7 @@ public class BenchmarkFilterAnalysis
 
 		analyse(filterSets);
 
-		final String timeString = Utils.timeToString(totalTime);
+		final String timeString = sw.toString();
 		// TODO - Decide where to write this.
 		IJ.log("Filter analysis time : " + timeString);
 		IJ.showStatus("Finished : " + timeString);
@@ -1747,9 +1749,8 @@ public class BenchmarkFilterAnalysis
 			plots = new ArrayList<NamedPlot>(plotTopN);
 			bestFilter = new HashMap<String, FilterScore>();
 			bestFilterOrder = new LinkedList<String>();
-			totalTime = 0;
 
-			startTimer();
+			sw = StopWatch.createStarted();
 			IJ.showStatus("Analysing filters ...");
 			int setNumber = 0;
 			for (FilterSet filterSet : filterSets)
@@ -1758,13 +1759,13 @@ public class BenchmarkFilterAnalysis
 				if (run(filterSet, setNumber) < 0)
 					break;
 			}
-			stopTimer();
+			sw.stop();
 			IJ.showProgress(1);
 			IJ.showStatus("");
 
 			if (debugSpeed)
 			{
-				System.out.println("Time = " + Utils.timeToString(totalTime));
+				System.out.println("Time = " + sw.toString());
 			}
 
 			if (Utils.isInterrupted())
@@ -1848,7 +1849,10 @@ public class BenchmarkFilterAnalysis
 				}
 
 				sb.append('\t');
-				sb.append(Utils.timeToString(totalTime));
+				sb.append(fs.algorithm);
+				sb.append('\t');
+				sb.append(DurationFormatUtils.formatDurationHMS(fs.time));
+				//sb.append(Utils.timeToString(fs.time));
 				text = sb.toString();
 
 				if (isHeadless)
@@ -1898,16 +1902,6 @@ public class BenchmarkFilterAnalysis
 		saveResults(filterResults, bestFilter);
 
 		wo.tile();
-	}
-
-	private void startTimer()
-	{
-		currentTime = System.currentTimeMillis();
-	}
-
-	private void stopTimer()
-	{
-		totalTime += System.currentTimeMillis() - currentTime;
 	}
 
 	private int countFilters(List<FilterSet> filterSets)
@@ -2194,7 +2188,7 @@ public class BenchmarkFilterAnalysis
 				sb.append("\t").append(COLUMNS[i]);
 
 		if (summary)
-			sb.append("\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tTime");
+			sb.append("\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tEvolve\tTime");
 		return sb.toString();
 	}
 
@@ -2237,11 +2231,13 @@ public class BenchmarkFilterAnalysis
 		this.ga_resultsList = resultsList;
 		Chromosome best = null;
 		boolean isOptimised = false;
+		String algorithm = "";
+		sw2 = StopWatch.createStarted();
 
 		if (evolve == 1 && allSameType)
 		{
 			// Collect parameters for the genetic algorithm
-			stopTimer();
+			pauseTimer();
 
 			Filter filter = filterSet.getFilters().get(0);
 			double[] stepSize = filter.mutationStepRange().clone();
@@ -2276,7 +2272,7 @@ public class BenchmarkFilterAnalysis
 
 			if (gd.wasCanceled())
 			{
-				startTimer();
+				resumeTimer();
 			}
 			else
 			{
@@ -2323,8 +2319,9 @@ public class BenchmarkFilterAnalysis
 				ga_iteration = 0;
 				ga_population.setTracker(this);
 
+				algorithm = EVOLVE[evolve];
 				createGAWindow();
-				startTimer();
+				resumeTimer();
 
 				best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
@@ -2385,7 +2382,7 @@ public class BenchmarkFilterAnalysis
 		if (evolve == 2 && allSameType && filterSet.size() == 4)
 		{
 			// Collect parameters for the range search algorithm
-			stopTimer();
+			pauseTimer();
 
 			// Ask the user for the search parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
@@ -2412,7 +2409,7 @@ public class BenchmarkFilterAnalysis
 
 			if (gd.wasCanceled())
 			{
-				startTimer();
+				resumeTimer();
 			}
 			else
 			{
@@ -2464,8 +2461,9 @@ public class BenchmarkFilterAnalysis
 				ss.setTracker(this);
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
+				algorithm = EVOLVE[evolve];
 				createGAWindow();
-				startTimer();
+				resumeTimer();
 
 				SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker);
 
@@ -2487,7 +2485,7 @@ public class BenchmarkFilterAnalysis
 		if (evolve == 3 && allSameType && filterSet.size() == 4)
 		{
 			// Collect parameters for the enrichment search algorithm
-			stopTimer();
+			pauseTimer();
 
 			// Ask the user for the search parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
@@ -2517,7 +2515,7 @@ public class BenchmarkFilterAnalysis
 
 			if (gd.wasCanceled())
 			{
-				startTimer();
+				resumeTimer();
 			}
 			else
 			{
@@ -2573,8 +2571,9 @@ public class BenchmarkFilterAnalysis
 				ss.setTracker(this);
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
+				algorithm = EVOLVE[evolve];
 				createGAWindow();
-				startTimer();
+				resumeTimer();
 
 				SearchResult<SimpleFilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker,
 						enrichmentSamples, enrichmentFraction, enrichmentPadding);
@@ -2614,7 +2613,7 @@ public class BenchmarkFilterAnalysis
 							best = optimum.score.r.filter;
 						}
 					}
-					
+
 					// Now update the filter set for final assessment
 					filterSet = new FilterSet(filterSet.getName(),
 							searchSpaceToFilters(optimum.score.r.filter, ss.getSearchSpace()));
@@ -2636,6 +2635,8 @@ public class BenchmarkFilterAnalysis
 		// If the filters were expanded we can do a step search from the initial optimum using the increment
 		if (!isOptimised && stepSearch != 0 && allSameType && wasExpanded(setNumber))
 		{
+			algorithm = "Step Search " + stepSearch;
+
 			// Evaluate all the filters and find the best
 			SimpleFilterScore max = null;
 
@@ -2643,6 +2644,7 @@ public class BenchmarkFilterAnalysis
 			if (scoreResults == null)
 				return -1;
 
+			pauseTimer();
 			for (int index = 0; index < scoreResults.length; index++)
 			{
 				final ScoreResult scoreResult = scoreResults[index];
@@ -2656,6 +2658,7 @@ public class BenchmarkFilterAnalysis
 					max = result;
 				}
 			}
+			resumeTimer();
 
 			if (max != null)
 			{
@@ -2721,6 +2724,7 @@ public class BenchmarkFilterAnalysis
 					if (scoreResults == null)
 						return -1;
 
+					pauseTimer();
 					for (int index = 0; index < scoreResults.length; index++)
 					{
 						final ScoreResult scoreResult = scoreResults[index];
@@ -2734,6 +2738,7 @@ public class BenchmarkFilterAnalysis
 							max = result;
 						}
 					}
+					resumeTimer();
 
 					// Check if the top filter has changed to continue the search
 					doSearch = !max.r.filter.equals(oldMaxFilter);
@@ -2766,6 +2771,8 @@ public class BenchmarkFilterAnalysis
 		ScoreResult[] scoreResults = scoreFilters(filterSet, showResultsTable);
 		if (scoreResults == null)
 			return -1;
+
+		sw.stop();
 
 		for (int index = 0; index < scoreResults.length; index++)
 		{
@@ -2871,7 +2878,7 @@ public class BenchmarkFilterAnalysis
 		// irrespective of whether they were the same type or not.
 		//if (allSameType)
 		//{
-		FilterScore newFilterScore = new FilterScore(max.r, atLimit);
+		FilterScore newFilterScore = new FilterScore(max.r, atLimit, algorithm, sw.getTime());
 		FilterScore filterScore = bestFilter.get(type);
 		if (filterScore != null)
 		{
@@ -2890,7 +2897,7 @@ public class BenchmarkFilterAnalysis
 			{
 				// Replace
 				if (newFilterScore.compareTo(filterScore) < 0)
-					filterScore.update(max.r, atLimit);
+					filterScore.update(max.r, atLimit, algorithm, sw.getTime());
 			}
 		}
 		else
@@ -2963,6 +2970,20 @@ public class BenchmarkFilterAnalysis
 		}
 
 		return 0;
+	}
+
+	private StopWatch sw2;
+
+	private void pauseTimer()
+	{
+		sw.suspend();
+		sw2.suspend();
+	}
+
+	private void resumeTimer()
+	{
+		sw.resume();
+		sw2.resume();
 	}
 
 	private void addToResultsWindow(BufferedTextWindow tw, final ScoreResult result)
@@ -3349,7 +3370,7 @@ public class BenchmarkFilterAnalysis
 	 */
 	private void saveFilterSet(FilterSet filterSet, int setNumber)
 	{
-		stopTimer();
+		pauseTimer();
 
 		String filename = getFilename("Filter_set_" + setNumber, filterSetFilename);
 		if (filename != null)
@@ -3359,7 +3380,7 @@ public class BenchmarkFilterAnalysis
 			saveFilterSet(filterSet, filename);
 		}
 
-		startTimer();
+		resumeTimer();
 	}
 
 	/**
@@ -4043,12 +4064,13 @@ public class BenchmarkFilterAnalysis
 	public class FilterScore extends SimpleFilterScore
 	{
 		int index;
-		final long time;
 		final ClassificationResult r2;
 		final int size;
 		final int[] combinations;
 		final boolean[] enable;
 		char[] atLimit;
+		String algorithm;
+		long time;
 
 		private FilterScore(ScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
 				ClassificationResult r2, int size, int[] combinations, boolean[] enable)
@@ -4069,18 +4091,21 @@ public class BenchmarkFilterAnalysis
 			this(r, allSameType, null, index, time, r2, size, combinations, enable);
 		}
 
-		public FilterScore(ScoreResult r, char[] atLimit)
+		public FilterScore(ScoreResult r, char[] atLimit, String algorithm, long time)
 		{
 			// This may be used in comparisons of different type so set allSameType to false
-			this(r, false, atLimit, 0, 0, null, 0, null, null);
+			this(r, false, atLimit, 0, time, null, 0, null, null);
+			this.algorithm = algorithm;
 		}
 
-		public void update(ScoreResult r, char[] atLimit)
+		public void update(ScoreResult r, char[] atLimit, String algorithm, long time)
 		{
 			this.r = r;
 			this.score = r.score;
 			this.criteria = r.criteria;
 			this.atLimit = atLimit;
+			this.algorithm = algorithm;
+			this.time = time;
 			criteriaPassed = (criteria >= minCriteria);
 		}
 
@@ -4642,7 +4667,7 @@ public class BenchmarkFilterAnalysis
 			}
 			scores[index] = new SearchResult<SimpleFilterScore>(result.r.filter.getParameters(), result);
 		}
-		
+
 		es_optimum = max;
 
 		// Add the best filter to the table
