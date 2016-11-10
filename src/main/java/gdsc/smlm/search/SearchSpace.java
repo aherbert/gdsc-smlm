@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
+import org.apache.commons.math3.random.RandomVectorGenerator;
 
 import gdsc.core.logging.TrackProgress;
 
@@ -619,7 +620,7 @@ public class SearchSpace
 		boolean reduced = false;
 		for (int i = 0; i < dimensions.length; i++)
 		{
-			if (!dimensions[i].canReduce())
+			if (dimensions[i].canReduce())
 			{
 				reduced = true;
 				break;
@@ -813,6 +814,35 @@ public class SearchSpace
 	private <T extends Comparable<T>> SearchResult<T>[] score(FullScoreFunction<T> scoreFunction, int samples,
 			double fraction, HaltonSequenceGenerator[] generator)
 	{
+		searchSpace = sample(dimensions, samples, generator);
+
+		// Score
+		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
+
+		// Get the top fraction
+		int size = (int) Math.ceil(scores.length * fraction);
+
+		return scoreFunction.cut(scores, size);
+	}
+
+	/**
+	 * Sample uniformly from the given dimensions. The lower and upper bounds of active dimensions are used to define
+	 * the search space.
+	 * <p>
+	 * If the input generator array is null, the first element is null, or the vector length is the wrong size then a
+	 * new HaltonSequenceGenerator is used. Input an array of length 1 to obtain the default generator allowing calling
+	 * the function again to generate a different search space.
+	 *
+	 * @param dimensions
+	 *            the dimensions
+	 * @param samples
+	 *            the samples
+	 * @param generator
+	 *            the generator
+	 * @return the double[][]
+	 */
+	public static double[][] sample(SearchDimension[] dimensions, int samples, RandomVectorGenerator[] generator)
+	{
 		// Count the number of active dimensions
 		final int[] indices = new int[dimensions.length];
 		int size = 0;
@@ -830,11 +860,17 @@ public class SearchSpace
 			}
 		}
 
-		// Generate random points
-		HaltonSequenceGenerator g = generator[0];
-		if (g == null)
+		// Create the generator
+		if (generator == null)
+			generator = new RandomVectorGenerator[1];
+		RandomVectorGenerator g = generator[0];
+		if (g == null || g.nextVector().length != size)
+		{
 			generator[0] = g = new HaltonSequenceGenerator(size);
-		searchSpace = new double[samples][];
+		}
+
+		// Generate random points
+		final double[][] searchSpace = new double[samples][];
 		for (int i = 0; i < samples; i++)
 		{
 			final double[] r = g.nextVector();
@@ -843,14 +879,7 @@ public class SearchSpace
 				p[indices[j]] = lower[j] + r[j] * range[j];
 			searchSpace[i] = p;
 		}
-
-		// Score
-		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
-
-		// Get the top fraction
-		size = (int) Math.ceil(scores.length * fraction);
-
-		return scoreFunction.cut(scores, size);
+		return searchSpace;
 	}
 
 	/**
