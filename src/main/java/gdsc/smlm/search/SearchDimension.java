@@ -148,6 +148,18 @@ public class SearchDimension implements Cloneable
 		return new SearchDimension(min, max, minIncrement, nIncrement, lower, upper);
 	}
 
+	/**
+	 * Creates a new search dimension, respecting the current settings and changing the number of increments.
+	 *
+	 * @param nIncrement
+	 *            the number of increments to use around the centre
+	 * @return the search dimension
+	 */
+	public SearchDimension create(int nIncrement)
+	{
+		return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
+	}
+	
 	private static boolean isInvalid(double d)
 	{
 		return Double.isNaN(d) || Double.isInfinite(d);
