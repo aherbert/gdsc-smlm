@@ -2239,33 +2239,142 @@ public class BenchmarkFilterAnalysis
 
 		// All the search algorithms use search dimensions.
 		// Create search dimensions if needed (these are used for testing if the optimum is at the limit).
+		SearchDimension[] dimensions = null;
 		if (allSameType)
 		{
+			// There should always be 1 filter
+			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
+			int n = ss_filter.getNumberOfParameters();
+			dimensions = new SearchDimension[n];
+
 			if (filterSet.getFilters().size() == 4)
 			{
-				// Build the search dimensions
+				// This is used as min/lower/upper/max
+				final Filter minF = ss_filter;
+				final Filter lowerF = filterSet.getFilters().get(1);
+				final Filter upperF = filterSet.getFilters().get(2);
+				final Filter maxF = filterSet.getFilters().get(3);
+				for (int i = 0; i < n; i++)
+				{
+					double min = minF.getParameterValue(i);
+					double lower = lowerF.getParameterValue(i);
+					double upper = upperF.getParameterValue(i);
+					double max = maxF.getParameterValue(i);
+					double minIncrement = ss_filter.getParameterIncrement(i);
+					try
+					{
+						dimensions[i] = new SearchDimension(min, max, minIncrement, 1, lower, upper);
+					}
+					catch (IllegalArgumentException e)
+					{
+						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+								ss_filter.getParameterName(i));
+						dimensions = null;
+						break;
+					}
+				}
 			}
-			else
+
+			if (filterSet.getFilters().size() == 3)
 			{
-				// Allow inputting a filter set (e.g. saved from previous optimisation)
+				// This is used as lower/upper/increment
+				final Filter lowerF = ss_filter;
+				final Filter upperF = filterSet.getFilters().get(1);
+				final Filter incF = filterSet.getFilters().get(2);
+
+				for (int i = 0; i < n; i++)
+				{
+					if (incF.getParameterValue(i) == incF.getDisabledParameterValue(i) ||
+							Double.isInfinite(incF.getParameterValue(i)))
+					{
+						// Not enabled
+						dimensions[i] = new SearchDimension(incF.getDisabledParameterValue(i));
+						continue;
+					}
+					double lower = lowerF.getParameterValue(i);
+					double upper = upperF.getParameterValue(i);
+					String name = ss_filter.getParameterName(i);
+					double min = BenchmarkSpotFit.getMin(name);
+					double max = BenchmarkSpotFit.getMax(name);
+					double minIncrement = ss_filter.getParameterIncrement(i);
+					try
+					{
+						dimensions[i] = new SearchDimension(min, max, minIncrement, 1, lower, upper);
+					}
+					catch (IllegalArgumentException e)
+					{
+						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+								ss_filter.getParameterName(i));
+						dimensions = null;
+						break;
+					}
+				}
+			}
+
+			if (dimensions == null)
+			{
+				// Allow inputing a filter set (e.g. saved from previous optimisation)
+				// Find the limits in the current scores
+				final double[] lower = ss_filter.getParameters().clone();
+				final double[] upper = lower.clone();
+				for (Filter f : filterSet.getFilters())
+				{
+					final double[] point = f.getParameters();
+					for (int j = 0; j < lower.length; j++)
+					{
+						if (lower[j] > point[j])
+							lower[j] = point[j];
+						if (upper[j] < point[j])
+							upper[j] = point[j];
+					}
+				}
 
 				// Get the search dimensions from the data.
 				// Min/max must be set using values from BenchmarkSpotFit.
+				for (int i = 0; i < n; i++)
+				{
+					if (lower[i] == upper[i])
+					{
+						// Not enabled
+						dimensions[i] = new SearchDimension(lower[i]);
+						continue;
+					}
+					String name = ss_filter.getParameterName(i);
+					double min = BenchmarkSpotFit.getMin(name);
+					double max = BenchmarkSpotFit.getMax(name);
+					double minIncrement = ss_filter.getParameterIncrement(i);
+					if (min > lower[i])
+						min = lower[i];
+					if (max > upper[i])
+						max = upper[i];
+					try
+					{
+						dimensions[i] = new SearchDimension(min, max, minIncrement, 1, lower[i], upper[i]);
+					}
+					catch (IllegalArgumentException e)
+					{
+						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+								ss_filter.getParameterName(i));
+						dimensions = null;
+						break;
+					}
+				}
 
 				// TODO - allow the SearchSpace algorithms to be seeded with an initial population for the first evaluation of the optimum
 			}
 		}
 
+		// Store the dimensions so we can do an at limit check
+
 		filterSetStopWatch = StopWatch.createStarted();
 
-		if (evolve == 1 && allSameType)
+		if (evolve == 1 && dimensions != null)
 		{
 			// Collect parameters for the genetic algorithm
 			pauseTimer();
 
-			Filter filter = filterSet.getFilters().get(0);
-			double[] stepSize = filter.mutationStepRange().clone();
-			double[] upper = filter.upperLimit();
+			double[] stepSize = ss_filter.mutationStepRange().clone();
+			double[] upper = ss_filter.upperLimit();
 			// Ask the user for the mutation step parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
@@ -2283,13 +2392,13 @@ public class BenchmarkFilterAnalysis
 			gd.addCheckbox(prefix + "Save_option", saveOption);
 
 			gd.addMessage("Configure the step size for each parameter");
-			int[] indices = filter.getChromosomeParameters();
+			int[] indices = ss_filter.getChromosomeParameters();
 			final boolean wasExpanded = wasExpanded(setNumber);
 			for (int j = 0; j < indices.length; j++)
 			{
 				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
 				final double step = (wasExpanded && wasNotExpanded(setNumber, indices[j])) ? 0 : stepSize[j] * delta;
-				gd.addNumericField(getDialogName(prefix, filter.getParameterName(indices[j])), step, 2);
+				gd.addNumericField(getDialogName(prefix, ss_filter.getParameterName(indices[j])), step, 2);
 			}
 
 			gd.showDialog();
@@ -2331,6 +2440,9 @@ public class BenchmarkFilterAnalysis
 				else
 					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax);
 				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
+
+				// TODO - create new random filters if the population is initially below the population size
+
 				ga_population = new Population(filterSet.getFilters());
 				ga_population.setPopulationSize(populationSize);
 				ga_population.setFailureLimit(failureLimit);
@@ -2351,7 +2463,7 @@ public class BenchmarkFilterAnalysis
 				{
 					// Enumerate on the min interval to produce the final filter
 					ss_filter = (DirectFilter) best;
-					SearchDimension[] dimensions = new SearchDimension[ss_filter.getNumberOfParameters()];
+					SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
 					for (int i = 0; i < indices.length; i++)
 					{
 						int j = indices[i];
@@ -2360,30 +2472,30 @@ public class BenchmarkFilterAnalysis
 							double minIncrement = ss_filter.getParameterIncrement(j);
 							try
 							{
-								dimensions[i] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
-								dimensions[i].setCentre(ss_filter.getParameterValue(j));
-								dimensions[i].setIncrement(minIncrement);
+								dimensions2[i] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
+								dimensions2[i].setCentre(ss_filter.getParameterValue(j));
+								dimensions2[i].setIncrement(minIncrement);
 							}
 							catch (IllegalArgumentException e)
 							{
 								IJ.error(TITLE,
 										String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), j,
 												ss_filter.getParameterName(j)));
-								dimensions = null;
+								dimensions2 = null;
 								break;
 							}
 						}
 					}
-					if (dimensions != null)
+					if (dimensions2 != null)
 					{
 						// Add dimensions that have been missed
-						for (int i = 0; i < dimensions.length; i++)
-							if (dimensions[i] == null)
-								dimensions[i] = new SearchDimension(ss_filter.getParameterValue(i));
+						for (int i = 0; i < dimensions2.length; i++)
+							if (dimensions2[i] == null)
+								dimensions2[i] = new SearchDimension(ss_filter.getParameterValue(i));
 
 						SearchSpace ss = new SearchSpace();
 						ss.setTracker(this);
-						SearchResult<SimpleFilterScore> optimum = ss.findOptimum(dimensions, this);
+						SearchResult<SimpleFilterScore> optimum = ss.findOptimum(dimensions2, this);
 
 						if (optimum != null)
 						{
@@ -2401,7 +2513,7 @@ public class BenchmarkFilterAnalysis
 			}
 		}
 
-		if ((evolve == 2 || evolve == 4) && allSameType && filterSet.size() == 4)
+		if ((evolve == 2 || evolve == 4) && dimensions != null)
 		{
 			// Collect parameters for the range search algorithm
 			pauseTimer();
@@ -2455,39 +2567,29 @@ public class BenchmarkFilterAnalysis
 					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
 				}
 
-				final Filter filter1 = ss_filter;
-				final Filter filter2 = filterSet.getFilters().get(1);
-				final Filter filter3 = filterSet.getFilters().get(2);
-				final Filter filter4 = filterSet.getFilters().get(3);
-
-				SearchDimension[] dimensions = new SearchDimension[n];
 				for (int i = 0; i < n; i++)
 				{
 					enabled[i] = gd.getNextBoolean();
 					if (enabled[i])
 					{
-						double min = filter1.getParameterValue(i);
-						double lower = filter2.getParameterValue(i);
-						double upper = filter3.getParameterValue(i);
-						double max = filter4.getParameterValue(i);
-						double minIncrement = filter1.getParameterIncrement(i);
 						try
 						{
-							dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
+							dimensions[i] = dimensions[i].create(rangeSearchWidth);
 							dimensions[i].setPad(true);
 							if (isStepSearch)
+								// Prevent range reduction so that the step search just does a single refinement step
 								dimensions[i].setReduceFactor(1);
 						}
 						catch (IllegalArgumentException e)
 						{
 							IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
-									filter1.getParameterName(i)));
+									ss_filter.getParameterName(i)));
 							return -1;
 						}
 					}
 					else
 					{
-						dimensions[i] = new SearchDimension(filter1.getDisabledParameterValue(i));
+						dimensions[i] = new SearchDimension(ss_filter.getDisabledParameterValue(i));
 					}
 				}
 				searchRangeMap.put(setNumber, enabled);
@@ -2520,7 +2622,7 @@ public class BenchmarkFilterAnalysis
 			}
 		}
 
-		if (evolve == 3 && allSameType && filterSet.size() == 4)
+		if (evolve == 3 && dimensions != null)
 		{
 			// Collect parameters for the enrichment search algorithm
 			pauseTimer();
@@ -2566,37 +2668,26 @@ public class BenchmarkFilterAnalysis
 				enrichmentFraction = gd.getNextNumber();
 				enrichmentPadding = gd.getNextNumber();
 
-				final Filter filter1 = ss_filter;
-				final Filter filter2 = filterSet.getFilters().get(1);
-				final Filter filter3 = filterSet.getFilters().get(2);
-				final Filter filter4 = filterSet.getFilters().get(3);
-
-				SearchDimension[] dimensions = new SearchDimension[n];
 				for (int i = 0; i < n; i++)
 				{
 					enabled[i] = gd.getNextBoolean();
 					if (enabled[i])
 					{
-						double min = filter1.getParameterValue(i);
-						double lower = filter2.getParameterValue(i);
-						double upper = filter3.getParameterValue(i);
-						double max = filter4.getParameterValue(i);
-						double minIncrement = filter1.getParameterIncrement(i);
 						try
 						{
-							dimensions[i] = new SearchDimension(min, max, minIncrement, rangeSearchWidth, lower, upper);
+							dimensions[i] = dimensions[i].create(rangeSearchWidth);
 							dimensions[i].setPad(true);
 						}
 						catch (IllegalArgumentException e)
 						{
 							IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
-									filter1.getParameterName(i)));
+									ss_filter.getParameterName(i)));
 							return -1;
 						}
 					}
 					else
 					{
-						dimensions[i] = new SearchDimension(filter1.getDisabledParameterValue(i));
+						dimensions[i] = new SearchDimension(ss_filter.getDisabledParameterValue(i));
 					}
 				}
 				searchRangeMap.put(setNumber, enabled);
@@ -2671,125 +2762,6 @@ public class BenchmarkFilterAnalysis
 		if (tw != null)
 			tw.setIncrement(Integer.MAX_VALUE);
 
-		// TODO - Remove - this is now obsolete ...
-
-		//		// If the filters were expanded we can do a step search from the initial optimum using the increment
-		//		if (!isOptimised && stepSearch != 0 && allSameType && wasExpanded(setNumber))
-		//		{
-		//			algorithm = "Step Search " + stepSearch;
-		//
-		//			// Evaluate all the filters and find the best
-		//			SimpleFilterScore max = null;
-		//
-		//			ScoreResult[] scoreResults = scoreFilters(filterSet, showResultsTable);
-		//			if (scoreResults == null)
-		//				return -1;
-		//
-		//			pauseTimer();
-		//			for (int index = 0; index < scoreResults.length; index++)
-		//			{
-		//				final ScoreResult scoreResult = scoreResults[index];
-		//
-		//				addToResultsWindow(tw, scoreResult);
-		//
-		//				final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
-		//						scoreResult.criteria >= minCriteria);
-		//				if (result.compareTo(max) < 0)
-		//				{
-		//					max = result;
-		//				}
-		//			}
-		//			resumeTimer();
-		//
-		//			if (max != null)
-		//			{
-		//				final int set = setNumber - 1;
-		//				// Force this if we are using smaller steps. 
-		//				boolean doSearch = (stepSearch > 1);
-		//				if (!doSearch)
-		//				{
-		//					// Test if the best filter is at the limit of the enumeration
-		//					// Otherwise we will walk around the space we have already covered with a step size of 1.
-		//					for (int j = 0; j < lowerLimit[set].length; j++)
-		//					{
-		//						if (increment[set][j] > 0)
-		//						{
-		//							final double value = max.r.filter.getParameterValue(j);
-		//							if ((value <= lowerLimit[set][j] && value > 0) || value >= upperLimit[set][j])
-		//							{
-		//								doSearch = true;
-		//								break;
-		//							}
-		//						}
-		//					}
-		//				}
-		//
-		//				// Iterative step search until the surrounding positions are not an improvement
-		//				// Limit the iterations in case of a problem.
-		//				int iteration = 0;
-		//				while (doSearch && iteration < 20)
-		//				{
-		//					iteration++;
-		//					//System.out.printf("[%d] %s = %.3f (%.3f)\n", iteration, max.filter.getName(), max.score,
-		//					//		max.criteria);
-		//
-		//					IJ.showStatus(
-		//							"Step search [" + setNumber + "] " + filterSet.getName() + " ... Iteration=" + iteration);
-		//
-		//					// Create a new filter set surrounding the top filter
-		//					final DirectFilter oldMaxFilter = max.r.filter;
-		//					ArrayList<Filter> filters = new ArrayList<Filter>();
-		//					filters.add(max.r.filter);
-		//					final int n = lowerLimit[set].length;
-		//					for (int i = 0; i < n; i++)
-		//					{
-		//						if (increment[set][i] > 0)
-		//						{
-		//							for (int k = filters.size(); k-- > 0;)
-		//							{
-		//								Filter f = filters.get(k);
-		//								double[] parameters = f.getParameters();
-		//
-		//								final double d = parameters[i];
-		//								for (int step = 1; step <= stepSearch; step++)
-		//								{
-		//									addFilters(filters, f, parameters, d, i, step * increment[set][i] / stepSearch);
-		//								}
-		//							}
-		//						}
-		//					}
-		//					FilterSet newSet = new FilterSet(filters);
-		//
-		//					// Score the filters
-		//					scoreResults = scoreFilters(newSet, showResultsTable);
-		//					if (scoreResults == null)
-		//						return -1;
-		//
-		//					pauseTimer();
-		//					for (int index = 0; index < scoreResults.length; index++)
-		//					{
-		//						final ScoreResult scoreResult = scoreResults[index];
-		//
-		//						addToResultsWindow(tw, scoreResult);
-		//
-		//						final SimpleFilterScore result = new SimpleFilterScore(scoreResult, allSameType,
-		//								scoreResult.criteria >= minCriteria);
-		//						if (result.compareTo(max) < 0)
-		//						{
-		//							max = result;
-		//						}
-		//					}
-		//					resumeTimer();
-		//
-		//					// Check if the top filter has changed to continue the search
-		//					doSearch = !max.r.filter.equals(oldMaxFilter);
-		//				}
-		//			}
-		//
-		//			// Allow the re-evaluation of all the filters to be skipped
-		//			best = max.r.filter;
-		//		}
-
 		// Do not support plotting if we used optimisation
 		double[] xValues = (best != null || isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
 		double[] yValues = (xValues == null) ? null : new double[xValues.length];
@@ -2839,6 +2811,7 @@ public class BenchmarkFilterAnalysis
 		if (showResultsTable)
 			resultsWindow.getTextPanel().updateDisplay();
 
+		// TODO - update this to use the dimensions ...
 		// Check the top filter against the limits
 		char[] atLimit = null;
 		if (allSameType)
