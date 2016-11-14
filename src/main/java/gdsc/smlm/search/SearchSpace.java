@@ -188,8 +188,7 @@ public class SearchSpace
 	}
 
 	/**
-	 * Find the optimum. Create the search space using the current dimensions. Score any new point that has not
-	 * previously been scored. Compare the result with the current optimum and return the best.
+	 * Find the optimum in the seed population.
 	 *
 	 * @param <T>
 	 *            the type of comparable score
@@ -256,11 +255,11 @@ public class SearchSpace
 				}
 			}
 		}
-		
+
 		searchSpace = seed;
 		return true;
 	}
-	
+
 	/**
 	 * Find the optimum. Create the search space using the current dimensions. Score any new point that has not
 	 * previously been scored. Compare the result with the current optimum and return the best.
@@ -626,21 +625,22 @@ public class SearchSpace
 			{
 				// Check if at the bounds of the dimension values
 				final boolean atBounds = dimensions[i].isAtBounds(p[i]);
-				final double[] values = (atBounds) ? dimensions[i].values() : null;
 
-				// Move to the centre using the current optimum
-				dimensions[i].setCentre(p[i]);
-
-				// If at bounds then check if the bounds have changed due to the move
+				// Only if at the bounds then move the centre. 
+				// (There is no point moving the bounds if not currently at the limits).
 				if (atBounds)
 				{
+					// Get the current bounds
+					final double[] values = (atBounds) ? dimensions[i].values() : null;
+
+					// Move to the centre using the current optimum
+					dimensions[i].setCentre(p[i]);
+					
+					// Check if the bounds have changed due to the move
 					if (changed(values, dimensions[i].values()))
 						changed = true;
 				}
 			}
-
-			// Q. Always reduce the range ... ?
-			//changed = false;
 
 			if (changed)
 			{
@@ -662,6 +662,15 @@ public class SearchSpace
 			}
 			else
 			{
+				// No changes at the current range.
+				// We can reduce/refine the search space.
+				
+				// Move to the centre using the current optimum
+				for (int i = 0; i < dimensions.length; i++)
+				{
+					dimensions[i].setCentre(p[i]);
+				}
+				
 				// Clear the memory of the space that has been searched 
 				// (as the search space is about to be altered so the values may not overlap).
 				coveredSpace.clear();
@@ -674,7 +683,6 @@ public class SearchSpace
 				}
 				else
 				{
-
 					changed = reduceRange();
 				}
 			}
@@ -877,6 +885,19 @@ public class SearchSpace
 		return current;
 	}
 
+	/**
+	 * Score the seed population and return the top fraction.
+	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param scoreFunction
+	 *            the score function
+	 * @param samples
+	 *            the samples
+	 * @param fraction
+	 *            the fraction
+	 * @return the score results
+	 */
 	private <T extends Comparable<T>> SearchResult<T>[] scoreSeed(FullScoreFunction<T> scoreFunction, int samples,
 			double fraction)
 	{
@@ -893,7 +914,7 @@ public class SearchSpace
 	}
 
 	/**
-	 * Score random samples from the search space and return the top fraction
+	 * Score random samples from the search space and return the top fraction.
 	 *
 	 * @param <T>
 	 *            the type of comparable score
@@ -903,6 +924,8 @@ public class SearchSpace
 	 *            the samples
 	 * @param fraction
 	 *            the fraction
+	 * @param generator
+	 *            the generator
 	 * @return the score results
 	 */
 	private <T extends Comparable<T>> SearchResult<T>[] score(FullScoreFunction<T> scoreFunction, int samples,
