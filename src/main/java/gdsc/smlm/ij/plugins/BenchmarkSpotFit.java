@@ -2012,7 +2012,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		ArrayList<FilterSet> filterList = new ArrayList<FilterSet>(1);
 		// Add Range keyword to identify as a range filter set 
-		filterList.add(new FilterSet("Multi2 Range", filters));
+		filterList.add(new FilterSet("Range", filters));
 		FileOutputStream fos = null;
 		try
 		{
