@@ -30,6 +30,7 @@ public class SearchSpace
 	private SearchDimension[] dimensions;
 	private int iteration = 0;
 	private double[][] searchSpace;
+	private double[][] seed;
 
 	private double[][] scoredSearchSpace;
 	private ArrayList<String> scoredSearchSpaceHash = new ArrayList<String>();
@@ -116,7 +117,9 @@ public class SearchSpace
 		reset();
 
 		// Find the best individual
-		SearchResult<T> current = findOptimum(scoreFunction, null);
+		SearchResult<T> current = findSeedOptimum(scoreFunction);
+		if (current == null)
+			current = findOptimum(scoreFunction, null);
 		SearchResult<T> previous = null;
 
 		boolean converged = false;
@@ -184,6 +187,80 @@ public class SearchSpace
 		return current;
 	}
 
+	/**
+	 * Find the optimum. Create the search space using the current dimensions. Score any new point that has not
+	 * previously been scored. Compare the result with the current optimum and return the best.
+	 *
+	 * @param <T>
+	 *            the type of comparable score
+	 * @param scoreFunction
+	 *            the score function
+	 * @return the new optimum
+	 */
+	private <T extends Comparable<T>> SearchResult<T> findSeedOptimum(ScoreFunction<T> scoreFunction)
+	{
+		if (!seedToSearchSpace())
+			return null;
+
+		start("Find Seed Optimum");
+
+		scoredSearchSpace = searchSpace;
+		scoredSearchSpaceHash.clear();
+
+		SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
+
+		end();
+		return optimum;
+	}
+
+	private boolean seedToSearchSpace()
+	{
+		if (seed == null)
+			return false;
+
+		// Get the limits of active dimensions
+		final int[] indices = new int[dimensions.length];
+		int size = 0;
+		final double[] min = new double[dimensions.length];
+		final double[] max = new double[dimensions.length];
+		for (int i = 0; i < dimensions.length; i++)
+		{
+			if (dimensions[i].active)
+			{
+				min[size] = dimensions[i].min;
+				max[size] = dimensions[i].max;
+				indices[size++] = i;
+			}
+		}
+
+		for (double[] p : seed)
+		{
+			// Check the seed has the correct dimensions
+			if (p == null || p.length != indices.length)
+				return false;
+			// Check the data is within the limits for active dimensions
+			for (int j = 0; j < size; j++)
+			{
+				final double value = p[indices[j]];
+				if (value < min[j])
+				{
+					// Check with rounding
+					if (dimensions[indices[j]].round(value) < min[j])
+						return false;
+				}
+				if (value > max[j])
+				{
+					// Check with rounding
+					if (dimensions[indices[j]].round(value) > max[j])
+						return false;
+				}
+			}
+		}
+		
+		searchSpace = seed;
+		return true;
+	}
+	
 	/**
 	 * Find the optimum. Create the search space using the current dimensions. Score any new point that has not
 	 * previously been scored. Compare the result with the current optimum and return the best.
@@ -765,7 +842,9 @@ public class SearchSpace
 		final HaltonSequenceGenerator[] generator = new HaltonSequenceGenerator[1];
 
 		// Find the best individual
-		SearchResult<T>[] scores = score(scoreFunction, samples, fraction, generator);
+		SearchResult<T>[] scores = scoreSeed(scoreFunction, samples, fraction);
+		if (scores == null)
+			scores = score(scoreFunction, samples, fraction, generator);
 		if (scores == null)
 			return null;
 
@@ -796,6 +875,21 @@ public class SearchSpace
 			tracker.status("Converged [%d]", iteration);
 
 		return current;
+	}
+
+	private <T extends Comparable<T>> SearchResult<T>[] scoreSeed(FullScoreFunction<T> scoreFunction, int samples,
+			double fraction)
+	{
+		if (!seedToSearchSpace())
+			return null;
+
+		// Score
+		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
+
+		// Get the top fraction
+		int size = (int) Math.ceil(samples * fraction);
+
+		return scoreFunction.cut(scores, size);
 	}
 
 	/**
@@ -931,5 +1025,17 @@ public class SearchSpace
 		}
 
 		return true;
+	}
+
+	/**
+	 * Seed the search with an initial population. This is used to determine the initial optimum and centre the search
+	 * in the search space.
+	 *
+	 * @param seed
+	 *            the seed
+	 */
+	public void seed(double[][] seed)
+	{
+		this.seed = seed;
 	}
 }
