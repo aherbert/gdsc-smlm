@@ -501,6 +501,23 @@ public class SearchSpace
 	}
 
 	/**
+	 * Count the number of combinations if enumerating the search space.
+	 *
+	 * @param dimensions
+	 *            the dimensions
+	 * @return the number of combinations
+	 */
+	public static long countCombinations(SearchDimension[] dimensions)
+	{
+		long combinations = 1;
+		for (int i = 0; i < dimensions.length; i++)
+		{
+			combinations *= dimensions[i].values().length;
+		}
+		return combinations;
+	}
+
+	/**
 	 * Creates the search space.
 	 *
 	 * @param dimensionValues
@@ -635,7 +652,7 @@ public class SearchSpace
 
 					// Move to the centre using the current optimum
 					dimensions[i].setCentre(p[i]);
-					
+
 					// Check if the bounds have changed due to the move
 					if (changed(values, dimensions[i].values()))
 						changed = true;
@@ -664,13 +681,13 @@ public class SearchSpace
 			{
 				// No changes at the current range.
 				// We can reduce/refine the search space.
-				
+
 				// Move to the centre using the current optimum
 				for (int i = 0; i < dimensions.length; i++)
 				{
 					dimensions[i].setCentre(p[i]);
 				}
-				
+
 				// Clear the memory of the space that has been searched 
 				// (as the search space is about to be altered so the values may not overlap).
 				coveredSpace.clear();
