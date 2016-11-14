@@ -1966,7 +1966,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			if (filename == null)
 				return;
 			// Remove extension to store the filename
-			filename = Utils.removeExtension(filename);
+			filename = Utils.replaceExtension(filename, ".xml");
 			filterSettings.filterSetFilename = filename;
 
 			// Create a filter set using the ranges
@@ -1975,7 +1975,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			filters.add(new MultiFilter2(upper[0], (float) upper[1], upper[2], upper[3], upper[4], upper[5], upper[6]));
 			filters.add(new MultiFilter2(increment[0], (float) increment[1], increment[2], increment[3], increment[4],
 					increment[5], increment[6]));
-			if (saveFilters(filename + ".3.xml", filters))
+			if (saveFilters(filename, filters))
 				SettingsManager.saveSettings(gs);
 
 			// Create a filter set using the min/max and the initial bounds.
@@ -2004,14 +2004,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
 			filters.add(new MultiFilter2(upper[0], (float) upper[1], upper[2], upper[3], upper[4], upper[5], upper[6]));
 			filters.add(new MultiFilter2(max[0], (float) max[1], max[2], max[3], max[4], max[5], max[6]));
-			saveFilters(filename + ".4.xml", filters);
+			saveFilters(Utils.replaceExtension(filename, ".4.xml"), filters);
 		}
 	}
 
 	private boolean saveFilters(String filename, ArrayList<Filter> filters)
 	{
 		ArrayList<FilterSet> filterList = new ArrayList<FilterSet>(1);
-		filterList.add(new FilterSet("Multi2", filters));
+		// Add Range keyword to identify as a range filter set 
+		filterList.add(new FilterSet("Multi2 Range", filters));
 		FileOutputStream fos = null;
 		try
 		{
