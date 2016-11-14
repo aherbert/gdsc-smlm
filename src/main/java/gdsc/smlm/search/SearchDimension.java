@@ -159,17 +159,24 @@ public class SearchDimension implements Cloneable
 	{
 		return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
 	}
-	
+
 	private static boolean isInvalid(double d)
 	{
 		return Double.isNaN(d) || Double.isInfinite(d);
 	}
 
-	private double round(double d)
+	/**
+	 * Round the value to the nearest min increment. If min increment is zero no rounding is performed.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the rounded value
+	 */
+	public double round(double value)
 	{
 		if (minIncrement != 0)
-			return Maths.round(d, minIncrement);
-		return d;
+			return Maths.round(value, minIncrement);
+		return value;
 	}
 
 	/**
