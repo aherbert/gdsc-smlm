@@ -2181,6 +2181,8 @@ public class BenchmarkFilterAnalysis
 		// All the search algorithms use search dimensions.
 		// Create search dimensions if needed (these are used for testing if the optimum is at the limit).
 		SearchDimension[] dimensions = null;
+		SearchDimension[] originalDimensions = null;
+		boolean[] disabled = null;
 		double[][] seed = null;
 		if (allSameType)
 		{
@@ -2299,7 +2301,7 @@ public class BenchmarkFilterAnalysis
 					double minIncrement = ss_filter.getParameterIncrement(i);
 					if (min > lower[i])
 						min = lower[i];
-					if (max > upper[i])
+					if (max < upper[i])
 						max = upper[i];
 					try
 					{
@@ -2316,6 +2318,8 @@ public class BenchmarkFilterAnalysis
 
 				if (dimensions == null)
 				{
+					// Failed to work out the dimensions. No optimisation will be possible.
+
 					// Sort so that the filters are in a nice order for reporting
 					filterSet.sort();
 
@@ -2323,18 +2327,25 @@ public class BenchmarkFilterAnalysis
 					seed = null;
 				}
 			}
+
+			if (dimensions != null)
+			{
+				// Store the dimensions so we can do an 'at limit' check
+				originalDimensions = new SearchDimension[dimensions.length];
+				disabled = new boolean[dimensions.length];
+				for (int i = 0; i < disabled.length; i++)
+				{
+					originalDimensions[i] = dimensions[i];
+					disabled[i] = !dimensions[i].active;
+				}
+			}
+
 		}
 		else
 		{
 			// Sort so that the filters are in a nice order for reporting
 			filterSet.sort();
 		}
-
-		// Store the dimensions so we can do an at limit check
-		SearchDimension[] originalDimensions = dimensions;
-		boolean[] disabled = new boolean[dimensions.length];
-		for (int i = 0; i < disabled.length; i++)
-			disabled[i] = !dimensions[i].active;
 
 		filterSetStopWatch = StopWatch.createStarted();
 
