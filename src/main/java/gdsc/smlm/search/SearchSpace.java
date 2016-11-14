@@ -27,7 +27,6 @@ import gdsc.core.logging.TrackProgress;
  */
 public class SearchSpace
 {
-	//private SearchDimension[] dimensions;
 	private int iteration = 0;
 	private double[][] searchSpace;
 	private double[][] seed;
@@ -196,7 +195,8 @@ public class SearchSpace
 	 *            the score function
 	 * @return the new optimum
 	 */
-	private <T extends Comparable<T>> SearchResult<T> findSeedOptimum(Dimension[] dimensions, ScoreFunction<T> scoreFunction)
+	private <T extends Comparable<T>> SearchResult<T> findSeedOptimum(Dimension[] dimensions,
+			ScoreFunction<T> scoreFunction)
 	{
 		if (!seedToSearchSpace(dimensions))
 			return null;
@@ -272,8 +272,8 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return the new optimum
 	 */
-	private <T extends Comparable<T>> SearchResult<T> findOptimum(SearchDimension[] dimensions, ScoreFunction<T> scoreFunction,
-			SearchResult<T> current)
+	private <T extends Comparable<T>> SearchResult<T> findOptimum(SearchDimension[] dimensions,
+			ScoreFunction<T> scoreFunction, SearchResult<T> current)
 	{
 		if (!createSearchSpace(dimensions, current))
 			return null;
@@ -590,7 +590,8 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return true, if successful
 	 */
-	private boolean updateSearchSpace(SearchDimension[] dimensions, SearchResult<?> current, RefinementMode refinementMode)
+	private boolean updateSearchSpace(SearchDimension[] dimensions, SearchResult<?> current,
+			RefinementMode refinementMode)
 	{
 		if (current == null)
 			return false;
@@ -598,13 +599,21 @@ public class SearchSpace
 		start("Update search space");
 		boolean changed = false;
 
+		final double[] p = current.point;
+		//		System.out.printf("[%d] Before:", iteration);
+		//		for (int i = 0; i < dimensions.length; i++)
+		//		{
+		//			if (dimensions[i].isActive())
+		//				System.out.printf(" %.2f-%.2f (%.2f)", dimensions[i].getLower(), dimensions[i].getUpper(), p[i]);
+		//		}
+		//		System.out.println();
+
 		if (searchMode != RefinementMode.NONE)
 		{
 			// During refinement we will not repeat the same point if the optimum moves
 			coveredSpace.clear();
 
 			// Move to the centre using the current optimum
-			final double[] p = current.point;
 			for (int i = 0; i < dimensions.length; i++)
 			{
 				if (p[i] != dimensions[i].getCentre())
@@ -637,7 +646,6 @@ public class SearchSpace
 			// searchMode == ENUMERATION
 
 			// Process each dimension
-			final double[] p = current.point;
 			for (int i = 0; i < dimensions.length; i++)
 			{
 				// Check if at the bounds of the dimension values
@@ -648,7 +656,7 @@ public class SearchSpace
 				if (atBounds)
 				{
 					// Get the current bounds
-					final double[] values = (atBounds) ? dimensions[i].values() : null;
+					final double[] values = dimensions[i].values();
 
 					// Move to the centre using the current optimum
 					dimensions[i].setCentre(p[i]);
@@ -707,13 +715,22 @@ public class SearchSpace
 
 		end();
 
+		//		System.out.printf("[%d] After:", iteration);
+		//		for (int i = 0; i < dimensions.length; i++)
+		//		{
+		//			if (dimensions[i].isActive())
+		//				System.out.printf(" %.2f-%.2f (%.2f)", dimensions[i].getLower(), dimensions[i].getUpper(), p[i]);
+		//		}
+		//		System.out.println();
+
 		return changed;
 	}
 
 	/**
 	 * Reduce range.
 	 *
-	 * @param dimensions the dimensions
+	 * @param dimensions
+	 *            the dimensions
 	 * @return true, if successful
 	 */
 	private boolean reduceRange(SearchDimension[] dimensions)
@@ -917,8 +934,8 @@ public class SearchSpace
 	 *            the fraction
 	 * @return the score results
 	 */
-	private <T extends Comparable<T>> SearchResult<T>[] scoreSeed(Dimension[] dimensions, FullScoreFunction<T> scoreFunction, int samples,
-			double fraction)
+	private <T extends Comparable<T>> SearchResult<T>[] scoreSeed(Dimension[] dimensions,
+			FullScoreFunction<T> scoreFunction, int samples, double fraction)
 	{
 		if (!seedToSearchSpace(dimensions))
 			return null;
