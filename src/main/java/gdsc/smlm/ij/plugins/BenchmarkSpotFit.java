@@ -1920,12 +1920,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			double range = upper[i] - lower[i];
 			// Allow clipping if the range is small compared to the min increment
 			double multiples = range / interval[i];
-			if (multiples < 9)
+			// Use 8 multiples for the equivalent of +/- 4 steps around the centre
+			if (multiples < 8)
 			{
 				multiples = Math.ceil(multiples);
 			}
 			else
-				multiples = 9;
+				multiples = 8;
 			increment[i] = Maths.ceil(range / multiples, interval[i]);
 
 			if (i == FILTER_MIN_WIDTH)
