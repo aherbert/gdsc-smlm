@@ -235,10 +235,6 @@ public class BenchmarkFilterAnalysis
 	private static String oldFilename = "";
 	private static long lastModified = 0;
 	private static List<FilterSet> filterList = null;
-	private static boolean[][] wasNotExpanded;
-	private static double[][] lowerLimit;
-	private static double[][] upperLimit;
-	private static double[][] increment;
 	static int lastId = 0;
 	private static HashMap<Integer, IdPeakResult[]> actualCoordinates = null;
 	private static MultiPathFitResults[] resultsList = null;
@@ -741,7 +737,6 @@ public class BenchmarkFilterAnalysis
 					failCountRange = 0;
 					residualsThreshold = (BenchmarkSpotFit.computeDoublets)
 							? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
-					wasNotExpanded = null;
 					createResultsPrefix2();
 					return filterSets;
 				}
@@ -869,36 +864,12 @@ public class BenchmarkFilterAnalysis
 		return false;
 	}
 
-	private static boolean wasNotExpanded(int setNumber, int parameterNumber)
-	{
-		if (wasNotExpanded == null)
-			return true;
-		setNumber--;
-		if (wasNotExpanded[setNumber] == null)
-			return true;
-		return wasNotExpanded[setNumber][parameterNumber];
-	}
-
-	private static boolean wasExpanded(int setNumber)
-	{
-		if (wasNotExpanded == null)
-			return false;
-		setNumber--;
-		if (wasNotExpanded[setNumber] == null)
-			return false;
-		for (int i = 0; i < wasNotExpanded[setNumber].length; i++)
-			if (!wasNotExpanded[setNumber][i])
-				return true;
-		return false;
-	}
-
 	/**
 	 * If filters have been provided in FiltersSets of 3 then expand the filters into a set assuming the three represent
 	 * min:max:increment.
 	 */
 	private void expandFilters()
 	{
-		wasNotExpanded = null;
 		searchRangeMap.clear();
 
 		long[] expanded = new long[filterList.size()];
@@ -962,11 +933,6 @@ public class BenchmarkFilterAnalysis
 
 		IJ.showStatus("Expanding filters ...");
 
-		wasNotExpanded = new boolean[filterList.size()][];
-		lowerLimit = new double[filterList.size()][];
-		upperLimit = new double[filterList.size()][];
-		increment = new double[filterList.size()][];
-
 		List<FilterSet> filterList2 = new ArrayList<FilterSet>(filterList.size());
 		for (FilterSet filterSet : filterList)
 		{
@@ -992,25 +958,6 @@ public class BenchmarkFilterAnalysis
 			}
 
 			List<Filter> list = expandFilters(f1, parameters, parameters2, increment);
-
-			// Use the output to set the range
-			wasNotExpanded[c] = new boolean[n];
-			lowerLimit[c] = new double[n];
-			upperLimit[c] = new double[n];
-			BenchmarkFilterAnalysis.increment[c] = new double[n];
-			for (int i = 0; i < n; i++)
-			{
-				if (increment[i] == 0)
-				{
-					wasNotExpanded[c][i] = true;
-				}
-				else
-				{
-					lowerLimit[c][i] = parameters[i];
-					upperLimit[c][i] = parameters2[i];
-					BenchmarkFilterAnalysis.increment[c][i] = increment[i];
-				}
-			}
 
 			filterList2.add(new FilterSet(filterSet.getName(), list));
 		}
@@ -2240,12 +2187,14 @@ public class BenchmarkFilterAnalysis
 		// All the search algorithms use search dimensions.
 		// Create search dimensions if needed (these are used for testing if the optimum is at the limit).
 		SearchDimension[] dimensions = null;
+		double[][] seed = null;
 		if (allSameType)
 		{
 			// There should always be 1 filter
 			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
 			int n = ss_filter.getNumberOfParameters();
 			dimensions = new SearchDimension[n];
+			boolean rangeInput = false;
 
 			if (filterSet.getFilters().size() == 4)
 			{
@@ -2273,6 +2222,7 @@ public class BenchmarkFilterAnalysis
 						break;
 					}
 				}
+				rangeInput = dimensions != null;
 			}
 
 			if (filterSet.getFilters().size() == 3)
@@ -2309,6 +2259,7 @@ public class BenchmarkFilterAnalysis
 						break;
 					}
 				}
+				rangeInput = dimensions != null;
 			}
 
 			if (dimensions == null)
@@ -2317,9 +2268,15 @@ public class BenchmarkFilterAnalysis
 				// Find the limits in the current scores
 				final double[] lower = ss_filter.getParameters().clone();
 				final double[] upper = lower.clone();
+				// Allow the SearchSpace algorithms to be seeded with an initial population 
+				// for the first evaluation of the optimum. This is done when the input filter 
+				// set is not a range.
+				seed = new double[filterSet.size()][];
+				int c = 0;
 				for (Filter f : filterSet.getFilters())
 				{
 					final double[] point = f.getParameters();
+					seed[c++] = point;
 					for (int j = 0; j < lower.length; j++)
 					{
 						if (lower[j] > point[j])
@@ -2360,11 +2317,17 @@ public class BenchmarkFilterAnalysis
 					}
 				}
 
-				// TODO - allow the SearchSpace algorithms to be seeded with an initial population for the first evaluation of the optimum
+				if (rangeInput || dimensions == null)
+					// This is not needed
+					seed = null;
 			}
 		}
 
 		// Store the dimensions so we can do an at limit check
+		SearchDimension[] originalDimensions = dimensions;
+		boolean[] disabled = new boolean[dimensions.length];
+		for (int i = 0; i < disabled.length; i++)
+			disabled[i] = !dimensions[i].active;
 
 		filterSetStopWatch = StopWatch.createStarted();
 
@@ -2393,11 +2356,10 @@ public class BenchmarkFilterAnalysis
 
 			gd.addMessage("Configure the step size for each parameter");
 			int[] indices = ss_filter.getChromosomeParameters();
-			final boolean wasExpanded = wasExpanded(setNumber);
 			for (int j = 0; j < indices.length; j++)
 			{
 				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
-				final double step = (wasExpanded && wasNotExpanded(setNumber, indices[j])) ? 0 : stepSize[j] * delta;
+				final double step = (dimensions[indices[j]].active) ? stepSize[j] * delta : 0;
 				gd.addNumericField(getDialogName(prefix, ss_filter.getParameterName(indices[j])), step, 2);
 			}
 
@@ -2441,7 +2403,12 @@ public class BenchmarkFilterAnalysis
 					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax);
 				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
 
-				// TODO - create new random filters if the population is initially below the population size
+				// Create new random filters if the population is initially below the population size
+				if (filterSet.size() < populationSize)
+				{
+					double[][] sample = SearchSpace.sample(originalDimensions, populationSize - filterSet.size(), null);
+					filterSet.getFilters().addAll(searchSpaceToFilters(ss_filter, sample));
+				}
 
 				ga_population = new Population(filterSet.getFilters());
 				ga_population.setPopulationSize(populationSize);
@@ -2593,6 +2560,8 @@ public class BenchmarkFilterAnalysis
 					}
 				}
 				searchRangeMap.put(setNumber, enabled);
+				for (int i = 0; i < disabled.length; i++)
+					disabled[i] = !dimensions[i].active;
 
 				algorithm = EVOLVE[evolve];
 				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
@@ -2600,6 +2569,7 @@ public class BenchmarkFilterAnalysis
 
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
+				ss.seed(seed);
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
 				createGAWindow();
@@ -2691,6 +2661,8 @@ public class BenchmarkFilterAnalysis
 					}
 				}
 				searchRangeMap.put(setNumber, enabled);
+				for (int i = 0; i < disabled.length; i++)
+					disabled[i] = !dimensions[i].active;
 
 				algorithm = EVOLVE[evolve];
 				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
@@ -2699,6 +2671,7 @@ public class BenchmarkFilterAnalysis
 
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
+				ss.seed(seed);
 				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations,
 						convergedCount);
 
@@ -2811,65 +2784,62 @@ public class BenchmarkFilterAnalysis
 		if (showResultsTable)
 			resultsWindow.getTextPanel().updateDisplay();
 
-		// TODO - update this to use the dimensions ...
-		// Check the top filter against the limits
+		// Check the top filter against the limits of the original dimensions
 		char[] atLimit = null;
-		if (allSameType)
+		if (allSameType && originalDimensions != null)
 		{
-			if (max != null)
+			DirectFilter filter = max.r.filter;
+			int[] indices = filter.getChromosomeParameters();
+			atLimit = new char[indices.length];
+			StringBuilder sb = new StringBuilder();
+			for (int j = 0; j < indices.length; j++)
 			{
-				DirectFilter filter = max.r.filter;
-				int[] indices = filter.getChromosomeParameters();
-				atLimit = new char[indices.length];
-				StringBuilder sb = new StringBuilder();
-				final int set = setNumber - 1;
-				for (int j = 0; j < indices.length; j++)
+				atLimit[j] = ' ';
+				final int p = indices[j];
+				if (disabled[p])
+					continue;
+
+				final double value = filter.getParameterValue(p);
+				double lowerLimit = originalDimensions[p].getLower();
+				double upperLimit = originalDimensions[p].getUpper();
+
+				int c1 = Double.compare(value, lowerLimit);
+				if (c1 <= 0)
 				{
-					atLimit[j] = ' ';
-					final int p = indices[j];
-					if (!wasNotExpanded(setNumber, p))
+					atLimit[j] = '<';
+					sb.append(" : ").append(filter.getParameterName(p)).append(" [").append(Utils.rounded(value));
+					if (c1 == -1)
+						sb.append("<").append(Utils.rounded(lowerLimit));
+					sb.append("]");
+				}
+				else
+				{
+					int c2 = Double.compare(value, upperLimit);
+					if (c2 >= 0)
 					{
-						final double value = filter.getParameterValue(p);
-						int c1 = Double.compare(value, lowerLimit[set][p]);
-						if (c1 <= 0)
-						{
-							atLimit[j] = '<';
-							sb.append(" : ").append(filter.getParameterName(p)).append(" [")
-									.append(Utils.rounded(value));
-							if (c1 == -1)
-								sb.append("<").append(Utils.rounded(lowerLimit[set][p]));
-							sb.append("]");
-						}
-						else
-						{
-							int c2 = Double.compare(value, upperLimit[set][p]);
-							if (c2 >= 0)
-							{
-								atLimit[j] = '>';
-								sb.append(" : ").append(filter.getParameterName(p)).append(" [")
-										.append(Utils.rounded(value));
-								if (c2 == 1)
-									sb.append(">").append(Utils.rounded(upperLimit[set][p]));
-								sb.append("]");
-							}
-						}
+						atLimit[j] = '>';
+						sb.append(" : ").append(filter.getParameterName(p)).append(" [").append(Utils.rounded(value));
+						if (c2 == 1)
+							sb.append(">").append(Utils.rounded(upperLimit));
+						sb.append("]");
 					}
 				}
-				if (sb.length() > 0)
+			}
+
+			if (sb.length() > 0)
+			{
+				if (max.criteriaPassed)
 				{
-					if (max.criteriaPassed)
-					{
-						Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
-								filter.getName(), Utils.rounded((invertScore) ? -max.score : max.score),
-								Utils.rounded((invertCriteria) ? -minCriteria : minCriteria),
-								limitFailCount + limitRange, sb.toString());
-					}
-					else
-					{
-						Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
-								filter.getName(), Utils.rounded((invertCriteria) ? -max.criteria : max.criteria),
-								limitFailCount + limitRange, sb.toString());
-					}
+					Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
+							filter.getName(), Utils.rounded((invertScore) ? -max.score : max.score),
+							Utils.rounded((invertCriteria) ? -minCriteria : minCriteria), limitFailCount + limitRange,
+							sb.toString());
+				}
+				else
+				{
+					Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
+							filter.getName(), Utils.rounded((invertCriteria) ? -max.criteria : max.criteria),
+							limitFailCount + limitRange, sb.toString());
 				}
 			}
 		}
