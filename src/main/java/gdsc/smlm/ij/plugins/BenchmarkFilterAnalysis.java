@@ -231,7 +231,7 @@ public class BenchmarkFilterAnalysis
 	private static StopWatch analysisStopWatch;
 
 	private static boolean reUseFilters = true;
-	private static boolean expandFilters = true;
+	private static boolean expandFilters = false;
 	private static String oldFilename = "";
 	private static long lastModified = 0;
 	private static List<FilterSet> filterList = null;
@@ -816,12 +816,6 @@ public class BenchmarkFilterAnalysis
 
 					// Option to enumerate filters
 					expandFilters();
-
-					// Sort so that the filters are in a nice order
-					for (FilterSet filterSet : filterList)
-					{
-						filterSet.sort();
-					}
 
 					setLastFile(filename);
 					return filterList;
@@ -2194,9 +2188,11 @@ public class BenchmarkFilterAnalysis
 			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
 			int n = ss_filter.getNumberOfParameters();
 			dimensions = new SearchDimension[n];
-			boolean rangeInput = false;
 
-			if (filterSet.getFilters().size() == 4)
+			// Option to configure a range
+			final boolean rangeInput = filterSet.getName().contains("Range");
+
+			if (rangeInput && filterSet.size() == 4)
 			{
 				// This is used as min/lower/upper/max
 				final Filter minF = ss_filter;
@@ -2222,25 +2218,26 @@ public class BenchmarkFilterAnalysis
 						break;
 					}
 				}
-				rangeInput = dimensions != null;
 			}
 
-			if (filterSet.getFilters().size() == 3)
+			if (rangeInput && (filterSet.size() == 3 || filterSet.size() == 2))
 			{
-				// This is used as lower/upper/increment
+				// This is used as lower/upper[/increment]
 				final Filter lowerF = ss_filter;
 				final Filter upperF = filterSet.getFilters().get(1);
-				final Filter incF = filterSet.getFilters().get(2);
+				//				final Filter incF = filterSet.getFilters().get(2);
 
 				for (int i = 0; i < n; i++)
 				{
-					if (incF.getParameterValue(i) == incF.getDisabledParameterValue(i) ||
-							Double.isInfinite(incF.getParameterValue(i)))
-					{
-						// Not enabled
-						dimensions[i] = new SearchDimension(incF.getDisabledParameterValue(i));
-						continue;
-					}
+					// Do not disable if the increment is not set. This is left to the user to decide.
+					//					if (incF.getParameterValue(i) == incF.getDisabledParameterValue(i) ||
+					//							Double.isInfinite(incF.getParameterValue(i)))
+					//					{
+					//						// Not enabled
+					//						dimensions[i] = new SearchDimension(incF.getDisabledParameterValue(i));
+					//						continue;
+					//					}
+
 					double lower = lowerF.getParameterValue(i);
 					double upper = upperF.getParameterValue(i);
 					String name = ss_filter.getParameterName(i);
@@ -2259,9 +2256,9 @@ public class BenchmarkFilterAnalysis
 						break;
 					}
 				}
-				rangeInput = dimensions != null;
 			}
 
+			// Get the dimensions from the filters
 			if (dimensions == null)
 			{
 				// Allow inputing a filter set (e.g. saved from previous optimisation)
@@ -2317,10 +2314,20 @@ public class BenchmarkFilterAnalysis
 					}
 				}
 
-				if (rangeInput || dimensions == null)
-					// This is not needed
+				if (dimensions == null)
+				{
+					// Sort so that the filters are in a nice order for reporting
+					filterSet.sort();
+
+					// This will not be used when the dimensions are null
 					seed = null;
+				}
 			}
+		}
+		else
+		{
+			// Sort so that the filters are in a nice order for reporting
+			filterSet.sort();
 		}
 
 		// Store the dimensions so we can do an at limit check
@@ -2563,31 +2570,56 @@ public class BenchmarkFilterAnalysis
 				for (int i = 0; i < disabled.length; i++)
 					disabled[i] = !dimensions[i].active;
 
-				algorithm = EVOLVE[evolve];
-				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
-				ga_iteration = 0;
-
-				SearchSpace ss = new SearchSpace();
-				ss.setTracker(this);
-				ss.seed(seed);
-				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
-
-				createGAWindow();
-				resumeTimer();
-
-				SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker, myRefinementMode);
-
-				if (optimum != null)
+				// Check the number of combinations is OK
+				long combinations = SearchSpace.countCombinations(dimensions);
+				if (combinations > 10000)
 				{
-					best = optimum.score.r.filter;
+					gd = new GenericDialog(TITLE);
+					gd.addMessage(
+							String.format("%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.",
+									combinations));
+					gd.enableYesNoCancel();
+					gd.hideCancelButton();
+					gd.showDialog();
+					if (!gd.wasOKed())
+					{
+						combinations = 0;
+					}
+				}
 
-					// Now update the filter set for final assessment
-					filterSet = new FilterSet(filterSet.getName(),
-							searchSpaceToFilters(optimum.score.r.filter, ss.getSearchSpace()));
+				if (combinations == 0)
+				{
+					resumeTimer();
+				}
+				else
+				{
+					algorithm = EVOLVE[evolve];
+					ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
+					ga_iteration = 0;
 
-					// Option to save the filters
-					if (saveOption)
-						saveFilterSet(filterSet, setNumber);
+					SearchSpace ss = new SearchSpace();
+					ss.setTracker(this);
+					ss.seed(seed);
+					ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0,
+							maxIterations);
+
+					createGAWindow();
+					resumeTimer();
+
+					SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker, myRefinementMode);
+
+					if (optimum != null)
+					{
+						best = optimum.score.r.filter;
+
+						// Now update the filter set for final assessment
+						filterSet = new FilterSet(filterSet.getName(),
+								searchSpaceToFilters(optimum.score.r.filter, ss.getSearchSpace()));
+
+						// Option to save the filters
+						if (saveOption)
+							saveFilterSet(filterSet, setNumber);
+					}
 				}
 			}
 		}
