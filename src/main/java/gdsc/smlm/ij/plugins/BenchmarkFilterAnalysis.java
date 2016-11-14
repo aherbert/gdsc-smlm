@@ -101,6 +101,7 @@ import gdsc.smlm.results.filter.ResultAssignment;
 import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.search.ConvergenceChecker;
 import gdsc.smlm.search.ConvergenceToleranceChecker;
+import gdsc.smlm.search.FixedDimension;
 import gdsc.smlm.search.FullScoreFunction;
 import gdsc.smlm.search.ScoreFunctionHelper;
 import gdsc.smlm.search.SearchDimension;
@@ -2180,8 +2181,7 @@ public class BenchmarkFilterAnalysis
 
 		// All the search algorithms use search dimensions.
 		// Create search dimensions if needed (these are used for testing if the optimum is at the limit).
-		SearchDimension[] dimensions = null;
-		SearchDimension[] originalDimensions = null;
+		FixedDimension[] originalDimensions = null;
 		boolean[] disabled = null;
 		double[][] seed = null;
 		if (allSameType)
@@ -2189,7 +2189,7 @@ public class BenchmarkFilterAnalysis
 			// There should always be 1 filter
 			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
 			int n = ss_filter.getNumberOfParameters();
-			dimensions = new SearchDimension[n];
+			originalDimensions = new FixedDimension[n];
 
 			// Option to configure a range
 			final boolean rangeInput = filterSet.getName().contains("Range");
@@ -2210,13 +2210,13 @@ public class BenchmarkFilterAnalysis
 					double minIncrement = ss_filter.getParameterIncrement(i);
 					try
 					{
-						dimensions[i] = new SearchDimension(min, max, minIncrement, 1, lower, upper);
+						originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower, upper);
 					}
 					catch (IllegalArgumentException e)
 					{
 						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
 								ss_filter.getParameterName(i));
-						dimensions = null;
+						originalDimensions = null;
 						break;
 					}
 				}
@@ -2248,20 +2248,20 @@ public class BenchmarkFilterAnalysis
 					double minIncrement = ss_filter.getParameterIncrement(i);
 					try
 					{
-						dimensions[i] = new SearchDimension(min, max, minIncrement, 1, lower, upper);
+						originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower, upper);
 					}
 					catch (IllegalArgumentException e)
 					{
 						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
 								ss_filter.getParameterName(i));
-						dimensions = null;
+						originalDimensions = null;
 						break;
 					}
 				}
 			}
 
 			// Get the dimensions from the filters
-			if (dimensions == null)
+			if (originalDimensions == null)
 			{
 				// Allow inputing a filter set (e.g. saved from previous optimisation)
 				// Find the limits in the current scores
@@ -2292,7 +2292,7 @@ public class BenchmarkFilterAnalysis
 					if (lower[i] == upper[i])
 					{
 						// Not enabled
-						dimensions[i] = new SearchDimension(lower[i]);
+						originalDimensions[i] = new FixedDimension(lower[i]);
 						continue;
 					}
 					String name = ss_filter.getParameterName(i);
@@ -2305,18 +2305,18 @@ public class BenchmarkFilterAnalysis
 						max = upper[i];
 					try
 					{
-						dimensions[i] = new SearchDimension(min, max, minIncrement, 1, lower[i], upper[i]);
+						originalDimensions[i] = new FixedDimension(min, max, minIncrement, lower[i], upper[i]);
 					}
 					catch (IllegalArgumentException e)
 					{
 						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
 								ss_filter.getParameterName(i));
-						dimensions = null;
+						originalDimensions = null;
 						break;
 					}
 				}
 
-				if (dimensions == null)
+				if (originalDimensions == null)
 				{
 					// Failed to work out the dimensions. No optimisation will be possible.
 
@@ -2328,15 +2328,13 @@ public class BenchmarkFilterAnalysis
 				}
 			}
 
-			if (dimensions != null)
+			if (originalDimensions != null)
 			{
 				// Store the dimensions so we can do an 'at limit' check
-				originalDimensions = new SearchDimension[dimensions.length];
-				disabled = new boolean[dimensions.length];
+				disabled = new boolean[originalDimensions.length];
 				for (int i = 0; i < disabled.length; i++)
 				{
-					originalDimensions[i] = dimensions[i];
-					disabled[i] = !dimensions[i].active;
+					disabled[i] = !originalDimensions[i].isActive();
 				}
 			}
 
@@ -2349,7 +2347,7 @@ public class BenchmarkFilterAnalysis
 
 		filterSetStopWatch = StopWatch.createStarted();
 
-		if (evolve == 1 && dimensions != null)
+		if (evolve == 1 && originalDimensions != null)
 		{
 			// Collect parameters for the genetic algorithm
 			pauseTimer();
@@ -2377,7 +2375,7 @@ public class BenchmarkFilterAnalysis
 			for (int j = 0; j < indices.length; j++)
 			{
 				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
-				final double step = (dimensions[indices[j]].active) ? stepSize[j] * delta : 0;
+				final double step = (originalDimensions[indices[j]].isActive()) ? stepSize[j] * delta : 0;
 				gd.addNumericField(getDialogName(prefix, ss_filter.getParameterName(indices[j])), step, 2);
 			}
 
@@ -2498,7 +2496,7 @@ public class BenchmarkFilterAnalysis
 			}
 		}
 
-		if ((evolve == 2 || evolve == 4) && dimensions != null)
+		if ((evolve == 2 || evolve == 4) && originalDimensions != null)
 		{
 			// Collect parameters for the range search algorithm
 			pauseTimer();
@@ -2552,6 +2550,7 @@ public class BenchmarkFilterAnalysis
 					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
 				}
 
+				SearchDimension[] dimensions = new SearchDimension[n];
 				for (int i = 0; i < n; i++)
 				{
 					enabled[i] = gd.getNextBoolean();
@@ -2559,7 +2558,7 @@ public class BenchmarkFilterAnalysis
 					{
 						try
 						{
-							dimensions[i] = dimensions[i].create(rangeSearchWidth);
+							dimensions[i] = originalDimensions[i].create(rangeSearchWidth);
 							dimensions[i].setPad(true);
 							if (isStepSearch)
 								// Prevent range reduction so that the step search just does a single refinement step
@@ -2635,7 +2634,7 @@ public class BenchmarkFilterAnalysis
 			}
 		}
 
-		if (evolve == 3 && dimensions != null)
+		if (evolve == 3 && originalDimensions != null)
 		{
 			// Collect parameters for the enrichment search algorithm
 			pauseTimer();
@@ -2681,6 +2680,7 @@ public class BenchmarkFilterAnalysis
 				enrichmentFraction = gd.getNextNumber();
 				enrichmentPadding = gd.getNextNumber();
 
+				SearchDimension[] dimensions = new SearchDimension[n];
 				for (int i = 0; i < n; i++)
 				{
 					enabled[i] = gd.getNextBoolean();
@@ -2688,7 +2688,7 @@ public class BenchmarkFilterAnalysis
 					{
 						try
 						{
-							dimensions[i] = dimensions[i].create(rangeSearchWidth);
+							dimensions[i] = originalDimensions[i].create(rangeSearchWidth);
 							dimensions[i].setPad(true);
 						}
 						catch (IllegalArgumentException e)

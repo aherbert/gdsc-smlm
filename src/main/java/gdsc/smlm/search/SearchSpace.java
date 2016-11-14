@@ -27,7 +27,7 @@ import gdsc.core.logging.TrackProgress;
  */
 public class SearchSpace
 {
-	private SearchDimension[] dimensions;
+	//private SearchDimension[] dimensions;
 	private int iteration = 0;
 	private double[][] searchSpace;
 	private double[][] seed;
@@ -113,13 +113,13 @@ public class SearchSpace
 			throw new IllegalArgumentException("Dimensions must not be empty");
 		if (scoreFunction == null)
 			throw new IllegalArgumentException("Score function is null");
-		this.dimensions = dimensions;
+
 		reset();
 
 		// Find the best individual
-		SearchResult<T> current = findSeedOptimum(scoreFunction);
+		SearchResult<T> current = findSeedOptimum(dimensions, scoreFunction);
 		if (current == null)
-			current = findOptimum(scoreFunction, null);
+			current = findOptimum(dimensions, scoreFunction, null);
 		SearchResult<T> previous = null;
 
 		boolean converged = false;
@@ -128,11 +128,11 @@ public class SearchSpace
 			iteration++;
 			previous = current;
 
-			if (!updateSearchSpace(current, refinementMode))
+			if (!updateSearchSpace(dimensions, current, refinementMode))
 				break;
 
 			// Find the optimum and check convergence
-			current = findOptimum(scoreFunction, current);
+			current = findOptimum(dimensions, scoreFunction, current);
 			if (current == null)
 				break;
 			if (checker != null)
@@ -178,11 +178,11 @@ public class SearchSpace
 			throw new IllegalArgumentException("Dimensions must not be empty");
 		if (scoreFunction == null)
 			throw new IllegalArgumentException("Score function is null");
-		this.dimensions = dimensions;
+
 		reset();
 
 		// Find the best individual
-		SearchResult<T> current = findOptimum(scoreFunction, null);
+		SearchResult<T> current = findOptimum(dimensions, scoreFunction, null);
 
 		return current;
 	}
@@ -196,9 +196,9 @@ public class SearchSpace
 	 *            the score function
 	 * @return the new optimum
 	 */
-	private <T extends Comparable<T>> SearchResult<T> findSeedOptimum(ScoreFunction<T> scoreFunction)
+	private <T extends Comparable<T>> SearchResult<T> findSeedOptimum(Dimension[] dimensions, ScoreFunction<T> scoreFunction)
 	{
-		if (!seedToSearchSpace())
+		if (!seedToSearchSpace(dimensions))
 			return null;
 
 		start("Find Seed Optimum");
@@ -212,7 +212,7 @@ public class SearchSpace
 		return optimum;
 	}
 
-	private boolean seedToSearchSpace()
+	private boolean seedToSearchSpace(Dimension[] dimensions)
 	{
 		if (seed == null)
 			return false;
@@ -224,10 +224,10 @@ public class SearchSpace
 		final double[] max = new double[dimensions.length];
 		for (int i = 0; i < dimensions.length; i++)
 		{
-			if (dimensions[i].active)
+			if (dimensions[i].isActive())
 			{
-				min[size] = dimensions[i].min;
-				max[size] = dimensions[i].max;
+				min[size] = dimensions[i].getMin();
+				max[size] = dimensions[i].getMax();
 				indices[size++] = i;
 			}
 		}
@@ -272,10 +272,10 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return the new optimum
 	 */
-	private <T extends Comparable<T>> SearchResult<T> findOptimum(ScoreFunction<T> scoreFunction,
+	private <T extends Comparable<T>> SearchResult<T> findOptimum(SearchDimension[] dimensions, ScoreFunction<T> scoreFunction,
 			SearchResult<T> current)
 	{
-		if (!createSearchSpace(current))
+		if (!createSearchSpace(dimensions, current))
 			return null;
 
 		start("Find Optimum");
@@ -353,7 +353,7 @@ public class SearchSpace
 	 *            the current
 	 * @return true, if successful
 	 */
-	private <T extends Comparable<T>> boolean createSearchSpace(SearchResult<T> current)
+	private <T extends Comparable<T>> boolean createSearchSpace(SearchDimension[] dimensions, SearchResult<T> current)
 	{
 		start("Create Search Space");
 		if (searchMode == RefinementMode.SINGLE_DIMENSION && current != null)
@@ -590,7 +590,7 @@ public class SearchSpace
 	 *            the current optimum
 	 * @return true, if successful
 	 */
-	private boolean updateSearchSpace(SearchResult<?> current, RefinementMode refinementMode)
+	private boolean updateSearchSpace(SearchDimension[] dimensions, SearchResult<?> current, RefinementMode refinementMode)
 	{
 		if (current == null)
 			return false;
@@ -621,7 +621,7 @@ public class SearchSpace
 					// Switch back to enumeration of a smaller range if 
 					// the refinement has not changed the centre
 					searchMode = RefinementMode.NONE;
-					changed = reduceRange();
+					changed = reduceRange(dimensions);
 				}
 			}
 			else if (searchMode == RefinementMode.MULTI_DIMENSION)
@@ -629,7 +629,7 @@ public class SearchSpace
 				// We enumerated all the points around the optimum so 
 				// just switch back to enumeration of a smaller range
 				searchMode = RefinementMode.NONE;
-				changed = reduceRange();
+				changed = reduceRange(dimensions);
 			}
 		}
 		else
@@ -700,7 +700,7 @@ public class SearchSpace
 				}
 				else
 				{
-					changed = reduceRange();
+					changed = reduceRange(dimensions);
 				}
 			}
 		}
@@ -713,9 +713,10 @@ public class SearchSpace
 	/**
 	 * Reduce range.
 	 *
+	 * @param dimensions the dimensions
 	 * @return true, if successful
 	 */
-	private boolean reduceRange()
+	private boolean reduceRange(SearchDimension[] dimensions)
 	{
 		// First check if the range can be reduced. 
 		// If not then return false as nothing can be changed.
@@ -846,7 +847,7 @@ public class SearchSpace
 	 *            the padding
 	 * @return The optimum (or null)
 	 */
-	public <T extends Comparable<T>> SearchResult<T> enrichmentSearch(SearchDimension[] dimensions,
+	public <T extends Comparable<T>> SearchResult<T> enrichmentSearch(Dimension[] dimensions,
 			FullScoreFunction<T> scoreFunction, ConvergenceChecker<T> checker, int samples, double fraction,
 			double padding)
 	{
@@ -860,16 +861,16 @@ public class SearchSpace
 			throw new IllegalArgumentException("Samples must be strictly positive");
 		if (padding < 0)
 			throw new IllegalArgumentException("Padding must be positive");
-		this.dimensions = dimensions;
+
 		reset();
 
 		// Keep the same generator throughout
 		final HaltonSequenceGenerator[] generator = new HaltonSequenceGenerator[1];
 
 		// Find the best individual
-		SearchResult<T>[] scores = scoreSeed(scoreFunction, samples, fraction);
+		SearchResult<T>[] scores = scoreSeed(dimensions, scoreFunction, samples, fraction);
 		if (scores == null)
-			scores = score(scoreFunction, samples, fraction, generator);
+			scores = score(dimensions, scoreFunction, samples, fraction, generator);
 		if (scores == null)
 			return null;
 
@@ -882,11 +883,12 @@ public class SearchSpace
 			iteration++;
 			previous = current;
 
-			if (!updateSearchSpace(current, scores, padding))
+			dimensions = updateSearchSpace(dimensions, current, scores, padding);
+			if (dimensions == null)
 				break;
 
 			// Find the optimum and check convergence
-			scores = score(scoreFunction, samples, fraction, generator);
+			scores = score(dimensions, scoreFunction, samples, fraction, generator);
 			if (scores == null)
 				break;
 
@@ -915,10 +917,10 @@ public class SearchSpace
 	 *            the fraction
 	 * @return the score results
 	 */
-	private <T extends Comparable<T>> SearchResult<T>[] scoreSeed(FullScoreFunction<T> scoreFunction, int samples,
+	private <T extends Comparable<T>> SearchResult<T>[] scoreSeed(Dimension[] dimensions, FullScoreFunction<T> scoreFunction, int samples,
 			double fraction)
 	{
-		if (!seedToSearchSpace())
+		if (!seedToSearchSpace(dimensions))
 			return null;
 
 		// Score
@@ -935,6 +937,8 @@ public class SearchSpace
 	 *
 	 * @param <T>
 	 *            the type of comparable score
+	 * @param dimensions
+	 *            the dimensions
 	 * @param scoreFunction
 	 *            the score function
 	 * @param samples
@@ -945,8 +949,8 @@ public class SearchSpace
 	 *            the generator
 	 * @return the score results
 	 */
-	private <T extends Comparable<T>> SearchResult<T>[] score(FullScoreFunction<T> scoreFunction, int samples,
-			double fraction, HaltonSequenceGenerator[] generator)
+	private <T extends Comparable<T>> SearchResult<T>[] score(Dimension[] dimensions,
+			FullScoreFunction<T> scoreFunction, int samples, double fraction, HaltonSequenceGenerator[] generator)
 	{
 		searchSpace = sample(dimensions, samples, generator);
 
@@ -975,7 +979,7 @@ public class SearchSpace
 	 *            the generator
 	 * @return the double[][]
 	 */
-	public static double[][] sample(SearchDimension[] dimensions, int samples, RandomVectorGenerator[] generator)
+	public static double[][] sample(Dimension[] dimensions, int samples, RandomVectorGenerator[] generator)
 	{
 		// Count the number of active dimensions
 		final int[] indices = new int[dimensions.length];
@@ -986,7 +990,7 @@ public class SearchSpace
 		for (int i = 0; i < dimensions.length; i++)
 		{
 			centre[i] = dimensions[i].getCentre();
-			if (dimensions[i].active)
+			if (dimensions[i].isActive())
 			{
 				lower[size] = dimensions[i].getLower();
 				range[size] = (dimensions[i].getUpper() - lower[size]);
@@ -1021,16 +1025,18 @@ public class SearchSpace
 	 *
 	 * @param <T>
 	 *            the type of comparable score
+	 * @param dimensions
+	 *            the dimensions
 	 * @param current
 	 *            the current
 	 * @param scores
 	 *            the scores
 	 * @param padding
 	 *            the padding
-	 * @return true, if successful
+	 * @return the new dimensions
 	 */
-	private <T extends Comparable<T>> boolean updateSearchSpace(SearchResult<T> current, SearchResult<T>[] scores,
-			double padding)
+	private <T extends Comparable<T>> Dimension[] updateSearchSpace(Dimension[] dimensions, SearchResult<T> current,
+			SearchResult<T>[] scores, double padding)
 	{
 		// Find the limits in the current scores
 		final double[] lower = current.point.clone();
@@ -1064,7 +1070,7 @@ public class SearchSpace
 			dimensions[j] = dimensions[j].create(lower[j], upper[j]);
 		}
 
-		return true;
+		return dimensions;
 	}
 
 	/**

@@ -20,7 +20,7 @@ import gdsc.core.utils.Maths;
 /**
  * Specify the dimensions for a search
  */
-public class SearchDimension implements Cloneable
+public class SearchDimension implements Cloneable, Dimension
 {
 	public final double min;
 	public final double max;
@@ -248,21 +248,15 @@ public class SearchDimension implements Cloneable
 		return values[values.length - 1];
 	}
 
-	/**
-	 * Checks if the value is at the bounds of the current dimension range.
-	 *
-	 * @param v
-	 *            the value
-	 * @return true, if is at bounds
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.search.Dimension#isAtBounds(double)
 	 */
 	public boolean isAtBounds(double v)
 	{
 		values();
-		if (v == values[0])
-			return true;
-		if (v == values[values.length - 1])
-			return true;
-		return false;
+		return (v <= values[0] || v >= values[values.length - 1]);
 	}
 
 	/**
@@ -543,5 +537,35 @@ public class SearchDimension implements Cloneable
 
 		return (size != values.length) ? Arrays.copyOf(values, size) : values;
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.search.Dimension#getMin()
+	 */
+	public double getMin()
+	{
+		return min;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.search.Dimension#getMax()
+	 */
+	public double getMax()
+	{
+		return max;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.search.Dimension#isActive()
+	 */
+	public boolean isActive()
+	{
+		return active;
 	}
 }
