@@ -2177,11 +2177,10 @@ public class BenchmarkFilterAnalysis
 		Chromosome best = null;
 		String algorithm = "";
 
-		// TODO - Remove need for the expanded array 
-
 		// All the search algorithms use search dimensions.
 		// Create search dimensions if needed (these are used for testing if the optimum is at the limit).
 		FixedDimension[] originalDimensions = null;
+		boolean rangeInput = false;
 		boolean[] disabled = null;
 		double[][] seed = null;
 		if (allSameType)
@@ -2189,13 +2188,13 @@ public class BenchmarkFilterAnalysis
 			// There should always be 1 filter
 			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
 			int n = ss_filter.getNumberOfParameters();
-			originalDimensions = new FixedDimension[n];
 
 			// Option to configure a range
-			final boolean rangeInput = filterSet.getName().contains("Range");
+			rangeInput = filterSet.getName().contains("Range");
 
 			if (rangeInput && filterSet.size() == 4)
 			{
+				originalDimensions = new FixedDimension[n];
 				// This is used as min/lower/upper/max
 				final Filter minF = ss_filter;
 				final Filter lowerF = filterSet.getFilters().get(1);
@@ -2217,6 +2216,7 @@ public class BenchmarkFilterAnalysis
 						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
 								ss_filter.getParameterName(i));
 						originalDimensions = null;
+						rangeInput = false;
 						break;
 					}
 				}
@@ -2224,6 +2224,7 @@ public class BenchmarkFilterAnalysis
 
 			if (rangeInput && (filterSet.size() == 3 || filterSet.size() == 2))
 			{
+				originalDimensions = new FixedDimension[n];
 				// This is used as lower/upper[/increment]
 				final Filter lowerF = ss_filter;
 				final Filter upperF = filterSet.getFilters().get(1);
@@ -2255,6 +2256,7 @@ public class BenchmarkFilterAnalysis
 						Utils.log(TITLE + " : Unable to configure dimension [%d] %s: " + e.getMessage(), i,
 								ss_filter.getParameterName(i));
 						originalDimensions = null;
+						rangeInput = false;
 						break;
 					}
 				}
@@ -2352,6 +2354,8 @@ public class BenchmarkFilterAnalysis
 			// Collect parameters for the genetic algorithm
 			pauseTimer();
 
+			// TODO - Remember the step size settings (as for the other evolve algorithms)
+			
 			double[] stepSize = ss_filter.mutationStepRange().clone();
 			double[] upper = ss_filter.upperLimit();
 			// Ask the user for the mutation step parameters.
@@ -2401,8 +2405,21 @@ public class BenchmarkFilterAnalysis
 				strictFitness = gd.getNextBoolean();
 				saveOption = gd.getNextBoolean();
 
+				// Used to create random sample
+				FixedDimension[] dimensions = originalDimensions;
+
 				for (int j = 0; j < indices.length; j++)
-					stepSize[j] = Math.abs(gd.getNextNumber());
+				{
+					double value = gd.getNextNumber();
+					// Disable values with a negative step size
+					if (value < 0)
+					{
+						dimensions[indices[j]] = new FixedDimension(ss_filter.getDisabledParameterValue(indices[j]));
+						stepSize[j] = 0;
+					}
+					else
+						stepSize[j] = value;
+				}
 
 				// Create the genetic algorithm
 				RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
@@ -2420,13 +2437,18 @@ public class BenchmarkFilterAnalysis
 				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
 
 				// Create new random filters if the population is initially below the population size
+				List<Filter> filters = filterSet.getFilters();
 				if (filterSet.size() < populationSize)
 				{
-					double[][] sample = SearchSpace.sample(originalDimensions, populationSize - filterSet.size(), null);
-					filterSet.getFilters().addAll(searchSpaceToFilters(ss_filter, sample));
+					filters = new ArrayList<Filter>(populationSize);
+					// Add the existing filters if they are not a range input file
+					if (!rangeInput)
+						filters.addAll(filterSet.getFilters());
+					double[][] sample = SearchSpace.sample(dimensions, populationSize - filters.size(), null);
+					filters.addAll(searchSpaceToFilters(ss_filter, sample));
 				}
 
-				ga_population = new Population(filterSet.getFilters());
+				ga_population = new Population(filters);
 				ga_population.setPopulationSize(populationSize);
 				ga_population.setFailureLimit(failureLimit);
 				selectionStrategy.setTracker(this);
@@ -2603,7 +2625,7 @@ public class BenchmarkFilterAnalysis
 				}
 				else
 				{
-					algorithm = EVOLVE[evolve];
+					algorithm = EVOLVE[evolve] + " " + rangeSearchWidth;
 					ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
 					ga_iteration = 0;
 
