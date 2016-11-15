@@ -1,11 +1,12 @@
 package gdsc.smlm.ga;
 
-import gdsc.core.logging.TrackProgress;
-
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
+
+import gdsc.core.logging.TrackProgress;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -27,24 +28,32 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 {
 	final double fraction;
 	final int max;
+	final Comparator<Chromosome> comparator;
 
 	private List<? extends Chromosome> individuals = null;
 	TrackProgress tracker = null;
 
 	/**
+	 * Instantiates a new simple selection strategy.
+	 *
 	 * @param random
+	 *            the random
 	 * @param fraction
 	 *            The fraction of the individuals to select (set between 0 and 1)
 	 * @param max
 	 *            The maximum number of individuals to select
+	 * @param comparator
+	 *            the comparator
 	 */
-	public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max)
+	public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max,
+			Comparator<Chromosome> comparator)
 	{
 		super(random);
 		if (fraction > 1)
 			fraction = 1;
 		this.fraction = fraction;
 		this.max = max;
+		this.comparator = comparator;
 	}
 
 	/**
@@ -59,20 +68,23 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	{
 		if (individuals == null || individuals.size() < 2)
 			return individuals;
-		ArrayList<Chromosome> subset = new ArrayList<Chromosome>();
+		Chromosome[] subset = new Chromosome[individuals.size()];
+		int size = 0;
 		// Add only those with a fitness score
 		for (Chromosome c : individuals)
 			if (c.getFitness() > 0)
-				subset.add(c);
-		if (subset.size() < 3)
-			return subset;
+			{
+				subset[size++] = c;
+			}
+		if (size < 3)
+			return Arrays.asList(Arrays.copyOf(subset, size));
 		if (tracker != null)
 			tracker.progress(0.5);
-		ChromosomeComparator.sort(subset);
-		final int size = getSize(subset.size());
+		ChromosomeComparator.sort(subset, size, comparator);
+		size = getSize(size);
 		if (tracker != null)
 			tracker.progress(1);
-		return subset.subList(0, size);
+		return Arrays.asList(Arrays.copyOf(subset, size));
 	}
 
 	/**

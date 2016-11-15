@@ -1,6 +1,7 @@
 package gdsc.smlm.ga;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -31,15 +32,21 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 	private long upper;
 
 	/**
+	 * Instantiates a new ramped selection strategy.
+	 *
 	 * @param random
+	 *            the random
 	 * @param fraction
 	 *            The fraction of the individuals to select (set between 0 and 1)
 	 * @param max
 	 *            The maximum number of individuals to select
+	 * @param comparator
+	 *            the comparator
 	 */
-	public RampedSelectionStrategy(RandomDataGenerator random, double fraction, int max)
+	public RampedSelectionStrategy(RandomDataGenerator random, double fraction, int max,
+			Comparator<Chromosome> comparator)
 	{
-		super(random, fraction, max);
+		super(random, fraction, max, comparator);
 	}
 
 	/**
@@ -70,7 +77,7 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			tracker.progress(0);
 
 		// Sort the list
-		ChromosomeComparator.sort(sorted);
+		ChromosomeComparator.sort(sorted, comparator);
 
 		// Create the output subset
 		ArrayList<Chromosome> subset = new ArrayList<Chromosome>(size);
@@ -143,7 +150,7 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			return;
 		}
 		this.sorted = new ArrayList<Chromosome>(individuals);
-		ChromosomeComparator.sort(this.sorted);
+		ChromosomeComparator.sort(this.sorted, comparator);
 		n = 0;
 
 		// Build a cumulative array of rank weighting. The highest ranked starts at n.

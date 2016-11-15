@@ -19,10 +19,39 @@ import java.util.List;
  *---------------------------------------------------------------------------*/
 
 /**
- * Sorts chromosome using the fitness, highest first.
+ * Sorts chromosome using the fitness, highest fitness first.
  */
 public class ChromosomeComparator implements Comparator<Chromosome>
 {
+	private static class NullComparator implements Comparator<Chromosome>
+	{
+		public int compare(Chromosome o1, Chromosome o2)
+		{
+			return 0;
+		}
+	}
+
+	final Comparator<Chromosome> comparator;
+
+	/**
+	 * Instantiates a new chromosome comparator.
+	 */
+	public ChromosomeComparator()
+	{
+		this(null);
+	}
+
+	/**
+	 * Instantiates a new chromosome comparator.
+	 *
+	 * @param comparator
+	 *            the comparator used when the fitness is equal
+	 */
+	public ChromosomeComparator(Comparator<Chromosome> comparator)
+	{
+		this.comparator = (comparator == null) ? new NullComparator() : comparator;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -34,11 +63,11 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 			return -1;
 		if (chromosome1.getFitness() < chromosome2.getFitness())
 			return 1;
-		return 0;
+		return comparator.compare(chromosome1, chromosome2);
 	}
 
 	/**
-	 * Sort the list (highest first)
+	 * Sort the list (highest fitness first)
 	 * 
 	 * @param list
 	 */
@@ -48,40 +77,50 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 	}
 
 	/**
-	 * Sort the list (lowest first)
-	 * 
+	 * Sort the list (highest fitness first), then using the comparator.
+	 *
 	 * @param list
+	 *            the list
+	 * @param comparator
+	 *            the comparator used when the fitness is equal
 	 */
-	public static void sortAscending(List<? extends Chromosome> list)
+	public static void sort(List<? extends Chromosome> list, Comparator<Chromosome> comparator)
 	{
-		sort(list);
-		Collections.reverse(list);
+		Collections.sort(list, new ChromosomeComparator(comparator));
 	}
 
 	/**
-	 * Sort the list (highest first)
+	 * Sort the list (highest fitness first)
 	 * 
 	 * @param list
 	 */
 	public static void sort(Chromosome[] list)
 	{
-		Arrays.sort(list, new ChromosomeComparator());
+		sort(list, list.length);
 	}
 
 	/**
-	 * Sort the list (lowest first)
+	 * Sort the list (highest fitness first)
 	 * 
 	 * @param list
 	 */
-	public static void sortAscending(Chromosome[] list)
+	public static void sort(Chromosome[] list, int size)
 	{
-		sort(list);
-		int size = list.length;
-		for (int i = 0, mid = size >> 1, j = size - 1; i < mid; i++, j--)
-		{
-			final Chromosome tmp = list[i];
-			list[i] = list[j];
-			list[j] = tmp;
-		}
+		Arrays.sort(list, 0, size, new ChromosomeComparator());
+	}
+
+	/**
+	 * Sort the list (highest fitness first).
+	 *
+	 * @param list
+	 *            the list
+	 * @param size
+	 *            the size
+	 * @param comparator
+	 *            the comparator used when the fitness is equal
+	 */
+	public static void sort(Chromosome[] list, int size, Comparator<Chromosome> comparator)
+	{
+		Arrays.sort(list, 0, size, new ChromosomeComparator(comparator));
 	}
 }

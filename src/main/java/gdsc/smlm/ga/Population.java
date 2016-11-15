@@ -3,6 +3,7 @@ package gdsc.smlm.ga;
 import gdsc.core.logging.TrackProgress;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /*----------------------------------------------------------------------------- 
@@ -35,6 +36,7 @@ public class Population
 	private int iteration = 0;
 	// This introduces a dependency on another gdsc.smlm package
 	private TrackProgress tracker = null;
+	private Comparator<Chromosome> comparator = null;
 
 	/**
 	 * Create a population of individuals
@@ -297,6 +299,14 @@ public class Population
 				max = f;
 				best = c;
 			}
+			else if (max == f && comparator != null)
+			{
+				// Use an optional chromosome comparator
+				if (comparator.compare(c, best) < 0)
+				{
+					best = c;
+				}
+			}
 			if (tracker != null)
 				tracker.progress(++count, individuals.size());
 		}
@@ -408,5 +418,26 @@ public class Population
 	{
 		if (tracker != null)
 			tracker.progress(1);
+	}
+
+	/**
+	 * Gets the comparator used when choosing individuals with equal fitness.
+	 *
+	 * @return the comparator
+	 */
+	public Comparator<Chromosome> getComparator()
+	{
+		return comparator;
+	}
+
+	/**
+	 * Sets the comparator used when choosing individuals with equal fitness.
+	 *
+	 * @param comparator
+	 *            the new comparator
+	 */
+	public void setComparator(Comparator<Chromosome> comparator)
+	{
+		this.comparator = comparator;
 	}
 }
