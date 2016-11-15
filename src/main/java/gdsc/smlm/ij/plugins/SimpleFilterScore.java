@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.results.filter.DirectFilter;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -97,13 +99,27 @@ public class SimpleFilterScore implements Comparable<SimpleFilterScore>
 
 	private int compareParameters(SimpleFilterScore that)
 	{
-		// Get the filter with the weakest params
-		//return this.r.filter.weakest(that.r.filter);
-		
-		// Get the filter with the strongest params
-		return that.r.filter.weakest(this.r.filter);
+		return compare(this.r.filter, that.r.filter);
 	}
-	
+
+	/**
+	 * Compare the two filters. Get the filter with the strongest parameters.
+	 *
+	 * @param f1
+	 *            filter 1
+	 * @param f2
+	 *            filter 2
+	 * @return the comparison score
+	 */
+	public static int compare(DirectFilter f1, DirectFilter f2)
+	{
+		// Get the filter with the weakest params
+		//return f1.weakestUnsafe(f2);
+
+		// Get the filter with the strongest params
+		return f2.weakestUnsafe(f1);
+	}
+
 	@Override
 	public String toString()
 	{

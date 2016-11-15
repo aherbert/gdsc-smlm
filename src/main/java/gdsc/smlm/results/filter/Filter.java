@@ -1190,6 +1190,44 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	}
 
 	/**
+	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
+	 * parameters. If positive then this filter has less weak parameters.
+	 * <p>
+	 * This method does not check for null or if the other filter has a different number of parameters.
+	 * 
+	 * @param o
+	 *            The other filter
+	 * @return the count difference
+	 */
+	public int weakestUnsafe(Filter o)
+	{
+		// Use all the parameters
+		int i = getNumberOfParameters();
+		
+		// Extract the parameters
+		final double[] p1 = getParameters();
+		final double[] p2 = o.getParameters();
+
+		// Find the weakest
+
+		final double[] weakest = p1.clone();
+		o.weakestParameters(weakest);
+		// Count the number of weakest
+		int c = 0;
+		while (i-- > 0)
+		{
+			if (p1[i] != p2[i])
+			{
+				if (p1[i] == weakest[i])
+					--c;
+				else
+					++c;
+			}
+		}
+		return c;
+	}
+
+	/**
 	 * @return The number of parameters for the filter
 	 */
 	public abstract int getNumberOfParameters();

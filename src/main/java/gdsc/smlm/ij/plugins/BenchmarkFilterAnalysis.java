@@ -125,8 +125,8 @@ import ij.text.TextWindow;
  * Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table,
  * e.g. precision, Jaccard, F-score.
  */
-public class BenchmarkFilterAnalysis
-		implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore, FullScoreFunction<SimpleFilterScore>
+public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore,
+		FullScoreFunction<SimpleFilterScore>, Comparator<Chromosome>
 {
 	private static final String TITLE = "Benchmark Filter Analysis";
 	private static TextWindow resultsWindow = null;
@@ -2441,10 +2441,11 @@ public class BenchmarkFilterAnalysis
 				SelectionStrategy selectionStrategy;
 				// If the initial population is huge ensure that the first selection culls to the correct size
 				final int selectionMax = (int) (selectionFraction * populationSize);
+				Comparator<Chromosome> comparator = this;
 				if (rampedSelection)
-					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction, selectionMax);
+					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction, selectionMax, comparator);
 				else
-					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax);
+					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax, comparator);
 				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
 
 				// Create new random filters if the population is initially below the population size
@@ -2469,6 +2470,7 @@ public class BenchmarkFilterAnalysis
 				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 				ga_population.setTracker(this);
+				ga_population.setComparator(comparator);
 
 				createGAWindow();
 				resumeTimer();
@@ -5287,5 +5289,15 @@ public class BenchmarkFilterAnalysis
 			int origY = (int) p[Gaussian2DFunction.Y_POSITION];
 			results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
+	public int compare(Chromosome o1, Chromosome o2)
+	{
+		return SimpleFilterScore.compare((DirectFilter) o1, (DirectFilter) o2);
 	}
 }
