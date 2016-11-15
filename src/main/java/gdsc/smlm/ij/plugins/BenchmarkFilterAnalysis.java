@@ -2418,8 +2418,12 @@ public class BenchmarkFilterAnalysis
 					final double value = gd.getNextNumber();
 					// Disable values with a negative step size
 					if (value < 0)
+					{
 						dimensions[indices[j]] = new FixedDimension(ss_filter.getDisabledParameterValue(indices[j]));
+						disabled[indices[j]] = true;
+					}
 					stepSize[j] = value;
+					disabled[indices[j]] = (value <= 0);
 				}
 				// Store for repeat analysis
 				stepSizeMap.put(setNumber, stepSize.clone());
@@ -2635,6 +2639,7 @@ public class BenchmarkFilterAnalysis
 					algorithm = EVOLVE[evolve] + " " + rangeSearchWidth;
 					ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
 					ga_iteration = 0;
+					es_optimum = null;
 
 					SearchSpace ss = new SearchSpace();
 					ss.setTracker(this);
@@ -2672,7 +2677,6 @@ public class BenchmarkFilterAnalysis
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
 			gd.addMessage("Configure the enrichment search algorithm for [" + setNumber + "] " + filterSet.getName());
-			gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
 			gd.addCheckbox(prefix + "Save_option", saveOption);
 			gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
 			gd.addNumericField(prefix + "Converged_count", convergedCount, 0);
@@ -2701,7 +2705,6 @@ public class BenchmarkFilterAnalysis
 			}
 			else
 			{
-				rangeSearchWidth = (int) gd.getNextNumber();
 				saveOption = gd.getNextBoolean();
 				maxIterations = (int) gd.getNextNumber();
 				convergedCount = (int) gd.getNextNumber();
@@ -2709,27 +2712,13 @@ public class BenchmarkFilterAnalysis
 				enrichmentFraction = gd.getNextNumber();
 				enrichmentPadding = gd.getNextNumber();
 
-				SearchDimension[] dimensions = new SearchDimension[n];
+				FixedDimension[] dimensions = Arrays.copyOf(originalDimensions, originalDimensions.length);
 				for (int i = 0; i < n; i++)
 				{
 					enabled[i] = gd.getNextBoolean();
-					if (enabled[i])
+					if (!enabled[i])
 					{
-						try
-						{
-							dimensions[i] = originalDimensions[i].create(rangeSearchWidth);
-							dimensions[i].setPad(true);
-						}
-						catch (IllegalArgumentException e)
-						{
-							IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
-									ss_filter.getParameterName(i)));
-							return -1;
-						}
-					}
-					else
-					{
-						dimensions[i] = new SearchDimension(ss_filter.getDisabledParameterValue(i));
+						dimensions[i] = new FixedDimension(ss_filter.getDisabledParameterValue(i));
 					}
 				}
 				searchRangeMap.put(setNumber, enabled);
@@ -2759,6 +2748,7 @@ public class BenchmarkFilterAnalysis
 
 					// Enumerate on the min interval to produce the final filter
 					ss_filter = (DirectFilter) best;
+					SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
 					for (int j = 0; j < n; j++)
 					{
 						if (enabled[j])
@@ -2766,23 +2756,27 @@ public class BenchmarkFilterAnalysis
 							double minIncrement = ss_filter.getParameterIncrement(j);
 							try
 							{
-								dimensions[j] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
-								dimensions[j].setCentre(ss_filter.getParameterValue(j));
-								dimensions[j].setIncrement(minIncrement);
+								dimensions2[j] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
+								dimensions2[j].setCentre(ss_filter.getParameterValue(j));
+								dimensions2[j].setIncrement(minIncrement);
 							}
 							catch (IllegalArgumentException e)
 							{
 								IJ.error(TITLE,
 										String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), j,
 												ss_filter.getParameterName(j)));
-								dimensions = null;
+								dimensions2 = null;
 								break;
 							}
 						}
+						else
+						{
+							dimensions2[j] = new SearchDimension(ss_filter.getParameterValue(j));
+						}
 					}
-					if (dimensions != null)
+					if (dimensions2 != null)
 					{
-						optimum = ss.findOptimum(dimensions, this);
+						optimum = ss.findOptimum(dimensions2, this);
 						if (optimum != null)
 						{
 							best = optimum.score.r.filter;
@@ -4695,11 +4689,13 @@ public class BenchmarkFilterAnalysis
 		gaWindow.append(text.toString());
 	}
 
+	private SimpleFilterScore es_optimum = null;
+
 	public SearchResult<SimpleFilterScore> findOptimum(double[][] points)
 	{
 		ga_iteration++;
 		final ScoreResult[] scoreResults = scoreFilters(new FilterSet(searchSpaceToFilters(points)), false);
-		SimpleFilterScore max = null;
+		SimpleFilterScore max = es_optimum;
 
 		if (scoreResults == null)
 			return null;
@@ -4726,8 +4722,6 @@ public class BenchmarkFilterAnalysis
 
 		return new SearchResult<SimpleFilterScore>(filter.getParameters(), max);
 	}
-
-	private SimpleFilterScore es_optimum = null;
 
 	public SearchResult<SimpleFilterScore>[] score(double[][] points)
 	{
