@@ -361,11 +361,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				StoredDataStatistics lengths = calculateTraceLengths(distances);
 				showHistogram(lengths, "Trace length (um)");
 			}
-			
+
 			if (displayTraceSize)
 			{
 				StoredDataStatistics sizes = calculateTraceSizes(traces);
-				showHistogram(sizes, "Trace size");
+				showHistogram(sizes, "Trace size", true);
 			}
 
 			// Plot the per-trace histogram of MSD and D
@@ -447,7 +447,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 		return sizes;
 	}
-	
+
 	private void display(String title, Plot2 plot)
 	{
 		PlotWindow pw = Utils.display(title, plot);
@@ -455,18 +455,25 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			idList[idCount++] = pw.getImagePlus().getID();
 	}
 
-	private void showHistogram(StoredDataStatistics stats, String title)
+	private void showHistogram(StoredDataStatistics stats, String title, boolean integerData)
 	{
-		showHistogram(stats, title, false, false);
+		showHistogram(stats, title, false, false, integerData);
 	}
 
-	private void showHistogram(StoredDataStatistics stats, String title, boolean alwaysRemoveOutliers, boolean rounded)
+	private void showHistogram(StoredDataStatistics stats, String title)
+	{
+		showHistogram(stats, title, false, false, false);
+	}
+
+	private void showHistogram(StoredDataStatistics stats, String title, boolean alwaysRemoveOutliers, boolean rounded,
+			boolean integerData)
 	{
 		if (saveRawData)
 			saveStatistics(stats, title, title, rounded);
 
-		int id = Utils.showHistogram(TITLE, stats, title, 0, (settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0,
-				settings.histogramBins);
+		double minWidth = (integerData) ? 1 : 0;
+		int id = Utils.showHistogram(TITLE, stats, title, minWidth,
+				(settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0, settings.histogramBins);
 		if (Utils.isNewWindow())
 			idList[idCount++] = id;
 	}
@@ -826,7 +833,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			{
 				if (displayHistograms[i])
 				{
-					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i], ROUNDED[i]);
+					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i], ROUNDED[i], false);
 				}
 			}
 		}
