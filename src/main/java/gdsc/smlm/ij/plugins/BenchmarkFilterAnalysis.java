@@ -89,6 +89,7 @@ import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
+import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
@@ -1683,8 +1684,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// Only repeat analysis if necessary
 		boolean newResults = false;
+		double evolveSetting = evolve;
+		if (evolve == 1)
+			// The delta effects the step size for the Genetic Algorithm
+			evolveSetting *= delta;
 		Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
-				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve);
+				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
 
 		if (debugSpeed || !settings.equals(lastAnalyseSettings) || (evolve != 0 && repeatEvolve))
 		{
@@ -2361,6 +2366,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (stepSize == null || stepSize.length != ss_filter.length())
 			{
 				stepSize = ss_filter.mutationStepRange().clone();
+				for (int j = 0; j < stepSize.length; j++)
+					stepSize[j] *= delta;
 			}
 			double[] upper = ss_filter.upperLimit();
 			// Ask the user for the mutation step parameters.
@@ -2384,7 +2391,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			for (int j = 0; j < indices.length; j++)
 			{
 				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
-				final double step = (originalDimensions[indices[j]].isActive()) ? stepSize[j] * delta : 0;
+				final double step = (originalDimensions[indices[j]].isActive()) ? stepSize[j] : 0;
 				gd.addNumericField(getDialogName(prefix, ss_filter.getParameterName(indices[j])), step, 2);
 			}
 
@@ -2443,9 +2450,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				final int selectionMax = (int) (selectionFraction * populationSize);
 				Comparator<Chromosome> comparator = this;
 				if (rampedSelection)
-					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction, selectionMax, comparator);
+					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction, selectionMax,
+							comparator);
 				else
-					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax, comparator);
+					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax,
+							comparator);
 				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
 
 				// Create new random filters if the population is initially below the population size
@@ -4511,6 +4520,57 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		if (filterSet.size() < 2)
 			return;
+
+		if (filterSet.allSameType())
+		{
+			// Would there be a speed increase if the results list were partitioned into multiple sets
+			// by filtering with not just the weakest but a step set of weaker and weaker filters.
+			// This could be done using, e.g. precision, to partition the filters into a range.
+
+			// Plot the cumulative histogram of precision for the filters in the set.
+			try
+			{
+				StoredDataStatistics stats = new StoredDataStatistics(filterSet.size());
+				for (Filter f : filterSet.getFilters())
+				{
+					IMultiFilter f2 = (IMultiFilter) f;
+					stats.add(f2.getPrecision());
+				}
+				double[][] h1 = Maths.cumulativeHistogram(stats.getValues(), false);
+				String title = TITLE + " Cumul Precision";
+				Plot2 plot = new Plot2(title, "Precision", "Frequency");
+				// Find limits
+				double[] xlimit = Maths.limits(h1[0]);
+				plot.setLimits(xlimit[0] - 1, xlimit[1] + 1, 0, Maths.max(h1[1]) * 1.05);
+				plot.addPoints(h1[0], h1[1], Plot2.BAR);
+				Utils.display(title, plot);
+			}
+			catch (ClassCastException e)
+			{
+
+			}
+
+			// Debug the limits of all parameters
+			final double[] lower = filterSet.getFilters().get(0).getParameters().clone();
+			final double[] upper = lower.clone();
+			for (Filter f : filterSet.getFilters())
+			{
+				final double[] point = f.getParameters();
+				for (int j = 0; j < lower.length; j++)
+				{
+					if (lower[j] > point[j])
+						lower[j] = point[j];
+					if (upper[j] < point[j])
+						upper[j] = point[j];
+				}
+			}
+			StringBuilder sb = new StringBuilder("Scoring:");
+			for (int j = 0; j < lower.length; j++)
+			{
+				sb.append(' ').append(Utils.rounded(lower[j])).append('-').append(Utils.rounded(upper[j]));
+			}
+			Utils.log(sb.toString());
+		}
 
 		Filter weakest = filterSet.createWeakestFilter();
 		if (weakest != null)
