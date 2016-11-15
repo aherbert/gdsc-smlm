@@ -358,7 +358,7 @@ public class SearchSpace
 		start("Create Search Space");
 		if (searchMode == RefinementMode.SINGLE_DIMENSION && current != null)
 			searchSpace = createRefineSpace(dimensions, current.point);
-		if (searchMode == RefinementMode.MULTI_DIMENSION && current != null)
+		else if (searchMode == RefinementMode.MULTI_DIMENSION && current != null)
 			searchSpace = createBoundedSearchSpace(dimensions, current.point);
 		else
 			// Enumerate
