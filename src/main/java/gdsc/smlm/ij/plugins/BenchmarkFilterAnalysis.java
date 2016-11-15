@@ -198,7 +198,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			"Step Search" };
 	private static int evolve = 0;
 	private static boolean repeatEvolve = true;
-	private static int rangeSearchWidth = 2;
+	private static int rangeSearchWidth = 3;
+	private static double rangeSearchReduce = 0.5;
 	private static int maxIterations = 30;
 	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 5000;
@@ -2561,6 +2562,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				gd.addCheckbox(prefix + "Save_option", saveOption);
 				gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
 				String[] modes = SettingsManager.getNames((Object[]) SearchSpace.RefinementMode.values());
+				gd.addSlider(prefix + "Reduce", 0.01, 0.99, rangeSearchReduce);
 				gd.addChoice("Refinement", modes, modes[refinementMode]);
 			}
 
@@ -2591,6 +2593,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					saveOption = gd.getNextBoolean();
 					maxIterations = (int) gd.getNextNumber();
 					refinementMode = gd.getNextChoiceIndex();
+					rangeSearchReduce = gd.getNextNumber();
 					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
 				}
 
@@ -2604,9 +2607,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						{
 							dimensions[i] = originalDimensions[i].create(rangeSearchWidth);
 							dimensions[i].setPad(true);
-							if (isStepSearch)
-								// Prevent range reduction so that the step search just does a single refinement step
-								dimensions[i].setReduceFactor(1);
+							// Prevent range reduction so that the step search just does a single refinement step
+							dimensions[i].setReduceFactor((isStepSearch) ? 1 : rangeSearchReduce);
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -4564,7 +4566,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						upper[j] = point[j];
 				}
 			}
-			StringBuilder sb = new StringBuilder("Scoring:");
+			StringBuilder sb = new StringBuilder("Scoring (");
+			sb.append(filterSet.size()).append("):");
 			for (int j = 0; j < lower.length; j++)
 			{
 				sb.append(' ').append(Utils.rounded(lower[j])).append('-').append(Utils.rounded(upper[j]));
