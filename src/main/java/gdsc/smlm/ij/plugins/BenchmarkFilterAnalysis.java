@@ -205,6 +205,7 @@ public class BenchmarkFilterAnalysis
 	private static double enrichmentPadding = 0.1;
 	private static int stepSearch = 0;
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
+	private static HashMap<Integer, double[]> stepSizeMap = new HashMap<Integer, double[]>();
 
 	private static boolean showTP = false;
 	private static boolean showFP = false;
@@ -865,7 +866,10 @@ public class BenchmarkFilterAnalysis
 	 */
 	private void expandFilters()
 	{
-		searchRangeMap.clear();
+		// Do not clear these when reading a new set of filters. 
+		// The filters may be the same with slight modifications and so it is useful to keep the last settings.
+		//searchRangeMap.clear();
+		//stepSizeMap.clear();
 
 		long[] expanded = new long[filterList.size()];
 		String[] name = new String[expanded.length];
@@ -2355,8 +2359,12 @@ public class BenchmarkFilterAnalysis
 			pauseTimer();
 
 			// TODO - Remember the step size settings (as for the other evolve algorithms)
-			
-			double[] stepSize = ss_filter.mutationStepRange().clone();
+
+			double[] stepSize = stepSizeMap.get(setNumber);
+			if (stepSize == null || stepSize.length != ss_filter.length())
+			{
+				stepSize = ss_filter.mutationStepRange().clone();
+			}
 			double[] upper = ss_filter.upperLimit();
 			// Ask the user for the mutation step parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
@@ -2406,20 +2414,22 @@ public class BenchmarkFilterAnalysis
 				saveOption = gd.getNextBoolean();
 
 				// Used to create random sample
-				FixedDimension[] dimensions = originalDimensions;
+				FixedDimension[] dimensions = Arrays.copyOf(originalDimensions, originalDimensions.length);
 
 				for (int j = 0; j < indices.length; j++)
 				{
-					double value = gd.getNextNumber();
+					final double value = gd.getNextNumber();
 					// Disable values with a negative step size
 					if (value < 0)
-					{
 						dimensions[indices[j]] = new FixedDimension(ss_filter.getDisabledParameterValue(indices[j]));
-						stepSize[j] = 0;
-					}
-					else
-						stepSize[j] = value;
+					stepSize[j] = value;
 				}
+				// Store for repeat analysis
+				stepSizeMap.put(setNumber, stepSize.clone());
+				// Reset negatives to zero
+				for (int j = 0; j < stepSize.length; j++)
+					if (stepSize[j] < 0)
+						stepSize[j] = 0;
 
 				// Create the genetic algorithm
 				RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
