@@ -41,7 +41,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
@@ -197,13 +196,13 @@ public class BenchmarkFilterAnalysis
 	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search",
 			"Step Search" };
 	private static int evolve = 0;
+	private static boolean repeatEvolve = true;
 	private static int rangeSearchWidth = 2;
 	private static int maxIterations = 30;
 	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 10000;
 	private static double enrichmentFraction = 0.3;
 	private static double enrichmentPadding = 0.1;
-	private static int stepSearch = 0;
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
 	private static HashMap<Integer, double[]> stepSizeMap = new HashMap<Integer, double[]>();
 
@@ -1495,7 +1494,7 @@ public class BenchmarkFilterAnalysis
 		gd.addCheckbox("Score_analysis", scoreAnalysis);
 		gd.addChoice("Component_analysis", COMPONENT_ANALYSIS, COMPONENT_ANALYSIS[componentAnalysis]);
 		gd.addChoice("Evolve", EVOLVE, EVOLVE[evolve]);
-		gd.addSlider("Step_search", 0, 4, stepSearch);
+		gd.addCheckbox("Repeat_evolve", repeatEvolve);
 		gd.addStringField("Title", resultsTitle, 20);
 		String[] labels = { "Show_TP", "Show_FP", "Show_FN" };
 		gd.addCheckboxGroup(1, 3, labels, new boolean[] { showTP, showFP, showFN });
@@ -1598,7 +1597,7 @@ public class BenchmarkFilterAnalysis
 		scoreAnalysis = gd.getNextBoolean();
 		componentAnalysis = gd.getNextChoiceIndex();
 		evolve = gd.getNextChoiceIndex();
-		stepSearch = (int) Math.abs(gd.getNextNumber());
+		repeatEvolve = gd.getNextBoolean();
 		resultsTitle = gd.getNextString();
 		showTP = gd.getNextBoolean();
 		showFP = gd.getNextBoolean();
@@ -1684,12 +1683,10 @@ public class BenchmarkFilterAnalysis
 
 		// Only repeat analysis if necessary
 		boolean newResults = false;
-		// Force a repeat if using filter evolution
-		final long evolveSetting = (evolve != 0) ? System.currentTimeMillis() : 0;
 		Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
-				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting, rangeSearchWidth,
-				stepSearch);
-		if (debugSpeed || !settings.equals(lastAnalyseSettings))
+				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolve);
+
+		if (debugSpeed || !settings.equals(lastAnalyseSettings) || (evolve != 0 && repeatEvolve))
 		{
 			//System.out.println("Running...");
 			newResults = true;
@@ -1800,8 +1797,8 @@ public class BenchmarkFilterAnalysis
 				sb.append('\t');
 				sb.append(fs.algorithm);
 				sb.append('\t');
-				sb.append(DurationFormatUtils.formatDurationHMS(fs.time));
-				//sb.append(Utils.timeToString(fs.time));
+				//sb.append(DurationFormatUtils.formatDurationHMS(fs.time));
+				sb.append(Utils.timeToString(fs.time));
 				text = sb.toString();
 
 				if (isHeadless)
