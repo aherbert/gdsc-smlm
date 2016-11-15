@@ -210,7 +210,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static boolean showFP = false;
 	private static boolean showFN = false;
 
-	private static int populationSize = 500;
+	private static int populationSize = 5000;
 	private static int failureLimit = 5;
 	private static double tolerance = 1e-4;
 	private static int convergedCount = 2;
