@@ -1797,8 +1797,8 @@ public class BenchmarkFilterAnalysis
 				sb.append('\t');
 				sb.append(fs.algorithm);
 				sb.append('\t');
-				//sb.append(DurationFormatUtils.formatDurationHMS(fs.time));
-				sb.append(Utils.timeToString(fs.time));
+				sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.time));
+				//sb.append(Utils.timeToString(fs.time));
 				text = sb.toString();
 
 				if (isHeadless)
