@@ -90,6 +90,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private static boolean displayMSDHistogram = true;
 	private static boolean displayDHistogram = true;
 	private static boolean displayTraceLength = false;
+	private static boolean displayTraceSize = false;
 
 	private static boolean saveTraceDistances = false;
 	private static boolean saveRawData = false;
@@ -360,6 +361,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				StoredDataStatistics lengths = calculateTraceLengths(distances);
 				showHistogram(lengths, "Trace length (um)");
 			}
+			
+			if (displayTraceSize)
+			{
+				StoredDataStatistics sizes = calculateTraceSizes(traces);
+				showHistogram(sizes, "Trace size");
+			}
 
 			// Plot the per-trace histogram of MSD and D
 			if (settings.showHistograms)
@@ -431,6 +438,16 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return lengths;
 	}
 
+	private StoredDataStatistics calculateTraceSizes(Trace[] traces)
+	{
+		StoredDataStatistics sizes = new StoredDataStatistics();
+		for (Trace trace : traces)
+		{
+			sizes.add(trace.size());
+		}
+		return sizes;
+	}
+	
 	private void display(String title, Plot2 plot)
 	{
 		PlotWindow pw = Utils.display(title, plot);
@@ -1114,6 +1131,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			gd.addCheckbox("MSD/Molecule", displayMSDHistogram);
 			gd.addCheckbox("D/Molecule", displayDHistogram);
 			gd.addCheckbox("Trace_length", displayTraceLength);
+			gd.addCheckbox("Trace_size", displayTraceSize);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -1124,6 +1142,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			displayMSDHistogram = gd.getNextBoolean();
 			displayDHistogram = gd.getNextBoolean();
 			displayTraceLength = gd.getNextBoolean();
+			displayTraceSize = gd.getNextBoolean();
 		}
 
 		// Check arguments
