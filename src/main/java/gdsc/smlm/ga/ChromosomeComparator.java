@@ -1,5 +1,6 @@
 package gdsc.smlm.ga;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -41,9 +42,9 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 	 * 
 	 * @param list
 	 */
-	public static void sort(List<? extends Chromosome> individuals)
+	public static void sort(List<? extends Chromosome> list)
 	{
-		Collections.sort(individuals, new ChromosomeComparator());
+		Collections.sort(list, new ChromosomeComparator());
 	}
 
 	/**
@@ -51,9 +52,36 @@ public class ChromosomeComparator implements Comparator<Chromosome>
 	 * 
 	 * @param list
 	 */
-	public static void sortAscending(List<? extends Chromosome> individuals)
+	public static void sortAscending(List<? extends Chromosome> list)
 	{
-		Collections.sort(individuals, new ChromosomeComparator());
-		Collections.reverse(individuals);
+		sort(list);
+		Collections.reverse(list);
+	}
+
+	/**
+	 * Sort the list (highest first)
+	 * 
+	 * @param list
+	 */
+	public static void sort(Chromosome[] list)
+	{
+		Arrays.sort(list, new ChromosomeComparator());
+	}
+
+	/**
+	 * Sort the list (lowest first)
+	 * 
+	 * @param list
+	 */
+	public static void sortAscending(Chromosome[] list)
+	{
+		sort(list);
+		int size = list.length;
+		for (int i = 0, mid = size >> 1, j = size - 1; i < mid; i++, j--)
+		{
+			final Chromosome tmp = list[i];
+			list[i] = list[j];
+			list[j] = tmp;
+		}
 	}
 }
