@@ -2479,7 +2479,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					if (!rangeInput)
 						filters.addAll(filterSet.getFilters());
 					double[][] sample = SearchSpace.sample(dimensions, populationSize - filters.size(), null);
-					filters.addAll(searchSpaceToFilters(ss_filter, sample));
+					filters.addAll(searchSpaceToFilters(sample));
 				}
 
 				ga_population = new Population(filters);
