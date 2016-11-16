@@ -1787,8 +1787,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				sb.append(Utils.rounded(sf / scored)).append('\t');
 				sb.append(Utils.rounded(Math.sqrt(rmsd / scored))).append('\t');
 				sb.append(Utils.rounded(slope)).append('\t');
-				if (fs.isAtLimit())
-					sb.append('Y');
+				//if (fs.isAtLimit())
+				sb.append(fs.atLimit());
 
 				String text = sb.toString();
 				if (topFilterSummary == null)
@@ -2379,7 +2379,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				{
 					for (int j = 0; j < stepSize.length; j++)
 						if (!enabled[j])
-							stepSize[j] *= -1; 
+							stepSize[j] *= -1;
 				}
 			}
 			double[] upper = ss_filter.upperLimit();
@@ -2599,7 +2599,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				{
 					for (int j = 0; j < stepSize.length; j++)
 						if (stepSize[j] < 0)
-							enabled[j] = false; 
+							enabled[j] = false;
 				}
 			}
 			for (int i = 0; i < n; i++)
@@ -2741,7 +2741,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				{
 					for (int j = 0; j < stepSize.length; j++)
 						if (stepSize[j] < 0)
-							enabled[j] = false; 
+							enabled[j] = false;
 				}
 			}
 			for (int i = 0; i < n; i++)
@@ -2914,7 +2914,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			StringBuilder sb = new StringBuilder();
 			for (int j = 0; j < indices.length; j++)
 			{
-				atLimit[j] = ' ';
+				atLimit[j] = FilterScore.WITHIN;
 				final int p = indices[j];
 				if (disabled[p])
 					continue;
@@ -2926,10 +2926,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				int c1 = Double.compare(value, lowerLimit);
 				if (c1 <= 0)
 				{
-					atLimit[j] = '<';
-					sb.append(" : ").append(filter.getParameterName(p)).append(" [").append(Utils.rounded(value));
+					atLimit[j] = FilterScore.FLOOR;
+					sb.append(" : ").append(filter.getParameterName(p)).append(" l[").append(Utils.rounded(value));
 					if (c1 == -1)
+					{
+						atLimit[j] = FilterScore.BELOW;
 						sb.append("<").append(Utils.rounded(lowerLimit));
+					}
 					sb.append("]");
 				}
 				else
@@ -2937,10 +2940,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					int c2 = Double.compare(value, upperLimit);
 					if (c2 >= 0)
 					{
-						atLimit[j] = '>';
-						sb.append(" : ").append(filter.getParameterName(p)).append(" [").append(Utils.rounded(value));
+						atLimit[j] = FilterScore.CEIL;
+						sb.append(" : ").append(filter.getParameterName(p)).append(" u[").append(Utils.rounded(value));
 						if (c2 == 1)
+						{
+							atLimit[j] = FilterScore.ABOVE;
 							sb.append(">").append(Utils.rounded(upperLimit));
+						}
 						sb.append("]");
 					}
 				}
@@ -4158,6 +4164,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	public class FilterScore extends SimpleFilterScore
 	{
+		final static char WITHIN = '-';
+		final static char BELOW = '<';
+		final static char FLOOR = 'l';
+		final static char ABOVE = '>';
+		final static char CEIL = 'u';
+
 		int index;
 		final ClassificationResult r2;
 		final int size;
@@ -4213,16 +4225,45 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			if (atLimit != null)
 				for (int i = 0; i < atLimit.length; i++)
-					if (atLimit[i] != ' ')
+					if (atLimit[i] != WITHIN)
 						return true;
 			return false;
 		}
 
 		public char atLimit(int i)
 		{
-			if (atLimit != null && i < atLimit.length)
-				return atLimit[i];
-			return ' ';
+			return atLimit[i];
+		}
+		
+		public String atLimitString(int i)
+		{
+			switch (atLimit[i])
+			{
+				case BELOW:
+					return "<";
+				case ABOVE:
+					return ">";
+				case CEIL:
+					return "\u2309";
+				case FLOOR:
+					return "\u230A";
+				case WITHIN:
+					return "-";
+			}
+			return "";
+		}
+
+		public char[] atLimit()
+		{
+			return atLimit;
+		}
+		
+		public String atLimitString()
+		{
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < atLimit.length; i++)
+				sb.append(atLimitString(i));
+			return sb.toString();
 		}
 	}
 
@@ -4389,7 +4430,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 		return filterSet;
 	}
-	
+
 	/**
 	 * Sets the strength on all the filters if not computed.
 	 *
@@ -4850,7 +4891,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public SearchResult<SimpleFilterScore> findOptimum(double[][] points)
 	{
 		ga_iteration++;
-		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
+		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))),
+				false);
 		SimpleFilterScore max = es_optimum;
 
 		if (scoreResults == null)
@@ -4882,7 +4924,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public SearchResult<SimpleFilterScore>[] score(double[][] points)
 	{
 		ga_iteration++;
-		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
+		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))),
+				false);
 		SimpleFilterScore max = es_optimum;
 
 		if (scoreResults == null)
