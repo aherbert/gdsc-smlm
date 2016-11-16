@@ -89,7 +89,6 @@ import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
-import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
@@ -250,6 +249,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
+	private boolean debug;
 
 	// Used to tile plot windows
 	private WindowOrganiser wo = new WindowOrganiser();
@@ -378,12 +378,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			try
 			{
-				while (!finished)
+				// Constantly take jobs from the queue until a termination job is found 
+				while (true)
 				{
 					Job job = jobs.take();
-					if (job == null || job.entry == null || finished)
+					if (job == null || job.entry == null)
 						break;
-					run(job);
+					if (!finished)
+						run(job);
 				}
 			}
 			catch (InterruptedException e)
@@ -657,6 +659,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+		// For now do not provide an option, just debug
+		debug = true; //Utils.isExtraOptions();
 
 		simulationParameters = CreateData.simulationParameters;
 		if (simulationParameters == null)
@@ -2361,8 +2365,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			// Collect parameters for the genetic algorithm
 			pauseTimer();
 
-			// TODO - Remember the step size settings (as for the other evolve algorithms)
-
+			// Remember the step size settings
 			double[] stepSize = stepSizeMap.get(setNumber);
 			if (stepSize == null || stepSize.length != ss_filter.length())
 			{
@@ -2489,6 +2492,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				if (best != null)
 				{
+					// In case optimisation was stopped
+					IJ.resetEscape();
+
 					// Enumerate on the min interval to produce the final filter
 					ss_filter = (DirectFilter) best;
 					SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
@@ -2667,6 +2673,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 					if (optimum != null)
 					{
+						// In case optimisation was stopped
+						IJ.resetEscape();
+
 						best = optimum.score.r.filter;
 
 						// Now update the filter set for final assessment
@@ -2757,6 +2766,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				if (optimum != null)
 				{
+					// In case optimisation was stopped
+					IJ.resetEscape();
+
 					best = optimum.score.r.filter;
 
 					// Enumerate on the min interval to produce the final filter
@@ -4373,12 +4385,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			try
 			{
-				while (!finished)
+				// Constantly take jobs from the queue until a termination job is found 
+				while (true)
 				{
 					ScoreJob job = jobs.take();
-					if (job == null || job.index == -1 || finished)
+					if (job == null || job.index == -1)
 						break;
-					run(job);
+					if (!finished)
+						run(job);
 				}
 			}
 			catch (InterruptedException e)
@@ -4458,6 +4472,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			progress = 0;
 			for (Filter filter : filterSet.getFilters())
 			{
+				if (IJ.escapePressed())
+					break;
 				put(jobs, new ScoreJob((DirectFilter) filter, index++));
 			}
 			// Finish all the worker threads by passing in a null job
@@ -4523,34 +4539,34 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		if (filterSet.size() < 2)
 			return;
 
-		if (filterSet.allSameType())
+		if (filterSet.allSameType() && debug)
 		{
 			// Would there be a speed increase if the results list were partitioned into multiple sets
 			// by filtering with not just the weakest but a step set of weaker and weaker filters.
 			// This could be done using, e.g. precision, to partition the filters into a range.
 
-			// Plot the cumulative histogram of precision for the filters in the set.
-			try
-			{
-				StoredDataStatistics stats = new StoredDataStatistics(filterSet.size());
-				for (Filter f : filterSet.getFilters())
-				{
-					IMultiFilter f2 = (IMultiFilter) f;
-					stats.add(f2.getPrecision());
-				}
-				double[][] h1 = Maths.cumulativeHistogram(stats.getValues(), false);
-				String title = TITLE + " Cumul Precision";
-				Plot2 plot = new Plot2(title, "Precision", "Frequency");
-				// Find limits
-				double[] xlimit = Maths.limits(h1[0]);
-				plot.setLimits(xlimit[0] - 1, xlimit[1] + 1, 0, Maths.max(h1[1]) * 1.05);
-				plot.addPoints(h1[0], h1[1], Plot2.BAR);
-				Utils.display(title, plot);
-			}
-			catch (ClassCastException e)
-			{
-
-			}
+			//			// Plot the cumulative histogram of precision for the filters in the set.
+			//			try
+			//			{
+			//				StoredDataStatistics stats = new StoredDataStatistics(filterSet.size());
+			//				for (Filter f : filterSet.getFilters())
+			//				{
+			//					IMultiFilter f2 = (IMultiFilter) f;
+			//					stats.add(f2.getPrecision());
+			//				}
+			//				double[][] h1 = Maths.cumulativeHistogram(stats.getValues(), false);
+			//				String title = TITLE + " Cumul Precision";
+			//				Plot2 plot = new Plot2(title, "Precision", "Frequency");
+			//				// Find limits
+			//				double[] xlimit = Maths.limits(h1[0]);
+			//				plot.setLimits(xlimit[0] - 1, xlimit[1] + 1, 0, Maths.max(h1[1]) * 1.05);
+			//				plot.addPoints(h1[0], h1[1], Plot2.BAR);
+			//				Utils.display(title, plot);
+			//			}
+			//			catch (ClassCastException e)
+			//			{
+			//
+			//			}
 
 			// Debug the limits of all parameters
 			final double[] lower = filterSet.getFilters().get(0).getParameters().clone();
