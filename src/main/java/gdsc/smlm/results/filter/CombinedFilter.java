@@ -250,6 +250,21 @@ public abstract class CombinedFilter extends DirectFilter
 		return createFilter(f1, f2);
 	}
 
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		if (dfilter1 == null)
+			return 0;
+		
+		if (index < dfilter1.getNumberOfParameters())
+			return dfilter1.lowerBoundOrientation(index);
+
+		if (dfilter2 == null)
+			return 0;
+		
+		return dfilter2.lowerBoundOrientation(index - dfilter1.getNumberOfParameters());
+	}
+	
 	/**
 	 * Create a new combined filter from the two input filters
 	 * 
