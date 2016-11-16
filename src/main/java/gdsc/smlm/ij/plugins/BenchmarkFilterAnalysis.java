@@ -230,7 +230,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static ArrayList<NamedPlot> plots;
 	private static HashMap<String, FilterScore> bestFilter;
 	private static LinkedList<String> bestFilterOrder;
-	private static StopWatch analysisStopWatch;
 
 	private static boolean reUseFilters = true;
 	private static boolean expandFilters = false;
@@ -713,10 +712,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		analyse(filterSets);
 
-		final String timeString = analysisStopWatch.toString();
-		// TODO - Decide where to write this.
-		IJ.log("Filter analysis time : " + timeString);
-		IJ.showStatus("Finished : " + timeString);
+		IJ.showStatus("Finished");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1719,10 +1715,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			IJ.showProgress(1);
 			IJ.showStatus("");
 
-			if (debugSpeed)
-			{
-				System.out.println("Time = " + analysisStopWatch.toString());
-			}
+			final String timeString = analysisStopWatch.toString();
+			IJ.log("Filter analysis time : " + timeString);
 
 			if (Utils.isInterrupted())
 				return;
@@ -2988,7 +2982,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// irrespective of whether they were the same type or not.
 		//if (allSameType)
 		//{
-		FilterScore newFilterScore = new FilterScore(max.r, atLimit, algorithm, analysisStopWatch.getTime());
+		FilterScore newFilterScore = new FilterScore(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
 		FilterScore filterScore = bestFilter.get(type);
 		if (filterScore != null)
 		{
@@ -3007,7 +3001,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				// Replace
 				if (newFilterScore.compareTo(filterScore) < 0)
-					filterScore.update(max.r, atLimit, algorithm, analysisStopWatch.getTime());
+					filterScore.update(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
 			}
 		}
 		else
@@ -3082,6 +3076,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return 0;
 	}
 
+	private static StopWatch analysisStopWatch;
 	private StopWatch filterSetStopWatch;
 
 	private void pauseTimer()
