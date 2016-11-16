@@ -19,7 +19,7 @@ The Google .proto buffer file is used to generate Java code using
 [Google Protocol buffers](https://developers.google.com/protocol-buffers/).
 
 You must have the binary protoc executable in your path. You can generate
-the Java code for teh GDSC SMLM project using the following command:
+the Java code for the GDSC SMLM project using the following command:
 
         protoc --java_out=../src/main/java TSFProto.proto
 
