@@ -290,17 +290,17 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 */
 	public int weakestUnsafe(DirectFilter o)
 	{
-		// This should not happen if used correctly
-		if (Float.isNaN(strength) || Float.isNaN(o.strength))
-		{
-			System.out.println("No strength (nan)");
-			return super.weakestUnsafe(o);
-		}
-		if (Float.isInfinite(strength) || Float.isInfinite(o.strength))
-		{
-			System.out.println("No strength (inf)");
-			return super.weakestUnsafe(o);
-		}
+		//		// This should not happen if used correctly
+		//		if (Float.isNaN(strength) || Float.isNaN(o.strength))
+		//		{
+		//			System.out.println("No strength (nan)");
+		//			return super.weakestUnsafe(o);
+		//		}
+		//		if (Float.isInfinite(strength) || Float.isInfinite(o.strength))
+		//		{
+		//			System.out.println("No strength (inf)");
+		//			return super.weakestUnsafe(o);
+		//		}
 
 		if (this.strength < o.strength)
 			return -1;
