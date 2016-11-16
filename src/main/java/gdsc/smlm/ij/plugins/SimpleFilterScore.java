@@ -30,6 +30,7 @@ public class SimpleFilterScore implements Comparable<SimpleFilterScore>
 		this.r = r;
 		this.score = r.score;
 		this.criteria = r.criteria;
+		this.allSameType = allSameType;
 		this.criteriaPassed = criteriaPassed;
 	}
 

@@ -251,6 +251,17 @@ public class CoordinateFilter extends DirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+	 */
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		return (index == 1 || index == 3) ? 1 : -1;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
 	public int length()

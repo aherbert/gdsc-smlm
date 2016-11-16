@@ -218,6 +218,17 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+	 */
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		return 1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override

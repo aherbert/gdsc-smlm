@@ -2190,6 +2190,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 		// All the search algorithms use search dimensions.
 		// Create search dimensions if needed (these are used for testing if the optimum is at the limit).
+		ss_filter = null;
+		ss_lower = null;
+		ss_upper = null;
 		FixedDimension[] originalDimensions = null;
 		boolean rangeInput = false;
 		boolean[] disabled = null;
@@ -2345,9 +2348,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				// Store the dimensions so we can do an 'at limit' check
 				disabled = new boolean[originalDimensions.length];
+				ss_lower = new double[originalDimensions.length];
+				ss_upper = new double[originalDimensions.length];
 				for (int i = 0; i < disabled.length; i++)
 				{
 					disabled[i] = !originalDimensions[i].isActive();
+					ss_lower[i] = originalDimensions[i].lower;
+					ss_upper[i] = originalDimensions[i].upper;
 				}
 			}
 
@@ -2506,8 +2513,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							double minIncrement = ss_filter.getParameterIncrement(j);
 							try
 							{
-								dimensions2[i] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
-								dimensions2[i].setCentre(ss_filter.getParameterValue(j));
+								double value = ss_filter.getParameterValue(j);
+								double max = Maths.ceil(value, minIncrement);
+								double min = Maths.floor(value, minIncrement);
+								dimensions2[i] = new SearchDimension(min, max, minIncrement, 1);
+								dimensions2[i].setCentre(value);
 								dimensions2[i].setIncrement(minIncrement);
 							}
 							catch (IllegalArgumentException e)
@@ -2781,8 +2791,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 							double minIncrement = ss_filter.getParameterIncrement(j);
 							try
 							{
-								dimensions2[j] = new SearchDimension(0, Double.MAX_VALUE, minIncrement, 1);
-								dimensions2[j].setCentre(ss_filter.getParameterValue(j));
+								double value = ss_filter.getParameterValue(j);
+								double max = Maths.ceil(value, minIncrement);
+								double min = Maths.floor(value, minIncrement);
+								dimensions2[j] = new SearchDimension(min, max, minIncrement, 1);
+								dimensions2[j].setCentre(value);
 								dimensions2[j].setIncrement(minIncrement);
 							}
 							catch (IllegalArgumentException e)
@@ -2842,10 +2855,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		// Score the filters and report the results if configured.
-		// Note that count and total may have changed after running the genetic algorithm
-		// so use fractional progress.
 
-		ScoreResult[] scoreResults = scoreFilters(filterSet, showResultsTable);
+		ScoreResult[] scoreResults = scoreFilters(setUncomputedStrength(filterSet), showResultsTable);
 		if (scoreResults == null)
 			return -1;
 
@@ -4336,6 +4347,51 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private String ga_statusPrefix;
 	private Population ga_population;
 
+	// Used to set the strength on a filter
+	private double[] ss_lower, ss_upper;
+
+	/**
+	 * Sets the strength on all the filters.
+	 *
+	 * @param filterSet
+	 *            the filter set
+	 * @return the filter set
+	 */
+	private FilterSet setStrength(FilterSet filterSet)
+	{
+		if (ss_lower != null)
+		{
+			for (Filter f : filterSet.getFilters())
+			{
+				final DirectFilter df = (DirectFilter) f;
+				df.setStrength(df.computeStrength(ss_lower, ss_upper));
+			}
+
+		}
+		return filterSet;
+	}
+	
+	/**
+	 * Sets the strength on all the filters if not computed.
+	 *
+	 * @param filterSet
+	 *            the filter set
+	 * @return the filter set
+	 */
+	private FilterSet setUncomputedStrength(FilterSet filterSet)
+	{
+		if (ss_lower != null)
+		{
+			for (Filter f : filterSet.getFilters())
+			{
+				final DirectFilter df = (DirectFilter) f;
+				if (Float.isNaN(df.getStrength()))
+					df.setStrength(df.computeStrength(ss_lower, ss_upper));
+			}
+		}
+		return filterSet;
+	}
+
 	// Used for the scoring of filter sets
 	private MultiPathFitResults[] ga_resultsList = null;
 	private MultiPathFitResults[] ga_resultsListToScore = null;
@@ -4687,7 +4743,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	{
 		ga_iteration++;
 		ga_scoreIndex = 0;
-		ga_scoreResults = scoreFilters(new FilterSet(populationToFilters(individuals)), false);
+		ga_scoreResults = scoreFilters(setStrength(new FilterSet(populationToFilters(individuals))), false);
 	}
 
 	private ArrayList<Filter> populationToFilters(List<? extends Chromosome> individuals)
@@ -4775,7 +4831,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public SearchResult<SimpleFilterScore> findOptimum(double[][] points)
 	{
 		ga_iteration++;
-		final ScoreResult[] scoreResults = scoreFilters(new FilterSet(searchSpaceToFilters(points)), false);
+		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
 		SimpleFilterScore max = es_optimum;
 
 		if (scoreResults == null)
@@ -4807,7 +4863,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public SearchResult<SimpleFilterScore>[] score(double[][] points)
 	{
 		ga_iteration++;
-		final ScoreResult[] scoreResults = scoreFilters(new FilterSet(searchSpaceToFilters(points)), false);
+		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
 		SimpleFilterScore max = es_optimum;
 
 		if (scoreResults == null)

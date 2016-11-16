@@ -477,6 +477,17 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		setMax(parameters, 6, precision);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+	 */
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		return (index >= 3) ? 1 : -1;
+	}
+	
 	/**
 	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
 	 * parameters. If positive then this filter has less weak parameters. If the same or the number of parameters do not

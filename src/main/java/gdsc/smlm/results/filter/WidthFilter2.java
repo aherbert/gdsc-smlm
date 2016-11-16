@@ -249,6 +249,17 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		setMin(parameters, 0, minWidth);
 		setMax(parameters, 1, maxWidth);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+	 */
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		return (index == 1) ? 1 : -1;
+	}
 
 	/*
 	 * (non-Javadoc)

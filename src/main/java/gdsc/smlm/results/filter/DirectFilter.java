@@ -25,6 +25,8 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 {
 	@XStreamOmitField
 	private int result = 0;
+	@XStreamOmitField
+	private float strength = Float.NaN;
 
 	/*
 	 * (non-Javadoc)
@@ -201,5 +203,109 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		if (sb.length() != 0)
 			sb.append("; ");
 		sb.append(name);
+	}
+
+	/**
+	 * Gets the strength. This is used in the {@link #weakestUnsafe(Filter)} method before the parameters are compared.
+	 *
+	 * @return the strength
+	 */
+	public float getStrength()
+	{
+		return strength;
+	}
+
+	/**
+	 * Sets the strength. This is used in the {@link #weakestUnsafe(DirectFilter)} method before the parameters are
+	 * compared.
+	 *
+	 * @param strength
+	 *            the new strength
+	 */
+	public void setStrength(float strength)
+	{
+		this.strength = strength;
+	}
+
+	/**
+	 * Compute strength using the limits on the parameters. Strength is computed using the distance from the lower/upper
+	 * bounds inside the range for each parameter. The bounds to choose is determined by the method
+	 * {@link #lowerBoundOrientation(int)}.
+	 * <p>
+	 * Warning: No checks are made for the input arrays to be null or incorrect length.
+	 * <p>
+	 * If lower is equal or above upper then this index is ignored.
+	 *
+	 * @param lower
+	 *            the lower limit
+	 * @param upper
+	 *            the upper limit
+	 * @return the strength
+	 */
+	public float computeStrength(double[] lower, double[] upper)
+	{
+		double s = 0;
+		double[] p = getParameters();
+		for (int i = 0; i < p.length; i++)
+		{
+			final double range = upper[i] - lower[i];
+			if (range <= 0)
+				// Ignore this as it will produce bad strength data
+				continue;
+			final int o = lowerBoundOrientation(i);
+			if (o < 0)
+			{
+				s += (p[i] - lower[i]) / range;
+			}
+			else if (o > 0)
+			{
+				s += (upper[i] - p[i]) / range;
+			}
+		}
+		return (float) s;
+	}
+
+	/**
+	 * Get the lower bound orientation for the given parameter index. This is the orientation of the bound for the
+	 * weakest parameter. E.g. if a parameter must be low to be weak, the orientation is -1.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the lower bound orientation.
+	 */
+	public int lowerBoundOrientation(int index)
+	{
+		return -1;
+	}
+
+	/**
+	 * Compare to the other filter using the strength property and return the weakest. If equal (or the strength is not
+	 * set) then default to the {@link #weakest(Filter)} method.
+	 * <p>
+	 * This method does not check for null or if the other filter has a different number of parameters.
+	 * 
+	 * @param o
+	 *            The other filter
+	 * @return the count difference
+	 */
+	public int weakestUnsafe(DirectFilter o)
+	{
+		// This should not happen if used correctly
+		if (Float.isNaN(strength) || Float.isNaN(o.strength))
+		{
+			System.out.println("No strength (nan)");
+			return super.weakestUnsafe(o);
+		}
+		if (Float.isInfinite(strength) || Float.isInfinite(o.strength))
+		{
+			System.out.println("No strength (inf)");
+			return super.weakestUnsafe(o);
+		}
+
+		if (this.strength < o.strength)
+			return -1;
+		if (this.strength > o.strength)
+			return 1;
+		return super.weakestUnsafe(o);
 	}
 }

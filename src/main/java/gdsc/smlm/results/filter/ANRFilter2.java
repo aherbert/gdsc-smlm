@@ -197,7 +197,7 @@ public class ANRFilter2 extends DirectFilter
 				return WidthFilter.DEFAULT_INCREMENT;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -260,6 +260,17 @@ public class ANRFilter2 extends DirectFilter
 		setMin(parameters, 0, anr);
 		setMin(parameters, 1, minWidth);
 		setMax(parameters, 2, maxWidth);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+	 */
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		return (index == 2) ? 1 : -1;
 	}
 
 	/*
