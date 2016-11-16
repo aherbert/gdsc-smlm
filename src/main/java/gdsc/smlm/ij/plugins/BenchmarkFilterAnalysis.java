@@ -2379,6 +2379,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				stepSize = ss_filter.mutationStepRange().clone();
 				for (int j = 0; j < stepSize.length; j++)
 					stepSize[j] *= delta;
+				// See if the same number of parameters have been optimised in other algorithms
+				boolean[] enabled = searchRangeMap.get(setNumber);
+				if (enabled != null && enabled.length == stepSize.length)
+				{
+					for (int j = 0; j < stepSize.length; j++)
+						if (!enabled[j])
+							stepSize[j] *= -1; 
+				}
 			}
 			double[] upper = ss_filter.upperLimit();
 			// Ask the user for the mutation step parameters.
@@ -2591,6 +2599,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				enabled = new boolean[n];
 				Arrays.fill(enabled, true);
+				// See if the same number of parameters have been optimised in other algorithms
+				double[] stepSize = stepSizeMap.get(setNumber);
+				if (stepSize != null && enabled.length == stepSize.length)
+				{
+					for (int j = 0; j < stepSize.length; j++)
+						if (stepSize[j] < 0)
+							enabled[j] = false; 
+				}
 			}
 			for (int i = 0; i < n; i++)
 				gd.addCheckbox(prefix + ss_filter.getParameterName(i), enabled[i]);
@@ -2725,6 +2741,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				enabled = new boolean[n];
 				Arrays.fill(enabled, true);
+				// See if the same number of parameters have been optimised in other algorithms
+				double[] stepSize = stepSizeMap.get(setNumber);
+				if (stepSize != null && enabled.length == stepSize.length)
+				{
+					for (int j = 0; j < stepSize.length; j++)
+						if (stepSize[j] < 0)
+							enabled[j] = false; 
+				}
 			}
 			for (int i = 0; i < n; i++)
 				gd.addCheckbox(prefix + ss_filter.getParameterName(i), enabled[i]);
