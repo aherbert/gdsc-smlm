@@ -301,11 +301,23 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		//			System.out.println("No strength (inf)");
 		//			return super.weakestUnsafe(o);
 		//		}
+		
+		//System.out.println("weakestUnsafe");
+		
+		//int result = super.weakestUnsafe(o); 
 
 		if (this.strength < o.strength)
+		{
+			//if (result >= 0)
+			//	System.out.println("Strength not same as weakest");
 			return -1;
+		}
 		if (this.strength > o.strength)
+		{
+			//if (result <= 0)
+			//	System.out.println("Strength not same as weakest");
 			return 1;
+		}
 		return super.weakestUnsafe(o);
 	}
 }
