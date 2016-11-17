@@ -2583,7 +2583,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				String[] modes = SettingsManager.getNames((Object[]) SearchSpace.RefinementMode.values());
 				gd.addSlider(prefix + "Reduce", 0.01, 0.99, rangeSearchReduce);
 				gd.addChoice("Refinement", modes, modes[refinementMode]);
-				
+
 			}
 			gd.addNumericField(prefix + "Seed_size", seedSize, 0);
 
@@ -2689,17 +2689,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					if (seedSize > 0)
 					{
 						double[][] sample = SearchSpace.sample(dimensions, seedSize, null);
-						if (seed==null)
+						if (seed == null)
 							seed = sample;
 						else
 						{
 							// Merge
-							ArrayList<double[]> merged = new ArrayList<double[]>(sample.length+seed.length);
+							ArrayList<double[]> merged = new ArrayList<double[]>(sample.length + seed.length);
 							merged.addAll(Arrays.asList(seed));
 							merged.addAll(Arrays.asList(sample));
 							seed = merged.toArray(new double[merged.size()][]);
 						}
-					}					
+					}
 					ss.seed(seed);
 					ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0,
 							maxIterations);
