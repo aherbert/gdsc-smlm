@@ -292,7 +292,7 @@ public class Population<T extends Comparable<T>>
 		{
 			final T f = fitnessFunction.fitness(c);
 			c.setFitness(f);
-			if (f.compareTo(max) < 0)
+			if (f != null && f.compareTo(max) < 0)
 			{
 				max = f;
 				best = c;
