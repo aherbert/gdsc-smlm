@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.FilterScore;
 
 /*----------------------------------------------------------------------------- 
@@ -26,5 +27,12 @@ public class SimpleFilterScore extends FilterScore
 	{
 		super(r.filter, r.score, r.criteria, allSameType, criteriaPassed);
 		this.r = r;
+	}
+
+	@Override
+	protected int compareParameters(FilterScore that)
+	{
+		// We only use this class with DirectFilter
+		return ((DirectFilter) that.filter).weakestUnsafe((DirectFilter) this.filter);
 	}
 }

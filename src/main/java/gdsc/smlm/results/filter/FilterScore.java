@@ -96,27 +96,10 @@ public class FilterScore implements Comparable<FilterScore>
 		}
 	}
 
-	private int compareParameters(FilterScore that)
+	protected int compareParameters(FilterScore that)
 	{
-		return compare(this.filter, that.filter);
-	}
-
-	/**
-	 * Compare the two filters. Get the filter with the strongest parameters.
-	 *
-	 * @param f1
-	 *            filter 1
-	 * @param f2
-	 *            filter 2
-	 * @return the comparison score
-	 */
-	public static int compare(Filter f1, Filter f2)
-	{
-		// Get the filter with the weakest params
-		//return f1.weakestUnsafe(f2);
-
 		// Get the filter with the strongest params
-		return f2.weakestUnsafe(f1);
+		return that.filter.weakestUnsafe(this.filter);
 	}
 
 	@Override
