@@ -4869,6 +4869,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Assume that fitness will be called in the order of the individuals passed to the initialise function.
 		final ScoreResult scoreResult = ga_scoreResults[ga_scoreIndex++];
+		
+		// Set this to null and it will be removed at the next population selection
+		if (scoreResult.score == 0)
+			return null;
 
 		return new SimpleFilterScore(scoreResult, true, scoreResult.criteria >= minCriteria);
 	}
