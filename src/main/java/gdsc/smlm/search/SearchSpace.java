@@ -218,6 +218,8 @@ public class SearchSpace
 			for (int i = 0; i < dimensions.length; i++)
 			{
 				dimensions[i].setCentre(p[i]);
+				// In-case the seed was not on the min interval grid
+				p[i] = dimensions[i].getCentre();
 			}
 		}
 
