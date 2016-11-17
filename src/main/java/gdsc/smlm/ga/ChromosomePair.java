@@ -16,13 +16,13 @@ package gdsc.smlm.ga;
 /**
  * Define a pair of chromosomes
  */
-public class ChromosomePair
+public class ChromosomePair<T extends Comparable<T>>
 {
-	final Chromosome c1, c2;
+	final Chromosome<T> c1, c2;
 
 	/**
-	 * Create a pair
-	 * 
+	 * Create a pair.
+	 *
 	 * @param c1
 	 *            Chromosome 1
 	 * @param c2
@@ -30,7 +30,7 @@ public class ChromosomePair
 	 * @throws IllegalArgumentException
 	 *             if either chromosome is null
 	 */
-	public ChromosomePair(Chromosome c1, Chromosome c2)
+	public ChromosomePair(Chromosome<T> c1, Chromosome<T> c2)
 	{
 		if (c1 == null || c2 == null)
 			throw new IllegalArgumentException("Chromosomes must not be null");

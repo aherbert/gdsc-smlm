@@ -23,7 +23,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Check if converged using a tolerance on the fitness and/or sequence change, and the number of iterations
  */
-public class ToleranceChecker implements ConvergenceChecker
+public abstract class ToleranceChecker<T extends Comparable<T>> implements ConvergenceChecker<T>
 {
 	final double relative, absolute;
 	final boolean checkFitness, checkSequence;
@@ -32,7 +32,7 @@ public class ToleranceChecker implements ConvergenceChecker
 	private int iterations = 0;
 
 	/**
-	 * Build an instance with specified thresholds. This only check convergence using the fitness.
+	 * Build an instance with specified thresholds. This only check convergence using the sequence.
 	 *
 	 * In order to perform only relative checks, the absolute tolerance
 	 * must be set to a negative value. In order to perform only absolute
@@ -47,7 +47,7 @@ public class ToleranceChecker implements ConvergenceChecker
 	 */
 	public ToleranceChecker(double relative, double absolute)
 	{
-		this(relative, absolute, true, false, 0);
+		this(relative, absolute, false, true, 0);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class ToleranceChecker implements ConvergenceChecker
 	 * @param checkSequence
 	 *            Set to true to check the sequence
 	 * @param maxIterations
-	 *            Set above zero to check the iterations (number of time {@link #converged(Chromosome, Chromosome)} is
+	 *            Set above zero to check the iterations (number of time {@link #converged(Chromosome<T>, Chromosome<T>)} is
 	 *            called)
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid
@@ -121,7 +121,7 @@ public class ToleranceChecker implements ConvergenceChecker
 	 *            Current
 	 * @return True if converged
 	 */
-	private boolean converged(final double p, final double c)
+	public boolean converged(final double p, final double c)
 	{
 		final double difference = Math.abs(p - c);
 		final double size = FastMath.max(Math.abs(p), Math.abs(c));
@@ -132,7 +132,7 @@ public class ToleranceChecker implements ConvergenceChecker
 		return true;
 	}
 
-	public boolean converged(Chromosome previous, Chromosome current)
+	public boolean converged(Chromosome<T> previous, Chromosome<T> current)
 	{
 		iterations++;
 		if (maxIterations != 0 && iterations >= maxIterations)
@@ -143,6 +143,8 @@ public class ToleranceChecker implements ConvergenceChecker
 			return true;
 		return false;
 	}
+
+	protected abstract boolean converged(T previous, T current);
 
 	/**
 	 * @return the iterations

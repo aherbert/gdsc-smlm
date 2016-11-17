@@ -16,7 +16,7 @@ package gdsc.smlm.ga;
 /**
  * Define the genetic sequence that can evolve
  */
-public interface Chromosome
+public interface Chromosome<T extends Comparable<T>>
 {
 	/**
 	 * Get the chromosome length
@@ -39,7 +39,7 @@ public interface Chromosome
 	 *            the chromosome sequence (must equal the current length)
 	 * @return A new chromosome with the given sequence
 	 */
-	Chromosome newChromosome(double[] sequence);
+	Chromosome<T> newChromosome(double[] sequence);
 
 	/**
 	 * Get the range for mutation at each position in the sequence. This defines how far each position in the sequence
@@ -73,18 +73,17 @@ public interface Chromosome
 	 * @param fitness
 	 *            The fitness of the sequence
 	 */
-	void setFitness(double fitness);
+	void setFitness(T fitness);
 
 	/**
 	 * Get the fitness
 	 * <p>
-	 * This should be zero for an uninitialised score. It should be higher than zero to indicate that the chromosome has
-	 * some fitness. It can be left at zero or set to a negative value if the chromosome has no fitness. Using a
-	 * negative value will ensure that it is not scored again.
+	 * This should be null for an uninitialised score. The comparable should rank in ascending order with the first item
+	 * the fittest individual.
 	 * 
 	 * @return The fitness of the sequence
 	 */
-	double getFitness();
+	T getFitness();
 
 	/**
 	 * Calculate the distance to another chromosome
@@ -93,7 +92,7 @@ public interface Chromosome
 	 *            the other chromosome
 	 * @return the distance (zero is a match)
 	 */
-	double distance(Chromosome other);
+	double distance(Chromosome<T> other);
 
 	/**
 	 * Calculate if equal to another chromosome
@@ -102,5 +101,5 @@ public interface Chromosome
 	 *            the other chromosome
 	 * @return true if the same
 	 */
-	boolean equals(Chromosome other);
+	boolean equals(Chromosome<T> other);
 }

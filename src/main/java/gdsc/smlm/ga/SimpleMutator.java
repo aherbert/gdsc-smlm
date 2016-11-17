@@ -18,7 +18,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 /**
  * Mutates the sequence by selecting random positions and random shifts.
  */
-public class SimpleMutator extends Randomiser implements Mutator
+public class SimpleMutator<T extends Comparable<T>> extends Randomiser implements Mutator<T>
 {
 	final double fraction;
 
@@ -96,7 +96,7 @@ public class SimpleMutator extends Randomiser implements Mutator
 	 * 
 	 * @see gdsc.smlm.ga.Mutator#mutate(gdsc.smlm.ga.Chromosome)
 	 */
-	public Chromosome mutate(Chromosome chromosome)
+	public Chromosome<T> mutate(Chromosome<T> chromosome)
 	{
 		final double[] sequence = chromosome.sequence().clone();
 

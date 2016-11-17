@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Calculate the fitness of a chromosome
  */
-public interface FitnessFunction
+public interface FitnessFunction<T extends Comparable<T>>
 {
 	/**
 	 * Initialise the fitness function using a population of individuals. This can be used to pre-process the population
@@ -26,7 +26,7 @@ public interface FitnessFunction
 	 * 
 	 * @param individuals The population of individuals that will be assessed
 	 */
-	void initialise(List<? extends Chromosome> individuals);
+	void initialise(List<? extends Chromosome<T>> individuals);
 
 	/**
 	 * Calculate the fitness
@@ -34,7 +34,7 @@ public interface FitnessFunction
 	 * @param chromosome
 	 * @return the fitness
 	 */
-	double fitness(Chromosome chromosome);
+	T fitness(Chromosome<T> chromosome);
 	
 	/**
 	 * Shutdown the fitness function. This can be used to post-process the population

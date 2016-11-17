@@ -420,7 +420,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	 * @see gdsc.smlm.results.filter.Filter#newChromosome(double[])
 	 */
 	@Override
-	public Chromosome newChromosome(double[] sequence)
+	public Chromosome<FilterScore> newChromosome(double[] sequence)
 	{
 		// Override the default Hysteresis filter implementation for speed since this is the filter we
 		// will most likely optimise using the genetic algorithm

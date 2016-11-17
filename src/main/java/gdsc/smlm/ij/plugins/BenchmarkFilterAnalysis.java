@@ -86,6 +86,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.Filter;
+import gdsc.smlm.results.filter.FilterScore;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
@@ -125,8 +126,8 @@ import ij.text.TextWindow;
  * Filtering is done using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table,
  * e.g. precision, Jaccard, F-score.
  */
-public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackProgress, FractionScoreStore,
-		FullScoreFunction<SimpleFilterScore>, Comparator<Chromosome>
+public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterScore>, TrackProgress, FractionScoreStore,
+		FullScoreFunction<FilterScore>
 {
 	private static final String TITLE = "Benchmark Filter Analysis";
 	private static TextWindow resultsWindow = null;
@@ -221,7 +222,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static double mutationRate = 1;
 	private static double selectionFraction = 0.2;
 	private static boolean rampedSelection = true;
-	private static boolean strictFitness = true;
 	private static boolean saveOption = false;
 
 	private static String resultsTitle;
@@ -229,7 +229,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static String resultsPrefix3, limitRange;
 
 	private static ArrayList<NamedPlot> plots;
-	private static HashMap<String, FilterScore> bestFilter;
+	private static HashMap<String, ComplexFilterScore> bestFilter;
 	private static LinkedList<String> bestFilterOrder;
 
 	private static boolean reUseFilters = true;
@@ -1700,7 +1700,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			lastAnalyseSettings = settings;
 
 			plots = new ArrayList<NamedPlot>(plotTopN);
-			bestFilter = new HashMap<String, FilterScore>();
+			bestFilter = new HashMap<String, ComplexFilterScore>();
 			bestFilterOrder = new LinkedList<String>();
 
 			analysisStopWatch = StopWatch.createStarted();
@@ -1729,7 +1729,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return;
 		}
 
-		List<FilterScore> filters = new ArrayList<FilterScore>(bestFilter.values());
+		List<ComplexFilterScore> filters = new ArrayList<ComplexFilterScore>(bestFilter.values());
 		Collections.sort(filters);
 
 		FractionClassificationResult topFilterClassificationResult = null;
@@ -1746,7 +1746,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				if (Math.abs(depth) < range)
 					np++;
 			}
-			for (FilterScore fs : filters)
+			for (ComplexFilterScore fs : filters)
 			{
 				final ArrayList<FractionalAssignment[]> list = new ArrayList<FractionalAssignment[]>(
 						resultsList.length);
@@ -2087,7 +2087,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return header;
 	}
 
-	private void addToComponentAnalysisWindow(FilterScore filterScore, FilterScore bestFilterScore, String[] names)
+	private void addToComponentAnalysisWindow(ComplexFilterScore filterScore, ComplexFilterScore bestFilterScore,
+			String[] names)
 	{
 		final ScoreResult result = filterScore.r;
 		final StringBuilder sb = new StringBuilder(result.text);
@@ -2180,7 +2181,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		final boolean allSameType = filterSet.allSameType();
 
 		this.ga_resultsList = resultsList;
-		Chromosome best = null;
+		Chromosome<FilterScore> best = null;
 		String algorithm = "";
 
 		// All the search algorithms use search dimensions.
@@ -2397,7 +2398,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			gd.addSlider(prefix + "Mean_children", 0.05, 3, meanChildren);
 			gd.addSlider(prefix + "Selection_fraction", 0.05, 0.5, selectionFraction);
 			gd.addCheckbox(prefix + "Ramped_selection", rampedSelection);
-			gd.addCheckbox(prefix + "Strict_fitness", strictFitness);
 			gd.addCheckbox(prefix + "Save_option", saveOption);
 
 			gd.addMessage("Configure the step size for each parameter");
@@ -2428,7 +2428,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				meanChildren = Math.abs(gd.getNextNumber());
 				selectionFraction = Math.abs(gd.getNextNumber());
 				rampedSelection = gd.getNextBoolean();
-				strictFitness = gd.getNextBoolean();
 				saveOption = gd.getNextBoolean();
 
 				// Used to create random sample
@@ -2455,21 +2454,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 				// Create the genetic algorithm
 				RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
-				SimpleMutator mutator = new SimpleMutator(random, mutationRate);
+				SimpleMutator<FilterScore> mutator = new SimpleMutator<FilterScore>(random, mutationRate);
 				// Override the settings with the step length, a min of zero and the configured upper
 				mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
-				Recombiner recombiner = new SimpleRecombiner(random, crossoverRate, meanChildren);
-				SelectionStrategy selectionStrategy;
+				Recombiner<FilterScore> recombiner = new SimpleRecombiner<FilterScore>(random, crossoverRate,
+						meanChildren);
+				SelectionStrategy<FilterScore> selectionStrategy;
 				// If the initial population is huge ensure that the first selection culls to the correct size
 				final int selectionMax = (int) (selectionFraction * populationSize);
-				Comparator<Chromosome> comparator = this;
 				if (rampedSelection)
-					selectionStrategy = new RampedSelectionStrategy(random, selectionFraction, selectionMax,
-							comparator);
+					selectionStrategy = new RampedSelectionStrategy<FilterScore>(random, selectionFraction,
+							selectionMax);
 				else
-					selectionStrategy = new SimpleSelectionStrategy(random, selectionFraction, selectionMax,
-							comparator);
-				ToleranceChecker ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3, convergedCount);
+					selectionStrategy = new SimpleSelectionStrategy<FilterScore>(random, selectionFraction,
+							selectionMax);
+				ToleranceChecker<FilterScore> ga_checker = new InterruptChecker(tolerance, tolerance * 1e-3,
+						convergedCount);
 
 				// Create new random filters if the population is initially below the population size
 				List<Filter> filters = filterSet.getFilters();
@@ -2483,7 +2483,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					filters.addAll(searchSpaceToFilters(sample));
 				}
 
-				ga_population = new Population(filters);
+				ga_population = new Population<FilterScore>(filters);
 				ga_population.setPopulationSize(populationSize);
 				ga_population.setFailureLimit(failureLimit);
 				selectionStrategy.setTracker(this);
@@ -2493,7 +2493,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				ga_statusPrefix = algorithm + " [" + setNumber + "] " + filterSet.getName() + " ... ";
 				ga_iteration = 0;
 				ga_population.setTracker(this);
-				ga_population.setComparator(comparator);
 
 				createGAWindow();
 				resumeTimer();
@@ -2542,11 +2541,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 						SearchSpace ss = new SearchSpace();
 						ss.setTracker(this);
-						SearchResult<SimpleFilterScore> optimum = ss.findOptimum(dimensions2, this);
+						SearchResult<FilterScore> optimum = ss.findOptimum(dimensions2, this);
 
 						if (optimum != null)
 						{
-							best = optimum.score.r.filter;
+							best = ((SimpleFilterScore) optimum.score).r.filter;
 						}
 					}
 
@@ -2701,24 +2700,23 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						}
 					}
 					ss.seed(seed);
-					ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0,
-							maxIterations);
+					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
 					createGAWindow();
 					resumeTimer();
 
-					SearchResult<SimpleFilterScore> optimum = ss.search(dimensions, this, checker, myRefinementMode);
+					SearchResult<FilterScore> optimum = ss.search(dimensions, this, checker, myRefinementMode);
 
 					if (optimum != null)
 					{
 						// In case optimisation was stopped
 						IJ.resetEscape();
 
-						best = optimum.score.r.filter;
+						best = ((SimpleFilterScore) optimum.score).r.filter;
 
 						// Now update the filter set for final assessment
 						filterSet = new FilterSet(filterSet.getName(),
-								searchSpaceToFilters(optimum.score.r.filter, ss.getSearchSpace()));
+								searchSpaceToFilters((DirectFilter) best, ss.getSearchSpace()));
 
 						// Option to save the filters
 						if (saveOption)
@@ -2801,21 +2799,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
 				ss.seed(seed);
-				ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations,
+				ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations,
 						convergedCount);
 
 				createGAWindow();
 				resumeTimer();
 
-				SearchResult<SimpleFilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker,
-						enrichmentSamples, enrichmentFraction, enrichmentPadding);
+				SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker, enrichmentSamples,
+						enrichmentFraction, enrichmentPadding);
 
 				if (optimum != null)
 				{
 					// In case optimisation was stopped
 					IJ.resetEscape();
 
-					best = optimum.score.r.filter;
+					best = ((SimpleFilterScore) optimum.score).r.filter;
 
 					// Enumerate on the min interval to produce the final filter
 					ss_filter = (DirectFilter) best;
@@ -2853,13 +2851,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 						optimum = ss.findOptimum(dimensions2, this);
 						if (optimum != null)
 						{
-							best = optimum.score.r.filter;
+							best = ((SimpleFilterScore) optimum.score).r.filter;
 						}
 					}
 
 					// Now update the filter set for final assessment
 					filterSet = new FilterSet(filterSet.getName(),
-							searchSpaceToFilters(optimum.score.r.filter, ss.getSearchSpace()));
+							searchSpaceToFilters((DirectFilter) best, ss.getSearchSpace()));
 
 					// Option to save the filters
 					if (saveOption)
@@ -2932,7 +2930,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			StringBuilder sb = new StringBuilder();
 			for (int j = 0; j < indices.length; j++)
 			{
-				atLimit[j] = FilterScore.WITHIN;
+				atLimit[j] = ComplexFilterScore.WITHIN;
 				final int p = indices[j];
 				if (disabled[p])
 					continue;
@@ -2944,11 +2942,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				int c1 = Double.compare(value, lowerLimit);
 				if (c1 <= 0)
 				{
-					atLimit[j] = FilterScore.FLOOR;
+					atLimit[j] = ComplexFilterScore.FLOOR;
 					sb.append(" : ").append(filter.getParameterName(p)).append(" l[").append(Utils.rounded(value));
 					if (c1 == -1)
 					{
-						atLimit[j] = FilterScore.BELOW;
+						atLimit[j] = ComplexFilterScore.BELOW;
 						sb.append("<").append(Utils.rounded(lowerLimit));
 					}
 					sb.append("]");
@@ -2958,11 +2956,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					int c2 = Double.compare(value, upperLimit);
 					if (c2 >= 0)
 					{
-						atLimit[j] = FilterScore.CEIL;
+						atLimit[j] = ComplexFilterScore.CEIL;
 						sb.append(" : ").append(filter.getParameterName(p)).append(" u[").append(Utils.rounded(value));
 						if (c2 == 1)
 						{
-							atLimit[j] = FilterScore.ABOVE;
+							atLimit[j] = ComplexFilterScore.ABOVE;
 							sb.append(">").append(Utils.rounded(upperLimit));
 						}
 						sb.append("]");
@@ -3006,8 +3004,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		// irrespective of whether they were the same type or not.
 		//if (allSameType)
 		//{
-		FilterScore newFilterScore = new FilterScore(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
-		FilterScore filterScore = bestFilter.get(type);
+		ComplexFilterScore newFilterScore = new ComplexFilterScore(max.r, atLimit, algorithm,
+				filterSetStopWatch.getTime());
+		ComplexFilterScore filterScore = bestFilter.get(type);
 		if (filterScore != null)
 		{
 			if (allowDuplicates)
@@ -3025,7 +3024,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				// Replace
 				if (newFilterScore.compareTo(filterScore) < 0)
-					filterScore.update(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
+				{
+					bestFilter.put(type, newFilterScore);
+					//filterScore.update(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
+				}
 			}
 		}
 		else
@@ -3877,7 +3879,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		return allAssignments;
 	}
 
-	private void componentAnalysis(FractionClassificationResult bestResult, FilterScore bestFilterScore)
+	private void componentAnalysis(FractionClassificationResult bestResult, ComplexFilterScore bestFilterScore)
 	{
 		if (componentAnalysis == 0)
 			return;
@@ -3915,7 +3917,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			long count = countCombinations(nParams);
 
 			// Enumerate all combinations
-			FilterScore[] scores = new FilterScore[(int) count];
+			ComplexFilterScore[] scores = new ComplexFilterScore[(int) count];
 			int j = 0;
 
 			for (int k = 1; k <= nParams; k++)
@@ -4010,7 +4012,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		for (int ii = 0; ii < nParams; ii++)
 		{
 			// Create a set of filters by enabling each component that is not currently enabled.
-			FilterScore[] scores = new FilterScore[nParams - enabled];
+			ComplexFilterScore[] scores = new ComplexFilterScore[nParams - enabled];
 			int k = enabled + 1;
 			for (int i = 0, j = 0; i < nParams; i++)
 			{
@@ -4044,8 +4046,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	private FilterScore score(DirectFilter f, int i, int size, int[] combinations, boolean[] enable, int[] uniqueIds1,
-			int uniqueIdCount1)
+	private ComplexFilterScore score(DirectFilter f, int i, int size, int[] combinations, boolean[] enable,
+			int[] uniqueIds1, int uniqueIdCount1)
 	{
 		setupFractionScoreStore();
 
@@ -4099,7 +4101,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		// These scores are used when the same filter type so set allSameType to true
-		return new FilterScore(r, true, i, time, r2, size, combinations, enable);
+		return new ComplexFilterScore(r, true, i, time, r2, size, combinations, enable);
 	}
 
 	private String[] getNames(DirectFilter bestFilter)
@@ -4168,9 +4170,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			Arrays.sort(uniqueIds, 0, uniqueIdCount);
 	}
 
-	private static class FilterScoreCompararor implements Comparator<FilterScore>
+	private static class FilterScoreCompararor implements Comparator<ComplexFilterScore>
 	{
-		public int compare(FilterScore o1, FilterScore o2)
+		public int compare(ComplexFilterScore o1, ComplexFilterScore o2)
 		{
 			// Sort by size, smallest first
 			final int result = o1.size - o2.size;
@@ -4180,7 +4182,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 	}
 
-	public class FilterScore extends SimpleFilterScore
+	public class ComplexFilterScore extends SimpleFilterScore
 	{
 		final static char WITHIN = '-';
 		final static char BELOW = '<';
@@ -4197,7 +4199,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		String algorithm;
 		long time;
 
-		private FilterScore(ScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
+		private ComplexFilterScore(ScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
 				ClassificationResult r2, int size, int[] combinations, boolean[] enable)
 		{
 			super(r, allSameType, r.criteria >= minCriteria);
@@ -4210,28 +4212,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			this.atLimit = atLimit;
 		}
 
-		public FilterScore(ScoreResult r, boolean allSameType, int index, long time, ClassificationResult r2, int size,
-				int[] combinations, boolean[] enable)
+		public ComplexFilterScore(ScoreResult r, boolean allSameType, int index, long time, ClassificationResult r2,
+				int size, int[] combinations, boolean[] enable)
 		{
 			this(r, allSameType, null, index, time, r2, size, combinations, enable);
 		}
 
-		public FilterScore(ScoreResult r, char[] atLimit, String algorithm, long time)
+		public ComplexFilterScore(ScoreResult r, char[] atLimit, String algorithm, long time)
 		{
 			// This may be used in comparisons of different type so set allSameType to false
 			this(r, false, atLimit, 0, time, null, 0, null, null);
 			this.algorithm = algorithm;
-		}
-
-		public void update(ScoreResult r, char[] atLimit, String algorithm, long time)
-		{
-			this.r = r;
-			this.score = r.score;
-			this.criteria = r.criteria;
-			this.atLimit = atLimit;
-			this.algorithm = algorithm;
-			this.time = time;
-			criteriaPassed = (criteria >= minCriteria);
 		}
 
 		public DirectFilter getFilter()
@@ -4318,7 +4309,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	/**
 	 * Allow the genetic algorithm to be stopped using the escape key
 	 */
-	private class InterruptChecker extends ToleranceChecker
+	private class InterruptChecker extends ToleranceChecker<FilterScore>
 	{
 		final int convergedCount;
 		int count = 0;
@@ -4330,7 +4321,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		@Override
-		public boolean converged(Chromosome previous, Chromosome current)
+		public boolean converged(Chromosome<FilterScore> previous, Chromosome<FilterScore> current)
 		{
 			if (super.converged(previous, current))
 				count++;
@@ -4347,12 +4338,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			}
 			return false;
 		}
+
+		@Override
+		protected boolean converged(FilterScore previous, FilterScore current)
+		{
+			// Check the score only if both have criteria achieved
+			if (current.criteriaPassed)
+			{
+				if (previous.criteriaPassed)
+					return converged(previous.score, current.score);
+				return false;
+			}
+			if (previous.criteriaPassed)
+				// This should not happen as current should be better than previous
+				return false;
+
+			return converged(previous.criteria, current.criteria);
+		}
 	}
 
 	/**
 	 * Allow the range search to be stopped using the escape key
 	 */
-	private class InterruptConvergenceChecker extends ConvergenceToleranceChecker<SimpleFilterScore>
+	private class InterruptConvergenceChecker extends ConvergenceToleranceChecker<FilterScore>
 	{
 		/**
 		 * The number of times it must have already converged before convergence is achieved.
@@ -4392,7 +4400,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		}
 
 		@Override
-		public boolean converged(SearchResult<SimpleFilterScore> previous, SearchResult<SimpleFilterScore> current)
+		public boolean converged(SearchResult<FilterScore> previous, SearchResult<FilterScore> current)
 		{
 			if (super.converged(previous, current))
 			{
@@ -4423,7 +4431,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	// Used to implement the FitnessFunction interface 
 	private String ga_statusPrefix;
-	private Population ga_population;
+	private Population<FilterScore> ga_population;
 
 	// Used to set the strength on a filter
 	private double[] ss_lower, ss_upper;
@@ -4817,17 +4825,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
 	 */
-	public void initialise(List<? extends Chromosome> individuals)
+	public void initialise(List<? extends Chromosome<FilterScore>> individuals)
 	{
 		ga_iteration++;
 		ga_scoreIndex = 0;
 		ga_scoreResults = scoreFilters(setStrength(new FilterSet(populationToFilters(individuals))), false);
 	}
 
-	private ArrayList<Filter> populationToFilters(List<? extends Chromosome> individuals)
+	private ArrayList<Filter> populationToFilters(List<? extends Chromosome<FilterScore>> individuals)
 	{
 		ArrayList<Filter> filters = new ArrayList<Filter>(individuals.size());
-		for (Chromosome c : individuals)
+		for (Chromosome<FilterScore> c : individuals)
 			filters.add((DirectFilter) c);
 		return filters;
 	}
@@ -4853,34 +4861,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#fitness(gdsc.smlm.ga.Chromosome)
 	 */
-	public double fitness(Chromosome chromosome)
+	public FilterScore fitness(Chromosome<FilterScore> chromosome)
 	{
 		// In case the user aborted with Escape
 		if (ga_scoreResults == null)
-			return 0;
+			return null;
 
 		// Assume that fitness will be called in the order of the individuals passed to the initialise function.
 		final ScoreResult scoreResult = ga_scoreResults[ga_scoreIndex++];
 
-		double score = scoreResult.score;
-		final double criteria = scoreResult.criteria;
-
-		if (strictFitness)
-		{
-			// No fitness for those below the criteria 
-			if (criteria < minCriteria)
-				// To flag that it has been scored, but is invalid.
-				score = -1;
-		}
-		else
-		{
-			// Make sure all individuals who pass the criteria are above those that do not.
-			// This will work unless we are scoring using the counts (i.e. scores that may exceed 1) 
-			if (criteria >= minCriteria)
-				score += 1;
-		}
-
-		return score;
+		return new SimpleFilterScore(scoreResult, true, scoreResult.criteria >= minCriteria);
 	}
 
 	/*
@@ -4891,7 +4881,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	public void shutdown()
 	{
 		// Report the score for the best filter
-		List<? extends Chromosome> individuals = ga_population.getIndividuals();
+		List<? extends Chromosome<FilterScore>> individuals = ga_population.getIndividuals();
 		ChromosomeComparator.sort(individuals);
 
 		DirectFilter filter = (DirectFilter) individuals.get(0);
@@ -4906,7 +4896,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 	private SimpleFilterScore es_optimum = null;
 
-	public SearchResult<SimpleFilterScore> findOptimum(double[][] points)
+	public SearchResult<FilterScore> findOptimum(double[][] points)
 	{
 		ga_iteration++;
 		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))),
@@ -4936,10 +4926,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		add(text, ga_iteration);
 		gaWindow.append(text.toString());
 
-		return new SearchResult<SimpleFilterScore>(filter.getParameters(), max);
+		return new SearchResult<FilterScore>(filter.getParameters(), max);
 	}
 
-	public SearchResult<SimpleFilterScore>[] score(double[][] points)
+	public SearchResult<FilterScore>[] score(double[][] points)
 	{
 		ga_iteration++;
 		final ScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))),
@@ -4950,7 +4940,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			return null;
 
 		@SuppressWarnings("unchecked")
-		SearchResult<SimpleFilterScore>[] scores = new SearchResult[scoreResults.length];
+		SearchResult<FilterScore>[] scores = new SearchResult[scoreResults.length];
 		for (int index = 0; index < scoreResults.length; index++)
 		{
 			final ScoreResult scoreResult = scoreResults[index];
@@ -4960,7 +4950,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			{
 				max = result;
 			}
-			scores[index] = new SearchResult<SimpleFilterScore>(result.r.filter.getParameters(), result);
+			scores[index] = new SearchResult<FilterScore>(result.r.filter.getParameters(), result);
 		}
 
 		es_optimum = max;
@@ -4983,14 +4973,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	 * @see gdsc.smlm.search.FullScoreFunction#cut(gdsc.smlm.search.SearchResult[], int)
 	 */
 	@SuppressWarnings("unchecked")
-	public SearchResult<SimpleFilterScore>[] cut(SearchResult<SimpleFilterScore>[] scores, int size)
+	public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size)
 	{
 		// Do a full sort and truncation
 		//return ScoreFunctionHelper.cut(scores, size);
 
 		// Split the list into those that pass the criteria and those that do not
-		SearchResult<SimpleFilterScore>[] passList = new SearchResult[scores.length];
-		SearchResult<SimpleFilterScore>[] failList = new SearchResult[scores.length];
+		SearchResult<FilterScore>[] passList = new SearchResult[scores.length];
+		SearchResult<FilterScore>[] failList = new SearchResult[scores.length];
 		int pass = 0;
 		int fail = 0;
 		for (int i = 0; i < scores.length; i++)
@@ -5015,7 +5005,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			if (passList[i].compareTo(passList[best]) < 0)
 				best = i;
 		}
-		final SearchResult<SimpleFilterScore> tmp = passList[best];
+		final SearchResult<FilterScore> tmp = passList[best];
 		passList[best] = passList[0];
 		passList[0] = tmp;
 
@@ -5504,15 +5494,5 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 			int origY = (int) p[Gaussian2DFunction.Y_POSITION];
 			results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	public int compare(Chromosome o1, Chromosome o2)
-	{
-		return SimpleFilterScore.compare((DirectFilter) o1, (DirectFilter) o2);
 	}
 }

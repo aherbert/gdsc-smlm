@@ -23,7 +23,7 @@ import gdsc.core.utils.Sort;
 /**
  * Recombine sequence by selecting random positions for crossover.
  */
-public class SimpleRecombiner extends Randomiser implements Recombiner
+public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implements Recombiner<T>
 {
 	final double fraction;
 	final double meanChildren;
@@ -53,21 +53,22 @@ public class SimpleRecombiner extends Randomiser implements Recombiner
 	 * <p>
 	 * The positions are then chosen randomly and the new chromosome generated.
 	 * 
-	 * @see gdsc.smlm.ga.Recombiner#cross(gdsc.smlm.ga.Chromosome, gdsc.smlm.ga.Chromosome)
+	 * @see gdsc.smlm.ga.Recombiner#cross(gdsc.smlm.ga.Chromosome<T>, gdsc.smlm.ga.Chromosome<T>)
 	 */
-	public Chromosome[] cross(Chromosome chromosome1, Chromosome chromosome2)
+	public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2)
 	{
 		int nChildren = 1;
 		if (meanChildren > 0)
 			nChildren = Math.max(1, (int) random.nextPoisson(meanChildren));
 
-		Chromosome[] children = new Chromosome[nChildren];
+		@SuppressWarnings("unchecked")
+		Chromosome<T>[] children = new Chromosome[nChildren];
 		int count = 0;
 		double[] s1 = chromosome1.sequence();
 		double[] s2 = chromosome2.sequence();
 		while (count < nChildren)
 		{
-			ChromosomePair pair = recombine(chromosome1, chromosome2, s1, s2);
+			ChromosomePair<T> pair = recombine(chromosome1, chromosome2, s1, s2);
 			children[count++] = pair.c1;
 			if (count == nChildren)
 				break;
@@ -77,7 +78,7 @@ public class SimpleRecombiner extends Randomiser implements Recombiner
 		return children;
 	}
 
-	private ChromosomePair recombine(Chromosome chromosome1, Chromosome chromosome2, double[] s1, double[] s2)
+	private ChromosomePair<T> recombine(Chromosome<T> chromosome1, Chromosome<T> chromosome2, double[] s1, double[] s2)
 	{
 		int nCrossovers = 1;
 		if (fraction > 0)
@@ -127,12 +128,12 @@ public class SimpleRecombiner extends Randomiser implements Recombiner
 
 		// Create the new chromosome using the correct parent, i.e.
 		// If the first swap position was at the start then reverse them.
-		Chromosome c1 = (positions[0] == 0) ? chromosome2 : chromosome1;
-		Chromosome c2 = (positions[0] == 0) ? chromosome1 : chromosome2;
+		Chromosome<T> c1 = (positions[0] == 0) ? chromosome2 : chromosome1;
+		Chromosome<T> c2 = (positions[0] == 0) ? chromosome1 : chromosome2;
 		c1 = c1.newChromosome(n1);
 		c2 = c2.newChromosome(n2);
 
 		// Ensure the child order is random
-		return (ran.nextDouble() < 0.5) ? new ChromosomePair(c1, c2) : new ChromosomePair(c2, c1);
+		return (ran.nextDouble() < 0.5) ? new ChromosomePair<T>(c1, c2) : new ChromosomePair<T>(c2, c1);
 	}
 }

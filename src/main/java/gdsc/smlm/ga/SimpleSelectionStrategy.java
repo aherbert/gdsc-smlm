@@ -1,7 +1,6 @@
 package gdsc.smlm.ga;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -24,13 +23,12 @@ import gdsc.core.logging.TrackProgress;
 /**
  * Selects the top individuals
  */
-public class SimpleSelectionStrategy extends Randomiser implements SelectionStrategy
+public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser implements SelectionStrategy<T>
 {
 	final double fraction;
 	final int max;
-	final Comparator<Chromosome> comparator;
 
-	private List<? extends Chromosome> individuals = null;
+	private List<? extends Chromosome<T>> individuals = null;
 	TrackProgress tracker = null;
 
 	/**
@@ -42,18 +40,14 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 *            The fraction of the individuals to select (set between 0 and 1)
 	 * @param max
 	 *            The maximum number of individuals to select
-	 * @param comparator
-	 *            the comparator
 	 */
-	public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max,
-			Comparator<Chromosome> comparator)
+	public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max)
 	{
 		super(random);
 		if (fraction > 1)
 			fraction = 1;
 		this.fraction = fraction;
 		this.max = max;
-		this.comparator = comparator;
 	}
 
 	/**
@@ -64,15 +58,16 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * @return the subset
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
 	 */
-	public List<? extends Chromosome> select(List<? extends Chromosome> individuals)
+	public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals)
 	{
 		if (individuals == null || individuals.size() < 2)
 			return individuals;
-		Chromosome[] subset = new Chromosome[individuals.size()];
+		@SuppressWarnings("unchecked")
+		Chromosome<T>[] subset = new Chromosome[individuals.size()];
 		int size = 0;
 		// Add only those with a fitness score
-		for (Chromosome c : individuals)
-			if (c.getFitness() > 0)
+		for (Chromosome<T> c : individuals)
+			if (c.getFitness() != null)
 			{
 				subset[size++] = c;
 			}
@@ -80,7 +75,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 			return Arrays.asList(Arrays.copyOf(subset, size));
 		if (tracker != null)
 			tracker.progress(0.5);
-		ChromosomeComparator.sort(subset, size, comparator);
+		Arrays.sort(subset, 0, size);
 		size = getSize(size);
 		if (tracker != null)
 			tracker.progress(1);
@@ -112,7 +107,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
 	 */
-	public void initialiseBreeding(List<? extends Chromosome> individuals)
+	public void initialiseBreeding(List<? extends Chromosome<T>> individuals)
 	{
 		if (individuals != null && individuals.size() < 2)
 			individuals = null;
@@ -124,7 +119,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#next()
 	 */
-	public ChromosomePair next()
+	public ChromosomePair<T> next()
 	{
 		if (individuals == null)
 			return null;
@@ -144,7 +139,7 @@ public class SimpleSelectionStrategy extends Randomiser implements SelectionStra
 			while (second == first)
 				second = random.nextInt(0, upper);
 		}
-		return new ChromosomePair(individuals.get(first), individuals.get(second));
+		return new ChromosomePair<T>(individuals.get(first), individuals.get(second));
 	}
 
 	/*

@@ -29,14 +29,14 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 /**
  * Filter a set of peak results into accepted/rejected.
  */
-public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneable
+public abstract class Filter implements Comparable<Filter>, Chromosome<FilterScore>, Cloneable
 {
 	@XStreamOmitField
 	private String name;
 	@XStreamOmitField
 	private String type;
 	@XStreamOmitField
-	private double fitness;
+	private FilterScore fitness;
 
 	/**
 	 * Generate the name of the filter using the filter settings
@@ -1507,7 +1507,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#newChromosome(double[])
 	 */
-	public Chromosome newChromosome(double[] sequence)
+	public Chromosome<FilterScore> newChromosome(double[] sequence)
 	{
 		return create(sequence);
 	}
@@ -1539,7 +1539,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#setFitness(double)
 	 */
-	public void setFitness(double fitness)
+	public void setFitness(FilterScore fitness)
 	{
 		this.fitness = fitness;
 	}
@@ -1549,7 +1549,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#getFitness()
 	 */
-	public double getFitness()
+	public FilterScore getFitness()
 	{
 		return fitness;
 	}
@@ -1560,7 +1560,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#distance(gdsc.smlm.ga.Chromosome)
 	 */
-	public double distance(Chromosome other)
+	public double distance(Chromosome<FilterScore> other)
 	{
 		// NOTE: If the distance is required for a certain type of analysis then this could be done
 		// using injection of an interface for calculating the distance.
@@ -1579,7 +1579,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome, Cloneabl
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#equals(gdsc.smlm.ga.Chromosome)
 	 */
-	public boolean equals(Chromosome other)
+	public boolean equals(Chromosome<FilterScore> other)
 	{
 		if (length() != other.length())
 			return false;

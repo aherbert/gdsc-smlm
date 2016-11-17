@@ -16,7 +16,7 @@ package gdsc.smlm.ga;
 /**
  * Defines mutation of a chromosome
  */
-public interface Mutator
+public interface Mutator<T extends Comparable<T>>
 {
 	/**
 	 * Mutate the provided chromosome
@@ -24,5 +24,5 @@ public interface Mutator
 	 * @param chromosome
 	 * @return a new sequence
 	 */
-	Chromosome mutate(Chromosome chromosome);
+	Chromosome<T> mutate(Chromosome<T> chromosome);
 }

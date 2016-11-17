@@ -422,7 +422,7 @@ public abstract class HysteresisFilter extends Filter
 	 * @see gdsc.smlm.results.filter.Filter#newChromosome(double[])
 	 */
 	@Override
-	public Chromosome newChromosome(double[] sequence)
+	public Chromosome<FilterScore> newChromosome(double[] sequence)
 	{
 		// Hysteresis filters remove their search and time mode parameters in their Chromosome sequence
 		// so add it back

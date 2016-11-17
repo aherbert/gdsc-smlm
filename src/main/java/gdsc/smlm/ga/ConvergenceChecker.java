@@ -16,7 +16,7 @@ package gdsc.smlm.ga;
 /**
  * Defines convergence of a chromosome
  */
-public interface ConvergenceChecker
+public interface ConvergenceChecker<T extends Comparable<T>>
 {
 	/**
 	 * Check if the chromosome has converged
@@ -25,5 +25,5 @@ public interface ConvergenceChecker
 	 * @param current
 	 * @return true if the chromosome has converged
 	 */
-	boolean converged(Chromosome previous, Chromosome current);
+	boolean converged(Chromosome<T> previous, Chromosome<T> current);
 }

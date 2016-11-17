@@ -1,7 +1,7 @@
 package gdsc.smlm.ga;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -24,9 +24,10 @@ import org.apache.commons.math3.random.RandomDataGenerator;
  * Selection of breeding couples is uniform from the top n (n is incremented from 1 each selection) crossed with a
  * sample from the entire population using a linear ramped weighting.
  */
-public class RampedSelectionStrategy extends SimpleSelectionStrategy implements SelectionStrategy
+public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSelectionStrategy<T>
+		implements SelectionStrategy<T>
 {
-	private List<? extends Chromosome> sorted = null;
+	private List<? extends Chromosome<T>> sorted = null;
 	private int n;
 	private long[] sum;
 	private long upper;
@@ -40,13 +41,10 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 	 *            The fraction of the individuals to select (set between 0 and 1)
 	 * @param max
 	 *            The maximum number of individuals to select
-	 * @param comparator
-	 *            the comparator
 	 */
-	public RampedSelectionStrategy(RandomDataGenerator random, double fraction, int max,
-			Comparator<Chromosome> comparator)
+	public RampedSelectionStrategy(RandomDataGenerator random, double fraction, int max)
 	{
-		super(random, fraction, max, comparator);
+		super(random, fraction, max);
 	}
 
 	/**
@@ -58,15 +56,15 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
 	 */
 	@Override
-	public List<? extends Chromosome> select(List<? extends Chromosome> individuals)
+	public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals)
 	{
 		if (individuals == null || individuals.size() < 3)
 			return individuals;
 
-		ArrayList<Chromosome> sorted = new ArrayList<Chromosome>(individuals.size());
+		ArrayList<Chromosome<T>> sorted = new ArrayList<Chromosome<T>>(individuals.size());
 		// Add only those with a fitness score
-		for (Chromosome c : individuals)
-			if (c.getFitness() > 0)
+		for (Chromosome<T> c : individuals)
+			if (c.getFitness() != null)
 				sorted.add(c);
 		if (sorted.size() < 3)
 			return sorted;
@@ -77,10 +75,10 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 			tracker.progress(0);
 
 		// Sort the list
-		ChromosomeComparator.sort(sorted, comparator);
+		ChromosomeComparator.sort(sorted);
 
 		// Create the output subset
-		ArrayList<Chromosome> subset = new ArrayList<Chromosome>(size);
+		ArrayList<Chromosome<T>> subset = new ArrayList<Chromosome<T>>(size);
 
 		// Get the number of point available for selection:
 		// n in this case is (size-1) since we include the top ranking individual.
@@ -142,26 +140,88 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 	 * @see gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
 	 */
 	@Override
-	public void initialiseBreeding(List<? extends Chromosome> individuals)
+	public void initialiseBreeding(List<? extends Chromosome<T>> individuals)
 	{
+		sorted = null;
 		if (individuals != null && individuals.size() < 2)
 		{
-			individuals = null;
 			return;
 		}
-		this.sorted = new ArrayList<Chromosome>(individuals);
-		ChromosomeComparator.sort(this.sorted, comparator);
-		n = 0;
 
-		// Build a cumulative array of rank weighting. The highest ranked starts at n.
-		sum = new long[sorted.size()];
-		int rank = sorted.size();
-		sum[0] = rank--;
-		for (int i = 1; i < sum.length; i++)
-			sum[i] = rank-- + sum[i - 1];
+		// This method may be called when fitness is unknown. 
+		// Only sort those with a fitness score.
+		ArrayList<Chromosome<T>> list = null;
+		int count = 0;
+		for (Chromosome<T> c : individuals)
+			if (c.getFitness() == null)
+				count++;
+
+		if (count != 0)
+		{
+			int toSort = individuals.size() - count;
+			if (toSort == 0)
+			{
+				// No sort possible. Revert to the simple selection strategy
+				super.initialiseBreeding(individuals);
+				return;
+			}
+			else
+			{
+				// A mixed population, some of which we can sort and some we cannot.
+				list = new ArrayList<Chromosome<T>>(toSort);
+				ArrayList<Chromosome<T>> subset = new ArrayList<Chromosome<T>>(count);
+				for (Chromosome<T> c : individuals)
+				{
+					if (c.getFitness() == null)
+						subset.add(c);
+					else
+						list.add(c);
+				}
+
+				ChromosomeComparator.sort(list);
+
+				// Create a ramped sum for all those we can sort
+				sum = createSum(list.size());
+				// Extend the sum linearly for those we cannot sort (i.e. they have the same selection chance)
+				sum = extendSum(sum, subset.size());
+
+				list.addAll(subset);
+			}
+		}
+		else
+		{
+			list = new ArrayList<Chromosome<T>>(individuals);
+			ChromosomeComparator.sort(list);
+
+			// Build a cumulative array of rank weighting. The highest ranked starts at n.
+			sum = createSum(list.size());
+		}
+
+		this.sorted = list;
+
+		n = 0;
 
 		// Bounds are inclusive so subtract 1
 		upper = sum[sum.length - 1] - 1;
+	}
+
+	public static long[] createSum(int size)
+	{
+		long[] sum = new long[size];
+		int rank = size;
+		sum[0] = rank--;
+		for (int i = 1; i < sum.length; i++)
+			sum[i] = rank-- + sum[i - 1];
+		return sum;
+	}
+
+	public static long[] extendSum(long[] sum, int size)
+	{
+		long[] sum2 = Arrays.copyOf(sum, sum.length + size);
+		long s = sum[sum.length - 1];
+		for (int i = sum.length; i < sum2.length; i++)
+			sum2[i] = ++s;
+		return sum2;
 	}
 
 	/**
@@ -172,10 +232,10 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 	 * @see gdsc.smlm.ga.SelectionStrategy#next()
 	 */
 	@Override
-	public ChromosomePair next()
+	public ChromosomePair<T> next()
 	{
 		if (sorted == null)
-			return null;
+			return super.next();
 		int first, second;
 		if (sorted.size() == 2)
 		{
@@ -204,16 +264,75 @@ public class RampedSelectionStrategy extends SimpleSelectionStrategy implements 
 				second = nextSample();
 		}
 		//System.out.printf("Next [%d] %d x %d\n", n, first, second);
-		return new ChromosomePair(sorted.get(first), sorted.get(second));
+		return new ChromosomePair<T>(sorted.get(first), sorted.get(second));
 	}
 
 	private int nextSample()
 	{
 		final long next = random.nextLong(0, upper);
+		// JUnit test shows that the simple scan through the array is faster for small arrays
+		if (sum.length < 100)
+			return search(sum, next);
+		else
+			return binarySearch(sum, next);
+	}
+
+	/**
+	 * Find the index such that sum[index-1] <= key < sum[index]
+	 * 
+	 * @param sum
+	 * @param p
+	 * @return the index (or -1)
+	 */
+	public static int search(final long[] sum, final long key)
+	{
 		for (int i = 0; i < sum.length; i++)
-			if (next < sum[i])
+			if (key < sum[i])
 				return i;
 		return 0; // This should not happen
+	}
+
+	/**
+	 * Find the index such that sum[index-1] <= key < sum[index]
+	 * 
+	 * @param sum
+	 * @param p
+	 * @return the index (or -1)
+	 */
+	public static int binarySearch(final long[] sum, final long key)
+	{
+		if (key < sum[0])
+			return 0;
+
+		// Adapted from Arrays.binarySearch which 
+		// finds the actual key value or returns a negative insertion point:
+
+		// If we find the actual key return the next index above.
+		// If we do not find the actual key return the insertion point
+
+		int low = 0;
+		int high = sum.length - 1;
+
+		while (low <= high)
+		{
+			int mid = (low + high) >>> 1;
+			long midVal = sum[mid];
+
+			if (midVal < key)
+				low = mid + 1;
+			else if (midVal > key)
+				high = mid - 1;
+			else
+				// Changed from Arrays.binarySearch 
+				//return mid; // key found
+				// If we find the actual key return the next index above.
+				return mid + 1;
+		}
+
+		// Changed from Arrays.binarySearch 
+		//return -(low + 1);  // key not found.
+		// If we do not find the actual key return the insertion point
+		return low;
 	}
 
 	/*

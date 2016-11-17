@@ -1,10 +1,9 @@
 package gdsc.smlm.ga;
 
-import gdsc.core.logging.TrackProgress;
-
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+
+import gdsc.core.logging.TrackProgress;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -28,15 +27,14 @@ import java.util.List;
  * An extension would be to have an Individual class that has many Chromosomes, each is allowed to crossover with its
  * matching pair and then segregation occurs to new individuals.
  */
-public class Population
+public class Population<T extends Comparable<T>>
 {
-	private List<? extends Chromosome> individuals;
+	private List<? extends Chromosome<T>> individuals;
 	private int populationSize = 500;
 	private int failureLimit = 3;
 	private int iteration = 0;
 	// This introduces a dependency on another gdsc.smlm package
 	private TrackProgress tracker = null;
-	private Comparator<Chromosome> comparator = null;
 
 	/**
 	 * Create a population of individuals
@@ -46,7 +44,7 @@ public class Population
 	 * @throws InvalidPopulationSize
 	 *             if the population is less than 2
 	 */
-	public Population(List<? extends Chromosome> individuals)
+	public Population(List<? extends Chromosome<T>> individuals)
 	{
 		if (individuals == null)
 			throw new InvalidPopulationSize(0, 1);
@@ -63,7 +61,7 @@ public class Population
 	/**
 	 * @return the individuals
 	 */
-	public List<? extends Chromosome> getIndividuals()
+	public List<? extends Chromosome<T>> getIndividuals()
 	{
 		return individuals;
 	}
@@ -74,7 +72,7 @@ public class Population
 	 * The population will grow until the desired population size by recombination of individual pairs chosen from the
 	 * population by the selection strategy. Child sequences will be subject to mutation. The fitness of all the
 	 * individuals in the new population is evaluated and convergence checked for the fittest individual. If the initial
-	 * population is small (<2 or <Chromosome.length()) then mutation will be used to expand it before recombination.
+	 * population is small (<2 or <Chromosome<T>.length()) then mutation will be used to expand it before recombination.
 	 * <p>
 	 * The process of grow, evaluate, select is repeated until convergence.
 	 * <p>
@@ -88,17 +86,17 @@ public class Population
 	 *             if the population is less than 2 (this can occur after selection)
 	 * @return The best individual
 	 */
-	public Chromosome evolve(Mutator mutator, Recombiner recombiner, FitnessFunction fitnessFunction,
-			SelectionStrategy selectionStrategy, ConvergenceChecker checker)
+	public Chromosome<T> evolve(Mutator<T> mutator, Recombiner<T> recombiner, FitnessFunction<T> fitnessFunction,
+			SelectionStrategy<T> selectionStrategy, ConvergenceChecker<T> checker)
 	{
 		// Reset the fitness
-		for (Chromosome c : individuals)
-			c.setFitness(0);
+		for (Chromosome<T> c : individuals)
+			c.setFitness(null);
 
 		// Find the best individual
 		grow(selectionStrategy, mutator, recombiner);
-		Chromosome current = evaluateFitness(fitnessFunction);
-		Chromosome previous;
+		Chromosome<T> current = evaluateFitness(fitnessFunction);
+		Chromosome<T> previous;
 
 		boolean converged = false;
 		while (!converged)
@@ -120,7 +118,7 @@ public class Population
 		return current;
 	}
 
-	private void grow(SelectionStrategy selectionStrategy, Mutator mutator, Recombiner recombiner)
+	private void grow(SelectionStrategy<T> selectionStrategy, Mutator<T> mutator, Recombiner<T> recombiner)
 	{
 		iteration++;
 		start("Grow");
@@ -128,7 +126,7 @@ public class Population
 		if (individuals.size() >= populationSize)
 			return;
 
-		ArrayList<Chromosome> newIndividuals = new ArrayList<Chromosome>(populationSize - individuals.size());
+		ArrayList<Chromosome<T>> newIndividuals = new ArrayList<Chromosome<T>>(populationSize - individuals.size());
 
 		// Check for a minimum population size & mutate the individuals to achieve it.
 		// This allows a seed population of 1 to evolve.
@@ -143,7 +141,7 @@ public class Population
 			int fails = 0;
 			while (newIndividuals.size() < target && fails < failureLimit)
 			{
-				Chromosome c = mutator.mutate(individuals.get(next++ % individuals.size()));
+				Chromosome<T> c = mutator.mutate(individuals.get(next++ % individuals.size()));
 				if (c != null && !isDuplicate(newIndividuals, c))
 				{
 					newIndividuals.add(c);
@@ -178,14 +176,14 @@ public class Population
 			previousSize = newIndividuals.size();
 
 			// Select two individuals for recombination
-			ChromosomePair pair = selectionStrategy.next();
-			Chromosome[] children = recombiner.cross(pair.c1, pair.c2);
+			ChromosomePair<T> pair = selectionStrategy.next();
+			Chromosome<T>[] children = recombiner.cross(pair.c1, pair.c2);
 			if (children != null && children.length != 0)
 			{
 				// New children have been generated so mutate them
 				for (int i = 0; i < children.length && newIndividuals.size() < target; i++)
 				{
-					Chromosome c = mutator.mutate(children[i]);
+					Chromosome<T> c = mutator.mutate(children[i]);
 					if (c == null)
 						continue;
 
@@ -224,13 +222,13 @@ public class Population
 	 *            The chromosome
 	 * @return true if a duplicate
 	 */
-	private boolean isDuplicate(ArrayList<? extends Chromosome> newIndividuals, Chromosome c)
+	private boolean isDuplicate(ArrayList<? extends Chromosome<T>> newIndividuals, Chromosome<T> c)
 	{
 		final double[] s = c.sequence();
-		for (Chromosome i : this.individuals)
+		for (Chromosome<T> i : this.individuals)
 			if (match(i, s))
 				return true;
-		for (Chromosome i : newIndividuals)
+		for (Chromosome<T> i : newIndividuals)
 			if (match(i, s))
 				return true;
 		return false;
@@ -245,7 +243,7 @@ public class Population
 	 *            The sequence
 	 * @return True if a match
 	 */
-	private boolean match(Chromosome c, double[] s)
+	private boolean match(Chromosome<T> c, double[] s)
 	{
 		final double[] s2 = c.sequence();
 		for (int i = 0; i < s.length; i++)
@@ -260,20 +258,20 @@ public class Population
 	 * @param fitnessFunction
 	 * @return The fittest individual
 	 */
-	private Chromosome evaluateFitness(FitnessFunction fitnessFunction)
+	private Chromosome<T> evaluateFitness(FitnessFunction<T> fitnessFunction)
 	{
 		start("Score");
 
-		Chromosome best = null;
-		double max = Double.NEGATIVE_INFINITY;
+		Chromosome<T> best = null;
+		T max = null;
 
 		// Subset only those with no fitness score (the others must be unchanged)
-		ArrayList<Chromosome> subset = new ArrayList<Chromosome>(individuals.size());
+		ArrayList<Chromosome<T>> subset = new ArrayList<Chromosome<T>>(individuals.size());
 		long count = 0;
-		for (Chromosome c : individuals)
+		for (Chromosome<T> c : individuals)
 		{
-			final double f = c.getFitness();
-			if (f == 0)
+			final T f = c.getFitness();
+			if (f == null)
 			{
 				subset.add(c);
 			}
@@ -281,7 +279,7 @@ public class Population
 			{
 				if (tracker != null)
 					tracker.progress(++count, individuals.size());
-				if (max < f)
+				if (f.compareTo(max) < 0)
 				{
 					max = f;
 					best = c;
@@ -290,22 +288,14 @@ public class Population
 		}
 
 		fitnessFunction.initialise(subset);
-		for (Chromosome c : subset)
+		for (Chromosome<T> c : subset)
 		{
-			final double f = fitnessFunction.fitness(c);
+			final T f = fitnessFunction.fitness(c);
 			c.setFitness(f);
-			if (max < f)
+			if (f.compareTo(max) < 0)
 			{
 				max = f;
 				best = c;
-			}
-			else if (max == f && comparator != null)
-			{
-				// Use an optional chromosome comparator
-				if (comparator.compare(c, best) < 0)
-				{
-					best = c;
-				}
 			}
 			if (tracker != null)
 				tracker.progress(++count, individuals.size());
@@ -324,7 +314,7 @@ public class Population
 	 *            The selection strategy
 	 * @return True if a valid population was selected (size>=1)
 	 */
-	private boolean select(SelectionStrategy selection)
+	private boolean select(SelectionStrategy<T> selection)
 	{
 		start("Select");
 		individuals = selection.select(individuals);
@@ -418,26 +408,5 @@ public class Population
 	{
 		if (tracker != null)
 			tracker.progress(1);
-	}
-
-	/**
-	 * Gets the comparator used when choosing individuals with equal fitness.
-	 *
-	 * @return the comparator
-	 */
-	public Comparator<Chromosome> getComparator()
-	{
-		return comparator;
-	}
-
-	/**
-	 * Sets the comparator used when choosing individuals with equal fitness.
-	 *
-	 * @param comparator
-	 *            the new comparator
-	 */
-	public void setComparator(Comparator<Chromosome> comparator)
-	{
-		this.comparator = comparator;
 	}
 }

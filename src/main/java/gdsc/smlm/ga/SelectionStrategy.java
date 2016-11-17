@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * Defines a selection strategy of a population of individuals
  */
-public interface SelectionStrategy
+public interface SelectionStrategy<T extends Comparable<T>>
 {
 	/**
 	 * Select a subset from the population using the fitness
@@ -28,7 +28,7 @@ public interface SelectionStrategy
 	 * @param individuals
 	 * @return a selection of individuals
 	 */
-	List<? extends Chromosome> select(List<? extends Chromosome> individuals);
+	List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals);
 
 	/**
 	 * Initialise the selection of pairs for breeding using the fitness
@@ -36,14 +36,14 @@ public interface SelectionStrategy
 	 * @param individuals
 	 *            the population of individuals
 	 */
-	void initialiseBreeding(List<? extends Chromosome> individuals);
+	void initialiseBreeding(List<? extends Chromosome<T>> individuals);
 
 	/**
 	 * Get the next pair of individuals for breeding. Must be called after {@link #initialiseBreeding(List)}.
 	 * 
 	 * @return The next pair
 	 */
-	ChromosomePair next();
+	ChromosomePair<T> next();
 
 	/**
 	 * Finish selection of pairs for breeding
