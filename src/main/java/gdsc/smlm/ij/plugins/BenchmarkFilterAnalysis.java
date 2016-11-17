@@ -5000,6 +5000,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		int fail = 0;
 		for (int i = 0; i < scores.length; i++)
 		{
+			// Ignore this
+			if (scores[i].score.score == 0)
+				continue;
 			if (scores[i].score.criteriaPassed)
 				passList[pass++] = scores[i];
 			else
@@ -5014,17 +5017,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		Arrays.sort(failList, 0, fail);
 
 		// Find the top score and put it first.
-		int best = 0;
-		for (int i = 1; i < pass; i++)
+		if (pass != 0)
 		{
-			if (passList[i].compareTo(passList[best]) < 0)
-				best = i;
+			int best = 0;
+			for (int i = 1; i < pass; i++)
+			{
+				if (passList[i].compareTo(passList[best]) < 0)
+					best = i;
+			}
+			final SearchResult<FilterScore> tmp = passList[best];
+			passList[best] = passList[0];
+			passList[0] = tmp;
 		}
-		final SearchResult<FilterScore> tmp = passList[best];
-		passList[best] = passList[0];
-		passList[0] = tmp;
 
-		// Combine the lists
+		// Combine the lists. Account for removing zero scores (i.e. pass+fail<=size)
+		size = Math.min(size, pass + fail);
 		System.arraycopy(failList, 0, passList, pass, size - pass);
 
 		return Arrays.copyOf(passList, size);
