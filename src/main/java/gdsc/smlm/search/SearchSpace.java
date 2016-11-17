@@ -90,6 +90,9 @@ public class SearchSpace
 	 * only those points that have not yet been evaluated will be passed to the score function. If not at the bounds
 	 * then the range is re-centred and the width of the range reduced.
 	 * <p>
+	 * If a seed population was provided then the first step is to re-centre to the optimum of the seed population and
+	 * the range refined/reduced as per the refinement mode parameter.
+	 * <p>
 	 * The process iterates until the range cannot be reduced in size, or convergence is reached. The input dimensions
 	 * are modified during the search. Use the clone(SearchDimension[]) method to create a copy.
 	 *
@@ -195,7 +198,7 @@ public class SearchSpace
 	 *            the score function
 	 * @return the new optimum
 	 */
-	private <T extends Comparable<T>> SearchResult<T> findSeedOptimum(Dimension[] dimensions,
+	private <T extends Comparable<T>> SearchResult<T> findSeedOptimum(SearchDimension[] dimensions,
 			ScoreFunction<T> scoreFunction)
 	{
 		if (!seedToSearchSpace(dimensions))
@@ -207,6 +210,16 @@ public class SearchSpace
 		scoredSearchSpaceHash.clear();
 
 		SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
+
+		// Re-centre on the seed
+		if (optimum != null)
+		{
+			final double[] p = optimum.point;
+			for (int i = 0; i < dimensions.length; i++)
+			{
+				dimensions[i].setCentre(p[i]);
+			}
+		}
 
 		end();
 		return optimum;

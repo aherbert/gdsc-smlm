@@ -202,6 +202,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 	private static int maxIterations = 30;
 	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 5000;
+	private static int seedSize = 0;
 	private static double enrichmentFraction = 0.3;
 	private static double enrichmentPadding = 0.1;
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
@@ -2582,7 +2583,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 				String[] modes = SettingsManager.getNames((Object[]) SearchSpace.RefinementMode.values());
 				gd.addSlider(prefix + "Reduce", 0.01, 0.99, rangeSearchReduce);
 				gd.addChoice("Refinement", modes, modes[refinementMode]);
+				
 			}
+			gd.addNumericField(prefix + "Seed_size", seedSize, 0);
 
 			// Add choice of fields to optimise
 			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
@@ -2622,6 +2625,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 					rangeSearchReduce = gd.getNextNumber();
 					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
 				}
+				seedSize = (int) gd.getNextNumber();
 
 				SearchDimension[] dimensions = new SearchDimension[n];
 				for (int i = 0; i < n; i++)
@@ -2682,6 +2686,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
 					SearchSpace ss = new SearchSpace();
 					ss.setTracker(this);
+					if (seedSize > 0)
+					{
+						double[][] sample = SearchSpace.sample(dimensions, seedSize, null);
+						if (seed==null)
+							seed = sample;
+						else
+						{
+							// Merge
+							ArrayList<double[]> merged = new ArrayList<double[]>(sample.length+seed.length);
+							merged.addAll(Arrays.asList(seed));
+							merged.addAll(Arrays.asList(sample));
+							seed = merged.toArray(new double[merged.size()][]);
+						}
+					}					
 					ss.seed(seed);
 					ConvergenceChecker<SimpleFilterScore> checker = new InterruptConvergenceChecker(0, 0,
 							maxIterations);
@@ -4234,7 +4252,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			return atLimit[i];
 		}
-		
+
 		public String atLimitString(int i)
 		{
 			switch (atLimit[i])
@@ -4257,7 +4275,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 		{
 			return atLimit;
 		}
-		
+
 		public String atLimitString()
 		{
 			StringBuilder sb = new StringBuilder();
