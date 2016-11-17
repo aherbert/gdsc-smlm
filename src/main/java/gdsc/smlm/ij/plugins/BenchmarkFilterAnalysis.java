@@ -67,7 +67,6 @@ import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ga.Chromosome;
-import gdsc.smlm.ga.ChromosomeComparator;
 import gdsc.smlm.ga.FitnessFunction;
 import gdsc.smlm.ga.Population;
 import gdsc.smlm.ga.RampedSelectionStrategy;
@@ -4869,7 +4868,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Assume that fitness will be called in the order of the individuals passed to the initialise function.
 		final ScoreResult scoreResult = ga_scoreResults[ga_scoreIndex++];
-		
+
 		// Set this to null and it will be removed at the next population selection
 		if (scoreResult.score == 0)
 			return null;
@@ -4886,9 +4885,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		// Report the score for the best filter
 		List<? extends Chromosome<FilterScore>> individuals = ga_population.getIndividuals();
-		ChromosomeComparator.sort(individuals);
 
-		DirectFilter filter = (DirectFilter) individuals.get(0);
+		FilterScore max = null;
+		for (Chromosome<FilterScore> c : individuals)
+		{
+			final FilterScore f = c.getFitness();
+			if (f != null && f.compareTo(max) < 0)
+			{
+				max = f;
+			}
+		}
+
+		if (max == null)
+			return;
+
+		DirectFilter filter = (DirectFilter) ((SimpleFilterScore) max).filter;
 
 		// This filter may not have been part of the scored subset so use the entire results set for reporting
 		FractionClassificationResult r = scoreFilter(filter, minimalFilter, ga_resultsList);
