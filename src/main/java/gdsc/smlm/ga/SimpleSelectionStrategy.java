@@ -52,7 +52,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 
 	/**
 	 * Select the top individuals using the configured fraction. The resulting subset will be at least size 2 (unless
-	 * the input is smaller or there are not enough valid individuals (fitness above zero)).
+	 * the input is smaller or there are not enough valid individuals (fitness not null)).
 	 * 
 	 * @param individuals
 	 * @return the subset
@@ -75,7 +75,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 			return Arrays.asList(Arrays.copyOf(subset, size));
 		if (tracker != null)
 			tracker.progress(0.5);
-		Arrays.sort(subset, 0, size);
+		ChromosomeComparator.sort(subset, 0, size);
 		size = getSize(size);
 		if (tracker != null)
 			tracker.progress(1);
