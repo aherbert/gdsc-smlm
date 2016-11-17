@@ -76,7 +76,10 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 		if (tracker != null)
 			tracker.progress(0.5);
 		ChromosomeComparator.sort(subset, 0, size);
-		size = getSize(size);
+		
+		// Get the fraction relative to the input list size
+		//size = getSize(size);
+		size = Math.min(size, getSize(individuals.size()));
 		if (tracker != null)
 			tracker.progress(1);
 		return Arrays.asList(Arrays.copyOf(subset, size));

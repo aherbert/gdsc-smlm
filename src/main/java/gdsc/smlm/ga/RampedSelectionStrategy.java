@@ -49,7 +49,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
 	/**
 	 * Select the top individual and then the rest using a probability set by their rank. The resulting subset will be
-	 * at least size 2 (unless the input is smaller or there are not enough valid individuals (fitness above zero)).
+	 * at least size 2 (unless the input is smaller or there are not enough valid individuals (fitness not null)).
 	 * 
 	 * @param individuals
 	 * @return the subset
@@ -69,7 +69,9 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		if (sorted.size() < 3)
 			return sorted;
 
-		final int size = getSize(sorted.size());
+		// Get the fraction relative to the input list size
+		//final int size = getSize(sorted.size());
+		final int size = getSize(individuals.size());
 
 		if (tracker != null)
 			tracker.progress(0);
