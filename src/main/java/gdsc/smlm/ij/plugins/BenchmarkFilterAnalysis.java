@@ -1255,8 +1255,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
-			limitRange = ", d=" +
-					Utils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
+			limitRange = ", d=" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
 
 			// Signal factor must be greater than 1
@@ -1654,7 +1653,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			resultsPrefix2 += "-" + (failCount + failCountRange);
 			limitFailCount += "-" + (failCount + failCountRange);
 		}
-		limitFailCount += ", r=" + Utils.rounded(residualsThreshold);		
+		limitFailCount += ", r=" + Utils.rounded(residualsThreshold);
 		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
 	}
 
@@ -1788,8 +1787,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				sb.append(Utils.rounded(sf / scored)).append('\t');
 				sb.append(Utils.rounded(Math.sqrt(rmsd / scored))).append('\t');
 				sb.append(Utils.rounded(slope)).append('\t');
-				//if (fs.isAtLimit())
-				sb.append(fs.atLimit());
+				if (fs.atLimit() != null)
+					sb.append(fs.atLimit());
 
 				String text = sb.toString();
 				if (topFilterSummary == null)
@@ -2099,7 +2098,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			sb.append('\t').append(names[index]);
 			sb.append('\t').append(Utils.rounded(filterScore.getFilter().getParameterValue(index)));
 			sb.append('\t');
-			sb.append(bestFilterScore.atLimit(index));
+			if (bestFilterScore.atLimit != null)
+				sb.append(bestFilterScore.atLimit(index));
 		}
 		else
 		{

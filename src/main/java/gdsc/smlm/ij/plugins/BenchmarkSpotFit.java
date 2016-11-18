@@ -37,6 +37,7 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.OutOfRangeException;
@@ -1025,12 +1026,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			{
 				FitConfiguration tmpFitConfig = new FitConfiguration();
 				FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+				tmpFitConfig.setComputeResiduals(true); // Collect the residuals threshold
 				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 				{
 					textFailLimit.setText("" + tmp.getFailuresLimit());
 					cbIncludeNeighbours.setState(tmp.isIncludeNeighbours());
 					textNeighbourHeight.setText(Utils.rounded(tmp.getNeighbourHeightThreshold()));
-					cbComputeDoublets.setState(tmpFitConfig.isComputeResiduals());
+					cbComputeDoublets.setState(tmp.getResidualsThreshold() < 1);
 
 					final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
 					final double residualsThreshold = tmp.getResidualsThreshold();
@@ -1070,16 +1072,18 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		boolean myComputeDoublets = gd.getNextBoolean();
 
 		MultiPathFilter myMultiFilter = null;
-		if (myUseBenchmarkSettings)
+		if (myUseBenchmarkSettings && !Utils.isShowGenericDialog())
 		{
+			// Only copy the benchmark settings if not interactive
 			FitConfiguration tmpFitConfig = new FitConfiguration();
 			FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+			tmpFitConfig.setComputeResiduals(true); // Collect the residuals threshold
 			if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 			{
 				config.setFailuresLimit(tmp.getFailuresLimit());
 				config.setIncludeNeighbours(tmp.isIncludeNeighbours());
 				config.setNeighbourHeightThreshold(tmp.getNeighbourHeightThreshold());
-				computeDoublets = tmpFitConfig.isComputeResiduals();
+				computeDoublets = (tmp.getResidualsThreshold() < 1);
 
 				final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
 				final double residualsThreshold = tmp.getResidualsThreshold();
@@ -1229,8 +1233,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			lastNegativesAfterAllPositives = negativesAfterAllPositives;
 		}
 
+		StopWatch stopWatch = StopWatch.createStarted();
 		final ImageStack stack = imp.getImageStack();
-
+		
 		// Clear old results to free memory
 		if (fitResults != null)
 			fitResults.clear();
@@ -1294,6 +1299,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			return;
 		}
 
+		final String timeString = stopWatch.toString();
+		IJ.log("Spot fit time : " + timeString);
+		
 		IJ.showStatus("Collecting results ...");
 
 		fitResultsId++;
@@ -1331,7 +1339,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 
 		summariseResults(fitResults, runTime, preprocessedPeakResults);
-
+		
 		IJ.showStatus("");
 	}
 
@@ -2708,12 +2716,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			{
 				FitConfiguration tmpFitConfig = new FitConfiguration();
 				FitEngineConfiguration tmp = new FitEngineConfiguration(tmpFitConfig);
+				tmpFitConfig.setComputeResiduals(true); // Collect residuals threshold
 				if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false))
 				{
 					failLimit = tmp.getFailuresLimit();
 					includeNeighbours = tmp.isIncludeNeighbours();
 					neighbourHeightThrehsold = tmp.getNeighbourHeightThreshold();
-					computeDoublets = tmpFitConfig.isComputeResiduals();
+					computeDoublets = tmp.getResidualsThreshold() < 1;
 
 					final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
 					final double residualsThreshold = tmp.getResidualsThreshold();
