@@ -283,9 +283,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		if (type == null || array == null || filterCriteria == null)
 			return defaultValue;
+		
+		// Assume these are roughly the same
+		if (type == ParameterType.PRECISION2)
+			type = ParameterType.PRECISION;
+		
 		for (int j = 0; j < filterCriteria.length; j++)
 			if (filterCriteria[j].type == type)
 				return array[j];
+		
+		// All other types will have a default value
 		return defaultValue;
 	}
 

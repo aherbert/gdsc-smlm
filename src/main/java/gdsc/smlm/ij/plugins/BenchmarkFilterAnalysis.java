@@ -94,6 +94,7 @@ import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.ParameterType;
 import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.ResultAssignment;
@@ -2253,9 +2254,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 					double lower = lowerF.getParameterValue(i);
 					double upper = upperF.getParameterValue(i);
-					String name = ss_filter.getParameterName(i);
-					double min = BenchmarkSpotFit.getMin(name);
-					double max = BenchmarkSpotFit.getMax(name);
+					ParameterType type = ss_filter.getParameterType(i);
+					double min = BenchmarkSpotFit.getMin(type);
+					double max = BenchmarkSpotFit.getMax(type);
 					double minIncrement = ss_filter.getParameterIncrement(i);
 					try
 					{
@@ -2307,9 +2308,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						originalDimensions[i] = new FixedDimension(lower[i]);
 						continue;
 					}
-					String name = ss_filter.getParameterName(i);
-					double min = BenchmarkSpotFit.getMin(name);
-					double max = BenchmarkSpotFit.getMax(name);
+					ParameterType type = ss_filter.getParameterType(i);
+					double min = BenchmarkSpotFit.getMin(type);
+					double max = BenchmarkSpotFit.getMax(type);
 					double minIncrement = ss_filter.getParameterIncrement(i);
 					if (min > lower[i])
 						min = lower[i];
