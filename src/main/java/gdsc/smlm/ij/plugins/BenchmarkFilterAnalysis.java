@@ -2505,50 +2505,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// In case optimisation was stopped
 					IJ.resetEscape();
 
-					// Enumerate on the min interval to produce the final filter
-					ss_filter = (DirectFilter) best;
-					SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
-					for (int i = 0; i < indices.length; i++)
-					{
-						int j = indices[i];
-						if (stepSize[j] != 0)
-						{
-							double minIncrement = ss_filter.getParameterIncrement(j);
-							try
-							{
-								double value = ss_filter.getParameterValue(j);
-								double max = Maths.ceil(value, minIncrement);
-								double min = Maths.floor(value, minIncrement);
-								dimensions2[i] = new SearchDimension(min, max, minIncrement, 1);
-								dimensions2[i].setCentre(value);
-								dimensions2[i].setIncrement(minIncrement);
-							}
-							catch (IllegalArgumentException e)
-							{
-								IJ.error(TITLE,
-										String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), j,
-												ss_filter.getParameterName(j)));
-								dimensions2 = null;
-								break;
-							}
-						}
-					}
-					if (dimensions2 != null)
-					{
-						// Add dimensions that have been missed
-						for (int i = 0; i < dimensions2.length; i++)
-							if (dimensions2[i] == null)
-								dimensions2[i] = new SearchDimension(ss_filter.getParameterValue(i));
-
-						SearchSpace ss = new SearchSpace();
-						ss.setTracker(this);
-						SearchResult<FilterScore> optimum = ss.findOptimum(dimensions2, this);
-
-						if (optimum != null)
-						{
-							best = ((SimpleFilterScore) optimum.score).r.filter;
-						}
-					}
+					best = enumerateMinInterval(best, stepSize, indices);
 
 					// Now update the filter set for final assessment
 					filterSet = new FilterSet(filterSet.getName(), populationToFilters(ga_population.getIndividuals()));
@@ -2715,6 +2672,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 						best = ((SimpleFilterScore) optimum.score).r.filter;
 
+						if (seedSize > 0)
+						{
+							// The optimum may be off grid if it was from the seed
+							best = enumerateMinInterval(best, enabled);
+						}
+
 						// Now update the filter set for final assessment
 						filterSet = new FilterSet(filterSet.getName(),
 								searchSpaceToFilters((DirectFilter) best, ss.getSearchSpace()));
@@ -2817,44 +2780,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					best = ((SimpleFilterScore) optimum.score).r.filter;
 
 					// Enumerate on the min interval to produce the final filter
-					ss_filter = (DirectFilter) best;
-					SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
-					for (int j = 0; j < n; j++)
-					{
-						if (enabled[j])
-						{
-							double minIncrement = ss_filter.getParameterIncrement(j);
-							try
-							{
-								double value = ss_filter.getParameterValue(j);
-								double max = Maths.ceil(value, minIncrement);
-								double min = Maths.floor(value, minIncrement);
-								dimensions2[j] = new SearchDimension(min, max, minIncrement, 1);
-								dimensions2[j].setCentre(value);
-								dimensions2[j].setIncrement(minIncrement);
-							}
-							catch (IllegalArgumentException e)
-							{
-								IJ.error(TITLE,
-										String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), j,
-												ss_filter.getParameterName(j)));
-								dimensions2 = null;
-								break;
-							}
-						}
-						else
-						{
-							dimensions2[j] = new SearchDimension(ss_filter.getParameterValue(j));
-						}
-					}
-					if (dimensions2 != null)
-					{
-						optimum = ss.findOptimum(dimensions2, this);
-						if (optimum != null)
-						{
-							best = ((SimpleFilterScore) optimum.score).r.filter;
-						}
-					}
+					best = enumerateMinInterval(best, enabled);
 
 					// Now update the filter set for final assessment
 					filterSet = new FilterSet(filterSet.getName(),
@@ -3103,6 +3029,101 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Enumerate on the min interval to convert an off grid result to one on the grid.
+	 *
+	 * @param best
+	 *            The optimum
+	 * @param stepSize
+	 *            Array specifying the step size for each of the parameter indices
+	 * @param indices
+	 *            Array specifying which parameter indices to search
+	 * @return The optimum on the min interval grid
+	 */
+	private Chromosome<FilterScore> enumerateMinInterval(Chromosome<FilterScore> best, double[] stepSize, int[] indices)
+	{
+		boolean[] enabled = new boolean[stepSize.length];
+		for (int i = 0; i < indices.length; i++)
+		{
+			int j = indices[i];
+			enabled[j] = stepSize[j] > 0;
+		}
+		return enumerateMinInterval(best, enabled, indices);
+	}
+
+	/**
+	 * Enumerate on the min interval to convert an off grid result to one on the grid
+	 * 
+	 * @param best
+	 *            The optimum
+	 * @param enabled
+	 *            Array specifying which parameters are enabled
+	 * @return The optimum on the min interval grid
+	 */
+	private Chromosome<FilterScore> enumerateMinInterval(Chromosome<FilterScore> best, boolean[] enabled)
+	{
+		return enumerateMinInterval(best, enabled, Utils.newArray(enabled.length, 0, 1));
+	}
+
+	/**
+	 * Enumerate on the min interval to convert an off grid result to one on the grid
+	 * 
+	 * @param best
+	 *            The optimum
+	 * @param enabled
+	 *            Array specifying which parameters are enabled
+	 * @param indices
+	 *            Array specifying which parameter indices to search
+	 * @return The optimum on the min interval grid
+	 */
+	private Chromosome<FilterScore> enumerateMinInterval(Chromosome<FilterScore> best, boolean[] enabled, int[] indices)
+	{
+		// Enumerate on the min interval to produce the final filter
+		ss_filter = (DirectFilter) best;
+		SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
+		for (int i = 0; i < indices.length; i++)
+		{
+			int j = indices[i];
+			if (enabled[j])
+			{
+				double minIncrement = ss_filter.getParameterIncrement(j);
+				try
+				{
+					double value = ss_filter.getParameterValue(j);
+					double max = Maths.ceil(value, minIncrement);
+					double min = Maths.floor(value, minIncrement);
+					dimensions2[i] = new SearchDimension(min, max, minIncrement, 1);
+					dimensions2[i].setCentre(value);
+					dimensions2[i].setIncrement(minIncrement);
+				}
+				catch (IllegalArgumentException e)
+				{
+					IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), j,
+							ss_filter.getParameterName(j)));
+					dimensions2 = null;
+					break;
+				}
+			}
+		}
+		if (dimensions2 != null)
+		{
+			// Add dimensions that have been missed
+			for (int i = 0; i < dimensions2.length; i++)
+				if (dimensions2[i] == null)
+					dimensions2[i] = new SearchDimension(ss_filter.getParameterValue(i));
+
+			SearchSpace ss = new SearchSpace();
+			ss.setTracker(this);
+			SearchResult<FilterScore> optimum = ss.findOptimum(dimensions2, this);
+
+			if (optimum != null)
+			{
+				best = ((SimpleFilterScore) optimum.score).r.filter;
+			}
+		}
+		return best;
 	}
 
 	private static StopWatch analysisStopWatch;
