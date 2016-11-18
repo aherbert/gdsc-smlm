@@ -426,7 +426,7 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 			case 5:
 				return ParameterType.ESHIFT;
 			default:
-				return ParameterType.PRECISION;
+				return ParameterType.PRECISION2;
 		}
 	}
 

@@ -183,21 +183,23 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		if (index < super.getNumberOfParameters())
-			return super.getParameterName(index);
+		{
+			return super.getParameterType(index);
+		}
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{
 			case 0:
-				return "Strict Precision";
+				return ParameterType.PRECISION2;
 			default:
-				return "Range";
+				return ParameterType.PRECISION2_RANGE;
 		}
 	}
 
