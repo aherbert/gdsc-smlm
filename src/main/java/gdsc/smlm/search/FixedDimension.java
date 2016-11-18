@@ -71,9 +71,9 @@ public class FixedDimension implements Cloneable, Dimension
 	 * @param minIncrement
 	 *            the min increment to use around the centre
 	 * @param lower
-	 *            the current lower bound of the range
+	 *            the current lower bound of the range (will be clipped to min/max)
 	 * @param upper
-	 *            the current upper bound of the range
+	 *            the current upper bound of the range (will be clipped to min/max)
 	 */
 	public FixedDimension(double min, double max, double minIncrement, double lower, double upper)
 	{
@@ -94,10 +94,14 @@ public class FixedDimension implements Cloneable, Dimension
 			throw new IllegalArgumentException("Min increment is negative: " + minIncrement);
 		if (upper < lower)
 			throw new IllegalArgumentException("Upper is less than lower");
-		if (upper < min || upper > max)
-			throw new IllegalArgumentException("Upper is outside min/max range");
-		if (lower < min || lower > max)
-			throw new IllegalArgumentException("Lower is outside min/max range");
+		//		if (upper < min || upper > max)
+		//			throw new IllegalArgumentException("Upper is outside min/max range");
+		//		if (lower < min || lower > max)
+		//			throw new IllegalArgumentException("Lower is outside min/max range");
+
+		// Clip to range
+		lower = Math.min(max, Math.max(lower, min));
+		upper = Math.min(max, Math.max(upper, min));
 
 		// We round to the min increment so that the values returned should be identical if the centre is moved by a factor of the increment.
 		this.minIncrement = minIncrement;

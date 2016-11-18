@@ -83,9 +83,9 @@ public class SearchDimension implements Cloneable, Dimension
 	 * @param nIncrement
 	 *            the number of increments to use around the centre
 	 * @param lower
-	 *            the current lower bound of the range
+	 *            the current lower bound of the range (will be clipped to min/max)
 	 * @param upper
-	 *            the current upper bound of the range
+	 *            the current upper bound of the range (will be clipped to min/max)
 	 */
 	public SearchDimension(double min, double max, double minIncrement, int nIncrement, double lower, double upper)
 	{
@@ -108,10 +108,10 @@ public class SearchDimension implements Cloneable, Dimension
 			throw new IllegalArgumentException("Min increment is negative: " + minIncrement);
 		if (upper < lower)
 			throw new IllegalArgumentException("Upper is less than lower");
-		if (upper < min || upper > max)
-			throw new IllegalArgumentException("Upper is outside min/max range");
-		if (lower < min || lower > max)
-			throw new IllegalArgumentException("Lower is outside min/max range");
+		//		if (upper < min || upper > max)
+		//			throw new IllegalArgumentException("Upper is outside min/max range");
+		//		if (lower < min || lower > max)
+		//			throw new IllegalArgumentException("Lower is outside min/max range");
 
 		// We round to the min increment so that the values returned should be identical if the centre is moved by a factor of the increment.
 		this.minIncrement = minIncrement;
