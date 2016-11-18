@@ -40,18 +40,6 @@ public class SBRFilter extends DirectFilter
 	}
 
 	@Override
-	protected String generateName()
-	{
-		return "SBR " + sbr;
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "SBR";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		bias = -1;
@@ -91,18 +79,6 @@ public class SBRFilter extends DirectFilter
 		if (peak.getSNR() < this.sbr)
 			return V_SNR;
 		return 0;
-	}
-
-	@Override
-	public double getNumericalValue()
-	{
-		return sbr;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "SBR";
 	}
 
 	/*
@@ -153,13 +129,13 @@ public class SBRFilter extends DirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return "SBR";
+		return ParameterType.SBR;
 	}
 
 	/*

@@ -35,18 +35,6 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	protected String generateName()
-	{
-		return "SNR " + snr;
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "SNR";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 	}
@@ -68,18 +56,6 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	static float getSNR(PeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getSignal() / peak.getNoise() : Float.POSITIVE_INFINITY;
-	}
-
-	@Override
-	public double getNumericalValue()
-	{
-		return snr;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "SNR";
 	}
 
 	/*
@@ -130,13 +106,13 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return "SNR";
+		return ParameterType.SNR;
 	}
 
 	/*

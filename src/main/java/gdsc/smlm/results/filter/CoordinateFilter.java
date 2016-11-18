@@ -62,12 +62,6 @@ public class CoordinateFilter extends DirectFilter
 	}
 
 	@Override
-	protected String generateType()
-	{
-		return "Coordinate";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 	}
@@ -87,18 +81,6 @@ public class CoordinateFilter extends DirectFilter
 		if (peak.getY() < minY || peak.getY() > maxY)
 			return V_Y;
 		return 0;
-	}
-
-	@Override
-	public double getNumericalValue()
-	{
-		return minX;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "X";
 	}
 
 	/*
@@ -178,25 +160,26 @@ public class CoordinateFilter extends DirectFilter
 		}
 	}
 
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		switch (index)
 		{
 			case 0:
-				return "Min X";
+				return ParameterType.MIN_X;
 			case 1:
-				return "Max X";
+				return ParameterType.MAX_X;
 			case 2:
-				return "Min Y";
+				return ParameterType.MIN_Y;
 			default:
-				return "Max Y";
+				return ParameterType.MAX_Y;
 		}
 	}
 

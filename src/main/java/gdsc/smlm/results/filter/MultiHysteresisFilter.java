@@ -137,12 +137,6 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	}
 
 	@Override
-	protected String generateType()
-	{
-		return "Multi Hysteresis";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Calibration
@@ -225,7 +219,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@Override
 	public String getNumericalValueName()
 	{
-		return "SNR +" + rangeSnr;
+		return ParameterType.SNR.toString() + " +" + rangeSnr;
 	}
 
 	@Override
@@ -288,47 +282,84 @@ public class MultiHysteresisFilter extends HysteresisFilter
 				return rangePrecision;
 		}
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
-	 */
+	
 	@Override
-	public String getParameterName(int index)
+	public double getParameterIncrement(int index)
 	{
-		checkIndex(index);
 		if (index < super.getNumberOfParameters())
 		{
-			return super.getParameterName(index);
+			return super.getParameterValueInternal(index);
 		}
 		index -= super.getNumberOfParameters();
 		switch (index)
 		{
 			case 0:
-				return "Strict Signal";
+				return SignalFilter.DEFAULT_INCREMENT;
 			case 1:
-				return "Range Signal";
+				return SignalFilter.DEFAULT_INCREMENT;
 			case 2:
-				return "Strict SNR";
+				return SNRFilter.DEFAULT_INCREMENT;
 			case 3:
-				return "Range SNR";
+				return SNRFilter.DEFAULT_INCREMENT;
 			case 4:
-				return "Strict Min Width";
+				return WidthFilter2.DEFAULT_MIN_INCREMENT;
 			case 5:
-				return "Range Min Width";
+				return WidthFilter2.DEFAULT_MIN_INCREMENT;
 			case 6:
-				return "Strict Max Width";
+				return WidthFilter.DEFAULT_INCREMENT;
 			case 7:
-				return "Range Max Width";
+				return WidthFilter.DEFAULT_INCREMENT;
 			case 8:
-				return "Strict Shift";
+				return ShiftFilter.DEFAULT_INCREMENT;
 			case 9:
-				return "Range Shift";
+				return ShiftFilter.DEFAULT_INCREMENT;
 			case 10:
-				return "Strict Precision";
+				return PrecisionFilter.DEFAULT_INCREMENT;
 			default:
-				return "Range Precision";
+				return PrecisionFilter.DEFAULT_INCREMENT;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
+	 */
+	@Override
+	public ParameterType getParameterType(int index)
+	{
+		checkIndex(index);
+		if (index < super.getNumberOfParameters())
+		{
+			return super.getParameterType(index);
+		}
+		index -= super.getNumberOfParameters();
+		switch (index)
+		{
+			case 0:
+				return ParameterType.SIGNAL;
+			case 1:
+				return ParameterType.SIGNAL_RANGE;
+			case 2:
+				return ParameterType.SNR;
+			case 3:
+				return ParameterType.SNR_RANGE;
+			case 4:
+				return ParameterType.MIN_WIDTH;
+			case 5:
+				return ParameterType.MIN_WIDTH_RANGE;
+			case 6:
+				return ParameterType.MAX_WIDTH;
+			case 7:
+				return ParameterType.MAX_WIDTH_RANGE;
+			case 8:
+				return ParameterType.SHIFT;
+			case 9:
+				return ParameterType.SHIFT_RANGE;
+			case 10:
+				return ParameterType.PRECISION;
+			default:
+				return ParameterType.PRECISION_RANGE;
 		}
 	}
 

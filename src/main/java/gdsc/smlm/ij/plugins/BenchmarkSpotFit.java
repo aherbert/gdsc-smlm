@@ -94,6 +94,7 @@ import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.ParameterType;
 import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PrecisionFilter;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
@@ -176,6 +177,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	private class FilterCriteria
 	{
+		final ParameterType type;
 		final String name;
 		final LowerLimit lower;
 		final UpperLimit upper;
@@ -183,14 +185,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final boolean restrictRange;
 		final boolean requireLabel;
 
-		public FilterCriteria(String name, LowerLimit lower, UpperLimit upper)
+		public FilterCriteria(ParameterType type, LowerLimit lower, UpperLimit upper)
 		{
-			this(name, lower, upper, 0, true, true);
+			this(type, type.toString(), lower, upper, 0, true, true);
 		}
 
-		public FilterCriteria(String name, LowerLimit lower, UpperLimit upper, int minBinWidth, boolean restrictRange,
-				boolean requireLabel)
+		public FilterCriteria(ParameterType type, String name, LowerLimit lower, UpperLimit upper, int minBinWidth,
+				boolean restrictRange, boolean requireLabel)
 		{
+			this.type = type;
 			this.name = name;
 			this.lower = lower;
 			this.upper = upper;
@@ -210,7 +213,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static final int FILTER_PRECISION = 6;
 	private static final int FILTER_ITERATIONS = 7;
 	private static final int FILTER_EVALUATIONS = 8;
-	private static String[] names;
 
 	private FilterCriteria[] createFilterCriteria()
 	{
@@ -219,22 +221,33 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			filterCriteria = new FilterCriteria[9];
 			int i = 0;
 			//@formatter:off
-			filterCriteria[i++] = new FilterCriteria("Signal",     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-			filterCriteria[i++] = new FilterCriteria("SNR",        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-			filterCriteria[i++] = new FilterCriteria("MinWidth",   LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
-			filterCriteria[i++] = new FilterCriteria("MaxWidth",   LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
-			filterCriteria[i++] = new FilterCriteria("Shift",      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-			filterCriteria[i++] = new FilterCriteria("EShift",     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-			// Precision has enough descrimination power to be able to use the jaccard score
-			filterCriteria[i++] = new FilterCriteria("Precision",  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
+			filterCriteria[i++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+			filterCriteria[i++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+			filterCriteria[i++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
+			filterCriteria[i++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			filterCriteria[i++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+			// Precision has enough discrimination power to be able to use the jaccard score
+			filterCriteria[i++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
 			// These are not filters but are used for stats analysis
-			filterCriteria[i++] = new FilterCriteria("Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
-			filterCriteria[i++] = new FilterCriteria("Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+			filterCriteria[i++] = new FilterCriteria(null, "Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+			filterCriteria[i++] = new FilterCriteria(null, "Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
 			//@formatter:on
 
-			names = new String[7];
-			for (int j = 0; j < names.length; j++)
-				names[j] = filterCriteria[j].name;
+			// Some parameter types may not be for DirectFilters so ignore this check...
+			// We just have to be sure that we support all the types produced by any DirectFilter.
+			
+			//			// Do a check to ensure we have all the parameter types in the correct order.
+			//			// This is needed so that all possible filters can be processed.
+			//			ParameterType[] types = ParameterType.values();
+			//			NEXT_TYPE: for (int k = 0; k < types.length; k++)
+			//			{
+			//				for (int j = 0; j < filterCriteria.length; j++)
+			//					if (filterCriteria[j].type == types[k])
+			//						continue NEXT_TYPE;
+			//				filterCriteria = null;
+			//				throw new RuntimeException("Missing parameter type: " + types[k].toString());
+			//			}
 		}
 		return filterCriteria;
 	}
@@ -249,9 +262,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 *            the name
 	 * @return the min
 	 */
-	public static double getMin(String name)
+	public static double getMin(ParameterType type)
 	{
-		return getValue(name, min, 0);
+		return getValue(type, min, 0);
 	}
 
 	/**
@@ -261,18 +274,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 *            the name
 	 * @return the max
 	 */
-	public static double getMax(String name)
+	public static double getMax(ParameterType type)
 	{
-		return getValue(name, max, Double.MAX_VALUE);
+		return getValue(type, max, Double.MAX_VALUE);
 	}
 
-	private static double getValue(String name, double[] array, double defaultValue)
+	private static double getValue(ParameterType type, double[] array, double defaultValue)
 	{
-		if (Utils.isNullOrEmpty(name) || array == null)
+		if (type == null || array == null || filterCriteria == null)
 			return defaultValue;
-		name = name.replace(" ", "");
-		for (int j = 0; j < names.length; j++)
-			if (names[j].equalsIgnoreCase(name))
+		for (int j = 0; j < filterCriteria.length; j++)
+			if (filterCriteria[j].type == type)
 				return array[j];
 		return defaultValue;
 	}
@@ -1235,7 +1247,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		StopWatch stopWatch = StopWatch.createStarted();
 		final ImageStack stack = imp.getImageStack();
-		
+
 		// Clear old results to free memory
 		if (fitResults != null)
 			fitResults.clear();
@@ -1301,7 +1313,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		final String timeString = stopWatch.toString();
 		IJ.log("Spot fit time : " + timeString);
-		
+
 		IJ.showStatus("Collecting results ...");
 
 		fitResultsId++;
@@ -1339,7 +1351,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 
 		summariseResults(fitResults, runTime, preprocessedPeakResults);
-		
+
 		IJ.showStatus("");
 	}
 

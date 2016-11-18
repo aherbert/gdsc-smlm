@@ -44,18 +44,6 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	protected String generateName()
-	{
-		return "Width " + width;
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "Width";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the width limit
@@ -106,18 +94,6 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
-	@Override
-	public double getNumericalValue()
-	{
-		return width;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "Width";
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -166,13 +142,13 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return "Width";
+		return ParameterType.MAX_WIDTH;
 	}
 
 	/*

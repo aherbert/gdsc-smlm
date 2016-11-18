@@ -26,7 +26,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 {
 	public static final double DEFAULT_INCREMENT = 5;
 	public static final double DEFAULT_RANGE = 30;
-	
+
 	@XStreamAsAttribute
 	final double signal;
 	@XStreamOmitField
@@ -35,18 +35,6 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	public SignalFilter(double signal)
 	{
 		this.signal = Math.max(0, signal);
-	}
-
-	@Override
-	protected String generateName()
-	{
-		return "Signal " + signal;
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "Signal";
 	}
 
 	@Override
@@ -68,18 +56,6 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 		if (peak.getPhotons() < signal)
 			return V_PHOTONS;
 		return 0;
-	}
-	
-	@Override
-	public double getNumericalValue()
-	{
-		return signal;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "Signal";
 	}
 
 	/*
@@ -126,17 +102,17 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 		checkIndex(index);
 		return SignalFilter.DEFAULT_INCREMENT;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return "Signal";
+		return ParameterType.SIGNAL;
 	}
 
 	/*
@@ -182,7 +158,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return signal;

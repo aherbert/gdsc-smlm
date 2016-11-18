@@ -39,18 +39,24 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	private FilterScore fitness;
 
 	/**
-	 * Generate the name of the filter using the filter settings
+	 * Generate the name of the filter using the filter settings (defaults to the first parameter)
 	 * 
 	 * @return The name of the filter
 	 */
-	protected abstract String generateName();
+	protected String generateName()
+	{
+		return getParameterName(0) + " " + getParameterValue(0);
+	}
 
 	/**
-	 * Generate the type of the filter using the filter settings
+	 * Generate the type of the filter using the filter settings (default to the class name with 'Filter' removed)
 	 * 
 	 * @return The type of the filter
 	 */
-	protected abstract String generateType();
+	protected String generateType()
+	{
+		return this.getClass().getSimpleName().replaceAll("Filter", "");
+	}
 
 	/**
 	 * Filter the results
@@ -1048,17 +1054,27 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
+	 * The numerical value of the filter (defaults to the first parameter)
+	 * 
 	 * @return The numerical value of the filter. Used for plotting value against performance score.
 	 */
-	public abstract double getNumericalValue();
+	public double getNumericalValue()
+	{
+		return getParameterValue(0);
+	}
 
 	/**
+	 * The name of the numerical value of the filter (defaults to the first parameter)
+	 * 
 	 * @return The name of the numerical value of the filter. Used for plotting value against performance score.
 	 */
-	public abstract String getNumericalValueName();
+	public String getNumericalValueName()
+	{
+		return getParameterName(0);
+	}
 
 	/**
-	 * @return the name
+	 * @return the name (including any parameter values)
 	 */
 	public String getName()
 	{
@@ -1203,7 +1219,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	{
 		// Use all the parameters
 		int i = getNumberOfParameters();
-		
+
 		// Extract the parameters
 		final double[] p1 = getParameters();
 		final double[] p2 = o.getParameters();
@@ -1298,7 +1314,16 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * @param index
 	 * @return The name of the specified parameter
 	 */
-	public abstract String getParameterName(int index);
+	public String getParameterName(int index)
+	{
+		return getParameterType(index).toString();
+	}
+
+	/**
+	 * @param index
+	 * @return The type of the specified parameter
+	 */
+	public abstract ParameterType getParameterType(int index);
 
 	/**
 	 * Create a new filter by adjusting the specified parameter.

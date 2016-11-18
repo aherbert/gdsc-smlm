@@ -58,12 +58,6 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	}
 
 	@Override
-	protected String generateType()
-	{
-		return "SNR Hysteresis";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		weakSnr = strictSnr - range;
@@ -90,7 +84,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@Override
 	public String getNumericalValueName()
 	{
-		return "SNR -" + range;
+		return ParameterType.SNR.toString() + " +" + range;
 	}
 
 	@Override

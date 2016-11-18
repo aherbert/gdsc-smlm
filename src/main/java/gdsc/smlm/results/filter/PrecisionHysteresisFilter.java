@@ -66,12 +66,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	}
 
 	@Override
-	protected String generateType()
-	{
-		return "Precision Hysteresis";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		lowerVariance = Filter.getDUpperSquaredLimit(strictPrecision);
@@ -103,7 +97,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	@Override
 	public String getNumericalValueName()
 	{
-		return "Precision +" + range;
+		return ParameterType.PRECISION.toString() + " +" + range;
 	}
 
 	/*

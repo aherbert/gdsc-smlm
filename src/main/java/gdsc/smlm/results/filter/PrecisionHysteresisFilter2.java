@@ -66,13 +66,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	protected String generateName()
 	{
-		return String.format("Precision2 Hysteresis %.2f +%.2f (%s)", strictPrecision, range, getTraceParameters());
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "Precision2 Hysteresis";
+		return String.format("Precision Hysteresis2 %.2f +%.2f (%s)", strictPrecision, range, getTraceParameters());
 	}
 
 	@Override
@@ -124,7 +118,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter
 	@Override
 	public String getNumericalValueName()
 	{
-		return "Precision2 +" + range;
+		return ParameterType.PRECISION2.toString() + " +" + range;
 	}
 
 	/*

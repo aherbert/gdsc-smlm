@@ -212,22 +212,22 @@ public abstract class HysteresisFilter extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		switch (index)
 		{
 			case 0:
-				return "Search distance";
+				return ParameterType.DISTANCE_THRESHOLD;
 			case 1:
-				return "Search distance mode";
+				return ParameterType.DISTANCE_THRESHOLD_MODE;
 			case 2:
-				return "Time threshold";
+				return ParameterType.TIME_THRESHOLD;
 			default:
-				return "Time threshold mode";
+				return ParameterType.TIME_THRESHOLD_MODE;
 		}
 	}
 

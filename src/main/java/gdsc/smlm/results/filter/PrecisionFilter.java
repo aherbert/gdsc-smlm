@@ -45,18 +45,6 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	protected String generateName()
-	{
-		return "Precision " + precision;
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "Precision";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		variance = Filter.getDUpperSquaredLimit(precision);
@@ -80,18 +68,6 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 		if (peak.getLocationVariance() > variance)
 			return V_LOCATION_VARIANCE;
 		return 0;
-	}
-
-	@Override
-	public double getNumericalValue()
-	{
-		return precision;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "Precision";
 	}
 
 	/*
@@ -142,13 +118,13 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return "Precision";
+		return ParameterType.PRECISION;
 	}
 
 	/*

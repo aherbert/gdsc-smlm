@@ -229,12 +229,12 @@ public abstract class CombinedFilter extends DirectFilter
 	}
 
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		if (index < filter1.getNumberOfParameters())
-			return filter1.getParameterName(index);
-		return filter2.getParameterName(index - filter1.getNumberOfParameters());
+			return filter1.getParameterType(index);
+		return filter2.getParameterType(index - filter1.getNumberOfParameters());
 	}
 
 	@Override

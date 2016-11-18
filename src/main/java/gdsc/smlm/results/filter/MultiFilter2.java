@@ -98,14 +98,8 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	protected String generateName()
 	{
-		return String.format("Multi2: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f",
+		return String.format("Multi2: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision2=%.1f",
 				signal, snr, minWidth, maxWidth, shift, eshift, precision);
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "Multi2";
 	}
 
 	@Override
@@ -314,13 +308,15 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public double getNumericalValue()
 	{
+		// This is not the first parameter so override
 		return snr;
 	}
 
 	@Override
 	public String getNumericalValueName()
 	{
-		return "SNR";
+		// This is not the first parameter so override
+		return ParameterType.SNR.toString();
 	}
 
 	/*
@@ -409,28 +405,28 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		switch (index)
 		{
 			case 0:
-				return "Signal";
+				return ParameterType.SIGNAL;
 			case 1:
-				return "SNR";
+				return ParameterType.SNR;
 			case 2:
-				return "Min width";
+				return ParameterType.MIN_WIDTH;
 			case 3:
-				return "Max width";
+				return ParameterType.MAX_WIDTH;
 			case 4:
-				return "Shift";
+				return ParameterType.SHIFT;
 			case 5:
-				return "EShift";
+				return ParameterType.ESHIFT;
 			default:
-				return "Precision";
+				return ParameterType.PRECISION;
 		}
 	}
 

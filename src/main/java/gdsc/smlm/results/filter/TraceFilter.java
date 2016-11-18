@@ -54,12 +54,6 @@ public class TraceFilter extends Filter
 	}
 
 	@Override
-	protected String generateType()
-	{
-		return "Trace";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		ok = new HashSet<PeakResult>();
@@ -100,7 +94,7 @@ public class TraceFilter extends Filter
 	@Override
 	public String getNumericalValueName()
 	{
-		return "Time";
+		return ParameterType.TIME_THRESHOLD.toString();
 	}
 
 	@Override
@@ -156,21 +150,21 @@ public class TraceFilter extends Filter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		switch (index)
 		{
 			case 0:
-				return "d-threshold";
+				return ParameterType.DISTANCE_THRESHOLD;
 			default:
-				return "t-threshold";
+				return ParameterType.TIME_THRESHOLD;
 		}
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

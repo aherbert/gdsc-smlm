@@ -47,18 +47,6 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	protected String generateName()
-	{
-		return "EShift " + eshift;
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "EShift";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the shift limit
@@ -112,18 +100,6 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
-	@Override
-	public double getNumericalValue()
-	{
-		return eshift;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "EShift";
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -172,13 +148,13 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return "Shift";
+		return ParameterType.ESHIFT;
 	}
 
 	/*

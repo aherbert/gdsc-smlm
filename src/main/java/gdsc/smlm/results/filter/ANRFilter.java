@@ -32,18 +32,6 @@ public class ANRFilter extends DirectFilter
 	}
 
 	@Override
-	protected String generateName()
-	{
-		return "ANR " + anr;
-	}
-
-	@Override
-	protected String generateType()
-	{
-		return "ANR";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 	}
@@ -69,18 +57,6 @@ public class ANRFilter extends DirectFilter
 	static float getANR(PreprocessedPeakResult peak)
 	{
 		return (peak.getNoise() > 0) ? peak.getAmplitude() / peak.getNoise() : Float.POSITIVE_INFINITY;
-	}
-
-	@Override
-	public double getNumericalValue()
-	{
-		return anr;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "ANR";
 	}
 
 	/*
@@ -131,13 +107,13 @@ public class ANRFilter extends DirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return "ANR";
+		return ParameterType.ANR;
 	}
 
 	/*

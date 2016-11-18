@@ -62,12 +62,6 @@ public class ANRFilter2 extends DirectFilter
 	}
 
 	@Override
-	protected String generateType()
-	{
-		return "ANR2";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the width limit
@@ -123,18 +117,6 @@ public class ANRFilter2 extends DirectFilter
 				return V_X_SD_FACTOR;
 		}
 		return 0;
-	}
-
-	@Override
-	public double getNumericalValue()
-	{
-		return anr;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "ANR";
 	}
 
 	/*
@@ -201,20 +183,20 @@ public class ANRFilter2 extends DirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		switch (index)
 		{
 			case 0:
-				return "ANR";
+				return ParameterType.ANR;
 			case 1:
-				return "Min width";
+				return ParameterType.MIN_WIDTH;
 			default:
-				return "Max width";
+				return ParameterType.MAX_WIDTH;
 		}
 	}
 

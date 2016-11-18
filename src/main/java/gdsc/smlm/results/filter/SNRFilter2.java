@@ -61,12 +61,6 @@ public class SNRFilter2 extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	protected String generateType()
-	{
-		return "SNR2";
-	}
-
-	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the width limit
@@ -122,18 +116,6 @@ public class SNRFilter2 extends DirectFilter implements IMultiFilter
 				return V_X_SD_FACTOR;
 		}
 		return 0;
-	}
-
-	@Override
-	public double getNumericalValue()
-	{
-		return snr;
-	}
-
-	@Override
-	public String getNumericalValueName()
-	{
-		return "SNR";
 	}
 
 	/*
@@ -200,20 +182,20 @@ public class SNRFilter2 extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.Filter#getParameterName(int)
+	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
-	public String getParameterName(int index)
+	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
 		switch (index)
 		{
 			case 0:
-				return "SNR";
+				return ParameterType.SNR;
 			case 1:
-				return "Min width";
+				return ParameterType.MIN_WIDTH;
 			default:
-				return "Max width";
+				return ParameterType.MAX_WIDTH;
 		}
 	}
 
