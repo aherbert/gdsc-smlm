@@ -197,13 +197,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			"Step Search" };
 	private static int evolve = 0;
 	private static boolean repeatEvolve = true;
-	private static int rangeSearchWidth = 3;
-	private static double rangeSearchReduce = 0.5;
+	private static int rangeSearchWidth = 2;
+	private static double rangeSearchReduce = 0.3;
 	private static int maxIterations = 30;
 	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 5000;
 	private static int seedSize = 5000;
-	private static double enrichmentFraction = 0.3;
+	private static double enrichmentFraction = 0.2;
 	private static double enrichmentPadding = 0.1;
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
 	private static HashMap<Integer, double[]> stepSizeMap = new HashMap<Integer, double[]>();
@@ -1255,7 +1255,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			resultsPrefix3 = "\t" + Utils.rounded(distanceScore.lower * simulationParameters.a) + "\t" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
-			limitRange = ", r=" + Utils.rounded(residualsThreshold) + ", d=" +
+			limitRange = ", d=" +
 					Utils.rounded(distanceScore.lower * simulationParameters.a) + "-" +
 					Utils.rounded(distanceScore.upper * simulationParameters.a);
 
@@ -1654,6 +1654,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			resultsPrefix2 += "-" + (failCount + failCountRange);
 			limitFailCount += "-" + (failCount + failCountRange);
 		}
+		limitFailCount += ", r=" + Utils.rounded(residualsThreshold);		
 		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
 	}
 
