@@ -202,7 +202,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int maxIterations = 30;
 	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 5000;
-	private static int seedSize = 0;
+	private static int seedSize = 5000;
 	private static double enrichmentFraction = 0.3;
 	private static double enrichmentPadding = 0.1;
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
