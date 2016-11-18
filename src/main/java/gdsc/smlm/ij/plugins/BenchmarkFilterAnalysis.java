@@ -2407,7 +2407,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
 				final double step = (originalDimensions[indices[j]].isActive()) ? stepSize[j] : 0;
-				gd.addNumericField(getDialogName(prefix, ss_filter.getParameterName(indices[j])), step, 2);
+				gd.addNumericField(getDialogName(prefix, ss_filter, indices[j]), step, 2);
 			}
 
 			gd.showDialog();
@@ -2606,7 +2606,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 			for (int i = 0; i < n; i++)
-				gd.addCheckbox(prefix + ss_filter.getParameterName(i), enabled[i]);
+				gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
 
 			gd.showDialog();
 
@@ -2762,7 +2762,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 			for (int i = 0; i < n; i++)
-				gd.addCheckbox(prefix + ss_filter.getParameterName(i), enabled[i]);
+				gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
 
 			gd.showDialog();
 
@@ -2944,7 +2944,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				if (c1 <= 0)
 				{
 					atLimit[j] = ComplexFilterScore.FLOOR;
-					sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[').append(Utils.rounded(value));
+					sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[')
+							.append(Utils.rounded(value));
 					if (c1 == -1)
 					{
 						atLimit[j] = ComplexFilterScore.BELOW;
@@ -2958,7 +2959,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					if (c2 >= 0)
 					{
 						atLimit[j] = ComplexFilterScore.CEIL;
-						sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[').append(Utils.rounded(value));
+						sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[')
+								.append(Utils.rounded(value));
 						if (c2 == 1)
 						{
 							atLimit[j] = ComplexFilterScore.ABOVE;
@@ -3145,9 +3147,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return (filter2.weakest(filter1) < 0) ? filter1 : filter2;
 	}
 
-	private String getDialogName(String prefix, String parameterName)
+	private String getDialogName(String prefix, Filter filter, int index)
 	{
-		return prefix + parameterName.replace(" ", "_");
+		ParameterType type = filter.getParameterType(index);
+		String parameterName = prefix + type.shortName.replace(" ", "_");
+		if (type.name == type.shortName) // A pointer compare is OK here as the constructor will use the same string
+			return parameterName;
+		return parameterName + " (" + type.name + ")";
 	}
 
 	private double getCriteria(FractionClassificationResult s)
