@@ -2944,7 +2944,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				if (c1 <= 0)
 				{
 					atLimit[j] = ComplexFilterScore.FLOOR;
-					sb.append(" : ").append(filter.getParameterName(p)).append(" l[").append(Utils.rounded(value));
+					sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[').append(Utils.rounded(value));
 					if (c1 == -1)
 					{
 						atLimit[j] = ComplexFilterScore.BELOW;
@@ -2958,7 +2958,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					if (c2 >= 0)
 					{
 						atLimit[j] = ComplexFilterScore.CEIL;
-						sb.append(" : ").append(filter.getParameterName(p)).append(" u[").append(Utils.rounded(value));
+						sb.append(" : ").append(filter.getParameterName(p)).append(' ').append(atLimit[j]).append('[').append(Utils.rounded(value));
 						if (c2 == 1)
 						{
 							atLimit[j] = ComplexFilterScore.ABOVE;
@@ -4187,9 +4187,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		final static char WITHIN = '-';
 		final static char BELOW = '<';
-		final static char FLOOR = 'l';
+		final static char FLOOR = 'L';
 		final static char ABOVE = '>';
-		final static char CEIL = 'u';
+		final static char CEIL = 'U';
 
 		int index;
 		final ClassificationResult r2;
