@@ -79,7 +79,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
 		boolean canConverge = maxIterations != 0;
 
 		if (checkFitness || checkSequence)
-			canConverge |= (relative > 0 || absolute > 0);
+			canConverge |= (relative >= 0 || absolute >= 0);
 
 		if (!canConverge)
 			throw new IllegalArgumentException("No valid convergence criteria");
