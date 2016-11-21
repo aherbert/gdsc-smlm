@@ -390,7 +390,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			addResult(inputOption1, inputOption2, distanceThreshold, result, idResult1, idResult2);
 		}
 	}
-
+	
 	@SuppressWarnings("unused")
 	private boolean haveIds(MemoryPeakResults results1, MemoryPeakResults results2)
 	{
@@ -499,10 +499,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param predictedCoordinates
 	 * @return a list of time points
 	 */
-	private int[] getTimepoints(HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
+	private static int[] getTimepoints(HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
 			HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates)
 	{
-		Set<Integer> set = new HashSet<Integer>();
+		Set<Integer> set = new TreeSet<Integer>();
 		for (Integer i : actualCoordinates.keySet())
 			set.add(i);
 		for (Integer i : predictedCoordinates.keySet())
@@ -526,7 +526,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 */
 	public static Coordinate[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
 	{
-		ArrayList<Coordinate> tmp = coords.get(t); 
+		ArrayList<Coordinate> tmp = coords.get(t);
 		if (tmp != null)
 		{
 			return tmp.toArray(new Coordinate[tmp.size()]);
@@ -755,5 +755,58 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		{
 			return t;
 		}
+	}
+
+	/**
+	 * Compare the coordinates in two results sets.
+	 *
+	 * @param results1 the results 1
+	 * @param results2 the results 2
+	 * @param distance the distance
+	 * @return the match result
+	 */
+	public static MatchResult compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
+			double distance)
+	{
+		List<PeakResult> actualPoints = results1.getResults();
+		List<PeakResult> predictedPoints = results2.getResults();
+
+		// Divide the results into time points
+		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
+		HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
+
+		return compareCoordinates(actualCoordinates, predictedCoordinates, distance);
+	}
+
+	/**
+	 * Compare the coordinates on a frame-by-frame basis.
+	 *
+	 * @param actualCoordinates the actual coordinates
+	 * @param predictedCoordinates the predicted coordinates
+	 * @param distance the distance
+	 * @return the match result
+	 */
+	public static MatchResult compareCoordinates(HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
+			HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates, double distance)
+	{
+		int tp = 0;
+		int fp = 0;
+		int fn = 0;
+
+		// Process each time point
+		for (Integer t : getTimepoints(actualCoordinates, predictedCoordinates))
+		{
+			Coordinate[] actual = getCoordinates(actualCoordinates, t);
+			Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
+
+			MatchResult r = MatchCalculator.analyseResults2D(actual, predicted, distance);
+
+			// Aggregate
+			tp += r.getTruePositives();
+			fp += r.getFalsePositives();
+			fn += r.getFalseNegatives();
+		}
+
+		return new MatchResult(tp, fp, fn, 0);
 	}
 }
