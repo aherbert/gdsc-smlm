@@ -411,8 +411,7 @@ public class CreateFilters implements PlugIn, ItemListener
 			{
 				sb.append(" ");
 				String name = attributes.getQName(attribute);
-				if (substitutionCount < attributeSubstitutions.length && !name.equals("class") &&
-						!name.equals("reference"))
+				if (substitutionCount < attributeSubstitutions.length && !name.equals("class"))
 				{
 					String nextSubstitution = attributeSubstitutions[substitutionCount++];
 					if (nextSubstitution != null)
