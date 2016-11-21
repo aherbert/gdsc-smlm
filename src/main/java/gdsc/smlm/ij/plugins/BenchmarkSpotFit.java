@@ -236,7 +236,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			// Some parameter types may not be for DirectFilters so ignore this check...
 			// We just have to be sure that we support all the types produced by any DirectFilter.
-			
+
 			//			// Do a check to ensure we have all the parameter types in the correct order.
 			//			// This is needed so that all possible filters can be processed.
 			//			ParameterType[] types = ParameterType.values();
@@ -283,15 +283,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		if (type == null || array == null || filterCriteria == null)
 			return defaultValue;
-		
+
 		// Assume these are roughly the same
 		if (type == ParameterType.PRECISION2)
 			type = ParameterType.PRECISION;
-		
+
 		for (int j = 0; j < filterCriteria.length; j++)
 			if (filterCriteria[j].type == type)
 				return array[j];
-		
+
 		// All other types will have a default value
 		return defaultValue;
 	}
@@ -2770,5 +2770,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			textNeighbourHeight.setText(Utils.rounded(neighbourHeightThrehsold));
 			cbComputeDoublets.setState(computeDoublets);
 		}
+	}
+
+	/**
+	 * Run the analysis non-interactively using the given filter settings.
+	 *
+	 * @param filter
+	 *            the filter
+	 * @param residualsThreshold
+	 *            the residuals threshold
+	 */
+	public void run(DirectFilter filter, double residualsThreshold)
+	{
+		multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
+		run();
 	}
 }
