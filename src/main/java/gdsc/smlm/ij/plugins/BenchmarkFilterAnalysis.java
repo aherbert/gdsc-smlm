@@ -54,8 +54,10 @@ import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.match.ClassificationResult;
+import gdsc.core.match.Coordinate;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
+import gdsc.core.match.MatchResult;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
@@ -223,6 +225,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double selectionFraction = 0.2;
 	private static boolean rampedSelection = true;
 	private static boolean saveOption = false;
+	private static double iterationScoreTolerance = -1;
+	private static double iterationFilterTolerance = 1e-3;
+	private static boolean iterationCompareResults = false;
+	private static double iterationCompareDistance = 0.1;
+	private static int iterationMaxIterations = 10;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2, limitFailCount;
@@ -769,12 +776,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (!showIterationDialog())
 			return;
 
-		// Ensure we create the list of unique IDs that are created from the candidates after fit and filtering
+		IterationConvergenceChecker checker = new IterationConvergenceChecker(current);
 
-		// TODO - create a new convergence check for this
-		InterruptConvergenceChecker checker = new InterruptConvergenceChecker(0, 0, 0, 0);
-
-		// Iterate until the filter does not change, or the unique IDs do not change.
+		// Iterate ...
 		while (true)
 		{
 			// Do the fit (using the current optimum filter)
@@ -786,13 +790,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Re-use the filters as the user may be loading a custom set.
 			ComplexFilterScore previous = current;
 			current = analyse(filterSets, current);
-
 			if (current == null)
 				break;
-
-			// Check convergence
-			//if (checker.converged(previous, current))
-			//	break;
+			if (checker.converged(previous, current))
+				break;
 		}
 
 		IJ.showStatus("Finished");
@@ -1742,10 +1743,26 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private boolean showIterationDialog()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Configure the convergence criteria for iteration");
+		gd.addNumericField("Score_Tolerance", iterationScoreTolerance, -1);
+		gd.addNumericField("Filter_Tolerance", iterationFilterTolerance, -1);
+		gd.addCheckbox("Compare_Results", iterationCompareResults);
+		gd.addNumericField("Compare_Distance", iterationCompareDistance, 2);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		iterationScoreTolerance = gd.getNextNumber();
+		iterationFilterTolerance = gd.getNextNumber();
+		iterationCompareResults = gd.getNextBoolean();
+		iterationCompareDistance = Math.abs(gd.getNextNumber());
+
+		return true;
 	}
-	
+
 	private static Settings lastAnalyseSettings = null;
 
 	/**
@@ -2566,7 +2583,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				if (populationSize < 10)
 					populationSize = 10;
 				failureLimit = (int) Math.abs(gd.getNextNumber());
-				tolerance = Math.abs(gd.getNextNumber());
+				tolerance = gd.getNextNumber();
 				convergedCount = (int) gd.getNextNumber(); // Allow negatives
 				mutationRate = Math.abs(gd.getNextNumber());
 				crossoverRate = Math.abs(gd.getNextNumber());
@@ -4565,6 +4582,27 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.convergedCount = Math.max(0, convergedCount);
 		}
 
+		/**
+		 * Instantiates a new interrupt convergence checker.
+		 *
+		 * @param relative
+		 *            the relative
+		 * @param absolute
+		 *            the absolute
+		 * @param checkScore
+		 *            the check score
+		 * @param checkSequence
+		 *            the check sequence
+		 * @param maxIterations
+		 *            the max iterations
+		 */
+		public InterruptConvergenceChecker(double relative, double absolute, boolean checkScore, boolean checkSequence,
+				int maxIterations)
+		{
+			super(relative, absolute, checkScore, checkSequence, maxIterations);
+			this.convergedCount = 0;
+		}
+
 		@Override
 		protected void noConvergenceCriteria()
 		{
@@ -4597,6 +4635,62 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				IJ.resetEscape(); // Allow the plugin to continue processing
 				return true;
 			}
+			return false;
+		}
+	}
+
+	/**
+	 * Configure the convergence for iterative optimisation
+	 */
+	private class IterationConvergenceChecker
+	{
+		InterruptConvergenceChecker scoreChecker = null;
+		InterruptConvergenceChecker filterChecker = null;
+		HashMap<Integer, ArrayList<Coordinate>> previousResults = null;
+
+		public IterationConvergenceChecker(FilterScore current)
+		{
+			// We have two different relative thresholds so use 2 convergence checkers
+			scoreChecker = new InterruptConvergenceChecker(iterationScoreTolerance, iterationScoreTolerance * 1e-3,
+					true, false, iterationMaxIterations);
+			scoreChecker = new InterruptConvergenceChecker(iterationFilterTolerance, iterationFilterTolerance * 1e-3,
+					false, true, iterationMaxIterations);
+			if (iterationCompareResults)
+			{
+				previousResults = ResultsMatchCalculator
+						.getCoordinates(createResults(null, (DirectFilter) current.filter).getResults());
+			}
+		}
+
+		public boolean converged(FilterScore previous, FilterScore current)
+		{
+			// Stop if interrupted
+			if (IJ.escapePressed())
+			{
+				Utils.log("STOPPED");
+				// Do not reset escape
+				// IJ.resetEscape();
+				return true;
+			}
+
+			SearchResult<FilterScore> p = new SearchResult<FilterScore>(previous.filter.getParameters(), previous);
+			SearchResult<FilterScore> c = new SearchResult<FilterScore>(current.filter.getParameters(), current);
+
+			if (scoreChecker.converged(p, c))
+				return true;
+			if (filterChecker.converged(p, c))
+				return true;
+
+			if (iterationCompareResults)
+			{
+				HashMap<Integer, ArrayList<Coordinate>> currentResults = ResultsMatchCalculator
+						.getCoordinates(createResults(null, (DirectFilter) current.filter).getResults());
+				MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults, previousResults, iterationCompareDistance);
+				if (r.getJaccard() == 1)
+					return true;
+				previousResults = currentResults;
+			}
+
 			return false;
 		}
 	}
@@ -5673,6 +5767,27 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			filterResults = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
 		}
 
+		MemoryPeakResults results = createResults(filterResults, filter);
+		MemoryPeakResults.addResults(results);
+	}
+
+	/**
+	 * Save the results to memory.
+	 *
+	 * @param filterResults
+	 *            The results from running the filter (or null)
+	 * @param filter
+	 *            the filter
+	 */
+	private MemoryPeakResults createResults(PreprocessedPeakResult[] filterResults, DirectFilter filter)
+	{
+		if (filterResults == null)
+		{
+			final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
+			//multiPathFilter.setDebugFile("/tmp/filter.txt");
+			filterResults = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
+		}
+
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.copySettings(this.results);
 		results.setName(TITLE);
@@ -5689,5 +5804,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			int origY = (int) p[Gaussian2DFunction.Y_POSITION];
 			results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
 		}
+
+		return results;
 	}
 }
