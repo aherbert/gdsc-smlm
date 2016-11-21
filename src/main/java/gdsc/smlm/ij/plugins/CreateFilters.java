@@ -78,7 +78,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (!showDialog())
 			return;
 
@@ -133,8 +133,8 @@ public class CreateFilters implements PlugIn, ItemListener
 		}
 	}
 
-	private int processElement(StringWriter sw, Node node) throws TransformerFactoryConfigurationError,
-			TransformerException
+	private int processElement(StringWriter sw, Node node)
+			throws TransformerFactoryConfigurationError, TransformerException
 	{
 		// Get entire element as a string
 		String xmlString = XmlUtils.getString(node, false);
@@ -282,7 +282,8 @@ public class CreateFilters implements PlugIn, ItemListener
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Create a set of filters for use in the Filter Analysis plugin.\nAttributes will be enumerated if they are of the form 'min:max:increment'");
+		gd.addMessage(
+				"Create a set of filters for use in the Filter Analysis plugin.\nAttributes will be enumerated if they are of the form 'min:max:increment'");
 
 		gs = SettingsManager.loadSettings();
 		filterSettings = gs.getFilterSettings();
@@ -345,8 +346,8 @@ public class CreateFilters implements PlugIn, ItemListener
 		comment("Combined filters");
 		IJ.log("");
 		demo(new AndFilter(new SNRFilter(10), new WidthFilter(2)), new String[] { "10:20:1", "1.5:2.5:0.2" });
-		demo(new OrFilter(new PrecisionFilter(30), new AndFilter(new SNRFilter(10), new WidthFilter(2))), new String[] {
-				"30:40:2", "10:20:1", "1.5:2.5:0.2" });
+		demo(new OrFilter(new PrecisionFilter(30), new AndFilter(new SNRFilter(10), new WidthFilter(2))),
+				new String[] { "30:40:2", "10:20:1", "1.5:2.5:0.2" });
 		IJ.log("");
 	}
 
@@ -363,8 +364,8 @@ public class CreateFilters implements PlugIn, ItemListener
 			{
 				SAXParserFactory factory = SAXParserFactory.newInstance();
 				SAXParser saxParser = factory.newSAXParser();
-				saxParser.parse(new InputSource(new StringReader(xml)), new AttributeSubstitutionHandler(sb,
-						attributeSubstitutions));
+				saxParser.parse(new InputSource(new StringReader(xml)),
+						new AttributeSubstitutionHandler(sb, attributeSubstitutions));
 			}
 			catch (Exception e)
 			{
@@ -412,20 +413,19 @@ public class CreateFilters implements PlugIn, ItemListener
 			for (int attribute = 0; attribute < attributes.getLength(); attribute++)
 			{
 				sb.append(" ");
-				if (substitutionCount < attributeSubstitutions.length &&
-						!attributes.getLocalName(attribute).equals("class"))
+				String name = attributes.getQName(attribute);
+				if (substitutionCount < attributeSubstitutions.length && !name.equals("class") &&
+						!name.equals("reference"))
 				{
 					String nextSubstitution = attributeSubstitutions[substitutionCount++];
 					if (nextSubstitution != null)
 					{
-						sb.append(attributes.getLocalName(attribute)).append("=\"").append(nextSubstitution)
-								.append("\"");
+						sb.append(name).append("=\"").append(nextSubstitution).append("\"");
 						continue;
 					}
 				}
 
-				sb.append(attributes.getLocalName(attribute)).append("=\"").append(attributes.getValue(attribute))
-						.append("\"");
+				sb.append(name).append("=\"").append(attributes.getValue(attribute)).append("\"");
 			}
 			sb.append(">");
 		}
