@@ -659,8 +659,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		// For now do not provide an option, just debug
-		debug = true; //Utils.isExtraOptions();
 
 		simulationParameters = CreateData.simulationParameters;
 		if (simulationParameters == null)
@@ -674,30 +672,23 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			IJ.error(TITLE, "No benchmark results in memory");
 			return;
 		}
-		if (BenchmarkSpotFit.fitResults == null)
+
+		// Iterative optimisation: [Fit; Optimise] x N
+		if ("iterate".equals(arg))
 		{
-			IJ.error(TITLE, "No benchmark fitting results in memory");
+			iterate();
 			return;
 		}
-		if (BenchmarkSpotFit.lastId != simulationParameters.id)
-		{
-			IJ.error(TITLE, "Update the benchmark spot fitting for the latest simulation");
+
+		if (invalidBenchmarkSpotFitResults())
 			return;
-		}
-		if (BenchmarkSpotFit.lastFilterId != BenchmarkSpotFilter.filterResult.id)
-		{
-			IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
-			return;
-		}
 
 		extraOptions = Utils.isExtraOptions();
+		// For now do not provide an option, just debug
+		debug = true; //extraOptions
 
-		resultsList = readResults();
-		if (resultsList == null)
-		{
-			IJ.error(TITLE, "No results could be loaded");
+		if (!loadFitResults())
 			return;
-		}
 
 		if (!showDialog())
 			return;
@@ -712,6 +703,97 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 
 		analyse(filterSets);
+
+		IJ.showStatus("Finished");
+	}
+
+	private boolean invalidBenchmarkSpotFitResults()
+	{
+		if (BenchmarkSpotFit.fitResults == null)
+		{
+			IJ.error(TITLE, "No benchmark fitting results in memory");
+			return true;
+		}
+		if (BenchmarkSpotFit.lastId != simulationParameters.id)
+		{
+			IJ.error(TITLE, "Update the benchmark spot fitting for the latest simulation");
+			return true;
+		}
+		if (BenchmarkSpotFit.lastFilterId != BenchmarkSpotFilter.filterResult.id)
+		{
+			IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
+			return true;
+		}
+		return false;
+	}
+
+	private boolean loadFitResults()
+	{
+		resultsList = readResults();
+		if (resultsList == null)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			return false;
+		}
+		return true;
+	}
+
+	private void iterate()
+	{
+		// Run the benchmark fit once interactively, keep the instance
+		// TODO - Add ability to skip this step if the fitting has already been done.
+		BenchmarkSpotFit fit = new BenchmarkSpotFit();
+		fit.run(null);
+		if (invalidBenchmarkSpotFitResults())
+			return;
+
+		// Run filter analysis once interactively
+		if (!loadFitResults())
+			return;
+
+		if (!showDialog())
+			return;
+
+		// Load filters from file
+		List<FilterSet> filterSets = readFilterSets();
+		if (filterSets == null || filterSets.isEmpty())
+		{
+			IJ.error(TITLE, "No filters specified");
+			return;
+		}
+
+		ComplexFilterScore current = analyse(filterSets, null);
+		if (current == null)
+			return;
+
+		if (!showIterationDialog())
+			return;
+
+		// Ensure we create the list of unique IDs that are created from the candidates after fit and filtering
+
+		// TODO - create a new convergence check for this
+		InterruptConvergenceChecker checker = new InterruptConvergenceChecker(0, 0, 0, 0);
+
+		// Iterate until the filter does not change, or the unique IDs do not change.
+		while (true)
+		{
+			// Do the fit (using the current optimum filter)
+			//fit.run(current.atLimitString().filter);
+			if (!loadFitResults())
+				return;
+
+			// Optimise the filter again.
+			// Re-use the filters as the user may be loading a custom set.
+			ComplexFilterScore previous = current;
+			current = analyse(filterSets, current);
+
+			if (current == null)
+				break;
+
+			// Check convergence
+			//if (checker.converged(previous, current))
+			//	break;
+		}
 
 		IJ.showStatus("Finished");
 	}
@@ -1658,75 +1740,111 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
 	}
 
+	private boolean showIterationDialog()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 	private static Settings lastAnalyseSettings = null;
 
 	/**
 	 * Run different filtering methods on a set of labelled peak results outputting performance statistics on the
-	 * success of
-	 * the filter to an ImageJ table.
-	 * <p>
-	 * If the peak result original value is set to 1 it is considered a true peak, 0 for a false peak. Filtering is done
-	 * using e.g. SNR threshold, Precision thresholds, etc. The statistics reported are shown in a table, e.g.
-	 * precision, Jaccard, F-score.
+	 * success of the filter to an ImageJ table.
 	 * <p>
 	 * For each filter set a plot is shown of the score verses the filter value, thus filters should be provided in
 	 * ascending numerical order otherwise they are sorted.
-	 * 
-	 * @param resultsList
+	 *
 	 * @param filterSets
+	 *            the filter sets
+	 * @param optimum
+	 *            the optimum
+	 * @return the best filter
 	 */
-	private void analyse(List<FilterSet> filterSets)
+	private ComplexFilterScore analyse(List<FilterSet> filterSets, ComplexFilterScore optimum)
 	{
-		if (reset)
-			scores.clear();
+		return analyse(filterSets, true, optimum);
+	}
 
-		createResultsWindow();
+	/**
+	 * Run different filtering methods on a set of labelled peak results outputting performance statistics on the
+	 * success of the filter to an ImageJ table.
+	 * <p>
+	 * For each filter set a plot is shown of the score verses the filter value, thus filters should be provided in
+	 * ascending numerical order otherwise they are sorted.
+	 *
+	 * @param filterSets
+	 *            the filter sets
+	 * @return the best filter
+	 */
+	private ComplexFilterScore analyse(List<FilterSet> filterSets)
+	{
+		return analyse(filterSets, false, null);
+	}
 
-		boolean debugSpeed = false;
+	/**
+	 * Run different filtering methods on a set of labelled peak results outputting performance statistics on the
+	 * success of the filter to an ImageJ table.
+	 * <p>
+	 * For each filter set a plot is shown of the score verses the filter value, thus filters should be provided in
+	 * ascending numerical order otherwise they are sorted.
+	 *
+	 * @param filterSets
+	 *            the filter sets
+	 * @param iterative
+	 *            the iterative
+	 * @param optimum
+	 *            the optimum
+	 * @return the best filter
+	 */
+	private ComplexFilterScore analyse(List<FilterSet> filterSets, boolean iterative, ComplexFilterScore optimum)
+	{
+		// Non-zero modes are used for the iterative optimisation which require new results
+		boolean newResults = iterative;
 
-		// Only repeat analysis if necessary
-		boolean newResults = false;
-		double evolveSetting = evolve;
-		if (evolve == 1)
-			// The delta effects the step size for the Genetic Algorithm
-			evolveSetting *= delta;
-		Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
-				plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
-
-		if (debugSpeed || !settings.equals(lastAnalyseSettings) || (evolve != 0 && repeatEvolve))
+		if (optimum != null)
 		{
-			//System.out.println("Running...");
-			newResults = true;
-			lastAnalyseSettings = settings;
-
-			plots = new ArrayList<NamedPlot>(plotTopN);
-			bestFilter = new HashMap<String, ComplexFilterScore>();
-			bestFilterOrder = new LinkedList<String>();
-
-			analysisStopWatch = StopWatch.createStarted();
-			IJ.showStatus("Analysing filters ...");
-			int setNumber = 0;
-			for (FilterSet filterSet : filterSets)
-			{
-				setNumber++;
-				if (run(filterSet, setNumber) < 0)
-					break;
-			}
-			analysisStopWatch.stop();
-			IJ.showProgress(1);
-			IJ.showStatus("");
-
-			final String timeString = analysisStopWatch.toString();
-			IJ.log("Filter analysis time : " + timeString);
+			// Non-interactive re-run when iterating
+			scores.clear();
+			runAnalysis(filterSets, optimum);
 
 			if (Utils.isInterrupted())
-				return;
+				return null;
+		}
+		else
+		{
+			// Interactive run, this may be the first run during iterative optimisation
+			if (reset)
+				scores.clear();
+
+			createResultsWindow();
+
+			boolean debugSpeed = false;
+
+			// Only repeat analysis if necessary
+			double evolveSetting = evolve;
+			if (evolve == 1)
+				// The delta effects the step size for the Genetic Algorithm
+				evolveSetting *= delta;
+			Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
+					plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
+
+			if (debugSpeed || !settings.equals(lastAnalyseSettings) || (evolve != 0 && repeatEvolve))
+			{
+				newResults = true;
+				lastAnalyseSettings = settings;
+
+				runAnalysis(filterSets, null);
+
+				if (Utils.isInterrupted())
+					return null;
+			}
 		}
 
 		if (bestFilter.isEmpty())
 		{
 			IJ.log("Warning: No filters pass the criteria");
-			return;
+			return null;
 		}
 
 		List<ComplexFilterScore> filters = new ArrayList<ComplexFilterScore>(bestFilter.values());
@@ -1853,6 +1971,32 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		saveResults(filterResults, bestFilter);
 
 		wo.tile();
+
+		return filters.get(0);
+	}
+
+	private void runAnalysis(List<FilterSet> filterSets, ComplexFilterScore optimum)
+	{
+		plots = new ArrayList<NamedPlot>(plotTopN);
+		bestFilter = new HashMap<String, ComplexFilterScore>();
+		bestFilterOrder = new LinkedList<String>();
+
+		analysisStopWatch = StopWatch.createStarted();
+		IJ.showStatus("Analysing filters ...");
+		int setNumber = 0;
+		DirectFilter currentOptimum = (optimum != null) ? optimum.r.filter : null;
+		for (FilterSet filterSet : filterSets)
+		{
+			setNumber++;
+			if (run(filterSet, setNumber, currentOptimum) < 0)
+				break;
+		}
+		analysisStopWatch.stop();
+		IJ.showProgress(1);
+		IJ.showStatus("");
+
+		final String timeString = analysisStopWatch.toString();
+		IJ.log("Filter analysis time : " + timeString);
 	}
 
 	private int countFilters(List<FilterSet> filterSets)
@@ -2176,7 +2320,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return sb.toString();
 	}
 
-	private int run(FilterSet filterSet, int setNumber)
+	private int run(FilterSet filterSet, int setNumber, DirectFilter currentOptimum)
 	{
 		// Check if the filters are the same so allowing optimisation
 		final boolean allSameType = filterSet.allSameType();
@@ -4458,7 +4602,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	}
 
 	// Used to implement the FitnessFunction interface 
-	private String ga_statusPrefix;
+	private String ga_statusPrefix = "";
 	private Population<FilterScore> ga_population;
 
 	// Used to set the strength on a filter
