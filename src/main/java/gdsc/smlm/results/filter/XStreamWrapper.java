@@ -31,45 +31,57 @@ public abstract class XStreamWrapper
 		xs = new XStream(new DomDriver());
 		if (xs != null)
 		{
-			xs.autodetectAnnotations(true);
+			try
+			{
+				xs.autodetectAnnotations(true);
 
-			addAlias(FilterSet.class);
+				addAlias(FilterSet.class);
 
-			// Add aliases for all Filter classes
-			addAlias(AndFilter.class);
-			addAlias(ANRFilter.class);
-			addAlias(ANRFilter2.class);
-			addAlias(CombinedFilter.class);
-			addAlias(CoordinateFilter.class);
-			addAlias(DirectFilter.class);
-			addAlias(EShiftFilter.class);
-			addAlias(Filter.class);
-			addAlias(HysteresisFilter.class);
-			addAlias(MultiFilter.class);
-			addAlias(MultiFilter2.class);
-			addAlias(MultiHysteresisFilter.class);
-			addAlias(MultiHysteresisFilter2.class);
-			addAlias(MultiPathFilter.class);
-			addAlias(OrFilter.class);
-			addAlias(PrecisionFilter.class);
-			addAlias(PrecisionFilter2.class);
-			addAlias(PrecisionHysteresisFilter.class);
-			addAlias(PrecisionHysteresisFilter2.class);
-			addAlias(SBRFilter.class);
-			addAlias(ShiftFilter.class);
-			addAlias(SignalFilter.class);
-			addAlias(SNRFilter.class);
-			addAlias(SNRFilter2.class);
-			addAlias(SNRHysteresisFilter.class);
-			addAlias(TraceFilter.class);
-			addAlias(WidthFilter.class);
-			addAlias(WidthFilter2.class);
+				// Add aliases for all Filter classes
+				addAlias(AndFilter.class);
+				addAlias(ANRFilter.class);
+				addAlias(ANRFilter2.class);
+				addAlias(CombinedFilter.class);
+				addAlias(CoordinateFilter.class);
+				addAlias(DirectFilter.class);
+				addAlias(EShiftFilter.class);
+				addAlias(Filter.class);
+				addAlias(HysteresisFilter.class);
+				addAlias(MultiFilter.class);
+				addAlias(MultiFilter2.class);
+				addAlias(MultiHysteresisFilter.class);
+				addAlias(MultiHysteresisFilter2.class);
+				addAlias(MultiPathFilter.class);
+				addAlias(OrFilter.class);
+				addAlias(PrecisionFilter.class);
+				addAlias(PrecisionFilter2.class);
+				addAlias(PrecisionHysteresisFilter.class);
+				addAlias(PrecisionHysteresisFilter2.class);
+				addAlias(SBRFilter.class);
+				addAlias(ShiftFilter.class);
+				addAlias(SignalFilter.class);
+				addAlias(SNRFilter.class);
+				addAlias(SNRFilter2.class);
+				addAlias(SNRHysteresisFilter.class);
+				addAlias(TraceFilter.class);
+				addAlias(WidthFilter.class);
+				addAlias(WidthFilter2.class);
 
-			// Removed dependency on reflections since this has other jar dependencies
-			//Reflections reflections = new Reflections("gdsc.smlm.results.filter");
-			//Set<Class<? extends DirectFilter>> subTypes = reflections.getSubTypesOf(Filter.class);
-			//for (Class<? extends DirectFilter> type : subTypes)
-			//	addAlias(type);
+				// Removed dependency on reflections since this has other jar dependencies
+				//Reflections reflections = new Reflections("gdsc.smlm.results.filter");
+				//Set<Class<? extends DirectFilter>> subTypes = reflections.getSubTypesOf(Filter.class);
+				//for (Class<? extends DirectFilter> type : subTypes)
+				//	addAlias(type);
+			}
+			catch (XStreamException ex)
+			{
+				ex.printStackTrace();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+
 		}
 	}
 
@@ -101,7 +113,11 @@ public abstract class XStreamWrapper
 			}
 			catch (XStreamException ex)
 			{
-				//ex.printStackTrace();
+				ex.printStackTrace();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
 			}
 		}
 		return "";
@@ -123,7 +139,11 @@ public abstract class XStreamWrapper
 			}
 			catch (XStreamException ex)
 			{
-				//ex.printStackTrace();
+				ex.printStackTrace();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
 			}
 		}
 		return null;
