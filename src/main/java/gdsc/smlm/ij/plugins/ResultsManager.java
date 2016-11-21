@@ -766,9 +766,10 @@ public class ResultsManager implements PlugIn, MouseListener
 			if (results != null && results.size() > 0)
 			{
 				// If the name contains a .tif suffix then create an image source
-				if (results.getName() != null && results.getName().contains(".tif"))
+				if (results.getName() != null && results.getName().contains(".tif") && results.getSource() == null)
 				{
-					results.setSource(new IJImageSource(results.getName(), results.getName()));
+					int index = results.getName().indexOf(".tif");
+					results.setSource(new IJImageSource(results.getName().substring(0, index)));
 				}
 			}
 		}

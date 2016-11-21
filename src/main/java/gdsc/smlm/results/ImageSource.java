@@ -323,9 +323,17 @@ public abstract class ImageSource
 			xs.autodetectAnnotations(true);
 			return (ImageSource) xs.fromXML(xml);
 		}
+		catch (ClassCastException ex)
+		{
+			ex.printStackTrace();
+		}
 		catch (XStreamException ex)
 		{
-			//ex.printStackTrace();
+			ex.printStackTrace();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
 		}
 		return null;
 	}

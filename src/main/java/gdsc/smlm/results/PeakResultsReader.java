@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.utils.XmlUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.utils.XmlUtils;
 
 /**
  * Reads the fit results from file
@@ -336,9 +336,13 @@ public class PeakResultsReader
 						{
 							calibration = (Calibration) XmlUtils.fromXML(xml);
 						}
-						catch (ClassCastException e)
+						catch (ClassCastException ex)
 						{
-
+							ex.printStackTrace();
+						}
+						catch (Exception ex)
+						{
+							ex.printStackTrace();
 						}
 					}
 				}

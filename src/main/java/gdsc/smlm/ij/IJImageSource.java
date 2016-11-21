@@ -45,6 +45,16 @@ public class IJImageSource extends ImageSource
 	private String path;
 
 	/**
+	 * Create a new image source using the name of the image file
+	 * 
+	 * @param name
+	 */
+	public IJImageSource(String name)
+	{
+		super(name);
+	}
+	
+	/**
 	 * Create a new image source using the path to the image file
 	 * 
 	 * @param name
