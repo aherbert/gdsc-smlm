@@ -372,14 +372,11 @@ public class CreateFilters implements PlugIn, ItemListener
 				e.printStackTrace();
 			}
 
-			IJ.log(xml);
-			IJ.log(sb.toString());
-			//IJ.log(XmlUtils.prettyPrintXml(sb.toString()));
+			//IJ.log(xml);
+			//IJ.log(sb.toString());
+			xml = sb.toString();
 		}
-		else
-		{
-			IJ.log(xml);
-		}
+		IJ.log(XmlUtils.prettyPrintXml(xml));
 	}
 
 	/*
