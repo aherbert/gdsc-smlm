@@ -782,7 +782,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		while (true)
 		{
 			// Do the fit (using the current optimum filter)
-			//fit.run(current.atLimitString().filter);
+			fit.run(current.r.filter, residualsThreshold);
 			if (!loadFitResults())
 				return;
 
@@ -2355,6 +2355,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		boolean rangeInput = false;
 		boolean[] disabled = null;
 		double[][] seed = null;
+		boolean nonInteractive = false;
 		if (allSameType)
 		{
 			// There should always be 1 filter
@@ -2363,6 +2364,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			// Option to configure a range
 			rangeInput = filterSet.getName().contains("Range");
+			double[] range;
 
 			if (rangeInput && filterSet.size() == 4)
 			{
@@ -2504,6 +2506,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (originalDimensions != null)
 			{
+				// Use the current optimum if we are doing a range optimisation
+				if (currentOptimum != null && rangeInput && currentOptimum.getType().equals(ss_filter.getType()) &&
+						evolve != 0)
+				{
+					// Suppress dialogs and use the current settings
+					nonInteractive = true;
+
+					// If the optimum is that same filter type as the filter set, and we are using
+					// a search method then centre the dimensions on the optimum.
+					for (int i = 0; i < disabled.length; i++)
+					{
+						if (originalDimensions[i].isActive())
+						{
+							// TODO - Centre on the current optimum
+
+							// TODO - Optionally reduce the width of the dimensions depending on the current
+							// iteration. This should really reduce the original width. So store the
+							// range for each param when we read the filters
+
+						}
+					}
+				}
+
 				// Store the dimensions so we can do an 'at limit' check
 				disabled = new boolean[originalDimensions.length];
 				ss_lower = new double[originalDimensions.length];
@@ -2515,7 +2540,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					ss_upper[i] = originalDimensions[i].upper;
 				}
 			}
-
 		}
 		else
 		{
@@ -2546,7 +2570,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							stepSize[j] *= -1;
 				}
 			}
-			double[] upper = ss_filter.upperLimit();
+
+			if (nonInteractive)
+			{
+				// TODO - Build the options without a dialog
+			}
+			
 			// Ask the user for the mutation step parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
@@ -2618,6 +2647,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
 				SimpleMutator<FilterScore> mutator = new SimpleMutator<FilterScore>(random, mutationRate);
 				// Override the settings with the step length, a min of zero and the configured upper
+				double[] upper = ss_filter.upperLimit();
 				mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
 				Recombiner<FilterScore> recombiner = new SimpleRecombiner<FilterScore>(random, crossoverRate,
 						meanChildren);
@@ -2688,6 +2718,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// The step search should use a multi-dimension refinement and no range reduction
 			SearchSpace.RefinementMode myRefinementMode = SearchSpace.RefinementMode.MULTI_DIMENSION;
 
+			if (nonInteractive)
+			{
+				// TODO - Build the options without a dialog
+			}
+			
 			// Ask the user for the search parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
@@ -2856,6 +2891,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Collect parameters for the enrichment search algorithm
 			pauseTimer();
 
+			if (nonInteractive)
+			{
+				// TODO - Build the options without a dialog
+			}
+			
 			// Ask the user for the search parameters.
 			GenericDialog gd = new GenericDialog(TITLE);
 			String prefix = setNumber + "_";
@@ -4685,7 +4725,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				HashMap<Integer, ArrayList<Coordinate>> currentResults = ResultsMatchCalculator
 						.getCoordinates(createResults(null, (DirectFilter) current.filter).getResults());
-				MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults, previousResults, iterationCompareDistance);
+				MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults, previousResults,
+						iterationCompareDistance);
 				if (r.getJaccard() == 1)
 					return true;
 				previousResults = currentResults;
