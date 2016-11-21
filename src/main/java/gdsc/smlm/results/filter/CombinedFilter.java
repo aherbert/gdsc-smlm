@@ -29,7 +29,10 @@ import gdsc.smlm.results.PeakResult;
 public abstract class CombinedFilter extends DirectFilter
 {
 	protected Filter filter1, filter2;
-	protected DirectFilter dfilter1, dfilter2;
+	@XStreamOmitField
+	protected DirectFilter dfilter1;
+	@XStreamOmitField
+	protected DirectFilter dfilter2;
 
 	@XStreamOmitField
 	protected int result1;
@@ -40,12 +43,18 @@ public abstract class CombinedFilter extends DirectFilter
 	{
 		this.filter1 = filter1;
 		this.filter2 = filter2;
+		initialiseState();
+	}
+
+	@Override
+	protected void initialiseState()
+	{
 		if (filter1 instanceof DirectFilter)
 			dfilter1 = (DirectFilter) filter1;
 		if (filter2 instanceof DirectFilter)
 			dfilter2 = (DirectFilter) filter2;
 	}
-
+	
 	@Override
 	protected String generateName()
 	{

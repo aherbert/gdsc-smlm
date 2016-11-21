@@ -1116,13 +1116,23 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	{
 		try
 		{
-			return (Filter) XStreamWrapper.fromXML(xml);
+			Filter f = (Filter) XStreamWrapper.fromXML(xml);
+			f.initialiseState();
+			return f;
 		}
 		catch (ClassCastException ex)
 		{
 			//ex.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 * Run after the filter is deserialised using XStream
+	 */
+	protected void initialiseState()
+	{
+		
 	}
 
 	/*
