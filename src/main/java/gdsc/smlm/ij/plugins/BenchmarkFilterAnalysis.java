@@ -181,7 +181,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search",
 			"Step Search" };
 	private static int evolve = 0;
-	private static boolean repeatEvolve = true;
+	private static boolean repeatEvolve = false;
 	private static int rangeSearchWidth = 2;
 	private static double rangeSearchReduce = 0.3;
 	private static int maxIterations = 30;
@@ -222,6 +222,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static ArrayList<NamedPlot> plots;
 	private static HashMap<String, ComplexFilterScore> bestFilter;
 	private static LinkedList<String> bestFilterOrder;
+	private static HashMap<String, ComplexFilterScore> iterBestFilter = null;
 
 	private static boolean reUseFilters = true;
 	private static boolean expandFilters = false;
@@ -714,6 +715,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private void iterate()
 	{
+		// If this is run again immediately then provide options for reporting the results
+		if (iterBestFilter != null && iterBestFilter == bestFilter)
+		{
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.enableYesNoCancel();
+			gd.addMessage("Iteration results are held in memory.\n \nReport these results?");
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return;
+			if (gd.wasOKed())
+			{
+				reportIterationResults();
+				return;
+			}
+		}
+
 		// Run the benchmark fit once interactively, keep the instance
 		BenchmarkSpotFit fit = new BenchmarkSpotFit();
 		// Provide ability to skip this step if the fitting has already been done.
@@ -744,10 +761,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (!showIterationDialog())
 			return;
 
+		// Remove the previous iteration results
+		iterBestFilter = null;
+
+		Utils.log(TITLE + " Iterating ...");
+
 		IterationConvergenceChecker checker = new IterationConvergenceChecker(current);
 
 		// Iterate ...
-		while (true)
+		boolean converged = false;
+		while (!converged)
 		{
 			// Do the fit (using the current optimum filter)
 			fit.run(current.r.filter, residualsThreshold, failCount);
@@ -770,11 +793,27 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			current = analyse(filterSets, current, rangeReduction);
 			if (current == null)
 				break;
-			if (checker.converged(previous, current))
-				break;
+			converged = checker.converged(previous, current);
+			converged = true;
+		}
+
+		if (converged)
+		{
+			// Set-up the plugin so that it can be run again (in iterative mode) 
+			// and the results reported for the top filter.
+			// If the user runs the non-iterative mode then the results will be lost.
+			iterBestFilter = bestFilter;
 		}
 
 		IJ.showStatus("Finished");
+	}
+	
+	private void reportIterationResults()
+	{
+		residualsThreshold = sResidualsThreshold;
+		if (!showReportDialog())
+			return;
+		reportResults(false);		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1590,9 +1629,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (gd.wasCanceled() || !readDialog(gd))
 			return false;
 
+		if (!selectTableColumns())
+			return false;
+
+		// We may have to read the results again if the ranking option has changed
+		readResults();
+
+		return true;
+	}
+
+	private boolean selectTableColumns()
+	{
 		if (showResultsTable || showSummaryTable)
 		{
-			gd = new GenericDialog(TITLE);
+			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addHelp(About.HELP_URL);
 
 			gd.addMessage("Select the results:");
@@ -1616,10 +1666,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 		}
-
-		// We may have to read the results again if the ranking option has changed
-		readResults();
-
 		return true;
 	}
 
@@ -1739,6 +1785,104 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return true;
 	}
 
+	private boolean showReportDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		double signal = simulationParameters.minSignal;
+		if (simulationParameters.maxSignal > signal)
+		{
+			signal += simulationParameters.maxSignal;
+			signal *= 0.5;
+		}
+		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
+				simulationParameters.b2, simulationParameters.emCCD);
+		double pLSE = PeakResult.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
+				simulationParameters.b2, simulationParameters.emCCD);
+		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
+				simulationParameters.b2, simulationParameters.emCCD);
+		String msg = String.format(
+				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
+				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE);
+		FilterResult best = getBestResult();
+		if (best != null)
+		{
+			msg += String.format("\nCurrent Best=%s, FailCount=%d, Range=%d", Utils.rounded(best.score), best.failCount,
+					best.failCountRange);
+		}
+		gd.addMessage(msg);
+
+		gd.addCheckbox("Show_table", showResultsTable);
+		gd.addCheckbox("Show_summary", showSummaryTable);
+		gd.addCheckbox("Clear_tables", clearTables);
+		gd.addSlider("Summary_top_n", 0, 20, summaryTopN);
+		gd.addCheckbox("Save_best_filter", saveBestFilter);
+		gd.addCheckbox("Save_template", saveTemplate);
+		gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
+		gd.addSlider("Delta", 0.01, 1, delta);
+		if (!simulationParameters.fixedDepth)
+			gd.addCheckbox("Depth_recall_analysis", depthRecallAnalysis);
+		gd.addCheckbox("Score_analysis", scoreAnalysis);
+		gd.addChoice("Component_analysis", COMPONENT_ANALYSIS, COMPONENT_ANALYSIS[componentAnalysis]);
+		gd.addStringField("Title", resultsTitle, 20);
+		String[] labels = { "Show_TP", "Show_FP", "Show_FN" };
+		gd.addCheckboxGroup(1, 3, labels, new boolean[] { showTP, showFP, showFN });
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+		
+		showResultsTable = gd.getNextBoolean();
+		showSummaryTable = gd.getNextBoolean();
+		clearTables = gd.getNextBoolean();
+		summaryTopN = (int) Math.abs(gd.getNextNumber());
+		saveBestFilter = gd.getNextBoolean();
+		saveTemplate = gd.getNextBoolean();
+		calculateSensitivity = gd.getNextBoolean();
+		delta = gd.getNextNumber();
+		if (!simulationParameters.fixedDepth)
+			depthRecallAnalysis = gd.getNextBoolean();
+		scoreAnalysis = gd.getNextBoolean();
+		componentAnalysis = gd.getNextChoiceIndex();
+		resultsTitle = gd.getNextString();
+		showTP = gd.getNextBoolean();
+		showFP = gd.getNextBoolean();
+		showFN = gd.getNextBoolean();
+
+		if (gd.invalidNumber())
+			return false;
+		
+		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
+		createResultsPrefix2();
+
+		// Check there is one output
+		if (!showResultsTable && !showSummaryTable && !calculateSensitivity && plotTopN < 1 && !saveBestFilter)
+		{
+			IJ.error(TITLE, "No output selected");
+			return false;
+		}
+
+		// Check arguments
+		try
+		{
+			Parameters.isAboveZero("Delta", delta);
+			Parameters.isBelow("Delta", delta, 1);
+			Parameters.isAboveZero("Upper match distance", upperMatchDistance);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		if (!selectTableColumns())
+			return false;
+
+		return true;
+	}
+
 	private static Settings lastAnalyseSettings = null;
 
 	/**
@@ -1824,10 +1968,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (evolve == 1)
 				// The delta effects the step size for the Genetic Algorithm
 				evolveSetting *= delta;
-			Settings settings = new Settings(resultsList, filterSets, failCount, failCountRange, residualsThreshold,
+			Settings settings = new Settings(filterSets, resultsList, failCount, failCountRange, residualsThreshold,
 					plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
 
-			if (debugSpeed || !settings.equals(lastAnalyseSettings) || (evolve != 0 && repeatEvolve))
+			boolean equalSettings = settings.equals(lastAnalyseSettings);
+
+			if (debugSpeed || !equalSettings || (evolve != 0 && repeatEvolve))
 			{
 				newResults = true;
 				lastAnalyseSettings = settings;
@@ -1839,6 +1985,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
+		return reportResults(newResults);
+	}
+
+	private ComplexFilterScore reportResults(boolean newResults)
+	{
 		if (bestFilter.isEmpty())
 		{
 			IJ.log("Warning: No filters pass the criteria");
@@ -4806,7 +4957,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		private void logConvergence(String component)
 		{
 			if (iterationMaxIterations != 0 && getIterations() >= iterationMaxIterations)
-				component = "iterations";			
+				component = "iterations";
 			Utils.log("Converged on " + component);
 		}
 
