@@ -900,7 +900,7 @@ public class SearchSpace
 		final HaltonSequenceGenerator[] generator = new HaltonSequenceGenerator[1];
 
 		// Find the best individual
-		SearchResult<T>[] scores = scoreSeed(dimensions, scoreFunction, samples, fraction);
+		SearchResult<T>[] scores = scoreSeed(dimensions, scoreFunction, samples, fraction, generator);
 		if (scores == null)
 			scores = score(dimensions, scoreFunction, samples, fraction, generator);
 		if (scores == null)
@@ -941,19 +941,34 @@ public class SearchSpace
 	 *
 	 * @param <T>
 	 *            the type of comparable score
+	 * @param dimensions
+	 *            the dimensions
 	 * @param scoreFunction
 	 *            the score function
 	 * @param samples
 	 *            the samples
 	 * @param fraction
 	 *            the fraction
+	 * @param generator
+	 *            the generator
 	 * @return the score results
 	 */
 	private <T extends Comparable<T>> SearchResult<T>[] scoreSeed(Dimension[] dimensions,
-			FullScoreFunction<T> scoreFunction, int samples, double fraction)
+			FullScoreFunction<T> scoreFunction, int samples, double fraction, HaltonSequenceGenerator[] generator)
 	{
 		if (!seedToSearchSpace(dimensions))
 			return null;
+
+		// Pad search space with more samples
+		int remaining = samples - searchSpace.length;
+		if (remaining > 0)
+		{
+			double[][] sample = sample(dimensions, remaining, generator);
+			ArrayList<double[]> merged = new ArrayList<double[]>(sample.length + searchSpace.length);
+			merged.addAll(Arrays.asList(searchSpace));
+			merged.addAll(Arrays.asList(sample));
+			searchSpace = merged.toArray(new double[merged.size()][]);
+		}
 
 		// Score
 		SearchResult<T>[] scores = scoreFunction.score(searchSpace);
@@ -1013,6 +1028,8 @@ public class SearchSpace
 	 */
 	public static double[][] sample(Dimension[] dimensions, int samples, RandomVectorGenerator[] generator)
 	{
+		if (samples <= 0)
+			return null;
 		// Count the number of active dimensions
 		final int[] indices = new int[dimensions.length];
 		int size = 0;
