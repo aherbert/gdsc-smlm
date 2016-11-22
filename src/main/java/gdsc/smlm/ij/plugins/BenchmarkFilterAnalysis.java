@@ -794,7 +794,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (current == null)
 				break;
 			converged = checker.converged(previous, current);
-			converged = true;
 		}
 
 		if (converged)
