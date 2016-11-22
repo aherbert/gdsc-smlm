@@ -2779,10 +2779,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 *            the filter
 	 * @param residualsThreshold
 	 *            the residuals threshold
+	 * @param failuresLimit
+	 *            the failures limit
 	 */
-	public void run(DirectFilter filter, double residualsThreshold)
+	public void run(DirectFilter filter, double residualsThreshold, int failuresLimit)
 	{
 		multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
+		config.setFailuresLimit(failuresLimit);
 		run();
 	}
 }
