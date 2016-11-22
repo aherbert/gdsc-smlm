@@ -64,7 +64,6 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -91,7 +90,6 @@ import gdsc.smlm.results.filter.FilterScore;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
-import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
@@ -143,22 +141,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	// However the min filter is not used to determine if candidates are valid (that is the primary filter).
 	// It is used to store poor estimates during fitting. So we can set it to null.
 	private static final DirectFilter minimalFilter = null;
-	// Used to remove very bad spots that should fail any reasonable primary filter
-	// TODO - make this configurable
-	private static final DirectFilter minimalFilter2;
-	static
-	{
-		MultiFilter2 defaulltMinFilter = FitWorker.createMinimalFilter();
-		double signal = defaulltMinFilter.getSignal() * 0.5;
-		float snr = (float) (defaulltMinFilter.getSNR() * 0.5);
-		double minWidth = defaulltMinFilter.getMinWidth() * 0.5;
-		double maxWidth = defaulltMinFilter.getMaxWidth() * 1.5;
-		double shift = 10; // Make this big as sometimes shifts are large
-		double eshift = 0;
-		// Disable precision since we may or may not use the local background
-		double precision = 0;
-		minimalFilter2 = new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
-	}
 	private static double sResidualsThreshold = 0.3;
 	private double residualsThreshold = 1; // Disabled
 	private static boolean reset = true;
@@ -230,6 +212,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static boolean iterationCompareResults = false;
 	private static double iterationCompareDistance = 0.1;
 	private static int iterationMaxIterations = 10;
+	private static double iterationMinRangeReduction = 0.2;
+	private static int iterationMinRangeReductionIteration = 5;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2, limitFailCount;
@@ -340,7 +324,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		int included = 0;
 		int includedActual = 0;
 		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
-		private final DirectFilter minFilter;
 		private final boolean checkBorder;
 		final float border;
 		final float xlimit;
@@ -360,8 +343,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			depthFitStats = new StoredDataStatistics();
 			signalFactorStats = new StoredDataStatistics();
 			distanceStats = new StoredDataStatistics();
-			minFilter = (DirectFilter) minimalFilter2.clone();
-			minFilter.setup();
 
 			checkBorder = (BenchmarkSpotFilter.lastAnalysisBorder != null &&
 					BenchmarkSpotFilter.lastAnalysisBorder.x != 0);
@@ -479,7 +460,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		 *            the result grid
 		 * @param matched
 		 *            array of actual results that have been matched
-		 * @return true, if the fit status was ok and spots pass the min filter
+		 * @return true, if the fit status was ok
 		 */
 		private boolean score(int n, int set, final gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
 				final ResultGridManager resultGrid, final boolean[] matched)
@@ -487,28 +468,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (fitResult != null && fitResult.status == 0)
 			{
 				// Get the new results
-				int size = 0;
 				for (int i = 0; i < fitResult.results.length; i++)
 				{
 					final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
 					peak.setAssignments(null);
 					peak.setIgnore(false);
 
-					// Remove bad candidate fits to speed up filtering later.
-
-					// Note: We cannot do this as we do not know what the minimum filter will be.
+					// Note: We cannot remove bad candidates as we do not know what the minimum filter will be.
 					// Instead this is done when we create a subset for scoring.
-
-					//					final boolean isCandidate = !(peak.isNewResult() || peak.isExistingResult());
-					//					if (isCandidate && i != 0 && !minFilter.accept(peak))
-					//					{
-					//						System.out.printf("%d [%d] (%d) %d (%d) %.2f %.2f %s\n", peak.getFrame(), n, set, i,
-					//								peak.getCandidateId(), peak.getX(), peak.getY(),
-					//								DirectFilter.getStatusMessage(peak, minFilter.getResult()));
-					//						continue;
-					//					}
-
-					fitResult.results[size++] = fitResult.results[i];
 
 					if (!peak.isNewResult())
 						continue;
@@ -592,10 +559,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					}
 				}
 
-				if (size < fitResult.results.length)
-					fitResult.results = (size == 0) ? null : Arrays.copyOf(fitResult.results, size);
-
-				return (size != 0);
+				return (fitResult.results.length != 0);
 			}
 			return false;
 		}
@@ -769,7 +733,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return;
 		}
 
-		ComplexFilterScore current = analyse(filterSets, null);
+		ComplexFilterScore current = analyse(filterSets);
 		if (current == null)
 			return;
 
@@ -782,14 +746,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		while (true)
 		{
 			// Do the fit (using the current optimum filter)
-			fit.run(current.r.filter, residualsThreshold);
+			fit.run(current.r.filter, residualsThreshold, failCount);
 			if (!loadFitResults())
 				return;
 
 			// Optimise the filter again.
 			// Re-use the filters as the user may be loading a custom set.
 			ComplexFilterScore previous = current;
-			current = analyse(filterSets, current);
+			double rangeReduction = 1;
+			if (iterationMinRangeReduction < 1)
+			{
+				// Linear interpolate down to the min range reduction
+				// Add 1 to the iterations as this is the second call to analyse
+				rangeReduction = Maths.max(iterationMinRangeReduction, Maths.interpolateY(0, 1,
+						iterationMinRangeReductionIteration, iterationMinRangeReduction, checker.getIterations() + 1));
+			}
+			current = analyse(filterSets, current, rangeReduction);
 			if (current == null)
 				break;
 			if (checker.converged(previous, current))
@@ -1446,14 +1418,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (resultsList != null)
 		{
 			MultiPathFilter.resetValidationFlag(resultsList);
-
-			// XXX Clone this for use in debugging
-			//clonedResultsList = new MultiPathFitResults[resultsList.length];
-			//for (int i = 0; i < clonedResultsList.length; i++)
-			//	clonedResultsList[i] = resultsList[i].clone();
-
-			// We do not need a clone since nothing is changed in the list
-			//clonedResultsList = resultsList;
 		}
 
 		return resultsList;
@@ -1749,6 +1713,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		gd.addNumericField("Filter_Tolerance", iterationFilterTolerance, -1);
 		gd.addCheckbox("Compare_Results", iterationCompareResults);
 		gd.addNumericField("Compare_Distance", iterationCompareDistance, 2);
+		gd.addNumericField("Iter_Max_Iterations", iterationMaxIterations, 0);
+		gd.addSlider("Min_range_reduction", 0, 1, iterationMinRangeReduction);
+		gd.addSlider("Min_range_reduction_iteration", 1, 10, iterationMinRangeReductionIteration);
 
 		gd.showDialog();
 
@@ -1759,6 +1726,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		iterationFilterTolerance = gd.getNextNumber();
 		iterationCompareResults = gd.getNextBoolean();
 		iterationCompareDistance = Math.abs(gd.getNextNumber());
+		iterationMaxIterations = (int) gd.getNextNumber();
+		iterationMinRangeReduction = Math.abs(gd.getNextNumber());
+		iterationMinRangeReductionIteration = (int) Math.abs(gd.getNextNumber());
 
 		return true;
 	}
@@ -1776,11 +1746,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 *            the filter sets
 	 * @param optimum
 	 *            the optimum
+	 * @param rangeReduction
+	 *            the range reduction
 	 * @return the best filter
 	 */
-	private ComplexFilterScore analyse(List<FilterSet> filterSets, ComplexFilterScore optimum)
+	private ComplexFilterScore analyse(List<FilterSet> filterSets, ComplexFilterScore optimum, double rangeReduction)
 	{
-		return analyse(filterSets, true, optimum);
+		return analyse(filterSets, true, optimum, rangeReduction);
 	}
 
 	/**
@@ -1796,7 +1768,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private ComplexFilterScore analyse(List<FilterSet> filterSets)
 	{
-		return analyse(filterSets, false, null);
+		return analyse(filterSets, false, null, 0);
 	}
 
 	/**
@@ -1812,9 +1784,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 *            the iterative
 	 * @param optimum
 	 *            the optimum
+	 * @param rangeReduction
+	 *            the range reduction
 	 * @return the best filter
 	 */
-	private ComplexFilterScore analyse(List<FilterSet> filterSets, boolean iterative, ComplexFilterScore optimum)
+	private ComplexFilterScore analyse(List<FilterSet> filterSets, boolean iterative, ComplexFilterScore optimum,
+			double rangeReduction)
 	{
 		// Non-zero modes are used for the iterative optimisation which require new results
 		boolean newResults = iterative;
@@ -1823,7 +1798,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			// Non-interactive re-run when iterating
 			scores.clear();
-			runAnalysis(filterSets, optimum);
+			runAnalysis(filterSets, optimum, rangeReduction);
 
 			if (Utils.isInterrupted())
 				return null;
@@ -1851,7 +1826,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				newResults = true;
 				lastAnalyseSettings = settings;
 
-				runAnalysis(filterSets, null);
+				runAnalysis(filterSets);
 
 				if (Utils.isInterrupted())
 					return null;
@@ -1992,7 +1967,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return filters.get(0);
 	}
 
-	private void runAnalysis(List<FilterSet> filterSets, ComplexFilterScore optimum)
+	private void runAnalysis(List<FilterSet> filterSets)
+	{
+		runAnalysis(filterSets, null, 0);
+	}
+
+	private void runAnalysis(List<FilterSet> filterSets, ComplexFilterScore optimum, double rangeReduction)
 	{
 		plots = new ArrayList<NamedPlot>(plotTopN);
 		bestFilter = new HashMap<String, ComplexFilterScore>();
@@ -2005,7 +1985,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		for (FilterSet filterSet : filterSets)
 		{
 			setNumber++;
-			if (run(filterSet, setNumber, currentOptimum) < 0)
+			if (run(filterSet, setNumber, currentOptimum, rangeReduction) < 0)
 				break;
 		}
 		analysisStopWatch.stop();
@@ -2337,7 +2317,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return sb.toString();
 	}
 
-	private int run(FilterSet filterSet, int setNumber, DirectFilter currentOptimum)
+	private int run(FilterSet filterSet, int setNumber, DirectFilter currentOptimum, double rangeReduction)
 	{
 		// Check if the filters are the same so allowing optimisation
 		final boolean allSameType = filterSet.allSameType();
@@ -2364,7 +2344,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			// Option to configure a range
 			rangeInput = filterSet.getName().contains("Range");
-			double[] range;
+			double[] range = new double[n];
 
 			if (rangeInput && filterSet.size() == 4)
 			{
@@ -2379,6 +2359,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					double min = minF.getParameterValue(i);
 					double lower = lowerF.getParameterValue(i);
 					double upper = upperF.getParameterValue(i);
+					range[i] = upper - lower;
 					double max = maxF.getParameterValue(i);
 					double minIncrement = ss_filter.getParameterIncrement(i);
 					try
@@ -2417,6 +2398,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 					double lower = lowerF.getParameterValue(i);
 					double upper = upperF.getParameterValue(i);
+					range[i] = upper - lower;
 					ParameterType type = ss_filter.getParameterType(i);
 					double min = BenchmarkSpotFit.getMin(type);
 					double max = BenchmarkSpotFit.getMax(type);
@@ -2513,19 +2495,30 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// Suppress dialogs and use the current settings
 					nonInteractive = true;
 
+					double[] p = currentOptimum.getParameters();
+
 					// If the optimum is that same filter type as the filter set, and we are using
 					// a search method then centre the dimensions on the optimum.
+					// Note:
+					// Enrichment search and GA just use the upper and lower bounds to seed the population
+					// These can use FixedDimension and we add the current optimum to the seed.
+					// Range search uses SearchDimension and we must centre on the optimum after creation.							
 					for (int i = 0; i < disabled.length; i++)
 					{
+						double centre = p[i];
+						double r = 0;
 						if (originalDimensions[i].isActive())
 						{
-							// TODO - Centre on the current optimum
-
-							// TODO - Optionally reduce the width of the dimensions depending on the current
-							// iteration. This should really reduce the original width. So store the
-							// range for each param when we read the filters
-
+							// Set the range around the centre.
+							// This uses the range for each param when we read the filters.
+							r = range[i];
+							// Optionally reduce the width of the dimensions. 
+							if (rangeReduction > 0 && rangeReduction < 1)
+								r *= rangeReduction;
 						}
+						double lower = centre - r * 0.5;
+						double upper = centre + r * 0.5;
+						originalDimensions[i] = originalDimensions[i].create(lower, upper);
 					}
 				}
 
@@ -2571,77 +2564,81 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 
-			if (nonInteractive)
-			{
-				// TODO - Build the options without a dialog
-			}
-			
-			// Ask the user for the mutation step parameters.
-			GenericDialog gd = new GenericDialog(TITLE);
-			String prefix = setNumber + "_";
-			gd.addMessage("Configure the genetic algorithm for [" + setNumber + "] " + filterSet.getName());
-			gd.addNumericField(prefix + "Population_size", populationSize, 0);
-			gd.addNumericField(prefix + "Failure_limit", failureLimit, 0);
-			gd.addNumericField(prefix + "Tolerance", tolerance, -1);
-			gd.addNumericField(prefix + "Converged_count", convergedCount, 0);
-			gd.addSlider(prefix + "Mutation_rate", 0.05, 1, mutationRate);
-			gd.addSlider(prefix + "Crossover_rate", 0.05, 1, crossoverRate);
-			gd.addSlider(prefix + "Mean_children", 0.05, 3, meanChildren);
-			gd.addSlider(prefix + "Selection_fraction", 0.05, 0.5, selectionFraction);
-			gd.addCheckbox(prefix + "Ramped_selection", rampedSelection);
-			gd.addCheckbox(prefix + "Save_option", saveOption);
-
-			gd.addMessage("Configure the step size for each parameter");
+			GenericDialog gd = null;
 			int[] indices = ss_filter.getChromosomeParameters();
-			for (int j = 0; j < indices.length; j++)
+			boolean runAlgorithm = nonInteractive;
+			if (!nonInteractive)
 			{
-				// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
-				final double step = (originalDimensions[indices[j]].isActive()) ? stepSize[j] : 0;
-				gd.addNumericField(getDialogName(prefix, ss_filter, indices[j]), step, 2);
+				// Ask the user for the mutation step parameters.
+				gd = new GenericDialog(TITLE);
+				String prefix = setNumber + "_";
+				gd.addMessage("Configure the genetic algorithm for [" + setNumber + "] " + filterSet.getName());
+				gd.addNumericField(prefix + "Population_size", populationSize, 0);
+				gd.addNumericField(prefix + "Failure_limit", failureLimit, 0);
+				gd.addNumericField(prefix + "Tolerance", tolerance, -1);
+				gd.addNumericField(prefix + "Converged_count", convergedCount, 0);
+				gd.addSlider(prefix + "Mutation_rate", 0.05, 1, mutationRate);
+				gd.addSlider(prefix + "Crossover_rate", 0.05, 1, crossoverRate);
+				gd.addSlider(prefix + "Mean_children", 0.05, 3, meanChildren);
+				gd.addSlider(prefix + "Selection_fraction", 0.05, 0.5, selectionFraction);
+				gd.addCheckbox(prefix + "Ramped_selection", rampedSelection);
+				gd.addCheckbox(prefix + "Save_option", saveOption);
+
+				gd.addMessage("Configure the step size for each parameter");
+				for (int j = 0; j < indices.length; j++)
+				{
+					// Do not mutate parameters that were not expanded, i.e. the input did not vary them.
+					final double step = (originalDimensions[indices[j]].isActive()) ? stepSize[j] : 0;
+					gd.addNumericField(getDialogName(prefix, ss_filter, indices[j]), step, 2);
+				}
+
+				gd.showDialog();
+				runAlgorithm = gd.wasCanceled();
 			}
 
-			gd.showDialog();
-
-			if (gd.wasCanceled())
+			if (runAlgorithm)
 			{
-				resumeTimer();
-			}
-			else
-			{
-				populationSize = (int) Math.abs(gd.getNextNumber());
-				if (populationSize < 10)
-					populationSize = 10;
-				failureLimit = (int) Math.abs(gd.getNextNumber());
-				tolerance = gd.getNextNumber();
-				convergedCount = (int) gd.getNextNumber(); // Allow negatives
-				mutationRate = Math.abs(gd.getNextNumber());
-				crossoverRate = Math.abs(gd.getNextNumber());
-				meanChildren = Math.abs(gd.getNextNumber());
-				selectionFraction = Math.abs(gd.getNextNumber());
-				rampedSelection = gd.getNextBoolean();
-				saveOption = gd.getNextBoolean();
-
 				// Used to create random sample
 				FixedDimension[] dimensions = Arrays.copyOf(originalDimensions, originalDimensions.length);
+				if (!nonInteractive)
+				{
+					populationSize = (int) Math.abs(gd.getNextNumber());
+					if (populationSize < 10)
+						populationSize = 10;
+					failureLimit = (int) Math.abs(gd.getNextNumber());
+					tolerance = gd.getNextNumber();
+					convergedCount = (int) gd.getNextNumber(); // Allow negatives
+					mutationRate = Math.abs(gd.getNextNumber());
+					crossoverRate = Math.abs(gd.getNextNumber());
+					meanChildren = Math.abs(gd.getNextNumber());
+					selectionFraction = Math.abs(gd.getNextNumber());
+					rampedSelection = gd.getNextBoolean();
+					saveOption = gd.getNextBoolean();
+
+					for (int j = 0; j < indices.length; j++)
+					{
+						stepSize[j] = gd.getNextNumber();
+					}
+					// Store for repeat analysis
+					stepSizeMap.put(setNumber, stepSize);
+				}
 
 				for (int j = 0; j < indices.length; j++)
 				{
-					final double value = gd.getNextNumber();
-					// Disable values with a negative step size
-					if (value < 0)
+					// Disable values with a negative step size.
+					// A zero step size will keep the parameter but prevent range mutation.
+					if (stepSize[j] < 0)
 					{
 						dimensions[indices[j]] = new FixedDimension(ss_filter.getDisabledParameterValue(indices[j]));
 						disabled[indices[j]] = true;
 					}
-					stepSize[j] = value;
-					disabled[indices[j]] = (value <= 0);
 				}
-				// Store for repeat analysis
-				stepSizeMap.put(setNumber, stepSize.clone());
-				// Reset negatives to zero
-				for (int j = 0; j < stepSize.length; j++)
-					if (stepSize[j] < 0)
-						stepSize[j] = 0;
+
+				//				// Reset negatives to zero
+				//				stepSize = stepSize.clone();
+				//				for (int j = 0; j < stepSize.length; j++)
+				//					if (stepSize[j] < 0)
+				//						stepSize[j] = 0;
 
 				// Create the genetic algorithm
 				RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
@@ -2671,10 +2668,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// Add the existing filters if they are not a range input file
 					if (!rangeInput)
 						filters.addAll(filterSet.getFilters());
+					// Add current optimum to seed
+					if (nonInteractive)
+						filters.add(currentOptimum);
 					double[][] sample = SearchSpace.sample(dimensions, populationSize - filters.size(), null);
 					filters.addAll(searchSpaceToFilters(sample));
 				}
-
 				ga_population = new Population<FilterScore>(filters);
 				ga_population.setPopulationSize(populationSize);
 				ga_population.setFailureLimit(failureLimit);
@@ -2703,9 +2702,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 					// Option to save the filters
 					if (saveOption)
-						saveFilterSet(filterSet, setNumber);
+						saveFilterSet(filterSet, setNumber, !nonInteractive);
 				}
 			}
+			else
+				resumeTimer();
 		}
 
 		if ((evolve == 2 || evolve == 4) && originalDimensions != null)
@@ -2718,33 +2719,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// The step search should use a multi-dimension refinement and no range reduction
 			SearchSpace.RefinementMode myRefinementMode = SearchSpace.RefinementMode.MULTI_DIMENSION;
 
-			if (nonInteractive)
-			{
-				// TODO - Build the options without a dialog
-			}
-			
-			// Ask the user for the search parameters.
-			GenericDialog gd = new GenericDialog(TITLE);
-			String prefix = setNumber + "_";
-			gd.addMessage(
-					"Configure the " + EVOLVE[evolve] + " algorithm for [" + setNumber + "] " + filterSet.getName());
-			gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
-			if (!isStepSearch)
-			{
-				gd.addCheckbox(prefix + "Save_option", saveOption);
-				gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
-				String[] modes = SettingsManager.getNames((Object[]) SearchSpace.RefinementMode.values());
-				gd.addSlider(prefix + "Reduce", 0.01, 0.99, rangeSearchReduce);
-				gd.addChoice("Refinement", modes, modes[refinementMode]);
-
-			}
-			gd.addNumericField(prefix + "Seed_size", seedSize, 0);
-
-			// Add choice of fields to optimise
-			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
-			int n = ss_filter.getNumberOfParameters();
-
+			// Remmeber the enabled settings
 			boolean[] enabled = searchRangeMap.get(setNumber);
+			int n = ss_filter.getNumberOfParameters();
 			if (enabled == null || enabled.length != n)
 			{
 				enabled = new boolean[n];
@@ -2758,32 +2735,59 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							enabled[j] = false;
 				}
 			}
-			for (int i = 0; i < n; i++)
-				gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
 
-			gd.showDialog();
-
-			if (gd.wasCanceled())
+			GenericDialog gd = null;
+			boolean runAlgorithm = nonInteractive;
+			if (!nonInteractive)
 			{
-				resumeTimer();
-			}
-			else
-			{
-				rangeSearchWidth = (int) gd.getNextNumber();
+				// Ask the user for the search parameters.
+				gd = new GenericDialog(TITLE);
+				String prefix = setNumber + "_";
+				gd.addMessage("Configure the " + EVOLVE[evolve] + " algorithm for [" + setNumber + "] " +
+						filterSet.getName());
+				gd.addSlider(prefix + "Width", 1, 5, rangeSearchWidth);
 				if (!isStepSearch)
 				{
-					saveOption = gd.getNextBoolean();
-					maxIterations = (int) gd.getNextNumber();
-					refinementMode = gd.getNextChoiceIndex();
-					rangeSearchReduce = gd.getNextNumber();
-					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
+					gd.addCheckbox(prefix + "Save_option", saveOption);
+					gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
+					String[] modes = SettingsManager.getNames((Object[]) SearchSpace.RefinementMode.values());
+					gd.addSlider(prefix + "Reduce", 0.01, 0.99, rangeSearchReduce);
+					gd.addChoice("Refinement", modes, modes[refinementMode]);
 				}
-				seedSize = (int) gd.getNextNumber();
+				gd.addNumericField(prefix + "Seed_size", seedSize, 0);
 
+				// Add choice of fields to optimise
+				for (int i = 0; i < n; i++)
+					gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
+
+				gd.showDialog();
+				runAlgorithm = gd.wasCanceled();
+			}
+
+			if (runAlgorithm)
+			{
 				SearchDimension[] dimensions = new SearchDimension[n];
+				if (!nonInteractive)
+				{
+					rangeSearchWidth = (int) gd.getNextNumber();
+					if (!isStepSearch)
+					{
+						saveOption = gd.getNextBoolean();
+						maxIterations = (int) gd.getNextNumber();
+						refinementMode = gd.getNextChoiceIndex();
+						rangeSearchReduce = gd.getNextNumber();
+					}
+					seedSize = (int) gd.getNextNumber();
+					for (int i = 0; i < n; i++)
+						enabled[i] = gd.getNextBoolean();
+
+					searchRangeMap.put(setNumber, enabled);
+				}
+
+				if (!isStepSearch)
+					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
 				for (int i = 0; i < n; i++)
 				{
-					enabled[i] = gd.getNextBoolean();
 					if (enabled[i])
 					{
 						try
@@ -2792,6 +2796,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							dimensions[i].setPad(true);
 							// Prevent range reduction so that the step search just does a single refinement step
 							dimensions[i].setReduceFactor((isStepSearch) ? 1 : rangeSearchReduce);
+							// Centre on current optimum
+							if (nonInteractive)
+								dimensions[i].setCentre(currentOptimum.getParameterValue(i));
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -2805,13 +2812,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						dimensions[i] = new SearchDimension(ss_filter.getDisabledParameterValue(i));
 					}
 				}
-				searchRangeMap.put(setNumber, enabled);
 				for (int i = 0; i < disabled.length; i++)
 					disabled[i] = !dimensions[i].active;
 
 				// Check the number of combinations is OK
 				long combinations = SearchSpace.countCombinations(dimensions);
-				if (combinations > 10000)
+				if (!nonInteractive && combinations > 10000)
 				{
 					gd = new GenericDialog(TITLE);
 					gd.addMessage(
@@ -2841,18 +2847,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					ss.setTracker(this);
 					if (seedSize > 0)
 					{
-						double[][] sample = SearchSpace.sample(dimensions, seedSize, null);
-						if (seed == null)
-							seed = sample;
-						else
+						double[][] sample;
+						// Add current optimum to seed
+						if (nonInteractive)
 						{
-							// Merge
-							ArrayList<double[]> merged = new ArrayList<double[]>(sample.length + seed.length);
-							merged.addAll(Arrays.asList(seed));
-							merged.addAll(Arrays.asList(sample));
-							seed = merged.toArray(new double[merged.size()][]);
+							sample = new double[1][];
+							sample[0] = currentOptimum.getParameters();
+							seed = merge(seed, sample);
 						}
+						int size = (seed == null) ? 0 : seed.length;
+						sample = SearchSpace.sample(dimensions, seedSize - size, null);
+						seed = merge(seed, sample);
 					}
+					// Note: If we have an optimum and we are not seeding this should not matter as the dimensions 
+					// have been centred on the current optimum					
 					ss.seed(seed);
 					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
@@ -2880,10 +2888,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 						// Option to save the filters
 						if (saveOption)
-							saveFilterSet(filterSet, setNumber);
+							saveFilterSet(filterSet, setNumber, !nonInteractive);
 					}
 				}
 			}
+			else
+				resumeTimer();
 		}
 
 		if (evolve == 3 && originalDimensions != null)
@@ -2891,27 +2901,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Collect parameters for the enrichment search algorithm
 			pauseTimer();
 
-			if (nonInteractive)
-			{
-				// TODO - Build the options without a dialog
-			}
-			
-			// Ask the user for the search parameters.
-			GenericDialog gd = new GenericDialog(TITLE);
-			String prefix = setNumber + "_";
-			gd.addMessage("Configure the enrichment search algorithm for [" + setNumber + "] " + filterSet.getName());
-			gd.addCheckbox(prefix + "Save_option", saveOption);
-			gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
-			gd.addNumericField(prefix + "Converged_count", convergedCount, 0);
-			gd.addNumericField(prefix + "Samples", enrichmentSamples, 0);
-			gd.addSlider(prefix + "Fraction", 0.01, 0.99, enrichmentFraction);
-			gd.addSlider(prefix + "Padding", 0, 0.99, enrichmentPadding);
-
-			// Add choice of fields to optimise
-			ss_filter = (DirectFilter) filterSet.getFilters().get(0);
-			int n = ss_filter.getNumberOfParameters();
-
 			boolean[] enabled = searchRangeMap.get(setNumber);
+			int n = ss_filter.getNumberOfParameters();
 			if (enabled == null || enabled.length != n)
 			{
 				enabled = new boolean[n];
@@ -2925,34 +2916,53 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							enabled[j] = false;
 				}
 			}
-			for (int i = 0; i < n; i++)
-				gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
 
-			gd.showDialog();
-
-			if (gd.wasCanceled())
+			GenericDialog gd = null;
+			boolean runAlgorithm = nonInteractive;
+			if (!nonInteractive)
 			{
-				resumeTimer();
+				// Ask the user for the search parameters.
+				gd = new GenericDialog(TITLE);
+				String prefix = setNumber + "_";
+				gd.addMessage(
+						"Configure the enrichment search algorithm for [" + setNumber + "] " + filterSet.getName());
+				gd.addCheckbox(prefix + "Save_option", saveOption);
+				gd.addNumericField(prefix + "Max_iterations", maxIterations, 0);
+				gd.addNumericField(prefix + "Converged_count", convergedCount, 0);
+				gd.addNumericField(prefix + "Samples", enrichmentSamples, 0);
+				gd.addSlider(prefix + "Fraction", 0.01, 0.99, enrichmentFraction);
+				gd.addSlider(prefix + "Padding", 0, 0.99, enrichmentPadding);
+
+				// Add choice of fields to optimise
+				for (int i = 0; i < n; i++)
+					gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
+
+				gd.showDialog();
+				runAlgorithm = gd.wasCanceled();
 			}
-			else
-			{
-				saveOption = gd.getNextBoolean();
-				maxIterations = (int) gd.getNextNumber();
-				convergedCount = (int) gd.getNextNumber();
-				enrichmentSamples = (int) gd.getNextNumber();
-				enrichmentFraction = gd.getNextNumber();
-				enrichmentPadding = gd.getNextNumber();
 
+			if (runAlgorithm)
+			{
 				FixedDimension[] dimensions = Arrays.copyOf(originalDimensions, originalDimensions.length);
+				if (!nonInteractive)
+				{
+					saveOption = gd.getNextBoolean();
+					maxIterations = (int) gd.getNextNumber();
+					convergedCount = (int) gd.getNextNumber();
+					enrichmentSamples = (int) gd.getNextNumber();
+					enrichmentFraction = gd.getNextNumber();
+					enrichmentPadding = gd.getNextNumber();
+					for (int i = 0; i < n; i++)
+						enabled[i] = gd.getNextBoolean();
+
+					searchRangeMap.put(setNumber, enabled);
+				}
+
 				for (int i = 0; i < n; i++)
 				{
-					enabled[i] = gd.getNextBoolean();
 					if (!enabled[i])
-					{
 						dimensions[i] = new FixedDimension(ss_filter.getDisabledParameterValue(i));
-					}
 				}
-				searchRangeMap.put(setNumber, enabled);
 				for (int i = 0; i < disabled.length; i++)
 					disabled[i] = !dimensions[i].active;
 
@@ -2963,6 +2973,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
+				// Add current optimum to seed
+				if (nonInteractive)
+				{
+					double[][] sample = new double[1][];
+					sample[0] = currentOptimum.getParameters();
+					seed = merge(seed, sample);
+				}
 				ss.seed(seed);
 				ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations,
 						convergedCount);
@@ -2989,9 +3006,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 					// Option to save the filters
 					if (saveOption)
-						saveFilterSet(filterSet, setNumber);
+						saveFilterSet(filterSet, setNumber, !nonInteractive);
 				}
 			}
+			else
+				resumeTimer();
 		}
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
@@ -3230,6 +3249,23 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 
 		return 0;
+	}
+
+	private double[][] merge(double[][] seed, double[][] sample)
+	{
+		if (seed == null)
+		{
+			seed = sample;
+		}
+		else if (sample != null)
+		{
+			// Merge
+			ArrayList<double[]> merged = new ArrayList<double[]>(sample.length + seed.length);
+			merged.addAll(Arrays.asList(seed));
+			merged.addAll(Arrays.asList(sample));
+			seed = merged.toArray(new double[merged.size()][]);
+		}
+		return seed;
 	}
 
 	/**
@@ -3713,22 +3749,35 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	}
 
 	/**
-	 * Save the filter set to a file prompted from the user
-	 * 
+	 * Save the filter set to a file prompted from the user.
+	 * <p>
+	 * If non-interactive then the last filename will be used. This will overwrite existing files if multiple filter
+	 * sets are used.
+	 *
 	 * @param filterSet
+	 *            the filter set
 	 * @param setNumber
+	 *            the set number
+	 * @param interactive
+	 *            Set to true to prompt the user
 	 */
-	private void saveFilterSet(FilterSet filterSet, int setNumber)
+	private void saveFilterSet(FilterSet filterSet, int setNumber, boolean interactive)
 	{
 		pauseTimer();
 
-		String filename = getFilename("Filter_set_" + setNumber, filterSetFilename);
-		if (filename != null)
+		if (interactive)
 		{
-			filterSetFilename = filename;
-			Prefs.set(KEY_FILTERSET_FILENAME, filename);
-			saveFilterSet(filterSet, filename);
+			String filename = getFilename("Filter_set_" + setNumber, filterSetFilename);
+			if (filename != null)
+			{
+				filterSetFilename = filename;
+				Prefs.set(KEY_FILTERSET_FILENAME, filename);
+				saveFilterSet(filterSet, filename);
+			}
 		}
+		else
+			// Add support for multiple filter sets
+			saveFilterSet(filterSet, filterSetFilename);
 
 		resumeTimer();
 	}
@@ -4734,6 +4783,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			return false;
 		}
+
+		public int getIterations()
+		{
+			return scoreChecker.getIterations();
+		}
 	}
 
 	// Used to implement the FitnessFunction interface 
@@ -5154,12 +5208,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private List<Filter> searchSpaceToFilters(DirectFilter f, double[][] searchSpace)
 	{
-		final int size = searchSpace.length + ((f == null) ? 0 : 1);
+		final int size = ((searchSpace == null) ? 0 : searchSpace.length) + ((f == null) ? 0 : 1);
 		ArrayList<Filter> filters = new ArrayList<Filter>(size);
 		if (f != null)
 			filters.add(f);
-		for (int i = 0; i < searchSpace.length; i++)
-			filters.add((DirectFilter) ss_filter.create(searchSpace[i]));
+		if (searchSpace != null)
+			for (int i = 0; i < searchSpace.length; i++)
+				filters.add((DirectFilter) ss_filter.create(searchSpace[i]));
 		return filters;
 	}
 
@@ -5801,13 +5856,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private void saveResults(PreprocessedPeakResult[] filterResults, DirectFilter filter)
 	{
-		if (filterResults == null)
-		{
-			final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
-			//multiPathFilter.setDebugFile("/tmp/filter.txt");
-			filterResults = multiPathFilter.filter(resultsList, failCount + failCountRange, true);
-		}
-
 		MemoryPeakResults results = createResults(filterResults, filter);
 		MemoryPeakResults.addResults(results);
 	}
