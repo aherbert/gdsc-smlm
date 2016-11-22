@@ -360,6 +360,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private Checkbox cbComputeDoublets;
 
 	private boolean extraOptions = false;
+	// Flag used when being called by another plugin to suppress dialogs
+	private boolean silent = false;
 
 	private static TextWindow summaryTable = null;
 
@@ -934,41 +936,54 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		extraOptions = Utils.isExtraOptions();
 
-		simulationParameters = CreateData.simulationParameters;
-		if (simulationParameters == null)
-		{
-			IJ.error(TITLE, "No benchmark spot parameters in memory");
+		silent = false;
+		if (!initialise())
 			return;
-		}
-		imp = CreateData.getImage();
-		if (imp == null)
-		{
-			IJ.error(TITLE, "No benchmark image");
-			return;
-		}
-		results = CreateData.getResults();
-		if (results == null)
-		{
-			IJ.error(TITLE, "No benchmark results in memory");
-			return;
-		}
-		if (BenchmarkSpotFilter.filterResult == null)
-		{
-			IJ.error(TITLE, "No benchmark spot candidates in memory");
-			return;
-		}
-		if (BenchmarkSpotFilter.filterResult.simulationId != simulationParameters.id)
-		{
-			IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
-			return;
-		}
-		// This is required to initialise the FitWorker
-		spotFilter = BenchmarkSpotFilter.filterResult.spotFilter;
 
 		if (!showDialog())
 			return;
 
 		run();
+	}
+
+	private boolean initialise()
+	{
+		simulationParameters = CreateData.simulationParameters;
+		if (simulationParameters == null)
+		{
+			if (!silent)
+				IJ.error(TITLE, "No benchmark spot parameters in memory");
+			return false;
+		}
+		imp = CreateData.getImage();
+		if (imp == null)
+		{
+			if (!silent)
+				IJ.error(TITLE, "No benchmark image");
+			return false;
+		}
+		results = CreateData.getResults();
+		if (results == null)
+		{
+			if (!silent)
+				IJ.error(TITLE, "No benchmark results in memory");
+			return false;
+		}
+		if (BenchmarkSpotFilter.filterResult == null)
+		{
+			if (!silent)
+				IJ.error(TITLE, "No benchmark spot candidates in memory");
+			return false;
+		}
+		if (BenchmarkSpotFilter.filterResult.simulationId != simulationParameters.id)
+		{
+			if (!silent)
+				IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
+			return false;
+		}
+		// This is required to initialise the FitWorker
+		spotFilter = BenchmarkSpotFilter.filterResult.spotFilter;
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1255,10 +1270,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		StopWatch stopWatch = StopWatch.createStarted();
 		final ImageStack stack = imp.getImageStack();
 
-		// Clear old results to free memory
-		if (fitResults != null)
-			fitResults.clear();
-		fitResults = null;
+		clearFitResults();
 
 		// Save results to memory
 		MemoryPeakResults peakResults = new MemoryPeakResults();
@@ -1360,6 +1372,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		summariseResults(fitResults, runTime, preprocessedPeakResults);
 
 		IJ.showStatus("");
+	}
+
+	/**
+	 * Clear old results to free memory
+	 */
+	private void clearFitResults()
+	{
+		if (fitResults != null)
+			fitResults.clear();
+		fitResults = null;
 	}
 
 	private int count(gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult)
@@ -1990,7 +2012,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			GlobalSettings gs = SettingsManager.loadSettings();
 			FilterSettings filterSettings = gs.getFilterSettings();
 
-			String filename = Utils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
+			String filename = (silent) ? filterSettings.filterSetFilename
+					: Utils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
 			if (filename == null)
 				return;
 			// Remove extension to store the filename
@@ -2786,6 +2809,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
 		config.setFailuresLimit(failuresLimit);
+
+		clearFitResults();
+
+		silent = true;
+		if (!initialise())
+			return;
+
 		run();
 	}
 }

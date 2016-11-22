@@ -651,7 +651,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return;
 		}
 
-		if (invalidBenchmarkSpotFitResults())
+		if (invalidBenchmarkSpotFitResults(false))
 			return;
 
 		extraOptions = Utils.isExtraOptions();
@@ -678,21 +678,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		IJ.showStatus("Finished");
 	}
 
-	private boolean invalidBenchmarkSpotFitResults()
+	private boolean invalidBenchmarkSpotFitResults(boolean silent)
 	{
 		if (BenchmarkSpotFit.fitResults == null)
 		{
-			IJ.error(TITLE, "No benchmark fitting results in memory");
+			if (!silent)
+				IJ.error(TITLE, "No benchmark fitting results in memory");
 			return true;
 		}
 		if (BenchmarkSpotFit.lastId != simulationParameters.id)
 		{
-			IJ.error(TITLE, "Update the benchmark spot fitting for the latest simulation");
+			if (!silent)
+				IJ.error(TITLE, "Update the benchmark spot fitting for the latest simulation");
 			return true;
 		}
 		if (BenchmarkSpotFit.lastFilterId != BenchmarkSpotFilter.filterResult.id)
 		{
-			IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
+			if (!silent)
+				IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
 			return true;
 		}
 		return false;
@@ -712,10 +715,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private void iterate()
 	{
 		// Run the benchmark fit once interactively, keep the instance
-		// TODO - Add ability to skip this step if the fitting has already been done.
 		BenchmarkSpotFit fit = new BenchmarkSpotFit();
-		fit.run(null);
-		if (invalidBenchmarkSpotFitResults())
+		// Provide ability to skip this step if the fitting has already been done.
+		if (invalidBenchmarkSpotFitResults(true))
+			fit.run(null);
+		if (invalidBenchmarkSpotFitResults(false))
 			return;
 
 		// Run filter analysis once interactively
@@ -747,6 +751,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			// Do the fit (using the current optimum filter)
 			fit.run(current.r.filter, residualsThreshold, failCount);
+			if (invalidBenchmarkSpotFitResults(false))
+				return;
 			if (!loadFitResults())
 				return;
 
@@ -2503,7 +2509,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// Enrichment search and GA just use the upper and lower bounds to seed the population
 					// These can use FixedDimension and we add the current optimum to the seed.
 					// Range search uses SearchDimension and we must centre on the optimum after creation.							
-					for (int i = 0; i < disabled.length; i++)
+					for (int i = 0; i < originalDimensions.length; i++)
 					{
 						double centre = p[i];
 						double r = 0;
@@ -2593,7 +2599,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 
 				gd.showDialog();
-				runAlgorithm = gd.wasCanceled();
+				runAlgorithm = !gd.wasCanceled();
 			}
 
 			if (runAlgorithm)
@@ -2761,7 +2767,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
 
 				gd.showDialog();
-				runAlgorithm = gd.wasCanceled();
+				runAlgorithm = !gd.wasCanceled();
 			}
 
 			if (runAlgorithm)
@@ -2938,7 +2944,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					gd.addCheckbox(getDialogName(prefix, ss_filter, i), enabled[i]);
 
 				gd.showDialog();
-				runAlgorithm = gd.wasCanceled();
+				runAlgorithm = !gd.wasCanceled();
 			}
 
 			if (runAlgorithm)
@@ -4742,13 +4748,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// We have two different relative thresholds so use 2 convergence checkers
 			scoreChecker = new InterruptConvergenceChecker(iterationScoreTolerance, iterationScoreTolerance * 1e-3,
 					true, false, iterationMaxIterations);
-			scoreChecker = new InterruptConvergenceChecker(iterationFilterTolerance, iterationFilterTolerance * 1e-3,
+			filterChecker = new InterruptConvergenceChecker(iterationFilterTolerance, iterationFilterTolerance * 1e-3,
 					false, true, iterationMaxIterations);
 			if (iterationCompareResults)
 			{
-				previousResults = ResultsMatchCalculator
-						.getCoordinates(createResults(null, (DirectFilter) current.filter).getResults());
+				previousResults = getResults(current);
 			}
+		}
+
+		private HashMap<Integer, ArrayList<Coordinate>> getResults(FilterScore current)
+		{
+			return ResultsMatchCalculator
+					.getCoordinates(createResults(null, (DirectFilter) current.filter).getResults());
 		}
 
 		public boolean converged(FilterScore previous, FilterScore current)
@@ -4766,22 +4777,37 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			SearchResult<FilterScore> c = new SearchResult<FilterScore>(current.filter.getParameters(), current);
 
 			if (scoreChecker.converged(p, c))
+			{
+				logConvergence("score");
 				return true;
+			}
 			if (filterChecker.converged(p, c))
+			{
+				logConvergence("filter parameters");
 				return true;
+			}
 
 			if (iterationCompareResults)
 			{
-				HashMap<Integer, ArrayList<Coordinate>> currentResults = ResultsMatchCalculator
-						.getCoordinates(createResults(null, (DirectFilter) current.filter).getResults());
+				HashMap<Integer, ArrayList<Coordinate>> currentResults = getResults(current);
 				MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults, previousResults,
 						iterationCompareDistance);
 				if (r.getJaccard() == 1)
+				{
+					logConvergence("results coordinates");
 					return true;
+				}
 				previousResults = currentResults;
 			}
 
 			return false;
+		}
+
+		private void logConvergence(String component)
+		{
+			if (iterationMaxIterations != 0 && getIterations() >= iterationMaxIterations)
+				component = "iterations";			
+			Utils.log("Converged on " + component);
 		}
 
 		public int getIterations()
