@@ -209,7 +209,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static boolean saveOption = false;
 	private static double iterationScoreTolerance = -1;
 	private static double iterationFilterTolerance = 1e-3;
-	private static boolean iterationCompareResults = false;
+	private static boolean iterationCompareResults = true;
 	private static double iterationCompareDistance = 0.1;
 	private static int iterationMaxIterations = 10;
 	private static double iterationMinRangeReduction = 0.2;
