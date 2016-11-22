@@ -386,6 +386,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static double distanceInPixels;
 	static double lowerDistanceInPixels;
 	static double candidateTN, candidateFN;
+	// Allow access to the time
+	StopWatch stopWatch;
 
 	public static String tablePrefix, resultPrefix;
 
@@ -1267,7 +1269,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			lastNegativesAfterAllPositives = negativesAfterAllPositives;
 		}
 
-		StopWatch stopWatch = StopWatch.createStarted();
+		stopWatch = StopWatch.createStarted();
 		final ImageStack stack = imp.getImageStack();
 
 		clearFitResults();
@@ -1330,6 +1332,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			return;
 		}
 
+		stopWatch.stop();
 		final String timeString = stopWatch.toString();
 		IJ.log("Spot fit time : " + timeString);
 

@@ -41,6 +41,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
@@ -207,7 +208,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double selectionFraction = 0.2;
 	private static boolean rampedSelection = true;
 	private static boolean saveOption = false;
-	private static double iterationScoreTolerance = -1;
+	private static double iterationScoreTolerance = 1e-4;
 	private static double iterationFilterTolerance = 1e-3;
 	private static boolean iterationCompareResults = true;
 	private static double iterationCompareDistance = 0.1;
@@ -731,13 +732,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
+		// Total the time from the interactive plugins
+		long time = 0;
+		
 		// Run the benchmark fit once interactively, keep the instance
 		BenchmarkSpotFit fit = new BenchmarkSpotFit();
 		// Provide ability to skip this step if the fitting has already been done.
 		if (invalidBenchmarkSpotFitResults(true))
+		{
 			fit.run(null);
+		}
 		if (invalidBenchmarkSpotFitResults(false))
 			return;
+		
+		if (fit.stopWatch!=null)
+			time += fit.stopWatch.getTime();
 
 		// Run filter analysis once interactively
 		if (!loadFitResults())
@@ -754,7 +763,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return;
 		}
 
+		time += analysisStopWatch.getTime();
+		
+		// Time the non-interactive plugins as a continuous section
 		iterationStopWatch = StopWatch.createStarted();
+		
 		ComplexFilterScore current = analyse(filterSets);
 		if (current == null)
 			return;
@@ -807,7 +820,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			iterBestFilter = bestFilter;
 		}
 
-		IJ.log("Iteration analysis time : " + iterationStopWatch.toString());
+		time += iterationStopWatch.getTime();
+		IJ.log("Iteration analysis time : " + DurationFormatUtils.formatDurationHMS(time));
 		
 		IJ.showStatus("Finished");
 	}
