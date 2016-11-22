@@ -754,12 +754,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return;
 		}
 
+		iterationStopWatch = StopWatch.createStarted();
 		ComplexFilterScore current = analyse(filterSets);
 		if (current == null)
 			return;
 
+		iterationStopWatch.suspend();
 		if (!showIterationDialog())
 			return;
+		iterationStopWatch.resume();
 
 		// Remove the previous iteration results
 		iterBestFilter = null;
@@ -804,15 +807,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			iterBestFilter = bestFilter;
 		}
 
+		IJ.log("Iteration analysis time : " + iterationStopWatch.toString());
+		
 		IJ.showStatus("Finished");
 	}
-	
+
 	private void reportIterationResults()
 	{
 		residualsThreshold = sResidualsThreshold;
 		if (!showReportDialog())
 			return;
-		reportResults(false);		
+		reportResults(false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1832,7 +1837,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		if (gd.wasCanceled())
 			return false;
-		
+
 		showResultsTable = gd.getNextBoolean();
 		showSummaryTable = gd.getNextBoolean();
 		clearTables = gd.getNextBoolean();
@@ -1852,7 +1857,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		if (gd.invalidNumber())
 			return false;
-		
+
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
 		createResultsPrefix2();
 
@@ -3521,17 +3526,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private static StopWatch analysisStopWatch;
 	private StopWatch filterSetStopWatch;
+	private StopWatch iterationStopWatch;
 
 	private void pauseTimer()
 	{
 		analysisStopWatch.suspend();
 		filterSetStopWatch.suspend();
+		if (iterationStopWatch != null)
+			iterationStopWatch.suspend();
 	}
 
 	private void resumeTimer()
 	{
 		analysisStopWatch.resume();
 		filterSetStopWatch.resume();
+		if (iterationStopWatch != null)
+			iterationStopWatch.resume();
 	}
 
 	private void addToResultsWindow(BufferedTextWindow tw, final ScoreResult result)
