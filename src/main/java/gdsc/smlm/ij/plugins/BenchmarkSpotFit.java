@@ -387,7 +387,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static double lowerDistanceInPixels;
 	static double candidateTN, candidateFN;
 	// Allow access to the time
-	StopWatch stopWatch;
+	static StopWatch stopWatch;
 
 	public static String tablePrefix, resultPrefix;
 
