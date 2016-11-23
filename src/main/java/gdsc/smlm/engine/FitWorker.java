@@ -1417,16 +1417,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Coords for comparison to the real positions
 					final float fcx2 = (float) (regionBounds.x + fitParams[Gaussian2DFunction.X_POSITION] + 0.5);
 					final float fcy2 = (float) (regionBounds.y + fitParams[Gaussian2DFunction.Y_POSITION] + 0.5);
-					final float d2 = (float) distanceToSingleFit2;
+					float mind2 = (float) distanceToSingleFit2;
 					int ii = -1;
 					for (int i = 0; i < peakNeighbours.length; i++)
 					{
-						if (d2 > distance2(fcx2, fcy2, peakNeighbours[i].params))
+						final float d2 = distance2(fcx2, fcy2, peakNeighbours[i].params);
+						if (mind2 > d2)
 						{
 							// There is another fitted result that is closer.
 							// Note: The fit region is not centred on the other spot so this fit will probably
 							// be worse and is discarded (not compared to the existing fit to get the best one). 
 
+							mind2 = d2;
 							ii = i;
 							otherId = peakNeighbours[i].getId();
 						}
@@ -2100,16 +2102,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Coords for comparison to the real positions
 					final float fcx2 = (float) (regionBounds.x + fitParams[Gaussian2DFunction.X_POSITION] + 0.5);
 					final float fcy2 = (float) (regionBounds.y + fitParams[Gaussian2DFunction.Y_POSITION] + 0.5);
-					final float d2 = (float) distanceToSingleFit2;
+					float mind2 = (float) distanceToSingleFit2;
 					int ii = -1;
 					for (int i = 0; i < peakNeighbours.length; i++)
 					{
-						if (d2 > distance2(fcx2, fcy2, peakNeighbours[i].params))
+						final float d2 = distance2(fcx2, fcy2, peakNeighbours[i].params);
+						if (mind2 > d2)
 						{
 							// There is another fitted result that is closer.
 							// Note: The fit region is not centred on the other spot so this fit will probably
 							// be worse and is discarded (not compared to the existing fit to get the best one). 
 
+							mind2 = d2;
 							ii = i;
 							otherId = peakNeighbours[i].getId();
 						}
