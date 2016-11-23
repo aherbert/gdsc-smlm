@@ -734,7 +734,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Total the time from the interactive plugins
 		long time = 0;
-		
+
 		// Run the benchmark fit once interactively, keep the instance
 		BenchmarkSpotFit fit = new BenchmarkSpotFit();
 		// Provide ability to skip this step if the fitting has already been done.
@@ -744,9 +744,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		if (invalidBenchmarkSpotFitResults(false))
 			return;
-		
-		if (fit.stopWatch!=null)
-			time += fit.stopWatch.getTime();
+
+		if (BenchmarkSpotFit.stopWatch != null)
+			time += BenchmarkSpotFit.stopWatch.getTime();
 
 		// Run filter analysis once interactively
 		if (!loadFitResults())
@@ -764,10 +764,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 
 		time += analysisStopWatch.getTime();
-		
+
 		// Time the non-interactive plugins as a continuous section
 		iterationStopWatch = StopWatch.createStarted();
-		
+
 		ComplexFilterScore current = analyse(filterSets);
 		if (current == null)
 			return;
@@ -822,7 +822,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		time += iterationStopWatch.getTime();
 		IJ.log("Iteration analysis time : " + DurationFormatUtils.formatDurationHMS(time));
-		
+
 		IJ.showStatus("Finished");
 	}
 
