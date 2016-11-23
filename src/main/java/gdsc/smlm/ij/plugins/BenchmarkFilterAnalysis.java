@@ -147,6 +147,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double sResidualsThreshold = 0.3;
 	private double residualsThreshold = 1; // Disabled
 	private static double duplicateDistance = 0;
+	static
+	{
+		duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
+	}
 	private static boolean reset = true;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
