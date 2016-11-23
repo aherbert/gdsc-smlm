@@ -256,7 +256,7 @@ public class SettingsManager
 		}
 		catch (FileNotFoundException ex)
 		{
-			//ex.printStackTrace();
+			ex.printStackTrace();
 		}
 		catch (XStreamException ex)
 		{
