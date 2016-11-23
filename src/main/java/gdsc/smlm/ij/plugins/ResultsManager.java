@@ -180,17 +180,23 @@ public class ResultsManager implements PlugIn, MouseListener
 			return;
 		}
 
+		debug(new Throwable());
 		if (!showDialog())
 			return;
+		debug(new Throwable());
 
 		MemoryPeakResults results = loadResults(inputOption);
 
+		debug(new Throwable());
+		
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
 			IJ.showStatus("");
 			return;
 		}
+		
+		debug(new Throwable());
 
 		results = cropToRoi(results);
 		if (results.size() == 0)
@@ -199,9 +205,13 @@ public class ResultsManager implements PlugIn, MouseListener
 			return;
 		}
 
+		debug(new Throwable());
+		
 		if (resultsSettings.resultsInMemory && fileInput)
 			MemoryPeakResults.addResults(results);
 
+		debug(new Throwable());
+		
 		IJ.showStatus("Processing outputs ...");
 
 		Rectangle bounds = results.getBounds(true);
@@ -209,19 +219,29 @@ public class ResultsManager implements PlugIn, MouseListener
 		boolean showEndFrame = canShowEndFrame(results);
 		boolean showId = canShowId(results);
 
+		debug(new Throwable());
+		
 		// Display the configured output
 		PeakResultsList output = new PeakResultsList();
 
+		debug(new Throwable());
+		
 		output.copySettings(results);
 		//String title = results.getSource();
 		//if (title == null || title.length() == 0)
 		//	output.setSource(TITLE);
 
+		debug(new Throwable());
+		
 		addTableResults(results, output, showDeviations, showEndFrame);
+		debug(new Throwable());
 		addImageResults(output, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
+		debug(new Throwable());
 		addFileResults(output, showDeviations, showEndFrame, showId);
+		debug(new Throwable());
 
 		output.begin();
+		debug(new Throwable());
 
 		// Process in batches to provide progress
 		int batchSize = 100;
@@ -238,6 +258,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			if (isInterrupted())
 				break;
 		}
+		debug(new Throwable());
 		IJ.showProgress(1);
 		output.end();
 
@@ -905,11 +926,18 @@ public class ResultsManager implements PlugIn, MouseListener
 	 */
 	private MemoryPeakResults loadResults(String inputOption)
 	{
+		debug(new Throwable());
 		if (inputOption.equals(INPUT_FILE))
 		{
 			fileInput = true;
 		}
 		return loadInputResults(inputOption, true);
+	}
+	
+	public static void debug(Throwable t)
+	{
+		StackTraceElement e = t.getStackTrace()[0];
+		System.err.printf("%s:%s:%d\n", e.getClassName(), e.getMethodName(), e.getLineNumber());		
 	}
 
 	public void mouseClicked(MouseEvent e)
