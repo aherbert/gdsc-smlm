@@ -739,12 +739,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		BenchmarkSpotFit fit = new BenchmarkSpotFit();
 		// Provide ability to skip this step if the fitting has already been done.
 		if (invalidBenchmarkSpotFitResults(true))
-		{
 			fit.run(null);
-		}
 		if (invalidBenchmarkSpotFitResults(false))
 			return;
-
 		if (BenchmarkSpotFit.stopWatch != null)
 			time += BenchmarkSpotFit.stopWatch.getTime();
 
