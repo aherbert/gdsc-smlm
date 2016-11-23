@@ -2853,7 +2853,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			GlobalSettings settings = new GlobalSettings();
 			settings.setNotes(getNotes(summary));
 			settings.setFitEngineConfiguration(config);
-			if (!SettingsManager.saveSettings(settings, filename))
+			if (!SettingsManager.saveSettings(settings, filename, true))
 				IJ.log("Unable to save the template configuration");
 		}
 	}

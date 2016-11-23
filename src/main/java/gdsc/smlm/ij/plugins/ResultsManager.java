@@ -36,7 +36,6 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.PeakResultsReader;
-import gdsc.smlm.utils.CodeReporter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -181,23 +180,17 @@ public class ResultsManager implements PlugIn, MouseListener
 			return;
 		}
 
-		CodeReporter.debug(new Throwable());
 		if (!showDialog())
 			return;
-		CodeReporter.debug(new Throwable());
 
 		MemoryPeakResults results = loadResults(inputOption);
 
-		CodeReporter.debug(new Throwable());
-		
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
 			IJ.showStatus("");
 			return;
 		}
-		
-		CodeReporter.debug(new Throwable());
 
 		results = cropToRoi(results);
 		if (results.size() == 0)
@@ -206,13 +199,9 @@ public class ResultsManager implements PlugIn, MouseListener
 			return;
 		}
 
-		CodeReporter.debug(new Throwable());
-		
 		if (resultsSettings.resultsInMemory && fileInput)
 			MemoryPeakResults.addResults(results);
 
-		CodeReporter.debug(new Throwable());
-		
 		IJ.showStatus("Processing outputs ...");
 
 		Rectangle bounds = results.getBounds(true);
@@ -220,29 +209,19 @@ public class ResultsManager implements PlugIn, MouseListener
 		boolean showEndFrame = canShowEndFrame(results);
 		boolean showId = canShowId(results);
 
-		CodeReporter.debug(new Throwable());
-		
 		// Display the configured output
 		PeakResultsList output = new PeakResultsList();
 
-		CodeReporter.debug(new Throwable());
-		
 		output.copySettings(results);
 		//String title = results.getSource();
 		//if (title == null || title.length() == 0)
 		//	output.setSource(TITLE);
 
-		CodeReporter.debug(new Throwable());
-		
 		addTableResults(results, output, showDeviations, showEndFrame);
-		CodeReporter.debug(new Throwable());
 		addImageResults(output, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
-		CodeReporter.debug(new Throwable());
 		addFileResults(output, showDeviations, showEndFrame, showId);
-		CodeReporter.debug(new Throwable());
 
 		output.begin();
-		CodeReporter.debug(new Throwable());
 
 		// Process in batches to provide progress
 		int batchSize = 100;
@@ -259,7 +238,6 @@ public class ResultsManager implements PlugIn, MouseListener
 			if (isInterrupted())
 				break;
 		}
-		CodeReporter.debug(new Throwable());
 		IJ.showProgress(1);
 		output.end();
 
@@ -461,8 +439,6 @@ public class ResultsManager implements PlugIn, MouseListener
 		if (gd.wasCanceled())
 			return false;
 
-		CodeReporter.debug(new Throwable());
-		
 		inputOption = ResultsManager.getInputSource(gd);
 		inputFilename = gd.getNextString();
 		if (!titles.isEmpty())
@@ -479,20 +455,15 @@ public class ResultsManager implements PlugIn, MouseListener
 		resultsSettings.binaryResults = gd.getNextBoolean();
 		resultsSettings.resultsInMemory = gd.getNextBoolean();
 
-		CodeReporter.debug(new Throwable());
-		
 		// Check arguments
 		try
 		{
 			if (resultsSettings.getResultsImage() == ResultsImage.SIGNAL_AV_PRECISION ||
 					resultsSettings.getResultsImage() == ResultsImage.LOCALISATIONS_AV_PRECISION)
 			{
-				CodeReporter.debug(new Throwable());
 				Parameters.isAboveZero("Image precision", resultsSettings.precision);
 			}
-			CodeReporter.debug(new Throwable());
 			Parameters.isAboveZero("Image scale", resultsSettings.imageScale);
-			CodeReporter.debug(new Throwable());
 			Parameters.isPositive("Image rolling window", resultsSettings.imageRollingWindow);
 		}
 		catch (IllegalArgumentException e)
@@ -500,12 +471,9 @@ public class ResultsManager implements PlugIn, MouseListener
 			IJ.error(TITLE, e.getMessage());
 			return false;
 		}
-		CodeReporter.debug(new Throwable());
 
-		CodeReporter.debug(new Throwable());
 		Prefs.set(Constants.inputFilename, inputFilename);
 
-		CodeReporter.debug(new Throwable());
 		if (!titles.isEmpty() && chooseRoi)
 		{
 			if (titles.size() == 1)
@@ -535,8 +503,9 @@ public class ResultsManager implements PlugIn, MouseListener
 			roiBounds = null;
 		}
 
-		CodeReporter.debug(new Throwable());
-		return SettingsManager.saveSettings(settings);
+		SettingsManager.saveSettings(settings);
+		
+		return true;
 	}
 
 	/**
@@ -938,7 +907,6 @@ public class ResultsManager implements PlugIn, MouseListener
 	 */
 	private MemoryPeakResults loadResults(String inputOption)
 	{
-		CodeReporter.debug(new Throwable());
 		if (inputOption.equals(INPUT_FILE))
 		{
 			fileInput = true;

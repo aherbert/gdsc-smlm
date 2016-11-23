@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.utils.CodeReporter;
+import ij.IJ;
 import ij.Prefs;
 
 /**
@@ -49,7 +49,8 @@ public class SettingsManager
 	/**
 	 * Save settings filename.
 	 *
-	 * @param filename the filename
+	 * @param filename
+	 *            the filename
 	 */
 	public static void saveSettingsFilename(String filename)
 	{
@@ -159,7 +160,7 @@ public class SettingsManager
 			//xs.omitField(FitConfiguration.class, "noise");
 			xs.omitField(FitConfiguration.class, "enableValidation");
 			xs.omitField(FitConfiguration.class, "computeResiduals");
-			
+
 			// Smart filter settings
 			xs.omitField(FitConfiguration.class, "directFilter");
 			xs.omitField(FitConfiguration.class, "dynamicPeakResult");
@@ -233,30 +234,47 @@ public class SettingsManager
 	}
 
 	/**
-	 * Save the settings to file
-	 * 
+	 * Save the settings to file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
 	 * @param settings
+	 *            the settings
 	 * @param filename
+	 *            the filename
 	 * @return True if saved
 	 */
 	public static boolean saveSettings(GlobalSettings settings, String filename)
 	{
-		CodeReporter.debug(new Throwable());
+		return saveSettings(settings, filename, false);
+	}
+
+	/**
+	 * Save the settings to file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param settings
+	 *            the settings
+	 * @param filename
+	 *            the filename
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return True if saved
+	 */
+	public static boolean saveSettings(GlobalSettings settings, String filename, boolean silent)
+	{
 		XStream xs = createXStream();
-		CodeReporter.debug(new Throwable());
 		FileOutputStream fs = null;
 		try
 		{
-			CodeReporter.debug(new Throwable());
 			fs = new FileOutputStream(filename);
-			CodeReporter.debug(new Throwable());
 			xs.toXML(settings, fs);
-			CodeReporter.debug(new Throwable());
 			return true;
 		}
 		catch (FileNotFoundException ex)
 		{
-			ex.printStackTrace();
+			//ex.printStackTrace();
 		}
 		catch (XStreamException ex)
 		{
@@ -276,28 +294,36 @@ public class SettingsManager
 				}
 			}
 		}
-		CodeReporter.debug(new Throwable());
+		if (!silent)
+			IJ.log("Unable to save settings to: " + filename);
 		return false;
 	}
 
 	/**
-	 * Save the settings to the default file
-	 * 
+	 * Save the settings to the default file.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
 	 * @param settings
+	 *            the settings
 	 * @return True if saved
 	 */
 	public static boolean saveSettings(GlobalSettings settings)
 	{
-		return saveSettings(settings, getSettingsFilename());
+		return saveSettings(settings, getSettingsFilename(), false);
 	}
 
 	/**
 	 * Load the settings within the specified file
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
 	 * 
 	 * @param filename
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
 	 * @return The settings (or null)
 	 */
-	public static GlobalSettings unsafeLoadSettings(String filename)
+	public static GlobalSettings unsafeLoadSettings(String filename, boolean silent)
 	{
 		XStream xs = createXStream();
 		GlobalSettings config = null;
@@ -335,18 +361,39 @@ public class SettingsManager
 			}
 		}
 
+		if (config == null)
+			if (!silent)
+				IJ.log("Unable to load settings from: " + filename);
+
 		return config;
 	}
 
 	/**
 	 * Load the settings within the specified file
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
 	 * 
 	 * @param filename
 	 * @return The settings (or a default instance)
 	 */
 	public static GlobalSettings loadSettings(String filename)
 	{
-		GlobalSettings config = unsafeLoadSettings(filename);
+		return loadSettings(filename, false);
+	}
+
+	/**
+	 * Load the settings within the specified file
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 * 
+	 * @param filename
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return The settings (or a default instance)
+	 */
+	public static GlobalSettings loadSettings(String filename, boolean silent)
+	{
+		GlobalSettings config = unsafeLoadSettings(filename, silent);
 		if (config == null)
 			config = new GlobalSettings();
 		// This should not be null
@@ -357,11 +404,13 @@ public class SettingsManager
 
 	/**
 	 * Load the settings from the default file
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
 	 * 
 	 * @return The settings (or a default instance)
 	 */
 	public static GlobalSettings loadSettings()
 	{
-		return loadSettings(getSettingsFilename());
+		return loadSettings(getSettingsFilename(), false);
 	}
 }

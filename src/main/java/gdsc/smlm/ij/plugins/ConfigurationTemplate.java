@@ -43,7 +43,7 @@ public class ConfigurationTemplate implements PlugIn
 			{
 				if (file.lastModified() != timestamp)
 				{
-					GlobalSettings settings = SettingsManager.unsafeLoadSettings(file.getPath());
+					GlobalSettings settings = SettingsManager.unsafeLoadSettings(file.getPath(), false);
 					if (settings != null)
 					{
 						this.settings = settings;
@@ -278,7 +278,7 @@ public class ConfigurationTemplate implements PlugIn
 		int count = 0;
 		for (String path : list)
 		{
-			GlobalSettings settings = SettingsManager.unsafeLoadSettings(path);
+			GlobalSettings settings = SettingsManager.unsafeLoadSettings(path, false);
 			if (settings != null)
 			{
 				count++;

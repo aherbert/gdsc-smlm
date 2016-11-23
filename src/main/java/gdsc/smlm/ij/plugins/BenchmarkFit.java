@@ -569,7 +569,7 @@ public class BenchmarkFit implements PlugIn
 			psfWidth = sa;
 		}
 
-		String filename = SettingsManager.getSettingsFilename();
+		final String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
 
 		fitConfig = settings.getFitEngineConfiguration().getFitConfiguration();

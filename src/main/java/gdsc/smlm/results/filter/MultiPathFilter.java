@@ -153,6 +153,14 @@ public class MultiPathFilter implements Cloneable
 		 */
 		public void add(SelectedResult selectedResult)
 		{
+			final PreprocessedPeakResult[] results = selectedResult.results;
+			if (results == null)
+				return;
+			for (int i = 0; i < results.length; i++)
+			{
+				if (results[i].isNewResult())
+					isFit[results[i].getCandidateId()] = true;
+			}
 		}
 
 		/*
@@ -320,6 +328,9 @@ public class MultiPathFilter implements Cloneable
 
 	/** The null fraction result store. */
 	private static NullFractionScoreStore nullFractionScoreStore = new NullFractionScoreStore();
+
+	/** The null fraction result store. */
+	private static NullCoordinateStore nullCoordinateStore = new NullCoordinateStore();
 
 	/** The direct filter to apply to the results. */
 	final IDirectFilter filter;
@@ -945,6 +956,8 @@ public class MultiPathFilter implements Cloneable
 	 * The SelectedResultStore can be used to track results that pass validation. If this is null then the default
 	 * behaviour is to track fitted candidates that pass validation. These will be processed even if the fail count has
 	 * been reached.
+	 * <p>
+	 * The coordinate store is used to check for duplicates.
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
@@ -954,16 +967,20 @@ public class MultiPathFilter implements Cloneable
 	 *            Set to true to run the {@link #setup()} method
 	 * @param store
 	 *            the store (can be used to track results that pass validation)
+	 * @param coordinateStore
+	 *            the coordinate store (can be null)
 	 * @return the results
 	 */
 	public void select(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
-			SelectedResultStore store)
+			SelectedResultStore store, CoordinateStore coordinateStore)
 	{
 		if (setup)
 			setup();
 
 		if (store == null)
 			store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
+		if (coordinateStore == null)
+			coordinateStore = nullCoordinateStore;
 
 		//		// Debugging the results that are scored
 		//		java.io.OutputStreamWriter out = null;
@@ -978,13 +995,14 @@ public class MultiPathFilter implements Cloneable
 		//			}
 		//		}
 
-		// TODO - this could be made iterative. Any pass through the data may store estimates 
+		// Note - this could be made iterative. Any pass through the data may store estimates 
 		// using the SelectedResultStore and used to determine if 
 
 		int failCount = 0;
 		final int total = multiPathResults.getNumberOfResults();
 		//while (multiPathResults.begin())
 		//{
+		coordinateStore.clear();
 		for (int c = 0; c < total; c++)
 		{
 			final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
@@ -1007,7 +1025,7 @@ public class MultiPathFilter implements Cloneable
 				//								multiPathResult.candidateId, failCount, store.isValid(multiPathResult.candidateId),
 				//								isNewResult(accept(multiPathResult, true, null))));
 				//
-				//						// TODO - Write out the full set of initial and fitted parameters for the results...
+				//						// todo - Write out the full set of initial and fitted parameters for the results...
 				//					}
 				//					catch (Exception e)
 				//					{
@@ -1027,14 +1045,16 @@ public class MultiPathFilter implements Cloneable
 
 				// Assess the result if we are below the fail limit or have an estimate
 				final SelectedResult result = select(multiPathResult, true, store);
-				int size = 0;
+				boolean newResult = false;
 				if (result != null)
 				{
+					int size = 0;
 					final int[] ok = new int[result.results.length];
 					for (int i = 0; i < ok.length; i++)
 					{
 						if (result.results[i].isNewResult())
 						{
+							newResult = true;
 							//							if (out != null)
 							//							{
 							//								try
@@ -1059,12 +1079,16 @@ public class MultiPathFilter implements Cloneable
 							//								}
 							//							}
 
-							ok[size++] = i;
+							// TODO - Check for duplicates
+							if (coordinateStore.queue(result.results[i].getX(), result.results[i].getY()))
+								ok[size++] = i;
 						}
 					}
 
 					if (size != 0)
 					{
+						coordinateStore.flush();
+
 						// This has valid results so add to the output subset only those that are new
 						if (size == ok.length)
 						{
@@ -1080,15 +1104,20 @@ public class MultiPathFilter implements Cloneable
 							store.add(new SelectedResult(filtered, result.fitResult));
 						}
 					}
+					else
+					{
+						// Add the selected result but with no new results (due to duplicates) 
+						store.add(new SelectedResult(null, result.fitResult));
+					}
 				}
-				if (size == 0)
+				else
 				{
 					// This failed. Just return the single result
 					store.add(new SelectedResult(null, multiPathResult.getSingleFitResult()));
 				}
 				if (evaluateFit)
 				{
-					if (size != 0)
+					if (newResult)
 					{
 						// More results were accepted so reset the fail count
 						failCount = 0;
@@ -1566,6 +1595,8 @@ public class MultiPathFilter implements Cloneable
 
 	/**
 	 * Filter a set of multi-path results into a set of results.
+	 * <p>
+	 * The coordinate store is used to check for duplicates.
 	 *
 	 * @param results
 	 *            the results
@@ -1574,13 +1605,18 @@ public class MultiPathFilter implements Cloneable
 	 * @param subset
 	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
 	 *            current candidate)
+	 * @param coordinateStore
+	 *            the coordinate store (can be null)
 	 * @return the filtered results
 	 */
 	final public PreprocessedPeakResult[] filter(final MultiPathFitResults[] results, final int failures,
-			boolean subset)
+			boolean subset, CoordinateStore coordinateStore)
 	{
 		setup();
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
+
+		if (coordinateStore == null)
+			coordinateStore = nullCoordinateStore;
 
 		final ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
 		for (int k = 0; k < results.length; k++)
@@ -1604,6 +1640,7 @@ public class MultiPathFilter implements Cloneable
 			int lastId = -1;
 			final int length = multiPathResults.getNumberOfResults();
 			store.resize(multiPathResults.getTotalCandidates());
+			coordinateStore.clear();
 			for (int c = 0; c < length; c++)
 			{
 				final MultiPathFitResult multiPathResult = multiPathResults.getResult(c);
@@ -1645,13 +1682,14 @@ public class MultiPathFilter implements Cloneable
 					// Evaluate the result. 
 					// This allows storing more estimates in the store even if we are past the failures limit.
 					final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
-					final int size = list.size();
+					boolean newResult = false;
 					if (result != null)
 					{
 						for (int i = 0; i < result.length; i++)
 						{
 							if (result[i].isNewResult())
 							{
+								newResult = true;
 								//								if (out != null)
 								//								{
 								//									try
@@ -1674,13 +1712,38 @@ public class MultiPathFilter implements Cloneable
 								//										}
 								//									}
 								//								}
-								list.add(result[i]);
+
+								// TODO - Check for duplicates
+								if (coordinateStore.queue(result[i].getX(), result[i].getY()))
+								{
+									//									if (store.isFit[result[i].getCandidateId()] &&
+									//											result[i].getCandidateId() != multiPathResult.candidateId)
+									//										System.out.printf("Fitted candidate %d [%d] %f,%f ([%d])\n",
+									//												multiPathResults.frame, multiPathResult.candidateId, result[i].getX(),
+									//												result[i].getY(), result[i].getCandidateId());
+
+									list.add(result[i]);
+
+									// This is a new fitted result
+									store.isFit[result[i].getCandidateId()] = true;
+								}
+								//								else
+								//								{
+								//									double[] tmp = cstore.find(result[i].getX(), result[i].getY());
+								//									System.out.printf("Duplicate %d [%d] %f,%f == %f,%f (%b [%d])\n",
+								//											multiPathResults.frame, multiPathResult.candidateId, result[i].getX(),
+								//											result[i].getY(), tmp[0], tmp[1], store.isFit[result[i].getCandidateId()],
+								//											result[i].getCandidateId());
+								//									// So we can see them
+								//									//list.add(result[i]);
+								//								}
 							}
 						}
+						coordinateStore.flush();
 					}
 					if (evaluateFit)
 					{
-						if (size != list.size())
+						if (newResult)
 						{
 							// More results were accepted so reset the fail count
 							failCount = 0;
@@ -2023,7 +2086,7 @@ public class MultiPathFilter implements Cloneable
 	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
 			final int n)
 	{
-		return fractionScore(results, failures, n, false, null, null);
+		return fractionScore(results, failures, n, false, null, null, null);
 	}
 
 	/**
@@ -2050,7 +2113,7 @@ public class MultiPathFilter implements Cloneable
 	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
 			final int n)
 	{
-		return fractionScore(results, failures, n, true, null, null);
+		return fractionScore(results, failures, n, true, null, null, null);
 	}
 
 	/**
@@ -2062,6 +2125,8 @@ public class MultiPathFilter implements Cloneable
 	 * <p>
 	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
 	 * and negatives fields of the result.
+	 * <p>
+	 * The coordinate store is used to check for duplicates.
 	 *
 	 * @param results
 	 *            a set of results to analyse
@@ -2073,12 +2138,15 @@ public class MultiPathFilter implements Cloneable
 	 *            the assignments
 	 * @param scoreStore
 	 *            the score store
+	 * @param coordinateStore
+	 *            the coordinate store (can be null)
 	 * @return the score
 	 */
 	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore)
+			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore,
+			CoordinateStore coordinateStore)
 	{
-		return fractionScore(results, failures, n, false, assignments, scoreStore);
+		return fractionScore(results, failures, n, false, assignments, scoreStore, coordinateStore);
 	}
 
 	/**
@@ -2093,6 +2161,8 @@ public class MultiPathFilter implements Cloneable
 	 * <p>
 	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
 	 * and negatives fields of the result.
+	 * <p>
+	 * The coordinate store is used to check for duplicates.
 	 *
 	 * @param results
 	 *            a set of results to analyse
@@ -2104,12 +2174,15 @@ public class MultiPathFilter implements Cloneable
 	 *            the assignments
 	 * @param scoreStore
 	 *            the score store
+	 * @param coordinateStore
+	 *            the coordinate store (can be null)
 	 * @return the score
 	 */
 	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
-			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore)
+			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore,
+			CoordinateStore coordinateStore)
 	{
-		return fractionScore(results, failures, n, true, assignments, scoreStore);
+		return fractionScore(results, failures, n, true, assignments, scoreStore, coordinateStore);
 	}
 
 	String debugFilename;
@@ -2141,6 +2214,8 @@ public class MultiPathFilter implements Cloneable
 	 * <p>
 	 * Note: The fractional scores are totalled as well as the integer tp/fp scores. These are returned in the positives
 	 * and negatives fields of the result.
+	 * <p>
+	 * The coordinate store is used to check for duplicates.
 	 *
 	 * @param results
 	 *            a set of results to analyse
@@ -2153,11 +2228,15 @@ public class MultiPathFilter implements Cloneable
 	 *            current candidate)
 	 * @param allAssignments
 	 *            the assignments
+	 * @param scoreStore
+	 *            the score store
+	 * @param coordinateStore
+	 *            the coordinate store (can be null)
 	 * @return the score
 	 */
 	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
 			final int n, final boolean subset, List<FractionalAssignment[]> allAssignments,
-			FractionScoreStore scoreStore)
+			FractionScoreStore scoreStore, CoordinateStore coordinateStore)
 	{
 		final double[] score = new double[4];
 		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
@@ -2165,6 +2244,8 @@ public class MultiPathFilter implements Cloneable
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 		if (scoreStore == null)
 			scoreStore = nullFractionScoreStore;
+		if (coordinateStore == null)
+			coordinateStore = nullCoordinateStore;
 		final boolean save = allAssignments != null;
 
 		setup();
@@ -2191,6 +2272,7 @@ public class MultiPathFilter implements Cloneable
 			final int length = multiPathResults.multiPathFitResults.length;
 			int nPredicted = 0;
 			store.resize(multiPathResults.totalCandidates);
+			coordinateStore.clear();
 			for (int c = 0; c < length; c++)
 			{
 				final MultiPathFitResult multiPathResult = multiPathResults.multiPathFitResults[c];
@@ -2240,6 +2322,7 @@ public class MultiPathFilter implements Cloneable
 						{
 							if (result[i].isNewResult())
 							{
+								newResult = true;
 								//								if (out != null)
 								//								{
 								//									try
@@ -2263,26 +2346,30 @@ public class MultiPathFilter implements Cloneable
 								//									}
 								//								}
 
-								// This is a new fitted result
-								store.isFit[result[i].getCandidateId()] = true;
-								newResult = true;
-								
 								if (result[i].ignore())
 								{
 									// Q. should this be passed to the scoreStore?
 								}
 								else
 								{
-									scoreStore.add(result[i].getUniqueId());
-									final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
-									if (a != null && a.length > 0)
+									// TODO - Check for duplicates
+									if (coordinateStore.queue(result[i].getX(), result[i].getY()))
 									{
-										//list.addAll(Arrays.asList(a));
-										assignments.addAll(new DummyCollection(a));
+										scoreStore.add(result[i].getUniqueId());
+										final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
+										if (a != null && a.length > 0)
+										{
+											//list.addAll(Arrays.asList(a));
+											assignments.addAll(new DummyCollection(a));
+										}
+
+										// This is a new fitted result
+										store.isFit[result[i].getCandidateId()] = true;
 									}
 								}
 							}
 						}
+						coordinateStore.flush();
 					}
 					if (evaluateFit)
 					{

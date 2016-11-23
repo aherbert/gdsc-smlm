@@ -429,7 +429,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 				// see all the changes that have been written, since the later dialogs are shown depending 
 				// on what options are initially configured. 
 
-				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename);
+				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename, false);
 				if (settings == null)
 					return;
 				FitEngineConfiguration config = settings.getFitEngineConfiguration();

@@ -163,10 +163,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		if (!gd.wasCanceled())
 		{
 			filename = gd.getNextString();
-			if (!SettingsManager.saveSettings(settings, filename))
-			{
+			if (SettingsManager.saveSettings(settings, filename, true))
+				SettingsManager.saveSettingsFilename(filename);
+			else
 				IJ.error(TITLE, "Failed to save settings to file " + filename);
-			}
 		}
 
 		// Reset

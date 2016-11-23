@@ -1631,11 +1631,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 		}
 
-		boolean result = SettingsManager.saveSettings(settings, filename);
+		boolean result = SettingsManager.saveSettings(settings, filename, true);
 		if (!result)
-		{
 			IJ.error(TITLE, "Failed to save settings to file " + filename);
-		}
+		
 		return result;
 	}
 
@@ -2704,7 +2703,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (gd.wasOKed())
 			{
 				// Reload the settings and update the GUI
-				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename);
+				GlobalSettings settings = SettingsManager.unsafeLoadSettings(newFilename, false);
 				if (settings == null)
 					return;
 

@@ -33,8 +33,9 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#queue(double, double)
 	 */
-	public void queue(double x, double y)
+	public boolean queue(double x, double y)
 	{
+		return true;
 	}
 
 	/*
@@ -72,5 +73,15 @@ public class NullCoordinateStore implements CoordinateStore
 	public boolean contains(double x, double y)
 	{
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#find(double, double)
+	 */
+	public double[] find(double x, double y)
+	{
+		return null;
 	}
 }

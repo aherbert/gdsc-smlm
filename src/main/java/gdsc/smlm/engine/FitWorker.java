@@ -48,6 +48,7 @@ import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
+import gdsc.smlm.results.filter.GridCoordinateStore;
 import gdsc.smlm.results.filter.IMultiPathFitResults;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
@@ -125,7 +126,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	// Contains the index in the list of fitted results for any neighbours 
 	private int fittedNeighbourCount = 0;
 	private PeakResult[] fittedNeighbours = null;
-	private float duplicateDistance2;
+	private final float duplicateDistance2;
+	private GridCoordinateStore coordinateStore;
 
 	private volatile boolean finished = false;
 
@@ -296,6 +298,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		this.logger = fitConfig.getLog();
 		gf = new Gaussian2DFitter(fitConfig);
 		duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
+		coordinateStore = (fitConfig.getDuplicateDistance() > 0)
+				? new GridCoordinateStore(fitConfig.getDuplicateDistance()) : null;
 		calculateNoise = config.getFitConfiguration().getNoise() <= 0;
 		if (!calculateNoise)
 		{
@@ -452,6 +456,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			MultiPathFilter filter;
 			IMultiPathFitResults multiPathResults = this;
 			SelectedResultStore store = this;
+			if (coordinateStore != null)
+				coordinateStore = coordinateStore.resize(width, height);
+			
+			// TODO - Test if duplicate distance is now obsolete ...
 
 			if (params != null && params.fitTask == FitTask.BENCHMARKING)
 			{
@@ -506,7 +514,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				Utils.write(String.format("/tmp/candidates.%b.xml", benchmarking), sb.toString());
 			}
 
-			filter.select(multiPathResults, config.getFailuresLimit(), true, store);
+			filter.select(multiPathResults, config.getFailuresLimit(), true, store, coordinateStore);
 
 			if (logger != null)
 				logger.info("Slice %d: %d / %d", slice, success, candidates.length);
@@ -2512,9 +2520,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					//    If the shift is too far (e.g. half the distance to the edge), the centre 
 					//    must be in the correct quadrant.
 
-					final double xShift = fitParams[Gaussian2DFunction.X_POSITION + offset] -
+					double xShift = fitParams[Gaussian2DFunction.X_POSITION + offset] -
 							params[Gaussian2DFunction.X_POSITION];
-					final double yShift = fitParams[Gaussian2DFunction.Y_POSITION + offset] -
+					double yShift = fitParams[Gaussian2DFunction.Y_POSITION + offset] -
 							params[Gaussian2DFunction.Y_POSITION];
 					if (Math.abs(xShift) > halfWindow || Math.abs(yShift) > halfWindow)
 					{
@@ -2537,7 +2545,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Spots from the doublet must be closer to the single fit than any other spots.
 					// This is true for candidates we have yet to fit or already fitted candidates.
 
-					// Distance to current candidate fitted as a single
+					// Distance to current candidate 
+					xShift = fitParams[Gaussian2DFunction.X_POSITION + offset] -
+							initialParams[Gaussian2DFunction.X_POSITION];
+					yShift = fitParams[Gaussian2DFunction.Y_POSITION + offset] -
+							initialParams[Gaussian2DFunction.Y_POSITION];
 					final double distanceToSingleFit2 = xShift * xShift + yShift * yShift;
 
 					// 3. Check we are not closer to a fitted spot. This has already had a chance at 

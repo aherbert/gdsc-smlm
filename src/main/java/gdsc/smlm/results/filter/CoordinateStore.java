@@ -14,14 +14,15 @@ public interface CoordinateStore
 
 	/**
 	 * Queue a coordinate to the store. It is not added to the store until flush is called. Assumes that the coordinates
-	 * are within the size of the grid.
+	 * are within the size of the grid. A check is made for duplicates.
 	 *
 	 * @param x
 	 *            the x
 	 * @param y
 	 *            the y
+	 * @return true, if successful (i.e. not a duplicate)
 	 */
-	public void queue(double x, double y);
+	public boolean queue(double x, double y);
 
 	/**
 	 * Flush the queue to the store
@@ -54,4 +55,16 @@ public interface CoordinateStore
 	 * @return true, if the store contains another coordinate closer than the resolution
 	 */
 	public boolean contains(double x, double y);
+
+	/**
+	 * Find the closest coordinate within the configured resolution. Assumes that the coordinates are
+	 * within the size of the grid.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return the coordinate closer than the resolution (or null)
+	 */
+	public double[] find(double x, double y);
 }
