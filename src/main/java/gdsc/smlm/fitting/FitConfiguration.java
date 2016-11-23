@@ -80,7 +80,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private double widthFactor = 2;
 	private double lambda = 10;
 	private boolean computeResiduals = true;
-	private double duplicateDistance = 0.5f;
+	private double duplicateDistance = 0.5;
 	private double bias = 0;
 	private double readNoise = 0;
 	private double amplification = 0;
