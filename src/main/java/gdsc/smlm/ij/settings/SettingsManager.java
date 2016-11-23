@@ -24,6 +24,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.utils.CodeReporter;
 import ij.Prefs;
 
 /**
@@ -240,12 +241,17 @@ public class SettingsManager
 	 */
 	public static boolean saveSettings(GlobalSettings settings, String filename)
 	{
+		CodeReporter.debug(new Throwable());
 		XStream xs = createXStream();
+		CodeReporter.debug(new Throwable());
 		FileOutputStream fs = null;
 		try
 		{
+			CodeReporter.debug(new Throwable());
 			fs = new FileOutputStream(filename);
+			CodeReporter.debug(new Throwable());
 			xs.toXML(settings, fs);
+			CodeReporter.debug(new Throwable());
 			return true;
 		}
 		catch (FileNotFoundException ex)
@@ -270,6 +276,7 @@ public class SettingsManager
 				}
 			}
 		}
+		CodeReporter.debug(new Throwable());
 		return false;
 	}
 
