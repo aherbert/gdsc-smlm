@@ -784,19 +784,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return;
 		}
 
-		time += analysisStopWatch.getTime();
-
-		// Time the non-interactive plugins as a continuous section
-		iterationStopWatch = StopWatch.createStarted();
-
 		ComplexFilterScore current = analyse(filterSets);
 		if (current == null)
 			return;
+		
+		time += analysisStopWatch.getTime();
 
-		iterationStopWatch.suspend();
 		if (!showIterationDialog())
 			return;
-		iterationStopWatch.resume();
+		
+		// Time the non-interactive plugins as a continuous section
+		iterationStopWatch = StopWatch.createStarted();
 
 		// Remove the previous iteration results
 		iterBestFilter = null;
@@ -833,7 +831,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			converged = checker.converged(previous, current);
 		}
 
-		if (converged)
+		if (current != null)
+		//if (converged)
 		{
 			// Set-up the plugin so that it can be run again (in iterative mode) 
 			// and the results reported for the top filter.
@@ -4963,15 +4962,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private class IterationConvergenceChecker
 	{
-		InterruptConvergenceChecker scoreChecker = null;
+		InterruptChecker scoreChecker = null;
 		InterruptConvergenceChecker filterChecker = null;
 		HashMap<Integer, ArrayList<Coordinate>> previousResults = null;
 
 		public IterationConvergenceChecker(FilterScore current)
 		{
-			// We have two different relative thresholds so use 2 convergence checkers
-			scoreChecker = new InterruptConvergenceChecker(iterationScoreTolerance, iterationScoreTolerance * 1e-3,
-					true, false, iterationMaxIterations);
+			// We have two different relative thresholds so use 2 convergence checkers,
+			// one for the score and one for the filter sequence
+			scoreChecker = new InterruptChecker(iterationScoreTolerance, iterationScoreTolerance * 1e-3, 0);
 			filterChecker = new InterruptConvergenceChecker(iterationFilterTolerance, iterationFilterTolerance * 1e-3,
 					false, true, iterationMaxIterations);
 			if (iterationCompareResults)
@@ -5000,14 +4999,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			SearchResult<FilterScore> p = new SearchResult<FilterScore>(previous.filter.getParameters(), previous);
 			SearchResult<FilterScore> c = new SearchResult<FilterScore>(current.filter.getParameters(), current);
 
-			if (scoreChecker.converged(p, c))
-			{
-				logConvergence("score");
-				return true;
-			}
 			if (filterChecker.converged(p, c))
 			{
 				logConvergence("filter parameters");
+				return true;
+			}
+			// Directly call the method with the scores 
+			if (scoreChecker.converged(p.score, c.score))
+			{
+				logConvergence("score");
 				return true;
 			}
 
@@ -5026,7 +5026,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			return false;
 		}
-
+			
 		private void logConvergence(String component)
 		{
 			if (iterationMaxIterations != 0 && getIterations() >= iterationMaxIterations)
@@ -5036,7 +5036,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		public int getIterations()
 		{
-			return scoreChecker.getIterations();
+			return filterChecker.getIterations();
 		}
 	}
 
