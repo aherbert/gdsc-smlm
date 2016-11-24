@@ -278,7 +278,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 		final int xmin = Math.max(0, xBlock - 1);
 		final int ymin = Math.max(0, yBlock - 1);
-		final int xmax = Math.min(yBlocks, xBlock + 2);
+		final int xmax = Math.min(xBlocks, xBlock + 2);
 		final int ymax = Math.min(yBlocks, yBlock + 2);
 		
 		for (int xx = xmin; xx < xmax; xx++)
@@ -331,7 +331,7 @@ public class GridCoordinateStore implements CoordinateStore
 		
 		final int xmin = Math.max(0, xBlock - 1);
 		final int ymin = Math.max(0, yBlock - 1);
-		final int xmax = Math.min(yBlocks, xBlock + 2);
+		final int xmax = Math.min(xBlocks, xBlock + 2);
 		final int ymax = Math.min(yBlocks, yBlock + 2);
 		
 		for (int xx = xmin; xx < xmax; xx++)
