@@ -1049,7 +1049,7 @@ public class MultiPathFilter implements Cloneable
 				if (selectedResult != null)
 				{
 					int size = 0;
-					final PreprocessedPeakResult[] result = selectedResult.results; 					
+					final PreprocessedPeakResult[] result = selectedResult.results;
 					final int[] ok = new int[result.length];
 					for (int i = 0; i < ok.length; i++)
 					{
@@ -1081,11 +1081,18 @@ public class MultiPathFilter implements Cloneable
 							//							}
 
 							// TODO - Check for duplicates
-							if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(), result[i].getY()))
+							if (result[i].isNotDuplicate() ||
+									!coordinateStore.contains(result[i].getX(), result[i].getY()))
 							{
 								coordinateStore.addToQueue(result[i].getX(), result[i].getY());
 								ok[size++] = i;
 							}
+							//							else
+							//							{
+							//								double[] tmp = coordinateStore.find(result[i].getX(), result[i].getY());
+							//								System.out.printf("Duplicate [%d] %.2f,%.2f == %.2f,%.2f\n", multiPathResult.candidateId,
+							//										result[i].getX(), result[i].getY(), tmp[0], tmp[1]);
+							//							}
 						}
 					}
 
@@ -1718,7 +1725,8 @@ public class MultiPathFilter implements Cloneable
 								//								}
 
 								// TODO - Check for duplicates
-								if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(), result[i].getY()))
+								if (result[i].isNotDuplicate() ||
+										!coordinateStore.contains(result[i].getX(), result[i].getY()))
 								{
 									coordinateStore.addToQueue(result[i].getX(), result[i].getY());
 									//									if (store.isFit[result[i].getCandidateId()] &&
@@ -2358,7 +2366,8 @@ public class MultiPathFilter implements Cloneable
 								else
 								{
 									// TODO - Check for duplicates
-									if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(), result[i].getY()))
+									if (result[i].isNotDuplicate() ||
+											!coordinateStore.contains(result[i].getX(), result[i].getY()))
 									{
 										coordinateStore.addToQueue(result[i].getX(), result[i].getY());
 										scoreStore.add(result[i].getUniqueId());

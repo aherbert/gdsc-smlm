@@ -126,7 +126,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	// Contains the index in the list of fitted results for any neighbours 
 	private int fittedNeighbourCount = 0;
 	private PeakResult[] fittedNeighbours = null;
-	private final float duplicateDistance2;
+	//private final float duplicateDistance2;
 	private GridCoordinateStore coordinateStore;
 
 	private volatile boolean finished = false;
@@ -297,7 +297,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		this.jobs = jobs;
 		this.logger = fitConfig.getLog();
 		gf = new Gaussian2DFitter(fitConfig);
-		duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
+		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
+		// Used for duplicate checking
 		coordinateStore = (fitConfig.getDuplicateDistance() > 0)
 				? new GridCoordinateStore(fitConfig.getDuplicateDistance()) : null;
 		calculateNoise = config.getFitConfiguration().getNoise() <= 0;
@@ -458,7 +459,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			SelectedResultStore store = this;
 			if (coordinateStore != null)
 				coordinateStore = coordinateStore.resize(width, height);
-			
+
 			// TODO - Test if duplicate distance is now obsolete ...
 
 			if (params != null && params.fitTask == FitTask.BENCHMARKING)
@@ -740,21 +741,25 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		int y = candidates[candidateId].y;
 		float value = data[y * cc.dataBounds.width + x];
 
-		if (duplicateDistance2 > 0)
-		{
-			// Check for duplicates
-			final PeakResult[] neighbours = gridManager.getPeakResultNeighbours(x, y);
-			for (int i = 0; i < neighbours.length; i++)
-			{
-				if (distance2(neighbours[i].params, peakParams) < duplicateDistance2)
-				{
-					if (logger != null)
-						logger.info("[%d] Ignoring duplicate peak @ %.2f,%.2f", slice,
-								peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION]);
-					return false;
-				}
-			}
-		}
+		// This is obsolete as the multipathfilter now performs duplicate testing 
+		//if (duplicateDistance2 > 0)
+		//{
+		//	// Check for duplicates
+		//	final PeakResult[] neighbours = gridManager.getPeakResultNeighbours(x, y);
+		//	for (int i = 0; i < neighbours.length; i++)
+		//	{
+		//		if (distance2(neighbours[i].params, peakParams) < duplicateDistance2)
+		//		{
+		//			if (logger != null)
+		//				logger.info("[%d] Ignoring duplicate peak @ %.2f,%.2f", slice,
+		//						peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION]);
+		//			//System.out.printf("Duplicate [%d] %.2f,%.2f == %.2f,%.2f\n", candidateId,
+		//			//		peakParams[Gaussian2DFunction.X_POSITION], peakParams[Gaussian2DFunction.Y_POSITION], 
+		//			//		neighbours[i].params[Gaussian2DFunction.X_POSITION], neighbours[i].params[Gaussian2DFunction.Y_POSITION]);
+		//			return false;
+		//		}
+		//	}
+		//}
 
 		// Update to the global bounds.
 		// (Note the global bounds will be added to the params at the end of processing the frame
@@ -806,6 +811,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * @param params2
 	 * @return The squared distance between the two points
 	 */
+	@SuppressWarnings("unused")
 	private float distance2(float[] params1, float[] params2)
 	{
 		final float dx = params1[Gaussian2DFunction.X_POSITION] - params2[Gaussian2DFunction.X_POSITION];
