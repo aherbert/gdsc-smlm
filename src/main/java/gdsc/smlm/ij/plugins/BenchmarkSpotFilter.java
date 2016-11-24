@@ -709,14 +709,20 @@ public class BenchmarkSpotFilter implements PlugIn
 					int j = 0;
 					for (int i = 0; i < actual.length; i++)
 						if (actualWeight[i] == 1)
+						{
+							actualWeight[j] = 1;
 							actual2[j++] = actual[i];
+						}
 					actual = Arrays.copyOf(actual2, j);
 
 					Spot[] spots2 = new Spot[spots.length];
 					j = 0;
 					for (int i = 0; i < spots.length; i++)
 						if (spotsWeight[i] == 1)
+						{
+							spotsWeight[j] = 1;
 							spots2[j++] = spots[i];
+						}
 					spots = Arrays.copyOf(spots2, j);
 
 					// Update lengths
@@ -724,6 +730,12 @@ public class BenchmarkSpotFilter implements PlugIn
 					spotsLength = spots.length;
 				}
 			}
+			else
+			{
+				Arrays.fill(actualWeight, 1);
+				Arrays.fill(spotsWeight, 1);
+			}
+			
 
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
 			FractionClassificationResult result;
