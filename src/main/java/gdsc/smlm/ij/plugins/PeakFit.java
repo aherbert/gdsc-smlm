@@ -1972,19 +1972,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				if (extraOptions)
 				{
 					fitConfig.setClampBackground(Math.abs(gd.getNextNumber()));
-					;
 					fitConfig.setClampSignal(Math.abs(gd.getNextNumber()));
-					;
 					fitConfig.setClampAngle(Math.abs(gd.getNextNumber()));
-					;
 					fitConfig.setClampX(Math.abs(gd.getNextNumber()));
-					;
 					fitConfig.setClampY(Math.abs(gd.getNextNumber()));
-					;
 					fitConfig.setClampXSD(Math.abs(gd.getNextNumber()));
-					;
 					fitConfig.setClampYSD(Math.abs(gd.getNextNumber()));
-					;
 				}
 			}
 
