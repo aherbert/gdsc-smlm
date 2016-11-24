@@ -35,7 +35,11 @@ public class ResultGridManager
 			if (list == null)
 				list = new PeakResult[4];
 			else if (list.length == size)
-				list = Arrays.copyOf(list, size * 2);
+			{
+				final PeakResult[] list2 = new PeakResult[size * 2];
+				System.arraycopy(list, 0, list2, 0, size);
+				list = list2;
+			}
 			list[size++] = peak;
 		}
 	}
@@ -95,7 +99,11 @@ public class ResultGridManager
 			if (list == null)
 				list = new Candidate[4];
 			else if (list.length == size)
-				list = Arrays.copyOf(list, size * 2);
+			{
+				final Candidate[] list2 = new Candidate[size * 2];
+				System.arraycopy(list, 0, list2, 0, size);
+				list = list2;
+			}
 			list[size++] = candidate;
 		}
 
@@ -314,14 +322,16 @@ public class ResultGridManager
 			return peakCache;
 
 		int size = 0;
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+		
+		final int xmin = Math.max(0, xBlock - 1);
+		final int ymin = Math.max(0, yBlock - 1);
+		final int xmax = Math.min(yBlocks, xBlock + 2);
+		final int ymax = Math.min(yBlocks, yBlock + 2);
+		
+		for (int xx = xmin; xx < xmax; xx++)
 		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+			for (int yy = ymin; yy < ymax; yy++)
 			{
-				if (yy < 0 || yy >= yBlocks)
-					continue;
 				size += peakGrid[xx][yy].size;
 			}
 		}
@@ -329,13 +339,11 @@ public class ResultGridManager
 		if (size != 0)
 		{
 			size = 0;
-			for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+			for (int xx = xmin; xx < xmax; xx++)
 			{
-				if (xx < 0 || xx >= xBlocks)
-					continue;
-				for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+				for (int yy = ymin; yy < ymax; yy++)
 				{
-					if (yy < 0 || yy >= yBlocks || peakGrid[xx][yy].size == 0)
+					if (peakGrid[xx][yy].size == 0)
 						continue;
 					System.arraycopy(peakGrid[xx][yy].list, 0, list, size, peakGrid[xx][yy].size);
 					size += peakGrid[xx][yy].size;
@@ -435,14 +443,16 @@ public class ResultGridManager
 		final int yBlock = getBlock(y);
 
 		int size = 0;
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+		
+		final int xmin = Math.max(0, xBlock - 1);
+		final int ymin = Math.max(0, yBlock - 1);
+		final int xmax = Math.min(yBlocks, xBlock + 2);
+		final int ymax = Math.min(yBlocks, yBlock + 2);
+		
+		for (int xx = xmin; xx < xmax; xx++)
 		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+			for (int yy = ymin; yy < ymax; yy++)
 			{
-				if (yy < 0 || yy >= yBlocks)
-					continue;
 				size += candidateGrid[xx][yy].size;
 			}
 		}
@@ -450,13 +460,11 @@ public class ResultGridManager
 		if (size != 0)
 		{
 			size = 0;
-			for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+			for (int xx = xmin; xx < xmax; xx++)
 			{
-				if (xx < 0 || xx >= xBlocks)
-					continue;
-				for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+				for (int yy = ymin; yy < ymax; yy++)
 				{
-					if (yy < 0 || yy >= yBlocks || candidateGrid[xx][yy].size == 0)
+					if (candidateGrid[xx][yy].size == 0)
 						continue;
 					System.arraycopy(candidateGrid[xx][yy].list, 0, list, size, candidateGrid[xx][yy].size);
 					size += candidateGrid[xx][yy].size;

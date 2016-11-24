@@ -13,8 +13,6 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import java.util.Arrays;
-
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows checking for duplicates.
  */
@@ -35,7 +33,11 @@ public class GridCoordinateStore implements CoordinateStore
 		void add(double x, double y)
 		{
 			if (list.length == size)
-				list = Arrays.copyOf(list, size * 2);
+			{
+				final double[] list2 = new double[size * 2];
+				System.arraycopy(list, 0, list2, 0, size);
+				list = list2;
+			}
 			list[size] = x;
 			list[size + 1] = y;
 			size += 2;
@@ -274,14 +276,15 @@ public class GridCoordinateStore implements CoordinateStore
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
 
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+		final int xmin = Math.max(0, xBlock - 1);
+		final int ymin = Math.max(0, yBlock - 1);
+		final int xmax = Math.min(yBlocks, xBlock + 2);
+		final int ymax = Math.min(yBlocks, yBlock + 2);
+		
+		for (int xx = xmin; xx < xmax; xx++)
 		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+			for (int yy = ymin; yy < ymax; yy++)
 			{
-				if (yy < 0 || yy >= yBlocks)
-					continue;
 				final CoordinateList l = getList(xx, yy);
 				final int size = l.size;
 				if (size == 0)
@@ -325,14 +328,16 @@ public class GridCoordinateStore implements CoordinateStore
 
 		double[] match = new double[2];
 		double min = d2;
-		for (int xx = xBlock - 1; xx <= xBlock + 1; xx++)
+		
+		final int xmin = Math.max(0, xBlock - 1);
+		final int ymin = Math.max(0, yBlock - 1);
+		final int xmax = Math.min(yBlocks, xBlock + 2);
+		final int ymax = Math.min(yBlocks, yBlock + 2);
+		
+		for (int xx = xmin; xx < xmax; xx++)
 		{
-			if (xx < 0 || xx >= xBlocks)
-				continue;
-			for (int yy = yBlock - 1; yy <= yBlock + 1; yy++)
+			for (int yy = ymin; yy < ymax; yy++)
 			{
-				if (yy < 0 || yy >= yBlocks)
-					continue;
 				final CoordinateList l = getList(xx, yy);
 				final int size = l.size;
 				if (size == 0)
