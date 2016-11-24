@@ -66,6 +66,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.ResultGridManager;
+import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ga.Chromosome;
@@ -787,12 +788,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		ComplexFilterScore current = analyse(filterSets);
 		if (current == null)
 			return;
-		
+
 		time += analysisStopWatch.getTime();
 
 		if (!showIterationDialog())
 			return;
-		
+
 		// Time the non-interactive plugins as a continuous section
 		iterationStopWatch = StopWatch.createStarted();
 
@@ -4982,7 +4983,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		private HashMap<Integer, ArrayList<Coordinate>> getResults(FilterScore current)
 		{
 			return ResultsMatchCalculator
-					.getCoordinates(createResults(null, (DirectFilter) current.filter).getResults());
+					.getCoordinates(createResults(null, (DirectFilter) current.filter, false).getResults());
 		}
 
 		public boolean converged(FilterScore previous, FilterScore current)
@@ -5026,7 +5027,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			return false;
 		}
-			
+
 		private void logConvergence(String component)
 		{
 			if (iterationMaxIterations != 0 && getIterations() >= iterationMaxIterations)
@@ -5734,11 +5735,26 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	public static boolean updateAllConfiguration(FitEngineConfiguration config, boolean useLatest)
 	{
 		// Do this first as it sets the initial SD
+		if (!updateAllConfiguration(config))
+			return false;
+		if (!updateConfiguration(config, useLatest))
+			return false;
+		return true;
+	}
+
+	/**
+	 * Updates the given configuration using the latest settings used in benchmarking spot filters and fitting.
+	 *
+	 * @param config
+	 *            the configuration
+	 * @return true, if successful
+	 */
+	private static boolean updateAllConfiguration(FitEngineConfiguration config)
+	{
+		// Do this first as it sets the initial SD
 		if (!BenchmarkSpotFit.updateConfiguration(config))
 			return false;
 		if (!BenchmarkSpotFilter.updateConfiguration(config))
-			return false;
-		if (!updateConfiguration(config, useLatest))
 			return false;
 		return true;
 	}
@@ -5789,7 +5805,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// We could set the fail count range dynamically using a window around the best filter 
 
 		config.setFailuresLimit((best.failCount + best.failCountRange / 2));
-		
+
 		fitConfig.setDuplicateDistance(duplicateDistance);
 
 		return true;
@@ -6114,19 +6130,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private void saveResults(PreprocessedPeakResult[] filterResults, DirectFilter filter)
 	{
-		MemoryPeakResults results = createResults(filterResults, filter);
+		MemoryPeakResults results = createResults(filterResults, filter, true);
 		MemoryPeakResults.addResults(results);
 	}
 
 	/**
-	 * Save the results to memory.
+	 * Create peak results.
 	 *
 	 * @param filterResults
 	 *            The results from running the filter (or null)
 	 * @param filter
 	 *            the filter
 	 */
-	private MemoryPeakResults createResults(PreprocessedPeakResult[] filterResults, DirectFilter filter)
+	private MemoryPeakResults createResults(PreprocessedPeakResult[] filterResults, DirectFilter filter,
+			boolean withBorder)
 	{
 		if (filterResults == null)
 		{
@@ -6138,18 +6155,50 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.copySettings(this.results);
 		results.setName(TITLE);
-		MemoryPeakResults.addResults(results);
 
-		for (PreprocessedPeakResult spot : filterResults)
+		if (withBorder)
 		{
-			double[] p = spot.toGaussian2DParameters();
-			float[] params = new float[p.length];
-			for (int j = 0; j < p.length; j++)
-				params[j] = (float) p[j];
-			int frame = spot.getFrame();
-			int origX = (int) p[Gaussian2DFunction.X_POSITION];
-			int origY = (int) p[Gaussian2DFunction.Y_POSITION];
-			results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
+			// To produce the same results as the PeakFit plugin we must implement the border
+			// functionality used in the FitWorker. This respects the border of the spot filter.
+			FitEngineConfiguration config = new FitEngineConfiguration(new FitConfiguration());
+			updateAllConfiguration(config);
+			MaximaSpotFilter spotFilter = config.createSpotFilter(true);
+			final int border = spotFilter.getBorder();
+			int[] bounds = getBounds();
+			final int borderLimitX = bounds[0] - border;
+			final int borderLimitY = bounds[1] - border;
+
+			for (PreprocessedPeakResult spot : filterResults)
+			{
+				if (spot.getX() > border && spot.getX() < borderLimitX && spot.getY() > border &&
+						spot.getY() < borderLimitY)
+				{
+					double[] p = spot.toGaussian2DParameters();
+					float[] params = new float[p.length];
+					for (int j = 0; j < p.length; j++)
+						params[j] = (float) p[j];
+					int frame = spot.getFrame();
+					int origX = (int) p[Gaussian2DFunction.X_POSITION];
+					int origY = (int) p[Gaussian2DFunction.Y_POSITION];
+
+					results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
+				}
+			}
+		}
+		else
+		{
+			for (PreprocessedPeakResult spot : filterResults)
+			{
+				double[] p = spot.toGaussian2DParameters();
+				float[] params = new float[p.length];
+				for (int j = 0; j < p.length; j++)
+					params[j] = (float) p[j];
+				int frame = spot.getFrame();
+				int origX = (int) p[Gaussian2DFunction.X_POSITION];
+				int origY = (int) p[Gaussian2DFunction.Y_POSITION];
+
+				results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
+			}
 		}
 
 		return results;
@@ -6157,23 +6206,29 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private PreprocessedPeakResult[] filterResults(final MultiPathFilter multiPathFilter)
 	{
-		Rectangle bounds = results.getBounds(true);
-		int maxx = bounds.x + bounds.width;
-		int maxy = bounds.y + bounds.height;
-		double duplicateDistance = 0.5;
-		CoordinateStore cstore = new GridCoordinateStore(maxx, maxy, duplicateDistance);
-		return multiPathFilter.filter(resultsList, failCount + failCountRange, true, cstore);
+		return multiPathFilter.filter(resultsList, failCount + failCountRange, true, coordinateStore);
 	}
 
 	public GridCoordinateStore createCoordinateStore()
 	{
 		if (duplicateDistance > 0)
 		{
-			Rectangle bounds = results.getBounds(true);
-			int maxx = bounds.x + bounds.width;
-			int maxy = bounds.y + bounds.height;
-			return new GridCoordinateStore(maxx, maxy, duplicateDistance);
+			int[] bounds = getBounds();
+			return new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance);
 		}
 		return null;
+	}
+
+	private int[] getBounds()
+	{
+		ImagePlus imp = CreateData.getImage();
+		if (imp != null)
+		{
+			return new int[] { imp.getWidth(), imp.getHeight() };
+		}
+		Rectangle bounds = results.getBounds(true);
+		int maxx = bounds.x + bounds.width;
+		int maxy = bounds.y + bounds.height;
+		return new int[] { maxx, maxy };
 	}
 }
