@@ -2040,23 +2040,27 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// Set sensible limits
 			min[FILTER_SIGNAL] = Math.max(min[FILTER_SIGNAL], 30);
 			max[FILTER_PRECISION] = Math.min(max[FILTER_PRECISION], 100);
-			// Use half the initial bounds (hoping this is a good starting guess for the optimum)
-			final boolean[] limitToLower = new boolean[min.length];
-			limitToLower[FILTER_SIGNAL] = true;
-			limitToLower[FILTER_SNR] = true;
-			limitToLower[FILTER_MIN_WIDTH] = true;
-			limitToLower[FILTER_MAX_WIDTH] = false;
-			limitToLower[FILTER_SHIFT] = false;
-			limitToLower[FILTER_ESHIFT] = false;
-			limitToLower[FILTER_PRECISION] = true;
-			for (int i = 0; i < limitToLower.length; i++)
-			{
-				final double range = (upper[i] - lower[i]) / 2;
-				if (limitToLower[i])
-					upper[i] = lower[i] + range;
-				else
-					lower[i] = upper[i] - range;
-			}
+
+			// Commented this out so that the 4-set filters are the same as the 3-set filters.
+			// The difference leads to differences when optimising.
+			//			// Use half the initial bounds (hoping this is a good starting guess for the optimum)
+			//			final boolean[] limitToLower = new boolean[min.length];
+			//			limitToLower[FILTER_SIGNAL] = true;
+			//			limitToLower[FILTER_SNR] = true;
+			//			limitToLower[FILTER_MIN_WIDTH] = true;
+			//			limitToLower[FILTER_MAX_WIDTH] = false;
+			//			limitToLower[FILTER_SHIFT] = false;
+			//			limitToLower[FILTER_ESHIFT] = false;
+			//			limitToLower[FILTER_PRECISION] = true;
+			//			for (int i = 0; i < limitToLower.length; i++)
+			//			{
+			//				final double range = (upper[i] - lower[i]) / 2;
+			//				if (limitToLower[i])
+			//					upper[i] = lower[i] + range;
+			//				else
+			//					lower[i] = upper[i] - range;
+			//			}
+
 			filters = new ArrayList<Filter>(4);
 			filters.add(new MultiFilter2(min[0], (float) min[1], min[2], min[3], min[4], min[5], min[6]));
 			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
@@ -2805,10 +2809,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	/**
 	 * Run the analysis non-interactively using the given filter settings.
 	 *
-	 * @param filter            the filter
-	 * @param residualsThreshold            the residuals threshold
-	 * @param failuresLimit            the failures limit
-	 * @param duplicateDistance the duplicate distance
+	 * @param filter
+	 *            the filter
+	 * @param residualsThreshold
+	 *            the residuals threshold
+	 * @param failuresLimit
+	 *            the failures limit
+	 * @param duplicateDistance
+	 *            the duplicate distance
 	 */
 	public void run(DirectFilter filter, double residualsThreshold, int failuresLimit, double duplicateDistance)
 	{
