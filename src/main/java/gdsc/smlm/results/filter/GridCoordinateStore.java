@@ -196,8 +196,8 @@ public class GridCoordinateStore implements CoordinateStore
 		return Math.sqrt(d2);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Note: This does not check that the x,y coordinates are within the correct bounds.
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double)
 	 */
@@ -219,14 +219,39 @@ public class GridCoordinateStore implements CoordinateStore
 		queue.size = 0;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Note: This does not check that the x,y coordinates are within the correct bounds. Use
+	 * {@link #safeAdd(double, double)} to do a bounds check.
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double)
 	 */
 	public void add(final double x, final double y)
 	{
+		// Note: A bounds check is not currently necessary since the this code is only used
+		// by the MultiPathFilter on results that are inside the bounds
+
 		getList(getBlock(x), getBlock(y)).add(x, y);
+	}
+
+	/**
+	 * Add a coordinate to the store. Assumes that the coordinates are within the size of the grid otherwise they will
+	 * be ignored.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 */
+	public void safeAdd(final double x, final double y)
+	{
+		// Check bounds 
+		final int xBlock = getBlock(x);
+		if (xBlock < 0 || xBlock >= xBlocks)
+			return;
+		final int yBlock = getBlock(y);
+		if (yBlock < 0 || yBlock >= yBlocks)
+			return;
+		getList(xBlock, yBlock).add(x, y);
 	}
 
 	/**
@@ -280,7 +305,7 @@ public class GridCoordinateStore implements CoordinateStore
 		final int ymin = Math.max(0, yBlock - 1);
 		final int xmax = Math.min(xBlocks, xBlock + 2);
 		final int ymax = Math.min(yBlocks, yBlock + 2);
-		
+
 		for (int xx = xmin; xx < xmax; xx++)
 		{
 			for (int yy = ymin; yy < ymax; yy++)
@@ -328,12 +353,12 @@ public class GridCoordinateStore implements CoordinateStore
 
 		double[] match = new double[2];
 		double min = d2;
-		
+
 		final int xmin = Math.max(0, xBlock - 1);
 		final int ymin = Math.max(0, yBlock - 1);
 		final int xmax = Math.min(xBlocks, xBlock + 2);
 		final int ymax = Math.min(yBlocks, yBlock + 2);
-		
+
 		for (int xx = xmin; xx < xmax; xx++)
 		{
 			for (int yy = ymin; yy < ymax; yy++)

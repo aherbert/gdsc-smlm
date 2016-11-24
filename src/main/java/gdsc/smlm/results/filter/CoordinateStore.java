@@ -15,7 +15,7 @@ public interface CoordinateStore
 	/**
 	 * Queue a coordinate to the store.
 	 * <p>
-	 * It is not added to the store until flush is called. Assumes that the coordinates are within the size of the grid.
+	 * It is not added to the store until flush is called.
 	 *
 	 * @param x
 	 *            the x
@@ -30,7 +30,7 @@ public interface CoordinateStore
 	public void flush();
 
 	/**
-	 * Add a coordinate to the store. Assumes that the coordinates are within the size of the grid.
+	 * Add a coordinate to the store. Assumes that the coordinates are within the size of the grid otherwise they will be ignored.
 	 *
 	 * @param x
 	 *            the x
@@ -45,8 +45,7 @@ public interface CoordinateStore
 	public void clear();
 
 	/**
-	 * Check if the store contains the coordinates within the configured resolution. Assumes that the coordinates are
-	 * within the size of the grid.
+	 * Check if the store contains the coordinates within the configured resolution.
 	 *
 	 * @param x
 	 *            the x
@@ -57,8 +56,7 @@ public interface CoordinateStore
 	public boolean contains(double x, double y);
 
 	/**
-	 * Find the closest coordinate within the configured resolution. Assumes that the coordinates are
-	 * within the size of the grid.
+	 * Find the closest coordinate within the configured resolution.
 	 *
 	 * @param x
 	 *            the x
