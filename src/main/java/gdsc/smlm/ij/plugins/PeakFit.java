@@ -1900,7 +1900,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			// Collect options for LVM fitting
 			GenericDialog gd = new GenericDialog(TITLE);
-			gd.addMessage("LVM requires additional parameters");
+			gd.addMessage(fitConfig.getFitSolver().getShortName() + " requires additional parameters");
 			String[] criteriaNames = SettingsManager.getNames((Object[]) FitCriteria.values());
 			gd.addChoice("Fit_criteria", criteriaNames, criteriaNames[fitConfig.getFitCriteria().ordinal()]);
 			gd.addNumericField("Significant_digits", fitConfig.getSignificantDigits(), 0);
