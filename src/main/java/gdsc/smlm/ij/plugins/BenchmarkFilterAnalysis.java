@@ -5789,6 +5789,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// We could set the fail count range dynamically using a window around the best filter 
 
 		config.setFailuresLimit((best.failCount + best.failCountRange / 2));
+		
+		fitConfig.setDuplicateDistance(duplicateDistance);
 
 		return true;
 	}

@@ -1107,6 +1107,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		boolean includeNeighbours = gd.getNextBoolean();
 		double neighbourHeightThreshold = gd.getNextNumber();
 		boolean myComputeDoublets = gd.getNextBoolean();
+		double myDuplicateDistance = gd.getNextNumber();
 
 		MultiPathFilter myMultiFilter = null;
 		if (myUseBenchmarkSettings && !Utils.isShowGenericDialog())
@@ -1121,6 +1122,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				config.setIncludeNeighbours(tmp.isIncludeNeighbours());
 				config.setNeighbourHeightThreshold(tmp.getNeighbourHeightThreshold());
 				computeDoublets = (tmp.getResidualsThreshold() < 1);
+				fitConfig.setDuplicateDistance(tmpFitConfig.getDuplicateDistance());
 
 				final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
 				final double residualsThreshold = tmp.getResidualsThreshold();
@@ -1135,6 +1137,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			config.setIncludeNeighbours(includeNeighbours);
 			config.setNeighbourHeightThreshold(neighbourHeightThreshold);
 			computeDoublets = myComputeDoublets;
+			fitConfig.setDuplicateDistance(myDuplicateDistance);
 		}
 
 		if (myMultiFilter == null)
@@ -1163,7 +1166,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			config.setResidualsThreshold(1);
 			fitConfig.setComputeResiduals(false);
 		}
-		fitConfig.setDuplicateDistance(gd.getNextNumber());
 		showFilterScoreHistograms = gd.getNextBoolean();
 		showCorrelation = gd.getNextBoolean();
 		rankByIntensity = gd.getNextBoolean();
