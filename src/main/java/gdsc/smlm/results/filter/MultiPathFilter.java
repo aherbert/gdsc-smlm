@@ -1044,15 +1044,16 @@ public class MultiPathFilter implements Cloneable
 				//				}
 
 				// Assess the result if we are below the fail limit or have an estimate
-				final SelectedResult result = select(multiPathResult, true, store);
+				final SelectedResult selectedResult = select(multiPathResult, true, store);
 				boolean newResult = false;
-				if (result != null)
+				if (selectedResult != null)
 				{
 					int size = 0;
-					final int[] ok = new int[result.results.length];
+					final PreprocessedPeakResult[] result = selectedResult.results; 					
+					final int[] ok = new int[result.length];
 					for (int i = 0; i < ok.length; i++)
 					{
-						if (result.results[i].isNewResult())
+						if (result[i].isNewResult())
 						{
 							newResult = true;
 							//							if (out != null)
@@ -1080,8 +1081,11 @@ public class MultiPathFilter implements Cloneable
 							//							}
 
 							// TODO - Check for duplicates
-							if (coordinateStore.queue(result.results[i].getX(), result.results[i].getY()))
+							if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(), result[i].getY()))
+							{
+								coordinateStore.addToQueue(result[i].getX(), result[i].getY());
 								ok[size++] = i;
+							}
 						}
 					}
 
@@ -1092,22 +1096,22 @@ public class MultiPathFilter implements Cloneable
 						// This has valid results so add to the output subset only those that are new
 						if (size == ok.length)
 						{
-							store.add(result);
+							store.add(selectedResult);
 						}
 						else
 						{
 							final PreprocessedPeakResult[] filtered = new PreprocessedPeakResult[size];
 							for (int i = 0; i < size; i++)
 							{
-								filtered[i] = result.results[ok[i]];
+								filtered[i] = result[ok[i]];
 							}
-							store.add(new SelectedResult(filtered, result.fitResult));
+							store.add(new SelectedResult(filtered, selectedResult.fitResult));
 						}
 					}
 					else
 					{
 						// Add the selected result but with no new results (due to duplicates) 
-						store.add(new SelectedResult(null, result.fitResult));
+						store.add(new SelectedResult(null, selectedResult.fitResult));
 					}
 				}
 				else
@@ -1714,8 +1718,9 @@ public class MultiPathFilter implements Cloneable
 								//								}
 
 								// TODO - Check for duplicates
-								if (coordinateStore.queue(result[i].getX(), result[i].getY()))
+								if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(), result[i].getY()))
 								{
+									coordinateStore.addToQueue(result[i].getX(), result[i].getY());
 									//									if (store.isFit[result[i].getCandidateId()] &&
 									//											result[i].getCandidateId() != multiPathResult.candidateId)
 									//										System.out.printf("Fitted candidate %d [%d] %f,%f ([%d])\n",
@@ -2353,8 +2358,9 @@ public class MultiPathFilter implements Cloneable
 								else
 								{
 									// TODO - Check for duplicates
-									if (coordinateStore.queue(result[i].getX(), result[i].getY()))
+									if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(), result[i].getY()))
 									{
+										coordinateStore.addToQueue(result[i].getX(), result[i].getY());
 										scoreStore.add(result[i].getUniqueId());
 										final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
 										if (a != null && a.length > 0)

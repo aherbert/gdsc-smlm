@@ -1476,6 +1476,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 		{
 			return false;
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
+		 */
+		public boolean isNotDuplicate()
+		{
+			return false;
+		}
 	}
 
 	/**

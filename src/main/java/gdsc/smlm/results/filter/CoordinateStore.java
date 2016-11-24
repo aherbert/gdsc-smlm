@@ -13,16 +13,16 @@ public interface CoordinateStore
 	public double getResolution();
 
 	/**
-	 * Queue a coordinate to the store. It is not added to the store until flush is called. Assumes that the coordinates
-	 * are within the size of the grid. A check is made for duplicates.
+	 * Queue a coordinate to the store.
+	 * <p>
+	 * It is not added to the store until flush is called. Assumes that the coordinates are within the size of the grid.
 	 *
 	 * @param x
 	 *            the x
 	 * @param y
 	 *            the y
-	 * @return true, if successful (i.e. not a duplicate)
 	 */
-	public boolean queue(double x, double y);
+	public void addToQueue(double x, double y);
 
 	/**
 	 * Flush the queue to the store

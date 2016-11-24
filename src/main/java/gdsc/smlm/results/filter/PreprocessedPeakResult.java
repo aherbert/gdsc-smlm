@@ -222,4 +222,14 @@ public interface PreprocessedPeakResult
 	 * @return the validation result
 	 */
 	int getValidationResult();
+
+	/**
+	 * Returns true if this result is not a duplicate. The default value should be false.
+	 * <p>
+	 * Implementations can preprocess a results set to check if this is close to any preceeding results. If it is
+	 * impossible to be a duplicate then the return value is true.
+	 *
+	 * @return true, if is not duplicate. 
+	 */
+	boolean isNotDuplicate();
 }

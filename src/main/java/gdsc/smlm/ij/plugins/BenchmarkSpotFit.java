@@ -2803,17 +2803,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	/**
 	 * Run the analysis non-interactively using the given filter settings.
 	 *
-	 * @param filter
-	 *            the filter
-	 * @param residualsThreshold
-	 *            the residuals threshold
-	 * @param failuresLimit
-	 *            the failures limit
+	 * @param filter            the filter
+	 * @param residualsThreshold            the residuals threshold
+	 * @param failuresLimit            the failures limit
+	 * @param duplicateDistance the duplicate distance
 	 */
-	public void run(DirectFilter filter, double residualsThreshold, int failuresLimit)
+	public void run(DirectFilter filter, double residualsThreshold, int failuresLimit, double duplicateDistance)
 	{
 		multiFilter = new MultiPathFilter(filter, minimalFilter, residualsThreshold);
 		config.setFailuresLimit(failuresLimit);
+		fitConfig.setDuplicateDistance(duplicateDistance);
 
 		clearFitResults();
 

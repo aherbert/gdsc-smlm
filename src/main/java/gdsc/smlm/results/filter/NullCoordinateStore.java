@@ -31,11 +31,10 @@ public class NullCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#queue(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double)
 	 */
-	public boolean queue(double x, double y)
+	public void addToQueue(double x, double y)
 	{
-		return true;
 	}
 
 	/*

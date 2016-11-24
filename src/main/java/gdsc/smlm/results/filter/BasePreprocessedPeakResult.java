@@ -54,7 +54,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private ResultAssignment[] assignments;
 	public int uniqueId;
 	private int validationResult = 0;
-	private boolean ignore;
+	private boolean ignore, notDuplicate;
 
 	//@formatter:off
 	/**
@@ -350,5 +350,27 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	public void setValidationResult(int validationResult)
 	{
 		this.validationResult = validationResult;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
+	 */
+	public boolean isNotDuplicate()
+	{
+		return notDuplicate;
+	}
+
+	/**
+	 * Sets the not duplicate flag. Set to true if this result cannot be a duplicate (i.e. no preceeding results in the
+	 * same frame within a close distance).
+	 *
+	 * @param notDuplicate
+	 *            the new not duplicate flag
+	 */
+	public void setNotDuplicate(boolean notDuplicate)
+	{
+		this.notDuplicate = notDuplicate;
 	}
 }

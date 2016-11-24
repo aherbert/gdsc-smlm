@@ -97,6 +97,7 @@ import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
+import gdsc.smlm.results.filter.NullCoordinateStore;
 import gdsc.smlm.results.filter.ParameterType;
 import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
@@ -147,10 +148,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double sResidualsThreshold = 0.3;
 	private double residualsThreshold = 1; // Disabled
 	private static double duplicateDistance = 0;
-	static
-	{
-		duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
-	}
 	private static boolean reset = true;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
@@ -244,6 +241,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int matches;
 	private static int fittedResults;
 	private static int totalResults;
+	private static int notDuplicateCount;
+	private static int newResultCount;
 	private static int maxUniqueId = 0;
 	private static int nActual;
 	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
@@ -333,14 +332,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		int total = 0;
 		int included = 0;
 		int includedActual = 0;
+		int notDuplicateCount = 0;
+		int newResultCount = 0;
 		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
 		private final boolean checkBorder;
 		final float border;
 		final float xlimit;
 		final float ylimit;
+		final CoordinateStore coordinateStore;
 
 		public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults, double matchDistance,
-				RampedScore distanceScore, RampedScore signalScore, AtomicInteger uniqueId)
+				RampedScore distanceScore, RampedScore signalScore, AtomicInteger uniqueId,
+				CoordinateStore coordinateStore)
 		{
 			this.jobs = jobs;
 			this.results = syncResults;
@@ -348,6 +351,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.distanceScore = distanceScore;
 			this.signalScore = signalScore;
 			this.uniqueId = uniqueId;
+			this.coordinateStore = coordinateStore;
 
 			depthStats = new StoredDataStatistics();
 			depthFitStats = new StoredDataStatistics();
@@ -424,6 +428,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final MultiPathFitResult[] multiPathFitResults = new MultiPathFitResult[result.fitResult.length];
 			int size = 0;
 
+			coordinateStore.clear();
+
 			// TODO - support a multi-pass filter.
 			// The results are in order they were fit.
 			// For a single pass fitter this will be in order of candidate ranking.
@@ -438,6 +444,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				fitted |= score(index, 2, fitResult.getDoubletFitResult(), resultGrid, matched);
 				fitted |= score(index, 3, fitResult.getMultiFitResult(), resultGrid, matched);
 				fitted |= score(index, 4, fitResult.getMultiDoubletFitResult(), resultGrid, matched);
+
+				coordinateStore.flush();
 
 				// XXX - comment out while debugging
 				if (fitted)
@@ -499,6 +507,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						peak.setIgnore(true);
 						continue;
 					}
+
+					// Flag if it is possible to be a duplicate
+					final boolean notDuplicate = !coordinateStore.contains(peak.getX(), peak.getY());
+					if (notDuplicate)
+						notDuplicateCount++;
+					newResultCount++;
+					peak.setNotDuplicate(notDuplicate);
+					coordinateStore.addToQueue(peak.getX(), peak.getY());
 
 					// Compare to actual results
 					// We do this using the ResultGridManager to generate a sublist to score against
@@ -794,7 +810,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		while (!converged)
 		{
 			// Do the fit (using the current optimum filter)
-			fit.run(current.r.filter, residualsThreshold, failCount);
+			fit.run(current.r.filter, residualsThreshold, failCount, duplicateDistance);
 			if (invalidBenchmarkSpotFitResults(false))
 				return;
 			if (!loadFitResults())
@@ -862,6 +878,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					filterSets.add(filterSet);
 					failCount = BenchmarkSpotFit.config.getFailuresLimit();
 					failCountRange = 0;
+					duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
 					residualsThreshold = (BenchmarkSpotFit.computeDoublets)
 							? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 					createResultsPrefix2();
@@ -1279,6 +1296,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Copy the settings from the fitter if this is the first run
 				failCount = BenchmarkSpotFit.config.getFailuresLimit();
 				failCountRange = 0;
+				duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
 				sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
 						? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 			}
@@ -1288,7 +1306,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 
 		Settings settings = new Settings(partialMatchDistance, upperMatchDistance, partialSignalFactor,
-				upperSignalFactor);
+				upperSignalFactor, duplicateDistance);
 
 		if (update || !settings.equals(lastReadResultsSettings))
 		{
@@ -1306,6 +1324,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			matches = 0;
 			fittedResults = 0;
 			totalResults = 0;
+			notDuplicateCount = 0;
+			newResultCount = 0;
 			maxUniqueId = 0;
 			nActual = 0;
 
@@ -1411,10 +1431,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final List<FitResultsWorker> workers = new LinkedList<FitResultsWorker>();
 			final List<Thread> threads = new LinkedList<Thread>();
 			final AtomicInteger uniqueId = new AtomicInteger();
+			GridCoordinateStore coordinateStore = createCoordinateStore();
 			for (int i = 0; i < nThreads; i++)
 			{
 				final FitResultsWorker worker = new FitResultsWorker(jobs, syncResults, matchDistance, distanceScore,
-						signalScore, uniqueId);
+						signalScore, uniqueId,
+						(coordinateStore == null) ? new NullCoordinateStore() : coordinateStore.newInstance());
 				final Thread t = new Thread(worker);
 				workers.add(worker);
 				threads.add(t);
@@ -1444,6 +1466,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					matches += worker.matches;
 					fittedResults += worker.included;
 					totalResults += worker.total;
+					notDuplicateCount += worker.notDuplicateCount;
+					newResultCount += worker.newResultCount;
 					nActual += worker.includedActual;
 					if (i == 0)
 					{
@@ -1567,8 +1591,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
 				simulationParameters.b2, simulationParameters.emCCD);
 		String msg = String.format(
-				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE);
+				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
+				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE, notDuplicateCount,
+				newResultCount, (100.0 * notDuplicateCount) / newResultCount);
+
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
@@ -1780,6 +1806,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		limitFailCount += ", r=" + Utils.rounded(residualsThreshold);
 		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
+		resultsPrefix2 += "\t" + Utils.rounded(duplicateDistance);
 	}
 
 	private boolean showIterationDialog()
@@ -1994,7 +2021,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// The delta effects the step size for the Genetic Algorithm
 				evolveSetting *= delta;
 			Settings settings = new Settings(filterSets, resultsList, failCount, failCountRange, residualsThreshold,
-					plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
+					duplicateDistance, plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
 
 			boolean equalSettings = settings.equals(lastAnalyseSettings);
 
@@ -2161,7 +2188,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		plots = new ArrayList<NamedPlot>(plotTopN);
 		bestFilter = new HashMap<String, ComplexFilterScore>();
 		bestFilterOrder = new LinkedList<String>();
-		
+
 		coordinateStore = createCoordinateStore();
 
 		analysisStopWatch = StopWatch.createStarted();
@@ -2463,7 +2490,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private String createResultsHeader(boolean summary)
 	{
 		StringBuilder sb = new StringBuilder(BenchmarkSpotFit.tablePrefix);
-		sb.append("\tTitle\tName\tFail\tRes\tLower D (nm)\tUpper D (nm)\tLower factor\tUpper factor");
+		sb.append("\tTitle\tName\tFail\tRes\tDup D\tLower D (nm)\tUpper D (nm)\tLower factor\tUpper factor");
 
 		for (int i = 0; i < COLUMNS.length; i++)
 			if (showColumns[i])
@@ -2609,6 +2636,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Get the dimensions from the filters
 			if (originalDimensions == null)
 			{
+				originalDimensions = new FixedDimension[n];
+
 				// Allow inputing a filter set (e.g. saved from previous optimisation)
 				// Find the limits in the current scores
 				final double[] lower = ss_filter.getParameters().clone();

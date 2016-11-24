@@ -22,22 +22,40 @@ public class GridCoordinateStore implements CoordinateStore
 {
 	private class CoordinateList
 	{
+		int timestamp = 0;
 		int size = 0;
 		double[] list = new double[4];
+
+		// Not needed as we only create lists in the constructor when the timestamp is zero
+		//CoordinateList()
+		//{
+		//	refresh();
+		//}
 
 		void add(double x, double y)
 		{
 			if (list.length == size)
 				list = Arrays.copyOf(list, size * 2);
-			list[size++] = x;
-			list[size++] = y;
+			list[size] = x;
+			list[size + 1] = y;
+			size += 2;
+		}
+
+		void refresh()
+		{
+			// If this is out-of-date then clear the contents 
+			if (this.timestamp != GridCoordinateStore.this.timestamp)
+				clear();
 		}
 
 		void clear()
 		{
 			size = 0;
+			this.timestamp = GridCoordinateStore.this.timestamp;
 		}
 	}
+
+	private int timestamp = 0;
 
 	private final CoordinateList[][] grid;
 	private final CoordinateList queue = new CoordinateList();
@@ -179,14 +197,11 @@ public class GridCoordinateStore implements CoordinateStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.CoordinateStore#queue(double, double)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double)
 	 */
-	public boolean queue(double x, double y)
+	public void addToQueue(double x, double y)
 	{
-		if (contains(x, y))
-			return false;
 		queue.add(x, y);
-		return true;
 	}
 
 	/*
@@ -198,7 +213,8 @@ public class GridCoordinateStore implements CoordinateStore
 	{
 		for (int i = 0; i < queue.size; i += 2)
 			add(queue.list[i], queue.list[i + 1]);
-		queue.clear();
+		//queue.clear(); // Avoid the timestamp refresh
+		queue.size = 0;
 	}
 
 	/*
@@ -206,9 +222,25 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double)
 	 */
-	public void add(double x, double y)
+	public void add(final double x, final double y)
 	{
-		grid[getBlock(x)][getBlock(y)].add(x, y);
+		getList(getBlock(x), getBlock(y)).add(x, y);
+	}
+
+	/**
+	 * Gets the list for the grid point. Refresh the list using the current timestamp (i.e. clear any old data).
+	 *
+	 * @param xBlock
+	 *            the x grid point
+	 * @param yBlock
+	 *            the y grid point
+	 * @return the list
+	 */
+	private CoordinateList getList(final int xBlock, final int yBlock)
+	{
+		final CoordinateList l = grid[xBlock][yBlock];
+		l.refresh();
+		return l;
 	}
 
 	/*
@@ -218,14 +250,18 @@ public class GridCoordinateStore implements CoordinateStore
 	 */
 	public void clear()
 	{
-		for (int x = 0; x < xBlocks; x++)
-		{
-			final CoordinateList[] list = grid[x];
-			for (int y = 0; y < yBlocks; y++)
-			{
-				list[y].clear();
-			}
-		}
+		// This method is a big overhead when the grid is large and the number of additions to the grid is small.
+		// So store a timestamp for the clear and we refresh each list when we next use it.
+		timestamp++;
+
+		//		for (int x = 0; x < xBlocks; x++)
+		//		{
+		//			final CoordinateList[] list = grid[x];
+		//			for (int y = 0; y < yBlocks; y++)
+		//			{
+		//				list[y].clear();
+		//			}
+		//		}
 	}
 
 	/*
@@ -233,7 +269,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double)
 	 */
-	public boolean contains(double x, double y)
+	public boolean contains(final double x, final double y)
 	{
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
@@ -246,10 +282,11 @@ public class GridCoordinateStore implements CoordinateStore
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				final int size = grid[xx][yy].size;
+				final CoordinateList l = getList(xx, yy);
+				final int size = l.size;
 				if (size == 0)
 					continue;
-				final double[] list = grid[xx][yy].list;
+				final double[] list = l.list;
 				for (int i = 0; i < size; i += 2)
 				{
 					if (distance2(x, y, list[i], list[i + 1]) < d2)
@@ -274,14 +311,14 @@ public class GridCoordinateStore implements CoordinateStore
 	 *            the y2 coordinate
 	 * @return the squared distance
 	 */
-	private double distance2(double x, double y, double x2, double y2)
+	private double distance2(final double x, final double y, final double x2, final double y2)
 	{
 		final double dx = x - x2;
 		final double dy = y - y2;
 		return dx * dx + dy * dy;
 	}
 
-	public double[] find(double x, double y)
+	public double[] find(final double x, final double y)
 	{
 		final int xBlock = getBlock(x);
 		final int yBlock = getBlock(y);
@@ -296,10 +333,11 @@ public class GridCoordinateStore implements CoordinateStore
 			{
 				if (yy < 0 || yy >= yBlocks)
 					continue;
-				final int size = grid[xx][yy].size;
+				final CoordinateList l = getList(xx, yy);
+				final int size = l.size;
 				if (size == 0)
 					continue;
-				final double[] list = grid[xx][yy].list;
+				final double[] list = l.list;
 				for (int i = 0; i < size; i += 2)
 				{
 					final double d = distance2(x, y, list[i], list[i + 1]);
