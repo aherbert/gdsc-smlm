@@ -5943,7 +5943,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					if (c != 0)
 						SpotFinderPreview.addRoi(frame, o, x, y, c, Color.red);
 					if (c2 != 0)
-						SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
+						SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.magenta);
 					c = c2 = 0;
 				}
 				frame = filterResults[i].getFrame();
