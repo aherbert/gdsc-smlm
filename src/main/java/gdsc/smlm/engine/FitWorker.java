@@ -835,6 +835,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
 				double[] params, double localBackground, ResultType resultType)
 		{
+			//if (dynamicMultiPathFitResult.candidateId < candidateId && resultType == ResultType.NEW)
+			//	System.out.println("WTF");
+			
 			// Update the initial params since we may have used an estimate
 			// This will ensure that the width factor is computed correctly.
 
