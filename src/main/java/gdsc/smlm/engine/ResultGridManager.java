@@ -380,7 +380,7 @@ public class ResultGridManager
 	 * @param candidate
 	 *            the candidate
 	 * @param nonUnique
-	 *            True if candidate indices are not unique unique
+	 *            True if candidate indices are not unique
 	 * @return the neighbours
 	 */
 	public CandidateList getNeighbours(final Candidate candidate, boolean nonUnique)
