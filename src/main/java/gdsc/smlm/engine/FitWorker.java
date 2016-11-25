@@ -518,6 +518,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			filter.select(multiPathResults, config.getFailuresLimit(), true, store, coordinateStore);
 
+			// TODO - If benchmarking can we go deeper into the candidate list than max candidate
+			// for any candidate where we have an estimate
+			// i.e. call select() as above but pass in the start index and a failures limit of -1
+			// Modify getResult(...) to only set-up for fitting if there is an estimate.
+			// We must set up the complete(...) method to ignore computing all the results unless
+			// we generated results using getResult(...)
+			
+			// BenchmarkSpotFit must then be made aware of the extra results...
+			
+			
 			if (logger != null)
 				logger.info("Slice %d: %d / %d", slice, success, candidates.getSize());
 
@@ -1308,7 +1318,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			gf.setBounds(lower, upper);
 			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, amplitudeEstimate,
 					params[Gaussian2DFunction.BACKGROUND] == 0);
-			multiResiduals = gf.getResiduals();
 			gf.setBounds(null, null);
 
 			//			if (fitResult.getStatus() == FitStatus.BAD_PARAMETERS)
@@ -1361,6 +1370,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			PreprocessedPeakResult[] results = null;
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
+				multiResiduals = gf.getResiduals();
+				
 				//				// Debug background estimates
 				//				double base = 1; //params[0] - fitConfig.getBias();
 				//				System.out.printf("[%d] %d %.1f : %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f\n", slice,
@@ -2062,7 +2073,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 			final FitResult fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate,
 					params[Gaussian2DFunction.BACKGROUND] == 0);
-			singleResiduals = gf.getResiduals();
 			singleSumOfSquares = gf.getFinalResidualSumOfSquares();
 			singleValue = gf.getValue();
 			updateError(fitResult);
@@ -2077,6 +2087,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			PreprocessedPeakResult[] results = null;
 			if (fitResult.getStatus() == FitStatus.OK)
 			{
+				singleResiduals = gf.getResiduals();
+				
 				//				// Debug background estimates
 				//				double base = params[0] - fitConfig.getBias();
 				//				System.out.printf("[%d] %d %.1f : %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f  %.1f  %.2f\n", slice,
