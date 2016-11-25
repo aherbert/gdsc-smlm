@@ -50,11 +50,17 @@ public class FitParameters
 	 */
 	public Spot[] spots = null;
 	/**
+	 * The maximum candidate spot to fit. This should be equal to spots.lnegth or less. It is used when additional
+	 * candidates have been added to the spots list that are neighbours of the primary spot candidates.
+	 */
+	public int maxCandidate;
+	/**
 	 * The maxima to fit within the data
 	 */
 	public int[] maxIndices = null;
 	/**
-	 * The background for the image data. This is no longer used as the background is estimated using the local fit region.
+	 * The background for the image data. This is no longer used as the background is estimated using the local fit
+	 * region.
 	 */
 	@Deprecated
 	public float background = Float.NaN;

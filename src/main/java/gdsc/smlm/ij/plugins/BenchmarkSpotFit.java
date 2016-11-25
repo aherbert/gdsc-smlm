@@ -59,14 +59,18 @@ import gdsc.core.utils.FastCorrelator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NoiseEstimator.Method;
 import gdsc.core.utils.RampedScore;
+import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.XmlUtils;
+import gdsc.smlm.engine.Candidate;
+import gdsc.smlm.engine.CandidateList;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
@@ -85,11 +89,11 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
+import gdsc.smlm.results.filter.CoordinateStoreFactory;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.EShiftFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
-import gdsc.smlm.results.filter.CoordinateStoreFactory;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
@@ -377,9 +381,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static int nP, nN;
 
 	static int lastId = -1, lastFilterId = -1;
-	private static double lastFractionPositives = -1;
-	private static double lastFractionNegativesAfterAllPositives = -1;
-	private static int lastNegativesAfterAllPositives = -1;
+	private static Settings lastSettings = null;
 
 	// Allow other plugins to access the results
 	static int fitResultsId = 0;
@@ -546,6 +548,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Double sums of the fractions match score and antiscore 
 		final double np, nn;
 		final ScoredSpot[] spots;
+		final int maxCandidate;
 		double tp, fp, tn, fn;
 		MultiPathFitResult[] fitResult;
 		float noise;
@@ -558,13 +561,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		 */
 		SpotMatch[] match;
 
-		public FilterCandidates(int p, int n, double np, double nn, ScoredSpot[] spots)
+		public FilterCandidates(int p, int n, double np, double nn, ScoredSpot[] spots, int maxCandidate)
 		{
 			this.p = p;
 			this.n = n;
 			this.np = np;
 			this.nn = nn;
 			this.spots = spots;
+			this.maxCandidate = maxCandidate;
 		}
 
 		/*
@@ -681,7 +685,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
 			FilterCandidates candidates = filterCandidates.get(frame);
-			final MultiPathFitResult[] fitResult = new MultiPathFitResult[candidates.spots.length];
+			int maxCandidate = candidates.maxCandidate;
+			final MultiPathFitResult[] fitResult = new MultiPathFitResult[maxCandidate];
 
 			// Fit the candidates and store the results
 			final FitParameters parameters = new FitParameters();
@@ -694,13 +699,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				//	System.out.printf("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity);
 			}
 			parameters.spots = spots;
+			parameters.maxCandidate = maxCandidate;
 			parameters.fitTask = FitTask.BENCHMARKING;
 			parameters.benchmarkFilter = multiFilter;
 
 			final ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
 			fitWorker.run(job); // Results will be stored in the fit job 
 
-			for (int i = 0; i < spots.length; i++)
+			for (int i = 0; i < maxCandidate; i++)
 			{
 				fitResult[i] = job.getMultiPathFitResult(i);
 			}
@@ -709,7 +715,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// We will match all fitting results so providing the upper limit for the match score after filtering.
 			final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
 			final double[] zPosition = new double[actual.length];
-			SpotMatch[] match = new SpotMatch[spots.length];
+			SpotMatch[] match = new SpotMatch[actual.length];
 			int matchCount = 0;
 			final RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
 			final RampedScore signalScore = (signalFactor > 0) ? new RampedScore(lowerSignalFactor, signalFactor)
@@ -724,10 +730,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				}
 
 				// Allow for doublets the predicted array
-				final ArrayList<MultiPathPoint> predicted = new ArrayList<MultiPathPoint>(spots.length * 2);
+				final ArrayList<MultiPathPoint> predicted = new ArrayList<MultiPathPoint>(maxCandidate * 2);
 				matches.clear();
 
-				for (int i = 0; i < spots.length; i++)
+				for (int i = 0; i < maxCandidate; i++)
 				{
 					// Use all the results. 
 					// Store results using the candidate Id. The best match for each Id will be chosen.
@@ -1247,7 +1253,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private void run()
 	{
 		// Extract all the results in memory into a list per frame. This can be cached
-		boolean refresh = false;
+		boolean refresh = true; // XXX false;
 		if (lastId != simulationParameters.id)
 		{
 			// Do not get integer coordinates
@@ -1259,17 +1265,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 
 		// Extract all the candidates into a list per frame. This can be cached if the settings have not changed
-		if (refresh || lastFilterId != BenchmarkSpotFilter.filterResult.id ||
-				lastFractionPositives != fractionPositives ||
-				lastFractionNegativesAfterAllPositives != fractionNegativesAfterAllPositives ||
-				lastNegativesAfterAllPositives != negativesAfterAllPositives)
+		final int width = (config.isIncludeNeighbours()) ? config.getRelativeFitting() : 0;
+		final Settings settings = new Settings(BenchmarkSpotFilter.filterResult.id, fractionPositives,
+				fractionNegativesAfterAllPositives, negativesAfterAllPositives, width);
+		if (refresh || !settings.equals(lastSettings))
 		{
 			filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults);
-
+			lastSettings = settings;
 			lastFilterId = BenchmarkSpotFilter.filterResult.id;
-			lastFractionPositives = fractionPositives;
-			lastFractionNegativesAfterAllPositives = fractionNegativesAfterAllPositives;
-			lastNegativesAfterAllPositives = negativesAfterAllPositives;
 		}
 
 		stopWatch = StopWatch.createStarted();
@@ -1434,6 +1437,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final double f1 = Math.min(1, fractionPositives / 100.0);
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
+		// Used to search for neighbours
+		final int fitting = config.getRelativeFitting();
+		final int width = imp.getWidth();
+		final int height = imp.getHeight();
+		int added = 0;
+		int target = 0;
+		int total = 0;
+
 		HashMap<Integer, FilterCandidates> subset = new HashMap<Integer, FilterCandidates>();
 		fP = fN = 0;
 		nP = nN = 0;
@@ -1497,13 +1508,75 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				}
 			}
 
+			ScoredSpot[] spots = Arrays.copyOf(r.spots, count);
+			target += count;
+			total += r.spots.length;
+
+			if (config.isIncludeNeighbours())
+			{
+				// Add all the candidates that are within the fit region of candidates we have chosen.
+				// Note that we do not perform height filtering but just add them all.
+
+				ResultGridManager gridManager = new ResultGridManager(width, height, 2 * fitting + 1);
+				boolean[] add = new boolean[r.spots.length];
+				Candidate[] candidates = new Candidate[add.length];
+				for (int i = 0; i < add.length; i++)
+				{
+					gridManager.putOnGrid(candidates[i] = new Candidate(r.spots[i].spot, i));
+				}
+
+				for (int i = 0; i < count; i++)
+				{
+					CandidateList neighbours = gridManager.getNeighbours(candidates[i]);
+					if (neighbours.getSize() == 0)
+						continue;
+					final int xmin = candidates[i].x - fitting;
+					final int xmax = candidates[i].x + fitting;
+					final int ymin = candidates[i].y - fitting;
+					final int ymax = candidates[i].y + fitting;
+					for (int j = neighbours.getSize(); j-- > 0;)
+					{
+						Candidate c = neighbours.get(j);
+						if (add[c.index] || c.x < xmin || c.x > xmax || c.y < ymin || c.y > ymax)
+							continue;
+						add[c.index] = true;
+					}
+				}
+
+				int extra = 0;
+				for (int i = count; i < add.length; i++)
+				{
+					if (add[i])
+						extra++;
+				}
+
+				if (extra != 0)
+				{
+					spots = Arrays.copyOf(spots, count + extra);
+					for (int i = count, j = count; i < add.length; i++)
+					{
+						if (add[i])
+							spots[j++] = r.spots[i];
+					}
+				}
+
+				added += extra;
+				//System.out.printf("[%d] Added %s to %d (total = %d)\n", result.getKey(),
+				//		Utils.pleural(extra, "neighbour"), count, add.length);
+			}
+
 			// Debug
 			//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
 			//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
 			//		nAfter, (double) n / (n + p));
 
-			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
+			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, spots, count));
 		}
+
+		if (extraOptions && added > target)
+			Utils.log("Added %s to %s (total = %d)", Utils.pleural(added, "neighbour"),
+					Utils.pleural(target, "candidate"), total);
+
 		return subset;
 	}
 
@@ -1630,8 +1703,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		for (Entry<Integer, FilterCandidates> entry : filterCandidates.entrySet())
 		{
 			int frame = entry.getKey();
-			MultiPathFitResult[] multiPathFitResults = entry.getValue().fitResult;
-			int totalCandidates = multiPathFitResults.length;
+			FilterCandidates candidates = entry.getValue();
+			MultiPathFitResult[] multiPathFitResults = candidates.fitResult;
+			int totalCandidates = candidates.spots.length;
 			int nActual = actualCoordinates.get(frame).size();
 			multiPathResults.add(new MultiPathFitResults(frame, multiPathFitResults, totalCandidates, nActual));
 		}
