@@ -34,9 +34,10 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Show the results header\n(double-click the string field to open a file chooser)");
+		gd.addMessage(
+				"Show the results header in the ImageJ log.\n(Double-click the string field to open a file chooser.)");
 		gd.addStringField("Filename", inputFilename, 30);
 		gd.addCheckbox("Raw", raw);
 
@@ -74,21 +75,25 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 			return;
 		}
 		// Output what information we can extract
-		show("Format", reader.getFormat().toString());
-		show("Name", reader.getName());
-		show("Bounds", reader.getBounds());
-		show("Calibration", reader.getCalibration());
-		show("Configuration", reader.getConfiguration());
+		boolean found = false;
+		found |= show("Format", reader.getFormat().toString());
+		found |= show("Name", reader.getName());
+		found |= show("Bounds", reader.getBounds());
+		found |= show("Calibration", reader.getCalibration());
+		found |= show("Configuration", reader.getConfiguration());
+		if (!found)
+			IJ.error(TITLE, "No header information found in file: " + inputFilename);
 	}
 
-	private void show(String title, Object data)
+	private boolean show(String title, Object data)
 	{
 		if (data == null)
-			return;
+			return false;
 		String text = (data instanceof String) ? (String) data : XmlUtils.toXML(data);
 		if (text.startsWith("<"))
 			text = XmlUtils.prettyPrintXml(text);
 		Utils.log("%s: %s", title, text);
+		return true;
 	}
 
 	/*
