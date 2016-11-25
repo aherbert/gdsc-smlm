@@ -1270,7 +1270,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				fractionNegativesAfterAllPositives, negativesAfterAllPositives, width);
 		if (refresh || !settings.equals(lastSettings))
 		{
-			filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults);
+			filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults, width);
 			lastSettings = settings;
 			lastFilterId = BenchmarkSpotFilter.filterResult.id;
 		}
@@ -1431,14 +1431,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 * @param filterResults
 	 * @return The filter candidates
 	 */
-	private HashMap<Integer, FilterCandidates> subsetFilterResults(HashMap<Integer, FilterResult> filterResults)
+	private HashMap<Integer, FilterCandidates> subsetFilterResults(HashMap<Integer, FilterResult> filterResults,
+			int fitting)
 	{
 		// Convert fractions from percent 
 		final double f1 = Math.min(1, fractionPositives / 100.0);
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
 		// Used to search for neighbours
-		final int fitting = config.getRelativeFitting();
 		final int width = imp.getWidth();
 		final int height = imp.getHeight();
 		int added = 0;
@@ -1512,7 +1512,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			target += count;
 			total += r.spots.length;
 
-			if (config.isIncludeNeighbours())
+			if (width != 0)
 			{
 				// Add all the candidates that are within the fit region of candidates we have chosen.
 				// Note that we do not perform height filtering but just add them all.
