@@ -1468,7 +1468,35 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 
 			// Make the target use the fractional score
-			final double targetP = r.result.getTP() * f1;
+			final double np2 = r.result.getTP() * f1;
+			double targetP = np2;
+
+			// Set the target using the closest
+			if (f1 < 1)
+			{
+				double np = 0;
+				double min = r.result.getTP();
+				for (ScoredSpot spot : r.spots)
+				{
+					if (spot.match)
+					{
+						np += spot.getScore();
+						double d = np2 - np;
+						if (d < min)
+						{
+							min = d;
+							targetP = np;
+						}
+						else
+						{
+							break;
+						}
+					}
+				}
+
+				//if (targetP < np2)
+				//	System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
+			}
 
 			// Count the number of positive & negatives
 			int p = 0, n = 0;
