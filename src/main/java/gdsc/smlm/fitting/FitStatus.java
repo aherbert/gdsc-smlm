@@ -57,6 +57,10 @@ public enum FitStatus
 	/**
 	 * 
 	 */
+	FAILED_TO_ESTIMATE_WIDTH("Failed to estimate width"),
+	/**
+	 * 
+	 */
 	COORDINATES_MOVED("Coordinates moved"),
 	/**
 	 * 

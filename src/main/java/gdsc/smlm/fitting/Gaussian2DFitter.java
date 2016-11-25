@@ -490,7 +490,7 @@ public class Gaussian2DFitter
 				{
 					// Fail if the width cannot be estimated due to out of bounds
 					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-						return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0, null,
+						return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, 0, initialParams, null, null, npeaks, 0, null,
 								0, 0);
 
 					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
@@ -509,7 +509,7 @@ public class Gaussian2DFitter
 					{
 						// Fail if the width cannot be estimated
 						if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-							return new FitResult(FitStatus.BAD_PARAMETERS, 0, 0, initialParams, null, null, npeaks, 0,
+							return new FitResult(FitStatus.FAILED_TO_ESTIMATE_WIDTH, 0, 0, initialParams, null, null, npeaks, 0,
 									null, 0, 0);
 
 						sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));

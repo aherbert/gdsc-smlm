@@ -3624,6 +3624,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					break;
 
 				case BAD_PARAMETERS:
+				case FAILED_TO_ESTIMATE_WIDTH:
 					logger.info("Bad parameters: %s", Arrays.toString(fitResult.getInitialParameters()));
 					break;
 
