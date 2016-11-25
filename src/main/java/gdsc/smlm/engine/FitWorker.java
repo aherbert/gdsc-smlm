@@ -493,7 +493,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, false);
 
 			// Debug where the fit config may be different between benchmarking and fitting
-			if (slice == 1)
+			if (slice == -1)
 			{
 				SettingsManager.saveFitEngineConfiguration(config, String.format("/tmp/config.%b.xml", benchmarking));
 				Utils.write(String.format("/tmp/filter.%b.xml", benchmarking), filter.toXML());

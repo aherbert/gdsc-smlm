@@ -1253,7 +1253,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private void run()
 	{
 		// Extract all the results in memory into a list per frame. This can be cached
-		boolean refresh = true; // XXX false;
+		boolean refresh = false;
 		if (lastId != simulationParameters.id)
 		{
 			// Do not get integer coordinates
