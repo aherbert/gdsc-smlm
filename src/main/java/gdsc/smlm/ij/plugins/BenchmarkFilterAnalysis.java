@@ -87,18 +87,17 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.CoordinateStore;
+import gdsc.smlm.results.filter.CoordinateStoreFactory;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterScore;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.FilterType;
-import gdsc.smlm.results.filter.GridCoordinateStore;
 import gdsc.smlm.results.filter.IDirectFilter;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.MultiPathFitResults;
-import gdsc.smlm.results.filter.NullCoordinateStore;
 import gdsc.smlm.results.filter.ParameterType;
 import gdsc.smlm.results.filter.PeakFractionalAssignment;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
@@ -250,7 +249,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private boolean isHeadless;
 	private boolean debug;
-	private GridCoordinateStore coordinateStore = null;
+	private CoordinateStore coordinateStore = null;
 
 	// Used to tile plot windows
 	private WindowOrganiser wo = new WindowOrganiser();
@@ -1431,12 +1430,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final List<FitResultsWorker> workers = new LinkedList<FitResultsWorker>();
 			final List<Thread> threads = new LinkedList<Thread>();
 			final AtomicInteger uniqueId = new AtomicInteger();
-			GridCoordinateStore coordinateStore = createCoordinateStore();
+			CoordinateStore coordinateStore = createCoordinateStore();
 			for (int i = 0; i < nThreads; i++)
 			{
 				final FitResultsWorker worker = new FitResultsWorker(jobs, syncResults, matchDistance, distanceScore,
-						signalScore, uniqueId,
-						(coordinateStore == null) ? new NullCoordinateStore() : coordinateStore.newInstance());
+						signalScore, uniqueId, coordinateStore.newInstance());
 				final Thread t = new Thread(worker);
 				workers.add(worker);
 				threads.add(t);
@@ -2047,6 +2045,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			IJ.log("Warning: No filters pass the criteria");
 			return null;
 		}
+		
+		getCoordinateStore();
 
 		List<ComplexFilterScore> filters = new ArrayList<ComplexFilterScore>(bestFilter.values());
 		Collections.sort(filters);
@@ -2189,7 +2189,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		bestFilter = new HashMap<String, ComplexFilterScore>();
 		bestFilterOrder = new LinkedList<String>();
 
-		coordinateStore = createCoordinateStore();
+		getCoordinateStore();
 
 		analysisStopWatch = StopWatch.createStarted();
 		IJ.showStatus("Analysing filters ...");
@@ -2207,6 +2207,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		final String timeString = analysisStopWatch.toString();
 		IJ.log("Filter analysis time : " + timeString);
+	}
+
+	private CoordinateStore getCoordinateStore()
+	{
+		if (coordinateStore == null)
+			coordinateStore = createCoordinateStore();
+		return coordinateStore;
 	}
 
 	private int countFilters(List<FilterSet> filterSets)
@@ -5121,10 +5128,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final ScoreResult[] scoreResults;
 		final boolean createTextResult;
 		final DirectFilter minFilter;
-		final GridCoordinateStore coordinateStore;
+		final CoordinateStore coordinateStore;
 
 		public ScoreWorker(BlockingQueue<ScoreJob> jobs, ScoreResult[] scoreResults, boolean createTextResult,
-				GridCoordinateStore coordinateStore)
+				CoordinateStore coordinateStore)
 		{
 			this.jobs = jobs;
 			this.scoreResults = scoreResults;
@@ -6209,14 +6216,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return multiPathFilter.filter(resultsList, failCount + failCountRange, true, coordinateStore);
 	}
 
-	public GridCoordinateStore createCoordinateStore()
+	public CoordinateStore createCoordinateStore()
 	{
-		if (duplicateDistance > 0)
-		{
-			int[] bounds = getBounds();
-			return new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance);
-		}
-		return null;
+		int[] bounds = getBounds();
+		return CoordinateStoreFactory.create(bounds[0], bounds[1], duplicateDistance);
 	}
 
 	private int[] getBounds()

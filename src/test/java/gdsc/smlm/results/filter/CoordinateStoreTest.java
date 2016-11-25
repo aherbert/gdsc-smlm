@@ -4,27 +4,46 @@ import org.junit.Test;
 
 import org.junit.Assert;
 
-public class GridCoordinateStoreTest
+public class CoordinateStoreTest
 {
+	@Test
+	public void canCreateStore()
+	{
+		CoordinateStore s;
+		s = CoordinateStoreFactory.create(10, 10, 0);
+		Assert.assertTrue(s instanceof NullCoordinateStore);
+		s = CoordinateStoreFactory.create(10, 10, 0.2);
+		Assert.assertTrue(s instanceof GridCoordinateStore);
+		s = CoordinateStoreFactory.create(10, 10, 0.5);
+		Assert.assertTrue(s instanceof GridCoordinateStore1);
+		s = CoordinateStoreFactory.create(10, 10, 1);
+		Assert.assertTrue(s instanceof GridCoordinateStore1);
+		s = CoordinateStoreFactory.create(10, 10, 1.5);
+		Assert.assertTrue(s instanceof GridCoordinateStore);
+		s = CoordinateStoreFactory.create(10, 10, 2);
+		Assert.assertTrue(s instanceof GridCoordinateStore);
+	}
+	
 	@Test
 	public void canDetectDuplicates()
 	{
-		double[] datax = { 0.1, 3.1 };
-		double[] datay = { 3.1, 5.1 };
-		double[] resolution = { 0.5, 1 };
+		double[] datax = { 0.1, 4.1 };
+		double[] datay = { 3.1, 7.1 };
+		double[] resolution = { 0.3, 0.5, 1.5 };
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			GridCoordinateStore s = new GridCoordinateStore(10, 10, resolution[i]);
+			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i]);
 			for (int j = 0; j < datax.length; j++)
 				s.add(datax[j], datay[j]);
 
 			for (int j = 0; j < datax.length; j++)
 			{
-				Assert.assertTrue(s.contains(datax[j], datay[j]));
-				Assert.assertTrue(s.contains(datax[j] + resolution[i] * 0.99, datay[j]));
-				Assert.assertTrue(s.contains(datax[j], datay[j] + resolution[i] * 0.99));
-				Assert.assertFalse(s.contains(datax[j] + resolution[i], datay[j] + resolution[i]));
+				String msg = resolution[i] + " [" + j + "]"; 
+				Assert.assertTrue(msg, s.contains(datax[j], datay[j]));
+				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j]));
+				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99));
+				Assert.assertFalse(msg, s.contains(datax[j] + resolution[i], datay[j] + resolution[i]));
 			}
 		}
 	}
@@ -32,13 +51,13 @@ public class GridCoordinateStoreTest
 	@Test
 	public void canQueueToGrid()
 	{
-		double[] datax = { 0.1, 3.1 };
-		double[] datay = { 3.1, 5.1 };
-		double[] resolution = { 0.5, 1 };
+		double[] datax = { 0.1, 4.1 };
+		double[] datay = { 3.1, 7.1 };
+		double[] resolution = { 0.3, 0.5, 1.5 };
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			GridCoordinateStore s = new GridCoordinateStore(10, 10, resolution[i]);
+			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i]);
 			for (int j = 0; j < datax.length; j++)
 			{
 				s.addToQueue(datax[j], datay[j]);
@@ -55,13 +74,13 @@ public class GridCoordinateStoreTest
 	@Test
 	public void canClearGrid()
 	{
-		double[] datax = { 0.1, 3.1 };
-		double[] datay = { 3.1, 5.1 };
-		double[] resolution = { 0.5, 1 };
+		double[] datax = { 0.1, 4.1 };
+		double[] datay = { 3.1, 7.1 };
+		double[] resolution = { 0.3, 0.5, 1.5 };
 
 		for (int i = 0; i < resolution.length; i++)
 		{
-			GridCoordinateStore s = new GridCoordinateStore(10, 10, resolution[i]);
+			CoordinateStore s = CoordinateStoreFactory.create(10, 10, resolution[i]);
 
 			// Add then clear
 			for (int j = 0; j < datax.length; j++)
@@ -95,28 +114,28 @@ public class GridCoordinateStoreTest
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGrid1XLow()
 	{
-		GridCoordinateStore s = new GridCoordinateStore(10, 10, 1);
+		CoordinateStore s = CoordinateStoreFactory.create(10, 10, 1);
 		s.add(-1, 0);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGridXHigh()
 	{
-		GridCoordinateStore s = new GridCoordinateStore(10, 10, 1);
+		CoordinateStore s = CoordinateStoreFactory.create(10, 10, 1);
 		s.add(11, 0);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGrid1YLow()
 	{
-		GridCoordinateStore s = new GridCoordinateStore(10, 10, 1);
+		CoordinateStore s = CoordinateStoreFactory.create(10, 10, 1);
 		s.add(0, -1);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void cannotAddOutsideGridYHigh()
 	{
-		GridCoordinateStore s = new GridCoordinateStore(10, 10, 1);
+		CoordinateStore s = CoordinateStoreFactory.create(10, 10, 1);
 		s.add(0, 11);
 	}
 	

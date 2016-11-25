@@ -48,7 +48,8 @@ import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
-import gdsc.smlm.results.filter.GridCoordinateStore;
+import gdsc.smlm.results.filter.CoordinateStore;
+import gdsc.smlm.results.filter.CoordinateStoreFactory;
 import gdsc.smlm.results.filter.IMultiPathFitResults;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
@@ -127,7 +128,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private int fittedNeighbourCount = 0;
 	private PeakResult[] fittedNeighbours = null;
 	//private final float duplicateDistance2;
-	private GridCoordinateStore coordinateStore;
+	private CoordinateStore coordinateStore;
 
 	private volatile boolean finished = false;
 
@@ -299,8 +300,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		gf = new Gaussian2DFitter(fitConfig);
 		//duplicateDistance2 = (float) (fitConfig.getDuplicateDistance() * fitConfig.getDuplicateDistance());
 		// Used for duplicate checking
-		coordinateStore = (fitConfig.getDuplicateDistance() > 0)
-				? new GridCoordinateStore(fitConfig.getDuplicateDistance()) : null;
+		coordinateStore = CoordinateStoreFactory.create(0, 0, fitConfig.getDuplicateDistance());
 		calculateNoise = config.getFitConfiguration().getNoise() <= 0;
 		if (!calculateNoise)
 		{
@@ -457,8 +457,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			MultiPathFilter filter;
 			IMultiPathFitResults multiPathResults = this;
 			SelectedResultStore store = this;
-			if (coordinateStore != null)
-				coordinateStore = coordinateStore.resize(width, height);
+			coordinateStore = coordinateStore.resize(width, height);
 
 			// TODO - Test if duplicate distance is now obsolete ...
 
@@ -494,7 +493,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, false);
 
 			// Debug where the fit config may be different between benchmarking and fitting
-			if (slice == -1)
+			if (slice == 1)
 			{
 				SettingsManager.saveFitEngineConfiguration(config, String.format("/tmp/config.%b.xml", benchmarking));
 				Utils.write(String.format("/tmp/filter.%b.xml", benchmarking), filter.toXML());
@@ -505,6 +504,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				sb.append(((gdsc.smlm.results.filter.Filter) filter.getMinimalFilter()).toXML()).append("\n");
 				sb.append(filter.residualsThreshold).append("\n");
 				sb.append(config.getFailuresLimit()).append("\n");
+				sb.append(fitConfig.getDuplicateDistance()).append("\n");
 				if (spotFilter != null)
 					sb.append(spotFilter.getDescription()).append("\n");
 				for (int i = 0; i < candidates.length; i++)

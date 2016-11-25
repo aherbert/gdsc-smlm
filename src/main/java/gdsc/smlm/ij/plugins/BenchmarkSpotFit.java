@@ -89,7 +89,7 @@ import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.EShiftFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
-import gdsc.smlm.results.filter.GridCoordinateStore;
+import gdsc.smlm.results.filter.CoordinateStoreFactory;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
@@ -1650,7 +1650,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
 		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, Integer.MAX_VALUE,
 				this.results.size(), assignments, scoreStore,
-				new GridCoordinateStore(imp.getWidth(), imp.getHeight(), fitConfig.getDuplicateDistance()));
+				CoordinateStoreFactory.create(imp.getWidth(), imp.getHeight(), fitConfig.getDuplicateDistance()));
 		double nPredicted = fractionResult.getTP() + fractionResult.getFP();
 
 		double[][] matchScores = new double[set.size()][];

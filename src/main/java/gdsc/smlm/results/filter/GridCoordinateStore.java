@@ -18,6 +18,12 @@ package gdsc.smlm.results.filter;
  */
 public class GridCoordinateStore implements CoordinateStore
 {
+	/**
+	 * The minimum size for the block. This prevents excess use of memory when the resolution is smaller than this
+	 * value.
+	 */
+	public final static double MINIMUM_BLOCK_SIZE = 0.5;
+
 	private class CoordinateList
 	{
 		int timestamp = 0;
@@ -65,6 +71,8 @@ public class GridCoordinateStore implements CoordinateStore
 	private final double d2;
 	private final int xBlocks, yBlocks;
 
+	// Note: We have package level constructors so that the factory must be used to create an instance. 
+	
 	/**
 	 * Create an empty grid for coordinates. The grid should be resized to the max dimensions of the data using
 	 * {@link #resize(int, int)}
@@ -72,7 +80,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * @param resolution
 	 *            the resolution
 	 */
-	public GridCoordinateStore(double resolution)
+	GridCoordinateStore(double resolution)
 	{
 		this(0, 0, resolution);
 	}
@@ -87,7 +95,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * @param resolution
 	 *            the resolution
 	 */
-	public GridCoordinateStore(int maxx, int maxy, double resolution)
+	GridCoordinateStore(int maxx, int maxy, double resolution)
 	{
 		if (maxx < 0)
 			maxx = 0;
@@ -95,7 +103,7 @@ public class GridCoordinateStore implements CoordinateStore
 			maxy = 0;
 		if (resolution < 0)
 			resolution = 0;
-		this.blockResolution = Math.max(0.5, resolution);
+		this.blockResolution = Math.max(MINIMUM_BLOCK_SIZE, resolution);
 		this.d2 = resolution * resolution;
 		this.xBlocks = getBlock(maxx) + 1;
 		this.yBlocks = getBlock(maxy) + 1;
@@ -123,7 +131,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * @param yBlocks
 	 *            the y blocks
 	 */
-	private GridCoordinateStore(double blockResolution, double d2, int xBlocks, int yBlocks)
+	protected GridCoordinateStore(double blockResolution, double d2, int xBlocks, int yBlocks)
 	{
 		this.blockResolution = blockResolution;
 		this.d2 = d2;
@@ -145,21 +153,25 @@ public class GridCoordinateStore implements CoordinateStore
 	 * Create a new instance with the same settings
 	 *
 	 * @return the grid coordinate store
+	 * @see gdsc.smlm.results.filter.CoordinateStore#newInstance()
 	 */
 	public GridCoordinateStore newInstance()
+	{
+		return newInstance(xBlocks, yBlocks);
+	}
+
+	/**
+	 * Create a new instance with the same settings but different number of blocks
+	 *
+	 * @return the grid coordinate store
+	 */
+	protected GridCoordinateStore newInstance(int xBlocks, int yBlocks)
 	{
 		return new GridCoordinateStore(blockResolution, d2, xBlocks, yBlocks);
 	}
 
-	/**
-	 * Resize to the given dimensions. If these match the existing dimensions the current store is returned. Otherwise a
-	 * new store is returned.
-	 *
-	 * @param maxx
-	 *            the max x coordinate value
-	 * @param maxy
-	 *            the max y coordinate value
-	 * @return the grid coordinate store
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int)
 	 */
 	public GridCoordinateStore resize(int maxx, int maxy)
 	{
@@ -171,7 +183,7 @@ public class GridCoordinateStore implements CoordinateStore
 		int yBlocks = getBlock(maxy) + 1;
 		if (this.xBlocks == xBlocks && this.yBlocks == yBlocks)
 			return this;
-		return new GridCoordinateStore(blockResolution, d2, xBlocks, yBlocks);
+		return newInstance(xBlocks, yBlocks);
 	}
 
 	/**
@@ -181,7 +193,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 *            the coordinate
 	 * @return the block
 	 */
-	private int getBlock(final double x)
+	protected int getBlock(final double x)
 	{
 		return (int) (x / blockResolution);
 	}
@@ -194,6 +206,16 @@ public class GridCoordinateStore implements CoordinateStore
 	public double getResolution()
 	{
 		return Math.sqrt(d2);
+	}
+
+	/**
+	 * Gets the squared distance. This is equal to the resolution squared.
+	 *
+	 * @return the squared distance
+	 */
+	public double getSquaredDistance()
+	{
+		return d2;
 	}
 
 	/**

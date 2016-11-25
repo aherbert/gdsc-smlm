@@ -18,6 +18,15 @@ package gdsc.smlm.results.filter;
  */
 public class NullCoordinateStore implements CoordinateStore
 {
+	// Note: We have package level constructors so that the factory must be used to create an instance.
+	
+	/**
+	 * Instantiates a new null coordinate store.
+	 */
+	NullCoordinateStore()
+	{
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -82,5 +91,25 @@ public class NullCoordinateStore implements CoordinateStore
 	public double[] find(double x, double y)
 	{
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#newInstance()
+	 */
+	public CoordinateStore newInstance()
+	{
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int)
+	 */
+	public CoordinateStore resize(int maxx, int maxy)
+	{
+		return this;
 	}
 }
