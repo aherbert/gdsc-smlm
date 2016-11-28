@@ -63,14 +63,11 @@ import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.XmlUtils;
-import gdsc.smlm.engine.Candidate;
-import gdsc.smlm.engine.CandidateList;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.engine.ResultGridManager;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitConfiguration;
@@ -1438,9 +1435,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final double f1 = Math.min(1, fractionPositives / 100.0);
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
-		// Used to search for neighbours
-		final int width = imp.getWidth();
-		final int height = imp.getHeight();
 		int added = 0;
 		int target = 0;
 		int total = 0;
@@ -1456,16 +1450,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fP += r.result.getTP();
 			fN += r.result.getFP();
 
-			// Q. Is r.result.getTP() not the same as the total of r.spots[i].match
+			// Q. Is r.result.getTP() not the same as the total of r.spots[i].match?
 			// A. Not if we used fractional scoring.
-
-			for (ScoredSpot spot : r.spots)
+			int c = 0;
+			for (int i = r.spots.length; i-- > 0;)
 			{
-				if (spot.match)
-					nP++;
-				else
-					nN++;
+				if (r.spots[i].match)
+					c++;
 			}
+			nP += c;
+			nN += (r.spots.length - c);
 
 			// Make the target use the fractional score
 			final double np2 = r.result.getTP() * f1;
@@ -1536,70 +1530,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				}
 			}
 
-			ScoredSpot[] spots = Arrays.copyOf(r.spots, count);
 			target += count;
 			total += r.spots.length;
-
-			if (width != 0)
-			{
-				// Add all the candidates that are within the fit region of candidates we have chosen.
-				// Note that we do not perform height filtering but just add them all.
-
-				ResultGridManager gridManager = new ResultGridManager(width, height, 2 * fitting + 1);
-				boolean[] add = new boolean[r.spots.length];
-				Candidate[] candidates = new Candidate[add.length];
-				for (int i = 0; i < add.length; i++)
-				{
-					gridManager.putOnGrid(candidates[i] = new Candidate(r.spots[i].spot, i));
-				}
-
-				for (int i = 0; i < count; i++)
-				{
-					CandidateList neighbours = gridManager.getNeighbours(candidates[i]);
-					if (neighbours.getSize() == 0)
-						continue;
-					final int xmin = candidates[i].x - fitting;
-					final int xmax = candidates[i].x + fitting;
-					final int ymin = candidates[i].y - fitting;
-					final int ymax = candidates[i].y + fitting;
-					for (int j = neighbours.getSize(); j-- > 0;)
-					{
-						Candidate c = neighbours.get(j);
-						if (add[c.index] || c.x < xmin || c.x > xmax || c.y < ymin || c.y > ymax)
-							continue;
-						add[c.index] = true;
-					}
-				}
-
-				int extra = 0;
-				for (int i = count; i < add.length; i++)
-				{
-					if (add[i])
-						extra++;
-				}
-
-				if (extra != 0)
-				{
-					spots = Arrays.copyOf(spots, count + extra);
-					for (int i = count, j = count; i < add.length; i++)
-					{
-						if (add[i])
-							spots[j++] = r.spots[i];
-					}
-				}
-
-				added += extra;
-				//System.out.printf("[%d] Added %s to %d (total = %d)\n", result.getKey(),
-				//		Utils.pleural(extra, "neighbour"), count, add.length);
-			}
 
 			// Debug
 			//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
 			//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
 			//		nAfter, (double) n / (n + p));
 
-			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, spots, count));
+			// We can use all the candidates but only fit up to count
+			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, r.spots, count));
 		}
+
+		// We now add all the candidates but only fit the first N
+		added = total - target;
 
 		if (extraOptions && added > target)
 			Utils.log("Added %s to %s (total = %d)", Utils.pleural(added, "neighbour"),
