@@ -762,8 +762,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// Run the benchmark fit once interactively, keep the instance
 		BenchmarkSpotFit fit = new BenchmarkSpotFit();
 		// Provide ability to skip this step if the fitting has already been done.
-		if (invalidBenchmarkSpotFitResults(true))
+		// It must have been done with the default multi-path filter.
+		if (fit.resetMultiPathFilter() || invalidBenchmarkSpotFitResults(true))
+		{
 			fit.run(null);
+		}
 		if (invalidBenchmarkSpotFitResults(false))
 			return;
 		if (BenchmarkSpotFit.stopWatch != null)

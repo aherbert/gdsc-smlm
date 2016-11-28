@@ -302,6 +302,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static FitEngineConfiguration config;
 	private static Calibration cal;
 	static MultiPathFilter multiFilter;
+	private static final MultiPathFilter defaultMultiFilter;
 	private static MultiFilter2 minimalFilter;;
 
 	static
@@ -337,6 +338,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// We might as well use the doublet fits given we will compute them.
 		final double residualsThreshold = 0.4;
 		multiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
+		defaultMultiFilter = multiFilter;
 	}
 
 	private static double fractionPositives = 100;
@@ -2877,5 +2879,19 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			return;
 
 		run();
+	}
+
+	/**
+	 * Reset the multi path filter. This may have been updated when copying benchmark filter settings or by the user
+	 * within the dialog.
+	 *
+	 * @return true, if a reset was required
+	 */
+	public boolean resetMultiPathFilter()
+	{
+		if (defaultMultiFilter.equals(multiFilter))
+			return false;
+		multiFilter = defaultMultiFilter;
+		return true;
 	}
 }
