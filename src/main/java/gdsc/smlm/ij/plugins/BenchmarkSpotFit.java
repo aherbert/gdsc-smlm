@@ -1778,7 +1778,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			printFailures("Multi doublet", multiDoubletStatus);
 		}
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(300);
 
 		// Add information about the simulation
 		final double signal = simulationParameters.signalPerFrame; //(simulationParameters.minSignal + simulationParameters.maxSignal) * 0.5;
