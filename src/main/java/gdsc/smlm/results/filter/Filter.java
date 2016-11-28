@@ -1743,7 +1743,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			return false;
 		}
 		// Check the types are the same before a parameter comparison
-		if (this.getType().equals(other.getType()))
+		if (!this.getType().equals(other.getType()))
 		{
 			return false;
 		}
