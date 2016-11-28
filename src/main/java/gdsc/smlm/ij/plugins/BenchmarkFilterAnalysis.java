@@ -756,6 +756,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
+		// Show this dialog first so we can run fully automated after interactive dialogs
+		if (!showIterationDialog())
+			return;
+		
 		// Total the time from the interactive plugins
 		long time = 0;
 
@@ -792,9 +796,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return;
 
 		time += analysisStopWatch.getTime();
-
-		if (!showIterationDialog())
-			return;
 
 		// Time the non-interactive plugins as a continuous section
 		iterationStopWatch = StopWatch.createStarted();
@@ -1813,12 +1814,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private boolean showIterationDialog()
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage("Configure the convergence criteria for iteration");
+		StringBuilder sb = new StringBuilder();
+		sb.append("Iterate ").append(BenchmarkSpotFit.TITLE).append(" & ").append(TITLE).append(".\n");
+		sb.append(BenchmarkSpotFit.TITLE).append(" will be run once interactively if results cannot be loaded.\n");
+		sb.append(TITLE).append(" will be run once interactively to obtain settings.\n \n");
+		sb.append("Configure the convergence criteria for iteration:");
+		gd.addMessage(sb.toString());
 		gd.addNumericField("Score_Tolerance", iterationScoreTolerance, -1);
 		gd.addNumericField("Filter_Tolerance", iterationFilterTolerance, -1);
 		gd.addCheckbox("Compare_Results", iterationCompareResults);
 		gd.addNumericField("Compare_Distance", iterationCompareDistance, 2);
 		gd.addNumericField("Iter_Max_Iterations", iterationMaxIterations, 0);
+		gd.addMessage("Configure how the parameter range is updated per iteration:");
 		gd.addSlider("Min_range_reduction", 0, 1, iterationMinRangeReduction);
 		gd.addSlider("Min_range_reduction_iteration", 1, 10, iterationMinRangeReductionIteration);
 
@@ -3301,7 +3308,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			DirectFilter filter = max.r.filter;
 			int[] indices = filter.getChromosomeParameters();
 			atLimit = new char[indices.length];
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder(200);
 			for (int j = 0; j < indices.length; j++)
 			{
 				atLimit[j] = ComplexFilterScore.WITHIN;
