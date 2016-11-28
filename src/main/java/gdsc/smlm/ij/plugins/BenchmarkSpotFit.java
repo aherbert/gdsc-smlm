@@ -682,8 +682,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
 			FilterCandidates candidates = filterCandidates.get(frame);
-			int maxCandidate = candidates.maxCandidate;
-			final MultiPathFitResult[] fitResult = new MultiPathFitResult[maxCandidate];
+			int totalCandidates = candidates.spots.length;
+			final MultiPathFitResult[] fitResult = new MultiPathFitResult[totalCandidates];
 
 			// Fit the candidates and store the results
 			final FitParameters parameters = new FitParameters();
@@ -696,14 +696,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				//	System.out.printf("Fit %d [%d,%d = %.1f]\n", i, spots[i].x, spots[i].y, spots[i].intensity);
 			}
 			parameters.spots = spots;
-			parameters.maxCandidate = maxCandidate;
+			parameters.maxCandidate = candidates.maxCandidate;
 			parameters.fitTask = FitTask.BENCHMARKING;
 			parameters.benchmarkFilter = multiFilter;
 
 			final ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
 			fitWorker.run(job); // Results will be stored in the fit job 
 
-			for (int i = 0; i < maxCandidate; i++)
+			for (int i = 0; i < totalCandidates; i++)
 			{
 				fitResult[i] = job.getMultiPathFitResult(i);
 			}
@@ -727,10 +727,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				}
 
 				// Allow for doublets the predicted array
-				final ArrayList<MultiPathPoint> predicted = new ArrayList<MultiPathPoint>(maxCandidate * 2);
+				final ArrayList<MultiPathPoint> predicted = new ArrayList<MultiPathPoint>(totalCandidates * 2);
 				matches.clear();
 
-				for (int i = 0; i < maxCandidate; i++)
+				for (int i = 0; i < totalCandidates; i++)
 				{
 					// Use all the results. 
 					// Store results using the candidate Id. The best match for each Id will be chosen.
