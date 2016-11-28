@@ -1245,7 +1245,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	{
 		if (progress % stepProgress == 0)
 		{
-			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+			if (Utils.showStatus("Fitting frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
 		progress++;
