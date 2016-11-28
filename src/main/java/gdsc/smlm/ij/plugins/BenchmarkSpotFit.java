@@ -330,11 +330,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Add a filter to use for storing the slice results:
 		// Use the standard configuration to ensure sensible fits are stored as the current slice results.
 		FitConfiguration tmp = new FitConfiguration();
-		final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
+		tmp.setPrecisionUsingBackground(true); // So we get a MultiFilter2 to match the minimal filter
 
 		// Add a minimum filter to use for storing estimates
 		minimalFilter = FitWorker.createMinimalFilter();
 
+		final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
+		
 		// We might as well use the doublet fits given we will compute them.
 		final double residualsThreshold = 0.4;
 		multiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
