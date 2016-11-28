@@ -1126,13 +1126,13 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Run after the filter is deserialised using XStream
 	 */
 	protected void initialiseState()
 	{
-		
+
 	}
 
 	/*
@@ -1714,5 +1714,46 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		{
 			return null;
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null)
+		{
+			return false;
+		}
+		if (obj == this)
+		{
+			return true;
+		}
+		if (!(obj instanceof Filter))
+		{
+			return false;
+		}
+		final Filter other = (Filter) obj;
+		final int size = getNumberOfParameters();
+		if (size != other.getNumberOfParameters())
+		{
+			return false;
+		}
+		// Check the types are the same before a parameter comparison
+		if (this.getType().equals(other.getType()))
+		{
+			return false;
+		}
+		for (int i = 0; i < size; i++)
+		{
+			final double d1 = getParameterValueInternal(i);
+			final double d2 = other.getParameterValueInternal(i);
+			if (d1 != d2)
+				return false;
+		}
+		return true;
 	}
 }

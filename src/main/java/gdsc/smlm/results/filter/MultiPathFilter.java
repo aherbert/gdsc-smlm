@@ -393,6 +393,43 @@ public class MultiPathFilter implements Cloneable
 		return new MultiPathFilter(copy(filter), copy(minFilter), residualsThreshold);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == null)
+		{
+			return false;
+		}
+		if (obj == this)
+		{
+			return true;
+		}		
+		//if (!MultiPathFilter.class.isAssignableFrom(obj.getClass()))
+		if (!(obj instanceof MultiPathFilter))
+		{
+			return false;
+		}
+		final MultiPathFilter other = (MultiPathFilter) obj;
+		if (this.residualsThreshold != other.residualsThreshold)
+		{
+			return false;
+		}
+		if ((this.filter == null) ? (other.filter != null) : !this.filter.equals(other.filter))
+		{
+			return false;
+		}
+		if ((this.minFilter == null) ? (other.minFilter != null) : !this.minFilter.equals(other.minFilter))
+		{
+			return false;
+		}
+		return true;
+	}
+
 	private IDirectFilter copy(IDirectFilter f)
 	{
 		return (f == null) ? null : f.copy();
