@@ -21,7 +21,7 @@ package gdsc.smlm.results.filter;
 public class GridCoordinateStore1 extends GridCoordinateStore
 {
 	// Note: We have package level constructors so that the factory must be used to create an instance.
-	
+
 	/**
 	 * Create an empty grid for coordinates. The grid should be resized to the max dimensions of the data using
 	 * {@link #resize(int, int)}
@@ -64,6 +64,8 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 	{
 		// Use a block resolution of 1
 		super(1, d2, xBlocks, yBlocks);
+		if (d2 > 1)
+			throw new IllegalArgumentException("Resolution must be less than 1");
 	}
 
 	/*
@@ -86,5 +88,24 @@ public class GridCoordinateStore1 extends GridCoordinateStore
 	protected int getBlock(final double x)
 	{
 		return (int) x;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.GridCoordinateStore#getCoordinate(int)
+	 */
+	@Override
+	protected int getCoordinate(int blocks)
+	{
+		return (int) Math.round(blocks);
+	}
+
+	@Override
+	public void changeResolution(double resolution)
+	{
+		if (resolution > 1)
+			throw new IllegalArgumentException("Resolution must be less than 1");
+		super.changeResolution(resolution);
 	}
 }
