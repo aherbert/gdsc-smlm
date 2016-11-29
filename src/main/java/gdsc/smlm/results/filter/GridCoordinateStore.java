@@ -65,14 +65,12 @@ public class GridCoordinateStore implements CoordinateStore
 
 	private int timestamp = 0;
 
-	private final CoordinateList[][] grid;
+	private CoordinateList[][] grid;
 	private final CoordinateList queue = new CoordinateList();
-	private final double blockResolution;
-	private final double d2;
-	private final int xBlocks, yBlocks;
+	private double blockResolution;
+	private double d2;
+	private int xBlocks, yBlocks;
 
-	// Note: We have package level constructors so that the factory must be used to create an instance. 
-	
 	/**
 	 * Create an empty grid for coordinates. The grid should be resized to the max dimensions of the data using
 	 * {@link #resize(int, int)}
@@ -85,6 +83,8 @@ public class GridCoordinateStore implements CoordinateStore
 		this(0, 0, resolution);
 	}
 
+	// Note: This is a public constructor so this can be used without the factory
+	
 	/**
 	 * Create a grid for coordinates.
 	 *
@@ -95,7 +95,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * @param resolution
 	 *            the resolution
 	 */
-	GridCoordinateStore(int maxx, int maxy, double resolution)
+	public GridCoordinateStore(int maxx, int maxy, double resolution)
 	{
 		if (maxx < 0)
 			maxx = 0;
@@ -108,6 +108,11 @@ public class GridCoordinateStore implements CoordinateStore
 		this.xBlocks = getBlock(maxx) + 1;
 		this.yBlocks = getBlock(maxy) + 1;
 
+		createGrid();
+	}
+
+	private void createGrid()
+	{
 		grid = new CoordinateList[xBlocks][yBlocks];
 		for (int x = 0; x < xBlocks; x++)
 		{
@@ -138,15 +143,7 @@ public class GridCoordinateStore implements CoordinateStore
 		this.xBlocks = xBlocks;
 		this.yBlocks = yBlocks;
 
-		grid = new CoordinateList[xBlocks][yBlocks];
-		for (int x = 0; x < xBlocks; x++)
-		{
-			final CoordinateList[] list = grid[x];
-			for (int y = 0; y < yBlocks; y++)
-			{
-				list[y] = new CoordinateList();
-			}
-		}
+		createGrid();
 	}
 
 	/**
@@ -170,7 +167,9 @@ public class GridCoordinateStore implements CoordinateStore
 		return new GridCoordinateStore(blockResolution, d2, xBlocks, yBlocks);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int)
 	 */
 	public GridCoordinateStore resize(int maxx, int maxy)
@@ -187,6 +186,37 @@ public class GridCoordinateStore implements CoordinateStore
 	}
 
 	/**
+	 * Change the resolution of the store. The max dimensions are unchanged.
+	 * 
+	 * @param resolution
+	 *            The new resolution
+	 */
+	public void changeResolution(double resolution)
+	{
+		clear();
+		
+		if (resolution < 0)
+			resolution = 0;
+		double new_d2 = resolution * resolution;
+		if (new_d2 == d2)
+			// No size change
+			return;
+		
+		int maxx = getCoordinate(xBlocks - 1);
+		int maxy = getCoordinate(yBlocks - 1);
+		
+		this.blockResolution = Math.max(MINIMUM_BLOCK_SIZE, resolution);
+		this.d2 = new_d2;
+		
+		this.xBlocks = getBlock(maxx) + 1;
+		this.yBlocks = getBlock(maxy) + 1;
+
+		if (grid.length < xBlocks || grid[0].length < yBlocks)
+			// The grid is larger so recreate
+			createGrid();
+	}
+
+	/**
 	 * Gets the block for the coordinate.
 	 *
 	 * @param x
@@ -196,6 +226,18 @@ public class GridCoordinateStore implements CoordinateStore
 	protected int getBlock(final double x)
 	{
 		return (int) (x / blockResolution);
+	}
+
+	/**
+	 * Gets the coordinate for the block.
+	 *
+	 * @param blocks
+	 *            the blocks
+	 * @return the coordinate
+	 */
+	protected int getCoordinate(final int blocks)
+	{
+		return (int) Math.round(blocks * this.blockResolution);
 	}
 
 	/*
@@ -299,18 +341,9 @@ public class GridCoordinateStore implements CoordinateStore
 	 */
 	public void clear()
 	{
-		// This method is a big overhead when the grid is large and the number of additions to the grid is small.
+		// Clearing each item in the grid is a big overhead when the grid is large and the number of additions to the grid is small.
 		// So store a timestamp for the clear and we refresh each list when we next use it.
 		timestamp++;
-
-		//		for (int x = 0; x < xBlocks; x++)
-		//		{
-		//			final CoordinateList[] list = grid[x];
-		//			for (int y = 0; y < yBlocks; y++)
-		//			{
-		//				list[y].clear();
-		//			}
-		//		}
 	}
 
 	/*

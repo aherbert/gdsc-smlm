@@ -176,4 +176,30 @@ public class CoordinateStoreTest
 		Assert.assertNull(s.find(-1, 0));
 		Assert.assertNull(s.find(0, 11));
 	}
+
+	@Test
+	public void canChangeResolution()
+	{
+		double[] datax = { 0.1, 4.1 };
+		double[] datay = { 3.1, 7.1 };
+		double[] resolution = { 0.3, 0.5, 1.5 };
+
+		GridCoordinateStore s = new GridCoordinateStore(10, 10, 0);
+		for (int i = 0; i < resolution.length; i++)
+		{
+			s.changeResolution(resolution[i]);
+
+			for (int j = 0; j < datax.length; j++)
+				s.add(datax[j], datay[j]);
+
+			for (int j = 0; j < datax.length; j++)
+			{
+				String msg = resolution[i] + " [" + j + "]"; 
+				Assert.assertTrue(msg, s.contains(datax[j], datay[j]));
+				Assert.assertTrue(msg, s.contains(datax[j] + resolution[i] * 0.99, datay[j]));
+				Assert.assertTrue(msg, s.contains(datax[j], datay[j] + resolution[i] * 0.99));
+				Assert.assertFalse(msg, s.contains(datax[j] + resolution[i], datay[j] + resolution[i]));
+			}
+		}
+	}
 }
