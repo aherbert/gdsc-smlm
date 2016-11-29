@@ -147,7 +147,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static TextWindow gaWindow = null;
 	private static TextWindow componentAnalysisWindow = null;
 	private static int failCount = 1;
-	private static int failCountRange = 0;
+
 	// This can be used during filtering. 
 	// However the min filter is not used to determine if candidates are valid (that is the primary filter).
 	// It is used to store poor estimates during fitting. So we can set it to null.
@@ -605,16 +605,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final DirectFilter filter;
 		final double score;
 		final int failCount;
-		final int failCountRange;
 		final double residualsThreshold;
 
-		public FilterResult(DirectFilter filter, double score, int failCount, int failCountRange,
-				double residualsThreshold)
+		public FilterResult(DirectFilter filter, double score, int failCount, double residualsThreshold)
 		{
 			this.filter = filter;
 			this.score = score;
 			this.failCount = failCount;
-			this.failCountRange = failCountRange;
 			this.residualsThreshold = residualsThreshold;
 		}
 	}
@@ -684,12 +681,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			iterate();
 			return;
 		}
-		// Score a given filter
-		if ("score".equals(arg))
-		{
-			score();
-			return;
-		}
 
 		if (invalidBenchmarkSpotFitResults(false))
 			return;
@@ -701,7 +692,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (!loadFitResults())
 			return;
 
-		if (!showDialog())
+		// Score a given filter
+		if ("score".equals(arg))
+		{
+			score();
+			return;
+		}
+		// Score a given filter
+		if ("parameters".equals(arg))
+		{
+			optimiseParameters();
+			return;
+		}
+
+		if (!showDialog(false))
 			return;
 
 		// Load filters from file
@@ -771,6 +775,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 
 		// Show this dialog first so we can run fully automated after interactive dialogs
+		// TODO - collect this in the iteration dialog
+		boolean optimiseParameters = true;
 		if (!showIterationDialog())
 			return;
 
@@ -794,7 +800,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (!loadFitResults())
 			return;
 
-		if (!showDialog())
+		// Collect parameters for optimising the parameters
+		if (!showDialog(optimiseParameters))
 			return;
 
 		// Load filters from file
@@ -883,10 +890,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private void score()
 	{
-		// Check if we have read the results
-		if (!loadFitResults())
-			return;
-
 		// Show dialog to allow the user to change the settings.
 		if (!showScoreDialog())
 			return;
@@ -944,6 +947,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 	}
 
+	private void optimiseParameters()
+	{
+		if (!showDialog(true))
+			return;
+
+	}
+
 	@SuppressWarnings("unchecked")
 	private List<FilterSet> readFilterSets()
 	{
@@ -966,7 +976,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					FilterSet filterSet = new FilterSet(filters);
 					filterSets.add(filterSet);
 					failCount = BenchmarkSpotFit.config.getFailuresLimit();
-					failCountRange = 0;
 					duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
 					residualsThreshold = (BenchmarkSpotFit.computeDoublets)
 							? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
@@ -1384,7 +1393,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				// Copy the settings from the fitter if this is the first run
 				failCount = BenchmarkSpotFit.config.getFailuresLimit();
-				failCountRange = 0;
 				duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
 				sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
 						? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
@@ -1661,7 +1669,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return (tmp == null) ? EMPTY : tmp;
 	}
 
-	private boolean showDialog()
+	private boolean showDialog(boolean optimiseParameters)
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -1686,15 +1694,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
-			msg += String.format("\nCurrent Best=%s, FailCount=%d, Range=%d", Utils.rounded(best.score), best.failCount,
-					best.failCountRange);
+			msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
 		}
 		gd.addMessage(msg);
 
 		// TODO - Make minimal filter configurable?
 
 		gd.addSlider("Fail_count", 0, 20, failCount);
-		gd.addSlider("Fail_count_range", 0, 5, failCountRange);
 		if (BenchmarkSpotFit.computeDoublets)
 			gd.addSlider("Residuals_threshold", 0.01, 1, sResidualsThreshold);
 		gd.addNumericField("Duplicate_distance", duplicateDistance, 2);
@@ -1810,7 +1816,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private boolean readDialog(GenericDialog gd)
 	{
 		failCount = (int) Math.abs(gd.getNextNumber());
-		failCountRange = (int) Math.abs(gd.getNextNumber());
 		if (BenchmarkSpotFit.computeDoublets)
 			residualsThreshold = sResidualsThreshold = Math.abs(gd.getNextNumber());
 		duplicateDistance = Math.abs(gd.getNextNumber());
@@ -1881,11 +1886,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private void createResultsPrefix2()
 	{
-		createResultsPrefix2(failCount, failCountRange, residualsThreshold, duplicateDistance);
+		createResultsPrefix2(failCount, residualsThreshold, duplicateDistance);
 	}
 
-	private void createResultsPrefix2(int failCount, int failCountRange, double residualsThreshold,
-			double duplicateDistance)
+	private void createResultsPrefix2(int failCount, double residualsThreshold, double duplicateDistance)
 	{
 		resultsPrefix2 = "\t" + failCount;
 		if (!Utils.isNullOrEmpty(resultsTitle))
@@ -1893,11 +1897,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		else
 			limitFailCount = "";
 		limitFailCount += "f=" + failCount;
-		if (failCountRange > 0)
-		{
-			resultsPrefix2 += "-" + (failCount + failCountRange);
-			limitFailCount += "-" + (failCount + failCountRange);
-		}
 		limitFailCount += ", r=" + Utils.rounded(residualsThreshold);
 		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
 		resultsPrefix2 += "\t" + Utils.rounded(duplicateDistance);
@@ -1960,8 +1959,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
-			msg += String.format("\nCurrent Best=%s, FailCount=%d, Range=%d", Utils.rounded(best.score), best.failCount,
-					best.failCountRange);
+			msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
 		}
 		gd.addMessage(msg);
 
@@ -2057,8 +2055,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		FilterResult best = getBestResult();
 		if (best != null)
 		{
-			msg += String.format("\nCurrent Best=%s, FailCount=%d, Range=%d", Utils.rounded(best.score), best.failCount,
-					best.failCountRange);
+			msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
 		}
 		gd.addMessage(msg);
 
@@ -2164,7 +2161,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return false;
 
 		resultsPrefix = BenchmarkSpotFit.resultPrefix + "\t" + resultsTitle + "\t";
-		createResultsPrefix2(scoreFailCount, 0, scoreResidualsThreshold, scoreDuplicateDistance);
+		createResultsPrefix2(scoreFailCount, scoreResidualsThreshold, scoreDuplicateDistance);
 
 		// Check there is one output
 		if (!showSummaryTable && !calculateSensitivity && !saveBestFilter && !saveTemplate)
@@ -2276,8 +2273,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (evolve == 1)
 				// The delta effects the step size for the Genetic Algorithm
 				evolveSetting *= delta;
-			Settings settings = new Settings(filterSets, resultsList, failCount, failCountRange, residualsThreshold,
-					duplicateDistance, plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
+			Settings settings = new Settings(filterSets, resultsList, failCount, residualsThreshold, duplicateDistance,
+					plotTopN, summaryDepth, criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
 
 			boolean equalSettings = settings.equals(lastAnalyseSettings);
 
@@ -2418,7 +2415,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		if (newResults || scores.isEmpty())
 		{
-			scores.add(new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount, failCountRange,
+			scores.add(new FilterResult(bestFilter, getScore(topFilterClassificationResult), failCount,
 					residualsThreshold));
 		}
 
@@ -4045,29 +4042,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		//multiPathFilter.setDebugFile("/tmp/fractionScoreSubset.txt");
 
 		// Note: We always use the subset method since fail counts have been accumulated when we read in the results.
-
-		if (failCountRange == 0)
-			return multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual, allAssignments, scoreStore,
-					coordinateStore);
-
-		double tp = 0, fp = 0, fn = 0;
-		int p = 0, n = 0;
-		for (int i = 0; i <= failCountRange; i++)
-		{
-			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(resultsList, failCount + i,
-					nActual, (i == failCountRange) ? allAssignments : null, (i == failCountRange) ? scoreStore : null,
-					coordinateStore);
-			tp += r.getTP();
-			fp += r.getFP();
-			fn += r.getFN();
-			p += r.getPositives();
-			n += r.getNegatives();
-		}
-		// Normalise by the number of evaluations
-		final int norm = failCountRange + 1;
-		p = (int) Math.round((double) p / norm);
-		n = (int) Math.round((double) n / norm);
-		return new FractionClassificationResult(tp / norm, fp / norm, 0, fn / norm, p, n);
+		return multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual, allAssignments, scoreStore,
+				coordinateStore);
 	}
 
 	private MultiPathFilter createMPF(DirectFilter filter, DirectFilter minFilter)
@@ -4091,8 +4067,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
 
 		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<FractionalAssignment[]>(resultsList.length);
-		multiPathFilter.fractionScoreSubset(resultsList, failCount + failCountRange, nActual, allAssignments, null,
-				coordinateStore);
+		multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual, allAssignments, null, coordinateStore);
 		return allAssignments;
 	}
 
@@ -5630,7 +5605,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			ga_subset = true;
 
 			ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter).filterSubset(ga_resultsList,
-					failCount + failCountRange, true);
+					failCount, true);
 
 			//MultiPathFilter.resetValidationFlag(ga_resultsListToScore);			
 
@@ -6079,7 +6054,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// We could set the fail count range dynamically using a window around the best filter 
 
-		config.setFailuresLimit((best.failCount + best.failCountRange / 2));
+		config.setFailuresLimit(best.failCount);
 
 		fitConfig.setDuplicateDistance(duplicateDistance);
 
@@ -6097,10 +6072,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				public int compare(FilterResult o1, FilterResult o2)
 				{
-					int result = o1.failCount - o2.failCount;
-					if (result != 0)
-						return result;
-					return o1.failCountRange - o2.failCountRange;
+					return o1.failCount - o2.failCount;
 				}
 			});
 
@@ -6481,7 +6453,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private PreprocessedPeakResult[] filterResults(final MultiPathFilter multiPathFilter)
 	{
-		return multiPathFilter.filter(resultsList, failCount + failCountRange, true, coordinateStore);
+		return multiPathFilter.filter(resultsList, failCount, true, coordinateStore);
 	}
 
 	private CoordinateStore createCoordinateStore()
