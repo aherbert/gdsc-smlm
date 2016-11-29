@@ -18,13 +18,13 @@ import gdsc.smlm.results.filter.DirectFilter;
 /**
  * Store the score from analysis of the direct filter
  */
-public class ScoreResult
+public class FilterScoreResult
 {
 	final double score, criteria;
 	final DirectFilter filter;
 	final String text;
 
-	public ScoreResult(double score, double criteria, DirectFilter filter, String text)
+	public FilterScoreResult(double score, double criteria, DirectFilter filter, String text)
 	{
 		this.score = score;
 		this.criteria = criteria;

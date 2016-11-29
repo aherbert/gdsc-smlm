@@ -19,20 +19,20 @@ import gdsc.smlm.results.filter.FilterScore;
 /**
  * Store the filter score used in benchmarking
  */
-public class SimpleFilterScore extends FilterScore
+public class SimpleParameterScore extends FilterScore
 {
-	final FilterScoreResult r;
+	final ParameterScoreResult r;
 
-	public SimpleFilterScore(FilterScoreResult r, boolean allSameType, boolean criteriaPassed)
+	public SimpleParameterScore(DirectFilter filter, ParameterScoreResult r, boolean criteriaPassed)
 	{
-		super(r.filter, r.score, r.criteria, allSameType, criteriaPassed);
+		super(filter, r.score, r.criteria, true, criteriaPassed);
 		this.r = r;
 	}
 
 	@Override
 	protected int compareParameters(FilterScore that)
 	{
-		// We only use this class with DirectFilter
-		return ((DirectFilter) that.filter).weakestUnsafe((DirectFilter) this.filter);
+		// TODO - Compare the parameters and return the strongest
+		return 0;
 	}
 }

@@ -1,8 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.results.filter.DirectFilter;
-import gdsc.smlm.results.filter.FilterScore;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -17,22 +14,19 @@ import gdsc.smlm.results.filter.FilterScore;
  *---------------------------------------------------------------------------*/
 
 /**
- * Store the filter score used in benchmarking
+ * Store the score from analysis of the non-filter parameters during direct filter analysis
  */
-public class SimpleFilterScore extends FilterScore
+public class ParameterScoreResult
 {
-	final FilterScoreResult r;
+	final double score, criteria;
+	final double[] parameters;
+	final String text;
 
-	public SimpleFilterScore(FilterScoreResult r, boolean allSameType, boolean criteriaPassed)
+	public ParameterScoreResult(double score, double criteria, double[] parameters, String text)
 	{
-		super(r.filter, r.score, r.criteria, allSameType, criteriaPassed);
-		this.r = r;
-	}
-
-	@Override
-	protected int compareParameters(FilterScore that)
-	{
-		// We only use this class with DirectFilter
-		return ((DirectFilter) that.filter).weakestUnsafe((DirectFilter) this.filter);
+		this.score = score;
+		this.criteria = criteria;
+		this.parameters=parameters;
+		this.text = text;
 	}
 }

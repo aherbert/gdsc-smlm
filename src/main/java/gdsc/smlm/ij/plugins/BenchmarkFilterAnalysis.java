@@ -901,7 +901,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		duplicateDistance = scoreDuplicateDistance;
 
 		// Create a dummy result, the filter will be rescored in reportResults(...)
-		ScoreResult sr = new ScoreResult(0, 0, scoreFilter, "");
+		FilterScoreResult sr = new FilterScoreResult(0, 0, scoreFilter, "");
 		ComplexFilterScore newFilterScore = new ComplexFilterScore(sr, null, "", 0);
 
 		// Report to summary window
@@ -975,7 +975,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return;
 
 		// Create the optimum position
-		ScoreResult r = new ScoreResult(fr.score, fr.criteria, fr.filter, "");
+		FilterScoreResult r = new FilterScoreResult(fr.score, fr.criteria, fr.filter, "");
 		char[] atLimit = null;
 		String algorithm = "";
 		long time = 0;
@@ -1870,7 +1870,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		boolean showOptimiseParams = (optimiseParameters & FLAG_OPTIMISE_PARAMS) != 0;
 
 		failCount = (int) Math.abs(gd.getNextNumber());
-		if (showOptimiseFilter)
+		if (showOptimiseParams)
 		{
 			minFailCount = (int) Math.abs(gd.getNextNumber());
 			maxFailCount = (int) Math.abs(gd.getNextNumber());
@@ -1878,14 +1878,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (BenchmarkSpotFit.computeDoublets)
 		{
 			residualsThreshold = sResidualsThreshold = Math.abs(gd.getNextNumber());
-			if (showOptimiseFilter)
+			if (showOptimiseParams)
 			{
 				minResidualsThreshold = Math.abs(gd.getNextNumber());
 				maxResidualsThreshold = Math.abs(gd.getNextNumber());
 			}
 		}
 		duplicateDistance = Math.abs(gd.getNextNumber());
-		if (showOptimiseFilter)
+		if (showOptimiseParams)
 		{
 			minDuplicateDistance = Math.abs(gd.getNextNumber());
 			maxDuplicateDistance = Math.abs(gd.getNextNumber());
@@ -1947,7 +1947,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				partialMatchDistance = upperMatchDistance;
 			if (partialSignalFactor > upperSignalFactor)
 				partialSignalFactor = upperSignalFactor;
-			if (showOptimiseFilter)
+			if (showOptimiseParams)
 			{
 				Parameters.isEqualOrBelow("Fail count", failCount, maxFailCount);
 				Parameters.isEqualOrAbove("Fail count", failCount, minFailCount);
@@ -2895,7 +2895,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private void addToComponentAnalysisWindow(ComplexFilterScore filterScore, ComplexFilterScore bestFilterScore,
 			String[] names)
 	{
-		final ScoreResult result = filterScore.r;
+		final FilterScoreResult result = filterScore.r;
 		final StringBuilder sb = new StringBuilder(result.text);
 		sb.append('\t').append(filterScore.size);
 		final int index = filterScore.index;
@@ -2987,7 +2987,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final boolean allSameType = filterSet.allSameType();
 
 		this.ga_resultsList = resultsList;
-		scoreParameters = false;
 
 		Chromosome<FilterScore> best = null;
 		String algorithm = "";
@@ -3705,7 +3704,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Score the filters and report the results if configured.
 
-		ScoreResult[] scoreResults = scoreFilters(setUncomputedStrength(filterSet), showResultsTable);
+		FilterScoreResult[] scoreResults = scoreFilters(setUncomputedStrength(filterSet), showResultsTable);
 		if (scoreResults == null)
 			return -1;
 
@@ -3713,7 +3712,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		for (int index = 0; index < scoreResults.length; index++)
 		{
-			final ScoreResult scoreResult = scoreResults[index];
+			final FilterScoreResult scoreResult = scoreResults[index];
 
 			addToResultsWindow(tw, scoreResult);
 
@@ -3992,7 +3991,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		// Enumerate on the min interval to produce the final filter
 		ss_filter = (DirectFilter) best;
-		es_optimum = null; // Reset to ignore the current optimum
+		es_optimum = null;
 		SearchDimension[] dimensions2 = new SearchDimension[ss_filter.getNumberOfParameters()];
 		for (int i = 0; i < indices.length; i++)
 		{
@@ -4039,8 +4038,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private double[] enumerateMinInterval(double[] point, String[] names, FixedDimension[] originalDimensions)
 	{
-		// Enumerate on the min interval to produce the final filter
-		es_optimum = null; // Reset to ignore the current optimum
+		p_optimum = null;
 		SearchDimension[] dimensions2 = new SearchDimension[originalDimensions.length];
 		for (int i = 0; i < dimensions2.length; i++)
 		{
@@ -4098,7 +4096,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private ComplexFilterScore run(boolean nonInteractive, ComplexFilterScore currentOptimum, double rangeReduction)
 	{
 		this.ga_resultsList = resultsList;
-		scoreParameters = true;
 
 		// All the search algorithms use search dimensions.
 		ss_filter = currentOptimum.r.filter;
@@ -4264,7 +4261,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					String algorithm = SEARCH[searchParam] + " " + rangeSearchWidth;
 					ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
 					ga_iteration = 0;
-					es_optimum = null;
+					p_optimum = null;
 
 					SearchSpace ss = new SearchSpace();
 					ss.setTracker(this);
@@ -4283,7 +4280,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					createGAWindow();
 					resumeTimer();
 
-					SearchResult<FilterScore> optimum = ss.search(dimensions, this, checker, myRefinementMode);
+					SearchResult<FilterScore> optimum = ss.search(dimensions, new ParameterScoreFunction(), checker,
+							myRefinementMode);
 
 					if (optimum != null)
 					{
@@ -4342,7 +4340,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				String algorithm = SEARCH[searchParam];
 				ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
 				ga_iteration = 0;
-				es_optimum = null;
+				p_optimum = null;
 
 				SearchSpace ss = new SearchSpace();
 				ss.setTracker(this);
@@ -4356,8 +4354,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				createGAWindow();
 				resumeTimer();
 
-				SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker, enrichmentSamples,
-						enrichmentFraction, enrichmentPadding);
+				SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, new ParameterScoreFunction(),
+						checker, enrichmentSamples, enrichmentFraction, enrichmentPadding);
 
 				if (optimum != null)
 				{
@@ -4394,7 +4392,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		duplicateDistance = point[2];
 
 		// Score the filter
-		ScoreResult scoreResult = scoreFilter(ss_filter);
+		FilterScoreResult scoreResult = scoreFilter(ss_filter);
 
 		SimpleFilterScore max = new SimpleFilterScore(scoreResult, true, scoreResult.criteria >= minCriteria);
 
@@ -4515,7 +4513,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			iterationStopWatch.resume();
 	}
 
-	private void addToResultsWindow(BufferedTextWindow tw, final ScoreResult result)
+	private void addToResultsWindow(BufferedTextWindow tw, final FilterScoreResult result)
 	{
 		if (showResultsTable && result.text != null)
 		{
@@ -5454,7 +5452,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Score them
 		long time = System.nanoTime();
-		ScoreResult r = scoreFilter(f);
+		FilterScoreResult r = scoreFilter(f);
 		time = System.nanoTime() - time;
 
 		endFractionScoreStore();
@@ -5600,7 +5598,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		String algorithm;
 		long time;
 
-		private ComplexFilterScore(ScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
+		private ComplexFilterScore(FilterScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
 				ClassificationResult r2, int size, int[] combinations, boolean[] enable)
 		{
 			super(r, allSameType, r.criteria >= minCriteria);
@@ -5613,13 +5611,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.atLimit = atLimit;
 		}
 
-		public ComplexFilterScore(ScoreResult r, boolean allSameType, int index, long time, ClassificationResult r2,
-				int size, int[] combinations, boolean[] enable)
+		public ComplexFilterScore(FilterScoreResult r, boolean allSameType, int index, long time,
+				ClassificationResult r2, int size, int[] combinations, boolean[] enable)
 		{
 			this(r, allSameType, null, index, time, r2, size, combinations, enable);
 		}
 
-		public ComplexFilterScore(ScoreResult r, char[] atLimit, String algorithm, long time)
+		public ComplexFilterScore(FilterScoreResult r, char[] atLimit, String algorithm, long time)
 		{
 			// This may be used in comparisons of different type so set allSameType to false
 			this(r, false, atLimit, 0, time, null, 0, null, null);
@@ -5989,7 +5987,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private boolean ga_subset;
 	private int ga_iteration;
 	private DirectFilter ss_filter;
-	private ScoreResult[] ga_scoreResults = null;
+	private FilterScoreResult[] ga_scoreResults = null;
 	private int ga_scoreIndex = 0;
 
 	private class ScoreJob
@@ -6023,12 +6021,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		volatile boolean finished = false;
 		final BlockingQueue<ScoreJob> jobs;
-		final ScoreResult[] scoreResults;
+		final FilterScoreResult[] scoreResults;
 		final boolean createTextResult;
 		final DirectFilter minFilter;
 		final CoordinateStore coordinateStore;
 
-		public ScoreWorker(BlockingQueue<ScoreJob> jobs, ScoreResult[] scoreResults, boolean createTextResult,
+		public ScoreWorker(BlockingQueue<ScoreJob> jobs, FilterScoreResult[] scoreResults, boolean createTextResult,
 				CoordinateStore coordinateStore)
 		{
 			this.jobs = jobs;
@@ -6088,12 +6086,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		volatile boolean finished = false;
 		final BlockingQueue<ParameterScoreJob> jobs;
-		final ScoreResult[] scoreResults;
+		final ParameterScoreResult[] scoreResults;
 		final boolean createTextResult;
 		final DirectFilter minFilter;
 		final GridCoordinateStore coordinateStore;
 
-		public ParameterScoreWorker(BlockingQueue<ParameterScoreJob> jobs, ScoreResult[] scoreResults,
+		public ParameterScoreWorker(BlockingQueue<ParameterScoreJob> jobs, ParameterScoreResult[] scoreResults,
 				boolean createTextResult)
 		{
 			this.jobs = jobs;
@@ -6169,14 +6167,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		progress++;
 	}
 
-	private ScoreResult[] scoreFilters(FilterSet filterSet, boolean createTextResult)
+	private FilterScoreResult[] scoreFilters(FilterSet filterSet, boolean createTextResult)
 	{
 		if (filterSet.size() == 0)
 			return null;
 
 		initialiseScoring(filterSet);
 
-		ScoreResult[] scoreResults = new ScoreResult[filterSet.size()];
+		FilterScoreResult[] scoreResults = new FilterScoreResult[filterSet.size()];
 
 		if (scoreResults.length == 1)
 		{
@@ -6259,7 +6257,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 	}
 
-	private ScoreResult[] scoreFilters(double[][] points, boolean createTextResult)
+	/**
+	 * Score filters.
+	 *
+	 * @param points
+	 *            the points (must be sorted by duplicate distance)
+	 * @param createTextResult
+	 *            set to true to create the text result
+	 * @return the score results
+	 */
+	private ParameterScoreResult[] scoreFilters(double[][] points, boolean createTextResult)
 	{
 		if (points == null || points.length == 0)
 			return null;
@@ -6267,14 +6274,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		ga_resultsListToScore = ga_resultsList;
 		ga_subset = false;
 
-		ScoreResult[] scoreResults = new ScoreResult[points.length];
+		ParameterScoreResult[] scoreResults = new ParameterScoreResult[points.length];
 
 		if (scoreResults.length == 1)
 		{
 			// No need to multi-thread this
 			int failCount = (int) points[0][0];
 			double residualsThreshold = points[0][1];
-			double duplicateDistance = points[0][1];
+			double duplicateDistance = points[0][2];
 			scoreResults[0] = scoreFilter(minimalFilter, failCount, residualsThreshold, duplicateDistance,
 					createCoordinateStore(duplicateDistance), createTextResult);
 		}
@@ -6293,15 +6300,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				threads.add(t);
 				t.start();
 			}
-
-			// Sort points to allow the CoordinateStore to be reused with the same duplicate distance
-			Arrays.sort(points, new Comparator<double[]>()
-			{
-				public int compare(double[] o1, double[] o2)
-				{
-					return Double.compare(o1[2], o2[2]);
-				}
-			});
 
 			totalProgress = scoreResults.length;
 			stepProgress = Utils.getProgressInterval(totalProgress);
@@ -6436,7 +6434,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return c;
 	}
 
-	private ScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter, boolean createTextResult,
+	private FilterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter, boolean createTextResult,
 			CoordinateStore coordinateStore)
 	{
 		FractionClassificationResult r = scoreFilter(filter, minFilter, ga_resultsListToScore, coordinateStore);
@@ -6470,20 +6468,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// Show the result if it achieves the criteria limit 
 		final String text = (createTextResult && criteria >= minCriteria) ? createResult(filter, r).toString() : null;
 
-		return new ScoreResult(score, criteria, filter, text);
+		return new FilterScoreResult(score, criteria, filter, text);
 	}
 
-	private ScoreResult scoreFilter(DirectFilter filter)
+	private FilterScoreResult scoreFilter(DirectFilter filter)
 	{
 		final FractionClassificationResult r = scoreFilter(filter, minimalFilter, resultsList, coordinateStore);
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
 		// Create the score output
 		final String text = createResult(filter, r).toString();
-		return new ScoreResult(score, criteria, filter, text);
+		return new FilterScoreResult(score, criteria, filter, text);
 	}
 
-	private ScoreResult scoreFilter(DirectFilter minFilter, int failCount, double residualsThreshold,
+	private ParameterScoreResult scoreFilter(DirectFilter minFilter, int failCount, double residualsThreshold,
 			double duplicateDistance, CoordinateStore coordinateStore, boolean createTextResult)
 	{
 		final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minFilter, residualsThreshold);
@@ -6497,7 +6495,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// TODO - update createResult so that it uses the input search parameters (e.g. fail count, etc.)
 		final String text = (createTextResult && criteria >= minCriteria) ? createResult(ss_filter, r).toString()
 				: null;
-		return new ScoreResult(score, criteria, ss_filter, text);
+		double[] parameters = new double[] { failCount, residualsThreshold, duplicateDistance };
+		return new ParameterScoreResult(score, criteria, parameters, text);
 	}
 
 	/**
@@ -6564,7 +6563,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return null;
 
 		// Assume that fitness will be called in the order of the individuals passed to the initialise function.
-		final ScoreResult scoreResult = ga_scoreResults[ga_scoreIndex++];
+		final FilterScoreResult scoreResult = ga_scoreResults[ga_scoreIndex++];
 
 		// Set this to null and it will be removed at the next population selection
 		if (scoreResult.score == 0)
@@ -6607,21 +6606,133 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	}
 
 	private SimpleFilterScore es_optimum = null;
-	private boolean scoreParameters = false;
+	private SimpleParameterScore p_optimum = null;
+
+	private class ParameterScoreFunction implements FullScoreFunction<FilterScore>
+	{
+		public SearchResult<FilterScore> findOptimum(double[][] points)
+		{
+			ga_iteration++;
+			SimpleParameterScore max = p_optimum;
+
+			// Sort points to allow the CoordinateStore to be reused with the same duplicate distance
+			Arrays.sort(points, new Comparator<double[]>()
+			{
+				public int compare(double[] o1, double[] o2)
+				{
+					return Double.compare(o1[2], o2[2]);
+				}
+			});
+
+			final ParameterScoreResult[] scoreResults = scoreFilters(points, false);
+
+			if (scoreResults == null)
+				return null;
+
+			for (int index = 0; index < scoreResults.length; index++)
+			{
+				final ParameterScoreResult scoreResult = scoreResults[index];
+				final SimpleParameterScore result = new SimpleParameterScore(ss_filter, scoreResult,
+						scoreResult.criteria >= minCriteria);
+				if (result.compareTo(max) < 0)
+				{
+					max = result;
+				}
+			}
+
+			p_optimum = max;
+
+			// Add the best filter to the table
+			// This filter may not have been part of the scored subset so use the entire results set for reporting
+			double[] parameters = max.r.parameters;
+			int failCount = (int) parameters[0];
+			double residualsThreshold = parameters[1];
+			double duplicateDistance = parameters[2];
+			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
+			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
+					nActual, null, null, createCoordinateStore(duplicateDistance));
+
+			// TODO - fix this to use the non-filter params
+			final StringBuilder text = createResult(ss_filter, r);
+			add(text, ga_iteration);
+			gaWindow.append(text.toString());
+
+			return new SearchResult<FilterScore>(parameters, max);
+		}
+
+		public SearchResult<FilterScore>[] score(double[][] points)
+		{
+			ga_iteration++;
+			SimpleParameterScore max = p_optimum;
+
+			// Sort points to allow the CoordinateStore to be reused with the same duplicate distance
+			Arrays.sort(points, new Comparator<double[]>()
+			{
+				public int compare(double[] o1, double[] o2)
+				{
+					return Double.compare(o1[2], o2[2]);
+				}
+			});
+
+			final ParameterScoreResult[] scoreResults = scoreFilters(points, false);
+
+			if (scoreResults == null)
+				return null;
+
+			@SuppressWarnings("unchecked")
+			SearchResult<FilterScore>[] scores = new SearchResult[scoreResults.length];
+			for (int index = 0; index < scoreResults.length; index++)
+			{
+				final ParameterScoreResult scoreResult = scoreResults[index];
+				final SimpleParameterScore result = new SimpleParameterScore(ss_filter, scoreResult,
+						scoreResult.criteria >= minCriteria);
+				if (result.compareTo(max) < 0)
+				{
+					max = result;
+				}
+				scores[index] = new SearchResult<FilterScore>(points[index], result);
+			}
+
+			p_optimum = max;
+
+			// Add the best filter to the table
+			// This filter may not have been part of the scored subset so use the entire results set for reporting
+			double[] parameters = max.r.parameters;
+			int failCount = (int) parameters[0];
+			double residualsThreshold = parameters[1];
+			double duplicateDistance = parameters[2];
+			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
+			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
+					nActual, null, null, createCoordinateStore(duplicateDistance));
+
+			// TODO - fix this to use the non-filter params
+			final StringBuilder text = createResult(ss_filter, r);
+			add(text, ga_iteration);
+			gaWindow.append(text.toString());
+
+			return scores;
+		}
+
+		public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size)
+		{
+			return ScoreFunctionHelper.cut(scores, size);
+		}
+	}
 
 	public SearchResult<FilterScore> findOptimum(double[][] points)
 	{
 		ga_iteration++;
-		final ScoreResult[] scoreResults = (scoreParameters) ? scoreFilters(points, false)
-				: scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
 		SimpleFilterScore max = es_optimum;
+
+		final FilterScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))),
+				false);
 
 		if (scoreResults == null)
 			return null;
 
 		for (int index = 0; index < scoreResults.length; index++)
 		{
-			final ScoreResult scoreResult = scoreResults[index];
+			final FilterScoreResult scoreResult = scoreResults[index];
 			final SimpleFilterScore result = new SimpleFilterScore(scoreResult, true,
 					scoreResult.criteria >= minCriteria);
 			if (result.compareTo(max) < 0)
@@ -6629,6 +6740,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				max = result;
 			}
 		}
+
+		es_optimum = max;
 
 		// Add the best filter to the table
 		// This filter may not have been part of the scored subset so use the entire results set for reporting
@@ -6645,9 +6758,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	public SearchResult<FilterScore>[] score(double[][] points)
 	{
 		ga_iteration++;
-		final ScoreResult[] scoreResults = (scoreParameters) ? scoreFilters(points, false)
-				: scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))), false);
 		SimpleFilterScore max = es_optimum;
+
+		final FilterScoreResult[] scoreResults = scoreFilters(setStrength(new FilterSet(searchSpaceToFilters(points))),
+				false);
 
 		if (scoreResults == null)
 			return null;
@@ -6656,7 +6770,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		SearchResult<FilterScore>[] scores = new SearchResult[scoreResults.length];
 		for (int index = 0; index < scoreResults.length; index++)
 		{
-			final ScoreResult scoreResult = scoreResults[index];
+			final FilterScoreResult scoreResult = scoreResults[index];
 			final SimpleFilterScore result = new SimpleFilterScore(scoreResult, true,
 					scoreResult.criteria >= minCriteria);
 			if (result.compareTo(max) < 0)
