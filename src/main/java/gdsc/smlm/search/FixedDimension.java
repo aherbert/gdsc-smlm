@@ -137,6 +137,11 @@ public class FixedDimension implements Cloneable, Dimension
 	 */
 	public SearchDimension create(int nIncrement)
 	{
+		if (nIncrement <= 0)
+		{
+			// Compute the maximum number of increments to cover the range from the centre
+			nIncrement = (int) Math.ceil(Math.ceil((max - min) / minIncrement) / 2);
+		}
 		return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
 	}
 
