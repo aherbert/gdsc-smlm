@@ -202,7 +202,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int evolve = 0;
 	private static boolean repeatEvolve = false;
 	private final static String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search", "Enumerate" };
-	private static int searchParam = 0;
+	private static int searchParam = 3;
 	private static boolean repeatSearch = false;
 	private static int rangeSearchWidth = 2;
 	private static double rangeSearchReduce = 0.3;
