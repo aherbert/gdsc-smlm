@@ -1042,7 +1042,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		//gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
 		gd.addCheckbox("Compute_doublets", computeDoublets);
-		gd.addSlider("Duplicate_distance", 0, 1.5, fitConfig.getDuplicateDistance());
+		gd.addNumericField("Duplicate_distance", fitConfig.getDuplicateDistance(), 2);
 		gd.addCheckbox("Show_score_histograms", showFilterScoreHistograms);
 		gd.addCheckbox("Show_correlation", showCorrelation);
 		gd.addCheckbox("Plot_rank_by_intensity", rankByIntensity);
