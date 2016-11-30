@@ -1415,6 +1415,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	}
 
 	private static Settings lastReadResultsSettings;
+	private static double lastDuplicateDistance = -1;
 
 	private MultiPathFitResults[] readResults()
 	{
@@ -1435,17 +1436,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 
 		Settings settings = new Settings(partialMatchDistance, upperMatchDistance, partialSignalFactor,
-				upperSignalFactor, duplicateDistance);
+				upperSignalFactor);
+		boolean equalScoreSettings = settings.equals(lastReadResultsSettings);
 
-		if (update || !settings.equals(lastReadResultsSettings))
+		if (update || !equalScoreSettings || lastDuplicateDistance != duplicateDistance)
 		{
 			IJ.showStatus("Reading results ...");
 
-			// Only cache results for the same analysis settings.
-			// This functionality is for choosing the optimum fail limit.
-			scores.clear();
+			// Only cache results for the same score analysis settings.
+			// This functionality is for choosing the optimum filter for the given scoring metric.
+			if (!equalScoreSettings)
+				scores.clear();
 
 			lastReadResultsSettings = settings;
+			lastDuplicateDistance = duplicateDistance;
 			depthStats = null;
 			depthFitStats = null;
 			signalFactorStats = null;
@@ -1827,8 +1831,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (!selectTableColumns())
 			return false;
 
-		// We may have to read the results again if the ranking option has changed
+		// We may have to read the results again if the ranking option has changed.
+		// Also we must read the results with the maximum duplicate distance we may encounter.
+		final double dd = duplicateDistance;
+		if (showOptimiseParams)
+			duplicateDistance = maxDuplicateDistance;
 		readResults();
+		duplicateDistance = dd;
 
 		return true;
 	}
@@ -1982,15 +1991,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private void createResultsPrefix2(int failCount, double residualsThreshold, double duplicateDistance)
 	{
-		resultsPrefix2 = "\t" + failCount;
+		resultsPrefix2 = buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance);
 		if (!Utils.isNullOrEmpty(resultsTitle))
 			limitFailCount = resultsTitle + ", ";
 		else
 			limitFailCount = "";
 		limitFailCount += "f=" + failCount;
 		limitFailCount += ", r=" + Utils.rounded(residualsThreshold);
-		resultsPrefix2 += "\t" + Utils.rounded(residualsThreshold);
-		resultsPrefix2 += "\t" + Utils.rounded(duplicateDistance);
+	}
+
+	private static String buildResultsPrefix2(int failCount, double residualsThreshold, double duplicateDistance)
+	{
+		return "\t" + failCount + "\t" + Utils.rounded(residualsThreshold) + "\t" + Utils.rounded(duplicateDistance);
 	}
 
 	private boolean showIterationDialog()
@@ -2432,7 +2444,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			optimum = runParameterAnalysis(iterative, optimum, rangeReduction);
 
-			if (Utils.isInterrupted())
+			if (optimum == null || Utils.isInterrupted())
 				return null;
 		}
 
@@ -3682,11 +3694,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
 
-		final BufferedTextWindow tw = (showResultsTable && resultsWindow != null)
-				? new BufferedTextWindow(resultsWindow) : null;
-		if (tw != null)
-			tw.setIncrement(Integer.MAX_VALUE);
-
 		// Do not support plotting if we used optimisation
 		double[] xValues = (best != null || isHeadless || (plotTopN == 0)) ? null : new double[filterSet.size()];
 		double[] yValues = (xValues == null) ? null : new double[xValues.length];
@@ -3714,8 +3721,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			final FilterScoreResult scoreResult = scoreResults[index];
 
-			addToResultsWindow(tw, scoreResult);
-
 			if (xValues != null)
 			{
 				xValues[index] = scoreResult.filter.getNumericalValue();
@@ -3730,9 +3735,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
-		// Update the final results window given that we mainly use appendWidthoutUpdate(...) when adding data
 		if (showResultsTable)
-			resultsWindow.getTextPanel().updateDisplay();
+		{
+			BufferedTextWindow tw = null;
+			if (resultsWindow != null)
+			{
+				tw = new BufferedTextWindow(resultsWindow);
+				tw.setIncrement(Integer.MAX_VALUE);
+			}
+			for (int index = 0; index < scoreResults.length; index++)
+				addToResultsWindow(tw, scoreResults[index].text);
+			if (resultsWindow != null)
+				resultsWindow.getTextPanel().updateDisplay();
+		}
 
 		// Check the top filter against the limits of the original dimensions
 		char[] atLimit = null;
@@ -4069,7 +4084,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			SearchSpace ss = new SearchSpace();
 			ss.setTracker(this);
-			SearchResult<FilterScore> optimum = ss.findOptimum(dimensions2, this);
+			SearchResult<FilterScore> optimum = ss.findOptimum(dimensions2, new ParameterScoreFunction());
 
 			if (optimum != null)
 			{
@@ -4374,12 +4389,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		IJ.showStatus("Analysing " + ss_filter.getName() + " ...");
 
-		// TODO - move this into the score function
-		BufferedTextWindow tw = (showResultsTable && resultsWindow != null) ? new BufferedTextWindow(resultsWindow)
-				: null;
-		if (tw != null)
-			tw.setIncrement(Integer.MAX_VALUE);
-
 		// Update the parameters using the optimum
 		failCount = (int) point[0];
 		residualsThreshold = point[1];
@@ -4387,9 +4396,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			// Refresh the coordinate store
 			coordinateStore = null;
+			duplicateDistance = point[2];
 			getCoordinateStore();
 		}
-		duplicateDistance = point[2];
+		createResultsPrefix2();
 
 		// Score the filter
 		FilterScoreResult scoreResult = scoreFilter(ss_filter);
@@ -4400,9 +4410,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		if (showResultsTable)
 		{
+			BufferedTextWindow tw = null;
 			if (resultsWindow != null)
 				tw = new BufferedTextWindow(resultsWindow);
-			addToResultsWindow(tw, scoreResult);
+			addToResultsWindow(tw, scoreResult.text);
 			if (resultsWindow != null)
 				resultsWindow.getTextPanel().updateDisplay();
 		}
@@ -4490,6 +4501,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				resultsWindow.append("");
 		}
 
+		if (newFilterScore.compareTo(currentOptimum) < 0)
+			return newFilterScore;
 		return currentOptimum;
 	}
 
@@ -4513,17 +4526,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			iterationStopWatch.resume();
 	}
 
-	private void addToResultsWindow(BufferedTextWindow tw, final FilterScoreResult result)
+	private void addToResultsWindow(BufferedTextWindow tw, final String text)
 	{
-		if (showResultsTable && result.text != null)
+		if (text != null)
 		{
 			if (isHeadless)
 			{
-				IJ.log(result.text);
+				IJ.log(text);
 			}
 			else
 			{
-				tw.append(result.text);
+				tw.append(text);
 			}
 		}
 	}
@@ -4713,6 +4726,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	}
 
 	public StringBuilder createResult(DirectFilter filter, FractionClassificationResult r)
+	{
+		return createResult(filter, r, resultsPrefix2);
+	}
+
+	public StringBuilder createResult(DirectFilter filter, FractionClassificationResult r, String resultsPrefix2)
 	{
 		StringBuilder sb = new StringBuilder(resultsPrefix);
 		sb.append(filter.getName()).append(resultsPrefix2).append(resultsPrefix3);
@@ -6492,8 +6510,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
 		// Create the score output
-		// TODO - update createResult so that it uses the input search parameters (e.g. fail count, etc.)
-		final String text = (createTextResult && criteria >= minCriteria) ? createResult(ss_filter, r).toString()
+		final String text = (createTextResult && criteria >= minCriteria)
+				? createResult(ss_filter, r, buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance))
+						.toString()
 				: null;
 		double[] parameters = new double[] { failCount, residualsThreshold, duplicateDistance };
 		return new ParameterScoreResult(score, criteria, parameters, text);
@@ -6620,11 +6639,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				public int compare(double[] o1, double[] o2)
 				{
-					return Double.compare(o1[2], o2[2]);
+					return BenchmarkFilterAnalysis.compare(o1[2], o2[2]);
 				}
 			});
 
-			final ParameterScoreResult[] scoreResults = scoreFilters(points, false);
+			final ParameterScoreResult[] scoreResults = scoreFilters(points, showResultsTable);
 
 			if (scoreResults == null)
 				return null;
@@ -6640,6 +6659,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 
+			if (showResultsTable)
+			{
+				BufferedTextWindow tw = null;
+				if (resultsWindow != null)
+				{
+					tw = new BufferedTextWindow(resultsWindow);
+					tw.setIncrement(Integer.MAX_VALUE);
+				}
+				for (int index = 0; index < scoreResults.length; index++)
+					addToResultsWindow(tw, scoreResults[index].text);
+				if (resultsWindow != null)
+					resultsWindow.getTextPanel().updateDisplay();
+			}
+
 			p_optimum = max;
 
 			// Add the best filter to the table
@@ -6652,8 +6685,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
 					nActual, null, null, createCoordinateStore(duplicateDistance));
 
-			// TODO - fix this to use the non-filter params
-			final StringBuilder text = createResult(ss_filter, r);
+			final StringBuilder text = createResult(ss_filter, r,
+					buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
 			add(text, ga_iteration);
 			gaWindow.append(text.toString());
 
@@ -6670,11 +6703,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				public int compare(double[] o1, double[] o2)
 				{
-					return Double.compare(o1[2], o2[2]);
+					return BenchmarkFilterAnalysis.compare(o1[2], o2[2]);
 				}
 			});
 
-			final ParameterScoreResult[] scoreResults = scoreFilters(points, false);
+			final ParameterScoreResult[] scoreResults = scoreFilters(points, showResultsTable);
 
 			if (scoreResults == null)
 				return null;
@@ -6693,6 +6726,20 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				scores[index] = new SearchResult<FilterScore>(points[index], result);
 			}
 
+			if (showResultsTable)
+			{
+				BufferedTextWindow tw = null;
+				if (resultsWindow != null)
+				{
+					tw = new BufferedTextWindow(resultsWindow);
+					tw.setIncrement(Integer.MAX_VALUE);
+				}
+				for (int index = 0; index < scoreResults.length; index++)
+					addToResultsWindow(tw, scoreResults[index].text);
+				if (resultsWindow != null)
+					resultsWindow.getTextPanel().updateDisplay();
+			}
+
 			p_optimum = max;
 
 			// Add the best filter to the table
@@ -6705,8 +6752,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
 					nActual, null, null, createCoordinateStore(duplicateDistance));
 
-			// TODO - fix this to use the non-filter params
-			final StringBuilder text = createResult(ss_filter, r);
+			final StringBuilder text = createResult(ss_filter, r,
+					buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
 			add(text, ga_iteration);
 			gaWindow.append(text.toString());
 
@@ -6717,6 +6764,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			return ScoreFunctionHelper.cut(scores, size);
 		}
+	}
+
+	private static int compare(final double d1, final double d2)
+	{
+		if (d1 < d2)
+			return -1;
+		if (d1 > d2)
+			return 1;
+		return 0;
 	}
 
 	public SearchResult<FilterScore> findOptimum(double[][] points)
