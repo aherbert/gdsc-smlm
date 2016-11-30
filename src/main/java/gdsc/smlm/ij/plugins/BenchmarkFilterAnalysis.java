@@ -197,23 +197,33 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static boolean scoreAnalysis = true;
 	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
 	private static int componentAnalysis = 3;
+	
 	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search",
 			"Step Search" };
 	private static int evolve = 0;
 	private static boolean repeatEvolve = false;
-	private final static String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search", "Enumerate" };
-	private static int searchParam = 3;
-	private static boolean repeatSearch = false;
 	private static int rangeSearchWidth = 2;
 	private static double rangeSearchReduce = 0.3;
 	private static int maxIterations = 30;
 	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 5000;
-	private static int pEnrichmentSamples = 500;
 	private static int seedSize = 5000;
-	private static int pSeedSize = 500;
 	private static double enrichmentFraction = 0.2;
 	private static double enrichmentPadding = 0.1;
+		
+	private final static String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search", "Enumerate" };
+	private static int searchParam = 3;
+	private static boolean repeatSearch = false;
+		private static int pRangeSearchWidth = 2;
+	private static double pRangeSearchReduce = 0.3;
+	private static int pMaxIterations = 30;
+	private static int pRefinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
+	private static int pEnrichmentSamples = 500;
+	private static int pSeedSize = 500;
+	private static double pEnrichmentFraction = 0.2;
+	private static double pEnrichmentPadding = 0.1;
+	private static int pConvergedCount = 2;
+	
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
 	private static HashMap<Integer, double[]> stepSizeMap = new HashMap<Integer, double[]>();
 
@@ -233,7 +243,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static boolean saveOption = false;
 	private static double iterationScoreTolerance = 1e-4;
 	private static double iterationFilterTolerance = 1e-3;
-	private static boolean iterationCompareResults = true;
+	private static boolean iterationCompareResults = false;
 	private static double iterationCompareDistance = 0.1;
 	private static int iterationMaxIterations = 10;
 	private static double iterationMinRangeReduction = 0.2;
@@ -815,8 +825,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		ComplexFilterScore current = analyse(filterSets);
 		if (current == null)
 			return;
+		time += filterAnalysisStopWatch.getTime();
 
-		time += analysisStopWatch.getTime();
+		current = analyseParameters(current);
+		if (current == null)
+			return;
+		time += parameterAnalysisStopWatch.getTime();
 
 		// Time the non-interactive plugins as a continuous section
 		iterationStopWatch = StopWatch.createStarted();
@@ -850,10 +864,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				rangeReduction = Maths.max(iterationMinRangeReduction, Maths.interpolateY(0, 1,
 						iterationMinRangeReductionIteration, iterationMinRangeReduction, checker.getIterations() + 1));
 			}
-			current = analyse(filterSets, current, rangeReduction);
-			if (current == null)
-				break;
-			converged = checker.converged(previous, current);
+
+			// TODO - Add optional inner loop so that the non-filter and filter parameters converge
+			// before a refit
+
+			{
+				current = analyse(filterSets, current, rangeReduction);
+				if (current == null)
+					break;
+				double[] previousParameters = createParameters();
+				current = analyseParameters(current, rangeReduction);
+				if (current == null)
+					return;
+				double[] currentParameters = createParameters();
+
+				converged = checker.converged(previous, current, previousParameters, currentParameters);
+			}
 		}
 
 		if (current != null)
@@ -869,6 +895,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		IJ.log("Iteration analysis time : " + DurationFormatUtils.formatDurationHMS(time));
 
 		IJ.showStatus("Finished");
+	}
+
+	private double[] createParameters()
+	{
+		return new double[] { failCount, residualsThreshold, duplicateDistance };
 	}
 
 	private void reportIterationResults()
@@ -897,7 +928,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// Set the variables used for scoring. Note: these are used throughout the plugin in various 
 		// methods so it is easier to just set them here and reset them later than pass the score 
 		// versions through to every method.
-		double[] stash = new double[] { failCount, residualsThreshold, duplicateDistance };
+		double[] stash = createParameters();
 		failCount = scoreFailCount;
 		residualsThreshold = scoreResidualsThreshold;
 		duplicateDistance = scoreDuplicateDistance;
@@ -2403,6 +2434,34 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * Run the optimum filter on a set of labelled peak results using various parameter settings outputting performance
 	 * statistics on the success of the filter to an ImageJ table.
 	 *
+	 * @param optimum
+	 *            the optimum
+	 * @return the best filter
+	 */
+	private ComplexFilterScore analyseParameters(ComplexFilterScore optimum)
+	{
+		return analyseParameters(false, optimum, 0);
+	}
+
+	/**
+	 * Run the optimum filter on a set of labelled peak results using various parameter settings outputting performance
+	 * statistics on the success of the filter to an ImageJ table.
+	 *
+	 * @param optimum
+	 *            the optimum
+	 * @param rangeReduction
+	 *            the range reduction
+	 * @return the best filter
+	 */
+	private ComplexFilterScore analyseParameters(ComplexFilterScore optimum, double rangeReduction)
+	{
+		return analyseParameters(true, optimum, rangeReduction);
+	}
+
+	/**
+	 * Run the optimum filter on a set of labelled peak results using various parameter settings outputting performance
+	 * statistics on the success of the filter to an ImageJ table.
+	 *
 	 * @param iterative
 	 *            the iterative
 	 * @param optimum
@@ -2618,21 +2677,21 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		getCoordinateStore();
 
-		analysisStopWatch = StopWatch.createStarted();
+		filterAnalysisStopWatch = StopWatch.createStarted();
 		IJ.showStatus("Analysing filters ...");
 		int setNumber = 0;
 		DirectFilter currentOptimum = (optimum != null) ? optimum.r.filter : null;
 		for (FilterSet filterSet : filterSets)
 		{
 			setNumber++;
-			if (run(filterSet, setNumber, currentOptimum, rangeReduction) < 0)
+			if (filterAnalysis(filterSet, setNumber, currentOptimum, rangeReduction) < 0)
 				break;
 		}
-		analysisStopWatch.stop();
+		filterAnalysisStopWatch.stop();
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
-		final String timeString = analysisStopWatch.toString();
+		final String timeString = filterAnalysisStopWatch.toString();
 		IJ.log("Filter analysis time : " + timeString);
 	}
 
@@ -2653,14 +2712,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private ComplexFilterScore runParameterAnalysis(boolean nonInteractive, ComplexFilterScore optimum,
 			double rangeReduction)
 	{
-		analysisStopWatch = StopWatch.createStarted();
+		parameterAnalysisStopWatch = StopWatch.createStarted();
 		IJ.showStatus("Analysing filters ...");
-		optimum = run(nonInteractive, optimum, rangeReduction);
-		analysisStopWatch.stop();
+		optimum = parameterAnalysis(nonInteractive, optimum, rangeReduction);
+		parameterAnalysisStopWatch.stop();
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
-		final String timeString = analysisStopWatch.toString();
+		final String timeString = parameterAnalysisStopWatch.toString();
 		IJ.log("Filter analysis time : " + timeString);
 		return optimum;
 	}
@@ -2995,7 +3054,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return sb.toString();
 	}
 
-	private int run(FilterSet filterSet, int setNumber, DirectFilter currentOptimum, double rangeReduction)
+	private int filterAnalysis(FilterSet filterSet, int setNumber, DirectFilter currentOptimum, double rangeReduction)
 	{
 		// Check if the filters are the same so allowing optimisation
 		final boolean allSameType = filterSet.allSameType();
@@ -3221,12 +3280,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			filterSet.sort();
 		}
 
-		filterSetStopWatch = StopWatch.createStarted();
+		analysisStopWatch = StopWatch.createStarted();
 
 		if (evolve == 1 && originalDimensions != null)
 		{
 			// Collect parameters for the genetic algorithm
-			pauseTimer();
+			pauseFilterTimer();
 
 			// Remember the step size settings
 			double[] stepSize = stepSizeMap.get(setNumber);
@@ -3367,7 +3426,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				ga_population.setTracker(this);
 
 				createGAWindow();
-				resumeTimer();
+				resumeFilterTimer();
 
 				best = ga_population.evolve(mutator, recombiner, this, selectionStrategy, ga_checker);
 
@@ -3387,13 +3446,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 			else
-				resumeTimer();
+				resumeFilterTimer();
 		}
 
 		if ((evolve == 2 || evolve == 4) && originalDimensions != null)
 		{
 			// Collect parameters for the range search algorithm
-			pauseTimer();
+			pauseFilterTimer();
 
 			boolean isStepSearch = evolve == 4;
 
@@ -3515,7 +3574,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 				if (combinations == 0)
 				{
-					resumeTimer();
+					resumeFilterTimer();
 				}
 				else
 				{
@@ -3546,7 +3605,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
 
 					createGAWindow();
-					resumeTimer();
+					resumeFilterTimer();
 
 					SearchResult<FilterScore> optimum = ss.search(dimensions, this, checker, myRefinementMode);
 
@@ -3574,13 +3633,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 			else
-				resumeTimer();
+				resumeFilterTimer();
 		}
 
 		if (evolve == 3 && originalDimensions != null)
 		{
 			// Collect parameters for the enrichment search algorithm
-			pauseTimer();
+			pauseFilterTimer();
 
 			boolean[] enabled = searchRangeMap.get(setNumber);
 			int n = ss_filter.getNumberOfParameters();
@@ -3666,7 +3725,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						convergedCount);
 
 				createGAWindow();
-				resumeTimer();
+				resumeFilterTimer();
 
 				SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker, enrichmentSamples,
 						enrichmentFraction, enrichmentPadding);
@@ -3691,7 +3750,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 			else
-				resumeTimer();
+				resumeFilterTimer();
 		}
 
 		IJ.showStatus("Analysing [" + setNumber + "] " + filterSet.getName() + " ...");
@@ -3717,7 +3776,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (scoreResults == null)
 			return -1;
 
-		filterSetStopWatch.stop();
+		analysisStopWatch.stop();
 
 		for (int index = 0; index < scoreResults.length; index++)
 		{
@@ -3838,7 +3897,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		//if (allSameType)
 		//{
 		ComplexFilterScore newFilterScore = new ComplexFilterScore(max.r, atLimit, algorithm,
-				filterSetStopWatch.getTime());
+				analysisStopWatch.getTime());
 		addBestFilter(type, allowDuplicates, newFilterScore);
 		//}
 
@@ -4110,14 +4169,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 *            the range reduction
 	 * @return the best filter
 	 */
-	private ComplexFilterScore run(boolean nonInteractive, ComplexFilterScore currentOptimum, double rangeReduction)
+	private ComplexFilterScore parameterAnalysis(boolean nonInteractive, ComplexFilterScore currentOptimum, double rangeReduction)
 	{
 		this.ga_resultsList = resultsList;
 
 		// All the search algorithms use search dimensions.
 		ss_filter = currentOptimum.r.filter;
 		FixedDimension[] originalDimensions = new FixedDimension[3];
-		double[] point = { failCount, residualsThreshold, duplicateDistance };
+		double[] point = createParameters();
 		String[] names = { "Fail count", "Residuals threshold", "Duplicate distance" };
 
 		{
@@ -4176,12 +4235,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
-		filterSetStopWatch = StopWatch.createStarted();
+		analysisStopWatch = StopWatch.createStarted();
 
 		if (searchParam == 0 || searchParam == 2)
 		{
 			// Collect parameters for the range search algorithm
-			pauseTimer();
+			pauseParameterTimer();
 
 			boolean isStepSearch = searchParam == 2;
 
@@ -4195,13 +4254,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Ask the user for the search parameters.
 				gd = new GenericDialog(TITLE);
 				gd.addMessage("Configure the " + SEARCH[searchParam] + " algorithm for " + ss_filter.getType());
-				gd.addSlider("Width", 1, 5, rangeSearchWidth);
+				gd.addSlider("Width", 1, 5, pRangeSearchWidth);
 				if (!isStepSearch)
 				{
-					gd.addNumericField("Max_iterations", maxIterations, 0);
+					gd.addNumericField("Max_iterations", pMaxIterations, 0);
 					String[] modes = SettingsManager.getNames((Object[]) SearchSpace.RefinementMode.values());
-					gd.addSlider("Reduce", 0.01, 0.99, rangeSearchReduce);
-					gd.addChoice("Refinement", modes, modes[refinementMode]);
+					gd.addSlider("Reduce", 0.01, 0.99, pRangeSearchReduce);
+					gd.addChoice("Refinement", modes, modes[pRefinementMode]);
 				}
 				gd.addNumericField("Seed_size", pSeedSize, 0);
 
@@ -4214,28 +4273,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				SearchDimension[] dimensions = new SearchDimension[originalDimensions.length];
 				if (!nonInteractive)
 				{
-					rangeSearchWidth = (int) gd.getNextNumber();
+					pRangeSearchWidth = (int) gd.getNextNumber();
 					if (!isStepSearch)
 					{
-						maxIterations = (int) gd.getNextNumber();
-						rangeSearchReduce = gd.getNextNumber();
-						refinementMode = gd.getNextChoiceIndex();
+						pMaxIterations = (int) gd.getNextNumber();
+						pRangeSearchReduce = gd.getNextNumber();
+						pRefinementMode = gd.getNextChoiceIndex();
 					}
 					pSeedSize = (int) gd.getNextNumber();
 				}
 
 				if (!isStepSearch)
-					myRefinementMode = SearchSpace.RefinementMode.values()[refinementMode];
+					myRefinementMode = SearchSpace.RefinementMode.values()[pRefinementMode];
 				for (int i = 0; i < dimensions.length; i++)
 				{
 					if (originalDimensions[i].isActive())
 					{
 						try
 						{
-							dimensions[i] = originalDimensions[i].create(rangeSearchWidth);
+							dimensions[i] = originalDimensions[i].create(pRangeSearchWidth);
 							dimensions[i].setPad(true);
 							// Prevent range reduction so that the step search just does a single refinement step
-							dimensions[i].setReduceFactor((isStepSearch) ? 1 : rangeSearchReduce);
+							dimensions[i].setReduceFactor((isStepSearch) ? 1 : pRangeSearchReduce);
 							// Centre on current optimum
 							dimensions[i].setCentre(point[i]);
 						}
@@ -4271,11 +4330,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 				if (combinations == 0)
 				{
-					resumeTimer();
+					resumeParameterTimer();
 				}
 				else
 				{
-					String algorithm = SEARCH[searchParam] + " " + rangeSearchWidth;
+					String algorithm = SEARCH[searchParam] + " " + pRangeSearchWidth;
 					ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
 					ga_iteration = 0;
 					p_optimum = null;
@@ -4292,10 +4351,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						double[][] sample = SearchSpace.sample(dimensions, pSeedSize - 1, null);
 						ss.seed(merge(sample, seed));
 					}
-					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
+					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, pMaxIterations);
 
 					createGAWindow();
-					resumeTimer();
+					resumeParameterTimer();
 
 					SearchResult<FilterScore> optimum = ss.search(dimensions, new ParameterScoreFunction(), checker,
 							myRefinementMode);
@@ -4317,13 +4376,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 			else
-				resumeTimer();
+				resumeParameterTimer();
 		}
 
 		if (searchParam == 1)
 		{
 			// Collect parameters for the enrichment search algorithm
-			pauseTimer();
+			pauseParameterTimer();
 
 			GenericDialog gd = null;
 			boolean runAlgorithm = nonInteractive;
@@ -4332,11 +4391,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Ask the user for the search parameters.
 				gd = new GenericDialog(TITLE);
 				gd.addMessage("Configure the " + SEARCH[searchParam] + " algorithm for " + ss_filter.getType());
-				gd.addNumericField("Max_iterations", maxIterations, 0);
-				gd.addNumericField("Converged_count", convergedCount, 0);
+				gd.addNumericField("Max_iterations", pMaxIterations, 0);
+				gd.addNumericField("Converged_count", pConvergedCount, 0);
 				gd.addNumericField("Samples", pEnrichmentSamples, 0);
-				gd.addSlider("Fraction", 0.01, 0.99, enrichmentFraction);
-				gd.addSlider("Padding", 0, 0.99, enrichmentPadding);
+				gd.addSlider("Fraction", 0.01, 0.99, pEnrichmentFraction);
+				gd.addSlider("Padding", 0, 0.99, pEnrichmentPadding);
 
 				gd.showDialog();
 				runAlgorithm = !gd.wasCanceled();
@@ -4347,11 +4406,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				FixedDimension[] dimensions = Arrays.copyOf(originalDimensions, originalDimensions.length);
 				if (!nonInteractive)
 				{
-					maxIterations = (int) gd.getNextNumber();
-					convergedCount = (int) gd.getNextNumber();
+					pMaxIterations = (int) gd.getNextNumber();
+					pConvergedCount = (int) gd.getNextNumber();
 					pEnrichmentSamples = (int) gd.getNextNumber();
-					enrichmentFraction = gd.getNextNumber();
-					enrichmentPadding = gd.getNextNumber();
+					pEnrichmentFraction = gd.getNextNumber();
+					pEnrichmentPadding = gd.getNextNumber();
 				}
 
 				String algorithm = SEARCH[searchParam];
@@ -4365,14 +4424,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				double[][] seed = new double[1][];
 				seed[0] = point;
 				ss.seed(seed);
-				ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations,
-						convergedCount);
+				ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, pMaxIterations,
+						pConvergedCount);
 
 				createGAWindow();
-				resumeTimer();
+				resumeParameterTimer();
 
 				SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, new ParameterScoreFunction(),
-						checker, pEnrichmentSamples, enrichmentFraction, enrichmentPadding);
+						checker, pEnrichmentSamples, pEnrichmentFraction, pEnrichmentPadding);
 
 				if (optimum != null)
 				{
@@ -4386,13 +4445,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 			else
-				resumeTimer();
+				resumeParameterTimer();
 		}
 
 		if (searchParam == 3)
 		{
 			// Collect parameters for the enumeration search algorithm
-			pauseTimer();
+			pauseParameterTimer();
 
 			SearchDimension[] dimensions = new SearchDimension[originalDimensions.length];
 			for (int i = 0; i < dimensions.length; i++)
@@ -4434,7 +4493,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (combinations == 0)
 			{
-				resumeTimer();
+				resumeParameterTimer();
 			}
 			else
 			{
@@ -4447,7 +4506,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 				ss.setTracker(this);
 				createGAWindow();
-				resumeTimer();
+				resumeParameterTimer();
 
 				SearchResult<FilterScore> optimum = ss.findOptimum(dimensions, new ParameterScoreFunction());
 
@@ -4466,7 +4525,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Update the parameters using the optimum
 		failCount = (int) Math.round(point[0]);
-		residualsThreshold = sResidualsThreshold= point[1];
+		residualsThreshold = sResidualsThreshold = point[1];
 		duplicateDistance = point[2];
 		// Refresh the coordinate store
 		if (coordinateStore == null || duplicateDistance != coordinateStore.getResolution())
@@ -4480,7 +4539,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		SimpleFilterScore max = new SimpleFilterScore(scoreResult, true, scoreResult.criteria >= minCriteria);
 
-		filterSetStopWatch.stop();
+		analysisStopWatch.stop();
 
 		if (showResultsTable)
 		{
@@ -4580,25 +4639,43 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return currentOptimum;
 	}
 
-	private static StopWatch analysisStopWatch;
-	private StopWatch filterSetStopWatch;
+	private static StopWatch filterAnalysisStopWatch;
+	private static StopWatch parameterAnalysisStopWatch;
+	private StopWatch analysisStopWatch;
 	private StopWatch iterationStopWatch;
 
-	private void pauseTimer()
+	private void pauseFilterTimer()
 	{
+		filterAnalysisStopWatch.suspend();
 		analysisStopWatch.suspend();
-		filterSetStopWatch.suspend();
 		if (iterationStopWatch != null)
 			iterationStopWatch.suspend();
 	}
 
-	private void resumeTimer()
+	private void resumeFilterTimer()
 	{
+		filterAnalysisStopWatch.resume();
 		analysisStopWatch.resume();
-		filterSetStopWatch.resume();
 		if (iterationStopWatch != null)
 			iterationStopWatch.resume();
 	}
+	
+	private void pauseParameterTimer()
+	{
+		parameterAnalysisStopWatch.suspend();
+		analysisStopWatch.suspend();
+		if (iterationStopWatch != null)
+			iterationStopWatch.suspend();
+	}
+
+	private void resumeParameterTimer()
+	{
+		parameterAnalysisStopWatch.resume();
+		analysisStopWatch.resume();
+		if (iterationStopWatch != null)
+			iterationStopWatch.resume();
+	}
+
 
 	private void addToResultsWindow(BufferedTextWindow tw, final String text)
 	{
@@ -4976,7 +5053,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 */
 	private void saveFilterSet(FilterSet filterSet, int setNumber, boolean interactive)
 	{
-		pauseTimer();
+		pauseFilterTimer();
 
 		if (interactive)
 		{
@@ -4992,7 +5069,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Add support for multiple filter sets
 			saveFilterSet(filterSet, filterSetFilename);
 
-		resumeTimer();
+		resumeFilterTimer();
 	}
 
 	/**
@@ -5969,7 +6046,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					.getCoordinates(createResults(null, (DirectFilter) current.filter, false).getResults());
 		}
 
-		public boolean converged(FilterScore previous, FilterScore current)
+		public boolean converged(FilterScore previous, FilterScore current, double[] previousParameters,
+				double[] currentParameters)
 		{
 			// Stop if interrupted
 			if (IJ.escapePressed())
@@ -5978,6 +6056,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				// Do not reset escape
 				// IJ.resetEscape();
 				return true;
+			}
+
+			// Must converge on the non-filter parameters
+			if (!converged(previousParameters, currentParameters))
+			{
+				if (iterationCompareResults)
+					previousResults = getResults(current);
+				return false;
 			}
 
 			SearchResult<FilterScore> p = new SearchResult<FilterScore>(previous.filter.getParameters(), previous);
@@ -6009,6 +6095,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 
 			return false;
+		}
+
+		private boolean converged(double[] previousParameters, double[] currentParameters)
+		{
+			for (int i = 0; i < previousParameters.length; i++)
+				if (previousParameters[i] != currentParameters[i])
+					return false;
+			return true;
 		}
 
 		private void logConvergence(String component)
