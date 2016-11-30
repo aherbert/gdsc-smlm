@@ -201,7 +201,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			"Step Search" };
 	private static int evolve = 0;
 	private static boolean repeatEvolve = false;
-	private final static String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search" };
+	private final static String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search", "Enumerate" };
 	private static int searchParam = 0;
 	private static boolean repeatSearch = false;
 	private static int rangeSearchWidth = 2;
@@ -4389,6 +4389,80 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				resumeTimer();
 		}
 
+		if (searchParam == 3)
+		{
+			// Collect parameters for the enumeration search algorithm
+			pauseTimer();
+
+			SearchDimension[] dimensions = new SearchDimension[originalDimensions.length];
+			for (int i = 0; i < dimensions.length; i++)
+			{
+				if (originalDimensions[i].isActive())
+				{
+					try
+					{
+						dimensions[i] = originalDimensions[i].create(0);
+					}
+					catch (IllegalArgumentException e)
+					{
+						IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
+								names[i]));
+						return null;
+					}
+				}
+				else
+				{
+					dimensions[i] = new SearchDimension(point[i]);
+				}
+			}
+			
+			GenericDialog gd = null;
+			long combinations = SearchSpace.countCombinations(dimensions);
+			if (!nonInteractive && combinations > 2000)
+			{
+				gd = new GenericDialog(TITLE);
+				gd.addMessage(
+						String.format("%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.",
+								combinations));
+				gd.enableYesNoCancel();
+				gd.hideCancelButton();
+				gd.showDialog();
+				if (!gd.wasOKed())
+				{
+					combinations = 0;
+				}
+			}
+
+			if (combinations == 0)
+			{
+				resumeTimer();
+			}
+			else
+			{
+				String algorithm = SEARCH[searchParam];
+				ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
+				ga_iteration = 0;
+				p_optimum = null;
+
+				SearchSpace ss = new SearchSpace();
+				
+				ss.setTracker(this);
+				createGAWindow();
+				resumeTimer();
+
+				SearchResult<FilterScore> optimum = ss.findOptimum(dimensions, new ParameterScoreFunction());
+
+				if (optimum != null)
+				{
+					// In case optimisation was stopped
+					IJ.resetEscape();
+
+					// Now update the parameters for final assessment
+					point = optimum.point;
+				}
+			}
+		}
+		
 		IJ.showStatus("Analysing " + ss_filter.getName() + " ...");
 
 		// Update the parameters using the optimum
