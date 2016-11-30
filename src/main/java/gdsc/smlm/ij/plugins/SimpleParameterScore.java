@@ -32,7 +32,32 @@ public class SimpleParameterScore extends FilterScore
 	@Override
 	protected int compareParameters(FilterScore that)
 	{
-		// TODO - Compare the parameters and return the strongest
+		// Compare the parameters and return the strongest, those most likely to restrict the output
+		
+		// 0 = failCount
+		// 1 = residudalsThreshold
+		// 2 = duplicateDistance
+		double[] p1 = this.r.parameters;
+		double[] p2 = ((SimpleParameterScore)that).r.parameters;
+		
+		// Lowest fail count
+		if (p1[0] < p2[0])
+			return -1;
+		if (p1[0] > p2[0])
+			return 1;
+		
+		// Lowest duplicate distance 
+		if (p1[2] < p2[2])
+			return -1;
+		if (p1[2] > p2[2])
+			return 1;
+
+		// Highest residuals threshold 
+		if (p1[2] > p2[2])
+			return -1;
+		if (p1[2] < p2[2])
+			return 1;
+		
 		return 0;
 	}
 }
