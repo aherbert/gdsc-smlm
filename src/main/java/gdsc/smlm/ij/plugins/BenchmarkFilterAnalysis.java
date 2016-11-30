@@ -4405,8 +4405,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					}
 					catch (IllegalArgumentException e)
 					{
-						IJ.error(TITLE, String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i,
-								names[i]));
+						IJ.error(TITLE,
+								String.format("Unable to configure dimension [%d] %s: " + e.getMessage(), i, names[i]));
 						return null;
 					}
 				}
@@ -4415,15 +4415,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					dimensions[i] = new SearchDimension(point[i]);
 				}
 			}
-			
+
 			GenericDialog gd = null;
 			long combinations = SearchSpace.countCombinations(dimensions);
 			if (!nonInteractive && combinations > 2000)
 			{
 				gd = new GenericDialog(TITLE);
-				gd.addMessage(
-						String.format("%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.",
-								combinations));
+				gd.addMessage(String.format(
+						"%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.", combinations));
 				gd.enableYesNoCancel();
 				gd.hideCancelButton();
 				gd.showDialog();
@@ -4445,7 +4444,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				p_optimum = null;
 
 				SearchSpace ss = new SearchSpace();
-				
+
 				ss.setTracker(this);
 				createGAWindow();
 				resumeTimer();
@@ -4462,18 +4461,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 			}
 		}
-		
+
 		IJ.showStatus("Analysing " + ss_filter.getName() + " ...");
 
 		// Update the parameters using the optimum
-		failCount = (int) point[0];
+		failCount = (int) Math.round(point[0]);
 		residualsThreshold = point[1];
-		if (duplicateDistance != point[2])
+		duplicateDistance = point[2];
+		// Refresh the coordinate store
+		if (coordinateStore == null || duplicateDistance != coordinateStore.getResolution())
 		{
-			// Refresh the coordinate store
-			coordinateStore = null;
-			duplicateDistance = point[2];
-			getCoordinateStore();
+			coordinateStore = createCoordinateStore();
 		}
 		createResultsPrefix2();
 
@@ -6182,8 +6180,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final BlockingQueue<ParameterScoreJob> jobs;
 		final ParameterScoreResult[] scoreResults;
 		final boolean createTextResult;
+		final DirectFilter filter;
 		final DirectFilter minFilter;
-		final GridCoordinateStore coordinateStore;
+		final GridCoordinateStore gridCoordinateStore;
 
 		public ParameterScoreWorker(BlockingQueue<ParameterScoreJob> jobs, ParameterScoreResult[] scoreResults,
 				boolean createTextResult)
@@ -6191,9 +6190,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.jobs = jobs;
 			this.scoreResults = scoreResults;
 			this.createTextResult = createTextResult;
+			this.filter = (DirectFilter) ss_filter.clone();
 			this.minFilter = (minimalFilter != null) ? (DirectFilter) minimalFilter.clone() : null;
 			int[] bounds = getBounds();
-			this.coordinateStore = new GridCoordinateStore(bounds[0], bounds[1], 0);
+			this.gridCoordinateStore = new GridCoordinateStore(bounds[0], bounds[1], 0);
 		}
 
 		/*
@@ -6234,14 +6234,27 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				return;
 			}
 			showProgress();
-			// Directly write to the result array, this is thread safe
+
 			final double[] point = job.point;
 			int failCount = (int) Math.round(point[0]);
 			double residualsThreshold = point[1];
 			double duplicateDistance = point[2];
-			coordinateStore.changeResolution(duplicateDistance);
-			scoreResults[job.index] = scoreFilter(minFilter, failCount, residualsThreshold, duplicateDistance,
-					coordinateStore, createTextResult);
+			CoordinateStore coordinateStore2;
+
+			// Re-use
+			gridCoordinateStore.changeResolution(duplicateDistance);
+			coordinateStore2 = gridCoordinateStore;
+
+			// New
+			//int[] bounds = getBounds();
+			//coordinateStore2 = new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance);
+
+			// From factory
+			//coordinateStore2 = createCoordinateStore(duplicateDistance);
+
+			// Directly write to the result array, this is thread safe
+			scoreResults[job.index] = scoreFilter(filter, minFilter, failCount, residualsThreshold, duplicateDistance,
+					coordinateStore2, createTextResult);
 		}
 	}
 
@@ -6373,10 +6386,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (scoreResults.length == 1)
 		{
 			// No need to multi-thread this
-			int failCount = (int) points[0][0];
+			int failCount = (int) Math.round(points[0][0]);
 			double residualsThreshold = points[0][1];
 			double duplicateDistance = points[0][2];
-			scoreResults[0] = scoreFilter(minimalFilter, failCount, residualsThreshold, duplicateDistance,
+			scoreResults[0] = scoreFilter(ss_filter, minimalFilter, failCount, residualsThreshold, duplicateDistance,
 					createCoordinateStore(duplicateDistance), createTextResult);
 		}
 		else
@@ -6575,10 +6588,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return new FilterScoreResult(score, criteria, filter, text);
 	}
 
-	private ParameterScoreResult scoreFilter(DirectFilter minFilter, int failCount, double residualsThreshold,
-			double duplicateDistance, CoordinateStore coordinateStore, boolean createTextResult)
+	private ParameterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter, int failCount,
+			double residualsThreshold, double duplicateDistance, CoordinateStore coordinateStore,
+			boolean createTextResult)
 	{
-		final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minFilter, residualsThreshold);
+		final MultiPathFilter multiPathFilter = new MultiPathFilter(filter, minFilter, residualsThreshold);
 
 		final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
 				nActual, null, null, coordinateStore);
@@ -6587,7 +6601,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final double criteria = getCriteria(r);
 		// Create the score output
 		final String text = (createTextResult && criteria >= minCriteria)
-				? createResult(ss_filter, r, buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance))
+				? createResult(filter, r, buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance))
 						.toString()
 				: null;
 		double[] parameters = new double[] { failCount, residualsThreshold, duplicateDistance };
@@ -6754,7 +6768,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Add the best filter to the table
 			// This filter may not have been part of the scored subset so use the entire results set for reporting
 			double[] parameters = max.r.parameters;
-			int failCount = (int) parameters[0];
+			int failCount = (int) Math.round(parameters[0]);
 			double residualsThreshold = parameters[1];
 			double duplicateDistance = parameters[2];
 			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
@@ -6821,7 +6835,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Add the best filter to the table
 			// This filter may not have been part of the scored subset so use the entire results set for reporting
 			double[] parameters = max.r.parameters;
-			int failCount = (int) parameters[0];
+			int failCount = (int) Math.round(parameters[0]);
 			double residualsThreshold = parameters[1];
 			double duplicateDistance = parameters[2];
 			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
