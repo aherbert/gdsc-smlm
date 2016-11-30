@@ -209,7 +209,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int maxIterations = 30;
 	private static int refinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
 	private static int enrichmentSamples = 5000;
+	private static int pEnrichmentSamples = 500;
 	private static int seedSize = 5000;
+	private static int pSeedSize = 500;
 	private static double enrichmentFraction = 0.2;
 	private static double enrichmentPadding = 0.1;
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
@@ -4201,7 +4203,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					gd.addSlider("Reduce", 0.01, 0.99, rangeSearchReduce);
 					gd.addChoice("Refinement", modes, modes[refinementMode]);
 				}
-				gd.addNumericField("Seed_size", seedSize, 0);
+				gd.addNumericField("Seed_size", pSeedSize, 0);
 
 				gd.showDialog();
 				runAlgorithm = !gd.wasCanceled();
@@ -4219,7 +4221,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						rangeSearchReduce = gd.getNextNumber();
 						refinementMode = gd.getNextChoiceIndex();
 					}
-					seedSize = (int) gd.getNextNumber();
+					pSeedSize = (int) gd.getNextNumber();
 				}
 
 				if (!isStepSearch)
@@ -4280,14 +4282,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 					SearchSpace ss = new SearchSpace();
 					ss.setTracker(this);
-					if (seedSize > 0)
+					if (pSeedSize > 0)
 					{
 						// Add current optimum to seed
 						// Note: If we have an optimum and we are not seeding this should not matter as the dimensions 
 						// have been centred on the current optimum					
 						double[][] seed = new double[1][];
 						seed[0] = point;
-						double[][] sample = SearchSpace.sample(dimensions, seedSize - 1, null);
+						double[][] sample = SearchSpace.sample(dimensions, pSeedSize - 1, null);
 						ss.seed(merge(sample, seed));
 					}
 					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, maxIterations);
@@ -4306,7 +4308,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						// Now update the parameters for final assessment
 						point = optimum.point;
 
-						if (seedSize > 0)
+						if (pSeedSize > 0)
 						{
 							// The optimum may be off grid if it was from the seed
 							point = enumerateMinInterval(point, names, originalDimensions);
@@ -4332,7 +4334,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				gd.addMessage("Configure the " + SEARCH[searchParam] + " algorithm for " + ss_filter.getType());
 				gd.addNumericField("Max_iterations", maxIterations, 0);
 				gd.addNumericField("Converged_count", convergedCount, 0);
-				gd.addNumericField("Samples", enrichmentSamples, 0);
+				gd.addNumericField("Samples", pEnrichmentSamples, 0);
 				gd.addSlider("Fraction", 0.01, 0.99, enrichmentFraction);
 				gd.addSlider("Padding", 0, 0.99, enrichmentPadding);
 
@@ -4347,7 +4349,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				{
 					maxIterations = (int) gd.getNextNumber();
 					convergedCount = (int) gd.getNextNumber();
-					enrichmentSamples = (int) gd.getNextNumber();
+					pEnrichmentSamples = (int) gd.getNextNumber();
 					enrichmentFraction = gd.getNextNumber();
 					enrichmentPadding = gd.getNextNumber();
 				}
@@ -4370,7 +4372,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				resumeTimer();
 
 				SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, new ParameterScoreFunction(),
-						checker, enrichmentSamples, enrichmentFraction, enrichmentPadding);
+						checker, pEnrichmentSamples, enrichmentFraction, enrichmentPadding);
 
 				if (optimum != null)
 				{
