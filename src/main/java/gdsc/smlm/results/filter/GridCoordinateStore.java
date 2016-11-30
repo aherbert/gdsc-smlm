@@ -344,6 +344,7 @@ public class GridCoordinateStore implements CoordinateStore
 		// Clearing each item in the grid is a big overhead when the grid is large and the number of additions to the grid is small.
 		// So store a timestamp for the clear and we refresh each list when we next use it.
 		timestamp++;
+		queue.size = 0;
 	}
 
 	/*
