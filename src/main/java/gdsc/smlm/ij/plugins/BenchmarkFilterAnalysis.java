@@ -1011,7 +1011,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					filterSets.add(filterSet);
 					failCount = BenchmarkSpotFit.config.getFailuresLimit();
 					duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
-					residualsThreshold = (BenchmarkSpotFit.computeDoublets)
+					residualsThreshold = sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
 							? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 					createResultsPrefix2();
 					return filterSets;
@@ -4466,7 +4466,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Update the parameters using the optimum
 		failCount = (int) Math.round(point[0]);
-		residualsThreshold = point[1];
+		residualsThreshold = sResidualsThreshold= point[1];
 		duplicateDistance = point[2];
 		// Refresh the coordinate store
 		if (coordinateStore == null || duplicateDistance != coordinateStore.getResolution())
