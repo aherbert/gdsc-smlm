@@ -156,12 +156,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	// It is used to store poor estimates during fitting. So we can set it to null.
 	private static final DirectFilter minimalFilter = null;
 	private static double sResidualsThreshold = 0.3;
-	private static double minResidualsThreshold = 0;
-	private static double maxResidualsThreshold = 1;
+	private static double minResidualsThreshold = 0.1;
+	private static double maxResidualsThreshold = 0.6;
 	private double residualsThreshold = 1; // Disabled
 	private static double duplicateDistance = 0;
 	private static double minDuplicateDistance = 0;
-	private static double maxDuplicateDistance = 3;
+	private static double maxDuplicateDistance = 5;
 	private static boolean reset = true;
 	private static boolean showResultsTable = false;
 	private static boolean showSummaryTable = true;
@@ -2713,14 +2713,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			double rangeReduction)
 	{
 		parameterAnalysisStopWatch = StopWatch.createStarted();
-		IJ.showStatus("Analysing filters ...");
+		IJ.showStatus("Analysing parameters ...");
 		optimum = parameterAnalysis(nonInteractive, optimum, rangeReduction);
 		parameterAnalysisStopWatch.stop();
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
 		final String timeString = parameterAnalysisStopWatch.toString();
-		IJ.log("Filter analysis time : " + timeString);
+		IJ.log("Parameter analysis time : " + timeString);
 		return optimum;
 	}
 
