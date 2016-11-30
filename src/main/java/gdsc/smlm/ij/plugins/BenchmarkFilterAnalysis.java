@@ -1919,18 +1919,19 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		if (BenchmarkSpotFit.computeDoublets)
 		{
-			residualsThreshold = sResidualsThreshold = Math.abs(gd.getNextNumber());
+			// Round to the precision of the min/max
+			residualsThreshold = sResidualsThreshold = Maths.round(Math.abs(gd.getNextNumber()), 4);
 			if (showOptimiseParams)
 			{
-				minResidualsThreshold = Math.abs(gd.getNextNumber());
-				maxResidualsThreshold = Math.abs(gd.getNextNumber());
+				minResidualsThreshold = Maths.round(Math.abs(gd.getNextNumber()), 4);
+				maxResidualsThreshold = Maths.round(Math.abs(gd.getNextNumber()), 4);
 			}
 		}
-		duplicateDistance = Math.abs(gd.getNextNumber());
+		duplicateDistance = Maths.round(Math.abs(gd.getNextNumber()), 4);
 		if (showOptimiseParams)
 		{
-			minDuplicateDistance = Math.abs(gd.getNextNumber());
-			maxDuplicateDistance = Math.abs(gd.getNextNumber());
+			minDuplicateDistance = Maths.round(Math.abs(gd.getNextNumber()), 4);
+			maxDuplicateDistance = Maths.round(Math.abs(gd.getNextNumber()), 4);
 		}
 		reset = gd.getNextBoolean();
 		showResultsTable = gd.getNextBoolean();
