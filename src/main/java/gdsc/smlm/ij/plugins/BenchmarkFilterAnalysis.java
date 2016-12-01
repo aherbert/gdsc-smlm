@@ -625,20 +625,24 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	// Store the best filter scores
 	private class FilterResult
 	{
-		final DirectFilter filter;
-		final double score, criteria;
+		final double score;
 		final int failCount;
 		final double residualsThreshold, duplicateDistance;
+		final ComplexFilterScore filterScore;
 
-		public FilterResult(DirectFilter filter, double score, double criteria, int failCount,
-				double residualsThreshold, double duplicateDistance)
+		public FilterResult(int failCount, double residualsThreshold, double duplicateDistance,
+				ComplexFilterScore filterScore)
 		{
-			this.filter = filter;
-			this.score = score;
-			this.criteria = criteria;
+			this.score = filterScore.score;
 			this.failCount = failCount;
 			this.residualsThreshold = residualsThreshold;
 			this.duplicateDistance = duplicateDistance;
+			this.filterScore = filterScore;
+		}
+
+		DirectFilter getFilter()
+		{
+			return filterScore.getFilter();
 		}
 	}
 
@@ -880,7 +884,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						return;
 					double[] currentParameters = createParameters();
 
-					innerConverged = checker.converged("Filter", previous, current, previousParameters, currentParameters);
+					innerConverged = checker.converged("Filter", previous, current, previousParameters,
+							currentParameters);
 
 				}
 				// Check if we can continue (e.g. not max iterations or escape pressed) 
@@ -980,7 +985,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// Create a dummy result, the filter will be rescored in reportResults(...)
 		FilterScoreResult sr = new FilterScoreResult(0, 0, scoreFilter, "");
-		ComplexFilterScore newFilterScore = new ComplexFilterScore(sr, null, "", 0);
+		ComplexFilterScore newFilterScore = new ComplexFilterScore(sr, null, "", 0, "", 0);
 
 		// Report to summary window
 		reportResults(true, newFilterScore);
@@ -1007,7 +1012,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			FilterResult r = getBestResult();
 			if (r != null)
 			{
-				scoreFilter = r.filter;
+				scoreFilter = r.getFilter();
 				scoreFailCount = r.failCount;
 				scoreResidualsThreshold = r.residualsThreshold;
 			}
@@ -1052,14 +1057,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (!showDialog(FLAG_OPTIMISE_PARAMS))
 			return;
 
-		// Create the optimum position
-		FilterScoreResult r = new FilterScoreResult(fr.score, fr.criteria, fr.filter, "");
-		char[] atLimit = null;
-		String algorithm = "";
-		long time = 0;
-		ComplexFilterScore optimum = new ComplexFilterScore(r, atLimit, algorithm, time);
-
-		analyseParameters(false, optimum, 0);
+		analyseParameters(false, fr.filterScore, 0);
 
 		IJ.showStatus("Finished");
 	}
@@ -2653,7 +2651,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				sb.append(fs.algorithm);
 				sb.append('\t');
 				sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.time));
-				//sb.append(Utils.timeToString(fs.time));
+				sb.append('\t');
+				sb.append(fs.getParamAlgorithm());
+				sb.append('\t');
+				sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.paramTime));
 				text = sb.toString();
 
 				if (isHeadless)
@@ -2686,8 +2687,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		if (newResults || scores.isEmpty())
 		{
-			scores.add(new FilterResult(bestFilter, getScore(topFilterClassificationResult),
-					getCriteria(topFilterClassificationResult), failCount, residualsThreshold, duplicateDistance));
+			scores.add(new FilterResult(failCount, residualsThreshold, duplicateDistance, filters.get(0)));
 		}
 
 		if (saveTemplate)
@@ -3064,7 +3064,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				sb.append("\t").append(COLUMNS[i]);
 
 		if (summary)
-			sb.append("\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tEvolve\tTime");
+			sb.append("\tDepth Recall\tDistance\tSignal Factor\tRMSD\tSlope\tAt limit\tEvolve\tTime\tSearch\tTime");
 		return sb.toString();
 	}
 
@@ -3942,7 +3942,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		//if (allSameType)
 		//{
 		ComplexFilterScore newFilterScore = new ComplexFilterScore(max.r, atLimit, algorithm,
-				analysisStopWatch.getTime());
+				analysisStopWatch.getTime(), "", 0);
 		addBestFilter(type, allowDuplicates, newFilterScore);
 		//}
 
@@ -4218,6 +4218,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			double rangeReduction)
 	{
 		this.ga_resultsList = resultsList;
+		String algorithm = "";
 
 		// All the search algorithms use search dimensions.
 		ss_filter = currentOptimum.r.filter;
@@ -4380,7 +4381,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				}
 				else
 				{
-					String algorithm = SEARCH[searchParam] + " " + pRangeSearchWidth;
+					algorithm = SEARCH[searchParam] + " " + pRangeSearchWidth;
 					ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
 					ga_iteration = 0;
 					p_optimum = null;
@@ -4459,7 +4460,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					pEnrichmentPadding = gd.getNextNumber();
 				}
 
-				String algorithm = SEARCH[searchParam];
+				algorithm = SEARCH[searchParam];
 				ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
 				ga_iteration = 0;
 				p_optimum = null;
@@ -4543,7 +4544,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			else
 			{
-				String algorithm = SEARCH[searchParam];
+				algorithm = SEARCH[searchParam];
 				ga_statusPrefix = algorithm + " " + ss_filter.getName() + " ... ";
 				ga_iteration = 0;
 				p_optimum = null;
@@ -4665,7 +4666,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		boolean allowDuplicates = false;
 		// Re-use the atLimit and algorithm for the input optimum
 		ComplexFilterScore newFilterScore = new ComplexFilterScore(max.r, currentOptimum.atLimit,
-				currentOptimum.algorithm, currentOptimum.time);
+				currentOptimum.algorithm, currentOptimum.time, algorithm, analysisStopWatch.getTime());
 		addBestFilter(type, allowDuplicates, newFilterScore);
 
 		// Add spacer at end of each result set
@@ -5811,6 +5812,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		char[] atLimit;
 		String algorithm;
 		long time;
+		String paramAlgorithm;
+		long paramTime;
 
 		private ComplexFilterScore(FilterScoreResult r, boolean allSameType, char[] atLimit, int index, long time,
 				ClassificationResult r2, int size, int[] combinations, boolean[] enable)
@@ -5831,11 +5834,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this(r, allSameType, null, index, time, r2, size, combinations, enable);
 		}
 
-		public ComplexFilterScore(FilterScoreResult r, char[] atLimit, String algorithm, long time)
+		public ComplexFilterScore(FilterScoreResult r, char[] atLimit, String algorithm, long time,
+				String paramAlgorithm, long paramTime)
 		{
 			// This may be used in comparisons of different type so set allSameType to false
 			this(r, false, atLimit, 0, time, null, 0, null, null);
 			this.algorithm = algorithm;
+			this.paramAlgorithm = paramAlgorithm;
+			this.paramTime = paramTime;
 		}
 
 		public DirectFilter getFilter()
@@ -5886,6 +5892,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			for (int i = 0; i < atLimit.length; i++)
 				sb.append(atLimitString(i));
 			return sb.toString();
+		}
+
+		String getParamAlgorithm()
+		{
+			return (paramAlgorithm == null) ? "" : paramAlgorithm;
 		}
 	}
 
@@ -7269,7 +7280,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		// New smart filter support
 		final FitConfiguration fitConfig = config.getFitConfiguration();
-		fitConfig.setDirectFilter(best.filter);
+		fitConfig.setDirectFilter(best.getFilter());
 
 		if (fitConfig.isComputeResiduals())
 		{
