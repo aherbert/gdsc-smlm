@@ -197,7 +197,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static boolean scoreAnalysis = true;
 	private final static String[] COMPONENT_ANALYSIS = { "None", "Best Ranked", "Ranked", "Best All", "All" };
 	private static int componentAnalysis = 3;
-	
+
 	private final static String[] EVOLVE = { "None", "Genetic Algorithm", "Range Search", "Enrichment Search",
 			"Step Search" };
 	private static int evolve = 0;
@@ -210,11 +210,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int seedSize = 5000;
 	private static double enrichmentFraction = 0.2;
 	private static double enrichmentPadding = 0.1;
-		
+
 	private final static String[] SEARCH = { "Range Search", "Enrichment Search", "Step Search", "Enumerate" };
 	private static int searchParam = 3;
 	private static boolean repeatSearch = false;
-		private static int pRangeSearchWidth = 2;
+	private static int pRangeSearchWidth = 2;
 	private static double pRangeSearchReduce = 0.3;
 	private static int pMaxIterations = 30;
 	private static int pRefinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
@@ -223,7 +223,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double pEnrichmentFraction = 0.2;
 	private static double pEnrichmentPadding = 0.1;
 	private static int pConvergedCount = 2;
-	
+
 	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
 	private static HashMap<Integer, double[]> stepSizeMap = new HashMap<Integer, double[]>();
 
@@ -248,6 +248,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int iterationMaxIterations = 10;
 	private static double iterationMinRangeReduction = 0.2;
 	private static int iterationMinRangeReductionIteration = 5;
+	private static boolean iterationConvergeBeforeRefit = false;
 
 	private static String resultsTitle;
 	private String resultsPrefix, resultsPrefix2, limitFailCount;
@@ -796,7 +797,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// Run the benchmark fit once interactively, keep the instance
 		BenchmarkSpotFit fit = new BenchmarkSpotFit();
 		// Provide ability to skip this step if the fitting has already been done.
-		// It must have been done with the default multi-path filter.
+		// It must have been done with the default multi-path filter for consistency
+		// when re-optimising with different settings (i.e. do not start from a filter
+		// than has been optimised before)
 		if (fit.resetMultiPathFilter() || invalidBenchmarkSpotFitResults(true))
 		{
 			fit.run(null);
@@ -843,9 +846,47 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		IterationConvergenceChecker checker = new IterationConvergenceChecker(current);
 
 		// Iterate ...
-		boolean converged = false;
-		while (!converged)
+		boolean outerConverged = false;
+		int outerIteration = 1;
+		double outerRangeReduction = 1;
+		while (!outerConverged)
 		{
+			if (iterationConvergeBeforeRefit)
+			{
+				// Optional inner loop so that the non-filter and filter parameters converge
+				// before a refit
+				boolean innerConverged = false;
+				int innerIteration = 0;
+				double innerRangeReduction = 1;
+				if (iterationMinRangeReduction < 1)
+				{
+					// Linear interpolate down to the min range reduction
+					innerRangeReduction = Maths.max(iterationMinRangeReduction, Maths.interpolateY(0, 1,
+							iterationMinRangeReductionIteration, iterationMinRangeReduction, innerIteration++));
+					// This would make the range too small...
+					//innerRangeReduction *= outerRangeReduction;
+				}
+				while (!innerConverged)
+				{
+					ComplexFilterScore previous = current;
+					// Re-use the filters as the user may be loading a custom set.
+					current = analyse(filterSets, current, innerRangeReduction);
+					if (current == null)
+						break;
+					double[] previousParameters = createParameters();
+					current = analyseParameters(current, innerRangeReduction);
+					if (current == null)
+						return;
+					double[] currentParameters = createParameters();
+
+					innerConverged = checker.converged(previous, current, previousParameters, currentParameters);
+
+				}
+				// Check if we can continue (e.g. not max iterations or escape pressed) 
+				if (!checker.canContinue)
+					break;
+			}
+
 			// Do the fit (using the current optimum filter)
 			fit.run(current.r.filter, residualsThreshold, failCount, duplicateDistance);
 			if (invalidBenchmarkSpotFitResults(false))
@@ -853,33 +894,28 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			if (!loadFitResults())
 				return;
 
-			// Optimise the filter again.
-			// Re-use the filters as the user may be loading a custom set.
-			ComplexFilterScore previous = current;
-			double rangeReduction = 1;
+			// Reduce the range over which the filter parameters are searched. Note that this range 
+			// is centred around the current optimum.
 			if (iterationMinRangeReduction < 1)
 			{
 				// Linear interpolate down to the min range reduction
-				// Add 1 to the iterations as this is the second call to analyse
-				rangeReduction = Maths.max(iterationMinRangeReduction, Maths.interpolateY(0, 1,
-						iterationMinRangeReductionIteration, iterationMinRangeReduction, checker.getIterations() + 1));
+				outerRangeReduction = Maths.max(iterationMinRangeReduction, Maths.interpolateY(0, 1,
+						iterationMinRangeReductionIteration, iterationMinRangeReduction, outerIteration++));
 			}
 
-			// TODO - Add optional inner loop so that the non-filter and filter parameters converge
-			// before a refit
+			// Optimise the filter again.
+			ComplexFilterScore previous = current;
+			// Re-use the filters as the user may be loading a custom set.
+			current = analyse(filterSets, current, outerRangeReduction);
+			if (current == null)
+				break;
+			double[] previousParameters = createParameters();
+			current = analyseParameters(current, outerRangeReduction);
+			if (current == null)
+				return;
+			double[] currentParameters = createParameters();
 
-			{
-				current = analyse(filterSets, current, rangeReduction);
-				if (current == null)
-					break;
-				double[] previousParameters = createParameters();
-				current = analyseParameters(current, rangeReduction);
-				if (current == null)
-					return;
-				double[] currentParameters = createParameters();
-
-				converged = checker.converged(previous, current, previousParameters, currentParameters);
-			}
+			outerConverged = checker.converged(previous, current, previousParameters, currentParameters);
 		}
 
 		if (current != null)
@@ -2056,6 +2092,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		gd.addMessage("Configure how the parameter range is updated per iteration:");
 		gd.addSlider("Min_range_reduction", 0, 1, iterationMinRangeReduction);
 		gd.addSlider("Min_range_reduction_iteration", 1, 10, iterationMinRangeReductionIteration);
+		gd.addCheckbox("Converge_before_refit", iterationConvergeBeforeRefit);
 
 		gd.showDialog();
 
@@ -2069,6 +2106,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		iterationMaxIterations = (int) gd.getNextNumber();
 		iterationMinRangeReduction = Math.abs(gd.getNextNumber());
 		iterationMinRangeReductionIteration = (int) Math.abs(gd.getNextNumber());
+		iterationConvergeBeforeRefit = gd.getNextBoolean();
 
 		return true;
 	}
@@ -4170,7 +4208,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 *            the range reduction
 	 * @return the best filter
 	 */
-	private ComplexFilterScore parameterAnalysis(boolean nonInteractive, ComplexFilterScore currentOptimum, double rangeReduction)
+	private ComplexFilterScore parameterAnalysis(boolean nonInteractive, ComplexFilterScore currentOptimum,
+			double rangeReduction)
 	{
 		this.ga_resultsList = resultsList;
 
@@ -4660,7 +4699,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (iterationStopWatch != null)
 			iterationStopWatch.resume();
 	}
-	
+
 	private void pauseParameterTimer()
 	{
 		parameterAnalysisStopWatch.suspend();
@@ -4676,7 +4715,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (iterationStopWatch != null)
 			iterationStopWatch.resume();
 	}
-
 
 	private void addToResultsWindow(BufferedTextWindow tw, final String text)
 	{
@@ -6027,6 +6065,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		InterruptChecker scoreChecker = null;
 		InterruptConvergenceChecker filterChecker = null;
 		HashMap<Integer, ArrayList<Coordinate>> previousResults = null;
+		boolean canContinue = true;
 
 		public IterationConvergenceChecker(FilterScore current)
 		{
@@ -6056,6 +6095,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				Utils.log("STOPPED");
 				// Do not reset escape
 				// IJ.resetEscape();
+				canContinue = false;
 				return true;
 			}
 
@@ -6109,7 +6149,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		private void logConvergence(String component)
 		{
 			if (iterationMaxIterations != 0 && getIterations() >= iterationMaxIterations)
+			{
 				component = "iterations";
+				canContinue = false;
+			}
 			Utils.log("Converged on " + component);
 		}
 
