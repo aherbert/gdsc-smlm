@@ -15,6 +15,8 @@ package gdsc.smlm.results.filter;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.results.MemoryPeakResults;
@@ -54,7 +56,19 @@ public abstract class CombinedFilter extends DirectFilter
 		if (filter2 instanceof DirectFilter)
 			dfilter2 = (DirectFilter) filter2;
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#clone()
+	 */
+	@Override
+	public Filter clone()
+	{
+		// Add a reminder to implement clone
+		throw new NotImplementedException("Derived classes must clone filter1 and filter2");
+	}
+
 	@Override
 	protected String generateName()
 	{
@@ -264,16 +278,16 @@ public abstract class CombinedFilter extends DirectFilter
 	{
 		if (dfilter1 == null)
 			return 0;
-		
+
 		if (index < dfilter1.getNumberOfParameters())
 			return dfilter1.lowerBoundOrientation(index);
 
 		if (dfilter2 == null)
 			return 0;
-		
+
 		return dfilter2.lowerBoundOrientation(index - dfilter1.getNumberOfParameters());
 	}
-	
+
 	/**
 	 * Create a new combined filter from the two input filters
 	 * 

@@ -45,16 +45,22 @@ public class OrFilter extends CombinedFilter
 		// We only get here when both filters failed so we can just combine the results
 		return result1 | result2;
 	}
-	
+
 	@Override
 	public String getDescription()
 	{
 		return "Filter results using the combination of two filters. Results can pass either filter.";
 	}
-	
+
 	@Override
 	protected Filter createFilter(Filter f1, Filter f2)
 	{
 		return new OrFilter(f1, f2);
+	}
+
+	@Override
+	public Filter clone()
+	{
+		return new OrFilter(filter1.clone(), filter2.clone());
 	}
 }

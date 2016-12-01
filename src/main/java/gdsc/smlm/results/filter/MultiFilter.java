@@ -575,4 +575,15 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	{
 		return false;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#initialiseState()
+	 */
+	@Override
+	protected void initialiseState()
+	{
+		components_Width_Shift = null;
+	}
 }

@@ -1128,7 +1128,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	}
 
 	/**
-	 * Run after the filter is deserialised using XStream
+	 * Run after the filter is deserialised using XStream or cloned. Overrride this method if the filter has state that
+	 * requires resetting.
 	 */
 	protected void initialiseState()
 	{
@@ -1708,7 +1709,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	{
 		try
 		{
-			return (Filter) super.clone();
+			Filter f = (Filter) super.clone();
+			f.initialiseState();
+			return f;
 		}
 		catch (CloneNotSupportedException e)
 		{

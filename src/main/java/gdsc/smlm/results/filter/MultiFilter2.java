@@ -184,8 +184,10 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 				components1[s1++] = new MultiFilterEShiftComponent(eshift);
 			}
 
-			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1, MultiFilterWidthComponent.class);
-			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1, MultiFilterShiftComponent.class);
+			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1,
+					MultiFilterWidthComponent.class);
+			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1,
+					MultiFilterShiftComponent.class);
 
 			final MultiFilterComponent[] components4 = MultiFilter.remove(components2, components2.length,
 					MultiFilterShiftComponent.class);
@@ -204,7 +206,7 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		{
 			components = (shiftEnabled) ? components_NoWidth_Shift : components_NoWidth_NoShift;
 		}
-		
+
 		//		// This is the legacy support for all components together
 		//		this.widthEnabled = widthEnabled;
 		//		signalThreshold = (float) signal;
@@ -371,9 +373,9 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public double[] getParameters()
 	{
-		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision	};
+		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -483,7 +485,7 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	{
 		return (index >= 3) ? 1 : -1;
 	}
-	
+
 	/**
 	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
 	 * parameters. If positive then this filter has less weak parameters. If the same or the number of parameters do not
@@ -510,7 +512,7 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
     		compareMax(precision, o.precision);
 		//@formatter:on
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -572,5 +574,16 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	public boolean isPrecisionUsesLocalBackground()
 	{
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#initialiseState()
+	 */
+	@Override
+	protected void initialiseState()
+	{
+		components_Width_Shift = null;
 	}
 }
