@@ -434,9 +434,11 @@ public class BenchmarkSpotFilter implements PlugIn
 				while (!finished)
 				{
 					Integer job = jobs.take();
-					if (job == null || job.intValue() < 0 || finished)
+					if (job == null || job.intValue() < 0)
 						break;
-					run(job.intValue());
+					if (!finished)
+						// Only run if not finished to allow queue to be emptied
+						run(job.intValue());
 				}
 			}
 			catch (InterruptedException e)
@@ -605,9 +607,11 @@ public class BenchmarkSpotFilter implements PlugIn
 				while (!finished)
 				{
 					Integer job = jobs.take();
-					if (job == null || job.intValue() < 0 || finished)
+					if (job == null || job.intValue() < 0)
 						break;
-					run(job.intValue());
+					if (!finished)
+						// Only run if not finished to allow queue to be emptied
+						run(job.intValue());
 				}
 			}
 			catch (InterruptedException e)
@@ -735,7 +739,6 @@ public class BenchmarkSpotFilter implements PlugIn
 				Arrays.fill(actualWeight, 1);
 				Arrays.fill(spotsWeight, 1);
 			}
-			
 
 			ScoredSpot[] scoredSpots = new ScoredSpot[spots.length];
 			FractionClassificationResult result;

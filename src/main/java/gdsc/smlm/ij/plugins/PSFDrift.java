@@ -182,9 +182,11 @@ public class PSFDrift implements PlugIn
 				while (!finished)
 				{
 					Job job = jobs.take();
-					if (job == null || job.index < 0 || finished)
+					if (job == null || job.index < 0)
 						break;
-					run(job);
+					if (!finished)
+						// Only run if not finished to allow queue to be emptied
+						run(job);
 				}
 			}
 			catch (InterruptedException e)
@@ -413,7 +415,7 @@ public class PSFDrift implements PlugIn
 			showHWHM(titles);
 			return;
 		}
-		
+
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage("Select the input PSF image");
 		gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
@@ -431,7 +433,7 @@ public class PSFDrift implements PlugIn
 		gd.addChoice("Fit_function", functionNames, functionNames[fitConfig.getFitFunction().ordinal()]);
 		// We need these to set bounds for any bounded fitters
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());		
+		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getWidthFactor());
 		gd.addCheckbox("Offset_fit", offsetFitting);
 		gd.addNumericField("Start_offset", startOffset, 3);
 		gd.addCheckbox("Include_CoM_fit", comFitting);
@@ -1087,14 +1089,14 @@ public class PSFDrift implements PlugIn
 			IJ.error(TITLE, "No PSF settings for image: " + title);
 			return;
 		}
-		
+
 		int size = imp.getStackSize();
 		ImagePSFModel psf = createImagePSF(1, size);
-		
+
 		double[] w0 = psf.getAllHWHM0();
 		double[] w1 = psf.getAllHWHM1();
 		double[] slice = Utils.newArray(w0.length, 1, 1.0);
-		
+
 		// Widths are in pixels
 		String title = TITLE + " HWHM";
 		Plot plot = new Plot(title, "Slice", "HWHM (px)");

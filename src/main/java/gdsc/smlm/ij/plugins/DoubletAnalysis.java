@@ -101,7 +101,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 * optimised concurrently with the fail count and the filter. It is left within the codebase in case
 	 * it is useful in the future.
 	 */
-	
+
 	private static final String TITLE = "Doublet Analysis";
 	private static FitConfiguration fitConfig, filterFitConfig;
 	private static FitEngineConfiguration config;
@@ -505,9 +505,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				while (!finished)
 				{
 					Integer job = jobs.take();
-					if (job == null || job.intValue() < 0 || finished)
+					if (job == null || job.intValue() < 0)
 						break;
-					run(job.intValue());
+					if (!finished)
+						// Only run if not finished to allow queue to be emptied
+						run(job.intValue());
 				}
 			}
 			catch (InterruptedException e)
@@ -2786,7 +2788,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(SELECTION_CRITERIA[selectionCriteria]).append('\t');
 		if (filterFitConfig.isSmartFilter())
 		{
-			sb.append(filterFitConfig.getSmartFilterName()).append("\t\t\t\t\t\t\t\t");			
+			sb.append(filterFitConfig.getSmartFilterName()).append("\t\t\t\t\t\t\t\t");
 		}
 		else
 		{

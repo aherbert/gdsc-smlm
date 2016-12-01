@@ -238,9 +238,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				while (!finished)
 				{
 					Integer job = jobs.take();
-					if (job == null || job.intValue() < 0 || finished)
+					if (job == null || job.intValue() < 0)
 						break;
-					run(job.intValue());
+					if (!finished)
+						// Only run if not finished to allow queue to be emptied
+						run(job.intValue());
 				}
 			}
 			catch (InterruptedException e)
