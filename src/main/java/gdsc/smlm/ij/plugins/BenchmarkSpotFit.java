@@ -303,6 +303,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static Calibration cal;
 	static MultiPathFilter multiFilter;
 	private static final MultiPathFilter defaultMultiFilter;
+	private static final double[] defaultParameters;
 	private static MultiFilter2 minimalFilter;;
 
 	static
@@ -336,11 +337,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		minimalFilter = FitWorker.createMinimalFilter();
 
 		final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
-		
+
 		// We might as well use the doublet fits given we will compute them.
 		final double residualsThreshold = 0.4;
 		multiFilter = new MultiPathFilter(primaryFilter, minimalFilter, residualsThreshold);
 		defaultMultiFilter = multiFilter;
+		defaultParameters = createParameters();
 	}
 
 	private static double fractionPositives = 100;
@@ -653,12 +655,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		{
 			try
 			{
+				// Constantly take jobs from the queue until a termination job is found 
 				while (!finished)
 				{
 					Integer job = jobs.take();
-					if (job == null || job.intValue() < 0 || finished)
+					if (job == null || job.intValue() < 0)
 						break;
-					run(job.intValue());
+					if (!finished)
+						run(job.intValue());
 				}
 			}
 			catch (InterruptedException e)
@@ -1335,7 +1339,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		if (Utils.isInterrupted())
 		{
-			IJ.showStatus("Aborted");
 			return;
 		}
 
@@ -2884,16 +2887,36 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	}
 
 	/**
-	 * Reset the multi path filter. This may have been updated when copying benchmark filter settings or by the user
-	 * within the dialog.
+	 * Reset the multi path filter and non-filter parameters. This may have been updated when copying benchmark filter
+	 * settings or by the user within the dialog.
 	 *
 	 * @return true, if a reset was required
 	 */
 	public boolean resetMultiPathFilter()
 	{
 		if (defaultMultiFilter.equals(multiFilter))
-			return false;
+		{
+			if (equals(createParameters(), defaultParameters))
+				return false;
+		}
 		multiFilter = defaultMultiFilter;
+		config.setFailuresLimit((int) defaultParameters[0]);
+		// Note we are not resetting the residuals threshold in the config.
+		// Only the threshold in the multi-filter matters.
+		fitConfig.setDuplicateDistance(defaultParameters[1]);
 		return true;
+	}
+
+	private boolean equals(double[] currentParameters, double[] previousParameters)
+	{
+		for (int i = 0; i < previousParameters.length; i++)
+			if (previousParameters[i] != currentParameters[i])
+				return false;
+		return true;
+	}
+
+	private static double[] createParameters()
+	{
+		return new double[] { config.getFailuresLimit(), fitConfig.getDuplicateDistance() };
 	}
 }

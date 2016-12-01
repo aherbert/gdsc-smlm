@@ -803,6 +803,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (fit.resetMultiPathFilter() || invalidBenchmarkSpotFitResults(true))
 		{
 			fit.run(null);
+			resetParametersFromFitting();
 		}
 		if (invalidBenchmarkSpotFitResults(false))
 			return;
@@ -915,7 +916,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				return;
 			double[] currentParameters = createParameters();
 
-			outerConverged = checker.converged("System", previous, current, previousParameters, currentParameters);
+			outerConverged = checker.converged("Fit+Filter", previous, current, previousParameters, currentParameters);
 		}
 
 		if (current != null)
@@ -931,6 +932,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		IJ.log("Iteration analysis time : " + DurationFormatUtils.formatDurationHMS(time));
 
 		IJ.showStatus("Finished");
+	}
+
+	private void resetParametersFromFitting()
+	{
+		failCount = BenchmarkSpotFit.config.getFailuresLimit();
+		duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
+		residualsThreshold = sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
+				? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
 	}
 
 	private double[] createParameters()
@@ -1076,10 +1085,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					filters.add((DirectFilter) f);
 					FilterSet filterSet = new FilterSet(filters);
 					filterSets.add(filterSet);
-					failCount = BenchmarkSpotFit.config.getFailuresLimit();
-					duplicateDistance = BenchmarkSpotFit.fitConfig.getDuplicateDistance();
-					residualsThreshold = sResidualsThreshold = (BenchmarkSpotFit.computeDoublets)
-							? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
+					resetParametersFromFitting();
 					createResultsPrefix2();
 					return filterSets;
 				}
@@ -6153,7 +6159,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				component = "iterations";
 				canContinue = false;
 			}
-			Utils.log(prefix + ": Converged on " + component);
+			Utils.log(prefix + " converged on " + component);
 		}
 
 		public int getIterations()
