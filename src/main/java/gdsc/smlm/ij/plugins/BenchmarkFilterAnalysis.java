@@ -217,7 +217,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int pRangeSearchWidth = 2;
 	private static double pRangeSearchReduce = 0.3;
 	private static int pMaxIterations = 30;
-	private static int pRefinementMode = SearchSpace.RefinementMode.SINGLE_DIMENSION.ordinal();
+	private static int pRefinementMode = SearchSpace.RefinementMode.MULTI_DIMENSION.ordinal();
 	private static int pEnrichmentSamples = 500;
 	private static int pSeedSize = 500;
 	private static double pEnrichmentFraction = 0.2;
@@ -4029,8 +4029,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 			else
 			{
-				// Replace
-				if (newFilterScore.compareTo(filterScore) < 0)
+				// Replace (even if the same so that the latest results settings are stored)
+				if (newFilterScore.compareTo(filterScore) <= 0)
 				{
 					bestFilter.put(type, newFilterScore);
 					//filterScore.update(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
@@ -4681,8 +4681,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				resultsWindow.append("");
 		}
 
-		if (newFilterScore.compareTo(currentOptimum) < 0)
+		if (newFilterScore.compareTo(currentOptimum) <= 0)
 			return newFilterScore;
+		else
+		{
+			// Update the algorithm and time
+			currentOptimum.paramAlgorithm = algorithm;
+			currentOptimum.paramTime = analysisStopWatch.getTime();			
+		}
 		return currentOptimum;
 	}
 
