@@ -431,7 +431,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			try
 			{
-				while (!finished)
+				while (true)
 				{
 					Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)
@@ -604,7 +604,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			try
 			{
-				while (!finished)
+				while (true)
 				{
 					Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)

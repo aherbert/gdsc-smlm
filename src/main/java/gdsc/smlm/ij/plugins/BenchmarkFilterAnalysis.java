@@ -411,13 +411,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			try
 			{
-				// Constantly take jobs from the queue until a termination job is found 
 				while (true)
 				{
 					Job job = jobs.take();
 					if (job == null || job.entry == null)
 						break;
 					if (!finished)
+						// Only run jobs when not finished. This allows the queue to be emptied.
 						run(job);
 				}
 			}
@@ -2651,10 +2651,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				sb.append(fs.algorithm);
 				sb.append('\t');
 				sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.time));
-				sb.append('\t');
-				sb.append(fs.getParamAlgorithm());
-				sb.append('\t');
-				sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.paramTime));
+				if (fs.paramTime != 0)
+				{
+					sb.append('\t');
+					sb.append(fs.getParamAlgorithm());
+					sb.append('\t');
+					sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.paramTime));
+				}
+				else
+					sb.append("\t\t");
 				text = sb.toString();
 
 				if (isHeadless)
@@ -4687,7 +4692,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			// Update the algorithm and time
 			currentOptimum.paramAlgorithm = algorithm;
-			currentOptimum.paramTime = analysisStopWatch.getTime();			
+			currentOptimum.paramTime = analysisStopWatch.getTime();
 		}
 		return currentOptimum;
 	}
@@ -6298,13 +6303,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			try
 			{
-				// Constantly take jobs from the queue until a termination job is found 
 				while (true)
 				{
 					ScoreJob job = jobs.take();
 					if (job == null || job.index == -1)
 						break;
 					if (!finished)
+						// Only run jobs when not finished. This allows the queue to be emptied.
 						run(job);
 				}
 			}
@@ -6366,13 +6371,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		{
 			try
 			{
-				// Constantly take jobs from the queue until a termination job is found 
 				while (true)
 				{
 					ParameterScoreJob job = jobs.take();
 					if (job == null || job.index == -1)
 						break;
 					if (!finished)
+						// Only run jobs when not finished. This allows the queue to be emptied.
 						run(job);
 				}
 			}

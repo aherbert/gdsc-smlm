@@ -179,7 +179,7 @@ public class PSFDrift implements PlugIn
 		{
 			try
 			{
-				while (!finished)
+				while (true)
 				{
 					Job job = jobs.take();
 					if (job == null || job.index < 0)

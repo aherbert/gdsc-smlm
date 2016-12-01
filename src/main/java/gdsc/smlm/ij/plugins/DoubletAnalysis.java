@@ -502,7 +502,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		{
 			try
 			{
-				while (!finished)
+				while (true)
 				{
 					Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)

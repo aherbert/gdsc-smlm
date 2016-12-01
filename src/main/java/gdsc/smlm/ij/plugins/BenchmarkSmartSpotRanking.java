@@ -235,7 +235,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		{
 			try
 			{
-				while (!finished)
+				while (true)
 				{
 					Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)

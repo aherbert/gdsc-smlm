@@ -655,13 +655,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		{
 			try
 			{
-				// Constantly take jobs from the queue until a termination job is found 
-				while (!finished)
+				while (true)
 				{
 					Integer job = jobs.take();
 					if (job == null || job.intValue() < 0)
 						break;
 					if (!finished)
+						// Only run jobs when not finished. This allows the queue to be emptied.
 						run(job.intValue());
 				}
 			}
