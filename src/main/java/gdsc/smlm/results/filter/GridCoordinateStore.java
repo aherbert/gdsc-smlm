@@ -345,6 +345,19 @@ public class GridCoordinateStore implements CoordinateStore
 		// So store a timestamp for the clear and we refresh each list when we next use it.
 		timestamp++;
 		queue.size = 0;
+		
+		// Reset after an entire cycle of timestamps
+		if (timestamp == 0)
+		{
+			for (int x = 0; x < xBlocks; x++)
+			{
+				final CoordinateList[] list = grid[x];
+				for (int y = 0; y < yBlocks; y++)
+				{
+					list[y].clear();
+				}
+			}
+		}
 	}
 
 	/*
