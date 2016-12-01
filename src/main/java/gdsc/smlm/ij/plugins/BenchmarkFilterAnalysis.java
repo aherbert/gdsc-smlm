@@ -879,7 +879,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						return;
 					double[] currentParameters = createParameters();
 
-					innerConverged = checker.converged(previous, current, previousParameters, currentParameters);
+					innerConverged = checker.converged("Filter", previous, current, previousParameters, currentParameters);
 
 				}
 				// Check if we can continue (e.g. not max iterations or escape pressed) 
@@ -915,7 +915,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				return;
 			double[] currentParameters = createParameters();
 
-			outerConverged = checker.converged(previous, current, previousParameters, currentParameters);
+			outerConverged = checker.converged("System", previous, current, previousParameters, currentParameters);
 		}
 
 		if (current != null)
@@ -6086,7 +6086,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					.getCoordinates(createResults(null, (DirectFilter) current.filter, false).getResults());
 		}
 
-		public boolean converged(FilterScore previous, FilterScore current, double[] previousParameters,
+		public boolean converged(String prefix, FilterScore previous, FilterScore current, double[] previousParameters,
 				double[] currentParameters)
 		{
 			// Stop if interrupted
@@ -6112,13 +6112,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (filterChecker.converged(p, c))
 			{
-				logConvergence("filter parameters");
+				logConvergence(prefix, "filter parameters");
 				return true;
 			}
 			// Directly call the method with the scores 
 			if (scoreChecker.converged(p.score, c.score))
 			{
-				logConvergence("score");
+				logConvergence(prefix, "score");
 				return true;
 			}
 
@@ -6129,7 +6129,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						iterationCompareDistance);
 				if (r.getJaccard() == 1)
 				{
-					logConvergence("results coordinates");
+					logConvergence(prefix, "results coordinates");
 					return true;
 				}
 				previousResults = currentResults;
@@ -6146,14 +6146,14 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return true;
 		}
 
-		private void logConvergence(String component)
+		private void logConvergence(String prefix, String component)
 		{
 			if (iterationMaxIterations != 0 && getIterations() >= iterationMaxIterations)
 			{
 				component = "iterations";
 				canContinue = false;
 			}
-			Utils.log("Converged on " + component);
+			Utils.log(prefix + ": Converged on " + component);
 		}
 
 		public int getIterations()
