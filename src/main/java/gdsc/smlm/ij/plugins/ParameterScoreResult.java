@@ -26,7 +26,7 @@ public class ParameterScoreResult
 	{
 		this.score = score;
 		this.criteria = criteria;
-		this.parameters=parameters;
+		this.parameters = parameters;
 		this.text = text;
 	}
 }
