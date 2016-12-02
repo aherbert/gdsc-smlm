@@ -6975,7 +6975,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			double residualsThreshold = parameters[1];
 			double duplicateDistance = parameters[2];
 
-			System.out.println(Arrays.toString(parameters));
+			//System.out.println(Arrays.toString(parameters));
 
 			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
 			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
