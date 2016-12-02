@@ -1780,29 +1780,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		boolean showOptimiseFilter = (optimiseParameters & FLAG_OPTIMISE_FILTER) != 0;
 		boolean showOptimiseParams = (optimiseParameters & FLAG_OPTIMISE_PARAMS) != 0;
 
-		double signal = simulationParameters.minSignal;
-		if (simulationParameters.maxSignal > signal)
-		{
-			signal += simulationParameters.maxSignal;
-			signal *= 0.5;
-		}
-		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		double pLSE = PeakResult.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		String msg = String.format(
-				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
-				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE, notDuplicateCount,
-				newResultCount, (100.0 * notDuplicateCount) / newResultCount);
-
-		FilterResult best = getBestResult();
-		if (best != null)
-		{
-			msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
-		}
-		gd.addMessage(msg);
+		addSimulationData(gd);
 
 		// TODO - Make minimal filter configurable?
 
@@ -1916,6 +1894,33 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		duplicateDistance = dd;
 
 		return true;
+	}
+
+	private void addSimulationData(GenericDialog gd)
+	{
+		double signal = simulationParameters.minSignal;
+		if (simulationParameters.maxSignal > signal)
+		{
+			signal += simulationParameters.maxSignal;
+			signal *= 0.5;
+		}
+		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
+				simulationParameters.b2, simulationParameters.emCCD);
+		double pLSE = PeakResult.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
+				simulationParameters.b2, simulationParameters.emCCD);
+		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
+				simulationParameters.b2, simulationParameters.emCCD);
+		String msg = String.format(
+				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
+				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE, notDuplicateCount,
+				newResultCount, (100.0 * notDuplicateCount) / newResultCount);
+
+		FilterResult best = getBestResult();
+		if (best != null)
+		{
+			msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
+		}
+		gd.addMessage(msg);
 	}
 
 	private boolean selectTableColumns()
@@ -2123,27 +2128,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		double signal = simulationParameters.minSignal;
-		if (simulationParameters.maxSignal > signal)
-		{
-			signal += simulationParameters.maxSignal;
-			signal *= 0.5;
-		}
-		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		double pLSE = PeakResult.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		String msg = String.format(
-				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE);
-		FilterResult best = getBestResult();
-		if (best != null)
-		{
-			msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
-		}
-		gd.addMessage(msg);
+		addSimulationData(gd);
 
 		gd.addCheckbox("Show_table", showResultsTable);
 		gd.addCheckbox("Show_summary", showSummaryTable);
@@ -2219,27 +2204,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		double signal = simulationParameters.minSignal;
-		if (simulationParameters.maxSignal > signal)
-		{
-			signal += simulationParameters.maxSignal;
-			signal *= 0.5;
-		}
-		double pSignal = CreateData.getPrecisionN(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		double pLSE = PeakResult.getPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		double pMLE = PeakResult.getMLPrecisionX(simulationParameters.a, simulationParameters.s, signal,
-				simulationParameters.b2, simulationParameters.emCCD);
-		String msg = String.format(
-				"Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\nExpected X precision = %.3f (LSE), %.3f (MLE)",
-				fittedResults, totalResults, matches, maxUniqueId, signal, pSignal, pLSE, pMLE);
-		FilterResult best = getBestResult();
-		if (best != null)
-		{
-			msg += String.format("\nCurrent Best=%s, FailCount=%d", Utils.rounded(best.score), best.failCount);
-		}
-		gd.addMessage(msg);
+		addSimulationData(gd);
 
 		// Get the last scored filter or default to the best filter
 		getScoreFilter();
@@ -2650,10 +2615,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						break;
 				}
 
-				sb.append('\t');
-				sb.append(fs.algorithm);
-				sb.append('\t');
-				sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.time));
+				if (fs.time != 0)
+				{
+					sb.append('\t');
+					sb.append(fs.algorithm);
+					sb.append('\t');
+					sb.append(org.apache.commons.lang3.time.DurationFormatUtils.formatDurationHMS(fs.time));
+				}
+				else
+					sb.append("\t\t");
+
 				if (fs.paramTime != 0)
 				{
 					sb.append('\t');
