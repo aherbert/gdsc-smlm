@@ -807,6 +807,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (fit.resetMultiPathFilter() || invalidBenchmarkSpotFitResults(true))
 		{
 			fit.run(null);
+			if (!fit.finished)
+				// The plugin did not complete
+				return;
 			resetParametersFromFitting();
 		}
 		if (invalidBenchmarkSpotFitResults(false))
@@ -3462,7 +3465,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					if (nonInteractive)
 						filters.add(currentOptimum);
 					// The GA does not use the min interval grid so sample without rounding
-					double[][] sample = SearchSpace.sampleWithoutRounding(dimensions, populationSize - filters.size(), null);
+					double[][] sample = SearchSpace.sampleWithoutRounding(dimensions, populationSize - filters.size(),
+							null);
 					filters.addAll(searchSpaceToFilters(sample));
 				}
 				ga_population = new Population<FilterScore>(filters);

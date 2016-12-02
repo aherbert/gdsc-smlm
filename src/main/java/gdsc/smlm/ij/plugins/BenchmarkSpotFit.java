@@ -370,6 +370,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private boolean extraOptions = false;
 	// Flag used when being called by another plugin to suppress dialogs
 	private boolean silent = false;
+	// Flag used when being called by another plugin to idicate success
+	boolean finished;
 
 	private static TextWindow summaryTable = null;
 
@@ -951,6 +953,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		extraOptions = Utils.isExtraOptions();
 
 		silent = false;
+		finished = false;
 		if (!initialise())
 			return;
 
@@ -958,6 +961,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			return;
 
 		run();
+		finished = true;
 	}
 
 	private boolean initialise()
