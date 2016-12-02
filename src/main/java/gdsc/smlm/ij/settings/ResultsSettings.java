@@ -3,7 +3,6 @@ package gdsc.smlm.ij.settings;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsTable;
-import gdsc.smlm.model.DiffusionType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
