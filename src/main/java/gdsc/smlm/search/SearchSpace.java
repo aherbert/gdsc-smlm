@@ -27,6 +27,9 @@ import gdsc.core.logging.TrackProgress;
  */
 public class SearchSpace
 {
+	/** Used to ignore rounding values */
+	private static NonRoundingDimension nonRoundingDimension = new NonRoundingDimension();
+
 	private int iteration = 0;
 	private double[][] searchSpace;
 	private double[][] seed;
@@ -219,7 +222,8 @@ public class SearchSpace
 			{
 				dimensions[i].setCentre(p[i]);
 				// In-case the seed was not on the min interval grid
-				p[i] = dimensions[i].getCentre();
+				// Should not happen as we now map the seed to the min interval
+				//p[i] = dimensions[i].getCentre();
 			}
 		}
 
@@ -244,6 +248,8 @@ public class SearchSpace
 				min[size] = dimensions[i].getMin();
 				max[size] = dimensions[i].getMax();
 				indices[size++] = i;
+				if (!dimensions[i].canRound())
+					dimensions[i] = nonRoundingDimension;
 			}
 		}
 
@@ -255,24 +261,20 @@ public class SearchSpace
 			// Check the data is within the limits for active dimensions
 			for (int j = 0; j < size; j++)
 			{
-				final double value = p[indices[j]];
+				// Round to dimension interval
+				final int k = indices[j];
+				final double value = dimensions[k].round(p[k]);
 				if (value < min[j])
-				{
-					// Check with rounding
-					if (dimensions[indices[j]].round(value) < min[j])
-						return false;
-				}
-				if (value > max[j])
-				{
-					// Check with rounding
-					if (dimensions[indices[j]].round(value) > max[j])
-						return false;
-				}
+					return false;
+				else if (value > max[j])
+					return false;
+				p[k] = value;
 			}
 		}
 
 		searchSpace = seed;
 		return true;
+
 	}
 
 	/**
@@ -1012,7 +1014,7 @@ public class SearchSpace
 
 	/**
 	 * Sample uniformly from the given dimensions. The lower and upper bounds of active dimensions are used to define
-	 * the search space.
+	 * the search space. The min interval of each dimension is respected.
 	 * <p>
 	 * If the input generator array is null, the first element is null, or the vector length is the wrong size then a
 	 * new HaltonSequenceGenerator is used. Input an array of length 1 to obtain the default generator allowing calling
@@ -1024,7 +1026,7 @@ public class SearchSpace
 	 *            the samples
 	 * @param generator
 	 *            the generator
-	 * @return the double[][]
+	 * @return the sample
 	 */
 	public static double[][] sample(Dimension[] dimensions, int samples, RandomVectorGenerator[] generator)
 	{
@@ -1032,6 +1034,115 @@ public class SearchSpace
 			return null;
 		// Count the number of active dimensions
 		final int[] indices = new int[dimensions.length];
+		final Dimension[] dimensions2 = new Dimension[dimensions.length];
+		int size = 0;
+		final double[] centre = new double[dimensions.length];
+		final double[] lower = new double[dimensions.length];
+		final double[] range = new double[dimensions.length];
+		boolean requireRounding = false;
+		for (int i = 0; i < dimensions.length; i++)
+		{
+			centre[i] = dimensions[i].getCentre();
+			if (dimensions[i].isActive())
+			{
+				lower[size] = dimensions[i].getLower();
+				range[size] = (dimensions[i].getUpper() - lower[size]);
+				if (dimensions[i].canRound())
+					requireRounding = true;
+				else
+					// Ignore rounding functionality
+					dimensions[i] = nonRoundingDimension;
+				dimensions2[size] = dimensions[i];
+				indices[size++] = i;
+			}
+		}
+
+		if (requireRounding)
+			return sampleWithRounding(samples, generator, indices, dimensions2, size, centre, lower, range);
+
+		return sampleWithoutRounding(samples, generator, indices, size, centre, lower, range);
+	}
+
+	/**
+	 * Sample with rounding. The input dimensions are used purely for rounding. The limits of the range have been
+	 * precomputed.
+	 *
+	 * @param samples
+	 *            the samples
+	 * @param generator
+	 *            the generator
+	 * @param indices
+	 *            the indices
+	 * @param dimensions
+	 *            the dimensions
+	 * @param size
+	 *            the size
+	 * @param centre
+	 *            the centre
+	 * @param lower
+	 *            the lower
+	 * @param range
+	 *            the range
+	 * @return the sample
+	 */
+	private static double[][] sampleWithRounding(int samples, RandomVectorGenerator[] generator, final int[] indices,
+			final Dimension[] dimensions, int size, final double[] centre, final double[] lower, final double[] range)
+	{
+		RandomVectorGenerator g = createGenerator(generator, size);
+
+		// Generate random points
+		final double[][] searchSpace = new double[samples][];
+		for (int i = 0; i < samples; i++)
+		{
+			final double[] r = g.nextVector();
+			final double[] p = centre.clone();
+			for (int j = 0; j < size; j++)
+			{
+				// Ensure the min interval is respected
+				p[indices[j]] = dimensions[j].round(lower[j] + r[j] * range[j]);
+			}
+			searchSpace[i] = p;
+		}
+		return searchSpace;
+	}
+
+	private static RandomVectorGenerator createGenerator(RandomVectorGenerator[] generator, int size)
+	{
+		// Create the generator
+		if (generator == null)
+			generator = new RandomVectorGenerator[1];
+		RandomVectorGenerator g = generator[0];
+		if (g == null || g.nextVector().length != size)
+		{
+			generator[0] = g = new HaltonSequenceGenerator(size);
+		}
+		return g;
+	}
+
+	/**
+	 * Sample uniformly from the given dimensions. The lower and upper bounds of active dimensions are used to define
+	 * the search space. The min interval of each dimension is not respected, i.e the coordinates are not rounded.
+	 * <p>
+	 * If the input generator array is null, the first element is null, or the vector length is the wrong size then a
+	 * new HaltonSequenceGenerator is used. Input an array of length 1 to obtain the default generator allowing calling
+	 * the function again to generate a different search space.
+	 *
+	 * @param dimensions
+	 *            the dimensions
+	 * @param samples
+	 *            the samples
+	 * @param generator
+	 *            the generator
+	 * @return the sample
+	 */
+	public static double[][] sampleWithoutRounding(Dimension[] dimensions, int samples,
+			RandomVectorGenerator[] generator)
+	{
+		if (samples <= 0)
+			return null;
+		// Count the number of active dimensions
+		final int[] indices = new int[dimensions.length];
+		final Dimension[] dimensions2 = new Dimension[dimensions.length];
 		int size = 0;
 		final double[] centre = new double[dimensions.length];
 		final double[] lower = new double[dimensions.length];
@@ -1043,18 +1154,18 @@ public class SearchSpace
 			{
 				lower[size] = dimensions[i].getLower();
 				range[size] = (dimensions[i].getUpper() - lower[size]);
+				dimensions2[size] = dimensions[i];
 				indices[size++] = i;
 			}
 		}
 
-		// Create the generator
-		if (generator == null)
-			generator = new RandomVectorGenerator[1];
-		RandomVectorGenerator g = generator[0];
-		if (g == null || g.nextVector().length != size)
-		{
-			generator[0] = g = new HaltonSequenceGenerator(size);
-		}
+		return sampleWithoutRounding(samples, generator, indices, size, centre, lower, range);
+	}
+
+	private static double[][] sampleWithoutRounding(int samples, RandomVectorGenerator[] generator, final int[] indices,
+			int size, final double[] centre, final double[] lower, final double[] range)
+	{
+		RandomVectorGenerator g = createGenerator(generator, size);
 
 		// Generate random points
 		final double[][] searchSpace = new double[samples][];
@@ -1063,7 +1174,10 @@ public class SearchSpace
 			final double[] r = g.nextVector();
 			final double[] p = centre.clone();
 			for (int j = 0; j < size; j++)
+			{
+				// Ensure the min interval is respected
 				p[indices[j]] = lower[j] + r[j] * range[j];
+			}
 			searchSpace[i] = p;
 		}
 		return searchSpace;
@@ -1125,6 +1239,8 @@ public class SearchSpace
 	/**
 	 * Seed the search with an initial population. This is used to determine the initial optimum and centre the search
 	 * in the search space.
+	 * <p>
+	 * Note that the parameters in the seed are mapped to the min interval of the configured dimensions by rounding.
 	 *
 	 * @param seed
 	 *            the seed

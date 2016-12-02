@@ -174,9 +174,19 @@ public class SearchDimension implements Cloneable, Dimension
 	 */
 	public double round(double value)
 	{
-		if (minIncrement != 0)
+		if (canRound())
 			return Maths.round(value, minIncrement);
 		return value;
+	}
+
+	/**
+	 * If the dimension is not active or min increment is zero no rounding is performed.
+	 * 
+	 * @see gdsc.smlm.search.Dimension#canRound()
+	 */
+	public boolean canRound()
+	{
+		return (active && minIncrement != 0);
 	}
 
 	/**

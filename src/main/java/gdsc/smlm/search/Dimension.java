@@ -89,4 +89,11 @@ public interface Dimension
 	 * @return the rounded value
 	 */
 	public double round(double value);
+	
+	/**
+	 * True if the dimension can round values.
+	 *
+	 * @return true, if can round
+	 */
+	public boolean canRound();
 }

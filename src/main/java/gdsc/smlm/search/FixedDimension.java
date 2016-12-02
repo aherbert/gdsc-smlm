@@ -159,11 +159,21 @@ public class FixedDimension implements Cloneable, Dimension
 	 */
 	public double round(double value)
 	{
-		if (active && minIncrement != 0)
+		if (canRound())
 			return Maths.round(value, minIncrement);
 		return value;
 	}
 
+	/**
+	 * If the dimension is not active or min increment is zero no rounding is performed.
+	 * 
+	 * @see gdsc.smlm.search.Dimension#canRound()
+	 */
+	public boolean canRound()
+	{
+		return (active && minIncrement != 0);
+	}
+	
 	/**
 	 * Gets the centre of the range in the dimension
 	 *
