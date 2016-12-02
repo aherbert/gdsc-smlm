@@ -19,6 +19,7 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
+import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.results.ResultsTable;
@@ -32,6 +33,7 @@ import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FileFormat;
 import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.MALKFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsList;
@@ -319,10 +321,9 @@ public class ResultsManager implements PlugIn, MouseListener
 	{
 		if (resultsSettings.getResultsImage() != ResultsImage.NONE)
 		{
-			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-					resultsSettings.getResultsImage(), resultsSettings.weightedImage, resultsSettings.equalisedImage,
-					title, bounds, nmPerPixel, gain, resultsSettings.imageScale, resultsSettings.precision,
-					ResultsMode.ADD);
+			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
+					resultsSettings.weightedImage, resultsSettings.equalisedImage, title, bounds, nmPerPixel, gain,
+					resultsSettings.imageScale, resultsSettings.precision, ResultsMode.ADD);
 			image.setRollingWindowSize(resultsSettings.imageRollingWindow);
 			resultsList.addOutput(image);
 		}
@@ -334,16 +335,8 @@ public class ResultsManager implements PlugIn, MouseListener
 		if (resultsSettings.resultsFilename != null && resultsSettings.resultsFilename.length() > 0)
 		{
 			// Remove extension
-			File file = new File(resultsSettings.resultsFilename);
-			int index = file.getName().lastIndexOf('.');
-			if (index > 0)
-			{
-				resultsSettings.resultsFilename = file.getParent() + File.separatorChar +
-						file.getName().substring(0, index);
-			}
-
-			// Add used extension
-			resultsSettings.resultsFilename += (resultsSettings.binaryResults) ? ".bin" : ".xls";
+			resultsSettings.resultsFilename = Utils.replaceExtension(resultsSettings.resultsFilename,
+					resultsSettings.getResultsFileFormat().getExtension());
 
 			if (fileInput && inputFilename.equals(resultsSettings.resultsFilename))
 			{
@@ -352,11 +345,11 @@ public class ResultsManager implements PlugIn, MouseListener
 			}
 
 			// Check if file exists
-			file = new File(resultsSettings.resultsFilename);
+			File file = new File(resultsSettings.resultsFilename);
 			if (file.exists())
 			{
-				YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE, "Overwrite existing file?\n" +
-						resultsSettings.resultsFilename);
+				YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), TITLE,
+						"Overwrite existing file?\n" + resultsSettings.resultsFilename);
 				if (!d.yesPressed())
 					return;
 			}
@@ -365,10 +358,21 @@ public class ResultsManager implements PlugIn, MouseListener
 			if (parent != null && parent.exists())
 			{
 				FilePeakResults r;
-				if (resultsSettings.binaryResults)
-					r = new BinaryFilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
-				else
-					r = new FilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
+				switch (resultsSettings.getResultsFileFormat())
+				{
+					case GDSC_BINARY:
+						r = new BinaryFilePeakResults(resultsSettings.resultsFilename, resultsSettings.showDeviations);
+						break;
+					case GDSC_TEXT:
+						r = new FilePeakResults(resultsSettings.resultsFilename, resultsSettings.showDeviations);
+						break;
+					case MALK:
+						r = new MALKFilePeakResults(resultsSettings.resultsFilename);
+						break;
+					default:
+						throw new RuntimeException(
+								"Unsupported file format: " + resultsSettings.getResultsFileFormat());
+				}
 				r.setPeakIdColumnName("Frame");
 				resultsList.addOutput(r);
 			}
@@ -419,7 +423,8 @@ public class ResultsManager implements PlugIn, MouseListener
 
 		gd.addMessage("--- File output ---");
 		gd.addStringField("Results_file", resultsSettings.resultsFilename);
-		gd.addCheckbox("Binary_results (file output only)", resultsSettings.binaryResults);
+		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
+		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
 		gd.addCheckbox("Results_in_memory (file input only)", resultsSettings.resultsInMemory);
 
@@ -452,7 +457,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		resultsSettings.imageScale = gd.getNextNumber();
 		resultsSettings.imageRollingWindow = (int) gd.getNextNumber();
 		resultsSettings.resultsFilename = gd.getNextString();
-		resultsSettings.binaryResults = gd.getNextBoolean();
+		resultsSettings.setResultsFileFormat(gd.getNextChoiceIndex());
 		resultsSettings.resultsInMemory = gd.getNextBoolean();
 
 		// Check arguments
@@ -504,7 +509,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		}
 
 		SettingsManager.saveSettings(settings);
-		
+
 		return true;
 	}
 
@@ -827,6 +832,22 @@ public class ResultsManager implements PlugIn, MouseListener
 				msg = "uncalibrated";
 			}
 
+			// We may have results that are within configured bounds. If so we do not need the conversion
+			boolean showConvert = true;
+			if (results.getBounds(false) != null)
+			{
+				final Rectangle bounds = results.getBounds(false);
+				showConvert = false;
+				for (PeakResult r : results.getResults())
+				{
+					if (!bounds.contains(r.getXPosition(), r.getYPosition()))
+					{
+						showConvert = true;
+						break;
+					}
+				}
+			}
+
 			if (calibration.nmPerPixel <= 0)
 				calibration.nmPerPixel = input_nmPerPixel;
 			if (calibration.gain <= 0)
@@ -841,7 +862,8 @@ public class ResultsManager implements PlugIn, MouseListener
 			gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
 			if (noise <= 0)
 				gd.addNumericField("Noise (ADU)", input_noise, 2);
-			gd.addCheckbox("Convert_nm_to_pixels", convert);
+			if (showConvert)
+				gd.addCheckbox("Convert_nm_to_pixels", convert);
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return false;
@@ -850,6 +872,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			input_exposureTime = Math.abs(gd.getNextNumber());
 			if (noise == 0)
 				input_noise = Math.abs((float) gd.getNextNumber());
+			if (showConvert)
 			convert = gd.getNextBoolean();
 
 			Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
@@ -862,8 +885,8 @@ public class ResultsManager implements PlugIn, MouseListener
 			if (convert && input_nmPerPixel > 0)
 			{
 				// Note: NSTORM stores 2xSD
-				final double widthConversion = (reader != null && reader.getFormat() == FileFormat.NSTORM) ? 1.0 / (2 * input_nmPerPixel)
-						: 1.0 / input_nmPerPixel;
+				final double widthConversion = (reader != null && reader.getFormat() == FileFormat.NSTORM)
+						? 1.0 / (2 * input_nmPerPixel) : 1.0 / input_nmPerPixel;
 				for (PeakResult p : results.getResults())
 				{
 					p.params[Gaussian2DFunction.X_POSITION] /= input_nmPerPixel;

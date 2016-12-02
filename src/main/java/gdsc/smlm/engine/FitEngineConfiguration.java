@@ -59,10 +59,10 @@ public class FitEngineConfiguration implements Cloneable
 	private boolean includeNeighbours = true;
 	private double neighbourHeightThreshold = 0.3;
 	private double residualsThreshold = 1;
-	private NoiseEstimator.Method noiseMethod = Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
-	private DataFilterType dataFilterType = DataFilterType.SINGLE;
-	private double[] smooth = new double[] { 1.2 };
-	private DataFilter[] dataFilter = new DataFilter[] { DataFilter.MEAN };
+	private NoiseEstimator.Method noiseMethod;
+	private DataFilterType dataFilterType;
+	private double[] smooth;
+	private DataFilter[] dataFilter;
 
 	/**
 	 * Constructor
@@ -72,6 +72,7 @@ public class FitEngineConfiguration implements Cloneable
 	public FitEngineConfiguration(FitConfiguration fitConfiguration)
 	{
 		this.fitConfiguration = fitConfiguration;
+		initialiseState();
 	}
 
 	/**
@@ -274,11 +275,12 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		if (fitConfiguration == null)
 			fitConfiguration = new FitConfiguration();
-		fitConfiguration.initialiseState();
+		else
+			fitConfiguration.initialiseState();
 		if (noiseMethod == null)
-			noiseMethod = Method.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES;
+			noiseMethod = Method.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
 		if (dataFilter == null || smooth == null)
-			setDataFilter(DataFilter.MEAN, 1.3, 0);
+			setDataFilter(DataFilter.MEAN, 1.2, 0);
 		// Do this last as it resizes the dataFilter and smooth arrays
 		if (dataFilterType == null)
 			setDataFilterType(DataFilterType.SINGLE);
@@ -320,7 +322,12 @@ public class FitEngineConfiguration implements Cloneable
 
 	private void resizeFilters(int n)
 	{
-		if (this.dataFilter == null || this.dataFilter.length < n)
+		if (this.dataFilter == null)
+		{
+			this.dataFilter = new DataFilter[n];
+			this.smooth = new double[n];
+		}
+		else if (this.dataFilter.length < n)
 		{
 			this.dataFilter = Arrays.copyOf(this.dataFilter, n);
 			this.smooth = Arrays.copyOf(this.smooth, n);

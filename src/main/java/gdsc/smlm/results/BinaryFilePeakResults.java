@@ -32,10 +32,9 @@ public class BinaryFilePeakResults extends FilePeakResults
 {
 	public static final String END_HEADER = "END_HEADER";
 
-	// Only write to a single results window
+	// Only write to a single results file
+	// This uses a separate output from the inherited FilePeakResults
 	private OutputStream out = null;
-
-	private int size = 0;
 
 	public BinaryFilePeakResults(String filename)
 	{
@@ -143,8 +142,10 @@ public class BinaryFilePeakResults extends FilePeakResults
 		return names.toArray(new String[names.size()]);
 	}
 
-	private void closeOutput()
+	protected void closeOutput()
 	{
+		super.closeOutput();
+		
 		if (out == null)
 			return;
 

@@ -15,6 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsTable;
 import gdsc.smlm.ij.settings.BatchRun;
@@ -393,7 +394,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 		resultsSettings.resultsDirectory = null;
 		resultsSettings.showDeviations = fitConfig.getFitConfiguration().isComputeDeviations();
 		resultsSettings.resultsFilename = prefix + ".xls";
-		resultsSettings.binaryResults = false;
+		resultsSettings.setResultsFileFormat(ResultsFileFormat.GDSC_TEXT);
 		return resultsSettings;
 	}
 

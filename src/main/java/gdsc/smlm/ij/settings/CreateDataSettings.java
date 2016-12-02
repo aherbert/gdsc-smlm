@@ -71,7 +71,7 @@ public class CreateDataSettings
 	public double pixelPitch = 107;
 	public double density = 1;
 	public double diffusionRate = 0;
-	private DiffusionType diffusionType = DiffusionType.RANDOM_WALK;
+	private DiffusionType diffusionType;
 	public boolean compoundMolecules = false;
 	public String compoundText = "";
 	public boolean diffuse2D = false;
@@ -139,6 +139,11 @@ public class CreateDataSettings
 	public double yPosition = 0;
 	public double zPosition = 0;
 
+	public CreateDataSettings()
+	{
+		initialiseState();
+	}
+	
 	/**
 	 * Get the total gain (ADUs/Photon). This is equal to the EM-gain multiplied by the camera gain multiplied by the
 	 * quantum efficiency. If either gain is disabled then they will be ignored. A total gain of zero means no gain is
@@ -235,7 +240,7 @@ public class CreateDataSettings
 	public void initialiseState()
 	{
 		setTotalGain();
-		if (getDiffusionType() == null)
+		if (diffusionType == null)
 			setDiffusionType(DiffusionType.RANDOM_WALK);
 	}
 

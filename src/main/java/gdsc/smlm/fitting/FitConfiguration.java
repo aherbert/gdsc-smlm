@@ -47,14 +47,14 @@ import gdsc.smlm.results.filter.PreprocessedPeakResult;
  */
 public class FitConfiguration implements Cloneable, IDirectFilter
 {
-	private FitCriteria fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
+	private FitCriteria fitCriteria;
 	private Logger log = null;
 	private double delta = 0.0001;
 	private double initialAngle = 0; // Radians
 	private double initialSD0 = 1;
 	private double initialSD1 = 1;
 	private boolean computeDeviations = false;
-	private FitSolver fitSolver = FitSolver.LVM;
+	private FitSolver fitSolver;
 	private int minIterations = 0;
 	private int maxIterations = 20;
 	private int significantDigits = 5;
@@ -84,8 +84,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	private double bias = 0;
 	private double readNoise = 0;
 	private double amplification = 0;
-	private int maxFunctionEvaluations = 2000;
-	private SearchMethod searchMethod = SearchMethod.POWELL_BOUNDED; // Best for noisy data since gradients are unstable
+	private int maxFunctionEvaluations;
+	private SearchMethod searchMethod;
 	private boolean gradientLineMinimisation = false;
 	private double relativeThreshold = 1e-6;
 	private double absoluteThreshold = 1e-16;
@@ -139,7 +139,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public FitConfiguration()
 	{
-		setFitFunction(FitFunction.CIRCULAR);
+		initialiseState();
 	}
 
 	/**
@@ -1730,16 +1730,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 	 */
 	public void initialiseState()
 	{
+		// Initialise objects that cannot be null
+		if (fitCriteria == null)
+			fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
 		if (fitSolver == null)
 			fitSolver = FitSolver.LVM;
 		if (fitFunction == null)
 			fitFunction = FitFunction.CIRCULAR;
-		if (fitCriteria == null)
-			fitCriteria = FitCriteria.LEAST_SQUARED_ERROR;
 		if (searchMethod == null)
 			searchMethod = SearchMethod.POWELL;
+		
 		if (maxFunctionEvaluations == 0)
-			maxFunctionEvaluations = 1000;
+			maxFunctionEvaluations = 2000;
 		if (initialSD0 == 0)
 			initialSD0 = 1;
 		if (initialSD1 == 0)
@@ -1748,6 +1750,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			setCoordinateShiftFactor(1);
 		if (dynamicPeakResult == null)
 			dynamicPeakResult = new DynamicPeakResult();
+		
 		setNoise(noise);
 		setFitFunction(fitFunction);
 		invalidateFunctionSolver();

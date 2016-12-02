@@ -36,8 +36,8 @@ import java.util.Scanner;
  */
 public class FilePeakResults extends AbstractPeakResults
 {
-	// Only write to a single results window
-	private OutputStreamWriter out = null;
+	// Only write to a single results file
+	protected OutputStreamWriter out = null;
 
 	protected String filename;
 	private boolean showDeviations = true;
@@ -46,7 +46,7 @@ public class FilePeakResults extends AbstractPeakResults
 	protected boolean sortAfterEnd = false;
 	protected String peakIdColumnName = "Peak";
 
-	private int size = 0;
+	protected int size = 0;
 
 	public FilePeakResults(String filename)
 	{
@@ -135,7 +135,7 @@ public class FilePeakResults extends AbstractPeakResults
 					sb.append("\t");
 				sb.append(fields[i]);
 			}
-			sb.append("\n");
+			sb.append('\n');
 		}
 
 		addComment(sb, getHeaderEnd());
@@ -146,7 +146,7 @@ public class FilePeakResults extends AbstractPeakResults
 	private void addComment(StringBuilder sb, String comment)
 	{
 		if (comment != null)
-			sb.append("#").append(comment).append("\n");
+			sb.append("#").append(comment).append('\n');
 	}
 
 	/**
@@ -224,7 +224,7 @@ public class FilePeakResults extends AbstractPeakResults
 		return text.replaceAll("\n *", "");
 	}
 
-	private void closeOutput()
+	protected void closeOutput()
 	{
 		if (out == null)
 			return;
@@ -281,7 +281,7 @@ public class FilePeakResults extends AbstractPeakResults
 			addResult(sb, precision);
 		}
 
-		sb.append("\n");
+		sb.append('\n');
 		writeResult(1, sb.toString());
 	}
 
@@ -291,23 +291,23 @@ public class FilePeakResults extends AbstractPeakResults
 		if (showId)
 		{
 			sb.append(id);
-			sb.append("\t");
+			sb.append('\t');
 		}
 		sb.append(peak);
-		sb.append("\t");
+		sb.append('\t');
 		if (showEndFrame)
 		{
 			sb.append(endPeak);
-			sb.append("\t");
+			sb.append('\t');
 		}
 		sb.append(origX);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(origY);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(origValue);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(chiSquared);
-		sb.append("\t");
+		sb.append('\t');
 		sb.append(noise);
 	}
 
@@ -354,7 +354,7 @@ public class FilePeakResults extends AbstractPeakResults
 						calibration.emCCD);
 				addResult(sb, precision);
 			}
-			sb.append("\n");
+			sb.append('\n');
 
 			// Flush the output to allow for very large input lists
 			if (++count >= 20)
@@ -459,7 +459,7 @@ public class FilePeakResults extends AbstractPeakResults
 		writeResult(0, text);
 	}
 
-	private synchronized void writeResult(int count, String result)
+	protected synchronized void writeResult(int count, String result)
 	{
 		// In case another thread caused the output to close
 		if (out == null)
@@ -520,7 +520,7 @@ public class FilePeakResults extends AbstractPeakResults
 						break;
 					}
 					else
-						header.append(line).append("\n");
+						header.append(line).append('\n');
 				}
 
 				while ((line = input.readLine()) != null)

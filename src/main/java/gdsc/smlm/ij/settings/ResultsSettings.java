@@ -1,7 +1,9 @@
 package gdsc.smlm.ij.settings;
 
+import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsTable;
+import gdsc.smlm.model.DiffusionType;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -23,7 +25,7 @@ public class ResultsSettings implements Cloneable
 {
 	public boolean logProgress = false;
 	public boolean showDeviations = false;
-	private ResultsImage resultsImage = ResultsImage.LOCALISATIONS;
+	private ResultsImage resultsImage;
 	public boolean weightedImage = true;
 	public boolean equalisedImage = true;
 	public double precision = 0.3;
@@ -31,9 +33,14 @@ public class ResultsSettings implements Cloneable
 	public int imageRollingWindow = 0;
 	public String resultsDirectory = null;
 	public String resultsFilename = null;
-	public boolean binaryResults = false;
+	private ResultsFileFormat resultsFileFormat;
 	public boolean resultsInMemory = true;
-	private ResultsTable resultsTable = ResultsTable.NONE;
+	private ResultsTable resultsTable;
+
+	public ResultsSettings()
+	{
+		initialiseState();
+	}
 
 	/**
 	 * @return the resultsImage
@@ -65,6 +72,35 @@ public class ResultsSettings implements Cloneable
 	}
 
 	/**
+	 * @return the resultsFileFormat
+	 */
+	public ResultsFileFormat getResultsFileFormat()
+	{
+		return resultsFileFormat;
+	}
+
+	/**
+	 * @param resultsFileFormat
+	 *            the resultsFileFormat to set
+	 */
+	public void setResultsFileFormat(ResultsFileFormat resultsFileFormat)
+	{
+		this.resultsFileFormat = resultsFileFormat;
+	}
+
+	/**
+	 * @param resultsFileFormat
+	 *            the resultsFileFormat to set
+	 */
+	public void setResultsFileFormat(int resultsFileFormat)
+	{
+		if (resultsFileFormat >= 0 && resultsFileFormat < ResultsFileFormat.values().length)
+		{
+			setResultsFileFormat(ResultsFileFormat.values()[resultsFileFormat]);
+		}
+	}
+
+	/**
 	 * @return the resultsTable
 	 */
 	public ResultsTable getResultsTable()
@@ -91,6 +127,20 @@ public class ResultsSettings implements Cloneable
 		{
 			setResultsTable(ResultsTable.values()[resultsTable]);
 		}
+	}
+
+	/**
+	 * Ensure that the internal state of the object is initialised. This is used after deserialisation since some state
+	 * is not saved but restored from other property values.
+	 */
+	public void initialiseState()
+	{
+		if (resultsImage == null)
+			resultsImage = ResultsImage.LOCALISATIONS;
+		if (resultsFileFormat == null)
+			resultsFileFormat = ResultsFileFormat.GDSC_TEXT;
+		if (resultsTable == null)
+			resultsTable = ResultsTable.NONE;
 	}
 
 	/*

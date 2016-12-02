@@ -70,6 +70,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
+import gdsc.smlm.ij.results.ResultsFileFormat;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.results.ResultsTable;
@@ -86,6 +87,7 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.InterlacedImageSource;
+import gdsc.smlm.results.MALKFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
@@ -212,7 +214,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private TextField textImageScale;
 	private TextField textImageRollingWindow;
 	private TextField textResultsDirectory;
-	private Checkbox textBinaryResults;
+	private Choice textBinaryResults;
 	private Checkbox textResultsInMemory;
 
 	public PeakFit()
@@ -788,7 +790,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 			discardLabel = gd.getMessage();
-			
+
 			gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
 			gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
 			gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
@@ -827,7 +829,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 		gd.addMessage("--- File output ---");
 		gd.addStringField("Results_dir", resultsSettings.resultsDirectory);
-		gd.addCheckbox("Binary_results", resultsSettings.binaryResults);
+		String[] formatNames = SettingsManager.getNames((Object[]) ResultsFileFormat.values());
+		gd.addChoice("Results_format", formatNames, formatNames[resultsSettings.getResultsFileFormat().ordinal()]);
 		gd.addMessage(" ");
 		gd.addCheckbox("Results_in_memory", resultsSettings.resultsInMemory);
 
@@ -960,7 +963,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			textResultsDirectory = texts.get(t++);
 			textResultsDirectory.addMouseListener(this);
 
-			textBinaryResults = checkboxes.get(b++);
+			textBinaryResults = choices.get(ch++);
 			textResultsInMemory = checkboxes.get(b++);
 		}
 
@@ -1497,7 +1500,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			showProcessedFrames = optionShowProcessedFrames = gd.getNextBoolean();
 		}
 		resultsSettings.resultsDirectory = gd.getNextString();
-		resultsSettings.binaryResults = gd.getNextBoolean();
+		resultsSettings.setResultsFileFormat(gd.getNextChoiceIndex());
 		resultsSettings.resultsInMemory = gd.getNextBoolean();
 
 		if (extraOptions)
@@ -1634,7 +1637,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		boolean result = SettingsManager.saveSettings(settings, filename, true);
 		if (!result)
 			IJ.error(TITLE, "Failed to save settings to file " + filename);
-		
+
 		return result;
 	}
 
@@ -2056,8 +2059,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		String filename = null;
 		if (resultsSettings.resultsDirectory != null && new File(resultsSettings.resultsDirectory).exists())
 		{
-			filename = resultsSettings.resultsDirectory + File.separatorChar + source.getName() +
-					((resultsSettings.binaryResults) ? ".results.bin" : ".results.xls");
+			filename = resultsSettings.resultsDirectory + File.separatorChar + source.getName() + ".results." +
+					resultsSettings.getResultsFileFormat().getExtension();
 		}
 		else if (resultsSettings.resultsFilename != null && resultsSettings.resultsFilename.length() > 0)
 		{
@@ -2066,10 +2069,20 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (filename != null)
 		{
 			FilePeakResults r;
-			if (resultsSettings.binaryResults)
-				r = new BinaryFilePeakResults(filename, resultsSettings.showDeviations);
-			else
-				r = new FilePeakResults(filename, resultsSettings.showDeviations);
+			switch (resultsSettings.getResultsFileFormat())
+			{
+				case GDSC_BINARY:
+					r = new BinaryFilePeakResults(filename, resultsSettings.showDeviations);
+					break;
+				case GDSC_TEXT:
+					r = new FilePeakResults(filename, resultsSettings.showDeviations);
+					break;
+				case MALK:
+					r = new MALKFilePeakResults(resultsSettings.resultsFilename);
+					break;
+				default:
+					throw new RuntimeException("Unsupported file format: " + resultsSettings.getResultsFileFormat());
+			}
 			r.setSortAfterEnd(Prefs.getThreads() > 1);
 			r.setPeakIdColumnName("Frame");
 			resultsList.addOutput(r);
@@ -2424,8 +2437,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			Utils.log("Fit window = %d x %d", w, w);
 			if (!fitConfig.isDisableSimpleFilter())
 			{
-			IJ.log("Coordinate shift = " + Utils.rounded(config.getFitConfiguration().getCoordinateShift()));
-			IJ.log("Signal strength = " + Utils.rounded(fitConfig.getSignalStrength()));
+				IJ.log("Coordinate shift = " + Utils.rounded(config.getFitConfiguration().getCoordinateShift()));
+				IJ.log("Signal strength = " + Utils.rounded(fitConfig.getSignalStrength()));
 			}
 			if (fitConfig.isDirectFilter())
 				IJ.log("Smart filter = " + fitConfig.getSmartFilter().getDescription());
@@ -2807,7 +2820,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		if (extraOptions)
 			textImageRollingWindow.setText("" + resultsSettings.imageRollingWindow);
 		textResultsDirectory.setText("" + resultsSettings.resultsDirectory);
-		textBinaryResults.setState(resultsSettings.binaryResults);
+		textBinaryResults.select(resultsSettings.getResultsFileFormat().ordinal());
 		textResultsInMemory.setState(resultsSettings.resultsInMemory);
 	}
 }

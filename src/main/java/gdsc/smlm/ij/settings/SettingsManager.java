@@ -395,10 +395,15 @@ public class SettingsManager
 	{
 		GlobalSettings config = unsafeLoadSettings(filename, silent);
 		if (config == null)
+		{
 			config = new GlobalSettings();
-		// This should not be null
-		config.getFitEngineConfiguration().initialiseState();
-		config.getCreateDataSettings().initialiseState();
+		}
+		else
+		{
+			config.getFitEngineConfiguration().initialiseState();
+			config.getCreateDataSettings().initialiseState();
+			config.getResultsSettings().initialiseState();
+		}
 		return config;
 	}
 

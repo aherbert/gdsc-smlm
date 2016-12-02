@@ -28,7 +28,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -39,6 +41,13 @@ import gdsc.smlm.utils.XmlUtils;
  */
 public class PeakResultsReader
 {
+	/** The space patterm */
+	private static Pattern spacePattern = Pattern.compile(" ");
+	/** The tab patterm */
+	private static Pattern tabPattern = Pattern.compile("\t");
+	/** Simple whitespace pattern for tabs of spaces */
+	private static Pattern whitespacePattern = Pattern.compile("[\t ]");
+	
 	private boolean useScanner = false;
 
 	private String filename;
@@ -106,7 +115,7 @@ public class PeakResultsReader
 
 				version = getField("FileVersion");
 
-				guessFormat();
+				guessFormat(line);
 			}
 			catch (IOException e)
 			{
@@ -128,12 +137,12 @@ public class PeakResultsReader
 		return header;
 	}
 
-	private void guessFormat()
+	private void guessFormat(String firstLine)
 	{
 		format = FileFormat.UNKNOWN;
 
-		// This cannot be done for empty header
-		if (header.length() == 0)
+		// This cannot be done for empty header or if there is no non-header data
+		if (header.length() == 0 && Utils.isNullOrEmpty(firstLine))
 			return;
 
 		// Check for Nikon NSTORM header
@@ -180,6 +189,11 @@ public class PeakResultsReader
 		else if (header.contains("<localizations "))
 		{
 			format = FileFormat.RAPID_STORM;
+		}
+		// Check for MALK format: X,Y,T,Signal
+		else if (isMALKFormat(firstLine))
+		{
+			format = FileFormat.MALK;
 		}
 		else
 		{
@@ -399,13 +413,14 @@ public class PeakResultsReader
 		{
 			case SMLM_BINARY:
 			case SMLM_TEXT:
-				// Read SMLM data
+			case MALK:
+				// Read SMLM data. We do this for MALK files because we may have written them.
 				getName();
 				getSource();
 				getBounds();
 				getConfiguration();
-			case RAPID_STORM:
 				// RapidSTORM has calibration too 
+			case RAPID_STORM:
 				getCalibration();
 			default:
 				break;
@@ -428,6 +443,9 @@ public class PeakResultsReader
 				break;
 			case NSTORM:
 				results = readNSTORM();
+				break;
+			case MALK:
+				results = readMALK();
 				break;
 			default:
 				break;
@@ -671,8 +689,6 @@ public class PeakResultsReader
 		return false;
 	}
 
-	private static Pattern p = Pattern.compile("\t");
-
 	private PeakResult createPeakResultV1(String line)
 	{
 		try
@@ -683,7 +699,7 @@ public class PeakResultsReader
 			{
 				// Code using a Scanner
 				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter("\t");
+				scanner.useDelimiter(tabPattern);
 				scanner.useLocale(Locale.US);
 				int id = 0, endPeak = 0;
 				if (readId)
@@ -712,7 +728,7 @@ public class PeakResultsReader
 			else
 			{
 				// Code using split and parse
-				String[] fields = p.split(line);
+				String[] fields = tabPattern.split(line);
 				int j = 0;
 				int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
 				int peak = Integer.parseInt(fields[j++]);
@@ -761,7 +777,7 @@ public class PeakResultsReader
 			{
 				// Code using a Scanner
 				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter("\t");
+				scanner.useDelimiter(tabPattern);
 				scanner.useLocale(Locale.US);
 				int id = 0, endPeak = 0;
 				if (readId)
@@ -798,7 +814,7 @@ public class PeakResultsReader
 				// All are slower than the Scanner
 
 				// Code using split and parse
-				String[] fields = p.split(line);
+				String[] fields = tabPattern.split(line);
 				int j = 0;
 				int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
 				int peak = Integer.parseInt(fields[j++]);
@@ -847,7 +863,7 @@ public class PeakResultsReader
 			{
 				// Code using a Scanner
 				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter("\t");
+				scanner.useDelimiter(tabPattern);
 				scanner.useLocale(Locale.US);
 				int id = 0, endPeak = 0;
 				if (readId)
@@ -874,7 +890,7 @@ public class PeakResultsReader
 			else
 			{
 				// Code using split and parse
-				String[] fields = p.split(line);
+				String[] fields = tabPattern.split(line);
 				int j = 0;
 				int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
 				int peak = Integer.parseInt(fields[j++]);
@@ -921,7 +937,7 @@ public class PeakResultsReader
 			{
 				// Code using a Scanner
 				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter("\t");
+				scanner.useDelimiter(tabPattern);
 				scanner.useLocale(Locale.US);
 				int id = 0, endPeak = 0;
 				if (readId)
@@ -956,7 +972,7 @@ public class PeakResultsReader
 				// All are slower than the Scanner
 
 				// Code using split and parse
-				String[] fields = p.split(line);
+				String[] fields = tabPattern.split(line);
 				int j = 0;
 				int id = (readId) ? Integer.parseInt(fields[j++]) : 0;
 				int peak = Integer.parseInt(fields[j++]);
@@ -1074,7 +1090,7 @@ public class PeakResultsReader
 			if (results.size() == 0 && readSource)
 			{
 				Scanner scanner = new Scanner(line);
-				scanner.useDelimiter("\t");
+				scanner.useDelimiter(tabPattern);
 				scanner.useLocale(Locale.US);
 				if (readId)
 					scanner.nextInt();
@@ -1141,7 +1157,7 @@ public class PeakResultsReader
 		try
 		{
 			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter("\t");
+			scanner.useDelimiter(tabPattern);
 			scanner.useLocale(Locale.US);
 			int id = 0, endPeak = 0;
 			if (readId)
@@ -1221,7 +1237,7 @@ public class PeakResultsReader
 		try
 		{
 			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter("\t");
+			scanner.useDelimiter(tabPattern);
 			scanner.useLocale(Locale.US);
 			int id = 0, endPeak = 0;
 			if (readId)
@@ -1356,7 +1372,7 @@ public class PeakResultsReader
 		try
 		{
 			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter(" ");
+			scanner.useDelimiter(spacePattern);
 			scanner.useLocale(Locale.US);
 			float x = scanner.nextFloat();
 			float y = scanner.nextFloat();
@@ -1515,8 +1531,8 @@ public class PeakResultsReader
 		return false;
 	}
 
-	@SuppressWarnings("unused")
 	// So that the fields can be named  
+	@SuppressWarnings("unused")
 	private PeakResult createNSTORMResult(String line)
 	{
 		// Note that the NSTORM file contains traced molecules hence the Frame
@@ -1563,7 +1579,7 @@ public class PeakResultsReader
 		try
 		{
 			Scanner scanner = new Scanner(line);
-			scanner.useDelimiter("\t");
+			scanner.useDelimiter(tabPattern);
 			scanner.useLocale(Locale.US);
 			String channelName = scanner.next();
 			float x = scanner.nextFloat();
@@ -1613,6 +1629,167 @@ public class PeakResultsReader
 		catch (NoSuchElementException e)
 		{
 			// Ignore
+		}
+		return null;
+	}
+
+	private MemoryPeakResults readMALK()
+	{
+		MemoryPeakResults results = createResults();
+		if (name == null)
+			results.setName(new File(filename).getName());
+
+		BufferedReader input = null;
+		try
+		{
+			FileInputStream fis = new FileInputStream(filename);
+			FileChannel channel = fis.getChannel();
+			input = new BufferedReader(new UnicodeReader(fis, null));
+
+			String line;
+			int errors = 0;
+
+			// Skip the header
+			while ((line = input.readLine()) != null)
+			{
+				if (line.length() == 0)
+					continue;
+
+				if (line.charAt(0) != '#')
+				{
+					// This is the first record
+					if (!addMALKResult(results, line))
+						errors = 1;
+					break;
+				}
+			}
+
+			int c = 0;
+			while ((line = input.readLine()) != null)
+			{
+				if (line.length() == 0)
+					continue;
+				if (line.charAt(0) == '#')
+					continue;
+
+				if (!addMALKResult(results, line))
+				{
+					if (++errors >= 10)
+					{
+						break;
+					}
+				}
+
+				if (++c % 512 == 0)
+					showProgress(channel);
+			}
+		}
+		catch (IOException e)
+		{
+			// ignore
+		}
+		finally
+		{
+			try
+			{
+				if (input != null)
+					input.close();
+			}
+			catch (IOException e)
+			{
+				// Ignore
+			}
+		}
+
+		// MALK stores the data in nm. 
+		// The GDSC SMLM code still adds a calibration to the MALK file when saving so we may be able to convert back
+		if (getCalibration() != null)
+		{
+			if (Maths.isFinite(calibration.nmPerPixel) && calibration.nmPerPixel > 0)
+			{
+				double nmPerPixel = calibration.nmPerPixel;
+				for (PeakResult p : results.getResults())
+				{
+					p.params[Gaussian2DFunction.X_POSITION] /= nmPerPixel;
+					p.params[Gaussian2DFunction.Y_POSITION] /= nmPerPixel;
+					p.origX = (int) p.params[Gaussian2DFunction.X_POSITION];
+					p.origY = (int) p.params[Gaussian2DFunction.Y_POSITION];
+				}
+			}
+		}
+
+		return results;
+	}
+
+	private boolean addMALKResult(MemoryPeakResults results, String line)
+	{
+		PeakResult result = createMALKResult(line);
+		if (result != null)
+		{
+			results.add(result);
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isMALKFormat(String firstLine)
+	{
+		// The MALK file format is very simple: X,Y,T,Signal
+		String[] fields = whitespacePattern.split(firstLine);
+		if (fields.length != 4)
+			return false;
+		if (createMALKResult(firstLine) == null)
+			return false;
+		return true;
+	}
+
+	private PeakResult createMALKResult(String line)
+	{
+		try
+		{
+			float[] params = new float[7];
+
+			// To avoid problems handling the data
+			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = 1;
+
+			if (isUseScanner())
+			{
+				// Code using a Scanner
+				Scanner scanner = new Scanner(line);
+				scanner.useDelimiter(whitespacePattern);
+				scanner.useLocale(Locale.US);
+				params[Gaussian2DFunction.X_POSITION] = scanner.nextFloat();
+				params[Gaussian2DFunction.Y_POSITION] = scanner.nextFloat();
+				int peak = scanner.nextInt();
+				params[Gaussian2DFunction.SIGNAL] = scanner.nextFloat();
+				scanner.close();
+
+				return new PeakResult(peak, 0, 0, 0, 0, 0, params, null);
+			}
+			else
+			{
+				// Code using split and parse
+				String[] fields = whitespacePattern.split(line);
+
+				params[Gaussian2DFunction.X_POSITION] = Float.parseFloat(fields[0]);
+				params[Gaussian2DFunction.Y_POSITION] = Float.parseFloat(fields[1]);
+				int peak = Integer.parseInt(fields[2]);
+				params[Gaussian2DFunction.SIGNAL] = Float.parseFloat(fields[3]);
+
+				return new PeakResult(peak, 0, 0, 0, 0, 0, params, null);
+			}
+		}
+		catch (InputMismatchException e)
+		{
+		}
+		catch (NoSuchElementException e)
+		{
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+		}
+		catch (NumberFormatException e)
+		{
 		}
 		return null;
 	}

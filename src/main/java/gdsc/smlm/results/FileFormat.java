@@ -19,7 +19,7 @@ package gdsc.smlm.results;
 public enum FileFormat
 {
 	SMLM_TEXT("SMLM Text"), SMLM_BINARY("SMLM Binary"), RAPID_STORM("RapidSTORM"), NSTORM("NSTORM"), SMLM_TABLE(
-			"SMLM Table"), UNKNOWN("Unknown");
+			"SMLM Table"), MALK("MALK"), UNKNOWN("Unknown");
 
 	private String name;
 
