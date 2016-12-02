@@ -3461,7 +3461,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// Add current optimum to seed
 					if (nonInteractive)
 						filters.add(currentOptimum);
-					double[][] sample = SearchSpace.sample(dimensions, populationSize - filters.size(), null);
+					// The GA does not use the min interval grid so sample without rounding
+					double[][] sample = SearchSpace.sampleWithoutRounding(dimensions, populationSize - filters.size(), null);
 					filters.addAll(searchSpaceToFilters(sample));
 				}
 				ga_population = new Population<FilterScore>(filters);
@@ -3485,6 +3486,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					// In case optimisation was stopped
 					IJ.resetEscape();
 
+					// The GA may produce coordinates off the min interval grid
 					best = enumerateMinInterval(best, stepSize, indices);
 
 					// Now update the filter set for final assessment
@@ -3646,7 +3648,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							seed = merge(seed, sample);
 						}
 						int size = (seed == null) ? 0 : seed.length;
-						sample = SearchSpace.sample(dimensions, seedSize - size, null);
+						// Sample without rounding as the seed will be rounded
+						sample = SearchSpace.sampleWithoutRounding(dimensions, seedSize - size, null);
 						seed = merge(seed, sample);
 					}
 					// Note: If we have an optimum and we are not seeding this should not matter as the dimensions 
@@ -3668,8 +3671,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 						if (seedSize > 0)
 						{
+							// Not required as the search now respects the min interval
 							// The optimum may be off grid if it was from the seed
-							best = enumerateMinInterval(best, enabled);
+							//best = enumerateMinInterval(best, enabled);
 						}
 
 						// Now update the filter set for final assessment
@@ -3787,8 +3791,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 					best = ((SimpleFilterScore) optimum.score).r.filter;
 
+					// Not required as the search now respects the min interval
 					// Enumerate on the min interval to produce the final filter
-					best = enumerateMinInterval(best, enabled);
+					//best = enumerateMinInterval(best, enabled);
 
 					// Now update the filter set for final assessment
 					filterSet = new FilterSet(filterSet.getName(),
@@ -4097,6 +4102,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 *            Array specifying which parameters are enabled
 	 * @return The optimum on the min interval grid
 	 */
+	@SuppressWarnings("unused")
 	private Chromosome<FilterScore> enumerateMinInterval(Chromosome<FilterScore> best, boolean[] enabled)
 	{
 		return enumerateMinInterval(best, enabled, Utils.newArray(enabled.length, 0, 1));
@@ -4162,6 +4168,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return best;
 	}
 
+	@SuppressWarnings("unused")
 	private double[] enumerateMinInterval(double[] point, String[] names, FixedDimension[] originalDimensions)
 	{
 		p_optimum = null;
@@ -4289,6 +4296,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		analysisStopWatch = StopWatch.createStarted();
 
+		SearchResult<FilterScore> optimum = null; // Store this for later debugging
+
 		if (searchParam == 0 || searchParam == 2)
 		{
 			// Collect parameters for the range search algorithm
@@ -4400,7 +4409,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						// have been centred on the current optimum					
 						double[][] seed = new double[1][];
 						seed[0] = point;
-						double[][] sample = SearchSpace.sample(dimensions, pSeedSize - 1, null);
+						// Sample without rounding as the seed will be rounded
+						double[][] sample = SearchSpace.sampleWithoutRounding(dimensions, pSeedSize - 1, null);
 						ss.seed(merge(sample, seed));
 					}
 					ConvergenceChecker<FilterScore> checker = new InterruptConvergenceChecker(0, 0, pMaxIterations);
@@ -4408,8 +4418,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					createGAWindow();
 					resumeParameterTimer();
 
-					SearchResult<FilterScore> optimum = ss.search(dimensions, new ParameterScoreFunction(), checker,
-							myRefinementMode);
+					optimum = ss.search(dimensions, new ParameterScoreFunction(), checker, myRefinementMode);
 
 					if (optimum != null)
 					{
@@ -4419,11 +4428,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						// Now update the parameters for final assessment
 						point = optimum.point;
 
-						if (pSeedSize > 0)
-						{
-							// The optimum may be off grid if it was from the seed
-							point = enumerateMinInterval(point, names, originalDimensions);
-						}
+						// Not required as the seed in now rounded
+						//if (pSeedSize > 0)
+						//{
+						//	// The optimum may be off grid if it was from the seed
+						//	point = enumerateMinInterval(point, names, originalDimensions);
+						//}
 					}
 				}
 			}
@@ -4482,8 +4492,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				createGAWindow();
 				resumeParameterTimer();
 
-				SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, new ParameterScoreFunction(),
-						checker, pEnrichmentSamples, pEnrichmentFraction, pEnrichmentPadding);
+				optimum = ss.enrichmentSearch(dimensions, new ParameterScoreFunction(), checker, pEnrichmentSamples,
+						pEnrichmentFraction, pEnrichmentPadding);
 
 				if (optimum != null)
 				{
@@ -4492,8 +4502,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 					point = optimum.point;
 
+					// Not required as the search now respects the min interval
 					// Enumerate on the min interval to produce the final filter
-					point = enumerateMinInterval(point, names, originalDimensions);
+					//point = enumerateMinInterval(point, names, originalDimensions);
 				}
 			}
 			else
@@ -4560,7 +4571,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				createGAWindow();
 				resumeParameterTimer();
 
-				SearchResult<FilterScore> optimum = ss.findOptimum(dimensions, new ParameterScoreFunction());
+				optimum = ss.findOptimum(dimensions, new ParameterScoreFunction());
 
 				if (optimum != null)
 				{
@@ -4586,8 +4597,26 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		}
 		createResultsPrefix2();
 
-		// Score the filter
+		// (Re) Score the filter.
+
+		// TODO - check this is now OK. Maybe remove the enumeration on the min interval grid
+
+		// If scoring of filter here is different to scoring in the optimisation routine it is probably an ss_filter.clone() issue,
+		// i.e. multi-threading use of the filter clone is not working.
+		// Or it could be that the optimisation produced params off the min-interval grid
 		FilterScoreResult scoreResult = scoreFilter(ss_filter);
+		if (optimum != null)
+		{
+			if (scoreResult.score != optimum.score.score && scoreResult.criteria != optimum.score.criteria)
+			{
+				ParameterScoreResult r = scoreFilter((DirectFilter) ss_filter.clone(), minimalFilter, failCount,
+						residualsThreshold, duplicateDistance, createCoordinateStore(duplicateDistance), false);
+
+				System.out.printf("Weird re- score of the filter: %f!=%f or %f!=%f (%f:%f)\n", scoreResult.score,
+						optimum.score.score, scoreResult.criteria, optimum.score.criteria, r.score, r.criteria);
+
+			}
+		}
 
 		SimpleFilterScore max = new SimpleFilterScore(scoreResult, true, scoreResult.criteria >= minCriteria);
 
@@ -6412,7 +6441,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			coordinateStore2 = gridCoordinateStore;
 
 			// New
-			//int[] bounds = getBounds();
 			//coordinateStore2 = new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance);
 
 			// From factory
@@ -6421,6 +6449,15 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Directly write to the result array, this is thread safe
 			scoreResults[job.index] = scoreFilter(filter, minFilter, failCount, residualsThreshold, duplicateDistance,
 					coordinateStore2, createTextResult);
+
+			// Allow debugging the score 
+			//			if (failCount == 3 && DoubleEquality.almostEqualRelativeOrAbsolute(residualsThreshold, 0.35, 0, 0.01) &&
+			//					DoubleEquality.almostEqualRelativeOrAbsolute(duplicateDistance, 2.5, 0, 0.01))
+			//			{
+			//				System.out.printf("%s @ %s : %d %f %f \n", Double.toString(scoreResults[job.index].score),
+			//						Double.toString(scoreResults[job.index].criteria), failCount, residualsThreshold,
+			//						duplicateDistance);
+			//			}
 		}
 	}
 
@@ -6937,6 +6974,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			int failCount = (int) Math.round(parameters[0]);
 			double residualsThreshold = parameters[1];
 			double duplicateDistance = parameters[2];
+
+			System.out.println(Arrays.toString(parameters));
+
 			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
 			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
 					nActual, null, null, createCoordinateStore(duplicateDistance));
