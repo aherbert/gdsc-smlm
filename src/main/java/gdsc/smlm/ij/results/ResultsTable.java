@@ -15,18 +15,22 @@ package gdsc.smlm.ij.results;
 
 public enum ResultsTable
 {
-	NONE("None"), UNCALIBRATED("Uncalibrated"), CALIBRATED("Calibrated");
-
-	private String name;
-
-	private ResultsTable(String name)
-	{
-		this.name = name;
-	}
+	//@formatter:off
+	NONE{ public String getName() { return "None"; }}, 
+	UNCALIBRATED{ public String getName() { return "Uncalibrated"; }}, 
+	CALIBRATED{ public String getName() { return "Calibrated"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

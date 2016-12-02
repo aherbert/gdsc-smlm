@@ -18,25 +18,27 @@ package gdsc.smlm.results.filter;
  */
 public enum FilterType
 {
+	//@formatter:off
 	/**
 	 * A basic filter
 	 */
-	STANDARD("Standard"),
+	STANDARD{ public String getName() { return "Standard"; }},
 	/**
 	 * A direct filter. This can perform filtering on PreprocessedPeakResult objects.
 	 */
-	DIRECT("Direct");
-
-	private String name;
-
-	private FilterType(String name)
-	{
-		this.name = name;
-	}
+	DIRECT{ public String getName() { return "Direct"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

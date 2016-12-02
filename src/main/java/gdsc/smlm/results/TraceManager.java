@@ -35,34 +35,36 @@ public class TraceManager
 	 */
 	public enum TraceMode
 	{
+		//@formatter:off
 		/**
 		 * Search the latest localisations first. This is equivalent to a downwards search. When a localisation is found
 		 * no more time points will be searched.
 		 */
-		LATEST_FORERUNNER("Latest forerunner"),
+		LATEST_FORERUNNER{ public String getName() { return "Latest forerunner"; }},
 		/**
 		 * Search the earliest localisations first. This is equivalent to a depth first search. When a localisation is
 		 * found no more time points will be searched.
 		 */
-		EARLIEST_FORERUNNER("Earliest forerunner"),
+		EARLIEST_FORERUNNER{ public String getName() { return "Earliest forerunner"; }},
 		/**
 		 * Search all time points within the distance threshold. This is slower as all time points are searched. It is
 		 * equivalent to single-linkage clustering with a time constraint on joined localisations.
 		 */
-		SINGLE_LINKAGE("Single linkage");
-
-		private String name;
-
-		private TraceMode(String name)
-		{
-			this.name = name;
-		}
+		SINGLE_LINKAGE{ public String getName() { return "Single linkage"; }};
+		//@formatter:on
 
 		@Override
 		public String toString()
 		{
-			return name;
+			return getName();
 		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 	}
 
 	private MemoryPeakResults results;
@@ -664,7 +666,7 @@ public class TraceManager
 			{
 				if (trace == null || trace.size() == 0)
 					continue;
-				
+
 				final int traceId = (newId) ? ++id : trace.getId();
 				for (PeakResult result : trace.getPoints())
 				{

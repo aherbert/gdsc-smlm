@@ -18,101 +18,40 @@ package gdsc.smlm.fitting;
  */
 public enum FitStatus
 {
-	/**
-	 * 
-	 */
-	OK("OK"),
-	/**
-	 * 
-	 */
-	SINGULAR_NON_LINEAR_MODEL("Singular non-linear model"),
-	/**
-	 * 
-	 */
-	SINGULAR_NON_LINEAR_SOLUTION("Singular non-linear solution"),
-	/**
-	 * 
-	 */
-	INVALID_GRADIENTS_IN_NON_LINEAR_MODEL("Invalid gradients in non-linear model"),
-	/**
-	 * 
-	 */
-	FAILED_TO_CONVERGE("Failed to converge"),
-	/**
-	 * 
-	 */
-	TOO_MANY_ITERATIONS("Too many iterations"),
-	/**
-	 * 
-	 */
-	TOO_MANY_EVALUATIONS("Too many evaluations"),
-	/**
-	 * 
-	 */
-	INVALID_LIKELIHOOD("Invalid likelihood"),
-	/**
-	 * 
-	 */
-	BAD_PARAMETERS("Bad parameters"),
-	/**
-	 * 
-	 */
-	FAILED_TO_ESTIMATE_WIDTH("Failed to estimate width"),
-	/**
-	 * 
-	 */
-	COORDINATES_MOVED("Coordinates moved"),
-	/**
-	 * 
-	 */
-	OUTSIDE_FIT_REGION("Outside fit region"),
-	/**
-	 * 
-	 */
-	INSUFFICIENT_SIGNAL("Insufficient signal"),
-	/**
-	 * 
-	 */
-	WIDTH_DIVERGED("Width diverged"),
-	/**
-	 * 
-	 */
-	INSUFFICIENT_PRECISION("Insufficient precision"),
-	/**
-	 * 
-	 */
-	NEIGHBOUR_OVERLAP("Neighbour overlap"),
-	/**
-	 * 
-	 */
-	FAILED_SMART_FILTER("Failed smart filter"),
-	/**
-	 * 
-	 */
-	DRIFT_TO_ANOTHER_RESULT("Drift to another result"),
-	/**
-	 * 
-	 */
-	FAILED_VALIDATION("Failed validation"),
-	/**
-	 * 
-	 */
-	NO_MODEL_IMPROVEMENT("No model improvement"),
-	/**
-	 * 
-	 */
-	UNKNOWN("Unknown");
-
-	private String name;
-
-	private FitStatus(String name)
-	{
-		this.name = name;
-	}
+	//@formatter:off
+	OK{ public String getName() { return "OK"; }},
+	SINGULAR_NON_LINEAR_MODEL{ public String getName() { return "Singular non-linear model"; }},
+	SINGULAR_NON_LINEAR_SOLUTION{ public String getName() { return "Singular non-linear solution"; }},
+	INVALID_GRADIENTS_IN_NON_LINEAR_MODEL{ public String getName() { return "Invalid gradients in non-linear model"; }},
+	FAILED_TO_CONVERGE{ public String getName() { return "Failed to converge"; }},
+	TOO_MANY_ITERATIONS{ public String getName() { return "Too many iterations"; }},
+	TOO_MANY_EVALUATIONS{ public String getName() { return "Too many evaluations"; }},
+	INVALID_LIKELIHOOD{ public String getName() { return "Invalid likelihood"; }},
+	BAD_PARAMETERS{ public String getName() { return "Bad parameters"; }},
+	FAILED_TO_ESTIMATE_WIDTH{ public String getName() { return "Failed to estimate width"; }},
+	COORDINATES_MOVED{ public String getName() { return "Coordinates moved"; }},
+	OUTSIDE_FIT_REGION{ public String getName() { return "Outside fit region"; }},
+	INSUFFICIENT_SIGNAL{ public String getName() { return "Insufficient signal"; }},
+	WIDTH_DIVERGED{ public String getName() { return "Width diverged"; }},
+	INSUFFICIENT_PRECISION{ public String getName() { return "Insufficient precision"; }},
+	NEIGHBOUR_OVERLAP{ public String getName() { return "Neighbour overlap"; }},
+	FAILED_SMART_FILTER{ public String getName() { return "Failed smart filter"; }},
+	DRIFT_TO_ANOTHER_RESULT{ public String getName() { return "Drift to another result"; }},
+	FAILED_VALIDATION{ public String getName() { return "Failed validation"; }},
+	NO_MODEL_IMPROVEMENT{ public String getName() { return "No model improvement"; }},
+	UNKNOWN{ public String getName() { return "Unknown"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

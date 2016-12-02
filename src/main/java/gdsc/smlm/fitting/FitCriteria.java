@@ -18,34 +18,36 @@ package gdsc.smlm.fitting;
  */
 public enum FitCriteria
 {
+	//@formatter:off
 	/**
 	 * Stop fitting when the least-squared-error does not change significantly
 	 */
-	LEAST_SQUARED_ERROR("Least-squared error"),
+	LEAST_SQUARED_ERROR{ public String getName() { return "Least-squared error"; }},
 	/**
 	 * Stop fitting when the least-squared-error does not change significantly.
 	 * Add an additional check for slowly improving or plateaued fitting is performed.
 	 */
-	LEAST_SQUARED_PLUS("Least-squared error plateau"),
+	LEAST_SQUARED_PLUS{ public String getName() { return "Least-squared error plateau"; }},
 	/**
 	 * Stop fitting when the XY coordinates do not change significantly
 	 */
-	COORDINATES("Coordinates"),
+	COORDINATES{ public String getName() { return "Coordinates"; }},
 	/**
 	 * Stop fitting when the parameters do not change significantly
 	 */
-	PARAMETERS("Parameters");
-
-	private String name;
-
-	private FitCriteria(String name)
-	{
-		this.name = name;
-	}
-
+	PARAMETERS{ public String getName() { return "Parameters"; }};
+	//@formatter:on
+	
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

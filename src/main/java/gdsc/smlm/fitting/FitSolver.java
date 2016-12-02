@@ -18,12 +18,15 @@ package gdsc.smlm.fitting;
  */
 public enum FitSolver
 {
+	//@formatter:off
 	/**
 	 * Custom Levenberg-Marquardt least-squares fitting.
 	 * <p>
 	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
 	 */
-	LVM("Least Squares Estimator", "LSE"),
+	LVM{ 
+		public String getName() { return "Least Squares Estimator"; } 
+		public String getShortName() { return "LSE"; }},
 	/**
 	 * Custom Levenberg-Marquardt least-squares fitting.
 	 * <p>
@@ -31,7 +34,9 @@ public enum FitSolver
 	 * <p>
 	 * Parameters can be bounded using a hard-stop limit.
 	 */
-	BOUNDED_LVM("Bounded Least Squares Estimator", "BLSE"),
+	BOUNDED_LVM{ 
+		public String getName() { return "Bounded Least Squares Estimator"; } 
+		public String getShortName() { return "BLSE"; }},
 	/**
 	 * Custom Levenberg-Marquardt least-squares fitting for Poisson data using the method of Laurence & Chromy (2010) Nature Methods 7, 338-339.
 	 * <p>
@@ -39,14 +44,18 @@ public enum FitSolver
 	 * <p>
 	 * Parameters are bounded using a hard-stop limit to prevent negative function values being produced.
 	 */
-	LVM_MLE("Bounded LVM Maximum Likelihood Estimator", "LVM MLE"),
+	LVM_MLE{ 
+		public String getName() { return "Bounded LVM Maximum Likelihood Estimator"; } 
+		public String getShortName() { return "LVM MLE"; }},
 	/**
 	 * Custom Levenberg-Marquardt least-squares fitting with weights. The weights require a function that provides the
 	 * expected variance for each data point. Without weights the results match the LVM method.
 	 * <p>
 	 * Uses the Hessian matrix with a Newton optimisation method that requires inversion of the Hessian.
 	 */
-	LVM_WEIGHTED("Weighted Least Squares Estimator", "WLSE"),
+	LVM_WEIGHTED{ 
+		public String getName() { return "Weighted Least Squares Estimator"; } 
+		public String getShortName() { return "WLSE"; }},
 	/**
 	 * Custom Levenberg-Marquardt least-squares fitting with weights. The weights require a function that provides the
 	 * expected variance for each data point. Without weights the results match the LVM method.
@@ -55,7 +64,9 @@ public enum FitSolver
 	 * <p>
 	 * Parameters can be bounded using a hard-stop limit.
 	 */
-	BOUNDED_LVM_WEIGHTED("Bounded Weighted Least Squares Estimator", "BWLSE"),
+	BOUNDED_LVM_WEIGHTED{ 
+		public String getName() { return "Bounded Weighted Least Squares Estimator"; } 
+		public String getShortName() { return "BWLSE"; }},
 	/**
 	 * Apache Commons Math Levenberg-Marquardt least-squares fitting.
 	 * <p>
@@ -63,36 +74,37 @@ public enum FitSolver
 	 * methods should avoid problems with a Hessian that cannot be inverted, e.g. in the case of round-off error
 	 * introduced by vastly different magnitudes in the gradients.
 	 */
-	LVM_QUASI_NEWTON("Least Squares Estimator (Quasi-Newton)", "LSEqn"),
+	LVM_QUASI_NEWTON{ 
+		public String getName() { return "Least Squares Estimator (Quasi-Newton)"; } 
+		public String getShortName() { return "LSEqn"; }},
 	/**
 	 * Maximum Likelihood Estimator
 	 * <p>
 	 * Uses a Poisson noise model for the probability density function of the data.
 	 */
-	MLE("Maximum Likelihood Estimator", "MLE");
-
-	private String name;
-	private String shortName;
-
-	private FitSolver(String name, String shortName)
-	{
-		this.name = name;
-		this.shortName = shortName;
-	}
+	MLE{ 
+		public String getName() { return "Maximum Likelihood Estimator"; } 
+		public String getShortName() { return "MLE"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name + " (" + shortName + ")";
+		return getName() + " (" + getShortName() + ")";
 	}
-	
-	public String getName()
-	{
-		return name;
-	}
-	
-	public String getShortName()
-	{
-		return shortName;
-	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
+
+	/**
+	 * Gets the short name.
+	 *
+	 * @return the short name
+	 */
+	abstract public String getShortName();
+
 }

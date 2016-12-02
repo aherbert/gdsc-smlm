@@ -15,7 +15,7 @@ package gdsc.smlm.ij.results;
 
 public enum ResultsFileFormat
 {
-	//@Formatter:off
+	//@formatter:off
 	GDSC_TEXT {
 		@Override public String getName()      { return "Text"; }
 		@Override public String getExtension() { return "xls"; }
@@ -32,7 +32,7 @@ public enum ResultsFileFormat
 		@Override public String getName()      { return "Molecular Accuracy Localisation Keep"; }
 		@Override public String getExtension() { return "txt"; }
 	};
-	//@Formatter:on
+	//@formatter:on
 	
 	@Override
 	public String toString()

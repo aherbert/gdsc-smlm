@@ -18,37 +18,39 @@ package gdsc.smlm.engine;
  */
 public enum DataFilter
 {
+	//@formatter:off
 	/**
 	 * Use a mean within a specified area
 	 */
-	MEAN("Mean"),
+	MEAN{ public String getName() { return "Mean"; }},
 	/**
 	 * Use a mean within a specified box area. The box has integer size.
 	 */
-	BLOCK_MEAN("Block mean"),
+	BLOCK_MEAN{ public String getName() { return "Block mean"; }},
 	/**
 	 * Use a mean within a specified circle area
 	 */
-	CIRCULAR_MEAN("Circular mean"),
+	CIRCULAR_MEAN{ public String getName() { return "Circular mean"; }},
 	/**
 	 * Use a Gaussian with a specified radius
 	 */
-	GAUSSIAN("Gaussian"),
+	GAUSSIAN{ public String getName() { return "Gaussian"; }},
 	/**
 	 * Use a median within a specified box area. The box has integer size.
 	 */
-	MEDIAN("Median");
-
-	private String name;
-
-	private DataFilter(String name)
-	{
-		this.name = name;
-	}
+	MEDIAN{ public String getName() { return "Median"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

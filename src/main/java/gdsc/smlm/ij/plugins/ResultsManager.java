@@ -67,21 +67,27 @@ public class ResultsManager implements PlugIn, MouseListener
 {
 	public enum InputSource
 	{
-		FILE("File"), MEMORY("Memory"), MEMORY_MULTI_FRAME("Memory (Multi-Frame)"), MEMORY_SINGLE_FRAME(
-				"Memory (Single-Frame)"), MEMORY_CLUSTERED("Memory (Clustered)"), NONE("None");
-
-		private String name;
-
-		private InputSource(String name)
-		{
-			this.name = name;
-		}
+		//@formatter:off
+		FILE{ public String getName() { return "File"; }}, 
+		MEMORY{ public String getName() { return "Memory"; }}, 
+		MEMORY_MULTI_FRAME{ public String getName() { return "Memory (Multi-Frame)"; }},
+		MEMORY_SINGLE_FRAME{ public String getName() { return "Memory (Single-Frame)"; }},
+		MEMORY_CLUSTERED{ public String getName() { return "Memory (Clustered)"; }}, 
+		NONE{ public String getName() { return "None"; }};
+		//@formatter:on
 
 		@Override
 		public String toString()
 		{
-			return name;
+			return getName();
 		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 	}
 
 	private static String TITLE = "Peak Results Manager";
@@ -873,7 +879,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			if (noise == 0)
 				input_noise = Math.abs((float) gd.getNextNumber());
 			if (showConvert)
-			convert = gd.getNextBoolean();
+				convert = gd.getNextBoolean();
 
 			Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
 			Prefs.set(Constants.inputGain, input_gain);

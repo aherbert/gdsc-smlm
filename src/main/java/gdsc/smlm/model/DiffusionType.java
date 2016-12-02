@@ -18,31 +18,33 @@ package gdsc.smlm.model;
  */
 public enum DiffusionType
 {
+	//@formatter:off
 	/**
 	 * A random walk
 	 */
-	RANDOM_WALK("Random Walk"),
+	RANDOM_WALK{ public String getName() { return "Random Walk"; }},
 	/**
 	 * A grid walk using defined step sizes in each dimension
 	 */
-	GRID_WALK("Grid Walk"),
+	GRID_WALK{ public String getName() { return "Grid Walk"; }},
 	/**
 	 * A random walk along a linear axis
 	 */
-	LINEAR_WALK("Linear Walk");
-
-	private String name;
-
-	private DiffusionType(String name)
-	{
-		this.name = name;
-	}
-
+	LINEAR_WALK{ public String getName() { return "Linear Walk"; }};
+	//@formatter:on
+	
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+	
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 
 	/**
 	 * Get the diffusion type from a given string. Returns null if the text is not a valid type.
@@ -57,7 +59,7 @@ public enum DiffusionType
 			text = text.trim();
 			for (DiffusionType type : DiffusionType.values())
 			{
-				if (text.equalsIgnoreCase(type.name))
+				if (text.equalsIgnoreCase(type.getName()))
 				{
 					return type;
 				}

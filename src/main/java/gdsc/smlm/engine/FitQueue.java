@@ -18,29 +18,31 @@ package gdsc.smlm.engine;
  */
 public enum FitQueue
 {
+	//@formatter:off
 	/**
 	 * Block additions if there is a backlog
 	 */
-	BLOCKING("Blocking"),
+	BLOCKING{ public String getName() { return "Blocking"; }},
 	/**
 	 * Allow all additions if there is a backlog
 	 */
-	NON_BLOCKING("Non-blocking"),
+	NON_BLOCKING{ public String getName() { return "Non-blocking"; }},
 	/**
 	 * Ignore additions if there is a backlog
 	 */
-	IGNORE("Ignore");
-
-	private String name;
-
-	private FitQueue(String name)
-	{
-		this.name = name;
-	}
+	IGNORE{ public String getName() { return "Ignore"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

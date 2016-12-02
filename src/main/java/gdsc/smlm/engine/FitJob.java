@@ -27,20 +27,24 @@ public class FitJob
 {
 	public enum Status
 	{
-		PENDING("Pending"), IN_PROGRESS("In-progress"), FINISHED("Finished");
-
-		private String name;
-
-		private Status(String name)
-		{
-			this.name = name;
-		}
+		//@formatter:off
+		PENDING{ public String getName() { return "Pending"; }}, 
+		IN_PROGRESS{ public String getName() { return "In-progress"; }}, 
+		FINISHED{ public String getName() { return "Finished"; }};
+		//@formatter:on
 
 		@Override
 		public String toString()
 		{
-			return name;
+			return getName();
 		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 	}
 
 	private int id = 0;

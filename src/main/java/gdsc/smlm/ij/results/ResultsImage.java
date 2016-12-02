@@ -15,21 +15,29 @@ package gdsc.smlm.ij.results;
 
 public enum ResultsImage
 {
-	NONE("None"), LOCALISATIONS("Localisations"), SIGNAL_INTENSITY("Signal intensity"), FRAME_NUMBER("Frame number"), PSF(
-			"PSF"), LOCALISATIONS_PRECISION("Localisations (width=precision)"), SIGNAL_PRECISION(
-			"Signal (width=precision)"), LOCALISATIONS_AV_PRECISION("Localisations (width=av.precision)"), SIGNAL_AV_PRECISION(
-			"Signal (width=av.precision)"), ERROR("Fit error");
-
-	private String name;
-
-	private ResultsImage(String name)
-	{
-		this.name = name;
-	}
+	//@formatter:off
+	NONE{ public String getName() { return "None"; }}, 
+	LOCALISATIONS{ public String getName() { return "Localisations"; }}, 
+	SIGNAL_INTENSITY{ public String getName() { return "Signal intensity"; }},
+	FRAME_NUMBER{ public String getName() { return "Frame number"; }},
+	PSF{ public String getName() { return "PSF"; }}, 
+	LOCALISATIONS_PRECISION{ public String getName() { return "Localisations (width=precision)"; }}, 
+	SIGNAL_PRECISION{ public String getName() { return "Signal (width=precision)"; }}, 
+	LOCALISATIONS_AV_PRECISION{ public String getName() { return "Localisations (width=av.precision)"; }}, 
+	SIGNAL_AV_PRECISION{ public String getName() { return "Signal (width=av.precision)"; }}, 
+	ERROR{ public String getName() { return "Fit error"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

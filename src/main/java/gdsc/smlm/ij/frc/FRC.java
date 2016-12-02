@@ -23,20 +23,24 @@ public class FRC
 {
 	public enum ThresholdMethod
 	{
-		FIXED_1_OVER_7("Fixed 1/7"), HALF_BIT("Half-bit"), THREE_SIGMA("Three sigma");
-
-		private String name;
-
-		private ThresholdMethod(String name)
-		{
-			this.name = name;
-		}
+		//@formatter:off
+		FIXED_1_OVER_7{ public String getName() { return "Fixed 1/7"; }}, 
+		HALF_BIT{ public String getName() { return "Half-bit"; }}, 
+		THREE_SIGMA{ public String getName() { return "Three sigma"; }};
+		//@formatter:on
 
 		@Override
 		public String toString()
 		{
-			return name;
+			return getName();
 		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 	};
 
 	// Properties controlling the algorithm
@@ -398,7 +402,8 @@ public class FRC
 			switch (method)
 			{
 				case HALF_BIT:
-					threshold[i] = ((0.2071 * Math.sqrt(frcCurve[i][2]) + 1.9102) / (1.2701 * Math.sqrt(frcCurve[i][2]) + 0.9102));
+					threshold[i] = ((0.2071 * Math.sqrt(frcCurve[i][2]) + 1.9102) /
+							(1.2701 * Math.sqrt(frcCurve[i][2]) + 0.9102));
 					break;
 				case THREE_SIGMA:
 					threshold[i] = (3.0 / Math.sqrt(frcCurve[i][2] / 2.0));
@@ -454,13 +459,13 @@ public class FRC
 			if (!((y3 >= y1 && y4 < y2) || (y1 >= y3 && y2 < y4)))
 			{
 				continue;
-			}			
+			}
 
 			final double x1 = frcCurve[i - 1][0];
 			final double x2 = frcCurve[i][0];
 			final double x3 = x1;
 			final double x4 = x2;
-			
+
 			final double x1_x2 = x1 - x2;
 			final double x3_x4 = x3 - x4;
 			final double y1_y2 = y1 - y2;
@@ -513,9 +518,9 @@ public class FRC
 
 		switch (method)
 		{
-		// The half-bit and 3-sigma curves are often above 1 at close to zero spatial frequency.
-		// This means that any FRC curve starting at 1 may cross the line twice. 
-		// If so the second crossing is the one that is desired.
+			// The half-bit and 3-sigma curves are often above 1 at close to zero spatial frequency.
+			// This means that any FRC curve starting at 1 may cross the line twice. 
+			// If so the second crossing is the one that is desired.
 			case HALF_BIT:
 			case THREE_SIGMA:
 				return (intersections.length > 1) ? intersections[1] : intersections[0];

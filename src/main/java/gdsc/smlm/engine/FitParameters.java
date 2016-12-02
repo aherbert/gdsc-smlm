@@ -25,20 +25,24 @@ public class FitParameters
 {
 	public enum FitTask
 	{
-		PSF_FITTING("PSF Fitting"), MAXIMA_IDENITIFICATION("Maxima Identification"), BENCHMARKING("Benchmarking");
-
-		private String name;
-
-		private FitTask(String name)
-		{
-			this.name = name;
-		}
+		//@formatter:off
+		PSF_FITTING{ public String getName() { return "PSF Fitting"; }},
+		MAXIMA_IDENITIFICATION{ public String getName() { return "Maxima Identification"; }}, 
+		BENCHMARKING{ public String getName() { return "Benchmarking"; }};
+		//@formatter:on
 
 		@Override
 		public String toString()
 		{
-			return name;
+			return getName();
 		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 	}
 
 	/**

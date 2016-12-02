@@ -18,29 +18,31 @@ package gdsc.smlm.engine;
  */
 public enum DataFilterType
 {
+	//@formatter:off
 	/**
 	 * Use a single filter
 	 */
-	SINGLE("Single"),
+	SINGLE{ public String getName() { return "Single"; }},
 	/**
 	 * Use a difference filter (the second subtracted from the first).
 	 */
-	DIFFERENCE("Difference"),
+	DIFFERENCE{ public String getName() { return "Difference"; }},
 	/**
 	 * Use a jury of multiple filters
 	 */
-	JURY("Jury");
-
-	private String name;
-
-	private DataFilterType(String name)
-	{
-		this.name = name;
-	}
+	JURY{ public String getName() { return "Jury"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

@@ -18,19 +18,26 @@ package gdsc.smlm.results;
  */
 public enum FileFormat
 {
-	SMLM_TEXT("SMLM Text"), SMLM_BINARY("SMLM Binary"), RAPID_STORM("RapidSTORM"), NSTORM("NSTORM"), SMLM_TABLE(
-			"SMLM Table"), MALK("MALK"), UNKNOWN("Unknown");
-
-	private String name;
-
-	private FileFormat(String name)
-	{
-		this.name = name;
-	}
+	//@formatter:off
+	SMLM_TEXT{ public String getName() { return "SMLM Text"; }}, 
+	SMLM_BINARY{ public String getName() { return "SMLM Binary"; }},
+	RAPID_STORM{ public String getName() { return "RapidSTORM"; }}, 
+	NSTORM{ public String getName() { return "NSTORM"; }},
+	SMLM_TABLE{ public String getName() { return "SMLM Table"; }}, 
+	MALK{ public String getName() { return "MALK"; }}, 
+	UNKNOWN{ public String getName() { return "Unknown"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

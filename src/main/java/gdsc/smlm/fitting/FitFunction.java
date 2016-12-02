@@ -18,33 +18,35 @@ package gdsc.smlm.fitting;
  */
 public enum FitFunction
 {
+	//@formatter:off
 	/**
 	 * Fixed width 2D Gaussian
 	 */
-	FIXED("Fixed"),
+	FIXED{ public String getName() { return "Fixed"; }},
 	/**
 	 * Fit 2D Gaussian with XY width simultaneously 
 	 */
-	CIRCULAR("Circular"),
+	CIRCULAR{ public String getName() { return "Circular"; }},
 	/**
 	 * Fit 2D Gaussian with XY width independently
 	 */
-	FREE_CIRCULAR("Free circular"),
+	FREE_CIRCULAR{ public String getName() { return "Free circular"; }},
 	/**
 	 * Fit elliptical 2D Gaussian
 	 */
-	FREE("Free");
-
-	private String name;
-
-	private FitFunction(String name)
-	{
-		this.name = name;
-	}
+	FREE{ public String getName() { return "Free"; }};
+	//@formatter:on
 
 	@Override
 	public String toString()
 	{
-		return name;
+		return getName();
 	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	abstract public String getName();
 }

@@ -33,26 +33,30 @@ public class About implements PlugIn, MacroExtension
 
 	enum ConfigureOption
 	{
-		INSTALL("Install"), REMOVE("Remove"), EDIT("Edit & Install");
-
-		private String name;
-
-		private ConfigureOption(String name)
-		{
-			this.name = name;
-		}
+		//@formatter:off
+		INSTALL{ public String getName() { return "Install"; }}, 
+		REMOVE{ public String getName() { return "Remove"; }}, 
+		EDIT{ public String getName() { return "Edit & Install"; }};
+		//@formatter:on
 
 		@Override
 		public String toString()
 		{
-			return name;
+			return getName();
 		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 	}
 
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (arg.equals("about"))
 		{
 			showAbout();
@@ -67,8 +71,8 @@ public class About implements PlugIn, MacroExtension
 
 		if (arg.equals("toolset"))
 		{
-			installResource("/macros/toolsets/SMLM Tools.txt", "macros",
-					"toolsets" + File.separator + "SMLM Tools.txt", "SMLM toolset",
+			installResource("/macros/toolsets/SMLM Tools.txt", "macros", "toolsets" + File.separator + "SMLM Tools.txt",
+					"SMLM toolset",
 					"Select the toolset from the ImageJ 'More Tools' menu to load buttons on to the ImageJ menu bar.",
 					ConfigureOption.INSTALL, ConfigureOption.REMOVE);
 			return;
@@ -76,10 +80,7 @@ public class About implements PlugIn, MacroExtension
 
 		if (arg.equals("config"))
 		{
-			int result = installResource(
-					"/gdsc/smlm/plugins.config",
-					"plugins",
-					"smlm.config",
+			int result = installResource("/gdsc/smlm/plugins.config", "plugins", "smlm.config",
 					"SMLM Tools Configuration",
 					"The configuration file is used to specify which plugins to display on the SMLM Tools window. Creating a custom file will need to be repeated when the available plugins change.",
 					ConfigureOption.INSTALL, ConfigureOption.EDIT, ConfigureOption.REMOVE);
@@ -103,8 +104,8 @@ public class About implements PlugIn, MacroExtension
 
 	public static void showUnintallDialog()
 	{
-		IJ.showMessage(TITLE, "To uninstall this plugin, move the SMLM jar out\n"
-				+ "of the plugins folder and restart ImageJ.");
+		IJ.showMessage(TITLE,
+				"To uninstall this plugin, move the SMLM jar out\n" + "of the plugins folder and restart ImageJ.");
 	}
 
 	public static void showAbout()
@@ -400,15 +401,15 @@ public class About implements PlugIn, MacroExtension
 	public ExtensionDescriptor[] getExtensionFunctions()
 	{
 		ArrayList<ExtensionDescriptor> list = new ArrayList<ExtensionDescriptor>(3);
-		list.add(ExtensionDescriptor.newDescriptor("getNumberOfSpecies", this, MacroExtension.ARG_NUMBER +
-				MacroExtension.ARG_OUTPUT));
-		list.add(ExtensionDescriptor.newDescriptor("getD", this, MacroExtension.ARG_NUMBER, MacroExtension.ARG_NUMBER +
-				MacroExtension.ARG_OUTPUT));
-		list.add(ExtensionDescriptor.newDescriptor("getF", this, MacroExtension.ARG_NUMBER, MacroExtension.ARG_NUMBER +
-				MacroExtension.ARG_OUTPUT));
-		list.add(ExtensionDescriptor.newDescriptor("getSpecies", this, MacroExtension.ARG_NUMBER, MacroExtension.ARG_NUMBER +
-				MacroExtension.ARG_OUTPUT, MacroExtension.ARG_NUMBER +
-				MacroExtension.ARG_OUTPUT));
+		list.add(ExtensionDescriptor.newDescriptor("getNumberOfSpecies", this,
+				MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
+		list.add(ExtensionDescriptor.newDescriptor("getD", this, MacroExtension.ARG_NUMBER,
+				MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
+		list.add(ExtensionDescriptor.newDescriptor("getF", this, MacroExtension.ARG_NUMBER,
+				MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
+		list.add(ExtensionDescriptor.newDescriptor("getSpecies", this, MacroExtension.ARG_NUMBER,
+				MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT,
+				MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
 		return list.toArray(new ExtensionDescriptor[list.size()]);
 	}
 }

@@ -24,27 +24,31 @@ public class ClusteringSettings
 {
 	public enum OptimiserPlot
 	{
-		NONE("None"), NEAREST_NEIGHBOUR("Nearest neighbour"), BILINEAR("Bi-linear");
-
-		private String name;
-
-		private OptimiserPlot(String name)
-		{
-			this.name = name;
-		}
+		//@formatter:off
+		NONE{ public String getName() { return "None"; }}, 
+		NEAREST_NEIGHBOUR{ public String getName() { return "Nearest neighbour"; }}, 
+		BILINEAR{ public String getName() { return "Bi-linear"; }};
+		//@formatter:on
 
 		@Override
 		public String toString()
 		{
-			return name;
+			return getName();
 		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 	}
-	
+
 	public double distanceThreshold = 50;
 	public double distanceExclusion = 0;
 	public double timeThreshold = 5;
-	private TraceManager.TraceMode traceMode = TraceMode.LATEST_FORERUNNER; 
-	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE; 
+	private TraceManager.TraceMode traceMode = TraceMode.LATEST_FORERUNNER;
+	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE;
 	public int pulseInterval = 0;
 	public int pulseWindow = 0;
 	public boolean splitPulses = false;
@@ -75,19 +79,19 @@ public class ClusteringSettings
 	public int fitLength = 6;
 	public int fitRestarts = 3;
 	public int jumpDistance = 1;
-	
+
 	public OptimiserPlot getOptimiserPlot()
 	{
 		if (optimiserPlot == null)
 			optimiserPlot = OptimiserPlot.NONE;
 		return optimiserPlot;
 	}
-	
+
 	public void setOptimiserPlot(OptimiserPlot optimiserPlot)
 	{
 		this.optimiserPlot = optimiserPlot;
 	}
-	
+
 	public void setOptimiserPlot(int optimiserPlot)
 	{
 		if (optimiserPlot < 0 || optimiserPlot >= OptimiserPlot.values().length)
@@ -95,19 +99,19 @@ public class ClusteringSettings
 		else
 			this.optimiserPlot = OptimiserPlot.values()[optimiserPlot];
 	}
-	
+
 	public TraceMode getTraceMode()
 	{
 		if (traceMode == null)
 			traceMode = TraceMode.LATEST_FORERUNNER;
 		return traceMode;
 	}
-	
+
 	public void setTraceMode(TraceMode traceMode)
 	{
 		this.traceMode = traceMode;
 	}
-	
+
 	public void setTraceMode(int traceMode)
 	{
 		if (traceMode < 0 || traceMode >= TraceMode.values().length)
@@ -115,19 +119,19 @@ public class ClusteringSettings
 		else
 			this.traceMode = TraceMode.values()[traceMode];
 	}
-	
+
 	public ClusteringAlgorithm getClusteringAlgorithm()
 	{
 		if (clusteringAlgorithm == null)
 			clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE;
 		return clusteringAlgorithm;
 	}
-	
+
 	public void setClusteringAlgorithm(ClusteringAlgorithm clusteringAlgorithm)
 	{
 		this.clusteringAlgorithm = clusteringAlgorithm;
 	}
-	
+
 	public void setClusteringAlgorithm(int clusteringAlgorithm)
 	{
 		if (clusteringAlgorithm < 0 || clusteringAlgorithm >= ClusteringAlgorithm.values().length)
