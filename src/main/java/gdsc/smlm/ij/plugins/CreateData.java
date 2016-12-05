@@ -4753,29 +4753,72 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		return compounds;
 	}
 
+	private static int seedAddition = 0;
+	private boolean resetSeed = true;
+
+	private enum SeedMode
+	{
+		//@formatter:off
+		DEFAULT{ 
+			@Override boolean identicalOffset() { return false; }
+			@Override boolean identicalAddition() { return false; } },
+		REPRODUCE_EACH_STARTUP{ 
+				@Override boolean identicalOffset() { return true; }
+				@Override boolean identicalAddition() { return false; } },
+		REPRODUCE_EACH_RUN{ 
+			@Override boolean identicalOffset() { return true; }
+			@Override boolean identicalAddition() { return true; } };
+		//@formatter:on
+
+		/**
+		 * Set to true when the seed should not have a time dependent offset. This ensure that the plugin can be run at
+		 * any time from start-up and the simulation will be reproducible.
+		 *
+		 * @return true, if the seed offset should be identical
+		 */
+		abstract boolean identicalOffset();
+
+		/**
+		 * Set to true when the seed should have the same addition for each plugin execution. Set to false will ensure
+		 * subsequent runs of the plugin produce different simulations.
+		 *
+		 * @return true, if the seed addition should be reset for each plugin execution
+		 */
+		abstract boolean identicalAddition();
+	}
+
+	private SeedMode seedMode = SeedMode.DEFAULT;
+
+	private long getSeedOffset()
+	{
+		return (seedMode.identicalOffset()) ? 1 : System.currentTimeMillis() + System.identityHashCode(this);
+	}
+
+	private int getSeedAddition()
+	{
+		if (seedMode.identicalAddition())
+		{
+			if (resetSeed)
+			{
+				// Reset only once per plugin execution
+				resetSeed = false;
+				seedAddition = 0;
+			}
+		}
+		// Increment the seed to ensure that new generators are created at the same system time point
+		return seedAddition++;
+	}
+
 	/**
 	 * Get a random generator. The generators used in the simulation can be adjusted by changing this method.
 	 * 
-	 * @param seedAddition
-	 *            Added to the seed generated from the system time
-	 * @return A random generator
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.RandomGeneratorFactory#createRandomGenerator()
 	 */
-	private RandomGenerator createRandomGenerator(int seedAddition)
-	{
-		//return new Well44497b(System.currentTimeMillis() + System.identityHashCode(this) + seedAddition);
-
-		// Note: To make the simulation reproducible we can use a fixed offset 
-		return new Well44497b(1 + seedAddition);
-	}
-
-	// Note: To make the simulation reproducible we can use a static seed addition
-	//private static int seedAddition = 0;
-	private int seedAddition = 0;
-
 	public RandomGenerator createRandomGenerator()
 	{
-		// Increment the seed to ensure that new generators are created at the same system time point
-		return createRandomGenerator(seedAddition++);
+		return new Well44497b(getSeedOffset() + getSeedAddition());
 	}
 
 	private static void setBenchmarkResults(ImagePlus imp, MemoryPeakResults results)
