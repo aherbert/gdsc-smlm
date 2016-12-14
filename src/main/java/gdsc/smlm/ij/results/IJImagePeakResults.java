@@ -377,6 +377,30 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		updateImage();
 	}
 
+	/**
+	 * Map x to the location on the output image.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the output x
+	 */
+	public float mapX(float x)
+	{
+		return (x - bounds.x) * scale;
+	}
+
+	/**
+	 * Map y to the location on the output image.
+	 *
+	 * @param y
+	 *            the y
+	 * @return the output y
+	 */
+	public float mapY(float y)
+	{
+		return (y - bounds.y) * scale;
+	}
+
 	private float[] getValue(int peak, float[] params, double error, float x, float y, int x1, int y1)
 	{
 		// Add a count to each adjacent pixel
@@ -466,7 +490,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		// Avoid overrun
 		final int xDelta = (x == xlimit) ? 0 : 1;
 		final int yDelta = (y == ylimit) ? 0 : imageWidth;
-		
+
 		// Now add the values to the configured indices
 		synchronized (data)
 		{
@@ -625,7 +649,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			float[] value = getValue(result.peak, result.params, result.error, x, y, x1, y1);
 
 			int index = y1 * imageWidth + x1;
-			
+
 			// Avoid overrun
 			if (x == xlimit)
 			{
