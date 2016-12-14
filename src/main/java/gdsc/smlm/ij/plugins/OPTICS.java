@@ -413,11 +413,21 @@ public class OPTICS implements PlugIn, DialogListener
 						ConvexHull hull = ConvexHull.create(xx, yy, n);
 						if (hull != null)
 						{
+							// Convert the Hull to the correct image scale.
+							for (int i=0; i<hull.x.length; i++)
+							{
+								hull.x[i] = image.mapX(hull.x[i]);
+								hull.y[i] = image.mapX(hull.y[i]);
+							}
 							PolygonRoi roi = new PolygonRoi(hull.x, hull.y, Roi.POLYGON);
 							// TODO: Create a colour to match the LUT
 							//roi.setStrokeColor(color);
 							// TODO: Options to set a fill colour?
 							o.add(roi);
+							
+							// TODO: Print out the coordinates and the hull.
+							// The break to allow debugging.
+							
 						}
 					}
 				}
