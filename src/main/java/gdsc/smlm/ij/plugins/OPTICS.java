@@ -402,7 +402,7 @@ public class OPTICS implements PlugIn, DialogListener
 				{
 					traces[clusters[i++]].add(r);
 				}
-				TraceMolecules.saveResults(results, traces, "");
+				TraceMolecules.saveResults(results, traces, TITLE);
 			}
 
 			// We have not created anything new so return the current object
