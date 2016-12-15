@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.results;
 
+import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
 
@@ -77,7 +78,43 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	@Override
 	public void add(int peak, float x, float y, float v)
 	{
-		throw new RuntimeException(
+		throw new NotImplementedException(
+				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(float, float, float)
+	 */
+	@Override
+	public void add(float x, float y, float v)
+	{
+		throw new NotImplementedException(
+				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int[], float[], float[], float[])
+	 */
+	@Override
+	public void add(int[] allpeak, float[] allx, float[] ally, float[] allv)
+	{
+		throw new NotImplementedException(
+				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(float[], float[], float[])
+	 */
+	@Override
+	public void add(float[] allx, float[] ally, float[] allv)
+	{
+		throw new NotImplementedException(
 				"This method is not supported. Some PSF images require the PSF parameters for amplitude and angle.");
 	}
 
