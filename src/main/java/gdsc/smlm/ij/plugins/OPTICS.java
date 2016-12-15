@@ -132,8 +132,7 @@ public class OPTICS implements PlugIn, DialogListener
 
 		public Worker()
 		{
-			this.inbox = null;
-			this.outbox = null;
+			this(null, null);
 		}
 
 		public Worker(WorkStack inbox, WorkStack outbox)
@@ -486,31 +485,34 @@ public class OPTICS implements PlugIn, DialogListener
 			{
 				// Display the results ...
 
+				// TODO - Draw each cluster in a new colour. Set get an appropriate LUT.
+				// TODO: Options to not draw the points
+				
 				// Working coordinates
-				float[] x, y;
+				float[] x, y, v;
 				{
 					int i = 0;
 					x = new float[results.size()];
-					y = new float[results.size()];
+					y = new float[x.length];
+					v = new float[x.length];
 					for (PeakResult r : results.getResults())
 					{
 						x[i] = r.getXPosition();
-						y[i++] = r.getYPosition();
+						y[i] = r.getYPosition();
+						v[i] = clusters[i];
+						i++;
 					}
 				}
 
 				Rectangle bounds = results.getBounds();
 				image = new IJImagePeakResults(results.getName() + " " + TITLE, bounds,
 						(float) work.inputSettings.imageScale);
+				// TODO - options to control rendering
 				int displayFlags = IJImagePeakResults.DISPLAY_REPLACE; // | IJImagePeakResults.DISPLAY_WEIGHTED;
 				image.setDisplayFlags(displayFlags);
 				image.begin();
-				// TODO - Draw each cluster in a new colour. Set get an appropriate LUT.
-				for (int i = 0; i < x.length; i++)
-				{
-					// TODO: Options to not draw the points
-					image.add(0, x[i], y[i], clusters[i]);
-				}
+				// Add in a single batch
+				image.add(x, y, v);
 				image.end();
 			}
 
