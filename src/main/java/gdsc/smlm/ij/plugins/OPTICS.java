@@ -68,6 +68,7 @@ public class OPTICS implements PlugIn, DialogListener
 
 	private static class Work
 	{
+		long time = 0;
 		InputSettings inputSettings;
 		Settings settings;
 
@@ -134,7 +135,7 @@ public class OPTICS implements PlugIn, DialogListener
 			this.inbox = null;
 			this.outbox = null;
 		}
-		
+
 		public Worker(WorkStack inbox, WorkStack outbox)
 		{
 			this.inbox = inbox;
@@ -155,8 +156,9 @@ public class OPTICS implements PlugIn, DialogListener
 							debug("Inbox empty, waiting ...");
 							inbox.wait();
 						}
-						debug(" Found work");
 						work = inbox.getWork();
+						if (work != null)
+							debug(" Found work");
 					}
 					if (work == null)
 					{
@@ -168,6 +170,31 @@ public class OPTICS implements PlugIn, DialogListener
 						debug(" Not running, stopping");
 						break;
 					}
+
+					// Delay processing the work. Allows the work to be updated before we process it.
+					if (work.time != 0)
+					{
+						long time = work.time;
+						while (System.currentTimeMillis() < time)
+						{
+							debug(" Delaying");
+							Thread.sleep(50);
+							// Assume new work can be added to the inbox. Here we are peaking at the inbox
+							// so we do not take ownership with synchronized
+							if (inbox.work != null)
+								time = inbox.work.time;
+						}
+						// If we intend to modify the inbox then we should take ownership
+						synchronized (inbox)
+						{
+							if (!inbox.isEmpty())
+							{
+								work = inbox.getWork();
+								debug(" Found updated work");
+							}
+						}
+					}
+
 					if (!equals(work, lastWork))
 					{
 						// Create a new result
@@ -530,7 +557,7 @@ public class OPTICS implements PlugIn, DialogListener
 			{
 				int[] clusters = opticsResult.getClusters();
 				int max = Maths.max(clusters);
-				
+
 				// The current overlay may be fine. 
 				// If the result has cached convex hulls then assume we have constructed an overlay
 				// for these results.
@@ -769,7 +796,9 @@ public class OPTICS implements PlugIn, DialogListener
 			// Queue the settings
 			if (extraOptions)
 				System.out.println("Adding work:" + e);
-			inputStack.addWork(new Work(settings, results));
+			Work work = new Work(settings, results);
+			work.time = System.currentTimeMillis() + 100;
+			inputStack.addWork(work);
 		}
 
 		return true;
