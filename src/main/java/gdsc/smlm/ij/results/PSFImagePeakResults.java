@@ -102,7 +102,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		float y = (params[4] - bounds.y) * scale;
 
 		// Check bounds
-		if (x < 0 || x > xlimit || y < 0 || y > ylimit)
+		if (x < 0 || x > imageWidth || y < 0 || y > imageHeight)
 			return;
 
 		checkAndUpdateToFrame(peak);
