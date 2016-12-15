@@ -198,7 +198,7 @@ public class OPTICS implements PlugIn, DialogListener
 
 		private void debug(String msg)
 		{
-			//if (extraOptions)
+			if (extraOptions)
 				System.out.println(this.getClass().getSimpleName() + msg);
 		}
 
