@@ -91,7 +91,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	}
 
 	private static String TITLE = "Peak Results Manager";
-f
+
 	static String INPUT_FILE = "File";
 	static String INPUT_MEMORY = "Memory";
 	static String INPUT_NONE = "[None]";
