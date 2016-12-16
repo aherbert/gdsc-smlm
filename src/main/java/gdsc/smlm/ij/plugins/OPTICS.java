@@ -172,7 +172,7 @@ public class OPTICS implements PlugIn, DialogListener
 		{
 			return false;
 		}
-		
+
 		/**
 		 * @return True if the profile should be coloured using the cluster colour for top-cluster regions
 		 */
@@ -188,7 +188,7 @@ public class OPTICS implements PlugIn, DialogListener
 		{
 			return false;
 		}
-		
+
 		/**
 		 * @return True if the clusters are needed
 		 */
@@ -524,8 +524,22 @@ public class OPTICS implements PlugIn, DialogListener
 			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
 			// The second item should be the OPTICS manager
 			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-			OPTICSResult opticsResult = opticsManager.optics((float) work.inputSettings.generatingDistance,
-					work.inputSettings.minPoints);
+
+			double generatingDistance = work.inputSettings.generatingDistance;
+			if (generatingDistance > 0)
+			{
+				// Convert generating distance to pixels
+				double nmPerPixel = getNmPerPixel(results);
+				if (nmPerPixel != 1)
+				{
+					double newGeneratingDistance = generatingDistance / nmPerPixel;
+					Utils.log(TITLE + ": Converting generating distance %f to %f pixels", generatingDistance,
+							newGeneratingDistance);
+					generatingDistance = newGeneratingDistance;
+				}
+			}
+
+			OPTICSResult opticsResult = opticsManager.optics((float) generatingDistance, work.inputSettings.minPoints);
 			// It may be null if cancelled. However return null Work will close down the next thread
 			return new Work(work.inputSettings, results, opticsManager, opticsResult);
 		}
@@ -660,6 +674,9 @@ public class OPTICS implements PlugIn, DialogListener
 				return work;
 			}
 
+			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
+			double nmPerPixel = getNmPerPixel(results);
+
 			// Draw the reachability profile
 			PlotMode mode = work.inputSettings.plotMode;
 			if (mode != PlotMode.OFF)
@@ -669,9 +686,17 @@ public class OPTICS implements PlugIn, DialogListener
 				{
 					profile = opticsResult.getReachabilityDistanceProfile(true);
 				}
+				String units = " (px)";
+				if (nmPerPixel != 1)
+				{
+					units = " (nm)";
+					for (int i = 0; i < profile.length; i++)
+						profile[i] *= nmPerPixel;
+				}
+
 				double[] order = Utils.newArray(profile.length, 1.0, 1.0);
 				String title = TITLE + " Reachability Distance";
-				Plot plot = new Plot(title, "Order", "Reachability");
+				Plot plot = new Plot(title, "Order", "Reachability" + units);
 				double[] limits = Maths.limits(profile);
 
 				ArrayList<OPTICSCluster> clusters = null;
@@ -685,7 +710,7 @@ public class OPTICS implements PlugIn, DialogListener
 					{
 						clusters = opticsResult.getAllClusters();
 					}
-					
+
 					for (OPTICSCluster cluster : clusters)
 					{
 						if (maxLevel < cluster.getLevel())
@@ -694,7 +719,7 @@ public class OPTICS implements PlugIn, DialogListener
 							maxClusterId = cluster.clusterId;
 					}
 				}
-				
+
 				// Draw the clusters using lines underneath
 				if (mode.isDrawClusters())
 				{
@@ -1037,6 +1062,20 @@ public class OPTICS implements PlugIn, DialogListener
 	}
 
 	/**
+	 * Gets the nm per pixel.
+	 *
+	 * @param results
+	 *            the results
+	 * @return the nm per pixel
+	 */
+	public double getNmPerPixel(MemoryPeakResults results)
+	{
+		if (results.getCalibration() != null && results.getCalibration().nmPerPixel > 0)
+			return results.getCalibration().nmPerPixel;
+		return 1;
+	}
+
+	/**
 	 * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input.
 	 *
 	 * @param workers
@@ -1071,7 +1110,7 @@ public class OPTICS implements PlugIn, DialogListener
 		//globalSettings = SettingsManager.loadSettings();
 		//settings = globalSettings.getClusteringSettings();
 
-		gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2);
+		gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
 		gd.addNumericField("Min_points", inputSettings.minPoints, 0);
 		gd.addNumericField("Xi", inputSettings.xi, 4);
 		gd.addCheckbox("Top_clusters", inputSettings.topLevel);
