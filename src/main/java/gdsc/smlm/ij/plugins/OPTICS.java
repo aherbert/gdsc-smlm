@@ -336,7 +336,10 @@ public class OPTICS implements PlugIn, DialogListener
 			if (opticsResult != null)
 			{
 				int options = (work.inputSettings.topLevel) ? OPTICSResult.XI_OPTION_TOP_LEVEL : 0;
-				opticsResult.extractClusters(work.inputSettings.xi, options);
+				synchronized (opticsResult)
+				{
+					opticsResult.extractClusters(work.inputSettings.xi, options);
+				}
 				// We created a new clustering
 				clusterCount++;
 			}
@@ -387,7 +390,11 @@ public class OPTICS implements PlugIn, DialogListener
 			// It may be null if cancelled.
 			if (opticsResult != null)
 			{
-				int[] clusters = opticsResult.getClusters();
+				int[] clusters;
+				synchronized (opticsResult)
+				{
+					clusters = opticsResult.getClusters();
+				}
 				int max = Maths.max(clusters);
 
 				// Save the clusters to memory
@@ -434,7 +441,11 @@ public class OPTICS implements PlugIn, DialogListener
 			}
 
 			// Draw the reachability profile
-			double[] profile = opticsResult.getReachabilityDistanceProfile(true);
+			double[] profile;
+			synchronized (opticsResult)
+			{
+				profile = opticsResult.getReachabilityDistanceProfile(true);
+			}
 			double[] order = Utils.newArray(profile.length, 1.0, 1.0);
 			String title = TITLE + " Reachability Distance";
 			Plot plot = new Plot(title, "Order", "Reachability");
@@ -479,7 +490,11 @@ public class OPTICS implements PlugIn, DialogListener
 				return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount, image);
 			}
 
-			int[] clusters = opticsResult.getClusters();
+			int[] clusters;
+			synchronized (opticsResult)
+			{
+				clusters = opticsResult.getClusters();
+			}
 
 			if (work.inputSettings.imageScale > 0)
 			{
@@ -487,7 +502,7 @@ public class OPTICS implements PlugIn, DialogListener
 
 				// TODO - Draw each cluster in a new colour. Set get an appropriate LUT.
 				// TODO: Options to not draw the points
-				
+
 				// Working coordinates
 				float[] x, y, v;
 				{
@@ -557,7 +572,11 @@ public class OPTICS implements PlugIn, DialogListener
 
 			if (work.inputSettings.outline)
 			{
-				int[] clusters = opticsResult.getClusters();
+				int[] clusters;
+				synchronized (opticsResult)
+				{
+					clusters = opticsResult.getClusters();
+				}
 				int max = Maths.max(clusters);
 
 				// The current overlay may be fine. 
@@ -567,12 +586,21 @@ public class OPTICS implements PlugIn, DialogListener
 				{
 					// We need to recompute
 					o = new Overlay();
-					opticsResult.computeConvexHulls();
+					ConvexHull[] hulls = new ConvexHull[max + 1];
+					synchronized (opticsResult)
+					{
+						opticsResult.computeConvexHulls();
+						clusters = opticsResult.getClusters();
+						for (int c = 1; c <= max; c++)
+						{
+							hulls[c] = opticsResult.getConvexHull(c);
+						}
+					}
 
 					// Extract the ConvexHull of each cluster
 					for (int c = 1; c <= max; c++)
 					{
-						ConvexHull hull = opticsResult.getConvexHull(c);
+						ConvexHull hull = hulls[c];
 						if (hull != null)
 						{
 							// Convert the Hull to the correct image scale.
@@ -734,6 +762,8 @@ public class OPTICS implements PlugIn, DialogListener
 		return gd.wasCanceled();
 	}
 
+	private boolean delay = false;
+
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		if (e == null)
@@ -799,8 +829,17 @@ public class OPTICS implements PlugIn, DialogListener
 			if (extraOptions)
 				System.out.println("Adding work:" + e);
 			Work work = new Work(settings, results);
-			work.time = System.currentTimeMillis() + 100;
+			if (delay)
+				work.time = System.currentTimeMillis() + 100;
+			else
+				// Use a delay next time. This prevents delay when the preview is first switched on. 
+				delay = true;
 			inputStack.addWork(work);
+		}
+		else
+		{
+			// Preview is off so set no delay when the preview is first switched on
+			delay = false;
 		}
 
 		return true;
