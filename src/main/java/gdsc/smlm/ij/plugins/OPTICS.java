@@ -1112,6 +1112,7 @@ public class OPTICS implements PlugIn, DialogListener
 
 		gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
 		gd.addNumericField("Min_points", inputSettings.minPoints, 0);
+		gd.addMessage("Xi controls the change in reachability (profile steepness) to define a cluster");
 		gd.addNumericField("Xi", inputSettings.xi, 4);
 		gd.addCheckbox("Top_clusters", inputSettings.topLevel);
 		gd.addSlider("Image_Scale", 0, 15, inputSettings.imageScale);
