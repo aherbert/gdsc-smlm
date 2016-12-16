@@ -58,29 +58,17 @@ public class OPTICS implements PlugIn, DialogListener
 			@Override
 			public String getName() { return "Value"; };
 			@Override
-			float getValue(float value, int clusterId) { return value; }
-		},
-		VALUE_WEIGHTED {
-			@Override
-			public String getName() { return "Value (Weighted)"; };
+			boolean canBeWeighted() { return true; }
 			@Override
 			float getValue(float value, int clusterId) { return value; }
-			@Override
-			boolean isWeighted() { return true; }
 		},
 		COUNT {
 			@Override
 			public String getName() { return "Count"; };
 			@Override
-			float getValue(float value, int clusterId) { return 1f; }
-		},
-		COUNT_WEIGHTED {
-			@Override
-			public String getName() { return "Count (Weighted)"; };
+			boolean canBeWeighted() { return true; }
 			@Override
 			float getValue(float value, int clusterId) { return 1f; }
-			@Override
-			boolean isWeighted() { return true; }
 		},
 		NONE {
 			@Override
@@ -109,11 +97,11 @@ public class OPTICS implements PlugIn, DialogListener
 		abstract float getValue(float value, int clusterId);
 
 		/**
-		 * Checks if is weighted.
+		 * Can be weighted.
 		 *
-		 * @return true, if is weighted
+		 * @return true, if successful
 		 */
-		boolean isWeighted()
+		boolean canBeWeighted()
 		{
 			return false;
 		}
@@ -141,6 +129,8 @@ public class OPTICS implements PlugIn, DialogListener
 		// Affect display of results
 		double imageScale = 2;
 		ImageMode mode = ImageMode.CLUSTER_ID;
+		boolean weighted = false;
+		boolean equalised = false;
 
 		boolean outline = true;
 
@@ -341,7 +331,10 @@ public class OPTICS implements PlugIn, DialogListener
 
 			// We can compare these here using object references. 
 			// Any new results passed in will trigger equals to fail.
-			return work.settings.equals(lastWork.settings);
+			boolean result = work.settings.equals(lastWork.settings);
+			if (!result)
+				newResults();
+			return result;
 		}
 
 		/**
@@ -354,6 +347,13 @@ public class OPTICS implements PlugIn, DialogListener
 		abstract boolean equals(InputSettings current, InputSettings previous);
 
 		abstract Work createResult(Work work);
+
+		/**
+		 * Called when there are new results in the current work.
+		 */
+		void newResults()
+		{
+		}
 	}
 
 	private class InputWorker extends Worker
@@ -582,19 +582,27 @@ public class OPTICS implements PlugIn, DialogListener
 		{
 			if (current.imageScale != previous.imageScale)
 			{
-				image = null;
-				// We can cache the overlay only if the image is the same size
-				o = null;
+				// Clear all the cached results
+				newResults();
 				return false;
 			}
 			if (current.outline != previous.outline)
 				return false;
-			if (current.mode != previous.mode)
+			if (getDisplayFlags(current) != getDisplayFlags(previous))
 			{
+				// We can only cache the image if the display mode is the same
 				image = null;
 				return false;
 			}
 			return true;
+		}
+
+		@Override
+		void newResults()
+		{
+			// Clear cache
+			image = null;
+			o = null;
 		}
 
 		@Override
@@ -630,12 +638,8 @@ public class OPTICS implements PlugIn, DialogListener
 						(float) work.inputSettings.imageScale);
 				// TODO - options to control rendering
 				ImageMode mode = work.inputSettings.mode;
-				int displayFlags = 0; // | IJImagePeakResults.DISPLAY_WEIGHTED;
-				if (mode.isWeighted())
-					displayFlags |= IJImagePeakResults.DISPLAY_WEIGHTED;
-				if (mode == ImageMode.CLUSTER_ID)
-					displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
-				image.setDisplayFlags(displayFlags);
+				image.setDisplayFlags(getDisplayFlags(work.inputSettings));
+				image.setLiveImage(false);
 				image.begin();
 				ImagePlus imp = image.getImagePlus();
 				imp.setOverlay(null);
@@ -733,6 +737,21 @@ public class OPTICS implements PlugIn, DialogListener
 			}
 
 			return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount, image);
+		}
+
+		private int getDisplayFlags(InputSettings inputSettings)
+		{
+			int displayFlags = 0;
+			if (inputSettings.mode.canBeWeighted())
+			{
+				if (inputSettings.weighted)
+					displayFlags |= IJImagePeakResults.DISPLAY_WEIGHTED;
+				if (inputSettings.equalised)
+					displayFlags |= IJImagePeakResults.DISPLAY_EQUALIZED;
+			}
+			if (inputSettings.mode == ImageMode.CLUSTER_ID)
+				displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
+			return displayFlags;
 		}
 	}
 
@@ -856,6 +875,8 @@ public class OPTICS implements PlugIn, DialogListener
 		gd.addSlider("Image_Scale", 0, 15, inputSettings.imageScale);
 		String[] imageModes = SettingsManager.getNames((Object[]) ImageMode.values());
 		gd.addChoice("Image_mode", imageModes, imageModes[inputSettings.getImageMode()]);
+		gd.addCheckbox("Weighted", inputSettings.weighted);
+		gd.addCheckbox("Equalised", inputSettings.equalised);
 		gd.addCheckbox("Outline", inputSettings.outline);
 
 		// Start disabled so the user can choose settings to update
@@ -910,6 +931,8 @@ public class OPTICS implements PlugIn, DialogListener
 		settings.topLevel = gd.getNextBoolean();
 		settings.imageScale = gd.getNextNumber();
 		settings.setImageMode(gd.getNextChoiceIndex());
+		settings.weighted = gd.getNextBoolean();
+		settings.equalised = gd.getNextBoolean();
 		settings.outline = gd.getNextBoolean();
 		boolean preview = gd.getNextBoolean();
 
