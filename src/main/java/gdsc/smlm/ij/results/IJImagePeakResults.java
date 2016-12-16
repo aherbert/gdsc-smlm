@@ -86,6 +86,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	protected int displayFlags = 0;
 	private int rollingWindowSize = 0;
 	private boolean displayImage = true;
+	private boolean liveImage = true;
 
 	// Used to draw the image
 	private int nextRepaintSize = 0;
@@ -847,8 +848,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				//System.out.printf("%d => %d (%d)\n", currentFrame, currentFrame + rollingWindowSize, peak+rollingWindowSize);
 				if (i++ == 0)
 				{
-					nextRepaintSize = 0; // Force repaint 
-					updateImage(); // Draw all current data for first frame
+					// Draw all current data for first time we move forward.
+					// Force repaint 
+					forceUpdateImage();
 				}
 
 				ImageProcessor ip = createNewProcessor();
@@ -938,12 +940,26 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	protected void updateImage()
 	{
-		if (size < nextRepaintSize || !displayImage)
+		if (size < nextRepaintSize || !liveImage || !displayImage)
 			return;
 
 		if (!imp.isVisible())
 		{
 			//System.out.println("Image has been closed");
+			imageActive = false;
+			return;
+		}
+
+		drawImage();
+	}
+
+	/**
+	 * This forces all the current data to be written to the image. It is used when a rolling window is being drawn.
+	 */
+	private void forceUpdateImage()
+	{
+		if (!imp.isVisible())
+		{
 			imageActive = false;
 			return;
 		}
@@ -1156,5 +1172,26 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	public void setLutName(String lutName)
 	{
 		this.lutName = lutName;
+	}
+
+	/**
+	 * Checks if is live image. If true the image will be updated as data is added.
+	 *
+	 * @return true, if is live image
+	 */
+	public boolean isLiveImage()
+	{
+		return liveImage;
+	}
+
+	/**
+	 * Sets the live image flag. Set to true and the image will be updated as data is added.
+	 *
+	 * @param liveImage
+	 *            the new live image flag
+	 */
+	public void setLiveImage(boolean liveImage)
+	{
+		this.liveImage = liveImage;
 	}
 }
