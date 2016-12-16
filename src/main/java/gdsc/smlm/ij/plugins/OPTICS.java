@@ -187,6 +187,11 @@ public class OPTICS implements PlugIn, DialogListener
 		// We only support a stack size of 1
 		private Work work = null;
 
+		synchronized void setWork(Work work)
+		{
+			this.work = work;
+		}
+		
 		synchronized void addWork(Work work)
 		{
 			this.work = work;
@@ -792,7 +797,7 @@ public class OPTICS implements PlugIn, DialogListener
 			threads.add(t);
 		}
 
-		boolean cancelled = showDialog();
+		boolean cancelled = !showDialog();
 
 		// Finish work
 		for (int i = 0; i < threads.size(); i++)
@@ -800,12 +805,12 @@ public class OPTICS implements PlugIn, DialogListener
 			Thread t = threads.get(i);
 			Worker w = workers.get(i);
 
-			w.running = false;
-			w.inbox.close();
-
 			// Wait for threads to end
 			if (cancelled)
 			{
+				w.running = false;
+				w.inbox.close();
+				
 				// Stop immediately
 				try
 				{
@@ -827,6 +832,9 @@ public class OPTICS implements PlugIn, DialogListener
 				catch (InterruptedException e)
 				{
 				}
+				
+				w.running = false;
+				w.inbox.close();
 			}
 		}
 
@@ -887,20 +895,30 @@ public class OPTICS implements PlugIn, DialogListener
 
 		gd.showDialog();
 
-		return gd.wasCanceled();
+		if (gd.wasCanceled())
+			return false;
+
+		if (!isPreview)
+		{
+			// The dialog was OK'd so run if there was no preview result 
+			// (i.e. work was stashed in the input stack)
+			inputStack.addWork(inputStack.work);
+		}
+
+		return true;
 	}
 
-	private boolean delay = false;
+	private boolean isPreview = false;
 
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-		if (e == null)
-		{
-			// This happens when the dialog is first shown and can be ignored.
-			// It also happens when called from within a macro. In this case we should run.
-			if (!Utils.isMacro())
-				return true;
-		}
+//		if (e == null)
+//		{
+//			// This happens when the dialog is first shown and can be ignored.
+//			// It also happens when called from within a macro. In this case we should run.
+//			if (!Utils.isMacro())
+//				return true;
+//		}
 
 		if (extraOptions)
 			System.out.println("dialogItemChanged: " + e);
@@ -908,10 +926,13 @@ public class OPTICS implements PlugIn, DialogListener
 		// A previous run may have been cancelled so we have to handle this.
 		if (Utils.isInterrupted())
 		{
+			if (Utils.isMacro())
+				return true;
+
 			// Q. Should we ask if the user wants to restart?
 			IJ.resetEscape();
 		}
-
+		
 		InputSettings settings = new InputSettings();
 
 		settings.inputOption = ResultsManager.getInputSource(gd);
@@ -954,23 +975,25 @@ public class OPTICS implements PlugIn, DialogListener
 		// Store for next time
 		inputSettings = settings;
 
+		Work work = new Work(settings, results);
 		if (preview)
 		{
 			// Queue the settings
 			if (extraOptions)
-				System.out.println("Adding work:" + e);
-			Work work = new Work(settings, results);
-			if (delay)
+				System.out.println("Adding work");
+			if (isPreview)
+				// Use a delay next time. This prevents delay when the preview is first switched on. 
 				work.time = System.currentTimeMillis() + 100;
 			else
-				// Use a delay next time. This prevents delay when the preview is first switched on. 
-				delay = true;
+				isPreview = true;
 			inputStack.addWork(work);
 		}
 		else
 		{
-			// Preview is off so set no delay when the preview is first switched on
-			delay = false;
+			// Preview is off
+			isPreview = false;
+			// Stash the work (this does not notify the input worker)
+			inputStack.setWork(work);
 		}
 
 		return true;
