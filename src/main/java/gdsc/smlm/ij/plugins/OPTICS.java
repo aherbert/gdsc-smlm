@@ -16,6 +16,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -31,6 +32,7 @@ import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.process.LUTHelper;
+import ij.process.LUTHelper.LutColour;
 
 /**
  * Run the OPTICS algorithm on the peak results.
@@ -42,6 +44,86 @@ import ij.process.LUTHelper;
 public class OPTICS implements PlugIn, DialogListener
 {
 	private String TITLE = "OPTICS";
+
+	private enum ImageMode
+	{
+		//@formatter:off
+		CLUSTER_ID {
+			@Override
+			public String getName() { return "Cluster Id"; };
+			@Override
+			float getValue(float value, int clusterId) { return clusterId; }
+		},
+		VALUE {
+			@Override
+			public String getName() { return "Value"; };
+			@Override
+			float getValue(float value, int clusterId) { return value; }
+		},
+		VALUE_WEIGHTED {
+			@Override
+			public String getName() { return "Value (Weighted)"; };
+			@Override
+			float getValue(float value, int clusterId) { return value; }
+			@Override
+			boolean isWeighted() { return true; }
+		},
+		COUNT {
+			@Override
+			public String getName() { return "Count"; };
+			@Override
+			float getValue(float value, int clusterId) { return 1f; }
+		},
+		COUNT_WEIGHTED {
+			@Override
+			public String getName() { return "Count (Weighted)"; };
+			@Override
+			float getValue(float value, int clusterId) { return 1f; }
+			@Override
+			boolean isWeighted() { return true; }
+		},
+		NONE {
+			@Override
+			public String getName() { return "None"; };
+			@Override
+			float getValue(float value, int clusterId) { return 0; }
+		};
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+
+		/**
+		 * Return the value to draw
+		 * 
+		 * @param value
+		 *            The value of the cluster point
+		 * @param clusterId
+		 *            The cluster Id of the cluster point
+		 * @return The value
+		 */
+		abstract float getValue(float value, int clusterId);
+
+		/**
+		 * Checks if is weighted.
+		 *
+		 * @return true, if is weighted
+		 */
+		boolean isWeighted()
+		{
+			return false;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+	}
 
 	private static class InputSettings
 	{
@@ -58,7 +140,24 @@ public class OPTICS implements PlugIn, DialogListener
 
 		// Affect display of results
 		double imageScale = 2;
+		ImageMode mode = ImageMode.CLUSTER_ID;
+
 		boolean outline = true;
+
+		public int getImageMode()
+		{
+			if (mode == null)
+				return 0;
+			return mode.ordinal();
+		}
+
+		public void setImageMode(int mode)
+		{
+			ImageMode[] values = ImageMode.values();
+			if (mode < 0 || mode >= values.length)
+				mode = 0;
+			this.mode = values[mode];
+		}
 	}
 
 	private static InputSettings inputSettings = new InputSettings();
@@ -272,15 +371,19 @@ public class OPTICS implements PlugIn, DialogListener
 			// The first item should be the memory peak results 
 			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
 			// Convert results to coordinates
-			int size = results.size();
-			float[] x = new float[size];
-			float[] y = new float[size];
-			int i = 0;
-			for (PeakResult p : results)
+			float[] x, y;
+			synchronized (results)
 			{
-				x[i] = p.getXPosition();
-				y[i] = p.getYPosition();
-				i++;
+				int size = results.size();
+				x = new float[size];
+				y = new float[size];
+				int i = 0;
+				for (PeakResult p : results)
+				{
+					x[i] = p.getXPosition();
+					y[i] = p.getYPosition();
+					i++;
+				}
 			}
 			Rectangle bounds = results.getBounds(true);
 			OPTICSManager opticsManager = new OPTICSManager(x, y, bounds);
@@ -408,9 +511,12 @@ public class OPTICS implements PlugIn, DialogListener
 					traces[i].setId(i);
 				}
 				int i = 0;
-				for (PeakResult r : results.getResults())
+				synchronized (results)
 				{
-					traces[clusters[i++]].add(r);
+					for (PeakResult r : results.getResults())
+					{
+						traces[clusters[i++]].add(r);
+					}
 				}
 				TraceMolecules.saveResults(results, traces, TITLE);
 			}
@@ -469,13 +575,25 @@ public class OPTICS implements PlugIn, DialogListener
 	private class ImageResultsWorker extends Worker
 	{
 		IJImagePeakResults image = null;
+		Overlay o = null;
 
 		@Override
 		boolean equals(InputSettings current, InputSettings previous)
 		{
 			if (current.imageScale != previous.imageScale)
+			{
+				image = null;
+				// We can cache the overlay only if the image is the same size
+				o = null;
 				return false;
-			// TODO - options for other image output ...
+			}
+			if (current.outline != previous.outline)
+				return false;
+			if (current.mode != previous.mode)
+			{
+				image = null;
+				return false;
+			}
 			return true;
 		}
 
@@ -490,139 +608,120 @@ public class OPTICS implements PlugIn, DialogListener
 			if (opticsResult == null)
 			{
 				image = null;
+				o = null;
 				return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount, image);
 			}
 
-			int[] clusters;
-			synchronized (opticsResult)
-			{
-				clusters = opticsResult.getClusters();
-			}
+			int[] clusters = null;
 
-			if (work.inputSettings.imageScale > 0)
+			if (work.inputSettings.imageScale > 0 && image == null)
 			{
+				synchronized (opticsResult)
+				{
+					clusters = opticsResult.getClusters();
+				}
+
 				// Display the results ...
 
 				// TODO: Options to not draw the points
-
-				// Working coordinates
-				float[] x, y, v;
-				{
-					int i = 0;
-					x = new float[results.size()];
-					y = new float[x.length];
-					v = new float[x.length];
-					for (PeakResult r : results.getResults())
-					{
-						x[i] = r.getXPosition();
-						y[i] = r.getYPosition();
-						v[i] = clusters[i];
-						i++;
-					}
-				}
 
 				Rectangle bounds = results.getBounds();
 				image = new IJImagePeakResults(results.getName() + " " + TITLE, bounds,
 						(float) work.inputSettings.imageScale);
 				// TODO - options to control rendering
-				int displayFlags = IJImagePeakResults.DISPLAY_REPLACE; // | IJImagePeakResults.DISPLAY_WEIGHTED;
+				ImageMode mode = work.inputSettings.mode;
+				int displayFlags = 0; // | IJImagePeakResults.DISPLAY_WEIGHTED;
+				if (mode.isWeighted())
+					displayFlags |= IJImagePeakResults.DISPLAY_WEIGHTED;
+				if (mode == ImageMode.CLUSTER_ID)
+					displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
 				image.setDisplayFlags(displayFlags);
 				image.begin();
-				// Draw each cluster in a new colour. Set get an appropriate LUT.
-				image.getImagePlus().getProcessor().setColorModel(Utils.getColorModel());
-				// Add in a single batch
-				image.add(x, y, v);
-				image.end();
-				image.getImagePlus().getWindow().toFront();
-			}
-
-			return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount, image);
-		}
-	}
-
-	private class OverlayResultsWorker extends Worker
-	{
-		Overlay o = null;
-
-		@Override
-		boolean equals(InputSettings current, InputSettings previous)
-		{
-			if (current.imageScale != previous.imageScale)
-			{
-				// We can cache the overlay only if the image is the same size
-				o = null;
-				return false;
-			}
-			if (current.outline != previous.outline)
-				return false;
-			// TODO - options for other results output ...
-			return true;
-		}
-
-		@Override
-		Work createResult(Work work)
-		{
-			OPTICSResult opticsResult = (OPTICSResult) work.settings.get(2);
-			// It may be null if cancelled.
-			if (opticsResult == null)
-			{
-				return work;
-			}
-			IJImagePeakResults image = (IJImagePeakResults) work.settings.get(4);
-			if (image == null)
-			{
-				return work;
-			}
-			ImagePlus imp = image.getImagePlus();
-
-			if (work.inputSettings.outline)
-			{
-				int[] clusters;
-				synchronized (opticsResult)
+				ImagePlus imp = image.getImagePlus();
+				imp.setOverlay(null);
+				if (mode != ImageMode.NONE)
 				{
-					clusters = opticsResult.getClusters();
-				}
-				int max = Maths.max(clusters);
+					// Draw each cluster in a new colour. Set get an appropriate LUT.
+					LUT lut = (mode == ImageMode.CLUSTER_ID) ? Utils.getColorModel()
+							: LUTHelper.createLUT(LutColour.FIRE);
+					image.getImagePlus().getProcessor().setColorModel(lut);
 
-				// The current overlay may be fine. 
-				// If the result has cached convex hulls then assume we have constructed an overlay
-				// for these results.
-				if (!opticsResult.hasConvexHulls() || o == null)
-				{
-					// We need to recompute
-					o = new Overlay();
-					ConvexHull[] hulls = new ConvexHull[max + 1];
-					synchronized (opticsResult)
+					// Add in a single batch
+					float[] x, y, v;
+					synchronized (results)
 					{
-						opticsResult.computeConvexHulls();
-						clusters = opticsResult.getClusters();
-						for (int c = 1; c <= max; c++)
+						int i = 0;
+						x = new float[results.size()];
+						y = new float[x.length];
+						v = new float[x.length];
+						for (PeakResult r : results.getResults())
 						{
-							hulls[c] = opticsResult.getConvexHull(c);
+							x[i] = r.getXPosition();
+							y[i] = r.getYPosition();
+							v[i] = mode.getValue(r.getSignal(), clusters[i]);
+							i++;
 						}
 					}
+					image.add(x, y, v);
+				}
+				image.end();
+				imp.getWindow().toFront();
+			}
 
-					// Create a colour to match the LUT
-					LUT lut = Utils.getColorModel();
-					// Extract the ConvexHull of each cluster
-					for (int c = 1; c <= max; c++)
+			ImagePlus imp = image.getImagePlus();
+			if (work.inputSettings.outline)
+			{
+				if (o == null)
+				{
+					if (clusters == null)
 					{
-						ConvexHull hull = hulls[c];
-						if (hull != null)
+						synchronized (opticsResult)
 						{
-							// Convert the Hull to the correct image scale.
-							float[] x = hull.x.clone();
-							float[] y = hull.y.clone();
-							for (int i = 0; i < x.length; i++)
+							clusters = opticsResult.getClusters();
+						}
+					}
+					int max = Maths.max(clusters);
+
+					// The current overlay may be fine. 
+					// If the result has cached convex hulls then assume we have constructed an overlay
+					// for these results.
+					if (!opticsResult.hasConvexHulls() || o == null)
+					{
+						// We need to recompute
+						o = new Overlay();
+						ConvexHull[] hulls = new ConvexHull[max + 1];
+						synchronized (opticsResult)
+						{
+							opticsResult.computeConvexHulls();
+							clusters = opticsResult.getClusters();
+							for (int c = 1; c <= max; c++)
 							{
-								x[i] = image.mapX(x[i]);
-								y[i] = image.mapX(y[i]);
+								hulls[c] = opticsResult.getConvexHull(c);
 							}
-							PolygonRoi roi = new PolygonRoi(x, y, Roi.POLYGON);
-							Color color = LUTHelper.getColour(lut, c, 0f, max);
-							roi.setStrokeColor(color);
-							// TODO: Options to set a fill colour?
-							o.add(roi);
+						}
+
+						// Create a colour to match the LUT
+						LUT lut = Utils.getColorModel();
+						// Extract the ConvexHull of each cluster
+						for (int c = 1; c <= max; c++)
+						{
+							ConvexHull hull = hulls[c];
+							if (hull != null)
+							{
+								// Convert the Hull to the correct image scale.
+								float[] x = hull.x.clone();
+								float[] y = hull.y.clone();
+								for (int i = 0; i < x.length; i++)
+								{
+									x[i] = image.mapX(x[i]);
+									y[i] = image.mapX(y[i]);
+								}
+								PolygonRoi roi = new PolygonRoi(x, y, Roi.POLYGON);
+								Color color = LUTHelper.getColour(lut, c, 0f, max);
+								roi.setStrokeColor(color);
+								// TODO: Options to set a fill colour?
+								o.add(roi);
+							}
 						}
 					}
 				}
@@ -632,9 +731,8 @@ public class OPTICS implements PlugIn, DialogListener
 			{
 				imp.setOverlay(null);
 			}
-			imp.getWindow().toFront();
 
-			return work;
+			return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount, image);
 		}
 	}
 
@@ -664,7 +762,6 @@ public class OPTICS implements PlugIn, DialogListener
 		add(workers, new MemoryResultsWorker());
 		add(workers, new ReachabilityResultsWorker());
 		add(workers, new ImageResultsWorker());
-		add(workers, new OverlayResultsWorker());
 
 		ArrayList<Thread> threads = new ArrayList<Thread>();
 
@@ -757,6 +854,8 @@ public class OPTICS implements PlugIn, DialogListener
 		gd.addNumericField("Xi", inputSettings.xi, 4);
 		gd.addCheckbox("Top_clusters", inputSettings.topLevel);
 		gd.addSlider("Image_Scale", 0, 15, inputSettings.imageScale);
+		String[] imageModes = SettingsManager.getNames((Object[]) ImageMode.values());
+		gd.addChoice("Image_mode", imageModes, imageModes[inputSettings.getImageMode()]);
 		gd.addCheckbox("Outline", inputSettings.outline);
 
 		// Start disabled so the user can choose settings to update
@@ -810,6 +909,7 @@ public class OPTICS implements PlugIn, DialogListener
 		settings.xi = gd.getNextNumber();
 		settings.topLevel = gd.getNextBoolean();
 		settings.imageScale = gd.getNextNumber();
+		settings.setImageMode(gd.getNextChoiceIndex());
 		settings.outline = gd.getNextBoolean();
 		boolean preview = gd.getNextBoolean();
 
