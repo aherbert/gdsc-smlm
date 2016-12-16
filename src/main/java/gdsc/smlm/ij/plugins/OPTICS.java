@@ -4,7 +4,9 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import gdsc.core.clustering.optics.OPTICSCluster;
 import gdsc.core.clustering.optics.OPTICSManager;
 import gdsc.core.clustering.optics.OPTICSResult;
 import gdsc.core.ij.IJTrackProgress;
@@ -113,6 +115,95 @@ public class OPTICS implements PlugIn, DialogListener
 		}
 	}
 
+	private enum PlotMode
+	{
+		//@formatter:off
+		ON {
+			@Override
+			public String getName() { return "On"; };
+		},
+		WITH_CLUSTERS {
+			@Override
+			public String getName() { return "With clusters"; };
+			@Override
+			boolean isDrawClusters() { return true; }
+		},
+		HIGHLIGHTED {
+			@Override
+			public String getName() { return "Highlighted"; };
+			@Override
+			boolean isHighlightProfile() { return true; }
+		},
+		HIGHLIGHTED_WITH_CLUSTERS {
+			@Override
+			public String getName() { return "Highlighted with clusters"; };
+			@Override
+			boolean isHighlightProfile() { return true; }
+			@Override
+			boolean isDrawClusters() { return true; }
+		},
+		COLOURED_WITH_CLUSTERS {
+			@Override
+			public String getName() { return "Coloured with clusters"; };
+			@Override
+			boolean isHighlightProfile() { return true; }
+			@Override
+			boolean isColourProfile() { return true; }
+			@Override
+			boolean isDrawClusters() { return true; }
+		},
+		OFF {
+			@Override
+			public String getName() { return "Off"; };
+		};
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+
+		/**
+		 * @return True if the profile should be highlighted for top-cluster regions
+		 */
+		boolean isHighlightProfile()
+		{
+			return false;
+		}
+		
+		/**
+		 * @return True if the profile should be coloured using the cluster colour for top-cluster regions
+		 */
+		boolean isColourProfile()
+		{
+			return false;
+		}
+
+		/**
+		 * @return If clusters should be drawn on the plot
+		 */
+		boolean isDrawClusters()
+		{
+			return false;
+		}
+		
+		/**
+		 * @return True if the clusters are needed
+		 */
+		boolean requiresClusters()
+		{
+			return isDrawClusters() || isHighlightProfile() || isColourProfile();
+		}
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+	}
+
 	private static class InputSettings
 	{
 		// Affect creating the OPTICS manager
@@ -128,17 +219,19 @@ public class OPTICS implements PlugIn, DialogListener
 
 		// Affect display of results
 		double imageScale = 2;
-		ImageMode mode = ImageMode.CLUSTER_ID;
+		ImageMode imageMode = ImageMode.CLUSTER_ID;
 		boolean weighted = false;
 		boolean equalised = false;
+
+		PlotMode plotMode = PlotMode.COLOURED_WITH_CLUSTERS;
 
 		boolean outline = true;
 
 		public int getImageMode()
 		{
-			if (mode == null)
+			if (imageMode == null)
 				return 0;
-			return mode.ordinal();
+			return imageMode.ordinal();
 		}
 
 		public void setImageMode(int mode)
@@ -146,7 +239,22 @@ public class OPTICS implements PlugIn, DialogListener
 			ImageMode[] values = ImageMode.values();
 			if (mode < 0 || mode >= values.length)
 				mode = 0;
-			this.mode = values[mode];
+			this.imageMode = values[mode];
+		}
+
+		public int getPlotMode()
+		{
+			if (plotMode == null)
+				return 0;
+			return plotMode.ordinal();
+		}
+
+		public void setPlotMode(int mode)
+		{
+			PlotMode[] values = PlotMode.values();
+			if (mode < 0 || mode >= values.length)
+				mode = 0;
+			this.plotMode = values[mode];
 		}
 	}
 
@@ -191,7 +299,7 @@ public class OPTICS implements PlugIn, DialogListener
 		{
 			this.work = work;
 		}
-		
+
 		synchronized void addWork(Work work)
 		{
 			this.work = work;
@@ -536,10 +644,8 @@ public class OPTICS implements PlugIn, DialogListener
 		@Override
 		boolean equals(InputSettings current, InputSettings previous)
 		{
-			// Only depends on if the OPTICS results are new. This is triggered 
-			// in the default comparison of the Settings object.
-
-			// TODO - add options to control the plot output
+			if (current.plotMode != previous.plotMode)
+				return false;
 
 			return true;
 		}
@@ -555,22 +661,97 @@ public class OPTICS implements PlugIn, DialogListener
 			}
 
 			// Draw the reachability profile
-			double[] profile;
-			synchronized (opticsResult)
+			PlotMode mode = work.inputSettings.plotMode;
+			if (mode != PlotMode.OFF)
 			{
-				profile = opticsResult.getReachabilityDistanceProfile(true);
-			}
-			double[] order = Utils.newArray(profile.length, 1.0, 1.0);
-			String title = TITLE + " Reachability Distance";
-			Plot plot = new Plot(title, "Order", "Reachability");
-			double[] limits = Maths.limits(profile);
-			// We should update the limits if we are plotting lines underneath for the clusters
-			limits[0] = 0;
-			plot.setLimits(1, order.length, limits[0], limits[1] * 1.05);
-			plot.addPoints(order, profile, Plot.LINE);
-			// TODO - Draw the clusters using lines underneath
+				double[] profile;
+				synchronized (opticsResult)
+				{
+					profile = opticsResult.getReachabilityDistanceProfile(true);
+				}
+				double[] order = Utils.newArray(profile.length, 1.0, 1.0);
+				String title = TITLE + " Reachability Distance";
+				Plot plot = new Plot(title, "Order", "Reachability");
+				double[] limits = Maths.limits(profile);
 
-			Utils.display(title, plot);
+				ArrayList<OPTICSCluster> clusters = null;
+				LUT lut = Utils.getColorModel();
+				int maxClusterId = 0;
+				int maxLevel = 0;
+
+				if (mode.requiresClusters())
+				{
+					synchronized (opticsResult)
+					{
+						clusters = opticsResult.getAllClusters();
+					}
+					
+					for (OPTICSCluster cluster : clusters)
+					{
+						if (maxLevel < cluster.getLevel())
+							maxLevel = cluster.getLevel();
+						if (maxClusterId < cluster.clusterId)
+							maxClusterId = cluster.clusterId;
+					}
+				}
+				
+				// Draw the clusters using lines underneath
+				if (mode.isDrawClusters())
+				{
+					// TODO - Get a good distance to start the lines, and the separation
+					double start = -limits[0];
+					double separation = limits[0];
+
+					for (OPTICSCluster cluster : clusters)
+					{
+						int level = cluster.getLevel();
+						double y = start - (maxLevel - level) * separation;
+						Color color = LUTHelper.getColour(lut, cluster.clusterId, 0f, maxClusterId);
+						plot.setColor(color);
+						plot.drawLine(cluster.start, y, cluster.end, y);
+					}
+
+					// Update the limits if we are plotting lines underneath for the clusters
+					limits[0] = start - (maxLevel + 1) * separation;
+				}
+				else
+				{
+					// Just plot to zero
+					limits[0] = 0;
+				}
+
+				plot.setLimits(1, order.length, limits[0], limits[1] * 1.05);
+
+				plot.setColor(Color.black);
+				plot.addPoints(order, profile, Plot.LINE);
+
+				// Colour the reachability plot line if it is in a cluster. Use a default colour 
+				plot.setColor(Color.blue);
+				if (mode.isHighlightProfile())
+				{
+					for (OPTICSCluster cluster : clusters)
+					{
+						// Only do top level clusters
+						if (cluster.getLevel() != 0)
+							continue;
+
+						if (mode.isColourProfile())
+							plot.setColor(LUTHelper.getColour(lut, cluster.clusterId, 0f, maxClusterId));
+						int from = cluster.start;
+						int to = cluster.end + 1;
+						double[] order1 = Arrays.copyOfRange(order, from, to);
+						double[] profile1 = Arrays.copyOfRange(profile, from, to);
+						plot.addPoints(order1, profile1, Plot.LINE);
+					}
+				}
+
+				Utils.display(title, plot);
+			}
+			else
+			{
+				// We could close an existing plot here. 
+				// However we leave it as the user may wish to keep it for something.
+			}
 
 			// We have not created anything new so return the current object
 			return work;
@@ -627,118 +808,132 @@ public class OPTICS implements PlugIn, DialogListener
 
 			int[] clusters = null;
 
-			if (work.inputSettings.imageScale > 0 && image == null)
+			if (work.inputSettings.imageScale > 0)
 			{
-				synchronized (opticsResult)
+				if (image == null)
 				{
-					clusters = opticsResult.getClusters();
-				}
-
-				// Display the results ...
-
-				// TODO: Options to not draw the points
-
-				Rectangle bounds = results.getBounds();
-				image = new IJImagePeakResults(results.getName() + " " + TITLE, bounds,
-						(float) work.inputSettings.imageScale);
-				// TODO - options to control rendering
-				ImageMode mode = work.inputSettings.mode;
-				image.setDisplayFlags(getDisplayFlags(work.inputSettings));
-				image.setLiveImage(false);
-				image.begin();
-				ImagePlus imp = image.getImagePlus();
-				imp.setOverlay(null);
-				if (mode != ImageMode.NONE)
-				{
-					// Draw each cluster in a new colour. Set get an appropriate LUT.
-					LUT lut = (mode == ImageMode.CLUSTER_ID) ? Utils.getColorModel()
-							: LUTHelper.createLUT(LutColour.FIRE);
-					image.getImagePlus().getProcessor().setColorModel(lut);
-
-					// Add in a single batch
-					float[] x, y, v;
-					synchronized (results)
+					synchronized (opticsResult)
 					{
-						int i = 0;
-						x = new float[results.size()];
-						y = new float[x.length];
-						v = new float[x.length];
-						for (PeakResult r : results.getResults())
-						{
-							x[i] = r.getXPosition();
-							y[i] = r.getYPosition();
-							v[i] = mode.getValue(r.getSignal(), clusters[i]);
-							i++;
-						}
+						clusters = opticsResult.getClusters();
 					}
-					image.add(x, y, v);
-				}
-				image.end();
-				imp.getWindow().toFront();
-			}
 
-			ImagePlus imp = image.getImagePlus();
-			if (work.inputSettings.outline)
-			{
-				if (o == null)
-				{
-					if (clusters == null)
-					{
-						synchronized (opticsResult)
-						{
-							clusters = opticsResult.getClusters();
-						}
-					}
-					int max = Maths.max(clusters);
+					// Display the results ...
 
-					// The current overlay may be fine. 
-					// If the result has cached convex hulls then assume we have constructed an overlay
-					// for these results.
-					if (!opticsResult.hasConvexHulls() || o == null)
+					// TODO: Options to not draw the points
+
+					Rectangle bounds = results.getBounds();
+					image = new IJImagePeakResults(results.getName() + " " + TITLE, bounds,
+							(float) work.inputSettings.imageScale);
+					// TODO - options to control rendering
+					ImageMode mode = work.inputSettings.imageMode;
+					image.setDisplayFlags(getDisplayFlags(work.inputSettings));
+					image.setLiveImage(false);
+					image.begin();
+					ImagePlus imp = image.getImagePlus();
+					imp.setOverlay(null);
+					if (mode != ImageMode.NONE)
 					{
-						// We need to recompute
-						o = new Overlay();
-						ConvexHull[] hulls = new ConvexHull[max + 1];
-						synchronized (opticsResult)
+						// Draw each cluster in a new colour. Set get an appropriate LUT.
+						LUT lut = (mode == ImageMode.CLUSTER_ID) ? Utils.getColorModel()
+								: LUTHelper.createLUT(LutColour.FIRE);
+						image.getImagePlus().getProcessor().setColorModel(lut);
+
+						// Add in a single batch
+						float[] x, y, v;
+						synchronized (results)
 						{
-							opticsResult.computeConvexHulls();
-							clusters = opticsResult.getClusters();
-							for (int c = 1; c <= max; c++)
+							int i = 0;
+							x = new float[results.size()];
+							y = new float[x.length];
+							v = new float[x.length];
+							for (PeakResult r : results.getResults())
 							{
-								hulls[c] = opticsResult.getConvexHull(c);
+								x[i] = r.getXPosition();
+								y[i] = r.getYPosition();
+								v[i] = mode.getValue(r.getSignal(), clusters[i]);
+								i++;
 							}
 						}
-
-						// Create a colour to match the LUT
-						LUT lut = Utils.getColorModel();
-						// Extract the ConvexHull of each cluster
-						for (int c = 1; c <= max; c++)
-						{
-							ConvexHull hull = hulls[c];
-							if (hull != null)
-							{
-								// Convert the Hull to the correct image scale.
-								float[] x = hull.x.clone();
-								float[] y = hull.y.clone();
-								for (int i = 0; i < x.length; i++)
-								{
-									x[i] = image.mapX(x[i]);
-									y[i] = image.mapX(y[i]);
-								}
-								PolygonRoi roi = new PolygonRoi(x, y, Roi.POLYGON);
-								Color color = LUTHelper.getColour(lut, c, 0f, max);
-								roi.setStrokeColor(color);
-								// TODO: Options to set a fill colour?
-								o.add(roi);
-							}
-						}
+						image.add(x, y, v);
 					}
+					image.end();
+					imp.getWindow().toFront();
 				}
-				imp.setOverlay(o);
 			}
 			else
 			{
-				imp.setOverlay(null);
+				// We could close an image here. 
+				// However we leave it as the user may wish to keep it for something.
+			}
+
+			// Note: If the image scale is set to zero then the image cache will be cleared and the image will be null.
+			// This will prevent computing an overlay even if the 'outline' setting is enabled.
+
+			if (image != null)
+			{
+				ImagePlus imp = image.getImagePlus();
+				if (work.inputSettings.outline)
+				{
+					if (o == null)
+					{
+						if (clusters == null)
+						{
+							synchronized (opticsResult)
+							{
+								clusters = opticsResult.getClusters();
+							}
+						}
+						int max = Maths.max(clusters);
+
+						// The current overlay may be fine. 
+						// If the result has cached convex hulls then assume we have constructed an overlay
+						// for these results.
+						if (!opticsResult.hasConvexHulls() || o == null)
+						{
+							// We need to recompute
+							o = new Overlay();
+							ConvexHull[] hulls = new ConvexHull[max + 1];
+							synchronized (opticsResult)
+							{
+								opticsResult.computeConvexHulls();
+								clusters = opticsResult.getClusters();
+								for (int c = 1; c <= max; c++)
+								{
+									hulls[c] = opticsResult.getConvexHull(c);
+								}
+							}
+
+							// Create a colour to match the LUT
+							LUT lut = Utils.getColorModel();
+							// Extract the ConvexHull of each cluster
+							for (int c = 1; c <= max; c++)
+							{
+								ConvexHull hull = hulls[c];
+								if (hull != null)
+								{
+									// Convert the Hull to the correct image scale.
+									float[] x = hull.x.clone();
+									float[] y = hull.y.clone();
+									for (int i = 0; i < x.length; i++)
+									{
+										x[i] = image.mapX(x[i]);
+										y[i] = image.mapX(y[i]);
+									}
+									PolygonRoi roi = new PolygonRoi(x, y, Roi.POLYGON);
+									Color color = LUTHelper.getColour(lut, c, 0f, max);
+									roi.setStrokeColor(color);
+									// TODO: Options to set a fill colour?
+									o.add(roi);
+								}
+							}
+						}
+					}
+					imp.setOverlay(o);
+				}
+				else
+				{
+					imp.setOverlay(null);
+				}
 			}
 
 			return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount, image);
@@ -747,14 +942,14 @@ public class OPTICS implements PlugIn, DialogListener
 		private int getDisplayFlags(InputSettings inputSettings)
 		{
 			int displayFlags = 0;
-			if (inputSettings.mode.canBeWeighted())
+			if (inputSettings.imageMode.canBeWeighted())
 			{
 				if (inputSettings.weighted)
 					displayFlags |= IJImagePeakResults.DISPLAY_WEIGHTED;
 				if (inputSettings.equalised)
 					displayFlags |= IJImagePeakResults.DISPLAY_EQUALIZED;
 			}
-			if (inputSettings.mode == ImageMode.CLUSTER_ID)
+			if (inputSettings.imageMode == ImageMode.CLUSTER_ID)
 				displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
 			return displayFlags;
 		}
@@ -810,7 +1005,7 @@ public class OPTICS implements PlugIn, DialogListener
 			{
 				w.running = false;
 				w.inbox.close();
-				
+
 				// Stop immediately
 				try
 				{
@@ -832,7 +1027,7 @@ public class OPTICS implements PlugIn, DialogListener
 				catch (InterruptedException e)
 				{
 				}
-				
+
 				w.running = false;
 				w.inbox.close();
 			}
@@ -886,6 +1081,8 @@ public class OPTICS implements PlugIn, DialogListener
 		gd.addCheckbox("Weighted", inputSettings.weighted);
 		gd.addCheckbox("Equalised", inputSettings.equalised);
 		gd.addCheckbox("Outline", inputSettings.outline);
+		String[] plotModes = SettingsManager.getNames((Object[]) PlotMode.values());
+		gd.addChoice("Plot_mode", plotModes, plotModes[inputSettings.getPlotMode()]);
 
 		// Start disabled so the user can choose settings to update
 		gd.addCheckbox("Preview", false);
@@ -900,8 +1097,7 @@ public class OPTICS implements PlugIn, DialogListener
 
 		if (!isPreview)
 		{
-			// The dialog was OK'd so run if there was no preview result 
-			// (i.e. work was stashed in the input stack)
+			// The dialog was OK'd so run if work was stashed in the input stack.
 			inputStack.addWork(inputStack.work);
 		}
 
@@ -912,13 +1108,13 @@ public class OPTICS implements PlugIn, DialogListener
 
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
-//		if (e == null)
-//		{
-//			// This happens when the dialog is first shown and can be ignored.
-//			// It also happens when called from within a macro. In this case we should run.
-//			if (!Utils.isMacro())
-//				return true;
-//		}
+		//		if (e == null)
+		//		{
+		//			// This happens when the dialog is first shown and can be ignored.
+		//			// It also happens when called from within a macro. In this case we should run.
+		//			if (!Utils.isMacro())
+		//				return true;
+		//		}
 
 		if (extraOptions)
 			System.out.println("dialogItemChanged: " + e);
@@ -932,7 +1128,7 @@ public class OPTICS implements PlugIn, DialogListener
 			// Q. Should we ask if the user wants to restart?
 			IJ.resetEscape();
 		}
-		
+
 		InputSettings settings = new InputSettings();
 
 		settings.inputOption = ResultsManager.getInputSource(gd);
@@ -955,6 +1151,7 @@ public class OPTICS implements PlugIn, DialogListener
 		settings.weighted = gd.getNextBoolean();
 		settings.equalised = gd.getNextBoolean();
 		settings.outline = gd.getNextBoolean();
+		settings.setPlotMode(gd.getNextChoiceIndex());
 		boolean preview = gd.getNextBoolean();
 
 		if (gd.invalidNumber())
