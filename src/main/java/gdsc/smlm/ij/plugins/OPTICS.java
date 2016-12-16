@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
@@ -28,6 +29,8 @@ import ij.gui.Plot;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.process.LUT;
+import ij.process.LUTHelper;
 
 /**
  * Run the OPTICS algorithm on the peak results.
@@ -500,7 +503,6 @@ public class OPTICS implements PlugIn, DialogListener
 			{
 				// Display the results ...
 
-				// TODO - Draw each cluster in a new colour. Set get an appropriate LUT.
 				// TODO: Options to not draw the points
 
 				// Working coordinates
@@ -526,9 +528,12 @@ public class OPTICS implements PlugIn, DialogListener
 				int displayFlags = IJImagePeakResults.DISPLAY_REPLACE; // | IJImagePeakResults.DISPLAY_WEIGHTED;
 				image.setDisplayFlags(displayFlags);
 				image.begin();
+				// Draw each cluster in a new colour. Set get an appropriate LUT.
+				image.getImagePlus().getProcessor().setColorModel(Utils.getColorModel());
 				// Add in a single batch
 				image.add(x, y, v);
 				image.end();
+				image.getImagePlus().getWindow().toFront();
 			}
 
 			return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount, image);
@@ -597,6 +602,8 @@ public class OPTICS implements PlugIn, DialogListener
 						}
 					}
 
+					// Create a colour to match the LUT
+					LUT lut = Utils.getColorModel();
 					// Extract the ConvexHull of each cluster
 					for (int c = 1; c <= max; c++)
 					{
@@ -612,8 +619,8 @@ public class OPTICS implements PlugIn, DialogListener
 								y[i] = image.mapX(y[i]);
 							}
 							PolygonRoi roi = new PolygonRoi(x, y, Roi.POLYGON);
-							// TODO: Create a colour to match the LUT
-							//roi.setStrokeColor(color);
+							Color color = LUTHelper.getColour(lut, c, 0f, max);
+							roi.setStrokeColor(color);
 							// TODO: Options to set a fill colour?
 							o.add(roi);
 						}
@@ -625,6 +632,7 @@ public class OPTICS implements PlugIn, DialogListener
 			{
 				imp.setOverlay(null);
 			}
+			imp.getWindow().toFront();
 
 			return work;
 		}
