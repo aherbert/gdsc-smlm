@@ -91,7 +91,7 @@ public class ResultsManager implements PlugIn, MouseListener
 	}
 
 	private static String TITLE = "Peak Results Manager";
-
+f
 	static String INPUT_FILE = "File";
 	static String INPUT_MEMORY = "Memory";
 	static String INPUT_NONE = "[None]";
@@ -423,7 +423,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		gd.addChoice("Image", imageNames, imageNames[resultsSettings.getResultsImage().ordinal()]);
 		gd.addCheckbox("Weighted", resultsSettings.weightedImage);
 		gd.addCheckbox("Equalised", resultsSettings.equalisedImage);
-		gd.addSlider("Image_Precision (nm)", 0, 1.5, resultsSettings.precision);
+		gd.addSlider("Image_Precision (nm)", 5, 30, resultsSettings.precision);
 		gd.addSlider("Image_Scale", 1, 15, resultsSettings.imageScale);
 		gd.addNumericField("Image_Window", resultsSettings.imageRollingWindow, 0);
 
