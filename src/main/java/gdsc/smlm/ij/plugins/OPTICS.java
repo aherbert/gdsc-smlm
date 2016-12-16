@@ -526,6 +526,7 @@ public class OPTICS implements PlugIn, DialogListener
 			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
 
 			double generatingDistance = work.inputSettings.generatingDistance;
+			int minPts = work.inputSettings.minPoints;
 			if (generatingDistance > 0)
 			{
 				// Convert generating distance to pixels
@@ -533,13 +534,22 @@ public class OPTICS implements PlugIn, DialogListener
 				if (nmPerPixel != 1)
 				{
 					double newGeneratingDistance = generatingDistance / nmPerPixel;
-					Utils.log(TITLE + ": Converting generating distance %f to %f pixels", generatingDistance,
+					Utils.log(TITLE + ": Converting generating distance %f nm to %f pixels", generatingDistance,
 							newGeneratingDistance);
 					generatingDistance = newGeneratingDistance;
 				}
 			}
+			else
+			{
+				double nmPerPixel = getNmPerPixel(results);
+				if (nmPerPixel != 1)
+				{
+					Utils.log(TITLE + ": Default generating distance %f nm",
+							opticsManager.computeGeneratingDistance(minPts) * nmPerPixel);
+				}
+			}
 
-			OPTICSResult opticsResult = opticsManager.optics((float) generatingDistance, work.inputSettings.minPoints);
+			OPTICSResult opticsResult = opticsManager.optics((float) generatingDistance, minPts);
 			// It may be null if cancelled. However return null Work will close down the next thread
 			return new Work(work.inputSettings, results, opticsManager, opticsResult);
 		}
