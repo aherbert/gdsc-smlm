@@ -47,7 +47,7 @@ public class PeakResultsReader
 	private static Pattern tabPattern = Pattern.compile("\t");
 	/** Simple whitespace pattern for tabs of spaces */
 	private static Pattern whitespacePattern = Pattern.compile("[\t ]");
-	
+
 	private boolean useScanner = false;
 
 	private String filename;
@@ -188,7 +188,16 @@ public class PeakResultsReader
 		// Check for RapidSTORM stuff in the header
 		else if (header.contains("<localizations "))
 		{
-			format = FileFormat.RAPID_STORM;
+			// RapidSTORM can use the MALK format
+			if (isMALKFormat(firstLine))
+			{
+				format = FileFormat.MALK;
+			}
+			else
+			{
+				// There may be many other formats for RapidSTORM. Just support the one we know about.
+				format = FileFormat.RAPID_STORM;
+			}
 		}
 		// Check for MALK format: X,Y,T,Signal
 		else if (isMALKFormat(firstLine))
@@ -1636,7 +1645,7 @@ public class PeakResultsReader
 	private MemoryPeakResults readMALK()
 	{
 		MemoryPeakResults results = createResults();
-		if (name == null)
+		if (Utils.isNullOrEmpty(name))
 			results.setName(new File(filename).getName());
 
 		BufferedReader input = null;
