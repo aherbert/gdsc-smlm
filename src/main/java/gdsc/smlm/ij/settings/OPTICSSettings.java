@@ -18,7 +18,7 @@ package gdsc.smlm.ij.settings;
  * 
  * @author Alex Herbert
  */
-public class OPTICSSettings
+public class OPTICSSettings implements Cloneable
 {
 	/**
 	 * Options for displaying the clustering image
@@ -83,6 +83,36 @@ public class OPTICSSettings
 		{
 			return false;
 		}
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+	}
+
+	/**
+	 * Options for plotting the OPTICS results
+	 */
+	public enum ClusteringMode
+	{
+		//@formatter:off
+		XI {
+			@Override
+			public String getName() { return "Xi"; };
+		},
+		DBSCAN {
+			@Override
+			public String getName() { return "pseudo-DBSCAN"; };
+		};
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
 
 		@Override
 		public String toString()
@@ -190,13 +220,17 @@ public class OPTICSSettings
 	public double generatingDistance = 0;
 	public int minPoints = 5;
 
+	// OPTICS clustering
+	public ClusteringMode clusteringMode = ClusteringMode.XI;
+
 	// Affect running OPTICS Xi
 	public double xi = 0.03;
 	public boolean topLevel = false;
 
 	// Affect DBSCAN clustering
+	public double clusteringDistance = 0;
 	public boolean core = false;
-	
+
 	// Affect display of results
 	public double imageScale = 2;
 	private ImageMode imageMode = ImageMode.CLUSTER_ID;
@@ -211,7 +245,7 @@ public class OPTICSSettings
 	{
 		return imageMode;
 	}
-	
+
 	public int getImageModeOridinal()
 	{
 		if (imageMode == null)
@@ -232,11 +266,36 @@ public class OPTICSSettings
 		this.imageMode = values[mode];
 	}
 
+	public ClusteringMode getClusteringMode()
+	{
+		return clusteringMode;
+	}
+
+	public int getClusteringModeOridinal()
+	{
+		if (clusteringMode == null)
+			return 0;
+		return clusteringMode.ordinal();
+	}
+
+	public void setClusteringMode(ClusteringMode mode)
+	{
+		clusteringMode = mode;
+	}
+
+	public void setClusteringMode(int mode)
+	{
+		ClusteringMode[] values = ClusteringMode.values();
+		if (mode < 0 || mode >= values.length)
+			mode = 0;
+		this.clusteringMode = values[mode];
+	}
+
 	public PlotMode getPlotMode()
 	{
 		return plotMode;
 	}
-	
+
 	public int getPlotModeOridinal()
 	{
 		if (plotMode == null)
@@ -255,5 +314,23 @@ public class OPTICSSettings
 		if (mode < 0 || mode >= values.length)
 			mode = 0;
 		this.plotMode = values[mode];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public OPTICSSettings clone()
+	{
+		try
+		{
+			return (OPTICSSettings) super.clone();
+		}
+		catch (CloneNotSupportedException ex)
+		{
+			return null;
+		}
 	}
 }
