@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -364,6 +365,53 @@ public class SettingsManager
 		if (config == null)
 			if (!silent)
 				IJ.log("Unable to load settings from: " + filename);
+
+		return config;
+	}
+
+	/**
+	 * Load the settings from the input stream. The stream will be closed.
+	 * <p>
+	 * If this fails then an error message is written to the ImageJ log
+	 *
+	 * @param inputStream
+	 *            the input stream
+	 * @param silent
+	 *            Set to true to suppress writing an error message to the ImageJ log
+	 * @return The settings (or null)
+	 */
+	public static GlobalSettings unsafeLoadSettings(InputStream inputStream, boolean silent)
+	{
+		XStream xs = createXStream();
+		GlobalSettings config = null;
+
+		try
+		{
+			config = (GlobalSettings) xs.fromXML(inputStream);
+		}
+		catch (ClassCastException ex)
+		{
+			//ex.printStackTrace();
+		}
+		catch (XStreamException ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				inputStream.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		if (config == null)
+			if (!silent)
+				IJ.log("Unable to load settings from input stream");
 
 		return config;
 	}

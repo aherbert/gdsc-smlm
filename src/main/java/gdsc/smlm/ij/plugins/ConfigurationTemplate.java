@@ -1,9 +1,28 @@
 package gdsc.smlm.ij.plugins;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2016 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import gdsc.core.ij.Utils;
 import gdsc.smlm.engine.DataFilter;
@@ -21,7 +40,21 @@ import ij.util.StringSorter;
  */
 public class ConfigurationTemplate implements PlugIn
 {
-	private class Template
+	private static class TemplateResource
+	{
+		final String path;
+		final String name;
+		final boolean optional;
+
+		TemplateResource(String path, String name, boolean optional)
+		{
+			this.path = path;
+			this.name = name;
+			this.optional = optional;
+		}
+	}
+
+	private static class Template
 	{
 		GlobalSettings settings;
 		final boolean custom;
@@ -140,6 +173,8 @@ public class ConfigurationTemplate implements PlugIn
 		config.setResidualsThreshold(0.4);
 		config.setFailuresLimit(3);
 		addTemplate("STORM MLE Camera", config, false);
+
+		loadStandardTemplates();
 	}
 
 	private static void addTemplate(String name, FitEngineConfiguration config, boolean custom)
@@ -149,12 +184,78 @@ public class ConfigurationTemplate implements PlugIn
 		addTemplate(name, settings, custom, null);
 	}
 
+	/**
+	 * Load standard templates (those not marked as optional).
+	 */
+	private static void loadStandardTemplates()
+	{
+		TemplateResource[] templates = listTemplates();
+		int c = 0;
+		for (int i = 0; i < templates.length; i++)
+			if (!templates[i].optional)
+				templates[c++] = templates[i];
+		if (c != 0)
+			loadTemplates(Arrays.copyOf(templates, c));
+	}
+	
+	private static TemplateResource[] listTemplates()
+	{
+		// Load templates from package resources
+		String templateDir = "/gdsc/smlm/templates/";
+		Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
+		InputStream templateListStream = resourceClass.getResourceAsStream(templateDir + "list.txt");
+		if (templateListStream == null)
+			return new TemplateResource[0];
+		BufferedReader input = new BufferedReader(new InputStreamReader(templateListStream));
+		String line;
+		ArrayList<TemplateResource> list = new ArrayList<TemplateResource>();
+		Pattern p = Pattern.compile("\\*");
+		try
+		{
+			while ((line = input.readLine()) != null)
+			{
+				String template = line;
+				boolean optional = true;
+				int index = template.indexOf('*');
+				if (index >= 0)
+				{
+					template = p.matcher(template).replaceAll("");
+					optional = false;
+				}
+				String name = Utils.removeExtension(template);
+				list.add(new TemplateResource(templateDir + template, name, optional));
+			}
+		}
+		catch (IOException e)
+		{
+
+		}
+		return list.toArray(new TemplateResource[list.size()]);
+	}
+
+	private static void loadTemplates(TemplateResource[] templates)
+	{
+		// Load templates from package resources
+		Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
+		for (TemplateResource template : templates)
+		{
+			InputStream templateStream = resourceClass.getResourceAsStream(template.path);
+			if (templateStream == null)
+				continue;
+			GlobalSettings settings = SettingsManager.unsafeLoadSettings(templateStream, true);
+			if (settings != null)
+			{
+				addTemplate(template.name, settings, false, null);
+			}
+		}
+	}
+
 	private static void addTemplate(String name, GlobalSettings settings, boolean custom, File file)
 	{
 		// Maintain the names in the order they are added
 		if (!map.containsKey(name))
 			names.add(name);
-		map.put(name, new ConfigurationTemplate().new Template(settings, custom, file));
+		map.put(name, new Template(settings, custom, file));
 	}
 
 	/**
