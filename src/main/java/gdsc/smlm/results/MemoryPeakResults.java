@@ -101,6 +101,27 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	}
 
 	/**
+	 * Count the number of result sets in memory
+	 */
+	public static int getResultsMemorySize()
+	{
+		return resultsMap.size();
+	}
+
+	/**
+	 * Return true if there are no non-empty results in memory
+	 */
+	public static boolean isMemoryEmpty()
+	{
+		if (resultsMap.isEmpty())
+			return true;
+		for (MemoryPeakResults r : resultsMap.values())
+			if (!r.isEmpty())
+				return false;
+		return true;
+	}
+
+	/**
 	 * Count the total number of results in memory
 	 */
 	public static int countMemorySize()
@@ -172,7 +193,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	/**
 	 * Add a result. Not synchronized.
 	 *
-	 * @param result the result
+	 * @param result
+	 *            the result
 	 */
 	@Override
 	public void add(PeakResult result)
@@ -474,7 +496,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	{
 		return s_runtime.totalMemory();
 	}
-	
+
 	public static long freeMemory()
 	{
 		return s_runtime.freeMemory();

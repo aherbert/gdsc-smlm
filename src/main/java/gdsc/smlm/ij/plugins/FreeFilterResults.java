@@ -71,7 +71,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (MemoryPeakResults.countMemorySize() == 0)
+		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			// Ask user if they want to show the demo filters
 			GenericDialog gd = new GenericDialog(TITLE);

@@ -87,7 +87,7 @@ public class BlinkEstimator implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		// Require some fit results and selected regions
-		if (MemoryPeakResults.countMemorySize() == 0)
+		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return;

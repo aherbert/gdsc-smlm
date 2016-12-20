@@ -47,7 +47,7 @@ public class SplitResults implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
-		if (MemoryPeakResults.countMemorySize() == 0)
+		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return;

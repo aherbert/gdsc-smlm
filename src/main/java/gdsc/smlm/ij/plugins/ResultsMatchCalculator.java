@@ -76,7 +76,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (MemoryPeakResults.countMemorySize() == 0)
+		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "No localisations in memory");
 			return;

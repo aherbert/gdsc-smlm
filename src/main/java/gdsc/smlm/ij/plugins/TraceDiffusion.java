@@ -144,7 +144,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		jumpDistanceParameters = null;
 
 		extraOptions = Utils.isExtraOptions();
-		if (MemoryPeakResults.countMemorySize() == 0)
+		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "No localisations in memory");
 			return;
