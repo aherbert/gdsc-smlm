@@ -47,8 +47,8 @@ import java.util.Locale;
 /**
  * Shows a list of all the results sets held in memory, allowing multiple results to be selected
  */
-public class MultiDialog extends Dialog implements ActionListener, KeyListener, WindowListener, MouseListener,
-		ItemListener
+public class MultiDialog extends Dialog
+		implements ActionListener, KeyListener, WindowListener, MouseListener, ItemListener
 {
 	private static final long serialVersionUID = -881270633231897572L;
 
@@ -60,14 +60,105 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 	private String macroOptions;
 	private boolean macro;
 
-	public MultiDialog(String title)
+	/**
+	 * Interface to allow a list of any type to be shown in the MultiDialog
+	 * 
+	 * @author Alex Herbert
+	 */
+	public interface Items
 	{
-		super(WindowManager.getCurrentImage() != null ? (Frame) WindowManager.getCurrentImage().getWindow() : IJ
-				.getInstance() != null ? IJ.getInstance() : new Frame(), title, true);
+		/**
+		 * Get the number of items to display.
+		 *
+		 * @return the size
+		 */
+		int size();
+
+		/**
+		 * Gets the formatted name of the result for display in the dialog.
+		 *
+		 * @param i
+		 *            the result i
+		 * @return the formatted name
+		 */
+		String getFormattedName(int i);
+
+		/**
+		 * Removes the formatting from the name. The plain name will be in the list returned by
+		 * {@link MultiDialog#getSelectedResults()}.
+		 *
+		 * @param formattedName
+		 *            the formatted name
+		 * @return the plain name string
+		 */
+		String removeFormatting(String formattedName);
+	}
+
+	/**
+	 * Base class for default implementation of the Items interface
+	 * 
+	 * @author Alex Herbert
+	 */
+	public static abstract class BaseItems implements Items
+	{
+		/**
+		 * Returns the same formatted name.
+		 * <p>
+		 * {@inheritDoc}
+		 * 
+		 * @see gdsc.smlm.ij.plugins.MultiDialog.Items#removeFormatting(java.lang.String)
+		 */
+		public String removeFormatting(String formattedName)
+		{
+			return formattedName;
+		}
+	}
+
+	/**
+	 * Class that allows the current results held in memory to be shown in the dialog
+	 * 
+	 * @author Alex Herbert
+	 */
+	public static class MemoryResultsItems implements Items
+	{
+		private String[] names;
+
+		public MemoryResultsItems()
+		{
+			Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
+			names = new String[allResults.size()];
+			int i = 0;
+			for (MemoryPeakResults results : allResults)
+				names[i++] = ResultsManager.getName(results);
+		}
+
+		public int size()
+		{
+			return names.length;
+		}
+
+		public String getFormattedName(int i)
+		{
+			return names[i];
+		}
+
+		public String removeFormatting(String formattedName)
+		{
+			return ResultsManager.removeFormatting(formattedName);
+		}
+	}
+
+	private Items items;
+
+	public MultiDialog(String title, Items items)
+	{
+		super(WindowManager.getCurrentImage() != null ? (Frame) WindowManager.getCurrentImage().getWindow()
+				: IJ.getInstance() != null ? IJ.getInstance() : new Frame(), title, true);
 		addKeyListener(this);
 		addWindowListener(this);
 		macroOptions = Macro.getOptions();
 		macro = macroOptions != null;
+		this.items = items;
 	}
 
 	public void addSelected(ArrayList<String> selected)
@@ -108,29 +199,19 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 
 	protected Component buildResultsList()
 	{
-		Collection<MemoryPeakResults> alResults = MemoryPeakResults.getAllResults();
 		final int MAX_SIZE = 30;
-		int size;
-		if (alResults.size() < MAX_SIZE)
+		int size = items.size();
+		int rows = (size < MAX_SIZE) ? size : MAX_SIZE;
+		list = new List(rows, true);
+		for (int n = 0; n < size; n++)
 		{
-			size = alResults.size();
-		}
-		else
-		{
-			size = MAX_SIZE;
-		}
-		list = new List(size, true);
-		int n = 0;
-		for (MemoryPeakResults results : alResults)
-		{
-			String formattedName = ResultsManager.getName(results);
+			String formattedName = items.getFormattedName(n);
 			list.add(formattedName);
 			// Select the same as last time
-			if (selected != null && selected.contains(results.getName()))
+			if (selected != null && selected.contains(items.removeFormatting(formattedName)))
 			{
 				list.select(n);
 			}
-			n++;
 		}
 
 		list.addMouseListener(this);
@@ -271,7 +352,7 @@ public class MultiDialog extends Dialog implements ActionListener, KeyListener, 
 			{
 				for (int index : listIndexes)
 				{
-					selected.add(ResultsManager.removeFormatting(list.getItem(index)));
+					selected.add(items.removeFormatting(list.getItem(index)));
 				}
 			}
 		}

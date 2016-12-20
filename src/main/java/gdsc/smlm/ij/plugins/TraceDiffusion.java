@@ -1883,7 +1883,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		multiMode = true;
 
 		// Show a list box containing all the results. This should remember the last set of chosen items.
-		MultiDialog md = new MultiDialog(TITLE);
+		MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
 		md.addSelected(selected);
 
 		md.showDialog();

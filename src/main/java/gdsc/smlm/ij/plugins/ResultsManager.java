@@ -132,7 +132,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			boolean removeAll = false;
 			if (arg.contains("multi"))
 			{
-				MultiDialog md = new MultiDialog(TITLE);
+				MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
 				md.addSelected(selected);
 				md.showDialog();
 				if (md.wasCanceled())
