@@ -43,11 +43,10 @@ import ij.util.StringSorter;
  */
 public class ConfigurationTemplate implements PlugIn
 {
-	private static class TemplateResource
+	static class TemplateResource
 	{
 		final String path;
 		final String name;
-		@SuppressWarnings("unused")
 		final boolean optional;
 
 		TemplateResource(String path, String name, boolean optional)
@@ -210,7 +209,7 @@ public class ConfigurationTemplate implements PlugIn
 	 *            Set to true to list the optional templates
 	 * @return the templates
 	 */
-	private static TemplateResource[] listTemplates(boolean loadMandatory, boolean loadOptional)
+	static TemplateResource[] listTemplates(boolean loadMandatory, boolean loadOptional)
 	{
 		// Load templates from package resources
 		String templateDir = "/gdsc/smlm/templates/";
@@ -261,7 +260,7 @@ public class ConfigurationTemplate implements PlugIn
 	 * @param templates
 	 *            the templates
 	 */
-	private static void loadTemplates(TemplateResource[] templates)
+	static void loadTemplates(TemplateResource[] templates)
 	{
 		if (templates == null || templates.length == 0)
 			return;
@@ -290,7 +289,7 @@ public class ConfigurationTemplate implements PlugIn
 			names.add(name);
 		map.put(name, new Template(settings, custom, file));
 	}
-
+	
 	/**
 	 * Get the template configuration
 	 * 
