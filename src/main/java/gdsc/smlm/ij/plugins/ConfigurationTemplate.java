@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.TurboList;
+import gdsc.core.utils.TurboList.SimplePredicate;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
@@ -32,6 +34,7 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.util.StringSorter;
 
@@ -44,6 +47,7 @@ public class ConfigurationTemplate implements PlugIn
 	{
 		final String path;
 		final String name;
+		@SuppressWarnings("unused")
 		final boolean optional;
 
 		TemplateResource(String path, String name, boolean optional)
@@ -106,7 +110,11 @@ public class ConfigurationTemplate implements PlugIn
 
 	private static HashMap<String, Template> map;
 	private static ArrayList<String> names;
+	private static boolean selectStandardTemplates = false;
+	private static boolean chooseDirectory = true;
 	private static String configurationDirectory;
+	// Used for the multiMode option 
+	private static ArrayList<String> selected;
 
 	static
 	{
@@ -189,16 +197,20 @@ public class ConfigurationTemplate implements PlugIn
 	 */
 	private static void loadStandardTemplates()
 	{
-		TemplateResource[] templates = listTemplates();
-		int c = 0;
-		for (int i = 0; i < templates.length; i++)
-			if (!templates[i].optional)
-				templates[c++] = templates[i];
-		if (c != 0)
-			loadTemplates(Arrays.copyOf(templates, c));
+		TemplateResource[] templates = listTemplates(true, false);
+		loadTemplates(templates);
 	}
-	
-	private static TemplateResource[] listTemplates()
+
+	/**
+	 * List the templates from package resources.
+	 *
+	 * @param loadMandatory
+	 *            Set to true to list the mandatory templates
+	 * @param loadOptional
+	 *            Set to true to list the optional templates
+	 * @return the templates
+	 */
+	private static TemplateResource[] listTemplates(boolean loadMandatory, boolean loadOptional)
 	{
 		// Load templates from package resources
 		String templateDir = "/gdsc/smlm/templates/";
@@ -222,6 +234,16 @@ public class ConfigurationTemplate implements PlugIn
 					template = p.matcher(template).replaceAll("");
 					optional = false;
 				}
+				if (optional)
+				{
+					if (!loadOptional)
+						continue;
+				}
+				else
+				{
+					if (!loadMandatory)
+						continue;
+				}
 				String name = Utils.removeExtension(template);
 				list.add(new TemplateResource(templateDir + template, name, optional));
 			}
@@ -233,12 +255,23 @@ public class ConfigurationTemplate implements PlugIn
 		return list.toArray(new TemplateResource[list.size()]);
 	}
 
+	/**
+	 * Load templates from package resources.
+	 *
+	 * @param templates
+	 *            the templates
+	 */
 	private static void loadTemplates(TemplateResource[] templates)
 	{
-		// Load templates from package resources
+		if (templates == null || templates.length == 0)
+			return;
 		Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
 		for (TemplateResource template : templates)
 		{
+			// Skip those already done
+			if (map.containsKey(template.name))
+				continue;
+			
 			InputStream templateStream = resourceClass.getResourceAsStream(template.path);
 			if (templateStream == null)
 				continue;
@@ -345,6 +378,64 @@ public class ConfigurationTemplate implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
+		GenericDialog gd = new GenericDialog("Template Configuration");
+		gd.addCheckbox("Select_templates", selectStandardTemplates);
+		gd.addCheckbox("Choose_directory", chooseDirectory);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		selectStandardTemplates = gd.getNextBoolean();
+		chooseDirectory = gd.getNextBoolean();
+
+		if (selectStandardTemplates)
+			loadSelectedStandardTemplates();
+		if (chooseDirectory)
+			loadTemplatesFromDirectory();
+	}
+
+	private void loadSelectedStandardTemplates()
+	{
+		final TemplateResource[] templates = listTemplates(false, true);
+		if (templates.length == 0)
+			return;
+
+		MultiDialog md = new MultiDialog("Select Templates", new MultiDialog.BaseItems()
+		{
+			public int size()
+			{
+				return templates.length;
+			}
+
+			public String getFormattedName(int i)
+			{
+				return templates[i].name;
+			}
+		});
+		md.addSelected(selected);
+
+		md.showDialog();
+
+		if (md.wasCanceled())
+			return;
+
+		selected = md.getSelectedResults();
+		if (selected.isEmpty())
+			return;
+		
+		// Use list filtering to get the selected templates
+		TurboList<TemplateResource> list = new TurboList<TemplateResource>(Arrays.asList(templates));
+		list.removeIf(new SimplePredicate<TemplateResource>()
+		{
+			public boolean test(TemplateResource t)
+			{
+				return !(selected.contains(t.name));
+			}
+		});
+		loadTemplates(list.toArray(new TemplateResource[list.size()]));
+	}
+
+	private void loadTemplatesFromDirectory()
+	{
 		// Allow the user to specify a configuration directory
 		String newDirectory = Utils.getDirectory("Template_directory", configurationDirectory);
 
