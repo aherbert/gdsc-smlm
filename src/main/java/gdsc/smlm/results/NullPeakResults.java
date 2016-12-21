@@ -26,7 +26,7 @@ public class NullPeakResults extends AbstractPeakResults
 	}
 
 	@Override
-	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise, float[] params,
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
 	}

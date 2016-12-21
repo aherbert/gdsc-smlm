@@ -77,12 +77,12 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	/* (non-Javadoc)
 	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise, float[] params,
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
 		size.incrementAndGet();
 		for (PeakResults peakResults : results)
-			peakResults.add(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev);		
+			peakResults.add(peak, origX, origY, origValue, error, noise, params, paramsStdDev);		
 	}
 
 	public void addAll(Collection<PeakResult> results)

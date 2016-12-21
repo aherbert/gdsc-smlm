@@ -37,8 +37,8 @@ public interface PeakResults
 	 *            The original Y value
 	 * @param origValue
 	 *            The original value
-	 * @param chiSquared
-	 *            The Chi-squared error of the fit
+	 * @param error
+	 *            The error of the fit
 	 * @param noise
 	 *            Estimate of the noise in the signal
 	 * @param params
@@ -46,7 +46,7 @@ public interface PeakResults
 	 * @param paramsStdDev
 	 *            The peak parameters standard deviations
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise, float[] params,
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev);
 
 	/**

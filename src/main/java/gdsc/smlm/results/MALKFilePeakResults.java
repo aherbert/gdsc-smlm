@@ -104,7 +104,7 @@ public class MALKFilePeakResults extends FilePeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise, float[] params,
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsStdDev)
 	{
 		if (out == null)
