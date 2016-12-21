@@ -274,14 +274,22 @@ public class BinaryFilePeakResults extends FilePeakResults
 		writeResult(count, bytes.toByteArray());
 	}
 
+	@Override
 	public void addCluster(Cluster cluster)
 	{
 		throw new NoSuchMethodError("Binary results do not support clusters");
 	}
 
+	@Override
 	public void addComment(String text)
 	{
 		throw new NoSuchMethodError("Binary results do not support comments");
+	}
+	
+	@Override
+	public void addTrace(Trace trace)
+	{
+		throw new NoSuchMethodError("Binary results do not support traces");
 	}
 
 	private synchronized void writeResult(int count, byte[] bytes)
