@@ -10,202 +10,204 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
+import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
+import gdsc.smlm.ij.results.ResultsFileFormat;
 
 public class PeakResultsReaderTest
 {
 	private gdsc.core.utils.Random rand = new Random();
 
 	// TODO - Add tests to compare writing to a IJTablePeakResults, saving the TextPanel contents to file and then reading.
-	
+
 	// -=-=-=-=-
-	
+
 	@Test
 	public void writeTextMatchesRead()
 	{
-		writeMatchesRead(true, false, false, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, false, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsMatchesRead()
 	{
-		writeMatchesRead(true, true, false, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, false, false, false);
 	}
 
 	@Test
 	public void writeTextWithEndFrameMatchesRead()
 	{
-		writeMatchesRead(true, false, true, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, false, true, false, false);
 	}
 
 	@Test
 	public void writeTextWithIdMatchesRead()
 	{
-		writeMatchesRead(true, false, false, true, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, false, false, true, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameMatchesRead()
 
 	{
-		writeMatchesRead(true, true, true, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, true, false, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndIdMatchesRead()
 
 	{
-		writeMatchesRead(true, true, false, true, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, false, true, false);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameAndIdMatchesRead()
 
 	{
-		writeMatchesRead(true, true, true, true, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, true, true, false);
 	}
 
 	// -=-=-=-=-
-	
+
 	@Test
 	public void writeBinaryMatchesRead()
 	{
-		writeMatchesRead(false, false, false, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, false, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsMatchesRead()
 	{
-		writeMatchesRead(false, true, false, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, false, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameMatchesRead()
 	{
-		writeMatchesRead(false, false, true, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, false, true, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithIdMatchesRead()
 	{
-		writeMatchesRead(false, false, false, true, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, false, false, true, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameMatchesRead()
 
 	{
-		writeMatchesRead(false, true, true, false, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, true, false, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, true, false, true, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, false, true, false);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameAndIdMatchesRead()
 
 	{
-		writeMatchesRead(false, true, true, true, false);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, true, true, false);
 	}
 
 	// -=-=-=-=-
-	
+
 	@Test
 	public void writeTextWithSortMatchesRead()
 	{
-		writeMatchesRead(true, false, false, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, false, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsWithSortMatchesRead()
 	{
-		writeMatchesRead(true, true, false, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, false, false, true);
 	}
 
 	@Test
 	public void writeTextWithEndFrameWithSortMatchesRead()
 	{
-		writeMatchesRead(true, false, true, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, false, true, false, true);
 	}
 
 	@Test
 	public void writeTextWithIdWithSortMatchesRead()
 	{
-		writeMatchesRead(true, false, false, true, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, false, false, true, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameWithSortMatchesRead()
 
 	{
-		writeMatchesRead(true, true, true, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, true, false, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(true, true, false, true, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, false, true, true);
 	}
 
 	@Test
 	public void writeTextWithDeviationsAndEndFrameAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(true, true, true, true, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_TEXT, true, true, true, true);
 	}
-	
+
 	// -=-=-=-=-
-	
+
 	@Test
 	public void writeBinaryWithSortMatchesRead()
 	{
-		writeMatchesRead(false, false, false, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, false, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsWithSortMatchesRead()
 	{
-		writeMatchesRead(false, true, false, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, false, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithEndFrameWithSortMatchesRead()
 	{
-		writeMatchesRead(false, false, true, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, false, true, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithIdWithSortMatchesRead()
 	{
-		writeMatchesRead(false, false, false, true, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, false, false, true, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, true, true, false, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, true, false, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, true, false, true, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, false, true, true);
 	}
 
 	@Test
 	public void writeBinaryWithDeviationsAndEndFrameAndIdWithSortMatchesRead()
 
 	{
-		writeMatchesRead(false, true, true, true, true);
+		writeMatchesRead(ResultsFileFormat.GDSC_BINARY, true, true, true, true);
 	}
-	
+
 	// -=-=-=-=-
 
 	@Test
@@ -257,7 +259,7 @@ public class PeakResultsReaderTest
 	}
 
 	// -=-=-=-=-
-	
+
 	@Test
 	public void readWithScannerMatchesNonScannerWithSort()
 	{
@@ -314,7 +316,7 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(20000, true, true, true);
 		String filename = createFile();
 
-		writeFile(true, true, true, true, false, out, filename);
+		writeFile(ResultsFileFormat.GDSC_TEXT, true, true, true, false, out, filename);
 
 		final int loops = 20;
 
@@ -324,25 +326,26 @@ public class PeakResultsReaderTest
 		Assert.assertTrue(String.format("Scanner is slower: %d > %d", time2, time), time2 < time);
 	}
 
-	private void writeMatchesRead(boolean textFormat, boolean showDeviations, boolean showEndFrame, boolean showId,
-			boolean sort)
+	private void writeMatchesRead(ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame,
+			boolean showId, boolean sort)
 	{
 		MemoryPeakResults out = createResults(200, showDeviations, showEndFrame, showId);
 		String filename = createFile();
 
-		writeFile(textFormat, showDeviations, showEndFrame, showId, sort, out, filename);
+		writeFile(fileFormat, showDeviations, showEndFrame, showId, sort, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false);
 
 		checkEqual(showDeviations, showEndFrame, showId, sort, out, in);
 	}
 
-	private void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId, boolean sort)
+	private void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId,
+			boolean sort)
 	{
 		MemoryPeakResults out = createResults(1000, showDeviations, showEndFrame, showId);
 		String filename = createFile();
 
-		writeFile(true, showDeviations, showEndFrame, showId, sort, out, filename);
+		writeFile(ResultsFileFormat.GDSC_TEXT, showDeviations, showEndFrame, showId, sort, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false);
 		MemoryPeakResults in2 = readFile(filename, true);
@@ -440,18 +443,42 @@ public class PeakResultsReaderTest
 		}
 		catch (IOException e)
 		{
-			Assert.fail("Cannot create temp files for I?O testing");
+			Assert.fail("Cannot create temp files for IO testing");
 		}
 		return null; // Allow compilation but the assert will stop the code
 	}
 
-	private void writeFile(boolean textFormat, boolean showDeviations, boolean showEndFrame, boolean showId, boolean sort,
-			MemoryPeakResults results, String filename)
+	private void writeFile(ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame, boolean showId,
+			boolean sort, MemoryPeakResults results, String filename)
 	{
-		FilePeakResults out = (textFormat) ? new FilePeakResults(filename, showDeviations, showEndFrame, showId)
-				: new BinaryFilePeakResults(filename, showDeviations, showEndFrame, showId);
-		out.setSortAfterEnd(sort);
+		PeakResults out;
+		switch (fileFormat)
+		{
+			case GDSC_BINARY:
+				out = new BinaryFilePeakResults(filename, showDeviations, showEndFrame, showId);
+				break;
+			case GDSC_TEXT:
+				out = new FilePeakResults(filename, showDeviations, showEndFrame, showId);
+				break;
+			case TSF:
+				out = new TSFPeakResultsWriter(filename);
+				break;
+			case MALK:
+				out = new MALKFilePeakResults(filename);
+				break;
+			default:
+				throw new NotImplementedException("Unsupported file format: " + fileFormat);
+		}
+
+		if (sort && out instanceof FilePeakResults)
+		{
+			((FilePeakResults) out).setSortAfterEnd(sort);
+		}
 		out.begin();
+		
+		// TODO - option to test adding using:
+		// add(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev);
+		
 		out.addAll(results.getResults());
 		out.end();
 	}
