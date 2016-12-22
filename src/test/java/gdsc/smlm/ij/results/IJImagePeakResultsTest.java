@@ -10,6 +10,8 @@ import org.junit.Test;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
 
 /**
  * Test the IJImagePeakResults functionality.
@@ -19,8 +21,322 @@ public class IJImagePeakResultsTest
 	private RandomGenerator rand = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
 
 	String title = "Test";
-	Rectangle bounds = new Rectangle(0, 0, 3, 3);
+	Rectangle bounds = new Rectangle(0, 0, 3, 5);
 
+	@Test
+	public void canAddToSinglePixels()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		add(fp, r, 1, 1, 1);
+		add(fp, r, 1, 2, 4);
+		add(fp, r, 0, 1, 2);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+
+	@Test
+	public void canAddToSinglePixelsWithInvalidPositions()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		add(fp, r, 1, 1, 1);
+		add(fp, r, 1, 2, 4);
+		add(fp, r, 0, 1, 2);
+		for (int x : new int[] { -1, 0, 1, bounds.width, bounds.width + 1 })
+			for (int y : new int[] { -1, 0, 1, bounds.height, bounds.height + 1 })
+				add(fp, r, x, y, 1);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+
+	private void add(FloatProcessor fp, IJImagePeakResults r, int x, int y, float value)
+	{
+		addValue(r, x, y, value);
+		fp.putPixelValue(x, y, fp.getPixelValue(x, y) + value);
+	}
+	
+	@Test
+	public void canInterpolateInMiddleOfPixel()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.5f, 1.5f, 1);
+		fp.putPixelValue(1, 1, 1);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateDownInXAtPixelEdge() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1f, 1.5f, 2);
+		fp.putPixelValue(0, 1, 1);
+		fp.putPixelValue(1, 1, 1);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateUpInXAtPixelEdge()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 2f, 1.5f, 2);
+		fp.putPixelValue(1, 1, 1);
+		fp.putPixelValue(2, 1, 1);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+
+	@Test
+	public void canInterpolateDownInYAtPixelEdge()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.5f, 1f, 2);
+		fp.putPixelValue(1, 0, 1);
+		fp.putPixelValue(1, 1, 1);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateUpInYAtPixelEdge()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.5f, 2f, 2);
+		fp.putPixelValue(1, 1, 1);
+		fp.putPixelValue(1, 2, 1);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}	
+	
+	@Test
+	public void canInterpolateDownInX() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.25f, 1.5f, 2);
+		fp.putPixelValue(0, 1, 0.5f);
+		fp.putPixelValue(1, 1, 1.5f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateUpInX()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.75f, 1.5f, 2);
+		fp.putPixelValue(1, 1, 1.5f);
+		fp.putPixelValue(2, 1, 0.5f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}	
+	
+	@Test
+	public void canInterpolateDownInY() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.5f, 1.25f, 2);
+		fp.putPixelValue(1, 0, 0.5f);
+		fp.putPixelValue(1, 1, 1.5f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateUpInY()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.5f, 1.75f, 2);
+		fp.putPixelValue(1, 1, 1.5f);
+		fp.putPixelValue(1, 2, 0.5f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateDownInXYAtPixelEdge() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1f, 1f, 4);
+		fp.putPixelValue(0, 0, 1f);
+		fp.putPixelValue(0, 1, 1f);
+		fp.putPixelValue(1, 0, 1f);
+		fp.putPixelValue(1, 1, 1f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateUpInXYAtPixelEdge()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 2f, 2f, 4);
+		fp.putPixelValue(1, 1, 1f);
+		fp.putPixelValue(2, 1, 1f);
+		fp.putPixelValue(1, 2, 1f);
+		fp.putPixelValue(2, 2, 1f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateDownInXY() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.25f, 1.25f, 1);
+		fp.putPixelValue(0, 0, 0.25f * 0.25f);
+		fp.putPixelValue(0, 1, 0.75f * 0.25f);
+		fp.putPixelValue(1, 0, 0.75f * 0.25f);
+		fp.putPixelValue(1, 1, 0.75f * 0.75f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void canInterpolateUpInXY()
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.75f, 1.75f, 1);
+		fp.putPixelValue(1, 1, 0.75f * 0.75f);
+		fp.putPixelValue(2, 1, 0.75f * 0.25f);
+		fp.putPixelValue(1, 2, 0.75f * 0.25f);
+		fp.putPixelValue(2, 2, 0.25f * 0.25f);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}	
+	
+	@Test
+	public void noInterpolateDownInXAtImageEdge() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 0.5f, 1.5f, 2);
+		fp.putPixelValue(0, 1, 2);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void noInterpolateUpInXAtImageEdge() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 2.5f, 1.5f, 2);
+		fp.putPixelValue(2, 1, 2);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}	 
+	
+	@Test
+	public void noInterpolateDownInYAtImageEdge() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.5f, 0.5f, 2);
+		fp.putPixelValue(1, 0, 2);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}
+	
+	@Test
+	public void noInterpolateUpInYAtImageEdge() 
+	{
+		IJImagePeakResults r = new IJImagePeakResults(title, bounds, 1);
+		r.setDisplayFlags(IJImagePeakResults.DISPLAY_WEIGHTED);
+		FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
+		r.begin();
+		addValue(r, 1.5f, 2.5f, 2);
+		fp.putPixelValue(1, 2, 2);
+		r.end();
+		float[] expecteds = getImage(fp);
+		float[] actuals = getImage(r);
+		Assert.assertArrayEquals(expecteds, actuals, 0);
+	}	 
+	
 	@Test
 	public void canAddUsingDifferentMethods()
 	{
@@ -94,7 +410,7 @@ public class IJImagePeakResultsTest
 		for (int i = 0; i < r.length; i++)
 		{
 			r[i].end();
-			image[i] = (float[]) r[i].getImagePlus().getProcessor().convertToFloat().getPixels();
+			image[i] = getImage(r[i]);
 		}
 
 		float[] expecteds = image[0];
@@ -158,5 +474,15 @@ public class IJImagePeakResultsTest
 	private void addValues(IJImagePeakResults r, int[] t, float[] x, float[] y, float[] v)
 	{
 		r.add(t, x, y, v);
+	}
+
+	private float[] getImage(IJImagePeakResults r)
+	{
+		return getImage(r.getImagePlus().getProcessor());
+	}
+
+	private float[] getImage(ImageProcessor ip)
+	{
+		return (float[]) ip.convertToFloat().getPixels();
 	}
 }
