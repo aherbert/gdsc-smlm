@@ -1,5 +1,6 @@
 package gdsc.smlm.results;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -323,31 +324,36 @@ public class PeakResultsReaderTest
 	@Test
 	public void readTextWithNonScannerIsFasterThanScanner()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.GDSC_TEXT, true, ResultsFileFormat.GDSC_TEXT, false, 1);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.GDSC_TEXT, true, ResultsFileFormat.GDSC_TEXT,
+				false, 1);
 	}
-	
+
 	@Test
 	public void readTextWithNonScannerIsFasterThanScannerWithDeviationsWithEndFrameWithId()
 	{
-		readWith2IsFasterThan1(true, true, true, ResultsFileFormat.GDSC_TEXT, true, ResultsFileFormat.GDSC_TEXT, false, 1);
+		readWith2IsFasterThan1(true, true, true, ResultsFileFormat.GDSC_TEXT, true, ResultsFileFormat.GDSC_TEXT, false,
+				1);
 	}
 
 	@Test
 	public void readWithMALKIsFasterThanText()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.GDSC_TEXT, false, ResultsFileFormat.MALK, false, 2);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.GDSC_TEXT, false, ResultsFileFormat.MALK, false,
+				2);
 	}
-	
+
 	@Test
 	public void readWithBinaryIsFasterThanText()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.GDSC_TEXT, false, ResultsFileFormat.GDSC_BINARY, false, 2);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.GDSC_TEXT, false, ResultsFileFormat.GDSC_BINARY,
+				false, 2);
 	}
-	
+
 	@Test
 	public void readWithBinaryIsFasterThanTSF()
 	{
-		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.GDSC_BINARY, false, 20);
+		readWith2IsFasterThan1(false, false, false, ResultsFileFormat.TSF, false, ResultsFileFormat.GDSC_BINARY, false,
+				20);
 	}
 
 	private void readWith2IsFasterThan1(boolean showDeviations, boolean showEndFrame, boolean showId,
@@ -363,7 +369,8 @@ public class PeakResultsReaderTest
 		long time2 = getReadTime(filename, useScanner2, loops);
 
 		if (useScanner1 != useScanner2)
-			System.out.printf("%s (scan=%b) is %.2fx faster than %s (scan=%b)\n", f2, useScanner2, (double) time1 / time2, f1, useScanner1);
+			System.out.printf("%s (scan=%b) is %.2fx faster than %s (scan=%b)\n", f2, useScanner2,
+					(double) time1 / time2, f1, useScanner1);
 		else
 			System.out.printf("%s is %.2fx faster than %s\n", f2, (double) time1 / time2, f1);
 		Assert.assertTrue(String.format(f1 + " is slower (%d > %d) than " + f2, time2, time1), time2 < time1);
@@ -450,6 +457,46 @@ public class PeakResultsReaderTest
 				Assert.assertEquals("ID mismatch @ " + i, p1.getId(), p2.getId());
 			}
 		}
+
+		if (basic)
+			return;
+
+		// Check the header information
+		Assert.assertEquals("Name", expectedResults.getName(), actualResults.getName());
+		Assert.assertEquals("Configuration", expectedResults.getConfiguration(), actualResults.getConfiguration());
+
+		Rectangle r1 = expectedResults.getBounds();
+		Rectangle r2 = actualResults.getBounds();
+		if (r1 != null)
+		{
+			Assert.assertNotNull("Bounds", r2);
+			Assert.assertEquals("Bounds x", r1.x, r2.x);
+			Assert.assertEquals("Bounds y", r1.y, r2.y);
+			Assert.assertEquals("Bounds width", r1.width, r2.width);
+			Assert.assertEquals("Bounds height", r1.height, r2.height);
+		}
+		else
+		{
+			Assert.assertNull("Bounds", r2);
+		}
+
+		Calibration c1 = expectedResults.getCalibration();
+		Calibration c2 = actualResults.getCalibration();
+		if (c1 != null)
+		{
+			Assert.assertNotNull("Calibration", c2);
+			Assert.assertEquals("Calibration nmPerPixel", c1.nmPerPixel, c2.nmPerPixel, 1e-6);
+			Assert.assertEquals("Calibration gain", c1.gain, c2.gain, 1e-6);
+			Assert.assertEquals("Calibration exposureTime", c1.exposureTime, c2.exposureTime, 1e-6);
+			Assert.assertEquals("Calibration readNoise", c1.readNoise, c2.readNoise, 1e-6);
+			Assert.assertEquals("Calibration bias", c1.bias, c2.bias, 1e-6);
+			Assert.assertEquals("Calibration emCCD", c1.emCCD, c2.emCCD);
+			Assert.assertEquals("Calibration amplification", c1.amplification, c2.amplification, 1e-6);
+		}
+		else
+		{
+			Assert.assertNull("Calibration", c2);
+		}
 	}
 
 	private MemoryPeakResults createResults(int i, boolean showDeviations, boolean showEndFrame, boolean showId)
@@ -471,6 +518,19 @@ public class PeakResultsReaderTest
 			else
 				results.add(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
 		}
+		results.setName(Float.toString(rand.next()) + Float.toString(rand.next()));
+		results.setConfiguration(Float.toString(rand.next()) + Float.toString(rand.next()));
+		results.setBounds(new Rectangle((int) (10 * rand.next()), (int) (10 * rand.next()), (int) (100 * rand.next()),
+				(int) (100 * rand.next())));
+		Calibration cal = new Calibration();
+		cal.nmPerPixel = rand.next();
+		cal.gain = rand.next();
+		cal.exposureTime = rand.next();
+		cal.readNoise = rand.next();
+		cal.bias = rand.next();
+		cal.emCCD = rand.next() < 0.5f;
+		cal.amplification = rand.next();
+		results.setCalibration(cal);
 		return results;
 	}
 
@@ -520,7 +580,7 @@ public class PeakResultsReaderTest
 			default:
 				throw new NotImplementedException("Unsupported file format: " + fileFormat);
 		}
-
+		out.copySettings(results);
 		if (sort && out instanceof FilePeakResults)
 		{
 			((FilePeakResults) out).setSortAfterEnd(sort);
