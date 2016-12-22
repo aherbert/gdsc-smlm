@@ -141,9 +141,19 @@ public class PeakResultsReader
 	{
 		format = FileFormat.UNKNOWN;
 
-		// This cannot be done for empty header or if there is no non-header data
-		if (header.length() == 0 && Utils.isNullOrEmpty(firstLine))
-			return;
+		if (header.length() == 0)
+		{
+			// No header. Check non-text formats.
+			if (TSFPeakResultsReader.isTSF(filename))
+			{
+				format = FileFormat.TSF_BINARY;
+				return;
+			}
+			
+			// We cannot continue guess if there is no non-header data
+			if (Utils.isNullOrEmpty(firstLine))
+				return;
+		}
 
 		// Check for Nikon NSTORM header
 		if (header.contains("Channel Name"))
@@ -455,6 +465,9 @@ public class PeakResultsReader
 				break;
 			case MALK:
 				results = readMALK();
+				break;
+			case TSF_BINARY:
+				results = readTSF();
 				break;
 			default:
 				break;
@@ -815,12 +828,7 @@ public class PeakResultsReader
 			}
 			else
 			{
-				// Tried using:
-				// -String.split()
-				// -Pattern.split()
-				// -StringTokenizer
-				// -Custom tokenizer routine the iterates the line
-				// All are slower than the Scanner
+				// JUnit test shows this is faster than the scanner
 
 				// Code using split and parse
 				String[] fields = tabPattern.split(line);
@@ -973,12 +981,7 @@ public class PeakResultsReader
 			}
 			else
 			{
-				// Tried using:
-				// -String.split()
-				// -Pattern.split()
-				// -StringTokenizer
-				// -Custom tokenizer routine the iterates the line
-				// All are slower than the Scanner
+				// JUnit test shows this is faster than the scanner
 
 				// Code using split and parse
 				String[] fields = tabPattern.split(line);
@@ -1803,6 +1806,12 @@ public class PeakResultsReader
 		return null;
 	}
 
+	private MemoryPeakResults readTSF()
+	{
+		TSFPeakResultsReader reader = new TSFPeakResultsReader(filename);
+		return reader.read();
+	}
+	
 	/**
 	 * @return the tracker
 	 */

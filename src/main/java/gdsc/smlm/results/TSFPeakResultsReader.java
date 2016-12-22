@@ -107,6 +107,65 @@ public class TSFPeakResultsReader
 	}
 
 	/**
+	 * Checks if is a binary TSF file by attempting to read the SpotList header.
+	 *
+	 * @param filename
+	 *            the filename
+	 * @return true, if is a TSF file
+	 */
+	public static boolean isTSF(String filename)
+	{
+		FileInputStream fi = null;
+		try
+		{
+			fi = new FileInputStream(filename);
+			DataInputStream di = new DataInputStream(fi);
+			// the file has an initial 0, then the offset (as long)
+			// to the position of spotList
+			int magic = di.readInt();
+			if (magic != 0)
+			{
+				// Magic number should be zero
+				return false;
+			}
+			if (fi.available() == 0)
+			{
+				// No more contents
+				return false;
+			}
+			long offset = di.readLong();
+			if (offset == 0)
+			{
+				// No offset record
+				return false;
+			}
+			fi.skip(offset);
+			SpotList spotList = SpotList.parseDelimitedFrom(fi);
+			if (spotList != null)
+				return true;
+		}
+		catch (Exception e)
+		{
+			// Fail
+		}
+		finally
+		{
+			if (fi != null)
+			{
+				try
+				{
+					fi.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Read the results from the TSF file into memory
 	 * 
 	 * @return The results set (or null if an error occurred)
@@ -130,20 +189,17 @@ public class TSFPeakResultsReader
 		{
 			System.err.println("Failed to read open TSF file: " + filename);
 			e.printStackTrace();
-			return null;
-		}
-		finally
-		{
 			if (fi != null)
 			{
 				try
 				{
 					fi.close();
 				}
-				catch (IOException e)
+				catch (IOException ex)
 				{
 				}
 			}
+			return null;
 		}
 
 		LocationUnits locationUnits = spotList.getLocationUnits();
@@ -418,7 +474,8 @@ public class TSFPeakResultsReader
 	/**
 	 * Sets the channel to read.
 	 *
-	 * @param channel the new channel
+	 * @param channel
+	 *            the new channel
 	 */
 	public void setChannel(int channel)
 	{
@@ -438,7 +495,8 @@ public class TSFPeakResultsReader
 	/**
 	 * Sets the slice to read.
 	 *
-	 * @param slice the new slice
+	 * @param slice
+	 *            the new slice
 	 */
 	public void setSlice(int slice)
 	{
@@ -458,7 +516,8 @@ public class TSFPeakResultsReader
 	/**
 	 * Sets the position to read.
 	 *
-	 * @param position the new position
+	 * @param position
+	 *            the new position
 	 */
 	public void setPosition(int position)
 	{
@@ -478,7 +537,8 @@ public class TSFPeakResultsReader
 	/**
 	 * Sets the fluorophore type to read.
 	 *
-	 * @param fluorophoreType the new fluorophore type
+	 * @param fluorophoreType
+	 *            the new fluorophore type
 	 */
 	public void setFluorophoreType(int fluorophoreType)
 	{

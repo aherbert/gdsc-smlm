@@ -25,6 +25,7 @@ public enum FileFormat
 	NSTORM{ public String getName() { return "NSTORM"; }},
 	SMLM_TABLE{ public String getName() { return "SMLM Table"; }}, 
 	MALK{ public String getName() { return "MALK"; }}, 
+	TSF_BINARY{ public String getName() { return "TSF Binary"; }}, 
 	UNKNOWN{ public String getName() { return "Unknown"; }};
 	//@formatter:on
 

@@ -292,7 +292,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		long offset = 0;
 		try
 		{
-			offset = out.getChannel().position();
+			// The offset is the amount to skip forward after reading the int 
+			// magic number (4 bytes) and long offset (8 bytes)
+			//out.flush();
+			offset = out.getChannel().position() - 12;
 		}
 		catch (IOException e)
 		{
