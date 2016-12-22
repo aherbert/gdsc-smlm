@@ -6,6 +6,7 @@ import gdsc.smlm.results.PeakResult;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
+import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.process.FloatProcessor;
@@ -159,6 +160,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			ip.setColorModel(imp.getProcessor().getColorModel());
 			ImageStack stack = new ImageStack(imageWidth, imageHeight);
 			stack.addSlice(null, ip);
+			// If resizing then remove adornments
+			if (stack.getWidth() != imp.getWidth() || stack.getHeight() != imp.getHeight())
+			{
+				imp.setOverlay(null);
+				imp.setRoi((Roi) null);
+			}
 			imp.setStack(stack);
 		}
 
