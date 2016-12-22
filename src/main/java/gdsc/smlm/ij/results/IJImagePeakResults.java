@@ -365,7 +365,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		final float y = mapY(params[Gaussian2DFunction.Y_POSITION]);
 
 		// Check bounds
-		if (x < 0 || x > imageWidth || y < 0 || y > imageHeight)
+		if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 			return;
 
 		checkAndUpdateToFrame(peak);
@@ -626,7 +626,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		y = mapY(y);
 
 		// Check bounds
-		if (x < 0 || x > imageWidth || y < 0 || y > imageHeight)
+		if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 			return;
 
 		checkAndUpdateToFrame(peak);
@@ -660,7 +660,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		y = mapY(y);
 
 		// Check bounds
-		if (x < 0 || x > imageWidth || y < 0 || y > imageHeight)
+		if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 			return;
 
 		int[] indices = new int[5];
@@ -710,7 +710,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			int peak = allpeak[j];
 
 			// Check bounds
-			if (x < 0 || x > imageWidth || y < 0 || y > imageHeight)
+			if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 				continue;
 
 			if (shouldUpdate(peak))
@@ -783,7 +783,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			float y = mapY(ally[j]);
 
 			// Check bounds
-			if (x < 0 || x > imageWidth || y < 0 || y > imageHeight)
+			if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 				continue;
 
 			getValue(allv[j], x, y, indices, values);
@@ -906,7 +906,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			float y = mapY(result.getYPosition());
 
 			// Check bounds
-			if (x < 0 || x > imageWidth || y < 0 || y > imageHeight)
+			if (x < 0 || x >= imageWidth || y < 0 || y >= imageHeight)
 				continue;
 
 			if (shouldUpdate(result.peak))
