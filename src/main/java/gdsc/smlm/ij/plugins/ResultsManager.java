@@ -369,10 +369,10 @@ public class ResultsManager implements PlugIn, MouseListener
 				switch (resultsSettings.getResultsFileFormat())
 				{
 					case GDSC_BINARY:
-						r = new BinaryFilePeakResults(resultsSettings.resultsFilename, resultsSettings.showDeviations);
+						r = new BinaryFilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
 						break;
 					case GDSC_TEXT:
-						r = new FilePeakResults(resultsSettings.resultsFilename, resultsSettings.showDeviations);
+						r = new FilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
 						break;
 					case MALK:
 						r = new MALKFilePeakResults(resultsSettings.resultsFilename);
