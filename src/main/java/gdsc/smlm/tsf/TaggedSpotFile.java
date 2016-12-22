@@ -1444,35 +1444,59 @@ public final class TaggedSpotFile {
     int getBoundsX();
 
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_y = 1501;</code>
      */
     boolean hasBoundsY();
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_y = 1501;</code>
      */
     int getBoundsY();
 
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_width = 1502;</code>
      */
     boolean hasBoundsWidth();
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_width = 1502;</code>
      */
     int getBoundsWidth();
 
     /**
+     * <pre>
+     * if no crop was used)
+     * </pre>
+     *
      * <code>optional int32 bounds_height = 1503;</code>
      */
     boolean hasBoundsHeight();
     /**
+     * <pre>
+     * if no crop was used)
+     * </pre>
+     *
      * <code>optional int32 bounds_height = 1503;</code>
      */
     int getBoundsHeight();
 
     /**
      * <pre>
-     * Source of the results (can be a serialised object)
+     * Source of the results (can be a serialised 
      * </pre>
      *
      * <code>optional string source = 1504;</code>
@@ -1480,7 +1504,7 @@ public final class TaggedSpotFile {
     boolean hasSource();
     /**
      * <pre>
-     * Source of the results (can be a serialised object)
+     * Source of the results (can be a serialised 
      * </pre>
      *
      * <code>optional string source = 1504;</code>
@@ -1488,7 +1512,7 @@ public final class TaggedSpotFile {
     java.lang.String getSource();
     /**
      * <pre>
-     * Source of the results (can be a serialised object)
+     * Source of the results (can be a serialised 
      * </pre>
      *
      * <code>optional string source = 1504;</code>
@@ -1498,7 +1522,7 @@ public final class TaggedSpotFile {
 
     /**
      * <pre>
-     * Configuration used for fitting (can be a serialised object)
+     * Configuration used for fitting (can 
      * </pre>
      *
      * <code>optional string configuration = 1505;</code>
@@ -1506,7 +1530,7 @@ public final class TaggedSpotFile {
     boolean hasConfiguration();
     /**
      * <pre>
-     * Configuration used for fitting (can be a serialised object)
+     * Configuration used for fitting (can 
      * </pre>
      *
      * <code>optional string configuration = 1505;</code>
@@ -1514,7 +1538,7 @@ public final class TaggedSpotFile {
     java.lang.String getConfiguration();
     /**
      * <pre>
-     * Configuration used for fitting (can be a serialised object)
+     * Configuration used for fitting (can 
      * </pre>
      *
      * <code>optional string configuration = 1505;</code>
@@ -1524,72 +1548,105 @@ public final class TaggedSpotFile {
 
     /**
      * <pre>
-     * Calibration
+     * Calibration. This is for a single channel, i.e. camera.
+     * The pixel pitch is expected in pixel_size.
      * </pre>
      *
-     * <code>optional double nmPerPixel = 1506;</code>
-     */
-    boolean hasNmPerPixel();
-    /**
-     * <pre>
-     * Calibration
-     * </pre>
-     *
-     * <code>optional double nmPerPixel = 1506;</code>
-     */
-    double getNmPerPixel();
-
-    /**
-     * <code>optional double gain = 1507;</code>
+     * <code>optional double gain = 1506;</code>
      */
     boolean hasGain();
     /**
-     * <code>optional double gain = 1507;</code>
+     * <pre>
+     * Calibration. This is for a single channel, i.e. camera.
+     * The pixel pitch is expected in pixel_size.
+     * </pre>
+     *
+     * <code>optional double gain = 1506;</code>
      */
     double getGain();
 
     /**
-     * <code>optional double exposureTime = 1508;</code>
+     * <pre>
+     * (units=count/photon)
+     * </pre>
+     *
+     * <code>optional double exposureTime = 1507;</code>
      */
     boolean hasExposureTime();
     /**
-     * <code>optional double exposureTime = 1508;</code>
+     * <pre>
+     * (units=count/photon)
+     * </pre>
+     *
+     * <code>optional double exposureTime = 1507;</code>
      */
     double getExposureTime();
 
     /**
-     * <code>optional double readNoise = 1509;</code>
+     * <pre>
+     * (units=millisecond)
+     * </pre>
+     *
+     * <code>optional double readNoise = 1508;</code>
      */
     boolean hasReadNoise();
     /**
-     * <code>optional double readNoise = 1509;</code>
+     * <pre>
+     * (units=millisecond)
+     * </pre>
+     *
+     * <code>optional double readNoise = 1508;</code>
      */
     double getReadNoise();
 
     /**
-     * <code>optional double bias = 1510;</code>
+     * <pre>
+     * (units=count)
+     * </pre>
+     *
+     * <code>optional double bias = 1509;</code>
      */
     boolean hasBias();
     /**
-     * <code>optional double bias = 1510;</code>
+     * <pre>
+     * (units=count)
+     * </pre>
+     *
+     * <code>optional double bias = 1509;</code>
      */
     double getBias();
 
     /**
-     * <code>optional bool emCCD = 1511;</code>
+     * <pre>
+     * Set to true if this was an EM-CCD camera
+     * </pre>
+     *
+     * <code>optional bool emCCD = 1510;</code>
      */
     boolean hasEmCCD();
     /**
-     * <code>optional bool emCCD = 1511;</code>
+     * <pre>
+     * Set to true if this was an EM-CCD camera
+     * </pre>
+     *
+     * <code>optional bool emCCD = 1510;</code>
      */
     boolean getEmCCD();
 
     /**
-     * <code>optional double amplification = 1512;</code>
+     * <pre>
+     * The readout amplification applied 
+     * </pre>
+     *
+     * <code>optional double amplification = 1511;</code>
      */
     boolean hasAmplification();
     /**
-     * <code>optional double amplification = 1512;</code>
+     * <pre>
+     * The readout amplification applied 
+     * </pre>
+     *
+     * <code>optional double amplification = 1511;</code>
      */
     double getAmplification();
   }
@@ -1634,7 +1691,6 @@ public final class TaggedSpotFile {
       boundsHeight_ = 0;
       source_ = "";
       configuration_ = "";
-      nmPerPixel_ = 0D;
       gain_ = 0D;
       exposureTime_ = 0D;
       readNoise_ = 0D;
@@ -1819,36 +1875,31 @@ public final class TaggedSpotFile {
             }
             case 12049: {
               bitField0_ |= 0x00800000;
-              nmPerPixel_ = input.readDouble();
+              gain_ = input.readDouble();
               break;
             }
             case 12057: {
               bitField0_ |= 0x01000000;
-              gain_ = input.readDouble();
+              exposureTime_ = input.readDouble();
               break;
             }
             case 12065: {
               bitField0_ |= 0x02000000;
-              exposureTime_ = input.readDouble();
+              readNoise_ = input.readDouble();
               break;
             }
             case 12073: {
               bitField0_ |= 0x04000000;
-              readNoise_ = input.readDouble();
-              break;
-            }
-            case 12081: {
-              bitField0_ |= 0x08000000;
               bias_ = input.readDouble();
               break;
             }
-            case 12088: {
-              bitField0_ |= 0x10000000;
+            case 12080: {
+              bitField0_ |= 0x08000000;
               emCCD_ = input.readBool();
               break;
             }
-            case 12097: {
-              bitField0_ |= 0x20000000;
+            case 12089: {
+              bitField0_ |= 0x10000000;
               amplification_ = input.readDouble();
               break;
             }
@@ -2426,12 +2477,20 @@ public final class TaggedSpotFile {
     public static final int BOUNDS_Y_FIELD_NUMBER = 1501;
     private int boundsY_;
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_y = 1501;</code>
      */
     public boolean hasBoundsY() {
       return ((bitField0_ & 0x00040000) == 0x00040000);
     }
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_y = 1501;</code>
      */
     public int getBoundsY() {
@@ -2441,12 +2500,20 @@ public final class TaggedSpotFile {
     public static final int BOUNDS_WIDTH_FIELD_NUMBER = 1502;
     private int boundsWidth_;
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_width = 1502;</code>
      */
     public boolean hasBoundsWidth() {
       return ((bitField0_ & 0x00080000) == 0x00080000);
     }
     /**
+     * <pre>
+     * used)
+     * </pre>
+     *
      * <code>optional int32 bounds_width = 1502;</code>
      */
     public int getBoundsWidth() {
@@ -2456,12 +2523,20 @@ public final class TaggedSpotFile {
     public static final int BOUNDS_HEIGHT_FIELD_NUMBER = 1503;
     private int boundsHeight_;
     /**
+     * <pre>
+     * if no crop was used)
+     * </pre>
+     *
      * <code>optional int32 bounds_height = 1503;</code>
      */
     public boolean hasBoundsHeight() {
       return ((bitField0_ & 0x00100000) == 0x00100000);
     }
     /**
+     * <pre>
+     * if no crop was used)
+     * </pre>
+     *
      * <code>optional int32 bounds_height = 1503;</code>
      */
     public int getBoundsHeight() {
@@ -2472,7 +2547,7 @@ public final class TaggedSpotFile {
     private volatile java.lang.Object source_;
     /**
      * <pre>
-     * Source of the results (can be a serialised object)
+     * Source of the results (can be a serialised 
      * </pre>
      *
      * <code>optional string source = 1504;</code>
@@ -2482,7 +2557,7 @@ public final class TaggedSpotFile {
     }
     /**
      * <pre>
-     * Source of the results (can be a serialised object)
+     * Source of the results (can be a serialised 
      * </pre>
      *
      * <code>optional string source = 1504;</code>
@@ -2503,7 +2578,7 @@ public final class TaggedSpotFile {
     }
     /**
      * <pre>
-     * Source of the results (can be a serialised object)
+     * Source of the results (can be a serialised 
      * </pre>
      *
      * <code>optional string source = 1504;</code>
@@ -2526,7 +2601,7 @@ public final class TaggedSpotFile {
     private volatile java.lang.Object configuration_;
     /**
      * <pre>
-     * Configuration used for fitting (can be a serialised object)
+     * Configuration used for fitting (can 
      * </pre>
      *
      * <code>optional string configuration = 1505;</code>
@@ -2536,7 +2611,7 @@ public final class TaggedSpotFile {
     }
     /**
      * <pre>
-     * Configuration used for fitting (can be a serialised object)
+     * Configuration used for fitting (can 
      * </pre>
      *
      * <code>optional string configuration = 1505;</code>
@@ -2557,7 +2632,7 @@ public final class TaggedSpotFile {
     }
     /**
      * <pre>
-     * Configuration used for fitting (can be a serialised object)
+     * Configuration used for fitting (can 
      * </pre>
      *
      * <code>optional string configuration = 1505;</code>
@@ -2576,114 +2651,141 @@ public final class TaggedSpotFile {
       }
     }
 
-    public static final int NMPERPIXEL_FIELD_NUMBER = 1506;
-    private double nmPerPixel_;
+    public static final int GAIN_FIELD_NUMBER = 1506;
+    private double gain_;
     /**
      * <pre>
-     * Calibration
+     * Calibration. This is for a single channel, i.e. camera.
+     * The pixel pitch is expected in pixel_size.
      * </pre>
      *
-     * <code>optional double nmPerPixel = 1506;</code>
+     * <code>optional double gain = 1506;</code>
      */
-    public boolean hasNmPerPixel() {
+    public boolean hasGain() {
       return ((bitField0_ & 0x00800000) == 0x00800000);
     }
     /**
      * <pre>
-     * Calibration
+     * Calibration. This is for a single channel, i.e. camera.
+     * The pixel pitch is expected in pixel_size.
      * </pre>
      *
-     * <code>optional double nmPerPixel = 1506;</code>
-     */
-    public double getNmPerPixel() {
-      return nmPerPixel_;
-    }
-
-    public static final int GAIN_FIELD_NUMBER = 1507;
-    private double gain_;
-    /**
-     * <code>optional double gain = 1507;</code>
-     */
-    public boolean hasGain() {
-      return ((bitField0_ & 0x01000000) == 0x01000000);
-    }
-    /**
-     * <code>optional double gain = 1507;</code>
+     * <code>optional double gain = 1506;</code>
      */
     public double getGain() {
       return gain_;
     }
 
-    public static final int EXPOSURETIME_FIELD_NUMBER = 1508;
+    public static final int EXPOSURETIME_FIELD_NUMBER = 1507;
     private double exposureTime_;
     /**
-     * <code>optional double exposureTime = 1508;</code>
+     * <pre>
+     * (units=count/photon)
+     * </pre>
+     *
+     * <code>optional double exposureTime = 1507;</code>
      */
     public boolean hasExposureTime() {
-      return ((bitField0_ & 0x02000000) == 0x02000000);
+      return ((bitField0_ & 0x01000000) == 0x01000000);
     }
     /**
-     * <code>optional double exposureTime = 1508;</code>
+     * <pre>
+     * (units=count/photon)
+     * </pre>
+     *
+     * <code>optional double exposureTime = 1507;</code>
      */
     public double getExposureTime() {
       return exposureTime_;
     }
 
-    public static final int READNOISE_FIELD_NUMBER = 1509;
+    public static final int READNOISE_FIELD_NUMBER = 1508;
     private double readNoise_;
     /**
-     * <code>optional double readNoise = 1509;</code>
+     * <pre>
+     * (units=millisecond)
+     * </pre>
+     *
+     * <code>optional double readNoise = 1508;</code>
      */
     public boolean hasReadNoise() {
-      return ((bitField0_ & 0x04000000) == 0x04000000);
+      return ((bitField0_ & 0x02000000) == 0x02000000);
     }
     /**
-     * <code>optional double readNoise = 1509;</code>
+     * <pre>
+     * (units=millisecond)
+     * </pre>
+     *
+     * <code>optional double readNoise = 1508;</code>
      */
     public double getReadNoise() {
       return readNoise_;
     }
 
-    public static final int BIAS_FIELD_NUMBER = 1510;
+    public static final int BIAS_FIELD_NUMBER = 1509;
     private double bias_;
     /**
-     * <code>optional double bias = 1510;</code>
+     * <pre>
+     * (units=count)
+     * </pre>
+     *
+     * <code>optional double bias = 1509;</code>
      */
     public boolean hasBias() {
-      return ((bitField0_ & 0x08000000) == 0x08000000);
+      return ((bitField0_ & 0x04000000) == 0x04000000);
     }
     /**
-     * <code>optional double bias = 1510;</code>
+     * <pre>
+     * (units=count)
+     * </pre>
+     *
+     * <code>optional double bias = 1509;</code>
      */
     public double getBias() {
       return bias_;
     }
 
-    public static final int EMCCD_FIELD_NUMBER = 1511;
+    public static final int EMCCD_FIELD_NUMBER = 1510;
     private boolean emCCD_;
     /**
-     * <code>optional bool emCCD = 1511;</code>
+     * <pre>
+     * Set to true if this was an EM-CCD camera
+     * </pre>
+     *
+     * <code>optional bool emCCD = 1510;</code>
      */
     public boolean hasEmCCD() {
-      return ((bitField0_ & 0x10000000) == 0x10000000);
+      return ((bitField0_ & 0x08000000) == 0x08000000);
     }
     /**
-     * <code>optional bool emCCD = 1511;</code>
+     * <pre>
+     * Set to true if this was an EM-CCD camera
+     * </pre>
+     *
+     * <code>optional bool emCCD = 1510;</code>
      */
     public boolean getEmCCD() {
       return emCCD_;
     }
 
-    public static final int AMPLIFICATION_FIELD_NUMBER = 1512;
+    public static final int AMPLIFICATION_FIELD_NUMBER = 1511;
     private double amplification_;
     /**
-     * <code>optional double amplification = 1512;</code>
+     * <pre>
+     * The readout amplification applied 
+     * </pre>
+     *
+     * <code>optional double amplification = 1511;</code>
      */
     public boolean hasAmplification() {
-      return ((bitField0_ & 0x20000000) == 0x20000000);
+      return ((bitField0_ & 0x10000000) == 0x10000000);
     }
     /**
-     * <code>optional double amplification = 1512;</code>
+     * <pre>
+     * The readout amplification applied 
+     * </pre>
+     *
+     * <code>optional double amplification = 1511;</code>
      */
     public double getAmplification() {
       return amplification_;
@@ -2791,25 +2893,22 @@ public final class TaggedSpotFile {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1505, configuration_);
       }
       if (((bitField0_ & 0x00800000) == 0x00800000)) {
-        output.writeDouble(1506, nmPerPixel_);
+        output.writeDouble(1506, gain_);
       }
       if (((bitField0_ & 0x01000000) == 0x01000000)) {
-        output.writeDouble(1507, gain_);
+        output.writeDouble(1507, exposureTime_);
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
-        output.writeDouble(1508, exposureTime_);
+        output.writeDouble(1508, readNoise_);
       }
       if (((bitField0_ & 0x04000000) == 0x04000000)) {
-        output.writeDouble(1509, readNoise_);
+        output.writeDouble(1509, bias_);
       }
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
-        output.writeDouble(1510, bias_);
+        output.writeBool(1510, emCCD_);
       }
       if (((bitField0_ & 0x10000000) == 0x10000000)) {
-        output.writeBool(1511, emCCD_);
-      }
-      if (((bitField0_ & 0x20000000) == 0x20000000)) {
-        output.writeDouble(1512, amplification_);
+        output.writeDouble(1511, amplification_);
       }
       extensionWriter.writeUntil(2048, output);
       unknownFields.writeTo(output);
@@ -2914,31 +3013,27 @@ public final class TaggedSpotFile {
       }
       if (((bitField0_ & 0x00800000) == 0x00800000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1506, nmPerPixel_);
+          .computeDoubleSize(1506, gain_);
       }
       if (((bitField0_ & 0x01000000) == 0x01000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1507, gain_);
+          .computeDoubleSize(1507, exposureTime_);
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1508, exposureTime_);
+          .computeDoubleSize(1508, readNoise_);
       }
       if (((bitField0_ & 0x04000000) == 0x04000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1509, readNoise_);
+          .computeDoubleSize(1509, bias_);
       }
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1510, bias_);
+          .computeBoolSize(1510, emCCD_);
       }
       if (((bitField0_ & 0x10000000) == 0x10000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1511, emCCD_);
-      }
-      if (((bitField0_ & 0x20000000) == 0x20000000)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1512, amplification_);
+          .computeDoubleSize(1511, amplification_);
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -3073,13 +3168,6 @@ public final class TaggedSpotFile {
       if (hasConfiguration()) {
         result = result && getConfiguration()
             .equals(other.getConfiguration());
-      }
-      result = result && (hasNmPerPixel() == other.hasNmPerPixel());
-      if (hasNmPerPixel()) {
-        result = result && (
-            java.lang.Double.doubleToLongBits(getNmPerPixel())
-            == java.lang.Double.doubleToLongBits(
-                other.getNmPerPixel()));
       }
       result = result && (hasGain() == other.hasGain());
       if (hasGain()) {
@@ -3233,11 +3321,6 @@ public final class TaggedSpotFile {
       if (hasConfiguration()) {
         hash = (37 * hash) + CONFIGURATION_FIELD_NUMBER;
         hash = (53 * hash) + getConfiguration().hashCode();
-      }
-      if (hasNmPerPixel()) {
-        hash = (37 * hash) + NMPERPIXEL_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            java.lang.Double.doubleToLongBits(getNmPerPixel()));
       }
       if (hasGain()) {
         hash = (37 * hash) + GAIN_FIELD_NUMBER;
@@ -3446,20 +3529,18 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x00400000);
         configuration_ = "";
         bitField0_ = (bitField0_ & ~0x00800000);
-        nmPerPixel_ = 0D;
-        bitField0_ = (bitField0_ & ~0x01000000);
         gain_ = 0D;
-        bitField0_ = (bitField0_ & ~0x02000000);
+        bitField0_ = (bitField0_ & ~0x01000000);
         exposureTime_ = 0D;
-        bitField0_ = (bitField0_ & ~0x04000000);
+        bitField0_ = (bitField0_ & ~0x02000000);
         readNoise_ = 0D;
-        bitField0_ = (bitField0_ & ~0x08000000);
+        bitField0_ = (bitField0_ & ~0x04000000);
         bias_ = 0D;
-        bitField0_ = (bitField0_ & ~0x10000000);
+        bitField0_ = (bitField0_ & ~0x08000000);
         emCCD_ = false;
-        bitField0_ = (bitField0_ & ~0x20000000);
+        bitField0_ = (bitField0_ & ~0x10000000);
         amplification_ = 0D;
-        bitField0_ = (bitField0_ & ~0x40000000);
+        bitField0_ = (bitField0_ & ~0x20000000);
         return this;
       }
 
@@ -3588,29 +3669,25 @@ public final class TaggedSpotFile {
         if (((from_bitField0_ & 0x01000000) == 0x01000000)) {
           to_bitField0_ |= 0x00800000;
         }
-        result.nmPerPixel_ = nmPerPixel_;
+        result.gain_ = gain_;
         if (((from_bitField0_ & 0x02000000) == 0x02000000)) {
           to_bitField0_ |= 0x01000000;
         }
-        result.gain_ = gain_;
+        result.exposureTime_ = exposureTime_;
         if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
           to_bitField0_ |= 0x02000000;
         }
-        result.exposureTime_ = exposureTime_;
+        result.readNoise_ = readNoise_;
         if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
           to_bitField0_ |= 0x04000000;
         }
-        result.readNoise_ = readNoise_;
+        result.bias_ = bias_;
         if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
           to_bitField0_ |= 0x08000000;
         }
-        result.bias_ = bias_;
+        result.emCCD_ = emCCD_;
         if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
           to_bitField0_ |= 0x10000000;
-        }
-        result.emCCD_ = emCCD_;
-        if (((from_bitField0_ & 0x40000000) == 0x40000000)) {
-          to_bitField0_ |= 0x20000000;
         }
         result.amplification_ = amplification_;
         result.bitField0_ = to_bitField0_;
@@ -3780,9 +3857,6 @@ public final class TaggedSpotFile {
           bitField0_ |= 0x00800000;
           configuration_ = other.configuration_;
           onChanged();
-        }
-        if (other.hasNmPerPixel()) {
-          setNmPerPixel(other.getNmPerPixel());
         }
         if (other.hasGain()) {
           setGain(other.getGain());
@@ -5162,18 +5236,30 @@ public final class TaggedSpotFile {
 
       private int boundsY_ ;
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_y = 1501;</code>
        */
       public boolean hasBoundsY() {
         return ((bitField0_ & 0x00080000) == 0x00080000);
       }
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_y = 1501;</code>
        */
       public int getBoundsY() {
         return boundsY_;
       }
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_y = 1501;</code>
        */
       public Builder setBoundsY(int value) {
@@ -5183,6 +5269,10 @@ public final class TaggedSpotFile {
         return this;
       }
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_y = 1501;</code>
        */
       public Builder clearBoundsY() {
@@ -5194,18 +5284,30 @@ public final class TaggedSpotFile {
 
       private int boundsWidth_ ;
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_width = 1502;</code>
        */
       public boolean hasBoundsWidth() {
         return ((bitField0_ & 0x00100000) == 0x00100000);
       }
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_width = 1502;</code>
        */
       public int getBoundsWidth() {
         return boundsWidth_;
       }
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_width = 1502;</code>
        */
       public Builder setBoundsWidth(int value) {
@@ -5215,6 +5317,10 @@ public final class TaggedSpotFile {
         return this;
       }
       /**
+       * <pre>
+       * used)
+       * </pre>
+       *
        * <code>optional int32 bounds_width = 1502;</code>
        */
       public Builder clearBoundsWidth() {
@@ -5226,18 +5332,30 @@ public final class TaggedSpotFile {
 
       private int boundsHeight_ ;
       /**
+       * <pre>
+       * if no crop was used)
+       * </pre>
+       *
        * <code>optional int32 bounds_height = 1503;</code>
        */
       public boolean hasBoundsHeight() {
         return ((bitField0_ & 0x00200000) == 0x00200000);
       }
       /**
+       * <pre>
+       * if no crop was used)
+       * </pre>
+       *
        * <code>optional int32 bounds_height = 1503;</code>
        */
       public int getBoundsHeight() {
         return boundsHeight_;
       }
       /**
+       * <pre>
+       * if no crop was used)
+       * </pre>
+       *
        * <code>optional int32 bounds_height = 1503;</code>
        */
       public Builder setBoundsHeight(int value) {
@@ -5247,6 +5365,10 @@ public final class TaggedSpotFile {
         return this;
       }
       /**
+       * <pre>
+       * if no crop was used)
+       * </pre>
+       *
        * <code>optional int32 bounds_height = 1503;</code>
        */
       public Builder clearBoundsHeight() {
@@ -5259,7 +5381,7 @@ public final class TaggedSpotFile {
       private java.lang.Object source_ = "";
       /**
        * <pre>
-       * Source of the results (can be a serialised object)
+       * Source of the results (can be a serialised 
        * </pre>
        *
        * <code>optional string source = 1504;</code>
@@ -5269,7 +5391,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised object)
+       * Source of the results (can be a serialised 
        * </pre>
        *
        * <code>optional string source = 1504;</code>
@@ -5290,7 +5412,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised object)
+       * Source of the results (can be a serialised 
        * </pre>
        *
        * <code>optional string source = 1504;</code>
@@ -5310,7 +5432,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised object)
+       * Source of the results (can be a serialised 
        * </pre>
        *
        * <code>optional string source = 1504;</code>
@@ -5327,7 +5449,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised object)
+       * Source of the results (can be a serialised 
        * </pre>
        *
        * <code>optional string source = 1504;</code>
@@ -5340,7 +5462,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Source of the results (can be a serialised object)
+       * Source of the results (can be a serialised 
        * </pre>
        *
        * <code>optional string source = 1504;</code>
@@ -5359,7 +5481,7 @@ public final class TaggedSpotFile {
       private java.lang.Object configuration_ = "";
       /**
        * <pre>
-       * Configuration used for fitting (can be a serialised object)
+       * Configuration used for fitting (can 
        * </pre>
        *
        * <code>optional string configuration = 1505;</code>
@@ -5369,7 +5491,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can be a serialised object)
+       * Configuration used for fitting (can 
        * </pre>
        *
        * <code>optional string configuration = 1505;</code>
@@ -5390,7 +5512,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can be a serialised object)
+       * Configuration used for fitting (can 
        * </pre>
        *
        * <code>optional string configuration = 1505;</code>
@@ -5410,7 +5532,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can be a serialised object)
+       * Configuration used for fitting (can 
        * </pre>
        *
        * <code>optional string configuration = 1505;</code>
@@ -5427,7 +5549,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can be a serialised object)
+       * Configuration used for fitting (can 
        * </pre>
        *
        * <code>optional string configuration = 1505;</code>
@@ -5440,7 +5562,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Configuration used for fitting (can be a serialised object)
+       * Configuration used for fitting (can 
        * </pre>
        *
        * <code>optional string configuration = 1505;</code>
@@ -5456,81 +5578,53 @@ public final class TaggedSpotFile {
         return this;
       }
 
-      private double nmPerPixel_ ;
+      private double gain_ ;
       /**
        * <pre>
-       * Calibration
+       * Calibration. This is for a single channel, i.e. camera.
+       * The pixel pitch is expected in pixel_size.
        * </pre>
        *
-       * <code>optional double nmPerPixel = 1506;</code>
+       * <code>optional double gain = 1506;</code>
        */
-      public boolean hasNmPerPixel() {
+      public boolean hasGain() {
         return ((bitField0_ & 0x01000000) == 0x01000000);
       }
       /**
        * <pre>
-       * Calibration
+       * Calibration. This is for a single channel, i.e. camera.
+       * The pixel pitch is expected in pixel_size.
        * </pre>
        *
-       * <code>optional double nmPerPixel = 1506;</code>
-       */
-      public double getNmPerPixel() {
-        return nmPerPixel_;
-      }
-      /**
-       * <pre>
-       * Calibration
-       * </pre>
-       *
-       * <code>optional double nmPerPixel = 1506;</code>
-       */
-      public Builder setNmPerPixel(double value) {
-        bitField0_ |= 0x01000000;
-        nmPerPixel_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Calibration
-       * </pre>
-       *
-       * <code>optional double nmPerPixel = 1506;</code>
-       */
-      public Builder clearNmPerPixel() {
-        bitField0_ = (bitField0_ & ~0x01000000);
-        nmPerPixel_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double gain_ ;
-      /**
-       * <code>optional double gain = 1507;</code>
-       */
-      public boolean hasGain() {
-        return ((bitField0_ & 0x02000000) == 0x02000000);
-      }
-      /**
-       * <code>optional double gain = 1507;</code>
+       * <code>optional double gain = 1506;</code>
        */
       public double getGain() {
         return gain_;
       }
       /**
-       * <code>optional double gain = 1507;</code>
+       * <pre>
+       * Calibration. This is for a single channel, i.e. camera.
+       * The pixel pitch is expected in pixel_size.
+       * </pre>
+       *
+       * <code>optional double gain = 1506;</code>
        */
       public Builder setGain(double value) {
-        bitField0_ |= 0x02000000;
+        bitField0_ |= 0x01000000;
         gain_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional double gain = 1507;</code>
+       * <pre>
+       * Calibration. This is for a single channel, i.e. camera.
+       * The pixel pitch is expected in pixel_size.
+       * </pre>
+       *
+       * <code>optional double gain = 1506;</code>
        */
       public Builder clearGain() {
-        bitField0_ = (bitField0_ & ~0x02000000);
+        bitField0_ = (bitField0_ & ~0x01000000);
         gain_ = 0D;
         onChanged();
         return this;
@@ -5538,31 +5632,47 @@ public final class TaggedSpotFile {
 
       private double exposureTime_ ;
       /**
-       * <code>optional double exposureTime = 1508;</code>
+       * <pre>
+       * (units=count/photon)
+       * </pre>
+       *
+       * <code>optional double exposureTime = 1507;</code>
        */
       public boolean hasExposureTime() {
-        return ((bitField0_ & 0x04000000) == 0x04000000);
+        return ((bitField0_ & 0x02000000) == 0x02000000);
       }
       /**
-       * <code>optional double exposureTime = 1508;</code>
+       * <pre>
+       * (units=count/photon)
+       * </pre>
+       *
+       * <code>optional double exposureTime = 1507;</code>
        */
       public double getExposureTime() {
         return exposureTime_;
       }
       /**
-       * <code>optional double exposureTime = 1508;</code>
+       * <pre>
+       * (units=count/photon)
+       * </pre>
+       *
+       * <code>optional double exposureTime = 1507;</code>
        */
       public Builder setExposureTime(double value) {
-        bitField0_ |= 0x04000000;
+        bitField0_ |= 0x02000000;
         exposureTime_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional double exposureTime = 1508;</code>
+       * <pre>
+       * (units=count/photon)
+       * </pre>
+       *
+       * <code>optional double exposureTime = 1507;</code>
        */
       public Builder clearExposureTime() {
-        bitField0_ = (bitField0_ & ~0x04000000);
+        bitField0_ = (bitField0_ & ~0x02000000);
         exposureTime_ = 0D;
         onChanged();
         return this;
@@ -5570,31 +5680,47 @@ public final class TaggedSpotFile {
 
       private double readNoise_ ;
       /**
-       * <code>optional double readNoise = 1509;</code>
+       * <pre>
+       * (units=millisecond)
+       * </pre>
+       *
+       * <code>optional double readNoise = 1508;</code>
        */
       public boolean hasReadNoise() {
-        return ((bitField0_ & 0x08000000) == 0x08000000);
+        return ((bitField0_ & 0x04000000) == 0x04000000);
       }
       /**
-       * <code>optional double readNoise = 1509;</code>
+       * <pre>
+       * (units=millisecond)
+       * </pre>
+       *
+       * <code>optional double readNoise = 1508;</code>
        */
       public double getReadNoise() {
         return readNoise_;
       }
       /**
-       * <code>optional double readNoise = 1509;</code>
+       * <pre>
+       * (units=millisecond)
+       * </pre>
+       *
+       * <code>optional double readNoise = 1508;</code>
        */
       public Builder setReadNoise(double value) {
-        bitField0_ |= 0x08000000;
+        bitField0_ |= 0x04000000;
         readNoise_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional double readNoise = 1509;</code>
+       * <pre>
+       * (units=millisecond)
+       * </pre>
+       *
+       * <code>optional double readNoise = 1508;</code>
        */
       public Builder clearReadNoise() {
-        bitField0_ = (bitField0_ & ~0x08000000);
+        bitField0_ = (bitField0_ & ~0x04000000);
         readNoise_ = 0D;
         onChanged();
         return this;
@@ -5602,31 +5728,47 @@ public final class TaggedSpotFile {
 
       private double bias_ ;
       /**
-       * <code>optional double bias = 1510;</code>
+       * <pre>
+       * (units=count)
+       * </pre>
+       *
+       * <code>optional double bias = 1509;</code>
        */
       public boolean hasBias() {
-        return ((bitField0_ & 0x10000000) == 0x10000000);
+        return ((bitField0_ & 0x08000000) == 0x08000000);
       }
       /**
-       * <code>optional double bias = 1510;</code>
+       * <pre>
+       * (units=count)
+       * </pre>
+       *
+       * <code>optional double bias = 1509;</code>
        */
       public double getBias() {
         return bias_;
       }
       /**
-       * <code>optional double bias = 1510;</code>
+       * <pre>
+       * (units=count)
+       * </pre>
+       *
+       * <code>optional double bias = 1509;</code>
        */
       public Builder setBias(double value) {
-        bitField0_ |= 0x10000000;
+        bitField0_ |= 0x08000000;
         bias_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional double bias = 1510;</code>
+       * <pre>
+       * (units=count)
+       * </pre>
+       *
+       * <code>optional double bias = 1509;</code>
        */
       public Builder clearBias() {
-        bitField0_ = (bitField0_ & ~0x10000000);
+        bitField0_ = (bitField0_ & ~0x08000000);
         bias_ = 0D;
         onChanged();
         return this;
@@ -5634,31 +5776,47 @@ public final class TaggedSpotFile {
 
       private boolean emCCD_ ;
       /**
-       * <code>optional bool emCCD = 1511;</code>
+       * <pre>
+       * Set to true if this was an EM-CCD camera
+       * </pre>
+       *
+       * <code>optional bool emCCD = 1510;</code>
        */
       public boolean hasEmCCD() {
-        return ((bitField0_ & 0x20000000) == 0x20000000);
+        return ((bitField0_ & 0x10000000) == 0x10000000);
       }
       /**
-       * <code>optional bool emCCD = 1511;</code>
+       * <pre>
+       * Set to true if this was an EM-CCD camera
+       * </pre>
+       *
+       * <code>optional bool emCCD = 1510;</code>
        */
       public boolean getEmCCD() {
         return emCCD_;
       }
       /**
-       * <code>optional bool emCCD = 1511;</code>
+       * <pre>
+       * Set to true if this was an EM-CCD camera
+       * </pre>
+       *
+       * <code>optional bool emCCD = 1510;</code>
        */
       public Builder setEmCCD(boolean value) {
-        bitField0_ |= 0x20000000;
+        bitField0_ |= 0x10000000;
         emCCD_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bool emCCD = 1511;</code>
+       * <pre>
+       * Set to true if this was an EM-CCD camera
+       * </pre>
+       *
+       * <code>optional bool emCCD = 1510;</code>
        */
       public Builder clearEmCCD() {
-        bitField0_ = (bitField0_ & ~0x20000000);
+        bitField0_ = (bitField0_ & ~0x10000000);
         emCCD_ = false;
         onChanged();
         return this;
@@ -5666,31 +5824,47 @@ public final class TaggedSpotFile {
 
       private double amplification_ ;
       /**
-       * <code>optional double amplification = 1512;</code>
+       * <pre>
+       * The readout amplification applied 
+       * </pre>
+       *
+       * <code>optional double amplification = 1511;</code>
        */
       public boolean hasAmplification() {
-        return ((bitField0_ & 0x40000000) == 0x40000000);
+        return ((bitField0_ & 0x20000000) == 0x20000000);
       }
       /**
-       * <code>optional double amplification = 1512;</code>
+       * <pre>
+       * The readout amplification applied 
+       * </pre>
+       *
+       * <code>optional double amplification = 1511;</code>
        */
       public double getAmplification() {
         return amplification_;
       }
       /**
-       * <code>optional double amplification = 1512;</code>
+       * <pre>
+       * The readout amplification applied 
+       * </pre>
+       *
+       * <code>optional double amplification = 1511;</code>
        */
       public Builder setAmplification(double value) {
-        bitField0_ |= 0x40000000;
+        bitField0_ |= 0x20000000;
         amplification_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional double amplification = 1512;</code>
+       * <pre>
+       * The readout amplification applied 
+       * </pre>
+       *
+       * <code>optional double amplification = 1511;</code>
        */
       public Builder clearAmplification() {
-        bitField0_ = (bitField0_ & ~0x40000000);
+        bitField0_ = (bitField0_ & ~0x20000000);
         amplification_ = 0D;
         onChanged();
         return this;
@@ -6196,50 +6370,77 @@ public final class TaggedSpotFile {
     double getError();
 
     /**
+     * <pre>
+     * Local noise estimate
+     * </pre>
+     *
      * <code>optional float noise = 1501;</code>
      */
     boolean hasNoise();
     /**
+     * <pre>
+     * Local noise estimate
+     * </pre>
+     *
      * <code>optional float noise = 1501;</code>
      */
     float getNoise();
 
     /**
-     * <code>optional int32 id = 1502;</code>
-     */
-    boolean hasId();
-    /**
-     * <code>optional int32 id = 1502;</code>
-     */
-    int getId();
-
-    /**
+     * <pre>
+     * The end frame (if the spot represents an 
+     * </pre>
+     *
      * <code>optional int32 end_frame = 1503;</code>
      */
     boolean hasEndFrame();
     /**
+     * <pre>
+     * The end frame (if the spot represents an 
+     * </pre>
+     *
      * <code>optional int32 end_frame = 1503;</code>
      */
     int getEndFrame();
 
     /**
+     * <pre>
+     * average across multiple frames)
+     * </pre>
+     *
      * <code>optional float original_value = 1504;</code>
      */
     boolean hasOriginalValue();
     /**
+     * <pre>
+     * average across multiple frames)
+     * </pre>
+     *
      * <code>optional float original_value = 1504;</code>
      */
     float getOriginalValue();
 
     /**
+     * <pre>
+     * fitting origin (x_position,y_position)
+     * </pre>
+     *
      * <code>repeated float params_std_dev = 1505;</code>
      */
     java.util.List<java.lang.Float> getParamsStdDevList();
     /**
+     * <pre>
+     * fitting origin (x_position,y_position)
+     * </pre>
+     *
      * <code>repeated float params_std_dev = 1505;</code>
      */
     int getParamsStdDevCount();
     /**
+     * <pre>
+     * fitting origin (x_position,y_position)
+     * </pre>
+     *
      * <code>repeated float params_std_dev = 1505;</code>
      */
     float getParamsStdDev(int index);
@@ -6284,7 +6485,6 @@ public final class TaggedSpotFile {
       yPosition_ = 0;
       error_ = 0D;
       noise_ = 0F;
-      id_ = 0;
       endFrame_ = 0;
       originalValue_ = 0F;
       paramsStdDev_ = java.util.Collections.emptyList();
@@ -6465,25 +6665,20 @@ public final class TaggedSpotFile {
               noise_ = input.readFloat();
               break;
             }
-            case 12016: {
-              bitField0_ |= 0x08000000;
-              id_ = input.readInt32();
-              break;
-            }
             case 12024: {
-              bitField0_ |= 0x10000000;
+              bitField0_ |= 0x08000000;
               endFrame_ = input.readInt32();
               break;
             }
             case 12037: {
-              bitField0_ |= 0x20000000;
+              bitField0_ |= 0x10000000;
               originalValue_ = input.readFloat();
               break;
             }
             case 12045: {
-              if (!((mutable_bitField0_ & 0x40000000) == 0x40000000)) {
+              if (!((mutable_bitField0_ & 0x20000000) == 0x20000000)) {
                 paramsStdDev_ = new java.util.ArrayList<java.lang.Float>();
-                mutable_bitField0_ |= 0x40000000;
+                mutable_bitField0_ |= 0x20000000;
               }
               paramsStdDev_.add(input.readFloat());
               break;
@@ -6491,9 +6686,9 @@ public final class TaggedSpotFile {
             case 12042: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x40000000) == 0x40000000) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField0_ & 0x20000000) == 0x20000000) && input.getBytesUntilLimit() > 0) {
                 paramsStdDev_ = new java.util.ArrayList<java.lang.Float>();
-                mutable_bitField0_ |= 0x40000000;
+                mutable_bitField0_ |= 0x20000000;
               }
               while (input.getBytesUntilLimit() > 0) {
                 paramsStdDev_.add(input.readFloat());
@@ -6509,7 +6704,7 @@ public final class TaggedSpotFile {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x40000000) == 0x40000000)) {
+        if (((mutable_bitField0_ & 0x20000000) == 0x20000000)) {
           paramsStdDev_ = java.util.Collections.unmodifiableList(paramsStdDev_);
         }
         this.unknownFields = unknownFields.build();
@@ -7136,42 +7331,43 @@ public final class TaggedSpotFile {
     public static final int NOISE_FIELD_NUMBER = 1501;
     private float noise_;
     /**
+     * <pre>
+     * Local noise estimate
+     * </pre>
+     *
      * <code>optional float noise = 1501;</code>
      */
     public boolean hasNoise() {
       return ((bitField0_ & 0x04000000) == 0x04000000);
     }
     /**
+     * <pre>
+     * Local noise estimate
+     * </pre>
+     *
      * <code>optional float noise = 1501;</code>
      */
     public float getNoise() {
       return noise_;
     }
 
-    public static final int ID_FIELD_NUMBER = 1502;
-    private int id_;
-    /**
-     * <code>optional int32 id = 1502;</code>
-     */
-    public boolean hasId() {
-      return ((bitField0_ & 0x08000000) == 0x08000000);
-    }
-    /**
-     * <code>optional int32 id = 1502;</code>
-     */
-    public int getId() {
-      return id_;
-    }
-
     public static final int END_FRAME_FIELD_NUMBER = 1503;
     private int endFrame_;
     /**
+     * <pre>
+     * The end frame (if the spot represents an 
+     * </pre>
+     *
      * <code>optional int32 end_frame = 1503;</code>
      */
     public boolean hasEndFrame() {
-      return ((bitField0_ & 0x10000000) == 0x10000000);
+      return ((bitField0_ & 0x08000000) == 0x08000000);
     }
     /**
+     * <pre>
+     * The end frame (if the spot represents an 
+     * </pre>
+     *
      * <code>optional int32 end_frame = 1503;</code>
      */
     public int getEndFrame() {
@@ -7181,12 +7377,20 @@ public final class TaggedSpotFile {
     public static final int ORIGINAL_VALUE_FIELD_NUMBER = 1504;
     private float originalValue_;
     /**
+     * <pre>
+     * average across multiple frames)
+     * </pre>
+     *
      * <code>optional float original_value = 1504;</code>
      */
     public boolean hasOriginalValue() {
-      return ((bitField0_ & 0x20000000) == 0x20000000);
+      return ((bitField0_ & 0x10000000) == 0x10000000);
     }
     /**
+     * <pre>
+     * average across multiple frames)
+     * </pre>
+     *
      * <code>optional float original_value = 1504;</code>
      */
     public float getOriginalValue() {
@@ -7196,6 +7400,10 @@ public final class TaggedSpotFile {
     public static final int PARAMS_STD_DEV_FIELD_NUMBER = 1505;
     private java.util.List<java.lang.Float> paramsStdDev_;
     /**
+     * <pre>
+     * fitting origin (x_position,y_position)
+     * </pre>
+     *
      * <code>repeated float params_std_dev = 1505;</code>
      */
     public java.util.List<java.lang.Float>
@@ -7203,12 +7411,20 @@ public final class TaggedSpotFile {
       return paramsStdDev_;
     }
     /**
+     * <pre>
+     * fitting origin (x_position,y_position)
+     * </pre>
+     *
      * <code>repeated float params_std_dev = 1505;</code>
      */
     public int getParamsStdDevCount() {
       return paramsStdDev_.size();
     }
     /**
+     * <pre>
+     * fitting origin (x_position,y_position)
+     * </pre>
+     *
      * <code>repeated float params_std_dev = 1505;</code>
      */
     public float getParamsStdDev(int index) {
@@ -7340,12 +7556,9 @@ public final class TaggedSpotFile {
         output.writeFloat(1501, noise_);
       }
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
-        output.writeInt32(1502, id_);
-      }
-      if (((bitField0_ & 0x10000000) == 0x10000000)) {
         output.writeInt32(1503, endFrame_);
       }
-      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
         output.writeFloat(1504, originalValue_);
       }
       for (int i = 0; i < paramsStdDev_.size(); i++) {
@@ -7470,13 +7683,9 @@ public final class TaggedSpotFile {
       }
       if (((bitField0_ & 0x08000000) == 0x08000000)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1502, id_);
-      }
-      if (((bitField0_ & 0x10000000) == 0x10000000)) {
-        size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1503, endFrame_);
       }
-      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(1504, originalValue_);
       }
@@ -7669,11 +7878,6 @@ public final class TaggedSpotFile {
             == java.lang.Float.floatToIntBits(
                 other.getNoise()));
       }
-      result = result && (hasId() == other.hasId());
-      if (hasId()) {
-        result = result && (getId()
-            == other.getId());
-      }
       result = result && (hasEndFrame() == other.hasEndFrame());
       if (hasEndFrame()) {
         result = result && (getEndFrame()
@@ -7824,10 +8028,6 @@ public final class TaggedSpotFile {
         hash = (37 * hash) + NOISE_FIELD_NUMBER;
         hash = (53 * hash) + java.lang.Float.floatToIntBits(
             getNoise());
-      }
-      if (hasId()) {
-        hash = (37 * hash) + ID_FIELD_NUMBER;
-        hash = (53 * hash) + getId();
       }
       if (hasEndFrame()) {
         hash = (37 * hash) + END_FRAME_FIELD_NUMBER;
@@ -8016,14 +8216,12 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x02000000);
         noise_ = 0F;
         bitField0_ = (bitField0_ & ~0x04000000);
-        id_ = 0;
-        bitField0_ = (bitField0_ & ~0x08000000);
         endFrame_ = 0;
-        bitField0_ = (bitField0_ & ~0x10000000);
+        bitField0_ = (bitField0_ & ~0x08000000);
         originalValue_ = 0F;
-        bitField0_ = (bitField0_ & ~0x20000000);
+        bitField0_ = (bitField0_ & ~0x10000000);
         paramsStdDev_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x40000000);
+        bitField0_ = (bitField0_ & ~0x20000000);
         return this;
       }
 
@@ -8159,18 +8357,14 @@ public final class TaggedSpotFile {
         if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
           to_bitField0_ |= 0x08000000;
         }
-        result.id_ = id_;
+        result.endFrame_ = endFrame_;
         if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
           to_bitField0_ |= 0x10000000;
         }
-        result.endFrame_ = endFrame_;
-        if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
-          to_bitField0_ |= 0x20000000;
-        }
         result.originalValue_ = originalValue_;
-        if (((bitField0_ & 0x40000000) == 0x40000000)) {
+        if (((bitField0_ & 0x20000000) == 0x20000000)) {
           paramsStdDev_ = java.util.Collections.unmodifiableList(paramsStdDev_);
-          bitField0_ = (bitField0_ & ~0x40000000);
+          bitField0_ = (bitField0_ & ~0x20000000);
         }
         result.paramsStdDev_ = paramsStdDev_;
         result.bitField0_ = to_bitField0_;
@@ -8319,9 +8513,6 @@ public final class TaggedSpotFile {
         if (other.hasNoise()) {
           setNoise(other.getNoise());
         }
-        if (other.hasId()) {
-          setId(other.getId());
-        }
         if (other.hasEndFrame()) {
           setEndFrame(other.getEndFrame());
         }
@@ -8331,7 +8522,7 @@ public final class TaggedSpotFile {
         if (!other.paramsStdDev_.isEmpty()) {
           if (paramsStdDev_.isEmpty()) {
             paramsStdDev_ = other.paramsStdDev_;
-            bitField0_ = (bitField0_ & ~0x40000000);
+            bitField0_ = (bitField0_ & ~0x20000000);
           } else {
             ensureParamsStdDevIsMutable();
             paramsStdDev_.addAll(other.paramsStdDev_);
@@ -9654,18 +9845,30 @@ public final class TaggedSpotFile {
 
       private float noise_ ;
       /**
+       * <pre>
+       * Local noise estimate
+       * </pre>
+       *
        * <code>optional float noise = 1501;</code>
        */
       public boolean hasNoise() {
         return ((bitField0_ & 0x04000000) == 0x04000000);
       }
       /**
+       * <pre>
+       * Local noise estimate
+       * </pre>
+       *
        * <code>optional float noise = 1501;</code>
        */
       public float getNoise() {
         return noise_;
       }
       /**
+       * <pre>
+       * Local noise estimate
+       * </pre>
+       *
        * <code>optional float noise = 1501;</code>
        */
       public Builder setNoise(float value) {
@@ -9675,6 +9878,10 @@ public final class TaggedSpotFile {
         return this;
       }
       /**
+       * <pre>
+       * Local noise estimate
+       * </pre>
+       *
        * <code>optional float noise = 1501;</code>
        */
       public Builder clearNoise() {
@@ -9684,65 +9891,49 @@ public final class TaggedSpotFile {
         return this;
       }
 
-      private int id_ ;
-      /**
-       * <code>optional int32 id = 1502;</code>
-       */
-      public boolean hasId() {
-        return ((bitField0_ & 0x08000000) == 0x08000000);
-      }
-      /**
-       * <code>optional int32 id = 1502;</code>
-       */
-      public int getId() {
-        return id_;
-      }
-      /**
-       * <code>optional int32 id = 1502;</code>
-       */
-      public Builder setId(int value) {
-        bitField0_ |= 0x08000000;
-        id_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 id = 1502;</code>
-       */
-      public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x08000000);
-        id_ = 0;
-        onChanged();
-        return this;
-      }
-
       private int endFrame_ ;
       /**
+       * <pre>
+       * The end frame (if the spot represents an 
+       * </pre>
+       *
        * <code>optional int32 end_frame = 1503;</code>
        */
       public boolean hasEndFrame() {
-        return ((bitField0_ & 0x10000000) == 0x10000000);
+        return ((bitField0_ & 0x08000000) == 0x08000000);
       }
       /**
+       * <pre>
+       * The end frame (if the spot represents an 
+       * </pre>
+       *
        * <code>optional int32 end_frame = 1503;</code>
        */
       public int getEndFrame() {
         return endFrame_;
       }
       /**
+       * <pre>
+       * The end frame (if the spot represents an 
+       * </pre>
+       *
        * <code>optional int32 end_frame = 1503;</code>
        */
       public Builder setEndFrame(int value) {
-        bitField0_ |= 0x10000000;
+        bitField0_ |= 0x08000000;
         endFrame_ = value;
         onChanged();
         return this;
       }
       /**
+       * <pre>
+       * The end frame (if the spot represents an 
+       * </pre>
+       *
        * <code>optional int32 end_frame = 1503;</code>
        */
       public Builder clearEndFrame() {
-        bitField0_ = (bitField0_ & ~0x10000000);
+        bitField0_ = (bitField0_ & ~0x08000000);
         endFrame_ = 0;
         onChanged();
         return this;
@@ -9750,31 +9941,47 @@ public final class TaggedSpotFile {
 
       private float originalValue_ ;
       /**
+       * <pre>
+       * average across multiple frames)
+       * </pre>
+       *
        * <code>optional float original_value = 1504;</code>
        */
       public boolean hasOriginalValue() {
-        return ((bitField0_ & 0x20000000) == 0x20000000);
+        return ((bitField0_ & 0x10000000) == 0x10000000);
       }
       /**
+       * <pre>
+       * average across multiple frames)
+       * </pre>
+       *
        * <code>optional float original_value = 1504;</code>
        */
       public float getOriginalValue() {
         return originalValue_;
       }
       /**
+       * <pre>
+       * average across multiple frames)
+       * </pre>
+       *
        * <code>optional float original_value = 1504;</code>
        */
       public Builder setOriginalValue(float value) {
-        bitField0_ |= 0x20000000;
+        bitField0_ |= 0x10000000;
         originalValue_ = value;
         onChanged();
         return this;
       }
       /**
+       * <pre>
+       * average across multiple frames)
+       * </pre>
+       *
        * <code>optional float original_value = 1504;</code>
        */
       public Builder clearOriginalValue() {
-        bitField0_ = (bitField0_ & ~0x20000000);
+        bitField0_ = (bitField0_ & ~0x10000000);
         originalValue_ = 0F;
         onChanged();
         return this;
@@ -9782,12 +9989,16 @@ public final class TaggedSpotFile {
 
       private java.util.List<java.lang.Float> paramsStdDev_ = java.util.Collections.emptyList();
       private void ensureParamsStdDevIsMutable() {
-        if (!((bitField0_ & 0x40000000) == 0x40000000)) {
+        if (!((bitField0_ & 0x20000000) == 0x20000000)) {
           paramsStdDev_ = new java.util.ArrayList<java.lang.Float>(paramsStdDev_);
-          bitField0_ |= 0x40000000;
+          bitField0_ |= 0x20000000;
          }
       }
       /**
+       * <pre>
+       * fitting origin (x_position,y_position)
+       * </pre>
+       *
        * <code>repeated float params_std_dev = 1505;</code>
        */
       public java.util.List<java.lang.Float>
@@ -9795,18 +10006,30 @@ public final class TaggedSpotFile {
         return java.util.Collections.unmodifiableList(paramsStdDev_);
       }
       /**
+       * <pre>
+       * fitting origin (x_position,y_position)
+       * </pre>
+       *
        * <code>repeated float params_std_dev = 1505;</code>
        */
       public int getParamsStdDevCount() {
         return paramsStdDev_.size();
       }
       /**
+       * <pre>
+       * fitting origin (x_position,y_position)
+       * </pre>
+       *
        * <code>repeated float params_std_dev = 1505;</code>
        */
       public float getParamsStdDev(int index) {
         return paramsStdDev_.get(index);
       }
       /**
+       * <pre>
+       * fitting origin (x_position,y_position)
+       * </pre>
+       *
        * <code>repeated float params_std_dev = 1505;</code>
        */
       public Builder setParamsStdDev(
@@ -9817,6 +10040,10 @@ public final class TaggedSpotFile {
         return this;
       }
       /**
+       * <pre>
+       * fitting origin (x_position,y_position)
+       * </pre>
+       *
        * <code>repeated float params_std_dev = 1505;</code>
        */
       public Builder addParamsStdDev(float value) {
@@ -9826,6 +10053,10 @@ public final class TaggedSpotFile {
         return this;
       }
       /**
+       * <pre>
+       * fitting origin (x_position,y_position)
+       * </pre>
+       *
        * <code>repeated float params_std_dev = 1505;</code>
        */
       public Builder addAllParamsStdDev(
@@ -9837,11 +10068,15 @@ public final class TaggedSpotFile {
         return this;
       }
       /**
+       * <pre>
+       * fitting origin (x_position,y_position)
+       * </pre>
+       *
        * <code>repeated float params_std_dev = 1505;</code>
        */
       public Builder clearParamsStdDev() {
         paramsStdDev_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x40000000);
+        bitField0_ = (bitField0_ & ~0x20000000);
         onChanged();
         return this;
       }
@@ -9920,7 +10155,7 @@ public final class TaggedSpotFile {
     java.lang.String[] descriptorData = {
       "\n\016TSFProto.proto\022\003TSF\"G\n\017FluorophoreType" +
       "\022\n\n\002id\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_" +
-      "fiducial\030\003 \001(\010\"\317\005\n\010SpotList\022\031\n\016applicati" +
+      "fiducial\030\003 \001(\010\"\272\005\n\010SpotList\022\031\n\016applicati" +
       "on_id\030\001 \002(\005:\0011\022\014\n\004name\030\002 \001(\t\022\020\n\010filepath" +
       "\030\003 \001(\t\022\013\n\003uid\030\004 \001(\003\022\023\n\013nr_pixels_x\030\005 \001(\005" +
       "\022\023\n\013nr_pixels_y\030\006 \001(\005\022\022\n\npixel_size\030\007 \001(" +
@@ -9934,31 +10169,30 @@ public final class TaggedSpotFile {
       "ode\022\027\n\010is_track\030\031 \001(\010:\005false\022\021\n\010bounds_x" +
       "\030\334\013 \001(\005\022\021\n\010bounds_y\030\335\013 \001(\005\022\025\n\014bounds_wid" +
       "th\030\336\013 \001(\005\022\026\n\rbounds_height\030\337\013 \001(\005\022\017\n\006sou" +
-      "rce\030\340\013 \001(\t\022\026\n\rconfiguration\030\341\013 \001(\t\022\023\n\nnm" +
-      "PerPixel\030\342\013 \001(\001\022\r\n\004gain\030\343\013 \001(\001\022\025\n\014exposu" +
-      "reTime\030\344\013 \001(\001\022\022\n\treadNoise\030\345\013 \001(\001\022\r\n\004bia" +
-      "s\030\346\013 \001(\001\022\016\n\005emCCD\030\347\013 \001(\010\022\026\n\ramplificatio",
-      "n\030\350\013 \001(\001*\006\010\244\r\020\200\020\"\350\004\n\004Spot\022\020\n\010molecule\030\001 " +
-      "\002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005frame\030\003 \002(\005\022\r\n\005s" +
-      "lice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020fluorophore_t" +
-      "ype\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*\n\016location_u" +
-      "nits\030\021 \001(\0162\022.TSF.LocationUnits\022\t\n\001x\030\007 \002(" +
-      "\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017intensity_uni" +
-      "ts\030\022 \001(\0162\023.TSF.IntensityUnits\022\021\n\tintensi" +
-      "ty\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002\022\r\n\005width\030\014 " +
-      "\001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(\002\022\022\n\nx_origi" +
-      "nal\030e \001(\002\022\022\n\ny_original\030f \001(\002\022\022\n\nz_origi",
-      "nal\030g \001(\002\022\023\n\013x_precision\030h \001(\002\022\023\n\013y_prec" +
-      "ision\030i \001(\002\022\023\n\013z_precision\030j \001(\002\022\022\n\nx_po" +
-      "sition\030k \001(\005\022\022\n\ny_position\030l \001(\005\022\016\n\005erro" +
-      "r\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\013\n\002id\030\336\013 \001(\005\022\022\n" +
-      "\tend_frame\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001" +
-      "(\002\022\027\n\016params_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007F" +
-      "itMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOA" +
-      "XISANDTHETA\020\002*)\n\016IntensityUnits\022\n\n\006COUNT" +
-      "S\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020" +
-      "\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002B\037\n\rgdsc.smlm.tsfB\016",
-      "TaggedSpotFile"
+      "rce\030\340\013 \001(\t\022\026\n\rconfiguration\030\341\013 \001(\t\022\r\n\004ga" +
+      "in\030\342\013 \001(\001\022\025\n\014exposureTime\030\343\013 \001(\001\022\022\n\tread" +
+      "Noise\030\344\013 \001(\001\022\r\n\004bias\030\345\013 \001(\001\022\016\n\005emCCD\030\346\013 " +
+      "\001(\010\022\026\n\ramplification\030\347\013 \001(\001*\006\010\244\r\020\200\020\"\333\004\n\004",
+      "Spot\022\020\n\010molecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022" +
+      "\r\n\005frame\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001" +
+      "(\005\022\030\n\020fluorophore_type\030\023 \001(\005\022\017\n\007cluster\030" +
+      "\024 \001(\005\022*\n\016location_units\030\021 \001(\0162\022.TSF.Loca" +
+      "tionUnits\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001" +
+      "(\002\022,\n\017intensity_units\030\022 \001(\0162\023.TSF.Intens" +
+      "ityUnits\022\021\n\tintensity\030\n \002(\002\022\022\n\nbackgroun" +
+      "d\030\013 \001(\002\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005the" +
+      "ta\030\016 \001(\002\022\022\n\nx_original\030e \001(\002\022\022\n\ny_origin" +
+      "al\030f \001(\002\022\022\n\nz_original\030g \001(\002\022\023\n\013x_precis",
+      "ion\030h \001(\002\022\023\n\013y_precision\030i \001(\002\022\023\n\013z_prec" +
+      "ision\030j \001(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_pos" +
+      "ition\030l \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 " +
+      "\001(\002\022\022\n\tend_frame\030\337\013 \001(\005\022\027\n\016original_valu" +
+      "e\030\340\013 \001(\002\022\027\n\016params_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200" +
+      "\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023" +
+      "\n\017TWOAXISANDTHETA\020\002*)\n\016IntensityUnits\022\n\n" +
+      "\006COUNTS\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022" +
+      "\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002B\037\n\rgdsc.smlm" +
+      ".tsfB\016TaggedSpotFile"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -9983,13 +10217,13 @@ public final class TaggedSpotFile {
     internal_static_TSF_SpotList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_SpotList_descriptor,
-        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "FitMode", "IsTrack", "BoundsX", "BoundsY", "BoundsWidth", "BoundsHeight", "Source", "Configuration", "NmPerPixel", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", });
+        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "FitMode", "IsTrack", "BoundsX", "BoundsY", "BoundsWidth", "BoundsHeight", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", });
     internal_static_TSF_Spot_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_TSF_Spot_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_Spot_descriptor,
-        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", "Error", "Noise", "Id", "EndFrame", "OriginalValue", "ParamsStdDev", });
+        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", "Error", "Noise", "EndFrame", "OriginalValue", "ParamsStdDev", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

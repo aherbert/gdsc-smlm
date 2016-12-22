@@ -253,9 +253,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setYPrecision(precision);
 			}
 
+			builder.setCluster(result.getId());
+			
 			builder.setError(result.error);
 			builder.setNoise(result.noise);
-			builder.setId(result.getId());
 			builder.setEndFrame(result.getEndFrame());
 			builder.setOriginalValue(result.origValue);
 			addParamsStdDev(builder, result.paramsStdDev);
@@ -374,11 +375,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		}
 		if (source != null)
 		{
-			builder.setSource(singleLine(source.toXML()));
-
 			builder.setNrPixelsX(source.width);
 			builder.setNrPixelsY(source.height);
 			builder.setNrFrames(source.frames);
+			
+			builder.setSource(singleLine(source.toXML()));
 		}
 		if (bounds != null)
 		{
@@ -389,15 +390,14 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		}
 		if (calibration != null)
 		{
-			builder.setNmPerPixel(calibration.nmPerPixel);
+			builder.setPixelSize((float) calibration.nmPerPixel);
+			
 			builder.setGain(calibration.gain);
 			builder.setExposureTime(calibration.exposureTime);
 			builder.setReadNoise(calibration.readNoise);
 			builder.setBias(calibration.bias);
 			builder.setEmCCD(calibration.emCCD);
 			builder.setAmplification(calibration.amplification);
-
-			builder.setPixelSize((float) calibration.nmPerPixel);
 		}
 		if (configuration != null && configuration.length() > 0)
 		{

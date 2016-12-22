@@ -332,7 +332,7 @@ public class TSFPeakResultsReader
 				{
 					error = spot.getError();
 					noise = spot.getNoise();
-					id = spot.getId();
+					id = spot.getCluster();
 					origValue = spot.getOriginalValue();
 					endFrame = spot.getEndFrame();
 					if (spot.getParamsStdDevCount() != 0)
@@ -458,11 +458,11 @@ public class TSFPeakResultsReader
 						spotList.getBoundsHeight()));
 			}
 
+			// Use the calibration we created when the pixel size was read
 			Calibration cal = results.getCalibration();
 			if (cal == null)
 				cal = new Calibration();
-			if (spotList.hasNmPerPixel())
-				cal.nmPerPixel = spotList.getNmPerPixel();
+			
 			if (spotList.hasGain())
 				cal.gain = spotList.getGain();
 			if (spotList.hasExposureTime())

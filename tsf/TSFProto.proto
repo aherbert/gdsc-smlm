@@ -75,10 +75,44 @@ message SpotList {
    // otherwise use the fitmode with each spot
    optional FitMode fit_mode = 24;
    optional bool is_track = 25 [default = false]; // flag indicating whether this is a sequence of spot data in consecutive time frames thought to originate from the same entity
+   
+   // GDSC SMLM ...
+   
+   // Fit region of original data
+   optional int32 bounds_x = 1500; // Fit region x origin (zero if no crop was 
+      // used)
+   optional int32 bounds_y = 1501; // Fit region y origin (zero if no crop was 
+      // used)
+   optional int32 bounds_width = 1502; // Fit region width origin (nr_pixels_x 
+      // if no crop was used)
+   optional int32 bounds_height = 1503; // Fit region height origin (nr_pixels_y
+      // if no crop was used)
+   
+   optional string source = 1504; // Source of the results (can be a serialised 
+      // object)
+   
+   optional string configuration = 1505; // Configuration used for fitting (can 
+      // be a serialised object)
+   
+   // Calibration. This is for a single channel, i.e. camera.
+   // The pixel pitch is expected in pixel_size.
+   optional double gain = 1506; // The system gain to convert counts to photons 
+      // (units=count/photon)
+   optional double exposureTime = 1507; // The exposure time for a single frame 
+      // (units=millisecond)
+   optional double readNoise = 1508; // The camera read noise for a pixel 
+      // (units=count)
+   optional double bias = 1509; // The camera bias (units=counts)
+   optional bool emCCD = 1510; // Set to true if this was an EM-CCD camera
+   optional double amplification = 1511; // The readout amplification applied 
+      // when converting the pixel value to counts (units=count/electron). This 
+      // is expected to be higher than the total system gain. The factor 
+      // difference (gain/amplification) is the Quantum Efficiency (QE, 
+      // units=electron/photon). The amplification is used in the noise model 
+      // when fitting using Maximum Likelihood Estimation (MLE).
 
    // These ids can be used in your own .proto derived from this one
-   extensions 1500 to 2047;
-      
+   extensions 1700 to 2047;
 }
    
 message Spot {
@@ -165,7 +199,21 @@ message Spot {
    optional int32 x_position = 107;
    optional int32 y_position = 108;
 
-   // These ids can be used in your own .proto derived from this one
-   extensions 1500 to 2047;
+   // GDSC SMLM ...
+   
+   // Additional spot data
+   optional double error = 1500; // Fit error
+   optional float noise = 1501; // Local noise estimate
+   optional int32 end_frame = 1503; // The end frame (if the spot represents an 
+      // average across multiple frames)
+   optional float original_value = 1504; // The original pixel value at the
+      // fitting origin (x_position,y_position)
+   repeated float params_std_dev = 1505; // The estimated standard deviations of
+      // each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+      // size 7 for fitted parameters:
+      // [Background,Signal,Theta,X,Y,X-width,Y-width].
+      // Parameters that are not fit will have zero in the array.   
 
+   // These ids can be used in your own .proto derived from this one
+   extensions 1700 to 2047;
 }
