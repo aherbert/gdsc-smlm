@@ -324,16 +324,39 @@ public class TSFPeakResultsReader
 				double error = 0;
 				float noise = 0;
 				float[] paramsStdDev = null;
-				if (isGDSC)
-				{
-					// Get the error, noise, origValue, paramsStdDev
-				}
+				int id = 0;
+				int endFrame = frame;
 
 				PeakResult peakResult;
-				if (spot.hasCluster())
+				if (isGDSC)
+				{
+					error = spot.getError();
+					noise = spot.getNoise();
+					id = spot.getId();
+					origValue = spot.getOriginalValue();
+					endFrame = spot.getEndFrame();
+					if (spot.getParamsStdDevCount() != 0)
+					{
+						paramsStdDev = new float[spot.getParamsStdDevCount()];
+						for (int i = 0; i < paramsStdDev.length; i++)
+							paramsStdDev[i] = spot.getParamsStdDev(i);
+					}
+				}
+				// Use the standard cluster field for the ID
+				else if (spot.hasCluster())
+				{
+					id = spot.getCluster();
+				}
+
+				if (endFrame != frame)
+				{
+					peakResult = new ExtendedPeakResult(frame, origX, origY, origValue, error, noise, params,
+							paramsStdDev, endFrame, id);
+				}
+				else if (id != 0)
 				{
 					peakResult = new IdPeakResult(frame, origX, origY, origValue, error, noise, params, paramsStdDev,
-							spot.getCluster());
+							id);
 				}
 				else
 				{
@@ -419,12 +442,45 @@ public class TSFPeakResultsReader
 
 		if (isGDSC)
 		{
-			// TODO: Special processing for results we created to allow
+			// Special processing for results we created to allow
 			// perfect dataset reconstruction
 
-			// Only trust this if we created it using the source property
-			if (spotList.hasNrFrames())
-				results.setBounds(new Rectangle(0, 0, spotList.getNrPixelsX(), spotList.getNrPixelsY()));
+			if (spotList.hasSource())
+			{
+				// Deserialise
+				results.setSource(ImageSource.fromXML(spotList.getSource()));
+			}
+
+			if (spotList.hasBoundsX() && spotList.hasBoundsY() && spotList.hasBoundsWidth() &&
+					spotList.hasBoundsHeight())
+			{
+				results.setBounds(new Rectangle(spotList.getBoundsX(), spotList.getBoundsY(), spotList.getBoundsWidth(),
+						spotList.getBoundsHeight()));
+			}
+
+			Calibration cal = results.getCalibration();
+			if (cal == null)
+				cal = new Calibration();
+			if (spotList.hasNmPerPixel())
+				cal.nmPerPixel = spotList.getNmPerPixel();
+			if (spotList.hasGain())
+				cal.gain = spotList.getGain();
+			if (spotList.hasExposureTime())
+				cal.exposureTime = spotList.getExposureTime();
+			if (spotList.hasReadNoise())
+				cal.readNoise = spotList.getReadNoise();
+			if (spotList.hasBias())
+				cal.bias = spotList.getBias();
+			if (spotList.hasEmCCD())
+				cal.emCCD = spotList.getEmCCD();
+			if (spotList.hasAmplification())
+				cal.amplification = spotList.getAmplification();
+			results.setCalibration(cal);
+
+			if (spotList.hasConfiguration())
+			{
+				results.setConfiguration(spotList.getConfiguration());
+			}
 		}
 
 		Calibration cal = results.getCalibration();

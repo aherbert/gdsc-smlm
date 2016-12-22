@@ -1063,7 +1063,8 @@ public final class TaggedSpotFile {
 
   public interface SpotListOrBuilder extends
       // @@protoc_insertion_point(interface_extends:TSF.SpotList)
-      com.google.protobuf.MessageOrBuilder {
+      com.google.protobuf.GeneratedMessageV3.
+          ExtendableMessageOrBuilder<SpotList> {
 
     /**
      * <pre>
@@ -1424,6 +1425,173 @@ public final class TaggedSpotFile {
      * <code>optional bool is_track = 25 [default = false];</code>
      */
     boolean getIsTrack();
+
+    /**
+     * <pre>
+     * Fit region of original data
+     * </pre>
+     *
+     * <code>optional int32 bounds_x = 1500;</code>
+     */
+    boolean hasBoundsX();
+    /**
+     * <pre>
+     * Fit region of original data
+     * </pre>
+     *
+     * <code>optional int32 bounds_x = 1500;</code>
+     */
+    int getBoundsX();
+
+    /**
+     * <code>optional int32 bounds_y = 1501;</code>
+     */
+    boolean hasBoundsY();
+    /**
+     * <code>optional int32 bounds_y = 1501;</code>
+     */
+    int getBoundsY();
+
+    /**
+     * <code>optional int32 bounds_width = 1502;</code>
+     */
+    boolean hasBoundsWidth();
+    /**
+     * <code>optional int32 bounds_width = 1502;</code>
+     */
+    int getBoundsWidth();
+
+    /**
+     * <code>optional int32 bounds_height = 1503;</code>
+     */
+    boolean hasBoundsHeight();
+    /**
+     * <code>optional int32 bounds_height = 1503;</code>
+     */
+    int getBoundsHeight();
+
+    /**
+     * <pre>
+     * Source of the results (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string source = 1504;</code>
+     */
+    boolean hasSource();
+    /**
+     * <pre>
+     * Source of the results (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string source = 1504;</code>
+     */
+    java.lang.String getSource();
+    /**
+     * <pre>
+     * Source of the results (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string source = 1504;</code>
+     */
+    com.google.protobuf.ByteString
+        getSourceBytes();
+
+    /**
+     * <pre>
+     * Configuration used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string configuration = 1505;</code>
+     */
+    boolean hasConfiguration();
+    /**
+     * <pre>
+     * Configuration used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string configuration = 1505;</code>
+     */
+    java.lang.String getConfiguration();
+    /**
+     * <pre>
+     * Configuration used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string configuration = 1505;</code>
+     */
+    com.google.protobuf.ByteString
+        getConfigurationBytes();
+
+    /**
+     * <pre>
+     * Calibration
+     * </pre>
+     *
+     * <code>optional double nmPerPixel = 1506;</code>
+     */
+    boolean hasNmPerPixel();
+    /**
+     * <pre>
+     * Calibration
+     * </pre>
+     *
+     * <code>optional double nmPerPixel = 1506;</code>
+     */
+    double getNmPerPixel();
+
+    /**
+     * <code>optional double gain = 1507;</code>
+     */
+    boolean hasGain();
+    /**
+     * <code>optional double gain = 1507;</code>
+     */
+    double getGain();
+
+    /**
+     * <code>optional double exposureTime = 1508;</code>
+     */
+    boolean hasExposureTime();
+    /**
+     * <code>optional double exposureTime = 1508;</code>
+     */
+    double getExposureTime();
+
+    /**
+     * <code>optional double readNoise = 1509;</code>
+     */
+    boolean hasReadNoise();
+    /**
+     * <code>optional double readNoise = 1509;</code>
+     */
+    double getReadNoise();
+
+    /**
+     * <code>optional double bias = 1510;</code>
+     */
+    boolean hasBias();
+    /**
+     * <code>optional double bias = 1510;</code>
+     */
+    double getBias();
+
+    /**
+     * <code>optional bool emCCD = 1511;</code>
+     */
+    boolean hasEmCCD();
+    /**
+     * <code>optional bool emCCD = 1511;</code>
+     */
+    boolean getEmCCD();
+
+    /**
+     * <code>optional double amplification = 1512;</code>
+     */
+    boolean hasAmplification();
+    /**
+     * <code>optional double amplification = 1512;</code>
+     */
+    double getAmplification();
   }
   /**
    * <pre>
@@ -1433,11 +1601,12 @@ public final class TaggedSpotFile {
    * Protobuf type {@code TSF.SpotList}
    */
   public  static final class SpotList extends
-      com.google.protobuf.GeneratedMessageV3 implements
+      com.google.protobuf.GeneratedMessageV3.ExtendableMessage<
+        SpotList> implements
       // @@protoc_insertion_point(message_implements:TSF.SpotList)
       SpotListOrBuilder {
     // Use SpotList.newBuilder() to construct.
-    private SpotList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    private SpotList(com.google.protobuf.GeneratedMessageV3.ExtendableBuilder<gdsc.smlm.tsf.TaggedSpotFile.SpotList, ?> builder) {
       super(builder);
     }
     private SpotList() {
@@ -1459,6 +1628,19 @@ public final class TaggedSpotFile {
       intensityUnits_ = 0;
       fitMode_ = 0;
       isTrack_ = false;
+      boundsX_ = 0;
+      boundsY_ = 0;
+      boundsWidth_ = 0;
+      boundsHeight_ = 0;
+      source_ = "";
+      configuration_ = "";
+      nmPerPixel_ = 0D;
+      gain_ = 0D;
+      exposureTime_ = 0D;
+      readNoise_ = 0D;
+      bias_ = 0D;
+      emCCD_ = false;
+      amplification_ = 0D;
     }
 
     @java.lang.Override
@@ -1601,6 +1783,73 @@ public final class TaggedSpotFile {
               }
               fluorophoreTypes_.add(
                   input.readMessage(gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType.PARSER, extensionRegistry));
+              break;
+            }
+            case 12000: {
+              bitField0_ |= 0x00020000;
+              boundsX_ = input.readInt32();
+              break;
+            }
+            case 12008: {
+              bitField0_ |= 0x00040000;
+              boundsY_ = input.readInt32();
+              break;
+            }
+            case 12016: {
+              bitField0_ |= 0x00080000;
+              boundsWidth_ = input.readInt32();
+              break;
+            }
+            case 12024: {
+              bitField0_ |= 0x00100000;
+              boundsHeight_ = input.readInt32();
+              break;
+            }
+            case 12034: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00200000;
+              source_ = bs;
+              break;
+            }
+            case 12042: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00400000;
+              configuration_ = bs;
+              break;
+            }
+            case 12049: {
+              bitField0_ |= 0x00800000;
+              nmPerPixel_ = input.readDouble();
+              break;
+            }
+            case 12057: {
+              bitField0_ |= 0x01000000;
+              gain_ = input.readDouble();
+              break;
+            }
+            case 12065: {
+              bitField0_ |= 0x02000000;
+              exposureTime_ = input.readDouble();
+              break;
+            }
+            case 12073: {
+              bitField0_ |= 0x04000000;
+              readNoise_ = input.readDouble();
+              break;
+            }
+            case 12081: {
+              bitField0_ |= 0x08000000;
+              bias_ = input.readDouble();
+              break;
+            }
+            case 12088: {
+              bitField0_ |= 0x10000000;
+              emCCD_ = input.readBool();
+              break;
+            }
+            case 12097: {
+              bitField0_ |= 0x20000000;
+              amplification_ = input.readDouble();
               break;
             }
           }
@@ -2151,6 +2400,295 @@ public final class TaggedSpotFile {
       return isTrack_;
     }
 
+    public static final int BOUNDS_X_FIELD_NUMBER = 1500;
+    private int boundsX_;
+    /**
+     * <pre>
+     * Fit region of original data
+     * </pre>
+     *
+     * <code>optional int32 bounds_x = 1500;</code>
+     */
+    public boolean hasBoundsX() {
+      return ((bitField0_ & 0x00020000) == 0x00020000);
+    }
+    /**
+     * <pre>
+     * Fit region of original data
+     * </pre>
+     *
+     * <code>optional int32 bounds_x = 1500;</code>
+     */
+    public int getBoundsX() {
+      return boundsX_;
+    }
+
+    public static final int BOUNDS_Y_FIELD_NUMBER = 1501;
+    private int boundsY_;
+    /**
+     * <code>optional int32 bounds_y = 1501;</code>
+     */
+    public boolean hasBoundsY() {
+      return ((bitField0_ & 0x00040000) == 0x00040000);
+    }
+    /**
+     * <code>optional int32 bounds_y = 1501;</code>
+     */
+    public int getBoundsY() {
+      return boundsY_;
+    }
+
+    public static final int BOUNDS_WIDTH_FIELD_NUMBER = 1502;
+    private int boundsWidth_;
+    /**
+     * <code>optional int32 bounds_width = 1502;</code>
+     */
+    public boolean hasBoundsWidth() {
+      return ((bitField0_ & 0x00080000) == 0x00080000);
+    }
+    /**
+     * <code>optional int32 bounds_width = 1502;</code>
+     */
+    public int getBoundsWidth() {
+      return boundsWidth_;
+    }
+
+    public static final int BOUNDS_HEIGHT_FIELD_NUMBER = 1503;
+    private int boundsHeight_;
+    /**
+     * <code>optional int32 bounds_height = 1503;</code>
+     */
+    public boolean hasBoundsHeight() {
+      return ((bitField0_ & 0x00100000) == 0x00100000);
+    }
+    /**
+     * <code>optional int32 bounds_height = 1503;</code>
+     */
+    public int getBoundsHeight() {
+      return boundsHeight_;
+    }
+
+    public static final int SOURCE_FIELD_NUMBER = 1504;
+    private volatile java.lang.Object source_;
+    /**
+     * <pre>
+     * Source of the results (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string source = 1504;</code>
+     */
+    public boolean hasSource() {
+      return ((bitField0_ & 0x00200000) == 0x00200000);
+    }
+    /**
+     * <pre>
+     * Source of the results (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string source = 1504;</code>
+     */
+    public java.lang.String getSource() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          source_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Source of the results (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string source = 1504;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSourceBytes() {
+      java.lang.Object ref = source_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        source_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CONFIGURATION_FIELD_NUMBER = 1505;
+    private volatile java.lang.Object configuration_;
+    /**
+     * <pre>
+     * Configuration used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string configuration = 1505;</code>
+     */
+    public boolean hasConfiguration() {
+      return ((bitField0_ & 0x00400000) == 0x00400000);
+    }
+    /**
+     * <pre>
+     * Configuration used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string configuration = 1505;</code>
+     */
+    public java.lang.String getConfiguration() {
+      java.lang.Object ref = configuration_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          configuration_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Configuration used for fitting (can be a serialised object)
+     * </pre>
+     *
+     * <code>optional string configuration = 1505;</code>
+     */
+    public com.google.protobuf.ByteString
+        getConfigurationBytes() {
+      java.lang.Object ref = configuration_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        configuration_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NMPERPIXEL_FIELD_NUMBER = 1506;
+    private double nmPerPixel_;
+    /**
+     * <pre>
+     * Calibration
+     * </pre>
+     *
+     * <code>optional double nmPerPixel = 1506;</code>
+     */
+    public boolean hasNmPerPixel() {
+      return ((bitField0_ & 0x00800000) == 0x00800000);
+    }
+    /**
+     * <pre>
+     * Calibration
+     * </pre>
+     *
+     * <code>optional double nmPerPixel = 1506;</code>
+     */
+    public double getNmPerPixel() {
+      return nmPerPixel_;
+    }
+
+    public static final int GAIN_FIELD_NUMBER = 1507;
+    private double gain_;
+    /**
+     * <code>optional double gain = 1507;</code>
+     */
+    public boolean hasGain() {
+      return ((bitField0_ & 0x01000000) == 0x01000000);
+    }
+    /**
+     * <code>optional double gain = 1507;</code>
+     */
+    public double getGain() {
+      return gain_;
+    }
+
+    public static final int EXPOSURETIME_FIELD_NUMBER = 1508;
+    private double exposureTime_;
+    /**
+     * <code>optional double exposureTime = 1508;</code>
+     */
+    public boolean hasExposureTime() {
+      return ((bitField0_ & 0x02000000) == 0x02000000);
+    }
+    /**
+     * <code>optional double exposureTime = 1508;</code>
+     */
+    public double getExposureTime() {
+      return exposureTime_;
+    }
+
+    public static final int READNOISE_FIELD_NUMBER = 1509;
+    private double readNoise_;
+    /**
+     * <code>optional double readNoise = 1509;</code>
+     */
+    public boolean hasReadNoise() {
+      return ((bitField0_ & 0x04000000) == 0x04000000);
+    }
+    /**
+     * <code>optional double readNoise = 1509;</code>
+     */
+    public double getReadNoise() {
+      return readNoise_;
+    }
+
+    public static final int BIAS_FIELD_NUMBER = 1510;
+    private double bias_;
+    /**
+     * <code>optional double bias = 1510;</code>
+     */
+    public boolean hasBias() {
+      return ((bitField0_ & 0x08000000) == 0x08000000);
+    }
+    /**
+     * <code>optional double bias = 1510;</code>
+     */
+    public double getBias() {
+      return bias_;
+    }
+
+    public static final int EMCCD_FIELD_NUMBER = 1511;
+    private boolean emCCD_;
+    /**
+     * <code>optional bool emCCD = 1511;</code>
+     */
+    public boolean hasEmCCD() {
+      return ((bitField0_ & 0x10000000) == 0x10000000);
+    }
+    /**
+     * <code>optional bool emCCD = 1511;</code>
+     */
+    public boolean getEmCCD() {
+      return emCCD_;
+    }
+
+    public static final int AMPLIFICATION_FIELD_NUMBER = 1512;
+    private double amplification_;
+    /**
+     * <code>optional double amplification = 1512;</code>
+     */
+    public boolean hasAmplification() {
+      return ((bitField0_ & 0x20000000) == 0x20000000);
+    }
+    /**
+     * <code>optional double amplification = 1512;</code>
+     */
+    public double getAmplification() {
+      return amplification_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -2167,12 +2705,19 @@ public final class TaggedSpotFile {
           return false;
         }
       }
+      if (!extensionsAreInitialized()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      com.google.protobuf.GeneratedMessageV3
+        .ExtendableMessage<gdsc.smlm.tsf.TaggedSpotFile.SpotList>.ExtensionWriter
+          extensionWriter = newExtensionWriter();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeInt32(1, applicationId_);
       }
@@ -2227,6 +2772,46 @@ public final class TaggedSpotFile {
       for (int i = 0; i < fluorophoreTypes_.size(); i++) {
         output.writeMessage(26, fluorophoreTypes_.get(i));
       }
+      if (((bitField0_ & 0x00020000) == 0x00020000)) {
+        output.writeInt32(1500, boundsX_);
+      }
+      if (((bitField0_ & 0x00040000) == 0x00040000)) {
+        output.writeInt32(1501, boundsY_);
+      }
+      if (((bitField0_ & 0x00080000) == 0x00080000)) {
+        output.writeInt32(1502, boundsWidth_);
+      }
+      if (((bitField0_ & 0x00100000) == 0x00100000)) {
+        output.writeInt32(1503, boundsHeight_);
+      }
+      if (((bitField0_ & 0x00200000) == 0x00200000)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1504, source_);
+      }
+      if (((bitField0_ & 0x00400000) == 0x00400000)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1505, configuration_);
+      }
+      if (((bitField0_ & 0x00800000) == 0x00800000)) {
+        output.writeDouble(1506, nmPerPixel_);
+      }
+      if (((bitField0_ & 0x01000000) == 0x01000000)) {
+        output.writeDouble(1507, gain_);
+      }
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+        output.writeDouble(1508, exposureTime_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        output.writeDouble(1509, readNoise_);
+      }
+      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+        output.writeDouble(1510, bias_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        output.writeBool(1511, emCCD_);
+      }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        output.writeDouble(1512, amplification_);
+      }
+      extensionWriter.writeUntil(2048, output);
       unknownFields.writeTo(output);
     }
 
@@ -2305,6 +2890,57 @@ public final class TaggedSpotFile {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(26, fluorophoreTypes_.get(i));
       }
+      if (((bitField0_ & 0x00020000) == 0x00020000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1500, boundsX_);
+      }
+      if (((bitField0_ & 0x00040000) == 0x00040000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1501, boundsY_);
+      }
+      if (((bitField0_ & 0x00080000) == 0x00080000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1502, boundsWidth_);
+      }
+      if (((bitField0_ & 0x00100000) == 0x00100000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1503, boundsHeight_);
+      }
+      if (((bitField0_ & 0x00200000) == 0x00200000)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1504, source_);
+      }
+      if (((bitField0_ & 0x00400000) == 0x00400000)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1505, configuration_);
+      }
+      if (((bitField0_ & 0x00800000) == 0x00800000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1506, nmPerPixel_);
+      }
+      if (((bitField0_ & 0x01000000) == 0x01000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1507, gain_);
+      }
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1508, exposureTime_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1509, readNoise_);
+      }
+      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1510, bias_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1511, emCCD_);
+      }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1512, amplification_);
+      }
+      size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -2408,7 +3044,86 @@ public final class TaggedSpotFile {
         result = result && (getIsTrack()
             == other.getIsTrack());
       }
+      result = result && (hasBoundsX() == other.hasBoundsX());
+      if (hasBoundsX()) {
+        result = result && (getBoundsX()
+            == other.getBoundsX());
+      }
+      result = result && (hasBoundsY() == other.hasBoundsY());
+      if (hasBoundsY()) {
+        result = result && (getBoundsY()
+            == other.getBoundsY());
+      }
+      result = result && (hasBoundsWidth() == other.hasBoundsWidth());
+      if (hasBoundsWidth()) {
+        result = result && (getBoundsWidth()
+            == other.getBoundsWidth());
+      }
+      result = result && (hasBoundsHeight() == other.hasBoundsHeight());
+      if (hasBoundsHeight()) {
+        result = result && (getBoundsHeight()
+            == other.getBoundsHeight());
+      }
+      result = result && (hasSource() == other.hasSource());
+      if (hasSource()) {
+        result = result && getSource()
+            .equals(other.getSource());
+      }
+      result = result && (hasConfiguration() == other.hasConfiguration());
+      if (hasConfiguration()) {
+        result = result && getConfiguration()
+            .equals(other.getConfiguration());
+      }
+      result = result && (hasNmPerPixel() == other.hasNmPerPixel());
+      if (hasNmPerPixel()) {
+        result = result && (
+            java.lang.Double.doubleToLongBits(getNmPerPixel())
+            == java.lang.Double.doubleToLongBits(
+                other.getNmPerPixel()));
+      }
+      result = result && (hasGain() == other.hasGain());
+      if (hasGain()) {
+        result = result && (
+            java.lang.Double.doubleToLongBits(getGain())
+            == java.lang.Double.doubleToLongBits(
+                other.getGain()));
+      }
+      result = result && (hasExposureTime() == other.hasExposureTime());
+      if (hasExposureTime()) {
+        result = result && (
+            java.lang.Double.doubleToLongBits(getExposureTime())
+            == java.lang.Double.doubleToLongBits(
+                other.getExposureTime()));
+      }
+      result = result && (hasReadNoise() == other.hasReadNoise());
+      if (hasReadNoise()) {
+        result = result && (
+            java.lang.Double.doubleToLongBits(getReadNoise())
+            == java.lang.Double.doubleToLongBits(
+                other.getReadNoise()));
+      }
+      result = result && (hasBias() == other.hasBias());
+      if (hasBias()) {
+        result = result && (
+            java.lang.Double.doubleToLongBits(getBias())
+            == java.lang.Double.doubleToLongBits(
+                other.getBias()));
+      }
+      result = result && (hasEmCCD() == other.hasEmCCD());
+      if (hasEmCCD()) {
+        result = result && (getEmCCD()
+            == other.getEmCCD());
+      }
+      result = result && (hasAmplification() == other.hasAmplification());
+      if (hasAmplification()) {
+        result = result && (
+            java.lang.Double.doubleToLongBits(getAmplification())
+            == java.lang.Double.doubleToLongBits(
+                other.getAmplification()));
+      }
       result = result && unknownFields.equals(other.unknownFields);
+      result = result &&
+          getExtensionFields().equals(other.getExtensionFields());
       return result;
     }
 
@@ -2495,6 +3210,66 @@ public final class TaggedSpotFile {
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getIsTrack());
       }
+      if (hasBoundsX()) {
+        hash = (37 * hash) + BOUNDS_X_FIELD_NUMBER;
+        hash = (53 * hash) + getBoundsX();
+      }
+      if (hasBoundsY()) {
+        hash = (37 * hash) + BOUNDS_Y_FIELD_NUMBER;
+        hash = (53 * hash) + getBoundsY();
+      }
+      if (hasBoundsWidth()) {
+        hash = (37 * hash) + BOUNDS_WIDTH_FIELD_NUMBER;
+        hash = (53 * hash) + getBoundsWidth();
+      }
+      if (hasBoundsHeight()) {
+        hash = (37 * hash) + BOUNDS_HEIGHT_FIELD_NUMBER;
+        hash = (53 * hash) + getBoundsHeight();
+      }
+      if (hasSource()) {
+        hash = (37 * hash) + SOURCE_FIELD_NUMBER;
+        hash = (53 * hash) + getSource().hashCode();
+      }
+      if (hasConfiguration()) {
+        hash = (37 * hash) + CONFIGURATION_FIELD_NUMBER;
+        hash = (53 * hash) + getConfiguration().hashCode();
+      }
+      if (hasNmPerPixel()) {
+        hash = (37 * hash) + NMPERPIXEL_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getNmPerPixel()));
+      }
+      if (hasGain()) {
+        hash = (37 * hash) + GAIN_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getGain()));
+      }
+      if (hasExposureTime()) {
+        hash = (37 * hash) + EXPOSURETIME_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getExposureTime()));
+      }
+      if (hasReadNoise()) {
+        hash = (37 * hash) + READNOISE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getReadNoise()));
+      }
+      if (hasBias()) {
+        hash = (37 * hash) + BIAS_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getBias()));
+      }
+      if (hasEmCCD()) {
+        hash = (37 * hash) + EMCCD_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getEmCCD());
+      }
+      if (hasAmplification()) {
+        hash = (37 * hash) + AMPLIFICATION_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getAmplification()));
+      }
+      hash = hashFields(hash, getExtensionFields());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2585,7 +3360,8 @@ public final class TaggedSpotFile {
      * Protobuf type {@code TSF.SpotList}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        com.google.protobuf.GeneratedMessageV3.ExtendableBuilder<
+          gdsc.smlm.tsf.TaggedSpotFile.SpotList, Builder> implements
         // @@protoc_insertion_point(builder_implements:TSF.SpotList)
         gdsc.smlm.tsf.TaggedSpotFile.SpotListOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
@@ -2658,6 +3434,32 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x00010000);
         isTrack_ = false;
         bitField0_ = (bitField0_ & ~0x00020000);
+        boundsX_ = 0;
+        bitField0_ = (bitField0_ & ~0x00040000);
+        boundsY_ = 0;
+        bitField0_ = (bitField0_ & ~0x00080000);
+        boundsWidth_ = 0;
+        bitField0_ = (bitField0_ & ~0x00100000);
+        boundsHeight_ = 0;
+        bitField0_ = (bitField0_ & ~0x00200000);
+        source_ = "";
+        bitField0_ = (bitField0_ & ~0x00400000);
+        configuration_ = "";
+        bitField0_ = (bitField0_ & ~0x00800000);
+        nmPerPixel_ = 0D;
+        bitField0_ = (bitField0_ & ~0x01000000);
+        gain_ = 0D;
+        bitField0_ = (bitField0_ & ~0x02000000);
+        exposureTime_ = 0D;
+        bitField0_ = (bitField0_ & ~0x04000000);
+        readNoise_ = 0D;
+        bitField0_ = (bitField0_ & ~0x08000000);
+        bias_ = 0D;
+        bitField0_ = (bitField0_ & ~0x10000000);
+        emCCD_ = false;
+        bitField0_ = (bitField0_ & ~0x20000000);
+        amplification_ = 0D;
+        bitField0_ = (bitField0_ & ~0x40000000);
         return this;
       }
 
@@ -2759,6 +3561,58 @@ public final class TaggedSpotFile {
           to_bitField0_ |= 0x00010000;
         }
         result.isTrack_ = isTrack_;
+        if (((from_bitField0_ & 0x00040000) == 0x00040000)) {
+          to_bitField0_ |= 0x00020000;
+        }
+        result.boundsX_ = boundsX_;
+        if (((from_bitField0_ & 0x00080000) == 0x00080000)) {
+          to_bitField0_ |= 0x00040000;
+        }
+        result.boundsY_ = boundsY_;
+        if (((from_bitField0_ & 0x00100000) == 0x00100000)) {
+          to_bitField0_ |= 0x00080000;
+        }
+        result.boundsWidth_ = boundsWidth_;
+        if (((from_bitField0_ & 0x00200000) == 0x00200000)) {
+          to_bitField0_ |= 0x00100000;
+        }
+        result.boundsHeight_ = boundsHeight_;
+        if (((from_bitField0_ & 0x00400000) == 0x00400000)) {
+          to_bitField0_ |= 0x00200000;
+        }
+        result.source_ = source_;
+        if (((from_bitField0_ & 0x00800000) == 0x00800000)) {
+          to_bitField0_ |= 0x00400000;
+        }
+        result.configuration_ = configuration_;
+        if (((from_bitField0_ & 0x01000000) == 0x01000000)) {
+          to_bitField0_ |= 0x00800000;
+        }
+        result.nmPerPixel_ = nmPerPixel_;
+        if (((from_bitField0_ & 0x02000000) == 0x02000000)) {
+          to_bitField0_ |= 0x01000000;
+        }
+        result.gain_ = gain_;
+        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
+          to_bitField0_ |= 0x02000000;
+        }
+        result.exposureTime_ = exposureTime_;
+        if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
+          to_bitField0_ |= 0x04000000;
+        }
+        result.readNoise_ = readNoise_;
+        if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
+          to_bitField0_ |= 0x08000000;
+        }
+        result.bias_ = bias_;
+        if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
+          to_bitField0_ |= 0x10000000;
+        }
+        result.emCCD_ = emCCD_;
+        if (((from_bitField0_ & 0x40000000) == 0x40000000)) {
+          to_bitField0_ |= 0x20000000;
+        }
+        result.amplification_ = amplification_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2789,6 +3643,29 @@ public final class TaggedSpotFile {
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
         return (Builder) super.addRepeatedField(field, value);
+      }
+      public <Type> Builder setExtension(
+          com.google.protobuf.GeneratedMessage.GeneratedExtension<
+              gdsc.smlm.tsf.TaggedSpotFile.SpotList, Type> extension,
+          Type value) {
+        return (Builder) super.setExtension(extension, value);
+      }
+      public <Type> Builder setExtension(
+          com.google.protobuf.GeneratedMessage.GeneratedExtension<
+              gdsc.smlm.tsf.TaggedSpotFile.SpotList, java.util.List<Type>> extension,
+          int index, Type value) {
+        return (Builder) super.setExtension(extension, index, value);
+      }
+      public <Type> Builder addExtension(
+          com.google.protobuf.GeneratedMessage.GeneratedExtension<
+              gdsc.smlm.tsf.TaggedSpotFile.SpotList, java.util.List<Type>> extension,
+          Type value) {
+        return (Builder) super.addExtension(extension, value);
+      }
+      public <Type> Builder clearExtension(
+          com.google.protobuf.GeneratedMessage.GeneratedExtension<
+              gdsc.smlm.tsf.TaggedSpotFile.SpotList, ?> extension) {
+        return (Builder) super.clearExtension(extension);
       }
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.tsf.TaggedSpotFile.SpotList) {
@@ -2882,6 +3759,50 @@ public final class TaggedSpotFile {
         if (other.hasIsTrack()) {
           setIsTrack(other.getIsTrack());
         }
+        if (other.hasBoundsX()) {
+          setBoundsX(other.getBoundsX());
+        }
+        if (other.hasBoundsY()) {
+          setBoundsY(other.getBoundsY());
+        }
+        if (other.hasBoundsWidth()) {
+          setBoundsWidth(other.getBoundsWidth());
+        }
+        if (other.hasBoundsHeight()) {
+          setBoundsHeight(other.getBoundsHeight());
+        }
+        if (other.hasSource()) {
+          bitField0_ |= 0x00400000;
+          source_ = other.source_;
+          onChanged();
+        }
+        if (other.hasConfiguration()) {
+          bitField0_ |= 0x00800000;
+          configuration_ = other.configuration_;
+          onChanged();
+        }
+        if (other.hasNmPerPixel()) {
+          setNmPerPixel(other.getNmPerPixel());
+        }
+        if (other.hasGain()) {
+          setGain(other.getGain());
+        }
+        if (other.hasExposureTime()) {
+          setExposureTime(other.getExposureTime());
+        }
+        if (other.hasReadNoise()) {
+          setReadNoise(other.getReadNoise());
+        }
+        if (other.hasBias()) {
+          setBias(other.getBias());
+        }
+        if (other.hasEmCCD()) {
+          setEmCCD(other.getEmCCD());
+        }
+        if (other.hasAmplification()) {
+          setAmplification(other.getAmplification());
+        }
+        this.mergeExtensionFields(other);
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -2895,6 +3816,9 @@ public final class TaggedSpotFile {
           if (!getFluorophoreTypes(i).isInitialized()) {
             return false;
           }
+        }
+        if (!extensionsAreInitialized()) {
+          return false;
         }
         return true;
       }
@@ -4187,6 +5111,590 @@ public final class TaggedSpotFile {
         onChanged();
         return this;
       }
+
+      private int boundsX_ ;
+      /**
+       * <pre>
+       * Fit region of original data
+       * </pre>
+       *
+       * <code>optional int32 bounds_x = 1500;</code>
+       */
+      public boolean hasBoundsX() {
+        return ((bitField0_ & 0x00040000) == 0x00040000);
+      }
+      /**
+       * <pre>
+       * Fit region of original data
+       * </pre>
+       *
+       * <code>optional int32 bounds_x = 1500;</code>
+       */
+      public int getBoundsX() {
+        return boundsX_;
+      }
+      /**
+       * <pre>
+       * Fit region of original data
+       * </pre>
+       *
+       * <code>optional int32 bounds_x = 1500;</code>
+       */
+      public Builder setBoundsX(int value) {
+        bitField0_ |= 0x00040000;
+        boundsX_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Fit region of original data
+       * </pre>
+       *
+       * <code>optional int32 bounds_x = 1500;</code>
+       */
+      public Builder clearBoundsX() {
+        bitField0_ = (bitField0_ & ~0x00040000);
+        boundsX_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int boundsY_ ;
+      /**
+       * <code>optional int32 bounds_y = 1501;</code>
+       */
+      public boolean hasBoundsY() {
+        return ((bitField0_ & 0x00080000) == 0x00080000);
+      }
+      /**
+       * <code>optional int32 bounds_y = 1501;</code>
+       */
+      public int getBoundsY() {
+        return boundsY_;
+      }
+      /**
+       * <code>optional int32 bounds_y = 1501;</code>
+       */
+      public Builder setBoundsY(int value) {
+        bitField0_ |= 0x00080000;
+        boundsY_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 bounds_y = 1501;</code>
+       */
+      public Builder clearBoundsY() {
+        bitField0_ = (bitField0_ & ~0x00080000);
+        boundsY_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int boundsWidth_ ;
+      /**
+       * <code>optional int32 bounds_width = 1502;</code>
+       */
+      public boolean hasBoundsWidth() {
+        return ((bitField0_ & 0x00100000) == 0x00100000);
+      }
+      /**
+       * <code>optional int32 bounds_width = 1502;</code>
+       */
+      public int getBoundsWidth() {
+        return boundsWidth_;
+      }
+      /**
+       * <code>optional int32 bounds_width = 1502;</code>
+       */
+      public Builder setBoundsWidth(int value) {
+        bitField0_ |= 0x00100000;
+        boundsWidth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 bounds_width = 1502;</code>
+       */
+      public Builder clearBoundsWidth() {
+        bitField0_ = (bitField0_ & ~0x00100000);
+        boundsWidth_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int boundsHeight_ ;
+      /**
+       * <code>optional int32 bounds_height = 1503;</code>
+       */
+      public boolean hasBoundsHeight() {
+        return ((bitField0_ & 0x00200000) == 0x00200000);
+      }
+      /**
+       * <code>optional int32 bounds_height = 1503;</code>
+       */
+      public int getBoundsHeight() {
+        return boundsHeight_;
+      }
+      /**
+       * <code>optional int32 bounds_height = 1503;</code>
+       */
+      public Builder setBoundsHeight(int value) {
+        bitField0_ |= 0x00200000;
+        boundsHeight_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 bounds_height = 1503;</code>
+       */
+      public Builder clearBoundsHeight() {
+        bitField0_ = (bitField0_ & ~0x00200000);
+        boundsHeight_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object source_ = "";
+      /**
+       * <pre>
+       * Source of the results (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string source = 1504;</code>
+       */
+      public boolean hasSource() {
+        return ((bitField0_ & 0x00400000) == 0x00400000);
+      }
+      /**
+       * <pre>
+       * Source of the results (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string source = 1504;</code>
+       */
+      public java.lang.String getSource() {
+        java.lang.Object ref = source_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            source_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Source of the results (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string source = 1504;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSourceBytes() {
+        java.lang.Object ref = source_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          source_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Source of the results (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string source = 1504;</code>
+       */
+      public Builder setSource(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00400000;
+        source_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Source of the results (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string source = 1504;</code>
+       */
+      public Builder clearSource() {
+        bitField0_ = (bitField0_ & ~0x00400000);
+        source_ = getDefaultInstance().getSource();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Source of the results (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string source = 1504;</code>
+       */
+      public Builder setSourceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00400000;
+        source_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object configuration_ = "";
+      /**
+       * <pre>
+       * Configuration used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string configuration = 1505;</code>
+       */
+      public boolean hasConfiguration() {
+        return ((bitField0_ & 0x00800000) == 0x00800000);
+      }
+      /**
+       * <pre>
+       * Configuration used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string configuration = 1505;</code>
+       */
+      public java.lang.String getConfiguration() {
+        java.lang.Object ref = configuration_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            configuration_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Configuration used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string configuration = 1505;</code>
+       */
+      public com.google.protobuf.ByteString
+          getConfigurationBytes() {
+        java.lang.Object ref = configuration_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          configuration_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Configuration used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string configuration = 1505;</code>
+       */
+      public Builder setConfiguration(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00800000;
+        configuration_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Configuration used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string configuration = 1505;</code>
+       */
+      public Builder clearConfiguration() {
+        bitField0_ = (bitField0_ & ~0x00800000);
+        configuration_ = getDefaultInstance().getConfiguration();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Configuration used for fitting (can be a serialised object)
+       * </pre>
+       *
+       * <code>optional string configuration = 1505;</code>
+       */
+      public Builder setConfigurationBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00800000;
+        configuration_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double nmPerPixel_ ;
+      /**
+       * <pre>
+       * Calibration
+       * </pre>
+       *
+       * <code>optional double nmPerPixel = 1506;</code>
+       */
+      public boolean hasNmPerPixel() {
+        return ((bitField0_ & 0x01000000) == 0x01000000);
+      }
+      /**
+       * <pre>
+       * Calibration
+       * </pre>
+       *
+       * <code>optional double nmPerPixel = 1506;</code>
+       */
+      public double getNmPerPixel() {
+        return nmPerPixel_;
+      }
+      /**
+       * <pre>
+       * Calibration
+       * </pre>
+       *
+       * <code>optional double nmPerPixel = 1506;</code>
+       */
+      public Builder setNmPerPixel(double value) {
+        bitField0_ |= 0x01000000;
+        nmPerPixel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Calibration
+       * </pre>
+       *
+       * <code>optional double nmPerPixel = 1506;</code>
+       */
+      public Builder clearNmPerPixel() {
+        bitField0_ = (bitField0_ & ~0x01000000);
+        nmPerPixel_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double gain_ ;
+      /**
+       * <code>optional double gain = 1507;</code>
+       */
+      public boolean hasGain() {
+        return ((bitField0_ & 0x02000000) == 0x02000000);
+      }
+      /**
+       * <code>optional double gain = 1507;</code>
+       */
+      public double getGain() {
+        return gain_;
+      }
+      /**
+       * <code>optional double gain = 1507;</code>
+       */
+      public Builder setGain(double value) {
+        bitField0_ |= 0x02000000;
+        gain_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double gain = 1507;</code>
+       */
+      public Builder clearGain() {
+        bitField0_ = (bitField0_ & ~0x02000000);
+        gain_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double exposureTime_ ;
+      /**
+       * <code>optional double exposureTime = 1508;</code>
+       */
+      public boolean hasExposureTime() {
+        return ((bitField0_ & 0x04000000) == 0x04000000);
+      }
+      /**
+       * <code>optional double exposureTime = 1508;</code>
+       */
+      public double getExposureTime() {
+        return exposureTime_;
+      }
+      /**
+       * <code>optional double exposureTime = 1508;</code>
+       */
+      public Builder setExposureTime(double value) {
+        bitField0_ |= 0x04000000;
+        exposureTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double exposureTime = 1508;</code>
+       */
+      public Builder clearExposureTime() {
+        bitField0_ = (bitField0_ & ~0x04000000);
+        exposureTime_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double readNoise_ ;
+      /**
+       * <code>optional double readNoise = 1509;</code>
+       */
+      public boolean hasReadNoise() {
+        return ((bitField0_ & 0x08000000) == 0x08000000);
+      }
+      /**
+       * <code>optional double readNoise = 1509;</code>
+       */
+      public double getReadNoise() {
+        return readNoise_;
+      }
+      /**
+       * <code>optional double readNoise = 1509;</code>
+       */
+      public Builder setReadNoise(double value) {
+        bitField0_ |= 0x08000000;
+        readNoise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double readNoise = 1509;</code>
+       */
+      public Builder clearReadNoise() {
+        bitField0_ = (bitField0_ & ~0x08000000);
+        readNoise_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double bias_ ;
+      /**
+       * <code>optional double bias = 1510;</code>
+       */
+      public boolean hasBias() {
+        return ((bitField0_ & 0x10000000) == 0x10000000);
+      }
+      /**
+       * <code>optional double bias = 1510;</code>
+       */
+      public double getBias() {
+        return bias_;
+      }
+      /**
+       * <code>optional double bias = 1510;</code>
+       */
+      public Builder setBias(double value) {
+        bitField0_ |= 0x10000000;
+        bias_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double bias = 1510;</code>
+       */
+      public Builder clearBias() {
+        bitField0_ = (bitField0_ & ~0x10000000);
+        bias_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean emCCD_ ;
+      /**
+       * <code>optional bool emCCD = 1511;</code>
+       */
+      public boolean hasEmCCD() {
+        return ((bitField0_ & 0x20000000) == 0x20000000);
+      }
+      /**
+       * <code>optional bool emCCD = 1511;</code>
+       */
+      public boolean getEmCCD() {
+        return emCCD_;
+      }
+      /**
+       * <code>optional bool emCCD = 1511;</code>
+       */
+      public Builder setEmCCD(boolean value) {
+        bitField0_ |= 0x20000000;
+        emCCD_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool emCCD = 1511;</code>
+       */
+      public Builder clearEmCCD() {
+        bitField0_ = (bitField0_ & ~0x20000000);
+        emCCD_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double amplification_ ;
+      /**
+       * <code>optional double amplification = 1512;</code>
+       */
+      public boolean hasAmplification() {
+        return ((bitField0_ & 0x40000000) == 0x40000000);
+      }
+      /**
+       * <code>optional double amplification = 1512;</code>
+       */
+      public double getAmplification() {
+        return amplification_;
+      }
+      /**
+       * <code>optional double amplification = 1512;</code>
+       */
+      public Builder setAmplification(double value) {
+        bitField0_ |= 0x40000000;
+        amplification_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double amplification = 1512;</code>
+       */
+      public Builder clearAmplification() {
+        bitField0_ = (bitField0_ & ~0x40000000);
+        amplification_ = 0D;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
@@ -4669,6 +6177,72 @@ public final class TaggedSpotFile {
      * <code>optional int32 y_position = 108;</code>
      */
     int getYPosition();
+
+    /**
+     * <pre>
+     * Additional spot data
+     * </pre>
+     *
+     * <code>optional double error = 1500;</code>
+     */
+    boolean hasError();
+    /**
+     * <pre>
+     * Additional spot data
+     * </pre>
+     *
+     * <code>optional double error = 1500;</code>
+     */
+    double getError();
+
+    /**
+     * <code>optional float noise = 1501;</code>
+     */
+    boolean hasNoise();
+    /**
+     * <code>optional float noise = 1501;</code>
+     */
+    float getNoise();
+
+    /**
+     * <code>optional int32 id = 1502;</code>
+     */
+    boolean hasId();
+    /**
+     * <code>optional int32 id = 1502;</code>
+     */
+    int getId();
+
+    /**
+     * <code>optional int32 end_frame = 1503;</code>
+     */
+    boolean hasEndFrame();
+    /**
+     * <code>optional int32 end_frame = 1503;</code>
+     */
+    int getEndFrame();
+
+    /**
+     * <code>optional float original_value = 1504;</code>
+     */
+    boolean hasOriginalValue();
+    /**
+     * <code>optional float original_value = 1504;</code>
+     */
+    float getOriginalValue();
+
+    /**
+     * <code>repeated float params_std_dev = 1505;</code>
+     */
+    java.util.List<java.lang.Float> getParamsStdDevList();
+    /**
+     * <code>repeated float params_std_dev = 1505;</code>
+     */
+    int getParamsStdDevCount();
+    /**
+     * <code>repeated float params_std_dev = 1505;</code>
+     */
+    float getParamsStdDev(int index);
   }
   /**
    * Protobuf type {@code TSF.Spot}
@@ -4708,6 +6282,12 @@ public final class TaggedSpotFile {
       zPrecision_ = 0F;
       xPosition_ = 0;
       yPosition_ = 0;
+      error_ = 0D;
+      noise_ = 0F;
+      id_ = 0;
+      endFrame_ = 0;
+      originalValue_ = 0F;
+      paramsStdDev_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -4875,6 +6455,52 @@ public final class TaggedSpotFile {
               yPosition_ = input.readInt32();
               break;
             }
+            case 12001: {
+              bitField0_ |= 0x02000000;
+              error_ = input.readDouble();
+              break;
+            }
+            case 12013: {
+              bitField0_ |= 0x04000000;
+              noise_ = input.readFloat();
+              break;
+            }
+            case 12016: {
+              bitField0_ |= 0x08000000;
+              id_ = input.readInt32();
+              break;
+            }
+            case 12024: {
+              bitField0_ |= 0x10000000;
+              endFrame_ = input.readInt32();
+              break;
+            }
+            case 12037: {
+              bitField0_ |= 0x20000000;
+              originalValue_ = input.readFloat();
+              break;
+            }
+            case 12045: {
+              if (!((mutable_bitField0_ & 0x40000000) == 0x40000000)) {
+                paramsStdDev_ = new java.util.ArrayList<java.lang.Float>();
+                mutable_bitField0_ |= 0x40000000;
+              }
+              paramsStdDev_.add(input.readFloat());
+              break;
+            }
+            case 12042: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x40000000) == 0x40000000) && input.getBytesUntilLimit() > 0) {
+                paramsStdDev_ = new java.util.ArrayList<java.lang.Float>();
+                mutable_bitField0_ |= 0x40000000;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                paramsStdDev_.add(input.readFloat());
+              }
+              input.popLimit(limit);
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -4883,6 +6509,9 @@ public final class TaggedSpotFile {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x40000000) == 0x40000000)) {
+          paramsStdDev_ = java.util.Collections.unmodifiableList(paramsStdDev_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -5481,6 +7110,111 @@ public final class TaggedSpotFile {
       return yPosition_;
     }
 
+    public static final int ERROR_FIELD_NUMBER = 1500;
+    private double error_;
+    /**
+     * <pre>
+     * Additional spot data
+     * </pre>
+     *
+     * <code>optional double error = 1500;</code>
+     */
+    public boolean hasError() {
+      return ((bitField0_ & 0x02000000) == 0x02000000);
+    }
+    /**
+     * <pre>
+     * Additional spot data
+     * </pre>
+     *
+     * <code>optional double error = 1500;</code>
+     */
+    public double getError() {
+      return error_;
+    }
+
+    public static final int NOISE_FIELD_NUMBER = 1501;
+    private float noise_;
+    /**
+     * <code>optional float noise = 1501;</code>
+     */
+    public boolean hasNoise() {
+      return ((bitField0_ & 0x04000000) == 0x04000000);
+    }
+    /**
+     * <code>optional float noise = 1501;</code>
+     */
+    public float getNoise() {
+      return noise_;
+    }
+
+    public static final int ID_FIELD_NUMBER = 1502;
+    private int id_;
+    /**
+     * <code>optional int32 id = 1502;</code>
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x08000000) == 0x08000000);
+    }
+    /**
+     * <code>optional int32 id = 1502;</code>
+     */
+    public int getId() {
+      return id_;
+    }
+
+    public static final int END_FRAME_FIELD_NUMBER = 1503;
+    private int endFrame_;
+    /**
+     * <code>optional int32 end_frame = 1503;</code>
+     */
+    public boolean hasEndFrame() {
+      return ((bitField0_ & 0x10000000) == 0x10000000);
+    }
+    /**
+     * <code>optional int32 end_frame = 1503;</code>
+     */
+    public int getEndFrame() {
+      return endFrame_;
+    }
+
+    public static final int ORIGINAL_VALUE_FIELD_NUMBER = 1504;
+    private float originalValue_;
+    /**
+     * <code>optional float original_value = 1504;</code>
+     */
+    public boolean hasOriginalValue() {
+      return ((bitField0_ & 0x20000000) == 0x20000000);
+    }
+    /**
+     * <code>optional float original_value = 1504;</code>
+     */
+    public float getOriginalValue() {
+      return originalValue_;
+    }
+
+    public static final int PARAMS_STD_DEV_FIELD_NUMBER = 1505;
+    private java.util.List<java.lang.Float> paramsStdDev_;
+    /**
+     * <code>repeated float params_std_dev = 1505;</code>
+     */
+    public java.util.List<java.lang.Float>
+        getParamsStdDevList() {
+      return paramsStdDev_;
+    }
+    /**
+     * <code>repeated float params_std_dev = 1505;</code>
+     */
+    public int getParamsStdDevCount() {
+      return paramsStdDev_.size();
+    }
+    /**
+     * <code>repeated float params_std_dev = 1505;</code>
+     */
+    public float getParamsStdDev(int index) {
+      return paramsStdDev_.get(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -5599,6 +7333,24 @@ public final class TaggedSpotFile {
       if (((bitField0_ & 0x01000000) == 0x01000000)) {
         output.writeInt32(108, yPosition_);
       }
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+        output.writeDouble(1500, error_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        output.writeFloat(1501, noise_);
+      }
+      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+        output.writeInt32(1502, id_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        output.writeInt32(1503, endFrame_);
+      }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        output.writeFloat(1504, originalValue_);
+      }
+      for (int i = 0; i < paramsStdDev_.size(); i++) {
+        output.writeFloat(1505, paramsStdDev_.get(i));
+      }
       extensionWriter.writeUntil(2048, output);
       unknownFields.writeTo(output);
     }
@@ -5707,6 +7459,32 @@ public final class TaggedSpotFile {
       if (((bitField0_ & 0x01000000) == 0x01000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(108, yPosition_);
+      }
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1500, error_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFloatSize(1501, noise_);
+      }
+      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1502, id_);
+      }
+      if (((bitField0_ & 0x10000000) == 0x10000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1503, endFrame_);
+      }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFloatSize(1504, originalValue_);
+      }
+      {
+        int dataSize = 0;
+        dataSize = 4 * getParamsStdDevList().size();
+        size += dataSize;
+        size += 2 * getParamsStdDevList().size();
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -5877,6 +7655,39 @@ public final class TaggedSpotFile {
         result = result && (getYPosition()
             == other.getYPosition());
       }
+      result = result && (hasError() == other.hasError());
+      if (hasError()) {
+        result = result && (
+            java.lang.Double.doubleToLongBits(getError())
+            == java.lang.Double.doubleToLongBits(
+                other.getError()));
+      }
+      result = result && (hasNoise() == other.hasNoise());
+      if (hasNoise()) {
+        result = result && (
+            java.lang.Float.floatToIntBits(getNoise())
+            == java.lang.Float.floatToIntBits(
+                other.getNoise()));
+      }
+      result = result && (hasId() == other.hasId());
+      if (hasId()) {
+        result = result && (getId()
+            == other.getId());
+      }
+      result = result && (hasEndFrame() == other.hasEndFrame());
+      if (hasEndFrame()) {
+        result = result && (getEndFrame()
+            == other.getEndFrame());
+      }
+      result = result && (hasOriginalValue() == other.hasOriginalValue());
+      if (hasOriginalValue()) {
+        result = result && (
+            java.lang.Float.floatToIntBits(getOriginalValue())
+            == java.lang.Float.floatToIntBits(
+                other.getOriginalValue()));
+      }
+      result = result && getParamsStdDevList()
+          .equals(other.getParamsStdDevList());
       result = result && unknownFields.equals(other.unknownFields);
       result = result &&
           getExtensionFields().equals(other.getExtensionFields());
@@ -6003,6 +7814,33 @@ public final class TaggedSpotFile {
       if (hasYPosition()) {
         hash = (37 * hash) + Y_POSITION_FIELD_NUMBER;
         hash = (53 * hash) + getYPosition();
+      }
+      if (hasError()) {
+        hash = (37 * hash) + ERROR_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getError()));
+      }
+      if (hasNoise()) {
+        hash = (37 * hash) + NOISE_FIELD_NUMBER;
+        hash = (53 * hash) + java.lang.Float.floatToIntBits(
+            getNoise());
+      }
+      if (hasId()) {
+        hash = (37 * hash) + ID_FIELD_NUMBER;
+        hash = (53 * hash) + getId();
+      }
+      if (hasEndFrame()) {
+        hash = (37 * hash) + END_FRAME_FIELD_NUMBER;
+        hash = (53 * hash) + getEndFrame();
+      }
+      if (hasOriginalValue()) {
+        hash = (37 * hash) + ORIGINAL_VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + java.lang.Float.floatToIntBits(
+            getOriginalValue());
+      }
+      if (getParamsStdDevCount() > 0) {
+        hash = (37 * hash) + PARAMS_STD_DEV_FIELD_NUMBER;
+        hash = (53 * hash) + getParamsStdDevList().hashCode();
       }
       hash = hashFields(hash, getExtensionFields());
       hash = (29 * hash) + unknownFields.hashCode();
@@ -6174,6 +8012,18 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x00800000);
         yPosition_ = 0;
         bitField0_ = (bitField0_ & ~0x01000000);
+        error_ = 0D;
+        bitField0_ = (bitField0_ & ~0x02000000);
+        noise_ = 0F;
+        bitField0_ = (bitField0_ & ~0x04000000);
+        id_ = 0;
+        bitField0_ = (bitField0_ & ~0x08000000);
+        endFrame_ = 0;
+        bitField0_ = (bitField0_ & ~0x10000000);
+        originalValue_ = 0F;
+        bitField0_ = (bitField0_ & ~0x20000000);
+        paramsStdDev_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x40000000);
         return this;
       }
 
@@ -6298,6 +8148,31 @@ public final class TaggedSpotFile {
           to_bitField0_ |= 0x01000000;
         }
         result.yPosition_ = yPosition_;
+        if (((from_bitField0_ & 0x02000000) == 0x02000000)) {
+          to_bitField0_ |= 0x02000000;
+        }
+        result.error_ = error_;
+        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
+          to_bitField0_ |= 0x04000000;
+        }
+        result.noise_ = noise_;
+        if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
+          to_bitField0_ |= 0x08000000;
+        }
+        result.id_ = id_;
+        if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
+          to_bitField0_ |= 0x10000000;
+        }
+        result.endFrame_ = endFrame_;
+        if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
+          to_bitField0_ |= 0x20000000;
+        }
+        result.originalValue_ = originalValue_;
+        if (((bitField0_ & 0x40000000) == 0x40000000)) {
+          paramsStdDev_ = java.util.Collections.unmodifiableList(paramsStdDev_);
+          bitField0_ = (bitField0_ & ~0x40000000);
+        }
+        result.paramsStdDev_ = paramsStdDev_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6437,6 +8312,31 @@ public final class TaggedSpotFile {
         }
         if (other.hasYPosition()) {
           setYPosition(other.getYPosition());
+        }
+        if (other.hasError()) {
+          setError(other.getError());
+        }
+        if (other.hasNoise()) {
+          setNoise(other.getNoise());
+        }
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasEndFrame()) {
+          setEndFrame(other.getEndFrame());
+        }
+        if (other.hasOriginalValue()) {
+          setOriginalValue(other.getOriginalValue());
+        }
+        if (!other.paramsStdDev_.isEmpty()) {
+          if (paramsStdDev_.isEmpty()) {
+            paramsStdDev_ = other.paramsStdDev_;
+            bitField0_ = (bitField0_ & ~0x40000000);
+          } else {
+            ensureParamsStdDevIsMutable();
+            paramsStdDev_.addAll(other.paramsStdDev_);
+          }
+          onChanged();
         }
         this.mergeExtensionFields(other);
         this.mergeUnknownFields(other.unknownFields);
@@ -7703,6 +9603,248 @@ public final class TaggedSpotFile {
         onChanged();
         return this;
       }
+
+      private double error_ ;
+      /**
+       * <pre>
+       * Additional spot data
+       * </pre>
+       *
+       * <code>optional double error = 1500;</code>
+       */
+      public boolean hasError() {
+        return ((bitField0_ & 0x02000000) == 0x02000000);
+      }
+      /**
+       * <pre>
+       * Additional spot data
+       * </pre>
+       *
+       * <code>optional double error = 1500;</code>
+       */
+      public double getError() {
+        return error_;
+      }
+      /**
+       * <pre>
+       * Additional spot data
+       * </pre>
+       *
+       * <code>optional double error = 1500;</code>
+       */
+      public Builder setError(double value) {
+        bitField0_ |= 0x02000000;
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Additional spot data
+       * </pre>
+       *
+       * <code>optional double error = 1500;</code>
+       */
+      public Builder clearError() {
+        bitField0_ = (bitField0_ & ~0x02000000);
+        error_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private float noise_ ;
+      /**
+       * <code>optional float noise = 1501;</code>
+       */
+      public boolean hasNoise() {
+        return ((bitField0_ & 0x04000000) == 0x04000000);
+      }
+      /**
+       * <code>optional float noise = 1501;</code>
+       */
+      public float getNoise() {
+        return noise_;
+      }
+      /**
+       * <code>optional float noise = 1501;</code>
+       */
+      public Builder setNoise(float value) {
+        bitField0_ |= 0x04000000;
+        noise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional float noise = 1501;</code>
+       */
+      public Builder clearNoise() {
+        bitField0_ = (bitField0_ & ~0x04000000);
+        noise_ = 0F;
+        onChanged();
+        return this;
+      }
+
+      private int id_ ;
+      /**
+       * <code>optional int32 id = 1502;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x08000000) == 0x08000000);
+      }
+      /**
+       * <code>optional int32 id = 1502;</code>
+       */
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>optional int32 id = 1502;</code>
+       */
+      public Builder setId(int value) {
+        bitField0_ |= 0x08000000;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 id = 1502;</code>
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x08000000);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int endFrame_ ;
+      /**
+       * <code>optional int32 end_frame = 1503;</code>
+       */
+      public boolean hasEndFrame() {
+        return ((bitField0_ & 0x10000000) == 0x10000000);
+      }
+      /**
+       * <code>optional int32 end_frame = 1503;</code>
+       */
+      public int getEndFrame() {
+        return endFrame_;
+      }
+      /**
+       * <code>optional int32 end_frame = 1503;</code>
+       */
+      public Builder setEndFrame(int value) {
+        bitField0_ |= 0x10000000;
+        endFrame_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 end_frame = 1503;</code>
+       */
+      public Builder clearEndFrame() {
+        bitField0_ = (bitField0_ & ~0x10000000);
+        endFrame_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private float originalValue_ ;
+      /**
+       * <code>optional float original_value = 1504;</code>
+       */
+      public boolean hasOriginalValue() {
+        return ((bitField0_ & 0x20000000) == 0x20000000);
+      }
+      /**
+       * <code>optional float original_value = 1504;</code>
+       */
+      public float getOriginalValue() {
+        return originalValue_;
+      }
+      /**
+       * <code>optional float original_value = 1504;</code>
+       */
+      public Builder setOriginalValue(float value) {
+        bitField0_ |= 0x20000000;
+        originalValue_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional float original_value = 1504;</code>
+       */
+      public Builder clearOriginalValue() {
+        bitField0_ = (bitField0_ & ~0x20000000);
+        originalValue_ = 0F;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<java.lang.Float> paramsStdDev_ = java.util.Collections.emptyList();
+      private void ensureParamsStdDevIsMutable() {
+        if (!((bitField0_ & 0x40000000) == 0x40000000)) {
+          paramsStdDev_ = new java.util.ArrayList<java.lang.Float>(paramsStdDev_);
+          bitField0_ |= 0x40000000;
+         }
+      }
+      /**
+       * <code>repeated float params_std_dev = 1505;</code>
+       */
+      public java.util.List<java.lang.Float>
+          getParamsStdDevList() {
+        return java.util.Collections.unmodifiableList(paramsStdDev_);
+      }
+      /**
+       * <code>repeated float params_std_dev = 1505;</code>
+       */
+      public int getParamsStdDevCount() {
+        return paramsStdDev_.size();
+      }
+      /**
+       * <code>repeated float params_std_dev = 1505;</code>
+       */
+      public float getParamsStdDev(int index) {
+        return paramsStdDev_.get(index);
+      }
+      /**
+       * <code>repeated float params_std_dev = 1505;</code>
+       */
+      public Builder setParamsStdDev(
+          int index, float value) {
+        ensureParamsStdDevIsMutable();
+        paramsStdDev_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated float params_std_dev = 1505;</code>
+       */
+      public Builder addParamsStdDev(float value) {
+        ensureParamsStdDevIsMutable();
+        paramsStdDev_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated float params_std_dev = 1505;</code>
+       */
+      public Builder addAllParamsStdDev(
+          java.lang.Iterable<? extends java.lang.Float> values) {
+        ensureParamsStdDevIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, paramsStdDev_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated float params_std_dev = 1505;</code>
+       */
+      public Builder clearParamsStdDev() {
+        paramsStdDev_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x40000000);
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
@@ -7778,7 +9920,7 @@ public final class TaggedSpotFile {
     java.lang.String[] descriptorData = {
       "\n\016TSFProto.proto\022\003TSF\"G\n\017FluorophoreType" +
       "\022\n\n\002id\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_" +
-      "fiducial\030\003 \001(\010\"\303\003\n\010SpotList\022\031\n\016applicati" +
+      "fiducial\030\003 \001(\010\"\317\005\n\010SpotList\022\031\n\016applicati" +
       "on_id\030\001 \002(\005:\0011\022\014\n\004name\030\002 \001(\t\022\020\n\010filepath" +
       "\030\003 \001(\t\022\013\n\003uid\030\004 \001(\003\022\023\n\013nr_pixels_x\030\005 \001(\005" +
       "\022\023\n\013nr_pixels_y\030\006 \001(\005\022\022\n\npixel_size\030\007 \001(" +
@@ -7789,24 +9931,34 @@ public final class TaggedSpotFile {
       "e\022*\n\016location_units\030\026 \001(\0162\022.TSF.Location" +
       "Units\022,\n\017intensity_units\030\027 \001(\0162\023.TSF.Int" +
       "ensityUnits\022\036\n\010fit_mode\030\030 \001(\0162\014.TSF.FitM" +
-      "ode\022\027\n\010is_track\030\031 \001(\010:\005false\"\365\003\n\004Spot\022\020\n" +
-      "\010molecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005fram" +
-      "e\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020f" +
-      "luorophore_type\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*" +
-      "\n\016location_units\030\021 \001(\0162\022.TSF.LocationUni" +
-      "ts\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017i" +
-      "ntensity_units\030\022 \001(\0162\023.TSF.IntensityUnit",
-      "s\022\021\n\tintensity\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002" +
-      "\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(" +
-      "\002\022\022\n\nx_original\030e \001(\002\022\022\n\ny_original\030f \001(" +
-      "\002\022\022\n\nz_original\030g \001(\002\022\023\n\013x_precision\030h \001" +
-      "(\002\022\023\n\013y_precision\030i \001(\002\022\023\n\013z_precision\030j" +
-      " \001(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_position\030l" +
-      " \001(\005*\006\010\334\013\020\200\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n\007" +
-      "TWOAXIS\020\001\022\023\n\017TWOAXISANDTHETA\020\002*)\n\016Intens" +
-      "ityUnits\022\n\n\006COUNTS\020\000\022\013\n\007PHOTONS\020\001*+\n\rLoc" +
-      "ationUnits\022\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002B\037",
-      "\n\rgdsc.smlm.tsfB\016TaggedSpotFile"
+      "ode\022\027\n\010is_track\030\031 \001(\010:\005false\022\021\n\010bounds_x" +
+      "\030\334\013 \001(\005\022\021\n\010bounds_y\030\335\013 \001(\005\022\025\n\014bounds_wid" +
+      "th\030\336\013 \001(\005\022\026\n\rbounds_height\030\337\013 \001(\005\022\017\n\006sou" +
+      "rce\030\340\013 \001(\t\022\026\n\rconfiguration\030\341\013 \001(\t\022\023\n\nnm" +
+      "PerPixel\030\342\013 \001(\001\022\r\n\004gain\030\343\013 \001(\001\022\025\n\014exposu" +
+      "reTime\030\344\013 \001(\001\022\022\n\treadNoise\030\345\013 \001(\001\022\r\n\004bia" +
+      "s\030\346\013 \001(\001\022\016\n\005emCCD\030\347\013 \001(\010\022\026\n\ramplificatio",
+      "n\030\350\013 \001(\001*\006\010\244\r\020\200\020\"\350\004\n\004Spot\022\020\n\010molecule\030\001 " +
+      "\002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005frame\030\003 \002(\005\022\r\n\005s" +
+      "lice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020fluorophore_t" +
+      "ype\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*\n\016location_u" +
+      "nits\030\021 \001(\0162\022.TSF.LocationUnits\022\t\n\001x\030\007 \002(" +
+      "\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017intensity_uni" +
+      "ts\030\022 \001(\0162\023.TSF.IntensityUnits\022\021\n\tintensi" +
+      "ty\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002\022\r\n\005width\030\014 " +
+      "\001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(\002\022\022\n\nx_origi" +
+      "nal\030e \001(\002\022\022\n\ny_original\030f \001(\002\022\022\n\nz_origi",
+      "nal\030g \001(\002\022\023\n\013x_precision\030h \001(\002\022\023\n\013y_prec" +
+      "ision\030i \001(\002\022\023\n\013z_precision\030j \001(\002\022\022\n\nx_po" +
+      "sition\030k \001(\005\022\022\n\ny_position\030l \001(\005\022\016\n\005erro" +
+      "r\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\013\n\002id\030\336\013 \001(\005\022\022\n" +
+      "\tend_frame\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001" +
+      "(\002\022\027\n\016params_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007F" +
+      "itMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOA" +
+      "XISANDTHETA\020\002*)\n\016IntensityUnits\022\n\n\006COUNT" +
+      "S\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020" +
+      "\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002B\037\n\rgdsc.smlm.tsfB\016",
+      "TaggedSpotFile"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7831,13 +9983,13 @@ public final class TaggedSpotFile {
     internal_static_TSF_SpotList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_SpotList_descriptor,
-        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "FitMode", "IsTrack", });
+        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "FitMode", "IsTrack", "BoundsX", "BoundsY", "BoundsWidth", "BoundsHeight", "Source", "Configuration", "NmPerPixel", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", });
     internal_static_TSF_Spot_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_TSF_Spot_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_Spot_descriptor,
-        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", });
+        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", "Error", "Noise", "Id", "EndFrame", "OriginalValue", "ParamsStdDev", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

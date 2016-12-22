@@ -26,6 +26,7 @@ import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.Spot;
+import gdsc.smlm.tsf.TaggedSpotFile.Spot.Builder;
 import gdsc.smlm.tsf.TaggedSpotFile.SpotList;
 
 /**
@@ -158,18 +159,25 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setYPrecision(precision);
 		}
 
-		// TODO: Extend the Spot with fields for....
-		// Note: paramsStdDev for X/Y could be set into the X/YPrecision field.
-		//		error;
-		//		noise;
-		//		origValue;
-		//		paramsStdDev;
+		builder.setError(error);
+		builder.setNoise(noise);
+		builder.setOriginalValue(origValue);
+		if (paramsStdDev != null)
+			addNewParamsStdDev(builder, paramsStdDev);
 
 		Spot spot = builder.build();
 
 		writeResult(1, spot);
 	}
 
+	/**
+	 * Sets the width. Convert the X/Y widths used in GDSC SMLM to the single width and shape parameters used in TSF.
+	 *
+	 * @param params
+	 *            the params
+	 * @param builder
+	 *            the builder
+	 */
 	private void setWidth(float[] params, Spot.Builder builder)
 	{
 		if (params[Gaussian2DFunction.X_SD] == params[Gaussian2DFunction.Y_SD])
@@ -179,18 +187,35 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		else
 		{
 			FitMode newFitMode = FitMode.TWOAXIS;
+			
 			builder.setWidth(SD_TO_FWHM_FACTOR *
 					(float) Math.sqrt(Math.abs(params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD])));
+			builder.setA(params[Gaussian2DFunction.X_SD] / params[Gaussian2DFunction.Y_SD]);
+			
 			if (params[Gaussian2DFunction.ANGLE] != 0)
 			{
 				newFitMode = FitMode.TWOAXISANDTHETA;
 				builder.setTheta(params[Gaussian2DFunction.ANGLE]);
 			}
-			builder.setA(params[Gaussian2DFunction.X_SD] / params[Gaussian2DFunction.Y_SD]);
 
 			if (fitMode.getNumber() < newFitMode.getNumber())
 				fitMode = newFitMode;
 		}
+	}
+
+	/**
+	 * Adds the params std dev assuming a new builder.
+	 *
+	 * @param builder
+	 *            the builder
+	 * @param paramsStdDev
+	 *            the params std dev
+	 */
+	private void addNewParamsStdDev(Builder builder, float[] paramsStdDev)
+	{
+		// Note: paramsStdDev for X/Y could be set into the X/Y Precision field.
+		for (int i = 0; i < paramsStdDev.length; i++)
+			builder.addParamsStdDev(paramsStdDev[i]);
 	}
 
 	public void addAll(Collection<PeakResult> results)
@@ -228,14 +253,12 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				builder.setYPrecision(precision);
 			}
 
-			// TODO: Extend the Spot with additional fields for...
-			// Note: paramsStdDev for X/Y could be set into the X/YPrecision field.
-			//			result.error;
-			//			result.noise;
-			//			result.getId();
-			//			result.getEndFrame();
-			//			result.origValue;
-			//			result.paramsStdDev;
+			builder.setError(result.error);
+			builder.setNoise(result.noise);
+			builder.setId(result.getId());
+			builder.setEndFrame(result.getEndFrame());
+			builder.setOriginalValue(result.origValue);
+			addParamsStdDev(builder, result.paramsStdDev);
 
 			spots[count++] = builder.build();
 
@@ -249,6 +272,37 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			}
 		}
 		writeResult(count, spots);
+	}
+
+	/**
+	 * Adds the params std dev assuming an existing builder (allowing re-use of the space).
+	 *
+	 * @param builder
+	 *            the builder
+	 * @param paramsStdDev
+	 *            the params std dev
+	 */
+	private void addParamsStdDev(Builder builder, float[] paramsStdDev)
+	{
+		// Note: paramsStdDev for X/Y could be set into the X/Y Precision field.
+		if (paramsStdDev == null)
+		{
+			if (builder.getParamsStdDevCount() != 0)
+				builder.clearParamsStdDev();
+			return;
+		}
+
+		// Reuse the space
+		if (builder.getParamsStdDevCount() == paramsStdDev.length)
+		{
+			for (int i = 0; i < paramsStdDev.length; i++)
+				builder.setParamsStdDev(i, paramsStdDev[i]);
+		}
+		else
+		{
+			builder.clearParamsStdDev();
+			addNewParamsStdDev(builder, paramsStdDev);
+		}
 	}
 
 	private synchronized void writeResult(int count, Spot... spots)
@@ -313,43 +367,41 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		builder.setNrSpots(size);
 
-		// Add the standard details the TSF supports
+		// Add the standard details the TSF supports. We use extensions to add GDSC SMLM data.
+		if (name != null)
+		{
+			builder.setName(name);
+		}
 		if (source != null)
 		{
-			//String.format("#Source %s\n", singleLine(source.toXML()));
-			builder.setName(source.getName());
+			builder.setSource(singleLine(source.toXML()));
+
 			builder.setNrPixelsX(source.width);
 			builder.setNrPixelsY(source.height);
 			builder.setNrFrames(source.frames);
 		}
-		if (name != null)
-		{
-			// This may have been set already by source
-			if (!builder.hasName())
-				builder.setName(name);
-		}
 		if (bounds != null)
 		{
-			//String.format("#Bounds x%d y%d w%d h%d\n", bounds.x, bounds.y, bounds.width, bounds.height);
-
-			// This may have been set already by source
-			if (!builder.hasNrPixelsX())
-			{
-				// Include the origin so that the number of pixels will cover the range of the data
-				builder.setNrPixelsX(bounds.x + bounds.width);
-				builder.setNrPixelsY(bounds.y + bounds.height);
-			}
+			builder.setBoundsX(bounds.x);
+			builder.setBoundsY(bounds.y);
+			builder.setBoundsWidth(bounds.width);
+			builder.setBoundsHeight(bounds.height);
 		}
 		if (calibration != null)
 		{
-			//String.format("#Calibration %s\n", singleLine(XmlUtils.toXML(calibration)));
+			builder.setNmPerPixel(calibration.nmPerPixel);
+			builder.setGain(calibration.gain);
+			builder.setExposureTime(calibration.exposureTime);
+			builder.setReadNoise(calibration.readNoise);
+			builder.setBias(calibration.bias);
+			builder.setEmCCD(calibration.emCCD);
+			builder.setAmplification(calibration.amplification);
 
 			builder.setPixelSize((float) calibration.nmPerPixel);
 		}
 		if (configuration != null && configuration.length() > 0)
 		{
-			//String.format("#Configuration %s\n", singleLine(configuration));
-
+			builder.setConfiguration(singleLine(configuration));
 		}
 
 		// Have a property so the boxSize can be set
@@ -359,14 +411,6 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setLocationUnits(LocationUnits.PIXELS);
 		builder.setIntensityUnits(IntensityUnits.COUNTS);
 		builder.setFitMode(fitMode);
-
-		// TODO: Extend the SpotList with additional fields for ... 
-		// Some of these will need to be 'message' types.
-		//      name;
-		//		source;
-		//		bounds;
-		//		calibration;
-		//		configuration;
 
 		SpotList spotList = builder.build();
 		try
@@ -414,6 +458,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 				}
 			}
 		}
+	}
+
+	private String singleLine(String text)
+	{
+		return text.replaceAll("\n *", "");
 	}
 
 	/**
