@@ -36,8 +36,10 @@ import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MALKFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.PeakResultsReader;
+import gdsc.smlm.results.TSFPeakResultsWriter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -363,7 +365,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			File parent = file.getParentFile();
 			if (parent != null && parent.exists())
 			{
-				FilePeakResults r;
+				PeakResults r;
 				switch (resultsSettings.getResultsFileFormat())
 				{
 					case GDSC_BINARY:
@@ -375,11 +377,18 @@ public class ResultsManager implements PlugIn, MouseListener
 					case MALK:
 						r = new MALKFilePeakResults(resultsSettings.resultsFilename);
 						break;
+					case TSF:
+						r = new TSFPeakResultsWriter(resultsSettings.resultsFilename);
+						break;
 					default:
 						throw new RuntimeException(
 								"Unsupported file format: " + resultsSettings.getResultsFileFormat());
 				}
-				r.setPeakIdColumnName("Frame");
+				if (r instanceof FilePeakResults)
+				{
+					FilePeakResults fr = (FilePeakResults) r;
+					fr.setPeakIdColumnName("Frame");
+				}
 				resultsList.addOutput(r);
 			}
 		}
