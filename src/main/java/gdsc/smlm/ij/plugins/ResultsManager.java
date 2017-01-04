@@ -39,6 +39,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.PeakResultsReader;
+import gdsc.smlm.results.ResultOption;
 import gdsc.smlm.results.TSFPeakResultsWriter;
 import ij.IJ;
 import ij.ImagePlus;
@@ -369,7 +370,8 @@ public class ResultsManager implements PlugIn, MouseListener
 				switch (resultsSettings.getResultsFileFormat())
 				{
 					case GDSC_BINARY:
-						r = new BinaryFilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
+						r = new BinaryFilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame,
+								showId);
 						break;
 					case GDSC_TEXT:
 						r = new FilePeakResults(resultsSettings.resultsFilename, showDeviations, showEndFrame, showId);
@@ -781,6 +783,9 @@ public class ResultsManager implements PlugIn, MouseListener
 		{
 			IJ.showStatus("Reading results file ...");
 			reader = new PeakResultsReader(inputFilename);
+			ResultOption[] options = reader.getOptions();
+			if (options != null)
+				collectOptions(reader, options);
 			reader.setTracker(new IJTrackProgress());
 			results = reader.getResults();
 			reader.getTracker().progress(1.0);
@@ -806,6 +811,102 @@ public class ResultsManager implements PlugIn, MouseListener
 				return null;
 		}
 		return results;
+	}
+
+	private static void collectOptions(PeakResultsReader reader, ResultOption[] options)
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addMessage("Options required for file format: " + reader.getFormat().getName());
+		for (ResultOption option : options)
+		{
+			if (option.hasValues())
+			{
+				String[] items = new String[option.values.length];
+				for (int i = 0; i < items.length; i++)
+					items[i] = option.values[i].toString();
+				gd.addChoice(getName(option), items, option.getValue().toString());
+			}
+			else if (option.getValue() instanceof Number)
+			{
+				Number n = (Number) option.getValue();
+				if (n.doubleValue() == n.intValue())
+				{
+					gd.addNumericField(getName(option), n.intValue(), 0);
+				}
+				else
+				{
+					String value = n.toString();
+					int sig = 0;
+					int index = value.indexOf('.');
+					if (index != -1)
+					{
+						// There is a decimal point. Count the digits after it
+						while (++index < value.length())
+						{
+							if (!Character.isDigit(value.charAt(index)))
+							{
+								// A non-digit character after the decimal point is for scientific notation
+								sig = -sig;
+								break;
+							}
+							sig++;
+						}
+					}
+					gd.addNumericField(getName(option), n.doubleValue(), sig);
+				}
+			}
+			else if (option.getValue() instanceof String)
+			{
+				gd.addStringField(getName(option), (String) option.getValue());
+			}
+			else if (option.getValue() instanceof Boolean)
+			{
+				gd.addCheckbox(getName(option), (Boolean) option.getValue());
+			}
+			else
+			{
+				IJ.log(TITLE + ": Unsupported reader option: " + option.name + "=" + option.getValue().toString());
+			}
+		}
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		try
+		{
+			for (ResultOption option : options)
+			{
+				if (option.hasValues())
+				{
+					option.setValue(option.values[gd.getNextChoiceIndex()]);
+				}
+				else if (option.getValue() instanceof Number)
+				{
+					double d = gd.getNextNumber();
+					// Convert to the correct type using the String value constructor for the number
+					option.setValue(
+							option.getValue().getClass().getConstructor(String.class).newInstance(Double.toString(d)));
+				}
+				else if (option.getValue() instanceof String)
+				{
+					option.setValue(gd.getNextString());
+				}
+				else if (option.getValue() instanceof Boolean)
+				{
+					option.setValue(gd.getNextBoolean());
+				}
+			}
+			reader.setOptions(options);
+		}
+		catch (Exception e)
+		{
+			// This can occur if the options are not valid
+			IJ.log(TITLE + ": Failed to configure reader options: " + e.getMessage());
+		}
+	}
+
+	private static String getName(ResultOption option)
+	{
+		return option.name.replace(' ', '_');
 	}
 
 	/**
@@ -1019,5 +1120,26 @@ public class ResultsManager implements PlugIn, MouseListener
 		newResults.copySettings(results);
 		newResults.setBounds(new Rectangle((int) minX, (int) minY, (int) (maxX - minX), (int) (maxY - minY)));
 		return newResults;
+	}
+
+	/**
+	 * Gets the input filename that will be used in {@link ResultsManager#loadInputResults(String, boolean)}.
+	 *
+	 * @return the input filename
+	 */
+	static String getInputFilename()
+	{
+		return inputFilename;
+	}
+
+	/**
+	 * Sets the input filename that will be used in {@link ResultsManager#loadInputResults(String, boolean)}.
+	 *
+	 * @param inputFilename
+	 *            the new input filename
+	 */
+	static void setInputFilename(String inputFilename)
+	{
+		ResultsManager.inputFilename = inputFilename;
 	}
 }

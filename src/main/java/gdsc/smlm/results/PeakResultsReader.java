@@ -60,6 +60,7 @@ public class PeakResultsReader
 	private Calibration calibration = null;
 	private String configuration = null;
 	private TrackProgress tracker = null;
+	private ResultOption[] options = null;
 
 	private boolean deviations, readEndFrame, readId, readSource;
 	// Original file data contains signal and amplitude
@@ -149,7 +150,7 @@ public class PeakResultsReader
 				format = FileFormat.TSF_BINARY;
 				return;
 			}
-			
+
 			// We cannot continue guess if there is no non-header data
 			if (Utils.isNullOrEmpty(firstLine))
 				return;
@@ -1809,9 +1810,10 @@ public class PeakResultsReader
 	private MemoryPeakResults readTSF()
 	{
 		TSFPeakResultsReader reader = new TSFPeakResultsReader(filename);
+		reader.setOptions(options);
 		return reader.read();
 	}
-	
+
 	/**
 	 * @return the tracker
 	 */
@@ -1837,5 +1839,35 @@ public class PeakResultsReader
 	public void setUseScanner(boolean useScanner)
 	{
 		this.useScanner = useScanner;
+	}
+
+	/**
+	 * Gets the options for reading the results. Allows specific file formats to provide options for how to read the
+	 * data.
+	 *
+	 * @return the options
+	 */
+	public ResultOption[] getOptions()
+	{
+		getHeader();
+		if (header == null || format == null)
+			return null;
+		if (format == FileFormat.TSF_BINARY)
+		{
+			TSFPeakResultsReader reader = new TSFPeakResultsReader(filename);
+			return reader.getOptions();
+		}
+		return null;
+	}
+
+	/**
+	 * Sets the options for reading the results.
+	 *
+	 * @param options
+	 *            the new options for reading the results
+	 */
+	public void setOptions(ResultOption[] options)
+	{
+		this.options = options;
 	}
 }

@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -21,6 +22,7 @@ import java.io.IOException;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
+import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.Spot;
@@ -648,5 +650,93 @@ public class TSFPeakResultsReader
 	{
 		readHeader();
 		return isMulti;
+	}
+
+	/**
+	 * Gets the options for reading the results.
+	 *
+	 * @return the options
+	 */
+	public ResultOption[] getOptions()
+	{
+		if (!isMulti())
+			return null;
+
+		ResultOption[] options = new ResultOption[4];
+		int count = 0;
+
+		if (spotList.getNrChannels() > 1)
+		{
+			options[count++] = createOption(1, "Channel", spotList.getNrChannels(), 1, false);
+		}
+		if (spotList.getNrSlices() > 1)
+		{
+			options[count++] = createOption(2, "Slice", spotList.getNrSlices(), 0, true);
+		}
+		if (spotList.getNrPos() > 1)
+		{
+			options[count++] = createOption(3, "Position", spotList.getNrPos(), 0, true);
+		}
+		if (spotList.getFluorophoreTypesCount() > 1)
+		{
+			// Build a string for the allowed value to provide space for the description
+			String[] values = new String[spotList.getFluorophoreTypesCount()];
+			for (int i = 0; i < spotList.getFluorophoreTypesCount(); i++)
+			{
+				FluorophoreType type = spotList.getFluorophoreTypes(i);
+				String value = Integer.toString(type.getId());
+				if (type.hasDescription())
+					value += ":" + type.getDescription();
+				values[i] = value;
+			}
+			options[count++] = new ResultOption(4, "Fluorophore type", values[0], values);
+		}
+
+		return Arrays.copyOf(options, count);
+	}
+
+	private ResultOption createOption(int id, String name, int total, int value, boolean allowZero)
+	{
+		Integer[] values = new Integer[total + ((allowZero) ? 1 : 0)];
+		for (int v = (allowZero) ? 0 : 1, i = 0; v <= total; v++)
+		{
+			values[i++] = v;
+		}
+		return new ResultOption(id, name, new Integer(value), values);
+	}
+
+	/**
+	 * Sets the options for reading the results.
+	 *
+	 * @param options
+	 *            the new options for reading the results
+	 */
+	public void setOptions(ResultOption[] options)
+	{
+		if (options == null)
+			return;
+		for (ResultOption option : options)
+		{
+			switch (option.id)
+			{
+				case 1:
+					setChannel((Integer) option.getValue());
+					break;
+				case 2:
+					setSlice((Integer) option.getValue());
+					break;
+				case 3:
+					setPosition((Integer) option.getValue());
+					break;
+				case 4:
+					String value = (String) option.getValue();
+					// Remove the appended description
+					int index = value.indexOf(':');
+					if (index != -1)
+						value = value.substring(0, index);
+					setFluorophoreType(Integer.parseInt(value));
+					break;
+			}
+		}
 	}
 }
