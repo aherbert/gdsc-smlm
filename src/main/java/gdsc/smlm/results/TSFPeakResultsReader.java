@@ -40,10 +40,11 @@ public class TSFPeakResultsReader
 	private SpotList spotList = null;
 	private boolean readHeader = false;
 	private boolean isGDSC = false;
+	private boolean isMulti = false;
 
 	private int channel = 1;
-	private int slice = 1;
-	private int position = 1;
+	private int slice = 0;
+	private int position = 0;
 	private int fluorophoreType = 1;
 
 	public TSFPeakResultsReader(String filename)
@@ -102,8 +103,30 @@ public class TSFPeakResultsReader
 
 		// We can do special processing for a TSF file we created
 		isGDSC = (spotList.getApplicationId() == TSFPeakResultsWriter.APPLICATION_ID);
+		isMulti = isMulti(spotList);
 
 		return spotList;
+	}
+
+	/**
+	 * Checks if the header data in the SpotList contains multiple channels, slices, positions, or fluorophores. These
+	 * are categories that can be use to filter the data when reading.
+	 *
+	 * @param spotList
+	 *            the spot list
+	 * @return true, if is multi
+	 */
+	public static boolean isMulti(SpotList spotList)
+	{
+		if (spotList.getNrChannels() > 1)
+			return true;
+		if (spotList.getNrSlices() > 1)
+			return true;
+		if (spotList.getNrPos() > 1)
+			return true;
+		if (spotList.getFluorophoreTypesCount() > 1)
+			return true;
+		return false;
 	}
 
 	/**
@@ -244,6 +267,9 @@ public class TSFPeakResultsReader
 		if (spotList.hasFitMode())
 			fitMode = spotList.getFitMode();
 
+		final boolean filterPosition = position > 0;
+		final boolean filterSlice = slice > 0;
+
 		long expectedSpots = getExpectedSpots();
 		try
 		{
@@ -257,9 +283,9 @@ public class TSFPeakResultsReader
 				// Only read the specified channel, position, slice and fluorophore type
 				if (spot.getChannel() != channel)
 					continue;
-				if (spot.hasPos() && spot.getPos() != position)
+				if (filterPosition && spot.hasPos() && spot.getPos() != position)
 					continue;
-				if (spot.hasSlice() && spot.getSlice() != slice)
+				if (filterSlice && spot.hasSlice() && spot.getSlice() != slice)
 					continue;
 				if (spot.hasFluorophoreType() && spot.getFluorophoreType() != fluorophoreType)
 					continue;
@@ -421,7 +447,7 @@ public class TSFPeakResultsReader
 			name = new File(filename).getName();
 		}
 		// Append these if not using the defaults
-		if (channel != 1 || slice != 1 || position != 1 || fluorophoreType != 1)
+		if (channel != 1 || slice != 0 || position != 0 || fluorophoreType != 1)
 		{
 			name = String.format("%s c=%d, s=%d, p=%d, ft=%d", name, channel, slice, position, fluorophoreType);
 		}
@@ -462,7 +488,7 @@ public class TSFPeakResultsReader
 			Calibration cal = results.getCalibration();
 			if (cal == null)
 				cal = new Calibration();
-			
+
 			if (spotList.hasGain())
 				cal.gain = spotList.getGain();
 			if (spotList.hasExposureTime())
@@ -599,5 +625,28 @@ public class TSFPeakResultsReader
 	public void setFluorophoreType(int fluorophoreType)
 	{
 		this.fluorophoreType = fluorophoreType;
+	}
+
+	/**
+	 * Checks if is a GDSC TSF file.
+	 *
+	 * @return true, if is GDSC TSF file
+	 */
+	public boolean isGDSC()
+	{
+		readHeader();
+		return isGDSC;
+	}
+
+	/**
+	 * Checks if the header data in the SpotList contains multiple channels, slices, positions, or fluorophores. These
+	 * are categories that can be use to filter the data when reading.
+	 *
+	 * @return true, if the data contains multiple categories of localisations
+	 */
+	public boolean isMulti()
+	{
+		readHeader();
+		return isMulti;
 	}
 }
