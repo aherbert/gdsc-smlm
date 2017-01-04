@@ -224,7 +224,8 @@ public class ResultsManagerTest
 						sb.append(" slice=").append(slice);
 						sb.append(" position=").append(position);
 						sb.append(" fluorophore_type=[").append(type).append(":Type ").append(type).append(']');
-						// This is needed to trick the Macro class into returning the options for the thread
+						// This is needed to trick the Macro class into returning the options 
+						// for the thread to the GenericDialog used in the ResultsManager
 						Thread.currentThread().setName("Run$_");
 						Macro.setOptions(sb.toString());
 
