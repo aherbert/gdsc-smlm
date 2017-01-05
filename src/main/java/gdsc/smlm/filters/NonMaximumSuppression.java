@@ -1,9 +1,10 @@
 package gdsc.smlm.filters;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gnu.trove.list.array.TIntArrayList;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -53,7 +54,7 @@ public class NonMaximumSuppression implements Cloneable
 	 */
 	public int[] maxFind(float[] data, int maxx, int maxy, int n)
 	{
-		ArrayList<Integer> results = new ArrayList<Integer>(10);
+		TIntArrayList results = new TIntArrayList(10);
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
@@ -174,7 +175,7 @@ public class NonMaximumSuppression implements Cloneable
 			}
 		}
 
-		return toArray(results);
+		return results.toArray();
 	}
 
 	/**
@@ -197,7 +198,7 @@ public class NonMaximumSuppression implements Cloneable
 	 */
 	public int[] maxFindInternal(float[] data, int maxx, int maxy, int n)
 	{
-		ArrayList<Integer> results = new ArrayList<Integer>(10);
+		TIntArrayList results = new TIntArrayList(10);
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
@@ -288,7 +289,7 @@ public class NonMaximumSuppression implements Cloneable
 			}
 		}
 
-		return toArray(results);
+		return results.toArray();
 	}
 
 	/**
@@ -317,7 +318,7 @@ public class NonMaximumSuppression implements Cloneable
 			// Faster algorithm as there is no requirement for bounds checking.
 			return maxFindInternal(data, maxx, maxy, n);
 
-		ArrayList<Integer> results = new ArrayList<Integer>(10);
+		TIntArrayList results = new TIntArrayList(10);
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
@@ -444,7 +445,7 @@ public class NonMaximumSuppression implements Cloneable
 			}
 		}
 
-		return toArray(results);
+		return results.toArray();
 	}
 
 	/**
@@ -1868,21 +1869,6 @@ public class NonMaximumSuppression implements Cloneable
 	}
 
 	/**
-	 * Convert a result list into a simple array
-	 * 
-	 * @param results
-	 * @return the array
-	 */
-	private int[] toArray(ArrayList<Integer> results)
-	{
-		int[] array = new int[results.size()];
-		int index = 0;
-		for (int i : results)
-			array[index++] = i;
-		return array;
-	}
-
-	/**
 	 * Get the height threshold for peaks using the current minimum height and fraction above background.
 	 * 
 	 * @return the height threshold
@@ -2072,7 +2058,7 @@ public class NonMaximumSuppression implements Cloneable
 	 */
 	public int[] maxFind(int[] data, int maxx, int maxy, int n)
 	{
-		ArrayList<Integer> results = new ArrayList<Integer>(10);
+		TIntArrayList results = new TIntArrayList(10);
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
@@ -2193,7 +2179,7 @@ public class NonMaximumSuppression implements Cloneable
 			}
 		}
 
-		return toArray(results);
+		return results.toArray();
 	}
 
 	/**
@@ -2216,7 +2202,7 @@ public class NonMaximumSuppression implements Cloneable
 	 */
 	public int[] maxFindInternal(int[] data, int maxx, int maxy, int n)
 	{
-		ArrayList<Integer> results = new ArrayList<Integer>(10);
+		TIntArrayList results = new TIntArrayList(10);
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
@@ -2307,7 +2293,7 @@ public class NonMaximumSuppression implements Cloneable
 			}
 		}
 
-		return toArray(results);
+		return results.toArray();
 	}
 
 	/**
@@ -2336,7 +2322,7 @@ public class NonMaximumSuppression implements Cloneable
 			// Faster algorithm as there is no requirement for bounds checking.
 			return maxFindInternal(data, maxx, maxy, n);
 
-		ArrayList<Integer> results = new ArrayList<Integer>(10);
+		TIntArrayList results = new TIntArrayList(10);
 		boolean[] maximaFlag = getFlagBuffer(data.length);
 
 		// Boundary control
@@ -2463,7 +2449,7 @@ public class NonMaximumSuppression implements Cloneable
 			}
 		}
 
-		return toArray(results);
+		return results.toArray();
 	}
 
 	/**
@@ -3760,7 +3746,7 @@ public class NonMaximumSuppression implements Cloneable
 
 		return findBlockMaximaNxN(data, maxx, maxy, n);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

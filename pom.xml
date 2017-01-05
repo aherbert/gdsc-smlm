@@ -61,7 +61,7 @@
 								<addClasspath>true</addClasspath>
 								<mainClass>gdsc.smlm.Version</mainClass>
 								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-              					<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							</manifest>
 						</archive>
 					</configuration>
@@ -160,6 +160,12 @@
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
 			<version>3.0.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.sf.trove4j/trove4j -->
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+			<version>3.0.3</version>
 		</dependency>
 	</dependencies>
 
