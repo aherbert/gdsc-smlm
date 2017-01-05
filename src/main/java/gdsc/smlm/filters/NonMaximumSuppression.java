@@ -98,11 +98,11 @@ public class NonMaximumSuppression implements Cloneable
 					// Sweep neighbourhood
 					if (isInnerXY)
 					{
-						for (int offset_d : offset)
+						for (int i = 0; i < offset.length; i++)
 						{
-							if (maximaFlag[index + offset_d])
+							if (maximaFlag[index + offset[i]])
 								break FIND_MAXIMUM;
-							if (data[index + offset_d] > v)
+							if (data[index + offset[i]] > v)
 								break FIND_MAXIMUM;
 						}
 					}
@@ -232,11 +232,11 @@ public class NonMaximumSuppression implements Cloneable
 
 					// Sweep neighbourhood - 
 					// No check for boundaries as this should be an internal sweep.
-					for (int offset_d : offset)
+					for (int i = 0; i < offset.length; i++)
 					{
-						if (maximaFlag[index + offset_d])
+						if (maximaFlag[index + offset[i]])
 							break FIND_MAXIMUM;
-						if (data[index + offset_d] > v)
+						if (data[index + offset[i]] > v)
 							break FIND_MAXIMUM;
 					}
 
@@ -361,11 +361,11 @@ public class NonMaximumSuppression implements Cloneable
 
 					if (inner)
 					{
-						for (int offset_d : offset)
+						for (int i = 0; i < offset.length; i++)
 						{
-							if (maximaFlag[index + offset_d])
+							if (maximaFlag[index + offset[i]])
 								break FIND_MAXIMUM;
-							if (data[index + offset_d] > v)
+							if (data[index + offset[i]] > v)
 								break FIND_MAXIMUM;
 						}
 					}
@@ -2102,11 +2102,11 @@ public class NonMaximumSuppression implements Cloneable
 					// Sweep neighbourhood
 					if (isInnerXY)
 					{
-						for (int offset_d : offset)
+						for (int i = 0; i < offset.length; i++)
 						{
-							if (maximaFlag[index + offset_d])
+							if (maximaFlag[index + offset[i]])
 								break FIND_MAXIMUM;
-							if (data[index + offset_d] > v)
+							if (data[index + offset[i]] > v)
 								break FIND_MAXIMUM;
 						}
 					}
@@ -2236,11 +2236,11 @@ public class NonMaximumSuppression implements Cloneable
 
 					// Sweep neighbourhood - 
 					// No check for boundaries as this should be an internal sweep.
-					for (int offset_d : offset)
+					for (int i = 0; i < offset.length; i++)
 					{
-						if (maximaFlag[index + offset_d])
+						if (maximaFlag[index + offset[i]])
 							break FIND_MAXIMUM;
-						if (data[index + offset_d] > v)
+						if (data[index + offset[i]] > v)
 							break FIND_MAXIMUM;
 					}
 
@@ -2365,11 +2365,11 @@ public class NonMaximumSuppression implements Cloneable
 
 					if (inner)
 					{
-						for (int offset_d : offset)
+						for (int i = 0; i < offset.length; i++)
 						{
-							if (maximaFlag[index + offset_d])
+							if (maximaFlag[index + offset[i]])
 								break FIND_MAXIMUM;
-							if (data[index + offset_d] > v)
+							if (data[index + offset[i]] > v)
 								break FIND_MAXIMUM;
 						}
 					}
