@@ -69,6 +69,7 @@ import gdsc.core.match.MatchResult;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
+import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -276,7 +277,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static int newResultCount;
 	private static int maxUniqueId = 0;
 	private static int nActual;
-	private static StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
+	private static StoredData depthStats, depthFitStats;
+	private static StoredDataStatistics signalFactorStats, distanceStats;
 
 	private boolean isHeadless;
 	private boolean debug;
@@ -365,7 +367,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		int includedActual = 0;
 		int notDuplicateCount = 0;
 		int newResultCount = 0;
-		StoredDataStatistics depthStats, depthFitStats, signalFactorStats, distanceStats;
+		StoredData depthStats, depthFitStats;
+		StoredDataStatistics signalFactorStats, distanceStats;
 		private final boolean checkBorder;
 		final float border;
 		final float xlimit;
@@ -384,8 +387,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.uniqueId = uniqueId;
 			this.coordinateStore = coordinateStore;
 
-			depthStats = new StoredDataStatistics();
-			depthFitStats = new StoredDataStatistics();
+			depthStats = new StoredData();
+			depthFitStats = new StoredData();
 			signalFactorStats = new StoredDataStatistics();
 			distanceStats = new StoredDataStatistics();
 
