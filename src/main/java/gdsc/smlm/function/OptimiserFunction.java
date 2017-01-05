@@ -1,23 +1,36 @@
 package gdsc.smlm.function;
 
-import java.util.ArrayList;
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2017 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import java.util.Arrays;
-import java.util.List;
+
+import gnu.trove.list.array.TDoubleArrayList;
 
 /**
  * Allow optimisation using Apache Commons Math 3 Optimiser
  */
 public abstract class OptimiserFunction
 {
-	protected List<Double> x = null;
-	protected List<Double> y = null;
+	protected TDoubleArrayList x = null;
+	protected TDoubleArrayList y = null;
 
 	public void addPoint(double x, double y)
 	{
 		if (this.x == null)
 		{
-			this.x = new ArrayList<Double>();
-			this.y = new ArrayList<Double>();
+			this.x = new TDoubleArrayList();
+			this.y = new TDoubleArrayList();
 		}
 		this.x.add(x);
 		this.y.add(y);
@@ -25,8 +38,8 @@ public abstract class OptimiserFunction
 
 	public void addData(float[] x, float[] y)
 	{
-		this.x = new ArrayList<Double>();
-		this.y = new ArrayList<Double>();
+		this.x = new TDoubleArrayList();
+		this.y = new TDoubleArrayList();
 		for (int i = 0; i < x.length; i++)
 		{
 			this.x.add((double) x[i]);
@@ -36,8 +49,8 @@ public abstract class OptimiserFunction
 
 	public void addData(double[] x, double[] y)
 	{
-		this.x = new ArrayList<Double>();
-		this.y = new ArrayList<Double>();
+		this.x = new TDoubleArrayList();
+		this.y = new TDoubleArrayList();
 		for (int i = 0; i < x.length; i++)
 		{
 			this.x.add(x[i]);
@@ -45,24 +58,14 @@ public abstract class OptimiserFunction
 		}
 	}
 
-	private double[] getValues(List<Double> list)
-	{
-		double[] values = new double[list.size()];
-		for (int i = 0; i < list.size(); i++)
-		{
-			values[i] = list.get(i).doubleValue();
-		}
-		return values;
-	}
-
 	public double[] getX()
 	{
-		return getValues(x);
+		return x.toArray();
 	}
 
 	public double[] getY()
 	{
-		return getValues(y);
+		return y.toArray();
 	}
 
 	public double[] getWeights()

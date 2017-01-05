@@ -25,6 +25,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -86,7 +87,7 @@ public class FIRE implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		// Require some fit results and selected regions
 		int size = MemoryPeakResults.countMemorySize();
 		if (size == 0)
@@ -122,8 +123,8 @@ public class FIRE implements PlugIn
 		initialise(results);
 		double fire = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex], IMAGE_SIZE_VALUES[imageSizeIndex]);
 
-		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", results.getName(),
-				Utils.rounded(fire, 4), units, Utils.rounded(imageScale, 3)));
+		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", results.getName(), Utils.rounded(fire, 4),
+				units, Utils.rounded(imageScale, 3)));
 
 		String name = results.getName();
 		if (showFRCCurve)
@@ -407,8 +408,8 @@ public class FIRE implements PlugIn
 			maxT = list.size();
 		int step = maxT / nSteps;
 
-		ArrayList<Double> x = new ArrayList<Double>();
-		ArrayList<Double> y = new ArrayList<Double>();
+		TDoubleArrayList x = new TDoubleArrayList();
+		TDoubleArrayList y = new TDoubleArrayList();
 
 		double yMin = fireNumber;
 		double yMax = fireNumber;
@@ -445,13 +446,8 @@ public class FIRE implements PlugIn
 		x.add((double) maxT);
 		y.add(fireNumber);
 
-		double[] xValues = new double[x.size()];
-		double[] yValues = new double[xValues.length];
-		for (int ii = 0; ii < xValues.length; ii++)
-		{
-			xValues[ii] = x.get(ii);
-			yValues[ii] = y.get(ii);
-		}
+		double[] xValues = x.toArray();
+		double[] yValues = y.toArray();
 
 		String title = name + " FRC Time Evolution";
 		Plot2 plot = new Plot2(title, "Frames", "Resolution", (float[]) null, (float[]) null);

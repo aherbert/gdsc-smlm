@@ -1,6 +1,6 @@
 package gdsc.smlm.results;
 
-import java.util.LinkedList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -60,8 +60,8 @@ public class Trace extends Cluster
 
 			// Ensure in the correct time-order
 			sort();
-			LinkedList<Integer> on = new LinkedList<Integer>();
-			LinkedList<Integer> off = new LinkedList<Integer>();
+			TIntLinkedList on = new TIntLinkedList();
+			TIntLinkedList off = new TIntLinkedList();
 
 			nBlinks = 1;
 			int t1 = results.get(0).peak;
@@ -81,22 +81,9 @@ public class Trace extends Cluster
 			}
 			on.add(t1 - onStart + 1);
 			
-			onTimes = toArray(on);
-			offTimes = toArray(off);
+			onTimes = on.toArray();
+			offTimes = off.toArray();
 		}
-	}
-
-	private int[] toArray(LinkedList<Integer> data)
-	{
-		if (data.isEmpty())
-			return null;
-		int[] array = new int[data.size()];
-		int i=0;
-		for (int value : data)
-		{
-			array[i++] = value;
-		}
-		return array;
 	}
 
 	/**

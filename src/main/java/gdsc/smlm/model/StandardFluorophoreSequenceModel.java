@@ -13,9 +13,9 @@ package gdsc.smlm.model;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import java.util.ArrayList;
-
 import org.apache.commons.math3.random.RandomDataGenerator;
+
+import gnu.trove.list.array.TDoubleArrayList;
 
 /**
  * Contains a continuous-time model for a blinking fluorophore. Assumes a constant activation laser and a simple
@@ -152,7 +152,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 
 		// Note: 1+nBlinks is the number of on-states
 
-		ArrayList<Double> sequence = new ArrayList<Double>();
+		TDoubleArrayList sequence = new TDoubleArrayList();
 
 		// Perform a set number of long blinks
 		int nLongBlinks = getBlinks(useGeometricBlinkingDistribution, rand, nBlinks2);
@@ -183,11 +183,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 		}
 
 		// Convert the sequence to the burst sequence array
-		double[] burstSequence = new double[sequence.size()];
-		int c = 0;
-		for (double time : sequence)
-			burstSequence[c++] = time;
-		setBurstSequence(burstSequence);
+		setBurstSequence(sequence.toArray());
 	}
 
 	/**

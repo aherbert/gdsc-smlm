@@ -1,6 +1,6 @@
 package gdsc.smlm.filters;
 
-import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.StoredData;
 
 import java.awt.Rectangle;
 
@@ -351,7 +351,7 @@ public class CircularMeanFilter implements Cloneable
 	 */
 	public static double[] getRadii(double max, double increment)
 	{
-		StoredDataStatistics radii = new StoredDataStatistics();
+		StoredData radii = new StoredData();
 		double lastN = 0;
 		if (increment < 0)
 			increment = 0.1;

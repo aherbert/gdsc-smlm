@@ -1,50 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC Plugins for ImageJ
- * 
- * Copyright (C) 2011 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.fitting.Gaussian2DFitter;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.ij.IJImageSource;
-import gdsc.smlm.ij.utils.ImageROIPainter;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.Trace;
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.Statistics;
-import ij.IJ;
-import ij.ImageListener;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Menus;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GUI;
-import ij.gui.GenericDialog;
-import ij.gui.Plot2;
-import ij.gui.PointRoi;
-import ij.gui.Roi;
-import ij.plugin.ZProjector;
-import ij.plugin.filter.GaussianBlur;
-import ij.plugin.frame.PlugInFrame;
-import ij.process.ImageProcessor;
-import ij.text.TextWindow;
-
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Choice;
@@ -93,11 +48,58 @@ import javax.swing.event.ListSelectionListener;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Statistics;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC Plugins for ImageJ
+ * 
+ * Copyright (C) 2011 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.fitting.FitResult;
+import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.fitting.Gaussian2DFitter;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.IJImageSource;
+import gdsc.smlm.ij.utils.ImageROIPainter;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.Trace;
+import gnu.trove.list.array.TIntArrayList;
+import ij.IJ;
+import ij.ImageListener;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Menus;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GUI;
+import ij.gui.GenericDialog;
+import ij.gui.Plot2;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.plugin.ZProjector;
+import ij.plugin.filter.GaussianBlur;
+import ij.plugin.frame.PlugInFrame;
+import ij.process.ImageProcessor;
+import ij.text.TextWindow;
+
 /**
  * Allows analysis of the signal and on/off times for fixed fluorophore spots in an image stack.
  */
-public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemListener, Runnable, ImageListener,
-		ListSelectionListener, KeyListener
+public class SpotAnalysis extends PlugInFrame
+		implements ActionListener, ItemListener, Runnable, ImageListener, ListSelectionListener, KeyListener
 {
 	private static final long serialVersionUID = 1L;
 
@@ -203,7 +205,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			GaussianBlur gb = new GaussianBlur();
 			for (int i = 0; i < slices && slice <= inputStack.getSize(); i++, slice++)
 			{
-				IJ.showStatus(String.format("Calculating blur ... %.1f%%", (100.0 * ++blurCount) / inputStack.getSize()));
+				IJ.showStatus(
+						String.format("Calculating blur ... %.1f%%", (100.0 * ++blurCount) / inputStack.getSize()));
 				ImageProcessor ip = inputStack.getProcessor(slice).duplicate();
 				ip.setRoi(bounds);
 				ip.snapshot();
@@ -264,7 +267,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 	private Rectangle areaBounds;
 
 	private TreeSet<Spot> onFrames = new TreeSet<Spot>();
-	private ArrayList<Integer> candidateFrames = new ArrayList<Integer>();
+	private TIntArrayList candidateFrames = new TIntArrayList();
 
 	private HashMap<Integer, Trace> traces = new HashMap<Integer, Trace>();
 	private int id = 0;
@@ -284,7 +287,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (WindowManager.getImageCount() == 0)
 		{
 			IJ.showMessage(TITLE, "No images opened.");
@@ -354,9 +357,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 				ImagePlus imp = WindowManager.getImage(id);
 
 				// Image must be greyscale stacks
-				if (imp != null &&
-						(imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16 || imp.getType() == ImagePlus.GRAY32) &&
-						imp.getStackSize() > 2)
+				if (imp != null && (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16 ||
+						imp.getType() == ImagePlus.GRAY32) && imp.getStackSize() > 2)
 				{
 					// Exclude previous results
 					if (previousResult(imp.getTitle()))
@@ -559,8 +561,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 		ImagePlus imp = WindowManager.getImage(inputChoice.getSelectedItem());
 
 		// This should not be a problem but leave it in for now
-		if (imp == null ||
-				(imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16 && imp.getType() != ImagePlus.GRAY32))
+		if (imp == null || (imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16 &&
+				imp.getType() != ImagePlus.GRAY32))
 		{
 			IJ.showMessage(TITLE, "Images must be grayscale.");
 			return;
@@ -644,7 +646,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.enableYesNoCancel();
 			gd.hideCancelButton();
-			gd.addMessage("The list contains unsaved selected frames. Creating a new profile will erase them.\n \nDo you want to continue?");
+			gd.addMessage(
+					"The list contains unsaved selected frames. Creating a new profile will erase them.\n \nDo you want to continue?");
 			gd.showDialog();
 			if (!gd.wasOKed())
 				return false;
@@ -756,7 +759,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 		currentSlice = -1;
 		onFrames.clear();
 		listModel.clear();
-		candidateFrames.clear();
+		candidateFrames.resetQuick();
 		updated = false;
 	}
 
@@ -916,10 +919,11 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			double[] onx = new double[candidateFrames.size()];
 			double[] ony = new double[onx.length];
 			int c = 0;
-			for (int i : candidateFrames)
+			for (int i = 0; i < candidateFrames.size(); i++)
 			{
-				onx[c] = i;
-				ony[c] = yValues[i - 1];
+				int frame = candidateFrames.getQuick(i);
+				onx[c] = frame;
+				ony[c] = yValues[frame - 1];
 				c++;
 			}
 			plot.addPoints(onx, ony, Plot2.BOX);
@@ -1026,11 +1030,11 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
 		Statistics tOn = new Statistics(trace.getOnTimes());
 		Statistics tOff = new Statistics(trace.getOffTimes());
-		resultsWindow.append(String.format("%d\t%.1f\t%.1f\t%s\t%s\t%s\t%d\t%s\t%s\t%s", id, cx, cy,
-				Utils.rounded(signal, 4), Utils.rounded(tOn.getSum() * msPerFrame, 3),
-				Utils.rounded(tOff.getSum() * msPerFrame, 3), trace.getNBlinks() - 1,
-				Utils.rounded(tOn.getMean() * msPerFrame, 3), Utils.rounded(tOff.getMean() * msPerFrame, 3),
-				imp.getTitle()));
+		resultsWindow.append(
+				String.format("%d\t%.1f\t%.1f\t%s\t%s\t%s\t%d\t%s\t%s\t%s", id, cx, cy, Utils.rounded(signal, 4),
+						Utils.rounded(tOn.getSum() * msPerFrame, 3), Utils.rounded(tOff.getSum() * msPerFrame, 3),
+						trace.getNBlinks() - 1, Utils.rounded(tOn.getMean() * msPerFrame, 3),
+						Utils.rounded(tOff.getMean() * msPerFrame, 3), imp.getTitle()));
 
 		// Save the individual on/off times for use in creating a histogram
 		traces.put(id, trace);
@@ -1131,10 +1135,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 		BufferedWriter[] files = new BufferedWriter[5];
 		try
 		{
-			files[0] = openBufferedWriter(
-					resultsDirectory + "traces.txt",
-					String.format("#ms/frame = %s\n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...",
-							Utils.rounded(msPerFrame, 3)));
+			files[0] = openBufferedWriter(resultsDirectory + "traces.txt", String.format(
+					"#ms/frame = %s\n#Id\tcx\tcy\tsignal\tn-Blinks\tStart\tStop\t...", Utils.rounded(msPerFrame, 3)));
 			files[1] = openBufferedWriter(resultsDirectory + "tOn.txt", "");
 			files[2] = openBufferedWriter(resultsDirectory + "tOff.txt", "");
 			files[3] = openBufferedWriter(resultsDirectory + "blinks.txt", "");
@@ -1426,8 +1428,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 				final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
 				rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
 						Utils.rounded(spotSignal / noise, 3)));
-				ImageROIPainter.addRoi(rawImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
-						params[Gaussian2DFunction.Y_POSITION]));
+				ImageROIPainter.addRoi(rawImp, slice,
+						new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]));
 			}
 			else
 			{
@@ -1455,8 +1457,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 				final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
 				blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s", Utils.rounded(spotSignal, 4),
 						Utils.rounded(spotSignal / noise, 3)));
-				ImageROIPainter.addRoi(blurImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
-						params[Gaussian2DFunction.Y_POSITION]));
+				ImageROIPainter.addRoi(blurImp, slice,
+						new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]));
 			}
 			else
 			{

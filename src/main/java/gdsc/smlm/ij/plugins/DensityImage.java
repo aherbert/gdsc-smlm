@@ -23,6 +23,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.clustering.DensityManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -756,8 +757,8 @@ public class DensityImage implements PlugIn
 
 	private double[][] calculateLScores(DensityManager dm)
 	{
-		ArrayList<Double> x = new ArrayList<Double>();
-		ArrayList<Double> y = new ArrayList<Double>();
+		TDoubleArrayList x = new TDoubleArrayList();
+		TDoubleArrayList y = new TDoubleArrayList();
 		x.add(0.0);
 		y.add(0.0);
 
@@ -769,12 +770,9 @@ public class DensityImage implements PlugIn
 			y.add(score);
 		}
 
-		double[][] values = new double[2][x.size()];
-		for (int ii = 0; ii < x.size(); ii++)
-		{
-			values[0][ii] = x.get(ii);
-			values[1][ii] = y.get(ii);
-		}
+		double[][] values = new double[2][];
+		values[0] = x.toArray();
+		values[1] = y.toArray();
 		return values;
 	}
 }

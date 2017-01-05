@@ -52,8 +52,10 @@ import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.ClusteringEngine;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.function.SkewNormalFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -70,6 +72,7 @@ import gdsc.smlm.results.NullSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
+import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -1334,12 +1337,12 @@ public class PCPALMMolecules implements PlugIn
 
 		// Show optional histograms
 		StoredDataStatistics intraDistances = null;
-		StoredDataStatistics blinks = null;
+		StoredData blinks = null;
 		if (showHistograms)
 		{
 			int capacity = (int) (xyz.size() * blinkingRate);
 			intraDistances = new StoredDataStatistics(capacity);
-			blinks = new StoredDataStatistics(capacity);
+			blinks = new StoredData(capacity);
 		}
 
 		Statistics statsSigma = new Statistics();
@@ -1490,7 +1493,7 @@ public class PCPALMMolecules implements PlugIn
 		}
 	}
 
-	private double[][] plot(StoredDataStatistics stats, String label, boolean integerBins)
+	private double[][] plot(DoubleData stats, String label, boolean integerBins)
 	{
 		String title = TITLE + " " + label;
 		Plot2 plot;
@@ -1503,7 +1506,7 @@ public class PCPALMMolecules implements PlugIn
 		else
 		{
 			// Show a cumulative histogram so that the bin size is not relevant
-			hist = Maths.cumulativeHistogram(stats.getValues(), false);
+			hist = Maths.cumulativeHistogram(stats.values(), false);
 
 			// Create the axes
 			double[] xValues = hist[0];
@@ -2004,15 +2007,15 @@ public class PCPALMMolecules implements PlugIn
 			super(parameters);
 		}
 
-		protected List<Double> x = null;
-		protected List<Double> y = null;
+		protected TDoubleArrayList x = null;
+		protected TDoubleArrayList y = null;
 
 		public void addPoint(double x, double y)
 		{
 			if (this.x == null)
 			{
-				this.x = new ArrayList<Double>();
-				this.y = new ArrayList<Double>();
+				this.x = new TDoubleArrayList();
+				this.y = new TDoubleArrayList();
 			}
 			this.x.add(x);
 			this.y.add(y);
@@ -2020,8 +2023,8 @@ public class PCPALMMolecules implements PlugIn
 
 		public void addData(float[] x, float[] y)
 		{
-			this.x = new ArrayList<Double>();
-			this.y = new ArrayList<Double>();
+			this.x = new TDoubleArrayList();
+			this.y = new TDoubleArrayList();
 			for (int i = 0; i < x.length; i++)
 			{
 				this.x.add((double) x[i]);
@@ -2031,12 +2034,7 @@ public class PCPALMMolecules implements PlugIn
 
 		public double[] calculateTarget()
 		{
-			double[] target = new double[y.size()];
-			for (int i = 0; i < y.size(); i++)
-			{
-				target[i] = y.get(i).doubleValue();
-			}
-			return target;
+			return y.toArray();
 		}
 
 		public double[] calculateWeights()
@@ -2075,7 +2073,7 @@ public class PCPALMMolecules implements PlugIn
 				d[i][i] = delta * Math.abs(variables[i]); // Should the delta be changed for each parameter ?
 			for (int i = 0; i < jacobian.length; ++i)
 			{
-				double x = this.x.get(i);
+				double x = this.x.getQuick(i);
 				double value = evaluate(x, variables);
 				for (int j = 0; j < variables.length; j++)
 				{
@@ -2096,7 +2094,7 @@ public class PCPALMMolecules implements PlugIn
 		{
 			double[] values = new double[x.size()];
 			for (int i = 0; i < values.length; i++)
-				values[i] = evaluate(x.get(i), variables);
+				values[i] = evaluate(x.getQuick(i), variables);
 			return values;
 		}
 	}
@@ -2122,7 +2120,7 @@ public class PCPALMMolecules implements PlugIn
 			double ss = 0;
 			for (int i = x.size(); i-- > 0;)
 			{
-				double dx = y.get(i) - evaluate(x.get(i), point);
+				double dx = y.get(i) - evaluate(x.getQuick(i), point);
 				ss += dx * dx;
 			}
 			return ss;
