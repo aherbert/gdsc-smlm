@@ -15,9 +15,11 @@ import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RollingArray;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 
 /*----------------------------------------------------------------------------- 
@@ -223,9 +225,9 @@ public class DiffusionRateTest implements PlugIn
 		// Store raw coordinates
 		ArrayList<Point> points = new ArrayList<Point>(totalSteps);
 
-		StoredDataStatistics totalJumpDistances1D = new StoredDataStatistics(settings.particles);
-		StoredDataStatistics totalJumpDistances2D = new StoredDataStatistics(settings.particles);
-		StoredDataStatistics totalJumpDistances3D = new StoredDataStatistics(settings.particles);
+		StoredData totalJumpDistances1D = new StoredData(settings.particles);
+		StoredData totalJumpDistances2D = new StoredData(settings.particles);
+		StoredData totalJumpDistances3D = new StoredData(settings.particles);
 
 		for (int i = 0; i < settings.particles; i++)
 		{
@@ -515,12 +517,12 @@ public class DiffusionRateTest implements PlugIn
 	 * @param steps
 	 *            the steps
 	 */
-	private void plotJumpDistances(String title, StoredDataStatistics jumpDistances, int dimensions, int steps)
+	private void plotJumpDistances(String title, DoubleData jumpDistances, int dimensions, int steps)
 	{
 		// Cumulative histogram
 		// --------------------
 		final double factor = conversionFactor;
-		double[] values = jumpDistances.getValues();
+		double[] values = jumpDistances.values();
 		for (int i = 0; i < values.length; i++)
 			values[i] /= factor;
 		String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
@@ -587,8 +589,8 @@ public class DiffusionRateTest implements PlugIn
 		// Histogram
 		// ---------
 		title2 = title + " Jump " + dimensions + "D";
-		jumpDistances = new StoredDataStatistics(values);
-		int plotId = Utils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
+		StoredDataStatistics jumpDistances2 = new StoredDataStatistics(values);
+		int plotId = Utils.showHistogram(title2, jumpDistances2, "Distance (um^2)", 0, 0,
 				Math.max(20, values.length / 1000));
 		if (Utils.isNewWindow())
 			idList[idCount++] = plotId;
@@ -600,7 +602,7 @@ public class DiffusionRateTest implements PlugIn
 		// Scale to have the same area
 		if (Utils.xValues.length > 1)
 		{
-			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
+			final double area1 = jumpDistances2.getN() * (Utils.xValues[1] - Utils.xValues[0]);
 			final double area2 = dist.cumulativeProbability(x[x.length - 1]);
 			final double scale = area1 / area2;
 			for (int i = 0; i < y.length; i++)
@@ -1286,11 +1288,11 @@ public class DiffusionRateTest implements PlugIn
 	 * @param steps
 	 *            the steps
 	 */
-	private void plotJumpDistances(String title, StoredDataStatistics jumpDistances, int dimensions)
+	private void plotJumpDistances(String title, DoubleData jumpDistances, int dimensions)
 	{
 		// Cumulative histogram
 		// --------------------
-		double[] values = jumpDistances.getValues();
+		double[] values = jumpDistances.values();
 		String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
 		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
 		Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0], jdHistogram[1]);
@@ -1338,7 +1340,7 @@ public class DiffusionRateTest implements PlugIn
 		// Scale to have the same area
 		if (Utils.xValues.length > 1)
 		{
-			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
+			final double area1 = jumpDistances.size() * (Utils.xValues[1] - Utils.xValues[0]);
 			final double area2 = dist.cumulativeProbability(x[x.length - 1]);
 			final double scaleFactor = area1 / area2;
 			for (int i = 0; i < y.length; i++)
