@@ -25,11 +25,13 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
+import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 
 /*----------------------------------------------------------------------------- 
@@ -867,9 +869,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	}
 
 	@SuppressWarnings("unused")
-	private float getBackground(final double fraction, StoredDataStatistics all)
+	private float getBackground(final double fraction, DoubleData all)
 	{
-		double[] allValues = all.getValues();
+		double[] allValues = all.values();
 		Arrays.sort(allValues);
 		int fractionIndex = (int) (allValues.length * fraction);
 		double sum = 0;
@@ -2019,7 +2021,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			double lastD = d[0];
 			int lastI = 0;
 			int counter = 0;
-			StoredDataStatistics distance = new StoredDataStatistics();
+			StoredData distance = new StoredData();
 			indexLookup = new int[indices.length];
 			for (int i = 0; i < indices.length; i++)
 			{
