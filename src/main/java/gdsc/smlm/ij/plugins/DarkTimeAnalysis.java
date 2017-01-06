@@ -23,6 +23,7 @@ import gdsc.smlm.results.TraceManager;
 import gdsc.core.clustering.Cluster;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.utils.StoredData;
 import gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.Prefs;
@@ -63,7 +64,7 @@ public class DarkTimeAnalysis implements PlugIn
 	private static double searchDistance = 100;
 	private static double maxDarkTime = 0;
 	private static double percentile = 99;
-	private static int nBins = 100;
+	private static int nBins = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -115,7 +116,7 @@ public class DarkTimeAnalysis implements PlugIn
 		gd.addSlider("Search_distance (nm)", 5, 150, searchDistance);
 		gd.addNumericField("Max_dark_time (seconds)", maxDarkTime, 2);
 		gd.addSlider("Percentile", 0, 100, percentile);
-		gd.addSlider("Histogram_bins", 0, 100, nBins);
+		gd.addSlider("Histogram_bins", -1, 100, nBins);
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -126,7 +127,7 @@ public class DarkTimeAnalysis implements PlugIn
 		searchDistance = gd.getNextNumber();
 		maxDarkTime = gd.getNextNumber();
 		percentile = gd.getNextNumber();
-		nBins = (int) Math.abs(gd.getNextNumber());
+		nBins = (int) gd.getNextNumber();
 
 		// Check arguments
 		try
@@ -182,7 +183,7 @@ public class DarkTimeAnalysis implements PlugIn
 
 		// Build dark-time histogram
 		int[] times = new int[range];
-		StoredDataStatistics stats = new StoredDataStatistics();
+		StoredData stats = new StoredData();
 		for (Trace trace : traces)
 		{
 			if (trace.getNBlinks() > 1)
@@ -240,9 +241,9 @@ public class DarkTimeAnalysis implements PlugIn
 		tracker.status("");
 	}
 
-	private void plotDarkTimeHistogram(StoredDataStatistics stats)
+	private void plotDarkTimeHistogram(StoredData stats)
 	{
-		if (nBins > 0)
+		if (nBins >= 0)
 		{
 			// Convert the X-axis to milliseconds
 			double[] xValues = stats.getValues();
