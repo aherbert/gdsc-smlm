@@ -228,6 +228,8 @@ public class OPTICSSettings implements Cloneable
 	public boolean topLevel = false;
 
 	// Affect DBSCAN clustering
+	public int samples = 1000;
+	public double fractionNoise = 0.05;
 	public double clusteringDistance = 0;
 	public boolean core = false;
 

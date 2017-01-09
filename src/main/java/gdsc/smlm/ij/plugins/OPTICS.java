@@ -16,6 +16,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.ConvexHull;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Settings;
+import gdsc.core.utils.Sort;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -100,6 +101,7 @@ public class OPTICS implements PlugIn
 			this.notify();
 		}
 
+		@SuppressWarnings("unused")
 		synchronized void close()
 		{
 			this.work = null;
@@ -163,11 +165,14 @@ public class OPTICS implements PlugIn
 						debug(" No work, stopping");
 						break;
 					}
-					if (!running)
-					{
-						debug(" Not running, stopping");
-						break;
-					}
+
+					// Commented out. To stop the worker from doing any more work just close the inbox
+					// (so passing in null work).
+					//if (!running)
+					//{
+					//	debug(" Not running, stopping");
+					//	break;
+					//}
 
 					// Delay processing the work. Allows the work to be updated before we process it.
 					if (work.time != 0)
@@ -191,6 +196,8 @@ public class OPTICS implements PlugIn
 								debug(" Found updated work");
 							}
 						}
+						// No further delay checking
+						work.time = 0;
 					}
 
 					if (!equals(work, lastWork))
@@ -824,14 +831,134 @@ public class OPTICS implements PlugIn
 		}
 	}
 
+	private class KNNWorker extends Worker
+	{
+		double[] profile = null;
+
+		@Override
+		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		{
+			if (current.minPoints != previous.minPoints)
+			{
+				newResults();
+				return false;
+			}
+			if (current.samples != previous.samples)
+			{
+				newResults();
+				return false;
+			}
+			if (current.fractionNoise != previous.fractionNoise)
+				return false;
+			if (current.clusteringDistance != previous.clusteringDistance)
+				return false;
+
+			return true;
+		}
+
+		@Override
+		void newResults()
+		{
+			// Clear cache
+			profile = null;
+		}
+
+		@Override
+		Work createResult(Work work)
+		{
+			// The first item should be the memory peak results 
+			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
+			// The second item should be the OPTICS manager
+			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+
+			int minPts = work.inputSettings.minPoints;
+			int k = minPts - 1; // Since min points includes the actual point
+			double fractionNoise = work.inputSettings.fractionNoise;
+
+			double nmPerPixel = getNmPerPixel(results);
+
+			// Create a profile of the K-Nearest Neighbour distances
+			if (profile == null)
+			{
+				synchronized (opticsManager)
+				{
+					int samples = work.inputSettings.samples;
+					if (samples != -1)
+						samples = Math.max(100, samples);
+					float[] d = opticsManager.nearestNeighbourDistance(k, samples, true);
+					profile = new double[d.length];
+					for (int i = d.length; i-- > 0;)
+						profile[i] = d[i];
+				}
+				Arrays.sort(profile);
+				Sort.reverse(profile);
+				if (nmPerPixel != 1)
+				{
+					for (int i = 0; i < profile.length; i++)
+						profile[i] *= nmPerPixel;
+				}
+			}
+
+			String units = (nmPerPixel != 1) ? " (nm)" : " (px)";
+
+			double[] order = Utils.newArray(profile.length, 1.0, 1.0);
+			String title = TITLE + " KNN Distance";
+			Plot plot = new Plot(title, "Sample", k + "-NN Distance" + units);
+			double[] limits = new double[] { profile[profile.length - 1], profile[0] };
+
+			plot.setLimits(1, order.length, limits[0], limits[1] * 1.05);
+
+			plot.setColor(Color.black);
+			plot.addPoints(order, profile, Plot.LINE);
+
+			// Add the DBSCAN clustering distance
+			double distance = inputSettings.clusteringDistance;
+			plot.setColor(Color.red);
+			plot.drawLine(1, distance, order.length, distance);
+
+			// Find the clustering distance using a % noise in the KNN distance samples
+			distance = findClusteringDistance(profile, fractionNoise);
+			plot.setColor(Color.blue);
+			plot.drawDottedLine(1, distance, order.length, distance, 2);
+
+			Utils.display(title, plot);
+
+			if (work.inputSettings.clusteringDistance <= 0)
+			{
+				// Set this distance into the settings if there is no clustering distance
+				work.inputSettings.clusteringDistance = distance;
+			}
+
+			// We have not created anything new so return the current object
+			return work;
+		}
+
+	}
+
+	/**
+	 * Find the clustering distance using a sorted profile of the KNN distance.
+	 *
+	 * @param profile
+	 *            the profile (sorted high to low)
+	 * @param fractionNoise
+	 *            the fraction noise
+	 * @return the clustering distance
+	 */
+	public static double findClusteringDistance(double[] profile, double fractionNoise)
+	{
+		// Return the next distance after the fraction has been achieved
+		int n = Maths.clip(0, profile.length - 1, (int) Math.ceil(profile.length * fractionNoise));
+		return profile[n];
+	}
+
 	private class DBSCANWorker extends Worker
 	{
 		@Override
 		boolean equals(OPTICSSettings current, OPTICSSettings previous)
 		{
-			if (current.generatingDistance != previous.generatingDistance)
-				return false;
 			if (current.minPoints != previous.minPoints)
+				return false;
+			if (current.clusteringDistance != previous.clusteringDistance)
 				return false;
 			return true;
 		}
@@ -844,31 +971,33 @@ public class OPTICS implements PlugIn
 			// The second item should be the OPTICS manager
 			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
 
-			double generatingDistance = work.inputSettings.generatingDistance;
+			double clusteringDistance = work.inputSettings.clusteringDistance;
 			int minPts = work.inputSettings.minPoints;
-			if (generatingDistance > 0)
+			if (clusteringDistance > 0)
 			{
-				// Convert generating distance to pixels
+				// Convert clustering distance to pixels
 				double nmPerPixel = getNmPerPixel(results);
 				if (nmPerPixel != 1)
 				{
-					double newGeneratingDistance = generatingDistance / nmPerPixel;
-					Utils.log(TITLE + ": Converting generating distance %s nm to %s pixels",
-							Utils.rounded(generatingDistance), Utils.rounded(newGeneratingDistance));
-					generatingDistance = newGeneratingDistance;
+					double newGeneratingDistance = clusteringDistance / nmPerPixel;
+					Utils.log(TITLE + ": Converting clustering distance %s nm to %s pixels",
+							Utils.rounded(clusteringDistance), Utils.rounded(newGeneratingDistance));
+					clusteringDistance = newGeneratingDistance;
 				}
 			}
 			else
 			{
+				// Note: This should not happen since the clustering distance is set using the KNN distance samples
+
 				double nmPerPixel = getNmPerPixel(results);
 				if (nmPerPixel != 1)
 				{
-					Utils.log(TITLE + ": Default generating distance %s nm",
+					Utils.log(TITLE + ": Default clustering distance %s nm",
 							Utils.rounded(opticsManager.computeGeneratingDistance(minPts) * nmPerPixel));
 				}
 			}
 
-			DBSCANResult dbscanResult = opticsManager.dbscan((float) generatingDistance, minPts);
+			DBSCANResult dbscanResult = opticsManager.dbscan((float) clusteringDistance, minPts);
 			// It may be null if cancelled. However return null Work will close down the next thread
 			return new Work(work.inputSettings, results, opticsManager, dbscanResult);
 		}
@@ -985,13 +1114,9 @@ public class OPTICS implements PlugIn
 			Thread t = threads.get(i);
 			Worker w = workers.get(i);
 
-			// Wait for threads to end
 			if (cancelled)
 			{
-				w.running = false;
-				w.inbox.close();
-
-				// Stop immediately
+				// Stop immediately any running worker
 				try
 				{
 					t.interrupt();
@@ -1004,7 +1129,17 @@ public class OPTICS implements PlugIn
 			}
 			else
 			{
-				// Leave to finish
+				// Stop after the current work in the inbox
+				w.running = false;
+				
+				// Notify a workers waiting on the inbox.
+				// Q. How to check if the worker is sleeping?
+				synchronized (w.inbox)
+				{
+					w.inbox.notify();
+				}
+
+				// Leave to finish their current work
 				try
 				{
 					t.join(0);
@@ -1012,9 +1147,6 @@ public class OPTICS implements PlugIn
 				catch (InterruptedException e)
 				{
 				}
-
-				w.running = false;
-				w.inbox.close();
 			}
 		}
 	}
@@ -1069,8 +1201,18 @@ public class OPTICS implements PlugIn
 		//settings = globalSettings.getClusteringSettings();
 
 		gd.addMessage("--- " + TITLE + " ---");
-		gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
 		gd.addNumericField("Min_points", inputSettings.minPoints, 0);
+		if (isDBSCAN)
+		{
+			// Add fields to auto-compute the clustering distance from the K-nearest neighbour distance profile
+			gd.addSlider("Noise (%)", 0, 50, inputSettings.fractionNoise * 100);
+			gd.addNumericField("Samples", inputSettings.samples, 0);
+			gd.addNumericField("Clustering_distance", inputSettings.clusteringDistance, 2, 6, "nm");
+		}
+		else
+		{
+			gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
+		}
 		gd.addMessage("--- Clustering ---");
 		if (isDBSCAN)
 		{
@@ -1161,8 +1303,8 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 
-			inputSettings.generatingDistance = gd.getNextNumber();
 			inputSettings.minPoints = (int) gd.getNextNumber();
+			inputSettings.generatingDistance = gd.getNextNumber();
 			inputSettings.setClusteringMode(gd.getNextChoiceIndex());
 			inputSettings.xi = gd.getNextNumber();
 			inputSettings.topLevel = gd.getNextBoolean();
@@ -1252,8 +1394,10 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 
-			inputSettings.generatingDistance = gd.getNextNumber();
 			inputSettings.minPoints = (int) gd.getNextNumber();
+			inputSettings.fractionNoise = gd.getNextNumber() / 100;
+			inputSettings.samples = (int) gd.getNextNumber();
+			inputSettings.clusteringDistance = gd.getNextNumber();
 			inputSettings.core = gd.getNextBoolean();
 			inputSettings.imageScale = gd.getNextNumber();
 			inputSettings.setImageMode(gd.getNextChoiceIndex());
@@ -1298,6 +1442,7 @@ public class OPTICS implements PlugIn
 		// Create the working threads, connected in a chain
 		ArrayList<Worker> workers = new ArrayList<Worker>();
 		add(workers, new InputWorker());
+		add(workers, new KNNWorker());
 		add(workers, new DBSCANWorker());
 		add(workers, new DBSCANClusterWorker());
 		add(workers, new ResultsWorker());
