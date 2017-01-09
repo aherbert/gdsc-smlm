@@ -1,67 +1,5 @@
 package gdsc.smlm.ij.plugins;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.engine.DataFilterType;
-import gdsc.smlm.engine.DataFilter;
-import gdsc.smlm.engine.FitEngine;
-import gdsc.smlm.engine.FitEngineConfiguration;
-import gdsc.smlm.engine.FitParameters;
-import gdsc.smlm.engine.FitQueue;
-import gdsc.smlm.engine.ParameterisedFitJob;
-import gdsc.smlm.fitting.FitConfiguration;
-import gdsc.smlm.fitting.FitCriteria;
-import gdsc.smlm.fitting.FitFunction;
-import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.fitting.FitSolver;
-import gdsc.smlm.fitting.FitStatus;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.core.ij.IJTrackProgress;
-import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.settings.ClusteringSettings;
-import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
-import gdsc.smlm.ij.settings.GlobalSettings;
-import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.results.Cluster.CentroidMethod;
-import gdsc.smlm.results.FilePeakResults;
-import gdsc.smlm.results.ImageSource;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.Trace;
-import gdsc.smlm.results.TraceManager;
-import gdsc.core.clustering.Cluster;
-import gdsc.core.clustering.ClusterPoint;
-import gdsc.core.clustering.ClusteringAlgorithm;
-import gdsc.core.clustering.ClusteringEngine;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.utils.XmlUtils;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.PolygonRoi;
-import ij.measure.Calibration;
-import ij.plugin.LutLoader;
-import ij.plugin.PlugIn;
-import ij.plugin.WindowOrganiser;
-import ij.process.FloatProcessor;
-import ij.text.TextWindow;
-
 import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -77,6 +15,70 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.clustering.Cluster;
+import gdsc.core.clustering.ClusterPoint;
+import gdsc.core.clustering.ClusteringAlgorithm;
+import gdsc.core.clustering.ClusteringEngine;
+import gdsc.core.ij.IJTrackProgress;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
+import gdsc.smlm.engine.DataFilter;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.smlm.engine.DataFilterType;
+import gdsc.smlm.engine.FitEngine;
+import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.engine.FitParameters;
+import gdsc.smlm.engine.FitQueue;
+import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.fitting.FitConfiguration;
+import gdsc.smlm.fitting.FitCriteria;
+import gdsc.smlm.fitting.FitFunction;
+import gdsc.smlm.fitting.FitResult;
+import gdsc.smlm.fitting.FitSolver;
+import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.ij.settings.ClusteringSettings;
+import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
+import gdsc.smlm.ij.settings.ClusteringSettings.TimeUnit;
+import gdsc.smlm.ij.settings.GlobalSettings;
+import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Cluster.CentroidMethod;
+import gdsc.smlm.results.FilePeakResults;
+import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.Trace;
+import gdsc.smlm.results.TraceManager;
+import gdsc.smlm.utils.XmlUtils;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.PolygonRoi;
+import ij.measure.Calibration;
+import ij.plugin.LutLoader;
+import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
+import ij.process.FloatProcessor;
+import ij.text.TextWindow;
 
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
@@ -186,15 +188,24 @@ public class TraceMolecules implements PlugIn
 			if (settings.splitPulses)
 			{
 				engine.setPulseInterval(settings.pulseInterval);
-				if (timeInFrames(settings.timeThreshold) > settings.pulseInterval)
+				if (settings.getTimeUnit() == TimeUnit.FRAME)
 				{
-					settings.timeThreshold = settings.pulseInterval * exposureTime;
+					if (settings.getTimeThreshold() > settings.pulseInterval)
+					{
+						settings.setTimeThreshold(settings.pulseInterval);
+					}
+				}
+				else
+				{
+					if (timeInFrames(settings) > settings.pulseInterval)
+					{
+						settings.setTimeThreshold(settings.pulseInterval * exposureTime);
+					}
 				}
 			}
 
 			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
-					settings.distanceThreshold / results.getCalibration().nmPerPixel,
-					timeInFrames(settings.timeThreshold));
+					settings.distanceThreshold / results.getCalibration().nmPerPixel, timeInFrames(settings));
 
 			if (clusters == null)
 			{
@@ -229,15 +240,25 @@ public class TraceMolecules implements PlugIn
 			if (settings.splitPulses)
 			{
 				manager.setPulseInterval(settings.pulseInterval);
-				if (timeInFrames(settings.timeThreshold) > settings.pulseInterval)
+				if (settings.getTimeUnit() == TimeUnit.FRAME)
 				{
-					settings.timeThreshold = settings.pulseInterval * exposureTime;
+					if (settings.getTimeThreshold() > settings.pulseInterval)
+					{
+						settings.setTimeThreshold(settings.pulseInterval);
+					}
+				}
+				else
+				{
+					if (timeInFrames(settings) > settings.pulseInterval)
+					{
+						settings.setTimeThreshold(settings.pulseInterval * exposureTime);
+					}
 				}
 			}
 
 			manager.setTracker(new IJTrackProgress());
 			manager.traceMolecules(settings.distanceThreshold / results.getCalibration().nmPerPixel,
-					timeInFrames(settings.timeThreshold));
+					timeInFrames(settings));
 			traces = manager.getTraces();
 			totalFiltered = manager.getTotalFiltered();
 		}
@@ -268,7 +289,7 @@ public class TraceMolecules implements PlugIn
 		if (settings.saveTraces)
 			saveTraces(traces);
 
-		summarise(traces, totalFiltered, settings.distanceThreshold, settings.timeThreshold);
+		summarise(traces, totalFiltered, settings.distanceThreshold, timeInSeconds(settings));
 
 		IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(), tracedResults.size(),
 				totalFiltered));
@@ -443,7 +464,7 @@ public class TraceMolecules implements PlugIn
 	private String createSettingsComment()
 	{
 		return String.format("Molecule tracing : distance-threshold = %f : time-threshold = %f (%d frames)",
-				settings.distanceThreshold, settings.timeThreshold, timeInFrames(settings.timeThreshold));
+				settings.distanceThreshold, timeInSeconds(settings), timeInFrames(settings));
 	}
 
 	private void summarise(Trace[] traces, int filtered, double dThreshold, double tThreshold)
@@ -501,7 +522,7 @@ public class TraceMolecules implements PlugIn
 		if (settings.splitPulses)
 			sb.append(" *");
 		sb.append("\t");
-		sb.append(timeInFrames(tThreshold)).append("\t");
+		sb.append(timeInFrames2(tThreshold)).append("\t");
 		sb.append(traces.length).append("\t");
 		sb.append(filtered).append("\t");
 		sb.append(singles).append("\t");
@@ -650,7 +671,9 @@ public class TraceMolecules implements PlugIn
 
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 2);
 		gd.addNumericField("Distance_Exclusion (nm)", settings.distanceExclusion, 2);
-		gd.addNumericField("Time_Threshold (seconds)", settings.timeThreshold, 2);
+		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
+		String[] timeUnits = SettingsManager.getNames((Object[]) ClusteringSettings.TimeUnit.values());
+		gd.addChoice("Time_unit", timeUnits, timeUnits[settings.getTimeUnit().ordinal()]);
 		String[] traceModes = SettingsManager.getNames((Object[]) TraceManager.TraceMode.values());
 		gd.addChoice("Trace_mode", traceModes, traceModes[settings.getTraceMode().ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
@@ -694,7 +717,8 @@ public class TraceMolecules implements PlugIn
 		inputOption = ResultsManager.getInputSource(gd);
 		settings.distanceThreshold = gd.getNextNumber();
 		settings.distanceExclusion = gd.getNextNumber();
-		settings.timeThreshold = gd.getNextNumber();
+		settings.setTimeThreshold(gd.getNextNumber());
+		settings.setTimeUnit(gd.getNextChoiceIndex());
 		settings.setTraceMode(gd.getNextChoiceIndex());
 		settings.pulseInterval = (int) gd.getNextNumber();
 		settings.pulseWindow = (int) gd.getNextNumber();
@@ -733,7 +757,7 @@ public class TraceMolecules implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Distance threshold", settings.distanceThreshold);
-			Parameters.isAboveZero("Time threshold", settings.timeThreshold);
+			Parameters.isAboveZero("Time threshold", settings.getTimeThreshold());
 			Parameters.isPositive("Pulse interval", settings.pulseInterval);
 			Parameters.isPositive("Pulse window", settings.pulseWindow);
 			Parameters.isAboveZero("Histogram bins", settings.histogramBins);
@@ -759,7 +783,9 @@ public class TraceMolecules implements PlugIn
 		settings = globalSettings.getClusteringSettings();
 
 		gd.addNumericField("Distance_Threshold (nm)", settings.distanceThreshold, 2);
-		gd.addNumericField("Time_Threshold (seconds)", settings.timeThreshold, 2);
+		gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
+		String[] timeUnits = SettingsManager.getNames((Object[]) ClusteringSettings.TimeUnit.values());
+		gd.addChoice("Time_unit", timeUnits, timeUnits[settings.getTimeUnit().ordinal()]);
 		String[] algorithm = SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
 		gd.addChoice("Clustering_algorithm", algorithm, algorithm[settings.getClusteringAlgorithm().ordinal()]);
 		gd.addNumericField("Pulse_interval (frames)", settings.pulseInterval, 0);
@@ -800,7 +826,8 @@ public class TraceMolecules implements PlugIn
 	{
 		inputOption = ResultsManager.getInputSource(gd);
 		settings.distanceThreshold = gd.getNextNumber();
-		settings.timeThreshold = gd.getNextNumber();
+		settings.setTimeThreshold(gd.getNextNumber());
+		settings.setTimeUnit(gd.getNextChoiceIndex());
 		settings.setClusteringAlgorithm(gd.getNextChoiceIndex());
 		settings.pulseInterval = (int) gd.getNextNumber();
 		settings.splitPulses = gd.getNextBoolean();
@@ -840,7 +867,7 @@ public class TraceMolecules implements PlugIn
 			if (settings.getClusteringAlgorithm() == ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY ||
 					settings.getClusteringAlgorithm() == ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY)
 			{
-				Parameters.isAboveZero("Time threshold", settings.timeThreshold);
+				Parameters.isAboveZero("Time threshold", settings.getTimeThreshold());
 				Parameters.isPositive("Pulse interval", settings.pulseInterval);
 			}
 			Parameters.isAboveZero("Histogram bins", settings.histogramBins);
@@ -877,8 +904,7 @@ public class TraceMolecules implements PlugIn
 
 		// TODO - Convert the distance threshold to use nm instead of pixels?		
 		List<double[]> results = runTracing(manager, settings.minDistanceThreshold, settings.maxDistanceThreshold,
-				timeInFrames(settings.minTimeThreshold), timeInFrames(settings.maxTimeThreshold),
-				settings.optimiserSteps);
+				settings.minTimeThreshold, settings.maxTimeThreshold, settings.optimiserSteps);
 
 		// Compute fractional difference from the true value:
 		// Use blinking rate directly or the estimated number of molecules
@@ -913,25 +939,26 @@ public class TraceMolecules implements PlugIn
 		createPlotResults(results);
 
 		if (!found)
-		{
-			// Make fractional difference absolute so that lowest is best
-			for (double[] result : results)
-				result[2] = Math.abs(result[2]);
+			return;
 
-			// Set the optimal thresholds using the lowest value
-			double[] best = new double[] { 0, 0, Double.MAX_VALUE };
-			for (double[] result : results)
-				if (best[2] > result[2])
-					best = result;
-			settings.distanceThreshold = best[0];
-			settings.timeThreshold = best[1];
-		}
+		// Make fractional difference absolute so that lowest is best
+		for (double[] result : results)
+			result[2] = Math.abs(result[2]);
 
-		// The optimiser works using frames so convert back to seconds
-		settings.timeThreshold *= exposureTime;
+		// Set the optimal thresholds using the lowest value
+		double[] best = new double[] { 0, 0, Double.MAX_VALUE };
+		for (double[] result : results)
+			if (best[2] > result[2])
+				best = result;
+		
+		settings.distanceThreshold = best[0];
+
+		// The optimiser works using frames so convert back to the correct units
+		double convert = (settings.getTimeUnit() == TimeUnit.SECOND) ? exposureTime : 1;
+		settings.setTimeThreshold(settings.getTimeThreshold() * convert);
 
 		IJ.log(String.format("Optimal fractional difference @ D-threshold=%g, T-threshold=%f (%d frames)",
-				settings.distanceThreshold, settings.timeThreshold, timeInFrames(settings.timeThreshold)));
+				settings.distanceThreshold, timeInSeconds(settings), timeInFrames(settings)));
 		SettingsManager.saveSettings(globalSettings);
 	}
 
@@ -944,8 +971,8 @@ public class TraceMolecules implements PlugIn
 		gd.addMessage(msg);
 		gd.addNumericField("Min_Distance_Threshold (px)", settings.minDistanceThreshold, 2);
 		gd.addNumericField("Max_Distance_Threshold (px)", settings.maxDistanceThreshold, 2);
-		gd.addNumericField("Min_Time_Threshold (seconds)", settings.minTimeThreshold, 0);
-		gd.addNumericField("Max_Time_Threshold (seconds)", settings.maxTimeThreshold, 0);
+		gd.addNumericField("Min_Time_Threshold (frames)", settings.minTimeThreshold, 0);
+		gd.addNumericField("Max_Time_Threshold (frames)", settings.maxTimeThreshold, 0);
 		gd.addSlider("Steps", 1, 20, settings.optimiserSteps);
 		gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
 		String[] plotNames = SettingsManager.getNames((Object[]) ClusteringSettings.OptimiserPlot.values());
@@ -960,8 +987,8 @@ public class TraceMolecules implements PlugIn
 
 		settings.minDistanceThreshold = gd.getNextNumber();
 		settings.maxDistanceThreshold = gd.getNextNumber();
-		settings.minTimeThreshold = gd.getNextNumber();
-		settings.maxTimeThreshold = gd.getNextNumber();
+		settings.minTimeThreshold = (int) gd.getNextNumber();
+		settings.maxTimeThreshold = (int) gd.getNextNumber();
 		settings.optimiserSteps = (int) gd.getNextNumber();
 		settings.blinkingRate = gd.getNextNumber();
 		settings.setOptimiserPlot(gd.getNextChoiceIndex());
@@ -989,9 +1016,8 @@ public class TraceMolecules implements PlugIn
 			return false;
 		}
 
-		// Get time thresholds in frames before checking they match
 		if (settings.minDistanceThreshold == settings.maxDistanceThreshold &&
-				timeInFrames(settings.minTimeThreshold) == timeInFrames(settings.maxTimeThreshold))
+				settings.minTimeThreshold == settings.maxTimeThreshold)
 		{
 			IJ.error(gd.getTitle(), "Nothing to optimise");
 			return false;
@@ -1002,9 +1028,23 @@ public class TraceMolecules implements PlugIn
 		return true;
 	}
 
-	private int timeInFrames(double timeInSeconds)
+	private int timeInFrames2(double timeInSeconds)
 	{
 		return (int) Math.round(timeInSeconds / exposureTime);
+	}
+
+	private int timeInFrames(ClusteringSettings settings)
+	{
+		if (settings.getTimeUnit() == TimeUnit.FRAME)
+			return (int) settings.getTimeThreshold();
+		return (int) Math.round(settings.getTimeThreshold() / exposureTime);
+	}
+
+	private double timeInSeconds(ClusteringSettings settings)
+	{
+		if (settings.getTimeUnit() == TimeUnit.SECOND)
+			return settings.getTimeThreshold();
+		return settings.getTimeThreshold() * exposureTime;
 	}
 
 	/**
@@ -1197,7 +1237,7 @@ public class TraceMolecules implements PlugIn
 		// and set this as the optimal parameters
 		// --------
 		double minD = Double.MAX_VALUE;
-		final double maxTimeThresholdInFrames = timeInFrames(settings.maxTimeThreshold);
+		final double maxTimeThresholdInFrames = settings.maxTimeThreshold;
 		for (double[] point : zeroCrossingPoints)
 		{
 			double dx = point[0] / maxTimeThresholdInFrames;
@@ -1207,7 +1247,7 @@ public class TraceMolecules implements PlugIn
 			{
 				minD = d;
 				settings.distanceThreshold = point[1];
-				settings.timeThreshold = point[0];
+				settings.setTimeThreshold(point[0]);
 			}
 		}
 
@@ -1440,7 +1480,7 @@ public class TraceMolecules implements PlugIn
 		FloatProcessor fp = new FloatProcessor(w, h);
 
 		// Create lookup table that map the tested threshold values to a position in the image
-		int[] xLookup = createLookup(tThresholds, timeInFrames(settings.minTimeThreshold), w);
+		int[] xLookup = createLookup(tThresholds, settings.minTimeThreshold, w);
 		int[] yLookup = createLookup(dThresholds, settings.minDistanceThreshold, h);
 		origX = (settings.minTimeThreshold != 0) ? xLookup[1] : 0;
 		origY = (settings.minDistanceThreshold != 0) ? yLookup[1] : 0;
@@ -1505,7 +1545,7 @@ public class TraceMolecules implements PlugIn
 		FloatProcessor fp = new FloatProcessor(w, h);
 
 		// Create lookup table that map the tested threshold values to a position in the image
-		int[] xLookup = createLookup(tThresholds, timeInFrames(settings.minTimeThreshold), w);
+		int[] xLookup = createLookup(tThresholds, settings.minTimeThreshold, w);
 		int[] yLookup = createLookup(dThresholds, settings.minDistanceThreshold, h);
 		origX = (settings.minTimeThreshold != 0) ? xLookup[1] : 0;
 		origY = (settings.minDistanceThreshold != 0) ? yLookup[1] : 0;

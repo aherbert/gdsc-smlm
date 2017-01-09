@@ -44,9 +44,31 @@ public class ClusteringSettings
 		abstract public String getName();
 	}
 
+	public enum TimeUnit
+	{
+		//@formatter:off
+		SECOND{ public String getName() { return "Second"; }}, 
+		FRAME{ public String getName() { return "Frame"; }};
+		//@formatter:on
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+	}
+
 	public double distanceThreshold = 50;
 	public double distanceExclusion = 0;
-	public double timeThreshold = 5;
+	private double timeThreshold = 1;
+	private TimeUnit timeUnit = TimeUnit.SECOND;
 	private TraceManager.TraceMode traceMode = TraceMode.LATEST_FORERUNNER;
 	private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE;
 	public int pulseInterval = 0;
@@ -56,8 +78,10 @@ public class ClusteringSettings
 	public boolean optimise = false;
 	public double minDistanceThreshold = 0;
 	public double maxDistanceThreshold = 500;
-	public double minTimeThreshold = 0;
-	public double maxTimeThreshold = 20;
+	/** The min time threshold for optimisation (time is in frames). */
+	public int minTimeThreshold = 0;
+	/** The max time threshold for optimisation (time is in frames). */
+	public int maxTimeThreshold = 20;
 	public int optimiserSteps = 10;
 	private OptimiserPlot optimiserPlot = OptimiserPlot.BILINEAR;
 	public boolean saveTraces = false;
@@ -120,6 +144,26 @@ public class ClusteringSettings
 			this.traceMode = TraceMode.values()[traceMode];
 	}
 
+	public TimeUnit getTimeUnit()
+	{
+		if (timeUnit == null)
+			timeUnit = TimeUnit.SECOND;
+		return timeUnit;
+	}
+
+	public void setTimeUnit(TimeUnit timeUnit)
+	{
+		this.timeUnit = timeUnit;
+	}
+
+	public void setTimeUnit(int timeUnit)
+	{
+		if (timeUnit < 0 || timeUnit >= TimeUnit.values().length)
+			this.timeUnit = TimeUnit.SECOND;
+		else
+			this.timeUnit = TimeUnit.values()[timeUnit];
+	}
+
 	public ClusteringAlgorithm getClusteringAlgorithm()
 	{
 		if (clusteringAlgorithm == null)
@@ -138,5 +182,30 @@ public class ClusteringSettings
 			this.clusteringAlgorithm = ClusteringAlgorithm.PAIRWISE;
 		else
 			this.clusteringAlgorithm = ClusteringAlgorithm.values()[clusteringAlgorithm];
+	}
+
+	/**
+	 * Gets the time threshold.
+	 * <p>
+	 * The units are specified in {@link #getTimeUnit()}
+	 *
+	 * @return the time threshold
+	 */
+	public double getTimeThreshold()
+	{
+		return timeThreshold;
+	}
+
+	/**
+	 * Sets the time threshold.
+	 * <p>
+	 * The units are specified in {@link #getTimeUnit()}
+	 *
+	 * @param timeThreshold
+	 *            the new time threshold
+	 */
+	public void setTimeThreshold(double timeThreshold)
+	{
+		this.timeThreshold = timeThreshold;
 	}
 }
