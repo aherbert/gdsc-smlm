@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.filters.NonMaximumSuppression;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
