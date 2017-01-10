@@ -1,5 +1,19 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Rectangle;
+import java.util.Arrays;
+
+import gdsc.core.filters.FilteredNonMaximumSuppression;
+import gdsc.core.ij.IJLogger;
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.Sort;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,7 +28,6 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.filters.AverageFilter;
-import gdsc.smlm.filters.NonMaximumSuppression;
 import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.fitting.FitCriteria;
 import gdsc.smlm.fitting.FitFunction;
@@ -27,10 +40,6 @@ import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.core.ij.IJLogger;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.ImageExtractor;
-import gdsc.core.utils.Sort;
 import gdsc.smlm.results.PeakResults;
 import ij.IJ;
 import ij.ImagePlus;
@@ -44,14 +53,6 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
-
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Rectangle;
-import java.util.Arrays;
 
 /**
  * Fits the selected rectangular ROI using a 2D Gaussian.
@@ -703,7 +704,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	public int[] getMaxima(float[] data, int width, int height)
 	{
 		// Find maxima
-		NonMaximumSuppression nms = new NonMaximumSuppression();
+		FilteredNonMaximumSuppression nms = new FilteredNonMaximumSuppression();
 		nms.setBackground(getBackground());
 		nms.setFractionAboveBackground(getFractionAboveBackground());
 		nms.setMinimumHeight(getPeakHeight());
