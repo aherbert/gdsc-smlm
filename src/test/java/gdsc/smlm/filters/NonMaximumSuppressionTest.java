@@ -332,7 +332,7 @@ public class NonMaximumSuppressionTest
 		nms2.setFractionAboveBackground(0f);
 		nms2.setMinimumHeight(0);
 		nms2.setMinimumWidth(0);
-		nms.setDataBuffer(false);
+		nms2.setDataBuffer(false);
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData();
 		ArrayList<Long> blockTimes = new ArrayList<Long>();
@@ -373,7 +373,8 @@ public class NonMaximumSuppressionTest
 			}
 		System.out.printf("float blockFind3x3 %d => blockFind3x3 (buffer) %d = %.2fx\n", total, blockTotal,
 				(1.0 * total) / blockTotal);
-		Assert.assertTrue(String.format("Not faster: %d > %d", blockTotal, total), blockTotal < total);
+		// Add margin for error
+		Assert.assertTrue(String.format("Not faster: %d > %d", blockTotal, total), blockTotal < total * 1.05);
 	}
 
 	@Test
@@ -852,7 +853,7 @@ public class NonMaximumSuppressionTest
 		nms2.setFractionAboveBackground(0f);
 		nms2.setMinimumHeight(0);
 		nms2.setMinimumWidth(0);
-		nms.setDataBuffer(false);
+		nms2.setDataBuffer(false);
 
 		ArrayList<int[]> dataSet = intCreateSpeedData();
 		ArrayList<Long> blockTimes = new ArrayList<Long>();
@@ -893,7 +894,8 @@ public class NonMaximumSuppressionTest
 			}
 		System.out.printf("int blockFind3x3 %d => blockFind3x3 (buffer) %d = %.2fx\n", total, blockTotal,
 				(1.0 * total) / blockTotal);
-		Assert.assertTrue(String.format("Not faster: %d > %d", blockTotal, total), blockTotal < total);
+		// Add margin for error
+		Assert.assertTrue(String.format("Not faster: %d > %d", blockTotal, total), blockTotal < total * 1.05);
 	}
 
 	@Test
