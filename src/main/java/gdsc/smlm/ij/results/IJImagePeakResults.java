@@ -79,7 +79,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	protected final int imageHeight;
 	protected final float scale;
 	protected int size = 0;
-	protected float[] data;
+	protected double[] data;
 	protected final float xlimit;
 	protected final float ylimit;
 	protected ImagePlus imp = null;
@@ -161,7 +161,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		size = 0;
 		nextRepaintSize = 20; // Let some results appear before drawing
 		imageLock = false;
-		data = new float[w * h];
+		data = new double[w * h];
 		imp = WindowManager.getImage(title);
 		currentFrame = 1;
 
@@ -288,8 +288,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// 16-bit image
 
 			// Get the current maximum
-			float max = 0;
-			for (int i = 0; i < data.length; i++)
+			double max = data[0];
+			for (int i = 1; i < data.length; i++)
 			{
 				if (max < data[i])
 					max = data[i];
@@ -356,13 +356,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		{
 			// 32-bit image. Just copy the data but find the maximum
 			float[] pixels = (float[]) this.pixels;
-			float max = 0;
-			float min = 0;
+			double max = data[0];
+			double min = 0;
 			for (int i = 0; i < data.length; i++)
 			{
 				if (max < data[i])
 					max = data[i];
-				pixels[i] = data[i];
+				pixels[i] = (float) data[i];
 			}
 
 			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
@@ -434,7 +434,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		}
 	}
 
-	private static float max(final float a, final float b)
+	private static double max(final double a, final double b)
 	{
 		// Ignore possible NaNs or infinity
 
@@ -730,7 +730,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		float[] allValues = new float[allIndices.length];
 
 		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
-		
+
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
 
@@ -804,8 +804,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		// Buffer output in batches
 		int[] allIndices = new int[100];
 		float[] allValues = new float[allIndices.length];
-		
-		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);		
+
+		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
 
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
@@ -931,7 +931,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		float[] allValues = new float[allIndices.length];
 
 		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
-		
+
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
 
