@@ -3,6 +3,7 @@ package gdsc.smlm.results;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -259,6 +260,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	}
 
 	/**
+	 * Gets the bounds.
+	 *
 	 * @param calculate
 	 *            Set to true to calculate the bounds if they are null or zero width/height
 	 * @return the bounds of the result coordinates
@@ -268,33 +271,52 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		if ((bounds == null || bounds.width == 0 || bounds.height == 0) && calculate)
 		{
 			bounds = new Rectangle();
-			float minX = Float.POSITIVE_INFINITY, minY = Float.POSITIVE_INFINITY;
-			float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY;
-			for (PeakResult result : results)
-			{
-				if (minX > result.params[Gaussian2DFunction.X_POSITION])
-					minX = result.params[Gaussian2DFunction.X_POSITION];
-				if (maxX < result.params[Gaussian2DFunction.X_POSITION])
-					maxX = result.params[Gaussian2DFunction.X_POSITION];
-				if (minY > result.params[Gaussian2DFunction.Y_POSITION])
-					minY = result.params[Gaussian2DFunction.Y_POSITION];
-				if (maxY < result.params[Gaussian2DFunction.Y_POSITION])
-					maxY = result.params[Gaussian2DFunction.Y_POSITION];
-			}
+			Rectangle2D.Float b = getDataBounds();
+
 			// Round to integer
-			bounds.x = (int) Math.floor(minX);
-			bounds.y = (int) Math.floor(minY);
+			bounds.x = (int) Math.floor(b.x);
+			bounds.y = (int) Math.floor(b.y);
+
+			int maxX = (int) Math.ceil(b.x + b.width);
+			int maxY = (int) Math.ceil(b.y + b.height);
 
 			// For compatibility with drawing images add one to the limits if they are integers
-			if (maxX == (int) maxX)
-				maxX += 1;
-			if (maxY == (int) maxY)
-				maxY += 1;
+			// Q. Is this still necessary since drawing images has been re-written to handle edge cases?
+			//if (maxX == b.x + b.width)
+			//	maxX += 1;
+			//if (maxY == b.y + b.height)
+			//	maxY += 1;
 
-			bounds.width = (int) Math.ceil(maxX) - bounds.x;
-			bounds.height = (int) Math.ceil(maxY) - bounds.y;
+			bounds.width = maxX - bounds.x;
+			bounds.height = maxY - bounds.y;
 		}
 		return bounds;
+	}
+
+	/**
+	 * Gets the data bounds.
+	 *
+	 * @return the bounds of the result coordinates
+	 */
+	public Rectangle2D.Float getDataBounds()
+	{
+		if (isEmpty())
+			return new Rectangle2D.Float();
+
+		float minX = Float.POSITIVE_INFINITY, minY = Float.POSITIVE_INFINITY;
+		float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY;
+		for (PeakResult result : results)
+		{
+			if (minX > result.params[Gaussian2DFunction.X_POSITION])
+				minX = result.params[Gaussian2DFunction.X_POSITION];
+			if (maxX < result.params[Gaussian2DFunction.X_POSITION])
+				maxX = result.params[Gaussian2DFunction.X_POSITION];
+			if (minY > result.params[Gaussian2DFunction.Y_POSITION])
+				minY = result.params[Gaussian2DFunction.Y_POSITION];
+			if (maxY < result.params[Gaussian2DFunction.Y_POSITION])
+				maxY = result.params[Gaussian2DFunction.Y_POSITION];
+		}
+		return new Rectangle2D.Float(minX, minX, maxX - minX, maxY - minY);
 	}
 
 	/**
