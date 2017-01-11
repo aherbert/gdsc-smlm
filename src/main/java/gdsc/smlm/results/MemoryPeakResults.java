@@ -316,7 +316,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 			if (maxY < result.params[Gaussian2DFunction.Y_POSITION])
 				maxY = result.params[Gaussian2DFunction.Y_POSITION];
 		}
-		return new Rectangle2D.Float(minX, minX, maxX - minX, maxY - minY);
+		return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
 	}
 
 	/**
