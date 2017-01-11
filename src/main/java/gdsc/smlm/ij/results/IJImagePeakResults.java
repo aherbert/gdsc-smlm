@@ -125,8 +125,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		imageHeight = ceil(bounds.height * scale);
 
 		// Set the limits used to check if a coordinate has 4 neighbour cells
-		xlimit = imageWidth;
-		ylimit = imageHeight;
+		xlimit = imageWidth - 1;
+		ylimit = imageHeight - 1;
 	}
 
 	private int ceil(float f)
