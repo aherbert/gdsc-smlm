@@ -30,6 +30,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
@@ -37,7 +38,9 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,12 +56,40 @@ public class FIRE implements PlugIn
 	private static String inputOption = "";
 
 	private static boolean randomSplit = true;
-	private static String[] SCALE_ITEMS = new String[] { "Auto", "1", "2", "4", "8", "16", "32", "64", "128" };
+	private static String[] SCALE_ITEMS;
 	private static int[] SCALE_VALUES = new int[] { 0, 1, 2, 4, 8, 16, 32, 64, 128 };
-	private static String[] IMAGE_SIZE_ITEMS = new String[] { "2048", "4096", "8192", "16384" };
-	private static int[] IMAGE_SIZE_VALUES = new int[] { 2047, 4095, 8191, 16383 };
+	private static String[] IMAGE_SIZE_ITEMS;
+	private static int[] IMAGE_SIZE_VALUES;
 	private static int imageScaleIndex = 0;
-	private static int imageSizeIndex = 0;
+	private static int imageSizeIndex;
+
+	static
+	{
+		SCALE_ITEMS = new String[SCALE_VALUES.length];
+		SCALE_ITEMS[0] = "Auto";
+		for (int i = 1; i < SCALE_VALUES.length; i++)
+			SCALE_ITEMS[i] = Integer.toString(SCALE_VALUES[i]);
+
+		// Create size for Fourier transforms. Must be power of 2.
+		IMAGE_SIZE_VALUES = new int[32];
+		IMAGE_SIZE_ITEMS = new String[IMAGE_SIZE_VALUES.length];
+		int size = 512; // Start at a reasonable size. Too small does not work.
+		int count = 0;
+		while (size <= 16384)
+		{
+			if (size == 2048)
+				imageSizeIndex = count;
+
+			// Image sizes are 1 smaller so that rounding error when scaling does not create an image too large for the power of 2
+			IMAGE_SIZE_VALUES[count] = size - 1;
+			IMAGE_SIZE_ITEMS[count] = Integer.toString(size);
+			size *= 2;
+			count++;
+		}
+		IMAGE_SIZE_VALUES = Arrays.copyOf(IMAGE_SIZE_VALUES, count);
+		IMAGE_SIZE_ITEMS = Arrays.copyOf(IMAGE_SIZE_ITEMS, count);
+	}
+
 	private static double perimeterSamplingFactor = 1;
 	private static boolean useHalfCircle = true;
 	private static int thresholdMethodIndex = 0;
@@ -73,7 +104,7 @@ public class FIRE implements PlugIn
 
 	MemoryPeakResults results;
 	ImageProcessor ip1, ip2;
-	float imageScale;
+	double imageScale;
 	double[][] frcCurve;
 	double[][] smoothedFrcCurve;
 	String units;
@@ -279,7 +310,7 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	public ImageProcessor[] createImages(float fourierImageScale, int imageSize)
+	public ImageProcessor[] createImages(double fourierImageScale, int imageSize)
 	{
 		ip1 = ip2 = null;
 		if (results == null || results.size() == 0)
@@ -289,23 +320,31 @@ public class FIRE implements PlugIn
 				: ResultsImage.LOCALISATIONS;
 
 		// Draw images using the existing IJ routines.
-		// TODO - This could be speeded up using a simple 2D-histogram
-		Rectangle bounds = results.getBounds(true);
+
+		// Use the float data bounds. This prevents problems if the data is far from the origin.
+		Rectangle2D.Float dataBounds = results.getDataBounds();
+		Rectangle bounds = new Rectangle(0, 0, (int) Math.ceil(dataBounds.width), (int) Math.ceil(dataBounds.height));
+
 		boolean weighted = true;
 		boolean equalised = false;
 		if (fourierImageScale == 0)
-			this.imageScale = imageSize / (float) FastMath.max(bounds.x + bounds.width, bounds.y + bounds.height);
+		{
+			double size = FastMath.max(bounds.width, bounds.height);
+			if (size <= 0)
+				size = 1;
+			this.imageScale = imageSize / size;
+		}
 		else
 			// TODO - The coordinates should be adjusted if the max-min can fit inside a smaller power of 2
 			this.imageScale = fourierImageScale;
 
 		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(imageType, weighted, equalised,
-				"IP1", bounds, results.getNmPerPixel(), results.getGain(), imageScale, 0, ResultsMode.ADD);
+				"IP1", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
 		image1.setDisplayImage(false);
 		image1.begin();
 
 		IJImagePeakResults image2 = ImagePeakResultsFactory.createPeakResultsImage(imageType, weighted, equalised,
-				"IP2", bounds, results.getNmPerPixel(), results.getGain(), imageScale, 0, ResultsMode.ADD);
+				"IP2", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
 		image2.setDisplayImage(false);
 		image2.begin();
 
@@ -320,12 +359,17 @@ public class FIRE implements PlugIn
 
 		// Split alternating
 		int i = 0;
+		float minx = dataBounds.x;
+		float miny = dataBounds.y;
 		for (PeakResult p : list)
 		{
+			float x = p.getXPosition() - minx;
+			float y = p.getYPosition() - miny;
+			float v = p.getSignal();
 			if (i++ % 2 == 0)
-				image1.add(p.peak, p.origX, p.origY, p.origValue, p.error, p.noise, p.params, p.paramsStdDev);
+				image1.add(x, y, v);
 			else
-				image2.add(p.peak, p.origX, p.origY, p.origValue, p.error, p.noise, p.params, p.paramsStdDev);
+				image2.add(x, y, v);
 		}
 
 		image1.end();
@@ -449,10 +493,19 @@ public class FIRE implements PlugIn
 		double[] xValues = x.toArray();
 		double[] yValues = y.toArray();
 
+		String units = "px";
+		if (results.getCalibration() != null)
+		{
+			nmPerPixel = results.getNmPerPixel();
+			units = "nm";
+		}
+
 		String title = name + " FRC Time Evolution";
-		Plot2 plot = new Plot2(title, "Frames", "Resolution", (float[]) null, (float[]) null);
-		plot.setLimits(xValues[0], xValues[xValues.length - 1], yMin, yMax);
-		plot.addPoints(xValues, yValues, 1);
+		Plot2 plot = new Plot2(title, "Frames", "Resolution (" + units + ")", (float[]) null, (float[]) null);
+		double range = Math.max(1, yMax - yMin) * 0.05;
+		plot.setLimits(xValues[0], xValues[xValues.length - 1], yMin - range, yMax + range);
+		plot.setColor(Color.red);
+		plot.addPoints(xValues, yValues, Plot.CONNECTED_CIRCLES);
 
 		Utils.display(title, plot);
 	}
@@ -470,7 +523,7 @@ public class FIRE implements PlugIn
 	 *            optimum memory usage)
 	 * @return The FIRE number
 	 */
-	public double calculateFireNumber(ThresholdMethod method, float fourierImageScale, int imageSize)
+	public double calculateFireNumber(ThresholdMethod method, double fourierImageScale, int imageSize)
 	{
 		if (ip1 == null || ip2 == null)
 		{
