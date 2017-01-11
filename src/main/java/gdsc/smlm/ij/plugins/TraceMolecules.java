@@ -1238,6 +1238,9 @@ public class TraceMolecules implements PlugIn
 		// --------
 		double minD = Double.MAX_VALUE;
 		final double maxTimeThresholdInFrames = settings.maxTimeThreshold;
+		// The optimiser works using frames so convert back to the correct units
+		double convert = (settings.getTimeUnit() == TimeUnit.SECOND) ? exposureTime : 1;
+		
 		for (double[] point : zeroCrossingPoints)
 		{
 			double dx = point[0] / maxTimeThresholdInFrames;
@@ -1247,7 +1250,7 @@ public class TraceMolecules implements PlugIn
 			{
 				minD = d;
 				settings.distanceThreshold = point[1];
-				settings.setTimeThreshold(point[0]);
+				settings.setTimeThreshold(point[0] * convert);
 			}
 		}
 
@@ -1416,7 +1419,7 @@ public class TraceMolecules implements PlugIn
 		cal.pixelHeight = yRange / h;
 		cal.xOrigin = origX - settings.minTimeThreshold / cal.pixelWidth;
 		cal.yOrigin = origY - settings.minDistanceThreshold / cal.pixelHeight;
-		cal.setXUnit("sec");
+		cal.setXUnit("frame");
 		cal.setYUnit("pixel");
 
 		showPlot();
@@ -1467,8 +1470,7 @@ public class TraceMolecules implements PlugIn
 		{
 			double[] point = zeroCrossingPoints.get(i);
 			// Convert to pixel coordinates. 
-			// Note that the zero crossing points have time in frames but the calibration is using seconds
-			xPoints[i] = (float) (cal.xOrigin + (point[0] * exposureTime / cal.pixelWidth));
+			xPoints[i] = (float) (cal.xOrigin + (point[0] / cal.pixelWidth));
 			yPoints[i] = (float) (cal.yOrigin + (point[1] / cal.pixelHeight));
 		}
 		roi = new PolygonRoi(xPoints, yPoints, nPoints, PolygonRoi.POLYLINE);
