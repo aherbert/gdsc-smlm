@@ -783,6 +783,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		{
 			IJ.showStatus("Reading results file ...");
 			reader = new PeakResultsReader(inputFilename);
+			IJ.showStatus("Reading " + reader.getFormat() + " results file ...");
 			ResultOption[] options = reader.getOptions();
 			if (options != null)
 				collectOptions(reader, options);
@@ -808,8 +809,9 @@ public class ResultsManager implements PlugIn, MouseListener
 		if (results != null && results.size() > 0 && checkCalibration)
 		{
 			if (!checkCalibration(results, reader))
-				return null;
+				results = null;
 		}
+		IJ.showStatus("");
 		return results;
 	}
 
