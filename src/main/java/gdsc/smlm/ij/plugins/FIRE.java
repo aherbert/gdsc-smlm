@@ -316,8 +316,7 @@ public class FIRE implements PlugIn
 		if (results == null || results.size() == 0)
 			return null;
 
-		ResultsImage imageType = (results.getResults().get(0).getSignal() > 0) ? ResultsImage.SIGNAL_INTENSITY
-				: ResultsImage.LOCALISATIONS;
+		boolean hasSignal = (results.getResults().get(0).getSignal() > 0);
 
 		// Draw images using the existing IJ routines.
 
@@ -338,13 +337,13 @@ public class FIRE implements PlugIn
 			// TODO - The coordinates should be adjusted if the max-min can fit inside a smaller power of 2
 			this.imageScale = fourierImageScale;
 
-		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(imageType, weighted, equalised,
-				"IP1", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
+		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
+				equalised, "IP1", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
 		image1.setDisplayImage(false);
 		image1.begin();
 
-		IJImagePeakResults image2 = ImagePeakResultsFactory.createPeakResultsImage(imageType, weighted, equalised,
-				"IP2", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
+		IJImagePeakResults image2 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
+				equalised, "IP2", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
 		image2.setDisplayImage(false);
 		image2.begin();
 
@@ -365,7 +364,7 @@ public class FIRE implements PlugIn
 		{
 			float x = p.getXPosition() - minx;
 			float y = p.getYPosition() - miny;
-			float v = p.getSignal();
+			float v = (hasSignal) ? p.getSignal() : 1f;
 			if (i++ % 2 == 0)
 				image1.add(x, y, v);
 			else
