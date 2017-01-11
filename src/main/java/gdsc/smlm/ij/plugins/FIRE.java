@@ -174,17 +174,14 @@ public class FIRE implements PlugIn
 			return results;
 
 		// Adjust bounds relative to input results image
-		double xscale = roiImageWidth / results.getBounds().width;
-		double yscale = roiImageHeight / results.getBounds().height;
-		roiBounds.x /= xscale;
-		roiBounds.width /= xscale;
-		roiBounds.y /= yscale;
-		roiBounds.height /= yscale;
+		Rectangle2D.Float bounds = results.getDataBounds();
+		double xscale = roiImageWidth / bounds.width;
+		double yscale = roiImageHeight / bounds.height;
 
-		float minX = (int) (roiBounds.x);
-		float maxX = (int) Math.ceil(roiBounds.x + roiBounds.width);
-		float minY = (int) (roiBounds.y);
-		float maxY = (int) Math.ceil(roiBounds.y + roiBounds.height);
+		float minX = (float) (bounds.x + roiBounds.x / xscale);
+		float maxX = (float) (minX + roiBounds.width / xscale);
+		float minY = (float) (bounds.y + (roiBounds.y / yscale));
+		float maxY = (float) (minY + roiBounds.height / yscale);
 
 		// Create a new set of results within the bounds
 		MemoryPeakResults newResults = new MemoryPeakResults();
