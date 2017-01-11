@@ -286,18 +286,15 @@ public class OPTICS implements PlugIn
 			MemoryPeakResults results = (MemoryPeakResults) work.settings.get(0);
 			// Convert results to coordinates
 			float[] x, y;
-			synchronized (results)
+			int size = results.size();
+			x = new float[size];
+			y = new float[size];
+			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
+			for (int i = 0; i < size; i++)
 			{
-				int size = results.size();
-				x = new float[size];
-				y = new float[size];
-				int i = 0;
-				for (PeakResult p : results)
-				{
-					x[i] = p.getXPosition();
-					y[i] = p.getYPosition();
-					i++;
-				}
+				PeakResult p = list.get(i);
+				x[i] = p.getXPosition();
+				y[i] = p.getYPosition();
 			}
 			Rectangle bounds = results.getBounds(true);
 			OPTICSManager opticsManager = new OPTICSManager(x, y, bounds);
@@ -481,13 +478,11 @@ public class OPTICS implements PlugIn
 					traces[i] = new Trace();
 					traces[i].setId(i);
 				}
-				int i = 0;
-				synchronized (results)
+				ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
+				for (int i = 0, size = results.size(); i < size; i++)
 				{
-					for (PeakResult r : results.getResults())
-					{
-						traces[clusters[i++]].add(r);
-					}
+					PeakResult r = list.get(i);
+					traces[clusters[i++]].add(r);
 				}
 				TraceMolecules.saveResults(results, traces, TITLE);
 			}
@@ -717,19 +712,16 @@ public class OPTICS implements PlugIn
 
 						// Add in a single batch
 						float[] x, y, v;
-						synchronized (results)
+						x = new float[results.size()];
+						y = new float[x.length];
+						v = new float[x.length];
+						ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
+						for (int i = 0, size = results.size(); i < size; i++)
 						{
-							int i = 0;
-							x = new float[results.size()];
-							y = new float[x.length];
-							v = new float[x.length];
-							for (PeakResult r : results.getResults())
-							{
-								x[i] = r.getXPosition();
-								y[i] = r.getYPosition();
-								v[i] = mode.getValue(r.getSignal(), clusters[i]);
-								i++;
-							}
+							PeakResult r = list.get(i);
+							x[i] = r.getXPosition();
+							y[i] = r.getYPosition();
+							v[i] = mode.getValue(r.getSignal(), clusters[i]);
 						}
 						image.add(x, y, v);
 					}
@@ -793,7 +785,7 @@ public class OPTICS implements PlugIn
 									for (int i = 0; i < x.length; i++)
 									{
 										x[i] = image.mapX(x[i]);
-										y[i] = image.mapX(y[i]);
+										y[i] = image.mapY(y[i]);
 									}
 									PolygonRoi roi = new PolygonRoi(x, y, Roi.POLYGON);
 									Color color = LUTHelper.getColour(lut, c, 0f, max);
@@ -1131,7 +1123,7 @@ public class OPTICS implements PlugIn
 			{
 				// Stop after the current work in the inbox
 				w.running = false;
-				
+
 				// Notify a workers waiting on the inbox.
 				// Q. How to check if the worker is sleeping?
 				synchronized (w.inbox)
