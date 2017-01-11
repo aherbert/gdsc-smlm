@@ -74,14 +74,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 */
 	public static final int DISPLAY_NEGATIVES = 128;
 
-	protected String title;
-	protected int imageWidth;
-	protected int imageHeight;
-	protected float scale;
+	protected final String title;
+	protected final int imageWidth;
+	protected final int imageHeight;
+	protected final float scale;
 	protected int size = 0;
 	protected float[] data;
-	protected float xlimit;
-	protected float ylimit;
+	protected final float xlimit;
+	protected final float ylimit;
 	protected ImagePlus imp = null;
 	protected boolean imageActive = false;
 	protected int displayFlags = 0;
@@ -105,19 +105,28 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 *            Define the bounding rectangle of the image coordinates. Any results outside this will not be
 	 *            displayed.
 	 * @param scale
+	 *            The image scale. Must be strictly positive.
 	 */
 	public IJImagePeakResults(String title, Rectangle bounds, float scale)
 	{
+		if (scale <= 0 || Float.isNaN(scale))
+			throw new IllegalArgumentException("Invalid scale: " + scale);
+
 		this.title = title + " " + IMAGE_SUFFIX;
-		this.bounds = bounds;
+
+		this.bounds = (Rectangle) bounds.clone();
+		if (bounds.width < 0)
+			bounds.width = 0;
+		if (bounds.height < 0)
+			bounds.height = 0;
 		this.scale = scale;
 
 		imageWidth = ceil(bounds.width * scale);
 		imageHeight = ceil(bounds.height * scale);
 
 		// Set the limits used to check if a coordinate has 4 neighbour cells
-		xlimit = imageWidth - 1;
-		ylimit = imageHeight - 1;
+		xlimit = imageWidth;
+		ylimit = imageHeight;
 	}
 
 	private int ceil(float f)
@@ -136,14 +145,27 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		preBegin();
 
+		// Handle invalid bounds with an empty single pixel image
+		boolean validBounds = imageWidth > 0 && imageHeight > 0;
+		int w, h;
+		if (validBounds)
+		{
+			w = imageWidth;
+			h = imageHeight;
+		}
+		else
+		{
+			w = h = 1;
+		}
+
 		size = 0;
 		nextRepaintSize = 20; // Let some results appear before drawing
 		imageLock = false;
-		data = new float[imageWidth * imageHeight];
+		data = new float[w * h];
 		imp = WindowManager.getImage(title);
 		currentFrame = 1;
 
-		ImageProcessor ip = createNewProcessor();
+		ImageProcessor ip = createNewProcessor(w, h);
 
 		if (imp == null)
 		{
@@ -153,12 +175,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			LutLoader lut = new LutLoader();
 			lut.run(lutName);
 			WindowManager.setTempCurrentImage(null);
+
+			if (displayImage)
+				imp.show();
 		}
 		else
 		{
 			// Copy the lookup table
 			ip.setColorModel(imp.getProcessor().getColorModel());
-			ImageStack stack = new ImageStack(imageWidth, imageHeight);
+			ImageStack stack = new ImageStack(w, h);
 			stack.addSlice(null, ip);
 			// If resizing then remove adornments
 			if (stack.getWidth() != imp.getWidth() || stack.getHeight() != imp.getHeight())
@@ -167,14 +192,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				imp.setRoi((Roi) null);
 			}
 			imp.setStack(stack);
+
+			if (displayImage)
+				imp.show();
+			else
+				imp.hide();
 		}
 
 		imp.setProperty("Info", createInfo());
-
-		if (displayImage)
-			imp.show();
-		else
-			imp.hide();
 
 		if (calibration != null)
 		{
@@ -191,7 +216,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			imp.setCalibration(cal);
 		}
 
-		imageActive = true;
+		// We cannot draw anything with no bounds
+		imageActive = validBounds;
 	}
 
 	private String createInfo()
@@ -234,7 +260,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		}
 	}
 
-	private ImageProcessor createNewProcessor()
+	private ImageProcessor createNewProcessor(int imageWidth, int imageHeight)
 	{
 		// Equalised display requires a 16-bit image to allow fast processing of the histogram 
 		if ((displayFlags & DISPLAY_EQUALIZED) != 0)
@@ -537,6 +563,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		// Get the 4 neighbours and avoid overrun. In this case the edge pixel will get the entire value.
 		final int xDelta, yDelta;
 
+		// Note: The image width/height could be zero making the deltas invalid. However in this case the 
+		// getValue(...) method will never be called.
+
 		if (dx < 0.5f)
 		{
 			// Interpolate to the lower x pixel
@@ -700,6 +729,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		int[] allIndices = new int[100];
 		float[] allValues = new float[allIndices.length];
 
+		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
+		
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
 
@@ -732,7 +763,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			nPoints++;
 
-			if (nValues > limit)
+			if (nValues > limit || replace)
 			{
 				addData(nPoints, nValues, allIndices, allValues);
 				nPoints = 0;
@@ -773,6 +804,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		// Buffer output in batches
 		int[] allIndices = new int[100];
 		float[] allValues = new float[allIndices.length];
+		
+		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);		
 
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
@@ -797,7 +830,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			nPoints++;
 
-			if (nValues > limit)
+			if (nValues > limit || replace)
 			{
 				addData(nPoints, nValues, allIndices, allValues);
 				nPoints = 0;
@@ -860,7 +893,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 					forceUpdateImage();
 				}
 
-				ImageProcessor ip = createNewProcessor();
+				ImageProcessor ip = createNewProcessor(stack.getWidth(), stack.getHeight());
 				stack.addSlice(null, ip);
 				currentFrame += rollingWindowSize;
 			}
@@ -897,6 +930,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		int[] allIndices = new int[100];
 		float[] allValues = new float[allIndices.length];
 
+		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
+		
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
 
@@ -928,7 +963,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			nPoints++;
 
-			if (nValues > limit)
+			if (nValues > limit || replace)
 			{
 				addData(nPoints, nValues, allIndices, allValues);
 				nPoints = 0;
