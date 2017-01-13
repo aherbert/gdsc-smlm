@@ -400,8 +400,9 @@ public class OPTICS implements PlugIn
 						double nmPerPixel = getNmPerPixel(results);
 
 						// Ensure that the distance is valid
-						double distance = Math.min(work.inputSettings.clusteringDistance,
-								opticsResult.generatingDistance * nmPerPixel);
+						double distance = opticsResult.generatingDistance * nmPerPixel;
+						if (work.inputSettings.clusteringDistance > 0)
+							distance = Math.min(work.inputSettings.clusteringDistance, distance);
 
 						if (nmPerPixel != 1)
 						{
@@ -611,8 +612,10 @@ public class OPTICS implements PlugIn
 				// Add the DBSCAN clustering distance
 				if (inputSettings.clusteringMode == ClusteringMode.DBSCAN)
 				{
-					double distance = Math.min(inputSettings.clusteringDistance,
-							opticsResult.generatingDistance * nmPerPixel);
+					// Ensure that the distance is valid
+					double distance = opticsResult.generatingDistance * nmPerPixel;
+					if (work.inputSettings.clusteringDistance > 0)
+						distance = Math.min(work.inputSettings.clusteringDistance, distance);
 					plot.setColor(Color.red);
 					plot.drawLine(1, distance, order.length, distance);
 				}
