@@ -53,7 +53,12 @@ public class OPTICS implements PlugIn
 {
 	private static final String TITLE_OPTICS = "OPTICS";
 	private static final String TITLE_DBSCAN = "DBSCAN";
+
 	private String TITLE;
+	/**
+	 * Delay (in milliseconds) used when entering new values in the dialog before the preview is processed
+	 */
+	private long DELAY = 500;
 	private boolean isPreview = false;
 
 	private GlobalSettings globalSettings;
@@ -649,7 +654,8 @@ public class OPTICS implements PlugIn
 			}
 			if (current.outline != previous.outline)
 				return false;
-			if (getDisplayFlags(current) != getDisplayFlags(previous))
+			if (current.getImageMode() != previous.getImageMode() ||
+					getDisplayFlags(current) != getDisplayFlags(previous))
 			{
 				// We can only cache the image if the display mode is the same
 				image = null;
@@ -1337,7 +1343,7 @@ public class OPTICS implements PlugIn
 					System.out.println("Adding work");
 				if (isPreview)
 					// Use a delay next time. This prevents delay when the preview is first switched on. 
-					work.time = System.currentTimeMillis() + 100;
+					work.time = System.currentTimeMillis() + DELAY;
 				else
 					isPreview = true;
 				inputStack.addWork(work);
@@ -1413,7 +1419,7 @@ public class OPTICS implements PlugIn
 					System.out.println("Adding work");
 				if (isPreview)
 					// Use a delay next time. This prevents delay when the preview is first switched on. 
-					work.time = System.currentTimeMillis() + 100;
+					work.time = System.currentTimeMillis() + DELAY;
 				else
 					isPreview = true;
 				inputStack.addWork(work);
