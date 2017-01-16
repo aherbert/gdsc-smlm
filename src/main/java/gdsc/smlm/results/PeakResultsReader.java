@@ -352,7 +352,8 @@ public class PeakResultsReader
 						{
 							final float resolution = Float.parseFloat(match.group(1));
 							final double nmPerPixel = (float) (1e9 / resolution);
-							calibration = new Calibration(nmPerPixel, 1, 0);
+							calibration = new Calibration();
+							calibration.setNmPerPixel(nmPerPixel);
 						}
 						catch (NumberFormatException e)
 						{
@@ -369,6 +370,7 @@ public class PeakResultsReader
 						try
 						{
 							calibration = (Calibration) XmlUtils.fromXML(xml);
+							calibration.validate();
 						}
 						catch (ClassCastException ex)
 						{
@@ -1405,10 +1407,10 @@ public class PeakResultsReader
 			// If calibration was found convert to pixels
 			if (calibration != null)
 			{
-				x /= calibration.nmPerPixel;
-				y /= calibration.nmPerPixel;
-				sx /= calibration.nmPerPixel;
-				sy /= calibration.nmPerPixel;
+				x /= calibration.getNmPerPixel();
+				y /= calibration.getNmPerPixel();
+				sx /= calibration.getNmPerPixel();
+				sy /= calibration.getNmPerPixel();
 			}
 
 			float[] params = new float[7];
@@ -1507,7 +1509,8 @@ public class PeakResultsReader
 			final double widthConversion = 1.0 / (2 * nmPerPixel);
 
 			// Create a calibration
-			calibration = new Calibration(nmPerPixel, 1, 0);
+			calibration = new Calibration();
+			calibration.setNmPerPixel(nmPerPixel);
 			results.setCalibration(calibration);
 
 			// Convert data
@@ -1718,9 +1721,9 @@ public class PeakResultsReader
 		// The GDSC SMLM code still adds a calibration to the MALK file when saving so we may be able to convert back
 		if (getCalibration() != null)
 		{
-			if (Maths.isFinite(calibration.nmPerPixel) && calibration.nmPerPixel > 0)
+			if (Maths.isFinite(calibration.getNmPerPixel()) && calibration.getNmPerPixel() > 0)
 			{
-				double nmPerPixel = calibration.nmPerPixel;
+				double nmPerPixel = calibration.getNmPerPixel();
 				for (PeakResult p : results.getResults())
 				{
 					p.params[Gaussian2DFunction.X_POSITION] /= nmPerPixel;

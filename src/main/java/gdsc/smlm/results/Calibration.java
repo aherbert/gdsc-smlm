@@ -92,37 +92,72 @@ public class Calibration implements Cloneable
 		return ((fields & FIELD_AMPLIFICATION) == FIELD_AMPLIFICATION);
 	}
 
-	public void clearNmPerPixel()
+	private void setHasNmPerPixel()
+	{
+		fields |= FIELD_NM_PER_PIXEL;
+	}
+
+	private void setHasGain()
+	{
+		fields |= FIELD_GAIN;
+	}
+
+	private void setHasExposureTime()
+	{
+		fields |= FIELD_EXPOSURE_TIME;
+	}
+
+	private void setHasReadNoise()
+	{
+		fields |= FIELD_READ_NOISE;
+	}
+
+	private void setHasBias()
+	{
+		fields |= FIELD_BIAS;
+	}
+
+	private void setHasEMCCD()
+	{
+		fields |= FIELD_EM_CCD;
+	}
+
+	private void setHasAmplification()
+	{
+		fields |= FIELD_AMPLIFICATION;
+	}
+
+	public void clearHasNmPerPixel()
 	{
 		fields = fields & ~FIELD_NM_PER_PIXEL;
 	}
 
-	public void clearGain()
+	public void clearHasGain()
 	{
 		fields = fields & ~FIELD_GAIN;
 	}
 
-	public void clearExposureTime()
+	public void clearHasExposureTime()
 	{
 		fields = fields & ~FIELD_EXPOSURE_TIME;
 	}
 
-	public void clearReadNoise()
+	public void clearHasReadNoise()
 	{
 		fields = fields & ~FIELD_READ_NOISE;
 	}
 
-	public void clearBias()
+	public void clearHasBias()
 	{
 		fields = fields & ~FIELD_BIAS;
 	}
 
-	public void clearEMCCD()
+	public void clearHasEMCCD()
 	{
 		fields = fields & ~FIELD_EM_CCD;
 	}
 
-	public void clearAmplification()
+	public void clearHasAmplification()
 	{
 		fields = fields & ~FIELD_AMPLIFICATION;
 	}
@@ -130,29 +165,29 @@ public class Calibration implements Cloneable
 	/**
 	 * The image pixel size in nanometers
 	 */
-	public double nmPerPixel = 107;
+	private double nmPerPixel = 107;
 	/**
 	 * The gain (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units
 	 * (ADUs) to photons.
 	 */
-	public double gain = 37.7;
+	private double gain = 37.7;
 	/**
 	 * The exposure time in milliseconds per frame
 	 */
-	public double exposureTime;
+	private double exposureTime;
 
 	/**
 	 * The CCD camera Gaussian read noise (in ADUs)
 	 */
-	public double readNoise;
+	private double readNoise;
 	/**
 	 * The CCD camera bias (in ADUs)
 	 */
-	public double bias;
+	private double bias;
 	/**
 	 * True if the CCD camera was run in Electron Multiplying (EM) mode
 	 */
-	public boolean emCCD;
+	private boolean emCCD;
 	/**
 	 * The camera amplification (ADUs/e-) used when modelling a microscope camera.
 	 * <p>
@@ -160,7 +195,7 @@ public class Calibration implements Cloneable
 	 * perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided by the quantum
 	 * efficiency (e-/photon).
 	 */
-	public double amplification;
+	private double amplification;
 
 	/**
 	 * Default constructor. All properties are set to be invalid but missing exception are disabled.
@@ -184,18 +219,19 @@ public class Calibration implements Cloneable
 	 * Parameterised constructor.
 	 * <p>
 	 * If gain is zero then set to 1.
-	 * 
+	 *
 	 * @param nmPerPixel
+	 *            the nm per pixel
 	 * @param gain
+	 *            the gain
 	 * @param exposureTime
+	 *            the exposure time
 	 */
 	public Calibration(double nmPerPixel, double gain, double exposureTime)
 	{
-		this.nmPerPixel = nmPerPixel;
-		if (gain <= 0)
-			gain = 1;
-		this.gain = gain;
-		this.exposureTime = exposureTime;
+		this.setNmPerPixel(nmPerPixel);
+		this.setGain(gain);
+		this.setExposureTime(exposureTime);
 	}
 
 	/*
@@ -232,6 +268,227 @@ public class Calibration implements Cloneable
 	 */
 	public void validate()
 	{
+		setNmPerPixel(nmPerPixel);
+		setGain(gain);
+		setExposureTime(exposureTime);
+		setReadNoise(readNoise);
+		setBias(bias);
+		setEmCCD(emCCD);
+		setAmplification(amplification);
+	}
 
+	/**
+	 * Gets image pixel size in nanometers.
+	 *
+	 * @return image pixel size in nanometers
+	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public double getNmPerPixel()
+	{
+		if (isFieldMissingException() && !hasNmPerPixel())
+			throw new IllegalStateException();
+		return nmPerPixel;
+	}
+
+	/**
+	 * Sets the image pixel size in nanometers.
+	 *
+	 * @param nmPerPixel
+	 *            image pixel size in nanometers
+	 */
+	public void setNmPerPixel(double nmPerPixel)
+	{
+		if (nmPerPixel > 0)
+		{
+			setHasNmPerPixel();
+			this.nmPerPixel = nmPerPixel;
+		}
+		else
+			clearHasNmPerPixel();
+	}
+
+	/**
+	 * Gets the gain (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units
+	 * (ADUs) to photons.
+	 *
+	 * @return the gain
+	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public double getGain()
+	{
+		if (isFieldMissingException() && !hasGain())
+			throw new IllegalStateException();
+		return gain;
+	}
+
+	/**
+	 * Sets the (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units
+	 * (ADUs) to photons.
+	 *
+	 * @param gain
+	 *            the new gain
+	 */
+	public void setGain(double gain)
+	{
+		if (gain > 0)
+		{
+			setHasGain();
+			this.gain = gain;
+		}
+		else
+			clearHasGain();
+	}
+
+	/**
+	 * Gets the exposure time in milliseconds per frame.
+	 *
+	 * @return the exposure time
+	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public double getExposureTime()
+	{
+		if (isFieldMissingException() && !hasExposureTime())
+			throw new IllegalStateException();
+		return exposureTime;
+	}
+
+	/**
+	 * Sets the exposure time in milliseconds per frame
+	 *
+	 * @param exposureTime
+	 *            the new exposure time
+	 */
+	public void setExposureTime(double exposureTime)
+	{
+		if (exposureTime > 0)
+		{
+			setHasExposureTime();
+			this.exposureTime = exposureTime;
+		}
+		else
+			clearHasExposureTime();
+	}
+
+	/**
+	 * Gets the CCD camera Gaussian read noise (in ADUs).
+	 *
+	 * @return the CCD camera Gaussian read noise (in ADUs)
+	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public double getReadNoise()
+	{
+		if (isFieldMissingException() && !hasReadNoise())
+			throw new IllegalStateException();
+		return readNoise;
+	}
+
+	/**
+	 * Sets CCD camera Gaussian read noise (in ADUs).
+	 *
+	 * @param readNoise
+	 *            the new read noise
+	 */
+	public void setReadNoise(double readNoise)
+	{
+		if (readNoise >= 0)
+		{
+			setHasReadNoise();
+			this.readNoise = readNoise;
+		}
+		else
+			clearHasReadNoise();
+	}
+
+	/**
+	 * Gets CCD camera bias (in ADUs).
+	 *
+	 * @return CCD camera bias (in ADUs)
+	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public double getBias()
+	{
+		if (isFieldMissingException() && !hasBias())
+			throw new IllegalStateException();
+		return bias;
+	}
+
+	/**
+	 * Sets CCD camera bias (in ADUs).
+	 *
+	 * @param bias
+	 *            the new bias
+	 */
+	public void setBias(double bias)
+	{
+		if (bias >= 0)
+		{
+			setHasBias();
+			this.bias = bias;
+		}
+		else
+			clearHasBias();
+	}
+
+	/**
+	 * Checks if the CCD camera was run in Electron Multiplying (EM) mode.
+	 *
+	 * @return true, if the CCD camera was run in Electron Multiplying (EM) mode.
+	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set
+	 */
+	public boolean isEmCCD()
+	{
+		if (isFieldMissingException() && !hasEMCCD())
+			throw new IllegalStateException();
+		return emCCD;
+	}
+
+	/**
+	 * Set if the CCD camera was run in Electron Multiplying (EM) mode.
+	 *
+	 * @param emCCD
+	 *            true, if the CCD camera was run in Electron Multiplying (EM) mode.
+	 */
+	public void setEmCCD(boolean emCCD)
+	{
+		setHasEMCCD();
+		this.emCCD = emCCD;
+	}
+
+	/**
+	 * Get the camera amplification (ADUs/e-) used when modelling a microscope camera.
+	 * <p>
+	 * Note that the camera noise model assumes that electrons are converted to ADUs by amplification that is not
+	 * perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided by the quantum
+	 * efficiency (e-/photon).
+	 *
+	 * @return the amplification
+	 * @throws IllegalStateException if the missing field exceptions is enabled and the field has not been set to a valid value
+	 */
+	public double getAmplification()
+	{
+		if (isFieldMissingException() && !hasAmplification())
+			throw new IllegalStateException();
+		return amplification;
+	}
+
+	/**
+	 * Set the camera amplification (ADUs/e-) used when modelling a microscope camera.
+	 * <p>
+	 * Note that the camera noise model assumes that electrons are converted to ADUs by amplification that is not
+	 * perfect (i.e. it has noise). The amplification is equal to the gain (ADUs/photon) divided by the quantum
+	 * efficiency (e-/photon).
+	 *
+	 * @param amplification
+	 *            the new amplification
+	 */
+	public void setAmplification(double amplification)
+	{
+		if (amplification > 0)
+		{
+			setHasAmplification();
+			this.amplification = amplification;
+		}
+		else
+			clearHasAmplification();
 	}
 }

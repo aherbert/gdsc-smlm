@@ -1221,21 +1221,21 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Copy simulation defaults if a new simulation
 		if (lastId != simulationParameters.id)
 		{
-			cal.nmPerPixel = simulationParameters.a;
-			cal.gain = simulationParameters.gain;
-			cal.amplification = simulationParameters.amplification;
-			cal.exposureTime = 100;
-			cal.readNoise = simulationParameters.readNoise;
-			cal.bias = simulationParameters.bias;
-			cal.emCCD = simulationParameters.emCCD;
+			cal.setNmPerPixel(simulationParameters.a);
+			cal.setGain(simulationParameters.gain);
+			cal.setAmplification(simulationParameters.amplification);
+			cal.setExposureTime(100);
+			cal.setReadNoise(simulationParameters.readNoise);
+			cal.setBias(simulationParameters.bias);
+			cal.setEmCCD(simulationParameters.emCCD);
 
 			// This is needed to configure the fit solver
-			fitConfig.setNmPerPixel(Maths.round(cal.nmPerPixel));
-			fitConfig.setGain(Maths.round(cal.gain));
-			fitConfig.setBias(Maths.round(cal.bias));
-			fitConfig.setReadNoise(Maths.round(cal.readNoise));
-			fitConfig.setAmplification(Maths.round(cal.amplification));
-			fitConfig.setEmCCD(cal.emCCD);
+			fitConfig.setNmPerPixel(Maths.round(cal.getNmPerPixel()));
+			fitConfig.setGain(Maths.round(cal.getGain()));
+			fitConfig.setBias(Maths.round(cal.getBias()));
+			fitConfig.setReadNoise(Maths.round(cal.getReadNoise()));
+			fitConfig.setAmplification(Maths.round(cal.getAmplification()));
+			fitConfig.setEmCCD(cal.isEmCCD());
 		}
 		if (!PeakFit.configureFitSolver(settings, null, extraOptions))
 			return false;

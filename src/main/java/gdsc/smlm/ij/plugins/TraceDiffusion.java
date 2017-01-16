@@ -194,7 +194,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			//--- MSD Analysis ---
 
 			// Conversion constants
-			final double px2ToUm2 = results.getCalibration().nmPerPixel * results.getCalibration().nmPerPixel / 1e6;
+			final double px2ToUm2 = results.getCalibration().getNmPerPixel() * results.getCalibration().getNmPerPixel() / 1e6;
 			final double px2ToUm2PerSecond = px2ToUm2 / exposureTime;
 
 			// Get the maximum trace length
@@ -945,8 +945,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 */
 	private boolean checkCalibration(MemoryPeakResults results)
 	{
-		if (results.getCalibration() == null || results.getCalibration().exposureTime <= 0 ||
-				results.getCalibration().nmPerPixel <= 0)
+		if (results.getCalibration() == null || results.getCalibration().getExposureTime() <= 0 ||
+				results.getCalibration().getNmPerPixel() <= 0)
 		{
 			Calibration cal = results.getCalibration();
 			if (cal == null)
@@ -954,14 +954,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Uncalibrated results! Please enter the calibration:");
-			gd.addNumericField("Exposure_time (ms)", cal.exposureTime, 2);
-			gd.addNumericField("Pixel_pitch (nm)", cal.nmPerPixel, 2);
+			gd.addNumericField("Exposure_time (ms)", cal.getExposureTime(), 2);
+			gd.addNumericField("Pixel_pitch (nm)", cal.getNmPerPixel(), 2);
 			gd.showDialog();
 			if (gd.wasCanceled() || gd.invalidNumber())
 				return false;
-			cal.exposureTime = gd.getNextNumber();
-			cal.nmPerPixel = gd.getNextNumber();
-			if (cal.exposureTime <= 0 || cal.nmPerPixel <= 0)
+			cal.setExposureTime(gd.getNextNumber());
+			cal.setNmPerPixel(gd.getNextNumber());
+			if (cal.getExposureTime() <= 0 || cal.getNmPerPixel() <= 0)
 				return false;
 		}
 		return true;
@@ -1000,9 +1000,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		this.results = allResults.get(0);
 
 		// Results should be checked for calibration by this point
-		exposureTime = results.getCalibration().exposureTime / 1000;
+		exposureTime = results.getCalibration().getExposureTime() / 1000;
 
-		final double nmPerPixel = results.getCalibration().nmPerPixel;
+		final double nmPerPixel = results.getCalibration().getNmPerPixel();
 
 		ArrayList<Trace> allTraces = new ArrayList<Trace>();
 		additionalDatasets = -1;
@@ -1914,13 +1914,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		// Check the calibration is the same for the rest
 		Calibration cal = allResults.get(0).getCalibration();
-		final double nmPerPixel = cal.nmPerPixel;
-		final double exposureTime = cal.exposureTime;
+		final double nmPerPixel = cal.getNmPerPixel();
+		final double exposureTime = cal.getExposureTime();
 		for (int i = 1; i < allResults.size(); i++)
 		{
 			MemoryPeakResults results = allResults.get(1);
 
-			if (results.getCalibration() == null || results.getCalibration().exposureTime != exposureTime ||
+			if (results.getCalibration() == null || results.getCalibration().getExposureTime() != exposureTime ||
 					results.getNmPerPixel() != nmPerPixel)
 			{
 				IJ.error(TITLE, "The exposure time and pixel pitch must match across all the results");

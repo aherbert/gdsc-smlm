@@ -529,7 +529,7 @@ public class PeakResultsReaderTest
 		}
 
 		// TSF requires the bias be subtracted
-		double bias = expectedResults.getCalibration().bias;
+//		double bias = expectedResults.getCalibration().getBias();
 
 		for (int i = 0; i < actualResults.size(); i++)
 		{
@@ -552,10 +552,6 @@ public class PeakResultsReaderTest
 			Assert.assertEquals("Error mismatch @ " + i, p1.error, p2.error, 1e-6);
 			Assert.assertEquals("Noise mismatch @ " + i, p1.noise, p2.noise, delta);
 			Assert.assertNotNull("Params is null @ " + i, p2.params);
-			if (fileFormat == ResultsFileFormat.TSF)
-			{
-				p1.params[Gaussian2DFunction.BACKGROUND] -= bias;
-			}
 			Assert.assertArrayEquals("Params mismatch @ " + i, p1.params, p2.params, delta);
 			if (showDeviations)
 			{
@@ -596,13 +592,13 @@ public class PeakResultsReaderTest
 		if (c1 != null)
 		{
 			Assert.assertNotNull("Calibration", c2);
-			Assert.assertEquals("Calibration nmPerPixel", c1.nmPerPixel, c2.nmPerPixel, 1e-6);
-			Assert.assertEquals("Calibration gain", c1.gain, c2.gain, 1e-6);
-			Assert.assertEquals("Calibration exposureTime", c1.exposureTime, c2.exposureTime, 1e-6);
-			Assert.assertEquals("Calibration readNoise", c1.readNoise, c2.readNoise, 1e-6);
-			Assert.assertEquals("Calibration bias", c1.bias, c2.bias, 1e-6);
-			Assert.assertEquals("Calibration emCCD", c1.emCCD, c2.emCCD);
-			Assert.assertEquals("Calibration amplification", c1.amplification, c2.amplification, 1e-6);
+			Assert.assertEquals("Calibration nmPerPixel", c1.getNmPerPixel(), c2.getNmPerPixel(), 1e-6);
+			Assert.assertEquals("Calibration gain", c1.getGain(), c2.getGain(), 1e-6);
+			Assert.assertEquals("Calibration exposureTime", c1.getExposureTime(), c2.getExposureTime(), 1e-6);
+			Assert.assertEquals("Calibration readNoise", c1.getReadNoise(), c2.getReadNoise(), 1e-6);
+			Assert.assertEquals("Calibration bias", c1.getBias(), c2.getBias(), 1e-6);
+			Assert.assertEquals("Calibration emCCD", c1.isEmCCD(), c2.isEmCCD());
+			Assert.assertEquals("Calibration amplification", c1.getAmplification(), c2.getAmplification(), 1e-6);
 		}
 		else
 		{
@@ -637,13 +633,13 @@ public class PeakResultsReaderTest
 		results.setBounds(new Rectangle((int) (10 * rand.next()), (int) (10 * rand.next()), (int) (100 * rand.next()),
 				(int) (100 * rand.next())));
 		Calibration cal = new Calibration();
-		cal.nmPerPixel = rand.next();
-		cal.gain = rand.next();
-		cal.exposureTime = rand.next();
-		cal.readNoise = rand.next();
-		cal.bias = bias;
-		cal.emCCD = rand.next() < 0.5f;
-		cal.amplification = rand.next();
+		cal.setNmPerPixel(rand.next());
+		cal.setGain(rand.next());
+		cal.setExposureTime(rand.next());
+		cal.setReadNoise(rand.next());
+		cal.setBias(bias);
+		cal.setEmCCD(rand.next() < 0.5f);
+		cal.setAmplification(rand.next());
 		results.setCalibration(cal);
 		return results;
 	}

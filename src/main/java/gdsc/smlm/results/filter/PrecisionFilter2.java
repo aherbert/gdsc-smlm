@@ -54,7 +54,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 		bias = -1;
 		if (peakResults.getCalibration() != null)
 		{
-			bias = peakResults.getCalibration().bias;
+			bias = peakResults.getCalibration().getBias();
 		}
 	}
 

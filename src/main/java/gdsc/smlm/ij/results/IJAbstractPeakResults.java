@@ -24,8 +24,8 @@ public abstract class IJAbstractPeakResults extends AbstractPeakResults
 	public void setCalibration(double nmPerPixel, double gain)
 	{
 		Calibration calibration = new Calibration();
-		calibration.nmPerPixel = nmPerPixel;
-		calibration.gain = gain;
+		calibration.setNmPerPixel(nmPerPixel);
+		calibration.setGain(gain);
 		setCalibration(calibration);
 	}
 }

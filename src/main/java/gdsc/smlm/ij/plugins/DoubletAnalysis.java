@@ -1563,18 +1563,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			lowerDistance = 0.5 * matchDistance;
 			fitConfig.setInitialPeakStdDev(w);
 
-			cal.nmPerPixel = simulationParameters.a;
-			cal.gain = simulationParameters.gain;
-			cal.amplification = simulationParameters.amplification;
-			cal.exposureTime = 100;
-			cal.readNoise = simulationParameters.readNoise;
-			cal.bias = simulationParameters.bias;
-			cal.emCCD = simulationParameters.emCCD;
+			cal.setNmPerPixel(simulationParameters.a);
+			cal.setGain(simulationParameters.gain);
+			cal.setAmplification(simulationParameters.amplification);
+			cal.setExposureTime(100);
+			cal.setReadNoise(simulationParameters.readNoise);
+			cal.setBias(simulationParameters.bias);
+			cal.setEmCCD(simulationParameters.emCCD);
 
-			fitConfig.setGain(cal.gain);
-			fitConfig.setBias(cal.bias);
-			fitConfig.setReadNoise(cal.readNoise);
-			fitConfig.setAmplification(cal.amplification);
+			fitConfig.setGain(cal.getGain());
+			fitConfig.setBias(cal.getBias());
+			fitConfig.setReadNoise(cal.getReadNoise());
+			fitConfig.setAmplification(cal.getAmplification());
 		}
 
 		// Support for using templates
@@ -1733,18 +1733,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			return false;
 		}
 
-		cal.nmPerPixel = simulationParameters.a;
-		cal.gain = simulationParameters.gain;
-		cal.amplification = simulationParameters.amplification;
-		cal.exposureTime = 100;
-		cal.readNoise = simulationParameters.readNoise;
-		cal.bias = simulationParameters.bias;
-		cal.emCCD = simulationParameters.emCCD;
+		cal.setNmPerPixel(simulationParameters.a);
+		cal.setGain(simulationParameters.gain);
+		cal.setAmplification(simulationParameters.amplification);
+		cal.setExposureTime(100);
+		cal.setReadNoise(simulationParameters.readNoise);
+		cal.setBias(simulationParameters.bias);
+		cal.setEmCCD(simulationParameters.emCCD);
 
-		fitConfig.setGain(cal.gain);
-		fitConfig.setBias(cal.bias);
-		fitConfig.setReadNoise(cal.readNoise);
-		fitConfig.setAmplification(cal.amplification);
+		fitConfig.setGain(cal.getGain());
+		fitConfig.setBias(cal.getBias());
+		fitConfig.setReadNoise(cal.getReadNoise());
+		fitConfig.setAmplification(cal.getAmplification());
 
 		if (!BenchmarkSpotFilter.updateConfiguration(config))
 		{
@@ -3092,12 +3092,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setInitialPeakStdDev0(fitConfig.getInitialPeakStdDev0());
 		filterFitConfig.setInitialPeakStdDev1(fitConfig.getInitialPeakStdDev1());
 		filterFitConfig.setModelCamera(fitConfig.isModelCamera());
-		filterFitConfig.setNmPerPixel(cal.nmPerPixel);
-		filterFitConfig.setGain(cal.gain);
-		filterFitConfig.setBias(cal.bias);
-		filterFitConfig.setReadNoise(cal.readNoise);
-		filterFitConfig.setAmplification(cal.amplification);
-		filterFitConfig.setEmCCD(cal.emCCD);
+		filterFitConfig.setNmPerPixel(cal.getNmPerPixel());
+		filterFitConfig.setGain(cal.getGain());
+		filterFitConfig.setBias(cal.getBias());
+		filterFitConfig.setReadNoise(cal.getReadNoise());
+		filterFitConfig.setAmplification(cal.getAmplification());
+		filterFitConfig.setEmCCD(cal.isEmCCD());
 		filterFitConfig.setFitSolver(fitConfig.getFitSolver());
 
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);

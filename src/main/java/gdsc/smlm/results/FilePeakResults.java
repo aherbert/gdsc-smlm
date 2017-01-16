@@ -275,9 +275,9 @@ public class FilePeakResults extends AbstractPeakResults
 		if (this.calibration != null)
 		{
 			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-					calibration.nmPerPixel;
-			float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s,
-					params[Gaussian2DFunction.SIGNAL] / calibration.gain, noise / calibration.gain, calibration.emCCD);
+					calibration.getNmPerPixel();
+			float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
+					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(), calibration.isEmCCD());
 			addResult(sb, precision);
 		}
 
@@ -348,10 +348,10 @@ public class FilePeakResults extends AbstractPeakResults
 
 			if (this.calibration != null)
 			{
-				double s = result.getSD() * calibration.nmPerPixel;
-				float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s,
-						result.params[Gaussian2DFunction.SIGNAL] / calibration.gain, result.noise / calibration.gain,
-						calibration.emCCD);
+				double s = result.getSD() * calibration.getNmPerPixel();
+				float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
+						result.params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), result.noise / calibration.getGain(),
+						calibration.isEmCCD());
 				addResult(sb, precision);
 			}
 			sb.append('\n');

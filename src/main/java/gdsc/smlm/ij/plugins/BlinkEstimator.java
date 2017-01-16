@@ -103,7 +103,7 @@ public class BlinkEstimator implements PlugIn
 			IJ.showStatus("");
 			return;
 		}
-		msPerFrame = results.getCalibration().exposureTime;
+		msPerFrame = results.getCalibration().getExposureTime();
 		Utils.log("%s: %d localisations", TITLE, results.size());
 
 		showPlots = true;

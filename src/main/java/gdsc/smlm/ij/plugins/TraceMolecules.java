@@ -205,7 +205,7 @@ public class TraceMolecules implements PlugIn
 			}
 
 			ArrayList<Cluster> clusters = engine.findClusters(convertToClusterPoints(),
-					settings.distanceThreshold / results.getCalibration().nmPerPixel, timeInFrames(settings));
+					settings.distanceThreshold / results.getCalibration().getNmPerPixel(), timeInFrames(settings));
 
 			if (clusters == null)
 			{
@@ -229,7 +229,7 @@ public class TraceMolecules implements PlugIn
 			manager.setTraceMode(settings.getTraceMode());
 			manager.setActivationFrameInterval(settings.pulseInterval);
 			manager.setActivationFrameWindow(settings.pulseWindow);
-			manager.setDistanceExclusion(settings.distanceExclusion / results.getCalibration().nmPerPixel);
+			manager.setDistanceExclusion(settings.distanceExclusion / results.getCalibration().getNmPerPixel());
 
 			if (settings.optimise)
 			{
@@ -257,7 +257,7 @@ public class TraceMolecules implements PlugIn
 			}
 
 			manager.setTracker(new IJTrackProgress());
-			manager.traceMolecules(settings.distanceThreshold / results.getCalibration().nmPerPixel,
+			manager.traceMolecules(settings.distanceThreshold / results.getCalibration().getNmPerPixel(),
 					timeInFrames(settings));
 			traces = manager.getTraces();
 			totalFiltered = manager.getTotalFiltered();
@@ -707,7 +707,7 @@ public class TraceMolecules implements PlugIn
 		}
 
 		// Store exposure time in seconds
-		exposureTime = results.getCalibration().exposureTime / 1000;
+		exposureTime = results.getCalibration().getExposureTime() / 1000;
 
 		return true;
 	}
@@ -817,7 +817,7 @@ public class TraceMolecules implements PlugIn
 		}
 
 		// Store exposure time in seconds
-		exposureTime = results.getCalibration().exposureTime / 1000;
+		exposureTime = results.getCalibration().getExposureTime() / 1000;
 
 		return true;
 	}

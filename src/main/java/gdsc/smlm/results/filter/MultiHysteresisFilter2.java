@@ -150,7 +150,7 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 		bias = -1;
 		if (peakResults.getCalibration() != null)
 		{
-			bias = peakResults.getCalibration().bias;
+			bias = peakResults.getCalibration().getBias();
 		}
 
 		// Set the signal limit using the gain

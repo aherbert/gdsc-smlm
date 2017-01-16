@@ -72,18 +72,18 @@ public class MALKFilePeakResults extends FilePeakResults
 		nmPerPixel = 1;
 		if (calibration != null)
 		{
-			if (Maths.isFinite(calibration.nmPerPixel) && calibration.nmPerPixel > 0)
+			if (Maths.isFinite(calibration.getNmPerPixel()) && calibration.getNmPerPixel() > 0)
 			{
-				nmPerPixel = (float) calibration.nmPerPixel;
-				comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(calibration.nmPerPixel));
+				nmPerPixel = (float) calibration.getNmPerPixel();
+				comments[count++] = String.format("Pixel pitch %s (nm)", Utils.rounded(calibration.getNmPerPixel()));
 			}
-			if (Maths.isFinite(calibration.gain) && calibration.gain > 0)
+			if (Maths.isFinite(calibration.getGain()) && calibration.getGain() > 0)
 			{
-				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(calibration.gain));
+				comments[count++] = String.format("Gain %s (Count/photon)", Utils.rounded(calibration.getGain()));
 			}
-			if (Maths.isFinite(calibration.exposureTime) && calibration.exposureTime > 0)
+			if (Maths.isFinite(calibration.getExposureTime()) && calibration.getExposureTime() > 0)
 			{
-				comments[count++] = String.format("Exposure time %s (seconds)", Utils.rounded(calibration.exposureTime*1e-3));
+				comments[count++] = String.format("Exposure time %s (seconds)", Utils.rounded(calibration.getExposureTime()*1e-3));
 			}
 		}
 		return Arrays.copyOf(comments, count);

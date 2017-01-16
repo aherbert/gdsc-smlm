@@ -139,15 +139,15 @@ public class SpotInspector implements PlugIn, MouseListener
 		{
 			// Get a bias if required
 			Calibration calibration = results.getCalibration();
-			if (calibration.bias == 0)
+			if (calibration.getBias() == 0)
 			{
 				GenericDialog gd = new GenericDialog(TITLE);
 				gd.addMessage("Calibrated results requires a camera bias");
-				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 				gd.showDialog();
 				if (!gd.wasCanceled())
 				{
-					calibration.bias = Math.abs(gd.getNextNumber());
+					calibration.setBias(Math.abs(gd.getNextNumber()));
 				}
 			}
 		}

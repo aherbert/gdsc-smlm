@@ -128,7 +128,7 @@ public class SummariseResults implements PlugIn
 		sb.append("\t").append(result.size());
 		int maxT = getMaxT(result);
 		sb.append("\t").append(maxT);
-		final double exposureTime = (result.getCalibration() != null) ? result.getCalibration().exposureTime : 0;
+		final double exposureTime = (result.getCalibration() != null) ? result.getCalibration().getExposureTime() : 0;
 		sb.append("\t").append(Utils.timeToString(maxT * exposureTime));
 		if (size > 0)
 		{

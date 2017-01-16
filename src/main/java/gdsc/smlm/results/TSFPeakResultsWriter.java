@@ -79,7 +79,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	{
 		out = null;
 		size = 0;
-		bias = (calibration != null) ? (float) calibration.bias : 0;
+		bias = (calibration != null) ? (float) calibration.getBias() : 0;
 		id = new AtomicInteger();
 		try
 		{
@@ -164,9 +164,9 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		if (this.calibration != null)
 		{
 			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-					calibration.nmPerPixel;
-			float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s,
-					params[Gaussian2DFunction.SIGNAL] / calibration.gain, noise / calibration.gain, calibration.emCCD);
+					calibration.getNmPerPixel();
+			float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
+					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(), calibration.isEmCCD());
 			builder.setXPrecision(precision);
 			builder.setYPrecision(precision);
 		}
@@ -276,10 +276,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			if (this.calibration != null)
 			{
 				double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-						calibration.nmPerPixel;
-				float precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s,
-						params[Gaussian2DFunction.SIGNAL] / calibration.gain, result.noise / calibration.gain,
-						calibration.emCCD);
+						calibration.getNmPerPixel();
+				float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
+						params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), result.noise / calibration.getGain(),
+						calibration.isEmCCD());
 				builder.setXPrecision(precision);
 				builder.setYPrecision(precision);
 			}
@@ -423,17 +423,17 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		}
 		if (calibration != null)
 		{
-			builder.setPixelSize((float) calibration.nmPerPixel);
+			builder.setPixelSize((float) calibration.getNmPerPixel());
 
-			builder.setGain(calibration.gain);
-			builder.setExposureTime(calibration.exposureTime);
-			builder.setReadNoise(calibration.readNoise);
-			builder.setBias(calibration.bias);
-			builder.setEmCCD(calibration.emCCD);
-			builder.setAmplification(calibration.amplification);
+			builder.setGain(calibration.getGain());
+			builder.setExposureTime(calibration.getExposureTime());
+			builder.setReadNoise(calibration.getReadNoise());
+			builder.setBias(calibration.getBias());
+			builder.setEmCCD(calibration.isEmCCD());
+			builder.setAmplification(calibration.getAmplification());
 
 			// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
-			double ecf = (calibration.amplification > 0) ? calibration.amplification : calibration.gain;
+			double ecf = (calibration.getAmplification() > 0) ? calibration.getAmplification() : calibration.getGain();
 			builder.setEcf(ecf);
 		}
 		if (configuration != null && configuration.length() > 0)

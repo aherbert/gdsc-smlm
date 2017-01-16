@@ -121,10 +121,10 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
 		gd.addStringField("Config_file", filename, 40);
-		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
-		gd.addNumericField("Gain", calibration.gain, 2);
-		gd.addCheckbox("EM-CCD", calibration.emCCD);
-		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
+		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
+		gd.addNumericField("Gain", calibration.getGain(), 2);
+		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
+		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
 		gd.addMessage("--- Gaussian parameters ---");
 		gd.addNumericField("Initial_StdDev0", fitConfig.getInitialPeakStdDev0(), 3);
@@ -260,10 +260,10 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 
 		filename = gd.getNextString();
 
-		calibration.nmPerPixel = gd.getNextNumber();
-		calibration.gain = gd.getNextNumber();
-		calibration.emCCD = gd.getNextBoolean();
-		calibration.exposureTime = gd.getNextNumber();
+		calibration.setNmPerPixel(gd.getNextNumber());
+		calibration.setGain(gd.getNextNumber());
+		calibration.setEmCCD(gd.getNextBoolean());
+		calibration.setExposureTime(gd.getNextNumber());
 		fitConfig.setInitialPeakStdDev0(gd.getNextNumber());
 		fitConfig.setInitialPeakStdDev1(gd.getNextNumber());
 		fitConfig.setInitialAngleD(gd.getNextNumber());
@@ -295,9 +295,9 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("nm per pixel", calibration.nmPerPixel);
-			Parameters.isAboveZero("Gain", calibration.gain);
-			Parameters.isAboveZero("Exposure time", calibration.exposureTime);
+			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
+			Parameters.isAboveZero("Gain", calibration.getGain());
+			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialPeakStdDev0());
 			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialPeakStdDev1());
 			Parameters.isPositive("Initial angle", fitConfig.getInitialAngleD());
@@ -436,10 +436,10 @@ public class Configuration implements PlugIn, MouseListener, TextListener, ItemL
 				FitConfiguration fitConfig = config.getFitConfiguration();
 				Calibration calibration = settings.getCalibration();
 
-				textNmPerPixel.setText("" + calibration.nmPerPixel);
-				textGain.setText("" + calibration.gain);
-				textEMCCD.setState(calibration.emCCD);
-				textExposure.setText("" + calibration.exposureTime);
+				textNmPerPixel.setText("" + calibration.getNmPerPixel());
+				textGain.setText("" + calibration.getGain());
+				textEMCCD.setState(calibration.isEmCCD());
+				textExposure.setText("" + calibration.getExposureTime());
 				textInitialPeakStdDev0.setText("" + fitConfig.getInitialPeakStdDev0());
 				textInitialPeakStdDev1.setText("" + fitConfig.getInitialPeakStdDev1());
 				textInitialAngleD.setText("" + fitConfig.getInitialAngle());

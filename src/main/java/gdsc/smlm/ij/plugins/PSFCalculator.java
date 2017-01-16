@@ -72,7 +72,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 
 		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialPeakStdDev((float) sd);
 		globalSettings.getFitEngineConfiguration().getFitConfiguration().setInitialAngle(0);
-		globalSettings.getCalibration().nmPerPixel = getPixelPitch();
+		globalSettings.getCalibration().setNmPerPixel(getPixelPitch());
 		SettingsManager.saveSettings(globalSettings);
 	}
 

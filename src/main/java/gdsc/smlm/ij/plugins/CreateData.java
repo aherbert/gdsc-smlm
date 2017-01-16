@@ -1788,10 +1788,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		// Add drawn spots to memory
 		results = new MemoryPeakResults();
 		Calibration c = new Calibration(settings.pixelPitch, settings.getTotalGain(), settings.exposureTime);
-		c.emCCD = (settings.getEmGain() > 1);
-		c.bias = settings.bias;
-		c.readNoise = settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
-		c.amplification = settings.getAmplification();
+		c.setEmCCD((settings.getEmGain() > 1));
+		c.setBias(settings.bias);
+		c.setReadNoise(settings.readNoise * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
+		c.setAmplification(settings.getAmplification());
 		results.setCalibration(c);
 		results.setSortAfterEnd(true);
 		results.begin();
@@ -5034,12 +5034,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		Calibration cal = results.getCalibration();
 		if (cal != null)
 		{
-			bias = cal.bias;
-			gain = cal.gain;
-			amplification = cal.amplification;
-			emCCD = cal.emCCD;
-			readNoise = cal.readNoise;
-			a = cal.nmPerPixel;
+			bias = cal.getBias();
+			gain = cal.getGain();
+			amplification = cal.getAmplification();
+			emCCD = cal.isEmCCD();
+			readNoise = cal.getReadNoise();
+			a = cal.getNmPerPixel();
 		}
 
 		// Use last simulation parameters for missing settings.

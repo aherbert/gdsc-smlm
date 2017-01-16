@@ -208,7 +208,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getNmPerPixel()
 	{
-		return (calibration != null) ? calibration.nmPerPixel : DEFAULT_NM_PER_PIXEL;
+		return (calibration != null && calibration.hasNmPerPixel()) ? calibration.getNmPerPixel() : DEFAULT_NM_PER_PIXEL;
 	}
 
 	/**
@@ -218,7 +218,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public double getGain()
 	{
-		return (calibration != null) ? calibration.gain : DEFAULT_GAIN;
+		return (calibration != null && calibration.hasGain()) ? calibration.getGain() : DEFAULT_GAIN;
 	}
 
 	/**
@@ -228,7 +228,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 */
 	public boolean isEMCCD()
 	{
-		return (calibration != null) ? calibration.emCCD : DEFAULT_EMCCD;
+		return (calibration != null && calibration.hasEMCCD()) ? calibration.isEmCCD() : DEFAULT_EMCCD;
 	}
 	
 	/*

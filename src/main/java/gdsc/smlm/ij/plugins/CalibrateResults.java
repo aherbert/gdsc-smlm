@@ -98,13 +98,13 @@ public class CalibrateResults implements PlugIn
 		gd.addStringField("Name", results.getName(), Math.max(Math.min(results.getName().length(), 60), 20));
 		if (!newCalibration)
 			gd.addCheckbox("Update_all_linked_results", updateAll);
-		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
-		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
-		gd.addCheckbox("EM-CCD", calibration.emCCD);
-		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
-		gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
-		gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
-		gd.addNumericField("Amplification (ADUs/electron)", calibration.amplification, 2);
+		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
+		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
+		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
+		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
+		gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
+		gd.addNumericField("Read_noise (ADUs)", calibration.getReadNoise(), 2);
+		gd.addNumericField("Amplification (ADUs/electron)", calibration.getAmplification(), 2);
 		
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -135,13 +135,13 @@ public class CalibrateResults implements PlugIn
 			}
 		}
 		
-		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
-		calibration.gain = Math.abs(gd.getNextNumber());
-		calibration.emCCD = gd.getNextBoolean();
-		calibration.exposureTime = Math.abs(gd.getNextNumber());
-		calibration.bias = Math.abs(gd.getNextNumber());
-		calibration.readNoise = Math.abs(gd.getNextNumber());
-		calibration.amplification = Math.abs(gd.getNextNumber());
+		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
+		calibration.setGain(Math.abs(gd.getNextNumber()));
+		calibration.setEmCCD(gd.getNextBoolean());
+		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
+		calibration.setBias(Math.abs(gd.getNextNumber()));
+		calibration.setReadNoise(Math.abs(gd.getNextNumber()));
+		calibration.setAmplification(Math.abs(gd.getNextNumber()));
 		
 		if (newCalibration)
 			results.setCalibration(calibration);

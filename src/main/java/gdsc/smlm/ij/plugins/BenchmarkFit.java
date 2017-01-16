@@ -623,13 +623,13 @@ public class BenchmarkFit implements PlugIn
 
 		// Initialise the correct calibration
 		Calibration calibration = settings.getCalibration();
-		calibration.nmPerPixel = benchmarkParameters.a;
-		calibration.gain = benchmarkParameters.gain;
-		calibration.amplification = benchmarkParameters.amplification;
-		calibration.bias = benchmarkParameters.bias;
-		calibration.emCCD = benchmarkParameters.emCCD;
-		calibration.readNoise = benchmarkParameters.readNoise;
-		calibration.exposureTime = 1000;
+		calibration.setNmPerPixel(benchmarkParameters.a);
+		calibration.setGain(benchmarkParameters.gain);
+		calibration.setAmplification(benchmarkParameters.amplification);
+		calibration.setBias(benchmarkParameters.bias);
+		calibration.setEmCCD(benchmarkParameters.emCCD);
+		calibration.setReadNoise(benchmarkParameters.readNoise);
+		calibration.setExposureTime(1000);
 
 		if (!PeakFit.configureFitSolver(settings, filename, false))
 			return false;

@@ -92,7 +92,7 @@ public class DarkTimeAnalysis implements PlugIn
 			IJ.showStatus("");
 			return;
 		}
-		msPerFrame = results.getCalibration().exposureTime;
+		msPerFrame = results.getCalibration().getExposureTime();
 		Utils.log("%s: %d localisations", TITLE, results.size());
 
 		if (results.size() == 0)
@@ -152,7 +152,7 @@ public class DarkTimeAnalysis implements PlugIn
 		int max = results.getResults().get(results.size() - 1).getEndFrame();
 
 		// Trace results
-		double d = searchDistance / results.getCalibration().nmPerPixel;
+		double d = searchDistance / results.getCalibration().getNmPerPixel();
 		int range = max - min + 1;
 		if (maxDarkTime > 0)
 			range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));

@@ -266,6 +266,7 @@ public class TSFPeakResultsReader
 			default:
 				System.err.println("Unsupported intensity units conversion: " + intensityUnits);
 		}
+		final float bias = (results.getCalibration().hasBias()) ? (float) results.getCalibration().getBias() : 0f;
 
 		ThetaUnits thetaUnits = spotList.getThetaUnits();
 
@@ -330,8 +331,9 @@ public class TSFPeakResultsReader
 				params[Gaussian2DFunction.SIGNAL] = spot.getIntensity() * intensityConversion;
 				if (spot.hasBackground())
 				{
-					// The writer of the TSF file should have removed the bias (as documented in the format)
-					params[Gaussian2DFunction.BACKGROUND] = spot.getBackground() * intensityConversion;
+					// The writer of the TSF file should have removed the bias (as documented in the format).
+					// We can add it back for GSDC results
+					params[Gaussian2DFunction.BACKGROUND] = spot.getBackground() * intensityConversion + bias;
 				}
 
 				// Support different Gaussian shapes
@@ -486,13 +488,13 @@ public class TSFPeakResultsReader
 
 		if (spotList.hasPixelSize())
 		{
-			cal.nmPerPixel = spotList.getPixelSize();
+			cal.setNmPerPixel(spotList.getPixelSize());
 		}
 		if (spotList.hasEcf())
 		{
 			// Use it in both fields
-			cal.gain = spotList.getEcf();
-			cal.amplification = spotList.getEcf();
+			cal.setGain(spotList.getEcf());
+			cal.setAmplification(spotList.getEcf());
 		}
 
 		if (isGDSC)
@@ -514,17 +516,17 @@ public class TSFPeakResultsReader
 			}
 
 			if (spotList.hasGain())
-				cal.gain = spotList.getGain();
+				cal.setGain(spotList.getGain());
 			if (spotList.hasExposureTime())
-				cal.exposureTime = spotList.getExposureTime();
+				cal.setExposureTime(spotList.getExposureTime());
 			if (spotList.hasReadNoise())
-				cal.readNoise = spotList.getReadNoise();
+				cal.setReadNoise(spotList.getReadNoise());
 			if (spotList.hasBias())
-				cal.bias = spotList.getBias();
+				cal.setBias(spotList.getBias());
 			if (spotList.hasEmCCD())
-				cal.emCCD = spotList.getEmCCD();
+				cal.setEmCCD(spotList.getEmCCD());
 			if (spotList.hasAmplification())
-				cal.amplification = spotList.getAmplification();
+				cal.setAmplification(spotList.getAmplification());
 
 			if (spotList.hasConfiguration())
 			{
@@ -534,14 +536,14 @@ public class TSFPeakResultsReader
 
 		if (spotList.getLocationUnits() != LocationUnits.PIXELS)
 		{
-			if (getNmPerPixel(cal) == 1f)
+			if (!cal.hasNmPerPixel())
 				System.err.println(
 						"TSF location units are not pixels and no calibration is available. The dataset will be constructed in the native units: " +
 								spotList.getLocationUnits());
 		}
 		if (spotList.getIntensityUnits() != IntensityUnits.COUNTS)
 		{
-			if (getGain(cal) == 1f)
+			if (!cal.hasGain())
 				System.err.println(
 						"TSF intensity units are not counts and no calibration is available. The dataset will be constructed in the native units: " +
 								spotList.getIntensityUnits());
@@ -552,16 +554,16 @@ public class TSFPeakResultsReader
 
 	private float getNmPerPixel(Calibration cal)
 	{
-		if (cal.nmPerPixel <= 0)
+		if (cal.getNmPerPixel() <= 0)
 			return 1f;
-		return (float) cal.nmPerPixel;
+		return (float) cal.getNmPerPixel();
 	}
 
 	private float getGain(Calibration cal)
 	{
-		if (cal.gain <= 0)
+		if (cal.getGain() <= 0)
 			return 1f;
-		return (float) cal.gain;
+		return (float) cal.getGain();
 	}
 
 	/**

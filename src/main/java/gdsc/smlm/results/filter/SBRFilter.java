@@ -45,8 +45,8 @@ public class SBRFilter extends DirectFilter
 		bias = -1;
 		if (peakResults.getCalibration() != null)
 		{
-			if (peakResults.getCalibration().bias >= 0)
-				bias = peakResults.getCalibration().bias;
+			if (peakResults.getCalibration().getBias() >= 0)
+				bias = peakResults.getCalibration().getBias();
 		}
 	}
 

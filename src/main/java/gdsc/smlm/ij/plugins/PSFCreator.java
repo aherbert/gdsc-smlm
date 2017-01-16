@@ -1386,7 +1386,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 	{
 		final String filename = SettingsManager.getSettingsFilename();
 		GlobalSettings settings = SettingsManager.loadSettings(filename);
-		nmPerPixel = settings.getCalibration().nmPerPixel;
+		nmPerPixel = settings.getCalibration().getNmPerPixel();
 		config = settings.getFitEngineConfiguration();
 		fitConfig = config.getFitConfiguration();
 		if (radius < 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))

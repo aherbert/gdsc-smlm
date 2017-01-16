@@ -97,8 +97,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			Calibration cal = getCalibration();
 			if (cal != null)
 			{
-				gain = cal.gain;
-				nmPerPixel = cal.nmPerPixel;
+				gain = cal.getGain();
+				nmPerPixel = cal.getNmPerPixel();
 			}
 			else
 			{
@@ -266,9 +266,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (this.calibration != null)
 		{
 			final double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
-					calibration.nmPerPixel;
-			precision = (float) PeakResult.getPrecision(calibration.nmPerPixel, s, params[Gaussian2DFunction.SIGNAL] /
-					calibration.gain, noise / calibration.gain, calibration.emCCD);
+					calibration.getNmPerPixel();
+			precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s, params[Gaussian2DFunction.SIGNAL] /
+					calibration.getGain(), noise / calibration.getGain(), calibration.isEmCCD());
 		}
 		final float snr = (noise > 0) ? params[Gaussian2DFunction.SIGNAL] / noise : 0;
 		if (showCalibratedValues)
@@ -280,7 +280,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			noise /= gain;
 			params = Arrays.copyOf(params, params.length);
 			params[Gaussian2DFunction.SIGNAL] /= gain;
-			params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] - calibration.bias) / gain);
+			params[Gaussian2DFunction.BACKGROUND] = (float) ((params[Gaussian2DFunction.BACKGROUND] - calibration.getBias()) / gain);
 			params[Gaussian2DFunction.X_POSITION] *= nmPerPixel;
 			params[Gaussian2DFunction.X_SD] *= nmPerPixel;
 			params[Gaussian2DFunction.Y_POSITION] *= nmPerPixel;

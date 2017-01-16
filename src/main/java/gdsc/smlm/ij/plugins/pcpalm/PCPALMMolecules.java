@@ -913,7 +913,7 @@ public class PCPALMMolecules implements PlugIn
 		}
 		log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm, t=%d frames (%s s)",
 				results.size(), molecules.size() + singles.size(), singles.size(), molecules.size(), distance, time,
-				Utils.rounded(time * results.getCalibration().exposureTime / 1000.0));
+				Utils.rounded(time * results.getCalibration().getExposureTime() / 1000.0));
 		return molecules;
 	}
 
@@ -960,7 +960,7 @@ public class PCPALMMolecules implements PlugIn
 
 		// Convert seconds to frames
 		int timeInFrames = FastMath.max(1,
-				(int) Math.round(tThreshold * 1000.0 / results.getCalibration().exposureTime));
+				(int) Math.round(tThreshold * 1000.0 / results.getCalibration().getExposureTime()));
 
 		ArrayList<Molecule> singles = new ArrayList<Molecule>();
 		molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
@@ -1751,7 +1751,7 @@ public class PCPALMMolecules implements PlugIn
 			if (end < r.getEndFrame())
 				end = r.getEndFrame();
 		}
-		seconds = (end - start + 1) * results.getCalibration().exposureTime / 1000;
+		seconds = (end - start + 1) * results.getCalibration().getExposureTime() / 1000;
 	}
 
 	private boolean createImage(ArrayList<Molecule> molecules)

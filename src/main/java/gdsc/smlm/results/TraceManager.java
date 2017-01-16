@@ -578,9 +578,9 @@ public class TraceManager
 			final boolean emCCD;
 			if (calibration != null)
 			{
-				nmPerPixel = calibration.nmPerPixel;
-				gain = calibration.gain;
-				emCCD = calibration.emCCD;
+				nmPerPixel = calibration.getNmPerPixel();
+				gain = calibration.getGain();
+				emCCD = calibration.isEmCCD();
 			}
 			else
 			{

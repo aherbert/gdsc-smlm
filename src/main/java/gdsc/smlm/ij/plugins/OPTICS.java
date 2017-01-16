@@ -1155,8 +1155,8 @@ public class OPTICS implements PlugIn
 	 */
 	public double getNmPerPixel(MemoryPeakResults results)
 	{
-		if (results.getCalibration() != null && results.getCalibration().nmPerPixel > 0)
-			return results.getCalibration().nmPerPixel;
+		if (results.getCalibration() != null && results.getCalibration().getNmPerPixel() > 0)
+			return results.getCalibration().getNmPerPixel();
 		return 1;
 	}
 

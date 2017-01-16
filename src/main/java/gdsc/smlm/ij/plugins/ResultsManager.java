@@ -309,15 +309,15 @@ public class ResultsManager implements PlugIn, MouseListener
 			r.setShowCalibratedValues(resultsSettings.getResultsTable() == ResultsTable.CALIBRATED);
 			// Get a bias if required
 			Calibration calibration = results.getCalibration();
-			if (r.isShowCalibratedValues() && calibration.bias == 0)
+			if (r.isShowCalibratedValues() && calibration.getBias() == 0)
 			{
 				GenericDialog gd = new GenericDialog(TITLE);
 				gd.addMessage("Calibrated results requires a camera bias");
-				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 				gd.showDialog();
 				if (!gd.wasCanceled())
 				{
-					calibration.bias = Math.abs(gd.getNextNumber());
+					calibration.setBias(Math.abs(gd.getNextNumber()));
 				}
 			}
 			r.setShowEndFrame(showEndFrame);
@@ -936,19 +936,25 @@ public class ResultsManager implements PlugIn, MouseListener
 	{
 		// Check for Calibration
 		Calibration calibration = results.getCalibration();
+		String msg = "partially calibrated";
+		if (calibration == null)
+		{
+			// Make sure the user knows all the values have not been set
+			calibration = new Calibration();
+			msg = "uncalibrated";
+		}
+		else
+		{
+			// Validate to set the valid flags
+			calibration.validate();
+		}
+
 		final float noise = getNoise(results);
 		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
-		if (calibration == null || calibration.nmPerPixel <= 0 || calibration.gain <= 0 ||
-				calibration.exposureTime <= 0 || noise <= 0)
+		if (calibration == null || calibration.getNmPerPixel() <= 0 || calibration.getGain() <= 0 ||
+				calibration.getExposureTime() <= 0 || noise <= 0)
 		{
-			String msg = "partially calibrated";
 			boolean convert = false;
-			if (calibration == null)
-			{
-				// Make sure the user knows all the values have not been set
-				calibration = new Calibration(0, 0, 0);
-				msg = "uncalibrated";
-			}
 
 			// We may have results that are within configured bounds. If so we do not need the conversion
 			boolean showConvert = true;
@@ -966,18 +972,18 @@ public class ResultsManager implements PlugIn, MouseListener
 				}
 			}
 
-			if (calibration.nmPerPixel <= 0)
-				calibration.nmPerPixel = input_nmPerPixel;
-			if (calibration.gain <= 0)
-				calibration.gain = input_gain;
-			if (calibration.exposureTime <= 0)
-				calibration.exposureTime = input_exposureTime;
+			if (calibration.getNmPerPixel() <= 0)
+				calibration.setNmPerPixel(input_nmPerPixel);
+			if (calibration.getGain() <= 0)
+				calibration.setGain(input_gain);
+			if (calibration.getExposureTime() <= 0)
+				calibration.setExposureTime(input_exposureTime);
 
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.addMessage("Results are " + msg);
-			gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
-			gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
-			gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
+			gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
+			gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
+			gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 			if (noise <= 0)
 				gd.addNumericField("Noise (ADU)", input_noise, 2);
 			if (showConvert)

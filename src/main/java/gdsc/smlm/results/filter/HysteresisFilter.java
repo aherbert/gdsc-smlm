@@ -298,7 +298,7 @@ public abstract class HysteresisFilter extends Filter
 				if (peakResults.getCalibration() != null)
 				{
 					myTimeThreshold = (int) Math
-							.round((this.timeThreshold / peakResults.getCalibration().exposureTime));
+							.round((this.timeThreshold / peakResults.getCalibration().getExposureTime()));
 				}
 				else
 					myTimeThreshold = 1;

@@ -738,10 +738,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		gd.addChoice("Template", templates, templates[0]);
 
 		gd.addStringField("Config_file", filename, 40);
-		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
-		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
-		gd.addCheckbox("EM-CCD", calibration.emCCD);
-		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
+		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
+		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
+		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
+		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
 		if (isCrop)
 			gd.addCheckbox("Ignore_bounds_for_noise", optionIgnoreBoundsForNoise);
@@ -1063,16 +1063,16 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// Get a bias if required
-		if (resultsSettings.getResultsTable() == ResultsTable.CALIBRATED && calibration.bias == 0)
+		if (resultsSettings.getResultsTable() == ResultsTable.CALIBRATED && calibration.getBias() == 0)
 		{
 			gd = new GenericDialog(TITLE);
 			gd.addMessage("Calibrated results requires a camera bias");
-			gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+			gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 			gd.showDialog();
 			if (!gd.wasCanceled())
 			{
-				calibration.bias = Math.abs(gd.getNextNumber());
-				if (calibration.bias > 0)
+				calibration.setBias(Math.abs(gd.getNextNumber()));
+				if (calibration.getBias() > 0)
 					SettingsManager.saveSettings(settings, filename);
 			}
 		}
@@ -1157,9 +1157,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		IJ.log("-=-=-=-");
 		IJ.log("Peak Fit");
 		IJ.log("-=-=-=-");
-		Utils.log("Pixel pitch = %s", Utils.rounded(calibration.nmPerPixel, 4));
-		Utils.log("Exposure Time = %s", Utils.rounded(calibration.exposureTime, 4));
-		Utils.log("Gain = %s", Utils.rounded(calibration.gain, 4));
+		Utils.log("Pixel pitch = %s", Utils.rounded(calibration.getNmPerPixel(), 4));
+		Utils.log("Exposure Time = %s", Utils.rounded(calibration.getExposureTime(), 4));
+		Utils.log("Gain = %s", Utils.rounded(calibration.getGain(), 4));
 		Utils.log("PSF width = %s", Utils.rounded(fitConfig.getInitialPeakStdDev0(), 4));
 
 		// Save
@@ -1188,11 +1188,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		calibration = settings.getCalibration();
 
 		// Check if the calibration contains: Pixel pitch, Gain (can be 1), Exposure time
-		if (calibration.nmPerPixel <= 0)
+		if (calibration.getNmPerPixel() <= 0)
 			return true;
-		if (calibration.gain <= 0)
+		if (calibration.getGain() <= 0)
 			return true;
-		if (calibration.exposureTime <= 0)
+		if (calibration.getExposureTime() <= 0)
 			return true;
 
 		// Check for a PSF width
@@ -1231,9 +1231,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Check parameters
 		try
 		{
-			Parameters.isAboveZero("nm per pixel", calibration.nmPerPixel);
-			Parameters.isAboveZero("Gain", calibration.gain);
-			Parameters.isAboveZero("Exposure time", calibration.exposureTime);
+			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
+			Parameters.isAboveZero("Gain", calibration.getGain());
+			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD", fitConfig.getInitialPeakStdDev0());
 		}
 		catch (IllegalArgumentException e)
@@ -1262,11 +1262,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				"Enter the size of each pixel. This is required to ensure the dimensions of the image are calibrated.",
 				"E.g. a camera with a 6.45um pixel size and a 60x objective will have a pitch of 6450/60 = 107.5nm.");
 		// TODO - Add a pop-up calculator...
-		gd.addNumericField("Calibration (nm/px)", calibration.nmPerPixel, 2);
+		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
+		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		return true;
 	}
 
@@ -1277,13 +1277,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				"The gain is usually expressed using the product of the EM-gain (if applicable), the camera gain and the sensor quantum efficiency.",
 				"A value of 1 means no conversion to photons will occur.");
 		// TODO - Add a wizard to allow calculation of total gain from EM-gain, camera gain and QE
-		gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
-		gd.addCheckbox("EM-CCD", calibration.emCCD);
+		gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
+		gd.addCheckbox("EM-CCD", calibration.isEmCCD());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		calibration.gain = Math.abs(gd.getNextNumber());
-		calibration.emCCD = gd.getNextBoolean();
+		calibration.setGain(Math.abs(gd.getNextNumber()));
+		calibration.setEmCCD(gd.getNextBoolean());
 		return true;
 	}
 
@@ -1292,11 +1292,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		GenericDialog gd = newWizardDialog(
 				"Enter the exposure time. Calibration of the exposure time allows correct reporting of on and off times.",
 				"This is the length of time for each frame in the image.");
-		gd.addNumericField("Exposure_time (ms)", calibration.exposureTime, 2);
+		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		calibration.exposureTime = Math.abs(gd.getNextNumber());
+		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
 		return true;
 	}
 
@@ -1376,7 +1376,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				{
 					cb.setState(false);
 					PSFCalculator calculator = new PSFCalculator();
-					calculatorSettings.pixelPitch = calibration.nmPerPixel / 1000.0;
+					calculatorSettings.pixelPitch = calibration.getNmPerPixel() / 1000.0;
 					calculatorSettings.magnification = 1;
 					calculatorSettings.beamExpander = 1;
 					double sd = calculator.calculate(calculatorSettings, true);
@@ -1429,10 +1429,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 		String filename = gd.getNextString();
 
-		calibration.nmPerPixel = Math.abs(gd.getNextNumber());
-		calibration.gain = Math.abs(gd.getNextNumber());
-		calibration.emCCD = gd.getNextBoolean();
-		calibration.exposureTime = Math.abs(gd.getNextNumber());
+		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
+		calibration.setGain(Math.abs(gd.getNextNumber()));
+		calibration.setEmCCD(gd.getNextBoolean());
+		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
 		// Note: The bias and read noise will just end up being what was in the configuration file
 		// One fix for this is to save/load only the settings that are required from the configuration file
 		// (the others will remain unchanged). This will require a big refactor of the settings save/load.
@@ -1517,9 +1517,9 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("nm per pixel", calibration.nmPerPixel);
-			Parameters.isAboveZero("Gain", calibration.gain);
-			Parameters.isAboveZero("Exposure time", calibration.exposureTime);
+			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
+			Parameters.isAboveZero("Gain", calibration.getGain());
+			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialPeakStdDev0());
 			if (!maximaIdentification)
 			{
@@ -1578,12 +1578,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				gd.addMessage(
 						"Precision filtering can use global noise estimate or local background level.\n \nLocal background requires the camera bias:");
 				gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
-				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return false;
 				fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
-				calibration.bias = Math.abs(gd.getNextNumber());
+				calibration.setBias(Math.abs(gd.getNextNumber()));
 			}
 		}
 
@@ -1677,7 +1677,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Currently we just collect it here even if not needed
 		gd.addMessage(
 				"Smart filters using precision filtering may require a local background level.\n \nLocal background requires the camera bias:");
-		gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+		gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -1689,7 +1689,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			return false;
 		fitConfig.setDirectFilter((DirectFilter) f);
 
-		calibration.bias = Math.abs(gd.getNextNumber());
+		calibration.setBias(Math.abs(gd.getNextNumber()));
 
 		if (filename != null)
 			SettingsManager.saveSettings(settings, filename);
@@ -1829,11 +1829,11 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
 			if (!ignoreCalibration)
 			{
-				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 				gd.addCheckbox("Model_camera_noise", fitConfig.isModelCamera());
-				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
-				gd.addNumericField("Amplification (ADU/electron)", calibration.amplification, 2);
-				gd.addCheckbox("EM-CCD", calibration.emCCD);
+				gd.addNumericField("Read_noise (ADUs)", calibration.getReadNoise(), 2);
+				gd.addNumericField("Amplification (ADU/electron)", calibration.getAmplification(), 2);
+				gd.addCheckbox("EM-CCD", calibration.isEmCCD());
 			}
 			String[] searchNames = SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
 			gd.addChoice("Search_method", searchNames, searchNames[fitConfig.getSearchMethod().ordinal()]);
@@ -1848,15 +1848,15 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				return false;
 			if (!ignoreCalibration)
 			{
-				calibration.bias = Math.abs(gd.getNextNumber());
+				calibration.setBias(Math.abs(gd.getNextNumber()));
 				fitConfig.setModelCamera(gd.getNextBoolean());
-				calibration.readNoise = Math.abs(gd.getNextNumber());
-				calibration.amplification = Math.abs(gd.getNextNumber());
-				calibration.emCCD = gd.getNextBoolean();
-				fitConfig.setBias(calibration.bias);
-				fitConfig.setReadNoise(calibration.readNoise);
-				fitConfig.setAmplification(calibration.amplification);
-				fitConfig.setEmCCD(calibration.emCCD);
+				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
+				calibration.setAmplification(Math.abs(gd.getNextNumber()));
+				calibration.setEmCCD(gd.getNextBoolean());
+				fitConfig.setBias(calibration.getBias());
+				fitConfig.setReadNoise(calibration.getReadNoise());
+				fitConfig.setAmplification(calibration.getAmplification());
+				fitConfig.setEmCCD(calibration.isEmCCD());
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 			try
@@ -1918,12 +1918,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (isWeightedLVM && !ignoreCalibration)
 			{
 				gd.addMessage("Weighted LVM fitting requires a CCD camera noise model");
-				gd.addNumericField("Read_noise (ADUs)", calibration.readNoise, 2);
+				gd.addNumericField("Read_noise (ADUs)", calibration.getReadNoise(), 2);
 			}
 			if (requireBias)
-				gd.addNumericField("Camera_bias (ADUs)", calibration.bias, 2);
+				gd.addNumericField("Camera_bias (ADUs)", calibration.getBias(), 2);
 			if (requireGain)
-				gd.addNumericField("Gain (ADU/photon)", calibration.gain, 2);
+				gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
 
 			if (isBoundedLVM)
 			{
@@ -1956,17 +1956,17 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			if (isWeightedLVM && !ignoreCalibration)
 			{
-				calibration.readNoise = Math.abs(gd.getNextNumber());
+				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
 			}
 			if (requireBias)
 			{
-				calibration.bias = Math.abs(gd.getNextNumber());
-				fitConfig.setBias(calibration.bias);
+				calibration.setBias(Math.abs(gd.getNextNumber()));
+				fitConfig.setBias(calibration.getBias());
 			}
 			if (requireGain)
 			{
-				calibration.gain = Math.abs(gd.getNextNumber());
-				fitConfig.setGain(calibration.gain);
+				calibration.setGain(Math.abs(gd.getNextNumber()));
+				fitConfig.setGain(calibration.getGain());
 			}
 
 			if (isBoundedLVM)
@@ -1988,7 +1988,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			if (isWeightedLVM && !ignoreCalibration)
 			{
 				fitConfig.setNoiseModel(
-						CameraNoiseModel.createNoiseModel(calibration.readNoise, calibration.bias, calibration.emCCD));
+						CameraNoiseModel.createNoiseModel(calibration.getReadNoise(), calibration.getBias(), calibration.isEmCCD()));
 			}
 
 			if (filename != null)
@@ -2047,7 +2047,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(resultsSettings.getResultsImage(),
 					resultsSettings.weightedImage, resultsSettings.equalisedImage, resultsList.getName(), bounds,
-					calibration.nmPerPixel, calibration.gain, resultsSettings.imageScale, resultsSettings.precision,
+					calibration.getNmPerPixel(), calibration.getGain(), resultsSettings.imageScale, resultsSettings.precision,
 					ResultsMode.ADD);
 			if (extraOptions)
 				image.setRollingWindowSize(resultsSettings.imageRollingWindow);
@@ -2476,10 +2476,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		fitConfig.setComputeDeviations(resultsSettings.showDeviations);
 
 		// Add the calibration for precision filtering
-		fitConfig.setNmPerPixel(calibration.nmPerPixel);
-		fitConfig.setGain(calibration.gain);
-		fitConfig.setBias(calibration.bias);
-		fitConfig.setEmCCD(calibration.emCCD);
+		fitConfig.setNmPerPixel(calibration.getNmPerPixel());
+		fitConfig.setGain(calibration.getGain());
+		fitConfig.setBias(calibration.getBias());
+		fitConfig.setEmCCD(calibration.isEmCCD());
 	}
 
 	/**
@@ -2737,13 +2737,13 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	{
 		this.calibration = calibration;
 
-		if (calibration.nmPerPixel > 0)
-			textNmPerPixel.setText("" + calibration.nmPerPixel);
-		if (calibration.gain > 0)
-			textGain.setText("" + calibration.gain);
-		textEMCCD.setState(calibration.emCCD);
-		if (calibration.exposureTime > 0)
-			textExposure.setText("" + calibration.exposureTime);
+		if (calibration.getNmPerPixel() > 0)
+			textNmPerPixel.setText("" + calibration.getNmPerPixel());
+		if (calibration.getGain() > 0)
+			textGain.setText("" + calibration.getGain());
+		textEMCCD.setState(calibration.isEmCCD());
+		if (calibration.getExposureTime() > 0)
+			textExposure.setText("" + calibration.getExposureTime());
 	}
 
 	/**

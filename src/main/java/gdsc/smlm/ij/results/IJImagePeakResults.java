@@ -205,7 +205,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		{
 			Calibration cal = new Calibration();
 			String unit = "nm";
-			double unitPerPixel = calibration.nmPerPixel / scale;
+			double unitPerPixel = calibration.getNmPerPixel() / scale;
 			if (unitPerPixel > 100)
 			{
 				unit = "um";

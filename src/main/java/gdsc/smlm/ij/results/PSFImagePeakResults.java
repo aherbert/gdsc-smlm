@@ -64,9 +64,9 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		// Cache the nmPerPixel and gain
 		if (calibration != null)
 		{
-			nmPerPixel = calibration.nmPerPixel;
-			gain = calibration.gain;
-			emCCD = calibration.emCCD;
+			nmPerPixel = calibration.getNmPerPixel();
+			gain = calibration.getGain();
+			emCCD = calibration.isEmCCD();
 		}
 	}
 
