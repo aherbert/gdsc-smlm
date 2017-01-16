@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.results;
 
 import gdsc.smlm.utils.XmlUtils;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
 import ij.ImagePlus;
@@ -90,10 +91,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private boolean liveImage = true;
 
 	// Used to draw the image
+	private int lastPaintSize = 0;
 	private int nextRepaintSize = 0;
+	private long nextPaintTime = 0;
 	private Object pixels;
 	private boolean imageLock = false;
 	private double repaintInterval = 0.1;
+	private long repaintDelay = 1000;
 	private int currentFrame;
 
 	private String lutName = "fire";
@@ -146,7 +150,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		preBegin();
 
 		// Handle invalid bounds with an empty single pixel image
-		boolean validBounds = imageWidth > 0 && imageHeight > 0;
+		boolean validBounds = imageWidth > 0 && imageHeight > 0 &&
+				(double) imageWidth * (double) imageHeight < Integer.MAX_VALUE;
 		int w, h;
 		if (validBounds)
 		{
@@ -155,11 +160,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		}
 		else
 		{
+			Utils.log("ERROR: Unable to create image results '%s' due to invalid dimensions: width=%d, height=%d",
+					title, imageWidth, imageHeight);
 			w = h = 1;
 		}
 
 		size = 0;
+		lastPaintSize = 0;
 		nextRepaintSize = 20; // Let some results appear before drawing
+		nextPaintTime = System.currentTimeMillis() + repaintDelay;
 		imageLock = false;
 		data = new double[w * h];
 		imp = WindowManager.getImage(title);
@@ -276,13 +285,24 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	}
 
 	/**
-	 * Create the image from the current data. Should only be called by one thread which has the lock so can use class
-	 * variables and the actual pixel buffer.
+	 * Create the image from a clone of the current data. Should only be called by one thread which has the lock so can
+	 * use class variables and the actual pixel buffer.
 	 * 
-	 * @return
+	 * @return The size when the image data was cloned
 	 */
 	private void createImage()
 	{
+		double[] data;
+
+		synchronized (this.data)
+		{
+			data = this.data.clone();
+			lastPaintSize = this.size;
+			setNextRepaintSize(lastPaintSize);
+			if (repaintDelay != 0)
+				nextPaintTime = System.currentTimeMillis() + repaintDelay;
+		}
+
 		if ((displayFlags & DISPLAY_EQUALIZED) != 0)
 		{
 			// 16-bit image
@@ -992,7 +1012,39 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			return;
 		}
 
+		if (repaintDelay != 0)
+		{
+			long time = System.currentTimeMillis();
+
+			if (time < nextPaintTime)
+			{
+				// Get the amount of time it took to acquire the data
+				int n = size - lastPaintSize;
+				long elapsed = time - (nextPaintTime - repaintDelay);
+
+				if (elapsed > 0)
+				{
+					// Set the next repaint size using linear scaling
+					long remaining = nextPaintTime - time;
+					int extra = (int) (n * ((double) remaining / elapsed));
+					//System.out.printf("Updating next paint size: %d : %d -> %d\n", lastPaintSize, nextRepaintSize,
+					//		nextRepaintSize + extra);
+					nextRepaintSize += extra;
+				}
+				else
+				{
+					setNextRepaintSize(size);
+				}
+				return;
+			}
+		}
+
 		drawImage();
+	}
+
+	private void setNextRepaintSize(int size)
+	{
+		nextRepaintSize = (int) Math.ceil(size + size * repaintInterval);
 	}
 
 	/**
@@ -1016,7 +1068,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			try
 			{
 				createImage();
-				nextRepaintSize = (int) (size + size * repaintInterval);
 
 				// We direct manipulate the pixel buffer so this is not necessary
 				//ImageProcessor ip = imp.getProcessor();
@@ -1090,18 +1141,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	}
 
 	/**
-	 * Image will be repainted when a fraction of new results have been added.
+	 * Image will be repainted when the size is increased by a fraction of the last size painted.
 	 * 
 	 * @param repaintInterval
-	 *            the repaintInterval to set (range 0.001-1)
+	 *            the repaintInterval to set
 	 */
 	public void setRepaintInterval(double repaintInterval)
 	{
-		if (repaintInterval < 0.001)
-			repaintInterval = 0.001;
-		if (repaintInterval > 1)
-			repaintInterval = 1;
-
+		if (repaintInterval < 0)
+			repaintInterval = 0;
 		this.repaintInterval = repaintInterval;
 	}
 
@@ -1111,6 +1159,29 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	public double getRepaintInterval()
 	{
 		return repaintInterval;
+	}
+
+	/**
+	 * Sets the repaint delay (time in milliseconds that must elapse before a repaint).
+	 *
+	 * @param repaintDelay
+	 *            the new repaint delay
+	 */
+	public void setRepaintDelay(long repaintDelay)
+	{
+		if (repaintDelay < 0)
+			repaintDelay = 0;
+		this.repaintDelay = repaintDelay;
+	}
+
+	/**
+	 * Gets the repaint delay.
+	 *
+	 * @return the repaint delay
+	 */
+	public long getRepaintDelay()
+	{
+		return repaintDelay;
 	}
 
 	/**

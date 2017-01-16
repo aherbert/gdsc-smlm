@@ -339,6 +339,7 @@ public class ResultsManager implements PlugIn, MouseListener
 					resultsSettings.weightedImage, resultsSettings.equalisedImage, title, bounds, nmPerPixel, gain,
 					resultsSettings.imageScale, resultsSettings.precision, ResultsMode.ADD);
 			image.setRollingWindowSize(resultsSettings.imageRollingWindow);
+			image.setRepaintDelay(2000);
 			resultsList.addOutput(image);
 		}
 	}
