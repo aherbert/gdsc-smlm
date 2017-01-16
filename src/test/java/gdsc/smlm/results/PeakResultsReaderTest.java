@@ -13,6 +13,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Random;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.ResultsFileFormat;
 
 public class PeakResultsReaderTest
@@ -526,13 +527,17 @@ public class PeakResultsReaderTest
 				}
 			});
 		}
+
+		// TSF requires the bias be subtracted
+		double bias = expectedResults.getCalibration().bias;
+
 		for (int i = 0; i < actualResults.size(); i++)
 		{
 			PeakResult p1 = expected.get(i);
 			PeakResult p2 = actual.get(i);
 
 			Assert.assertEquals("Peak mismatch @ " + i, p1.peak, p2.peak);
-			
+
 			if (fileFormat == ResultsFileFormat.MALK)
 			{
 				Assert.assertEquals("X @ " + i, p1.getXPosition(), p2.getXPosition(), delta);
@@ -540,13 +545,17 @@ public class PeakResultsReaderTest
 				Assert.assertEquals("Signal @ " + i, p1.getSignal(), p2.getSignal(), delta);
 				continue;
 			}
-			
+
 			Assert.assertEquals("Orig X mismatch @ " + i, p1.origX, p2.origX);
 			Assert.assertEquals("Orig Y mismatch @ " + i, p1.origY, p2.origY);
 			Assert.assertEquals("Orig value mismatch @ " + i, p1.origValue, p2.origValue, delta);
 			Assert.assertEquals("Error mismatch @ " + i, p1.error, p2.error, 1e-6);
 			Assert.assertEquals("Noise mismatch @ " + i, p1.noise, p2.noise, delta);
 			Assert.assertNotNull("Params is null @ " + i, p2.params);
+			if (fileFormat == ResultsFileFormat.TSF)
+			{
+				p1.params[Gaussian2DFunction.BACKGROUND] -= bias;
+			}
 			Assert.assertArrayEquals("Params mismatch @ " + i, p1.params, p2.params, delta);
 			if (showDeviations)
 			{
@@ -603,6 +612,8 @@ public class PeakResultsReaderTest
 
 	private MemoryPeakResults createResults(int i, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
+		double bias = rand.next();
+
 		MemoryPeakResults results = new MemoryPeakResults();
 		while (i-- > 0)
 		{
@@ -613,6 +624,7 @@ public class PeakResultsReaderTest
 			double error = rand.next();
 			float noise = rand.next();
 			float[] params = createData();
+			params[Gaussian2DFunction.BACKGROUND] += bias;
 			float[] paramsStdDev = (showDeviations) ? createData() : null;
 			if (showEndFrame || showId)
 				results.add(new ExtendedPeakResult(startFrame, origX, origY, origValue, error, noise, params,
@@ -629,7 +641,7 @@ public class PeakResultsReaderTest
 		cal.gain = rand.next();
 		cal.exposureTime = rand.next();
 		cal.readNoise = rand.next();
-		cal.bias = rand.next();
+		cal.bias = bias;
 		cal.emCCD = rand.next() < 0.5f;
 		cal.amplification = rand.next();
 		results.setCalibration(cal);

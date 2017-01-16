@@ -15,6 +15,7 @@ syntax = "proto2";
 //          Steve Wolter (swolter at sdf.org), 2014
 // Contributions by Nico Stuurman are copyright Regents of the University of
 //                   California
+// Jan. 2017, added fields suggested by Alex Herbert
 // License: BSD 2-Clause License
 package TSF;
 
@@ -25,6 +26,11 @@ enum FitMode {
    ONEAXIS = 0;
    TWOAXIS = 1;
    TWOAXISANDTHETA = 2;
+}
+
+enum ThetaUnits {
+   DEGREES = 0;
+   RADIANS = 1;
 }
 
 enum IntensityUnits {
@@ -44,7 +50,14 @@ message FluorophoreType {
    optional bool is_fiducial = 3;
 }
 
-// If units will always be the same for all spots, then use these units tags,
+// ROI in pixels, should be consistent with nr pixels given in SpotList
+message ROI {
+   required int32 x = 1;
+   required int32 y = 2;
+   required int32 x_width = 3;
+   required int32 y_width = 4;
+}
+
 message SpotList {
    // UID for the application that generated these data
    // Request a UID from nico at cmp.ucsf.edu or use 1 
@@ -67,44 +80,45 @@ message SpotList {
    // you must add a FluorophoreType message for each used id.
    repeated FluorophoreType fluorophore_types = 26;
 
+   // If units will always be the same for all spots, then use these units tags,
    // otherwise use the unit tags with each spot
    optional LocationUnits location_units = 22;
-   optional IntensityUnits intensity_units = 23; // use only if different from SpotList
+   optional IntensityUnits intensity_units = 23; 
+   optional ThetaUnits theta_units = 27;
 
    // If fitmode  will always be the same for all spots, then use this fitmode
    // otherwise use the fitmode with each spot
    optional FitMode fit_mode = 24;
-   optional bool is_track = 25 [default = false]; // flag indicating whether this is a sequence of spot data in consecutive time frames thought to originate from the same entity
+
+   // flag indicating whether this is a sequence of spot data in consecutive 
+   // time frames thought to originate from the same entity
+   optional bool is_track = 25 [default = false]; 
+
+   // The electron conversion factor (camera gain), defined as
+   // # of electrons per pixel / # of counts per pixel
+   optional double ecf = 28; 
+
+   optional ROI roi = 29;
    
    // GDSC SMLM ...
    
-   // Fit region of original data
-   optional int32 bounds_x = 1500; // Fit region x origin (zero if no crop was 
-      // used)
-   optional int32 bounds_y = 1501; // Fit region y origin (zero if no crop was 
-      // used)
-   optional int32 bounds_width = 1502; // Fit region width origin (nr_pixels_x 
-      // if no crop was used)
-   optional int32 bounds_height = 1503; // Fit region height origin (nr_pixels_y
-      // if no crop was used)
-   
-   optional string source = 1504; // Source of the results (can be a serialised 
+   optional string source = 1501; // Source of the results (can be a serialised 
       // object)
    
-   optional string configuration = 1505; // Configuration used for fitting (can 
+   optional string configuration = 1502; // Configuration used for fitting (can 
       // be a serialised object)
    
    // Calibration. This is for a single channel, i.e. camera.
    // The pixel pitch is expected in pixel_size.
-   optional double gain = 1506; // The system gain to convert counts to photons 
+   optional double gain = 1503; // The system gain to convert counts to photons 
       // (units=count/photon)
-   optional double exposureTime = 1507; // The exposure time for a single frame 
+   optional double exposureTime = 1504; // The exposure time for a single frame 
       // (units=millisecond)
-   optional double readNoise = 1508; // The camera read noise for a pixel 
+   optional double readNoise = 1505; // The camera read noise for a pixel 
       // (units=count)
-   optional double bias = 1509; // The camera bias (units=counts)
-   optional bool emCCD = 1510; // Set to true if this was an EM-CCD camera
-   optional double amplification = 1511; // The readout amplification applied 
+   optional double bias = 1506; // The camera bias (units=counts)
+   optional bool emCCD = 1507; // Set to true if this was an EM-CCD camera
+   optional double amplification = 1508; // The readout amplification applied 
       // when converting the pixel value to counts (units=count/electron). This 
       // is expected to be higher than the total system gain. The factor 
       // difference (gain/amplification) is the Quantum Efficiency (QE, 
@@ -165,27 +179,42 @@ message Spot {
    // examples are membrane rafts, 
    optional int32 cluster = 20;
 
-   // xyz coordinates of the spot in location_units  after fitting and optional correction
+   // xyz coordinates of the spot in location_units  
+   // after fitting and optional correction
    optional LocationUnits location_units = 17;
    required float x = 7;
    required float y = 8;
    optional float z = 9;
 
    // Intensity values
-   optional IntensityUnits intensity_units = 18; // use only if different from SpotList
+
+   // Use intenisty_units only if different from SpotList
+   // integrated spot density. This can either be determined from a fit or 
+   // using any other methods.  This number should be corrected for background
+   optional IntensityUnits intensity_units = 18; 
    required float intensity = 10; // integrated spot density
-   optional float background = 11; // background per pixel determined in fit
-   optional float width = 12; // peak width at half height in location units
-      // for asymetric peaks, calculate the width as the square root of the 
-      // product of the widths of the long and short axes
+   // Background around the spot. 
+   // This can be determined through a fit or other methods
+   // This number should not include the camera bias, i.e. it should be linearly
+   // propertional to the number of photons in the background
+   optional float background = 11;
 
-   optional float a = 13; // shape of the peak: width of the long axis 
-      // divided by width of the short axis
+   // Peak shape parameters
+
+   // Peak width at half height in location units
+   // for asymetric peaks, calculate the width as the square root of the 
+   // product of the widths of the long and short axes
+   optional float width = 12; 
+   // Shape of the peak: width of the long axis 
+   // divided by width of the short axis
+   optional float a = 13; 
    
-   optional float theta = 14; // rotation of assymetric peak, only used
-      // when fitmode == TWOAXISANDTHETA
+   // Rotation of assymetric peak, only used 
+   // when fitmode == TWOAXISANDTHETA
+   optional float theta = 14; 
 
-   // Original xyz coordinates from fitting before drift or other correction correction
+   // Original xyz coordinates from fitting before drift 
+   // or other correction correction
    optional float x_original = 101;
    optional float y_original = 102;
    optional float z_original = 103;
@@ -194,7 +223,7 @@ message Spot {
    optional float x_precision = 104;
    optional float y_precision = 105;
    optional float z_precision = 106;
- 
+
    // position in the original image (in pixels) used for fitting
    optional int32 x_position = 107;
    optional int32 y_position = 108;

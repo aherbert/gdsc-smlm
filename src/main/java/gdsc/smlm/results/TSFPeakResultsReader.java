@@ -25,8 +25,10 @@ import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
 import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
+import gdsc.smlm.tsf.TaggedSpotFile.ROI;
 import gdsc.smlm.tsf.TaggedSpotFile.Spot;
 import gdsc.smlm.tsf.TaggedSpotFile.SpotList;
+import gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits;
 
 /**
  * Reads the fit results from file using the Tagged Spot File (TSF) format.
@@ -265,6 +267,20 @@ public class TSFPeakResultsReader
 				System.err.println("Unsupported intensity units conversion: " + intensityUnits);
 		}
 
+		ThetaUnits thetaUnits = spotList.getThetaUnits();
+
+		float thetaConversion = 1;
+		switch (thetaUnits)
+		{
+			case DEGREES:
+				break;
+			case RADIANS:
+				thetaConversion = (float) (180.0 / Math.PI);
+				break;
+			default:
+				System.err.println("Unsupported theta units conversion: " + thetaUnits);
+		}
+
 		FitMode fitMode = FitMode.ONEAXIS;
 		if (spotList.hasFitMode())
 			fitMode = spotList.getFitMode();
@@ -294,13 +310,13 @@ public class TSFPeakResultsReader
 
 				if (spot.hasLocationUnits() && !locationUnitsWarning && spot.getLocationUnits() != locationUnits)
 				{
-					System.err.println("Spot message has different location units, these will be ignored: " +
+					System.err.println("Spot message has different location units, the units will be ignored: " +
 							spot.getLocationUnits());
 					locationUnitsWarning = true;
 				}
 				if (spot.hasIntensityUnits() && !intensityUnitsWarning && spot.getIntensityUnits() != intensityUnits)
 				{
-					System.err.println("Spot message has different intensity units, these will be ignored: " +
+					System.err.println("Spot message has different intensity units, the units will be ignored: " +
 							spot.getIntensityUnits());
 					intensityUnitsWarning = true;
 				}
@@ -313,8 +329,10 @@ public class TSFPeakResultsReader
 				params[Gaussian2DFunction.Y_POSITION] = spot.getY() * locationConversion;
 				params[Gaussian2DFunction.SIGNAL] = spot.getIntensity() * intensityConversion;
 				if (spot.hasBackground())
-					// Q. What is there is a bias? We hope that the writer of the TSF file has removed the bias.
+				{
+					// The writer of the TSF file should have removed the bias (as documented in the format)
 					params[Gaussian2DFunction.BACKGROUND] = spot.getBackground() * intensityConversion;
+				}
 
 				// Support different Gaussian shapes
 				if (fitMode == FitMode.ONEAXIS)
@@ -338,8 +356,9 @@ public class TSFPeakResultsReader
 					}
 
 					if (fitMode == FitMode.TWOAXISANDTHETA && spot.hasTheta())
-						// XXX - what are the units for theta? GDSC SMLM uses Radians.
-						params[Gaussian2DFunction.ANGLE] = spot.getTheta();
+					{
+						params[Gaussian2DFunction.ANGLE] = spot.getTheta() * thetaConversion;
+					}
 				}
 
 				// We can use the original position in pixels used for fitting
@@ -462,10 +481,18 @@ public class TSFPeakResultsReader
 		//			results.setBounds(new Rectangle(0, 0, spotList.getNrPixelsX(), spotList.getNrPixelsY()));
 		//		}
 
+		Calibration cal = new Calibration();
+		results.setCalibration(cal);
+
 		if (spotList.hasPixelSize())
 		{
-			Calibration cal = new Calibration(spotList.getPixelSize(), 1, 0);
-			results.setCalibration(cal);
+			cal.nmPerPixel = spotList.getPixelSize();
+		}
+		if (spotList.hasEcf())
+		{
+			// Use it in both fields
+			cal.gain = spotList.getEcf();
+			cal.amplification = spotList.getEcf();
 		}
 
 		if (isGDSC)
@@ -479,17 +506,12 @@ public class TSFPeakResultsReader
 				results.setSource(ImageSource.fromXML(spotList.getSource()));
 			}
 
-			if (spotList.hasBoundsX() && spotList.hasBoundsY() && spotList.hasBoundsWidth() &&
-					spotList.hasBoundsHeight())
+			if (spotList.hasRoi())
 			{
-				results.setBounds(new Rectangle(spotList.getBoundsX(), spotList.getBoundsY(), spotList.getBoundsWidth(),
-						spotList.getBoundsHeight()));
+				ROI roi = spotList.getRoi();
+				if (roi.hasX() && roi.hasY() && roi.hasXWidth() && roi.hasYWidth())
+					results.setBounds(new Rectangle(roi.getX(), roi.getY(), roi.getXWidth(), roi.getYWidth()));
 			}
-
-			// Use the calibration we created when the pixel size was read
-			Calibration cal = results.getCalibration();
-			if (cal == null)
-				cal = new Calibration();
 
 			if (spotList.hasGain())
 				cal.gain = spotList.getGain();
@@ -503,15 +525,12 @@ public class TSFPeakResultsReader
 				cal.emCCD = spotList.getEmCCD();
 			if (spotList.hasAmplification())
 				cal.amplification = spotList.getAmplification();
-			results.setCalibration(cal);
 
 			if (spotList.hasConfiguration())
 			{
 				results.setConfiguration(spotList.getConfiguration());
 			}
 		}
-
-		Calibration cal = results.getCalibration();
 
 		if (spotList.getLocationUnits() != LocationUnits.PIXELS)
 		{
@@ -533,14 +552,14 @@ public class TSFPeakResultsReader
 
 	private float getNmPerPixel(Calibration cal)
 	{
-		if (cal == null || cal.nmPerPixel <= 0)
+		if (cal.nmPerPixel <= 0)
 			return 1f;
 		return (float) cal.nmPerPixel;
 	}
 
 	private float getGain(Calibration cal)
 	{
-		if (cal == null || cal.gain <= 0)
+		if (cal.gain <= 0)
 			return 1f;
 		return (float) cal.gain;
 	}

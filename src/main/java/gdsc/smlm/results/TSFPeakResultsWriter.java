@@ -25,12 +25,21 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
+import gdsc.smlm.tsf.TaggedSpotFile.ROI;
 import gdsc.smlm.tsf.TaggedSpotFile.Spot;
 import gdsc.smlm.tsf.TaggedSpotFile.Spot.Builder;
 import gdsc.smlm.tsf.TaggedSpotFile.SpotList;
+import gdsc.smlm.tsf.TaggedSpotFile.ThetaUnits;
 
 /**
  * Saves the fit results to file using the Tagged Spot File (TSF) format.
+ * <p>
+ * Write out a TSF file assuming the results are in the standard GSDC SMLM format (intensity in counts, angles in
+ * degrees).
+ * <p>
+ * To satisfy the format the calibration must be set including the amplification (electrons/count) and camera bias. The
+ * bias is removed from the background. If amplification is not strictly positive then the calibration gain will be
+ * written to the TSF 'electron conversion factor' field.
  * 
  * @author Alex Herbert
  */
@@ -52,6 +61,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	private FitMode fitMode = FitMode.ONEAXIS;
 
+	private float bias = 0;
+
 	private int boxSize = 0;
 
 	public TSFPeakResultsWriter(String filename)
@@ -68,6 +79,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	{
 		out = null;
 		size = 0;
+		bias = (calibration != null) ? (float) calibration.bias : 0;
 		id = new AtomicInteger();
 		try
 		{
@@ -142,7 +154,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setFrame(peak);
 		builder.setXPosition(origX);
 		builder.setYPosition(origY);
-		builder.setBackground(params[Gaussian2DFunction.BACKGROUND]);
+		setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);
 		builder.setIntensity(params[Gaussian2DFunction.SIGNAL]);
 		builder.setX(params[Gaussian2DFunction.X_POSITION]);
 		builder.setY(params[Gaussian2DFunction.Y_POSITION]);
@@ -171,6 +183,25 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	}
 
 	/**
+	 * Sets the background.
+	 *
+	 * @param builder
+	 *            the builder
+	 * @param background
+	 *            the background
+	 */
+	private void setBackground(Builder builder, float background)
+	{
+		// Q. Should we ensure this is always positive?
+		// Since it "should be linearly proportional to the number of photons in the background" 
+		// then we assume that it cannot be negative.
+		if (background > bias)
+			builder.setBackground(background - bias);
+		else
+			builder.setBackground(0f);
+	}
+
+	/**
 	 * Sets the width. Convert the X/Y widths used in GDSC SMLM to the single width and shape parameters used in TSF.
 	 *
 	 * @param params
@@ -187,11 +218,11 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		else
 		{
 			FitMode newFitMode = FitMode.TWOAXIS;
-			
+
 			builder.setWidth(SD_TO_FWHM_FACTOR *
 					(float) Math.sqrt(Math.abs(params[Gaussian2DFunction.X_SD] * params[Gaussian2DFunction.Y_SD])));
 			builder.setA(params[Gaussian2DFunction.X_SD] / params[Gaussian2DFunction.Y_SD]);
-			
+
 			if (params[Gaussian2DFunction.ANGLE] != 0)
 			{
 				newFitMode = FitMode.TWOAXISANDTHETA;
@@ -235,7 +266,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setFrame(result.peak);
 			builder.setXPosition(result.origX);
 			builder.setYPosition(result.origY);
-			builder.setBackground(params[Gaussian2DFunction.BACKGROUND]);
+			setBackground(builder, params[Gaussian2DFunction.BACKGROUND]);
 			builder.setIntensity(params[Gaussian2DFunction.SIGNAL]);
 			builder.setX(params[Gaussian2DFunction.X_POSITION]);
 			builder.setY(params[Gaussian2DFunction.Y_POSITION]);
@@ -254,7 +285,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			}
 
 			builder.setCluster(result.getId());
-			
+
 			builder.setError(result.error);
 			builder.setNoise(result.noise);
 			builder.setEndFrame(result.getEndFrame());
@@ -378,26 +409,32 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setNrPixelsX(source.width);
 			builder.setNrPixelsY(source.height);
 			builder.setNrFrames(source.frames);
-			
+
 			builder.setSource(singleLine(source.toXML()));
 		}
 		if (bounds != null)
 		{
-			builder.setBoundsX(bounds.x);
-			builder.setBoundsY(bounds.y);
-			builder.setBoundsWidth(bounds.width);
-			builder.setBoundsHeight(bounds.height);
+			ROI.Builder roiBuilder = builder.getRoiBuilder();
+			roiBuilder.setX(bounds.x);
+			roiBuilder.setY(bounds.y);
+			roiBuilder.setXWidth(bounds.width);
+			roiBuilder.setYWidth(bounds.height);
+			builder.setRoi(roiBuilder.build());
 		}
 		if (calibration != null)
 		{
 			builder.setPixelSize((float) calibration.nmPerPixel);
-			
+
 			builder.setGain(calibration.gain);
 			builder.setExposureTime(calibration.exposureTime);
 			builder.setReadNoise(calibration.readNoise);
 			builder.setBias(calibration.bias);
 			builder.setEmCCD(calibration.emCCD);
 			builder.setAmplification(calibration.amplification);
+
+			// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
+			double ecf = (calibration.amplification > 0) ? calibration.amplification : calibration.gain;
+			builder.setEcf(ecf);
 		}
 		if (configuration != null && configuration.length() > 0)
 		{
@@ -410,6 +447,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		builder.setLocationUnits(LocationUnits.PIXELS);
 		builder.setIntensityUnits(IntensityUnits.COUNTS);
+		builder.setThetaUnits(ThetaUnits.DEGREES);
 		builder.setFitMode(fitMode);
 
 		SpotList spotList = builder.build();
