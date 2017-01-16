@@ -28,6 +28,7 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
@@ -55,13 +56,12 @@ import java.awt.Rectangle;
 import java.awt.TextField;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Opens peaks results and displays/converts them
@@ -235,27 +235,32 @@ public class ResultsManager implements PlugIn, MouseListener
 		output.begin();
 
 		// Process in batches to provide progress
-		int batchSize = 100;
-		ArrayList<PeakResult> batch = new ArrayList<PeakResult>(batchSize);
 		List<PeakResult> list = results.getResults();
-		int size = 0;
-		for (; size < list.size(); size += batchSize)
+		int progress = 0;
+		int totalProgress = list.size();
+		int stepProgress = Utils.getProgressInterval(totalProgress);
+		TurboList<PeakResult> batch = new TurboList<PeakResult>(stepProgress);
+		for (PeakResult result : results.getResults())
 		{
-			IJ.showProgress(size, list.size());
-			for (int j = size; j < FastMath.min(list.size(), size + batchSize); j++)
-				batch.add(list.get(j));
-			output.addAll(batch);
-			batch.clear();
-			if (isInterrupted())
-				break;
+			if (progress % stepProgress == 0)
+			{
+				IJ.showProgress(progress, totalProgress);
+			}
+			progress++;
+			batch.addf(result);
+			
+			if (batch.size() == stepProgress)
+			{
+				output.addAll(batch);
+				batch.clearf();
+				if (isInterrupted())
+					break;
+			}
 		}
 		IJ.showProgress(1);
 		output.end();
 
-		if (size > results.size())
-			size = results.size();
-
-		IJ.showStatus(String.format("Processed %d result%s", size, (size > 1) ? "s" : ""));
+		IJ.showStatus(String.format("Processed %d result%s", results.size(), (results.size() > 1) ? "s" : ""));
 	}
 
 	/**
@@ -951,8 +956,7 @@ public class ResultsManager implements PlugIn, MouseListener
 
 		final float noise = getNoise(results);
 		// Only check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification)
-		if (calibration == null || calibration.getNmPerPixel() <= 0 || calibration.getGain() <= 0 ||
-				calibration.getExposureTime() <= 0 || noise <= 0)
+		if (!calibration.hasNmPerPixel() || !calibration.hasGain() || !calibration.hasExposureTime() || noise <= 0)
 		{
 			boolean convert = false;
 
@@ -972,15 +976,20 @@ public class ResultsManager implements PlugIn, MouseListener
 				}
 			}
 
-			if (calibration.getNmPerPixel() <= 0)
+			if (!calibration.hasNmPerPixel())
 				calibration.setNmPerPixel(input_nmPerPixel);
-			if (calibration.getGain() <= 0)
+			if (!calibration.hasGain())
 				calibration.setGain(input_gain);
-			if (calibration.getExposureTime() <= 0)
+			if (!calibration.hasExposureTime())
 				calibration.setExposureTime(input_exposureTime);
 
+			Rectangle2D.Float dataBounds = results.getDataBounds();
+
 			GenericDialog gd = new GenericDialog(TITLE);
-			gd.addMessage("Results are " + msg);
+			gd.addMessage(
+					String.format("Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg, Utils.rounded(dataBounds.x),
+							Utils.rounded(dataBounds.y), Utils.rounded(dataBounds.y + dataBounds.getWidth()),
+							Utils.rounded(dataBounds.x + dataBounds.getHeight())));
 			gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 			gd.addNumericField("Gain (ADU/photon)", calibration.getGain(), 2);
 			gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
