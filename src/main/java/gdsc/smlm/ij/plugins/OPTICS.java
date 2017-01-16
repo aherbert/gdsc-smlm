@@ -851,7 +851,7 @@ public class OPTICS implements PlugIn
 			}
 			if (current.fractionNoise != previous.fractionNoise)
 				return false;
-			if (current.clusteringDistance != previous.clusteringDistance)
+			if (clusteringDistanceChange(current.clusteringDistance, previous.clusteringDistance))
 				return false;
 
 			return true;
@@ -913,7 +913,7 @@ public class OPTICS implements PlugIn
 			plot.addPoints(order, profile, Plot.LINE);
 
 			// Add the DBSCAN clustering distance
-			double distance = inputSettings.clusteringDistance;
+			double distance = work.inputSettings.clusteringDistance;
 			plot.setColor(Color.red);
 			plot.drawLine(1, distance, order.length, distance);
 
@@ -927,13 +927,22 @@ public class OPTICS implements PlugIn
 			if (work.inputSettings.clusteringDistance <= 0)
 			{
 				// Set this distance into the settings if there is no clustering distance
-				work.inputSettings.clusteringDistance = distance;
+				// Use a negative value to show it is an auto-distance
+				work.inputSettings.clusteringDistance = -distance;
 			}
 
 			// We have not created anything new so return the current object
 			return work;
 		}
-
+	}
+	
+	private boolean clusteringDistanceChange(double newD, double oldD)
+	{
+		if (newD <= 0 && oldD <= 0)
+			// Auto-distance
+			return false;
+		
+		return newD != oldD;
 	}
 
 	/**
@@ -959,7 +968,7 @@ public class OPTICS implements PlugIn
 		{
 			if (current.minPoints != previous.minPoints)
 				return false;
-			if (current.clusteringDistance != previous.clusteringDistance)
+			if (clusteringDistanceChange(current.clusteringDistance, previous.clusteringDistance))
 				return false;
 			return true;
 		}
@@ -972,7 +981,7 @@ public class OPTICS implements PlugIn
 			// The second item should be the OPTICS manager
 			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
 
-			double clusteringDistance = work.inputSettings.clusteringDistance;
+			double clusteringDistance = Math.abs(work.inputSettings.clusteringDistance);
 			int minPts = work.inputSettings.minPoints;
 			if (clusteringDistance > 0)
 			{
