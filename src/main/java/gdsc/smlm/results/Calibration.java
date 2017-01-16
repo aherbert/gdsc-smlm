@@ -198,7 +198,7 @@ public class Calibration implements Cloneable
 	private double amplification;
 
 	/**
-	 * Default constructor. All properties are set to be invalid but missing exception are disabled.
+	 * Default constructor. All properties are set to be invalid but field missing exceptions are disabled.
 	 */
 	public Calibration()
 	{
@@ -216,9 +216,7 @@ public class Calibration implements Cloneable
 	}
 
 	/**
-	 * Parameterised constructor.
-	 * <p>
-	 * If gain is zero then set to 1.
+	 * Parameterised constructor for essential settings.
 	 *
 	 * @param nmPerPixel
 	 *            the nm per pixel
