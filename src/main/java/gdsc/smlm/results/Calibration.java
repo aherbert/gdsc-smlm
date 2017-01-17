@@ -25,11 +25,11 @@ public class Calibration implements Cloneable
 	private static int FIELD_MISSING_EXCEPTION = 0x00000001;
 	private static int FIELD_NM_PER_PIXEL = 0x00000002;
 	private static int FIELD_GAIN = 0x00000004;
-	private static int FIELD_EXPOSURE_TIME = 0x00000010;
-	private static int FIELD_READ_NOISE = 0x00000020;
-	private static int FIELD_BIAS = 0x00000040;
-	private static int FIELD_EM_CCD = 0x00000100;
-	private static int FIELD_AMPLIFICATION = 0x00000200;
+	private static int FIELD_EXPOSURE_TIME = 0x00000008;
+	private static int FIELD_READ_NOISE = 0x00000010;
+	private static int FIELD_BIAS = 0x00000020;
+	private static int FIELD_EM_CCD = 0x00000040;
+	private static int FIELD_AMPLIFICATION = 0x00000080;
 	private int fields = 0;
 
 	/**
