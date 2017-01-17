@@ -132,5 +132,79 @@ public class CalibrationTest
 		Calibration c = new Calibration(true);
 		c.setAmplification(0);
 		c.getAmplification();
+	}
+	
+
+	@Test(expected=IllegalStateException.class)
+	public void getNmPerPixelThrowsExceptionAfterClear()
+	{
+		Calibration c = new Calibration(true);
+		c.setNmPerPixel(1);
+		c.clearHasNmPerPixel();
+		c.getNmPerPixel();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void getGainThrowsExceptionAfterClear()
+	{
+		Calibration c = new Calibration(true);
+		c.setGain(1);
+		c.clearHasGain();
+		c.getGain();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void getExposureTimeThrowsExceptionAfterClear()
+	{
+		Calibration c = new Calibration(true);
+		c.setExposureTime(1);
+		c.clearHasExposureTime();
+		c.getExposureTime();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void getReadNoiseThrowsExceptionAfterClear()
+	{
+		Calibration c = new Calibration(true);
+		c.setReadNoise(1);
+		c.clearHasReadNoise();
+		c.getReadNoise();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void getBiasThrowsExceptionAfterClear()
+	{
+		Calibration c = new Calibration(true);
+		c.setBias(1);
+		c.clearHasBias();
+		c.getBias();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void getEmCCDThrowsExceptionAfterClear()
+	{
+		Calibration c = new Calibration(true);
+		c.setEmCCD(true);
+		c.clearHasEMCCD();
+		c.isEmCCD();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void getAmplificationThrowsExceptionAfterClear()
+	{
+		Calibration c = new Calibration(true);
+		c.setAmplification(1);
+		c.clearHasAmplification();
+		c.getAmplification();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void clearDoesNotResetFieldMissingFlag()
+	{
+		Calibration c = new Calibration(true);
+		c.setAmplification(0);
+		
+		c.clear();
+		c.getAmplification();
 	}	
 }
