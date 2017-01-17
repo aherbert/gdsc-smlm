@@ -32,6 +32,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.Line;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
@@ -641,7 +642,8 @@ public class OPTICS implements PlugIn
 	private class ImageResultsWorker extends Worker
 	{
 		IJImagePeakResults image = null;
-		Overlay o = null;
+		Overlay outline = null;
+		Overlay spanningTree = null;
 
 		@Override
 		boolean equals(OPTICSSettings current, OPTICSSettings previous)
@@ -653,6 +655,8 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 			if (current.outline != previous.outline)
+				return false;
+			if (current.spanningTree != previous.spanningTree)
 				return false;
 			if (current.getImageMode() != previous.getImageMode() ||
 					getDisplayFlags(current) != getDisplayFlags(previous))
@@ -667,9 +671,15 @@ public class OPTICS implements PlugIn
 		@Override
 		void newResults()
 		{
+			clearCache();
+		}
+
+		private void clearCache()
+		{
 			// Clear cache
 			image = null;
-			o = null;
+			outline = null;
+			spanningTree = null;
 		}
 
 		@Override
@@ -682,12 +692,12 @@ public class OPTICS implements PlugIn
 			// It may be null if cancelled.
 			if (clusteringResult == null)
 			{
-				image = null;
-				o = null;
+				clearCache();
 				return new Work(work.inputSettings, results, opticsManager, clusteringResult, clusterCount, image);
 			}
 
 			int[] clusters = null;
+			float[] x = null, y = null;
 
 			if (work.inputSettings.imageScale > 0)
 			{
@@ -720,7 +730,7 @@ public class OPTICS implements PlugIn
 						image.getImagePlus().getProcessor().setColorModel(lut);
 
 						// Add in a single batch
-						float[] x, y, v;
+						float[] v;
 						x = new float[results.size()];
 						y = new float[x.length];
 						v = new float[x.length];
@@ -750,9 +760,10 @@ public class OPTICS implements PlugIn
 			if (image != null)
 			{
 				ImagePlus imp = image.getImagePlus();
+				Overlay overlay = null;
 				if (work.inputSettings.outline)
 				{
-					if (o == null)
+					if (outline == null)
 					{
 						if (clusters == null)
 						{
@@ -763,54 +774,112 @@ public class OPTICS implements PlugIn
 						}
 						int max = Maths.max(clusters);
 
-						// The current overlay may be fine. 
-						// If the result has cached convex hulls then assume we have constructed an overlay
-						// for these results.
-						if (!clusteringResult.hasConvexHulls() || o == null)
+						// We need to recompute
+						outline = new Overlay();
+						ConvexHull[] hulls = new ConvexHull[max + 1];
+						synchronized (clusteringResult)
 						{
-							// We need to recompute
-							o = new Overlay();
-							ConvexHull[] hulls = new ConvexHull[max + 1];
-							synchronized (clusteringResult)
-							{
-								clusteringResult.computeConvexHulls();
-								for (int c = 1; c <= max; c++)
-								{
-									hulls[c] = clusteringResult.getConvexHull(c);
-								}
-							}
-
-							// Create a colour to match the LUT
-							LUT lut = Utils.getColorModel();
-							// Extract the ConvexHull of each cluster
+							clusteringResult.computeConvexHulls();
 							for (int c = 1; c <= max; c++)
 							{
-								ConvexHull hull = hulls[c];
-								if (hull != null)
+								hulls[c] = clusteringResult.getConvexHull(c);
+							}
+						}
+
+						// Create a colour to match the LUT
+						LUT lut = Utils.getColorModel();
+						// Extract the ConvexHull of each cluster
+						for (int c = 1; c <= max; c++)
+						{
+							ConvexHull hull = hulls[c];
+							if (hull != null)
+							{
+								// Convert the Hull to the correct image scale.
+								float[] x2 = hull.x.clone();
+								float[] y2 = hull.y.clone();
+								for (int i = 0; i < x2.length; i++)
 								{
-									// Convert the Hull to the correct image scale.
-									float[] x = hull.x.clone();
-									float[] y = hull.y.clone();
-									for (int i = 0; i < x.length; i++)
-									{
-										x[i] = image.mapX(x[i]);
-										y[i] = image.mapY(y[i]);
-									}
-									PolygonRoi roi = new PolygonRoi(x, y, Roi.POLYGON);
-									Color color = LUTHelper.getColour(lut, c, 0f, max);
-									roi.setStrokeColor(color);
-									// TODO: Options to set a fill colour?
-									o.add(roi);
+									x2[i] = image.mapX(x2[i]);
+									y2[i] = image.mapY(y2[i]);
 								}
+								PolygonRoi roi = new PolygonRoi(x2, y2, Roi.POLYGON);
+								Color color = LUTHelper.getColour(lut, c, 0f, max);
+								roi.setStrokeColor(color);
+								// TODO: Options to set a fill colour?
+								outline.add(roi);
 							}
 						}
 					}
-					imp.setOverlay(o);
+					overlay = outline;
 				}
-				else
+
+				if (work.inputSettings.spanningTree && clusteringResult instanceof OPTICSResult)
 				{
-					imp.setOverlay(null);
+					if (spanningTree == null)
+					{
+						OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
+
+						int[] predecessor;
+						synchronized (opticsResult)
+						{
+							predecessor = opticsResult.getPredecessor();
+							if (clusters == null)
+							{
+								clusters = opticsResult.getClusters();
+							}
+						}
+						int max = Maths.max(clusters);
+
+						// Get the coordinates
+						if (x == null)
+						{
+							int size = results.size();
+							x = new float[size];
+							y = new float[x.length];
+							ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
+							for (int i = 0; i < size; i++)
+							{
+								PeakResult r = list.get(i);
+								x[i] = r.getXPosition();
+								y[i] = r.getYPosition();
+							}
+						}
+
+						// We need to recompute
+						spanningTree = new Overlay();
+
+						// Create a colour to match the LUT
+						LUT lut = Utils.getColorModel();
+
+						for (int i = 1; i < predecessor.length; i++)
+						{
+							if (predecessor[i] < 0)
+								continue;
+							int j = predecessor[i];
+
+							float xi = image.mapX(x[i]);
+							float yi = image.mapY(y[i]);
+							float xj = image.mapX(x[j]);
+							float yj = image.mapY(y[j]);
+
+							Line roi = new Line(xi, yi, xj, yj);
+							Color color = LUTHelper.getColour(lut, clusters[i], 0f, max);
+							roi.setStrokeColor(color);
+							spanningTree.add(roi);
+						}
+					}
+					if (overlay == null)
+					{
+						overlay = spanningTree;
+					}
+					else
+					{
+						for (int i = spanningTree.size(); i-- > 0;)
+							overlay.add(spanningTree.get(i));
+					}
 				}
+
+				imp.setOverlay(overlay);
 			}
 
 			return new Work(work.inputSettings, results, opticsManager, clusteringResult, clusterCount, image);
@@ -884,8 +953,12 @@ public class OPTICS implements PlugIn
 				synchronized (opticsManager)
 				{
 					int samples = work.inputSettings.samples;
-					if (samples != -1)
-						samples = Math.max(100, samples);
+					if (samples > 1 || work.inputSettings.sampleFraction > 0)
+					{
+						// Ensure we take a reasonable amount of samples (min=100)
+						samples = Maths.max(100, samples,
+								(int) Math.ceil(opticsManager.getSize() * work.inputSettings.sampleFraction));
+					}
 					float[] d = opticsManager.nearestNeighbourDistance(k, samples, true);
 					profile = new double[d.length];
 					for (int i = d.length; i-- > 0;)
@@ -935,13 +1008,13 @@ public class OPTICS implements PlugIn
 			return work;
 		}
 	}
-	
+
 	private boolean clusteringDistanceChange(double newD, double oldD)
 	{
 		if (newD <= 0 && oldD <= 0)
 			// Auto-distance
 			return false;
-		
+
 		return newD != oldD;
 	}
 
@@ -1217,6 +1290,7 @@ public class OPTICS implements PlugIn
 			// Add fields to auto-compute the clustering distance from the K-nearest neighbour distance profile
 			gd.addSlider("Noise (%)", 0, 50, inputSettings.fractionNoise * 100);
 			gd.addNumericField("Samples", inputSettings.samples, 0);
+			gd.addSlider("Sample_fraction (%)", 0, 15, inputSettings.sampleFraction * 100);
 			gd.addNumericField("Clustering_distance", inputSettings.clusteringDistance, 2, 6, "nm");
 		}
 		else
@@ -1250,6 +1324,7 @@ public class OPTICS implements PlugIn
 		gd.addCheckbox("Outline", inputSettings.outline);
 		if (!isDBSCAN)
 		{
+			gd.addCheckbox("Spanning_tree", inputSettings.spanningTree);
 			gd.addMessage("--- Reachability Plot ---");
 			String[] plotModes = SettingsManager.getNames((Object[]) PlotMode.values());
 			gd.addChoice("Plot_mode", plotModes, plotModes[inputSettings.getPlotModeOridinal()]);
@@ -1325,6 +1400,7 @@ public class OPTICS implements PlugIn
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
 			inputSettings.outline = gd.getNextBoolean();
+			inputSettings.spanningTree = gd.getNextBoolean();
 			inputSettings.setPlotMode(gd.getNextChoiceIndex());
 			boolean preview = gd.getNextBoolean();
 
@@ -1407,6 +1483,7 @@ public class OPTICS implements PlugIn
 			inputSettings.minPoints = (int) gd.getNextNumber();
 			inputSettings.fractionNoise = gd.getNextNumber() / 100;
 			inputSettings.samples = (int) gd.getNextNumber();
+			inputSettings.sampleFraction = gd.getNextNumber() / 100;
 			inputSettings.clusteringDistance = gd.getNextNumber();
 			inputSettings.core = gd.getNextBoolean();
 			inputSettings.imageScale = gd.getNextNumber();

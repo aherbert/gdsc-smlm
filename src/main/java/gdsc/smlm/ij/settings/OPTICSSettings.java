@@ -257,9 +257,13 @@ public class OPTICSSettings implements Cloneable
 	// Affect DBSCAN clustering
 	
 	/**
-	 * The number of samples to take for the k-distance plot.
+	 * The number of samples to take for the k-distance plot. This should be 1-10% of the data.
 	 */
-	public int samples = 1000;
+	public int samples = 100;
+	/**
+	 * The fraction of the data to sample for the k-distance plot. Recommended to be 1-10%.
+	 */
+	public double sampleFraction = 0.05;
 	/**
 	 * The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
 	 * been ignored.
@@ -303,6 +307,11 @@ public class OPTICSSettings implements Cloneable
 	 * Set to true to draw the convex hull of each cluster as an outline
 	 */
 	public boolean outline = true;
+
+	/**
+	 * Set to true to draw the spanning tree (connections between each point and its parent)
+	 */
+	public boolean spanningTree = true;
 
 	public ImageMode getImageMode()
 	{
