@@ -214,33 +214,94 @@ public class OPTICSSettings implements Cloneable
 	}
 
 	// Affect creating the OPTICS manager
+	
+	/**
+	 * The input results dataset to use
+	 */
 	public String inputOption = "";
 
 	// Affect running OPTICS
+
+	/**
+	 * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
+	 * using the expected density of uniformly spread random points.
+	 */
 	public double generatingDistance = 0;
-	public int minPoints = 5;
+
+	/**
+	 * The minimum number of neighbours to define a core point.
+	 * <p>
+	 * Note that the minimum cardinality (i.e. count of the number of neighbours) in the paper discussing Generalised
+	 * DBSCAN is recommended to be 2 x dimensions, so 4 for a 2D dataset.
+	 */
+	public int minPoints = 4;
 
 	// OPTICS clustering
+	
+	/**
+	 * The clustering mode to use on the OPTICS results. 
+	 */
 	public ClusteringMode clusteringMode = ClusteringMode.XI;
 
 	// Affect running OPTICS Xi
+	
+	/**
+	 * The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
+	 */
 	public double xi = 0.03;
+	/**
+	 * Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
+	 */
 	public boolean topLevel = false;
 
 	// Affect DBSCAN clustering
+	
+	/**
+	 * The number of samples to take for the k-distance plot.
+	 */
 	public int samples = 1000;
+	/**
+	 * The fraction of noise in the k-distance plot. The clustering distance is set as the next distance after noise has
+	 * been ignored.
+	 */
 	public double fractionNoise = 0.05;
+	/**
+	 * The clustering distance for DBSCAN.
+	 */
 	public double clusteringDistance = 0;
+	/**
+	 * Set to true to only include core point in clusters. Note: Non-core points can be assigned arbitrarily to clusters
+	 * if they are on the border of two clusters due to the arbitrary processing order of input points.
+	 */
 	public boolean core = false;
 
 	// Affect display of results
+	
+	/**
+	 * The magnification scale of the output image 
+	 */
 	public double imageScale = 2;
+	/**
+	 * The output image mode
+	 */
 	private ImageMode imageMode = ImageMode.CLUSTER_ID;
+	/**
+	 * Set to true to weight the image data over nearest neighbour pixels
+	 */
 	public boolean weighted = false;
+	/**
+	 * Set to true to equalise the image histogram (allowing viewing high dynamic range data)
+	 */
 	public boolean equalised = false;
 
+	/**
+	 * The plot mode for the reachability distance profile
+	 */
 	private PlotMode plotMode = PlotMode.COLOURED_WITH_CLUSTERS;
 
+	/**
+	 * Set to true to draw the convex hull of each cluster as an outline
+	 */
 	public boolean outline = true;
 
 	public ImageMode getImageMode()
