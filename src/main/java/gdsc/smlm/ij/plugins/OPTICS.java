@@ -874,6 +874,10 @@ public class OPTICS implements PlugIn
 					}
 					else
 					{
+						// Merge the two
+						overlay = new Overlay();
+						for (int i = outline.size(); i-- > 0;)
+							overlay.add(outline.get(i));
 						for (int i = spanningTree.size(); i-- > 0;)
 							overlay.add(spanningTree.get(i));
 					}
@@ -913,7 +917,7 @@ public class OPTICS implements PlugIn
 				newResults();
 				return false;
 			}
-			if (current.samples != previous.samples)
+			if (current.samples != previous.samples || current.sampleFraction != previous.sampleFraction)
 			{
 				newResults();
 				return false;
@@ -1415,7 +1419,7 @@ public class OPTICS implements PlugIn
 			}
 			catch (IllegalArgumentException ex)
 			{
-				IJ.error(TITLE, ex.getMessage());
+				Utils.log(TITLE + ": " + ex.getMessage());
 				return false;
 			}
 
