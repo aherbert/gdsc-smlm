@@ -435,10 +435,23 @@ public class OPTICS implements PlugIn
 					{
 						double nmPerPixel = getNmPerPixel(results);
 
-						// Ensure that the distance is valid
-						double distance = opticsResult.generatingDistance * nmPerPixel;
-						if (work.inputSettings.clusteringDistance > 0)
-							distance = Math.min(work.inputSettings.clusteringDistance, distance);
+						double distance;
+						if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+						{
+							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
+									nmPerPixel;
+							if (nmPerPixel != 1)
+							{
+								Utils.log(TITLE + ": Default clustering distance %s nm", Utils.rounded(distance));
+							}
+						}
+						else
+						{
+							// Ensure that the distance is valid
+							distance = opticsResult.generatingDistance * nmPerPixel;
+							if (work.inputSettings.clusteringDistance > 0)
+								distance = Math.min(work.inputSettings.clusteringDistance, distance);
+						}
 
 						if (nmPerPixel != 1)
 						{
@@ -648,10 +661,20 @@ public class OPTICS implements PlugIn
 				// Add the DBSCAN clustering distance
 				if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN)
 				{
-					// Ensure that the distance is valid
-					double distance = opticsResult.generatingDistance * nmPerPixel;
-					if (work.inputSettings.clusteringDistance > 0)
-						distance = Math.min(work.inputSettings.clusteringDistance, distance);
+					double distance;
+					if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+					{
+						OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+						distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) * nmPerPixel;
+					}
+					else
+					{
+						// Ensure that the distance is valid
+						distance = opticsResult.generatingDistance * nmPerPixel;
+						if (work.inputSettings.clusteringDistance > 0)
+							distance = Math.min(work.inputSettings.clusteringDistance, distance);
+					}
+
 					plot.setColor(Color.red);
 					plot.drawLine(1, distance, order.length, distance);
 				}
