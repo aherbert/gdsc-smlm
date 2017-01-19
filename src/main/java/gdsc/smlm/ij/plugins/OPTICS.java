@@ -1,5 +1,18 @@
 package gdsc.smlm.ij.plugins;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2016 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -10,6 +23,7 @@ import gdsc.core.clustering.optics.ClusteringResult;
 import gdsc.core.clustering.optics.DBSCANResult;
 import gdsc.core.clustering.optics.OPTICSCluster;
 import gdsc.core.clustering.optics.OPTICSManager;
+import gdsc.core.clustering.optics.OPTICSManager.Option;
 import gdsc.core.clustering.optics.OPTICSResult;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -21,6 +35,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.OPTICSSettings;
+import gdsc.smlm.ij.settings.OPTICSSettings.OPTICSMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.ClusteringMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.ImageMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.PlotMode;
@@ -305,6 +320,7 @@ public class OPTICS implements PlugIn
 			Rectangle bounds = results.getBounds(true);
 			OPTICSManager opticsManager = new OPTICSManager(x, y, bounds);
 			opticsManager.setTracker(new IJTrackProgress());
+			opticsManager.setOptions(Option.CACHE);
 			return new Work(work.inputSettings, results, opticsManager);
 		}
 	}
@@ -314,10 +330,15 @@ public class OPTICS implements PlugIn
 		@Override
 		boolean equals(OPTICSSettings current, OPTICSSettings previous)
 		{
-			if (current.generatingDistance != previous.generatingDistance)
-				return false;
 			if (current.minPoints != previous.minPoints)
 				return false;
+			if (current.getOPTICSMode() != previous.getOPTICSMode())
+				return false;
+			if (current.getOPTICSMode() == OPTICSMode.OPTICS)
+			{
+				if (current.generatingDistance != previous.generatingDistance)
+					return false;
+			}
 			return true;
 		}
 
@@ -329,31 +350,40 @@ public class OPTICS implements PlugIn
 			// The second item should be the OPTICS manager
 			OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
 
-			double distance = work.inputSettings.generatingDistance;
 			int minPts = work.inputSettings.minPoints;
-			if (distance > 0)
+
+			OPTICSResult opticsResult;
+			if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 			{
-				// Convert generating distance to pixels
-				double nmPerPixel = getNmPerPixel(results);
-				if (nmPerPixel != 1)
-				{
-					double newDistance = distance / nmPerPixel;
-					Utils.log(TITLE + ": Converting generating distance %s nm to %s pixels", Utils.rounded(distance),
-							Utils.rounded(newDistance));
-					distance = newDistance;
-				}
+				opticsResult = opticsManager.fastOptics(minPts);
 			}
 			else
 			{
-				double nmPerPixel = getNmPerPixel(results);
-				if (nmPerPixel != 1)
+				double distance = work.inputSettings.generatingDistance;
+				if (distance > 0)
 				{
-					Utils.log(TITLE + ": Default generating distance %s nm",
-							Utils.rounded(opticsManager.computeGeneratingDistance(minPts) * nmPerPixel));
+					// Convert generating distance to pixels
+					double nmPerPixel = getNmPerPixel(results);
+					if (nmPerPixel != 1)
+					{
+						double newDistance = distance / nmPerPixel;
+						Utils.log(TITLE + ": Converting generating distance %s nm to %s pixels",
+								Utils.rounded(distance), Utils.rounded(newDistance));
+						distance = newDistance;
+					}
 				}
-			}
+				else
+				{
+					double nmPerPixel = getNmPerPixel(results);
+					if (nmPerPixel != 1)
+					{
+						Utils.log(TITLE + ": Default generating distance %s nm",
+								Utils.rounded(opticsManager.computeGeneratingDistance(minPts) * nmPerPixel));
+					}
+				}
 
-			OPTICSResult opticsResult = opticsManager.optics((float) distance, minPts);
+				opticsResult = opticsManager.optics((float) distance, minPts);
+			}
 			// It may be null if cancelled. However return null Work will close down the next thread
 			return new Work(work.inputSettings, results, opticsManager, opticsResult);
 		}
@@ -366,9 +396,9 @@ public class OPTICS implements PlugIn
 		@Override
 		boolean equals(OPTICSSettings current, OPTICSSettings previous)
 		{
-			if (current.clusteringMode != previous.clusteringMode)
+			if (current.getClusteringMode() != previous.getClusteringMode())
 				return false;
-			if (current.clusteringMode == ClusteringMode.XI)
+			if (current.getClusteringMode() == ClusteringMode.XI)
 			{
 				if (current.xi != previous.xi)
 					return false;
@@ -396,7 +426,7 @@ public class OPTICS implements PlugIn
 			{
 				synchronized (opticsResult)
 				{
-					if (work.inputSettings.clusteringMode == ClusteringMode.XI)
+					if (work.inputSettings.getClusteringMode() == ClusteringMode.XI)
 					{
 						int options = (work.inputSettings.topLevel) ? OPTICSResult.XI_OPTION_TOP_LEVEL : 0;
 						opticsResult.extractClusters(work.inputSettings.xi, options);
@@ -616,7 +646,7 @@ public class OPTICS implements PlugIn
 				}
 
 				// Add the DBSCAN clustering distance
-				if (inputSettings.clusteringMode == ClusteringMode.DBSCAN)
+				if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN)
 				{
 					// Ensure that the distance is valid
 					double distance = opticsResult.generatingDistance * nmPerPixel;
@@ -1299,6 +1329,8 @@ public class OPTICS implements PlugIn
 		}
 		else
 		{
+			String[] opticsModes = SettingsManager.getNames((Object[]) OPTICSMode.values());
+			gd.addChoice("OPTICS_mode", opticsModes, opticsModes[inputSettings.getOPTICSModeOridinal()]);
 			gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
 		}
 		gd.addMessage("--- Clustering ---");
@@ -1393,6 +1425,7 @@ public class OPTICS implements PlugIn
 			}
 
 			inputSettings.minPoints = (int) gd.getNextNumber();
+			inputSettings.setOPTICSMode(gd.getNextChoiceIndex());
 			inputSettings.generatingDistance = gd.getNextNumber();
 			inputSettings.setClusteringMode(gd.getNextChoiceIndex());
 			inputSettings.xi = gd.getNextNumber();

@@ -92,6 +92,36 @@ public class OPTICSSettings implements Cloneable
 	}
 
 	/**
+	 * Options for plotting the OPTICS algorithm
+	 */
+	public enum OPTICSMode
+	{
+		//@formatter:off
+		FAST_OPTICS {
+			@Override
+			public String getName() { return "FastOPTICS"; };
+		},
+		OPTICS {
+			@Override
+			public String getName() { return "OPTICS"; };
+		};
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+	}
+	
+	/**
 	 * Options for plotting the OPTICS results
 	 */
 	public enum ClusteringMode
@@ -223,6 +253,11 @@ public class OPTICSSettings implements Cloneable
 	// Affect running OPTICS
 
 	/**
+	 * The OPTICS algorithm to use. 
+	 */
+	private OPTICSMode opticsMode = OPTICSMode.FAST_OPTICS;
+	
+	/**
 	 * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
 	 * using the expected density of uniformly spread random points.
 	 */
@@ -241,7 +276,7 @@ public class OPTICSSettings implements Cloneable
 	/**
 	 * The clustering mode to use on the OPTICS results. 
 	 */
-	public ClusteringMode clusteringMode = ClusteringMode.XI;
+	private ClusteringMode clusteringMode = ClusteringMode.XI;
 
 	// Affect running OPTICS Xi
 	
@@ -313,6 +348,31 @@ public class OPTICSSettings implements Cloneable
 	 */
 	public boolean spanningTree = true;
 
+	public OPTICSMode getOPTICSMode()
+	{
+		return opticsMode;
+	}
+
+	public int getOPTICSModeOridinal()
+	{
+		if (opticsMode == null)
+			return 0;
+		return opticsMode.ordinal();
+	}
+
+	public void setOPTICSMode(OPTICSMode mode)
+	{
+		opticsMode = mode;
+	}
+
+	public void setOPTICSMode(int mode)
+	{
+		OPTICSMode[] values = OPTICSMode.values();
+		if (mode < 0 || mode >= values.length)
+			mode = 0;
+		this.opticsMode = values[mode];
+	}
+	
 	public ImageMode getImageMode()
 	{
 		return imageMode;
