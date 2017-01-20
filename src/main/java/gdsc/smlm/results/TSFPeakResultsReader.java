@@ -490,11 +490,12 @@ public class TSFPeakResultsReader
 		{
 			cal.setNmPerPixel(spotList.getPixelSize());
 		}
-		if (spotList.hasEcf())
+		if (spotList.getEcfCount() >= channel)
 		{
-			// Use it in both fields
-			cal.setGain(spotList.getEcf());
-			cal.setAmplification(spotList.getEcf());
+			double ecf = spotList.getEcf(channel - 1);
+			double qe = (spotList.getQeCount() >= channel) ? spotList.getQe(channel - 1) : 1;
+			cal.setGain(ecf * qe);
+			cal.setAmplification(ecf);
 		}
 
 		if (isGDSC)
@@ -584,7 +585,12 @@ public class TSFPeakResultsReader
 	 */
 	public void setChannel(int channel)
 	{
-		this.channel = channel;
+		this.channel = get1Based(channel);
+	}
+
+	private int get1Based(int value)
+	{
+		return (value < 1) ? 1 : value;
 	}
 
 	/**
@@ -605,7 +611,7 @@ public class TSFPeakResultsReader
 	 */
 	public void setSlice(int slice)
 	{
-		this.slice = slice;
+		this.slice = get1Based(slice);
 	}
 
 	/**
@@ -626,7 +632,7 @@ public class TSFPeakResultsReader
 	 */
 	public void setPosition(int position)
 	{
-		this.position = position;
+		this.position = get1Based(position);
 	}
 
 	/**
@@ -647,7 +653,7 @@ public class TSFPeakResultsReader
 	 */
 	public void setFluorophoreType(int fluorophoreType)
 	{
-		this.fluorophoreType = fluorophoreType;
+		this.fluorophoreType = get1Based(fluorophoreType);
 	}
 
 	/**

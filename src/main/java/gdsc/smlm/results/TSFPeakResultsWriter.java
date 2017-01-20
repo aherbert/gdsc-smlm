@@ -166,7 +166,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			double s = (params[Gaussian2DFunction.X_SD] + params[Gaussian2DFunction.Y_SD]) * 0.5 *
 					calibration.getNmPerPixel();
 			float precision = (float) PeakResult.getPrecision(calibration.getNmPerPixel(), s,
-					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(), calibration.isEmCCD());
+					params[Gaussian2DFunction.SIGNAL] / calibration.getGain(), noise / calibration.getGain(),
+					calibration.isEmCCD());
 			builder.setXPrecision(precision);
 			builder.setYPrecision(precision);
 		}
@@ -432,9 +433,22 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.setEmCCD(calibration.isEmCCD());
 			builder.setAmplification(calibration.getAmplification());
 
-			// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
-			double ecf = (calibration.getAmplification() > 0) ? calibration.getAmplification() : calibration.getGain();
-			builder.setEcf(ecf);
+			if (calibration.hasGain())
+			{
+				// Use amplification if present (as this is the correct electrons/count value), otherwise use gain
+				if (calibration.hasAmplification())
+				{
+					double ecf = calibration.getAmplification();
+					double qe = calibration.getGain() / ecf;
+					builder.addEcf(ecf);
+					builder.addQe(qe);
+				}
+				else
+				{
+					builder.addEcf(calibration.getGain());
+					builder.addQe(1);
+				}
+			}
 		}
 		if (configuration != null && configuration.length() > 0)
 		{

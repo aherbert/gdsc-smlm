@@ -2288,20 +2288,75 @@ public final class TaggedSpotFile {
      * <pre>
      * The electron conversion factor (camera gain), defined as
      * # of electrons per pixel / # of counts per pixel
+     * The ecf can be different for different channels (which can 
+     * happen when separate cameras are used for separate channels),
+     * therefore provide the ecf for each channel in the channel order
      * </pre>
      *
-     * <code>optional double ecf = 28;</code>
+     * <code>repeated double ecf = 28;</code>
      */
-    boolean hasEcf();
+    java.util.List<java.lang.Double> getEcfList();
     /**
      * <pre>
      * The electron conversion factor (camera gain), defined as
      * # of electrons per pixel / # of counts per pixel
+     * The ecf can be different for different channels (which can 
+     * happen when separate cameras are used for separate channels),
+     * therefore provide the ecf for each channel in the channel order
      * </pre>
      *
-     * <code>optional double ecf = 28;</code>
+     * <code>repeated double ecf = 28;</code>
      */
-    double getEcf();
+    int getEcfCount();
+    /**
+     * <pre>
+     * The electron conversion factor (camera gain), defined as
+     * # of electrons per pixel / # of counts per pixel
+     * The ecf can be different for different channels (which can 
+     * happen when separate cameras are used for separate channels),
+     * therefore provide the ecf for each channel in the channel order
+     * </pre>
+     *
+     * <code>repeated double ecf = 28;</code>
+     */
+    double getEcf(int index);
+
+    /**
+     * <pre>
+     * The quantum efficiency can be used to calculate the number
+     * of photons that hit the sensor, rather than the number of 
+     * electrons that were derived from them
+     * Since this number is wavelength dependent, provide the QE
+     * for each channel (in the channel order)
+     * </pre>
+     *
+     * <code>repeated double qe = 30;</code>
+     */
+    java.util.List<java.lang.Double> getQeList();
+    /**
+     * <pre>
+     * The quantum efficiency can be used to calculate the number
+     * of photons that hit the sensor, rather than the number of 
+     * electrons that were derived from them
+     * Since this number is wavelength dependent, provide the QE
+     * for each channel (in the channel order)
+     * </pre>
+     *
+     * <code>repeated double qe = 30;</code>
+     */
+    int getQeCount();
+    /**
+     * <pre>
+     * The quantum efficiency can be used to calculate the number
+     * of photons that hit the sensor, rather than the number of 
+     * electrons that were derived from them
+     * Since this number is wavelength dependent, provide the QE
+     * for each channel (in the channel order)
+     * </pre>
+     *
+     * <code>repeated double qe = 30;</code>
+     */
+    double getQe(int index);
 
     /**
      * <code>optional .TSF.ROI roi = 29;</code>
@@ -2504,7 +2559,8 @@ public final class TaggedSpotFile {
       thetaUnits_ = 0;
       fitMode_ = 0;
       isTrack_ = false;
-      ecf_ = 0D;
+      ecf_ = java.util.Collections.emptyList();
+      qe_ = java.util.Collections.emptyList();
       source_ = "";
       configuration_ = "";
       gain_ = 0D;
@@ -2669,13 +2725,29 @@ public final class TaggedSpotFile {
               break;
             }
             case 225: {
-              bitField0_ |= 0x00040000;
-              ecf_ = input.readDouble();
+              if (!((mutable_bitField0_ & 0x00080000) == 0x00080000)) {
+                ecf_ = new java.util.ArrayList<java.lang.Double>();
+                mutable_bitField0_ |= 0x00080000;
+              }
+              ecf_.add(input.readDouble());
+              break;
+            }
+            case 226: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00080000) == 0x00080000) && input.getBytesUntilLimit() > 0) {
+                ecf_ = new java.util.ArrayList<java.lang.Double>();
+                mutable_bitField0_ |= 0x00080000;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                ecf_.add(input.readDouble());
+              }
+              input.popLimit(limit);
               break;
             }
             case 234: {
               gdsc.smlm.tsf.TaggedSpotFile.ROI.Builder subBuilder = null;
-              if (((bitField0_ & 0x00080000) == 0x00080000)) {
+              if (((bitField0_ & 0x00040000) == 0x00040000)) {
                 subBuilder = roi_.toBuilder();
               }
               roi_ = input.readMessage(gdsc.smlm.tsf.TaggedSpotFile.ROI.PARSER, extensionRegistry);
@@ -2683,48 +2755,69 @@ public final class TaggedSpotFile {
                 subBuilder.mergeFrom(roi_);
                 roi_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00080000;
+              bitField0_ |= 0x00040000;
+              break;
+            }
+            case 241: {
+              if (!((mutable_bitField0_ & 0x00100000) == 0x00100000)) {
+                qe_ = new java.util.ArrayList<java.lang.Double>();
+                mutable_bitField0_ |= 0x00100000;
+              }
+              qe_.add(input.readDouble());
+              break;
+            }
+            case 242: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00100000) == 0x00100000) && input.getBytesUntilLimit() > 0) {
+                qe_ = new java.util.ArrayList<java.lang.Double>();
+                mutable_bitField0_ |= 0x00100000;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                qe_.add(input.readDouble());
+              }
+              input.popLimit(limit);
               break;
             }
             case 12010: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00100000;
+              bitField0_ |= 0x00080000;
               source_ = bs;
               break;
             }
             case 12018: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00200000;
+              bitField0_ |= 0x00100000;
               configuration_ = bs;
               break;
             }
             case 12025: {
-              bitField0_ |= 0x00400000;
+              bitField0_ |= 0x00200000;
               gain_ = input.readDouble();
               break;
             }
             case 12033: {
-              bitField0_ |= 0x00800000;
+              bitField0_ |= 0x00400000;
               exposureTime_ = input.readDouble();
               break;
             }
             case 12041: {
-              bitField0_ |= 0x01000000;
+              bitField0_ |= 0x00800000;
               readNoise_ = input.readDouble();
               break;
             }
             case 12049: {
-              bitField0_ |= 0x02000000;
+              bitField0_ |= 0x01000000;
               bias_ = input.readDouble();
               break;
             }
             case 12056: {
-              bitField0_ |= 0x04000000;
+              bitField0_ |= 0x02000000;
               emCCD_ = input.readBool();
               break;
             }
             case 12065: {
-              bitField0_ |= 0x08000000;
+              bitField0_ |= 0x04000000;
               amplification_ = input.readDouble();
               break;
             }
@@ -2738,6 +2831,12 @@ public final class TaggedSpotFile {
       } finally {
         if (((mutable_bitField0_ & 0x00002000) == 0x00002000)) {
           fluorophoreTypes_ = java.util.Collections.unmodifiableList(fluorophoreTypes_);
+        }
+        if (((mutable_bitField0_ & 0x00080000) == 0x00080000)) {
+          ecf_ = java.util.Collections.unmodifiableList(ecf_);
+        }
+        if (((mutable_bitField0_ & 0x00100000) == 0x00100000)) {
+          qe_ = java.util.Collections.unmodifiableList(qe_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -3289,28 +3388,95 @@ public final class TaggedSpotFile {
     }
 
     public static final int ECF_FIELD_NUMBER = 28;
-    private double ecf_;
+    private java.util.List<java.lang.Double> ecf_;
     /**
      * <pre>
      * The electron conversion factor (camera gain), defined as
      * # of electrons per pixel / # of counts per pixel
+     * The ecf can be different for different channels (which can 
+     * happen when separate cameras are used for separate channels),
+     * therefore provide the ecf for each channel in the channel order
      * </pre>
      *
-     * <code>optional double ecf = 28;</code>
+     * <code>repeated double ecf = 28;</code>
      */
-    public boolean hasEcf() {
-      return ((bitField0_ & 0x00040000) == 0x00040000);
+    public java.util.List<java.lang.Double>
+        getEcfList() {
+      return ecf_;
     }
     /**
      * <pre>
      * The electron conversion factor (camera gain), defined as
      * # of electrons per pixel / # of counts per pixel
+     * The ecf can be different for different channels (which can 
+     * happen when separate cameras are used for separate channels),
+     * therefore provide the ecf for each channel in the channel order
      * </pre>
      *
-     * <code>optional double ecf = 28;</code>
+     * <code>repeated double ecf = 28;</code>
      */
-    public double getEcf() {
-      return ecf_;
+    public int getEcfCount() {
+      return ecf_.size();
+    }
+    /**
+     * <pre>
+     * The electron conversion factor (camera gain), defined as
+     * # of electrons per pixel / # of counts per pixel
+     * The ecf can be different for different channels (which can 
+     * happen when separate cameras are used for separate channels),
+     * therefore provide the ecf for each channel in the channel order
+     * </pre>
+     *
+     * <code>repeated double ecf = 28;</code>
+     */
+    public double getEcf(int index) {
+      return ecf_.get(index);
+    }
+
+    public static final int QE_FIELD_NUMBER = 30;
+    private java.util.List<java.lang.Double> qe_;
+    /**
+     * <pre>
+     * The quantum efficiency can be used to calculate the number
+     * of photons that hit the sensor, rather than the number of 
+     * electrons that were derived from them
+     * Since this number is wavelength dependent, provide the QE
+     * for each channel (in the channel order)
+     * </pre>
+     *
+     * <code>repeated double qe = 30;</code>
+     */
+    public java.util.List<java.lang.Double>
+        getQeList() {
+      return qe_;
+    }
+    /**
+     * <pre>
+     * The quantum efficiency can be used to calculate the number
+     * of photons that hit the sensor, rather than the number of 
+     * electrons that were derived from them
+     * Since this number is wavelength dependent, provide the QE
+     * for each channel (in the channel order)
+     * </pre>
+     *
+     * <code>repeated double qe = 30;</code>
+     */
+    public int getQeCount() {
+      return qe_.size();
+    }
+    /**
+     * <pre>
+     * The quantum efficiency can be used to calculate the number
+     * of photons that hit the sensor, rather than the number of 
+     * electrons that were derived from them
+     * Since this number is wavelength dependent, provide the QE
+     * for each channel (in the channel order)
+     * </pre>
+     *
+     * <code>repeated double qe = 30;</code>
+     */
+    public double getQe(int index) {
+      return qe_.get(index);
     }
 
     public static final int ROI_FIELD_NUMBER = 29;
@@ -3319,7 +3485,7 @@ public final class TaggedSpotFile {
      * <code>optional .TSF.ROI roi = 29;</code>
      */
     public boolean hasRoi() {
-      return ((bitField0_ & 0x00080000) == 0x00080000);
+      return ((bitField0_ & 0x00040000) == 0x00040000);
     }
     /**
      * <code>optional .TSF.ROI roi = 29;</code>
@@ -3344,7 +3510,7 @@ public final class TaggedSpotFile {
      * <code>optional string source = 1501;</code>
      */
     public boolean hasSource() {
-      return ((bitField0_ & 0x00100000) == 0x00100000);
+      return ((bitField0_ & 0x00080000) == 0x00080000);
     }
     /**
      * <pre>
@@ -3398,7 +3564,7 @@ public final class TaggedSpotFile {
      * <code>optional string configuration = 1502;</code>
      */
     public boolean hasConfiguration() {
-      return ((bitField0_ & 0x00200000) == 0x00200000);
+      return ((bitField0_ & 0x00100000) == 0x00100000);
     }
     /**
      * <pre>
@@ -3453,7 +3619,7 @@ public final class TaggedSpotFile {
      * <code>optional double gain = 1503;</code>
      */
     public boolean hasGain() {
-      return ((bitField0_ & 0x00400000) == 0x00400000);
+      return ((bitField0_ & 0x00200000) == 0x00200000);
     }
     /**
      * <pre>
@@ -3477,7 +3643,7 @@ public final class TaggedSpotFile {
      * <code>optional double exposureTime = 1504;</code>
      */
     public boolean hasExposureTime() {
-      return ((bitField0_ & 0x00800000) == 0x00800000);
+      return ((bitField0_ & 0x00400000) == 0x00400000);
     }
     /**
      * <pre>
@@ -3500,7 +3666,7 @@ public final class TaggedSpotFile {
      * <code>optional double readNoise = 1505;</code>
      */
     public boolean hasReadNoise() {
-      return ((bitField0_ & 0x01000000) == 0x01000000);
+      return ((bitField0_ & 0x00800000) == 0x00800000);
     }
     /**
      * <pre>
@@ -3523,7 +3689,7 @@ public final class TaggedSpotFile {
      * <code>optional double bias = 1506;</code>
      */
     public boolean hasBias() {
-      return ((bitField0_ & 0x02000000) == 0x02000000);
+      return ((bitField0_ & 0x01000000) == 0x01000000);
     }
     /**
      * <pre>
@@ -3546,7 +3712,7 @@ public final class TaggedSpotFile {
      * <code>optional bool emCCD = 1507;</code>
      */
     public boolean hasEmCCD() {
-      return ((bitField0_ & 0x04000000) == 0x04000000);
+      return ((bitField0_ & 0x02000000) == 0x02000000);
     }
     /**
      * <pre>
@@ -3569,7 +3735,7 @@ public final class TaggedSpotFile {
      * <code>optional double amplification = 1508;</code>
      */
     public boolean hasAmplification() {
-      return ((bitField0_ & 0x08000000) == 0x08000000);
+      return ((bitField0_ & 0x04000000) == 0x04000000);
     }
     /**
      * <pre>
@@ -3674,34 +3840,37 @@ public final class TaggedSpotFile {
       if (((bitField0_ & 0x00008000) == 0x00008000)) {
         output.writeEnum(27, thetaUnits_);
       }
-      if (((bitField0_ & 0x00040000) == 0x00040000)) {
-        output.writeDouble(28, ecf_);
+      for (int i = 0; i < ecf_.size(); i++) {
+        output.writeDouble(28, ecf_.get(i));
       }
-      if (((bitField0_ & 0x00080000) == 0x00080000)) {
+      if (((bitField0_ & 0x00040000) == 0x00040000)) {
         output.writeMessage(29, getRoi());
       }
-      if (((bitField0_ & 0x00100000) == 0x00100000)) {
+      for (int i = 0; i < qe_.size(); i++) {
+        output.writeDouble(30, qe_.get(i));
+      }
+      if (((bitField0_ & 0x00080000) == 0x00080000)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1501, source_);
       }
-      if (((bitField0_ & 0x00200000) == 0x00200000)) {
+      if (((bitField0_ & 0x00100000) == 0x00100000)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1502, configuration_);
       }
-      if (((bitField0_ & 0x00400000) == 0x00400000)) {
+      if (((bitField0_ & 0x00200000) == 0x00200000)) {
         output.writeDouble(1503, gain_);
       }
-      if (((bitField0_ & 0x00800000) == 0x00800000)) {
+      if (((bitField0_ & 0x00400000) == 0x00400000)) {
         output.writeDouble(1504, exposureTime_);
       }
-      if (((bitField0_ & 0x01000000) == 0x01000000)) {
+      if (((bitField0_ & 0x00800000) == 0x00800000)) {
         output.writeDouble(1505, readNoise_);
       }
-      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+      if (((bitField0_ & 0x01000000) == 0x01000000)) {
         output.writeDouble(1506, bias_);
       }
-      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
         output.writeBool(1507, emCCD_);
       }
-      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
         output.writeDouble(1508, amplification_);
       }
       extensionWriter.writeUntil(2048, output);
@@ -3787,41 +3956,49 @@ public final class TaggedSpotFile {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(27, thetaUnits_);
       }
-      if (((bitField0_ & 0x00040000) == 0x00040000)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(28, ecf_);
+      {
+        int dataSize = 0;
+        dataSize = 8 * getEcfList().size();
+        size += dataSize;
+        size += 2 * getEcfList().size();
       }
-      if (((bitField0_ & 0x00080000) == 0x00080000)) {
+      if (((bitField0_ & 0x00040000) == 0x00040000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(29, getRoi());
       }
-      if (((bitField0_ & 0x00100000) == 0x00100000)) {
+      {
+        int dataSize = 0;
+        dataSize = 8 * getQeList().size();
+        size += dataSize;
+        size += 2 * getQeList().size();
+      }
+      if (((bitField0_ & 0x00080000) == 0x00080000)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1501, source_);
       }
-      if (((bitField0_ & 0x00200000) == 0x00200000)) {
+      if (((bitField0_ & 0x00100000) == 0x00100000)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1502, configuration_);
       }
-      if (((bitField0_ & 0x00400000) == 0x00400000)) {
+      if (((bitField0_ & 0x00200000) == 0x00200000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1503, gain_);
       }
-      if (((bitField0_ & 0x00800000) == 0x00800000)) {
+      if (((bitField0_ & 0x00400000) == 0x00400000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1504, exposureTime_);
       }
-      if (((bitField0_ & 0x01000000) == 0x01000000)) {
+      if (((bitField0_ & 0x00800000) == 0x00800000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1505, readNoise_);
       }
-      if (((bitField0_ & 0x02000000) == 0x02000000)) {
+      if (((bitField0_ & 0x01000000) == 0x01000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1506, bias_);
       }
-      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+      if (((bitField0_ & 0x02000000) == 0x02000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1507, emCCD_);
       }
-      if (((bitField0_ & 0x08000000) == 0x08000000)) {
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1508, amplification_);
       }
@@ -3933,13 +4110,10 @@ public final class TaggedSpotFile {
         result = result && (getIsTrack()
             == other.getIsTrack());
       }
-      result = result && (hasEcf() == other.hasEcf());
-      if (hasEcf()) {
-        result = result && (
-            java.lang.Double.doubleToLongBits(getEcf())
-            == java.lang.Double.doubleToLongBits(
-                other.getEcf()));
-      }
+      result = result && getEcfList()
+          .equals(other.getEcfList());
+      result = result && getQeList()
+          .equals(other.getQeList());
       result = result && (hasRoi() == other.hasRoi());
       if (hasRoi()) {
         result = result && getRoi()
@@ -4088,10 +4262,13 @@ public final class TaggedSpotFile {
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getIsTrack());
       }
-      if (hasEcf()) {
+      if (getEcfCount() > 0) {
         hash = (37 * hash) + ECF_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            java.lang.Double.doubleToLongBits(getEcf()));
+        hash = (53 * hash) + getEcfList().hashCode();
+      }
+      if (getQeCount() > 0) {
+        hash = (37 * hash) + QE_FIELD_NUMBER;
+        hash = (53 * hash) + getQeList().hashCode();
       }
       if (hasRoi()) {
         hash = (37 * hash) + ROI_FIELD_NUMBER;
@@ -4299,30 +4476,32 @@ public final class TaggedSpotFile {
         bitField0_ = (bitField0_ & ~0x00020000);
         isTrack_ = false;
         bitField0_ = (bitField0_ & ~0x00040000);
-        ecf_ = 0D;
+        ecf_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00080000);
+        qe_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00100000);
         if (roiBuilder_ == null) {
           roi_ = null;
         } else {
           roiBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00100000);
-        source_ = "";
         bitField0_ = (bitField0_ & ~0x00200000);
-        configuration_ = "";
+        source_ = "";
         bitField0_ = (bitField0_ & ~0x00400000);
-        gain_ = 0D;
+        configuration_ = "";
         bitField0_ = (bitField0_ & ~0x00800000);
-        exposureTime_ = 0D;
+        gain_ = 0D;
         bitField0_ = (bitField0_ & ~0x01000000);
-        readNoise_ = 0D;
+        exposureTime_ = 0D;
         bitField0_ = (bitField0_ & ~0x02000000);
-        bias_ = 0D;
+        readNoise_ = 0D;
         bitField0_ = (bitField0_ & ~0x04000000);
-        emCCD_ = false;
+        bias_ = 0D;
         bitField0_ = (bitField0_ & ~0x08000000);
-        amplification_ = 0D;
+        emCCD_ = false;
         bitField0_ = (bitField0_ & ~0x10000000);
+        amplification_ = 0D;
+        bitField0_ = (bitField0_ & ~0x20000000);
         return this;
       }
 
@@ -4428,48 +4607,54 @@ public final class TaggedSpotFile {
           to_bitField0_ |= 0x00020000;
         }
         result.isTrack_ = isTrack_;
-        if (((from_bitField0_ & 0x00080000) == 0x00080000)) {
-          to_bitField0_ |= 0x00040000;
+        if (((bitField0_ & 0x00080000) == 0x00080000)) {
+          ecf_ = java.util.Collections.unmodifiableList(ecf_);
+          bitField0_ = (bitField0_ & ~0x00080000);
         }
         result.ecf_ = ecf_;
-        if (((from_bitField0_ & 0x00100000) == 0x00100000)) {
-          to_bitField0_ |= 0x00080000;
+        if (((bitField0_ & 0x00100000) == 0x00100000)) {
+          qe_ = java.util.Collections.unmodifiableList(qe_);
+          bitField0_ = (bitField0_ & ~0x00100000);
+        }
+        result.qe_ = qe_;
+        if (((from_bitField0_ & 0x00200000) == 0x00200000)) {
+          to_bitField0_ |= 0x00040000;
         }
         if (roiBuilder_ == null) {
           result.roi_ = roi_;
         } else {
           result.roi_ = roiBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00200000) == 0x00200000)) {
-          to_bitField0_ |= 0x00100000;
+        if (((from_bitField0_ & 0x00400000) == 0x00400000)) {
+          to_bitField0_ |= 0x00080000;
         }
         result.source_ = source_;
-        if (((from_bitField0_ & 0x00400000) == 0x00400000)) {
-          to_bitField0_ |= 0x00200000;
+        if (((from_bitField0_ & 0x00800000) == 0x00800000)) {
+          to_bitField0_ |= 0x00100000;
         }
         result.configuration_ = configuration_;
-        if (((from_bitField0_ & 0x00800000) == 0x00800000)) {
-          to_bitField0_ |= 0x00400000;
+        if (((from_bitField0_ & 0x01000000) == 0x01000000)) {
+          to_bitField0_ |= 0x00200000;
         }
         result.gain_ = gain_;
-        if (((from_bitField0_ & 0x01000000) == 0x01000000)) {
-          to_bitField0_ |= 0x00800000;
+        if (((from_bitField0_ & 0x02000000) == 0x02000000)) {
+          to_bitField0_ |= 0x00400000;
         }
         result.exposureTime_ = exposureTime_;
-        if (((from_bitField0_ & 0x02000000) == 0x02000000)) {
-          to_bitField0_ |= 0x01000000;
+        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
+          to_bitField0_ |= 0x00800000;
         }
         result.readNoise_ = readNoise_;
-        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
-          to_bitField0_ |= 0x02000000;
+        if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
+          to_bitField0_ |= 0x01000000;
         }
         result.bias_ = bias_;
-        if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
-          to_bitField0_ |= 0x04000000;
+        if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
+          to_bitField0_ |= 0x02000000;
         }
         result.emCCD_ = emCCD_;
-        if (((from_bitField0_ & 0x10000000) == 0x10000000)) {
-          to_bitField0_ |= 0x08000000;
+        if (((from_bitField0_ & 0x20000000) == 0x20000000)) {
+          to_bitField0_ |= 0x04000000;
         }
         result.amplification_ = amplification_;
         result.bitField0_ = to_bitField0_;
@@ -4621,19 +4806,36 @@ public final class TaggedSpotFile {
         if (other.hasIsTrack()) {
           setIsTrack(other.getIsTrack());
         }
-        if (other.hasEcf()) {
-          setEcf(other.getEcf());
+        if (!other.ecf_.isEmpty()) {
+          if (ecf_.isEmpty()) {
+            ecf_ = other.ecf_;
+            bitField0_ = (bitField0_ & ~0x00080000);
+          } else {
+            ensureEcfIsMutable();
+            ecf_.addAll(other.ecf_);
+          }
+          onChanged();
+        }
+        if (!other.qe_.isEmpty()) {
+          if (qe_.isEmpty()) {
+            qe_ = other.qe_;
+            bitField0_ = (bitField0_ & ~0x00100000);
+          } else {
+            ensureQeIsMutable();
+            qe_.addAll(other.qe_);
+          }
+          onChanged();
         }
         if (other.hasRoi()) {
           mergeRoi(other.getRoi());
         }
         if (other.hasSource()) {
-          bitField0_ |= 0x00200000;
+          bitField0_ |= 0x00400000;
           source_ = other.source_;
           onChanged();
         }
         if (other.hasConfiguration()) {
-          bitField0_ |= 0x00400000;
+          bitField0_ |= 0x00800000;
           configuration_ = other.configuration_;
           onChanged();
         }
@@ -5998,40 +6200,71 @@ public final class TaggedSpotFile {
         return this;
       }
 
-      private double ecf_ ;
-      /**
-       * <pre>
-       * The electron conversion factor (camera gain), defined as
-       * # of electrons per pixel / # of counts per pixel
-       * </pre>
-       *
-       * <code>optional double ecf = 28;</code>
-       */
-      public boolean hasEcf() {
-        return ((bitField0_ & 0x00080000) == 0x00080000);
+      private java.util.List<java.lang.Double> ecf_ = java.util.Collections.emptyList();
+      private void ensureEcfIsMutable() {
+        if (!((bitField0_ & 0x00080000) == 0x00080000)) {
+          ecf_ = new java.util.ArrayList<java.lang.Double>(ecf_);
+          bitField0_ |= 0x00080000;
+         }
       }
       /**
        * <pre>
        * The electron conversion factor (camera gain), defined as
        * # of electrons per pixel / # of counts per pixel
+       * The ecf can be different for different channels (which can 
+       * happen when separate cameras are used for separate channels),
+       * therefore provide the ecf for each channel in the channel order
        * </pre>
        *
-       * <code>optional double ecf = 28;</code>
+       * <code>repeated double ecf = 28;</code>
        */
-      public double getEcf() {
-        return ecf_;
+      public java.util.List<java.lang.Double>
+          getEcfList() {
+        return java.util.Collections.unmodifiableList(ecf_);
       }
       /**
        * <pre>
        * The electron conversion factor (camera gain), defined as
        * # of electrons per pixel / # of counts per pixel
+       * The ecf can be different for different channels (which can 
+       * happen when separate cameras are used for separate channels),
+       * therefore provide the ecf for each channel in the channel order
        * </pre>
        *
-       * <code>optional double ecf = 28;</code>
+       * <code>repeated double ecf = 28;</code>
        */
-      public Builder setEcf(double value) {
-        bitField0_ |= 0x00080000;
-        ecf_ = value;
+      public int getEcfCount() {
+        return ecf_.size();
+      }
+      /**
+       * <pre>
+       * The electron conversion factor (camera gain), defined as
+       * # of electrons per pixel / # of counts per pixel
+       * The ecf can be different for different channels (which can 
+       * happen when separate cameras are used for separate channels),
+       * therefore provide the ecf for each channel in the channel order
+       * </pre>
+       *
+       * <code>repeated double ecf = 28;</code>
+       */
+      public double getEcf(int index) {
+        return ecf_.get(index);
+      }
+      /**
+       * <pre>
+       * The electron conversion factor (camera gain), defined as
+       * # of electrons per pixel / # of counts per pixel
+       * The ecf can be different for different channels (which can 
+       * happen when separate cameras are used for separate channels),
+       * therefore provide the ecf for each channel in the channel order
+       * </pre>
+       *
+       * <code>repeated double ecf = 28;</code>
+       */
+      public Builder setEcf(
+          int index, double value) {
+        ensureEcfIsMutable();
+        ecf_.set(index, value);
         onChanged();
         return this;
       }
@@ -6039,13 +6272,174 @@ public final class TaggedSpotFile {
        * <pre>
        * The electron conversion factor (camera gain), defined as
        * # of electrons per pixel / # of counts per pixel
+       * The ecf can be different for different channels (which can 
+       * happen when separate cameras are used for separate channels),
+       * therefore provide the ecf for each channel in the channel order
        * </pre>
        *
-       * <code>optional double ecf = 28;</code>
+       * <code>repeated double ecf = 28;</code>
+       */
+      public Builder addEcf(double value) {
+        ensureEcfIsMutable();
+        ecf_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The electron conversion factor (camera gain), defined as
+       * # of electrons per pixel / # of counts per pixel
+       * The ecf can be different for different channels (which can 
+       * happen when separate cameras are used for separate channels),
+       * therefore provide the ecf for each channel in the channel order
+       * </pre>
+       *
+       * <code>repeated double ecf = 28;</code>
+       */
+      public Builder addAllEcf(
+          java.lang.Iterable<? extends java.lang.Double> values) {
+        ensureEcfIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, ecf_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The electron conversion factor (camera gain), defined as
+       * # of electrons per pixel / # of counts per pixel
+       * The ecf can be different for different channels (which can 
+       * happen when separate cameras are used for separate channels),
+       * therefore provide the ecf for each channel in the channel order
+       * </pre>
+       *
+       * <code>repeated double ecf = 28;</code>
        */
       public Builder clearEcf() {
+        ecf_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00080000);
-        ecf_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<java.lang.Double> qe_ = java.util.Collections.emptyList();
+      private void ensureQeIsMutable() {
+        if (!((bitField0_ & 0x00100000) == 0x00100000)) {
+          qe_ = new java.util.ArrayList<java.lang.Double>(qe_);
+          bitField0_ |= 0x00100000;
+         }
+      }
+      /**
+       * <pre>
+       * The quantum efficiency can be used to calculate the number
+       * of photons that hit the sensor, rather than the number of 
+       * electrons that were derived from them
+       * Since this number is wavelength dependent, provide the QE
+       * for each channel (in the channel order)
+       * </pre>
+       *
+       * <code>repeated double qe = 30;</code>
+       */
+      public java.util.List<java.lang.Double>
+          getQeList() {
+        return java.util.Collections.unmodifiableList(qe_);
+      }
+      /**
+       * <pre>
+       * The quantum efficiency can be used to calculate the number
+       * of photons that hit the sensor, rather than the number of 
+       * electrons that were derived from them
+       * Since this number is wavelength dependent, provide the QE
+       * for each channel (in the channel order)
+       * </pre>
+       *
+       * <code>repeated double qe = 30;</code>
+       */
+      public int getQeCount() {
+        return qe_.size();
+      }
+      /**
+       * <pre>
+       * The quantum efficiency can be used to calculate the number
+       * of photons that hit the sensor, rather than the number of 
+       * electrons that were derived from them
+       * Since this number is wavelength dependent, provide the QE
+       * for each channel (in the channel order)
+       * </pre>
+       *
+       * <code>repeated double qe = 30;</code>
+       */
+      public double getQe(int index) {
+        return qe_.get(index);
+      }
+      /**
+       * <pre>
+       * The quantum efficiency can be used to calculate the number
+       * of photons that hit the sensor, rather than the number of 
+       * electrons that were derived from them
+       * Since this number is wavelength dependent, provide the QE
+       * for each channel (in the channel order)
+       * </pre>
+       *
+       * <code>repeated double qe = 30;</code>
+       */
+      public Builder setQe(
+          int index, double value) {
+        ensureQeIsMutable();
+        qe_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The quantum efficiency can be used to calculate the number
+       * of photons that hit the sensor, rather than the number of 
+       * electrons that were derived from them
+       * Since this number is wavelength dependent, provide the QE
+       * for each channel (in the channel order)
+       * </pre>
+       *
+       * <code>repeated double qe = 30;</code>
+       */
+      public Builder addQe(double value) {
+        ensureQeIsMutable();
+        qe_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The quantum efficiency can be used to calculate the number
+       * of photons that hit the sensor, rather than the number of 
+       * electrons that were derived from them
+       * Since this number is wavelength dependent, provide the QE
+       * for each channel (in the channel order)
+       * </pre>
+       *
+       * <code>repeated double qe = 30;</code>
+       */
+      public Builder addAllQe(
+          java.lang.Iterable<? extends java.lang.Double> values) {
+        ensureQeIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, qe_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The quantum efficiency can be used to calculate the number
+       * of photons that hit the sensor, rather than the number of 
+       * electrons that were derived from them
+       * Since this number is wavelength dependent, provide the QE
+       * for each channel (in the channel order)
+       * </pre>
+       *
+       * <code>repeated double qe = 30;</code>
+       */
+      public Builder clearQe() {
+        qe_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00100000);
         onChanged();
         return this;
       }
@@ -6057,7 +6451,7 @@ public final class TaggedSpotFile {
        * <code>optional .TSF.ROI roi = 29;</code>
        */
       public boolean hasRoi() {
-        return ((bitField0_ & 0x00100000) == 0x00100000);
+        return ((bitField0_ & 0x00200000) == 0x00200000);
       }
       /**
        * <code>optional .TSF.ROI roi = 29;</code>
@@ -6082,7 +6476,7 @@ public final class TaggedSpotFile {
         } else {
           roiBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00100000;
+        bitField0_ |= 0x00200000;
         return this;
       }
       /**
@@ -6096,7 +6490,7 @@ public final class TaggedSpotFile {
         } else {
           roiBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00100000;
+        bitField0_ |= 0x00200000;
         return this;
       }
       /**
@@ -6104,7 +6498,7 @@ public final class TaggedSpotFile {
        */
       public Builder mergeRoi(gdsc.smlm.tsf.TaggedSpotFile.ROI value) {
         if (roiBuilder_ == null) {
-          if (((bitField0_ & 0x00100000) == 0x00100000) &&
+          if (((bitField0_ & 0x00200000) == 0x00200000) &&
               roi_ != null &&
               roi_ != gdsc.smlm.tsf.TaggedSpotFile.ROI.getDefaultInstance()) {
             roi_ =
@@ -6116,7 +6510,7 @@ public final class TaggedSpotFile {
         } else {
           roiBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00100000;
+        bitField0_ |= 0x00200000;
         return this;
       }
       /**
@@ -6129,14 +6523,14 @@ public final class TaggedSpotFile {
         } else {
           roiBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00100000);
+        bitField0_ = (bitField0_ & ~0x00200000);
         return this;
       }
       /**
        * <code>optional .TSF.ROI roi = 29;</code>
        */
       public gdsc.smlm.tsf.TaggedSpotFile.ROI.Builder getRoiBuilder() {
-        bitField0_ |= 0x00100000;
+        bitField0_ |= 0x00200000;
         onChanged();
         return getRoiFieldBuilder().getBuilder();
       }
@@ -6177,7 +6571,7 @@ public final class TaggedSpotFile {
        * <code>optional string source = 1501;</code>
        */
       public boolean hasSource() {
-        return ((bitField0_ & 0x00200000) == 0x00200000);
+        return ((bitField0_ & 0x00400000) == 0x00400000);
       }
       /**
        * <pre>
@@ -6232,7 +6626,7 @@ public final class TaggedSpotFile {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00200000;
+  bitField0_ |= 0x00400000;
         source_ = value;
         onChanged();
         return this;
@@ -6245,7 +6639,7 @@ public final class TaggedSpotFile {
        * <code>optional string source = 1501;</code>
        */
       public Builder clearSource() {
-        bitField0_ = (bitField0_ & ~0x00200000);
+        bitField0_ = (bitField0_ & ~0x00400000);
         source_ = getDefaultInstance().getSource();
         onChanged();
         return this;
@@ -6262,7 +6656,7 @@ public final class TaggedSpotFile {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00200000;
+  bitField0_ |= 0x00400000;
         source_ = value;
         onChanged();
         return this;
@@ -6277,7 +6671,7 @@ public final class TaggedSpotFile {
        * <code>optional string configuration = 1502;</code>
        */
       public boolean hasConfiguration() {
-        return ((bitField0_ & 0x00400000) == 0x00400000);
+        return ((bitField0_ & 0x00800000) == 0x00800000);
       }
       /**
        * <pre>
@@ -6332,7 +6726,7 @@ public final class TaggedSpotFile {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00400000;
+  bitField0_ |= 0x00800000;
         configuration_ = value;
         onChanged();
         return this;
@@ -6345,7 +6739,7 @@ public final class TaggedSpotFile {
        * <code>optional string configuration = 1502;</code>
        */
       public Builder clearConfiguration() {
-        bitField0_ = (bitField0_ & ~0x00400000);
+        bitField0_ = (bitField0_ & ~0x00800000);
         configuration_ = getDefaultInstance().getConfiguration();
         onChanged();
         return this;
@@ -6362,7 +6756,7 @@ public final class TaggedSpotFile {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00400000;
+  bitField0_ |= 0x00800000;
         configuration_ = value;
         onChanged();
         return this;
@@ -6378,7 +6772,7 @@ public final class TaggedSpotFile {
        * <code>optional double gain = 1503;</code>
        */
       public boolean hasGain() {
-        return ((bitField0_ & 0x00800000) == 0x00800000);
+        return ((bitField0_ & 0x01000000) == 0x01000000);
       }
       /**
        * <pre>
@@ -6400,7 +6794,7 @@ public final class TaggedSpotFile {
        * <code>optional double gain = 1503;</code>
        */
       public Builder setGain(double value) {
-        bitField0_ |= 0x00800000;
+        bitField0_ |= 0x01000000;
         gain_ = value;
         onChanged();
         return this;
@@ -6414,7 +6808,7 @@ public final class TaggedSpotFile {
        * <code>optional double gain = 1503;</code>
        */
       public Builder clearGain() {
-        bitField0_ = (bitField0_ & ~0x00800000);
+        bitField0_ = (bitField0_ & ~0x01000000);
         gain_ = 0D;
         onChanged();
         return this;
@@ -6429,7 +6823,7 @@ public final class TaggedSpotFile {
        * <code>optional double exposureTime = 1504;</code>
        */
       public boolean hasExposureTime() {
-        return ((bitField0_ & 0x01000000) == 0x01000000);
+        return ((bitField0_ & 0x02000000) == 0x02000000);
       }
       /**
        * <pre>
@@ -6449,7 +6843,7 @@ public final class TaggedSpotFile {
        * <code>optional double exposureTime = 1504;</code>
        */
       public Builder setExposureTime(double value) {
-        bitField0_ |= 0x01000000;
+        bitField0_ |= 0x02000000;
         exposureTime_ = value;
         onChanged();
         return this;
@@ -6462,7 +6856,7 @@ public final class TaggedSpotFile {
        * <code>optional double exposureTime = 1504;</code>
        */
       public Builder clearExposureTime() {
-        bitField0_ = (bitField0_ & ~0x01000000);
+        bitField0_ = (bitField0_ & ~0x02000000);
         exposureTime_ = 0D;
         onChanged();
         return this;
@@ -6477,7 +6871,7 @@ public final class TaggedSpotFile {
        * <code>optional double readNoise = 1505;</code>
        */
       public boolean hasReadNoise() {
-        return ((bitField0_ & 0x02000000) == 0x02000000);
+        return ((bitField0_ & 0x04000000) == 0x04000000);
       }
       /**
        * <pre>
@@ -6497,7 +6891,7 @@ public final class TaggedSpotFile {
        * <code>optional double readNoise = 1505;</code>
        */
       public Builder setReadNoise(double value) {
-        bitField0_ |= 0x02000000;
+        bitField0_ |= 0x04000000;
         readNoise_ = value;
         onChanged();
         return this;
@@ -6510,7 +6904,7 @@ public final class TaggedSpotFile {
        * <code>optional double readNoise = 1505;</code>
        */
       public Builder clearReadNoise() {
-        bitField0_ = (bitField0_ & ~0x02000000);
+        bitField0_ = (bitField0_ & ~0x04000000);
         readNoise_ = 0D;
         onChanged();
         return this;
@@ -6525,7 +6919,7 @@ public final class TaggedSpotFile {
        * <code>optional double bias = 1506;</code>
        */
       public boolean hasBias() {
-        return ((bitField0_ & 0x04000000) == 0x04000000);
+        return ((bitField0_ & 0x08000000) == 0x08000000);
       }
       /**
        * <pre>
@@ -6545,7 +6939,7 @@ public final class TaggedSpotFile {
        * <code>optional double bias = 1506;</code>
        */
       public Builder setBias(double value) {
-        bitField0_ |= 0x04000000;
+        bitField0_ |= 0x08000000;
         bias_ = value;
         onChanged();
         return this;
@@ -6558,7 +6952,7 @@ public final class TaggedSpotFile {
        * <code>optional double bias = 1506;</code>
        */
       public Builder clearBias() {
-        bitField0_ = (bitField0_ & ~0x04000000);
+        bitField0_ = (bitField0_ & ~0x08000000);
         bias_ = 0D;
         onChanged();
         return this;
@@ -6573,7 +6967,7 @@ public final class TaggedSpotFile {
        * <code>optional bool emCCD = 1507;</code>
        */
       public boolean hasEmCCD() {
-        return ((bitField0_ & 0x08000000) == 0x08000000);
+        return ((bitField0_ & 0x10000000) == 0x10000000);
       }
       /**
        * <pre>
@@ -6593,7 +6987,7 @@ public final class TaggedSpotFile {
        * <code>optional bool emCCD = 1507;</code>
        */
       public Builder setEmCCD(boolean value) {
-        bitField0_ |= 0x08000000;
+        bitField0_ |= 0x10000000;
         emCCD_ = value;
         onChanged();
         return this;
@@ -6606,7 +7000,7 @@ public final class TaggedSpotFile {
        * <code>optional bool emCCD = 1507;</code>
        */
       public Builder clearEmCCD() {
-        bitField0_ = (bitField0_ & ~0x08000000);
+        bitField0_ = (bitField0_ & ~0x10000000);
         emCCD_ = false;
         onChanged();
         return this;
@@ -6621,7 +7015,7 @@ public final class TaggedSpotFile {
        * <code>optional double amplification = 1508;</code>
        */
       public boolean hasAmplification() {
-        return ((bitField0_ & 0x10000000) == 0x10000000);
+        return ((bitField0_ & 0x20000000) == 0x20000000);
       }
       /**
        * <pre>
@@ -6641,7 +7035,7 @@ public final class TaggedSpotFile {
        * <code>optional double amplification = 1508;</code>
        */
       public Builder setAmplification(double value) {
-        bitField0_ |= 0x10000000;
+        bitField0_ |= 0x20000000;
         amplification_ = value;
         onChanged();
         return this;
@@ -6654,7 +7048,7 @@ public final class TaggedSpotFile {
        * <code>optional double amplification = 1508;</code>
        */
       public Builder clearAmplification() {
-        bitField0_ = (bitField0_ & ~0x10000000);
+        bitField0_ = (bitField0_ & ~0x20000000);
         amplification_ = 0D;
         onChanged();
         return this;
@@ -6948,7 +7342,7 @@ public final class TaggedSpotFile {
 
     /**
      * <pre>
-     * Use intenisty_units only if different from SpotList
+     * Use intensity_units only if different from SpotList
      * integrated spot density. This can either be determined from a fit or 
      * using any other methods.  This number should be corrected for background
      * </pre>
@@ -6958,7 +7352,7 @@ public final class TaggedSpotFile {
     boolean hasIntensityUnits();
     /**
      * <pre>
-     * Use intenisty_units only if different from SpotList
+     * Use intensity_units only if different from SpotList
      * integrated spot density. This can either be determined from a fit or 
      * using any other methods.  This number should be corrected for background
      * </pre>
@@ -6989,7 +7383,7 @@ public final class TaggedSpotFile {
      * Background around the spot. 
      * This can be determined through a fit or other methods
      * This number should not include the camera bias, i.e. it should be linearly
-     * propertional to the number of photons in the background
+     * proportional to the number of photons in the background
      * </pre>
      *
      * <code>optional float background = 11;</code>
@@ -7000,7 +7394,7 @@ public final class TaggedSpotFile {
      * Background around the spot. 
      * This can be determined through a fit or other methods
      * This number should not include the camera bias, i.e. it should be linearly
-     * propertional to the number of photons in the background
+     * proportional to the number of photons in the background
      * </pre>
      *
      * <code>optional float background = 11;</code>
@@ -7010,7 +7404,7 @@ public final class TaggedSpotFile {
     /**
      * <pre>
      * Peak width at half height in location units
-     * for asymetric peaks, calculate the width as the square root of the 
+     * for asymmetric peaks, calculate the width as the square root of the 
      * product of the widths of the long and short axes
      * </pre>
      *
@@ -7020,7 +7414,7 @@ public final class TaggedSpotFile {
     /**
      * <pre>
      * Peak width at half height in location units
-     * for asymetric peaks, calculate the width as the square root of the 
+     * for asymmetric peaks, calculate the width as the square root of the 
      * product of the widths of the long and short axes
      * </pre>
      *
@@ -7049,7 +7443,7 @@ public final class TaggedSpotFile {
 
     /**
      * <pre>
-     * Rotation of assymetric peak, only used 
+     * Rotation of asymmetric peak, only used 
      * when fitmode == TWOAXISANDTHETA
      * </pre>
      *
@@ -7058,7 +7452,7 @@ public final class TaggedSpotFile {
     boolean hasTheta();
     /**
      * <pre>
-     * Rotation of assymetric peak, only used 
+     * Rotation of asymmetric peak, only used 
      * when fitmode == TWOAXISANDTHETA
      * </pre>
      *
@@ -7840,7 +8234,7 @@ public final class TaggedSpotFile {
     private int intensityUnits_;
     /**
      * <pre>
-     * Use intenisty_units only if different from SpotList
+     * Use intensity_units only if different from SpotList
      * integrated spot density. This can either be determined from a fit or 
      * using any other methods.  This number should be corrected for background
      * </pre>
@@ -7852,7 +8246,7 @@ public final class TaggedSpotFile {
     }
     /**
      * <pre>
-     * Use intenisty_units only if different from SpotList
+     * Use intensity_units only if different from SpotList
      * integrated spot density. This can either be determined from a fit or 
      * using any other methods.  This number should be corrected for background
      * </pre>
@@ -7894,7 +8288,7 @@ public final class TaggedSpotFile {
      * Background around the spot. 
      * This can be determined through a fit or other methods
      * This number should not include the camera bias, i.e. it should be linearly
-     * propertional to the number of photons in the background
+     * proportional to the number of photons in the background
      * </pre>
      *
      * <code>optional float background = 11;</code>
@@ -7907,7 +8301,7 @@ public final class TaggedSpotFile {
      * Background around the spot. 
      * This can be determined through a fit or other methods
      * This number should not include the camera bias, i.e. it should be linearly
-     * propertional to the number of photons in the background
+     * proportional to the number of photons in the background
      * </pre>
      *
      * <code>optional float background = 11;</code>
@@ -7921,7 +8315,7 @@ public final class TaggedSpotFile {
     /**
      * <pre>
      * Peak width at half height in location units
-     * for asymetric peaks, calculate the width as the square root of the 
+     * for asymmetric peaks, calculate the width as the square root of the 
      * product of the widths of the long and short axes
      * </pre>
      *
@@ -7933,7 +8327,7 @@ public final class TaggedSpotFile {
     /**
      * <pre>
      * Peak width at half height in location units
-     * for asymetric peaks, calculate the width as the square root of the 
+     * for asymmetric peaks, calculate the width as the square root of the 
      * product of the widths of the long and short axes
      * </pre>
      *
@@ -7972,7 +8366,7 @@ public final class TaggedSpotFile {
     private float theta_;
     /**
      * <pre>
-     * Rotation of assymetric peak, only used 
+     * Rotation of asymmetric peak, only used 
      * when fitmode == TWOAXISANDTHETA
      * </pre>
      *
@@ -7983,7 +8377,7 @@ public final class TaggedSpotFile {
     }
     /**
      * <pre>
-     * Rotation of assymetric peak, only used 
+     * Rotation of asymmetric peak, only used 
      * when fitmode == TWOAXISANDTHETA
      * </pre>
      *
@@ -10040,7 +10434,7 @@ public final class TaggedSpotFile {
       private int intensityUnits_ = 0;
       /**
        * <pre>
-       * Use intenisty_units only if different from SpotList
+       * Use intensity_units only if different from SpotList
        * integrated spot density. This can either be determined from a fit or 
        * using any other methods.  This number should be corrected for background
        * </pre>
@@ -10052,7 +10446,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Use intenisty_units only if different from SpotList
+       * Use intensity_units only if different from SpotList
        * integrated spot density. This can either be determined from a fit or 
        * using any other methods.  This number should be corrected for background
        * </pre>
@@ -10065,7 +10459,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Use intenisty_units only if different from SpotList
+       * Use intensity_units only if different from SpotList
        * integrated spot density. This can either be determined from a fit or 
        * using any other methods.  This number should be corrected for background
        * </pre>
@@ -10083,7 +10477,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Use intenisty_units only if different from SpotList
+       * Use intensity_units only if different from SpotList
        * integrated spot density. This can either be determined from a fit or 
        * using any other methods.  This number should be corrected for background
        * </pre>
@@ -10151,7 +10545,7 @@ public final class TaggedSpotFile {
        * Background around the spot. 
        * This can be determined through a fit or other methods
        * This number should not include the camera bias, i.e. it should be linearly
-       * propertional to the number of photons in the background
+       * proportional to the number of photons in the background
        * </pre>
        *
        * <code>optional float background = 11;</code>
@@ -10164,7 +10558,7 @@ public final class TaggedSpotFile {
        * Background around the spot. 
        * This can be determined through a fit or other methods
        * This number should not include the camera bias, i.e. it should be linearly
-       * propertional to the number of photons in the background
+       * proportional to the number of photons in the background
        * </pre>
        *
        * <code>optional float background = 11;</code>
@@ -10177,7 +10571,7 @@ public final class TaggedSpotFile {
        * Background around the spot. 
        * This can be determined through a fit or other methods
        * This number should not include the camera bias, i.e. it should be linearly
-       * propertional to the number of photons in the background
+       * proportional to the number of photons in the background
        * </pre>
        *
        * <code>optional float background = 11;</code>
@@ -10193,7 +10587,7 @@ public final class TaggedSpotFile {
        * Background around the spot. 
        * This can be determined through a fit or other methods
        * This number should not include the camera bias, i.e. it should be linearly
-       * propertional to the number of photons in the background
+       * proportional to the number of photons in the background
        * </pre>
        *
        * <code>optional float background = 11;</code>
@@ -10209,7 +10603,7 @@ public final class TaggedSpotFile {
       /**
        * <pre>
        * Peak width at half height in location units
-       * for asymetric peaks, calculate the width as the square root of the 
+       * for asymmetric peaks, calculate the width as the square root of the 
        * product of the widths of the long and short axes
        * </pre>
        *
@@ -10221,7 +10615,7 @@ public final class TaggedSpotFile {
       /**
        * <pre>
        * Peak width at half height in location units
-       * for asymetric peaks, calculate the width as the square root of the 
+       * for asymmetric peaks, calculate the width as the square root of the 
        * product of the widths of the long and short axes
        * </pre>
        *
@@ -10233,7 +10627,7 @@ public final class TaggedSpotFile {
       /**
        * <pre>
        * Peak width at half height in location units
-       * for asymetric peaks, calculate the width as the square root of the 
+       * for asymmetric peaks, calculate the width as the square root of the 
        * product of the widths of the long and short axes
        * </pre>
        *
@@ -10248,7 +10642,7 @@ public final class TaggedSpotFile {
       /**
        * <pre>
        * Peak width at half height in location units
-       * for asymetric peaks, calculate the width as the square root of the 
+       * for asymmetric peaks, calculate the width as the square root of the 
        * product of the widths of the long and short axes
        * </pre>
        *
@@ -10316,7 +10710,7 @@ public final class TaggedSpotFile {
       private float theta_ ;
       /**
        * <pre>
-       * Rotation of assymetric peak, only used 
+       * Rotation of asymmetric peak, only used 
        * when fitmode == TWOAXISANDTHETA
        * </pre>
        *
@@ -10327,7 +10721,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Rotation of assymetric peak, only used 
+       * Rotation of asymmetric peak, only used 
        * when fitmode == TWOAXISANDTHETA
        * </pre>
        *
@@ -10338,7 +10732,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Rotation of assymetric peak, only used 
+       * Rotation of asymmetric peak, only used 
        * when fitmode == TWOAXISANDTHETA
        * </pre>
        *
@@ -10352,7 +10746,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Rotation of assymetric peak, only used 
+       * Rotation of asymmetric peak, only used 
        * when fitmode == TWOAXISANDTHETA
        * </pre>
        *
@@ -11039,7 +11433,7 @@ public final class TaggedSpotFile {
       "\n\016TSFProto.proto\022\003TSF\"G\n\017FluorophoreType" +
       "\022\n\n\002id\030\001 \002(\005\022\023\n\013description\030\002 \001(\t\022\023\n\013is_" +
       "fiducial\030\003 \001(\010\"=\n\003ROI\022\t\n\001x\030\001 \002(\005\022\t\n\001y\030\002 " +
-      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\257\005" +
+      "\002(\005\022\017\n\007x_width\030\003 \002(\005\022\017\n\007y_width\030\004 \002(\005\"\273\005" +
       "\n\010SpotList\022\031\n\016application_id\030\001 \002(\005:\0011\022\014\n" +
       "\004name\030\002 \001(\t\022\020\n\010filepath\030\003 \001(\t\022\013\n\003uid\030\004 \001" +
       "(\003\022\023\n\013nr_pixels_x\030\005 \001(\005\022\023\n\013nr_pixels_y\030\006" +
@@ -11052,32 +11446,33 @@ public final class TaggedSpotFile {
       "y_units\030\027 \001(\0162\023.TSF.IntensityUnits\022$\n\013th" +
       "eta_units\030\033 \001(\0162\017.TSF.ThetaUnits\022\036\n\010fit_" +
       "mode\030\030 \001(\0162\014.TSF.FitMode\022\027\n\010is_track\030\031 \001" +
-      "(\010:\005false\022\013\n\003ecf\030\034 \001(\001\022\025\n\003roi\030\035 \001(\0132\010.TS" +
-      "F.ROI\022\017\n\006source\030\335\013 \001(\t\022\026\n\rconfiguration\030" +
-      "\336\013 \001(\t\022\r\n\004gain\030\337\013 \001(\001\022\025\n\014exposureTime\030\340\013" +
-      " \001(\001\022\022\n\treadNoise\030\341\013 \001(\001\022\r\n\004bias\030\342\013 \001(\001\022",
-      "\016\n\005emCCD\030\343\013 \001(\010\022\026\n\ramplification\030\344\013 \001(\001*" +
-      "\006\010\244\r\020\200\020\"\333\004\n\004Spot\022\020\n\010molecule\030\001 \002(\005\022\017\n\007ch" +
-      "annel\030\002 \002(\005\022\r\n\005frame\030\003 \002(\005\022\r\n\005slice\030\004 \001(" +
-      "\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020fluorophore_type\030\023 \001(\005" +
-      "\022\017\n\007cluster\030\024 \001(\005\022*\n\016location_units\030\021 \001(" +
-      "\0162\022.TSF.LocationUnits\022\t\n\001x\030\007 \002(\002\022\t\n\001y\030\010 " +
-      "\002(\002\022\t\n\001z\030\t \001(\002\022,\n\017intensity_units\030\022 \001(\0162" +
-      "\023.TSF.IntensityUnits\022\021\n\tintensity\030\n \002(\002\022" +
-      "\022\n\nbackground\030\013 \001(\002\022\r\n\005width\030\014 \001(\002\022\t\n\001a\030" +
-      "\r \001(\002\022\r\n\005theta\030\016 \001(\002\022\022\n\nx_original\030e \001(\002",
-      "\022\022\n\ny_original\030f \001(\002\022\022\n\nz_original\030g \001(\002" +
-      "\022\023\n\013x_precision\030h \001(\002\022\023\n\013y_precision\030i \001" +
-      "(\002\022\023\n\013z_precision\030j \001(\002\022\022\n\nx_position\030k " +
-      "\001(\005\022\022\n\ny_position\030l \001(\005\022\016\n\005error\030\334\013 \001(\001\022" +
-      "\016\n\005noise\030\335\013 \001(\002\022\022\n\tend_frame\030\337\013 \001(\005\022\027\n\016o" +
-      "riginal_value\030\340\013 \001(\002\022\027\n\016params_std_dev\030\341" +
-      "\013 \003(\002*\006\010\244\r\020\200\020*8\n\007FitMode\022\013\n\007ONEAXIS\020\000\022\013\n" +
-      "\007TWOAXIS\020\001\022\023\n\017TWOAXISANDTHETA\020\002*&\n\nTheta" +
-      "Units\022\013\n\007DEGREES\020\000\022\013\n\007RADIANS\020\001*)\n\016Inten" +
-      "sityUnits\022\n\n\006COUNTS\020\000\022\013\n\007PHOTONS\020\001*+\n\rLo",
-      "cationUnits\022\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002B" +
-      "\037\n\rgdsc.smlm.tsfB\016TaggedSpotFile"
+      "(\010:\005false\022\013\n\003ecf\030\034 \003(\001\022\n\n\002qe\030\036 \003(\001\022\025\n\003ro" +
+      "i\030\035 \001(\0132\010.TSF.ROI\022\017\n\006source\030\335\013 \001(\t\022\026\n\rco" +
+      "nfiguration\030\336\013 \001(\t\022\r\n\004gain\030\337\013 \001(\001\022\025\n\014exp" +
+      "osureTime\030\340\013 \001(\001\022\022\n\treadNoise\030\341\013 \001(\001\022\r\n\004",
+      "bias\030\342\013 \001(\001\022\016\n\005emCCD\030\343\013 \001(\010\022\026\n\ramplifica" +
+      "tion\030\344\013 \001(\001*\006\010\244\r\020\200\020\"\333\004\n\004Spot\022\020\n\010molecule" +
+      "\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005frame\030\003 \002(\005\022\r" +
+      "\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020fluorophor" +
+      "e_type\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*\n\016locatio" +
+      "n_units\030\021 \001(\0162\022.TSF.LocationUnits\022\t\n\001x\030\007" +
+      " \002(\002\022\t\n\001y\030\010 \002(\002\022\t\n\001z\030\t \001(\002\022,\n\017intensity_" +
+      "units\030\022 \001(\0162\023.TSF.IntensityUnits\022\021\n\tinte" +
+      "nsity\030\n \002(\002\022\022\n\nbackground\030\013 \001(\002\022\r\n\005width" +
+      "\030\014 \001(\002\022\t\n\001a\030\r \001(\002\022\r\n\005theta\030\016 \001(\002\022\022\n\nx_or",
+      "iginal\030e \001(\002\022\022\n\ny_original\030f \001(\002\022\022\n\nz_or" +
+      "iginal\030g \001(\002\022\023\n\013x_precision\030h \001(\002\022\023\n\013y_p" +
+      "recision\030i \001(\002\022\023\n\013z_precision\030j \001(\002\022\022\n\nx" +
+      "_position\030k \001(\005\022\022\n\ny_position\030l \001(\005\022\016\n\005e" +
+      "rror\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\022\n\tend_frame" +
+      "\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001(\002\022\027\n\016para" +
+      "ms_std_dev\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007FitMode\022\013\n\007" +
+      "ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOAXISANDTHET" +
+      "A\020\002*&\n\nThetaUnits\022\013\n\007DEGREES\020\000\022\013\n\007RADIAN" +
+      "S\020\001*)\n\016IntensityUnits\022\n\n\006COUNTS\020\000\022\013\n\007PHO",
+      "TONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020\000\022\006\n\002UM\020\001\022" +
+      "\n\n\006PIXELS\020\002B\037\n\rgdsc.smlm.tsfB\016TaggedSpot" +
+      "File"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -11108,7 +11503,7 @@ public final class TaggedSpotFile {
     internal_static_TSF_SpotList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_SpotList_descriptor,
-        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", });
+        new java.lang.String[] { "ApplicationId", "Name", "Filepath", "Uid", "NrPixelsX", "NrPixelsY", "PixelSize", "NrSpots", "BoxSize", "NrChannels", "NrFrames", "NrSlices", "NrPos", "FluorophoreTypes", "LocationUnits", "IntensityUnits", "ThetaUnits", "FitMode", "IsTrack", "Ecf", "Qe", "Roi", "Source", "Configuration", "Gain", "ExposureTime", "ReadNoise", "Bias", "EmCCD", "Amplification", });
     internal_static_TSF_Spot_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_TSF_Spot_fieldAccessorTable = new

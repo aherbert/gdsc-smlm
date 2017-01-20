@@ -96,7 +96,17 @@ message SpotList {
 
    // The electron conversion factor (camera gain), defined as
    // # of electrons per pixel / # of counts per pixel
-   optional double ecf = 28; 
+   // The ecf can be different for different channels (which can 
+   // happen when separate cameras are used for separate channels),
+   // therefore provide the ecf for each channel in the channel order
+   repeated double ecf = 28; 
+   
+   // The quantum efficiency can be used to calculate the number
+   // of photons that hit the sensor, rather than the number of 
+   // electrons that were derived from them
+   // Since this number is wavelength dependent, provide the QE
+   // for each channel (in the channel order)
+   repeated double qe = 30;
 
    optional ROI roi = 29;
    
@@ -188,7 +198,7 @@ message Spot {
 
    // Intensity values
 
-   // Use intenisty_units only if different from SpotList
+   // Use intensity_units only if different from SpotList
    // integrated spot density. This can either be determined from a fit or 
    // using any other methods.  This number should be corrected for background
    optional IntensityUnits intensity_units = 18; 
@@ -196,20 +206,20 @@ message Spot {
    // Background around the spot. 
    // This can be determined through a fit or other methods
    // This number should not include the camera bias, i.e. it should be linearly
-   // propertional to the number of photons in the background
+   // proportional to the number of photons in the background
    optional float background = 11;
 
    // Peak shape parameters
 
    // Peak width at half height in location units
-   // for asymetric peaks, calculate the width as the square root of the 
+   // for asymmetric peaks, calculate the width as the square root of the 
    // product of the widths of the long and short axes
    optional float width = 12; 
    // Shape of the peak: width of the long axis 
    // divided by width of the short axis
    optional float a = 13; 
    
-   // Rotation of assymetric peak, only used 
+   // Rotation of asymmetric peak, only used 
    // when fitmode == TWOAXISANDTHETA
    optional float theta = 14; 
 
