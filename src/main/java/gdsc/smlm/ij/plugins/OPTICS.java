@@ -19,6 +19,8 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+
 import gdsc.core.clustering.optics.ClusteringResult;
 import gdsc.core.clustering.optics.DBSCANResult;
 import gdsc.core.clustering.optics.OPTICSCluster;
@@ -647,7 +649,60 @@ public class OPTICS implements PlugIn
 					limits[0] = 0;
 				}
 
-				plot.setLimits(1, order.length, limits[0], limits[1] * 1.05);
+				if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+				{
+					// The profile may be very high. Compute the outliers and remove.
+					Percentile p = new Percentile();
+					p.setData(profile);
+					double max;
+					boolean useIQR = true;
+					if (useIQR)
+					{
+						double lq = p.evaluate(25);
+						double uq = p.evaluate(75);
+						max = (uq - lq) * 2 + uq;
+					}
+					else
+					{
+						// Remove top 2%
+						max = p.evaluate(98);
+					}
+					if (limits[1] > max)
+						limits[1] = max;
+				}
+				else
+				{
+					// Show extra at the top
+					limits[1] *= 1.05;
+				}
+
+				double distance = -1;
+				if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN)
+				{
+					if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+					{
+						if (work.inputSettings.clusteringDistance > 0)
+							distance = work.inputSettings.clusteringDistance;
+						else
+						{
+							OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
+									nmPerPixel;
+						}
+					}
+					else
+					{
+						// Ensure that the distance is valid
+						distance = opticsResult.generatingDistance * nmPerPixel;
+						if (work.inputSettings.clusteringDistance > 0)
+							distance = Math.min(work.inputSettings.clusteringDistance, distance);
+					}
+					
+					if (distance > limits[1])
+						limits[1] = distance * 1.05;
+				}				
+				
+				plot.setLimits(1, order.length, limits[0], limits[1]);
 
 				plot.setColor(Color.black);
 				plot.addPoints(order, profile, Plot.LINE);
@@ -673,28 +728,8 @@ public class OPTICS implements PlugIn
 				}
 
 				// Add the DBSCAN clustering distance
-				if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN)
+				if (distance > -1)
 				{
-					double distance;
-					if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
-					{
-						if (work.inputSettings.clusteringDistance > 0)
-							distance = work.inputSettings.clusteringDistance;
-						else
-						{
-							OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
-									nmPerPixel;
-						}
-					}
-					else
-					{
-						// Ensure that the distance is valid
-						distance = opticsResult.generatingDistance * nmPerPixel;
-						if (work.inputSettings.clusteringDistance > 0)
-							distance = Math.min(work.inputSettings.clusteringDistance, distance);
-					}
-
 					plot.setColor(Color.red);
 					plot.drawLine(1, distance, order.length, distance);
 				}
@@ -1439,7 +1474,7 @@ public class OPTICS implements PlugIn
 	private static byte logged = 0;
 	private static final byte LOG_DBSCAN = 0x01;
 	private static final byte LOG_OPTICS = 0x02;
-	
+
 	private static void logReferences(boolean isDBSCAN)
 	{
 		int width = 80;
@@ -1450,7 +1485,8 @@ public class OPTICS implements PlugIn
 			sb.append("DBSCAN: ");
 			sb.append(TextUtils.wrap(
 					"Ester, et al (1996). 'A density-based algorithm for discovering clusters in large spatial databases with noise'. Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.",
-					width)).append('\n');;
+					width)).append('\n');
+			;
 		}
 		else if ((logged & LOG_OPTICS) != LOG_OPTICS)
 		{
@@ -1458,10 +1494,13 @@ public class OPTICS implements PlugIn
 			sb.append("OPTICS: ");
 			sb.append(TextUtils.wrap(
 					"Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery. 1 (3): 231–240.",
-					width)).append('\n');;
+					width)).append('\n');
+			;
 			sb.append("FastOPTICS: ");
-			sb.append(TextUtils.wrap("Schneider, et al (2013). 'Fast parameterless density-based clustering via random projections'. 22nd ACM International Conference on Information and Knowledge Management(CIKM). ACM.",
-					width)).append('\n');;
+			sb.append(TextUtils.wrap(
+					"Schneider, et al (2013). 'Fast parameterless density-based clustering via random projections'. 22nd ACM International Conference on Information and Knowledge Management(CIKM). ACM.",
+					width)).append('\n');
+			;
 		}
 		if (sb.length() > 0)
 			IJ.log(sb.toString());
