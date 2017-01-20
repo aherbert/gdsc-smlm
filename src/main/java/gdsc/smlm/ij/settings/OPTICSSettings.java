@@ -30,7 +30,16 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public String getName() { return "Cluster Id"; };
 			@Override
-			public float getValue(float value, int clusterId) { return clusterId; }
+			public float getValue(float value, int clusterId, float scale) 
+			{ 
+				// Map the cluster ID (above 0) to a value between 1-255
+				int ivalue = 1 + (int) (((clusterId - 1) * scale) + 0.5f);
+				if (ivalue > 255)
+					ivalue = 255;
+				//if (ivalue == 0)
+				//	System.out.println("error");
+				return ivalue; 
+			}
 		},
 		VALUE {
 			@Override
@@ -38,7 +47,7 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
-			public float getValue(float value, int clusterId) { return value; }
+			public float getValue(float value, int clusterId, float scale) { return value; }
 		},
 		COUNT {
 			@Override
@@ -46,13 +55,13 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
-			public float getValue(float value, int clusterId) { return 1f; }
+			public float getValue(float value, int clusterId, float scale) { return 1f; }
 		},
 		NONE {
 			@Override
 			public String getName() { return "None"; };
 			@Override
-			public float getValue(float value, int clusterId) { return 0; }
+			public float getValue(float value, int clusterId, float scale) { return 0; }
 		};
 		//@formatter:on
 
@@ -64,15 +73,17 @@ public class OPTICSSettings implements Cloneable
 		abstract public String getName();
 
 		/**
-		 * Return the value to draw
-		 * 
+		 * Return the value to draw.
+		 *
 		 * @param value
 		 *            The value of the cluster point
 		 * @param clusterId
 		 *            The cluster Id of the cluster point
+		 * @param scale
+		 *            the scale to map the cluster id from 1-N to 1-255
 		 * @return The value
 		 */
-		abstract public float getValue(float value, int clusterId);
+		abstract public float getValue(float value, int clusterId, float scale);
 
 		/**
 		 * Can be weighted.

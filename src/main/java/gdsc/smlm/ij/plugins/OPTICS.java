@@ -635,7 +635,7 @@ public class OPTICS implements PlugIn
 					{
 						int level = cluster.getLevel();
 						double y = start - (maxLevel - level) * separation;
-						Color color = LUTHelper.getColour(lut, cluster.clusterId, 0f, maxClusterId);
+						Color color = LUTHelper.getNonZeroColour(lut, cluster.clusterId, 1f, maxClusterId);
 						plot.setColor(color);
 						plot.drawLine(cluster.start, y, cluster.end, y);
 					}
@@ -697,11 +697,11 @@ public class OPTICS implements PlugIn
 						if (work.inputSettings.clusteringDistance > 0)
 							distance = Math.min(work.inputSettings.clusteringDistance, distance);
 					}
-					
+
 					if (distance > limits[1])
 						limits[1] = distance * 1.05;
-				}				
-				
+				}
+
 				plot.setLimits(1, order.length, limits[0], limits[1]);
 
 				plot.setColor(Color.black);
@@ -718,7 +718,7 @@ public class OPTICS implements PlugIn
 							continue;
 
 						if (mode.isColourProfile())
-							plot.setColor(LUTHelper.getColour(lut, cluster.clusterId, 0f, maxClusterId));
+							plot.setColor(LUTHelper.getNonZeroColour(lut, cluster.clusterId, 1f, maxClusterId));
 						int from = cluster.start;
 						int to = cluster.end + 1;
 						double[] order1 = Arrays.copyOfRange(order, from, to);
@@ -805,6 +805,7 @@ public class OPTICS implements PlugIn
 			}
 
 			int[] clusters = null;
+			int max = 0;
 			float[] x = null, y = null;
 
 			if (work.inputSettings.imageScale > 0)
@@ -814,6 +815,7 @@ public class OPTICS implements PlugIn
 					synchronized (clusteringResult)
 					{
 						clusters = clusteringResult.getClusters();
+						max = Maths.max(clusters);
 					}
 
 					// Display the results ...
@@ -833,10 +835,13 @@ public class OPTICS implements PlugIn
 					imp.setOverlay(null);
 					if (mode != ImageMode.NONE)
 					{
-						// Draw each cluster in a new colour. Set get an appropriate LUT.
+						// Draw each cluster in a new colour
 						LUT lut = (mode == ImageMode.CLUSTER_ID) ? Utils.getColorModel()
 								: LUTHelper.createLUT(LutColour.FIRE);
 						image.getImagePlus().getProcessor().setColorModel(lut);
+
+						// Same logic as LUTHelper.getNonZeroColour
+						float scale = 254f / (max - 1);
 
 						// Add in a single batch
 						float[] v;
@@ -849,7 +854,7 @@ public class OPTICS implements PlugIn
 							PeakResult r = list.get(i);
 							x[i] = r.getXPosition();
 							y[i] = r.getYPosition();
-							v[i] = mode.getValue(r.getSignal(), clusters[i]);
+							v[i] = mode.getValue(r.getSignal(), clusters[i], scale);
 						}
 						image.add(x, y, v);
 					}
@@ -879,9 +884,9 @@ public class OPTICS implements PlugIn
 							synchronized (clusteringResult)
 							{
 								clusters = clusteringResult.getClusters();
+								max = Maths.max(clusters);
 							}
 						}
-						int max = Maths.max(clusters);
 
 						// We need to recompute
 						outline = new Overlay();
@@ -912,7 +917,7 @@ public class OPTICS implements PlugIn
 									y2[i] = image.mapY(y2[i]);
 								}
 								PolygonRoi roi = new PolygonRoi(x2, y2, Roi.POLYGON);
-								Color color = LUTHelper.getColour(lut, c, 0f, max);
+								Color color = LUTHelper.getNonZeroColour(lut, c, 1f, max);
 								roi.setStrokeColor(color);
 								// TODO: Options to set a fill colour?
 								outline.add(roi);
@@ -935,9 +940,9 @@ public class OPTICS implements PlugIn
 							if (clusters == null)
 							{
 								clusters = opticsResult.getClusters();
+								max = Maths.max(clusters);
 							}
 						}
-						int max = Maths.max(clusters);
 
 						// Get the coordinates
 						if (x == null)
@@ -960,11 +965,19 @@ public class OPTICS implements PlugIn
 						// Create a colour to match the LUT
 						LUT lut = Utils.getColorModel();
 
+						// Cache all the colours
+						Color[] colors = new Color[max + 1];
+						for (int c = 1; c <= max; c++)
+							colors[c] = LUTHelper.getNonZeroColour(lut, c, 1f, max);
+
 						for (int i = 1; i < predecessor.length; i++)
 						{
-							if (predecessor[i] < 0)
+							if (clusters[i] == 0 || predecessor[i] < 0)
 								continue;
 							int j = predecessor[i];
+							// The spanning tree can jump across hierachical clusters
+							//if (clusters[i] != clusters[j] && work.inputSettings.topLevel)
+							//	continue;
 
 							float xi = image.mapX(x[i]);
 							float yi = image.mapY(y[i]);
@@ -972,8 +985,7 @@ public class OPTICS implements PlugIn
 							float yj = image.mapY(y[j]);
 
 							Line roi = new Line(xi, yi, xj, yj);
-							Color color = LUTHelper.getColour(lut, clusters[i], 0f, max);
-							roi.setStrokeColor(color);
+							roi.setStrokeColor(colors[clusters[i]]);
 							spanningTree.add(roi);
 						}
 					}
