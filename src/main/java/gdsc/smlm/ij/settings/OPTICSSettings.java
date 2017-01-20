@@ -120,7 +120,7 @@ public class OPTICSSettings implements Cloneable
 			return getName();
 		}
 	}
-	
+
 	/**
 	 * Options for plotting the OPTICS results
 	 */
@@ -244,7 +244,7 @@ public class OPTICSSettings implements Cloneable
 	}
 
 	// Affect creating the OPTICS manager
-	
+
 	/**
 	 * The input results dataset to use
 	 */
@@ -253,10 +253,13 @@ public class OPTICSSettings implements Cloneable
 	// Affect running OPTICS
 
 	/**
-	 * The OPTICS algorithm to use. 
+	 * The OPTICS algorithm to use.
 	 */
 	private OPTICSMode opticsMode = OPTICSMode.FAST_OPTICS;
-	
+
+	/** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) */
+	public int numberOfSplitSets = 0;
+
 	/**
 	 * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
 	 * using the expected density of uniformly spread random points.
@@ -272,14 +275,14 @@ public class OPTICSSettings implements Cloneable
 	public int minPoints = 4;
 
 	// OPTICS clustering
-	
+
 	/**
-	 * The clustering mode to use on the OPTICS results. 
+	 * The clustering mode to use on the OPTICS results.
 	 */
 	private ClusteringMode clusteringMode = ClusteringMode.XI;
 
 	// Affect running OPTICS Xi
-	
+
 	/**
 	 * The steepness parameter for the OPTICS hierarchical clustering algorithm using the reachability profile.
 	 */
@@ -290,7 +293,7 @@ public class OPTICSSettings implements Cloneable
 	public boolean topLevel = false;
 
 	// Affect DBSCAN clustering
-	
+
 	/**
 	 * The number of samples to take for the k-distance plot. This should be 1-10% of the data.
 	 */
@@ -315,9 +318,9 @@ public class OPTICSSettings implements Cloneable
 	public boolean core = false;
 
 	// Affect display of results
-	
+
 	/**
-	 * The magnification scale of the output image 
+	 * The magnification scale of the output image
 	 */
 	public double imageScale = 2;
 	/**
@@ -372,7 +375,7 @@ public class OPTICSSettings implements Cloneable
 			mode = 0;
 		this.opticsMode = values[mode];
 	}
-	
+
 	public ImageMode getImageMode()
 	{
 		return imageMode;

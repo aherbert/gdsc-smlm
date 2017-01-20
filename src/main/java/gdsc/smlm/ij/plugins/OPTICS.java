@@ -31,6 +31,7 @@ import gdsc.core.utils.ConvexHull;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
+import gdsc.core.utils.TextUtils;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -45,6 +46,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Line;
@@ -321,6 +323,7 @@ public class OPTICS implements PlugIn
 			OPTICSManager opticsManager = new OPTICSManager(x, y, bounds);
 			opticsManager.setTracker(new IJTrackProgress());
 			opticsManager.setOptions(Option.CACHE);
+			opticsManager.setNumberOfThreads(Prefs.getThreads());
 			return new Work(work.inputSettings, results, opticsManager);
 		}
 	}
@@ -339,6 +342,11 @@ public class OPTICS implements PlugIn
 				if (current.generatingDistance != previous.generatingDistance)
 					return false;
 			}
+			else
+			{
+				if (current.numberOfSplitSets != previous.numberOfSplitSets)
+					return false;
+			}
 			return true;
 		}
 
@@ -355,7 +363,8 @@ public class OPTICS implements PlugIn
 			OPTICSResult opticsResult;
 			if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 			{
-				opticsResult = opticsManager.fastOptics(minPts);
+				int n = work.inputSettings.numberOfSplitSets;
+				opticsResult = opticsManager.fastOptics(minPts, n, n, false);
 			}
 			else
 			{
@@ -438,11 +447,16 @@ public class OPTICS implements PlugIn
 						double distance;
 						if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 						{
-							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
-									nmPerPixel;
-							if (nmPerPixel != 1)
+							if (work.inputSettings.clusteringDistance > 0)
+								distance = work.inputSettings.clusteringDistance;
+							else
 							{
-								Utils.log(TITLE + ": Default clustering distance %s nm", Utils.rounded(distance));
+								distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
+										nmPerPixel;
+								if (nmPerPixel != 1)
+								{
+									Utils.log(TITLE + ": Default clustering distance %s nm", Utils.rounded(distance));
+								}
 							}
 						}
 						else
@@ -664,8 +678,14 @@ public class OPTICS implements PlugIn
 					double distance;
 					if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 					{
-						OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-						distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) * nmPerPixel;
+						if (work.inputSettings.clusteringDistance > 0)
+							distance = work.inputSettings.clusteringDistance;
+						else
+						{
+							OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
+									nmPerPixel;
+						}
 					}
 					else
 					{
@@ -770,6 +790,7 @@ public class OPTICS implements PlugIn
 							(float) work.inputSettings.imageScale);
 					// TODO - options to control rendering
 					ImageMode mode = work.inputSettings.getImageMode();
+					image.copySettings(results);
 					image.setDisplayFlags(getDisplayFlags(work.inputSettings));
 					image.setLiveImage(false);
 					image.begin();
@@ -1332,6 +1353,8 @@ public class OPTICS implements PlugIn
 
 	private boolean showDialog(boolean isDBSCAN)
 	{
+		logReferences(isDBSCAN);
+
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
@@ -1354,6 +1377,7 @@ public class OPTICS implements PlugIn
 		{
 			String[] opticsModes = SettingsManager.getNames((Object[]) OPTICSMode.values());
 			gd.addChoice("OPTICS_mode", opticsModes, opticsModes[inputSettings.getOPTICSModeOridinal()]);
+			gd.addNumericField("Number_of_splits", inputSettings.numberOfSplitSets, 0);
 			gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
 		}
 		gd.addMessage("--- Clustering ---");
@@ -1412,6 +1436,37 @@ public class OPTICS implements PlugIn
 		return true;
 	}
 
+	private static byte logged = 0;
+	private static final byte LOG_DBSCAN = 0x01;
+	private static final byte LOG_OPTICS = 0x02;
+	
+	private static void logReferences(boolean isDBSCAN)
+	{
+		int width = 80;
+		StringBuilder sb = new StringBuilder();
+		if (isDBSCAN && (logged & LOG_DBSCAN) != LOG_DBSCAN)
+		{
+			logged |= LOG_DBSCAN;
+			sb.append("DBSCAN: ");
+			sb.append(TextUtils.wrap(
+					"Ester, et al (1996). 'A density-based algorithm for discovering clusters in large spatial databases with noise'. Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.",
+					width)).append('\n');;
+		}
+		else if ((logged & LOG_OPTICS) != LOG_OPTICS)
+		{
+			logged |= LOG_OPTICS;
+			sb.append("OPTICS: ");
+			sb.append(TextUtils.wrap(
+					"Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery. 1 (3): 231–240.",
+					width)).append('\n');;
+			sb.append("FastOPTICS: ");
+			sb.append(TextUtils.wrap("Schneider, et al (2013). 'Fast parameterless density-based clustering via random projections'. 22nd ACM International Conference on Information and Knowledge Management(CIKM). ACM.",
+					width)).append('\n');;
+		}
+		if (sb.length() > 0)
+			IJ.log(sb.toString());
+	}
+
 	private class OPTICSDialogListener implements DialogListener
 	{
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
@@ -1449,6 +1504,7 @@ public class OPTICS implements PlugIn
 
 			inputSettings.minPoints = (int) gd.getNextNumber();
 			inputSettings.setOPTICSMode(gd.getNextChoiceIndex());
+			inputSettings.numberOfSplitSets = (int) gd.getNextNumber();
 			inputSettings.generatingDistance = gd.getNextNumber();
 			inputSettings.setClusteringMode(gd.getNextChoiceIndex());
 			inputSettings.xi = gd.getNextNumber();
