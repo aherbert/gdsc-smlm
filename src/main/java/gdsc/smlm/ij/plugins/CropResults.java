@@ -1,12 +1,28 @@
 package gdsc.smlm.ij.plugins;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2017 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
@@ -19,7 +35,9 @@ public class CropResults implements PlugIn
 	private static String inputOption = "";
 	private static double border = 0;
 	private static double x = 0, y = 0, width = 0, height = 0;
-	private static boolean selectRegion, overwrite;
+	private static boolean selectRegion, overwrite, useRoi;
+	private static String roiImage = "";
+	private boolean myUseRoi;
 
 	private MemoryPeakResults results;
 
@@ -65,6 +83,21 @@ public class CropResults implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
+		// TODO - add option to crop using the bounding rectangle of an ROI on an open image.
+		// See PC-PALM Molecules.
+
+		// Build a list of all images with a region ROI
+		TurboList<String> titles = new TurboList<String>(WindowManager.getWindowCount());
+		if (WindowManager.getWindowCount() > 0)
+		{
+			for (int imageID : WindowManager.getIDList())
+			{
+				ImagePlus imp = WindowManager.getImage(imageID);
+				if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
+					titles.add(imp.getTitle());
+			}
+		}
+
 		Rectangle bounds = results.getBounds(true);
 
 		gd.addMessage(String.format("x=%d,y=%d,w=%d,h=%d", bounds.x, bounds.y, bounds.width, bounds.height));
@@ -74,6 +107,12 @@ public class CropResults implements PlugIn
 		gd.addNumericField("Y", y, 2);
 		gd.addNumericField("Width", width, 2);
 		gd.addNumericField("Height", height, 2);
+		if (!titles.isEmpty())
+		{
+			gd.addCheckbox("Use_ROI", useRoi);
+			String[] items = titles.toArray(new String[titles.size()]);
+			gd.addChoice("Image", items, roiImage);
+		}
 		gd.addCheckbox("Overwrite", overwrite);
 
 		gd.showDialog();
@@ -87,6 +126,11 @@ public class CropResults implements PlugIn
 		y = gd.getNextNumber();
 		width = Math.max(0, gd.getNextNumber());
 		height = Math.max(0, gd.getNextNumber());
+		if (!titles.isEmpty())
+		{
+			myUseRoi = useRoi = gd.getNextBoolean();
+			roiImage = gd.getNextChoice();
+		}
 		overwrite = gd.getNextBoolean();
 
 		return true;
@@ -118,6 +162,26 @@ public class CropResults implements PlugIn
 			borderBounds = borderBounds.createIntersection(boxBounds);
 		}
 
+		// If an ROI was chosen from an image, scale the roi to the bounds of this dataset
+		// and create another intersection
+		if (myUseRoi)
+		{
+			ImagePlus imp = WindowManager.getImage(roiImage);
+			if (imp != null && imp.getRoi() != null)
+			{
+				Rectangle roi = imp.getRoi().getBounds();
+				int roiImageWidth = imp.getWidth();
+				int roiImageHeight = imp.getHeight();
+
+				double xscale = (double) roiImageWidth / bounds.width;
+				double yscale = (double) roiImageHeight / bounds.height;
+
+				Rectangle2D roiBounds = new Rectangle2D.Double(roi.x / xscale, roi.y / yscale, roi.width / xscale,
+						roi.height / yscale);
+				borderBounds = borderBounds.createIntersection(roiBounds);
+			}
+		}
+
 		if (borderBounds.getWidth() > 0 && borderBounds.getHeight() > 0)
 		{
 			for (PeakResult result : results.getResults())
@@ -128,6 +192,8 @@ public class CropResults implements PlugIn
 		}
 
 		newResults.copySettings(results);
+		newResults.setBounds(new Rectangle((int) Math.floor(borderBounds.getX()), (int) Math.floor(borderBounds.getY()),
+				(int) Math.ceil(borderBounds.getWidth()), (int) Math.ceil(borderBounds.getHeight())));
 		if (!overwrite)
 		{
 			newResults.setName(results.getName() + " Cropped");
