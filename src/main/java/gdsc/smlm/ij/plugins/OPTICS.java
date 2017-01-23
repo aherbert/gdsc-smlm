@@ -325,7 +325,6 @@ public class OPTICS implements PlugIn
 			OPTICSManager opticsManager = new OPTICSManager(x, y, bounds);
 			opticsManager.setTracker(new IJTrackProgress());
 			opticsManager.setOptions(Option.CACHE);
-			opticsManager.setNumberOfThreads(Prefs.getThreads());
 			return new Work(work.inputSettings, results, opticsManager);
 		}
 	}
@@ -366,7 +365,9 @@ public class OPTICS implements PlugIn
 			if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 			{
 				int n = work.inputSettings.numberOfSplitSets;
-				opticsResult = opticsManager.fastOptics(minPts, n, n, false);
+				boolean isDistanceToMedian = false;
+				opticsManager.setNumberOfThreads(Prefs.getThreads());
+				opticsResult = opticsManager.fastOptics(minPts, n, n, isDistanceToMedian);
 			}
 			else
 			{
