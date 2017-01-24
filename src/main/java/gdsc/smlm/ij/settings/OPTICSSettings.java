@@ -30,15 +30,28 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public String getName() { return "Cluster Id"; };
 			@Override
-			public float getValue(float value, int clusterId, float scale) 
+			public float getValue(float value, int clusterId) 
 			{ 
-				// Map the cluster ID (above 0) to a value between 1-255
-				int ivalue = 1 + (int) (((clusterId - 1) * scale) + 0.5f);
-				if (ivalue > 255)
-					ivalue = 255;
-				//if (ivalue == 0)
-				//	System.out.println("error");
-				return ivalue; 
+				return clusterId; 
+			}
+			@Override
+			public boolean isMapped()
+			{
+				return true;
+			}
+		},
+		CLUSTER_DEPTH {
+			@Override
+			public String getName() { return "Cluster Depth"; };
+			@Override
+			public float getValue(float value, int clusterId) 
+			{ 
+				return clusterId; 
+			}
+			@Override
+			public boolean isMapped()
+			{
+				return true;
 			}
 		},
 		VALUE {
@@ -47,7 +60,7 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
-			public float getValue(float value, int clusterId, float scale) { return value; }
+			public float getValue(float value, int clusterId) { return value; }
 		},
 		COUNT {
 			@Override
@@ -55,13 +68,13 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
-			public float getValue(float value, int clusterId, float scale) { return 1f; }
+			public float getValue(float value, int clusterId) { return 1f; }
 		},
 		NONE {
 			@Override
 			public String getName() { return "None"; };
 			@Override
-			public float getValue(float value, int clusterId, float scale) { return 0; }
+			public float getValue(float value, int clusterId) { return 0; }
 		};
 		//@formatter:on
 
@@ -79,11 +92,9 @@ public class OPTICSSettings implements Cloneable
 		 *            The value of the cluster point
 		 * @param clusterId
 		 *            The cluster Id of the cluster point
-		 * @param scale
-		 *            the scale to map the cluster id from 1-N to 1-255
 		 * @return The value
 		 */
-		abstract public float getValue(float value, int clusterId, float scale);
+		abstract public float getValue(float value, int clusterId);
 
 		/**
 		 * Can be weighted.
@@ -91,6 +102,16 @@ public class OPTICSSettings implements Cloneable
 		 * @return true, if successful
 		 */
 		public boolean canBeWeighted()
+		{
+			return false;
+		}
+		
+		/**
+		 * Checks if is a mapped value.
+		 *
+		 * @return true, if is mapped
+		 */
+		public boolean isMapped()
 		{
 			return false;
 		}
@@ -361,6 +382,11 @@ public class OPTICSSettings implements Cloneable
 	 * Set to true to draw the spanning tree (connections between each point and its parent)
 	 */
 	public boolean spanningTree = true;
+
+	/**
+	 * Set to true to draw the overlay coloured using the depth of the OPTICS hierarchy (default is the cluster ID)
+	 */
+	public boolean overlayColorByDepth = true;
 
 	public OPTICSMode getOPTICSMode()
 	{
