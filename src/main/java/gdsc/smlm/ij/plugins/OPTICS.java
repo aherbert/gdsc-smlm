@@ -80,7 +80,7 @@ public class OPTICS implements PlugIn
 
 	private static LUT clusterLut = LUTHelper.getColorModel();
 	private static LUT valueLut = LUTHelper.createLUT(LutColour.FIRE);
-	private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT);
+	private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
 
 	private String TITLE;
 	/**
@@ -162,18 +162,8 @@ public class OPTICS implements PlugIn
 		private boolean running = true;
 		private Work lastWork = null;
 		private Work result = null;
-		private WorkStack inbox, outbox;
-
-		public Worker()
-		{
-			this(null, null);
-		}
-
-		public Worker(WorkStack inbox, WorkStack outbox)
-		{
-			this.inbox = inbox;
-			this.outbox = outbox;
-		}
+		private WorkStack inbox;
+		private WorkStack[] outbox;
 
 		public void run()
 		{
@@ -250,7 +240,8 @@ public class OPTICS implements PlugIn
 					if (outbox != null)
 					{
 						debug(" Posting result");
-						outbox.addWork(result);
+						for (int i = outbox.length; i-- > 0;)
+							outbox[i].addWork(result);
 					}
 				}
 				catch (InterruptedException e)
@@ -392,8 +383,12 @@ public class OPTICS implements PlugIn
 					saveApproximateSets = work.inputSettings.saveApproximateSets;
 					sampleMode = work.inputSettings.getSampleMode();
 				}
-				opticsManager.setNumberOfThreads(Prefs.getThreads());
-				opticsResult = opticsManager.fastOptics(minPts, n, n, useRandomVectors, saveApproximateSets, sampleMode);
+				synchronized (opticsManager)
+				{
+					opticsManager.setNumberOfThreads(Prefs.getThreads());
+					opticsResult = opticsManager.fastOptics(minPts, n, n, useRandomVectors, saveApproximateSets,
+							sampleMode);
+				}
 			}
 			else
 			{
@@ -420,7 +415,10 @@ public class OPTICS implements PlugIn
 					}
 				}
 
-				opticsResult = opticsManager.optics((float) distance, minPts);
+				synchronized (opticsManager)
+				{
+					opticsResult = opticsManager.optics((float) distance, minPts);
+				}
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
 			return new Work(work.inputSettings, results, opticsManager, opticsResult);
@@ -877,6 +875,7 @@ public class OPTICS implements PlugIn
 		@Override
 		void newResults()
 		{
+			System.out.println("Clearing image cache");
 			clearCache();
 		}
 
@@ -903,9 +902,7 @@ public class OPTICS implements PlugIn
 			}
 
 			int[] clusters = null;
-			int[] map = null; // Used to map clusters to a display value
 			int max = 0; // max cluster value
-			int max2 = 0; // max mapped cluster value
 			float[] x = null, y = null;
 			ImageMode mode = work.inputSettings.getImageMode();
 
@@ -927,18 +924,26 @@ public class OPTICS implements PlugIn
 					imp.setOverlay(null);
 					if (mode != ImageMode.NONE)
 					{
+						int[] map = null; // Used to map clusters to a display value
+						int max2 = 0; // max mapped cluster value
+
 						synchronized (clusteringResult)
 						{
 							clusters = clusteringResult.getClusters();
-							max2 = max = Maths.max(clusters);
-							map = Utils.newArray(max + 1, 0, 1);
+							max = Maths.max(clusters);
 							if (mode == ImageMode.CLUSTER_DEPTH && clusteringResult instanceof OPTICSResult)
 							{
 								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
 								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
+								map = new int[max + 1];
 								for (OPTICSCluster c : allClusters)
 									map[c.clusterId] = c.getLevel() + 1;
 								max2 = Maths.max(map);
+							}
+							else
+							{
+								map = Utils.newArray(max + 1, 0, 1);
+								max2 = max;
 							}
 						}
 
@@ -994,6 +999,10 @@ public class OPTICS implements PlugIn
 			{
 				ImagePlus imp = image.getImagePlus();
 				Overlay overlay = null;
+
+				int[] map = null; // Used to map clusters to a display value
+				int max2 = 0; // max mapped cluster value
+
 				if (work.inputSettings.outline)
 				{
 					if (outline == null)
@@ -1003,21 +1012,23 @@ public class OPTICS implements PlugIn
 							synchronized (clusteringResult)
 							{
 								clusters = clusteringResult.getClusters();
-								max2 = max = Maths.max(clusters);
-								map = Utils.newArray(max + 1, 0, 1);
+								max = Maths.max(clusters);
 							}
 						}
 
+						max2 = max;
+						map = Utils.newArray(max + 1, 0, 1);
+
 						LUT lut = clusterLut;
 
-						if (work.inputSettings.overlayColorByDepth && max == max2 &&
-								clusteringResult instanceof OPTICSResult)
+						if (work.inputSettings.overlayColorByDepth && clusteringResult instanceof OPTICSResult)
 						{
 							lut = clusterDepthLut;
 							synchronized (clusteringResult)
 							{
 								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
 								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
+								Arrays.fill(map, 0);
 								for (OPTICSCluster c : allClusters)
 									map[c.clusterId] = c.getLevel() + 1;
 								max2 = Maths.max(map);
@@ -1081,9 +1092,14 @@ public class OPTICS implements PlugIn
 							if (clusters == null)
 							{
 								clusters = opticsResult.getClusters();
-								max2 = max = Maths.max(clusters);
-								map = Utils.newArray(max + 1, 0, 1);
+								max = Maths.max(clusters);
 							}
+						}
+
+						if (map == null)
+						{
+							max2 = max;
+							map = Utils.newArray(max + 1, 0, 1);
 						}
 
 						LUT lut = clusterLut;
@@ -1094,6 +1110,7 @@ public class OPTICS implements PlugIn
 							synchronized (clusteringResult)
 							{
 								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
+								Arrays.fill(map, 0);
 								for (OPTICSCluster c : allClusters)
 									map[c.clusterId] = c.getLevel() + 1;
 								max2 = Maths.max(map);
@@ -1363,7 +1380,11 @@ public class OPTICS implements PlugIn
 				}
 			}
 
-			DBSCANResult dbscanResult = opticsManager.dbscan((float) clusteringDistance, minPts);
+			DBSCANResult dbscanResult;
+			synchronized (opticsManager)
+			{
+				dbscanResult = opticsManager.dbscan((float) clusteringDistance, minPts);
+			}
 			// It may be null if cancelled. However return null Work will close down the next thread
 			return new Work(work.inputSettings, results, opticsManager, dbscanResult);
 		}
@@ -1447,10 +1468,16 @@ public class OPTICS implements PlugIn
 		add(workers, new InputWorker());
 		add(workers, new OpticsWorker());
 		add(workers, new OpticsClusterWorker());
-		add(workers, new ResultsWorker());
-		add(workers, new MemoryResultsWorker());
-		add(workers, new ReachabilityResultsWorker());
-		add(workers, new ImageResultsWorker());
+		// The following could operate in parallel
+		//		add(workers, new ResultsWorker());
+		//		add(workers, new MemoryResultsWorker());
+		//		add(workers, new ReachabilityResultsWorker());
+		//		add(workers, new ImageResultsWorker());
+		Worker previous = workers.get(workers.size() - 1);
+		add(workers, new ResultsWorker(), previous);
+		add(workers, new MemoryResultsWorker(), previous);
+		add(workers, new ReachabilityResultsWorker(), previous);
+		add(workers, new ImageResultsWorker(), previous);
 
 		ArrayList<Thread> threads = startWorkers(workers);
 
@@ -1543,15 +1570,44 @@ public class OPTICS implements PlugIn
 	{
 		if (workers.isEmpty())
 		{
+			add(workers, worker, null);
+		}
+		else
+		{
+			// Chain together
+			Worker previous = workers.get(workers.size() - 1);
+			add(workers, worker, previous);
+		}
+		workers.add(worker);
+	}
+
+	/**
+	 * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input.
+	 *
+	 * @param workers
+	 *            the workers
+	 * @param worker
+	 *            the worker
+	 * @param previous
+	 *            the previous worker from which to take work
+	 */
+	private void add(ArrayList<Worker> workers, Worker worker, Worker previous)
+	{
+		if (previous == null)
+		{
 			// Take the primary input
 			worker.inbox = inputStack;
 		}
 		else
 		{
 			// Chain together
-			Worker previous = workers.get(workers.size() - 1);
-			previous.outbox = new WorkStack();
-			worker.inbox = previous.outbox;
+			int size = (previous.outbox == null) ? 0 : previous.outbox.length;
+			if (size == 0)
+				previous.outbox = new WorkStack[1];
+			else
+				previous.outbox = Arrays.copyOf(previous.outbox, size + 1);
+			previous.outbox[size] = new WorkStack();
+			worker.inbox = previous.outbox[size];
 		}
 		workers.add(worker);
 	}
@@ -1897,9 +1953,11 @@ public class OPTICS implements PlugIn
 		add(workers, new KNNWorker());
 		add(workers, new DBSCANWorker());
 		add(workers, new DBSCANClusterWorker());
-		add(workers, new ResultsWorker());
-		add(workers, new MemoryResultsWorker());
-		add(workers, new ImageResultsWorker());
+		// The following could operate in parallel
+		Worker previous = workers.get(workers.size() - 1);
+		add(workers, new ResultsWorker(), previous);
+		add(workers, new MemoryResultsWorker(), previous);
+		add(workers, new ImageResultsWorker(), previous);
 
 		ArrayList<Thread> threads = startWorkers(workers);
 
