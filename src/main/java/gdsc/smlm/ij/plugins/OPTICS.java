@@ -1657,8 +1657,8 @@ public class OPTICS implements PlugIn
 			String[] clusteringModes = SettingsManager.getNames((Object[]) ClusteringMode.values());
 			gd.addChoice("Clustering_mode", clusteringModes,
 					clusteringModes[inputSettings.getClusteringModeOridinal()]);
-			gd.addMessage(ClusteringMode.XI.toString() + " options:");
-			gd.addMessage("Xi controls the change in reachability (profile steepness) to define a cluster");
+			gd.addMessage(ClusteringMode.XI.toString() + " options:\n" + ClusteringMode.XI.toString() +
+					" controls the change in reachability (profile steepness) to define a cluster");
 			gd.addNumericField("Xi", inputSettings.xi, 4);
 			gd.addCheckbox("Top_clusters", inputSettings.topLevel);
 			gd.addMessage(ClusteringMode.DBSCAN.toString() + " options:");

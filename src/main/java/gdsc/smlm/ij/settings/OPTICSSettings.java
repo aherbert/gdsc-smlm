@@ -395,20 +395,20 @@ public class OPTICSSettings implements Cloneable
 	/**
 	 * The output image mode
 	 */
-	private ImageMode imageMode = ImageMode.CLUSTER_ID;
+	private ImageMode imageMode = ImageMode.VALUE;
 	/**
 	 * Set to true to weight the image data over nearest neighbour pixels
 	 */
-	public boolean weighted = false;
+	public boolean weighted = true;
 	/**
 	 * Set to true to equalise the image histogram (allowing viewing high dynamic range data)
 	 */
-	public boolean equalised = false;
+	public boolean equalised = true;
 
 	/**
 	 * The plot mode for the reachability distance profile
 	 */
-	private PlotMode plotMode = PlotMode.COLOURED_WITH_CLUSTERS;
+	private PlotMode plotMode = PlotMode.COLOURED_BY_DEPTH_WITH_CLUSTERS;
 
 	/**
 	 * Set to true to draw the convex hull of each cluster as an outline
@@ -418,7 +418,7 @@ public class OPTICSSettings implements Cloneable
 	/**
 	 * Set to true to draw the spanning tree (connections between each point and its parent)
 	 */
-	public boolean spanningTree = true;
+	public boolean spanningTree = false;
 
 	/**
 	 * Set to true to draw the overlay coloured using the depth of the OPTICS hierarchy (default is the cluster ID)
