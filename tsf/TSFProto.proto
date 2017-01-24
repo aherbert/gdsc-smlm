@@ -100,12 +100,13 @@ message SpotList {
    // happen when separate cameras are used for separate channels),
    // therefore provide the ecf for each channel in the channel order
    repeated double ecf = 28; 
-   
+
    // The quantum efficiency can be used to calculate the number
    // of photons that hit the sensor, rather than the number of 
    // electrons that were derived from them
    // Since this number is wavelength dependent, provide the QE
-   // for each channel (in the channel order)
+   // for each fluorophore type (in the fluorophore type order)
+   // See the description of the field channel in the Spot message below
    repeated double qe = 30;
 
    optional ROI roi = 29;
@@ -218,13 +219,11 @@ message Spot {
    // Shape of the peak: width of the long axis 
    // divided by width of the short axis
    optional float a = 13; 
-   
    // Rotation of asymmetric peak, only used 
    // when fitmode == TWOAXISANDTHETA
    optional float theta = 14; 
 
-   // Original xyz coordinates from fitting before drift 
-   // or other correction correction
+   // Original xyz coordinates from fitting before correction
    optional float x_original = 101;
    optional float y_original = 102;
    optional float z_original = 103;

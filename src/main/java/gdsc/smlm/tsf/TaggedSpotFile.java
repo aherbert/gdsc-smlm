@@ -2327,7 +2327,8 @@ public final class TaggedSpotFile {
      * of photons that hit the sensor, rather than the number of 
      * electrons that were derived from them
      * Since this number is wavelength dependent, provide the QE
-     * for each channel (in the channel order)
+     * for each fluorophore type (in the fluorophore type order)
+     * See the description of the field channel in the Spot message below
      * </pre>
      *
      * <code>repeated double qe = 30;</code>
@@ -2339,7 +2340,8 @@ public final class TaggedSpotFile {
      * of photons that hit the sensor, rather than the number of 
      * electrons that were derived from them
      * Since this number is wavelength dependent, provide the QE
-     * for each channel (in the channel order)
+     * for each fluorophore type (in the fluorophore type order)
+     * See the description of the field channel in the Spot message below
      * </pre>
      *
      * <code>repeated double qe = 30;</code>
@@ -2351,7 +2353,8 @@ public final class TaggedSpotFile {
      * of photons that hit the sensor, rather than the number of 
      * electrons that were derived from them
      * Since this number is wavelength dependent, provide the QE
-     * for each channel (in the channel order)
+     * for each fluorophore type (in the fluorophore type order)
+     * See the description of the field channel in the Spot message below
      * </pre>
      *
      * <code>repeated double qe = 30;</code>
@@ -3441,7 +3444,8 @@ public final class TaggedSpotFile {
      * of photons that hit the sensor, rather than the number of 
      * electrons that were derived from them
      * Since this number is wavelength dependent, provide the QE
-     * for each channel (in the channel order)
+     * for each fluorophore type (in the fluorophore type order)
+     * See the description of the field channel in the Spot message below
      * </pre>
      *
      * <code>repeated double qe = 30;</code>
@@ -3456,7 +3460,8 @@ public final class TaggedSpotFile {
      * of photons that hit the sensor, rather than the number of 
      * electrons that were derived from them
      * Since this number is wavelength dependent, provide the QE
-     * for each channel (in the channel order)
+     * for each fluorophore type (in the fluorophore type order)
+     * See the description of the field channel in the Spot message below
      * </pre>
      *
      * <code>repeated double qe = 30;</code>
@@ -3470,7 +3475,8 @@ public final class TaggedSpotFile {
      * of photons that hit the sensor, rather than the number of 
      * electrons that were derived from them
      * Since this number is wavelength dependent, provide the QE
-     * for each channel (in the channel order)
+     * for each fluorophore type (in the fluorophore type order)
+     * See the description of the field channel in the Spot message below
      * </pre>
      *
      * <code>repeated double qe = 30;</code>
@@ -6335,7 +6341,8 @@ public final class TaggedSpotFile {
        * of photons that hit the sensor, rather than the number of 
        * electrons that were derived from them
        * Since this number is wavelength dependent, provide the QE
-       * for each channel (in the channel order)
+       * for each fluorophore type (in the fluorophore type order)
+       * See the description of the field channel in the Spot message below
        * </pre>
        *
        * <code>repeated double qe = 30;</code>
@@ -6350,7 +6357,8 @@ public final class TaggedSpotFile {
        * of photons that hit the sensor, rather than the number of 
        * electrons that were derived from them
        * Since this number is wavelength dependent, provide the QE
-       * for each channel (in the channel order)
+       * for each fluorophore type (in the fluorophore type order)
+       * See the description of the field channel in the Spot message below
        * </pre>
        *
        * <code>repeated double qe = 30;</code>
@@ -6364,7 +6372,8 @@ public final class TaggedSpotFile {
        * of photons that hit the sensor, rather than the number of 
        * electrons that were derived from them
        * Since this number is wavelength dependent, provide the QE
-       * for each channel (in the channel order)
+       * for each fluorophore type (in the fluorophore type order)
+       * See the description of the field channel in the Spot message below
        * </pre>
        *
        * <code>repeated double qe = 30;</code>
@@ -6378,7 +6387,8 @@ public final class TaggedSpotFile {
        * of photons that hit the sensor, rather than the number of 
        * electrons that were derived from them
        * Since this number is wavelength dependent, provide the QE
-       * for each channel (in the channel order)
+       * for each fluorophore type (in the fluorophore type order)
+       * See the description of the field channel in the Spot message below
        * </pre>
        *
        * <code>repeated double qe = 30;</code>
@@ -6396,7 +6406,8 @@ public final class TaggedSpotFile {
        * of photons that hit the sensor, rather than the number of 
        * electrons that were derived from them
        * Since this number is wavelength dependent, provide the QE
-       * for each channel (in the channel order)
+       * for each fluorophore type (in the fluorophore type order)
+       * See the description of the field channel in the Spot message below
        * </pre>
        *
        * <code>repeated double qe = 30;</code>
@@ -6413,7 +6424,8 @@ public final class TaggedSpotFile {
        * of photons that hit the sensor, rather than the number of 
        * electrons that were derived from them
        * Since this number is wavelength dependent, provide the QE
-       * for each channel (in the channel order)
+       * for each fluorophore type (in the fluorophore type order)
+       * See the description of the field channel in the Spot message below
        * </pre>
        *
        * <code>repeated double qe = 30;</code>
@@ -6432,7 +6444,8 @@ public final class TaggedSpotFile {
        * of photons that hit the sensor, rather than the number of 
        * electrons that were derived from them
        * Since this number is wavelength dependent, provide the QE
-       * for each channel (in the channel order)
+       * for each fluorophore type (in the fluorophore type order)
+       * See the description of the field channel in the Spot message below
        * </pre>
        *
        * <code>repeated double qe = 30;</code>
@@ -7462,8 +7475,7 @@ public final class TaggedSpotFile {
 
     /**
      * <pre>
-     * Original xyz coordinates from fitting before drift 
-     * or other correction correction
+     * Original xyz coordinates from fitting before correction
      * </pre>
      *
      * <code>optional float x_original = 101;</code>
@@ -7471,8 +7483,7 @@ public final class TaggedSpotFile {
     boolean hasXOriginal();
     /**
      * <pre>
-     * Original xyz coordinates from fitting before drift 
-     * or other correction correction
+     * Original xyz coordinates from fitting before correction
      * </pre>
      *
      * <code>optional float x_original = 101;</code>
@@ -8391,8 +8402,7 @@ public final class TaggedSpotFile {
     private float xOriginal_;
     /**
      * <pre>
-     * Original xyz coordinates from fitting before drift 
-     * or other correction correction
+     * Original xyz coordinates from fitting before correction
      * </pre>
      *
      * <code>optional float x_original = 101;</code>
@@ -8402,8 +8412,7 @@ public final class TaggedSpotFile {
     }
     /**
      * <pre>
-     * Original xyz coordinates from fitting before drift 
-     * or other correction correction
+     * Original xyz coordinates from fitting before correction
      * </pre>
      *
      * <code>optional float x_original = 101;</code>
@@ -10762,8 +10771,7 @@ public final class TaggedSpotFile {
       private float xOriginal_ ;
       /**
        * <pre>
-       * Original xyz coordinates from fitting before drift 
-       * or other correction correction
+       * Original xyz coordinates from fitting before correction
        * </pre>
        *
        * <code>optional float x_original = 101;</code>
@@ -10773,8 +10781,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Original xyz coordinates from fitting before drift 
-       * or other correction correction
+       * Original xyz coordinates from fitting before correction
        * </pre>
        *
        * <code>optional float x_original = 101;</code>
@@ -10784,8 +10791,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Original xyz coordinates from fitting before drift 
-       * or other correction correction
+       * Original xyz coordinates from fitting before correction
        * </pre>
        *
        * <code>optional float x_original = 101;</code>
@@ -10798,8 +10804,7 @@ public final class TaggedSpotFile {
       }
       /**
        * <pre>
-       * Original xyz coordinates from fitting before drift 
-       * or other correction correction
+       * Original xyz coordinates from fitting before correction
        * </pre>
        *
        * <code>optional float x_original = 101;</code>
