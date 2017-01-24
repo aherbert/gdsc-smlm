@@ -875,7 +875,6 @@ public class OPTICS implements PlugIn
 		@Override
 		void newResults()
 		{
-			System.out.println("Clearing image cache");
 			clearCache();
 		}
 
