@@ -612,6 +612,8 @@ public class OPTICS implements PlugIn
 				String title = TITLE + " Reachability Distance";
 				Plot plot = new Plot(title, "Order", "Reachability" + units);
 				double[] limits = Maths.limits(profile);
+				// plot to zero
+				limits[0] = 0;
 
 				ArrayList<OPTICSCluster> clusters = null;
 				LUT lut = clusterLut;
@@ -632,31 +634,6 @@ public class OPTICS implements PlugIn
 						if (maxClusterId < cluster.clusterId)
 							maxClusterId = cluster.clusterId;
 					}
-				}
-
-				// Draw the clusters using lines underneath
-				if (mode.isDrawClusters())
-				{
-					// TODO - Get a good distance to start the lines, and the separation
-					double start = -limits[0];
-					double separation = limits[0];
-
-					LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, maxClusterId);
-					for (OPTICSCluster cluster : clusters)
-					{
-						int level = cluster.getLevel();
-						double y = start - (maxLevel - level) * separation;
-						plot.setColor(mapper.getColour(lut, cluster.clusterId));
-						plot.drawLine(cluster.start, y, cluster.end, y);
-					}
-
-					// Update the limits if we are plotting lines underneath for the clusters
-					limits[0] = start - (maxLevel + 1) * separation;
-				}
-				else
-				{
-					// Just plot to zero
-					limits[0] = 0;
 				}
 
 				if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
@@ -712,6 +689,28 @@ public class OPTICS implements PlugIn
 						limits[1] = distance * 1.05;
 				}
 
+				// Draw the clusters using lines underneath
+				if (mode.isDrawClusters() && maxClusterId > 0)
+				{
+					// Get a good distance to start the lines, and the separation
+					// Make the clusters fill 1/3 of the plot.
+					double range = 0.5 * limits[1];
+					double separation = range / (maxLevel + 2);
+					double start = -separation;
+
+					LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, maxClusterId);
+					for (OPTICSCluster cluster : clusters)
+					{
+						int level = cluster.getLevel();
+						double y = start - (maxLevel - level) * separation;
+						plot.setColor(mapper.getColour(lut, cluster.clusterId));
+						plot.drawLine(cluster.start, y, cluster.end, y);
+					}
+
+					// Update the limits if we are plotting lines underneath for the clusters
+					limits[0] = -range; //start - (maxLevel + 1) * separation;
+				}
+				
 				plot.setLimits(1, order.length, limits[0], limits[1]);
 
 				// Create the colour for each point on the line
@@ -754,21 +753,21 @@ public class OPTICS implements PlugIn
 				}
 
 				// Now draw the line
-				int max2 = Maths.max(profileColour);
+				int maxColour = Maths.max(profileColour);
 
 				// Create a colour to match the LUT of the image
-				LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
+				LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, maxColour);
 
 				// Cache all the colours
-				Color[] colors = new Color[max2 + 1];
+				Color[] colors = new Color[maxColour + 1];
 				if (mode.isColourProfile())
 				{
-					for (int c = 1; c <= max2; c++)
+					for (int c = 1; c <= maxColour; c++)
 						colors[c] = mapper.getColour(lut, c);
 				}
-				else
+				else if (maxColour == 1)
 				{
-					colors[0] = Color.BLUE;
+					colors[1] = Color.BLUE;
 				}
 				colors[0] = Color.BLACK;
 
