@@ -92,7 +92,7 @@ public class OPTICS implements PlugIn
 	private GlobalSettings globalSettings;
 	private OPTICSSettings inputSettings;
 
-	private boolean extraOptions;
+	private boolean extraOptions, debug;
 
 	private static class Work
 	{
@@ -263,7 +263,7 @@ public class OPTICS implements PlugIn
 
 		private void debug(String msg)
 		{
-			if (extraOptions)
+			if (debug)
 				System.out.println(this.getClass().getSimpleName() + msg);
 		}
 
@@ -356,6 +356,13 @@ public class OPTICS implements PlugIn
 				if (current.numberOfSplitSets != previous.numberOfSplitSets)
 					return false;
 			}
+			if (extraOptions)
+			{
+				if (current.saveApproximateSets != previous.saveApproximateSets)
+					return false;
+				if (current.getSampleMode() != previous.getSampleMode())
+					return false;
+			}			
 			return true;
 		}
 
@@ -376,6 +383,11 @@ public class OPTICS implements PlugIn
 				// Q. Should these be options
 				boolean saveApproximateSets = false;
 				SampleMode sampleMode = SampleMode.RANDOM;
+				if (extraOptions)
+				{
+					saveApproximateSets = work.inputSettings.saveApproximateSets;
+					sampleMode = work.inputSettings.getSampleMode();
+				}
 				opticsManager.setNumberOfThreads(Prefs.getThreads());
 				opticsResult = opticsManager.fastOptics(minPts, n, n, saveApproximateSets, sampleMode);
 			}
@@ -713,7 +725,7 @@ public class OPTICS implements PlugIn
 					// Update the limits if we are plotting lines underneath for the clusters
 					limits[0] = -range; //start - (maxLevel + 1) * separation;
 				}
-				
+
 				plot.setLimits(1, order.length, limits[0], limits[1]);
 
 				// Create the colour for each point on the line
@@ -1567,6 +1579,12 @@ public class OPTICS implements PlugIn
 			String[] opticsModes = SettingsManager.getNames((Object[]) OPTICSMode.values());
 			gd.addChoice("OPTICS_mode", opticsModes, opticsModes[inputSettings.getOPTICSModeOridinal()]);
 			gd.addNumericField("Number_of_splits", inputSettings.numberOfSplitSets, 0);
+			if (extraOptions)
+			{
+				gd.addCheckbox("Approx_sets", inputSettings.saveApproximateSets);
+				String[] sampleModes = SettingsManager.getNames((Object[]) SampleMode.values());
+				gd.addChoice("Sample_mode", sampleModes, sampleModes[inputSettings.getSampleModeOridinal()]);
+			}
 			gd.addNumericField("Generating_distance", inputSettings.generatingDistance, 2, 6, "nm");
 		}
 		gd.addMessage("--- Clustering ---");
@@ -1623,6 +1641,9 @@ public class OPTICS implements PlugIn
 
 		// Start disabled so the user can choose settings to update
 		gd.addCheckbox("Preview", false);
+
+		if (extraOptions)
+			gd.addCheckbox("Debug", false);
 
 		// Everything is done within the dialog listener
 		if (isDBSCAN)
@@ -1691,7 +1712,7 @@ public class OPTICS implements PlugIn
 			//				return true;
 			//		}
 
-			if (extraOptions)
+			if (debug)
 				System.out.println("dialogItemChanged: " + e);
 
 			// A previous run may have been cancelled so we have to handle this.
@@ -1717,6 +1738,11 @@ public class OPTICS implements PlugIn
 			inputSettings.minPoints = (int) gd.getNextNumber();
 			inputSettings.setOPTICSMode(gd.getNextChoiceIndex());
 			inputSettings.numberOfSplitSets = (int) gd.getNextNumber();
+			if (extraOptions)
+			{
+				inputSettings.saveApproximateSets = gd.getNextBoolean();
+				inputSettings.setSampleMode(gd.getNextChoiceIndex());
+			}
 			inputSettings.generatingDistance = gd.getNextNumber();
 			inputSettings.setClusteringMode(gd.getNextChoiceIndex());
 			inputSettings.xi = gd.getNextNumber();
@@ -1732,6 +1758,8 @@ public class OPTICS implements PlugIn
 			inputSettings.overlayColorByDepth = gd.getNextBoolean();
 			inputSettings.setPlotMode(gd.getNextChoiceIndex());
 			boolean preview = gd.getNextBoolean();
+			if (extraOptions)
+				debug = gd.getNextBoolean();
 
 			if (gd.invalidNumber())
 				return false;
@@ -1753,7 +1781,7 @@ public class OPTICS implements PlugIn
 			if (preview)
 			{
 				// Queue the settings
-				if (extraOptions)
+				if (debug)
 					System.out.println("Adding work");
 				if (isPreview)
 					// Use a delay next time. This prevents delay when the preview is first switched on. 
@@ -1786,7 +1814,7 @@ public class OPTICS implements PlugIn
 			//				return true;
 			//		}
 
-			if (extraOptions)
+			if (debug)
 				System.out.println("dialogItemChanged: " + e);
 
 			// A previous run may have been cancelled so we have to handle this.
@@ -1820,8 +1848,9 @@ public class OPTICS implements PlugIn
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
 			inputSettings.outline = gd.getNextBoolean();
-
 			boolean preview = gd.getNextBoolean();
+			if (extraOptions)
+				debug = gd.getNextBoolean();
 
 			if (gd.invalidNumber())
 				return false;
@@ -1831,7 +1860,7 @@ public class OPTICS implements PlugIn
 			if (preview)
 			{
 				// Queue the settings
-				if (extraOptions)
+				if (debug)
 					System.out.println("Adding work");
 				if (isPreview)
 					// Use a delay next time. This prevents delay when the preview is first switched on. 

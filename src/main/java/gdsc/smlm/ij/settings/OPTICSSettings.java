@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.settings;
 
+import gdsc.core.clustering.optics.SampleMode;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -313,6 +315,15 @@ public class OPTICSSettings implements Cloneable
 	public int numberOfSplitSets = 0;
 
 	/**
+	 * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
+	 * min split size.
+	 */
+	public boolean saveApproximateSets = false;
+
+	/** The sample mode. */
+	private SampleMode sampleMode;
+	
+	/**
 	 * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
 	 * using the expected density of uniformly spread random points.
 	 */
@@ -456,6 +467,31 @@ public class OPTICSSettings implements Cloneable
 		if (mode < 0 || mode >= values.length)
 			mode = 0;
 		this.imageMode = values[mode];
+	}
+
+	public SampleMode getSampleMode()
+	{
+		return sampleMode;
+	}
+
+	public int getSampleModeOridinal()
+	{
+		if (sampleMode == null)
+			return 0;
+		return sampleMode.ordinal();
+	}
+
+	public void setSampleMode(SampleMode mode)
+	{
+		sampleMode = mode;
+	}
+
+	public void setSampleMode(int mode)
+	{
+		SampleMode[] values = SampleMode.values();
+		if (mode < 0 || mode >= values.length)
+			mode = 0;
+		this.sampleMode = values[mode];
 	}
 
 	public ClusteringMode getClusteringMode()
