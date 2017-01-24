@@ -29,6 +29,7 @@ import gdsc.core.clustering.optics.OPTICSCluster;
 import gdsc.core.clustering.optics.OPTICSManager;
 import gdsc.core.clustering.optics.OPTICSManager.Option;
 import gdsc.core.clustering.optics.OPTICSResult;
+import gdsc.core.clustering.optics.SampleMode;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ConvexHull;
@@ -372,9 +373,11 @@ public class OPTICS implements PlugIn
 			if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 			{
 				int n = work.inputSettings.numberOfSplitSets;
-				boolean isDistanceToMedian = false;
+				// Q. Should these be options
+				boolean saveApproximateSets = false;
+				SampleMode sampleMode = SampleMode.RANDOM;
 				opticsManager.setNumberOfThreads(Prefs.getThreads());
-				opticsResult = opticsManager.fastOptics(minPts, n, n, isDistanceToMedian);
+				opticsResult = opticsManager.fastOptics(minPts, n, n, saveApproximateSets, sampleMode);
 			}
 			else
 			{
