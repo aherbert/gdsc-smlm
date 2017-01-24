@@ -327,7 +327,7 @@ public class OPTICSSettings implements Cloneable
 	public boolean saveApproximateSets = false;
 
 	/** The sample mode. */
-	private SampleMode sampleMode;
+	private SampleMode sampleMode = SampleMode.RANDOM;
 	
 	/**
 	 * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
