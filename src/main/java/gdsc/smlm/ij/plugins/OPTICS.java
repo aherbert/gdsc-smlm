@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
@@ -75,6 +76,10 @@ public class OPTICS implements PlugIn
 {
 	private static final String TITLE_OPTICS = "OPTICS";
 	private static final String TITLE_DBSCAN = "DBSCAN";
+
+	private static LUT clusterLut = LUTHelper.getColorModel();
+	private static LUT valueLut = LUTHelper.createLUT(LutColour.FIRE);
+	private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT);
 
 	private String TITLE;
 	/**
@@ -609,7 +614,7 @@ public class OPTICS implements PlugIn
 				double[] limits = Maths.limits(profile);
 
 				ArrayList<OPTICSCluster> clusters = null;
-				LUT lut = Utils.getColorModel();
+				LUT lut = clusterLut;
 				int maxClusterId = 0;
 				int maxLevel = 0;
 
@@ -636,12 +641,12 @@ public class OPTICS implements PlugIn
 					double start = -limits[0];
 					double separation = limits[0];
 
+					LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, maxClusterId);
 					for (OPTICSCluster cluster : clusters)
 					{
 						int level = cluster.getLevel();
 						double y = start - (maxLevel - level) * separation;
-						Color color = LUTHelper.getNonZeroColour(lut, cluster.clusterId, 1f, maxClusterId);
-						plot.setColor(color);
+						plot.setColor(mapper.getColour(lut, cluster.clusterId));
 						plot.drawLine(cluster.start, y, cluster.end, y);
 					}
 
@@ -709,27 +714,88 @@ public class OPTICS implements PlugIn
 
 				plot.setLimits(1, order.length, limits[0], limits[1]);
 
-				plot.setColor(Color.black);
-				plot.addPoints(order, profile, Plot.LINE);
+				// Create the colour for each point on the line
+				int[] profileColour = new int[profile.length];
 
-				// Colour the reachability plot line if it is in a cluster. Use a default colour 
-				plot.setColor(Color.blue);
-				if (mode.isHighlightProfile())
+				//plot.setColor(Color.black);
+				//plot.addPoints(order, profile, Plot.LINE);
+
+				// Colour the reachability plot line if it is in a cluster. Use a default colour
+				if (mode.isColourProfile())
+				{
+					// Do all clusters so rank by level
+					clusters.sort(new Comparator<OPTICSCluster>()
+					{
+						public int compare(OPTICSCluster o1, OPTICSCluster o2)
+						{
+							return o1.getLevel() - o2.getLevel();
+						}
+					});
+
+					final boolean useLevel = mode.isColourProfileByDepth();
+					if (useLevel)
+						lut = clusterDepthLut;
+
+					for (OPTICSCluster cluster : clusters)
+					{
+						Arrays.fill(profileColour, cluster.start, cluster.end + 1,
+								(useLevel) ? cluster.getLevel() + 1 : cluster.clusterId);
+					}
+				}
+				else if (mode.isHighlightProfile())
 				{
 					for (OPTICSCluster cluster : clusters)
 					{
 						// Only do top level clusters
 						if (cluster.getLevel() != 0)
 							continue;
+						Arrays.fill(profileColour, cluster.start, cluster.end + 1, 1);
+					}
+				}
 
-						if (mode.isColourProfile())
-							plot.setColor(LUTHelper.getNonZeroColour(lut, cluster.clusterId, 1f, maxClusterId));
-						int from = cluster.start;
-						int to = cluster.end + 1;
+				// Now draw the line
+				int max2 = Maths.max(profileColour);
+
+				// Create a colour to match the LUT of the image
+				LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
+
+				// Cache all the colours
+				Color[] colors = new Color[max2 + 1];
+				if (mode.isColourProfile())
+				{
+					for (int c = 1; c <= max2; c++)
+						colors[c] = mapper.getColour(lut, c);
+				}
+				else
+				{
+					colors[0] = Color.BLUE;
+				}
+				colors[0] = Color.BLACK;
+
+				int from = 0;
+				for (int i = 1; i < profileColour.length; i++)
+				{
+					if (profileColour[from] != profileColour[i])
+					{
+						// Draw the line on the plot
+						int to = i + 1;
 						double[] order1 = Arrays.copyOfRange(order, from, to);
 						double[] profile1 = Arrays.copyOfRange(profile, from, to);
+						plot.setColor(colors[profileColour[from]]);
 						plot.addPoints(order1, profile1, Plot.LINE);
+
+						from = i;
 					}
+				}
+
+				// Draw the final line
+				if (from != profileColour.length - 1)
+				{
+					int to = profileColour.length;
+					double[] order1 = Arrays.copyOfRange(order, from, to);
+					double[] profile1 = Arrays.copyOfRange(profile, from, to);
+					plot.setColor(colors[profileColour[from]]);
+					plot.addPoints(order1, profile1, Plot.LINE);
 				}
 
 				// Add the DBSCAN clustering distance
@@ -853,22 +919,22 @@ public class OPTICS implements PlugIn
 								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
 								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
 								for (OPTICSCluster c : allClusters)
-									map[c.clusterId] = c.getLevel();
+									map[c.clusterId] = c.getLevel() + 1;
 								max2 = Maths.max(map);
 							}
 						}
 
 						// Draw each cluster in a new colour
-						LUT lut = LUTHelper.createLUT(LutColour.FIRE);
+						LUT lut;
 						LUTMapper mapper;
 						if (mode.isMapped())
 						{
-							if (mode == ImageMode.CLUSTER_ID)
-								lut = Utils.getColorModel();
+							lut = (mode == ImageMode.CLUSTER_ID) ? clusterLut : clusterDepthLut;
 							mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
 						}
 						else
 						{
+							lut = valueLut;
 							mapper = new LUTHelper.NullLUTMapper();
 						}
 						image.getImagePlus().getProcessor().setColorModel(lut);
@@ -924,18 +990,18 @@ public class OPTICS implements PlugIn
 							}
 						}
 
-						LUT lut = Utils.getColorModel();
+						LUT lut = clusterLut;
 
 						if (work.inputSettings.overlayColorByDepth && max == max2 &&
 								clusteringResult instanceof OPTICSResult)
 						{
-							lut = LUTHelper.createLUT(LutColour.FIRE);
+							lut = clusterDepthLut;
 							synchronized (clusteringResult)
 							{
 								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
 								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
 								for (OPTICSCluster c : allClusters)
-									map[c.clusterId] = c.getLevel();
+									map[c.clusterId] = c.getLevel() + 1;
 								max2 = Maths.max(map);
 							}
 						}
@@ -1002,16 +1068,16 @@ public class OPTICS implements PlugIn
 							}
 						}
 
-						LUT lut = Utils.getColorModel();
+						LUT lut = clusterLut;
 
 						if (work.inputSettings.overlayColorByDepth && max == max2)
 						{
-							lut = LUTHelper.createLUT(LutColour.FIRE);
+							lut = clusterDepthLut;
 							synchronized (clusteringResult)
 							{
 								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
 								for (OPTICSCluster c : allClusters)
-									map[c.clusterId] = c.getLevel();
+									map[c.clusterId] = c.getLevel() + 1;
 								max2 = Maths.max(map);
 							}
 						}

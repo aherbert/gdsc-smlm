@@ -223,6 +223,18 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
+		COLOURED_BY_DEPTH_WITH_CLUSTERS {
+			@Override
+			public String getName() { return "Coloured by depth with clusters"; };
+			@Override
+			public boolean isHighlightProfile() { return true; }
+			@Override
+			public boolean isColourProfile() { return true; }
+			@Override
+			public boolean isColourProfileByDepth() { return true; }
+			@Override
+			public boolean isDrawClusters() { return true; }
+		},
 		OFF {
 			@Override
 			public String getName() { return "Off"; };
@@ -245,9 +257,17 @@ public class OPTICSSettings implements Cloneable
 		}
 
 		/**
-		 * @return True if the profile should be coloured using the cluster colour for top-cluster regions
+		 * @return True if the profile should be coloured using the cluster
 		 */
 		public boolean isColourProfile()
+		{
+			return false;
+		}
+
+		/**
+		 * @return True if the profile should be coloured using the cluster depth
+		 */
+		public boolean isColourProfileByDepth()
 		{
 			return false;
 		}
