@@ -492,8 +492,10 @@ public class TSFPeakResultsReader
 		}
 		if (spotList.getEcfCount() >= channel)
 		{
+			// ECF is per channel
 			double ecf = spotList.getEcf(channel - 1);
-			double qe = (spotList.getQeCount() >= channel) ? spotList.getQe(channel - 1) : 1;
+			// QE is per fluorophore type
+			double qe = (spotList.getQeCount() >= fluorophoreType) ? spotList.getQe(fluorophoreType - 1) : 1;
 			cal.setGain(ecf * qe);
 			cal.setAmplification(ecf);
 		}
@@ -714,6 +716,8 @@ public class TSFPeakResultsReader
 				String value = Integer.toString(type.getId());
 				if (type.hasDescription())
 					value += ":" + type.getDescription();
+				if (type.hasIsFiducial())
+					value += ":fiducial=" + type.getIsFiducial();
 				values[i] = value;
 			}
 			options[count++] = new ResultOption(4, "Fluorophore type", values[0], values);

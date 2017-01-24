@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.tsf.TaggedSpotFile.FitMode;
+import gdsc.smlm.tsf.TaggedSpotFile.FluorophoreType;
 import gdsc.smlm.tsf.TaggedSpotFile.IntensityUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.LocationUnits;
 import gdsc.smlm.tsf.TaggedSpotFile.ROI;
@@ -151,6 +152,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		Spot.Builder builder = Spot.newBuilder();
 		builder.setMolecule(id.incrementAndGet());
 		builder.setChannel(1);
+		builder.setFluorophoreType(1); 
 		builder.setFrame(peak);
 		builder.setXPosition(origX);
 		builder.setYPosition(origY);
@@ -264,6 +266,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 			builder.setMolecule(id.incrementAndGet());
 			builder.setChannel(1);
+			builder.setFluorophoreType(1); 
 			builder.setFrame(result.peak);
 			builder.setXPosition(result.origX);
 			builder.setYPosition(result.origY);
@@ -463,6 +466,12 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setIntensityUnits(IntensityUnits.COUNTS);
 		builder.setThetaUnits(ThetaUnits.DEGREES);
 		builder.setFitMode(fitMode);
+		
+		FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
+		typeBuilder.setId(1);
+		typeBuilder.setDescription("Default fluorophore");
+		typeBuilder.setIsFiducial(false);
+		builder.addFluorophoreTypes(typeBuilder.build());
 
 		SpotList spotList = builder.build();
 		try
