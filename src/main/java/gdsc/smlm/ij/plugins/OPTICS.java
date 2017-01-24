@@ -358,11 +358,13 @@ public class OPTICS implements PlugIn
 			}
 			if (extraOptions)
 			{
+				if (current.useRandomVectors != previous.useRandomVectors)
+					return false;
 				if (current.saveApproximateSets != previous.saveApproximateSets)
 					return false;
 				if (current.getSampleMode() != previous.getSampleMode())
 					return false;
-			}			
+			}
 			return true;
 		}
 
@@ -381,15 +383,17 @@ public class OPTICS implements PlugIn
 			{
 				int n = work.inputSettings.numberOfSplitSets;
 				// Q. Should these be options
+				boolean useRandomVectors = false;
 				boolean saveApproximateSets = false;
 				SampleMode sampleMode = SampleMode.RANDOM;
 				if (extraOptions)
 				{
+					useRandomVectors = work.inputSettings.useRandomVectors;
 					saveApproximateSets = work.inputSettings.saveApproximateSets;
 					sampleMode = work.inputSettings.getSampleMode();
 				}
 				opticsManager.setNumberOfThreads(Prefs.getThreads());
-				opticsResult = opticsManager.fastOptics(minPts, n, n, saveApproximateSets, sampleMode);
+				opticsResult = opticsManager.fastOptics(minPts, n, n, useRandomVectors, saveApproximateSets, sampleMode);
 			}
 			else
 			{
@@ -1581,6 +1585,7 @@ public class OPTICS implements PlugIn
 			gd.addNumericField("Number_of_splits", inputSettings.numberOfSplitSets, 0);
 			if (extraOptions)
 			{
+				gd.addCheckbox("Random_vectors", inputSettings.useRandomVectors);
 				gd.addCheckbox("Approx_sets", inputSettings.saveApproximateSets);
 				String[] sampleModes = SettingsManager.getNames((Object[]) SampleMode.values());
 				gd.addChoice("Sample_mode", sampleModes, sampleModes[inputSettings.getSampleModeOridinal()]);
@@ -1740,6 +1745,7 @@ public class OPTICS implements PlugIn
 			inputSettings.numberOfSplitSets = (int) gd.getNextNumber();
 			if (extraOptions)
 			{
+				inputSettings.useRandomVectors = gd.getNextBoolean();
 				inputSettings.saveApproximateSets = gd.getNextBoolean();
 				inputSettings.setSampleMode(gd.getNextChoiceIndex());
 			}

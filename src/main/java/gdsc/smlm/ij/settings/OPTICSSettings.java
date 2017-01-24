@@ -315,6 +315,12 @@ public class OPTICSSettings implements Cloneable
 	public int numberOfSplitSets = 0;
 
 	/**
+	 * Set to true to use random vectors for the projections. The default is to uniformly create vectors on the
+	 * semi-circle interval.
+	 */
+	public boolean useRandomVectors = false;
+	
+	/**
 	 * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
 	 * min split size.
 	 */
