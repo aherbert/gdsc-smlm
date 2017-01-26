@@ -1159,15 +1159,17 @@ public class OPTICS implements PlugIn
 						OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
 						SpanningTreeMode treeMode = work.inputSettings.getSpanningTreeMode();
 
-						int[] predecessor;
+						int[] predecessor, topLevelClusters;
 						synchronized (opticsResult)
 						{
 							predecessor = opticsResult.getPredecessor();
-							if (treeMode.isColourByOrder())
+							order = opticsResult.getOrder();
+							topLevelClusters = new int[predecessor.length];
+							for (OPTICSCluster c : opticsResult.getClusteringHierarchy())
 							{
-								if (order == null)
-									order = opticsResult.getOrder();
+								Arrays.fill(topLevelClusters, c.start, c.end + 1, c.clusterId);
 							}
+
 							if (clusters == null)
 							{
 								clusters = opticsResult.getClusters();
@@ -1247,10 +1249,13 @@ public class OPTICS implements PlugIn
 						{
 							if (clusters[i] == 0 || predecessor[i] < 0)
 								continue;
+
 							int j = predecessor[i];
-							// The spanning tree can jump across hierachical clusters
-							//if (clusters[i] != clusters[j] && work.inputSettings.topLevel)
-							//	continue;
+
+							// The spanning tree can jump across hierachical clusters.
+							// Prevent jumps across top-level clusters
+							if (topLevelClusters[order[i] - 1] != topLevelClusters[order[j] - 1])
+								continue;
 
 							float xi = image.mapX(x[i]);
 							float yi = image.mapY(y[i]);
