@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
 
@@ -760,7 +761,7 @@ public class OPTICS implements PlugIn
 					else
 					{
 						// Do all clusters so rank by level
-						clusters.sort(new Comparator<OPTICSCluster>()
+						Collections.sort(clusters, new Comparator<OPTICSCluster>()
 						{
 							public int compare(OPTICSCluster o1, OPTICSCluster o2)
 							{
