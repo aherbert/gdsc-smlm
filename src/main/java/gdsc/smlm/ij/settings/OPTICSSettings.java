@@ -32,29 +32,25 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public String getName() { return "Cluster Id"; };
 			@Override
-			public float getValue(float value, int clusterId) 
-			{ 
-				return clusterId; 
-			}
+			public float getValue(float value, int clusterId, int order) { return clusterId; }
 			@Override
-			public boolean isMapped()
-			{
-				return true;
-			}
+			public boolean isMapped() { return true; }
 		},
 		CLUSTER_DEPTH {
 			@Override
 			public String getName() { return "Cluster Depth"; };
 			@Override
-			public float getValue(float value, int clusterId) 
-			{ 
-				return clusterId; 
-			}
+			public float getValue(float value, int clusterId, int order) { return clusterId; }
 			@Override
-			public boolean isMapped()
-			{
-				return true;
-			}
+			public boolean isMapped() { return true; }
+		},
+		CLUSTER_ORDER {
+			@Override
+			public String getName() { return "Cluster Order"; };
+			@Override
+			public float getValue(float value, int clusterId, int order) { return order; }
+			@Override
+			public boolean isMapped() { return true; }
 		},
 		VALUE {
 			@Override
@@ -62,7 +58,7 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
-			public float getValue(float value, int clusterId) { return value; }
+			public float getValue(float value, int clusterId, int order) { return value; }
 		},
 		COUNT {
 			@Override
@@ -70,13 +66,13 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean canBeWeighted() { return true; }
 			@Override
-			public float getValue(float value, int clusterId) { return 1f; }
+			public float getValue(float value, int clusterId, int order) { return 1f; }
 		},
 		NONE {
 			@Override
 			public String getName() { return "None"; };
 			@Override
-			public float getValue(float value, int clusterId) { return 0; }
+			public float getValue(float value, int clusterId, int order) { return 0; }
 		};
 		//@formatter:on
 
@@ -94,9 +90,11 @@ public class OPTICSSettings implements Cloneable
 		 *            The value of the cluster point
 		 * @param clusterId
 		 *            The cluster Id of the cluster point
+		 * @param order
+		 *            the order of the cluster point
 		 * @return The value
 		 */
-		abstract public float getValue(float value, int clusterId);
+		abstract public float getValue(float value, int clusterId, int order);
 
 		/**
 		 * Can be weighted.
@@ -107,7 +105,7 @@ public class OPTICSSettings implements Cloneable
 		{
 			return false;
 		}
-		
+
 		/**
 		 * Checks if is a mapped value.
 		 *
@@ -195,17 +193,35 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public String getName() { return "On"; };
 		},
-		WITH_CLUSTERS {
-			@Override
-			public String getName() { return "With clusters"; };
-			@Override
-			public boolean isDrawClusters() { return true; }
-		},
 		HIGHLIGHTED {
 			@Override
 			public String getName() { return "Highlighted"; };
 			@Override
 			public boolean isHighlightProfile() { return true; }
+		},
+		COLOURED_BY_ID {
+			@Override
+			public String getName() { return "Coloured by Id"; };
+			@Override
+			public boolean isColourProfileById() { return true; }
+		},
+		COLOURED_BY_DEPTH {
+			@Override
+			public String getName() { return "Coloured by depth"; };
+			@Override
+			public boolean isColourProfileByDepth() { return true; }
+		},
+		COLOURED_BY_ORDER {
+			@Override
+			public String getName() { return "Coloured by order"; };
+			@Override
+			public boolean isColourProfileByOrder() { return true; }
+		},
+		WITH_CLUSTERS {
+			@Override
+			public String getName() { return "With clusters"; };
+			@Override
+			public boolean isDrawClusters() { return true; }
 		},
 		HIGHLIGHTED_WITH_CLUSTERS {
 			@Override
@@ -215,13 +231,11 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
-		COLOURED_WITH_CLUSTERS {
+		COLOURED_BY_ID_WITH_CLUSTERS {
 			@Override
-			public String getName() { return "Coloured with clusters"; };
+			public String getName() { return "Coloured by Id with clusters"; };
 			@Override
-			public boolean isHighlightProfile() { return true; }
-			@Override
-			public boolean isColourProfile() { return true; }
+			public boolean isColourProfileById() { return true; }
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
@@ -229,11 +243,15 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public String getName() { return "Coloured by depth with clusters"; };
 			@Override
-			public boolean isHighlightProfile() { return true; }
-			@Override
-			public boolean isColourProfile() { return true; }
-			@Override
 			public boolean isColourProfileByDepth() { return true; }
+			@Override
+			public boolean isDrawClusters() { return true; }
+		},
+		COLOURED_BY_ORDER_WITH_CLUSTERS {
+			@Override
+			public String getName() { return "Coloured by order with clusters"; };
+			@Override
+			public boolean isColourProfileByOrder() { return true; }
 			@Override
 			public boolean isDrawClusters() { return true; }
 		},
@@ -259,9 +277,17 @@ public class OPTICSSettings implements Cloneable
 		}
 
 		/**
-		 * @return True if the profile should be coloured using the cluster
+		 * @return True if the profile should be coloured using the OPTICS results
 		 */
 		public boolean isColourProfile()
+		{
+			return isColourProfileByDepth() || isColourProfileById() || isColourProfileByOrder();
+		}
+
+		/**
+		 * @return True if the profile should be coloured using the cluster Id
+		 */
+		public boolean isColourProfileById()
 		{
 			return false;
 		}
@@ -270,6 +296,14 @@ public class OPTICSSettings implements Cloneable
 		 * @return True if the profile should be coloured using the cluster depth
 		 */
 		public boolean isColourProfileByDepth()
+		{
+			return false;
+		}
+
+		/**
+		 * @return True if the profile should be coloured using the cluster order
+		 */
+		public boolean isColourProfileByOrder()
 		{
 			return false;
 		}
@@ -288,6 +322,128 @@ public class OPTICSSettings implements Cloneable
 		public boolean requiresClusters()
 		{
 			return isDrawClusters() || isHighlightProfile() || isColourProfile();
+		}
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+	}
+
+	/**
+	 * Options for plotting the OPTICS results
+	 */
+	public enum OutlineMode
+	{
+		//@formatter:off
+		COLOURED_BY_CLUSTER {
+			@Override
+			public String getName() { return "Coloured by cluster"; };
+		},
+		COLOURED_BY_DEPTH {
+			@Override
+			public String getName() { return "Coloured by depth"; };
+			@Override
+			public boolean isColourByDepth() { return true; }
+		},
+		OFF {
+			@Override
+			public String getName() { return "Off"; };
+			@Override
+			public boolean isOutline() { return false; }
+		};
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+
+		/**
+		 * @return True if the outline should be displayed
+		 */
+		public boolean isOutline()
+		{
+			return true;
+		}
+
+		/**
+		 * @return True if the outline should be coloured using the cluster depth
+		 */
+		public boolean isColourByDepth()
+		{
+			return false;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getName();
+		}
+	}
+
+	/**
+	 * Options for plotting the OPTICS results
+	 */
+	public enum SpanningTreeMode
+	{
+		//@formatter:off
+		COLOURED_BY_CLUSTER {
+			@Override
+			public String getName() { return "Coloured by cluster"; };
+		},
+		COLOURED_BY_DEPTH {
+			@Override
+			public String getName() { return "Coloured by depth"; };
+			@Override
+			public boolean isColourByDepth() { return true; }
+		},
+		COLOURED_BY_ORDER {
+			@Override
+			public String getName() { return "Coloured by order"; };
+			@Override
+			public boolean isColourByOrder() { return true; }
+		},
+		OFF {
+			@Override
+			public String getName() { return "Off"; };
+			@Override
+			public boolean isSpanningTree() { return false; }
+		};
+		//@formatter:on
+
+		/**
+		 * Gets the name.
+		 *
+		 * @return the name
+		 */
+		abstract public String getName();
+
+		/**
+		 * @return True if the spanning tree should be displayed
+		 */
+		public boolean isSpanningTree()
+		{
+			return true;
+		}
+
+		/**
+		 * @return True if the spanning tree should be coloured using the cluster depth
+		 */
+		public boolean isColourByDepth()
+		{
+			return false;
+		}
+
+		/**
+		 * @return True if the spanning tree should be coloured using the cluster order
+		 */
+		public boolean isColourByOrder()
+		{
+			return false;
 		}
 
 		@Override
@@ -319,7 +475,7 @@ public class OPTICSSettings implements Cloneable
 	 * semi-circle interval.
 	 */
 	public boolean useRandomVectors = false;
-	
+
 	/**
 	 * Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
 	 * min split size.
@@ -328,7 +484,7 @@ public class OPTICSSettings implements Cloneable
 
 	/** The sample mode. */
 	private SampleMode sampleMode = SampleMode.RANDOM;
-	
+
 	/**
 	 * The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
 	 * using the expected density of uniformly spread random points.
@@ -411,19 +567,14 @@ public class OPTICSSettings implements Cloneable
 	private PlotMode plotMode = PlotMode.COLOURED_BY_DEPTH_WITH_CLUSTERS;
 
 	/**
-	 * Set to true to draw the convex hull of each cluster as an outline
+	 * The outline mode for the reachability distance profile
 	 */
-	public boolean outline = true;
+	private OutlineMode outlineMode = OutlineMode.COLOURED_BY_CLUSTER;
 
 	/**
-	 * Set to true to draw the spanning tree (connections between each point and its parent)
+	 * The spanningTree mode for the reachability distance profile
 	 */
-	public boolean spanningTree = false;
-
-	/**
-	 * Set to true to draw the overlay coloured using the depth of the OPTICS hierarchy (default is the cluster ID)
-	 */
-	public boolean overlayColorByDepth = true;
+	private SpanningTreeMode spanningTreeMode = SpanningTreeMode.OFF;
 
 	public OPTICSMode getOPTICSMode()
 	{
@@ -548,6 +699,56 @@ public class OPTICSSettings implements Cloneable
 		if (mode < 0 || mode >= values.length)
 			mode = 0;
 		this.plotMode = values[mode];
+	}
+
+	public OutlineMode getOutlineMode()
+	{
+		return outlineMode;
+	}
+
+	public int getOutlineModeOridinal()
+	{
+		if (outlineMode == null)
+			return 0;
+		return outlineMode.ordinal();
+	}
+
+	public void setOutlineMode(OutlineMode mode)
+	{
+		outlineMode = mode;
+	}
+
+	public void setOutlineMode(int mode)
+	{
+		OutlineMode[] values = OutlineMode.values();
+		if (mode < 0 || mode >= values.length)
+			mode = 0;
+		this.outlineMode = values[mode];
+	}
+
+	public SpanningTreeMode getSpanningTreeMode()
+	{
+		return spanningTreeMode;
+	}
+
+	public int getSpanningTreeModeOridinal()
+	{
+		if (spanningTreeMode == null)
+			return 0;
+		return spanningTreeMode.ordinal();
+	}
+
+	public void setSpanningTreeMode(SpanningTreeMode mode)
+	{
+		spanningTreeMode = mode;
+	}
+
+	public void setSpanningTreeMode(int mode)
+	{
+		SpanningTreeMode[] values = SpanningTreeMode.values();
+		if (mode < 0 || mode >= values.length)
+			mode = 0;
+		this.spanningTreeMode = values[mode];
 	}
 
 	/*

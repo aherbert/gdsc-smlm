@@ -34,6 +34,7 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ConvexHull;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
@@ -42,8 +43,10 @@ import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.OPTICSSettings;
 import gdsc.smlm.ij.settings.OPTICSSettings.OPTICSMode;
+import gdsc.smlm.ij.settings.OPTICSSettings.OutlineMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.ClusteringMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.ImageMode;
+import gdsc.smlm.ij.settings.OPTICSSettings.SpanningTreeMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.PlotMode;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -80,7 +83,10 @@ public class OPTICS implements PlugIn
 
 	private static LUT clusterLut = LUTHelper.getColorModel();
 	private static LUT valueLut = LUTHelper.createLUT(LutColour.FIRE);
-	private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
+	// Need to be able to see all colours against white (plot) or black (image) background 
+	//private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
+	private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
+	private static LUT clusterOrderLut = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
 
 	private String TITLE;
 	/**
@@ -736,26 +742,41 @@ public class OPTICS implements PlugIn
 				//plot.setColor(Color.black);
 				//plot.addPoints(order, profile, Plot.LINE);
 
+				// Create a colour to match the LUT of the image
+				LUTMapper mapper = null;
+
 				// Colour the reachability plot line if it is in a cluster. Use a default colour
 				if (mode.isColourProfile())
 				{
-					// Do all clusters so rank by level
-					clusters.sort(new Comparator<OPTICSCluster>()
+					if (mode.isColourProfileByOrder())
 					{
-						public int compare(OPTICSCluster o1, OPTICSCluster o2)
+						lut = clusterOrderLut;
+						mapper = new LUTHelper.NonZeroLUTMapper(0, profileColour.length - 1);
+						for (int i = 0; i < profileColour.length; i++)
+							profileColour[i] = mapper.map(i);
+						// Ensure we correctly get colours for each value 
+						mapper = new LUTHelper.DefaultLUTMapper(0, 255);
+					}
+					else
+					{
+						// Do all clusters so rank by level
+						clusters.sort(new Comparator<OPTICSCluster>()
 						{
-							return o1.getLevel() - o2.getLevel();
+							public int compare(OPTICSCluster o1, OPTICSCluster o2)
+							{
+								return o1.getLevel() - o2.getLevel();
+							}
+						});
+
+						final boolean useLevel = mode.isColourProfileByDepth();
+						if (useLevel)
+							lut = clusterDepthLut;
+
+						for (OPTICSCluster cluster : clusters)
+						{
+							Arrays.fill(profileColour, cluster.start, cluster.end + 1,
+									(useLevel) ? cluster.getLevel() + 1 : cluster.clusterId);
 						}
-					});
-
-					final boolean useLevel = mode.isColourProfileByDepth();
-					if (useLevel)
-						lut = clusterDepthLut;
-
-					for (OPTICSCluster cluster : clusters)
-					{
-						Arrays.fill(profileColour, cluster.start, cluster.end + 1,
-								(useLevel) ? cluster.getLevel() + 1 : cluster.clusterId);
 					}
 				}
 				else if (mode.isHighlightProfile())
@@ -771,22 +792,23 @@ public class OPTICS implements PlugIn
 
 				// Now draw the line
 				int maxColour = Maths.max(profileColour);
-
-				// Create a colour to match the LUT of the image
-				LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, maxColour);
+				if (mapper == null)
+					// Make zero black
+					mapper = new LUTHelper.NonZeroLUTMapper(1, maxColour);
 
 				// Cache all the colours
 				Color[] colors = new Color[maxColour + 1];
 				if (mode.isColourProfile())
 				{
-					for (int c = 1; c <= maxColour; c++)
+					for (int c = mapper.getMin(); c <= maxColour; c++)
 						colors[c] = mapper.getColour(lut, c);
 				}
 				else if (maxColour == 1)
 				{
 					colors[1] = Color.BLUE;
 				}
-				colors[0] = Color.BLACK;
+				if (colors[0] == null)
+					colors[0] = Color.BLACK;
 
 				int from = 0;
 				for (int i = 1; i < profileColour.length; i++)
@@ -834,10 +856,36 @@ public class OPTICS implements PlugIn
 		}
 	}
 
+	private class OrderProvider
+	{
+		int getOrder(int i)
+		{
+			return 0;
+		}
+	}
+
+	private class RealOrderProvider extends OrderProvider
+	{
+		final int[] order;
+
+		RealOrderProvider(int[] order)
+		{
+			this.order = order;
+		}
+
+		@Override
+		int getOrder(int i)
+		{
+			return order[i];
+		}
+	}
+
 	private class ImageResultsWorker extends Worker
 	{
 		IJImagePeakResults image = null;
+		OutlineMode lastOutlineMode = null;
 		Overlay outline = null;
+		SpanningTreeMode lastSpanningTreeMode = null;
 		Overlay spanningTree = null;
 
 		@Override
@@ -849,25 +897,25 @@ public class OPTICS implements PlugIn
 				newResults();
 				return false;
 			}
-			if (current.outline != previous.outline)
+			if (current.getOutlineMode() != previous.getOutlineMode())
+			{
+				if (current.getOutlineMode().isOutline() && current.getOutlineMode() != lastOutlineMode)
+					outline = null;
 				return false;
-			if (current.spanningTree != previous.spanningTree)
+			}
+			if (current.getSpanningTreeMode() != previous.getSpanningTreeMode())
+			{
+				if (current.getSpanningTreeMode().isSpanningTree() &&
+						current.getSpanningTreeMode() != lastSpanningTreeMode)
+					spanningTree = null;
 				return false;
+			}
 			if (current.getImageMode() != previous.getImageMode() ||
 					getDisplayFlags(current) != getDisplayFlags(previous))
 			{
 				// We can only cache the image if the display mode is the same
 				image = null;
 				return false;
-			}
-			if (current.outline || current.spanningTree)
-			{
-				if (current.overlayColorByDepth != previous.overlayColorByDepth)
-				{
-					outline = null;
-					spanningTree = null;
-					return false;
-				}
 			}
 			return true;
 		}
@@ -882,7 +930,9 @@ public class OPTICS implements PlugIn
 		{
 			// Clear cache
 			image = null;
+			lastOutlineMode = null;
 			outline = null;
+			lastSpanningTreeMode = null;
 			spanningTree = null;
 		}
 
@@ -900,7 +950,7 @@ public class OPTICS implements PlugIn
 				return new Work(work.inputSettings, results, opticsManager, clusteringResult, clusterCount, image);
 			}
 
-			int[] clusters = null;
+			int[] clusters = null, order = null;
 			int max = 0; // max cluster value
 			float[] x = null, y = null;
 			ImageMode mode = work.inputSettings.getImageMode();
@@ -930,16 +980,23 @@ public class OPTICS implements PlugIn
 						{
 							clusters = clusteringResult.getClusters();
 							max = Maths.max(clusters);
-							if (mode == ImageMode.CLUSTER_DEPTH && clusteringResult instanceof OPTICSResult)
+							if (clusteringResult instanceof OPTICSResult)
 							{
 								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
-								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
-								map = new int[max + 1];
-								for (OPTICSCluster c : allClusters)
-									map[c.clusterId] = c.getLevel() + 1;
-								max2 = Maths.max(map);
+								if (mode == ImageMode.CLUSTER_ORDER)
+								{
+									order = opticsResult.getOrder();
+								}
+								else if (mode == ImageMode.CLUSTER_DEPTH)
+								{
+									ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
+									map = new int[max + 1];
+									for (OPTICSCluster c : allClusters)
+										map[c.clusterId] = c.getLevel() + 1;
+									max2 = Maths.max(map);
+								}
 							}
-							else
+							if (map == null)
 							{
 								map = Utils.newArray(max + 1, 0, 1);
 								max2 = max;
@@ -948,11 +1005,24 @@ public class OPTICS implements PlugIn
 
 						// Draw each cluster in a new colour
 						LUT lut;
-						LUTMapper mapper;
+						LUTMapper mapper = null;
 						if (mode.isMapped())
 						{
-							lut = (mode == ImageMode.CLUSTER_ID) ? clusterLut : clusterDepthLut;
-							mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
+							switch (mode)
+							{
+								//@formatter:off
+								case CLUSTER_ORDER: 
+									lut = clusterOrderLut;
+									mapper = new LUTHelper.NonZeroLUTMapper(1, results.size());																		
+									break;								
+								case CLUSTER_ID: lut = clusterLut; break;
+								case CLUSTER_DEPTH: lut = clusterDepthLut; break;
+								default:
+									throw new NotImplementedException();
+								//@formatter:on
+							}
+							if (mapper == null)
+								mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
 						}
 						else
 						{
@@ -967,12 +1037,13 @@ public class OPTICS implements PlugIn
 						y = new float[x.length];
 						v = new float[x.length];
 						ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();
+						OrderProvider op = (order == null) ? new OrderProvider() : new RealOrderProvider(order);
 						for (int i = 0, size = results.size(); i < size; i++)
 						{
 							PeakResult r = list.get(i);
 							x[i] = r.getXPosition();
 							y[i] = r.getYPosition();
-							v[i] = mapper.mapf(mode.getValue(r.getSignal(), map[clusters[i]]));
+							v[i] = mapper.mapf(mode.getValue(r.getSignal(), map[clusters[i]], op.getOrder(i)));
 						}
 						image.add(x, y, v);
 					}
@@ -1002,7 +1073,7 @@ public class OPTICS implements PlugIn
 				int[] map = null; // Used to map clusters to a display value
 				int max2 = 0; // max mapped cluster value
 
-				if (work.inputSettings.outline)
+				if (work.inputSettings.getOutlineMode().isOutline())
 				{
 					if (outline == null)
 					{
@@ -1020,21 +1091,23 @@ public class OPTICS implements PlugIn
 
 						LUT lut = clusterLut;
 
-						if (work.inputSettings.overlayColorByDepth && clusteringResult instanceof OPTICSResult)
+						if (clusteringResult instanceof OPTICSResult)
 						{
-							lut = clusterDepthLut;
-							synchronized (clusteringResult)
+							if (work.inputSettings.getOutlineMode().isColourByDepth())
 							{
-								OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
-								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
-								Arrays.fill(map, 0);
-								for (OPTICSCluster c : allClusters)
-									map[c.clusterId] = c.getLevel() + 1;
-								max2 = Maths.max(map);
+								lut = clusterDepthLut;
+								synchronized (clusteringResult)
+								{
+									OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
+									ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
+									Arrays.fill(map, 0);
+									for (OPTICSCluster c : allClusters)
+										map[c.clusterId] = c.getLevel() + 1;
+									max2 = Maths.max(map);
+								}
 							}
 						}
 
-						// We need to recompute
 						outline = new Overlay();
 						ConvexHull[] hulls = new ConvexHull[max + 1];
 						synchronized (clusteringResult)
@@ -1078,16 +1151,23 @@ public class OPTICS implements PlugIn
 					overlay = outline;
 				}
 
-				if (work.inputSettings.spanningTree && clusteringResult instanceof OPTICSResult)
+				if (work.inputSettings.getSpanningTreeMode().isSpanningTree() &&
+						clusteringResult instanceof OPTICSResult)
 				{
 					if (spanningTree == null)
 					{
 						OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
+						SpanningTreeMode treeMode = work.inputSettings.getSpanningTreeMode();
 
 						int[] predecessor;
 						synchronized (opticsResult)
 						{
 							predecessor = opticsResult.getPredecessor();
+							if (treeMode.isColourByOrder())
+							{
+								if (order == null)
+									order = opticsResult.getOrder();
+							}
 							if (clusters == null)
 							{
 								clusters = opticsResult.getClusters();
@@ -1103,7 +1183,11 @@ public class OPTICS implements PlugIn
 
 						LUT lut = clusterLut;
 
-						if (work.inputSettings.overlayColorByDepth && max == max2)
+						if (treeMode.isColourByOrder())
+						{
+							lut = clusterOrderLut;
+						}
+						else if (treeMode.isColourByDepth() && max == max2)
 						{
 							lut = clusterDepthLut;
 							synchronized (clusteringResult)
@@ -1131,16 +1215,33 @@ public class OPTICS implements PlugIn
 							}
 						}
 
-						// We need to recompute
 						spanningTree = new Overlay();
 
-						// Create a colour to match the LUT of the image
-						LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
-
 						// Cache all the colours
-						Color[] colors = new Color[max2 + 1];
-						for (int c = 1; c <= max2; c++)
-							colors[c] = mapper.getColour(lut, c);
+						Color[] colors;
+						// Create a colour to match the LUT of the image
+						LUTMapper mapper;
+
+						boolean useMap;
+						if (treeMode.isColourByOrder())
+						{
+							// We will use the order for the colour
+							useMap = false;
+							mapper = new LUTHelper.DefaultLUTMapper(0, 255);
+							colors = new Color[256];
+							for (int c = 1; c < colors.length; c++)
+								colors[c] = mapper.getColour(lut, c);
+							mapper = new LUTHelper.NonZeroLUTMapper(1, clusters.length);
+						}
+						else
+						{
+							// Alternative is to colour by cluster Id/Depth using a map
+							useMap = true;
+							mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
+							colors = new Color[max2 + 1];
+							for (int c = 1; c <= max2; c++)
+								colors[c] = mapper.getColour(lut, c);
+						}
 
 						for (int i = 1; i < predecessor.length; i++)
 						{
@@ -1157,7 +1258,10 @@ public class OPTICS implements PlugIn
 							float yj = image.mapY(y[j]);
 
 							Line roi = new Line(xi, yi, xj, yj);
-							roi.setStrokeColor(colors[map[clusters[i]]]);
+							if (useMap)
+								roi.setStrokeColor(colors[map[clusters[i]]]);
+							else
+								roi.setStrokeColor(colors[mapper.map(order[i])]);
 							spanningTree.add(roi);
 						}
 					}
@@ -1194,7 +1298,8 @@ public class OPTICS implements PlugIn
 			}
 			if (inputSettings.getImageMode() == ImageMode.CLUSTER_ID)
 				displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
-			else if (inputSettings.getImageMode() == ImageMode.CLUSTER_DEPTH)
+			else if (inputSettings.getImageMode() == ImageMode.CLUSTER_DEPTH ||
+					inputSettings.getImageMode() == ImageMode.CLUSTER_ORDER)
 				displayFlags = IJImagePeakResults.DISPLAY_MAX;
 			return displayFlags;
 		}
@@ -1667,11 +1772,14 @@ public class OPTICS implements PlugIn
 		}
 		gd.addMessage("--- Image ---");
 		gd.addSlider("Image_Scale", 0, 15, inputSettings.imageScale);
-		TreeSet<ImageMode> set = new TreeSet<ImageMode>();
-		set.addAll(Arrays.asList(ImageMode.values()));
+		TreeSet<ImageMode> imageModeSet = new TreeSet<ImageMode>();
+		imageModeSet.addAll(Arrays.asList(ImageMode.values()));
 		if (isDBSCAN)
-			set.remove(ImageMode.CLUSTER_DEPTH);
-		String[] imageModes = SettingsManager.getNames(set.toArray());
+		{
+			imageModeSet.remove(ImageMode.CLUSTER_DEPTH);
+			imageModeSet.remove(ImageMode.CLUSTER_ORDER);
+		}
+		String[] imageModes = SettingsManager.getNames(imageModeSet.toArray());
 		gd.addChoice("Image_mode", imageModes, imageModes[inputSettings.getImageModeOridinal()]);
 
 		gd.addCheckboxGroup(1, 2, new String[] { "Weighted", "Equalised" },
@@ -1679,20 +1787,20 @@ public class OPTICS implements PlugIn
 		//gd.addCheckbox("Weighted", inputSettings.weighted);
 		//gd.addCheckbox("Equalised", inputSettings.equalised);
 
+		TreeSet<OutlineMode> outlineModeSet = new TreeSet<OutlineMode>();
+		outlineModeSet.addAll(Arrays.asList(OutlineMode.values()));
 		if (isDBSCAN)
 		{
-			gd.addCheckbox("Outline", inputSettings.outline);
+			outlineModeSet.remove(OutlineMode.COLOURED_BY_DEPTH);
 		}
-		else
-		{
-			gd.addCheckboxGroup(1, 3,
-					new String[] { "Outline", "Spanning_tree", "Colour_by_depth" }, new boolean[] {
-							inputSettings.outline, inputSettings.spanningTree, inputSettings.overlayColorByDepth },
-					new String[] { "Overlay" });
+		String[] outlineModes = SettingsManager.getNames(outlineModeSet.toArray());
+		gd.addChoice("Outline", outlineModes, outlineModes[inputSettings.getOutlineModeOridinal()]);
 
-			//gd.addCheckbox("Outline", inputSettings.outline);
-			//gd.addCheckbox("Spanning_tree", inputSettings.spanningTree);
-			//gd.addCheckbox("Colour_by_depth", inputSettings.overlayColorByDepth);			
+		if (!isDBSCAN)
+		{
+			String[] spanningTreeModes = SettingsManager.getNames((Object[]) SpanningTreeMode.values());
+			gd.addChoice("Spanning_tree", spanningTreeModes,
+					spanningTreeModes[inputSettings.getSpanningTreeModeOridinal()]);
 
 			gd.addMessage("--- Reachability Plot ---");
 			String[] plotModes = SettingsManager.getNames((Object[]) PlotMode.values());
@@ -1814,9 +1922,8 @@ public class OPTICS implements PlugIn
 			inputSettings.setImageMode(gd.getNextChoiceIndex());
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
-			inputSettings.outline = gd.getNextBoolean();
-			inputSettings.spanningTree = gd.getNextBoolean();
-			inputSettings.overlayColorByDepth = gd.getNextBoolean();
+			inputSettings.setOutlineMode(gd.getNextChoiceIndex());
+			inputSettings.setSpanningTreeMode(gd.getNextChoiceIndex());
 			inputSettings.setPlotMode(gd.getNextChoiceIndex());
 			boolean preview = gd.getNextBoolean();
 			if (extraOptions)
@@ -1908,7 +2015,7 @@ public class OPTICS implements PlugIn
 			inputSettings.setImageMode(gd.getNextChoiceIndex());
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
-			inputSettings.outline = gd.getNextBoolean();
+			inputSettings.setOutlineMode(gd.getNextChoiceIndex());
 			boolean preview = gd.getNextBoolean();
 			if (extraOptions)
 				debug = gd.getNextBoolean();
