@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
@@ -33,6 +36,7 @@ import gdsc.core.clustering.optics.OPTICSResult;
 import gdsc.core.clustering.optics.SampleMode;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.core.match.RandIndex;
 import gdsc.core.utils.ConvexHull;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
@@ -353,15 +357,15 @@ public class OPTICS implements PlugIn
 			{
 				if (current.numberOfSplitSets != previous.numberOfSplitSets)
 					return false;
-			}
-			if (extraOptions)
-			{
-				if (current.useRandomVectors != previous.useRandomVectors)
-					return false;
-				if (current.saveApproximateSets != previous.saveApproximateSets)
-					return false;
-				if (current.getSampleMode() != previous.getSampleMode())
-					return false;
+				if (extraOptions)
+				{
+					if (current.useRandomVectors != previous.useRandomVectors)
+						return false;
+					if (current.saveApproximateSets != previous.saveApproximateSets)
+						return false;
+					if (current.getSampleMode() != previous.getSampleMode())
+						return false;
+				}
 			}
 			return true;
 		}
@@ -540,6 +544,110 @@ public class OPTICS implements PlugIn
 				IJ.log(TITLE + ": No results to display");
 			}
 			return work;
+		}
+	}
+
+	private class ClusterResult
+	{
+		final int n1, n2;
+		final int[] c1, c2;
+
+		ClusterResult(int[] clusters, int[] topClusters)
+		{
+			n1 = RandIndex.compact(clusters);
+			this.c1 = clusters;
+			if (topClusters != null)
+			{
+				n2 = RandIndex.compact(topClusters);
+				this.c2 = topClusters;
+			}
+			else
+			{
+				n2 = 0;
+				c2 = null;
+			}
+		}
+	}
+
+	private class RandIndexWorker extends Worker
+	{
+		Queue<ClusterResult> queue = new LinkedList<ClusterResult>();
+
+		@Override
+		boolean equals(OPTICSSettings current, OPTICSSettings previous)
+		{
+			if (!current.inputOption.equals(previous.inputOption))
+			{
+				// We only cache results for the same set of raw results, i.e. the input coordinates.
+				queue.clear();
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		Work createResult(Work work)
+		{
+			ClusteringResult clusteringResult = (ClusteringResult) work.settings.get(2);
+			if (clusteringResult == null)
+				return work;
+
+			int[] clusters, topClusters = null;
+			synchronized (clusteringResult)
+			{
+				clusters = clusteringResult.getClusters();
+				if (clusteringResult instanceof OPTICSResult)
+				{
+					topClusters = ((OPTICSResult) clusteringResult).getTopLevelClusters(false);
+				}
+			}
+
+			ClusterResult current = new ClusterResult(clusters, topClusters);
+
+			// Compare to previous results
+			if (!queue.isEmpty())
+			{
+				int i = -queue.size();
+				StringBuilder sb = new StringBuilder();
+				sb.append("Cluster comparison: RandIndex (AdjustedRandIndex)\n");
+				for (Iterator<ClusterResult> it = queue.iterator(); it.hasNext();)
+				{
+					ClusterResult previous = it.next();
+					sb.append("[").append(i++).append("] ");
+					compare(sb, "All clusters", current.c1, current.n1, previous.c1, previous.n1);
+					if (current.c2 != null)
+					{
+						sb.append(" : ");
+						compare(sb, "Top level clusters", current.c2, current.n2, previous.c2, previous.n2);
+					}
+					sb.append('\n');
+				}
+				IJ.log(sb.toString());
+			}
+
+			queue.add(current);
+
+			// Limit size
+			if (queue.size() > 2)
+				queue.poll();
+
+			return work;
+		}
+
+		private void compare(StringBuilder sb, String title, int[] set1, int n1, int[] set2, int n2)
+		{
+			RandIndex ri = new RandIndex();
+			ri.compute(set1, n1, set2, n2);
+			double r = ri.getRandIndex();
+			double ari = ri.getAdjustedRandIndex();
+			sb.append(title);
+			sb.append(" ");
+			sb.append(Utils.rounded(r));
+			sb.append(" (");
+			sb.append(Utils.rounded(ari));
+			sb.append(")");
+
 		}
 	}
 
@@ -895,42 +1003,45 @@ public class OPTICS implements PlugIn
 			if (current.imageScale != previous.imageScale)
 			{
 				// Clear all the cached results
-				newResults();
+				clearCache(true);
 				return false;
 			}
+			boolean result = true;
 			if (current.getOutlineMode() != previous.getOutlineMode())
 			{
 				if (current.getOutlineMode().isOutline() && current.getOutlineMode() != lastOutlineMode)
 					outline = null;
-				return false;
+				result = false;
 			}
 			if (current.getSpanningTreeMode() != previous.getSpanningTreeMode())
 			{
 				if (current.getSpanningTreeMode().isSpanningTree() &&
 						current.getSpanningTreeMode() != lastSpanningTreeMode)
 					spanningTree = null;
-				return false;
+				result = false;
 			}
 			if (current.getImageMode() != previous.getImageMode() ||
 					getDisplayFlags(current) != getDisplayFlags(previous))
 			{
 				// We can only cache the image if the display mode is the same
 				image = null;
-				return false;
+				result = false;
 			}
-			return true;
+			return result;
 		}
 
 		@Override
 		void newResults()
 		{
-			clearCache();
+			// We can keep the image but should clear the overlays
+			clearCache(false);
 		}
 
-		private void clearCache()
+		private void clearCache(boolean clearImage)
 		{
 			// Clear cache
-			image = null;
+			if (clearImage)
+				image = null;
 			lastOutlineMode = null;
 			outline = null;
 			lastSpanningTreeMode = null;
@@ -947,7 +1058,7 @@ public class OPTICS implements PlugIn
 			// It may be null if cancelled.
 			if (clusteringResult == null)
 			{
-				clearCache();
+				clearCache(true);
 				return new Work(work.inputSettings, results, opticsManager, clusteringResult, clusterCount, image);
 			}
 
@@ -1078,6 +1189,7 @@ public class OPTICS implements PlugIn
 				{
 					if (outline == null)
 					{
+						lastOutlineMode = work.inputSettings.getOutlineMode();
 						if (clusters == null)
 						{
 							synchronized (clusteringResult)
@@ -1158,18 +1270,15 @@ public class OPTICS implements PlugIn
 					if (spanningTree == null)
 					{
 						OPTICSResult opticsResult = (OPTICSResult) clusteringResult;
-						SpanningTreeMode treeMode = work.inputSettings.getSpanningTreeMode();
+						lastSpanningTreeMode = work.inputSettings.getSpanningTreeMode();
 
 						int[] predecessor, topLevelClusters;
 						synchronized (opticsResult)
 						{
 							predecessor = opticsResult.getPredecessor();
-							order = opticsResult.getOrder();
-							topLevelClusters = new int[predecessor.length];
-							for (OPTICSCluster c : opticsResult.getClusteringHierarchy())
-							{
-								Arrays.fill(topLevelClusters, c.start, c.end + 1, c.clusterId);
-							}
+							if (order == null)
+								order = opticsResult.getOrder();
+							topLevelClusters = opticsResult.getTopLevelClusters(false);
 
 							if (clusters == null)
 							{
@@ -1186,11 +1295,11 @@ public class OPTICS implements PlugIn
 
 						LUT lut = clusterLut;
 
-						if (treeMode.isColourByOrder())
+						if (lastSpanningTreeMode.isColourByOrder())
 						{
 							lut = clusterOrderLut;
 						}
-						else if (treeMode.isColourByDepth() && max == max2)
+						else if (lastSpanningTreeMode.isColourByDepth() && max == max2)
 						{
 							lut = clusterDepthLut;
 							synchronized (clusteringResult)
@@ -1226,7 +1335,7 @@ public class OPTICS implements PlugIn
 						LUTMapper mapper;
 
 						boolean useMap;
-						if (treeMode.isColourByOrder())
+						if (lastSpanningTreeMode.isColourByOrder())
 						{
 							// We will use the order for the colour
 							useMap = false;
@@ -1255,7 +1364,7 @@ public class OPTICS implements PlugIn
 
 							// The spanning tree can jump across hierachical clusters.
 							// Prevent jumps across top-level clusters
-							if (topLevelClusters[order[i] - 1] != topLevelClusters[order[j] - 1])
+							if (topLevelClusters[i] != topLevelClusters[i])
 								continue;
 
 							float xi = image.mapX(x[i]);
@@ -1585,6 +1694,7 @@ public class OPTICS implements PlugIn
 		//		add(workers, new ImageResultsWorker());
 		Worker previous = workers.get(workers.size() - 1);
 		add(workers, new ResultsWorker(), previous);
+		add(workers, new RandIndexWorker(), previous);
 		add(workers, new MemoryResultsWorker(), previous);
 		add(workers, new ReachabilityResultsWorker(), previous);
 		add(workers, new ImageResultsWorker(), previous);
@@ -1688,7 +1798,6 @@ public class OPTICS implements PlugIn
 			Worker previous = workers.get(workers.size() - 1);
 			add(workers, worker, previous);
 		}
-		workers.add(worker);
 	}
 
 	/**
@@ -2068,6 +2177,7 @@ public class OPTICS implements PlugIn
 		// The following could operate in parallel
 		Worker previous = workers.get(workers.size() - 1);
 		add(workers, new ResultsWorker(), previous);
+		add(workers, new RandIndexWorker(), previous);
 		add(workers, new MemoryResultsWorker(), previous);
 		add(workers, new ImageResultsWorker(), previous);
 
