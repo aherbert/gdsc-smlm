@@ -554,10 +554,12 @@ public class OPTICS implements PlugIn
 
 		ClusterResult(int[] clusters, int[] topClusters)
 		{
-			n1 = RandIndex.compact(clusters);
+			// The original set of clusters does not need to be compacted
+			n1 = Maths.max(clusters) + 1;
 			this.c1 = clusters;
 			if (topClusters != null)
 			{
+				// The top clusters from OPTICS may contain non-sequential integers
 				n2 = RandIndex.compact(topClusters);
 				this.c2 = topClusters;
 			}
@@ -615,11 +617,11 @@ public class OPTICS implements PlugIn
 				{
 					ClusterResult previous = it.next();
 					sb.append("[").append(i++).append("] ");
-					compare(sb, "All clusters", current.c1, current.n1, previous.c1, previous.n1);
+					compare(sb, "Clusters", current.c1, current.n1, previous.c1, previous.n1);
 					if (current.c2 != null)
 					{
 						sb.append(" : ");
-						compare(sb, "Top level clusters", current.c2, current.n2, previous.c2, previous.n2);
+						compare(sb, "Top-level clusters", current.c2, current.n2, previous.c2, previous.n2);
 					}
 					sb.append('\n');
 				}
@@ -1831,6 +1833,9 @@ public class OPTICS implements PlugIn
 		workers.add(worker);
 	}
 
+	private Object[] imageModeArray;
+	private Object[] outlineModeArray;
+
 	private boolean showDialog(boolean isDBSCAN)
 	{
 		logReferences(isDBSCAN);
@@ -1894,7 +1899,8 @@ public class OPTICS implements PlugIn
 			imageModeSet.remove(ImageMode.CLUSTER_DEPTH);
 			imageModeSet.remove(ImageMode.CLUSTER_ORDER);
 		}
-		String[] imageModes = SettingsManager.getNames(imageModeSet.toArray());
+		imageModeArray = imageModeSet.toArray();
+		String[] imageModes = SettingsManager.getNames(imageModeArray);
 		gd.addChoice("Image_mode", imageModes, imageModes[inputSettings.getImageModeOridinal()]);
 
 		gd.addCheckboxGroup(1, 2, new String[] { "Weighted", "Equalised" },
@@ -1908,7 +1914,8 @@ public class OPTICS implements PlugIn
 		{
 			outlineModeSet.remove(OutlineMode.COLOURED_BY_DEPTH);
 		}
-		String[] outlineModes = SettingsManager.getNames(outlineModeSet.toArray());
+		outlineModeArray = outlineModeSet.toArray();
+		String[] outlineModes = SettingsManager.getNames(outlineModeArray);
 		gd.addChoice("Outline", outlineModes, outlineModes[inputSettings.getOutlineModeOridinal()]);
 
 		if (!isDBSCAN)
@@ -2034,10 +2041,10 @@ public class OPTICS implements PlugIn
 			inputSettings.clusteringDistance = gd.getNextNumber();
 			inputSettings.core = gd.getNextBoolean();
 			inputSettings.imageScale = gd.getNextNumber();
-			inputSettings.setImageMode(gd.getNextChoiceIndex());
+			inputSettings.setImageMode((ImageMode) imageModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
-			inputSettings.setOutlineMode(gd.getNextChoiceIndex());
+			inputSettings.setOutlineMode((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.setSpanningTreeMode(gd.getNextChoiceIndex());
 			inputSettings.setPlotMode(gd.getNextChoiceIndex());
 			boolean preview = gd.getNextBoolean();
@@ -2127,10 +2134,10 @@ public class OPTICS implements PlugIn
 			inputSettings.clusteringDistance = gd.getNextNumber();
 			inputSettings.core = gd.getNextBoolean();
 			inputSettings.imageScale = gd.getNextNumber();
-			inputSettings.setImageMode(gd.getNextChoiceIndex());
+			inputSettings.setImageMode((ImageMode) imageModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
-			inputSettings.setOutlineMode(gd.getNextChoiceIndex());
+			inputSettings.setOutlineMode((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]);
 			boolean preview = gd.getNextBoolean();
 			if (extraOptions)
 				debug = gd.getNextBoolean();
