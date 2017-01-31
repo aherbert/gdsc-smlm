@@ -68,6 +68,14 @@ public class OPTICSSettings implements Cloneable
 			@Override
 			public float getValue(float value, int clusterId, int order) { return 1f; }
 		},
+		LOOP {
+			@Override
+			public String getName() { return "Local Outlier Probability (LoOP)"; };
+			@Override
+			public float getValue(float value, int clusterId, int order) { return order; }
+			@Override
+			public boolean isMapped() { return true; }
+		},
 		NONE {
 			@Override
 			public String getName() { return "None"; };

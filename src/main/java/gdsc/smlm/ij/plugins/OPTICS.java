@@ -92,6 +92,7 @@ public class OPTICS implements PlugIn
 	//private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
 	private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
 	private static LUT clusterOrderLut = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
+	private static LUT loopLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
 
 	private String TITLE;
 	/**
@@ -971,7 +972,7 @@ public class OPTICS implements PlugIn
 	{
 		int getOrder(int i)
 		{
-			return 0;
+			return i;
 		}
 	}
 
@@ -991,6 +992,25 @@ public class OPTICS implements PlugIn
 		}
 	}
 
+	/**
+	 * Map the LoOP value of 0-1 to a non zero value for 8-bit display between 1 & 255.
+	 */
+	public class LoopLUTMapper extends LUTHelper.NonZeroLUTMapper
+	{
+		float[] loop;
+
+		public LoopLUTMapper(float[] loop)
+		{
+			super(1, 2);
+			this.loop = loop;
+		}
+
+		public float mapf(float value)
+		{
+			return super.mapf(loop[(int) value] + 1);
+		}
+	}
+
 	private class ImageResultsWorker extends Worker
 	{
 		IJImagePeakResults image = null;
@@ -998,6 +1018,8 @@ public class OPTICS implements PlugIn
 		Overlay outline = null;
 		SpanningTreeMode lastSpanningTreeMode = null;
 		Overlay spanningTree = null;
+		int lastMinPoints;
+		float[] loop = null;
 
 		@Override
 		boolean equals(OPTICSSettings current, OPTICSSettings previous)
@@ -1029,7 +1051,21 @@ public class OPTICS implements PlugIn
 				image = null;
 				result = false;
 			}
+			if (requiresLoop(current) && current.minPoints != lastMinPoints)
+			{
+				// We can only cache the loop values if the minPts is the same
+				loop = null;
+				// We must rebuild the image 
+				if (current.getImageMode() == ImageMode.LOOP)
+					image = null;
+				result = false;
+			}
 			return result;
+		}
+
+		private boolean requiresLoop(OPTICSSettings settings)
+		{
+			return settings.getImageMode() == ImageMode.LOOP;
 		}
 
 		@Override
@@ -1116,6 +1152,18 @@ public class OPTICS implements PlugIn
 								max2 = max;
 							}
 						}
+						if (requiresLoop(work.inputSettings) && loop == null)
+						{
+							synchronized (opticsManager)
+							{
+								// TODO - Add as an option
+								double lambda = 2;
+								lastMinPoints = work.inputSettings.minPoints;
+								loop = opticsManager.loop(lastMinPoints, lambda, true);
+							}
+							float[] limits = Maths.limits(loop);
+							Utils.log("LoOP range: %s - %s", Utils.rounded(limits[0]), Utils.rounded(limits[1]));
+						}
 
 						// Draw each cluster in a new colour
 						LUT lut;
@@ -1131,6 +1179,10 @@ public class OPTICS implements PlugIn
 									break;								
 								case CLUSTER_ID: lut = clusterLut; break;
 								case CLUSTER_DEPTH: lut = clusterDepthLut; break;
+								case LOOP: 
+									lut = loopLut; 
+									mapper = new LoopLUTMapper(loop);
+									break;
 								default:
 									throw new NotImplementedException();
 								//@formatter:on
@@ -1416,7 +1468,8 @@ public class OPTICS implements PlugIn
 			if (inputSettings.getImageMode() == ImageMode.CLUSTER_ID)
 				displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
 			else if (inputSettings.getImageMode() == ImageMode.CLUSTER_DEPTH ||
-					inputSettings.getImageMode() == ImageMode.CLUSTER_ORDER)
+					inputSettings.getImageMode() == ImageMode.CLUSTER_ORDER ||
+					inputSettings.getImageMode() == ImageMode.LOOP)
 				displayFlags = IJImagePeakResults.DISPLAY_MAX;
 			return displayFlags;
 		}
