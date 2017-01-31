@@ -194,7 +194,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			//--- MSD Analysis ---
 
 			// Conversion constants
-			final double px2ToUm2 = results.getCalibration().getNmPerPixel() * results.getCalibration().getNmPerPixel() / 1e6;
+			final double px2ToUm2 = results.getCalibration().getNmPerPixel() *
+					results.getCalibration().getNmPerPixel() / 1e6;
 			final double px2ToUm2PerSecond = px2ToUm2 / exposureTime;
 
 			// Get the maximum trace length
@@ -712,6 +713,48 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 	}
 
+	private void saveFit(double[] x, double[] y, String title)
+	{
+		if (!directoryChosen)
+			rawDataDirectory = Utils.getDirectory("Data_directory", rawDataDirectory);
+		directoryChosen = true;
+		if (rawDataDirectory == null)
+			return;
+		String filename = rawDataDirectory + "Fit." + title + ".txt";
+
+		BufferedWriter out = null;
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(filename);
+			out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
+			out.write("JumpDistance\tCumulativeP");
+			out.newLine();
+			for (int i = 0; i < x.length; i++)
+			{
+				out.write(Double.toString(x[i]));
+				out.write('\t');
+				out.write(Double.toString(y[i]));
+				out.newLine();
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		finally
+		{
+			if (out != null)
+			{
+				try
+				{
+					out.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
+	}
+
 	private double distance2(final float x, final float y, PeakResult r2)
 	{
 		final double dx = x - r2.getXPosition();
@@ -833,7 +876,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			{
 				if (displayHistograms[i])
 				{
-					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i], ROUNDED[i], false);
+					showHistogram((StoredDataStatistics) stats[i], NAMES[i], alwaysRemoveOutliers[i], ROUNDED[i],
+							false);
 				}
 			}
 		}
@@ -1769,12 +1813,20 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	public void saveSinglePopulationCurve(double[][] curve)
 	{
-		addToJumpDistancePlot(curve[0], curve[1], Color.magenta);
+		double[] x = curve[0];
+		double[] y = curve[1];
+		if (saveRawData)
+			saveFit(x, y, "Single");
+		addToJumpDistancePlot(x, y, Color.magenta);
 	}
 
 	public void saveMixedPopulationCurve(double[][] curve)
 	{
-		addToJumpDistancePlot(curve[0], curve[1], Color.yellow);
+		double[] x = curve[0];
+		double[] y = curve[1];
+		if (saveRawData)
+			saveFit(x, y, "Mixed");
+		addToJumpDistancePlot(x, y, Color.yellow);
 	}
 
 	private void addToJumpDistancePlot(double[] x, double[] y, Color color)
