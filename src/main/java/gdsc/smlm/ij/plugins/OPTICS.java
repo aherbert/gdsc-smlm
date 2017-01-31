@@ -993,21 +993,20 @@ public class OPTICS implements PlugIn
 	}
 
 	/**
-	 * Map the LoOP value of 0-1 to a non zero value for 8-bit display between 1 & 255.
+	 * Map the input value as an index to an output value
 	 */
-	public class LoopLUTMapper extends LUTHelper.NonZeroLUTMapper
+	public class ValueLUTMapper extends LUTHelper.NullLUTMapper
 	{
-		float[] loop;
+		float[] values;
 
-		public LoopLUTMapper(float[] loop)
+		public ValueLUTMapper(float[] values)
 		{
-			super(1, 2);
-			this.loop = loop;
+			this.values = values;
 		}
 
 		public float mapf(float value)
 		{
-			return super.mapf(loop[(int) value] + 1);
+			return values[(int) value];
 		}
 	}
 
@@ -1123,8 +1122,7 @@ public class OPTICS implements PlugIn
 					imp.setOverlay(null);
 					if (mode != ImageMode.NONE)
 					{
-						int[] map = null; // Used to map clusters to a display value
-						int max2 = 0; // max mapped cluster value
+						float[] map = null; // Used to map clusters to a display value
 
 						synchronized (clusteringResult)
 						{
@@ -1140,16 +1138,10 @@ public class OPTICS implements PlugIn
 								else if (mode == ImageMode.CLUSTER_DEPTH)
 								{
 									ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
-									map = new int[max + 1];
+									map = new float[max + 1];
 									for (OPTICSCluster c : allClusters)
 										map[c.clusterId] = c.getLevel() + 1;
-									max2 = Maths.max(map);
 								}
-							}
-							if (map == null)
-							{
-								map = Utils.newArray(max + 1, 0, 1);
-								max2 = max;
 							}
 						}
 						if (requiresLoop(work.inputSettings) && loop == null)
@@ -1166,34 +1158,27 @@ public class OPTICS implements PlugIn
 						}
 
 						// Draw each cluster in a new colour
-						LUT lut;
-						LUTMapper mapper = null;
+						LUT lut = valueLut;
+						LUTMapper mapper = new LUTHelper.NullLUTMapper();
 						if (mode.isMapped())
 						{
 							switch (mode)
 							{
 								//@formatter:off
-								case CLUSTER_ORDER: 
-									lut = clusterOrderLut;
-									mapper = new LUTHelper.NonZeroLUTMapper(1, results.size());																		
-									break;								
-								case CLUSTER_ID: lut = clusterLut; break;
-								case CLUSTER_DEPTH: lut = clusterDepthLut; break;
+								case CLUSTER_ORDER: lut = clusterOrderLut; break;								
+								case CLUSTER_ID:    lut = clusterLut; break;
+								case CLUSTER_DEPTH: 
+									lut = clusterDepthLut; 
+									mapper = new ValueLUTMapper(map);
+									break;
 								case LOOP: 
 									lut = loopLut; 
-									mapper = new LoopLUTMapper(loop);
+									mapper = new ValueLUTMapper(loop);
 									break;
 								default:
 									throw new NotImplementedException();
 								//@formatter:on
 							}
-							if (mapper == null)
-								mapper = new LUTHelper.NonZeroLUTMapper(1, max2);
-						}
-						else
-						{
-							lut = valueLut;
-							mapper = new LUTHelper.NullLUTMapper();
 						}
 						image.getImagePlus().getProcessor().setColorModel(lut);
 
@@ -1209,7 +1194,7 @@ public class OPTICS implements PlugIn
 							PeakResult r = list.get(i);
 							x[i] = r.getXPosition();
 							y[i] = r.getYPosition();
-							v[i] = mapper.mapf(mode.getValue(r.getSignal(), map[clusters[i]], op.getOrder(i)));
+							v[i] = mapper.mapf(mode.getValue(r.getSignal(), clusters[i], op.getOrder(i)));
 						}
 						image.add(x, y, v);
 					}
@@ -1217,7 +1202,7 @@ public class OPTICS implements PlugIn
 					if (mode.isMapped())
 					{
 						// Convert already mapped image to 8-bit (so the values are fixed)
-						imp.setProcessor(imp.getProcessor().convertToByteProcessor(false));
+						//imp.setProcessor(imp.getProcessor().convertToByteProcessor(false));
 					}
 					imp.getWindow().toFront();
 				}
@@ -1471,6 +1456,8 @@ public class OPTICS implements PlugIn
 					inputSettings.getImageMode() == ImageMode.CLUSTER_ORDER ||
 					inputSettings.getImageMode() == ImageMode.LOOP)
 				displayFlags = IJImagePeakResults.DISPLAY_MAX;
+			if (inputSettings.getImageMode().isMapped())
+				displayFlags |= IJImagePeakResults.DISPLAY_MAPPED;
 			return displayFlags;
 		}
 	}

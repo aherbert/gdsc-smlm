@@ -12,6 +12,7 @@ import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
 
 import java.awt.Rectangle;
@@ -74,6 +75,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * Use this to support negative values
 	 */
 	public static final int DISPLAY_NEGATIVES = 128;
+	/**
+	 * Mapped all non-zero values to 1-255 in the 8-bit displayed image. Zero is mapped to 0 in the LUT.
+	 * <p>
+	 * This cannot be used with {@link #DISPLAY_EQUALIZED}.
+	 */
+	public static final int DISPLAY_MAPPED = 256;
 
 	protected final String title;
 	protected final int imageWidth;
@@ -280,6 +287,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		else
 		{
 			pixels = new float[data.length];
+			
+			// Special float processor that maps all values to 1-255 in the LUT.
+			// Zero is mapped to 0 in the LUT.
+			if ((displayFlags & DISPLAY_MAPPED) != 0)
+				return new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
+			
 			return new FloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
 		}
 	}
