@@ -35,6 +35,8 @@ public class OPTICSSettings implements Cloneable
 			public float getValue(float value, int clusterId, int order) { return clusterId; }
 			@Override
 			public boolean isMapped() { return true; }
+			@Override
+			public boolean isRequiresClusters() { return true; }
 		},
 		CLUSTER_DEPTH {
 			@Override
@@ -43,6 +45,8 @@ public class OPTICSSettings implements Cloneable
 			public float getValue(float value, int clusterId, int order) { return clusterId; }
 			@Override
 			public boolean isMapped() { return true; }
+			@Override
+			public boolean isRequiresClusters() { return true; }
 		},
 		CLUSTER_ORDER {
 			@Override
@@ -51,6 +55,8 @@ public class OPTICSSettings implements Cloneable
 			public float getValue(float value, int clusterId, int order) { return order; }
 			@Override
 			public boolean isMapped() { return true; }
+			@Override
+			public boolean isRequiresClusters() { return true; }
 		},
 		VALUE {
 			@Override
@@ -128,6 +134,16 @@ public class OPTICSSettings implements Cloneable
 		public String toString()
 		{
 			return getName();
+		}
+
+		/**
+		 * Checks if the mode requires clusters.
+		 *
+		 * @return true, if requires clusters
+		 */
+		public boolean isRequiresClusters()
+		{
+			return false;
 		}
 	}
 

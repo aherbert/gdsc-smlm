@@ -472,6 +472,7 @@ public class OPTICS implements PlugIn
 			// It may be null if cancelled.
 			if (opticsResult != null)
 			{
+				int nClusters = 0;
 				synchronized (opticsResult)
 				{
 					if (work.inputSettings.getClusteringMode() == ClusteringMode.XI)
@@ -516,9 +517,12 @@ public class OPTICS implements PlugIn
 
 						opticsResult.extractDBSCANClustering((float) distance, work.inputSettings.core);
 					}
+					nClusters = opticsResult.getNumberOfClusters();
 				}
 				// We created a new clustering
 				clusterCount++;
+				Utils.log("Clustering mode: %s = %s", work.inputSettings.getClusteringMode(),
+						Utils.pleural(nClusters, "Cluster"));
 			}
 			return new Work(work.inputSettings, results, opticsManager, opticsResult, clusterCount);
 		}
@@ -1106,6 +1110,10 @@ public class OPTICS implements PlugIn
 
 			if (work.inputSettings.imageScale > 0)
 			{
+				// Check if the image should be redrawn based on the clusters
+				if (mode.isRequiresClusters())
+					image = null;
+				
 				if (image == null)
 				{
 					// Display the results ...
