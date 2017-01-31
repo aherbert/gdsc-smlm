@@ -105,7 +105,7 @@ public class OPTICSSettings implements Cloneable
 		abstract public float getValue(float value, int clusterId, int order);
 
 		/**
-		 * Can be weighted.
+		 * Return true if the value can be weighted amongst neighbour pixels int the output image
 		 *
 		 * @return true, if successful
 		 */
@@ -115,7 +115,7 @@ public class OPTICSSettings implements Cloneable
 		}
 
 		/**
-		 * Checks if is a mapped value.
+		 * Return true if the value should be mapped to the 1-255 range for the output image
 		 *
 		 * @return true, if is mapped
 		 */
