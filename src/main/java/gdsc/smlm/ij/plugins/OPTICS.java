@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.TreeSet;
 
+import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import gdsc.core.clustering.optics.ClusteringResult;
@@ -526,6 +527,7 @@ public class OPTICS implements PlugIn
 						opticsResult.extractDBSCANClustering((float) distance, work.inputSettings.core);
 					}
 					nClusters = opticsResult.getNumberOfClusters();
+					scrambleClusters(opticsResult);
 				}
 				// We created a new clustering
 				clusterCount++;
@@ -778,8 +780,8 @@ public class OPTICS implements PlugIn
 					{
 						if (maxLevel < cluster.getLevel())
 							maxLevel = cluster.getLevel();
-						if (maxClusterId < cluster.clusterId)
-							maxClusterId = cluster.clusterId;
+						if (maxClusterId < cluster.getClusterId())
+							maxClusterId = cluster.getClusterId();
 					}
 				}
 
@@ -825,7 +827,7 @@ public class OPTICS implements PlugIn
 					{
 						int level = cluster.getLevel();
 						double y = start - (maxLevel - level) * separation;
-						Color c = mapper.getColour(lut, cluster.clusterId);
+						Color c = mapper.getColour(lut, cluster.getClusterId());
 						//hsbvals = Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsbvals);
 						//System.out.printf("%s = %f\n", c.toString(), hsbvals[2]);
 						plot.setColor(c);
@@ -880,7 +882,7 @@ public class OPTICS implements PlugIn
 
 						for (OPTICSCluster cluster : clusters)
 						{
-							int value = (useLevel) ? cluster.getLevel() + 1 : cluster.clusterId;
+							int value = (useLevel) ? cluster.getLevel() + 1 : cluster.getClusterId();
 							Arrays.fill(profileColourFrom, cluster.start, cluster.end, value);
 							Arrays.fill(profileColourTo, cluster.start + 1, cluster.end + 1, value);
 						}
@@ -1180,7 +1182,7 @@ public class OPTICS implements PlugIn
 									ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
 									map = new float[max + 1];
 									for (OPTICSCluster c : allClusters)
-										map[c.clusterId] = c.getLevel() + 1;
+										map[c.getClusterId()] = c.getLevel() + 1;
 								}
 							}
 						}
@@ -1294,7 +1296,7 @@ public class OPTICS implements PlugIn
 									ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
 									Arrays.fill(map, 0);
 									for (OPTICSCluster c : allClusters)
-										map[c.clusterId] = c.getLevel() + 1;
+										map[c.getClusterId()] = c.getLevel() + 1;
 									max2 = Maths.max(map);
 								}
 							}
@@ -1386,7 +1388,7 @@ public class OPTICS implements PlugIn
 								ArrayList<OPTICSCluster> allClusters = opticsResult.getAllClusters();
 								Arrays.fill(map, 0);
 								for (OPTICSCluster c : allClusters)
-									map[c.clusterId] = c.getLevel() + 1;
+									map[c.getClusterId()] = c.getLevel() + 1;
 								max2 = Maths.max(map);
 							}
 						}
@@ -1619,6 +1621,13 @@ public class OPTICS implements PlugIn
 		return newD != oldD;
 	}
 
+	private void scrambleClusters(ClusteringResult result)
+	{
+		// Scramble to ensure adjacent clusters have different Ids.
+		// Same seed for consistency (e.g. in macros on the same data).
+		result.scrambleClusters(new Well19937c(1999)); 
+	}
+
 	/**
 	 * Find the clustering distance using a sorted profile of the KNN distance.
 	 *
@@ -1715,6 +1724,7 @@ public class OPTICS implements PlugIn
 				synchronized (dbscanResult)
 				{
 					dbscanResult.extractClusters(work.inputSettings.core);
+					scrambleClusters(dbscanResult);
 				}
 				// We created a new clustering
 				clusterCount++;
