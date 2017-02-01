@@ -540,6 +540,17 @@ public class OPTICSSettings implements Cloneable
 	 * Set to true to only show the top-level clusters, i.e. child clusters will be merged into their parents.
 	 */
 	public boolean topLevel = false;
+	/**
+	 * The upper limit for reachability. The first and last reachable points within a cluster must have a
+	 * reachability equal or below the upper limit. This prevents creating clusters with points associated above the
+	 * upper limit.
+	 */
+	public double upperLimit = 0;
+	/**
+	 * The lower limit for reachability. The first and last reachable points within a cluster must have a reachability
+	 * equal or above the lower limit. This prevents creating clusters that are only associated below the lower limit.
+	 */
+	public double lowerLimit = 0;
 
 	// Affect DBSCAN clustering
 

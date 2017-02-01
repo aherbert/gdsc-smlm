@@ -452,6 +452,10 @@ public class OPTICS implements PlugIn
 					return false;
 				if (current.topLevel != previous.topLevel)
 					return false;
+				if (current.upperLimit != previous.upperLimit)
+					return false;
+				if (current.lowerLimit != previous.lowerLimit)
+					return false;
 			}
 			else
 			{
@@ -475,15 +479,19 @@ public class OPTICS implements PlugIn
 				int nClusters = 0;
 				synchronized (opticsResult)
 				{
+					double nmPerPixel = getNmPerPixel(results);
+
 					if (work.inputSettings.getClusteringMode() == ClusteringMode.XI)
 					{
 						int options = (work.inputSettings.topLevel) ? OPTICSResult.XI_OPTION_TOP_LEVEL : 0;
+						// Always include these as they are ignored if invalid
+						options |= OPTICSResult.XI_OPTION_UPPER_LIMIT | OPTICSResult.XI_OPTION_LOWER_LIMIT;
+						opticsResult.setUpperLimit(work.inputSettings.upperLimit / nmPerPixel);
+						opticsResult.setLowerLimit(work.inputSettings.lowerLimit / nmPerPixel);
 						opticsResult.extractClusters(work.inputSettings.xi, options);
 					}
 					else
 					{
-						double nmPerPixel = getNmPerPixel(results);
-
 						double distance;
 						if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
 						{
@@ -802,32 +810,6 @@ public class OPTICS implements PlugIn
 					limits[1] *= 1.05;
 				}
 
-				double distance = -1;
-				if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN)
-				{
-					if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
-					{
-						if (work.inputSettings.clusteringDistance > 0)
-							distance = work.inputSettings.clusteringDistance;
-						else
-						{
-							OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
-							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
-									nmPerPixel;
-						}
-					}
-					else
-					{
-						// Ensure that the distance is valid
-						distance = opticsResult.generatingDistance * nmPerPixel;
-						if (work.inputSettings.clusteringDistance > 0)
-							distance = Math.min(work.inputSettings.clusteringDistance, distance);
-					}
-
-					if (distance > limits[1])
-						limits[1] = distance * 1.05;
-				}
-
 				// Draw the clusters using lines underneath
 				if (mode.isDrawClusters() && maxClusterId > 0)
 				{
@@ -854,6 +836,7 @@ public class OPTICS implements PlugIn
 
 				// Create the colour for each point on the line
 				int[] profileColour = new int[profile.length];
+				int[] profileColourFrom = new int[profile.length];
 
 				//plot.setColor(Color.black);
 				//plot.addPoints(order, profile, Plot.LINE);
@@ -869,7 +852,10 @@ public class OPTICS implements PlugIn
 						lut = clusterOrderLut;
 						mapper = new LUTHelper.NonZeroLUTMapper(0, profileColour.length - 1);
 						for (int i = 0; i < profileColour.length; i++)
+						{
 							profileColour[i] = mapper.map(i);
+							profileColourFrom[i] = profileColour[i];
+						}
 						// Ensure we correctly get colours for each value 
 						mapper = new LUTHelper.DefaultLUTMapper(0, 255);
 					}
@@ -890,8 +876,9 @@ public class OPTICS implements PlugIn
 
 						for (OPTICSCluster cluster : clusters)
 						{
-							Arrays.fill(profileColour, cluster.start, cluster.end + 1,
-									(useLevel) ? cluster.getLevel() + 1 : cluster.clusterId);
+							int value = (useLevel) ? cluster.getLevel() + 1 : cluster.clusterId;
+							Arrays.fill(profileColour, cluster.start, cluster.end + 1, value);
+							Arrays.fill(profileColourFrom, cluster.start, cluster.end + 1, value);
 						}
 					}
 				}
@@ -937,7 +924,6 @@ public class OPTICS implements PlugIn
 						double[] profile1 = Arrays.copyOfRange(profile, from, to);
 						plot.setColor(colors[profileColour[from]]);
 						plot.addPoints(order1, profile1, Plot.LINE);
-
 						from = i;
 					}
 				}
@@ -952,11 +938,49 @@ public class OPTICS implements PlugIn
 					plot.addPoints(order1, profile1, Plot.LINE);
 				}
 
-				// Add the DBSCAN clustering distance
+				// Add the clustering distance limits
+				double distance = -1, distance2 = -1;
+				if (inputSettings.getClusteringMode() == ClusteringMode.DBSCAN)
+				{
+					if (work.inputSettings.getOPTICSMode() == OPTICSMode.FAST_OPTICS)
+					{
+						if (work.inputSettings.clusteringDistance > 0)
+							distance = work.inputSettings.clusteringDistance;
+						else
+						{
+							OPTICSManager opticsManager = (OPTICSManager) work.settings.get(1);
+							distance = opticsManager.computeGeneratingDistance(work.inputSettings.minPoints) *
+									nmPerPixel;
+						}
+					}
+					else
+					{
+						// Ensure that the distance is valid
+						distance = opticsResult.generatingDistance * nmPerPixel;
+						if (work.inputSettings.clusteringDistance > 0)
+							distance = Math.min(work.inputSettings.clusteringDistance, distance);
+					}
+
+					if (distance > limits[1])
+						limits[1] = distance * 1.05;
+				}
+				else // Assume Optics Xi
+				{
+					if (work.inputSettings.upperLimit > 0)
+						distance = work.inputSettings.upperLimit;
+					if (work.inputSettings.lowerLimit > 0)
+						distance2 = work.inputSettings.lowerLimit;
+				}
+
 				if (distance > -1)
 				{
 					plot.setColor(Color.red);
 					plot.drawLine(1, distance, order.length, distance);
+				}
+				if (distance2 > -1)
+				{
+					plot.setColor(Color.magenta);
+					plot.drawLine(1, distance2, order.length, distance2);
 				}
 
 				Utils.display(title, plot);
@@ -1113,7 +1137,7 @@ public class OPTICS implements PlugIn
 				// Check if the image should be redrawn based on the clusters
 				if (mode.isRequiresClusters())
 					image = null;
-				
+
 				if (image == null)
 				{
 					// Display the results ...
@@ -1934,6 +1958,8 @@ public class OPTICS implements PlugIn
 					" controls the change in reachability (profile steepness) to define a cluster");
 			gd.addNumericField("Xi", inputSettings.xi, 4);
 			gd.addCheckbox("Top_clusters", inputSettings.topLevel);
+			gd.addNumericField("Upper_limit", inputSettings.upperLimit, 4);
+			gd.addNumericField("Lower_limit", inputSettings.lowerLimit, 4);
 			gd.addMessage(ClusteringMode.DBSCAN.toString() + " options:");
 			gd.addNumericField("Clustering_distance", inputSettings.clusteringDistance, 4);
 			gd.addCheckbox("Core_points", inputSettings.core);
@@ -2073,22 +2099,24 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 
-			inputSettings.minPoints = (int) gd.getNextNumber();
+			inputSettings.minPoints = (int) Math.abs(gd.getNextNumber());
 			inputSettings.setOPTICSMode(gd.getNextChoiceIndex());
-			inputSettings.numberOfSplitSets = (int) gd.getNextNumber();
+			inputSettings.numberOfSplitSets = (int) Math.abs(gd.getNextNumber());
 			if (extraOptions)
 			{
 				inputSettings.useRandomVectors = gd.getNextBoolean();
 				inputSettings.saveApproximateSets = gd.getNextBoolean();
 				inputSettings.setSampleMode(gd.getNextChoiceIndex());
 			}
-			inputSettings.generatingDistance = gd.getNextNumber();
+			inputSettings.generatingDistance = Math.abs(gd.getNextNumber());
 			inputSettings.setClusteringMode(gd.getNextChoiceIndex());
-			inputSettings.xi = gd.getNextNumber();
+			inputSettings.xi = Math.abs(gd.getNextNumber());
 			inputSettings.topLevel = gd.getNextBoolean();
-			inputSettings.clusteringDistance = gd.getNextNumber();
+			inputSettings.upperLimit = Math.abs(gd.getNextNumber());
+			inputSettings.lowerLimit = Math.abs(gd.getNextNumber());
+			inputSettings.clusteringDistance = Math.abs(gd.getNextNumber());
 			inputSettings.core = gd.getNextBoolean();
-			inputSettings.imageScale = gd.getNextNumber();
+			inputSettings.imageScale = Math.abs(gd.getNextNumber());
 			inputSettings.setImageMode((ImageMode) imageModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
@@ -2107,6 +2135,8 @@ public class OPTICS implements PlugIn
 			{
 				Parameters.isAboveZero("Xi", inputSettings.xi);
 				Parameters.isBelow("Xi", inputSettings.xi, 1);
+				if (inputSettings.upperLimit > 0)
+					Parameters.isAbove("Upper limit", inputSettings.upperLimit, inputSettings.lowerLimit);
 			}
 			catch (IllegalArgumentException ex)
 			{
@@ -2175,13 +2205,13 @@ public class OPTICS implements PlugIn
 				return false;
 			}
 
-			inputSettings.minPoints = (int) gd.getNextNumber();
-			inputSettings.fractionNoise = gd.getNextNumber() / 100;
-			inputSettings.samples = (int) gd.getNextNumber();
-			inputSettings.sampleFraction = gd.getNextNumber() / 100;
-			inputSettings.clusteringDistance = gd.getNextNumber();
+			inputSettings.minPoints = (int) Math.abs(gd.getNextNumber());
+			inputSettings.fractionNoise = Math.abs(gd.getNextNumber() / 100);
+			inputSettings.samples = (int) Math.abs(gd.getNextNumber());
+			inputSettings.sampleFraction = Math.abs(gd.getNextNumber() / 100);
+			inputSettings.clusteringDistance = Math.abs(gd.getNextNumber());
 			inputSettings.core = gd.getNextBoolean();
-			inputSettings.imageScale = gd.getNextNumber();
+			inputSettings.imageScale = Math.abs(gd.getNextNumber());
 			inputSettings.setImageMode((ImageMode) imageModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
