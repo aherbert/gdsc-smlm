@@ -820,11 +820,15 @@ public class OPTICS implements PlugIn
 					double start = -separation;
 
 					LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, maxClusterId);
+					//float[] hsbvals = null;
 					for (OPTICSCluster cluster : clusters)
 					{
 						int level = cluster.getLevel();
 						double y = start - (maxLevel - level) * separation;
-						plot.setColor(mapper.getColour(lut, cluster.clusterId));
+						Color c = mapper.getColour(lut, cluster.clusterId);
+						//hsbvals = Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsbvals);
+						//System.out.printf("%s = %f\n", c.toString(), hsbvals[2]);
+						plot.setColor(c);
 						plot.drawLine(cluster.start, y, cluster.end, y);
 					}
 
@@ -834,9 +838,10 @@ public class OPTICS implements PlugIn
 
 				plot.setLimits(1, order.length, limits[0], limits[1]);
 
-				// Create the colour for each point on the line
-				int[] profileColour = new int[profile.length];
+				// Create the colour for each point on the line:
+				// We draw lines between from and to of the same colour
 				int[] profileColourFrom = new int[profile.length];
+				int[] profileColourTo = new int[profile.length];
 
 				//plot.setColor(Color.black);
 				//plot.addPoints(order, profile, Plot.LINE);
@@ -850,11 +855,10 @@ public class OPTICS implements PlugIn
 					if (mode.isColourProfileByOrder())
 					{
 						lut = clusterOrderLut;
-						mapper = new LUTHelper.NonZeroLUTMapper(0, profileColour.length - 1);
-						for (int i = 0; i < profileColour.length; i++)
+						mapper = new LUTHelper.NonZeroLUTMapper(1, profileColourTo.length - 1);
+						for (int i = 1; i < profileColourTo.length; i++)
 						{
-							profileColour[i] = mapper.map(i);
-							profileColourFrom[i] = profileColour[i];
+							profileColourFrom[i - 1] = profileColourTo[i] = mapper.map(i);
 						}
 						// Ensure we correctly get colours for each value 
 						mapper = new LUTHelper.DefaultLUTMapper(0, 255);
@@ -877,8 +881,8 @@ public class OPTICS implements PlugIn
 						for (OPTICSCluster cluster : clusters)
 						{
 							int value = (useLevel) ? cluster.getLevel() + 1 : cluster.clusterId;
-							Arrays.fill(profileColour, cluster.start, cluster.end + 1, value);
-							Arrays.fill(profileColourFrom, cluster.start, cluster.end + 1, value);
+							Arrays.fill(profileColourFrom, cluster.start, cluster.end, value);
+							Arrays.fill(profileColourTo, cluster.start + 1, cluster.end + 1, value);
 						}
 					}
 				}
@@ -889,12 +893,14 @@ public class OPTICS implements PlugIn
 						// Only do top level clusters
 						if (cluster.getLevel() != 0)
 							continue;
-						Arrays.fill(profileColour, cluster.start, cluster.end + 1, 1);
+						int value = 1;
+						Arrays.fill(profileColourFrom, cluster.start, cluster.end, value);
+						Arrays.fill(profileColourTo, cluster.start + 1, cluster.end + 1, value);
 					}
 				}
 
 				// Now draw the line
-				int maxColour = Maths.max(profileColour);
+				int maxColour = Maths.max(profileColourTo);
 				if (mapper == null)
 					// Make zero black
 					mapper = new LUTHelper.NonZeroLUTMapper(1, maxColour);
@@ -913,28 +919,30 @@ public class OPTICS implements PlugIn
 				if (colors[0] == null)
 					colors[0] = Color.BLACK;
 
+				// We draw lines between from and to of the same colour
 				int from = 0;
-				for (int i = 1; i < profileColour.length; i++)
+				int to = 1;
+				int limit = profileColourTo.length - 1;
+				while (to < profileColourTo.length)
 				{
-					if (profileColour[from] != profileColour[i])
-					{
-						// Draw the line on the plot
-						int to = i + 1;
-						double[] order1 = Arrays.copyOfRange(order, from, to);
-						double[] profile1 = Arrays.copyOfRange(profile, from, to);
-						plot.setColor(colors[profileColour[from]]);
-						plot.addPoints(order1, profile1, Plot.LINE);
-						from = i;
-					}
+					while (to < limit && profileColourFrom[from] == profileColourTo[to + 1])
+						to++;
+
+					// Draw the line on the plot
+					double[] order1 = Arrays.copyOfRange(order, from, to + 1);
+					double[] profile1 = Arrays.copyOfRange(profile, from, to + 1);
+					plot.setColor(colors[profileColourFrom[from]]);
+					plot.addPoints(order1, profile1, Plot.LINE);
+					from = to++;
 				}
 
 				// Draw the final line
-				if (from != profileColour.length - 1)
+				if (from != limit)
 				{
-					int to = profileColour.length;
+					to = limit;
 					double[] order1 = Arrays.copyOfRange(order, from, to);
 					double[] profile1 = Arrays.copyOfRange(profile, from, to);
-					plot.setColor(colors[profileColour[from]]);
+					plot.setColor(colors[profileColourFrom[from]]);
 					plot.addPoints(order1, profile1, Plot.LINE);
 				}
 
