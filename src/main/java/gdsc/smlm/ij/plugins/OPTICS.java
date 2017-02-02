@@ -1006,7 +1006,8 @@ public class OPTICS implements PlugIn
 					plot.drawLine(1, distance2, order.length, distance2);
 				}
 
-				Utils.display(title, plot);
+				// Q. Can we keep the current user zoom level?
+				Utils.display(title, plot, true);
 			}
 			else
 			{
