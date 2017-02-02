@@ -48,12 +48,12 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.OPTICSSettings;
-import gdsc.smlm.ij.settings.OPTICSSettings.OPTICSMode;
-import gdsc.smlm.ij.settings.OPTICSSettings.OutlineMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.ClusteringMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.ImageMode;
-import gdsc.smlm.ij.settings.OPTICSSettings.SpanningTreeMode;
+import gdsc.smlm.ij.settings.OPTICSSettings.OPTICSMode;
+import gdsc.smlm.ij.settings.OPTICSSettings.OutlineMode;
 import gdsc.smlm.ij.settings.OPTICSSettings.PlotMode;
+import gdsc.smlm.ij.settings.OPTICSSettings.SpanningTreeMode;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -730,8 +730,6 @@ public class OPTICS implements PlugIn
 
 	private class ReachabilityResultsWorker extends Worker
 	{
-		// TODO - options to colour the reachability plot by the cluster depth
-
 		@Override
 		boolean equals(OPTICSSettings current, OPTICSSettings previous)
 		{
@@ -835,16 +833,17 @@ public class OPTICS implements PlugIn
 					double start = -separation;
 
 					LUTMapper mapper = new LUTHelper.NonZeroLUTMapper(1, maxClusterId);
-					//float[] hsbvals = null;
 					for (OPTICSCluster cluster : clusters)
 					{
 						int level = cluster.getLevel();
-						double y = start - (maxLevel - level) * separation;
+						float y = (float) (start - (maxLevel - level) * separation);
 						Color c = mapper.getColour(lut, cluster.getClusterId());
-						//hsbvals = Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsbvals);
-						//System.out.printf("%s = %f\n", c.toString(), hsbvals[2]);
 						plot.setColor(c);
-						plot.drawLine(cluster.start, y, cluster.end, y);
+						//plot.drawLine(cluster.start, y, cluster.end, y);
+						// Create as a line. This allows the plot to reset the range to the full data set
+						float[] xx = new float[] { cluster.start, cluster.end };
+						float[] yy = new float[] { y, y };
+						plot.addPoints(xx, yy, Plot.LINE);
 					}
 
 					// Update the limits if we are plotting lines underneath for the clusters
@@ -1006,8 +1005,8 @@ public class OPTICS implements PlugIn
 					plot.drawLine(1, distance2, order.length, distance2);
 				}
 
-				// Keep the current user zoom level
-				Utils.display(title, plot, true);
+				// Preserve current limits (but not y-min so the clusters profile can be redrawn)
+				Utils.display(title, plot, Utils.PRESERVE_X_MIN | Utils.PRESERVE_X_MAX | Utils.PRESERVE_Y_MAX);
 			}
 			else
 			{
@@ -1519,21 +1518,27 @@ public class OPTICS implements PlugIn
 		private int getDisplayFlags(OPTICSSettings inputSettings)
 		{
 			int displayFlags = 0;
-			if (inputSettings.getImageMode().canBeWeighted())
+			ImageMode imageMode = inputSettings.getImageMode();
+			if (imageMode.canBeWeighted())
 			{
 				if (inputSettings.weighted)
 					displayFlags |= IJImagePeakResults.DISPLAY_WEIGHTED;
 				if (inputSettings.equalised)
 					displayFlags |= IJImagePeakResults.DISPLAY_EQUALIZED;
 			}
-			if (inputSettings.getImageMode() == ImageMode.CLUSTER_ID)
+
+			if (imageMode == ImageMode.CLUSTER_ID)
 				displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
-			else if (inputSettings.getImageMode() == ImageMode.CLUSTER_DEPTH ||
-					inputSettings.getImageMode() == ImageMode.CLUSTER_ORDER ||
-					inputSettings.getImageMode() == ImageMode.LOOP)
+			else if (imageMode == ImageMode.CLUSTER_DEPTH || imageMode == ImageMode.CLUSTER_ORDER ||
+					imageMode == ImageMode.LOOP)
 				displayFlags = IJImagePeakResults.DISPLAY_MAX;
-			if (inputSettings.getImageMode().isMapped())
+
+			if (imageMode.isMapped())
+			{
 				displayFlags |= IJImagePeakResults.DISPLAY_MAPPED;
+				if (imageMode == ImageMode.LOOP)
+					displayFlags |= IJImagePeakResults.DISPLAY_MAP_ZERO;
+			}
 			return displayFlags;
 		}
 	}
