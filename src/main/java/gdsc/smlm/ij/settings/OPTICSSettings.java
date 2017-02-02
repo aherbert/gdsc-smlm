@@ -422,14 +422,14 @@ public class OPTICSSettings implements Cloneable
 		COLOURED_BY_DEPTH {
 			@Override
 			public String getName() { return "Coloured by depth"; };
-			@Override
-			public boolean isColourByDepth() { return true; }
 		},
 		COLOURED_BY_ORDER {
 			@Override
 			public String getName() { return "Coloured by order"; };
+		},
+		COLOURED_BY_LOOP {
 			@Override
-			public boolean isColourByOrder() { return true; }
+			public String getName() { return "Coloured by LoOP"; };
 		},
 		OFF {
 			@Override
@@ -452,22 +452,6 @@ public class OPTICSSettings implements Cloneable
 		public boolean isSpanningTree()
 		{
 			return true;
-		}
-
-		/**
-		 * @return True if the spanning tree should be coloured using the cluster depth
-		 */
-		public boolean isColourByDepth()
-		{
-			return false;
-		}
-
-		/**
-		 * @return True if the spanning tree should be coloured using the cluster order
-		 */
-		public boolean isColourByOrder()
-		{
-			return false;
 		}
 
 		@Override

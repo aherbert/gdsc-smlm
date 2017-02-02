@@ -92,10 +92,10 @@ public class OPTICS implements PlugIn
 	private static LUT clusterDepthLut;
 	private static LUT clusterOrderLut;
 	private static LUT loopLut;
-	static 
+	static
 	{
 		valueLut = LUTHelper.createLUT(LutColour.FIRE);
-		
+
 		// Need to be able to see all colours against white (plot) or black (image) background
 		LUT fireGlow = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
 		// Clusters are scrambled so use a LUT with colours that are visible easily visible on black/white.
@@ -103,7 +103,7 @@ public class OPTICS implements PlugIn
 		clusterLut = LUTHelper.getColorModel();
 		clusterDepthLut = fireGlow;
 		clusterOrderLut = fireGlow;
-		
+
 		// This is only used on the image so can include white
 		loopLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
 	}
@@ -1006,7 +1006,7 @@ public class OPTICS implements PlugIn
 					plot.drawLine(1, distance2, order.length, distance2);
 				}
 
-				// Q. Can we keep the current user zoom level?
+				// Keep the current user zoom level
 				Utils.display(title, plot, true);
 			}
 			else
@@ -1103,13 +1103,17 @@ public class OPTICS implements PlugIn
 				image = null;
 				result = false;
 			}
-			if (requiresLoop(current) && (current.minPoints != lastMinPoints || (extraOptions && current.lambda != lastLambda)))
+			if (requiresLoop(current) &&
+					(current.minPoints != lastMinPoints || (extraOptions && current.lambda != lastLambda)))
 			{
 				// We can only cache the loop values if the minPts is the same
 				loop = null;
-				// We must rebuild the image 
 				if (current.getImageMode() == ImageMode.LOOP)
+					// We must rebuild the image
 					image = null;
+				if (current.getSpanningTreeMode() == SpanningTreeMode.COLOURED_BY_LOOP)
+					// We must rebuild the outline
+					outline = null;
 				result = false;
 			}
 			return result;
@@ -1117,7 +1121,8 @@ public class OPTICS implements PlugIn
 
 		private boolean requiresLoop(OPTICSSettings settings)
 		{
-			return settings.getImageMode() == ImageMode.LOOP;
+			return settings.getImageMode() == ImageMode.LOOP ||
+					settings.getSpanningTreeMode() == SpanningTreeMode.COLOURED_BY_LOOP;
 		}
 
 		@Override
@@ -1390,11 +1395,11 @@ public class OPTICS implements PlugIn
 
 						LUT lut = clusterLut;
 
-						if (lastSpanningTreeMode.isColourByOrder())
+						if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER)
 						{
 							lut = clusterOrderLut;
 						}
-						else if (lastSpanningTreeMode.isColourByDepth() && max == max2)
+						else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_DEPTH && max == max2)
 						{
 							lut = clusterDepthLut;
 							synchronized (clusteringResult)
@@ -1405,6 +1410,10 @@ public class OPTICS implements PlugIn
 									map[c.getClusterId()] = c.getLevel() + 1;
 								max2 = Maths.max(map);
 							}
+						}
+						else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP)
+						{
+							lut = loopLut;
 						}
 
 						// Get the coordinates
@@ -1429,16 +1438,25 @@ public class OPTICS implements PlugIn
 						// Create a colour to match the LUT of the image
 						LUTMapper mapper;
 
-						boolean useMap;
-						if (lastSpanningTreeMode.isColourByOrder())
+						boolean useMap = false, useLoop = false;
+						if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER)
 						{
 							// We will use the order for the colour
-							useMap = false;
 							mapper = new LUTHelper.DefaultLUTMapper(0, 255);
 							colors = new Color[256];
 							for (int c = 1; c < colors.length; c++)
 								colors[c] = mapper.getColour(lut, c);
 							mapper = new LUTHelper.NonZeroLUTMapper(1, clusters.length);
+						}
+						else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP)
+						{
+							// We will use the LoOP for the colour
+							useLoop = true;
+							mapper = new LUTHelper.DefaultLUTMapper(0, 255);
+							colors = new Color[256];
+							for (int c = 1; c < colors.length; c++)
+								colors[c] = mapper.getColour(lut, c);
+							mapper = new LUTHelper.NonZeroLUTMapper(0, 1);
 						}
 						else
 						{
@@ -1470,6 +1488,8 @@ public class OPTICS implements PlugIn
 							Line roi = new Line(xi, yi, xj, yj);
 							if (useMap)
 								roi.setStrokeColor(colors[map[clusters[i]]]);
+							else if (useLoop)
+								roi.setStrokeColor(colors[mapper.map(loop[i])]);
 							else
 								roi.setStrokeColor(colors[mapper.map(order[i])]);
 							spanningTree.add(roi);
@@ -1639,7 +1659,7 @@ public class OPTICS implements PlugIn
 	{
 		// Scramble to ensure adjacent clusters have different Ids.
 		// Same seed for consistency (e.g. in macros on the same data).
-		result.scrambleClusters(new Well19937c(1999)); 
+		result.scrambleClusters(new Well19937c(1999));
 	}
 
 	/**
@@ -2255,7 +2275,7 @@ public class OPTICS implements PlugIn
 			if (extraOptions)
 			{
 				inputSettings.lambda = Math.abs(gd.getNextNumber());
-			}	
+			}
 			inputSettings.setOutlineMode((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]);
 			boolean preview = gd.getNextBoolean();
 			if (extraOptions)
