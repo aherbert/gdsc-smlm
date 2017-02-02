@@ -81,6 +81,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * This cannot be used with {@link #DISPLAY_EQUALIZED}.
 	 */
 	public static final int DISPLAY_MAPPED = 256;
+	/**
+	 * Mapped even zero to 1-255 in the 8-bit displayed image. -0.0f is mapped to 0 in the LUT.
+	 * <p>
+	 * This cannot be used with {@link #DISPLAY_EQUALIZED}.
+	 */
+	public static final int DISPLAY_MAP_ZERO = 512;
+	
+	/** The empty value. Use negative zero so that we know when positive zero has been written to the array. */
+	private final double EMPTY = -0.0;
 
 	protected final String title;
 	protected final int imageWidth;
@@ -178,6 +187,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		nextPaintTime = System.currentTimeMillis() + repaintDelay;
 		imageLock = false;
 		data = new double[w * h];
+		resetData();
 		imp = WindowManager.getImage(title);
 		currentFrame = 1;
 
@@ -291,7 +301,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// Special float processor that maps all values to 1-255 in the LUT.
 			// Zero is mapped to 0 in the LUT.
 			if ((displayFlags & DISPLAY_MAPPED) != 0)
-				return new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
+			{
+				MappedFloatProcessor fp = new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
+				if ((displayFlags & DISPLAY_MAP_ZERO) != 0)
+				{
+					fp.setZero(-0.0f);
+				}
+				return fp;
+			}
 			
 			return new FloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
 		}
@@ -937,10 +954,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				imp.setStack(stack);
 				imp.setSlice(stack.getSize());
 
-				// Reset the data
-				Arrays.fill(data, 0);
+				resetData();
 			}
 		}
+	}
+
+	private void resetData()
+	{
+		Arrays.fill(data, EMPTY);
 	}
 
 	/*
