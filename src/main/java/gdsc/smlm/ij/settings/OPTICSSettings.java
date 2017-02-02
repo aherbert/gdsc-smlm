@@ -611,6 +611,11 @@ public class OPTICSSettings implements Cloneable
 	 */
 	private SpanningTreeMode spanningTreeMode = SpanningTreeMode.OFF;
 
+	/** 
+	 * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP). 
+	 */
+	public double lambda = 3;
+
 	public OPTICSMode getOPTICSMode()
 	{
 		return opticsMode;

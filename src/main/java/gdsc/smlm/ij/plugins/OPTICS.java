@@ -87,13 +87,26 @@ public class OPTICS implements PlugIn
 	private static final String TITLE_OPTICS = "OPTICS";
 	private static final String TITLE_DBSCAN = "DBSCAN";
 
-	private static LUT clusterLut = LUTHelper.getColorModel();
-	private static LUT valueLut = LUTHelper.createLUT(LutColour.FIRE);
-	// Need to be able to see all colours against white (plot) or black (image) background 
-	//private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
-	private static LUT clusterDepthLut = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
-	private static LUT clusterOrderLut = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
-	private static LUT loopLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
+	private static LUT clusterLut;
+	private static LUT valueLut;
+	private static LUT clusterDepthLut;
+	private static LUT clusterOrderLut;
+	private static LUT loopLut;
+	static 
+	{
+		valueLut = LUTHelper.createLUT(LutColour.FIRE);
+		
+		// Need to be able to see all colours against white (plot) or black (image) background
+		LUT fireGlow = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
+		// Clusters are scrambled so use a LUT with colours that are visible easily visible on black/white.
+		// Note: The colours returned by LUTHelper.getColorModel() can be close to black.
+		clusterLut = LUTHelper.getColorModel();
+		clusterDepthLut = fireGlow;
+		clusterOrderLut = fireGlow;
+		
+		// This is only used on the image so can include white
+		loopLut = LUTHelper.createLUT(LutColour.FIRE_LIGHT, true);
+	}
 
 	private String TITLE;
 	/**
@@ -1055,6 +1068,7 @@ public class OPTICS implements PlugIn
 		Overlay outline = null;
 		SpanningTreeMode lastSpanningTreeMode = null;
 		Overlay spanningTree = null;
+		double lastLambda = 0;
 		int lastMinPoints;
 		float[] loop = null;
 
@@ -1088,7 +1102,7 @@ public class OPTICS implements PlugIn
 				image = null;
 				result = false;
 			}
-			if (requiresLoop(current) && current.minPoints != lastMinPoints)
+			if (requiresLoop(current) && (current.minPoints != lastMinPoints || (extraOptions && current.lambda != lastLambda)))
 			{
 				// We can only cache the loop values if the minPts is the same
 				loop = null;
@@ -1190,10 +1204,9 @@ public class OPTICS implements PlugIn
 						{
 							synchronized (opticsManager)
 							{
-								// TODO - Add as an option
-								double lambda = 2;
+								lastLambda = (extraOptions) ? work.inputSettings.lambda : 3;
 								lastMinPoints = work.inputSettings.minPoints;
-								loop = opticsManager.loop(lastMinPoints, lambda, true);
+								loop = opticsManager.loop(lastMinPoints, lastLambda, true);
 							}
 							float[] limits = Maths.limits(loop);
 							Utils.log("LoOP range: %s - %s", Utils.rounded(limits[0]), Utils.rounded(limits[1]));
@@ -1997,9 +2010,10 @@ public class OPTICS implements PlugIn
 
 		gd.addCheckboxGroup(1, 2, new String[] { "Weighted", "Equalised" },
 				new boolean[] { inputSettings.weighted, inputSettings.equalised }, new String[] { "Image" });
-		//gd.addCheckbox("Weighted", inputSettings.weighted);
-		//gd.addCheckbox("Equalised", inputSettings.equalised);
-
+		if (extraOptions)
+		{
+			gd.addNumericField("LoOP_lambda", inputSettings.lambda, 4);
+		}
 		TreeSet<OutlineMode> outlineModeSet = new TreeSet<OutlineMode>();
 		outlineModeSet.addAll(Arrays.asList(OutlineMode.values()));
 		if (isDBSCAN)
@@ -2138,6 +2152,10 @@ public class OPTICS implements PlugIn
 			inputSettings.setImageMode((ImageMode) imageModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
+			if (extraOptions)
+			{
+				inputSettings.lambda = Math.abs(gd.getNextNumber());
+			}
 			inputSettings.setOutlineMode((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.setSpanningTreeMode(gd.getNextChoiceIndex());
 			inputSettings.setPlotMode(gd.getNextChoiceIndex());
@@ -2233,6 +2251,10 @@ public class OPTICS implements PlugIn
 			inputSettings.setImageMode((ImageMode) imageModeArray[gd.getNextChoiceIndex()]);
 			inputSettings.weighted = gd.getNextBoolean();
 			inputSettings.equalised = gd.getNextBoolean();
+			if (extraOptions)
+			{
+				inputSettings.lambda = Math.abs(gd.getNextNumber());
+			}	
 			inputSettings.setOutlineMode((OutlineMode) outlineModeArray[gd.getNextChoiceIndex()]);
 			boolean preview = gd.getNextBoolean();
 			if (extraOptions)
