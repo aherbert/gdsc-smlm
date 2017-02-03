@@ -1527,11 +1527,11 @@ public class OPTICS implements PlugIn
 					displayFlags |= IJImagePeakResults.DISPLAY_EQUALIZED;
 			}
 
-			if (imageMode == ImageMode.CLUSTER_ID)
-				displayFlags = IJImagePeakResults.DISPLAY_REPLACE;
-			else if (imageMode == ImageMode.CLUSTER_DEPTH || imageMode == ImageMode.CLUSTER_ORDER ||
-					imageMode == ImageMode.LOOP)
+			if (imageMode == ImageMode.CLUSTER_ID || imageMode == ImageMode.CLUSTER_DEPTH ||
+					imageMode == ImageMode.CLUSTER_ORDER || imageMode == ImageMode.LOOP)
+			{
 				displayFlags = IJImagePeakResults.DISPLAY_MAX;
+			}
 
 			if (imageMode.isMapped())
 			{
