@@ -540,6 +540,7 @@ public class OPTICS implements PlugIn
 						opticsResult.extractDBSCANClustering((float) distance, work.inputSettings.core);
 					}
 					nClusters = opticsResult.getNumberOfClusters();
+					// We must scramble after extracting the clusters since the cluster Ids have been rewritten
 					scrambleClusters(opticsResult);
 				}
 				// We created a new clustering
@@ -1733,6 +1734,8 @@ public class OPTICS implements PlugIn
 			synchronized (opticsManager)
 			{
 				dbscanResult = opticsManager.dbscan((float) clusteringDistance, minPts);
+				// Scramble only needs to be done once as the cluster Ids are not re-allocated when extracting the clusters
+				scrambleClusters(dbscanResult);
 			}
 			// It may be null if cancelled. However return null Work will close down the next thread
 			return new Work(work.inputSettings, results, opticsManager, dbscanResult);
@@ -1763,7 +1766,6 @@ public class OPTICS implements PlugIn
 				synchronized (dbscanResult)
 				{
 					dbscanResult.extractClusters(work.inputSettings.core);
-					scrambleClusters(dbscanResult);
 				}
 				// We created a new clustering
 				clusterCount++;
@@ -2032,7 +2034,7 @@ public class OPTICS implements PlugIn
 		}
 		imageModeArray = imageModeSet.toArray();
 		String[] imageModes = SettingsManager.getNames(imageModeArray);
-		gd.addChoice("Image_mode", imageModes, imageModes[inputSettings.getImageModeOridinal()]);
+		gd.addChoice("Image_mode", imageModes, inputSettings.getImageMode().toString());
 
 		gd.addCheckboxGroup(1, 2, new String[] { "Weighted", "Equalised" },
 				new boolean[] { inputSettings.weighted, inputSettings.equalised }, new String[] { "Image" });
@@ -2048,7 +2050,7 @@ public class OPTICS implements PlugIn
 		}
 		outlineModeArray = outlineModeSet.toArray();
 		String[] outlineModes = SettingsManager.getNames(outlineModeArray);
-		gd.addChoice("Outline", outlineModes, outlineModes[inputSettings.getOutlineModeOridinal()]);
+		gd.addChoice("Outline", outlineModes, inputSettings.getOutlineMode().toString());
 
 		if (!isDBSCAN)
 		{
