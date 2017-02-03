@@ -67,6 +67,7 @@ import ij.gui.Line;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
+import ij.gui.Plot2;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
@@ -771,7 +772,7 @@ public class OPTICS implements PlugIn
 
 				double[] order = Utils.newArray(profile.length, 1.0, 1.0);
 				String title = TITLE + " Reachability Distance";
-				Plot plot = new Plot(title, "Order", "Reachability" + units);
+				Plot2 plot = new Plot2(title, "Order", "Reachability" + units);
 				double[] limits = Maths.limits(profile);
 				// plot to zero
 				limits[0] = 0;
@@ -1590,9 +1591,13 @@ public class OPTICS implements PlugIn
 
 			double nmPerPixel = getNmPerPixel(results);
 
+			// Flag indicating that the scale can be kept on a new plot
+			int preserve = Utils.PRESERVE_ALL;
+			
 			// Create a profile of the K-Nearest Neighbour distances
 			if (profile == null)
 			{
+				preserve = 0;
 				synchronized (opticsManager)
 				{
 					int samples = work.inputSettings.samples;
@@ -1620,7 +1625,7 @@ public class OPTICS implements PlugIn
 
 			double[] order = Utils.newArray(profile.length, 1.0, 1.0);
 			String title = TITLE + " KNN Distance";
-			Plot plot = new Plot(title, "Sample", k + "-NN Distance" + units);
+			Plot2 plot = new Plot2(title, "Sample", k + "-NN Distance" + units);
 			double[] limits = new double[] { profile[profile.length - 1], profile[0] };
 
 			plot.setLimits(1, order.length, limits[0], limits[1] * 1.05);
@@ -1638,7 +1643,7 @@ public class OPTICS implements PlugIn
 			plot.setColor(Color.blue);
 			plot.drawDottedLine(1, distance, order.length, distance, 2);
 
-			Utils.display(title, plot);
+			Utils.display(title, plot, preserve);
 
 			if (work.inputSettings.clusteringDistance <= 0)
 			{
