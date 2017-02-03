@@ -1593,7 +1593,7 @@ public class OPTICS implements PlugIn
 
 			// Flag indicating that the scale can be kept on a new plot
 			int preserve = Utils.PRESERVE_ALL;
-			
+
 			// Create a profile of the K-Nearest Neighbour distances
 			if (profile == null)
 			{
@@ -1635,8 +1635,11 @@ public class OPTICS implements PlugIn
 
 			// Add the DBSCAN clustering distance
 			double distance = work.inputSettings.clusteringDistance;
-			plot.setColor(Color.red);
-			plot.drawLine(1, distance, order.length, distance);
+			if (distance > 0)
+			{
+				plot.setColor(Color.red);
+				plot.drawLine(1, distance, order.length, distance);
+			}
 
 			// Find the clustering distance using a % noise in the KNN distance samples
 			distance = findClusteringDistance(profile, fractionNoise);
@@ -1645,7 +1648,7 @@ public class OPTICS implements PlugIn
 
 			Utils.display(title, plot, preserve);
 
-			if (work.inputSettings.clusteringDistance <= 0)
+			if (work.inputSettings.clusteringDistance == 0)
 			{
 				// Set this distance into the settings if there is no clustering distance
 				// Use a negative value to show it is an auto-distance
@@ -1659,9 +1662,11 @@ public class OPTICS implements PlugIn
 
 	private boolean clusteringDistanceChange(double newD, double oldD)
 	{
-		if (newD <= 0 && oldD <= 0)
-			// Auto-distance
-			return false;
+		// The input distance can never be below zero due to the use of abs.
+		// If the auto-distance changes then we want to rerun DBSCAN so remove this check.
+		//if (newD <= 0 && oldD <= 0)
+		//	// Auto-distance
+		//	return false;
 
 		return newD != oldD;
 	}
