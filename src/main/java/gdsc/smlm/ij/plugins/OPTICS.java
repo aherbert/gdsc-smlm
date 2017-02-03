@@ -100,7 +100,7 @@ public class OPTICS implements PlugIn
 		LUT fireGlow = LUTHelper.createLUT(LutColour.FIRE_GLOW, true);
 		// Clusters are scrambled so use a LUT with colours that are visible easily visible on black/white.
 		// Note: The colours returned by LUTHelper.getColorModel() can be close to black.
-		clusterLut = LUTHelper.getColorModel();
+		clusterLut = LUTHelper.createLUT(LutColour.PIMP_LIGHT, true);
 		clusterDepthLut = fireGlow;
 		clusterOrderLut = fireGlow;
 
