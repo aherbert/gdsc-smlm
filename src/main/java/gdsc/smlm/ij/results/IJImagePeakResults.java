@@ -6,6 +6,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.MappedImageStack;
 import ij.WindowManager;
 import ij.gui.Roi;
 import ij.measure.Calibration;
@@ -76,20 +77,22 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 */
 	public static final int DISPLAY_NEGATIVES = 128;
 	/**
-	 * Mapped all non-zero values to 1-255 in the 8-bit displayed image. Zero is mapped to 0 in the LUT.
+	 * Mapped all non-zero values to 1-255 in the 8-bit displayed image. Zero and below are mapped to 0 in the LUT.
 	 * <p>
-	 * This cannot be used with {@link #DISPLAY_EQUALIZED}.
+	 * This cannot be used with {@link #DISPLAY_EQUALIZED} or {@link #DISPLAY_NEGATIVES}.
 	 */
 	public static final int DISPLAY_MAPPED = 256;
 	/**
-	 * Mapped even zero to 1-255 in the 8-bit displayed image. -0.0f is mapped to 0 in the LUT.
+	 * Mapped even zero to 1-255 in the 8-bit displayed image. -0.0f and below is mapped to 0 in the LUT. This can be
+	 * used for example to display the result of a probability calculation where 0 is a valid display value but must be
+	 * distinguished from pixels that have no value computed.
 	 * <p>
-	 * This cannot be used with {@link #DISPLAY_EQUALIZED}.
+	 * Must be used with {@link #DISPLAY_MAPPED}.
 	 */
 	public static final int DISPLAY_MAP_ZERO = 512;
-	
-	/** The empty value. Use negative zero so that we know when positive zero has been written to the array. */
-	private final double EMPTY = -0.0;
+
+	/** The empty value. */
+	private double EMPTY = 0.0;
 
 	protected final String title;
 	protected final int imageWidth;
@@ -187,6 +190,11 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		nextPaintTime = System.currentTimeMillis() + repaintDelay;
 		imageLock = false;
 		data = new double[w * h];
+
+		// Use negative zero so that we know when positive zero has been written to the array.
+		if ((displayFlags & (DISPLAY_MAPPED | DISPLAY_MAP_ZERO)) == (DISPLAY_MAPPED | DISPLAY_MAP_ZERO))
+			EMPTY = -0.0f;
+
 		resetData();
 		imp = WindowManager.getImage(title);
 		currentFrame = 1;
@@ -209,7 +217,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		{
 			// Copy the lookup table
 			ip.setColorModel(imp.getProcessor().getColorModel());
-			ImageStack stack = new ImageStack(w, h);
+			ImageStack stack = createNewImageStack(w, h);
 			stack.addSlice(null, ip);
 			// If resizing then remove adornments
 			if (stack.getWidth() != imp.getWidth() || stack.getHeight() != imp.getHeight())
@@ -284,6 +292,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			displayFlags &= ~DISPLAY_WEIGHTED;
 			displayFlags |= DISPLAY_REPLACE;
 		}
+		
+		// Mapped values (above zero) cannot use equalisation or be negative
+		if ((displayFlags & DISPLAY_MAPPED) != 0)
+		{
+			displayFlags &= ~DISPLAY_EQUALIZED;
+			displayFlags &= ~DISPLAY_NEGATIVES;
+		}
 	}
 
 	private ImageProcessor createNewProcessor(int imageWidth, int imageHeight)
@@ -297,21 +312,29 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		else
 		{
 			pixels = new float[data.length];
-			
+
 			// Special float processor that maps all values to 1-255 in the LUT.
 			// Zero is mapped to 0 in the LUT.
 			if ((displayFlags & DISPLAY_MAPPED) != 0)
 			{
 				MappedFloatProcessor fp = new MappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
-				if ((displayFlags & DISPLAY_MAP_ZERO) != 0)
-				{
-					fp.setZero(-0.0f);
-				}
+				fp.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
 				return fp;
 			}
-			
+
 			return new FloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
 		}
+	}
+
+	private ImageStack createNewImageStack(int w, int h)
+	{
+		if ((displayFlags & DISPLAY_MAPPED) != 0)
+		{
+			MappedImageStack stack = new MappedImageStack(w, h);
+			stack.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
+			return stack;
+		}
+		return new ImageStack(w, h);
 	}
 
 	/**
