@@ -595,13 +595,15 @@ public class OPTICSSettings implements Cloneable
 	 */
 	private SpanningTreeMode spanningTreeMode = SpanningTreeMode.OFF;
 
-	/** 
-	 * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP). 
+	/**
+	 * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
 	 */
 	public double lambda = 3;
 
 	public OPTICSMode getOPTICSMode()
 	{
+		if (opticsMode == null)
+			setOPTICSMode(0);
 		return opticsMode;
 	}
 
@@ -627,6 +629,8 @@ public class OPTICSSettings implements Cloneable
 
 	public ImageMode getImageMode()
 	{
+		if (imageMode == null)
+			setImageMode(0);
 		return imageMode;
 	}
 
@@ -652,6 +656,8 @@ public class OPTICSSettings implements Cloneable
 
 	public SampleMode getSampleMode()
 	{
+		if (sampleMode == null)
+			setSampleMode(0);
 		return sampleMode;
 	}
 
@@ -677,6 +683,8 @@ public class OPTICSSettings implements Cloneable
 
 	public ClusteringMode getClusteringMode()
 	{
+		if (clusteringMode == null)
+			setClusteringMode(0);
 		return clusteringMode;
 	}
 
@@ -702,6 +710,8 @@ public class OPTICSSettings implements Cloneable
 
 	public PlotMode getPlotMode()
 	{
+		if (plotMode == null)
+			setPlotMode(0);
 		return plotMode;
 	}
 
@@ -727,6 +737,8 @@ public class OPTICSSettings implements Cloneable
 
 	public OutlineMode getOutlineMode()
 	{
+		if (outlineMode == null)
+			setOutlineMode(0);
 		return outlineMode;
 	}
 
@@ -752,6 +764,8 @@ public class OPTICSSettings implements Cloneable
 
 	public SpanningTreeMode getSpanningTreeMode()
 	{
+		if (spanningTreeMode == null)
+			setSpanningTreeMode(0);
 		return spanningTreeMode;
 	}
 
