@@ -76,7 +76,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				// We assume xi is positive
 				if (xi != 0)
 					// Penalise the chi-squared value by assuming fi is a very small positive value
-					chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+					chisq += (-xi - xi * LOG_FOR_MIN);
 
 				// We ignore this contribution to the gradient for stability
 				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
@@ -85,9 +85,9 @@ public class MLEGradientCalculator extends GradientCalculator
 			{
 				// We assume y[i] is positive
 				if (xi == 0)
-					chisq += 2 * fi;
+					chisq += fi;
 				else
-					chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 
 				compute(alpha, beta, dfi_da, fi, xi);
 			}
@@ -95,7 +95,8 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		symmetric(alpha);
 
-		return checkGradients(alpha, beta, nparams, chisq);
+		// Move the factor of 2 to the end		
+		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
 	/**
@@ -118,6 +119,15 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		func.initialise(a);
 
+		int[] indices = new int[nparams];
+		int nnparams = 0;
+		for (int j = 0; j < nparams; j++)
+		{
+			if (ignore[j])
+				continue;
+			indices[nnparams++] = j;
+		}
+		
 		for (int i = 0; i < x.length; i++)
 		{
 			// Function must produce a positive output.
@@ -136,7 +146,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				// We assume xi is positive
 				if (xi != 0)
 					// Penalise the chi-squared value by assuming fi is a very small positive value
-					chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+					chisq += (-xi - xi * LOG_FOR_MIN);
 
 				// We ignore this contribution to the gradient for stability
 				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
@@ -145,17 +155,18 @@ public class MLEGradientCalculator extends GradientCalculator
 			{
 				// We assume y[i] is positive
 				if (xi == 0)
-					chisq += 2 * fi;
+					chisq += fi;
 				else
-					chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 
-				compute(alpha, beta, dfi_da, fi, xi, ignore);
+				compute(alpha, beta, dfi_da, fi, xi, indices, nnparams);
 			}
 		}
 
 		symmetric(alpha);
 
-		return checkGradients(alpha, beta, nparams, chisq);
+		// Move the factor of 2 to the end		
+		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
 	/**
@@ -193,15 +204,15 @@ public class MLEGradientCalculator extends GradientCalculator
 					// We assume xi is positive
 					if (xi != 0)
 						// Penalise the chi-squared value by assuming fi is a very small positive value
-						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
 				else
 				{
 					// We assume y[i] is positive
 					if (xi == 0)
-						chisq += 2 * fi;
+						chisq += fi;
 					else
-						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+						chisq += (fi - xi - xi * Math.log(fi / xi));
 				}
 			}
 		}
@@ -226,20 +237,21 @@ public class MLEGradientCalculator extends GradientCalculator
 					// We assume xi is positive
 					if (xi != 0)
 						// Penalise the chi-squared value by assuming fi is a very small positive value
-						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
 				else
 				{
 					// We assume y[i] is positive
 					if (xi == 0)
-						chisq += 2 * fi;
+						chisq += fi;
 					else
-						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+						chisq += (fi - xi - xi * Math.log(fi / xi));
 				}
 			}
 		}
 
-		return chisq;
+		// Move the factor of 2 to the end		
+		return chisq * 2;
 	}
 
 	/**
@@ -278,7 +290,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				// We assume xi is positive
 				if (xi != 0)
 					// Penalise the chi-squared value by assuming fi is a very small positive value
-					chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+					chisq += (-xi - xi * LOG_FOR_MIN);
 
 				// We ignore this contribution to the gradient for stability
 				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
@@ -287,9 +299,9 @@ public class MLEGradientCalculator extends GradientCalculator
 			{
 				// We assume y[i] is positive
 				if (xi == 0)
-					chisq += 2 * fi;
+					chisq += fi;
 				else
-					chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 
 				compute(alpha, beta, dfi_da, fi, xi);
 			}
@@ -305,7 +317,8 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		symmetric(alpha);
 
-		return checkGradients(alpha, beta, nparams, chisq);
+		// Move the factor of 2 to the end		
+		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
 	/**
@@ -325,6 +338,15 @@ public class MLEGradientCalculator extends GradientCalculator
 		zero(alpha, beta);
 
 		func.initialise(a);
+		
+		int[] indices = new int[nparams];
+		int nnparams = 0;
+		for (int j = 0; j < nparams; j++)
+		{
+			if (ignore[j])
+				continue;
+			indices[nnparams++] = j;
+		}
 
 		for (int i = 0; i < n; i++)
 		{
@@ -344,7 +366,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				// We assume xi is positive
 				if (xi != 0)
 					// Penalise the chi-squared value by assuming fi is a very small positive value
-					chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+					chisq += (-xi - xi * LOG_FOR_MIN);
 
 				// We ignore this contribution to the gradient for stability
 				//compute(alpha, beta, dfi_da, Double.MIN_VALUE, xi);
@@ -353,11 +375,11 @@ public class MLEGradientCalculator extends GradientCalculator
 			{
 				// We assume y[i] is positive
 				if (xi == 0)
-					chisq += 2 * fi;
+					chisq += fi;
 				else
-					chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+					chisq += (fi - xi - xi * Math.log(fi / xi));
 
-				compute(alpha, beta, dfi_da, fi, xi, ignore);
+				compute(alpha, beta, dfi_da, fi, xi, indices, nnparams);
 			}
 
 			//checkGradients(alpha, beta, nparams, 0);
@@ -371,7 +393,8 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		symmetric(alpha);
 
-		return checkGradients(alpha, beta, nparams, chisq);
+		// Move the factor of 2 to the end		
+		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
 	/**
@@ -419,15 +442,15 @@ public class MLEGradientCalculator extends GradientCalculator
 					// We assume xi is positive
 					if (xi != 0)
 						// Penalise the chi-squared value by assuming fi is a very small positive value
-						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
 				else
 				{
 					// We assume y[i] is positive
 					if (xi == 0)
-						chisq += 2 * fi;
+						chisq += fi;
 					else
-						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+						chisq += (fi - xi - xi * Math.log(fi / xi));
 				}
 			}
 		}
@@ -452,20 +475,21 @@ public class MLEGradientCalculator extends GradientCalculator
 					// We assume xi is positive
 					if (xi != 0)
 						// Penalise the chi-squared value by assuming fi is a very small positive value
-						chisq += 2 * (-xi - xi * LOG_FOR_MIN);
+						chisq += (-xi - xi * LOG_FOR_MIN);
 				}
 				else
 				{
 					// We assume y[i] is positive
 					if (xi == 0)
-						chisq += 2 * fi;
+						chisq += fi;
 					else
-						chisq += 2 * (fi - xi - xi * Math.log(fi / xi));
+						chisq += (fi - xi - xi * Math.log(fi / xi));
 				}
 			}
 		}
 
-		return chisq;
+		// Move the factor of 2 to the end		
+		return chisq * 2;
 	}
 
 	/**
@@ -487,18 +511,13 @@ public class MLEGradientCalculator extends GradientCalculator
 	}
 
 	/**
-	 * Compute the matrix alpha and vector beta
+	 * Compute the matrix alpha and vector beta.
 	 *
-	 * @param alpha
-	 *            the alpha
-	 * @param beta
-	 *            the beta
-	 * @param dfi_da
-	 *            the gradient of the function with respect to each parameter a
-	 * @param fi
-	 *            the function value at index i
-	 * @param xi
-	 *            the data value at index i
+	 * @param alpha            the alpha
+	 * @param beta            the beta
+	 * @param dfi_da            the gradient of the function with respect to each parameter a
+	 * @param fi            the function value at index i
+	 * @param xi            the data value at index i
 	 */
 	protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
 			final double xi)
@@ -519,11 +538,11 @@ public class MLEGradientCalculator extends GradientCalculator
 
 			for (int l = 0; l <= k; l++)
 				// This is the non-optimised version:
-				//alpha[j][k] += dfi_da[k] * dfi_da[l] * xi / (fi * fi);
+				//alpha[k][l] += dfi_da[k] * dfi_da[l] * xi / (fi * fi);
 				alpha[k][l] += w * dfi_da[l];
 
 			// This is the non-optimised version:
-			//beta[j] -= (1 - xi / fi) * dfi_da[k];
+			//beta[k] -= (1 - xi / fi) * dfi_da[k];
 			beta[k] -= e * dfi_da[k];
 		}
 	}
@@ -545,7 +564,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 *            An array of size beta.length. Set the index to true to ignore the gradients.
 	 */
 	protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
-			final double xi, boolean[] ignore)
+			final double xi, int[] indices, int nnparams)
 	{
 		final double xi_fi = xi / fi;
 		final double xi_fi2 = xi_fi / fi;
@@ -557,16 +576,14 @@ public class MLEGradientCalculator extends GradientCalculator
 		//         that is, it describes the local curvature of a function of many variables.)
 		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
 
-		for (int k = 0, kk = 0; k < nparams; k++)
+		for (int k = 0; k < nnparams; k++)
 		{
-			if (ignore[k])
-				continue;
-			final double w = dfi_da[k] * xi_fi2;
+			final double w = dfi_da[indices[k]] * xi_fi2;
 
-			for (int l = 0; l <= kk; l++)
-				alpha[kk][l] += w * dfi_da[l];
+			for (int l = 0; l <= k; l++)
+				alpha[k][l] += w * dfi_da[indices[l]];
 
-			beta[kk++] -= e * dfi_da[k];
+			beta[k] -= e * dfi_da[k];
 		}
 	}
 

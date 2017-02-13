@@ -168,6 +168,15 @@ public class GradientCalculator
 
 		func.initialise(a);
 
+		int[] indices = new int[nparams];
+		int nnparams = 0;
+		for (int j = 0; j < nparams; j++)
+		{
+			if (ignore[j])
+				continue;
+			indices[nnparams++] = j;
+		}
+
 		if (func.canComputeWeights())
 		{
 			final double[] w = new double[1];
@@ -181,16 +190,14 @@ public class GradientCalculator
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the gradient vector of the function's partial first derivatives with respect to the parameters
 
-				for (int j = 0, jj = 0; j < nparams; j++)
+				for (int j = 0; j < nnparams; j++)
 				{
-					if (ignore[j])
-						continue;
-					final double wgt = dy_da[j] * weight;
+					final double wgt = dy_da[indices[j]] * weight;
 
-					for (int k = 0; k <= jj; k++)
-						alpha[jj][k] += wgt * dy_da[k];
+					for (int k = 0; k <= j; k++)
+						alpha[j][k] += wgt * dy_da[indices[k]];
 
-					beta[jj++] += wgt * dy;
+					beta[j] += wgt * dy;
 				}
 
 				ssx += dy * dy * weight;
@@ -207,16 +214,14 @@ public class GradientCalculator
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the gradient vector of the function's partial first derivatives with respect to the parameters
 
-				for (int j = 0, jj = 0; j < nparams; j++)
+				for (int j = 0; j < nnparams; j++)
 				{
-					if (ignore[j])
-						continue;
-					final double wgt = dy_da[j];
+					final double wgt = dy_da[indices[j]];
 
-					for (int k = 0; k <= jj; k++)
-						alpha[jj][k] += wgt * dy_da[k];
+					for (int k = 0; k <= j; k++)
+						alpha[j][k] += wgt * dy_da[indices[k]];
 
-					beta[jj++] += wgt * dy;
+					beta[j] += wgt * dy;
 				}
 
 				ssx += dy * dy;
@@ -447,6 +452,15 @@ public class GradientCalculator
 
 		func.initialise(a);
 
+		int[] indices = new int[nparams];
+		int nnparams = 0;
+		for (int j = 0; j < nparams; j++)
+		{
+			if (ignore[j])
+				continue;
+			indices[nnparams++] = j;
+		}
+		
 		if (func.canComputeWeights())
 		{
 			final double[] w = new double[1];
@@ -460,16 +474,14 @@ public class GradientCalculator
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the gradient vector of the function's partial first derivatives with respect to the parameters
 
-				for (int j = 0, jj = 0; j < nparams; j++)
+				for (int j = 0; j < nnparams; j++)
 				{
-					if (ignore[j])
-						continue;
-					final double wgt = dy_da[j] * weight;
+					final double wgt = dy_da[indices[j]] * weight;
 
-					for (int k = 0; k <= jj; k++)
-						alpha[jj][k] += wgt * dy_da[k];
+					for (int k = 0; k <= j; k++)
+						alpha[j][k] += wgt * dy_da[indices[k]];
 
-					beta[jj++] += wgt * dy;
+					beta[j] += wgt * dy;
 				}
 
 				ssx += dy * dy * weight;
@@ -486,16 +498,14 @@ public class GradientCalculator
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the gradient vector of the function's partial first derivatives with respect to the parameters
 
-				for (int j = 0, jj = 0; j < nparams; j++)
+				for (int j = 0; j < nnparams; j++)
 				{
-					if (ignore[j])
-						continue;
-					final double wgt = dy_da[j];
+					final double wgt = dy_da[indices[j]];
 
-					for (int k = 0; k <= jj; k++)
-						alpha[jj][k] += wgt * dy_da[k];
+					for (int k = 0; k <= j; k++)
+						alpha[j][k] += wgt * dy_da[indices[k]];
 
-					beta[jj++] += wgt * dy;
+					beta[j] += wgt * dy;
 				}
 
 				ssx += dy * dy;
