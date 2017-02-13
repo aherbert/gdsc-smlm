@@ -2102,6 +2102,7 @@ public class OPTICS implements PlugIn
 	private static byte logged = 0;
 	private static final byte LOG_DBSCAN = 0x01;
 	private static final byte LOG_OPTICS = 0x02;
+	private static final byte LOG_LOOP = 0x04;
 
 	private static void logReferences(boolean isDBSCAN)
 	{
@@ -2124,7 +2125,15 @@ public class OPTICS implements PlugIn
 					width)).append('\n');
 			sb.append("FastOPTICS: ");
 			sb.append(TextUtils.wrap(
-					"Schneider, et al (2013). 'Fast parameterless density-based clustering via random projections'. 22nd ACM International Conference on Information and Knowledge Management(CIKM). ACM.",
+					"Schneider, et al (2013). 'Fast parameterless density-based clustering via random projections'. 22nd ACM International Conference on Information and Knowledge Management(CIKM). ACM. pp. 861-866.",
+					width)).append('\n');
+		}
+		if ((logged & LOG_LOOP) != LOG_LOOP)
+		{
+			logged |= LOG_LOOP;
+			sb.append("LoOP: ");
+			sb.append(TextUtils.wrap(
+					"Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International Conference on Information and knowledge management(CIKM). ACM. pp. 1649-1652.",
 					width)).append('\n');
 		}
 		if (sb.length() > 0)
