@@ -2114,7 +2114,6 @@ public class OPTICS implements PlugIn
 			sb.append(TextUtils.wrap(
 					"Ester, et al (1996). 'A density-based algorithm for discovering clusters in large spatial databases with noise'. Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.",
 					width)).append('\n');
-			;
 		}
 		else if ((logged & LOG_OPTICS) != LOG_OPTICS)
 		{
@@ -2123,12 +2122,10 @@ public class OPTICS implements PlugIn
 			sb.append(TextUtils.wrap(
 					"Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery. 1 (3): 231–240.",
 					width)).append('\n');
-			;
 			sb.append("FastOPTICS: ");
 			sb.append(TextUtils.wrap(
 					"Schneider, et al (2013). 'Fast parameterless density-based clustering via random projections'. 22nd ACM International Conference on Information and Knowledge Management(CIKM). ACM.",
 					width)).append('\n');
-			;
 		}
 		if (sb.length() > 0)
 			IJ.log(sb.toString());
