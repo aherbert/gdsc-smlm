@@ -597,6 +597,8 @@ public class OPTICSSettings implements Cloneable
 
 	/**
 	 * The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
+	 * Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
+	 * scores, not the actual ranking of outliers.
 	 */
 	public double lambda = 3;
 
