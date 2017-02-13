@@ -36,7 +36,7 @@ public class BoundedFunctionSolverTest
 	static double[] noise = { 0.1, 0.5, 1 };
 	static double[] shift = { -1, 0, 1 };
 	static double[] factor = { 0.7, 1, 1.3 };
-	static int size = 15;
+	static int size = 11;
 	static
 	{
 		params[Gaussian2DFunction.BACKGROUND] = 5;
@@ -466,7 +466,7 @@ public class BoundedFunctionSolverTest
 					printBetterDetails);
 			test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index], printBetterDetails);
 		}
-		test(name2, name, String.format("All [%d] [%d] : ", i2, i1), better, total, true);
+		test(name2, name, String.format("All (eval [%d] [%d]) : ", i2, i1), better, total, true);
 	}
 
 	private void test(String name2, String name, String statName, int better, int total, boolean print)

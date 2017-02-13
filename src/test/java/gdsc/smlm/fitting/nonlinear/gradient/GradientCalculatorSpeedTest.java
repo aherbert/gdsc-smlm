@@ -217,7 +217,7 @@ public class GradientCalculatorSpeedTest
 		{
 			double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
 			double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-			Assert.assertTrue("n-Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
+			Assert.assertTrue("N-Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
 			Assert.assertTrue("N-observations: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
 			for (int j = 0; j < beta.length; j++)
 				Assert.assertTrue("N-observations: Not same alpha @ " + i,
@@ -232,7 +232,7 @@ public class GradientCalculatorSpeedTest
 			{
 				double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 				double s2 = calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-				Assert.assertTrue("Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
+				Assert.assertTrue("Result+Noise: Not same @ " + i, eq.almostEqualComplement(s, s2));
 				Assert.assertTrue("Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
 				for (int j = 0; j < beta.length; j++)
 					Assert.assertTrue("Observations+Noise: Not same alpha @ " + i,
@@ -243,7 +243,7 @@ public class GradientCalculatorSpeedTest
 			{
 				double s = calc.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha, beta, func);
 				double s2 = calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
-				Assert.assertTrue("N-Result: Not same @ " + i, eq.almostEqualComplement(s, s2));
+				Assert.assertTrue("N-Result+Noise: Not same @ " + i, eq.almostEqualComplement(s, s2));
 				Assert.assertTrue("N-Observations+Noise: Not same beta @ " + i, eq.almostEqualComplement(beta, beta2));
 				for (int j = 0; j < beta.length; j++)
 					Assert.assertTrue("N-Observations+Noise: Not same alpha @ " + i,
