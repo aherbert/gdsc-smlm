@@ -649,6 +649,10 @@ public class Gaussian2DFitter
 
 		if (result == FitStatus.OK)
 		{
+			// For debugging
+			//double[] initialParams2 = initialParams.clone();
+			//double[] params2 = params.clone();
+			
 			if (fitConfiguration.isApplyGainBeforeFitting())
 			{
 				// Update all the output parameters

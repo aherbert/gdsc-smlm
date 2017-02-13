@@ -1089,7 +1089,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 				log.info("Bad peak %d: Insufficient signal %g (SNR=%g)\n", n, signal / ((gain > 0) ? gain : 1),
 						signal / noise);
 			}
-			//System.out.printf("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
+			//if (params.length == 7) // Single peak
+			//	System.out.printf("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
 			return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
 		}
 
@@ -1739,7 +1740,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			fitFunction = FitFunction.CIRCULAR;
 		if (searchMethod == null)
 			searchMethod = SearchMethod.POWELL;
-		
+
 		if (maxFunctionEvaluations == 0)
 			maxFunctionEvaluations = 2000;
 		if (initialSD0 == 0)
@@ -1750,7 +1751,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter
 			setCoordinateShiftFactor(1);
 		if (dynamicPeakResult == null)
 			dynamicPeakResult = new DynamicPeakResult();
-		
+
 		setNoise(noise);
 		setFitFunction(fitFunction);
 		invalidateFunctionSolver();
