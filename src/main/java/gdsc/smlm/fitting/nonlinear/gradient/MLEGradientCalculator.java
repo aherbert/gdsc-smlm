@@ -525,6 +525,8 @@ public class MLEGradientCalculator extends GradientCalculator
 		final double xi_fi = xi / fi;
 		final double xi_fi2 = xi_fi / fi;
 		final double e = 1 - (xi_fi);
+		// For + summation:
+		//final double e = (xi_fi) - 1;
 
 		// Compute:
 		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
@@ -544,6 +546,8 @@ public class MLEGradientCalculator extends GradientCalculator
 			// This is the non-optimised version:
 			//beta[k] -= (1 - xi / fi) * dfi_da[k];
 			beta[k] -= e * dfi_da[k];
+			// + summation:
+			//beta[k] += e * dfi_da[k];
 		}
 	}
 
