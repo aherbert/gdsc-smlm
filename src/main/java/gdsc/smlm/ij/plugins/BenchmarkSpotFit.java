@@ -2592,7 +2592,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				break;
 			case MAX_JACCARD2:
 				u = getValue(metric, j, maxJ) * 2;
-				System.out.printf("MaxJ = %.4f @ %.3f\n", maxJ, u / 2);
+				//System.out.printf("MaxJ = %.4f @ %.3f\n", maxJ, u / 2);
 				break;
 			default:
 				throw new RuntimeException("Missing upper limit method");
