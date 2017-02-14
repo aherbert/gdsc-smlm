@@ -794,4 +794,72 @@ public class GradientCalculator
 		checkGradients(alpha, nparams);
 		return alpha;
 	}
+
+	/**
+	 * Evaluate the function and compute the sum-of-squares and the gradient with respect to the model
+	 * parameters.
+	 * <p>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param y
+	 *            Data to fit
+	 * @param a
+	 *            Set of m coefficients
+	 * @param df_da
+	 *            the gradient vector of the function's partial first derivatives with respect to the parameters (size
+	 *            m)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return The sum-of-squares value for the fit
+	 */
+	public double evaluate(final int[] x, final double[] y, final double[] a, final double[] df_da,
+			final NonLinearFunction func)
+	{
+		double ssx = 0;
+		final double[] dy_da = new double[nparams];
+
+		zero(df_da);
+
+		func.initialise(a);
+
+		for (int i = 0; i < x.length; i++)
+		{
+			final double dy = y[i] - func.eval(x[i], dy_da);
+
+			// Compute:
+			// - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+			for (int j = 0; j < nparams; j++)
+			{
+				df_da[j] += dy_da[j] * dy;
+			}
+
+			ssx += dy * dy;
+		}
+
+		checkGradients(df_da, nparams);
+		
+		// Apply a factor of -2 to the gradients:
+		// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models 
+		for (int j = 0; j < nparams; j++)
+			df_da[j] *= -2;
+
+		return ssx;
+	}
+
+	/**
+	 * Zero the working region of the input matrix alpha and vector beta
+	 *
+	 * @param beta
+	 *            the beta
+	 */
+	protected void zero(final double[] beta)
+	{
+		for (int i = 0; i < nparams; i++)
+		{
+			beta[i] = 0;
+		}
+	}
 }

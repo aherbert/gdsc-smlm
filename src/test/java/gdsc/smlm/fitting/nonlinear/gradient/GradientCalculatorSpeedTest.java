@@ -1,5 +1,12 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import java.util.ArrayList;
+
+import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.junit.Assert;
+import org.junit.Test;
+
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.CameraNoiseModel;
@@ -10,12 +17,6 @@ import gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -28,15 +29,15 @@ public class GradientCalculatorSpeedTest
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
-	double Background = 20;
-	double Amplitude = 10;
-	double Angle = 0;
+	double Background = 2;
+	double Amplitude = 100;
+	double Angle = Math.PI;
 	double Xpos = 5;
 	double Ypos = 5;
-	double Xwidth = 5;
-	double Ywidth = 5;
+	double Xwidth = 1.2;
+	double Ywidth = 1.2;
 
-	Random rand;
+	RandomDataGenerator rdg;
 
 	@Test
 	public void gradientCalculatorFactoryCreatesOptimisedCalculators()
@@ -188,7 +189,7 @@ public class GradientCalculatorSpeedTest
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
 		int iter = 100;
-		rand = new Random(30051977);
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
 
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
@@ -268,7 +269,7 @@ public class GradientCalculatorSpeedTest
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
 		int iter = 10000;
-		rand = new Random(30051977);
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
 
@@ -329,7 +330,7 @@ public class GradientCalculatorSpeedTest
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
 		int iter = 10000;
-		rand = new Random(30051977);
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
 		double[][] alpha = new double[7][7];
 		double[] beta = new double[7];
 
@@ -365,30 +366,91 @@ public class GradientCalculatorSpeedTest
 			Assert.assertTrue(start2 < start1);
 	}
 
+	@Test
+	public void gradientCalculatorComputesGradient()
+	{
+		gradientCalculatorComputesGradient(new GradientCalculator(7));
+	}
+
+	@Test
+	public void mleGradientCalcutlatorComputesGradient()
+	{
+		gradientCalculatorComputesGradient(new MLEGradientCalculator(7));
+	}
+
+	private void gradientCalculatorComputesGradient(GradientCalculator calc)
+	{
+		int nparams = calc.nparams;
+		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth);
+		// Check the function is the correct size
+		Assert.assertEquals(nparams, func.gradientIndices().length);
+
+		int iter = 100;
+		rdg = new RandomDataGenerator(new Well19937c(30051977));
+
+		double[] beta = new double[nparams];
+		double[] beta2 = new double[nparams];
+
+		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+
+		int[] x = createData(1, iter, paramsList, yList, true);
+
+		double delta = 1e-3;
+		DoubleEquality eq = new DoubleEquality(3, 1e-3);
+
+		for (int i = 0; i < paramsList.size(); i++)
+		{
+			double[] y = yList.get(i);
+			double[] a = paramsList.get(i);
+			double[] a2 = a.clone();
+			//double s = 
+			calc.evaluate(x, y, a, beta, func);
+
+			for (int j = 0; j < nparams; j++)
+			{
+				double d = (a[j] == 0) ? 1e-3 : a[j] * delta;
+				a2[j] = a[j] + d;
+				double s1 = calc.evaluate(x, y, a2, beta2, func);
+				a2[j] = a[j] - d;
+				double s2 = calc.evaluate(x, y, a2, beta2, func);
+				a2[j] = a[j];
+
+				double gradient = (s1 - s2) / (2 * d);
+				//System.out.printf("[%d,%d] %f  (%f+/-%f)  %f  ?=  %f\n", i, j, s, a[j], d, beta[j], gradient);
+				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualComplement(beta[j], gradient));
+			}
+		}
+	}
+
 	/**
 	 * Create random elliptical Gaussian data an returns the data plus an estimate of the parameters.
 	 * Only the chosen parameters are randomised and returned for a maximum of (background, amplitude, angle, xpos,
 	 * ypos, xwidth, ywidth }
-	 * 
+	 *
+	 * @param npeaks
+	 *            the npeaks
 	 * @param params
 	 *            set on output
-	 * @return
+	 * @param randomiseParams
+	 *            Set to true to randomise the params
+	 * @return the double[]
 	 */
-	private double[] doubleCreateGaussianData(int npeaks, double[] params)
+	private double[] doubleCreateGaussianData(int npeaks, double[] params, boolean randomiseParams)
 	{
 		int n = blockWidth * blockWidth;
 
 		// Generate a 2D Gaussian
 		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(npeaks, blockWidth);
-		params[0] = Background + rand.nextDouble() * 5;
+		params[0] = random(Background);
 		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
 		{
-			params[j] = Amplitude + rand.nextDouble() * 5;
-			params[j + 1] = 0; //(double) (Math.PI / 4.0); // Angle
-			params[j + 2] = Xpos + rand.nextDouble() * 2;
-			params[j + 3] = Ypos + rand.nextDouble() * 2;
-			params[j + 4] = Xwidth + rand.nextDouble() * 2;
-			params[j + 5] = params[j + 4];
+			params[j] = random(Amplitude);
+			params[j + 1] = random(Angle);
+			params[j + 2] = random(Xpos);
+			params[j + 3] = random(Ypos);
+			params[j + 4] = random(Xwidth);
+			params[j + 5] = random(Ywidth);
 		}
 
 		double[] dy_da = new double[params.length];
@@ -396,24 +458,39 @@ public class GradientCalculatorSpeedTest
 		func.initialise(params);
 		for (int i = 0; i < y.length; i++)
 		{
-			// Add random noise
-			y[i] = func.eval(i, dy_da) + ((rand.nextDouble() < 0.5) ? -rand.nextDouble() * 5 : rand.nextDouble() * 5);
+			// Add random Poisson noise
+			y[i] = rdg.nextPoisson(func.eval(i, dy_da));
 		}
 
-		// Randomise only the necessary parameters (i.e. not angle and X & Y widths should be the same)
-		params[0] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
-		for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+		if (randomiseParams)
 		{
-			params[j + 1] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
-			params[j + 3] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
-			params[j + 4] += ((rand.nextDouble() < 0.5) ? -rand.nextDouble() : rand.nextDouble());
-			params[j + 5] = params[j + 4];
+			// Randomise only the necessary parameters (i.e. not angle and X & Y widths should be the same)
+			params[0] = random(params[0]);
+			for (int i = 0, j = 1; i < npeaks; i++, j += 6)
+			{
+				params[j + 1] = random(params[j + 1]);
+				params[j + 2] = random(params[j + 2]);
+				params[j + 3] = random(params[j + 3]);
+				params[j + 4] = random(params[j + 4]);
+				params[j + 5] = random(params[j + 5]); //params[j + 4];
+			}
 		}
 
 		return y;
 	}
 
+	private double random(double d)
+	{
+		return d + rdg.nextUniform(-d * 0.1, d * 0.1);
+	}
+
 	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	{
+		return createData(npeaks, iter, paramsList, yList, true);
+	}
+
+	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList,
+			boolean randomiseParams)
 	{
 		int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
@@ -421,7 +498,7 @@ public class GradientCalculatorSpeedTest
 		for (int i = 0; i < iter; i++)
 		{
 			double[] params = new double[1 + 6 * npeaks];
-			double[] y = doubleCreateGaussianData(npeaks, params);
+			double[] y = doubleCreateGaussianData(npeaks, params, randomiseParams);
 			paramsList.add(params);
 			yList.add(y);
 		}

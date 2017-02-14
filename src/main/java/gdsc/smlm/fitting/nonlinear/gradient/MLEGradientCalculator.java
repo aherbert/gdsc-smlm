@@ -127,7 +127,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				continue;
 			indices[nnparams++] = j;
 		}
-		
+
 		for (int i = 0; i < x.length; i++)
 		{
 			// Function must produce a positive output.
@@ -338,7 +338,7 @@ public class MLEGradientCalculator extends GradientCalculator
 		zero(alpha, beta);
 
 		func.initialise(a);
-		
+
 		int[] indices = new int[nparams];
 		int nnparams = 0;
 		for (int j = 0; j < nparams; j++)
@@ -513,11 +513,16 @@ public class MLEGradientCalculator extends GradientCalculator
 	/**
 	 * Compute the matrix alpha and vector beta.
 	 *
-	 * @param alpha            the alpha
-	 * @param beta            the beta
-	 * @param dfi_da            the gradient of the function with respect to each parameter a
-	 * @param fi            the function value at index i
-	 * @param xi            the data value at index i
+	 * @param alpha
+	 *            the alpha
+	 * @param beta
+	 *            the beta
+	 * @param dfi_da
+	 *            the gradient of the function with respect to each parameter a
+	 * @param fi
+	 *            the function value at index i
+	 * @param xi
+	 *            the data value at index i
 	 */
 	protected void compute(final double[][] alpha, final double[] beta, final double[] dfi_da, final double fi,
 			final double xi)
@@ -602,5 +607,90 @@ public class MLEGradientCalculator extends GradientCalculator
 		for (int i = 0; i < nparams - 1; i++)
 			for (int j = i + 1; j < nparams; j++)
 				alpha[i][j] = alpha[j][i];
+	}
+
+	/**
+	 * Evaluate the function and compute the MLE chi-squared value and the gradient with respect to the model
+	 * parameters.
+	 * <p>
+	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param y
+	 *            Data to fit
+	 * @param a
+	 *            Set of m coefficients
+	 * @param df_da
+	 *            the gradient vector of the function's partial first derivatives with respect to the parameters (size
+	 *            m)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return The MLE chi-squared value
+	 */
+	public double evaluate(final int[] x, final double[] y, final double[] a, final double[] df_da,
+			final NonLinearFunction func)
+	{
+		double chisq = 0;
+		final double[] dfi_da = new double[nparams];
+
+		zero(df_da);
+
+		func.initialise(a);
+
+		for (int i = 0; i < x.length; i++)
+		{
+			// Function must produce a positive output.
+			final double xi = y[i];
+
+			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+			// effectively ignores the any function value below zero. This could lead to a 
+			// situation where the best chisq value can be achieved by setting the output
+			// function to produce 0 for all evaluations. To cope with this we heavily 
+			// penalise the chisq value. 
+			// Optimally the function should be bounded to always produce a positive number.
+			final double fi = func.eval(i, dfi_da);
+
+			if (fi <= 0)
+			{
+				// We assume xi is positive
+				if (xi != 0)
+					// Penalise the chi-squared value by assuming fi is a very small positive value
+					chisq += (-xi - xi * LOG_FOR_MIN);
+
+				//// Note: We ignore this contribution to the gradient for stability
+				//final double e = 1 - (xi / Double.MIN_VALUE);
+				//for (int k = 0; k < nparams; k++)
+				//{
+				//	df_da[k] += e * dfi_da[k];
+				//}
+			}
+			else
+			{
+				// We assume y[i] is positive
+				if (xi == 0)
+					chisq += fi;
+				else
+					chisq += (fi - xi - xi * Math.log(fi / xi));
+
+				final double e = 1 - (xi / fi);
+
+				// Compute:
+				// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI, Equation 6
+				// df_da - the gradient vector of the function's partial first derivatives with respect to the parameters
+
+				for (int k = 0; k < nparams; k++)
+				{
+					df_da[k] += e * dfi_da[k];
+				}
+			}
+		}
+
+		checkGradients(df_da, nparams);
+
+		// Move the factor of 2 to the end		
+		for (int j = 0; j < nparams; j++)
+			df_da[j] *= 2;
+		return chisq * 2;
 	}
 }
