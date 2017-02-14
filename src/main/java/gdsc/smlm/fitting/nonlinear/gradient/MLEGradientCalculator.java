@@ -85,11 +85,15 @@ public class MLEGradientCalculator extends GradientCalculator
 			{
 				// We assume y[i] is positive
 				if (xi == 0)
+				{
 					chisq += fi;
+					compute0(beta, dfi_da, fi);
+				}
 				else
+				{
 					chisq += (fi - xi - xi * Math.log(fi / xi));
-
-				compute(alpha, beta, dfi_da, fi, xi);
+					compute(alpha, beta, dfi_da, fi, xi);
+				}
 			}
 		}
 
@@ -299,11 +303,15 @@ public class MLEGradientCalculator extends GradientCalculator
 			{
 				// We assume y[i] is positive
 				if (xi == 0)
+				{
 					chisq += fi;
+					compute0(beta, dfi_da, fi);
+				}
 				else
+				{
 					chisq += (fi - xi - xi * Math.log(fi / xi));
-
-				compute(alpha, beta, dfi_da, fi, xi);
+					compute(alpha, beta, dfi_da, fi, xi);
+				}
 			}
 
 			//checkGradients(alpha, beta, nparams, 0);
@@ -553,6 +561,26 @@ public class MLEGradientCalculator extends GradientCalculator
 			beta[k] -= e * dfi_da[k];
 			// + summation:
 			//beta[k] += e * dfi_da[k];
+		}
+	}
+
+	/**
+	 * Compute the matrix alpha and vector beta when the data value is zero.
+	 *
+	 * @param beta
+	 *            the beta
+	 * @param dfi_da
+	 *            the gradient of the function with respect to each parameter a
+	 * @param fi
+	 *            the function value at index i
+	 */
+	protected void compute0(final double[] beta, final double[] dfi_da, final double fi)
+	{
+		// Assume xi is zero. This removes most of the computation
+
+		for (int k = 0; k < nparams; k++)
+		{
+			beta[k] -= dfi_da[k];
 		}
 	}
 
