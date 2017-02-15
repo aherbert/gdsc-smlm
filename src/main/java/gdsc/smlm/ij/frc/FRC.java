@@ -121,6 +121,7 @@ public class FRC
 
 		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
 
+		final double limit = (useHalfCircle) ? Math.PI : 2 * Math.PI;
 		while (radius < max)
 		{
 			final double progress = (1.0 * radius) / max;
@@ -132,14 +133,11 @@ public class FRC
 			double sum2 = 0;
 			double sum3 = 0;
 
-			// Circumference is 2*pi*r
-			double numSteps = perimeterSamplingFactor * Math.PI * radius;
-			double angleStep = 180.0 / numSteps;
+			final double angleStep = 1 / (perimeterSamplingFactor * radius);
 
 			double angle = 0D;
 			int numSum = 0;
 
-			final double limit = (useHalfCircle) ? 180 : 360;
 			while (angle < limit)
 			{
 				double x = centre + radius * Math.cos(angle);
