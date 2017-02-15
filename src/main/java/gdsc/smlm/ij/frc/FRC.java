@@ -395,21 +395,22 @@ public class FRC
 	{
 		double[] threshold = new double[frcCurve.length];
 
-		for (int i = 0; i < threshold.length; i++)
+		switch (method)
 		{
-			switch (method)
-			{
-				case HALF_BIT:
+			case HALF_BIT:
+				for (int i = 0; i < threshold.length; i++)
 					threshold[i] = ((0.2071 * Math.sqrt(frcCurve[i][2]) + 1.9102) /
 							(1.2701 * Math.sqrt(frcCurve[i][2]) + 0.9102));
-					break;
-				case THREE_SIGMA:
+				break;
+
+			case THREE_SIGMA:
+				for (int i = 0; i < threshold.length; i++)
 					threshold[i] = (3.0 / Math.sqrt(frcCurve[i][2] / 2.0));
-					break;
-				case FIXED_1_OVER_7:
-				default:
-					threshold[i] = 0.1428;
-			}
+				break;
+
+			case FIXED_1_OVER_7:
+			default:
+				Arrays.fill(threshold, 1.0 / 7.0);
 		}
 
 		return threshold;
