@@ -1,5 +1,17 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.MathArrays;
+
+import gdsc.core.ij.Utils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -22,7 +34,6 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -36,17 +47,6 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Computes the Fourier Image Resolution of an image
  */
@@ -54,8 +54,12 @@ public class FIRE implements PlugIn
 {
 	private static String TITLE = "Fourier Image REsolution (FIRE)";
 	private static String inputOption = "";
+	private static String inputOption2 = "";
 
+	private static boolean useSignal = true;
+	private static int maxPerBin = 5;
 	private static boolean randomSplit = true;
+	private static int blockSize = 50;
 	private static String[] SCALE_ITEMS;
 	private static int[] SCALE_VALUES = new int[] { 0, 1, 2, 4, 8, 16, 32, 64, 128 };
 	private static String[] IMAGE_SIZE_ITEMS;
@@ -102,7 +106,8 @@ public class FIRE implements PlugIn
 	private Rectangle roiBounds;
 	private int roiImageWidth, roiImageHeight;
 
-	MemoryPeakResults results;
+	MemoryPeakResults results, results2;
+	Rectangle2D dataBounds;
 	ImageProcessor ip1, ip2;
 	double imageScale;
 	double[][] frcCurve;
@@ -137,6 +142,7 @@ public class FIRE implements PlugIn
 			IJ.showStatus("");
 			return;
 		}
+		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false);
 
 		results = cropToRoi(results);
 		if (results.size() == 0)
@@ -145,23 +151,35 @@ public class FIRE implements PlugIn
 			IJ.showStatus("");
 			return;
 		}
+		if (results2 != null)
+		{
+			results2 = cropToRoi(results2);
+			if (results2.size() == 0)
+			{
+				IJ.error(TITLE, "No results2 within the crop region");
+				IJ.showStatus("");
+				return;
+			}
+		}
 
 		long start = System.currentTimeMillis();
 
 		ThresholdMethod method = FRC.ThresholdMethod.values()[thresholdMethodIndex];
 
 		// Compute FIRE
-		initialise(results);
+		initialise(results, results2);
 		double fire = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex], IMAGE_SIZE_VALUES[imageSizeIndex]);
 
 		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", results.getName(), Utils.rounded(fire, 4),
 				units, Utils.rounded(imageScale, 3)));
 
 		String name = results.getName();
+		if (this.results2 != null)
+			name += " vs " + results2.getName();
 		if (showFRCCurve)
 			showFrcCurve(name, frcCurve, smoothedFrcCurve, method);
 
-		if (showFRCTimeEvolution && !Double.isNaN(fire))
+		if (showFRCTimeEvolution && !Double.isNaN(fire) && this.results2 == null)
 			showFrcTimeEvolution(name, fire, method);
 
 		double seconds = (System.currentTimeMillis() - start) / 1000.0;
@@ -220,8 +238,15 @@ public class FIRE implements PlugIn
 		gd.addMessage("Compute the resolution using Fourier Ring Correlation");
 
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+		ResultsManager.addInput(gd, "Input2", inputOption2, InputSource.NONE, InputSource.MEMORY);
 
+		gd.addCheckbox("Use_signal (if present)", useSignal);
+		gd.addNumericField("Max_per_bin", maxPerBin, 0);
+		gd.addMessage("For single datsets:");
 		gd.addCheckbox("Random_split", randomSplit);
+		gd.addNumericField("Block_size", blockSize, 0);
+		gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
+		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
 		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
 		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
@@ -229,7 +254,6 @@ public class FIRE implements PlugIn
 		String[] methodNames = SettingsManager.getNames((Object[]) FRC.ThresholdMethod.values());
 		gd.addChoice("Threshold_method", methodNames, methodNames[thresholdMethodIndex]);
 		gd.addCheckbox("Show_FRC_curve", showFRCCurve);
-		gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
 		if (!titles.isEmpty())
 			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
 
@@ -239,14 +263,18 @@ public class FIRE implements PlugIn
 			return false;
 
 		inputOption = ResultsManager.getInputSource(gd);
+		inputOption2 = ResultsManager.getInputSource(gd);
+		useSignal = gd.getNextBoolean();
+		maxPerBin = Math.abs((int) gd.getNextNumber());
 		randomSplit = gd.getNextBoolean();
+		blockSize = Math.max(1, (int) gd.getNextNumber());
+		showFRCTimeEvolution = gd.getNextBoolean();
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
 		perimeterSamplingFactor = gd.getNextNumber();
 		useHalfCircle = gd.getNextBoolean();
 		thresholdMethodIndex = gd.getNextChoiceIndex();
 		showFRCCurve = gd.getNextBoolean();
-		showFRCTimeEvolution = gd.getNextBoolean();
 
 		// Check arguments
 		try
@@ -294,32 +322,60 @@ public class FIRE implements PlugIn
 		return true;
 	}
 
-	public void initialise(MemoryPeakResults results)
+	public void initialise(MemoryPeakResults results, MemoryPeakResults results2)
 	{
-		this.results = results;
+		this.results = verify(results);
+		this.results2 = verify(results2);
 		ip1 = ip2 = null;
 		nmPerPixel = 1;
 		units = "px";
+
+		if (this.results == null)
+			return;
+
+		// Use the float data bounds. This prevents problems if the data is far from the origin.
+		dataBounds = results.getDataBounds();
+
+		if (this.results2 != null)
+		{
+			Rectangle2D dataBounds2 = results.getDataBounds();
+			dataBounds = dataBounds.createUnion(dataBounds2);
+		}
+
 		if (results.getCalibration() != null)
 		{
+			// Calibration must match between datasets
+			if (this.results2 != null)
+			{
+				if (results2.getNmPerPixel() != results.getNmPerPixel())
+				{
+					IJ.log(TITLE +
+							" Error: Calibration between the two input datasets does not match, defaulting to pixels");
+					return;
+				}
+			}
+
 			nmPerPixel = results.getNmPerPixel();
 			units = "nm";
 		}
 	}
 
+	private MemoryPeakResults verify(MemoryPeakResults results)
+	{
+		return (results == null || results.size() < 2) ? null : results;
+	}
+
 	public ImageProcessor[] createImages(double fourierImageScale, int imageSize)
 	{
 		ip1 = ip2 = null;
-		if (results == null || results.size() == 0)
+		if (results == null)
 			return null;
 
-		boolean hasSignal = (results.getResults().get(0).getSignal() > 0);
+		final boolean hasSignal = useSignal && (results.getResults().get(0).getSignal() > 0);
 
 		// Draw images using the existing IJ routines.
-
-		// Use the float data bounds. This prevents problems if the data is far from the origin.
-		Rectangle2D.Float dataBounds = results.getDataBounds();
-		Rectangle bounds = new Rectangle(0, 0, (int) Math.ceil(dataBounds.width), (int) Math.ceil(dataBounds.height));
+		Rectangle bounds = new Rectangle(0, 0, (int) Math.ceil(dataBounds.getWidth()),
+				(int) Math.ceil(dataBounds.getHeight()));
 
 		boolean weighted = true;
 		boolean equalised = false;
@@ -344,28 +400,75 @@ public class FIRE implements PlugIn
 		image2.setDisplayImage(false);
 		image2.begin();
 
-		List<PeakResult> list = results.getResults();
-		if (randomSplit)
-		{
-			@SuppressWarnings("unchecked")
-			ArrayList<PeakResult> dest = (ArrayList<PeakResult>) ((ArrayList<PeakResult>) list).clone();
-			Collections.shuffle(dest);
-			list = dest;
-		}
+		float minx = (float) dataBounds.getX();
+		float miny = (float) dataBounds.getY();
 
-		// Split alternating
-		int i = 0;
-		float minx = dataBounds.x;
-		float miny = dataBounds.y;
-		for (PeakResult p : list)
+		if (this.results2 != null)
 		{
-			float x = p.getXPosition() - minx;
-			float y = p.getYPosition() - miny;
-			float v = (hasSignal) ? p.getSignal() : 1f;
-			if (i++ % 2 == 0)
+			// Two image comparison
+			for (PeakResult p : results)
+			{
+				float x = p.getXPosition() - minx;
+				float y = p.getYPosition() - miny;
+				float v = (hasSignal) ? p.getSignal() : 1f;
 				image1.add(x, y, v);
-			else
+			}
+			for (PeakResult p : results2)
+			{
+				float x = p.getXPosition() - minx;
+				float y = p.getYPosition() - miny;
+				float v = (hasSignal) ? p.getSignal() : 1f;
 				image2.add(x, y, v);
+			}
+		}
+		else
+		{
+			// Block sampling.
+			// Ensure we have at least 2 even sized blocks.
+			int blockSize = Math.min(results.size() / 2, Math.max(1, FIRE.blockSize));
+			int nBlocks = (int) Math.ceil((double)results.size() / blockSize);
+			while (nBlocks <= 1 && blockSize > 1)
+			{
+				blockSize /= 2;
+				nBlocks = (int) Math.ceil((double)results.size() / blockSize);
+			}
+			if (nBlocks <= 1)
+				// This should not happen since the results should contain at least 2 localisations
+				return null;
+			if (blockSize != FIRE.blockSize)
+				IJ.log(TITLE + " Warning: Changed block size to " + blockSize);
+
+			int i = 0;
+			int block = 0;
+			PeakResult[][] blocks = new PeakResult[nBlocks][blockSize];
+			for (PeakResult p : results)
+			{
+				if (i == blockSize)
+				{
+					block++;
+					i = 0;
+				}
+				blocks[block][i++] = p;
+			}
+			// Truncate last block
+			blocks[block] = Arrays.copyOf(blocks[block], i);
+
+			final int[] indices = Utils.newArray(nBlocks, 0, 1);
+			if (randomSplit)
+				MathArrays.shuffle(indices);
+
+			for (int b = 0; b < nBlocks; b++)
+			{
+				// Split alternating
+				IJImagePeakResults image = (b % 2 == 0) ? image1 : image2;
+				for (PeakResult p : blocks[indices[b]])
+				{
+					float x = p.getXPosition() - minx;
+					float y = p.getYPosition() - miny;
+					float v = (hasSignal) ? p.getSignal() : 1f;
+					image.add(x, y, v);
+				}
+			}
 		}
 
 		image1.end();
@@ -373,6 +476,18 @@ public class FIRE implements PlugIn
 
 		image2.end();
 		ip2 = image2.getImagePlus().getProcessor();
+
+		if (!hasSignal && maxPerBin > 0)
+		{
+			// We can eliminate over-sampled pixels
+			for (int i = ip1.getPixelCount(); i-- > 0;)
+			{
+				if (ip1.getf(i) > maxPerBin)
+					ip1.setf(i, maxPerBin);
+				if (ip2.getf(i) > maxPerBin)
+					ip2.setf(i, maxPerBin);
+			}
+		}
 
 		return new ImageProcessor[] { ip1, ip2 };
 	}
@@ -474,7 +589,7 @@ public class FIRE implements PlugIn
 			x.add((double) t);
 
 			FIRE f = new FIRE();
-			f.initialise(newResults);
+			f.initialise(newResults, null);
 			double fire = f.calculateFireNumber(method, imageScale, ip1.getWidth() - 1);
 			y.add(fire);
 
