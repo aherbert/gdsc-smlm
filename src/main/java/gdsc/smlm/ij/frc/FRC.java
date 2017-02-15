@@ -70,6 +70,8 @@ public class FRC
 	 */
 	public double[][] calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2)
 	{
+		// TODO - Allow a progress tracker to be input 
+		IJ.showProgress(0);
 		IJ.showStatus("Calculating complex FFT images...");
 
 		// Pad images to the same size
@@ -80,8 +82,10 @@ public class FRC
 
 		// TODO - Can this be sped up by computing both FFT transforms together?
 		FloatProcessor[] fft1 = getComplexFFT(ip1);
+		IJ.showProgress(0.333);
 		FloatProcessor[] fft2 = getComplexFFT(ip2);
 
+		IJ.showProgress(0.666);
 		IJ.showStatus("Preparing FRC curve calculation...");
 
 		final int size = fft1[0].getWidth();
@@ -107,8 +111,8 @@ public class FRC
 		}
 
 		int radius = 1;
-		final double centre = size / 2;
-		final double max = centre - 1;
+		final int centre = size / 2;
+		final int max = centre - 1;
 
 		IJ.showStatus("Calculating FRC curve...");
 
@@ -124,10 +128,6 @@ public class FRC
 		final double limit = (useHalfCircle) ? Math.PI : 2 * Math.PI;
 		while (radius < max)
 		{
-			final double progress = (1.0 * radius) / max;
-			IJ.showProgress(progress);
-			IJ.showStatus("Calculating FRC curve...[Radius = " + radius + "px]");
-
 			// Inline the calculation for speed
 			double sum1 = 0;
 			double sum2 = 0;
@@ -189,6 +189,7 @@ public class FRC
 		FloatProcessor taperedDataImage = getSquareTaperedImage(ip);
 
 		FHT2 fht = new FHT2(taperedDataImage);
+		fht.setShowProgress(false);
 		fht.transform();
 
 		FloatProcessor[] ret = new FloatProcessor[2];
@@ -391,7 +392,7 @@ public class FRC
 	 * @param method
 	 * @return The threshold curve representing the threshold for each input spatial frequency
 	 */
-	public double[] calculateThresholdCurve(double[][] frcCurve, ThresholdMethod method)
+	public static double[] calculateThresholdCurve(double[][] frcCurve, ThresholdMethod method)
 	{
 		double[] threshold = new double[frcCurve.length];
 

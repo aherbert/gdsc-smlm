@@ -56,6 +56,7 @@ public class FIRE implements PlugIn
 	private static String inputOption = "";
 	private static String inputOption2 = "";
 
+	private static int repeats = 1;
 	private static boolean useSignal = true;
 	private static int maxPerBin = 5;
 	private static boolean randomSplit = true;
@@ -106,14 +107,40 @@ public class FIRE implements PlugIn
 	private Rectangle roiBounds;
 	private int roiImageWidth, roiImageHeight;
 
+	// Stored in initialisation
 	MemoryPeakResults results, results2;
 	Rectangle2D dataBounds;
-	ImageProcessor ip1, ip2;
-	double imageScale;
-	double[][] frcCurve;
-	double[][] smoothedFrcCurve;
 	String units;
 	double nmPerPixel = 1;
+
+	public class FireImages
+	{
+		final ImageProcessor ip1, ip2;
+		final double imageScale;
+
+		FireImages(ImageProcessor ip1, ImageProcessor ip2, double imageScale)
+		{
+			this.ip1 = ip1;
+			this.ip2 = ip2;
+			this.imageScale = imageScale;
+		}
+	}
+
+	public class FireResult
+	{
+		final double fireNumber;
+		final double imageScale;
+		final double[][] frcCurve;
+		final double[][] smoothedFrcCurve;
+
+		FireResult(double fireNumber, double imageScale, double[][] frcCurve, double[][] smoothedFrcCurve)
+		{
+			this.fireNumber = fireNumber;
+			this.imageScale = imageScale;
+			this.frcCurve = frcCurve;
+			this.smoothedFrcCurve = smoothedFrcCurve;
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -168,22 +195,51 @@ public class FIRE implements PlugIn
 
 		// Compute FIRE
 		initialise(results, results2);
-		double fire = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex], IMAGE_SIZE_VALUES[imageSizeIndex]);
-
-		IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", results.getName(), Utils.rounded(fire, 4),
-				units, Utils.rounded(imageScale, 3)));
 
 		String name = results.getName();
 		if (this.results2 != null)
+		{
 			name += " vs " + results2.getName();
-		if (showFRCCurve)
-			showFrcCurve(name, frcCurve, smoothedFrcCurve, method);
 
-		if (showFRCTimeEvolution && !Double.isNaN(fire) && this.results2 == null)
-			showFrcTimeEvolution(name, fire, method);
+			FireResult result = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex],
+					IMAGE_SIZE_VALUES[imageSizeIndex]);
 
-		double seconds = (System.currentTimeMillis() - start) / 1000.0;
-		IJ.showStatus(TITLE + " complete : " + seconds + "s");
+			if (result != null)
+			{
+				IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
+						Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
+
+				if (showFRCCurve)
+					showFrcCurve(name, result, method);
+			}
+		}
+		else
+		{
+			// TODO Multi-thread this ... See OPTICS for a recent example using runnables 			
+			int repeats = (randomSplit) ? Math.max(1, FIRE.repeats) : 1;			
+			
+			// TODO output each FRC curve using a suffix.
+			// TODO show a combined FRC curve plot of all the smoothed curves if we have multiples.
+			
+			FireResult result = null;
+			for (int i = 0; i < repeats; i++)
+			{
+				result = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex], IMAGE_SIZE_VALUES[imageSizeIndex]);
+
+				IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
+						Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
+
+				if (showFRCCurve)
+					showFrcCurve(name, result, method);
+			}
+
+			// Only do this once
+			if (showFRCTimeEvolution && result != null && !Double.isNaN(result.fireNumber))
+				showFrcTimeEvolution(name, result.fireNumber, method, result.imageScale,
+						IMAGE_SIZE_VALUES[imageSizeIndex]);
+		}
+
+		IJ.showStatus(TITLE + " complete : " + Utils.timeToString(System.currentTimeMillis() - start));
 	}
 
 	private MemoryPeakResults cropToRoi(MemoryPeakResults results)
@@ -243,8 +299,9 @@ public class FIRE implements PlugIn
 		gd.addCheckbox("Use_signal (if present)", useSignal);
 		gd.addNumericField("Max_per_bin", maxPerBin, 0);
 		gd.addMessage("For single datsets:");
-		gd.addCheckbox("Random_split", randomSplit);
 		gd.addNumericField("Block_size", blockSize, 0);
+		gd.addCheckbox("Random_split", randomSplit);
+		gd.addNumericField("Repeats", repeats, 0);
 		gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
@@ -266,8 +323,9 @@ public class FIRE implements PlugIn
 		inputOption2 = ResultsManager.getInputSource(gd);
 		useSignal = gd.getNextBoolean();
 		maxPerBin = Math.abs((int) gd.getNextNumber());
-		randomSplit = gd.getNextBoolean();
 		blockSize = Math.max(1, (int) gd.getNextNumber());
+		randomSplit = gd.getNextBoolean();
+		repeats = Math.max(1, (int) gd.getNextNumber());
 		showFRCTimeEvolution = gd.getNextBoolean();
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
@@ -326,7 +384,6 @@ public class FIRE implements PlugIn
 	{
 		this.results = verify(results);
 		this.results2 = verify(results2);
-		ip1 = ip2 = null;
 		nmPerPixel = 1;
 		units = "px";
 
@@ -362,12 +419,16 @@ public class FIRE implements PlugIn
 
 	private MemoryPeakResults verify(MemoryPeakResults results)
 	{
-		return (results == null || results.size() < 2) ? null : results;
+		if (results == null || results.size() < 2)
+			return null;
+		if (blockSize > 1)
+			// Results must be in time order when processing blocks
+			results.sort();
+		return results;
 	}
 
-	public ImageProcessor[] createImages(double fourierImageScale, int imageSize)
+	public FireImages createImages(double fourierImageScale, int imageSize)
 	{
-		ip1 = ip2 = null;
 		if (results == null)
 			return null;
 
@@ -379,16 +440,17 @@ public class FIRE implements PlugIn
 
 		boolean weighted = true;
 		boolean equalised = false;
+		double imageScale;
 		if (fourierImageScale == 0)
 		{
 			double size = FastMath.max(bounds.width, bounds.height);
 			if (size <= 0)
 				size = 1;
-			this.imageScale = imageSize / size;
+			imageScale = imageSize / size;
 		}
 		else
 			// TODO - The coordinates should be adjusted if the max-min can fit inside a smaller power of 2
-			this.imageScale = fourierImageScale;
+			imageScale = fourierImageScale;
 
 		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
 				equalised, "IP1", bounds, 1, 1, imageScale, 0, ResultsMode.ADD);
@@ -426,11 +488,11 @@ public class FIRE implements PlugIn
 			// Block sampling.
 			// Ensure we have at least 2 even sized blocks.
 			int blockSize = Math.min(results.size() / 2, Math.max(1, FIRE.blockSize));
-			int nBlocks = (int) Math.ceil((double)results.size() / blockSize);
+			int nBlocks = (int) Math.ceil((double) results.size() / blockSize);
 			while (nBlocks <= 1 && blockSize > 1)
 			{
 				blockSize /= 2;
-				nBlocks = (int) Math.ceil((double)results.size() / blockSize);
+				nBlocks = (int) Math.ceil((double) results.size() / blockSize);
 			}
 			if (nBlocks <= 1)
 				// This should not happen since the results should contain at least 2 localisations
@@ -472,10 +534,10 @@ public class FIRE implements PlugIn
 		}
 
 		image1.end();
-		ip1 = image1.getImagePlus().getProcessor();
+		ImageProcessor ip1 = image1.getImagePlus().getProcessor();
 
 		image2.end();
-		ip2 = image2.getImagePlus().getProcessor();
+		ImageProcessor ip2 = image2.getImagePlus().getProcessor();
 
 		if (!hasSignal && maxPerBin > 0)
 		{
@@ -489,15 +551,15 @@ public class FIRE implements PlugIn
 			}
 		}
 
-		return new ImageProcessor[] { ip1, ip2 };
+		return new FireImages(ip1, ip2, imageScale);
 	}
 
-	private void showFrcCurve(String name, double[][] frcIn, double[][] frcNoSmooth, ThresholdMethod method)
+	private void showFrcCurve(String name, FireResult result, ThresholdMethod method)
 	{
-		double[][] frcCurve = frcIn;
+		double[][] frcCurve = result.smoothedFrcCurve;
+		double[][] frcNoSmooth = result.frcCurve;
 
-		FRC frc = new FRC();
-		double[] threshold = frc.calculateThresholdCurve(frcCurve, method);
+		double[] threshold = FRC.calculateThresholdCurve(frcCurve, method);
 
 		double[] xValues = new double[frcCurve.length];
 		double[] yValues = new double[frcCurve.length];
@@ -517,7 +579,7 @@ public class FIRE implements PlugIn
 		// we must double the curve length to get the original maximum image width. In addition
 		// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
 		double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
-		double conversion = imageScale / (frcCurveLength * nmPerPixel);
+		double conversion = result.imageScale / (frcCurveLength * nmPerPixel);
 		for (int i = 0; i < xValues.length; i++)
 		{
 			final double radius = frcCurve[i][0];
@@ -550,11 +612,11 @@ public class FIRE implements PlugIn
 		Utils.display(title, plot);
 	}
 
-	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod method)
+	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod method, double fourierImageScale,
+			int imageSize)
 	{
 		IJ.showStatus("Calculating FRC time evolution curve...");
 
-		results.sort();
 		List<PeakResult> list = results.getResults();
 
 		int nSteps = 10;
@@ -590,7 +652,8 @@ public class FIRE implements PlugIn
 
 			FIRE f = new FIRE();
 			f.initialise(newResults, null);
-			double fire = f.calculateFireNumber(method, imageScale, ip1.getWidth() - 1);
+			FireResult result = f.calculateFireNumber(method, fourierImageScale, imageSize);
+			double fire = (result == null) ? 0 : result.fireNumber;
 			y.add(fire);
 
 			yMin = FastMath.min(yMin, fire);
@@ -634,21 +697,43 @@ public class FIRE implements PlugIn
 	 *            optimum memory usage)
 	 * @return The FIRE number
 	 */
-	public double calculateFireNumber(ThresholdMethod method, double fourierImageScale, int imageSize)
+	public FireResult calculateFireNumber(ThresholdMethod method, double fourierImageScale, int imageSize)
 	{
-		if (ip1 == null || ip2 == null)
-		{
-			if (createImages(fourierImageScale, imageSize) == null)
-				return 0;
-		}
+		FireImages images = createImages(fourierImageScale, imageSize);
+		return calculateFireNumber(method, images);
+	}
+
+	/**
+	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
+	 * {@link #initialise(MemoryPeakResults)}
+	 *
+	 * @param method
+	 *            the method
+	 * @param ip1
+	 *            the ip 1
+	 * @param ip2
+	 *            the ip 2
+	 * @return The FIRE number
+	 */
+	public FireResult calculateFireNumber(ThresholdMethod method, FireImages images)
+	{
+		if (images == null)
+			return null;
+
 		FRC frc = new FRC();
+		// TODO - Allow a progress tracker to be input. 
+		// This should be setup for the total number of repeats. 
+		// If parallelised then do not output the text status messages as they conflict. 
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
-		frcCurve = frc.calculateFrcCurve(ip1, ip2);
-		smoothedFrcCurve = frc.getSmoothedCurve(frcCurve);
+		double imageScale = images.imageScale;
+		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
+		double[][] smoothedFrcCurve = frc.getSmoothedCurve(frcCurve);
 		// The FIRE number will be returned in pixels relative to the input images. 
 		// However these were generated using an image scale so adjust for this.
 
-		return nmPerPixel * frc.calculateFireNumber(smoothedFrcCurve, method) / imageScale;
+		double fireNumber = nmPerPixel * frc.calculateFireNumber(smoothedFrcCurve, method) / imageScale;
+
+		return new FireResult(fireNumber, imageScale, frcCurve, smoothedFrcCurve);
 	}
 }
