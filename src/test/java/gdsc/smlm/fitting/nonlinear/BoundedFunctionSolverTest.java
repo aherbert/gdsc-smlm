@@ -326,6 +326,7 @@ public class BoundedFunctionSolverTest
 	private void canFitSingleGaussianBetter(FunctionSolver solver, boolean applyBounds, boolean withBias,
 			FunctionSolver solver2, boolean applyBounds2, boolean withBias2, String name, String name2)
 	{
+		int LOOPS = 5;
 		randomGenerator.setSeed(seed);
 		double bias2 = (withBias != withBias2) ? (withBias) ? -bias : bias : 0;
 		StoredDataStatistics[] stats = new StoredDataStatistics[6];
@@ -357,60 +358,93 @@ public class BoundedFunctionSolverTest
 
 			for (double n : noise)
 			{
-				double[] data = drawGaussian(expected, n, withBias);
-				double[] data2 = data.clone();
-				for (int i = 0; i < data.length; i++)
-					data2[i] += bias2;
-
-				for (int i = 0; i < stats.length; i++)
-					stats[i] = new StoredDataStatistics();
-
-				for (double db : base)
-					for (double dx : shift)
-						for (double dy : shift)
-							for (double dsx : factor)
-							{
-								double[] p = createParams(db, s, dx, dy, dsx, withBias);
-								double[] fp = fitGaussian(solver, data, p, expected);
-								i1 += solver.getEvaluations();
-
-								double[] p2 = createParams(db, s, dx, dy, dsx, withBias2);
-								double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
-								i2 += solver2.getEvaluations();
-
-								// Get the mean and sd (the fit precision)
-								compare(fp, expected, fp2, expected2, Gaussian2DFunction.SIGNAL, stats[0], stats[1]);
-
-								compare(fp, expected, fp2, expected2, Gaussian2DFunction.X_POSITION, stats[2],
-										stats[3]);
-								compare(fp, expected, fp2, expected2, Gaussian2DFunction.Y_POSITION, stats[4],
-										stats[5]);
-
-								// Use the distance
-								//stats[2].add(distance(fp, expected));
-								//stats[3].add(distance(fp2, expected2));
-							}
-
-				double alpha = 0.05; // two sided
-				for (int i = 0; i < stats.length; i += 2)
+				for (int loop = LOOPS; loop-- > 0;)
 				{
-					double u1 = stats[i].getMean();
-					double u2 = stats[i + 1].getMean();
-					double sd1 = stats[i].getStandardDeviation();
-					double sd2 = stats[i + 1].getStandardDeviation();
+					double[] data = drawGaussian(expected, n, withBias);
+					double[] data2 = data.clone();
+					for (int i = 0; i < data.length; i++)
+						data2[i] += bias2;
 
-					TTest tt = new TTest();
-					boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
+					for (int i = 0; i < stats.length; i++)
+						stats[i] = new StoredDataStatistics();
 
-					int index = i / 2;
-					String msg = String.format("%s vs %s : %.1f (%.1f) %s %f +/- %f vs %f +/- %f  (N=%d) %b", name2,
-							name, s, n, statName[index], u2, sd2, u1, sd1, stats[i].getN(), diff);
-					if (diff)
+					for (double db : base)
+						for (double dx : shift)
+							for (double dy : shift)
+								for (double dsx : factor)
+								{
+									double[] p = createParams(db, s, dx, dy, dsx, withBias);
+									double[] fp = fitGaussian(solver, data, p, expected);
+									i1 += solver.getEvaluations();
+
+									double[] p2 = createParams(db, s, dx, dy, dsx, withBias2);
+									double[] fp2 = fitGaussian(solver2, data2, p2, expected2);
+									i2 += solver2.getEvaluations();
+
+									// Get the mean and sd (the fit precision)
+									compare(fp, expected, fp2, expected2, Gaussian2DFunction.SIGNAL, stats[0],
+											stats[1]);
+
+									compare(fp, expected, fp2, expected2, Gaussian2DFunction.X_POSITION, stats[2],
+											stats[3]);
+									compare(fp, expected, fp2, expected2, Gaussian2DFunction.Y_POSITION, stats[4],
+											stats[5]);
+
+									// Use the distance
+									//stats[2].add(distance(fp, expected));
+									//stats[3].add(distance(fp2, expected2));
+								}
+
+					double alpha = 0.05; // two sided
+					for (int i = 0; i < stats.length; i += 2)
 					{
-						// Different means. Check they are roughly the same
-						if (DoubleEquality.almostEqualRelativeOrAbsolute(u1, u2, 0.1, 0))
+						double u1 = stats[i].getMean();
+						double u2 = stats[i + 1].getMean();
+						double sd1 = stats[i].getStandardDeviation();
+						double sd2 = stats[i + 1].getStandardDeviation();
+
+						TTest tt = new TTest();
+						boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
+
+						int index = i / 2;
+						String msg = String.format("%s vs %s : %.1f (%.1f) %s %f +/- %f vs %f +/- %f  (N=%d) %b", name2,
+								name, s, n, statName[index], u2, sd2, u1, sd1, stats[i].getN(), diff);
+						if (diff)
 						{
-							// Basically the same. Check which is more precise
+							// Different means. Check they are roughly the same
+							if (DoubleEquality.almostEqualRelativeOrAbsolute(u1, u2, 0.1, 0))
+							{
+								// Basically the same. Check which is more precise
+								if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
+								{
+									if (sd2 < sd1)
+									{
+										betterPrecision[index]++;
+										println(msg + " P*");
+									}
+									else
+										println(msg + " P");
+									totalPrecision[index]++;
+								}
+							}
+							else
+							{
+								// Check which is more accurate (closer to zero)
+								u1 = Math.abs(u1);
+								u2 = Math.abs(u2);
+								if (u2 < u1)
+								{
+									betterAccuracy[index]++;
+									println(msg + " A*");
+								}
+								else
+									println(msg + " A");
+								totalAccuracy[index]++;
+							}
+						}
+						else
+						{
+							// The same means. Check that it is more precise
 							if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
 							{
 								if (sd2 < sd1)
@@ -422,35 +456,6 @@ public class BoundedFunctionSolverTest
 									println(msg + " P");
 								totalPrecision[index]++;
 							}
-						}
-						else
-						{
-							// Check which is more accurate (closer to zero)
-							u1 = Math.abs(u1);
-							u2 = Math.abs(u2);
-							if (u2 < u1)
-							{
-								betterAccuracy[index]++;
-								println(msg + " A*");
-							}
-							else
-								println(msg + " A");
-							totalAccuracy[index]++;
-						}
-					}
-					else
-					{
-						// The same means. Check that it is more precise
-						if (!DoubleEquality.almostEqualRelativeOrAbsolute(sd1, sd2, 0.05, 0))
-						{
-							if (sd2 < sd1)
-							{
-								betterPrecision[index]++;
-								println(msg + " P*");
-							}
-							else
-								println(msg + " P");
-							totalPrecision[index]++;
 						}
 					}
 				}
