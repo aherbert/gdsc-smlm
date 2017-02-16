@@ -220,7 +220,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	 */
 	public int size()
 	{
-		results.trimToSize();
 		return results.size();
 	}
 
