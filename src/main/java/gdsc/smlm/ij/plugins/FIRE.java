@@ -4,12 +4,19 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.analysis.function.Gaussian;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.fitting.GaussianCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoint;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 
@@ -19,6 +26,7 @@ import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TurboList;
 
 /*----------------------------------------------------------------------------- 
@@ -207,6 +215,12 @@ public class FIRE implements PlugIn
 			return;
 		}
 
+		if ("q".equals(arg))
+		{
+			runQEstimation();
+			return;
+		}
+
 		if (!showDialog())
 			return;
 
@@ -220,7 +234,7 @@ public class FIRE implements PlugIn
 		MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false);
 
 		results = cropToRoi(results);
-		if (results.size() == 0)
+		if (results.size() < 2)
 		{
 			IJ.error(TITLE, "No results within the crop region");
 			IJ.showStatus("");
@@ -229,7 +243,7 @@ public class FIRE implements PlugIn
 		if (results2 != null)
 		{
 			results2 = cropToRoi(results2);
-			if (results2.size() == 0)
+			if (results2.size() < 2)
 			{
 				IJ.error(TITLE, "No results2 within the crop region");
 				IJ.showStatus("");
@@ -586,7 +600,6 @@ public class FIRE implements PlugIn
 			imageScale = imageSize / size;
 		}
 		else
-			// TODO - The coordinates should be adjusted if the max-min can fit inside a smaller power of 2
 			imageScale = fourierImageScale;
 
 		IJImagePeakResults image1 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImage.NONE, weighted,
@@ -656,11 +669,13 @@ public class FIRE implements PlugIn
 			if (randomSplit)
 				MathArrays.shuffle(indices);
 
-			for (int b = 0; b < nBlocks; b++)
+			for (int index : indices)
 			{
-				// Split alternating
-				IJImagePeakResults image = (b % 2 == 0) ? image1 : image2;
-				for (PeakResult p : blocks[indices[b]])
+				// Split alternating so just rotate
+				IJImagePeakResults image = image1;
+				image1 = image2;
+				image2 = image;
+				for (PeakResult p : blocks[index])
 				{
 					float x = p.getXPosition() - minx;
 					float y = p.getYPosition() - miny;
@@ -940,11 +955,374 @@ public class FIRE implements PlugIn
 		double imageScale = images.imageScale;
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 		double[][] smoothedFrcCurve = frc.getSmoothedCurve(frcCurve);
+
+		// Resolution in pixels
+		double fireNumber = frc.calculateFireNumber(smoothedFrcCurve, method);
+
+		// The FRC paper states that the super-resolution pixel size should be smaller
+		// than 1/4 of R (the resolution).
+		boolean pixelsTooBig = (4 > fireNumber);
+
 		// The FIRE number will be returned in pixels relative to the input images. 
 		// However these were generated using an image scale so adjust for this.
+		fireNumber *= nmPerPixel / imageScale;
 
-		double fireNumber = nmPerPixel * frc.calculateFireNumber(smoothedFrcCurve, method) / imageScale;
+		if (pixelsTooBig)
+		{
+			// Q. Should this be output somewhere else?
+			Utils.log(
+					"%s Warning: The super-resolution pixel size (%s) should be smaller than 1/4 of R (the resolution %s)",
+					TITLE, Utils.rounded(nmPerPixel / imageScale), Utils.rounded(fireNumber));
+		}
 
 		return new FireResult(fireNumber, imageScale, frcCurve, smoothedFrcCurve);
+	}
+
+	private void runQEstimation()
+	{
+		if (!showQEstimationInputDialog())
+			return;
+
+		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return;
+		}
+
+		results = cropToRoi(results);
+		if (results.size() < 2)
+		{
+			IJ.error(TITLE, "No results within the crop region");
+			IJ.showStatus("");
+			return;
+		}
+
+		initialise(results, null);
+
+		String name = results.getName();
+		double fourierImageScale = SCALE_VALUES[imageScaleIndex];
+		int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
+
+		// Create the image and compute the numerator of FRC.
+
+		// Build a histogram of the localisation precision.
+		// Get the initial mean and SD and plot as a Gaussian.
+		PrecisionHistogram histogram = calculatePrecisionHistogram();
+		histogram.plot();
+
+		// Compute log| v(q) / H(q) / sinc(pi*q*L)^2 | and smooth
+		// q = Spatial frequency (1/L, 2/L, ...)
+		// L = size of field of view
+		// H(q) depends on the mean and standard deviation of the precision  
+
+		// log(NQ/4) = min of the curve => Q = 4*exp(min) / N
+		// N == Number of localisations
+
+		// Interactive dialog to estimate Q (blinking events per flourophore) using 
+		// sliders for the mean and standard deviation of the localisation precision.
+
+	}
+
+	private boolean showQEstimationInputDialog()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		// Build a list of all images with a region ROI
+		List<String> titles = new LinkedList<String>();
+		if (WindowManager.getWindowCount() > 0)
+		{
+			for (int imageID : WindowManager.getIDList())
+			{
+				ImagePlus imp = WindowManager.getImage(imageID);
+				if (imp != null && imp.getRoi() != null && imp.getRoi().isArea())
+					titles.add(imp.getTitle());
+			}
+		}
+
+		gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation");
+
+		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+
+		//gd.addCheckbox("Use_signal (if present)", useSignal);
+		gd.addNumericField("Max_per_bin", maxPerBin, 0);
+		gd.addNumericField("Block_size", blockSize, 0);
+		gd.addCheckbox("Random_split", randomSplit);
+		gd.addMessage("Fourier options:");
+		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
+		gd.addChoice("Auto_image_scale", IMAGE_SIZE_ITEMS, IMAGE_SIZE_ITEMS[imageSizeIndex]);
+		gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
+		gd.addCheckbox("Half_circle", useHalfCircle);
+		if (!titles.isEmpty())
+			gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		inputOption = ResultsManager.getInputSource(gd);
+		//useSignal = gd.getNextBoolean();
+		maxPerBin = Math.abs((int) gd.getNextNumber());
+		blockSize = Math.max(1, (int) gd.getNextNumber());
+		randomSplit = gd.getNextBoolean();
+		imageScaleIndex = gd.getNextChoiceIndex();
+		imageSizeIndex = gd.getNextChoiceIndex();
+		perimeterSamplingFactor = gd.getNextNumber();
+		useHalfCircle = gd.getNextBoolean();
+
+		// Check arguments
+		try
+		{
+			Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		if (!titles.isEmpty())
+			chooseRoi = gd.getNextBoolean();
+
+		if (!titles.isEmpty() && chooseRoi)
+		{
+			if (titles.size() == 1)
+			{
+				roiImage = titles.get(0);
+				Recorder.recordOption("Image", roiImage);
+			}
+			else
+			{
+				String[] items = titles.toArray(new String[titles.size()]);
+				gd = new GenericDialog(TITLE);
+				gd.addMessage("Select the source image for the ROI");
+				gd.addChoice("Image", items, roiImage);
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return false;
+				roiImage = gd.getNextChoice();
+			}
+			ImagePlus imp = WindowManager.getImage(roiImage);
+
+			roiBounds = imp.getRoi().getBounds();
+			roiImageWidth = imp.getWidth();
+			roiImageHeight = imp.getHeight();
+		}
+		else
+		{
+			roiBounds = null;
+		}
+
+		return true;
+	}
+
+	public class PrecisionHistogram
+	{
+		final float[] x, y;
+		final String title;
+		final double standardAmplitude;
+		final float[] x2;
+
+		double mean;
+		double sigma;
+
+		PrecisionHistogram(float[][] hist, int nPoints, String title)
+		{
+			this.title = title;
+			x = Utils.createHistogramAxis(hist[0]);
+			y = Utils.createHistogramValues(hist[1]);
+
+			// Sum the area under the histogram to use for normalisation.
+			// Amplitude = volume / (sigma * sqrt(2*pi)) 
+			// Precompute the correct amplitude for a standard width Gaussian
+			double dx = (hist[0][1] - hist[0][0]);
+			standardAmplitude = nPoints * dx / Math.sqrt(2 * Math.PI);
+
+			// Set up for drawing the Gaussian curve
+			double min = x[0];
+			double max = x[x.length - 1];
+			int n = 100;
+			dx = (max - min) / n;
+			x2 = new float[n + 1];
+			for (int i = 0; i <= n; i++)
+				x2[i] = (float) (min + i * dx);
+		}
+
+		void plot()
+		{
+			Plot2 plot = new Plot2(title, "Precision (nm)", "Frequency");
+			plot.setColor(Color.black);
+			plot.addPoints(x, y, Plot.LINE);
+			plot.addLabel(0, 0, String.format("%.3f +/- %.3f", mean, sigma));
+			// Add the Gaussian line
+			Gaussian g = new Gaussian(this.standardAmplitude / sigma, mean, sigma);
+			float[] y2 = new float[x2.length];
+			for (int i = 0; i < y2.length; i++)
+			{
+				y2[i] = (float) g.value(x2[i]);
+			}
+			// Normalise
+			plot.setColor(Color.red);
+			plot.addPoints(x2, y2, Plot.LINE);
+			Utils.display(title, plot);
+		}
+	}
+
+	/**
+	 * Calculate the average precision by fitting a Gaussian to the histogram of the precision distribution.
+	 * 
+	 * @return The average precision
+	 */
+	public PrecisionHistogram calculatePrecisionHistogram()
+	{
+		boolean logFitParameters = false;
+
+		// Plot histogram of the precision
+		final double nmPerPixel = results.getNmPerPixel();
+		final double gain = results.getGain();
+		final boolean emCCD = results.isEMCCD();
+		StoredDataStatistics precision = new StoredDataStatistics(results.size());
+		for (PeakResult r : results.getResults())
+		{
+			precision.add(r.getPrecision(nmPerPixel, gain, emCCD));
+		}
+
+		double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
+
+		// Set the min and max y-values using 1.5 x IQR 
+		DescriptiveStatistics stats = precision.getStatistics();
+		double lower = stats.getPercentile(25);
+		double upper = stats.getPercentile(75);
+		if (Double.isNaN(lower) || Double.isNaN(upper))
+		{
+			if (logFitParameters)
+				Utils.log("Error computing IQR: %f - %f", lower, upper);
+		}
+		else
+		{
+			double iqr = upper - lower;
+
+			yMin = FastMath.max(lower - iqr, stats.getMin());
+			yMax = FastMath.min(upper + iqr, stats.getMax());
+
+			if (logFitParameters)
+				Utils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
+						yMax);
+		}
+
+		if (yMin == Double.NEGATIVE_INFINITY)
+		{
+			int n = 5;
+			yMin = Math.max(stats.getMin(), stats.getMean() - n * stats.getStandardDeviation());
+			yMax = Math.min(stats.getMax(), stats.getMean() + n * stats.getStandardDeviation());
+
+			if (logFitParameters)
+				Utils.log("  Data range: %f - %f. Plotting mean +/- %dxSD: %f - %f", stats.getMin(), stats.getMax(), n,
+						yMin, yMax);
+		}
+
+		// Get the data within the range
+		double[] data = precision.getValues();
+		precision = new StoredDataStatistics(data.length);
+		for (double d : data)
+		{
+			if (d < yMin || d > yMax)
+				continue;
+			precision.add(d);
+		}
+
+		int histogramBins = Utils.getBins(precision, Utils.BinMethod.SCOTT);
+		float[][] hist = Utils.calcHistogram(precision.getFloatValues(), yMin, yMax, histogramBins);
+
+		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision.getN(), results.getName() + " Precision Histogram");
+
+		// Extract non-zero data
+		float[] x = Arrays.copyOf(hist[0], hist[0].length);
+		float[] y = hist[1];
+		int count = 0;
+		float dx = (x[1] - x[0]) * 0.5f;
+		for (int i = 0; i < y.length; i++)
+			if (y[i] > 0)
+			{
+				x[count] = x[i] + dx;
+				y[count] = y[i];
+				count++;
+			}
+		x = Arrays.copyOf(x, count);
+		y = Arrays.copyOf(y, count);
+
+		// Sense check to fitted data. Get mean and SD of histogram
+		double[] stats2 = Utils.getHistogramStatistics(x, y);
+		if (logFitParameters)
+			Utils.log("  Initial Statistics: %f +/- %f", stats2[0], stats2[1]);
+		histogram.mean = stats2[0];
+		histogram.sigma = stats2[1];
+
+		// Standard Gaussian fit
+		double[] parameters = fitGaussian(x, y);
+		if (parameters == null)
+		{
+			Utils.log("  Failed to fit initial Gaussian");
+			return histogram;
+		}
+		double newMean = parameters[1];
+		double error = Math.abs(stats2[0] - newMean) / stats2[1];
+		if (error > 3)
+		{
+			Utils.log("  Failed to fit Gaussian: %f standard deviations from histogram mean", error);
+			return histogram;
+		}
+		if (newMean < yMin || newMean > yMax)
+		{
+			Utils.log("  Failed to fit Gaussian: %f outside data range %f - %f", newMean, yMin, yMax);
+			return histogram;
+		}
+
+		if (logFitParameters)
+			Utils.log("  Initial Gaussian: %f @ %f +/- %f", parameters[0], parameters[1], parameters[2]);
+
+		histogram.mean = parameters[1];
+		histogram.sigma = parameters[2];
+
+		return histogram;
+	}
+
+	/**
+	 * Fit gaussian.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return new double[] { norm, mean, sigma }
+	 */
+	private double[] fitGaussian(float[] x, float[] y)
+	{
+		WeightedObservedPoints obs = new WeightedObservedPoints();
+		for (int i = 0; i < x.length; i++)
+			obs.add(x[i], y[i]);
+
+		Collection<WeightedObservedPoint> observations = obs.toList();
+		GaussianCurveFitter fitter = GaussianCurveFitter.create().withMaxIterations(2000);
+		GaussianCurveFitter.ParameterGuesser guess = new GaussianCurveFitter.ParameterGuesser(observations);
+		double[] initialGuess = null;
+		try
+		{
+			initialGuess = guess.guess();
+			return fitter.withStartPoint(initialGuess).fit(observations);
+		}
+		catch (TooManyEvaluationsException e)
+		{
+			// Use the initial estimate
+			return initialGuess;
+		}
+		catch (Exception e)
+		{
+			// Just in case there is another exception type, or the initial estimate failed
+			return null;
+		}
 	}
 }
