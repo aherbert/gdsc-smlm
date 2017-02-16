@@ -26,6 +26,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.ImageWindow;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
@@ -112,12 +113,38 @@ public class FRC
 		ip1 = pad(ip1, maxWidth, maxHeight);
 		ip2 = pad(ip2, maxWidth, maxHeight);
 
-		// TODO - Can this be sped up by computing both FFT transforms together?
-		FloatProcessor[] fft1 = getComplexFFT(ip1);
-		progess.incrementProgress(THIRD);
-		FloatProcessor[] fft2 = getComplexFFT(ip2);
+		FloatProcessor[] fft1, fft2;
 
-		progess.incrementProgress(THIRD);
+		// TODO - Can this be sped up by computing both FFT transforms together?
+		boolean basic = false;
+		if (basic)
+		{
+			fft1 = getComplexFFT(ip1);
+			progess.incrementProgress(THIRD);
+			fft2 = getComplexFFT(ip2);
+			progess.incrementProgress(THIRD);
+		}
+		else
+		{
+			// Speed up by reusing the FHT object which performs pre-computation
+			FHT2 fht = new FHT2();
+			fht.setShowProgress(false);
+
+			ip1 = getSquareTaperedImage(ip1);
+			float[] f1 = (float[]) ip1.getPixels();
+			fht.rc2DFHT(f1, false, ip1.getWidth());
+			FHT2 fht1 = new FHT2(ip1, true);
+			fft1 = getProcessors(fht1.getComplexTransform());
+			progess.incrementProgress(THIRD);
+
+			ip2 = getSquareTaperedImage(ip2);
+			float[] f2 = (float[]) ip2.getPixels();
+			fht.rc2DFHT(f2, false, ip2.getWidth());
+			FHT2 fht2 = new FHT2(ip2, true);
+			fft2 = getProcessors(fht2.getComplexTransform());
+			progess.incrementProgress(THIRD);
+		}
+
 		progess.status("Preparing FRC curve calculation...");
 
 		final int size = fft1[0].getWidth();
@@ -224,18 +251,17 @@ public class FRC
 		fht.setShowProgress(false);
 		fht.transform();
 
-		FloatProcessor[] ret = new FloatProcessor[2];
-
 		ImageStack stack1 = fht.getComplexTransform();
-		ret[0] = ((FloatProcessor) stack1.getProcessor(1));
-		ret[1] = ((FloatProcessor) stack1.getProcessor(2));
-
-		return ret;
+		return getProcessors(stack1);
 	}
 
-	// Cache the Tukey window function
-	private float[] taperX = new float[0];
-	private float[] taperY = new float[0];
+	private FloatProcessor[] getProcessors(ImageStack stack1)
+	{
+		FloatProcessor[] ret = new FloatProcessor[2];
+		ret[0] = ((FloatProcessor) stack1.getProcessor(1));
+		ret[1] = ((FloatProcessor) stack1.getProcessor(2));
+		return ret;
+	}
 
 	/**
 	 * Applies a Tukey window function to the image and then pads it to the next square size power of two.
@@ -246,8 +272,8 @@ public class FRC
 	public FloatProcessor getSquareTaperedImage(ImageProcessor dataImage)
 	{
 		// Use a Tukey window function
-		taperX = getWindowFunction(taperX, dataImage.getWidth());
-		taperY = getWindowFunction(taperY, dataImage.getHeight());
+		float[] taperX = getWindowFunctionX(dataImage.getWidth());
+		float[] taperY = getWindowFunctionY(dataImage.getHeight());
 
 		final int size = FastMath.max(dataImage.getWidth(), dataImage.getHeight());
 
@@ -284,31 +310,75 @@ public class FRC
 		return new FloatProcessor(newSize, newSize, pixels, null);
 	}
 
-	private float[] getWindowFunction(float[] taper, int size)
+	// Cache the Tukey window function.
+	// Using methods to check the length should make it thread safe since we create an instance reference
+	// to an array of the correct length.
+	private static float[] taperX = new float[0], taperY = new float[0];
+
+	private static float[] getWindowFunctionX(int size)
+	{
+		float[] taper = getWindowFunction(taperX, size);
+		taperX = taper;
+		return taper;
+	}
+
+	private static float[] getWindowFunctionY(int size)
+	{
+		float[] taper = getWindowFunction(taperY, size);
+		taperY = taper;
+		return taper;
+	}
+
+	private static float[] getWindowFunction(float[] taper, int size)
 	{
 		if (taper.length != size)
 		{
 			// Re-use cached values
-			if (taperX.length == size)
-				return taperX;
-			if (taperY.length == size)
-				return taperY;
-
-			final int boundary = size / 8;
-			final int upperBoundary = size - boundary;
-			taper = new float[size];
-			for (int i = 0; i < size; i++)
-			{
-				if ((i < boundary) || (i > size - upperBoundary))
-				{
-					taper[i] = (float) Math.pow(Math.sin(12.566370614359172D * i / size), 2.0D);
-				}
-				else
-				{
-					taper[i] = 1;
-				}
-			}
+			taper = check(taperX, size);
+			if (taper != null)
+				return taper;
+			taper = check(taperY, size);
+			if (taper != null)
+				return taper;
+			taper = getTukeyWindowFunction(size);
 		}
+		return taper;
+	}
+
+	private static float[] check(float[] taper, int size)
+	{
+		return (taper.length == size) ? taper : null;
+	}
+
+	private static float[] getTukeyWindowFunction(int size)
+	{
+		float[] taper = new float[size];
+
+		//// Original code. This created a non-symmetric window
+		//final int boundary = size / 8;
+		//final int upperBoundary = size - boundary;
+		//for (int i = 0; i < size; i++)
+		//{
+		//	if ((i < boundary) || (i >= upperBoundary))
+		//	{
+		//		final double d = Math.sin(12.566370614359172D * i / size);
+		//		taper[i] = (float) (d * d);
+		//	}
+		//	else
+		//	{
+		//		taper[i] = 1;
+		//	}
+		//}
+
+		// Use the GDSC ImageWindow class:
+		// FRC has Image width / Width of edge region = 8 so use alpha 0.25.
+		double[] w = ImageWindow.tukey(size, 0.25);
+		for (int i = 0; i < size; i++)
+		{
+			//System.out.printf("[%d] %f  %f\n", i, w[i], taper[i]);
+			taper[i] = (float) w[i];
+		}
+
 		return taper;
 	}
 
