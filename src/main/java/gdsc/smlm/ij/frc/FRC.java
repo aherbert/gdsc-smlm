@@ -1,6 +1,18 @@
 package gdsc.smlm.ij.frc;
 
-import ij.IJ;
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import ij.ImageStack;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
@@ -12,12 +24,18 @@ import java.util.Arrays;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.logging.NullTrackProgress;
+import gdsc.core.logging.TrackProgress;
+
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
  * <p>
- * Adapted from the FIRE (Fourier Image REsolution) plugin produced as part of the paper:<br>
+ * Adapted by Alex Herbert from the FIRE (Fourier Image REsolution) plugin produced as part of the paper:<br>
  * Niewenhuizen, et al (2013). Measuring image resolution in optical nanoscopy. Nature Methods, 10, 557<br>
  * http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
+ * 
+ * @author Alex Herbert
+ * @author Bernd Rieger, b.rieger@tudelft.nl
  */
 public class FRC
 {
@@ -59,6 +77,19 @@ public class FRC
 	 */
 	public boolean useHalfCircle = true;
 
+	/** Used to track the progess within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}. */
+	public TrackProgress progress = null;
+
+	private TrackProgress getTrackProgress()
+	{
+		if (progress == null)
+			return new NullTrackProgress();
+		return progress;
+	}
+
+	private static final double THIRD = 1.0 / 3.0;
+	private static final double LAST_THIRD = 1.0 - 2 * THIRD;
+
 	/**
 	 * Calculate the Fourier Ring Correlation curve for two images.
 	 * 
@@ -70,9 +101,10 @@ public class FRC
 	 */
 	public double[][] calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2)
 	{
-		// TODO - Allow a progress tracker to be input 
-		IJ.showProgress(0);
-		IJ.showStatus("Calculating complex FFT images...");
+		// Allow a progress tracker to be input
+		TrackProgress progess = getTrackProgress();
+		progess.incrementProgress(0);
+		progess.status("Calculating complex FFT images...");
 
 		// Pad images to the same size
 		final int maxWidth = FastMath.max(ip1.getWidth(), ip2.getWidth());
@@ -82,11 +114,11 @@ public class FRC
 
 		// TODO - Can this be sped up by computing both FFT transforms together?
 		FloatProcessor[] fft1 = getComplexFFT(ip1);
-		IJ.showProgress(0.333);
+		progess.incrementProgress(THIRD);
 		FloatProcessor[] fft2 = getComplexFFT(ip2);
 
-		IJ.showProgress(0.666);
-		IJ.showStatus("Preparing FRC curve calculation...");
+		progess.incrementProgress(THIRD);
+		progess.status("Preparing FRC curve calculation...");
 
 		final int size = fft1[0].getWidth();
 
@@ -114,7 +146,7 @@ public class FRC
 		final int centre = size / 2;
 		final int max = centre - 1;
 
-		IJ.showStatus("Calculating FRC curve...");
+		progess.status("Calculating FRC curve...");
 
 		double[][] frcCurve = new double[(int) max][3];
 
@@ -161,8 +193,8 @@ public class FRC
 			radius++;
 		}
 
-		IJ.showProgress(1);
-		IJ.showStatus("Finished calculating FRC curve...");
+		progess.incrementProgress(LAST_THIRD);
+		progess.status("Finished calculating FRC curve...");
 
 		return frcCurve;
 	}
@@ -429,7 +461,7 @@ public class FRC
 	{
 		if (frcCurve.length != thresholdCurve.length)
 		{
-			IJ.error("Error", "Unable to calculate FRC curve intersections due to input length mismatch.");
+			getTrackProgress().log("Error: Unable to calculate FRC curve intersections due to input length mismatch.");
 			return null;
 		}
 

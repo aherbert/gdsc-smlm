@@ -13,7 +13,10 @@ import java.util.concurrent.Future;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.core.logging.NullTrackProgress;
+import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
@@ -285,7 +288,9 @@ public class FIRE implements PlugIn
 				ExecutorService executor = Executors.newFixedThreadPool(nThreads);
 				TurboList<Future<?>> futures = new TurboList<Future<?>>(repeats);
 				TurboList<FIREWorker> workers = new TurboList<FIREWorker>(repeats);
-
+				setProgress(repeats);
+				IJ.showProgress(0);
+				IJ.showStatus(TITLE + " computing ...");
 				for (int i = 1; i <= repeats; i++)
 				{
 					FIREWorker w = new FIREWorker(i, method, fourierImageScale, imageSize);
@@ -308,6 +313,7 @@ public class FIRE implements PlugIn
 						e.printStackTrace();
 					}
 				}
+				IJ.showProgress(1);
 
 				executor.shutdown();
 
@@ -866,6 +872,47 @@ public class FIRE implements PlugIn
 		return calculateFireNumber(method, images);
 	}
 
+	private TrackProgress progress = new IJTrackProgress();
+
+	private void setProgress(int repeats)
+	{
+		if (repeats > 1)
+			progress = new ParallelTrackProgress(repeats);
+		else
+			progress = new IJTrackProgress();
+	}
+
+	/**
+	 * Dumb implementation of the track progress interface for parallel threads. Used simple synchronisation to
+	 * increment total progress.
+	 */
+	private static class ParallelTrackProgress extends NullTrackProgress
+	{
+		double done = 0;
+		final int total;
+
+		ParallelTrackProgress(int repeats)
+		{
+			total = repeats;
+		}
+
+		@Override
+		public void incrementProgress(double fraction)
+		{
+			// Avoid synchronisation for nothing
+			if (fraction == 0)
+				return;
+			double done = add(fraction);
+			IJ.showProgress(done / this.total);
+		}
+
+		synchronized double add(double d)
+		{
+			done += d;
+			return done;
+		}
+	}
+
 	/**
 	 * Calculate the Fourier Image REsolution (FIRE) number using the chosen threshold method. Should be called after
 	 * {@link #initialise(MemoryPeakResults)}
@@ -884,9 +931,10 @@ public class FIRE implements PlugIn
 			return null;
 
 		FRC frc = new FRC();
-		// TODO - Allow a progress tracker to be input. 
+		// Allow a progress tracker to be input.
 		// This should be setup for the total number of repeats. 
 		// If parallelised then do not output the text status messages as they conflict. 
+		frc.progress = progress;
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
 		double imageScale = images.imageScale;
