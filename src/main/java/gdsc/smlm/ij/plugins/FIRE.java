@@ -312,7 +312,7 @@ public class FIRE implements PlugIn
 				executor.shutdown();
 
 				// Show a combined FRC curve plot of all the smoothed curves if we have multiples.
-				LUT valuesLUT = LUTHelper.createLUT(LutColour.RED);
+				LUT valuesLUT = LUTHelper.createLUT(LutColour.FIRE_GLOW);
 				@SuppressWarnings("unused")
 				LUT noSmoothLUT = LUTHelper.createLUT(LutColour.GRAYS).createInvertedLut(); // Black at max value
 				LUTHelper.DefaultLUTMapper mapper = new LUTHelper.DefaultLUTMapper(0, repeats);
