@@ -6,11 +6,17 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.TurboList;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -39,13 +45,18 @@ import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
+import ij.process.LUT;
+import ij.process.LUTHelper;
+import ij.process.LUTHelper.LutColour;
 
 /**
  * Computes the Fourier Image Resolution of an image
@@ -99,6 +110,7 @@ public class FIRE implements PlugIn
 	private static boolean useHalfCircle = true;
 	private static int thresholdMethodIndex = 0;
 	private static boolean showFRCCurve = true;
+	private static boolean showFRCCurveRepeats = false;
 	private static boolean showFRCTimeEvolution = false;
 
 	private static boolean chooseRoi = false;
@@ -139,6 +151,39 @@ public class FIRE implements PlugIn
 			this.imageScale = imageScale;
 			this.frcCurve = frcCurve;
 			this.smoothedFrcCurve = smoothedFrcCurve;
+		}
+	}
+
+	public class FIREWorker implements Runnable
+	{
+		final int id;
+		final ThresholdMethod method;
+		final double fourierImageScale;
+		final int imageSize;
+
+		String name;
+		FireResult result;
+		Plot2 plot;
+
+		public FIREWorker(int id, ThresholdMethod method, double fourierImageScale, int imageSize)
+		{
+			this.id = id;
+			this.method = method;
+			this.fourierImageScale = fourierImageScale;
+			this.imageSize = imageSize;
+			name = results.getName() + " [" + id + "]";
+		}
+
+		public void run()
+		{
+			result = calculateFireNumber(method, fourierImageScale, imageSize);
+			if (showFRCCurve)
+			{
+				plot = createFrcCurve(name, result, method);
+				if (showFRCCurveRepeats)
+					// Do this on the thread
+					plot.draw();
+			}
 		}
 	}
 
@@ -197,12 +242,14 @@ public class FIRE implements PlugIn
 		initialise(results, results2);
 
 		String name = results.getName();
+		double fourierImageScale = SCALE_VALUES[imageScaleIndex];
+		int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
+
 		if (this.results2 != null)
 		{
 			name += " vs " + results2.getName();
 
-			FireResult result = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex],
-					IMAGE_SIZE_VALUES[imageSizeIndex]);
+			FireResult result = calculateFireNumber(method, fourierImageScale, imageSize);
 
 			if (result != null)
 			{
@@ -215,28 +262,110 @@ public class FIRE implements PlugIn
 		}
 		else
 		{
-			// TODO Multi-thread this ... See OPTICS for a recent example using runnables 			
-			int repeats = (randomSplit) ? Math.max(1, FIRE.repeats) : 1;			
-			
-			// TODO output each FRC curve using a suffix.
-			// TODO show a combined FRC curve plot of all the smoothed curves if we have multiples.
-			
 			FireResult result = null;
-			for (int i = 0; i < repeats; i++)
+
+			int repeats = (randomSplit) ? Math.max(1, FIRE.repeats) : 1;
+			if (repeats == 1)
 			{
-				result = calculateFireNumber(method, SCALE_VALUES[imageScaleIndex], IMAGE_SIZE_VALUES[imageSizeIndex]);
+				result = calculateFireNumber(method, fourierImageScale, imageSize);
 
-				IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
-						Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
+				if (result != null)
+				{
+					IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", name,
+							Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
 
-				if (showFRCCurve)
-					showFrcCurve(name, result, method);
+					if (showFRCCurve)
+						showFrcCurve(name, result, method);
+				}
+			}
+			else
+			{
+				// Multi-thread this ... 			
+				int nThreads = Maths.min(repeats, Prefs.getThreads());
+				ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+				TurboList<Future<?>> futures = new TurboList<Future<?>>(repeats);
+				TurboList<FIREWorker> workers = new TurboList<FIREWorker>(repeats);
+
+				for (int i = 1; i <= repeats; i++)
+				{
+					FIREWorker w = new FIREWorker(i, method, fourierImageScale, imageSize);
+					workers.add(w);
+					futures.add(executor.submit(w));
+				}
+
+				// Wait for all to finish
+				for (int t = futures.size(); t-- > 0;)
+				{
+					try
+					{
+						// The future .get() method will block until completed
+						futures.get(t).get();
+					}
+					catch (Exception e)
+					{
+						// This should not happen. 
+						// Ignore it and allow processing to continue (the number of neighbour samples will just be smaller).  
+						e.printStackTrace();
+					}
+				}
+
+				executor.shutdown();
+
+				// Show a combined FRC curve plot of all the smoothed curves if we have multiples.
+				LUT valuesLUT = LUTHelper.createLUT(LutColour.RED);
+				@SuppressWarnings("unused")
+				LUT noSmoothLUT = LUTHelper.createLUT(LutColour.GRAYS).createInvertedLut(); // Black at max value
+				LUTHelper.DefaultLUTMapper mapper = new LUTHelper.DefaultLUTMapper(0, repeats);
+				FrcCurve curve = new FrcCurve();
+
+				Statistics stats = new Statistics();
+				WindowOrganiser wo = new WindowOrganiser();
+				for (int i = 0; i < repeats; i++)
+				{
+					FIREWorker w = workers.get(i);
+					if (w.result == null)
+						continue;
+					result = w.result;
+					if (!Double.isNaN(result.fireNumber))
+						stats.add(result.fireNumber);
+
+					if (showFRCCurveRepeats)
+					{
+						// Output each FRC curve using a suffix.
+						IJ.log(String.format("%s : FIRE number = %s %s (Fourier scale = %s)", w.name,
+								Utils.rounded(result.fireNumber, 4), units, Utils.rounded(result.imageScale, 3)));
+						wo.add(Utils.display(w.plot.getTitle(), w.plot));
+					}
+					if (showFRCCurve)
+					{
+						int index = mapper.map(i + 1);
+						//@formatter:off
+						curve.add(name, result, method, 
+								LUTHelper.getColour(valuesLUT, index),
+								Color.blue, 
+								null //LUTHelper.getColour(noSmoothLUT, index)
+								);
+						//@formatter:on
+					}
+				}
+
+				if (result != null)
+				{
+					wo.cascade();
+					IJ.log(String.format("%s : FIRE number = %s +/- %s %s (Fourier scale = %s)", name,
+							Utils.rounded(stats.getMean(), 4), Utils.rounded(stats.getStandardDeviation(), 4), units,
+							Utils.rounded(result.imageScale, 3)));
+					if (showFRCCurve)
+					{
+						Plot2 plot = curve.getPlot();
+						Utils.display(plot.getTitle(), plot);
+					}
+				}
 			}
 
 			// Only do this once
 			if (showFRCTimeEvolution && result != null && !Double.isNaN(result.fireNumber))
-				showFrcTimeEvolution(name, result.fireNumber, method, result.imageScale,
-						IMAGE_SIZE_VALUES[imageSizeIndex]);
+				showFrcTimeEvolution(name, result.fireNumber, method, result.imageScale, imageSize);
 		}
 
 		IJ.showStatus(TITLE + " complete : " + Utils.timeToString(System.currentTimeMillis() - start));
@@ -302,6 +431,7 @@ public class FIRE implements PlugIn
 		gd.addNumericField("Block_size", blockSize, 0);
 		gd.addCheckbox("Random_split", randomSplit);
 		gd.addNumericField("Repeats", repeats, 0);
+		gd.addCheckbox("Show_FRC_curve_repeats", showFRCCurveRepeats);
 		gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
@@ -326,6 +456,7 @@ public class FIRE implements PlugIn
 		blockSize = Math.max(1, (int) gd.getNextNumber());
 		randomSplit = gd.getNextBoolean();
 		repeats = Math.max(1, (int) gd.getNextNumber());
+		showFRCCurveRepeats = gd.getNextBoolean();
 		showFRCTimeEvolution = gd.getNextBoolean();
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
@@ -554,62 +685,94 @@ public class FIRE implements PlugIn
 		return new FireImages(ip1, ip2, imageScale);
 	}
 
+	/**
+	 * Encapsulate plotting the FRC curve to allow multiple curves to be plotted together
+	 */
+	private class FrcCurve
+	{
+		double[] xValues = null;
+		Plot2 plot = null;
+
+		void add(String name, FireResult result, ThresholdMethod method, Color colorValues, Color colorThreshold,
+				Color colorNoSmooth)
+		{
+			double[][] frcCurve = result.smoothedFrcCurve;
+			double[][] frcNoSmooth = result.frcCurve;
+
+			double[] yValues = new double[frcCurve.length];
+			double[] yValuesNotSmooth = new double[frcCurve.length];
+
+			if (plot == null)
+			{
+				double nmPerPixel = 1;
+				String units = "px";
+				if (results.getCalibration() != null)
+				{
+					nmPerPixel = results.getNmPerPixel();
+					units = "nm";
+				}
+				String title = name + " FRC Curve";
+				plot = new Plot2(title, String.format("Spatial Frequency (%s^-1)", units), "FRC");
+
+				xValues = new double[frcCurve.length];
+				// Since the Fourier calculation only uses half of the image (from centre to the edge) 
+				// we must double the curve length to get the original maximum image width. In addition
+				// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
+				double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
+				double conversion = result.imageScale / (frcCurveLength * nmPerPixel);
+				for (int i = 0; i < xValues.length; i++)
+				{
+					final double radius = frcCurve[i][0];
+					xValues[i] = radius * conversion;
+				}
+
+				// The threshold curve is the same
+				double[] threshold = FRC.calculateThresholdCurve(frcCurve, method);
+				add(colorThreshold, threshold);
+			}
+
+			for (int i = 0; i < xValues.length; i++)
+			{
+				yValues[i] = frcCurve[i][1];
+				if (frcNoSmooth != null)
+					yValuesNotSmooth[i] = frcNoSmooth[i][1];
+			}
+
+			add(colorValues, yValues);
+			if (frcNoSmooth != null)
+				add(colorNoSmooth, yValuesNotSmooth);
+		}
+
+		void add(Color color, double[] y)
+		{
+			if (color == null)
+				return;
+			plot.setColor(color);
+			plot.addPoints(xValues, y, Plot2.LINE);
+		}
+
+		Plot2 getPlot()
+		{
+			plot.setLimitsToFit(false);
+			// Q. For some reason the limits calculated are ignored,
+			// so set them as the defaults.
+			double[] limits = plot.getCurrentMinAndMax();
+			plot.setLimits(limits[0], limits[1], limits[2], limits[3]);
+			return plot;
+		}
+	}
+
+	private Plot2 createFrcCurve(String name, FireResult result, ThresholdMethod method)
+	{
+		FrcCurve curve = new FrcCurve();
+		curve.add(name, result, method, Color.red, Color.blue, Color.black);
+		return curve.getPlot();
+	}
+
 	private void showFrcCurve(String name, FireResult result, ThresholdMethod method)
 	{
-		double[][] frcCurve = result.smoothedFrcCurve;
-		double[][] frcNoSmooth = result.frcCurve;
-
-		double[] threshold = FRC.calculateThresholdCurve(frcCurve, method);
-
-		double[] xValues = new double[frcCurve.length];
-		double[] yValues = new double[frcCurve.length];
-		double[] yValuesNotSmooth = new double[frcCurve.length];
-
-		double nmPerPixel = 1;
-		String units = "px";
-		if (results.getCalibration() != null)
-		{
-			nmPerPixel = results.getNmPerPixel();
-			units = "nm";
-		}
-
-		double yMin = frcCurve[0][1];
-		double yMax = frcCurve[0][1];
-		// Since the Fourier calculation only uses half of the image (from centre to the edge) 
-		// we must double the curve length to get the original maximum image width. In addition
-		// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-		double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
-		double conversion = result.imageScale / (frcCurveLength * nmPerPixel);
-		for (int i = 0; i < xValues.length; i++)
-		{
-			final double radius = frcCurve[i][0];
-			xValues[i] = radius * conversion;
-			yValues[i] = frcCurve[i][1];
-
-			yMin = FastMath.min(yMin, yValues[i]);
-			yMax = FastMath.max(yMax, yValues[i]);
-			if (frcNoSmooth != null)
-				yValuesNotSmooth[i] = frcNoSmooth[i][1];
-		}
-
-		String title = name + " FRC Curve";
-		double[] dummy = null;
-		Plot2 plot = new Plot2(title, String.format("Spatial Frequency (%s^-1)", units), "FRC", dummy, dummy);
-		plot.setLimits(0, xValues[xValues.length - 1], yMin, yMax);
-
-		plot.setColor(Color.BLACK);
-		plot.addPoints(xValues, yValues, Plot2.LINE);
-
-		plot.setColor(Color.BLUE);
-		plot.addPoints(xValues, threshold, Plot2.LINE);
-
-		if (frcNoSmooth != null)
-		{
-			plot.setColor(Color.RED);
-			plot.addPoints(xValues, yValuesNotSmooth, Plot2.LINE);
-		}
-
-		Utils.display(title, plot);
+		Plot2 plot = createFrcCurve(name, result, method);
+		Utils.display(plot.getTitle(), plot);
 	}
 
 	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod method, double fourierImageScale,
