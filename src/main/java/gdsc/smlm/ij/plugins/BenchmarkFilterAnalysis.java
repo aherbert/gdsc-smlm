@@ -7217,6 +7217,16 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.core.logging.TrackProgress#incrementProgress(double)
+	 */
+	public void incrementProgress(double fraction)
+	{
+		// Ignore		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.core.logging.TrackProgress#log(java.lang.String, java.lang.Object[])
 	 */
 	public void log(String format, Object... args)
