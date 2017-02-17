@@ -16,6 +16,7 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
@@ -1158,7 +1159,11 @@ public class FIRE implements PlugIn
 			plot.addPoints(x, y, Plot.LINE);
 			plot.addLabel(0, 0, String.format("%.3f +/- %.3f", mean, sigma));
 			// Add the Gaussian line
-			Gaussian g = new Gaussian(this.standardAmplitude / sigma, mean, sigma);
+			// Compute the intergal of the standard gaussian between the min and max
+			final double denom0 = 1.0 / (Math.sqrt(2.0) * sigma);
+			double integral = 0.5 * Erf.erf((x2[0] - mean) * denom0, (x2[x2.length - 1] - mean) * denom0);
+			// Normalise so the integral has the same volume as the histogram
+			Gaussian g = new Gaussian(this.standardAmplitude / (sigma * integral), mean, sigma);
 			float[] y2 = new float[x2.length];
 			for (int i = 0; i < y2.length; i++)
 			{
@@ -1237,7 +1242,8 @@ public class FIRE implements PlugIn
 		int histogramBins = Utils.getBins(precision, Utils.BinMethod.SCOTT);
 		float[][] hist = Utils.calcHistogram(precision.getFloatValues(), yMin, yMax, histogramBins);
 
-		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision.getN(), results.getName() + " Precision Histogram");
+		PrecisionHistogram histogram = new PrecisionHistogram(hist, precision.getN(),
+				results.getName() + " Precision Histogram");
 
 		// Extract non-zero data
 		float[] x = Arrays.copyOf(hist[0], hist[0].length);
