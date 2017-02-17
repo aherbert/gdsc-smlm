@@ -589,4 +589,28 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	{
 		return results.isEmpty();
 	}
+
+	/**
+	 * Convert to an array.
+	 *
+	 * @return the peak result array
+	 */
+	public PeakResult[] toArray()
+	{
+		return results.toArray(new PeakResult[size()]);
+	}
+
+	/**
+	 * Convert to an array reusing the space if provided.
+	 *
+	 * @param array
+	 *            the array (can be null)
+	 * @return the peak result array
+	 */
+	public PeakResult[] toArray(PeakResult[] array)
+	{
+		if (array == null)
+			return toArray();
+		return results.toArray(array);
+	}
 }
