@@ -13,7 +13,6 @@ import gdsc.core.match.Coordinate;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.MatchResult;
 import gdsc.core.match.PointPair;
-import gdsc.core.utils.SimpleArrayUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -35,6 +34,7 @@ import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.gui.GenericDialog;
@@ -389,7 +389,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			addResult(inputOption1, inputOption2, distanceThreshold, result, idResult1, idResult2);
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private boolean haveIds(MemoryPeakResults results1, MemoryPeakResults results2)
 	{
@@ -501,7 +501,24 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private static int[] getTimepoints(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
 			TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates)
 	{
-		return SimpleArrayUtils.merge(actualCoordinates.keys(), predictedCoordinates.keys());
+		//int[] set = SimpleArrayUtils.merge(actualCoordinates.keys(), predictedCoordinates.keys());
+
+		// Do inline to avoid materialising the keys arrays
+		final TIntHashSet hashset = new TIntHashSet();
+		final TIntProcedure p = new TIntProcedure()
+		{
+			public boolean execute(int value)
+			{
+				hashset.add(value);
+				return true;
+			}
+		};
+		actualCoordinates.forEachKey(p);
+		predictedCoordinates.forEachKey(p);
+		int[] set = hashset.toArray();
+
+		Arrays.sort(set);
+		return set;
 	}
 
 	/**
@@ -742,9 +759,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	/**
 	 * Compare the coordinates in two results sets.
 	 *
-	 * @param results1 the results 1
-	 * @param results2 the results 2
-	 * @param distance the distance
+	 * @param results1
+	 *            the results 1
+	 * @param results2
+	 *            the results 2
+	 * @param distance
+	 *            the distance
 	 * @return the match result
 	 */
 	public static MatchResult compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
@@ -763,9 +783,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	/**
 	 * Compare the coordinates on a frame-by-frame basis.
 	 *
-	 * @param actualCoordinates the actual coordinates
-	 * @param predictedCoordinates the predicted coordinates
-	 * @param distance the distance
+	 * @param actualCoordinates
+	 *            the actual coordinates
+	 * @param predictedCoordinates
+	 *            the predicted coordinates
+	 * @param distance
+	 *            the distance
 	 * @return the match result
 	 */
 	public static MatchResult compareCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
