@@ -66,6 +66,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.utils.XmlUtils;
+import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -1168,16 +1169,13 @@ public class TraceMolecules implements PlugIn
 
 	private int[] convert(double[] intervals)
 	{
-		TreeSet<Integer> set = new TreeSet<Integer>();
+		TIntHashSet set = new TIntHashSet();
 		for (double d : intervals)
 			set.add((int) Math.round(d));
 
 		set.remove(0); // Do not allow zero
 
-		int[] values = new int[set.size()];
-		int i = 0;
-		for (Integer ii : set)
-			values[i++] = ii;
+		int[] values = set.toArray();
 		Arrays.sort(values);
 		return values;
 	}

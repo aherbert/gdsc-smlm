@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -69,6 +68,9 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.procedure.TObjectProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -436,7 +438,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		volatile boolean finished = false;
 		final BlockingQueue<Integer> jobs;
 		final ImageStack stack;
-		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
+		final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
 		final int fitting;
 		final FitConfiguration fitConfig;
 		final MaximaSpotFilter spotFilter;
@@ -470,7 +472,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 *            the o
 		 */
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, Overlay o)
+				TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig, Overlay o)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
@@ -1812,20 +1814,24 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final ImageStack stack = imp.getImageStack();
 
 		// Get the coordinates per frame
-		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator
+		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = ResultsMatchCalculator
 				.getCoordinates(results.getResults(), false);
 
-		long sumCount = 0;
-		for (ArrayList<Coordinate> list : actualCoordinates.values())
+		final long[] sumCount = new long[1];
+		actualCoordinates.forEachValue(new TObjectProcedure<ArrayList<Coordinate>>()
 		{
-			sumCount += list.size();
-		}
-		final double density = 1e6 * sumCount / (simulationParameters.a * simulationParameters.a *
+			public boolean execute(ArrayList<Coordinate> list)
+			{
+				sumCount[0] += list.size();
+				return true;
+			}
+		});
+		final double density = 1e6 * sumCount[0] / (simulationParameters.a * simulationParameters.a *
 				results.getBounds().getWidth() * results.getBounds().getHeight() * actualCoordinates.size());
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
+		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 		List<Worker> workers = new LinkedList<Worker>();
 		List<Thread> threads = new LinkedList<Thread>();
 		Overlay overlay = (showOverlay) ? new Overlay() : null;
@@ -1843,11 +1849,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		totalProgress = actualCoordinates.size();
 		stepProgress = Utils.getProgressInterval(totalProgress);
 		progress = 0;
-		for (int frame : actualCoordinates.keySet())
+		actualCoordinates.forEachKey(new TIntProcedure()
 		{
-			put(jobs, frame);
-		}
-
+			public boolean execute(int frame)
+			{
+				put(jobs, frame);
+				return true;
+			}
+		});
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
 		{

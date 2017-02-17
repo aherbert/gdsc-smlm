@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Label;
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import gdsc.core.ij.Utils;
@@ -37,6 +36,7 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -66,7 +66,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private ImagePlus imp = null;
 	private boolean preview = false;
 	private Label label = null;
-	private HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
+	private TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
 	private static double distance = 1.5;
 	private static boolean showTP = true;
 	private static boolean showFP = true;

@@ -5,10 +5,8 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -29,7 +27,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.Settings;
 import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
+import gdsc.core.utils.StoredData;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -59,6 +57,10 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.procedure.TObjectProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -153,7 +155,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 
-	private static HashMap<Integer, PSFSpot[]> actualCoordinates = null;
+	private static TIntObjectHashMap<PSFSpot[]> actualCoordinates = null;
 	private static int lastId = -1;
 	//private static boolean lastRelativeDistances = false;
 
@@ -169,7 +171,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		public final int simulationId;
 		public final int id = ++filterResultsId;
-		public HashMap<Integer, FilterResult> filterResults;
+		public TIntObjectHashMap<FilterResult> filterResults;
 		public FitEngineConfiguration config;
 		public MaximaSpotFilter spotFilter;
 		public double auc;
@@ -177,7 +179,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		int maxIndex;
 		int fractionIndex;
 		public double[][] cumul;
-		public StoredDataStatistics stats;
+		public StoredData stats;
 		public double auc2;
 		public double slope;
 		public double[] i1;
@@ -186,7 +188,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		public boolean relativeDistances;
 		public long time;
 
-		public BenchmarkFilterResult(HashMap<Integer, FilterResult> filterResults, FitEngineConfiguration config,
+		public BenchmarkFilterResult(TIntObjectHashMap<FilterResult> filterResults, FitEngineConfiguration config,
 				MaximaSpotFilter spotFilter)
 		{
 			this.simulationId = simulationParameters.id;
@@ -412,14 +414,14 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		volatile boolean finished = false;
 		final BlockingQueue<Integer> jobs;
-		final HashMap<Integer, ArrayList<Coordinate>> originalCoordinates;
-		final HashMap<Integer, PSFSpot[]> coordinates;
+		final TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates;
+		final TIntObjectHashMap<PSFSpot[]> coordinates;
 
-		public OverlapWorker(BlockingQueue<Integer> jobs, HashMap<Integer, ArrayList<Coordinate>> originalCoordinates)
+		public OverlapWorker(BlockingQueue<Integer> jobs, TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates)
 		{
 			this.jobs = jobs;
 			this.originalCoordinates = originalCoordinates;
-			this.coordinates = new HashMap<Integer, PSFSpot[]>();
+			this.coordinates = new TIntObjectHashMap<PSFSpot[]>();
 		}
 
 		/*
@@ -550,7 +552,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		 * @param t
 		 * @return The array list
 		 */
-		public PSFSpot[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
+		public PSFSpot[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t)
 		{
 			ArrayList<Coordinate> list1 = coords.get(t);
 			if (list1 != null)
@@ -581,7 +583,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		final ImageStack stack;
 		final MaximaSpotFilter spotFilter;
 		final float background;
-		final HashMap<Integer, FilterResult> results;
+		final TIntObjectHashMap<FilterResult> results;
 
 		float[] data = null;
 		long time = 0;
@@ -591,7 +593,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.jobs = jobs;
 			this.stack = stack;
 			this.spotFilter = spotFilter.clone();
-			this.results = new HashMap<Integer, FilterResult>();
+			this.results = new TIntObjectHashMap<FilterResult>();
 			this.background = background;
 		}
 
@@ -1618,9 +1620,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			// Always use float coordinates.
 			// The Worker adds a pixel offset for the spot coordinates.
-			HashMap<Integer, ArrayList<Coordinate>> coordinates = ResultsMatchCalculator
+			TIntObjectHashMap<ArrayList<Coordinate>> coordinates = ResultsMatchCalculator
 					.getCoordinates(results.getResults(), false);
-			actualCoordinates = new HashMap<Integer, PSFSpot[]>();
+			actualCoordinates = new TIntObjectHashMap<PSFSpot[]>();
 			lastId = simulationParameters.id;
 			//lastRelativeDistances = relativeDistances;
 
@@ -1633,7 +1635,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			IJ.showStatus("Computing PSF overlap ...");
 
 			final int nThreads = Prefs.getThreads();
-			BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
+			final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 			List<OverlapWorker> workers = new LinkedList<OverlapWorker>();
 			List<Thread> threads = new LinkedList<Thread>();
 			for (int i = 0; i < nThreads; i++)
@@ -1649,10 +1651,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			totalProgress = coordinates.size();
 			stepProgress = Utils.getProgressInterval(totalProgress);
 			progress = 0;
-			for (int frame : coordinates.keySet())
+			coordinates.forEachKey(new TIntProcedure()
 			{
-				put(jobs, frame);
-			}
+				public boolean execute(int value)
+				{
+					put(jobs, value);
+					return true;
+				}
+			});
 			// Finish all the worker threads by passing in a null job
 			for (int i = 0; i < threads.size(); i++)
 			{
@@ -1744,7 +1750,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			IJ.showStatus("Collecting results ...");
 		}
 
-		HashMap<Integer, FilterResult> filterResults = new HashMap<Integer, FilterResult>();
+		TIntObjectHashMap<FilterResult> filterResults = new TIntObjectHashMap<FilterResult>();
 		time = 0;
 		for (Worker w : workers)
 		{
@@ -1767,22 +1773,26 @@ public class BenchmarkSpotFilter implements PlugIn
 	 * 
 	 * @param filterResults
 	 */
-	void addSpotsToMemory(HashMap<Integer, FilterResult> filterResults)
+	void addSpotsToMemory(TIntObjectHashMap<FilterResult> filterResults)
 	{
-		MemoryPeakResults results = new MemoryPeakResults();
+		final MemoryPeakResults results = new MemoryPeakResults();
 		results.setName(TITLE + " TP " + id++);
-		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
+		filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
-			int peak = result.getKey();
-			for (ScoredSpot spot : result.getValue().spots)
+			public boolean execute(int peak, FilterResult filterResult)
 			{
-				if (spot.match)
+				for (ScoredSpot spot : filterResult.spots)
 				{
-					final float[] params = new float[] { 0, spot.getIntensity(), 0, spot.spot.x, spot.spot.y, 0, 0 };
-					results.addf(peak, spot.spot.x, spot.spot.y, spot.getIntensity(), 0d, 0f, params, null);
+					if (spot.match)
+					{
+						final float[] params = new float[] { 0, spot.getIntensity(), 0, spot.spot.x, spot.spot.y, 0,
+								0 };
+						results.addf(peak, spot.spot.x, spot.spot.y, spot.getIntensity(), 0d, 0f, params, null);
+					}
 				}
+				return true;
 			}
-		}
+		});
 		MemoryPeakResults.addResults(results);
 	}
 
@@ -1795,22 +1805,26 @@ public class BenchmarkSpotFilter implements PlugIn
 	 */
 	private double[][] histogramFailures(BenchmarkFilterResult filterResult)
 	{
-		StoredDataStatistics stats = new StoredDataStatistics();
-		for (Entry<Integer, FilterResult> result : filterResult.filterResults.entrySet())
+		final StoredData data = new StoredData();
+		filterResult.filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
-			for (ScoredSpot spot : result.getValue().spots)
+			public boolean execute(int peak, FilterResult filterResult)
 			{
-				if (spot.match)
+				for (ScoredSpot spot : filterResult.spots)
 				{
-					stats.add(spot.fails);
+					if (spot.match)
+					{
+						data.add(spot.fails);
+					}
 				}
+				return true;
 			}
-		}
+		});
 
-		double[][] h = Maths.cumulativeHistogram(stats.getValues(), true);
+		double[][] h = Maths.cumulativeHistogram(data.getValues(), true);
 
 		filterResult.cumul = h;
-		filterResult.stats = stats;
+		filterResult.stats = data;
 
 		return h;
 	}
@@ -1818,17 +1832,17 @@ public class BenchmarkSpotFilter implements PlugIn
 	private void showFailuresPlot(BenchmarkFilterResult filterResult)
 	{
 		double[][] h = filterResult.cumul;
-		StoredDataStatistics stats = filterResult.stats;
+		StoredData data = filterResult.stats;
 
 		String xTitle = "Failures";
-		final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 0);
+		final int id = Utils.showHistogram(TITLE, data, xTitle, 1, 0, 0);
 		if (Utils.isNewWindow())
 			windowOrganiser.add(id);
 
 		String title = TITLE + " " + xTitle + " Cumulative";
 		Plot2 plot = new Plot2(title, xTitle, "Frequency");
-		double xMin = (stats.getN() == 0) ? 1 : h[0][0];
-		double xMax = (stats.getN() == 0) ? 1 : h[0][h[0].length - 1] + 1;
+		double xMin = (data.size() == 0) ? 1 : h[0][0];
+		double xMax = (data.size() == 0) ? 1 : h[0][h[0].length - 1] + 1;
 		double xPadding = 0.05 * (xMax - xMin);
 		plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
 		plot.setColor(Color.blue);
@@ -1850,7 +1864,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 	}
 
-	private BenchmarkFilterResult summariseResults(HashMap<Integer, FilterResult> filterResults,
+	private BenchmarkFilterResult summariseResults(TIntObjectHashMap<FilterResult> filterResults,
 			FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean relativeDistances, boolean batchSummary)
 	{
 		BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
@@ -1876,15 +1890,20 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[][] cumul = histogramFailures(filterResult);
 
 		// Create the overall match score
-		double tp = 0, fp = 0, fn = 0;
-		ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
-		for (FilterResult result : filterResults.values())
+		final double[] total = new double[3];
+		final ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
+		filterResults.forEachValue(new TObjectProcedure<FilterResult>()
 		{
-			tp += result.result.getTP();
-			fp += result.result.getFP();
-			fn += result.result.getFN();
-			allSpots.addAll(Arrays.asList(result.spots));
-		}
+			public boolean execute(FilterResult result)
+			{
+				total[0] += result.result.getTP();
+				total[1] += result.result.getFP();
+				total[2] += result.result.getFN();
+				allSpots.addAll(Arrays.asList(result.spots));
+				return true;
+			}
+		});
+		double tp = total[0], fp = total[1], fn = total[2];
 		FractionClassificationResult allResult = new FractionClassificationResult(tp, fp, 0, fn);
 		// The number of actual results
 		final double n = (tp + fn);
@@ -2099,70 +2118,74 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private void showOverlay(ImagePlus imp, BenchmarkFilterResult filterResult)
 	{
-		Overlay o = new Overlay();
+		final Overlay o = new Overlay();
 		//int tp = 0, fp = 0, fn = 0, nn = 0;
-		for (FilterResult result : filterResult.filterResults.values())
+		filterResult.filterResults.forEachValue(new TObjectProcedure<FilterResult>()
 		{
-			final int size = result.spots.length;
+			public boolean execute(FilterResult result)
+			{
+				final int size = result.spots.length;
 
-			float[] tx = null, ty = null, fx = null, fy = null;
-			if (showTP)
-			{
-				tx = new float[size];
-				ty = new float[size];
-			}
-			if (showFP)
-			{
-				fx = new float[size];
-				fy = new float[size];
-			}
-			int t = 0, f = 0;
-			for (ScoredSpot s : result.spots)
-			{
-				if (s.match)
+				float[] tx = null, ty = null, fx = null, fy = null;
+				if (showTP)
 				{
-					if (showTP)
+					tx = new float[size];
+					ty = new float[size];
+				}
+				if (showFP)
+				{
+					fx = new float[size];
+					fy = new float[size];
+				}
+				int t = 0, f = 0;
+				for (ScoredSpot s : result.spots)
+				{
+					if (s.match)
 					{
-						tx[t] = s.spot.x + 0.5f;
-						ty[t++] = s.spot.y + 0.5f;
+						if (showTP)
+						{
+							tx[t] = s.spot.x + 0.5f;
+							ty[t++] = s.spot.y + 0.5f;
+						}
+					}
+					else
+					{
+						if (showFP)
+						{
+							fx[f] = s.spot.x + 0.5f;
+							fy[f++] = s.spot.y + 0.5f;
+						}
 					}
 				}
-				else
+				//tp += t;
+				//fp += f;
+				if (showTP)
+					SpotFinderPreview.addRoi(result.frame, o, tx, ty, t, Color.green);
+				if (showFP)
+					SpotFinderPreview.addRoi(result.frame, o, fx, fy, f, Color.red);
+				if (showFN)
 				{
-					if (showFP)
+					// We need the FN ...
+					final PSFSpot[] actual = result.actual;
+					final boolean[] actualAssignment = result.actualAssignment;
+					//nn += actual.length;
+					final float[] nx = new float[actual.length];
+					final float[] ny = new float[actual.length];
+					int n = 0;
+					for (int i = 0; i < actual.length; i++)
 					{
-						fx[f] = s.spot.x + 0.5f;
-						fy[f++] = s.spot.y + 0.5f;
+						if (!actualAssignment[i])
+						{
+							nx[n] = actual[i].getX();
+							ny[n++] = actual[i].getY();
+						}
 					}
+					//fn += n;
+					SpotFinderPreview.addRoi(result.frame, o, nx, ny, n, Color.yellow);
 				}
+				return true;
 			}
-			//tp += t;
-			//fp += f;
-			if (showTP)
-				SpotFinderPreview.addRoi(result.frame, o, tx, ty, t, Color.green);
-			if (showFP)
-				SpotFinderPreview.addRoi(result.frame, o, fx, fy, f, Color.red);
-			if (showFN)
-			{
-				// We need the FN ...
-				final PSFSpot[] actual = result.actual;
-				final boolean[] actualAssignment = result.actualAssignment;
-				//nn += actual.length;
-				final float[] nx = new float[actual.length];
-				final float[] ny = new float[actual.length];
-				int n = 0;
-				for (int i = 0; i < actual.length; i++)
-				{
-					if (!actualAssignment[i])
-					{
-						nx[n] = actual[i].getX();
-						ny[n++] = actual[i].getY();
-					}
-				}
-				//fn += n;
-				SpotFinderPreview.addRoi(result.frame, o, nx, ny, n, Color.yellow);
-			}
-		}
+		});
 
 		//System.out.printf("TP=%d, FP=%d, FN=%d, N=%d (%d) %d\n", tp, fp, fn, tp + fn, results.size(), nn);
 

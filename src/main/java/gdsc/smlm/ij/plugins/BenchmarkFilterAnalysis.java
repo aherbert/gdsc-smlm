@@ -40,9 +40,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -121,6 +118,9 @@ import gdsc.smlm.search.SearchDimension;
 import gdsc.smlm.search.SearchResult;
 import gdsc.smlm.search.SearchSpace;
 import gdsc.smlm.utils.XmlUtils;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -225,8 +225,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static double pEnrichmentPadding = 0.1;
 	private static int pConvergedCount = 2;
 
-	private static HashMap<Integer, boolean[]> searchRangeMap = new HashMap<Integer, boolean[]>();
-	private static HashMap<Integer, double[]> stepSizeMap = new HashMap<Integer, double[]>();
+	private static TIntObjectHashMap<boolean[]> searchRangeMap = new TIntObjectHashMap<boolean[]>();
+	private static TIntObjectHashMap<double[]> stepSizeMap = new TIntObjectHashMap<double[]>();
 
 	private static boolean showTP = false;
 	private static boolean showFP = false;
@@ -267,7 +267,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private static long lastModified = 0;
 	private static List<FilterSet> filterList = null;
 	static int lastId = 0;
-	private static HashMap<Integer, IdPeakResult[]> actualCoordinates = null;
+	private static TIntObjectHashMap<IdPeakResult[]> actualCoordinates = null;
 	private static MultiPathFitResults[] resultsList = null;
 	//private static MultiPathFitResults[] clonedResultsList = null;
 	private static int matches;
@@ -341,11 +341,13 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private class Job
 	{
-		final Entry<Integer, FilterCandidates> entry;
+		final int frame;
+		final FilterCandidates candidates;
 
-		Job(Entry<Integer, FilterCandidates> entry)
+		Job(int frame, FilterCandidates candidates)
 		{
-			this.entry = entry;
+			this.frame = frame;
+			this.candidates = candidates;
 		}
 	}
 
@@ -417,7 +419,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				while (true)
 				{
 					Job job = jobs.take();
-					if (job == null || job.entry == null)
+					if (job == null || job.candidates == null)
 						break;
 					if (!finished)
 						// Only run jobs when not finished. This allows the queue to be emptied.
@@ -445,8 +447,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			showProgress();
 
-			final int frame = job.entry.getKey();
-			final FilterCandidates result = job.entry.getValue();
+			final int frame = job.frame;
+			final FilterCandidates result = job.candidates;
 
 			depthStats.add(result.zPosition);
 
@@ -1657,14 +1659,18 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			totalProgress = BenchmarkSpotFit.fitResults.size();
 			stepProgress = Utils.getProgressInterval(totalProgress);
 			progress = 0;
-			for (Entry<Integer, FilterCandidates> entry : BenchmarkSpotFit.fitResults.entrySet())
+			BenchmarkSpotFit.fitResults.forEachEntry(new TIntObjectProcedure<FilterCandidates>()
 			{
-				put(jobs, new Job(entry));
-			}
+				public boolean execute(int a, FilterCandidates b)
+				{
+					put(jobs, new Job(a, b));
+					return true;
+				}
+			});
 			// Finish all the worker threads by passing in a null job
 			for (int i = 0; i < threads.size(); i++)
 			{
-				put(jobs, new Job(null));
+				put(jobs, new Job(0, null));
 			}
 
 			// Wait for all to finish
@@ -1726,9 +1732,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return resultsList;
 	}
 
-	private HashMap<Integer, IdPeakResult[]> getCoordinates(List<PeakResult> list)
+	private TIntObjectHashMap<IdPeakResult[]> getCoordinates(List<PeakResult> list)
 	{
-		final HashMap<Integer, IdPeakResult[]> coords = new HashMap<Integer, IdPeakResult[]>();
+		final TIntObjectHashMap<IdPeakResult[]> coords = new TIntObjectHashMap<IdPeakResult[]>();
 		if (list.size() > 0)
 		{
 			// Do not use HashMap directly to build the coords object since there 
@@ -1766,7 +1772,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private static IdPeakResult[] EMPTY = new IdPeakResult[0];
 
-	private static IdPeakResult[] getCoordinates(HashMap<Integer, IdPeakResult[]> coords, Integer t)
+	private static IdPeakResult[] getCoordinates(TIntObjectHashMap<IdPeakResult[]> coords, Integer t)
 	{
 		final IdPeakResult[] tmp = coords.get(t);
 		return (tmp == null) ? EMPTY : tmp;
@@ -6099,7 +6105,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		InterruptChecker scoreChecker = null;
 		InterruptConvergenceChecker filterChecker = null;
-		HashMap<Integer, ArrayList<Coordinate>> previousResults = null;
+		TIntObjectHashMap<ArrayList<Coordinate>> previousResults = null;
 		boolean canContinue = true;
 
 		public IterationConvergenceChecker(FilterScore current)
@@ -6115,7 +6121,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			}
 		}
 
-		private HashMap<Integer, ArrayList<Coordinate>> getResults(FilterScore current)
+		private TIntObjectHashMap<ArrayList<Coordinate>> getResults(FilterScore current)
 		{
 			return ResultsMatchCalculator
 					.getCoordinates(createResults(null, (DirectFilter) current.filter, false).getResults());
@@ -6159,7 +6165,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			if (iterationCompareResults)
 			{
-				HashMap<Integer, ArrayList<Coordinate>> currentResults = getResults(current);
+				TIntObjectHashMap<ArrayList<Coordinate>> currentResults = getResults(current);
 				MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults, previousResults,
 						iterationCompareDistance);
 				if (r.getJaccard() == 1)
@@ -7387,6 +7393,22 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	}
 
 	/**
+	 * Abstract class to allow the array storage to be reused
+	 */
+	private abstract class CustomTIntObjectProcedure implements TIntObjectProcedure<IdPeakResult[]>
+	{
+		float[] x, y, x2, y2;
+
+		CustomTIntObjectProcedure(float[] x, float[] y, float[] x2, float[] y2)
+		{
+			this.x = x;
+			this.y = y;
+			this.x2 = x2;
+			this.y2 = y2;
+		}
+	}
+
+	/**
 	 * Show overlay.
 	 *
 	 * @param allAssignments
@@ -7405,11 +7427,11 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		if (allAssignments == null)
 			allAssignments = getAssignments(filter);
 
-		Overlay o = new Overlay();
+		final Overlay o = new Overlay();
 
 		// Do TP
-		Set<Integer> actual = new TreeSet<Integer>();
-		Set<Integer> predicted = new TreeSet<Integer>();
+		final TIntHashSet actual = new TIntHashSet();
+		final TIntHashSet predicted = new TIntHashSet();
 		//int tp = 0, fp = 0, fn = 0;
 		for (FractionalAssignment[] assignments : allAssignments)
 		{
@@ -7503,9 +7525,6 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		// Do TN (all remaining peaks that have not been matched)
 		if (showFN)
 		{
-			int c = 0;
-			int c2 = 0;
-
 			final boolean checkBorder = (BenchmarkSpotFilter.lastAnalysisBorder != null &&
 					BenchmarkSpotFilter.lastAnalysisBorder.x != 0);
 			final float border, xlimit, ylimit;
@@ -7520,44 +7539,47 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				border = xlimit = ylimit = 0;
 
 			// Add the results to the lists
-			for (Entry<Integer, IdPeakResult[]> entry : actualCoordinates.entrySet())
+			actualCoordinates.forEachEntry(new CustomTIntObjectProcedure(x, y, x2, y2)
 			{
-				IdPeakResult[] results = entry.getValue();
-				c = c2 = 0;
-				if (x.length <= results.length)
+				public boolean execute(int frame, IdPeakResult[] results)
 				{
-					x = new float[results.length];
-					y = new float[results.length];
-				}
-				if (x2.length <= results.length)
-				{
-					x2 = new float[results.length];
-					y2 = new float[results.length];
-				}
-
-				for (int i = 0; i < results.length; i++)
-				{
-					// Ignore those that were matched by TP
-					if (actual.contains(results[i].uniqueId))
-						continue;
-
-					if (checkBorder && outsideBorder(results[i], border, xlimit, ylimit))
+					int c = 0, c2 = 0;
+					if (x.length <= results.length)
 					{
-						x2[c2] = results[i].getXPosition();
-						y2[c2++] = results[i].getYPosition();
+						x = new float[results.length];
+						y = new float[results.length];
 					}
-					else
+					if (x2.length <= results.length)
 					{
-						x[c] = results[i].getXPosition();
-						y[c++] = results[i].getYPosition();
+						x2 = new float[results.length];
+						y2 = new float[results.length];
 					}
+
+					for (int i = 0; i < results.length; i++)
+					{
+						// Ignore those that were matched by TP
+						if (actual.contains(results[i].uniqueId))
+							continue;
+
+						if (checkBorder && outsideBorder(results[i], border, xlimit, ylimit))
+						{
+							x2[c2] = results[i].getXPosition();
+							y2[c2++] = results[i].getYPosition();
+						}
+						else
+						{
+							x[c] = results[i].getXPosition();
+							y[c++] = results[i].getYPosition();
+						}
+					}
+					//fn += c;
+					if (c != 0)
+						SpotFinderPreview.addRoi(frame, o, x, y, c, Color.yellow);
+					if (c2 != 0)
+						SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
+					return true;
 				}
-				//fn += c;
-				if (c != 0)
-					SpotFinderPreview.addRoi(entry.getKey(), o, x, y, c, Color.yellow);
-				if (c2 != 0)
-					SpotFinderPreview.addRoi(entry.getKey(), o, x2, y2, c2, Color.orange);
-			}
+			});
 		}
 
 		//System.out.printf("TP=%d, FP=%d, FN=%d, N=%d (%d)\n", tp, fp, fn, tp + fn, results.size());

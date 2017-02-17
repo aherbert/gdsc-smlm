@@ -1,14 +1,25 @@
 package gdsc.smlm.ij.plugins;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2016 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -33,6 +44,10 @@ import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.procedure.TObjectProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -117,8 +132,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	private MemoryPeakResults results;
 	private CreateData.SimulationParameters simulationParameters;
 
-	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
-	private static HashMap<Integer, FilterCandidates> filterCandidates;
+	private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
+	private static TIntObjectHashMap<FilterCandidates> filterCandidates;
 	private static double fP, fN;
 	private static int nP, nN;
 
@@ -131,7 +146,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 	// Allow other plugins to access the results
 	static int rankResultsId = 0;
-	static HashMap<Integer, RankResults> rankResults;
+	static TIntObjectHashMap<RankResults> rankResults;
 	static double distanceInPixels;
 	static double lowerDistanceInPixels;
 	static double candidateTN, candidateFN;
@@ -204,9 +219,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		volatile boolean finished = false;
 		final BlockingQueue<Integer> jobs;
 		final ImageStack stack;
-		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
-		final HashMap<Integer, FilterCandidates> filterCandidates;
-		final HashMap<Integer, RankResults> results;
+		final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+		final TIntObjectHashMap<FilterCandidates> filterCandidates;
+		final TIntObjectHashMap<RankResults> results;
 		final int fitting;
 		final boolean requireSNR;
 
@@ -214,14 +229,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		double[] region = null;
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
-				HashMap<Integer, FilterCandidates> filterCandidates)
+				TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
+				TIntObjectHashMap<FilterCandidates> filterCandidates)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
-			this.results = new HashMap<Integer, RankResults>();
+			this.results = new TIntObjectHashMap<RankResults>();
 			fitting = config.getRelativeFitting();
 			requireSNR = (levels.length > 0);
 		}
@@ -696,7 +711,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
+		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
 		List<Worker> workers = new LinkedList<Worker>();
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
@@ -712,10 +727,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		totalProgress = filterCandidates.size();
 		stepProgress = Utils.getProgressInterval(totalProgress);
 		progress = 0;
-		for (int i : filterCandidates.keySet())
+		filterCandidates.forEachKey(new TIntProcedure()
 		{
-			put(jobs, i);
-		}
+			public boolean execute(int value)
+			{
+				put(jobs, value);
+				return true;
+			}
+		});
 		// Finish all the worker threads by passing in a null job
 		for (int i = 0; i < threads.size(); i++)
 		{
@@ -747,7 +766,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		IJ.showStatus("Collecting results ...");
 
 		rankResultsId++;
-		rankResults = new HashMap<Integer, RankResults>();
+		rankResults = new TIntObjectHashMap<RankResults>();
 		for (Worker w : workers)
 		{
 			rankResults.putAll(w.results);
@@ -765,82 +784,123 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	 * @param filterResults
 	 * @return The filter candidates
 	 */
-	private HashMap<Integer, FilterCandidates> subsetFilterResults(HashMap<Integer, FilterResult> filterResults)
+	private TIntObjectHashMap<FilterCandidates> subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults)
 	{
 		// Convert fractions from percent 
 		final double f1 = Math.min(1, fractionPositives / 100.0);
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
-		HashMap<Integer, FilterCandidates> subset = new HashMap<Integer, FilterCandidates>();
+		final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<FilterCandidates>();
 		fP = fN = 0;
 		nP = nN = 0;
-		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
+		final double[] fX = new double[2];
+		final int[] nX = new int[2];
+		filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
-			FilterResult r = result.getValue();
-
-			// Determine the number of positives to find. This score may be fractional.
-			fP += r.result.getTP();
-			fN += r.result.getFP();
-
-			// Q. Is r.result.getTP() not the same as the total of r.spots[i].match
-			// A. Not if we used fractional scoring.
-
-			for (ScoredSpot spot : r.spots)
+			public boolean execute(int frame, FilterResult r)
 			{
-				if (spot.match)
-					nP++;
-				else
-					nN++;
-			}
+				// Determine the number of positives to find. This score may be fractional.
+				fX[0] += r.result.getTP();
+				fX[1] += r.result.getFP();
 
-			// Make the target use the fractional score
-			final double targetP = r.result.getTP() * f1;
-
-			// Count the number of positive & negatives
-			int p = 0, n = 0;
-			double np = 0, nn = 0;
-
-			boolean reachedTarget = false;
-			int nAfter = 0;
-
-			int count = 0;
-			for (ScoredSpot spot : r.spots)
-			{
-				count++;
-				nn += spot.antiScore();
-				if (spot.match)
+				// Q. Is r.result.getTP() not the same as the total of r.spots[i].match?
+				// A. Not if we used fractional scoring.
+				int c = 0;
+				for (int i = r.spots.length; i-- > 0;)
 				{
-					np += spot.getScore();
-					p++;
-					if (!reachedTarget)
-					{
-						reachedTarget = np >= targetP;
-					}
+					if (r.spots[i].match)
+						c++;
 				}
-				else
+				nX[0] += c;
+				nX[1] += (r.spots.length - c);
+
+				// Make the target use the fractional score
+				final double np2 = r.result.getTP() * f1;
+				double targetP = np2;
+
+				// Set the target using the closest
+				if (f1 < 1)
 				{
-					n++;
+					double np = 0;
+					double min = r.result.getTP();
+					for (ScoredSpot spot : r.spots)
+					{
+						if (spot.match)
+						{
+							np += spot.getScore();
+							double d = np2 - np;
+							if (d < min)
+							{
+								min = d;
+								targetP = np;
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+
+					//if (targetP < np2)
+					//	System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
+				}
+
+				// Count the number of positive & negatives
+				int p = 0, n = 0;
+				double np = 0, nn = 0;
+
+				boolean reachedTarget = false;
+				int nAfter = 0;
+
+				int count = 0;
+				for (ScoredSpot spot : r.spots)
+				{
+					count++;
+					nn += spot.antiScore();
+					if (spot.match)
+					{
+						np += spot.getScore();
+						p++;
+						if (!reachedTarget)
+						{
+							reachedTarget = np >= targetP;
+						}
+					}
+					else
+					{
+						n++;
+						if (reachedTarget)
+						{
+							nAfter++;
+						}
+					}
+
 					if (reachedTarget)
 					{
-						nAfter++;
+						// Check if we have reached both the limits
+						if (nAfter >= negativesAfterAllPositives && (double) n / (n + p) >= f2)
+							break;
 					}
 				}
 
-				if (reachedTarget)
-				{
-					// Check if we have reached both the limits
-					if (nAfter >= negativesAfterAllPositives && (double) n / (n + p) >= f2)
-						break;
-				}
+				// Debug
+				//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
+				//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
+				//		nAfter, (double) n / (n + p));
+
+				// TODO - This is different from BenchmarkSpotFit where all the candidates are
+				// included but only the first N are processed. Should this be changed here too.
+
+				subset.put(frame, new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
+				return true;
 			}
+		});
 
-			// Debug
-			//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
-			//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
-			//		nAfter, (double) n / (n + p));
+		fP = fX[0];
+		fN = fX[1];
+		nP = nX[0];
+		nN = nX[1];
 
-			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, Arrays.copyOf(r.spots, count)));
-		}
 		return subset;
 	}
 
@@ -879,7 +939,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		}
 	}
 
-	private void summariseResults(HashMap<Integer, RankResults> rankResults)
+	private void summariseResults(TIntObjectHashMap<RankResults> rankResults)
 	{
 		createTable();
 
@@ -893,16 +953,23 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		addCount(sb, fP);
 		addCount(sb, fN);
 
-		double tp = 0;
-		double fp = 0;
-		int cTP = 0, cFP = 0;
-		for (FilterCandidates result : filterCandidates.values())
+		final double[] counter1 = new double[2];
+		final int[] counter2 = new int[2];
+		filterCandidates.forEachValue(new TObjectProcedure<FilterCandidates>()
 		{
-			tp += result.np;
-			fp += result.nn;
-			cTP += result.p;
-			cFP += result.n;
-		}
+			public boolean execute(FilterCandidates result)
+			{
+				counter1[0] += result.np;
+				counter1[1] += result.nn;
+				counter2[0] += result.p;
+				counter2[1] += result.n;
+				return true;
+			}
+		});
+		double tp = counter1[0];
+		double fp = counter1[1];
+		int cTP = counter2[0];
+		int cFP = counter2[2];
 
 		//		// This should be the same
 		//		double tp2 = 0;
@@ -937,10 +1004,25 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		add(sb, tp);
 		add(sb, fp);
 
+		// Materialise rankeResults
+		final int[] frames = new int[rankResults.size()];
+		final RankResults[] results = new RankResults[rankResults.size()];
+		final int[] counter = new int[1];
+		rankResults.forEachEntry(new TIntObjectProcedure<RankResults>()
+		{
+			public boolean execute(int a, RankResults b)
+			{
+				frames[counter[0]] = a;
+				results[counter[0]] = b;
+				counter[0]++;
+				return true;
+			}
+		});
+
 		// Summarise actual and candidate spots per frame
 		Statistics actual = new Statistics();
 		Statistics candidates = new Statistics();
-		for (RankResults rr : rankResults.values())
+		for (RankResults rr : results)
 		{
 			actual.add(rr.zPosition.length);
 			candidates.add(rr.spots.length);
@@ -999,7 +1081,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			Statistics s = new Statistics();
 			long time = 0;
 
-			for (RankResults rr : rankResults.values())
+			for (RankResults rr : results)
 			{
 				RankResult r = rr.results.get(i);
 				// Some results will not have a threshold
@@ -1058,11 +1140,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		{
 			int bestMethod = list.get(0).i;
 			Overlay o = new Overlay();
-			for (Entry<Integer, RankResults> entry : rankResults.entrySet())
+			for (int j = 0; j < results.length; j++)
 			{
-				int frame = entry.getKey();
+				int frame = frames[j];
 				//FilterCandidates candidates = filterCandidates.get(frame);
-				RankResults rr = entry.getValue();
+				RankResults rr = results[j];
 				RankResult r = rr.results.get(bestMethod);
 				int[] x1 = new int[r.good.length];
 				int[] y1 = new int[r.good.length];

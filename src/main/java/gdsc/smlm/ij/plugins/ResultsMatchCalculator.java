@@ -4,12 +4,8 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
@@ -17,6 +13,7 @@ import gdsc.core.match.Coordinate;
 import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.MatchResult;
 import gdsc.core.match.PointPair;
+import gdsc.core.utils.SimpleArrayUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -37,6 +34,8 @@ import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
@@ -180,8 +179,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		//	Coordinate[] predicted = getCoordinates(predictedPoints, t);
 
 		// Divide the results into time points
-		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
-		HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
+		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
+		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
 
 		int n1 = 0;
 		int n2 = 0;
@@ -336,8 +335,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		if (!showTable)
 			return;
 
-		TreeSet<Integer> id1 = (doIdAnalysis1) ? getIds(results1) : null;
-		TreeSet<Integer> id2 = (doIdAnalysis2) ? getIds(results2) : null;
+		TIntHashSet id1 = (doIdAnalysis1) ? getIds(results1) : null;
+		TIntHashSet id2 = (doIdAnalysis2) ? getIds(results2) : null;
 
 		// We have the results for the largest distance.
 		// Now reduce the distance threshold and recalculate the results
@@ -365,8 +364,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			MatchResult idResult1 = null, idResult2 = null;
 			if (doIdAnalysis)
 			{
-				TreeSet<Integer> matchId1 = (doIdAnalysis1) ? new TreeSet<Integer>() : null;
-				TreeSet<Integer> matchId2 = (doIdAnalysis2) ? new TreeSet<Integer>() : null;
+				TIntHashSet matchId1 = (doIdAnalysis1) ? new TIntHashSet() : null;
+				TIntHashSet matchId2 = (doIdAnalysis2) ? new TIntHashSet() : null;
 				int i = 0;
 				for (PointPair pair : allMatches)
 				{
@@ -430,7 +429,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param results
 	 * @return
 	 */
-	public static HashMap<Integer, ArrayList<Coordinate>> getCoordinates(List<PeakResult> results)
+	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(List<PeakResult> results)
 	{
 		return getCoordinates(results, false);
 	}
@@ -443,10 +442,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 *            True if the values should be rounded down to integers
 	 * @return
 	 */
-	public static HashMap<Integer, ArrayList<Coordinate>> getCoordinates(List<PeakResult> results,
+	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(List<PeakResult> results,
 			boolean integerCoordinates)
 	{
-		HashMap<Integer, ArrayList<Coordinate>> coords = new HashMap<Integer, ArrayList<Coordinate>>();
+		TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<ArrayList<Coordinate>>();
 		if (results.size() > 0)
 		{
 			ResultsMatchCalculator instance = new ResultsMatchCalculator();
@@ -499,22 +498,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param predictedCoordinates
 	 * @return a list of time points
 	 */
-	private static int[] getTimepoints(HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
-			HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates)
+	private static int[] getTimepoints(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
+			TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates)
 	{
-		Set<Integer> set = new TreeSet<Integer>();
-		for (Integer i : actualCoordinates.keySet())
-			set.add(i);
-		for (Integer i : predictedCoordinates.keySet())
-			set.add(i);
-		int[] t = new int[set.size()];
-		int i = 0;
-		for (Integer ii : set)
-		{
-			t[i++] = ii.intValue();
-		}
-		Arrays.sort(t);
-		return t;
+		return SimpleArrayUtils.merge(actualCoordinates.keys(), predictedCoordinates.keys());
 	}
 
 	/**
@@ -524,7 +511,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param t
 	 * @return
 	 */
-	public static Coordinate[] getCoordinates(HashMap<Integer, ArrayList<Coordinate>> coords, Integer t)
+	public static Coordinate[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t)
 	{
 		ArrayList<Coordinate> tmp = coords.get(t);
 		if (tmp != null)
@@ -547,17 +534,12 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	@SuppressWarnings("unused")
 	private int[] getTimepoints(List<PeakResult> actualPoints, List<PeakResult> predictedPoints)
 	{
-		Set<Integer> set = new HashSet<Integer>();
+		TIntHashSet set = new TIntHashSet();
 		for (PeakResult r : actualPoints)
 			set.add(r.peak);
 		for (PeakResult r : predictedPoints)
 			set.add(r.peak);
-		int[] t = new int[set.size()];
-		int i = 0;
-		for (Integer ii : set)
-		{
-			t[i++] = ii.intValue();
-		}
+		int[] t = set.toArray();
 		Arrays.sort(t);
 		return t;
 	}
@@ -712,9 +694,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		}
 	}
 
-	private TreeSet<Integer> getIds(MemoryPeakResults results)
+	private TIntHashSet getIds(MemoryPeakResults results)
 	{
-		TreeSet<Integer> ids = new TreeSet<Integer>();
+		TIntHashSet ids = new TIntHashSet();
 		for (PeakResult p : results.getResults())
 			ids.add(p.getId());
 		return ids;
@@ -772,8 +754,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		List<PeakResult> predictedPoints = results2.getResults();
 
 		// Divide the results into time points
-		HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
-		HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
+		TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(actualPoints);
+		TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(predictedPoints);
 
 		return compareCoordinates(actualCoordinates, predictedCoordinates, distance);
 	}
@@ -786,8 +768,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * @param distance the distance
 	 * @return the match result
 	 */
-	public static MatchResult compareCoordinates(HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
-			HashMap<Integer, ArrayList<Coordinate>> predictedCoordinates, double distance)
+	public static MatchResult compareCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
+			TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates, double distance)
 	{
 		int tp = 0;
 		int fp = 0;

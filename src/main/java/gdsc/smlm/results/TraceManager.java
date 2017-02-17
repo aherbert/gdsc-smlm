@@ -17,13 +17,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.TrackProgress;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Trace localisations through a time stack to identify single molecules
@@ -463,7 +464,7 @@ public class TraceManager
 		// trace number out-of-order. This occurs if re-allocation has been performed,
 		// e.g.  [1,2,2,1,3] => [1,2,5,4,3] when spots in group 1 are reallocated before spots in group 2.
 
-		TreeSet<Integer> processedTraces = new TreeSet<Integer>();
+		TIntHashSet processedTraces = new TIntHashSet();
 		for (int index = 0; index < localisations.length; index++)
 		{
 			if (tracker != null && index % 256 == 0)
@@ -1760,7 +1761,7 @@ public class TraceManager
 		else
 		{
 			// Use a map when the size is potentially large
-			TreeMap<Integer, Trace> map = new TreeMap<Integer, Trace>();
+			TIntObjectHashMap<Trace> map = new TIntObjectHashMap<Trace>();
 			for (PeakResult result : list)
 			{
 				final int id = result.getId();
@@ -1778,10 +1779,7 @@ public class TraceManager
 			}
 
 			// Extract the traces
-			Trace[] traces = new Trace[map.size()];
-			int count = 0;
-			for (Trace trace : map.values())
-				traces[count++] = trace;
+			Trace[] traces = map.values(new Trace[map.size()]);
 			Arrays.sort(traces);
 			return traces;
 		}

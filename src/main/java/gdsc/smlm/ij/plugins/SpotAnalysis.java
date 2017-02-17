@@ -27,7 +27,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,6 +76,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -269,7 +269,7 @@ public class SpotAnalysis extends PlugInFrame
 	private TreeSet<Spot> onFrames = new TreeSet<Spot>();
 	private TIntArrayList candidateFrames = new TIntArrayList();
 
-	private HashMap<Integer, Trace> traces = new HashMap<Integer, Trace>();
+	private TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<Trace>();
 	private int id = 0;
 	private boolean updated = false;
 	private int blurCount = 0;

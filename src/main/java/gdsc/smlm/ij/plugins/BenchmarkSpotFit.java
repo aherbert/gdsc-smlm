@@ -27,12 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -107,6 +103,10 @@ import gdsc.smlm.results.filter.SignalFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
 import gdsc.smlm.results.filter.XStreamWrapper;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -380,8 +380,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private CreateData.SimulationParameters simulationParameters;
 	private MaximaSpotFilter spotFilter;
 
-	private static HashMap<Integer, ArrayList<Coordinate>> actualCoordinates = null;
-	private static HashMap<Integer, FilterCandidates> filterCandidates;
+	private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = null;
+	private static TIntObjectHashMap<FilterCandidates> filterCandidates;
 	private static double fP, fN;
 	private static int nP, nN;
 
@@ -390,7 +390,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 	// Allow other plugins to access the results
 	static int fitResultsId = 0;
-	static HashMap<Integer, FilterCandidates> fitResults;
+	static TIntObjectHashMap<FilterCandidates> fitResults;
 	static double distanceInPixels;
 	static double lowerDistanceInPixels;
 	static double candidateTN, candidateFN;
@@ -620,9 +620,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final BlockingQueue<Integer> jobs;
 		final ImageStack stack;
 		final FitWorker fitWorker;
-		final HashMap<Integer, ArrayList<Coordinate>> actualCoordinates;
-		final HashMap<Integer, FilterCandidates> filterCandidates;
-		final HashMap<Integer, FilterCandidates> results;
+		final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+		final TIntObjectHashMap<FilterCandidates> filterCandidates;
+		final TIntObjectHashMap<FilterCandidates> results;
 		final Rectangle bounds;
 		final MultiPathFilter multiFilter;
 
@@ -630,8 +630,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		List<PointPair> matches = new ArrayList<PointPair>();
 
 		public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-				HashMap<Integer, ArrayList<Coordinate>> actualCoordinates,
-				HashMap<Integer, FilterCandidates> filterCandidates, PeakResults peakResults)
+				TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
+				TIntObjectHashMap<FilterCandidates> filterCandidates, PeakResults peakResults)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
@@ -642,7 +642,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			this.actualCoordinates = actualCoordinates;
 			this.filterCandidates = filterCandidates;
-			this.results = new HashMap<Integer, FilterCandidates>();
+			this.results = new TIntObjectHashMap<FilterCandidates>();
 			bounds = new Rectangle(0, 0, stack.getWidth(), stack.getHeight());
 			// Instance copy
 			multiFilter = BenchmarkSpotFit.multiFilter.clone();
@@ -1353,7 +1353,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		IJ.showStatus("Collecting results ...");
 
 		fitResultsId++;
-		fitResults = new HashMap<Integer, FilterCandidates>();
+		fitResults = new TIntObjectHashMap<FilterCandidates>();
 		for (Worker w : workers)
 		{
 			fitResults.putAll(w.results);
@@ -1361,7 +1361,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Assign a unique ID to each result
 		int count = 0;
-		for (FilterCandidates result : fitResults.values())
+		// Materialise into an array since we use it twice
+		FilterCandidates[] candidates = fitResults.values(new FilterCandidates[fitResults.size()]);
+		for (FilterCandidates result : candidates)
 		{
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
@@ -1374,7 +1376,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 		PreprocessedPeakResult[] preprocessedPeakResults = new PreprocessedPeakResult[count];
 		count = 0;
-		for (FilterCandidates result : fitResults.values())
+		for (FilterCandidates result : candidates)
 		{
 			for (int i = 0; i < result.fitResult.length; i++)
 			{
@@ -1439,122 +1441,131 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 * @param filterResults
 	 * @return The filter candidates
 	 */
-	private HashMap<Integer, FilterCandidates> subsetFilterResults(HashMap<Integer, FilterResult> filterResults,
+	private TIntObjectHashMap<FilterCandidates> subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults,
 			int fitting)
 	{
 		// Convert fractions from percent 
 		final double f1 = Math.min(1, fractionPositives / 100.0);
 		final double f2 = fractionNegativesAfterAllPositives / 100.0;
 
-		int added = 0;
-		int target = 0;
-		int total = 0;
+		final int[] counter = new int[2];
 
-		HashMap<Integer, FilterCandidates> subset = new HashMap<Integer, FilterCandidates>();
+		final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<FilterCandidates>();
 		fP = fN = 0;
 		nP = nN = 0;
-		for (Entry<Integer, FilterResult> result : filterResults.entrySet())
+		final double[] fX = new double[2];
+		final int[] nX = new int[2];
+		filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
-			FilterResult r = result.getValue();
-
-			// Determine the number of positives to find. This score may be fractional.
-			fP += r.result.getTP();
-			fN += r.result.getFP();
-
-			// Q. Is r.result.getTP() not the same as the total of r.spots[i].match?
-			// A. Not if we used fractional scoring.
-			int c = 0;
-			for (int i = r.spots.length; i-- > 0;)
+			public boolean execute(int frame, FilterResult r)
 			{
-				if (r.spots[i].match)
-					c++;
-			}
-			nP += c;
-			nN += (r.spots.length - c);
+				// Determine the number of positives to find. This score may be fractional.
+				fX[0] += r.result.getTP();
+				fX[1] += r.result.getFP();
 
-			// Make the target use the fractional score
-			final double np2 = r.result.getTP() * f1;
-			double targetP = np2;
+				// Q. Is r.result.getTP() not the same as the total of r.spots[i].match?
+				// A. Not if we used fractional scoring.
+				int c = 0;
+				for (int i = r.spots.length; i-- > 0;)
+				{
+					if (r.spots[i].match)
+						c++;
+				}
+				nX[0] += c;
+				nX[1] += (r.spots.length - c);
 
-			// Set the target using the closest
-			if (f1 < 1)
-			{
-				double np = 0;
-				double min = r.result.getTP();
+				// Make the target use the fractional score
+				final double np2 = r.result.getTP() * f1;
+				double targetP = np2;
+
+				// Set the target using the closest
+				if (f1 < 1)
+				{
+					double np = 0;
+					double min = r.result.getTP();
+					for (ScoredSpot spot : r.spots)
+					{
+						if (spot.match)
+						{
+							np += spot.getScore();
+							double d = np2 - np;
+							if (d < min)
+							{
+								min = d;
+								targetP = np;
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+
+					//if (targetP < np2)
+					//	System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
+				}
+
+				// Count the number of positive & negatives
+				int p = 0, n = 0;
+				double np = 0, nn = 0;
+
+				boolean reachedTarget = false;
+				int nAfter = 0;
+
+				int count = 0;
 				for (ScoredSpot spot : r.spots)
 				{
+					count++;
+					nn += spot.antiScore();
 					if (spot.match)
 					{
 						np += spot.getScore();
-						double d = np2 - np;
-						if (d < min)
+						p++;
+						if (!reachedTarget)
 						{
-							min = d;
-							targetP = np;
-						}
-						else
-						{
-							break;
+							reachedTarget = np >= targetP;
 						}
 					}
-				}
-
-				//if (targetP < np2)
-				//	System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
-			}
-
-			// Count the number of positive & negatives
-			int p = 0, n = 0;
-			double np = 0, nn = 0;
-
-			boolean reachedTarget = false;
-			int nAfter = 0;
-
-			int count = 0;
-			for (ScoredSpot spot : r.spots)
-			{
-				count++;
-				nn += spot.antiScore();
-				if (spot.match)
-				{
-					np += spot.getScore();
-					p++;
-					if (!reachedTarget)
+					else
 					{
-						reachedTarget = np >= targetP;
+						n++;
+						if (reachedTarget)
+						{
+							nAfter++;
+						}
 					}
-				}
-				else
-				{
-					n++;
+
 					if (reachedTarget)
 					{
-						nAfter++;
+						// Check if we have reached both the limits
+						if (nAfter >= negativesAfterAllPositives && (double) n / (n + p) >= f2)
+							break;
 					}
 				}
 
-				if (reachedTarget)
-				{
-					// Check if we have reached both the limits
-					if (nAfter >= negativesAfterAllPositives && (double) n / (n + p) >= f2)
-						break;
-				}
+				counter[0] += count;
+				counter[1] += r.spots.length;
+
+				// Debug
+				//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
+				//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
+				//		nAfter, (double) n / (n + p));
+
+				// We can use all the candidates but only fit up to count
+				subset.put(frame, new FilterCandidates(p, n, np, nn, r.spots, count));
+				return true;
 			}
+		});
 
-			target += count;
-			total += r.spots.length;
-
-			// Debug
-			//System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n", result.getKey().intValue(),
-			//		r.result.getTP(), r.result.getTP(), r.result.getFP(), p, n,
-			//		nAfter, (double) n / (n + p));
-
-			// We can use all the candidates but only fit up to count
-			subset.put(result.getKey(), new FilterCandidates(p, n, np, nn, r.spots, count));
-		}
+		fP = fX[0];
+		fN = fX[1];
+		nP = nX[0];
+		nN = nX[1];
 
 		// We now add all the candidates but only fit the first N
-		added = total - target;
+		int target = counter[0];
+		int total = counter[1];
+		int added = total - target;
 
 		if (extraOptions && added > target)
 			Utils.log("Added %s to %s (total = %d)", Utils.pleural(added, "neighbour"),
@@ -1575,8 +1586,22 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 	}
 
-	private void summariseResults(HashMap<Integer, FilterCandidates> filterCandidates, long runTime,
-			PreprocessedPeakResult[] preprocessedPeakResults)
+	/**
+	 * Create an abstract class to allow a count to be passed to the constructor. The procedure can be coded inline
+	 * using final object references.
+	 */
+	private abstract class CustomTIntProcedure implements TIntProcedure
+	{
+		int c;
+
+		CustomTIntProcedure(int count)
+		{
+			c = count;
+		}
+	}
+
+	private void summariseResults(TIntObjectHashMap<FilterCandidates> filterCandidates, long runTime,
+			final PreprocessedPeakResult[] preprocessedPeakResults)
 	{
 		createTable();
 
@@ -1602,7 +1627,23 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		multiStatus = new int[singleStatus.length];
 		doubletStatus = new int[singleStatus.length];
 		multiDoubletStatus = new int[singleStatus.length];
-		for (FilterCandidates result : filterCandidates.values())
+		
+		// Easier to materialise the values since we have a lot of non final variables to manipulate
+		final int[] frames = new int[filterCandidates.size()];
+		final FilterCandidates[] candidates = new FilterCandidates[filterCandidates.size()];
+		final int[] counter = new int[1];
+		filterCandidates.forEachEntry(new TIntObjectProcedure<FilterCandidates>()
+		{
+			public boolean execute(int a, FilterCandidates b)
+			{
+				frames[counter[0]] = a;
+				candidates[counter[0]] = b;
+				counter[0]++;
+				return true;
+			}
+		});
+		
+		for (FilterCandidates result : candidates)
 		{
 			// Count the number of fit results that matched (tp) and did not match (fp)
 			tp += result.tp;
@@ -1662,7 +1703,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		double[] i2 = new double[i1.length];
 		double[] is = new double[i1.length];
 		int ci = 0;
-		for (FilterCandidates result : filterCandidates.values())
+		for (FilterCandidates result : candidates)
 		{
 			for (int i = 0; i < result.match.length; i++)
 			{
@@ -1683,18 +1724,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 		// Filter the results using the multi-path filter
 		ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<MultiPathFitResults>(filterCandidates.size());
-		for (Entry<Integer, FilterCandidates> entry : filterCandidates.entrySet())
+		for (int i=0; i<frames.length; i++)
 		{
-			int frame = entry.getKey();
-			FilterCandidates candidates = entry.getValue();
-			MultiPathFitResult[] multiPathFitResults = candidates.fitResult;
-			int totalCandidates = candidates.spots.length;
+			int frame = frames[i];
+			MultiPathFitResult[] multiPathFitResults = candidates[i].fitResult;
+			int totalCandidates = candidates[i].spots.length;
 			int nActual = actualCoordinates.get(frame).size();
 			multiPathResults.add(new MultiPathFitResults(frame, multiPathFitResults, totalCandidates, nActual));
 		}
 		// Score the results and count the number returned
 		List<FractionalAssignment[]> assignments = new ArrayList<FractionalAssignment[]>();
-		final Set<Integer> set = new TreeSet<Integer>();
+		final TIntHashSet set = new TIntHashSet();
 		FractionScoreStore scoreStore = new FractionScoreStore()
 		{
 			public void add(int uniqueId)
@@ -1710,7 +1750,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 				CoordinateStoreFactory.create(imp.getWidth(), imp.getHeight(), fitConfig.getDuplicateDistance()));
 		double nPredicted = fractionResult.getTP() + fractionResult.getFP();
 
-		double[][] matchScores = new double[set.size()][];
+		final double[][] matchScores = new double[set.size()][];
 		int count = 0;
 		for (int i = 0; i < assignments.size(); i++)
 		{
@@ -1745,32 +1785,36 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 		}
 		// Add the rest
-		for (int uniqueId : set.toArray(new Integer[0]))
+		set.forEach(new CustomTIntProcedure(count)
 		{
-			// This should not be null or something has gone wrong
-			PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
-			if (r == null)
-				throw new RuntimeException("Missing result: " + uniqueId);
-			final double precision = Math.sqrt(r.getLocationVariance());
-			final double signal = r.getSignal();
-			final double snr = r.getSNR();
-			final double width = r.getXSDFactor();
-			final double xShift = r.getXRelativeShift2();
-			final double yShift = r.getYRelativeShift2();
-			// Since these two are combined for filtering and the max is what matters.
-			final double shift = (xShift > yShift) ? Math.sqrt(xShift) : Math.sqrt(yShift);
-			final double eshift = Math.sqrt(xShift + yShift);
+			public boolean execute(int uniqueId)
+			{
+				// This should not be null or something has gone wrong
+				PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
+				if (r == null)
+					throw new RuntimeException("Missing result: " + uniqueId);
+				final double precision = Math.sqrt(r.getLocationVariance());
+				final double signal = r.getSignal();
+				final double snr = r.getSNR();
+				final double width = r.getXSDFactor();
+				final double xShift = r.getXRelativeShift2();
+				final double yShift = r.getYRelativeShift2();
+				// Since these two are combined for filtering and the max is what matters.
+				final double shift = (xShift > yShift) ? Math.sqrt(xShift) : Math.sqrt(yShift);
+				final double eshift = Math.sqrt(xShift + yShift);
 
-			final double[] score = new double[8];
-			score[FILTER_SIGNAL] = signal;
-			score[FILTER_SNR] = snr;
-			score[FILTER_MIN_WIDTH] = width;
-			score[FILTER_MAX_WIDTH] = width;
-			score[FILTER_SHIFT] = shift;
-			score[FILTER_ESHIFT] = eshift;
-			score[FILTER_PRECISION] = precision;
-			matchScores[count++] = score;
-		}
+				final double[] score = new double[8];
+				score[FILTER_SIGNAL] = signal;
+				score[FILTER_SNR] = snr;
+				score[FILTER_MIN_WIDTH] = width;
+				score[FILTER_MAX_WIDTH] = width;
+				score[FILTER_SHIFT] = shift;
+				score[FILTER_ESHIFT] = eshift;
+				score[FILTER_PRECISION] = precision;
+				matchScores[c++] = score;
+				return true;
+			}
+		});
 
 		// Debug the reasons the fit failed
 		if (singleStatus != null)

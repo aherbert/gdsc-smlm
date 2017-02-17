@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -121,6 +119,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.utils.XmlUtils;
+import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -234,7 +233,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 	private boolean imagePSF;
 	private double hwhm = 0;
 
-	private TreeSet<Integer> movingMolecules;
+	private TIntHashSet movingMolecules;
 	private boolean maskListContainsStacks;
 
 	// Created by drawImage(...)
@@ -1523,7 +1522,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 
 		List<LocalisationModelSet> newLocalisations = new ArrayList<LocalisationModelSet>(
 				(int) (localisations.size() / simulationStepsPerFrame));
-		movingMolecules = new TreeSet<Integer>();
+		movingMolecules = new TIntHashSet();
 
 		//System.out.printf("combineSimulationSteps @ %f\n", simulationStepsPerFrame);
 
@@ -2843,7 +2842,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 	{
 		if (fluorophores == null)
 			return null;
-		Set<Integer> idSet = new TreeSet<Integer>();
+		TIntHashSet idSet = new TIntHashSet();
 		for (LocalisationModel l : localisations)
 			idSet.add(l.getId());
 		List<FluorophoreSequenceModel> newFluorophores = new ArrayList<FluorophoreSequenceModel>(idSet.size());

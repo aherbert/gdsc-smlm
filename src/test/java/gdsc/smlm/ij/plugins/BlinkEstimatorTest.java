@@ -1,5 +1,17 @@
 package gdsc.smlm.ij.plugins;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.junit.Assert;
+import org.junit.Test;
+
+import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Statistics;
+import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.model.ActivationEnergyImageModel;
 import gdsc.smlm.model.CompoundMoleculeModel;
@@ -14,19 +26,8 @@ import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.Statistics;
-import gdsc.core.utils.StoredDataStatistics;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
-
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
-import org.junit.Assert;
-import org.junit.Test;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
 
 public class BlinkEstimatorTest
 {
@@ -140,7 +141,7 @@ public class BlinkEstimatorTest
 
 		for (boolean timeAtLowerBound : new boolean[] { false })
 		{
-			int[] count = new int[MAX_FITTED_POINTS + 1];
+			final int[] count = new int[MAX_FITTED_POINTS + 1];
 			int tests = 0;
 			for (int run = 0; run < 3; run++)
 			{
@@ -149,10 +150,16 @@ public class BlinkEstimatorTest
 					for (int i = 0; i < tOn.length; i++)
 					{
 						tests++;
-						TreeSet<Integer> ok = estimateBlinking(n, tOn[i], tOff[i], particles, fixedFraction,
+						TIntHashSet ok = estimateBlinking(n, tOn[i], tOff[i], particles, fixedFraction,
 								timeAtLowerBound, false);
-						for (int fit : ok)
-							count[fit]++;
+						ok.forEach(new TIntProcedure()
+						{
+							public boolean execute(int value)
+							{
+								count[value]++;
+								return true;
+							}
+						});
 					}
 				}
 			}
@@ -167,7 +174,7 @@ public class BlinkEstimatorTest
 		}
 	}
 
-	private TreeSet<Integer> estimateBlinking(double nBlinks, double tOn, double tOff, int particles,
+	private TIntHashSet estimateBlinking(double nBlinks, double tOn, double tOff, int particles,
 			double fixedFraction, boolean timeAtLowerBound, boolean doAssert)
 	{
 		SpatialIllumination activationIllumination = new UniformIllumination(100);
@@ -298,7 +305,7 @@ public class BlinkEstimatorTest
 		}
 
 		// See if any fitting regime gets a correct answer
-		TreeSet<Integer> ok = new TreeSet<Integer>();
+		TIntHashSet ok = new TIntHashSet();
 		for (int nFittedPoints = MIN_FITTED_POINTS; nFittedPoints <= MAX_FITTED_POINTS; nFittedPoints++)
 		{
 			be.nFittedPoints = nFittedPoints;
