@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
@@ -52,6 +53,8 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.settings.OPTICSSettings.ImageMode;
+import gdsc.smlm.ij.settings.OPTICSSettings.OutlineMode;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -59,7 +62,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
+import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
@@ -1002,16 +1007,19 @@ public class FIRE implements PlugIn
 
 		initialise(results, null);
 
-		String name = results.getName();
+		//String name = results.getName();
 		double fourierImageScale = SCALE_VALUES[imageScaleIndex];
 		int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
 
 		// Create the image and compute the numerator of FRC.
+		FireImages images = createImages(fourierImageScale, imageSize);
+		FRC frc = new FRC();
+		frc.progress = progress;
+		frc.perimeterSamplingFactor = perimeterSamplingFactor;
+		frc.useHalfCircle = useHalfCircle;
+		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 
-		// Build a histogram of the localisation precision.
-		// Get the initial mean and SD and plot as a Gaussian.
-		PrecisionHistogram histogram = calculatePrecisionHistogram();
-		histogram.plot();
+		// TODO ...
 
 		// Compute log| v(q) / H(q) / sinc(pi*q*L)^2 | and smooth
 		// q = Spatial frequency (1/L, 2/L, ...)
@@ -1021,9 +1029,13 @@ public class FIRE implements PlugIn
 		// log(NQ/4) = min of the curve => Q = 4*exp(min) / N
 		// N == Number of localisations
 
+		// Build a histogram of the localisation precision.
+		// Get the initial mean and SD and plot as a Gaussian.
+		PrecisionHistogram histogram = calculatePrecisionHistogram();
+
 		// Interactive dialog to estimate Q (blinking events per flourophore) using 
 		// sliders for the mean and standard deviation of the localisation precision.
-
+		showQEstimationDialog(histogram);
 	}
 
 	private boolean showQEstimationInputDialog()
@@ -1329,6 +1341,65 @@ public class FIRE implements PlugIn
 		{
 			// Just in case there is another exception type, or the initial estimate failed
 			return null;
+		}
+	}
+
+	private boolean showQEstimationDialog(PrecisionHistogram histogram)
+	{
+		histogram.plot();
+
+		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
+				String.format("Precision estimate = %.3f +/- %.3f", histogram.mean, histogram.sigma));
+
+		gd.addNumericField("Mean", histogram.mean, 3);
+		gd.addNumericField("SD", histogram.sigma, 3);
+		
+		// TODO - Field to reset to the default
+
+		// TODO 
+		// - create a synchronised work queue and pass it to the dialog listener.
+		// - create a worker thread to take the work from the queue and do the computation.
+
+		gd.addDialogListener(new FIREDialogListener(histogram));
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		return true;
+	}
+
+	private class FIREDialogListener implements DialogListener
+	{
+		PrecisionHistogram histogram;
+		long time;
+		boolean notActive = true;
+
+		FIREDialogListener(PrecisionHistogram histogram)
+		{
+			this.histogram = histogram;
+			time = System.currentTimeMillis() + 1000;
+		}
+
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			if (notActive && System.currentTimeMillis() < time)
+				return false;
+
+			notActive = false;
+
+			// TODO - allow reset the initial estimate
+			
+			histogram.mean = Math.abs(gd.getNextNumber());
+			histogram.sigma = Math.abs(gd.getNextNumber());
+
+			// TODO - offload this work onto a thread that just picks up the most recent dialog input.
+			histogram.plot();
+
+			return true;
 		}
 	}
 }

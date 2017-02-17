@@ -92,13 +92,15 @@ public class FRC
 	private static final double LAST_THIRD = 1.0 - 2 * THIRD;
 
 	/**
-	 * Calculate the Fourier Ring Correlation curve for two images.
+	 * Calculate the Fourier Ring Correlation curve and numerator for two images.
 	 * 
 	 * @param ip1
 	 * @param ip2
-	 * @return An array of triples representing [][radius,correlation,N] where correlation is the FRC at the given
-	 *         radius from the centre of the Fourier transform (i.e. 1/spatial frequency) and N is the number of samples
-	 *         used to compute the correlation
+	 * @return An array of sextuples representing [][radius,correlation,N,sum1,sum2,sum3] where correlation is the FRC
+	 *         at the given radius from the centre of the Fourier transform (i.e. 1/spatial frequency) and N is the
+	 *         number of samples used to compute the correlation. sum1 is the numerator of the correlation (the
+	 *         conjugate multiple of the two FFT images), sum2 and sum3 are the two sums of the absolute FFT transform
+	 *         of each input image. correlation = sum1 / Math.sqrt(sum2*sum3).
 	 */
 	public double[][] calculateFrcCurve(ImageProcessor ip1, ImageProcessor ip2)
 	{
@@ -115,7 +117,6 @@ public class FRC
 
 		FloatProcessor[] fft1, fft2;
 
-		// TODO - Can this be sped up by computing both FFT transforms together?
 		boolean basic = false;
 		if (basic)
 		{
@@ -134,14 +135,14 @@ public class FRC
 			float[] f1 = (float[]) ip1.getPixels();
 			fht.rc2DFHT(f1, false, ip1.getWidth());
 			FHT2 fht1 = new FHT2(ip1, true);
-			fft1 = getProcessors(fht1.getComplexTransform());
+			fft1 = getProcessors(fht1.getComplexTransform2());
 			progess.incrementProgress(THIRD);
 
 			ip2 = getSquareTaperedImage(ip2);
 			float[] f2 = (float[]) ip2.getPixels();
 			fht.rc2DFHT(f2, false, ip2.getWidth());
 			FHT2 fht2 = new FHT2(ip2, true);
-			fft2 = getProcessors(fht2.getComplexTransform());
+			fft2 = getProcessors(fht2.getComplexTransform2());
 			progess.incrementProgress(THIRD);
 		}
 
@@ -175,12 +176,11 @@ public class FRC
 
 		progess.status("Calculating FRC curve...");
 
-		double[][] frcCurve = new double[(int) max][3];
+		double[][] frcCurve = new double[(int) max][];
 
 		// Radius zero is always 1
-		frcCurve[0][0] = 0;
-		frcCurve[0][1] = 1;
-		frcCurve[0][2] = 1; // Avoid divide by zero errors. Not sure if this is OK
+		// Avoid divide by zero errors. Not sure if this is OK
+		frcCurve[0] = new double[] { 0, 1, 1, 0, 0, 0 };
 
 		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
 
@@ -213,9 +213,7 @@ public class FRC
 
 			double val = sum1 / Math.sqrt(sum2 * sum3);
 
-			frcCurve[radius][0] = radius;
-			frcCurve[radius][1] = val;
-			frcCurve[radius][2] = numSum;
+			frcCurve[radius] = new double[] { radius, val, numSum, sum1, sum2, sum3 };
 
 			radius++;
 		}
