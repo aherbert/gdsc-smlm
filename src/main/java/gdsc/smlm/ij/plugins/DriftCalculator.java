@@ -1312,10 +1312,9 @@ public class DriftCalculator implements PlugIn
 		// Extract the localisations into blocks of N consecutive frames
 		ArrayList<ArrayList<Localisation>> blocks = new ArrayList<ArrayList<Localisation>>();
 		results.sort();
-		List<PeakResult> peakResults = results.getResults();
 		int t = 0;
 		ArrayList<Localisation> nextBlock = null;
-		for (PeakResult r : peakResults)
+		for (PeakResult r : results.getResults())
 		{
 			if (r.peak > t)
 			{

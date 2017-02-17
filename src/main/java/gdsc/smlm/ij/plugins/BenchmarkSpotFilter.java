@@ -1691,7 +1691,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// that the intensities correspond to the results amplitude.
 			// Just assume the background is uniform.
 			double sum = 0;
-			for (PeakResult r : results.getResults())
+			for (PeakResult r : results)
 				sum += r.getBackground();
 			background = (float) (sum / results.size());
 		}

@@ -205,7 +205,7 @@ public class LoadLocalisations implements PlugIn
 	private boolean getZDepth(MemoryPeakResults results)
 	{
 		// The z-depth is stored in pixels
-		double min = results.getResults().get(0).error;
+		double min = results.getHead().error;
 		double max = min;
 		for (PeakResult peak : results.getResults())
 		{

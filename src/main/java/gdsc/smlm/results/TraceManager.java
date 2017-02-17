@@ -148,11 +148,12 @@ public class TraceManager
 
 		// Assign localisations
 		localisations = new Localisation[results.size()];
-		for (int i = 0; i < localisations.length; i++)
+		int id = 0;
+		for (PeakResult result : results.getResults())
 		{
-			PeakResult result = results.getResults().get(i);
-			localisations[i] = new Localisation(i, result.peak, result.getEndFrame(),
+			localisations[id] = new Localisation(id, result.peak, result.getEndFrame(),
 					result.params[Gaussian2DFunction.X_POSITION], result.params[Gaussian2DFunction.Y_POSITION]);
+			id++;
 		}
 
 		totalTraces = localisations.length;
@@ -422,6 +423,8 @@ public class TraceManager
 	 */
 	public Trace[] getTraces()
 	{
+		PeakResult[] peakResults = results.toArray();
+
 		// No tracing yet performed or no thresholds
 		if (totalTraces == localisations.length)
 		{
@@ -430,7 +433,7 @@ public class TraceManager
 				ArrayList<Trace> traces = new ArrayList<Trace>();
 				for (int index = 0; index < totalTraces; index++)
 				{
-					PeakResult peakResult = results.getResults().get(localisations[index].id);
+					PeakResult peakResult = peakResults[localisations[index].id];
 					if (!outsideActivationWindow(peakResult.peak))
 						traces.add(new Trace(peakResult));
 				}
@@ -440,7 +443,7 @@ public class TraceManager
 			{
 				Trace[] traces = new Trace[localisations.length];
 				for (int index = 0; index < traces.length; index++)
-					traces[index] = new Trace(results.getResults().get(localisations[index].id));
+					traces[index] = new Trace(peakResults[localisations[index].id]);
 				return traces;
 			}
 		}
@@ -475,7 +478,7 @@ public class TraceManager
 			if (filterActivationFrames && outsideActivationWindow(localisations[index].t))
 				continue;
 
-			PeakResult peakResult = results.getResults().get(localisations[index].id);
+			PeakResult peakResult = peakResults[localisations[index].id];
 
 			Trace nextTrace = new Trace(peakResult);
 			nextTrace.setId(traceId);
@@ -494,7 +497,7 @@ public class TraceManager
 						break;
 					}
 					if (localisations[j].trace == traceId)
-						nextTrace.add(results.getResults().get(localisations[j].id));
+						nextTrace.add(peakResults[localisations[j].id]);
 				}
 			}
 
@@ -1630,7 +1633,7 @@ public class TraceManager
 			throw new IllegalArgumentException("Distancet and time thresholds must be positive");
 
 		Trace[] neighbours = new Trace[results.size()];
-		final List<PeakResult> peakResults = results.getResults();
+		final PeakResult[] peakResults = results.toArray();
 
 		final float dThresh2 = (float) (distanceThreshold * distanceThreshold);
 
@@ -1673,7 +1676,7 @@ public class TraceManager
 				{
 					if (l.distance2(endLocalisations[i]) < dThresh2)
 					{
-						float signal = peakResults.get(endLocalisations[i].id).getSignal();
+						float signal = peakResults[endLocalisations[i].id].getSignal();
 						if (maxSignal < signal)
 						{
 							maxSignal = signal;
@@ -1687,7 +1690,7 @@ public class TraceManager
 				{
 					if (l.distance2(localisations[i]) < dThresh2)
 					{
-						float signal = peakResults.get(localisations[i].id).getSignal();
+						float signal = peakResults[localisations[i].id].getSignal();
 						if (maxSignal < signal)
 						{
 							maxSignal = signal;
@@ -1697,9 +1700,9 @@ public class TraceManager
 				}
 
 				// Assign
-				Trace trace = new Trace(peakResults.get(l.id));
+				Trace trace = new Trace(peakResults[l.id]);
 				if (neighbour > -1)
-					trace.add(peakResults.get(neighbour));
+					trace.add(peakResults[neighbour]);
 				neighbours[index] = trace;
 			}
 		}

@@ -105,9 +105,8 @@ public class SummariseResults implements PlugIn
 
 		// Only process the statistics if we have a noise component
 		final int size = result.size();
-		if (size > 0 && result.getResults().get(0).noise > 0)
+		if (size > 0 && result.getHead().noise > 0)
 		{
-
 			int ii = 0;
 			final double nmPerPixel = result.getNmPerPixel();
 			final double gain = result.getGain();
@@ -132,7 +131,7 @@ public class SummariseResults implements PlugIn
 		sb.append("\t").append(Utils.timeToString(maxT * exposureTime));
 		if (size > 0)
 		{
-			boolean includeDeviations = result.getResults().get(0).paramsStdDev != null;
+			boolean includeDeviations = result.getHead().paramsStdDev != null;
 			long memorySize = MemoryPeakResults.estimateMemorySize(size, includeDeviations);
 			String memory = MemoryPeakResults.memorySizeString(memorySize);
 			sb.append("\t").append(memory);

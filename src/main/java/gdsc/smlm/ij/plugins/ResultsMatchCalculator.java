@@ -399,7 +399,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	private boolean haveIds(MemoryPeakResults results)
 	{
-		final int id = results.getResults().get(0).getId();
+		final int id = results.getHead().getId();
 		for (PeakResult r : results.getResults())
 			if (id != r.getId())
 				return true;

@@ -583,7 +583,7 @@ public class FIRE implements PlugIn
 		if (results == null)
 			return null;
 
-		final boolean hasSignal = useSignal && (results.getResults().get(0).getSignal() > 0);
+		final boolean hasSignal = useSignal && (results.getHead().getSignal() > 0);
 
 		// Draw images using the existing IJ routines.
 		Rectangle bounds = new Rectangle(0, 0, (int) Math.ceil(dataBounds.getWidth()),

@@ -279,7 +279,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 
 			// Check for single frame
-			singleFrame = results.getResults().get(0).peak;
+			singleFrame = results.getHead().peak;
 			for (PeakResult result : results.getResults())
 			{
 				if (singleFrame != result.peak)
@@ -2193,9 +2193,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			LUT lut = LUTHelper.createLUT(LutColour.ICE);
 			Overlay o = new Overlay();
+			ArrayList<PeakResult> list = (ArrayList<PeakResult>) results.getResults();			
 			for (int i = 0, j = results.size() - 1; i < results.size(); i++, j--)
 			{
-				PeakResult r = results.getResults().get(i);
+				PeakResult r = list.get(i);
 				PointRoi roi = new PointRoi(r.getXPosition(), r.getYPosition());
 				Color c = LUTHelper.getColour(lut, j, results.size());
 				roi.setStrokeColor(c);

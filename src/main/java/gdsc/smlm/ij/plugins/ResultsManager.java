@@ -240,7 +240,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		int totalProgress = list.size();
 		int stepProgress = Utils.getProgressInterval(totalProgress);
 		TurboList<PeakResult> batch = new TurboList<PeakResult>(stepProgress);
-		for (PeakResult result : results.getResults())
+		for (PeakResult result : list)
 		{
 			if (progress % stepProgress == 0)
 			{
@@ -248,7 +248,7 @@ public class ResultsManager implements PlugIn, MouseListener
 			}
 			progress++;
 			batch.addf(result);
-			
+
 			if (batch.size() == stepProgress)
 			{
 				output.addAll(batch);
@@ -297,7 +297,7 @@ public class ResultsManager implements PlugIn, MouseListener
 
 	private boolean canShowId(MemoryPeakResults results)
 	{
-		final int id = results.getResults().get(0).getId();
+		final int id = results.getHead().getId();
 		for (PeakResult r : results.getResults())
 			if (id != r.getId())
 				return true;
@@ -668,7 +668,8 @@ public class ResultsManager implements PlugIn, MouseListener
 	 * @param memoryResults
 	 * @param input
 	 *            MEMORY_MULTI_FRAME : Select only those results with at least one result spanning frames,
-	 *            MEMORY_CLUSTERED : Select only those results with all IDs above zero
+	 *            MEMORY_CLUSTERED : Select only those results which have at least some IDs above zero (allowing zero to
+	 *            be a valid cluster Id for no cluster)
 	 */
 	public static void addInputSource(ArrayList<String> source, MemoryPeakResults memoryResults, InputSource input)
 	{
@@ -685,7 +686,7 @@ public class ResultsManager implements PlugIn, MouseListener
 						return;
 					break;
 				case MEMORY_CLUSTERED:
-					if (!isID(memoryResults))
+					if (!hasID(memoryResults))
 						return;
 					break;
 				default:
@@ -731,7 +732,21 @@ public class ResultsManager implements PlugIn, MouseListener
 	}
 
 	/**
-	 * Check for IDs above zero.
+	 * Check for any IDs above zero.
+	 * 
+	 * @param memoryResults
+	 * @return True if any results have IDs above zero
+	 */
+	public static boolean hasID(MemoryPeakResults memoryResults)
+	{
+		for (PeakResult r : memoryResults.getResults())
+			if (r.getId() > 0)
+				return true;
+		return false;
+	}
+
+	/**
+	 * Check for all IDs above zero.
 	 * 
 	 * @param memoryResults
 	 * @return True if all results have IDs above zero

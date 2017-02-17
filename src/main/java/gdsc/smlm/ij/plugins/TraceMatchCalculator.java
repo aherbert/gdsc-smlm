@@ -283,7 +283,6 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		if (results == null)
 			return null;
-		results.getResults();
 		Pulse[] pulses = new Pulse[results.size()];
 		int i = 0;
 		for (PeakResult p : results.getResults())

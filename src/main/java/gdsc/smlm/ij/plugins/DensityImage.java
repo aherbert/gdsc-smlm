@@ -1,5 +1,19 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
+import gdsc.core.clustering.DensityManager;
+import gdsc.core.ij.Utils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -19,8 +33,6 @@ import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
-import gdsc.core.ij.Utils;
-import gdsc.core.clustering.DensityManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -31,17 +43,6 @@ import ij.gui.GenericDialog;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
-
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.math3.random.HaltonSequenceGenerator;
-import org.apache.commons.math3.random.Well19937c;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 /**
  * Produces an image on localisation using their density
@@ -149,9 +150,10 @@ public class DensityImage implements PlugIn
 
 		final float[] xcoord = new float[results.size()];
 		final float[] ycoord = new float[xcoord.length];
+		ArrayList<PeakResult> peakResults = (ArrayList<PeakResult>) results.getResults();
 		for (int i = 0; i < xcoord.length; i++)
 		{
-			PeakResult result = results.getResults().get(i);
+			PeakResult result = peakResults.get(i);
 			xcoord[i] = result.getXPosition();
 			ycoord[i] = result.getYPosition();
 		}
@@ -428,12 +430,12 @@ public class DensityImage implements PlugIn
 		final float minY = (int) (scaledRoiMinY);
 		final float maxY = (int) Math.ceil(scaledRoiMaxY);
 		// Clone the results then add back those that are within the bounds
-		List<PeakResult> peakResults = new ArrayList<PeakResult>(results.getResults());
+		PeakResult[] peakResults = results.toArray();
 		results.begin();
 		int count = 0;
-		for (int i = 0; i < peakResults.size(); i++)
+		for (int i = 0; i < peakResults.length; i++)
 		{
-			PeakResult peakResult = peakResults.get(i);
+			PeakResult peakResult = peakResults[i];
 			float x = peakResult.params[Gaussian2DFunction.X_POSITION];
 			float y = peakResult.params[Gaussian2DFunction.Y_POSITION];
 			if (x < minX || x > maxX || y < minY || y > maxY)

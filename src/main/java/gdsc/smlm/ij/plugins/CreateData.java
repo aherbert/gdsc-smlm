@@ -3013,12 +3013,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 				ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 				List<Future<?>> futures = new LinkedList<Future<?>>();
 				final ArrayList<float[]> coords = new ArrayList<float[]>();
-				int t = results.getResults().get(0).peak;
+				int t = results.getHead().peak;
 				final Statistics densityStats = stats[DENSITY];
 				final float radius = (float) (settings.densityRadius * getHWHM());
 				final Rectangle bounds = results.getBounds();
 				currentIndex = 0;
-				finalIndex = results.getResults().get(results.getResults().size() - 1).peak;
+				finalIndex = results.getTail().peak;
 				// Store the density for each result.
 				int[] allDensity = new int[results.size()];
 				int allIndex = 0;

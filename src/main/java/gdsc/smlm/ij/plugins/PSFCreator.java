@@ -300,7 +300,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			final int y = (int) spot.getY();
 
 			MemoryPeakResults results = fitSpot(stack, width, height, x, y);
-			allResults.addAll(results.getResults());
+			allResults.addAllf(results.getResults());
 
 			if (results.size() < 5)
 			{

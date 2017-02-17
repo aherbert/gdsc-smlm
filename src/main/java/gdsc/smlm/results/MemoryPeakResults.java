@@ -223,6 +223,15 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 	}
 
 	/**
+	 * Add all results. Not synchronized.
+	 * 
+	 */
+	public void addAllf(Collection<PeakResult> results)
+	{
+		this.results.addAll(results);
+	}
+
+	/**
 	 * Add a result. Not synchronized.
 	 *
 	 * @param result
@@ -612,5 +621,29 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		if (array == null)
 			return toArray();
 		return results.toArray(array);
+	}
+
+	/**
+	 * Gets the head position in the set of results.
+	 *
+	 * @return the head
+	 */
+	public PeakResult getHead()
+	{
+		if (isEmpty())
+			return null;
+		return results.get(0);
+	}
+
+	/**
+	 * Gets the tail position in the set of results.
+	 *
+	 * @return the tail
+	 */
+	public PeakResult getTail()
+	{
+		if (isEmpty())
+			return null;
+		return results.get(size() - 1);
 	}
 }
