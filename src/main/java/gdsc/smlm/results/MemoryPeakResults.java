@@ -27,7 +27,8 @@ import java.util.Set;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stores peak results in memory. The PeakResults interface add methods are thread safe.
+ * Stores peak results in memory. The PeakResults interface add methods are thread safe as they are synchronized. There
+ * are equivalent non-.synchronized methods.
  */
 public class MemoryPeakResults extends AbstractPeakResults implements Iterable<PeakResult>
 {
@@ -170,8 +171,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 			results.clear();
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Add a result. Synchronized.
+	 * 
+	 * {@inheritDoc}
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
@@ -181,8 +184,36 @@ public class MemoryPeakResults extends AbstractPeakResults implements Iterable<P
 		results.add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Add a result. Not synchronized.
+	 *
+	 * @param peak
+	 *            the peak (e.g. frame number)
+	 * @param origX
+	 *            the original X position
+	 * @param origY
+	 *            the original Y position
+	 * @param origValue
+	 *            the original value
+	 * @param error
+	 *            the error
+	 * @param noise
+	 *            the noise
+	 * @param params
+	 *            the parameters
+	 * @param paramsStdDev
+	 *            the parameters standard deviation (or null)
+	 */
+	public void addf(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
+			float[] paramsStdDev)
+	{
+		results.add(new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev));
+	}
+
+	/**
+	 * Add all results. Synchronized.
+	 * 
+	 * {@inheritDoc}
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#addAll(java.util.Collection)
 	 */

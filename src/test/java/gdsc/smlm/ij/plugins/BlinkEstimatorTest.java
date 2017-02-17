@@ -232,7 +232,7 @@ public class BlinkEstimatorTest
 			params[Gaussian2DFunction.Y_POSITION] = (float) l.getY();
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			params[Gaussian2DFunction.SIGNAL] = (float) (l.getIntensity());
-			results.add(l.getTime(), 0, 0, 0, 0, 0, params, null);
+			results.addf(l.getTime(), 0, 0, 0, 0, 0, params, null);
 		}
 
 		// Add random localisations
@@ -244,7 +244,7 @@ public class BlinkEstimatorTest
 			params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = psfWidth;
 			// Intensity doesn't matter at the moment for tracing
 			params[Gaussian2DFunction.SIGNAL] = (float) (photons);
-			results.add(1 + rand.nextInt(totalSteps), 0, 0, 0, 0, 0, params, null);
+			results.addf(1 + rand.nextInt(totalSteps), 0, 0, 0, 0, 0, params, null);
 		}
 
 		// Get actual simulated stats ...

@@ -626,7 +626,7 @@ public class PeakResultsReaderTest
 				results.add(new ExtendedPeakResult(startFrame, origX, origY, origValue, error, noise, params,
 						paramsStdDev, startFrame + (int) (10 * rand.next()), i + 1));
 			else
-				results.add(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
+				results.addf(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
 		}
 		results.setName(Float.toString(rand.next()) + Float.toString(rand.next()));
 		results.setConfiguration(Float.toString(rand.next()) + Float.toString(rand.next()));

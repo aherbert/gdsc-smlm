@@ -7711,7 +7711,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 					int origX = (int) p[Gaussian2DFunction.X_POSITION];
 					int origY = (int) p[Gaussian2DFunction.Y_POSITION];
 
-					results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
+					results.addf(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
 				}
 			}
 		}
@@ -7727,7 +7727,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				int origX = (int) p[Gaussian2DFunction.X_POSITION];
 				int origY = (int) p[Gaussian2DFunction.Y_POSITION];
 
-				results.add(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
+				results.addf(frame, origX, origY, 0, 0, spot.getNoise(), params, null);
 			}
 		}
 

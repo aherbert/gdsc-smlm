@@ -96,7 +96,7 @@ public class SphericalDistributionTest
 			float[] params = new float[7];
 			params[Gaussian2DFunction.X_POSITION] = radius + (float) xyz[0];
 			params[Gaussian2DFunction.Y_POSITION] = radius + (float) xyz[1];
-			results.add(peak, 0, 0, 0, 0, 0, params, null);
+			results.addf(peak, 0, 0, 0, 0, 0, params, null);
 		}
 		results.end();
 		IJImagePeakResults image = new IJImagePeakResults((useRejctionMethod) ? "Rejection Method"

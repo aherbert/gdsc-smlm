@@ -597,7 +597,7 @@ public class DriftCalculator implements PlugIn
 				float[] params = Arrays.copyOf(r.params, r.params.length);
 				params[Gaussian2DFunction.X_POSITION] += dx[r.peak];
 				params[Gaussian2DFunction.Y_POSITION] += dy[r.peak];
-				newResults.add(r.peak, r.origX, r.origY, r.origValue, r.error, r.noise, params, r.paramsStdDev);
+				newResults.addf(r.peak, r.origX, r.origY, r.origValue, r.error, r.noise, params, r.paramsStdDev);
 			}
 		}
 	}

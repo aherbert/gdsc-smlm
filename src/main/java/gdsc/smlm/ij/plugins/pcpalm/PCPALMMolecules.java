@@ -1386,7 +1386,7 @@ public class PCPALMMolecules implements PlugIn
 				float[] params = new float[7];
 				params[Gaussian2DFunction.X_POSITION] = (float) (x / nmPerPixel);
 				params[Gaussian2DFunction.Y_POSITION] = (float) (y / nmPerPixel);
-				results.add(i + 1, (int) x, (int) y, 0, 0, 0, params, null);
+				results.addf(i + 1, (int) x, (int) y, 0, 0, 0, params, null);
 			}
 
 			if (molecules.size() > size)
