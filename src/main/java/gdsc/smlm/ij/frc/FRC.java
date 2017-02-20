@@ -26,7 +26,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
-import gdsc.core.utils.ImageWindow;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
@@ -179,8 +178,7 @@ public class FRC
 		double[][] frcCurve = new double[(int) max][];
 
 		// Radius zero is always 1
-		// Avoid divide by zero errors. Not sure if this is OK
-		frcCurve[0] = new double[] { 0, 1, 1, 0, 0, 0 };
+		frcCurve[0] = new double[] { 0, 1, 0, 0, 0, 0 };
 
 		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
 
@@ -383,14 +381,31 @@ public class FRC
 		//	}
 		//}
 
-		// Use the GDSC ImageWindow class:
-		// FRC has Image width / Width of edge region = 8 so use alpha 0.25.
-		double[] w = ImageWindow.tukey(size, 0.25);
-		for (int i = 0; i < size; i++)
+		// New optimised code. This matches ImageWindow.tukey(size, 0.25) 
+		final int boundary = size / 8;
+		final int middle = size / 2;
+		final double FOUR_PI_OVER_SIZE = 12.566370614359172D / (size - 1);
 		{
-			//System.out.printf("[%d] %f  %f\n", i, w[i], taper[i]);
-			taper[i] = (float) w[i];
+			int i = 1, j = size - 2;
+			while (i <= boundary)
+			{
+				final double d = Math.sin(FOUR_PI_OVER_SIZE * i);
+				taper[i++] = taper[j--] = (float) (d * d);
+			}
+			while (i <= middle)
+			{
+				taper[i++] = taper[j--] = 1f;
+			}
 		}
+
+		//// Use the GDSC ImageWindow class:
+		//// FRC has Image width / Width of edge region = 8 so use alpha 0.25.
+		//double[] w = gdsc.core.utils.ImageWindow.tukey(size, 0.25);
+		//for (int i = 0; i < size; i++)
+		//{
+		//	System.out.printf("[%d] %f  %f\n", i, w[i], taper[i]);
+		//	taper[i] = (float) w[i];
+		//}
 
 		return taper;
 	}
@@ -499,6 +514,8 @@ public class FRC
 		return getSmoothedCurve(frcCurve, bandwidth, robustness);
 	}
 
+	private final static double TWO_PI = 2.0 * Math.PI;
+
 	/**
 	 * Calculate the curve representing the minimum correlation required to distinguish two images for each resolution
 	 * in the input FRC curve.
@@ -511,25 +528,52 @@ public class FRC
 	{
 		double[] threshold = new double[frcCurve.length];
 
-		// Note: frcCurve[i][2] holds the number of samples that were taken from the circle. 
-		// It is not q/L as required in the Nieuwenhuizen paper, Supp S5.4. 
-		// q = spatial frequency = 1/L, 2/L, ...
-		// L = size of the field of view
+		// ADH: 
+		// Half-Bit and 3 Sigma are explained in Supp section 5.4. However this is based on 
+		// Heel, et al (2005) which gives a better explanation so I have updated using their 
+		// equations.
+		// Equation S.84 has an error compared to equation (13) in Heel. In fact equation (17) 
+		// from Heel is what should be implemented for Half-bit.
+
+		// Note: The original code used frcCurve[i][2] which holds the number of samples that 
+		// were taken from the circle. This makes the curve dependent on the number of samples 
+		// taken (e.g. half-circle/full-circle with different sampling factors).
+		// To make the curve sampling independent I assume 2*pi*r samples were taken. 
+
+		// See: Heel, M. v. & Schatz, M. Fourier shell correlation threshold criteria. J. Struct. Bio. 151, 250–262 (2005).
+
+		// Fourier Shell Radius:
+		// This is set to 1 for r==0 in Heel
+		double r = 1;
 
 		switch (method)
 		{
 			case HALF_BIT:
-				threshold[0] = 1;
-				for (int q = 1; q < threshold.length; q++)
-					threshold[q] = ((0.2071 * Math.sqrt(frcCurve[q][2]) + 1.9102) /
-							(1.2701 * Math.sqrt(frcCurve[q][2]) + 0.9102));
+				for (int i = 0; i < threshold.length; i++, r = i)
+				{
+					// Original. This is wrong!
+					//threshold[i] = ((0.2071 * Math.sqrt(frcCurve[q][2]) + 1.9102) /
+					//		          (1.2701 * Math.sqrt(frcCurve[q][2]) + 0.9102));
+
+					// ADH:
+					// This is actually equation (17) from Heel:
+					double nr = TWO_PI * r;
+					threshold[i] = ((0.2071 + 1.9102 / Math.sqrt(nr)) / (1.2071 + 0.9102 / Math.sqrt(nr)));
+				}
 				break;
 
 			case THREE_SIGMA:
-				threshold[0] = 1;
-				for (int q = 1; q < threshold.length; q++)
-					//threshold[q] = (3.0 / Math.sqrt(frcCurve[q][2] / 2.0));
-					threshold[q] = (3.0 / Math.sqrt(q));
+				for (int i = 0; i < threshold.length; i++, r = i)
+				{
+					// Note: frcCurve[i][2] holds the number of samples that were taken from the circle.
+					//threshold[i] = (3.0 / Math.sqrt(frcCurve[i][2] / 2.0));
+
+					// Heel, Equation (2):
+					// We actually want to know the number of pixels contained in the Fourier shell of radius r.
+					// We can compute this assuming we sampled the full circle 2*pi*r.
+					double nr = TWO_PI * r;
+					threshold[i] = 3.0 / Math.sqrt(nr / 2.0);
+				}
 				break;
 
 			case FIXED_1_OVER_7:
