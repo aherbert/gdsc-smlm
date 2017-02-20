@@ -177,8 +177,9 @@ public class FRC
 
 		double[][] frcCurve = new double[(int) max][];
 
-		// Radius zero is always 1
-		frcCurve[0] = new double[] { 0, 1, 0, 0, 0, 0 };
+		// Radius zero is always 1. Set number of pixel to 1 when r==0.
+		// Avoids divide by zero error.
+		frcCurve[0] = new double[] { 0, 1, 1, 0, 0, 0 };
 
 		float[][] images = new float[][] { numerator, absFFT1, absFFT2 };
 
