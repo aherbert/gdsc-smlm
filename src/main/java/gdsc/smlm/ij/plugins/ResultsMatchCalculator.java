@@ -501,10 +501,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private static int[] getTimepoints(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
 			TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates)
 	{
-		//int[] set = SimpleArrayUtils.merge(actualCoordinates.keys(), predictedCoordinates.keys());
+		//int[] set = SimpleArrayUtils.merge(actualCoordinates.keys(), predictedCoordinates.keys(), true);
 
 		// Do inline to avoid materialising the keys arrays
-		final TIntHashSet hashset = new TIntHashSet();
+		final TIntHashSet hashset = new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()) * 2);
 		final TIntProcedure p = new TIntProcedure()
 		{
 			public boolean execute(int value)
