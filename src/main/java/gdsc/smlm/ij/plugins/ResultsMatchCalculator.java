@@ -504,7 +504,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		//int[] set = SimpleArrayUtils.merge(actualCoordinates.keys(), predictedCoordinates.keys(), true);
 
 		// Do inline to avoid materialising the keys arrays
-		final TIntHashSet hashset = new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()) * 2);
+		final TIntHashSet hashset = new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
 		final TIntProcedure p = new TIntProcedure()
 		{
 			public boolean execute(int value)
