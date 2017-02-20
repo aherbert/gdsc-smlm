@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.analysis.function.Gaussian;
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
@@ -53,8 +54,6 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.settings.OPTICSSettings.ImageMode;
-import gdsc.smlm.ij.settings.OPTICSSettings.OutlineMode;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -586,6 +585,11 @@ public class FIRE implements PlugIn
 
 	public FireImages createImages(double fourierImageScale, int imageSize)
 	{
+		return createImages(fourierImageScale, imageSize, useSignal);
+	}
+
+	public FireImages createImages(double fourierImageScale, int imageSize, boolean useSignal)
+	{
 		if (results == null)
 			return null;
 
@@ -784,7 +788,8 @@ public class FIRE implements PlugIn
 			// Q. For some reason the limits calculated are ignored,
 			// so set them as the defaults.
 			double[] limits = plot.getCurrentMinAndMax();
-			plot.setLimits(limits[0], limits[1], limits[2], limits[3]);
+			// The FRC should not go above 1 so limit Y
+			plot.setLimits(limits[0], limits[1], limits[2], Math.min(1.05, limits[3]));
 			return plot;
 		}
 	}
@@ -1011,23 +1016,16 @@ public class FIRE implements PlugIn
 		double fourierImageScale = SCALE_VALUES[imageScaleIndex];
 		int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
 
-		// Create the image and compute the numerator of FRC.
-		FireImages images = createImages(fourierImageScale, imageSize);
+		// Create the image and compute the numerator of FRC. 
+		// Do not use the signal so results.size() is the number of localisations.
+		FireImages images = createImages(fourierImageScale, imageSize, false);
 		FRC frc = new FRC();
 		frc.progress = progress;
 		frc.perimeterSamplingFactor = perimeterSamplingFactor;
 		frc.useHalfCircle = useHalfCircle;
 		double[][] frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2);
 
-		// TODO ...
-
-		// Compute log| v(q) / H(q) / sinc(pi*q*L)^2 | and smooth
-		// q = Spatial frequency (1/L, 2/L, ...)
-		// L = size of field of view
-		// H(q) depends on the mean and standard deviation of the precision  
-
-		// log(NQ/4) = min of the curve => Q = 4*exp(min) / N
-		// N == Number of localisations
+		QPlot qplot = new QPlot(images.imageScale, results.size(), frcCurve);
 
 		// Build a histogram of the localisation precision.
 		// Get the initial mean and SD and plot as a Gaussian.
@@ -1035,7 +1033,7 @@ public class FIRE implements PlugIn
 
 		// Interactive dialog to estimate Q (blinking events per flourophore) using 
 		// sliders for the mean and standard deviation of the localisation precision.
-		showQEstimationDialog(histogram);
+		showQEstimationDialog(histogram, qplot);
 	}
 
 	private boolean showQEstimationInputDialog()
@@ -1130,6 +1128,133 @@ public class FIRE implements PlugIn
 		}
 
 		return true;
+	}
+
+	public class QPlot
+	{
+		final double N;
+		double[] vq, sinc, q, xValues;
+		String title;
+
+		QPlot(double imageScale, double N, double[][] frcCurve)
+		{
+			this.N = N;
+
+			// Compute v(q) - The numerator of the FRC divided by the number of pixels 
+			// in the Fourier circle (2*pi*q*L)
+			vq = new double[frcCurve.length];
+			for (int i = 0; i < vq.length; i++)
+			{
+				// Use the actual number of samples and not 2*pi*q*L so we normalise 
+				// to the correct scale 
+				double d = frcCurve[i][3];
+				//double d = 2.0 * Math.PI * i;
+				vq[i] = frcCurve[i][3] / d;
+			}
+
+			// Compute sinc factor
+			sinc = new double[frcCurve.length];
+			sinc[0] = 1; // By definition
+			for (int i = 1; i < sinc.length; i++)
+			{
+				// This should be sinc(pi*q*L)^2
+				// where pi*q*L is half the number of samples in the Fourier circle.
+				double d = Math.PI * i;
+				sinc[i] = sinc(d * d);
+				// This could this be:
+				//sinc[i] = sinc(d)*sinc(d);
+			}
+
+			// For smoothing
+			q = Utils.newArray(vq.length, 0, 1.0);
+
+			// For the plot
+			title = results.getName() + " FRC Numerator Curve";
+
+			xValues = new double[frcCurve.length];
+			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
+			// we must double the curve length to get the original maximum image width. In addition
+			// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
+			double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
+			double conversion = imageScale / (frcCurveLength * nmPerPixel);
+			for (int i = 0; i < xValues.length; i++)
+			{
+				final double radius = frcCurve[i][0];
+				xValues[i] = radius * conversion;
+			}
+		}
+
+		private double sinc(double x)
+		{
+			return FastMath.sin(x) / x;
+		}
+
+		double[] computeHq(int n, double mean, double sigma)
+		{
+			// H(q) is the factor in the correlation averages related to the localization
+			// uncertainties that depends on the mean and width of the
+			// distribution of localization uncertainties
+			double[] hq = new double[n];
+			final double four_pi2 = 4 * Math.PI * Math.PI;
+			double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
+			hq[0] = 1; // TODO - what should this be at zero?
+			for (int q = 1; q < n; q++)
+			{
+				double q2 = q * q;
+				double d = 1 + eight_pi2_s2 * q2;
+				hq[q] = FastMath.exp((-four_pi2 * mean * mean * q2) / d) / Math.sqrt(d);
+			}
+			return hq;
+		}
+
+		final double LOG_10 = Math.log(10);
+		
+		double[] getLog(double[] hq)
+		{
+			double[] l = new double[hq.length];
+			for (int q = 0; q < hq.length; q++)
+				// Do this using log10
+				l[q] = Math.log(Math.abs(vq[q] / hq[q] / sinc[q])) / LOG_10;
+			return l;
+		}
+
+		double[] smooth(double[] l)
+		{
+			double bandwidth = 0.1;
+			int robustness = 0;
+			try
+			{
+				LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
+				return loess.smooth(q, l);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			return l;
+		}
+
+		void plot(double mean, double sigma)
+		{
+			double[] hq = computeHq(q.length, mean, sigma);
+			double[] l = getLog(hq);
+			double[] sl = smooth(l);
+
+			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "Log10 Scaled FRC Numerator");
+			plot.setColor(Color.black);
+			plot.addPoints(xValues, l, Plot.LINE);
+			plot.setColor(Color.red);
+			plot.addPoints(xValues, sl, Plot.LINE);
+
+			// log(NQ/4) = min of the curve => Q = 4*exp(min) / N
+			// where N == Number of localisations
+			double min = Maths.min(sl);
+			// Use Math.pow since we are using log10. 
+			double Q = 4 * Math.pow(10, min) / N;
+			plot.addLabel(0, 0, String.format("Q = %.3f (Precision = %.3f +/- %.3f)", Q, mean, sigma));
+
+			Utils.display(title, plot);
+		}
 	}
 
 	public class PrecisionHistogram
@@ -1344,9 +1469,10 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	private boolean showQEstimationDialog(PrecisionHistogram histogram)
+	private boolean showQEstimationDialog(PrecisionHistogram histogram, QPlot qplot)
 	{
 		histogram.plot();
+		qplot.plot(histogram.mean, histogram.sigma);
 
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -1356,7 +1482,7 @@ public class FIRE implements PlugIn
 
 		gd.addNumericField("Mean", histogram.mean, 3);
 		gd.addNumericField("SD", histogram.sigma, 3);
-		
+
 		// TODO - Field to reset to the default
 
 		// TODO 
@@ -1392,7 +1518,7 @@ public class FIRE implements PlugIn
 			notActive = false;
 
 			// TODO - allow reset the initial estimate
-			
+
 			histogram.mean = Math.abs(gd.getNextNumber());
 			histogram.sigma = Math.abs(gd.getNextNumber());
 
