@@ -1147,7 +1147,7 @@ public class FIRE implements PlugIn
 			{
 				// Use the actual number of samples and not 2*pi*q*L so we normalise 
 				// to the correct scale 
-				double d = frcCurve[i][3];
+				double d = frcCurve[i][2];
 				//double d = 2.0 * Math.PI * i;
 				vq[i] = frcCurve[i][3] / d;
 			}
@@ -1160,9 +1160,10 @@ public class FIRE implements PlugIn
 				// This should be sinc(pi*q*L)^2
 				// where pi*q*L is half the number of samples in the Fourier circle.
 				double d = Math.PI * i;
-				sinc[i] = sinc(d * d);
-				// This could this be:
-				//sinc[i] = sinc(d)*sinc(d);
+				//sinc[i] = sinc(d * d);
+				// This could be:
+				sinc[i] = sinc(d);
+				sinc[i] *= sinc[i];
 			}
 
 			// For smoothing
@@ -1238,6 +1239,8 @@ public class FIRE implements PlugIn
 		{
 			double[] hq = computeHq(q.length, mean, sigma);
 			double[] l = getLog(hq);
+			// Avoid bad value at zero
+			l[0] = l[1];
 			double[] sl = smooth(l);
 
 			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "Log10 Scaled FRC Numerator");
