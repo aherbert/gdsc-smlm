@@ -199,9 +199,10 @@ public class FRC
 
 			while (angle < limit)
 			{
-				double x = centre + radius * Math.cos(angle);
-				double y = centre + radius * Math.sin(angle);
-
+				double cosA = FastMath.cos(angle);
+				double x = centre + radius * cosA;
+				//double sinA = FastMath.sin(angle);
+				double y = centre + radius * getSine(angle, cosA);
 				double[] values = getInterpolatedValues(x, y, images, size);
 				sum1 += values[0];
 				sum2 += values[1];
@@ -222,6 +223,20 @@ public class FRC
 		progess.status("Finished calculating FRC curve...");
 
 		return frcCurve;
+	}
+
+	/**
+	 * Gets the sine of the angle given the cosine value.
+	 *
+	 * @param angle
+	 *            the angle (in radians between 0 and 2*pi)
+	 * @param cosA
+	 *            the cosine of the angle
+	 * @return the sine
+	 */
+	public static double getSine(double angle, double cosA)
+	{
+		return Math.sqrt(1 - (cosA * cosA)) * ((angle > Math.PI) ? -1 : 1); // Place in correct domain
 	}
 
 	private ImageProcessor pad(ImageProcessor ip, int width, int height)
@@ -496,17 +511,25 @@ public class FRC
 	{
 		double[] threshold = new double[frcCurve.length];
 
+		// Note: frcCurve[i][2] holds the number of samples that were taken from the circle. 
+		// It is not q/L as required in the Nieuwenhuizen paper, Supp S5.4. 
+		// q = spatial frequency = 1/L, 2/L, ...
+		// L = size of the field of view
+
 		switch (method)
 		{
 			case HALF_BIT:
-				for (int i = 0; i < threshold.length; i++)
-					threshold[i] = ((0.2071 * Math.sqrt(frcCurve[i][2]) + 1.9102) /
-							(1.2701 * Math.sqrt(frcCurve[i][2]) + 0.9102));
+				threshold[0] = 1;
+				for (int q = 1; q < threshold.length; q++)
+					threshold[q] = ((0.2071 * Math.sqrt(frcCurve[q][2]) + 1.9102) /
+							(1.2701 * Math.sqrt(frcCurve[q][2]) + 0.9102));
 				break;
 
 			case THREE_SIGMA:
-				for (int i = 0; i < threshold.length; i++)
-					threshold[i] = (3.0 / Math.sqrt(frcCurve[i][2] / 2.0));
+				threshold[0] = 1;
+				for (int q = 1; q < threshold.length; q++)
+					//threshold[q] = (3.0 / Math.sqrt(frcCurve[q][2] / 2.0));
+					threshold[q] = (3.0 / Math.sqrt(q));
 				break;
 
 			case FIXED_1_OVER_7:
