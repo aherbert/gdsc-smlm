@@ -1522,13 +1522,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 
 		List<LocalisationModelSet> newLocalisations = new ArrayList<LocalisationModelSet>(
 				(int) (localisations.size() / simulationStepsPerFrame));
-		movingMolecules = new TIntHashSet();
 
 		//System.out.printf("combineSimulationSteps @ %f\n", simulationStepsPerFrame);
 
 		final double gain = (settings.getTotalGain() > 0) ? settings.getTotalGain() : 1;
 		sortLocalisationsByIdThenTime(localisations);
 		int[] idList = getIds(localisations);
+		movingMolecules = new TIntHashSet(idList.length);
 		int index = 0;
 		for (int id : idList)
 		{
@@ -2842,7 +2842,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 	{
 		if (fluorophores == null)
 			return null;
-		TIntHashSet idSet = new TIntHashSet();
+		// movingMolecules will be created with an initial capacity to hold all the unique IDs
+		TIntHashSet idSet = new TIntHashSet((movingMolecules != null) ? movingMolecules.capacity() : 0);
 		for (LocalisationModel l : localisations)
 			idSet.add(l.getId());
 		List<FluorophoreSequenceModel> newFluorophores = new ArrayList<FluorophoreSequenceModel>(idSet.size());

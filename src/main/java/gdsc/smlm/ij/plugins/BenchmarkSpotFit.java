@@ -1388,7 +1388,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			}
 		}
 
-		summariseResults(fitResults, runTime, preprocessedPeakResults);
+		summariseResults(fitResults, runTime, preprocessedPeakResults, count);
 
 		IJ.showStatus("");
 	}
@@ -1601,7 +1601,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	}
 
 	private void summariseResults(TIntObjectHashMap<FilterCandidates> filterCandidates, long runTime,
-			final PreprocessedPeakResult[] preprocessedPeakResults)
+			final PreprocessedPeakResult[] preprocessedPeakResults, int nUniqueIDs)
 	{
 		createTable();
 
@@ -1734,7 +1734,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		}
 		// Score the results and count the number returned
 		List<FractionalAssignment[]> assignments = new ArrayList<FractionalAssignment[]>();
-		final TIntHashSet set = new TIntHashSet();
+		final TIntHashSet set = new TIntHashSet(nUniqueIDs);
 		FractionScoreStore scoreStore = new FractionScoreStore()
 		{
 			public void add(int uniqueId)

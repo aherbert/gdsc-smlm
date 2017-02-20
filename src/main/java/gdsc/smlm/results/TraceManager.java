@@ -23,7 +23,6 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.logging.TrackProgress;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 
 /**
@@ -464,7 +463,7 @@ public class TraceManager
 		// trace number out-of-order. This occurs if re-allocation has been performed,
 		// e.g.  [1,2,2,1,3] => [1,2,5,4,3] when spots in group 1 are reallocated before spots in group 2.
 
-		TIntHashSet processedTraces = new TIntHashSet();
+		TIntHashSet processedTraces = new TIntHashSet(traces.length);
 		for (int index = 0; index < localisations.length; index++)
 		{
 			if (tracker != null && index % 256 == 0)

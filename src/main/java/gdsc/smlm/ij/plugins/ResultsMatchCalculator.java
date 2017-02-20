@@ -335,13 +335,25 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		if (!showTable)
 			return;
 
-		TIntHashSet id1 = (doIdAnalysis1) ? getIds(results1) : null;
-		TIntHashSet id2 = (doIdAnalysis2) ? getIds(results2) : null;
-
 		// We have the results for the largest distance.
 		// Now reduce the distance threshold and recalculate the results
 		double[] distanceThresholds = getDistances(dThreshold, increments, delta);
 		double[] pairDistances = getPairDistances(allMatches);
+		// Re-use storage for the ID analysis
+		TIntHashSet id1 = null, id2 = null, matchId1 = null, matchId2 = null;
+		if (doIdAnalysis)
+		{
+			if (doIdAnalysis1)
+			{
+				id1 = getIds(results1);
+				matchId1 = new TIntHashSet(id1.size());
+			}
+			if (doIdAnalysis2)
+			{
+				id2 = getIds(results2);
+				matchId2 = new TIntHashSet(id2.size());
+			}
+		}
 		for (double distanceThreshold : distanceThresholds)
 		{
 			double rms = 0;
@@ -364,8 +376,10 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			MatchResult idResult1 = null, idResult2 = null;
 			if (doIdAnalysis)
 			{
-				TIntHashSet matchId1 = (doIdAnalysis1) ? new TIntHashSet() : null;
-				TIntHashSet matchId2 = (doIdAnalysis2) ? new TIntHashSet() : null;
+				if (doIdAnalysis1)
+					matchId1.clear();
+				if (doIdAnalysis2)
+					matchId2.clear();
 				int i = 0;
 				for (PointPair pair : allMatches)
 				{
@@ -713,7 +727,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	private TIntHashSet getIds(MemoryPeakResults results)
 	{
-		TIntHashSet ids = new TIntHashSet();
+		TIntHashSet ids = new TIntHashSet(results.size());
 		for (PeakResult p : results.getResults())
 			ids.add(p.getId());
 		return ids;

@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -1169,7 +1168,7 @@ public class TraceMolecules implements PlugIn
 
 	private int[] convert(double[] intervals)
 	{
-		TIntHashSet set = new TIntHashSet();
+		TIntHashSet set = new TIntHashSet(intervals.length);
 		for (double d : intervals)
 			set.add((int) Math.round(d));
 
