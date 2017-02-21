@@ -5020,27 +5020,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		double depth = Math.max(Math.abs(limits[0]), Math.abs(limits[1]));
 		boolean fixedDepth = Double.compare(limits[0], limits[1]) == 0;
 
-		double bias = -1;
-		double gain = -1;
-		double amplification = -1;
-		boolean emCCD = false;
-		double readNoise = -1;
-		double a = -1;
+		Calibration cal = new Calibration();
+		// Get any calibration we have
+		if (results.getCalibration() != null)
+			cal = results.getCalibration();
 
 		// Get this from the user
 		double b = -1;
-
-		// Get any calibration we have
-		Calibration cal = results.getCalibration();
-		if (cal != null)
-		{
-			bias = cal.getBias();
-			gain = cal.getGain();
-			amplification = cal.getAmplification();
-			emCCD = cal.isEmCCD();
-			readNoise = cal.getReadNoise();
-			a = cal.getNmPerPixel();
-		}
 
 		// Use last simulation parameters for missing settings.
 		// This is good if we are re-running the plugin to load data.
@@ -5049,18 +5035,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 			fullSimulation = simulationParameters.fullSimulation;
 			s = simulationParameters.s;
 			b = simulationParameters.b;
-			if (bias <= 0)
-				bias = simulationParameters.bias;
-			if (gain <= 0)
-				gain = simulationParameters.gain;
-			if (amplification <= 0)
-				amplification = simulationParameters.amplification;
-			if (readNoise <= 0)
-				readNoise = simulationParameters.readNoise;
-			if (cal == null)
-				emCCD = simulationParameters.emCCD;
-			if (a <= 0)
-				a = simulationParameters.a;
+			if (!cal.hasBias())
+				cal.setBias(simulationParameters.bias);
+			if (!cal.hasGain())
+				cal.setGain(simulationParameters.gain);
+			if (!cal.hasAmplification())
+				cal.setAmplification(simulationParameters.amplification);
+			if (!cal.hasReadNoise())
+				cal.setReadNoise(simulationParameters.readNoise);
+			if (!cal.hasEMCCD())
+				cal.setEmCCD(simulationParameters.emCCD);
+			if (!cal.hasNmPerPixel())
+				cal.setNmPerPixel(simulationParameters.a);
 		}
 
 		// Show a dialog to confirm settings
@@ -5076,13 +5062,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 
 		gd.addCheckbox("Flourophore_simulation", fullSimulation);
 		gd.addNumericField("Gaussian_SD", s, 3, 8, "nm");
-		gd.addNumericField("Pixel_pitch", a, 3, 8, "nm");
+		gd.addNumericField("Pixel_pitch", cal.getNmPerPixel(), 3, 8, "nm");
 		gd.addNumericField("Background", b, 3, 8, "photon");
-		gd.addNumericField("Total_gain", gain, 3, 8, "ADU/photon");
-		gd.addNumericField("Amplification", amplification, 3, 8, "ADU/e-");
-		gd.addCheckbox("EM-CCD", emCCD);
-		gd.addNumericField("Read_noise", readNoise, 3, 8, "ADU");
-		gd.addNumericField("Bias", bias, 3, 8, "pixel");
+		gd.addNumericField("Total_gain", cal.getGain(), 3, 8, "ADU/photon");
+		gd.addNumericField("Amplification", cal.getAmplification(), 3, 8, "ADU/e-");
+		gd.addCheckbox("EM-CCD", cal.isEmCCD());
+		gd.addNumericField("Read_noise", cal.getReadNoise(), 3, 8, "ADU");
+		gd.addNumericField("Bias", cal.getBias(), 3, 8, "pixel");
 
 		if (!fixedDepth)
 		{
@@ -5095,13 +5081,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 
 		fullSimulation = gd.getNextBoolean();
 		s = gd.getNextNumber();
-		a = gd.getNextNumber();
+		cal.setNmPerPixel(gd.getNextNumber());
 		b = gd.getNextNumber();
-		gain = gd.getNextNumber();
-		amplification = gd.getNextNumber();
-		emCCD = gd.getNextBoolean();
-		readNoise = gd.getNextNumber();
-		bias = gd.getNextNumber();
+		cal.setGain(gd.getNextNumber());
+		cal.setAmplification(gd.getNextNumber());
+		cal.setEmCCD(gd.getNextBoolean());
+		cal.setReadNoise(gd.getNextNumber());
+		cal.setBias(gd.getNextNumber());
 		double myDepth = depth;
 		if (!fixedDepth)
 		{
@@ -5119,12 +5105,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 		try
 		{
 			Parameters.isAboveZero("Gaussian_SD", s);
-			Parameters.isAboveZero("Pixel_pitch", a);
+			Parameters.isAboveZero("Pixel_pitch", cal.getNmPerPixel());
 			Parameters.isPositive("Background", b);
-			Parameters.isAboveZero("Total_gain", gain);
-			Parameters.isAboveZero("Amplification", amplification);
-			Parameters.isPositive("Read_noise", readNoise);
-			Parameters.isPositive("Bias", bias);
+			Parameters.isAboveZero("Total_gain", cal.getGain());
+			Parameters.isAboveZero("Amplification", cal.getAmplification());
+			Parameters.isPositive("Read_noise", cal.getReadNoise());
+			Parameters.isPositive("Bias", cal.getBias());
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -5132,6 +5118,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory,
 			return null;
 		}
 
+		// Store calibration
+		results.setCalibration(cal);
+
+		double gain = cal.getGain();
+		double a = cal.getNmPerPixel();
+		double bias = cal.getBias();
+		double readNoise = cal.getReadNoise();
+		double amplification = cal.getAmplification();
+		boolean emCCD = cal.isEmCCD();
+		
 		// Convert ADU values to photons
 		minSignal /= gain;
 		maxSignal /= gain;
