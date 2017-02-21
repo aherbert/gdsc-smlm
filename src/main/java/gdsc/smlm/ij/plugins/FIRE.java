@@ -1,9 +1,12 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.TextField;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -66,6 +69,7 @@ import ij.gui.GenericDialog;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Plot;
 import ij.gui.Plot2;
+import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.plugin.frame.Recorder;
@@ -1133,7 +1137,7 @@ public class FIRE implements PlugIn
 	public class QPlot
 	{
 		final double N;
-		double[] vq, sinc, q, xValues;
+		double[] vq, sinc, q;
 		String title;
 
 		QPlot(double imageScale, double N, double[][] frcCurve)
@@ -1152,37 +1156,51 @@ public class FIRE implements PlugIn
 				vq[i] = frcCurve[i][3] / d;
 			}
 
+			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
+			// we must double the curve length to get the original maximum image width. In addition
+			// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
+			// Note: frcCurveLength == L == Size of field of view.
+			double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
+
+			q = new double[frcCurve.length];
+			double conversion = imageScale / (frcCurveLength * nmPerPixel);
+			for (int i = 0; i < q.length; i++)
+			{
+				final double radius = frcCurve[i][0];
+				q[i] = radius * conversion;
+			}
+
 			// Compute sinc factor
 			sinc = new double[frcCurve.length];
 			sinc[0] = 1; // By definition
 			for (int i = 1; i < sinc.length; i++)
 			{
+				double d;
 				// This should be sinc(pi*q*L)^2
 				// where pi*q*L is half the number of samples in the Fourier circle.
-				double d = Math.PI * i;
-				//sinc[i] = sinc(d * d);
-				// This could be:
+				//d = Math.PI * i;
+
+				// This does not seem correct. We are essentially computing Sine at intervals of pi
+				// which all compute to 0. Try removing the L factor => sinc(pi*q)^2 with 
+				// q == 1/L, 2/L, ... (i.e. no unit conversion to nm). This means that the function 
+				// will start at 1 and drop off to zero at L.
+
+				// sinc(pi*q)^2
+				d = Math.PI * i / frcCurveLength;
+
+				// Use q in the correct units - WRONG curve shape
+				//d = Math.PI * q[i] * frcCurveLength;				
+
 				sinc[i] = sinc(d);
 				sinc[i] *= sinc[i];
-			}
 
-			// For smoothing
-			q = Utils.newArray(vq.length, 0, 1.0);
+				// TODO - figure out what this should be...
+				// Ignore this term for now
+				//sinc[i] = 1;
+			}
 
 			// For the plot
 			title = results.getName() + " FRC Numerator Curve";
-
-			xValues = new double[frcCurve.length];
-			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
-			// we must double the curve length to get the original maximum image width. In addition
-			// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-			double frcCurveLength = (frcCurve[(frcCurve.length - 1)][0] + 1) * 2.0;
-			double conversion = imageScale / (frcCurveLength * nmPerPixel);
-			for (int i = 0; i < xValues.length; i++)
-			{
-				final double radius = frcCurve[i][0];
-				xValues[i] = radius * conversion;
-			}
 		}
 
 		private double sinc(double x)
@@ -1190,26 +1208,28 @@ public class FIRE implements PlugIn
 			return FastMath.sin(x) / x;
 		}
 
-		double[] computeHq(int n, double mean, double sigma)
+		double[] computeHq(double[] q, double mean, double sigma)
 		{
 			// H(q) is the factor in the correlation averages related to the localization
 			// uncertainties that depends on the mean and width of the
 			// distribution of localization uncertainties
-			double[] hq = new double[n];
+			double[] hq = new double[q.length];
 			final double four_pi2 = 4 * Math.PI * Math.PI;
 			double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
 			hq[0] = 1; // TODO - what should this be at zero?
-			for (int q = 1; q < n; q++)
+			for (int i = 1; i < q.length; i++)
 			{
-				double q2 = q * q;
+				// Q. Should q be in the correct units?
+				double q2 = q[i] * q[i];
+				//double q2 = i * i;
 				double d = 1 + eight_pi2_s2 * q2;
-				hq[q] = FastMath.exp((-four_pi2 * mean * mean * q2) / d) / Math.sqrt(d);
+				hq[i] = FastMath.exp((-four_pi2 * mean * mean * q2) / d) / Math.sqrt(d);
 			}
 			return hq;
 		}
 
 		final double LOG_10 = Math.log(10);
-		
+
 		double[] getLog(double[] hq)
 		{
 			double[] l = new double[hq.length];
@@ -1235,28 +1255,30 @@ public class FIRE implements PlugIn
 			return l;
 		}
 
-		void plot(double mean, double sigma)
+		PlotWindow plot(double mean, double sigma)
 		{
-			double[] hq = computeHq(q.length, mean, sigma);
+			double[] hq = computeHq(q, mean, sigma);
 			double[] l = getLog(hq);
 			// Avoid bad value at zero
 			l[0] = l[1];
 			double[] sl = smooth(l);
-
-			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "Log10 Scaled FRC Numerator");
-			plot.setColor(Color.black);
-			plot.addPoints(xValues, l, Plot.LINE);
-			plot.setColor(Color.red);
-			plot.addPoints(xValues, sl, Plot.LINE);
 
 			// log(NQ/4) = min of the curve => Q = 4*exp(min) / N
 			// where N == Number of localisations
 			double min = Maths.min(sl);
 			// Use Math.pow since we are using log10. 
 			double Q = 4 * Math.pow(10, min) / N;
-			plot.addLabel(0, 0, String.format("Q = %.3f (Precision = %.3f +/- %.3f)", Q, mean, sigma));
 
-			Utils.display(title, plot);
+			Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "Log10 Scaled FRC Numerator");
+			plot.setColor(Color.black);
+			plot.addPoints(q, l, Plot.LINE);
+			plot.addLabel(0, 0, String.format("Q = %.3f (Precision = %.3f +/- %.3f)", Q, mean, sigma));
+			plot.setColor(Color.red);
+			plot.addPoints(q, sl, Plot.LINE);
+			plot.setColor(Color.blue);
+			plot.drawLine(0, min, q[q.length - 1], min);
+
+			return Utils.display(title, plot);
 		}
 	}
 
@@ -1292,7 +1314,14 @@ public class FIRE implements PlugIn
 				x2[i] = (float) (min + i * dx);
 		}
 
-		void plot()
+		PlotWindow plot(double mean, double sigma)
+		{
+			this.mean = mean;
+			this.sigma = sigma;
+			return plot();
+		}
+
+		PlotWindow plot()
 		{
 			Plot2 plot = new Plot2(title, "Precision (nm)", "Frequency");
 			plot.setColor(Color.black);
@@ -1312,7 +1341,7 @@ public class FIRE implements PlugIn
 			// Normalise
 			plot.setColor(Color.red);
 			plot.addPoints(x2, y2, Plot.LINE);
-			Utils.display(title, plot);
+			return Utils.display(title, plot);
 		}
 	}
 
@@ -1472,10 +1501,12 @@ public class FIRE implements PlugIn
 		}
 	}
 
-	private boolean showQEstimationDialog(PrecisionHistogram histogram, QPlot qplot)
+	private boolean showQEstimationDialog(final PrecisionHistogram histogram, final QPlot qplot)
 	{
-		histogram.plot();
-		qplot.plot(histogram.mean, histogram.sigma);
+		WindowOrganiser wo = new WindowOrganiser();
+		wo.add(histogram.plot());
+		wo.add(qplot.plot(histogram.mean, histogram.sigma));
+		wo.tile();
 
 		NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -1485,48 +1516,231 @@ public class FIRE implements PlugIn
 
 		gd.addNumericField("Mean", histogram.mean, 3);
 		gd.addNumericField("SD", histogram.sigma, 3);
+		gd.addCheckbox("reset", false);
 
-		// TODO - Field to reset to the default
-
-		// TODO 
 		// - create a synchronised work queue and pass it to the dialog listener.
 		// - create a worker thread to take the work from the queue and do the computation.
+		ArrayList<WorkStack> stacks = new ArrayList<WorkStack>();
+		ArrayList<Worker> workers = new ArrayList<Worker>();
+		add(stacks, workers, new Worker()
+		{
+			@Override
+			void createResult(Work work)
+			{
+				histogram.plot(work.mean, work.sigma);
+			}
+		});
+		add(stacks, workers, new Worker()
+		{
+			@Override
+			void createResult(Work work)
+			{
+				qplot.plot(work.mean, work.sigma);
+			}
+		});
 
-		gd.addDialogListener(new FIREDialogListener(histogram));
+		gd.addDialogListener(new FIREDialogListener(gd, histogram, stacks));
 		gd.showDialog();
+
+		// Finish the worker threads
+		for (WorkStack stack : stacks)
+			stack.close();
 
 		if (gd.wasCanceled())
 			return false;
+		
+		// TODO - Store the Q value and the mean and sigma
+		// Allow the FIRE plugin to be run with these settings.
 
 		return true;
 	}
 
+	private void add(ArrayList<WorkStack> stacks, ArrayList<Worker> workers, Worker worker)
+	{
+		WorkStack stack = new WorkStack();
+		worker.inbox = stack;
+		stacks.add(stack);
+		Thread t = new Thread(worker);
+		t.setDaemon(true);
+		t.start();
+	}
+
+	private class Work
+	{
+		double mean, sigma;
+
+		Work(double mean, double sigma)
+		{
+			this.mean = mean;
+			this.sigma = sigma;
+		}
+	}
+
+	/**
+	 * Allow work to be added to a FIFO stack in a synchronised manner
+	 * 
+	 * @author Alex Herbert
+	 */
+	private class WorkStack
+	{
+		// We only support a stack size of 1
+		private Work work = null;
+
+		synchronized void addWork(Work work)
+		{
+			this.work = work;
+			this.notify();
+		}
+
+		synchronized void close()
+		{
+			this.work = null;
+			this.notify();
+		}
+
+		synchronized Work getWork()
+		{
+			Work work = this.work;
+			this.work = null;
+			return work;
+		}
+
+		boolean isEmpty()
+		{
+			return work == null;
+		}
+	}
+
+	private abstract class Worker implements Runnable
+	{
+		private boolean running = true;
+		private Work lastWork = null;
+		private WorkStack inbox;
+
+		public void run()
+		{
+			while (running)
+			{
+				try
+				{
+					Work work = null;
+					synchronized (inbox)
+					{
+						if (inbox.isEmpty())
+						{
+							debug("Inbox empty, waiting ...");
+							inbox.wait();
+						}
+						work = inbox.getWork();
+						if (work != null)
+							debug(" Found work");
+					}
+					if (work == null)
+					{
+						debug(" No work, stopping");
+						break;
+					}
+					if (!equals(work, lastWork))
+						createResult(work);
+					lastWork = work;
+				}
+				catch (InterruptedException e)
+				{
+					debug(" Interrupted, stopping");
+					break;
+				}
+			}
+		}
+
+		private void debug(String msg)
+		{
+			boolean debug = false;
+			if (debug)
+				System.out.println(this.getClass().getSimpleName() + msg);
+		}
+
+		boolean equals(Work work, Work lastWork)
+		{
+			if (lastWork == null)
+				return false;
+
+			if (work.mean != lastWork.mean)
+				return false;
+			if (work.sigma != lastWork.sigma)
+				return false;
+
+			return true;
+		}
+
+		abstract void createResult(Work work);
+	}
+
 	private class FIREDialogListener implements DialogListener
 	{
-		PrecisionHistogram histogram;
 		long time;
 		boolean notActive = true;
+		volatile int ignore = 0;
+		ArrayList<WorkStack> stacks;
+		double mean, sigma;
+		String m, s;
+		TextField tf1, tf2;
+		Checkbox cb;
 
-		FIREDialogListener(PrecisionHistogram histogram)
+		FIREDialogListener(GenericDialog gd, PrecisionHistogram histogram, ArrayList<WorkStack> stacks)
 		{
-			this.histogram = histogram;
 			time = System.currentTimeMillis() + 1000;
+			this.stacks = stacks;
+			this.mean = histogram.mean;
+			this.sigma = histogram.sigma;
+			// For the reset
+			tf1 = (TextField) gd.getNumericFields().get(0);
+			tf2 = (TextField) gd.getNumericFields().get(1);
+			cb = (Checkbox) (gd.getCheckboxes().get(0));
+			m = tf1.getText();
+			s = tf2.getText();
 		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			if (notActive && System.currentTimeMillis() < time)
-				return false;
+				return true;
+			if (ignore-- > 0)
+			{
+				//System.out.println("ignored");
+				return true;
+			}
 
 			notActive = false;
 
-			// TODO - allow reset the initial estimate
+			double mean = Math.abs(gd.getNextNumber());
+			double sigma = Math.abs(gd.getNextNumber());
+			boolean reset = gd.getNextBoolean();
 
-			histogram.mean = Math.abs(gd.getNextNumber());
-			histogram.sigma = Math.abs(gd.getNextNumber());
+			//System.out.printf("Event: %s, %f, %f\n", e, mean, sigma);
 
-			// TODO - offload this work onto a thread that just picks up the most recent dialog input.
-			histogram.plot();
+			// Allow reset to default
+			if (reset)
+			{
+				// This does not trigger the event
+				cb.setState(false);
+				mean = this.mean;
+				sigma = this.sigma;
+			}
+
+			Work work = new Work(mean, sigma);
+
+			// Offload this work onto a thread that just picks up the most recent dialog input.
+			for (WorkStack stack : stacks)
+				stack.addWork(work);
+
+			if (reset)
+			{
+				// These trigger dialogItemChanged(...) so do them after we added 
+				// work to the queue and ignore the events
+				ignore = 2;
+				tf1.setText(m);
+				tf2.setText(s);
+			}
 
 			return true;
 		}
