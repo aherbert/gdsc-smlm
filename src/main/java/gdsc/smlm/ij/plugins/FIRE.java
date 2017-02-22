@@ -161,13 +161,16 @@ public class FIRE implements PlugIn
 	public class FireResult
 	{
 		final double fireNumber;
+		final double correlation;
 		final double imageScale;
 		final double[][] frcCurve;
 		final double[][] smoothedFrcCurve;
 
-		FireResult(double fireNumber, double imageScale, double[][] frcCurve, double[][] smoothedFrcCurve)
+		FireResult(double fireNumber, double correlation, double imageScale, double[][] frcCurve,
+				double[][] smoothedFrcCurve)
 		{
 			this.fireNumber = fireNumber;
+			this.correlation = correlation;
 			this.imageScale = imageScale;
 			this.frcCurve = frcCurve;
 			this.smoothedFrcCurve = smoothedFrcCurve;
@@ -381,11 +384,13 @@ public class FIRE implements PlugIn
 				if (result != null)
 				{
 					wo.cascade();
+					double mean = stats.getMean();
 					IJ.log(String.format("%s : FIRE number = %s +/- %s %s (Fourier scale = %s)", name,
-							Utils.rounded(stats.getMean(), 4), Utils.rounded(stats.getStandardDeviation(), 4), units,
+							Utils.rounded(mean, 4), Utils.rounded(stats.getStandardDeviation(), 4), units,
 							Utils.rounded(result.imageScale, 3)));
 					if (showFRCCurve)
 					{
+						curve.addResolution(mean);
 						Plot2 plot = curve.getPlot();
 						Utils.display(plot.getTitle(), plot);
 					}
@@ -726,6 +731,7 @@ public class FIRE implements PlugIn
 	private class FrcCurve
 	{
 		double[] xValues = null;
+		double[] threshold = null;
 		Plot2 plot = null;
 
 		void add(String name, FireResult result, ThresholdMethod method, Color colorValues, Color colorThreshold,
@@ -762,7 +768,7 @@ public class FIRE implements PlugIn
 				}
 
 				// The threshold curve is the same
-				double[] threshold = FRC.calculateThresholdCurve(frcCurve, method);
+				threshold = FRC.calculateThresholdCurve(frcCurve, method);
 				add(colorThreshold, threshold);
 			}
 
@@ -778,7 +784,36 @@ public class FIRE implements PlugIn
 				add(colorNoSmooth, yValuesNotSmooth);
 		}
 
-		void add(Color color, double[] y)
+		public void addResolution(double resolution)
+		{
+			// Convert back to nm^-1
+			double x = 1 / resolution;
+
+			// Find the intersection with the threshold line
+			for (int i = 1; i < xValues.length; i++)
+			{
+				if (x < xValues[i])
+				{
+					double correlation;
+					// Interpolate
+					double upper = xValues[i], lower = xValues[i - 1];
+					double xx = (x - lower) / (upper - lower);
+					correlation = threshold[i - 1] + xx * (threshold[i] - threshold[i - 1]);
+					addResolution(resolution, correlation);
+					return;
+				}
+			}
+		}
+
+		public void addResolution(double resolution, double correlation)
+		{
+			// Convert back to nm^-1
+			double x = 1 / resolution;
+			plot.setColor(Color.MAGENTA);
+			plot.drawLine(x, 0, x, correlation);
+		}
+
+		private void add(Color color, double[] y)
 		{
 			if (color == null)
 				return;
@@ -802,6 +837,7 @@ public class FIRE implements PlugIn
 	{
 		FrcCurve curve = new FrcCurve();
 		curve.add(name, result, method, Color.red, Color.blue, Color.black);
+		curve.addResolution(result.fireNumber, result.correlation);
 		return curve.getPlot();
 	}
 
@@ -972,7 +1008,11 @@ public class FIRE implements PlugIn
 		double[][] smoothedFrcCurve = frc.getSmoothedCurve(frcCurve);
 
 		// Resolution in pixels
-		double fireNumber = frc.calculateFireNumber(smoothedFrcCurve, method);
+		double[] result = frc.calculateFire(smoothedFrcCurve, method);
+		if (result == null)
+			return null;
+		double fireNumber = result[0];
+		double correlation = result[1];
 
 		// The FRC paper states that the super-resolution pixel size should be smaller
 		// than 1/4 of R (the resolution).
@@ -990,7 +1030,7 @@ public class FIRE implements PlugIn
 					TITLE, Utils.rounded(nmPerPixel / imageScale), Utils.rounded(fireNumber));
 		}
 
-		return new FireResult(fireNumber, imageScale, frcCurve, smoothedFrcCurve);
+		return new FireResult(fireNumber, correlation, imageScale, frcCurve, smoothedFrcCurve);
 	}
 
 	private void runQEstimation()
@@ -1326,7 +1366,7 @@ public class FIRE implements PlugIn
 			Plot2 plot = new Plot2(title, "Precision (nm)", "Frequency");
 			plot.setColor(Color.black);
 			plot.addPoints(x, y, Plot.LINE);
-			plot.addLabel(0, 0, String.format("%.3f +/- %.3f", mean, sigma));
+			plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
 			// Add the Gaussian line
 			// Compute the intergal of the standard gaussian between the min and max
 			final double denom0 = 1.0 / (Math.sqrt(2.0) * sigma);
@@ -1548,9 +1588,12 @@ public class FIRE implements PlugIn
 
 		if (gd.wasCanceled())
 			return false;
-		
+
 		// TODO - Store the Q value and the mean and sigma
 		// Allow the FIRE plugin to be run with these settings.
+
+		// Add use of Q to the FIRE plugin.
+		// Add +/- SD lines to the histogram overlay?
 
 		return true;
 	}

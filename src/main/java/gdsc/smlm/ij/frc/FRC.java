@@ -26,6 +26,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.Maths;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
@@ -44,7 +45,12 @@ public class FRC
 		//@formatter:off
 		FIXED_1_OVER_7{ public String getName() { return "Fixed 1/7"; }}, 
 		HALF_BIT{ public String getName() { return "Half-bit"; }}, 
-		THREE_SIGMA{ public String getName() { return "Three sigma"; }};
+		ONE_BIT{ public String getName() { return "One-bit"; }}, 
+		TWO_BIT{ public String getName() { return "Two-bit"; }}, 
+		ONE_SIGMA{ public String getName() { return "One sigma"; }},
+		TWO_SIGMA{ public String getName() { return "Two sigma"; }},
+		THREE_SIGMA{ public String getName() { return "Three sigma"; }},
+		FOUR_SIGMA{ public String getName() { return "Four sigma"; }};
 		//@formatter:on
 
 		@Override
@@ -545,26 +551,42 @@ public class FRC
 
 		// Fourier Shell Radius:
 		// This is set to 1 for r==0 in Heel
-		double r = 1;
+		double nr = 1;
+
+		int sigma = 0; // For the N-sigma methods
 
 		switch (method)
 		{
-			case HALF_BIT:
-				for (int i = 0; i < threshold.length; i++, r = i)
-				{
-					// Original. This is wrong!
-					//threshold[i] = ((0.2071 * Math.sqrt(frcCurve[q][2]) + 1.9102) /
-					//		          (1.2701 * Math.sqrt(frcCurve[q][2]) + 0.9102));
-
-					// ADH:
-					// This is actually equation (17) from Heel:
-					double nr = TWO_PI * r;
-					threshold[i] = ((0.2071 + 1.9102 / Math.sqrt(nr)) / (1.2071 + 0.9102 / Math.sqrt(nr)));
-				}
+			case FIXED_1_OVER_7:
+				Arrays.fill(threshold, 1.0 / 7.0);
 				break;
 
+			// Note: The bit curve approach unity when r==0, i.e. nr=1	
+
+			case HALF_BIT:
+				// This is actually equation (17) from Heel:
+				calculateBitCurve(threshold, 0.5);
+				break;
+
+			case ONE_BIT:
+				// This is equation (14) from Heel:
+				calculateBitCurve(threshold, 1);
+				break;
+
+			case TWO_BIT:
+				calculateBitCurve(threshold, 2);
+				break;
+
+			// We use fall through here to increment sigma to the appropriate level.
+			case FOUR_SIGMA:
+				sigma++;
 			case THREE_SIGMA:
-				for (int i = 0; i < threshold.length; i++, r = i)
+				sigma++;
+			case TWO_SIGMA:
+				sigma++;
+			case ONE_SIGMA:
+				sigma++;
+				for (int i = 0; i < threshold.length; i++, nr = TWO_PI * i)
 				{
 					// Note: frcCurve[i][2] holds the number of samples that were taken from the circle.
 					//threshold[i] = (3.0 / Math.sqrt(frcCurve[i][2] / 2.0));
@@ -572,12 +594,10 @@ public class FRC
 					// Heel, Equation (2):
 					// We actually want to know the number of pixels contained in the Fourier shell of radius r.
 					// We can compute this assuming we sampled the full circle 2*pi*r.
-					double nr = TWO_PI * r;
-					threshold[i] = 3.0 / Math.sqrt(nr / 2.0);
+					threshold[i] = sigma / Math.sqrt(nr / 2.0);
 				}
 				break;
 
-			case FIXED_1_OVER_7:
 			default:
 				Arrays.fill(threshold, 1.0 / 7.0);
 		}
@@ -586,14 +606,54 @@ public class FRC
 	}
 
 	/**
+	 * Compute the threshold curve for the given number of bits
+	 * 
+	 * @param threshold
+	 * @param bits
+	 */
+	private static void calculateBitCurve(final double[] threshold, double bits)
+	{
+		// This is adapted from equation (13) from Heel
+		// See: Heel, M. v. & Schatz, M. Fourier shell correlation threshold criteria. J. Struct. Bio. 151, 250–262 (2005).
+
+		// Approach unity when r -> 0:
+		threshold[0] = 1;
+
+		// Find the SNR in each half of the dataset: 
+		// "because the total reconstruction, being the sum of the two half-data 
+		// set reconstructions, will have twice the SNR value of each of the half 
+		// data sets"
+		// Eq. (15) = log2(SNR+1) = n-bits
+		final double snr = (Math.pow(2, bits) - 1) / 2;
+		final double snr1 = snr + 1;
+		final double twoRootSnr = 2 * Math.sqrt(snr);
+		final double twoRootSnr1 = twoRootSnr + 1;
+
+		// Sense check: 
+		// 1/2-bit is equation (17) from Heel:
+		// snr = 0.2071, twoRootSnr = 0.9102
+		// 1-bit is equation (14) from Heel:
+		// snr = 0.5, twoRootSnr = 1.4142
+
+		for (int i = 1; i < threshold.length; i++)
+		{
+			// nr = number of samples in Fourier circle = 2*pi*r
+			final double sqrtNr = Math.sqrt(TWO_PI * i);
+			threshold[i] = ((snr + twoRootSnr1 / sqrtNr) / (snr1 + twoRootSnr / sqrtNr));
+		}
+	}
+
+	/**
 	 * Computes the crossing points of the FRC curve and the threshold curve. The intersections can be used to determine
 	 * the image resolution using {@link #getCorrectIntersection(ArrayList, ThresholdMethod)}
 	 * 
 	 * @param frcCurve
 	 * @param thresholdCurve
+	 * @param max
+	 *            The maximum number of intersections to compute
 	 * @return The crossing points
 	 */
-	public double[] getIntersections(double[][] frcCurve, double[] thresholdCurve)
+	public double[][] getIntersections(double[][] frcCurve, double[] thresholdCurve, int max)
 	{
 		if (frcCurve.length != thresholdCurve.length)
 		{
@@ -601,7 +661,7 @@ public class FRC
 			return null;
 		}
 
-		double[] intersections = new double[frcCurve.length - 1];
+		double[][] intersections = new double[Math.min(max, frcCurve.length - 1)][];
 		int count = 0;
 
 		for (int i = 1; i < frcCurve.length; i++)
@@ -644,7 +704,7 @@ public class FRC
 			{
 				if (y1 == y3)
 					// The lines are the same
-					intersections[count++] = x1;
+					intersections[count++] = new double[] { x1, y1 };
 			}
 			else
 			{
@@ -660,9 +720,12 @@ public class FRC
 				// Q. Is this necessary given the intersection check above?
 				if (px >= x1 && px < x2)
 				{
-					intersections[count++] = px;
+					double py = Maths.interpolateY(x1, y3, x2, y4, px);
+					intersections[count++] = new double[] { px, py };
 				}
 			}
+			if (count >= max)
+				break;
 		}
 
 		return Arrays.copyOf(intersections, count);
@@ -677,26 +740,35 @@ public class FRC
 	 * 
 	 * @param intersections
 	 * @param method
-	 * @return The intersection (or zero if no crossings)
+	 * @return The intersection (or null if no crossings)
 	 */
-	public double getCorrectIntersection(double[] intersections, ThresholdMethod method)
+	public double[] getCorrectIntersection(double[][] intersections, ThresholdMethod method)
 	{
 		if (intersections == null || intersections.length == 0)
-			return 0;
+			return null;
 
+		int pos = 0;
 		switch (method)
 		{
-			// The half-bit and 3-sigma curves are often above 1 at close to zero spatial frequency.
-			// This means that any FRC curve starting at 1 may cross the line twice. 
-			// If so the second crossing is the one that is desired.
-			case HALF_BIT:
-			case THREE_SIGMA:
-				return (intersections.length > 1) ? intersections[1] : intersections[0];
-
 			case FIXED_1_OVER_7:
+				// always use the first intersection
+				break;
+
+			// The N-sigma curves are above 1 at close to zero spatial frequency.
+			// The bit curves are 1 at zero spatial frequency.
+			// This means that any FRC curve starting around 1 (due to smoothing)
+			// may cross the line twice. 
+			// If so the second crossing is the one that is desired.
 			default:
-				return intersections[0];
+				if (intersections.length == 2)
+				{
+					// Choose the intersection. Just discard an intersection with a correlation above 0.9
+					if (intersections[0][1] > 0.9)
+						pos++;
+				}
 		}
+
+		return intersections[pos];
 	}
 
 	/**
@@ -705,7 +777,7 @@ public class FRC
 	 * @param ip1
 	 * @param ip2
 	 * @param method
-	 * @return The FIRE number (in pixels)
+	 * @return The FIRE number (in pixels) and the correlation
 	 */
 	public double calculateFireNumber(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
 	{
@@ -722,18 +794,47 @@ public class FRC
 	 */
 	public double calculateFireNumber(double[][] frcCurve, ThresholdMethod method)
 	{
-		double[] thresholdCurve = calculateThresholdCurve(frcCurve, method);
-		double[] intersections = getIntersections(frcCurve, thresholdCurve);
+		double[] result = calculateFire(frcCurve, method);
+		if (result == null)
+			return Double.NaN;
+		return result[0];
+	}
 
-		double fire = Double.NaN;
+	/**
+	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided images.
+	 * 
+	 * @param ip1
+	 * @param ip2
+	 * @param method
+	 * @return The FIRE number (in pixels) and the correlation (null if computation failed)
+	 */
+	public double[] calculateFire(ImageProcessor ip1, ImageProcessor ip2, ThresholdMethod method)
+	{
+		double[][] frcCurve = calculateFrcCurve(ip1, ip2);
+		return calculateFire(frcCurve, method);
+	}
+
+	/**
+	 * Utility function that calculates the Fourier Image Resolution (FIRE) number using the provided FRC curve data.
+	 * 
+	 * @param frcCurve
+	 * @param method
+	 * @return The FIRE number (in pixels) and the correlation (null if computation failed)
+	 */
+	public double[] calculateFire(double[][] frcCurve, ThresholdMethod method)
+	{
+		double[] thresholdCurve = calculateThresholdCurve(frcCurve, method);
+		double[][] intersections = getIntersections(frcCurve, thresholdCurve, 2);
+
 		if (intersections == null || intersections.length != 0)
 		{
-			double spatialFrequency = getCorrectIntersection(intersections, method);
+			double[] intersection = getCorrectIntersection(intersections, method);
 			// Since the Fourier calculation only uses half of the image (from centre to the edge) 
 			// we must double the curve length to get the original maximum image width. In addition
 			// the computation was up to the edge-1 pixels so add back a pixel to the curve length.
-			fire = 2 * (frcCurve.length + 1) / spatialFrequency;
+			double fire = 2 * (frcCurve.length + 1) / intersection[0];
+			return new double[] { fire, intersection[1] };
 		}
-		return fire;
+		return null;
 	}
 }
