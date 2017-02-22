@@ -1381,6 +1381,10 @@ public class FIRE implements PlugIn
 			// Normalise
 			plot.setColor(Color.red);
 			plot.addPoints(x2, y2, Plot.LINE);
+			float max = Maths.max(y2);
+			max = Maths.maxDefault(max, y);
+			double rangex = 0; //(x2[x2.length - 1] - x2[0]) * 0.025;
+			plot.setLimits(x2[0] - rangex, x2[x2.length - 1] + rangex, 0, max * 1.05);
 			return Utils.display(title, plot);
 		}
 	}
@@ -1403,6 +1407,7 @@ public class FIRE implements PlugIn
 		{
 			precision.add(r.getPrecision(nmPerPixel, gain, emCCD));
 		}
+		//System.out.printf("Raw p = %f\n", precision.getMean());
 
 		double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
 
@@ -1554,8 +1559,10 @@ public class FIRE implements PlugIn
 		gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n" +
 				String.format("Precision estimate = %.3f +/- %.3f", histogram.mean, histogram.sigma));
 
-		gd.addNumericField("Mean", histogram.mean, 3);
-		gd.addNumericField("SD", histogram.sigma, 3);
+		double mean10 = histogram.mean * 10;
+		double sd10 = histogram.sigma * 10;
+		gd.addSlider("Mean (x10)", Math.max(0, mean10 - sd10 * 2), mean10 + sd10 * 2, mean10);
+		gd.addSlider("SD (x10)", Math.max(0, sd10 / 2), sd10 * 2, sd10);
 		gd.addCheckbox("reset", false);
 
 		// - create a synchronised work queue and pass it to the dialog listener.
@@ -1755,8 +1762,8 @@ public class FIRE implements PlugIn
 
 			notActive = false;
 
-			double mean = Math.abs(gd.getNextNumber());
-			double sigma = Math.abs(gd.getNextNumber());
+			double mean = Math.abs(gd.getNextNumber()) / 10;
+			double sigma = Math.abs(gd.getNextNumber()) / 10;
 			boolean reset = gd.getNextBoolean();
 
 			//System.out.printf("Event: %s, %f, %f\n", e, mean, sigma);
@@ -1770,6 +1777,7 @@ public class FIRE implements PlugIn
 				sigma = this.sigma;
 			}
 
+			// TODO - implement a delay to allow typing - see OPTICS
 			Work work = new Work(mean, sigma);
 
 			// Offload this work onto a thread that just picks up the most recent dialog input.
