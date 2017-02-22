@@ -26,6 +26,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Maths;
 
 /**
@@ -154,29 +155,27 @@ public class FRC
 		progess.status("Preparing FRC curve calculation...");
 
 		final int size = fft1[0].getWidth();
+		final int centre = size / 2;
 
-		// In-line for speed
-		float[] numerator = new float[size * size];
-		float[] absFFT1 = new float[numerator.length];
-		float[] absFFT2 = new float[numerator.length];
-
+		// In-line for speed 
 		float[] dataA1 = (float[]) fft1[0].getPixels();
 		float[] dataB1 = (float[]) fft1[1].getPixels();
 		float[] dataA2 = (float[]) fft2[0].getPixels();
 		float[] dataB2 = (float[]) fft2[1].getPixels();
+		float[] numerator = new float[dataA1.length];
+		float[] absFFT1 = new float[dataA1.length];
+		float[] absFFT2 = new float[dataA1.length];
 
-		for (int y = size, i = size * size - 1; y-- > 0;)
+		if (basic)
 		{
-			for (int x = size; x-- > 0; i--)
-			{
-				numerator[i] = dataA1[i] * dataA2[i] + dataB1[i] * dataB2[i];
-				absFFT1[i] = dataA1[i] * dataA1[i] + dataB1[i] * dataB1[i];
-				absFFT2[i] = dataA2[i] * dataA2[i] + dataB2[i] * dataB2[i];
-			}
+			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+		}
+		else
+		{
+			computeMirrored(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
 		}
 
 		int radius = 1;
-		final int centre = size / 2;
 		final int max = centre - 1;
 
 		progess.status("Calculating FRC curve...");
@@ -228,6 +227,104 @@ public class FRC
 		progess.status("Finished calculating FRC curve...");
 
 		return frcCurve;
+	}
+
+	// Package level to allow JUnit test
+	static void compute(float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1, float[] dataB1,
+			float[] dataA2, float[] dataB2)
+	{
+		for (int i = dataA1.length; i-- > 0;)
+		{
+			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+		}
+	}
+
+	// Package level to allow JUnit test
+	static void computeMirrored(int size, float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1, float[] dataB1,
+			float[] dataA2, float[] dataB2)
+	{
+		// Note: Since this is symmetric around the centre we could compute half of it.
+		// This is non-trivial since the centre is greater than half of the image, i.e.
+		// not (size-1)/2;
+		// So we compute up to the centre and copy back to the other half but must not miss
+		// the edge pixels.
+		final int centre = size / 2;
+
+		// Do the first row, This is not mirrored
+		int i = 0;
+		while (i < size)
+		{
+			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i++);
+		}
+
+		// Compute remaining rows up to the centre. These are mirrored
+		int j = numerator.length - 1;
+		for (int y = 1; y < centre; y++)
+		{
+			// The first entry in each row is not mirrored so compute and increment i
+			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i++);
+			for (int x = 1; x < size; x++, i++, j--)
+			{
+				compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+				// Mirror
+				numerator[j] = numerator[i];
+				absFFT1[j] = absFFT1[i];
+				absFFT2[j] = absFFT2[i];
+			}
+			// The last entry in each reverse row is not mirrored so compute and decrement j
+			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, j--);
+		}
+
+		// Do the centre row. This is mirrored with itself
+		compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i++);
+		for (int x = 1; x <= centre; x++, i++, j--)
+		{
+			compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2, i);
+			// Mirror
+			numerator[j] = numerator[i];
+			absFFT1[j] = absFFT1[i];
+			absFFT2[j] = absFFT2[i];
+		}
+	}
+
+	private static void compute(float[] numerator, float[] absFFT1, float[] absFFT2, float[] dataA1, float[] dataB1,
+			float[] dataA2, float[] dataB2, int i)
+	{
+		final float a1i = dataA1[i];
+		final float a2i = dataA2[i];
+		final float b1i = dataB1[i];
+		final float b2i = dataB2[i];
+		numerator[i] = a1i * a2i + b1i * b2i;
+		absFFT1[i] = a1i * a1i + b1i * b1i;
+		absFFT2[i] = a2i * a2i + b2i * b2i;
+	}
+
+	static boolean checkSymmetry(float[] data, int size)
+	{
+		// Symmetry is around the centre
+		int centre = size / 2;
+
+		float maxRelativeError = 1e-10f, maxAbsoluteError = 1e-16f;
+		int error = 0;
+
+		for (int y = centre, y2 = centre; y >= 0 && y2 < size; y--, y2++)
+		{
+			for (int x = centre, x2 = centre, i = size * y + x, j = size * y2 + x2; x >= 0 &&
+					x2 < size; x--, x2++, i--, j++)
+			{
+				if (data[i] != data[j] || !FloatEquality.almostEqualRelativeOrAbsolute(data[i], data[j],
+						maxRelativeError, maxAbsoluteError))
+				{
+					//System.out.printf("[%d] %f != [%d] %f\n", i, data[i], j, data[j]);
+					if (--error < 0)
+					{
+						//gdsc.core.ij.Utils.display("check", new FloatProcessor(size, size, data));
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
