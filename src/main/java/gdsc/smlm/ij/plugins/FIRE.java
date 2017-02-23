@@ -80,6 +80,10 @@ import ij.process.LUTHelper.LutColour;
 
 /**
  * Computes the Fourier Image Resolution of an image
+ * <p>
+ * Implements the FIRE (Fourier Image REsolution) method described in:<br>
+ * Niewenhuizen, et al (2013). Measuring image resolution in optical nanoscopy. Nature Methods, 10, 557<br>
+ * http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
  */
 public class FIRE implements PlugIn
 {
@@ -88,8 +92,8 @@ public class FIRE implements PlugIn
 	private static String inputOption2 = "";
 
 	private static int repeats = 1;
-	private static boolean useSignal = true;
-	private static int maxPerBin = 5;
+	private static boolean useSignal = false;
+	private static int maxPerBin = 0; // 5 in the Niewenhuizen paper
 	private static boolean randomSplit = true;
 	private static int blockSize = 50;
 	private static String[] SCALE_ITEMS;
@@ -140,6 +144,7 @@ public class FIRE implements PlugIn
 	private static boolean chooseRoi = false;
 	private static String roiImage = "";
 
+	private boolean extraOptions;
 	private Rectangle roiBounds;
 	private int roiImageWidth, roiImageHeight;
 
@@ -224,6 +229,7 @@ public class FIRE implements PlugIn
 	 */
 	public void run(String arg)
 	{
+		extraOptions = Utils.isExtraOptions();
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		// Require some fit results and selected regions
@@ -465,8 +471,6 @@ public class FIRE implements PlugIn
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 		ResultsManager.addInput(gd, "Input2", inputOption2, InputSource.NONE, InputSource.MEMORY);
 
-		// TODO - Add use of Q to the FIRE plugin.
-
 		gd.addCheckbox("Use_signal (if present)", useSignal);
 		gd.addNumericField("Max_per_bin", maxPerBin, 0);
 
@@ -476,10 +480,13 @@ public class FIRE implements PlugIn
 		gd.addNumericField("Repeats", repeats, 0);
 		gd.addCheckbox("Show_FRC_curve_repeats", showFRCCurveRepeats);
 		gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
-		gd.addCheckbox("Spurious correlation correction", spuriousCorrelationCorrection);
-		gd.addNumericField("Q-value", qValue, 3);
-		gd.addNumericField("Precision_Mean", mean, 2);
-		gd.addNumericField("Precision_Sigma", sigma, 2);
+		if (extraOptions)
+		{
+			gd.addCheckbox("Spurious correlation correction", spuriousCorrelationCorrection);
+			gd.addNumericField("Q-value", qValue, 3);
+			gd.addNumericField("Precision_Mean", mean, 2);
+			gd.addNumericField("Precision_Sigma", sigma, 2);
+		}
 
 		gd.addMessage("Fourier options:");
 		gd.addChoice("Fourier_image_scale", SCALE_ITEMS, SCALE_ITEMS[imageScaleIndex]);
@@ -507,11 +514,14 @@ public class FIRE implements PlugIn
 		repeats = Math.max(1, (int) gd.getNextNumber());
 		showFRCCurveRepeats = gd.getNextBoolean();
 		showFRCTimeEvolution = gd.getNextBoolean();
-		spuriousCorrelationCorrection = gd.getNextBoolean();
-		qValue = Math.abs(gd.getNextNumber());
-		mean = Math.abs(gd.getNextNumber());
-		sigma = Math.abs(gd.getNextNumber());
-
+		if (extraOptions)
+		{
+			spuriousCorrelationCorrection = gd.getNextBoolean();
+			qValue = Math.abs(gd.getNextNumber());
+			mean = Math.abs(gd.getNextNumber());
+			sigma = Math.abs(gd.getNextNumber());
+		}
+		
 		imageScaleIndex = gd.getNextChoiceIndex();
 		imageSizeIndex = gd.getNextChoiceIndex();
 		perimeterSamplingFactor = gd.getNextNumber();
@@ -523,7 +533,7 @@ public class FIRE implements PlugIn
 		try
 		{
 			Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
-			if (spuriousCorrelationCorrection)
+			if (extraOptions && spuriousCorrelationCorrection)
 			{
 				Parameters.isAboveZero("Q-value", qValue);
 				Parameters.isAboveZero("Precision Mean", mean);

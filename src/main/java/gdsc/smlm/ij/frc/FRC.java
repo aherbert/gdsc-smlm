@@ -1036,8 +1036,8 @@ public class FRC
 	}
 
 	/**
-	 * Compute H(q) for all q. This is the integral of the distribution function of the localisation uncertainty. It is
-	 * assumed to Gaussian with the specified mean and width.
+	 * Compute the localization PDF factor H(q) for all q. This is the integral of the distribution function of the
+	 * localisation uncertainty. It is assumed to Gaussian with the specified mean and width.
 	 *
 	 * @param q
 	 *            the q array
